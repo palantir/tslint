@@ -1,0 +1,69 @@
+0.ts line 87 col 5: error TS2009: Operator '==' cannot be applied to types 'number' and 'string'.
+0.ts line 88 col 5: error TS2009: Operator '==' cannot be applied to types 'number' and 'boolean'.
+0.ts line 94 col 5: error TS2009: Operator '==' cannot be applied to types 'string' and 'number'.
+0.ts line 95 col 5: error TS2009: Operator '==' cannot be applied to types 'string' and 'boolean'.
+0.ts line 98 col 5: error TS2009: Operator '==' cannot be applied to types 'string' and 'E'.
+0.ts line 115 col 5: error TS2009: Operator '==' cannot be applied to types 'E' and 'string'.
+0.ts line 116 col 5: error TS2009: Operator '==' cannot be applied to types 'E' and 'boolean'.
+0.ts line 142 col 5: error TS2111: Invalid '+' expression - types not known to support the addition operator.
+0.ts line 143 col 5: error TS2111: Invalid '+' expression - types not known to support the addition operator.
+0.ts line 161 col 5: error TS2111: Invalid '+' expression - types not known to support the addition operator.
+0.ts line 163 col 5: error TS2111: Invalid '+' expression - types not known to support the addition operator.
+0.ts line 165 col 5: error TS2111: Invalid '+' expression - types not known to support the addition operator.
+0.ts line 166 col 5: error TS2111: Invalid '+' expression - types not known to support the addition operator.
+0.ts line 170 col 5: error TS2111: Invalid '+' expression - types not known to support the addition operator.
+0.ts line 172 col 5: error TS2111: Invalid '+' expression - types not known to support the addition operator.
+0.ts line 176 col 5: error TS2112: The right-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 177 col 5: error TS2112: The right-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 178 col 5: error TS2112: The right-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 182 col 7: error TS2113: The left-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 183 col 7: error TS2113: The left-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 184 col 5: error TS2112: The right-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 184 col 7: error TS2113: The left-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 185 col 5: error TS2112: The right-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 185 col 7: error TS2113: The left-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 186 col 5: error TS2112: The right-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 186 col 7: error TS2113: The left-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 187 col 7: error TS2113: The left-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 190 col 5: error TS2112: The right-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 191 col 5: error TS2112: The right-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 192 col 5: error TS2112: The right-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 196 col 7: error TS2113: The left-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 197 col 5: error TS2112: The right-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 197 col 7: error TS2113: The left-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 198 col 5: error TS2112: The right-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 198 col 7: error TS2113: The left-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 199 col 7: error TS2113: The left-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 200 col 5: error TS2112: The right-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 200 col 7: error TS2113: The left-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 201 col 7: error TS2113: The left-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 204 col 5: error TS2112: The right-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 205 col 5: error TS2112: The right-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 207 col 5: error TS2112: The right-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 211 col 5: error TS2112: The right-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 212 col 5: error TS2112: The right-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 213 col 5: error TS2112: The right-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 217 col 7: error TS2113: The left-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 218 col 7: error TS2113: The left-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 219 col 5: error TS2112: The right-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 219 col 7: error TS2113: The left-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 220 col 5: error TS2112: The right-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 220 col 7: error TS2113: The left-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 221 col 5: error TS2112: The right-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 221 col 7: error TS2113: The left-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 222 col 7: error TS2113: The left-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 225 col 5: error TS2112: The right-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 226 col 5: error TS2112: The right-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 227 col 5: error TS2112: The right-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 231 col 7: error TS2113: The left-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 232 col 5: error TS2112: The right-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 232 col 7: error TS2113: The left-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 233 col 5: error TS2112: The right-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 233 col 7: error TS2113: The left-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 234 col 7: error TS2113: The left-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 235 col 5: error TS2112: The right-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 235 col 7: error TS2113: The left-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 236 col 7: error TS2113: The left-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 239 col 5: error TS2112: The right-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 240 col 5: error TS2112: The right-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 242 col 5: error TS2112: The right-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.

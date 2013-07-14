@@ -1,0 +1,1 @@
+0.ts line 14 col 9: error TS2086: Type 'B' does not satisfy the constraint 'A' for type parameter 'T extends A'.

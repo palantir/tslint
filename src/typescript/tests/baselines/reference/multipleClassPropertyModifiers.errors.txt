@@ -1,0 +1,2 @@
+0.ts line 3 col 12: error TS1029: 'public' modifier must precede 'static' modifier.
+0.ts line 5 col 12: error TS1029: 'private' modifier must precede 'static' modifier.

@@ -1,0 +1,2 @@
+0.ts line 4 col 7: error TS2137: Class c1 declares interface i1 but does not implement it:
+	Property 'name' defined as private in type 'c1' is defined as public in type 'i1'.

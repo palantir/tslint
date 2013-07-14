@@ -1,0 +1,6 @@
+0.ts line 22 col 1: error TS2000: Duplicate identifier 'c33'.
+0.ts line 22 col 16: error TS2012: Cannot convert 'number' to 'c33':
+	Type 'Number' is missing property 'foo' from type 'c33'.
+0.ts line 31 col 1: error TS2000: Duplicate identifier 'c44'.
+0.ts line 31 col 1: error TS2071: Unable to resolve external module ''''.
+0.ts line 31 col 1: error TS2072: Module cannot be aliased to a non-module type.

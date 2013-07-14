@@ -1,0 +1,2 @@
+0.ts line 7 col 9: error TS2087: Could not select overload for 'call' expression.
+0.ts line 7 col 17: error TS2095: Could not find symbol 'Uhhhh'.

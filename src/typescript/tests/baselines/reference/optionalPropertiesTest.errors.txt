@@ -1,0 +1,6 @@
+0.ts line 14 col 1: error TS2012: Cannot convert '{ name: string; }' to 'IFoo':
+	Type '{ name: string; }' is missing property 'id' from type 'IFoo'.
+0.ts line 25 col 5: error TS2012: Cannot convert '{}' to 'i1':
+	Type '{}' is missing property 'M' from type 'i1'.
+0.ts line 26 col 5: error TS2012: Cannot convert '{}' to 'i3':
+	Type '{}' is missing property 'M' from type 'i3'.

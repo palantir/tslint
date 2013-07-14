@@ -1,0 +1,7 @@
+0.ts line 60 col 10: error TS1015: Parameter cannot have question mark and initializer.
+0.ts line 70 col 11: error TS1015: Parameter cannot have question mark and initializer.
+0.ts line 80 col 17: error TS1015: Parameter cannot have question mark and initializer.
+0.ts line 106 col 3: error TS1015: Parameter cannot have question mark and initializer.
+0.ts line 106 col 34: error TS1015: Parameter cannot have question mark and initializer.
+0.ts line 126 col 6: error TS1015: Parameter cannot have question mark and initializer.
+0.ts line 128 col 9: error TS1015: Parameter cannot have question mark and initializer.

@@ -1,0 +1,6 @@
+0.ts line 16 col 1: error TS2012: Cannot convert 'C2' to 'C':
+	Types 'A' and 'C' define property 'x' as private.
+0.ts line 17 col 1: error TS2012: Cannot convert 'C' to 'C2':
+	Types 'C' and 'A' define property 'x' as private.
+0.ts line 5 col 7: error TS2138: Class C declares class A as an implemented interface but does not implement it:
+	Types 'C' and 'A' define property 'x' as private.

@@ -1,0 +1,3 @@
+0.ts line 10 col 10: error TS1043: Function overload name must be 'Foo'.
+0.ts line 17 col 1: error TS2161: Value of type 'new(x: any) => Foo' is not callable. Did you mean to include 'new'?
+0.ts line 9 col 1: error TS2000: Duplicate identifier 'Foo'.

@@ -1,0 +1,7 @@
+0.ts line 16 col 16: error TS1005: ']' expected.
+0.ts line 16 col 29: error TS1005: ';' expected.
+0.ts line 16 col 30: error TS1008: Unexpected token; 'call, construct, index, property or function signature' expected.
+0.ts line 17 col 16: error TS1005: ']' expected.
+0.ts line 17 col 18: error TS1008: Unexpected token; 'call, construct, index, property or function signature' expected.
+0.ts line 17 col 30: error TS1005: ';' expected.
+0.ts line 17 col 31: error TS1008: Unexpected token; 'call, construct, index, property or function signature' expected.

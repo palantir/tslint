@@ -1,0 +1,2 @@
+0.ts line 2 col 17: error TS2073: A class may only extend another class.
+0.ts line 6 col 21: error TS2073: A class may only extend another class.

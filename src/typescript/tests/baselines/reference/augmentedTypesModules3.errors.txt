@@ -1,0 +1,1 @@
+0.ts line 6 col 1: error TS2000: Duplicate identifier 'm3a'.

@@ -1,0 +1,3 @@
+0.ts line 11 col 1: error TS2120: The left-hand side of an 'instanceOf' expression must be of type 'any', an object type or a type parameter.
+0.ts line 14 col 1: error TS2121: The right-hand side of an 'instanceOf' expression must be of type 'any' or a subtype of the 'Function' interface type.
+0.ts line 6 col 1: error TS2000: Duplicate identifier 'Object'.

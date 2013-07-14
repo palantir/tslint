@@ -1,0 +1,10 @@
+0.ts line 4 col 5: error TS2000: Duplicate identifier 'e1111'.
+0.ts line 8 col 1: error TS2000: Duplicate identifier 'e2'.
+0.ts line 12 col 5: error TS2000: Duplicate identifier 'e3'.
+0.ts line 17 col 1: error TS2000: Duplicate identifier 'e4'.
+0.ts line 17 col 1: error TS2000: Duplicate identifier 'e4'.
+0.ts line 21 col 15: error TS4024: Enums with multiple declarations must provide an initializer for the first enum element.
+0.ts line 24 col 16: error TS4024: Enums with multiple declarations must provide an initializer for the first enum element.
+0.ts line 24 col 16: error TS2000: Duplicate identifier 'One'.
+0.ts line 31 col 1: error TS2000: Duplicate identifier 'e6a'.
+0.ts line 34 col 1: error TS2000: Duplicate identifier 'e6b'.

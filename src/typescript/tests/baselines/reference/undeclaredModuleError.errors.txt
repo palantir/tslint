@@ -1,0 +1,6 @@
+0.ts line 1 col 1: error TS2071: Unable to resolve external module ''fs''.
+0.ts line 1 col 1: error TS2072: Module cannot be aliased to a non-module type.
+0.ts line 8 col 9: error TS2082: Supplied parameters do not match any signature of call target:
+	Call signatures of types '() => void' and '(stat: any, name: string) => boolean' are incompatible.
+0.ts line 8 col 9: error TS2087: Could not select overload for 'call' expression.
+0.ts line 11 col 41: error TS2095: Could not find symbol 'IDoNotExist'.

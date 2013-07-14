@@ -1,0 +1,11 @@
+0.ts line 13 col 10: error TS2036: Parameter 'c1' of call signature from exported interface has or is using private type 'm1.C2_private'.
+0.ts line 15 col 23: error TS2053: Return type of call signature from exported interface has or is using private type 'm1.C2_private'.
+0.ts line 18 col 14: error TS2035: Parameter 'c1' of constructor signature from exported interface has or is using private type 'm1.C2_private'.
+0.ts line 20 col 27: error TS2052: Return type of constructor signature from exported interface has or is using private type 'm1.C2_private'.
+0.ts line 23 col 22: error TS2054: Return type of index signature from exported interface has or is using private type 'm1.C2_private'.
+0.ts line 26 col 9: error TS2026: Property 'y' of exported interface has or is using private type 'm1.C2_private'.
+0.ts line 29 col 9: error TS2026: Property 'b' of exported interface has or is using private type 'm1.C2_private'.
+0.ts line 32 col 12: error TS2039: Parameter 'a1' of method from exported interface has or is using private type 'm1.C2_private'.
+0.ts line 34 col 15: error TS2057: Return type of method from exported interface has or is using private type 'm1.C2_private'.
+0.ts line 104 col 43: error TS2020: Exported interface 'm3_C4_public' extends private interface 'm3.m3_i_private'.
+0.ts line 109 col 44: error TS2020: Exported interface 'm3_C6_public' extends private interface 'm3.m3_i_private'.

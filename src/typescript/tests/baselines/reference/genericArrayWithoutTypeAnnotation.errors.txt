@@ -1,0 +1,2 @@
+0.ts line 4 col 24: error TS2173: Generic type references must include all type arguments
+0.ts line 4 col 24: error TS2173: Generic type references must include all type arguments

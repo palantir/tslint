@@ -1,0 +1,2 @@
+0.ts line 10 col 5: error TS2012: Cannot convert '(p1?: string) => I1' to 'I1':
+	Call signatures of types '(p1?: string) => I1' and 'I1' are incompatible.

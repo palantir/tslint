@@ -1,0 +1,4 @@
+0.ts line 2 col 1: error TS2086: Type 'string' does not satisfy the constraint 'number' for type parameter 'T extends U'.
+0.ts line 2 col 1: error TS2087: Could not select overload for 'call' expression.
+0.ts line 5 col 1: error TS2086: Type 'string' does not satisfy the constraint 'number' for type parameter 'U extends T'.
+0.ts line 5 col 1: error TS2087: Could not select overload for 'call' expression.

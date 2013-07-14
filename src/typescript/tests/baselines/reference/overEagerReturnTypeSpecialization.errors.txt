@@ -1,0 +1,5 @@
+0.ts line 8 col 5: error TS2012: Cannot convert 'I1<number>' to 'I1<string>':
+	Types of property 'func' of types 'I1<number>' and 'I1<string>' are incompatible:
+		Call signatures of types '<U>(callback: (value: number) => U) => I1<U>' and '<U>(callback: (value: string) => U) => I1<U>' are incompatible:
+			Call signatures of types '(value: number) => U' and '(value: string) => U' are incompatible.
+			Call signatures of types '(value: string) => U' and '(value: number) => U' are incompatible.

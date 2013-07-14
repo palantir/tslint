@@ -1,0 +1,1 @@
+0.ts line 4 col 15: error TS2094: The property 'b' does not exist on value of type 'Foo'.

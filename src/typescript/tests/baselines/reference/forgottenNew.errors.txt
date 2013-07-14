@@ -1,0 +1,1 @@
+0.ts line 5 col 20: error TS2161: Value of type 'new() => Tools.NullLogger' is not callable. Did you mean to include 'new'?

@@ -1,0 +1,1 @@
+0.ts line 1 col 11: error TS2101: Interface 'I5<T>' is recursively referenced as a base type of itself.

@@ -1,0 +1,2 @@
+0.ts line 8 col 17: error TS2086: Type 'number' does not satisfy the constraint 'Comparable<T extends Comparable<T>>' for type parameter 'T extends Comparable<T>'.
+0.ts line 8 col 17: error TS2087: Could not select overload for 'call' expression.

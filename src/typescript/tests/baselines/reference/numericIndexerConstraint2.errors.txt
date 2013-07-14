@@ -1,0 +1,2 @@
+0.ts line 4 col 1: error TS2012: Cannot convert '{ one: number; }' to '{ [index: string]: Foo; }':
+	Type 'Number' is missing property 'foo' from type 'Foo'.

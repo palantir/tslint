@@ -1,0 +1,6 @@
+0.ts line 22 col 15: error TS2166: Only public instance methods of the base class are accessible via the super keyword
+0.ts line 24 col 15: error TS2107: 'MyBase.p1' is inaccessible.
+0.ts line 26 col 24: error TS2166: Only public instance methods of the base class are accessible via the super keyword
+0.ts line 28 col 24: error TS2166: Only public instance methods of the base class are accessible via the super keyword
+0.ts line 32 col 15: error TS2166: Only public instance methods of the base class are accessible via the super keyword
+0.ts line 34 col 23: error TS2166: Only public instance methods of the base class are accessible via the super keyword

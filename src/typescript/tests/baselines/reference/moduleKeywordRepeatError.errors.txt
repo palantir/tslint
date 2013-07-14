@@ -1,0 +1,2 @@
+0.ts line 3 col 15: error TS1005: ';' expected.
+0.ts line 3 col 1: error TS2095: Could not find symbol 'module'.

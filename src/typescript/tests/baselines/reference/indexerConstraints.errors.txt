@@ -1,0 +1,8 @@
+0.ts line 17 col 5: error TS2168: Numeric indexer type 'A' must be a subtype of string indexer type 'B':
+	Type 'A' is missing property 'b' from type 'B'.
+0.ts line 25 col 5: error TS2168: Numeric indexer type 'A' must be a subtype of string indexer type 'B':
+	Type 'A' is missing property 'b' from type 'B'.
+0.ts line 33 col 5: error TS2168: Numeric indexer type 'A' must be a subtype of string indexer type 'B':
+	Type 'A' is missing property 'b' from type 'B'.
+0.ts line 41 col 5: error TS2168: Numeric indexer type 'A' must be a subtype of string indexer type 'B':
+	Type 'A' is missing property 'b' from type 'B'.

@@ -1,0 +1,5 @@
+0.ts line 6 col 4: error TS2094: The property 'x' does not exist on value of type 'Number'.
+0.ts line 6 col 4: error TS2094: The property 'x' does not exist on value of type 'Number'.
+0.ts line 8 col 4: error TS2094: The property 'x' does not exist on value of type 'Number'.
+0.ts line 8 col 4: error TS2094: The property 'x' does not exist on value of type 'Number'.
+0.ts line 12 col 4: error TS2094: The property 'toExponential' does not exist on value of type 'String'.

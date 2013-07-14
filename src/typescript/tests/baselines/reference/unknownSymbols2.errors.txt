@@ -1,0 +1,10 @@
+0.ts line 2 col 12: error TS2095: Could not find symbol 'asdf'.
+0.ts line 3 col 17: error TS2095: Could not find symbol 'asdf'.
+0.ts line 4 col 13: error TS2095: Could not find symbol 'asdf'.
+0.ts line 5 col 9: error TS2095: Could not find symbol 'asdf'.
+0.ts line 7 col 14: error TS2095: Could not find symbol 'qwerty'.
+0.ts line 15 col 13: error TS2095: Could not find symbol 'asdf'.
+0.ts line 16 col 14: error TS2095: Could not find symbol 'qwerty'.
+0.ts line 29 col 5: error TS2072: Module cannot be aliased to a non-module type.
+0.ts line 22 col 19: error TS2095: Could not find symbol 'asdf'.
+0.ts line 23 col 32: error TS2095: Could not find symbol 'qwerty'.

@@ -1,0 +1,8 @@
+0.ts line 9 col 1: error TS2012: Cannot convert '(s: string) => void' to '() => number':
+	Call signatures of types '(s: string) => void' and '() => number' are incompatible:
+		Call signature expects 0 or fewer parameters.
+0.ts line 10 col 1: error TS2012: Cannot convert '(s: string) => void' to '() => number':
+	Call signatures of types '(s: string) => void' and '() => number' are incompatible:
+		Call signature expects 0 or fewer parameters.
+0.ts line 12 col 1: error TS2012: Cannot convert '(s: string) => void' to 'new() => number':
+	Type 'new() => number' requires a construct signature, but type '(s: string) => void' lacks one.

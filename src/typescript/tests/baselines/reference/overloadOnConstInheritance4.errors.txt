@@ -1,0 +1,3 @@
+0.ts line 2 col 29: error TS2154: Specialized overload signature is not subtype of any non-specialized signature.
+0.ts line 5 col 29: error TS2154: Specialized overload signature is not subtype of any non-specialized signature.
+0.ts line 6 col 29: error TS2154: Specialized overload signature is not subtype of any non-specialized signature.

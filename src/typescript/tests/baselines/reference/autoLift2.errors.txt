@@ -1,0 +1,12 @@
+0.ts line 5 col 17: error TS1005: ';' expected.
+0.ts line 6 col 17: error TS1005: ';' expected.
+0.ts line 5 col 14: error TS2094: The property 'foo' does not exist on value of type 'A'.
+0.ts line 5 col 19: error TS2095: Could not find symbol 'any'.
+0.ts line 6 col 14: error TS2094: The property 'bar' does not exist on value of type 'A'.
+0.ts line 6 col 19: error TS2095: Could not find symbol 'any'.
+0.ts line 12 col 11: error TS2094: The property 'foo' does not exist on value of type 'A'.
+0.ts line 12 col 11: error TS2094: The property 'foo' does not exist on value of type 'A'.
+0.ts line 14 col 11: error TS2094: The property 'bar' does not exist on value of type 'A'.
+0.ts line 14 col 11: error TS2094: The property 'bar' does not exist on value of type 'A'.
+0.ts line 16 col 33: error TS2094: The property 'foo' does not exist on value of type 'A'.
+0.ts line 18 col 33: error TS2094: The property 'bar' does not exist on value of type 'A'.

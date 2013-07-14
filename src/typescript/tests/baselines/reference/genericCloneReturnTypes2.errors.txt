@@ -1,0 +1,2 @@
+0.ts line 15 col 5: error TS2012: Cannot convert 'MyList<string>' to 'MyList<number>':
+	Types of property 'data' of types 'MyList<string>' and 'MyList<number>' are incompatible.

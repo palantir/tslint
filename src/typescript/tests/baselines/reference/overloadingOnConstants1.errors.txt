@@ -1,0 +1,8 @@
+0.ts line 17 col 5: error TS2012: Cannot convert 'HTMLElement' to 'HTMLCanvasElement':
+	Type 'HTMLElement' is missing property 'width' from type 'HTMLCanvasElement'.
+0.ts line 18 col 5: error TS2012: Cannot convert 'HTMLCanvasElement' to 'HTMLSpanElement':
+	Type 'HTMLCanvasElement' is missing property 'dataSrc' from type 'HTMLSpanElement'.
+0.ts line 19 col 5: error TS2012: Cannot convert 'HTMLDivElement' to 'HTMLCanvasElement':
+	Type 'HTMLDivElement' is missing property 'width' from type 'HTMLCanvasElement'.
+0.ts line 20 col 5: error TS2012: Cannot convert 'HTMLSpanElement' to 'HTMLCanvasElement':
+	Type 'HTMLSpanElement' is missing property 'width' from type 'HTMLCanvasElement'.

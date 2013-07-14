@@ -1,0 +1,4 @@
+0.ts line 6 col 15: error TS2068: 'new T[]' cannot be used to create an array. Use 'new Array<T>()' instead.
+0.ts line 7 col 15: error TS2068: 'new T[]' cannot be used to create an array. Use 'new Array<T>()' instead.
+0.ts line 8 col 20: error TS2068: 'new T[]' cannot be used to create an array. Use 'new Array<T>()' instead.
+0.ts line 9 col 20: error TS2068: 'new T[]' cannot be used to create an array. Use 'new Array<T>()' instead.

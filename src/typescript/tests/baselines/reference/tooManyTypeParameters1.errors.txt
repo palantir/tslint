@@ -1,0 +1,3 @@
+0.ts line 2 col 1: error TS2087: Could not select overload for 'call' expression.
+0.ts line 5 col 1: error TS2087: Could not select overload for 'call' expression.
+0.ts line 11 col 8: error TS2090: Generic type 'I<T>' requires 1 type argument(s).

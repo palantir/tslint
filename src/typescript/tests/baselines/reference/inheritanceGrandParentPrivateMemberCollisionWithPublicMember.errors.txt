@@ -1,0 +1,2 @@
+0.ts line 7 col 7: error TS2141: Class 'C' cannot extend class 'B':
+	Property 'myMethod' defined as public in type 'C' is defined as private in type 'A'.

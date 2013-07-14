@@ -1,0 +1,1 @@
+0.ts line 5 col 3: error TS2107: 'Foo.privProp' is inaccessible.

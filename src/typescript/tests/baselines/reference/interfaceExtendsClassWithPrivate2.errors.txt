@@ -1,0 +1,8 @@
+0.ts line 10 col 7: error TS2141: Class 'D' cannot extend class 'C':
+	Types 'D' and 'C' define property 'x' as private.
+0.ts line 10 col 7: error TS2137: Class D declares interface I but does not implement it:
+	Types 'D' and 'C' define property 'x' as private.
+0.ts line 18 col 7: error TS2141: Class 'D2' cannot extend class 'C':
+	Types 'D2' and 'C' define property 'x' as private.
+0.ts line 18 col 7: error TS2137: Class D2 declares interface I but does not implement it:
+	Types 'D2' and 'C' define property 'x' as private.

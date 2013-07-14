@@ -1,0 +1,10 @@
+0.ts line 15 col 40: error TS2040: Parameter 'entry' of exported function has or is using private type 'Editor.List<U>'.
+0.ts line 15 col 57: error TS2058: Return type of exported function has or is using private type 'Editor.List<U>'.
+0.ts line 16 col 6: error TS2058: Return type of exported function has or is using private type 'Editor.List<U>'.
+0.ts line 19 col 40: error TS2058: Return type of exported function has or is using private type 'Editor.List<U>'.
+0.ts line 19 col 5: error TS2058: Return type of exported function has or is using private type 'Editor.List<U>'.
+0.ts line 23 col 48: error TS2058: Return type of exported function has or is using private type 'Editor.List<U>'.
+0.ts line 23 col 5: error TS2058: Return type of exported function has or is using private type 'Editor.List<U>'.
+0.ts line 4 col 6: error TS2025: Public property 'lines' of exported class has or is using private type 'Editor.List<Editor.Line>'.
+0.ts line 6 col 36: error TS2056: Return type of public method from exported class has or is using private type 'Editor.List<Editor.Line>'.
+0.ts line 11 col 13: error TS2056: Return type of public method from exported class has or is using private type 'Editor.List<Editor.Line>'.

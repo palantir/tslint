@@ -1,0 +1,2 @@
+0.ts line 29 col 9: error TS2103: 'super' cannot be referenced in non-derived classes.
+0.ts line 29 col 15: error TS2166: Only public instance methods of the base class are accessible via the super keyword

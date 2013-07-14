@@ -1,0 +1,11 @@
+0.ts line 18 col 20: error TS2068: 'new T[]' cannot be used to create an array. Use 'new Array<T>()' instead.
+0.ts line 22 col 1: error TS2068: 'new T[]' cannot be used to create an array. Use 'new Array<T>()' instead.
+0.ts line 45 col 23: error TS2068: 'new T[]' cannot be used to create an array. Use 'new Array<T>()' instead.
+0.ts line 3 col 13: error TS2095: Could not find symbol 'ifc'.
+0.ts line 10 col 14: error TS2083: Invalid 'new' expression.
+0.ts line 11 col 14: error TS2083: Invalid 'new' expression.
+0.ts line 12 col 5: error TS2095: Could not find symbol 'string'.
+0.ts line 18 col 14: error TS2095: Could not find symbol 'string'.
+0.ts line 21 col 1: error TS2095: Could not find symbol 'string'.
+0.ts line 28 col 13: error TS2095: Could not find symbol 'q'.
+0.ts line 31 col 14: error TS2083: Invalid 'new' expression.

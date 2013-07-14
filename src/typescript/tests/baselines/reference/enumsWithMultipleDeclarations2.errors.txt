@@ -1,0 +1,1 @@
+0.ts line 11 col 1: error TS4024: Enums with multiple declarations must provide an initializer for the first enum element.

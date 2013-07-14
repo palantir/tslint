@@ -1,0 +1,2 @@
+0.ts line 1 col 23: error TS2154: Specialized overload signature is not subtype of any non-specialized signature.
+0.ts line 4 col 5: error TS2095: Could not find symbol 'cb'.

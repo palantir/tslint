@@ -1,0 +1,18 @@
+0.ts line 31 col 1: error TS2012: Cannot convert 'Control' to 'Button':
+	Type 'Control' is missing property 'select' from type 'Button'.
+0.ts line 37 col 1: error TS2012: Cannot convert 'Control' to 'TextBox':
+	Type 'Control' is missing property 'select' from type 'TextBox'.
+0.ts line 46 col 1: error TS2012: Cannot convert 'Image1' to 'SelectableControl':
+	Type 'Image1' is missing property 'select' from type 'SelectableControl'.
+0.ts line 55 col 1: error TS2012: Cannot convert 'Control' to 'Locations':
+	Type 'Control' is missing property 'select' from type 'Locations'.
+0.ts line 58 col 1: error TS2012: Cannot convert 'Locations1' to 'SelectableControl':
+	Type 'Locations1' is missing property 'state' from type 'SelectableControl'.
+0.ts line 59 col 1: error TS2012: Cannot convert 'Locations1' to 'Control':
+	Type 'Locations1' is missing property 'state' from type 'Control'.
+0.ts line 61 col 1: error TS2012: Cannot convert 'Control' to 'Locations1':
+	Type 'Control' is missing property 'select' from type 'Locations1'.
+0.ts line 14 col 7: error TS2137: Class ImageBase declares interface SelectableControl but does not implement it:
+	Type 'ImageBase' is missing property 'select' from type 'SelectableControl'.
+0.ts line 18 col 7: error TS2137: Class Locations declares interface SelectableControl but does not implement it:
+	Type 'Locations' is missing property 'state' from type 'SelectableControl'.

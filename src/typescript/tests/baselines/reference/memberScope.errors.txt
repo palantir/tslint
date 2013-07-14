@@ -1,0 +1,1 @@
+0.ts line 4 col 17: error TS2094: The property 'Pepper' does not exist on value of type 'Basil'.

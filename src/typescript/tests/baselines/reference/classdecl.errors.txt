@@ -1,0 +1,3 @@
+0.ts line 15 col 12: error TS1049: 'set' accessor must have one and only one parameter.
+0.ts line 15 col 5: error TS2096: 'get' and 'set' accessor must have the same type.
+0.ts line 15 col 5: error TS2096: 'get' and 'set' accessor must have the same type.

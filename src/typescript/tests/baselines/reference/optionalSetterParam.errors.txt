@@ -1,0 +1,1 @@
+0.ts line 3 col 19: error TS1051: 'set' accessor parameter cannot be optional.

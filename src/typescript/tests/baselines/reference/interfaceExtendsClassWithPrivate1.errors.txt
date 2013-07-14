@@ -1,0 +1,6 @@
+0.ts line 21 col 1: error TS2012: Cannot convert 'C' to 'I':
+	Type 'C' is missing property 'other' from type 'I'.
+0.ts line 24 col 1: error TS2012: Cannot convert 'I' to 'D':
+	Type 'I' is missing property 'bar' from type 'D'.
+0.ts line 27 col 1: error TS2012: Cannot convert 'C' to 'D':
+	Type 'C' is missing property 'other' from type 'D'.

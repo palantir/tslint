@@ -1,0 +1,3 @@
+0.ts line 1 col 5: error TS2012: Cannot convert '() => void' to '() => boolean':
+	Call signatures of types '() => void' and '() => boolean' are incompatible.
+0.ts line 2 col 37: error TS2125: Function expression declared a non-void return type, but has no return expression.

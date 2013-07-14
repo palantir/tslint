@@ -1,0 +1,2 @@
+0.ts line 9 col 5: error TS2011: Cannot convert 'Date' to 'string'.
+0.ts line 12 col 5: error TS2011: Cannot convert 'Date' to 'string'.

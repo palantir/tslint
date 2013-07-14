@@ -1,0 +1,7 @@
+0.ts line 7 col 1: error TS2082: Supplied parameters do not match any signature of call target:
+	Call signatures of types '(x: string) => number' and '(x: number) => number' are incompatible.
+0.ts line 7 col 1: error TS2087: Could not select overload for 'call' expression.
+0.ts line 8 col 1: error TS2082: Supplied parameters do not match any signature of call target:
+	Call signatures of types '(x: 'hm') => number' and '(x: number) => number' are incompatible.
+0.ts line 8 col 1: error TS2087: Could not select overload for 'call' expression.
+0.ts line 8 col 7: error TS2163: Overload signature implementation cannot use specialized type.

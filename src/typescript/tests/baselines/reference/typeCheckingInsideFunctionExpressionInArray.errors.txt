@@ -1,0 +1,4 @@
+0.ts line 2 col 7: error TS2011: Cannot convert 'number' to 'string'.
+0.ts line 3 col 5: error TS2011: Cannot convert 'Object' to 'string'.
+0.ts line 4 col 15: error TS2094: The property 'NonexistantMethod' does not exist on value of type 'Array'.
+0.ts line 5 col 5: error TS2095: Could not find symbol 'derp'.

@@ -1,0 +1,1 @@
+0.ts line 10 col 9: error TS2119: The right-hand side of an 'in' expression must be of type 'any', an object type or a type parameter.

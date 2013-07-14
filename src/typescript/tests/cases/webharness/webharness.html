@@ -1,0 +1,132 @@
+<!DOCTYPE html> 
+
+<html>
+<head>
+    <title>TypeScript Web harness</title>
+    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.9.1.js"></script>
+    <script src='perfCompiler.js'></script>
+    <script>
+        var repeat = 20;
+        var batch;
+
+        if (!batch) {
+            batch = new BatchCompiler();
+        }
+
+        var languageService = batch.createLanguageService();
+        languageService.refresh();
+
+        function appendTime(message, time) {
+            var res = message + ": " + time;
+            var div = document.createElement('div');
+            div.innerText = res;
+            document.body.appendChild(div);
+        }
+
+        function clear1() {
+            $("div").remove();
+        }
+
+        function run(f) {
+            var start = new Date().getTime();
+            for (var i = 0; i < repeat; i++) {
+                f();
+            }
+
+            var end = new Date().getTime();
+            if (repeat > 1) {
+                appendTime("Average", (end - start) / repeat);
+            }
+        }
+
+        function newParse() {
+            run(function () {
+                var start = new Date().getTime();
+                batch.newParse();
+                var end = new Date().getTime();
+                appendTime("New Parse", end - start);
+            });
+        }
+
+        function newParseAndAST() {
+            run(function () {
+                var start = new Date().getTime();
+
+                var tree = batch.newParse();
+                TypeScript.SyntaxTreeToAstVisitor.visit(tree, "", new TypeScript.CompilationSettings());
+
+                var end = new Date().getTime();
+                appendTime("AST", end - start);
+            });
+        }
+
+        function newIncrementalParse() {
+            var tree = batch.newParse();
+
+            run(function () {
+                var start = new Date().getTime();
+                tree = batch.newIncrementalParse(tree);
+                var end = new Date().getTime();
+                appendTime("Incremental Parse", end - start);
+            });
+        }
+
+        function newIncrementalParseAndAST() {
+            var tree = batch.newParse();
+            TypeScript.SyntaxTreeToAstVisitor.visit(tree, "", new TypeScript.CompilationSettings());
+
+            run(function () {
+                var start = new Date().getTime();
+                tree = batch.newIncrementalParse(tree);
+                TypeScript.SyntaxTreeToAstVisitor.visit(tree, "", new TypeScript.CompilationSettings());
+                var end = new Date().getTime();
+                appendTime("Incremental Parse and AST", end - start);
+            });
+        }
+
+        function completion() {
+            //run(function () {
+            var start = new Date().getTime();
+
+            var index = compilerString.indexOf("walker.options.goChildren = AstWalkerCallback(true, cur, callback);");
+            var index2 = compilerString.indexOf(".", index) + 1;
+            
+            run(function () {
+                var start = new Date().getTime();
+                languageService.compilerState.compiler.semanticInfoChain.update();
+                var info = languageService.getCompletionsAtPosition(compilerFileName, index2, /*isMemberCompletion:*/ true);
+
+                var end = new Date().getTime();
+                appendTime("Completions " + info.entries.length, end - start);
+            });
+            //});
+        }
+
+        function typeCheck() {
+            var start = new Date().getTime();
+            batch.reTypeCheck();
+            var end = new Date().getTime();
+            appendTime("Type Check", end - start);
+        }
+
+        //    for (var i = 0; i < 500; i++) {
+        //        service.refresh();
+        //        var res = service.getTypeAtPosition(5);
+        //        document.write(res); // bug: nothing printed here
+        //        document.write("<br>");
+        //        document.write("<br>");
+        //    }
+
+    </script>
+</head>
+<body>
+    <h1>TypeScript Perf Testbed</h1>
+    <button onclick="newParse()">Parse</button>
+    <button onclick="newParseAndAST()">Parse + AST</button>
+    <button onclick="newIncrementalParse()">Incremental Parse</button>
+    <button onclick="newIncrementalParseAndAST()">Incremental Parse + AST</button>
+    <button onclick="typeCheck()">Type Check</button>
+    <button onclick="completion()">Completion</button>
+    <button onclick="clear1()">Clear</button>
+</body>
+</html>

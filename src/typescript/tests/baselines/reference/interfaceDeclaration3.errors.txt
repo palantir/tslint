@@ -1,0 +1,6 @@
+0.ts line 6 col 11: error TS2137: Class M1.C1 declares interface M1.I1 but does not implement it:
+	Types of property 'item' of types 'M1.C1' and 'M1.I1' are incompatible.
+0.ts line 31 col 11: error TS2137: Class M2.C1 declares interface M2.I1 but does not implement it:
+	Types of property 'item' of types 'M2.C1' and 'M2.I1' are incompatible.
+0.ts line 54 col 11: error TS2143: Interface 'I2' cannot extend interface 'I1':
+	Types of property 'item' of types 'I2' and 'I1' are incompatible.

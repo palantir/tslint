@@ -1,0 +1,16 @@
+0.ts line 12 col 5: error TS2012: Cannot convert '{ x: A<number>; }' to 'I<string>':
+	Types of property 'x' of types '{ x: A<number>; }' and 'I<string>' are incompatible:
+		Types of property 'compareTo' of types 'A<number>' and 'Comparable<string>' are incompatible:
+			Call signatures of types '(other: number) => number' and '(other: string) => number' are incompatible.
+0.ts line 13 col 5: error TS2012: Cannot convert '{ x: A<number>; }' to 'I<string>':
+	Types of property 'x' of types '{ x: A<number>; }' and 'I<string>' are incompatible:
+		Types of property 'compareTo' of types 'A<number>' and 'Comparable<string>' are incompatible:
+			Call signatures of types '(other: number) => number' and '(other: string) => number' are incompatible.
+0.ts line 16 col 5: error TS2012: Cannot convert '{ x: A<number>; }' to 'I<string>':
+	Types of property 'x' of types '{ x: A<number>; }' and 'I<string>' are incompatible:
+		Types of property 'compareTo' of types 'A<number>' and 'Comparable<string>' are incompatible:
+			Call signatures of types '(other: number) => number' and '(other: string) => number' are incompatible.
+0.ts line 17 col 5: error TS2012: Cannot convert 'K<number>' to 'I<string>':
+	Types of property 'x' of types 'K<number>' and 'I<string>' are incompatible:
+		Types of property 'compareTo' of types 'A<number>' and 'Comparable<string>' are incompatible:
+			Call signatures of types '(other: number) => number' and '(other: string) => number' are incompatible.

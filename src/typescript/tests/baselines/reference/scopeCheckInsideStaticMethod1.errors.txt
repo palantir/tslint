@@ -1,0 +1,2 @@
+0.ts line 6 col 7: error TS2095: Could not find symbol 'v'.
+0.ts line 6 col 7: error TS2095: Could not find symbol 'v'.

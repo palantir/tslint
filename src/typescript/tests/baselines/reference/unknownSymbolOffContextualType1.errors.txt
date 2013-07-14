@@ -1,0 +1,1 @@
+0.ts line 9 col 18: error TS2094: The property 'xyxyxyx' does not exist on value of type 'HTMLElement'.

@@ -1,0 +1,2 @@
+0.ts line 4 col 5: error TS2011: Cannot convert 'U' to 'T'.
+0.ts line 5 col 5: error TS2011: Cannot convert 'Object' to 'T'.

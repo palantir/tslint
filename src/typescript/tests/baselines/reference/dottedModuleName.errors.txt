@@ -1,0 +1,5 @@
+0.ts line 3 col 29: error TS1012: Unexpected token.
+0.ts line 3 col 31: error TS1005: '{' expected.
+0.ts line 4 col 2: error TS1008: Unexpected token; 'statement' expected.
+0.ts line 5 col 20: error TS2081: Supplied parameters do not match any signature of call target.
+0.ts line 5 col 20: error TS2087: Could not select overload for 'call' expression.

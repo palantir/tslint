@@ -1,0 +1,3 @@
+0.ts line 17 col 61: error TS2011: Cannot convert 'number' to 'string'.
+0.ts line 9 col 19: error TS2011: Cannot convert 'number' to 'string'.
+0.ts line 13 col 23: error TS2011: Cannot convert 'number' to 'string'.

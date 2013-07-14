@@ -1,0 +1,1 @@
+0.ts line 4 col 18: error TS2094: The property 'length' does not exist on value of type 'Number'.

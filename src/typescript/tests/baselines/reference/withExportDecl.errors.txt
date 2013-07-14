@@ -1,0 +1,1 @@
+0.ts line 43 col 9: error TS1029: 'export' modifier must precede 'declare' modifier.

@@ -1,0 +1,13 @@
+0.ts line 4 col 1: error TS2139: The operand of an increment or decrement operator must be a variable, property or indexer.
+0.ts line 6 col 1: error TS2139: The operand of an increment or decrement operator must be a variable, property or indexer.
+0.ts line 7 col 1: error TS2139: The operand of an increment or decrement operator must be a variable, property or indexer.
+0.ts line 9 col 3: error TS2139: The operand of an increment or decrement operator must be a variable, property or indexer.
+0.ts line 10 col 3: error TS2139: The operand of an increment or decrement operator must be a variable, property or indexer.
+0.ts line 12 col 1: error TS2139: The operand of an increment or decrement operator must be a variable, property or indexer.
+0.ts line 13 col 1: error TS2139: The operand of an increment or decrement operator must be a variable, property or indexer.
+0.ts line 15 col 3: error TS2139: The operand of an increment or decrement operator must be a variable, property or indexer.
+0.ts line 16 col 3: error TS2139: The operand of an increment or decrement operator must be a variable, property or indexer.
+0.ts line 18 col 1: error TS2139: The operand of an increment or decrement operator must be a variable, property or indexer.
+0.ts line 19 col 1: error TS2139: The operand of an increment or decrement operator must be a variable, property or indexer.
+0.ts line 21 col 3: error TS2139: The operand of an increment or decrement operator must be a variable, property or indexer.
+0.ts line 22 col 3: error TS2139: The operand of an increment or decrement operator must be a variable, property or indexer.

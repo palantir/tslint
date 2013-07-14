@@ -1,0 +1,2 @@
+0.ts line 9 col 7: error TS2141: Class 'DerivedClass' cannot extend class 'BaseClass':
+	Types 'DerivedClass' and 'BaseClass' define property '_init' as private.

@@ -1,0 +1,5 @@
+0.ts line 10 col 5: error TS2012: Cannot convert 'I1<boolean>' to 'I1<number>':
+	Types of property 'm1' of types 'I1<boolean>' and 'I1<number>' are incompatible:
+		Call signatures of types '<U>(callback: (p: boolean) => U) => I1<U>' and '<U>(callback: (p: number) => U) => I1<U>' are incompatible:
+			Call signatures of types '(p: boolean) => U' and '(p: number) => U' are incompatible.
+			Call signatures of types '(p: number) => U' and '(p: boolean) => U' are incompatible.

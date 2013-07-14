@@ -1,0 +1,1 @@
+0.ts line 18 col 23: error TS2094: The property 'static' does not exist on value of type ''.

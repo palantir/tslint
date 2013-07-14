@@ -1,0 +1,4 @@
+0.ts line 6 col 1: error TS2152: Overload signatures must all be ambient or non-ambient.
+0.ts line 7 col 1: error TS2151: Overload signatures must all be exported or local.
+0.ts line 2 col 5: error TS2150: Overload signatures must all be public or private.
+0.ts line 12 col 5: error TS2153: Overload signatures must all be optional or required.

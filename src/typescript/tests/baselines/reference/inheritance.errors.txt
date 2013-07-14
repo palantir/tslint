@@ -1,0 +1,4 @@
+0.ts line 21 col 7: error TS2141: Class 'ND' cannot extend class 'N':
+	Types of property 'y' of types 'ND' and 'N' are incompatible.
+0.ts line 30 col 7: error TS2141: Class 'Baad' cannot extend class 'Good':
+	Class 'Baad' defines instance member function 'f', but extended class 'Good' defines it as instance member property.

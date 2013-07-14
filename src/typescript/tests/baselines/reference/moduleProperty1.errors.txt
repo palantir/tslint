@@ -1,0 +1,4 @@
+0.ts line 9 col 5: error TS1008: Unexpected token; 'module, class, interface, enum, import or statement' expected.
+0.ts line 9 col 13: error TS2095: Could not find symbol 'y'.
+0.ts line 9 col 13: error TS2095: Could not find symbol 'y'.
+0.ts line 10 col 20: error TS2095: Could not find symbol 'y'.

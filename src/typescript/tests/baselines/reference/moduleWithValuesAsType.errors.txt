@@ -1,0 +1,1 @@
+0.ts line 5 col 8: error TS4022: Type reference cannot refer to container 'A'.

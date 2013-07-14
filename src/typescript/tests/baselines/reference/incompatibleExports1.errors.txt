@@ -1,0 +1,2 @@
+0.ts line 4 col 5: error TS1064: Export assignment not allowed in module with exported element.
+0.ts line 16 col 5: error TS1064: Export assignment not allowed in module with exported element.

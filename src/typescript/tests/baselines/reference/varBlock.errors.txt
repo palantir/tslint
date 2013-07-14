@@ -1,0 +1,20 @@
+0.ts line 8 col 16: error TS1039: Initializers are not allowed in ambient contexts.
+0.ts line 11 col 22: error TS1040: Overload and ambient signatures cannot specify parameter properties.
+0.ts line 11 col 31: error TS1039: Initializers are not allowed in ambient contexts.
+0.ts line 15 col 15: error TS1039: Initializers are not allowed in ambient contexts.
+0.ts line 21 col 16: error TS1039: Initializers are not allowed in ambient contexts.
+0.ts line 22 col 20: error TS1039: Initializers are not allowed in ambient contexts.
+0.ts line 25 col 19: error TS1039: Initializers are not allowed in ambient contexts.
+0.ts line 26 col 24: error TS1039: Initializers are not allowed in ambient contexts.
+0.ts line 26 col 33: error TS1039: Initializers are not allowed in ambient contexts.
+0.ts line 27 col 27: error TS1039: Initializers are not allowed in ambient contexts.
+0.ts line 28 col 33: error TS1039: Initializers are not allowed in ambient contexts.
+0.ts line 28 col 43: error TS1039: Initializers are not allowed in ambient contexts.
+0.ts line 32 col 11: error TS1039: Initializers are not allowed in ambient contexts.
+0.ts line 33 col 16: error TS1039: Initializers are not allowed in ambient contexts.
+0.ts line 33 col 25: error TS1039: Initializers are not allowed in ambient contexts.
+0.ts line 34 col 19: error TS1039: Initializers are not allowed in ambient contexts.
+0.ts line 35 col 25: error TS1039: Initializers are not allowed in ambient contexts.
+0.ts line 35 col 35: error TS1039: Initializers are not allowed in ambient contexts.
+0.ts line 39 col 15: error TS1039: Initializers are not allowed in ambient contexts.
+0.ts line 39 col 13: error TS2000: Duplicate identifier 'c'.

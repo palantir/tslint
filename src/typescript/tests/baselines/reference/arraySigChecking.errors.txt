@@ -1,0 +1,4 @@
+0.ts line 11 col 14: error TS1023: Index signature parameter type must be 'string' or 'number'.
+0.ts line 18 col 27: error TS2011: Cannot convert 'void' to 'string'.
+0.ts line 22 col 13: error TS2012: Cannot convert 'number' to 'number[]':
+	Type 'Number' is missing property 'concat' from type 'number[]'.

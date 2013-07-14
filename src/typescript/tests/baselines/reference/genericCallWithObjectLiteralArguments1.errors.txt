@@ -1,0 +1,12 @@
+0.ts line 4 col 10: error TS2082: Supplied parameters do not match any signature of call target:
+	Types of property 'y' of types '{ x: number; y: string; }' and '{ x: number; y: number; }' are incompatible.
+0.ts line 4 col 10: error TS2087: Could not select overload for 'call' expression.
+0.ts line 5 col 10: error TS2082: Supplied parameters do not match any signature of call target:
+	Types of property 'x' of types '{ x: number; y: string; }' and '{ x: string; y: string; }' are incompatible.
+0.ts line 5 col 10: error TS2087: Could not select overload for 'call' expression.
+0.ts line 6 col 10: error TS2082: Supplied parameters do not match any signature of call target:
+	Types of property 'x' of types '{ x: string; y: number; }' and '{ x: number; y: number; }' are incompatible.
+0.ts line 6 col 10: error TS2087: Could not select overload for 'call' expression.
+0.ts line 7 col 10: error TS2082: Supplied parameters do not match any signature of call target:
+	Types of property 'y' of types '{ x: string; y: number; }' and '{ x: string; y: string; }' are incompatible.
+0.ts line 7 col 10: error TS2087: Could not select overload for 'call' expression.

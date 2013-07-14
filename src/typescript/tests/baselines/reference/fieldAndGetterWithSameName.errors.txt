@@ -1,0 +1,1 @@
+0.ts line 3 col 3: error TS2000: Duplicate identifier 'x'.

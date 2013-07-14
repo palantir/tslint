@@ -1,0 +1,5 @@
+0.ts line 8 col 1: error TS2154: Specialized overload signature is not subtype of any non-specialized signature.
+0.ts line 9 col 1: error TS2154: Specialized overload signature is not subtype of any non-specialized signature.
+0.ts line 15 col 9: error TS2081: Supplied parameters do not match any signature of call target.
+0.ts line 15 col 9: error TS2087: Could not select overload for 'call' expression.
+0.ts line 19 col 1: error TS2154: Specialized overload signature is not subtype of any non-specialized signature.

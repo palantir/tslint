@@ -1,0 +1,3 @@
+0.ts line 11 col 16: error TS4022: Type reference cannot refer to container '"winjs"'.
+0.ts line 9 col 14: error TS4022: Type reference cannot refer to container '"winjs"'.
+0.ts line 10 col 23: error TS4022: Type reference cannot refer to container '"winjs"'.

@@ -1,0 +1,2 @@
+0.ts line 10 col 13: error TS2083: Invalid 'new' expression.
+0.ts line 11 col 9: error TS2088: Unable to invoke type with no call signatures.

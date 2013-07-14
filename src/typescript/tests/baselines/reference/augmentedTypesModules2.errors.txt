@@ -1,0 +1,3 @@
+0.ts line 6 col 1: error TS2000: Duplicate identifier 'm2a'.
+0.ts line 9 col 1: error TS2000: Duplicate identifier 'm2b'.
+0.ts line 15 col 1: error TS2000: Duplicate identifier 'm2cc'.

@@ -1,0 +1,11 @@
+var TShirtSize;
+(function (TShirtSize) {
+    TShirtSize[TShirtSize["Small"] = 0] = "Small";
+    TShirtSize[TShirtSize["Medium"] = 1] = "Medium";
+
+    TShirtSize[TShirtSize["Large"] = 2] = "Large";
+})(TShirtSize || (TShirtSize = {}));
+var mySize = TShirtSize.Large;
+var test = TShirtSize[mySize];
+
+test + '';

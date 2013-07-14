@@ -1,0 +1,17 @@
+0.ts line 2 col 23: error TS1005: ';' expected.
+0.ts line 3 col 23: error TS1005: ';' expected.
+0.ts line 5 col 17: error TS1005: ';' expected.
+0.ts line 2 col 12: error TS2095: Could not find symbol 'a'.
+0.ts line 2 col 16: error TS2095: Could not find symbol 'b'.
+0.ts line 2 col 19: error TS2095: Could not find symbol 'c'.
+0.ts line 3 col 13: error TS2095: Could not find symbol 'a'.
+0.ts line 3 col 17: error TS2095: Could not find symbol 'b'.
+0.ts line 3 col 20: error TS2095: Could not find symbol 'c'.
+0.ts line 5 col 13: error TS2095: Could not find symbol 'a'.
+0.ts line 2 col 26: error TS2095: Could not find symbol 'a'.
+0.ts line 2 col 28: error TS2095: Could not find symbol 'b'.
+0.ts line 2 col 30: error TS2095: Could not find symbol 'c'.
+0.ts line 3 col 26: error TS2095: Could not find symbol 'a'.
+0.ts line 3 col 28: error TS2095: Could not find symbol 'b'.
+0.ts line 3 col 30: error TS2095: Could not find symbol 'c'.
+0.ts line 5 col 20: error TS2095: Could not find symbol 'a'.

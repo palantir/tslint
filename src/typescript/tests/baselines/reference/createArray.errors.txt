@@ -1,0 +1,7 @@
+0.ts line 1 col 18: error TS2068: 'new T[]' cannot be used to create an array. Use 'new Array<T>()' instead.
+0.ts line 6 col 6: error TS2068: 'new T[]' cannot be used to create an array. Use 'new Array<T>()' instead.
+0.ts line 7 col 19: error TS2068: 'new T[]' cannot be used to create an array. Use 'new Array<T>()' instead.
+0.ts line 8 col 18: error TS2068: 'new T[]' cannot be used to create an array. Use 'new Array<T>()' instead.
+0.ts line 1 col 12: error TS2095: Could not find symbol 'number'.
+0.ts line 7 col 12: error TS2095: Could not find symbol 'boolean'.
+0.ts line 8 col 12: error TS2095: Could not find symbol 'string'.

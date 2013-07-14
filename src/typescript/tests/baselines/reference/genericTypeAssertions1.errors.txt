@@ -1,0 +1,14 @@
+0.ts line 3 col 5: error TS2012: Cannot convert 'A<number>' to 'A<string>':
+	Types of property 'foo' of types 'A<number>' and 'A<string>' are incompatible:
+		Call signatures of types '(x: number) => void' and '(x: string) => void' are incompatible.
+0.ts line 4 col 21: error TS2012: Cannot convert 'A<number>' to 'A<A<number>>':
+	Types of property 'foo' of types 'A<A<number>>' and 'A<number>' are incompatible:
+		Call signatures of types '(x: A<number>) => void' and '(x: number) => void' are incompatible:
+			Type 'Number' is missing property 'foo' from type 'A<number>'.
+	Types of property 'foo' of types 'A<number>' and 'A<A<number>>' are incompatible:
+		Call signatures of types '(x: number) => void' and '(x: A<number>) => void' are incompatible:
+			Type 'Number' is missing property 'foo' from type 'A<number>'.
+0.ts line 4 col 5: error TS2012: Cannot convert 'A<A<number>>' to 'A<number>':
+	Types of property 'foo' of types 'A<A<number>>' and 'A<number>' are incompatible:
+		Call signatures of types '(x: A<number>) => void' and '(x: number) => void' are incompatible:
+			Type 'Number' is missing property 'foo' from type 'A<number>'.

@@ -1,0 +1,13 @@
+0.ts line 80 col 5: error TS1008: Unexpected token; 'module, class, interface, enum, import or statement' expected.
+0.ts line 81 col 5: error TS1008: Unexpected token; 'module, class, interface, enum, import or statement' expected.
+0.ts line 82 col 5: error TS1008: Unexpected token; 'module, class, interface, enum, import or statement' expected.
+0.ts line 83 col 5: error TS1008: Unexpected token; 'module, class, interface, enum, import or statement' expected.
+0.ts line 50 col 16: error TS2027: Exported variable 'm1.m1_im2_private_v1_public' has or is using private type 'm1.m1_M2_private.c1'.
+0.ts line 51 col 16: error TS2027: Exported variable 'm1.m1_im2_private_v2_public' has or is using private type 'm1.m1_M2_private.c1'.
+0.ts line 53 col 16: error TS2027: Exported variable 'm1.m1_im2_private_v4_public' has or is using private type 'm1.m1_M2_private.c1'.
+0.ts line 70 col 16: error TS2027: Exported variable 'm1.m1_im4_private_v1_public' has or is using private type '"m1_M4_private".c1'.
+0.ts line 71 col 16: error TS2027: Exported variable 'm1.m1_im4_private_v2_public' has or is using private type '"m1_M4_private".c1'.
+0.ts line 107 col 45: error TS4022: Type reference cannot refer to container 'glo_M1_public'.
+0.ts line 110 col 39: error TS4022: Type reference cannot refer to container 'glo_M1_public'.
+0.ts line 115 col 45: error TS4022: Type reference cannot refer to container '"glo_M2_public"'.
+0.ts line 118 col 39: error TS4022: Type reference cannot refer to container '"glo_M2_public"'.

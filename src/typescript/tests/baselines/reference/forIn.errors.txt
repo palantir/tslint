@@ -1,0 +1,2 @@
+0.ts line 2 col 6: error TS2115: Variable declarations for for/in expressions cannot contain a type annotation.
+0.ts line 20 col 4: error TS2095: Could not find symbol 'k'.

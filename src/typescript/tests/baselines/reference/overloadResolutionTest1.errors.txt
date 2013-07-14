@@ -1,0 +1,12 @@
+0.ts line 8 col 12: error TS2082: Supplied parameters do not match any signature of call target:
+	Types of property 'a' of types '{ a: string; }' and '{ a: number; }' are incompatible.
+	Types of property 'a' of types '{ a: string; }' and '{ a: boolean; }' are incompatible.
+0.ts line 8 col 12: error TS2087: Could not select overload for 'call' expression.
+0.ts line 19 col 10: error TS2082: Supplied parameters do not match any signature of call target:
+	Types of property 'a' of types '{ a: string; }' and '{ a: number; }' are incompatible.
+	Types of property 'a' of types '{ a: string; }' and '{ a: boolean; }' are incompatible.
+0.ts line 19 col 10: error TS2087: Could not select overload for 'call' expression.
+0.ts line 25 col 9: error TS2082: Supplied parameters do not match any signature of call target:
+	Types of property 'a' of types '{ a: boolean; }' and '{ a: number; }' are incompatible.
+	Types of property 'a' of types '{ a: boolean; }' and '{ a: string; }' are incompatible.
+0.ts line 25 col 9: error TS2087: Could not select overload for 'call' expression.

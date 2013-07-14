@@ -1,0 +1,1 @@
+0.ts line 2 col 19: error TS2083: Invalid 'new' expression.

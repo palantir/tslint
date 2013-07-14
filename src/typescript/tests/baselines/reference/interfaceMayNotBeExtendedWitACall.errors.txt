@@ -1,0 +1,2 @@
+0.ts line 3 col 29: error TS1005: ',' expected.
+0.ts line 3 col 32: error TS1005: '=>' expected.

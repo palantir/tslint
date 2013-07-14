@@ -1,0 +1,5 @@
+0.ts line 4 col 11: error TS2143: Interface 'Deriver' cannot extend interface 'Base':
+	Types of property 'addEventListener' of types 'Deriver' and 'Base' are incompatible:
+		Call signatures of types '{ (x: 'bar'): string; (x: 'foo'): string; }' and '(x: string) => any' are incompatible.
+0.ts line 6 col 5: error TS2154: Specialized overload signature is not subtype of any non-specialized signature.
+0.ts line 7 col 5: error TS2154: Specialized overload signature is not subtype of any non-specialized signature.

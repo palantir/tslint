@@ -1,0 +1,1 @@
+0.ts line 1 col 6: error TS2094: The property 'toBAZ' does not exist on value of type 'null'.

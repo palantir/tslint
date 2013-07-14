@@ -1,0 +1,1 @@
+importInsideModule_file2.ts line 2 col 5: error TS2136: Import declarations in an internal module cannot reference an external module.

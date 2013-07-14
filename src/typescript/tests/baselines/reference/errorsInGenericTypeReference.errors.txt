@@ -1,0 +1,22 @@
+0.ts line 12 col 1: error TS2087: Could not select overload for 'call' expression.
+0.ts line 23 col 29: error TS2095: Could not find symbol 'V'.
+0.ts line 24 col 36: error TS2095: Could not find symbol 'V'.
+0.ts line 25 col 27: error TS2095: Could not find symbol 'V'.
+0.ts line 26 col 24: error TS2095: Could not find symbol 'V'.
+0.ts line 31 col 36: error TS2095: Could not find symbol 'V'.
+0.ts line 35 col 36: error TS2095: Could not find symbol 'V'.
+0.ts line 43 col 33: error TS2095: Could not find symbol 'V'.
+0.ts line 45 col 41: error TS2095: Could not find symbol 'V'.
+0.ts line 48 col 27: error TS2095: Could not find symbol 'V'.
+0.ts line 52 col 25: error TS2095: Could not find symbol 'V'.
+0.ts line 57 col 35: error TS2095: Could not find symbol 'V'.
+0.ts line 61 col 39: error TS2095: Could not find symbol 'V'.
+0.ts line 66 col 22: error TS2095: Could not find symbol 'V'.
+0.ts line 66 col 38: error TS2095: Could not find symbol 'V'.
+0.ts line 67 col 27: error TS2095: Could not find symbol 'V'.
+0.ts line 68 col 24: error TS2095: Could not find symbol 'V'.
+0.ts line 68 col 40: error TS2095: Could not find symbol 'V'.
+0.ts line 69 col 24: error TS2095: Could not find symbol 'V'.
+0.ts line 12 col 17: error TS2095: Could not find symbol 'V'.
+0.ts line 18 col 31: error TS2095: Could not find symbol 'V'.
+0.ts line 39 col 17: error TS2095: Could not find symbol 'V'.

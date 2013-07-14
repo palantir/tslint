@@ -1,0 +1,4 @@
+0.ts line 13 col 1: error TS2012: Cannot convert 'C' to 'C2':
+	Type 'C' is missing property 'foo' from type 'C2'.
+0.ts line 2 col 7: error TS2138: Class C declares class A as an implemented interface but does not implement it:
+	Type 'C' is missing property 'foo' from type 'A'.

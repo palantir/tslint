@@ -1,0 +1,1 @@
+0.ts line 3 col 9: error TS1026: Class can only extend single type.

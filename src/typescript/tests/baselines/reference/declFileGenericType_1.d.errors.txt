@@ -1,0 +1,5 @@
+0.d.ts line 19 col 23: error TS2095: Could not find symbol 'T'.
+0.d.ts line 20 col 23: error TS2095: Could not find symbol 'T'.
+0.d.ts line 21 col 23: error TS2095: Could not find symbol 'T'.
+0.d.ts line 22 col 40: error TS2095: Could not find symbol 'T'.
+0.d.ts line 30 col 40: error TS2095: Could not find symbol 'T'.

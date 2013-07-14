@@ -1,0 +1,2 @@
+0.ts line 1 col 8: error TS1001: Unexpected character "\".
+0.ts line 1 col 8: error TS1005: ',' expected.

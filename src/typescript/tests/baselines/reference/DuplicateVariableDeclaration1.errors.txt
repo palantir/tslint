@@ -1,0 +1,1 @@
+0.ts line 2 col 5: error TS2000: Duplicate identifier 'v'.

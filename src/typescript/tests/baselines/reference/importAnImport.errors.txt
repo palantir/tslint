@@ -1,0 +1,2 @@
+0.ts line 6 col 23: error TS2094: The property 'ma' does not exist on value of type 'b'.
+0.ts line 6 col 5: error TS2072: Module cannot be aliased to a non-module type.

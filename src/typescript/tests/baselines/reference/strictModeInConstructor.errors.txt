@@ -1,0 +1,2 @@
+0.ts line 9 col 5: error TS2104: A 'super' call must be the first statement in the constructor when a class contains initialized properties or has parameter properties.
+0.ts line 27 col 5: error TS2104: A 'super' call must be the first statement in the constructor when a class contains initialized properties or has parameter properties.

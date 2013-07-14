@@ -1,0 +1,2 @@
+0.ts line 1 col 2: error TS2095: Could not find symbol 'a'.
+0.ts line 1 col 5: error TS2095: Could not find symbol 'b'.

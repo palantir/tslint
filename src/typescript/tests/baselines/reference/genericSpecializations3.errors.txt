@@ -1,0 +1,9 @@
+0.ts line 28 col 1: error TS2012: Cannot convert 'StringFoo2' to 'IntFoo':
+	Types of property 'foo' of types 'StringFoo2' and 'IntFoo' are incompatible:
+		Call signatures of types '<string>(x: string) => string' and '<number>(x: number) => number' are incompatible.
+0.ts line 29 col 1: error TS2012: Cannot convert 'IntFoo' to 'StringFoo2':
+	Types of property 'foo' of types 'IntFoo' and 'StringFoo2' are incompatible:
+		Call signatures of types '<number>(x: number) => number' and '<string>(x: string) => string' are incompatible.
+0.ts line 8 col 7: error TS2137: Class IntFooBad declares interface IFoo<number> but does not implement it:
+	Types of property 'foo' of types 'IntFooBad' and 'IFoo<number>' are incompatible:
+		Call signatures of types '<string>(x: string) => string' and '(x: number) => number' are incompatible.

@@ -1,0 +1,2 @@
+0.ts line 1 col 14: error TS1005: ':' expected.
+0.ts line 1 col 16: error TS1008: Unexpected token; 'module, class, interface, enum, import or statement' expected.

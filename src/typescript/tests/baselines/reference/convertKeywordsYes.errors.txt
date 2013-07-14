@@ -1,0 +1,4 @@
+0.ts line 303 col 11: error TS1057: Class name cannot be 'any'.
+0.ts line 304 col 11: error TS1057: Class name cannot be 'bool'.
+0.ts line 310 col 11: error TS1057: Class name cannot be 'number'.
+0.ts line 317 col 11: error TS1057: Class name cannot be 'string'.

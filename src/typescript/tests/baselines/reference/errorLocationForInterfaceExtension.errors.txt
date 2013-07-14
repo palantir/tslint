@@ -1,0 +1,1 @@
+0.ts line 3 col 21: error TS2075: An interface may only extend another class or interface.

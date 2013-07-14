@@ -1,0 +1,2 @@
+0.ts line 8 col 7: error TS2137: Class C4 declares interface I1 but does not implement it:
+	Type 'C4' is missing property 'iAny' from type 'I1'.

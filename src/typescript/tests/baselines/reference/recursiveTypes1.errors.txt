@@ -1,0 +1,2 @@
+0.ts line 6 col 47: error TS2086: Type 'Person<U extends Person<U>>' does not satisfy the constraint 'Entity<T extends Entity<T>>' for type parameter 'T extends Entity<T>'.
+0.ts line 10 col 28: error TS2086: Type 'Customer' does not satisfy the constraint 'Person<U extends Person<U>>' for type parameter 'U extends Person<U>'.

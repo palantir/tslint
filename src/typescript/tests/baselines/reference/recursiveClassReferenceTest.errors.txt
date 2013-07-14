@@ -1,0 +1,5 @@
+0.ts line 56 col 11: error TS2095: Could not find symbol 'domNode'.
+0.ts line 84 col 36: error TS2095: Could not find symbol 'mode'.
+0.ts line 91 col 15: error TS2082: Supplied parameters do not match any signature of call target:
+	Type 'Window' is missing property 'getInitialState' from type 'IMode'.
+0.ts line 91 col 15: error TS2085: Could not select overload for 'new' expression.

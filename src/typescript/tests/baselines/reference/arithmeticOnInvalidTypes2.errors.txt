@@ -1,0 +1,7 @@
+0.ts line 2 col 14: error TS2111: Invalid '+' expression - types not known to support the addition operator.
+0.ts line 3 col 14: error TS2112: The right-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 3 col 18: error TS2113: The left-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 4 col 14: error TS2112: The right-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 4 col 18: error TS2113: The left-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 5 col 14: error TS2112: The right-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.
+0.ts line 5 col 18: error TS2113: The left-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.

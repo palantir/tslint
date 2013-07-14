@@ -1,0 +1,2 @@
+0.ts line 22 col 19: error TS2073: A class may only extend another class.
+0.ts line 26 col 9: error TS2103: 'super' cannot be referenced in non-derived classes.

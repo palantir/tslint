@@ -1,0 +1,1 @@
+0.ts line 2 col 14: error TS2094: The property 'prototype' does not exist on value of type 'Object'.

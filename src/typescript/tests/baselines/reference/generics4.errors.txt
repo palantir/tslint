@@ -1,0 +1,4 @@
+0.ts line 7 col 1: error TS2012: Cannot convert 'C<Y>' to 'C<X>':
+	Types of property 'x' of types 'C<Y>' and 'C<X>' are incompatible:
+		Types of property 'f' of types 'Y' and 'X' are incompatible:
+			Call signatures of types '() => boolean' and '() => string' are incompatible.

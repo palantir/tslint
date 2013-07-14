@@ -1,0 +1,3 @@
+0.ts line 2 col 25: error TS1005: '=' expected.
+0.ts line 2 col 26: error TS1005: ',' expected.
+0.ts line 2 col 25: error TS2095: Could not find symbol 'a'.

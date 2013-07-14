@@ -1,0 +1,2 @@
+0.ts line 53 col 63: error TS2161: Value of type 'new(flavor: string, isGlutenFree: boolean) => Cookie' is not callable. Did you mean to include 'new'?
+0.ts line 54 col 79: error TS2161: Value of type 'new(flavor: string, isGlutenFree: boolean) => Cookie' is not callable. Did you mean to include 'new'?

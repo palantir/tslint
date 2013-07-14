@@ -1,0 +1,2 @@
+0.ts line 3 col 1: error TS2000: Duplicate identifier 'c2'.
+0.ts line 4 col 5: error TS2000: Duplicate identifier 'c2'.

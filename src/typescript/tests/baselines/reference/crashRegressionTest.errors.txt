@@ -1,0 +1,5 @@
+0.ts line 16 col 56: error TS2094: The property '_name' does not exist on value of type 'StringTemplate'.
+0.ts line 16 col 13: error TS2008: Value of type 'MsPortal.Util.TemplateEngine.TemplateKeyValue' is not indexable by type 'any'.
+0.ts line 16 col 13: error TS2008: Value of type 'MsPortal.Util.TemplateEngine.TemplateKeyValue' is not indexable by type 'any'.
+0.ts line 16 col 35: error TS2025: Public property 'templateSources' of exported class has or is using private type 'MsPortal.Util.TemplateEngine.TemplateKeyValue'.
+0.ts line 22 col 9: error TS2025: Public property 'templateData' of exported class has or is using private type 'MsPortal.Util.TemplateEngine.TemplateKeyValue'.

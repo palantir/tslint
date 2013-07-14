@@ -1,0 +1,8 @@
+0.ts line 7 col 29: error TS1005: '{' expected.
+0.ts line 7 col 30: error TS1008: Unexpected token; 'constructor, function, accessor or variable' expected.
+0.ts line 7 col 37: error TS1005: ';' expected.
+0.ts line 8 col 1: error TS1008: Unexpected token; 'module, class, interface, enum, import or statement' expected.
+0.ts line 7 col 30: error TS2095: Could not find symbol 'string'.
+0.ts line 5 col 5: error TS2000: Duplicate identifier 'Foo'.
+0.ts line 11 col 17: error TS2127: Getter and setter accessors do not agree in visibility.
+0.ts line 12 col 16: error TS2127: Getter and setter accessors do not agree in visibility.

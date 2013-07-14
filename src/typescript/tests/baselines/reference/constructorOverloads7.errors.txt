@@ -1,0 +1,2 @@
+0.ts line 22 col 1: error TS2152: Overload signatures must all be ambient or non-ambient.
+0.ts line 15 col 1: error TS2000: Duplicate identifier 'Point'.

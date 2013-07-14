@@ -1,0 +1,42 @@
+0.ts line 35 col 47: error TS1016: Required parameter cannot follow optional parameter.
+0.ts line 99 col 6: error TS2081: Supplied parameters do not match any signature of call target.
+0.ts line 99 col 6: error TS2087: Could not select overload for 'call' expression.
+0.ts line 100 col 6: error TS2081: Supplied parameters do not match any signature of call target.
+0.ts line 100 col 6: error TS2087: Could not select overload for 'call' expression.
+0.ts line 101 col 1: error TS2081: Supplied parameters do not match any signature of call target.
+0.ts line 101 col 1: error TS2087: Could not select overload for 'call' expression.
+0.ts line 102 col 1: error TS2081: Supplied parameters do not match any signature of call target.
+0.ts line 102 col 1: error TS2087: Could not select overload for 'call' expression.
+0.ts line 103 col 6: error TS2081: Supplied parameters do not match any signature of call target.
+0.ts line 103 col 6: error TS2087: Could not select overload for 'call' expression.
+0.ts line 104 col 6: error TS2081: Supplied parameters do not match any signature of call target.
+0.ts line 104 col 6: error TS2087: Could not select overload for 'call' expression.
+0.ts line 105 col 1: error TS2081: Supplied parameters do not match any signature of call target.
+0.ts line 105 col 1: error TS2087: Could not select overload for 'call' expression.
+0.ts line 106 col 1: error TS2081: Supplied parameters do not match any signature of call target.
+0.ts line 106 col 1: error TS2087: Could not select overload for 'call' expression.
+0.ts line 107 col 6: error TS2081: Supplied parameters do not match any signature of call target.
+0.ts line 107 col 6: error TS2087: Could not select overload for 'call' expression.
+0.ts line 108 col 6: error TS2081: Supplied parameters do not match any signature of call target.
+0.ts line 108 col 6: error TS2087: Could not select overload for 'call' expression.
+0.ts line 109 col 1: error TS2081: Supplied parameters do not match any signature of call target.
+0.ts line 109 col 1: error TS2087: Could not select overload for 'call' expression.
+0.ts line 110 col 1: error TS2081: Supplied parameters do not match any signature of call target.
+0.ts line 110 col 1: error TS2087: Could not select overload for 'call' expression.
+0.ts line 111 col 6: error TS2081: Supplied parameters do not match any signature of call target.
+0.ts line 111 col 6: error TS2087: Could not select overload for 'call' expression.
+0.ts line 112 col 6: error TS2081: Supplied parameters do not match any signature of call target.
+0.ts line 112 col 6: error TS2087: Could not select overload for 'call' expression.
+0.ts line 113 col 1: error TS2081: Supplied parameters do not match any signature of call target.
+0.ts line 113 col 1: error TS2087: Could not select overload for 'call' expression.
+0.ts line 114 col 1: error TS2081: Supplied parameters do not match any signature of call target.
+0.ts line 114 col 1: error TS2087: Could not select overload for 'call' expression.
+0.ts line 115 col 6: error TS2081: Supplied parameters do not match any signature of call target.
+0.ts line 115 col 6: error TS2087: Could not select overload for 'call' expression.
+0.ts line 116 col 6: error TS2081: Supplied parameters do not match any signature of call target.
+0.ts line 116 col 6: error TS2087: Could not select overload for 'call' expression.
+0.ts line 117 col 1: error TS2081: Supplied parameters do not match any signature of call target.
+0.ts line 117 col 1: error TS2087: Could not select overload for 'call' expression.
+0.ts line 118 col 1: error TS2081: Supplied parameters do not match any signature of call target.
+0.ts line 118 col 1: error TS2087: Could not select overload for 'call' expression.
+0.ts line 35 col 5: error TS2000: Duplicate identifier 'C1M5'.

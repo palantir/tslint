@@ -1,0 +1,2 @@
+0.ts line 1 col 14: error TS2162: Rest parameters must be array types.
+0.ts line 1 col 14: error TS2162: Rest parameters must be array types.

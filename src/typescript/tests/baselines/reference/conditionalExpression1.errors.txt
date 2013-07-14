@@ -1,0 +1,1 @@
+0.ts line 1 col 19: error TS2091: Type of conditional expression cannot be determined. Best common type could not be found between 'number' and 'string'.

@@ -1,0 +1,2 @@
+0.ts line 3 col 4: error TS2088: Unable to invoke type with no call signatures.
+0.ts line 10 col 9: error TS2094: The property 'apply' does not exist on value of type 'Number'.

@@ -1,0 +1,1 @@
+0.ts line 25 col 37: error TS1015: Parameter cannot have question mark and initializer.

@@ -1,0 +1,2 @@
+0.ts line 10 col 7: error TS2137: Class D2 declares interface I but does not implement it:
+	Types 'D2' and 'C' define property 'x' as private.

@@ -1,0 +1,9 @@
+0.ts line 27 col 5: error TS2011: Cannot convert 'O.C' to 'string'.
+0.ts line 29 col 1: error TS2011: Cannot convert 'number' to 'string'.
+0.ts line 31 col 5: error TS2081: Supplied parameters do not match any signature of call target.
+0.ts line 31 col 5: error TS2087: Could not select overload for 'call' expression.
+0.ts line 32 col 5: error TS2081: Supplied parameters do not match any signature of call target.
+0.ts line 32 col 5: error TS2087: Could not select overload for 'call' expression.
+0.ts line 33 col 1: error TS2011: Cannot convert 'O.C' to 'string'.
+0.ts line 34 col 5: error TS2081: Supplied parameters do not match any signature of call target.
+0.ts line 34 col 5: error TS2087: Could not select overload for 'call' expression.

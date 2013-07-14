@@ -1,0 +1,22 @@
+0.ts line 93 col 3: error TS1008: Unexpected token; 'statement' expected.
+0.ts line 95 col 1: error TS1008: Unexpected token; 'module, class, interface, enum, import or statement' expected.
+0.ts line 99 col 3: error TS1008: Unexpected token; 'statement' expected.
+0.ts line 101 col 1: error TS1008: Unexpected token; 'module, class, interface, enum, import or statement' expected.
+0.ts line 105 col 3: error TS1008: Unexpected token; 'statement' expected.
+0.ts line 111 col 3: error TS1008: Unexpected token; 'statement' expected.
+0.ts line 34 col 2: error TS2105: Constructors for derived classes must contain a 'super' call.
+0.ts line 43 col 18: error TS2103: 'super' cannot be referenced in non-derived classes.
+0.ts line 46 col 17: error TS2073: A class may only extend another class.
+0.ts line 47 col 18: error TS2103: 'super' cannot be referenced in non-derived classes.
+0.ts line 57 col 2: error TS2104: A 'super' call must be the first statement in the constructor when a class contains initialized properties or has parameter properties.
+0.ts line 63 col 7: error TS2141: Class 'L' cannot extend class 'G':
+	Property 'p1' defined as private in type 'L' is defined as public in type 'G'.
+0.ts line 69 col 7: error TS2141: Class 'M' cannot extend class 'G':
+	Property 'p1' defined as private in type 'M' is defined as public in type 'G'.
+0.ts line 70 col 2: error TS2104: A 'super' call must be the first statement in the constructor when a class contains initialized properties or has parameter properties.
+0.ts line 81 col 14: error TS2140: 'this' cannot be referenced in initializers in a class body.
+0.ts line 81 col 14: error TS2109: 'this' must only be used inside a function or script context.
+0.ts line 105 col 15: error TS2094: The property 'p1' does not exist on value of type 'Q'.
+0.ts line 105 col 15: error TS2094: The property 'p1' does not exist on value of type 'Q'.
+0.ts line 111 col 16: error TS2094: The property 'p1' does not exist on value of type 'R'.
+0.ts line 111 col 16: error TS2094: The property 'p1' does not exist on value of type 'R'.

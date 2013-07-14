@@ -1,0 +1,5 @@
+debugger;
+
+function foo() {
+    debugger;
+}

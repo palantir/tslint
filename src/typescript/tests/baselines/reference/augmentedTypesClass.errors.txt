@@ -1,0 +1,5 @@
+0.ts line 3 col 5: error TS2000: Duplicate identifier 'c1'.
+0.ts line 7 col 1: error TS2000: Duplicate identifier 'c4'.
+0.ts line 7 col 1: error TS2000: Duplicate identifier 'c4'.
+0.ts line 7 col 15: error TS2012: Cannot convert 'number' to 'c4':
+	Type 'Number' is missing property 'foo' from type 'c4'.

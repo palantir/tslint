@@ -1,0 +1,1 @@
+0.ts line 1 col 11: error TS2133: Constructors cannot have a return type of 'void'.

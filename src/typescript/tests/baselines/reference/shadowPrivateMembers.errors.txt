@@ -1,0 +1,2 @@
+0.ts line 2 col 7: error TS2141: Class 'derived' cannot extend class 'base':
+	Types 'derived' and 'base' define property 'n' as private.

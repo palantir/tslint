@@ -1,0 +1,20 @@
+0.ts line 47 col 1: error TS2012: Cannot convert 'C2[]' to 'C3[]':
+	Type 'C2' is missing property 'CM3M1' from type 'C3'.
+0.ts line 48 col 1: error TS2012: Cannot convert 'C1[]' to 'C3[]':
+	Type 'C1' is missing property 'CM3M1' from type 'C3'.
+0.ts line 49 col 1: error TS2012: Cannot convert 'I1[]' to 'C3[]':
+	Type 'I1' is missing property 'CM3M1' from type 'C3'.
+0.ts line 51 col 1: error TS2012: Cannot convert '() => C1' to 'any[]':
+	Type '() => C1' is missing property 'concat' from type 'any[]'.
+0.ts line 52 col 1: error TS2012: Cannot convert '() => any' to 'any[]':
+	Type '() => any' is missing property 'concat' from type 'any[]'.
+0.ts line 53 col 1: error TS2012: Cannot convert '{ one: number; }' to 'any[]':
+	Type '{ one: number; }' is missing property 'concat' from type 'any[]'.
+0.ts line 55 col 1: error TS2012: Cannot convert 'C1' to 'any[]':
+	Type 'C1' is missing property 'concat' from type 'any[]'.
+0.ts line 56 col 1: error TS2012: Cannot convert 'C2' to 'any[]':
+	Type 'C2' is missing property 'concat' from type 'any[]'.
+0.ts line 57 col 1: error TS2012: Cannot convert 'C3' to 'any[]':
+	Type 'C3' is missing property 'concat' from type 'any[]'.
+0.ts line 58 col 1: error TS2012: Cannot convert 'I1' to 'any[]':
+	Type 'I1' is missing property 'concat' from type 'any[]'.

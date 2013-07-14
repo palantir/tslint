@@ -1,0 +1,7 @@
+0.ts line 2 col 1: error TS1041: Function implementation expected.
+0.ts line 4 col 1: error TS2082: Supplied parameters do not match any signature of call target:
+	Types of property 'name' of types '{ id: number; name: boolean; }' and '{ id: number; name?: string; }' are incompatible.
+0.ts line 4 col 1: error TS2087: Could not select overload for 'call' expression.
+0.ts line 5 col 1: error TS2082: Supplied parameters do not match any signature of call target:
+	Type '{ name: string; }' is missing property 'id' from type '{ id: number; name?: string; }'.
+0.ts line 5 col 1: error TS2087: Could not select overload for 'call' expression.

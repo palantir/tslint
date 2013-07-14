@@ -1,0 +1,2 @@
+0.ts line 3 col 9: error TS2140: 'this' cannot be referenced in initializers in a class body.
+0.ts line 3 col 9: error TS2109: 'this' must only be used inside a function or script context.

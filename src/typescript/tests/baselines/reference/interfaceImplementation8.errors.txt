@@ -1,0 +1,6 @@
+0.ts line 12 col 7: error TS2137: Class C2 declares interface i1 but does not implement it:
+	Property 'name' defined as private in type 'C2' is defined as public in type 'i1'.
+0.ts line 21 col 7: error TS2137: Class C5 declares interface i1 but does not implement it:
+	Property 'name' defined as private in type 'C2' is defined as public in type 'i1'.
+0.ts line 22 col 7: error TS2137: Class C6 declares interface i1 but does not implement it:
+	Property 'name' defined as private in type 'C3' is defined as public in type 'i1'.

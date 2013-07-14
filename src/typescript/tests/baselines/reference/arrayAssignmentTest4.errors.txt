@@ -1,0 +1,4 @@
+0.ts line 24 col 1: error TS2012: Cannot convert '() => any' to 'any[]':
+	Type '() => any' is missing property 'concat' from type 'any[]'.
+0.ts line 25 col 1: error TS2012: Cannot convert 'C3' to 'any[]':
+	Type 'C3' is missing property 'concat' from type 'any[]'.

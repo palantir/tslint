@@ -1,0 +1,12 @@
+0.ts line 1 col 13: error TS1005: '(' expected.
+0.ts line 2 col 4: error TS1008: Unexpected token; 'statement' expected.
+0.ts line 3 col 4: error TS1008: Unexpected token; 'statement' expected.
+0.ts line 3 col 20: error TS1005: ',' expected.
+0.ts line 4 col 4: error TS1008: Unexpected token; 'statement' expected.
+0.ts line 4 col 21: error TS1003: Identifier expected.
+0.ts line 4 col 26: error TS1005: ';' expected.
+0.ts line 2 col 11: error TS2095: Could not find symbol 'test'.
+0.ts line 3 col 11: error TS2095: Could not find symbol 'test'.
+0.ts line 3 col 21: error TS2095: Could not find symbol 'string'.
+0.ts line 4 col 11: error TS2095: Could not find symbol 'test'.
+0.ts line 4 col 22: error TS2095: Could not find symbol 'any'.

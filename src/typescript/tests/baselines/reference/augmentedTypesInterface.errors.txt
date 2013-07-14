@@ -1,0 +1,5 @@
+0.ts line 27 col 15: error TS2012: Cannot convert 'number' to 'i3':
+	Type 'Number' is missing property 'foo' from type 'i3'.
+0.ts line 34 col 1: error TS2000: Duplicate identifier 'i4'.
+0.ts line 34 col 1: error TS2071: Unable to resolve external module ''''.
+0.ts line 34 col 1: error TS2072: Module cannot be aliased to a non-module type.

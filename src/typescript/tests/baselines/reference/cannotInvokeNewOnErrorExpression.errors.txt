@@ -1,0 +1,2 @@
+0.ts line 5 col 21: error TS2068: 'new T[]' cannot be used to create an array. Use 'new Array<T>()' instead.
+0.ts line 5 col 15: error TS2094: The property 'ClassA' does not exist on value of type 'M'.

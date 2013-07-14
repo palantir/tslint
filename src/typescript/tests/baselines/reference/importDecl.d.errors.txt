@@ -1,0 +1,10 @@
+0.d.ts line 2 col 24: error TS2095: Could not find symbol 'm4'.
+0.d.ts line 4 col 24: error TS2095: Could not find symbol 'm4'.
+0.d.ts line 10 col 34: error TS2095: Could not find symbol 'glo_m4'.
+0.d.ts line 12 col 34: error TS2095: Could not find symbol 'glo_m4'.
+0.d.ts line 13 col 38: error TS2095: Could not find symbol 'fncOnly_m4'.
+0.d.ts line 16 col 23: error TS2095: Could not find symbol 'm4'.
+0.d.ts line 17 col 42: error TS2095: Could not find symbol 'm4'.
+0.d.ts line 19 col 42: error TS2095: Could not find symbol 'm4'.
+0.d.ts line 6 col 13: error TS2095: Could not find symbol 'm4'.
+0.d.ts line 8 col 13: error TS2095: Could not find symbol 'm4'.

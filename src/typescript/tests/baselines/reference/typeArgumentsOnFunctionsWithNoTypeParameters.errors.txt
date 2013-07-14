@@ -1,0 +1,4 @@
+0.ts line 2 col 13: error TS2087: Could not select overload for 'call' expression.
+0.ts line 3 col 13: error TS2081: Supplied parameters do not match any signature of call target.
+0.ts line 3 col 13: error TS2087: Could not select overload for 'call' expression.
+0.ts line 4 col 13: error TS2087: Could not select overload for 'call' expression.

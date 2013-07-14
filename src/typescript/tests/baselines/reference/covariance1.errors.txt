@@ -1,0 +1,2 @@
+0.ts line 8 col 23: error TS2040: Parameter 'y' of exported function has or is using private type 'M.Y'.
+0.ts line 4 col 32: error TS2019: Exported class 'M.XX' implements private interface 'M.X'.

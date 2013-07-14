@@ -1,0 +1,1 @@
+0.ts line 3 col 10: error TS2156: Static member cannot be accessed off an instance variable.

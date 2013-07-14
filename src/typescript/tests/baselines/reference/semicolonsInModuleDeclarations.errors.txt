@@ -1,0 +1,1 @@
+0.ts line 2 col 27: error TS1036: Statements are not allowed in ambient contexts.

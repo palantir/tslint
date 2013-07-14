@@ -1,0 +1,7 @@
+0.ts line 10 col 9: error TS2095: Could not find symbol 's'.
+0.ts line 10 col 9: error TS2095: Could not find symbol 's'.
+0.ts line 13 col 9: error TS2095: Could not find symbol 'b'.
+0.ts line 18 col 9: error TS2095: Could not find symbol 'v'.
+0.ts line 18 col 9: error TS2095: Could not find symbol 'v'.
+0.ts line 33 col 29: error TS2095: Could not find symbol 'barback'.
+0.ts line 33 col 29: error TS2095: Could not find symbol 'barback'.

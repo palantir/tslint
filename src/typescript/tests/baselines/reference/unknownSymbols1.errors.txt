@@ -1,0 +1,14 @@
+0.ts line 1 col 9: error TS2095: Could not find symbol 'asdf'.
+0.ts line 2 col 8: error TS2095: Could not find symbol 'asdf'.
+0.ts line 9 col 9: error TS2095: Could not find symbol 'asdf'.
+0.ts line 4 col 17: error TS2095: Could not find symbol 'asdf'.
+0.ts line 4 col 35: error TS2095: Could not find symbol 'asdf'.
+0.ts line 6 col 12: error TS2095: Could not find symbol 'asdf'.
+0.ts line 12 col 10: error TS2095: Could not find symbol 'asdf'.
+0.ts line 13 col 12: error TS2095: Could not find symbol 'asdf'.
+0.ts line 16 col 21: error TS2095: Could not find symbol 'asdf'.
+0.ts line 17 col 21: error TS2095: Could not find symbol 'adsf'.
+0.ts line 22 col 15: error TS2095: Could not find symbol 'asdf'.
+0.ts line 30 col 14: error TS2094: The property 'asdf' does not exist on value of type 'C5'.
+0.ts line 30 col 14: error TS2094: The property 'asdf' does not exist on value of type 'C5'.
+0.ts line 30 col 21: error TS2095: Could not find symbol 'asdf'.

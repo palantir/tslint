@@ -1,0 +1,2 @@
+0.ts line 7 col 15: error TS2095: Could not find symbol 'x'.
+0.ts line 12 col 17: error TS2094: The property 'y' does not exist on value of type 'M'.

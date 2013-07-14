@@ -1,0 +1,2 @@
+0.ts line 2 col 31: error TS2094: The property 'B' does not exist on value of type 'M'.
+0.ts line 7 col 29: error TS2095: Could not find symbol 'B'.

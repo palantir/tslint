@@ -1,0 +1,3 @@
+0.ts line 12 col 40: error TS2099: Static methods cannot reference class type parameters.
+0.ts line 13 col 29: error TS2099: Static methods cannot reference class type parameters.
+0.ts line 13 col 43: error TS2099: Static methods cannot reference class type parameters.

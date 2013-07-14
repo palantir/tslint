@@ -1,0 +1,2 @@
+0.ts line 1 col 22: error TS2125: Function 'f' declared a non-void return type, but has no return expression.
+0.ts line 2 col 34: error TS2095: Could not find symbol 'T'.

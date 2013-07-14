@@ -1,0 +1,2 @@
+0.ts line 4 col 20: error TS2122: Setters cannot return a value.
+0.ts line 7 col 20: error TS2122: Setters cannot return a value.

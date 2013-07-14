@@ -1,0 +1,7 @@
+0.ts line 19 col 5: error TS2011: Cannot convert 'A' to 'T'.
+0.ts line 20 col 5: error TS2011: Cannot convert 'B' to 'T'.
+0.ts line 21 col 5: error TS2011: Cannot convert 'C' to 'T'.
+0.ts line 23 col 9: error TS2012: Cannot convert 'B' to 'T':
+	Type 'A' is missing property 'bar' from type 'B'.
+0.ts line 24 col 9: error TS2012: Cannot convert 'C' to 'T':
+	Type 'A' is missing property 'baz' from type 'C'.

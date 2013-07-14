@@ -1,0 +1,6 @@
+0.ts line 1 col 1: error TS2000: Duplicate identifier 'Event'.
+0.ts line 29 col 10: error TS2082: Supplied parameters do not match any signature of call target:
+	Call signatures of types '(items: any) => void' and '() => any' are incompatible:
+		Call signature expects 0 or fewer parameters.
+0.ts line 29 col 10: error TS2087: Could not select overload for 'call' expression.
+0.ts line 27 col 25: error TS2095: Could not find symbol 'ItemSet'.

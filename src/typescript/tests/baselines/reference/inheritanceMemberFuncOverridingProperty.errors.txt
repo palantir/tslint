@@ -1,0 +1,2 @@
+0.ts line 5 col 7: error TS2141: Class 'b' cannot extend class 'a':
+	Class 'b' defines instance member function 'x', but extended class 'a' defines it as instance member property.

@@ -1,0 +1,2 @@
+0.ts line 2 col 17: error TS2094: The property 'Y' does not exist on value of type 'X'.
+0.ts line 2 col 2: error TS2072: Module cannot be aliased to a non-module type.

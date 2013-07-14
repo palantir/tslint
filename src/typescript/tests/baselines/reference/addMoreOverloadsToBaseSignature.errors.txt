@@ -1,0 +1,4 @@
+0.ts line 5 col 11: error TS2143: Interface 'Bar' cannot extend interface 'Foo':
+	Types of property 'f' of types 'Bar' and 'Foo' are incompatible:
+		Call signatures of types '(key: string) => string' and '() => string' are incompatible:
+			Call signature expects 0 or fewer parameters.

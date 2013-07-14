@@ -1,0 +1,1 @@
+0.ts line 2 col 17: error TS2099: Static methods cannot reference class type parameters.

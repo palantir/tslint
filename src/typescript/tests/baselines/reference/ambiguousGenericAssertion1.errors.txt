@@ -1,0 +1,5 @@
+0.ts line 4 col 10: error TS1003: Identifier expected.
+0.ts line 4 col 12: error TS2095: Could not find symbol 'T'.
+0.ts line 4 col 10: error TS2009: Operator '>' cannot be applied to types 'number' and '(x: any) => boolean'.
+0.ts line 4 col 18: error TS2095: Could not find symbol 'T'.
+0.ts line 4 col 24: error TS2095: Could not find symbol 'T'.

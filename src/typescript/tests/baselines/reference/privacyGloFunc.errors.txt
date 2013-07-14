@@ -1,0 +1,20 @@
+0.ts line 490 col 27: error TS2040: Parameter 'f2_arg' of exported function has or is using private type 'C5_private'.
+0.ts line 512 col 5: error TS2058: Return type of exported function has or is using private type 'C5_private'.
+0.ts line 527 col 31: error TS2058: Return type of exported function has or is using private type 'C5_private'.
+0.ts line 528 col 5: error TS2058: Return type of exported function has or is using private type 'C5_private'.
+0.ts line 141 col 31: error TS2040: Parameter 'm1_f4_arg' of exported function has or is using private type 'm1.C2_private'.
+0.ts line 158 col 9: error TS2058: Return type of exported function has or is using private type 'm1.C2_private'.
+0.ts line 174 col 35: error TS2058: Return type of exported function has or is using private type 'm1.C2_private'.
+0.ts line 175 col 9: error TS2058: Return type of exported function has or is using private type 'm1.C2_private'.
+0.ts line 12 col 22: error TS2032: Parameter 'm1_c3_c2' of constructor from exported class has or is using private type 'm1.C2_private'.
+0.ts line 25 col 26: error TS2038: Parameter 'm1_c3_f4_arg' of public method from exported class has or is using private type 'm1.C2_private'.
+0.ts line 41 col 13: error TS2056: Return type of public method from exported class has or is using private type 'm1.C2_private'.
+0.ts line 56 col 30: error TS2056: Return type of public method from exported class has or is using private type 'm1.C2_private'.
+0.ts line 57 col 13: error TS2056: Return type of public method from exported class has or is using private type 'm1.C2_private'.
+0.ts line 123 col 22: error TS2032: Parameter 'm1_c7_c' of constructor from exported class has or is using private type 'm1.C2_private'.
+0.ts line 367 col 18: error TS2032: Parameter 'c7_c1' of constructor from exported class has or is using private type 'C5_private'.
+0.ts line 380 col 22: error TS2038: Parameter 'c7_f4_arg' of public method from exported class has or is using private type 'C5_private'.
+0.ts line 396 col 9: error TS2056: Return type of public method from exported class has or is using private type 'C5_private'.
+0.ts line 411 col 26: error TS2056: Return type of public method from exported class has or is using private type 'C5_private'.
+0.ts line 412 col 9: error TS2056: Return type of public method from exported class has or is using private type 'C5_private'.
+0.ts line 478 col 18: error TS2032: Parameter 'c11_c' of constructor from exported class has or is using private type 'C5_private'.

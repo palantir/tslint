@@ -1,0 +1,2 @@
+0.ts line 3 col 3: error TS1008: Unexpected token; 'statement' expected.
+0.ts line 6 col 1: error TS1008: Unexpected token; 'module, class, interface, enum, import or statement' expected.

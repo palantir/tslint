@@ -1,0 +1,2 @@
+0.ts line 4 col 7: error TS2137: Class Foo declares interface Qux but does not implement it:
+	Property 'Bar' defined as private in type 'Foo' is defined as public in type 'Qux'.

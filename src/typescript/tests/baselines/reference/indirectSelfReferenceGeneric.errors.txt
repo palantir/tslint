@@ -1,0 +1,2 @@
+0.ts line 1 col 7: error TS2100: Class 'a<T>' is recursively referenced as a base type of itself.
+0.ts line 2 col 7: error TS2100: Class 'b<T>' is recursively referenced as a base type of itself.
