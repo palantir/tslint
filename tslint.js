@@ -63001,5 +63001,95 @@ var Services;
     })();
     Services.TypeScriptServicesFactory = TypeScriptServicesFactory;
 })(Services || (Services = {}));
-console.log("hi");
-console.log("hello");
+var Lint;
+(function (Lint) {
+    var Logger = (function () {
+        function Logger() {
+        }
+        Logger.prototype.information = function () {
+            return true;
+        };
+
+        Logger.prototype.debug = function () {
+            return true;
+        };
+
+        Logger.prototype.warning = function () {
+            return true;
+        };
+
+        Logger.prototype.error = function () {
+            return true;
+        };
+
+        Logger.prototype.fatal = function () {
+            return true;
+        };
+
+        Logger.prototype.log = function (s) {
+        };
+        return Logger;
+    })();
+    Lint.Logger = Logger;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    var LanguageServiceHost = (function (_super) {
+        __extends(LanguageServiceHost, _super);
+        function LanguageServiceHost(fileName, contents) {
+            _super.call(this);
+            this.compilationSettings = new TypeScript.CompilationSettings();
+            this.diagnostics = new LanguageServicesDiagnostics();
+            this.fileName = fileName;
+            this.scriptSnapshot = TypeScript.ScriptSnapshot.fromString(contents);
+        }
+        LanguageServiceHost.prototype.getCompilationSettings = function () {
+            return this.compilationSettings;
+        };
+
+        LanguageServiceHost.prototype.getScriptFileNames = function () {
+            return [this.fileName];
+        };
+
+        LanguageServiceHost.prototype.getScriptVersion = function (fileName) {
+            return 0;
+        };
+
+        LanguageServiceHost.prototype.getScriptIsOpen = function (fileName) {
+            return false;
+        };
+
+        LanguageServiceHost.prototype.getScriptSnapshot = function (fileName) {
+            return this.scriptSnapshot;
+        };
+
+        LanguageServiceHost.prototype.getDiagnosticsObject = function () {
+            return this.diagnostics;
+        };
+        return LanguageServiceHost;
+    })(Lint.Logger);
+    Lint.LanguageServiceHost = LanguageServiceHost;
+
+    var LanguageServicesDiagnostics = (function () {
+        function LanguageServicesDiagnostics() {
+            this.logger = new Lint.Logger();
+        }
+        LanguageServicesDiagnostics.prototype.log = function (content) {
+            this.logger.log(content);
+        };
+        return LanguageServicesDiagnostics;
+    })();
+    Lint.LanguageServicesDiagnostics = LanguageServicesDiagnostics;
+})(Lint || (Lint = {}));
+var fs = require("fs");
+var path = require("path");
+
+var argv = process.argv;
+if (argv.length < 3) {
+    console.error("usage: " + argv[0] + " " + path.basename(argv[1]) + " <filename>");
+    return 1;
+}
+
+var file = argv[2];
+var contents = fs.readFileSync(file);
+var languageServiceHost = new Lint.LanguageServiceHost(file, contents);
