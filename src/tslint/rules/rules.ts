@@ -1,41 +1,25 @@
 /// <reference path='rule.ts'/>
 
-module Lint {
+/// <reference path='semicolonSyntaxRule.ts'/>
 
-  export class BaseRule {
-    private name: any;
-    private type: any;
-    private value: any;
+module Lint.Rules {
 
-    constructor(name: any, type: any, value: any) {
-      this.name = name;
-      this.type = type;
-      this.value = value;
-    }
+  var ALL_RULES: Rule[] = [];
 
-    public getName() {
-      return this.name;
-    }
-
-    public getType() {
-      return this.type;
-    }
-
-    public getValue() {
-      return this.value;
-    }
-
-    public getFailureString() {
-      throw new Error("Unsupported Operation");
-    }
-
-    public apply(contents: string) {
-      throw new Error("Unsupported Operation");
-    }
+  export function createAllRules() {
+    ALL_RULES.push(new SemicolonSyntaxRule("semicolon", Lint.RuleType.BufferBased));
   }
 
-  export function getAllRules(): Rule[] {
-    return [];
+    export function getRuleForName(name: string): Rule {
+    var filteredRules = ALL_RULES.filter(function(rule) {
+      return rule.getName() === name;
+    });
+
+    if(filteredRules.length > 0) {
+      return filteredRules[0];
+    } else {
+      return undefined;
+    }
   }
 
 }

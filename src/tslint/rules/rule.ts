@@ -1,3 +1,5 @@
+/// <reference path='../../typescript/compiler/syntax/syntaxTree.ts'/>
+
 module Lint {
 
   export interface Rule {
@@ -8,8 +10,10 @@ module Lint {
     getFailureString(): string;
 
     getValue(): any;
+  }
 
-    apply(contents: string): RuleFailure[];
+  export interface SyntaxRule extends Rule {
+    apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[];
   }
 
   export enum RuleType {

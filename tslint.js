@@ -63118,39 +63118,86 @@ var Lint;
 })(Lint || (Lint = {}));
 var Lint;
 (function (Lint) {
-    var BaseRule = (function () {
-        function BaseRule(name, type, value) {
-            this.name = name;
-            this.type = type;
-            this.value = value;
+    (function (Rules) {
+        var BaseSyntaxRule = (function () {
+            function BaseSyntaxRule(name, type) {
+                this.name = name;
+                this.type = type;
+            }
+            BaseSyntaxRule.prototype.getName = function () {
+                return this.name;
+            };
+
+            BaseSyntaxRule.prototype.getType = function () {
+                return this.type;
+            };
+
+            BaseSyntaxRule.prototype.getValue = function () {
+                return this.value;
+            };
+
+            BaseSyntaxRule.prototype.setValue = function (value) {
+                this.value = value;
+            };
+
+            BaseSyntaxRule.prototype.getFailureString = function () {
+                throw new Error("Unsupported Operation");
+            };
+
+            BaseSyntaxRule.prototype.apply = function (syntaxTree) {
+                throw new Error("Unsupported Operation");
+            };
+            return BaseSyntaxRule;
+        })();
+        Rules.BaseSyntaxRule = BaseSyntaxRule;
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
+        var SemicolonSyntaxRule = (function (_super) {
+            __extends(SemicolonSyntaxRule, _super);
+            function SemicolonSyntaxRule(name, type) {
+                _super.call(this, name, type);
+            }
+            SemicolonSyntaxRule.prototype.getFailureString = function () {
+                return "missing semicolon";
+            };
+
+            SemicolonSyntaxRule.prototype.apply = function (syntaxTree) {
+                return [];
+            };
+            return SemicolonSyntaxRule;
+        })(Rules.BaseSyntaxRule);
+        Rules.SemicolonSyntaxRule = SemicolonSyntaxRule;
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
+        var ALL_RULES = [];
+
+        function createAllRules() {
+            ALL_RULES.push(new Rules.SemicolonSyntaxRule("semicolon", Lint.RuleType.BufferBased));
         }
-        BaseRule.prototype.getName = function () {
-            return this.name;
-        };
+        Rules.createAllRules = createAllRules;
 
-        BaseRule.prototype.getType = function () {
-            return this.type;
-        };
+        function getRuleForName(name) {
+            var filteredRules = ALL_RULES.filter(function (rule) {
+                return rule.getName() === name;
+            });
 
-        BaseRule.prototype.getValue = function () {
-            return this.value;
-        };
-
-        BaseRule.prototype.getFailureString = function () {
-            throw new Error("Unsupported Operation");
-        };
-
-        BaseRule.prototype.apply = function (contents) {
-            throw new Error("Unsupported Operation");
-        };
-        return BaseRule;
-    })();
-    Lint.BaseRule = BaseRule;
-
-    function getAllRules() {
-        return [];
-    }
-    Lint.getAllRules = getAllRules;
+            if (filteredRules.length > 0) {
+                return filteredRules[0];
+            } else {
+                return undefined;
+            }
+        }
+        Rules.getRuleForName = getRuleForName;
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
 })(Lint || (Lint = {}));
 var Lint;
 (function (Lint) {
@@ -63194,6 +63241,13 @@ var contents = fs.readFileSync(file, "utf8");
 var languageServiceHost = new Lint.LanguageServiceHost(file, contents);
 var languageService = new Services.LanguageService(languageServiceHost);
 var syntaxTree = languageService.getSyntaxTree(file);
+
+Lint.Rules.createAllRules();
+
+var rule = Lint.Rules.getRuleForName("semicolon");
+console.log(rule.getFailureString());
+
+return 0;
 
 var results = [];
 var classifier = new Services.Classifier(new TypeScript.NullLogger());

@@ -23,6 +23,14 @@ var languageServiceHost = new Lint.LanguageServiceHost(file, contents);
 var languageService = new Services.LanguageService(languageServiceHost);
 var syntaxTree = languageService.getSyntaxTree(file);
 
+Lint.Rules.createAllRules();
+
+var rule = Lint.Rules.getRuleForName("semicolon");
+console.log(rule.getFailureString());
+
+return 0;
+
+
 var results = [];
 var classifier = new Services.Classifier(new TypeScript.NullLogger());
 var lines = contents.split("\n");
