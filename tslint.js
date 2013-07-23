@@ -63003,96 +63003,6 @@ var Services;
 })(Services || (Services = {}));
 var Lint;
 (function (Lint) {
-    var Logger = (function () {
-        function Logger() {
-        }
-        Logger.prototype.information = function () {
-            return true;
-        };
-
-        Logger.prototype.debug = function () {
-            return true;
-        };
-
-        Logger.prototype.warning = function () {
-            return true;
-        };
-
-        Logger.prototype.error = function () {
-            return true;
-        };
-
-        Logger.prototype.fatal = function () {
-            return true;
-        };
-
-        Logger.prototype.log = function (s) {
-        };
-        return Logger;
-    })();
-    Lint.Logger = Logger;
-})(Lint || (Lint = {}));
-var Lint;
-(function (Lint) {
-    var LanguageServiceHost = (function (_super) {
-        __extends(LanguageServiceHost, _super);
-        function LanguageServiceHost(fileName, contents) {
-            _super.call(this);
-
-            this.compilationSettings = this.createCompilationSettings();
-            this.diagnostics = new LanguageServicesDiagnostics();
-            this.fileName = fileName;
-            this.scriptSnapshot = TypeScript.ScriptSnapshot.fromString(contents);
-        }
-        LanguageServiceHost.prototype.getCompilationSettings = function () {
-            return this.compilationSettings;
-        };
-
-        LanguageServiceHost.prototype.getScriptFileNames = function () {
-            return [this.fileName];
-        };
-
-        LanguageServiceHost.prototype.getScriptVersion = function (fileName) {
-            return 0;
-        };
-
-        LanguageServiceHost.prototype.getScriptIsOpen = function (fileName) {
-            return true;
-        };
-
-        LanguageServiceHost.prototype.getScriptSnapshot = function (fileName) {
-            return this.scriptSnapshot;
-        };
-
-        LanguageServiceHost.prototype.getDiagnosticsObject = function () {
-            return this.diagnostics;
-        };
-
-        LanguageServiceHost.prototype.createCompilationSettings = function () {
-            var settings = new TypeScript.CompilationSettings();
-
-            settings.codeGenTarget = TypeScript.LanguageVersion.EcmaScript5;
-
-            settings.allowAutomaticSemicolonInsertion = false;
-
-            return settings;
-        };
-        return LanguageServiceHost;
-    })(Lint.Logger);
-    Lint.LanguageServiceHost = LanguageServiceHost;
-
-    var LanguageServicesDiagnostics = (function () {
-        function LanguageServicesDiagnostics() {
-            this.logger = new Lint.Logger();
-        }
-        LanguageServicesDiagnostics.prototype.log = function (content) {
-            this.logger.log(content);
-        };
-        return LanguageServicesDiagnostics;
-    })();
-})(Lint || (Lint = {}));
-var Lint;
-(function (Lint) {
     (function (RuleType) {
         RuleType[RuleType["BufferBased"] = 0] = "BufferBased";
 
@@ -63201,6 +63111,148 @@ var Lint;
 })(Lint || (Lint = {}));
 var Lint;
 (function (Lint) {
+    (function (Configuration) {
+        var CONFIG_FILENAME = ".tslintrc";
+
+        var fs = require("fs");
+        var path = require("path");
+
+        function findConfiguration() {
+            var currentPath = global.process.cwd();
+            var parentPath = currentPath;
+
+            while (true) {
+                var filePath = path.join(currentPath, CONFIG_FILENAME);
+
+                if (fs.existsSync(filePath)) {
+                    return JSON.parse(fs.readFileSync(filePath, "utf8"));
+                }
+
+                parentPath = path.resolve(currentPath, "..");
+                if (parentPath === currentPath) {
+                    break;
+                }
+
+                currentPath = parentPath;
+            }
+
+            return undefined;
+        }
+        Configuration.findConfiguration = findConfiguration;
+
+        function getConfiguredRules(configuration) {
+            var rules = [];
+
+            for (var ruleName in configuration) {
+                var rule = Lint.Rules.getRuleForName(ruleName);
+                if (rule === undefined) {
+                    console.warn("ignoring unrecognized rule '" + ruleName + "'");
+                    continue;
+                }
+
+                var ruleValue = configuration[ruleName];
+                rule.setValue(ruleValue);
+                rules.push(rule);
+            }
+
+            return rules;
+        }
+        Configuration.getConfiguredRules = getConfiguredRules;
+    })(Lint.Configuration || (Lint.Configuration = {}));
+    var Configuration = Lint.Configuration;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    var Logger = (function () {
+        function Logger() {
+        }
+        Logger.prototype.information = function () {
+            return true;
+        };
+
+        Logger.prototype.debug = function () {
+            return true;
+        };
+
+        Logger.prototype.warning = function () {
+            return true;
+        };
+
+        Logger.prototype.error = function () {
+            return true;
+        };
+
+        Logger.prototype.fatal = function () {
+            return true;
+        };
+
+        Logger.prototype.log = function (s) {
+        };
+        return Logger;
+    })();
+    Lint.Logger = Logger;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    var LanguageServiceHost = (function (_super) {
+        __extends(LanguageServiceHost, _super);
+        function LanguageServiceHost(fileName, contents) {
+            _super.call(this);
+
+            this.compilationSettings = this.createCompilationSettings();
+            this.diagnostics = new LanguageServicesDiagnostics();
+            this.fileName = fileName;
+            this.scriptSnapshot = TypeScript.ScriptSnapshot.fromString(contents);
+        }
+        LanguageServiceHost.prototype.getCompilationSettings = function () {
+            return this.compilationSettings;
+        };
+
+        LanguageServiceHost.prototype.getScriptFileNames = function () {
+            return [this.fileName];
+        };
+
+        LanguageServiceHost.prototype.getScriptVersion = function (fileName) {
+            return 0;
+        };
+
+        LanguageServiceHost.prototype.getScriptIsOpen = function (fileName) {
+            return true;
+        };
+
+        LanguageServiceHost.prototype.getScriptSnapshot = function (fileName) {
+            return this.scriptSnapshot;
+        };
+
+        LanguageServiceHost.prototype.getDiagnosticsObject = function () {
+            return this.diagnostics;
+        };
+
+        LanguageServiceHost.prototype.createCompilationSettings = function () {
+            var settings = new TypeScript.CompilationSettings();
+
+            settings.codeGenTarget = TypeScript.LanguageVersion.EcmaScript5;
+
+            settings.allowAutomaticSemicolonInsertion = false;
+
+            return settings;
+        };
+        return LanguageServiceHost;
+    })(Lint.Logger);
+    Lint.LanguageServiceHost = LanguageServiceHost;
+
+    var LanguageServicesDiagnostics = (function () {
+        function LanguageServicesDiagnostics() {
+            this.logger = new Lint.Logger();
+        }
+        LanguageServicesDiagnostics.prototype.log = function (content) {
+            this.logger.log(content);
+        };
+        return LanguageServicesDiagnostics;
+    })();
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
     var RuleManager = (function () {
         function RuleManager(rules) {
             this.bufferBasedRules = [];
@@ -63229,38 +63281,19 @@ var Lint;
 var fs = require("fs");
 var path = require("path");
 
+var configuration = Lint.Configuration.findConfiguration();
+if (configuration === undefined) {
+    console.error("unable to find .tslintrc configuration");
+    process.exit(1);
+}
+
 var argv = process.argv;
 if (argv.length < 3) {
     console.error("usage: " + argv[0] + " " + path.basename(argv[1]) + " <filename>");
-    return 1;
+    process.exit(2);
 }
-
-var file = argv[2];
-var contents = fs.readFileSync(file, "utf8");
-
-var languageServiceHost = new Lint.LanguageServiceHost(file, contents);
-var languageService = new Services.LanguageService(languageServiceHost);
-var syntaxTree = languageService.getSyntaxTree(file);
 
 Lint.Rules.createAllRules();
 
-var rule = Lint.Rules.getRuleForName("semicolon");
-console.log(rule.getFailureString());
-
-return 0;
-
-var results = [];
-var classifier = new Services.Classifier(new TypeScript.NullLogger());
-var lines = contents.split("\n");
-var lastLexState = Services.EndOfLineState.Start;
-
-for (var i = 0; i < lines.length; i++) {
-    var line = lines[i];
-    var classificationResult = classifier.getClassificationsForLine(line, lastLexState);
-    lastLexState = classificationResult.finalLexState;
-    results.push(classificationResult);
-}
-
-var diagnostics = syntaxTree.diagnostics();
-
-console.log(JSON.stringify(diagnostics));
+var configuredRules = Lint.Configuration.getConfiguredRules(configuration);
+console.log(configuredRules.length);

@@ -24,7 +24,7 @@ module Lint.Rules {
       return this.value;
     }
 
-    public setValue(value: any) {
+    public setValue(value: any): void {
       this.value = value;
     }
 

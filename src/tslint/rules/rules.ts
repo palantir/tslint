@@ -10,7 +10,7 @@ module Lint.Rules {
     ALL_RULES.push(new SemicolonSyntaxRule("semicolon", Lint.RuleType.BufferBased));
   }
 
-    export function getRuleForName(name: string): Rule {
+  export function getRuleForName(name: string): Rule {
     var filteredRules = ALL_RULES.filter(function(rule) {
       return rule.getName() === name;
     });

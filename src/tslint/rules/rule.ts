@@ -10,6 +10,8 @@ module Lint {
     getFailureString(): string;
 
     getValue(): any;
+
+    setValue(value: any): void;
   }
 
   export interface SyntaxRule extends Rule {
