@@ -1,14 +1,14 @@
 /// <reference path='rule.ts'/>
-/// <reference path='semicolonSyntaxRule.ts'/>
-/// <reference path='tripleComparisonSyntaxRule.ts'/>
+/// <reference path='semicolonRule.ts'/>
+/// <reference path='tripleComparisonRule.ts'/>
 
 module Lint.Rules {
 
   var ALL_RULES: Rule[] = [];
 
   export function createAllRules() {
-    ALL_RULES.push(new SemicolonSyntaxRule());
-    ALL_RULES.push(new TripleComparisonSyntaxRule());
+    ALL_RULES.push(new SemicolonRule());
+    ALL_RULES.push(new TripleComparisonRule());
   }
 
   export function getRuleForName(name: string): Rule {

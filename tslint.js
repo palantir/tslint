@@ -63080,12 +63080,12 @@ var Lint;
 var Lint;
 (function (Lint) {
     (function (Rules) {
-        var SemicolonSyntaxRule = (function (_super) {
-            __extends(SemicolonSyntaxRule, _super);
-            function SemicolonSyntaxRule() {
+        var SemicolonRule = (function (_super) {
+            __extends(SemicolonRule, _super);
+            function SemicolonRule() {
                 _super.call(this, "semicolon");
             }
-            SemicolonSyntaxRule.prototype.apply = function (syntaxTree) {
+            SemicolonRule.prototype.apply = function (syntaxTree) {
                 var ruleFailures = [];
                 var diagnostics = syntaxTree.diagnostics();
 
@@ -63104,22 +63104,22 @@ var Lint;
 
                 return ruleFailures;
             };
-            SemicolonSyntaxRule.FAILURE_STRING = "missing semicolon";
-            return SemicolonSyntaxRule;
+            SemicolonRule.FAILURE_STRING = "missing semicolon";
+            return SemicolonRule;
         })(Rules.BaseRule);
-        Rules.SemicolonSyntaxRule = SemicolonSyntaxRule;
+        Rules.SemicolonRule = SemicolonRule;
     })(Lint.Rules || (Lint.Rules = {}));
     var Rules = Lint.Rules;
 })(Lint || (Lint = {}));
 var Lint;
 (function (Lint) {
     (function (Rules) {
-        var TripleComparisonSyntaxRule = (function (_super) {
-            __extends(TripleComparisonSyntaxRule, _super);
-            function TripleComparisonSyntaxRule() {
+        var TripleComparisonRule = (function (_super) {
+            __extends(TripleComparisonRule, _super);
+            function TripleComparisonRule() {
                 _super.call(this, "triple_eq_neq");
             }
-            TripleComparisonSyntaxRule.prototype.apply = function (syntaxTree) {
+            TripleComparisonRule.prototype.apply = function (syntaxTree) {
                 var sourceUnit = syntaxTree.sourceUnit();
                 var comparisonWalker = new ComparisonWalker(syntaxTree.fileName());
 
@@ -63127,9 +63127,9 @@ var Lint;
 
                 return comparisonWalker.getFailures();
             };
-            return TripleComparisonSyntaxRule;
+            return TripleComparisonRule;
         })(Rules.BaseRule);
-        Rules.TripleComparisonSyntaxRule = TripleComparisonSyntaxRule;
+        Rules.TripleComparisonRule = TripleComparisonRule;
 
         var ComparisonWalker = (function (_super) {
             __extends(ComparisonWalker, _super);
@@ -63172,8 +63172,8 @@ var Lint;
         var ALL_RULES = [];
 
         function createAllRules() {
-            ALL_RULES.push(new Rules.SemicolonSyntaxRule());
-            ALL_RULES.push(new Rules.TripleComparisonSyntaxRule());
+            ALL_RULES.push(new Rules.SemicolonRule());
+            ALL_RULES.push(new Rules.TripleComparisonRule());
         }
         Rules.createAllRules = createAllRules;
 

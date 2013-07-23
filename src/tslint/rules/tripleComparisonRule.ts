@@ -3,7 +3,7 @@
 
 module Lint.Rules {
 
-  export class TripleComparisonSyntaxRule extends BaseRule {
+  export class TripleComparisonRule extends BaseRule {
     constructor() {
       super("triple_eq_neq");
     }
