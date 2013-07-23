@@ -63038,7 +63038,8 @@ var Lint;
         __extends(LanguageServiceHost, _super);
         function LanguageServiceHost(fileName, contents) {
             _super.call(this);
-            this.compilationSettings = new TypeScript.CompilationSettings();
+
+            this.compilationSettings = this.createCompilationSettings();
             this.diagnostics = new LanguageServicesDiagnostics();
             this.fileName = fileName;
             this.scriptSnapshot = TypeScript.ScriptSnapshot.fromString(contents);
@@ -63056,7 +63057,7 @@ var Lint;
         };
 
         LanguageServiceHost.prototype.getScriptIsOpen = function (fileName) {
-            return false;
+            return true;
         };
 
         LanguageServiceHost.prototype.getScriptSnapshot = function (fileName) {
@@ -63065,6 +63066,16 @@ var Lint;
 
         LanguageServiceHost.prototype.getDiagnosticsObject = function () {
             return this.diagnostics;
+        };
+
+        LanguageServiceHost.prototype.createCompilationSettings = function () {
+            var settings = new TypeScript.CompilationSettings();
+
+            settings.codeGenTarget = TypeScript.LanguageVersion.EcmaScript5;
+
+            settings.allowAutomaticSemicolonInsertion = false;
+
+            return settings;
         };
         return LanguageServiceHost;
     })(Lint.Logger);
@@ -63079,7 +63090,94 @@ var Lint;
         };
         return LanguageServicesDiagnostics;
     })();
-    Lint.LanguageServicesDiagnostics = LanguageServicesDiagnostics;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (RuleType) {
+        RuleType[RuleType["BufferBased"] = 0] = "BufferBased";
+
+        RuleType[RuleType["LineBased"] = 1] = "LineBased";
+    })(Lint.RuleType || (Lint.RuleType = {}));
+    var RuleType = Lint.RuleType;
+
+    var RuleFailure = (function () {
+        function RuleFailure(position, context) {
+            this.position = position;
+            this.context = context;
+        }
+        RuleFailure.prototype.getPosition = function () {
+            return this.position;
+        };
+
+        RuleFailure.prototype.getContext = function () {
+            return this.context;
+        };
+        return RuleFailure;
+    })();
+    Lint.RuleFailure = RuleFailure;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    var BaseRule = (function () {
+        function BaseRule(name, type, value) {
+            this.name = name;
+            this.type = type;
+            this.value = value;
+        }
+        BaseRule.prototype.getName = function () {
+            return this.name;
+        };
+
+        BaseRule.prototype.getType = function () {
+            return this.type;
+        };
+
+        BaseRule.prototype.getValue = function () {
+            return this.value;
+        };
+
+        BaseRule.prototype.getFailureString = function () {
+            throw new Error("Unsupported Operation");
+        };
+
+        BaseRule.prototype.apply = function (contents) {
+            throw new Error("Unsupported Operation");
+        };
+        return BaseRule;
+    })();
+    Lint.BaseRule = BaseRule;
+
+    function getAllRules() {
+        return [];
+    }
+    Lint.getAllRules = getAllRules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    var RuleManager = (function () {
+        function RuleManager(rules) {
+            this.bufferBasedRules = [];
+            this.lineBasedRules = [];
+
+            for (var i = 0; i < rules.length; ++i) {
+                var rule = rules[i];
+                if (rule.getType() === Lint.RuleType.BufferBased) {
+                    this.bufferBasedRules.push(rule);
+                } else {
+                    this.lineBasedRules.push(rule);
+                }
+            }
+        }
+        RuleManager.prototype.getLineBasedRules = function () {
+            return this.lineBasedRules;
+        };
+
+        RuleManager.prototype.getBufferBasedRules = function () {
+            return this.bufferBasedRules;
+        };
+        return RuleManager;
+    })();
+    Lint.RuleManager = RuleManager;
 })(Lint || (Lint = {}));
 var fs = require("fs");
 var path = require("path");
@@ -63091,5 +63189,24 @@ if (argv.length < 3) {
 }
 
 var file = argv[2];
-var contents = fs.readFileSync(file);
+var contents = fs.readFileSync(file, "utf8");
+
 var languageServiceHost = new Lint.LanguageServiceHost(file, contents);
+var languageService = new Services.LanguageService(languageServiceHost);
+var syntaxTree = languageService.getSyntaxTree(file);
+
+var results = [];
+var classifier = new Services.Classifier(new TypeScript.NullLogger());
+var lines = contents.split("\n");
+var lastLexState = Services.EndOfLineState.Start;
+
+for (var i = 0; i < lines.length; i++) {
+    var line = lines[i];
+    var classificationResult = classifier.getClassificationsForLine(line, lastLexState);
+    lastLexState = classificationResult.finalLexState;
+    results.push(classificationResult);
+}
+
+var diagnostics = syntaxTree.diagnostics();
+
+console.log(JSON.stringify(diagnostics));

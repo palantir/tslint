@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
+// Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0.
 // See LICENSE.txt in the project root for complete license information.
 
 ///<reference path='typescriptServices.ts' />
@@ -39,7 +39,7 @@ module Services {
 
             var document = this.compilerState.getDocument(fileName);
             var script = document.script;
-              
+
             /// TODO: this does not allow getting references on "constructor"
 
             var path = this.getAstPathToPosition(script, pos);
@@ -60,7 +60,7 @@ module Services {
             var fileNames = this.compilerState.getFileNames();
             for (var i = 0, len = fileNames.length; i < len; i++) {
                 var tempFileName = fileNames[i];
-        
+
                 var tempDocument = this.compilerState.getDocument(tempFileName);
                 var filter: TypeScript.BloomFilter = tempDocument.bloomFilter();
 
@@ -105,7 +105,7 @@ module Services {
         private getReferencesInFile(fileName: string, symbol: TypeScript.PullSymbol): ReferenceEntry[] {
             var result: ReferenceEntry[] = [];
             var symbolName = symbol.getDisplayName();
-            
+
             var possiblePositions = this.getPossibleSymbolReferencePositions(fileName, symbolName);
             if (possiblePositions && possiblePositions.length > 0) {
                 var document = this.compilerState.getDocument(fileName);
@@ -376,7 +376,7 @@ module Services {
                 var signature = declaration.getSignatureSymbol();
                 if (signature) {
                     // This is either a signature of an overload, definition or an ambient function signature.
-                    // We want to filter them so that we only have one entry for all signatures. 
+                    // We want to filter them so that we only have one entry for all signatures.
                     // If a definition exits, we should pick it, if not (e.g. ambient methods case) just use the last of the signatures.
                     if (lastAddedSingature && !lastAddedSingature.isDefinition) {
                         // The last entry was a signature overload. overwrite it with the new signature.
@@ -430,7 +430,7 @@ module Services {
 
                     result.push(item);
                 }
-                
+
                 if (includeSubcontainers && this.isContainerDeclaration(declaration)) {
                     // process child declarations
                     this.mapPullDeclsToNavigateToItem(declaration.getChildDecls(), result, fullName, kindName, /*includeSubcontainers*/ true);
@@ -444,7 +444,7 @@ module Services {
                     //        for (var j = 0, m = otherDeclarations.length; j < m; j++) {
                     //            var otherDeclaration = otherDeclarations[j];
                     //            if (otherDeclaration.getScriptName() === fileName) {
-                    //                // this has already been processed 
+                    //                // this has already been processed
                     //                continue;
                     //            }
                     //            this.mapPullDeclsToNavigateToItem(otherDeclaration.getChildDecls(), result, fullName, kindName, /*includeSubcontainers*/ false);
@@ -488,7 +488,7 @@ module Services {
                 case TypeScript.PullElementKind.Container:
                 case TypeScript.PullElementKind.Class:
                 case TypeScript.PullElementKind.Interface:
-                case TypeScript.PullElementKind.DynamicModule:                
+                case TypeScript.PullElementKind.DynamicModule:
                 case TypeScript.PullElementKind.Enum:
                     return true;
             }
@@ -634,7 +634,7 @@ module Services {
                 // Skip the name and get to the declaration
                 path.pop();
             }
-            
+
             if (path.isDeclaration()) {
                 var declarationInformation = this.compilerState.getDeclarationSymbolInformation(path, document);
 
@@ -698,7 +698,7 @@ module Services {
                 symbol = symbolInformation.symbol;
                 enclosingScopeSymbol = symbolInformation.enclosingScopeSymbol;
 
-               
+
                 if (symbol.getKind() === TypeScript.PullElementKind.Method || symbol.getKind() == TypeScript.PullElementKind.Function) {
                     typeSymbol = symbol.getType()
                     if (typeSymbol) {
@@ -902,7 +902,7 @@ module Services {
         private getCompletionEntriesForKeywords(keywords: CompletionEntry[], result): void {
             for (var i = 0, n = keywords.length; i < n; i++) {
                 var keyword = keywords[i];
-                result.addOrUpdate(keyword.name, keyword); 
+                result.addOrUpdate(keyword.name, keyword);
             }
         }
 
@@ -1116,7 +1116,7 @@ module Services {
             return result.length > 0 ? result.join(',') : ScriptElementKindModifier.none;
         }
 
-        // 
+        //
         // Syntactic Single-File features
         //
 
@@ -1149,7 +1149,7 @@ module Services {
             this.minimalRefresh();
 
             var manager = this.getFormattingManager(fileName, options);
-           
+
             return manager.formatSelection(minChar, limChar);
         }
 
@@ -1216,7 +1216,7 @@ module Services {
             return OutliningElementsCollector.collectElements(syntaxTree.sourceUnit());
         }
 
-        // Given a script name and position in the script, return a string representing 
+        // Given a script name and position in the script, return a string representing
         // the desired smart indent text (assuming the line is empty).
         // Return "null" in case the smart indent cannot be determined.
         public getIndentationAtPosition(fileName: string, position: number, editorOptions: EditorOptions): number {
@@ -1232,7 +1232,7 @@ module Services {
             return TypeScript.Formatting.SingleTokenIndenter.getIndentationAmount(position, syntaxTree.sourceUnit(), textSnapshot, options);
         }
 
-        // Given a script name and position in the script, return a pair of text range if the 
+        // Given a script name and position in the script, return a pair of text range if the
         // position corresponds to a "brace matchin" characters (e.g. "{" or "(", etc.)
         // If the position is not on any range, return "null".
         public getBraceMatchingAtPosition(fileName: string, position: number): TypeScript.TextSpan[] {
