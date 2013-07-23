@@ -63080,6 +63080,37 @@ var Lint;
 var Lint;
 (function (Lint) {
     (function (Rules) {
+        var MaxLineLengthRule = (function (_super) {
+            __extends(MaxLineLengthRule, _super);
+            function MaxLineLengthRule() {
+                _super.call(this, "max_line_length");
+            }
+            MaxLineLengthRule.prototype.apply = function (syntaxTree) {
+                var ruleFailures = [];
+                var lineLimit = this.getValue();
+                var lineStarts = syntaxTree.lineMap().lineStarts();
+                var errorString = MaxLineLengthRule.FAILURE_STRING + lineLimit;
+
+                for (var i = 0; i < lineStarts.length - 1; ++i) {
+                    var from = lineStarts[i], to = lineStarts[i + 1];
+                    if ((to - from - 1) > lineLimit) {
+                        var ruleFailure = new Lint.RuleFailure(syntaxTree.fileName(), from, errorString);
+                        ruleFailures.push(ruleFailure);
+                    }
+                }
+
+                return ruleFailures;
+            };
+            MaxLineLengthRule.FAILURE_STRING = "exceeds maximum line length of ";
+            return MaxLineLengthRule;
+        })(Rules.BaseRule);
+        Rules.MaxLineLengthRule = MaxLineLengthRule;
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
         var SemicolonRule = (function (_super) {
             __extends(SemicolonRule, _super);
             function SemicolonRule() {
@@ -63172,6 +63203,7 @@ var Lint;
         var ALL_RULES = [];
 
         function createAllRules() {
+            ALL_RULES.push(new Rules.MaxLineLengthRule());
             ALL_RULES.push(new Rules.SemicolonRule());
             ALL_RULES.push(new Rules.TripleComparisonRule());
         }
