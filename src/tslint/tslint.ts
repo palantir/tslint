@@ -7,7 +7,6 @@
 
 /// <reference path='configuration.ts' />
 /// <reference path='language/languageServiceHost.ts' />
-/// <reference path='rules/ruleManager.ts' />
 
 var fs = require("fs");
 var path = require("path");
@@ -34,11 +33,14 @@ var languageService = new Services.LanguageService(languageServiceHost);
 var syntaxTree = languageService.getSyntaxTree(file);
 var lineMap = syntaxTree.lineMap();
 
+var i, failures = [];
 var configuredRules = Lint.Configuration.getConfiguredRules(configuration);
-var ruleManager = new Lint.RuleManager(configuredRules);
+for(i = 0; i < configuredRules.length; ++i) {
+  var rule = configuredRules[i];
+  failures = failures.concat(rule.apply(syntaxTree));
+}
 
-var failures = ruleManager.apply(syntaxTree);
-for(var i = 0; i < failures.length; ++i) {
+for(i = 0; i < failures.length; ++i) {
   var failure = failures[i];
   var lineAndCharacter = lineMap.getLineAndCharacterFromPosition(failure.getPosition());
 

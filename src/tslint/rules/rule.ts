@@ -6,18 +6,11 @@ module Lint {
   export interface Rule {
     getName(): string;
 
-    getType(): RuleType;
-
     getValue(): any;
 
     setValue(value: any): void;
 
     apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[];
-  }
-
-  export enum RuleType {
-    BufferBased,
-    LineBased
   }
 
   export class RuleFailure {

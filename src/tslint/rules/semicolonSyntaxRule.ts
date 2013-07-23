@@ -6,7 +6,7 @@ module Lint.Rules {
     static FAILURE_STRING = "missing semicolon";
 
     constructor() {
-      super("semicolon", Lint.RuleType.BufferBased);
+      super("semicolon");
     }
 
     public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {

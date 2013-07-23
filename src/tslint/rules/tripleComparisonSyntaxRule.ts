@@ -5,7 +5,7 @@ module Lint.Rules {
 
   export class TripleComparisonSyntaxRule extends BaseRule {
     constructor() {
-      super("triple_eq_neq", Lint.RuleType.BufferBased);
+      super("triple_eq_neq");
     }
 
     public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {

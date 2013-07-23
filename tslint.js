@@ -63003,13 +63003,6 @@ var Services;
 })(Services || (Services = {}));
 var Lint;
 (function (Lint) {
-    (function (RuleType) {
-        RuleType[RuleType["BufferBased"] = 0] = "BufferBased";
-
-        RuleType[RuleType["LineBased"] = 1] = "LineBased";
-    })(Lint.RuleType || (Lint.RuleType = {}));
-    var RuleType = Lint.RuleType;
-
     var RuleFailure = (function () {
         function RuleFailure(fileName, position, failure) {
             this.fileName = fileName;
@@ -63060,16 +63053,11 @@ var Lint;
 (function (Lint) {
     (function (Rules) {
         var BaseRule = (function () {
-            function BaseRule(name, type) {
+            function BaseRule(name) {
                 this.name = name;
-                this.type = type;
             }
             BaseRule.prototype.getName = function () {
                 return this.name;
-            };
-
-            BaseRule.prototype.getType = function () {
-                return this.type;
             };
 
             BaseRule.prototype.getValue = function () {
@@ -63095,7 +63083,7 @@ var Lint;
         var SemicolonSyntaxRule = (function (_super) {
             __extends(SemicolonSyntaxRule, _super);
             function SemicolonSyntaxRule() {
-                _super.call(this, "semicolon", Lint.RuleType.BufferBased);
+                _super.call(this, "semicolon");
             }
             SemicolonSyntaxRule.prototype.apply = function (syntaxTree) {
                 var ruleFailures = [];
@@ -63129,7 +63117,7 @@ var Lint;
         var TripleComparisonSyntaxRule = (function (_super) {
             __extends(TripleComparisonSyntaxRule, _super);
             function TripleComparisonSyntaxRule() {
-                _super.call(this, "triple_eq_neq", Lint.RuleType.BufferBased);
+                _super.call(this, "triple_eq_neq");
             }
             TripleComparisonSyntaxRule.prototype.apply = function (syntaxTree) {
                 var sourceUnit = syntaxTree.sourceUnit();
@@ -63346,36 +63334,6 @@ var Lint;
         return LanguageServicesDiagnostics;
     })();
 })(Lint || (Lint = {}));
-var Lint;
-(function (Lint) {
-    var RuleManager = (function () {
-        function RuleManager(rules) {
-            this.bufferBasedRules = [];
-            this.lineBasedRules = [];
-
-            for (var i = 0; i < rules.length; ++i) {
-                var rule = rules[i];
-                if (rule.getType() === Lint.RuleType.BufferBased) {
-                    this.bufferBasedRules.push(rule);
-                } else {
-                    this.lineBasedRules.push(rule);
-                }
-            }
-        }
-        RuleManager.prototype.apply = function (syntaxTree) {
-            var ruleFailures = [];
-
-            for (var i = 0; i < this.bufferBasedRules.length; ++i) {
-                var rule = this.bufferBasedRules[i];
-                ruleFailures = ruleFailures.concat(rule.apply(syntaxTree));
-            }
-
-            return ruleFailures;
-        };
-        return RuleManager;
-    })();
-    Lint.RuleManager = RuleManager;
-})(Lint || (Lint = {}));
 var fs = require("fs");
 var path = require("path");
 
@@ -63401,11 +63359,14 @@ var languageService = new Services.LanguageService(languageServiceHost);
 var syntaxTree = languageService.getSyntaxTree(file);
 var lineMap = syntaxTree.lineMap();
 
+var i, failures = [];
 var configuredRules = Lint.Configuration.getConfiguredRules(configuration);
-var ruleManager = new Lint.RuleManager(configuredRules);
+for (i = 0; i < configuredRules.length; ++i) {
+    var rule = configuredRules[i];
+    failures = failures.concat(rule.apply(syntaxTree));
+}
 
-var failures = ruleManager.apply(syntaxTree);
-for (var i = 0; i < failures.length; ++i) {
+for (i = 0; i < failures.length; ++i) {
     var failure = failures[i];
     var lineAndCharacter = lineMap.getLineAndCharacterFromPosition(failure.getPosition());
 
