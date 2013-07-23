@@ -1,5 +1,4 @@
 /// <reference path='rule.ts'/>
-
 /// <reference path='semicolonSyntaxRule.ts'/>
 
 module Lint.Rules {
@@ -7,7 +6,7 @@ module Lint.Rules {
   var ALL_RULES: Rule[] = [];
 
   export function createAllRules() {
-    ALL_RULES.push(new SemicolonSyntaxRule("semicolon", Lint.RuleType.BufferBased));
+    ALL_RULES.push(new SemicolonSyntaxRule());
   }
 
   export function getRuleForName(name: string): Rule {

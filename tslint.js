@@ -63011,16 +63011,21 @@ var Lint;
     var RuleType = Lint.RuleType;
 
     var RuleFailure = (function () {
-        function RuleFailure(position, context) {
+        function RuleFailure(fileName, position, failure) {
+            this.fileName = fileName;
             this.position = position;
-            this.context = context;
+            this.failure = failure;
         }
+        RuleFailure.prototype.getFileName = function () {
+            return this.fileName;
+        };
+
         RuleFailure.prototype.getPosition = function () {
             return this.position;
         };
 
-        RuleFailure.prototype.getContext = function () {
-            return this.context;
+        RuleFailure.prototype.getFailure = function () {
+            return this.failure;
         };
         return RuleFailure;
     })();
@@ -63029,57 +63034,67 @@ var Lint;
 var Lint;
 (function (Lint) {
     (function (Rules) {
-        var BaseSyntaxRule = (function () {
-            function BaseSyntaxRule(name, type) {
+        var BaseRule = (function () {
+            function BaseRule(name, type) {
                 this.name = name;
                 this.type = type;
             }
-            BaseSyntaxRule.prototype.getName = function () {
+            BaseRule.prototype.getName = function () {
                 return this.name;
             };
 
-            BaseSyntaxRule.prototype.getType = function () {
+            BaseRule.prototype.getType = function () {
                 return this.type;
             };
 
-            BaseSyntaxRule.prototype.getValue = function () {
+            BaseRule.prototype.getValue = function () {
                 return this.value;
             };
 
-            BaseSyntaxRule.prototype.setValue = function (value) {
+            BaseRule.prototype.setValue = function (value) {
                 this.value = value;
             };
 
-            BaseSyntaxRule.prototype.getFailureString = function () {
+            BaseRule.prototype.apply = function (syntaxTree) {
                 throw new Error("Unsupported Operation");
             };
-
-            BaseSyntaxRule.prototype.apply = function (syntaxTree) {
-                throw new Error("Unsupported Operation");
-            };
-            return BaseSyntaxRule;
+            return BaseRule;
         })();
-        Rules.BaseSyntaxRule = BaseSyntaxRule;
+        Rules.BaseRule = BaseRule;
     })(Lint.Rules || (Lint.Rules = {}));
     var Rules = Lint.Rules;
 })(Lint || (Lint = {}));
 var Lint;
 (function (Lint) {
     (function (Rules) {
+        var FAILURE_STRING = "missing semicolon";
+
         var SemicolonSyntaxRule = (function (_super) {
             __extends(SemicolonSyntaxRule, _super);
-            function SemicolonSyntaxRule(name, type) {
-                _super.call(this, name, type);
+            function SemicolonSyntaxRule() {
+                _super.call(this, "semicolon", Lint.RuleType.BufferBased);
             }
-            SemicolonSyntaxRule.prototype.getFailureString = function () {
-                return "missing semicolon";
-            };
-
             SemicolonSyntaxRule.prototype.apply = function (syntaxTree) {
-                return [];
+                var ruleFailures = [];
+                var diagnostics = syntaxTree.diagnostics();
+
+                for (var i = 0; i < diagnostics.length; ++i) {
+                    var diagnostic = diagnostics[i];
+                    var code = diagnostic.diagnosticCode();
+
+                    if (code === TypeScript.DiagnosticCode.Automatic_semicolon_insertion_not_allowed) {
+                        var fileName = diagnostic.fileName();
+                        var position = diagnostic.start();
+                        var ruleFailure = new Lint.RuleFailure(fileName, position, FAILURE_STRING);
+
+                        ruleFailures.push(ruleFailure);
+                    }
+                }
+
+                return ruleFailures;
             };
             return SemicolonSyntaxRule;
-        })(Rules.BaseSyntaxRule);
+        })(Rules.BaseRule);
         Rules.SemicolonSyntaxRule = SemicolonSyntaxRule;
     })(Lint.Rules || (Lint.Rules = {}));
     var Rules = Lint.Rules;
@@ -63090,7 +63105,7 @@ var Lint;
         var ALL_RULES = [];
 
         function createAllRules() {
-            ALL_RULES.push(new Rules.SemicolonSyntaxRule("semicolon", Lint.RuleType.BufferBased));
+            ALL_RULES.push(new Rules.SemicolonSyntaxRule());
         }
         Rules.createAllRules = createAllRules;
 
@@ -63112,10 +63127,10 @@ var Lint;
 var Lint;
 (function (Lint) {
     (function (Configuration) {
-        var CONFIG_FILENAME = ".tslintrc";
-
         var fs = require("fs");
         var path = require("path");
+
+        var CONFIG_FILENAME = ".tslintrc";
 
         function findConfiguration() {
             var currentPath = global.process.cwd();
@@ -63267,12 +63282,15 @@ var Lint;
                 }
             }
         }
-        RuleManager.prototype.getLineBasedRules = function () {
-            return this.lineBasedRules;
-        };
+        RuleManager.prototype.apply = function (syntaxTree) {
+            var ruleFailures = [];
 
-        RuleManager.prototype.getBufferBasedRules = function () {
-            return this.bufferBasedRules;
+            for (var i = 0; i < this.bufferBasedRules.length; ++i) {
+                var rule = this.bufferBasedRules[i];
+                ruleFailures = ruleFailures.concat(rule.apply(syntaxTree));
+            }
+
+            return ruleFailures;
         };
         return RuleManager;
     })();
@@ -63280,6 +63298,8 @@ var Lint;
 })(Lint || (Lint = {}));
 var fs = require("fs");
 var path = require("path");
+
+Lint.Rules.createAllRules();
 
 var configuration = Lint.Configuration.findConfiguration();
 if (configuration === undefined) {
@@ -63293,7 +63313,30 @@ if (argv.length < 3) {
     process.exit(2);
 }
 
-Lint.Rules.createAllRules();
+var file = argv[2];
+var contents = fs.readFileSync(file, "utf8");
+
+var languageServiceHost = new Lint.LanguageServiceHost(file, contents);
+var languageService = new Services.LanguageService(languageServiceHost);
+var syntaxTree = languageService.getSyntaxTree(file);
+var lineMap = syntaxTree.lineMap();
 
 var configuredRules = Lint.Configuration.getConfiguredRules(configuration);
-console.log(configuredRules.length);
+var ruleManager = new Lint.RuleManager(configuredRules);
+
+var failures = ruleManager.apply(syntaxTree);
+for (var i = 0; i < failures.length; ++i) {
+    var failure = failures[i];
+    var lineAndCharacter = lineMap.getLineAndCharacterFromPosition(failure.getPosition());
+
+    var fileName = failure.getFileName();
+    var line = lineAndCharacter.line() + 1;
+    var character = lineAndCharacter.character() + 1;
+    var failureString = failure.getFailure();
+
+    console.error(fileName + "[" + line + ", " + character + "]: " + failureString);
+}
+
+if (failures.length > 0) {
+    process.exit(3);
+}

@@ -2,7 +2,7 @@
 
 module Lint.Rules {
 
-  export class BaseSyntaxRule implements Lint.SyntaxRule {
+  export class BaseRule implements Lint.Rule {
     private name: string;
     private type: Lint.RuleType;
     private value: any;
@@ -26,10 +26,6 @@ module Lint.Rules {
 
     public setValue(value: any): void {
       this.value = value;
-    }
-
-    public getFailureString(): string {
-      throw new Error("Unsupported Operation");
     }
 
     public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {

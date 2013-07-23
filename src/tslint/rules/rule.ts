@@ -2,19 +2,16 @@
 
 module Lint {
 
+  // TODO: Make this immutable somehow
   export interface Rule {
     getName(): string;
 
     getType(): RuleType;
 
-    getFailureString(): string;
-
-    getValue(): any;
+   getValue(): any;
 
     setValue(value: any): void;
-  }
 
-  export interface SyntaxRule extends Rule {
     apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[];
   }
 
@@ -24,20 +21,26 @@ module Lint {
   }
 
   export class RuleFailure {
+    private fileName: string;
     private position: number;
-    private context: any;
+    private failure: string;
 
-    constructor(position: number, context: any) {
+    constructor(fileName: string, position: number, failure: string) {
+      this.fileName = fileName;
       this.position = position;
-      this.context = context;
+      this.failure = failure;
     }
 
-    public getPosition(): number {
+    public getFileName() {
+      return this.fileName;
+    }
+
+    public getPosition() {
       return this.position;
     }
 
-    public getContext(): number {
-      return this.context;
+    public getFailure() {
+      return this.failure;
     }
   }
 

@@ -1,3 +1,5 @@
+/// <reference path='../../typescript/compiler/syntax/syntaxTree.ts'/>
+
 /// <reference path='rule.ts'/>
 /// <reference path='rules.ts'/>
 
@@ -21,12 +23,15 @@ module Lint {
       }
     }
 
-    public getLineBasedRules(): Rule[] {
-      return this.lineBasedRules;
-    }
+    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
+      var ruleFailures = [];
 
-    public getBufferBasedRules(): Rule[] {
-      return this.bufferBasedRules;
+      for(var i = 0; i < this.bufferBasedRules.length; ++i) {
+        var rule = this.bufferBasedRules[i];
+        ruleFailures = ruleFailures.concat(rule.apply(syntaxTree));
+      }
+
+      return ruleFailures;
     }
   }
 
