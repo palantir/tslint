@@ -8,7 +8,7 @@ module Lint {
 
     getType(): RuleType;
 
-   getValue(): any;
+    getValue(): any;
 
     setValue(value: any): void;
 

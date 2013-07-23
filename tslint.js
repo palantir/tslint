@@ -63033,6 +63033,31 @@ var Lint;
 })(Lint || (Lint = {}));
 var Lint;
 (function (Lint) {
+    var RuleWalker = (function (_super) {
+        __extends(RuleWalker, _super);
+        function RuleWalker(fileName) {
+            _super.call(this);
+
+            this.fileName = fileName;
+            this.failures = [];
+        }
+        RuleWalker.prototype.getFileName = function () {
+            return this.fileName;
+        };
+
+        RuleWalker.prototype.addFailure = function (failure) {
+            this.failures.push(failure);
+        };
+
+        RuleWalker.prototype.getFailures = function () {
+            return this.failures;
+        };
+        return RuleWalker;
+    })(TypeScript.PositionTrackingWalker);
+    Lint.RuleWalker = RuleWalker;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
     (function (Rules) {
         var BaseRule = (function () {
             function BaseRule(name, type) {
@@ -63056,7 +63081,7 @@ var Lint;
             };
 
             BaseRule.prototype.apply = function (syntaxTree) {
-                throw new Error("Unsupported Operation");
+                throw TypeScript.Errors.abstract();
             };
             return BaseRule;
         })();
@@ -63067,8 +63092,6 @@ var Lint;
 var Lint;
 (function (Lint) {
     (function (Rules) {
-        var FAILURE_STRING = "missing semicolon";
-
         var SemicolonSyntaxRule = (function (_super) {
             __extends(SemicolonSyntaxRule, _super);
             function SemicolonSyntaxRule() {
@@ -63085,7 +63108,7 @@ var Lint;
                     if (code === TypeScript.DiagnosticCode.Automatic_semicolon_insertion_not_allowed) {
                         var fileName = diagnostic.fileName();
                         var position = diagnostic.start();
-                        var ruleFailure = new Lint.RuleFailure(fileName, position, FAILURE_STRING);
+                        var ruleFailure = new Lint.RuleFailure(fileName, position, SemicolonSyntaxRule.FAILURE_STRING);
 
                         ruleFailures.push(ruleFailure);
                     }
@@ -63093,9 +63116,65 @@ var Lint;
 
                 return ruleFailures;
             };
+            SemicolonSyntaxRule.FAILURE_STRING = "missing semicolon";
             return SemicolonSyntaxRule;
         })(Rules.BaseRule);
         Rules.SemicolonSyntaxRule = SemicolonSyntaxRule;
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
+        var TripleComparisonSyntaxRule = (function (_super) {
+            __extends(TripleComparisonSyntaxRule, _super);
+            function TripleComparisonSyntaxRule() {
+                _super.call(this, "triple_eq_neq", Lint.RuleType.BufferBased);
+            }
+            TripleComparisonSyntaxRule.prototype.apply = function (syntaxTree) {
+                var sourceUnit = syntaxTree.sourceUnit();
+                var comparisonWalker = new ComparisonWalker(syntaxTree.fileName());
+
+                sourceUnit.accept(comparisonWalker);
+
+                return comparisonWalker.getFailures();
+            };
+            return TripleComparisonSyntaxRule;
+        })(Rules.BaseRule);
+        Rules.TripleComparisonSyntaxRule = TripleComparisonSyntaxRule;
+
+        var ComparisonWalker = (function (_super) {
+            __extends(ComparisonWalker, _super);
+            function ComparisonWalker() {
+                _super.apply(this, arguments);
+            }
+            ComparisonWalker.prototype.visitBinaryExpression = function (node) {
+                this.visitNodeOrToken(node.left);
+
+                this.handleOperatorToken(node.operatorToken);
+                this.visitToken(node.operatorToken);
+
+                this.visitNodeOrToken(node.right);
+            };
+
+            ComparisonWalker.prototype.handleOperatorToken = function (operatorToken) {
+                var failure = null;
+                var operatorKind = operatorToken.kind();
+
+                if (operatorKind === TypeScript.SyntaxKind.EqualsEqualsToken) {
+                    failure = new Lint.RuleFailure(this.getFileName(), this.position(), ComparisonWalker.EQ_FAILURE);
+                } else if (operatorKind === TypeScript.SyntaxKind.ExclamationEqualsToken) {
+                    failure = new Lint.RuleFailure(this.getFileName(), this.position(), ComparisonWalker.NEQ_FAILURE);
+                }
+
+                if (failure) {
+                    this.addFailure(failure);
+                }
+            };
+            ComparisonWalker.EQ_FAILURE = "== should be ===";
+            ComparisonWalker.NEQ_FAILURE = "!= should be !==";
+            return ComparisonWalker;
+        })(Lint.RuleWalker);
     })(Lint.Rules || (Lint.Rules = {}));
     var Rules = Lint.Rules;
 })(Lint || (Lint = {}));
@@ -63106,6 +63185,7 @@ var Lint;
 
         function createAllRules() {
             ALL_RULES.push(new Rules.SemicolonSyntaxRule());
+            ALL_RULES.push(new Rules.TripleComparisonSyntaxRule());
         }
         Rules.createAllRules = createAllRules;
 

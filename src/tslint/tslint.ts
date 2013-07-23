@@ -1,4 +1,5 @@
 /// <reference path='../typescript/compiler/typescript.ts'/>
+/// <reference path='../typescript/compiler/syntax/positionTrackingWalker.ts'/>
 /// <reference path=../typescript/services/classifier.ts' />
 /// <reference path=../typescript/services/coreServices.ts' />
 /// <reference path='../typescript/services/typescriptServices.ts' />
@@ -54,8 +55,6 @@ if(failures.length > 0) {
 }
 
 /*
-
-
 //return 0;
 
 var results = [];

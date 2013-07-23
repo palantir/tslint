@@ -1,4 +1,7 @@
+/// <reference path='../../typescript/compiler/core/errors.ts'/>
+
 /// <reference path='rule.ts'/>
+/// <reference path='../language/ruleWalker.ts'/>
 
 module Lint.Rules {
 
@@ -29,7 +32,7 @@ module Lint.Rules {
     }
 
     public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-      throw new Error("Unsupported Operation");
+      throw TypeScript.Errors.abstract();
     }
   }
 

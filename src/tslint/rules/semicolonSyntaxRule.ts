@@ -2,10 +2,9 @@
 /// <reference path='baseRule.ts'/>
 
 module Lint.Rules {
-
-  var FAILURE_STRING = "missing semicolon";
-
   export class SemicolonSyntaxRule extends BaseRule {
+    static FAILURE_STRING = "missing semicolon";
+
     constructor() {
       super("semicolon", Lint.RuleType.BufferBased);
     }
@@ -21,7 +20,7 @@ module Lint.Rules {
         if (code === TypeScript.DiagnosticCode.Automatic_semicolon_insertion_not_allowed) {
           var fileName = diagnostic.fileName();
           var position = diagnostic.start();
-          var ruleFailure = new Lint.RuleFailure(fileName, position, FAILURE_STRING);
+          var ruleFailure = new Lint.RuleFailure(fileName, position, SemicolonSyntaxRule.FAILURE_STRING);
 
           ruleFailures.push(ruleFailure);
         }
