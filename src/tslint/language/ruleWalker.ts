@@ -21,6 +21,11 @@ module Lint {
       return this.fileName;
     }
 
+    // create a failure at the current position
+    public createFailure(failure: string): Lint.RuleFailure {
+      return new Lint.RuleFailure(this.getFileName(), this.position(), failure);
+    }
+
     public addFailure(failure: RuleFailure) {
       if(!this.existsFailure(failure)) {
         this.failures.push(failure);

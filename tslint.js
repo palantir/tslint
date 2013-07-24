@@ -63042,6 +63042,10 @@ var Lint;
             return this.fileName;
         };
 
+        RuleWalker.prototype.createFailure = function (failure) {
+            return new Lint.RuleFailure(this.getFileName(), this.position(), failure);
+        };
+
         RuleWalker.prototype.addFailure = function (failure) {
             if (!this.existsFailure(failure)) {
                 this.failures.push(failure);
@@ -63407,21 +63411,17 @@ var Lint;
                 var failure = null;
 
                 if (trivia.count() < 1) {
-                    failure = this.createFailure();
+                    failure = this.createFailure(WhitespaceWalker.FAILURE_STRING);
                 } else {
                     var kind = trivia.syntaxTriviaAt(0).kind();
                     if (kind !== TypeScript.SyntaxKind.WhitespaceTrivia && kind !== TypeScript.SyntaxKind.NewLineTrivia) {
-                        failure = this.createFailure();
+                        failure = this.createFailure(WhitespaceWalker.FAILURE_STRING);
                     }
                 }
 
                 if (failure) {
                     this.addFailure(failure);
                 }
-            };
-
-            WhitespaceWalker.prototype.createFailure = function () {
-                return new Lint.RuleFailure(this.getFileName(), this.position(), WhitespaceWalker.FAILURE_STRING);
             };
             WhitespaceWalker.FAILURE_STRING = "missing whitespace";
             return WhitespaceWalker;

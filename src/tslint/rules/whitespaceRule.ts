@@ -115,22 +115,18 @@ module Lint.Rules {
       var failure = null;
 
       if(trivia.count() < 1) {
-        failure = this.createFailure();
+        failure = this.createFailure(WhitespaceWalker.FAILURE_STRING);
       } else {
         var kind = trivia.syntaxTriviaAt(0).kind();
         if(kind !== TypeScript.SyntaxKind.WhitespaceTrivia &&
            kind !== TypeScript.SyntaxKind.NewLineTrivia) {
-          failure = this.createFailure();
+          failure = this.createFailure(WhitespaceWalker.FAILURE_STRING);
         }
       }
 
       if(failure) {
         this.addFailure(failure);
       }
-    }
-
-    private createFailure(): Lint.RuleFailure {
-      return new Lint.RuleFailure(this.getFileName(), this.position(), WhitespaceWalker.FAILURE_STRING);
     }
   }
 
