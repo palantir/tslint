@@ -63132,6 +63132,168 @@ var Lint;
 })(Lint || (Lint = {}));
 var Lint;
 (function (Lint) {
+    var LastTokenAwareRuleWalker = (function (_super) {
+        __extends(LastTokenAwareRuleWalker, _super);
+        function LastTokenAwareRuleWalker() {
+            _super.apply(this, arguments);
+        }
+        LastTokenAwareRuleWalker.prototype.visitToken = function (token) {
+            this.lastState = {
+                position: this.position(),
+                token: token
+            };
+
+            _super.prototype.visitToken.call(this, token);
+        };
+
+        LastTokenAwareRuleWalker.prototype.getLastState = function () {
+            return this.lastState;
+        };
+        return LastTokenAwareRuleWalker;
+    })(Lint.RuleWalker);
+    Lint.LastTokenAwareRuleWalker = LastTokenAwareRuleWalker;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
+        var OpenBraceRule = (function (_super) {
+            __extends(OpenBraceRule, _super);
+            function OpenBraceRule() {
+                _super.call(this, "opening_brace_on_same_line");
+            }
+            OpenBraceRule.prototype.isEnabled = function () {
+                return this.getValue() === true;
+            };
+
+            OpenBraceRule.prototype.apply = function (syntaxTree) {
+                var sourceUnit = syntaxTree.sourceUnit();
+                var braceWalker = new BraceWalker(syntaxTree.lineMap(), syntaxTree.fileName());
+
+                sourceUnit.accept(braceWalker);
+
+                return braceWalker.getFailures();
+            };
+            return OpenBraceRule;
+        })(Rules.BaseRule);
+        Rules.OpenBraceRule = OpenBraceRule;
+
+        var BraceWalker = (function (_super) {
+            __extends(BraceWalker, _super);
+            function BraceWalker(lineMap, fileName) {
+                _super.call(this, fileName);
+                this.lineMap = lineMap;
+            }
+            BraceWalker.prototype.visitToken = function (token) {
+                var kind = token.kind();
+                var lastState = this.getLastState();
+
+                if (kind === TypeScript.SyntaxKind.OpenBraceToken && lastState !== null) {
+                    var lastKind = lastState.token.kind();
+                    if (lastKind !== TypeScript.SyntaxKind.SemicolonToken) {
+                        var lastLine = this.getLine(lastState.position);
+                        var currentLine = this.getLine(this.position());
+
+                        if (currentLine !== lastLine) {
+                            this.addFailure(this.createFailure(BraceWalker.FAILURE_STRING));
+                        }
+                    }
+                }
+
+                _super.prototype.visitToken.call(this, token);
+            };
+
+            BraceWalker.prototype.getLine = function (position) {
+                return this.lineMap.getLineAndCharacterFromPosition(position).line();
+            };
+            BraceWalker.FAILURE_STRING = "misplaced opening brace";
+            return BraceWalker;
+        })(Lint.LastTokenAwareRuleWalker);
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
+        var QuoteStyle;
+        (function (QuoteStyle) {
+            QuoteStyle[QuoteStyle["SINGLE_QUOTES"] = 0] = "SINGLE_QUOTES";
+
+            QuoteStyle[QuoteStyle["DOUBLE_QUOTES"] = 1] = "DOUBLE_QUOTES";
+        })(QuoteStyle || (QuoteStyle = {}));
+        ;
+
+        var QuoteStyleRule = (function (_super) {
+            __extends(QuoteStyleRule, _super);
+            function QuoteStyleRule() {
+                _super.call(this, "quote_style");
+            }
+            QuoteStyleRule.prototype.apply = function (syntaxTree) {
+                var sourceUnit = syntaxTree.sourceUnit();
+                var quoteStyleString = this.getValue();
+                var quoteStyle;
+                if (quoteStyleString === "single") {
+                    quoteStyle = QuoteStyle.SINGLE_QUOTES;
+                } else if (quoteStyleString === "double") {
+                    quoteStyle = QuoteStyle.DOUBLE_QUOTES;
+                } else {
+                    throw new Error("Unknown quote style " + quoteStyle);
+                }
+                var quoteWalker = new QuoteWalker(syntaxTree.fileName(), quoteStyle);
+
+                sourceUnit.accept(quoteWalker);
+
+                return quoteWalker.getFailures();
+            };
+            return QuoteStyleRule;
+        })(Rules.BaseRule);
+        Rules.QuoteStyleRule = QuoteStyleRule;
+
+        var QuoteWalker = (function (_super) {
+            __extends(QuoteWalker, _super);
+            function QuoteWalker(fileName, quoteStyle) {
+                this.quoteStyle = quoteStyle;
+                return _super.call(this, fileName);
+            }
+            QuoteWalker.prototype.visitToken = function (token) {
+                _super.prototype.visitToken.call(this, token);
+                this.handleToken(token);
+            };
+
+            QuoteWalker.prototype.handleToken = function (operatorToken) {
+                var failure = null;
+
+                var operatorKind = operatorToken.kind();
+
+                if (operatorKind === TypeScript.SyntaxKind.StringLiteral) {
+                    var fullText = operatorToken.fullText();
+                    var fullTextLength = fullText.length;
+                    if (fullTextLength < 1) {
+                        return;
+                    }
+                    if (this.quoteStyle === QuoteStyle.SINGLE_QUOTES) {
+                        if (fullText.charAt(0) !== "'" || fullText.charAt(fullTextLength - 1) !== "'") {
+                            failure = new Lint.RuleFailure(this.getFileName(), this.position(), QuoteWalker.SINGLE_QUOTE_FAILURE);
+                        }
+                    } else if (this.quoteStyle === QuoteStyle.DOUBLE_QUOTES) {
+                        if (fullText.charAt(0) !== "\"" || fullText.charAt(fullTextLength - 1) !== "\"") {
+                            failure = new Lint.RuleFailure(this.getFileName(), this.position(), QuoteWalker.DOUBLE_QUOTE_FAILURE);
+                        }
+                    }
+                }
+
+                if (failure) {
+                    this.addFailure(failure);
+                }
+            };
+            QuoteWalker.DOUBLE_QUOTE_FAILURE = "' should be \"";
+            QuoteWalker.SINGLE_QUOTE_FAILURE = "\" should be '";
+            return QuoteWalker;
+        })(Lint.RuleWalker);
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
     (function (Rules) {
         var SemicolonRule = (function (_super) {
             __extends(SemicolonRule, _super);
@@ -63223,87 +63385,6 @@ var Lint;
             ComparisonWalker.EQ_FAILURE = "== should be ===";
             ComparisonWalker.NEQ_FAILURE = "!= should be !==";
             return ComparisonWalker;
-        })(Lint.RuleWalker);
-    })(Lint.Rules || (Lint.Rules = {}));
-    var Rules = Lint.Rules;
-})(Lint || (Lint = {}));
-var Lint;
-(function (Lint) {
-    (function (Rules) {
-        var QuoteStyle;
-        (function (QuoteStyle) {
-            QuoteStyle[QuoteStyle["SINGLE_QUOTES"] = 0] = "SINGLE_QUOTES";
-
-            QuoteStyle[QuoteStyle["DOUBLE_QUOTES"] = 1] = "DOUBLE_QUOTES";
-        })(QuoteStyle || (QuoteStyle = {}));
-        ;
-
-        var QuoteStyleRule = (function (_super) {
-            __extends(QuoteStyleRule, _super);
-            function QuoteStyleRule() {
-                _super.call(this, "quote_style");
-            }
-            QuoteStyleRule.prototype.apply = function (syntaxTree) {
-                var sourceUnit = syntaxTree.sourceUnit();
-                var quoteStyleString = this.getValue();
-                var quoteStyle;
-                if (quoteStyleString === "single") {
-                    quoteStyle = QuoteStyle.SINGLE_QUOTES;
-                } else if (quoteStyleString === "double") {
-                    quoteStyle = QuoteStyle.DOUBLE_QUOTES;
-                } else {
-                    throw new Error("Unknown quote style " + quoteStyle);
-                }
-                var quoteWalker = new QuoteWalker(syntaxTree.fileName(), quoteStyle);
-
-                sourceUnit.accept(quoteWalker);
-
-                return quoteWalker.getFailures();
-            };
-            return QuoteStyleRule;
-        })(Rules.BaseRule);
-        Rules.QuoteStyleRule = QuoteStyleRule;
-
-        var QuoteWalker = (function (_super) {
-            __extends(QuoteWalker, _super);
-            function QuoteWalker(fileName, quoteStyle) {
-                this.quoteStyle = quoteStyle;
-                return _super.call(this, fileName);
-            }
-            QuoteWalker.prototype.visitToken = function (token) {
-                _super.prototype.visitToken.call(this, token);
-                this.handleToken(token);
-            };
-
-            QuoteWalker.prototype.handleToken = function (operatorToken) {
-                var failure = null;
-
-                var operatorKind = operatorToken.kind();
-
-                if (operatorKind === TypeScript.SyntaxKind.StringLiteral) {
-                    var fullText = operatorToken.fullText();
-                    var fullTextLength = fullText.length;
-                    if (fullTextLength < 1) {
-                        return;
-                    }
-                    if (this.quoteStyle === QuoteStyle.SINGLE_QUOTES) {
-                        if (fullText.charAt(0) !== "'" || fullText.charAt(fullTextLength - 1) !== "'") {
-                            failure = new Lint.RuleFailure(this.getFileName(), this.position(), QuoteWalker.SINGLE_QUOTE_FAILURE);
-                        }
-                    } else if (this.quoteStyle === QuoteStyle.DOUBLE_QUOTES) {
-                        if (fullText.charAt(0) !== "\"" || fullText.charAt(fullTextLength - 1) !== "\"") {
-                            failure = new Lint.RuleFailure(this.getFileName(), this.position(), QuoteWalker.DOUBLE_QUOTE_FAILURE);
-                        }
-                    }
-                }
-
-                if (failure) {
-                    this.addFailure(failure);
-                }
-            };
-            QuoteWalker.DOUBLE_QUOTE_FAILURE = "' should be \"";
-            QuoteWalker.SINGLE_QUOTE_FAILURE = "\" should be '";
-            return QuoteWalker;
         })(Lint.RuleWalker);
     })(Lint.Rules || (Lint.Rules = {}));
     var Rules = Lint.Rules;
@@ -63436,9 +63517,10 @@ var Lint;
 
         function createAllRules() {
             ALL_RULES.push(new Rules.MaxLineLengthRule());
+            ALL_RULES.push(new Rules.OpenBraceRule());
+            ALL_RULES.push(new Rules.QuoteStyleRule());
             ALL_RULES.push(new Rules.SemicolonRule());
             ALL_RULES.push(new Rules.TripleComparisonRule());
-            ALL_RULES.push(new Rules.QuoteStyleRule());
             ALL_RULES.push(new Rules.WhitespaceRule());
         }
         Rules.createAllRules = createAllRules;

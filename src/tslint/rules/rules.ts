@@ -1,8 +1,10 @@
 /// <reference path='rule.ts'/>
+
 /// <reference path='maxLineLengthRule.ts'/>
+/// <reference path='openBraceRule.ts'/>
+/// <reference path='quoteStyleRule.ts'/>
 /// <reference path='semicolonRule.ts'/>
 /// <reference path='tripleComparisonRule.ts'/>
-/// <reference path='quoteStyleRule.ts'/>
 /// <reference path='whitespaceRule.ts'/>
 
 module Lint.Rules {
@@ -11,9 +13,10 @@ module Lint.Rules {
 
   export function createAllRules() {
     ALL_RULES.push(new MaxLineLengthRule());
+    ALL_RULES.push(new OpenBraceRule());
+    ALL_RULES.push(new QuoteStyleRule());
     ALL_RULES.push(new SemicolonRule());
     ALL_RULES.push(new TripleComparisonRule());
-    ALL_RULES.push(new QuoteStyleRule());
     ALL_RULES.push(new WhitespaceRule());
   }
 
