@@ -1,4 +1,4 @@
-• Opening brace right after if/for/while on the same line
+• Opening brace right after if/else/for/while/switch/try/catch/enum/class/module on the same line
 • Disallow trailing whitespace
 • Disallow bitwise operators
 • Disable eval
