@@ -2,6 +2,7 @@
 /// <reference path='maxLineLengthRule.ts'/>
 /// <reference path='semicolonRule.ts'/>
 /// <reference path='tripleComparisonRule.ts'/>
+/// <reference path='quoteStyleRule.ts'/>
 
 module Lint.Rules {
 
@@ -11,6 +12,7 @@ module Lint.Rules {
     ALL_RULES.push(new MaxLineLengthRule());
     ALL_RULES.push(new SemicolonRule());
     ALL_RULES.push(new TripleComparisonRule());
+    ALL_RULES.push(new QuoteStyleRule());
   }
 
   export function getRuleForName(name: string): Rule {
