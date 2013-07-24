@@ -1,4 +1,3 @@
-• Enforce string quoting
 • Opening brace right after if/for/while on the same line
 • Disallow trailing whitespace
 • Disallow bitwise operators
