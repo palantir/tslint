@@ -4,6 +4,7 @@
 /// <reference path='quoteStyleRule.ts'/>
 /// <reference path='sameLineRule.ts'/>
 /// <reference path='semicolonRule.ts'/>
+/// <reference path='trailingWhitespaceRule.ts'/>
 /// <reference path='tripleComparisonRule.ts'/>
 /// <reference path='whitespaceRule.ts'/>
 
@@ -16,6 +17,7 @@ module Lint.Rules {
     ALL_RULES.push(new QuoteStyleRule());
     ALL_RULES.push(new SameLineRule());
     ALL_RULES.push(new SemicolonRule());
+    ALL_RULES.push(new TrailingWhitespaceRule());
     ALL_RULES.push(new TripleComparisonRule());
     ALL_RULES.push(new WhitespaceRule());
   }

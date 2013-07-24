@@ -63366,6 +63366,69 @@ var Lint;
 var Lint;
 (function (Lint) {
     (function (Rules) {
+        var TrailingWhitespaceRule = (function (_super) {
+            __extends(TrailingWhitespaceRule, _super);
+            function TrailingWhitespaceRule() {
+                _super.call(this, "no_trailing_whitespace");
+            }
+            TrailingWhitespaceRule.prototype.isEnabled = function () {
+                return this.getValue() === true;
+            };
+
+            TrailingWhitespaceRule.prototype.apply = function (syntaxTree) {
+                var sourceUnit = syntaxTree.sourceUnit();
+                var trailingWalker = new TrailingWalker(syntaxTree.fileName());
+
+                sourceUnit.accept(trailingWalker);
+
+                return trailingWalker.getFailures();
+            };
+            return TrailingWhitespaceRule;
+        })(Rules.BaseRule);
+        Rules.TrailingWhitespaceRule = TrailingWhitespaceRule;
+
+        var TrailingWalker = (function (_super) {
+            __extends(TrailingWalker, _super);
+            function TrailingWalker() {
+                _super.apply(this, arguments);
+            }
+            TrailingWalker.prototype.visitToken = function (token) {
+                _super.prototype.visitToken.call(this, token);
+                this.checkForTrailingWhitespace(token.trailingTrivia());
+            };
+
+            TrailingWalker.prototype.visitNode = function (node) {
+                _super.prototype.visitNode.call(this, node);
+                this.checkForTrailingWhitespace(node.trailingTrivia());
+            };
+
+            TrailingWalker.prototype.checkForTrailingWhitespace = function (triviaList) {
+                var failure = null;
+
+                if (triviaList.count() < 2) {
+                    return;
+                }
+
+                var lastButOne = triviaList.count() - 2;
+                var triviaKind = triviaList.syntaxTriviaAt(lastButOne).kind();
+                if (triviaList.hasNewLine() && triviaKind === TypeScript.SyntaxKind.WhitespaceTrivia) {
+                    this.createAndAddFailure();
+                }
+            };
+
+            TrailingWalker.prototype.createAndAddFailure = function () {
+                var failure = new Lint.RuleFailure(this.getFileName(), this.position() - 1, TrailingWalker.FAILURE_STRING);
+                this.addFailure(failure);
+            };
+            TrailingWalker.FAILURE_STRING = "trailing whitespace";
+            return TrailingWalker;
+        })(Lint.RuleWalker);
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
         var TripleComparisonRule = (function (_super) {
             __extends(TripleComparisonRule, _super);
             function TripleComparisonRule() {
@@ -63553,6 +63616,7 @@ var Lint;
             ALL_RULES.push(new Rules.QuoteStyleRule());
             ALL_RULES.push(new Rules.SameLineRule());
             ALL_RULES.push(new Rules.SemicolonRule());
+            ALL_RULES.push(new Rules.TrailingWhitespaceRule());
             ALL_RULES.push(new Rules.TripleComparisonRule());
             ALL_RULES.push(new Rules.WhitespaceRule());
         }

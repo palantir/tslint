@@ -1,4 +1,3 @@
-• Disallow trailing whitespace
 • Disallow bitwise operators
 • Disable eval
 • Enforce minimum tab width
