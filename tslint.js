@@ -63274,10 +63274,13 @@ var Lint;
                 this.visitToken(node.identifier);
 
                 this.visitOptionalNode(node.typeAnnotation);
-                if (node.typeAnnotation !== null) {
-                    this.checkForLeadingSpace(node.typeAnnotation.trailingTrivia());
-                } else {
-                    this.checkForLeadingSpace(node.identifier.trailingTrivia());
+
+                if (node.equalsValueClause !== null) {
+                    if (node.typeAnnotation !== null) {
+                        this.checkForLeadingSpace(node.typeAnnotation.trailingTrivia());
+                    } else {
+                        this.checkForLeadingSpace(node.identifier.trailingTrivia());
+                    }
                 }
 
                 this.visitOptionalNode(node.equalsValueClause);
