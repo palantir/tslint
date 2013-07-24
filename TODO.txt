@@ -3,4 +3,10 @@
 • Disable eval
 • Enforce minimum tab width
 • Enforce newline at EOF
-
+• Enforce filtering within for...in (forin)
+• Disallow debugger statements (debug)
+• Disallow arguments.caller and arguments.callee (noarg)
+• Disallow variables referenced outside of their scope definition (funcscope)
+• Disallow usage of [''] notation when the dot notation can be used (sub)
+• Disallow comma-first coding style (laxcomma)
+• Disallow unused variables
