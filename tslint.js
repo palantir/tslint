@@ -63170,32 +63170,32 @@ var Lint;
         var QuoteWalker = (function (_super) {
             __extends(QuoteWalker, _super);
             function QuoteWalker(fileName, quoteStyle) {
+                _super.call(this, fileName);
                 this.quoteStyle = quoteStyle;
-                return _super.call(this, fileName);
             }
             QuoteWalker.prototype.visitToken = function (token) {
-                _super.prototype.visitToken.call(this, token);
                 this.handleToken(token);
+                _super.prototype.visitToken.call(this, token);
             };
 
             QuoteWalker.prototype.handleToken = function (operatorToken) {
                 var failure = null;
-
                 var operatorKind = operatorToken.kind();
 
                 if (operatorKind === TypeScript.SyntaxKind.StringLiteral) {
                     var fullText = operatorToken.fullText();
-                    var fullTextLength = fullText.length;
-                    if (fullTextLength < 1) {
-                        return;
-                    }
+                    var textStart = operatorToken.leadingTriviaWidth();
+                    var textEnd = textStart + operatorToken.width() - 1;
+                    var firstChar = fullText.charAt(textStart);
+                    var lastChar = fullText.charAt(textEnd);
+
                     if (this.quoteStyle === QuoteStyle.SINGLE_QUOTES) {
-                        if (fullText.charAt(0) !== "'" || fullText.charAt(fullTextLength - 1) !== "'") {
-                            failure = new Lint.RuleFailure(this.getFileName(), this.position(), QuoteWalker.SINGLE_QUOTE_FAILURE);
+                        if (firstChar !== "'" || lastChar !== "'") {
+                            failure = this.createFailure(QuoteWalker.SINGLE_QUOTE_FAILURE);
                         }
                     } else if (this.quoteStyle === QuoteStyle.DOUBLE_QUOTES) {
-                        if (fullText.charAt(0) !== "\"" || fullText.charAt(fullTextLength - 1) !== "\"") {
-                            failure = new Lint.RuleFailure(this.getFileName(), this.position(), QuoteWalker.DOUBLE_QUOTE_FAILURE);
+                        if (firstChar !== "\"" || lastChar !== "\"") {
+                            failure = this.createFailure(QuoteWalker.DOUBLE_QUOTE_FAILURE);
                         }
                     }
                 }
@@ -63275,7 +63275,6 @@ var Lint;
                         var currentLine = this.getLine(this.position());
 
                         if (currentLine !== lastLine) {
-                            console.log(currentLine + " " + lastLine);
                             this.addFailure(this.createFailure(BraceWalker.BRACE_FAILURE_STRING));
                         } else if (!this.hasTrailingWhiteSpace(lastState.token)) {
                             this.addFailure(this.createFailure(BraceWalker.WHITESPACE_FAILURE_STRING));

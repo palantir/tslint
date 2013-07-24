@@ -14,13 +14,13 @@ var path = require("path");
 Lint.Rules.createAllRules();
 
 var configuration = Lint.Configuration.findConfiguration();
-if(configuration === undefined) {
+if (configuration === undefined) {
   console.error("unable to find .tslintrc configuration");
   process.exit(1);
 }
 
 var argv = process.argv;
-if(argv.length < 3) {
+if (argv.length < 3) {
   console.error("usage: " + argv[0] + " " + path.basename(argv[1]) + " <filename>");
   process.exit(2);
 }
@@ -35,14 +35,14 @@ var lineMap = syntaxTree.lineMap();
 
 var i, failures = [];
 var configuredRules = Lint.Configuration.getConfiguredRules(configuration);
-for(i = 0; i < configuredRules.length; ++i) {
+for (i = 0; i < configuredRules.length; ++i) {
   var rule = configuredRules[i];
   if (rule.isEnabled()) {
     failures = failures.concat(rule.apply(syntaxTree));
   }
 }
 
-for(i = 0; i < failures.length; ++i) {
+for (i = 0; i < failures.length; ++i) {
   var failure = failures[i];
   var lineAndCharacter = lineMap.getLineAndCharacterFromPosition(failure.getPosition());
 
@@ -54,7 +54,7 @@ for(i = 0; i < failures.length; ++i) {
   console.error(fileName + "[" + line + ", " + character + "]: " + failureString);
 }
 
-if(failures.length > 0) {
+if (failures.length > 0) {
   process.exit(3);
 }
 

@@ -21,7 +21,7 @@ module Lint.Rules {
       } else if (quoteStyleString === "double") {
         quoteStyle = QuoteStyle.DOUBLE_QUOTES;
       } else {
-		throw new Error("Unknown quote style " + quoteStyle);
+    		throw new Error("Unknown quote style " + quoteStyle);
       }
       var quoteWalker = new QuoteWalker(syntaxTree.fileName(), quoteStyle);
 
@@ -38,33 +38,33 @@ module Lint.Rules {
 	private quoteStyle : QuoteStyle;
 
     constructor (fileName: string, quoteStyle: QuoteStyle) {
+      super(fileName);
       this.quoteStyle = quoteStyle;
-	  return super(fileName);
     }
 
     public visitToken(token : TypeScript.ISyntaxToken): void {
-      super.visitToken(token);
       this.handleToken(token);
+      super.visitToken(token);
     }
 
     private handleToken(operatorToken: TypeScript.ISyntaxToken) {
       var failure = null;
-
       var operatorKind = operatorToken.kind();
 
       if (operatorKind === TypeScript.SyntaxKind.StringLiteral) {
         var fullText = operatorToken.fullText();
-        var fullTextLength = fullText.length;
-        if (fullTextLength < 1) {
-          return;
-        }
+        var textStart = operatorToken.leadingTriviaWidth();
+        var textEnd = textStart + operatorToken.width() - 1;
+        var firstChar = fullText.charAt(textStart);
+        var lastChar = fullText.charAt(textEnd);
+
         if (this.quoteStyle === QuoteStyle.SINGLE_QUOTES) {
-          if (fullText.charAt(0) !== "'" || fullText.charAt(fullTextLength - 1) !== "'") {
-	        failure = new Lint.RuleFailure(this.getFileName(), this.position(), QuoteWalker.SINGLE_QUOTE_FAILURE);
+          if (firstChar !== "'" || lastChar !== "'") {
+  	        failure = this.createFailure(QuoteWalker.SINGLE_QUOTE_FAILURE);
           }
         } else if (this.quoteStyle === QuoteStyle.DOUBLE_QUOTES) {
-          if (fullText.charAt(0) !== "\"" || fullText.charAt(fullTextLength - 1) !== "\"") {
-            failure = new Lint.RuleFailure(this.getFileName(), this.position(), QuoteWalker.DOUBLE_QUOTE_FAILURE);
+          if (firstChar !== "\"" || lastChar !== "\"") {
+            failure = this.createFailure(QuoteWalker.DOUBLE_QUOTE_FAILURE);
           }
         }
       }
