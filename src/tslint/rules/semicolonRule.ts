@@ -10,7 +10,7 @@ module Lint.Rules {
     }
 
     public isEnabled() : boolean {
-      return this.getValue() === "true";
+      return this.getValue() === true;
     }
 
     public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {

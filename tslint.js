@@ -63135,7 +63135,7 @@ var Lint;
                 _super.call(this, "semicolon");
             }
             SemicolonRule.prototype.isEnabled = function () {
-                return this.getValue() === "true";
+                return this.getValue() === true;
             };
 
             SemicolonRule.prototype.apply = function (syntaxTree) {
@@ -63173,7 +63173,7 @@ var Lint;
                 _super.call(this, "triple_eq_neq");
             }
             TripleComparisonRule.prototype.isEnabled = function () {
-                return this.getValue() === "true";
+                return this.getValue() === true;
             };
 
             TripleComparisonRule.prototype.apply = function (syntaxTree) {
@@ -63313,7 +63313,7 @@ var Lint;
                 _super.call(this, "enclosing_whitespace");
             }
             WhitespaceRule.prototype.isEnabled = function () {
-                return this.getValue() === "true";
+                return this.getValue() === true;
             };
 
             WhitespaceRule.prototype.apply = function (syntaxTree) {
