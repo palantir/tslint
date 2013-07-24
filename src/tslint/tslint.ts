@@ -37,7 +37,9 @@ var i, failures = [];
 var configuredRules = Lint.Configuration.getConfiguredRules(configuration);
 for(i = 0; i < configuredRules.length; ++i) {
   var rule = configuredRules[i];
-  failures = failures.concat(rule.apply(syntaxTree));
+  if (rule.isEnabled()) {
+    failures = failures.concat(rule.apply(syntaxTree));
+  }
 }
 
 for(i = 0; i < failures.length; ++i) {

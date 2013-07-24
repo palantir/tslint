@@ -28,6 +28,10 @@ module Lint.Rules {
     public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
       throw TypeScript.Errors.abstract();
     }
+
+    public isEnabled() : boolean {
+      return true;
+    }
   }
 
 }

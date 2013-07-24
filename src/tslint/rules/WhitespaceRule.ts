@@ -8,6 +8,10 @@ module Lint.Rules {
       super("enclosing_whitespace");
     }
 
+    public isEnabled() : boolean {
+      return this.getValue() === "true";
+    }
+
     public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
       var sourceUnit = syntaxTree.sourceUnit();
       var whitespaceWalker = new WhitespaceWalker(syntaxTree.fileName());

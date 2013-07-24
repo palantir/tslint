@@ -9,6 +9,10 @@ module Lint.Rules {
       super("semicolon");
     }
 
+    public isEnabled() : boolean {
+      return this.getValue() === "true";
+    }
+
     public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
       var ruleFailures = [];
       var diagnostics = syntaxTree.diagnostics();

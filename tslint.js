@@ -63085,6 +63085,10 @@ var Lint;
             BaseRule.prototype.apply = function (syntaxTree) {
                 throw TypeScript.Errors.abstract();
             };
+
+            BaseRule.prototype.isEnabled = function () {
+                return true;
+            };
             return BaseRule;
         })();
         Rules.BaseRule = BaseRule;
@@ -63130,6 +63134,10 @@ var Lint;
             function SemicolonRule() {
                 _super.call(this, "semicolon");
             }
+            SemicolonRule.prototype.isEnabled = function () {
+                return this.getValue() === "true";
+            };
+
             SemicolonRule.prototype.apply = function (syntaxTree) {
                 var ruleFailures = [];
                 var diagnostics = syntaxTree.diagnostics();
@@ -63164,6 +63172,10 @@ var Lint;
             function TripleComparisonRule() {
                 _super.call(this, "triple_eq_neq");
             }
+            TripleComparisonRule.prototype.isEnabled = function () {
+                return this.getValue() === "true";
+            };
+
             TripleComparisonRule.prototype.apply = function (syntaxTree) {
                 var sourceUnit = syntaxTree.sourceUnit();
                 var comparisonWalker = new ComparisonWalker(syntaxTree.fileName());
@@ -63300,6 +63312,10 @@ var Lint;
             function WhitespaceRule() {
                 _super.call(this, "enclosing_whitespace");
             }
+            WhitespaceRule.prototype.isEnabled = function () {
+                return this.getValue() === "true";
+            };
+
             WhitespaceRule.prototype.apply = function (syntaxTree) {
                 var sourceUnit = syntaxTree.sourceUnit();
                 var whitespaceWalker = new WhitespaceWalker(syntaxTree.fileName());
@@ -63613,7 +63629,9 @@ var i, failures = [];
 var configuredRules = Lint.Configuration.getConfiguredRules(configuration);
 for (i = 0; i < configuredRules.length; ++i) {
     var rule = configuredRules[i];
-    failures = failures.concat(rule.apply(syntaxTree));
+    if (rule.isEnabled()) {
+        failures = failures.concat(rule.apply(syntaxTree));
+    }
 }
 
 for (i = 0; i < failures.length; ++i) {

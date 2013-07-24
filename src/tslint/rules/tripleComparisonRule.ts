@@ -8,6 +8,10 @@ module Lint.Rules {
       super("triple_eq_neq");
     }
 
+    public isEnabled() : boolean {
+      return this.getValue() === "true";
+    }
+
     public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
       var sourceUnit = syntaxTree.sourceUnit();
       var comparisonWalker = new ComparisonWalker(syntaxTree.fileName());
