@@ -1,4 +1,3 @@
-• Disallow bitwise operators
 • Disable eval
 • Enforce minimum tab width
 • Enforce newline at EOF

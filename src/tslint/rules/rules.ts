@@ -1,5 +1,6 @@
 /// <reference path='rule.ts'/>
 
+/// <reference path='bitwiseOperatorRule.ts'/>
 /// <reference path='maxLineLengthRule.ts'/>
 /// <reference path='quoteStyleRule.ts'/>
 /// <reference path='sameLineRule.ts'/>
@@ -13,6 +14,7 @@ module Lint.Rules {
   var ALL_RULES: Rule[] = [];
 
   export function createAllRules() {
+    ALL_RULES.push(new BitwiseOperatorRule());
     ALL_RULES.push(new MaxLineLengthRule());
     ALL_RULES.push(new QuoteStyleRule());
     ALL_RULES.push(new SameLineRule());

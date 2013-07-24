@@ -63102,6 +63102,48 @@ var Lint;
 var Lint;
 (function (Lint) {
     (function (Rules) {
+        var BitwiseOperatorRule = (function (_super) {
+            __extends(BitwiseOperatorRule, _super);
+            function BitwiseOperatorRule() {
+                _super.call(this, "bitwise");
+            }
+            BitwiseOperatorRule.prototype.isEnabled = function () {
+                return this.getValue() === true;
+            };
+
+            BitwiseOperatorRule.prototype.apply = function (syntaxTree) {
+                var sourceUnit = syntaxTree.sourceUnit();
+                var bitwiseWalker = new BitwiseWalker(syntaxTree.fileName());
+
+                sourceUnit.accept(bitwiseWalker);
+
+                return bitwiseWalker.getFailures();
+            };
+            return BitwiseOperatorRule;
+        })(Rules.BaseRule);
+        Rules.BitwiseOperatorRule = BitwiseOperatorRule;
+
+        var BitwiseWalker = (function (_super) {
+            __extends(BitwiseWalker, _super);
+            function BitwiseWalker() {
+                _super.apply(this, arguments);
+            }
+            BitwiseWalker.prototype.visitNode = function (node) {
+                if (node.kind() === TypeScript.SyntaxKind.BitwiseAndExpression || node.kind() === TypeScript.SyntaxKind.AndAssignmentExpression || node.kind() === TypeScript.SyntaxKind.BitwiseOrExpression || node.kind() === TypeScript.SyntaxKind.OrAssignmentExpression || node.kind() === TypeScript.SyntaxKind.BitwiseExclusiveOrExpression || node.kind() === TypeScript.SyntaxKind.ExclusiveOrAssignmentExpression || node.kind() === TypeScript.SyntaxKind.LeftShiftExpression || node.kind() === TypeScript.SyntaxKind.LeftShiftAssignmentExpression || node.kind() === TypeScript.SyntaxKind.SignedRightShiftExpression || node.kind() === TypeScript.SyntaxKind.SignedRightShiftAssignmentExpression || node.kind() === TypeScript.SyntaxKind.UnsignedRightShiftExpression || node.kind() === TypeScript.SyntaxKind.UnsignedRightShiftAssignmentExpression || node.kind() === TypeScript.SyntaxKind.BitwiseNotExpression) {
+                    this.addFailure(new Lint.RuleFailure(this.getFileName(), this.position() + node.leadingTriviaWidth(), BitwiseWalker.FAILURE_STRING));
+                }
+
+                _super.prototype.visitNode.call(this, node);
+            };
+            BitwiseWalker.FAILURE_STRING = "forbidden bitwise operation";
+            return BitwiseWalker;
+        })(Lint.RuleWalker);
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
         var MaxLineLengthRule = (function (_super) {
             __extends(MaxLineLengthRule, _super);
             function MaxLineLengthRule() {
@@ -63403,8 +63445,6 @@ var Lint;
             };
 
             TrailingWalker.prototype.checkForTrailingWhitespace = function (triviaList) {
-                var failure = null;
-
                 if (triviaList.count() < 2) {
                     return;
                 }
@@ -63612,6 +63652,7 @@ var Lint;
         var ALL_RULES = [];
 
         function createAllRules() {
+            ALL_RULES.push(new Rules.BitwiseOperatorRule());
             ALL_RULES.push(new Rules.MaxLineLengthRule());
             ALL_RULES.push(new Rules.QuoteStyleRule());
             ALL_RULES.push(new Rules.SameLineRule());
