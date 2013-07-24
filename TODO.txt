@@ -1,4 +1,3 @@
-• whitespace after if/for/while
 • Disallow trailing whitespace
 • Disallow bitwise operators
 • Disable eval

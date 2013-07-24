@@ -63132,87 +63132,6 @@ var Lint;
 })(Lint || (Lint = {}));
 var Lint;
 (function (Lint) {
-    var LastTokenAwareRuleWalker = (function (_super) {
-        __extends(LastTokenAwareRuleWalker, _super);
-        function LastTokenAwareRuleWalker() {
-            _super.apply(this, arguments);
-        }
-        LastTokenAwareRuleWalker.prototype.visitToken = function (token) {
-            this.lastState = {
-                position: this.position(),
-                token: token
-            };
-
-            _super.prototype.visitToken.call(this, token);
-        };
-
-        LastTokenAwareRuleWalker.prototype.getLastState = function () {
-            return this.lastState;
-        };
-        return LastTokenAwareRuleWalker;
-    })(Lint.RuleWalker);
-    Lint.LastTokenAwareRuleWalker = LastTokenAwareRuleWalker;
-})(Lint || (Lint = {}));
-var Lint;
-(function (Lint) {
-    (function (Rules) {
-        var OpenBraceRule = (function (_super) {
-            __extends(OpenBraceRule, _super);
-            function OpenBraceRule() {
-                _super.call(this, "opening_brace_on_same_line");
-            }
-            OpenBraceRule.prototype.isEnabled = function () {
-                return this.getValue() === true;
-            };
-
-            OpenBraceRule.prototype.apply = function (syntaxTree) {
-                var sourceUnit = syntaxTree.sourceUnit();
-                var braceWalker = new BraceWalker(syntaxTree.lineMap(), syntaxTree.fileName());
-
-                sourceUnit.accept(braceWalker);
-
-                return braceWalker.getFailures();
-            };
-            return OpenBraceRule;
-        })(Rules.BaseRule);
-        Rules.OpenBraceRule = OpenBraceRule;
-
-        var BraceWalker = (function (_super) {
-            __extends(BraceWalker, _super);
-            function BraceWalker(lineMap, fileName) {
-                _super.call(this, fileName);
-                this.lineMap = lineMap;
-            }
-            BraceWalker.prototype.visitToken = function (token) {
-                var kind = token.kind();
-                var lastState = this.getLastState();
-
-                if (kind === TypeScript.SyntaxKind.OpenBraceToken && lastState !== null) {
-                    var lastKind = lastState.token.kind();
-                    if (lastKind !== TypeScript.SyntaxKind.SemicolonToken) {
-                        var lastLine = this.getLine(lastState.position);
-                        var currentLine = this.getLine(this.position());
-
-                        if (currentLine !== lastLine) {
-                            this.addFailure(this.createFailure(BraceWalker.FAILURE_STRING));
-                        }
-                    }
-                }
-
-                _super.prototype.visitToken.call(this, token);
-            };
-
-            BraceWalker.prototype.getLine = function (position) {
-                return this.lineMap.getLineAndCharacterFromPosition(position).line();
-            };
-            BraceWalker.FAILURE_STRING = "misplaced opening brace";
-            return BraceWalker;
-        })(Lint.LastTokenAwareRuleWalker);
-    })(Lint.Rules || (Lint.Rules = {}));
-    var Rules = Lint.Rules;
-})(Lint || (Lint = {}));
-var Lint;
-(function (Lint) {
     (function (Rules) {
         var QuoteStyle;
         (function (QuoteStyle) {
@@ -63289,6 +63208,120 @@ var Lint;
             QuoteWalker.SINGLE_QUOTE_FAILURE = "\" should be '";
             return QuoteWalker;
         })(Lint.RuleWalker);
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    var LastTokenAwareRuleWalker = (function (_super) {
+        __extends(LastTokenAwareRuleWalker, _super);
+        function LastTokenAwareRuleWalker() {
+            _super.apply(this, arguments);
+        }
+        LastTokenAwareRuleWalker.prototype.visitToken = function (token) {
+            this.lastState = {
+                position: this.position(),
+                token: token
+            };
+
+            _super.prototype.visitToken.call(this, token);
+        };
+
+        LastTokenAwareRuleWalker.prototype.getLastState = function () {
+            return this.lastState;
+        };
+        return LastTokenAwareRuleWalker;
+    })(Lint.RuleWalker);
+    Lint.LastTokenAwareRuleWalker = LastTokenAwareRuleWalker;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
+        var SameLineRule = (function (_super) {
+            __extends(SameLineRule, _super);
+            function SameLineRule() {
+                _super.call(this, "same_line_brace");
+            }
+            SameLineRule.prototype.isEnabled = function () {
+                return this.getValue() === true;
+            };
+
+            SameLineRule.prototype.apply = function (syntaxTree) {
+                var sourceUnit = syntaxTree.sourceUnit();
+                var braceWalker = new BraceWalker(syntaxTree.lineMap(), syntaxTree.fileName());
+
+                sourceUnit.accept(braceWalker);
+
+                return braceWalker.getFailures();
+            };
+            return SameLineRule;
+        })(Rules.BaseRule);
+        Rules.SameLineRule = SameLineRule;
+
+        var BraceWalker = (function (_super) {
+            __extends(BraceWalker, _super);
+            function BraceWalker(lineMap, fileName) {
+                _super.call(this, fileName);
+                this.lineMap = lineMap;
+            }
+            BraceWalker.prototype.visitToken = function (token) {
+                var kind = token.kind();
+                var lastState = this.getLastState();
+
+                if (kind === TypeScript.SyntaxKind.OpenBraceToken && lastState !== undefined) {
+                    var lastKind = lastState.token.kind();
+                    if (lastKind === TypeScript.SyntaxKind.CloseParenToken || lastKind === TypeScript.SyntaxKind.IdentifierName || lastKind === TypeScript.SyntaxKind.StringLiteral) {
+                        var lastLine = this.getLine(lastState.position);
+                        var currentLine = this.getLine(this.position());
+
+                        if (currentLine !== lastLine) {
+                            this.addFailure(this.createFailure(BraceWalker.BRACE_FAILURE_STRING));
+                        } else if (!this.hasTrailingWhiteSpace(lastState.token)) {
+                            this.addFailure(this.createFailure(BraceWalker.WHITESPACE_FAILURE_STRING));
+                        }
+                    }
+                }
+
+                _super.prototype.visitToken.call(this, token);
+            };
+
+            BraceWalker.prototype.visitElseClause = function (node) {
+                var lastState = this.getLastState();
+                if (lastState !== undefined && !this.hasTrailingWhiteSpace(lastState.token)) {
+                    this.addFailure(this.createFailure(BraceWalker.ELSE_FAILURE_STRING));
+                }
+
+                _super.prototype.visitElseClause.call(this, node);
+            };
+
+            BraceWalker.prototype.visitCatchClause = function (node) {
+                var lastState = this.getLastState();
+                if (lastState !== undefined && !this.hasTrailingWhiteSpace(lastState.token)) {
+                    this.addFailure(this.createFailure(BraceWalker.CATCH_FAILURE_STRING));
+                }
+
+                _super.prototype.visitCatchClause.call(this, node);
+            };
+
+            BraceWalker.prototype.getLine = function (position) {
+                return this.lineMap.getLineAndCharacterFromPosition(position).line();
+            };
+
+            BraceWalker.prototype.hasTrailingWhiteSpace = function (token) {
+                var trivia = token.trailingTrivia();
+                if (trivia.count() < 1) {
+                    return false;
+                }
+
+                var kind = trivia.syntaxTriviaAt(0).kind();
+                return (kind === TypeScript.SyntaxKind.WhitespaceTrivia);
+            };
+            BraceWalker.BRACE_FAILURE_STRING = "misplaced opening brace";
+            BraceWalker.CATCH_FAILURE_STRING = "misplaced 'catch'";
+            BraceWalker.ELSE_FAILURE_STRING = "misplaced 'else'";
+            BraceWalker.WHITESPACE_FAILURE_STRING = "missing whitespace";
+            return BraceWalker;
+        })(Lint.LastTokenAwareRuleWalker);
     })(Lint.Rules || (Lint.Rules = {}));
     var Rules = Lint.Rules;
 })(Lint || (Lint = {}));
@@ -63517,8 +63550,8 @@ var Lint;
 
         function createAllRules() {
             ALL_RULES.push(new Rules.MaxLineLengthRule());
-            ALL_RULES.push(new Rules.OpenBraceRule());
             ALL_RULES.push(new Rules.QuoteStyleRule());
+            ALL_RULES.push(new Rules.SameLineRule());
             ALL_RULES.push(new Rules.SemicolonRule());
             ALL_RULES.push(new Rules.TripleComparisonRule());
             ALL_RULES.push(new Rules.WhitespaceRule());
