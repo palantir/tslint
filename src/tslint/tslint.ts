@@ -57,23 +57,3 @@ for (i = 0; i < failures.length; ++i) {
 if (failures.length > 0) {
   process.exit(3);
 }
-
-/*
-//return 0;
-
-var results = [];
-var classifier = new Services.Classifier(new TypeScript.NullLogger());
-var lines = contents.split("\n");
-var lastLexState = Services.EndOfLineState.Start;
-
-for (var i = 0; i < lines.length; i++) {
-  var line = lines[i];
-  var classificationResult = classifier.getClassificationsForLine(line, lastLexState);
-  lastLexState = classificationResult.finalLexState;
-  results.push(classificationResult);
-}
-
-var diagnostics = syntaxTree.diagnostics();
-
-console.log(JSON.stringify(syntaxTree));
-*/
