@@ -16,10 +16,10 @@ module Lint.Rules {
       var lineStarts = syntaxTree.lineMap().lineStarts();
       var errorString = MaxLineLengthRule.FAILURE_STRING + lineLimit;
 
-      for(var i = 0; i < lineStarts.length - 1; ++i) {
+      for (var i = 0; i < lineStarts.length - 1; ++i) {
         var from = lineStarts[i], to = lineStarts[i + 1];
-        if((to - from - 1) > lineLimit) {
-          var ruleFailure = new Lint.RuleFailure(syntaxTree.fileName(), from, errorString);
+        if ((to - from - 1) > lineLimit) {
+          var ruleFailure = new Lint.RuleFailure(syntaxTree.fileName(), to - 1, errorString);
           ruleFailures.push(ruleFailure);
         }
       }
