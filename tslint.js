@@ -63220,7 +63220,7 @@ var Lint;
         }
         LastTokenAwareRuleWalker.prototype.visitToken = function (token) {
             this.lastState = {
-                position: this.position(),
+                position: this.position() + token.leadingTriviaWidth(),
                 token: token
             };
 
@@ -63270,11 +63270,12 @@ var Lint;
 
                 if (kind === TypeScript.SyntaxKind.OpenBraceToken && lastState !== undefined) {
                     var lastKind = lastState.token.kind();
-                    if (lastKind === TypeScript.SyntaxKind.CloseParenToken || lastKind === TypeScript.SyntaxKind.IdentifierName || lastKind === TypeScript.SyntaxKind.StringLiteral) {
+                    if (lastKind === TypeScript.SyntaxKind.CloseParenToken || lastKind === TypeScript.SyntaxKind.DoKeyword || lastKind === TypeScript.SyntaxKind.IdentifierName || lastKind === TypeScript.SyntaxKind.StringLiteral || lastKind === TypeScript.SyntaxKind.TryKeyword) {
                         var lastLine = this.getLine(lastState.position);
                         var currentLine = this.getLine(this.position());
 
                         if (currentLine !== lastLine) {
+                            console.log(currentLine + " " + lastLine);
                             this.addFailure(this.createFailure(BraceWalker.BRACE_FAILURE_STRING));
                         } else if (!this.hasTrailingWhiteSpace(lastState.token)) {
                             this.addFailure(this.createFailure(BraceWalker.WHITESPACE_FAILURE_STRING));

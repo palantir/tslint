@@ -12,7 +12,7 @@ module Lint {
 
     public visitToken(token: TypeScript.ISyntaxToken): void {
       this.lastState = {
-        position: this.position(),
+        position: this.position() + token.leadingTriviaWidth(),
         token: token
       };
 

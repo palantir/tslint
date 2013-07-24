@@ -42,8 +42,10 @@ module Lint.Rules {
       if (kind === TypeScript.SyntaxKind.OpenBraceToken && lastState !== undefined) {
         var lastKind = lastState.token.kind();
         if (lastKind === TypeScript.SyntaxKind.CloseParenToken ||
+            lastKind === TypeScript.SyntaxKind.DoKeyword ||
             lastKind === TypeScript.SyntaxKind.IdentifierName ||
-            lastKind === TypeScript.SyntaxKind.StringLiteral) {
+            lastKind === TypeScript.SyntaxKind.StringLiteral ||
+            lastKind === TypeScript.SyntaxKind.TryKeyword) {
 
           var lastLine = this.getLine(lastState.position);
           var currentLine = this.getLine(this.position());
