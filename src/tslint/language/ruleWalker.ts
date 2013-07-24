@@ -22,11 +22,21 @@ module Lint {
     }
 
     public addFailure(failure: RuleFailure) {
-      this.failures.push(failure);
+      if(!this.existsFailure(failure)) {
+        this.failures.push(failure);
+      }
     }
 
     public getFailures(): RuleFailure[] {
       return this.failures;
+    }
+
+    private existsFailure(failure: RuleFailure) {
+      var filteredFailures = this.failures.filter(function(f) {
+        return f.equals(failure);
+      });
+
+      return (filteredFailures.length > 0);
     }
   }
 

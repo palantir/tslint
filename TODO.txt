@@ -1,6 +1,5 @@
 • Enforce string quoting
-• Whitespace after if/for/while and within any conditional
-• Whitespace and brace right after if/for/while on the same line
+• Opening brace right after if/for/while on the same line
 • Disallow trailing whitespace
 • Disallow bitwise operators
 • Disable eval
