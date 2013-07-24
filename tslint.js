@@ -63020,6 +63020,10 @@ var Lint;
         RuleFailure.prototype.getFailure = function () {
             return this.failure;
         };
+
+        RuleFailure.prototype.equals = function (ruleFailure) {
+            return this.fileName === ruleFailure.getFileName() && this.position === ruleFailure.getPosition() && this.failure === ruleFailure.getFailure();
+        };
         return RuleFailure;
     })();
     Lint.RuleFailure = RuleFailure;
@@ -63039,11 +63043,21 @@ var Lint;
         };
 
         RuleWalker.prototype.addFailure = function (failure) {
-            this.failures.push(failure);
+            if (!this.existsFailure(failure)) {
+                this.failures.push(failure);
+            }
         };
 
         RuleWalker.prototype.getFailures = function () {
             return this.failures;
+        };
+
+        RuleWalker.prototype.existsFailure = function (failure) {
+            var filteredFailures = this.failures.filter(function (f) {
+                return f.equals(failure);
+            });
+
+            return (filteredFailures.length > 0);
         };
         return RuleWalker;
     })(TypeScript.PositionTrackingWalker);
@@ -63281,6 +63295,127 @@ var Lint;
 var Lint;
 (function (Lint) {
     (function (Rules) {
+        var WhitespaceRule = (function (_super) {
+            __extends(WhitespaceRule, _super);
+            function WhitespaceRule() {
+                _super.call(this, "enclosing_whitespace");
+            }
+            WhitespaceRule.prototype.apply = function (syntaxTree) {
+                var sourceUnit = syntaxTree.sourceUnit();
+                var whitespaceWalker = new WhitespaceWalker(syntaxTree.fileName());
+
+                sourceUnit.accept(whitespaceWalker);
+
+                return whitespaceWalker.getFailures();
+            };
+            return WhitespaceRule;
+        })(Rules.BaseRule);
+        Rules.WhitespaceRule = WhitespaceRule;
+
+        var WhitespaceWalker = (function (_super) {
+            __extends(WhitespaceWalker, _super);
+            function WhitespaceWalker() {
+                _super.apply(this, arguments);
+            }
+            WhitespaceWalker.prototype.visitToken = function (token) {
+                _super.prototype.visitToken.call(this, token);
+
+                var kind = token.kind();
+                if (kind === TypeScript.SyntaxKind.CatchKeyword || kind === TypeScript.SyntaxKind.ColonToken || kind === TypeScript.SyntaxKind.CommaToken || kind === TypeScript.SyntaxKind.EqualsToken || kind === TypeScript.SyntaxKind.ForKeyword || kind === TypeScript.SyntaxKind.IfKeyword || kind === TypeScript.SyntaxKind.SemicolonToken || kind === TypeScript.SyntaxKind.SwitchKeyword || kind === TypeScript.SyntaxKind.WhileKeyword || kind === TypeScript.SyntaxKind.WithKeyword) {
+                    this.checkForLeadingSpace(token.trailingTrivia());
+                }
+            };
+
+            WhitespaceWalker.prototype.visitBinaryExpression = function (node) {
+                this.visitNodeOrToken(node.left);
+                this.checkForLeadingSpace(node.left.trailingTrivia());
+
+                this.visitToken(node.operatorToken);
+                this.checkForLeadingSpace(node.operatorToken.trailingTrivia());
+
+                this.visitNodeOrToken(node.right);
+            };
+
+            WhitespaceWalker.prototype.visitConditionalExpression = function (node) {
+                this.visitNodeOrToken(node.condition);
+                this.checkForLeadingSpace(node.condition.trailingTrivia());
+
+                this.visitToken(node.questionToken);
+                this.checkForLeadingSpace(node.questionToken.trailingTrivia());
+
+                this.visitNodeOrToken(node.whenTrue);
+                this.checkForLeadingSpace(node.whenTrue.trailingTrivia());
+
+                this.visitToken(node.colonToken);
+
+                this.visitNodeOrToken(node.whenFalse);
+            };
+
+            WhitespaceWalker.prototype.visitVariableDeclarator = function (node) {
+                this.visitToken(node.identifier);
+
+                this.visitOptionalNode(node.typeAnnotation);
+
+                if (node.equalsValueClause !== null) {
+                    if (node.typeAnnotation !== null) {
+                        this.checkForLeadingSpace(node.typeAnnotation.trailingTrivia());
+                    } else {
+                        this.checkForLeadingSpace(node.identifier.trailingTrivia());
+                    }
+                }
+
+                this.visitOptionalNode(node.equalsValueClause);
+            };
+
+            WhitespaceWalker.prototype.visitImportDeclaration = function (node) {
+                this.visitToken(node.importKeyword);
+
+                this.visitToken(node.identifier);
+                this.checkForLeadingSpace(node.identifier.trailingTrivia());
+
+                this.visitToken(node.equalsToken);
+                this.visitNode(node.moduleReference);
+                this.visitToken(node.semicolonToken);
+            };
+
+            WhitespaceWalker.prototype.visitExportAssignment = function (node) {
+                this.visitToken(node.exportKeyword);
+                this.checkForLeadingSpace(node.exportKeyword.trailingTrivia());
+
+                this.visitToken(node.equalsToken);
+                this.visitToken(node.identifier);
+                this.visitToken(node.semicolonToken);
+            };
+
+            WhitespaceWalker.prototype.checkForLeadingSpace = function (trivia) {
+                var failure = null;
+
+                if (trivia.count() < 1) {
+                    failure = this.createFailure();
+                } else {
+                    var kind = trivia.syntaxTriviaAt(0).kind();
+                    if (kind !== TypeScript.SyntaxKind.WhitespaceTrivia && kind !== TypeScript.SyntaxKind.NewLineTrivia) {
+                        failure = this.createFailure();
+                    }
+                }
+
+                if (failure) {
+                    this.addFailure(failure);
+                }
+            };
+
+            WhitespaceWalker.prototype.createFailure = function () {
+                return new Lint.RuleFailure(this.getFileName(), this.position(), WhitespaceWalker.FAILURE_STRING);
+            };
+            WhitespaceWalker.FAILURE_STRING = "missing whitespace";
+            return WhitespaceWalker;
+        })(Lint.RuleWalker);
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
         var ALL_RULES = [];
 
         function createAllRules() {
@@ -63288,6 +63423,7 @@ var Lint;
             ALL_RULES.push(new Rules.SemicolonRule());
             ALL_RULES.push(new Rules.TripleComparisonRule());
             ALL_RULES.push(new Rules.QuoteStyleRule());
+            ALL_RULES.push(new Rules.WhitespaceRule());
         }
         Rules.createAllRules = createAllRules;
 

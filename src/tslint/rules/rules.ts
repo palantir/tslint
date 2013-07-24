@@ -3,6 +3,7 @@
 /// <reference path='semicolonRule.ts'/>
 /// <reference path='tripleComparisonRule.ts'/>
 /// <reference path='quoteStyleRule.ts'/>
+/// <reference path='whitespaceRule.ts'/>
 
 module Lint.Rules {
 
@@ -13,6 +14,7 @@ module Lint.Rules {
     ALL_RULES.push(new SemicolonRule());
     ALL_RULES.push(new TripleComparisonRule());
     ALL_RULES.push(new QuoteStyleRule());
+    ALL_RULES.push(new WhitespaceRule());
   }
 
   export function getRuleForName(name: string): Rule {

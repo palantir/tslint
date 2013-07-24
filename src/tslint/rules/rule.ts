@@ -35,6 +35,12 @@ module Lint {
     public getFailure() {
       return this.failure;
     }
+
+    public equals(ruleFailure: RuleFailure): boolean {
+      return this.fileName === ruleFailure.getFileName() &&
+             this.position === ruleFailure.getPosition() &&
+             this.failure  === ruleFailure.getFailure();
+    }
   }
 
 }
