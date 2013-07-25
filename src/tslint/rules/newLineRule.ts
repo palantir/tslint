@@ -4,7 +4,7 @@
 
 module Lint.Rules {
 
-    export class FileMustEndWithNewLineRule extends BaseRule {
+    export class NewLineRule extends BaseRule {
         static FAILURE_STRING = "the file doesn't end with a newline";
 
         constructor() {

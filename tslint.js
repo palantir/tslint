@@ -63331,22 +63331,22 @@ var Lint;
 var Lint;
 (function (Lint) {
     (function (Rules) {
-        var FileMustEndWithNewLineRule = (function (_super) {
-            __extends(FileMustEndWithNewLineRule, _super);
-            function FileMustEndWithNewLineRule() {
+        var NewLineRule = (function (_super) {
+            __extends(NewLineRule, _super);
+            function NewLineRule() {
                 _super.call(this, "file_must_end_with_newline");
             }
-            FileMustEndWithNewLineRule.prototype.isEnabled = function () {
+            NewLineRule.prototype.isEnabled = function () {
                 return this.getValue() === true;
             };
 
-            FileMustEndWithNewLineRule.prototype.apply = function (syntaxTree) {
+            NewLineRule.prototype.apply = function (syntaxTree) {
                 return this.applyWithWalker(new EOFWalker(syntaxTree));
             };
-            FileMustEndWithNewLineRule.FAILURE_STRING = "the file doesn't end with a newline";
-            return FileMustEndWithNewLineRule;
+            NewLineRule.FAILURE_STRING = "the file doesn't end with a newline";
+            return NewLineRule;
         })(Rules.BaseRule);
-        Rules.FileMustEndWithNewLineRule = FileMustEndWithNewLineRule;
+        Rules.NewLineRule = NewLineRule;
 
         var EOFWalker = (function (_super) {
             __extends(EOFWalker, _super);
@@ -64048,7 +64048,7 @@ var Lint;
             ALL_RULES.push(new Rules.ClassNameRule());
             ALL_RULES.push(new Rules.DebugRule());
             ALL_RULES.push(new Rules.EvalRule());
-            ALL_RULES.push(new Rules.FileMustEndWithNewLineRule());
+            ALL_RULES.push(new Rules.NewLineRule());
             ALL_RULES.push(new Rules.ForInRule());
             ALL_RULES.push(new Rules.MaxLineLengthRule());
             ALL_RULES.push(new Rules.QuoteStyleRule());
