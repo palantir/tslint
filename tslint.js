@@ -63119,6 +63119,55 @@ var Lint;
 var Lint;
 (function (Lint) {
     (function (Rules) {
+        var ArgumentsRule = (function (_super) {
+            __extends(ArgumentsRule, _super);
+            function ArgumentsRule() {
+                _super.call(this, "arguments");
+            }
+            ArgumentsRule.prototype.isEnabled = function () {
+                return this.getValue() === true;
+            };
+
+            ArgumentsRule.prototype.apply = function (syntaxTree) {
+                var sourceUnit = syntaxTree.sourceUnit();
+                var argumentsWalker = new ArgumentsWalker(syntaxTree.fileName());
+
+                sourceUnit.accept(argumentsWalker);
+
+                return argumentsWalker.getFailures();
+            };
+            return ArgumentsRule;
+        })(Rules.BaseRule);
+        Rules.ArgumentsRule = ArgumentsRule;
+
+        var ArgumentsWalker = (function (_super) {
+            __extends(ArgumentsWalker, _super);
+            function ArgumentsWalker() {
+                _super.apply(this, arguments);
+            }
+            ArgumentsWalker.prototype.visitMemberAccessExpression = function (node) {
+                var expression = node.expression;
+                var name = node.name;
+                var position = this.position() + node.expression.leadingTriviaWidth();
+
+                if (expression.isToken() && name.text() === "callee") {
+                    var tokenExpression = expression;
+                    if (tokenExpression.text() === "arguments") {
+                        this.addFailure(new Lint.RuleFailure(this.getFileName(), position, ArgumentsWalker.FAILURE_STRING));
+                    }
+                }
+
+                _super.prototype.visitMemberAccessExpression.call(this, node);
+            };
+            ArgumentsWalker.FAILURE_STRING = "access forbidden to arguments property";
+            return ArgumentsWalker;
+        })(Lint.RuleWalker);
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
         var BitwiseOperatorRule = (function (_super) {
             __extends(BitwiseOperatorRule, _super);
             function BitwiseOperatorRule() {
@@ -63929,6 +63978,7 @@ var Lint;
         var ALL_RULES = [];
 
         function createAllRules() {
+            ALL_RULES.push(new Rules.ArgumentsRule());
             ALL_RULES.push(new Rules.BitwiseOperatorRule());
             ALL_RULES.push(new Rules.ClassNameRule());
             ALL_RULES.push(new Rules.DebugRule());

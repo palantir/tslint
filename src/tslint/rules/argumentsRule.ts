@@ -1,0 +1,44 @@
+/// <reference path='rule.ts'/>
+/// <reference path='baseRule.ts'/>
+
+module Lint.Rules {
+
+  export class ArgumentsRule extends BaseRule {
+    constructor() {
+      super("arguments");
+    }
+
+    public isEnabled() : boolean {
+      return this.getValue() === true;
+    }
+
+    public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
+      var sourceUnit = syntaxTree.sourceUnit();
+      var argumentsWalker = new ArgumentsWalker(syntaxTree.fileName());
+
+      sourceUnit.accept(argumentsWalker);
+
+      return argumentsWalker.getFailures();
+    }
+  }
+
+  class ArgumentsWalker extends Lint.RuleWalker {
+    static FAILURE_STRING = "access forbidden to arguments property";
+
+    public visitMemberAccessExpression(node: TypeScript.MemberAccessExpressionSyntax): void {
+      var expression = node.expression;
+      var name = node.name;
+      var position = this.position() + node.expression.leadingTriviaWidth();
+
+      if(expression.isToken() && name.text() === "callee") {
+        var tokenExpression = <TypeScript.ISyntaxToken> expression;
+        if(tokenExpression.text() === "arguments") {
+          this.addFailure(new Lint.RuleFailure(this.getFileName(), position, ArgumentsWalker.FAILURE_STRING));
+        }
+      }
+
+      super.visitMemberAccessExpression(node);
+    }
+  }
+
+}

@@ -1,4 +1,5 @@
 /// <reference path='rule.ts'/>
+/// <reference path='argumentsRule.ts'/>
 /// <reference path='bitwiseOperatorRule.ts'/>
 /// <reference path='classNameRule.ts'/>
 /// <reference path='debugRule.ts'/>
@@ -18,6 +19,7 @@ module Lint.Rules {
   var ALL_RULES: Rule[] = [];
 
   export function createAllRules() {
+    ALL_RULES.push(new ArgumentsRule());
     ALL_RULES.push(new BitwiseOperatorRule());
     ALL_RULES.push(new ClassNameRule());
     ALL_RULES.push(new DebugRule());
