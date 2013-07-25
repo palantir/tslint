@@ -63236,6 +63236,52 @@ var Lint;
 var Lint;
 (function (Lint) {
     (function (Rules) {
+        var EvalRule = (function (_super) {
+            __extends(EvalRule, _super);
+            function EvalRule() {
+                _super.call(this, "eval");
+            }
+            EvalRule.prototype.isEnabled = function () {
+                return this.getValue() === true;
+            };
+
+            EvalRule.prototype.apply = function (syntaxTree) {
+                var sourceUnit = syntaxTree.sourceUnit();
+                var evalWalker = new EvalWalker(syntaxTree.fileName());
+
+                sourceUnit.accept(evalWalker);
+
+                return evalWalker.getFailures();
+            };
+            return EvalRule;
+        })(Rules.BaseRule);
+        Rules.EvalRule = EvalRule;
+
+        var EvalWalker = (function (_super) {
+            __extends(EvalWalker, _super);
+            function EvalWalker() {
+                _super.apply(this, arguments);
+            }
+            EvalWalker.prototype.visitInvocationExpression = function (node) {
+                var expression = node.expression;
+                if (expression.isToken() && expression.kind() === TypeScript.SyntaxKind.IdentifierName) {
+                    if (expression.firstToken().text() === "eval") {
+                        var position = this.position() + node.leadingTriviaWidth();
+                        this.addFailure(new Lint.RuleFailure(this.getFileName(), position, EvalWalker.FAILURE_STRING));
+                    }
+                }
+
+                _super.prototype.visitInvocationExpression.call(this, node);
+            };
+            EvalWalker.FAILURE_STRING = "forbidden eval";
+            return EvalWalker;
+        })(Lint.RuleWalker);
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
         var MaxLineLengthRule = (function (_super) {
             __extends(MaxLineLengthRule, _super);
             function MaxLineLengthRule() {
@@ -63722,8 +63768,8 @@ var Lint;
 
         function createAllRules() {
             ALL_RULES.push(new Rules.BitwiseOperatorRule());
+            ALL_RULES.push(new Rules.EvalRule());
             ALL_RULES.push(new Rules.FileMustEndWithNewLineRule());
-            ALL_RULES.push(new Rules.MaxLineLengthRule());
             ALL_RULES.push(new Rules.MaxLineLengthRule());
             ALL_RULES.push(new Rules.QuoteStyleRule());
             ALL_RULES.push(new Rules.SameLineRule());
