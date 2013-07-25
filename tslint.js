@@ -63268,11 +63268,11 @@ var Lint;
 
             DebugRule.prototype.apply = function (syntaxTree) {
                 var sourceUnit = syntaxTree.sourceUnit();
-                var comparisonWalker = new DebugWalker(syntaxTree.fileName());
+                var debugWalker = new DebugWalker(syntaxTree.fileName());
 
-                sourceUnit.accept(comparisonWalker);
+                sourceUnit.accept(debugWalker);
 
-                return comparisonWalker.getFailures();
+                return debugWalker.getFailures();
             };
             return DebugRule;
         })(Rules.BaseRule);
@@ -63395,6 +63395,78 @@ var Lint;
             EOFWalker.EOF_Failure = "File should end with newline";
             return EOFWalker;
         })(Lint.LastTokenAwareRuleWalker);
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
+        var ForInRule = (function (_super) {
+            __extends(ForInRule, _super);
+            function ForInRule() {
+                _super.call(this, "forin");
+            }
+            ForInRule.prototype.isEnabled = function () {
+                return this.getValue() === true;
+            };
+
+            ForInRule.prototype.apply = function (syntaxTree) {
+                var sourceUnit = syntaxTree.sourceUnit();
+                var forInWalker = new ForInWalker(syntaxTree.fileName());
+
+                sourceUnit.accept(forInWalker);
+
+                return forInWalker.getFailures();
+            };
+            return ForInRule;
+        })(Rules.BaseRule);
+        Rules.ForInRule = ForInRule;
+
+        var ForInWalker = (function (_super) {
+            __extends(ForInWalker, _super);
+            function ForInWalker() {
+                _super.apply(this, arguments);
+            }
+            ForInWalker.prototype.visitForInStatement = function (node) {
+                _super.prototype.visitForInStatement.call(this, node);
+                this.handleForInStatement(node);
+            };
+
+            ForInWalker.prototype.handleForInStatement = function (node) {
+                var failure = null;
+
+                var statement = node.statement;
+                var statementChildCount = statement.childCount();
+                for (var i = 0; i < statementChildCount; i++) {
+                    var child = statement.childAt(i);
+                    var childKind = child.kind();
+
+                    if (childKind !== TypeScript.SyntaxKind.FirstPunctuation && childKind !== TypeScript.SyntaxKind.CloseBraceToken) {
+                        if (childKind !== TypeScript.SyntaxKind.List) {
+                            throw new Error("The only possible children are opening punctuation, a list, and a closing brace");
+                        }
+
+                        var grandChildrenCount = child.childCount();
+
+                        if (grandChildrenCount > 1) {
+                            failure = new Lint.RuleFailure(this.getFileName(), this.position(), ForInWalker.FOR_IN_FAILURE);
+                        } else if (grandChildrenCount === 1) {
+                            var grandChild = child.childAt(0);
+
+                            if (grandChild.kind() !== TypeScript.SyntaxKind.IfStatement) {
+                                failure = new Lint.RuleFailure(this.getFileName(), this.position(), ForInWalker.FOR_IN_FAILURE);
+                            }
+                        }
+                    }
+                }
+
+                if (failure) {
+                    this.addFailure(failure);
+                }
+            };
+            ForInWalker.FOR_IN_FAILURE = "for (... in ...) statements must be filtered with an if statement";
+            return ForInWalker;
+        })(Lint.RuleWalker);
     })(Lint.Rules || (Lint.Rules = {}));
     var Rules = Lint.Rules;
 })(Lint || (Lint = {}));
@@ -64036,6 +64108,7 @@ var Lint;
             ALL_RULES.push(new Rules.DebugRule());
             ALL_RULES.push(new Rules.EvalRule());
             ALL_RULES.push(new Rules.FileMustEndWithNewLineRule());
+            ALL_RULES.push(new Rules.ForInRule());
             ALL_RULES.push(new Rules.MaxLineLengthRule());
             ALL_RULES.push(new Rules.QuoteStyleRule());
             ALL_RULES.push(new Rules.SameLineRule());
