@@ -64123,6 +64123,81 @@ var Lint;
 })(Lint || (Lint = {}));
 var Lint;
 (function (Lint) {
+    (function (Formatters) {
+        var AbstractFormatter = (function () {
+            function AbstractFormatter(name) {
+                this.name = name;
+            }
+            AbstractFormatter.prototype.getName = function () {
+                return this.name;
+            };
+
+            AbstractFormatter.prototype.format = function (failures) {
+                throw TypeScript.Errors.abstract();
+            };
+            return AbstractFormatter;
+        })();
+        Formatters.AbstractFormatter = AbstractFormatter;
+    })(Lint.Formatters || (Lint.Formatters = {}));
+    var Formatters = Lint.Formatters;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Formatters) {
+        var ProseFormatter = (function (_super) {
+            __extends(ProseFormatter, _super);
+            function ProseFormatter() {
+                _super.call(this, "prose");
+            }
+            ProseFormatter.prototype.format = function (failures) {
+                var output = "";
+
+                for (var i = 0; i < failures.length; ++i) {
+                    var failure = failures[i];
+                    var fileName = failure.getFileName();
+                    var lineAndCharacter = failure.getLineAndCharacter();
+                    var line = lineAndCharacter.line() + 1;
+                    var character = lineAndCharacter.character() + 1;
+                    var failureString = failure.getFailure();
+
+                    output += fileName + "[" + line + ", " + character + "]: " + failureString + "\n";
+                }
+
+                return output;
+            };
+            return ProseFormatter;
+        })(Formatters.AbstractFormatter);
+        Formatters.ProseFormatter = ProseFormatter;
+    })(Lint.Formatters || (Lint.Formatters = {}));
+    var Formatters = Lint.Formatters;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Formatters) {
+        var ALL_FORMATTERS = [];
+
+        function createAllFormatters() {
+            ALL_FORMATTERS.push(new Formatters.ProseFormatter());
+        }
+        Formatters.createAllFormatters = createAllFormatters;
+
+        function getFormatterForName(name) {
+            var filteredFormatters = ALL_FORMATTERS.filter(function (formatter) {
+                return formatter.getName() === name;
+            });
+
+            if (filteredFormatters.length > 0) {
+                return filteredFormatters[0];
+            } else {
+                return undefined;
+            }
+        }
+        Formatters.getFormatterForName = getFormatterForName;
+    })(Lint.Formatters || (Lint.Formatters = {}));
+    var Formatters = Lint.Formatters;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
     var Logger = (function () {
         function Logger() {
         }
@@ -64224,17 +64299,25 @@ var argv = require("optimist").usage("usage: $0").demand("f").options({
     },
     "o": {
         alias: "out",
-        describe: "output destination (stdout, file)",
-        default: "stdout"
+        describe: "output file"
     },
     "t": {
         alias: "format",
         describe: "output format (prose, json)",
         default: "prose"
     }
-}).argv;
+}).check(validateArguments).argv;
 
-Lint.Rules.createAllRules();
+function validateArguments(args) {
+    Lint.Rules.createAllRules();
+    Lint.Formatters.createAllFormatters();
+
+    if (Lint.Formatters.getFormatterForName(args.t) === undefined) {
+        throw new Error("invalid option for 'format'");
+    }
+
+    return true;
+}
 
 var configuration = Lint.Configuration.findConfiguration(argv.c);
 if (configuration === undefined) {
@@ -64258,18 +64341,20 @@ for (i = 0; i < configuredRules.length; ++i) {
     }
 }
 
-for (i = 0; i < failures.length; ++i) {
-    var failure = failures[i];
-    var lineAndCharacter = failure.getLineAndCharacter();
-
-    var fileName = failure.getFileName();
-    var line = lineAndCharacter.line() + 1;
-    var character = lineAndCharacter.character() + 1;
-    var failureString = failure.getFailure();
-
-    console.error(fileName + "[" + line + ", " + character + "]: " + failureString);
+if (failures.length === 0) {
+    process.exit(0);
 }
 
-if (failures.length > 0) {
-    process.exit(3);
+var formatter = Lint.Formatters.getFormatterForName(argv.t);
+var outputText = formatter.format(failures);
+
+var outputStream;
+if (argv.o !== undefined) {
+    outputStream = fs.createWriteStream(argv.o, { end: false, mode: 0644 });
+} else {
+    outputStream = process.stdout;
 }
+
+outputStream.write(outputText, function () {
+    process.exit(2);
+});

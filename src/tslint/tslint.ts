@@ -1,11 +1,12 @@
-/// <reference path='../typescript/compiler/typescript.ts'/>
-/// <reference path='../typescript/compiler/syntax/positionTrackingWalker.ts'/>
+/// <reference path='../typescript/compiler/typescript.ts' />
+/// <reference path='../typescript/compiler/syntax/positionTrackingWalker.ts' />
 /// <reference path=../typescript/services/classifier.ts' />
 /// <reference path=../typescript/services/coreServices.ts' />
 /// <reference path='../typescript/services/typescriptServices.ts' />
 /// <reference path=../typescript/services/pullLanguageService.ts' />
 
 /// <reference path='configuration.ts' />
+/// <reference path='formatters/formatters.ts' />
 /// <reference path='language/languageServiceHost.ts' />
 
 var fs = require("fs");
@@ -24,8 +25,7 @@ var argv = require("optimist")
     },
     "o": {
       alias: "out",
-      describe: "output destination (stdout, file)",
-      default: "stdout"
+      describe: "output file",
     },
     "t": {
       alias: "format",
@@ -33,9 +33,19 @@ var argv = require("optimist")
       default: "prose"
     }
   })
+  .check(validateArguments)
   .argv;
 
-Lint.Rules.createAllRules();
+function validateArguments(args) {
+  Lint.Rules.createAllRules();
+  Lint.Formatters.createAllFormatters();
+
+  if(Lint.Formatters.getFormatterForName(args.t) === undefined) {
+    throw new Error("invalid option for 'format'");
+  }
+
+  return true;
+}
 
 var configuration = Lint.Configuration.findConfiguration(argv.c);
 if (configuration === undefined) {
@@ -59,18 +69,21 @@ for (i = 0; i < configuredRules.length; ++i) {
   }
 }
 
-for (i = 0; i < failures.length; ++i) {
-  var failure: Lint.RuleFailure = failures[i];
-  var lineAndCharacter = failure.getLineAndCharacter();
-
-  var fileName = failure.getFileName();
-  var line = lineAndCharacter.line() + 1;
-  var character = lineAndCharacter.character() + 1;
-  var failureString = failure.getFailure();
-
-  console.error(fileName + "[" + line + ", " + character + "]: " + failureString);
+// if there are no failures, exit gracefully
+if(failures.length === 0) {
+  process.exit(0);
 }
 
-if (failures.length > 0) {
-  process.exit(3);
+var formatter = Lint.Formatters.getFormatterForName(argv.t);
+var outputText = formatter.format(failures);
+
+var outputStream;
+if (argv.o !== undefined) {
+  outputStream = fs.createWriteStream(argv.o, {end: false, mode: 0644})
+} else {
+  outputStream = process.stdout;
 }
+
+outputStream.write(outputText, function() {
+  process.exit(2);
+});
