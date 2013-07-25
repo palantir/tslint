@@ -63143,6 +63143,98 @@ var Lint;
 })(Lint || (Lint = {}));
 var Lint;
 (function (Lint) {
+    var LastTokenAwareRuleWalker = (function (_super) {
+        __extends(LastTokenAwareRuleWalker, _super);
+        function LastTokenAwareRuleWalker() {
+            _super.apply(this, arguments);
+            this.lastState = null;
+        }
+        LastTokenAwareRuleWalker.prototype.visitToken = function (token) {
+            if (token.value() !== null) {
+                this.lastState = {
+                    position: this.position() + token.leadingTriviaWidth(),
+                    token: token
+                };
+            }
+
+            _super.prototype.visitToken.call(this, token);
+        };
+
+        LastTokenAwareRuleWalker.prototype.getLastState = function () {
+            return this.lastState;
+        };
+        return LastTokenAwareRuleWalker;
+    })(Lint.RuleWalker);
+    Lint.LastTokenAwareRuleWalker = LastTokenAwareRuleWalker;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
+        var FileMustEndWithNewLineRule = (function (_super) {
+            __extends(FileMustEndWithNewLineRule, _super);
+            function FileMustEndWithNewLineRule() {
+                _super.call(this, "file_must_end_with_newline");
+            }
+            FileMustEndWithNewLineRule.prototype.isEnabled = function () {
+                return this.getValue() === true;
+            };
+
+            FileMustEndWithNewLineRule.prototype.apply = function (syntaxTree) {
+                var sourceUnit = syntaxTree.sourceUnit();
+                var eofWalker = new EOFWalker(syntaxTree.fileName());
+
+                sourceUnit.accept(eofWalker);
+
+                return eofWalker.getFailures();
+            };
+            FileMustEndWithNewLineRule.FAILURE_STRING = "the file doesn't end with a newline";
+            return FileMustEndWithNewLineRule;
+        })(Rules.BaseRule);
+        Rules.FileMustEndWithNewLineRule = FileMustEndWithNewLineRule;
+
+        var EOFWalker = (function (_super) {
+            __extends(EOFWalker, _super);
+            function EOFWalker() {
+                _super.apply(this, arguments);
+            }
+            EOFWalker.prototype.visitToken = function (token) {
+                this.handleToken(token);
+                _super.prototype.visitToken.call(this, token);
+            };
+
+            EOFWalker.prototype.handleToken = function (operatorToken) {
+                var failure = null;
+
+                var operatorKind = operatorToken.kind();
+                if (operatorKind === TypeScript.SyntaxKind.EndOfFileToken) {
+                    var endsWithNewLine = false;
+
+                    var previousToken = this.getLastState().token;
+                    if (previousToken !== null && previousToken.hasTrailingNewLine()) {
+                        endsWithNewLine = true;
+                    }
+
+                    if (operatorToken.hasLeadingTrivia()) {
+                        endsWithNewLine = false;
+                    }
+
+                    if (!endsWithNewLine) {
+                        failure = this.createFailure(EOFWalker.EOF_Failure);
+                    }
+                }
+
+                if (failure) {
+                    this.addFailure(failure);
+                }
+            };
+            EOFWalker.EOF_Failure = "File should end with newline";
+            return EOFWalker;
+        })(Lint.LastTokenAwareRuleWalker);
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
     (function (Rules) {
         var MaxLineLengthRule = (function (_super) {
             __extends(MaxLineLengthRule, _super);
@@ -63252,29 +63344,6 @@ var Lint;
         })(Lint.RuleWalker);
     })(Lint.Rules || (Lint.Rules = {}));
     var Rules = Lint.Rules;
-})(Lint || (Lint = {}));
-var Lint;
-(function (Lint) {
-    var LastTokenAwareRuleWalker = (function (_super) {
-        __extends(LastTokenAwareRuleWalker, _super);
-        function LastTokenAwareRuleWalker() {
-            _super.apply(this, arguments);
-        }
-        LastTokenAwareRuleWalker.prototype.visitToken = function (token) {
-            this.lastState = {
-                position: this.position() + token.leadingTriviaWidth(),
-                token: token
-            };
-
-            _super.prototype.visitToken.call(this, token);
-        };
-
-        LastTokenAwareRuleWalker.prototype.getLastState = function () {
-            return this.lastState;
-        };
-        return LastTokenAwareRuleWalker;
-    })(Lint.RuleWalker);
-    Lint.LastTokenAwareRuleWalker = LastTokenAwareRuleWalker;
 })(Lint || (Lint = {}));
 var Lint;
 (function (Lint) {
@@ -63653,6 +63722,8 @@ var Lint;
 
         function createAllRules() {
             ALL_RULES.push(new Rules.BitwiseOperatorRule());
+            ALL_RULES.push(new Rules.FileMustEndWithNewLineRule());
+            ALL_RULES.push(new Rules.MaxLineLengthRule());
             ALL_RULES.push(new Rules.MaxLineLengthRule());
             ALL_RULES.push(new Rules.QuoteStyleRule());
             ALL_RULES.push(new Rules.SameLineRule());

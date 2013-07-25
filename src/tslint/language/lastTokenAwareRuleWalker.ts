@@ -8,13 +8,16 @@ module Lint {
   }
 
   export class LastTokenAwareRuleWalker extends RuleWalker {
-    private lastState: LastTokenAwareWalkerState;
+    private lastState: LastTokenAwareWalkerState = null;
 
     public visitToken(token: TypeScript.ISyntaxToken): void {
-      this.lastState = {
-        position: this.position() + token.leadingTriviaWidth(),
-        token: token
-      };
+      // Skip compiler insertions of empty tokens
+      if (token.value() !== null) {
+        this.lastState = {
+          position: this.position() + token.leadingTriviaWidth(),
+          token: token
+        };
+      }
 
       super.visitToken(token);
     }
