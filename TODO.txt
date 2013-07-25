@@ -1,3 +1,4 @@
 • Enforce minimum tab width
+• Enforce braces for if/for/do/while (curly)
 • Disallow variables referenced outside of their scope definition (funcscope)
 • Disallow unused variables

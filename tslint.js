@@ -63244,7 +63244,7 @@ var Lint;
 
                 _super.prototype.visitClassDeclaration.call(this, node);
             };
-            ClassNameWalker.FAILURE_STRING = "name must start with an uppercase character";
+            ClassNameWalker.FAILURE_STRING = "class name must start with an uppercase character";
             return ClassNameWalker;
         })(Lint.RuleWalker);
     })(Lint.Rules || (Lint.Rules = {}));
@@ -63929,7 +63929,7 @@ var Lint;
             VariableNameWalker.prototype.isUpperCase = function (name) {
                 return (name === name.toUpperCase());
             };
-            VariableNameWalker.FAILURE_STRING = "name must be in camelcase or uppercase";
+            VariableNameWalker.FAILURE_STRING = "variable name must be in camelcase or uppercase";
             return VariableNameWalker;
         })(Lint.RuleWalker);
     })(Lint.Rules || (Lint.Rules = {}));
