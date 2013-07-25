@@ -63042,6 +63042,21 @@ var Lint;
             return this.fileName;
         };
 
+        RuleWalker.prototype.positionAfter = function () {
+            var elements = [];
+            for (var _i = 0; _i < (arguments.length - 0); _i++) {
+                elements[_i] = arguments[_i + 0];
+            }
+            var position = this.position();
+
+            for (var i = 0; i < elements.length; ++i) {
+                var element = elements[i];
+                position += element.fullWidth();
+            }
+
+            return position;
+        };
+
         RuleWalker.prototype.createFailure = function (failure) {
             return new Lint.RuleFailure(this.getFileName(), this.position(), failure);
         };
@@ -63137,6 +63152,53 @@ var Lint;
             };
             BitwiseWalker.FAILURE_STRING = "forbidden bitwise operation";
             return BitwiseWalker;
+        })(Lint.RuleWalker);
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
+        var ClassNameRule = (function (_super) {
+            __extends(ClassNameRule, _super);
+            function ClassNameRule() {
+                _super.call(this, "class_name");
+            }
+            ClassNameRule.prototype.isEnabled = function () {
+                return this.getValue() === true;
+            };
+
+            ClassNameRule.prototype.apply = function (syntaxTree) {
+                var sourceUnit = syntaxTree.sourceUnit();
+                var classNameWalker = new ClassNameWalker(syntaxTree.fileName());
+
+                sourceUnit.accept(classNameWalker);
+
+                return classNameWalker.getFailures();
+            };
+            return ClassNameRule;
+        })(Rules.BaseRule);
+        Rules.ClassNameRule = ClassNameRule;
+
+        var ClassNameWalker = (function (_super) {
+            __extends(ClassNameWalker, _super);
+            function ClassNameWalker() {
+                _super.apply(this, arguments);
+            }
+            ClassNameWalker.prototype.visitClassDeclaration = function (node) {
+                var position = this.positionAfter(node.modifiers, node.classKeyword);
+                var className = node.identifier.text();
+                if (className.length > 0) {
+                    var firstCharacter = className.charAt(0);
+                    if (firstCharacter !== firstCharacter.toUpperCase()) {
+                        this.addFailure(new Lint.RuleFailure(this.getFileName(), position, ClassNameWalker.FAILURE_STRING));
+                    }
+                }
+
+                _super.prototype.visitClassDeclaration.call(this, node);
+            };
+            ClassNameWalker.FAILURE_STRING = "name must start with an uppercase character";
+            return ClassNameWalker;
         })(Lint.RuleWalker);
     })(Lint.Rules || (Lint.Rules = {}));
     var Rules = Lint.Rules;
@@ -63820,6 +63882,7 @@ var Lint;
 
         function createAllRules() {
             ALL_RULES.push(new Rules.BitwiseOperatorRule());
+            ALL_RULES.push(new Rules.ClassNameRule());
             ALL_RULES.push(new Rules.DebugRule());
             ALL_RULES.push(new Rules.EvalRule());
             ALL_RULES.push(new Rules.FileMustEndWithNewLineRule());

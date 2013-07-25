@@ -21,6 +21,17 @@ module Lint {
       return this.fileName;
     }
 
+    public positionAfter(...elements: TypeScript.ISyntaxElement[]): number {
+      var position = this.position();
+
+      for (var i = 0; i < elements.length; ++i) {
+        var element = elements[i];
+        position += element.fullWidth();
+      }
+
+      return position;
+    }
+
     // create a failure at the current position
     public createFailure(failure: string): Lint.RuleFailure {
       return new Lint.RuleFailure(this.getFileName(), this.position(), failure);
