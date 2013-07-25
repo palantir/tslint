@@ -63688,6 +63688,58 @@ var Lint;
 var Lint;
 (function (Lint) {
     (function (Rules) {
+        var SubRule = (function (_super) {
+            __extends(SubRule, _super);
+            function SubRule() {
+                _super.call(this, "sub");
+            }
+            SubRule.prototype.isEnabled = function () {
+                return this.getValue() === true;
+            };
+
+            SubRule.prototype.apply = function (syntaxTree) {
+                var sourceUnit = syntaxTree.sourceUnit();
+                var comparisonWalker = new SubWalker(syntaxTree.fileName());
+
+                sourceUnit.accept(comparisonWalker);
+
+                return comparisonWalker.getFailures();
+            };
+            return SubRule;
+        })(Rules.BaseRule);
+        Rules.SubRule = SubRule;
+
+        var SubWalker = (function (_super) {
+            __extends(SubWalker, _super);
+            function SubWalker() {
+                _super.apply(this, arguments);
+            }
+            SubWalker.prototype.visitElementAccessExpression = function (node) {
+                _super.prototype.visitElementAccessExpression.call(this, node);
+                this.handleElementAccessExpression(node);
+            };
+
+            SubWalker.prototype.handleElementAccessExpression = function (operatorToken) {
+                var failure = null;
+                var argumentExpressionKind = operatorToken.argumentExpression.kind();
+
+                if (argumentExpressionKind === TypeScript.SyntaxKind.StringLiteral) {
+                    failure = new Lint.RuleFailure(this.getFileName(), this.position(), SubWalker.SUB_FAILURE);
+                }
+
+                if (failure) {
+                    this.addFailure(failure);
+                }
+            };
+            SubWalker.SUB_FAILURE = "dictionary access via string literals is disallowed";
+            return SubWalker;
+        })(Lint.RuleWalker);
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
         var TrailingWhitespaceRule = (function (_super) {
             __extends(TrailingWhitespaceRule, _super);
             function TrailingWhitespaceRule() {
@@ -63988,6 +64040,7 @@ var Lint;
             ALL_RULES.push(new Rules.QuoteStyleRule());
             ALL_RULES.push(new Rules.SameLineRule());
             ALL_RULES.push(new Rules.SemicolonRule());
+            ALL_RULES.push(new Rules.SubRule());
             ALL_RULES.push(new Rules.TrailingWhitespaceRule());
             ALL_RULES.push(new Rules.TripleComparisonRule());
             ALL_RULES.push(new Rules.VariableNameRule());

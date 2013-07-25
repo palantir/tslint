@@ -1,5 +1,4 @@
 • Enforce minimum tab width
 • Enforce filtering within for...in (forin)
 • Disallow variables referenced outside of their scope definition (funcscope)
-• Disallow usage of [''] notation when the dot notation can be used (sub)
 • Disallow unused variables
