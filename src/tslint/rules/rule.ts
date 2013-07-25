@@ -1,4 +1,5 @@
 /// <reference path='../../typescript/compiler/syntax/syntaxTree.ts'/>
+/// <reference path='../../typescript/compiler/text/linePosition.ts'/>
 
 module Lint {
 
@@ -15,12 +16,12 @@ module Lint {
 
   export class RuleFailure {
     private fileName: string;
-    private position: number;
+    private lineAndCharacter: TypeScript.LineAndCharacter;
     private failure: string;
 
-    constructor(fileName: string, position: number, failure: string) {
+    constructor(fileName: string, lineAndCharacter: TypeScript.LineAndCharacter, failure: string) {
       this.fileName = fileName;
-      this.position = position;
+      this.lineAndCharacter = lineAndCharacter;
       this.failure = failure;
     }
 
@@ -28,8 +29,8 @@ module Lint {
       return this.fileName;
     }
 
-    public getPosition() {
-      return this.position;
+    public getLineAndCharacter(): TypeScript.LineAndCharacter {
+      return this.lineAndCharacter;
     }
 
     public getFailure() {
@@ -37,9 +38,10 @@ module Lint {
     }
 
     public equals(ruleFailure: RuleFailure): boolean {
-      return this.fileName === ruleFailure.getFileName() &&
-             this.position === ruleFailure.getPosition() &&
-             this.failure  === ruleFailure.getFailure();
+      return (this.failure  === ruleFailure.getFailure() &&
+              this.fileName === ruleFailure.getFileName() &&
+              this.lineAndCharacter.line() === ruleFailure.getLineAndCharacter().line() &&
+              this.lineAndCharacter.character() === ruleFailure.getLineAndCharacter().character());
     }
   }
 

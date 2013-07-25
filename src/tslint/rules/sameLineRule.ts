@@ -13,8 +13,8 @@ module Lint.Rules {
     }
 
     public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-      var braceWalker = new BraceWalker(syntaxTree.lineMap(), syntaxTree.fileName());
-      return this.applyWithWalker(syntaxTree, braceWalker);
+      var braceWalker = new BraceWalker(syntaxTree);
+      return this.applyWithWalker(braceWalker);
     }
   }
 
@@ -23,13 +23,6 @@ module Lint.Rules {
     static CATCH_FAILURE_STRING = "misplaced 'catch'";
     static ELSE_FAILURE_STRING = "misplaced 'else'";
     static WHITESPACE_FAILURE_STRING = "missing whitespace";
-
-    private lineMap: TypeScript.LineMap;
-
-    constructor(lineMap: TypeScript.LineMap, fileName: string) {
-      super(fileName);
-      this.lineMap = lineMap;
-    }
 
     public visitToken(token: TypeScript.ISyntaxToken): void {
       var kind = token.kind();
@@ -48,9 +41,9 @@ module Lint.Rules {
           var currentLine = this.getLine(this.position());
 
           if (currentLine !== lastLine) {
-            this.addFailure(this.createFailure(BraceWalker.BRACE_FAILURE_STRING));
+            this.addFailure(this.createFailure(this.position(), BraceWalker.BRACE_FAILURE_STRING));
           } else if (!this.hasTrailingWhiteSpace(lastState.token)) {
-            this.addFailure(this.createFailure(BraceWalker.WHITESPACE_FAILURE_STRING));
+            this.addFailure(this.createFailure(this.position(), BraceWalker.WHITESPACE_FAILURE_STRING));
           }
         }
       }
@@ -61,7 +54,7 @@ module Lint.Rules {
     public visitElseClause(node: TypeScript.ElseClauseSyntax): void {
       var lastState = this.getLastState();
       if(lastState !== undefined && !this.hasTrailingWhiteSpace(lastState.token)) {
-        this.addFailure(this.createFailure(BraceWalker.ELSE_FAILURE_STRING));
+        this.addFailure(this.createFailure(this.position(), BraceWalker.ELSE_FAILURE_STRING));
       }
 
       super.visitElseClause(node);
@@ -70,14 +63,14 @@ module Lint.Rules {
     public visitCatchClause(node: TypeScript.CatchClauseSyntax): void {
       var lastState = this.getLastState();
       if(lastState !== undefined && !this.hasTrailingWhiteSpace(lastState.token)) {
-        this.addFailure(this.createFailure(BraceWalker.CATCH_FAILURE_STRING));
+        this.addFailure(this.createFailure(this.position(), BraceWalker.CATCH_FAILURE_STRING));
       }
 
       super.visitCatchClause(node);
     }
 
     private getLine(position): number {
-      return this.lineMap.getLineAndCharacterFromPosition(position).line();
+      return this.getSyntaxTree().lineMap().getLineAndCharacterFromPosition(position).line();
     }
 
     private hasTrailingWhiteSpace(token: TypeScript.ISyntaxToken): boolean {

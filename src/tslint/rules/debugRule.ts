@@ -9,15 +9,12 @@ module Lint.Rules {
       super("debug");
     }
 
-  /**
-   * @param test
-   */
     public isEnabled() : boolean {
       return this.getValue() === true;
     }
 
     public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-      return this.applyWithWalker(syntaxTree, new DebugWalker(syntaxTree.fileName()));
+      return this.applyWithWalker(new DebugWalker(syntaxTree));
     }
   }
 
@@ -34,11 +31,7 @@ module Lint.Rules {
       var operatorKind = operatorToken.kind();
 
       if (operatorKind === TypeScript.SyntaxKind.DebuggerKeyword) {
-        failure = new Lint.RuleFailure(this.getFileName(), this.position(), DebugWalker.DEBUG_FAILURE);
-      }
-
-      if(failure) {
-        this.addFailure(failure);
+        this.addFailure(this.createFailure(this.position(), DebugWalker.DEBUG_FAILURE));
       }
     }
   }

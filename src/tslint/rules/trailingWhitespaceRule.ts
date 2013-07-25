@@ -13,7 +13,7 @@ module Lint.Rules {
     }
 
     public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-      return this.applyWithWalker(syntaxTree, new TrailingWalker(syntaxTree.fileName()));
+      return this.applyWithWalker(new TrailingWalker(syntaxTree));
     }
   }
 
@@ -44,7 +44,7 @@ module Lint.Rules {
 
     // create a failure at the end of the previous line and add it
     private createAndAddFailure() {
-      var failure = new Lint.RuleFailure(this.getFileName(), this.position() - 1, TrailingWalker.FAILURE_STRING);
+      var failure = this.createFailure(this.position() - 1, TrailingWalker.FAILURE_STRING);
       this.addFailure(failure);
     }
   }

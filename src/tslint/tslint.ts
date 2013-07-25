@@ -49,7 +49,6 @@ var contents = fs.readFileSync(file, "utf8");
 var languageServiceHost = new Lint.LanguageServiceHost(file, contents);
 var languageService = new Services.LanguageService(languageServiceHost);
 var syntaxTree = languageService.getSyntaxTree(file);
-var lineMap = syntaxTree.lineMap();
 
 var i, failures = [];
 var configuredRules = Lint.Configuration.getConfiguredRules(configuration);
@@ -61,8 +60,8 @@ for (i = 0; i < configuredRules.length; ++i) {
 }
 
 for (i = 0; i < failures.length; ++i) {
-  var failure = failures[i];
-  var lineAndCharacter = lineMap.getLineAndCharacterFromPosition(failure.getPosition());
+  var failure: Lint.RuleFailure = failures[i];
+  var lineAndCharacter = failure.getLineAndCharacter();
 
   var fileName = failure.getFileName();
   var line = lineAndCharacter.line() + 1;

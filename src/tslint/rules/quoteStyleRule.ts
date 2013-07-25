@@ -25,7 +25,7 @@ module Lint.Rules {
     		throw new Error("Unknown quote style " + quoteStyle);
       }
 
-      return this.applyWithWalker(syntaxTree, new QuoteWalker(syntaxTree.fileName(), quoteStyle));
+      return this.applyWithWalker(new QuoteWalker(syntaxTree, quoteStyle));
     }
   }
 
@@ -35,8 +35,8 @@ module Lint.Rules {
 
 	private quoteStyle : QuoteStyle;
 
-    constructor (fileName: string, quoteStyle: QuoteStyle) {
-      super(fileName);
+    constructor (syntaxTree: TypeScript.SyntaxTree, quoteStyle: QuoteStyle) {
+      super(syntaxTree);
       this.quoteStyle = quoteStyle;
     }
 
@@ -58,11 +58,11 @@ module Lint.Rules {
 
         if (this.quoteStyle === QuoteStyle.SINGLE_QUOTES) {
           if (firstChar !== "'" || lastChar !== "'") {
-  	        failure = this.createFailure(QuoteWalker.SINGLE_QUOTE_FAILURE);
+  	        failure = this.createFailure(this.position(), QuoteWalker.SINGLE_QUOTE_FAILURE);
           }
         } else if (this.quoteStyle === QuoteStyle.DOUBLE_QUOTES) {
           if (firstChar !== "\"" || lastChar !== "\"") {
-            failure = this.createFailure(QuoteWalker.DOUBLE_QUOTE_FAILURE);
+            failure = this.createFailure(this.position(), QuoteWalker.DOUBLE_QUOTE_FAILURE);
           }
         }
       }

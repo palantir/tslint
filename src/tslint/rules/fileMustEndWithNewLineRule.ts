@@ -16,7 +16,7 @@ module Lint.Rules {
         }
 
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            return this.applyWithWalker(syntaxTree, new EOFWalker(syntaxTree.fileName()));
+            return this.applyWithWalker(new EOFWalker(syntaxTree));
         }
     }
 
@@ -28,8 +28,6 @@ module Lint.Rules {
         }
 
         private handleToken(operatorToken: TypeScript.ISyntaxToken) {
-            var failure = null;
-
             var operatorKind = operatorToken.kind();
             if (operatorKind === TypeScript.SyntaxKind.EndOfFileToken) {
                 var endsWithNewLine = false;
@@ -46,12 +44,8 @@ module Lint.Rules {
                 }
 
                 if (!endsWithNewLine) {
-                    failure = this.createFailure(EOFWalker.EOF_Failure);
+                    this.addFailure(this.createFailure(this.position(), EOFWalker.EOF_Failure));
                 }
-            }
-
-            if (failure) {
-                this.addFailure(failure);
             }
         }
     }

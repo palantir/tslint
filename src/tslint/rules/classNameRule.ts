@@ -13,12 +13,7 @@ module Lint.Rules {
     }
 
     public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-      var sourceUnit = syntaxTree.sourceUnit();
-      var classNameWalker = new ClassNameWalker(syntaxTree.fileName());
-
-      sourceUnit.accept(classNameWalker);
-
-      return classNameWalker.getFailures();
+      return this.applyWithWalker(new ClassNameWalker(syntaxTree));
     }
   }
 
@@ -31,7 +26,7 @@ module Lint.Rules {
       if(className.length > 0) {
         var firstCharacter = className.charAt(0);
         if(firstCharacter !== firstCharacter.toUpperCase()) {
-          this.addFailure(new Lint.RuleFailure(this.getFileName(), position, ClassNameWalker.FAILURE_STRING));
+          this.addFailure(this.createFailure(position, ClassNameWalker.FAILURE_STRING));
         }
       }
 

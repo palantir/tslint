@@ -13,7 +13,7 @@ module Lint.Rules {
     }
 
     public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-      return this.applyWithWalker(syntaxTree, new BitwiseWalker(syntaxTree.fileName()));
+      return this.applyWithWalker(new BitwiseWalker(syntaxTree));
     }
   }
 
@@ -35,9 +35,9 @@ module Lint.Rules {
           node.kind() === TypeScript.SyntaxKind.UnsignedRightShiftAssignmentExpression ||
           node.kind() === TypeScript.SyntaxKind.BitwiseNotExpression) {
 
-        this.addFailure(new Lint.RuleFailure(this.getFileName(),
-          this.position() + node.leadingTriviaWidth(),
-          BitwiseWalker.FAILURE_STRING));
+        this.addFailure(this.createFailure(
+            this.position() + node.leadingTriviaWidth(),
+            BitwiseWalker.FAILURE_STRING));
       }
 
       super.visitNode(node);

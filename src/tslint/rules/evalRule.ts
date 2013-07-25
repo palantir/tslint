@@ -13,7 +13,7 @@ module Lint.Rules {
     }
 
     public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-      return this.applyWithWalker(syntaxTree, new EvalWalker(syntaxTree.fileName()));
+      return this.applyWithWalker(new EvalWalker(syntaxTree));
     }
   }
 
@@ -25,7 +25,7 @@ module Lint.Rules {
       if (expression.isToken() && expression.kind() === TypeScript.SyntaxKind.IdentifierName) {
         if (expression.firstToken().text() === "eval") {
           var position = this.position() + node.leadingTriviaWidth();
-          this.addFailure(new Lint.RuleFailure(this.getFileName(), position, EvalWalker.FAILURE_STRING));
+          this.addFailure(this.createFailure(position, EvalWalker.FAILURE_STRING));
         }
       }
 

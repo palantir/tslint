@@ -13,7 +13,7 @@ module Lint.Rules {
     }
 
     public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-      return this.applyWithWalker(syntaxTree, new ArgumentsWalker(syntaxTree.fileName()));
+      return this.applyWithWalker(new ArgumentsWalker(syntaxTree));
     }
   }
 
@@ -28,7 +28,7 @@ module Lint.Rules {
       if(expression.isToken() && name.text() === "callee") {
         var tokenExpression = <TypeScript.ISyntaxToken> expression;
         if(tokenExpression.text() === "arguments") {
-          this.addFailure(new Lint.RuleFailure(this.getFileName(), position, ArgumentsWalker.FAILURE_STRING));
+          this.addFailure(this.createFailure(position, ArgumentsWalker.FAILURE_STRING));
         }
       }
 

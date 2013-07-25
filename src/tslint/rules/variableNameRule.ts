@@ -13,7 +13,7 @@ module Lint.Rules {
     }
 
     public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-      return this.applyWithWalker(syntaxTree, new VariableNameWalker(syntaxTree.fileName()));
+      return this.applyWithWalker(new VariableNameWalker(syntaxTree));
     }
   }
 
@@ -26,7 +26,7 @@ module Lint.Rules {
       var position = this.position() + identifier.leadingTriviaWidth();
 
       if(!this.isCamelCase(variableName) && !this.isUpperCase(variableName)) {
-        this.addFailure(new Lint.RuleFailure(this.getFileName(), position, VariableNameWalker.FAILURE_STRING));
+        this.addFailure(this.createFailure(position, VariableNameWalker.FAILURE_STRING));
       }
 
       super.visitVariableDeclarator(node);

@@ -63004,17 +63004,17 @@ var Services;
 var Lint;
 (function (Lint) {
     var RuleFailure = (function () {
-        function RuleFailure(fileName, position, failure) {
+        function RuleFailure(fileName, lineAndCharacter, failure) {
             this.fileName = fileName;
-            this.position = position;
+            this.lineAndCharacter = lineAndCharacter;
             this.failure = failure;
         }
         RuleFailure.prototype.getFileName = function () {
             return this.fileName;
         };
 
-        RuleFailure.prototype.getPosition = function () {
-            return this.position;
+        RuleFailure.prototype.getLineAndCharacter = function () {
+            return this.lineAndCharacter;
         };
 
         RuleFailure.prototype.getFailure = function () {
@@ -63022,7 +63022,7 @@ var Lint;
         };
 
         RuleFailure.prototype.equals = function (ruleFailure) {
-            return this.fileName === ruleFailure.getFileName() && this.position === ruleFailure.getPosition() && this.failure === ruleFailure.getFailure();
+            return (this.failure === ruleFailure.getFailure() && this.fileName === ruleFailure.getFileName() && this.lineAndCharacter.line() === ruleFailure.getLineAndCharacter().line() && this.lineAndCharacter.character() === ruleFailure.getLineAndCharacter().character());
         };
         return RuleFailure;
     })();
@@ -63032,14 +63032,18 @@ var Lint;
 (function (Lint) {
     var RuleWalker = (function (_super) {
         __extends(RuleWalker, _super);
-        function RuleWalker(fileName) {
+        function RuleWalker(syntaxTree) {
             _super.call(this);
 
-            this.fileName = fileName;
+            this.syntaxTree = syntaxTree;
             this.failures = [];
         }
-        RuleWalker.prototype.getFileName = function () {
-            return this.fileName;
+        RuleWalker.prototype.getSyntaxTree = function () {
+            return this.syntaxTree;
+        };
+
+        RuleWalker.prototype.getFailures = function () {
+            return this.failures;
         };
 
         RuleWalker.prototype.positionAfter = function () {
@@ -63059,18 +63063,17 @@ var Lint;
             return position;
         };
 
-        RuleWalker.prototype.createFailure = function (failure) {
-            return new Lint.RuleFailure(this.getFileName(), this.position(), failure);
+        RuleWalker.prototype.createFailure = function (position, failure) {
+            var lineMap = this.syntaxTree.lineMap();
+            var lineAndCharacter = lineMap.getLineAndCharacterFromPosition(position);
+
+            return new Lint.RuleFailure(this.syntaxTree.fileName(), lineAndCharacter, failure);
         };
 
         RuleWalker.prototype.addFailure = function (failure) {
             if (!this.existsFailure(failure)) {
                 this.failures.push(failure);
             }
-        };
-
-        RuleWalker.prototype.getFailures = function () {
-            return this.failures;
         };
 
         RuleWalker.prototype.existsFailure = function (failure) {
@@ -63107,8 +63110,8 @@ var Lint;
                 throw TypeScript.Errors.abstract();
             };
 
-            BaseRule.prototype.applyWithWalker = function (syntaxTree, walker) {
-                var sourceUnit = syntaxTree.sourceUnit();
+            BaseRule.prototype.applyWithWalker = function (walker) {
+                var sourceUnit = walker.getSyntaxTree().sourceUnit();
                 sourceUnit.accept(walker);
                 return walker.getFailures();
             };
@@ -63135,7 +63138,7 @@ var Lint;
             };
 
             ArgumentsRule.prototype.apply = function (syntaxTree) {
-                return this.applyWithWalker(syntaxTree, new ArgumentsWalker(syntaxTree.fileName()));
+                return this.applyWithWalker(new ArgumentsWalker(syntaxTree));
             };
             return ArgumentsRule;
         })(Rules.BaseRule);
@@ -63154,7 +63157,7 @@ var Lint;
                 if (expression.isToken() && name.text() === "callee") {
                     var tokenExpression = expression;
                     if (tokenExpression.text() === "arguments") {
-                        this.addFailure(new Lint.RuleFailure(this.getFileName(), position, ArgumentsWalker.FAILURE_STRING));
+                        this.addFailure(this.createFailure(position, ArgumentsWalker.FAILURE_STRING));
                     }
                 }
 
@@ -63179,7 +63182,7 @@ var Lint;
             };
 
             BitwiseOperatorRule.prototype.apply = function (syntaxTree) {
-                return this.applyWithWalker(syntaxTree, new BitwiseWalker(syntaxTree.fileName()));
+                return this.applyWithWalker(new BitwiseWalker(syntaxTree));
             };
             return BitwiseOperatorRule;
         })(Rules.BaseRule);
@@ -63192,7 +63195,7 @@ var Lint;
             }
             BitwiseWalker.prototype.visitNode = function (node) {
                 if (node.kind() === TypeScript.SyntaxKind.BitwiseAndExpression || node.kind() === TypeScript.SyntaxKind.AndAssignmentExpression || node.kind() === TypeScript.SyntaxKind.BitwiseOrExpression || node.kind() === TypeScript.SyntaxKind.OrAssignmentExpression || node.kind() === TypeScript.SyntaxKind.BitwiseExclusiveOrExpression || node.kind() === TypeScript.SyntaxKind.ExclusiveOrAssignmentExpression || node.kind() === TypeScript.SyntaxKind.LeftShiftExpression || node.kind() === TypeScript.SyntaxKind.LeftShiftAssignmentExpression || node.kind() === TypeScript.SyntaxKind.SignedRightShiftExpression || node.kind() === TypeScript.SyntaxKind.SignedRightShiftAssignmentExpression || node.kind() === TypeScript.SyntaxKind.UnsignedRightShiftExpression || node.kind() === TypeScript.SyntaxKind.UnsignedRightShiftAssignmentExpression || node.kind() === TypeScript.SyntaxKind.BitwiseNotExpression) {
-                    this.addFailure(new Lint.RuleFailure(this.getFileName(), this.position() + node.leadingTriviaWidth(), BitwiseWalker.FAILURE_STRING));
+                    this.addFailure(this.createFailure(this.position() + node.leadingTriviaWidth(), BitwiseWalker.FAILURE_STRING));
                 }
 
                 _super.prototype.visitNode.call(this, node);
@@ -63216,12 +63219,7 @@ var Lint;
             };
 
             ClassNameRule.prototype.apply = function (syntaxTree) {
-                var sourceUnit = syntaxTree.sourceUnit();
-                var classNameWalker = new ClassNameWalker(syntaxTree.fileName());
-
-                sourceUnit.accept(classNameWalker);
-
-                return classNameWalker.getFailures();
+                return this.applyWithWalker(new ClassNameWalker(syntaxTree));
             };
             return ClassNameRule;
         })(Rules.BaseRule);
@@ -63238,7 +63236,7 @@ var Lint;
                 if (className.length > 0) {
                     var firstCharacter = className.charAt(0);
                     if (firstCharacter !== firstCharacter.toUpperCase()) {
-                        this.addFailure(new Lint.RuleFailure(this.getFileName(), position, ClassNameWalker.FAILURE_STRING));
+                        this.addFailure(this.createFailure(position, ClassNameWalker.FAILURE_STRING));
                     }
                 }
 
@@ -63263,7 +63261,7 @@ var Lint;
             };
 
             DebugRule.prototype.apply = function (syntaxTree) {
-                return this.applyWithWalker(syntaxTree, new DebugWalker(syntaxTree.fileName()));
+                return this.applyWithWalker(new DebugWalker(syntaxTree));
             };
             return DebugRule;
         })(Rules.BaseRule);
@@ -63284,11 +63282,7 @@ var Lint;
                 var operatorKind = operatorToken.kind();
 
                 if (operatorKind === TypeScript.SyntaxKind.DebuggerKeyword) {
-                    failure = new Lint.RuleFailure(this.getFileName(), this.position(), DebugWalker.DEBUG_FAILURE);
-                }
-
-                if (failure) {
-                    this.addFailure(failure);
+                    this.addFailure(this.createFailure(this.position(), DebugWalker.DEBUG_FAILURE));
                 }
             };
             DebugWalker.DEBUG_FAILURE = "use of debugger statements is disallowed";
@@ -63336,7 +63330,7 @@ var Lint;
             };
 
             FileMustEndWithNewLineRule.prototype.apply = function (syntaxTree) {
-                return this.applyWithWalker(syntaxTree, new EOFWalker(syntaxTree.fileName()));
+                return this.applyWithWalker(new EOFWalker(syntaxTree));
             };
             FileMustEndWithNewLineRule.FAILURE_STRING = "the file doesn't end with a newline";
             return FileMustEndWithNewLineRule;
@@ -63354,8 +63348,6 @@ var Lint;
             };
 
             EOFWalker.prototype.handleToken = function (operatorToken) {
-                var failure = null;
-
                 var operatorKind = operatorToken.kind();
                 if (operatorKind === TypeScript.SyntaxKind.EndOfFileToken) {
                     var endsWithNewLine = false;
@@ -63370,12 +63362,8 @@ var Lint;
                     }
 
                     if (!endsWithNewLine) {
-                        failure = this.createFailure(EOFWalker.EOF_Failure);
+                        this.addFailure(this.createFailure(this.position(), EOFWalker.EOF_Failure));
                     }
-                }
-
-                if (failure) {
-                    this.addFailure(failure);
                 }
             };
             EOFWalker.EOF_Failure = "File should end with newline";
@@ -63397,7 +63385,7 @@ var Lint;
             };
 
             ForInRule.prototype.apply = function (syntaxTree) {
-                return this.applyWithWalker(syntaxTree, new ForInWalker(syntaxTree.fileName()));
+                return this.applyWithWalker(new ForInWalker(syntaxTree));
             };
             return ForInRule;
         })(Rules.BaseRule);
@@ -63430,12 +63418,12 @@ var Lint;
                         var grandChildrenCount = child.childCount();
 
                         if (grandChildrenCount > 1) {
-                            failure = new Lint.RuleFailure(this.getFileName(), this.position(), ForInWalker.FOR_IN_FAILURE);
+                            failure = this.createFailure(this.position(), ForInWalker.FOR_IN_FAILURE);
                         } else if (grandChildrenCount === 1) {
                             var grandChild = child.childAt(0);
 
                             if (grandChild.kind() !== TypeScript.SyntaxKind.IfStatement) {
-                                failure = new Lint.RuleFailure(this.getFileName(), this.position(), ForInWalker.FOR_IN_FAILURE);
+                                failure = this.createFailure(this.position(), ForInWalker.FOR_IN_FAILURE);
                             }
                         }
                     }
@@ -63464,7 +63452,7 @@ var Lint;
             };
 
             EvalRule.prototype.apply = function (syntaxTree) {
-                return this.applyWithWalker(syntaxTree, new EvalWalker(syntaxTree.fileName()));
+                return this.applyWithWalker(new EvalWalker(syntaxTree));
             };
             return EvalRule;
         })(Rules.BaseRule);
@@ -63480,7 +63468,7 @@ var Lint;
                 if (expression.isToken() && expression.kind() === TypeScript.SyntaxKind.IdentifierName) {
                     if (expression.firstToken().text() === "eval") {
                         var position = this.position() + node.leadingTriviaWidth();
-                        this.addFailure(new Lint.RuleFailure(this.getFileName(), position, EvalWalker.FAILURE_STRING));
+                        this.addFailure(this.createFailure(position, EvalWalker.FAILURE_STRING));
                     }
                 }
 
@@ -63503,13 +63491,15 @@ var Lint;
             MaxLineLengthRule.prototype.apply = function (syntaxTree) {
                 var ruleFailures = [];
                 var lineLimit = this.getValue();
-                var lineStarts = syntaxTree.lineMap().lineStarts();
+                var lineMap = syntaxTree.lineMap();
+                var lineStarts = lineMap.lineStarts();
                 var errorString = MaxLineLengthRule.FAILURE_STRING + lineLimit;
 
                 for (var i = 0; i < lineStarts.length - 1; ++i) {
                     var from = lineStarts[i], to = lineStarts[i + 1];
                     if ((to - from - 1) > lineLimit) {
-                        var ruleFailure = new Lint.RuleFailure(syntaxTree.fileName(), to - 1, errorString);
+                        var lineAndCharacter = lineMap.getLineAndCharacterFromPosition(to - 1);
+                        var ruleFailure = new Lint.RuleFailure(syntaxTree.fileName(), lineAndCharacter, errorString);
                         ruleFailures.push(ruleFailure);
                     }
                 }
@@ -63552,7 +63542,7 @@ var Lint;
                     throw new Error("Unknown quote style " + quoteStyle);
                 }
 
-                return this.applyWithWalker(syntaxTree, new QuoteWalker(syntaxTree.fileName(), quoteStyle));
+                return this.applyWithWalker(new QuoteWalker(syntaxTree, quoteStyle));
             };
             return QuoteStyleRule;
         })(Rules.BaseRule);
@@ -63560,8 +63550,8 @@ var Lint;
 
         var QuoteWalker = (function (_super) {
             __extends(QuoteWalker, _super);
-            function QuoteWalker(fileName, quoteStyle) {
-                _super.call(this, fileName);
+            function QuoteWalker(syntaxTree, quoteStyle) {
+                _super.call(this, syntaxTree);
                 this.quoteStyle = quoteStyle;
             }
             QuoteWalker.prototype.visitToken = function (token) {
@@ -63582,11 +63572,11 @@ var Lint;
 
                     if (this.quoteStyle === QuoteStyle.SINGLE_QUOTES) {
                         if (firstChar !== "'" || lastChar !== "'") {
-                            failure = this.createFailure(QuoteWalker.SINGLE_QUOTE_FAILURE);
+                            failure = this.createFailure(this.position(), QuoteWalker.SINGLE_QUOTE_FAILURE);
                         }
                     } else if (this.quoteStyle === QuoteStyle.DOUBLE_QUOTES) {
                         if (firstChar !== "\"" || lastChar !== "\"") {
-                            failure = this.createFailure(QuoteWalker.DOUBLE_QUOTE_FAILURE);
+                            failure = this.createFailure(this.position(), QuoteWalker.DOUBLE_QUOTE_FAILURE);
                         }
                     }
                 }
@@ -63615,8 +63605,8 @@ var Lint;
             };
 
             SameLineRule.prototype.apply = function (syntaxTree) {
-                var braceWalker = new BraceWalker(syntaxTree.lineMap(), syntaxTree.fileName());
-                return this.applyWithWalker(syntaxTree, braceWalker);
+                var braceWalker = new BraceWalker(syntaxTree);
+                return this.applyWithWalker(braceWalker);
             };
             return SameLineRule;
         })(Rules.BaseRule);
@@ -63624,9 +63614,8 @@ var Lint;
 
         var BraceWalker = (function (_super) {
             __extends(BraceWalker, _super);
-            function BraceWalker(lineMap, fileName) {
-                _super.call(this, fileName);
-                this.lineMap = lineMap;
+            function BraceWalker() {
+                _super.apply(this, arguments);
             }
             BraceWalker.prototype.visitToken = function (token) {
                 var kind = token.kind();
@@ -63639,9 +63628,9 @@ var Lint;
                         var currentLine = this.getLine(this.position());
 
                         if (currentLine !== lastLine) {
-                            this.addFailure(this.createFailure(BraceWalker.BRACE_FAILURE_STRING));
+                            this.addFailure(this.createFailure(this.position(), BraceWalker.BRACE_FAILURE_STRING));
                         } else if (!this.hasTrailingWhiteSpace(lastState.token)) {
-                            this.addFailure(this.createFailure(BraceWalker.WHITESPACE_FAILURE_STRING));
+                            this.addFailure(this.createFailure(this.position(), BraceWalker.WHITESPACE_FAILURE_STRING));
                         }
                     }
                 }
@@ -63652,7 +63641,7 @@ var Lint;
             BraceWalker.prototype.visitElseClause = function (node) {
                 var lastState = this.getLastState();
                 if (lastState !== undefined && !this.hasTrailingWhiteSpace(lastState.token)) {
-                    this.addFailure(this.createFailure(BraceWalker.ELSE_FAILURE_STRING));
+                    this.addFailure(this.createFailure(this.position(), BraceWalker.ELSE_FAILURE_STRING));
                 }
 
                 _super.prototype.visitElseClause.call(this, node);
@@ -63661,14 +63650,14 @@ var Lint;
             BraceWalker.prototype.visitCatchClause = function (node) {
                 var lastState = this.getLastState();
                 if (lastState !== undefined && !this.hasTrailingWhiteSpace(lastState.token)) {
-                    this.addFailure(this.createFailure(BraceWalker.CATCH_FAILURE_STRING));
+                    this.addFailure(this.createFailure(this.position(), BraceWalker.CATCH_FAILURE_STRING));
                 }
 
                 _super.prototype.visitCatchClause.call(this, node);
             };
 
             BraceWalker.prototype.getLine = function (position) {
-                return this.lineMap.getLineAndCharacterFromPosition(position).line();
+                return this.getSyntaxTree().lineMap().getLineAndCharacterFromPosition(position).line();
             };
 
             BraceWalker.prototype.hasTrailingWhiteSpace = function (token) {
@@ -63712,7 +63701,8 @@ var Lint;
                     if (code === TypeScript.DiagnosticCode.Automatic_semicolon_insertion_not_allowed) {
                         var fileName = diagnostic.fileName();
                         var position = diagnostic.start();
-                        var ruleFailure = new Lint.RuleFailure(fileName, position, SemicolonRule.FAILURE_STRING);
+                        var lineAndCharacter = syntaxTree.lineMap().getLineAndCharacterFromPosition(position);
+                        var ruleFailure = new Lint.RuleFailure(fileName, lineAndCharacter, SemicolonRule.FAILURE_STRING);
 
                         ruleFailures.push(ruleFailure);
                     }
@@ -63740,7 +63730,7 @@ var Lint;
             };
 
             SubRule.prototype.apply = function (syntaxTree) {
-                return this.applyWithWalker(syntaxTree, new SubWalker(syntaxTree.fileName()));
+                return this.applyWithWalker(new SubWalker(syntaxTree));
             };
             return SubRule;
         })(Rules.BaseRule);
@@ -63757,15 +63747,10 @@ var Lint;
             };
 
             SubWalker.prototype.handleElementAccessExpression = function (operatorToken) {
-                var failure = null;
                 var argumentExpressionKind = operatorToken.argumentExpression.kind();
 
                 if (argumentExpressionKind === TypeScript.SyntaxKind.StringLiteral) {
-                    failure = new Lint.RuleFailure(this.getFileName(), this.position(), SubWalker.SUB_FAILURE);
-                }
-
-                if (failure) {
-                    this.addFailure(failure);
+                    this.addFailure(this.createFailure(this.position(), SubWalker.SUB_FAILURE));
                 }
             };
             SubWalker.SUB_FAILURE = "object access via string literals is disallowed";
@@ -63787,7 +63772,7 @@ var Lint;
             };
 
             TrailingWhitespaceRule.prototype.apply = function (syntaxTree) {
-                return this.applyWithWalker(syntaxTree, new TrailingWalker(syntaxTree.fileName()));
+                return this.applyWithWalker(new TrailingWalker(syntaxTree));
             };
             return TrailingWhitespaceRule;
         })(Rules.BaseRule);
@@ -63821,7 +63806,7 @@ var Lint;
             };
 
             TrailingWalker.prototype.createAndAddFailure = function () {
-                var failure = new Lint.RuleFailure(this.getFileName(), this.position() - 1, TrailingWalker.FAILURE_STRING);
+                var failure = this.createFailure(this.position() - 1, TrailingWalker.FAILURE_STRING);
                 this.addFailure(failure);
             };
             TrailingWalker.FAILURE_STRING = "trailing whitespace";
@@ -63843,7 +63828,7 @@ var Lint;
             };
 
             TripleComparisonRule.prototype.apply = function (syntaxTree) {
-                return this.applyWithWalker(syntaxTree, new ComparisonWalker(syntaxTree.fileName()));
+                return this.applyWithWalker(new ComparisonWalker(syntaxTree));
             };
             return TripleComparisonRule;
         })(Rules.BaseRule);
@@ -63865,9 +63850,9 @@ var Lint;
                 var operatorKind = operatorToken.kind();
 
                 if (operatorKind === TypeScript.SyntaxKind.EqualsEqualsToken) {
-                    failure = new Lint.RuleFailure(this.getFileName(), position, ComparisonWalker.EQ_FAILURE);
+                    failure = this.createFailure(position, ComparisonWalker.EQ_FAILURE);
                 } else if (operatorKind === TypeScript.SyntaxKind.ExclamationEqualsToken) {
-                    failure = new Lint.RuleFailure(this.getFileName(), position, ComparisonWalker.NEQ_FAILURE);
+                    failure = this.createFailure(position, ComparisonWalker.NEQ_FAILURE);
                 }
 
                 if (failure) {
@@ -63894,7 +63879,7 @@ var Lint;
             };
 
             VariableNameRule.prototype.apply = function (syntaxTree) {
-                return this.applyWithWalker(syntaxTree, new VariableNameWalker(syntaxTree.fileName()));
+                return this.applyWithWalker(new VariableNameWalker(syntaxTree));
             };
             return VariableNameRule;
         })(Rules.BaseRule);
@@ -63911,7 +63896,7 @@ var Lint;
                 var position = this.position() + identifier.leadingTriviaWidth();
 
                 if (!this.isCamelCase(variableName) && !this.isUpperCase(variableName)) {
-                    this.addFailure(new Lint.RuleFailure(this.getFileName(), position, VariableNameWalker.FAILURE_STRING));
+                    this.addFailure(this.createFailure(position, VariableNameWalker.FAILURE_STRING));
                 }
 
                 _super.prototype.visitVariableDeclarator.call(this, node);
@@ -63948,7 +63933,7 @@ var Lint;
             };
 
             WhitespaceRule.prototype.apply = function (syntaxTree) {
-                return this.applyWithWalker(syntaxTree, new WhitespaceWalker(syntaxTree.fileName()));
+                return this.applyWithWalker(new WhitespaceWalker(syntaxTree));
             };
             return WhitespaceRule;
         })(Rules.BaseRule);
@@ -64023,11 +64008,11 @@ var Lint;
                 var failure = null;
 
                 if (trivia.count() < 1) {
-                    failure = new Lint.RuleFailure(this.getFileName(), position, WhitespaceWalker.FAILURE_STRING);
+                    failure = this.createFailure(position, WhitespaceWalker.FAILURE_STRING);
                 } else {
                     var kind = trivia.syntaxTriviaAt(0).kind();
                     if (kind !== TypeScript.SyntaxKind.WhitespaceTrivia && kind !== TypeScript.SyntaxKind.NewLineTrivia) {
-                        failure = new Lint.RuleFailure(this.getFileName(), position, WhitespaceWalker.FAILURE_STRING);
+                        failure = this.createFailure(position, WhitespaceWalker.FAILURE_STRING);
                     }
                 }
 
@@ -64263,7 +64248,6 @@ var contents = fs.readFileSync(file, "utf8");
 var languageServiceHost = new Lint.LanguageServiceHost(file, contents);
 var languageService = new Services.LanguageService(languageServiceHost);
 var syntaxTree = languageService.getSyntaxTree(file);
-var lineMap = syntaxTree.lineMap();
 
 var i, failures = [];
 var configuredRules = Lint.Configuration.getConfiguredRules(configuration);
@@ -64276,7 +64260,7 @@ for (i = 0; i < configuredRules.length; ++i) {
 
 for (i = 0; i < failures.length; ++i) {
     var failure = failures[i];
-    var lineAndCharacter = lineMap.getLineAndCharacterFromPosition(failure.getPosition());
+    var lineAndCharacter = failure.getLineAndCharacter();
 
     var fileName = failure.getFileName();
     var line = lineAndCharacter.line() + 1;

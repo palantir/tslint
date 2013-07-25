@@ -13,7 +13,7 @@ module Lint.Rules {
     }
 
     public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-      return this.applyWithWalker(syntaxTree, new ForInWalker(syntaxTree.fileName()));
+      return this.applyWithWalker(new ForInWalker(syntaxTree));
     }
   }
 
@@ -45,12 +45,12 @@ module Lint.Rules {
            var grandChildrenCount = child.childCount();
            // There has to be either no body of the for-in loop or a single if statement
            if (grandChildrenCount > 1) {
-              failure = new Lint.RuleFailure(this.getFileName(), this.position(), ForInWalker.FOR_IN_FAILURE);
+              failure = this.createFailure(this.position(), ForInWalker.FOR_IN_FAILURE);
            } else if (grandChildrenCount === 1) {
              var grandChild = child.childAt(0);
              // The enclosing statement inside the for-in loop must be a single if statement
              if (grandChild.kind() !== TypeScript.SyntaxKind.IfStatement) {
-               failure = new Lint.RuleFailure(this.getFileName(), this.position(), ForInWalker.FOR_IN_FAILURE);
+               failure = this.createFailure(this.position(), ForInWalker.FOR_IN_FAILURE);
              }
            }
         }

@@ -9,16 +9,21 @@ module Lint {
   export class RuleWalker extends TypeScript.PositionTrackingWalker {
     private fileName: string;
     private failures: RuleFailure[];
+    private syntaxTree: TypeScript.SyntaxTree;
 
-    constructor(fileName: string) {
+    constructor(syntaxTree: TypeScript.SyntaxTree) {
       super();
 
-      this.fileName = fileName;
+      this.syntaxTree = syntaxTree;
       this.failures = [];
     }
 
-    public getFileName(): string {
-      return this.fileName;
+    public getSyntaxTree(): TypeScript.SyntaxTree {
+      return this.syntaxTree;
+    }
+
+    public getFailures(): RuleFailure[] {
+      return this.failures;
     }
 
     public positionAfter(...elements: TypeScript.ISyntaxElement[]): number {
@@ -34,19 +39,18 @@ module Lint {
       return position;
     }
 
-    // create a failure at the current position
-    public createFailure(failure: string): Lint.RuleFailure {
-      return new Lint.RuleFailure(this.getFileName(), this.position(), failure);
+    // create a failure at the given position
+    public createFailure(position: number, failure: string): Lint.RuleFailure {
+      var lineMap = this.syntaxTree.lineMap();
+      var lineAndCharacter = lineMap.getLineAndCharacterFromPosition(position);
+
+      return new Lint.RuleFailure(this.syntaxTree.fileName(), lineAndCharacter, failure);
     }
 
     public addFailure(failure: RuleFailure) {
       if(!this.existsFailure(failure)) {
         this.failures.push(failure);
       }
-    }
-
-    public getFailures(): RuleFailure[] {
-      return this.failures;
     }
 
     private existsFailure(failure: RuleFailure) {

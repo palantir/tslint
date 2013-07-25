@@ -13,7 +13,7 @@ module Lint.Rules {
     }
 
     public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-      return this.applyWithWalker(syntaxTree, new SubWalker(syntaxTree.fileName()));
+      return this.applyWithWalker(new SubWalker(syntaxTree));
     }
   }
 
@@ -26,15 +26,10 @@ module Lint.Rules {
     }
 
     private handleElementAccessExpression(operatorToken: TypeScript.ElementAccessExpressionSyntax) {
-      var failure = null;
       var argumentExpressionKind = operatorToken.argumentExpression.kind()
 
       if (argumentExpressionKind === TypeScript.SyntaxKind.StringLiteral) {
-        failure = new Lint.RuleFailure(this.getFileName(), this.position(), SubWalker.SUB_FAILURE);
-      }
-
-      if(failure) {
-        this.addFailure(failure);
+        this.addFailure(this.createFailure(this.position(), SubWalker.SUB_FAILURE));
       }
     }
   }

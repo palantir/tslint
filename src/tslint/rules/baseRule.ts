@@ -29,8 +29,8 @@ module Lint.Rules {
       throw TypeScript.Errors.abstract();
     }
 
-    public applyWithWalker(syntaxTree: TypeScript.SyntaxTree, walker: Lint.RuleWalker) {
-      var sourceUnit = syntaxTree.sourceUnit();
+    public applyWithWalker(walker: Lint.RuleWalker) {
+      var sourceUnit = walker.getSyntaxTree().sourceUnit();
       sourceUnit.accept(walker);
       return walker.getFailures();
     }
