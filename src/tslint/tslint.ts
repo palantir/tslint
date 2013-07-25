@@ -14,18 +14,22 @@ var argv = require("optimist")
   .usage("usage: $0")
   .demand("f")
   .options({
+    "c": {
+      alias: "config",
+      describe: "configuration file"
+    },
     "f": {
       alias: "file",
       describe: "file to lint"
     },
     "o": {
       alias: "out",
-      describe: "output destination (stdout, file)"
+      describe: "output destination (stdout, file)",
       default: "stdout"
     },
     "t": {
       alias: "format",
-      describe: "output format (prose, json)"
+      describe: "output format (prose, json)",
       default: "prose"
     }
   })
@@ -33,7 +37,7 @@ var argv = require("optimist")
 
 Lint.Rules.createAllRules();
 
-var configuration = Lint.Configuration.findConfiguration();
+var configuration = Lint.Configuration.findConfiguration(argv.c);
 if (configuration === undefined) {
   console.error("unable to find .tslintrc configuration");
   process.exit(1);

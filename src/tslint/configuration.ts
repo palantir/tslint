@@ -7,27 +7,30 @@ module Lint.Configuration {
 
   var CONFIG_FILENAME = ".tslintrc";
 
-  export function findConfiguration(): string {
-    var currentPath = global.process.cwd();
-    var parentPath = currentPath;
+  export function findConfiguration(configFile): string {
+    if (!configFile) {
+      var currentPath = global.process.cwd();
+      var parentPath = currentPath;
 
-    while(true) {
-      var filePath = path.join(currentPath, CONFIG_FILENAME);
+      while(true) {
+        var filePath = path.join(currentPath, CONFIG_FILENAME);
 
-      if(fs.existsSync(filePath)) {
-        return JSON.parse(fs.readFileSync(filePath, "utf8"));
+        if(fs.existsSync(filePath)) {
+          configFile = filePath;
+          break;
+        }
+
+        // check if there's nowhere else to go
+        parentPath = path.resolve(currentPath, "..");
+        if(parentPath === currentPath) {
+          return undefined;
+        }
+
+        currentPath = parentPath;
       }
-
-      // check if there's nowhere else to go
-      parentPath = path.resolve(currentPath, "..");
-      if(parentPath === currentPath) {
-        break;
-      }
-
-      currentPath = parentPath;
     }
 
-    return undefined;
+    return JSON.parse(fs.readFileSync(configFile, "utf8"));
   }
 
   export function getConfiguredRules(configuration): Rule[] {
