@@ -10,6 +10,26 @@
 
 var fs = require("fs");
 var path = require("path");
+var argv = require("optimist")
+  .usage("usage: $0")
+  .demand("f")
+  .options({
+    "f": {
+      alias: "file",
+      describe: "file to lint"
+    },
+    "o": {
+      alias: "out",
+      describe: "output destination (stdout, file)"
+      default: "stdout"
+    },
+    "t": {
+      alias: "format",
+      describe: "output format (prose, json)"
+      default: "prose"
+    }
+  })
+  .argv;
 
 Lint.Rules.createAllRules();
 
@@ -19,13 +39,7 @@ if (configuration === undefined) {
   process.exit(1);
 }
 
-var argv = process.argv;
-if (argv.length < 3) {
-  console.error("usage: " + argv[0] + " " + path.basename(argv[1]) + " <filename>");
-  process.exit(2);
-}
-
-var file = argv[2];
+var file = argv.f;
 var contents = fs.readFileSync(file, "utf8");
 
 var languageServiceHost = new Lint.LanguageServiceHost(file, contents);
