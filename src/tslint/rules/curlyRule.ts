@@ -5,7 +5,7 @@ module Lint.Rules {
 
     export class CurlyRule extends BaseRule {
         constructor() {
-            super("forin");
+            super("curly");
         }
 
         public isEnabled(): boolean {
