@@ -2,13 +2,13 @@
 
 module Lint {
 
-  export interface LastTokenAwareWalkerState {
+  export interface RuleWalkerState {
     position: number;
     token: TypeScript.ISyntaxToken;
   }
 
-  export class LastTokenAwareRuleWalker extends RuleWalker {
-    private lastState: LastTokenAwareWalkerState = null;
+  export class StateAwareRuleWalker extends RuleWalker {
+    private lastState: RuleWalkerState = null;
 
     public visitToken(token: TypeScript.ISyntaxToken): void {
       // Skip compiler insertions of empty tokens
@@ -22,7 +22,7 @@ module Lint {
       super.visitToken(token);
     }
 
-    public getLastState(): LastTokenAwareWalkerState {
+    public getLastState(): RuleWalkerState {
       return this.lastState;
     }
   }

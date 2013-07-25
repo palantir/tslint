@@ -1,6 +1,6 @@
 /// <reference path='rule.ts'/>
 /// <reference path='baseRule.ts'/>
-/// <reference path='../language/lastTokenAwareRuleWalker.ts'/>
+/// <reference path='../language/stateAwareRuleWalker.ts'/>
 
 module Lint.Rules {
 
@@ -20,7 +20,7 @@ module Lint.Rules {
         }
     }
 
-    class EOFWalker extends Lint.LastTokenAwareRuleWalker {
+    class EOFWalker extends Lint.StateAwareRuleWalker {
         static EOF_Failure = "File should end with newline";
         public visitToken(token: TypeScript.ISyntaxToken): void {
             this.handleToken(token);

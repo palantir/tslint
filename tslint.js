@@ -63299,13 +63299,13 @@ var Lint;
 })(Lint || (Lint = {}));
 var Lint;
 (function (Lint) {
-    var LastTokenAwareRuleWalker = (function (_super) {
-        __extends(LastTokenAwareRuleWalker, _super);
-        function LastTokenAwareRuleWalker() {
+    var StateAwareRuleWalker = (function (_super) {
+        __extends(StateAwareRuleWalker, _super);
+        function StateAwareRuleWalker() {
             _super.apply(this, arguments);
             this.lastState = null;
         }
-        LastTokenAwareRuleWalker.prototype.visitToken = function (token) {
+        StateAwareRuleWalker.prototype.visitToken = function (token) {
             if (token.value() !== null) {
                 this.lastState = {
                     position: this.position() + token.leadingTriviaWidth(),
@@ -63316,12 +63316,12 @@ var Lint;
             _super.prototype.visitToken.call(this, token);
         };
 
-        LastTokenAwareRuleWalker.prototype.getLastState = function () {
+        StateAwareRuleWalker.prototype.getLastState = function () {
             return this.lastState;
         };
-        return LastTokenAwareRuleWalker;
+        return StateAwareRuleWalker;
     })(Lint.RuleWalker);
-    Lint.LastTokenAwareRuleWalker = LastTokenAwareRuleWalker;
+    Lint.StateAwareRuleWalker = StateAwareRuleWalker;
 })(Lint || (Lint = {}));
 var Lint;
 (function (Lint) {
@@ -63380,7 +63380,7 @@ var Lint;
             };
             EOFWalker.EOF_Failure = "File should end with newline";
             return EOFWalker;
-        })(Lint.LastTokenAwareRuleWalker);
+        })(Lint.StateAwareRuleWalker);
     })(Lint.Rules || (Lint.Rules = {}));
     var Rules = Lint.Rules;
 })(Lint || (Lint = {}));
@@ -63685,7 +63685,7 @@ var Lint;
             BraceWalker.ELSE_FAILURE_STRING = "misplaced 'else'";
             BraceWalker.WHITESPACE_FAILURE_STRING = "missing whitespace";
             return BraceWalker;
-        })(Lint.LastTokenAwareRuleWalker);
+        })(Lint.StateAwareRuleWalker);
     })(Lint.Rules || (Lint.Rules = {}));
     var Rules = Lint.Rules;
 })(Lint || (Lint = {}));

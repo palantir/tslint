@@ -1,5 +1,5 @@
 /// <reference path='rule.ts'/>
-/// <reference path='../language/lastTokenAwareRuleWalker.ts'/>
+/// <reference path='../language/stateAwareRuleWalker.ts'/>
 
 module Lint.Rules {
 
@@ -18,7 +18,7 @@ module Lint.Rules {
     }
   }
 
-  class BraceWalker extends Lint.LastTokenAwareRuleWalker {
+  class BraceWalker extends Lint.StateAwareRuleWalker {
     static BRACE_FAILURE_STRING = "misplaced opening brace";
     static CATCH_FAILURE_STRING = "misplaced 'catch'";
     static ELSE_FAILURE_STRING = "misplaced 'else'";
