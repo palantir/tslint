@@ -63143,6 +63143,58 @@ var Lint;
 })(Lint || (Lint = {}));
 var Lint;
 (function (Lint) {
+    (function (Rules) {
+        var DebugRule = (function (_super) {
+            __extends(DebugRule, _super);
+            function DebugRule() {
+                _super.call(this, "debug");
+            }
+            DebugRule.prototype.isEnabled = function () {
+                return this.getValue() === true;
+            };
+
+            DebugRule.prototype.apply = function (syntaxTree) {
+                var sourceUnit = syntaxTree.sourceUnit();
+                var comparisonWalker = new DebugWalker(syntaxTree.fileName());
+
+                sourceUnit.accept(comparisonWalker);
+
+                return comparisonWalker.getFailures();
+            };
+            return DebugRule;
+        })(Rules.BaseRule);
+        Rules.DebugRule = DebugRule;
+
+        var DebugWalker = (function (_super) {
+            __extends(DebugWalker, _super);
+            function DebugWalker() {
+                _super.apply(this, arguments);
+            }
+            DebugWalker.prototype.visitToken = function (token) {
+                this.handleToken(token);
+                _super.prototype.visitToken.call(this, token);
+            };
+
+            DebugWalker.prototype.handleToken = function (operatorToken) {
+                var failure = null;
+                var operatorKind = operatorToken.kind();
+
+                if (operatorKind === TypeScript.SyntaxKind.DebuggerKeyword) {
+                    failure = new Lint.RuleFailure(this.getFileName(), this.position(), DebugWalker.DEBUG_FAILURE);
+                }
+
+                if (failure) {
+                    this.addFailure(failure);
+                }
+            };
+            DebugWalker.DEBUG_FAILURE = "use of debugger statements is disallowed";
+            return DebugWalker;
+        })(Lint.RuleWalker);
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
     var LastTokenAwareRuleWalker = (function (_super) {
         __extends(LastTokenAwareRuleWalker, _super);
         function LastTokenAwareRuleWalker() {
@@ -63768,6 +63820,7 @@ var Lint;
 
         function createAllRules() {
             ALL_RULES.push(new Rules.BitwiseOperatorRule());
+            ALL_RULES.push(new Rules.DebugRule());
             ALL_RULES.push(new Rules.EvalRule());
             ALL_RULES.push(new Rules.FileMustEndWithNewLineRule());
             ALL_RULES.push(new Rules.MaxLineLengthRule());
