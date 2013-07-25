@@ -63262,6 +63262,85 @@ var Lint;
 var Lint;
 (function (Lint) {
     (function (Rules) {
+        var CurlyRule = (function (_super) {
+            __extends(CurlyRule, _super);
+            function CurlyRule() {
+                _super.call(this, "forin");
+            }
+            CurlyRule.prototype.isEnabled = function () {
+                return this.getValue() === true;
+            };
+
+            CurlyRule.prototype.apply = function (syntaxTree) {
+                return this.applyWithWalker(new CurlyWalker(syntaxTree));
+            };
+            return CurlyRule;
+        })(Rules.BaseRule);
+        Rules.CurlyRule = CurlyRule;
+
+        var CurlyWalker = (function (_super) {
+            __extends(CurlyWalker, _super);
+            function CurlyWalker() {
+                _super.apply(this, arguments);
+            }
+            CurlyWalker.prototype.visitForInStatement = function (node) {
+                _super.prototype.visitForInStatement.call(this, node);
+                this.verifyStatementIsBraced(node.statement);
+            };
+
+            CurlyWalker.prototype.visitForStatement = function (node) {
+                _super.prototype.visitForStatement.call(this, node);
+                this.verifyStatementIsBraced(node.statement);
+            };
+
+            CurlyWalker.prototype.visitIfStatement = function (node) {
+                _super.prototype.visitIfStatement.call(this, node);
+                this.verifyStatementIsBraced(node.statement);
+            };
+
+            CurlyWalker.prototype.visitElseClause = function (node) {
+                _super.prototype.visitElseClause.call(this, node);
+                this.verifyStatementIsBraced(node.statement);
+            };
+
+            CurlyWalker.prototype.visitDoStatement = function (node) {
+                _super.prototype.visitDoStatement.call(this, node);
+                this.verifyStatementIsBraced(node.statement);
+            };
+
+            CurlyWalker.prototype.visitWhileStatement = function (node) {
+                _super.prototype.visitWhileStatement.call(this, node);
+                this.verifyStatementIsBraced(node.statement);
+            };
+
+            CurlyWalker.prototype.verifyStatementIsBraced = function (node) {
+                var failure = null;
+                var hasBraces = false;
+
+                var childCount = node.childCount();
+                if (childCount == 3) {
+                    if (node.childAt(0).kind() === TypeScript.SyntaxKind.FirstPunctuation && node.childAt(1).kind() === TypeScript.SyntaxKind.List && node.childAt(2).kind() === TypeScript.SyntaxKind.CloseBraceToken) {
+                        hasBraces = true;
+                    }
+                }
+
+                if (!hasBraces) {
+                    failure = this.createFailure(this.position(), CurlyWalker.CURLY_FAILURE);
+                }
+
+                if (failure) {
+                    this.addFailure(failure);
+                }
+            };
+            CurlyWalker.CURLY_FAILURE = "if/for/do/while statements must be braced";
+            return CurlyWalker;
+        })(Lint.RuleWalker);
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
         var DebugRule = (function (_super) {
             __extends(DebugRule, _super);
             function DebugRule() {
@@ -63343,7 +63422,6 @@ var Lint;
             NewLineRule.prototype.apply = function (syntaxTree) {
                 return this.applyWithWalker(new EOFWalker(syntaxTree));
             };
-            NewLineRule.FAILURE_STRING = "the file doesn't end with a newline";
             return NewLineRule;
         })(Rules.BaseRule);
         Rules.NewLineRule = NewLineRule;
@@ -63373,11 +63451,11 @@ var Lint;
                     }
 
                     if (!endsWithNewLine) {
-                        this.addFailure(this.createFailure(this.position(), EOFWalker.EOF_Failure));
+                        this.addFailure(this.createFailure(this.position(), EOFWalker.FAILURE_STRING));
                     }
                 }
             };
-            EOFWalker.EOF_Failure = "File should end with newline";
+            EOFWalker.FAILURE_STRING = "file should end with a newline";
             return EOFWalker;
         })(Lint.StateAwareRuleWalker);
     })(Lint.Rules || (Lint.Rules = {}));
@@ -64046,6 +64124,7 @@ var Lint;
             ALL_RULES.push(new Rules.ArgumentsRule());
             ALL_RULES.push(new Rules.BitwiseOperatorRule());
             ALL_RULES.push(new Rules.ClassNameRule());
+            ALL_RULES.push(new Rules.CurlyRule());
             ALL_RULES.push(new Rules.DebugRule());
             ALL_RULES.push(new Rules.EvalRule());
             ALL_RULES.push(new Rules.NewLineRule());

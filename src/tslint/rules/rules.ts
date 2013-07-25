@@ -2,6 +2,7 @@
 /// <reference path='argumentsRule.ts'/>
 /// <reference path='bitwiseOperatorRule.ts'/>
 /// <reference path='classNameRule.ts'/>
+/// <reference path='curlyRule.ts'/>
 /// <reference path='debugRule.ts'/>
 /// <reference path='newLineRule.ts'/>
 /// <reference path='forInRule.ts'/>
@@ -24,6 +25,7 @@ module Lint.Rules {
     ALL_RULES.push(new ArgumentsRule());
     ALL_RULES.push(new BitwiseOperatorRule());
     ALL_RULES.push(new ClassNameRule());
+    ALL_RULES.push(new CurlyRule());
     ALL_RULES.push(new DebugRule());
     ALL_RULES.push(new EvalRule());
     ALL_RULES.push(new NewLineRule());
