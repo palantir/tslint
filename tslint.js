@@ -63756,6 +63756,65 @@ var Lint;
 var Lint;
 (function (Lint) {
     (function (Rules) {
+        var VariableNameRule = (function (_super) {
+            __extends(VariableNameRule, _super);
+            function VariableNameRule() {
+                _super.call(this, "variable_name");
+            }
+            VariableNameRule.prototype.isEnabled = function () {
+                return this.getValue() === true;
+            };
+
+            VariableNameRule.prototype.apply = function (syntaxTree) {
+                var sourceUnit = syntaxTree.sourceUnit();
+                var variableNameWalker = new VariableNameWalker(syntaxTree.fileName());
+
+                sourceUnit.accept(variableNameWalker);
+
+                return variableNameWalker.getFailures();
+            };
+            return VariableNameRule;
+        })(Rules.BaseRule);
+        Rules.VariableNameRule = VariableNameRule;
+
+        var VariableNameWalker = (function (_super) {
+            __extends(VariableNameWalker, _super);
+            function VariableNameWalker() {
+                _super.apply(this, arguments);
+            }
+            VariableNameWalker.prototype.visitVariableDeclarator = function (node) {
+                var identifier = node.identifier;
+                var variableName = identifier.text();
+                var position = this.position() + identifier.leadingTriviaWidth();
+
+                if (!this.isCamelCase(variableName) && !this.isUpperCase(variableName)) {
+                    this.addFailure(new Lint.RuleFailure(this.getFileName(), position, VariableNameWalker.FAILURE_STRING));
+                }
+
+                _super.prototype.visitVariableDeclarator.call(this, node);
+            };
+
+            VariableNameWalker.prototype.isCamelCase = function (name) {
+                if (name.length < 0) {
+                    return true;
+                }
+
+                var firstCharacter = name.charAt(0);
+                return (firstCharacter === firstCharacter.toLowerCase());
+            };
+
+            VariableNameWalker.prototype.isUpperCase = function (name) {
+                return (name === name.toUpperCase());
+            };
+            VariableNameWalker.FAILURE_STRING = "name must be in camelcase or uppercase";
+            return VariableNameWalker;
+        })(Lint.RuleWalker);
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
         var WhitespaceRule = (function (_super) {
             __extends(WhitespaceRule, _super);
             function WhitespaceRule() {
@@ -63881,6 +63940,7 @@ var Lint;
             ALL_RULES.push(new Rules.SemicolonRule());
             ALL_RULES.push(new Rules.TrailingWhitespaceRule());
             ALL_RULES.push(new Rules.TripleComparisonRule());
+            ALL_RULES.push(new Rules.VariableNameRule());
             ALL_RULES.push(new Rules.WhitespaceRule());
         }
         Rules.createAllRules = createAllRules;

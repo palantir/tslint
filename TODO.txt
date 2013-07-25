@@ -1,4 +1,3 @@
-• Enforce only camelCased and UPPERCASED variable names
 • Enforce minimum tab width
 • Enforce filtering within for...in (forin)
 • Disallow arguments.caller and arguments.callee (noarg)
