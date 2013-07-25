@@ -63051,7 +63051,9 @@ var Lint;
 
             for (var i = 0; i < elements.length; ++i) {
                 var element = elements[i];
-                position += element.fullWidth();
+                if (element !== null) {
+                    position += element.fullWidth();
+                }
             }
 
             return position;
@@ -63541,7 +63543,7 @@ var Lint;
 
                 if (kind === TypeScript.SyntaxKind.OpenBraceToken && lastState !== undefined) {
                     var lastKind = lastState.token.kind();
-                    if (lastKind === TypeScript.SyntaxKind.CloseParenToken || lastKind === TypeScript.SyntaxKind.DoKeyword || lastKind === TypeScript.SyntaxKind.IdentifierName || lastKind === TypeScript.SyntaxKind.StringLiteral || lastKind === TypeScript.SyntaxKind.TryKeyword) {
+                    if (lastKind === TypeScript.SyntaxKind.CloseParenToken || lastKind === TypeScript.SyntaxKind.DoKeyword || lastKind === TypeScript.SyntaxKind.ElseKeyword || lastKind === TypeScript.SyntaxKind.IdentifierName || lastKind === TypeScript.SyntaxKind.StringLiteral || lastKind === TypeScript.SyntaxKind.TryKeyword) {
                         var lastLine = this.getLine(lastState.position);
                         var currentLine = this.getLine(this.position());
 
@@ -63725,22 +63727,19 @@ var Lint;
                 _super.apply(this, arguments);
             }
             ComparisonWalker.prototype.visitBinaryExpression = function (node) {
-                this.visitNodeOrToken(node.left);
-
-                this.handleOperatorToken(node.operatorToken);
-                this.visitToken(node.operatorToken);
-
-                this.visitNodeOrToken(node.right);
+                var position = this.positionAfter(node.left);
+                this.handleOperatorToken(position, node.operatorToken);
+                _super.prototype.visitBinaryExpression.call(this, node);
             };
 
-            ComparisonWalker.prototype.handleOperatorToken = function (operatorToken) {
+            ComparisonWalker.prototype.handleOperatorToken = function (position, operatorToken) {
                 var failure = null;
                 var operatorKind = operatorToken.kind();
 
                 if (operatorKind === TypeScript.SyntaxKind.EqualsEqualsToken) {
-                    failure = new Lint.RuleFailure(this.getFileName(), this.position(), ComparisonWalker.EQ_FAILURE);
+                    failure = new Lint.RuleFailure(this.getFileName(), position, ComparisonWalker.EQ_FAILURE);
                 } else if (operatorKind === TypeScript.SyntaxKind.ExclamationEqualsToken) {
-                    failure = new Lint.RuleFailure(this.getFileName(), this.position(), ComparisonWalker.NEQ_FAILURE);
+                    failure = new Lint.RuleFailure(this.getFileName(), position, ComparisonWalker.NEQ_FAILURE);
                 }
 
                 if (failure) {
@@ -63788,80 +63787,70 @@ var Lint;
 
                 var kind = token.kind();
                 if (kind === TypeScript.SyntaxKind.CatchKeyword || kind === TypeScript.SyntaxKind.ColonToken || kind === TypeScript.SyntaxKind.CommaToken || kind === TypeScript.SyntaxKind.EqualsToken || kind === TypeScript.SyntaxKind.ForKeyword || kind === TypeScript.SyntaxKind.IfKeyword || kind === TypeScript.SyntaxKind.SemicolonToken || kind === TypeScript.SyntaxKind.SwitchKeyword || kind === TypeScript.SyntaxKind.WhileKeyword || kind === TypeScript.SyntaxKind.WithKeyword) {
-                    this.checkForLeadingSpace(token.trailingTrivia());
+                    this.checkForLeadingSpace(this.position(), token.trailingTrivia());
                 }
             };
 
             WhitespaceWalker.prototype.visitBinaryExpression = function (node) {
-                this.visitNodeOrToken(node.left);
-                this.checkForLeadingSpace(node.left.trailingTrivia());
+                var position = this.positionAfter(node.left);
+                this.checkForLeadingSpace(position, node.left.trailingTrivia());
 
-                this.visitToken(node.operatorToken);
-                this.checkForLeadingSpace(node.operatorToken.trailingTrivia());
+                position += node.operatorToken.fullWidth();
+                this.checkForLeadingSpace(position, node.operatorToken.trailingTrivia());
 
-                this.visitNodeOrToken(node.right);
+                _super.prototype.visitBinaryExpression.call(this, node);
             };
 
             WhitespaceWalker.prototype.visitConditionalExpression = function (node) {
-                this.visitNodeOrToken(node.condition);
-                this.checkForLeadingSpace(node.condition.trailingTrivia());
+                var position = this.positionAfter(node.condition);
+                this.checkForLeadingSpace(position, node.condition.trailingTrivia());
 
-                this.visitToken(node.questionToken);
-                this.checkForLeadingSpace(node.questionToken.trailingTrivia());
+                position += node.questionToken.fullWidth();
+                this.checkForLeadingSpace(position, node.questionToken.trailingTrivia());
 
-                this.visitNodeOrToken(node.whenTrue);
-                this.checkForLeadingSpace(node.whenTrue.trailingTrivia());
+                position += node.whenTrue.fullWidth();
+                this.checkForLeadingSpace(position, node.whenTrue.trailingTrivia());
 
-                this.visitToken(node.colonToken);
-
-                this.visitNodeOrToken(node.whenFalse);
+                _super.prototype.visitConditionalExpression.call(this, node);
             };
 
             WhitespaceWalker.prototype.visitVariableDeclarator = function (node) {
-                this.visitToken(node.identifier);
-
-                this.visitOptionalNode(node.typeAnnotation);
+                var position = this.positionAfter(node.identifier, node.typeAnnotation);
 
                 if (node.equalsValueClause !== null) {
                     if (node.typeAnnotation !== null) {
-                        this.checkForLeadingSpace(node.typeAnnotation.trailingTrivia());
+                        this.checkForLeadingSpace(position, node.typeAnnotation.trailingTrivia());
                     } else {
-                        this.checkForLeadingSpace(node.identifier.trailingTrivia());
+                        this.checkForLeadingSpace(position, node.identifier.trailingTrivia());
                     }
                 }
 
-                this.visitOptionalNode(node.equalsValueClause);
+                _super.prototype.visitVariableDeclarator.call(this, node);
             };
 
             WhitespaceWalker.prototype.visitImportDeclaration = function (node) {
-                this.visitToken(node.importKeyword);
+                var position = this.positionAfter(node.importKeyword, node.identifier);
+                this.checkForLeadingSpace(position, node.identifier.trailingTrivia());
 
-                this.visitToken(node.identifier);
-                this.checkForLeadingSpace(node.identifier.trailingTrivia());
-
-                this.visitToken(node.equalsToken);
-                this.visitNode(node.moduleReference);
-                this.visitToken(node.semicolonToken);
+                _super.prototype.visitImportDeclaration.call(this, node);
             };
 
             WhitespaceWalker.prototype.visitExportAssignment = function (node) {
-                this.visitToken(node.exportKeyword);
-                this.checkForLeadingSpace(node.exportKeyword.trailingTrivia());
+                var position = this.positionAfter(node.exportKeyword);
+                this.checkForLeadingSpace(position, node.exportKeyword.trailingTrivia());
 
-                this.visitToken(node.equalsToken);
-                this.visitToken(node.identifier);
-                this.visitToken(node.semicolonToken);
+                _super.prototype.visitExportAssignment.call(this, node);
             };
 
-            WhitespaceWalker.prototype.checkForLeadingSpace = function (trivia) {
+            WhitespaceWalker.prototype.checkForLeadingSpace = function (position, trivia) {
                 var failure = null;
 
                 if (trivia.count() < 1) {
-                    failure = this.createFailure(WhitespaceWalker.FAILURE_STRING);
+                    failure = new Lint.RuleFailure(this.getFileName(), position, WhitespaceWalker.FAILURE_STRING);
                 } else {
                     var kind = trivia.syntaxTriviaAt(0).kind();
                     if (kind !== TypeScript.SyntaxKind.WhitespaceTrivia && kind !== TypeScript.SyntaxKind.NewLineTrivia) {
-                        failure = this.createFailure(WhitespaceWalker.FAILURE_STRING);
+                        failure = new Lint.RuleFailure(this.getFileName(), position, WhitespaceWalker.FAILURE_STRING);
                     }
                 }
 

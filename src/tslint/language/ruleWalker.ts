@@ -26,7 +26,9 @@ module Lint {
 
       for (var i = 0; i < elements.length; ++i) {
         var element = elements[i];
-        position += element.fullWidth();
+        if(element !== null) {
+          position += element.fullWidth();
+        }
       }
 
       return position;

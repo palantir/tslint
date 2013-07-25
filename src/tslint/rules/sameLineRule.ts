@@ -43,6 +43,7 @@ module Lint.Rules {
         var lastKind = lastState.token.kind();
         if (lastKind === TypeScript.SyntaxKind.CloseParenToken ||
             lastKind === TypeScript.SyntaxKind.DoKeyword ||
+            lastKind === TypeScript.SyntaxKind.ElseKeyword ||
             lastKind === TypeScript.SyntaxKind.IdentifierName ||
             lastKind === TypeScript.SyntaxKind.StringLiteral ||
             lastKind === TypeScript.SyntaxKind.TryKeyword) {

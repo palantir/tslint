@@ -40,87 +40,76 @@ module Lint.Rules {
           kind === TypeScript.SyntaxKind.SwitchKeyword ||
           kind === TypeScript.SyntaxKind.WhileKeyword ||
           kind === TypeScript.SyntaxKind.WithKeyword) {
-        this.checkForLeadingSpace(token.trailingTrivia());
+
+        this.checkForLeadingSpace(this.position(), token.trailingTrivia());
       }
     }
 
     // check for spaces between the operator symbol
     public visitBinaryExpression(node: TypeScript.BinaryExpressionSyntax): void {
-      this.visitNodeOrToken(node.left);
-      this.checkForLeadingSpace(node.left.trailingTrivia());
+      var position = this.positionAfter(node.left);
+      this.checkForLeadingSpace(position, node.left.trailingTrivia());
 
-      this.visitToken(node.operatorToken);
-      this.checkForLeadingSpace(node.operatorToken.trailingTrivia());
+      position += node.operatorToken.fullWidth();
+      this.checkForLeadingSpace(position, node.operatorToken.trailingTrivia());
 
-      this.visitNodeOrToken(node.right);
+      super.visitBinaryExpression(node);
     }
 
     // check for spaces between ternary operator symbols
     public visitConditionalExpression(node: TypeScript.ConditionalExpressionSyntax): void {
-        this.visitNodeOrToken(node.condition);
-        this.checkForLeadingSpace(node.condition.trailingTrivia());
+      var position = this.positionAfter(node.condition);
+      this.checkForLeadingSpace(position, node.condition.trailingTrivia());
 
-        this.visitToken(node.questionToken);
-        this.checkForLeadingSpace(node.questionToken.trailingTrivia());
+      position += node.questionToken.fullWidth();
+      this.checkForLeadingSpace(position, node.questionToken.trailingTrivia());
 
-        this.visitNodeOrToken(node.whenTrue);
-        this.checkForLeadingSpace(node.whenTrue.trailingTrivia());
+      position += node.whenTrue.fullWidth();
+      this.checkForLeadingSpace(position, node.whenTrue.trailingTrivia());
 
-        // trailing spaces for the colon token are verified within visitToken
-        this.visitToken(node.colonToken);
-
-        this.visitNodeOrToken(node.whenFalse);
+      super.visitConditionalExpression(node);
     }
 
     // check for spaces in variable declarations
     public visitVariableDeclarator(node: TypeScript.VariableDeclaratorSyntax): void {
-        this.visitToken(node.identifier);
+      var position = this.positionAfter(node.identifier, node.typeAnnotation);
 
-        this.visitOptionalNode(node.typeAnnotation);
-
-        if (node.equalsValueClause !== null) {
-          if (node.typeAnnotation !== null) {
-            this.checkForLeadingSpace(node.typeAnnotation.trailingTrivia());
-          } else {
-            this.checkForLeadingSpace(node.identifier.trailingTrivia());
-          }
+      if (node.equalsValueClause !== null) {
+        if (node.typeAnnotation !== null) {
+          this.checkForLeadingSpace(position, node.typeAnnotation.trailingTrivia());
+        } else {
+          this.checkForLeadingSpace(position, node.identifier.trailingTrivia());
         }
+      }
 
-        this.visitOptionalNode(node.equalsValueClause);
+      super.visitVariableDeclarator(node);
     }
 
     // check for spaces within imports
     public visitImportDeclaration(node: TypeScript.ImportDeclarationSyntax): void {
-        this.visitToken(node.importKeyword);
+      var position = this.positionAfter(node.importKeyword, node.identifier);
+      this.checkForLeadingSpace(position, node.identifier.trailingTrivia());
 
-        this.visitToken(node.identifier);
-        this.checkForLeadingSpace(node.identifier.trailingTrivia());
-
-        this.visitToken(node.equalsToken);
-        this.visitNode(node.moduleReference);
-        this.visitToken(node.semicolonToken);
+      super.visitImportDeclaration(node);
     }
 
     // check for spaces within exports
     public visitExportAssignment(node: TypeScript.ExportAssignmentSyntax): void {
-        this.visitToken(node.exportKeyword);
-        this.checkForLeadingSpace(node.exportKeyword.trailingTrivia());
+      var position = this.positionAfter(node.exportKeyword);
+      this.checkForLeadingSpace(position, node.exportKeyword.trailingTrivia());
 
-        this.visitToken(node.equalsToken);
-        this.visitToken(node.identifier);
-        this.visitToken(node.semicolonToken);
+      super.visitExportAssignment(node);
     }
 
-    private checkForLeadingSpace(trivia: TypeScript.ISyntaxTriviaList) {
+    private checkForLeadingSpace(position: number, trivia: TypeScript.ISyntaxTriviaList) {
       var failure = null;
 
       if(trivia.count() < 1) {
-        failure = this.createFailure(WhitespaceWalker.FAILURE_STRING);
+        failure = new Lint.RuleFailure(this.getFileName(), position, WhitespaceWalker.FAILURE_STRING);
       } else {
         var kind = trivia.syntaxTriviaAt(0).kind();
-        if(kind !== TypeScript.SyntaxKind.WhitespaceTrivia &&
-           kind !== TypeScript.SyntaxKind.NewLineTrivia) {
-          failure = this.createFailure(WhitespaceWalker.FAILURE_STRING);
+        if(kind !== TypeScript.SyntaxKind.WhitespaceTrivia && kind !== TypeScript.SyntaxKind.NewLineTrivia) {
+          failure = new Lint.RuleFailure(this.getFileName(), position, WhitespaceWalker.FAILURE_STRING);
         }
       }
 

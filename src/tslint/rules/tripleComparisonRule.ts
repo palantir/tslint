@@ -27,22 +27,19 @@ module Lint.Rules {
     static NEQ_FAILURE = "!= should be !==";
 
     public visitBinaryExpression(node: TypeScript.BinaryExpressionSyntax): void {
-      this.visitNodeOrToken(node.left);
-
-      this.handleOperatorToken(node.operatorToken);
-      this.visitToken(node.operatorToken);
-
-      this.visitNodeOrToken(node.right);
+      var position = this.positionAfter(node.left);
+      this.handleOperatorToken(position, node.operatorToken);
+      super.visitBinaryExpression(node);
     }
 
-    private handleOperatorToken(operatorToken: TypeScript.ISyntaxToken) {
+    private handleOperatorToken(position: number, operatorToken: TypeScript.ISyntaxToken) {
       var failure = null;
       var operatorKind = operatorToken.kind();
 
       if (operatorKind === TypeScript.SyntaxKind.EqualsEqualsToken) {
-        failure = new Lint.RuleFailure(this.getFileName(), this.position(), ComparisonWalker.EQ_FAILURE);
+        failure = new Lint.RuleFailure(this.getFileName(), position, ComparisonWalker.EQ_FAILURE);
       } else if (operatorKind === TypeScript.SyntaxKind.ExclamationEqualsToken) {
-        failure = new Lint.RuleFailure(this.getFileName(), this.position(), ComparisonWalker.NEQ_FAILURE);
+        failure = new Lint.RuleFailure(this.getFileName(), position, ComparisonWalker.NEQ_FAILURE);
       }
 
       if(failure) {
