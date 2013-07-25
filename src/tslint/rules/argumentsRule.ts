@@ -13,12 +13,7 @@ module Lint.Rules {
     }
 
     public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-      var sourceUnit = syntaxTree.sourceUnit();
-      var argumentsWalker = new ArgumentsWalker(syntaxTree.fileName());
-
-      sourceUnit.accept(argumentsWalker);
-
-      return argumentsWalker.getFailures();
+      return this.applyWithWalker(syntaxTree, new ArgumentsWalker(syntaxTree.fileName()));
     }
   }
 

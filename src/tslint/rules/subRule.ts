@@ -13,17 +13,12 @@ module Lint.Rules {
     }
 
     public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-      var sourceUnit = syntaxTree.sourceUnit();
-      var subWalker = new SubWalker(syntaxTree.fileName());
-
-      sourceUnit.accept(subWalker);
-
-      return subWalker.getFailures();
+      return this.applyWithWalker(syntaxTree, new SubWalker(syntaxTree.fileName()));
     }
   }
 
   class SubWalker extends Lint.RuleWalker {
-    static SUB_FAILURE = "dictionary access via string literals is disallowed";
+    static SUB_FAILURE = "object access via string literals is disallowed";
 
     public visitElementAccessExpression(node: TypeScript.ElementAccessExpressionSyntax): void {
       super.visitElementAccessExpression(node);

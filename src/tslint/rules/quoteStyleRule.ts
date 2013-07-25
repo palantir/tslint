@@ -16,6 +16,7 @@ module Lint.Rules {
       var sourceUnit = syntaxTree.sourceUnit();
       var quoteStyleString : string = this.getValue();
       var quoteStyle : QuoteStyle;
+
       if (quoteStyleString === "single") {
        quoteStyle = QuoteStyle.SINGLE_QUOTES;
       } else if (quoteStyleString === "double") {
@@ -23,11 +24,8 @@ module Lint.Rules {
       } else {
     		throw new Error("Unknown quote style " + quoteStyle);
       }
-      var quoteWalker = new QuoteWalker(syntaxTree.fileName(), quoteStyle);
 
-      sourceUnit.accept(quoteWalker);
-
-      return quoteWalker.getFailures();
+      return this.applyWithWalker(syntaxTree, new QuoteWalker(syntaxTree.fileName(), quoteStyle));
     }
   }
 

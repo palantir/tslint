@@ -13,17 +13,12 @@ module Lint.Rules {
     }
 
     public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-      var sourceUnit = syntaxTree.sourceUnit();
-      var variableNameWalker = new VariableNameWalker(syntaxTree.fileName());
-
-      sourceUnit.accept(variableNameWalker);
-
-      return variableNameWalker.getFailures();
+      return this.applyWithWalker(syntaxTree, new VariableNameWalker(syntaxTree.fileName()));
     }
   }
 
   class VariableNameWalker extends Lint.RuleWalker {
-    static FAILURE_STRING = "name must be in camelcase or uppercase";
+    static FAILURE_STRING = "variable name must be in camelcase or uppercase";
 
     public visitVariableDeclarator(node: TypeScript.VariableDeclaratorSyntax): void {
       var identifier = node.identifier;

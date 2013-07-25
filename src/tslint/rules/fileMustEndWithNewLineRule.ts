@@ -16,12 +16,7 @@ module Lint.Rules {
         }
 
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            var sourceUnit = syntaxTree.sourceUnit();
-            var eofWalker = new EOFWalker(syntaxTree.fileName());
-
-            sourceUnit.accept(eofWalker);
-
-            return eofWalker.getFailures();
+            return this.applyWithWalker(syntaxTree, new EOFWalker(syntaxTree.fileName()));
         }
     }
 

@@ -63107,6 +63107,12 @@ var Lint;
                 throw TypeScript.Errors.abstract();
             };
 
+            BaseRule.prototype.applyWithWalker = function (syntaxTree, walker) {
+                var sourceUnit = syntaxTree.sourceUnit();
+                sourceUnit.accept(walker);
+                return walker.getFailures();
+            };
+
             BaseRule.prototype.isEnabled = function () {
                 return true;
             };
@@ -63129,12 +63135,7 @@ var Lint;
             };
 
             ArgumentsRule.prototype.apply = function (syntaxTree) {
-                var sourceUnit = syntaxTree.sourceUnit();
-                var argumentsWalker = new ArgumentsWalker(syntaxTree.fileName());
-
-                sourceUnit.accept(argumentsWalker);
-
-                return argumentsWalker.getFailures();
+                return this.applyWithWalker(syntaxTree, new ArgumentsWalker(syntaxTree.fileName()));
             };
             return ArgumentsRule;
         })(Rules.BaseRule);
@@ -63178,12 +63179,7 @@ var Lint;
             };
 
             BitwiseOperatorRule.prototype.apply = function (syntaxTree) {
-                var sourceUnit = syntaxTree.sourceUnit();
-                var bitwiseWalker = new BitwiseWalker(syntaxTree.fileName());
-
-                sourceUnit.accept(bitwiseWalker);
-
-                return bitwiseWalker.getFailures();
+                return this.applyWithWalker(syntaxTree, new BitwiseWalker(syntaxTree.fileName()));
             };
             return BitwiseOperatorRule;
         })(Rules.BaseRule);
@@ -63267,12 +63263,7 @@ var Lint;
             };
 
             DebugRule.prototype.apply = function (syntaxTree) {
-                var sourceUnit = syntaxTree.sourceUnit();
-                var debugWalker = new DebugWalker(syntaxTree.fileName());
-
-                sourceUnit.accept(debugWalker);
-
-                return debugWalker.getFailures();
+                return this.applyWithWalker(syntaxTree, new DebugWalker(syntaxTree.fileName()));
             };
             return DebugRule;
         })(Rules.BaseRule);
@@ -63345,12 +63336,7 @@ var Lint;
             };
 
             FileMustEndWithNewLineRule.prototype.apply = function (syntaxTree) {
-                var sourceUnit = syntaxTree.sourceUnit();
-                var eofWalker = new EOFWalker(syntaxTree.fileName());
-
-                sourceUnit.accept(eofWalker);
-
-                return eofWalker.getFailures();
+                return this.applyWithWalker(syntaxTree, new EOFWalker(syntaxTree.fileName()));
             };
             FileMustEndWithNewLineRule.FAILURE_STRING = "the file doesn't end with a newline";
             return FileMustEndWithNewLineRule;
@@ -63411,12 +63397,7 @@ var Lint;
             };
 
             ForInRule.prototype.apply = function (syntaxTree) {
-                var sourceUnit = syntaxTree.sourceUnit();
-                var forInWalker = new ForInWalker(syntaxTree.fileName());
-
-                sourceUnit.accept(forInWalker);
-
-                return forInWalker.getFailures();
+                return this.applyWithWalker(syntaxTree, new ForInWalker(syntaxTree.fileName()));
             };
             return ForInRule;
         })(Rules.BaseRule);
@@ -63483,12 +63464,7 @@ var Lint;
             };
 
             EvalRule.prototype.apply = function (syntaxTree) {
-                var sourceUnit = syntaxTree.sourceUnit();
-                var evalWalker = new EvalWalker(syntaxTree.fileName());
-
-                sourceUnit.accept(evalWalker);
-
-                return evalWalker.getFailures();
+                return this.applyWithWalker(syntaxTree, new EvalWalker(syntaxTree.fileName()));
             };
             return EvalRule;
         })(Rules.BaseRule);
@@ -63567,6 +63543,7 @@ var Lint;
                 var sourceUnit = syntaxTree.sourceUnit();
                 var quoteStyleString = this.getValue();
                 var quoteStyle;
+
                 if (quoteStyleString === "single") {
                     quoteStyle = QuoteStyle.SINGLE_QUOTES;
                 } else if (quoteStyleString === "double") {
@@ -63574,11 +63551,8 @@ var Lint;
                 } else {
                     throw new Error("Unknown quote style " + quoteStyle);
                 }
-                var quoteWalker = new QuoteWalker(syntaxTree.fileName(), quoteStyle);
 
-                sourceUnit.accept(quoteWalker);
-
-                return quoteWalker.getFailures();
+                return this.applyWithWalker(syntaxTree, new QuoteWalker(syntaxTree.fileName(), quoteStyle));
             };
             return QuoteStyleRule;
         })(Rules.BaseRule);
@@ -63641,12 +63615,8 @@ var Lint;
             };
 
             SameLineRule.prototype.apply = function (syntaxTree) {
-                var sourceUnit = syntaxTree.sourceUnit();
                 var braceWalker = new BraceWalker(syntaxTree.lineMap(), syntaxTree.fileName());
-
-                sourceUnit.accept(braceWalker);
-
-                return braceWalker.getFailures();
+                return this.applyWithWalker(syntaxTree, braceWalker);
             };
             return SameLineRule;
         })(Rules.BaseRule);
@@ -63770,12 +63740,7 @@ var Lint;
             };
 
             SubRule.prototype.apply = function (syntaxTree) {
-                var sourceUnit = syntaxTree.sourceUnit();
-                var subWalker = new SubWalker(syntaxTree.fileName());
-
-                sourceUnit.accept(subWalker);
-
-                return subWalker.getFailures();
+                return this.applyWithWalker(syntaxTree, new SubWalker(syntaxTree.fileName()));
             };
             return SubRule;
         })(Rules.BaseRule);
@@ -63803,7 +63768,7 @@ var Lint;
                     this.addFailure(failure);
                 }
             };
-            SubWalker.SUB_FAILURE = "dictionary access via string literals is disallowed";
+            SubWalker.SUB_FAILURE = "object access via string literals is disallowed";
             return SubWalker;
         })(Lint.RuleWalker);
     })(Lint.Rules || (Lint.Rules = {}));
@@ -63822,12 +63787,7 @@ var Lint;
             };
 
             TrailingWhitespaceRule.prototype.apply = function (syntaxTree) {
-                var sourceUnit = syntaxTree.sourceUnit();
-                var trailingWalker = new TrailingWalker(syntaxTree.fileName());
-
-                sourceUnit.accept(trailingWalker);
-
-                return trailingWalker.getFailures();
+                return this.applyWithWalker(syntaxTree, new TrailingWalker(syntaxTree.fileName()));
             };
             return TrailingWhitespaceRule;
         })(Rules.BaseRule);
@@ -63883,12 +63843,7 @@ var Lint;
             };
 
             TripleComparisonRule.prototype.apply = function (syntaxTree) {
-                var sourceUnit = syntaxTree.sourceUnit();
-                var comparisonWalker = new ComparisonWalker(syntaxTree.fileName());
-
-                sourceUnit.accept(comparisonWalker);
-
-                return comparisonWalker.getFailures();
+                return this.applyWithWalker(syntaxTree, new ComparisonWalker(syntaxTree.fileName()));
             };
             return TripleComparisonRule;
         })(Rules.BaseRule);
@@ -63939,12 +63894,7 @@ var Lint;
             };
 
             VariableNameRule.prototype.apply = function (syntaxTree) {
-                var sourceUnit = syntaxTree.sourceUnit();
-                var variableNameWalker = new VariableNameWalker(syntaxTree.fileName());
-
-                sourceUnit.accept(variableNameWalker);
-
-                return variableNameWalker.getFailures();
+                return this.applyWithWalker(syntaxTree, new VariableNameWalker(syntaxTree.fileName()));
             };
             return VariableNameRule;
         })(Rules.BaseRule);
@@ -63998,12 +63948,7 @@ var Lint;
             };
 
             WhitespaceRule.prototype.apply = function (syntaxTree) {
-                var sourceUnit = syntaxTree.sourceUnit();
-                var whitespaceWalker = new WhitespaceWalker(syntaxTree.fileName());
-
-                sourceUnit.accept(whitespaceWalker);
-
-                return whitespaceWalker.getFailures();
+                return this.applyWithWalker(syntaxTree, new WhitespaceWalker(syntaxTree.fileName()));
             };
             return WhitespaceRule;
         })(Rules.BaseRule);

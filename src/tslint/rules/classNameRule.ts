@@ -23,7 +23,7 @@ module Lint.Rules {
   }
 
   class ClassNameWalker extends Lint.RuleWalker {
-    static FAILURE_STRING = "name must start with an uppercase character";
+    static FAILURE_STRING = "class name must start with an uppercase character";
 
     public visitClassDeclaration(node: TypeScript.ClassDeclarationSyntax): void {
       var position = this.positionAfter(node.modifiers, node.classKeyword);

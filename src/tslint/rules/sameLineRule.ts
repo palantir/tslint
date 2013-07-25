@@ -13,12 +13,8 @@ module Lint.Rules {
     }
 
     public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-      var sourceUnit = syntaxTree.sourceUnit();
       var braceWalker = new BraceWalker(syntaxTree.lineMap(), syntaxTree.fileName());
-
-      sourceUnit.accept(braceWalker);
-
-      return braceWalker.getFailures();
+      return this.applyWithWalker(syntaxTree, braceWalker);
     }
   }
 
