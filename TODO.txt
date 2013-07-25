@@ -1,6 +1,5 @@
 • Disable eval
 • Enforce minimum tab width
-• Enforce newline at EOF
 • Enforce filtering within for...in (forin)
 • Disallow debugger statements (debug)
 • Disallow arguments.caller and arguments.callee (noarg)
