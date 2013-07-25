@@ -18,11 +18,11 @@ module Lint.Rules {
 
     public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
       var sourceUnit = syntaxTree.sourceUnit();
-      var comparisonWalker = new DebugWalker(syntaxTree.fileName());
+      var debugWalker = new DebugWalker(syntaxTree.fileName());
 
-      sourceUnit.accept(comparisonWalker);
+      sourceUnit.accept(debugWalker);
 
-      return comparisonWalker.getFailures();
+      return debugWalker.getFailures();
     }
   }
 

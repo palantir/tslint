@@ -63699,11 +63699,11 @@ var Lint;
 
             SubRule.prototype.apply = function (syntaxTree) {
                 var sourceUnit = syntaxTree.sourceUnit();
-                var comparisonWalker = new SubWalker(syntaxTree.fileName());
+                var subWalker = new SubWalker(syntaxTree.fileName());
 
-                sourceUnit.accept(comparisonWalker);
+                sourceUnit.accept(subWalker);
 
-                return comparisonWalker.getFailures();
+                return subWalker.getFailures();
             };
             return SubRule;
         })(Rules.BaseRule);
