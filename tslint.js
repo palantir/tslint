@@ -63021,6 +63021,17 @@ var Lint;
             return this.failure;
         };
 
+        RuleFailure.prototype.toJson = function () {
+            return {
+                name: this.fileName,
+                position: {
+                    line: this.lineAndCharacter.line(),
+                    character: this.lineAndCharacter.character()
+                },
+                failure: this.failure
+            };
+        };
+
         RuleFailure.prototype.equals = function (ruleFailure) {
             return (this.failure === ruleFailure.getFailure() && this.fileName === ruleFailure.getFileName() && this.lineAndCharacter.line() === ruleFailure.getLineAndCharacter().line() && this.lineAndCharacter.character() === ruleFailure.getLineAndCharacter().character());
         };
@@ -64144,6 +64155,30 @@ var Lint;
 var Lint;
 (function (Lint) {
     (function (Formatters) {
+        var JsonFormatter = (function (_super) {
+            __extends(JsonFormatter, _super);
+            function JsonFormatter() {
+                _super.call(this, "json");
+            }
+            JsonFormatter.prototype.format = function (failures) {
+                var failuresJSON = [];
+
+                for (var i = 0; i < failures.length; ++i) {
+                    var failure = failures[i];
+                    failuresJSON.push(failure.toJson());
+                }
+
+                return JSON.stringify(failuresJSON);
+            };
+            return JsonFormatter;
+        })(Formatters.AbstractFormatter);
+        Formatters.JsonFormatter = JsonFormatter;
+    })(Lint.Formatters || (Lint.Formatters = {}));
+    var Formatters = Lint.Formatters;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Formatters) {
         var ProseFormatter = (function (_super) {
             __extends(ProseFormatter, _super);
             function ProseFormatter() {
@@ -64177,6 +64212,7 @@ var Lint;
         var ALL_FORMATTERS = [];
 
         function createAllFormatters() {
+            ALL_FORMATTERS.push(new Formatters.JsonFormatter());
             ALL_FORMATTERS.push(new Formatters.ProseFormatter());
         }
         Formatters.createAllFormatters = createAllFormatters;
@@ -64341,20 +64377,18 @@ for (i = 0; i < configuredRules.length; ++i) {
     }
 }
 
-if (failures.length === 0) {
-    process.exit(0);
-}
-
 var formatter = Lint.Formatters.getFormatterForName(argv.t);
 var outputText = formatter.format(failures);
 
 var outputStream;
 if (argv.o !== undefined) {
-    outputStream = fs.createWriteStream(argv.o, { end: false, mode: 0644 });
+    outputStream = fs.createWriteStream(argv.o, { end: false, flags: "w+", mode: 0644 });
 } else {
     outputStream = process.stdout;
 }
 
-outputStream.write(outputText, function () {
-    process.exit(2);
-});
+if (failures.length > 0) {
+    outputStream.write(outputText, function () {
+        process.exit(2);
+    });
+}

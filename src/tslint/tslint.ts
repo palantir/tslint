@@ -69,21 +69,18 @@ for (i = 0; i < configuredRules.length; ++i) {
   }
 }
 
-// if there are no failures, exit gracefully
-if(failures.length === 0) {
-  process.exit(0);
-}
-
 var formatter = Lint.Formatters.getFormatterForName(argv.t);
 var outputText = formatter.format(failures);
 
 var outputStream;
 if (argv.o !== undefined) {
-  outputStream = fs.createWriteStream(argv.o, {end: false, mode: 0644})
+  outputStream = fs.createWriteStream(argv.o, {end: false, flags: "w+", mode: 0644});
 } else {
   outputStream = process.stdout;
 }
 
-outputStream.write(outputText, function() {
-  process.exit(2);
-});
+if(failures.length > 0) {
+  outputStream.write(outputText, () => {
+    process.exit(2);
+  });
+}

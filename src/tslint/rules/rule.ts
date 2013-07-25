@@ -37,6 +37,17 @@ module Lint {
       return this.failure;
     }
 
+    public toJson(): any {
+      return {
+        name: this.fileName,
+        position: {
+          line: this.lineAndCharacter.line(),
+          character: this.lineAndCharacter.character()
+        },
+        failure: this.failure
+      }
+    }
+
     public equals(ruleFailure: RuleFailure): boolean {
       return (this.failure  === ruleFailure.getFailure() &&
               this.fileName === ruleFailure.getFileName() &&

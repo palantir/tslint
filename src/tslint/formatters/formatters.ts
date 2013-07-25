@@ -1,3 +1,4 @@
+/// <reference path='jsonFormatter.ts'/>
 /// <reference path='proseFormatter.ts'/>
 
 module Lint.Formatters {
@@ -5,6 +6,7 @@ module Lint.Formatters {
   var ALL_FORMATTERS: Formatter[] = [];
 
   export function createAllFormatters() {
+    ALL_FORMATTERS.push(new JsonFormatter());
     ALL_FORMATTERS.push(new ProseFormatter());
   }
 
