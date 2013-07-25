@@ -5,8 +5,6 @@
 module Lint.Rules {
 
     export class NewLineRule extends BaseRule {
-        static FAILURE_STRING = "the file doesn't end with a newline";
-
         constructor() {
             super("file_must_end_with_newline");
         }
@@ -21,7 +19,7 @@ module Lint.Rules {
     }
 
     class EOFWalker extends Lint.StateAwareRuleWalker {
-        static EOF_Failure = "File should end with newline";
+        static FAILURE_STRING = "file should end with a newline";
         public visitToken(token: TypeScript.ISyntaxToken): void {
             this.handleToken(token);
             super.visitToken(token);
@@ -44,7 +42,7 @@ module Lint.Rules {
                 }
 
                 if (!endsWithNewLine) {
-                    this.addFailure(this.createFailure(this.position(), EOFWalker.EOF_Failure));
+                    this.addFailure(this.createFailure(this.position(), EOFWalker.FAILURE_STRING));
                 }
             }
         }
