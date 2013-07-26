@@ -54,9 +54,8 @@ module Lint.Rules {
             var failure = null;
             var hasBraces = false;
 
-
             var childCount = node.childCount();
-            if (childCount == 3) {
+            if (childCount === 3) {
                 if (node.childAt(0).kind() === TypeScript.SyntaxKind.FirstPunctuation &&
                     node.childAt(1).kind() === TypeScript.SyntaxKind.List &&
                     node.childAt(2).kind() === TypeScript.SyntaxKind.CloseBraceToken) {
@@ -65,11 +64,7 @@ module Lint.Rules {
             }
 
             if (!hasBraces) {
-                failure = this.createFailure(this.position(), CurlyWalker.CURLY_FAILURE);
-            }
-
-            if (failure) {
-                this.addFailure(failure);
+                this.addFailure(this.createFailure(this.position(), CurlyWalker.CURLY_FAILURE));
             }
         }
     }
