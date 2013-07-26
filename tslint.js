@@ -63383,7 +63383,6 @@ var Lint;
         __extends(StateAwareRuleWalker, _super);
         function StateAwareRuleWalker() {
             _super.apply(this, arguments);
-            this.lastState = null;
         }
         StateAwareRuleWalker.prototype.visitToken = function (token) {
             if (token.value() !== null) {
@@ -63433,11 +63432,12 @@ var Lint;
             };
 
             EOFWalker.prototype.handleToken = function (operatorToken) {
+                var lastState = this.getLastState();
                 var operatorKind = operatorToken.kind();
-                if (operatorKind === TypeScript.SyntaxKind.EndOfFileToken) {
+                if (lastState !== undefined && operatorKind === TypeScript.SyntaxKind.EndOfFileToken) {
                     var endsWithNewLine = false;
 
-                    var previousToken = this.getLastState().token;
+                    var previousToken = lastState.token;
                     if (previousToken !== null && previousToken.hasTrailingNewLine()) {
                         endsWithNewLine = true;
                     }
@@ -64627,7 +64627,11 @@ var outputText = formatter.format(failures);
 
 var outputStream;
 if (argv.o !== undefined) {
-    outputStream = fs.createWriteStream(argv.o, { end: false, flags: "w+", mode: 0644 });
+    outputStream = fs.createWriteStream(argv.o, {
+        end: false,
+        flags: "w+",
+        mode: 0644
+    });
 } else {
     outputStream = process.stdout;
 }

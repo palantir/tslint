@@ -8,7 +8,7 @@ module Lint {
   }
 
   export class StateAwareRuleWalker extends RuleWalker {
-    private lastState: RuleWalkerState = null;
+    private lastState: RuleWalkerState;
 
     public visitToken(token: TypeScript.ISyntaxToken): void {
       // Skip compiler insertions of empty tokens

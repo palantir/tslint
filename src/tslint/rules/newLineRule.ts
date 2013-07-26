@@ -26,12 +26,13 @@ module Lint.Rules {
         }
 
         private handleToken(operatorToken: TypeScript.ISyntaxToken) {
+            var lastState = this.getLastState();
             var operatorKind = operatorToken.kind();
-            if (operatorKind === TypeScript.SyntaxKind.EndOfFileToken) {
+            if (lastState !== undefined && operatorKind === TypeScript.SyntaxKind.EndOfFileToken) {
                 var endsWithNewLine = false;
 
                 // Begin by looking at the penultimate token to see if it contains a newline
-                var previousToken = this.getLastState().token;
+                var previousToken = lastState.token;
                 if (previousToken !== null && previousToken.hasTrailingNewLine()) {
                     endsWithNewLine = true;
                 }
