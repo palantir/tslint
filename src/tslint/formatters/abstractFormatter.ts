@@ -1,4 +1,4 @@
-/// <reference path='../../typescript/compiler/core/errors.ts' />
+/// <reference path='../../typescript/src/compiler/core/errors.ts' />
 
 /// <reference path='formatter.ts' />
 

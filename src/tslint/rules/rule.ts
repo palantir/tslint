@@ -1,5 +1,5 @@
-/// <reference path='../../typescript/compiler/syntax/syntaxTree.ts'/>
-/// <reference path='../../typescript/compiler/text/linePosition.ts'/>
+/// <reference path='../../typescript/src/compiler/syntax/syntaxTree.ts'/>
+/// <reference path='../../typescript/src/compiler/text/linePosition.ts'/>
 
 module Lint {
 

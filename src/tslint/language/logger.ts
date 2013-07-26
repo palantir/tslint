@@ -1,4 +1,4 @@
-/// <reference path='../../typescript/compiler/diagnostics.ts'/>
+/// <reference path='../../typescript/src/compiler/diagnostics.ts'/>
 
 module Lint {
 

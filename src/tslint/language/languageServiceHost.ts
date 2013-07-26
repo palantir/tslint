@@ -1,6 +1,6 @@
-/// <reference path='../../typescript/compiler/precompile.ts' />
-/// <reference path='../../typescript/compiler/text/scriptSnapshot.ts' />
-/// <reference path='../../typescript/services/languageService.ts' />
+/// <reference path='../../typescript/src/compiler/precompile.ts' />
+/// <reference path='../../typescript/src/compiler/text/scriptSnapshot.ts' />
+/// <reference path='../../typescript/src/services/languageService.ts' />
 
 /// <reference path='logger.ts' />
 

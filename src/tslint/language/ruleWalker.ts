@@ -1,6 +1,6 @@
-/// <reference path='../../typescript/compiler/core/errors.ts'/>
-/// <reference path='../../typescript/compiler/syntax/positionTrackingWalker.ts'/>
-/// <reference path='../../typescript/compiler/syntax/syntaxKind.ts'/>
+/// <reference path='../../typescript/src/compiler/core/errors.ts'/>
+/// <reference path='../../typescript/src/compiler/syntax/positionTrackingWalker.ts'/>
+/// <reference path='../../typescript/src/compiler/syntax/syntaxKind.ts'/>
 
 /// <reference path='../rules/rule.ts'/>
 

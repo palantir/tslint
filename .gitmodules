@@ -1,0 +1,3 @@
+[submodule "src/typescript"]
+	path = src/typescript
+	url = https://git01.codeplex.com/typescript
