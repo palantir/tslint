@@ -1,5 +1,0 @@
-0.ts line 30 col 1: error TS2012: Cannot convert 'X_1' to 'Y_1':
-	Types 'X_1' and 'Y_1' define property 'name' as private.
-0.ts line 31 col 1: error TS2082: Supplied parameters do not match any signature of call target:
-	Types 'Y_1' and 'X_1' define property 'name' as private.
-0.ts line 31 col 1: error TS2087: Could not select overload for 'call' expression.

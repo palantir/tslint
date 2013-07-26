@@ -1,1 +1,0 @@
-0.ts line 13 col 25: error TS1003: Identifier expected.

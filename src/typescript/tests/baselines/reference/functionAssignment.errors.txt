@@ -1,2 +1,0 @@
-0.ts line 22 col 5: error TS2011: Cannot convert 'number' to 'string'.
-0.ts line 34 col 17: error TS2094: The property 'length' does not exist on value of type 'Number'.

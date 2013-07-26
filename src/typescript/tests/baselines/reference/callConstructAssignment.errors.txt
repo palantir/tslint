@@ -1,4 +1,0 @@
-0.ts line 7 col 1: error TS2012: Cannot convert 'new() => any' to '() => void':
-	Type '() => void' requires a call signature, but type 'new() => any' lacks one.
-0.ts line 8 col 1: error TS2012: Cannot convert '() => void' to 'new() => any':
-	Type 'new() => any' requires a construct signature, but type '() => void' lacks one.

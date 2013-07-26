@@ -1,3 +1,0 @@
-0.ts line 22 col 20: error TS1003: Identifier expected.
-0.ts line 27 col 1: error TS1008: Unexpected token; 'module, class, interface, enum, import or statement' expected.
-0.ts line 1 col 13: error TS2000: Duplicate identifier 'console'.

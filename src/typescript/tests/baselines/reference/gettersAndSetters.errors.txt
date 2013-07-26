@@ -1,3 +1,0 @@
-0.ts line 25 col 13: error TS2094: The property 'Baz' does not exist on value of type 'C'.
-0.ts line 26 col 3: error TS2094: The property 'Baz' does not exist on value of type 'C'.
-0.ts line 26 col 3: error TS2094: The property 'Baz' does not exist on value of type 'C'.

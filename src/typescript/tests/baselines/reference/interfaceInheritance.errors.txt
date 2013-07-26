@@ -1,8 +1,0 @@
-0.ts line 30 col 1: error TS2012: Cannot convert 'I3' to 'I2':
-	Type 'I3' is missing property 'i1P1' from type 'I2'.
-0.ts line 37 col 1: error TS2012: Cannot convert 'I5' to 'I4':
-	Types of property 'one' of types 'I5' and 'I4' are incompatible.
-0.ts line 38 col 1: error TS2012: Cannot convert 'I4' to 'I5':
-	Types of property 'one' of types 'I4' and 'I5' are incompatible.
-0.ts line 22 col 7: error TS2137: Class C1 declares interface I2 but does not implement it:
-	Type 'C1' is missing property 'i1P1' from type 'I2'.

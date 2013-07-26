@@ -1,1 +1,0 @@
-0.ts line 19 col 70: error TS2094: The property 'm' does not exist on value of type 'Point3D'.

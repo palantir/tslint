@@ -1,3 +1,0 @@
-0.ts line 20 col 22: error TS4022: Type reference cannot refer to container '_modes'.
-0.ts line 20 col 39: error TS2094: The property 'Mode' does not exist on value of type '_modes'.
-0.ts line 21 col 22: error TS2094: The property 'Mode' does not exist on value of type '_modes'.

@@ -1,3 +1,0 @@
-Q.f(function () {
-    this;
-});

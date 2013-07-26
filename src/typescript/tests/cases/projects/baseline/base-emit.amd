@@ -1,4 +1,0 @@
-define(["require", "exports", "decl"], function(require, exports, __g__) {
-    var g = __g__;
-    var p = g.point(10, 20);
-});

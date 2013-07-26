@@ -1,1 +1,0 @@
-0.ts line 10 col 14: error TS2094: The property 'C' does not exist on value of type 'mod1'.

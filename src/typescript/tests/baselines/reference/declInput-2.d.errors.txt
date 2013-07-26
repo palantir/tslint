@@ -1,5 +1,0 @@
-0.d.ts line 11 col 21: error TS2095: Could not find symbol 'C'.
-0.d.ts line 14 col 21: error TS2095: Could not find symbol 'I2'.
-0.d.ts line 17 col 24: error TS2095: Could not find symbol 'I2'.
-0.d.ts line 19 col 24: error TS2095: Could not find symbol 'I2'.
-0.d.ts line 20 col 22: error TS2095: Could not find symbol 'C'.

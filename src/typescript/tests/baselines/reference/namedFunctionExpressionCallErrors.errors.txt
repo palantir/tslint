@@ -1,3 +1,0 @@
-0.ts line 5 col 1: error TS2095: Could not find symbol 'foo'.
-0.ts line 16 col 1: error TS2095: Could not find symbol 'bar'.
-0.ts line 12 col 5: error TS2095: Could not find symbol 'foo'.

@@ -1,2 +1,0 @@
-0.ts line 10 col 7: error TS2137: Class C2 declares interface ifoo but does not implement it:
-	Type 'C2' is missing property 'y' from type 'ifoo'.

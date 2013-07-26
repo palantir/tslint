@@ -1,1 +1,0 @@
-0.ts line 8 col 22: error TS2140: 'this' cannot be referenced in initializers in a class body.

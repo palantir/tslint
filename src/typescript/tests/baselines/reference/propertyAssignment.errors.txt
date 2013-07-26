@@ -1,5 +1,0 @@
-0.ts line 6 col 14: error TS1022: Index signature parameter must have a type annotation.
-0.ts line 14 col 1: error TS2012: Cannot convert '{ x: number; }' to 'new() => any':
-	Type 'new() => any' requires a construct signature, but type '{ x: number; }' lacks one.
-0.ts line 16 col 1: error TS2012: Cannot convert '{ x: number; }' to '() => void':
-	Type '() => void' requires a call signature, but type '{ x: number; }' lacks one.

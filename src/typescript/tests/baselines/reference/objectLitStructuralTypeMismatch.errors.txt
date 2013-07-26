@@ -1,2 +1,0 @@
-0.ts line 2 col 5: error TS2012: Cannot convert '{ b: number; }' to '{ a: number; }':
-	Type '{ b: number; }' is missing property 'a' from type '{ a: number; }'.

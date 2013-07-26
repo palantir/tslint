@@ -1,1 +1,0 @@
-0.ts line 1 col 8: error TS1060: Module name cannot be 'string'.

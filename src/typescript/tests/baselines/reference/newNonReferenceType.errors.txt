@@ -1,2 +1,0 @@
-0.ts line 1 col 13: error TS2095: Could not find symbol 'any'.
-0.ts line 2 col 13: error TS2095: Could not find symbol 'boolean'.

@@ -1,2 +1,0 @@
-0.ts line 3 col 5: error TS1056: Accessors are only when targeting EcmaScript5 and higher.
-0.ts line 5 col 11: error TS1056: Accessors are only when targeting EcmaScript5 and higher.

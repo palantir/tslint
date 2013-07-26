@@ -1,2 +1,0 @@
-0.ts line 3 col 5: error TS2094: The property 'b' does not exist on value of type ''.
-0.ts line 3 col 5: error TS2094: The property 'b' does not exist on value of type ''.

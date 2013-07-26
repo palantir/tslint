@@ -1,2 +1,0 @@
-0.ts line 31 col 1: error TS2095: Could not find symbol 'moduleType2'.
-0.ts line 32 col 1: error TS2095: Could not find symbol 'moduleType\u0032'.

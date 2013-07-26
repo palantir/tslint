@@ -1,3 +1,0 @@
-0.ts line 6 col 20: error TS2094: The property '_store' does not exist on value of type 'Bar'.
-0.ts line 11 col 13: error TS2094: The property '_store' does not exist on value of type 'Bar'.
-0.ts line 11 col 13: error TS2094: The property '_store' does not exist on value of type 'Bar'.

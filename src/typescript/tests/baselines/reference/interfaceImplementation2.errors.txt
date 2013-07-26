@@ -1,2 +1,0 @@
-0.ts line 8 col 7: error TS2137: Class C3 declares interface I1 but does not implement it:
-	Type 'C3' is missing property 'iFn' from type 'I1'.

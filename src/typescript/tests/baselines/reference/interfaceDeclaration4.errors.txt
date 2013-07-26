@@ -1,9 +1,0 @@
-0.ts line 39 col 14: error TS1005: '{' expected.
-0.ts line 39 col 18: error TS1005: ';' expected.
-0.ts line 39 col 15: error TS2095: Could not find symbol 'I1'.
-0.ts line 18 col 11: error TS2143: Interface 'I3' cannot extend interface 'Foo.I1':
-	Types of property 'item' of types 'I3' and 'Foo.I1' are incompatible.
-0.ts line 27 col 7: error TS2137: Class C2 declares interface I4 but does not implement it:
-	Type 'C2' is missing property 'item' from type 'I4'.
-0.ts line 36 col 7: error TS2137: Class C3 declares interface Foo.I1 but does not implement it:
-	Type 'C3' is missing property 'item' from type 'Foo.I1'.

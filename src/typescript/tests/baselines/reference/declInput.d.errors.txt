@@ -1,2 +1,0 @@
-0.d.ts line 4 col 1: error TS2000: Duplicate identifier 'bar'.
-0.d.ts line 8 col 12: error TS2095: Could not find symbol 'undefined'.

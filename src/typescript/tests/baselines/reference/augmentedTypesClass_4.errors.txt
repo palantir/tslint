@@ -1,2 +1,0 @@
-0.ts line 3 col 1: error TS2000: Duplicate identifier 'c3aa'.
-0.ts line 3 col 1: error TS2000: Duplicate identifier 'c3aa'.

@@ -1,5 +1,0 @@
-0.ts line 1 col 16: error TS1003: Identifier expected.
-0.ts line 32 col 11: error TS2095: Could not find symbol 'XDate'.
-0.ts line 34 col 7: error TS2095: Could not find symbol 'XDate'.
-0.ts line 36 col 7: error TS2095: Could not find symbol 'XDate'.
-0.ts line 37 col 3: error TS2095: Could not find symbol 'XDate'.

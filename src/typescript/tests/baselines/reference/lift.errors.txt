@@ -1,4 +1,0 @@
-0.ts line 14 col 32: error TS2095: Could not find symbol 'x'.
-0.ts line 14 col 34: error TS2095: Could not find symbol 'z'.
-0.ts line 15 col 37: error TS2095: Could not find symbol 'x'.
-0.ts line 15 col 39: error TS2095: Could not find symbol 'z'.

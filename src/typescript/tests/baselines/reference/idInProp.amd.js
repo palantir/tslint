@@ -1,3 +1,0 @@
-function f() {
-    var t;
-}

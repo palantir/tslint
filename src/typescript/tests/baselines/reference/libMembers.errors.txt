@@ -1,3 +1,0 @@
-0.ts line 9 col 16: error TS2068: 'new T[]' cannot be used to create an array. Use 'new Array<T>()' instead.
-0.ts line 4 col 3: error TS2094: The property 'subby' does not exist on value of type 'String'.
-0.ts line 12 col 15: error TS2156: Static member cannot be accessed off an instance variable.

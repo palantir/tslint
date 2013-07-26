@@ -1,7 +1,0 @@
-0.ts line 61 col 16: error TS2094: The property 'I' does not exist on value of type 'M'.
-0.ts line 61 col 20: error TS2095: Could not find symbol 'I'.
-0.ts line 64 col 11: error TS2094: The property 'x' does not exist on value of type 'M'.
-0.ts line 65 col 15: error TS2094: The property 'E' does not exist on value of type 'M'.
-0.ts line 37 col 29: error TS2019: Exported class 'M.C' implements private interface 'M.I'.
-0.ts line 57 col 17: error TS2095: Could not find symbol 'x'.
-0.ts line 58 col 21: error TS2094: The property 'E' does not exist on value of type 'M'.

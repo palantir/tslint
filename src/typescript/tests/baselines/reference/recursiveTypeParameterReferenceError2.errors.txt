@@ -1,2 +1,0 @@
-0.ts line 1 col 1: error TS2160: A generic type may not reference itself with a wrapped form of its own type parameters.
-0.ts line 1 col 1: error TS2160: A generic type may not reference itself with a wrapped form of its own type parameters.

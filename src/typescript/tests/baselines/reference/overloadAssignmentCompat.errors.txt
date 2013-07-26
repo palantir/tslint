@@ -1,1 +1,0 @@
-0.ts line 35 col 1: error TS2148: Overload signature is not compatible with function definition.

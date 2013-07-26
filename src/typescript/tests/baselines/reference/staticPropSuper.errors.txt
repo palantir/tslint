@@ -1,3 +1,0 @@
-0.ts line 16 col 5: error TS2105: Constructors for derived classes must contain a 'super' call.
-0.ts line 24 col 5: error TS2105: Constructors for derived classes must contain a 'super' call.
-0.ts line 32 col 5: error TS2105: Constructors for derived classes must contain a 'super' call.

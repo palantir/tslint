@@ -1,6 +1,0 @@
-0.ts line 9 col 9: error TS1026: Class can only extend single type.
-0.ts line 18 col 9: error TS1026: Class can only extend single type.
-0.ts line 25 col 7: error TS2141: Class 'ND' cannot extend class 'N':
-	Types of property 'y' of types 'ND' and 'N' are incompatible.
-0.ts line 34 col 7: error TS2141: Class 'Baad' cannot extend class 'Good':
-	Class 'Baad' defines instance member function 'f', but extended class 'Good' defines it as instance member property.

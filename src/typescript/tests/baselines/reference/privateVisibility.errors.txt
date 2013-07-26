@@ -1,3 +1,0 @@
-0.ts line 9 col 3: error TS2107: 'Foo.privMeth' is inaccessible.
-0.ts line 10 col 3: error TS2107: 'Foo.privProp' is inaccessible.
-0.ts line 24 col 3: error TS2107: 'M.C.priv' is inaccessible.

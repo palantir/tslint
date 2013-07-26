@@ -1,2 +1,0 @@
-0.ts line 14 col 15: error TS2097: 'this' cannot be referenced in current location.
-0.ts line 20 col 15: error TS2097: 'this' cannot be referenced in current location.

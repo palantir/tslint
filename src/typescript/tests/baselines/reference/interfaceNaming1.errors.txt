@@ -1,4 +1,0 @@
-0.ts line 1 col 11: error TS1005: ';' expected.
-0.ts line 1 col 1: error TS2095: Could not find symbol 'interface'.
-0.ts line 3 col 1: error TS2095: Could not find symbol 'interface'.
-0.ts line 3 col 1: error TS2112: The right-hand side of an arithmetic operation must be of type 'any', 'number' or an enum type.

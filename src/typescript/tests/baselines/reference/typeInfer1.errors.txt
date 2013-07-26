@@ -1,2 +1,0 @@
-0.ts line 11 col 5: error TS2012: Cannot convert '{ Moo: () => string; }' to 'ITextWriter2':
-	Type '{ Moo: () => string; }' is missing property 'Write' from type 'ITextWriter2'.

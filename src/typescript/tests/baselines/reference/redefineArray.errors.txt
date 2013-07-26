@@ -1,2 +1,0 @@
-0.ts line 1 col 1: error TS2012: Cannot convert '(n: number, s: string) => number' to '{ isArray(arg: any): boolean; prototype: any[]; <T>(arrayLength: number): T[]; <T>(...items: T[]): T[]; new<T>(arrayLength: number): T[]; new<T>(...items: T[]): T[]; }':
-	Type '(n: number, s: string) => number' is missing property 'isArray' from type '{ isArray(arg: any): boolean; prototype: any[]; <T>(arrayLength: number): T[]; <T>(...items: T[]): T[]; new<T>(arrayLength: number): T[]; new<T>(...items: T[]): T[]; }'.

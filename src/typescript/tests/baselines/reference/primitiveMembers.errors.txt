@@ -1,4 +1,0 @@
-0.ts line 24 col 35: error TS1008: Unexpected token; 'constructor, function, accessor or variable' expected.
-0.ts line 25 col 56: error TS1008: Unexpected token; 'constructor, function, accessor or variable' expected.
-0.ts line 5 col 3: error TS2094: The property 'toBAZ' does not exist on value of type 'Number'.
-0.ts line 11 col 1: error TS2011: Cannot convert 'Number' to 'number'.

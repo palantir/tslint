@@ -1,3 +1,0 @@
-0.ts line 13 col 16: error TS2027: Exported variable 'M.server' has or is using private type 'm2.connectModule'.
-0.ts line 13 col 16: error TS2027: Exported variable 'M.server' has or is using private type 'm2.connectModule'.
-0.ts line 13 col 16: error TS2027: Exported variable 'M.server' has or is using private type 'm2.connectExport'.

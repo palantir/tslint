@@ -1,9 +1,0 @@
-0.ts line 20 col 33: error TS2019: Exported class 'Test.Bug' implements private interface 'Test.IMode'.
-0.ts line 21 col 37: error TS2038: Parameter 'state' of public method from exported class has or is using private type 'Test.IState'.
-0.ts line 21 col 66: error TS2056: Return type of public method from exported class has or is using private type 'Test.IAction'.
-0.ts line 25 col 17: error TS2056: Return type of public method from exported class has or is using private type 'Test.IAction'.
-0.ts line 28 col 38: error TS2038: Parameter 'state' of public method from exported class has or is using private type 'Test.IState'.
-0.ts line 28 col 75: error TS2056: Return type of public method from exported class has or is using private type 'Test.ILineTokens'.
-0.ts line 28 col 9: error TS2056: Return type of public method from exported class has or is using private type 'Test.ILineTokens'.
-0.ts line 23 col 17: error TS2012: Cannot convert 'Test.IToken[]' to 'Test.IStateToken[]':
-	Type 'Test.IToken' is missing property 'state' from type 'Test.IStateToken'.

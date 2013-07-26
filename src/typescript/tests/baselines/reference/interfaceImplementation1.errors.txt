@@ -1,6 +1,0 @@
-0.ts line 34 col 5: error TS2012: Cannot convert '() => C2' to 'I4':
-	Type 'I4' requires a construct signature, but type '() => C2' lacks one.
-0.ts line 12 col 7: error TS2137: Class C1 declares interface I1 but does not implement it:
-	Property 'iObj' defined as private in type 'C1' is defined as public in type 'I1'.
-0.ts line 12 col 7: error TS2137: Class C1 declares interface I2 but does not implement it:
-	Property 'iFn' defined as private in type 'C1' is defined as public in type 'I2'.

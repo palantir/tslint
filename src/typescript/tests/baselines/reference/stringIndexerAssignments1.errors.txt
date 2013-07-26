@@ -1,2 +1,0 @@
-0.ts line 5 col 1: error TS2012: Cannot convert '{ one: number; two: string; }' to '{ one: string; [index: string]: string; }':
-	Types of property 'one' of types '{ one: number; two: string; }' and '{ one: string; [index: string]: string; }' are incompatible.

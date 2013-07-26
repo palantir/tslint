@@ -1,6 +1,0 @@
-0.ts line 47 col 16: error TS2027: Exported variable 'm1.m1_v4_public' has or is using private type 'm1.C2_private'.
-0.ts line 52 col 16: error TS2027: Exported variable 'm1.m1_v14_public' has or is using private type 'm1.C2_private'.
-0.ts line 57 col 16: error TS2027: Exported variable 'm1.m1_v24_public' has or is using private type 'm1.C2_private'.
-0.ts line 14 col 9: error TS2025: Public property 'C3_v4_public' of exported class has or is using private type 'm1.C2_private'.
-0.ts line 19 col 9: error TS2025: Public property 'C3_v14_public' of exported class has or is using private type 'm1.C2_private'.
-0.ts line 24 col 9: error TS2025: Public property 'C3_v24_public' of exported class has or is using private type 'm1.C2_private'.

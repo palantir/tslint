@@ -1,1 +1,0 @@
-0.ts line 4 col 17: error TS2011: Cannot convert 'void' to 'string'.

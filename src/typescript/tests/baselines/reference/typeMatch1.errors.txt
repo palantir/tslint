@@ -1,5 +1,0 @@
-0.ts line 18 col 1: error TS2012: Cannot convert 'D' to 'C':
-	Types 'D' and 'C' define property 'x' as private.
-0.ts line 19 col 1: error TS2012: Cannot convert 'new() => C' to 'C':
-	Type 'new() => C' is missing property 'x' from type 'C'.
-0.ts line 20 col 1: error TS2009: Operator '==' cannot be applied to types 'new() => C' and 'new() => D'.

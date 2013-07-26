@@ -1,3 +1,0 @@
-0.ts line 4 col 4: error TS2144: Duplicate overload signature for 'f'.
-0.ts line 7 col 4: error TS2146: Duplicate overload call signature.
-0.ts line 10 col 3: error TS2147: Duplicate overload construct signature.

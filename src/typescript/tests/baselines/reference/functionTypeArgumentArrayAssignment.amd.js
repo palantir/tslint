@@ -1,3 +1,0 @@
-function map() {
-    var ys = [];
-}

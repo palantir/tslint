@@ -1,2 +1,0 @@
-0.ts line 10 col 8: error TS2084: Call signatures used in a 'new' expression must have a 'void' return type.
-0.ts line 5 col 5: error TS2000: Duplicate identifier 'Function'.

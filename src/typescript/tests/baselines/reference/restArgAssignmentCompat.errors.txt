@@ -1,3 +1,0 @@
-0.ts line 7 col 1: error TS2012: Cannot convert '(...x: number[]) => void' to '(x: number[], y: string) => void':
-	Call signatures of types '(...x: number[]) => void' and '(x: number[], y: string) => void' are incompatible:
-		Type 'Number' is missing property 'concat' from type 'number[]'.

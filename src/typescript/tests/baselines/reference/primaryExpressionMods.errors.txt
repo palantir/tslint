@@ -1,3 +1,0 @@
-0.ts line 7 col 8: error TS4022: Type reference cannot refer to container 'M'.
-0.ts line 7 col 5: error TS2123: Tried to set variable type to container type 'M'.
-0.ts line 10 col 8: error TS2095: Could not find symbol 'm'.

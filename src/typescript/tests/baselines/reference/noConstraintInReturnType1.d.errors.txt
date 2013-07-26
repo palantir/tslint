@@ -1,2 +1,0 @@
-0.d.ts line 4 col 5: error TS1008: Unexpected token; 'constructor, function, accessor or variable' expected.
-0.d.ts line 6 col 1: error TS1008: Unexpected token; 'module, class, interface, enum, import or statement' expected.

@@ -1,5 +1,0 @@
-0.ts line 2 col 9: error TS1028: Accessibility modifier already seen.
-0.ts line 3 col 10: error TS1028: Accessibility modifier already seen.
-0.ts line 4 col 9: error TS1030: 'static' modifier already seen.
-0.ts line 5 col 9: error TS1028: Accessibility modifier already seen.
-0.ts line 6 col 10: error TS1028: Accessibility modifier already seen.

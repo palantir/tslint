@@ -1,5 +1,0 @@
-0.ts line 6 col 23: error TS2095: Could not find symbol 'store'.
-0.ts line 9 col 34: error TS2094: The property 'store' does not exist on value of type 'Foo'.
-0.ts line 16 col 25: error TS2094: The property '_store' does not exist on value of type 'Bar'.
-0.ts line 20 col 14: error TS2094: The property '_store' does not exist on value of type 'Bar'.
-0.ts line 20 col 14: error TS2094: The property '_store' does not exist on value of type 'Bar'.

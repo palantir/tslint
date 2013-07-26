@@ -1,3 +1,0 @@
-0.ts line 2 col 11: error TS2101: Interface 'I5' is recursively referenced as a base type of itself.
-0.ts line 6 col 11: error TS2101: Interface 'i8' is recursively referenced as a base type of itself.
-0.ts line 7 col 11: error TS2101: Interface 'i9' is recursively referenced as a base type of itself.

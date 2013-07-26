@@ -1,2 +1,0 @@
-0.ts line 1 col 7: error TS1057: Class name cannot be 'any'.
-0.ts line 1 col 1: error TS2000: Duplicate identifier 'any'.

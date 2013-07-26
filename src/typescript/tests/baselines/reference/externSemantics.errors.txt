@@ -1,2 +1,0 @@
-0.ts line 1 col 14: error TS1039: Initializers are not allowed in ambient contexts.
-0.ts line 3 col 21: error TS1039: Initializers are not allowed in ambient contexts.
