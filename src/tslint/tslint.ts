@@ -1,10 +1,3 @@
-/// <reference path='../typescript/src/compiler/typescript.ts' />
-/// <reference path='../typescript/src/compiler/syntax/positionTrackingWalker.ts' />
-/// <reference path=../typescript/src/services/classifier.ts' />
-/// <reference path=../typescript/src/services/coreServices.ts' />
-/// <reference path='../typescript/src/services/typescriptServices.ts' />
-/// <reference path=../typescript/src/services/pullLanguageService.ts' />
-
 /// <reference path='configuration.ts' />
 /// <reference path='formatters/formatters.ts' />
 /// <reference path='language/languageServiceHost.ts' />

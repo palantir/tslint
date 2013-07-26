@@ -24757,6 +24757,95 @@ var TypeScript;
 })(TypeScript || (TypeScript = {}));
 var TypeScript;
 (function (TypeScript) {
+    var TextSpanWalker = (function (_super) {
+        __extends(TextSpanWalker, _super);
+        function TextSpanWalker(textSpan) {
+            _super.call(this);
+            this.textSpan = textSpan;
+            this._position = 0;
+        }
+        TextSpanWalker.prototype.visitToken = function (token) {
+            this._position += token.fullWidth();
+        };
+
+        TextSpanWalker.prototype.visitNode = function (node) {
+            var nodeSpan = new TypeScript.TextSpan(this.position(), node.fullWidth());
+
+            if (nodeSpan.intersectsWithTextSpan(this.textSpan)) {
+                node.accept(this);
+            } else {
+                this._position += node.fullWidth();
+            }
+        };
+
+        TextSpanWalker.prototype.position = function () {
+            return this._position;
+        };
+        return TextSpanWalker;
+    })(TypeScript.SyntaxWalker);
+})(TypeScript || (TypeScript = {}));
+var TypeScript;
+(function (TypeScript) {
+    var Unicode = (function () {
+        function Unicode() {
+        }
+        Unicode.lookupInUnicodeMap = function (code, map) {
+            if (code < map[0]) {
+                return false;
+            }
+
+            var lo = 0;
+            var hi = map.length;
+            var mid;
+
+            while (lo + 1 < hi) {
+                mid = lo + (hi - lo) / 2;
+
+                mid -= mid % 2;
+                if (map[mid] <= code && code <= map[mid + 1]) {
+                    return true;
+                }
+
+                if (code < map[mid]) {
+                    hi = mid;
+                } else {
+                    lo = mid + 2;
+                }
+            }
+
+            return false;
+        };
+
+        Unicode.isIdentifierStart = function (code, languageVersion) {
+            if (languageVersion === TypeScript.LanguageVersion.EcmaScript3) {
+                return Unicode.lookupInUnicodeMap(code, Unicode.unicodeES3IdentifierStart);
+            } else if (languageVersion === TypeScript.LanguageVersion.EcmaScript5) {
+                return Unicode.lookupInUnicodeMap(code, Unicode.unicodeES5IdentifierStart);
+            } else {
+                throw TypeScript.Errors.argumentOutOfRange("languageVersion");
+            }
+        };
+
+        Unicode.isIdentifierPart = function (code, languageVersion) {
+            if (languageVersion === TypeScript.LanguageVersion.EcmaScript3) {
+                return Unicode.lookupInUnicodeMap(code, Unicode.unicodeES3IdentifierPart);
+            } else if (languageVersion === TypeScript.LanguageVersion.EcmaScript5) {
+                return Unicode.lookupInUnicodeMap(code, Unicode.unicodeES5IdentifierPart);
+            } else {
+                throw TypeScript.Errors.argumentOutOfRange("languageVersion");
+            }
+        };
+        Unicode.unicodeES3IdentifierStart = [170, 170, 181, 181, 186, 186, 192, 214, 216, 246, 248, 543, 546, 563, 592, 685, 688, 696, 699, 705, 720, 721, 736, 740, 750, 750, 890, 890, 902, 902, 904, 906, 908, 908, 910, 929, 931, 974, 976, 983, 986, 1011, 1024, 1153, 1164, 1220, 1223, 1224, 1227, 1228, 1232, 1269, 1272, 1273, 1329, 1366, 1369, 1369, 1377, 1415, 1488, 1514, 1520, 1522, 1569, 1594, 1600, 1610, 1649, 1747, 1749, 1749, 1765, 1766, 1786, 1788, 1808, 1808, 1810, 1836, 1920, 1957, 2309, 2361, 2365, 2365, 2384, 2384, 2392, 2401, 2437, 2444, 2447, 2448, 2451, 2472, 2474, 2480, 2482, 2482, 2486, 2489, 2524, 2525, 2527, 2529, 2544, 2545, 2565, 2570, 2575, 2576, 2579, 2600, 2602, 2608, 2610, 2611, 2613, 2614, 2616, 2617, 2649, 2652, 2654, 2654, 2674, 2676, 2693, 2699, 2701, 2701, 2703, 2705, 2707, 2728, 2730, 2736, 2738, 2739, 2741, 2745, 2749, 2749, 2768, 2768, 2784, 2784, 2821, 2828, 2831, 2832, 2835, 2856, 2858, 2864, 2866, 2867, 2870, 2873, 2877, 2877, 2908, 2909, 2911, 2913, 2949, 2954, 2958, 2960, 2962, 2965, 2969, 2970, 2972, 2972, 2974, 2975, 2979, 2980, 2984, 2986, 2990, 2997, 2999, 3001, 3077, 3084, 3086, 3088, 3090, 3112, 3114, 3123, 3125, 3129, 3168, 3169, 3205, 3212, 3214, 3216, 3218, 3240, 3242, 3251, 3253, 3257, 3294, 3294, 3296, 3297, 3333, 3340, 3342, 3344, 3346, 3368, 3370, 3385, 3424, 3425, 3461, 3478, 3482, 3505, 3507, 3515, 3517, 3517, 3520, 3526, 3585, 3632, 3634, 3635, 3648, 3654, 3713, 3714, 3716, 3716, 3719, 3720, 3722, 3722, 3725, 3725, 3732, 3735, 3737, 3743, 3745, 3747, 3749, 3749, 3751, 3751, 3754, 3755, 3757, 3760, 3762, 3763, 3773, 3773, 3776, 3780, 3782, 3782, 3804, 3805, 3840, 3840, 3904, 3911, 3913, 3946, 3976, 3979, 4096, 4129, 4131, 4135, 4137, 4138, 4176, 4181, 4256, 4293, 4304, 4342, 4352, 4441, 4447, 4514, 4520, 4601, 4608, 4614, 4616, 4678, 4680, 4680, 4682, 4685, 4688, 4694, 4696, 4696, 4698, 4701, 4704, 4742, 4744, 4744, 4746, 4749, 4752, 4782, 4784, 4784, 4786, 4789, 4792, 4798, 4800, 4800, 4802, 4805, 4808, 4814, 4816, 4822, 4824, 4846, 4848, 4878, 4880, 4880, 4882, 4885, 4888, 4894, 4896, 4934, 4936, 4954, 5024, 5108, 5121, 5740, 5743, 5750, 5761, 5786, 5792, 5866, 6016, 6067, 6176, 6263, 6272, 6312, 7680, 7835, 7840, 7929, 7936, 7957, 7960, 7965, 7968, 8005, 8008, 8013, 8016, 8023, 8025, 8025, 8027, 8027, 8029, 8029, 8031, 8061, 8064, 8116, 8118, 8124, 8126, 8126, 8130, 8132, 8134, 8140, 8144, 8147, 8150, 8155, 8160, 8172, 8178, 8180, 8182, 8188, 8319, 8319, 8450, 8450, 8455, 8455, 8458, 8467, 8469, 8469, 8473, 8477, 8484, 8484, 8486, 8486, 8488, 8488, 8490, 8493, 8495, 8497, 8499, 8505, 8544, 8579, 12293, 12295, 12321, 12329, 12337, 12341, 12344, 12346, 12353, 12436, 12445, 12446, 12449, 12538, 12540, 12542, 12549, 12588, 12593, 12686, 12704, 12727, 13312, 19893, 19968, 40869, 40960, 42124, 44032, 55203, 63744, 64045, 64256, 64262, 64275, 64279, 64285, 64285, 64287, 64296, 64298, 64310, 64312, 64316, 64318, 64318, 64320, 64321, 64323, 64324, 64326, 64433, 64467, 64829, 64848, 64911, 64914, 64967, 65008, 65019, 65136, 65138, 65140, 65140, 65142, 65276, 65313, 65338, 65345, 65370, 65382, 65470, 65474, 65479, 65482, 65487, 65490, 65495, 65498, 65500];
+        Unicode.unicodeES3IdentifierPart = [170, 170, 181, 181, 186, 186, 192, 214, 216, 246, 248, 543, 546, 563, 592, 685, 688, 696, 699, 705, 720, 721, 736, 740, 750, 750, 768, 846, 864, 866, 890, 890, 902, 902, 904, 906, 908, 908, 910, 929, 931, 974, 976, 983, 986, 1011, 1024, 1153, 1155, 1158, 1164, 1220, 1223, 1224, 1227, 1228, 1232, 1269, 1272, 1273, 1329, 1366, 1369, 1369, 1377, 1415, 1425, 1441, 1443, 1465, 1467, 1469, 1471, 1471, 1473, 1474, 1476, 1476, 1488, 1514, 1520, 1522, 1569, 1594, 1600, 1621, 1632, 1641, 1648, 1747, 1749, 1756, 1759, 1768, 1770, 1773, 1776, 1788, 1808, 1836, 1840, 1866, 1920, 1968, 2305, 2307, 2309, 2361, 2364, 2381, 2384, 2388, 2392, 2403, 2406, 2415, 2433, 2435, 2437, 2444, 2447, 2448, 2451, 2472, 2474, 2480, 2482, 2482, 2486, 2489, 2492, 2492, 2494, 2500, 2503, 2504, 2507, 2509, 2519, 2519, 2524, 2525, 2527, 2531, 2534, 2545, 2562, 2562, 2565, 2570, 2575, 2576, 2579, 2600, 2602, 2608, 2610, 2611, 2613, 2614, 2616, 2617, 2620, 2620, 2622, 2626, 2631, 2632, 2635, 2637, 2649, 2652, 2654, 2654, 2662, 2676, 2689, 2691, 2693, 2699, 2701, 2701, 2703, 2705, 2707, 2728, 2730, 2736, 2738, 2739, 2741, 2745, 2748, 2757, 2759, 2761, 2763, 2765, 2768, 2768, 2784, 2784, 2790, 2799, 2817, 2819, 2821, 2828, 2831, 2832, 2835, 2856, 2858, 2864, 2866, 2867, 2870, 2873, 2876, 2883, 2887, 2888, 2891, 2893, 2902, 2903, 2908, 2909, 2911, 2913, 2918, 2927, 2946, 2947, 2949, 2954, 2958, 2960, 2962, 2965, 2969, 2970, 2972, 2972, 2974, 2975, 2979, 2980, 2984, 2986, 2990, 2997, 2999, 3001, 3006, 3010, 3014, 3016, 3018, 3021, 3031, 3031, 3047, 3055, 3073, 3075, 3077, 3084, 3086, 3088, 3090, 3112, 3114, 3123, 3125, 3129, 3134, 3140, 3142, 3144, 3146, 3149, 3157, 3158, 3168, 3169, 3174, 3183, 3202, 3203, 3205, 3212, 3214, 3216, 3218, 3240, 3242, 3251, 3253, 3257, 3262, 3268, 3270, 3272, 3274, 3277, 3285, 3286, 3294, 3294, 3296, 3297, 3302, 3311, 3330, 3331, 3333, 3340, 3342, 3344, 3346, 3368, 3370, 3385, 3390, 3395, 3398, 3400, 3402, 3405, 3415, 3415, 3424, 3425, 3430, 3439, 3458, 3459, 3461, 3478, 3482, 3505, 3507, 3515, 3517, 3517, 3520, 3526, 3530, 3530, 3535, 3540, 3542, 3542, 3544, 3551, 3570, 3571, 3585, 3642, 3648, 3662, 3664, 3673, 3713, 3714, 3716, 3716, 3719, 3720, 3722, 3722, 3725, 3725, 3732, 3735, 3737, 3743, 3745, 3747, 3749, 3749, 3751, 3751, 3754, 3755, 3757, 3769, 3771, 3773, 3776, 3780, 3782, 3782, 3784, 3789, 3792, 3801, 3804, 3805, 3840, 3840, 3864, 3865, 3872, 3881, 3893, 3893, 3895, 3895, 3897, 3897, 3902, 3911, 3913, 3946, 3953, 3972, 3974, 3979, 3984, 3991, 3993, 4028, 4038, 4038, 4096, 4129, 4131, 4135, 4137, 4138, 4140, 4146, 4150, 4153, 4160, 4169, 4176, 4185, 4256, 4293, 4304, 4342, 4352, 4441, 4447, 4514, 4520, 4601, 4608, 4614, 4616, 4678, 4680, 4680, 4682, 4685, 4688, 4694, 4696, 4696, 4698, 4701, 4704, 4742, 4744, 4744, 4746, 4749, 4752, 4782, 4784, 4784, 4786, 4789, 4792, 4798, 4800, 4800, 4802, 4805, 4808, 4814, 4816, 4822, 4824, 4846, 4848, 4878, 4880, 4880, 4882, 4885, 4888, 4894, 4896, 4934, 4936, 4954, 4969, 4977, 5024, 5108, 5121, 5740, 5743, 5750, 5761, 5786, 5792, 5866, 6016, 6099, 6112, 6121, 6160, 6169, 6176, 6263, 6272, 6313, 7680, 7835, 7840, 7929, 7936, 7957, 7960, 7965, 7968, 8005, 8008, 8013, 8016, 8023, 8025, 8025, 8027, 8027, 8029, 8029, 8031, 8061, 8064, 8116, 8118, 8124, 8126, 8126, 8130, 8132, 8134, 8140, 8144, 8147, 8150, 8155, 8160, 8172, 8178, 8180, 8182, 8188, 8255, 8256, 8319, 8319, 8400, 8412, 8417, 8417, 8450, 8450, 8455, 8455, 8458, 8467, 8469, 8469, 8473, 8477, 8484, 8484, 8486, 8486, 8488, 8488, 8490, 8493, 8495, 8497, 8499, 8505, 8544, 8579, 12293, 12295, 12321, 12335, 12337, 12341, 12344, 12346, 12353, 12436, 12441, 12442, 12445, 12446, 12449, 12542, 12549, 12588, 12593, 12686, 12704, 12727, 13312, 19893, 19968, 40869, 40960, 42124, 44032, 55203, 63744, 64045, 64256, 64262, 64275, 64279, 64285, 64296, 64298, 64310, 64312, 64316, 64318, 64318, 64320, 64321, 64323, 64324, 64326, 64433, 64467, 64829, 64848, 64911, 64914, 64967, 65008, 65019, 65056, 65059, 65075, 65076, 65101, 65103, 65136, 65138, 65140, 65140, 65142, 65276, 65296, 65305, 65313, 65338, 65343, 65343, 65345, 65370, 65381, 65470, 65474, 65479, 65482, 65487, 65490, 65495, 65498, 65500];
+
+        Unicode.unicodeES5IdentifierStart = [170, 170, 181, 181, 186, 186, 192, 214, 216, 246, 248, 705, 710, 721, 736, 740, 748, 748, 750, 750, 880, 884, 886, 887, 890, 893, 902, 902, 904, 906, 908, 908, 910, 929, 931, 1013, 1015, 1153, 1162, 1319, 1329, 1366, 1369, 1369, 1377, 1415, 1488, 1514, 1520, 1522, 1568, 1610, 1646, 1647, 1649, 1747, 1749, 1749, 1765, 1766, 1774, 1775, 1786, 1788, 1791, 1791, 1808, 1808, 1810, 1839, 1869, 1957, 1969, 1969, 1994, 2026, 2036, 2037, 2042, 2042, 2048, 2069, 2074, 2074, 2084, 2084, 2088, 2088, 2112, 2136, 2208, 2208, 2210, 2220, 2308, 2361, 2365, 2365, 2384, 2384, 2392, 2401, 2417, 2423, 2425, 2431, 2437, 2444, 2447, 2448, 2451, 2472, 2474, 2480, 2482, 2482, 2486, 2489, 2493, 2493, 2510, 2510, 2524, 2525, 2527, 2529, 2544, 2545, 2565, 2570, 2575, 2576, 2579, 2600, 2602, 2608, 2610, 2611, 2613, 2614, 2616, 2617, 2649, 2652, 2654, 2654, 2674, 2676, 2693, 2701, 2703, 2705, 2707, 2728, 2730, 2736, 2738, 2739, 2741, 2745, 2749, 2749, 2768, 2768, 2784, 2785, 2821, 2828, 2831, 2832, 2835, 2856, 2858, 2864, 2866, 2867, 2869, 2873, 2877, 2877, 2908, 2909, 2911, 2913, 2929, 2929, 2947, 2947, 2949, 2954, 2958, 2960, 2962, 2965, 2969, 2970, 2972, 2972, 2974, 2975, 2979, 2980, 2984, 2986, 2990, 3001, 3024, 3024, 3077, 3084, 3086, 3088, 3090, 3112, 3114, 3123, 3125, 3129, 3133, 3133, 3160, 3161, 3168, 3169, 3205, 3212, 3214, 3216, 3218, 3240, 3242, 3251, 3253, 3257, 3261, 3261, 3294, 3294, 3296, 3297, 3313, 3314, 3333, 3340, 3342, 3344, 3346, 3386, 3389, 3389, 3406, 3406, 3424, 3425, 3450, 3455, 3461, 3478, 3482, 3505, 3507, 3515, 3517, 3517, 3520, 3526, 3585, 3632, 3634, 3635, 3648, 3654, 3713, 3714, 3716, 3716, 3719, 3720, 3722, 3722, 3725, 3725, 3732, 3735, 3737, 3743, 3745, 3747, 3749, 3749, 3751, 3751, 3754, 3755, 3757, 3760, 3762, 3763, 3773, 3773, 3776, 3780, 3782, 3782, 3804, 3807, 3840, 3840, 3904, 3911, 3913, 3948, 3976, 3980, 4096, 4138, 4159, 4159, 4176, 4181, 4186, 4189, 4193, 4193, 4197, 4198, 4206, 4208, 4213, 4225, 4238, 4238, 4256, 4293, 4295, 4295, 4301, 4301, 4304, 4346, 4348, 4680, 4682, 4685, 4688, 4694, 4696, 4696, 4698, 4701, 4704, 4744, 4746, 4749, 4752, 4784, 4786, 4789, 4792, 4798, 4800, 4800, 4802, 4805, 4808, 4822, 4824, 4880, 4882, 4885, 4888, 4954, 4992, 5007, 5024, 5108, 5121, 5740, 5743, 5759, 5761, 5786, 5792, 5866, 5870, 5872, 5888, 5900, 5902, 5905, 5920, 5937, 5952, 5969, 5984, 5996, 5998, 6000, 6016, 6067, 6103, 6103, 6108, 6108, 6176, 6263, 6272, 6312, 6314, 6314, 6320, 6389, 6400, 6428, 6480, 6509, 6512, 6516, 6528, 6571, 6593, 6599, 6656, 6678, 6688, 6740, 6823, 6823, 6917, 6963, 6981, 6987, 7043, 7072, 7086, 7087, 7098, 7141, 7168, 7203, 7245, 7247, 7258, 7293, 7401, 7404, 7406, 7409, 7413, 7414, 7424, 7615, 7680, 7957, 7960, 7965, 7968, 8005, 8008, 8013, 8016, 8023, 8025, 8025, 8027, 8027, 8029, 8029, 8031, 8061, 8064, 8116, 8118, 8124, 8126, 8126, 8130, 8132, 8134, 8140, 8144, 8147, 8150, 8155, 8160, 8172, 8178, 8180, 8182, 8188, 8305, 8305, 8319, 8319, 8336, 8348, 8450, 8450, 8455, 8455, 8458, 8467, 8469, 8469, 8473, 8477, 8484, 8484, 8486, 8486, 8488, 8488, 8490, 8493, 8495, 8505, 8508, 8511, 8517, 8521, 8526, 8526, 8544, 8584, 11264, 11310, 11312, 11358, 11360, 11492, 11499, 11502, 11506, 11507, 11520, 11557, 11559, 11559, 11565, 11565, 11568, 11623, 11631, 11631, 11648, 11670, 11680, 11686, 11688, 11694, 11696, 11702, 11704, 11710, 11712, 11718, 11720, 11726, 11728, 11734, 11736, 11742, 11823, 11823, 12293, 12295, 12321, 12329, 12337, 12341, 12344, 12348, 12353, 12438, 12445, 12447, 12449, 12538, 12540, 12543, 12549, 12589, 12593, 12686, 12704, 12730, 12784, 12799, 13312, 19893, 19968, 40908, 40960, 42124, 42192, 42237, 42240, 42508, 42512, 42527, 42538, 42539, 42560, 42606, 42623, 42647, 42656, 42735, 42775, 42783, 42786, 42888, 42891, 42894, 42896, 42899, 42912, 42922, 43000, 43009, 43011, 43013, 43015, 43018, 43020, 43042, 43072, 43123, 43138, 43187, 43250, 43255, 43259, 43259, 43274, 43301, 43312, 43334, 43360, 43388, 43396, 43442, 43471, 43471, 43520, 43560, 43584, 43586, 43588, 43595, 43616, 43638, 43642, 43642, 43648, 43695, 43697, 43697, 43701, 43702, 43705, 43709, 43712, 43712, 43714, 43714, 43739, 43741, 43744, 43754, 43762, 43764, 43777, 43782, 43785, 43790, 43793, 43798, 43808, 43814, 43816, 43822, 43968, 44002, 44032, 55203, 55216, 55238, 55243, 55291, 63744, 64109, 64112, 64217, 64256, 64262, 64275, 64279, 64285, 64285, 64287, 64296, 64298, 64310, 64312, 64316, 64318, 64318, 64320, 64321, 64323, 64324, 64326, 64433, 64467, 64829, 64848, 64911, 64914, 64967, 65008, 65019, 65136, 65140, 65142, 65276, 65313, 65338, 65345, 65370, 65382, 65470, 65474, 65479, 65482, 65487, 65490, 65495, 65498, 65500];
+        Unicode.unicodeES5IdentifierPart = [170, 170, 181, 181, 186, 186, 192, 214, 216, 246, 248, 705, 710, 721, 736, 740, 748, 748, 750, 750, 768, 884, 886, 887, 890, 893, 902, 902, 904, 906, 908, 908, 910, 929, 931, 1013, 1015, 1153, 1155, 1159, 1162, 1319, 1329, 1366, 1369, 1369, 1377, 1415, 1425, 1469, 1471, 1471, 1473, 1474, 1476, 1477, 1479, 1479, 1488, 1514, 1520, 1522, 1552, 1562, 1568, 1641, 1646, 1747, 1749, 1756, 1759, 1768, 1770, 1788, 1791, 1791, 1808, 1866, 1869, 1969, 1984, 2037, 2042, 2042, 2048, 2093, 2112, 2139, 2208, 2208, 2210, 2220, 2276, 2302, 2304, 2403, 2406, 2415, 2417, 2423, 2425, 2431, 2433, 2435, 2437, 2444, 2447, 2448, 2451, 2472, 2474, 2480, 2482, 2482, 2486, 2489, 2492, 2500, 2503, 2504, 2507, 2510, 2519, 2519, 2524, 2525, 2527, 2531, 2534, 2545, 2561, 2563, 2565, 2570, 2575, 2576, 2579, 2600, 2602, 2608, 2610, 2611, 2613, 2614, 2616, 2617, 2620, 2620, 2622, 2626, 2631, 2632, 2635, 2637, 2641, 2641, 2649, 2652, 2654, 2654, 2662, 2677, 2689, 2691, 2693, 2701, 2703, 2705, 2707, 2728, 2730, 2736, 2738, 2739, 2741, 2745, 2748, 2757, 2759, 2761, 2763, 2765, 2768, 2768, 2784, 2787, 2790, 2799, 2817, 2819, 2821, 2828, 2831, 2832, 2835, 2856, 2858, 2864, 2866, 2867, 2869, 2873, 2876, 2884, 2887, 2888, 2891, 2893, 2902, 2903, 2908, 2909, 2911, 2915, 2918, 2927, 2929, 2929, 2946, 2947, 2949, 2954, 2958, 2960, 2962, 2965, 2969, 2970, 2972, 2972, 2974, 2975, 2979, 2980, 2984, 2986, 2990, 3001, 3006, 3010, 3014, 3016, 3018, 3021, 3024, 3024, 3031, 3031, 3046, 3055, 3073, 3075, 3077, 3084, 3086, 3088, 3090, 3112, 3114, 3123, 3125, 3129, 3133, 3140, 3142, 3144, 3146, 3149, 3157, 3158, 3160, 3161, 3168, 3171, 3174, 3183, 3202, 3203, 3205, 3212, 3214, 3216, 3218, 3240, 3242, 3251, 3253, 3257, 3260, 3268, 3270, 3272, 3274, 3277, 3285, 3286, 3294, 3294, 3296, 3299, 3302, 3311, 3313, 3314, 3330, 3331, 3333, 3340, 3342, 3344, 3346, 3386, 3389, 3396, 3398, 3400, 3402, 3406, 3415, 3415, 3424, 3427, 3430, 3439, 3450, 3455, 3458, 3459, 3461, 3478, 3482, 3505, 3507, 3515, 3517, 3517, 3520, 3526, 3530, 3530, 3535, 3540, 3542, 3542, 3544, 3551, 3570, 3571, 3585, 3642, 3648, 3662, 3664, 3673, 3713, 3714, 3716, 3716, 3719, 3720, 3722, 3722, 3725, 3725, 3732, 3735, 3737, 3743, 3745, 3747, 3749, 3749, 3751, 3751, 3754, 3755, 3757, 3769, 3771, 3773, 3776, 3780, 3782, 3782, 3784, 3789, 3792, 3801, 3804, 3807, 3840, 3840, 3864, 3865, 3872, 3881, 3893, 3893, 3895, 3895, 3897, 3897, 3902, 3911, 3913, 3948, 3953, 3972, 3974, 3991, 3993, 4028, 4038, 4038, 4096, 4169, 4176, 4253, 4256, 4293, 4295, 4295, 4301, 4301, 4304, 4346, 4348, 4680, 4682, 4685, 4688, 4694, 4696, 4696, 4698, 4701, 4704, 4744, 4746, 4749, 4752, 4784, 4786, 4789, 4792, 4798, 4800, 4800, 4802, 4805, 4808, 4822, 4824, 4880, 4882, 4885, 4888, 4954, 4957, 4959, 4992, 5007, 5024, 5108, 5121, 5740, 5743, 5759, 5761, 5786, 5792, 5866, 5870, 5872, 5888, 5900, 5902, 5908, 5920, 5940, 5952, 5971, 5984, 5996, 5998, 6000, 6002, 6003, 6016, 6099, 6103, 6103, 6108, 6109, 6112, 6121, 6155, 6157, 6160, 6169, 6176, 6263, 6272, 6314, 6320, 6389, 6400, 6428, 6432, 6443, 6448, 6459, 6470, 6509, 6512, 6516, 6528, 6571, 6576, 6601, 6608, 6617, 6656, 6683, 6688, 6750, 6752, 6780, 6783, 6793, 6800, 6809, 6823, 6823, 6912, 6987, 6992, 7001, 7019, 7027, 7040, 7155, 7168, 7223, 7232, 7241, 7245, 7293, 7376, 7378, 7380, 7414, 7424, 7654, 7676, 7957, 7960, 7965, 7968, 8005, 8008, 8013, 8016, 8023, 8025, 8025, 8027, 8027, 8029, 8029, 8031, 8061, 8064, 8116, 8118, 8124, 8126, 8126, 8130, 8132, 8134, 8140, 8144, 8147, 8150, 8155, 8160, 8172, 8178, 8180, 8182, 8188, 8204, 8205, 8255, 8256, 8276, 8276, 8305, 8305, 8319, 8319, 8336, 8348, 8400, 8412, 8417, 8417, 8421, 8432, 8450, 8450, 8455, 8455, 8458, 8467, 8469, 8469, 8473, 8477, 8484, 8484, 8486, 8486, 8488, 8488, 8490, 8493, 8495, 8505, 8508, 8511, 8517, 8521, 8526, 8526, 8544, 8584, 11264, 11310, 11312, 11358, 11360, 11492, 11499, 11507, 11520, 11557, 11559, 11559, 11565, 11565, 11568, 11623, 11631, 11631, 11647, 11670, 11680, 11686, 11688, 11694, 11696, 11702, 11704, 11710, 11712, 11718, 11720, 11726, 11728, 11734, 11736, 11742, 11744, 11775, 11823, 11823, 12293, 12295, 12321, 12335, 12337, 12341, 12344, 12348, 12353, 12438, 12441, 12442, 12445, 12447, 12449, 12538, 12540, 12543, 12549, 12589, 12593, 12686, 12704, 12730, 12784, 12799, 13312, 19893, 19968, 40908, 40960, 42124, 42192, 42237, 42240, 42508, 42512, 42539, 42560, 42607, 42612, 42621, 42623, 42647, 42655, 42737, 42775, 42783, 42786, 42888, 42891, 42894, 42896, 42899, 42912, 42922, 43000, 43047, 43072, 43123, 43136, 43204, 43216, 43225, 43232, 43255, 43259, 43259, 43264, 43309, 43312, 43347, 43360, 43388, 43392, 43456, 43471, 43481, 43520, 43574, 43584, 43597, 43600, 43609, 43616, 43638, 43642, 43643, 43648, 43714, 43739, 43741, 43744, 43759, 43762, 43766, 43777, 43782, 43785, 43790, 43793, 43798, 43808, 43814, 43816, 43822, 43968, 44010, 44012, 44013, 44016, 44025, 44032, 55203, 55216, 55238, 55243, 55291, 63744, 64109, 64112, 64217, 64256, 64262, 64275, 64279, 64285, 64296, 64298, 64310, 64312, 64316, 64318, 64318, 64320, 64321, 64323, 64324, 64326, 64433, 64467, 64829, 64848, 64911, 64914, 64967, 65008, 65019, 65024, 65039, 65056, 65062, 65075, 65076, 65101, 65103, 65136, 65140, 65142, 65276, 65296, 65305, 65313, 65338, 65343, 65343, 65345, 65370, 65382, 65470, 65474, 65479, 65482, 65487, 65490, 65495, 65498, 65500];
+        return Unicode;
+    })();
+    TypeScript.Unicode = Unicode;
+})(TypeScript || (TypeScript = {}));
+var TypeScript;
+(function (TypeScript) {
     var SyntaxTree = (function () {
         function SyntaxTree(sourceUnit, isDeclaration, diagnostics, fileName, lineMap, languageVersion, parseOtions) {
             this._allDiagnostics = null;
@@ -25983,95 +26072,1486 @@ var TypeScript;
         return GrammarCheckerWalker;
     })(TypeScript.PositionTrackingWalker);
 })(TypeScript || (TypeScript = {}));
-var TypeScript;
-(function (TypeScript) {
-    var TextSpanWalker = (function (_super) {
-        __extends(TextSpanWalker, _super);
-        function TextSpanWalker(textSpan) {
+var Lint;
+(function (Lint) {
+    var RuleFailure = (function () {
+        function RuleFailure(fileName, lineAndCharacter, failure) {
+            this.fileName = fileName;
+            this.lineAndCharacter = lineAndCharacter;
+            this.failure = failure;
+        }
+        RuleFailure.prototype.getFileName = function () {
+            return this.fileName;
+        };
+
+        RuleFailure.prototype.getLineAndCharacter = function () {
+            return this.lineAndCharacter;
+        };
+
+        RuleFailure.prototype.getFailure = function () {
+            return this.failure;
+        };
+
+        RuleFailure.prototype.toJson = function () {
+            return {
+                name: this.fileName,
+                position: {
+                    line: this.lineAndCharacter.line(),
+                    character: this.lineAndCharacter.character()
+                },
+                failure: this.failure
+            };
+        };
+
+        RuleFailure.prototype.equals = function (ruleFailure) {
+            return (this.failure === ruleFailure.getFailure() && this.fileName === ruleFailure.getFileName() && this.lineAndCharacter.line() === ruleFailure.getLineAndCharacter().line() && this.lineAndCharacter.character() === ruleFailure.getLineAndCharacter().character());
+        };
+        return RuleFailure;
+    })();
+    Lint.RuleFailure = RuleFailure;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    var RuleWalker = (function (_super) {
+        __extends(RuleWalker, _super);
+        function RuleWalker(syntaxTree) {
             _super.call(this);
-            this.textSpan = textSpan;
-            this._position = 0;
+
+            this.syntaxTree = syntaxTree;
+            this.failures = [];
         }
-        TextSpanWalker.prototype.visitToken = function (token) {
-            this._position += token.fullWidth();
+        RuleWalker.prototype.getSyntaxTree = function () {
+            return this.syntaxTree;
         };
 
-        TextSpanWalker.prototype.visitNode = function (node) {
-            var nodeSpan = new TypeScript.TextSpan(this.position(), node.fullWidth());
+        RuleWalker.prototype.getFailures = function () {
+            return this.failures;
+        };
 
-            if (nodeSpan.intersectsWithTextSpan(this.textSpan)) {
-                node.accept(this);
-            } else {
-                this._position += node.fullWidth();
+        RuleWalker.prototype.positionAfter = function () {
+            var elements = [];
+            for (var _i = 0; _i < (arguments.length - 0); _i++) {
+                elements[_i] = arguments[_i + 0];
+            }
+            var position = this.position();
+
+            for (var i = 0; i < elements.length; ++i) {
+                var element = elements[i];
+                if (element !== null) {
+                    position += element.fullWidth();
+                }
+            }
+
+            return position;
+        };
+
+        RuleWalker.prototype.createFailure = function (position, failure) {
+            var lineMap = this.syntaxTree.lineMap();
+            var lineAndCharacter = lineMap.getLineAndCharacterFromPosition(position);
+
+            return new Lint.RuleFailure(this.syntaxTree.fileName(), lineAndCharacter, failure);
+        };
+
+        RuleWalker.prototype.addFailure = function (failure) {
+            if (!this.existsFailure(failure)) {
+                this.failures.push(failure);
             }
         };
 
-        TextSpanWalker.prototype.position = function () {
-            return this._position;
+        RuleWalker.prototype.existsFailure = function (failure) {
+            var filteredFailures = this.failures.filter(function (f) {
+                return f.equals(failure);
+            });
+
+            return (filteredFailures.length > 0);
         };
-        return TextSpanWalker;
-    })(TypeScript.SyntaxWalker);
-})(TypeScript || (TypeScript = {}));
-var TypeScript;
-(function (TypeScript) {
-    var Unicode = (function () {
-        function Unicode() {
+        return RuleWalker;
+    })(TypeScript.PositionTrackingWalker);
+    Lint.RuleWalker = RuleWalker;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
+        var AbstractRule = (function () {
+            function AbstractRule(name) {
+                this.name = name;
+            }
+            AbstractRule.prototype.getName = function () {
+                return this.name;
+            };
+
+            AbstractRule.prototype.getValue = function () {
+                return this.value;
+            };
+
+            AbstractRule.prototype.setValue = function (value) {
+                this.value = value;
+            };
+
+            AbstractRule.prototype.apply = function (syntaxTree) {
+                throw TypeScript.Errors.abstract();
+            };
+
+            AbstractRule.prototype.applyWithWalker = function (walker) {
+                var sourceUnit = walker.getSyntaxTree().sourceUnit();
+                sourceUnit.accept(walker);
+                return walker.getFailures();
+            };
+
+            AbstractRule.prototype.isEnabled = function () {
+                return true;
+            };
+            return AbstractRule;
+        })();
+        Rules.AbstractRule = AbstractRule;
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
+        var ArgumentsRule = (function (_super) {
+            __extends(ArgumentsRule, _super);
+            function ArgumentsRule() {
+                _super.call(this, "arguments");
+            }
+            ArgumentsRule.prototype.isEnabled = function () {
+                return this.getValue() === true;
+            };
+
+            ArgumentsRule.prototype.apply = function (syntaxTree) {
+                return this.applyWithWalker(new ArgumentsWalker(syntaxTree));
+            };
+            return ArgumentsRule;
+        })(Rules.AbstractRule);
+        Rules.ArgumentsRule = ArgumentsRule;
+
+        var ArgumentsWalker = (function (_super) {
+            __extends(ArgumentsWalker, _super);
+            function ArgumentsWalker() {
+                _super.apply(this, arguments);
+            }
+            ArgumentsWalker.prototype.visitMemberAccessExpression = function (node) {
+                var expression = node.expression;
+                var name = node.name;
+                var position = this.position() + node.expression.leadingTriviaWidth();
+
+                if (expression.isToken() && name.text() === "callee") {
+                    var tokenExpression = expression;
+                    if (tokenExpression.text() === "arguments") {
+                        this.addFailure(this.createFailure(position, ArgumentsWalker.FAILURE_STRING));
+                    }
+                }
+
+                _super.prototype.visitMemberAccessExpression.call(this, node);
+            };
+            ArgumentsWalker.FAILURE_STRING = "access forbidden to arguments property";
+            return ArgumentsWalker;
+        })(Lint.RuleWalker);
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
+        var BitwiseOperatorRule = (function (_super) {
+            __extends(BitwiseOperatorRule, _super);
+            function BitwiseOperatorRule() {
+                _super.call(this, "bitwise");
+            }
+            BitwiseOperatorRule.prototype.isEnabled = function () {
+                return this.getValue() === true;
+            };
+
+            BitwiseOperatorRule.prototype.apply = function (syntaxTree) {
+                return this.applyWithWalker(new BitwiseWalker(syntaxTree));
+            };
+            return BitwiseOperatorRule;
+        })(Rules.AbstractRule);
+        Rules.BitwiseOperatorRule = BitwiseOperatorRule;
+
+        var BitwiseWalker = (function (_super) {
+            __extends(BitwiseWalker, _super);
+            function BitwiseWalker() {
+                _super.apply(this, arguments);
+            }
+            BitwiseWalker.prototype.visitNode = function (node) {
+                if (node.kind() === TypeScript.SyntaxKind.BitwiseAndExpression || node.kind() === TypeScript.SyntaxKind.AndAssignmentExpression || node.kind() === TypeScript.SyntaxKind.BitwiseOrExpression || node.kind() === TypeScript.SyntaxKind.OrAssignmentExpression || node.kind() === TypeScript.SyntaxKind.BitwiseExclusiveOrExpression || node.kind() === TypeScript.SyntaxKind.ExclusiveOrAssignmentExpression || node.kind() === TypeScript.SyntaxKind.LeftShiftExpression || node.kind() === TypeScript.SyntaxKind.LeftShiftAssignmentExpression || node.kind() === TypeScript.SyntaxKind.SignedRightShiftExpression || node.kind() === TypeScript.SyntaxKind.SignedRightShiftAssignmentExpression || node.kind() === TypeScript.SyntaxKind.UnsignedRightShiftExpression || node.kind() === TypeScript.SyntaxKind.UnsignedRightShiftAssignmentExpression || node.kind() === TypeScript.SyntaxKind.BitwiseNotExpression) {
+                    this.addFailure(this.createFailure(this.position() + node.leadingTriviaWidth(), BitwiseWalker.FAILURE_STRING));
+                }
+
+                _super.prototype.visitNode.call(this, node);
+            };
+            BitwiseWalker.FAILURE_STRING = "forbidden bitwise operation";
+            return BitwiseWalker;
+        })(Lint.RuleWalker);
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
+        var ClassNameRule = (function (_super) {
+            __extends(ClassNameRule, _super);
+            function ClassNameRule() {
+                _super.call(this, "class_name");
+            }
+            ClassNameRule.prototype.isEnabled = function () {
+                return this.getValue() === true;
+            };
+
+            ClassNameRule.prototype.apply = function (syntaxTree) {
+                return this.applyWithWalker(new ClassNameWalker(syntaxTree));
+            };
+            return ClassNameRule;
+        })(Rules.AbstractRule);
+        Rules.ClassNameRule = ClassNameRule;
+
+        var ClassNameWalker = (function (_super) {
+            __extends(ClassNameWalker, _super);
+            function ClassNameWalker() {
+                _super.apply(this, arguments);
+            }
+            ClassNameWalker.prototype.visitClassDeclaration = function (node) {
+                var position = this.positionAfter(node.modifiers, node.classKeyword);
+                var className = node.identifier.text();
+                if (className.length > 0) {
+                    var firstCharacter = className.charAt(0);
+                    if (firstCharacter !== firstCharacter.toUpperCase()) {
+                        this.addFailure(this.createFailure(position, ClassNameWalker.FAILURE_STRING));
+                    }
+                }
+
+                _super.prototype.visitClassDeclaration.call(this, node);
+            };
+            ClassNameWalker.FAILURE_STRING = "class name must start with an uppercase character";
+            return ClassNameWalker;
+        })(Lint.RuleWalker);
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
+        var CurlyRule = (function (_super) {
+            __extends(CurlyRule, _super);
+            function CurlyRule() {
+                _super.call(this, "curly");
+            }
+            CurlyRule.prototype.isEnabled = function () {
+                return this.getValue() === true;
+            };
+
+            CurlyRule.prototype.apply = function (syntaxTree) {
+                return this.applyWithWalker(new CurlyWalker(syntaxTree));
+            };
+            return CurlyRule;
+        })(Rules.AbstractRule);
+        Rules.CurlyRule = CurlyRule;
+
+        var CurlyWalker = (function (_super) {
+            __extends(CurlyWalker, _super);
+            function CurlyWalker() {
+                _super.apply(this, arguments);
+            }
+            CurlyWalker.prototype.visitForInStatement = function (node) {
+                _super.prototype.visitForInStatement.call(this, node);
+                this.verifyStatementIsBraced(node.statement);
+            };
+
+            CurlyWalker.prototype.visitForStatement = function (node) {
+                _super.prototype.visitForStatement.call(this, node);
+                this.verifyStatementIsBraced(node.statement);
+            };
+
+            CurlyWalker.prototype.visitIfStatement = function (node) {
+                _super.prototype.visitIfStatement.call(this, node);
+                this.verifyStatementIsBraced(node.statement);
+            };
+
+            CurlyWalker.prototype.visitElseClause = function (node) {
+                _super.prototype.visitElseClause.call(this, node);
+                this.verifyStatementIsBraced(node.statement);
+            };
+
+            CurlyWalker.prototype.visitDoStatement = function (node) {
+                _super.prototype.visitDoStatement.call(this, node);
+                this.verifyStatementIsBraced(node.statement);
+            };
+
+            CurlyWalker.prototype.visitWhileStatement = function (node) {
+                _super.prototype.visitWhileStatement.call(this, node);
+                this.verifyStatementIsBraced(node.statement);
+            };
+
+            CurlyWalker.prototype.verifyStatementIsBraced = function (node) {
+                var failure = null;
+                var hasBraces = false;
+
+                var childCount = node.childCount();
+                if (childCount === 3) {
+                    if (node.childAt(0).kind() === TypeScript.SyntaxKind.FirstPunctuation && node.childAt(1).kind() === TypeScript.SyntaxKind.List && node.childAt(2).kind() === TypeScript.SyntaxKind.CloseBraceToken) {
+                        hasBraces = true;
+                    }
+                }
+
+                if (!hasBraces) {
+                    this.addFailure(this.createFailure(this.position(), CurlyWalker.CURLY_FAILURE));
+                }
+            };
+            CurlyWalker.CURLY_FAILURE = "if/for/do/while statements must be braced";
+            return CurlyWalker;
+        })(Lint.RuleWalker);
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
+        var DebugRule = (function (_super) {
+            __extends(DebugRule, _super);
+            function DebugRule() {
+                _super.call(this, "debug");
+            }
+            DebugRule.prototype.isEnabled = function () {
+                return this.getValue() === true;
+            };
+
+            DebugRule.prototype.apply = function (syntaxTree) {
+                return this.applyWithWalker(new DebugWalker(syntaxTree));
+            };
+            return DebugRule;
+        })(Rules.AbstractRule);
+        Rules.DebugRule = DebugRule;
+
+        var DebugWalker = (function (_super) {
+            __extends(DebugWalker, _super);
+            function DebugWalker() {
+                _super.apply(this, arguments);
+            }
+            DebugWalker.prototype.visitToken = function (token) {
+                this.handleToken(token);
+                _super.prototype.visitToken.call(this, token);
+            };
+
+            DebugWalker.prototype.handleToken = function (operatorToken) {
+                var failure = null;
+                var operatorKind = operatorToken.kind();
+
+                if (operatorKind === TypeScript.SyntaxKind.DebuggerKeyword) {
+                    this.addFailure(this.createFailure(this.position(), DebugWalker.DEBUG_FAILURE));
+                }
+            };
+            DebugWalker.DEBUG_FAILURE = "use of debugger statements is disallowed";
+            return DebugWalker;
+        })(Lint.RuleWalker);
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    var StateAwareRuleWalker = (function (_super) {
+        __extends(StateAwareRuleWalker, _super);
+        function StateAwareRuleWalker() {
+            _super.apply(this, arguments);
         }
-        Unicode.lookupInUnicodeMap = function (code, map) {
-            if (code < map[0]) {
-                return false;
+        StateAwareRuleWalker.prototype.visitToken = function (token) {
+            if (token.value() !== null) {
+                this.lastState = {
+                    position: this.position() + token.leadingTriviaWidth(),
+                    token: token
+                };
             }
 
-            var lo = 0;
-            var hi = map.length;
-            var mid;
+            _super.prototype.visitToken.call(this, token);
+        };
 
-            while (lo + 1 < hi) {
-                mid = lo + (hi - lo) / 2;
+        StateAwareRuleWalker.prototype.getLastState = function () {
+            return this.lastState;
+        };
+        return StateAwareRuleWalker;
+    })(Lint.RuleWalker);
+    Lint.StateAwareRuleWalker = StateAwareRuleWalker;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
+        var NewLineRule = (function (_super) {
+            __extends(NewLineRule, _super);
+            function NewLineRule() {
+                _super.call(this, "file_must_end_with_newline");
+            }
+            NewLineRule.prototype.isEnabled = function () {
+                return this.getValue() === true;
+            };
 
-                mid -= mid % 2;
-                if (map[mid] <= code && code <= map[mid + 1]) {
+            NewLineRule.prototype.apply = function (syntaxTree) {
+                return this.applyWithWalker(new EOFWalker(syntaxTree));
+            };
+            return NewLineRule;
+        })(Rules.AbstractRule);
+        Rules.NewLineRule = NewLineRule;
+
+        var EOFWalker = (function (_super) {
+            __extends(EOFWalker, _super);
+            function EOFWalker() {
+                _super.apply(this, arguments);
+            }
+            EOFWalker.prototype.visitToken = function (token) {
+                this.handleToken(token);
+                _super.prototype.visitToken.call(this, token);
+            };
+
+            EOFWalker.prototype.handleToken = function (operatorToken) {
+                var lastState = this.getLastState();
+                var operatorKind = operatorToken.kind();
+                if (lastState !== undefined && operatorKind === TypeScript.SyntaxKind.EndOfFileToken) {
+                    var endsWithNewLine = false;
+
+                    var previousToken = lastState.token;
+                    if (previousToken !== null && previousToken.hasTrailingNewLine()) {
+                        endsWithNewLine = true;
+                    }
+
+                    if (operatorToken.hasLeadingTrivia()) {
+                        endsWithNewLine = false;
+                    }
+
+                    if (!endsWithNewLine) {
+                        this.addFailure(this.createFailure(this.position(), EOFWalker.FAILURE_STRING));
+                    }
+                }
+            };
+            EOFWalker.FAILURE_STRING = "file should end with a newline";
+            return EOFWalker;
+        })(Lint.StateAwareRuleWalker);
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
+        var ForInRule = (function (_super) {
+            __extends(ForInRule, _super);
+            function ForInRule() {
+                _super.call(this, "forin");
+            }
+            ForInRule.prototype.isEnabled = function () {
+                return this.getValue() === true;
+            };
+
+            ForInRule.prototype.apply = function (syntaxTree) {
+                return this.applyWithWalker(new ForInWalker(syntaxTree));
+            };
+            return ForInRule;
+        })(Rules.AbstractRule);
+        Rules.ForInRule = ForInRule;
+
+        var ForInWalker = (function (_super) {
+            __extends(ForInWalker, _super);
+            function ForInWalker() {
+                _super.apply(this, arguments);
+            }
+            ForInWalker.prototype.visitForInStatement = function (node) {
+                _super.prototype.visitForInStatement.call(this, node);
+                this.handleForInStatement(node);
+            };
+
+            ForInWalker.prototype.handleForInStatement = function (node) {
+                var failure = null;
+
+                var statement = node.statement;
+                var statementChildCount = statement.childCount();
+                for (var i = 0; i < statementChildCount; i++) {
+                    var child = statement.childAt(i);
+                    var childKind = child.kind();
+
+                    if (childKind !== TypeScript.SyntaxKind.FirstPunctuation && childKind !== TypeScript.SyntaxKind.CloseBraceToken) {
+                        if (childKind !== TypeScript.SyntaxKind.List) {
+                            throw new Error("The only possible children are opening punctuation, a list, and a closing brace");
+                        }
+
+                        var grandChildrenCount = child.childCount();
+
+                        if (grandChildrenCount > 1) {
+                            failure = this.createFailure(this.position(), ForInWalker.FOR_IN_FAILURE);
+                        } else if (grandChildrenCount === 1) {
+                            var grandChild = child.childAt(0);
+
+                            if (grandChild.kind() !== TypeScript.SyntaxKind.IfStatement) {
+                                failure = this.createFailure(this.position(), ForInWalker.FOR_IN_FAILURE);
+                            }
+                        }
+                    }
+                }
+
+                if (failure) {
+                    this.addFailure(failure);
+                }
+            };
+            ForInWalker.FOR_IN_FAILURE = "for (... in ...) statements must be filtered with an if statement";
+            return ForInWalker;
+        })(Lint.RuleWalker);
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
+        var EvalRule = (function (_super) {
+            __extends(EvalRule, _super);
+            function EvalRule() {
+                _super.call(this, "eval");
+            }
+            EvalRule.prototype.isEnabled = function () {
+                return this.getValue() === true;
+            };
+
+            EvalRule.prototype.apply = function (syntaxTree) {
+                return this.applyWithWalker(new EvalWalker(syntaxTree));
+            };
+            return EvalRule;
+        })(Rules.AbstractRule);
+        Rules.EvalRule = EvalRule;
+
+        var EvalWalker = (function (_super) {
+            __extends(EvalWalker, _super);
+            function EvalWalker() {
+                _super.apply(this, arguments);
+            }
+            EvalWalker.prototype.visitInvocationExpression = function (node) {
+                var expression = node.expression;
+                if (expression.isToken() && expression.kind() === TypeScript.SyntaxKind.IdentifierName) {
+                    if (expression.firstToken().text() === "eval") {
+                        var position = this.position() + node.leadingTriviaWidth();
+                        this.addFailure(this.createFailure(position, EvalWalker.FAILURE_STRING));
+                    }
+                }
+
+                _super.prototype.visitInvocationExpression.call(this, node);
+            };
+            EvalWalker.FAILURE_STRING = "forbidden eval";
+            return EvalWalker;
+        })(Lint.RuleWalker);
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
+        var MaxLineLengthRule = (function (_super) {
+            __extends(MaxLineLengthRule, _super);
+            function MaxLineLengthRule() {
+                _super.call(this, "max_line_length");
+            }
+            MaxLineLengthRule.prototype.apply = function (syntaxTree) {
+                var ruleFailures = [];
+                var lineLimit = this.getValue();
+                var lineMap = syntaxTree.lineMap();
+                var lineStarts = lineMap.lineStarts();
+                var errorString = MaxLineLengthRule.FAILURE_STRING + lineLimit;
+
+                for (var i = 0; i < lineStarts.length - 1; ++i) {
+                    var from = lineStarts[i], to = lineStarts[i + 1];
+                    if ((to - from - 1) > lineLimit) {
+                        var lineAndCharacter = lineMap.getLineAndCharacterFromPosition(to - 1);
+                        var ruleFailure = new Lint.RuleFailure(syntaxTree.fileName(), lineAndCharacter, errorString);
+                        ruleFailures.push(ruleFailure);
+                    }
+                }
+
+                return ruleFailures;
+            };
+            MaxLineLengthRule.FAILURE_STRING = "exceeds maximum line length of ";
+            return MaxLineLengthRule;
+        })(Rules.AbstractRule);
+        Rules.MaxLineLengthRule = MaxLineLengthRule;
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
+        var QuoteStyle;
+        (function (QuoteStyle) {
+            QuoteStyle[QuoteStyle["SINGLE_QUOTES"] = 0] = "SINGLE_QUOTES";
+
+            QuoteStyle[QuoteStyle["DOUBLE_QUOTES"] = 1] = "DOUBLE_QUOTES";
+        })(QuoteStyle || (QuoteStyle = {}));
+        ;
+
+        var QuoteStyleRule = (function (_super) {
+            __extends(QuoteStyleRule, _super);
+            function QuoteStyleRule() {
+                _super.call(this, "quote_style");
+            }
+            QuoteStyleRule.prototype.apply = function (syntaxTree) {
+                var sourceUnit = syntaxTree.sourceUnit();
+                var quoteStyleString = this.getValue();
+                var quoteStyle;
+
+                if (quoteStyleString === "single") {
+                    quoteStyle = QuoteStyle.SINGLE_QUOTES;
+                } else if (quoteStyleString === "double") {
+                    quoteStyle = QuoteStyle.DOUBLE_QUOTES;
+                } else {
+                    throw new Error("Unknown quote style " + quoteStyle);
+                }
+
+                return this.applyWithWalker(new QuoteWalker(syntaxTree, quoteStyle));
+            };
+            return QuoteStyleRule;
+        })(Rules.AbstractRule);
+        Rules.QuoteStyleRule = QuoteStyleRule;
+
+        var QuoteWalker = (function (_super) {
+            __extends(QuoteWalker, _super);
+            function QuoteWalker(syntaxTree, quoteStyle) {
+                _super.call(this, syntaxTree);
+                this.quoteStyle = quoteStyle;
+            }
+            QuoteWalker.prototype.visitToken = function (token) {
+                this.handleToken(token);
+                _super.prototype.visitToken.call(this, token);
+            };
+
+            QuoteWalker.prototype.handleToken = function (operatorToken) {
+                var failure = null;
+                var operatorKind = operatorToken.kind();
+
+                if (operatorKind === TypeScript.SyntaxKind.StringLiteral) {
+                    var fullText = operatorToken.fullText();
+                    var textStart = operatorToken.leadingTriviaWidth();
+                    var textEnd = textStart + operatorToken.width() - 1;
+                    var firstChar = fullText.charAt(textStart);
+                    var lastChar = fullText.charAt(textEnd);
+
+                    if (this.quoteStyle === QuoteStyle.SINGLE_QUOTES) {
+                        if (firstChar !== "'" || lastChar !== "'") {
+                            failure = this.createFailure(this.position(), QuoteWalker.SINGLE_QUOTE_FAILURE);
+                        }
+                    } else if (this.quoteStyle === QuoteStyle.DOUBLE_QUOTES) {
+                        if (firstChar !== "\"" || lastChar !== "\"") {
+                            failure = this.createFailure(this.position(), QuoteWalker.DOUBLE_QUOTE_FAILURE);
+                        }
+                    }
+                }
+
+                if (failure) {
+                    this.addFailure(failure);
+                }
+            };
+            QuoteWalker.DOUBLE_QUOTE_FAILURE = "' should be \"";
+            QuoteWalker.SINGLE_QUOTE_FAILURE = "\" should be '";
+            return QuoteWalker;
+        })(Lint.RuleWalker);
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
+        var SameLineRule = (function (_super) {
+            __extends(SameLineRule, _super);
+            function SameLineRule() {
+                _super.call(this, "same_line_brace");
+            }
+            SameLineRule.prototype.isEnabled = function () {
+                return this.getValue() === true;
+            };
+
+            SameLineRule.prototype.apply = function (syntaxTree) {
+                var braceWalker = new BraceWalker(syntaxTree);
+                return this.applyWithWalker(braceWalker);
+            };
+            return SameLineRule;
+        })(Rules.AbstractRule);
+        Rules.SameLineRule = SameLineRule;
+
+        var BraceWalker = (function (_super) {
+            __extends(BraceWalker, _super);
+            function BraceWalker() {
+                _super.apply(this, arguments);
+            }
+            BraceWalker.prototype.visitToken = function (token) {
+                var kind = token.kind();
+                var lastState = this.getLastState();
+
+                if (kind === TypeScript.SyntaxKind.OpenBraceToken && lastState !== undefined) {
+                    var lastKind = lastState.token.kind();
+                    if (lastKind === TypeScript.SyntaxKind.CloseParenToken || lastKind === TypeScript.SyntaxKind.DoKeyword || lastKind === TypeScript.SyntaxKind.ElseKeyword || lastKind === TypeScript.SyntaxKind.IdentifierName || lastKind === TypeScript.SyntaxKind.StringLiteral || lastKind === TypeScript.SyntaxKind.TryKeyword) {
+                        var lastLine = this.getLine(lastState.position);
+                        var currentLine = this.getLine(this.position());
+
+                        if (currentLine !== lastLine) {
+                            this.addFailure(this.createFailure(this.position(), BraceWalker.BRACE_FAILURE_STRING));
+                        } else if (!this.hasTrailingWhiteSpace(lastState.token)) {
+                            this.addFailure(this.createFailure(this.position(), BraceWalker.WHITESPACE_FAILURE_STRING));
+                        }
+                    }
+                }
+
+                _super.prototype.visitToken.call(this, token);
+            };
+
+            BraceWalker.prototype.visitElseClause = function (node) {
+                var lastState = this.getLastState();
+                if (lastState !== undefined && !this.hasTrailingWhiteSpace(lastState.token)) {
+                    this.addFailure(this.createFailure(this.position(), BraceWalker.ELSE_FAILURE_STRING));
+                }
+
+                _super.prototype.visitElseClause.call(this, node);
+            };
+
+            BraceWalker.prototype.visitCatchClause = function (node) {
+                var lastState = this.getLastState();
+                if (lastState !== undefined && !this.hasTrailingWhiteSpace(lastState.token)) {
+                    this.addFailure(this.createFailure(this.position(), BraceWalker.CATCH_FAILURE_STRING));
+                }
+
+                _super.prototype.visitCatchClause.call(this, node);
+            };
+
+            BraceWalker.prototype.getLine = function (position) {
+                return this.getSyntaxTree().lineMap().getLineAndCharacterFromPosition(position).line();
+            };
+
+            BraceWalker.prototype.hasTrailingWhiteSpace = function (token) {
+                var trivia = token.trailingTrivia();
+                if (trivia.count() < 1) {
+                    return false;
+                }
+
+                var kind = trivia.syntaxTriviaAt(0).kind();
+                return (kind === TypeScript.SyntaxKind.WhitespaceTrivia);
+            };
+            BraceWalker.BRACE_FAILURE_STRING = "misplaced opening brace";
+            BraceWalker.CATCH_FAILURE_STRING = "misplaced 'catch'";
+            BraceWalker.ELSE_FAILURE_STRING = "misplaced 'else'";
+            BraceWalker.WHITESPACE_FAILURE_STRING = "missing whitespace";
+            return BraceWalker;
+        })(Lint.StateAwareRuleWalker);
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
+        var SemicolonRule = (function (_super) {
+            __extends(SemicolonRule, _super);
+            function SemicolonRule() {
+                _super.call(this, "semicolon");
+            }
+            SemicolonRule.prototype.isEnabled = function () {
+                return this.getValue() === true;
+            };
+
+            SemicolonRule.prototype.apply = function (syntaxTree) {
+                var ruleFailures = [];
+                var diagnostics = syntaxTree.diagnostics();
+
+                for (var i = 0; i < diagnostics.length; ++i) {
+                    var diagnostic = diagnostics[i];
+                    var code = diagnostic.diagnosticCode();
+
+                    if (code === TypeScript.DiagnosticCode.Automatic_semicolon_insertion_not_allowed) {
+                        var fileName = diagnostic.fileName();
+                        var position = diagnostic.start();
+                        var lineAndCharacter = syntaxTree.lineMap().getLineAndCharacterFromPosition(position);
+                        var ruleFailure = new Lint.RuleFailure(fileName, lineAndCharacter, SemicolonRule.FAILURE_STRING);
+
+                        ruleFailures.push(ruleFailure);
+                    }
+                }
+
+                return ruleFailures;
+            };
+            SemicolonRule.FAILURE_STRING = "missing semicolon";
+            return SemicolonRule;
+        })(Rules.AbstractRule);
+        Rules.SemicolonRule = SemicolonRule;
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
+        var SubRule = (function (_super) {
+            __extends(SubRule, _super);
+            function SubRule() {
+                _super.call(this, "sub");
+            }
+            SubRule.prototype.isEnabled = function () {
+                return this.getValue() === true;
+            };
+
+            SubRule.prototype.apply = function (syntaxTree) {
+                return this.applyWithWalker(new SubWalker(syntaxTree));
+            };
+            return SubRule;
+        })(Rules.AbstractRule);
+        Rules.SubRule = SubRule;
+
+        var SubWalker = (function (_super) {
+            __extends(SubWalker, _super);
+            function SubWalker() {
+                _super.apply(this, arguments);
+            }
+            SubWalker.prototype.visitElementAccessExpression = function (node) {
+                _super.prototype.visitElementAccessExpression.call(this, node);
+                this.handleElementAccessExpression(node);
+            };
+
+            SubWalker.prototype.handleElementAccessExpression = function (operatorToken) {
+                var argumentExpressionKind = operatorToken.argumentExpression.kind();
+
+                if (argumentExpressionKind === TypeScript.SyntaxKind.StringLiteral) {
+                    this.addFailure(this.createFailure(this.position(), SubWalker.SUB_FAILURE));
+                }
+            };
+            SubWalker.SUB_FAILURE = "object access via string literals is disallowed";
+            return SubWalker;
+        })(Lint.RuleWalker);
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
+        var TabWidthRule = (function (_super) {
+            __extends(TabWidthRule, _super);
+            function TabWidthRule() {
+                _super.call(this, "tab_width");
+            }
+            TabWidthRule.prototype.apply = function (syntaxTree) {
+                var tabWidth = parseInt(this.getValue());
+
+                return this.applyWithWalker(new TabWidthWalker(syntaxTree, tabWidth));
+            };
+            return TabWidthRule;
+        })(Rules.AbstractRule);
+        Rules.TabWidthRule = TabWidthRule;
+
+        var TabWidthWalker = (function (_super) {
+            __extends(TabWidthWalker, _super);
+            function TabWidthWalker(syntaxTree, tabWidth) {
+                _super.call(this, syntaxTree);
+                this.currentLevel = 0;
+                this.tabWidth = tabWidth;
+            }
+            TabWidthWalker.prototype.visitBlock = function (node) {
+                this.visitToken(node.openBraceToken);
+                this.checkAndVisitList(node.statements);
+                this.visitToken(node.closeBraceToken);
+            };
+
+            TabWidthWalker.prototype.visitClassDeclaration = function (node) {
+                this.currentLevel += 1;
+                _super.prototype.visitClassDeclaration.call(this, node);
+                this.currentLevel -= 1;
+            };
+
+            TabWidthWalker.prototype.visitMemberVariableDeclaration = function (node) {
+                var firstElement;
+                if (node.modifiers.childCount() > 0) {
+                    firstElement = node.modifiers.childAt(0);
+                } else {
+                    firstElement = node.variableDeclarator;
+                }
+
+                this.checkNodeOrToken(firstElement);
+                _super.prototype.visitMemberVariableDeclaration.call(this, node);
+            };
+
+            TabWidthWalker.prototype.visitMemberFunctionDeclaration = function (node) {
+                var firstElement;
+                if (node.modifiers.childCount() > 0) {
+                    firstElement = node.modifiers.childAt(0);
+                } else {
+                    firstElement = node.propertyName;
+                }
+
+                this.checkNodeOrToken(firstElement);
+                _super.prototype.visitMemberFunctionDeclaration.call(this, node);
+            };
+
+            TabWidthWalker.prototype.visitObjectType = function (node) {
+                this.visitToken(node.openBraceToken);
+                this.checkAndVisitSeparatedList(node.typeMembers);
+                this.visitToken(node.closeBraceToken);
+            };
+
+            TabWidthWalker.prototype.visitObjectLiteralExpression = function (node) {
+                this.visitToken(node.openBraceToken);
+                this.checkAndVisitSeparatedList(node.propertyAssignments);
+                this.visitToken(node.closeBraceToken);
+            };
+
+            TabWidthWalker.prototype.visitModuleDeclaration = function (node) {
+                this.visitList(node.modifiers);
+                this.visitToken(node.moduleKeyword);
+                this.visitOptionalNodeOrToken(node.moduleName);
+                if (node.stringLiteral !== null) {
+                    this.visitToken(node.stringLiteral);
+                }
+                this.visitToken(node.openBraceToken);
+                this.checkAndVisitList(node.moduleElements);
+                this.visitToken(node.closeBraceToken);
+            };
+
+            TabWidthWalker.prototype.visitEnumDeclaration = function (node) {
+                this.visitList(node.modifiers);
+                this.visitToken(node.enumKeyword);
+                this.visitToken(node.identifier);
+                this.visitToken(node.openBraceToken);
+                this.checkAndVisitSeparatedList(node.enumElements);
+                this.visitToken(node.closeBraceToken);
+            };
+
+            TabWidthWalker.prototype.visitSwitchStatement = function (node) {
+                this.currentLevel += 1;
+                _super.prototype.visitSwitchStatement.call(this, node);
+                this.currentLevel -= 1;
+            };
+
+            TabWidthWalker.prototype.visitCaseSwitchClause = function (node) {
+                this.checkAndVisitNodeOrToken(node.caseKeyword);
+                this.visitNodeOrToken(node.expression);
+                this.visitToken(node.colonToken);
+                this.checkAndVisitList(node.statements);
+            };
+
+            TabWidthWalker.prototype.visitDefaultSwitchClause = function (node) {
+                this.checkAndVisitNodeOrToken(node.defaultKeyword);
+                this.visitToken(node.colonToken);
+                this.checkAndVisitList(node.statements);
+            };
+
+            TabWidthWalker.prototype.checkAndVisitList = function (list) {
+                this.currentLevel += 1;
+                for (var i = 0; i < list.childCount(); i++) {
+                    this.checkAndVisitNodeOrToken(list.childAt(i));
+                }
+                this.currentLevel -= 1;
+            };
+
+            TabWidthWalker.prototype.checkAndVisitSeparatedList = function (list) {
+                this.currentLevel += 1;
+                for (var i = 0, n = list.childCount(); i < n; i++) {
+                    var element = list.childAt(i);
+
+                    if (element.kind() === TypeScript.SyntaxKind.CommaToken || element.kind() === TypeScript.SyntaxKind.SemicolonToken) {
+                        this.visitNodeOrToken(element);
+                    } else {
+                        this.checkAndVisitNodeOrToken(element);
+                    }
+                }
+                this.currentLevel -= 1;
+            };
+
+            TabWidthWalker.prototype.checkAndVisitNodeOrToken = function (nodeOrToken) {
+                this.checkNodeOrToken(nodeOrToken);
+                this.visitNodeOrToken(nodeOrToken);
+            };
+
+            TabWidthWalker.prototype.checkNodeOrToken = function (nodeOrToken) {
+                var expectedIndentation = this.currentLevel * this.tabWidth;
+                var actualIndentation = this.getImmediateIndentation(nodeOrToken);
+
+                if (expectedIndentation !== actualIndentation) {
+                    var position = this.position() + nodeOrToken.leadingTriviaWidth();
+                    var error = TabWidthWalker.FAILURE_STRING + "expected " + expectedIndentation + ", " + "got " + actualIndentation;
+
+                    this.addFailure(this.createFailure(position, error));
+                }
+            };
+
+            TabWidthWalker.prototype.getImmediateIndentation = function (element) {
+                var indentationCount = 0;
+                var triviaList = element.leadingTrivia();
+
+                var listCount = triviaList.count();
+                if (listCount > 0) {
+                    var trivia = triviaList.syntaxTriviaAt(listCount - 1);
+                    if (trivia.kind() === TypeScript.SyntaxKind.WhitespaceTrivia) {
+                        indentationCount = trivia.fullWidth();
+                    }
+                }
+
+                return indentationCount;
+            };
+            TabWidthWalker.FAILURE_STRING = "unexpected tab width: ";
+            return TabWidthWalker;
+        })(Lint.RuleWalker);
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
+        var TrailingWhitespaceRule = (function (_super) {
+            __extends(TrailingWhitespaceRule, _super);
+            function TrailingWhitespaceRule() {
+                _super.call(this, "no_trailing_whitespace");
+            }
+            TrailingWhitespaceRule.prototype.isEnabled = function () {
+                return this.getValue() === true;
+            };
+
+            TrailingWhitespaceRule.prototype.apply = function (syntaxTree) {
+                return this.applyWithWalker(new TrailingWalker(syntaxTree));
+            };
+            return TrailingWhitespaceRule;
+        })(Rules.AbstractRule);
+        Rules.TrailingWhitespaceRule = TrailingWhitespaceRule;
+
+        var TrailingWalker = (function (_super) {
+            __extends(TrailingWalker, _super);
+            function TrailingWalker() {
+                _super.apply(this, arguments);
+            }
+            TrailingWalker.prototype.visitToken = function (token) {
+                _super.prototype.visitToken.call(this, token);
+                this.checkForTrailingWhitespace(token.trailingTrivia());
+            };
+
+            TrailingWalker.prototype.visitNode = function (node) {
+                _super.prototype.visitNode.call(this, node);
+                this.checkForTrailingWhitespace(node.trailingTrivia());
+            };
+
+            TrailingWalker.prototype.checkForTrailingWhitespace = function (triviaList) {
+                if (triviaList.count() < 2) {
+                    return;
+                }
+
+                var lastButOne = triviaList.count() - 2;
+                var triviaKind = triviaList.syntaxTriviaAt(lastButOne).kind();
+                if (triviaList.hasNewLine() && triviaKind === TypeScript.SyntaxKind.WhitespaceTrivia) {
+                    this.createAndAddFailure();
+                }
+            };
+
+            TrailingWalker.prototype.createAndAddFailure = function () {
+                var failure = this.createFailure(this.position() - 1, TrailingWalker.FAILURE_STRING);
+                this.addFailure(failure);
+            };
+            TrailingWalker.FAILURE_STRING = "trailing whitespace";
+            return TrailingWalker;
+        })(Lint.RuleWalker);
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
+        var TripleComparisonRule = (function (_super) {
+            __extends(TripleComparisonRule, _super);
+            function TripleComparisonRule() {
+                _super.call(this, "triple_eq_neq");
+            }
+            TripleComparisonRule.prototype.isEnabled = function () {
+                return this.getValue() === true;
+            };
+
+            TripleComparisonRule.prototype.apply = function (syntaxTree) {
+                return this.applyWithWalker(new ComparisonWalker(syntaxTree));
+            };
+            return TripleComparisonRule;
+        })(Rules.AbstractRule);
+        Rules.TripleComparisonRule = TripleComparisonRule;
+
+        var ComparisonWalker = (function (_super) {
+            __extends(ComparisonWalker, _super);
+            function ComparisonWalker() {
+                _super.apply(this, arguments);
+            }
+            ComparisonWalker.prototype.visitBinaryExpression = function (node) {
+                var position = this.positionAfter(node.left);
+                this.handleOperatorToken(position, node.operatorToken);
+                _super.prototype.visitBinaryExpression.call(this, node);
+            };
+
+            ComparisonWalker.prototype.handleOperatorToken = function (position, operatorToken) {
+                var failure = null;
+                var operatorKind = operatorToken.kind();
+
+                if (operatorKind === TypeScript.SyntaxKind.EqualsEqualsToken) {
+                    failure = this.createFailure(position, ComparisonWalker.EQ_FAILURE);
+                } else if (operatorKind === TypeScript.SyntaxKind.ExclamationEqualsToken) {
+                    failure = this.createFailure(position, ComparisonWalker.NEQ_FAILURE);
+                }
+
+                if (failure) {
+                    this.addFailure(failure);
+                }
+            };
+            ComparisonWalker.EQ_FAILURE = "== should be ===";
+            ComparisonWalker.NEQ_FAILURE = "!= should be !==";
+            return ComparisonWalker;
+        })(Lint.RuleWalker);
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
+        var VariableNameRule = (function (_super) {
+            __extends(VariableNameRule, _super);
+            function VariableNameRule() {
+                _super.call(this, "variable_name");
+            }
+            VariableNameRule.prototype.isEnabled = function () {
+                return this.getValue() === true;
+            };
+
+            VariableNameRule.prototype.apply = function (syntaxTree) {
+                return this.applyWithWalker(new VariableNameWalker(syntaxTree));
+            };
+            return VariableNameRule;
+        })(Rules.AbstractRule);
+        Rules.VariableNameRule = VariableNameRule;
+
+        var VariableNameWalker = (function (_super) {
+            __extends(VariableNameWalker, _super);
+            function VariableNameWalker() {
+                _super.apply(this, arguments);
+            }
+            VariableNameWalker.prototype.visitVariableDeclarator = function (node) {
+                var identifier = node.identifier;
+                var variableName = identifier.text();
+                var position = this.position() + identifier.leadingTriviaWidth();
+
+                if (!this.isCamelCase(variableName) && !this.isUpperCase(variableName)) {
+                    this.addFailure(this.createFailure(position, VariableNameWalker.FAILURE_STRING));
+                }
+
+                _super.prototype.visitVariableDeclarator.call(this, node);
+            };
+
+            VariableNameWalker.prototype.isCamelCase = function (name) {
+                if (name.length < 0) {
                     return true;
                 }
 
-                if (code < map[mid]) {
-                    hi = mid;
+                var firstCharacter = name.charAt(0);
+                return (firstCharacter === firstCharacter.toLowerCase());
+            };
+
+            VariableNameWalker.prototype.isUpperCase = function (name) {
+                return (name === name.toUpperCase());
+            };
+            VariableNameWalker.FAILURE_STRING = "variable name must be in camelcase or uppercase";
+            return VariableNameWalker;
+        })(Lint.RuleWalker);
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
+        var WhitespaceRule = (function (_super) {
+            __extends(WhitespaceRule, _super);
+            function WhitespaceRule() {
+                _super.call(this, "enclosing_whitespace");
+            }
+            WhitespaceRule.prototype.isEnabled = function () {
+                return this.getValue() === true;
+            };
+
+            WhitespaceRule.prototype.apply = function (syntaxTree) {
+                return this.applyWithWalker(new WhitespaceWalker(syntaxTree));
+            };
+            return WhitespaceRule;
+        })(Rules.AbstractRule);
+        Rules.WhitespaceRule = WhitespaceRule;
+
+        var WhitespaceWalker = (function (_super) {
+            __extends(WhitespaceWalker, _super);
+            function WhitespaceWalker() {
+                _super.apply(this, arguments);
+            }
+            WhitespaceWalker.prototype.visitToken = function (token) {
+                _super.prototype.visitToken.call(this, token);
+
+                var kind = token.kind();
+                if (kind === TypeScript.SyntaxKind.CatchKeyword || kind === TypeScript.SyntaxKind.ColonToken || kind === TypeScript.SyntaxKind.CommaToken || kind === TypeScript.SyntaxKind.EqualsToken || kind === TypeScript.SyntaxKind.ForKeyword || kind === TypeScript.SyntaxKind.IfKeyword || kind === TypeScript.SyntaxKind.SemicolonToken || kind === TypeScript.SyntaxKind.SwitchKeyword || kind === TypeScript.SyntaxKind.WhileKeyword || kind === TypeScript.SyntaxKind.WithKeyword) {
+                    this.checkForLeadingSpace(this.position(), token.trailingTrivia());
+                }
+            };
+
+            WhitespaceWalker.prototype.visitBinaryExpression = function (node) {
+                var position = this.positionAfter(node.left);
+                this.checkForLeadingSpace(position, node.left.trailingTrivia());
+
+                position += node.operatorToken.fullWidth();
+                this.checkForLeadingSpace(position, node.operatorToken.trailingTrivia());
+
+                _super.prototype.visitBinaryExpression.call(this, node);
+            };
+
+            WhitespaceWalker.prototype.visitConditionalExpression = function (node) {
+                var position = this.positionAfter(node.condition);
+                this.checkForLeadingSpace(position, node.condition.trailingTrivia());
+
+                position += node.questionToken.fullWidth();
+                this.checkForLeadingSpace(position, node.questionToken.trailingTrivia());
+
+                position += node.whenTrue.fullWidth();
+                this.checkForLeadingSpace(position, node.whenTrue.trailingTrivia());
+
+                _super.prototype.visitConditionalExpression.call(this, node);
+            };
+
+            WhitespaceWalker.prototype.visitVariableDeclarator = function (node) {
+                var position = this.positionAfter(node.identifier, node.typeAnnotation);
+
+                if (node.equalsValueClause !== null) {
+                    if (node.typeAnnotation !== null) {
+                        this.checkForLeadingSpace(position, node.typeAnnotation.trailingTrivia());
+                    } else {
+                        this.checkForLeadingSpace(position, node.identifier.trailingTrivia());
+                    }
+                }
+
+                _super.prototype.visitVariableDeclarator.call(this, node);
+            };
+
+            WhitespaceWalker.prototype.visitImportDeclaration = function (node) {
+                var position = this.positionAfter(node.importKeyword, node.identifier);
+                this.checkForLeadingSpace(position, node.identifier.trailingTrivia());
+
+                _super.prototype.visitImportDeclaration.call(this, node);
+            };
+
+            WhitespaceWalker.prototype.visitExportAssignment = function (node) {
+                var position = this.positionAfter(node.exportKeyword);
+                this.checkForLeadingSpace(position, node.exportKeyword.trailingTrivia());
+
+                _super.prototype.visitExportAssignment.call(this, node);
+            };
+
+            WhitespaceWalker.prototype.checkForLeadingSpace = function (position, trivia) {
+                var failure = null;
+
+                if (trivia.count() < 1) {
+                    failure = this.createFailure(position, WhitespaceWalker.FAILURE_STRING);
                 } else {
-                    lo = mid + 2;
+                    var kind = trivia.syntaxTriviaAt(0).kind();
+                    if (kind !== TypeScript.SyntaxKind.WhitespaceTrivia && kind !== TypeScript.SyntaxKind.NewLineTrivia) {
+                        failure = this.createFailure(position, WhitespaceWalker.FAILURE_STRING);
+                    }
+                }
+
+                if (failure) {
+                    this.addFailure(failure);
+                }
+            };
+            WhitespaceWalker.FAILURE_STRING = "missing whitespace";
+            return WhitespaceWalker;
+        })(Lint.RuleWalker);
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
+        var ALL_RULES = [];
+
+        function createAllRules() {
+            ALL_RULES.push(new Rules.ArgumentsRule());
+            ALL_RULES.push(new Rules.BitwiseOperatorRule());
+            ALL_RULES.push(new Rules.ClassNameRule());
+            ALL_RULES.push(new Rules.CurlyRule());
+            ALL_RULES.push(new Rules.DebugRule());
+            ALL_RULES.push(new Rules.EvalRule());
+            ALL_RULES.push(new Rules.NewLineRule());
+            ALL_RULES.push(new Rules.ForInRule());
+            ALL_RULES.push(new Rules.MaxLineLengthRule());
+            ALL_RULES.push(new Rules.QuoteStyleRule());
+            ALL_RULES.push(new Rules.SameLineRule());
+            ALL_RULES.push(new Rules.SemicolonRule());
+            ALL_RULES.push(new Rules.SubRule());
+            ALL_RULES.push(new Rules.TabWidthRule());
+            ALL_RULES.push(new Rules.TrailingWhitespaceRule());
+            ALL_RULES.push(new Rules.TripleComparisonRule());
+            ALL_RULES.push(new Rules.VariableNameRule());
+            ALL_RULES.push(new Rules.WhitespaceRule());
+        }
+        Rules.createAllRules = createAllRules;
+
+        function getRuleForName(name) {
+            var filteredRules = ALL_RULES.filter(function (rule) {
+                return rule.getName() === name;
+            });
+
+            if (filteredRules.length > 0) {
+                return filteredRules[0];
+            } else {
+                return undefined;
+            }
+        }
+        Rules.getRuleForName = getRuleForName;
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Configuration) {
+        var fs = require("fs");
+        var path = require("path");
+
+        var CONFIG_FILENAME = ".tslintrc";
+
+        function findConfiguration(configFile) {
+            if (!configFile) {
+                var currentPath = global.process.cwd();
+                var parentPath = currentPath;
+
+                while (true) {
+                    var filePath = path.join(currentPath, CONFIG_FILENAME);
+
+                    if (fs.existsSync(filePath)) {
+                        configFile = filePath;
+                        break;
+                    }
+
+                    parentPath = path.resolve(currentPath, "..");
+                    if (parentPath === currentPath) {
+                        return undefined;
+                    }
+
+                    currentPath = parentPath;
                 }
             }
 
-            return false;
-        };
+            return JSON.parse(fs.readFileSync(configFile, "utf8"));
+        }
+        Configuration.findConfiguration = findConfiguration;
 
-        Unicode.isIdentifierStart = function (code, languageVersion) {
-            if (languageVersion === TypeScript.LanguageVersion.EcmaScript3) {
-                return Unicode.lookupInUnicodeMap(code, Unicode.unicodeES3IdentifierStart);
-            } else if (languageVersion === TypeScript.LanguageVersion.EcmaScript5) {
-                return Unicode.lookupInUnicodeMap(code, Unicode.unicodeES5IdentifierStart);
-            } else {
-                throw TypeScript.Errors.argumentOutOfRange("languageVersion");
+        function getConfiguredRules(configuration) {
+            var rules = [];
+
+            for (var ruleName in configuration) {
+                if (configuration.hasOwnProperty(ruleName)) {
+                    var rule = Lint.Rules.getRuleForName(ruleName);
+                    if (rule === undefined) {
+                        console.warn("ignoring unrecognized rule '" + ruleName + "'");
+                        continue;
+                    }
+
+                    var ruleValue = configuration[ruleName];
+                    rule.setValue(ruleValue);
+                    rules.push(rule);
+                }
             }
-        };
 
-        Unicode.isIdentifierPart = function (code, languageVersion) {
-            if (languageVersion === TypeScript.LanguageVersion.EcmaScript3) {
-                return Unicode.lookupInUnicodeMap(code, Unicode.unicodeES3IdentifierPart);
-            } else if (languageVersion === TypeScript.LanguageVersion.EcmaScript5) {
-                return Unicode.lookupInUnicodeMap(code, Unicode.unicodeES5IdentifierPart);
-            } else {
-                throw TypeScript.Errors.argumentOutOfRange("languageVersion");
+            return rules;
+        }
+        Configuration.getConfiguredRules = getConfiguredRules;
+    })(Lint.Configuration || (Lint.Configuration = {}));
+    var Configuration = Lint.Configuration;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Formatters) {
+        var AbstractFormatter = (function () {
+            function AbstractFormatter(name) {
+                this.name = name;
             }
-        };
-        Unicode.unicodeES3IdentifierStart = [170, 170, 181, 181, 186, 186, 192, 214, 216, 246, 248, 543, 546, 563, 592, 685, 688, 696, 699, 705, 720, 721, 736, 740, 750, 750, 890, 890, 902, 902, 904, 906, 908, 908, 910, 929, 931, 974, 976, 983, 986, 1011, 1024, 1153, 1164, 1220, 1223, 1224, 1227, 1228, 1232, 1269, 1272, 1273, 1329, 1366, 1369, 1369, 1377, 1415, 1488, 1514, 1520, 1522, 1569, 1594, 1600, 1610, 1649, 1747, 1749, 1749, 1765, 1766, 1786, 1788, 1808, 1808, 1810, 1836, 1920, 1957, 2309, 2361, 2365, 2365, 2384, 2384, 2392, 2401, 2437, 2444, 2447, 2448, 2451, 2472, 2474, 2480, 2482, 2482, 2486, 2489, 2524, 2525, 2527, 2529, 2544, 2545, 2565, 2570, 2575, 2576, 2579, 2600, 2602, 2608, 2610, 2611, 2613, 2614, 2616, 2617, 2649, 2652, 2654, 2654, 2674, 2676, 2693, 2699, 2701, 2701, 2703, 2705, 2707, 2728, 2730, 2736, 2738, 2739, 2741, 2745, 2749, 2749, 2768, 2768, 2784, 2784, 2821, 2828, 2831, 2832, 2835, 2856, 2858, 2864, 2866, 2867, 2870, 2873, 2877, 2877, 2908, 2909, 2911, 2913, 2949, 2954, 2958, 2960, 2962, 2965, 2969, 2970, 2972, 2972, 2974, 2975, 2979, 2980, 2984, 2986, 2990, 2997, 2999, 3001, 3077, 3084, 3086, 3088, 3090, 3112, 3114, 3123, 3125, 3129, 3168, 3169, 3205, 3212, 3214, 3216, 3218, 3240, 3242, 3251, 3253, 3257, 3294, 3294, 3296, 3297, 3333, 3340, 3342, 3344, 3346, 3368, 3370, 3385, 3424, 3425, 3461, 3478, 3482, 3505, 3507, 3515, 3517, 3517, 3520, 3526, 3585, 3632, 3634, 3635, 3648, 3654, 3713, 3714, 3716, 3716, 3719, 3720, 3722, 3722, 3725, 3725, 3732, 3735, 3737, 3743, 3745, 3747, 3749, 3749, 3751, 3751, 3754, 3755, 3757, 3760, 3762, 3763, 3773, 3773, 3776, 3780, 3782, 3782, 3804, 3805, 3840, 3840, 3904, 3911, 3913, 3946, 3976, 3979, 4096, 4129, 4131, 4135, 4137, 4138, 4176, 4181, 4256, 4293, 4304, 4342, 4352, 4441, 4447, 4514, 4520, 4601, 4608, 4614, 4616, 4678, 4680, 4680, 4682, 4685, 4688, 4694, 4696, 4696, 4698, 4701, 4704, 4742, 4744, 4744, 4746, 4749, 4752, 4782, 4784, 4784, 4786, 4789, 4792, 4798, 4800, 4800, 4802, 4805, 4808, 4814, 4816, 4822, 4824, 4846, 4848, 4878, 4880, 4880, 4882, 4885, 4888, 4894, 4896, 4934, 4936, 4954, 5024, 5108, 5121, 5740, 5743, 5750, 5761, 5786, 5792, 5866, 6016, 6067, 6176, 6263, 6272, 6312, 7680, 7835, 7840, 7929, 7936, 7957, 7960, 7965, 7968, 8005, 8008, 8013, 8016, 8023, 8025, 8025, 8027, 8027, 8029, 8029, 8031, 8061, 8064, 8116, 8118, 8124, 8126, 8126, 8130, 8132, 8134, 8140, 8144, 8147, 8150, 8155, 8160, 8172, 8178, 8180, 8182, 8188, 8319, 8319, 8450, 8450, 8455, 8455, 8458, 8467, 8469, 8469, 8473, 8477, 8484, 8484, 8486, 8486, 8488, 8488, 8490, 8493, 8495, 8497, 8499, 8505, 8544, 8579, 12293, 12295, 12321, 12329, 12337, 12341, 12344, 12346, 12353, 12436, 12445, 12446, 12449, 12538, 12540, 12542, 12549, 12588, 12593, 12686, 12704, 12727, 13312, 19893, 19968, 40869, 40960, 42124, 44032, 55203, 63744, 64045, 64256, 64262, 64275, 64279, 64285, 64285, 64287, 64296, 64298, 64310, 64312, 64316, 64318, 64318, 64320, 64321, 64323, 64324, 64326, 64433, 64467, 64829, 64848, 64911, 64914, 64967, 65008, 65019, 65136, 65138, 65140, 65140, 65142, 65276, 65313, 65338, 65345, 65370, 65382, 65470, 65474, 65479, 65482, 65487, 65490, 65495, 65498, 65500];
-        Unicode.unicodeES3IdentifierPart = [170, 170, 181, 181, 186, 186, 192, 214, 216, 246, 248, 543, 546, 563, 592, 685, 688, 696, 699, 705, 720, 721, 736, 740, 750, 750, 768, 846, 864, 866, 890, 890, 902, 902, 904, 906, 908, 908, 910, 929, 931, 974, 976, 983, 986, 1011, 1024, 1153, 1155, 1158, 1164, 1220, 1223, 1224, 1227, 1228, 1232, 1269, 1272, 1273, 1329, 1366, 1369, 1369, 1377, 1415, 1425, 1441, 1443, 1465, 1467, 1469, 1471, 1471, 1473, 1474, 1476, 1476, 1488, 1514, 1520, 1522, 1569, 1594, 1600, 1621, 1632, 1641, 1648, 1747, 1749, 1756, 1759, 1768, 1770, 1773, 1776, 1788, 1808, 1836, 1840, 1866, 1920, 1968, 2305, 2307, 2309, 2361, 2364, 2381, 2384, 2388, 2392, 2403, 2406, 2415, 2433, 2435, 2437, 2444, 2447, 2448, 2451, 2472, 2474, 2480, 2482, 2482, 2486, 2489, 2492, 2492, 2494, 2500, 2503, 2504, 2507, 2509, 2519, 2519, 2524, 2525, 2527, 2531, 2534, 2545, 2562, 2562, 2565, 2570, 2575, 2576, 2579, 2600, 2602, 2608, 2610, 2611, 2613, 2614, 2616, 2617, 2620, 2620, 2622, 2626, 2631, 2632, 2635, 2637, 2649, 2652, 2654, 2654, 2662, 2676, 2689, 2691, 2693, 2699, 2701, 2701, 2703, 2705, 2707, 2728, 2730, 2736, 2738, 2739, 2741, 2745, 2748, 2757, 2759, 2761, 2763, 2765, 2768, 2768, 2784, 2784, 2790, 2799, 2817, 2819, 2821, 2828, 2831, 2832, 2835, 2856, 2858, 2864, 2866, 2867, 2870, 2873, 2876, 2883, 2887, 2888, 2891, 2893, 2902, 2903, 2908, 2909, 2911, 2913, 2918, 2927, 2946, 2947, 2949, 2954, 2958, 2960, 2962, 2965, 2969, 2970, 2972, 2972, 2974, 2975, 2979, 2980, 2984, 2986, 2990, 2997, 2999, 3001, 3006, 3010, 3014, 3016, 3018, 3021, 3031, 3031, 3047, 3055, 3073, 3075, 3077, 3084, 3086, 3088, 3090, 3112, 3114, 3123, 3125, 3129, 3134, 3140, 3142, 3144, 3146, 3149, 3157, 3158, 3168, 3169, 3174, 3183, 3202, 3203, 3205, 3212, 3214, 3216, 3218, 3240, 3242, 3251, 3253, 3257, 3262, 3268, 3270, 3272, 3274, 3277, 3285, 3286, 3294, 3294, 3296, 3297, 3302, 3311, 3330, 3331, 3333, 3340, 3342, 3344, 3346, 3368, 3370, 3385, 3390, 3395, 3398, 3400, 3402, 3405, 3415, 3415, 3424, 3425, 3430, 3439, 3458, 3459, 3461, 3478, 3482, 3505, 3507, 3515, 3517, 3517, 3520, 3526, 3530, 3530, 3535, 3540, 3542, 3542, 3544, 3551, 3570, 3571, 3585, 3642, 3648, 3662, 3664, 3673, 3713, 3714, 3716, 3716, 3719, 3720, 3722, 3722, 3725, 3725, 3732, 3735, 3737, 3743, 3745, 3747, 3749, 3749, 3751, 3751, 3754, 3755, 3757, 3769, 3771, 3773, 3776, 3780, 3782, 3782, 3784, 3789, 3792, 3801, 3804, 3805, 3840, 3840, 3864, 3865, 3872, 3881, 3893, 3893, 3895, 3895, 3897, 3897, 3902, 3911, 3913, 3946, 3953, 3972, 3974, 3979, 3984, 3991, 3993, 4028, 4038, 4038, 4096, 4129, 4131, 4135, 4137, 4138, 4140, 4146, 4150, 4153, 4160, 4169, 4176, 4185, 4256, 4293, 4304, 4342, 4352, 4441, 4447, 4514, 4520, 4601, 4608, 4614, 4616, 4678, 4680, 4680, 4682, 4685, 4688, 4694, 4696, 4696, 4698, 4701, 4704, 4742, 4744, 4744, 4746, 4749, 4752, 4782, 4784, 4784, 4786, 4789, 4792, 4798, 4800, 4800, 4802, 4805, 4808, 4814, 4816, 4822, 4824, 4846, 4848, 4878, 4880, 4880, 4882, 4885, 4888, 4894, 4896, 4934, 4936, 4954, 4969, 4977, 5024, 5108, 5121, 5740, 5743, 5750, 5761, 5786, 5792, 5866, 6016, 6099, 6112, 6121, 6160, 6169, 6176, 6263, 6272, 6313, 7680, 7835, 7840, 7929, 7936, 7957, 7960, 7965, 7968, 8005, 8008, 8013, 8016, 8023, 8025, 8025, 8027, 8027, 8029, 8029, 8031, 8061, 8064, 8116, 8118, 8124, 8126, 8126, 8130, 8132, 8134, 8140, 8144, 8147, 8150, 8155, 8160, 8172, 8178, 8180, 8182, 8188, 8255, 8256, 8319, 8319, 8400, 8412, 8417, 8417, 8450, 8450, 8455, 8455, 8458, 8467, 8469, 8469, 8473, 8477, 8484, 8484, 8486, 8486, 8488, 8488, 8490, 8493, 8495, 8497, 8499, 8505, 8544, 8579, 12293, 12295, 12321, 12335, 12337, 12341, 12344, 12346, 12353, 12436, 12441, 12442, 12445, 12446, 12449, 12542, 12549, 12588, 12593, 12686, 12704, 12727, 13312, 19893, 19968, 40869, 40960, 42124, 44032, 55203, 63744, 64045, 64256, 64262, 64275, 64279, 64285, 64296, 64298, 64310, 64312, 64316, 64318, 64318, 64320, 64321, 64323, 64324, 64326, 64433, 64467, 64829, 64848, 64911, 64914, 64967, 65008, 65019, 65056, 65059, 65075, 65076, 65101, 65103, 65136, 65138, 65140, 65140, 65142, 65276, 65296, 65305, 65313, 65338, 65343, 65343, 65345, 65370, 65381, 65470, 65474, 65479, 65482, 65487, 65490, 65495, 65498, 65500];
+            AbstractFormatter.prototype.getName = function () {
+                return this.name;
+            };
 
-        Unicode.unicodeES5IdentifierStart = [170, 170, 181, 181, 186, 186, 192, 214, 216, 246, 248, 705, 710, 721, 736, 740, 748, 748, 750, 750, 880, 884, 886, 887, 890, 893, 902, 902, 904, 906, 908, 908, 910, 929, 931, 1013, 1015, 1153, 1162, 1319, 1329, 1366, 1369, 1369, 1377, 1415, 1488, 1514, 1520, 1522, 1568, 1610, 1646, 1647, 1649, 1747, 1749, 1749, 1765, 1766, 1774, 1775, 1786, 1788, 1791, 1791, 1808, 1808, 1810, 1839, 1869, 1957, 1969, 1969, 1994, 2026, 2036, 2037, 2042, 2042, 2048, 2069, 2074, 2074, 2084, 2084, 2088, 2088, 2112, 2136, 2208, 2208, 2210, 2220, 2308, 2361, 2365, 2365, 2384, 2384, 2392, 2401, 2417, 2423, 2425, 2431, 2437, 2444, 2447, 2448, 2451, 2472, 2474, 2480, 2482, 2482, 2486, 2489, 2493, 2493, 2510, 2510, 2524, 2525, 2527, 2529, 2544, 2545, 2565, 2570, 2575, 2576, 2579, 2600, 2602, 2608, 2610, 2611, 2613, 2614, 2616, 2617, 2649, 2652, 2654, 2654, 2674, 2676, 2693, 2701, 2703, 2705, 2707, 2728, 2730, 2736, 2738, 2739, 2741, 2745, 2749, 2749, 2768, 2768, 2784, 2785, 2821, 2828, 2831, 2832, 2835, 2856, 2858, 2864, 2866, 2867, 2869, 2873, 2877, 2877, 2908, 2909, 2911, 2913, 2929, 2929, 2947, 2947, 2949, 2954, 2958, 2960, 2962, 2965, 2969, 2970, 2972, 2972, 2974, 2975, 2979, 2980, 2984, 2986, 2990, 3001, 3024, 3024, 3077, 3084, 3086, 3088, 3090, 3112, 3114, 3123, 3125, 3129, 3133, 3133, 3160, 3161, 3168, 3169, 3205, 3212, 3214, 3216, 3218, 3240, 3242, 3251, 3253, 3257, 3261, 3261, 3294, 3294, 3296, 3297, 3313, 3314, 3333, 3340, 3342, 3344, 3346, 3386, 3389, 3389, 3406, 3406, 3424, 3425, 3450, 3455, 3461, 3478, 3482, 3505, 3507, 3515, 3517, 3517, 3520, 3526, 3585, 3632, 3634, 3635, 3648, 3654, 3713, 3714, 3716, 3716, 3719, 3720, 3722, 3722, 3725, 3725, 3732, 3735, 3737, 3743, 3745, 3747, 3749, 3749, 3751, 3751, 3754, 3755, 3757, 3760, 3762, 3763, 3773, 3773, 3776, 3780, 3782, 3782, 3804, 3807, 3840, 3840, 3904, 3911, 3913, 3948, 3976, 3980, 4096, 4138, 4159, 4159, 4176, 4181, 4186, 4189, 4193, 4193, 4197, 4198, 4206, 4208, 4213, 4225, 4238, 4238, 4256, 4293, 4295, 4295, 4301, 4301, 4304, 4346, 4348, 4680, 4682, 4685, 4688, 4694, 4696, 4696, 4698, 4701, 4704, 4744, 4746, 4749, 4752, 4784, 4786, 4789, 4792, 4798, 4800, 4800, 4802, 4805, 4808, 4822, 4824, 4880, 4882, 4885, 4888, 4954, 4992, 5007, 5024, 5108, 5121, 5740, 5743, 5759, 5761, 5786, 5792, 5866, 5870, 5872, 5888, 5900, 5902, 5905, 5920, 5937, 5952, 5969, 5984, 5996, 5998, 6000, 6016, 6067, 6103, 6103, 6108, 6108, 6176, 6263, 6272, 6312, 6314, 6314, 6320, 6389, 6400, 6428, 6480, 6509, 6512, 6516, 6528, 6571, 6593, 6599, 6656, 6678, 6688, 6740, 6823, 6823, 6917, 6963, 6981, 6987, 7043, 7072, 7086, 7087, 7098, 7141, 7168, 7203, 7245, 7247, 7258, 7293, 7401, 7404, 7406, 7409, 7413, 7414, 7424, 7615, 7680, 7957, 7960, 7965, 7968, 8005, 8008, 8013, 8016, 8023, 8025, 8025, 8027, 8027, 8029, 8029, 8031, 8061, 8064, 8116, 8118, 8124, 8126, 8126, 8130, 8132, 8134, 8140, 8144, 8147, 8150, 8155, 8160, 8172, 8178, 8180, 8182, 8188, 8305, 8305, 8319, 8319, 8336, 8348, 8450, 8450, 8455, 8455, 8458, 8467, 8469, 8469, 8473, 8477, 8484, 8484, 8486, 8486, 8488, 8488, 8490, 8493, 8495, 8505, 8508, 8511, 8517, 8521, 8526, 8526, 8544, 8584, 11264, 11310, 11312, 11358, 11360, 11492, 11499, 11502, 11506, 11507, 11520, 11557, 11559, 11559, 11565, 11565, 11568, 11623, 11631, 11631, 11648, 11670, 11680, 11686, 11688, 11694, 11696, 11702, 11704, 11710, 11712, 11718, 11720, 11726, 11728, 11734, 11736, 11742, 11823, 11823, 12293, 12295, 12321, 12329, 12337, 12341, 12344, 12348, 12353, 12438, 12445, 12447, 12449, 12538, 12540, 12543, 12549, 12589, 12593, 12686, 12704, 12730, 12784, 12799, 13312, 19893, 19968, 40908, 40960, 42124, 42192, 42237, 42240, 42508, 42512, 42527, 42538, 42539, 42560, 42606, 42623, 42647, 42656, 42735, 42775, 42783, 42786, 42888, 42891, 42894, 42896, 42899, 42912, 42922, 43000, 43009, 43011, 43013, 43015, 43018, 43020, 43042, 43072, 43123, 43138, 43187, 43250, 43255, 43259, 43259, 43274, 43301, 43312, 43334, 43360, 43388, 43396, 43442, 43471, 43471, 43520, 43560, 43584, 43586, 43588, 43595, 43616, 43638, 43642, 43642, 43648, 43695, 43697, 43697, 43701, 43702, 43705, 43709, 43712, 43712, 43714, 43714, 43739, 43741, 43744, 43754, 43762, 43764, 43777, 43782, 43785, 43790, 43793, 43798, 43808, 43814, 43816, 43822, 43968, 44002, 44032, 55203, 55216, 55238, 55243, 55291, 63744, 64109, 64112, 64217, 64256, 64262, 64275, 64279, 64285, 64285, 64287, 64296, 64298, 64310, 64312, 64316, 64318, 64318, 64320, 64321, 64323, 64324, 64326, 64433, 64467, 64829, 64848, 64911, 64914, 64967, 65008, 65019, 65136, 65140, 65142, 65276, 65313, 65338, 65345, 65370, 65382, 65470, 65474, 65479, 65482, 65487, 65490, 65495, 65498, 65500];
-        Unicode.unicodeES5IdentifierPart = [170, 170, 181, 181, 186, 186, 192, 214, 216, 246, 248, 705, 710, 721, 736, 740, 748, 748, 750, 750, 768, 884, 886, 887, 890, 893, 902, 902, 904, 906, 908, 908, 910, 929, 931, 1013, 1015, 1153, 1155, 1159, 1162, 1319, 1329, 1366, 1369, 1369, 1377, 1415, 1425, 1469, 1471, 1471, 1473, 1474, 1476, 1477, 1479, 1479, 1488, 1514, 1520, 1522, 1552, 1562, 1568, 1641, 1646, 1747, 1749, 1756, 1759, 1768, 1770, 1788, 1791, 1791, 1808, 1866, 1869, 1969, 1984, 2037, 2042, 2042, 2048, 2093, 2112, 2139, 2208, 2208, 2210, 2220, 2276, 2302, 2304, 2403, 2406, 2415, 2417, 2423, 2425, 2431, 2433, 2435, 2437, 2444, 2447, 2448, 2451, 2472, 2474, 2480, 2482, 2482, 2486, 2489, 2492, 2500, 2503, 2504, 2507, 2510, 2519, 2519, 2524, 2525, 2527, 2531, 2534, 2545, 2561, 2563, 2565, 2570, 2575, 2576, 2579, 2600, 2602, 2608, 2610, 2611, 2613, 2614, 2616, 2617, 2620, 2620, 2622, 2626, 2631, 2632, 2635, 2637, 2641, 2641, 2649, 2652, 2654, 2654, 2662, 2677, 2689, 2691, 2693, 2701, 2703, 2705, 2707, 2728, 2730, 2736, 2738, 2739, 2741, 2745, 2748, 2757, 2759, 2761, 2763, 2765, 2768, 2768, 2784, 2787, 2790, 2799, 2817, 2819, 2821, 2828, 2831, 2832, 2835, 2856, 2858, 2864, 2866, 2867, 2869, 2873, 2876, 2884, 2887, 2888, 2891, 2893, 2902, 2903, 2908, 2909, 2911, 2915, 2918, 2927, 2929, 2929, 2946, 2947, 2949, 2954, 2958, 2960, 2962, 2965, 2969, 2970, 2972, 2972, 2974, 2975, 2979, 2980, 2984, 2986, 2990, 3001, 3006, 3010, 3014, 3016, 3018, 3021, 3024, 3024, 3031, 3031, 3046, 3055, 3073, 3075, 3077, 3084, 3086, 3088, 3090, 3112, 3114, 3123, 3125, 3129, 3133, 3140, 3142, 3144, 3146, 3149, 3157, 3158, 3160, 3161, 3168, 3171, 3174, 3183, 3202, 3203, 3205, 3212, 3214, 3216, 3218, 3240, 3242, 3251, 3253, 3257, 3260, 3268, 3270, 3272, 3274, 3277, 3285, 3286, 3294, 3294, 3296, 3299, 3302, 3311, 3313, 3314, 3330, 3331, 3333, 3340, 3342, 3344, 3346, 3386, 3389, 3396, 3398, 3400, 3402, 3406, 3415, 3415, 3424, 3427, 3430, 3439, 3450, 3455, 3458, 3459, 3461, 3478, 3482, 3505, 3507, 3515, 3517, 3517, 3520, 3526, 3530, 3530, 3535, 3540, 3542, 3542, 3544, 3551, 3570, 3571, 3585, 3642, 3648, 3662, 3664, 3673, 3713, 3714, 3716, 3716, 3719, 3720, 3722, 3722, 3725, 3725, 3732, 3735, 3737, 3743, 3745, 3747, 3749, 3749, 3751, 3751, 3754, 3755, 3757, 3769, 3771, 3773, 3776, 3780, 3782, 3782, 3784, 3789, 3792, 3801, 3804, 3807, 3840, 3840, 3864, 3865, 3872, 3881, 3893, 3893, 3895, 3895, 3897, 3897, 3902, 3911, 3913, 3948, 3953, 3972, 3974, 3991, 3993, 4028, 4038, 4038, 4096, 4169, 4176, 4253, 4256, 4293, 4295, 4295, 4301, 4301, 4304, 4346, 4348, 4680, 4682, 4685, 4688, 4694, 4696, 4696, 4698, 4701, 4704, 4744, 4746, 4749, 4752, 4784, 4786, 4789, 4792, 4798, 4800, 4800, 4802, 4805, 4808, 4822, 4824, 4880, 4882, 4885, 4888, 4954, 4957, 4959, 4992, 5007, 5024, 5108, 5121, 5740, 5743, 5759, 5761, 5786, 5792, 5866, 5870, 5872, 5888, 5900, 5902, 5908, 5920, 5940, 5952, 5971, 5984, 5996, 5998, 6000, 6002, 6003, 6016, 6099, 6103, 6103, 6108, 6109, 6112, 6121, 6155, 6157, 6160, 6169, 6176, 6263, 6272, 6314, 6320, 6389, 6400, 6428, 6432, 6443, 6448, 6459, 6470, 6509, 6512, 6516, 6528, 6571, 6576, 6601, 6608, 6617, 6656, 6683, 6688, 6750, 6752, 6780, 6783, 6793, 6800, 6809, 6823, 6823, 6912, 6987, 6992, 7001, 7019, 7027, 7040, 7155, 7168, 7223, 7232, 7241, 7245, 7293, 7376, 7378, 7380, 7414, 7424, 7654, 7676, 7957, 7960, 7965, 7968, 8005, 8008, 8013, 8016, 8023, 8025, 8025, 8027, 8027, 8029, 8029, 8031, 8061, 8064, 8116, 8118, 8124, 8126, 8126, 8130, 8132, 8134, 8140, 8144, 8147, 8150, 8155, 8160, 8172, 8178, 8180, 8182, 8188, 8204, 8205, 8255, 8256, 8276, 8276, 8305, 8305, 8319, 8319, 8336, 8348, 8400, 8412, 8417, 8417, 8421, 8432, 8450, 8450, 8455, 8455, 8458, 8467, 8469, 8469, 8473, 8477, 8484, 8484, 8486, 8486, 8488, 8488, 8490, 8493, 8495, 8505, 8508, 8511, 8517, 8521, 8526, 8526, 8544, 8584, 11264, 11310, 11312, 11358, 11360, 11492, 11499, 11507, 11520, 11557, 11559, 11559, 11565, 11565, 11568, 11623, 11631, 11631, 11647, 11670, 11680, 11686, 11688, 11694, 11696, 11702, 11704, 11710, 11712, 11718, 11720, 11726, 11728, 11734, 11736, 11742, 11744, 11775, 11823, 11823, 12293, 12295, 12321, 12335, 12337, 12341, 12344, 12348, 12353, 12438, 12441, 12442, 12445, 12447, 12449, 12538, 12540, 12543, 12549, 12589, 12593, 12686, 12704, 12730, 12784, 12799, 13312, 19893, 19968, 40908, 40960, 42124, 42192, 42237, 42240, 42508, 42512, 42539, 42560, 42607, 42612, 42621, 42623, 42647, 42655, 42737, 42775, 42783, 42786, 42888, 42891, 42894, 42896, 42899, 42912, 42922, 43000, 43047, 43072, 43123, 43136, 43204, 43216, 43225, 43232, 43255, 43259, 43259, 43264, 43309, 43312, 43347, 43360, 43388, 43392, 43456, 43471, 43481, 43520, 43574, 43584, 43597, 43600, 43609, 43616, 43638, 43642, 43643, 43648, 43714, 43739, 43741, 43744, 43759, 43762, 43766, 43777, 43782, 43785, 43790, 43793, 43798, 43808, 43814, 43816, 43822, 43968, 44010, 44012, 44013, 44016, 44025, 44032, 55203, 55216, 55238, 55243, 55291, 63744, 64109, 64112, 64217, 64256, 64262, 64275, 64279, 64285, 64296, 64298, 64310, 64312, 64316, 64318, 64318, 64320, 64321, 64323, 64324, 64326, 64433, 64467, 64829, 64848, 64911, 64914, 64967, 65008, 65019, 65024, 65039, 65056, 65062, 65075, 65076, 65101, 65103, 65136, 65140, 65142, 65276, 65296, 65305, 65313, 65338, 65343, 65343, 65345, 65370, 65382, 65470, 65474, 65479, 65482, 65487, 65490, 65495, 65498, 65500];
-        return Unicode;
-    })();
-    TypeScript.Unicode = Unicode;
-})(TypeScript || (TypeScript = {}));
+            AbstractFormatter.prototype.format = function (failures) {
+                throw TypeScript.Errors.abstract();
+            };
+            return AbstractFormatter;
+        })();
+        Formatters.AbstractFormatter = AbstractFormatter;
+    })(Lint.Formatters || (Lint.Formatters = {}));
+    var Formatters = Lint.Formatters;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Formatters) {
+        var JsonFormatter = (function (_super) {
+            __extends(JsonFormatter, _super);
+            function JsonFormatter() {
+                _super.call(this, "json");
+            }
+            JsonFormatter.prototype.format = function (failures) {
+                var failuresJSON = [];
+
+                for (var i = 0; i < failures.length; ++i) {
+                    var failure = failures[i];
+                    failuresJSON.push(failure.toJson());
+                }
+
+                return JSON.stringify(failuresJSON);
+            };
+            return JsonFormatter;
+        })(Formatters.AbstractFormatter);
+        Formatters.JsonFormatter = JsonFormatter;
+    })(Lint.Formatters || (Lint.Formatters = {}));
+    var Formatters = Lint.Formatters;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Formatters) {
+        var ProseFormatter = (function (_super) {
+            __extends(ProseFormatter, _super);
+            function ProseFormatter() {
+                _super.call(this, "prose");
+            }
+            ProseFormatter.prototype.format = function (failures) {
+                var output = "";
+
+                for (var i = 0; i < failures.length; ++i) {
+                    var failure = failures[i];
+                    var fileName = failure.getFileName();
+                    var lineAndCharacter = failure.getLineAndCharacter();
+                    var line = lineAndCharacter.line() + 1;
+                    var character = lineAndCharacter.character() + 1;
+                    var failureString = failure.getFailure();
+
+                    output += fileName + "[" + line + ", " + character + "]: " + failureString + "\n";
+                }
+
+                return output;
+            };
+            return ProseFormatter;
+        })(Formatters.AbstractFormatter);
+        Formatters.ProseFormatter = ProseFormatter;
+    })(Lint.Formatters || (Lint.Formatters = {}));
+    var Formatters = Lint.Formatters;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Formatters) {
+        var ALL_FORMATTERS = [];
+
+        function createAllFormatters() {
+            ALL_FORMATTERS.push(new Formatters.JsonFormatter());
+            ALL_FORMATTERS.push(new Formatters.ProseFormatter());
+        }
+        Formatters.createAllFormatters = createAllFormatters;
+
+        function getFormatterForName(name) {
+            var filteredFormatters = ALL_FORMATTERS.filter(function (formatter) {
+                return formatter.getName() === name;
+            });
+
+            if (filteredFormatters.length > 0) {
+                return filteredFormatters[0];
+            } else {
+                return undefined;
+            }
+        }
+        Formatters.getFormatterForName = getFormatterForName;
+    })(Lint.Formatters || (Lint.Formatters = {}));
+    var Formatters = Lint.Formatters;
+})(Lint || (Lint = {}));
 var TypeScript;
 (function (TypeScript) {
     (function (CompilerDiagnostics) {
@@ -31699,192 +33179,6 @@ var TypeScript;
         return CodeResolver;
     })();
     TypeScript.CodeResolver = CodeResolver;
-})(TypeScript || (TypeScript = {}));
-var TypeScript;
-(function (TypeScript) {
-    var CompilationSettings = (function () {
-        function CompilationSettings() {
-            this.propagateConstants = false;
-            this.minWhitespace = false;
-            this.emitComments = false;
-            this.watch = false;
-            this.exec = false;
-            this.resolve = true;
-            this.disallowBool = false;
-            this.allowAutomaticSemicolonInsertion = true;
-            this.allowModuleKeywordInExternalModuleReference = true;
-            this.useDefaultLib = true;
-            this.codeGenTarget = TypeScript.LanguageVersion.EcmaScript3;
-            this.moduleGenTarget = TypeScript.ModuleGenTarget.Synchronous;
-            this.outputOption = "";
-            this.mapSourceFiles = false;
-            this.emitFullSourceMapPath = false;
-            this.generateDeclarationFiles = false;
-            this.useCaseSensitiveFileResolution = false;
-            this.gatherDiagnostics = false;
-            this.updateTC = false;
-            this.implicitAny = false;
-        }
-        return CompilationSettings;
-    })();
-    TypeScript.CompilationSettings = CompilationSettings;
-
-    function getFileReferenceFromReferencePath(comment) {
-        var referencesRegEx = /^(\/\/\/\s*<reference\s+path=)('|")(.+?)\2\s*(static=('|")(.+?)\2\s*)*\/>/gim;
-        var match = referencesRegEx.exec(comment);
-
-        if (match) {
-            var path = TypeScript.normalizePath(match[3]);
-            var adjustedPath = TypeScript.normalizePath(path);
-
-            var isResident = match.length >= 7 && match[6] === "true";
-            if (isResident) {
-                TypeScript.CompilerDiagnostics.debugPrint(path + " is resident");
-            }
-            return {
-                line: 0,
-                character: 0,
-                position: 0,
-                length: 0,
-                path: TypeScript.switchToForwardSlashes(adjustedPath),
-                isResident: isResident
-            };
-        } else {
-            return null;
-        }
-    }
-
-    function getImplicitImport(comment) {
-        var implicitImportRegEx = /^(\/\/\/\s*<implicit-import\s*)*\/>/gim;
-        var match = implicitImportRegEx.exec(comment);
-
-        if (match) {
-            return true;
-        }
-
-        return false;
-    }
-    TypeScript.getImplicitImport = getImplicitImport;
-
-    function getReferencedFiles(fileName, sourceText) {
-        var preProcessInfo = preProcessFile(fileName, sourceText, null, false);
-        return preProcessInfo.referencedFiles;
-    }
-    TypeScript.getReferencedFiles = getReferencedFiles;
-
-    var scannerWindow = TypeScript.ArrayUtilities.createArray(2048, 0);
-    var scannerDiagnostics = [];
-
-    function processImports(lineMap, scanner, token, importedFiles) {
-        var position = 0;
-        var lineChar = { line: -1, character: -1 };
-
-        while (token.tokenKind !== TypeScript.SyntaxKind.EndOfFileToken) {
-            if (token.tokenKind === TypeScript.SyntaxKind.ImportKeyword) {
-                var importStart = position + token.leadingTriviaWidth();
-                token = scanner.scan(scannerDiagnostics, false);
-
-                if (TypeScript.SyntaxFacts.isIdentifierNameOrAnyKeyword(token)) {
-                    token = scanner.scan(scannerDiagnostics, false);
-
-                    if (token.tokenKind === TypeScript.SyntaxKind.EqualsToken) {
-                        token = scanner.scan(scannerDiagnostics, false);
-
-                        if (token.tokenKind === TypeScript.SyntaxKind.ModuleKeyword || token.tokenKind === TypeScript.SyntaxKind.RequireKeyword) {
-                            token = scanner.scan(scannerDiagnostics, false);
-
-                            if (token.tokenKind === TypeScript.SyntaxKind.OpenParenToken) {
-                                var afterOpenParenPosition = scanner.absoluteIndex();
-                                token = scanner.scan(scannerDiagnostics, false);
-
-                                lineMap.fillLineAndCharacterFromPosition(importStart, lineChar);
-
-                                if (token.tokenKind === TypeScript.SyntaxKind.StringLiteral) {
-                                    var ref = {
-                                        line: lineChar.line,
-                                        character: lineChar.character,
-                                        position: afterOpenParenPosition + token.leadingTriviaWidth(),
-                                        length: token.width(),
-                                        path: TypeScript.stripQuotes(TypeScript.switchToForwardSlashes(token.text())),
-                                        isResident: false
-                                    };
-                                    importedFiles.push(ref);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            position = scanner.absoluteIndex();
-            token = scanner.scan(scannerDiagnostics, false);
-        }
-    }
-
-    function processTripleSlashDirectives(lineMap, firstToken, settings, referencedFiles) {
-        var leadingTrivia = firstToken.leadingTrivia();
-
-        var position = 0;
-        var lineChar = { line: -1, character: -1 };
-        var noDefaultLib = false;
-
-        for (var i = 0, n = leadingTrivia.count(); i < n; i++) {
-            var trivia = leadingTrivia.syntaxTriviaAt(i);
-
-            if (trivia.kind() === TypeScript.SyntaxKind.SingleLineCommentTrivia) {
-                var triviaText = trivia.fullText();
-                var referencedCode = getFileReferenceFromReferencePath(triviaText);
-
-                if (referencedCode) {
-                    lineMap.fillLineAndCharacterFromPosition(position, lineChar);
-                    referencedCode.position = position;
-                    referencedCode.length = trivia.fullWidth();
-                    referencedCode.line = lineChar.line;
-                    referencedCode.character = lineChar.character;
-
-                    referencedFiles.push(referencedCode);
-                }
-
-                if (settings) {
-                    var isNoDefaultLibRegex = /^(\/\/\/\s*<reference\s+no-default-lib=)('|")(.+?)\2\s*\/>/gim;
-                    var isNoDefaultLibMatch = isNoDefaultLibRegex.exec(triviaText);
-                    if (isNoDefaultLibMatch) {
-                        noDefaultLib = (isNoDefaultLibMatch[3] === "true");
-                    }
-                }
-            }
-
-            position += trivia.fullWidth();
-        }
-
-        return { noDefaultLib: noDefaultLib };
-    }
-
-    function preProcessFile(fileName, sourceText, settings, readImportFiles) {
-        if (typeof readImportFiles === "undefined") { readImportFiles = true; }
-        settings = settings || new CompilationSettings();
-        var text = TypeScript.SimpleText.fromScriptSnapshot(sourceText);
-        var scanner = new TypeScript.Scanner(fileName, text, settings.codeGenTarget, scannerWindow);
-
-        var firstToken = scanner.scan(scannerDiagnostics, false);
-
-        var importedFiles = [];
-        if (readImportFiles) {
-            processImports(text.lineMap(), scanner, firstToken, importedFiles);
-        }
-
-        var referencedFiles = [];
-        var properties = processTripleSlashDirectives(text.lineMap(), firstToken, settings, referencedFiles);
-
-        scannerDiagnostics.length = 0;
-        return { settings: settings, referencedFiles: referencedFiles, importedFiles: importedFiles, isLibFile: properties.noDefaultLib };
-    }
-    TypeScript.preProcessFile = preProcessFile;
-
-    function getParseOptions(settings) {
-        return new TypeScript.ParseOptions(settings.allowAutomaticSemicolonInsertion, settings.allowModuleKeywordInExternalModuleReference);
-    }
-    TypeScript.getParseOptions = getParseOptions;
 })(TypeScript || (TypeScript = {}));
 var TypeScript;
 (function (TypeScript) {
@@ -55685,6 +56979,192 @@ var TypeScript;
     })();
     TypeScript.TypeScriptCompiler = TypeScriptCompiler;
 })(TypeScript || (TypeScript = {}));
+var TypeScript;
+(function (TypeScript) {
+    var CompilationSettings = (function () {
+        function CompilationSettings() {
+            this.propagateConstants = false;
+            this.minWhitespace = false;
+            this.emitComments = false;
+            this.watch = false;
+            this.exec = false;
+            this.resolve = true;
+            this.disallowBool = false;
+            this.allowAutomaticSemicolonInsertion = true;
+            this.allowModuleKeywordInExternalModuleReference = true;
+            this.useDefaultLib = true;
+            this.codeGenTarget = TypeScript.LanguageVersion.EcmaScript3;
+            this.moduleGenTarget = TypeScript.ModuleGenTarget.Synchronous;
+            this.outputOption = "";
+            this.mapSourceFiles = false;
+            this.emitFullSourceMapPath = false;
+            this.generateDeclarationFiles = false;
+            this.useCaseSensitiveFileResolution = false;
+            this.gatherDiagnostics = false;
+            this.updateTC = false;
+            this.implicitAny = false;
+        }
+        return CompilationSettings;
+    })();
+    TypeScript.CompilationSettings = CompilationSettings;
+
+    function getFileReferenceFromReferencePath(comment) {
+        var referencesRegEx = /^(\/\/\/\s*<reference\s+path=)('|")(.+?)\2\s*(static=('|")(.+?)\2\s*)*\/>/gim;
+        var match = referencesRegEx.exec(comment);
+
+        if (match) {
+            var path = TypeScript.normalizePath(match[3]);
+            var adjustedPath = TypeScript.normalizePath(path);
+
+            var isResident = match.length >= 7 && match[6] === "true";
+            if (isResident) {
+                TypeScript.CompilerDiagnostics.debugPrint(path + " is resident");
+            }
+            return {
+                line: 0,
+                character: 0,
+                position: 0,
+                length: 0,
+                path: TypeScript.switchToForwardSlashes(adjustedPath),
+                isResident: isResident
+            };
+        } else {
+            return null;
+        }
+    }
+
+    function getImplicitImport(comment) {
+        var implicitImportRegEx = /^(\/\/\/\s*<implicit-import\s*)*\/>/gim;
+        var match = implicitImportRegEx.exec(comment);
+
+        if (match) {
+            return true;
+        }
+
+        return false;
+    }
+    TypeScript.getImplicitImport = getImplicitImport;
+
+    function getReferencedFiles(fileName, sourceText) {
+        var preProcessInfo = preProcessFile(fileName, sourceText, null, false);
+        return preProcessInfo.referencedFiles;
+    }
+    TypeScript.getReferencedFiles = getReferencedFiles;
+
+    var scannerWindow = TypeScript.ArrayUtilities.createArray(2048, 0);
+    var scannerDiagnostics = [];
+
+    function processImports(lineMap, scanner, token, importedFiles) {
+        var position = 0;
+        var lineChar = { line: -1, character: -1 };
+
+        while (token.tokenKind !== TypeScript.SyntaxKind.EndOfFileToken) {
+            if (token.tokenKind === TypeScript.SyntaxKind.ImportKeyword) {
+                var importStart = position + token.leadingTriviaWidth();
+                token = scanner.scan(scannerDiagnostics, false);
+
+                if (TypeScript.SyntaxFacts.isIdentifierNameOrAnyKeyword(token)) {
+                    token = scanner.scan(scannerDiagnostics, false);
+
+                    if (token.tokenKind === TypeScript.SyntaxKind.EqualsToken) {
+                        token = scanner.scan(scannerDiagnostics, false);
+
+                        if (token.tokenKind === TypeScript.SyntaxKind.ModuleKeyword || token.tokenKind === TypeScript.SyntaxKind.RequireKeyword) {
+                            token = scanner.scan(scannerDiagnostics, false);
+
+                            if (token.tokenKind === TypeScript.SyntaxKind.OpenParenToken) {
+                                var afterOpenParenPosition = scanner.absoluteIndex();
+                                token = scanner.scan(scannerDiagnostics, false);
+
+                                lineMap.fillLineAndCharacterFromPosition(importStart, lineChar);
+
+                                if (token.tokenKind === TypeScript.SyntaxKind.StringLiteral) {
+                                    var ref = {
+                                        line: lineChar.line,
+                                        character: lineChar.character,
+                                        position: afterOpenParenPosition + token.leadingTriviaWidth(),
+                                        length: token.width(),
+                                        path: TypeScript.stripQuotes(TypeScript.switchToForwardSlashes(token.text())),
+                                        isResident: false
+                                    };
+                                    importedFiles.push(ref);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            position = scanner.absoluteIndex();
+            token = scanner.scan(scannerDiagnostics, false);
+        }
+    }
+
+    function processTripleSlashDirectives(lineMap, firstToken, settings, referencedFiles) {
+        var leadingTrivia = firstToken.leadingTrivia();
+
+        var position = 0;
+        var lineChar = { line: -1, character: -1 };
+        var noDefaultLib = false;
+
+        for (var i = 0, n = leadingTrivia.count(); i < n; i++) {
+            var trivia = leadingTrivia.syntaxTriviaAt(i);
+
+            if (trivia.kind() === TypeScript.SyntaxKind.SingleLineCommentTrivia) {
+                var triviaText = trivia.fullText();
+                var referencedCode = getFileReferenceFromReferencePath(triviaText);
+
+                if (referencedCode) {
+                    lineMap.fillLineAndCharacterFromPosition(position, lineChar);
+                    referencedCode.position = position;
+                    referencedCode.length = trivia.fullWidth();
+                    referencedCode.line = lineChar.line;
+                    referencedCode.character = lineChar.character;
+
+                    referencedFiles.push(referencedCode);
+                }
+
+                if (settings) {
+                    var isNoDefaultLibRegex = /^(\/\/\/\s*<reference\s+no-default-lib=)('|")(.+?)\2\s*\/>/gim;
+                    var isNoDefaultLibMatch = isNoDefaultLibRegex.exec(triviaText);
+                    if (isNoDefaultLibMatch) {
+                        noDefaultLib = (isNoDefaultLibMatch[3] === "true");
+                    }
+                }
+            }
+
+            position += trivia.fullWidth();
+        }
+
+        return { noDefaultLib: noDefaultLib };
+    }
+
+    function preProcessFile(fileName, sourceText, settings, readImportFiles) {
+        if (typeof readImportFiles === "undefined") { readImportFiles = true; }
+        settings = settings || new CompilationSettings();
+        var text = TypeScript.SimpleText.fromScriptSnapshot(sourceText);
+        var scanner = new TypeScript.Scanner(fileName, text, settings.codeGenTarget, scannerWindow);
+
+        var firstToken = scanner.scan(scannerDiagnostics, false);
+
+        var importedFiles = [];
+        if (readImportFiles) {
+            processImports(text.lineMap(), scanner, firstToken, importedFiles);
+        }
+
+        var referencedFiles = [];
+        var properties = processTripleSlashDirectives(text.lineMap(), firstToken, settings, referencedFiles);
+
+        scannerDiagnostics.length = 0;
+        return { settings: settings, referencedFiles: referencedFiles, importedFiles: importedFiles, isLibFile: properties.noDefaultLib };
+    }
+    TypeScript.preProcessFile = preProcessFile;
+
+    function getParseOptions(settings) {
+        return new TypeScript.ParseOptions(settings.allowAutomaticSemicolonInsertion, settings.allowModuleKeywordInExternalModuleReference);
+    }
+    TypeScript.getParseOptions = getParseOptions;
+})(TypeScript || (TypeScript = {}));
 if (!String.prototype.trim) {
     (String.prototype.trim) = function () {
         return this.replace(/^\s+|\s+$/g, '');
@@ -56045,580 +57525,6 @@ var Services;
         return ClassificationInfo;
     })();
     Services.ClassificationInfo = ClassificationInfo;
-})(Services || (Services = {}));
-var Services;
-(function (Services) {
-    var CompilerDiagnostics = (function () {
-        function CompilerDiagnostics(host) {
-            this.host = host;
-            this.openEditTag = "<Edit>";
-            this.closeEditTag = "<Edit/>";
-        }
-        CompilerDiagnostics.prototype.isLoggingEdits = function () {
-            return (this.host.getDiagnosticsObject() !== null);
-        };
-        return CompilerDiagnostics;
-    })();
-    Services.CompilerDiagnostics = CompilerDiagnostics;
-
-    var DiagnosticService = (function () {
-        function DiagnosticService(internal, host) {
-            this.internal = internal;
-            this.diagnostics = host.getDiagnosticsObject();
-        }
-        DiagnosticService.prototype.writeFile = function (content) {
-            this.diagnostics.log(content);
-        };
-
-        DiagnosticService.prototype.refresh = function () {
-            this.writeFile("refresh: " + "\n");
-            this.internal.refresh();
-        };
-
-        DiagnosticService.prototype.getSyntacticDiagnostics = function (fileName) {
-            var args = "fileName: " + this.stringify(fileName);
-            var result = this.internal.getSyntacticDiagnostics(fileName);
-
-            this.writeFile("getSyntacticDiagnostics: " + args + " result: " + this.stringify(result) + "\n");
-
-            return result;
-        };
-
-        DiagnosticService.prototype.getSemanticDiagnostics = function (fileName) {
-            var args = "fileName: " + this.stringify(fileName);
-            var result = this.internal.getSemanticDiagnostics(fileName);
-
-            this.writeFile("getSemanticDiagnostics: " + args + " result: " + this.stringify(result) + "\n");
-
-            return result;
-        };
-
-        DiagnosticService.prototype.getCompletionsAtPosition = function (fileName, pos, isMemberCompletion) {
-            var args = "fileName: " + this.stringify(fileName) + " pos: " + this.stringify(pos) + " isMemberCompletion: " + this.stringify(isMemberCompletion);
-            var result = this.internal.getCompletionsAtPosition(fileName, pos, isMemberCompletion);
-
-            this.writeFile("getCompletionsAtPosition: " + args + " result: " + this.stringify(result) + "\n");
-
-            return result;
-        };
-
-        DiagnosticService.prototype.getCompletionEntryDetails = function (fileName, position, entryName) {
-            var args = "fileName: " + this.stringify(fileName) + " pos: " + this.stringify(position) + " entryName: " + this.stringify(entryName);
-            var result = this.internal.getCompletionEntryDetails(fileName, position, entryName);
-
-            this.writeFile("getCompletionEntryDetails: " + args + " result: " + this.stringify(result) + "\n");
-
-            return result;
-        };
-
-        DiagnosticService.prototype.getTypeAtPosition = function (fileName, pos) {
-            var args = "fileName: " + this.stringify(fileName) + " pos: " + this.stringify(pos);
-            var result = this.internal.getTypeAtPosition(fileName, pos);
-
-            this.writeFile("getTypeAtPosition: " + args + " result: " + this.stringify(result) + "\n");
-
-            return result;
-        };
-
-        DiagnosticService.prototype.getNameOrDottedNameSpan = function (fileName, startPos, endPos) {
-            var args = "fileName: " + this.stringify(fileName) + " startPos: " + this.stringify(startPos) + " endPos: " + this.stringify(endPos);
-            var result = this.internal.getNameOrDottedNameSpan(fileName, startPos, endPos);
-
-            this.writeFile("getNameOrDottedNameSpan: " + args + " result: " + this.stringify(result) + "\n");
-
-            return result;
-        };
-
-        DiagnosticService.prototype.getBreakpointStatementAtPosition = function (fileName, pos) {
-            var args = "fileName: " + this.stringify(fileName) + " pos: " + this.stringify(pos);
-            var result = this.internal.getBreakpointStatementAtPosition(fileName, pos);
-
-            this.writeFile("getBreakpointStatementAtPosition: " + args + " result: " + this.stringify(result) + "\n");
-
-            return result;
-        };
-
-        DiagnosticService.prototype.getSignatureAtPosition = function (fileName, pos) {
-            var args = "fileName: " + this.stringify(fileName) + " pos: " + this.stringify(pos);
-            var result = this.internal.getSignatureAtPosition(fileName, pos);
-
-            this.writeFile("getSignatureAtPosition: " + args + " result: " + this.stringify(result) + "\n");
-
-            return result;
-        };
-
-        DiagnosticService.prototype.getDefinitionAtPosition = function (fileName, pos) {
-            var args = "fileName: " + this.stringify(fileName) + " pos: " + this.stringify(pos);
-            var result = this.internal.getDefinitionAtPosition(fileName, pos);
-
-            this.writeFile("getDefinitionAtPosition: " + args + " result: " + this.stringify(result) + "\n");
-
-            return result;
-        };
-
-        DiagnosticService.prototype.getReferencesAtPosition = function (fileName, pos) {
-            var args = "fileName: " + this.stringify(fileName) + " pos: " + this.stringify(pos);
-            var result = this.internal.getReferencesAtPosition(fileName, pos);
-
-            this.writeFile("getReferencesAtPosition: " + args + " result: " + this.stringify(result) + "\n");
-
-            return result;
-        };
-
-        DiagnosticService.prototype.getOccurrencesAtPosition = function (fileName, pos) {
-            var args = "fileName: " + this.stringify(fileName) + " pos: " + this.stringify(pos);
-            var result = this.internal.getOccurrencesAtPosition(fileName, pos);
-
-            this.writeFile("getOccurrencesAtPosition: " + args + " result: " + this.stringify(result) + "\n");
-
-            return result;
-        };
-
-        DiagnosticService.prototype.getImplementorsAtPosition = function (fileName, pos) {
-            var args = "fileName: " + this.stringify(fileName) + " pos: " + this.stringify(pos);
-            var result = this.internal.getImplementorsAtPosition(fileName, pos);
-
-            this.writeFile("getImplementorsAtPosition: " + args + " result: " + this.stringify(result) + "\n");
-
-            return result;
-        };
-
-        DiagnosticService.prototype.getNavigateToItems = function (searchValue) {
-            var args = "searchValue: " + this.stringify(searchValue);
-            var result = this.internal.getNavigateToItems(searchValue);
-
-            this.writeFile("getNavigateToItems: " + args + " result: " + this.stringify(result) + "\n");
-
-            return result;
-        };
-
-        DiagnosticService.prototype.getScriptLexicalStructure = function (fileName) {
-            var args = "fileName: " + this.stringify(fileName);
-            var result = this.internal.getScriptLexicalStructure(fileName);
-
-            this.writeFile("getScriptLexicalStructure: " + args + " result: " + this.stringify(result) + "\n");
-
-            return result;
-        };
-
-        DiagnosticService.prototype.getOutliningRegions = function (fileName) {
-            var args = "fileName: " + this.stringify(fileName);
-            var result = this.internal.getOutliningRegions(fileName);
-
-            this.writeFile("getOutliningRegions: " + args + " result: " + this.stringify(result) + "\n");
-
-            return result;
-        };
-
-        DiagnosticService.prototype.getFormattingEditsForRange = function (fileName, minChar, limChar, options) {
-            var args = "fileName: " + this.stringify(fileName) + " minChar: " + this.stringify(minChar) + " limChar: " + this.stringify(limChar) + " options: " + this.stringify(options);
-            var result = this.internal.getFormattingEditsForRange(fileName, minChar, limChar, options);
-
-            this.writeFile("getFormattingEditsForRange: " + args + " result: " + this.stringify(result) + "\n");
-
-            return result;
-        };
-
-        DiagnosticService.prototype.getFormattingEditsForDocument = function (fileName, minChar, limChar, options) {
-            var args = "fileName: " + this.stringify(fileName) + " minChar: " + this.stringify(minChar) + " limChar: " + this.stringify(limChar) + " options: " + this.stringify(options);
-            var result = this.internal.getFormattingEditsForDocument(fileName, minChar, limChar, options);
-
-            this.writeFile("getFormattingEditsForDocument: " + args + " result: " + this.stringify(result) + "\n");
-
-            return result;
-        };
-
-        DiagnosticService.prototype.getFormattingEditsOnPaste = function (fileName, minChar, limChar, options) {
-            var args = "fileName: " + this.stringify(fileName) + " minChar: " + this.stringify(minChar) + " limChar: " + this.stringify(limChar) + " options: " + this.stringify(options);
-            var result = this.internal.getFormattingEditsOnPaste(fileName, minChar, limChar, options);
-
-            this.writeFile("getFormattingEditsOnPaste: " + args + " result: " + this.stringify(result) + "\n");
-
-            return result;
-        };
-
-        DiagnosticService.prototype.getFormattingEditsAfterKeystroke = function (fileName, position, key, options) {
-            var args = "fileName: " + this.stringify(fileName) + " position: " + this.stringify(position) + " key: " + this.stringify(key) + " options: " + this.stringify(options);
-            var result = this.internal.getFormattingEditsAfterKeystroke(fileName, position, key, options);
-
-            this.writeFile("getFormattingEditsAfterKeystroke: " + args + " result: " + this.stringify(result) + "\n");
-
-            return result;
-        };
-
-        DiagnosticService.prototype.getBraceMatchingAtPosition = function (fileName, position) {
-            var args = "fileName: " + this.stringify(fileName) + " position: " + this.stringify(position);
-            var result = this.internal.getBraceMatchingAtPosition(fileName, position);
-
-            this.writeFile("getBraceMatchingAtPosition: " + args + " result: " + this.stringify(result) + "\n");
-
-            return result;
-        };
-
-        DiagnosticService.prototype.getIndentationAtPosition = function (fileName, position, options) {
-            var args = "fileName: " + this.stringify(fileName) + " position: " + this.stringify(position) + " options: " + this.stringify(options);
-            var result = this.internal.getIndentationAtPosition(fileName, position, options);
-
-            this.writeFile("getIndentationAtPosition: " + args + " result: " + this.stringify(result) + "\n");
-
-            return result;
-        };
-
-        DiagnosticService.prototype.getEmitOutput = function (fileName) {
-            var args = "fileName: " + this.stringify(fileName);
-            var result = this.internal.getEmitOutput(fileName);
-
-            this.writeFile("getEmitOutput: " + args + " result: " + this.stringify(result) + "\n");
-
-            return result;
-        };
-
-        DiagnosticService.prototype.getSyntaxTree = function (fileName) {
-            var args = "fileName: " + this.stringify(fileName);
-            var result = this.internal.getSyntaxTree(fileName);
-
-            this.writeFile("getSyntaxTree: " + args + " result: " + this.stringify(result) + "\n");
-
-            return result;
-        };
-
-        DiagnosticService.prototype.stringify = function (object) {
-            var returnString = "";
-
-            if (typeof object === 'string') {
-                returnString = "\"" + object.toString().replace("\n", "\\n") + "\"";
-            } else if (typeof object === 'number') {
-                returnString = object.toString();
-            } else if (typeof object === 'boolean') {
-                returnString = object;
-            } else if (typeof object !== 'function') {
-                var properties = [];
-
-                for (var key in object) {
-                    if (object.hasOwnProperty(key) && typeof object[key] !== 'function') {
-                        properties.push(key);
-                    }
-                }
-
-                for (var i = 0; i < properties.length; i++) {
-                    key = properties[i];
-                    properties[i] = (typeof object[key] !== 'undefined' ? key + ": " + this.stringify(object[key]) : this.stringify(key));
-                }
-
-                returnString = "{ " + properties.toString() + " }";
-            }
-
-            return returnString;
-        };
-        return DiagnosticService;
-    })();
-    Services.DiagnosticService = DiagnosticService;
-})(Services || (Services = {}));
-var Services;
-(function (Services) {
-    function logInternalError(logger, err) {
-        logger.log("*INTERNAL ERROR* - Exception in typescript services: " + err.message);
-    }
-    Services.logInternalError = logInternalError;
-
-    var ReferenceEntry = (function () {
-        function ReferenceEntry(fileName, minChar, limChar, isWriteAccess) {
-            this.fileName = "";
-            this.minChar = -1;
-            this.limChar = -1;
-            this.isWriteAccess = false;
-            this.fileName = fileName;
-            this.minChar = minChar;
-            this.limChar = limChar;
-            this.isWriteAccess = isWriteAccess;
-        }
-        return ReferenceEntry;
-    })();
-    Services.ReferenceEntry = ReferenceEntry;
-
-    var NavigateToItem = (function () {
-        function NavigateToItem() {
-            this.name = "";
-            this.kind = "";
-            this.kindModifiers = "";
-            this.matchKind = "";
-            this.fileName = "";
-            this.minChar = -1;
-            this.limChar = -1;
-            this.containerName = "";
-            this.containerKind = "";
-        }
-        return NavigateToItem;
-    })();
-    Services.NavigateToItem = NavigateToItem;
-
-    var NavigateToContext = (function () {
-        function NavigateToContext() {
-            this.options = new TypeScript.AstWalkOptions();
-            this.fileName = "";
-            this.containerKinds = [];
-            this.containerASTs = [];
-            this.path = new TypeScript.AstPath();
-            this.result = [];
-        }
-        return NavigateToContext;
-    })();
-    Services.NavigateToContext = NavigateToContext;
-
-    var TextEdit = (function () {
-        function TextEdit(minChar, limChar, text) {
-            this.minChar = minChar;
-            this.limChar = limChar;
-            this.text = text;
-        }
-        TextEdit.createInsert = function (pos, text) {
-            return new TextEdit(pos, pos, text);
-        };
-        TextEdit.createDelete = function (minChar, limChar) {
-            return new TextEdit(minChar, limChar, "");
-        };
-        TextEdit.createReplace = function (minChar, limChar, text) {
-            return new TextEdit(minChar, limChar, text);
-        };
-        return TextEdit;
-    })();
-    Services.TextEdit = TextEdit;
-
-    var EditorOptions = (function () {
-        function EditorOptions() {
-            this.IndentSize = 4;
-            this.TabSize = 4;
-            this.NewLineCharacter = "\r\n";
-            this.ConvertTabsToSpaces = true;
-        }
-        EditorOptions.clone = function (objectToClone) {
-            var editorOptions = new EditorOptions();
-            editorOptions.IndentSize = objectToClone.IndentSize;
-            editorOptions.TabSize = objectToClone.TabSize;
-            editorOptions.NewLineCharacter = objectToClone.NewLineCharacter;
-            editorOptions.ConvertTabsToSpaces = objectToClone.ConvertTabsToSpaces;
-            return editorOptions;
-        };
-        return EditorOptions;
-    })();
-    Services.EditorOptions = EditorOptions;
-
-    var FormatCodeOptions = (function (_super) {
-        __extends(FormatCodeOptions, _super);
-        function FormatCodeOptions() {
-            _super.apply(this, arguments);
-            this.InsertSpaceAfterCommaDelimiter = true;
-            this.InsertSpaceAfterSemicolonInForStatements = true;
-            this.InsertSpaceBeforeAndAfterBinaryOperators = true;
-            this.InsertSpaceAfterKeywordsInControlFlowStatements = true;
-            this.InsertSpaceAfterFunctionKeywordForAnonymousFunctions = false;
-            this.InsertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis = false;
-            this.PlaceOpenBraceOnNewLineForFunctions = false;
-            this.PlaceOpenBraceOnNewLineForControlBlocks = false;
-        }
-        FormatCodeOptions.clone = function (objectToClone) {
-            var formatCodeOptions = EditorOptions.clone(objectToClone);
-            formatCodeOptions.InsertSpaceAfterCommaDelimiter = objectToClone.InsertSpaceAfterCommaDelimiter;
-            formatCodeOptions.InsertSpaceAfterSemicolonInForStatements = objectToClone.InsertSpaceAfterSemicolonInForStatements;
-            formatCodeOptions.InsertSpaceBeforeAndAfterBinaryOperators = objectToClone.InsertSpaceBeforeAndAfterBinaryOperators;
-            formatCodeOptions.InsertSpaceAfterKeywordsInControlFlowStatements = objectToClone.InsertSpaceAfterKeywordsInControlFlowStatements;
-            formatCodeOptions.InsertSpaceAfterFunctionKeywordForAnonymousFunctions = objectToClone.InsertSpaceAfterFunctionKeywordForAnonymousFunctions;
-            formatCodeOptions.InsertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis = objectToClone.InsertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis;
-            formatCodeOptions.PlaceOpenBraceOnNewLineForFunctions = objectToClone.PlaceOpenBraceOnNewLineForFunctions;
-            formatCodeOptions.PlaceOpenBraceOnNewLineForControlBlocks = objectToClone.PlaceOpenBraceOnNewLineForControlBlocks;
-            return formatCodeOptions;
-        };
-        return FormatCodeOptions;
-    })(EditorOptions);
-    Services.FormatCodeOptions = FormatCodeOptions;
-
-    var DefinitionInfo = (function () {
-        function DefinitionInfo(fileName, minChar, limChar, kind, name, containerKind, containerName) {
-            this.fileName = fileName;
-            this.minChar = minChar;
-            this.limChar = limChar;
-            this.kind = kind;
-            this.name = name;
-            this.containerKind = containerKind;
-            this.containerName = containerName;
-        }
-        return DefinitionInfo;
-    })();
-    Services.DefinitionInfo = DefinitionInfo;
-
-    var TypeInfo = (function () {
-        function TypeInfo(memberName, docComment, fullSymbolName, kind, minChar, limChar) {
-            this.memberName = memberName;
-            this.docComment = docComment;
-            this.fullSymbolName = fullSymbolName;
-            this.kind = kind;
-            this.minChar = minChar;
-            this.limChar = limChar;
-        }
-        return TypeInfo;
-    })();
-    Services.TypeInfo = TypeInfo;
-
-    var SpanInfo = (function () {
-        function SpanInfo(minChar, limChar, text) {
-            if (typeof text === "undefined") { text = null; }
-            this.minChar = minChar;
-            this.limChar = limChar;
-            this.text = text;
-        }
-        return SpanInfo;
-    })();
-    Services.SpanInfo = SpanInfo;
-
-    var SignatureInfo = (function () {
-        function SignatureInfo() {
-            this.formal = [];
-        }
-        return SignatureInfo;
-    })();
-    Services.SignatureInfo = SignatureInfo;
-
-    var FormalSignatureItemInfo = (function () {
-        function FormalSignatureItemInfo() {
-            this.typeParameters = [];
-            this.parameters = [];
-        }
-        return FormalSignatureItemInfo;
-    })();
-    Services.FormalSignatureItemInfo = FormalSignatureItemInfo;
-
-    var FormalTypeParameterInfo = (function () {
-        function FormalTypeParameterInfo() {
-        }
-        return FormalTypeParameterInfo;
-    })();
-    Services.FormalTypeParameterInfo = FormalTypeParameterInfo;
-
-    var FormalParameterInfo = (function () {
-        function FormalParameterInfo() {
-        }
-        return FormalParameterInfo;
-    })();
-    Services.FormalParameterInfo = FormalParameterInfo;
-
-    var ActualSignatureInfo = (function () {
-        function ActualSignatureInfo() {
-        }
-        return ActualSignatureInfo;
-    })();
-    Services.ActualSignatureInfo = ActualSignatureInfo;
-
-    var CompletionInfo = (function () {
-        function CompletionInfo() {
-            this.maybeInaccurate = false;
-            this.isMemberCompletion = false;
-            this.entries = [];
-        }
-        return CompletionInfo;
-    })();
-    Services.CompletionInfo = CompletionInfo;
-
-    var ScriptElementKind = (function () {
-        function ScriptElementKind() {
-        }
-        ScriptElementKind.unknown = "";
-
-        ScriptElementKind.keyword = "keyword";
-
-        ScriptElementKind.scriptElement = "script";
-
-        ScriptElementKind.moduleElement = "module";
-
-        ScriptElementKind.classElement = "class";
-
-        ScriptElementKind.interfaceElement = "interface";
-
-        ScriptElementKind.enumElement = "enum";
-
-        ScriptElementKind.variableElement = "var";
-
-        ScriptElementKind.localVariableElement = "local var";
-
-        ScriptElementKind.functionElement = "function";
-
-        ScriptElementKind.localFunctionElement = "local function";
-
-        ScriptElementKind.memberFunctionElement = "method";
-
-        ScriptElementKind.memberGetAccessorElement = "getter";
-        ScriptElementKind.memberSetAccessorElement = "setter";
-
-        ScriptElementKind.memberVariableElement = "property";
-
-        ScriptElementKind.constructorImplementationElement = "constructor";
-
-        ScriptElementKind.callSignatureElement = "call";
-
-        ScriptElementKind.indexSignatureElement = "index";
-
-        ScriptElementKind.constructSignatureElement = "construct";
-
-        ScriptElementKind.parameterElement = "parameter";
-
-        ScriptElementKind.typeParameterElement = "type parameter";
-
-        ScriptElementKind.primitiveType = "primitive type";
-        return ScriptElementKind;
-    })();
-    Services.ScriptElementKind = ScriptElementKind;
-
-    var ScriptElementKindModifier = (function () {
-        function ScriptElementKindModifier() {
-        }
-        ScriptElementKindModifier.none = "";
-        ScriptElementKindModifier.publicMemberModifier = "public";
-        ScriptElementKindModifier.privateMemberModifier = "private";
-        ScriptElementKindModifier.exportedModifier = "export";
-        ScriptElementKindModifier.ambientModifier = "declare";
-        ScriptElementKindModifier.staticModifier = "static";
-        return ScriptElementKindModifier;
-    })();
-    Services.ScriptElementKindModifier = ScriptElementKindModifier;
-
-    var MatchKind = (function () {
-        function MatchKind() {
-        }
-        MatchKind.none = null;
-        MatchKind.exact = "exact";
-        MatchKind.subString = "substring";
-        MatchKind.prefix = "prefix";
-        return MatchKind;
-    })();
-    Services.MatchKind = MatchKind;
-
-    var DiagnosticCategory = (function () {
-        function DiagnosticCategory() {
-        }
-        DiagnosticCategory.none = "";
-        DiagnosticCategory.error = "error";
-        DiagnosticCategory.warning = "warning";
-        DiagnosticCategory.message = "message";
-        return DiagnosticCategory;
-    })();
-    Services.DiagnosticCategory = DiagnosticCategory;
-
-    var ScriptSyntaxASTState = (function () {
-        function ScriptSyntaxASTState() {
-            this.version = -1;
-            this.fileName = null;
-        }
-        return ScriptSyntaxASTState;
-    })();
-    Services.ScriptSyntaxASTState = ScriptSyntaxASTState;
-
-    var EmitOutput = (function () {
-        function EmitOutput() {
-            this.outputFiles = [];
-            this.diagnostics = [];
-        }
-        return EmitOutput;
-    })();
-    Services.EmitOutput = EmitOutput;
 })(Services || (Services = {}));
 var TypeScript;
 (function (TypeScript) {
@@ -63001,1486 +63907,580 @@ var Services;
     })();
     Services.TypeScriptServicesFactory = TypeScriptServicesFactory;
 })(Services || (Services = {}));
-var Lint;
-(function (Lint) {
-    var RuleFailure = (function () {
-        function RuleFailure(fileName, lineAndCharacter, failure) {
-            this.fileName = fileName;
-            this.lineAndCharacter = lineAndCharacter;
-            this.failure = failure;
+var Services;
+(function (Services) {
+    var CompilerDiagnostics = (function () {
+        function CompilerDiagnostics(host) {
+            this.host = host;
+            this.openEditTag = "<Edit>";
+            this.closeEditTag = "<Edit/>";
         }
-        RuleFailure.prototype.getFileName = function () {
-            return this.fileName;
+        CompilerDiagnostics.prototype.isLoggingEdits = function () {
+            return (this.host.getDiagnosticsObject() !== null);
         };
-
-        RuleFailure.prototype.getLineAndCharacter = function () {
-            return this.lineAndCharacter;
-        };
-
-        RuleFailure.prototype.getFailure = function () {
-            return this.failure;
-        };
-
-        RuleFailure.prototype.toJson = function () {
-            return {
-                name: this.fileName,
-                position: {
-                    line: this.lineAndCharacter.line(),
-                    character: this.lineAndCharacter.character()
-                },
-                failure: this.failure
-            };
-        };
-
-        RuleFailure.prototype.equals = function (ruleFailure) {
-            return (this.failure === ruleFailure.getFailure() && this.fileName === ruleFailure.getFileName() && this.lineAndCharacter.line() === ruleFailure.getLineAndCharacter().line() && this.lineAndCharacter.character() === ruleFailure.getLineAndCharacter().character());
-        };
-        return RuleFailure;
+        return CompilerDiagnostics;
     })();
-    Lint.RuleFailure = RuleFailure;
-})(Lint || (Lint = {}));
-var Lint;
-(function (Lint) {
-    var RuleWalker = (function (_super) {
-        __extends(RuleWalker, _super);
-        function RuleWalker(syntaxTree) {
-            _super.call(this);
+    Services.CompilerDiagnostics = CompilerDiagnostics;
 
-            this.syntaxTree = syntaxTree;
-            this.failures = [];
+    var DiagnosticService = (function () {
+        function DiagnosticService(internal, host) {
+            this.internal = internal;
+            this.diagnostics = host.getDiagnosticsObject();
         }
-        RuleWalker.prototype.getSyntaxTree = function () {
-            return this.syntaxTree;
+        DiagnosticService.prototype.writeFile = function (content) {
+            this.diagnostics.log(content);
         };
 
-        RuleWalker.prototype.getFailures = function () {
-            return this.failures;
+        DiagnosticService.prototype.refresh = function () {
+            this.writeFile("refresh: " + "\n");
+            this.internal.refresh();
         };
 
-        RuleWalker.prototype.positionAfter = function () {
-            var elements = [];
-            for (var _i = 0; _i < (arguments.length - 0); _i++) {
-                elements[_i] = arguments[_i + 0];
-            }
-            var position = this.position();
+        DiagnosticService.prototype.getSyntacticDiagnostics = function (fileName) {
+            var args = "fileName: " + this.stringify(fileName);
+            var result = this.internal.getSyntacticDiagnostics(fileName);
 
-            for (var i = 0; i < elements.length; ++i) {
-                var element = elements[i];
-                if (element !== null) {
-                    position += element.fullWidth();
-                }
-            }
+            this.writeFile("getSyntacticDiagnostics: " + args + " result: " + this.stringify(result) + "\n");
 
-            return position;
+            return result;
         };
 
-        RuleWalker.prototype.createFailure = function (position, failure) {
-            var lineMap = this.syntaxTree.lineMap();
-            var lineAndCharacter = lineMap.getLineAndCharacterFromPosition(position);
+        DiagnosticService.prototype.getSemanticDiagnostics = function (fileName) {
+            var args = "fileName: " + this.stringify(fileName);
+            var result = this.internal.getSemanticDiagnostics(fileName);
 
-            return new Lint.RuleFailure(this.syntaxTree.fileName(), lineAndCharacter, failure);
+            this.writeFile("getSemanticDiagnostics: " + args + " result: " + this.stringify(result) + "\n");
+
+            return result;
         };
 
-        RuleWalker.prototype.addFailure = function (failure) {
-            if (!this.existsFailure(failure)) {
-                this.failures.push(failure);
-            }
+        DiagnosticService.prototype.getCompletionsAtPosition = function (fileName, pos, isMemberCompletion) {
+            var args = "fileName: " + this.stringify(fileName) + " pos: " + this.stringify(pos) + " isMemberCompletion: " + this.stringify(isMemberCompletion);
+            var result = this.internal.getCompletionsAtPosition(fileName, pos, isMemberCompletion);
+
+            this.writeFile("getCompletionsAtPosition: " + args + " result: " + this.stringify(result) + "\n");
+
+            return result;
         };
 
-        RuleWalker.prototype.existsFailure = function (failure) {
-            var filteredFailures = this.failures.filter(function (f) {
-                return f.equals(failure);
-            });
+        DiagnosticService.prototype.getCompletionEntryDetails = function (fileName, position, entryName) {
+            var args = "fileName: " + this.stringify(fileName) + " pos: " + this.stringify(position) + " entryName: " + this.stringify(entryName);
+            var result = this.internal.getCompletionEntryDetails(fileName, position, entryName);
 
-            return (filteredFailures.length > 0);
+            this.writeFile("getCompletionEntryDetails: " + args + " result: " + this.stringify(result) + "\n");
+
+            return result;
         };
-        return RuleWalker;
-    })(TypeScript.PositionTrackingWalker);
-    Lint.RuleWalker = RuleWalker;
-})(Lint || (Lint = {}));
-var Lint;
-(function (Lint) {
-    (function (Rules) {
-        var AbstractRule = (function () {
-            function AbstractRule(name) {
-                this.name = name;
-            }
-            AbstractRule.prototype.getName = function () {
-                return this.name;
-            };
 
-            AbstractRule.prototype.getValue = function () {
-                return this.value;
-            };
+        DiagnosticService.prototype.getTypeAtPosition = function (fileName, pos) {
+            var args = "fileName: " + this.stringify(fileName) + " pos: " + this.stringify(pos);
+            var result = this.internal.getTypeAtPosition(fileName, pos);
 
-            AbstractRule.prototype.setValue = function (value) {
-                this.value = value;
-            };
+            this.writeFile("getTypeAtPosition: " + args + " result: " + this.stringify(result) + "\n");
 
-            AbstractRule.prototype.apply = function (syntaxTree) {
-                throw TypeScript.Errors.abstract();
-            };
+            return result;
+        };
 
-            AbstractRule.prototype.applyWithWalker = function (walker) {
-                var sourceUnit = walker.getSyntaxTree().sourceUnit();
-                sourceUnit.accept(walker);
-                return walker.getFailures();
-            };
+        DiagnosticService.prototype.getNameOrDottedNameSpan = function (fileName, startPos, endPos) {
+            var args = "fileName: " + this.stringify(fileName) + " startPos: " + this.stringify(startPos) + " endPos: " + this.stringify(endPos);
+            var result = this.internal.getNameOrDottedNameSpan(fileName, startPos, endPos);
 
-            AbstractRule.prototype.isEnabled = function () {
-                return true;
-            };
-            return AbstractRule;
-        })();
-        Rules.AbstractRule = AbstractRule;
-    })(Lint.Rules || (Lint.Rules = {}));
-    var Rules = Lint.Rules;
-})(Lint || (Lint = {}));
-var Lint;
-(function (Lint) {
-    (function (Rules) {
-        var ArgumentsRule = (function (_super) {
-            __extends(ArgumentsRule, _super);
-            function ArgumentsRule() {
-                _super.call(this, "arguments");
-            }
-            ArgumentsRule.prototype.isEnabled = function () {
-                return this.getValue() === true;
-            };
+            this.writeFile("getNameOrDottedNameSpan: " + args + " result: " + this.stringify(result) + "\n");
 
-            ArgumentsRule.prototype.apply = function (syntaxTree) {
-                return this.applyWithWalker(new ArgumentsWalker(syntaxTree));
-            };
-            return ArgumentsRule;
-        })(Rules.AbstractRule);
-        Rules.ArgumentsRule = ArgumentsRule;
+            return result;
+        };
 
-        var ArgumentsWalker = (function (_super) {
-            __extends(ArgumentsWalker, _super);
-            function ArgumentsWalker() {
-                _super.apply(this, arguments);
-            }
-            ArgumentsWalker.prototype.visitMemberAccessExpression = function (node) {
-                var expression = node.expression;
-                var name = node.name;
-                var position = this.position() + node.expression.leadingTriviaWidth();
+        DiagnosticService.prototype.getBreakpointStatementAtPosition = function (fileName, pos) {
+            var args = "fileName: " + this.stringify(fileName) + " pos: " + this.stringify(pos);
+            var result = this.internal.getBreakpointStatementAtPosition(fileName, pos);
 
-                if (expression.isToken() && name.text() === "callee") {
-                    var tokenExpression = expression;
-                    if (tokenExpression.text() === "arguments") {
-                        this.addFailure(this.createFailure(position, ArgumentsWalker.FAILURE_STRING));
+            this.writeFile("getBreakpointStatementAtPosition: " + args + " result: " + this.stringify(result) + "\n");
+
+            return result;
+        };
+
+        DiagnosticService.prototype.getSignatureAtPosition = function (fileName, pos) {
+            var args = "fileName: " + this.stringify(fileName) + " pos: " + this.stringify(pos);
+            var result = this.internal.getSignatureAtPosition(fileName, pos);
+
+            this.writeFile("getSignatureAtPosition: " + args + " result: " + this.stringify(result) + "\n");
+
+            return result;
+        };
+
+        DiagnosticService.prototype.getDefinitionAtPosition = function (fileName, pos) {
+            var args = "fileName: " + this.stringify(fileName) + " pos: " + this.stringify(pos);
+            var result = this.internal.getDefinitionAtPosition(fileName, pos);
+
+            this.writeFile("getDefinitionAtPosition: " + args + " result: " + this.stringify(result) + "\n");
+
+            return result;
+        };
+
+        DiagnosticService.prototype.getReferencesAtPosition = function (fileName, pos) {
+            var args = "fileName: " + this.stringify(fileName) + " pos: " + this.stringify(pos);
+            var result = this.internal.getReferencesAtPosition(fileName, pos);
+
+            this.writeFile("getReferencesAtPosition: " + args + " result: " + this.stringify(result) + "\n");
+
+            return result;
+        };
+
+        DiagnosticService.prototype.getOccurrencesAtPosition = function (fileName, pos) {
+            var args = "fileName: " + this.stringify(fileName) + " pos: " + this.stringify(pos);
+            var result = this.internal.getOccurrencesAtPosition(fileName, pos);
+
+            this.writeFile("getOccurrencesAtPosition: " + args + " result: " + this.stringify(result) + "\n");
+
+            return result;
+        };
+
+        DiagnosticService.prototype.getImplementorsAtPosition = function (fileName, pos) {
+            var args = "fileName: " + this.stringify(fileName) + " pos: " + this.stringify(pos);
+            var result = this.internal.getImplementorsAtPosition(fileName, pos);
+
+            this.writeFile("getImplementorsAtPosition: " + args + " result: " + this.stringify(result) + "\n");
+
+            return result;
+        };
+
+        DiagnosticService.prototype.getNavigateToItems = function (searchValue) {
+            var args = "searchValue: " + this.stringify(searchValue);
+            var result = this.internal.getNavigateToItems(searchValue);
+
+            this.writeFile("getNavigateToItems: " + args + " result: " + this.stringify(result) + "\n");
+
+            return result;
+        };
+
+        DiagnosticService.prototype.getScriptLexicalStructure = function (fileName) {
+            var args = "fileName: " + this.stringify(fileName);
+            var result = this.internal.getScriptLexicalStructure(fileName);
+
+            this.writeFile("getScriptLexicalStructure: " + args + " result: " + this.stringify(result) + "\n");
+
+            return result;
+        };
+
+        DiagnosticService.prototype.getOutliningRegions = function (fileName) {
+            var args = "fileName: " + this.stringify(fileName);
+            var result = this.internal.getOutliningRegions(fileName);
+
+            this.writeFile("getOutliningRegions: " + args + " result: " + this.stringify(result) + "\n");
+
+            return result;
+        };
+
+        DiagnosticService.prototype.getFormattingEditsForRange = function (fileName, minChar, limChar, options) {
+            var args = "fileName: " + this.stringify(fileName) + " minChar: " + this.stringify(minChar) + " limChar: " + this.stringify(limChar) + " options: " + this.stringify(options);
+            var result = this.internal.getFormattingEditsForRange(fileName, minChar, limChar, options);
+
+            this.writeFile("getFormattingEditsForRange: " + args + " result: " + this.stringify(result) + "\n");
+
+            return result;
+        };
+
+        DiagnosticService.prototype.getFormattingEditsForDocument = function (fileName, minChar, limChar, options) {
+            var args = "fileName: " + this.stringify(fileName) + " minChar: " + this.stringify(minChar) + " limChar: " + this.stringify(limChar) + " options: " + this.stringify(options);
+            var result = this.internal.getFormattingEditsForDocument(fileName, minChar, limChar, options);
+
+            this.writeFile("getFormattingEditsForDocument: " + args + " result: " + this.stringify(result) + "\n");
+
+            return result;
+        };
+
+        DiagnosticService.prototype.getFormattingEditsOnPaste = function (fileName, minChar, limChar, options) {
+            var args = "fileName: " + this.stringify(fileName) + " minChar: " + this.stringify(minChar) + " limChar: " + this.stringify(limChar) + " options: " + this.stringify(options);
+            var result = this.internal.getFormattingEditsOnPaste(fileName, minChar, limChar, options);
+
+            this.writeFile("getFormattingEditsOnPaste: " + args + " result: " + this.stringify(result) + "\n");
+
+            return result;
+        };
+
+        DiagnosticService.prototype.getFormattingEditsAfterKeystroke = function (fileName, position, key, options) {
+            var args = "fileName: " + this.stringify(fileName) + " position: " + this.stringify(position) + " key: " + this.stringify(key) + " options: " + this.stringify(options);
+            var result = this.internal.getFormattingEditsAfterKeystroke(fileName, position, key, options);
+
+            this.writeFile("getFormattingEditsAfterKeystroke: " + args + " result: " + this.stringify(result) + "\n");
+
+            return result;
+        };
+
+        DiagnosticService.prototype.getBraceMatchingAtPosition = function (fileName, position) {
+            var args = "fileName: " + this.stringify(fileName) + " position: " + this.stringify(position);
+            var result = this.internal.getBraceMatchingAtPosition(fileName, position);
+
+            this.writeFile("getBraceMatchingAtPosition: " + args + " result: " + this.stringify(result) + "\n");
+
+            return result;
+        };
+
+        DiagnosticService.prototype.getIndentationAtPosition = function (fileName, position, options) {
+            var args = "fileName: " + this.stringify(fileName) + " position: " + this.stringify(position) + " options: " + this.stringify(options);
+            var result = this.internal.getIndentationAtPosition(fileName, position, options);
+
+            this.writeFile("getIndentationAtPosition: " + args + " result: " + this.stringify(result) + "\n");
+
+            return result;
+        };
+
+        DiagnosticService.prototype.getEmitOutput = function (fileName) {
+            var args = "fileName: " + this.stringify(fileName);
+            var result = this.internal.getEmitOutput(fileName);
+
+            this.writeFile("getEmitOutput: " + args + " result: " + this.stringify(result) + "\n");
+
+            return result;
+        };
+
+        DiagnosticService.prototype.getSyntaxTree = function (fileName) {
+            var args = "fileName: " + this.stringify(fileName);
+            var result = this.internal.getSyntaxTree(fileName);
+
+            this.writeFile("getSyntaxTree: " + args + " result: " + this.stringify(result) + "\n");
+
+            return result;
+        };
+
+        DiagnosticService.prototype.stringify = function (object) {
+            var returnString = "";
+
+            if (typeof object === 'string') {
+                returnString = "\"" + object.toString().replace("\n", "\\n") + "\"";
+            } else if (typeof object === 'number') {
+                returnString = object.toString();
+            } else if (typeof object === 'boolean') {
+                returnString = object;
+            } else if (typeof object !== 'function') {
+                var properties = [];
+
+                for (var key in object) {
+                    if (object.hasOwnProperty(key) && typeof object[key] !== 'function') {
+                        properties.push(key);
                     }
                 }
 
-                _super.prototype.visitMemberAccessExpression.call(this, node);
-            };
-            ArgumentsWalker.FAILURE_STRING = "access forbidden to arguments property";
-            return ArgumentsWalker;
-        })(Lint.RuleWalker);
-    })(Lint.Rules || (Lint.Rules = {}));
-    var Rules = Lint.Rules;
-})(Lint || (Lint = {}));
-var Lint;
-(function (Lint) {
-    (function (Rules) {
-        var BitwiseOperatorRule = (function (_super) {
-            __extends(BitwiseOperatorRule, _super);
-            function BitwiseOperatorRule() {
-                _super.call(this, "bitwise");
-            }
-            BitwiseOperatorRule.prototype.isEnabled = function () {
-                return this.getValue() === true;
-            };
-
-            BitwiseOperatorRule.prototype.apply = function (syntaxTree) {
-                return this.applyWithWalker(new BitwiseWalker(syntaxTree));
-            };
-            return BitwiseOperatorRule;
-        })(Rules.AbstractRule);
-        Rules.BitwiseOperatorRule = BitwiseOperatorRule;
-
-        var BitwiseWalker = (function (_super) {
-            __extends(BitwiseWalker, _super);
-            function BitwiseWalker() {
-                _super.apply(this, arguments);
-            }
-            BitwiseWalker.prototype.visitNode = function (node) {
-                if (node.kind() === TypeScript.SyntaxKind.BitwiseAndExpression || node.kind() === TypeScript.SyntaxKind.AndAssignmentExpression || node.kind() === TypeScript.SyntaxKind.BitwiseOrExpression || node.kind() === TypeScript.SyntaxKind.OrAssignmentExpression || node.kind() === TypeScript.SyntaxKind.BitwiseExclusiveOrExpression || node.kind() === TypeScript.SyntaxKind.ExclusiveOrAssignmentExpression || node.kind() === TypeScript.SyntaxKind.LeftShiftExpression || node.kind() === TypeScript.SyntaxKind.LeftShiftAssignmentExpression || node.kind() === TypeScript.SyntaxKind.SignedRightShiftExpression || node.kind() === TypeScript.SyntaxKind.SignedRightShiftAssignmentExpression || node.kind() === TypeScript.SyntaxKind.UnsignedRightShiftExpression || node.kind() === TypeScript.SyntaxKind.UnsignedRightShiftAssignmentExpression || node.kind() === TypeScript.SyntaxKind.BitwiseNotExpression) {
-                    this.addFailure(this.createFailure(this.position() + node.leadingTriviaWidth(), BitwiseWalker.FAILURE_STRING));
+                for (var i = 0; i < properties.length; i++) {
+                    key = properties[i];
+                    properties[i] = (typeof object[key] !== 'undefined' ? key + ": " + this.stringify(object[key]) : this.stringify(key));
                 }
 
-                _super.prototype.visitNode.call(this, node);
-            };
-            BitwiseWalker.FAILURE_STRING = "forbidden bitwise operation";
-            return BitwiseWalker;
-        })(Lint.RuleWalker);
-    })(Lint.Rules || (Lint.Rules = {}));
-    var Rules = Lint.Rules;
-})(Lint || (Lint = {}));
-var Lint;
-(function (Lint) {
-    (function (Rules) {
-        var ClassNameRule = (function (_super) {
-            __extends(ClassNameRule, _super);
-            function ClassNameRule() {
-                _super.call(this, "class_name");
+                returnString = "{ " + properties.toString() + " }";
             }
-            ClassNameRule.prototype.isEnabled = function () {
-                return this.getValue() === true;
-            };
 
-            ClassNameRule.prototype.apply = function (syntaxTree) {
-                return this.applyWithWalker(new ClassNameWalker(syntaxTree));
-            };
-            return ClassNameRule;
-        })(Rules.AbstractRule);
-        Rules.ClassNameRule = ClassNameRule;
+            return returnString;
+        };
+        return DiagnosticService;
+    })();
+    Services.DiagnosticService = DiagnosticService;
+})(Services || (Services = {}));
+var Services;
+(function (Services) {
+    function logInternalError(logger, err) {
+        logger.log("*INTERNAL ERROR* - Exception in typescript services: " + err.message);
+    }
+    Services.logInternalError = logInternalError;
 
-        var ClassNameWalker = (function (_super) {
-            __extends(ClassNameWalker, _super);
-            function ClassNameWalker() {
-                _super.apply(this, arguments);
-            }
-            ClassNameWalker.prototype.visitClassDeclaration = function (node) {
-                var position = this.positionAfter(node.modifiers, node.classKeyword);
-                var className = node.identifier.text();
-                if (className.length > 0) {
-                    var firstCharacter = className.charAt(0);
-                    if (firstCharacter !== firstCharacter.toUpperCase()) {
-                        this.addFailure(this.createFailure(position, ClassNameWalker.FAILURE_STRING));
-                    }
-                }
+    var ReferenceEntry = (function () {
+        function ReferenceEntry(fileName, minChar, limChar, isWriteAccess) {
+            this.fileName = "";
+            this.minChar = -1;
+            this.limChar = -1;
+            this.isWriteAccess = false;
+            this.fileName = fileName;
+            this.minChar = minChar;
+            this.limChar = limChar;
+            this.isWriteAccess = isWriteAccess;
+        }
+        return ReferenceEntry;
+    })();
+    Services.ReferenceEntry = ReferenceEntry;
 
-                _super.prototype.visitClassDeclaration.call(this, node);
-            };
-            ClassNameWalker.FAILURE_STRING = "class name must start with an uppercase character";
-            return ClassNameWalker;
-        })(Lint.RuleWalker);
-    })(Lint.Rules || (Lint.Rules = {}));
-    var Rules = Lint.Rules;
-})(Lint || (Lint = {}));
-var Lint;
-(function (Lint) {
-    (function (Rules) {
-        var CurlyRule = (function (_super) {
-            __extends(CurlyRule, _super);
-            function CurlyRule() {
-                _super.call(this, "curly");
-            }
-            CurlyRule.prototype.isEnabled = function () {
-                return this.getValue() === true;
-            };
+    var NavigateToItem = (function () {
+        function NavigateToItem() {
+            this.name = "";
+            this.kind = "";
+            this.kindModifiers = "";
+            this.matchKind = "";
+            this.fileName = "";
+            this.minChar = -1;
+            this.limChar = -1;
+            this.containerName = "";
+            this.containerKind = "";
+        }
+        return NavigateToItem;
+    })();
+    Services.NavigateToItem = NavigateToItem;
 
-            CurlyRule.prototype.apply = function (syntaxTree) {
-                return this.applyWithWalker(new CurlyWalker(syntaxTree));
-            };
-            return CurlyRule;
-        })(Rules.AbstractRule);
-        Rules.CurlyRule = CurlyRule;
+    var NavigateToContext = (function () {
+        function NavigateToContext() {
+            this.options = new TypeScript.AstWalkOptions();
+            this.fileName = "";
+            this.containerKinds = [];
+            this.containerASTs = [];
+            this.path = new TypeScript.AstPath();
+            this.result = [];
+        }
+        return NavigateToContext;
+    })();
+    Services.NavigateToContext = NavigateToContext;
 
-        var CurlyWalker = (function (_super) {
-            __extends(CurlyWalker, _super);
-            function CurlyWalker() {
-                _super.apply(this, arguments);
-            }
-            CurlyWalker.prototype.visitForInStatement = function (node) {
-                _super.prototype.visitForInStatement.call(this, node);
-                this.verifyStatementIsBraced(node.statement);
-            };
+    var TextEdit = (function () {
+        function TextEdit(minChar, limChar, text) {
+            this.minChar = minChar;
+            this.limChar = limChar;
+            this.text = text;
+        }
+        TextEdit.createInsert = function (pos, text) {
+            return new TextEdit(pos, pos, text);
+        };
+        TextEdit.createDelete = function (minChar, limChar) {
+            return new TextEdit(minChar, limChar, "");
+        };
+        TextEdit.createReplace = function (minChar, limChar, text) {
+            return new TextEdit(minChar, limChar, text);
+        };
+        return TextEdit;
+    })();
+    Services.TextEdit = TextEdit;
 
-            CurlyWalker.prototype.visitForStatement = function (node) {
-                _super.prototype.visitForStatement.call(this, node);
-                this.verifyStatementIsBraced(node.statement);
-            };
+    var EditorOptions = (function () {
+        function EditorOptions() {
+            this.IndentSize = 4;
+            this.TabSize = 4;
+            this.NewLineCharacter = "\r\n";
+            this.ConvertTabsToSpaces = true;
+        }
+        EditorOptions.clone = function (objectToClone) {
+            var editorOptions = new EditorOptions();
+            editorOptions.IndentSize = objectToClone.IndentSize;
+            editorOptions.TabSize = objectToClone.TabSize;
+            editorOptions.NewLineCharacter = objectToClone.NewLineCharacter;
+            editorOptions.ConvertTabsToSpaces = objectToClone.ConvertTabsToSpaces;
+            return editorOptions;
+        };
+        return EditorOptions;
+    })();
+    Services.EditorOptions = EditorOptions;
 
-            CurlyWalker.prototype.visitIfStatement = function (node) {
-                _super.prototype.visitIfStatement.call(this, node);
-                this.verifyStatementIsBraced(node.statement);
-            };
-
-            CurlyWalker.prototype.visitElseClause = function (node) {
-                _super.prototype.visitElseClause.call(this, node);
-                this.verifyStatementIsBraced(node.statement);
-            };
-
-            CurlyWalker.prototype.visitDoStatement = function (node) {
-                _super.prototype.visitDoStatement.call(this, node);
-                this.verifyStatementIsBraced(node.statement);
-            };
-
-            CurlyWalker.prototype.visitWhileStatement = function (node) {
-                _super.prototype.visitWhileStatement.call(this, node);
-                this.verifyStatementIsBraced(node.statement);
-            };
-
-            CurlyWalker.prototype.verifyStatementIsBraced = function (node) {
-                var failure = null;
-                var hasBraces = false;
-
-                var childCount = node.childCount();
-                if (childCount === 3) {
-                    if (node.childAt(0).kind() === TypeScript.SyntaxKind.FirstPunctuation && node.childAt(1).kind() === TypeScript.SyntaxKind.List && node.childAt(2).kind() === TypeScript.SyntaxKind.CloseBraceToken) {
-                        hasBraces = true;
-                    }
-                }
-
-                if (!hasBraces) {
-                    this.addFailure(this.createFailure(this.position(), CurlyWalker.CURLY_FAILURE));
-                }
-            };
-            CurlyWalker.CURLY_FAILURE = "if/for/do/while statements must be braced";
-            return CurlyWalker;
-        })(Lint.RuleWalker);
-    })(Lint.Rules || (Lint.Rules = {}));
-    var Rules = Lint.Rules;
-})(Lint || (Lint = {}));
-var Lint;
-(function (Lint) {
-    (function (Rules) {
-        var DebugRule = (function (_super) {
-            __extends(DebugRule, _super);
-            function DebugRule() {
-                _super.call(this, "debug");
-            }
-            DebugRule.prototype.isEnabled = function () {
-                return this.getValue() === true;
-            };
-
-            DebugRule.prototype.apply = function (syntaxTree) {
-                return this.applyWithWalker(new DebugWalker(syntaxTree));
-            };
-            return DebugRule;
-        })(Rules.AbstractRule);
-        Rules.DebugRule = DebugRule;
-
-        var DebugWalker = (function (_super) {
-            __extends(DebugWalker, _super);
-            function DebugWalker() {
-                _super.apply(this, arguments);
-            }
-            DebugWalker.prototype.visitToken = function (token) {
-                this.handleToken(token);
-                _super.prototype.visitToken.call(this, token);
-            };
-
-            DebugWalker.prototype.handleToken = function (operatorToken) {
-                var failure = null;
-                var operatorKind = operatorToken.kind();
-
-                if (operatorKind === TypeScript.SyntaxKind.DebuggerKeyword) {
-                    this.addFailure(this.createFailure(this.position(), DebugWalker.DEBUG_FAILURE));
-                }
-            };
-            DebugWalker.DEBUG_FAILURE = "use of debugger statements is disallowed";
-            return DebugWalker;
-        })(Lint.RuleWalker);
-    })(Lint.Rules || (Lint.Rules = {}));
-    var Rules = Lint.Rules;
-})(Lint || (Lint = {}));
-var Lint;
-(function (Lint) {
-    var StateAwareRuleWalker = (function (_super) {
-        __extends(StateAwareRuleWalker, _super);
-        function StateAwareRuleWalker() {
+    var FormatCodeOptions = (function (_super) {
+        __extends(FormatCodeOptions, _super);
+        function FormatCodeOptions() {
             _super.apply(this, arguments);
+            this.InsertSpaceAfterCommaDelimiter = true;
+            this.InsertSpaceAfterSemicolonInForStatements = true;
+            this.InsertSpaceBeforeAndAfterBinaryOperators = true;
+            this.InsertSpaceAfterKeywordsInControlFlowStatements = true;
+            this.InsertSpaceAfterFunctionKeywordForAnonymousFunctions = false;
+            this.InsertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis = false;
+            this.PlaceOpenBraceOnNewLineForFunctions = false;
+            this.PlaceOpenBraceOnNewLineForControlBlocks = false;
         }
-        StateAwareRuleWalker.prototype.visitToken = function (token) {
-            if (token.value() !== null) {
-                this.lastState = {
-                    position: this.position() + token.leadingTriviaWidth(),
-                    token: token
-                };
-            }
-
-            _super.prototype.visitToken.call(this, token);
+        FormatCodeOptions.clone = function (objectToClone) {
+            var formatCodeOptions = EditorOptions.clone(objectToClone);
+            formatCodeOptions.InsertSpaceAfterCommaDelimiter = objectToClone.InsertSpaceAfterCommaDelimiter;
+            formatCodeOptions.InsertSpaceAfterSemicolonInForStatements = objectToClone.InsertSpaceAfterSemicolonInForStatements;
+            formatCodeOptions.InsertSpaceBeforeAndAfterBinaryOperators = objectToClone.InsertSpaceBeforeAndAfterBinaryOperators;
+            formatCodeOptions.InsertSpaceAfterKeywordsInControlFlowStatements = objectToClone.InsertSpaceAfterKeywordsInControlFlowStatements;
+            formatCodeOptions.InsertSpaceAfterFunctionKeywordForAnonymousFunctions = objectToClone.InsertSpaceAfterFunctionKeywordForAnonymousFunctions;
+            formatCodeOptions.InsertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis = objectToClone.InsertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis;
+            formatCodeOptions.PlaceOpenBraceOnNewLineForFunctions = objectToClone.PlaceOpenBraceOnNewLineForFunctions;
+            formatCodeOptions.PlaceOpenBraceOnNewLineForControlBlocks = objectToClone.PlaceOpenBraceOnNewLineForControlBlocks;
+            return formatCodeOptions;
         };
-
-        StateAwareRuleWalker.prototype.getLastState = function () {
-            return this.lastState;
-        };
-        return StateAwareRuleWalker;
-    })(Lint.RuleWalker);
-    Lint.StateAwareRuleWalker = StateAwareRuleWalker;
-})(Lint || (Lint = {}));
-var Lint;
-(function (Lint) {
-    (function (Rules) {
-        var NewLineRule = (function (_super) {
-            __extends(NewLineRule, _super);
-            function NewLineRule() {
-                _super.call(this, "file_must_end_with_newline");
-            }
-            NewLineRule.prototype.isEnabled = function () {
-                return this.getValue() === true;
-            };
-
-            NewLineRule.prototype.apply = function (syntaxTree) {
-                return this.applyWithWalker(new EOFWalker(syntaxTree));
-            };
-            return NewLineRule;
-        })(Rules.AbstractRule);
-        Rules.NewLineRule = NewLineRule;
-
-        var EOFWalker = (function (_super) {
-            __extends(EOFWalker, _super);
-            function EOFWalker() {
-                _super.apply(this, arguments);
-            }
-            EOFWalker.prototype.visitToken = function (token) {
-                this.handleToken(token);
-                _super.prototype.visitToken.call(this, token);
-            };
-
-            EOFWalker.prototype.handleToken = function (operatorToken) {
-                var lastState = this.getLastState();
-                var operatorKind = operatorToken.kind();
-                if (lastState !== undefined && operatorKind === TypeScript.SyntaxKind.EndOfFileToken) {
-                    var endsWithNewLine = false;
-
-                    var previousToken = lastState.token;
-                    if (previousToken !== null && previousToken.hasTrailingNewLine()) {
-                        endsWithNewLine = true;
-                    }
-
-                    if (operatorToken.hasLeadingTrivia()) {
-                        endsWithNewLine = false;
-                    }
-
-                    if (!endsWithNewLine) {
-                        this.addFailure(this.createFailure(this.position(), EOFWalker.FAILURE_STRING));
-                    }
-                }
-            };
-            EOFWalker.FAILURE_STRING = "file should end with a newline";
-            return EOFWalker;
-        })(Lint.StateAwareRuleWalker);
-    })(Lint.Rules || (Lint.Rules = {}));
-    var Rules = Lint.Rules;
-})(Lint || (Lint = {}));
-var Lint;
-(function (Lint) {
-    (function (Rules) {
-        var ForInRule = (function (_super) {
-            __extends(ForInRule, _super);
-            function ForInRule() {
-                _super.call(this, "forin");
-            }
-            ForInRule.prototype.isEnabled = function () {
-                return this.getValue() === true;
-            };
-
-            ForInRule.prototype.apply = function (syntaxTree) {
-                return this.applyWithWalker(new ForInWalker(syntaxTree));
-            };
-            return ForInRule;
-        })(Rules.AbstractRule);
-        Rules.ForInRule = ForInRule;
-
-        var ForInWalker = (function (_super) {
-            __extends(ForInWalker, _super);
-            function ForInWalker() {
-                _super.apply(this, arguments);
-            }
-            ForInWalker.prototype.visitForInStatement = function (node) {
-                _super.prototype.visitForInStatement.call(this, node);
-                this.handleForInStatement(node);
-            };
-
-            ForInWalker.prototype.handleForInStatement = function (node) {
-                var failure = null;
-
-                var statement = node.statement;
-                var statementChildCount = statement.childCount();
-                for (var i = 0; i < statementChildCount; i++) {
-                    var child = statement.childAt(i);
-                    var childKind = child.kind();
-
-                    if (childKind !== TypeScript.SyntaxKind.FirstPunctuation && childKind !== TypeScript.SyntaxKind.CloseBraceToken) {
-                        if (childKind !== TypeScript.SyntaxKind.List) {
-                            throw new Error("The only possible children are opening punctuation, a list, and a closing brace");
-                        }
-
-                        var grandChildrenCount = child.childCount();
-
-                        if (grandChildrenCount > 1) {
-                            failure = this.createFailure(this.position(), ForInWalker.FOR_IN_FAILURE);
-                        } else if (grandChildrenCount === 1) {
-                            var grandChild = child.childAt(0);
-
-                            if (grandChild.kind() !== TypeScript.SyntaxKind.IfStatement) {
-                                failure = this.createFailure(this.position(), ForInWalker.FOR_IN_FAILURE);
-                            }
-                        }
-                    }
-                }
-
-                if (failure) {
-                    this.addFailure(failure);
-                }
-            };
-            ForInWalker.FOR_IN_FAILURE = "for (... in ...) statements must be filtered with an if statement";
-            return ForInWalker;
-        })(Lint.RuleWalker);
-    })(Lint.Rules || (Lint.Rules = {}));
-    var Rules = Lint.Rules;
-})(Lint || (Lint = {}));
-var Lint;
-(function (Lint) {
-    (function (Rules) {
-        var EvalRule = (function (_super) {
-            __extends(EvalRule, _super);
-            function EvalRule() {
-                _super.call(this, "eval");
-            }
-            EvalRule.prototype.isEnabled = function () {
-                return this.getValue() === true;
-            };
-
-            EvalRule.prototype.apply = function (syntaxTree) {
-                return this.applyWithWalker(new EvalWalker(syntaxTree));
-            };
-            return EvalRule;
-        })(Rules.AbstractRule);
-        Rules.EvalRule = EvalRule;
-
-        var EvalWalker = (function (_super) {
-            __extends(EvalWalker, _super);
-            function EvalWalker() {
-                _super.apply(this, arguments);
-            }
-            EvalWalker.prototype.visitInvocationExpression = function (node) {
-                var expression = node.expression;
-                if (expression.isToken() && expression.kind() === TypeScript.SyntaxKind.IdentifierName) {
-                    if (expression.firstToken().text() === "eval") {
-                        var position = this.position() + node.leadingTriviaWidth();
-                        this.addFailure(this.createFailure(position, EvalWalker.FAILURE_STRING));
-                    }
-                }
-
-                _super.prototype.visitInvocationExpression.call(this, node);
-            };
-            EvalWalker.FAILURE_STRING = "forbidden eval";
-            return EvalWalker;
-        })(Lint.RuleWalker);
-    })(Lint.Rules || (Lint.Rules = {}));
-    var Rules = Lint.Rules;
-})(Lint || (Lint = {}));
-var Lint;
-(function (Lint) {
-    (function (Rules) {
-        var MaxLineLengthRule = (function (_super) {
-            __extends(MaxLineLengthRule, _super);
-            function MaxLineLengthRule() {
-                _super.call(this, "max_line_length");
-            }
-            MaxLineLengthRule.prototype.apply = function (syntaxTree) {
-                var ruleFailures = [];
-                var lineLimit = this.getValue();
-                var lineMap = syntaxTree.lineMap();
-                var lineStarts = lineMap.lineStarts();
-                var errorString = MaxLineLengthRule.FAILURE_STRING + lineLimit;
-
-                for (var i = 0; i < lineStarts.length - 1; ++i) {
-                    var from = lineStarts[i], to = lineStarts[i + 1];
-                    if ((to - from - 1) > lineLimit) {
-                        var lineAndCharacter = lineMap.getLineAndCharacterFromPosition(to - 1);
-                        var ruleFailure = new Lint.RuleFailure(syntaxTree.fileName(), lineAndCharacter, errorString);
-                        ruleFailures.push(ruleFailure);
-                    }
-                }
-
-                return ruleFailures;
-            };
-            MaxLineLengthRule.FAILURE_STRING = "exceeds maximum line length of ";
-            return MaxLineLengthRule;
-        })(Rules.AbstractRule);
-        Rules.MaxLineLengthRule = MaxLineLengthRule;
-    })(Lint.Rules || (Lint.Rules = {}));
-    var Rules = Lint.Rules;
-})(Lint || (Lint = {}));
-var Lint;
-(function (Lint) {
-    (function (Rules) {
-        var QuoteStyle;
-        (function (QuoteStyle) {
-            QuoteStyle[QuoteStyle["SINGLE_QUOTES"] = 0] = "SINGLE_QUOTES";
-
-            QuoteStyle[QuoteStyle["DOUBLE_QUOTES"] = 1] = "DOUBLE_QUOTES";
-        })(QuoteStyle || (QuoteStyle = {}));
-        ;
-
-        var QuoteStyleRule = (function (_super) {
-            __extends(QuoteStyleRule, _super);
-            function QuoteStyleRule() {
-                _super.call(this, "quote_style");
-            }
-            QuoteStyleRule.prototype.apply = function (syntaxTree) {
-                var sourceUnit = syntaxTree.sourceUnit();
-                var quoteStyleString = this.getValue();
-                var quoteStyle;
-
-                if (quoteStyleString === "single") {
-                    quoteStyle = QuoteStyle.SINGLE_QUOTES;
-                } else if (quoteStyleString === "double") {
-                    quoteStyle = QuoteStyle.DOUBLE_QUOTES;
-                } else {
-                    throw new Error("Unknown quote style " + quoteStyle);
-                }
-
-                return this.applyWithWalker(new QuoteWalker(syntaxTree, quoteStyle));
-            };
-            return QuoteStyleRule;
-        })(Rules.AbstractRule);
-        Rules.QuoteStyleRule = QuoteStyleRule;
-
-        var QuoteWalker = (function (_super) {
-            __extends(QuoteWalker, _super);
-            function QuoteWalker(syntaxTree, quoteStyle) {
-                _super.call(this, syntaxTree);
-                this.quoteStyle = quoteStyle;
-            }
-            QuoteWalker.prototype.visitToken = function (token) {
-                this.handleToken(token);
-                _super.prototype.visitToken.call(this, token);
-            };
-
-            QuoteWalker.prototype.handleToken = function (operatorToken) {
-                var failure = null;
-                var operatorKind = operatorToken.kind();
-
-                if (operatorKind === TypeScript.SyntaxKind.StringLiteral) {
-                    var fullText = operatorToken.fullText();
-                    var textStart = operatorToken.leadingTriviaWidth();
-                    var textEnd = textStart + operatorToken.width() - 1;
-                    var firstChar = fullText.charAt(textStart);
-                    var lastChar = fullText.charAt(textEnd);
-
-                    if (this.quoteStyle === QuoteStyle.SINGLE_QUOTES) {
-                        if (firstChar !== "'" || lastChar !== "'") {
-                            failure = this.createFailure(this.position(), QuoteWalker.SINGLE_QUOTE_FAILURE);
-                        }
-                    } else if (this.quoteStyle === QuoteStyle.DOUBLE_QUOTES) {
-                        if (firstChar !== "\"" || lastChar !== "\"") {
-                            failure = this.createFailure(this.position(), QuoteWalker.DOUBLE_QUOTE_FAILURE);
-                        }
-                    }
-                }
-
-                if (failure) {
-                    this.addFailure(failure);
-                }
-            };
-            QuoteWalker.DOUBLE_QUOTE_FAILURE = "' should be \"";
-            QuoteWalker.SINGLE_QUOTE_FAILURE = "\" should be '";
-            return QuoteWalker;
-        })(Lint.RuleWalker);
-    })(Lint.Rules || (Lint.Rules = {}));
-    var Rules = Lint.Rules;
-})(Lint || (Lint = {}));
-var Lint;
-(function (Lint) {
-    (function (Rules) {
-        var SameLineRule = (function (_super) {
-            __extends(SameLineRule, _super);
-            function SameLineRule() {
-                _super.call(this, "same_line_brace");
-            }
-            SameLineRule.prototype.isEnabled = function () {
-                return this.getValue() === true;
-            };
-
-            SameLineRule.prototype.apply = function (syntaxTree) {
-                var braceWalker = new BraceWalker(syntaxTree);
-                return this.applyWithWalker(braceWalker);
-            };
-            return SameLineRule;
-        })(Rules.AbstractRule);
-        Rules.SameLineRule = SameLineRule;
-
-        var BraceWalker = (function (_super) {
-            __extends(BraceWalker, _super);
-            function BraceWalker() {
-                _super.apply(this, arguments);
-            }
-            BraceWalker.prototype.visitToken = function (token) {
-                var kind = token.kind();
-                var lastState = this.getLastState();
-
-                if (kind === TypeScript.SyntaxKind.OpenBraceToken && lastState !== undefined) {
-                    var lastKind = lastState.token.kind();
-                    if (lastKind === TypeScript.SyntaxKind.CloseParenToken || lastKind === TypeScript.SyntaxKind.DoKeyword || lastKind === TypeScript.SyntaxKind.ElseKeyword || lastKind === TypeScript.SyntaxKind.IdentifierName || lastKind === TypeScript.SyntaxKind.StringLiteral || lastKind === TypeScript.SyntaxKind.TryKeyword) {
-                        var lastLine = this.getLine(lastState.position);
-                        var currentLine = this.getLine(this.position());
-
-                        if (currentLine !== lastLine) {
-                            this.addFailure(this.createFailure(this.position(), BraceWalker.BRACE_FAILURE_STRING));
-                        } else if (!this.hasTrailingWhiteSpace(lastState.token)) {
-                            this.addFailure(this.createFailure(this.position(), BraceWalker.WHITESPACE_FAILURE_STRING));
-                        }
-                    }
-                }
-
-                _super.prototype.visitToken.call(this, token);
-            };
-
-            BraceWalker.prototype.visitElseClause = function (node) {
-                var lastState = this.getLastState();
-                if (lastState !== undefined && !this.hasTrailingWhiteSpace(lastState.token)) {
-                    this.addFailure(this.createFailure(this.position(), BraceWalker.ELSE_FAILURE_STRING));
-                }
-
-                _super.prototype.visitElseClause.call(this, node);
-            };
-
-            BraceWalker.prototype.visitCatchClause = function (node) {
-                var lastState = this.getLastState();
-                if (lastState !== undefined && !this.hasTrailingWhiteSpace(lastState.token)) {
-                    this.addFailure(this.createFailure(this.position(), BraceWalker.CATCH_FAILURE_STRING));
-                }
-
-                _super.prototype.visitCatchClause.call(this, node);
-            };
-
-            BraceWalker.prototype.getLine = function (position) {
-                return this.getSyntaxTree().lineMap().getLineAndCharacterFromPosition(position).line();
-            };
-
-            BraceWalker.prototype.hasTrailingWhiteSpace = function (token) {
-                var trivia = token.trailingTrivia();
-                if (trivia.count() < 1) {
-                    return false;
-                }
-
-                var kind = trivia.syntaxTriviaAt(0).kind();
-                return (kind === TypeScript.SyntaxKind.WhitespaceTrivia);
-            };
-            BraceWalker.BRACE_FAILURE_STRING = "misplaced opening brace";
-            BraceWalker.CATCH_FAILURE_STRING = "misplaced 'catch'";
-            BraceWalker.ELSE_FAILURE_STRING = "misplaced 'else'";
-            BraceWalker.WHITESPACE_FAILURE_STRING = "missing whitespace";
-            return BraceWalker;
-        })(Lint.StateAwareRuleWalker);
-    })(Lint.Rules || (Lint.Rules = {}));
-    var Rules = Lint.Rules;
-})(Lint || (Lint = {}));
-var Lint;
-(function (Lint) {
-    (function (Rules) {
-        var SemicolonRule = (function (_super) {
-            __extends(SemicolonRule, _super);
-            function SemicolonRule() {
-                _super.call(this, "semicolon");
-            }
-            SemicolonRule.prototype.isEnabled = function () {
-                return this.getValue() === true;
-            };
-
-            SemicolonRule.prototype.apply = function (syntaxTree) {
-                var ruleFailures = [];
-                var diagnostics = syntaxTree.diagnostics();
-
-                for (var i = 0; i < diagnostics.length; ++i) {
-                    var diagnostic = diagnostics[i];
-                    var code = diagnostic.diagnosticCode();
-
-                    if (code === TypeScript.DiagnosticCode.Automatic_semicolon_insertion_not_allowed) {
-                        var fileName = diagnostic.fileName();
-                        var position = diagnostic.start();
-                        var lineAndCharacter = syntaxTree.lineMap().getLineAndCharacterFromPosition(position);
-                        var ruleFailure = new Lint.RuleFailure(fileName, lineAndCharacter, SemicolonRule.FAILURE_STRING);
-
-                        ruleFailures.push(ruleFailure);
-                    }
-                }
-
-                return ruleFailures;
-            };
-            SemicolonRule.FAILURE_STRING = "missing semicolon";
-            return SemicolonRule;
-        })(Rules.AbstractRule);
-        Rules.SemicolonRule = SemicolonRule;
-    })(Lint.Rules || (Lint.Rules = {}));
-    var Rules = Lint.Rules;
-})(Lint || (Lint = {}));
-var Lint;
-(function (Lint) {
-    (function (Rules) {
-        var SubRule = (function (_super) {
-            __extends(SubRule, _super);
-            function SubRule() {
-                _super.call(this, "sub");
-            }
-            SubRule.prototype.isEnabled = function () {
-                return this.getValue() === true;
-            };
-
-            SubRule.prototype.apply = function (syntaxTree) {
-                return this.applyWithWalker(new SubWalker(syntaxTree));
-            };
-            return SubRule;
-        })(Rules.AbstractRule);
-        Rules.SubRule = SubRule;
-
-        var SubWalker = (function (_super) {
-            __extends(SubWalker, _super);
-            function SubWalker() {
-                _super.apply(this, arguments);
-            }
-            SubWalker.prototype.visitElementAccessExpression = function (node) {
-                _super.prototype.visitElementAccessExpression.call(this, node);
-                this.handleElementAccessExpression(node);
-            };
-
-            SubWalker.prototype.handleElementAccessExpression = function (operatorToken) {
-                var argumentExpressionKind = operatorToken.argumentExpression.kind();
-
-                if (argumentExpressionKind === TypeScript.SyntaxKind.StringLiteral) {
-                    this.addFailure(this.createFailure(this.position(), SubWalker.SUB_FAILURE));
-                }
-            };
-            SubWalker.SUB_FAILURE = "object access via string literals is disallowed";
-            return SubWalker;
-        })(Lint.RuleWalker);
-    })(Lint.Rules || (Lint.Rules = {}));
-    var Rules = Lint.Rules;
-})(Lint || (Lint = {}));
-var Lint;
-(function (Lint) {
-    (function (Rules) {
-        var TabWidthRule = (function (_super) {
-            __extends(TabWidthRule, _super);
-            function TabWidthRule() {
-                _super.call(this, "tab_width");
-            }
-            TabWidthRule.prototype.apply = function (syntaxTree) {
-                var tabWidth = parseInt(this.getValue());
-
-                return this.applyWithWalker(new TabWidthWalker(syntaxTree, tabWidth));
-            };
-            return TabWidthRule;
-        })(Rules.AbstractRule);
-        Rules.TabWidthRule = TabWidthRule;
-
-        var TabWidthWalker = (function (_super) {
-            __extends(TabWidthWalker, _super);
-            function TabWidthWalker(syntaxTree, tabWidth) {
-                _super.call(this, syntaxTree);
-                this.currentLevel = 0;
-                this.tabWidth = tabWidth;
-            }
-            TabWidthWalker.prototype.visitBlock = function (node) {
-                this.visitToken(node.openBraceToken);
-                this.checkAndVisitList(node.statements);
-                this.visitToken(node.closeBraceToken);
-            };
-
-            TabWidthWalker.prototype.visitClassDeclaration = function (node) {
-                this.currentLevel += 1;
-                _super.prototype.visitClassDeclaration.call(this, node);
-                this.currentLevel -= 1;
-            };
-
-            TabWidthWalker.prototype.visitMemberVariableDeclaration = function (node) {
-                var firstElement;
-                if (node.modifiers.childCount() > 0) {
-                    firstElement = node.modifiers.childAt(0);
-                } else {
-                    firstElement = node.variableDeclarator;
-                }
-
-                this.checkNodeOrToken(firstElement);
-                _super.prototype.visitMemberVariableDeclaration.call(this, node);
-            };
-
-            TabWidthWalker.prototype.visitMemberFunctionDeclaration = function (node) {
-                var firstElement;
-                if (node.modifiers.childCount() > 0) {
-                    firstElement = node.modifiers.childAt(0);
-                } else {
-                    firstElement = node.propertyName;
-                }
-
-                this.checkNodeOrToken(firstElement);
-                _super.prototype.visitMemberFunctionDeclaration.call(this, node);
-            };
-
-            TabWidthWalker.prototype.visitObjectType = function (node) {
-                this.visitToken(node.openBraceToken);
-                this.checkAndVisitSeparatedList(node.typeMembers);
-                this.visitToken(node.closeBraceToken);
-            };
-
-            TabWidthWalker.prototype.visitObjectLiteralExpression = function (node) {
-                this.visitToken(node.openBraceToken);
-                this.checkAndVisitSeparatedList(node.propertyAssignments);
-                this.visitToken(node.closeBraceToken);
-            };
-
-            TabWidthWalker.prototype.visitModuleDeclaration = function (node) {
-                this.visitList(node.modifiers);
-                this.visitToken(node.moduleKeyword);
-                this.visitOptionalNodeOrToken(node.moduleName);
-                if (node.stringLiteral !== null) {
-                    this.visitToken(node.stringLiteral);
-                }
-                this.visitToken(node.openBraceToken);
-                this.checkAndVisitList(node.moduleElements);
-                this.visitToken(node.closeBraceToken);
-            };
-
-            TabWidthWalker.prototype.visitEnumDeclaration = function (node) {
-                this.visitList(node.modifiers);
-                this.visitToken(node.enumKeyword);
-                this.visitToken(node.identifier);
-                this.visitToken(node.openBraceToken);
-                this.checkAndVisitSeparatedList(node.enumElements);
-                this.visitToken(node.closeBraceToken);
-            };
-
-            TabWidthWalker.prototype.visitSwitchStatement = function (node) {
-                this.currentLevel += 1;
-                _super.prototype.visitSwitchStatement.call(this, node);
-                this.currentLevel -= 1;
-            };
-
-            TabWidthWalker.prototype.visitCaseSwitchClause = function (node) {
-                this.checkAndVisitNodeOrToken(node.caseKeyword);
-                this.visitNodeOrToken(node.expression);
-                this.visitToken(node.colonToken);
-                this.checkAndVisitList(node.statements);
-            };
-
-            TabWidthWalker.prototype.visitDefaultSwitchClause = function (node) {
-                this.checkAndVisitNodeOrToken(node.defaultKeyword);
-                this.visitToken(node.colonToken);
-                this.checkAndVisitList(node.statements);
-            };
-
-            TabWidthWalker.prototype.checkAndVisitList = function (list) {
-                this.currentLevel += 1;
-                for (var i = 0; i < list.childCount(); i++) {
-                    this.checkAndVisitNodeOrToken(list.childAt(i));
-                }
-                this.currentLevel -= 1;
-            };
-
-            TabWidthWalker.prototype.checkAndVisitSeparatedList = function (list) {
-                this.currentLevel += 1;
-                for (var i = 0, n = list.childCount(); i < n; i++) {
-                    var element = list.childAt(i);
-
-                    if (element.kind() === TypeScript.SyntaxKind.CommaToken || element.kind() === TypeScript.SyntaxKind.SemicolonToken) {
-                        this.visitNodeOrToken(element);
-                    } else {
-                        this.checkAndVisitNodeOrToken(element);
-                    }
-                }
-                this.currentLevel -= 1;
-            };
-
-            TabWidthWalker.prototype.checkAndVisitNodeOrToken = function (nodeOrToken) {
-                this.checkNodeOrToken(nodeOrToken);
-                this.visitNodeOrToken(nodeOrToken);
-            };
-
-            TabWidthWalker.prototype.checkNodeOrToken = function (nodeOrToken) {
-                var expectedIndentation = this.currentLevel * this.tabWidth;
-                var actualIndentation = this.getImmediateIndentation(nodeOrToken);
-
-                if (expectedIndentation !== actualIndentation) {
-                    var position = this.position() + nodeOrToken.leadingTriviaWidth();
-                    var error = TabWidthWalker.FAILURE_STRING + "expected " + expectedIndentation + ", " + "got " + actualIndentation;
-
-                    this.addFailure(this.createFailure(position, error));
-                }
-            };
-
-            TabWidthWalker.prototype.getImmediateIndentation = function (element) {
-                var indentationCount = 0;
-                var triviaList = element.leadingTrivia();
-
-                var listCount = triviaList.count();
-                if (listCount > 0) {
-                    var trivia = triviaList.syntaxTriviaAt(listCount - 1);
-                    if (trivia.kind() === TypeScript.SyntaxKind.WhitespaceTrivia) {
-                        indentationCount = trivia.fullWidth();
-                    }
-                }
-
-                return indentationCount;
-            };
-            TabWidthWalker.FAILURE_STRING = "unexpected tab width: ";
-            return TabWidthWalker;
-        })(Lint.RuleWalker);
-    })(Lint.Rules || (Lint.Rules = {}));
-    var Rules = Lint.Rules;
-})(Lint || (Lint = {}));
-var Lint;
-(function (Lint) {
-    (function (Rules) {
-        var TrailingWhitespaceRule = (function (_super) {
-            __extends(TrailingWhitespaceRule, _super);
-            function TrailingWhitespaceRule() {
-                _super.call(this, "no_trailing_whitespace");
-            }
-            TrailingWhitespaceRule.prototype.isEnabled = function () {
-                return this.getValue() === true;
-            };
-
-            TrailingWhitespaceRule.prototype.apply = function (syntaxTree) {
-                return this.applyWithWalker(new TrailingWalker(syntaxTree));
-            };
-            return TrailingWhitespaceRule;
-        })(Rules.AbstractRule);
-        Rules.TrailingWhitespaceRule = TrailingWhitespaceRule;
-
-        var TrailingWalker = (function (_super) {
-            __extends(TrailingWalker, _super);
-            function TrailingWalker() {
-                _super.apply(this, arguments);
-            }
-            TrailingWalker.prototype.visitToken = function (token) {
-                _super.prototype.visitToken.call(this, token);
-                this.checkForTrailingWhitespace(token.trailingTrivia());
-            };
-
-            TrailingWalker.prototype.visitNode = function (node) {
-                _super.prototype.visitNode.call(this, node);
-                this.checkForTrailingWhitespace(node.trailingTrivia());
-            };
-
-            TrailingWalker.prototype.checkForTrailingWhitespace = function (triviaList) {
-                if (triviaList.count() < 2) {
-                    return;
-                }
-
-                var lastButOne = triviaList.count() - 2;
-                var triviaKind = triviaList.syntaxTriviaAt(lastButOne).kind();
-                if (triviaList.hasNewLine() && triviaKind === TypeScript.SyntaxKind.WhitespaceTrivia) {
-                    this.createAndAddFailure();
-                }
-            };
-
-            TrailingWalker.prototype.createAndAddFailure = function () {
-                var failure = this.createFailure(this.position() - 1, TrailingWalker.FAILURE_STRING);
-                this.addFailure(failure);
-            };
-            TrailingWalker.FAILURE_STRING = "trailing whitespace";
-            return TrailingWalker;
-        })(Lint.RuleWalker);
-    })(Lint.Rules || (Lint.Rules = {}));
-    var Rules = Lint.Rules;
-})(Lint || (Lint = {}));
-var Lint;
-(function (Lint) {
-    (function (Rules) {
-        var TripleComparisonRule = (function (_super) {
-            __extends(TripleComparisonRule, _super);
-            function TripleComparisonRule() {
-                _super.call(this, "triple_eq_neq");
-            }
-            TripleComparisonRule.prototype.isEnabled = function () {
-                return this.getValue() === true;
-            };
-
-            TripleComparisonRule.prototype.apply = function (syntaxTree) {
-                return this.applyWithWalker(new ComparisonWalker(syntaxTree));
-            };
-            return TripleComparisonRule;
-        })(Rules.AbstractRule);
-        Rules.TripleComparisonRule = TripleComparisonRule;
-
-        var ComparisonWalker = (function (_super) {
-            __extends(ComparisonWalker, _super);
-            function ComparisonWalker() {
-                _super.apply(this, arguments);
-            }
-            ComparisonWalker.prototype.visitBinaryExpression = function (node) {
-                var position = this.positionAfter(node.left);
-                this.handleOperatorToken(position, node.operatorToken);
-                _super.prototype.visitBinaryExpression.call(this, node);
-            };
-
-            ComparisonWalker.prototype.handleOperatorToken = function (position, operatorToken) {
-                var failure = null;
-                var operatorKind = operatorToken.kind();
-
-                if (operatorKind === TypeScript.SyntaxKind.EqualsEqualsToken) {
-                    failure = this.createFailure(position, ComparisonWalker.EQ_FAILURE);
-                } else if (operatorKind === TypeScript.SyntaxKind.ExclamationEqualsToken) {
-                    failure = this.createFailure(position, ComparisonWalker.NEQ_FAILURE);
-                }
-
-                if (failure) {
-                    this.addFailure(failure);
-                }
-            };
-            ComparisonWalker.EQ_FAILURE = "== should be ===";
-            ComparisonWalker.NEQ_FAILURE = "!= should be !==";
-            return ComparisonWalker;
-        })(Lint.RuleWalker);
-    })(Lint.Rules || (Lint.Rules = {}));
-    var Rules = Lint.Rules;
-})(Lint || (Lint = {}));
-var Lint;
-(function (Lint) {
-    (function (Rules) {
-        var VariableNameRule = (function (_super) {
-            __extends(VariableNameRule, _super);
-            function VariableNameRule() {
-                _super.call(this, "variable_name");
-            }
-            VariableNameRule.prototype.isEnabled = function () {
-                return this.getValue() === true;
-            };
-
-            VariableNameRule.prototype.apply = function (syntaxTree) {
-                return this.applyWithWalker(new VariableNameWalker(syntaxTree));
-            };
-            return VariableNameRule;
-        })(Rules.AbstractRule);
-        Rules.VariableNameRule = VariableNameRule;
-
-        var VariableNameWalker = (function (_super) {
-            __extends(VariableNameWalker, _super);
-            function VariableNameWalker() {
-                _super.apply(this, arguments);
-            }
-            VariableNameWalker.prototype.visitVariableDeclarator = function (node) {
-                var identifier = node.identifier;
-                var variableName = identifier.text();
-                var position = this.position() + identifier.leadingTriviaWidth();
-
-                if (!this.isCamelCase(variableName) && !this.isUpperCase(variableName)) {
-                    this.addFailure(this.createFailure(position, VariableNameWalker.FAILURE_STRING));
-                }
-
-                _super.prototype.visitVariableDeclarator.call(this, node);
-            };
-
-            VariableNameWalker.prototype.isCamelCase = function (name) {
-                if (name.length < 0) {
-                    return true;
-                }
-
-                var firstCharacter = name.charAt(0);
-                return (firstCharacter === firstCharacter.toLowerCase());
-            };
-
-            VariableNameWalker.prototype.isUpperCase = function (name) {
-                return (name === name.toUpperCase());
-            };
-            VariableNameWalker.FAILURE_STRING = "variable name must be in camelcase or uppercase";
-            return VariableNameWalker;
-        })(Lint.RuleWalker);
-    })(Lint.Rules || (Lint.Rules = {}));
-    var Rules = Lint.Rules;
-})(Lint || (Lint = {}));
-var Lint;
-(function (Lint) {
-    (function (Rules) {
-        var WhitespaceRule = (function (_super) {
-            __extends(WhitespaceRule, _super);
-            function WhitespaceRule() {
-                _super.call(this, "enclosing_whitespace");
-            }
-            WhitespaceRule.prototype.isEnabled = function () {
-                return this.getValue() === true;
-            };
-
-            WhitespaceRule.prototype.apply = function (syntaxTree) {
-                return this.applyWithWalker(new WhitespaceWalker(syntaxTree));
-            };
-            return WhitespaceRule;
-        })(Rules.AbstractRule);
-        Rules.WhitespaceRule = WhitespaceRule;
-
-        var WhitespaceWalker = (function (_super) {
-            __extends(WhitespaceWalker, _super);
-            function WhitespaceWalker() {
-                _super.apply(this, arguments);
-            }
-            WhitespaceWalker.prototype.visitToken = function (token) {
-                _super.prototype.visitToken.call(this, token);
-
-                var kind = token.kind();
-                if (kind === TypeScript.SyntaxKind.CatchKeyword || kind === TypeScript.SyntaxKind.ColonToken || kind === TypeScript.SyntaxKind.CommaToken || kind === TypeScript.SyntaxKind.EqualsToken || kind === TypeScript.SyntaxKind.ForKeyword || kind === TypeScript.SyntaxKind.IfKeyword || kind === TypeScript.SyntaxKind.SemicolonToken || kind === TypeScript.SyntaxKind.SwitchKeyword || kind === TypeScript.SyntaxKind.WhileKeyword || kind === TypeScript.SyntaxKind.WithKeyword) {
-                    this.checkForLeadingSpace(this.position(), token.trailingTrivia());
-                }
-            };
-
-            WhitespaceWalker.prototype.visitBinaryExpression = function (node) {
-                var position = this.positionAfter(node.left);
-                this.checkForLeadingSpace(position, node.left.trailingTrivia());
-
-                position += node.operatorToken.fullWidth();
-                this.checkForLeadingSpace(position, node.operatorToken.trailingTrivia());
-
-                _super.prototype.visitBinaryExpression.call(this, node);
-            };
-
-            WhitespaceWalker.prototype.visitConditionalExpression = function (node) {
-                var position = this.positionAfter(node.condition);
-                this.checkForLeadingSpace(position, node.condition.trailingTrivia());
-
-                position += node.questionToken.fullWidth();
-                this.checkForLeadingSpace(position, node.questionToken.trailingTrivia());
-
-                position += node.whenTrue.fullWidth();
-                this.checkForLeadingSpace(position, node.whenTrue.trailingTrivia());
-
-                _super.prototype.visitConditionalExpression.call(this, node);
-            };
-
-            WhitespaceWalker.prototype.visitVariableDeclarator = function (node) {
-                var position = this.positionAfter(node.identifier, node.typeAnnotation);
-
-                if (node.equalsValueClause !== null) {
-                    if (node.typeAnnotation !== null) {
-                        this.checkForLeadingSpace(position, node.typeAnnotation.trailingTrivia());
-                    } else {
-                        this.checkForLeadingSpace(position, node.identifier.trailingTrivia());
-                    }
-                }
-
-                _super.prototype.visitVariableDeclarator.call(this, node);
-            };
-
-            WhitespaceWalker.prototype.visitImportDeclaration = function (node) {
-                var position = this.positionAfter(node.importKeyword, node.identifier);
-                this.checkForLeadingSpace(position, node.identifier.trailingTrivia());
-
-                _super.prototype.visitImportDeclaration.call(this, node);
-            };
-
-            WhitespaceWalker.prototype.visitExportAssignment = function (node) {
-                var position = this.positionAfter(node.exportKeyword);
-                this.checkForLeadingSpace(position, node.exportKeyword.trailingTrivia());
-
-                _super.prototype.visitExportAssignment.call(this, node);
-            };
-
-            WhitespaceWalker.prototype.checkForLeadingSpace = function (position, trivia) {
-                var failure = null;
-
-                if (trivia.count() < 1) {
-                    failure = this.createFailure(position, WhitespaceWalker.FAILURE_STRING);
-                } else {
-                    var kind = trivia.syntaxTriviaAt(0).kind();
-                    if (kind !== TypeScript.SyntaxKind.WhitespaceTrivia && kind !== TypeScript.SyntaxKind.NewLineTrivia) {
-                        failure = this.createFailure(position, WhitespaceWalker.FAILURE_STRING);
-                    }
-                }
-
-                if (failure) {
-                    this.addFailure(failure);
-                }
-            };
-            WhitespaceWalker.FAILURE_STRING = "missing whitespace";
-            return WhitespaceWalker;
-        })(Lint.RuleWalker);
-    })(Lint.Rules || (Lint.Rules = {}));
-    var Rules = Lint.Rules;
-})(Lint || (Lint = {}));
-var Lint;
-(function (Lint) {
-    (function (Rules) {
-        var ALL_RULES = [];
-
-        function createAllRules() {
-            ALL_RULES.push(new Rules.ArgumentsRule());
-            ALL_RULES.push(new Rules.BitwiseOperatorRule());
-            ALL_RULES.push(new Rules.ClassNameRule());
-            ALL_RULES.push(new Rules.CurlyRule());
-            ALL_RULES.push(new Rules.DebugRule());
-            ALL_RULES.push(new Rules.EvalRule());
-            ALL_RULES.push(new Rules.NewLineRule());
-            ALL_RULES.push(new Rules.ForInRule());
-            ALL_RULES.push(new Rules.MaxLineLengthRule());
-            ALL_RULES.push(new Rules.QuoteStyleRule());
-            ALL_RULES.push(new Rules.SameLineRule());
-            ALL_RULES.push(new Rules.SemicolonRule());
-            ALL_RULES.push(new Rules.SubRule());
-            ALL_RULES.push(new Rules.TabWidthRule());
-            ALL_RULES.push(new Rules.TrailingWhitespaceRule());
-            ALL_RULES.push(new Rules.TripleComparisonRule());
-            ALL_RULES.push(new Rules.VariableNameRule());
-            ALL_RULES.push(new Rules.WhitespaceRule());
+        return FormatCodeOptions;
+    })(EditorOptions);
+    Services.FormatCodeOptions = FormatCodeOptions;
+
+    var DefinitionInfo = (function () {
+        function DefinitionInfo(fileName, minChar, limChar, kind, name, containerKind, containerName) {
+            this.fileName = fileName;
+            this.minChar = minChar;
+            this.limChar = limChar;
+            this.kind = kind;
+            this.name = name;
+            this.containerKind = containerKind;
+            this.containerName = containerName;
         }
-        Rules.createAllRules = createAllRules;
+        return DefinitionInfo;
+    })();
+    Services.DefinitionInfo = DefinitionInfo;
 
-        function getRuleForName(name) {
-            var filteredRules = ALL_RULES.filter(function (rule) {
-                return rule.getName() === name;
-            });
-
-            if (filteredRules.length > 0) {
-                return filteredRules[0];
-            } else {
-                return undefined;
-            }
+    var TypeInfo = (function () {
+        function TypeInfo(memberName, docComment, fullSymbolName, kind, minChar, limChar) {
+            this.memberName = memberName;
+            this.docComment = docComment;
+            this.fullSymbolName = fullSymbolName;
+            this.kind = kind;
+            this.minChar = minChar;
+            this.limChar = limChar;
         }
-        Rules.getRuleForName = getRuleForName;
-    })(Lint.Rules || (Lint.Rules = {}));
-    var Rules = Lint.Rules;
-})(Lint || (Lint = {}));
-var Lint;
-(function (Lint) {
-    (function (Configuration) {
-        var fs = require("fs");
-        var path = require("path");
+        return TypeInfo;
+    })();
+    Services.TypeInfo = TypeInfo;
 
-        var CONFIG_FILENAME = ".tslintrc";
-
-        function findConfiguration(configFile) {
-            if (!configFile) {
-                var currentPath = global.process.cwd();
-                var parentPath = currentPath;
-
-                while (true) {
-                    var filePath = path.join(currentPath, CONFIG_FILENAME);
-
-                    if (fs.existsSync(filePath)) {
-                        configFile = filePath;
-                        break;
-                    }
-
-                    parentPath = path.resolve(currentPath, "..");
-                    if (parentPath === currentPath) {
-                        return undefined;
-                    }
-
-                    currentPath = parentPath;
-                }
-            }
-
-            return JSON.parse(fs.readFileSync(configFile, "utf8"));
+    var SpanInfo = (function () {
+        function SpanInfo(minChar, limChar, text) {
+            if (typeof text === "undefined") { text = null; }
+            this.minChar = minChar;
+            this.limChar = limChar;
+            this.text = text;
         }
-        Configuration.findConfiguration = findConfiguration;
+        return SpanInfo;
+    })();
+    Services.SpanInfo = SpanInfo;
 
-        function getConfiguredRules(configuration) {
-            var rules = [];
-
-            for (var ruleName in configuration) {
-                if (configuration.hasOwnProperty(ruleName)) {
-                    var rule = Lint.Rules.getRuleForName(ruleName);
-                    if (rule === undefined) {
-                        console.warn("ignoring unrecognized rule '" + ruleName + "'");
-                        continue;
-                    }
-
-                    var ruleValue = configuration[ruleName];
-                    rule.setValue(ruleValue);
-                    rules.push(rule);
-                }
-            }
-
-            return rules;
+    var SignatureInfo = (function () {
+        function SignatureInfo() {
+            this.formal = [];
         }
-        Configuration.getConfiguredRules = getConfiguredRules;
-    })(Lint.Configuration || (Lint.Configuration = {}));
-    var Configuration = Lint.Configuration;
-})(Lint || (Lint = {}));
-var Lint;
-(function (Lint) {
-    (function (Formatters) {
-        var AbstractFormatter = (function () {
-            function AbstractFormatter(name) {
-                this.name = name;
-            }
-            AbstractFormatter.prototype.getName = function () {
-                return this.name;
-            };
+        return SignatureInfo;
+    })();
+    Services.SignatureInfo = SignatureInfo;
 
-            AbstractFormatter.prototype.format = function (failures) {
-                throw TypeScript.Errors.abstract();
-            };
-            return AbstractFormatter;
-        })();
-        Formatters.AbstractFormatter = AbstractFormatter;
-    })(Lint.Formatters || (Lint.Formatters = {}));
-    var Formatters = Lint.Formatters;
-})(Lint || (Lint = {}));
-var Lint;
-(function (Lint) {
-    (function (Formatters) {
-        var JsonFormatter = (function (_super) {
-            __extends(JsonFormatter, _super);
-            function JsonFormatter() {
-                _super.call(this, "json");
-            }
-            JsonFormatter.prototype.format = function (failures) {
-                var failuresJSON = [];
-
-                for (var i = 0; i < failures.length; ++i) {
-                    var failure = failures[i];
-                    failuresJSON.push(failure.toJson());
-                }
-
-                return JSON.stringify(failuresJSON);
-            };
-            return JsonFormatter;
-        })(Formatters.AbstractFormatter);
-        Formatters.JsonFormatter = JsonFormatter;
-    })(Lint.Formatters || (Lint.Formatters = {}));
-    var Formatters = Lint.Formatters;
-})(Lint || (Lint = {}));
-var Lint;
-(function (Lint) {
-    (function (Formatters) {
-        var ProseFormatter = (function (_super) {
-            __extends(ProseFormatter, _super);
-            function ProseFormatter() {
-                _super.call(this, "prose");
-            }
-            ProseFormatter.prototype.format = function (failures) {
-                var output = "";
-
-                for (var i = 0; i < failures.length; ++i) {
-                    var failure = failures[i];
-                    var fileName = failure.getFileName();
-                    var lineAndCharacter = failure.getLineAndCharacter();
-                    var line = lineAndCharacter.line() + 1;
-                    var character = lineAndCharacter.character() + 1;
-                    var failureString = failure.getFailure();
-
-                    output += fileName + "[" + line + ", " + character + "]: " + failureString + "\n";
-                }
-
-                return output;
-            };
-            return ProseFormatter;
-        })(Formatters.AbstractFormatter);
-        Formatters.ProseFormatter = ProseFormatter;
-    })(Lint.Formatters || (Lint.Formatters = {}));
-    var Formatters = Lint.Formatters;
-})(Lint || (Lint = {}));
-var Lint;
-(function (Lint) {
-    (function (Formatters) {
-        var ALL_FORMATTERS = [];
-
-        function createAllFormatters() {
-            ALL_FORMATTERS.push(new Formatters.JsonFormatter());
-            ALL_FORMATTERS.push(new Formatters.ProseFormatter());
+    var FormalSignatureItemInfo = (function () {
+        function FormalSignatureItemInfo() {
+            this.typeParameters = [];
+            this.parameters = [];
         }
-        Formatters.createAllFormatters = createAllFormatters;
+        return FormalSignatureItemInfo;
+    })();
+    Services.FormalSignatureItemInfo = FormalSignatureItemInfo;
 
-        function getFormatterForName(name) {
-            var filteredFormatters = ALL_FORMATTERS.filter(function (formatter) {
-                return formatter.getName() === name;
-            });
-
-            if (filteredFormatters.length > 0) {
-                return filteredFormatters[0];
-            } else {
-                return undefined;
-            }
+    var FormalTypeParameterInfo = (function () {
+        function FormalTypeParameterInfo() {
         }
-        Formatters.getFormatterForName = getFormatterForName;
-    })(Lint.Formatters || (Lint.Formatters = {}));
-    var Formatters = Lint.Formatters;
-})(Lint || (Lint = {}));
+        return FormalTypeParameterInfo;
+    })();
+    Services.FormalTypeParameterInfo = FormalTypeParameterInfo;
+
+    var FormalParameterInfo = (function () {
+        function FormalParameterInfo() {
+        }
+        return FormalParameterInfo;
+    })();
+    Services.FormalParameterInfo = FormalParameterInfo;
+
+    var ActualSignatureInfo = (function () {
+        function ActualSignatureInfo() {
+        }
+        return ActualSignatureInfo;
+    })();
+    Services.ActualSignatureInfo = ActualSignatureInfo;
+
+    var CompletionInfo = (function () {
+        function CompletionInfo() {
+            this.maybeInaccurate = false;
+            this.isMemberCompletion = false;
+            this.entries = [];
+        }
+        return CompletionInfo;
+    })();
+    Services.CompletionInfo = CompletionInfo;
+
+    var ScriptElementKind = (function () {
+        function ScriptElementKind() {
+        }
+        ScriptElementKind.unknown = "";
+
+        ScriptElementKind.keyword = "keyword";
+
+        ScriptElementKind.scriptElement = "script";
+
+        ScriptElementKind.moduleElement = "module";
+
+        ScriptElementKind.classElement = "class";
+
+        ScriptElementKind.interfaceElement = "interface";
+
+        ScriptElementKind.enumElement = "enum";
+
+        ScriptElementKind.variableElement = "var";
+
+        ScriptElementKind.localVariableElement = "local var";
+
+        ScriptElementKind.functionElement = "function";
+
+        ScriptElementKind.localFunctionElement = "local function";
+
+        ScriptElementKind.memberFunctionElement = "method";
+
+        ScriptElementKind.memberGetAccessorElement = "getter";
+        ScriptElementKind.memberSetAccessorElement = "setter";
+
+        ScriptElementKind.memberVariableElement = "property";
+
+        ScriptElementKind.constructorImplementationElement = "constructor";
+
+        ScriptElementKind.callSignatureElement = "call";
+
+        ScriptElementKind.indexSignatureElement = "index";
+
+        ScriptElementKind.constructSignatureElement = "construct";
+
+        ScriptElementKind.parameterElement = "parameter";
+
+        ScriptElementKind.typeParameterElement = "type parameter";
+
+        ScriptElementKind.primitiveType = "primitive type";
+        return ScriptElementKind;
+    })();
+    Services.ScriptElementKind = ScriptElementKind;
+
+    var ScriptElementKindModifier = (function () {
+        function ScriptElementKindModifier() {
+        }
+        ScriptElementKindModifier.none = "";
+        ScriptElementKindModifier.publicMemberModifier = "public";
+        ScriptElementKindModifier.privateMemberModifier = "private";
+        ScriptElementKindModifier.exportedModifier = "export";
+        ScriptElementKindModifier.ambientModifier = "declare";
+        ScriptElementKindModifier.staticModifier = "static";
+        return ScriptElementKindModifier;
+    })();
+    Services.ScriptElementKindModifier = ScriptElementKindModifier;
+
+    var MatchKind = (function () {
+        function MatchKind() {
+        }
+        MatchKind.none = null;
+        MatchKind.exact = "exact";
+        MatchKind.subString = "substring";
+        MatchKind.prefix = "prefix";
+        return MatchKind;
+    })();
+    Services.MatchKind = MatchKind;
+
+    var DiagnosticCategory = (function () {
+        function DiagnosticCategory() {
+        }
+        DiagnosticCategory.none = "";
+        DiagnosticCategory.error = "error";
+        DiagnosticCategory.warning = "warning";
+        DiagnosticCategory.message = "message";
+        return DiagnosticCategory;
+    })();
+    Services.DiagnosticCategory = DiagnosticCategory;
+
+    var ScriptSyntaxASTState = (function () {
+        function ScriptSyntaxASTState() {
+            this.version = -1;
+            this.fileName = null;
+        }
+        return ScriptSyntaxASTState;
+    })();
+    Services.ScriptSyntaxASTState = ScriptSyntaxASTState;
+
+    var EmitOutput = (function () {
+        function EmitOutput() {
+            this.outputFiles = [];
+            this.diagnostics = [];
+        }
+        return EmitOutput;
+    })();
+    Services.EmitOutput = EmitOutput;
+})(Services || (Services = {}));
 var Lint;
 (function (Lint) {
     var Logger = (function () {
