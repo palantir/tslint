@@ -5,7 +5,7 @@
 
 module Lint.Rules {
 
-  export class BaseRule implements Lint.Rule {
+  export class AbstractRule implements Lint.Rule {
     private name: string;
     private value: any;
 

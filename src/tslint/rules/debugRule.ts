@@ -1,9 +1,9 @@
 /// <reference path='rule.ts'/>
-/// <reference path='baseRule.ts'/>
+/// <reference path='abstractRule.ts'/>
 
 module Lint.Rules {
 
-  export class DebugRule extends BaseRule {
+  export class DebugRule extends AbstractRule {
 
     constructor() {
       super("debug");

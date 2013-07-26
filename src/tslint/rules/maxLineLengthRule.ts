@@ -1,9 +1,9 @@
 /// <reference path='rule.ts'/>
-/// <reference path='baseRule.ts'/>
+/// <reference path='abstractRule.ts'/>
 
 module Lint.Rules {
 
-  export class MaxLineLengthRule extends BaseRule {
+  export class MaxLineLengthRule extends AbstractRule {
     static FAILURE_STRING = "exceeds maximum line length of ";
 
     constructor() {

@@ -1,9 +1,9 @@
 /// <reference path='rule.ts'/>
-/// <reference path='baseRule.ts'/>
+/// <reference path='abstractRule.ts'/>
 
 module Lint.Rules {
 
-  export class TripleComparisonRule extends BaseRule {
+  export class TripleComparisonRule extends AbstractRule {
     constructor() {
       super("triple_eq_neq");
     }

@@ -3,7 +3,7 @@
 
 module Lint.Rules {
 
-  export class SameLineRule extends BaseRule {
+  export class SameLineRule extends AbstractRule {
     constructor() {
       super("same_line_brace");
     }

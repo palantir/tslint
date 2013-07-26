@@ -63101,38 +63101,38 @@ var Lint;
 var Lint;
 (function (Lint) {
     (function (Rules) {
-        var BaseRule = (function () {
-            function BaseRule(name) {
+        var AbstractRule = (function () {
+            function AbstractRule(name) {
                 this.name = name;
             }
-            BaseRule.prototype.getName = function () {
+            AbstractRule.prototype.getName = function () {
                 return this.name;
             };
 
-            BaseRule.prototype.getValue = function () {
+            AbstractRule.prototype.getValue = function () {
                 return this.value;
             };
 
-            BaseRule.prototype.setValue = function (value) {
+            AbstractRule.prototype.setValue = function (value) {
                 this.value = value;
             };
 
-            BaseRule.prototype.apply = function (syntaxTree) {
+            AbstractRule.prototype.apply = function (syntaxTree) {
                 throw TypeScript.Errors.abstract();
             };
 
-            BaseRule.prototype.applyWithWalker = function (walker) {
+            AbstractRule.prototype.applyWithWalker = function (walker) {
                 var sourceUnit = walker.getSyntaxTree().sourceUnit();
                 sourceUnit.accept(walker);
                 return walker.getFailures();
             };
 
-            BaseRule.prototype.isEnabled = function () {
+            AbstractRule.prototype.isEnabled = function () {
                 return true;
             };
-            return BaseRule;
+            return AbstractRule;
         })();
-        Rules.BaseRule = BaseRule;
+        Rules.AbstractRule = AbstractRule;
     })(Lint.Rules || (Lint.Rules = {}));
     var Rules = Lint.Rules;
 })(Lint || (Lint = {}));
@@ -63152,7 +63152,7 @@ var Lint;
                 return this.applyWithWalker(new ArgumentsWalker(syntaxTree));
             };
             return ArgumentsRule;
-        })(Rules.BaseRule);
+        })(Rules.AbstractRule);
         Rules.ArgumentsRule = ArgumentsRule;
 
         var ArgumentsWalker = (function (_super) {
@@ -63196,7 +63196,7 @@ var Lint;
                 return this.applyWithWalker(new BitwiseWalker(syntaxTree));
             };
             return BitwiseOperatorRule;
-        })(Rules.BaseRule);
+        })(Rules.AbstractRule);
         Rules.BitwiseOperatorRule = BitwiseOperatorRule;
 
         var BitwiseWalker = (function (_super) {
@@ -63233,7 +63233,7 @@ var Lint;
                 return this.applyWithWalker(new ClassNameWalker(syntaxTree));
             };
             return ClassNameRule;
-        })(Rules.BaseRule);
+        })(Rules.AbstractRule);
         Rules.ClassNameRule = ClassNameRule;
 
         var ClassNameWalker = (function (_super) {
@@ -63265,7 +63265,7 @@ var Lint;
         var CurlyRule = (function (_super) {
             __extends(CurlyRule, _super);
             function CurlyRule() {
-                _super.call(this, "forin");
+                _super.call(this, "curly");
             }
             CurlyRule.prototype.isEnabled = function () {
                 return this.getValue() === true;
@@ -63275,7 +63275,7 @@ var Lint;
                 return this.applyWithWalker(new CurlyWalker(syntaxTree));
             };
             return CurlyRule;
-        })(Rules.BaseRule);
+        })(Rules.AbstractRule);
         Rules.CurlyRule = CurlyRule;
 
         var CurlyWalker = (function (_super) {
@@ -63318,18 +63318,14 @@ var Lint;
                 var hasBraces = false;
 
                 var childCount = node.childCount();
-                if (childCount == 3) {
+                if (childCount === 3) {
                     if (node.childAt(0).kind() === TypeScript.SyntaxKind.FirstPunctuation && node.childAt(1).kind() === TypeScript.SyntaxKind.List && node.childAt(2).kind() === TypeScript.SyntaxKind.CloseBraceToken) {
                         hasBraces = true;
                     }
                 }
 
                 if (!hasBraces) {
-                    failure = this.createFailure(this.position(), CurlyWalker.CURLY_FAILURE);
-                }
-
-                if (failure) {
-                    this.addFailure(failure);
+                    this.addFailure(this.createFailure(this.position(), CurlyWalker.CURLY_FAILURE));
                 }
             };
             CurlyWalker.CURLY_FAILURE = "if/for/do/while statements must be braced";
@@ -63354,7 +63350,7 @@ var Lint;
                 return this.applyWithWalker(new DebugWalker(syntaxTree));
             };
             return DebugRule;
-        })(Rules.BaseRule);
+        })(Rules.AbstractRule);
         Rules.DebugRule = DebugRule;
 
         var DebugWalker = (function (_super) {
@@ -63423,7 +63419,7 @@ var Lint;
                 return this.applyWithWalker(new EOFWalker(syntaxTree));
             };
             return NewLineRule;
-        })(Rules.BaseRule);
+        })(Rules.AbstractRule);
         Rules.NewLineRule = NewLineRule;
 
         var EOFWalker = (function (_super) {
@@ -63477,7 +63473,7 @@ var Lint;
                 return this.applyWithWalker(new ForInWalker(syntaxTree));
             };
             return ForInRule;
-        })(Rules.BaseRule);
+        })(Rules.AbstractRule);
         Rules.ForInRule = ForInRule;
 
         var ForInWalker = (function (_super) {
@@ -63544,7 +63540,7 @@ var Lint;
                 return this.applyWithWalker(new EvalWalker(syntaxTree));
             };
             return EvalRule;
-        })(Rules.BaseRule);
+        })(Rules.AbstractRule);
         Rules.EvalRule = EvalRule;
 
         var EvalWalker = (function (_super) {
@@ -63597,7 +63593,7 @@ var Lint;
             };
             MaxLineLengthRule.FAILURE_STRING = "exceeds maximum line length of ";
             return MaxLineLengthRule;
-        })(Rules.BaseRule);
+        })(Rules.AbstractRule);
         Rules.MaxLineLengthRule = MaxLineLengthRule;
     })(Lint.Rules || (Lint.Rules = {}));
     var Rules = Lint.Rules;
@@ -63634,7 +63630,7 @@ var Lint;
                 return this.applyWithWalker(new QuoteWalker(syntaxTree, quoteStyle));
             };
             return QuoteStyleRule;
-        })(Rules.BaseRule);
+        })(Rules.AbstractRule);
         Rules.QuoteStyleRule = QuoteStyleRule;
 
         var QuoteWalker = (function (_super) {
@@ -63698,7 +63694,7 @@ var Lint;
                 return this.applyWithWalker(braceWalker);
             };
             return SameLineRule;
-        })(Rules.BaseRule);
+        })(Rules.AbstractRule);
         Rules.SameLineRule = SameLineRule;
 
         var BraceWalker = (function (_super) {
@@ -63801,7 +63797,7 @@ var Lint;
             };
             SemicolonRule.FAILURE_STRING = "missing semicolon";
             return SemicolonRule;
-        })(Rules.BaseRule);
+        })(Rules.AbstractRule);
         Rules.SemicolonRule = SemicolonRule;
     })(Lint.Rules || (Lint.Rules = {}));
     var Rules = Lint.Rules;
@@ -63822,7 +63818,7 @@ var Lint;
                 return this.applyWithWalker(new SubWalker(syntaxTree));
             };
             return SubRule;
-        })(Rules.BaseRule);
+        })(Rules.AbstractRule);
         Rules.SubRule = SubRule;
 
         var SubWalker = (function (_super) {
@@ -63864,7 +63860,7 @@ var Lint;
                 return this.applyWithWalker(new TrailingWalker(syntaxTree));
             };
             return TrailingWhitespaceRule;
-        })(Rules.BaseRule);
+        })(Rules.AbstractRule);
         Rules.TrailingWhitespaceRule = TrailingWhitespaceRule;
 
         var TrailingWalker = (function (_super) {
@@ -63920,7 +63916,7 @@ var Lint;
                 return this.applyWithWalker(new ComparisonWalker(syntaxTree));
             };
             return TripleComparisonRule;
-        })(Rules.BaseRule);
+        })(Rules.AbstractRule);
         Rules.TripleComparisonRule = TripleComparisonRule;
 
         var ComparisonWalker = (function (_super) {
@@ -63971,7 +63967,7 @@ var Lint;
                 return this.applyWithWalker(new VariableNameWalker(syntaxTree));
             };
             return VariableNameRule;
-        })(Rules.BaseRule);
+        })(Rules.AbstractRule);
         Rules.VariableNameRule = VariableNameRule;
 
         var VariableNameWalker = (function (_super) {
@@ -64025,7 +64021,7 @@ var Lint;
                 return this.applyWithWalker(new WhitespaceWalker(syntaxTree));
             };
             return WhitespaceRule;
-        })(Rules.BaseRule);
+        })(Rules.AbstractRule);
         Rules.WhitespaceRule = WhitespaceRule;
 
         var WhitespaceWalker = (function (_super) {

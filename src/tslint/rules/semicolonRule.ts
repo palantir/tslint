@@ -1,8 +1,8 @@
 /// <reference path='rule.ts'/>
-/// <reference path='baseRule.ts'/>
+/// <reference path='abstractRule.ts'/>
 
 module Lint.Rules {
-  export class SemicolonRule extends BaseRule {
+  export class SemicolonRule extends AbstractRule {
     static FAILURE_STRING = "missing semicolon";
 
     constructor() {

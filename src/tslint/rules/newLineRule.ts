@@ -1,10 +1,10 @@
 /// <reference path='rule.ts'/>
-/// <reference path='baseRule.ts'/>
+/// <reference path='abstractRule.ts'/>
 /// <reference path='../language/stateAwareRuleWalker.ts'/>
 
 module Lint.Rules {
 
-    export class NewLineRule extends BaseRule {
+    export class NewLineRule extends AbstractRule {
         constructor() {
             super("file_must_end_with_newline");
         }

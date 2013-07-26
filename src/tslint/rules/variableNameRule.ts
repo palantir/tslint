@@ -1,9 +1,9 @@
 /// <reference path='rule.ts'/>
-/// <reference path='baseRule.ts'/>
+/// <reference path='abstractRule.ts'/>
 
 module Lint.Rules {
 
-  export class VariableNameRule extends BaseRule {
+  export class VariableNameRule extends AbstractRule {
     constructor() {
       super("variable_name");
     }

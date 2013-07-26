@@ -1,9 +1,9 @@
 /// <reference path='rule.ts'/>
-/// <reference path='baseRule.ts'/>
+/// <reference path='abstractRule.ts'/>
 
 module Lint.Rules {
 
-  export class TrailingWhitespaceRule extends BaseRule {
+  export class TrailingWhitespaceRule extends AbstractRule {
     constructor() {
       super("no_trailing_whitespace");
     }

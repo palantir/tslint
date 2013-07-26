@@ -1,5 +1,5 @@
 /// <reference path='rule.ts'/>
-/// <reference path='baseRule.ts'/>
+/// <reference path='abstractRule.ts'/>
 module Lint.Rules {
 
   enum QuoteStyle {
@@ -7,7 +7,7 @@ module Lint.Rules {
     DOUBLE_QUOTES
   };
 
-  export class QuoteStyleRule extends BaseRule {
+  export class QuoteStyleRule extends AbstractRule {
     constructor() {
       super("quote_style");
     }

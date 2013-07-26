@@ -1,9 +1,9 @@
 /// <reference path='rule.ts'/>
-/// <reference path='baseRule.ts'/>
+/// <reference path='abstractRule.ts'/>
 
 module Lint.Rules {
 
-  export class BitwiseOperatorRule extends BaseRule {
+  export class BitwiseOperatorRule extends AbstractRule {
     constructor() {
       super("bitwise");
     }
