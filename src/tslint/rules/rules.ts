@@ -12,6 +12,7 @@
 /// <reference path='sameLineRule.ts'/>
 /// <reference path='semicolonRule.ts'/>
 /// <reference path='subRule.ts'/>
+/// <reference path='tabWidthRule.ts'/>
 /// <reference path='trailingWhitespaceRule.ts'/>
 /// <reference path='tripleComparisonRule.ts'/>
 /// <reference path='variableNameRule.ts'/>
@@ -35,6 +36,7 @@ module Lint.Rules {
     ALL_RULES.push(new SameLineRule());
     ALL_RULES.push(new SemicolonRule());
     ALL_RULES.push(new SubRule());
+    ALL_RULES.push(new TabWidthRule());
     ALL_RULES.push(new TrailingWhitespaceRule());
     ALL_RULES.push(new TripleComparisonRule());
     ALL_RULES.push(new VariableNameRule());

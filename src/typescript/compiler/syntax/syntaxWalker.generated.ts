@@ -10,7 +10,7 @@ module TypeScript {
         }
 
         public visitNodeOrToken(nodeOrToken: ISyntaxNodeOrToken): void {
-            if (nodeOrToken.isToken()) { 
+            if (nodeOrToken.isToken()) {
                 this.visitToken(<ISyntaxToken>nodeOrToken);
             }
             else {

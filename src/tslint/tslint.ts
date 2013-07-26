@@ -16,41 +16,41 @@ var argv = require("optimist")
   .demand("f")
   .options({
     "c": {
-      alias: "config",
-      describe: "configuration file"
+        alias: "config",
+        describe: "configuration file"
     },
     "f": {
-      alias: "file",
-      describe: "file to lint"
+        alias: "file",
+        describe: "file to lint"
     },
     "o": {
-      alias: "out",
-      describe: "output file",
+        alias: "out",
+        describe: "output file",
     },
     "t": {
-      alias: "format",
-      describe: "output format (prose, json)",
-      default: "prose"
+        alias: "format",
+        describe: "output format (prose, json)",
+        default: "prose"
     }
   })
   .check(validateArguments)
   .argv;
 
 function validateArguments(args) {
-  Lint.Rules.createAllRules();
-  Lint.Formatters.createAllFormatters();
+    Lint.Rules.createAllRules();
+    Lint.Formatters.createAllFormatters();
 
-  if(Lint.Formatters.getFormatterForName(args.t) === undefined) {
-    throw new Error("invalid option for 'format'");
-  }
+    if (Lint.Formatters.getFormatterForName(args.t) === undefined) {
+        throw new Error("invalid option for 'format'");
+    }
 
-  return true;
+    return true;
 }
 
 var configuration = Lint.Configuration.findConfiguration(argv.c);
 if (configuration === undefined) {
-  console.error("unable to find .tslintrc configuration");
-  process.exit(1);
+    console.error("unable to find .tslintrc configuration");
+    process.exit(1);
 }
 
 var file = argv.f;
@@ -63,10 +63,10 @@ var syntaxTree = languageService.getSyntaxTree(file);
 var i, failures = [];
 var configuredRules = Lint.Configuration.getConfiguredRules(configuration);
 for (i = 0; i < configuredRules.length; ++i) {
-  var rule = configuredRules[i];
-  if (rule.isEnabled()) {
-    failures = failures.concat(rule.apply(syntaxTree));
-  }
+    var rule = configuredRules[i];
+    if (rule.isEnabled()) {
+        failures = failures.concat(rule.apply(syntaxTree));
+    }
 }
 
 var formatter = Lint.Formatters.getFormatterForName(argv.t);
@@ -74,13 +74,17 @@ var outputText = formatter.format(failures);
 
 var outputStream;
 if (argv.o !== undefined) {
-  outputStream = fs.createWriteStream(argv.o, {end: false, flags: "w+", mode: 0644});
+    outputStream = fs.createWriteStream(argv.o, {
+        end: false,
+        flags: "w+",
+        mode: 0644
+    });
 } else {
-  outputStream = process.stdout;
+    outputStream = process.stdout;
 }
 
-if(failures.length > 0) {
-  outputStream.write(outputText, () => {
-    process.exit(2);
-  });
+if (failures.length > 0) {
+    outputStream.write(outputText, () => {
+        process.exit(2);
+    });
 }

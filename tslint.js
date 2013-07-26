@@ -63847,6 +63847,175 @@ var Lint;
 var Lint;
 (function (Lint) {
     (function (Rules) {
+        var TabWidthRule = (function (_super) {
+            __extends(TabWidthRule, _super);
+            function TabWidthRule() {
+                _super.call(this, "tab_width");
+            }
+            TabWidthRule.prototype.apply = function (syntaxTree) {
+                var tabWidth = parseInt(this.getValue());
+
+                return this.applyWithWalker(new TabWidthWalker(syntaxTree, tabWidth));
+            };
+            return TabWidthRule;
+        })(Rules.AbstractRule);
+        Rules.TabWidthRule = TabWidthRule;
+
+        var TabWidthWalker = (function (_super) {
+            __extends(TabWidthWalker, _super);
+            function TabWidthWalker(syntaxTree, tabWidth) {
+                _super.call(this, syntaxTree);
+                this.currentLevel = 0;
+                this.tabWidth = tabWidth;
+            }
+            TabWidthWalker.prototype.visitBlock = function (node) {
+                this.visitToken(node.openBraceToken);
+                this.checkAndVisitList(node.statements);
+                this.visitToken(node.closeBraceToken);
+            };
+
+            TabWidthWalker.prototype.visitClassDeclaration = function (node) {
+                this.currentLevel += 1;
+                _super.prototype.visitClassDeclaration.call(this, node);
+                this.currentLevel -= 1;
+            };
+
+            TabWidthWalker.prototype.visitMemberVariableDeclaration = function (node) {
+                var firstElement;
+                if (node.modifiers.childCount() > 0) {
+                    firstElement = node.modifiers.childAt(0);
+                } else {
+                    firstElement = node.variableDeclarator;
+                }
+
+                this.checkNodeOrToken(firstElement);
+                _super.prototype.visitMemberVariableDeclaration.call(this, node);
+            };
+
+            TabWidthWalker.prototype.visitMemberFunctionDeclaration = function (node) {
+                var firstElement;
+                if (node.modifiers.childCount() > 0) {
+                    firstElement = node.modifiers.childAt(0);
+                } else {
+                    firstElement = node.propertyName;
+                }
+
+                this.checkNodeOrToken(firstElement);
+                _super.prototype.visitMemberFunctionDeclaration.call(this, node);
+            };
+
+            TabWidthWalker.prototype.visitObjectType = function (node) {
+                this.visitToken(node.openBraceToken);
+                this.checkAndVisitSeparatedList(node.typeMembers);
+                this.visitToken(node.closeBraceToken);
+            };
+
+            TabWidthWalker.prototype.visitObjectLiteralExpression = function (node) {
+                this.visitToken(node.openBraceToken);
+                this.checkAndVisitSeparatedList(node.propertyAssignments);
+                this.visitToken(node.closeBraceToken);
+            };
+
+            TabWidthWalker.prototype.visitModuleDeclaration = function (node) {
+                this.visitList(node.modifiers);
+                this.visitToken(node.moduleKeyword);
+                this.visitOptionalNodeOrToken(node.moduleName);
+                if (node.stringLiteral !== null) {
+                    this.visitToken(node.stringLiteral);
+                }
+                this.visitToken(node.openBraceToken);
+                this.checkAndVisitList(node.moduleElements);
+                this.visitToken(node.closeBraceToken);
+            };
+
+            TabWidthWalker.prototype.visitEnumDeclaration = function (node) {
+                this.visitList(node.modifiers);
+                this.visitToken(node.enumKeyword);
+                this.visitToken(node.identifier);
+                this.visitToken(node.openBraceToken);
+                this.checkAndVisitSeparatedList(node.enumElements);
+                this.visitToken(node.closeBraceToken);
+            };
+
+            TabWidthWalker.prototype.visitSwitchStatement = function (node) {
+                this.currentLevel += 1;
+                _super.prototype.visitSwitchStatement.call(this, node);
+                this.currentLevel -= 1;
+            };
+
+            TabWidthWalker.prototype.visitCaseSwitchClause = function (node) {
+                this.checkAndVisitNodeOrToken(node.caseKeyword);
+                this.visitNodeOrToken(node.expression);
+                this.visitToken(node.colonToken);
+                this.checkAndVisitList(node.statements);
+            };
+
+            TabWidthWalker.prototype.visitDefaultSwitchClause = function (node) {
+                this.checkAndVisitNodeOrToken(node.defaultKeyword);
+                this.visitToken(node.colonToken);
+                this.checkAndVisitList(node.statements);
+            };
+
+            TabWidthWalker.prototype.checkAndVisitList = function (list) {
+                this.currentLevel += 1;
+                for (var i = 0; i < list.childCount(); i++) {
+                    this.checkAndVisitNodeOrToken(list.childAt(i));
+                }
+                this.currentLevel -= 1;
+            };
+
+            TabWidthWalker.prototype.checkAndVisitSeparatedList = function (list) {
+                this.currentLevel += 1;
+                for (var i = 0, n = list.childCount(); i < n; i++) {
+                    var element = list.childAt(i);
+
+                    if (element.kind() === TypeScript.SyntaxKind.CommaToken || element.kind() === TypeScript.SyntaxKind.SemicolonToken) {
+                        this.visitNodeOrToken(element);
+                    } else {
+                        this.checkAndVisitNodeOrToken(element);
+                    }
+                }
+                this.currentLevel -= 1;
+            };
+
+            TabWidthWalker.prototype.checkAndVisitNodeOrToken = function (nodeOrToken) {
+                this.checkNodeOrToken(nodeOrToken);
+                this.visitNodeOrToken(nodeOrToken);
+            };
+
+            TabWidthWalker.prototype.checkNodeOrToken = function (nodeOrToken) {
+                var expectedIndentation = this.currentLevel * this.tabWidth;
+                var actualIndentation = this.getTotalIndentation(nodeOrToken);
+
+                if (expectedIndentation !== actualIndentation) {
+                    var position = this.position() + nodeOrToken.leadingTriviaWidth();
+                    var error = TabWidthWalker.FAILURE_STRING + "expected " + expectedIndentation + ", " + "got " + actualIndentation;
+
+                    this.addFailure(this.createFailure(position, error));
+                }
+            };
+
+            TabWidthWalker.prototype.getTotalIndentation = function (element) {
+                var count = 0;
+                var triviaList = element.leadingTrivia();
+                for (var i = 0; i < triviaList.count(); ++i) {
+                    var trivia = triviaList.syntaxTriviaAt(i);
+                    if (trivia.kind() === TypeScript.SyntaxKind.WhitespaceTrivia) {
+                        count += trivia.fullWidth();
+                    }
+                }
+
+                return count;
+            };
+            TabWidthWalker.FAILURE_STRING = "unexpected tab width: ";
+            return TabWidthWalker;
+        })(Lint.RuleWalker);
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
         var TrailingWhitespaceRule = (function (_super) {
             __extends(TrailingWhitespaceRule, _super);
             function TrailingWhitespaceRule() {
@@ -64130,6 +64299,7 @@ var Lint;
             ALL_RULES.push(new Rules.SameLineRule());
             ALL_RULES.push(new Rules.SemicolonRule());
             ALL_RULES.push(new Rules.SubRule());
+            ALL_RULES.push(new Rules.TabWidthRule());
             ALL_RULES.push(new Rules.TrailingWhitespaceRule());
             ALL_RULES.push(new Rules.TripleComparisonRule());
             ALL_RULES.push(new Rules.VariableNameRule());
