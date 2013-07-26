@@ -2,11 +2,9 @@
 /// <reference path='../../typescript/src/compiler/text/scriptSnapshot.ts' />
 /// <reference path='../../typescript/src/services/languageService.ts' />
 
-/// <reference path='logger.ts' />
-
 module Lint {
 
-  export class LanguageServiceHost extends Logger implements Services.ILanguageServiceHost {
+  export class LanguageServiceHost extends TypeScript.NullLogger implements Services.ILanguageServiceHost {
     private compilationSettings: TypeScript.CompilationSettings;
     private diagnostics: Services.ILanguageServicesDiagnostics;
     private fileName: string;
@@ -58,10 +56,10 @@ module Lint {
   }
 
   class LanguageServicesDiagnostics implements Services.ILanguageServicesDiagnostics {
-    private logger: Logger;
+    private logger;
 
     constructor() {
-      this.logger = new Logger();
+      this.logger = new TypeScript.NullLogger();
     }
 
     public log(content: string): void {

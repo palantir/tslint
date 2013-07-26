@@ -64483,37 +64483,6 @@ var Services;
 })(Services || (Services = {}));
 var Lint;
 (function (Lint) {
-    var Logger = (function () {
-        function Logger() {
-        }
-        Logger.prototype.information = function () {
-            return true;
-        };
-
-        Logger.prototype.debug = function () {
-            return true;
-        };
-
-        Logger.prototype.warning = function () {
-            return true;
-        };
-
-        Logger.prototype.error = function () {
-            return true;
-        };
-
-        Logger.prototype.fatal = function () {
-            return true;
-        };
-
-        Logger.prototype.log = function (s) {
-        };
-        return Logger;
-    })();
-    Lint.Logger = Logger;
-})(Lint || (Lint = {}));
-var Lint;
-(function (Lint) {
     var LanguageServiceHost = (function (_super) {
         __extends(LanguageServiceHost, _super);
         function LanguageServiceHost(fileName, contents) {
@@ -64558,12 +64527,12 @@ var Lint;
             return settings;
         };
         return LanguageServiceHost;
-    })(Lint.Logger);
+    })(TypeScript.NullLogger);
     Lint.LanguageServiceHost = LanguageServiceHost;
 
     var LanguageServicesDiagnostics = (function () {
         function LanguageServicesDiagnostics() {
-            this.logger = new Lint.Logger();
+            this.logger = new TypeScript.NullLogger();
         }
         LanguageServicesDiagnostics.prototype.log = function (content) {
             this.logger.log(content);
