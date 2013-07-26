@@ -152,7 +152,7 @@ module Lint.Rules {
 
     private checkNodeOrToken(nodeOrToken: TypeScript.ISyntaxNodeOrToken) {
       var expectedIndentation = this.currentLevel * this.tabWidth;
-      var actualIndentation = this.getTotalIndentation(nodeOrToken);
+      var actualIndentation = this.getImmediateIndentation(nodeOrToken);
 
       if(expectedIndentation !== actualIndentation) {
         var position = this.position() + nodeOrToken.leadingTriviaWidth();
@@ -164,17 +164,19 @@ module Lint.Rules {
       }
     }
 
-    private getTotalIndentation(element: TypeScript.ISyntaxNodeOrToken): number {
-      var count = 0;
+    private getImmediateIndentation(element: TypeScript.ISyntaxNodeOrToken): number {
+      var indentationCount = 0;
       var triviaList = element.leadingTrivia();
-      for (var i = 0; i < triviaList.count(); ++i) {
-        var trivia = triviaList.syntaxTriviaAt(i);
+
+      var listCount = triviaList.count();
+      if (listCount > 0) {
+        var trivia = triviaList.syntaxTriviaAt(listCount-1);
         if (trivia.kind() === TypeScript.SyntaxKind.WhitespaceTrivia) {
-          count += trivia.fullWidth();
+          indentationCount = trivia.fullWidth();
         }
       }
 
-      return count;
+      return indentationCount;
     }
   }
 

@@ -63985,7 +63985,7 @@ var Lint;
 
             TabWidthWalker.prototype.checkNodeOrToken = function (nodeOrToken) {
                 var expectedIndentation = this.currentLevel * this.tabWidth;
-                var actualIndentation = this.getTotalIndentation(nodeOrToken);
+                var actualIndentation = this.getImmediateIndentation(nodeOrToken);
 
                 if (expectedIndentation !== actualIndentation) {
                     var position = this.position() + nodeOrToken.leadingTriviaWidth();
@@ -63995,17 +63995,19 @@ var Lint;
                 }
             };
 
-            TabWidthWalker.prototype.getTotalIndentation = function (element) {
-                var count = 0;
+            TabWidthWalker.prototype.getImmediateIndentation = function (element) {
+                var indentationCount = 0;
                 var triviaList = element.leadingTrivia();
-                for (var i = 0; i < triviaList.count(); ++i) {
-                    var trivia = triviaList.syntaxTriviaAt(i);
+
+                var listCount = triviaList.count();
+                if (listCount > 0) {
+                    var trivia = triviaList.syntaxTriviaAt(listCount - 1);
                     if (trivia.kind() === TypeScript.SyntaxKind.WhitespaceTrivia) {
-                        count += trivia.fullWidth();
+                        indentationCount = trivia.fullWidth();
                     }
                 }
 
-                return count;
+                return indentationCount;
             };
             TabWidthWalker.FAILURE_STRING = "unexpected tab width: ";
             return TabWidthWalker;
@@ -64360,15 +64362,17 @@ var Lint;
             var rules = [];
 
             for (var ruleName in configuration) {
-                var rule = Lint.Rules.getRuleForName(ruleName);
-                if (rule === undefined) {
-                    console.warn("ignoring unrecognized rule '" + ruleName + "'");
-                    continue;
-                }
+                if (configuration.hasOwnProperty(ruleName)) {
+                    var rule = Lint.Rules.getRuleForName(ruleName);
+                    if (rule === undefined) {
+                        console.warn("ignoring unrecognized rule '" + ruleName + "'");
+                        continue;
+                    }
 
-                var ruleValue = configuration[ruleName];
-                rule.setValue(ruleValue);
-                rules.push(rule);
+                    var ruleValue = configuration[ruleName];
+                    rule.setValue(ruleValue);
+                    rules.push(rule);
+                }
             }
 
             return rules;
