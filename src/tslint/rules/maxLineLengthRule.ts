@@ -23,7 +23,7 @@ module Lint.Rules {
         static FAILURE_STRING = "exceeds maximum line length of ";
 
         constructor() {
-            super("max_line_length");
+            super("maxlen");
         }
 
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {

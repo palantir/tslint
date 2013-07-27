@@ -21,7 +21,7 @@ module Lint.Rules {
 
     export class TripleComparisonRule extends AbstractRule {
         constructor() {
-            super("triple_eq_neq");
+            super("eqeqeq");
         }
 
         public isEnabled() : boolean {

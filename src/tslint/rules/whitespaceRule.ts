@@ -21,7 +21,7 @@ module Lint.Rules {
 
     export class WhitespaceRule extends AbstractRule {
         constructor() {
-            super("enclosing_whitespace");
+            super("whitespace");
         }
 
         public isEnabled() : boolean {

@@ -21,7 +21,7 @@ module Lint.Rules {
 
     export class TabWidthRule extends AbstractRule {
         constructor() {
-            super("tab_width");
+            super("indent");
         }
 
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {

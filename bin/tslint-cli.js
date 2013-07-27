@@ -26213,7 +26213,7 @@ var Lint;
         var ArgumentsRule = (function (_super) {
             __extends(ArgumentsRule, _super);
             function ArgumentsRule() {
-                _super.call(this, "arguments");
+                _super.call(this, "noarg");
             }
             ArgumentsRule.prototype.isEnabled = function () {
                 return this.getValue() === true;
@@ -26294,7 +26294,7 @@ var Lint;
         var ClassNameRule = (function (_super) {
             __extends(ClassNameRule, _super);
             function ClassNameRule() {
-                _super.call(this, "class_name");
+                _super.call(this, "classname");
             }
             ClassNameRule.prototype.isEnabled = function () {
                 return this.getValue() === true;
@@ -26481,7 +26481,7 @@ var Lint;
         var NewLineRule = (function (_super) {
             __extends(NewLineRule, _super);
             function NewLineRule() {
-                _super.call(this, "file_must_end_with_newline");
+                _super.call(this, "eofline");
             }
             NewLineRule.prototype.isEnabled = function () {
                 return this.getValue() === true;
@@ -26603,7 +26603,7 @@ var Lint;
         var EvalRule = (function (_super) {
             __extends(EvalRule, _super);
             function EvalRule() {
-                _super.call(this, "eval");
+                _super.call(this, "evil");
             }
             EvalRule.prototype.isEnabled = function () {
                 return this.getValue() === true;
@@ -26644,7 +26644,7 @@ var Lint;
         var MaxLineLengthRule = (function (_super) {
             __extends(MaxLineLengthRule, _super);
             function MaxLineLengthRule() {
-                _super.call(this, "max_line_length");
+                _super.call(this, "maxlen");
             }
             MaxLineLengthRule.prototype.apply = function (syntaxTree) {
                 var ruleFailures = [];
@@ -26684,7 +26684,7 @@ var Lint;
         var QuoteStyleRule = (function (_super) {
             __extends(QuoteStyleRule, _super);
             function QuoteStyleRule() {
-                _super.call(this, "quote_style");
+                _super.call(this, "quotemark");
             }
             QuoteStyleRule.prototype.apply = function (syntaxTree) {
                 var sourceUnit = syntaxTree.sourceUnit();
@@ -26755,7 +26755,7 @@ var Lint;
         var SameLineRule = (function (_super) {
             __extends(SameLineRule, _super);
             function SameLineRule() {
-                _super.call(this, "same_line_brace");
+                _super.call(this, "oneline");
             }
             SameLineRule.prototype.isEnabled = function () {
                 return this.getValue() === true;
@@ -26922,7 +26922,7 @@ var Lint;
         var TabWidthRule = (function (_super) {
             __extends(TabWidthRule, _super);
             function TabWidthRule() {
-                _super.call(this, "tab_width");
+                _super.call(this, "indent");
             }
             TabWidthRule.prototype.apply = function (syntaxTree) {
                 var tabWidth = parseInt(this.getValue());
@@ -27092,7 +27092,7 @@ var Lint;
         var TrailingWhitespaceRule = (function (_super) {
             __extends(TrailingWhitespaceRule, _super);
             function TrailingWhitespaceRule() {
-                _super.call(this, "no_trailing_whitespace");
+                _super.call(this, "trailing");
             }
             TrailingWhitespaceRule.prototype.isEnabled = function () {
                 return this.getValue() === true;
@@ -27148,7 +27148,7 @@ var Lint;
         var TripleComparisonRule = (function (_super) {
             __extends(TripleComparisonRule, _super);
             function TripleComparisonRule() {
-                _super.call(this, "triple_eq_neq");
+                _super.call(this, "eqeqeq");
             }
             TripleComparisonRule.prototype.isEnabled = function () {
                 return this.getValue() === true;
@@ -27199,7 +27199,7 @@ var Lint;
         var VariableNameRule = (function (_super) {
             __extends(VariableNameRule, _super);
             function VariableNameRule() {
-                _super.call(this, "variable_name");
+                _super.call(this, "varname");
             }
             VariableNameRule.prototype.isEnabled = function () {
                 return this.getValue() === true;
@@ -27253,7 +27253,7 @@ var Lint;
         var WhitespaceRule = (function (_super) {
             __extends(WhitespaceRule, _super);
             function WhitespaceRule() {
-                _super.call(this, "enclosing_whitespace");
+                _super.call(this, "whitespace");
             }
             WhitespaceRule.prototype.isEnabled = function () {
                 return this.getValue() === true;

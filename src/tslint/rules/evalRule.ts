@@ -21,7 +21,7 @@ module Lint.Rules {
 
     export class EvalRule extends AbstractRule {
         constructor() {
-            super("eval");
+            super("evil");
         }
 
         public isEnabled() : boolean {

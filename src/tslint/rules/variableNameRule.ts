@@ -21,7 +21,7 @@ module Lint.Rules {
 
     export class VariableNameRule extends AbstractRule {
         constructor() {
-            super("variable_name");
+            super("varname");
         }
 
         public isEnabled() : boolean {

@@ -22,7 +22,7 @@ module Lint.Rules {
 
     export class NewLineRule extends AbstractRule {
         constructor() {
-            super("file_must_end_with_newline");
+            super("eofline");
         }
 
         public isEnabled(): boolean {

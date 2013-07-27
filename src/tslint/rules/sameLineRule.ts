@@ -21,7 +21,7 @@ module Lint.Rules {
 
     export class SameLineRule extends AbstractRule {
         constructor() {
-            super("same_line_brace");
+            super("oneline");
         }
 
         public isEnabled(): boolean {

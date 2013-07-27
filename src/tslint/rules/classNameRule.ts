@@ -21,7 +21,7 @@ module Lint.Rules {
 
     export class ClassNameRule extends AbstractRule {
         constructor() {
-            super("class_name");
+            super("classname");
         }
 
         public isEnabled() : boolean {

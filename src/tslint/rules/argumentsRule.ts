@@ -21,7 +21,7 @@ module Lint.Rules {
 
     export class ArgumentsRule extends AbstractRule {
         constructor() {
-            super("arguments");
+            super("noarg");
         }
 
         public isEnabled() : boolean {

@@ -26,7 +26,7 @@ module Lint.Rules {
 
     export class QuoteStyleRule extends AbstractRule {
         constructor() {
-            super("quote_style");
+            super("quotemark");
         }
 
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
