@@ -3,12 +3,20 @@ module.exports = function(grunt) {
     pkg: grunt.file.readJSON('package.json'),
 
     typescript: {
-      compile: {
+      bin: {
         options: {
           target: 'es5'
         },
+        src: ['src/tslint/tslint-cli.ts'],
+        dest: 'bin/tslint.js'
+      },
+      lib: {
+        options: {
+          target: 'es5',
+          module: 'commonjs'
+        },
         src: ['src/tslint/tslint.ts'],
-        dest: 'tslint.js'
+        dest: 'lib/tslint.js'
       }
     }
   });
@@ -17,5 +25,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-typescript');
 
   // other tasks
-  grunt.registerTask('default', ['typescript']);
+  grunt.registerTask('bin', ['typescript:bin']);
+  grunt.registerTask('lib', ['typescript:lib']);
+  grunt.registerTask('default', ['bin', 'lib']);
 };

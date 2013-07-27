@@ -7,7 +7,7 @@ module Lint.Configuration {
 
     var CONFIG_FILENAME = ".tslintrc";
 
-    export function findConfiguration(configFile): string {
+    export function findConfiguration(configFile): any {
         if (!configFile) {
             var currentPath = global.process.cwd();
             var parentPath = currentPath;
