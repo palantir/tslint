@@ -37,7 +37,7 @@ module Lint.Rules {
 
         public visitElseClause(node: TypeScript.ElseClauseSyntax): void {
             super.visitElseClause(node);
-            if(node.statement.kind() !== TypeScript.SyntaxKind.IfStatement) {
+            if (node.statement.kind() !== TypeScript.SyntaxKind.IfStatement) {
                 this.verifyStatementIsBraced(node.statement);
             }
         }
