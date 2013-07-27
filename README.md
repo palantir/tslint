@@ -22,6 +22,7 @@ Rules
 * `noarg` disallows access to `arguments.callee`.
 * `sub` disallows object access via string literals.
 * `forin` enforces a `for ... in` statement to be filtered with an `if` statement.
+* `debug` disallows `debugger` statements.
 * `curly` enforces braces for if/for/do/while statements.
 * `indent` enforces consistent indentation for the whole file.
 
