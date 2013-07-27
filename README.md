@@ -3,7 +3,7 @@ tslint
 
 A linter for the TypeScript language.
 
-Rules
+Supported Rules
 -----
 
 * `semicolon` enforces semicolons at the end of every statement.
