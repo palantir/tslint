@@ -5,7 +5,7 @@
   "bin": {
     "tslint": "./bin/tslint"
   },
-  "main": "./lib/tslint.js",
+  "main": "./lib/tslint",
   "repository": {
     "type": "git",
     "url": "https://github.com/palantir/tslint.git"
