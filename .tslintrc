@@ -1,0 +1,20 @@
+{
+  "semicolon": true,
+  "eqeqeq": true,
+  "maxlen": 140,
+  "whitespace": true,
+  "quotemark": "double",
+  "oneline": true,
+  "trailing": true,
+  "bitwise": true,
+  "evil": true,
+  "eofline": true,
+  "classname": true,
+  "varname": true,
+  "noarg": true,
+  "sub": true,
+  "debug": true
+  "forin": true,
+  "curly": true,
+  "indent": 4
+}
