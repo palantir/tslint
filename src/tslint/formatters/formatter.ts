@@ -2,10 +2,10 @@
 
 module Lint {
 
-  export interface Formatter {
-    getName(): string;
+    export interface Formatter {
+        getName(): string;
 
-    format(failures: Lint.RuleFailure[]): string;
-  }
+        format(failures: Lint.RuleFailure[]): string;
+    }
 
 }

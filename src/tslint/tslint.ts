@@ -40,7 +40,7 @@ module Lint {
             }
 
             var formatter = Lint.Formatters.getFormatterForName(this.options.formatter);
-            if(formatter === undefined) {
+            if (formatter === undefined) {
                 formatter = new Lint.Formatters.ProseFormatter();
             }
 

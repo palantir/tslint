@@ -4,20 +4,20 @@
 
 module Lint.Formatters {
 
-  export class AbstractFormatter implements Lint.Formatter {
-    private name: string;
+    export class AbstractFormatter implements Lint.Formatter {
+        private name: string;
 
-    constructor(name) {
-      this.name = name;
-    }
+        constructor(name) {
+            this.name = name;
+        }
 
-    public getName() {
-      return this.name;
-    }
+        public getName() {
+            return this.name;
+        }
 
-    public format(failures: Lint.RuleFailure[]): string {
-      throw TypeScript.Errors.abstract();
+        public format(failures: Lint.RuleFailure[]): string {
+            throw TypeScript.Errors.abstract();
+        }
     }
-  }
 
 }

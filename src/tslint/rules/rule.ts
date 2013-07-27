@@ -3,57 +3,57 @@
 
 module Lint {
 
-  // TODO: Make this immutable somehow
-  export interface Rule {
-    getName(): string;
+    // TODO: Make this immutable somehow
+    export interface Rule {
+        getName(): string;
 
-    getValue(): any;
+        getValue(): any;
 
-    setValue(value: any): void;
+        setValue(value: any): void;
 
-    apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[];
-  }
-
-  export class RuleFailure {
-    private fileName: string;
-    private lineAndCharacter: TypeScript.LineAndCharacter;
-    private failure: string;
-
-    constructor(fileName: string, lineAndCharacter: TypeScript.LineAndCharacter, failure: string) {
-      this.fileName = fileName;
-      this.lineAndCharacter = lineAndCharacter;
-      this.failure = failure;
+        apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[];
     }
 
-    public getFileName() {
-      return this.fileName;
-    }
+    export class RuleFailure {
+        private fileName: string;
+        private lineAndCharacter: TypeScript.LineAndCharacter;
+        private failure: string;
 
-    public getLineAndCharacter(): TypeScript.LineAndCharacter {
-      return this.lineAndCharacter;
-    }
+        constructor(fileName: string, lineAndCharacter: TypeScript.LineAndCharacter, failure: string) {
+            this.fileName = fileName;
+            this.lineAndCharacter = lineAndCharacter;
+            this.failure = failure;
+        }
 
-    public getFailure() {
-      return this.failure;
-    }
+        public getFileName() {
+            return this.fileName;
+        }
 
-    public toJson(): any {
-      return {
-        name: this.fileName,
-        position: {
-          line: this.lineAndCharacter.line(),
-          character: this.lineAndCharacter.character()
-        },
-        failure: this.failure
-      }
-    }
+        public getLineAndCharacter(): TypeScript.LineAndCharacter {
+            return this.lineAndCharacter;
+        }
 
-    public equals(ruleFailure: RuleFailure): boolean {
-      return (this.failure  === ruleFailure.getFailure() &&
-              this.fileName === ruleFailure.getFileName() &&
-              this.lineAndCharacter.line() === ruleFailure.getLineAndCharacter().line() &&
-              this.lineAndCharacter.character() === ruleFailure.getLineAndCharacter().character());
+        public getFailure() {
+            return this.failure;
+        }
+
+        public toJson(): any {
+            return {
+                name: this.fileName,
+                position: {
+                    line: this.lineAndCharacter.line(),
+                    character: this.lineAndCharacter.character()
+                  },
+                failure: this.failure
+            };
+        }
+
+        public equals(ruleFailure: RuleFailure): boolean {
+            return (this.failure  === ruleFailure.getFailure() &&
+                    this.fileName === ruleFailure.getFileName() &&
+                    this.lineAndCharacter.line() === ruleFailure.getLineAndCharacter().line() &&
+                    this.lineAndCharacter.character() === ruleFailure.getLineAndCharacter().character());
+        }
     }
-  }
 
 }
