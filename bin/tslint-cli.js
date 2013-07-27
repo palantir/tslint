@@ -26680,7 +26680,6 @@ var Lint;
 
             QuoteStyle[QuoteStyle["DOUBLE_QUOTES"] = 1] = "DOUBLE_QUOTES";
         })(QuoteStyle || (QuoteStyle = {}));
-        ;
 
         var QuoteStyleRule = (function (_super) {
             __extends(QuoteStyleRule, _super);

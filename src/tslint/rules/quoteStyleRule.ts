@@ -5,7 +5,7 @@ module Lint.Rules {
     enum QuoteStyle {
         SINGLE_QUOTES,
         DOUBLE_QUOTES
-    };
+    }
 
     export class QuoteStyleRule extends AbstractRule {
         constructor() {
