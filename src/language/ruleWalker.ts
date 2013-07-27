@@ -14,9 +14,9 @@
  * limitations under the License.
 */
 
-/// <reference path='../../typescript/src/compiler/core/errors.ts'/>
-/// <reference path='../../typescript/src/compiler/syntax/positionTrackingWalker.ts'/>
-/// <reference path='../../typescript/src/compiler/syntax/syntaxKind.ts'/>
+/// <reference path='../typescript/src/compiler/core/errors.ts'/>
+/// <reference path='../typescript/src/compiler/syntax/positionTrackingWalker.ts'/>
+/// <reference path='../typescript/src/compiler/syntax/syntaxKind.ts'/>
 /// <reference path='../rules/rule.ts'/>
 
 module Lint {

@@ -7,7 +7,7 @@ module.exports = function(grunt) {
         options: {
           target: 'es5'
         },
-        src: ['src/tslint/tslint-cli.ts'],
+        src: ['src/tslint-cli.ts'],
         dest: 'bin/tslint-cli.js'
       },
       lib: {
@@ -15,7 +15,7 @@ module.exports = function(grunt) {
           target: 'es5',
           module: 'commonjs'
         },
-        src: ['src/tslint/tslint.ts'],
+        src: ['src/tslint.ts'],
         dest: 'lib/tslint.js'
       }
     }

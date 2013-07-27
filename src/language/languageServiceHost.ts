@@ -14,9 +14,9 @@
  * limitations under the License.
 */
 
-/// <reference path='../../typescript/src/compiler/precompile.ts' />
-/// <reference path='../../typescript/src/compiler/text/scriptSnapshot.ts' />
-/// <reference path='../../typescript/src/services/languageService.ts' />
+/// <reference path='../typescript/src/compiler/precompile.ts' />
+/// <reference path='../typescript/src/compiler/text/scriptSnapshot.ts' />
+/// <reference path='../typescript/src/services/languageService.ts' />
 
 module Lint {
 

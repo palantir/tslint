@@ -14,17 +14,15 @@
  * limitations under the License.
 */
 
-/// <reference path='../../typescript/src/compiler/core/errors.ts'/>
-/// <reference path='rule.ts'/>
-/// <reference path='../language/ruleWalker.ts'/>
+/// <reference path='../typescript/src/compiler/core/errors.ts' />
+/// <reference path='formatter.ts' />
 
-module Lint.Rules {
+module Lint.Formatters {
 
-    export class AbstractRule implements Lint.Rule {
+    export class AbstractFormatter implements Lint.Formatter {
         private name: string;
-        private value: any;
 
-        constructor(name: string) {
+        constructor(name) {
             this.name = name;
         }
 
@@ -32,26 +30,8 @@ module Lint.Rules {
             return this.name;
         }
 
-        public getValue() {
-            return this.value;
-        }
-
-        public setValue(value: any): void {
-            this.value = value;
-        }
-
-        public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
+        public format(failures: Lint.RuleFailure[]): string {
             throw TypeScript.Errors.abstract();
-        }
-
-        public applyWithWalker(walker: Lint.RuleWalker) {
-            var sourceUnit = walker.getSyntaxTree().sourceUnit();
-            sourceUnit.accept(walker);
-            return walker.getFailures();
-        }
-
-        public isEnabled() : boolean {
-            return true;
         }
     }
 
