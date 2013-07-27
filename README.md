@@ -24,7 +24,7 @@ Supported Rules
 * `forin` enforces a `for ... in` statement to be filtered with an `if` statement.
 * `debug` disallows `debugger` statements.
 * `curly` enforces braces for `if`/`for`/`do`/`while` statements.
-* `indent` enforces consistent indentation for the whole file.
+* `indent` enforces consistent indentation levels for the whole file.
 
 Development
 -----------

@@ -13,7 +13,7 @@
   "varname": true,
   "noarg": true,
   "sub": true,
-  "debug": true
+  "debug": true,
   "forin": true,
   "curly": true,
   "indent": 4
