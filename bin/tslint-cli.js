@@ -26371,7 +26371,9 @@ var Lint;
 
             CurlyWalker.prototype.visitElseClause = function (node) {
                 _super.prototype.visitElseClause.call(this, node);
-                this.verifyStatementIsBraced(node.statement);
+                if (node.statement.kind() !== TypeScript.SyntaxKind.IfStatement) {
+                    this.verifyStatementIsBraced(node.statement);
+                }
             };
 
             CurlyWalker.prototype.visitDoStatement = function (node) {
