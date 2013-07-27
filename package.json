@@ -1,12 +1,26 @@
 {
   "name": "tslint",
   "version": "0.0.1",
+  "description": "a static analysis linter for TypeScript",
+  "bin": {
+    "tslint": "./bin/tslint"
+  },
+  "main": "./lib/tslint.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/palantir/tslint.git"
+  },
+  "keywords": [
+    "cli",
+    "typescript",
+    "linter"
+  ],
   "dependencies": {
     "optimist": "~0.6.0"
   },
   "devDependencies": {
     "grunt": "~0.4.1",
     "grunt-typescript": "~0.2.1"
-  }
+  },
+  "license": "Apache 2.0"
 }
-
