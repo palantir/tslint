@@ -26752,22 +26752,22 @@ var Lint;
 var Lint;
 (function (Lint) {
     (function (Rules) {
-        var SameLineRule = (function (_super) {
-            __extends(SameLineRule, _super);
-            function SameLineRule() {
+        var OneLineRule = (function (_super) {
+            __extends(OneLineRule, _super);
+            function OneLineRule() {
                 _super.call(this, "oneline");
             }
-            SameLineRule.prototype.isEnabled = function () {
+            OneLineRule.prototype.isEnabled = function () {
                 return this.getValue() === true;
             };
 
-            SameLineRule.prototype.apply = function (syntaxTree) {
+            OneLineRule.prototype.apply = function (syntaxTree) {
                 var braceWalker = new BraceWalker(syntaxTree);
                 return this.applyWithWalker(braceWalker);
             };
-            return SameLineRule;
+            return OneLineRule;
         })(Rules.AbstractRule);
-        Rules.SameLineRule = SameLineRule;
+        Rules.OneLineRule = OneLineRule;
 
         var BraceWalker = (function (_super) {
             __extends(BraceWalker, _super);
@@ -27369,7 +27369,7 @@ var Lint;
             ALL_RULES.push(new Rules.ForInRule());
             ALL_RULES.push(new Rules.MaxLineLengthRule());
             ALL_RULES.push(new Rules.QuoteStyleRule());
-            ALL_RULES.push(new Rules.SameLineRule());
+            ALL_RULES.push(new Rules.OneLineRule());
             ALL_RULES.push(new Rules.SemicolonRule());
             ALL_RULES.push(new Rules.SubRule());
             ALL_RULES.push(new Rules.TabWidthRule());

@@ -19,7 +19,7 @@
 
 module Lint.Rules {
 
-    export class SameLineRule extends AbstractRule {
+    export class OneLineRule extends AbstractRule {
         constructor() {
             super("oneline");
         }

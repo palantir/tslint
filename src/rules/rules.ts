@@ -25,7 +25,7 @@
 /// <reference path='evalRule.ts'/>
 /// <reference path='maxLineLengthRule.ts'/>
 /// <reference path='quoteStyleRule.ts'/>
-/// <reference path='sameLineRule.ts'/>
+/// <reference path='oneLineRule.ts'/>
 /// <reference path='semicolonRule.ts'/>
 /// <reference path='subRule.ts'/>
 /// <reference path='tabWidthRule.ts'/>
@@ -49,7 +49,7 @@ module Lint.Rules {
         ALL_RULES.push(new ForInRule());
         ALL_RULES.push(new MaxLineLengthRule());
         ALL_RULES.push(new QuoteStyleRule());
-        ALL_RULES.push(new SameLineRule());
+        ALL_RULES.push(new OneLineRule());
         ALL_RULES.push(new SemicolonRule());
         ALL_RULES.push(new SubRule());
         ALL_RULES.push(new TabWidthRule());
