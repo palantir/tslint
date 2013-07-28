@@ -26,6 +26,44 @@ Supported Rules
 * `curly` enforces braces for `if`/`for`/`do`/`while` statements.
 * `indent` enforces consistent indentation levels for the whole file.
 
+Installation
+------------
+
+##### CLI
+
+    sudo npm install tslint -g
+
+##### Library
+
+    npm install tslint
+
+Usage
+-----
+
+##### CLI
+
+    usage: tslint
+
+	Options:
+	  -c, --config  configuration file
+	  -f, --file    file to lint                 [required]
+	  -o, --out     output file
+	  -t, --format  output format (prose, json)  [default: "prose"]
+
+By default, configuration is loaded from `.tslintrc`, if it exists in the current path.
+
+##### Library
+
+	var options = {
+		formatter: "json",
+	    configuration: configuration
+	};
+
+	var Linter = require("tslint");
+
+	var ll = new Linter(fileName, contents, options);
+	var result = ll.lint();
+
 Development
 -----------
 
