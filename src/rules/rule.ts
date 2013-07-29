@@ -76,7 +76,7 @@ module Lint {
                 name: this.fileName,
                 position: {
                     start: this.position.getStart(),
-                    end: this.position.getEnd()
+                    end: this.position.getEnd(),
                   },
                 failure: this.failure
             };

@@ -25,10 +25,15 @@ module Lint.Formatters {
 
         public format(syntaxTree: TypeScript.SyntaxTree, failures: Lint.RuleFailure[]): string {
             var failuresJSON = [];
+            var lineMap = syntaxTree.lineMap();
 
             for (var i = 0; i < failures.length; ++i) {
                 var failure = failures[i];
-                failuresJSON.push(failure.toJson());
+                var start = failure.getPosition().getStart();
+                var json = failure.toJson();
+
+                json.lineMarker = lineMap.getLineAndCharacterFromPosition(start).line() + 1;
+                failuresJSON.push(json);
             }
 
             return JSON.stringify(failuresJSON);
