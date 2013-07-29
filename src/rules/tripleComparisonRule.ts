@@ -48,9 +48,9 @@ module Lint.Rules {
             var operatorKind = operatorToken.kind();
 
             if (operatorKind === TypeScript.SyntaxKind.EqualsEqualsToken) {
-                failure = this.createFailure(position, ComparisonWalker.EQ_FAILURE);
+                failure = this.createFailure(position, operatorToken.width(), ComparisonWalker.EQ_FAILURE);
             } else if (operatorKind === TypeScript.SyntaxKind.ExclamationEqualsToken) {
-                failure = this.createFailure(position, ComparisonWalker.NEQ_FAILURE);
+                failure = this.createFailure(position, operatorToken.width(), ComparisonWalker.NEQ_FAILURE);
             }
 
             if (failure) {

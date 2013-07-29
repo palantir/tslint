@@ -47,7 +47,7 @@ module Lint.Rules {
             var operatorKind = operatorToken.kind();
 
             if (operatorKind === TypeScript.SyntaxKind.DebuggerKeyword) {
-                this.addFailure(this.createFailure(this.position(), DebugWalker.DEBUG_FAILURE));
+                this.addFailure(this.createFailure(this.position(), operatorToken.width(), DebugWalker.DEBUG_FAILURE));
             }
         }
     }

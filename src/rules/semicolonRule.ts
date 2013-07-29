@@ -42,7 +42,8 @@ module Lint.Rules {
                     var fileName = diagnostic.fileName();
                     var position = diagnostic.start();
                     var lineAndCharacter = syntaxTree.lineMap().getLineAndCharacterFromPosition(position);
-                    var ruleFailure = new Lint.RuleFailure(fileName, lineAndCharacter, SemicolonRule.FAILURE_STRING);
+                    var failurePosition = new Lint.RuleFailurePosition(position, position + 1);
+                    var ruleFailure = new Lint.RuleFailure(fileName, failurePosition, SemicolonRule.FAILURE_STRING);
 
                     ruleFailures.push(ruleFailure);
                 }

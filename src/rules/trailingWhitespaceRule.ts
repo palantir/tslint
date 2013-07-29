@@ -51,17 +51,15 @@ module Lint.Rules {
                 return;
             }
 
+            // skip the newline
             var lastButOne = triviaList.count() - 2;
-            var triviaKind = triviaList.syntaxTriviaAt(lastButOne).kind();
+            var trivia = triviaList.syntaxTriviaAt(lastButOne);
+            var triviaKind = trivia.kind();
             if (triviaList.hasNewLine() && triviaKind === TypeScript.SyntaxKind.WhitespaceTrivia) {
-                this.createAndAddFailure();
+                var start = this.position() - trivia.fullWidth() - 1;
+                var failure = this.createFailure(start, trivia.fullWidth(), TrailingWalker.FAILURE_STRING);
+                this.addFailure(failure);
             }
-        }
-
-        // create a failure at the end of the previous line and add it
-        private createAndAddFailure() {
-            var failure = this.createFailure(this.position() - 1, TrailingWalker.FAILURE_STRING);
-            this.addFailure(failure);
         }
     }
 

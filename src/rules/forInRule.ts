@@ -37,8 +37,8 @@ module Lint.Rules {
         static FOR_IN_FAILURE = "for (... in ...) statements must be filtered with an if statement";
 
         public visitForInStatement(node: TypeScript.ForInStatementSyntax): void {
-            super.visitForInStatement(node);
             this.handleForInStatement(node);
+            super.visitForInStatement(node);
         }
 
         private handleForInStatement(node: TypeScript.ForInStatementSyntax) {
@@ -61,12 +61,12 @@ module Lint.Rules {
                     var grandChildrenCount = child.childCount();
                     // There has to be either no body of the for-in loop or a single if statement
                     if (grandChildrenCount > 1) {
-                        failure = this.createFailure(this.position(), ForInWalker.FOR_IN_FAILURE);
+                        failure = this.createFailure(this.position(), node.width(), ForInWalker.FOR_IN_FAILURE);
                     } else if (grandChildrenCount === 1) {
                         var grandChild = child.childAt(0);
                         // The enclosing statement inside the for-in loop must be a single if statement
                         if (grandChild.kind() !== TypeScript.SyntaxKind.IfStatement) {
-                            failure = this.createFailure(this.position(), ForInWalker.FOR_IN_FAILURE);
+                            failure = this.createFailure(this.position(), node.width(), ForInWalker.FOR_IN_FAILURE);
                         }
                     }
                 }

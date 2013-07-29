@@ -42,7 +42,7 @@ module Lint.Rules {
             var position = this.position() + identifier.leadingTriviaWidth();
 
             if (!this.isCamelCase(variableName) && !this.isUpperCase(variableName)) {
-                this.addFailure(this.createFailure(position, VariableNameWalker.FAILURE_STRING));
+                this.addFailure(this.createFailure(position, identifier.width(), VariableNameWalker.FAILURE_STRING));
             }
 
             super.visitVariableDeclarator(node);

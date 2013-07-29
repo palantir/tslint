@@ -53,6 +53,7 @@ module Lint.Rules {
 
                 this.addFailure(this.createFailure(
                     this.position() + node.leadingTriviaWidth(),
+                    node.width(),
                     BitwiseWalker.FAILURE_STRING));
             }
 

@@ -36,8 +36,8 @@ module Lint.Rules {
             for (var i = 0; i < lineStarts.length - 1; ++i) {
                 var from = lineStarts[i], to = lineStarts[i + 1];
                 if ((to - from - 1) > lineLimit) {
-                    var lineAndCharacter = lineMap.getLineAndCharacterFromPosition(to - 1);
-                    var ruleFailure = new Lint.RuleFailure(syntaxTree.fileName(), lineAndCharacter, errorString);
+                    var failurePosition = new Lint.RuleFailurePosition(from, to);
+                    var ruleFailure = new Lint.RuleFailure(syntaxTree.fileName(), failurePosition, errorString);
                     ruleFailures.push(ruleFailure);
                 }
               }

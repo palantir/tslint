@@ -116,11 +116,11 @@ module Lint.Rules {
             var failure = null;
 
             if (trivia.count() < 1) {
-                failure = this.createFailure(position, WhitespaceWalker.FAILURE_STRING);
+                failure = this.createFailure(position, 1, WhitespaceWalker.FAILURE_STRING);
             } else {
                 var kind = trivia.syntaxTriviaAt(0).kind();
                 if (kind !== TypeScript.SyntaxKind.WhitespaceTrivia && kind !== TypeScript.SyntaxKind.NewLineTrivia) {
-                    failure = this.createFailure(position, WhitespaceWalker.FAILURE_STRING);
+                    failure = this.createFailure(position, 1, WhitespaceWalker.FAILURE_STRING);
                 }
             }
 

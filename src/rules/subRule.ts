@@ -45,7 +45,7 @@ module Lint.Rules {
             var argumentExpressionKind = operatorToken.argumentExpression.kind();
 
             if (argumentExpressionKind === TypeScript.SyntaxKind.StringLiteral) {
-                this.addFailure(this.createFailure(this.position(), SubWalker.SUB_FAILURE));
+                this.addFailure(this.createFailure(this.position(), operatorToken.width(), SubWalker.SUB_FAILURE));
             }
         }
   }

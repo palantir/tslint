@@ -69,17 +69,18 @@ module Lint.Rules {
             if (operatorKind === TypeScript.SyntaxKind.StringLiteral) {
                 var fullText = operatorToken.fullText();
                 var textStart = operatorToken.leadingTriviaWidth();
-                var textEnd = textStart + operatorToken.width() - 1;
+                var width = operatorToken.width();
+                var textEnd = textStart + width - 1;
                 var firstChar = fullText.charAt(textStart);
                 var lastChar = fullText.charAt(textEnd);
 
                 if (this.quoteStyle === QuoteStyle.SINGLE_QUOTES) {
                     if (firstChar !== "'" || lastChar !== "'") {
-                        failure = this.createFailure(this.position(), QuoteWalker.SINGLE_QUOTE_FAILURE);
+                        failure = this.createFailure(this.position(), width, QuoteWalker.SINGLE_QUOTE_FAILURE);
                     }
                 } else if (this.quoteStyle === QuoteStyle.DOUBLE_QUOTES) {
                     if (firstChar !== "\"" || lastChar !== "\"") {
-                        failure = this.createFailure(this.position(), QuoteWalker.DOUBLE_QUOTE_FAILURE);
+                        failure = this.createFailure(this.position(), width, QuoteWalker.DOUBLE_QUOTE_FAILURE);
                     }
                 }
             }

@@ -14,6 +14,7 @@
  * limitations under the License.
 */
 
+/// <reference path='../typescript/src/compiler/syntax/syntaxTree.ts'/>
 /// <reference-path='../rules/rule.ts'/>
 
 module Lint {
@@ -21,7 +22,7 @@ module Lint {
     export interface Formatter {
         getName(): string;
 
-        format(failures: Lint.RuleFailure[]): string;
+        format(syntaxTree: TypeScript.SyntaxTree, failures: Lint.RuleFailure[]): string;
     }
 
 }

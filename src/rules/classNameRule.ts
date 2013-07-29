@@ -42,7 +42,7 @@ module Lint.Rules {
             if (className.length > 0) {
                 var firstCharacter = className.charAt(0);
                 if (firstCharacter !== firstCharacter.toUpperCase()) {
-                    this.addFailure(this.createFailure(position, ClassNameWalker.FAILURE_STRING));
+                    this.addFailure(this.createFailure(position, node.identifier.width(), ClassNameWalker.FAILURE_STRING));
                 }
               }
 

@@ -175,7 +175,7 @@ module Lint.Rules {
                             "expected " + expectedIndentation + ", " +
                             "got " + actualIndentation;
 
-                this.addFailure(this.createFailure(position, error));
+                this.addFailure(this.createFailure(position, nodeOrToken.width(), error));
             }
         }
 

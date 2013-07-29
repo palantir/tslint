@@ -39,9 +39,10 @@ module Lint.Rules {
         public visitInvocationExpression(node: TypeScript.InvocationExpressionSyntax): void {
             var expression = node.expression;
             if (expression.isToken() && expression.kind() === TypeScript.SyntaxKind.IdentifierName) {
-                if (expression.firstToken().text() === "eval") {
+                var firstToken = expression.firstToken();
+                if (firstToken.text() === "eval") {
                     var position = this.position() + node.leadingTriviaWidth();
-                    this.addFailure(this.createFailure(position, EvalWalker.FAILURE_STRING));
+                    this.addFailure(this.createFailure(position, firstToken.width(), EvalWalker.FAILURE_STRING));
                 }
             }
 

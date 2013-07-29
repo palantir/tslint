@@ -30,14 +30,32 @@ module Lint {
         apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[];
     }
 
+    export class RuleFailurePosition {
+        private start: number;
+        private end: number;
+
+        constructor(start: number, end: number) {
+            this.start = start;
+            this.end = end;
+        }
+
+        public getStart() {
+            return this.start;
+        }
+
+        public getEnd() {
+            return this.end;
+        }
+    }
+
     export class RuleFailure {
         private fileName: string;
-        private lineAndCharacter: TypeScript.LineAndCharacter;
+        private position: Lint.RuleFailurePosition;
         private failure: string;
 
-        constructor(fileName: string, lineAndCharacter: TypeScript.LineAndCharacter, failure: string) {
+        constructor(fileName: string, position: Lint.RuleFailurePosition, failure: string) {
             this.fileName = fileName;
-            this.lineAndCharacter = lineAndCharacter;
+            this.position = position;
             this.failure = failure;
         }
 
@@ -45,8 +63,8 @@ module Lint {
             return this.fileName;
         }
 
-        public getLineAndCharacter(): TypeScript.LineAndCharacter {
-            return this.lineAndCharacter;
+        public getPosition(): Lint.RuleFailurePosition {
+            return this.position;
         }
 
         public getFailure() {
@@ -57,8 +75,8 @@ module Lint {
             return {
                 name: this.fileName,
                 position: {
-                    line: this.lineAndCharacter.line(),
-                    character: this.lineAndCharacter.character()
+                    start: this.position.getStart(),
+                    end: this.position.getEnd()
                   },
                 failure: this.failure
             };
@@ -67,8 +85,8 @@ module Lint {
         public equals(ruleFailure: RuleFailure): boolean {
             return (this.failure  === ruleFailure.getFailure() &&
                     this.fileName === ruleFailure.getFileName() &&
-                    this.lineAndCharacter.line() === ruleFailure.getLineAndCharacter().line() &&
-                    this.lineAndCharacter.character() === ruleFailure.getLineAndCharacter().character());
+                    this.position.getStart() === ruleFailure.getPosition().getStart() &&
+                    this.position.getEnd() === ruleFailure.getPosition().getEnd());
         }
     }
 

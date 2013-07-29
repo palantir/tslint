@@ -44,7 +44,7 @@ module Lint.Rules {
             if (expression.isToken() && name.text() === "callee") {
                 var tokenExpression = <TypeScript.ISyntaxToken> expression;
                 if (tokenExpression.text() === "arguments") {
-                    this.addFailure(this.createFailure(position, ArgumentsWalker.FAILURE_STRING));
+                    this.addFailure(this.createFailure(position, expression.width(), ArgumentsWalker.FAILURE_STRING));
                 }
               }
 

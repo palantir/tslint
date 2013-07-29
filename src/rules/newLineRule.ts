@@ -59,7 +59,7 @@ module Lint.Rules {
                 }
 
                 if (!endsWithNewLine) {
-                    this.addFailure(this.createFailure(this.position(), EOFWalker.FAILURE_STRING));
+                    this.addFailure(this.createFailure(this.position(), 1, EOFWalker.FAILURE_STRING));
                 }
             }
         }

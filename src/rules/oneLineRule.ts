@@ -53,13 +53,16 @@ module Lint.Rules {
                     lastKind === TypeScript.SyntaxKind.StringLiteral ||
                     lastKind === TypeScript.SyntaxKind.TryKeyword) {
 
+                    var failure;
                     var lastLine = this.getLine(lastState.position);
                     var currentLine = this.getLine(this.position());
 
                     if (currentLine !== lastLine) {
-                        this.addFailure(this.createFailure(this.position(), BraceWalker.BRACE_FAILURE_STRING));
+                        failure = this.createFailure(this.position(), token.width(), BraceWalker.BRACE_FAILURE_STRING);
+                        this.addFailure(failure);
                     } else if (!this.hasTrailingWhiteSpace(lastState.token)) {
-                        this.addFailure(this.createFailure(this.position(), BraceWalker.WHITESPACE_FAILURE_STRING));
+                        failure = this.createFailure(this.position(), token.width(), BraceWalker.WHITESPACE_FAILURE_STRING);
+                        this.addFailure(failure);
                     }
                   }
             }
@@ -70,7 +73,8 @@ module Lint.Rules {
         public visitElseClause(node: TypeScript.ElseClauseSyntax): void {
             var lastState = this.getLastState();
             if (lastState !== undefined && !this.hasTrailingWhiteSpace(lastState.token)) {
-                this.addFailure(this.createFailure(this.position(), BraceWalker.ELSE_FAILURE_STRING));
+                var failure = this.createFailure(this.position(), node.elseKeyword.width(), BraceWalker.ELSE_FAILURE_STRING);
+                this.addFailure(failure);
             }
 
             super.visitElseClause(node);
@@ -79,7 +83,8 @@ module Lint.Rules {
         public visitCatchClause(node: TypeScript.CatchClauseSyntax): void {
             var lastState = this.getLastState();
             if (lastState !== undefined && !this.hasTrailingWhiteSpace(lastState.token)) {
-                this.addFailure(this.createFailure(this.position(), BraceWalker.CATCH_FAILURE_STRING));
+                var failure = this.createFailure(this.position(), node.catchKeyword.width(), BraceWalker.CATCH_FAILURE_STRING);
+                this.addFailure(failure);
             }
 
             super.visitCatchClause(node);

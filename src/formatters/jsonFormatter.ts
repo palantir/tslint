@@ -23,7 +23,7 @@ module Lint.Formatters {
             super("json");
         }
 
-        public format(failures: Lint.RuleFailure[]): string {
+        public format(syntaxTree: TypeScript.SyntaxTree, failures: Lint.RuleFailure[]): string {
             var failuresJSON = [];
 
             for (var i = 0; i < failures.length; ++i) {

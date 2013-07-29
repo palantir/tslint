@@ -37,35 +37,35 @@ module Lint.Rules {
         static CURLY_FAILURE = "if/for/do/while statements must be braced";
 
         public visitForInStatement(node: TypeScript.ForInStatementSyntax): void {
-            super.visitForInStatement(node);
             this.verifyStatementIsBraced(node.statement);
+            super.visitForInStatement(node);
         }
 
         public visitForStatement(node: TypeScript.ForStatementSyntax): void {
-            super.visitForStatement(node);
             this.verifyStatementIsBraced(node.statement);
+            super.visitForStatement(node);
         }
 
         public visitIfStatement(node: TypeScript.IfStatementSyntax): void {
-            super.visitIfStatement(node);
             this.verifyStatementIsBraced(node.statement);
+            super.visitIfStatement(node);
         }
 
         public visitElseClause(node: TypeScript.ElseClauseSyntax): void {
-            super.visitElseClause(node);
             if (node.statement.kind() !== TypeScript.SyntaxKind.IfStatement) {
                 this.verifyStatementIsBraced(node.statement);
             }
+            super.visitElseClause(node);
         }
 
         public visitDoStatement(node: TypeScript.DoStatementSyntax): void {
-            super.visitDoStatement(node);
             this.verifyStatementIsBraced(node.statement);
+            super.visitDoStatement(node);
         }
 
         public visitWhileStatement(node: TypeScript.WhileStatementSyntax): void {
-            super.visitWhileStatement(node);
             this.verifyStatementIsBraced(node.statement);
+            super.visitWhileStatement(node);
         }
 
         private verifyStatementIsBraced(node: TypeScript.IExpressionSyntax) {
@@ -82,7 +82,7 @@ module Lint.Rules {
             }
 
             if (!hasBraces) {
-                this.addFailure(this.createFailure(this.position(), CurlyWalker.CURLY_FAILURE));
+                this.addFailure(this.createFailure(this.position(), node.width(), CurlyWalker.CURLY_FAILURE));
             }
         }
     }
