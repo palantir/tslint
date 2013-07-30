@@ -26075,33 +26075,53 @@ var TypeScript;
 var Lint;
 (function (Lint) {
     var RuleFailurePosition = (function () {
-        function RuleFailurePosition(start, end) {
-            this.start = start;
-            this.end = end;
+        function RuleFailurePosition(position, lineAndCharacter) {
+            this.position = position;
+            this.lineAndCharacter = lineAndCharacter;
         }
-        RuleFailurePosition.prototype.getStart = function () {
-            return this.start;
+        RuleFailurePosition.prototype.getPosition = function () {
+            return this.position;
         };
 
-        RuleFailurePosition.prototype.getEnd = function () {
-            return this.end;
+        RuleFailurePosition.prototype.getLineAndCharacter = function () {
+            return this.lineAndCharacter;
+        };
+
+        RuleFailurePosition.prototype.toJson = function () {
+            return {
+                position: this.position,
+                line: this.lineAndCharacter.line(),
+                character: this.lineAndCharacter.character()
+            };
+        };
+
+        RuleFailurePosition.prototype.equals = function (ruleFailurePosition) {
+            var ll = this.lineAndCharacter;
+            var rr = ruleFailurePosition.lineAndCharacter;
+
+            return (this.position === ruleFailurePosition.position && ll.line() === rr.line() && ll.character() === rr.character());
         };
         return RuleFailurePosition;
     })();
     Lint.RuleFailurePosition = RuleFailurePosition;
 
     var RuleFailure = (function () {
-        function RuleFailure(fileName, position, failure) {
-            this.fileName = fileName;
-            this.position = position;
+        function RuleFailure(syntaxTree, start, end, failure) {
             this.failure = failure;
+            this.fileName = syntaxTree.fileName();
+            this.startPosition = this.createFailurePosition(syntaxTree, start);
+            this.endPosition = this.createFailurePosition(syntaxTree, end);
         }
         RuleFailure.prototype.getFileName = function () {
             return this.fileName;
         };
 
-        RuleFailure.prototype.getPosition = function () {
-            return this.position;
+        RuleFailure.prototype.getStartPosition = function () {
+            return this.startPosition;
+        };
+
+        RuleFailure.prototype.getEndPosition = function () {
+            return this.endPosition;
         };
 
         RuleFailure.prototype.getFailure = function () {
@@ -26111,16 +26131,22 @@ var Lint;
         RuleFailure.prototype.toJson = function () {
             return {
                 name: this.fileName,
-                position: {
-                    start: this.position.getStart(),
-                    end: this.position.getEnd()
-                },
-                failure: this.failure
+                failure: this.failure,
+                failurePosition: {
+                    start: this.startPosition.toJson(),
+                    end: this.endPosition.toJson()
+                }
             };
         };
 
         RuleFailure.prototype.equals = function (ruleFailure) {
-            return (this.failure === ruleFailure.getFailure() && this.fileName === ruleFailure.getFileName() && this.position.getStart() === ruleFailure.getPosition().getStart() && this.position.getEnd() === ruleFailure.getPosition().getEnd());
+            return (this.failure === ruleFailure.getFailure() && this.fileName === ruleFailure.getFileName() && this.startPosition.equals(ruleFailure.getStartPosition()) && this.endPosition.equals(ruleFailure.getEndPosition()));
+        };
+
+        RuleFailure.prototype.createFailurePosition = function (syntaxTree, position) {
+            var lineAndCharacter = syntaxTree.lineMap().getLineAndCharacterFromPosition(position);
+            var failurePosition = new RuleFailurePosition(position, lineAndCharacter);
+            return failurePosition;
         };
         return RuleFailure;
     })();
@@ -26162,8 +26188,7 @@ var Lint;
         };
 
         RuleWalker.prototype.createFailure = function (start, width, failure) {
-            var failurePosition = new Lint.RuleFailurePosition(start, start + width);
-            return new Lint.RuleFailure(this.syntaxTree.fileName(), failurePosition, failure);
+            return new Lint.RuleFailure(this.syntaxTree, start, start + width, failure);
         };
 
         RuleWalker.prototype.addFailure = function (failure) {
@@ -26671,8 +26696,7 @@ var Lint;
                 for (var i = 0; i < lineStarts.length - 1; ++i) {
                     var from = lineStarts[i], to = lineStarts[i + 1];
                     if ((to - from - 1) > lineLimit) {
-                        var failurePosition = new Lint.RuleFailurePosition(from, to);
-                        var ruleFailure = new Lint.RuleFailure(syntaxTree.fileName(), failurePosition, errorString);
+                        var ruleFailure = new Lint.RuleFailure(syntaxTree, from, to, errorString);
                         ruleFailures.push(ruleFailure);
                     }
                 }
@@ -26877,11 +26901,9 @@ var Lint;
                     var code = diagnostic.diagnosticCode();
 
                     if (code === TypeScript.DiagnosticCode.Automatic_semicolon_insertion_not_allowed) {
-                        var fileName = diagnostic.fileName();
                         var position = diagnostic.start();
                         var lineAndCharacter = syntaxTree.lineMap().getLineAndCharacterFromPosition(position);
-                        var failurePosition = new Lint.RuleFailurePosition(position, position + 1);
-                        var ruleFailure = new Lint.RuleFailure(fileName, failurePosition, SemicolonRule.FAILURE_STRING);
+                        var ruleFailure = new Lint.RuleFailure(syntaxTree, position, position + 1, SemicolonRule.FAILURE_STRING);
 
                         ruleFailures.push(ruleFailure);
                     }
@@ -27483,7 +27505,7 @@ var Lint;
                 return this.name;
             };
 
-            AbstractFormatter.prototype.format = function (syntaxTree, failures) {
+            AbstractFormatter.prototype.format = function (failures) {
                 throw TypeScript.Errors.abstract();
             };
             return AbstractFormatter;
@@ -27500,17 +27522,11 @@ var Lint;
             function JsonFormatter() {
                 _super.call(this, "json");
             }
-            JsonFormatter.prototype.format = function (syntaxTree, failures) {
+            JsonFormatter.prototype.format = function (failures) {
                 var failuresJSON = [];
-                var lineMap = syntaxTree.lineMap();
 
                 for (var i = 0; i < failures.length; ++i) {
-                    var failure = failures[i];
-                    var start = failure.getPosition().getStart();
-                    var json = failure.toJson();
-                    json.lineMarker = lineMap.getLineAndCharacterFromPosition(start).line() + 1;
-
-                    failuresJSON.push(json);
+                    failuresJSON.push(failures[i].toJson());
                 }
 
                 return JSON.stringify(failuresJSON);
@@ -27529,15 +27545,14 @@ var Lint;
             function ProseFormatter() {
                 _super.call(this, "prose");
             }
-            ProseFormatter.prototype.format = function (syntaxTree, failures) {
+            ProseFormatter.prototype.format = function (failures) {
                 var output = "";
                 for (var i = 0; i < failures.length; ++i) {
                     var failure = failures[i];
                     var fileName = failure.getFileName();
                     var failureString = failure.getFailure();
 
-                    var position = failure.getPosition();
-                    var lineAndCharacter = syntaxTree.lineMap().getLineAndCharacterFromPosition(position.getStart());
+                    var lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
                     var line = lineAndCharacter.line() + 1;
                     var character = lineAndCharacter.character() + 1;
 
@@ -64596,7 +64611,7 @@ var Lint;
                 formatter = new Lint.Formatters.ProseFormatter();
             }
 
-            var output = formatter.format(syntaxTree, failures);
+            var output = formatter.format(failures);
             return {
                 failureCount: failures.length,
                 format: this.options.formatter,

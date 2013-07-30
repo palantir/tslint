@@ -23,17 +23,11 @@ module Lint.Formatters {
             super("json");
         }
 
-        public format(syntaxTree: TypeScript.SyntaxTree, failures: Lint.RuleFailure[]): string {
+        public format(failures: Lint.RuleFailure[]): string {
             var failuresJSON = [];
-            var lineMap = syntaxTree.lineMap();
 
             for (var i = 0; i < failures.length; ++i) {
-                var failure = failures[i];
-                var start = failure.getPosition().getStart();
-                var json = failure.toJson();
-
-                json.lineMarker = lineMap.getLineAndCharacterFromPosition(start).line() + 1;
-                failuresJSON.push(json);
+                failuresJSON.push(failures[i].toJson());
             }
 
             return JSON.stringify(failuresJSON);

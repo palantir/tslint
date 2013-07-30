@@ -31,40 +31,67 @@ module Lint {
     }
 
     export class RuleFailurePosition {
-        private start: number;
-        private end: number;
+        private position: number;
+        private lineAndCharacter: TypeScript.LineAndCharacter;
 
-        constructor(start: number, end: number) {
-            this.start = start;
-            this.end = end;
+        constructor(position: number, lineAndCharacter: TypeScript.LineAndCharacter) {
+            this.position = position;
+            this.lineAndCharacter = lineAndCharacter;
         }
 
-        public getStart() {
-            return this.start;
+        public getPosition() {
+            return this.position;
         }
 
-        public getEnd() {
-            return this.end;
+        public getLineAndCharacter() {
+            return this.lineAndCharacter;
+        }
+
+        public toJson() {
+            return {
+                position: this.position,
+                line: this.lineAndCharacter.line(),
+                character: this.lineAndCharacter.character()
+            }
+        }
+
+        public equals(ruleFailurePosition: RuleFailurePosition) {
+            var ll = this.lineAndCharacter;
+            var rr = ruleFailurePosition.lineAndCharacter;
+
+            return (this.position === ruleFailurePosition.position &&
+                    ll.line() === rr.line() &&
+                    ll.character() === rr.character());
         }
     }
 
     export class RuleFailure {
         private fileName: string;
-        private position: Lint.RuleFailurePosition;
+        private startPosition: Lint.RuleFailurePosition;
+        private endPosition: Lint.RuleFailurePosition;
         private failure: string;
 
-        constructor(fileName: string, position: Lint.RuleFailurePosition, failure: string) {
-            this.fileName = fileName;
-            this.position = position;
+        constructor(syntaxTree: TypeScript.SyntaxTree,
+                    start: number,
+                    end: number,
+                    failure: string) {
+
             this.failure = failure;
+            this.fileName = syntaxTree.fileName();
+            this.startPosition = this.createFailurePosition(syntaxTree, start);
+            this.endPosition = this.createFailurePosition(syntaxTree, end);
         }
 
         public getFileName() {
             return this.fileName;
         }
 
-        public getPosition(): Lint.RuleFailurePosition {
-            return this.position;
+        public getStartPosition(): Lint.RuleFailurePosition {
+            return this.startPosition;
+        }
+
+        public getEndPosition(): Lint.RuleFailurePosition {
+            return this.endPosition;
         }
 
         public getFailure() {
@@ -74,19 +101,25 @@ module Lint {
         public toJson(): any {
             return {
                 name: this.fileName,
-                position: {
-                    start: this.position.getStart(),
-                    end: this.position.getEnd(),
-                  },
-                failure: this.failure
+                failure: this.failure,
+                failurePosition: {
+                    start: this.startPosition.toJson(),
+                    end: this.endPosition.toJson()
+                }
             };
         }
 
         public equals(ruleFailure: RuleFailure): boolean {
             return (this.failure  === ruleFailure.getFailure() &&
                     this.fileName === ruleFailure.getFileName() &&
-                    this.position.getStart() === ruleFailure.getPosition().getStart() &&
-                    this.position.getEnd() === ruleFailure.getPosition().getEnd());
+                    this.startPosition.equals(ruleFailure.getStartPosition()) &&
+                    this.endPosition.equals(ruleFailure.getEndPosition()));
+        }
+
+        private createFailurePosition(syntaxTree, position): RuleFailurePosition {
+            var lineAndCharacter = syntaxTree.lineMap().getLineAndCharacterFromPosition(position);
+            var failurePosition = new RuleFailurePosition(position, lineAndCharacter);
+            return failurePosition;
         }
     }
 

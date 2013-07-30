@@ -56,8 +56,7 @@ module Lint {
 
         // create a failure at the given position
         public createFailure(start: number, width: number, failure: string): Lint.RuleFailure {
-            var failurePosition = new Lint.RuleFailurePosition(start, start + width);
-            return new Lint.RuleFailure(this.syntaxTree.fileName(), failurePosition, failure);
+            return new Lint.RuleFailure(this.syntaxTree, start, start + width, failure);
         }
 
         public addFailure(failure: RuleFailure) {

@@ -23,15 +23,14 @@ module Lint.Formatters {
             super("prose");
         }
 
-        public format(syntaxTree: TypeScript.SyntaxTree, failures: Lint.RuleFailure[]): string {
+        public format(failures: Lint.RuleFailure[]): string {
             var output = "";
             for (var i = 0; i < failures.length; ++i) {
                 var failure = failures[i];
                 var fileName = failure.getFileName();
                 var failureString = failure.getFailure();
 
-                var position = failure.getPosition();
-                var lineAndCharacter = syntaxTree.lineMap().getLineAndCharacterFromPosition(position.getStart());
+                var lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
                 var line = lineAndCharacter.line() + 1;
                 var character = lineAndCharacter.character() + 1;
 

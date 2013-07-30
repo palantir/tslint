@@ -30,7 +30,7 @@ module Lint.Formatters {
             return this.name;
         }
 
-        public format(syntaxTree: TypeScript.SyntaxTree, failures: Lint.RuleFailure[]): string {
+        public format(failures: Lint.RuleFailure[]): string {
             throw TypeScript.Errors.abstract();
         }
     }

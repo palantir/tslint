@@ -39,11 +39,9 @@ module Lint.Rules {
                 var code = diagnostic.diagnosticCode();
 
                 if (code === TypeScript.DiagnosticCode.Automatic_semicolon_insertion_not_allowed) {
-                    var fileName = diagnostic.fileName();
                     var position = diagnostic.start();
                     var lineAndCharacter = syntaxTree.lineMap().getLineAndCharacterFromPosition(position);
-                    var failurePosition = new Lint.RuleFailurePosition(position, position + 1);
-                    var ruleFailure = new Lint.RuleFailure(fileName, failurePosition, SemicolonRule.FAILURE_STRING);
+                    var ruleFailure = new Lint.RuleFailure(syntaxTree, position, position + 1, SemicolonRule.FAILURE_STRING);
 
                     ruleFailures.push(ruleFailure);
                 }

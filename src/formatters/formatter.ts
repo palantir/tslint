@@ -22,7 +22,7 @@ module Lint {
     export interface Formatter {
         getName(): string;
 
-        format(syntaxTree: TypeScript.SyntaxTree, failures: Lint.RuleFailure[]): string;
+        format(failures: Lint.RuleFailure[]): string;
     }
 
 }

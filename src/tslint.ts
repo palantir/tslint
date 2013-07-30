@@ -60,7 +60,7 @@ module Lint {
                 formatter = new Lint.Formatters.ProseFormatter();
             }
 
-            var output = formatter.format(syntaxTree, failures);
+            var output = formatter.format(failures);
             return {
                 failureCount: failures.length,
                 format: this.options.formatter,
