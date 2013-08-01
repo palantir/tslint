@@ -56,13 +56,16 @@ module Lint.Rules {
             }
         }
 
-        // check for spaces between the operator symbol
+        // check for spaces between the operator symbol (except in the case of comma statements)
         public visitBinaryExpression(node: TypeScript.BinaryExpressionSyntax): void {
-            var position = this.positionAfter(node.left);
-            this.checkForLeadingSpace(position, node.left.trailingTrivia());
+            var operator = node.operatorToken;
+            if(operator.kind() !== TypeScript.SyntaxKind.CommaToken) {
+                var position = this.positionAfter(node.left);
+                this.checkForLeadingSpace(position, node.left.trailingTrivia());
 
-            position += node.operatorToken.fullWidth();
-            this.checkForLeadingSpace(position, node.operatorToken.trailingTrivia());
+                position += operator.fullWidth();
+                this.checkForLeadingSpace(position, operator.trailingTrivia());
+            }
 
             super.visitBinaryExpression(node);
         }
