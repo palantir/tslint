@@ -36,25 +36,25 @@ module Lint.Rules {
 
     class EOFWalker extends Lint.StateAwareRuleWalker {
         static FAILURE_STRING = "file should end with a newline";
+
         public visitToken(token: TypeScript.ISyntaxToken): void {
             this.handleToken(token);
             super.visitToken(token);
         }
 
-        private handleToken(operatorToken: TypeScript.ISyntaxToken) {
+        private handleToken(token: TypeScript.ISyntaxToken) {
             var lastState = this.getLastState();
-            var operatorKind = operatorToken.kind();
-            if (lastState !== undefined && operatorKind === TypeScript.SyntaxKind.EndOfFileToken) {
+            if (lastState !== undefined && token.kind() === TypeScript.SyntaxKind.EndOfFileToken) {
                 var endsWithNewLine = false;
 
-                // Begin by looking at the penultimate token to see if it contains a newline
+                // look at the penultimate token to see if it contains a newline at the end
                 var previousToken = lastState.token;
-                if (previousToken !== null && previousToken.hasTrailingNewLine()) {
+                if (previousToken !== null && this.hasNewLineAtEnd(previousToken.trailingTrivia())) {
                     endsWithNewLine = true;
                 }
 
-                // Next, ensure that there are no spaces after the last newline
-                if (operatorToken.hasLeadingTrivia()) {
+                // if the EOF token has any leading trivia, then it has to end with a newline
+                if (token.hasLeadingTrivia() && !this.hasNewLineAtEnd(token.leadingTrivia())) {
                     endsWithNewLine = false;
                 }
 
@@ -62,6 +62,14 @@ module Lint.Rules {
                     this.addFailure(this.createFailure(this.position(), 1, EOFWalker.FAILURE_STRING));
                 }
             }
+        }
+
+        private hasNewLineAtEnd(triviaList: TypeScript.ISyntaxTriviaList) {
+            if (triviaList.count() <= 0 || !triviaList.hasNewLine()) {
+                return false;
+            }
+
+            return triviaList.last().isNewLine();
         }
     }
 }

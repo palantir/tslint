@@ -22,6 +22,7 @@
 module Lint {
 
     export class RuleWalker extends TypeScript.PositionTrackingWalker {
+        private limit: number;
         private fileName: string;
         private failures: RuleFailure[];
         private syntaxTree: TypeScript.SyntaxTree;
@@ -29,8 +30,9 @@ module Lint {
         constructor(syntaxTree: TypeScript.SyntaxTree) {
             super();
 
-            this.syntaxTree = syntaxTree;
             this.failures = [];
+            this.syntaxTree = syntaxTree;
+            this.limit = this.syntaxTree.sourceUnit().fullWidth();
         }
 
         public getSyntaxTree(): TypeScript.SyntaxTree {
@@ -56,7 +58,10 @@ module Lint {
 
         // create a failure at the given position
         public createFailure(start: number, width: number, failure: string): Lint.RuleFailure {
-            return new Lint.RuleFailure(this.syntaxTree, start, start + width, failure);
+            var from = (start > this.limit) ? this.limit : start;
+            var to = ((start + width) > this.limit) ? this.limit : (start + width);
+
+            return new Lint.RuleFailure(this.syntaxTree, from, to, failure);
         }
 
         public addFailure(failure: RuleFailure) {

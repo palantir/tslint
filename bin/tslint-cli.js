@@ -26159,8 +26159,9 @@ var Lint;
         function RuleWalker(syntaxTree) {
             _super.call(this);
 
-            this.syntaxTree = syntaxTree;
             this.failures = [];
+            this.syntaxTree = syntaxTree;
+            this.limit = this.syntaxTree.sourceUnit().fullWidth();
         }
         RuleWalker.prototype.getSyntaxTree = function () {
             return this.syntaxTree;
@@ -26188,7 +26189,10 @@ var Lint;
         };
 
         RuleWalker.prototype.createFailure = function (start, width, failure) {
-            return new Lint.RuleFailure(this.syntaxTree, start, start + width, failure);
+            var from = (start > this.limit) ? this.limit : start;
+            var to = ((start + width) > this.limit) ? this.limit : (start + width);
+
+            return new Lint.RuleFailure(this.syntaxTree, from, to, failure);
         };
 
         RuleWalker.prototype.addFailure = function (failure) {
@@ -26543,18 +26547,17 @@ var Lint;
                 _super.prototype.visitToken.call(this, token);
             };
 
-            EOFWalker.prototype.handleToken = function (operatorToken) {
+            EOFWalker.prototype.handleToken = function (token) {
                 var lastState = this.getLastState();
-                var operatorKind = operatorToken.kind();
-                if (lastState !== undefined && operatorKind === TypeScript.SyntaxKind.EndOfFileToken) {
+                if (lastState !== undefined && token.kind() === TypeScript.SyntaxKind.EndOfFileToken) {
                     var endsWithNewLine = false;
 
                     var previousToken = lastState.token;
-                    if (previousToken !== null && previousToken.hasTrailingNewLine()) {
+                    if (previousToken !== null && this.hasNewLineAtEnd(previousToken.trailingTrivia())) {
                         endsWithNewLine = true;
                     }
 
-                    if (operatorToken.hasLeadingTrivia()) {
+                    if (token.hasLeadingTrivia() && !this.hasNewLineAtEnd(token.leadingTrivia())) {
                         endsWithNewLine = false;
                     }
 
@@ -26562,6 +26565,14 @@ var Lint;
                         this.addFailure(this.createFailure(this.position(), 1, EOFWalker.FAILURE_STRING));
                     }
                 }
+            };
+
+            EOFWalker.prototype.hasNewLineAtEnd = function (triviaList) {
+                if (triviaList.count() <= 0 || !triviaList.hasNewLine()) {
+                    return false;
+                }
+
+                return triviaList.last().isNewLine();
             };
             EOFWalker.FAILURE_STRING = "file should end with a newline";
             return EOFWalker;
