@@ -102,10 +102,8 @@ module Lint {
             return {
                 name: this.fileName,
                 failure: this.failure,
-                failurePosition: {
-                    start: this.startPosition.toJson(),
-                    end: this.endPosition.toJson()
-                }
+                startPosition: this.startPosition.toJson(),
+                endPosition: this.endPosition.toJson()
             };
         }
 
