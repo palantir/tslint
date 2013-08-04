@@ -57,14 +57,14 @@ module Lint.Rules {
         "whitespace": WhitespaceRule.prototype
     }
 
-    export function getRuleForName(name: string): Rule {
+    export function createRule(name: string, value: any): Rule {
+        var rule = undefined;
         var rulePrototype = ALL_RULES[name];
-        if(rulePrototype === undefined) {
-            return rulePrototype;
-        }
 
-        var rule = Object.create(rulePrototype);
-        rule.constructor(name);
+        if (rulePrototype !== undefined) {
+            rule = Object.create(rulePrototype);
+            rule.constructor(name, value);
+        }
 
         return rule;
     }

@@ -19,13 +19,10 @@
 
 module Lint {
 
-    // TODO: Make this immutable somehow
     export interface Rule {
         getName(): string;
 
         getValue(): any;
-
-        setValue(value: any): void;
 
         apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[];
     }

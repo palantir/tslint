@@ -54,15 +54,13 @@ module Lint.Configuration {
 
         for (var ruleName in configuration) {
             if (configuration.hasOwnProperty(ruleName)) {
-                var rule = Lint.Rules.getRuleForName(ruleName);
+                var ruleValue = configuration[ruleName];
+                var rule = Rules.createRule(ruleName, ruleValue);
                 if (rule === undefined) {
                     console.warn("ignoring unrecognized rule '" + ruleName + "'");
-                    continue;
-                  }
-
-                var ruleValue = configuration[ruleName];
-                rule.setValue(ruleValue);
-                rules.push(rule);
+                } else {
+                    rules.push(rule);
+                }
             }
         }
 

@@ -26214,8 +26214,9 @@ var Lint;
 (function (Lint) {
     (function (Rules) {
         var AbstractRule = (function () {
-            function AbstractRule(name) {
+            function AbstractRule(name, value) {
                 this.name = name;
+                this.value = value;
             }
             AbstractRule.prototype.getName = function () {
                 return this.name;
@@ -26223,10 +26224,6 @@ var Lint;
 
             AbstractRule.prototype.getValue = function () {
                 return this.value;
-            };
-
-            AbstractRule.prototype.setValue = function (value) {
-                this.value = value;
             };
 
             AbstractRule.prototype.apply = function (syntaxTree) {
@@ -26744,7 +26741,7 @@ var Lint;
                 } else if (quoteStyleString === "double") {
                     quoteStyle = QuoteStyle.DOUBLE_QUOTES;
                 } else {
-                    throw new Error("Unknown quote style " + quoteStyle);
+                    throw new Error("Unknown quote style " + quoteStyleString);
                 }
 
                 return this.applyWithWalker(new QuoteWalker(syntaxTree, quoteStyle));
@@ -27431,18 +27428,18 @@ var Lint;
             "whitespace": Rules.WhitespaceRule.prototype
         };
 
-        function getRuleForName(name) {
+        function createRule(name, value) {
+            var rule = undefined;
             var rulePrototype = ALL_RULES[name];
-            if (rulePrototype === undefined) {
-                return rulePrototype;
-            }
 
-            var rule = Object.create(rulePrototype);
-            rule.constructor(name);
+            if (rulePrototype !== undefined) {
+                rule = Object.create(rulePrototype);
+                rule.constructor(name, value);
+            }
 
             return rule;
         }
-        Rules.getRuleForName = getRuleForName;
+        Rules.createRule = createRule;
     })(Lint.Rules || (Lint.Rules = {}));
     var Rules = Lint.Rules;
 })(Lint || (Lint = {}));
@@ -27485,15 +27482,13 @@ var Lint;
 
             for (var ruleName in configuration) {
                 if (configuration.hasOwnProperty(ruleName)) {
-                    var rule = Lint.Rules.getRuleForName(ruleName);
+                    var ruleValue = configuration[ruleName];
+                    var rule = Lint.Rules.createRule(ruleName, ruleValue);
                     if (rule === undefined) {
                         console.warn("ignoring unrecognized rule '" + ruleName + "'");
-                        continue;
+                    } else {
+                        rules.push(rule);
                     }
-
-                    var ruleValue = configuration[ruleName];
-                    rule.setValue(ruleValue);
-                    rules.push(rule);
                 }
             }
 

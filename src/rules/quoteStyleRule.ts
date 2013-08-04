@@ -35,7 +35,7 @@ module Lint.Rules {
             } else if (quoteStyleString === "double") {
                 quoteStyle = QuoteStyle.DOUBLE_QUOTES;
             } else {
-                throw new Error("Unknown quote style " + quoteStyle);
+                throw new Error("Unknown quote style " + quoteStyleString);
             }
 
             return this.applyWithWalker(new QuoteWalker(syntaxTree, quoteStyle));
@@ -48,7 +48,7 @@ module Lint.Rules {
 
         private quoteStyle : QuoteStyle;
 
-        constructor (syntaxTree: TypeScript.SyntaxTree, quoteStyle: QuoteStyle) {
+        constructor(syntaxTree: TypeScript.SyntaxTree, quoteStyle: QuoteStyle) {
             super(syntaxTree);
             this.quoteStyle = quoteStyle;
         }

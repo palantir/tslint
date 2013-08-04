@@ -24,8 +24,9 @@ module Lint.Rules {
         private name: string;
         private value: any;
 
-        constructor(name: string) {
+        constructor(name: string, value: any) {
             this.name = name;
+            this.value = value;
         }
 
         public getName() {
@@ -34,10 +35,6 @@ module Lint.Rules {
 
         public getValue() {
             return this.value;
-        }
-
-        public setValue(value: any): void {
-            this.value = value;
         }
 
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
