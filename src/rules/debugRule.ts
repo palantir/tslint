@@ -20,11 +20,6 @@
 module Lint.Rules {
 
     export class DebugRule extends AbstractRule {
-
-        constructor() {
-            super("debug");
-        }
-
         public isEnabled() : boolean {
             return this.getValue() === true;
         }

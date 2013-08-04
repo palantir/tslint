@@ -22,10 +22,6 @@ module Lint.Rules {
     export class SemicolonRule extends AbstractRule {
         static FAILURE_STRING = "missing semicolon";
 
-        constructor() {
-            super("semicolon");
-        }
-
         public isEnabled() : boolean {
             return this.getValue() === true;
         }

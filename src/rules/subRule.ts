@@ -20,10 +20,6 @@
 module Lint.Rules {
 
     export class SubRule extends AbstractRule {
-        constructor() {
-            super("sub");
-        }
-
         public isEnabled() : boolean {
             return this.getValue() === true;
         }

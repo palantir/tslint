@@ -20,10 +20,6 @@
 module Lint.Rules {
 
     export class ForInRule extends AbstractRule {
-        constructor() {
-            super("forin");
-        }
-
         public isEnabled() : boolean {
             return this.getValue() === true;
         }

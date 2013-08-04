@@ -20,10 +20,6 @@
 module Lint.Rules {
 
     export class TripleComparisonRule extends AbstractRule {
-        constructor() {
-            super("eqeqeq");
-        }
-
         public isEnabled() : boolean {
             return this.getValue() === true;
         }

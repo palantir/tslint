@@ -20,10 +20,6 @@
 module Lint.Rules {
 
     export class OneLineRule extends AbstractRule {
-        constructor() {
-            super("oneline");
-        }
-
         public isEnabled(): boolean {
             return this.getValue() === true;
         }

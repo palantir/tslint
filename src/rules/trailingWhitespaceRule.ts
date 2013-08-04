@@ -20,10 +20,6 @@
 module Lint.Rules {
 
     export class TrailingWhitespaceRule extends AbstractRule {
-        constructor() {
-            super("trailing");
-        }
-
         public isEnabled() : boolean {
             return this.getValue() === true;
         }

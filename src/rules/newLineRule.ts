@@ -21,10 +21,6 @@
 module Lint.Rules {
 
     export class NewLineRule extends AbstractRule {
-        constructor() {
-            super("eofline");
-        }
-
         public isEnabled(): boolean {
             return this.getValue() === true;
         }

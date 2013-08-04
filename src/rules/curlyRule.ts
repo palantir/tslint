@@ -20,10 +20,6 @@
 module Lint.Rules {
 
     export class CurlyRule extends AbstractRule {
-        constructor() {
-            super("curly");
-        }
-
         public isEnabled(): boolean {
             return this.getValue() === true;
         }

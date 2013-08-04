@@ -20,10 +20,6 @@
 module Lint.Rules {
 
     export class WhitespaceRule extends AbstractRule {
-        constructor() {
-            super("whitespace");
-        }
-
         public isEnabled() : boolean {
             return this.getValue() === true;
         }

@@ -20,10 +20,6 @@
 module Lint.Rules {
 
     export class BitwiseOperatorRule extends AbstractRule {
-        constructor() {
-            super("bitwise");
-        }
-
         public isEnabled() : boolean {
             return this.getValue() === true;
         }

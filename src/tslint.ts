@@ -36,7 +36,6 @@ module Lint {
             this.source = source;
             this.options = options;
 
-            Lint.Rules.createAllRules();
             Lint.Formatters.createAllFormatters();
         }
 

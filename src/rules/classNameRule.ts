@@ -20,10 +20,6 @@
 module Lint.Rules {
 
     export class ClassNameRule extends AbstractRule {
-        constructor() {
-            super("classname");
-        }
-
         public isEnabled() : boolean {
             return this.getValue() === true;
         }
