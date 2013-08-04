@@ -1,4 +1,6 @@
 .gitmodules
 .tslintrc
 Gruntfile.js
+build/
 src/
+test/
