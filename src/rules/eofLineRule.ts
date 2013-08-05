@@ -20,7 +20,7 @@
 
 module Lint.Rules {
 
-    export class NewLineRule extends AbstractRule {
+    export class EofLineRule extends AbstractRule {
         public isEnabled(): boolean {
             return this.getValue() === true;
         }

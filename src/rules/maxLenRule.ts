@@ -19,7 +19,7 @@
 
 module Lint.Rules {
 
-    export class MaxLineLengthRule extends AbstractRule {
+    export class MaxLenRule extends AbstractRule {
         static FAILURE_STRING = "exceeds maximum line length of ";
 
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
@@ -27,7 +27,7 @@ module Lint.Rules {
             var lineLimit = this.getValue();
             var lineMap = syntaxTree.lineMap();
             var lineStarts = lineMap.lineStarts();
-            var errorString = MaxLineLengthRule.FAILURE_STRING + lineLimit;
+            var errorString = MaxLenRule.FAILURE_STRING + lineLimit;
 
             for (var i = 0; i < lineStarts.length - 1; ++i) {
                 var from = lineStarts[i], to = lineStarts[i + 1];

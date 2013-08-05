@@ -19,30 +19,32 @@
 
 module Lint.Rules {
 
-    export class EvalRule extends AbstractRule {
+    export class NoArgRule extends AbstractRule {
+        public static FAILURE_STRING = "access forbidden to arguments property";
+
         public isEnabled() : boolean {
             return this.getValue() === true;
         }
 
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            return this.applyWithWalker(new EvalWalker(syntaxTree));
+            return this.applyWithWalker(new NoArgWalker(syntaxTree));
         }
-    }
+      }
 
-    class EvalWalker extends Lint.RuleWalker {
-        static FAILURE_STRING = "forbidden eval";
-
-        public visitInvocationExpression(node: TypeScript.InvocationExpressionSyntax): void {
+    class NoArgWalker extends Lint.RuleWalker {
+        public visitMemberAccessExpression(node: TypeScript.MemberAccessExpressionSyntax): void {
             var expression = node.expression;
-            if (expression.isToken() && expression.kind() === TypeScript.SyntaxKind.IdentifierName) {
-                var firstToken = expression.firstToken();
-                if (firstToken.text() === "eval") {
-                    var position = this.position() + node.leadingTriviaWidth();
-                    this.addFailure(this.createFailure(position, firstToken.width(), EvalWalker.FAILURE_STRING));
-                }
-            }
+            var name = node.name;
+            var position = this.position() + node.expression.leadingTriviaWidth();
 
-            super.visitInvocationExpression(node);
+            if (expression.isToken() && name.text() === "callee") {
+                var tokenExpression = <TypeScript.ISyntaxToken> expression;
+                if (tokenExpression.text() === "arguments") {
+                    this.addFailure(this.createFailure(position, expression.width(), NoArgRule.FAILURE_STRING));
+                }
+              }
+
+            super.visitMemberAccessExpression(node);
         }
     }
 

@@ -15,45 +15,45 @@
 */
 
 /// <reference path='rule.ts'/>
-/// <reference path='argumentsRule.ts'/>
-/// <reference path='bitwiseOperatorRule.ts'/>
+/// <reference path='bitwiseRule.ts'/>
 /// <reference path='classNameRule.ts'/>
 /// <reference path='curlyRule.ts'/>
 /// <reference path='debugRule.ts'/>
-/// <reference path='newLineRule.ts'/>
+/// <reference path='eofLineRule.ts'/>
+/// <reference path='eqeqeqRule.ts'/>
+/// <reference path='evilRule.ts'/>
 /// <reference path='forInRule.ts'/>
-/// <reference path='evalRule.ts'/>
-/// <reference path='maxLineLengthRule.ts'/>
-/// <reference path='quoteStyleRule.ts'/>
+/// <reference path='indentRule.ts'/>
+/// <reference path='maxLenRule.ts'/>
+/// <reference path='noArgRule.ts'/>
 /// <reference path='oneLineRule.ts'/>
+/// <reference path='quoteMarkRule.ts'/>
 /// <reference path='semicolonRule.ts'/>
 /// <reference path='subRule.ts'/>
-/// <reference path='tabWidthRule.ts'/>
-/// <reference path='trailingWhitespaceRule.ts'/>
-/// <reference path='tripleComparisonRule.ts'/>
-/// <reference path='variableNameRule.ts'/>
+/// <reference path='trailingRule.ts'/>
+/// <reference path='varNameRule.ts'/>
 /// <reference path='whitespaceRule.ts'/>
 
 module Lint.Rules {
 
     var ALL_RULES = {
-        "bitwise": BitwiseOperatorRule.prototype,
+        "bitwise": BitwiseRule.prototype,
         "classname": ClassNameRule.prototype,
         "curly": CurlyRule.prototype,
         "debug": DebugRule.prototype,
-        "eofline": NewLineRule.prototype,
-        "eqeqeq": TripleComparisonRule.prototype,
-        "evil": EvalRule.prototype,
+        "eofline": EofLineRule.prototype,
+        "eqeqeq": EqEqEqRule.prototype,
+        "evil": EvilRule.prototype,
         "forin": ForInRule.prototype,
-        "indent": TabWidthRule.prototype,
-        "maxlen": MaxLineLengthRule.prototype,
-        "noarg": ArgumentsRule.prototype,
+        "indent": IndentRule.prototype,
+        "maxlen": MaxLenRule.prototype,
+        "noarg": NoArgRule.prototype,
         "oneline": OneLineRule.prototype,
-        "quotemark": QuoteStyleRule.prototype,
+        "quotemark": QuoteMarkRule.prototype,
         "semicolon": SemicolonRule.prototype,
         "sub": SubRule.prototype,
-        "trailing": TrailingWhitespaceRule.prototype,
-        "varname": VariableNameRule.prototype,
+        "trailing": TrailingRule.prototype,
+        "varname": VarNameRule.prototype,
         "whitespace": WhitespaceRule.prototype
     }
 

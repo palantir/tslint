@@ -19,7 +19,7 @@
 
 module Lint.Rules {
 
-    export class BitwiseOperatorRule extends AbstractRule {
+    export class BitwiseRule extends AbstractRule {
         public isEnabled() : boolean {
             return this.getValue() === true;
         }

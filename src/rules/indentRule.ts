@@ -19,14 +19,14 @@
 
 module Lint.Rules {
 
-    export class TabWidthRule extends AbstractRule {
+    export class IndentRule extends AbstractRule {
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
             var tabWidth = parseInt(this.getValue());
-            return this.applyWithWalker(new TabWidthWalker(syntaxTree, tabWidth));
+            return this.applyWithWalker(new IndentWalker(syntaxTree, tabWidth));
         }
     }
 
-    class TabWidthWalker extends Lint.RuleWalker {
+    class IndentWalker extends Lint.RuleWalker {
         static FAILURE_STRING = "unexpected tab width: ";
 
         private tabWidth: number;
@@ -167,7 +167,7 @@ module Lint.Rules {
 
             if (expectedIndentation !== actualIndentation) {
                 var position = this.position() + nodeOrToken.leadingTriviaWidth();
-                var error = TabWidthWalker.FAILURE_STRING +
+                var error = IndentWalker.FAILURE_STRING +
                             "expected " + expectedIndentation + ", " +
                             "got " + actualIndentation;
 

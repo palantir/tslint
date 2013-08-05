@@ -19,7 +19,7 @@
 
 module Lint.Rules {
 
-    export class TripleComparisonRule extends AbstractRule {
+    export class EqEqEqRule extends AbstractRule {
         public isEnabled() : boolean {
             return this.getValue() === true;
         }

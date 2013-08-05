@@ -19,17 +19,17 @@
 
 module Lint.Rules {
 
-    export class VariableNameRule extends AbstractRule {
+    export class VarNameRule extends AbstractRule {
         public isEnabled() : boolean {
             return this.getValue() === true;
         }
 
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            return this.applyWithWalker(new VariableNameWalker(syntaxTree));
+            return this.applyWithWalker(new VarNameWalker(syntaxTree));
         }
     }
 
-    class VariableNameWalker extends Lint.RuleWalker {
+    class VarNameWalker extends Lint.RuleWalker {
         static FAILURE_STRING = "variable name must be in camelcase or uppercase";
 
         public visitVariableDeclarator(node: TypeScript.VariableDeclaratorSyntax): void {
@@ -38,7 +38,7 @@ module Lint.Rules {
             var position = this.position() + identifier.leadingTriviaWidth();
 
             if (!this.isCamelCase(variableName) && !this.isUpperCase(variableName)) {
-                this.addFailure(this.createFailure(position, identifier.width(), VariableNameWalker.FAILURE_STRING));
+                this.addFailure(this.createFailure(position, identifier.width(), VarNameWalker.FAILURE_STRING));
             }
 
             super.visitVariableDeclarator(node);

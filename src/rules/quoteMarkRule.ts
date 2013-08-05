@@ -19,26 +19,26 @@
 
 module Lint.Rules {
 
-    enum QuoteStyle {
+    enum QuoteMark {
         SINGLE_QUOTES,
         DOUBLE_QUOTES
     }
 
-    export class QuoteStyleRule extends AbstractRule {
+    export class QuoteMarkRule extends AbstractRule {
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
             var sourceUnit = syntaxTree.sourceUnit();
-            var quoteStyleString : string = this.getValue();
-            var quoteStyle : QuoteStyle;
+            var quoteMarkString : string = this.getValue();
+            var quoteMark : QuoteMark;
 
-            if (quoteStyleString === "single") {
-                quoteStyle = QuoteStyle.SINGLE_QUOTES;
-            } else if (quoteStyleString === "double") {
-                quoteStyle = QuoteStyle.DOUBLE_QUOTES;
+            if (quoteMarkString === "single") {
+                quoteMark = QuoteMark.SINGLE_QUOTES;
+            } else if (quoteMarkString === "double") {
+                quoteMark = QuoteMark.DOUBLE_QUOTES;
             } else {
-                throw new Error("Unknown quote style " + quoteStyleString);
+                throw new Error("Unknown quote style " + quoteMarkString);
             }
 
-            return this.applyWithWalker(new QuoteWalker(syntaxTree, quoteStyle));
+            return this.applyWithWalker(new QuoteWalker(syntaxTree, quoteMark));
         }
     }
 
@@ -46,11 +46,11 @@ module Lint.Rules {
         static DOUBLE_QUOTE_FAILURE = "' should be \"";
         static SINGLE_QUOTE_FAILURE = "\" should be '";
 
-        private quoteStyle : QuoteStyle;
+        private quoteMark : QuoteMark;
 
-        constructor(syntaxTree: TypeScript.SyntaxTree, quoteStyle: QuoteStyle) {
+        constructor(syntaxTree: TypeScript.SyntaxTree, quoteMark: QuoteMark) {
             super(syntaxTree);
-            this.quoteStyle = quoteStyle;
+            this.quoteMark = quoteMark;
         }
 
         public visitToken(token : TypeScript.ISyntaxToken): void {
@@ -70,11 +70,11 @@ module Lint.Rules {
                 var firstChar = fullText.charAt(textStart);
                 var lastChar = fullText.charAt(textEnd);
 
-                if (this.quoteStyle === QuoteStyle.SINGLE_QUOTES) {
+                if (this.quoteMark === QuoteMark.SINGLE_QUOTES) {
                     if (firstChar !== "'" || lastChar !== "'") {
                         failure = this.createFailure(this.position(), width, QuoteWalker.SINGLE_QUOTE_FAILURE);
                     }
-                } else if (this.quoteStyle === QuoteStyle.DOUBLE_QUOTES) {
+                } else if (this.quoteMark === QuoteMark.DOUBLE_QUOTES) {
                     if (firstChar !== "\"" || lastChar !== "\"") {
                         failure = this.createFailure(this.position(), width, QuoteWalker.DOUBLE_QUOTE_FAILURE);
                     }

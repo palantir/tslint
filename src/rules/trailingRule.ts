@@ -19,7 +19,7 @@
 
 module Lint.Rules {
 
-    export class TrailingWhitespaceRule extends AbstractRule {
+    export class TrailingRule extends AbstractRule {
         public isEnabled() : boolean {
             return this.getValue() === true;
         }
