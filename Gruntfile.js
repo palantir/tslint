@@ -39,7 +39,7 @@ module.exports = function(grunt) {
         options: {
           target: 'es5'
         },
-        src: ['test/**/*.ts'],
+        src: ['test/**/*.ts', '!test/files/**/*.ts'],
         dest: 'build/tslint-tests.js'
       }
     }

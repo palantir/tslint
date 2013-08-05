@@ -1,4 +1,5 @@
 /// <reference path='../src/tslint.ts'/>
+/// <reference path='helper.ts'/>
 /// <reference path='typings/chai.d.ts'/>
 /// <reference path='typings/chai-assert.d.ts'/>
 /// <reference path='typings/mocha.d.ts'/>
