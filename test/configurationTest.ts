@@ -8,9 +8,19 @@ describe("Configuration", () => {
             "eofline": true,
             "indent": 6,
             "debug": true
-        }
+        };
         
         var rules = Lint.Configuration.getConfiguredRules(validConfiguration);
         assert.equal(rules.length, 5);
+    });
+
+    it("skips invalid rules", () => {
+        var invalidConfiguration = {
+            "invalidConfig1": true,
+            "invalidConfig2": false
+        };
+
+        var rules = Lint.Configuration.getConfiguredRules(invalidConfiguration);
+        assert.deepEqual(rules, []);
     });
 });
