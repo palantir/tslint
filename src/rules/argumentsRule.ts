@@ -20,6 +20,8 @@
 module Lint.Rules {
 
     export class ArgumentsRule extends AbstractRule {
+        public static FAILURE_STRING = "access forbidden to arguments property";
+
         public isEnabled() : boolean {
             return this.getValue() === true;
         }
@@ -30,8 +32,6 @@ module Lint.Rules {
       }
 
     class ArgumentsWalker extends Lint.RuleWalker {
-        static FAILURE_STRING = "access forbidden to arguments property";
-
         public visitMemberAccessExpression(node: TypeScript.MemberAccessExpressionSyntax): void {
             var expression = node.expression;
             var name = node.name;
@@ -40,7 +40,7 @@ module Lint.Rules {
             if (expression.isToken() && name.text() === "callee") {
                 var tokenExpression = <TypeScript.ISyntaxToken> expression;
                 if (tokenExpression.text() === "arguments") {
-                    this.addFailure(this.createFailure(position, expression.width(), ArgumentsWalker.FAILURE_STRING));
+                    this.addFailure(this.createFailure(position, expression.width(), ArgumentsRule.FAILURE_STRING));
                 }
               }
 

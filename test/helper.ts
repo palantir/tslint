@@ -14,5 +14,22 @@ module Lint.Test {
 
         return languageService.getSyntaxTree(filePath);
     }
-    
+
+    export function applyRuleOnFile(filePath: string, ruleName: string, ruleValue: any = true): Lint.RuleFailure[] {
+        var syntaxTree = getSyntaxTree(filePath);
+        var rule = Lint.Rules.createRule(ruleName, ruleValue);
+
+        return rule.apply(syntaxTree);
+    }
+
+    // start and end are arrays with the first and second elements
+    // being (one-indexed) line and character positions respectively
+    export function createFailure(filePath: string, start: number[], end: number[], failure: string): Lint.RuleFailure {
+        var syntaxTree = getSyntaxTree(filePath);
+        var lineMap = syntaxTree.lineMap();
+        var startPosition = lineMap.getPosition(start[0] - 1, start[1] - 1);
+        var endPosition = lineMap.getPosition(end[0] - 1, end[1] - 1);
+
+        return new Lint.RuleFailure(getSyntaxTree(filePath), startPosition, endPosition, failure);
+    }
 }

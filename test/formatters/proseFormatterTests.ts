@@ -1,7 +1,7 @@
 /// <reference path='../references.ts' />
 
 describe("Prose Formatter", () => {
-    var TEST_FILE = "formatters/proseTest.ts";
+    var TEST_FILE = "formatters/proseFormatter.test.ts";
     var syntaxTree, formatter;
 
     before(function() {

@@ -1,7 +1,7 @@
 /// <reference path='../references.ts' />
 
 describe("JSON Formatter", () => {
-    var TEST_FILE = "formatters/jsonTest.ts";
+    var TEST_FILE = "formatters/jsonFormatter.test.ts";
     var syntaxTree, formatter;
 
     before(function() {
