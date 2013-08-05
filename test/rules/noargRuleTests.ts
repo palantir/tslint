@@ -1,8 +1,8 @@
 /// <reference path='../references.ts' />
 
-describe("NoArg Rule", () => {
+describe("<noarg>", () => {
     it("forbids access to arguments properties", () => {
-        var fileName = "rules/argumentsRule.test.ts";
+        var fileName = "rules/noarg.test.ts";
         var failures = Lint.Test.applyRuleOnFile(fileName, "noarg");
         var expectedFailure = Lint.Test.createFailure(fileName, [4, 8], [4, 17], Lint.Rules.NoArgRule.FAILURE_STRING);
 
