@@ -20,6 +20,8 @@
 module Lint.Rules {
 
     export class BitwiseRule extends AbstractRule {
+        public static FAILURE_STRING = "forbidden bitwise operation";
+
         public isEnabled() : boolean {
             return this.getValue() === true;
         }
@@ -30,8 +32,6 @@ module Lint.Rules {
     }
 
     class BitwiseWalker extends Lint.RuleWalker {
-        static FAILURE_STRING = "forbidden bitwise operation";
-
         public visitNode(node: TypeScript.SyntaxNode): void {
             if (node.kind() === TypeScript.SyntaxKind.BitwiseAndExpression ||
                 node.kind() === TypeScript.SyntaxKind.AndAssignmentExpression ||
@@ -50,7 +50,7 @@ module Lint.Rules {
                 this.addFailure(this.createFailure(
                     this.position() + node.leadingTriviaWidth(),
                     node.width(),
-                    BitwiseWalker.FAILURE_STRING));
+                    BitwiseRule.FAILURE_STRING));
             }
 
             super.visitNode(node);

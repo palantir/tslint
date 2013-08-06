@@ -1,7 +1,6 @@
 /// <reference path='../src/tslint.ts'/>
 
 module Lint.Test {
-
     var fs = require("fs");
     var path = require("path");
 
@@ -31,5 +30,21 @@ module Lint.Test {
         var endPosition = lineMap.getPosition(end[0] - 1, end[1] - 1);
 
         return new Lint.RuleFailure(getSyntaxTree(filePath), startPosition, endPosition, failure);
+    }
+
+    export function createFailuresOnFile(filePath: string, failure: string) {
+        return function(start: number[], end: number[]) {
+            return createFailure(filePath, start, end, failure);
+        }
+    }
+
+    export function assertFailuresEqual(actualFailures: Lint.RuleFailure[], expectedFailures: Lint.RuleFailure[]) {
+        assert.equal(actualFailures.length, expectedFailures.length);
+        for (var i = 0; i < actualFailures.length; ++i) {
+            var actualFailure = actualFailures[i];
+            var expectedFailure = expectedFailures[i];
+
+            assert.isTrue(actualFailure.equals(expectedFailure));
+        }
     }
 }
