@@ -20,6 +20,8 @@
 module Lint.Rules {
 
     export class ClassNameRule extends AbstractRule {
+        static FAILURE_STRING = "class name must start with an uppercase character";
+
         public isEnabled() : boolean {
             return this.getValue() === true;
         }
@@ -30,15 +32,13 @@ module Lint.Rules {
     }
 
     class ClassNameWalker extends Lint.RuleWalker {
-        static FAILURE_STRING = "class name must start with an uppercase character";
-
         public visitClassDeclaration(node: TypeScript.ClassDeclarationSyntax): void {
             var position = this.positionAfter(node.modifiers, node.classKeyword);
             var className = node.identifier.text();
             if (className.length > 0) {
                 var firstCharacter = className.charAt(0);
                 if (firstCharacter !== firstCharacter.toUpperCase()) {
-                    this.addFailure(this.createFailure(position, node.identifier.width(), ClassNameWalker.FAILURE_STRING));
+                    this.addFailure(this.createFailure(position, node.identifier.width(), ClassNameRule.FAILURE_STRING));
                 }
               }
 

@@ -1,0 +1,7 @@
+class ValidClassName {
+
+}
+
+class invalidClassName {
+
+}
