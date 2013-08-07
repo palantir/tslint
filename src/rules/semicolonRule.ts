@@ -32,9 +32,9 @@ module Lint.Rules {
 
             for (var i = 0; i < diagnostics.length; ++i) {
                 var diagnostic = diagnostics[i];
-                var code = diagnostic.diagnosticCode();
+                var diagnosticKey = diagnostic.diagnosticKey();
 
-                if (code === TypeScript.DiagnosticCode.Automatic_semicolon_insertion_not_allowed) {
+                if (diagnosticKey === TypeScript.DiagnosticCode.Automatic_semicolon_insertion_not_allowed) {
                     var position = diagnostic.start();
                     var lineAndCharacter = syntaxTree.lineMap().getLineAndCharacterFromPosition(position);
                     var ruleFailure = new Lint.RuleFailure(syntaxTree, position, position + 1, SemicolonRule.FAILURE_STRING);
