@@ -26612,31 +26612,49 @@ var Lint;
             };
 
             ClassNameRule.prototype.apply = function (syntaxTree) {
-                return this.applyWithWalker(new ClassNameWalker(syntaxTree));
+                return this.applyWithWalker(new NameWalker(syntaxTree));
             };
-            ClassNameRule.FAILURE_STRING = "class name must start with an uppercase character";
+            ClassNameRule.FAILURE_STRING = "name must start with an uppercase character";
             return ClassNameRule;
         })(Rules.AbstractRule);
         Rules.ClassNameRule = ClassNameRule;
 
-        var ClassNameWalker = (function (_super) {
-            __extends(ClassNameWalker, _super);
-            function ClassNameWalker() {
+        var NameWalker = (function (_super) {
+            __extends(NameWalker, _super);
+            function NameWalker() {
                 _super.apply(this, arguments);
             }
-            ClassNameWalker.prototype.visitClassDeclaration = function (node) {
-                var position = this.positionAfter(node.modifiers, node.classKeyword);
+            NameWalker.prototype.visitClassDeclaration = function (node) {
                 var className = node.identifier.text();
                 if (className.length > 0) {
                     var firstCharacter = className.charAt(0);
                     if (firstCharacter !== firstCharacter.toUpperCase()) {
-                        this.addFailure(this.createFailure(position, node.identifier.width(), ClassNameRule.FAILURE_STRING));
+                        var position = this.positionAfter(node.modifiers, node.classKeyword);
+                        this.addFailureAt(position, node.identifier.width());
                     }
                 }
 
                 _super.prototype.visitClassDeclaration.call(this, node);
             };
-            return ClassNameWalker;
+
+            NameWalker.prototype.visitInterfaceDeclaration = function (node) {
+                var interfaceName = node.identifier.text();
+                if (interfaceName.length > 0) {
+                    var firstCharacter = interfaceName.charAt(0);
+                    if (firstCharacter !== firstCharacter.toUpperCase()) {
+                        var position = this.positionAfter(node.modifiers, node.interfaceKeyword);
+                        this.addFailureAt(position, node.identifier.width());
+                    }
+                }
+
+                _super.prototype.visitInterfaceDeclaration.call(this, node);
+            };
+
+            NameWalker.prototype.addFailureAt = function (position, width) {
+                var failure = this.createFailure(position, width, ClassNameRule.FAILURE_STRING);
+                this.addFailure(failure);
+            };
+            return NameWalker;
         })(Lint.RuleWalker);
     })(Lint.Rules || (Lint.Rules = {}));
     var Rules = Lint.Rules;
