@@ -27166,11 +27166,25 @@ var Lint;
                 if (listCount > 0) {
                     var trivia = triviaList.syntaxTriviaAt(listCount - 1);
                     if (trivia.kind() === TypeScript.SyntaxKind.WhitespaceTrivia) {
-                        indentationCount = trivia.fullWidth();
+                        indentationCount = this.getWhitespaceWidth(trivia.fullText());
                     }
                 }
 
                 return indentationCount;
+            };
+
+            IndentWalker.prototype.getWhitespaceWidth = function (whitespace) {
+                var width = 0;
+                for (var i = 0; i < whitespace.length; ++i) {
+                    var charCode = whitespace.charCodeAt(i);
+                    if (charCode === TypeScript.CharacterCodes.tab) {
+                        width += 4;
+                    } else {
+                        width += 1;
+                    }
+                }
+
+                return width;
             };
             IndentWalker.FAILURE_STRING = "unexpected tab width: ";
             return IndentWalker;
