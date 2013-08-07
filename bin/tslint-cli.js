@@ -26297,6 +26297,7 @@ var Lint;
             ClassNameRule.prototype.apply = function (syntaxTree) {
                 return this.applyWithWalker(new ClassNameWalker(syntaxTree));
             };
+            ClassNameRule.FAILURE_STRING = "class name must start with an uppercase character";
             return ClassNameRule;
         })(Rules.AbstractRule);
         Rules.ClassNameRule = ClassNameRule;
@@ -26312,13 +26313,12 @@ var Lint;
                 if (className.length > 0) {
                     var firstCharacter = className.charAt(0);
                     if (firstCharacter !== firstCharacter.toUpperCase()) {
-                        this.addFailure(this.createFailure(position, node.identifier.width(), ClassNameWalker.FAILURE_STRING));
+                        this.addFailure(this.createFailure(position, node.identifier.width(), ClassNameRule.FAILURE_STRING));
                     }
                 }
 
                 _super.prototype.visitClassDeclaration.call(this, node);
             };
-            ClassNameWalker.FAILURE_STRING = "class name must start with an uppercase character";
             return ClassNameWalker;
         })(Lint.RuleWalker);
     })(Lint.Rules || (Lint.Rules = {}));
