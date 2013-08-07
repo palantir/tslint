@@ -76,14 +76,7 @@ module Lint.Rules {
             super.visitMemberFunctionDeclaration(node);
         }
 
-        // enum declaration
-        public visitObjectType(node: TypeScript.ObjectTypeSyntax): void {
-            this.visitToken(node.openBraceToken);
-            this.checkAndVisitSeparatedList(node.typeMembers);
-            this.visitToken(node.closeBraceToken);
-        }
-
-        // object literal
+        // object literal indentation
         public visitObjectLiteralExpression(node: TypeScript.ObjectLiteralExpressionSyntax): void {
             this.visitToken(node.openBraceToken);
             this.checkAndVisitSeparatedList(node.propertyAssignments);

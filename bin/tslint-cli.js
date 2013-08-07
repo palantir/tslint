@@ -27067,12 +27067,6 @@ var Lint;
                 _super.prototype.visitMemberFunctionDeclaration.call(this, node);
             };
 
-            IndentWalker.prototype.visitObjectType = function (node) {
-                this.visitToken(node.openBraceToken);
-                this.checkAndVisitSeparatedList(node.typeMembers);
-                this.visitToken(node.closeBraceToken);
-            };
-
             IndentWalker.prototype.visitObjectLiteralExpression = function (node) {
                 this.visitToken(node.openBraceToken);
                 this.checkAndVisitSeparatedList(node.propertyAssignments);
