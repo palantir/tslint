@@ -26,6 +26,7 @@
 /// <reference path='indentRule.ts'/>
 /// <reference path='maxLenRule.ts'/>
 /// <reference path='noArgRule.ts'/>
+/// <reference path='noConsoleRule.ts'/>
 /// <reference path='oneLineRule.ts'/>
 /// <reference path='quoteMarkRule.ts'/>
 /// <reference path='semicolonRule.ts'/>
@@ -48,6 +49,7 @@ module Lint.Rules {
         "indent": IndentRule.prototype,
         "maxlen": MaxLenRule.prototype,
         "noarg": NoArgRule.prototype,
+        "noconsole": NoConsoleRule.prototype,
         "oneline": OneLineRule.prototype,
         "quotemark": QuoteMarkRule.prototype,
         "semicolon": SemicolonRule.prototype,

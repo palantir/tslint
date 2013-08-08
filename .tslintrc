@@ -12,6 +12,7 @@
   "classname": true,
   "varname": true,
   "noarg": true,
+  "noconsole": "debug, info, log, time, timeEnd, trace",
   "sub": true,
   "debug": true,
   "forin": true,
