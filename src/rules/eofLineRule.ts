@@ -21,18 +21,18 @@
 module Lint.Rules {
 
     export class EofLineRule extends AbstractRule {
+        public static FAILURE_STRING = "file should end with a newline";
+
         public isEnabled(): boolean {
             return this.getValue() === true;
         }
 
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            return this.applyWithWalker(new EOFWalker(syntaxTree));
+            return this.applyWithWalker(new EofWalker(syntaxTree));
         }
     }
 
-    class EOFWalker extends Lint.StateAwareRuleWalker {
-        static FAILURE_STRING = "file should end with a newline";
-
+    class EofWalker extends Lint.StateAwareRuleWalker {
         public visitToken(token: TypeScript.ISyntaxToken): void {
             this.handleToken(token);
             super.visitToken(token);
@@ -55,7 +55,7 @@ module Lint.Rules {
                 }
 
                 if (!endsWithNewLine) {
-                    this.addFailure(this.createFailure(this.position(), 1, EOFWalker.FAILURE_STRING));
+                    this.addFailure(this.createFailure(this.position(), 1, EofLineRule.FAILURE_STRING));
                 }
             }
         }
