@@ -20,6 +20,8 @@
 module Lint.Rules {
 
     export class DebugRule extends AbstractRule {
+        public static FAILURE_STRING = "use of debugger statements is disallowed";
+
         public isEnabled() : boolean {
             return this.getValue() === true;
         }
@@ -30,19 +32,15 @@ module Lint.Rules {
     }
 
     class DebugWalker extends Lint.RuleWalker {
-        static DEBUG_FAILURE = "use of debugger statements is disallowed";
-
         public visitToken(token : TypeScript.ISyntaxToken): void {
             this.handleToken(token);
             super.visitToken(token);
        }
 
-        private handleToken(operatorToken: TypeScript.ISyntaxToken) {
-            var failure = null;
-            var operatorKind = operatorToken.kind();
-
-            if (operatorKind === TypeScript.SyntaxKind.DebuggerKeyword) {
-                this.addFailure(this.createFailure(this.position(), operatorToken.width(), DebugWalker.DEBUG_FAILURE));
+        private handleToken(token: TypeScript.ISyntaxToken) {
+            if (token.kind() === TypeScript.SyntaxKind.DebuggerKeyword) {
+                var position = this.position() + token.leadingTriviaWidth();
+                this.addFailure(this.createFailure(position, token.width(), DebugRule.FAILURE_STRING));
             }
         }
     }

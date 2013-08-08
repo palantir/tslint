@@ -26771,6 +26771,7 @@ var Lint;
             DebugRule.prototype.apply = function (syntaxTree) {
                 return this.applyWithWalker(new DebugWalker(syntaxTree));
             };
+            DebugRule.FAILURE_STRING = "use of debugger statements is disallowed";
             return DebugRule;
         })(Rules.AbstractRule);
         Rules.DebugRule = DebugRule;
@@ -26785,15 +26786,12 @@ var Lint;
                 _super.prototype.visitToken.call(this, token);
             };
 
-            DebugWalker.prototype.handleToken = function (operatorToken) {
-                var failure = null;
-                var operatorKind = operatorToken.kind();
-
-                if (operatorKind === TypeScript.SyntaxKind.DebuggerKeyword) {
-                    this.addFailure(this.createFailure(this.position(), operatorToken.width(), DebugWalker.DEBUG_FAILURE));
+            DebugWalker.prototype.handleToken = function (token) {
+                if (token.kind() === TypeScript.SyntaxKind.DebuggerKeyword) {
+                    var position = this.position() + token.leadingTriviaWidth();
+                    this.addFailure(this.createFailure(position, token.width(), DebugRule.FAILURE_STRING));
                 }
             };
-            DebugWalker.DEBUG_FAILURE = "use of debugger statements is disallowed";
             return DebugWalker;
         })(Lint.RuleWalker);
     })(Lint.Rules || (Lint.Rules = {}));
