@@ -20,6 +20,8 @@
 module Lint.Rules {
 
     export class EvilRule extends AbstractRule {
+        public static FAILURE_STRING = "forbidden eval";
+
         public isEnabled() : boolean {
             return this.getValue() === true;
         }
@@ -30,15 +32,13 @@ module Lint.Rules {
     }
 
     class EvilWalker extends Lint.RuleWalker {
-        static FAILURE_STRING = "forbidden eval";
-
         public visitInvocationExpression(node: TypeScript.InvocationExpressionSyntax): void {
             var expression = node.expression;
             if (expression.isToken() && expression.kind() === TypeScript.SyntaxKind.IdentifierName) {
                 var firstToken = expression.firstToken();
                 if (firstToken.text() === "eval") {
                     var position = this.position() + node.leadingTriviaWidth();
-                    this.addFailure(this.createFailure(position, firstToken.width(), EvilWalker.FAILURE_STRING));
+                    this.addFailure(this.createFailure(position, firstToken.width(), EvilRule.FAILURE_STRING));
                 }
             }
 

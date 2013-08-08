@@ -20,6 +20,9 @@
 module Lint.Rules {
 
     export class EqEqEqRule extends AbstractRule {
+        public static EQ_FAILURE_STRING = "== should be ===";
+        public static NEQ_FAILURE_STRING = "!= should be !==";
+
         public isEnabled() : boolean {
             return this.getValue() === true;
         }
@@ -30,9 +33,6 @@ module Lint.Rules {
     }
 
     class ComparisonWalker extends Lint.RuleWalker {
-        static EQ_FAILURE = "== should be ===";
-        static NEQ_FAILURE = "!= should be !==";
-
         public visitBinaryExpression(node: TypeScript.BinaryExpressionSyntax): void {
             var position = this.positionAfter(node.left);
             this.handleOperatorToken(position, node.operatorToken);
@@ -44,9 +44,9 @@ module Lint.Rules {
             var operatorKind = operatorToken.kind();
 
             if (operatorKind === TypeScript.SyntaxKind.EqualsEqualsToken) {
-                failure = this.createFailure(position, operatorToken.width(), ComparisonWalker.EQ_FAILURE);
+                failure = this.createFailure(position, operatorToken.width(), EqEqEqRule.EQ_FAILURE_STRING);
             } else if (operatorKind === TypeScript.SyntaxKind.ExclamationEqualsToken) {
-                failure = this.createFailure(position, operatorToken.width(), ComparisonWalker.NEQ_FAILURE);
+                failure = this.createFailure(position, operatorToken.width(), EqEqEqRule.NEQ_FAILURE_STRING);
             }
 
             if (failure) {

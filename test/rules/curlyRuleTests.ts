@@ -2,7 +2,7 @@
 
 describe("<curly>", () => {
     var actualFailures;
-    var fileName = "rules/curly.test.ts"
+    var fileName = "rules/curly.test.ts";
 
     before(() => {
         actualFailures = Lint.Test.applyRuleOnFile(fileName, "curly");

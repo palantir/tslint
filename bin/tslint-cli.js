@@ -26835,23 +26835,24 @@ var Lint;
             };
 
             EofLineRule.prototype.apply = function (syntaxTree) {
-                return this.applyWithWalker(new EOFWalker(syntaxTree));
+                return this.applyWithWalker(new EofWalker(syntaxTree));
             };
+            EofLineRule.FAILURE_STRING = "file should end with a newline";
             return EofLineRule;
         })(Rules.AbstractRule);
         Rules.EofLineRule = EofLineRule;
 
-        var EOFWalker = (function (_super) {
-            __extends(EOFWalker, _super);
-            function EOFWalker() {
+        var EofWalker = (function (_super) {
+            __extends(EofWalker, _super);
+            function EofWalker() {
                 _super.apply(this, arguments);
             }
-            EOFWalker.prototype.visitToken = function (token) {
+            EofWalker.prototype.visitToken = function (token) {
                 this.handleToken(token);
                 _super.prototype.visitToken.call(this, token);
             };
 
-            EOFWalker.prototype.handleToken = function (token) {
+            EofWalker.prototype.handleToken = function (token) {
                 var lastState = this.getLastState();
                 if (lastState !== undefined && token.kind() === TypeScript.SyntaxKind.EndOfFileToken) {
                     var endsWithNewLine = false;
@@ -26866,20 +26867,19 @@ var Lint;
                     }
 
                     if (!endsWithNewLine) {
-                        this.addFailure(this.createFailure(this.position(), 1, EOFWalker.FAILURE_STRING));
+                        this.addFailure(this.createFailure(this.position(), 1, EofLineRule.FAILURE_STRING));
                     }
                 }
             };
 
-            EOFWalker.prototype.hasNewLineAtEnd = function (triviaList) {
+            EofWalker.prototype.hasNewLineAtEnd = function (triviaList) {
                 if (triviaList.count() <= 0 || !triviaList.hasNewLine()) {
                     return false;
                 }
 
                 return triviaList.last().isNewLine();
             };
-            EOFWalker.FAILURE_STRING = "file should end with a newline";
-            return EOFWalker;
+            return EofWalker;
         })(Lint.StateAwareRuleWalker);
     })(Lint.Rules || (Lint.Rules = {}));
     var Rules = Lint.Rules;
@@ -26899,6 +26899,8 @@ var Lint;
             EqEqEqRule.prototype.apply = function (syntaxTree) {
                 return this.applyWithWalker(new ComparisonWalker(syntaxTree));
             };
+            EqEqEqRule.EQ_FAILURE_STRING = "== should be ===";
+            EqEqEqRule.NEQ_FAILURE_STRING = "!= should be !==";
             return EqEqEqRule;
         })(Rules.AbstractRule);
         Rules.EqEqEqRule = EqEqEqRule;
@@ -26919,17 +26921,15 @@ var Lint;
                 var operatorKind = operatorToken.kind();
 
                 if (operatorKind === TypeScript.SyntaxKind.EqualsEqualsToken) {
-                    failure = this.createFailure(position, operatorToken.width(), ComparisonWalker.EQ_FAILURE);
+                    failure = this.createFailure(position, operatorToken.width(), EqEqEqRule.EQ_FAILURE_STRING);
                 } else if (operatorKind === TypeScript.SyntaxKind.ExclamationEqualsToken) {
-                    failure = this.createFailure(position, operatorToken.width(), ComparisonWalker.NEQ_FAILURE);
+                    failure = this.createFailure(position, operatorToken.width(), EqEqEqRule.NEQ_FAILURE_STRING);
                 }
 
                 if (failure) {
                     this.addFailure(failure);
                 }
             };
-            ComparisonWalker.EQ_FAILURE = "== should be ===";
-            ComparisonWalker.NEQ_FAILURE = "!= should be !==";
             return ComparisonWalker;
         })(Lint.RuleWalker);
     })(Lint.Rules || (Lint.Rules = {}));
@@ -26950,6 +26950,7 @@ var Lint;
             EvilRule.prototype.apply = function (syntaxTree) {
                 return this.applyWithWalker(new EvilWalker(syntaxTree));
             };
+            EvilRule.FAILURE_STRING = "forbidden eval";
             return EvilRule;
         })(Rules.AbstractRule);
         Rules.EvilRule = EvilRule;
@@ -26965,13 +26966,12 @@ var Lint;
                     var firstToken = expression.firstToken();
                     if (firstToken.text() === "eval") {
                         var position = this.position() + node.leadingTriviaWidth();
-                        this.addFailure(this.createFailure(position, firstToken.width(), EvilWalker.FAILURE_STRING));
+                        this.addFailure(this.createFailure(position, firstToken.width(), EvilRule.FAILURE_STRING));
                     }
                 }
 
                 _super.prototype.visitInvocationExpression.call(this, node);
             };
-            EvilWalker.FAILURE_STRING = "forbidden eval";
             return EvilWalker;
         })(Lint.RuleWalker);
     })(Lint.Rules || (Lint.Rules = {}));
