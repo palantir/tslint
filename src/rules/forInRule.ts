@@ -38,39 +38,24 @@ module Lint.Rules {
         }
 
         private handleForInStatement(node: TypeScript.ForInStatementSyntax) {
-            var failure = null;
-
             var statement = node.statement;
-            var statementChildCount = statement.childCount();
-            for (var i = 0; i < statementChildCount; i++) {
-                var child = statement.childAt(i);
-                var childKind = child.kind();
+            var statementKind = node.statement.kind();
 
-                // Ignore the braces surrounding the body
-                if (childKind !== TypeScript.SyntaxKind.FirstPunctuation &&
-                    childKind !== TypeScript.SyntaxKind.CloseBraceToken) {
+            if (statementKind === TypeScript.SyntaxKind.IfStatement) {
+                return;
+            }
 
-                    if (childKind !== TypeScript.SyntaxKind.List) {
-                        throw new Error("The only possible children are opening punctuation, a list, and a closing brace");
-                    }
-
-                    var grandChildrenCount = child.childCount();
-                    // There has to be either no body of the for-in loop or a single if statement
-                    if (grandChildrenCount > 1) {
-                        failure = this.createFailure(this.position(), node.width(), ForInWalker.FOR_IN_FAILURE);
-                    } else if (grandChildrenCount === 1) {
-                        var grandChild = child.childAt(0);
-                        // The enclosing statement inside the for-in loop must be a single if statement
-                        if (grandChild.kind() !== TypeScript.SyntaxKind.IfStatement) {
-                            failure = this.createFailure(this.position(), node.width(), ForInWalker.FOR_IN_FAILURE);
-                        }
-                    }
+            if (statementKind === TypeScript.SyntaxKind.Block && statement.childCount() > 0) {
+                var blockNode = <TypeScript.BlockSyntax> statement;
+                var blockStatements = blockNode.statements;
+                if (blockStatements.childCount() === 1 &&
+                    blockStatements.childAt(0).kind() === TypeScript.SyntaxKind.IfStatement) {
+                    return;
                 }
             }
 
-            if (failure) {
-                this.addFailure(failure);
-            }
+            var failure = this.createFailure(this.position(), node.width(), ForInWalker.FOR_IN_FAILURE);
+            this.addFailure(failure);
         }
     }
 
