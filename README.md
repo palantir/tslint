@@ -20,6 +20,7 @@ Supported Rules
 * `classname` enforces PascalCased class names.
 * `varname` allows only camelCased or UPPER_CASED variable names.
 * `noarg` disallows access to `arguments.callee`.
+* `noconsole` disallows access to the specified properties on `console`. Property configurations are comma-delimited.
 * `sub` disallows object access via string literals.
 * `forin` enforces a `for ... in` statement to be filtered with an `if` statement.
 * `debug` disallows `debugger` statements.
