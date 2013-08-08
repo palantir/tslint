@@ -26992,6 +26992,7 @@ var Lint;
             ForInRule.prototype.apply = function (syntaxTree) {
                 return this.applyWithWalker(new ForInWalker(syntaxTree));
             };
+            ForInRule.FAILURE_STRING = "for (... in ...) statements must be filtered with an if statement";
             return ForInRule;
         })(Rules.AbstractRule);
         Rules.ForInRule = ForInRule;
@@ -27022,10 +27023,10 @@ var Lint;
                     }
                 }
 
-                var failure = this.createFailure(this.position(), node.width(), ForInWalker.FOR_IN_FAILURE);
+                var position = this.position() + node.leadingTriviaWidth();
+                var failure = this.createFailure(position, node.width(), ForInRule.FAILURE_STRING);
                 this.addFailure(failure);
             };
-            ForInWalker.FOR_IN_FAILURE = "for (... in ...) statements must be filtered with an if statement";
             return ForInWalker;
         })(Lint.RuleWalker);
     })(Lint.Rules || (Lint.Rules = {}));
@@ -27043,6 +27044,7 @@ var Lint;
                 var tabWidth = parseInt(this.getValue());
                 return this.applyWithWalker(new IndentWalker(syntaxTree, tabWidth));
             };
+            IndentRule.FAILURE_STRING = "unexpected tab width: ";
             return IndentRule;
         })(Rules.AbstractRule);
         Rules.IndentRule = IndentRule;
@@ -27169,7 +27171,7 @@ var Lint;
 
                 if (expectedIndentation !== actualIndentation) {
                     var position = this.position() + nodeOrToken.leadingTriviaWidth();
-                    var error = IndentWalker.FAILURE_STRING + "expected " + expectedIndentation + ", " + "got " + actualIndentation;
+                    var error = IndentRule.FAILURE_STRING + "expected " + expectedIndentation + ", " + "got " + actualIndentation;
 
                     this.addFailure(this.createFailure(position, nodeOrToken.width(), error));
                 }
@@ -27203,7 +27205,6 @@ var Lint;
 
                 return width;
             };
-            IndentWalker.FAILURE_STRING = "unexpected tab width: ";
             return IndentWalker;
         })(Lint.RuleWalker);
     })(Lint.Rules || (Lint.Rules = {}));
