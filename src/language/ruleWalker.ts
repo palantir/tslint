@@ -45,14 +45,11 @@ module Lint {
 
         public positionAfter(...elements: TypeScript.ISyntaxElement[]): number {
             var position = this.position();
-
-            for (var i = 0; i < elements.length; ++i) {
-                var element = elements[i];
+            elements.forEach((element) => {
                 if (element !== null) {
                     position += element.fullWidth();
                 }
-              }
-
+            });
             return position;
         }
 

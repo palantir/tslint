@@ -41,11 +41,13 @@ module Lint.Rules {
             var statement = node.statement;
             var statementKind = node.statement.kind();
 
+            // a direct IF statement under a for...in is valid
             if (statementKind === TypeScript.SyntaxKind.IfStatement) {
                 return;
             }
 
-            if (statementKind === TypeScript.SyntaxKind.Block && statement.childCount() > 0) {
+            // if there is a block, verify that it has a single if statement
+            if (statementKind === TypeScript.SyntaxKind.Block) {
                 var blockNode = <TypeScript.BlockSyntax> statement;
                 var blockStatements = blockNode.statements;
                 if (blockStatements.childCount() === 1 &&

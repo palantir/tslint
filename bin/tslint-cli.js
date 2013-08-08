@@ -26492,14 +26492,11 @@ var Lint;
                 elements[_i] = arguments[_i + 0];
             }
             var position = this.position();
-
-            for (var i = 0; i < elements.length; ++i) {
-                var element = elements[i];
+            elements.forEach(function (element) {
                 if (element !== null) {
                     position += element.fullWidth();
                 }
-            }
-
+            });
             return position;
         };
 
@@ -26674,6 +26671,11 @@ var Lint;
             CurlyRule.prototype.apply = function (syntaxTree) {
                 return this.applyWithWalker(new CurlyWalker(syntaxTree));
             };
+            CurlyRule.DO_FAILURE_STRING = "do statements must be braced";
+            CurlyRule.ELSE_FAILURE_STRING = "else statements must be braced";
+            CurlyRule.FOR_FAILURE_STRING = "for statements must be braced";
+            CurlyRule.IF_FAILURE_STRING = "if statements must be braced";
+            CurlyRule.WHILE_FAILURE_STRING = "while statements must be braced";
             return CurlyRule;
         })(Rules.AbstractRule);
         Rules.CurlyRule = CurlyRule;
@@ -26684,53 +26686,71 @@ var Lint;
                 _super.apply(this, arguments);
             }
             CurlyWalker.prototype.visitForInStatement = function (node) {
-                this.verifyStatementIsBraced(node.statement);
+                if (!this.isStatementBraced(node.statement)) {
+                    this.addFailureForNode(node, CurlyRule.FOR_FAILURE_STRING);
+                }
+
                 _super.prototype.visitForInStatement.call(this, node);
             };
 
             CurlyWalker.prototype.visitForStatement = function (node) {
-                this.verifyStatementIsBraced(node.statement);
+                if (!this.isStatementBraced(node.statement)) {
+                    this.addFailureForNode(node, CurlyRule.FOR_FAILURE_STRING);
+                }
+
                 _super.prototype.visitForStatement.call(this, node);
             };
 
             CurlyWalker.prototype.visitIfStatement = function (node) {
-                this.verifyStatementIsBraced(node.statement);
+                if (!this.isStatementBraced(node.statement)) {
+                    this.addFailureForNode(node, CurlyRule.IF_FAILURE_STRING);
+                }
+
                 _super.prototype.visitIfStatement.call(this, node);
             };
 
             CurlyWalker.prototype.visitElseClause = function (node) {
-                if (node.statement.kind() !== TypeScript.SyntaxKind.IfStatement) {
-                    this.verifyStatementIsBraced(node.statement);
+                if (node.statement.kind() !== TypeScript.SyntaxKind.IfStatement && !this.isStatementBraced(node.statement)) {
+                    this.addFailureForNode(node, CurlyRule.ELSE_FAILURE_STRING);
                 }
+
                 _super.prototype.visitElseClause.call(this, node);
             };
 
             CurlyWalker.prototype.visitDoStatement = function (node) {
-                this.verifyStatementIsBraced(node.statement);
+                if (!this.isStatementBraced(node.statement)) {
+                    this.addFailureForNode(node, CurlyRule.DO_FAILURE_STRING);
+                }
+
                 _super.prototype.visitDoStatement.call(this, node);
             };
 
             CurlyWalker.prototype.visitWhileStatement = function (node) {
-                this.verifyStatementIsBraced(node.statement);
+                if (!this.isStatementBraced(node.statement)) {
+                    this.addFailureForNode(node, CurlyRule.WHILE_FAILURE_STRING);
+                }
+
                 _super.prototype.visitWhileStatement.call(this, node);
             };
 
-            CurlyWalker.prototype.verifyStatementIsBraced = function (node) {
-                var failure = null;
-                var hasBraces = false;
-
+            CurlyWalker.prototype.isStatementBraced = function (node) {
                 var childCount = node.childCount();
                 if (childCount === 3) {
                     if (node.childAt(0).kind() === TypeScript.SyntaxKind.FirstPunctuation && node.childAt(1).kind() === TypeScript.SyntaxKind.List && node.childAt(2).kind() === TypeScript.SyntaxKind.CloseBraceToken) {
-                        hasBraces = true;
+                        return true;
                     }
                 }
 
-                if (!hasBraces) {
-                    this.addFailure(this.createFailure(this.position(), node.width(), CurlyWalker.CURLY_FAILURE));
-                }
+                return false;
             };
-            CurlyWalker.CURLY_FAILURE = "if/for/do/while statements must be braced";
+
+            CurlyWalker.prototype.addFailureForNode = function (node, failure) {
+                var leadingWidth = node.leadingTriviaWidth();
+                var start = this.position() + leadingWidth;
+                var end = node.width();
+
+                this.addFailure(this.createFailure(start, end, failure));
+            };
             return CurlyWalker;
         })(Lint.RuleWalker);
     })(Lint.Rules || (Lint.Rules = {}));
@@ -26989,36 +27009,23 @@ var Lint;
             };
 
             ForInWalker.prototype.handleForInStatement = function (node) {
-                var failure = null;
-
                 var statement = node.statement;
-                var statementChildCount = statement.childCount();
-                for (var i = 0; i < statementChildCount; i++) {
-                    var child = statement.childAt(i);
-                    var childKind = child.kind();
+                var statementKind = node.statement.kind();
 
-                    if (childKind !== TypeScript.SyntaxKind.FirstPunctuation && childKind !== TypeScript.SyntaxKind.CloseBraceToken) {
-                        if (childKind !== TypeScript.SyntaxKind.List) {
-                            throw new Error("The only possible children are opening punctuation, a list, and a closing brace");
-                        }
+                if (statementKind === TypeScript.SyntaxKind.IfStatement) {
+                    return;
+                }
 
-                        var grandChildrenCount = child.childCount();
-
-                        if (grandChildrenCount > 1) {
-                            failure = this.createFailure(this.position(), node.width(), ForInWalker.FOR_IN_FAILURE);
-                        } else if (grandChildrenCount === 1) {
-                            var grandChild = child.childAt(0);
-
-                            if (grandChild.kind() !== TypeScript.SyntaxKind.IfStatement) {
-                                failure = this.createFailure(this.position(), node.width(), ForInWalker.FOR_IN_FAILURE);
-                            }
-                        }
+                if (statementKind === TypeScript.SyntaxKind.Block) {
+                    var blockNode = statement;
+                    var blockStatements = blockNode.statements;
+                    if (blockStatements.childCount() === 1 && blockStatements.childAt(0).kind() === TypeScript.SyntaxKind.IfStatement) {
+                        return;
                     }
                 }
 
-                if (failure) {
-                    this.addFailure(failure);
-                }
+                var failure = this.createFailure(this.position(), node.width(), ForInWalker.FOR_IN_FAILURE);
+                this.addFailure(failure);
             };
             ForInWalker.FOR_IN_FAILURE = "for (... in ...) statements must be filtered with an if statement";
             return ForInWalker;

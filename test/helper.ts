@@ -32,12 +32,14 @@ module Lint.Test {
         return new Lint.RuleFailure(getSyntaxTree(filePath), startPosition, endPosition, failure);
     }
 
+    // return a partial on createFailure
     export function createFailuresOnFile(filePath: string, failure: string) {
         return function(start: number[], end: number[]) {
             return createFailure(filePath, start, end, failure);
         }
     }
 
+    // assert on array equality for failures
     export function assertFailuresEqual(actualFailures: Lint.RuleFailure[], expectedFailures: Lint.RuleFailure[]) {
         assert.equal(actualFailures.length, expectedFailures.length);
         for (var i = 0; i < actualFailures.length; ++i) {
@@ -46,5 +48,16 @@ module Lint.Test {
 
             assert.isTrue(actualFailure.equals(expectedFailure));
         }
+    }
+
+    // assert whether a failure array contains the given failure
+    export function assertContainsFailure(haystack: Lint.RuleFailure[], needle: Lint.RuleFailure) {
+        for (var i = 0; i < haystack.length; ++i) {
+            if(haystack[i].equals(needle)) {
+                return;
+            }
+        }
+
+        assert.fail(needle, haystack, "expected failure not found");
     }
 }

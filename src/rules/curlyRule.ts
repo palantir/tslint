@@ -20,6 +20,12 @@
 module Lint.Rules {
 
     export class CurlyRule extends AbstractRule {
+        public static DO_FAILURE_STRING = "do statements must be braced";
+        public static ELSE_FAILURE_STRING = "else statements must be braced";
+        public static FOR_FAILURE_STRING = "for statements must be braced";
+        public static IF_FAILURE_STRING = "if statements must be braced";
+        public static WHILE_FAILURE_STRING = "while statements must be braced";
+
         public isEnabled(): boolean {
             return this.getValue() === true;
         }
@@ -30,56 +36,75 @@ module Lint.Rules {
     }
 
     class CurlyWalker extends Lint.RuleWalker {
-        static CURLY_FAILURE = "if/for/do/while statements must be braced";
-
         public visitForInStatement(node: TypeScript.ForInStatementSyntax): void {
-            this.verifyStatementIsBraced(node.statement);
+            if (!this.isStatementBraced(node.statement)) {
+                this.addFailureForNode(node, CurlyRule.FOR_FAILURE_STRING);
+            }
+
             super.visitForInStatement(node);
         }
 
         public visitForStatement(node: TypeScript.ForStatementSyntax): void {
-            this.verifyStatementIsBraced(node.statement);
+            if (!this.isStatementBraced(node.statement)) {
+                this.addFailureForNode(node, CurlyRule.FOR_FAILURE_STRING);
+            }
+
             super.visitForStatement(node);
         }
 
         public visitIfStatement(node: TypeScript.IfStatementSyntax): void {
-            this.verifyStatementIsBraced(node.statement);
+            if (!this.isStatementBraced(node.statement)) {
+                this.addFailureForNode(node, CurlyRule.IF_FAILURE_STRING);
+            }
+
             super.visitIfStatement(node);
         }
 
         public visitElseClause(node: TypeScript.ElseClauseSyntax): void {
-            if (node.statement.kind() !== TypeScript.SyntaxKind.IfStatement) {
-                this.verifyStatementIsBraced(node.statement);
+            if (node.statement.kind() !== TypeScript.SyntaxKind.IfStatement &&
+                !this.isStatementBraced(node.statement)) {
+                this.addFailureForNode(node, CurlyRule.ELSE_FAILURE_STRING);
             }
+
             super.visitElseClause(node);
         }
 
         public visitDoStatement(node: TypeScript.DoStatementSyntax): void {
-            this.verifyStatementIsBraced(node.statement);
+            if (!this.isStatementBraced(node.statement)) {
+                this.addFailureForNode(node, CurlyRule.DO_FAILURE_STRING);
+            }
+
             super.visitDoStatement(node);
         }
 
         public visitWhileStatement(node: TypeScript.WhileStatementSyntax): void {
-            this.verifyStatementIsBraced(node.statement);
+            if (!this.isStatementBraced(node.statement)) {
+                this.addFailureForNode(node, CurlyRule.WHILE_FAILURE_STRING);
+            }
+
             super.visitWhileStatement(node);
         }
 
-        private verifyStatementIsBraced(node: TypeScript.IExpressionSyntax) {
-            var failure = null;
-            var hasBraces = false;
-
+        private isStatementBraced(node: TypeScript.IExpressionSyntax): boolean {
             var childCount = node.childCount();
             if (childCount === 3) {
                 if (node.childAt(0).kind() === TypeScript.SyntaxKind.FirstPunctuation &&
                     node.childAt(1).kind() === TypeScript.SyntaxKind.List &&
                     node.childAt(2).kind() === TypeScript.SyntaxKind.CloseBraceToken) {
-                    hasBraces = true;
+
+                    return true;
                 }
             }
 
-            if (!hasBraces) {
-                this.addFailure(this.createFailure(this.position(), node.width(), CurlyWalker.CURLY_FAILURE));
-            }
+            return false;
+        }
+
+        private addFailureForNode(node: TypeScript.ISyntaxElement, failure: string) {
+            var leadingWidth = node.leadingTriviaWidth();
+            var start = this.position() + leadingWidth;
+            var end = node.width();
+
+            this.addFailure(this.createFailure(start, end, failure));
         }
     }
 
