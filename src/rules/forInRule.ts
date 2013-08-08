@@ -20,6 +20,8 @@
 module Lint.Rules {
 
     export class ForInRule extends AbstractRule {
+        public static FAILURE_STRING = "for (... in ...) statements must be filtered with an if statement";
+
         public isEnabled() : boolean {
             return this.getValue() === true;
         }
@@ -30,8 +32,6 @@ module Lint.Rules {
     }
 
     class ForInWalker extends Lint.RuleWalker {
-        static FOR_IN_FAILURE = "for (... in ...) statements must be filtered with an if statement";
-
         public visitForInStatement(node: TypeScript.ForInStatementSyntax): void {
             this.handleForInStatement(node);
             super.visitForInStatement(node);
@@ -41,7 +41,7 @@ module Lint.Rules {
             var statement = node.statement;
             var statementKind = node.statement.kind();
 
-            // a direct IF statement under a for...in is valid
+            // a direct if statement under a for...in is valid
             if (statementKind === TypeScript.SyntaxKind.IfStatement) {
                 return;
             }
@@ -56,7 +56,8 @@ module Lint.Rules {
                 }
             }
 
-            var failure = this.createFailure(this.position(), node.width(), ForInWalker.FOR_IN_FAILURE);
+            var position = this.position() + node.leadingTriviaWidth();
+            var failure = this.createFailure(position, node.width(), ForInRule.FAILURE_STRING);
             this.addFailure(failure);
         }
     }
