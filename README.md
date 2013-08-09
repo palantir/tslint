@@ -17,7 +17,7 @@ Supported Rules
 * `bitwise` disallows bitwise operators.
 * `evil` disallows `eval` function invocations.
 * `eofline` enforces the file to end with a newline.
-* `classname` enforces PascalCased class names.
+* `classname` enforces PascalCased class and interface names.
 * `varname` allows only camelCased or UPPER_CASED variable names.
 * `noarg` disallows access to `arguments.callee`.
 * `noconsole` disallows access to the specified properties on `console`. Property configurations are comma-delimited.
