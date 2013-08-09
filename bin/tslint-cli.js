@@ -27228,7 +27228,7 @@ var Lint;
                 for (var i = 0; i < lineStarts.length - 1; ++i) {
                     var from = lineStarts[i], to = lineStarts[i + 1];
                     if ((to - from - 1) > lineLimit) {
-                        var ruleFailure = new Lint.RuleFailure(syntaxTree, from, to, errorString);
+                        var ruleFailure = new Lint.RuleFailure(syntaxTree, from, to - 1, errorString);
                         ruleFailures.push(ruleFailure);
                     }
                 }
