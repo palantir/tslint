@@ -21,6 +21,7 @@ Supported Rules
 * `varname` allows only camelCased or UPPER_CASED variable names.
 * `noarg` disallows access to `arguments.callee`.
 * `noconsole` disallows access to the specified properties on `console`. Property configurations are comma-delimited.
+   For example, the configuration "noconsole: log, debug, warn" disables `console.log`, `console.debug`, and `console.warn`.
 * `sub` disallows object access via string literals.
 * `forin` enforces a `for ... in` statement to be filtered with an `if` statement.
 * `debug` disallows `debugger` statements.
