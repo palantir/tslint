@@ -47,17 +47,19 @@ module Lint.Rules {
                     lastKind === TypeScript.SyntaxKind.ElseKeyword ||
                     lastKind === TypeScript.SyntaxKind.IdentifierName ||
                     lastKind === TypeScript.SyntaxKind.StringLiteral ||
-                    lastKind === TypeScript.SyntaxKind.TryKeyword) {
+                    lastKind === TypeScript.SyntaxKind.TryKeyword ||
+                    lastKind === TypeScript.SyntaxKind.EqualsToken) {
 
                     var failure;
                     var lastLine = this.getLine(lastState.position);
                     var currentLine = this.getLine(this.position());
+                    var position = this.position() + token.leadingTriviaWidth();
 
                     if (currentLine !== lastLine) {
-                        failure = this.createFailure(this.position(), token.width(), OneLineRule.BRACE_FAILURE_STRING);
+                        failure = this.createFailure(position, token.width(), OneLineRule.BRACE_FAILURE_STRING);
                         this.addFailure(failure);
                     } else if (!this.hasTrailingWhiteSpace(lastState.token)) {
-                        failure = this.createFailure(this.position(), token.width(), OneLineRule.WHITESPACE_FAILURE_STRING);
+                        failure = this.createFailure(position, token.width(), OneLineRule.WHITESPACE_FAILURE_STRING);
                         this.addFailure(failure);
                     }
                   }
@@ -68,8 +70,9 @@ module Lint.Rules {
 
         public visitElseClause(node: TypeScript.ElseClauseSyntax): void {
             var lastState = this.getLastState();
+            var position = this.position() + node.leadingTriviaWidth();
             if (lastState !== undefined && !this.hasTrailingWhiteSpace(lastState.token)) {
-                var failure = this.createFailure(this.position(), node.elseKeyword.width(), OneLineRule.ELSE_FAILURE_STRING);
+                var failure = this.createFailure(position, node.elseKeyword.width(), OneLineRule.ELSE_FAILURE_STRING);
                 this.addFailure(failure);
             }
 
@@ -78,8 +81,9 @@ module Lint.Rules {
 
         public visitCatchClause(node: TypeScript.CatchClauseSyntax): void {
             var lastState = this.getLastState();
+            var position = this.position() + node.leadingTriviaWidth();
             if (lastState !== undefined && !this.hasTrailingWhiteSpace(lastState.token)) {
-                var failure = this.createFailure(this.position(), node.catchKeyword.width(), OneLineRule.CATCH_FAILURE_STRING);
+                var failure = this.createFailure(position, node.catchKeyword.width(), OneLineRule.CATCH_FAILURE_STRING);
                 this.addFailure(failure);
             }
 

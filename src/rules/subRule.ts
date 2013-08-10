@@ -18,8 +18,9 @@
 /// <reference path='abstractRule.ts'/>
 
 module Lint.Rules {
-
     export class SubRule extends AbstractRule {
+        public static FAILURE_STRING = "object access via string literals is disallowed";
+
         public isEnabled() : boolean {
             return this.getValue() === true;
         }
@@ -30,20 +31,18 @@ module Lint.Rules {
       }
 
     class SubWalker extends Lint.RuleWalker {
-        static SUB_FAILURE = "object access via string literals is disallowed";
-
         public visitElementAccessExpression(node: TypeScript.ElementAccessExpressionSyntax): void {
-            super.visitElementAccessExpression(node);
             this.handleElementAccessExpression(node);
+            super.visitElementAccessExpression(node);
         }
 
-        private handleElementAccessExpression(operatorToken: TypeScript.ElementAccessExpressionSyntax) {
-            var argumentExpressionKind = operatorToken.argumentExpression.kind();
+        private handleElementAccessExpression(node: TypeScript.ElementAccessExpressionSyntax) {
+            var argument = node.argumentExpression;
+            var position = this.positionAfter(node.expression, node.openBracketToken);
 
-            if (argumentExpressionKind === TypeScript.SyntaxKind.StringLiteral) {
-                this.addFailure(this.createFailure(this.position(), operatorToken.width(), SubWalker.SUB_FAILURE));
+            if (argument.kind() === TypeScript.SyntaxKind.StringLiteral) {
+                this.addFailure(this.createFailure(position, argument.width(), SubRule.FAILURE_STRING));
             }
         }
-  }
-
+    }
 }

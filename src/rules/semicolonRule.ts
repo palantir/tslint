@@ -20,7 +20,7 @@
 module Lint.Rules {
 
     export class SemicolonRule extends AbstractRule {
-        static FAILURE_STRING = "missing semicolon";
+        public static FAILURE_STRING = "missing semicolon";
 
         public isEnabled() : boolean {
             return this.getValue() === true;
@@ -37,7 +37,7 @@ module Lint.Rules {
                 if (diagnosticKey === TypeScript.DiagnosticCode.Automatic_semicolon_insertion_not_allowed) {
                     var position = diagnostic.start();
                     var lineAndCharacter = syntaxTree.lineMap().getLineAndCharacterFromPosition(position);
-                    var ruleFailure = new Lint.RuleFailure(syntaxTree, position, position + 1, SemicolonRule.FAILURE_STRING);
+                    var ruleFailure = new Lint.RuleFailure(syntaxTree, position, position, SemicolonRule.FAILURE_STRING);
 
                     ruleFailures.push(ruleFailure);
                 }

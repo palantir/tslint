@@ -27369,16 +27369,17 @@ var Lint;
 
                 if (kind === TypeScript.SyntaxKind.OpenBraceToken && lastState !== undefined) {
                     var lastKind = lastState.token.kind();
-                    if (lastKind === TypeScript.SyntaxKind.CloseParenToken || lastKind === TypeScript.SyntaxKind.DoKeyword || lastKind === TypeScript.SyntaxKind.ElseKeyword || lastKind === TypeScript.SyntaxKind.IdentifierName || lastKind === TypeScript.SyntaxKind.StringLiteral || lastKind === TypeScript.SyntaxKind.TryKeyword) {
+                    if (lastKind === TypeScript.SyntaxKind.CloseParenToken || lastKind === TypeScript.SyntaxKind.DoKeyword || lastKind === TypeScript.SyntaxKind.ElseKeyword || lastKind === TypeScript.SyntaxKind.IdentifierName || lastKind === TypeScript.SyntaxKind.StringLiteral || lastKind === TypeScript.SyntaxKind.TryKeyword || lastKind === TypeScript.SyntaxKind.EqualsToken) {
                         var failure;
                         var lastLine = this.getLine(lastState.position);
                         var currentLine = this.getLine(this.position());
+                        var position = this.position() + token.leadingTriviaWidth();
 
                         if (currentLine !== lastLine) {
-                            failure = this.createFailure(this.position(), token.width(), OneLineRule.BRACE_FAILURE_STRING);
+                            failure = this.createFailure(position, token.width(), OneLineRule.BRACE_FAILURE_STRING);
                             this.addFailure(failure);
                         } else if (!this.hasTrailingWhiteSpace(lastState.token)) {
-                            failure = this.createFailure(this.position(), token.width(), OneLineRule.WHITESPACE_FAILURE_STRING);
+                            failure = this.createFailure(position, token.width(), OneLineRule.WHITESPACE_FAILURE_STRING);
                             this.addFailure(failure);
                         }
                     }
@@ -27389,8 +27390,9 @@ var Lint;
 
             BraceWalker.prototype.visitElseClause = function (node) {
                 var lastState = this.getLastState();
+                var position = this.position() + node.leadingTriviaWidth();
                 if (lastState !== undefined && !this.hasTrailingWhiteSpace(lastState.token)) {
-                    var failure = this.createFailure(this.position(), node.elseKeyword.width(), OneLineRule.ELSE_FAILURE_STRING);
+                    var failure = this.createFailure(position, node.elseKeyword.width(), OneLineRule.ELSE_FAILURE_STRING);
                     this.addFailure(failure);
                 }
 
@@ -27399,8 +27401,9 @@ var Lint;
 
             BraceWalker.prototype.visitCatchClause = function (node) {
                 var lastState = this.getLastState();
+                var position = this.position() + node.leadingTriviaWidth();
                 if (lastState !== undefined && !this.hasTrailingWhiteSpace(lastState.token)) {
-                    var failure = this.createFailure(this.position(), node.catchKeyword.width(), OneLineRule.CATCH_FAILURE_STRING);
+                    var failure = this.createFailure(position, node.catchKeyword.width(), OneLineRule.CATCH_FAILURE_STRING);
                     this.addFailure(failure);
                 }
 
@@ -27440,21 +27443,26 @@ var Lint;
             function QuoteMarkRule() {
                 _super.apply(this, arguments);
             }
-            QuoteMarkRule.prototype.apply = function (syntaxTree) {
-                var sourceUnit = syntaxTree.sourceUnit();
+            QuoteMarkRule.prototype.isEnabled = function () {
                 var quoteMarkString = this.getValue();
+                return (quoteMarkString === "single" || quoteMarkString === "double");
+            };
+
+            QuoteMarkRule.prototype.apply = function (syntaxTree) {
                 var quoteMark;
+                var quoteMarkString = this.getValue();
+                var sourceUnit = syntaxTree.sourceUnit();
 
                 if (quoteMarkString === "single") {
                     quoteMark = QuoteMark.SINGLE_QUOTES;
-                } else if (quoteMarkString === "double") {
-                    quoteMark = QuoteMark.DOUBLE_QUOTES;
                 } else {
-                    throw new Error("Unknown quote style " + quoteMarkString);
+                    quoteMark = QuoteMark.DOUBLE_QUOTES;
                 }
 
                 return this.applyWithWalker(new QuoteWalker(syntaxTree, quoteMark));
             };
+            QuoteMarkRule.SINGLE_QUOTE_FAILURE = "\" should be '";
+            QuoteMarkRule.DOUBLE_QUOTE_FAILURE = "' should be \"";
             return QuoteMarkRule;
         })(Rules.AbstractRule);
         Rules.QuoteMarkRule = QuoteMarkRule;
@@ -27470,25 +27478,25 @@ var Lint;
                 _super.prototype.visitToken.call(this, token);
             };
 
-            QuoteWalker.prototype.handleToken = function (operatorToken) {
+            QuoteWalker.prototype.handleToken = function (token) {
                 var failure = null;
-                var operatorKind = operatorToken.kind();
+                if (token.kind() === TypeScript.SyntaxKind.StringLiteral) {
+                    var fullText = token.fullText();
+                    var width = token.width();
+                    var position = this.position() + token.leadingTriviaWidth();
 
-                if (operatorKind === TypeScript.SyntaxKind.StringLiteral) {
-                    var fullText = operatorToken.fullText();
-                    var textStart = operatorToken.leadingTriviaWidth();
-                    var width = operatorToken.width();
+                    var textStart = token.leadingTriviaWidth();
                     var textEnd = textStart + width - 1;
-                    var firstChar = fullText.charAt(textStart);
-                    var lastChar = fullText.charAt(textEnd);
+                    var firstCharacter = fullText.charAt(textStart);
+                    var lastCharacter = fullText.charAt(textEnd);
 
                     if (this.quoteMark === QuoteMark.SINGLE_QUOTES) {
-                        if (firstChar !== "'" || lastChar !== "'") {
-                            failure = this.createFailure(this.position(), width, QuoteWalker.SINGLE_QUOTE_FAILURE);
+                        if (firstCharacter !== "'" || lastCharacter !== "'") {
+                            failure = this.createFailure(position, width, QuoteMarkRule.SINGLE_QUOTE_FAILURE);
                         }
                     } else if (this.quoteMark === QuoteMark.DOUBLE_QUOTES) {
-                        if (firstChar !== "\"" || lastChar !== "\"") {
-                            failure = this.createFailure(this.position(), width, QuoteWalker.DOUBLE_QUOTE_FAILURE);
+                        if (firstCharacter !== "\"" || lastCharacter !== "\"") {
+                            failure = this.createFailure(position, width, QuoteMarkRule.DOUBLE_QUOTE_FAILURE);
                         }
                     }
                 }
@@ -27497,8 +27505,6 @@ var Lint;
                     this.addFailure(failure);
                 }
             };
-            QuoteWalker.DOUBLE_QUOTE_FAILURE = "' should be \"";
-            QuoteWalker.SINGLE_QUOTE_FAILURE = "\" should be '";
             return QuoteWalker;
         })(Lint.RuleWalker);
     })(Lint.Rules || (Lint.Rules = {}));
@@ -27527,7 +27533,7 @@ var Lint;
                     if (diagnosticKey === TypeScript.DiagnosticCode.Automatic_semicolon_insertion_not_allowed) {
                         var position = diagnostic.start();
                         var lineAndCharacter = syntaxTree.lineMap().getLineAndCharacterFromPosition(position);
-                        var ruleFailure = new Lint.RuleFailure(syntaxTree, position, position + 1, SemicolonRule.FAILURE_STRING);
+                        var ruleFailure = new Lint.RuleFailure(syntaxTree, position, position, SemicolonRule.FAILURE_STRING);
 
                         ruleFailures.push(ruleFailure);
                     }
@@ -27557,6 +27563,7 @@ var Lint;
             SubRule.prototype.apply = function (syntaxTree) {
                 return this.applyWithWalker(new SubWalker(syntaxTree));
             };
+            SubRule.SUB_FAILURE = "object access via string literals is disallowed";
             return SubRule;
         })(Rules.AbstractRule);
         Rules.SubRule = SubRule;
@@ -27567,18 +27574,18 @@ var Lint;
                 _super.apply(this, arguments);
             }
             SubWalker.prototype.visitElementAccessExpression = function (node) {
-                _super.prototype.visitElementAccessExpression.call(this, node);
                 this.handleElementAccessExpression(node);
+                _super.prototype.visitElementAccessExpression.call(this, node);
             };
 
-            SubWalker.prototype.handleElementAccessExpression = function (operatorToken) {
-                var argumentExpressionKind = operatorToken.argumentExpression.kind();
+            SubWalker.prototype.handleElementAccessExpression = function (node) {
+                var argument = node.argumentExpression;
+                var position = this.positionAfter(node.expression, node.openBracketToken);
 
-                if (argumentExpressionKind === TypeScript.SyntaxKind.StringLiteral) {
-                    this.addFailure(this.createFailure(this.position(), operatorToken.width(), SubWalker.SUB_FAILURE));
+                if (argument.kind() === TypeScript.SyntaxKind.StringLiteral) {
+                    this.addFailure(this.createFailure(position, argument.width(), SubRule.SUB_FAILURE));
                 }
             };
-            SubWalker.SUB_FAILURE = "object access via string literals is disallowed";
             return SubWalker;
         })(Lint.RuleWalker);
     })(Lint.Rules || (Lint.Rules = {}));

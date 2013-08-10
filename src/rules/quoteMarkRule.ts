@@ -18,24 +18,29 @@
 /// <reference path='abstractRule.ts'/>
 
 module Lint.Rules {
-
     enum QuoteMark {
         SINGLE_QUOTES,
         DOUBLE_QUOTES
     }
 
     export class QuoteMarkRule extends AbstractRule {
+        public static SINGLE_QUOTE_FAILURE = "\" should be '";
+        public static DOUBLE_QUOTE_FAILURE = "' should be \"";
+
+        public isEnabled(): boolean {
+            var quoteMarkString = this.getValue();
+            return (quoteMarkString === "single" || quoteMarkString === "double");
+        }
+
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
+            var quoteMark: QuoteMark;
+            var quoteMarkString = this.getValue();
             var sourceUnit = syntaxTree.sourceUnit();
-            var quoteMarkString : string = this.getValue();
-            var quoteMark : QuoteMark;
 
             if (quoteMarkString === "single") {
                 quoteMark = QuoteMark.SINGLE_QUOTES;
-            } else if (quoteMarkString === "double") {
-                quoteMark = QuoteMark.DOUBLE_QUOTES;
             } else {
-                throw new Error("Unknown quote style " + quoteMarkString);
+                quoteMark = QuoteMark.DOUBLE_QUOTES;
             }
 
             return this.applyWithWalker(new QuoteWalker(syntaxTree, quoteMark));
@@ -43,10 +48,7 @@ module Lint.Rules {
     }
 
     class QuoteWalker extends Lint.RuleWalker {
-        static DOUBLE_QUOTE_FAILURE = "' should be \"";
-        static SINGLE_QUOTE_FAILURE = "\" should be '";
-
-        private quoteMark : QuoteMark;
+        private quoteMark: QuoteMark;
 
         constructor(syntaxTree: TypeScript.SyntaxTree, quoteMark: QuoteMark) {
             super(syntaxTree);
@@ -58,25 +60,25 @@ module Lint.Rules {
             super.visitToken(token);
         }
 
-        private handleToken(operatorToken: TypeScript.ISyntaxToken) {
+        private handleToken(token: TypeScript.ISyntaxToken) {
             var failure = null;
-            var operatorKind = operatorToken.kind();
+            if (token.kind() === TypeScript.SyntaxKind.StringLiteral) {
+                var fullText = token.fullText();
+                var width = token.width();
+                var position = this.position() + token.leadingTriviaWidth();
 
-            if (operatorKind === TypeScript.SyntaxKind.StringLiteral) {
-                var fullText = operatorToken.fullText();
-                var textStart = operatorToken.leadingTriviaWidth();
-                var width = operatorToken.width();
+                var textStart = token.leadingTriviaWidth();
                 var textEnd = textStart + width - 1;
-                var firstChar = fullText.charAt(textStart);
-                var lastChar = fullText.charAt(textEnd);
+                var firstCharacter = fullText.charAt(textStart);
+                var lastCharacter = fullText.charAt(textEnd);
 
                 if (this.quoteMark === QuoteMark.SINGLE_QUOTES) {
-                    if (firstChar !== "'" || lastChar !== "'") {
-                        failure = this.createFailure(this.position(), width, QuoteWalker.SINGLE_QUOTE_FAILURE);
+                    if (firstCharacter !== "'" || lastCharacter !== "'") {
+                        failure = this.createFailure(position, width, QuoteMarkRule.SINGLE_QUOTE_FAILURE);
                     }
                 } else if (this.quoteMark === QuoteMark.DOUBLE_QUOTES) {
-                    if (firstChar !== "\"" || lastChar !== "\"") {
-                        failure = this.createFailure(this.position(), width, QuoteWalker.DOUBLE_QUOTE_FAILURE);
+                    if (firstCharacter !== "\"" || lastCharacter !== "\"") {
+                        failure = this.createFailure(position, width, QuoteMarkRule.DOUBLE_QUOTE_FAILURE);
                     }
                 }
             }
@@ -86,5 +88,4 @@ module Lint.Rules {
             }
         }
     }
-
 }
