@@ -39,7 +39,7 @@ describe("Prose Formatter", () => {
             TEST_FILE + getPositionString(2, 12) + "mid failure\n" +
             TEST_FILE + getPositionString(9, 2) + "last failure\n";
 
-        var actualResult = formatter.format(failures)
+        var actualResult = formatter.format(failures);
         assert.equal(actualResult, expectedResult);
     });
 

@@ -57,7 +57,7 @@ module Lint.Rules {
         "trailing": TrailingRule.prototype,
         "varname": VarNameRule.prototype,
         "whitespace": WhitespaceRule.prototype
-    }
+    };
 
     export function createRule(name: string, value: any): Rule {
         var rule = undefined;

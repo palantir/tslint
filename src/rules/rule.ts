@@ -49,7 +49,7 @@ module Lint {
                 position: this.position,
                 line: this.lineAndCharacter.line(),
                 character: this.lineAndCharacter.character()
-            }
+            };
         }
 
         public equals(ruleFailurePosition: RuleFailurePosition) {

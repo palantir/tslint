@@ -64007,12 +64007,15 @@ var Lint;
         LanguageServiceHost.prototype.resolveRelativePath = function (path, directory) {
             throw new Error();
         };
+
         LanguageServiceHost.prototype.fileExists = function (path) {
             throw new Error();
         };
+
         LanguageServiceHost.prototype.directoryExists = function (path) {
             throw new Error();
         };
+
         LanguageServiceHost.prototype.getParentDirectory = function (path) {
             throw new Error();
         };

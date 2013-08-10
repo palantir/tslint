@@ -17,6 +17,23 @@ module.exports = function(grunt) {
       },
     },
 
+    tslint: {
+      options: {
+        configuration: grunt.file.readJSON(".tslintrc")
+      },
+      src: [
+        "src/*.ts",
+        "src/formatters/**/*.ts",
+        "src/language/**/*.ts",
+        "src/rules/**/*.ts"
+      ],
+      test: [
+        "test/**/*.ts",
+        "!test/**/*.test.ts",
+        "!test/typings/*.ts"
+      ]
+    },
+
     typescript: {
       bin: {
         options: {
@@ -48,12 +65,13 @@ module.exports = function(grunt) {
   // load NPM tasks
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-mocha-test');
+  grunt.loadNpmTasks('grunt-tslint');
   grunt.loadNpmTasks('grunt-typescript');
 
   // register custom tasks
-  grunt.registerTask('bin', ['clean:bin', 'typescript:bin']);
-  grunt.registerTask('lib', ['clean:lib', 'typescript:lib']);
-  grunt.registerTask('test', ['clean:test', 'typescript:test', 'mochaTest']);
+  grunt.registerTask('bin', ['clean:bin', 'typescript:bin', 'tslint:src']);
+  grunt.registerTask('lib', ['clean:lib', 'typescript:lib', 'tslint:src']);
+  grunt.registerTask('test', ['clean:test', 'typescript:test', 'tslint:test', 'mochaTest']);
 
   // create default task
   grunt.registerTask('default', ['bin', 'lib', 'test']);

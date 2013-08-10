@@ -67,10 +67,21 @@ module Lint {
             return null;
         }
 
-        public resolveRelativePath(path: string, directory: string): string { throw new Error(); }
-        public fileExists(path: string): boolean { throw new Error(); }
-        public directoryExists(path: string): boolean { throw new Error(); }
-        public getParentDirectory(path: string): string { throw new Error(); }
+        public resolveRelativePath(path: string, directory: string): string {
+            throw new Error();
+        }
+
+        public fileExists(path: string): boolean {
+            throw new Error();
+        }
+
+        public directoryExists(path: string): boolean {
+            throw new Error();
+        }
+
+        public getParentDirectory(path: string): string {
+            throw new Error();
+        }
 
         private createCompilationSettings(): TypeScript.CompilationSettings {
             var settings = new TypeScript.CompilationSettings();

@@ -52,7 +52,7 @@ module Lint.Test {
     export function createFailuresOnFile(filePath: string, failure: string) {
         return function(start: number[], end: number[]) {
             return createFailure(filePath, start, end, failure);
-        }
+        };
     }
 
     // assert on array equality for failures
@@ -69,7 +69,7 @@ module Lint.Test {
     // assert whether a failure array contains the given failure
     export function assertContainsFailure(haystack: Lint.RuleFailure[], needle: Lint.RuleFailure) {
         for (var i = 0; i < haystack.length; ++i) {
-            if(haystack[i].equals(needle)) {
+            if (haystack[i].equals(needle)) {
                 return;
             }
         }
