@@ -20,6 +20,11 @@
 module Lint.Rules {
 
     export class OneLineRule extends AbstractRule {
+        public static BRACE_FAILURE_STRING = "misplaced opening brace";
+        public static CATCH_FAILURE_STRING = "misplaced 'catch'";
+        public static ELSE_FAILURE_STRING = "misplaced 'else'";
+        public static WHITESPACE_FAILURE_STRING = "missing whitespace";
+
         public isEnabled(): boolean {
             return this.getValue() === true;
         }
@@ -31,11 +36,6 @@ module Lint.Rules {
     }
 
     class BraceWalker extends Lint.StateAwareRuleWalker {
-        static BRACE_FAILURE_STRING = "misplaced opening brace";
-        static CATCH_FAILURE_STRING = "misplaced 'catch'";
-        static ELSE_FAILURE_STRING = "misplaced 'else'";
-        static WHITESPACE_FAILURE_STRING = "missing whitespace";
-
         public visitToken(token: TypeScript.ISyntaxToken): void {
             var kind = token.kind();
             var lastState = this.getLastState();
@@ -54,10 +54,10 @@ module Lint.Rules {
                     var currentLine = this.getLine(this.position());
 
                     if (currentLine !== lastLine) {
-                        failure = this.createFailure(this.position(), token.width(), BraceWalker.BRACE_FAILURE_STRING);
+                        failure = this.createFailure(this.position(), token.width(), OneLineRule.BRACE_FAILURE_STRING);
                         this.addFailure(failure);
                     } else if (!this.hasTrailingWhiteSpace(lastState.token)) {
-                        failure = this.createFailure(this.position(), token.width(), BraceWalker.WHITESPACE_FAILURE_STRING);
+                        failure = this.createFailure(this.position(), token.width(), OneLineRule.WHITESPACE_FAILURE_STRING);
                         this.addFailure(failure);
                     }
                   }
@@ -69,7 +69,7 @@ module Lint.Rules {
         public visitElseClause(node: TypeScript.ElseClauseSyntax): void {
             var lastState = this.getLastState();
             if (lastState !== undefined && !this.hasTrailingWhiteSpace(lastState.token)) {
-                var failure = this.createFailure(this.position(), node.elseKeyword.width(), BraceWalker.ELSE_FAILURE_STRING);
+                var failure = this.createFailure(this.position(), node.elseKeyword.width(), OneLineRule.ELSE_FAILURE_STRING);
                 this.addFailure(failure);
             }
 
@@ -79,7 +79,7 @@ module Lint.Rules {
         public visitCatchClause(node: TypeScript.CatchClauseSyntax): void {
             var lastState = this.getLastState();
             if (lastState !== undefined && !this.hasTrailingWhiteSpace(lastState.token)) {
-                var failure = this.createFailure(this.position(), node.catchKeyword.width(), BraceWalker.CATCH_FAILURE_STRING);
+                var failure = this.createFailure(this.position(), node.catchKeyword.width(), OneLineRule.CATCH_FAILURE_STRING);
                 this.addFailure(failure);
             }
 

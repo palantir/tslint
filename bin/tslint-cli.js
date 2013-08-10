@@ -27350,6 +27350,10 @@ var Lint;
                 var braceWalker = new BraceWalker(syntaxTree);
                 return this.applyWithWalker(braceWalker);
             };
+            OneLineRule.BRACE_FAILURE_STRING = "misplaced opening brace";
+            OneLineRule.CATCH_FAILURE_STRING = "misplaced 'catch'";
+            OneLineRule.ELSE_FAILURE_STRING = "misplaced 'else'";
+            OneLineRule.WHITESPACE_FAILURE_STRING = "missing whitespace";
             return OneLineRule;
         })(Rules.AbstractRule);
         Rules.OneLineRule = OneLineRule;
@@ -27371,10 +27375,10 @@ var Lint;
                         var currentLine = this.getLine(this.position());
 
                         if (currentLine !== lastLine) {
-                            failure = this.createFailure(this.position(), token.width(), BraceWalker.BRACE_FAILURE_STRING);
+                            failure = this.createFailure(this.position(), token.width(), OneLineRule.BRACE_FAILURE_STRING);
                             this.addFailure(failure);
                         } else if (!this.hasTrailingWhiteSpace(lastState.token)) {
-                            failure = this.createFailure(this.position(), token.width(), BraceWalker.WHITESPACE_FAILURE_STRING);
+                            failure = this.createFailure(this.position(), token.width(), OneLineRule.WHITESPACE_FAILURE_STRING);
                             this.addFailure(failure);
                         }
                     }
@@ -27386,7 +27390,7 @@ var Lint;
             BraceWalker.prototype.visitElseClause = function (node) {
                 var lastState = this.getLastState();
                 if (lastState !== undefined && !this.hasTrailingWhiteSpace(lastState.token)) {
-                    var failure = this.createFailure(this.position(), node.elseKeyword.width(), BraceWalker.ELSE_FAILURE_STRING);
+                    var failure = this.createFailure(this.position(), node.elseKeyword.width(), OneLineRule.ELSE_FAILURE_STRING);
                     this.addFailure(failure);
                 }
 
@@ -27396,7 +27400,7 @@ var Lint;
             BraceWalker.prototype.visitCatchClause = function (node) {
                 var lastState = this.getLastState();
                 if (lastState !== undefined && !this.hasTrailingWhiteSpace(lastState.token)) {
-                    var failure = this.createFailure(this.position(), node.catchKeyword.width(), BraceWalker.CATCH_FAILURE_STRING);
+                    var failure = this.createFailure(this.position(), node.catchKeyword.width(), OneLineRule.CATCH_FAILURE_STRING);
                     this.addFailure(failure);
                 }
 
@@ -27416,10 +27420,6 @@ var Lint;
                 var kind = trivia.syntaxTriviaAt(0).kind();
                 return (kind === TypeScript.SyntaxKind.WhitespaceTrivia);
             };
-            BraceWalker.BRACE_FAILURE_STRING = "misplaced opening brace";
-            BraceWalker.CATCH_FAILURE_STRING = "misplaced 'catch'";
-            BraceWalker.ELSE_FAILURE_STRING = "misplaced 'else'";
-            BraceWalker.WHITESPACE_FAILURE_STRING = "missing whitespace";
             return BraceWalker;
         })(Lint.StateAwareRuleWalker);
     })(Lint.Rules || (Lint.Rules = {}));
