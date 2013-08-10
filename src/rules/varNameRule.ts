@@ -20,6 +20,8 @@
 module Lint.Rules {
 
     export class VarNameRule extends AbstractRule {
+        public static FAILURE_STRING = "variable name must be in camelcase or uppercase";
+
         public isEnabled() : boolean {
             return this.getValue() === true;
         }
@@ -30,27 +32,25 @@ module Lint.Rules {
     }
 
     class VarNameWalker extends Lint.RuleWalker {
-        static FAILURE_STRING = "variable name must be in camelcase or uppercase";
-
         public visitVariableDeclarator(node: TypeScript.VariableDeclaratorSyntax): void {
             var identifier = node.identifier;
             var variableName = identifier.text();
             var position = this.position() + identifier.leadingTriviaWidth();
 
             if (!this.isCamelCase(variableName) && !this.isUpperCase(variableName)) {
-                this.addFailure(this.createFailure(position, identifier.width(), VarNameWalker.FAILURE_STRING));
+                this.addFailure(this.createFailure(position, identifier.width(), VarNameRule.FAILURE_STRING));
             }
 
             super.visitVariableDeclarator(node);
         }
 
         private isCamelCase(name: string): boolean {
-            if (name.length < 0) {
+            if (name.length <= 0) {
                 return true;
             }
 
             var firstCharacter = name.charAt(0);
-            return (firstCharacter === firstCharacter.toLowerCase());
+            return (firstCharacter === firstCharacter.toLowerCase() && name.indexOf("_") === -1);
         }
 
         private isUpperCase(name: string): boolean {

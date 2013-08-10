@@ -27563,7 +27563,7 @@ var Lint;
             SubRule.prototype.apply = function (syntaxTree) {
                 return this.applyWithWalker(new SubWalker(syntaxTree));
             };
-            SubRule.SUB_FAILURE = "object access via string literals is disallowed";
+            SubRule.FAILURE_STRING = "object access via string literals is disallowed";
             return SubRule;
         })(Rules.AbstractRule);
         Rules.SubRule = SubRule;
@@ -27583,7 +27583,7 @@ var Lint;
                 var position = this.positionAfter(node.expression, node.openBracketToken);
 
                 if (argument.kind() === TypeScript.SyntaxKind.StringLiteral) {
-                    this.addFailure(this.createFailure(position, argument.width(), SubRule.SUB_FAILURE));
+                    this.addFailure(this.createFailure(position, argument.width(), SubRule.FAILURE_STRING));
                 }
             };
             return SubWalker;
@@ -27606,6 +27606,7 @@ var Lint;
             TrailingRule.prototype.apply = function (syntaxTree) {
                 return this.applyWithWalker(new TrailingWalker(syntaxTree));
             };
+            TrailingRule.FAILURE_STRING = "trailing whitespace";
             return TrailingRule;
         })(Rules.AbstractRule);
         Rules.TrailingRule = TrailingRule;
@@ -27635,11 +27636,10 @@ var Lint;
                 var triviaKind = trivia.kind();
                 if (triviaList.hasNewLine() && triviaKind === TypeScript.SyntaxKind.WhitespaceTrivia) {
                     var start = this.position() - trivia.fullWidth() - 1;
-                    var failure = this.createFailure(start, trivia.fullWidth(), TrailingWalker.FAILURE_STRING);
+                    var failure = this.createFailure(start, trivia.fullWidth(), TrailingRule.FAILURE_STRING);
                     this.addFailure(failure);
                 }
             };
-            TrailingWalker.FAILURE_STRING = "trailing whitespace";
             return TrailingWalker;
         })(Lint.RuleWalker);
     })(Lint.Rules || (Lint.Rules = {}));
@@ -27660,6 +27660,7 @@ var Lint;
             VarNameRule.prototype.apply = function (syntaxTree) {
                 return this.applyWithWalker(new VarNameWalker(syntaxTree));
             };
+            VarNameRule.FAILURE_STRING = "variable name must be in camelcase or uppercase";
             return VarNameRule;
         })(Rules.AbstractRule);
         Rules.VarNameRule = VarNameRule;
@@ -27675,25 +27676,24 @@ var Lint;
                 var position = this.position() + identifier.leadingTriviaWidth();
 
                 if (!this.isCamelCase(variableName) && !this.isUpperCase(variableName)) {
-                    this.addFailure(this.createFailure(position, identifier.width(), VarNameWalker.FAILURE_STRING));
+                    this.addFailure(this.createFailure(position, identifier.width(), VarNameRule.FAILURE_STRING));
                 }
 
                 _super.prototype.visitVariableDeclarator.call(this, node);
             };
 
             VarNameWalker.prototype.isCamelCase = function (name) {
-                if (name.length < 0) {
+                if (name.length <= 0) {
                     return true;
                 }
 
                 var firstCharacter = name.charAt(0);
-                return (firstCharacter === firstCharacter.toLowerCase());
+                return (firstCharacter === firstCharacter.toLowerCase() && name.indexOf("_") === -1);
             };
 
             VarNameWalker.prototype.isUpperCase = function (name) {
                 return (name === name.toUpperCase());
             };
-            VarNameWalker.FAILURE_STRING = "variable name must be in camelcase or uppercase";
             return VarNameWalker;
         })(Lint.RuleWalker);
     })(Lint.Rules || (Lint.Rules = {}));
