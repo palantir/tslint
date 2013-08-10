@@ -1,5 +1,5 @@
 /******************************************************************************
-This plugin incorporates material and code from the Microsoft TypeScript project: 
+This project incorporates material and code from the Microsoft TypeScript project: 
 http://www.typescriptlang.org/ licensed under the Apache Version 2.0 License
 
 Relevant notice and copyright provisions for TypeScript are below.
