@@ -15,6 +15,9 @@
     "typescript",
     "linter"
   ],
+  "scripts": {
+    "test": "grunt"
+  },
   "dependencies": {
     "optimist": "~0.6.0"
   },
