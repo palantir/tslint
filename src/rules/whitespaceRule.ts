@@ -20,6 +20,8 @@
 module Lint.Rules {
 
     export class WhitespaceRule extends AbstractRule {
+        public static FAILURE_STRING = "missing whitespace";
+
         public isEnabled() : boolean {
             return this.getValue() === true;
         }
@@ -30,9 +32,7 @@ module Lint.Rules {
     }
 
     class WhitespaceWalker extends Lint.RuleWalker {
-        static FAILURE_STRING = "missing whitespace";
-
-        // check for trailing space for the given tokens
+        // check for trailing space after the given tokens
         public visitToken(token: TypeScript.ISyntaxToken): void {
             super.visitToken(token);
 
@@ -115,11 +115,11 @@ module Lint.Rules {
             var failure = null;
 
             if (trivia.count() < 1) {
-                failure = this.createFailure(position, 1, WhitespaceWalker.FAILURE_STRING);
+                failure = this.createFailure(position, 1, WhitespaceRule.FAILURE_STRING);
             } else {
                 var kind = trivia.syntaxTriviaAt(0).kind();
                 if (kind !== TypeScript.SyntaxKind.WhitespaceTrivia && kind !== TypeScript.SyntaxKind.NewLineTrivia) {
-                    failure = this.createFailure(position, 1, WhitespaceWalker.FAILURE_STRING);
+                    failure = this.createFailure(position, 1, WhitespaceRule.FAILURE_STRING);
                 }
             }
 

@@ -27714,6 +27714,7 @@ var Lint;
             WhitespaceRule.prototype.apply = function (syntaxTree) {
                 return this.applyWithWalker(new WhitespaceWalker(syntaxTree));
             };
+            WhitespaceRule.FAILURE_STRING = "missing whitespace";
             return WhitespaceRule;
         })(Rules.AbstractRule);
         Rules.WhitespaceRule = WhitespaceRule;
@@ -27790,11 +27791,11 @@ var Lint;
                 var failure = null;
 
                 if (trivia.count() < 1) {
-                    failure = this.createFailure(position, 1, WhitespaceWalker.FAILURE_STRING);
+                    failure = this.createFailure(position, 1, WhitespaceRule.FAILURE_STRING);
                 } else {
                     var kind = trivia.syntaxTriviaAt(0).kind();
                     if (kind !== TypeScript.SyntaxKind.WhitespaceTrivia && kind !== TypeScript.SyntaxKind.NewLineTrivia) {
-                        failure = this.createFailure(position, 1, WhitespaceWalker.FAILURE_STRING);
+                        failure = this.createFailure(position, 1, WhitespaceRule.FAILURE_STRING);
                     }
                 }
 
@@ -27802,7 +27803,6 @@ var Lint;
                     this.addFailure(failure);
                 }
             };
-            WhitespaceWalker.FAILURE_STRING = "missing whitespace";
             return WhitespaceWalker;
         })(Lint.RuleWalker);
     })(Lint.Rules || (Lint.Rules = {}));
