@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2013 Palantir Technologies, Inc.
  *
@@ -27,6 +28,7 @@
 /// <reference path='maxLenRule.ts'/>
 /// <reference path='noArgRule.ts'/>
 /// <reference path='noConsoleRule.ts'/>
+/// <reference path='noEmptyRule.ts' />
 /// <reference path='oneLineRule.ts'/>
 /// <reference path='quoteMarkRule.ts'/>
 /// <reference path='semicolonRule.ts'/>
@@ -50,6 +52,7 @@ module Lint.Rules {
         "maxlen": MaxLenRule.prototype,
         "noarg": NoArgRule.prototype,
         "noconsole": NoConsoleRule.prototype,
+        "noempty": NoEmptyRule.prototype,
         "oneline": OneLineRule.prototype,
         "quotemark": QuoteMarkRule.prototype,
         "semicolon": SemicolonRule.prototype,

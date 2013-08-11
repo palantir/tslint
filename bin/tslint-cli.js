@@ -27337,6 +27337,45 @@ var Lint;
 var Lint;
 (function (Lint) {
     (function (Rules) {
+        var NoEmptyRule = (function (_super) {
+            __extends(NoEmptyRule, _super);
+            function NoEmptyRule() {
+                _super.apply(this, arguments);
+            }
+            NoEmptyRule.prototype.isEnabled = function () {
+                return this.getValue() === true;
+            };
+
+            NoEmptyRule.prototype.apply = function (syntaxTree) {
+                return this.applyWithWalker(new BlockWalker(syntaxTree));
+            };
+            NoEmptyRule.FAILURE_STRING = "block is empty";
+            return NoEmptyRule;
+        })(Rules.AbstractRule);
+        Rules.NoEmptyRule = NoEmptyRule;
+
+        var BlockWalker = (function (_super) {
+            __extends(BlockWalker, _super);
+            function BlockWalker() {
+                _super.apply(this, arguments);
+            }
+            BlockWalker.prototype.visitBlock = function (node) {
+                if (node.statements.childCount() <= 0) {
+                    var position = this.position() + node.leadingTriviaWidth();
+                    var width = node.width();
+                    this.addFailure(this.createFailure(position, width, NoEmptyRule.FAILURE_STRING));
+                }
+
+                _super.prototype.visitBlock.call(this, node);
+            };
+            return BlockWalker;
+        })(Lint.RuleWalker);
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
         var OneLineRule = (function (_super) {
             __extends(OneLineRule, _super);
             function OneLineRule() {
@@ -27824,6 +27863,7 @@ var Lint;
             "maxlen": Rules.MaxLenRule.prototype,
             "noarg": Rules.NoArgRule.prototype,
             "noconsole": Rules.NoConsoleRule.prototype,
+            "noempty": Rules.NoEmptyRule.prototype,
             "oneline": Rules.OneLineRule.prototype,
             "quotemark": Rules.QuoteMarkRule.prototype,
             "semicolon": Rules.SemicolonRule.prototype,
