@@ -3,7 +3,7 @@
   "classname": true,
   "curly": true,
   "debug": true,
-  "dupkey": true
+  "dupkey": true,
   "eofline": true,
   "eqeqeq": true,
   "evil": true,
@@ -20,5 +20,5 @@
   "sub": true,
   "trailing": true,
   "varname": true,
-  "whitespace": true,
+  "whitespace": true
 }
