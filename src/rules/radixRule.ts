@@ -18,26 +18,27 @@
 /// <reference path='abstractRule.ts'/>
 
 module Lint.Rules {
-    export class EvilRule extends AbstractRule {
-        public static FAILURE_STRING = "forbidden eval";
+    export class RadixRule extends AbstractRule {
+        public static FAILURE_STRING = "missing radix parameter";
 
         public isEnabled() : boolean {
             return this.getValue() === true;
         }
 
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            return this.applyWithWalker(new EvilWalker(syntaxTree));
+            return this.applyWithWalker(new RadixWalker(syntaxTree));
         }
     }
 
-    class EvilWalker extends Lint.RuleWalker {
+    class RadixWalker extends Lint.RuleWalker {
         public visitInvocationExpression(node: TypeScript.InvocationExpressionSyntax): void {
             var expression = node.expression;
             if (expression.isToken() && expression.kind() === TypeScript.SyntaxKind.IdentifierName) {
                 var firstToken = expression.firstToken();
-                if (firstToken.text() === "eval") {
+                var arguments = node.argumentList.arguments;
+                if (firstToken.text() === "parseInt" && arguments.childCount() < 2) {
                     var position = this.position() + node.leadingTriviaWidth();
-                    this.addFailure(this.createFailure(position, firstToken.width(), EvilRule.FAILURE_STRING));
+                    this.addFailure(this.createFailure(position, node.width(), RadixRule.FAILURE_STRING));
                 }
             }
 

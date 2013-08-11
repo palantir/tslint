@@ -20,6 +20,7 @@
 /// <reference path='classNameRule.ts'/>
 /// <reference path='curlyRule.ts'/>
 /// <reference path='debugRule.ts'/>
+/// <reference path='dupKeyRule.ts'/>
 /// <reference path='eofLineRule.ts'/>
 /// <reference path='eqeqeqRule.ts'/>
 /// <reference path='evilRule.ts'/>
@@ -31,6 +32,7 @@
 /// <reference path='noEmptyRule.ts' />
 /// <reference path='oneLineRule.ts'/>
 /// <reference path='quoteMarkRule.ts'/>
+/// <reference path='radixRule.ts'/>
 /// <reference path='semicolonRule.ts'/>
 /// <reference path='subRule.ts'/>
 /// <reference path='trailingRule.ts'/>
@@ -44,6 +46,7 @@ module Lint.Rules {
         "classname": ClassNameRule.prototype,
         "curly": CurlyRule.prototype,
         "debug": DebugRule.prototype,
+        "dupkey": DupKeyRule.prototype,
         "eofline": EofLineRule.prototype,
         "eqeqeq": EqEqEqRule.prototype,
         "evil": EvilRule.prototype,
@@ -55,6 +58,7 @@ module Lint.Rules {
         "noempty": NoEmptyRule.prototype,
         "oneline": OneLineRule.prototype,
         "quotemark": QuoteMarkRule.prototype,
+        "radix": RadixRule.prototype,
         "semicolon": SemicolonRule.prototype,
         "sub": SubRule.prototype,
         "trailing": TrailingRule.prototype,
@@ -63,7 +67,7 @@ module Lint.Rules {
     };
 
     export function createRule(name: string, value: any): Rule {
-        var rule = undefined;
+        var rule;
         var rulePrototype = ALL_RULES[name];
 
         if (rulePrototype !== undefined) {

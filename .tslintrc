@@ -18,5 +18,7 @@
   "debug": true,
   "forin": true,
   "curly": true,
-  "indent": 4
+  "indent": 4,
+  "radix": true,
+  "dupkey": true
 }

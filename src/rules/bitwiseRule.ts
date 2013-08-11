@@ -18,7 +18,6 @@
 /// <reference path='abstractRule.ts'/>
 
 module Lint.Rules {
-
     export class BitwiseRule extends AbstractRule {
         public static FAILURE_STRING = "forbidden bitwise operation";
 
@@ -56,5 +55,4 @@ module Lint.Rules {
             super.visitNode(node);
         }
     }
-
 }
