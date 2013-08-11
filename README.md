@@ -42,6 +42,8 @@ Installation
 Usage
 -----
 
+Please first ensure that the TypeScript source files compile correctly.
+
 ##### CLI
 
     usage: tslint
