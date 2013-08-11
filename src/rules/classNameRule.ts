@@ -20,7 +20,7 @@
 module Lint.Rules {
 
     export class ClassNameRule extends AbstractRule {
-        static FAILURE_STRING = "name must start with an uppercase character";
+        static FAILURE_STRING = "name must be in pascal case";
 
         public isEnabled() : boolean {
             return this.getValue() === true;
@@ -34,34 +34,38 @@ module Lint.Rules {
     class NameWalker extends Lint.RuleWalker {
         public visitClassDeclaration(node: TypeScript.ClassDeclarationSyntax): void {
             var className = node.identifier.text();
-            if (className.length > 0) {
-                var firstCharacter = className.charAt(0);
-                if (firstCharacter !== firstCharacter.toUpperCase()) {
-                    var position = this.positionAfter(node.modifiers, node.classKeyword);
-                    this.addFailureAt(position, node.identifier.width());
-                }
-              }
+            if (!this.isPascalCased(className)) {
+                var position = this.positionAfter(node.modifiers, node.classKeyword);
+                this.addFailureAt(position, node.identifier.width());
+            }
 
             super.visitClassDeclaration(node);
         }
 
         public visitInterfaceDeclaration(node: TypeScript.InterfaceDeclarationSyntax): void {
             var interfaceName = node.identifier.text();
-            if (interfaceName.length > 0) {
-                var firstCharacter = interfaceName.charAt(0);
-                if (firstCharacter !== firstCharacter.toUpperCase()) {
-                    var position = this.positionAfter(node.modifiers, node.interfaceKeyword);
-                    this.addFailureAt(position, node.identifier.width());
-                }
-              }
+            if (!this.isPascalCased(interfaceName)) {
+                var position = this.positionAfter(node.modifiers, node.interfaceKeyword);
+                this.addFailureAt(position, node.identifier.width());
+            }
 
             super.visitInterfaceDeclaration(node);
+        }
+
+        private isPascalCased(name): boolean {
+            if (name.length <= 0) {
+                return true;
+            }
+
+            var firstCharacter = name.charAt(0);
+            return ((firstCharacter === firstCharacter.toUpperCase()) && name.indexOf("_") === -1);
         }
 
         private addFailureAt(position, width) {
             var failure = this.createFailure(position, width, ClassNameRule.FAILURE_STRING);
             this.addFailure(failure);
         }
+
     }
 
 }

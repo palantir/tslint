@@ -26611,7 +26611,7 @@ var Lint;
             ClassNameRule.prototype.apply = function (syntaxTree) {
                 return this.applyWithWalker(new NameWalker(syntaxTree));
             };
-            ClassNameRule.FAILURE_STRING = "name must start with an uppercase character";
+            ClassNameRule.FAILURE_STRING = "name must be in pascal case";
             return ClassNameRule;
         })(Rules.AbstractRule);
         Rules.ClassNameRule = ClassNameRule;
@@ -26623,12 +26623,9 @@ var Lint;
             }
             NameWalker.prototype.visitClassDeclaration = function (node) {
                 var className = node.identifier.text();
-                if (className.length > 0) {
-                    var firstCharacter = className.charAt(0);
-                    if (firstCharacter !== firstCharacter.toUpperCase()) {
-                        var position = this.positionAfter(node.modifiers, node.classKeyword);
-                        this.addFailureAt(position, node.identifier.width());
-                    }
+                if (!this.isPascalCased(className)) {
+                    var position = this.positionAfter(node.modifiers, node.classKeyword);
+                    this.addFailureAt(position, node.identifier.width());
                 }
 
                 _super.prototype.visitClassDeclaration.call(this, node);
@@ -26636,15 +26633,21 @@ var Lint;
 
             NameWalker.prototype.visitInterfaceDeclaration = function (node) {
                 var interfaceName = node.identifier.text();
-                if (interfaceName.length > 0) {
-                    var firstCharacter = interfaceName.charAt(0);
-                    if (firstCharacter !== firstCharacter.toUpperCase()) {
-                        var position = this.positionAfter(node.modifiers, node.interfaceKeyword);
-                        this.addFailureAt(position, node.identifier.width());
-                    }
+                if (!this.isPascalCased(interfaceName)) {
+                    var position = this.positionAfter(node.modifiers, node.interfaceKeyword);
+                    this.addFailureAt(position, node.identifier.width());
                 }
 
                 _super.prototype.visitInterfaceDeclaration.call(this, node);
+            };
+
+            NameWalker.prototype.isPascalCased = function (name) {
+                if (name.length <= 0) {
+                    return true;
+                }
+
+                var firstCharacter = name.charAt(0);
+                return ((firstCharacter === firstCharacter.toUpperCase()) && name.indexOf("_") === -1);
             };
 
             NameWalker.prototype.addFailureAt = function (position, width) {
