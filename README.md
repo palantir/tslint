@@ -10,6 +10,7 @@ Supported Rules
 * `classname` enforces PascalCased class and interface names.
 * `curly` enforces braces for `if`/`for`/`do`/`while` statements.
 * `debug` disallows `debugger` statements.
+* `dupkey` disallows duplicate keys in object literals.
 * `eofline` enforces the file to end with a newline.
 * `eqeqeq` enforces === and !== in favor of == and !=.
 * `evil` disallows `eval` function invocations.
@@ -21,6 +22,7 @@ Supported Rules
 * `noempty` disallows empty blocks.
 * `oneline` enforces an opening brace to be on the same line as the expression preceding it.
 * `quotemark` enforces consistent single or double quoted string literals.
+* `radix` enforces the radix parameter of `parseInt`
 * `semicolon` enforces semicolons at the end of every statement.
 * `sub` disallows object access via string literals.
 * `trailing` disallows trailing whitespace at the end of a line.
