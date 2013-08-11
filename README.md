@@ -6,27 +6,27 @@ A linter for the TypeScript language.
 Supported Rules
 -----
 
-* `semicolon` enforces semicolons at the end of every statement.
-* `eqeqeq` enforces === and !== in favor of == and !=.
-* `maxlen` sets the maximum length of a line.
-* `whitespace` enforces whitespace between a keyword and a conditional, surrounding an operator,
-   and enclosing "=" within variable declarations and import/export statements.
-* `quotemark` enforces consistent single or double quoted string literals.
-* `oneline` enforces an opening brace to be on the same line as the expression preceding it.
-* `trailing` disallows trailing whitespace at the end of a line.
 * `bitwise` disallows bitwise operators.
-* `evil` disallows `eval` function invocations.
-* `eofline` enforces the file to end with a newline.
 * `classname` enforces PascalCased class and interface names.
-* `varname` allows only camelCased or UPPER_CASED variable names.
-* `noarg` disallows access to `arguments.callee`.
-* `noconsole` disallows access to the specified properties on `console`. Property configurations are comma-delimited.
-   For example, the configuration "noconsole: log, debug, warn" disables `console.log`, `console.debug` and `console.warn`.
-* `sub` disallows object access via string literals.
-* `forin` enforces a `for ... in` statement to be filtered with an `if` statement.
-* `debug` disallows `debugger` statements.
 * `curly` enforces braces for `if`/`for`/`do`/`while` statements.
+* `debug` disallows `debugger` statements.
+* `eofline` enforces the file to end with a newline.
+* `eqeqeq` enforces === and !== in favor of == and !=.
+* `evil` disallows `eval` function invocations.
+* `forin` enforces a `for ... in` statement to be filtered with an `if` statement.
 * `indent` enforces consistent indentation levels for the whole file.
+* `maxlen` sets the maximum length of a line.
+* `noarg` disallows access to `arguments.callee`.
+* `noconsole` disallows access to the specified properties on `console`. Property configurations are comma-delimited. For example, the configuration "noconsole: log, debug, warn" disables `console.log`, `console.debug` and `console.warn`.
+* `noempty` disallows empty blocks.
+* `oneline` enforces an opening brace to be on the same line as the expression preceding it.
+* `quotemark` enforces consistent single or double quoted string literals.
+* `semicolon` enforces semicolons at the end of every statement.
+* `sub` disallows object access via string literals.
+* `trailing` disallows trailing whitespace at the end of a line.
+* `varname` allows only camelCased or UPPER_CASED variable names.
+* `whitespace` enforces whitespace between a keyword and a conditional, surrounding an operator, and enclosing "=" within variable declarations and import/export statements.
+
 
 Installation
 ------------
