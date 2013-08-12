@@ -27388,6 +27388,52 @@ var Lint;
 var Lint;
 (function (Lint) {
     (function (Rules) {
+        var NoConstructRule = (function (_super) {
+            __extends(NoConstructRule, _super);
+            function NoConstructRule() {
+                _super.apply(this, arguments);
+            }
+            NoConstructRule.prototype.isEnabled = function () {
+                return this.getValue() === true;
+            };
+
+            NoConstructRule.prototype.apply = function (syntaxTree) {
+                return this.applyWithWalker(new NoConstructWalker(syntaxTree));
+            };
+            NoConstructRule.FAILURE_STRING = "undesirable constructor use";
+            return NoConstructRule;
+        })(Rules.AbstractRule);
+        Rules.NoConstructRule = NoConstructRule;
+
+        var NoConstructWalker = (function (_super) {
+            __extends(NoConstructWalker, _super);
+            function NoConstructWalker() {
+                _super.apply(this, arguments);
+            }
+            NoConstructWalker.prototype.visitObjectCreationExpression = function (node) {
+                var constructorName = node.expression.fullText().trim();
+                if (NoConstructWalker.FORBIDDEN_CONSTRUCTORS.indexOf(constructorName) !== -1) {
+                    var position = this.position() + node.leadingTriviaWidth();
+                    var width = node.newKeyword.fullWidth() + node.expression.fullWidth();
+                    var failure = this.createFailure(position, width, NoConstructRule.FAILURE_STRING);
+                    this.addFailure(failure);
+                }
+
+                _super.prototype.visitObjectCreationExpression.call(this, node);
+            };
+            NoConstructWalker.FORBIDDEN_CONSTRUCTORS = [
+                "String",
+                "Number",
+                "Boolean"
+            ];
+            return NoConstructWalker;
+        })(Lint.RuleWalker);
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
         var NoEmptyRule = (function (_super) {
             __extends(NoEmptyRule, _super);
             function NoEmptyRule() {
@@ -27958,6 +28004,7 @@ var Lint;
             "maxlen": Rules.MaxLenRule.prototype,
             "noarg": Rules.NoArgRule.prototype,
             "noconsole": Rules.NoConsoleRule.prototype,
+            "noconstruct": Rules.NoConstructRule.prototype,
             "noempty": Rules.NoEmptyRule.prototype,
             "oneline": Rules.OneLineRule.prototype,
             "quotemark": Rules.QuoteMarkRule.prototype,

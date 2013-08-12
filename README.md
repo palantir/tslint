@@ -19,6 +19,7 @@ Supported Rules
 * `maxlen` sets the maximum length of a line.
 * `noarg` disallows access to `arguments.callee`.
 * `noconsole` disallows access to the specified properties on `console`. Property configurations are comma-delimited. For example, the configuration "noconsole: log, debug, warn" disables `console.log`, `console.debug` and `console.warn`.
+* `noconstruct` disallows access to the constructors of `String`, `Number`, and `Boolean`.
 * `noempty` disallows empty blocks.
 * `oneline` enforces an opening brace to be on the same line as the expression preceding it.
 * `quotemark` enforces consistent single or double quoted string literals.

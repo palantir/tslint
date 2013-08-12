@@ -12,6 +12,7 @@
   "maxlen": 140,
   "noarg": true,
   "noconsole": "debug, info, time, timeEnd, trace",
+  "noconstruct": true,
   "noempty": true,
   "oneline": true,
   "quotemark": "double",
