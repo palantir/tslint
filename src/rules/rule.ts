@@ -24,6 +24,8 @@ module Lint {
 
         getValue(): any;
 
+        isEnabled(): boolean;
+
         apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[];
     }
 
