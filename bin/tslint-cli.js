@@ -27270,6 +27270,49 @@ var Lint;
 var Lint;
 (function (Lint) {
     (function (Rules) {
+        var LabelPosRule = (function (_super) {
+            __extends(LabelPosRule, _super);
+            function LabelPosRule() {
+                _super.apply(this, arguments);
+            }
+            LabelPosRule.prototype.isEnabled = function () {
+                return this.getValue() === true;
+            };
+
+            LabelPosRule.prototype.apply = function (syntaxTree) {
+                return this.applyWithWalker(new LabelPosWalker(syntaxTree));
+            };
+            LabelPosRule.FAILURE_STRING = "labels can only be defined on for/while/do/switch statements";
+            return LabelPosRule;
+        })(Rules.AbstractRule);
+        Rules.LabelPosRule = LabelPosRule;
+
+        var LabelPosWalker = (function (_super) {
+            __extends(LabelPosWalker, _super);
+            function LabelPosWalker() {
+                _super.apply(this, arguments);
+            }
+            LabelPosWalker.prototype.visitFunctionExpression = function (node) {
+                console.log("vfe");
+                _super.prototype.visitFunctionExpression.call(this, node);
+            };
+
+            LabelPosWalker.prototype.visitFunctionDeclaration = function (node) {
+                console.log("vfd");
+                _super.prototype.visitFunctionDeclaration.call(this, node);
+            };
+
+            LabelPosWalker.prototype.visitLabeledStatement = function (node) {
+                _super.prototype.visitLabeledStatement.call(this, node);
+            };
+            return LabelPosWalker;
+        })(Lint.RuleWalker);
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
         var MaxLenRule = (function (_super) {
             __extends(MaxLenRule, _super);
             function MaxLenRule() {
@@ -28007,6 +28050,7 @@ var Lint;
             "evil": Rules.EvilRule.prototype,
             "forin": Rules.ForInRule.prototype,
             "indent": Rules.IndentRule.prototype,
+            "labelpos": Rules.LabelPosRule.prototype,
             "maxlen": Rules.MaxLenRule.prototype,
             "noarg": Rules.NoArgRule.prototype,
             "noconsole": Rules.NoConsoleRule.prototype,

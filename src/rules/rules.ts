@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2013 Palantir Technologies, Inc.
  *
@@ -26,6 +25,7 @@
 /// <reference path='evilRule.ts'/>
 /// <reference path='forInRule.ts'/>
 /// <reference path='indentRule.ts'/>
+/// <reference path='labelPosRule.ts'/>,
 /// <reference path='maxLenRule.ts'/>
 /// <reference path='noArgRule.ts'/>
 /// <reference path='noConsoleRule.ts'/>
@@ -53,6 +53,7 @@ module Lint.Rules {
         "evil": EvilRule.prototype,
         "forin": ForInRule.prototype,
         "indent": IndentRule.prototype,
+        "labelpos": LabelPosRule.prototype,
         "maxlen": MaxLenRule.prototype,
         "noarg": NoArgRule.prototype,
         "noconsole": NoConsoleRule.prototype,
