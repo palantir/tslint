@@ -105,3 +105,22 @@ do {
 if (i < 1) {
        "123";
 }
+
+var arr = [
+    {
+      a: 1,
+       b: 2
+    }
+];
+
+// more valid code
+var arr = [
+    {
+        a: 1,
+        b: 2
+    },
+    {
+        a: 3,
+        b: 4
+    }
+];

@@ -27149,6 +27149,12 @@ var Lint;
                 this.visitToken(node.closeBraceToken);
             };
 
+            IndentWalker.prototype.visitArrayLiteralExpression = function (node) {
+                this.visitToken(node.openBracketToken);
+                this.checkAndVisitSeparatedList(node.expressions);
+                this.visitToken(node.closeBracketToken);
+            };
+
             IndentWalker.prototype.visitModuleDeclaration = function (node) {
                 this.visitList(node.modifiers);
                 this.visitToken(node.moduleKeyword);
@@ -27422,9 +27428,9 @@ var Lint;
                 _super.prototype.visitObjectCreationExpression.call(this, node);
             };
             NoConstructWalker.FORBIDDEN_CONSTRUCTORS = [
-                "String",
+                "Boolean",
                 "Number",
-                "Boolean"
+                "String"
             ];
             return NoConstructWalker;
         })(Lint.RuleWalker);

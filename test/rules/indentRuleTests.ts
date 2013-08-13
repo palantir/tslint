@@ -58,6 +58,14 @@ describe("<indent>", () => {
             Lint.Test.assertContainsFailure(actualFailures, expectedFailure3);
         });
 
+        it("enforces array literal indentation", () => {
+            var expectedFailure1 = Lint.Test.createFailure(fileName, [111, 4], [111, 8], failureString8 + "6");
+            var expectedFailure2 = Lint.Test.createFailure(fileName, [112, 5], [112, 9], failureString8 + "7");
+
+            Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
+            Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);
+        });
+
         it("enforces enum indentation", () => {
             var expectedFailure1 = Lint.Test.createFailure(fileName, [80, 4], [80, 10], failureString + "6");
             var expectedFailure2 = Lint.Test.createFailure(fileName, [81, 3], [81, 9], failureString + "5");
@@ -129,6 +137,14 @@ describe("<indent>", () => {
             Lint.Test.assertContainsFailure(actualFailures, expectedFailure3);
         });
 
+        it("enforces array literal indentation", () => {
+            var expectedFailure1 = Lint.Test.createFailure(fileName, [111, 7], [111, 11], failureString8 + "6");
+            var expectedFailure2 = Lint.Test.createFailure(fileName, [112, 8], [112, 12], failureString8 + "7");
+
+            Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
+            Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);
+        });
+
         it("enforces enum indentation", () => {
             var expectedFailure1 = Lint.Test.createFailure(fileName, [80, 7], [80, 13], failureString + "6");
             var expectedFailure2 = Lint.Test.createFailure(fileName, [81, 6], [81, 12], failureString + "5");
@@ -153,12 +169,12 @@ describe("<indent>", () => {
             var expectedFailure1 = Lint.Test.createFailure(fileName, [94, 3], [94, 9], failureString + "2");
             var expectedFailure2 = Lint.Test.createFailure(fileName, [98, 7], [98, 13], failureString + "6");
             var expectedFailure3 = Lint.Test.createFailure(fileName, [102, 6], [102, 12], failureString + "5");
-            var expectedFailure4 = Lint.Test.createFailure(fileName, [106, 5], [106, 11], failureString + "7");
+            var expectedFailure4 = Lint.Test.createFailure(fileName, [106, 8], [106, 14], failureString + "7");
 
             Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
             Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);
-            //Lint.Test.assertContainsFailure(actualFailures, expectedFailure3);
-            //Lint.Test.assertContainsFailure(actualFailures, expectedFailure4);
+            Lint.Test.assertContainsFailure(actualFailures, expectedFailure3);
+            Lint.Test.assertContainsFailure(actualFailures, expectedFailure4);
         });
     });
 });

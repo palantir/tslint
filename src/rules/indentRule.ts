@@ -83,6 +83,13 @@ module Lint.Rules {
             this.visitToken(node.closeBraceToken);
         }
 
+        // array literal indentation
+        public visitArrayLiteralExpression(node: TypeScript.ArrayLiteralExpressionSyntax): void {
+            this.visitToken(node.openBracketToken);
+            this.checkAndVisitSeparatedList(node.expressions);
+            this.visitToken(node.closeBracketToken);
+        }
+
         // module indentation
         public visitModuleDeclaration(node: TypeScript.ModuleDeclarationSyntax): void {
             this.visitList(node.modifiers);
