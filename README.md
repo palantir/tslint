@@ -91,3 +91,4 @@ TODO
 * Add more rules from jshint
 * Disallow variables referenced outside of their scope definition
 * Disallow unused variables
+* Support external formatters
