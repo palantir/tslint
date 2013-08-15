@@ -14,8 +14,9 @@ Supported Rules
 * `eofline` enforces the file to end with a newline.
 * `eqeqeq` enforces === and !== in favor of == and !=.
 * `evil` disallows `eval` function invocations.
-* `forin` enforces a `for ... in` statement to be filtered with an `if` statement.
+* `forin` enforces a `for ... in` statement to be filtered with an `if` statement.*
 * `indent` enforces consistent indentation levels for the whole file.
+* `labelpos` enforces labels only on sensible statements.
 * `maxlen` sets the maximum length of a line.
 * `noarg` disallows access to `arguments.callee`.
 * `noconsole` disallows access to the specified properties on `console`. Property configurations are comma-delimited. For example, the configuration "noconsole: log, debug, warn" disables `console.log`, `console.debug` and `console.warn`.

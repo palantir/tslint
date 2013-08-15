@@ -9,7 +9,6 @@
   "evil": true,
   "forin": true,
   "indent": 4,
-  "labeldup": true,
   "labelpos": true,
   "labelundef": true,
   "maxlen": 140,
