@@ -9,8 +9,23 @@ var t = function() {
     for (var i = 0; i < 5; ++i) {
         break lab3;
     }
-}
 
-var f = () => {
-    console.log();
+    lab4:
+    do {
+        break lab4;
+    } while (i < 10);
+
+    lab5:
+    while (i < 10) {
+        lab6:
+        while (j < 20) {
+            break lab5;
+        }
+    }
+
+    lab7:
+    switch (i) {
+        case 0:
+            break lab7;
+    }
 };

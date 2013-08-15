@@ -27282,7 +27282,7 @@ var Lint;
             LabelPosRule.prototype.apply = function (syntaxTree) {
                 return this.applyWithWalker(new LabelPosWalker(syntaxTree));
             };
-            LabelPosRule.FAILURE_STRING = "labels can only be defined on for/while/do/switch statements";
+            LabelPosRule.FAILURE_STRING = "unexpected label on statement";
             return LabelPosRule;
         })(Rules.AbstractRule);
         Rules.LabelPosRule = LabelPosRule;
@@ -27292,18 +27292,41 @@ var Lint;
             function LabelPosWalker() {
                 _super.apply(this, arguments);
             }
-            LabelPosWalker.prototype.visitFunctionExpression = function (node) {
-                console.log("vfe");
-                _super.prototype.visitFunctionExpression.call(this, node);
-            };
-
-            LabelPosWalker.prototype.visitFunctionDeclaration = function (node) {
-                console.log("vfd");
-                _super.prototype.visitFunctionDeclaration.call(this, node);
-            };
-
             LabelPosWalker.prototype.visitLabeledStatement = function (node) {
+                var width = node.identifier.width();
+                var position = this.position() + node.leadingTriviaWidth();
+
+                this.isValidLabel = false;
                 _super.prototype.visitLabeledStatement.call(this, node);
+                if (!this.isValidLabel) {
+                    var failure = this.createFailure(position, width, LabelPosRule.FAILURE_STRING);
+                    this.addFailure(failure);
+                }
+            };
+
+            LabelPosWalker.prototype.visitDoStatement = function (node) {
+                this.isValidLabel = true;
+                _super.prototype.visitDoStatement.call(this, node);
+            };
+
+            LabelPosWalker.prototype.visitForStatement = function (node) {
+                this.isValidLabel = true;
+                _super.prototype.visitForStatement.call(this, node);
+            };
+
+            LabelPosWalker.prototype.visitForInStatement = function (node) {
+                this.isValidLabel = true;
+                _super.prototype.visitForInStatement.call(this, node);
+            };
+
+            LabelPosWalker.prototype.visitWhileStatement = function (node) {
+                this.isValidLabel = true;
+                _super.prototype.visitWhileStatement.call(this, node);
+            };
+
+            LabelPosWalker.prototype.visitSwitchStatement = function (node) {
+                this.isValidLabel = true;
+                _super.prototype.visitSwitchStatement.call(this, node);
             };
             return LabelPosWalker;
         })(Lint.RuleWalker);

@@ -19,7 +19,7 @@
 
 module Lint.Rules {
     export class LabelPosRule extends AbstractRule {
-        public static FAILURE_STRING = "labels can only be defined on for/while/do/switch statements";
+        public static FAILURE_STRING = "unexpected label on statement";
 
         public isEnabled() : boolean {
             return this.getValue() === true;
@@ -31,24 +31,45 @@ module Lint.Rules {
     }
 
     class LabelPosWalker extends Lint.RuleWalker {
-        private functionLabels: string[];
-
-        public visitFunctionDeclaration(node: TypeScript.FunctionDeclarationSyntax): void {
-            console.log("vfd");
-            super.visitFunctionDeclaration(node);
-        }
-
-        public visitFunctionExpression(node: TypeScript.FunctionExpressionSyntax): void {
-            console.log("vfe");
-            super.visitFunctionExpression(node);
-        }
-
-        public visitSimpleArrowFunctionExpression(node: TypeScript.SimpleArrowFunctionExpressionSyntax): void {
-            super.visitSimpleArrowFunctionExpression(node);
-        }
+        private isValidLabel;
 
         public visitLabeledStatement(node: TypeScript.LabeledStatementSyntax): void {
+            var width = node.identifier.width();
+            var position = this.position() + node.leadingTriviaWidth();
+
+            // set the validity flag to false, visit the labeled statement,
+            // and check whether the flag is still set to false.
+            this.isValidLabel = false;
             super.visitLabeledStatement(node);
+            if (!this.isValidLabel) {
+                var failure = this.createFailure(position, width, LabelPosRule.FAILURE_STRING);
+                this.addFailure(failure);
+            }
+        }
+
+        public visitDoStatement(node: TypeScript.DoStatementSyntax): void {
+            this.isValidLabel = true;
+            super.visitDoStatement(node);
+        }
+
+        public visitForStatement(node: TypeScript.ForStatementSyntax): void {
+            this.isValidLabel = true;
+            super.visitForStatement(node);
+        }
+
+        public visitForInStatement(node: TypeScript.ForInStatementSyntax): void {
+            this.isValidLabel = true;
+            super.visitForInStatement(node);
+        }
+
+        public visitWhileStatement(node: TypeScript.WhileStatementSyntax): void {
+            this.isValidLabel = true;
+            super.visitWhileStatement(node);
+        }
+
+        public visitSwitchStatement(node: TypeScript.SwitchStatementSyntax): void {
+            this.isValidLabel = true;
+            super.visitSwitchStatement(node);
         }
     }
 }
