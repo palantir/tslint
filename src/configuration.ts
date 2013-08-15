@@ -17,7 +17,6 @@
 /// <reference path='rules/rules.ts'/>
 
 module Lint.Configuration {
-
     var fs = require("fs");
     var path = require("path");
 
@@ -57,9 +56,9 @@ module Lint.Configuration {
     export function getConfiguredRules(configuration): Rule[] {
         var rules = [];
 
-        for (var ruleName in configuration) {
-            if (configuration.hasOwnProperty(ruleName)) {
-                var ruleValue = configuration[ruleName];
+        for (var ruleName in configuration.rules) {
+            if (configuration.rules.hasOwnProperty(ruleName)) {
+                var ruleValue = configuration.rules[ruleName];
                 var rule = Rules.createRule(ruleName, ruleValue);
                 if (rule !== undefined) {
                     rules.push(rule);
@@ -69,5 +68,4 @@ module Lint.Configuration {
 
         return rules;
     }
-
 }
