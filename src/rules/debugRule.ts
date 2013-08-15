@@ -22,10 +22,6 @@ module Lint.Rules {
     export class DebugRule extends AbstractRule {
         public static FAILURE_STRING = "use of debugger statements is disallowed";
 
-        public isEnabled() : boolean {
-            return this.getValue() === true;
-        }
-
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
             return this.applyWithWalker(new DebugWalker(syntaxTree));
         }

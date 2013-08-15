@@ -23,10 +23,6 @@ module Lint.Rules {
     export class EofLineRule extends AbstractRule {
         public static FAILURE_STRING = "file should end with a newline";
 
-        public isEnabled(): boolean {
-            return this.getValue() === true;
-        }
-
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
             return this.applyWithWalker(new EofWalker(syntaxTree));
         }

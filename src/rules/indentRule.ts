@@ -22,6 +22,16 @@ module Lint.Rules {
     export class IndentRule extends AbstractRule {
         public static FAILURE_STRING = "unexpected tab width: ";
 
+        public isEnabled(): boolean {
+            var value = this.getValue();
+
+            if (typeof value === "number" && value > 0) {
+                return true;
+            }
+
+            return false;
+        }
+
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
             var tabWidth = parseInt(this.getValue());
             return this.applyWithWalker(new IndentWalker(syntaxTree, tabWidth));

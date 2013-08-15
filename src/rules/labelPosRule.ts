@@ -21,10 +21,6 @@ module Lint.Rules {
     export class LabelPosRule extends AbstractRule {
         public static FAILURE_STRING = "unexpected label on statement";
 
-        public isEnabled() : boolean {
-            return this.getValue() === true;
-        }
-
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
             return this.applyWithWalker(new LabelPosWalker(syntaxTree));
         }

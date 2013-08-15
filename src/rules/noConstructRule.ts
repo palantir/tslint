@@ -21,10 +21,6 @@ module Lint.Rules {
     export class NoConstructRule extends AbstractRule {
         public static FAILURE_STRING = "undesirable constructor use";
 
-        public isEnabled() : boolean {
-            return this.getValue() === true;
-        }
-
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
             return this.applyWithWalker(new NoConstructWalker(syntaxTree));
         }

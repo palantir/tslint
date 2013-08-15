@@ -22,10 +22,6 @@ module Lint.Rules {
     export class NoArgRule extends AbstractRule {
         public static FAILURE_STRING = "access forbidden to arguments property";
 
-        public isEnabled() : boolean {
-            return this.getValue() === true;
-        }
-
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
             return this.applyWithWalker(new NoArgWalker(syntaxTree));
         }

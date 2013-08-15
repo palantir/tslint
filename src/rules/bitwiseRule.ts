@@ -21,10 +21,6 @@ module Lint.Rules {
     export class BitwiseRule extends AbstractRule {
         public static FAILURE_STRING = "forbidden bitwise operation";
 
-        public isEnabled() : boolean {
-            return this.getValue() === true;
-        }
-
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
             return this.applyWithWalker(new BitwiseWalker(syntaxTree));
         }

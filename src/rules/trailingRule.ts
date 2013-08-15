@@ -22,10 +22,6 @@ module Lint.Rules {
     export class TrailingRule extends AbstractRule {
         public static FAILURE_STRING = "trailing whitespace";
 
-        public isEnabled() : boolean {
-            return this.getValue() === true;
-        }
-
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
             return this.applyWithWalker(new TrailingWalker(syntaxTree));
         }

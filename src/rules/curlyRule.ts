@@ -26,10 +26,6 @@ module Lint.Rules {
         public static IF_FAILURE_STRING = "if statements must be braced";
         public static WHILE_FAILURE_STRING = "while statements must be braced";
 
-        public isEnabled(): boolean {
-            return this.getValue() === true;
-        }
-
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
             return this.applyWithWalker(new CurlyWalker(syntaxTree));
         }

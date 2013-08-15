@@ -47,8 +47,18 @@ module Lint.Rules {
             return walker.getFailures();
         }
 
-        public isEnabled() : boolean {
-            return true;
+        public isEnabled(): boolean {
+            var value = this.value;
+
+            if (typeof value === "boolean") {
+                return value;
+            }
+
+            if (Array.isArray(value) && value.length > 0) {
+                return value[0];
+            }
+
+            return false;
         }
     }
 

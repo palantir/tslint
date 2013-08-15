@@ -22,10 +22,6 @@ module Lint.Rules {
     export class ForInRule extends AbstractRule {
         public static FAILURE_STRING = "for (... in ...) statements must be filtered with an if statement";
 
-        public isEnabled() : boolean {
-            return this.getValue() === true;
-        }
-
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
             return this.applyWithWalker(new ForInWalker(syntaxTree));
         }

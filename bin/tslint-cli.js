@@ -26551,7 +26551,17 @@ var Lint;
             };
 
             AbstractRule.prototype.isEnabled = function () {
-                return true;
+                var value = this.value;
+
+                if (typeof value === "boolean") {
+                    return value;
+                }
+
+                if (Array.isArray(value) && value.length > 0) {
+                    return value[0];
+                }
+
+                return false;
             };
             return AbstractRule;
         })();
@@ -26567,10 +26577,6 @@ var Lint;
             function BitwiseRule() {
                 _super.apply(this, arguments);
             }
-            BitwiseRule.prototype.isEnabled = function () {
-                return this.getValue() === true;
-            };
-
             BitwiseRule.prototype.apply = function (syntaxTree) {
                 return this.applyWithWalker(new BitwiseWalker(syntaxTree));
             };
@@ -26604,10 +26610,6 @@ var Lint;
             function ClassNameRule() {
                 _super.apply(this, arguments);
             }
-            ClassNameRule.prototype.isEnabled = function () {
-                return this.getValue() === true;
-            };
-
             ClassNameRule.prototype.apply = function (syntaxTree) {
                 return this.applyWithWalker(new NameWalker(syntaxTree));
             };
@@ -26667,10 +26669,6 @@ var Lint;
             function CurlyRule() {
                 _super.apply(this, arguments);
             }
-            CurlyRule.prototype.isEnabled = function () {
-                return this.getValue() === true;
-            };
-
             CurlyRule.prototype.apply = function (syntaxTree) {
                 return this.applyWithWalker(new CurlyWalker(syntaxTree));
             };
@@ -26767,10 +26765,6 @@ var Lint;
             function DebugRule() {
                 _super.apply(this, arguments);
             }
-            DebugRule.prototype.isEnabled = function () {
-                return this.getValue() === true;
-            };
-
             DebugRule.prototype.apply = function (syntaxTree) {
                 return this.applyWithWalker(new DebugWalker(syntaxTree));
             };
@@ -26808,10 +26802,6 @@ var Lint;
             function DupKeyRule() {
                 _super.apply(this, arguments);
             }
-            DupKeyRule.prototype.isEnabled = function () {
-                return this.getValue() === true;
-            };
-
             DupKeyRule.prototype.apply = function (syntaxTree) {
                 return this.applyWithWalker(new DupKeyWalker(syntaxTree));
             };
@@ -26882,10 +26872,6 @@ var Lint;
             function EofLineRule() {
                 _super.apply(this, arguments);
             }
-            EofLineRule.prototype.isEnabled = function () {
-                return this.getValue() === true;
-            };
-
             EofLineRule.prototype.apply = function (syntaxTree) {
                 return this.applyWithWalker(new EofWalker(syntaxTree));
             };
@@ -26944,10 +26930,6 @@ var Lint;
             function EqEqEqRule() {
                 _super.apply(this, arguments);
             }
-            EqEqEqRule.prototype.isEnabled = function () {
-                return this.getValue() === true;
-            };
-
             EqEqEqRule.prototype.apply = function (syntaxTree) {
                 return this.applyWithWalker(new ComparisonWalker(syntaxTree));
             };
@@ -26995,10 +26977,6 @@ var Lint;
             function EvilRule() {
                 _super.apply(this, arguments);
             }
-            EvilRule.prototype.isEnabled = function () {
-                return this.getValue() === true;
-            };
-
             EvilRule.prototype.apply = function (syntaxTree) {
                 return this.applyWithWalker(new EvilWalker(syntaxTree));
             };
@@ -27037,10 +27015,6 @@ var Lint;
             function ForInRule() {
                 _super.apply(this, arguments);
             }
-            ForInRule.prototype.isEnabled = function () {
-                return this.getValue() === true;
-            };
-
             ForInRule.prototype.apply = function (syntaxTree) {
                 return this.applyWithWalker(new ForInWalker(syntaxTree));
             };
@@ -27092,6 +27066,16 @@ var Lint;
             function IndentRule() {
                 _super.apply(this, arguments);
             }
+            IndentRule.prototype.isEnabled = function () {
+                var value = this.getValue();
+
+                if (typeof value === "number" && value > 0) {
+                    return true;
+                }
+
+                return false;
+            };
+
             IndentRule.prototype.apply = function (syntaxTree) {
                 var tabWidth = parseInt(this.getValue());
                 return this.applyWithWalker(new IndentWalker(syntaxTree, tabWidth));
@@ -27276,10 +27260,6 @@ var Lint;
             function LabelPosRule() {
                 _super.apply(this, arguments);
             }
-            LabelPosRule.prototype.isEnabled = function () {
-                return this.getValue() === true;
-            };
-
             LabelPosRule.prototype.apply = function (syntaxTree) {
                 return this.applyWithWalker(new LabelPosWalker(syntaxTree));
             };
@@ -27342,6 +27322,16 @@ var Lint;
             function MaxLenRule() {
                 _super.apply(this, arguments);
             }
+            MaxLenRule.prototype.isEnabled = function () {
+                var value = this.getValue();
+
+                if (typeof value === "number" && value > 0) {
+                    return true;
+                }
+
+                return false;
+            };
+
             MaxLenRule.prototype.apply = function (syntaxTree) {
                 var ruleFailures = [];
                 var lineLimit = this.getValue();
@@ -27374,10 +27364,6 @@ var Lint;
             function NoArgRule() {
                 _super.apply(this, arguments);
             }
-            NoArgRule.prototype.isEnabled = function () {
-                return this.getValue() === true;
-            };
-
             NoArgRule.prototype.apply = function (syntaxTree) {
                 return this.applyWithWalker(new NoArgWalker(syntaxTree));
             };
@@ -27418,10 +27404,6 @@ var Lint;
             function NoConsoleRule() {
                 _super.apply(this, arguments);
             }
-            NoConsoleRule.prototype.isEnabled = function () {
-                return (typeof this.getValue() === "string");
-            };
-
             NoConsoleRule.prototype.apply = function (syntaxTree) {
                 return this.applyWithWalker(new NoConsoleWalker(this.getValue(), syntaxTree));
             };
@@ -27466,10 +27448,6 @@ var Lint;
             function NoConstructRule() {
                 _super.apply(this, arguments);
             }
-            NoConstructRule.prototype.isEnabled = function () {
-                return this.getValue() === true;
-            };
-
             NoConstructRule.prototype.apply = function (syntaxTree) {
                 return this.applyWithWalker(new NoConstructWalker(syntaxTree));
             };
@@ -27512,10 +27490,6 @@ var Lint;
             function NoEmptyRule() {
                 _super.apply(this, arguments);
             }
-            NoEmptyRule.prototype.isEnabled = function () {
-                return this.getValue() === true;
-            };
-
             NoEmptyRule.prototype.apply = function (syntaxTree) {
                 return this.applyWithWalker(new BlockWalker(syntaxTree));
             };
@@ -27551,10 +27525,6 @@ var Lint;
             function OneLineRule() {
                 _super.apply(this, arguments);
             }
-            OneLineRule.prototype.isEnabled = function () {
-                return this.getValue() === true;
-            };
-
             OneLineRule.prototype.apply = function (syntaxTree) {
                 var braceWalker = new BraceWalker(syntaxTree);
                 return this.applyWithWalker(braceWalker);
@@ -27727,10 +27697,6 @@ var Lint;
             function RadixRule() {
                 _super.apply(this, arguments);
             }
-            RadixRule.prototype.isEnabled = function () {
-                return this.getValue() === true;
-            };
-
             RadixRule.prototype.apply = function (syntaxTree) {
                 return this.applyWithWalker(new RadixWalker(syntaxTree));
             };
@@ -27770,10 +27736,6 @@ var Lint;
             function SemicolonRule() {
                 _super.apply(this, arguments);
             }
-            SemicolonRule.prototype.isEnabled = function () {
-                return this.getValue() === true;
-            };
-
             SemicolonRule.prototype.apply = function (syntaxTree) {
                 var ruleFailures = [];
                 var diagnostics = syntaxTree.diagnostics();
@@ -27808,10 +27770,6 @@ var Lint;
             function SubRule() {
                 _super.apply(this, arguments);
             }
-            SubRule.prototype.isEnabled = function () {
-                return this.getValue() === true;
-            };
-
             SubRule.prototype.apply = function (syntaxTree) {
                 return this.applyWithWalker(new SubWalker(syntaxTree));
             };
@@ -27851,10 +27809,6 @@ var Lint;
             function TrailingRule() {
                 _super.apply(this, arguments);
             }
-            TrailingRule.prototype.isEnabled = function () {
-                return this.getValue() === true;
-            };
-
             TrailingRule.prototype.apply = function (syntaxTree) {
                 return this.applyWithWalker(new TrailingWalker(syntaxTree));
             };
@@ -27905,10 +27859,6 @@ var Lint;
             function VarNameRule() {
                 _super.apply(this, arguments);
             }
-            VarNameRule.prototype.isEnabled = function () {
-                return this.getValue() === true;
-            };
-
             VarNameRule.prototype.apply = function (syntaxTree) {
                 return this.applyWithWalker(new VarNameWalker(syntaxTree));
             };
@@ -27959,10 +27909,6 @@ var Lint;
             function WhitespaceRule() {
                 _super.apply(this, arguments);
             }
-            WhitespaceRule.prototype.isEnabled = function () {
-                return this.getValue() === true;
-            };
-
             WhitespaceRule.prototype.apply = function (syntaxTree) {
                 return this.applyWithWalker(new WhitespaceWalker(syntaxTree));
             };

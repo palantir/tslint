@@ -22,10 +22,6 @@ module Lint.Rules {
     export class VarNameRule extends AbstractRule {
         public static FAILURE_STRING = "variable name must be in camelcase or uppercase";
 
-        public isEnabled() : boolean {
-            return this.getValue() === true;
-        }
-
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
             return this.applyWithWalker(new VarNameWalker(syntaxTree));
         }

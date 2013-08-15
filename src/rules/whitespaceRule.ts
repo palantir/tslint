@@ -22,10 +22,6 @@ module Lint.Rules {
     export class WhitespaceRule extends AbstractRule {
         public static FAILURE_STRING = "missing whitespace";
 
-        public isEnabled() : boolean {
-            return this.getValue() === true;
-        }
-
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
             return this.applyWithWalker(new WhitespaceWalker(syntaxTree));
         }

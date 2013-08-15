@@ -22,10 +22,6 @@ module Lint.Rules {
     export class SemicolonRule extends AbstractRule {
         public static FAILURE_STRING = "missing semicolon";
 
-        public isEnabled() : boolean {
-            return this.getValue() === true;
-        }
-
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
             var ruleFailures = [];
             var diagnostics = syntaxTree.diagnostics();

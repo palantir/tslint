@@ -23,10 +23,6 @@ module Lint.Rules {
         public static EQ_FAILURE_STRING = "== should be ===";
         public static NEQ_FAILURE_STRING = "!= should be !==";
 
-        public isEnabled() : boolean {
-            return this.getValue() === true;
-        }
-
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
             return this.applyWithWalker(new ComparisonWalker(syntaxTree));
         }

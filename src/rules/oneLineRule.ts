@@ -25,10 +25,6 @@ module Lint.Rules {
         public static ELSE_FAILURE_STRING = "misplaced 'else'";
         public static WHITESPACE_FAILURE_STRING = "missing whitespace";
 
-        public isEnabled(): boolean {
-            return this.getValue() === true;
-        }
-
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
             var braceWalker = new BraceWalker(syntaxTree);
             return this.applyWithWalker(braceWalker);

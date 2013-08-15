@@ -21,10 +21,6 @@ module Lint.Rules {
     export class EvilRule extends AbstractRule {
         public static FAILURE_STRING = "forbidden eval";
 
-        public isEnabled() : boolean {
-            return this.getValue() === true;
-        }
-
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
             return this.applyWithWalker(new EvilWalker(syntaxTree));
         }

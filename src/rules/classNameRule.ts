@@ -22,10 +22,6 @@ module Lint.Rules {
     export class ClassNameRule extends AbstractRule {
         static FAILURE_STRING = "name must be in pascal case";
 
-        public isEnabled() : boolean {
-            return this.getValue() === true;
-        }
-
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
             return this.applyWithWalker(new NameWalker(syntaxTree));
         }

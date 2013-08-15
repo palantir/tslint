@@ -21,10 +21,6 @@ module Lint.Rules {
     export class SubRule extends AbstractRule {
         public static FAILURE_STRING = "object access via string literals is disallowed";
 
-        public isEnabled() : boolean {
-            return this.getValue() === true;
-        }
-
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
             return this.applyWithWalker(new SubWalker(syntaxTree));
         }

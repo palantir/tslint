@@ -21,10 +21,6 @@ module Lint.Rules {
     export class RadixRule extends AbstractRule {
         public static FAILURE_STRING = "missing radix parameter";
 
-        public isEnabled() : boolean {
-            return this.getValue() === true;
-        }
-
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
             return this.applyWithWalker(new RadixWalker(syntaxTree));
         }

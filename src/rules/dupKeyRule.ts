@@ -21,10 +21,6 @@ module Lint.Rules {
     export class DupKeyRule extends AbstractRule {
         public static FAILURE_STRING = "duplicate key '";
 
-        public isEnabled() : boolean {
-            return this.getValue() === true;
-        }
-
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
             return this.applyWithWalker(new DupKeyWalker(syntaxTree));
         }
