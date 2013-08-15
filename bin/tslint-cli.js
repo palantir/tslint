@@ -27533,7 +27533,12 @@ var Lint;
                 _super.apply(this, arguments);
             }
             OneLineRule.prototype.apply = function (syntaxTree) {
-                var braceWalker = new BraceWalker(syntaxTree);
+                var checkForWhitespace = false;
+                var options = this.getOptions();
+                if (options && options.indexOf("check-whitespace") !== -1) {
+                    checkForWhitespace = true;
+                }
+                var braceWalker = new BraceWalker(syntaxTree, checkForWhitespace);
                 return this.applyWithWalker(braceWalker);
             };
             OneLineRule.BRACE_FAILURE_STRING = "misplaced opening brace";
@@ -27546,8 +27551,9 @@ var Lint;
 
         var BraceWalker = (function (_super) {
             __extends(BraceWalker, _super);
-            function BraceWalker() {
-                _super.apply(this, arguments);
+            function BraceWalker(syntaxTree, checkForWhitespace) {
+                _super.call(this, syntaxTree);
+                this.checkForWhitespace = checkForWhitespace;
             }
             BraceWalker.prototype.visitToken = function (token) {
                 var kind = token.kind();
@@ -27564,7 +27570,7 @@ var Lint;
                         if (currentLine !== lastLine) {
                             failure = this.createFailure(position, token.width(), OneLineRule.BRACE_FAILURE_STRING);
                             this.addFailure(failure);
-                        } else if (!this.hasTrailingWhiteSpace(lastState.token)) {
+                        } else if (this.checkForWhitespace && !this.hasTrailingWhiteSpace(lastState.token)) {
                             failure = this.createFailure(position, token.width(), OneLineRule.WHITESPACE_FAILURE_STRING);
                             this.addFailure(failure);
                         }
@@ -28064,7 +28070,8 @@ var Lint;
         var fs = require("fs");
         var path = require("path");
 
-        var CONFIG_FILENAME = ".tslintrc";
+        var CONFIG_FILENAME1 = ".tslintrc";
+        var CONFIG_FILENAME2 = "tslint.json";
 
         function findConfiguration(configFile) {
             if (!configFile) {
@@ -28072,10 +28079,14 @@ var Lint;
                 var parentPath = currentPath;
 
                 while (true) {
-                    var filePath = path.join(currentPath, CONFIG_FILENAME);
+                    var filePath1 = path.join(currentPath, CONFIG_FILENAME1);
+                    var filePath2 = path.join(currentPath, CONFIG_FILENAME2);
 
-                    if (fs.existsSync(filePath)) {
-                        configFile = filePath;
+                    if (fs.existsSync(filePath1)) {
+                        configFile = filePath1;
+                        break;
+                    } else if (fs.existsSync(filePath2)) {
+                        configFile = filePath2;
                         break;
                     }
 
@@ -64320,7 +64331,7 @@ var argv = require("optimist").usage("usage: $0").demand("f").options({
 
 var configuration = Lint.Configuration.findConfiguration(argv.c);
 if (configuration === undefined) {
-    console.error("unable to find .tslintrc configuration");
+    console.error("unable to find tslint configuration");
     process.exit(1);
 }
 

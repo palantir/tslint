@@ -21,7 +21,8 @@ module Lint.Configuration {
     var fs = require("fs");
     var path = require("path");
 
-    var CONFIG_FILENAME = ".tslintrc";
+    var CONFIG_FILENAME1 = ".tslintrc";
+    var CONFIG_FILENAME2 = "tslint.json";
 
     export function findConfiguration(configFile): any {
         if (!configFile) {
@@ -29,10 +30,14 @@ module Lint.Configuration {
             var parentPath = currentPath;
 
             while (true) {
-                var filePath = path.join(currentPath, CONFIG_FILENAME);
+                var filePath1 = path.join(currentPath, CONFIG_FILENAME1);
+                var filePath2 = path.join(currentPath, CONFIG_FILENAME2);
 
-                if (fs.existsSync(filePath)) {
-                    configFile = filePath;
+                if (fs.existsSync(filePath1)) {
+                    configFile = filePath1;
+                    break;
+                } else if(fs.existsSync(filePath2)) {
+                    configFile = filePath2;
                     break;
                 }
 

@@ -58,7 +58,7 @@ Please first ensure that the TypeScript source files compile correctly.
 	  -o, --out     output file
 	  -t, --format  output format (prose, json)  [default: "prose"]
 
-By default, configuration is loaded from `.tslintrc`, if it exists in the current path.
+By default, configuration is loaded from `.tslintrc` or `tslint.json`, if either exists in the current path.
 
 ##### Library
 

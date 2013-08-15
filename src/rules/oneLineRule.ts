@@ -26,12 +26,24 @@ module Lint.Rules {
         public static WHITESPACE_FAILURE_STRING = "missing whitespace";
 
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            var braceWalker = new BraceWalker(syntaxTree);
+            var checkForWhitespace = false;
+            var options = this.getOptions();
+            if (options && options.indexOf("check-whitespace") !== -1) {
+                checkForWhitespace = true;
+            }
+            var braceWalker = new BraceWalker(syntaxTree, checkForWhitespace);
             return this.applyWithWalker(braceWalker);
         }
     }
 
     class BraceWalker extends Lint.StateAwareRuleWalker {
+        private checkForWhitespace: boolean;
+
+        constructor(syntaxTree: TypeScript.SyntaxTree, checkForWhitespace: boolean) {
+            super(syntaxTree);
+            this.checkForWhitespace = checkForWhitespace;
+        }
+
         public visitToken(token: TypeScript.ISyntaxToken): void {
             var kind = token.kind();
             var lastState = this.getLastState();
@@ -54,7 +66,7 @@ module Lint.Rules {
                     if (currentLine !== lastLine) {
                         failure = this.createFailure(position, token.width(), OneLineRule.BRACE_FAILURE_STRING);
                         this.addFailure(failure);
-                    } else if (!this.hasTrailingWhiteSpace(lastState.token)) {
+                    } else if (this.checkForWhitespace && !this.hasTrailingWhiteSpace(lastState.token)) {
                         failure = this.createFailure(position, token.width(), OneLineRule.WHITESPACE_FAILURE_STRING);
                         this.addFailure(failure);
                     }

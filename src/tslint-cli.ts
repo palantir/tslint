@@ -44,7 +44,7 @@ var argv = require("optimist")
 
 var configuration = Lint.Configuration.findConfiguration(argv.c);
 if (configuration === undefined) {
-    console.error("unable to find .tslintrc configuration");
+    console.error("unable to find tslint configuration");
     process.exit(1);
 }
 

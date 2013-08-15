@@ -81,7 +81,8 @@ describe("<oneline>", () => {
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 
-    it("enforces whitespace before a brace", () => {
+    it("enforces whitespace before a brace (if enabled)", () => {
+        var actualFailures = Lint.Test.applyRuleOnFile(fileName, "oneline", [true, "check-whitespace"]);
         var whitespaceFailure = Lint.Rules.OneLineRule.WHITESPACE_FAILURE_STRING;
         var expectedFailure = Lint.Test.createFailure(fileName, [59, 14], [59, 15], whitespaceFailure);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);

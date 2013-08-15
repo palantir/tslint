@@ -2,6 +2,7 @@
 .travis.yml
 .tslintrc
 Gruntfile.js
+tslint.json
 build/
 src/
 test/

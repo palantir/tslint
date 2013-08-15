@@ -1,0 +1,29 @@
+{
+  "rules": {
+    "bitwise": true,
+    "classname": true,
+    "curly": true,
+    "debug": true,
+    "dupkey": true,
+    "eofline": true,
+    "eqeqeq": true,
+    "evil": true,
+    "forin": true,
+    "indent": [true, 4],
+    "labelpos": true,
+    "labelundef": true,
+    "maxlen": [true, 140],
+    "noarg": true,
+    "noconsole": [true, "debug, info, time, timeEnd, trace"],
+    "noconstruct": true,
+    "noempty": true,
+    "oneline": [true, "check-whitespace"],
+    "quotemark": [true, "double"],
+    "radix": true,
+    "semicolon": true,
+    "sub": true,
+    "trailing": true,
+    "varname": true,
+    "whitespace": true
+  }
+}
