@@ -19,10 +19,10 @@ Supported Rules
 * `labelpos` enforces labels only on sensible statements.
 * `maxlen` sets the maximum length of a line.
 * `noarg` disallows access to `arguments.callee`.
-* `noconsole` disallows access to the specified properties on `console`. Property configurations are comma-delimited. For example, the configuration "noconsole: log, debug, warn" disables `console.log`, `console.debug` and `console.warn`.
+* `noconsole` disallows access to the specified properties on `console`. Property configurations are comma-delimited. For example, the rule option "log, debug, warn" disables `console.log`, `console.debug` and `console.warn`.
 * `noconstruct` disallows access to the constructors of `String`, `Number`, and `Boolean`.
 * `noempty` disallows empty blocks.
-* `oneline` enforces an opening brace to be on the same line as the expression preceding it.
+* `oneline` enforces an opening brace to be on the same line as the expression preceding it. The rule option `"check-whitespace"` ensures preceding whitespace before the brace.
 * `quotemark` enforces consistent single or double quoted string literals.
 * `radix` enforces the radix parameter of `parseInt`
 * `semicolon` enforces semicolons at the end of every statement.
@@ -92,4 +92,4 @@ TODO
 * Add more rules from jshint
 * Disallow variables referenced outside of their scope definition
 * Disallow unused variables
-* Support external formatters
+* Support pluggable formatters
