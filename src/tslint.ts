@@ -50,7 +50,12 @@ module Lint {
             for (i = 0; i < configuredRules.length; ++i) {
                 var rule = configuredRules[i];
                 if (rule.isEnabled()) {
-                    failures = failures.concat(rule.apply(syntaxTree));
+                    var ruleFailures = rule.apply(syntaxTree);
+                    ruleFailures.forEach ((ruleFailure) => {
+                        if (!this.containsRule(failures, ruleFailure)) {
+                            failures.push(ruleFailure);
+                        }
+                    });
                 }
             }
 
@@ -65,6 +70,16 @@ module Lint {
                 format: this.options.formatter,
                 output: output
             };
+        }
+
+        private containsRule(rules: RuleFailure[], rule: RuleFailure) {
+            for (var i = 0; i < rules.length; ++i) {
+                if (rules[i].equals(rule)) {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 
