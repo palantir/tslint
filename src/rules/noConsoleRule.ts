@@ -23,11 +23,11 @@ module Lint.Rules {
         public static FAILURE_STRING = "access forbidden to console property";
 
         public isEnabled() : boolean {
-            return (typeof this.getValue() === "string");
+            return (typeof this.getOptions()[0] === "string");
         }
 
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            return this.applyWithWalker(new NoConsoleWalker(this.getValue(), syntaxTree));
+            return this.applyWithWalker(new NoConsoleWalker(this.getOptions()[0], syntaxTree));
         }
       }
 

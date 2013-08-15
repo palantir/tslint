@@ -26536,8 +26536,11 @@ var Lint;
                 return this.name;
             };
 
-            AbstractRule.prototype.getValue = function () {
-                return this.value;
+            AbstractRule.prototype.getOptions = function () {
+                var value = this.value;
+                if (Array.isArray(value) && value.length > 1) {
+                    return value.slice(1);
+                }
             };
 
             AbstractRule.prototype.apply = function (syntaxTree) {
@@ -27067,9 +27070,9 @@ var Lint;
                 _super.apply(this, arguments);
             }
             IndentRule.prototype.isEnabled = function () {
-                var value = this.getValue();
+                var option = this.getOptions()[0];
 
-                if (typeof value === "number" && value > 0) {
+                if (typeof option === "number" && option > 0) {
                     return true;
                 }
 
@@ -27077,7 +27080,7 @@ var Lint;
             };
 
             IndentRule.prototype.apply = function (syntaxTree) {
-                var tabWidth = parseInt(this.getValue());
+                var tabWidth = this.getOptions()[0];
                 return this.applyWithWalker(new IndentWalker(syntaxTree, tabWidth));
             };
             IndentRule.FAILURE_STRING = "unexpected tab width: ";
@@ -27323,9 +27326,9 @@ var Lint;
                 _super.apply(this, arguments);
             }
             MaxLenRule.prototype.isEnabled = function () {
-                var value = this.getValue();
+                var option = this.getOptions()[0];
 
-                if (typeof value === "number" && value > 0) {
+                if (typeof option === "number" && option > 0) {
                     return true;
                 }
 
@@ -27334,7 +27337,7 @@ var Lint;
 
             MaxLenRule.prototype.apply = function (syntaxTree) {
                 var ruleFailures = [];
-                var lineLimit = this.getValue();
+                var lineLimit = this.getOptions()[0];
                 var lineMap = syntaxTree.lineMap();
                 var lineStarts = lineMap.lineStarts();
                 var errorString = MaxLenRule.FAILURE_STRING + lineLimit;
@@ -27404,8 +27407,12 @@ var Lint;
             function NoConsoleRule() {
                 _super.apply(this, arguments);
             }
+            NoConsoleRule.prototype.isEnabled = function () {
+                return (typeof this.getOptions()[0] === "string");
+            };
+
             NoConsoleRule.prototype.apply = function (syntaxTree) {
-                return this.applyWithWalker(new NoConsoleWalker(this.getValue(), syntaxTree));
+                return this.applyWithWalker(new NoConsoleWalker(this.getOptions()[0], syntaxTree));
             };
             NoConsoleRule.FAILURE_STRING = "access forbidden to console property";
             return NoConsoleRule;
@@ -27623,13 +27630,13 @@ var Lint;
                 _super.apply(this, arguments);
             }
             QuoteMarkRule.prototype.isEnabled = function () {
-                var quoteMarkString = this.getValue();
+                var quoteMarkString = this.getOptions()[0];
                 return (quoteMarkString === "single" || quoteMarkString === "double");
             };
 
             QuoteMarkRule.prototype.apply = function (syntaxTree) {
                 var quoteMark;
-                var quoteMarkString = this.getValue();
+                var quoteMarkString = this.getOptions()[0];
                 var sourceUnit = syntaxTree.sourceUnit();
 
                 if (quoteMarkString === "single") {

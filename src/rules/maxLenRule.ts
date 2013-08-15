@@ -23,9 +23,9 @@ module Lint.Rules {
         public static FAILURE_STRING = "exceeds maximum line length of ";
 
         public isEnabled(): boolean {
-            var value = this.getValue();
+            var option = this.getOptions()[0];
 
-            if (typeof value === "number" && value > 0) {
+            if (typeof option === "number" && option > 0) {
                 return true;
             }
 
@@ -34,7 +34,7 @@ module Lint.Rules {
 
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
             var ruleFailures = [];
-            var lineLimit = this.getValue();
+            var lineLimit = this.getOptions()[0];
             var lineMap = syntaxTree.lineMap();
             var lineStarts = lineMap.lineStarts();
             var errorString = MaxLenRule.FAILURE_STRING + lineLimit;

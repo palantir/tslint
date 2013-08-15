@@ -28,13 +28,13 @@ module Lint.Rules {
         public static DOUBLE_QUOTE_FAILURE = "' should be \"";
 
         public isEnabled(): boolean {
-            var quoteMarkString = this.getValue();
+            var quoteMarkString = this.getOptions()[0];
             return (quoteMarkString === "single" || quoteMarkString === "double");
         }
 
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
             var quoteMark: QuoteMark;
-            var quoteMarkString = this.getValue();
+            var quoteMarkString = this.getOptions()[0];
             var sourceUnit = syntaxTree.sourceUnit();
 
             if (quoteMarkString === "single") {

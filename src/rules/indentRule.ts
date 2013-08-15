@@ -23,9 +23,9 @@ module Lint.Rules {
         public static FAILURE_STRING = "unexpected tab width: ";
 
         public isEnabled(): boolean {
-            var value = this.getValue();
+            var option = this.getOptions()[0];
 
-            if (typeof value === "number" && value > 0) {
+            if (typeof option === "number" && option > 0) {
                 return true;
             }
 
@@ -33,7 +33,7 @@ module Lint.Rules {
         }
 
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            var tabWidth = parseInt(this.getValue());
+            var tabWidth = this.getOptions()[0];
             return this.applyWithWalker(new IndentWalker(syntaxTree, tabWidth));
         }
     }

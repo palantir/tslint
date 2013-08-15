@@ -33,15 +33,18 @@ module Lint.Rules {
             return this.name;
         }
 
-        public getValue() {
-            return this.value;
+        public getOptions(): any[] {
+            var value = this.value;
+            if (Array.isArray(value) && value.length > 1) {
+                return value.slice(1);
+            }
         }
 
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
             throw TypeScript.Errors.abstract();
         }
 
-        public applyWithWalker(walker: Lint.RuleWalker) {
+        public applyWithWalker(walker: Lint.RuleWalker): RuleFailure[] {
             var sourceUnit = walker.getSyntaxTree().sourceUnit();
             sourceUnit.accept(walker);
             return walker.getFailures();

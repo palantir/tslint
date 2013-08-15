@@ -22,11 +22,13 @@ module Lint {
     export interface Rule {
         getName(): string;
 
-        getValue(): any;
+        getOptions(): any[];
 
         isEnabled(): boolean;
 
         apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[];
+
+        applyWithWalker(walker: Lint.RuleWalker): RuleFailure[];
     }
 
     export class RuleFailurePosition {

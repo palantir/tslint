@@ -25,7 +25,7 @@ describe("<noconsole>", () => {
         var logFailure = createFailure([2, 1], [2, 12]);
         var warnFailure = createFailure([6, 1], [6, 13]);
 
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, "noconsole", "dir, error, log, warn");
+        var actualFailures = Lint.Test.applyRuleOnFile(fileName, "noconsole", [true, "dir, error, log, warn"]);
         Lint.Test.assertContainsFailure(actualFailures, dirFailure);
     });
 });

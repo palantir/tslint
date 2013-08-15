@@ -22,7 +22,7 @@ describe("<quotemark>", () => {
     var doubleFailure = Lint.Rules.QuoteMarkRule.DOUBLE_QUOTE_FAILURE;
 
     it("enforces single quotes", () => {
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, "quotemark", "single");
+        var actualFailures = Lint.Test.applyRuleOnFile(fileName, "quotemark", [true, "single"]);
         var expectedFailure = Lint.Test.createFailure(fileName, [2, 19], [2, 28], singleFailure);
 
         assert.equal(actualFailures.length, 1);
@@ -30,7 +30,7 @@ describe("<quotemark>", () => {
     });
 
     it("enforces double quotes", () => {
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, "quotemark", "double");
+        var actualFailures = Lint.Test.applyRuleOnFile(fileName, "quotemark", [true, "double"]);
         var expectedFailure = Lint.Test.createFailure(fileName, [1, 14], [1, 22], doubleFailure);
 
         assert.equal(actualFailures.length, 1);

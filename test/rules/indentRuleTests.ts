@@ -25,7 +25,7 @@ describe("<indent>", () => {
         var actualFailures;
 
         before(() => {
-            actualFailures = Lint.Test.applyRuleOnFile(fileName, "indent", 4);
+            actualFailures = Lint.Test.applyRuleOnFile(fileName, "indent", [true, 4]);
         });
 
         it("enforces module indentation", () => {
@@ -104,7 +104,7 @@ describe("<indent>", () => {
         var actualFailures;
 
         before(() => {
-            actualFailures = Lint.Test.applyRuleOnFile(fileName, "indent", 4);
+            actualFailures = Lint.Test.applyRuleOnFile(fileName, "indent", [true, 4]);
         });
 
         it("enforces module indentation", () => {
