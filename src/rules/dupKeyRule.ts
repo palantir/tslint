@@ -36,6 +36,7 @@ module Lint.Rules {
         public visitObjectLiteralExpression(node: TypeScript.ObjectLiteralExpressionSyntax): void {
             this.objectKeys = {};
             super.visitObjectLiteralExpression(node);
+            this.objectKeys = {};
         }
 
         public visitSimplePropertyAssignment(node: TypeScript.SimplePropertyAssignmentSyntax): void {
