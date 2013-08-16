@@ -23,7 +23,19 @@ describe("<whitespace>", () => {
     var createFailure = Lint.Test.createFailuresOnFile(fileName, failureString);
 
     before(() => {
-        actualFailures = Lint.Test.applyRuleOnFile(fileName, "whitespace");
+        var options = [true,
+            "check-branch",
+            "check-decl",
+            "check-operator",
+            "check-separator",
+            "check-type"
+        ];
+        actualFailures = Lint.Test.applyRuleOnFile(fileName, "whitespace", options);
+    });
+
+    it("enforces rules only when enabled", () => {
+        var failures = Lint.Test.applyRuleOnFile(fileName, "whitespace");
+        assert.equal(failures.length, 0);
     });
 
     it("enforces whitespace in import statements", () => {

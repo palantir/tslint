@@ -27941,13 +27941,19 @@ var Lint;
 var Lint;
 (function (Lint) {
     (function (Rules) {
+        var OPTION_BRANCH = "check-branch";
+        var OPTION_DECL = "check-decl";
+        var OPTION_OPERATOR = "check-operator";
+        var OPTION_SEPARATOR = "check-separator";
+        var OPTION_TYPE = "check-type";
+
         var WhitespaceRule = (function (_super) {
             __extends(WhitespaceRule, _super);
             function WhitespaceRule() {
                 _super.apply(this, arguments);
             }
             WhitespaceRule.prototype.apply = function (syntaxTree) {
-                return this.applyWithWalker(new WhitespaceWalker(syntaxTree));
+                return this.applyWithWalker(new WhitespaceWalker(syntaxTree, this.getOptions()));
             };
             WhitespaceRule.FAILURE_STRING = "missing whitespace";
             return WhitespaceRule;
@@ -27956,21 +27962,22 @@ var Lint;
 
         var WhitespaceWalker = (function (_super) {
             __extends(WhitespaceWalker, _super);
-            function WhitespaceWalker() {
-                _super.apply(this, arguments);
+            function WhitespaceWalker(syntaxTree, options) {
+                _super.call(this, syntaxTree);
+                this.options = options;
             }
             WhitespaceWalker.prototype.visitToken = function (token) {
                 _super.prototype.visitToken.call(this, token);
 
                 var kind = token.kind();
-                if (kind === TypeScript.SyntaxKind.CatchKeyword || kind === TypeScript.SyntaxKind.ColonToken || kind === TypeScript.SyntaxKind.CommaToken || kind === TypeScript.SyntaxKind.EqualsToken || kind === TypeScript.SyntaxKind.ForKeyword || kind === TypeScript.SyntaxKind.IfKeyword || kind === TypeScript.SyntaxKind.SemicolonToken || kind === TypeScript.SyntaxKind.SwitchKeyword || kind === TypeScript.SyntaxKind.WhileKeyword || kind === TypeScript.SyntaxKind.WithKeyword) {
+                if ((this.hasOption(OPTION_BRANCH) && this.isBranchKind(kind)) || (this.hasOption(OPTION_SEPARATOR) && this.isSeparatorKind(kind)) || (this.hasOption(OPTION_DECL) && kind === TypeScript.SyntaxKind.EqualsToken) || (this.hasOption(OPTION_TYPE) && kind === TypeScript.SyntaxKind.ColonToken)) {
                     this.checkForLeadingSpace(this.position(), token.trailingTrivia());
                 }
             };
 
             WhitespaceWalker.prototype.visitBinaryExpression = function (node) {
                 var operator = node.operatorToken;
-                if (operator.kind() !== TypeScript.SyntaxKind.CommaToken) {
+                if (this.hasOption(OPTION_OPERATOR) && operator.kind() !== TypeScript.SyntaxKind.CommaToken) {
                     var position = this.positionAfter(node.left);
                     this.checkForLeadingSpace(position, node.left.trailingTrivia());
 
@@ -27982,14 +27989,16 @@ var Lint;
             };
 
             WhitespaceWalker.prototype.visitConditionalExpression = function (node) {
-                var position = this.positionAfter(node.condition);
-                this.checkForLeadingSpace(position, node.condition.trailingTrivia());
+                if (this.hasOption(OPTION_OPERATOR)) {
+                    var position = this.positionAfter(node.condition);
+                    this.checkForLeadingSpace(position, node.condition.trailingTrivia());
 
-                position += node.questionToken.fullWidth();
-                this.checkForLeadingSpace(position, node.questionToken.trailingTrivia());
+                    position += node.questionToken.fullWidth();
+                    this.checkForLeadingSpace(position, node.questionToken.trailingTrivia());
 
-                position += node.whenTrue.fullWidth();
-                this.checkForLeadingSpace(position, node.whenTrue.trailingTrivia());
+                    position += node.whenTrue.fullWidth();
+                    this.checkForLeadingSpace(position, node.whenTrue.trailingTrivia());
+                }
 
                 _super.prototype.visitConditionalExpression.call(this, node);
             };
@@ -27997,7 +28006,7 @@ var Lint;
             WhitespaceWalker.prototype.visitVariableDeclarator = function (node) {
                 var position = this.positionAfter(node.identifier, node.typeAnnotation);
 
-                if (node.equalsValueClause !== null) {
+                if (this.hasOption(OPTION_DECL) && node.equalsValueClause !== null) {
                     if (node.typeAnnotation !== null) {
                         this.checkForLeadingSpace(position, node.typeAnnotation.trailingTrivia());
                     } else {
@@ -28009,17 +28018,37 @@ var Lint;
             };
 
             WhitespaceWalker.prototype.visitImportDeclaration = function (node) {
-                var position = this.positionAfter(node.importKeyword, node.identifier);
-                this.checkForLeadingSpace(position, node.identifier.trailingTrivia());
+                if (this.hasOption(OPTION_DECL)) {
+                    var position = this.positionAfter(node.importKeyword, node.identifier);
+                    this.checkForLeadingSpace(position, node.identifier.trailingTrivia());
+                }
 
                 _super.prototype.visitImportDeclaration.call(this, node);
             };
 
             WhitespaceWalker.prototype.visitExportAssignment = function (node) {
-                var position = this.positionAfter(node.exportKeyword);
-                this.checkForLeadingSpace(position, node.exportKeyword.trailingTrivia());
+                if (this.hasOption(OPTION_DECL)) {
+                    var position = this.positionAfter(node.exportKeyword);
+                    this.checkForLeadingSpace(position, node.exportKeyword.trailingTrivia());
+                }
 
                 _super.prototype.visitExportAssignment.call(this, node);
+            };
+
+            WhitespaceWalker.prototype.isBranchKind = function (kind) {
+                return (kind === TypeScript.SyntaxKind.CatchKeyword || kind === TypeScript.SyntaxKind.ForKeyword || kind === TypeScript.SyntaxKind.IfKeyword || kind === TypeScript.SyntaxKind.SwitchKeyword || kind === TypeScript.SyntaxKind.WhileKeyword || kind === TypeScript.SyntaxKind.WithKeyword);
+            };
+
+            WhitespaceWalker.prototype.isSeparatorKind = function (kind) {
+                return (kind === TypeScript.SyntaxKind.CommaToken || kind === TypeScript.SyntaxKind.SemicolonToken);
+            };
+
+            WhitespaceWalker.prototype.hasOption = function (option) {
+                if (this.options) {
+                    return this.options.indexOf(option) !== -1;
+                } else {
+                    return false;
+                }
             };
 
             WhitespaceWalker.prototype.checkForLeadingSpace = function (position, trivia) {

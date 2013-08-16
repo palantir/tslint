@@ -18,31 +18,37 @@
 /// <reference path='abstractRule.ts'/>
 
 module Lint.Rules {
+    var OPTION_BRANCH = "check-branch";
+    var OPTION_DECL = "check-decl";
+    var OPTION_OPERATOR = "check-operator";
+    var OPTION_SEPARATOR = "check-separator";
+    var OPTION_TYPE = "check-type";
 
     export class WhitespaceRule extends AbstractRule {
         public static FAILURE_STRING = "missing whitespace";
 
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            return this.applyWithWalker(new WhitespaceWalker(syntaxTree));
+            return this.applyWithWalker(new WhitespaceWalker(syntaxTree, this.getOptions()));
         }
     }
 
     class WhitespaceWalker extends Lint.RuleWalker {
+        private options: any;
+
+        constructor(syntaxTree: TypeScript.SyntaxTree, options: any) {
+            super(syntaxTree);
+            this.options = options;
+        }
+
         // check for trailing space after the given tokens
         public visitToken(token: TypeScript.ISyntaxToken): void {
             super.visitToken(token);
 
             var kind = token.kind();
-            if (kind === TypeScript.SyntaxKind.CatchKeyword ||
-                kind === TypeScript.SyntaxKind.ColonToken ||
-                kind === TypeScript.SyntaxKind.CommaToken ||
-                kind === TypeScript.SyntaxKind.EqualsToken ||
-                kind === TypeScript.SyntaxKind.ForKeyword ||
-                kind === TypeScript.SyntaxKind.IfKeyword ||
-                kind === TypeScript.SyntaxKind.SemicolonToken ||
-                kind === TypeScript.SyntaxKind.SwitchKeyword ||
-                kind === TypeScript.SyntaxKind.WhileKeyword ||
-                kind === TypeScript.SyntaxKind.WithKeyword) {
+            if ((this.hasOption(OPTION_BRANCH) && this.isBranchKind(kind)) ||
+                (this.hasOption(OPTION_SEPARATOR) && this.isSeparatorKind(kind)) ||
+                (this.hasOption(OPTION_DECL) && kind === TypeScript.SyntaxKind.EqualsToken) ||
+                (this.hasOption(OPTION_TYPE) && kind === TypeScript.SyntaxKind.ColonToken)) {
 
                 this.checkForLeadingSpace(this.position(), token.trailingTrivia());
             }
@@ -51,7 +57,7 @@ module Lint.Rules {
         // check for spaces between the operator symbol (except in the case of comma statements)
         public visitBinaryExpression(node: TypeScript.BinaryExpressionSyntax): void {
             var operator = node.operatorToken;
-            if (operator.kind() !== TypeScript.SyntaxKind.CommaToken) {
+            if (this.hasOption(OPTION_OPERATOR) && operator.kind() !== TypeScript.SyntaxKind.CommaToken) {
                 var position = this.positionAfter(node.left);
                 this.checkForLeadingSpace(position, node.left.trailingTrivia());
 
@@ -64,14 +70,16 @@ module Lint.Rules {
 
         // check for spaces between ternary operator symbols
         public visitConditionalExpression(node: TypeScript.ConditionalExpressionSyntax): void {
-            var position = this.positionAfter(node.condition);
-            this.checkForLeadingSpace(position, node.condition.trailingTrivia());
+            if (this.hasOption(OPTION_OPERATOR)) {
+                var position = this.positionAfter(node.condition);
+                this.checkForLeadingSpace(position, node.condition.trailingTrivia());
 
-            position += node.questionToken.fullWidth();
-            this.checkForLeadingSpace(position, node.questionToken.trailingTrivia());
+                position += node.questionToken.fullWidth();
+                this.checkForLeadingSpace(position, node.questionToken.trailingTrivia());
 
-            position += node.whenTrue.fullWidth();
-            this.checkForLeadingSpace(position, node.whenTrue.trailingTrivia());
+                position += node.whenTrue.fullWidth();
+                this.checkForLeadingSpace(position, node.whenTrue.trailingTrivia());
+            }
 
             super.visitConditionalExpression(node);
         }
@@ -80,31 +88,57 @@ module Lint.Rules {
         public visitVariableDeclarator(node: TypeScript.VariableDeclaratorSyntax): void {
             var position = this.positionAfter(node.identifier, node.typeAnnotation);
 
-            if (node.equalsValueClause !== null) {
+            if (this.hasOption(OPTION_DECL) && node.equalsValueClause !== null) {
                 if (node.typeAnnotation !== null) {
                     this.checkForLeadingSpace(position, node.typeAnnotation.trailingTrivia());
                 } else {
                     this.checkForLeadingSpace(position, node.identifier.trailingTrivia());
                 }
-              }
+            }
 
             super.visitVariableDeclarator(node);
         }
 
         // check for spaces within imports
         public visitImportDeclaration(node: TypeScript.ImportDeclarationSyntax): void {
-            var position = this.positionAfter(node.importKeyword, node.identifier);
-            this.checkForLeadingSpace(position, node.identifier.trailingTrivia());
+            if (this.hasOption(OPTION_DECL)) {
+                var position = this.positionAfter(node.importKeyword, node.identifier);
+                this.checkForLeadingSpace(position, node.identifier.trailingTrivia());
+            }
 
             super.visitImportDeclaration(node);
         }
 
         // check for spaces within exports
         public visitExportAssignment(node: TypeScript.ExportAssignmentSyntax): void {
-            var position = this.positionAfter(node.exportKeyword);
-            this.checkForLeadingSpace(position, node.exportKeyword.trailingTrivia());
+            if (this.hasOption(OPTION_DECL)) {
+                var position = this.positionAfter(node.exportKeyword);
+                this.checkForLeadingSpace(position, node.exportKeyword.trailingTrivia());
+            }
 
             super.visitExportAssignment(node);
+        }
+
+        private isBranchKind(kind: TypeScript.SyntaxKind): boolean {
+            return (kind === TypeScript.SyntaxKind.CatchKeyword ||
+                    kind === TypeScript.SyntaxKind.ForKeyword ||
+                    kind === TypeScript.SyntaxKind.IfKeyword ||
+                    kind === TypeScript.SyntaxKind.SwitchKeyword ||
+                    kind === TypeScript.SyntaxKind.WhileKeyword ||
+                    kind === TypeScript.SyntaxKind.WithKeyword);
+        }
+
+        private isSeparatorKind(kind: TypeScript.SyntaxKind): boolean {
+            return (kind === TypeScript.SyntaxKind.CommaToken ||
+                    kind === TypeScript.SyntaxKind.SemicolonToken);
+        }
+
+        private hasOption(option: string): boolean {
+            if (this.options) {
+                return this.options.indexOf(option) !== -1;
+            } else {
+                return false;
+            }
         }
 
         private checkForLeadingSpace(position: number, trivia: TypeScript.ISyntaxTriviaList) {

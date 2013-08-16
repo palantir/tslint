@@ -35,6 +35,12 @@
     "sub": true,
     "trailing": true,
     "varname": true,
-    "whitespace": true
+    "whitespace": [true,
+        "check-branch",
+        "check-decl",
+        "check-operator",
+        "check-separator",
+        "check-type"
+    ]
   }
 }

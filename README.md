@@ -33,7 +33,12 @@ Supported Rules
 * `sub` disallows object access via string literals.
 * `trailing` disallows trailing whitespace at the end of a line.
 * `varname` allows only camelCased or UPPER_CASED variable names.
-* `whitespace` enforces whitespace between a keyword and a conditional, surrounding an operator, and enclosing "=" within variable declarations and import/export statements.
+* `whitespace` enforces spacing whitespace. Rule options:
+	* `"check-branch"` checks branching statements (`if`/`else`/`for`/`while`) are followed by whitespace
+	* `"check-decl"`checks that variable declarations have whitespace around the equals token
+	* `"check-operator"` checks for whitespace around operator tokens
+	* `"check-separator"` checks for whitespace after separator tokens (`,`/`;`)
+	* `"check-type"` checks for whitespace before a variable type specification
 
 
 Installation
