@@ -124,3 +124,7 @@ var arr = [
         b: 4
     }
 ];
+
+var arr2 = [1, 2, 3];
+var obj = {a: 1, b: 2, c: 3};
+var both = {a: [1, 2, 3], b: [4, 5, 6]};

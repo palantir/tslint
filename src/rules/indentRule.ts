@@ -86,18 +86,30 @@ module Lint.Rules {
             super.visitMemberFunctionDeclaration(node);
         }
 
-        // object literal indentation
+        // object literal indentation, ignoring one-line literals
         public visitObjectLiteralExpression(node: TypeScript.ObjectLiteralExpressionSyntax): void {
-            this.visitToken(node.openBraceToken);
-            this.checkAndVisitSeparatedList(node.propertyAssignments);
-            this.visitToken(node.closeBraceToken);
+            var startPosition = this.position() + node.leadingTriviaWidth();
+
+            if (!this.arePositionsOnSameLine(startPosition, startPosition + node.width())) {
+                this.visitToken(node.openBraceToken);
+                this.checkAndVisitSeparatedList(node.propertyAssignments);
+                this.visitToken(node.closeBraceToken);
+            } else {
+                super.visitObjectLiteralExpression(node);
+            }
         }
 
-        // array literal indentation
+        // array literal indentation, ignoring one-line literals
         public visitArrayLiteralExpression(node: TypeScript.ArrayLiteralExpressionSyntax): void {
-            this.visitToken(node.openBracketToken);
-            this.checkAndVisitSeparatedList(node.expressions);
-            this.visitToken(node.closeBracketToken);
+            var startPosition = this.position() + node.leadingTriviaWidth();
+
+            if (!this.arePositionsOnSameLine(startPosition, startPosition + node.width())) {
+                this.visitToken(node.openBracketToken);
+                this.checkAndVisitSeparatedList(node.expressions);
+                this.visitToken(node.closeBracketToken);
+            } else {
+                super.visitArrayLiteralExpression(node);
+            }
         }
 
         // module indentation
@@ -141,6 +153,14 @@ module Lint.Rules {
             this.checkAndVisitNodeOrToken(node.defaultKeyword);
             this.visitToken(node.colonToken);
             this.checkAndVisitList(node.statements);
+        }
+
+        private arePositionsOnSameLine(pos1: number, pos2: number): boolean {
+            var lineMap = this.getSyntaxTree().lineMap();
+            var line1 = lineMap.getLineAndCharacterFromPosition(pos1).line();
+            var line2 = lineMap.getLineAndCharacterFromPosition(pos2).line();
+
+            return (line1 === line2);
         }
 
         private checkAndVisitList(list: TypeScript.ISyntaxList): void {
