@@ -27427,12 +27427,8 @@ var Lint;
             function NoConsoleRule() {
                 _super.apply(this, arguments);
             }
-            NoConsoleRule.prototype.isEnabled = function () {
-                return (typeof this.getOptions()[0] === "string");
-            };
-
             NoConsoleRule.prototype.apply = function (syntaxTree) {
-                return this.applyWithWalker(new NoConsoleWalker(this.getOptions()[0], syntaxTree));
+                return this.applyWithWalker(new NoConsoleWalker(this.getOptions(), syntaxTree));
             };
             NoConsoleRule.FAILURE_STRING = "access forbidden to console property";
             return NoConsoleRule;
@@ -27441,11 +27437,9 @@ var Lint;
 
         var NoConsoleWalker = (function (_super) {
             __extends(NoConsoleWalker, _super);
-            function NoConsoleWalker(value, syntaxTree) {
+            function NoConsoleWalker(options, syntaxTree) {
                 _super.call(this, syntaxTree);
-                this.forbiddenProperties = value.split(",").map(function (property) {
-                    return property.trim();
-                });
+                this.options = options;
             }
             NoConsoleWalker.prototype.visitInvocationExpression = function (node) {
                 var expression = node.expression;
@@ -27454,7 +27448,7 @@ var Lint;
                     var secondToken = expression.childAt(1);
                     var thirdToken = expression.childAt(2);
 
-                    if (firstToken.text() === "console" && secondToken.kind() === TypeScript.SyntaxKind.DotToken && this.forbiddenProperties.indexOf(thirdToken.fullText()) !== -1) {
+                    if (firstToken.text() === "console" && secondToken.kind() === TypeScript.SyntaxKind.DotToken && this.options.indexOf(thirdToken.fullText()) !== -1) {
                         var position = this.position() + node.leadingTriviaWidth();
                         this.addFailure(this.createFailure(position, expression.width(), NoConsoleRule.FAILURE_STRING));
                     }

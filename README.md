@@ -19,7 +19,7 @@ Supported Rules
 * `labelpos` enforces labels only on sensible statements.
 * `maxlen` sets the maximum length of a line.
 * `noarg` disallows access to `arguments.callee`.
-* `noconsole` disallows access to the specified properties on `console`. Property configurations are comma-delimited. For example, the rule option "log, debug, warn" disables `console.log`, `console.debug` and `console.warn`.
+* `noconsole` disallows access to the specified properties on `console`. Rule options are properties to ban on the console variable.
 * `noconstruct` disallows access to the constructors of `String`, `Number`, and `Boolean`.
 * `noempty` disallows empty blocks.
 * `oneline` enforces the specified tokens to be on the same line as the expression preceding it. Rule options:

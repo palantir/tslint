@@ -22,23 +22,17 @@ module Lint.Rules {
     export class NoConsoleRule extends AbstractRule {
         public static FAILURE_STRING = "access forbidden to console property";
 
-        public isEnabled() : boolean {
-            return (typeof this.getOptions()[0] === "string");
-        }
-
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            return this.applyWithWalker(new NoConsoleWalker(this.getOptions()[0], syntaxTree));
+            return this.applyWithWalker(new NoConsoleWalker(this.getOptions(), syntaxTree));
         }
       }
 
     class NoConsoleWalker extends Lint.RuleWalker {
-        private forbiddenProperties: string[];
+        private options: any;
 
-        constructor(value: string, syntaxTree: TypeScript.SyntaxTree) {
+        constructor(options: any, syntaxTree: TypeScript.SyntaxTree) {
             super(syntaxTree);
-            this.forbiddenProperties = value.split(",").map((property) => {
-                return property.trim();
-            });
+            this.options = options;
         }
 
         public visitInvocationExpression(node: TypeScript.InvocationExpressionSyntax): void {
@@ -52,7 +46,7 @@ module Lint.Rules {
 
                 if (firstToken.text() === "console" &&
                     secondToken.kind() === TypeScript.SyntaxKind.DotToken &&
-                    this.forbiddenProperties.indexOf(thirdToken.fullText()) !== -1) {
+                    this.options.indexOf(thirdToken.fullText()) !== -1) {
 
                     var position = this.position() + node.leadingTriviaWidth();
                     this.addFailure(this.createFailure(position, expression.width(), NoConsoleRule.FAILURE_STRING));
