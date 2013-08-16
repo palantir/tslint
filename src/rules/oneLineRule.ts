@@ -18,6 +18,10 @@
 /// <reference path='../language/stateAwareRuleWalker.ts'/>
 
 module Lint.Rules {
+    var OPTION_BRACE = "check-open-brace";
+    var OPTION_CATCH = "check-catch";
+    var OPTION_ELSE = "check-else";
+    var OPTION_WHITESPACE = "check-whitespace";
 
     export class OneLineRule extends AbstractRule {
         public static BRACE_FAILURE_STRING = "misplaced opening brace";
@@ -26,25 +30,21 @@ module Lint.Rules {
         public static WHITESPACE_FAILURE_STRING = "missing whitespace";
 
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            var checkForWhitespace = false;
-            var options = this.getOptions();
-            if (options && options.indexOf("check-whitespace") !== -1) {
-                checkForWhitespace = true;
-            }
-            var braceWalker = new BraceWalker(syntaxTree, checkForWhitespace);
+            var braceWalker = new BraceWalker(syntaxTree, this.getOptions());
             return this.applyWithWalker(braceWalker);
         }
     }
 
     class BraceWalker extends Lint.StateAwareRuleWalker {
-        private checkForWhitespace: boolean;
+        private options: any;
 
-        constructor(syntaxTree: TypeScript.SyntaxTree, checkForWhitespace: boolean) {
+        constructor(syntaxTree: TypeScript.SyntaxTree, options: any) {
             super(syntaxTree);
-            this.checkForWhitespace = checkForWhitespace;
+            this.options = options;
         }
 
         public visitToken(token: TypeScript.ISyntaxToken): void {
+            var failure;
             var kind = token.kind();
             var lastState = this.getLastState();
 
@@ -58,19 +58,20 @@ module Lint.Rules {
                     lastKind === TypeScript.SyntaxKind.TryKeyword ||
                     lastKind === TypeScript.SyntaxKind.EqualsToken) {
 
-                    var failure;
                     var lastLine = this.getLine(lastState.position);
                     var currentLine = this.getLine(this.position());
                     var position = this.position() + token.leadingTriviaWidth();
 
-                    if (currentLine !== lastLine) {
+                    if (this.hasOption(OPTION_BRACE) && currentLine !== lastLine) {
                         failure = this.createFailure(position, token.width(), OneLineRule.BRACE_FAILURE_STRING);
-                        this.addFailure(failure);
-                    } else if (this.checkForWhitespace && !this.hasTrailingWhiteSpace(lastState.token)) {
+                    } else if (this.hasOption(OPTION_WHITESPACE) && !this.hasTrailingWhiteSpace(lastState.token)) {
                         failure = this.createFailure(position, token.width(), OneLineRule.WHITESPACE_FAILURE_STRING);
-                        this.addFailure(failure);
                     }
-                  }
+                }
+            }
+
+            if (failure) {
+                this.addFailure(failure);
             }
 
             super.visitToken(token);
@@ -79,7 +80,7 @@ module Lint.Rules {
         public visitElseClause(node: TypeScript.ElseClauseSyntax): void {
             var lastState = this.getLastState();
             var position = this.position() + node.leadingTriviaWidth();
-            if (lastState !== undefined && !this.hasTrailingWhiteSpace(lastState.token)) {
+            if (this.hasOption(OPTION_ELSE) && lastState !== undefined && !this.hasTrailingWhiteSpace(lastState.token)) {
                 var failure = this.createFailure(position, node.elseKeyword.width(), OneLineRule.ELSE_FAILURE_STRING);
                 this.addFailure(failure);
             }
@@ -90,12 +91,20 @@ module Lint.Rules {
         public visitCatchClause(node: TypeScript.CatchClauseSyntax): void {
             var lastState = this.getLastState();
             var position = this.position() + node.leadingTriviaWidth();
-            if (lastState !== undefined && !this.hasTrailingWhiteSpace(lastState.token)) {
+            if (this.hasOption(OPTION_CATCH) && lastState !== undefined && !this.hasTrailingWhiteSpace(lastState.token)) {
                 var failure = this.createFailure(position, node.catchKeyword.width(), OneLineRule.CATCH_FAILURE_STRING);
                 this.addFailure(failure);
             }
 
             super.visitCatchClause(node);
+        }
+
+        private hasOption(option: string): boolean {
+            if (this.options) {
+                return this.options.indexOf(option) !== -1;
+            } else {
+                return false;
+            }
         }
 
         private getLine(position): number {
@@ -112,5 +121,4 @@ module Lint.Rules {
             return (kind === TypeScript.SyntaxKind.WhitespaceTrivia);
         }
     }
-
 }

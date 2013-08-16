@@ -20,9 +20,17 @@ describe("<oneline>", () => {
     var actualFailures;
     var fileName = "rules/oneline.test.ts";
     var braceFailure = Lint.Rules.OneLineRule.BRACE_FAILURE_STRING;
+    var elseFailure = Lint.Rules.OneLineRule.ELSE_FAILURE_STRING;
+    var whitespaceFailure = Lint.Rules.OneLineRule.WHITESPACE_FAILURE_STRING;
 
     before(() => {
-        actualFailures = Lint.Test.applyRuleOnFile(fileName, "oneline");
+        var options = [true, "check-open-brace", "check-catch", "check-else", "check-whitespace"];
+        actualFailures = Lint.Test.applyRuleOnFile(fileName, "oneline", options);
+    });
+
+    it("enforces rules only when enabled", () => {
+        var failures = Lint.Test.applyRuleOnFile(fileName, "oneline");
+        assert.equal(failures.length, 0);
     });
 
     it("enforces module brace", () => {
@@ -46,7 +54,6 @@ describe("<oneline>", () => {
     });
 
     it("enforces else position", () => {
-        var elseFailure = Lint.Rules.OneLineRule.ELSE_FAILURE_STRING;
         var expectedFailure = Lint.Test.createFailure(fileName, [17, 9], [17, 13], elseFailure);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
@@ -81,9 +88,7 @@ describe("<oneline>", () => {
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 
-    it("enforces whitespace before a brace (if enabled)", () => {
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, "oneline", [true, "check-whitespace"]);
-        var whitespaceFailure = Lint.Rules.OneLineRule.WHITESPACE_FAILURE_STRING;
+    it("enforces whitespace before a brace", () => {
         var expectedFailure = Lint.Test.createFailure(fileName, [59, 14], [59, 15], whitespaceFailure);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });

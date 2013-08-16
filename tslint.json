@@ -17,7 +17,7 @@
     "noconsole": [true, "debug, info, time, timeEnd, trace"],
     "noconstruct": true,
     "noempty": true,
-    "oneline": [true, "check-whitespace"],
+    "oneline": [true, "check-open-brace", "check-catch", "check-else", "check-whitespace"],
     "quotemark": [true, "double"],
     "radix": true,
     "semicolon": true,

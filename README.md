@@ -22,7 +22,11 @@ Supported Rules
 * `noconsole` disallows access to the specified properties on `console`. Property configurations are comma-delimited. For example, the rule option "log, debug, warn" disables `console.log`, `console.debug` and `console.warn`.
 * `noconstruct` disallows access to the constructors of `String`, `Number`, and `Boolean`.
 * `noempty` disallows empty blocks.
-* `oneline` enforces an opening brace to be on the same line as the expression preceding it. The rule option `"check-whitespace"` ensures preceding whitespace before the brace.
+* `oneline` enforces the specified tokens to be on the same line as the expression preceding it. Rule options:
+	* `"check-catch"` checks that `catch` is on the same line as the closing brace for `try`
+	* `"check-else"` checks that `else` is on the same line as the closing brace for `if`
+	* `"check-open-brace"` checks that an open brace falls on the same line as its preceding expression.
+	* `"check-whitespace"` checks preceding whitespace for the specified tokens.
 * `quotemark` enforces consistent single or double quoted string literals.
 * `radix` enforces the radix parameter of `parseInt`
 * `semicolon` enforces semicolons at the end of every statement.
