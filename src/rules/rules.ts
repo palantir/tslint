@@ -26,6 +26,7 @@
 /// <reference path='forInRule.ts'/>
 /// <reference path='indentRule.ts'/>
 /// <reference path='labelPosRule.ts'/>,
+/// <reference path='labelUndefinedRule.ts'/>,
 /// <reference path='maxLenRule.ts'/>
 /// <reference path='noArgRule.ts'/>
 /// <reference path='noConsoleRule.ts'/>
@@ -54,6 +55,7 @@ module Lint.Rules {
         "forin": ForInRule.prototype,
         "indent": IndentRule.prototype,
         "labelpos": LabelPosRule.prototype,
+        "label-undefined": LabelUndefinedRule.prototype,
         "maxlen": MaxLenRule.prototype,
         "noarg": NoArgRule.prototype,
         "noconsole": NoConsoleRule.prototype,

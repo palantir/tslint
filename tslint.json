@@ -11,7 +11,7 @@
     "forin": true,
     "indent": [true, 4],
     "labelpos": true,
-    "labelundef": true,
+    "label-undefined": true,
     "maxlen": [true, 140],
     "noarg": true,
     "noconsole": [true,

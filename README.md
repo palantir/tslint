@@ -17,6 +17,7 @@ Supported Rules
 * `forin` enforces a `for ... in` statement to be filtered with an `if` statement.*
 * `indent` enforces consistent indentation levels for the whole file.
 * `labelpos` enforces labels only on sensible statements.
+* `label-undefined` checks that labels are defined before usage.
 * `maxlen` sets the maximum length of a line.
 * `noarg` disallows access to `arguments.callee`.
 * `noconsole` disallows access to the specified properties on `console`. Rule options are properties to ban on the console variable.
