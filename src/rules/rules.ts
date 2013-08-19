@@ -31,6 +31,7 @@
 /// <reference path='noArgRule.ts'/>
 /// <reference path='noConsoleRule.ts'/>
 /// <reference path='noConstructRule.ts'/>
+/// <reference path='noUnreachableRule.ts'/>
 /// <reference path='noEmptyRule.ts' />
 /// <reference path='oneLineRule.ts'/>
 /// <reference path='quoteMarkRule.ts'/>
@@ -60,6 +61,7 @@ module Lint.Rules {
         "noarg": NoArgRule.prototype,
         "noconsole": NoConsoleRule.prototype,
         "noconstruct": NoConstructRule.prototype,
+        "nounreachable": NoUnreachableRule.prototype,
         "noempty": NoEmptyRule.prototype,
         "oneline": OneLineRule.prototype,
         "quotemark": QuoteMarkRule.prototype,

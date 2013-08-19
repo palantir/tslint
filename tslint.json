@@ -22,6 +22,7 @@
         "trace"
     ],
     "noconstruct": true,
+    "nounreachable": true,
     "noempty": true,
     "oneline": [true,
         "check-open-brace",
