@@ -22,10 +22,8 @@ describe("<sub>", () => {
         var failureString = Lint.Rules.SubRule.FAILURE_STRING;
 
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, "sub");
-        var expectedFailure1 = Lint.Test.createFailure(fileName, [10, 20], [10, 25], failureString);
-        var expectedFailure2 = Lint.Test.createFailure(fileName, [11, 21], [11, 24], failureString);
+        var expectedFailure = Lint.Test.createFailure(fileName, [11, 21], [11, 24], failureString);
 
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);
+        Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 });

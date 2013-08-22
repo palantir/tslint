@@ -34,9 +34,20 @@ module Lint.Rules {
 
         private handleElementAccessExpression(node: TypeScript.ElementAccessExpressionSyntax) {
             var argument = node.argumentExpression;
-            var position = this.positionAfter(node.expression, node.openBracketToken);
+            var id = argument.fullText();
 
-            if (argument.kind() === TypeScript.SyntaxKind.StringLiteral) {
+            // the argument expression should be a string of length at least 2 (due to quote characters)
+            if (argument.kind() !== TypeScript.SyntaxKind.StringLiteral || id.length < 2) {
+                return;
+            }
+
+            var unquotedString = id.substring(1, id.length - 1);
+            var simpleText = TypeScript.SimpleText.fromString(unquotedString);
+            var isValidIdentifier = TypeScript.Scanner.isValidIdentifier(simpleText, TypeScript.LanguageVersion);
+
+            // only create a failure if the identifier is valid, in which case there's no need to use string literals
+            if (isValidIdentifier) {
+                var position = this.positionAfter(node.expression, node.openBracketToken);
                 this.addFailure(this.createFailure(position, argument.width(), SubRule.FAILURE_STRING));
             }
         }

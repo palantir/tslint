@@ -11,3 +11,8 @@ function test() {
         var c = obj["c"];
     var d = obj[b];
 }
+
+// valid code
+obj["a-2"];
+obj["2a"];
+obj["?a#$!$^&%&"];

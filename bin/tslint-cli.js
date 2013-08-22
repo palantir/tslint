@@ -27990,9 +27990,18 @@ var Lint;
 
             SubWalker.prototype.handleElementAccessExpression = function (node) {
                 var argument = node.argumentExpression;
-                var position = this.positionAfter(node.expression, node.openBracketToken);
+                var id = argument.fullText();
 
-                if (argument.kind() === TypeScript.SyntaxKind.StringLiteral) {
+                if (argument.kind() !== TypeScript.SyntaxKind.StringLiteral || id.length < 2) {
+                    return;
+                }
+
+                var unquotedString = id.substring(1, id.length - 1);
+                var simpleText = TypeScript.SimpleText.fromString(unquotedString);
+                var isValidIdentifier = TypeScript.Scanner.isValidIdentifier(simpleText, TypeScript.LanguageVersion);
+
+                if (isValidIdentifier) {
+                    var position = this.positionAfter(node.expression, node.openBracketToken);
                     this.addFailure(this.createFailure(position, argument.width(), SubRule.FAILURE_STRING));
                 }
             };
