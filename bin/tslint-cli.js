@@ -27669,7 +27669,10 @@ var Lint;
                 _super.apply(this, arguments);
             }
             BlockWalker.prototype.visitBlock = function (node) {
-                if (node.statements.childCount() <= 0) {
+                var hasCommentAfter = node.openBraceToken.trailingTrivia().hasComment();
+                var hasCommentBefore = node.closeBraceToken.leadingTrivia().hasComment();
+
+                if (node.statements.childCount() <= 0 && !hasCommentAfter && !hasCommentBefore) {
                     var position = this.position() + node.leadingTriviaWidth();
                     var width = node.width();
                     this.addFailure(this.createFailure(position, width, NoEmptyRule.FAILURE_STRING));

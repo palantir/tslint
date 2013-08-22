@@ -28,7 +28,10 @@ module Lint.Rules {
 
     class BlockWalker extends Lint.RuleWalker {
         public visitBlock(node: TypeScript.BlockSyntax): void {
-            if (node.statements.childCount() <= 0) {
+            var hasCommentAfter = node.openBraceToken.trailingTrivia().hasComment();
+            var hasCommentBefore = node.closeBraceToken.leadingTrivia().hasComment();
+
+            if (node.statements.childCount() <= 0 && !hasCommentAfter && !hasCommentBefore) {
                 var position = this.position() + node.leadingTriviaWidth();
                 var width = node.width();
                 this.addFailure(this.createFailure(position, width, NoEmptyRule.FAILURE_STRING));
