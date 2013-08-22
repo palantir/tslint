@@ -50,6 +50,18 @@ module Lint.Rules {
             this.hasReturned = false;
         }
 
+        public visitCaseSwitchClause(node: TypeScript.CaseSwitchClauseSyntax): void {
+            this.hasReturned = false;
+            super.visitCaseSwitchClause(node);
+            this.hasReturned = false;            
+        }
+
+        public visitDefaultSwitchClause(node: TypeScript.DefaultSwitchClauseSyntax): void {
+            this.hasReturned = false;
+            super.visitDefaultSwitchClause(node);
+            this.hasReturned = false;            
+        }
+
         public visitBreakStatement(node: TypeScript.BreakStatementSyntax): void {
             super.visitBreakStatement(node);
             this.hasReturned = true;

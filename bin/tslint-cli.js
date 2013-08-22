@@ -27623,6 +27623,18 @@ var Lint;
                 this.hasReturned = false;
             };
 
+            UnreachableWalker.prototype.visitCaseSwitchClause = function (node) {
+                this.hasReturned = false;
+                _super.prototype.visitCaseSwitchClause.call(this, node);
+                this.hasReturned = false;
+            };
+
+            UnreachableWalker.prototype.visitDefaultSwitchClause = function (node) {
+                this.hasReturned = false;
+                _super.prototype.visitDefaultSwitchClause.call(this, node);
+                this.hasReturned = false;
+            };
+
             UnreachableWalker.prototype.visitBreakStatement = function (node) {
                 _super.prototype.visitBreakStatement.call(this, node);
                 this.hasReturned = true;

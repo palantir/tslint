@@ -39,3 +39,15 @@ var f2 = () => {
 
     return 123;
 };
+
+switch (x) {
+    case 1:
+        i = 2;
+        break;
+    case 2:
+        i = 3;
+        break;
+    default:
+        i = 4;
+        break;
+}
