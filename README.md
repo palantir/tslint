@@ -15,7 +15,7 @@ Supported Rules
 * `eqeqeq` enforces === and !== in favor of == and !=.
 * `evil` disallows `eval` function invocations.
 * `forin` enforces a `for ... in` statement to be filtered with an `if` statement.*
-* `indent` enforces consistent indentation levels for the whole file.
+* `indent` enforces consistent indentation levels.
 * `labelpos` enforces labels only on sensible statements.
 * `label-undefined` checks that labels are defined before usage.
 * `maxlen` sets the maximum length of a line.

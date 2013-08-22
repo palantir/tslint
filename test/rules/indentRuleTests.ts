@@ -33,11 +33,6 @@ describe("<indent>", () => {
             Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
         });
 
-        it("enforces function indentation", () => {
-            var expectedFailure = Lint.Test.createFailure(fileName, [62, 4], [62, 19], failureString + "9");
-            Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
-        });
-
         it("enforces class variable indentation", () => {
             var expectedFailure = Lint.Test.createFailure(fileName, [66, 3], [66, 10], failureString + "2");
             Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
@@ -67,18 +62,6 @@ describe("<indent>", () => {
             Lint.Test.assertContainsFailure(actualFailures, expectedFailure3);
             Lint.Test.assertContainsFailure(actualFailures, expectedFailure4);
         });
-
-        it("enforces block indentation", () => {
-            var expectedFailure1 = Lint.Test.createFailure(fileName, [94, 3], [94, 9], failureString + "2");
-            var expectedFailure2 = Lint.Test.createFailure(fileName, [98, 4], [98, 10], failureString + "6");
-            var expectedFailure3 = Lint.Test.createFailure(fileName, [102, 3], [102, 9], failureString + "5");
-            var expectedFailure4 = Lint.Test.createFailure(fileName, [106, 5], [106, 11], failureString + "7");
-
-            Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
-            Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);
-            Lint.Test.assertContainsFailure(actualFailures, expectedFailure3);
-            Lint.Test.assertContainsFailure(actualFailures, expectedFailure4);
-        });
     });
 
     describe("on a space-indented file", () => {
@@ -91,11 +74,6 @@ describe("<indent>", () => {
 
         it("enforces module indentation", () => {
             var expectedFailure = Lint.Test.createFailure(fileName, [58, 7], [58, 30], failureString + "6");
-            Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
-        });
-
-        it("enforces function indentation", () => {
-            var expectedFailure = Lint.Test.createFailure(fileName, [62, 10], [62, 25], failureString + "9");
             Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
         });
 
@@ -122,18 +100,6 @@ describe("<indent>", () => {
             var expectedFailure2 = Lint.Test.createFailure(fileName, [86, 7], [86, 25], failureString8 + "6");
             var expectedFailure3 = Lint.Test.createFailure(fileName, [88, 3], [88, 10], failureString + "2");
             var expectedFailure4 = Lint.Test.createFailure(fileName, [89, 7], [89, 31], failureString8 + "6");
-
-            Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
-            Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);
-            Lint.Test.assertContainsFailure(actualFailures, expectedFailure3);
-            Lint.Test.assertContainsFailure(actualFailures, expectedFailure4);
-        });
-
-        it("enforces block indentation", () => {
-            var expectedFailure1 = Lint.Test.createFailure(fileName, [94, 3], [94, 9], failureString + "2");
-            var expectedFailure2 = Lint.Test.createFailure(fileName, [98, 7], [98, 13], failureString + "6");
-            var expectedFailure3 = Lint.Test.createFailure(fileName, [102, 6], [102, 12], failureString + "5");
-            var expectedFailure4 = Lint.Test.createFailure(fileName, [106, 8], [106, 14], failureString + "7");
 
             Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
             Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);

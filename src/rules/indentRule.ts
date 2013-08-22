@@ -49,13 +49,6 @@ module Lint.Rules {
             this.tabWidth = tabWidth;
         }
 
-        // block indentation
-        public visitBlock(node: TypeScript.BlockSyntax): void {
-            this.visitToken(node.openBraceToken);
-            this.checkAndVisitList(node.statements);
-            this.visitToken(node.closeBraceToken);
-        }
-
         // class indentation
         public visitClassDeclaration(node: TypeScript.ClassDeclarationSyntax): void {
             this.currentLevel += 1;
