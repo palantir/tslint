@@ -87,32 +87,6 @@ module Lint.Rules {
             super.visitMemberFunctionDeclaration(node);
         }
 
-        // object literal indentation, ignoring one-line literals
-        public visitObjectLiteralExpression(node: TypeScript.ObjectLiteralExpressionSyntax): void {
-            var startPosition = this.position() + node.leadingTriviaWidth();
-
-            if (!this.arePositionsOnSameLine(startPosition, startPosition + node.width())) {
-                this.visitToken(node.openBraceToken);
-                this.checkAndVisitSeparatedList(node.propertyAssignments);
-                this.visitToken(node.closeBraceToken);
-            } else {
-                super.visitObjectLiteralExpression(node);
-            }
-        }
-
-        // array literal indentation, ignoring one-line literals
-        public visitArrayLiteralExpression(node: TypeScript.ArrayLiteralExpressionSyntax): void {
-            var startPosition = this.position() + node.leadingTriviaWidth();
-
-            if (!this.arePositionsOnSameLine(startPosition, startPosition + node.width())) {
-                this.visitToken(node.openBracketToken);
-                this.checkAndVisitSeparatedList(node.expressions);
-                this.visitToken(node.closeBracketToken);
-            } else {
-                super.visitArrayLiteralExpression(node);
-            }
-        }
-
         // module indentation
         public visitModuleDeclaration(node: TypeScript.ModuleDeclarationSyntax): void {
             this.visitList(node.modifiers);
