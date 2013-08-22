@@ -23,13 +23,6 @@ module Lint.Rules {
         public static FAILURE_STRING = "unexpected tab width: ";
 
         public isEnabled(): boolean {
-            if (super.isEnabled()) {
-                var option = this.getOptions()[0];
-                if (typeof option === "number" && option > 0) {
-                    return true;
-                }
-            }
-
             return false;
         }
 
