@@ -69,9 +69,9 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-typescript');
 
   // register custom tasks
-  grunt.registerTask('bin', ['clean:bin', 'typescript:bin', /*'tslint:src'*/]);
-  grunt.registerTask('lib', ['clean:lib', 'typescript:lib', /*'tslint:src'*/]);
-  grunt.registerTask('test', ['clean:test', 'typescript:test', /*'tslint:test',*/ 'mochaTest']);
+  grunt.registerTask('bin', ['clean:bin', 'typescript:bin', 'tslint:src']);
+  grunt.registerTask('lib', ['clean:lib', 'typescript:lib', 'tslint:src']);
+  grunt.registerTask('test', ['clean:test', 'typescript:test', 'tslint:test', 'mochaTest']);
 
   // create default task
   grunt.registerTask('default', ['bin', 'lib', 'test']);

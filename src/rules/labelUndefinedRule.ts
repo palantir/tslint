@@ -85,7 +85,7 @@ module Lint.Rules {
                 var failureString = LabelUndefinedRule.FAILURE_STRING + label.text() + "'";
                 var failure = this.createFailure(position, width, failureString);
                 this.addFailure(failure);
-            }            
+            }
         }
     }
 }

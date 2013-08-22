@@ -35,7 +35,7 @@ module Lint.Configuration {
                 if (fs.existsSync(filePath1)) {
                     configFile = filePath1;
                     break;
-                } else if(fs.existsSync(filePath2)) {
+                } else if (fs.existsSync(filePath2)) {
                     configFile = filePath2;
                     break;
                 }
