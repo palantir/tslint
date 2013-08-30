@@ -18,6 +18,7 @@
 /// <reference path='abstractRule.ts'/>
 
 module Lint.Rules {
+    var OPTION_ALLOW_NULL_CHECK = "allow-null-check";
 
     export class EqEqEqRule extends AbstractRule {
         public static EQ_FAILURE_STRING = "== should be ===";
@@ -29,10 +30,31 @@ module Lint.Rules {
     }
 
     class ComparisonWalker extends Lint.RuleWalker {
+        private options: any;
+
+        constructor(syntaxTree: TypeScript.SyntaxTree, options: any) {
+            super(syntaxTree);
+            this.options = options;
+        }
+
         public visitBinaryExpression(node: TypeScript.BinaryExpressionSyntax): void {
             var position = this.positionAfter(node.left);
-            this.handleOperatorToken(position, node.operatorToken);
+
+            if (!isExpressionAllowed(node)) {
+                this.handleOperatorToken(position, node.operatorToken);
+            }
             super.visitBinaryExpression(node);
+        }
+
+        private isExpressionAllowed(node: TypeScript.BinaryExpressionSyntax): boolean {
+            var nullKeyword = TypeScript.SyntaxKind.NullKeyword;
+
+            if (this.hasOption(OPTION_ALLOW_NULL_CHECK) &&
+                (node.left.kind() ===  nullKeyword || node.right.kind() === nullKeyword)) {
+                return true;
+            }
+
+            return false;
         }
 
         private handleOperatorToken(position: number, operatorToken: TypeScript.ISyntaxToken) {
@@ -47,6 +69,14 @@ module Lint.Rules {
 
             if (failure) {
                 this.addFailure(failure);
+            }
+        }
+
+        private hasOption(option: string): boolean {
+            if (this.options) {
+                return this.options.indexOf(option) !== -1;
+            } else {
+                return false;
             }
         }
     }

@@ -6,7 +6,7 @@
     "debug": true,
     "dupkey": true,
     "eofline": true,
-    "eqeqeq": true,
+    "eqeqeq": [true, "allow-null-check"],
     "evil": true,
     "forin": true,
     "indent": [true, 4],
