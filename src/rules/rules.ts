@@ -40,6 +40,7 @@
 /// <reference path='subRule.ts'/>
 /// <reference path='trailingRule.ts'/>
 /// <reference path='varNameRule.ts'/>
+/// <reference path='varNameUniquenessRule.ts'/>
 /// <reference path='whitespaceRule.ts'/>
 
 module Lint.Rules {
@@ -70,6 +71,7 @@ module Lint.Rules {
         "sub": SubRule.prototype,
         "trailing": TrailingRule.prototype,
         "varname": VarNameRule.prototype,
+        "varnameuniqueness": VarNameUniquenessRule.prototype,
         "whitespace": WhitespaceRule.prototype
     };
 
