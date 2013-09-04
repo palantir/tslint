@@ -36,6 +36,7 @@
     "sub": true,
     "trailing": true,
     "varname": true,
+    "varnameuniqueness": true,
     "whitespace": [true,
         "check-branch",
         "check-decl",

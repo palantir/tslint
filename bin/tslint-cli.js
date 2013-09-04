@@ -28100,6 +28100,71 @@ var Lint;
 var Lint;
 (function (Lint) {
     (function (Rules) {
+        var VarNameUniquenessRule = (function (_super) {
+            __extends(VarNameUniquenessRule, _super);
+            function VarNameUniquenessRule() {
+                _super.apply(this, arguments);
+            }
+            VarNameUniquenessRule.prototype.apply = function (syntaxTree) {
+                return this.applyWithWalker(new VarNameUniquenessWalker(syntaxTree));
+            };
+            VarNameUniquenessRule.FAILURE_STRING = "duplicate variable: '";
+            return VarNameUniquenessRule;
+        })(Rules.AbstractRule);
+        Rules.VarNameUniquenessRule = VarNameUniquenessRule;
+
+        var VarNameUniquenessWalker = (function (_super) {
+            __extends(VarNameUniquenessWalker, _super);
+            function VarNameUniquenessWalker(syntaxTree) {
+                _super.call(this, syntaxTree);
+
+                this.scopeStack = [new ScopeInfo()];
+            }
+            VarNameUniquenessWalker.prototype.visitNode = function (node) {
+                var isNewScope = this.isScopeBoundary(node);
+
+                if (isNewScope) {
+                    this.scopeStack.push(new ScopeInfo());
+                }
+
+                _super.prototype.visitNode.call(this, node);
+
+                if (isNewScope) {
+                    this.scopeStack.pop();
+                }
+            };
+
+            VarNameUniquenessWalker.prototype.visitVariableDeclarator = function (node) {
+                var identifier = node.identifier, variableName = identifier.text(), position = this.position() + identifier.leadingTriviaWidth(), currentScope = this.scopeStack[this.scopeStack.length - 1];
+
+                if (currentScope.variableNames.indexOf(variableName) >= 0) {
+                    var failureString = VarNameUniquenessRule.FAILURE_STRING + variableName + "'";
+                    this.addFailure(this.createFailure(position, identifier.width(), failureString));
+                } else {
+                    currentScope.variableNames.push(variableName);
+                }
+
+                _super.prototype.visitVariableDeclarator.call(this, node);
+            };
+
+            VarNameUniquenessWalker.prototype.isScopeBoundary = function (node) {
+                return node instanceof TypeScript.FunctionDeclarationSyntax || node instanceof TypeScript.MemberFunctionDeclarationSyntax || node instanceof TypeScript.SimpleArrowFunctionExpressionSyntax || node instanceof TypeScript.ParenthesizedArrowFunctionExpressionSyntax;
+            };
+            return VarNameUniquenessWalker;
+        })(Lint.RuleWalker);
+
+        var ScopeInfo = (function () {
+            function ScopeInfo() {
+                this.variableNames = [];
+            }
+            return ScopeInfo;
+        })();
+    })(Lint.Rules || (Lint.Rules = {}));
+    var Rules = Lint.Rules;
+})(Lint || (Lint = {}));
+var Lint;
+(function (Lint) {
+    (function (Rules) {
         var OPTION_BRANCH = "check-branch";
         var OPTION_DECL = "check-decl";
         var OPTION_OPERATOR = "check-operator";
@@ -28260,6 +28325,7 @@ var Lint;
             "sub": Rules.SubRule.prototype,
             "trailing": Rules.TrailingRule.prototype,
             "varname": Rules.VarNameRule.prototype,
+            "varnameuniqueness": Rules.VarNameUniquenessRule.prototype,
             "whitespace": Rules.WhitespaceRule.prototype
         };
 
