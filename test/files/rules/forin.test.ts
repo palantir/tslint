@@ -15,4 +15,16 @@ function a() {
             console.log("k");
         }
     }
+    
+    for (var m in obj) {
+        if (!obj.hasOwnProperty(m)) {
+            continue;
+        }
+        console.log("m");
+    }
+    
+    for (var n in obj) {
+        if (!obj.hasOwnProperty(n)) continue;
+        console.log("m");
+    }
 }
