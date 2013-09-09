@@ -13,3 +13,5 @@ function test() {
         var InVaLiDnAmE4 = "you";
     };
 }
+
+declare var DeclaresAreValid: any;

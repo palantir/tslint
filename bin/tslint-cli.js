@@ -28106,6 +28106,15 @@ var Lint;
                 _super.prototype.visitVariableDeclarator.call(this, node);
             };
 
+            VarNameWalker.prototype.visitVariableStatement = function (node) {
+                for (var i = 0; i < node.modifiers.childCount(); i++) {
+                    if (node.modifiers.childAt(i).kind() === TypeScript.SyntaxKind.DeclareKeyword) {
+                        return;
+                    }
+                }
+                _super.prototype.visitVariableStatement.call(this, node);
+            };
+
             VarNameWalker.prototype.isCamelCase = function (name) {
                 if (name.length <= 0) {
                     return true;

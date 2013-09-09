@@ -48,7 +48,17 @@ module Lint.Rules {
 
             super.visitVariableDeclarator(node);
         }
-
+        
+        public visitVariableStatement(node: TypeScript.VariableStatementSyntax): void {
+            for (var i = 0; i < node.modifiers.childCount(); i++) {
+                if (node.modifiers.childAt(i).kind() === TypeScript.SyntaxKind.DeclareKeyword) {
+                    // skip
+                    return;
+                }
+            }
+            super.visitVariableStatement(node);
+        }
+        
         private isCamelCase(name: string): boolean {
             if (name.length <= 0) {
                 return true;
