@@ -14,7 +14,7 @@ Supported Rules
 * `eofline` enforces the file to end with a newline.
 * `eqeqeq` enforces === and !== in favor of == and !=.
 * `evil` disallows `eval` function invocations.
-* `forin` enforces a `for ... in` statement to be filtered with an `if` statement.*
+* `forin` enforces a `for ... in` statement to be filtered with an `if` statement.
 * `indent` enforces consistent indentation levels (currently disabled).
 * `labelpos` enforces labels only on sensible statements.
 * `label-undefined` checks that labels are defined before usage.
