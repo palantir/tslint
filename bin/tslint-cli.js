@@ -28049,13 +28049,16 @@ var Lint;
 var Lint;
 (function (Lint) {
     (function (Rules) {
+        var OPTION_LEADING_UNDERSCORE = "allow-leading-underscore";
+        var OPTION_INNER_UNDERSCORE = "allow-inner-underscore";
+
         var VarNameRule = (function (_super) {
             __extends(VarNameRule, _super);
             function VarNameRule() {
                 _super.apply(this, arguments);
             }
             VarNameRule.prototype.apply = function (syntaxTree) {
-                return this.applyWithWalker(new VarNameWalker(syntaxTree));
+                return this.applyWithWalker(new VarNameWalker(syntaxTree, this.getOptions()));
             };
             VarNameRule.FAILURE_STRING = "variable name must be in camelcase or uppercase";
             return VarNameRule;
@@ -28064,8 +28067,9 @@ var Lint;
 
         var VarNameWalker = (function (_super) {
             __extends(VarNameWalker, _super);
-            function VarNameWalker() {
-                _super.apply(this, arguments);
+            function VarNameWalker(syntaxTree, options) {
+                _super.call(this, syntaxTree);
+                this.options = options;
             }
             VarNameWalker.prototype.visitVariableDeclarator = function (node) {
                 var identifier = node.identifier;
@@ -28085,11 +28089,19 @@ var Lint;
                 }
 
                 var firstCharacter = name.charAt(0);
-                return (firstCharacter === firstCharacter.toLowerCase() && name.indexOf("_") === -1);
+                return (firstCharacter === firstCharacter.toLowerCase() && (firstCharacter !== "_" || this.hasOption(OPTION_LEADING_UNDERSCORE)) && (name.indexOf("_", 1) === -1 || this.hasOption(OPTION_INNER_UNDERSCORE)));
             };
 
             VarNameWalker.prototype.isUpperCase = function (name) {
                 return (name === name.toUpperCase());
+            };
+
+            VarNameWalker.prototype.hasOption = function (option) {
+                if (this.options) {
+                    return this.options.indexOf(option) !== -1;
+                } else {
+                    return false;
+                }
             };
             return VarNameWalker;
         })(Lint.RuleWalker);
