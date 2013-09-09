@@ -18,16 +18,25 @@
 /// <reference path='abstractRule.ts'/>
 
 module Lint.Rules {
+    var OPTION_LEADING_UNDERSCORE = "allow-leading-underscore";
+    var OPTION_INNER_UNDERSCORE = "allow-inner-underscore";
 
     export class VarNameRule extends AbstractRule {
         public static FAILURE_STRING = "variable name must be in camelcase or uppercase";
 
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            return this.applyWithWalker(new VarNameWalker(syntaxTree));
+            return this.applyWithWalker(new VarNameWalker(syntaxTree, this.getOptions()));
         }
     }
 
     class VarNameWalker extends Lint.RuleWalker {
+        private options: any;
+        
+        constructor(syntaxTree: TypeScript.SyntaxTree, options: any) {
+            super(syntaxTree);
+            this.options = options;
+        }
+        
         public visitVariableDeclarator(node: TypeScript.VariableDeclaratorSyntax): void {
             var identifier = node.identifier;
             var variableName = identifier.text();
@@ -39,18 +48,38 @@ module Lint.Rules {
 
             super.visitVariableDeclarator(node);
         }
-
+        
+        public visitVariableStatement(node: TypeScript.VariableStatementSyntax): void {
+            for (var i = 0; i < node.modifiers.childCount(); i++) {
+                if (node.modifiers.childAt(i).kind() === TypeScript.SyntaxKind.DeclareKeyword) {
+                    // skip
+                    return;
+                }
+            }
+            super.visitVariableStatement(node);
+        }
+        
         private isCamelCase(name: string): boolean {
             if (name.length <= 0) {
                 return true;
             }
 
             var firstCharacter = name.charAt(0);
-            return (firstCharacter === firstCharacter.toLowerCase() && name.indexOf("_") === -1);
+            return (firstCharacter === firstCharacter.toLowerCase() &&
+                (firstCharacter !== "_" || this.hasOption(OPTION_LEADING_UNDERSCORE)) &&
+                (name.indexOf("_", 1) === -1 || this.hasOption(OPTION_INNER_UNDERSCORE)));
         }
 
         private isUpperCase(name: string): boolean {
             return (name === name.toUpperCase());
+        }
+        
+        private hasOption(option: string): boolean {
+            if (this.options) {
+                return this.options.indexOf(option) !== -1;
+            } else {
+                return false;
+            }
         }
     }
 

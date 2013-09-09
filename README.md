@@ -14,7 +14,7 @@ Supported Rules
 * `eofline` enforces the file to end with a newline.
 * `eqeqeq` enforces === and !== in favor of == and !=.
 * `evil` disallows `eval` function invocations.
-* `forin` enforces a `for ... in` statement to be filtered with an `if` statement.*
+* `forin` enforces a `for ... in` statement to be filtered with an `if` statement.
 * `indent` enforces consistent indentation levels (currently disabled).
 * `labelpos` enforces labels only on sensible statements.
 * `label-undefined` checks that labels are defined before usage.
@@ -34,7 +34,9 @@ Supported Rules
 * `semicolon` enforces semicolons at the end of every statement.
 * `sub` disallows object access via string literals.
 * `trailing` disallows trailing whitespace at the end of a line.
-* `varname` allows only camelCased or UPPER_CASED variable names.
+* `varname` allows only camelCased or UPPER_CASED variable names. Rule options:
+	* `"allow-inner-underscore"` allows underscores inside variable names
+	* `"allow-leading-underscore"` allows underscores at the beginnning of variable names
 * `whitespace` enforces spacing whitespace. Rule options:
 	* `"check-branch"` checks branching statements (`if`/`else`/`for`/`while`) are followed by whitespace
 	* `"check-decl"`checks that variable declarations have whitespace around the equals token

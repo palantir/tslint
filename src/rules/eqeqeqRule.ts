@@ -32,7 +32,7 @@ module Lint.Rules {
     class ComparisonWalker extends Lint.RuleWalker {
         private options: any;
 
-        constructor(syntaxTree: TypeScript.SyntaxTree, options: any) {
+        constructor(syntaxTree: TypeScript.SyntaxTree, options?: any) {
             super(syntaxTree);
             this.options = options;
         }
@@ -40,7 +40,7 @@ module Lint.Rules {
         public visitBinaryExpression(node: TypeScript.BinaryExpressionSyntax): void {
             var position = this.positionAfter(node.left);
 
-            if (!isExpressionAllowed(node)) {
+            if (!this.isExpressionAllowed(node)) {
                 this.handleOperatorToken(position, node.operatorToken);
             }
             super.visitBinaryExpression(node);

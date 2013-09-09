@@ -26936,7 +26936,7 @@ var Lint;
                 _super.apply(this, arguments);
             }
             EqEqEqRule.prototype.apply = function (syntaxTree) {
-                return this.applyWithWalker(new ComparisonWalker(syntaxTree, this.getOptions()));
+                return this.applyWithWalker(new ComparisonWalker(syntaxTree));
             };
             EqEqEqRule.EQ_FAILURE_STRING = "== should be ===";
             EqEqEqRule.NEQ_FAILURE_STRING = "!= should be !==";
@@ -27071,14 +27071,37 @@ var Lint;
                 if (statementKind === TypeScript.SyntaxKind.Block) {
                     var blockNode = statement;
                     var blockStatements = blockNode.statements;
-                    if (blockStatements.childCount() === 1 && blockStatements.childAt(0).kind() === TypeScript.SyntaxKind.IfStatement) {
-                        return;
+                    if (blockStatements.childCount() >= 1) {
+                        var firstBlockStatement = blockStatements.childAt(0);
+                        if (firstBlockStatement.kind() === TypeScript.SyntaxKind.IfStatement) {
+                            if (blockStatements.childCount() === 1) {
+                                return;
+                            }
+                            var ifStatement = (firstBlockStatement).statement;
+                            if (this.nodeIsContinue(ifStatement)) {
+                                return;
+                            }
+                        }
                     }
                 }
 
                 var position = this.position() + node.leadingTriviaWidth();
                 var failure = this.createFailure(position, node.width(), ForInRule.FAILURE_STRING);
                 this.addFailure(failure);
+            };
+
+            ForInWalker.prototype.nodeIsContinue = function (node) {
+                var kind = node.kind();
+                if (kind === TypeScript.SyntaxKind.ContinueStatement) {
+                    return true;
+                }
+                if (kind === TypeScript.SyntaxKind.Block) {
+                    var blockStatements = (node).statements;
+                    if (blockStatements.childCount() === 1 && blockStatements.childAt(0).kind() === TypeScript.SyntaxKind.ContinueStatement) {
+                        return true;
+                    }
+                }
+                return false;
             };
             return ForInWalker;
         })(Lint.RuleWalker);
@@ -27796,7 +27819,6 @@ var Lint;
         var QuoteMark;
         (function (QuoteMark) {
             QuoteMark[QuoteMark["SINGLE_QUOTES"] = 0] = "SINGLE_QUOTES";
-
             QuoteMark[QuoteMark["DOUBLE_QUOTES"] = 1] = "DOUBLE_QUOTES";
         })(QuoteMark || (QuoteMark = {}));
 
@@ -28050,13 +28072,16 @@ var Lint;
 var Lint;
 (function (Lint) {
     (function (Rules) {
+        var OPTION_LEADING_UNDERSCORE = "allow-leading-underscore";
+        var OPTION_INNER_UNDERSCORE = "allow-inner-underscore";
+
         var VarNameRule = (function (_super) {
             __extends(VarNameRule, _super);
             function VarNameRule() {
                 _super.apply(this, arguments);
             }
             VarNameRule.prototype.apply = function (syntaxTree) {
-                return this.applyWithWalker(new VarNameWalker(syntaxTree));
+                return this.applyWithWalker(new VarNameWalker(syntaxTree, this.getOptions()));
             };
             VarNameRule.FAILURE_STRING = "variable name must be in camelcase or uppercase";
             return VarNameRule;
@@ -28065,8 +28090,9 @@ var Lint;
 
         var VarNameWalker = (function (_super) {
             __extends(VarNameWalker, _super);
-            function VarNameWalker() {
-                _super.apply(this, arguments);
+            function VarNameWalker(syntaxTree, options) {
+                _super.call(this, syntaxTree);
+                this.options = options;
             }
             VarNameWalker.prototype.visitVariableDeclarator = function (node) {
                 var identifier = node.identifier;
@@ -28080,17 +28106,34 @@ var Lint;
                 _super.prototype.visitVariableDeclarator.call(this, node);
             };
 
+            VarNameWalker.prototype.visitVariableStatement = function (node) {
+                for (var i = 0; i < node.modifiers.childCount(); i++) {
+                    if (node.modifiers.childAt(i).kind() === TypeScript.SyntaxKind.DeclareKeyword) {
+                        return;
+                    }
+                }
+                _super.prototype.visitVariableStatement.call(this, node);
+            };
+
             VarNameWalker.prototype.isCamelCase = function (name) {
                 if (name.length <= 0) {
                     return true;
                 }
 
                 var firstCharacter = name.charAt(0);
-                return (firstCharacter === firstCharacter.toLowerCase() && name.indexOf("_") === -1);
+                return (firstCharacter === firstCharacter.toLowerCase() && (firstCharacter !== "_" || this.hasOption(OPTION_LEADING_UNDERSCORE)) && (name.indexOf("_", 1) === -1 || this.hasOption(OPTION_INNER_UNDERSCORE)));
             };
 
             VarNameWalker.prototype.isUpperCase = function (name) {
                 return (name === name.toUpperCase());
+            };
+
+            VarNameWalker.prototype.hasOption = function (option) {
+                if (this.options) {
+                    return this.options.indexOf(option) !== -1;
+                } else {
+                    return false;
+                }
             };
             return VarNameWalker;
         })(Lint.RuleWalker);
@@ -57394,7 +57437,6 @@ var TypeScript;
             FormattingRequestKind[FormattingRequestKind["FormatOnEnter"] = 2] = "FormatOnEnter";
             FormattingRequestKind[FormattingRequestKind["FormatOnSemicolon"] = 3] = "FormatOnSemicolon";
             FormattingRequestKind[FormattingRequestKind["FormatOnClosingCurlyBrace"] = 4] = "FormatOnClosingCurlyBrace";
-
             FormattingRequestKind[FormattingRequestKind["FormatOnPaste"] = 5] = "FormatOnPaste";
         })(Formatting.FormattingRequestKind || (Formatting.FormattingRequestKind = {}));
         var FormattingRequestKind = Formatting.FormattingRequestKind;
@@ -57427,7 +57469,6 @@ var TypeScript;
             RuleAction[RuleAction["Ignore"] = 0] = "Ignore";
             RuleAction[RuleAction["Space"] = 1] = "Space";
             RuleAction[RuleAction["NewLine"] = 2] = "NewLine";
-
             RuleAction[RuleAction["Delete"] = 3] = "Delete";
         })(Formatting.RuleAction || (Formatting.RuleAction = {}));
         var RuleAction = Formatting.RuleAction;
@@ -57472,7 +57513,6 @@ var TypeScript;
     (function (Formatting) {
         (function (RuleFlags) {
             RuleFlags[RuleFlags["None"] = 0] = "None";
-
             RuleFlags[RuleFlags["CanDeleteNewLines"] = 1] = "CanDeleteNewLines";
         })(Formatting.RuleFlags || (Formatting.RuleFlags = {}));
         var RuleFlags = Formatting.RuleFlags;
@@ -58051,7 +58091,6 @@ var TypeScript;
             RulesPosition[RulesPosition["ContextRulesSpecific"] = MaskBitSize * 2] = "ContextRulesSpecific";
             RulesPosition[RulesPosition["ContextRulesAny"] = MaskBitSize * 3] = "ContextRulesAny";
             RulesPosition[RulesPosition["NoContextRulesSpecific"] = MaskBitSize * 4] = "NoContextRulesSpecific";
-
             RulesPosition[RulesPosition["NoContextRulesAny"] = MaskBitSize * 5] = "NoContextRulesAny";
         })(Formatting.RulesPosition || (Formatting.RulesPosition = {}));
         var RulesPosition = Formatting.RulesPosition;
