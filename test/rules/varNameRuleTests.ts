@@ -26,10 +26,47 @@ describe("<varname>", () => {
             createFailure([3, 5], [3, 17]),
             createFailure([4, 5], [4, 18]),
             createFailure([7, 13], [7, 26]),
-            createFailure([12, 13], [12, 25])
+            createFailure([8, 13], [8, 29]),
+            createFailure([13, 13], [13, 25])
         ];
 
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, "varname");
+        Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
+    });
+    it("ensures leading underscores can optionally be legal", () => {
+        var fileName = "rules/varname.test.ts";
+        var failureString = Lint.Rules.VarNameRule.FAILURE_STRING;
+
+        var createFailure = Lint.Test.createFailuresOnFile(fileName, failureString);
+        var expectedFailures = [
+            createFailure([3, 5], [3, 17]),
+            createFailure([4, 5], [4, 18]),
+            createFailure([7, 13], [7, 26]),
+            createFailure([13, 13], [13, 25])
+        ];
+        var options = [true,
+            "allow-leading-underscore"
+        ];
+
+        var actualFailures = Lint.Test.applyRuleOnFile(fileName, "varname", options);
+        Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
+    });
+    it("ensures inner underscores can optionally be legal", () => {
+        var fileName = "rules/varname.test.ts";
+        var failureString = Lint.Rules.VarNameRule.FAILURE_STRING;
+
+        var createFailure = Lint.Test.createFailuresOnFile(fileName, failureString);
+        var expectedFailures = [
+            createFailure([3, 5], [3, 17]),
+            createFailure([7, 13], [7, 26]),
+            createFailure([8, 13], [8, 29]),
+            createFailure([13, 13], [13, 25])
+        ];
+        var options = [true,
+            "allow-inner-underscore"
+        ];
+
+        var actualFailures = Lint.Test.applyRuleOnFile(fileName, "varname", options);
         Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
     });
 });
