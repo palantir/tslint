@@ -25,14 +25,14 @@ module Lint.Rules {
         public static NEQ_FAILURE_STRING = "!= should be !==";
 
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            return this.applyWithWalker(new ComparisonWalker(syntaxTree));
+            return this.applyWithWalker(new ComparisonWalker(this.getOptions(), syntaxTree));
         }
     }
 
     class ComparisonWalker extends Lint.RuleWalker {
         private options: any;
 
-        constructor(syntaxTree: TypeScript.SyntaxTree, options: any) {
+        constructor(options: any, syntaxTree: TypeScript.SyntaxTree) {
             super(syntaxTree);
             this.options = options;
         }
@@ -40,7 +40,7 @@ module Lint.Rules {
         public visitBinaryExpression(node: TypeScript.BinaryExpressionSyntax): void {
             var position = this.positionAfter(node.left);
 
-            if (!isExpressionAllowed(node)) {
+            if (!this.isExpressionAllowed(node)) {
                 this.handleOperatorToken(position, node.operatorToken);
             }
             super.visitBinaryExpression(node);

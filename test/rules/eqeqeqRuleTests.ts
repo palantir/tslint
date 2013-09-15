@@ -21,9 +21,9 @@ describe("<eqeqeq>", () => {
     var actualFailures;
 
     before(() => {
-        actualFailures = Lint.Test.applyRuleOnFile(fileName, "eqeqeq");
+        actualFailures = Lint.Test.applyRuleOnFile(fileName, "eqeqeq", [true, "allow-null-check"]);
+        assert.equal(actualFailures.length, 2);
     });
-
 
     it("ensures ===", () => {
         var failureString = Lint.Rules.EqEqEqRule.EQ_FAILURE_STRING;

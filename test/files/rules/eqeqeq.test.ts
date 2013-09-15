@@ -8,3 +8,6 @@ function testFunction() {
     var z = (x + 3) != 5;
     return;
 }
+
+// allow double-equality null checks
+var x = (y == null) ? 1 : 2;
