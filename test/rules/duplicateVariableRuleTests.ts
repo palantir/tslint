@@ -1,9 +1,9 @@
 /// <reference path='../references.ts' />
 
-describe("<varnameuniqueness>", () => {
+describe("<duplicate-variable>", () => {
     it("ensures that variable declarations are unique within a scope", () => {
-        var fileName = "rules/varnameuniqueness.test.ts";
-        var failureString = Lint.Rules.VarNameUniquenessRule.FAILURE_STRING + "duplicated'";
+        var fileName = "rules/duplicate-variable.test.ts";
+        var failureString = Lint.Rules.DuplicateVariableRule.FAILURE_STRING + "duplicated'";
 
         var createFailure = Lint.Test.createFailuresOnFile(fileName, failureString);
         var expectedFailures = [
@@ -12,7 +12,7 @@ describe("<varnameuniqueness>", () => {
             createFailure([26, 5], [26, 15])
         ];
 
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, "varnameuniqueness");
+        var actualFailures = Lint.Test.applyRuleOnFile(fileName, "duplicate-variable");
         Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
     });
 });

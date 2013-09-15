@@ -40,7 +40,7 @@
 /// <reference path='subRule.ts'/>
 /// <reference path='trailingRule.ts'/>
 /// <reference path='varNameRule.ts'/>
-/// <reference path='varNameUniquenessRule.ts'/>
+/// <reference path='duplicateVariableRule.ts'/>
 /// <reference path='whitespaceRule.ts'/>
 
 module Lint.Rules {
@@ -51,6 +51,7 @@ module Lint.Rules {
         "curly": CurlyRule.prototype,
         "debug": DebugRule.prototype,
         "dupkey": DupKeyRule.prototype,
+        "duplicate-variable": DuplicateVariableRule.prototype,
         "eofline": EofLineRule.prototype,
         "eqeqeq": EqEqEqRule.prototype,
         "evil": EvilRule.prototype,
@@ -71,7 +72,6 @@ module Lint.Rules {
         "sub": SubRule.prototype,
         "trailing": TrailingRule.prototype,
         "varname": VarNameRule.prototype,
-        "varnameuniqueness": VarNameUniquenessRule.prototype,
         "whitespace": WhitespaceRule.prototype
     };
 

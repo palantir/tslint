@@ -3,15 +3,15 @@
 
 module Lint.Rules {
 
-    export class VarNameUniquenessRule extends AbstractRule {
+    export class DuplicateVariableRule extends AbstractRule {
         public static FAILURE_STRING = "duplicate variable: '";
 
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            return this.applyWithWalker(new VarNameUniquenessWalker(syntaxTree));
+            return this.applyWithWalker(new DuplicateVariableWalker(syntaxTree));
         }
     }
 
-    class VarNameUniquenessWalker extends Lint.RuleWalker {
+    class DuplicateVariableWalker extends Lint.RuleWalker {
         private scopeStack: ScopeInfo[];
 
         constructor(syntaxTree: TypeScript.SyntaxTree) {
@@ -42,7 +42,7 @@ module Lint.Rules {
                 currentScope = this.scopeStack[this.scopeStack.length - 1];
 
             if (currentScope.variableNames.indexOf(variableName) >= 0) {
-                var failureString = VarNameUniquenessRule.FAILURE_STRING + variableName + "'";
+                var failureString = DuplicateVariableRule.FAILURE_STRING + variableName + "'";
                 this.addFailure(this.createFailure(position, identifier.width(), failureString));
             } else {
                 currentScope.variableNames.push(variableName);
