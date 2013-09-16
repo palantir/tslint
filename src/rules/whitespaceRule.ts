@@ -33,13 +33,6 @@ module Lint.Rules {
     }
 
     class WhitespaceWalker extends Lint.RuleWalker {
-        private options: any;
-
-        constructor(syntaxTree: TypeScript.SyntaxTree, options: any) {
-            super(syntaxTree);
-            this.options = options;
-        }
-
         // check for trailing space after the given tokens
         public visitToken(token: TypeScript.ISyntaxToken): void {
             super.visitToken(token);
@@ -131,14 +124,6 @@ module Lint.Rules {
         private isSeparatorKind(kind: TypeScript.SyntaxKind): boolean {
             return (kind === TypeScript.SyntaxKind.CommaToken ||
                     kind === TypeScript.SyntaxKind.SemicolonToken);
-        }
-
-        private hasOption(option: string): boolean {
-            if (this.options) {
-                return this.options.indexOf(option) !== -1;
-            } else {
-                return false;
-            }
         }
 
         private checkForLeadingSpace(position: number, trivia: TypeScript.ISyntaxTriviaList) {

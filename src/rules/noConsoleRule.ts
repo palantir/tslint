@@ -18,25 +18,19 @@
 /// <reference path='abstractRule.ts'/>
 
 module Lint.Rules {
-
     export class NoConsoleRule extends AbstractRule {
         public static FAILURE_STRING = "access forbidden to console property";
 
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            return this.applyWithWalker(new NoConsoleWalker(this.getOptions(), syntaxTree));
+            return this.applyWithWalker(new NoConsoleWalker(syntaxTree, this.getOptions()));
         }
       }
 
     class NoConsoleWalker extends Lint.RuleWalker {
-        private options: any;
-
-        constructor(options: any, syntaxTree: TypeScript.SyntaxTree) {
-            super(syntaxTree);
-            this.options = options;
-        }
-
         public visitInvocationExpression(node: TypeScript.InvocationExpressionSyntax): void {
+            var options = this.getOptions();
             var expression = node.expression;
+
             if (expression.kind() === TypeScript.SyntaxKind.MemberAccessExpression &&
                 expression.childCount() >= 3) {
 
@@ -46,7 +40,7 @@ module Lint.Rules {
 
                 if (firstToken.text() === "console" &&
                     secondToken.kind() === TypeScript.SyntaxKind.DotToken &&
-                    this.options.indexOf(thirdToken.fullText()) !== -1) {
+                    options.indexOf(thirdToken.fullText()) !== -1) {
 
                     var position = this.position() + node.leadingTriviaWidth();
                     this.addFailure(this.createFailure(position, expression.width(), NoConsoleRule.FAILURE_STRING));
@@ -56,5 +50,4 @@ module Lint.Rules {
             super.visitInvocationExpression(node);
         }
     }
-
 }

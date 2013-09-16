@@ -25,18 +25,11 @@ module Lint.Rules {
         public static NEQ_FAILURE_STRING = "!= should be !==";
 
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            return this.applyWithWalker(new ComparisonWalker(this.getOptions(), syntaxTree));
+            return this.applyWithWalker(new ComparisonWalker(syntaxTree, this.getOptions()));
         }
     }
 
     class ComparisonWalker extends Lint.RuleWalker {
-        private options: any;
-
-        constructor(options: any, syntaxTree: TypeScript.SyntaxTree) {
-            super(syntaxTree);
-            this.options = options;
-        }
-
         public visitBinaryExpression(node: TypeScript.BinaryExpressionSyntax): void {
             var position = this.positionAfter(node.left);
 
@@ -71,14 +64,5 @@ module Lint.Rules {
                 this.addFailure(failure);
             }
         }
-
-        private hasOption(option: string): boolean {
-            if (this.options) {
-                return this.options.indexOf(option) !== -1;
-            } else {
-                return false;
-            }
-        }
     }
-
 }

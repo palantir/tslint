@@ -24,13 +24,15 @@ module Lint {
     export class RuleWalker extends TypeScript.PositionTrackingWalker {
         private limit: number;
         private fileName: string;
+        private options: any;
         private failures: RuleFailure[];
         private syntaxTree: TypeScript.SyntaxTree;
 
-        constructor(syntaxTree: TypeScript.SyntaxTree) {
+        constructor(syntaxTree: TypeScript.SyntaxTree, options?: any) {
             super();
 
             this.failures = [];
+            this.options = options;
             this.syntaxTree = syntaxTree;
             this.limit = this.syntaxTree.sourceUnit().fullWidth();
         }
@@ -51,6 +53,18 @@ module Lint {
                 }
             });
             return position;
+        }
+
+        public getOptions(): any {
+            return this.options;
+        }
+
+        public hasOption(option: string): boolean {
+            if (this.options) {
+                return this.options.indexOf(option) !== -1;
+            } else {
+                return false;
+            }
         }
 
         // create a failure at the given position

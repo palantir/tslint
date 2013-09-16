@@ -36,13 +36,6 @@ module Lint.Rules {
     }
 
     class BraceWalker extends Lint.StateAwareRuleWalker {
-        private options: any;
-
-        constructor(syntaxTree: TypeScript.SyntaxTree, options: any) {
-            super(syntaxTree);
-            this.options = options;
-        }
-
         public visitToken(token: TypeScript.ISyntaxToken): void {
             var failure;
             var kind = token.kind();
@@ -97,14 +90,6 @@ module Lint.Rules {
             }
 
             super.visitCatchClause(node);
-        }
-
-        private hasOption(option: string): boolean {
-            if (this.options) {
-                return this.options.indexOf(option) !== -1;
-            } else {
-                return false;
-            }
         }
 
         private getLine(position): number {
