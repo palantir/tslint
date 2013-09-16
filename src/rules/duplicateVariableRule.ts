@@ -16,9 +16,9 @@
 
 /// <reference path='rule.ts'/>
 /// <reference path='abstractRule.ts'/>
+/// <reference path='../language/scopeAwareRuleWalker.ts'/>
 
 module Lint.Rules {
-
     export class DuplicateVariableRule extends AbstractRule {
         public static FAILURE_STRING = "duplicate variable: '";
 
@@ -27,35 +27,16 @@ module Lint.Rules {
         }
     }
 
-    class DuplicateVariableWalker extends Lint.RuleWalker {
-        private scopeStack: ScopeInfo[];
-
-        constructor(syntaxTree: TypeScript.SyntaxTree) {
-            super(syntaxTree);
-
-            // initialize stack with global scope
-            this.scopeStack = [new ScopeInfo()];
-        }
-
-        public visitNode(node: TypeScript.SyntaxNode): void {
-            var isNewScope = this.isScopeBoundary(node);
-
-            if (isNewScope) {
-                this.scopeStack.push(new ScopeInfo());
-            }
-            
-            super.visitNode(node);
-
-            if (isNewScope) {
-                this.scopeStack.pop();
-            }
+    class DuplicateVariableWalker extends Lint.ScopeAwareRuleWalker<ScopeInfo> {
+        public createScope(): ScopeInfo {
+            return new ScopeInfo();
         }
 
         public visitVariableDeclarator(node: TypeScript.VariableDeclaratorSyntax): void {
             var identifier = node.identifier,
                 variableName = identifier.text(),
                 position = this.position() + identifier.leadingTriviaWidth(),
-                currentScope = this.scopeStack[this.scopeStack.length - 1];
+                currentScope = this.getCurrentScope();
 
             if (currentScope.variableNames.indexOf(variableName) >= 0) {
                 var failureString = DuplicateVariableRule.FAILURE_STRING + variableName + "'";
@@ -65,13 +46,6 @@ module Lint.Rules {
             }
 
             super.visitVariableDeclarator(node);
-        }
-
-        private isScopeBoundary(node: TypeScript.SyntaxNode): boolean {
-            return node instanceof TypeScript.FunctionDeclarationSyntax
-                || node instanceof TypeScript.MemberFunctionDeclarationSyntax
-                || node instanceof TypeScript.SimpleArrowFunctionExpressionSyntax
-                || node instanceof TypeScript.ParenthesizedArrowFunctionExpressionSyntax;
         }
     }
 

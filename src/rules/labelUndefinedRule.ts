@@ -16,6 +16,7 @@
 
 /// <reference path='rule.ts'/>
 /// <reference path='abstractRule.ts'/>
+/// <reference path='../language/scopeAwareRuleWalker.ts'/>
 
 module Lint.Rules {
     export class LabelUndefinedRule extends AbstractRule {
@@ -26,43 +27,16 @@ module Lint.Rules {
         }
     }
 
-    class LabelUndefinedWalker extends Lint.RuleWalker {
-        private functionLabels: any[];
-
-        constructor(syntaxTree: TypeScript.SyntaxTree) {
-            super(syntaxTree);
-            this.functionLabels = [{}];
-        }
-
-        public visitFunctionDeclaration(node: TypeScript.FunctionDeclarationSyntax): void {
-            this.functionLabels.push({});
-            super.visitFunctionDeclaration(node);
-            this.functionLabels.pop();
-        }
-
-        public visitFunctionExpression(node: TypeScript.FunctionExpressionSyntax): void {
-            this.functionLabels.push({});
-            super.visitFunctionExpression(node);
-            this.functionLabels.pop();
-        }
-
-        public visitSimpleArrowFunctionExpression(node: TypeScript.SimpleArrowFunctionExpressionSyntax): void {
-            this.functionLabels.push({});
-            super.visitSimpleArrowFunctionExpression(node);
-            this.functionLabels.pop();
-        }
-
-        public visitParenthesizedArrowFunctionExpression(node: TypeScript.ParenthesizedArrowFunctionExpressionSyntax): void {
-            this.functionLabels.push({});
-            super.visitParenthesizedArrowFunctionExpression(node);
-            this.functionLabels.pop();
+    class LabelUndefinedWalker extends Lint.ScopeAwareRuleWalker<any> {
+        public createScope(): any {
+            return {};
         }
 
         public visitLabeledStatement(node: TypeScript.LabeledStatementSyntax): void {
             var label = node.identifier.text();
-            var scopedLabels = this.functionLabels[this.functionLabels.length - 1];
+            var currentScope = this.getCurrentScope();
 
-            scopedLabels[label] = true;
+            currentScope[label] = true;
             super.visitLabeledStatement(node);
         }
 
@@ -79,9 +53,9 @@ module Lint.Rules {
         }
 
         private validateLabelAt(label: TypeScript.ISyntaxToken, position: number, width: number): void {
-            var scopedLabels = this.functionLabels[this.functionLabels.length - 1];
+            var currentScope = this.getCurrentScope();
 
-            if (label !== null && !scopedLabels[label.text()]) {
+            if (label !== null && !currentScope[label.text()]) {
                 var failureString = LabelUndefinedRule.FAILURE_STRING + label.text() + "'";
                 var failure = this.createFailure(position, width, failureString);
                 this.addFailure(failure);
