@@ -11,6 +11,7 @@ Supported Rules
 * `curly` enforces braces for `if`/`for`/`do`/`while` statements.
 * `debug` disallows `debugger` statements.
 * `dupkey` disallows duplicate keys in object literals.
+* `duplicate-variable` disallows duplicate variable declarations.
 * `eofline` enforces the file to end with a newline.
 * `eqeqeq` enforces === and !== in favor of == and !=.
 * `evil` disallows `eval` function invocations.
