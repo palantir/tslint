@@ -5,10 +5,13 @@ var invalid_name2 = " ";
 
 class Test {
     private Invalid_name3 = "how";
+    private _optionallyValid = "are";
 }
 
 function test() {
     () => {
-        var InVaLiDnAmE4 = "are";
+        var InVaLiDnAmE4 = "you";
     };
 }
+
+declare var DeclaresAreValid: any;

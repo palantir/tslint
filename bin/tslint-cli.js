@@ -28063,13 +28063,15 @@ var Lint;
 var Lint;
 (function (Lint) {
     (function (Rules) {
+        var OPTION_LEADING_UNDERSCORE = "allow-leading-underscore";
+
         var VarNameRule = (function (_super) {
             __extends(VarNameRule, _super);
             function VarNameRule() {
                 _super.apply(this, arguments);
             }
             VarNameRule.prototype.apply = function (syntaxTree) {
-                return this.applyWithWalker(new VarNameWalker(syntaxTree));
+                return this.applyWithWalker(new VarNameWalker(syntaxTree, this.getOptions()));
             };
             VarNameRule.FAILURE_STRING = "variable name must be in camelcase or uppercase";
             return VarNameRule;
@@ -28093,13 +28095,24 @@ var Lint;
                 _super.prototype.visitVariableDeclarator.call(this, node);
             };
 
+            VarNameWalker.prototype.visitVariableStatement = function (node) {
+                for (var i = 0; i < node.modifiers.childCount(); i++) {
+                    if (node.modifiers.childAt(i).kind() === TypeScript.SyntaxKind.DeclareKeyword) {
+                        return;
+                    }
+                }
+
+                _super.prototype.visitVariableStatement.call(this, node);
+            };
+
             VarNameWalker.prototype.isCamelCase = function (name) {
                 if (name.length <= 0) {
                     return true;
                 }
 
                 var firstCharacter = name.charAt(0);
-                return (firstCharacter === firstCharacter.toLowerCase() && name.indexOf("_") === -1);
+                var rest = name.substring(1);
+                return (firstCharacter === firstCharacter.toLowerCase() && rest.indexOf("_") === -1 && (firstCharacter !== "_" || this.hasOption(OPTION_LEADING_UNDERSCORE)));
             };
 
             VarNameWalker.prototype.isUpperCase = function (name) {
