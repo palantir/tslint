@@ -27081,6 +27081,7 @@ var Lint;
                             if (blockStatements.childCount() === 1) {
                                 return;
                             }
+
                             var ifStatement = (firstBlockStatement).statement;
                             if (this.nodeIsContinue(ifStatement)) {
                                 return;
@@ -27096,15 +27097,18 @@ var Lint;
 
             ForInWalker.prototype.nodeIsContinue = function (node) {
                 var kind = node.kind();
+
                 if (kind === TypeScript.SyntaxKind.ContinueStatement) {
                     return true;
                 }
+
                 if (kind === TypeScript.SyntaxKind.Block) {
                     var blockStatements = (node).statements;
                     if (blockStatements.childCount() === 1 && blockStatements.childAt(0).kind() === TypeScript.SyntaxKind.ContinueStatement) {
                         return true;
                     }
                 }
+
                 return false;
             };
             return ForInWalker;
