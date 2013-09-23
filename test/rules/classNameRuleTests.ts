@@ -18,7 +18,7 @@
 
 describe("<classname>", () => {
     it("ensures class names are always pascal-cased", () => {
-        var fileName = "rules/className.test.ts";
+        var fileName = "rules/classname.test.ts";
         var createFailure = Lint.Test.createFailuresOnFile(fileName, Lint.Rules.ClassNameRule.FAILURE_STRING);
         var expectedFailure1 = createFailure([5, 7], [5, 23]);
         var expectedFailure2 = createFailure([9, 7], [9, 33]);
