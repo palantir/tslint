@@ -42,19 +42,48 @@ module Lint.Rules {
                 return;
             }
 
-            // if there is a block, verify that it has a single if statement
+            // if there is a block, verify that it has a single if statement or starts with if (..) continue;
             if (statementKind === TypeScript.SyntaxKind.Block) {
                 var blockNode = <TypeScript.BlockSyntax> statement;
                 var blockStatements = blockNode.statements;
-                if (blockStatements.childCount() === 1 &&
-                    blockStatements.childAt(0).kind() === TypeScript.SyntaxKind.IfStatement) {
-                    return;
+                if (blockStatements.childCount() >= 1) {
+                    var firstBlockStatement = blockStatements.childAt(0);
+                    if (firstBlockStatement.kind() === TypeScript.SyntaxKind.IfStatement) {
+                        // if this "if" statement is the only statement within the block
+                        if (blockStatements.childCount() === 1) {
+                            return;
+                        }
+
+                        // if this "if" statement has a single continue block
+                        var ifStatement = (<TypeScript.IfStatementSyntax> firstBlockStatement).statement;
+                        if (this.nodeIsContinue(ifStatement)) {
+                            return;
+                        }
+                    }
                 }
             }
 
             var position = this.position() + node.leadingTriviaWidth();
             var failure = this.createFailure(position, node.width(), ForInRule.FAILURE_STRING);
             this.addFailure(failure);
+        }
+        
+        private nodeIsContinue(node: TypeScript.ISyntaxElement): boolean {
+            var kind = node.kind();
+
+            if (kind === TypeScript.SyntaxKind.ContinueStatement) {
+                return true;
+            }
+
+            if (kind === TypeScript.SyntaxKind.Block) {
+                var blockStatements = (<TypeScript.BlockSyntax>node).statements;
+                if (blockStatements.childCount() === 1 &&
+                    blockStatements.childAt(0).kind() === TypeScript.SyntaxKind.ContinueStatement) {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 

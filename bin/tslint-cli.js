@@ -27075,14 +27075,37 @@ var Lint;
                 if (statementKind === TypeScript.SyntaxKind.Block) {
                     var blockNode = statement;
                     var blockStatements = blockNode.statements;
-                    if (blockStatements.childCount() === 1 && blockStatements.childAt(0).kind() === TypeScript.SyntaxKind.IfStatement) {
-                        return;
+                    if (blockStatements.childCount() >= 1) {
+                        var firstBlockStatement = blockStatements.childAt(0);
+                        if (firstBlockStatement.kind() === TypeScript.SyntaxKind.IfStatement) {
+                            if (blockStatements.childCount() === 1) {
+                                return;
+                            }
+                            var ifStatement = (firstBlockStatement).statement;
+                            if (this.nodeIsContinue(ifStatement)) {
+                                return;
+                            }
+                        }
                     }
                 }
 
                 var position = this.position() + node.leadingTriviaWidth();
                 var failure = this.createFailure(position, node.width(), ForInRule.FAILURE_STRING);
                 this.addFailure(failure);
+            };
+
+            ForInWalker.prototype.nodeIsContinue = function (node) {
+                var kind = node.kind();
+                if (kind === TypeScript.SyntaxKind.ContinueStatement) {
+                    return true;
+                }
+                if (kind === TypeScript.SyntaxKind.Block) {
+                    var blockStatements = (node).statements;
+                    if (blockStatements.childCount() === 1 && blockStatements.childAt(0).kind() === TypeScript.SyntaxKind.ContinueStatement) {
+                        return true;
+                    }
+                }
+                return false;
             };
             return ForInWalker;
         })(Lint.RuleWalker);
