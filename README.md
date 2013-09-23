@@ -1,4 +1,4 @@
-tslint [![NPM version](https://badge.fury.io/js/tslint.png)](http://badge.fury.io/js/tslint)
+tslint [![NPM version](https://badge.fury.io/js/tslint.png)](http://badge.fury.io/js/tslint) [![Builds](https://api.travis-ci.org/repositories/palantir/tslint.png?branch=master)](https://travis-ci.org/palantir/tslint)
 ======
 
 A linter for the TypeScript language.
