@@ -24,3 +24,21 @@ function test() {
 
 duplicated = 2;
 var duplicated = 3;
+
+// valid code
+module tmp {
+    var path = require("path");
+    export class MyType {
+        path: string;
+    }
+}
+
+module MyModule {
+    export class ClassA {
+        id: string;
+    }
+
+    export class ClassB {
+        id: string;
+    }
+}

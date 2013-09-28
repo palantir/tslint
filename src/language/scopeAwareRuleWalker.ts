@@ -56,7 +56,9 @@ module Lint {
                 || node instanceof TypeScript.FunctionExpressionSyntax
                 || node instanceof TypeScript.MemberFunctionDeclarationSyntax
                 || node instanceof TypeScript.SimpleArrowFunctionExpressionSyntax
-                || node instanceof TypeScript.ParenthesizedArrowFunctionExpressionSyntax;
+                || node instanceof TypeScript.ParenthesizedArrowFunctionExpressionSyntax
+                || node instanceof TypeScript.ClassDeclarationSyntax
+                || node instanceof TypeScript.InterfaceDeclarationSyntax;
         }
     }
 }
