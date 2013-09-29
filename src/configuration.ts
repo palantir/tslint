@@ -14,7 +14,8 @@
  * limitations under the License.
 */
 
-/// <reference path='rules/rules.ts'/>
+/// <reference path='language/rule/rule.ts'/>
+/// <reference path='language/walker/ruleWalker.ts'/>
 
 module Lint.Configuration {
     var fs = require("fs");
@@ -59,7 +60,7 @@ module Lint.Configuration {
         for (var ruleName in configuration.rules) {
             if (configuration.rules.hasOwnProperty(ruleName)) {
                 var ruleValue = configuration.rules[ruleName];
-                var rule = Rules.createRule(ruleName, ruleValue);
+                var rule = createRule(ruleName, ruleValue);
                 if (rule !== undefined) {
                     rules.push(rule);
                 }
@@ -67,5 +68,11 @@ module Lint.Configuration {
         }
 
         return rules;
+    }
+
+    function createRule(name: string, value: any): Rule {
+        var rule = require("../build/rules/" + name + "Rule");
+        console.log("rule", rule);
+        return undefined;
     }
 }

@@ -18,6 +18,10 @@
 /// <reference path='formatters/formatters.ts' />
 /// <reference path='language/languageServiceHost.ts' />
 
+/// <reference path='language/rule/abstractRule.ts' />
+/// <reference path='language/walker/scopeAwareRuleWalker.ts' />
+/// <reference path='language/walker/stateAwareRuleWalker.ts' />
+
 module Lint {
 
     export interface LintResult {
