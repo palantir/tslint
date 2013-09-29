@@ -14,7 +14,7 @@
  * limitations under the License.
 */
 
-/// <reference path='rule.ts'/>
+/// <reference path='../language/rule/rule.ts'/>
 /// <reference path='bitwiseRule.ts'/>
 /// <reference path='classNameRule.ts'/>
 /// <reference path='curlyRule.ts'/>

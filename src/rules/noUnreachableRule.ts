@@ -14,8 +14,8 @@
  * limitations under the License.
 */
 
-/// <reference path='rule.ts'/>
-/// <reference path='abstractRule.ts'/>
+/// <reference path='../language/rule/rule.ts'/>
+/// <reference path='../language/rule/abstractRule.ts'/>
 
 module Lint.Rules {
     export class NoUnreachableRule extends AbstractRule {

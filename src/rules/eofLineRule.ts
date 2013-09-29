@@ -14,9 +14,9 @@
  * limitations under the License.
 */
 
-/// <reference path='rule.ts'/>
-/// <reference path='abstractRule.ts'/>
-/// <reference path='../language/stateAwareRuleWalker.ts'/>
+/// <reference path='../language/rule/rule.ts'/>
+/// <reference path='../language/rule/abstractRule.ts'/>
+/// <reference path='../language/walker/stateAwareRuleWalker.ts'/>
 
 module Lint.Rules {
 

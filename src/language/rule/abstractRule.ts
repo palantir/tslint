@@ -14,9 +14,9 @@
  * limitations under the License.
 */
 
-/// <reference path='../typescript/src/compiler/core/errors.ts'/>
+/// <reference path='../../typescript/src/compiler/core/errors.ts'/>
+/// <reference path='../walker/ruleWalker.ts'/>
 /// <reference path='rule.ts'/>
-/// <reference path='../language/ruleWalker.ts'/>
 
 module Lint.Rules {
 
