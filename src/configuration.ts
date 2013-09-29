@@ -71,8 +71,12 @@ module Lint.Configuration {
     }
 
     function createRule(name: string, value: any): Rule {
-        var rule = require("../build/rules/" + name + "Rule");
-        console.log("rule", rule);
-        return undefined;
+        var ruleModule = require("../lib/rules/" + name + "Rule");
+        if (ruleModule.Rule) {
+            console.log("creating rule");
+            return new ruleModule.Rule(name, value);
+        } else {
+            return undefined;
+        }
     }
 }

@@ -14,40 +14,37 @@
  * limitations under the License.
 */
 
-/// <reference path='../language/rule/rule.ts'/>
-/// <reference path='../language/rule/abstractRule.ts'/>
+/// <reference path='../../lib/tslint.d.ts' />
 
-module Lint.Rules {
-    export class NoConsoleRule extends AbstractRule {
-        public static FAILURE_STRING = "access forbidden to console property";
+export class Rule extends Lint.Rules.AbstractRule {
+    public static FAILURE_STRING = "access forbidden to console property";
 
-        public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            return this.applyWithWalker(new NoConsoleWalker(syntaxTree, this.getOptions()));
-        }
-      }
+    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
+        return this.applyWithWalker(new NoConsoleWalker(syntaxTree, this.getOptions()));
+    }
+  }
 
-    class NoConsoleWalker extends Lint.RuleWalker {
-        public visitInvocationExpression(node: TypeScript.InvocationExpressionSyntax): void {
-            var options = this.getOptions();
-            var expression = node.expression;
+class NoConsoleWalker extends Lint.RuleWalker {
+    public visitInvocationExpression(node: TypeScript.InvocationExpressionSyntax): void {
+        var options = this.getOptions();
+        var expression = node.expression;
 
-            if (expression.kind() === TypeScript.SyntaxKind.MemberAccessExpression &&
-                expression.childCount() >= 3) {
+        if (expression.kind() === TypeScript.SyntaxKind.MemberAccessExpression &&
+            expression.childCount() >= 3) {
 
-                var firstToken = expression.firstToken();
-                var secondToken = expression.childAt(1);
-                var thirdToken = expression.childAt(2);
+            var firstToken = expression.firstToken();
+            var secondToken = expression.childAt(1);
+            var thirdToken = expression.childAt(2);
 
-                if (firstToken.text() === "console" &&
-                    secondToken.kind() === TypeScript.SyntaxKind.DotToken &&
-                    options.indexOf(thirdToken.fullText()) !== -1) {
+            if (firstToken.text() === "console" &&
+                secondToken.kind() === TypeScript.SyntaxKind.DotToken &&
+                options.indexOf(thirdToken.fullText()) !== -1) {
 
-                    var position = this.position() + node.leadingTriviaWidth();
-                    this.addFailure(this.createFailure(position, expression.width(), NoConsoleRule.FAILURE_STRING));
-                }
+                var position = this.position() + node.leadingTriviaWidth();
+                this.addFailure(this.createFailure(position, expression.width(), Rule.FAILURE_STRING));
             }
-
-            super.visitInvocationExpression(node);
         }
+
+        super.visitInvocationExpression(node);
     }
 }

@@ -14,77 +14,72 @@
  * limitations under the License.
 */
 
-/// <reference path='../language/rule/rule.ts'/>
-/// <reference path='../language/rule/abstractRule.ts'/>
+/// <reference path='../../lib/tslint.d.ts' />
 
-module Lint.Rules {
+export class Rule extends Lint.Rules.AbstractRule {
+    public static FAILURE_STRING = "for (... in ...) statements must be filtered with an if statement";
 
-    export class ForInRule extends AbstractRule {
-        public static FAILURE_STRING = "for (... in ...) statements must be filtered with an if statement";
+    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
+        return this.applyWithWalker(new ForInWalker(syntaxTree));
+    }
+}
 
-        public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            return this.applyWithWalker(new ForInWalker(syntaxTree));
-        }
+class ForInWalker extends Lint.RuleWalker {
+    public visitForInStatement(node: TypeScript.ForInStatementSyntax): void {
+        this.handleForInStatement(node);
+        super.visitForInStatement(node);
     }
 
-    class ForInWalker extends Lint.RuleWalker {
-        public visitForInStatement(node: TypeScript.ForInStatementSyntax): void {
-            this.handleForInStatement(node);
-            super.visitForInStatement(node);
+    private handleForInStatement(node: TypeScript.ForInStatementSyntax) {
+        var statement = node.statement;
+        var statementKind = node.statement.kind();
+
+        // a direct if statement under a for...in is valid
+        if (statementKind === TypeScript.SyntaxKind.IfStatement) {
+            return;
         }
 
-        private handleForInStatement(node: TypeScript.ForInStatementSyntax) {
-            var statement = node.statement;
-            var statementKind = node.statement.kind();
+        // if there is a block, verify that it has a single if statement or starts with if (..) continue;
+        if (statementKind === TypeScript.SyntaxKind.Block) {
+            var blockNode = <TypeScript.BlockSyntax> statement;
+            var blockStatements = blockNode.statements;
+            if (blockStatements.childCount() >= 1) {
+                var firstBlockStatement = blockStatements.childAt(0);
+                if (firstBlockStatement.kind() === TypeScript.SyntaxKind.IfStatement) {
+                    // if this "if" statement is the only statement within the block
+                    if (blockStatements.childCount() === 1) {
+                        return;
+                    }
 
-            // a direct if statement under a for...in is valid
-            if (statementKind === TypeScript.SyntaxKind.IfStatement) {
-                return;
-            }
-
-            // if there is a block, verify that it has a single if statement or starts with if (..) continue;
-            if (statementKind === TypeScript.SyntaxKind.Block) {
-                var blockNode = <TypeScript.BlockSyntax> statement;
-                var blockStatements = blockNode.statements;
-                if (blockStatements.childCount() >= 1) {
-                    var firstBlockStatement = blockStatements.childAt(0);
-                    if (firstBlockStatement.kind() === TypeScript.SyntaxKind.IfStatement) {
-                        // if this "if" statement is the only statement within the block
-                        if (blockStatements.childCount() === 1) {
-                            return;
-                        }
-
-                        // if this "if" statement has a single continue block
-                        var ifStatement = (<TypeScript.IfStatementSyntax> firstBlockStatement).statement;
-                        if (this.nodeIsContinue(ifStatement)) {
-                            return;
-                        }
+                    // if this "if" statement has a single continue block
+                    var ifStatement = (<TypeScript.IfStatementSyntax> firstBlockStatement).statement;
+                    if (this.nodeIsContinue(ifStatement)) {
+                        return;
                     }
                 }
             }
-
-            var position = this.position() + node.leadingTriviaWidth();
-            var failure = this.createFailure(position, node.width(), ForInRule.FAILURE_STRING);
-            this.addFailure(failure);
         }
-        
-        private nodeIsContinue(node: TypeScript.ISyntaxElement): boolean {
-            var kind = node.kind();
 
-            if (kind === TypeScript.SyntaxKind.ContinueStatement) {
+        var position = this.position() + node.leadingTriviaWidth();
+        var failure = this.createFailure(position, node.width(), Rule.FAILURE_STRING);
+        this.addFailure(failure);
+    }
+    
+    private nodeIsContinue(node: TypeScript.ISyntaxElement): boolean {
+        var kind = node.kind();
+
+        if (kind === TypeScript.SyntaxKind.ContinueStatement) {
+            return true;
+        }
+
+        if (kind === TypeScript.SyntaxKind.Block) {
+            var blockStatements = (<TypeScript.BlockSyntax>node).statements;
+            if (blockStatements.childCount() === 1 &&
+                blockStatements.childAt(0).kind() === TypeScript.SyntaxKind.ContinueStatement) {
                 return true;
             }
-
-            if (kind === TypeScript.SyntaxKind.Block) {
-                var blockStatements = (<TypeScript.BlockSyntax>node).statements;
-                if (blockStatements.childCount() === 1 &&
-                    blockStatements.childAt(0).kind() === TypeScript.SyntaxKind.ContinueStatement) {
-                    return true;
-                }
-            }
-
-            return false;
         }
-    }
 
+        return false;
+    }
 }

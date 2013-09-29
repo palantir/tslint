@@ -14,55 +14,52 @@
  * limitations under the License.
 */
 
-/// <reference path='../language/rule/rule.ts'/>
-/// <reference path='../language/rule/abstractRule.ts'/>
+/// <reference path='../../lib/tslint.d.ts' />
 
-module Lint.Rules {
-    var OPTION_ALLOW_NULL_CHECK = "allow-null-check";
+var OPTION_ALLOW_NULL_CHECK = "allow-null-check";
 
-    export class EqEqEqRule extends AbstractRule {
-        public static EQ_FAILURE_STRING = "== should be ===";
-        public static NEQ_FAILURE_STRING = "!= should be !==";
+export class Rule extends Lint.Rules.AbstractRule {
+    public static EQ_FAILURE_STRING = "== should be ===";
+    public static NEQ_FAILURE_STRING = "!= should be !==";
 
-        public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            return this.applyWithWalker(new ComparisonWalker(syntaxTree, this.getOptions()));
+    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
+        return this.applyWithWalker(new ComparisonWalker(syntaxTree, this.getOptions()));
+    }
+}
+
+class ComparisonWalker extends Lint.RuleWalker {
+    public visitBinaryExpression(node: TypeScript.BinaryExpressionSyntax): void {
+        var position = this.positionAfter(node.left);
+
+        if (!this.isExpressionAllowed(node)) {
+            this.handleOperatorToken(position, node.operatorToken);
         }
+        super.visitBinaryExpression(node);
     }
 
-    class ComparisonWalker extends Lint.RuleWalker {
-        public visitBinaryExpression(node: TypeScript.BinaryExpressionSyntax): void {
-            var position = this.positionAfter(node.left);
+    private isExpressionAllowed(node: TypeScript.BinaryExpressionSyntax): boolean {
+        var nullKeyword = TypeScript.SyntaxKind.NullKeyword;
 
-            if (!this.isExpressionAllowed(node)) {
-                this.handleOperatorToken(position, node.operatorToken);
-            }
-            super.visitBinaryExpression(node);
+        if (this.hasOption(OPTION_ALLOW_NULL_CHECK) &&
+            (node.left.kind() ===  nullKeyword || node.right.kind() === nullKeyword)) {
+            return true;
         }
 
-        private isExpressionAllowed(node: TypeScript.BinaryExpressionSyntax): boolean {
-            var nullKeyword = TypeScript.SyntaxKind.NullKeyword;
+        return false;
+    }
 
-            if (this.hasOption(OPTION_ALLOW_NULL_CHECK) &&
-                (node.left.kind() ===  nullKeyword || node.right.kind() === nullKeyword)) {
-                return true;
-            }
+    private handleOperatorToken(position: number, operatorToken: TypeScript.ISyntaxToken) {
+        var failure = null;
+        var operatorKind = operatorToken.kind();
 
-            return false;
+        if (operatorKind === TypeScript.SyntaxKind.EqualsEqualsToken) {
+            failure = this.createFailure(position, operatorToken.width(), Rule.EQ_FAILURE_STRING);
+        } else if (operatorKind === TypeScript.SyntaxKind.ExclamationEqualsToken) {
+            failure = this.createFailure(position, operatorToken.width(), Rule.NEQ_FAILURE_STRING);
         }
 
-        private handleOperatorToken(position: number, operatorToken: TypeScript.ISyntaxToken) {
-            var failure = null;
-            var operatorKind = operatorToken.kind();
-
-            if (operatorKind === TypeScript.SyntaxKind.EqualsEqualsToken) {
-                failure = this.createFailure(position, operatorToken.width(), EqEqEqRule.EQ_FAILURE_STRING);
-            } else if (operatorKind === TypeScript.SyntaxKind.ExclamationEqualsToken) {
-                failure = this.createFailure(position, operatorToken.width(), EqEqEqRule.NEQ_FAILURE_STRING);
-            }
-
-            if (failure) {
-                this.addFailure(failure);
-            }
+        if (failure) {
+            this.addFailure(failure);
         }
     }
 }

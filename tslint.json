@@ -1,48 +1,5 @@
 {
   "rules": {
-    "bitwise": true,
-    "classname": true,
-    "curly": true,
-    "debug": true,
-    "dupkey": true,
-    "duplicate-variable": true,
-    "eofline": true,
-    "eqeqeq": [true, "allow-null-check"],
-    "evil": true,
-    "forin": true,
-    "indent": [true, 4],
-    "labelpos": true,
-    "label-undefined": true,
-    "maxlen": [true, 140],
-    "noarg": true,
-    "noconsole": [true,
-        "debug",
-        "info",
-        "time",
-        "timeEnd",
-        "trace"
-    ],
-    "noconstruct": true,
-    "nounreachable": true,
-    "noempty": true,
-    "oneline": [true,
-        "check-open-brace",
-        "check-catch",
-        "check-else",
-        "check-whitespace"
-    ],
-    "quotemark": [true, "double"],
-    "radix": true,
-    "semicolon": true,
-    "sub": true,
-    "trailing": true,
-    "varname": true,
-    "whitespace": [true,
-        "check-branch",
-        "check-decl",
-        "check-operator",
-        "check-separator",
-        "check-type"
-    ]
+    "bitwise": true
   }
 }

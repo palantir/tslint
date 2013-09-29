@@ -14,42 +14,37 @@
  * limitations under the License.
 */
 
-/// <reference path='../language/rule/rule.ts'/>
-/// <reference path='../language/rule/abstractRule.ts'/>
+/// <reference path='../../lib/tslint.d.ts' />
 
-module Lint.Rules {
+export class Rule extends Lint.Rules.AbstractRule {
+    public static FAILURE_STRING = "exceeds maximum line length of ";
 
-    export class MaxLenRule extends AbstractRule {
-        public static FAILURE_STRING = "exceeds maximum line length of ";
-
-        public isEnabled(): boolean {
-            if (super.isEnabled()) {
-                var option = this.getOptions()[0];
-                if (typeof option === "number" && option > 0) {
-                    return true;
-                }
+    public isEnabled(): boolean {
+        if (super.isEnabled()) {
+            var option = this.getOptions()[0];
+            if (typeof option === "number" && option > 0) {
+                return true;
             }
-
-            return false;
         }
 
-        public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            var ruleFailures = [];
-            var lineLimit = this.getOptions()[0];
-            var lineMap = syntaxTree.lineMap();
-            var lineStarts = lineMap.lineStarts();
-            var errorString = MaxLenRule.FAILURE_STRING + lineLimit;
-
-            for (var i = 0; i < lineStarts.length - 1; ++i) {
-                var from = lineStarts[i], to = lineStarts[i + 1];
-                if ((to - from - 1) > lineLimit) {
-                    var ruleFailure = new Lint.RuleFailure(syntaxTree, from, to - 1, errorString);
-                    ruleFailures.push(ruleFailure);
-                }
-              }
-
-            return ruleFailures;
-        }
+        return false;
     }
 
+    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
+        var ruleFailures = [];
+        var lineLimit = this.getOptions()[0];
+        var lineMap = syntaxTree.lineMap();
+        var lineStarts = lineMap.lineStarts();
+        var errorString = Rule.FAILURE_STRING + lineLimit;
+
+        for (var i = 0; i < lineStarts.length - 1; ++i) {
+            var from = lineStarts[i], to = lineStarts[i + 1];
+            if ((to - from - 1) > lineLimit) {
+                var ruleFailure = new Lint.RuleFailure(syntaxTree, from, to - 1, errorString);
+                ruleFailures.push(ruleFailure);
+            }
+          }
+
+        return ruleFailures;
+    }
 }

@@ -14,52 +14,48 @@
  * limitations under the License.
 */
 
-/// <reference path='../language/rule/rule.ts'/>
-/// <reference path='../language/rule/abstractRule.ts'/>
-/// <reference path='../language/walker/scopeAwareRuleWalker.ts'/>
+/// <reference path='../../lib/tslint.d.ts' />
 
-module Lint.Rules {
-    export class LabelUndefinedRule extends AbstractRule {
-        public static FAILURE_STRING = "undefined label: '";
+export class Rule extends Lint.Rules.AbstractRule {
+    public static FAILURE_STRING = "undefined label: '";
 
-        public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            return this.applyWithWalker(new LabelUndefinedWalker(syntaxTree));
-        }
+    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
+        return this.applyWithWalker(new LabelUndefinedWalker(syntaxTree));
+    }
+}
+
+class LabelUndefinedWalker extends Lint.ScopeAwareRuleWalker<any> {
+    public createScope(): any {
+        return {};
     }
 
-    class LabelUndefinedWalker extends Lint.ScopeAwareRuleWalker<any> {
-        public createScope(): any {
-            return {};
-        }
+    public visitLabeledStatement(node: TypeScript.LabeledStatementSyntax): void {
+        var label = node.identifier.text();
+        var currentScope = this.getCurrentScope();
 
-        public visitLabeledStatement(node: TypeScript.LabeledStatementSyntax): void {
-            var label = node.identifier.text();
-            var currentScope = this.getCurrentScope();
+        currentScope[label] = true;
+        super.visitLabeledStatement(node);
+    }
 
-            currentScope[label] = true;
-            super.visitLabeledStatement(node);
-        }
+    public visitBreakStatement(node: TypeScript.BreakStatementSyntax): void {
+        var position = this.position() + node.leadingTriviaWidth();
+        this.validateLabelAt(node.identifier, position, node.breakKeyword.width());
+        super.visitBreakStatement(node);
+    }
 
-        public visitBreakStatement(node: TypeScript.BreakStatementSyntax): void {
-            var position = this.position() + node.leadingTriviaWidth();
-            this.validateLabelAt(node.identifier, position, node.breakKeyword.width());
-            super.visitBreakStatement(node);
-        }
+    public visitContinueStatement(node: TypeScript.ContinueStatementSyntax): void {
+        var position = this.position() + node.leadingTriviaWidth();
+        this.validateLabelAt(node.identifier, position, node.continueKeyword.width());
+        super.visitContinueStatement(node);
+    }
 
-        public visitContinueStatement(node: TypeScript.ContinueStatementSyntax): void {
-            var position = this.position() + node.leadingTriviaWidth();
-            this.validateLabelAt(node.identifier, position, node.continueKeyword.width());
-            super.visitContinueStatement(node);
-        }
+    private validateLabelAt(label: TypeScript.ISyntaxToken, position: number, width: number): void {
+        var currentScope = this.getCurrentScope();
 
-        private validateLabelAt(label: TypeScript.ISyntaxToken, position: number, width: number): void {
-            var currentScope = this.getCurrentScope();
-
-            if (label !== null && !currentScope[label.text()]) {
-                var failureString = LabelUndefinedRule.FAILURE_STRING + label.text() + "'";
-                var failure = this.createFailure(position, width, failureString);
-                this.addFailure(failure);
-            }
+        if (label !== null && !currentScope[label.text()]) {
+            var failureString = Rule.FAILURE_STRING + label.text() + "'";
+            var failure = this.createFailure(position, width, failureString);
+            this.addFailure(failure);
         }
     }
 }

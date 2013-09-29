@@ -14,30 +14,27 @@
  * limitations under the License.
 */
 
-/// <reference path='../language/rule/rule.ts'/>
-/// <reference path='../language/rule/abstractRule.ts'/>
+/// <reference path='../../lib/tslint.d.ts' />
 
-module Lint.Rules {
-    export class NoEmptyRule extends AbstractRule {
-        public static FAILURE_STRING = "block is empty";
+export class Rule extends Lint.Rules.AbstractRule {
+    public static FAILURE_STRING = "block is empty";
 
-        public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            return this.applyWithWalker(new BlockWalker(syntaxTree));
-        }
+    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
+        return this.applyWithWalker(new BlockWalker(syntaxTree));
     }
+}
 
-    class BlockWalker extends Lint.RuleWalker {
-        public visitBlock(node: TypeScript.BlockSyntax): void {
-            var hasCommentAfter = node.openBraceToken.trailingTrivia().hasComment();
-            var hasCommentBefore = node.closeBraceToken.leadingTrivia().hasComment();
+class BlockWalker extends Lint.RuleWalker {
+    public visitBlock(node: TypeScript.BlockSyntax): void {
+        var hasCommentAfter = node.openBraceToken.trailingTrivia().hasComment();
+        var hasCommentBefore = node.closeBraceToken.leadingTrivia().hasComment();
 
-            if (node.statements.childCount() <= 0 && !hasCommentAfter && !hasCommentBefore) {
-                var position = this.position() + node.leadingTriviaWidth();
-                var width = node.width();
-                this.addFailure(this.createFailure(position, width, NoEmptyRule.FAILURE_STRING));
-            }
-
-            super.visitBlock(node);
+        if (node.statements.childCount() <= 0 && !hasCommentAfter && !hasCommentBefore) {
+            var position = this.position() + node.leadingTriviaWidth();
+            var width = node.width();
+            this.addFailure(this.createFailure(position, width, Rule.FAILURE_STRING));
         }
+
+        super.visitBlock(node);
     }
 }

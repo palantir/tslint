@@ -14,96 +14,93 @@
  * limitations under the License.
 */
 
-/// <reference path='../language/rule/rule.ts'/>
-/// <reference path='../language/walker/stateAwareRuleWalker.ts'/>
+/// <reference path='../../lib/tslint.d.ts' />
 
-module Lint.Rules {
-    var OPTION_BRACE = "check-open-brace";
-    var OPTION_CATCH = "check-catch";
-    var OPTION_ELSE = "check-else";
-    var OPTION_WHITESPACE = "check-whitespace";
+var OPTION_BRACE = "check-open-brace";
+var OPTION_CATCH = "check-catch";
+var OPTION_ELSE = "check-else";
+var OPTION_WHITESPACE = "check-whitespace";
 
-    export class OneLineRule extends AbstractRule {
-        public static BRACE_FAILURE_STRING = "misplaced opening brace";
-        public static CATCH_FAILURE_STRING = "misplaced 'catch'";
-        public static ELSE_FAILURE_STRING = "misplaced 'else'";
-        public static WHITESPACE_FAILURE_STRING = "missing whitespace";
+export class Rule extends Lint.Rules.AbstractRule {
+    public static BRACE_FAILURE_STRING = "misplaced opening brace";
+    public static CATCH_FAILURE_STRING = "misplaced 'catch'";
+    public static ELSE_FAILURE_STRING = "misplaced 'else'";
+    public static WHITESPACE_FAILURE_STRING = "missing whitespace";
 
-        public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            var braceWalker = new BraceWalker(syntaxTree, this.getOptions());
-            return this.applyWithWalker(braceWalker);
-        }
+    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
+        var braceWalker = new BraceWalker(syntaxTree, this.getOptions());
+        return this.applyWithWalker(braceWalker);
     }
+}
 
-    class BraceWalker extends Lint.StateAwareRuleWalker {
-        public visitToken(token: TypeScript.ISyntaxToken): void {
-            var failure;
-            var kind = token.kind();
-            var lastState = this.getLastState();
+class BraceWalker extends Lint.StateAwareRuleWalker {
+    public visitToken(token: TypeScript.ISyntaxToken): void {
+        var failure;
+        var kind = token.kind();
+        var lastState = this.getLastState();
 
-            if (kind === TypeScript.SyntaxKind.OpenBraceToken && lastState !== undefined) {
-                var lastKind = lastState.token.kind();
-                if (lastKind === TypeScript.SyntaxKind.CloseParenToken ||
-                    lastKind === TypeScript.SyntaxKind.DoKeyword ||
-                    lastKind === TypeScript.SyntaxKind.ElseKeyword ||
-                    lastKind === TypeScript.SyntaxKind.IdentifierName ||
-                    lastKind === TypeScript.SyntaxKind.StringLiteral ||
-                    lastKind === TypeScript.SyntaxKind.TryKeyword ||
-                    lastKind === TypeScript.SyntaxKind.EqualsToken) {
+        if (kind === TypeScript.SyntaxKind.OpenBraceToken && lastState !== undefined) {
+            var lastKind = lastState.token.kind();
+            if (lastKind === TypeScript.SyntaxKind.CloseParenToken ||
+                lastKind === TypeScript.SyntaxKind.DoKeyword ||
+                lastKind === TypeScript.SyntaxKind.ElseKeyword ||
+                lastKind === TypeScript.SyntaxKind.IdentifierName ||
+                lastKind === TypeScript.SyntaxKind.StringLiteral ||
+                lastKind === TypeScript.SyntaxKind.TryKeyword ||
+                lastKind === TypeScript.SyntaxKind.EqualsToken) {
 
-                    var lastLine = this.getLine(lastState.position);
-                    var currentLine = this.getLine(this.position());
-                    var position = this.position() + token.leadingTriviaWidth();
+                var lastLine = this.getLine(lastState.position);
+                var currentLine = this.getLine(this.position());
+                var position = this.position() + token.leadingTriviaWidth();
 
-                    if (this.hasOption(OPTION_BRACE) && currentLine !== lastLine) {
-                        failure = this.createFailure(position, token.width(), OneLineRule.BRACE_FAILURE_STRING);
-                    } else if (this.hasOption(OPTION_WHITESPACE) && !this.hasTrailingWhiteSpace(lastState.token)) {
-                        failure = this.createFailure(position, token.width(), OneLineRule.WHITESPACE_FAILURE_STRING);
-                    }
+                if (this.hasOption(OPTION_BRACE) && currentLine !== lastLine) {
+                    failure = this.createFailure(position, token.width(), Rule.BRACE_FAILURE_STRING);
+                } else if (this.hasOption(OPTION_WHITESPACE) && !this.hasTrailingWhiteSpace(lastState.token)) {
+                    failure = this.createFailure(position, token.width(), Rule.WHITESPACE_FAILURE_STRING);
                 }
             }
-
-            if (failure) {
-                this.addFailure(failure);
-            }
-
-            super.visitToken(token);
         }
 
-        public visitElseClause(node: TypeScript.ElseClauseSyntax): void {
-            var lastState = this.getLastState();
-            var position = this.position() + node.leadingTriviaWidth();
-            if (this.hasOption(OPTION_ELSE) && lastState !== undefined && !this.hasTrailingWhiteSpace(lastState.token)) {
-                var failure = this.createFailure(position, node.elseKeyword.width(), OneLineRule.ELSE_FAILURE_STRING);
-                this.addFailure(failure);
-            }
-
-            super.visitElseClause(node);
+        if (failure) {
+            this.addFailure(failure);
         }
 
-        public visitCatchClause(node: TypeScript.CatchClauseSyntax): void {
-            var lastState = this.getLastState();
-            var position = this.position() + node.leadingTriviaWidth();
-            if (this.hasOption(OPTION_CATCH) && lastState !== undefined && !this.hasTrailingWhiteSpace(lastState.token)) {
-                var failure = this.createFailure(position, node.catchKeyword.width(), OneLineRule.CATCH_FAILURE_STRING);
-                this.addFailure(failure);
-            }
+        super.visitToken(token);
+    }
 
-            super.visitCatchClause(node);
+    public visitElseClause(node: TypeScript.ElseClauseSyntax): void {
+        var lastState = this.getLastState();
+        var position = this.position() + node.leadingTriviaWidth();
+        if (this.hasOption(OPTION_ELSE) && lastState !== undefined && !this.hasTrailingWhiteSpace(lastState.token)) {
+            var failure = this.createFailure(position, node.elseKeyword.width(), Rule.ELSE_FAILURE_STRING);
+            this.addFailure(failure);
         }
 
-        private getLine(position): number {
-            return this.getSyntaxTree().lineMap().getLineAndCharacterFromPosition(position).line();
+        super.visitElseClause(node);
+    }
+
+    public visitCatchClause(node: TypeScript.CatchClauseSyntax): void {
+        var lastState = this.getLastState();
+        var position = this.position() + node.leadingTriviaWidth();
+        if (this.hasOption(OPTION_CATCH) && lastState !== undefined && !this.hasTrailingWhiteSpace(lastState.token)) {
+            var failure = this.createFailure(position, node.catchKeyword.width(), Rule.CATCH_FAILURE_STRING);
+            this.addFailure(failure);
         }
 
-        private hasTrailingWhiteSpace(token: TypeScript.ISyntaxToken): boolean {
-            var trivia = token.trailingTrivia();
-            if (trivia.count() < 1) {
-                return false;
-            }
+        super.visitCatchClause(node);
+    }
 
-            var kind = trivia.syntaxTriviaAt(0).kind();
-            return (kind === TypeScript.SyntaxKind.WhitespaceTrivia);
+    private getLine(position): number {
+        return this.getSyntaxTree().lineMap().getLineAndCharacterFromPosition(position).line();
+    }
+
+    private hasTrailingWhiteSpace(token: TypeScript.ISyntaxToken): boolean {
+        var trivia = token.trailingTrivia();
+        if (trivia.count() < 1) {
+            return false;
         }
+
+        var kind = trivia.syntaxTriviaAt(0).kind();
+        return (kind === TypeScript.SyntaxKind.WhitespaceTrivia);
     }
 }

@@ -14,57 +14,54 @@
  * limitations under the License.
 */
 
-/// <reference path='../language/rule/rule.ts'/>
-/// <reference path='../language/rule/abstractRule.ts'/>
+/// <reference path='../../lib/tslint.d.ts' />
 
-module Lint.Rules {
-    var OPTION_LEADING_UNDERSCORE = "allow-leading-underscore";
+var OPTION_LEADING_UNDERSCORE = "allow-leading-underscore";
 
-    export class VarNameRule extends AbstractRule {
-        public static FAILURE_STRING = "variable name must be in camelcase or uppercase";
+export class Rule extends Lint.Rules.AbstractRule {
+    public static FAILURE_STRING = "variable name must be in camelcase or uppercase";
 
-        public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            return this.applyWithWalker(new VarNameWalker(syntaxTree, this.getOptions()));
+    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
+        return this.applyWithWalker(new VarNameWalker(syntaxTree, this.getOptions()));
+    }
+}
+
+class VarNameWalker extends Lint.RuleWalker {
+    public visitVariableDeclarator(node: TypeScript.VariableDeclaratorSyntax): void {
+        var identifier = node.identifier;
+        var variableName = identifier.text();
+        var position = this.position() + identifier.leadingTriviaWidth();
+
+        if (!this.isCamelCase(variableName) && !this.isUpperCase(variableName)) {
+            this.addFailure(this.createFailure(position, identifier.width(), Rule.FAILURE_STRING));
         }
+
+        super.visitVariableDeclarator(node);
     }
 
-    class VarNameWalker extends Lint.RuleWalker {
-        public visitVariableDeclarator(node: TypeScript.VariableDeclaratorSyntax): void {
-            var identifier = node.identifier;
-            var variableName = identifier.text();
-            var position = this.position() + identifier.leadingTriviaWidth();
-
-            if (!this.isCamelCase(variableName) && !this.isUpperCase(variableName)) {
-                this.addFailure(this.createFailure(position, identifier.width(), VarNameRule.FAILURE_STRING));
+    public visitVariableStatement(node: TypeScript.VariableStatementSyntax): void {
+        for (var i = 0; i < node.modifiers.childCount(); i++) {
+            // skip declaration statements
+            if (node.modifiers.childAt(i).kind() === TypeScript.SyntaxKind.DeclareKeyword) {
+                return;
             }
-
-            super.visitVariableDeclarator(node);
         }
 
-        public visitVariableStatement(node: TypeScript.VariableStatementSyntax): void {
-            for (var i = 0; i < node.modifiers.childCount(); i++) {
-                // skip declaration statements
-                if (node.modifiers.childAt(i).kind() === TypeScript.SyntaxKind.DeclareKeyword) {
-                    return;
-                }
-            }
+        super.visitVariableStatement(node);
+    }
 
-            super.visitVariableStatement(node);
+    private isCamelCase(name: string): boolean {
+        if (name.length <= 0) {
+            return true;
         }
 
-        private isCamelCase(name: string): boolean {
-            if (name.length <= 0) {
-                return true;
-            }
+        var firstCharacter = name.charAt(0);
+        var rest = name.substring(1);
+        return (firstCharacter === firstCharacter.toLowerCase() && rest.indexOf("_") === -1 &&
+               (firstCharacter !== "_" || this.hasOption(OPTION_LEADING_UNDERSCORE)));
+    }
 
-            var firstCharacter = name.charAt(0);
-            var rest = name.substring(1);
-            return (firstCharacter === firstCharacter.toLowerCase() && rest.indexOf("_") === -1 &&
-                   (firstCharacter !== "_" || this.hasOption(OPTION_LEADING_UNDERSCORE)));
-        }
-
-        private isUpperCase(name: string): boolean {
-            return (name === name.toUpperCase());
-        }
+    private isUpperCase(name: string): boolean {
+        return (name === name.toUpperCase());
     }
 }

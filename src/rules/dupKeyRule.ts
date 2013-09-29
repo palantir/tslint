@@ -14,39 +14,35 @@
  * limitations under the License.
 */
 
-/// <reference path='../language/rule/rule.ts'/>
-/// <reference path='../language/rule/abstractRule.ts'/>
+/// <reference path='../../lib/tslint.d.ts' />
+export class Rule extends Lint.Rules.AbstractRule {
+    public static FAILURE_STRING = "duplicate key '";
 
-module Lint.Rules {
-    export class DupKeyRule extends AbstractRule {
-        public static FAILURE_STRING = "duplicate key '";
+    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
+        return this.applyWithWalker(new DupKeyWalker(syntaxTree));
+    }
+}
 
-        public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            return this.applyWithWalker(new DupKeyWalker(syntaxTree));
-        }
+class DupKeyWalker extends Lint.RuleWalker {
+    private objectKeys;
+
+    public visitObjectLiteralExpression(node: TypeScript.ObjectLiteralExpressionSyntax): void {
+        this.objectKeys = {};
+        super.visitObjectLiteralExpression(node);
+        this.objectKeys = {};
     }
 
-    class DupKeyWalker extends Lint.RuleWalker {
-        private objectKeys;
-
-        public visitObjectLiteralExpression(node: TypeScript.ObjectLiteralExpressionSyntax): void {
-            this.objectKeys = {};
-            super.visitObjectLiteralExpression(node);
-            this.objectKeys = {};
+    public visitSimplePropertyAssignment(node: TypeScript.SimplePropertyAssignmentSyntax): void {
+        var keyToken = node.propertyName;
+        var key = keyToken.text();
+        if (this.objectKeys[key]) {
+            var position = this.position() + node.leadingTriviaWidth();
+            var failureString = Rule.FAILURE_STRING + key + "'";
+            this.addFailure(this.createFailure(position, keyToken.width(), failureString));
+        } else {
+            this.objectKeys[key] = true;
         }
 
-        public visitSimplePropertyAssignment(node: TypeScript.SimplePropertyAssignmentSyntax): void {
-            var keyToken = node.propertyName;
-            var key = keyToken.text();
-            if (this.objectKeys[key]) {
-                var position = this.position() + node.leadingTriviaWidth();
-                var failureString = DupKeyRule.FAILURE_STRING + key + "'";
-                this.addFailure(this.createFailure(position, keyToken.width(), failureString));
-            } else {
-                this.objectKeys[key] = true;
-            }
-
-            super.visitSimplePropertyAssignment(node);
-        }
+        super.visitSimplePropertyAssignment(node);
     }
 }

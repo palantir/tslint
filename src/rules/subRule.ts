@@ -14,42 +14,39 @@
  * limitations under the License.
 */
 
-/// <reference path='../language/rule/rule.ts'/>
-/// <reference path='../language/rule/abstractRule.ts'/>
+/// <reference path='../../lib/tslint.d.ts' />
 
-module Lint.Rules {
-    export class SubRule extends AbstractRule {
-        public static FAILURE_STRING = "object access via string literals is disallowed";
+export class Rule extends Lint.Rules.AbstractRule {
+    public static FAILURE_STRING = "object access via string literals is disallowed";
 
-        public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            return this.applyWithWalker(new SubWalker(syntaxTree));
+    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
+        return this.applyWithWalker(new SubWalker(syntaxTree));
+    }
+  }
+
+class SubWalker extends Lint.RuleWalker {
+    public visitElementAccessExpression(node: TypeScript.ElementAccessExpressionSyntax): void {
+        this.handleElementAccessExpression(node);
+        super.visitElementAccessExpression(node);
+    }
+
+    private handleElementAccessExpression(node: TypeScript.ElementAccessExpressionSyntax) {
+        var argument = node.argumentExpression;
+        var id = argument.fullText();
+
+        // the argument expression should be a string of length at least 2 (due to quote characters)
+        if (argument.kind() !== TypeScript.SyntaxKind.StringLiteral || id.length < 2) {
+            return;
         }
-      }
 
-    class SubWalker extends Lint.RuleWalker {
-        public visitElementAccessExpression(node: TypeScript.ElementAccessExpressionSyntax): void {
-            this.handleElementAccessExpression(node);
-            super.visitElementAccessExpression(node);
-        }
+        var unquotedString = id.substring(1, id.length - 1);
+        var simpleText = TypeScript.SimpleText.fromString(unquotedString);
+        var isValidIdentifier = TypeScript.Scanner.isValidIdentifier(simpleText, TypeScript.LanguageVersion);
 
-        private handleElementAccessExpression(node: TypeScript.ElementAccessExpressionSyntax) {
-            var argument = node.argumentExpression;
-            var id = argument.fullText();
-
-            // the argument expression should be a string of length at least 2 (due to quote characters)
-            if (argument.kind() !== TypeScript.SyntaxKind.StringLiteral || id.length < 2) {
-                return;
-            }
-
-            var unquotedString = id.substring(1, id.length - 1);
-            var simpleText = TypeScript.SimpleText.fromString(unquotedString);
-            var isValidIdentifier = TypeScript.Scanner.isValidIdentifier(simpleText, TypeScript.LanguageVersion);
-
-            // only create a failure if the identifier is valid, in which case there's no need to use string literals
-            if (isValidIdentifier) {
-                var position = this.positionAfter(node.expression, node.openBracketToken);
-                this.addFailure(this.createFailure(position, argument.width(), SubRule.FAILURE_STRING));
-            }
+        // only create a failure if the identifier is valid, in which case there's no need to use string literals
+        if (isValidIdentifier) {
+            var position = this.positionAfter(node.expression, node.openBracketToken);
+            this.addFailure(this.createFailure(position, argument.width(), Rule.FAILURE_STRING));
         }
     }
 }

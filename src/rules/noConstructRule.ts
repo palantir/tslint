@@ -14,35 +14,32 @@
  * limitations under the License.
 */
 
-/// <reference path='../language/rule/rule.ts'/>
-/// <reference path='../language/rule/abstractRule.ts'/>
+/// <reference path='../../lib/tslint.d.ts' />
 
-module Lint.Rules {
-    export class NoConstructRule extends AbstractRule {
-        public static FAILURE_STRING = "undesirable constructor use";
+export class Rule extends Lint.Rules.AbstractRule {
+    public static FAILURE_STRING = "undesirable constructor use";
 
-        public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            return this.applyWithWalker(new NoConstructWalker(syntaxTree));
-        }
+    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
+        return this.applyWithWalker(new NoConstructWalker(syntaxTree));
     }
+}
 
-    class NoConstructWalker extends Lint.RuleWalker {
-        private static FORBIDDEN_CONSTRUCTORS = [
-            "Boolean",
-            "Number",
-            "String"
-        ];
+class NoConstructWalker extends Lint.RuleWalker {
+    private static FORBIDDEN_CONSTRUCTORS = [
+        "Boolean",
+        "Number",
+        "String"
+    ];
 
-        public visitObjectCreationExpression(node: TypeScript.ObjectCreationExpressionSyntax): void {
-            var constructorName = node.expression.fullText().trim();
-            if (NoConstructWalker.FORBIDDEN_CONSTRUCTORS.indexOf(constructorName) !== -1) {
-                var position = this.position() + node.leadingTriviaWidth();
-                var width = node.newKeyword.fullWidth() + node.expression.fullWidth();
-                var failure = this.createFailure(position, width, NoConstructRule.FAILURE_STRING);
-                this.addFailure(failure);
-            }
-
-            super.visitObjectCreationExpression(node);
+    public visitObjectCreationExpression(node: TypeScript.ObjectCreationExpressionSyntax): void {
+        var constructorName = node.expression.fullText().trim();
+        if (NoConstructWalker.FORBIDDEN_CONSTRUCTORS.indexOf(constructorName) !== -1) {
+            var position = this.position() + node.leadingTriviaWidth();
+            var width = node.newKeyword.fullWidth() + node.expression.fullWidth();
+            var failure = this.createFailure(position, width, Rule.FAILURE_STRING);
+            this.addFailure(failure);
         }
+
+        super.visitObjectCreationExpression(node);
     }
 }

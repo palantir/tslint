@@ -14,31 +14,28 @@
  * limitations under the License.
 */
 
-/// <reference path='../language/rule/rule.ts'/>
-/// <reference path='../language/rule/abstractRule.ts'/>
+/// <reference path='../../lib/tslint.d.ts' />
 
-module Lint.Rules {
-    export class RadixRule extends AbstractRule {
-        public static FAILURE_STRING = "missing radix parameter";
+export class Rule extends Lint.Rules.AbstractRule {
+    public static FAILURE_STRING = "missing radix parameter";
 
-        public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            return this.applyWithWalker(new RadixWalker(syntaxTree));
-        }
+    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
+        return this.applyWithWalker(new RadixWalker(syntaxTree));
     }
+}
 
-    class RadixWalker extends Lint.RuleWalker {
-        public visitInvocationExpression(node: TypeScript.InvocationExpressionSyntax): void {
-            var expression = node.expression;
-            if (expression.isToken() && expression.kind() === TypeScript.SyntaxKind.IdentifierName) {
-                var firstToken = expression.firstToken();
-                var arguments = node.argumentList.arguments;
-                if (firstToken.text() === "parseInt" && arguments.childCount() < 2) {
-                    var position = this.position() + node.leadingTriviaWidth();
-                    this.addFailure(this.createFailure(position, node.width(), RadixRule.FAILURE_STRING));
-                }
+class RadixWalker extends Lint.RuleWalker {
+    public visitInvocationExpression(node: TypeScript.InvocationExpressionSyntax): void {
+        var expression = node.expression;
+        if (expression.isToken() && expression.kind() === TypeScript.SyntaxKind.IdentifierName) {
+            var firstToken = expression.firstToken();
+            var arguments = node.argumentList.arguments;
+            if (firstToken.text() === "parseInt" && arguments.childCount() < 2) {
+                var position = this.position() + node.leadingTriviaWidth();
+                this.addFailure(this.createFailure(position, node.width(), Rule.FAILURE_STRING));
             }
-
-            super.visitInvocationExpression(node);
         }
+
+        super.visitInvocationExpression(node);
     }
 }

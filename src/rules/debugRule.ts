@@ -14,31 +14,26 @@
  * limitations under the License.
 */
 
-/// <reference path='../language/rule/rule.ts'/>
-/// <reference path='../language/rule/abstractRule.ts'/>
+/// <reference path='../../lib/tslint.d.ts' />
 
-module Lint.Rules {
+export class Rule extends Lint.Rules.AbstractRule {
+    public static FAILURE_STRING = "use of debugger statements is disallowed";
 
-    export class DebugRule extends AbstractRule {
-        public static FAILURE_STRING = "use of debugger statements is disallowed";
+    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
+        return this.applyWithWalker(new DebugWalker(syntaxTree));
+    }
+}
 
-        public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            return this.applyWithWalker(new DebugWalker(syntaxTree));
+class DebugWalker extends Lint.RuleWalker {
+    public visitToken(token : TypeScript.ISyntaxToken): void {
+        this.handleToken(token);
+        super.visitToken(token);
+   }
+
+    private handleToken(token: TypeScript.ISyntaxToken) {
+        if (token.kind() === TypeScript.SyntaxKind.DebuggerKeyword) {
+            var position = this.position() + token.leadingTriviaWidth();
+            this.addFailure(this.createFailure(position, token.width(), Rule.FAILURE_STRING));
         }
     }
-
-    class DebugWalker extends Lint.RuleWalker {
-        public visitToken(token : TypeScript.ISyntaxToken): void {
-            this.handleToken(token);
-            super.visitToken(token);
-       }
-
-        private handleToken(token: TypeScript.ISyntaxToken) {
-            if (token.kind() === TypeScript.SyntaxKind.DebuggerKeyword) {
-                var position = this.position() + token.leadingTriviaWidth();
-                this.addFailure(this.createFailure(position, token.width(), DebugRule.FAILURE_STRING));
-            }
-        }
-    }
-
 }

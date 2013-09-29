@@ -14,33 +14,28 @@
  * limitations under the License.
 */
 
-/// <reference path='../language/rule/rule.ts'/>
-/// <reference path='../language/rule/abstractRule.ts'/>
+/// <reference path='../../lib/tslint.d.ts' />
 
-module Lint.Rules {
+export class Rule extends Lint.Rules.AbstractRule {
+    public static FAILURE_STRING = "missing semicolon";
 
-    export class SemicolonRule extends AbstractRule {
-        public static FAILURE_STRING = "missing semicolon";
+    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
+        var ruleFailures = [];
+        var diagnostics = syntaxTree.diagnostics();
 
-        public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            var ruleFailures = [];
-            var diagnostics = syntaxTree.diagnostics();
+        for (var i = 0; i < diagnostics.length; ++i) {
+            var diagnostic = diagnostics[i];
+            var diagnosticKey = diagnostic.diagnosticKey();
 
-            for (var i = 0; i < diagnostics.length; ++i) {
-                var diagnostic = diagnostics[i];
-                var diagnosticKey = diagnostic.diagnosticKey();
+            if (diagnosticKey === TypeScript.DiagnosticCode.Automatic_semicolon_insertion_not_allowed) {
+                var position = diagnostic.start();
+                var lineAndCharacter = syntaxTree.lineMap().getLineAndCharacterFromPosition(position);
+                var ruleFailure = new Lint.RuleFailure(syntaxTree, position, position, Rule.FAILURE_STRING);
 
-                if (diagnosticKey === TypeScript.DiagnosticCode.Automatic_semicolon_insertion_not_allowed) {
-                    var position = diagnostic.start();
-                    var lineAndCharacter = syntaxTree.lineMap().getLineAndCharacterFromPosition(position);
-                    var ruleFailure = new Lint.RuleFailure(syntaxTree, position, position, SemicolonRule.FAILURE_STRING);
-
-                    ruleFailures.push(ruleFailure);
-                }
+                ruleFailures.push(ruleFailure);
             }
-
-            return ruleFailures;
         }
-    }
 
+        return ruleFailures;
+    }
 }

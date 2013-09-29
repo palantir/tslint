@@ -14,94 +14,89 @@
  * limitations under the License.
 */
 
-/// <reference path='../language/rule/rule.ts'/>
-/// <reference path='../language/rule/abstractRule.ts'/>
+/// <reference path='../../lib/tslint.d.ts' />
 
-module Lint.Rules {
+export class Rule extends Lint.Rules.AbstractRule {
+    public static DO_FAILURE_STRING = "do statements must be braced";
+    public static ELSE_FAILURE_STRING = "else statements must be braced";
+    public static FOR_FAILURE_STRING = "for statements must be braced";
+    public static IF_FAILURE_STRING = "if statements must be braced";
+    public static WHILE_FAILURE_STRING = "while statements must be braced";
 
-    export class CurlyRule extends AbstractRule {
-        public static DO_FAILURE_STRING = "do statements must be braced";
-        public static ELSE_FAILURE_STRING = "else statements must be braced";
-        public static FOR_FAILURE_STRING = "for statements must be braced";
-        public static IF_FAILURE_STRING = "if statements must be braced";
-        public static WHILE_FAILURE_STRING = "while statements must be braced";
+    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
+        return this.applyWithWalker(new CurlyWalker(syntaxTree));
+    }
+}
 
-        public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            return this.applyWithWalker(new CurlyWalker(syntaxTree));
+class CurlyWalker extends Lint.RuleWalker {
+    public visitForInStatement(node: TypeScript.ForInStatementSyntax): void {
+        if (!this.isStatementBraced(node.statement)) {
+            this.addFailureForNode(node, Rule.FOR_FAILURE_STRING);
         }
+
+        super.visitForInStatement(node);
     }
 
-    class CurlyWalker extends Lint.RuleWalker {
-        public visitForInStatement(node: TypeScript.ForInStatementSyntax): void {
-            if (!this.isStatementBraced(node.statement)) {
-                this.addFailureForNode(node, CurlyRule.FOR_FAILURE_STRING);
-            }
-
-            super.visitForInStatement(node);
+    public visitForStatement(node: TypeScript.ForStatementSyntax): void {
+        if (!this.isStatementBraced(node.statement)) {
+            this.addFailureForNode(node, Rule.FOR_FAILURE_STRING);
         }
 
-        public visitForStatement(node: TypeScript.ForStatementSyntax): void {
-            if (!this.isStatementBraced(node.statement)) {
-                this.addFailureForNode(node, CurlyRule.FOR_FAILURE_STRING);
-            }
-
-            super.visitForStatement(node);
-        }
-
-        public visitIfStatement(node: TypeScript.IfStatementSyntax): void {
-            if (!this.isStatementBraced(node.statement)) {
-                this.addFailureForNode(node, CurlyRule.IF_FAILURE_STRING);
-            }
-
-            super.visitIfStatement(node);
-        }
-
-        public visitElseClause(node: TypeScript.ElseClauseSyntax): void {
-            if (node.statement.kind() !== TypeScript.SyntaxKind.IfStatement &&
-                !this.isStatementBraced(node.statement)) {
-                this.addFailureForNode(node, CurlyRule.ELSE_FAILURE_STRING);
-            }
-
-            super.visitElseClause(node);
-        }
-
-        public visitDoStatement(node: TypeScript.DoStatementSyntax): void {
-            if (!this.isStatementBraced(node.statement)) {
-                this.addFailureForNode(node, CurlyRule.DO_FAILURE_STRING);
-            }
-
-            super.visitDoStatement(node);
-        }
-
-        public visitWhileStatement(node: TypeScript.WhileStatementSyntax): void {
-            if (!this.isStatementBraced(node.statement)) {
-                this.addFailureForNode(node, CurlyRule.WHILE_FAILURE_STRING);
-            }
-
-            super.visitWhileStatement(node);
-        }
-
-        private isStatementBraced(node: TypeScript.IExpressionSyntax): boolean {
-            var childCount = node.childCount();
-            if (childCount === 3) {
-                if (node.childAt(0).kind() === TypeScript.SyntaxKind.FirstPunctuation &&
-                    node.childAt(1).kind() === TypeScript.SyntaxKind.List &&
-                    node.childAt(2).kind() === TypeScript.SyntaxKind.CloseBraceToken) {
-
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        private addFailureForNode(node: TypeScript.ISyntaxElement, failure: string) {
-            var leadingWidth = node.leadingTriviaWidth();
-            var start = this.position() + leadingWidth;
-            var end = node.width();
-
-            this.addFailure(this.createFailure(start, end, failure));
-        }
+        super.visitForStatement(node);
     }
 
+    public visitIfStatement(node: TypeScript.IfStatementSyntax): void {
+        if (!this.isStatementBraced(node.statement)) {
+            this.addFailureForNode(node, Rule.IF_FAILURE_STRING);
+        }
+
+        super.visitIfStatement(node);
+    }
+
+    public visitElseClause(node: TypeScript.ElseClauseSyntax): void {
+        if (node.statement.kind() !== TypeScript.SyntaxKind.IfStatement &&
+            !this.isStatementBraced(node.statement)) {
+            this.addFailureForNode(node, Rule.ELSE_FAILURE_STRING);
+        }
+
+        super.visitElseClause(node);
+    }
+
+    public visitDoStatement(node: TypeScript.DoStatementSyntax): void {
+        if (!this.isStatementBraced(node.statement)) {
+            this.addFailureForNode(node, Rule.DO_FAILURE_STRING);
+        }
+
+        super.visitDoStatement(node);
+    }
+
+    public visitWhileStatement(node: TypeScript.WhileStatementSyntax): void {
+        if (!this.isStatementBraced(node.statement)) {
+            this.addFailureForNode(node, Rule.WHILE_FAILURE_STRING);
+        }
+
+        super.visitWhileStatement(node);
+    }
+
+    private isStatementBraced(node: TypeScript.IExpressionSyntax): boolean {
+        var childCount = node.childCount();
+        if (childCount === 3) {
+            if (node.childAt(0).kind() === TypeScript.SyntaxKind.FirstPunctuation &&
+                node.childAt(1).kind() === TypeScript.SyntaxKind.List &&
+                node.childAt(2).kind() === TypeScript.SyntaxKind.CloseBraceToken) {
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private addFailureForNode(node: TypeScript.ISyntaxElement, failure: string) {
+        var leadingWidth = node.leadingTriviaWidth();
+        var start = this.position() + leadingWidth;
+        var end = node.width();
+
+        this.addFailure(this.createFailure(start, end, failure));
+    }
 }

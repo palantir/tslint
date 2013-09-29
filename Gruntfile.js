@@ -3,7 +3,7 @@ module.exports = function(grunt) {
     pkg: grunt.file.readJSON('package.json'),
 
     clean: {
-      build: ['bin/*'],
+      build: ['bin/tslint-cli.js'],
       core: ['lib/*'],
       test: ['build/test/']
     },
@@ -35,7 +35,7 @@ module.exports = function(grunt) {
     },
 
     typescript: {
-      'build': {
+      build: {
         options: {
           target: 'es5'
         },
@@ -43,7 +43,7 @@ module.exports = function(grunt) {
         dest: 'bin/tslint-cli.js'
       },
 
-      'core': {
+      core: {
         options: {
           declaration: true,
           module: 'commonjs',
@@ -53,16 +53,17 @@ module.exports = function(grunt) {
         dest: 'lib/tslint.js'
       },
 
-      'core-rules': {
+      core_rules: {
         options: {
+          base_path: 'src/rules',
           module: 'commonjs',
-          target: 'es5',
+          target: 'es5'
         },
-        src: ['src/rules/*.ts'],
+        src: ['lib/tslint.d.ts', 'src/rules/bitwiseRule.ts'],
         dest: ['lib/rules/']
       },
 
-      'test': {
+      test: {
         options: {
           target: 'es5'
         },
@@ -79,7 +80,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-typescript');
 
   // register custom tasks
-  grunt.registerTask('core', ['clean:core', 'typescript:core', 'typescript:core-rules']);
+  grunt.registerTask('core', ['clean:core', 'typescript:core', 'typescript:core_rules']);
   grunt.registerTask('build', ['clean:build', 'core', 'typescript:build', 'tslint:src']);
   grunt.registerTask('test', ['clean:test', 'core', 'typescript:test', 'tslint:test', 'mochaTest']);
 

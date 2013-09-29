@@ -14,42 +14,38 @@
  * limitations under the License.
 */
 
-/// <reference path='../language/rule/rule.ts'/>
-/// <reference path='../language/rule/abstractRule.ts'/>
-/// <reference path='../language/walker/scopeAwareRuleWalker.ts'/>
+/// <reference path='../../lib/tslint.d.ts' />
 
-module Lint.Rules {
-    export class DuplicateVariableRule extends AbstractRule {
-        public static FAILURE_STRING = "duplicate variable: '";
+export class Rule extends Lint.Rules.AbstractRule {
+    public static FAILURE_STRING = "duplicate variable: '";
 
-        public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            return this.applyWithWalker(new DuplicateVariableWalker(syntaxTree));
-        }
+    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
+        return this.applyWithWalker(new DuplicateVariableWalker(syntaxTree));
+    }
+}
+
+class DuplicateVariableWalker extends Lint.ScopeAwareRuleWalker<ScopeInfo> {
+    public createScope(): ScopeInfo {
+        return new ScopeInfo();
     }
 
-    class DuplicateVariableWalker extends Lint.ScopeAwareRuleWalker<ScopeInfo> {
-        public createScope(): ScopeInfo {
-            return new ScopeInfo();
+    public visitVariableDeclarator(node: TypeScript.VariableDeclaratorSyntax): void {
+        var identifier = node.identifier,
+            variableName = identifier.text(),
+            position = this.position() + identifier.leadingTriviaWidth(),
+            currentScope = this.getCurrentScope();
+
+        if (currentScope.variableNames.indexOf(variableName) >= 0) {
+            var failureString = Rule.FAILURE_STRING + variableName + "'";
+            this.addFailure(this.createFailure(position, identifier.width(), failureString));
+        } else {
+            currentScope.variableNames.push(variableName);
         }
 
-        public visitVariableDeclarator(node: TypeScript.VariableDeclaratorSyntax): void {
-            var identifier = node.identifier,
-                variableName = identifier.text(),
-                position = this.position() + identifier.leadingTriviaWidth(),
-                currentScope = this.getCurrentScope();
-
-            if (currentScope.variableNames.indexOf(variableName) >= 0) {
-                var failureString = DuplicateVariableRule.FAILURE_STRING + variableName + "'";
-                this.addFailure(this.createFailure(position, identifier.width(), failureString));
-            } else {
-                currentScope.variableNames.push(variableName);
-            }
-
-            super.visitVariableDeclarator(node);
-        }
+        super.visitVariableDeclarator(node);
     }
+}
 
-    class ScopeInfo {
-        public variableNames: string[] = [];
-    }
+class ScopeInfo {
+    public variableNames: string[] = [];
 }

@@ -14,30 +14,27 @@
  * limitations under the License.
 */
 
-/// <reference path='../language/rule/rule.ts'/>
-/// <reference path='../language/rule/abstractRule.ts'/>
+/// <reference path='../../lib/tslint.d.ts' />
 
-module Lint.Rules {
-    export class EvilRule extends AbstractRule {
-        public static FAILURE_STRING = "forbidden eval";
+export class Rule extends Lint.Rules.AbstractRule {
+    public static FAILURE_STRING = "forbidden eval";
 
-        public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            return this.applyWithWalker(new EvilWalker(syntaxTree));
-        }
+    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
+        return this.applyWithWalker(new EvilWalker(syntaxTree));
     }
+}
 
-    class EvilWalker extends Lint.RuleWalker {
-        public visitInvocationExpression(node: TypeScript.InvocationExpressionSyntax): void {
-            var expression = node.expression;
-            if (expression.isToken() && expression.kind() === TypeScript.SyntaxKind.IdentifierName) {
-                var firstToken = expression.firstToken();
-                if (firstToken.text() === "eval") {
-                    var position = this.position() + node.leadingTriviaWidth();
-                    this.addFailure(this.createFailure(position, firstToken.width(), EvilRule.FAILURE_STRING));
-                }
+class EvilWalker extends Lint.RuleWalker {
+    public visitInvocationExpression(node: TypeScript.InvocationExpressionSyntax): void {
+        var expression = node.expression;
+        if (expression.isToken() && expression.kind() === TypeScript.SyntaxKind.IdentifierName) {
+            var firstToken = expression.firstToken();
+            if (firstToken.text() === "eval") {
+                var position = this.position() + node.leadingTriviaWidth();
+                this.addFailure(this.createFailure(position, firstToken.width(), Rule.FAILURE_STRING));
             }
-
-            super.visitInvocationExpression(node);
         }
+
+        super.visitInvocationExpression(node);
     }
 }

@@ -14,54 +14,49 @@
  * limitations under the License.
 */
 
-/// <reference path='../language/rule/rule.ts'/>
-/// <reference path='../language/rule/abstractRule.ts'/>
+/// <reference path='../../lib/tslint.d.ts' />
 
-module Lint.Rules {
+export class Rule extends Lint.Rules.AbstractRule {
+    static FAILURE_STRING = "name must be in pascal case";
 
-    export class ClassNameRule extends AbstractRule {
-        static FAILURE_STRING = "name must be in pascal case";
+    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
+        return this.applyWithWalker(new NameWalker(syntaxTree));
+    }
+}
 
-        public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            return this.applyWithWalker(new NameWalker(syntaxTree));
+class NameWalker extends Lint.RuleWalker {
+    public visitClassDeclaration(node: TypeScript.ClassDeclarationSyntax): void {
+        var className = node.identifier.text();
+        if (!this.isPascalCased(className)) {
+            var position = this.positionAfter(node.modifiers, node.classKeyword);
+            this.addFailureAt(position, node.identifier.width());
         }
+
+        super.visitClassDeclaration(node);
     }
 
-    class NameWalker extends Lint.RuleWalker {
-        public visitClassDeclaration(node: TypeScript.ClassDeclarationSyntax): void {
-            var className = node.identifier.text();
-            if (!this.isPascalCased(className)) {
-                var position = this.positionAfter(node.modifiers, node.classKeyword);
-                this.addFailureAt(position, node.identifier.width());
-            }
-
-            super.visitClassDeclaration(node);
+    public visitInterfaceDeclaration(node: TypeScript.InterfaceDeclarationSyntax): void {
+        var interfaceName = node.identifier.text();
+        if (!this.isPascalCased(interfaceName)) {
+            var position = this.positionAfter(node.modifiers, node.interfaceKeyword);
+            this.addFailureAt(position, node.identifier.width());
         }
 
-        public visitInterfaceDeclaration(node: TypeScript.InterfaceDeclarationSyntax): void {
-            var interfaceName = node.identifier.text();
-            if (!this.isPascalCased(interfaceName)) {
-                var position = this.positionAfter(node.modifiers, node.interfaceKeyword);
-                this.addFailureAt(position, node.identifier.width());
-            }
+        super.visitInterfaceDeclaration(node);
+    }
 
-            super.visitInterfaceDeclaration(node);
+    private isPascalCased(name): boolean {
+        if (name.length <= 0) {
+            return true;
         }
 
-        private isPascalCased(name): boolean {
-            if (name.length <= 0) {
-                return true;
-            }
+        var firstCharacter = name.charAt(0);
+        return ((firstCharacter === firstCharacter.toUpperCase()) && name.indexOf("_") === -1);
+    }
 
-            var firstCharacter = name.charAt(0);
-            return ((firstCharacter === firstCharacter.toUpperCase()) && name.indexOf("_") === -1);
-        }
-
-        private addFailureAt(position, width) {
-            var failure = this.createFailure(position, width, ClassNameRule.FAILURE_STRING);
-            this.addFailure(failure);
-        }
-
+    private addFailureAt(position, width) {
+        var failure = this.createFailure(position, width, Rule.FAILURE_STRING);
+        this.addFailure(failure);
     }
 
 }

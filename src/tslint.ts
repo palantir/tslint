@@ -23,7 +23,6 @@
 /// <reference path='language/walker/stateAwareRuleWalker.ts' />
 
 module Lint {
-
     export interface LintResult {
         failureCount: number;
         format: string;
@@ -86,7 +85,11 @@ module Lint {
             return false;
         }
     }
-
 }
 
+// add the Lint and TypeScript modules to global for pluggable formatters/rules
+global.Lint = Lint;
+global.TypeScript = TypeScript;
+
+// export Lint.Linter as the API interface for this module
 module.exports = Lint.Linter;

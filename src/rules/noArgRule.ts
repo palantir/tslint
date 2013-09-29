@@ -14,34 +14,29 @@
  * limitations under the License.
 */
 
-/// <reference path='../language/rule/rule.ts'/>
-/// <reference path='../language/rule/abstractRule.ts'/>
+/// <reference path='../../lib/tslint.d.ts' />
 
-module Lint.Rules {
+export class Rule extends Lint.Rules.AbstractRule {
+    public static FAILURE_STRING = "access forbidden to arguments property";
 
-    export class NoArgRule extends AbstractRule {
-        public static FAILURE_STRING = "access forbidden to arguments property";
-
-        public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            return this.applyWithWalker(new NoArgWalker(syntaxTree));
-        }
-      }
-
-    class NoArgWalker extends Lint.RuleWalker {
-        public visitMemberAccessExpression(node: TypeScript.MemberAccessExpressionSyntax): void {
-            var expression = node.expression;
-            var name = node.name;
-            var position = this.position() + node.expression.leadingTriviaWidth();
-
-            if (expression.isToken() && name.text() === "callee") {
-                var tokenExpression = <TypeScript.ISyntaxToken> expression;
-                if (tokenExpression.text() === "arguments") {
-                    this.addFailure(this.createFailure(position, expression.width(), NoArgRule.FAILURE_STRING));
-                }
-              }
-
-            super.visitMemberAccessExpression(node);
-        }
+    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
+        return this.applyWithWalker(new NoArgWalker(syntaxTree));
     }
+  }
 
+class NoArgWalker extends Lint.RuleWalker {
+    public visitMemberAccessExpression(node: TypeScript.MemberAccessExpressionSyntax): void {
+        var expression = node.expression;
+        var name = node.name;
+        var position = this.position() + node.expression.leadingTriviaWidth();
+
+        if (expression.isToken() && name.text() === "callee") {
+            var tokenExpression = <TypeScript.ISyntaxToken> expression;
+            if (tokenExpression.text() === "arguments") {
+                this.addFailure(this.createFailure(position, expression.width(), Rule.FAILURE_STRING));
+            }
+          }
+
+        super.visitMemberAccessExpression(node);
+    }
 }

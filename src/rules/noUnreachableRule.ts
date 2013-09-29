@@ -14,72 +14,69 @@
  * limitations under the License.
 */
 
-/// <reference path='../language/rule/rule.ts'/>
-/// <reference path='../language/rule/abstractRule.ts'/>
+/// <reference path='../../lib/tslint.d.ts' />
 
-module Lint.Rules {
-    export class NoUnreachableRule extends AbstractRule {
-        public static FAILURE_STRING = "unreachable code";
+export class Rule extends Lint.Rules.AbstractRule {
+    public static FAILURE_STRING = "unreachable code";
 
-        public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            return this.applyWithWalker(new UnreachableWalker(syntaxTree));
-        }
+    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
+        return this.applyWithWalker(new UnreachableWalker(syntaxTree));
+    }
+}
+
+class UnreachableWalker extends Lint.RuleWalker {
+    private hasReturned: boolean;
+
+    constructor(syntaxTree: TypeScript.SyntaxTree) {
+        super(syntaxTree);
+        this.hasReturned = false;
     }
 
-    class UnreachableWalker extends Lint.RuleWalker {
-        private hasReturned: boolean;
-
-        constructor(syntaxTree: TypeScript.SyntaxTree) {
-            super(syntaxTree);
+    public visitNode(node: TypeScript.SyntaxNode): void {
+        if (this.hasReturned) {
             this.hasReturned = false;
+            var position = this.position() + node.leadingTriviaWidth();
+            this.addFailure(this.createFailure(position, node.width(), Rule.FAILURE_STRING));
         }
 
-        public visitNode(node: TypeScript.SyntaxNode): void {
-            if (this.hasReturned) {
-                this.hasReturned = false;
-                var position = this.position() + node.leadingTriviaWidth();
-                this.addFailure(this.createFailure(position, node.width(), NoUnreachableRule.FAILURE_STRING));
-            }
+        super.visitNode(node);
+    }
 
-            super.visitNode(node);
-        }
+    public visitBlock(node: TypeScript.BlockSyntax): void {
+        this.hasReturned = false;
+        super.visitBlock(node);
+        this.hasReturned = false;
+    }
 
-        public visitBlock(node: TypeScript.BlockSyntax): void {
-            this.hasReturned = false;
-            super.visitBlock(node);
-            this.hasReturned = false;
-        }
+    public visitCaseSwitchClause(node: TypeScript.CaseSwitchClauseSyntax): void {
+        this.hasReturned = false;
+        super.visitCaseSwitchClause(node);
+        this.hasReturned = false;
+    }
 
-        public visitCaseSwitchClause(node: TypeScript.CaseSwitchClauseSyntax): void {
-            this.hasReturned = false;
-            super.visitCaseSwitchClause(node);
-            this.hasReturned = false;
-        }
+    public visitDefaultSwitchClause(node: TypeScript.DefaultSwitchClauseSyntax): void {
+        this.hasReturned = false;
+        super.visitDefaultSwitchClause(node);
+        this.hasReturned = false;
+    }
 
-        public visitDefaultSwitchClause(node: TypeScript.DefaultSwitchClauseSyntax): void {
-            this.hasReturned = false;
-            super.visitDefaultSwitchClause(node);
-            this.hasReturned = false;
-        }
+    public visitBreakStatement(node: TypeScript.BreakStatementSyntax): void {
+        super.visitBreakStatement(node);
+        this.hasReturned = true;
+    }
 
-        public visitBreakStatement(node: TypeScript.BreakStatementSyntax): void {
-            super.visitBreakStatement(node);
-            this.hasReturned = true;
-        }
+    public visitContinueStatement(node: TypeScript.ContinueStatementSyntax): void {
+        super.visitContinueStatement(node);
+        this.hasReturned = true;
+    }
 
-        public visitContinueStatement(node: TypeScript.ContinueStatementSyntax): void {
-            super.visitContinueStatement(node);
-            this.hasReturned = true;
-        }
+    public visitReturnStatement(node: TypeScript.ReturnStatementSyntax): void {
+        super.visitReturnStatement(node);
+        this.hasReturned = true;
+    }
 
-        public visitReturnStatement(node: TypeScript.ReturnStatementSyntax): void {
-            super.visitReturnStatement(node);
-            this.hasReturned = true;
-        }
-
-        public visitThrowStatement(node: TypeScript.ThrowStatementSyntax): void {
-            super.visitThrowStatement(node);
-            this.hasReturned = true;
-        }
+    public visitThrowStatement(node: TypeScript.ThrowStatementSyntax): void {
+        super.visitThrowStatement(node);
+        this.hasReturned = true;
     }
 }

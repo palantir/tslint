@@ -14,54 +14,49 @@
  * limitations under the License.
 */
 
-/// <reference path='../language/rule/rule.ts'/>
-/// <reference path='../language/rule/abstractRule.ts'/>
-/// <reference path='../language/walker/stateAwareRuleWalker.ts'/>
+/// <reference path='../../lib/tslint.d.ts' />
 
-module Lint.Rules {
+export class Rule extends Lint.Rules.AbstractRule {
+    public static FAILURE_STRING = "file should end with a newline";
 
-    export class EofLineRule extends AbstractRule {
-        public static FAILURE_STRING = "file should end with a newline";
+    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
+        return this.applyWithWalker(new EofWalker(syntaxTree));
+    }
+}
 
-        public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            return this.applyWithWalker(new EofWalker(syntaxTree));
+class EofWalker extends Lint.StateAwareRuleWalker {
+    public visitToken(token: TypeScript.ISyntaxToken): void {
+        this.handleToken(token);
+        super.visitToken(token);
+    }
+
+    private handleToken(token: TypeScript.ISyntaxToken) {
+        var lastState = this.getLastState();
+        if (lastState !== undefined && token.kind() === TypeScript.SyntaxKind.EndOfFileToken) {
+            var endsWithNewLine = false;
+
+            // look at the penultimate token to see if it contains a newline at the end
+            var previousToken = lastState.token;
+            if (previousToken !== null && this.hasNewLineAtEnd(previousToken.trailingTrivia())) {
+                endsWithNewLine = true;
+            }
+
+            // if the EOF token has any leading trivia, then it has to end with a newline
+            if (token.hasLeadingTrivia() && !this.hasNewLineAtEnd(token.leadingTrivia())) {
+                endsWithNewLine = false;
+            }
+
+            if (!endsWithNewLine) {
+                this.addFailure(this.createFailure(this.position(), 1, Rule.FAILURE_STRING));
+            }
         }
     }
 
-    class EofWalker extends Lint.StateAwareRuleWalker {
-        public visitToken(token: TypeScript.ISyntaxToken): void {
-            this.handleToken(token);
-            super.visitToken(token);
+    private hasNewLineAtEnd(triviaList: TypeScript.ISyntaxTriviaList) {
+        if (triviaList.count() <= 0 || !triviaList.hasNewLine()) {
+            return false;
         }
 
-        private handleToken(token: TypeScript.ISyntaxToken) {
-            var lastState = this.getLastState();
-            if (lastState !== undefined && token.kind() === TypeScript.SyntaxKind.EndOfFileToken) {
-                var endsWithNewLine = false;
-
-                // look at the penultimate token to see if it contains a newline at the end
-                var previousToken = lastState.token;
-                if (previousToken !== null && this.hasNewLineAtEnd(previousToken.trailingTrivia())) {
-                    endsWithNewLine = true;
-                }
-
-                // if the EOF token has any leading trivia, then it has to end with a newline
-                if (token.hasLeadingTrivia() && !this.hasNewLineAtEnd(token.leadingTrivia())) {
-                    endsWithNewLine = false;
-                }
-
-                if (!endsWithNewLine) {
-                    this.addFailure(this.createFailure(this.position(), 1, EofLineRule.FAILURE_STRING));
-                }
-            }
-        }
-
-        private hasNewLineAtEnd(triviaList: TypeScript.ISyntaxTriviaList) {
-            if (triviaList.count() <= 0 || !triviaList.hasNewLine()) {
-                return false;
-            }
-
-            return triviaList.last().isNewLine();
-        }
+        return triviaList.last().isNewLine();
     }
 }

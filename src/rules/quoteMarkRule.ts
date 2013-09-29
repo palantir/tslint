@@ -14,82 +14,79 @@
  * limitations under the License.
 */
 
-/// <reference path='../language/rule/rule.ts'/>
-/// <reference path='../language/rule/abstractRule.ts'/>
+/// <reference path='../../lib/tslint.d.ts' />
 
-module Lint.Rules {
-    enum QuoteMark {
-        SINGLE_QUOTES,
-        DOUBLE_QUOTES
-    }
+enum QuoteMark {
+    SINGLE_QUOTES,
+    DOUBLE_QUOTES
+}
 
-    export class QuoteMarkRule extends AbstractRule {
-        public static SINGLE_QUOTE_FAILURE = "\" should be '";
-        public static DOUBLE_QUOTE_FAILURE = "' should be \"";
+export class Rule extends Lint.Rules.AbstractRule {
+    public static SINGLE_QUOTE_FAILURE = "\" should be '";
+    public static DOUBLE_QUOTE_FAILURE = "' should be \"";
 
-        public isEnabled(): boolean {
-            if (super.isEnabled()) {
-                var quoteMarkString = this.getOptions()[0];
-                return (quoteMarkString === "single" || quoteMarkString === "double");
-            }
-
-            return false;
-        }
-
-        public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            var quoteMark: QuoteMark;
+    public isEnabled(): boolean {
+        if (super.isEnabled()) {
             var quoteMarkString = this.getOptions()[0];
-            var sourceUnit = syntaxTree.sourceUnit();
-
-            if (quoteMarkString === "single") {
-                quoteMark = QuoteMark.SINGLE_QUOTES;
-            } else {
-                quoteMark = QuoteMark.DOUBLE_QUOTES;
-            }
-
-            return this.applyWithWalker(new QuoteWalker(syntaxTree, quoteMark));
+            return (quoteMarkString === "single" || quoteMarkString === "double");
         }
+
+        return false;
     }
 
-    class QuoteWalker extends Lint.RuleWalker {
-        private quoteMark: QuoteMark;
+    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
+        var quoteMark: QuoteMark;
+        var quoteMarkString = this.getOptions()[0];
+        var sourceUnit = syntaxTree.sourceUnit();
 
-        constructor(syntaxTree: TypeScript.SyntaxTree, quoteMark: QuoteMark) {
-            super(syntaxTree);
-            this.quoteMark = quoteMark;
+        if (quoteMarkString === "single") {
+            quoteMark = QuoteMark.SINGLE_QUOTES;
+        } else {
+            quoteMark = QuoteMark.DOUBLE_QUOTES;
         }
 
-        public visitToken(token : TypeScript.ISyntaxToken): void {
-            this.handleToken(token);
-            super.visitToken(token);
-        }
+        return this.applyWithWalker(new QuoteWalker(syntaxTree, quoteMark));
+    }
+}
 
-        private handleToken(token: TypeScript.ISyntaxToken) {
-            var failure = null;
-            if (token.kind() === TypeScript.SyntaxKind.StringLiteral) {
-                var fullText = token.fullText();
-                var width = token.width();
-                var position = this.position() + token.leadingTriviaWidth();
+class QuoteWalker extends Lint.RuleWalker {
+    private quoteMark: QuoteMark;
 
-                var textStart = token.leadingTriviaWidth();
-                var textEnd = textStart + width - 1;
-                var firstCharacter = fullText.charAt(textStart);
-                var lastCharacter = fullText.charAt(textEnd);
+    constructor(syntaxTree: TypeScript.SyntaxTree, quoteMark: QuoteMark) {
+        super(syntaxTree);
+        this.quoteMark = quoteMark;
+    }
 
-                if (this.quoteMark === QuoteMark.SINGLE_QUOTES) {
-                    if (firstCharacter !== "'" || lastCharacter !== "'") {
-                        failure = this.createFailure(position, width, QuoteMarkRule.SINGLE_QUOTE_FAILURE);
-                    }
-                } else if (this.quoteMark === QuoteMark.DOUBLE_QUOTES) {
-                    if (firstCharacter !== "\"" || lastCharacter !== "\"") {
-                        failure = this.createFailure(position, width, QuoteMarkRule.DOUBLE_QUOTE_FAILURE);
-                    }
+    public visitToken(token : TypeScript.ISyntaxToken): void {
+        this.handleToken(token);
+        super.visitToken(token);
+    }
+
+    private handleToken(token: TypeScript.ISyntaxToken) {
+        var failure = null;
+        if (token.kind() === TypeScript.SyntaxKind.StringLiteral) {
+            var fullText = token.fullText();
+            var width = token.width();
+            var position = this.position() + token.leadingTriviaWidth();
+
+            var textStart = token.leadingTriviaWidth();
+            var textEnd = textStart + width - 1;
+            var firstCharacter = fullText.charAt(textStart);
+            var lastCharacter = fullText.charAt(textEnd);
+
+            if (this.quoteMark === QuoteMark.SINGLE_QUOTES) {
+                if (firstCharacter !== "'" || lastCharacter !== "'") {
+                    failure = this.createFailure(position, width, Rule.SINGLE_QUOTE_FAILURE);
+                }
+            } else if (this.quoteMark === QuoteMark.DOUBLE_QUOTES) {
+                if (firstCharacter !== "\"" || lastCharacter !== "\"") {
+                    failure = this.createFailure(position, width, Rule.DOUBLE_QUOTE_FAILURE);
                 }
             }
+        }
 
-            if (failure) {
-                this.addFailure(failure);
-            }
+        if (failure) {
+            this.addFailure(failure);
         }
     }
 }
