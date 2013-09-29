@@ -5,7 +5,7 @@ module.exports = function(grunt) {
     clean: {
       bin: ['bin/tslint-cli.js'],
       lib: ['lib/tslint.js'],
-      test: ['build/']
+      test: ['build/test']
     },
 
     mochaTest: {
@@ -13,7 +13,7 @@ module.exports = function(grunt) {
         options: {
           reporter: 'spec'
         },
-        src: ['build/**/*.js']
+        src: ['build/test/**/*.js']
       },
     },
 
@@ -57,7 +57,7 @@ module.exports = function(grunt) {
           target: 'es5'
         },
         src: ['test/**/*.ts', '!test/files/**/*.ts'],
-        dest: 'build/tslint-tests.js'
+        dest: 'build/test/tslint-tests.js'
       }
     }
   });
