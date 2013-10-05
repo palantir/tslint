@@ -14,11 +14,6 @@
  * limitations under the License.
 */
 
-/// <reference path='language/rule/rule.ts'/>
-/// <reference path='language/walker/ruleWalker.ts'/>
-
-var _s = require("underscore.string");
-
 module Lint.Configuration {
     var fs = require("fs");
     var path = require("path");
@@ -54,31 +49,5 @@ module Lint.Configuration {
         }
 
         return JSON.parse(fs.readFileSync(configFile, "utf8"));
-    }
-
-    export function getConfiguredRules(configuration): Rule[] {
-        var rules = [];
-
-        for (var ruleName in configuration.rules) {
-            if (configuration.rules.hasOwnProperty(ruleName)) {
-                var ruleValue = configuration.rules[ruleName];
-                var rule = createRule(ruleName, ruleValue);
-                if (rule !== undefined) {
-                    rules.push(rule);
-                }
-            }
-        }
-
-        return rules;
-    }
-
-    function createRule(name: string, value: any): Rule {
-        var camelizedName = _s.camelize(name + "Rule");
-        var ruleModule = require("../lib/rules/" + camelizedName);
-        if (ruleModule.Rule) {
-            return new ruleModule.Rule(name, value);
-        }
-
-        return undefined;
     }
 }

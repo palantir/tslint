@@ -1,5 +1,6 @@
 {
   "rules": {
+    "test": true,
     "bitwise": true,
     "class-name": true,
     "curly": true,
@@ -36,7 +37,7 @@
     "semicolon": true,
     "sub": true,
     "trailing": true,
-    "variable-name": true,
+    "variable-name": false,
     "whitespace": [true,
         "check-branch",
         "check-decl",

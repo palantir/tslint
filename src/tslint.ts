@@ -17,12 +17,16 @@
 /// <reference path='configuration.ts' />
 /// <reference path='formatters/formatters.ts' />
 /// <reference path='language/languageServiceHost.ts' />
+/// <reference path='ruleLoader.ts' />
 
 /// <reference path='language/rule/abstractRule.ts' />
 /// <reference path='language/walker/scopeAwareRuleWalker.ts' />
 /// <reference path='language/walker/stateAwareRuleWalker.ts' />
 
 module Lint {
+    var path = require("path");
+    var moduleDirectory = path.dirname(module.parent.filename);
+
     export interface LintResult {
         failureCount: number;
         format: string;
@@ -48,7 +52,13 @@ module Lint {
             var languageServiceHost = new Lint.LanguageServiceHost(this.fileName, this.source);
             var languageService = new Services.LanguageService(languageServiceHost);
             var syntaxTree = languageService.getSyntaxTree(this.fileName);
-            var configuredRules = Lint.Configuration.getConfiguredRules(this.options.configuration);
+
+            var rulesDirectory = this.options.rulesDirectory;
+            if (rulesDirectory) {
+                rulesDirectory = path.relative(moduleDirectory, rulesDirectory);
+            }
+
+            var configuredRules = Lint.loadRules(this.options.configuration.rules, rulesDirectory);
 
             for (i = 0; i < configuredRules.length; ++i) {
                 var rule = configuredRules[i];
