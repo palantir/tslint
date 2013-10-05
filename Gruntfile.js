@@ -59,7 +59,7 @@ module.exports = function(grunt) {
           module: 'commonjs',
           target: 'es5'
         },
-        src: ['lib/tslint.d.ts', 'src/rules/bitwiseRule.ts'],
+        src: ['lib/tslint.d.ts', 'src/rules/*.ts'],
         dest: ['lib/rules/']
       },
 

@@ -1,5 +1,48 @@
 {
   "rules": {
-    "bitwise": true
+    "bitwise": true,
+    "class-name": true,
+    "curly": true,
+    "debug": true,
+    "duplicate-key": true,
+    "duplicate-variable": true,
+    "eofline": true,
+    "eqeqeq": [true, "allow-null-check"],
+    "evil": true,
+    "forin": true,
+    "indent": [true, 4],
+    "label-position": true,
+    "label-undefined": true,
+    "max-len": [true, 140],
+    "no-arg": true,
+    "no-console": [true,
+        "debug",
+        "info",
+        "time",
+        "timeEnd",
+        "trace"
+    ],
+    "no-construct": true,
+    "no-unreachable": true,
+    "no-empty": true,
+    "one-line": [true,
+        "check-open-brace",
+        "check-catch",
+        "check-else",
+        "check-whitespace"
+    ],
+    "quotemark": [true, "double"],
+    "radix": true,
+    "semicolon": true,
+    "sub": true,
+    "trailing": true,
+    "variable-name": true,
+    "whitespace": [true,
+        "check-branch",
+        "check-decl",
+        "check-operator",
+        "check-separator",
+        "check-type"
+    ]
   }
 }

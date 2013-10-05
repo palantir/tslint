@@ -19,7 +19,8 @@
     "test": "grunt"
   },
   "dependencies": {
-    "optimist": "~0.6.0"
+    "optimist": "~0.6.0",
+    "underscore.string": "~2.3.3"
   },
   "devDependencies": {
     "chai": "~1.7.2",

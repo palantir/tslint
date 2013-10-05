@@ -17,6 +17,8 @@
 /// <reference path='language/rule/rule.ts'/>
 /// <reference path='language/walker/ruleWalker.ts'/>
 
+var _s = require("underscore.string");
+
 module Lint.Configuration {
     var fs = require("fs");
     var path = require("path");
@@ -71,12 +73,12 @@ module Lint.Configuration {
     }
 
     function createRule(name: string, value: any): Rule {
-        var ruleModule = require("../lib/rules/" + name + "Rule");
+        var camelizedName = _s.camelize(name + "Rule");
+        var ruleModule = require("../lib/rules/" + camelizedName);
         if (ruleModule.Rule) {
-            console.log("creating rule");
             return new ruleModule.Rule(name, value);
-        } else {
-            return undefined;
         }
+
+        return undefined;
     }
 }

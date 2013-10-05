@@ -26537,6 +26537,8 @@ var Lint;
     })(TypeScript.PositionTrackingWalker);
     Lint.RuleWalker = RuleWalker;
 })(Lint || (Lint = {}));
+var _s = require("underscore.string");
+
 var Lint;
 (function (Lint) {
     (function (Configuration) {
@@ -26594,9 +26596,10 @@ var Lint;
         Configuration.getConfiguredRules = getConfiguredRules;
 
         function createRule(name, value) {
-            var ruleModule = require("../lib/rules/" + name + "Rule");
+            var camelizedName = _s.camelize(name);
+            var ruleModule = require("../lib/rules/" + camelizedName + "Rule");
             if (ruleModule.Rule) {
-                console.log("creating rule");
+                console.log("creating: " + name);
                 return new ruleModule.Rule(name, value);
             } else {
                 return undefined;
