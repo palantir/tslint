@@ -16,20 +16,18 @@
 
 /// <reference path='../references.ts' />
 
-describe("<duplicate-key>", () => {
-    it("forbids duplicate keys in object literals", () => {
-        var fileName = "rules/dupkey.test.ts";
-        var DuplicateKeyRule = Lint.Test.getRule("duplicate-key");
-        var failureString = DuplicateKeyRule.FAILURE_STRING;
+describe("<no-bitwise>", () => {
+    var NoBitwiseRule = Lint.Test.getRule("no-bitwise");
 
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, DuplicateKeyRule);
-        var createFailure1 = Lint.Test.createFailuresOnFile(fileName, failureString + "axa'");
-        var createFailure2 = Lint.Test.createFailuresOnFile(fileName, failureString + "bd'");
-        var expectedFailures = [
-            createFailure1([10, 5], [10, 8]),
-            createFailure2([13, 5], [13, 7]),
-            createFailure1([14, 5], [14, 8])
+    it("forbids access to bitwise operators", () => {
+        var fileName = "rules/bitwise.test.ts";
+        var createFailure = Lint.Test.createFailuresOnFile(fileName, NoBitwiseRule.FAILURE_STRING);
+        var expectedFailures: Lint.RuleFailure[] = [
+            createFailure([2, 10], [2, 15]),
+            createFailure([3, 10], [3, 28]),
+            createFailure([3, 22], [3, 27]),
         ];
+        var actualFailures = Lint.Test.applyRuleOnFile(fileName, NoBitwiseRule);
 
         Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
     });

@@ -26,7 +26,7 @@ describe("Rule Loader", () => {
             "quotemark": "single",
             "eofline": true,
             "indent": 6,
-            "debug": true
+            "no-debugger": true
         };
 
         var rules = Lint.loadRules(validConfiguration, rulesDirectory);

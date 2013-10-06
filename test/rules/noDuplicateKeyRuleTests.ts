@@ -16,20 +16,21 @@
 
 /// <reference path='../references.ts' />
 
-describe("<duplicate-variable>", () => {
-    it("ensures that variable declarations are unique within a scope", () => {
-        var fileName = "rules/duplicate-variable.test.ts";
-        var DuplicateVariableRule = Lint.Test.getRule("duplicate-variable");
-        var failureString = DuplicateVariableRule.FAILURE_STRING + "duplicated'";
+describe("<no-duplicate-key>", () => {
+    it("forbids duplicate keys in object literals", () => {
+        var fileName = "rules/dupkey.test.ts";
+        var NoDuplicateKeyRule = Lint.Test.getRule("no-duplicate-key");
+        var failureString = NoDuplicateKeyRule.FAILURE_STRING;
 
-        var createFailure = Lint.Test.createFailuresOnFile(fileName, failureString);
+        var actualFailures = Lint.Test.applyRuleOnFile(fileName, NoDuplicateKeyRule);
+        var createFailure1 = Lint.Test.createFailuresOnFile(fileName, failureString + "axa'");
+        var createFailure2 = Lint.Test.createFailuresOnFile(fileName, failureString + "bd'");
         var expectedFailures = [
-            createFailure([11, 13], [11, 23]),
-            createFailure([22, 9], [22, 19]),
-            createFailure([26, 5], [26, 15])
+            createFailure1([10, 5], [10, 8]),
+            createFailure2([13, 5], [13, 7]),
+            createFailure1([14, 5], [14, 8])
         ];
 
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, DuplicateVariableRule);
         Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
     });
 });

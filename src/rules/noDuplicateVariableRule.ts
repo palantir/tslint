@@ -20,11 +20,11 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "duplicate variable: '";
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new DuplicateVariableWalker(syntaxTree));
+        return this.applyWithWalker(new NoDuplicateVariableWalker(syntaxTree));
     }
 }
 
-class DuplicateVariableWalker extends Lint.ScopeAwareRuleWalker<ScopeInfo> {
+class NoDuplicateVariableWalker extends Lint.ScopeAwareRuleWalker<ScopeInfo> {
     public createScope(): ScopeInfo {
         return new ScopeInfo();
     }

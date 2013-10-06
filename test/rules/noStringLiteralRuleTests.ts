@@ -16,15 +16,15 @@
 
 /// <reference path='../references.ts' />
 
-describe("<evil>", () => {
-    it("forbids eval", () => {
-        var fileName = "rules/evil.test.ts";
-        var EvilRule = Lint.Test.getRule("evil");
-        var failureString = EvilRule.FAILURE_STRING;
-        var expectedFailure = Lint.Test.createFailure(fileName, [6, 13], [6, 17], failureString);
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, EvilRule);
+describe("<no-string-literal>", () => {
+    it("forbids object access via string literals", () => {
+        var fileName = "rules/sub.test.ts";
+        var NoStringLiteralRule = Lint.Test.getRule("no-string-literal");
+        var failureString = NoStringLiteralRule.FAILURE_STRING;
 
-        assert.equal(actualFailures.length, 1);
-        assert.isTrue(actualFailures[0].equals(expectedFailure));
+        var actualFailures = Lint.Test.applyRuleOnFile(fileName, NoStringLiteralRule);
+        var expectedFailure = Lint.Test.createFailure(fileName, [11, 21], [11, 24], failureString);
+
+        Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 });

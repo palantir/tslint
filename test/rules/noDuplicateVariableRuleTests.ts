@@ -16,19 +16,20 @@
 
 /// <reference path='../references.ts' />
 
-describe("<bitwise>", () => {
-    var BitwiseRule = Lint.Test.getRule("bitwise");
+describe("<no-duplicate-variable>", () => {
+    it("ensures that variable declarations are unique within a scope", () => {
+        var fileName = "rules/duplicate-variable.test.ts";
+        var NoDuplicateVariableRule = Lint.Test.getRule("no-duplicate-variable");
+        var failureString = NoDuplicateVariableRule.FAILURE_STRING + "duplicated'";
 
-    it("forbids access to bitwise operators", () => {
-        var fileName = "rules/bitwise.test.ts";
-        var createFailure = Lint.Test.createFailuresOnFile(fileName, BitwiseRule.FAILURE_STRING);
-        var expectedFailures: Lint.RuleFailure[] = [
-            createFailure([2, 10], [2, 15]),
-            createFailure([3, 10], [3, 28]),
-            createFailure([3, 22], [3, 27]),
+        var createFailure = Lint.Test.createFailuresOnFile(fileName, failureString);
+        var expectedFailures = [
+            createFailure([11, 13], [11, 23]),
+            createFailure([22, 9], [22, 19]),
+            createFailure([26, 5], [26, 15])
         ];
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, BitwiseRule);
 
+        var actualFailures = Lint.Test.applyRuleOnFile(fileName, NoDuplicateVariableRule);
         Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
     });
 });

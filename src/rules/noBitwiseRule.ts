@@ -20,11 +20,11 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "forbidden bitwise operation";
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new BitwiseWalker(syntaxTree));
+        return this.applyWithWalker(new NoBitwiseWalker(syntaxTree));
     }
 }
 
-class BitwiseWalker extends Lint.RuleWalker {
+class NoBitwiseWalker extends Lint.RuleWalker {
     public visitNode(node: TypeScript.SyntaxNode): void {
         if (node.kind() === TypeScript.SyntaxKind.BitwiseAndExpression ||
             node.kind() === TypeScript.SyntaxKind.AndAssignmentExpression ||

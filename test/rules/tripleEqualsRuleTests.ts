@@ -16,25 +16,25 @@
 
 /// <reference path='../references.ts' />
 
-describe("<eqeqeq>", () => {
+describe("<triple-equals>", () => {
     var fileName = "rules/eqeqeq.test.ts";
     var actualFailures;
-    var EqEqEqRule = Lint.Test.getRule("eqeqeq");
+    var TripleEqualsRule = Lint.Test.getRule("triple-equals");
 
     before(() => {
-        actualFailures = Lint.Test.applyRuleOnFile(fileName, EqEqEqRule, [true, "allow-null-check"]);
+        actualFailures = Lint.Test.applyRuleOnFile(fileName, TripleEqualsRule, [true, "allow-null-check"]);
         assert.equal(actualFailures.length, 2);
     });
 
     it("ensures ===", () => {
-        var failureString = EqEqEqRule.EQ_FAILURE_STRING;
+        var failureString = TripleEqualsRule.EQ_FAILURE_STRING;
         var expectedFailure = Lint.Test.createFailure(fileName, [4, 33], [4, 35], failureString);
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 
     it("ensures !==", () => {
-        var failureString = EqEqEqRule.NEQ_FAILURE_STRING;
+        var failureString = TripleEqualsRule.NEQ_FAILURE_STRING;
         var expectedFailure = Lint.Test.createFailure(fileName, [8, 21], [8, 23], failureString);
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);

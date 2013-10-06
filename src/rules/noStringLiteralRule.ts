@@ -20,11 +20,11 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "object access via string literals is disallowed";
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new SubWalker(syntaxTree));
+        return this.applyWithWalker(new NoStringLiteralWalker(syntaxTree));
     }
   }
 
-class SubWalker extends Lint.RuleWalker {
+class NoStringLiteralWalker extends Lint.RuleWalker {
     public visitElementAccessExpression(node: TypeScript.ElementAccessExpressionSyntax): void {
         this.handleElementAccessExpression(node);
         super.visitElementAccessExpression(node);

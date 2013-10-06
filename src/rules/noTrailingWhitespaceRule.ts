@@ -20,11 +20,11 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "trailing whitespace";
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new TrailingWalker(syntaxTree));
+        return this.applyWithWalker(new NoTrailingWhitespaceWalker(syntaxTree));
     }
 }
 
-class TrailingWalker extends Lint.RuleWalker {
+class NoTrailingWhitespaceWalker extends Lint.RuleWalker {
     public visitToken(token: TypeScript.ISyntaxToken): void {
         super.visitToken(token);
         this.checkForTrailingWhitespace(token.trailingTrivia());

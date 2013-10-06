@@ -17,24 +17,23 @@
 /// <reference path='../../lib/tslint.d.ts' />
 
 export class Rule extends Lint.Rules.AbstractRule {
-    public static FAILURE_STRING = "forbidden eval";
+    public static FAILURE_STRING = "use of debugger statements is disallowed";
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new EvilWalker(syntaxTree));
+        return this.applyWithWalker(new NoDebuggerWalker(syntaxTree));
     }
 }
 
-class EvilWalker extends Lint.RuleWalker {
-    public visitInvocationExpression(node: TypeScript.InvocationExpressionSyntax): void {
-        var expression = node.expression;
-        if (expression.isToken() && expression.kind() === TypeScript.SyntaxKind.IdentifierName) {
-            var firstToken = expression.firstToken();
-            if (firstToken.text() === "eval") {
-                var position = this.position() + node.leadingTriviaWidth();
-                this.addFailure(this.createFailure(position, firstToken.width(), Rule.FAILURE_STRING));
-            }
-        }
+class NoDebuggerWalker extends Lint.RuleWalker {
+    public visitToken(token : TypeScript.ISyntaxToken): void {
+        this.handleToken(token);
+        super.visitToken(token);
+   }
 
-        super.visitInvocationExpression(node);
+    private handleToken(token: TypeScript.ISyntaxToken) {
+        if (token.kind() === TypeScript.SyntaxKind.DebuggerKeyword) {
+            var position = this.position() + token.leadingTriviaWidth();
+            this.addFailure(this.createFailure(position, token.width(), Rule.FAILURE_STRING));
+        }
     }
 }

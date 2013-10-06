@@ -16,14 +16,14 @@
 
 /// <reference path='../references.ts' />
 
-describe("<debug>", () => {
-    var DebugRule = Lint.Test.getRule("debug");
+describe("<no-debugger>", () => {
+    var NoDebuggerRule = Lint.Test.getRule("no-debugger");
 
     it("forbids debugger statements", () => {
         var fileName = "rules/debug.test.ts";
-        var failureString = DebugRule.FAILURE_STRING;
+        var failureString = NoDebuggerRule.FAILURE_STRING;
 
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, DebugRule);
+        var actualFailures = Lint.Test.applyRuleOnFile(fileName, NoDebuggerRule);
         var expectedFailure = Lint.Test.createFailure(fileName, [5, 9], [5, 17], failureString);
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);

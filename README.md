@@ -6,26 +6,27 @@ A linter for the TypeScript language.
 Supported Rules
 -----
 
-* `bitwise` disallows bitwise operators.
-* `classname` enforces PascalCased class and interface names.
+* `class-name` enforces PascalCased class and interface names.
 * `curly` enforces braces for `if`/`for`/`do`/`while` statements.
-* `debug` disallows `debugger` statements.
-* `dupkey` disallows duplicate keys in object literals.
-* `duplicate-variable` disallows duplicate variable declarations.
 * `eofline` enforces the file to end with a newline.
-* `eqeqeq` enforces === and !== in favor of == and !=.
-* `evil` disallows `eval` function invocations.
 * `forin` enforces a `for ... in` statement to be filtered with an `if` statement.*
 * `indent` enforces consistent indentation levels (currently disabled).
-* `labelpos` enforces labels only on sensible statements.
+* `label-position` enforces labels only on sensible statements.
 * `label-undefined` checks that labels are defined before usage.
-* `maxlen` sets the maximum length of a line.
-* `noarg` disallows access to `arguments.callee`.
-* `noconsole` disallows access to the specified properties on `console`. Rule options are properties to ban on the console variable.
-* `noconstruct` disallows access to the constructors of `String`, `Number`, and `Boolean`.
-* `nounreachable` disallows unreachable code after `break`, `catch`, `throw`, and `return` statements.
-* `noempty` disallows empty blocks.
-* `oneline` enforces the specified tokens to be on the same line as the expression preceding it. Rule options:
+* `max-line-length` sets the maximum length of a line.
+* `no-arg` disallows access to `arguments.callee`.
+* `no-bitwise` disallows bitwise operators.
+* `no-console` disallows access to the specified properties on `console`. Rule options are properties to ban on the console variable.
+* `no-construct` disallows access to the constructors of `String`, `Number`, and `Boolean`.
+* `no-debugger` disallows `debugger` statements.
+* `no-duplicate-key` disallows duplicate keys in object literals.
+* `no-duplicate-variable` disallows duplicate variable declarations.
+* `no-empty` disallows empty blocks.
+* `no-eval` disallows `eval` function invocations.
+* `no-string-literal` disallows object access via string literals.
+* `no-trailing-whitespace` disallows trailing whitespace at the end of a line.
+* `no-unreachable` disallows unreachable code after `break`, `catch`, `throw`, and `return` statements.
+* `one-line` enforces the specified tokens to be on the same line as the expression preceding it. Rule options:
 	* `"check-catch"` checks that `catch` is on the same line as the closing brace for `try`
 	* `"check-else"` checks that `else` is on the same line as the closing brace for `if`
 	* `"check-open-brace"` checks that an open brace falls on the same line as its preceding expression.
@@ -33,9 +34,8 @@ Supported Rules
 * `quotemark` enforces consistent single or double quoted string literals.
 * `radix` enforces the radix parameter of `parseInt`
 * `semicolon` enforces semicolons at the end of every statement.
-* `sub` disallows object access via string literals.
-* `trailing` disallows trailing whitespace at the end of a line.
-* `varname` allows only camelCased or UPPER_CASED variable names. Rule options:
+* `triple-equals` enforces === and !== in favor of == and !=.
+* `variable-name` allows only camelCased or UPPER_CASED variable names. Rule options:
 	* `"allow-leading-underscore"` allows underscores at the beginnning.
 * `whitespace` enforces spacing whitespace. Rule options:
 	* `"check-branch"` checks branching statements (`if`/`else`/`for`/`while`) are followed by whitespace
