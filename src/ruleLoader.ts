@@ -21,7 +21,7 @@ module Lint {
     var fs = require("fs");
     var path = require("path");
     var _s = require("underscore.string");
-    var moduleDirectory = path.dirname(module.parent.filename);
+    var moduleDirectory = path.dirname(module.filename);
 
     var CORE_RULES_DIRECTORY = path.join("..", "build", "rules");
 

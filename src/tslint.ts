@@ -25,7 +25,7 @@
 
 module Lint {
     var path = require("path");
-    var moduleDirectory = path.dirname(module.parent.filename);
+    var moduleDirectory = path.dirname(module.filename);
 
     export interface LintResult {
         failureCount: number;
