@@ -14,25 +14,13 @@
  * limitations under the License.
 */
 
-/// <reference path='../typescript/src/compiler/core/errors.ts' />
-/// <reference path='formatter.ts' />
+/// <reference path='../../typescript/src/compiler/syntax/syntaxTree.ts'/>
+/// <reference-path='../rule/rule.ts'/>
 
-module Lint.Formatters {
+module Lint {
+    export interface Formatter {
+        getName(): string;
 
-    export class AbstractFormatter implements Lint.Formatter {
-        private name: string;
-
-        constructor(name) {
-            this.name = name;
-        }
-
-        public getName() {
-            return this.name;
-        }
-
-        public format(failures: Lint.RuleFailure[]): string {
-            throw TypeScript.Errors.abstract();
-        }
+        format(failures: Lint.RuleFailure[]): string;
     }
-
 }

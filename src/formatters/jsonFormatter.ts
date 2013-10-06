@@ -14,24 +14,20 @@
  * limitations under the License.
 */
 
-/// <reference path='abstractFormatter.ts' />
+/// <reference path='../../lib/tslint.d.ts' />
 
-module Lint.Formatters {
-
-    export class JsonFormatter extends AbstractFormatter {
-        constructor() {
-            super("json");
-        }
-
-        public format(failures: Lint.RuleFailure[]): string {
-            var failuresJSON = [];
-
-            for (var i = 0; i < failures.length; ++i) {
-                failuresJSON.push(failures[i].toJson());
-            }
-
-            return JSON.stringify(failuresJSON);
-        }
+export class Formatter extends Lint.Formatters.AbstractFormatter {
+    constructor() {
+        super("json");
     }
 
+    public format(failures: Lint.RuleFailure[]): string {
+        var failuresJSON = [];
+
+        for (var i = 0; i < failures.length; ++i) {
+            failuresJSON.push(failures[i].toJson());
+        }
+
+        return JSON.stringify(failuresJSON);
+    }
 }

@@ -14,14 +14,15 @@
  * limitations under the License.
 */
 
-/// <reference path='configuration.ts' />
-/// <reference path='formatters/formatters.ts' />
-/// <reference path='language/languageServiceHost.ts' />
-/// <reference path='ruleLoader.ts' />
+/// <reference path='ruleLoader.ts'/>
+/// <reference path='configuration.ts'/>
+/// <reference path='formatterLoader.ts'/>
+/// <reference path='language/languageServiceHost.ts'/>
 
-/// <reference path='language/rule/abstractRule.ts' />
-/// <reference path='language/walker/scopeAwareRuleWalker.ts' />
-/// <reference path='language/walker/stateAwareRuleWalker.ts' />
+/// <reference path='language/rule/abstractRule.ts'/>
+/// <reference path='language/formatter/abstractFormatter.ts'/>
+/// <reference path='language/walker/scopeAwareRuleWalker.ts'/>
+/// <reference path='language/walker/stateAwareRuleWalker.ts'/>
 
 module Lint {
     var path = require("path");
@@ -42,8 +43,6 @@ module Lint {
             this.fileName = fileName;
             this.source = source;
             this.options = options;
-
-            Lint.Formatters.createAllFormatters();
         }
 
         public lint(): LintResult {
@@ -53,13 +52,8 @@ module Lint {
             var languageService = new Services.LanguageService(languageServiceHost);
             var syntaxTree = languageService.getSyntaxTree(this.fileName);
 
-            var rulesDirectory = this.options.rulesDirectory;
-            if (rulesDirectory) {
-                rulesDirectory = path.relative(moduleDirectory, rulesDirectory);
-            }
-
+            var rulesDirectory = this.getRelativePath(this.options.rulesDirectory);
             var configuredRules = Lint.loadRules(this.options.configuration.rules, rulesDirectory);
-
             for (i = 0; i < configuredRules.length; ++i) {
                 var rule = configuredRules[i];
                 if (rule.isEnabled()) {
@@ -72,9 +66,14 @@ module Lint {
                 }
             }
 
-            var formatter = Lint.Formatters.getFormatterForName(this.options.formatter);
-            if (formatter === undefined) {
-                formatter = new Lint.Formatters.ProseFormatter();
+            var formatter: Lint.Formatter;
+            var formattersDirectory = this.getRelativePath(this.options.formattersDirectory);
+
+            var Formatter = Lint.findFormatter(this.options.formatter, formattersDirectory);
+            if (Formatter) {
+                formatter = new Formatter();
+            } else {
+                throw new Error("formatter '" + this.options.formatter + "' not found");
             }
 
             var output = formatter.format(failures);
@@ -83,6 +82,14 @@ module Lint {
                 format: this.options.formatter,
                 output: output
             };
+        }
+
+        private getRelativePath(directory: string): string {
+            if (directory) {
+                return path.relative(moduleDirectory, directory);
+            }
+
+            return undefined;
         }
 
         private containsRule(rules: RuleFailure[], rule: RuleFailure) {

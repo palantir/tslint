@@ -38,6 +38,10 @@ var argv = require("optimist")
         alias: "rules-dir",
         describe: "rules directory"
     },
+    "s": {
+        alias: "formatters-dir",
+        describe: "formatters directory"
+    },
     "t": {
         alias: "format",
         describe: "output format (prose, json)",
@@ -58,7 +62,8 @@ var contents = fs.readFileSync(file, "utf8");
 var linter = new Lint.Linter(file, contents, {
     configuration: configuration,
     formatter: argv.t,
-    rulesDirectory: argv.r
+    rulesDirectory: argv.r,
+    formattersDirectory: argv.s
 });
 var lintResult = linter.lint();
 

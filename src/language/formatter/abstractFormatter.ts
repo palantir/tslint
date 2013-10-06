@@ -14,27 +14,24 @@
  * limitations under the License.
 */
 
-/// <reference path='jsonFormatter.ts'/>
-/// <reference path='proseFormatter.ts'/>
+/// <reference path='../../typescript/src/compiler/core/errors.ts' />
+/// <reference path='formatter.ts' />
 
 module Lint.Formatters {
 
-    var ALL_FORMATTERS: Formatter[] = [];
+    export class AbstractFormatter implements Lint.Formatter {
+        private name: string;
 
-    export function createAllFormatters() {
-        ALL_FORMATTERS.push(new JsonFormatter());
-        ALL_FORMATTERS.push(new ProseFormatter());
-    }
+        constructor(name) {
+            this.name = name;
+        }
 
-    export function getFormatterForName(name: string): Lint.Formatter {
-        var filteredFormatters = ALL_FORMATTERS.filter(function(formatter) {
-            return formatter.getName() === name;
-        });
+        public getName() {
+            return this.name;
+        }
 
-        if (filteredFormatters.length > 0) {
-            return filteredFormatters[0];
-        } else {
-            return undefined;
+        public format(failures: Lint.RuleFailure[]): string {
+            throw TypeScript.Errors.abstract();
         }
     }
 

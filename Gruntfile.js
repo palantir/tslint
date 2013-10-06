@@ -4,7 +4,7 @@ module.exports = function(grunt) {
 
     clean: {
       bin: ['bin/tslint-cli.js'],
-      core: ['build/rules/', 'lib/*'],
+      core: ['build/rules/', 'build/formatters', 'lib/*'],
       test: ['build/test/']
     },
 
@@ -63,6 +63,16 @@ module.exports = function(grunt) {
         dest: ['build/rules/']
       },
 
+      core_formatters: {
+        options: {
+          base_path: 'src/formatters',
+          module: 'commonjs',
+          target: 'es5'
+        },
+        src: ['lib/tslint.d.ts', 'src/formatters/*.ts'],
+        dest: ['build/formatters/']
+      },
+
       test: {
         options: {
           target: 'es5'
@@ -80,7 +90,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-typescript');
 
   // register custom tasks
-  grunt.registerTask('core', ['clean:core', 'typescript:core', 'typescript:core_rules']);
+  grunt.registerTask('core', ['clean:core', 'typescript:core', 'typescript:core_rules', 'typescript:core_formatters']);
   grunt.registerTask('bin', ['clean:bin', 'typescript:bin', 'tslint:src']);
   grunt.registerTask('test', ['clean:test', 'typescript:test', 'tslint:test', 'mochaTest']);
 

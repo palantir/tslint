@@ -14,30 +14,26 @@
  * limitations under the License.
 */
 
-/// <reference path='abstractFormatter.ts' />
+/// <reference path='../../lib/tslint.d.ts' />
 
-module Lint.Formatters {
-
-    export class ProseFormatter extends AbstractFormatter {
-        constructor() {
-            super("prose");
-        }
-
-        public format(failures: Lint.RuleFailure[]): string {
-            var output = "";
-            for (var i = 0; i < failures.length; ++i) {
-                var failure = failures[i];
-                var fileName = failure.getFileName();
-                var failureString = failure.getFailure();
-
-                var lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
-                var line = lineAndCharacter.line() + 1;
-                var character = lineAndCharacter.character() + 1;
-
-                output += fileName + "[" + line + ", " + character + "]: " + failureString + "\n";
-            }
-            return output;
-        }
+export class Formatter extends Lint.Formatters.AbstractFormatter {
+    constructor() {
+        super("prose");
     }
 
+    public format(failures: Lint.RuleFailure[]): string {
+        var output = "";
+        for (var i = 0; i < failures.length; ++i) {
+            var failure = failures[i];
+            var fileName = failure.getFileName();
+            var failureString = failure.getFailure();
+
+            var lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
+            var line = lineAndCharacter.line() + 1;
+            var character = lineAndCharacter.character() + 1;
+
+            output += fileName + "[" + line + ", " + character + "]: " + failureString + "\n";
+        }
+        return output;
+    }
 }

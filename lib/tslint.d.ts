@@ -1,6 +1,3 @@
-declare module Lint.Configuration {
-    function findConfiguration(configFile): any;
-}
 declare module TypeScript {
     var DiagnosticCode: {
         error_TS_0_1: string;
@@ -1928,6 +1925,16 @@ declare module TypeScript {
     }
 }
 declare module TypeScript {
+    class Errors {
+        static argument(argument: string, message?: string): Error;
+        static argumentOutOfRange(argument: string): Error;
+        static argumentNull(argument: string): Error;
+        static abstract(): Error;
+        static notYetImplemented(): Error;
+        static invalidOperation(message?: string): Error;
+    }
+}
+declare module TypeScript {
     class Hash {
         private static FNV_BASE;
         private static FNV_PRIME;
@@ -2085,16 +2092,6 @@ declare module TypeScript {
         public time: number;
         public start(): void;
         public end(): void;
-    }
-}
-declare module TypeScript {
-    class Errors {
-        static argument(argument: string, message?: string): Error;
-        static argumentOutOfRange(argument: string): Error;
-        static argumentNull(argument: string): Error;
-        static abstract(): Error;
-        static notYetImplemented(): Error;
-        static invalidOperation(message?: string): Error;
     }
 }
 declare module TypeScript {
@@ -6137,34 +6134,74 @@ declare module TypeScript {
     }
 }
 declare module Lint {
+    interface Rule {
+        getName(): string;
+        getOptions(): any[];
+        isEnabled(): boolean;
+        apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[];
+        applyWithWalker(walker: Lint.RuleWalker): RuleFailure[];
+    }
+    class RuleFailurePosition {
+        private position;
+        private lineAndCharacter;
+        constructor(position: number, lineAndCharacter: TypeScript.LineAndCharacter);
+        public getPosition(): number;
+        public getLineAndCharacter(): TypeScript.LineAndCharacter;
+        public toJson(): {
+            position: number;
+            line: number;
+            character: number;
+        };
+        public equals(ruleFailurePosition: RuleFailurePosition): boolean;
+    }
+    class RuleFailure {
+        private fileName;
+        private startPosition;
+        private endPosition;
+        private failure;
+        constructor(syntaxTree: TypeScript.SyntaxTree, start: number, end: number, failure: string);
+        public getFileName(): string;
+        public getStartPosition(): RuleFailurePosition;
+        public getEndPosition(): RuleFailurePosition;
+        public getFailure(): string;
+        public toJson(): any;
+        public equals(ruleFailure: RuleFailure): boolean;
+        private createFailurePosition(syntaxTree, position);
+    }
+}
+declare module Lint {
+    class RuleWalker extends TypeScript.PositionTrackingWalker {
+        private limit;
+        private fileName;
+        private options;
+        private failures;
+        private syntaxTree;
+        constructor(syntaxTree: TypeScript.SyntaxTree, options?: any);
+        public getSyntaxTree(): TypeScript.SyntaxTree;
+        public getFailures(): Lint.RuleFailure[];
+        public positionAfter(...elements: TypeScript.ISyntaxElement[]): number;
+        public getOptions(): any;
+        public hasOption(option: string): boolean;
+        public createFailure(start: number, width: number, failure: string): Lint.RuleFailure;
+        public addFailure(failure: Lint.RuleFailure): void;
+        private existsFailure(failure);
+    }
+}
+declare module Lint {
+    function loadRules(ruleConfiguration, rulesDirectory?: string): Rule[];
+    function findRule(name: string, rulesDirectory?: string);
+}
+declare module Lint.Configuration {
+    function findConfiguration(configFile): any;
+}
+declare module Lint {
     interface Formatter {
         getName(): string;
         format(failures: Lint.RuleFailure[]): string;
     }
 }
-declare module Lint.Formatters {
-    class AbstractFormatter implements Lint.Formatter {
-        private name;
-        constructor(name);
-        public getName(): string;
-        public format(failures: Lint.RuleFailure[]): string;
-    }
-}
-declare module Lint.Formatters {
-    class JsonFormatter extends Formatters.AbstractFormatter {
-        constructor();
-        public format(failures: Lint.RuleFailure[]): string;
-    }
-}
-declare module Lint.Formatters {
-    class ProseFormatter extends Formatters.AbstractFormatter {
-        constructor();
-        public format(failures: Lint.RuleFailure[]): string;
-    }
-}
-declare module Lint.Formatters {
-    function createAllFormatters(): void;
-    function getFormatterForName(name: string): Lint.Formatter;
+declare module Lint {
+    function findFormatter(name: string, formattersDirectory?: string);
 }
 declare module TypeScript {
     module CompilerDiagnostics {
@@ -10069,64 +10106,6 @@ declare module Lint {
         private createCompilationSettings();
     }
 }
-declare module Lint {
-    interface Rule {
-        getName(): string;
-        getOptions(): any[];
-        isEnabled(): boolean;
-        apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[];
-        applyWithWalker(walker: Lint.RuleWalker): RuleFailure[];
-    }
-    class RuleFailurePosition {
-        private position;
-        private lineAndCharacter;
-        constructor(position: number, lineAndCharacter: TypeScript.LineAndCharacter);
-        public getPosition(): number;
-        public getLineAndCharacter(): TypeScript.LineAndCharacter;
-        public toJson(): {
-            position: number;
-            line: number;
-            character: number;
-        };
-        public equals(ruleFailurePosition: RuleFailurePosition): boolean;
-    }
-    class RuleFailure {
-        private fileName;
-        private startPosition;
-        private endPosition;
-        private failure;
-        constructor(syntaxTree: TypeScript.SyntaxTree, start: number, end: number, failure: string);
-        public getFileName(): string;
-        public getStartPosition(): RuleFailurePosition;
-        public getEndPosition(): RuleFailurePosition;
-        public getFailure(): string;
-        public toJson(): any;
-        public equals(ruleFailure: RuleFailure): boolean;
-        private createFailurePosition(syntaxTree, position);
-    }
-}
-declare module Lint {
-    class RuleWalker extends TypeScript.PositionTrackingWalker {
-        private limit;
-        private fileName;
-        private options;
-        private failures;
-        private syntaxTree;
-        constructor(syntaxTree: TypeScript.SyntaxTree, options?: any);
-        public getSyntaxTree(): TypeScript.SyntaxTree;
-        public getFailures(): Lint.RuleFailure[];
-        public positionAfter(...elements: TypeScript.ISyntaxElement[]): number;
-        public getOptions(): any;
-        public hasOption(option: string): boolean;
-        public createFailure(start: number, width: number, failure: string): Lint.RuleFailure;
-        public addFailure(failure: Lint.RuleFailure): void;
-        private existsFailure(failure);
-    }
-}
-declare module Lint {
-    function loadRules(ruleConfiguration, rulesDirectory?: string): Rule[];
-    function findRule(name: string, rulesDirectory?: string);
-}
 declare module Lint.Rules {
     class AbstractRule implements Lint.Rule {
         private name;
@@ -10137,6 +10116,14 @@ declare module Lint.Rules {
         public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[];
         public applyWithWalker(walker: Lint.RuleWalker): Lint.RuleFailure[];
         public isEnabled(): boolean;
+    }
+}
+declare module Lint.Formatters {
+    class AbstractFormatter implements Lint.Formatter {
+        private name;
+        constructor(name);
+        public getName(): string;
+        public format(failures: Lint.RuleFailure[]): string;
     }
 }
 declare module Lint {
@@ -10172,6 +10159,7 @@ declare module Lint {
         private options;
         constructor(fileName: string, source: string, options: any);
         public lint(): LintResult;
+        private getRelativePath(directory);
         private containsRule(rules, rule);
     }
 }

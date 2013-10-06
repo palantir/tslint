@@ -82,7 +82,6 @@ module Lint {
         if (fs.existsSync(fullPath + ".js")) {
             var ruleModule = require(fullPath);
             if (ruleModule && ruleModule.Rule) {
-                //console.log("load rule " + fullPath);
                 return ruleModule.Rule;
             }
         }
