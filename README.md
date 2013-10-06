@@ -80,7 +80,8 @@ By default, configuration is loaded from `.tslintrc` or `tslint.json`, if either
 	var options = {
 		formatter: "json",
 	    configuration: configuration,
-	    rulesDirectory: "customRules/"
+	    rulesDirectory: "customRules/",
+	    formattersDirectory: "customFormatters/"
 	};
 
 	var Linter = require("tslint");
