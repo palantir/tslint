@@ -19,9 +19,10 @@
 describe("<eofline>", () => {
     it("ensures a trailing newline at EOF", () => {
         var fileName = "rules/eofline.test.ts";
-        var failureString = Lint.Rules.EofLineRule.FAILURE_STRING;
+        var EofLineRule = Lint.Test.getRule("eofline");
+        var failureString = EofLineRule.FAILURE_STRING;
 
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, "eofline");
+        var actualFailures = Lint.Test.applyRuleOnFile(fileName, EofLineRule);
         var expectedFailure = Lint.Test.createFailure(fileName, [4, 38], [4, 38], failureString);
 
         assert.equal(actualFailures.length, 1);

@@ -16,19 +16,16 @@
 
 /// <reference path='../references.ts' />
 
-describe("<dupkey>", () => {
-    it("forbids duplicate keys in object literals", () => {
-        var fileName = "rules/dupkey.test.ts";
-        var failureString = Lint.Rules.DupKeyRule.FAILURE_STRING;
-
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, "dupkey");
-        var createFailure1 = Lint.Test.createFailuresOnFile(fileName, failureString + "axa'");
-        var createFailure2 = Lint.Test.createFailuresOnFile(fileName, failureString + "bd'");
-        var expectedFailures = [
-            createFailure1([10, 5], [10, 8]),
-            createFailure2([13, 5], [13, 7]),
-            createFailure1([14, 5], [14, 8])
+describe("<label-position>", () => {
+    it("enforces that labels are correctly positioned", () => {
+        var fileName = "rules/labelpos.test.ts";
+        var LabelPositionRule = Lint.Test.getRule("label-position");
+        var createFailure = Lint.Test.createFailuresOnFile(fileName, LabelPositionRule.FAILURE_STRING);
+        var expectedFailures: Lint.RuleFailure[] = [
+            createFailure([2, 5], [2, 9]),
+            createFailure([5, 5], [5, 9])
         ];
+        var actualFailures = Lint.Test.applyRuleOnFile(fileName, LabelPositionRule);
 
         Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
     });

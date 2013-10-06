@@ -19,7 +19,8 @@
 describe("<whitespace>", () => {
     var actualFailures;
     var fileName = "rules/whitespace.test.ts";
-    var failureString = Lint.Rules.WhitespaceRule.FAILURE_STRING;
+    var WhitespaceRule = Lint.Test.getRule("whitespace");
+    var failureString = WhitespaceRule.FAILURE_STRING;
     var createFailure = Lint.Test.createFailuresOnFile(fileName, failureString);
 
     before(() => {
@@ -30,11 +31,11 @@ describe("<whitespace>", () => {
             "check-separator",
             "check-type"
         ];
-        actualFailures = Lint.Test.applyRuleOnFile(fileName, "whitespace", options);
+        actualFailures = Lint.Test.applyRuleOnFile(fileName, WhitespaceRule, options);
     });
 
     it("enforces rules only when enabled", () => {
-        var failures = Lint.Test.applyRuleOnFile(fileName, "whitespace");
+        var failures = Lint.Test.applyRuleOnFile(fileName, WhitespaceRule);
         assert.equal(failures.length, 0);
     });
 

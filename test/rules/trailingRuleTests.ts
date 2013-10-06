@@ -19,10 +19,11 @@
 describe("<trailing>", () => {
     it("forbids trailing whitespace", () => {
         var fileName = "rules/trailing.test.ts";
-        var failureString = Lint.Rules.TrailingRule.FAILURE_STRING;
+        var TrailingRule = Lint.Test.getRule("trailing");
+        var failureString = TrailingRule.FAILURE_STRING;
         var createFailure = Lint.Test.createFailuresOnFile(fileName, failureString);
 
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, "trailing");
+        var actualFailures = Lint.Test.applyRuleOnFile(fileName, TrailingRule);
         var expectedFailure1 = createFailure([2, 24], [2, 28]);
         var expectedFailure2 = createFailure([3, 32], [3, 36]);
         var expectedFailure3 = createFailure([5, 2], [5, 6]);

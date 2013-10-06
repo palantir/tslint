@@ -19,9 +19,10 @@
 describe("<sub>", () => {
     it("forbids object access via string literals", () => {
         var fileName = "rules/sub.test.ts";
-        var failureString = Lint.Rules.SubRule.FAILURE_STRING;
+        var SubRule = Lint.Test.getRule("sub");
+        var failureString = SubRule.FAILURE_STRING;
 
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, "sub");
+        var actualFailures = Lint.Test.applyRuleOnFile(fileName, SubRule);
         var expectedFailure = Lint.Test.createFailure(fileName, [11, 21], [11, 24], failureString);
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);

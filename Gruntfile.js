@@ -67,7 +67,7 @@ module.exports = function(grunt) {
         options: {
           target: 'es5'
         },
-        src: ['test/ruleLoaderTests.ts', 'test/rules/bitwiseRuleTests.ts', '!test/files/**/*.ts'],
+        src: ['test/**/*.ts', '!test/files/**/*.ts'],
         dest: 'build/test/tslint-tests.js'
       }
     }
@@ -81,8 +81,8 @@ module.exports = function(grunt) {
 
   // register custom tasks
   grunt.registerTask('core', ['clean:core', 'typescript:core', 'typescript:core_rules']);
-  grunt.registerTask('bin', ['clean:bin', 'core', 'typescript:bin', 'tslint:src']);
-  grunt.registerTask('test', ['clean:test', 'core', 'typescript:test', 'tslint:test', 'mochaTest']);
+  grunt.registerTask('bin', ['clean:bin', 'typescript:bin', 'tslint:src']);
+  grunt.registerTask('test', ['clean:test', 'typescript:test', 'tslint:test', 'mochaTest']);
 
   // create default task
   grunt.registerTask('default', ['core', 'bin', 'test']);

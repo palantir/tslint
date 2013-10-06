@@ -16,13 +16,14 @@
 
 /// <reference path='../references.ts' />
 
-describe("<noempty>", () => {
+describe("<no-empty>", () => {
     var actualFailures;
     var fileName = "rules/noempty.test.ts";
-    var createFailure = Lint.Test.createFailuresOnFile(fileName, Lint.Rules.NoEmptyRule.FAILURE_STRING);
+    var NoEmptyRule = Lint.Test.getRule("no-empty");
+    var createFailure = Lint.Test.createFailuresOnFile(fileName, NoEmptyRule.FAILURE_STRING);
 
     before(() => {
-        actualFailures = Lint.Test.applyRuleOnFile(fileName, "noempty");
+        actualFailures = Lint.Test.applyRuleOnFile(fileName, NoEmptyRule);
     });
 
     it("forbids empty conditional blocks", () => {

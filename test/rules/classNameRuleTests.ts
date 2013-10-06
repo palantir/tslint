@@ -16,13 +16,15 @@
 
 /// <reference path='../references.ts' />
 
-describe("<classname>", () => {
+describe("<class-name>", () => {
+    var ClassNameRule = Lint.Test.getRule("class-name");
+
     it("ensures class names are always pascal-cased", () => {
         var fileName = "rules/classname.test.ts";
-        var createFailure = Lint.Test.createFailuresOnFile(fileName, Lint.Rules.ClassNameRule.FAILURE_STRING);
+        var createFailure = Lint.Test.createFailuresOnFile(fileName, ClassNameRule.FAILURE_STRING);
         var expectedFailure1 = createFailure([5, 7], [5, 23]);
         var expectedFailure2 = createFailure([9, 7], [9, 33]);
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, "classname");
+        var actualFailures = Lint.Test.applyRuleOnFile(fileName, ClassNameRule);
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);

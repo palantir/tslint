@@ -19,7 +19,8 @@
 describe("<duplicate-variable>", () => {
     it("ensures that variable declarations are unique within a scope", () => {
         var fileName = "rules/duplicate-variable.test.ts";
-        var failureString = Lint.Rules.DuplicateVariableRule.FAILURE_STRING + "duplicated'";
+        var DuplicateVariableRule = Lint.Test.getRule("duplicate-variable");
+        var failureString = DuplicateVariableRule.FAILURE_STRING + "duplicated'";
 
         var createFailure = Lint.Test.createFailuresOnFile(fileName, failureString);
         var expectedFailures = [
@@ -28,7 +29,7 @@ describe("<duplicate-variable>", () => {
             createFailure([26, 5], [26, 15])
         ];
 
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, "duplicate-variable");
+        var actualFailures = Lint.Test.applyRuleOnFile(fileName, DuplicateVariableRule);
         Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
     });
 });

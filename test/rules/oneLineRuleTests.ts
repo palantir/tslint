@@ -16,20 +16,21 @@
 
 /// <reference path='../references.ts' />
 
-describe("<oneline>", () => {
+describe("<one-line>", () => {
     var actualFailures;
     var fileName = "rules/oneline.test.ts";
-    var braceFailure = Lint.Rules.OneLineRule.BRACE_FAILURE_STRING;
-    var elseFailure = Lint.Rules.OneLineRule.ELSE_FAILURE_STRING;
-    var whitespaceFailure = Lint.Rules.OneLineRule.WHITESPACE_FAILURE_STRING;
+    var OneLineRule = Lint.Test.getRule("one-line");
+    var braceFailure = OneLineRule.BRACE_FAILURE_STRING;
+    var elseFailure = OneLineRule.ELSE_FAILURE_STRING;
+    var whitespaceFailure = OneLineRule.WHITESPACE_FAILURE_STRING;
 
     before(() => {
         var options = [true, "check-open-brace", "check-catch", "check-else", "check-whitespace"];
-        actualFailures = Lint.Test.applyRuleOnFile(fileName, "oneline", options);
+        actualFailures = Lint.Test.applyRuleOnFile(fileName, OneLineRule, options);
     });
 
     it("enforces rules only when enabled", () => {
-        var failures = Lint.Test.applyRuleOnFile(fileName, "oneline");
+        var failures = Lint.Test.applyRuleOnFile(fileName, OneLineRule);
         assert.equal(failures.length, 0);
     });
 

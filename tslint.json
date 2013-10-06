@@ -1,6 +1,5 @@
 {
   "rules": {
-    "test": true,
     "bitwise": true,
     "class-name": true,
     "curly": true,

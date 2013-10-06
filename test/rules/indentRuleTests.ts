@@ -17,15 +17,16 @@
 /// <reference path='../references.ts' />
 
 describe("<indent>", () => {
-    var failureString = Lint.Rules.IndentRule.FAILURE_STRING + "expected 4, got ";
-    var failureString8 = Lint.Rules.IndentRule.FAILURE_STRING + "expected 8, got ";
+    var IndentRule = Lint.Test.getRule("indent");
+    var failureString = IndentRule.FAILURE_STRING + "expected 4, got ";
+    var failureString8 = IndentRule.FAILURE_STRING + "expected 8, got ";
 
     describe("on a tab-indented file", () => {
         var fileName = "rules/indent_tabs.test.ts";
         var actualFailures;
 
         before(() => {
-            actualFailures = Lint.Test.applyRuleOnFile(fileName, "indent", [true, 4]);
+            actualFailures = Lint.Test.applyRuleOnFile(fileName, IndentRule, [true, 4]);
         });
 
         it("enforces module indentation", () => {
@@ -69,7 +70,7 @@ describe("<indent>", () => {
         var actualFailures;
 
         before(() => {
-            actualFailures = Lint.Test.applyRuleOnFile(fileName, "indent", [true, 4]);
+            actualFailures = Lint.Test.applyRuleOnFile(fileName, IndentRule, [true, 4]);
         });
 
         it("enforces module indentation", () => {

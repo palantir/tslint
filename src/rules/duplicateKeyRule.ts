@@ -19,11 +19,11 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "duplicate key '";
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new DupKeyWalker(syntaxTree));
+        return this.applyWithWalker(new DuplicateKeyWalker(syntaxTree));
     }
 }
 
-class DupKeyWalker extends Lint.RuleWalker {
+class DuplicateKeyWalker extends Lint.RuleWalker {
     private objectKeys;
 
     public visitObjectLiteralExpression(node: TypeScript.ObjectLiteralExpressionSyntax): void {

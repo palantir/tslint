@@ -22,11 +22,11 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "variable name must be in camelcase or uppercase";
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new VarNameWalker(syntaxTree, this.getOptions()));
+        return this.applyWithWalker(new VariableNameWalker(syntaxTree, this.getOptions()));
     }
 }
 
-class VarNameWalker extends Lint.RuleWalker {
+class VariableNameWalker extends Lint.RuleWalker {
     public visitVariableDeclarator(node: TypeScript.VariableDeclaratorSyntax): void {
         var identifier = node.identifier;
         var variableName = identifier.text();

@@ -16,13 +16,14 @@
 
 /// <reference path='../references.ts' />
 
-describe("<noconstruct>", () => {
+describe("<no-construct>", () => {
     var actualFailures;
     var fileName = "rules/noconstruct.test.ts";
-    var createFailure = Lint.Test.createFailuresOnFile(fileName, Lint.Rules.NoConstructRule.FAILURE_STRING);
+    var NoConstructRule = Lint.Test.getRule("no-construct");
+    var createFailure = Lint.Test.createFailuresOnFile(fileName, NoConstructRule.FAILURE_STRING);
 
     before(() => {
-        actualFailures = Lint.Test.applyRuleOnFile(fileName, "noconstruct");
+        actualFailures = Lint.Test.applyRuleOnFile(fileName, NoConstructRule);
     });
 
     it("forbids access to String constructor", () => {

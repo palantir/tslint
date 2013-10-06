@@ -19,8 +19,9 @@
 describe("<radix>", () => {
     it("enforces radix parameter of parseInt", () => {
         var fileName = "rules/radix.test.ts";
-        var failureString = Lint.Rules.RadixRule.FAILURE_STRING;
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, "radix");
+        var RadixRule = Lint.Test.getRule("radix");
+        var failureString = RadixRule.FAILURE_STRING;
+        var actualFailures = Lint.Test.applyRuleOnFile(fileName, RadixRule);
         var expectedFailure = Lint.Test.createFailure(fileName, [2, 9], [2, 20], failureString);
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);

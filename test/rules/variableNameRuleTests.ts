@@ -16,10 +16,12 @@
 
 /// <reference path='../references.ts' />
 
-describe("<varname>", () => {
+describe("<variable-name>", () => {
+    var VariableNameRule = Lint.Test.getRule("variable-name");
+
     it("ensures only (camel/upper)case naming convention for variables", () => {
         var fileName = "rules/varname.test.ts";
-        var failureString = Lint.Rules.VarNameRule.FAILURE_STRING;
+        var failureString = VariableNameRule.FAILURE_STRING;
 
         var createFailure = Lint.Test.createFailuresOnFile(fileName, failureString);
         var expectedFailures = [
@@ -30,13 +32,13 @@ describe("<varname>", () => {
             createFailure([13, 13], [13, 25])
         ];
 
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, "varname");
+        var actualFailures = Lint.Test.applyRuleOnFile(fileName, VariableNameRule);
         Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
     });
 
     it("ensures leading underscores can optionally be legal", () => {
         var fileName = "rules/varname.test.ts";
-        var failureString = Lint.Rules.VarNameRule.FAILURE_STRING;
+        var failureString = VariableNameRule.FAILURE_STRING;
 
         var createFailure = Lint.Test.createFailuresOnFile(fileName, failureString);
         var expectedFailures = [
@@ -49,7 +51,7 @@ describe("<varname>", () => {
             "allow-leading-underscore"
         ];
 
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, "varname", options);
+        var actualFailures = Lint.Test.applyRuleOnFile(fileName, VariableNameRule, options);
         Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
     });
 });

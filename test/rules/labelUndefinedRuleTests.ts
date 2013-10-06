@@ -19,7 +19,8 @@
 describe("<label-undefined>", () => {
     it("forbids the use of undefined labels", () => {
         var fileName = "rules/label-undefined.test.ts";
-        var failureString = Lint.Rules.LabelUndefinedRule.FAILURE_STRING;
+        var LabelUndefinedRule = Lint.Test.getRule("label-undefined");
+        var failureString = LabelUndefinedRule.FAILURE_STRING;
 
         var expectedFailures: Lint.RuleFailure[] = [
             Lint.Test.createFailure(fileName, [6, 9], [6, 14], failureString + "lab1'"),
@@ -27,7 +28,7 @@ describe("<label-undefined>", () => {
             Lint.Test.createFailure(fileName, [27, 17], [27, 22], failureString + "lab3'"),
             Lint.Test.createFailure(fileName, [36, 9], [36, 17], failureString + "lab4'")
         ];
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, "label-undefined");
+        var actualFailures = Lint.Test.applyRuleOnFile(fileName, LabelUndefinedRule);
 
         Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
     });

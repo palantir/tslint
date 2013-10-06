@@ -10125,6 +10125,7 @@ declare module Lint {
 }
 declare module Lint {
     function loadRules(ruleConfiguration, rulesDirectory?: string): Rule[];
+    function findRule(name: string, rulesDirectory?: string);
 }
 declare module Lint.Rules {
     class AbstractRule implements Lint.Rule {

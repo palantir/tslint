@@ -19,21 +19,22 @@
 describe("<eqeqeq>", () => {
     var fileName = "rules/eqeqeq.test.ts";
     var actualFailures;
+    var EqEqEqRule = Lint.Test.getRule("eqeqeq");
 
     before(() => {
-        actualFailures = Lint.Test.applyRuleOnFile(fileName, "eqeqeq", [true, "allow-null-check"]);
+        actualFailures = Lint.Test.applyRuleOnFile(fileName, EqEqEqRule, [true, "allow-null-check"]);
         assert.equal(actualFailures.length, 2);
     });
 
     it("ensures ===", () => {
-        var failureString = Lint.Rules.EqEqEqRule.EQ_FAILURE_STRING;
+        var failureString = EqEqEqRule.EQ_FAILURE_STRING;
         var expectedFailure = Lint.Test.createFailure(fileName, [4, 33], [4, 35], failureString);
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 
     it("ensures !==", () => {
-        var failureString = Lint.Rules.EqEqEqRule.NEQ_FAILURE_STRING;
+        var failureString = EqEqEqRule.NEQ_FAILURE_STRING;
         var expectedFailure = Lint.Test.createFailure(fileName, [8, 21], [8, 23], failureString);
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);

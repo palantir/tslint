@@ -62775,6 +62775,7 @@ var Lint;
 
         return undefined;
     }
+    Lint.findRule = findRule;
 
     function loadRule() {
         var paths = [];
