@@ -36,6 +36,11 @@ module Lint.Test {
         return Lint.findRule(ruleName, rulesDirectory);
     }
 
+    export function getFormatter(formatterName: string) {
+        var formattersDirectory = path.join(global.process.cwd(), "build/formatters");
+        return Lint.findFormatter(formatterName, formattersDirectory);
+    }
+
     export function applyRuleOnFile(fileName: string, Rule: Lint.Rules.AbstractRule, ruleValue: any = true): Lint.RuleFailure[] {
         var syntaxTree = getSyntaxTree(fileName);
         var rule = new Rule("", ruleValue);

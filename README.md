@@ -66,11 +66,12 @@ Please first ensure that the TypeScript source files compile correctly.
     usage: tslint
 
 	Options:
-	  -c, --config  	configuration file
-	  -f, --file    	file to lint                 [required]
-	  -o, --out     	output file
-      -r, --rules-dir   rules directory
-	  -t, --format  	output format (prose, json)  [default: "prose"]
+	  -c, --config  		 configuration file
+	  -f, --file    		 file to lint                 [required]
+	  -o, --out     		 output file
+      -r, --rules-dir   	 rules directory
+      -s, --formatters-dir   formatters directory
+	  -t, --format  		 output format (prose, json)  [default: "prose"]
 
 By default, configuration is loaded from `.tslintrc` or `tslint.json`, if either exists in the current path.
 

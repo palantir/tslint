@@ -21,8 +21,9 @@ describe("Prose Formatter", () => {
     var syntaxTree, formatter;
 
     before(function() {
+        var Formatter = Lint.Test.getFormatter("prose");
         syntaxTree = Lint.Test.getSyntaxTree(TEST_FILE);
-        formatter = new Lint.Formatters.ProseFormatter();
+        formatter = new Formatter();
     });
 
     it("formats failures", () => {

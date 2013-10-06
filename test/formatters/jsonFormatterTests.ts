@@ -21,8 +21,9 @@ describe("JSON Formatter", () => {
     var syntaxTree, formatter;
 
     before(function() {
+        var Formatter = Lint.Test.getFormatter("json");
         syntaxTree = Lint.Test.getSyntaxTree(TEST_FILE);
-        formatter = new Lint.Formatters.JsonFormatter();
+        formatter = new Formatter();
     });
 
     it("formats failures", () => {
