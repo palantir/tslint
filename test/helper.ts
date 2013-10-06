@@ -15,43 +15,48 @@
 */
 
 /// <reference path='../src/tslint.ts'/>
+/// <reference path='../src/ruleLoader.ts'/>
 
 module Lint.Test {
     var fs = require("fs");
     var path = require("path");
 
-    export function getSyntaxTree(filePath: string): TypeScript.SyntaxTree {
-        var relativePath = path.join("test", "files", filePath);
+    export function getSyntaxTree(fileName: string): TypeScript.SyntaxTree {
+        var relativePath = path.join("test", "files", fileName);
         var source = fs.readFileSync(relativePath, "utf8");
 
-        var languageServiceHost = new Lint.LanguageServiceHost(filePath, source);
+        var languageServiceHost = new Lint.LanguageServiceHost(fileName, source);
         var languageService = new Services.LanguageService(languageServiceHost);
 
-        return languageService.getSyntaxTree(filePath);
+        return languageService.getSyntaxTree(fileName);
     }
 
-    export function applyRuleOnFile(filePath: string, ruleName: string, ruleValue: any = true): Lint.RuleFailure[] {
-        var syntaxTree = getSyntaxTree(filePath);
-        var rule = Lint.Rules.createRule(ruleName, ruleValue);
+    export function getRule(ruleName: string) {
+        var rulesDirectory = path.join(global.process.cwd(), "build/rules");
+        return Lint.findRule(ruleName, rulesDirectory);
+    }
 
+    export function applyRuleOnFile(fileName: string, Rule: Lint.Rules.AbstractRule, ruleValue: any = true): Lint.RuleFailure[] {
+        var syntaxTree = getSyntaxTree(fileName);
+        var rule = new Rule("", ruleValue);
         return rule.apply(syntaxTree);
     }
 
     // start and end are arrays with the first and second elements
     // being (one-indexed) line and character positions respectively
-    export function createFailure(filePath: string, start: number[], end: number[], failure: string): Lint.RuleFailure {
-        var syntaxTree = getSyntaxTree(filePath);
+    export function createFailure(fileName: string, start: number[], end: number[], failure: string): Lint.RuleFailure {
+        var syntaxTree = getSyntaxTree(fileName);
         var lineMap = syntaxTree.lineMap();
         var startPosition = lineMap.getPosition(start[0] - 1, start[1] - 1);
         var endPosition = lineMap.getPosition(end[0] - 1, end[1] - 1);
 
-        return new Lint.RuleFailure(getSyntaxTree(filePath), startPosition, endPosition, failure);
+        return new Lint.RuleFailure(getSyntaxTree(fileName), startPosition, endPosition, failure);
     }
 
     // return a partial on createFailure
-    export function createFailuresOnFile(filePath: string, failure: string) {
+    export function createFailuresOnFile(fileName: string, failure: string) {
         return function(start: number[], end: number[]) {
-            return createFailure(filePath, start, end, failure);
+            return createFailure(fileName, start, end, failure);
         };
     }
 

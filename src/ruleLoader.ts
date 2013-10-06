@@ -41,7 +41,7 @@ module Lint {
         return rules;
     }
 
-    function findRule(name: string, rulesDirectory?: string) {
+    export function findRule(name: string, rulesDirectory?: string) {
         var camelizedName = _s.camelize(name + "Rule");
 
         // first check for core rules

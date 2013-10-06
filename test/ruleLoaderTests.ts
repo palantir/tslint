@@ -16,31 +16,30 @@
 
 /// <reference path='references.ts' />
 
-describe("Configuration", () => {
-    it("recognizes valid rules", () => {
+describe("Rule Loader", () => {
+    var path = require("path");
+    var rulesDirectory = path.join(global.process.cwd(), "build/rules");
+
+    it("loads core rules", () => {
         var validConfiguration = {
-            "rules": {
-                "forin": false,
-                "quotemark": "single",
-                "eofline": true,
-                "indent": 6,
-                "debug": true
-            }
+            "forin": false,
+            "quotemark": "single",
+            "eofline": true,
+            "indent": 6,
+            "debug": true
         };
-        
-        var rules = Lint.Configuration.getConfiguredRules(validConfiguration);
+
+        var rules = Lint.loadRules(validConfiguration, rulesDirectory);
         assert.equal(rules.length, 5);
     });
 
     it("skips invalid rules", () => {
         var invalidConfiguration = {
-            "rules": {
-                "invalidConfig1": true,
-                "invalidConfig2": false
-            }
+            "invalidConfig1": true,
+            "invalidConfig2": false
         };
 
-        var rules = Lint.Configuration.getConfiguredRules(invalidConfiguration);
+        var rules = Lint.loadRules(invalidConfiguration, rulesDirectory);
         assert.deepEqual(rules, []);
     });
 });
