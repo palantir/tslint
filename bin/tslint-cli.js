@@ -62727,7 +62727,7 @@ var Lint;
     var _s = require("underscore.string");
     var moduleDirectory = path.dirname(module.parent.filename);
 
-    var CORE_RULES_DIRECTORY = path.join("..", "lib", "rules");
+    var CORE_RULES_DIRECTORY = path.join("..", "build", "rules");
 
     function loadRules(ruleConfiguration, rulesDirectory) {
         var rules = [];
