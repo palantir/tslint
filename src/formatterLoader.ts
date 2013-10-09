@@ -22,8 +22,7 @@ module Lint {
     var _s = require("underscore.string");
 
     var moduleDirectory = path.dirname(module.filename);
-
-    var CORE_FORMATTERS_DIRECTORY = path.join("..", "build", "formatters");
+    var CORE_FORMATTERS_DIRECTORY = path.resolve(moduleDirectory, "..", "build", "formatters");
 
     export function findFormatter(name: string, formattersDirectory?: string) {
         var camelizedName = _s.camelize(name + "Formatter");
@@ -42,7 +41,8 @@ module Lint {
             }
         }
 
-        return undefined;
+        // else try to resolve as module
+        return loadFormatterModule(name);
     }
 
     function loadFormatter(...paths: string[]) {
@@ -55,5 +55,15 @@ module Lint {
         }
 
         return undefined;
+    }
+
+    function loadFormatterModule(name: string) {
+        var src;
+        try {
+            src = require.resolve(name);
+        } catch (e) {
+            return undefined;
+        }
+        return require(src).Formatter;
     }
 }

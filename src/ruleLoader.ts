@@ -21,9 +21,9 @@ module Lint {
     var fs = require("fs");
     var path = require("path");
     var _s = require("underscore.string");
-    var moduleDirectory = path.dirname(module.filename);
 
-    var CORE_RULES_DIRECTORY = path.join("..", "build", "rules");
+    var moduleDirectory = path.dirname(module.filename);
+    var CORE_RULES_DIRECTORY = path.resolve(moduleDirectory, "..", "build", "rules");
 
     export function loadRules(ruleConfiguration, rulesDirectory?: string): Rule[] {
         var rules = [];
