@@ -1,3 +1,5 @@
 .DS_Store
+bin/
 build/
+lib/tslint.js
 node_modules/
