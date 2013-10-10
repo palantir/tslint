@@ -33,7 +33,7 @@ module Lint {
                 var ruleValue = ruleConfiguration[ruleName];
                 var Rule = findRule(ruleName, rulesDirectory);
                 if (Rule !== undefined) {
-                    rules.push(new Rule(ruleName, ruleValue));
+                    rules.push(new Rule(ruleValue));
                 }
             }
         }

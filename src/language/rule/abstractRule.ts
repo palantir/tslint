@@ -21,16 +21,10 @@
 module Lint.Rules {
 
     export class AbstractRule implements Lint.Rule {
-        private name: string;
         private value: any;
 
-        constructor(name: string, value: any) {
-            this.name = name;
+        constructor(value: any) {
             this.value = value;
-        }
-
-        public getName() {
-            return this.name;
         }
 
         public getOptions(): any[] {

@@ -17,10 +17,6 @@
 /// <reference path='../../lib/tslint.d.ts' />
 
 export class Formatter extends Lint.Formatters.AbstractFormatter {
-    constructor() {
-        super("json");
-    }
-
     public format(failures: Lint.RuleFailure[]): string {
         var failuresJSON = [];
 

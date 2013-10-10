@@ -17,10 +17,6 @@
 /// <reference path='../../lib/tslint.d.ts' />
 
 export class Formatter extends Lint.Formatters.AbstractFormatter {
-    constructor() {
-        super("prose");
-    }
-
     public format(failures: Lint.RuleFailure[]): string {
         var output = "";
         for (var i = 0; i < failures.length; ++i) {

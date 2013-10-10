@@ -20,8 +20,6 @@
 module Lint {
 
     export interface Rule {
-        getName(): string;
-
         getOptions(): any[];
 
         isEnabled(): boolean;

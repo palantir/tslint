@@ -26554,7 +26554,7 @@ var Lint;
                 var ruleValue = ruleConfiguration[ruleName];
                 var Rule = findRule(ruleName, rulesDirectory);
                 if (Rule !== undefined) {
-                    rules.push(new Rule(ruleName, ruleValue));
+                    rules.push(new Rule(ruleValue));
                 }
             }
         }
@@ -26620,8 +26620,7 @@ var Lint;
         var fs = require("fs");
         var path = require("path");
 
-        var CONFIG_FILENAME1 = ".tslintrc";
-        var CONFIG_FILENAME2 = "tslint.json";
+        var CONFIG_FILENAME = "tslint.json";
 
         function findConfiguration(configFile) {
             if (!configFile) {
@@ -26629,14 +26628,10 @@ var Lint;
                 var parentPath = currentPath;
 
                 while (true) {
-                    var filePath1 = path.join(currentPath, CONFIG_FILENAME1);
-                    var filePath2 = path.join(currentPath, CONFIG_FILENAME2);
+                    var filePath = path.join(currentPath, CONFIG_FILENAME);
 
-                    if (fs.existsSync(filePath1)) {
-                        configFile = filePath1;
-                        break;
-                    } else if (fs.existsSync(filePath2)) {
-                        configFile = filePath2;
+                    if (fs.existsSync(filePath)) {
+                        configFile = filePath;
                         break;
                     }
 
@@ -55671,6 +55666,7 @@ var TypeScript;
             FormattingRequestKind[FormattingRequestKind["FormatOnEnter"] = 2] = "FormatOnEnter";
             FormattingRequestKind[FormattingRequestKind["FormatOnSemicolon"] = 3] = "FormatOnSemicolon";
             FormattingRequestKind[FormattingRequestKind["FormatOnClosingCurlyBrace"] = 4] = "FormatOnClosingCurlyBrace";
+
             FormattingRequestKind[FormattingRequestKind["FormatOnPaste"] = 5] = "FormatOnPaste";
         })(Formatting.FormattingRequestKind || (Formatting.FormattingRequestKind = {}));
         var FormattingRequestKind = Formatting.FormattingRequestKind;
@@ -55703,6 +55699,7 @@ var TypeScript;
             RuleAction[RuleAction["Ignore"] = 0] = "Ignore";
             RuleAction[RuleAction["Space"] = 1] = "Space";
             RuleAction[RuleAction["NewLine"] = 2] = "NewLine";
+
             RuleAction[RuleAction["Delete"] = 3] = "Delete";
         })(Formatting.RuleAction || (Formatting.RuleAction = {}));
         var RuleAction = Formatting.RuleAction;
@@ -55747,6 +55744,7 @@ var TypeScript;
     (function (Formatting) {
         (function (RuleFlags) {
             RuleFlags[RuleFlags["None"] = 0] = "None";
+
             RuleFlags[RuleFlags["CanDeleteNewLines"] = 1] = "CanDeleteNewLines";
         })(Formatting.RuleFlags || (Formatting.RuleFlags = {}));
         var RuleFlags = Formatting.RuleFlags;
@@ -56325,6 +56323,7 @@ var TypeScript;
             RulesPosition[RulesPosition["ContextRulesSpecific"] = MaskBitSize * 2] = "ContextRulesSpecific";
             RulesPosition[RulesPosition["ContextRulesAny"] = MaskBitSize * 3] = "ContextRulesAny";
             RulesPosition[RulesPosition["NoContextRulesSpecific"] = MaskBitSize * 4] = "NoContextRulesSpecific";
+
             RulesPosition[RulesPosition["NoContextRulesAny"] = MaskBitSize * 5] = "NoContextRulesAny";
         })(Formatting.RulesPosition || (Formatting.RulesPosition = {}));
         var RulesPosition = Formatting.RulesPosition;
@@ -62755,14 +62754,9 @@ var Lint;
 (function (Lint) {
     (function (Rules) {
         var AbstractRule = (function () {
-            function AbstractRule(name, value) {
-                this.name = name;
+            function AbstractRule(value) {
                 this.value = value;
             }
-            AbstractRule.prototype.getName = function () {
-                return this.name;
-            };
-
             AbstractRule.prototype.getOptions = function () {
                 var value = this.value;
                 if (Array.isArray(value) && value.length > 1) {
@@ -62803,13 +62797,8 @@ var Lint;
 (function (Lint) {
     (function (Formatters) {
         var AbstractFormatter = (function () {
-            function AbstractFormatter(name) {
-                this.name = name;
+            function AbstractFormatter() {
             }
-            AbstractFormatter.prototype.getName = function () {
-                return this.name;
-            };
-
             AbstractFormatter.prototype.format = function (failures) {
                 throw TypeScript.Errors.abstract();
             };
