@@ -3,6 +3,6 @@
 .tslintrc
 Gruntfile.js
 tslint.json
-build/test/
+build/tslint-tests.js
 src/
 test/
