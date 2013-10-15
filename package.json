@@ -17,7 +17,7 @@
   ],
   "scripts": {
     "test": "grunt",
-    "build": "grunt"
+    "install": "grunt"
   },
   "dependencies": {
     "optimist": "~0.6.0",
