@@ -28,23 +28,16 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
 
     public visitCallSignature(node: TypeScript.CallSignatureSyntax): void {
         if (this.hasOption("callSignature") && node.typeAnnotation) {
-            var typeAnnotationChildIndex = this.getHasLeadingWhitespace(<TypeScript.SyntaxNode>node),
-                preceedingChild,
-                offset = 0;
-
-            while (!preceedingChild) {
-                offset++;
-                preceedingChild = node.childAt(typeAnnotationChildIndex - offset);
-            }
-
-            var hasLeadingWhitespace = this.hasLeadingWhitespace(preceedingChild.trailingTrivia());
+            var typeAnnotationChildIndex = this.getTypeAnnotationIndex(<TypeScript.SyntaxNode>node),
+                preceedingChild = this.findPreceedingChild(<TypeScript.SyntaxNode>node, typeAnnotationChildIndex),
+                hasLeadingWhitespace = this.hasLeadingWhitespace(preceedingChild.trailingTrivia());
 
             if (hasLeadingWhitespace !== (this.getOption("callSignature") === "space")) {
                 this.addFailure(
                     this.createFailure(
                         this.positionAfter(node.childAt(typeAnnotationChildIndex - 1)),
                         1,
-                        "failed expected whitespace rule."
+                        "expected" + this.getOption("callSignature") + " in call signature."
                     )
                 );
             }
@@ -53,85 +46,129 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
 
     public visitCatchClause(node: TypeScript.CatchClauseSyntax): void {
         if (this.hasOption("catchClause") && node.typeAnnotation) {
-            var typeAnnotationChildIndex = this.getHasLeadingWhitespace(<TypeScript.SyntaxNode>node),
-                hasLeadingWhitespace = this.hasLeadingWhitespace(node.childAt(typeAnnotationChildIndex - 1).trailingTrivia());
+            var typeAnnotationChildIndex = this.getTypeAnnotationIndex(<TypeScript.SyntaxNode>node),
+                preceedingChild = this.findPreceedingChild(<TypeScript.SyntaxNode>node, typeAnnotationChildIndex),
+                hasLeadingWhitespace = this.hasLeadingWhitespace(preceedingChild.trailingTrivia());
 
             if (hasLeadingWhitespace !== (this.getOption("catchClause") === "space")) {
                 this.addFailure(
                     this.createFailure(
                         this.positionAfter(node.childAt(typeAnnotationChildIndex - 1)),
                         1,
-                        "failed expected whitespace rule."
+                        "expected" + this.getOption("catchClause") + " in catch clause."
                     )
                 );
             }
         }
     }
 
-//    public visitGetAccessorPropertyAssignment(node: TypeScript.GetAccessorPropertyAssignmentSyntax): void {
-//        var current = node.findToken(node.childCount());
-//        while (!(current.token() instanceof TypeScript.TypeAnnotationSyntax)) {
-//            current = current.previousToken();
-//        }
-//        console.log(this.hasLeadingWhitespace(current.token().trailingTrivia()));
-//    }
-//
-//    public visitGetMemberAccessorDeclaration(node: TypeScript.GetMemberAccessorDeclarationSyntax): void {
-//        var current = node.findToken(node.childCount());
-//        while (!(current.token() instanceof TypeScript.TypeAnnotationSyntax)) {
-//            current = current.previousToken();
-//        }
-//        console.log(this.hasLeadingWhitespace(current.token().trailingTrivia()));
-//    }
-//
-//    public visitIndexSignature(node: TypeScript.IndexSignatureSyntax): void {
-//        var current = node.findToken(node.childCount());
-//        while (!(current.token() instanceof TypeScript.TypeAnnotationSyntax)) {
-//            current = current.previousToken();
-//        }
-//        console.log(this.hasLeadingWhitespace(current.token().trailingTrivia()));
-//    }
-//
+    public visitGetAccessorPropertyAssignment(node: TypeScript.GetAccessorPropertyAssignmentSyntax): void {
+        if (this.hasOption("getAccessorPropertyAssignment") && node.typeAnnotation) {
+            var typeAnnotationChildIndex = this.getTypeAnnotationIndex(<TypeScript.SyntaxNode>node),
+                preceedingChild = this.findPreceedingChild(<TypeScript.SyntaxNode>node, typeAnnotationChildIndex),
+                hasLeadingWhitespace = this.hasLeadingWhitespace(preceedingChild.trailingTrivia());
+
+            if (hasLeadingWhitespace !== (this.getOption("getAccessorPropertyAssignment") === "space")) {
+                this.addFailure(
+                    this.createFailure(
+                        this.positionAfter(node.childAt(typeAnnotationChildIndex - 1)),
+                        1,
+                        "expected" + this.getOption("getAccessorPropertyAssignment") + " in getAccessorPropertyAssignment."
+                    )
+                );
+            }
+        }
+    }
+
+    public visitGetMemberAccessorDeclaration(node: TypeScript.GetMemberAccessorDeclarationSyntax): void {
+        if (this.hasOption("getMemberAccessorDeclaration") && node.typeAnnotation) {
+            var typeAnnotationChildIndex = this.getTypeAnnotationIndex(<TypeScript.SyntaxNode>node),
+                preceedingChild = this.findPreceedingChild(<TypeScript.SyntaxNode>node, typeAnnotationChildIndex),
+                hasLeadingWhitespace = this.hasLeadingWhitespace(preceedingChild.trailingTrivia());
+
+            if (hasLeadingWhitespace !== (this.getOption("getMemberAccessorDeclaration") === "space")) {
+                this.addFailure(
+                    this.createFailure(
+                        this.positionAfter(node.childAt(typeAnnotationChildIndex - 1)),
+                        1,
+                        "expected" + this.getOption("getMemberAccessorDeclaration") + " in getMemberAccessorDeclaration."
+                    )
+                );
+            }
+        }
+    }
+
+    public visitIndexSignature(node: TypeScript.IndexSignatureSyntax): void {
+        if (this.hasOption("indexSignature") && node.typeAnnotation) {
+            var typeAnnotationChildIndex = this.getTypeAnnotationIndex(<TypeScript.SyntaxNode>node),
+                preceedingChild = this.findPreceedingChild(<TypeScript.SyntaxNode>node, typeAnnotationChildIndex),
+                hasLeadingWhitespace = this.hasLeadingWhitespace(preceedingChild.trailingTrivia());
+
+            if (hasLeadingWhitespace !== (this.getOption("indexSignature") === "space")) {
+                this.addFailure(
+                    this.createFailure(
+                        this.positionAfter(node.childAt(typeAnnotationChildIndex - 1)),
+                        1,
+                        "expected" + this.getOption("indexSignature") + " in indexSignature."
+                    )
+                );
+            }
+        }
+    }
+
     public visitParameter(node: TypeScript.ParameterSyntax): void {
         if (this.hasOption("parameter") && node.typeAnnotation) {
-            var typeAnnotationChildIndex = this.getHasLeadingWhitespace(<TypeScript.SyntaxNode>node),
-                preceedingChild,
-                offset = 0;
-
-            while (!preceedingChild) {
-                offset++;
-                preceedingChild = node.childAt(typeAnnotationChildIndex - offset);
-            }
-
-            var hasLeadingWhitespace = this.hasLeadingWhitespace(preceedingChild.trailingTrivia());
+            var typeAnnotationChildIndex = this.getTypeAnnotationIndex(<TypeScript.SyntaxNode>node),
+                preceedingChild = this.findPreceedingChild(<TypeScript.SyntaxNode>node, typeAnnotationChildIndex),
+                hasLeadingWhitespace = this.hasLeadingWhitespace(preceedingChild.trailingTrivia());
 
             if (hasLeadingWhitespace !== (this.getOption("parameter") === "space")) {
                 this.addFailure(
                     this.createFailure(
                         this.positionAfter(node.childAt(typeAnnotationChildIndex - 1)),
                         1,
-                        "failed expected whitespace rule."
+                        "expected" + this.getOption("parameter") + " in parameter."
                     )
                 );
             }
         }
     }
 
-//    public visitPropertySignature(node: TypeScript.PropertySignatureSyntax): void {
-//        var current = node.findToken(node.childCount());
-//        while (!(current.token() instanceof TypeScript.TypeAnnotationSyntax)) {
-//            current = current.previousToken();
-//        }
-//        console.log(this.hasLeadingWhitespace(current.token().trailingTrivia()));
-//    }
-//
-//    public visitVariableDeclarator(node: TypeScript.VariableDeclaratorSyntax): void {
-//        var current = node.findToken(node.childCount());
-//        while (!(current.token() instanceof TypeScript.TypeAnnotationSyntax)) {
-//            current = current.previousToken();
-//        }
-//        console.log(this.hasLeadingWhitespace(current.token().trailingTrivia()));
-//    }
+    public visitPropertySignature(node: TypeScript.PropertySignatureSyntax): void {
+        if (this.hasOption("propertySignature") && node.typeAnnotation) {
+            var typeAnnotationChildIndex = this.getTypeAnnotationIndex(<TypeScript.SyntaxNode>node),
+                preceedingChild = this.findPreceedingChild(<TypeScript.SyntaxNode>node, typeAnnotationChildIndex),
+                hasLeadingWhitespace = this.hasLeadingWhitespace(preceedingChild.trailingTrivia());
+
+            if (hasLeadingWhitespace !== (this.getOption("propertySignature") === "space")) {
+                this.addFailure(
+                    this.createFailure(
+                        this.positionAfter(node.childAt(typeAnnotationChildIndex - 1)),
+                        1,
+                        "expected" + this.getOption("propertySignature") + " in propertySignature."
+                    )
+                );
+            }
+        }
+    }
+
+    public visitVariableDeclarator(node: TypeScript.VariableDeclaratorSyntax): void {
+        if (this.hasOption("variableDeclarator") && node.typeAnnotation) {
+            var typeAnnotationChildIndex = this.getTypeAnnotationIndex(<TypeScript.SyntaxNode>node),
+                preceedingChild = this.findPreceedingChild(<TypeScript.SyntaxNode>node, typeAnnotationChildIndex),
+                hasLeadingWhitespace = this.hasLeadingWhitespace(preceedingChild.trailingTrivia());
+
+            if (hasLeadingWhitespace !== (this.getOption("variableDeclarator") === "space")) {
+                this.addFailure(
+                    this.createFailure(
+                        this.positionAfter(node.childAt(typeAnnotationChildIndex - 1)),
+                        1,
+                        "expected" + this.getOption("variableDeclarator") + " in variableDeclarator."
+                    )
+                );
+            }
+        }
+    }
 
     public hasOption(option: string): boolean {
         var options = this.getOptions()[0];
@@ -149,14 +186,26 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
         return options[option];
     }
 
-    private getHasLeadingWhitespace(node: TypeScript.SyntaxNode): number {
+    private getTypeAnnotationIndex(node: TypeScript.SyntaxNode): number {
         var index = 0,
             current = node.childAt(index);
+
         while (!(current instanceof TypeScript.TypeAnnotationSyntax)) {
             index++;
             current = node.childAt(index);
         }
-        return index
+        return index;
+    }
+
+    private findPreceedingChild(node: TypeScript.SyntaxNode, startIndex: number): TypeScript.ISyntaxElement {
+        var preceedingChild,
+            offset = 0;
+
+        while (!preceedingChild) {
+            offset++;
+            preceedingChild = node.childAt(startIndex - offset);
+        }
+        return preceedingChild;
     }
 
     private hasLeadingWhitespace(trivia: TypeScript.ISyntaxTriviaList): boolean {
