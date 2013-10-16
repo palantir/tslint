@@ -96,5 +96,4 @@ module.exports = function(grunt) {
 
   // create default task
   grunt.registerTask('default', ['core', 'bin', 'test']);
-  grunt.registerTask('build', ['typescript:core', 'typescript:bin']);
 };
