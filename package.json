@@ -16,8 +16,7 @@
     "linter"
   ],
   "scripts": {
-    "test": "grunt",
-    "postinstall": "grunt build"
+    "test": "grunt"
   },
   "dependencies": {
     "optimist": "~0.6.0",
