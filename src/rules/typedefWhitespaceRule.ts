@@ -42,6 +42,8 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
                 );
             }
         }
+
+        super.visitCallSignature(node);
     }
 
     public visitCatchClause(node: TypeScript.CatchClauseSyntax): void {
@@ -60,6 +62,8 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
                 );
             }
         }
+
+        super.visitCatchClause(node);
     }
 
     public visitGetAccessorPropertyAssignment(node: TypeScript.GetAccessorPropertyAssignmentSyntax): void {
@@ -78,6 +82,8 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
                 );
             }
         }
+
+        super.visitGetAccessorPropertyAssignment(node);
     }
 
     public visitGetMemberAccessorDeclaration(node: TypeScript.GetMemberAccessorDeclarationSyntax): void {
@@ -96,6 +102,8 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
                 );
             }
         }
+
+        super.visitGetMemberAccessorDeclaration(node);
     }
 
     public visitIndexSignature(node: TypeScript.IndexSignatureSyntax): void {
@@ -114,6 +122,8 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
                 );
             }
         }
+
+        super.visitIndexSignature(node);
     }
 
     public visitParameter(node: TypeScript.ParameterSyntax): void {
@@ -132,6 +142,8 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
                 );
             }
         }
+
+        super.visitParameter(node);
     }
 
     public visitPropertySignature(node: TypeScript.PropertySignatureSyntax): void {
@@ -150,6 +162,8 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
                 );
             }
         }
+
+        super.visitPropertySignature(node);
     }
 
     public visitVariableDeclarator(node: TypeScript.VariableDeclaratorSyntax): void {
@@ -168,6 +182,8 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
                 );
             }
         }
+
+        super.visitVariableDeclarator(node);
     }
 
     public hasOption(option: string): boolean {
