@@ -37,7 +37,7 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
                     this.createFailure(
                         this.positionAfter(node.childAt(typeAnnotationChildIndex - 1)),
                         1,
-                        "expected" + this.getOption("callSignature") + " in call signature."
+                        "expected " + this.getOption("callSignature") + " in call signature."
                     )
                 );
             }
@@ -55,7 +55,7 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
                     this.createFailure(
                         this.positionAfter(node.childAt(typeAnnotationChildIndex - 1)),
                         1,
-                        "expected" + this.getOption("catchClause") + " in catch clause."
+                        "expected " + this.getOption("catchClause") + " in catch clause."
                     )
                 );
             }
@@ -73,7 +73,7 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
                     this.createFailure(
                         this.positionAfter(node.childAt(typeAnnotationChildIndex - 1)),
                         1,
-                        "expected" + this.getOption("getAccessorPropertyAssignment") + " in getAccessorPropertyAssignment."
+                        "expected " + this.getOption("getAccessorPropertyAssignment") + " in get accessor property assignment."
                     )
                 );
             }
@@ -91,7 +91,7 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
                     this.createFailure(
                         this.positionAfter(node.childAt(typeAnnotationChildIndex - 1)),
                         1,
-                        "expected" + this.getOption("getMemberAccessorDeclaration") + " in getMemberAccessorDeclaration."
+                        "expected " + this.getOption("getMemberAccessorDeclaration") + " in get member accessor declaration."
                     )
                 );
             }
@@ -109,7 +109,7 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
                     this.createFailure(
                         this.positionAfter(node.childAt(typeAnnotationChildIndex - 1)),
                         1,
-                        "expected" + this.getOption("indexSignature") + " in indexSignature."
+                        "expected " + this.getOption("indexSignature") + " in index signature."
                     )
                 );
             }
@@ -127,7 +127,7 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
                     this.createFailure(
                         this.positionAfter(node.childAt(typeAnnotationChildIndex - 1)),
                         1,
-                        "expected" + this.getOption("parameter") + " in parameter."
+                        "expected " + this.getOption("parameter") + " in parameter."
                     )
                 );
             }
@@ -145,7 +145,7 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
                     this.createFailure(
                         this.positionAfter(node.childAt(typeAnnotationChildIndex - 1)),
                         1,
-                        "expected" + this.getOption("propertySignature") + " in propertySignature."
+                        "expected " + this.getOption("propertySignature") + " in property signature."
                     )
                 );
             }
@@ -163,7 +163,7 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
                     this.createFailure(
                         this.positionAfter(node.childAt(typeAnnotationChildIndex - 1)),
                         1,
-                        "expected" + this.getOption("variableDeclarator") + " in variableDeclarator."
+                        "expected " + this.getOption("variableDeclarator") + " in variable declarator."
                     )
                 );
             }
