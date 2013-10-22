@@ -57,6 +57,8 @@ class NoPreceedingSpacesClass {
 class WithPreceedingSpacesClass {
     [index : number] : string
 
+    Prop : string = "some property";
+
     public get name() : string {
         return "some name";
     }

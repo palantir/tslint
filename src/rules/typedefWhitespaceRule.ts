@@ -93,7 +93,12 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
     }
 
     public hasOption(option: string): boolean {
-        var options = this.getOptions()[0];
+        var allOptions = this.getOptions();
+        if (!allOptions || allOptions.length === 0) {
+            return false;
+        }
+
+        var options = allOptions[0];
 
         if (!options) {
             return false;
@@ -103,7 +108,12 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
     }
 
     private getOption(option: string): string {
-        var options = this.getOptions()[0];
+        var allOptions = this.getOptions();
+        if (!allOptions || allOptions.length === 0) {
+            return undefined;
+        }
+
+        var options = allOptions[0];
 
         return options[option];
     }
