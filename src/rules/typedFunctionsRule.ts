@@ -17,7 +17,7 @@
 /// <reference path="../../lib/tslint.d.ts" />
 
 export class Rule extends Lint.Rules.AbstractRule {
-    public static FAILURE_STRING = "missing type declaration";
+    public static FAILURE_STRING = "expected function to have a return type.";
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
         return this.applyWithWalker(<Lint.RuleWalker>(new TypedDefinitionWalker(syntaxTree)));
@@ -31,6 +31,7 @@ class TypedDefinitionWalker extends Lint.RuleWalker {
 
         var parameters = node.parameterList.parameters;
         this.validateFunctionParameters(parameters);
+        super.visitCallSignature(node);
     }
 
     private validateReturnType(callSignature: TypeScript.CallSignatureSyntax): void {
@@ -39,7 +40,7 @@ class TypedDefinitionWalker extends Lint.RuleWalker {
             this.addFailure(this.createFailure(
                 this.positionAfter(callSignature.parameterList),
                 1,
-                "expected function to have a return type."
+                Rule.FAILURE_STRING
             ));
         }
     }
