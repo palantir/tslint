@@ -1,0 +1,3 @@
+var myFunction = function (type) {
+};
+
