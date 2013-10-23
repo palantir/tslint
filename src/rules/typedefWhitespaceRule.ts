@@ -39,13 +39,23 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
     }
 
     public visitGetAccessorPropertyAssignment(node: TypeScript.GetAccessorPropertyAssignmentSyntax): void {
-        this.checkSpace("getAccessorPropertyAssignment", node, node.typeAnnotation);
+        // TODO: The following check was not accurate/working.  Since the notation
+        //       is esoteric, this subrule is marked as not implemented until
+        //       the functionality is needed and the bugs worked out. 
+        //this.checkSpace("getAccessorPropertyAssignment", node, node.typeAnnotation);
+
+        this.addNotImplementedFailure("getAccessorPropertyAssignment");
 
         super.visitGetAccessorPropertyAssignment(node);
     }
 
     public visitGetMemberAccessorDeclaration(node: TypeScript.GetMemberAccessorDeclarationSyntax): void {
-        this.checkSpace("getMemberAccessorDeclaration", node, node.typeAnnotation);
+        // TODO: The following check was not accurate/working.  Since the notation
+        //       is esoteric, this subrule is marked as not implemented until
+        //       the functionality is needed and the bugs worked out. 
+        //this.checkSpace("getMemberAccessorDeclaration", node, node.typeAnnotation);
+
+        this.addNotImplementedFailure("getMemberAccessorDeclaration");
 
         super.visitGetMemberAccessorDeclaration(node);
     }
@@ -74,7 +84,7 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
         super.visitVariableDeclarator(node);
     }
 
-    public checkSpace(option: string, node: TypeScript.SyntaxNode, typeAnnotation: TypeScript.TypeAnnotationSyntax) {
+    public checkSpace(option: string, node: TypeScript.SyntaxNode, typeAnnotation: TypeScript.TypeAnnotationSyntax) : void {
         if (this.hasOption(option) && typeAnnotation) {
             var typeAnnotationChildIndex = this.getTypeAnnotationIndex(node),
                 preceedingChild = this.findPreceedingChild(node, typeAnnotationChildIndex),
@@ -89,6 +99,12 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
                     )
                 );
             }
+        }
+    }
+
+    private addNotImplementedFailure(option: string) : void {
+        if (this.hasOption(option)) {
+            this.addFailure(this.createFailure(0, 1, option + " not implemented."));
         }
     }
 

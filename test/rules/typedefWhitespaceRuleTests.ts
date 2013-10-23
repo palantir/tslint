@@ -33,6 +33,33 @@ describe("<typedefWhitespace, not enabled>", () => {
     });
 });
 
+describe("<typedefWhitespace, not implemented>", () => {
+    var failures;
+    var fileName = "rules/typedefWhitespace.test.ts";
+    var TypedefWhitespaceRule = Lint.Test.getRule("typedefWhitespace");
+
+    before(() => {
+        var options = [true,
+            {
+                "getAccessorPropertyAssignment": "space",
+                "getMemberAccessorDeclaration": "space",
+            }
+        ];
+        failures = Lint.Test.applyRuleOnFile(fileName, TypedefWhitespaceRule, options);
+        console.log(failures);
+    });
+
+    it("get accessor property assignment not implemented", () => {
+        var notImplementedFailure = Lint.Test.createFailure(fileName, [1, 1], [1, 2], "getAccessorPropertyAssignment not implemented.");
+        Lint.Test.assertContainsFailure(failures, notImplementedFailure);
+    });
+
+    it("get member accessor declaration not implemented", () => {
+        var notImplementedFailure = Lint.Test.createFailure(fileName, [1, 1], [1, 2], "getMemberAccessorDeclaration not implemented.");
+        Lint.Test.assertContainsFailure(failures, notImplementedFailure);
+    });
+});
+
 describe("<typedefWhitespace, required>", () => {
     var actualFailures;
     var fileName = "rules/typedefWhitespace.test.ts";
@@ -43,8 +70,6 @@ describe("<typedefWhitespace, required>", () => {
             {
                 "callSignature": "space",
                 "catchClause": "space",
-                "getAccessorPropertyAssignment": "space",
-                "getMemberAccessorDeclaration": "space",
                 "indexSignature": "space",
                 "parameter": "space",
                 "propertySignature": "space",
@@ -62,18 +87,6 @@ describe("<typedefWhitespace, required>", () => {
 
     it("enforces whitespace in catch clauses", () => {
         var expectedFailure = Lint.Test.createFailure(fileName, [31, 9], [31, 10], "expected space in catchClause.");
-
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
-    });
-
-    it("enforces whitespace in get accessor property assignment", () => {
-        var expectedFailure = Lint.Test.createFailure(fileName, [3, 2], [3, 3], "expected space in getAccessorPropertyAssignment.");
-
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
-    });
-    
-    it("enforces whitespace in get member accessor declaration", () => {
-        var expectedFailure = Lint.Test.createFailure(fileName, [52, 1], [52, 2], "expected space in getMemberAccessorDeclaration.");
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
@@ -119,8 +132,6 @@ describe("<typedefWhitespace, not allowed>", () => {
             {
                 "callSignature": "nospace",
                 "catchClause": "nospace",
-                "getAccessorPropertyAssignment": "nospace",
-                "getMemberAccessorDeclaration": "nospace",
                 "indexSignature": "nospace",
                 "parameter": "nospace",
                 "propertySignature": "nospace",
@@ -138,18 +149,6 @@ describe("<typedefWhitespace, not allowed>", () => {
 
     it("enforces no whitespace in catch clauses", () => {
         var expectedFailure = Lint.Test.createFailure(fileName, [42, 10], [42, 11], "expected nospace in catchClause.");
-
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
-    });
-
-    it("enforces no whitespace in get accessor property assignment", () => {
-        var expectedFailure = Lint.Test.createFailure(fileName, [12, 1], [12, 2], "expected nospace in getAccessorPropertyAssignment.");
-
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
-    });
-
-    it("enforces no whitespace in get member accessor declaration", () => {
-        var expectedFailure = Lint.Test.createFailure(fileName, [62, 2], [62, 3], "expected nospace in getMemberAccessorDeclaration.");
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });

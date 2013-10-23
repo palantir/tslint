@@ -39,8 +39,6 @@ Supported Rules
    to require a space or no space before the type specifier's colon. Rule options:
     * `"callSignature"` checks return type of functions
     * `"catchClause"` checks type in exception catch blocks
-    * `"getAccessorPropertyAssignment"` checks return type of object literal getters
-    * `"getMemberAccessorDeclaration"` checks return type of object getters
     * `"indexSignature"` checks index type specifier of indexers
     * `"parameter"` checks type specifier of parameters
     * `"propertySignature"` checks return types of interface properties
