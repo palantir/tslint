@@ -81,6 +81,7 @@ describe("<typedef, enabled>", () => {
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
+
     it("enforces typedef in indexSignature", () => {
         var expectedFailure = Lint.Test.createFailure(fileName, [28, 1], [28, 2], "expected indexSignature to have a typedef.");
 
