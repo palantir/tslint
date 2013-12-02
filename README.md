@@ -7,11 +7,14 @@ Supported Rules
 -----
 
 * `class-name` enforces PascalCased class and interface names.
+* `comment-format` enforces rules for single-line comments. Rule options:
+    * `"check-space"` enforces the rule that all single-line comments must begin with a space, as in `// comment`
+    * `"check-lowercase"` enforces the rule that the first non-whitespace character of a comment must be lowercase, if applicable
 * `curly` enforces braces for `if`/`for`/`do`/`while` statements.
 * `eofline` enforces the file to end with a newline.
 * `forin` enforces a `for ... in` statement to be filtered with an `if` statement.*
 * `indent` enforces consistent indentation levels (currently disabled).
-* `interface-name` enforces the rule that interface names must begin with a capital 'I' 
+* `interface-name` enforces the rule that interface names must begin with a capital 'I'
 * `label-position` enforces labels only on sensible statements.
 * `label-undefined` checks that labels are defined before usage.
 * `max-line-length` sets the maximum length of a line.
