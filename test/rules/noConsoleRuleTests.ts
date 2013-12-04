@@ -20,13 +20,15 @@ describe("<no-console>", () => {
     it("forbids access to specified console properties", () => {
         var fileName = "rules/noconsole.test.ts";
         var NoConsoleRule = Lint.Test.getRule("no-console");
-        var createFailure = Lint.Test.createFailuresOnFile(fileName, NoConsoleRule.FAILURE_STRING);
-        var dirFailure = createFailure([3, 1], [3, 12]);
-        var errorFailure = createFailure([7, 1], [7, 14]);
-        var logFailure = createFailure([2, 1], [2, 12]);
-        var warnFailure = createFailure([6, 1], [6, 13]);
+        var dirFailure = Lint.Test.createFailuresOnFile(fileName, NoConsoleRule.FAILURE_STRING_PART + "console.dir")([3, 1], [3, 12]);
+        var errorFailure = Lint.Test.createFailuresOnFile(fileName, NoConsoleRule.FAILURE_STRING_PART + "console.error")([7, 1], [7, 14]);
+        var logFailure = Lint.Test.createFailuresOnFile(fileName, NoConsoleRule.FAILURE_STRING_PART + "console.log")([2, 1], [2, 12]);
+        var warnFailure = Lint.Test.createFailuresOnFile(fileName, NoConsoleRule.FAILURE_STRING_PART + "console.warn")([6, 1], [6, 13]);
 
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, NoConsoleRule, [true, "dir", "error", "log", "warn"]);
         Lint.Test.assertContainsFailure(actualFailures, dirFailure);
+        Lint.Test.assertContainsFailure(actualFailures, errorFailure);
+        Lint.Test.assertContainsFailure(actualFailures, logFailure);
+        Lint.Test.assertContainsFailure(actualFailures, warnFailure);
     });
 });
