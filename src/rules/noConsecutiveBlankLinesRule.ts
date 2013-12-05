@@ -25,12 +25,10 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class BlankLinesWalker extends Lint.RuleWalker {
-
     // starting with 1 to cover the case where the file starts with two blank lines
     private newLinesInARowSeenSoFar = 1;
 
     public visitToken(token: TypeScript.ISyntaxToken): void {
-
         this.findConsecutiveBlankLinesFromTriva(token.leadingTrivia().toArray(), this.position());
         this.newLinesInARowSeenSoFar = 0;
         this.findConsecutiveBlankLinesFromTriva(token.trailingTrivia().toArray(),
