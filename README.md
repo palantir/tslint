@@ -12,13 +12,14 @@ Supported Rules
 * `eofline` enforces the file to end with a newline.
 * `forin` enforces a `for ... in` statement to be filtered with an `if` statement.*
 * `indent` enforces consistent indentation levels (currently disabled).
-* `interface-name` enforces the rule that interface names must begin with a capital 'I' 
+* `interface-name` enforces the rule that interface names must begin with a capital 'I'
 * `label-position` enforces labels only on sensible statements.
 * `label-undefined` checks that labels are defined before usage.
 * `max-line-length` sets the maximum length of a line.
 * `no-arg` disallows access to `arguments.callee`.
 * `no-bitwise` disallows bitwise operators.
 * `no-console` disallows access to the specified functions on `console`. Rule options are functions to ban on the console variable.
+* `no-consecutive-blank-lines` disallows having more than one blank line in a row in a file
 * `no-construct` disallows access to the constructors of `String`, `Number`, and `Boolean`.
 * `no-debugger` disallows `debugger` statements.
 * `no-duplicate-key` disallows duplicate keys in object literals.
