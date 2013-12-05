@@ -6,6 +6,7 @@ A linter for the TypeScript language.
 Supported Rules
 -----
 
+* `ban` bans the use of specific functions. Options are ["object", "function"] pairs that ban the use of object.function()
 * `class-name` enforces PascalCased class and interface names.
 * `curly` enforces braces for `if`/`for`/`do`/`while` statements.
 * `eofline` enforces the file to end with a newline.
@@ -17,7 +18,7 @@ Supported Rules
 * `max-line-length` sets the maximum length of a line.
 * `no-arg` disallows access to `arguments.callee`.
 * `no-bitwise` disallows bitwise operators.
-* `no-console` disallows access to the specified properties on `console`. Rule options are properties to ban on the console variable.
+* `no-console` disallows access to the specified functions on `console`. Rule options are functions to ban on the console variable.
 * `no-construct` disallows access to the constructors of `String`, `Number`, and `Boolean`.
 * `no-debugger` disallows `debugger` statements.
 * `no-duplicate-key` disallows duplicate keys in object literals.

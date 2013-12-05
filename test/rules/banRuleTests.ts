@@ -14,17 +14,15 @@
  * limitations under the License.
 */
 
-/// <reference path='../../lib/tslint.d.ts' />
+/// <reference path='../references.ts' />
 
-import BanRule = require("banRule");
+describe("<ban>", () => {
+    it("bans access to specified functions", () => {
+        var fileName = "rules/ban.test.ts";
+        var BanRule = Lint.Test.getRule("ban");
+        var dirFailure = Lint.Test.createFailuresOnFile(fileName, BanRule.FAILURE_STRING_PART + "window.toString")([2, 1], [2, 16]);
 
-export class Rule extends BanRule.Rule {
-    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        var options = this.getOptions();
-        var consoleBanWalker = new BanRule.BanFunctionWalker(syntaxTree, this.getOptions());
-        options.forEach((option) => {
-            consoleBanWalker.addBannedFunction(["console", option]);
-        });
-        return this.applyWithWalker(consoleBanWalker);
-    }
-  }
+        var actualFailures = Lint.Test.applyRuleOnFile(fileName, BanRule, [true, ["window", "toString"]]);
+        Lint.Test.assertContainsFailure(actualFailures, dirFailure);
+    });
+});
