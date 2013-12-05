@@ -17,7 +17,7 @@
 /// <reference path='../../lib/tslint.d.ts' />
 
 export class Rule extends Lint.Rules.AbstractRule {
-    public static FAILURE_STRING_PART = "use of the following function is disallowed: ";
+    public static FAILURE_STRING_PART = "function invocation disallowed: ";
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
         var options = this.getOptions();
