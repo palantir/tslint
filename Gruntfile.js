@@ -60,7 +60,7 @@ module.exports = function(grunt) {
           target: 'es5'
         },
         src: ['lib/tslint.d.ts', 'src/rules/*.ts'],
-        dest: ['build/rules/']
+        dest: 'build/rules/'
       },
 
       core_formatters: {
@@ -70,7 +70,7 @@ module.exports = function(grunt) {
           target: 'es5'
         },
         src: ['lib/tslint.d.ts', 'src/formatters/*.ts'],
-        dest: ['build/formatters/']
+        dest: 'build/formatters/'
       },
 
       test: {
@@ -91,8 +91,8 @@ module.exports = function(grunt) {
 
   // register custom tasks
   grunt.registerTask('core', ['clean:core', 'typescript:core', 'typescript:core_rules', 'typescript:core_formatters']);
-  grunt.registerTask('bin', ['clean:bin', 'typescript:bin', 'tslint:src']);
-  grunt.registerTask('test', ['clean:test', 'typescript:test', 'tslint:test', 'mochaTest']);
+  grunt.registerTask('bin', ['clean:bin', 'typescript:bin']);
+  grunt.registerTask('test', ['clean:test', 'typescript:test', 'mochaTest']);
 
   // create default task
   grunt.registerTask('default', ['core', 'bin', 'test']);

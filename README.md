@@ -45,8 +45,6 @@ Supported Rules
     * `"callSignature"` checks return type of functions
     * `"catchClause"` checks type in exception catch blocks
     * `"indexSignature"` checks index type specifier of indexers
-    * `"getAccessorPropertyAssignment"` checks get accessor assignments on object literals
-    * `"getMemberAccessorDeclaration"` checks get member accessor declarations on classes
     * `"parameter"` checks type specifier of parameters
     * `"propertySignature"` checks return types of interface properties
     * `"variableDeclarator"` checks variable declarations

@@ -25,10 +25,7 @@ module Lint.Test {
         var relativePath = path.join("test", "files", fileName);
         var source = fs.readFileSync(relativePath, "utf8");
 
-        var languageServiceHost = new Lint.LanguageServiceHost(fileName, source);
-        var languageService = new Services.LanguageService(languageServiceHost);
-
-        return languageService.getSyntaxTree(fileName);
+        return Lint.getSyntaxTree(fileName, source);
     }
 
     export function getRule(ruleName: string) {
@@ -41,7 +38,7 @@ module Lint.Test {
         return Lint.findFormatter(formatterName, formattersDirectory);
     }
 
-    export function applyRuleOnFile(fileName: string, Rule: Lint.Rules.AbstractRule, ruleValue: any = true): Lint.RuleFailure[] {
+    export function applyRuleOnFile(fileName: string, Rule: any, ruleValue: any = true): Lint.RuleFailure[] {
         var syntaxTree = getSyntaxTree(fileName);
         var rule = new Rule(ruleValue);
         return rule.apply(syntaxTree);

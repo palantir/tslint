@@ -33,33 +33,6 @@ describe("<typedefWhitespace, not enabled>", () => {
     });
 });
 
-describe("<typedefWhitespace, not implemented>", () => {
-    var failures;
-    var fileName = "rules/typedefWhitespace.test.ts";
-    var TypedefWhitespaceRule = Lint.Test.getRule("typedefWhitespace");
-
-    before(() => {
-        var options = [true,
-            {
-                "getAccessorPropertyAssignment": "space",
-                "getMemberAccessorDeclaration": "space",
-            }
-        ];
-        failures = Lint.Test.applyRuleOnFile(fileName, TypedefWhitespaceRule, options);
-        console.log(failures);
-    });
-
-    it("get accessor property assignment not implemented", () => {
-        var notImplementedFailure = Lint.Test.createFailure(fileName, [1, 1], [1, 2], "getAccessorPropertyAssignment not implemented.");
-        Lint.Test.assertContainsFailure(failures, notImplementedFailure);
-    });
-
-    it("get member accessor declaration not implemented", () => {
-        var notImplementedFailure = Lint.Test.createFailure(fileName, [1, 1], [1, 2], "getMemberAccessorDeclaration not implemented.");
-        Lint.Test.assertContainsFailure(failures, notImplementedFailure);
-    });
-});
-
 describe("<typedefWhitespace, required>", () => {
     var actualFailures;
     var fileName = "rules/typedefWhitespace.test.ts";

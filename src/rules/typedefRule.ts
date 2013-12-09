@@ -68,7 +68,7 @@ class TypedefWalker extends Lint.RuleWalker {
 
         if (this.hasOption(option) && !typeAnnotation) {
             var ns = name ? ": '" + name.text() + "'" : "";
-            var failure = this.createFailure(this.positionAfter(node), 1, "expected " + ns + " to have a typedef.");
+            var failure = this.createFailure(this.positionAfter(node), 1, "expected " + option + ns + " to have a typedef.");
             this.addFailure(failure);
         }
     }

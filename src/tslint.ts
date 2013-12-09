@@ -17,8 +17,8 @@
 /// <reference path='ruleLoader.ts'/>
 /// <reference path='configuration.ts'/>
 /// <reference path='formatterLoader.ts'/>
-/// <reference path='language/languageServiceHost.ts'/>
 
+/// <reference path='language/utils.ts'/>
 /// <reference path='language/rule/abstractRule.ts'/>
 /// <reference path='language/formatter/abstractFormatter.ts'/>
 /// <reference path='language/walker/scopeAwareRuleWalker.ts'/>
@@ -47,10 +47,7 @@ module Lint {
 
         public lint(): LintResult {
             var i, failures = [];
-
-            var languageServiceHost = new Lint.LanguageServiceHost(this.fileName, this.source);
-            var languageService = new TypeScript.Services.LanguageService(languageServiceHost);
-            var syntaxTree = languageService.getSyntaxTree(this.fileName);
+            var syntaxTree = Lint.getSyntaxTree(this.fileName, this.source);
 
             var rulesDirectory = this.getRelativePath(this.options.rulesDirectory);
             var configuredRules = Lint.loadRules(this.options.configuration.rules, rulesDirectory);

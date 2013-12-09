@@ -16,3 +16,15 @@
 
 /// <reference path='../../lib/tslint.d.ts' />
 
+import BanRule = require("./banRule");
+
+export class Rule extends BanRule.Rule {
+    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
+        var options = this.getOptions();
+        var consoleBanWalker = new BanRule.BanFunctionWalker(syntaxTree, this.getOptions());
+        options.forEach((option) => {
+            consoleBanWalker.addBannedFunction(["console", option]);
+        });
+        return this.applyWithWalker(consoleBanWalker);
+    }
+  }
