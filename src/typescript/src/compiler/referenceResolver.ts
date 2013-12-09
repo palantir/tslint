@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 
-///<reference path='typescript.ts' />
+///<reference path='references.ts' />
 
 module TypeScript {
     export interface IResolvedFile {
@@ -37,25 +37,23 @@ module TypeScript {
     }
 
     class ReferenceLocation {
-        constructor(public filePath: string, public position: number, public length: number, public isImported: boolean) {
+        constructor(public filePath: string, public lineMap: LineMap, public position: number, public length: number, public isImported: boolean) {
         }
     }
 
     export class ReferenceResolver {
         private inputFileNames: string[];
         private host: IReferenceResolverHost;
-        private settings: TypeScript.CompilationSettings;
-        private visited: { [s: string]: string };
+        private visited: IIndexable<string>;
 
-        constructor(inputFileNames: string[], host: IReferenceResolverHost, settings: TypeScript.CompilationSettings) {
+        constructor(inputFileNames: string[], host: IReferenceResolverHost, private useCaseSensitiveFileResolution: boolean) {
             this.inputFileNames = inputFileNames;
             this.host = host;
-            this.settings = settings;
             this.visited = {};
         }
 
-        public static resolve(inputFileNames: string[], host: IReferenceResolverHost, settings: TypeScript.CompilationSettings): ReferenceResolutionResult {
-            var resolver = new ReferenceResolver(inputFileNames, host, settings);
+        public static resolve(inputFileNames: string[], host: IReferenceResolverHost, useCaseSensitiveFileResolution: boolean): ReferenceResolutionResult {
+            var resolver = new ReferenceResolver(inputFileNames, host, useCaseSensitiveFileResolution);
             return resolver.resolveInputFiles();
         }
 
@@ -68,10 +66,9 @@ module TypeScript {
             }
 
             // Loop over the files and extract references
-            var referenceLocation = new ReferenceLocation(null, 0, 0, false);
-            for (var i = 0, n = this.inputFileNames.length; i < n; i++) {
-                this.resolveIncludedFile(this.inputFileNames[i], referenceLocation, result);
-            }
+            var referenceLocation = new ReferenceLocation(null, null, 0, 0, false);
+            this.inputFileNames.forEach(fileName =>
+                this.resolveIncludedFile(fileName, referenceLocation, result));
 
             return result;
         }
@@ -83,7 +80,8 @@ module TypeScript {
                 // Cannot reference self
                 if (!referenceLocation.isImported) {
                     resolutionResult.diagnostics.push(
-                        new TypeScript.Diagnostic(referenceLocation.filePath, referenceLocation.position, referenceLocation.length, DiagnosticCode.A_file_cannot_have_a_reference_to_itself, null));
+                        new TypeScript.Diagnostic(referenceLocation.filePath, referenceLocation.lineMap,
+                            referenceLocation.position, referenceLocation.length, DiagnosticCode.A_file_cannot_have_a_reference_to_itself, null));
                 }
 
                 return normalizedPath;
@@ -104,7 +102,8 @@ module TypeScript {
             if (!this.host.fileExists(normalizedPath)) {
                 if (!referenceLocation.isImported) {
                     resolutionResult.diagnostics.push(
-                        new TypeScript.Diagnostic(referenceLocation.filePath, referenceLocation.position, referenceLocation.length, DiagnosticCode.Cannot_resolve_referenced_file_0, [path]));
+                        new TypeScript.Diagnostic(referenceLocation.filePath, referenceLocation.lineMap,
+                            referenceLocation.position, referenceLocation.length, DiagnosticCode.Cannot_resolve_referenced_file_0, [path]));
                 }
 
                 return normalizedPath;
@@ -129,6 +128,8 @@ module TypeScript {
                 var dtsFileName = path + ".d.ts";
                 var tsFilePath = path + ".ts";
 
+                var start = new Date().getTime();
+
                 do {
                     // Search for ".d.ts" file firs
                     var currentFilePath = this.host.resolveRelativePath(dtsFileName, parentDirectory);
@@ -147,8 +148,10 @@ module TypeScript {
                     }
 
                     parentDirectory = this.host.getParentDirectory(parentDirectory);
-                } while (parentDirectory);
+                }
+                while (parentDirectory);
 
+                TypeScript.fileResolutionImportFileSearchTime += new Date().getTime() - start;
 
                 if (!searchFilePath) {
                     // Cannot find file import, do not reprot an error, the typeChecker will report it later on
@@ -168,7 +171,14 @@ module TypeScript {
                 this.recordVisitedFile(normalizedPath);
 
                 // Preprocess the file
-                var preprocessedFileInformation = TypeScript.preProcessFile(normalizedPath, this.host.getScriptSnapshot(normalizedPath), this.settings);
+                var start = new Date().getTime();
+                var scriptSnapshot = this.host.getScriptSnapshot(normalizedPath);
+                var totalTime = new Date().getTime() - start;
+                TypeScript.fileResolutionIOTime += totalTime;
+
+                var lineMap = LineMap1.fromScriptSnapshot(scriptSnapshot);
+                var preprocessedFileInformation = TypeScript.preProcessFile(normalizedPath, scriptSnapshot);
+                resolutionResult.diagnostics.push.apply(resolutionResult.diagnostics, preprocessedFileInformation.diagnostics);
 
                 // If this file has a "no-default-lib = 'true'" tag
                 if (preprocessedFileInformation.isLibFile) {
@@ -177,18 +187,17 @@ module TypeScript {
 
                 // Resolve explicit references
                 var normalizedReferencePaths: string[] = [];
-                for (var i = 0, n = preprocessedFileInformation.referencedFiles.length; i < n; i++) {
-                    var fileReference = preprocessedFileInformation.referencedFiles[i];
-                    var currentReferenceLocation = new ReferenceLocation(normalizedPath, fileReference.position, fileReference.length, /* isImported */ false);
+                preprocessedFileInformation.referencedFiles.forEach(fileReference => {
+                    var currentReferenceLocation = new ReferenceLocation(normalizedPath, lineMap, fileReference.position, fileReference.length, /* isImported */ false);
                     var normalizedReferencePath = this.resolveIncludedFile(fileReference.path, currentReferenceLocation, resolutionResult);
                     normalizedReferencePaths.push(normalizedReferencePath);
-                }
+                });
 
                 // Resolve imports
                 var normalizedImportPaths: string[] = [];
                 for (var i = 0; i < preprocessedFileInformation.importedFiles.length; i++) {
                     var fileImport = preprocessedFileInformation.importedFiles[i];
-                    var currentReferenceLocation = new ReferenceLocation(normalizedPath, fileImport.position, fileImport.length, /* isImported */ true);
+                    var currentReferenceLocation = new ReferenceLocation(normalizedPath, lineMap, fileImport.position, fileImport.length, /* isImported */ true);
                     var normalizedImportPath = this.resolveImportedFile(fileImport.path, currentReferenceLocation, resolutionResult);
                     normalizedImportPaths.push(normalizedImportPath);
                 }
@@ -213,7 +222,7 @@ module TypeScript {
         }
 
         private getUniqueFileId(filePath: string): string {
-            return this.settings.useCaseSensitiveFileResolution ? filePath : filePath.toLocaleUpperCase();
+            return this.useCaseSensitiveFileResolution ? filePath : filePath.toLocaleUpperCase();
         }
 
         private recordVisitedFile(filePath: string): void {
@@ -229,7 +238,7 @@ module TypeScript {
                 return false;
             }
 
-            if (this.settings.useCaseSensitiveFileResolution) {
+            if (this.useCaseSensitiveFileResolution) {
                 return filePath1 === filePath2;
             }
             else {

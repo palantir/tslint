@@ -3,7 +3,7 @@
 
 ///<reference path='typescriptServices.ts' />
 
-module Services.Breakpoints {
+module TypeScript.Services.Breakpoints {
     function createBreakpointSpanInfo(parentElement: TypeScript.PositionedElement, ...childElements: TypeScript.ISyntaxElement[]): SpanInfo {
         if (!parentElement) {
             return null;
@@ -90,8 +90,8 @@ module Services.Breakpoints {
                     case TypeScript.SyntaxKind.FunctionDeclaration:
                     case TypeScript.SyntaxKind.ConstructorDeclaration:
                     case TypeScript.SyntaxKind.MemberFunctionDeclaration:
-                    case TypeScript.SyntaxKind.GetMemberAccessorDeclaration:
-                    case TypeScript.SyntaxKind.SetMemberAccessorDeclaration:
+                    case TypeScript.SyntaxKind.GetAccessor:
+                    case TypeScript.SyntaxKind.SetAccessor:
                     case TypeScript.SyntaxKind.FunctionExpression:
                         if (!this.canHaveBreakpointInDeclaration(container)) {
                             return null;
@@ -187,8 +187,8 @@ module Services.Breakpoints {
                     case TypeScript.SyntaxKind.FunctionDeclaration:
                     case TypeScript.SyntaxKind.ConstructorDeclaration:
                     case TypeScript.SyntaxKind.MemberFunctionDeclaration:
-                    case TypeScript.SyntaxKind.GetMemberAccessorDeclaration:
-                    case TypeScript.SyntaxKind.SetMemberAccessorDeclaration:
+                    case TypeScript.SyntaxKind.GetAccessor:
+                    case TypeScript.SyntaxKind.SetAccessor:
                     case TypeScript.SyntaxKind.FunctionExpression:
                         if (!this.canHaveBreakpointInDeclaration(container)) {
                             return null;
@@ -371,8 +371,8 @@ module Services.Breakpoints {
                 case TypeScript.SyntaxKind.FunctionDeclaration:
                 case TypeScript.SyntaxKind.ConstructorDeclaration:
                 case TypeScript.SyntaxKind.MemberFunctionDeclaration:
-                case TypeScript.SyntaxKind.GetMemberAccessorDeclaration:
-                case TypeScript.SyntaxKind.SetMemberAccessorDeclaration:
+                case TypeScript.SyntaxKind.GetAccessor:
+                case TypeScript.SyntaxKind.SetAccessor:
                     return this.breakpointSpanOfDeclarationWithElements(positionedNode);
 
                 // Var, parameter and member variable declaration syntax
@@ -533,8 +533,8 @@ module Services.Breakpoints {
                     case TypeScript.SyntaxKind.FunctionDeclaration:
                     case TypeScript.SyntaxKind.ConstructorDeclaration:
                     case TypeScript.SyntaxKind.MemberFunctionDeclaration:
-                    case TypeScript.SyntaxKind.GetMemberAccessorDeclaration:
-                    case TypeScript.SyntaxKind.SetMemberAccessorDeclaration:
+                    case TypeScript.SyntaxKind.GetAccessor:
+                    case TypeScript.SyntaxKind.SetAccessor:
                     case TypeScript.SyntaxKind.Block:
 
                     // Compound Statements
@@ -618,12 +618,12 @@ module Services.Breakpoints {
                     block = (<TypeScript.MemberFunctionDeclarationSyntax>node).block;
                     break;
 
-                case TypeScript.SyntaxKind.GetMemberAccessorDeclaration:
-                    block = (<TypeScript.GetMemberAccessorDeclarationSyntax>node).block;
+                case TypeScript.SyntaxKind.GetAccessor:
+                    block = (<TypeScript.GetAccessorSyntax>node).block;
                     break;
 
-                case TypeScript.SyntaxKind.SetMemberAccessorDeclaration:
-                    block = (<TypeScript.SetMemberAccessorDeclarationSyntax>node).block;
+                case TypeScript.SyntaxKind.SetAccessor:
+                    block = (<TypeScript.SetAccessorSyntax>node).block;
                     break;
 
                 case TypeScript.SyntaxKind.FunctionExpression:
@@ -657,8 +657,8 @@ module Services.Breakpoints {
             var moduleSyntax = <TypeScript.ModuleDeclarationSyntax>positionedNode.node();
             if ((node.isModuleElement() && positionedNode.containingNode().kind() != TypeScript.SyntaxKind.SourceUnit) ||
                 node.isClassElement() ||
-                (moduleSyntax.kind() == TypeScript.SyntaxKind.ModuleDeclaration && moduleSyntax.moduleName
-                && moduleSyntax.moduleName.kind() == TypeScript.SyntaxKind.QualifiedName)) {
+                (moduleSyntax.kind() == TypeScript.SyntaxKind.ModuleDeclaration && moduleSyntax.name
+                && moduleSyntax.name.kind() == TypeScript.SyntaxKind.QualifiedName)) {
                 return createBreakpointSpanInfo(positionedNode);
             } else {
                 // Try to get the breakpoint in first element declaration
@@ -769,7 +769,7 @@ module Services.Breakpoints {
             }
 
             var parameterSyntax = <TypeScript.ParameterSyntax>parameterNode.node();
-            if (parameterSyntax.dotDotDotToken || parameterSyntax.equalsValueClause || parameterSyntax.publicOrPrivateKeyword) {
+            if (parameterSyntax.dotDotDotToken || parameterSyntax.equalsValueClause || parameterSyntax.modifiers.childCount() > 0) {
                 return createBreakpointSpanInfo(parameterNode);
             } else {
                 return null;

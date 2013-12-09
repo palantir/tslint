@@ -1,16 +1,14 @@
 // Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
 // See LICENSE.txt in the project root for complete license information.
 
-///<reference path='..\typescript.ts' />
+///<reference path='..\references.ts' />
 
 module TypeScript {
-    export class DeclCollectionContext {
+    class DeclCollectionContext {
         public isDeclareFile = false;
-        public parentChain = new Array<PullDecl>();
-        public containingModuleHasExportAssignmentArray: boolean[] = [false];
-        public isParsingAmbientModuleArray: boolean[] = [false];
+        public parentChain: PullDecl[] = [];
 
-        constructor(public semanticInfo: SemanticInfo, public scriptName: string) {
+        constructor(public document: Document, public semanticInfoChain: SemanticInfoChain, public propagateEnumConstants: boolean) {
         }
 
         public getParent() { return this.parentChain ? this.parentChain[this.parentChain.length - 1] : null; }
@@ -18,128 +16,317 @@ module TypeScript {
         public pushParent(parentDecl: PullDecl) { if (parentDecl) { this.parentChain[this.parentChain.length] = parentDecl; } }
 
         public popParent() { this.parentChain.length--; }
-
-        public foundValueDecl = false;
-
-        public containingModuleHasExportAssignment(): boolean {
-            Debug.assert(this.containingModuleHasExportAssignmentArray.length > 0);
-            return ArrayUtilities.last(this.containingModuleHasExportAssignmentArray);
-        }
-
-        public isParsingAmbientModule(): boolean {
-            Debug.assert(this.isParsingAmbientModuleArray.length > 0);
-            return ArrayUtilities.last(this.isParsingAmbientModuleArray);
-        }
     }
 
-    function preCollectImportDecls(ast: AST, parentAST: AST, context: DeclCollectionContext) {
-        var importDecl = <ImportDeclaration>ast;
-        var declFlags = PullElementFlags.None;
-        var span = TextSpan.fromBounds(importDecl.minChar, importDecl.limChar);
+    function containingModuleHasExportAssignment(ast: AST): boolean {
+        ast = ast.parent;
+        while (ast) {
+            if (ast.kind() === SyntaxKind.ModuleDeclaration) {
+                var moduleDecl = <ModuleDeclaration>ast;
+                return moduleDecl.moduleElements.any(m => m.kind() === SyntaxKind.ExportAssignment);
+            }
+            else if (ast.kind() === SyntaxKind.SourceUnit) {
+                var sourceUnit = <SourceUnit>ast;
+                return sourceUnit.moduleElements.any(m => m.kind() === SyntaxKind.ExportAssignment);
+            }
 
-        var parent = context.getParent();
-
-        if (!context.containingModuleHasExportAssignment() && hasFlag(importDecl.getVarFlags(), VariableFlags.Exported)) {
-            declFlags |= PullElementFlags.Exported;
+            ast = ast.parent;
         }
-
-        if (parent && (parent.kind === PullElementKind.WithBlock || (parent.flags & PullElementFlags.DeclaredInAWithBlock))) {
-            declFlags |= PullElementFlags.DeclaredInAWithBlock;
-        }
-
-        var decl = new PullDecl(importDecl.id.text(), importDecl.id.actualText, PullElementKind.TypeAlias, declFlags, span, context.scriptName);
-        context.semanticInfo.setDeclForAST(ast, decl);
-        context.semanticInfo.setASTForDecl(decl, ast);
-
-        parent.addChildDecl(decl);
-        decl.setParentDecl(parent);
 
         return false;
     }
 
-    function preCollectModuleDecls(ast: AST, parentAST: AST, context: DeclCollectionContext) {
-        var moduleDecl: ModuleDeclaration = <ModuleDeclaration>ast;
-        var declFlags = PullElementFlags.None;
-        var modName = (<Identifier>moduleDecl.name).text();
-        var isDynamic = isQuoted(modName) || hasFlag(moduleDecl.getModuleFlags(), ModuleFlags.IsDynamic);
-        var kind: PullElementKind = PullElementKind.Container;
+    function isParsingAmbientModule(ast: AST, context: DeclCollectionContext): boolean {
+        ast = ast.parent;
+        while (ast) {
+            if (ast.kind() === SyntaxKind.ModuleDeclaration) {
+                if (hasModifier((<ModuleDeclaration>ast).modifiers, PullElementFlags.Ambient)) {
+                    return true;
+                }
+            }
 
-        if (!context.containingModuleHasExportAssignment() && (hasFlag(moduleDecl.getModuleFlags(), ModuleFlags.Exported) || context.isParsingAmbientModule())) {
+            ast = ast.parent;
+        }
+
+        return false;
+    }
+
+    function preCollectImportDecls(ast: AST, context: DeclCollectionContext): void {
+        var importDecl = <ImportDeclaration>ast;
+        var declFlags = PullElementFlags.None;
+        var span = TextSpan.fromBounds(importDecl.start(), importDecl.end());
+
+        var parent = context.getParent();
+
+        if (hasModifier(importDecl.modifiers, PullElementFlags.Exported) && !containingModuleHasExportAssignment(ast)) {
             declFlags |= PullElementFlags.Exported;
         }
 
-        if (hasFlag(moduleDecl.getModuleFlags(), ModuleFlags.Ambient) || context.isParsingAmbientModule() || context.isDeclareFile) {
-            declFlags |= PullElementFlags.Ambient;
-        }
+        var decl = new NormalPullDecl(importDecl.identifier.valueText(), importDecl.identifier.text(), PullElementKind.TypeAlias, declFlags, parent, span);
+        context.semanticInfoChain.setDeclForAST(ast, decl);
+        context.semanticInfoChain.setASTForDecl(decl, ast);
 
-        if (hasFlag(moduleDecl.getModuleFlags(), ModuleFlags.IsEnum)) {
-            // Consider an enum 'always initialized'.
-            declFlags |= (PullElementFlags.Enum | PullElementFlags.InitializedEnum);
-            kind = PullElementKind.Enum;
-        }
-        else {
-            kind = isDynamic ? PullElementKind.DynamicModule : PullElementKind.Container;
-        }
+        // Note: it is intentional that a import does not get added to hte context stack.  An
+        // import does not introduce a new name scope, so it shouldn't be in the context decl stack.
+        // context.pushParent(decl);
+    }
 
-        var span = TextSpan.fromBounds(moduleDecl.minChar, moduleDecl.limChar);
+    function preCollectScriptDecls(sourceUnit: SourceUnit, context: DeclCollectionContext): void {
+        var span = TextSpan.fromBounds(sourceUnit.start(), sourceUnit.end());
 
-        var decl = new PullDecl(modName, (<Identifier>moduleDecl.name).actualText, kind, declFlags, span, context.scriptName);
-        context.semanticInfo.setDeclForAST(ast, decl);
-        context.semanticInfo.setASTForDecl(decl, ast);
+        var fileName = sourceUnit.fileName();
 
-        var parent = context.getParent();
-        parent.addChildDecl(decl);
-        decl.setParentDecl(parent);
+        var isExternalModule = context.document.isExternalModule();
+
+        var decl: PullDecl = new RootPullDecl(
+            /*name:*/ fileName, fileName, PullElementKind.Script, PullElementFlags.None, span, context.semanticInfoChain, isExternalModule);
+        context.semanticInfoChain.setDeclForAST(sourceUnit, decl);
+        context.semanticInfoChain.setASTForDecl(decl, sourceUnit);
+
+        context.isDeclareFile = context.document.isDeclareFile();
 
         context.pushParent(decl);
 
-        context.containingModuleHasExportAssignmentArray.push(
-            ArrayUtilities.any(moduleDecl.members.members, m => m.nodeType() === NodeType.ExportAssignment));
-        context.isParsingAmbientModuleArray.push(
-            context.isDeclareFile || ArrayUtilities.last(context.isParsingAmbientModuleArray) || hasFlag(moduleDecl.getModuleFlags(), ModuleFlags.Ambient));
+        // if it's an external module, create another decl to represent that module inside the top 
+        // level script module.
 
-        return true;
+        if (isExternalModule) {
+            var declFlags = PullElementFlags.Exported;
+            if (isDTSFile(fileName)) {
+                declFlags |= PullElementFlags.Ambient;
+            }
+
+            var moduleContainsExecutableCode = containsExecutableCode(sourceUnit.moduleElements);
+            var kind = PullElementKind.DynamicModule;
+            var span = TextSpan.fromBounds(sourceUnit.start(), sourceUnit.end());
+            var valueText = quoteStr(fileName);
+
+            var decl: PullDecl = new NormalPullDecl(valueText, fileName, kind, declFlags, context.getParent(), span);
+
+            context.semanticInfoChain.setASTForDecl(decl, sourceUnit);
+            // Note: we're overring what the script points to.  For files with an external module, 
+            // the script node will point at the external module declaration.
+            context.semanticInfoChain.setDeclForAST(sourceUnit, decl);
+
+            if (moduleContainsExecutableCode) {
+                createModuleVariableDecl(decl, sourceUnit, context);
+            }
+
+            context.pushParent(decl);
+        }
     }
 
-    function preCollectClassDecls(classDecl: ClassDeclaration, parentAST: AST, context: DeclCollectionContext) {
+    function preCollectEnumDecls(enumDecl: EnumDeclaration, context: DeclCollectionContext): void {
+        var declFlags = PullElementFlags.None;
+        var enumName = enumDecl.identifier.valueText();
+        var kind: PullElementKind = PullElementKind.Container;
+
+        if ((hasModifier(enumDecl.modifiers, PullElementFlags.Exported) || isParsingAmbientModule(enumDecl, context)) && !containingModuleHasExportAssignment(enumDecl)) {
+            declFlags |= PullElementFlags.Exported;
+        }
+
+        if (hasModifier(enumDecl.modifiers, PullElementFlags.Ambient) || isParsingAmbientModule(enumDecl, context) || context.isDeclareFile) {
+            declFlags |= PullElementFlags.Ambient;
+        }
+
+        // Consider an enum 'always initialized'.
+        declFlags |= PullElementFlags.Enum;
+        kind = PullElementKind.Enum;
+
+        var span = TextSpan.fromBounds(enumDecl.start(), enumDecl.end());
+
+        var enumDeclaration = new NormalPullDecl(enumName, enumDecl.identifier.text(), kind, declFlags, context.getParent(), span);
+        context.semanticInfoChain.setDeclForAST(enumDecl, enumDeclaration);
+        context.semanticInfoChain.setASTForDecl(enumDeclaration, enumDecl);
+
+        var enumIndexerDecl = new NormalPullDecl("", "", PullElementKind.IndexSignature, PullElementFlags.Signature, enumDeclaration, span);
+        var enumIndexerParameter = new NormalPullDecl("x", "x", PullElementKind.Parameter, PullElementFlags.None, enumIndexerDecl, span);
+
+        // create the value decl
+        var valueDecl = new NormalPullDecl(enumDeclaration.name, enumDeclaration.getDisplayName(), PullElementKind.Variable, enumDeclaration.flags, context.getParent(), enumDeclaration.getSpan());
+        enumDeclaration.setValueDecl(valueDecl);
+        context.semanticInfoChain.setASTForDecl(valueDecl, enumDecl);
+
+        context.pushParent(enumDeclaration);
+    }
+
+    function createEnumElementDecls(propertyDecl: EnumElement, context: DeclCollectionContext): void {
+        var parent = context.getParent();
+
+        var span = TextSpan.fromBounds(propertyDecl.start(), propertyDecl.end());
+
+        var decl = new PullEnumElementDecl(propertyDecl.propertyName.valueText(), propertyDecl.propertyName.text(), parent, span);
+        context.semanticInfoChain.setDeclForAST(propertyDecl, decl);
+        context.semanticInfoChain.setASTForDecl(decl, propertyDecl);
+
+        // Note: it is intentional that a enum element does not get added to hte context stack.  An 
+        // enum element does not introduce a new name scope, so it shouldn't be in the context decl stack.
+        // context.pushParent(decl);
+    }
+
+    function preCollectModuleDecls(moduleDecl: ModuleDeclaration, context: DeclCollectionContext): void {
+        var declFlags = PullElementFlags.None;
+
+        var moduleContainsExecutableCode = containsExecutableCode(moduleDecl.moduleElements);
+
+        var isDynamic = moduleDecl.stringLiteral !== null;
+
+        if ((hasModifier(moduleDecl.modifiers, PullElementFlags.Exported) || isParsingAmbientModule(moduleDecl, context)) && !containingModuleHasExportAssignment(moduleDecl)) {
+            declFlags |= PullElementFlags.Exported;
+        }
+
+        if (hasModifier(moduleDecl.modifiers, PullElementFlags.Ambient) || isParsingAmbientModule(moduleDecl, context) || context.isDeclareFile) {
+            declFlags |= PullElementFlags.Ambient;
+        }
+
+        var kind = isDynamic ? PullElementKind.DynamicModule : PullElementKind.Container;
+
+        var span = TextSpan.fromBounds(moduleDecl.start(), moduleDecl.end());
+
+        if (moduleDecl.stringLiteral) {
+            var valueText = quoteStr(moduleDecl.stringLiteral.valueText());
+            var text = moduleDecl.stringLiteral.text();
+
+            var decl = new NormalPullDecl(valueText, text, kind, declFlags, context.getParent(), span);
+
+            context.semanticInfoChain.setDeclForAST(moduleDecl, decl);
+            context.semanticInfoChain.setDeclForAST(moduleDecl.stringLiteral, decl);
+            context.semanticInfoChain.setASTForDecl(decl, moduleDecl.stringLiteral);
+
+            if (moduleContainsExecutableCode) {
+                createModuleVariableDecl(decl, moduleDecl.stringLiteral, context);
+            }
+
+            context.pushParent(decl);
+        }
+        else {
+            // Module has a name or dotted name.
+            var moduleNames = getModuleNames(moduleDecl.name);
+            for (var i = 0, n = moduleNames.length; i < n; i++) {
+                var moduleName = moduleNames[i];
+
+                // All the inner module decls are exported.
+                var specificFlags = declFlags;
+                if (i > 0) {
+                    specificFlags |= PullElementFlags.Exported;
+                }
+
+                var decl = new NormalPullDecl(moduleName.valueText(), moduleName.text(), kind, specificFlags, context.getParent(), span);
+
+                //// The innermost moduleDecl maps to the entire ModuleDeclaration node.
+                //// All the other ones map to the name node.  i.e. module A.B.C { }
+                ////
+                //// The decl for C points to the entire module declaration.  The decls for A and B
+                //// will point at the A and B nodes respectively.
+                //var ast = (i === (moduleName.length - 1))
+                //    ? moduleDecl
+                //    : moduleName;
+                context.semanticInfoChain.setDeclForAST(moduleDecl, decl);
+                context.semanticInfoChain.setDeclForAST(moduleName, decl);
+                context.semanticInfoChain.setASTForDecl(decl, moduleName);
+
+                if (moduleContainsExecutableCode) {
+                    createModuleVariableDecl(decl, moduleName, context);
+                }
+
+                context.pushParent(decl);
+            }
+        }
+    }
+
+    export function getModuleNames(name: AST, result?: Identifier[]): Identifier[] {
+        result = result || [];
+
+        if (name.kind() === SyntaxKind.QualifiedName) {
+            getModuleNames((<QualifiedName>name).left, result);
+            result.push((<QualifiedName>name).right);
+        }
+        else {
+            result.push(<Identifier>name);
+        }
+
+        return result;
+    }
+
+    function createModuleVariableDecl(decl: PullDecl, moduleNameAST: AST, context: DeclCollectionContext): void {
+        decl.setFlags(decl.flags | getInitializationFlag(decl));
+
+        // create the value decl
+        var valueDecl = new NormalPullDecl(decl.name, decl.getDisplayName(), PullElementKind.Variable, decl.flags, context.getParent(), decl.getSpan());
+        decl.setValueDecl(valueDecl);
+        context.semanticInfoChain.setASTForDecl(valueDecl, moduleNameAST);
+    }
+
+    function containsExecutableCode(members: ISyntaxList2): boolean {
+        for (var i = 0, n = members.childCount(); i < n; i++) {
+            var member = members.childAt(i);
+
+            // October 11, 2013
+            // Internal modules are either instantiated or non-instantiated. A non-instantiated 
+            // module is an internal module containing only interface types and other non - 
+            // instantiated modules. 
+            //
+            // Note: small spec deviation.  We don't consider an import statement sufficient to
+            // consider a module instantiated.  After all, if there is an import, but no actual
+            // code that references the imported value, then there's no need to emit the import
+            // or the module.
+            if (member.kind() === SyntaxKind.ModuleDeclaration) {
+                var moduleDecl = <ModuleDeclaration>member;
+
+                // If we have a module in us, and it contains executable code, then we
+                // contain executable code.
+                if (containsExecutableCode(moduleDecl.moduleElements)) {
+                    return true;
+                }
+            }
+            else if (member.kind() !== SyntaxKind.InterfaceDeclaration && member.kind() !== SyntaxKind.ImportDeclaration) {
+                // If we contain anything that's not an interface declaration, then we contain
+                // executable code.
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    function preCollectClassDecls(classDecl: ClassDeclaration, context: DeclCollectionContext): void {
         var declFlags = PullElementFlags.None;
         var constructorDeclKind = PullElementKind.Variable;
 
-        if (!context.containingModuleHasExportAssignment() && (hasFlag(classDecl.getVarFlags(), VariableFlags.Exported) || context.isParsingAmbientModule())) {
+        if ((hasModifier(classDecl.modifiers, PullElementFlags.Exported) || isParsingAmbientModule(classDecl, context)) && !containingModuleHasExportAssignment(classDecl)) {
             declFlags |= PullElementFlags.Exported;
         }
 
-        if (hasFlag(classDecl.getVarFlags(), VariableFlags.Ambient) || context.isParsingAmbientModule() || context.isDeclareFile) {
+        if (hasModifier(classDecl.modifiers, PullElementFlags.Ambient) || isParsingAmbientModule(classDecl, context) || context.isDeclareFile) {
             declFlags |= PullElementFlags.Ambient;
         }
 
-        var span = TextSpan.fromBounds(classDecl.minChar, classDecl.limChar);
+        var span = TextSpan.fromBounds(classDecl.start(), classDecl.end());
+        var parent = context.getParent();
 
-        var decl = new PullDecl(classDecl.name.text(), classDecl.name.actualText, PullElementKind.Class, declFlags, span, context.scriptName);
+        var decl = new NormalPullDecl(classDecl.identifier.valueText(), classDecl.identifier.text(), PullElementKind.Class, declFlags, parent, span);
 
-        var constructorDecl = new PullDecl(classDecl.name.text(), classDecl.name.actualText, constructorDeclKind, declFlags | PullElementFlags.ClassConstructorVariable, span, context.scriptName);
+        var constructorDecl = new NormalPullDecl(classDecl.identifier.valueText(), classDecl.identifier.text(), constructorDeclKind, declFlags | PullElementFlags.ClassConstructorVariable, parent, span);
 
         decl.setValueDecl(constructorDecl);
 
-        var parent = context.getParent();
-        parent.addChildDecl(decl);
-        parent.addChildDecl(constructorDecl);
-        decl.setParentDecl(parent);
-        constructorDecl.setParentDecl(parent);
+        context.semanticInfoChain.setDeclForAST(classDecl, decl);
+        context.semanticInfoChain.setASTForDecl(decl, classDecl);
+        context.semanticInfoChain.setASTForDecl(constructorDecl, classDecl);
 
         context.pushParent(decl);
-
-        context.semanticInfo.setDeclForAST(classDecl, decl);
-        context.semanticInfo.setASTForDecl(decl, classDecl);
-        context.semanticInfo.setASTForDecl(constructorDecl, classDecl);
-
-        return true;
     }
 
-    function createObjectTypeDeclaration(interfaceDecl: InterfaceDeclaration, context: DeclCollectionContext) {
+    function preCollectObjectTypeDecls(objectType: ObjectType, context: DeclCollectionContext): void {
+        // if this is the 'body' of an interface declaration, then we don't want to create a decl 
+        // here.  We want the interface decl to be the parent decl of all the members we visit.
+        if (objectType.parent.kind() === SyntaxKind.InterfaceDeclaration) {
+            return;
+        }
+
         var declFlags = PullElementFlags.None;
 
-        var span = TextSpan.fromBounds(interfaceDecl.minChar, interfaceDecl.limChar);
+        var span = TextSpan.fromBounds(objectType.start(), objectType.end());
 
         var parent = context.getParent();
 
@@ -147,63 +334,41 @@ module TypeScript {
             declFlags |= PullElementFlags.DeclaredInAWithBlock;
         }
 
-        var decl = new PullDecl("", "", PullElementKind.ObjectType, declFlags, span, context.scriptName);
-        context.semanticInfo.setDeclForAST(interfaceDecl, decl);
-        context.semanticInfo.setASTForDecl(decl, interfaceDecl);
-
-        // if we're collecting a decl for a type annotation, we don't want to add the decl to the parent scope
-        if (parent) {
-            parent.addChildDecl(decl);
-            decl.setParentDecl(parent);
-        }
+        var decl = new NormalPullDecl("", "", PullElementKind.ObjectType, declFlags, parent, span);
+        context.semanticInfoChain.setDeclForAST(objectType, decl);
+        context.semanticInfoChain.setASTForDecl(decl, objectType);
 
         context.pushParent(decl);
-
-        return true;
     }
 
-    function preCollectInterfaceDecls(interfaceDecl: InterfaceDeclaration, parentAST: AST, context: DeclCollectionContext) {
+    function preCollectInterfaceDecls(interfaceDecl: InterfaceDeclaration, context: DeclCollectionContext): void {
         var declFlags = PullElementFlags.None;
 
-        // PULLTODO
-        if (interfaceDecl.getFlags() & ASTFlags.TypeReference) {
-            return createObjectTypeDeclaration(interfaceDecl, context);
-        }
-
-        if (!context.containingModuleHasExportAssignment() && (hasFlag(interfaceDecl.getVarFlags(), VariableFlags.Exported) || context.isParsingAmbientModule())) {
+        if ((hasModifier(interfaceDecl.modifiers, PullElementFlags.Exported) || isParsingAmbientModule(interfaceDecl, context)) && !containingModuleHasExportAssignment(interfaceDecl)) {
             declFlags |= PullElementFlags.Exported;
         }
 
-        var span = TextSpan.fromBounds(interfaceDecl.minChar, interfaceDecl.limChar);
-
-        var decl = new PullDecl(interfaceDecl.name.text(), interfaceDecl.name.actualText, PullElementKind.Interface, declFlags, span, context.scriptName);
-        context.semanticInfo.setDeclForAST(interfaceDecl, decl);
-        context.semanticInfo.setASTForDecl(decl, interfaceDecl);
-
+        var span = TextSpan.fromBounds(interfaceDecl.start(), interfaceDecl.end());
         var parent = context.getParent();
 
-        // if we're collecting a decl for a type annotation, we don't want to add the decl to the parent scope
-        if (parent) {
-            parent.addChildDecl(decl);
-            decl.setParentDecl(parent);
-        }
+        var decl = new NormalPullDecl(interfaceDecl.identifier.valueText(), interfaceDecl.identifier.text(), PullElementKind.Interface, declFlags, parent, span);
+        context.semanticInfoChain.setDeclForAST(interfaceDecl, decl);
+        context.semanticInfoChain.setASTForDecl(decl, interfaceDecl);
 
         context.pushParent(decl);
-
-        return true;
     }
 
-    function preCollectParameterDecl(argDecl: Parameter, parentAST: AST, context: DeclCollectionContext) {
+    function preCollectParameterDecl(argDecl: Parameter, context: DeclCollectionContext): void {
         var declFlags = PullElementFlags.None;
 
-        if (hasFlag(argDecl.getVarFlags(), VariableFlags.Private)) {
+        if (hasModifier(argDecl.modifiers, PullElementFlags.Private)) {
             declFlags |= PullElementFlags.Private;
         }
         else {
             declFlags |= PullElementFlags.Public;
         }
 
-        if (hasFlag(argDecl.getFlags(), ASTFlags.OptionalName) || hasFlag(argDecl.id.getFlags(), ASTFlags.OptionalName)) {
+        if (argDecl.questionToken !== null || argDecl.equalsValueClause !== null || argDecl.dotDotDotToken !== null) {
             declFlags |= PullElementFlags.Optional;
         }
 
@@ -213,49 +378,54 @@ module TypeScript {
             declFlags |= PullElementFlags.DeclaredInAWithBlock;
         }
 
-        var span = TextSpan.fromBounds(argDecl.minChar, argDecl.limChar);
+        var span = TextSpan.fromBounds(argDecl.start(), argDecl.end());
 
-        var decl = new PullDecl(argDecl.id.text(), argDecl.id.actualText, PullElementKind.Parameter, declFlags, span, context.scriptName);
+        var decl = new NormalPullDecl(argDecl.identifier.valueText(), argDecl.identifier.text(), PullElementKind.Parameter, declFlags, parent, span);
 
-        parent.addChildDecl(decl);
-        decl.setParentDecl(parent);
+        // If it has a default arg, record the fact that the parent has default args (we will need this during resolution)
+        if (argDecl.equalsValueClause) {
+            parent.flags |= PullElementFlags.HasDefaultArgs;
+        }
+
+        if (parent.kind == PullElementKind.ConstructorMethod) {
+            decl.setFlag(PullElementFlags.ConstructorParameter);
+        }
 
         // if it's a property type, we'll need to add it to the parent's parent as well
-        if (hasFlag(argDecl.getVarFlags(), VariableFlags.Property)) {
-            var propDecl = new PullDecl(argDecl.id.text(), argDecl.id.actualText, PullElementKind.Property, declFlags, span, context.scriptName);
+        var isPublicOrPrivate = hasModifier(argDecl.modifiers, PullElementFlags.Public | PullElementFlags.Private);
+        var isInConstructor = parent.kind === PullElementKind.ConstructorMethod;
+        if (isPublicOrPrivate && isInConstructor) {
+            var parentsParent = context.parentChain[context.parentChain.length - 2];
+            var propDecl = new NormalPullDecl(argDecl.identifier.valueText(), argDecl.identifier.text(), PullElementKind.Property, declFlags, parentsParent, span);
             propDecl.setValueDecl(decl);
             decl.setFlag(PullElementFlags.PropertyParameter);
-            context.parentChain[context.parentChain.length - 2].addChildDecl(propDecl);
-            propDecl.setParentDecl(context.parentChain[context.parentChain.length - 2]);
-            context.semanticInfo.setASTForDecl(decl, argDecl);
-            context.semanticInfo.setASTForDecl(propDecl, argDecl);
-            context.semanticInfo.setDeclForAST(argDecl, propDecl);
-        }
-        else {
-            context.semanticInfo.setASTForDecl(decl, argDecl);
-            context.semanticInfo.setDeclForAST(argDecl, decl);
-        }
+            propDecl.setFlag(PullElementFlags.PropertyParameter);
 
-        if (argDecl.typeExpr &&
-            ((<TypeReference>argDecl.typeExpr).term.nodeType() === NodeType.InterfaceDeclaration ||
-            (<TypeReference>argDecl.typeExpr).term.nodeType() === NodeType.FunctionDeclaration)) {
-
-            var declCollectionContext = new DeclCollectionContext(context.semanticInfo, context.scriptName);
-
-            if (parent) {
-                declCollectionContext.pushParent(parent);
+            if (parent.kind == PullElementKind.ConstructorMethod) {
+                propDecl.setFlag(PullElementFlags.ConstructorParameter);
             }
 
-            getAstWalkerFactory().walk((<TypeReference>argDecl.typeExpr).term, preCollectDecls, postCollectDecls, null, declCollectionContext);
+            context.semanticInfoChain.setASTForDecl(decl, argDecl);
+            context.semanticInfoChain.setASTForDecl(propDecl, argDecl);
+            context.semanticInfoChain.setDeclForAST(argDecl, propDecl);
+        }
+        else {
+            context.semanticInfoChain.setASTForDecl(decl, argDecl);
+            context.semanticInfoChain.setDeclForAST(argDecl, decl);
         }
 
-        return false;
+        // Record this decl in its parent in the declGroup with the corresponding name
+        parent.addVariableDeclToGroup(decl);
+        
+        // Note: it is intentional that a parameter does not get added to hte context stack.  A 
+        // parameter does not introduce a new name scope, so it shouldn't be in the context decl stack.
+        // context.pushParent(decl);
     }
 
-    function preCollectTypeParameterDecl(typeParameterDecl: TypeParameter, parentAST: AST, context: DeclCollectionContext) {
+    function preCollectTypeParameterDecl(typeParameterDecl: TypeParameter, context: DeclCollectionContext): void {
         var declFlags = PullElementFlags.None;
 
-        var span = TextSpan.fromBounds(typeParameterDecl.minChar, typeParameterDecl.limChar);
+        var span = TextSpan.fromBounds(typeParameterDecl.start(), typeParameterDecl.end());
 
         var parent = context.getParent();
 
@@ -263,123 +433,80 @@ module TypeScript {
             declFlags |= PullElementFlags.DeclaredInAWithBlock;
         }
 
-        var decl = new PullDecl(typeParameterDecl.name.text(), typeParameterDecl.name.actualText, PullElementKind.TypeParameter, declFlags, span, context.scriptName);
-        context.semanticInfo.setASTForDecl(decl, typeParameterDecl);
-        context.semanticInfo.setDeclForAST(typeParameterDecl, decl);
+        var decl = new NormalPullDecl(typeParameterDecl.identifier.valueText(), typeParameterDecl.identifier.text(), PullElementKind.TypeParameter, declFlags, parent, span);
+        context.semanticInfoChain.setASTForDecl(decl, typeParameterDecl);
+        context.semanticInfoChain.setDeclForAST(typeParameterDecl, decl);
 
-        parent.addChildDecl(decl);
-        decl.setParentDecl(parent);
-
-        if (typeParameterDecl.constraint &&
-            ((<TypeReference>typeParameterDecl.constraint).term.nodeType() === NodeType.InterfaceDeclaration ||
-            (<TypeReference>typeParameterDecl.constraint).term.nodeType() === NodeType.FunctionDeclaration)) {
-
-            var declCollectionContext = new DeclCollectionContext(context.semanticInfo, context.scriptName);
-
-            if (parent) {
-                declCollectionContext.pushParent(parent);
-            }
-
-            getAstWalkerFactory().walk((<TypeReference>typeParameterDecl.constraint).term, preCollectDecls, postCollectDecls, null, declCollectionContext);
-        }
-
-        return true;
+        // Note: it is intentional that a type parameter does not get added to hte context stack.
+        // A type parameter does not introduce a new name scope, so it shouldn't be in the 
+        // context decl stack.
+        // context.pushParent(decl);
     }
 
     // interface properties
-    function createPropertySignature(propertyDecl: VariableDeclarator, context: DeclCollectionContext) {
+    function createPropertySignature(propertyDecl: PropertySignature, context: DeclCollectionContext): void {
         var declFlags = PullElementFlags.Public;
         var parent = context.getParent();
-        var declType = parent.kind === PullElementKind.Enum ? PullElementKind.EnumMember : PullElementKind.Property;
+        var declType = PullElementKind.Property;
 
-        if (hasFlag(propertyDecl.id.getFlags(), ASTFlags.OptionalName)) {
+        if (propertyDecl.questionToken !== null) {
             declFlags |= PullElementFlags.Optional;
         }
 
-        if (propertyDecl.constantValue !== null) {
-            declFlags |= PullElementFlags.Constant;
-        }
+        var span = TextSpan.fromBounds(propertyDecl.start(), propertyDecl.end());
 
-        var span = TextSpan.fromBounds(propertyDecl.minChar, propertyDecl.limChar);
+        var decl = new NormalPullDecl(propertyDecl.propertyName.valueText(), propertyDecl.propertyName.text(), declType, declFlags, parent, span);
+        context.semanticInfoChain.setDeclForAST(propertyDecl, decl);
+        context.semanticInfoChain.setASTForDecl(decl, propertyDecl);
 
-        var decl = new PullDecl(propertyDecl.id.text(), propertyDecl.id.actualText, declType, declFlags, span, context.scriptName);
-        context.semanticInfo.setDeclForAST(propertyDecl, decl);
-        context.semanticInfo.setASTForDecl(decl, propertyDecl);
-
-        parent.addChildDecl(decl);
-        decl.setParentDecl(parent);
-
-        if (propertyDecl.typeExpr &&
-            ((<TypeReference>propertyDecl.typeExpr).term.nodeType() === NodeType.InterfaceDeclaration ||
-            (<TypeReference>propertyDecl.typeExpr).term.nodeType() === NodeType.FunctionDeclaration)) {
-
-            var declCollectionContext = new DeclCollectionContext(context.semanticInfo, context.scriptName);
-
-            if (parent) {
-                declCollectionContext.pushParent(parent);
-            }
-
-            getAstWalkerFactory().walk((<TypeReference>propertyDecl.typeExpr).term, preCollectDecls, postCollectDecls, null, declCollectionContext);
-        }
-
-        return false;
+        // Note: it is intentional that a var decl does not get added to hte context stack.  A var
+        // decl does not introduce a new name scope, so it shouldn't be in the context decl stack.
+        // context.pushParent(decl);
     }
 
     // class member variables
-    function createMemberVariableDeclaration(memberDecl: VariableDeclarator, context: DeclCollectionContext) {
+    function createMemberVariableDeclaration(memberDecl: MemberVariableDeclaration, context: DeclCollectionContext): void {
         var declFlags = PullElementFlags.None;
         var declType = PullElementKind.Property;
 
-        if (hasFlag(memberDecl.getVarFlags(), VariableFlags.Private)) {
+        if (hasModifier(memberDecl.modifiers, PullElementFlags.Private)) {
             declFlags |= PullElementFlags.Private;
         }
         else {
             declFlags |= PullElementFlags.Public;
         }
 
-        if (hasFlag(memberDecl.getVarFlags(), VariableFlags.Static)) {
+        if (hasModifier(memberDecl.modifiers, PullElementFlags.Static)) {
             declFlags |= PullElementFlags.Static;
         }
 
-        var span = TextSpan.fromBounds(memberDecl.minChar, memberDecl.limChar);
-
-        var decl = new PullDecl(memberDecl.id.text(), memberDecl.id.actualText, declType, declFlags, span, context.scriptName);
-        context.semanticInfo.setDeclForAST(memberDecl, decl);
-        context.semanticInfo.setASTForDecl(decl, memberDecl);
-
+        var span = TextSpan.fromBounds(memberDecl.start(), memberDecl.end());
         var parent = context.getParent();
-        parent.addChildDecl(decl);
-        decl.setParentDecl(parent);
 
-        if (memberDecl.typeExpr &&
-            ((<TypeReference>memberDecl.typeExpr).term.nodeType() === NodeType.InterfaceDeclaration ||
-            (<TypeReference>memberDecl.typeExpr).term.nodeType() === NodeType.FunctionDeclaration)) {
+        var decl = new NormalPullDecl(memberDecl.variableDeclarator.propertyName.valueText(), memberDecl.variableDeclarator.propertyName.text(), declType, declFlags, parent, span);
+        context.semanticInfoChain.setDeclForAST(memberDecl, decl);
+        context.semanticInfoChain.setDeclForAST(memberDecl.variableDeclarator, decl);
+        context.semanticInfoChain.setASTForDecl(decl, memberDecl);
 
-            var declCollectionContext = new DeclCollectionContext(context.semanticInfo, context.scriptName);
-
-            if (parent) {
-                declCollectionContext.pushParent(parent);
-            }
-
-            getAstWalkerFactory().walk((<TypeReference>memberDecl.typeExpr).term, preCollectDecls, postCollectDecls, null, declCollectionContext);
-        }
-
-        return false;
+        // Note: it is intentional that a var decl does not get added to hte context stack.  A var
+        // decl does not introduce a new name scope, so it shouldn't be in the context decl stack.
+        // context.pushParent(decl);
     }
 
-    function createVariableDeclaration(varDecl: VariableDeclarator, context: DeclCollectionContext) {
+    function createVariableDeclaration(varDecl: VariableDeclarator, context: DeclCollectionContext): void {
         var declFlags = PullElementFlags.None;
         var declType = PullElementKind.Variable;
 
-        if (!context.containingModuleHasExportAssignment() && (hasFlag(varDecl.getVarFlags(), VariableFlags.Exported) || context.isParsingAmbientModule())) {
+        var modifiers = getVariableDeclaratorModifiers(varDecl);
+        if ((hasModifier(modifiers, PullElementFlags.Exported) || isParsingAmbientModule(varDecl, context)) && !containingModuleHasExportAssignment(varDecl)) {
             declFlags |= PullElementFlags.Exported;
         }
 
-        if (hasFlag(varDecl.getVarFlags(), VariableFlags.Ambient) || context.isParsingAmbientModule() || context.isDeclareFile) {
+        if (hasModifier(modifiers, PullElementFlags.Ambient) || isParsingAmbientModule(varDecl, context) || context.isDeclareFile) {
             declFlags |= PullElementFlags.Ambient;
         }
 
-        var span = TextSpan.fromBounds(varDecl.minChar, varDecl.limChar);
+        var span = TextSpan.fromBounds(varDecl.start(), varDecl.end());
 
         var parent = context.getParent();
 
@@ -387,52 +514,36 @@ module TypeScript {
             declFlags |= PullElementFlags.DeclaredInAWithBlock;
         }
 
-        var decl = new PullDecl(varDecl.id.text(), varDecl.id.actualText, declType, declFlags, span, context.scriptName);
-        context.semanticInfo.setDeclForAST(varDecl, decl);
-        context.semanticInfo.setASTForDecl(decl, varDecl);
+        var decl = new NormalPullDecl(varDecl.propertyName.valueText(), varDecl.propertyName.text(), declType, declFlags, parent, span);
+        context.semanticInfoChain.setDeclForAST(varDecl, decl);
+        context.semanticInfoChain.setASTForDecl(decl, varDecl);
 
-        parent.addChildDecl(decl);
-        decl.setParentDecl(parent);
-
-        if (varDecl.typeExpr &&
-            ((<TypeReference>varDecl.typeExpr).term.nodeType() === NodeType.InterfaceDeclaration ||
-            (<TypeReference>varDecl.typeExpr).term.nodeType() === NodeType.FunctionDeclaration)) {
-
-            var declCollectionContext = new DeclCollectionContext(context.semanticInfo, context.scriptName);
-
-            if (parent) {
-                declCollectionContext.pushParent(parent);
-            }
-
-            getAstWalkerFactory().walk((<TypeReference>varDecl.typeExpr).term, preCollectDecls, postCollectDecls, null, declCollectionContext);
+        if (parent) {
+            // Record this decl in its parent in the declGroup with the corresponding name
+            parent.addVariableDeclToGroup(decl);
         }
 
-        return false;
+        // Note: it is intentional that a var decl does not get added to hte context stack.  A var
+        // decl does not introduce a new name scope, so it shouldn't be in the context decl stack.
+        // context.pushParent(decl);
     }
 
-    function preCollectVarDecls(ast: AST, parentAST: AST, context: DeclCollectionContext) {
+    function preCollectVarDecls(ast: AST, context: DeclCollectionContext): void {
+        if (ast.parent.kind() === SyntaxKind.MemberVariableDeclaration) {
+            // Already handled this node.
+            return;
+        }
+
         var varDecl = <VariableDeclarator>ast;
-        var declFlags = PullElementFlags.None;
-        var declType = PullElementKind.Variable;
-        var isProperty = false;
-        var isStatic = false;
-
-        if (hasFlag(varDecl.getVarFlags(), VariableFlags.ClassProperty)) {
-            return createMemberVariableDeclaration(varDecl, context);
-        }
-        else if (hasFlag(varDecl.getVarFlags(), VariableFlags.Property)) {
-            return createPropertySignature(varDecl, context);
-        }
-
-        return createVariableDeclaration(varDecl, context);
+        createVariableDeclaration(varDecl, context);
     }
 
     // function type expressions
-    function createFunctionTypeDeclaration(functionTypeDeclAST: FunctionDeclaration, context: DeclCollectionContext) {
+    function createFunctionTypeDeclaration(functionTypeDeclAST: FunctionType, context: DeclCollectionContext): void {
         var declFlags = PullElementFlags.Signature;
         var declType = PullElementKind.FunctionType;
 
-        var span = TextSpan.fromBounds(functionTypeDeclAST.minChar, functionTypeDeclAST.limChar);
+        var span = TextSpan.fromBounds(functionTypeDeclAST.start(), functionTypeDeclAST.end());
 
         var parent = context.getParent();
 
@@ -440,38 +551,19 @@ module TypeScript {
             declFlags |= PullElementFlags.DeclaredInAWithBlock;
         }
 
-        var decl = new PullDecl("", "", declType, declFlags, span, context.semanticInfo.getPath());
-        context.semanticInfo.setDeclForAST(functionTypeDeclAST, decl);
-        context.semanticInfo.setASTForDecl(decl, functionTypeDeclAST);
-
-        // parent could be null if we're collecting decls for a lambda expression
-        if (parent) {
-            parent.addChildDecl(decl);
-            decl.setParentDecl(parent);
-        }
+        var decl = new NormalPullDecl("", "", declType, declFlags, parent, span);
+        context.semanticInfoChain.setDeclForAST(functionTypeDeclAST, decl);
+        context.semanticInfoChain.setASTForDecl(decl, functionTypeDeclAST);
 
         context.pushParent(decl);
-
-        if (functionTypeDeclAST.returnTypeAnnotation &&
-            ((<TypeReference>functionTypeDeclAST.returnTypeAnnotation).term.nodeType() === NodeType.InterfaceDeclaration ||
-            (<TypeReference>functionTypeDeclAST.returnTypeAnnotation).term.nodeType() === NodeType.FunctionDeclaration)) {
-
-            var declCollectionContext = new DeclCollectionContext(context.semanticInfo, context.scriptName);
-
-            declCollectionContext.pushParent(decl);
-
-            getAstWalkerFactory().walk((<TypeReference>functionTypeDeclAST.returnTypeAnnotation).term, preCollectDecls, postCollectDecls, null, declCollectionContext);
-        }
-
-        return true;
     }
 
     // constructor types
-    function createConstructorTypeDeclaration(constructorTypeDeclAST: FunctionDeclaration, context: DeclCollectionContext) {
+    function createConstructorTypeDeclaration(constructorTypeDeclAST: ConstructorType, context: DeclCollectionContext): void {
         var declFlags = PullElementFlags.None;
         var declType = PullElementKind.ConstructorType;
 
-        var span = TextSpan.fromBounds(constructorTypeDeclAST.minChar, constructorTypeDeclAST.limChar);
+        var span = TextSpan.fromBounds(constructorTypeDeclAST.start(), constructorTypeDeclAST.end());
 
         var parent = context.getParent();
 
@@ -479,42 +571,23 @@ module TypeScript {
             declFlags |= PullElementFlags.DeclaredInAWithBlock;
         }
 
-        var decl = new PullDecl("", "", declType, declFlags, span, context.semanticInfo.getPath());
-        context.semanticInfo.setDeclForAST(constructorTypeDeclAST, decl);
-        context.semanticInfo.setASTForDecl(decl, constructorTypeDeclAST);
-
-        // parent could be null if we're collecting decls for a lambda expression
-        if (parent) {
-            parent.addChildDecl(decl);
-            decl.setParentDecl(parent);
-        }
+        var decl = new NormalPullDecl("", "", declType, declFlags, parent, span);
+        context.semanticInfoChain.setDeclForAST(constructorTypeDeclAST, decl);
+        context.semanticInfoChain.setASTForDecl(decl, constructorTypeDeclAST);
 
         context.pushParent(decl);
-
-        if (constructorTypeDeclAST.returnTypeAnnotation &&
-            ((<TypeReference>constructorTypeDeclAST.returnTypeAnnotation).term.nodeType() === NodeType.InterfaceDeclaration ||
-            (<TypeReference>constructorTypeDeclAST.returnTypeAnnotation).term.nodeType() === NodeType.FunctionDeclaration)) {
-
-            var declCollectionContext = new DeclCollectionContext(context.semanticInfo, context.scriptName);
-
-            declCollectionContext.pushParent(decl);
-
-            getAstWalkerFactory().walk((<TypeReference>constructorTypeDeclAST.returnTypeAnnotation).term, preCollectDecls, postCollectDecls, null, declCollectionContext);
-        }
-
-        return true;
     }
 
     // function declaration
-    function createFunctionDeclaration(funcDeclAST: FunctionDeclaration, context: DeclCollectionContext) {
+    function createFunctionDeclaration(funcDeclAST: FunctionDeclaration, context: DeclCollectionContext): void {
         var declFlags = PullElementFlags.None;
         var declType = PullElementKind.Function;
 
-        if (!context.containingModuleHasExportAssignment() && (hasFlag(funcDeclAST.getFunctionFlags(), FunctionFlags.Exported) || context.isParsingAmbientModule())) {
+        if ((hasModifier(funcDeclAST.modifiers, PullElementFlags.Exported) || isParsingAmbientModule(funcDeclAST, context)) && !containingModuleHasExportAssignment(funcDeclAST)) {
             declFlags |= PullElementFlags.Exported;
         }
 
-        if (hasFlag(funcDeclAST.getFunctionFlags(), FunctionFlags.Ambient) || context.isParsingAmbientModule() || context.isDeclareFile) {
+        if (hasModifier(funcDeclAST.modifiers, PullElementFlags.Ambient) || isParsingAmbientModule(funcDeclAST, context) || context.isDeclareFile) {
             declFlags |= PullElementFlags.Ambient;
         }
 
@@ -522,7 +595,7 @@ module TypeScript {
             declFlags |= PullElementFlags.Signature;
         }
 
-        var span = TextSpan.fromBounds(funcDeclAST.minChar, funcDeclAST.limChar);
+        var span = TextSpan.fromBounds(funcDeclAST.start(), funcDeclAST.end());
 
         var parent = context.getParent();
 
@@ -530,40 +603,28 @@ module TypeScript {
             declFlags |= PullElementFlags.DeclaredInAWithBlock;
         }
 
-        var decl = new PullDecl(funcDeclAST.name.text(), funcDeclAST.name.actualText, declType, declFlags, span, context.scriptName);
-        context.semanticInfo.setDeclForAST(funcDeclAST, decl);
-        context.semanticInfo.setASTForDecl(decl, funcDeclAST);
-
-        if (parent) {
-            parent.addChildDecl(decl);
-            decl.setParentDecl(parent);
-        }
+        var decl = new NormalPullDecl(funcDeclAST.identifier.valueText(), funcDeclAST.identifier.text(), declType, declFlags, parent, span);
+        context.semanticInfoChain.setDeclForAST(funcDeclAST, decl);
+        context.semanticInfoChain.setASTForDecl(decl, funcDeclAST);
 
         context.pushParent(decl);
-
-        if (funcDeclAST.returnTypeAnnotation &&
-            ((<TypeReference>funcDeclAST.returnTypeAnnotation).term.nodeType() === NodeType.InterfaceDeclaration ||
-            (<TypeReference>funcDeclAST.returnTypeAnnotation).term.nodeType() === NodeType.FunctionDeclaration)) {
-
-            var declCollectionContext = new DeclCollectionContext(context.semanticInfo, context.scriptName);
-
-            declCollectionContext.pushParent(decl);
-
-            getAstWalkerFactory().walk((<TypeReference>funcDeclAST.returnTypeAnnotation).term, preCollectDecls, postCollectDecls, null, declCollectionContext);
-        }
-
-        return true;
     }
 
     // function expression
-    function createFunctionExpressionDeclaration(functionExpressionDeclAST: FunctionDeclaration, context: DeclCollectionContext) {
+    function createAnyFunctionExpressionDeclaration(
+        functionExpressionDeclAST: AST,
+        id: Identifier,
+        context: DeclCollectionContext,
+        displayName: Identifier = null): void {
+
         var declFlags = PullElementFlags.None;
 
-        if (hasFlag(functionExpressionDeclAST.getFunctionFlags(), FunctionFlags.IsFatArrowFunction)) {
-            declFlags |= PullElementFlags.FatArrow;
+        if (functionExpressionDeclAST.kind() === SyntaxKind.SimpleArrowFunctionExpression ||
+            functionExpressionDeclAST.kind() === SyntaxKind.ParenthesizedArrowFunctionExpression) {
+            declFlags |= PullElementFlags.ArrowFunction;
         }
 
-        var span = TextSpan.fromBounds(functionExpressionDeclAST.minChar, functionExpressionDeclAST.limChar);
+        var span = TextSpan.fromBounds(functionExpressionDeclAST.start(), functionExpressionDeclAST.end());
 
         var parent = context.getParent();
 
@@ -571,131 +632,100 @@ module TypeScript {
             declFlags |= PullElementFlags.DeclaredInAWithBlock;
         }
 
-        var name = functionExpressionDeclAST.name ? functionExpressionDeclAST.name.actualText : "";
-        var decl = new PullFunctionExpressionDecl(name, declFlags, span, context.scriptName);
-        context.semanticInfo.setDeclForAST(functionExpressionDeclAST, decl);
-        context.semanticInfo.setASTForDecl(decl, functionExpressionDeclAST);
-
-        if (parent) {
-            parent.addChildDecl(decl);
-            decl.setParentDecl(parent);
-        }
+        var name = id ? id.text() : "";
+        var displayNameText = displayName ? displayName.text() : "";
+        var decl: PullDecl = new PullFunctionExpressionDecl(name, declFlags, parent, span, displayNameText);
+        context.semanticInfoChain.setDeclForAST(functionExpressionDeclAST, decl);
+        context.semanticInfoChain.setASTForDecl(decl, functionExpressionDeclAST);
 
         context.pushParent(decl);
 
-        if (functionExpressionDeclAST.returnTypeAnnotation &&
-            ((<TypeReference>functionExpressionDeclAST.returnTypeAnnotation).term.nodeType() === NodeType.InterfaceDeclaration ||
-            (<TypeReference>functionExpressionDeclAST.returnTypeAnnotation).term.nodeType() === NodeType.FunctionDeclaration)) {
+        if (functionExpressionDeclAST.kind() === SyntaxKind.SimpleArrowFunctionExpression) {
+            var simpleArrow = <SimpleArrowFunctionExpression>functionExpressionDeclAST;
+            var declFlags = PullElementFlags.Public;
 
-            var declCollectionContext = new DeclCollectionContext(context.semanticInfo, context.scriptName);
+            var parent = context.getParent();
 
-            declCollectionContext.pushParent(decl);
+            if (hasFlag(parent.flags, PullElementFlags.DeclaredInAWithBlock)) {
+                declFlags |= PullElementFlags.DeclaredInAWithBlock;
+            }
 
-            getAstWalkerFactory().walk((<TypeReference>functionExpressionDeclAST.returnTypeAnnotation).term, preCollectDecls, postCollectDecls, null, declCollectionContext);
+            var span = TextSpan.fromBounds(simpleArrow.identifier.start(), simpleArrow.identifier.end());
+
+            var decl: PullDecl = new NormalPullDecl(simpleArrow.identifier.valueText(), simpleArrow.identifier.text(), PullElementKind.Parameter, declFlags, parent, span);
+
+            context.semanticInfoChain.setASTForDecl(decl, simpleArrow.identifier);
+            context.semanticInfoChain.setDeclForAST(simpleArrow.identifier, decl);
+
+            // Record this decl in its parent in the declGroup with the corresponding name
+            parent.addVariableDeclToGroup(decl);
         }
-
-        return true;
     }
 
-    // methods
-    function createMemberFunctionDeclaration(memberFunctionDeclAST: FunctionDeclaration, context: DeclCollectionContext) {
+    function createMemberFunctionDeclaration(funcDecl: MemberFunctionDeclaration, context: DeclCollectionContext): void {
         var declFlags = PullElementFlags.None;
         var declType = PullElementKind.Method;
 
-        if (hasFlag(memberFunctionDeclAST.getFunctionFlags(), FunctionFlags.Static)) {
+        if (hasModifier(funcDecl.modifiers, PullElementFlags.Static)) {
             declFlags |= PullElementFlags.Static;
         }
 
-        if (hasFlag(memberFunctionDeclAST.getFunctionFlags(), FunctionFlags.Private)) {
+        if (hasModifier(funcDecl.modifiers, PullElementFlags.Private)) {
             declFlags |= PullElementFlags.Private;
         }
         else {
             declFlags |= PullElementFlags.Public;
         }
 
-        if (!memberFunctionDeclAST.block) {
+        if (!funcDecl.block) {
             declFlags |= PullElementFlags.Signature;
         }
 
-        if (hasFlag(memberFunctionDeclAST.name.getFlags(), ASTFlags.OptionalName)) {
-            declFlags |= PullElementFlags.Optional;
-        }
-
-        var span = TextSpan.fromBounds(memberFunctionDeclAST.minChar, memberFunctionDeclAST.limChar);
-
-        var decl = new PullDecl(memberFunctionDeclAST.name.text(), memberFunctionDeclAST.name.actualText, declType, declFlags, span, context.scriptName);
-        context.semanticInfo.setDeclForAST(memberFunctionDeclAST, decl);
-        context.semanticInfo.setASTForDecl(decl, memberFunctionDeclAST);
-
+        var span = TextSpan.fromBounds(funcDecl.start(), funcDecl.end());
         var parent = context.getParent();
 
-        if (parent) {
-            parent.addChildDecl(decl);
-            decl.setParentDecl(parent);
-        }
+        var decl = new NormalPullDecl(funcDecl.propertyName.valueText(), funcDecl.propertyName.text(), declType, declFlags, parent, span);
+        context.semanticInfoChain.setDeclForAST(funcDecl, decl);
+        context.semanticInfoChain.setASTForDecl(decl, funcDecl);
 
         context.pushParent(decl);
-
-        if (memberFunctionDeclAST.returnTypeAnnotation &&
-            ((<TypeReference>memberFunctionDeclAST.returnTypeAnnotation).term.nodeType() === NodeType.InterfaceDeclaration ||
-            (<TypeReference>memberFunctionDeclAST.returnTypeAnnotation).term.nodeType() === NodeType.FunctionDeclaration)) {
-
-            var declCollectionContext = new DeclCollectionContext(context.semanticInfo, context.scriptName);
-
-            declCollectionContext.pushParent(decl);
-
-            getAstWalkerFactory().walk((<TypeReference>memberFunctionDeclAST.returnTypeAnnotation).term, preCollectDecls, postCollectDecls, null, declCollectionContext);
-        }
-
-        return true;
     }
 
     // index signatures
-    function createIndexSignatureDeclaration(indexSignatureDeclAST: FunctionDeclaration, context: DeclCollectionContext) {
-        var declFlags = PullElementFlags.Signature | PullElementFlags.Index;
+    function createIndexSignatureDeclaration(indexSignatureDeclAST: IndexSignature, context: DeclCollectionContext): void {
+        var declFlags = PullElementFlags.Signature;
         var declType = PullElementKind.IndexSignature;
 
-        var span = TextSpan.fromBounds(indexSignatureDeclAST.minChar, indexSignatureDeclAST.limChar);
+        var span = TextSpan.fromBounds(indexSignatureDeclAST.start(), indexSignatureDeclAST.end());
 
         var parent = context.getParent();
 
-        if (parent && (parent.kind === PullElementKind.WithBlock || (parent.flags & PullElementFlags.DeclaredInAWithBlock))) {
-            declFlags |= PullElementFlags.DeclaredInAWithBlock;
-        }
-
-        var decl = new PullDecl("", "" , declType, declFlags, span, context.scriptName);
-        context.semanticInfo.setDeclForAST(indexSignatureDeclAST, decl);
-        context.semanticInfo.setASTForDecl(decl, indexSignatureDeclAST);
-
-        if (parent) {
-            parent.addChildDecl(decl);
-            decl.setParentDecl(parent);
-        }
+        var decl = new NormalPullDecl("", "" , declType, declFlags, parent, span);
+        context.semanticInfoChain.setDeclForAST(indexSignatureDeclAST, decl);
+        context.semanticInfoChain.setASTForDecl(decl, indexSignatureDeclAST);
 
         context.pushParent(decl);
-
-        if (indexSignatureDeclAST.returnTypeAnnotation &&
-            ((<TypeReference>indexSignatureDeclAST.returnTypeAnnotation).term.nodeType() === NodeType.InterfaceDeclaration ||
-            (<TypeReference>indexSignatureDeclAST.returnTypeAnnotation).term.nodeType() === NodeType.FunctionDeclaration)) {
-
-            var declCollectionContext = new DeclCollectionContext(context.semanticInfo, context.scriptName);
-
-            if (parent) {
-                declCollectionContext.pushParent(parent);
-            }
-
-            getAstWalkerFactory().walk((<TypeReference>indexSignatureDeclAST.returnTypeAnnotation).term, preCollectDecls, postCollectDecls, null, declCollectionContext);
-        }
-
-        return true;
     }
 
     // call signatures
-    function createCallSignatureDeclaration(callSignatureDeclAST: FunctionDeclaration, context: DeclCollectionContext) {
-        var declFlags = PullElementFlags.Signature | PullElementFlags.Call;
+    function createCallSignatureDeclaration(callSignature: CallSignature, context: DeclCollectionContext): void {
+        var isChildOfObjectType = callSignature.parent && callSignature.parent.parent &&
+            callSignature.parent.kind() === SyntaxKind.SeparatedList &&
+            callSignature.parent.parent.kind() === SyntaxKind.ObjectType;
+
+        if (!isChildOfObjectType) {
+            // This was a call signature that was part of some other entity (like a function 
+            // declaration or construct signature).  Those are already handled specially and
+            // we don't want to end up making another call signature for them.  We only want
+            // to make an actual call signature if we're a standalone call signature in an 
+            // object/interface type.
+            return;
+        }
+
+        var declFlags = PullElementFlags.Signature;
         var declType = PullElementKind.CallSignature;
 
-        var span = TextSpan.fromBounds(callSignatureDeclAST.minChar, callSignatureDeclAST.limChar);
+        var span = TextSpan.fromBounds(callSignature.start(), callSignature.end());
 
         var parent = context.getParent();
 
@@ -703,37 +733,40 @@ module TypeScript {
             declFlags |= PullElementFlags.DeclaredInAWithBlock;
         }
 
-        var decl = new PullDecl("", "", declType, declFlags, span, context.scriptName);
-        context.semanticInfo.setDeclForAST(callSignatureDeclAST, decl);
-        context.semanticInfo.setASTForDecl(decl, callSignatureDeclAST);
-
-        if (parent) {
-            parent.addChildDecl(decl);
-            decl.setParentDecl(parent);
-        }
+        var decl = new NormalPullDecl("", "", declType, declFlags, parent, span);
+        context.semanticInfoChain.setDeclForAST(callSignature, decl);
+        context.semanticInfoChain.setASTForDecl(decl, callSignature);
 
         context.pushParent(decl);
+    }
 
-        if (callSignatureDeclAST.returnTypeAnnotation &&
-            ((<TypeReference>callSignatureDeclAST.returnTypeAnnotation).term.nodeType() === NodeType.InterfaceDeclaration ||
-            (<TypeReference>callSignatureDeclAST.returnTypeAnnotation).term.nodeType() === NodeType.FunctionDeclaration)) {
+    function createMethodSignatureDeclaration(method: MethodSignature, context: DeclCollectionContext): void {
+        var declFlags = PullElementFlags.None;
+        var declType = PullElementKind.Method;
 
-            var declCollectionContext = new DeclCollectionContext(context.semanticInfo, context.scriptName);
+        declFlags |= PullElementFlags.Public;
+        declFlags |= PullElementFlags.Signature;
 
-            declCollectionContext.pushParent(decl);
-
-            getAstWalkerFactory().walk((<TypeReference>callSignatureDeclAST.returnTypeAnnotation).term, preCollectDecls, postCollectDecls, null, declCollectionContext);
+        if (method.questionToken !== null) {
+            declFlags |= PullElementFlags.Optional;
         }
 
-        return true;
+        var span = TextSpan.fromBounds(method.start(), method.end());
+        var parent = context.getParent();
+
+        var decl = new NormalPullDecl(method.propertyName.valueText(), method.propertyName.text(), declType, declFlags, parent, span);
+        context.semanticInfoChain.setDeclForAST(method, decl);
+        context.semanticInfoChain.setASTForDecl(decl, method);
+
+        context.pushParent(decl);
     }
 
     // construct signatures
-    function createConstructSignatureDeclaration(constructSignatureDeclAST: FunctionDeclaration, context: DeclCollectionContext) {
-        var declFlags = PullElementFlags.Signature | PullElementFlags.Call;
+    function createConstructSignatureDeclaration(constructSignatureDeclAST: ConstructSignature, context: DeclCollectionContext): void {
+        var declFlags = PullElementFlags.Signature;
         var declType = PullElementKind.ConstructSignature;
 
-        var span = TextSpan.fromBounds(constructSignatureDeclAST.minChar, constructSignatureDeclAST.limChar);
+        var span = TextSpan.fromBounds(constructSignatureDeclAST.start(), constructSignatureDeclAST.end());
 
         var parent = context.getParent();
 
@@ -741,41 +774,23 @@ module TypeScript {
             declFlags |= PullElementFlags.DeclaredInAWithBlock;
         }
 
-        var decl = new PullDecl("", "", declType, declFlags, span, context.scriptName);
-        context.semanticInfo.setDeclForAST(constructSignatureDeclAST, decl);
-        context.semanticInfo.setASTForDecl(decl, constructSignatureDeclAST);
-
-        if (parent) {
-            parent.addChildDecl(decl);
-            decl.setParentDecl(parent);
-        }
+        var decl = new NormalPullDecl("", "", declType, declFlags, parent, span);
+        context.semanticInfoChain.setDeclForAST(constructSignatureDeclAST, decl);
+        context.semanticInfoChain.setASTForDecl(decl, constructSignatureDeclAST);
 
         context.pushParent(decl);
-
-        if (constructSignatureDeclAST.returnTypeAnnotation &&
-            ((<TypeReference>constructSignatureDeclAST.returnTypeAnnotation).term.nodeType() === NodeType.InterfaceDeclaration ||
-            (<TypeReference>constructSignatureDeclAST.returnTypeAnnotation).term.nodeType() === NodeType.FunctionDeclaration)) {
-
-            var declCollectionContext = new DeclCollectionContext(context.semanticInfo, context.scriptName);
-
-            declCollectionContext.pushParent(decl);
-
-            getAstWalkerFactory().walk((<TypeReference>constructSignatureDeclAST.returnTypeAnnotation).term, preCollectDecls, postCollectDecls, null, declCollectionContext);
-        }
-
-        return true;
     }
 
     // class constructors
-    function createClassConstructorDeclaration(constructorDeclAST: FunctionDeclaration, context: DeclCollectionContext) {
-        var declFlags = PullElementFlags.Constructor;
+    function createClassConstructorDeclaration(constructorDeclAST: ConstructorDeclaration, context: DeclCollectionContext): void {
+        var declFlags = PullElementFlags.None;
         var declType = PullElementKind.ConstructorMethod;
 
         if (!constructorDeclAST.block) {
             declFlags |= PullElementFlags.Signature;
         }
 
-        var span = TextSpan.fromBounds(constructorDeclAST.minChar, constructorDeclAST.limChar);
+        var span = TextSpan.fromBounds(constructorDeclAST.start(), constructorDeclAST.end());
 
         var parent = context.getParent();
 
@@ -788,51 +803,29 @@ module TypeScript {
             }
         }
 
-        var decl = new PullDecl(parent.name, parent.getDisplayName(), declType, declFlags, span, context.scriptName);
-        context.semanticInfo.setDeclForAST(constructorDeclAST, decl);
-        context.semanticInfo.setASTForDecl(decl, constructorDeclAST);
-
-        if (parent) {
-            parent.addChildDecl(decl);
-            decl.setParentDecl(parent);
-        }
+        var decl = new NormalPullDecl(parent.name, parent.getDisplayName(), declType, declFlags, parent, span);
+        context.semanticInfoChain.setDeclForAST(constructorDeclAST, decl);
+        context.semanticInfoChain.setASTForDecl(decl, constructorDeclAST);
 
         context.pushParent(decl);
-
-        if (constructorDeclAST.returnTypeAnnotation &&
-            ((<TypeReference>constructorDeclAST.returnTypeAnnotation).term.nodeType() === NodeType.InterfaceDeclaration ||
-            (<TypeReference>constructorDeclAST.returnTypeAnnotation).term.nodeType() === NodeType.FunctionDeclaration)) {
-
-            var declCollectionContext = new DeclCollectionContext(context.semanticInfo, context.scriptName);
-
-            declCollectionContext.pushParent(decl);
-
-            getAstWalkerFactory().walk((<TypeReference>constructorDeclAST.returnTypeAnnotation).term, preCollectDecls, postCollectDecls, null, declCollectionContext);
-        }
-
-        return true;
     }
 
-    function createGetAccessorDeclaration(getAccessorDeclAST: FunctionDeclaration, context: DeclCollectionContext) {
+    function createGetAccessorDeclaration(getAccessorDeclAST: GetAccessor, context: DeclCollectionContext): void {
         var declFlags = PullElementFlags.Public;
         var declType = PullElementKind.GetAccessor;
 
-        if (hasFlag(getAccessorDeclAST.getFunctionFlags(), FunctionFlags.Static)) {
+        if (hasModifier(getAccessorDeclAST.modifiers, PullElementFlags.Static)) {
             declFlags |= PullElementFlags.Static;
         }
 
-        if (hasFlag(getAccessorDeclAST.name.getFlags(), ASTFlags.OptionalName)) {
-            declFlags |= PullElementFlags.Optional;
-        }
-
-        if (hasFlag(getAccessorDeclAST.getFunctionFlags(), FunctionFlags.Private)) {
+        if (hasModifier(getAccessorDeclAST.modifiers, PullElementFlags.Private)) {
             declFlags |= PullElementFlags.Private;
         }
         else {
             declFlags |= PullElementFlags.Public;
-        }        
+        }
 
-        var span = TextSpan.fromBounds(getAccessorDeclAST.minChar, getAccessorDeclAST.limChar);
+        var span = TextSpan.fromBounds(getAccessorDeclAST.start(), getAccessorDeclAST.end());
 
         var parent = context.getParent();
 
@@ -840,53 +833,33 @@ module TypeScript {
             declFlags |= PullElementFlags.DeclaredInAWithBlock;
         }
 
-        var decl = new PullDecl(getAccessorDeclAST.name.text(), getAccessorDeclAST.name.actualText, declType, declFlags, span, context.scriptName);
-        context.semanticInfo.setDeclForAST(getAccessorDeclAST, decl);
-        context.semanticInfo.setASTForDecl(decl, getAccessorDeclAST);
-
-
-        if (parent) {
-            parent.addChildDecl(decl);
-            decl.setParentDecl(parent);
-        }
+        var decl = new NormalPullDecl(getAccessorDeclAST.propertyName.valueText(), getAccessorDeclAST.propertyName.text(), declType, declFlags, parent, span);
+        context.semanticInfoChain.setDeclForAST(getAccessorDeclAST, decl);
+        context.semanticInfoChain.setASTForDecl(decl, getAccessorDeclAST);
 
         context.pushParent(decl);
-
-        if (getAccessorDeclAST.returnTypeAnnotation &&
-            ((<TypeReference>getAccessorDeclAST.returnTypeAnnotation).term.nodeType() === NodeType.InterfaceDeclaration ||
-            (<TypeReference>getAccessorDeclAST.returnTypeAnnotation).term.nodeType() === NodeType.FunctionDeclaration)) {
-
-            var declCollectionContext = new DeclCollectionContext(context.semanticInfo, context.scriptName);
-
-            declCollectionContext.pushParent(decl);
-
-            getAstWalkerFactory().walk((<TypeReference>getAccessorDeclAST.returnTypeAnnotation).term, preCollectDecls, postCollectDecls, null, declCollectionContext);
-        }
-
-        return true;
     }
 
-    // set accessors
-    function createSetAccessorDeclaration(setAccessorDeclAST: FunctionDeclaration, context: DeclCollectionContext) {
+    function createFunctionExpressionDeclaration(expression: FunctionExpression, context: DeclCollectionContext): void {
+        createAnyFunctionExpressionDeclaration(expression, expression.identifier, context);
+    }
+
+    function createSetAccessorDeclaration(setAccessorDeclAST: SetAccessor, context: DeclCollectionContext): void {
         var declFlags = PullElementFlags.Public;
         var declType = PullElementKind.SetAccessor;
 
-        if (hasFlag(setAccessorDeclAST.getFunctionFlags(), FunctionFlags.Static)) {
+        if (hasModifier(setAccessorDeclAST.modifiers, PullElementFlags.Static)) {
             declFlags |= PullElementFlags.Static;
         }
 
-        if (hasFlag(setAccessorDeclAST.name.getFlags(), ASTFlags.OptionalName)) {
-            declFlags |= PullElementFlags.Optional;
-        }
-
-        if (hasFlag(setAccessorDeclAST.getFunctionFlags(), FunctionFlags.Private)) {
+        if (hasModifier(setAccessorDeclAST.modifiers, PullElementFlags.Private)) {
             declFlags |= PullElementFlags.Private;
         }
         else {
             declFlags |= PullElementFlags.Public;
-        }         
+        }
 
-        var span = TextSpan.fromBounds(setAccessorDeclAST.minChar, setAccessorDeclAST.limChar);
+        var span = TextSpan.fromBounds(setAccessorDeclAST.start(), setAccessorDeclAST.end());
 
         var parent = context.getParent();
 
@@ -894,25 +867,18 @@ module TypeScript {
             declFlags |= PullElementFlags.DeclaredInAWithBlock;
         }
 
-        var decl = new PullDecl(setAccessorDeclAST.name.actualText, setAccessorDeclAST.name.actualText, declType, declFlags, span, context.scriptName);
-        context.semanticInfo.setDeclForAST(setAccessorDeclAST, decl);
-        context.semanticInfo.setASTForDecl(decl, setAccessorDeclAST);
-
-        if (parent) {
-            parent.addChildDecl(decl);
-            decl.setParentDecl(parent);
-        }
+        var decl = new NormalPullDecl(setAccessorDeclAST.propertyName.valueText(), setAccessorDeclAST.propertyName.text(), declType, declFlags, parent, span);
+        context.semanticInfoChain.setDeclForAST(setAccessorDeclAST, decl);
+        context.semanticInfoChain.setASTForDecl(decl, setAccessorDeclAST);
 
         context.pushParent(decl);
-
-        return true;
     }
 
-    function preCollectCatchDecls(ast: AST, parentAST: AST, context: DeclCollectionContext) {
+    function preCollectCatchDecls(ast: CatchClause, context: DeclCollectionContext): void {
         var declFlags = PullElementFlags.None;
         var declType = PullElementKind.CatchBlock;
 
-        var span = TextSpan.fromBounds(ast.minChar, ast.limChar);
+        var span = TextSpan.fromBounds(ast.start(), ast.end());
 
         var parent = context.getParent();
 
@@ -920,185 +886,185 @@ module TypeScript {
             declFlags |= PullElementFlags.DeclaredInAWithBlock;
         }
 
-        var decl = new PullDecl("", "", declType, declFlags, span, context.scriptName);
-        context.semanticInfo.setDeclForAST(ast, decl);
-        context.semanticInfo.setASTForDecl(decl, ast);
-
-
-        if (parent) {
-            parent.addChildDecl(decl);
-            decl.setParentDecl(parent);
-        }
+        var decl = new NormalPullDecl("", "", declType, declFlags, parent, span);
+        context.semanticInfoChain.setDeclForAST(ast, decl);
+        context.semanticInfoChain.setASTForDecl(decl, ast);
 
         context.pushParent(decl);
 
-        return true;
-    }
-
-    function preCollectWithDecls(ast: AST, parentAST: AST, context: DeclCollectionContext) {
         var declFlags = PullElementFlags.None;
-        var declType = PullElementKind.WithBlock;
+        var declType = PullElementKind.CatchVariable;
 
-        var span = TextSpan.fromBounds(ast.minChar, ast.limChar);
+        // Create a decl for the catch clause variable.
+        var span = TextSpan.fromBounds(ast.identifier.start(), ast.identifier.end());
 
         var parent = context.getParent();
 
-        var decl = new PullDecl("", "", declType, declFlags, span, context.scriptName);
-        context.semanticInfo.setDeclForAST(ast, decl);
-        context.semanticInfo.setASTForDecl(decl, ast);
+        if (hasFlag(parent.flags, PullElementFlags.DeclaredInAWithBlock)) {
+            declFlags |= PullElementFlags.DeclaredInAWithBlock;
+        }
 
+        var decl = new NormalPullDecl(ast.identifier.valueText(), ast.identifier.text(), declType, declFlags, parent, span);
+        context.semanticInfoChain.setDeclForAST(ast.identifier, decl);
+        context.semanticInfoChain.setASTForDecl(decl, ast.identifier);
 
         if (parent) {
-            parent.addChildDecl(decl);
-            decl.setParentDecl(parent);
+            // Record this decl in its parent in the declGroup with the corresponding name
+            parent.addVariableDeclToGroup(decl);
         }
+    }
+
+    function preCollectWithDecls(ast: AST, context: DeclCollectionContext): void {
+        var declFlags = PullElementFlags.None;
+        var declType = PullElementKind.WithBlock;
+
+        var span = TextSpan.fromBounds(ast.start(), ast.end());
+
+        var parent = context.getParent();
+
+        var decl = new NormalPullDecl("", "", declType, declFlags, parent, span);
+        context.semanticInfoChain.setDeclForAST(ast, decl);
+        context.semanticInfoChain.setASTForDecl(decl, ast);
 
         context.pushParent(decl);
-
-        return true;
     }
 
-    function preCollectFuncDecls(ast: AST, parentAST: AST, context: DeclCollectionContext) {
+    function preCollectObjectLiteralDecls(ast: AST, context: DeclCollectionContext): void {
+        var span = TextSpan.fromBounds(ast.start(), ast.end());
+        var decl = new NormalPullDecl(
+            "", "", PullElementKind.ObjectLiteral, PullElementFlags.None, context.getParent(), span);
 
-        var funcDecl = <FunctionDeclaration>ast;
+        context.semanticInfoChain.setDeclForAST(ast, decl);
+        context.semanticInfoChain.setASTForDecl(decl, ast);
 
-        if (funcDecl.isConstructor) {
-            return createClassConstructorDeclaration(funcDecl, context);
-        }
-        else if (funcDecl.isGetAccessor()) {
-            return createGetAccessorDeclaration(funcDecl, context);
-        }
-        else if (funcDecl.isSetAccessor()) {
-            return createSetAccessorDeclaration(funcDecl, context);
-        }
-        else if (hasFlag(funcDecl.getFunctionFlags(), FunctionFlags.ConstructMember)) {
-            return hasFlag(funcDecl.getFlags(), ASTFlags.TypeReference) ?
-                createConstructorTypeDeclaration(funcDecl, context) :
-                createConstructSignatureDeclaration(funcDecl, context);
-        }
-        else if (hasFlag(funcDecl.getFunctionFlags(), FunctionFlags.CallMember)) {
-            return createCallSignatureDeclaration(funcDecl, context);
-        }
-        else if (hasFlag(funcDecl.getFunctionFlags(), FunctionFlags.IndexerMember)) {
-            return createIndexSignatureDeclaration(funcDecl, context);
-        }
-        else if (hasFlag(funcDecl.getFlags(), ASTFlags.TypeReference)) {
-            return createFunctionTypeDeclaration(funcDecl, context);
-        }
-        else if (hasFlag(funcDecl.getFunctionFlags(), FunctionFlags.Method)) {
-            return createMemberFunctionDeclaration(funcDecl, context);
-        }
-        else if (hasFlag(funcDecl.getFunctionFlags(), (FunctionFlags.IsFunctionExpression | FunctionFlags.IsFatArrowFunction | FunctionFlags.IsFunctionProperty))) {
-            return createFunctionExpressionDeclaration(funcDecl, context);
-        }
-
-        return createFunctionDeclaration(funcDecl, context);
+        context.pushParent(decl);
     }
 
-    export function preCollectDecls(ast: AST, parentAST: AST, walker: IAstWalker) {
-        var context: DeclCollectionContext = walker.state;
-        var go = false;
+    function preCollectSimplePropertyAssignmentDecls(propertyAssignment: SimplePropertyAssignment, context: DeclCollectionContext): void {
+        var assignmentText = getPropertyAssignmentNameTextFromIdentifier(propertyAssignment.propertyName);
+        var span = TextSpan.fromBounds(propertyAssignment.start(), propertyAssignment.end());
 
-        if (ast.nodeType() === NodeType.Script) {
-            var script: Script = <Script>ast;
-            var span = TextSpan.fromBounds(script.minChar, script.limChar);
+        var decl = new NormalPullDecl(assignmentText.memberName, assignmentText.actualText, PullElementKind.Property, PullElementFlags.Public, context.getParent(), span);
 
-            var decl = new PullDecl(context.scriptName, context.scriptName, PullElementKind.Script, PullElementFlags.None, span, context.scriptName);
-            context.semanticInfo.setDeclForAST(ast, decl);
-            context.semanticInfo.setASTForDecl(decl, ast);
+        context.semanticInfoChain.setDeclForAST(propertyAssignment, decl);
+        context.semanticInfoChain.setASTForDecl(decl, propertyAssignment);
 
-            context.pushParent(decl);
-            context.isDeclareFile = script.isDeclareFile;
+        // Note: it is intentional that a property assignment does not get added to hte context 
+        // stack.  A prop assignment does not introduce a new name scope, so it shouldn't be in
+        // the context decl stack.
+        // context.pushParent(decl);
+    }
 
-            go = true;
-        }
-        else if (ast.nodeType() === NodeType.List) {
-            go = true;
-        }
-        else if (ast.nodeType() === NodeType.Block) {
-            go = true;
-        }
-        else if (ast.nodeType() === NodeType.VariableDeclaration) {
-            go = true;
-        }
-        else if (ast.nodeType() === NodeType.VariableStatement) {
-            go = true;
-        }
-        else if (ast.nodeType() === NodeType.ModuleDeclaration) {
-            go = preCollectModuleDecls(ast, parentAST, context);
-        }
-        else if (ast.nodeType() === NodeType.ClassDeclaration) {
-            go = preCollectClassDecls(<ClassDeclaration>ast, parentAST, context);
-        }
-        else if (ast.nodeType() === NodeType.InterfaceDeclaration) {
-            go = preCollectInterfaceDecls(<InterfaceDeclaration>ast, parentAST, context);
-        }
-        else if (ast.nodeType() === NodeType.Parameter) {
-            go = preCollectParameterDecl(<Parameter>ast, parentAST, context);
-        }
-        else if (ast.nodeType() === NodeType.VariableDeclarator) {
-            go = preCollectVarDecls(ast, parentAST, context);
-        }
-        else if (ast.nodeType() === NodeType.FunctionDeclaration) {
-            go = preCollectFuncDecls(ast, parentAST, context);
-        }
-        else if (ast.nodeType() === NodeType.ImportDeclaration) {
-            go = preCollectImportDecls(ast, parentAST, context);
-        }
-        else if (ast.nodeType() === NodeType.TypeParameter) {
-            go = preCollectTypeParameterDecl(<TypeParameter>ast, parentAST, context);
-        }
-        else if (ast.nodeType() === NodeType.IfStatement) {
-            go = true;
-        }
-        else if (ast.nodeType() === NodeType.ForStatement) {
-            go = true;
-        }
-        else if (ast.nodeType() === NodeType.ForInStatement) {
-            go = true;
-        }
-        else if (ast.nodeType() === NodeType.WhileStatement) {
-            go = true;
-        }
-        else if (ast.nodeType() === NodeType.DoStatement) {
-            go = true;
-        }
-        else if (ast.nodeType() === NodeType.CommaExpression) {
-            go = true;
-        }
-        else if (ast.nodeType() === NodeType.ReturnStatement) {
-            // want to be able to bind lambdas in return positions
-            go = true;
-        }
-        else if (ast.nodeType() === NodeType.SwitchStatement || ast.nodeType() === NodeType.CaseClause) {
-            go = true;
-        }
+    function preCollectFunctionPropertyAssignmentDecls(propertyAssignment: FunctionPropertyAssignment, context: DeclCollectionContext): void {
+        var assignmentText = getPropertyAssignmentNameTextFromIdentifier(propertyAssignment.propertyName);
+        var span = TextSpan.fromBounds(propertyAssignment.start(), propertyAssignment.end());
 
-        // call and 'new' expressions may contain lambdas with bindings...
-        else if (ast.nodeType() === NodeType.InvocationExpression) {
-            // want to be able to bind lambdas in return positions
-            go = true;
-        }
-        else if (ast.nodeType() === NodeType.ObjectCreationExpression) {
-            // want to be able to bind lambdas in return positions
-            go = true;
-        }
-        else if (ast.nodeType() === NodeType.TryStatement) {
-            go = true;
-        }
-        else if (ast.nodeType() === NodeType.LabeledStatement) {
-            go = true;
-        }
-        else if (ast.nodeType() === NodeType.CatchClause) {
-            go = preCollectCatchDecls(ast, parentAST, context);
-        }
-        else if (ast.nodeType() === NodeType.WithStatement) {
-            go = preCollectWithDecls(ast, parentAST, context);
-        }
+        var decl = new NormalPullDecl(assignmentText.memberName, assignmentText.actualText, PullElementKind.Property, PullElementFlags.Public, context.getParent(), span);
 
-        walker.options.goChildren = go;
+        context.semanticInfoChain.setDeclForAST(propertyAssignment, decl);
+        context.semanticInfoChain.setASTForDecl(decl, propertyAssignment);
 
-        return ast;
+        createAnyFunctionExpressionDeclaration(
+            propertyAssignment, propertyAssignment.propertyName, context, propertyAssignment.propertyName);
+    }
+
+    function preCollectDecls(ast: AST, context: DeclCollectionContext) {
+        switch (ast.kind()) {
+            case SyntaxKind.SourceUnit:
+                preCollectScriptDecls(<SourceUnit>ast, context);
+                break;
+            case SyntaxKind.EnumDeclaration:
+                preCollectEnumDecls(<EnumDeclaration>ast, context);
+                break;
+            case SyntaxKind.EnumElement:
+                createEnumElementDecls(<EnumElement>ast, context);
+                break;
+            case SyntaxKind.ModuleDeclaration:
+                preCollectModuleDecls(<ModuleDeclaration>ast, context);
+                break;
+            case SyntaxKind.ClassDeclaration:
+                preCollectClassDecls(<ClassDeclaration>ast, context);
+                break;
+            case SyntaxKind.InterfaceDeclaration:
+                preCollectInterfaceDecls(<InterfaceDeclaration>ast, context);
+                break;
+            case SyntaxKind.ObjectType:
+                preCollectObjectTypeDecls(<ObjectType>ast, context);
+                break;
+            case SyntaxKind.Parameter:
+                preCollectParameterDecl(<Parameter>ast, context);
+                break;
+            case SyntaxKind.MemberVariableDeclaration:
+                createMemberVariableDeclaration(<MemberVariableDeclaration>ast, context);
+                break;
+            case SyntaxKind.PropertySignature:
+                createPropertySignature(<PropertySignature>ast, context);
+                break;
+            case SyntaxKind.VariableDeclarator:
+                preCollectVarDecls(ast, context);
+                break;
+            case SyntaxKind.ConstructorDeclaration:
+                createClassConstructorDeclaration(<ConstructorDeclaration>ast, context);
+                break;
+            case SyntaxKind.GetAccessor:
+                createGetAccessorDeclaration(<GetAccessor>ast, context);
+                break;
+            case SyntaxKind.SetAccessor:
+                createSetAccessorDeclaration(<SetAccessor>ast, context);
+                break;
+            case SyntaxKind.FunctionExpression:
+                createFunctionExpressionDeclaration(<FunctionExpression>ast, context);
+                break;
+            case SyntaxKind.MemberFunctionDeclaration:
+                createMemberFunctionDeclaration(<MemberFunctionDeclaration>ast, context);
+                break;
+            case SyntaxKind.IndexSignature:
+                createIndexSignatureDeclaration(<IndexSignature>ast, context);
+                break;
+            case SyntaxKind.FunctionType:
+                createFunctionTypeDeclaration(<FunctionType>ast, context);
+                break;
+            case SyntaxKind.ConstructorType:
+                createConstructorTypeDeclaration(<ConstructorType>ast, context);
+                break;
+            case SyntaxKind.CallSignature:
+                createCallSignatureDeclaration(<CallSignature>ast, context);
+                break;
+            case SyntaxKind.ConstructSignature:
+                createConstructSignatureDeclaration(<ConstructSignature>ast, context);
+                break;
+            case SyntaxKind.MethodSignature:
+                createMethodSignatureDeclaration(<MethodSignature>ast, context);
+                break;
+            case SyntaxKind.FunctionDeclaration:
+                createFunctionDeclaration(<FunctionDeclaration>ast, context);
+                break;
+            case SyntaxKind.SimpleArrowFunctionExpression:
+            case SyntaxKind.ParenthesizedArrowFunctionExpression:
+                createAnyFunctionExpressionDeclaration(ast, /*id*/null, context);
+                break;
+            case SyntaxKind.ImportDeclaration:
+                preCollectImportDecls(ast, context);
+                break;
+            case SyntaxKind.TypeParameter:
+                preCollectTypeParameterDecl(<TypeParameter>ast, context);
+                break;
+            case SyntaxKind.CatchClause:
+                preCollectCatchDecls(<CatchClause>ast, context);
+                break;
+            case SyntaxKind.WithStatement:
+                preCollectWithDecls(ast, context);
+                break;
+            case SyntaxKind.ObjectLiteralExpression:
+                preCollectObjectLiteralDecls(ast, context);
+                break;
+            case SyntaxKind.SimplePropertyAssignment:
+                preCollectSimplePropertyAssignmentDecls(<SimplePropertyAssignment>ast, context);
+                break;
+            case SyntaxKind.FunctionPropertyAssignment:
+                preCollectFunctionPropertyAssignmentDecls(<FunctionPropertyAssignment>ast, context);
+                break;
+        }
     }
 
     function isContainer(decl: PullDecl): boolean {
@@ -1108,9 +1074,6 @@ module TypeScript {
     function getInitializationFlag(decl: PullDecl): PullElementFlags {
         if (decl.kind & PullElementKind.Container) {
             return PullElementFlags.InitializedModule;
-        }
-        else if (decl.kind & PullElementKind.Enum) {
-            return PullElementFlags.InitializedEnum;
         }
         else if (decl.kind & PullElementKind.DynamicModule) {
             return PullElementFlags.InitializedDynamicModule;
@@ -1125,9 +1088,6 @@ module TypeScript {
         if (kind & PullElementKind.Container) {
             return (decl.flags & PullElementFlags.InitializedModule) !== 0;
         }
-        else if (kind & PullElementKind.Enum) {
-            return (decl.flags & PullElementFlags.InitializedEnum) != 0;
-        }
         else if (kind & PullElementKind.DynamicModule) {
             return (decl.flags & PullElementFlags.InitializedDynamicModule) !== 0;
         }
@@ -1135,96 +1095,173 @@ module TypeScript {
         return false;
     }
 
-    export function postCollectDecls(ast: AST, parentAST: AST, walker: IAstWalker) {
-        var context: DeclCollectionContext = walker.state;
-        var parentDecl: PullDecl;
-        var initFlag = PullElementFlags.None;
+    function postCollectDecls(ast: AST, context: DeclCollectionContext) {
+        var currentDecl = context.getParent();
 
-        // Note that we never pop the Script - after the traversal, it should be the
-        // one parent left in the context
+        // We only want to pop the module decls when we're done with the module itself, and not 
+        // when we are done with the module names.
+        if (ast.kind() === SyntaxKind.IdentifierName || ast.kind() === SyntaxKind.StringLiteral) {
+            if (currentDecl.kind === PullElementKind.Container || currentDecl.kind === PullElementKind.DynamicModule) {
+                return;
+            }
+        }
 
-
-        if (ast.nodeType() === NodeType.ModuleDeclaration) {
-            var thisModule = context.getParent();
-            context.popParent();
-            context.containingModuleHasExportAssignmentArray.pop();
-            context.isParsingAmbientModuleArray.pop();
-
-            parentDecl = context.getParent();
-
-            if (hasInitializationFlag(thisModule)) {
-
-                if (parentDecl && isContainer(parentDecl)) {
-                    initFlag = getInitializationFlag(parentDecl);
-                    parentDecl.setFlags(parentDecl.flags | initFlag);
-                }
-
-                // create the value decl
-                var valueDecl = new PullDecl(thisModule.name, thisModule.getDisplayName(), PullElementKind.Variable, thisModule.flags, thisModule.getSpan(), context.scriptName);
-
-                thisModule.setValueDecl(valueDecl);
-
-                context.semanticInfo.setASTForDecl(valueDecl, ast);
-
-                if (parentDecl) {
-                    parentDecl.addChildDecl(valueDecl);
-                    valueDecl.setParentDecl(parentDecl);
+        if (ast.kind() === SyntaxKind.ModuleDeclaration) {
+            var moduleDeclaration = <ModuleDeclaration>ast;
+            if (moduleDeclaration.stringLiteral) {
+                Debug.assert(currentDecl.ast() === moduleDeclaration.stringLiteral);
+                context.popParent();
+            }
+            else {
+                var moduleNames = getModuleNames(moduleDeclaration.name);
+                for (var i = moduleNames.length - 1; i >= 0; i--) {
+                    var moduleName = moduleNames[i];
+                    Debug.assert(currentDecl.ast() === moduleName);
+                    context.popParent();
+                    currentDecl = context.getParent();
                 }
             }
         }
-        else if (ast.nodeType() === NodeType.ClassDeclaration) {
+
+        if (ast.kind() === SyntaxKind.EnumDeclaration) {
+            // Now that we've created all the child decls for the enum elements, determine what 
+            // (if any) their constant values should be.
+            computeEnumElementConstantValues(<EnumDeclaration>ast, currentDecl, context);
+        }
+
+        // Don't pop the topmost decl.  We return that out at the end.
+        while (currentDecl.getParentDecl() && currentDecl.ast() === ast) {
             context.popParent();
+            currentDecl = context.getParent();
+        }
+    }
 
-            parentDecl = context.getParent();
+    function computeEnumElementConstantValues(ast: EnumDeclaration, enumDecl: PullDecl, context: DeclCollectionContext): void {
+        Debug.assert(enumDecl.kind === PullElementKind.Enum);
 
-            if (parentDecl && isContainer(parentDecl)) {
-                initFlag = getInitializationFlag(parentDecl);
-                parentDecl.setFlags(parentDecl.flags | initFlag);
+        // If this is a non ambient enum, then it starts with a constant section of enum elements.
+        // Thus, elements without an initializer in these sections will be assumed to have a 
+        // constant value.
+        //
+        // However, if this an enum in an ambient context, then non initialized elements are 
+        // thought to have a computed value and are not in a constant section.
+        var isAmbientEnum = hasFlag(enumDecl.flags, PullElementFlags.Ambient);
+        var inConstantSection = !isAmbientEnum;
+        var currentConstantValue = 0;
+        var enumMemberDecls = <PullEnumElementDecl[]>enumDecl.getChildDecls();
+
+        for (var i = 0, n = ast.enumElements.nonSeparatorCount(); i < n; i++) {
+            var enumElement = <EnumElement>ast.enumElements.nonSeparatorAt(i);
+            var enumElementDecl = ArrayUtilities.first(enumMemberDecls, d =>
+                context.semanticInfoChain.getASTForDecl(d) === enumElement);
+
+            Debug.assert(enumElementDecl.kind === PullElementKind.EnumMember);
+
+            if (enumElement.equalsValueClause === null) {
+                // Didn't have an initializer.  If we're in a constant section, then this appears
+                // to have the value of the current constant.  If we're in a non-constant section
+                // then this gets no value.
+                if (inConstantSection) {
+                    enumElementDecl.constantValue = currentConstantValue;
+                    currentConstantValue++;
+                }
             }
-        }
-        else if (ast.nodeType() === NodeType.InterfaceDeclaration) {
-            context.popParent();
-        }
-        else if (ast.nodeType() === NodeType.FunctionDeclaration) {
-            context.popParent();
-
-            parentDecl = context.getParent();
-
-            if (parentDecl && isContainer(parentDecl)) {
-                initFlag = getInitializationFlag(parentDecl);
-                parentDecl.setFlags(parentDecl.flags | initFlag);
-            }
-        }
-        else if (ast.nodeType() === NodeType.VariableDeclarator) { // PULLREVIEW: What if we just have a for loop in a module body?
-            parentDecl = context.getParent();
-
-            if (parentDecl && isContainer(parentDecl)) {
-                initFlag = getInitializationFlag(parentDecl);
-                parentDecl.setFlags(parentDecl.flags | initFlag);
-            }
-        }
-        else if (ast.nodeType() === NodeType.CatchClause) {
-            parentDecl = context.getParent();
-
-            if (parentDecl && isContainer(parentDecl)) {
-                initFlag = getInitializationFlag(parentDecl);
-                parentDecl.setFlags(parentDecl.flags | initFlag);
+            else {
+                // Enum element had an initializer.  If it's a constant, then then enum gets that 
+                // value, and we transition to (or stay in) a constant section (as long as we're
+                // not in an ambient context.
+                //
+                // If it's not a constant, then we transition to a non-constant section.
+                enumElementDecl.constantValue = computeEnumElementConstantValue(enumElement.equalsValueClause.value, enumMemberDecls, context);
+                if (enumElementDecl.constantValue !== null && !isAmbientEnum) {
+                    // This enum element had a constant value.  We're now in a constant section.
+                    // Any successive enum elements should get their values from this constant
+                    // value onwards.
+                    inConstantSection = true;
+                    currentConstantValue = enumElementDecl.constantValue + 1;
+                }
+                else {
+                    // Didn't get a constant value.  We're not in a constant section.
+                    inConstantSection = false;
+                }
             }
 
-            context.popParent();
+            Debug.assert(enumElementDecl.constantValue !== undefined);
         }
-        else if (ast.nodeType() === NodeType.WithStatement) {
-            parentDecl = context.getParent();
+    }
 
-            if (parentDecl && isContainer(parentDecl)) {
-                initFlag = getInitializationFlag(parentDecl);
-                parentDecl.setFlags(parentDecl.flags | initFlag);
+    function computeEnumElementConstantValue(expression: AST, enumMemberDecls: PullEnumElementDecl[], context: DeclCollectionContext): number {
+        Debug.assert(expression);
+
+        if (isIntegerLiteralAST(expression)) {
+            // Always produce a value for an integer literal.
+            var token: NumericLiteral;
+            switch (expression.kind()) {
+                case SyntaxKind.PlusExpression:
+                case SyntaxKind.NegateExpression:
+                    token = <NumericLiteral>(<PrefixUnaryExpression>expression).operand;
+                    break;
+                default:
+                    token = <NumericLiteral>expression;
             }
 
-            context.popParent();
+            var value = token.value();
+            return value && expression.kind() === SyntaxKind.NegateExpression ? -value : value;
         }
+        else if (context.propagateEnumConstants) {
+            // It wasn't a numeric literal.  However, the experimental switch to be more aggressive
+            // about propogating enum constants is enabled.  See if we can still figure out the
+            // constant value for this enum element.
+            switch (expression.kind()) {
+                case SyntaxKind.IdentifierName:
+                    // If it's a name, see if we already had an enum value named this.  If so,
+                    // return that value.  Note, only search backward in the enum for a match.
+                    var name = <Identifier>expression;
+                    var matchingEnumElement = ArrayUtilities.firstOrDefault(enumMemberDecls, d => d.name === name.valueText());
 
+                    return matchingEnumElement ? matchingEnumElement.constantValue : null;
 
-        return ast;
+                case SyntaxKind.LeftShiftExpression:
+                    // Handle the common case of a left shifted value.
+                    var binaryExpression = <BinaryExpression>expression;
+                    var left = computeEnumElementConstantValue(binaryExpression.left, enumMemberDecls, context);
+                    var right = computeEnumElementConstantValue(binaryExpression.right, enumMemberDecls, context);
+                    if (left === null || right === null) {
+                        return null;
+                    }
+
+                    return left << right;
+
+                case SyntaxKind.BitwiseOrExpression:
+                    // Handle the common case of an or'ed value.
+                    var binaryExpression = <BinaryExpression>expression;
+                    var left = computeEnumElementConstantValue(binaryExpression.left, enumMemberDecls, context);
+                    var right = computeEnumElementConstantValue(binaryExpression.right, enumMemberDecls, context);
+                    if (left === null || right === null) {
+                        return null;
+                    }
+
+                    return left | right;
+            }
+
+            // TODO: add more cases.
+            return null;
+        }
+        else {
+            // Wasn't an integer literal, and we're not aggressively propagating constants.
+            // There is no constant value for this expression.
+            return null;
+        }
+    }
+
+    export module DeclarationCreator {
+        export function create(document: Document, semanticInfoChain: SemanticInfoChain, compilationSettings: ImmutableCompilationSettings): PullDecl {
+            var declCollectionContext = new DeclCollectionContext(document, semanticInfoChain, compilationSettings.propagateEnumConstants());
+            
+            // create decls
+            getAstWalkerFactory().simpleWalk(document.sourceUnit(), preCollectDecls, postCollectDecls, declCollectionContext);
+
+            return declCollectionContext.getParent();
+        }
     }
 }

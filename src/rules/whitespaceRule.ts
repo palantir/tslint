@@ -77,13 +77,13 @@ class WhitespaceWalker extends Lint.RuleWalker {
 
     // check for spaces in variable declarations
     public visitVariableDeclarator(node: TypeScript.VariableDeclaratorSyntax): void {
-        var position = this.positionAfter(node.identifier, node.typeAnnotation);
+        var position = this.positionAfter(node.propertyName, node.typeAnnotation);
 
         if (this.hasOption(OPTION_DECL) && node.equalsValueClause !== null) {
             if (node.typeAnnotation !== null) {
                 this.checkForLeadingSpace(position, node.typeAnnotation.trailingTrivia());
             } else {
-                this.checkForLeadingSpace(position, node.identifier.trailingTrivia());
+                this.checkForLeadingSpace(position, node.propertyName.trailingTrivia());
             }
         }
 

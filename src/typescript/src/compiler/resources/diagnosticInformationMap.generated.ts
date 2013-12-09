@@ -206,10 +206,6 @@ module TypeScript {
     "code": 1049,
     "category": DiagnosticCategory.Error
   },
-  "'set' accessor parameter cannot have accessibility modifier.": {
-    "code": 1050,
-    "category": DiagnosticCategory.Error
-  },
   "'set' accessor parameter cannot be optional.": {
     "code": 1051,
     "category": DiagnosticCategory.Error
@@ -322,11 +318,11 @@ module TypeScript {
     "code": 1079,
     "category": DiagnosticCategory.Error
   },
-  "Function overload must be static": {
+  "Function overload must be static.": {
     "code": 1080,
     "category": DiagnosticCategory.Error
   },
-  "Function overload must not be static": {
+  "Function overload must not be static.": {
     "code": 1081,
     "category": DiagnosticCategory.Error
   },
@@ -336,6 +332,26 @@ module TypeScript {
   },
   "Parameter property declarations cannot be used in a constructor overload.": {
     "code": 1083,
+    "category": DiagnosticCategory.Error
+  },
+  "Invalid 'reference' directive syntax.": {
+    "code": 1084,
+    "category": DiagnosticCategory.Error
+  },
+  "Octal literals are not available when targeting ECMAScript 5 and higher.": {
+    "code": 1085,
+    "category": DiagnosticCategory.Error
+  },
+  "Accessors are not allowed in ambient contexts.": {
+    "code": 1086,
+    "category": DiagnosticCategory.Error
+  },
+  "'{0}' modifier cannot appear on a constructor declaration.": {
+    "code": 1089,
+    "category": DiagnosticCategory.Error
+  },
+  "'{0}' modifier cannot appear on a parameter.": {
+    "code": 1090,
     "category": DiagnosticCategory.Error
   },
   "Duplicate identifier '{0}'.": {
@@ -404,10 +420,6 @@ module TypeScript {
   },
   "Setter '{0}' already declared.": {
     "code": 2016,
-    "category": DiagnosticCategory.Error
-  },
-  "Accessors cannot have type parameters.": {
-    "code": 2017,
     "category": DiagnosticCategory.Error
   },
   "Exported class '{0}' extends private class '{1}'.": {
@@ -642,10 +654,6 @@ module TypeScript {
     "code": 2075,
     "category": DiagnosticCategory.Error
   },
-  "An interface cannot implement another type.": {
-    "code": 2076,
-    "category": DiagnosticCategory.Error
-  },
   "Unable to resolve type.": {
     "code": 2077,
     "category": DiagnosticCategory.Error
@@ -702,10 +710,6 @@ module TypeScript {
     "code": 2090,
     "category": DiagnosticCategory.Error
   },
-  "Type of conditional expression cannot be determined. Best common type could not be found between '{0}' and '{1}'.": {
-    "code": 2091,
-    "category": DiagnosticCategory.Error
-  },
   "Type of array literal cannot be determined. Best common type could not be found for array elements.": {
     "code": 2092,
     "category": DiagnosticCategory.Error
@@ -742,7 +746,7 @@ module TypeScript {
     "code": 2101,
     "category": DiagnosticCategory.Error
   },
-  "'super' property access is permitted only in a constructor, instance member function, or instance member accessor of a derived class.": {
+  "'super' property access is permitted only in a constructor, member function, or member accessor of a derived class.": {
     "code": 2102,
     "category": DiagnosticCategory.Error
   },
@@ -798,7 +802,7 @@ module TypeScript {
     "code": 2117,
     "category": DiagnosticCategory.Error
   },
-  "The left-hand side of an 'in' expression must be of types 'string' or 'any'.": {
+  "The left-hand side of an 'in' expression must be of types 'any', 'string' or 'number'.": {
     "code": 2118,
     "category": DiagnosticCategory.Error
   },
@@ -922,7 +926,7 @@ module TypeScript {
     "code": 2150,
     "category": DiagnosticCategory.Error
   },
-  "Overload signatures must all be exported or local.": {
+  "Overload signatures must all be exported or not exported.": {
     "code": 2151,
     "category": DiagnosticCategory.Error
   },
@@ -940,10 +944,6 @@ module TypeScript {
   },
   "'this' cannot be referenced in constructor arguments.": {
     "code": 2155,
-    "category": DiagnosticCategory.Error
-  },
-  "Static member cannot be accessed off an instance variable.": {
-    "code": 2156,
     "category": DiagnosticCategory.Error
   },
   "Instance member cannot be accessed off a class.": {
@@ -974,11 +974,11 @@ module TypeScript {
     "code": 2164,
     "category": DiagnosticCategory.Error
   },
-  "Export assignments may only be made with variables, functions, classes, interfaces, enums and internal modules": {
+  "Export assignments may only be made with variables, functions, classes, interfaces, enums and internal modules.": {
     "code": 2165,
     "category": DiagnosticCategory.Error
   },
-  "Only public instance methods of the base class are accessible via the 'super' keyword.": {
+  "Only public methods of the base class are accessible via the 'super' keyword.": {
     "code": 2166,
     "category": DiagnosticCategory.Error
   },
@@ -1058,12 +1058,176 @@ module TypeScript {
     "code": 2185,
     "category": DiagnosticCategory.Error
   },
-  "Type reference '{0}' in extends clause doesn't reference constructor function for '{1}'.": {
+  "Type reference '{0}' in extends clause does not reference constructor function for '{1}'.": {
     "code": 2186,
     "category": DiagnosticCategory.Error
   },
-  "Internal module reference '{0}' in import declaration doesn't reference module instance for '{1}'.": {
+  "Internal module reference '{0}' in import declaration does not reference module instance for '{1}'.": {
     "code": 2187,
+    "category": DiagnosticCategory.Error
+  },
+  "Module '{0}' cannot merge with previous declaration of '{1}' in a different file '{2}'.": {
+    "code": 2188,
+    "category": DiagnosticCategory.Error
+  },
+  "Interface '{0}' cannot simultaneously extend types '{1}' and '{2}':{NL}{3}": {
+    "code": 2189,
+    "category": DiagnosticCategory.Error
+  },
+  "Initializer of parameter '{0}' cannot reference identifier '{1}' declared after it.": {
+    "code": 2190,
+    "category": DiagnosticCategory.Error
+  },
+  "Ambient external module declaration cannot be reopened.": {
+    "code": 2191,
+    "category": DiagnosticCategory.Error
+  },
+  "All declarations of merged declaration '{0}' must be exported or not exported.": {
+    "code": 2192,
+    "category": DiagnosticCategory.Error
+  },
+  "'super' cannot be referenced in constructor arguments.": {
+    "code": 2193,
+    "category": DiagnosticCategory.Error
+  },
+  "Return type of constructor signature must be assignable to the instance type of the class.": {
+    "code": 2194,
+    "category": DiagnosticCategory.Error
+  },
+  "Ambient external module declaration must be defined in global context.": {
+    "code": 2195,
+    "category": DiagnosticCategory.Error
+  },
+  "Ambient external module declaration cannot specify relative module name.": {
+    "code": 2196,
+    "category": DiagnosticCategory.Error
+  },
+  "Import declaration in an ambient external module declaration cannot reference external module through relative external module name.": {
+    "code": 2197,
+    "category": DiagnosticCategory.Error
+  },
+  "Could not find the best common type of types of all return statement expressions.": {
+    "code": 2198,
+    "category": DiagnosticCategory.Error
+  },
+  "Import declaration cannot refer to external module reference when --noResolve option is set.": {
+    "code": 2199,
+    "category": DiagnosticCategory.Error
+  },
+  "Duplicate identifier '_this'. Compiler uses variable declaration '_this' to capture 'this' reference.": {
+    "code": 2200,
+    "category": DiagnosticCategory.Error
+  },
+  "'continue' statement can only be used within an enclosing iteration statement.": {
+    "code": 2201,
+    "category": DiagnosticCategory.Error
+  },
+  "'break' statement can only be used within an enclosing iteration or switch statement.": {
+    "code": 2202,
+    "category": DiagnosticCategory.Error
+  },
+  "Jump target not found.": {
+    "code": 2203,
+    "category": DiagnosticCategory.Error
+  },
+  "Jump target cannot cross function boundary.": {
+    "code": 2204,
+    "category": DiagnosticCategory.Error
+  },
+  "Duplicate identifier '_super'. Compiler uses '_super' to capture base class reference.": {
+    "code": 2205,
+    "category": DiagnosticCategory.Error
+  },
+  "Expression resolves to variable declaration '_this' that compiler uses to capture 'this' reference.": {
+    "code": 2206,
+    "category": DiagnosticCategory.Error
+  },
+  "Expression resolves to '_super' that compiler uses to capture base class reference.": {
+    "code": 2207,
+    "category": DiagnosticCategory.Error
+  },
+  "TypeParameter '{0}' of constructor signature from exported interface has or is using private type '{1}'.": {
+    "code": 2208,
+    "category": DiagnosticCategory.Error
+  },
+  "TypeParameter '{0}' of call signature from exported interface has or is using private type '{1}'.": {
+    "code": 2209,
+    "category": DiagnosticCategory.Error
+  },
+  "TypeParameter '{0}' of public static method from exported class has or is using private type '{1}'.": {
+    "code": 2210,
+    "category": DiagnosticCategory.Error
+  },
+  "TypeParameter '{0}' of public method from exported class has or is using private type '{1}'.": {
+    "code": 2211,
+    "category": DiagnosticCategory.Error
+  },
+  "TypeParameter '{0}' of method from exported interface has or is using private type '{1}'.": {
+    "code": 2212,
+    "category": DiagnosticCategory.Error
+  },
+  "TypeParameter '{0}' of exported function has or is using private type '{1}'.": {
+    "code": 2213,
+    "category": DiagnosticCategory.Error
+  },
+  "TypeParameter '{0}' of constructor signature from exported interface is using inaccessible module {1}.": {
+    "code": 2214,
+    "category": DiagnosticCategory.Error
+  },
+  "TypeParameter '{0}' of call signature from exported interface is using inaccessible module {1}": {
+    "code": 2215,
+    "category": DiagnosticCategory.Error
+  },
+  "TypeParameter '{0}' of public static method from exported class is using inaccessible module {1}.": {
+    "code": 2216,
+    "category": DiagnosticCategory.Error
+  },
+  "TypeParameter '{0}' of public method from exported class is using inaccessible module {1}.": {
+    "code": 2217,
+    "category": DiagnosticCategory.Error
+  },
+  "TypeParameter '{0}' of method from exported interface is using inaccessible module {1}.": {
+    "code": 2218,
+    "category": DiagnosticCategory.Error
+  },
+  "TypeParameter '{0}' of exported function is using inaccessible module {1}.": {
+    "code": 2219,
+    "category": DiagnosticCategory.Error
+  },
+  "TypeParameter '{0}' of exported class has or is using private type '{1}'.": {
+    "code": 2220,
+    "category": DiagnosticCategory.Error
+  },
+  "TypeParameter '{0}' of exported interface has or is using private type '{1}'.": {
+    "code": 2221,
+    "category": DiagnosticCategory.Error
+  },
+  "TypeParameter '{0}' of exported class is using inaccessible module {1}.": {
+    "code": 2222,
+    "category": DiagnosticCategory.Error
+  },
+  "TypeParameter '{0}' of exported interface is using inaccessible module {1}.": {
+    "code": 2223,
+    "category": DiagnosticCategory.Error
+  },
+  "Duplicate identifier '_i'. Compiler uses '_i' to initialize rest parameter.": {
+    "code": 2224,
+    "category": DiagnosticCategory.Error
+  },
+  "Duplicate identifier 'arguments'. Compiler uses 'arguments' to initialize rest parameters.": {
+    "code": 2225,
+    "category": DiagnosticCategory.Error
+  },
+  "Type of conditional '{0}' must be identical to '{1}' or '{2}'.": {
+    "code": 2226,
+    "category": DiagnosticCategory.Error
+  },
+  "Type of conditional '{0}' must be identical to '{1}', '{2}' or '{3}'.": {
+    "code": 2227,
+    "category": DiagnosticCategory.Error
+  },
+  "Duplicate identifier '{0}'. Compiler reserves name '{1}' in top level scope of an external module.": {
+    "code": 2228,
     "category": DiagnosticCategory.Error
   },
   "Type '{0}' is missing property '{1}' from type '{2}'.": {
@@ -1107,7 +1271,7 @@ module TypeScript {
     "category": DiagnosticCategory.NoPrefix
   },
   "Construct signatures of types '{0}' and '{1}' are incompatible:{NL}{2}": {
-    "code": 40010,
+    "code": 4010,
     "category": DiagnosticCategory.NoPrefix
   },
   "Type '{0}' requires a construct signature, but type '{1}' lacks one.": {
@@ -1170,17 +1334,65 @@ module TypeScript {
     "code": 4025,
     "category": DiagnosticCategory.Message
   },
+  "Variable declaration cannot have the same name as an import declaration.": {
+    "code": 4026,
+    "category": DiagnosticCategory.Error
+  },
+  "Signature expected {0} type arguments, got {1} instead.": {
+    "code": 4027,
+    "category": DiagnosticCategory.Error
+  },
+  "Property '{0}' defined as optional in type '{1}', but is required in type '{2}'.": {
+    "code": 4028,
+    "category": DiagnosticCategory.NoPrefix
+  },
+  "Types '{0}' and '{1}' originating in inifinitely expanding type reference do not refer to same named type.": {
+    "code": 4029,
+    "category": DiagnosticCategory.NoPrefix
+  },
+  "Types '{0}' and '{1}' originating in inifinitely expanding type reference have incompatible type arguments.": {
+    "code": 4030,
+    "category": DiagnosticCategory.NoPrefix
+  },
+  "Types '{0}' and '{1}' originating in inifinitely expanding type reference have incompatible type arguments:{NL}{2}": {
+    "code": 4031,
+    "category": DiagnosticCategory.NoPrefix
+  },
+  "Types of property '{0}' of types '{1}' and '{2}' are not identical.": {
+    "code": 4032,
+    "category": DiagnosticCategory.NoPrefix
+  },
+  "Types of string indexer of types '{0}' and '{1}' are not identical.": {
+    "code": 4033,
+    "category": DiagnosticCategory.NoPrefix
+  },
+  "Types of number indexer of types '{0}' and '{1}' are not identical.": {
+    "code": 4034,
+    "category": DiagnosticCategory.NoPrefix
+  },
+  "Type of number indexer in type '{0}' is not a subtype of string indexer type in type '{1}'.{NL}{2}": {
+    "code": 4035,
+    "category": DiagnosticCategory.NoPrefix
+  },
+  "Type of property '{0}' in type '{1}' is not a subtype of string indexer type in type '{2}'.{NL}{3}": {
+    "code": 4036,
+    "category": DiagnosticCategory.NoPrefix
+  },
+  "Type of property '{0}' in type '{1}' is not a subtype of number indexer type in type '{2}'.{NL}{3}": {
+    "code": 4037,
+    "category": DiagnosticCategory.NoPrefix
+  },
   "Current host does not support '{0}' option.": {
     "code": 5001,
     "category": DiagnosticCategory.Error
   },
-  "ECMAScript target version '{0}' not supported.  Using default '{1}' code generation.": {
+  "ECMAScript target version '{0}' not supported.  Specify a valid target version: '{1}' (default), or '{2}'": {
     "code": 5002,
-    "category": DiagnosticCategory.Warning
+    "category": DiagnosticCategory.Error
   },
   "Module code generation '{0}' not supported.": {
     "code": 5003,
-    "category": DiagnosticCategory.Warning
+    "category": DiagnosticCategory.Error
   },
   "Could not find file: '{0}'.": {
     "code": 5004,
@@ -1222,14 +1434,6 @@ module TypeScript {
     "code": 5016,
     "category": DiagnosticCategory.Error
   },
-  "Should not emit a type query": {
-    "code": 5017,
-    "category": DiagnosticCategory.Error
-  },
-  "Should not emit a type reference": {
-    "code": 5018,
-    "category": DiagnosticCategory.Error
-  },
   "Invalid call to 'up'": {
     "code": 5019,
     "category": DiagnosticCategory.Error
@@ -1238,56 +1442,20 @@ module TypeScript {
     "code": 5020,
     "category": DiagnosticCategory.Error
   },
-  "Base64 value '{0}' finished with a continuation bit": {
+  "Base64 value '{0}' finished with a continuation bit.": {
     "code": 5021,
-    "category": DiagnosticCategory.Error
-  },
-  "Key was already in table": {
-    "code": 5022,
     "category": DiagnosticCategory.Error
   },
   "Unknown option '{0}'": {
     "code": 5023,
     "category": DiagnosticCategory.Error
   },
-  "Expected {0} arguments to message, got {1} instead": {
+  "Expected {0} arguments to message, got {1} instead.": {
     "code": 5024,
     "category": DiagnosticCategory.Error
   },
   "Expected the message '{0}' to have {1} arguments, but it had {2}": {
     "code": 5025,
-    "category": DiagnosticCategory.Error
-  },
-  "Invalid argument: {0}. {1}": {
-    "code": 5026,
-    "category": DiagnosticCategory.Error
-  },
-  "Invalid argument: {0}.": {
-    "code": 5027,
-    "category": DiagnosticCategory.Error
-  },
-  "Argument out of range: {0}.": {
-    "code": 5028,
-    "category": DiagnosticCategory.Error
-  },
-  "Argument null: {0}.": {
-    "code": 5029,
-    "category": DiagnosticCategory.Error
-  },
-  "Operation not implemented properly by subclass.": {
-    "code": 5030,
-    "category": DiagnosticCategory.Error
-  },
-  "Not yet implemented.": {
-    "code": 5031,
-    "category": DiagnosticCategory.Error
-  },
-  "Invalid operation: {0}": {
-    "code": 5032,
-    "category": DiagnosticCategory.Error
-  },
-  "Invalid operation.": {
-    "code": 5033,
     "category": DiagnosticCategory.Error
   },
   "Could not delete file '{0}'": {
@@ -1318,11 +1486,19 @@ module TypeScript {
     "code": 5040,
     "category": DiagnosticCategory.Error
   },
-  "Concatenate and emit output to single file": {
+  "Option '{0}' specified without '{1}'": {
+    "code": 5041,
+    "category": DiagnosticCategory.Error
+  },
+  "'codepage' option not supported on current platform.": {
+    "code": 5042,
+    "category": DiagnosticCategory.Error
+  },
+  "Concatenate and emit output to single file.": {
     "code": 6001,
     "category": DiagnosticCategory.Message
   },
-  "Generates corresponding {0} file": {
+  "Generates corresponding {0} file.": {
     "code": 6002,
     "category": DiagnosticCategory.Message
   },
@@ -1334,31 +1510,31 @@ module TypeScript {
     "code": 6004,
     "category": DiagnosticCategory.Message
   },
-  "Watch input files": {
+  "Watch input files.": {
     "code": 6005,
     "category": DiagnosticCategory.Message
   },
-  "Redirect output structure to the directory": {
+  "Redirect output structure to the directory.": {
     "code": 6006,
     "category": DiagnosticCategory.Message
   },
-  "Do not emit comments to output": {
+  "Do not emit comments to output.": {
     "code": 6009,
     "category": DiagnosticCategory.Message
   },
-  "Skip resolution and preprocessing": {
+  "Skip resolution and preprocessing.": {
     "code": 6010,
     "category": DiagnosticCategory.Message
   },
-  "Specify ECMAScript target version: \"{0}\" (default), or \"{1}\"": {
+  "Specify ECMAScript target version: '{0}' (default), or '{1}'": {
     "code": 6015,
     "category": DiagnosticCategory.Message
   },
-  "Specify module code generation: \"{0}\" or \"{1}\"": {
+  "Specify module code generation: '{0}' or '{1}'": {
     "code": 6016,
     "category": DiagnosticCategory.Message
   },
-  "Print this message": {
+  "Print this message.": {
     "code": 6017,
     "category": DiagnosticCategory.Message
   },
@@ -1366,7 +1542,7 @@ module TypeScript {
     "code": 6019,
     "category": DiagnosticCategory.Message
   },
-  "Allow use of deprecated \"{0}\" keyword when referencing an external module": {
+  "Allow use of deprecated '{0}' keyword when referencing an external module.": {
     "code": 6021,
     "category": DiagnosticCategory.Message
   },
@@ -1382,7 +1558,7 @@ module TypeScript {
     "code": 6024,
     "category": DiagnosticCategory.Message
   },
-  "file": {
+  "file1": {
     "code": 6025,
     "category": DiagnosticCategory.Message
   },
@@ -1402,7 +1578,7 @@ module TypeScript {
     "code": 6029,
     "category": DiagnosticCategory.Message
   },
-  "Use the '{0}' flag to see options": {
+  "Use the '{0}' flag to see options.": {
     "code": 6031,
     "category": DiagnosticCategory.Message
   },
@@ -1418,7 +1594,7 @@ module TypeScript {
     "code": 6034,
     "category": DiagnosticCategory.Message
   },
-  "FILE": {
+  "file2": {
     "code": 6035,
     "category": DiagnosticCategory.Message
   },
@@ -1434,15 +1610,19 @@ module TypeScript {
     "code": 6038,
     "category": DiagnosticCategory.Message
   },
+  "NUMBER": {
+    "code": 6039,
+    "category": DiagnosticCategory.Message
+  },
+  "Specify the codepage to use when opening source files.": {
+    "code": 6040,
+    "category": DiagnosticCategory.Message
+  },
   "This version of the Javascript runtime does not support the '{0}' function.": {
     "code": 7000,
     "category": DiagnosticCategory.Error
   },
-  "Looking up path for identifier token did not result in an identifer.": {
-    "code": 7001,
-    "category": DiagnosticCategory.Error
-  },
-  "Unknown rule": {
+  "Unknown rule.": {
     "code": 7002,
     "category": DiagnosticCategory.Error
   },
@@ -1470,7 +1650,7 @@ module TypeScript {
     "code": 7008,
     "category": DiagnosticCategory.Error
   },
-  "\"New\" expression, which lacks a constructor signature, implicitly has an 'any' type.": {
+  "'new' expression, which lacks a constructor signature, implicitly has an 'any' type.": {
     "code": 7009,
     "category": DiagnosticCategory.Error
   },
@@ -1495,7 +1675,11 @@ module TypeScript {
     "category": DiagnosticCategory.Error
   },
   "Array Literal implicitly has an 'any' type from widening.": {
-    "code": 7014,
+    "code": 7015,
+    "category": DiagnosticCategory.Error
+  },
+  "'{0}', which lacks 'get' accessor and parameter type annotation on 'set' accessor, implicitly has an 'any' type.": {
+    "code": 7016,
     "category": DiagnosticCategory.Error
   }
 };

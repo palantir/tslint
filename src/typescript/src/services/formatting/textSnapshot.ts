@@ -15,7 +15,7 @@
 
 ///<reference path='formatting.ts' />
 
-module TypeScript.Formatting {
+module TypeScript.Services.Formatting {
     export interface ITextSnapshot {
         getText(span: TextSpan): string;
         getLineNumberFromPosition(position: number): number;

@@ -7,13 +7,13 @@ module TypeScript {
     }
 
     export class SyntaxInformationMap extends SyntaxWalker {
-        private tokenToInformation = Collections.createHashTable(Collections.DefaultHashTableCapacity, Collections.identityHashCode);
-        private elementToPosition = Collections.createHashTable(Collections.DefaultHashTableCapacity, Collections.identityHashCode);
+        private tokenToInformation = Collections.createHashTable<any, any>(Collections.DefaultHashTableCapacity, Collections.identityHashCode);
+        private elementToPosition = Collections.createHashTable<any, any>(Collections.DefaultHashTableCapacity, Collections.identityHashCode);
 
         private _previousToken: ISyntaxToken = null;
         private _previousTokenInformation: ITokenInformation = null;
         private _currentPosition = 0;
-        private _elementToParent = Collections.createHashTable(Collections.DefaultHashTableCapacity, Collections.identityHashCode);
+        private _elementToParent = Collections.createHashTable<any, any>(Collections.DefaultHashTableCapacity, Collections.identityHashCode);
 
         private _parentStack: SyntaxNode[] = [];
 

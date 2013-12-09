@@ -38,18 +38,6 @@ class TypedefWalker extends Lint.RuleWalker {
         super.visitCatchClause(node);
     }
 
-    public visitGetAccessorPropertyAssignment(node: TypeScript.GetAccessorPropertyAssignmentSyntax): void {
-        this.checkTypeAnnotation("getAccessorPropertyAssignment", node, node.typeAnnotation, node.propertyName);
-
-        super.visitGetAccessorPropertyAssignment(node);
-    }
-
-    public visitGetMemberAccessorDeclaration(node: TypeScript.GetMemberAccessorDeclarationSyntax): void {
-        this.checkTypeAnnotation("getMemberAccessorDeclaration", node, node.typeAnnotation, node.propertyName);
-
-        super.visitGetMemberAccessorDeclaration(node);
-    }
-
     public visitIndexSignature(node: TypeScript.IndexSignatureSyntax): void {
         this.checkTypeAnnotation("indexSignature", node, node.typeAnnotation);
 
@@ -68,25 +56,20 @@ class TypedefWalker extends Lint.RuleWalker {
     }
 
     public visitVariableDeclarator(node: TypeScript.VariableDeclaratorSyntax): void {
-        this.checkTypeAnnotation("variableDeclarator", node, node.typeAnnotation, node.identifier);
+        this.checkTypeAnnotation("variableDeclarator", node, node.typeAnnotation, node.propertyName);
 
         super.visitVariableDeclarator(node);
     }
 
-    public checkTypeAnnotation(
-        option: string,
-        node: TypeScript.SyntaxNode,
-        typeAnnotation: TypeScript.TypeAnnotationSyntax,
-        name?: TypeScript.ISyntaxToken) : void {
+    public checkTypeAnnotation(option: string,
+                               node: TypeScript.SyntaxNode,
+                               typeAnnotation: TypeScript.TypeAnnotationSyntax,
+                               name?: TypeScript.ISyntaxToken): void {
+
         if (this.hasOption(option) && !typeAnnotation) {
-            var name = name ? ": '" + name.text() + "'" : "";
-            this.addFailure(
-                this.createFailure(
-                    this.positionAfter(node),
-                    1,
-                    "expected " + option + name + " to have a typedef."
-                )
-            );
+            var ns = name ? ": '" + name.text() + "'" : "";
+            var failure = this.createFailure(this.positionAfter(node), 1, "expected " + ns + " to have a typedef.");
+            this.addFailure(failure);
         }
     }
 }

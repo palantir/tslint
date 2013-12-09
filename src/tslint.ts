@@ -49,7 +49,7 @@ module Lint {
             var i, failures = [];
 
             var languageServiceHost = new Lint.LanguageServiceHost(this.fileName, this.source);
-            var languageService = new Services.LanguageService(languageServiceHost);
+            var languageService = new TypeScript.Services.LanguageService(languageServiceHost);
             var syntaxTree = languageService.getSyntaxTree(this.fileName);
 
             var rulesDirectory = this.getRelativePath(this.options.rulesDirectory);

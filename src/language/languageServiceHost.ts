@@ -20,9 +20,9 @@
 
 module Lint {
 
-    export class LanguageServiceHost extends TypeScript.NullLogger implements Services.ILanguageServiceHost {
+    export class LanguageServiceHost extends TypeScript.NullLogger implements TypeScript.Services.ILanguageServiceHost {
         private compilationSettings: TypeScript.CompilationSettings;
-        private diagnostics: Services.ILanguageServicesDiagnostics;
+        private diagnostics: TypeScript.Services.ILanguageServicesDiagnostics;
         private fileName: string;
         private scriptSnapshot: TypeScript.IScriptSnapshot;
 
@@ -55,11 +55,11 @@ module Lint {
             return this.scriptSnapshot;
         }
 
-        public getScriptByteOrderMark(fileName: string): ByteOrderMark {
-            return ByteOrderMark.None;
+        public getScriptByteOrderMark(fileName: string): TypeScript.ByteOrderMark {
+            return TypeScript.ByteOrderMark.None;
         }
 
-        public getDiagnosticsObject(): Services.ILanguageServicesDiagnostics {
+        public getDiagnosticsObject(): TypeScript.Services.ILanguageServicesDiagnostics {
             return this.diagnostics;
         }
 
@@ -95,7 +95,7 @@ module Lint {
         }
       }
 
-    class LanguageServicesDiagnostics implements Services.ILanguageServicesDiagnostics {
+    class LanguageServicesDiagnostics implements TypeScript.Services.ILanguageServicesDiagnostics {
         private logger;
 
         constructor() {

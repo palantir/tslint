@@ -100,6 +100,26 @@ module TypeScript.Syntax {
         public withTrailingTrivia(trailingTrivia: ISyntaxTriviaList): ISyntaxToken {
             return this.realize().withTrailingTrivia(trailingTrivia);
         }
+
+        public isExpression(): boolean {
+            return isExpression(this);
+        }
+
+        public isPrimaryExpression(): boolean {
+            return this.isExpression();
+        }
+
+        public isMemberExpression(): boolean {
+            return this.isExpression();
+        }
+
+        public isPostfixExpression(): boolean {
+            return this.isExpression();
+        }
+
+        public isUnaryExpression(): boolean {
+            return this.isExpression();
+        }
     }
 
     export class VariableWidthTokenWithLeadingTrivia implements ISyntaxToken {
@@ -204,6 +224,26 @@ module TypeScript.Syntax {
         public withTrailingTrivia(trailingTrivia: ISyntaxTriviaList): ISyntaxToken {
             return this.realize().withTrailingTrivia(trailingTrivia);
         }
+
+        public isExpression(): boolean {
+            return isExpression(this);
+        }
+
+        public isPrimaryExpression(): boolean {
+            return this.isExpression();
+        }
+
+        public isMemberExpression(): boolean {
+            return this.isExpression();
+        }
+
+        public isPostfixExpression(): boolean {
+            return this.isExpression();
+        }
+
+        public isUnaryExpression(): boolean {
+            return this.isExpression();
+        }
     }
 
     export class VariableWidthTokenWithTrailingTrivia implements ISyntaxToken {
@@ -307,6 +347,26 @@ module TypeScript.Syntax {
 
         public withTrailingTrivia(trailingTrivia: ISyntaxTriviaList): ISyntaxToken {
             return this.realize().withTrailingTrivia(trailingTrivia);
+        }
+
+        public isExpression(): boolean {
+            return isExpression(this);
+        }
+
+        public isPrimaryExpression(): boolean {
+            return this.isExpression();
+        }
+
+        public isMemberExpression(): boolean {
+            return this.isExpression();
+        }
+
+        public isPostfixExpression(): boolean {
+            return this.isExpression();
+        }
+
+        public isUnaryExpression(): boolean {
+            return this.isExpression();
         }
     }
 
@@ -415,6 +475,26 @@ module TypeScript.Syntax {
         public withTrailingTrivia(trailingTrivia: ISyntaxTriviaList): ISyntaxToken {
             return this.realize().withTrailingTrivia(trailingTrivia);
         }
+
+        public isExpression(): boolean {
+            return isExpression(this);
+        }
+
+        public isPrimaryExpression(): boolean {
+            return this.isExpression();
+        }
+
+        public isMemberExpression(): boolean {
+            return this.isExpression();
+        }
+
+        public isPostfixExpression(): boolean {
+            return this.isExpression();
+        }
+
+        public isUnaryExpression(): boolean {
+            return this.isExpression();
+        }
     }
 
     export class FixedWidthTokenWithNoTrivia implements ISyntaxToken {
@@ -480,6 +560,26 @@ module TypeScript.Syntax {
 
         public withTrailingTrivia(trailingTrivia: ISyntaxTriviaList): ISyntaxToken {
             return this.realize().withTrailingTrivia(trailingTrivia);
+        }
+
+        public isExpression(): boolean {
+            return isExpression(this);
+        }
+
+        public isPrimaryExpression(): boolean {
+            return this.isExpression();
+        }
+
+        public isMemberExpression(): boolean {
+            return this.isExpression();
+        }
+
+        public isPostfixExpression(): boolean {
+            return this.isExpression();
+        }
+
+        public isUnaryExpression(): boolean {
+            return this.isExpression();
         }
     }
 
@@ -559,6 +659,26 @@ module TypeScript.Syntax {
         public withTrailingTrivia(trailingTrivia: ISyntaxTriviaList): ISyntaxToken {
             return this.realize().withTrailingTrivia(trailingTrivia);
         }
+
+        public isExpression(): boolean {
+            return isExpression(this);
+        }
+
+        public isPrimaryExpression(): boolean {
+            return this.isExpression();
+        }
+
+        public isMemberExpression(): boolean {
+            return this.isExpression();
+        }
+
+        public isPostfixExpression(): boolean {
+            return this.isExpression();
+        }
+
+        public isUnaryExpression(): boolean {
+            return this.isExpression();
+        }
     }
 
     export class FixedWidthTokenWithTrailingTrivia implements ISyntaxToken {
@@ -636,6 +756,26 @@ module TypeScript.Syntax {
 
         public withTrailingTrivia(trailingTrivia: ISyntaxTriviaList): ISyntaxToken {
             return this.realize().withTrailingTrivia(trailingTrivia);
+        }
+
+        public isExpression(): boolean {
+            return isExpression(this);
+        }
+
+        public isPrimaryExpression(): boolean {
+            return this.isExpression();
+        }
+
+        public isMemberExpression(): boolean {
+            return this.isExpression();
+        }
+
+        public isPostfixExpression(): boolean {
+            return this.isExpression();
+        }
+
+        public isUnaryExpression(): boolean {
+            return this.isExpression();
         }
     }
 
@@ -717,6 +857,26 @@ module TypeScript.Syntax {
 
         public withTrailingTrivia(trailingTrivia: ISyntaxTriviaList): ISyntaxToken {
             return this.realize().withTrailingTrivia(trailingTrivia);
+        }
+
+        public isExpression(): boolean {
+            return isExpression(this);
+        }
+
+        public isPrimaryExpression(): boolean {
+            return this.isExpression();
+        }
+
+        public isMemberExpression(): boolean {
+            return this.isExpression();
+        }
+
+        public isPostfixExpression(): boolean {
+            return this.isExpression();
+        }
+
+        public isUnaryExpression(): boolean {
+            return this.isExpression();
         }
     }
 

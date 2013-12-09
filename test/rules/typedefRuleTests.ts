@@ -43,8 +43,6 @@ describe("<typedef, enabled>", () => {
             "callSignature",
             "catchClause",
             "indexSignature",
-            "getAccessorPropertyAssignment",
-            "getMemberAccessorDeclaration",
             "parameter",
             "propertySignature",
             "variableDeclarator"
@@ -60,24 +58,6 @@ describe("<typedef, enabled>", () => {
 
     it("enforces typedef in catch clauses", () => {
         var expectedFailure = Lint.Test.createFailure(fileName, [24, 1], [24, 2], "expected catchClause: 'ex' to have a typedef.");
-
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
-    });
-
-    it("enforces typedef in get accessor property assignment", () => {
-        var expectedFailure = Lint.Test.createFailure(fileName,
-            [7, 1],
-            [7, 2],
-            "expected getAccessorPropertyAssignment: 'Prop' to have a typedef.");
-
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
-    });
-
-    it("enforces typedef in get member accessor declaration", () => {
-        var expectedFailure = Lint.Test.createFailure(fileName,
-            [34, 1],
-            [34, 2],
-            "expected getMemberAccessorDeclaration: 'name' to have a typedef.");
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });

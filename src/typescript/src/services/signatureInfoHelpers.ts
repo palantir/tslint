@@ -3,7 +3,7 @@
 
 ///<reference path='typescriptServices.ts' />
 
-module Services {
+module TypeScript.Services {
 
     export interface IPartiallyWrittenTypeArgumentListInformation {
         genericIdentifer: TypeScript.PositionedToken;
@@ -138,7 +138,7 @@ module Services {
             return null;
         }
 
-        public static getSignatureInfoFromSignatureSymbol(symbol: TypeScript.PullSymbol, signatures: TypeScript.PullSignatureSymbol[], enclosingScopeSymbol: TypeScript.PullSymbol, compilerState: CompilerState) {
+        public static getSignatureInfoFromSignatureSymbol(symbol: TypeScript.PullSymbol, signatures: TypeScript.PullSignatureSymbol[], enclosingScopeSymbol: TypeScript.PullSymbol, compilerState: LanguageServiceCompiler) {
             var signatureGroup: FormalSignatureItemInfo[] = [];
 
             var hasOverloads = signatures.length > 1;
@@ -158,9 +158,9 @@ module Services {
                     functionName = symbol.getScopedNameEx(enclosingScopeSymbol).toString();
                 }
 
-                var signatureMemberName = signature.getSignatureTypeNameEx(functionName, false, false, enclosingScopeSymbol, true, true);
+                var signatureMemberName = signature.getSignatureTypeNameEx(functionName, /*shortform*/ false, /*brackets*/ false, enclosingScopeSymbol, /*getParamMarkerInfo*/ true, /*getTypeParameterMarkerInfo*/ true);
                 signatureGroupInfo.signatureInfo = TypeScript.MemberName.memberNameToString(signatureMemberName, paramIndexInfo);
-                signatureGroupInfo.docComment = compilerState.getDocComments(signature);
+                signatureGroupInfo.docComment = signature.docComments();
 
                 var parameterMarkerIndex = 0;
 
@@ -170,7 +170,7 @@ module Services {
                         var typeParameter = typeParameters[j];
                         var signatureTypeParameterInfo = new FormalTypeParameterInfo();
                         signatureTypeParameterInfo.name = typeParameter.getDisplayName();
-                        signatureTypeParameterInfo.docComment = compilerState.getDocComments(typeParameter);
+                        signatureTypeParameterInfo.docComment = typeParameter.docComments();
                         signatureTypeParameterInfo.minChar = paramIndexInfo[2 * parameterMarkerIndex];
                         signatureTypeParameterInfo.limChar = paramIndexInfo[2 * parameterMarkerIndex + 1];
                         parameterMarkerIndex++;
@@ -184,7 +184,7 @@ module Services {
                     var signatureParameterInfo = new FormalParameterInfo();
                     signatureParameterInfo.isVariable = signature.hasVarArgs && (j === parameters.length - 1);
                     signatureParameterInfo.name = parameter.getDisplayName();
-                    signatureParameterInfo.docComment = compilerState.getDocComments(parameter);
+                    signatureParameterInfo.docComment = parameter.docComments();
                     signatureParameterInfo.minChar = paramIndexInfo[2 * parameterMarkerIndex];
                     signatureParameterInfo.limChar = paramIndexInfo[2 * parameterMarkerIndex + 1];
                     parameterMarkerIndex++;
@@ -197,14 +197,14 @@ module Services {
             return signatureGroup;
         }
 
-        public static getSignatureInfoFromGenericSymbol(symbol: TypeScript.PullSymbol, enclosingScopeSymbol: TypeScript.PullSymbol, compilerState: CompilerState) {
+        public static getSignatureInfoFromGenericSymbol(symbol: TypeScript.PullSymbol, enclosingScopeSymbol: TypeScript.PullSymbol, compilerState: LanguageServiceCompiler) {
             var signatureGroupInfo = new FormalSignatureItemInfo();
 
             var paramIndexInfo: number[] = [];
-            var symbolName = symbol.getScopedNameEx(enclosingScopeSymbol, true, false, true);
+            var symbolName = symbol.getScopedNameEx(enclosingScopeSymbol, /*skipTypeParametersInName*/ false, /*useConstaintInName*/ true, /*getPrettyTypeName*/ false, /*getTypeParamMarkerInfo*/ true);
 
             signatureGroupInfo.signatureInfo = TypeScript.MemberName.memberNameToString(symbolName, paramIndexInfo);
-            signatureGroupInfo.docComment = compilerState.getDocComments(symbol);
+            signatureGroupInfo.docComment = symbol.docComments();
 
             var parameterMarkerIndex = 0;
 
@@ -215,7 +215,7 @@ module Services {
                 var typeParameter = typeParameters[i];
                 var signatureTypeParameterInfo = new FormalTypeParameterInfo();
                 signatureTypeParameterInfo.name = typeParameter.getDisplayName();
-                signatureTypeParameterInfo.docComment = compilerState.getDocComments(typeParameter);
+                signatureTypeParameterInfo.docComment = typeParameter.docComments();
                 signatureTypeParameterInfo.minChar = paramIndexInfo[2 * i];
                 signatureTypeParameterInfo.limChar = paramIndexInfo[2 * i + 1];
                 signatureGroupInfo.typeParameters.push(signatureTypeParameterInfo);
@@ -236,14 +236,14 @@ module Services {
             var parameterMinChar = caretPosition;
             var parameterLimChar = caretPosition;
 
-            if (ast.typeArguments) {
-                parameterMinChar = Math.min(ast.typeArguments.minChar);
-                parameterLimChar = Math.max(Math.max(ast.typeArguments.minChar, ast.typeArguments.limChar + ast.typeArguments.trailingTriviaWidth));
+            if (ast.argumentList.typeArgumentList) {
+                parameterMinChar = Math.min(ast.argumentList.typeArgumentList.start());
+                parameterLimChar = Math.max(Math.max(ast.argumentList.typeArgumentList.start(), ast.argumentList.typeArgumentList.end() + ast.argumentList.typeArgumentList.trailingTriviaWidth()));
             }
 
-            if (ast.arguments) {
-                parameterMinChar = Math.min(parameterMinChar, ast.arguments.minChar);
-                parameterLimChar = Math.max(parameterLimChar, Math.max(ast.arguments.minChar, ast.arguments.limChar + ast.arguments.trailingTriviaWidth));
+            if (ast.argumentList.arguments) {
+                parameterMinChar = Math.min(parameterMinChar, ast.argumentList.arguments.start());
+                parameterLimChar = Math.max(parameterLimChar, Math.max(ast.argumentList.arguments.start(), ast.argumentList.arguments.end() + ast.argumentList.arguments.trailingTriviaWidth()));
             }
 
             result.parameterMinChar = parameterMinChar;
@@ -255,10 +255,10 @@ module Services {
                 result.currentParameterIsTypeParameter = true;
                 result.currentParameter = typeParameterInformation.argumentIndex;
             }
-            else if (ast.arguments && ast.arguments.members) {
+            else if (ast.argumentList.arguments && ast.argumentList.arguments.nonSeparatorCount() > 0) {
                 result.currentParameter = 0;
-                for (var index = 0; index < ast.arguments.members.length; index++) {
-                    if (caretPosition > ast.arguments.members[index].limChar + ast.arguments.members[index].trailingTriviaWidth) {
+                for (var index = 0; index < ast.argumentList.arguments.nonSeparatorCount(); index++) {
+                    if (caretPosition > ast.argumentList.arguments.nonSeparatorAt(index).end() + ast.argumentList.arguments.nonSeparatorAt(index).trailingTriviaWidth()) {
                         result.currentParameter++;
                     }
                 }
@@ -279,6 +279,14 @@ module Services {
         }
 
         public static isSignatureHelpBlocker(sourceUnit: TypeScript.SourceUnitSyntax, position: number): boolean {
+            // We shouldn't be getting a possition that is outside the file because
+            // isEntirelyInsideComment can't handle when the position is out of bounds, 
+            // callers should be fixed, however we should be resiliant to bad inputs
+            // so we return true (this position is a blocker for getting signature help)
+            if (position < 0 || position > sourceUnit.fullWidth()) {
+                return true;
+            }
+
             return TypeScript.Syntax.isEntirelyInsideComment(sourceUnit, position);
         }
 

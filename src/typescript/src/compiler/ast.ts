@@ -13,19 +13,28 @@
 // limitations under the License.
 //
 
-///<reference path='typescript.ts' />
+///<reference path='references.ts' />
 
 module TypeScript {
     export interface IASTSpan {
-        minChar: number;
-        limChar: number;
-        trailingTriviaWidth: number;
+        _start: number;
+        _end: number;
+
+        start(): number;
+        end(): number;        //trailingTriviaWidth(): number;
     }
 
     export class ASTSpan implements IASTSpan {
-        public minChar: number = -1;  // -1 = "undefined" or "compiler generated"
-        public limChar: number = -1;  // -1 = "undefined" or "compiler generated"
-        public trailingTriviaWidth = 0;
+        constructor(public _start: number, public _end: number) {
+        }
+
+        public start(): number {
+            return this._start;
+        }
+
+        public end(): number {
+            return this._end;
+        }
     }
 
     var astID = 0;
@@ -38,14 +47,31 @@ module TypeScript {
         return structuralEquals(ast1, ast2, true);
     }
 
+    function commentStructuralEqualsNotIncludingPosition(ast1: Comment, ast2: Comment): boolean {
+        return commentStructuralEquals(ast1, ast2, false);
+    }
+
+    function commentStructuralEqualsIncludingPosition(ast1: Comment, ast2: Comment): boolean {
+        return commentStructuralEquals(ast1, ast2, true);
+    }
+
     function structuralEquals(ast1: AST, ast2: AST, includingPosition: boolean): boolean {
         if (ast1 === ast2) {
             return true;
         }
 
         return ast1 !== null && ast2 !== null &&
-               ast1.nodeType() === ast2.nodeType() &&
+               ast1.kind() === ast2.kind() &&
                ast1.structuralEquals(ast2, includingPosition);
+    }
+
+    function commentStructuralEquals(ast1: Comment, ast2: Comment, includingPosition: boolean): boolean {
+        if (ast1 === ast2) {
+            return true;
+        }
+
+        return ast1 !== null && ast2 !== null &&
+            ast1.structuralEquals(ast2, includingPosition);
     }
 
     function astArrayStructuralEquals(array1: AST[], array2: AST[], includingPosition: boolean): boolean {
@@ -53,43 +79,47 @@ module TypeScript {
             includingPosition ? structuralEqualsIncludingPosition : structuralEqualsNotIncludingPosition);
     }
 
-    export interface IAST extends IASTSpan {
-        nodeType(): NodeType;
-        astID: number;
-        astIDString: string;
-        getLength(): number;
+    function commentArrayStructuralEquals(array1: Comment[], array2: Comment[], includingPosition: boolean): boolean {
+        return ArrayUtilities.sequenceEquals(array1, array2,
+            includingPosition ? commentStructuralEqualsIncludingPosition : commentStructuralEqualsNotIncludingPosition);
     }
 
-    export class AST implements IAST {
-        public minChar: number = -1;  // -1 = "undefined" or "compiler generated"
-        public limChar: number = -1;  // -1 = "undefined" or "compiler generated"
-        public trailingTriviaWidth = 0;
+    export class AST implements IASTSpan {
+        public parent: AST = null;
+        public _start: number = -1;
+        public _end: number = -1;
+        public _trailingTriviaWidth: number = 0;
 
-        private _flags = ASTFlags.None;
-
-        public typeCheckPhase = -1;
-        public astIDString: string = astID.toString();
-        public astID: number = astID++;
-
-        // These are used to store type resolution information directly on the AST, rather than
-        // within a data map, if the useDirectTypeStorage flag is set
-        public symbol: PullSymbol = null; 
-        public aliasSymbol: PullSymbol = null;
-        public decl: PullDecl = null;
+        private _astID: number = astID++;
 
         private _preComments: Comment[] = null;
         private _postComments: Comment[] = null;
-        private _docComments: Comment[] = null;
 
         constructor() {
         }
 
-        public nodeType(): NodeType {
-            throw Errors.abstract();
+        public syntaxID(): number {
+            return this._astID;
         }
 
-        public isStatement() {
-            return false;
+        public start(): number {
+            return this._start;
+        }
+
+        public end(): number {
+            return this._end;
+        }
+
+        public trailingTriviaWidth(): number {
+            return this._trailingTriviaWidth;
+        }
+
+        public fileName(): string {
+            return this.parent.fileName();
+        }
+
+        public kind(): SyntaxKind {
+            throw Errors.abstract();
         }
 
         public preComments(): Comment[] {
@@ -118,182 +148,219 @@ module TypeScript {
             }
         }
 
-        public shouldEmit(): boolean {
-            return true;
-        }
-
-        public getFlags(): ASTFlags {
-            return this._flags;
-        }
-
-        // Must only be called from SyntaxTreeVisitor
-        public setFlags(flags: ASTFlags): void {
-            this._flags = flags;
-        }
-
-        public getLength(): number {
-            return this.limChar - this.minChar;
-        }
-
-        //public getID(): number {
-        //    var result = this.astID;
-        //    if (result === -1) {
-        //        result = astID++;
-        //        this.astID = result;
-        //    }
-
-        //    return result;
-        //}
-
-        public isDeclaration() { return false; }
-
-        public emit(emitter: Emitter) {
-            emitter.emitComments(this, true);
-            emitter.recordSourceMappingStart(this);
-            this.emitWorker(emitter);
-            emitter.recordSourceMappingEnd(this);
-            emitter.emitComments(this, false);
-        }
-
-        public emitWorker(emitter: Emitter) {
-            throw Errors.abstract();
-        }
-
-        public docComments(): Comment[] {
-            if (!this.isDeclaration() || !this.preComments() || this.preComments().length === 0) {
-                return [];
-            }
-
-            if (!this._docComments) {
-                var preComments = this.preComments();
-                var preCommentsLength = preComments.length;
-                var docComments = new Array<Comment>();
-                for (var i = preCommentsLength - 1; i >= 0; i--) {
-                    if (preComments[i].isDocComment()) {
-                        docComments.push(preComments[i]);
-                        continue;
-                    }
-                    break;
-                }
-
-                this._docComments = docComments.reverse();
-            }
-
-            return this._docComments;
+        public width(): number {
+            return this.end() - this.start();
         }
 
         public structuralEquals(ast: AST, includingPosition: boolean): boolean {
             if (includingPosition) {
-                if (this.minChar !== ast.minChar || this.limChar !== ast.limChar) {
+                if (this.start() !== ast.start() || this.end() !== ast.end()) {
                     return false;
                 }
             }
 
-            return this._flags === ast._flags &&
-                astArrayStructuralEquals(this.preComments(), ast.preComments(), includingPosition) &&
-                astArrayStructuralEquals(this.postComments(), ast.postComments(), includingPosition);
+            return commentArrayStructuralEquals(this.preComments(), ast.preComments(), includingPosition) &&
+                   commentArrayStructuralEquals(this.postComments(), ast.postComments(), includingPosition);
         }
     }
 
-    export class ASTList extends AST {
-        constructor(public members: AST[], public separatorCount?: number) {
+    export interface IASTToken extends AST {
+        text(): string;
+        valueText(): string;
+    }
+
+    export class ISyntaxList2 extends AST {
+        constructor(private _fileName: string, private members: AST[]) {
             super();
+
+            for (var i = 0, n = members.length; i < n; i++) {
+                members[i].parent = this;
+            }
         }
 
-        public nodeType(): NodeType {
-            return NodeType.List;
+        public childCount(): number {
+            return this.members.length;
         }
 
-        public emit(emitter: Emitter) {
-            emitter.recordSourceMappingStart(this);
-            emitter.emitModuleElements(this);
-            emitter.recordSourceMappingEnd(this);
+        public childAt(index: number): AST {
+            return this.members[index];
         }
 
-        public structuralEquals(ast: ASTList, includingPosition: boolean): boolean {
+        public fileName(): string {
+            return this._fileName;
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.List;
+        }
+
+        public firstOrDefault(func: (v: AST, index: number) => boolean): AST {
+            return ArrayUtilities.firstOrDefault(this.members, func);
+        }
+
+        public lastOrDefault(func: (v: AST, index: number) => boolean): AST {
+            return ArrayUtilities.lastOrDefault(this.members, func);
+        }
+
+        public any(func: (v: AST) => boolean): boolean {
+            return ArrayUtilities.any(this.members, func);
+        }
+
+        public structuralEquals(ast: ISyntaxList2, includingPosition: boolean): boolean {
             return super.structuralEquals(ast, includingPosition) &&
                    astArrayStructuralEquals(this.members, ast.members, includingPosition);
         }
     }
 
-    export class Identifier extends AST {
-        private _text: string;
+    export class ISeparatedSyntaxList2 extends AST {
+        constructor(private _fileName: string, private members: AST[], private _separatorCount: number) {
+            super();
+
+            for (var i = 0, n = members.length; i < n; i++) {
+                members[i].parent = this;
+            }
+        }
+
+        public nonSeparatorCount(): number {
+            return this.members.length;
+        }
+
+        public separatorCount(): number {
+            return this._separatorCount;
+        }
+
+        public nonSeparatorAt(index: number): AST {
+            return this.members[index];
+        }
+
+        public nonSeparatorIndexOf(ast: AST): number {
+            for (var i = 0, n = this.nonSeparatorCount(); i < n; i++) {
+                if (this.nonSeparatorAt(i) === ast) {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
+
+        public fileName(): string {
+            return this._fileName;
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.SeparatedList;
+        }
+
+        public structuralEquals(ast: ISeparatedSyntaxList2, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                astArrayStructuralEquals(this.members, ast.members, includingPosition);
+        }
+    }
+
+    export class SourceUnit extends AST {
+        constructor(public moduleElements: ISyntaxList2,
+                    private _fileName: string) {
+            super();
+            moduleElements && (moduleElements.parent = this);
+        }
+
+        public fileName(): string {
+            return this._fileName;
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.SourceUnit;
+        }
+
+        public structuralEquals(ast: SourceUnit, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.moduleElements, ast.moduleElements, includingPosition);
+        }
+    }
+
+    export class Identifier extends AST implements IASTToken {
+        private _valueText: string = null;
 
         // 'actualText' is the text that the user has entered for the identifier. the text might 
         // include any Unicode escape sequences (e.g.: \u0041 for 'A'). 'text', however, contains 
         // the resolved value of any escape sequences in the actual text; so in the previous 
         // example, actualText = '\u0041', text = 'A'.
+        // Also, in the case where actualText is "__proto__", we substitute "#__proto__" as the _text
+        // so that we can safely use it as a key in a javascript object.
         //
         // For purposes of finding a symbol, use text, as this will allow you to match all 
         // variations of the variable text. For full-fidelity translation of the user input, such
         // as emitting, use the actualText field.
-        constructor(public actualText: string, text: string) {
+        constructor(private _text: string) {
             super();
-            this._text = text;
         }
 
         public text(): string {
-            if (!this._text) {
-                this._text = Syntax.massageEscapes(this.actualText);
-            }
-
             return this._text;
         }
+        public valueText(): string {
+            if (!this._valueText) {
+                // In the case where actualText is "__proto__", we substitute "#__proto__" as the _text
+                // so that we can safely use it as a key in a javascript object.
+                var text = this._text;
+                if (text === "__proto__") {
+                    this._valueText = "#__proto__";
+                }
+                else {
+                    this._valueText = Syntax.massageEscapes(text);
+                }
+            }
 
-        public nodeType(): NodeType {
-            return NodeType.Name;
+            return this._valueText;
         }
 
-        public isMissing() { return false; }
-
-        public emit(emitter: Emitter) {
-            emitter.emitName(this, true);
+        public kind(): SyntaxKind {
+            return SyntaxKind.IdentifierName;
         }
 
         public structuralEquals(ast: Identifier, includingPosition: boolean): boolean {
             return super.structuralEquals(ast, includingPosition) &&
-                   this.actualText === ast.actualText &&
-                   this.isMissing() === ast.isMissing();
-        }
-    }
-
-    export class MissingIdentifier extends Identifier {
-        constructor() {
-            super("__missing", "__missing");
-        }
-
-        public isMissing() {
-            return true;
-        }
-
-        public emit(emitter: Emitter) {
-            // Emit nothing for a missing ID
+                   this._text === ast._text;
         }
     }
 
     export class LiteralExpression extends AST {
-        constructor(private _nodeType: NodeType) {
+        constructor(private _nodeType: SyntaxKind, private _text: string, private _valueText: string) {
             super();
         }
 
-        public nodeType(): NodeType {
+        public text(): string {
+            return this._text;
+        }
+
+        public valueText(): string {
+            return this._valueText;
+        }
+
+        public kind(): SyntaxKind {
             return this._nodeType;
         }
 
-        public emitWorker(emitter: Emitter) {
-            switch (this.nodeType()) {
-                case NodeType.NullLiteral:
-                    emitter.writeToOutput("null");
-                    break;
-                case NodeType.FalseLiteral:
-                    emitter.writeToOutput("false");
-                    break;
-                case NodeType.TrueLiteral:
-                    emitter.writeToOutput("true");
-                    break;
-                default:
-                    throw Errors.abstract();
-            }
+        public structuralEquals(ast: ParenthesizedExpression, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition);
+        }
+    }
+
+    export class ThisExpression extends AST implements IASTToken {
+        constructor(private _text: string, private _valueText: string) {
+            super();
+        }
+
+        public text(): string {
+            return this._text;
+        }
+
+        public valueText(): string {
+            return this._valueText;
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.ThisKeyword;
         }
 
         public structuralEquals(ast: ParenthesizedExpression, includingPosition: boolean): boolean {
@@ -301,18 +368,21 @@ module TypeScript {
         }
     }
 
-    export class ThisExpression extends AST {
-        public nodeType(): NodeType {
-            return NodeType.ThisExpression;
+    export class SuperExpression extends AST implements IASTToken {
+        constructor(private _text: string, private _valueText: string) {
+            super();
         }
 
-        public emitWorker(emitter: Emitter) {
-            if (emitter.thisFunctionDeclaration && (hasFlag(emitter.thisFunctionDeclaration.getFunctionFlags(), FunctionFlags.IsFatArrowFunction))) {
-                emitter.writeToOutput("_this");
-            }
-            else {
-                emitter.writeToOutput("this");
-            }
+        public text(): string {
+            return this._text;
+        }
+
+        public valueText(): string {
+            return this._valueText;
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.SuperKeyword;
         }
 
         public structuralEquals(ast: ParenthesizedExpression, includingPosition: boolean): boolean {
@@ -320,1389 +390,530 @@ module TypeScript {
         }
     }
 
-    export class SuperExpression extends AST {
-        public nodeType(): NodeType {
-            return NodeType.SuperExpression;
+    export class NumericLiteral extends AST implements IASTToken {
+        constructor(private _value: number,
+                    private _text: string,
+                    private _valueText: string) {
+            super();
         }
 
-        public emitWorker(emitter: Emitter) {
-            emitter.emitSuperReference();
+        public text(): string { return this._text; }
+        public valueText(): string { return this._valueText; }
+        public value(): any { return this._value; }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.NumericLiteral;
         }
 
-        public structuralEquals(ast: ParenthesizedExpression, includingPosition: boolean): boolean {
+        public structuralEquals(ast: NumericLiteral, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                   (this._value === ast._value || (isNaN(this._value) && isNaN(ast._value))) &&
+                   this._text === ast._text;
+        }
+    }
+
+    export class RegularExpressionLiteral extends AST implements IASTToken {
+        constructor(private _text: string, private _valueText: string) {
+            super();
+        }
+
+        public text(): string {
+            return this._text;
+        }
+
+        public valueText(): string {
+            return this._valueText;
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.RegularExpressionLiteral;
+        }
+    }
+
+    export class StringLiteral extends AST implements IASTToken {
+        constructor(private _text: string, private _valueText: string) {
+            super();
+            this._valueText = _valueText === "__proto__" ? "#__proto__" : _valueText;
+
+        }
+
+        public text(): string { return this._text; }
+        public valueText(): string { return this._valueText; }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.StringLiteral;
+        }
+
+        public structuralEquals(ast: StringLiteral, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                   this._text === ast._text;
+        }
+    }
+
+    export class TypeAnnotation extends AST {
+        constructor(public type: AST) {
+            super();
+            type && (type.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.TypeAnnotation;
+        }
+    }
+
+    export class BuiltInType extends AST implements IASTToken {
+        constructor(private _nodeType: SyntaxKind, private _text: string, private _valueText: string) {
+            super();
+        }
+
+        public text(): string {
+            return this._text;
+        }
+
+        public valueText(): string {
+            return this._valueText;
+        }
+
+        public kind(): SyntaxKind {
+            return this._nodeType;
+        }
+    }
+
+    export class ExternalModuleReference extends AST {
+        constructor(public stringLiteral: StringLiteral) {
+            super();
+            stringLiteral && (stringLiteral.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.ExternalModuleReference;
+        }
+    }
+
+    export class ModuleNameModuleReference extends AST {
+        constructor(public moduleName: AST) {
+            super();
+            moduleName && (moduleName.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.ModuleNameModuleReference;
+        }
+    }
+
+    export class ImportDeclaration extends AST {
+        constructor(public modifiers: PullElementFlags[], public identifier: Identifier, public moduleReference: AST) {
+            super();
+            identifier && (identifier.parent = this);
+            moduleReference && (moduleReference.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.ImportDeclaration;
+        }
+
+        public structuralEquals(ast: ImportDeclaration, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.identifier, ast.identifier, includingPosition) &&
+                structuralEquals(this.moduleReference, ast.moduleReference, includingPosition);
+        }
+    }
+
+    export class ExportAssignment extends AST {
+        constructor(public identifier: Identifier) {
+            super();
+            identifier && (identifier.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.ExportAssignment;
+        }
+
+        public structuralEquals(ast: ExportAssignment, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.identifier, ast.identifier, includingPosition);
+        }
+    }
+
+    export class TypeParameterList extends AST {
+        constructor(public typeParameters: ISeparatedSyntaxList2) {
+            super();
+            typeParameters && (typeParameters.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.TypeParameterList;
+        }
+    }
+
+    export class ClassDeclaration extends AST {
+        constructor(public modifiers: PullElementFlags[], public identifier: Identifier, public typeParameterList: TypeParameterList, public heritageClauses: ISyntaxList2, public classElements: ISyntaxList2, public closeBraceToken: ASTSpan) {
+            super();
+            identifier && (identifier.parent = this);
+            typeParameterList && (typeParameterList.parent = this);
+            heritageClauses && (heritageClauses.parent = this);
+            classElements && (classElements.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.ClassDeclaration;
+        }
+
+        public structuralEquals(ast: ClassDeclaration, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.identifier, ast.identifier, includingPosition) &&
+                structuralEquals(this.classElements, ast.classElements, includingPosition) &&
+                structuralEquals(this.typeParameterList, ast.typeParameterList, includingPosition) &&
+                structuralEquals(this.heritageClauses, ast.heritageClauses, includingPosition);
+        }
+    }
+
+    export class InterfaceDeclaration extends AST {
+        constructor(public modifiers: PullElementFlags[], public identifier: Identifier, public typeParameterList: TypeParameterList, public heritageClauses: ISyntaxList2, public body: ObjectType) {
+            super();
+            identifier && (identifier.parent = this);
+            typeParameterList && (typeParameterList.parent = this);
+            body && (body.parent = this);
+            heritageClauses && (heritageClauses.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.InterfaceDeclaration;
+        }
+
+        public structuralEquals(ast: InterfaceDeclaration, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.identifier, ast.identifier, includingPosition) &&
+                structuralEquals(this.body, ast.body, includingPosition) &&
+                structuralEquals(this.typeParameterList, ast.typeParameterList, includingPosition) &&
+                structuralEquals(this.heritageClauses, ast.heritageClauses, includingPosition);
+        }
+    }
+
+    export class HeritageClause extends AST {
+        constructor(private _nodeType: SyntaxKind, public typeNames: ISeparatedSyntaxList2) {
+            super();
+            typeNames && (typeNames.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return this._nodeType;
+        }
+
+        public structuralEquals(ast: HeritageClause, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.typeNames, ast.typeNames, includingPosition);
+        }
+    }
+
+    export class ModuleDeclaration extends AST {
+        constructor(public modifiers: PullElementFlags[], public name: AST, public stringLiteral: StringLiteral, public moduleElements: ISyntaxList2, public endingToken: ASTSpan) {
+            super();
+            name && (name.parent = this);
+            stringLiteral && (stringLiteral.parent = this);
+            moduleElements && (moduleElements.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.ModuleDeclaration;
+        }
+
+        public structuralEquals(ast: ModuleDeclaration, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.name, ast.name, includingPosition) &&
+                structuralEquals(this.moduleElements, ast.moduleElements, includingPosition);
+        }
+    }
+
+    export class FunctionDeclaration extends AST {
+        constructor(public modifiers: PullElementFlags[], public identifier: Identifier, public callSignature: CallSignature, public block: Block) {
+            super();
+            identifier && (identifier.parent = this);
+            callSignature && (callSignature.parent = this);
+            block && (block.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.FunctionDeclaration;
+        }
+
+        public structuralEquals(ast: FunctionDeclaration, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.identifier, ast.identifier, includingPosition) &&
+                structuralEquals(this.block, ast.block, includingPosition) &&
+                structuralEquals(this.callSignature, ast.callSignature, includingPosition);
+        }
+    }
+
+    export class VariableStatement extends AST {
+        constructor(public modifiers: PullElementFlags[], public declaration: VariableDeclaration) {
+            super();
+            declaration && (declaration.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.VariableStatement;
+        }
+
+        public structuralEquals(ast: VariableStatement, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.declaration, ast.declaration, includingPosition);
+        }
+    }
+
+    export class VariableDeclaration extends AST {
+        constructor(public declarators: ISeparatedSyntaxList2) {
+            super();
+            declarators && (declarators.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.VariableDeclaration;
+        }
+
+        public structuralEquals(ast: VariableDeclaration, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.declarators, ast.declarators, includingPosition);
+        }
+    }
+
+    export class VariableDeclarator extends AST {
+        constructor(public propertyName: IASTToken, public typeAnnotation: TypeAnnotation, public equalsValueClause: EqualsValueClause) {
+            super();
+            propertyName && (propertyName.parent = this);
+            typeAnnotation && (typeAnnotation.parent = this);
+            equalsValueClause && (equalsValueClause.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.VariableDeclarator;
+        }
+    }
+
+    export class EqualsValueClause extends AST {
+        constructor(public value: AST) {
+            super();
+            value && (value.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.EqualsValueClause;
+        }
+    }
+
+    export class PrefixUnaryExpression extends AST {
+        constructor(private _nodeType: SyntaxKind, public operand: AST) {
+            super();
+            operand && (operand.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return this._nodeType;
+        }
+
+        public structuralEquals(ast: PrefixUnaryExpression, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.operand, ast.operand, includingPosition);
+        }
+    }
+
+    export class ArrayLiteralExpression extends AST {
+        constructor(public expressions: ISeparatedSyntaxList2) {
+            super();
+            expressions && (expressions.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.ArrayLiteralExpression;
+        }
+
+        public structuralEquals(ast: ArrayLiteralExpression, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.expressions, ast.expressions, includingPosition);
+        }
+    }
+
+    export class OmittedExpression extends AST {
+        public kind(): SyntaxKind {
+            return SyntaxKind.OmittedExpression;
+        }
+
+        public structuralEquals(ast: CatchClause, includingPosition: boolean): boolean {
             return super.structuralEquals(ast, includingPosition);
         }
     }
 
     export class ParenthesizedExpression extends AST {
-        constructor(public expression: AST) {
+        constructor(public openParenTrailingComments: Comment[], public expression: AST) {
             super();
+            expression && (expression.parent = this);
         }
 
-        public nodeType(): NodeType {
-            return NodeType.ParenthesizedExpression;
-        }
-
-        public emitWorker(emitter: Emitter) {
-            emitter.writeToOutput("(");
-            this.expression.emit(emitter);
-            emitter.writeToOutput(")");
+        public kind(): SyntaxKind {
+            return SyntaxKind.ParenthesizedExpression;
         }
 
         public structuralEquals(ast: ParenthesizedExpression, includingPosition: boolean): boolean {
             return super.structuralEquals(ast, includingPosition) &&
-                   structuralEquals(this.expression, ast.expression, includingPosition);
+                structuralEquals(this.expression, ast.expression, includingPosition);
         }
     }
 
-    export class UnaryExpression extends AST {
-        constructor(private _nodeType: NodeType, public operand: AST, public castTerm: TypeReference) {
+    export interface ICallExpression extends IASTSpan {
+        expression: AST;
+        argumentList: ArgumentList;
+    }
+
+    export class SimpleArrowFunctionExpression extends AST {
+        constructor(public identifier: Identifier, public block: Block, public expression: AST) {
             super();
+            identifier && (identifier.parent = this);
+            block && (block.parent = this);
+            expression && (expression.parent = this);
         }
 
-        public nodeType(): NodeType {
-            return this._nodeType;
-        }
-
-        public emitWorker(emitter: Emitter) {
-            switch (this.nodeType()) {
-                case NodeType.PostIncrementExpression:
-                    this.operand.emit(emitter);
-                    emitter.writeToOutput("++");
-                    break;
-                case NodeType.LogicalNotExpression:
-                    emitter.writeToOutput("!");
-                    this.operand.emit(emitter);
-                    break;
-                case NodeType.PostDecrementExpression:
-                    this.operand.emit(emitter);
-                    emitter.writeToOutput("--");
-                    break;
-                case NodeType.ObjectLiteralExpression:
-                    emitter.emitObjectLiteral(this);
-                    break;
-                case NodeType.ArrayLiteralExpression:
-                    emitter.emitArrayLiteral(this);
-                    break;
-                case NodeType.BitwiseNotExpression:
-                    emitter.writeToOutput("~");
-                    this.operand.emit(emitter);
-                    break;
-                case NodeType.NegateExpression:
-                    emitter.writeToOutput("-");
-                    if (this.operand.nodeType() === NodeType.NegateExpression || this.operand.nodeType() === NodeType.PreDecrementExpression) {
-                        emitter.writeToOutput(" ");
-                    }
-                    this.operand.emit(emitter);
-                    break;
-                case NodeType.PlusExpression:
-                    emitter.writeToOutput("+");
-                    if (this.operand.nodeType() === NodeType.PlusExpression || this.operand.nodeType() === NodeType.PreIncrementExpression) {
-                        emitter.writeToOutput(" ");
-                    }
-                    this.operand.emit(emitter);
-                    break;
-                case NodeType.PreIncrementExpression:
-                    emitter.writeToOutput("++");
-                    this.operand.emit(emitter);
-                    break;
-                case NodeType.PreDecrementExpression:
-                    emitter.writeToOutput("--");
-                    this.operand.emit(emitter);
-                    break;
-                case NodeType.TypeOfExpression:
-                    emitter.writeToOutput("typeof ");
-                    this.operand.emit(emitter);
-                    break;
-                case NodeType.DeleteExpression:
-                    emitter.writeToOutput("delete ");
-                    this.operand.emit(emitter);
-                    break;
-                case NodeType.VoidExpression:
-                    emitter.writeToOutput("void ");
-                    this.operand.emit(emitter);
-                    break;
-                case NodeType.CastExpression:
-                    this.operand.emit(emitter);
-                    break;
-                default:
-                    throw Errors.abstract();
-            }
-        }
-
-        public structuralEquals(ast: UnaryExpression, includingPosition: boolean): boolean {
-            return super.structuralEquals(ast, includingPosition) &&
-                   structuralEquals(this.castTerm, ast.castTerm, includingPosition) &&
-                   structuralEquals(this.operand, ast.operand, includingPosition);
+        public kind(): SyntaxKind {
+            return SyntaxKind.SimpleArrowFunctionExpression;
         }
     }
 
-    export interface ICallExpression extends IAST {
-        target: AST;
-        typeArguments: ASTList;
-        arguments: ASTList;
-        closeParenSpan: ASTSpan;
-        callResolutionData: PullAdditionalCallResolutionData;
-    }
-
-    export class ObjectCreationExpression extends AST implements ICallExpression {
-        callResolutionData: PullAdditionalCallResolutionData = null;
-        constructor(public target: AST,
-                    public typeArguments: ASTList,
-                    public arguments: ASTList,
-                    public closeParenSpan: ASTSpan) {
+    export class ParenthesizedArrowFunctionExpression extends AST {
+        constructor(public callSignature: CallSignature, public block: Block, public expression: AST) {
             super();
+            callSignature && (callSignature.parent = this);
+            block && (block.parent = this);
+            expression && (expression.parent = this);
         }
 
-        public nodeType(): NodeType {
-            return NodeType.ObjectCreationExpression;
-        }
-
-        public emitWorker(emitter: Emitter) {
-            emitter.emitNew(this, this.target, this.arguments);
-        }
-
-        public structuralEquals(ast: ObjectCreationExpression, includingPosition: boolean): boolean {
-            return super.structuralEquals(ast, includingPosition) &&
-                structuralEquals(this.target, ast.target, includingPosition) &&
-                structuralEquals(this.typeArguments, ast.typeArguments, includingPosition) &&
-                structuralEquals(this.arguments, ast.arguments, includingPosition);
+        public kind(): SyntaxKind {
+            return SyntaxKind.ParenthesizedArrowFunctionExpression;
         }
     }
 
-    export class InvocationExpression extends AST implements ICallExpression {
-        callResolutionData: PullAdditionalCallResolutionData = null;
-        constructor(public target: AST,
-                    public typeArguments: ASTList,
-                    public arguments: ASTList,
-                    public closeParenSpan: ASTSpan) {
+    export class QualifiedName extends AST {
+        constructor(public left: AST, public right: Identifier) {
             super();
+            left && (left.parent = this);
+            right && (right.parent = this);
         }
 
-        public nodeType(): NodeType {
-            return NodeType.InvocationExpression;
+        public kind(): SyntaxKind {
+            return SyntaxKind.QualifiedName;
         }
 
-        public emitWorker(emitter: Emitter) {
-            emitter.emitCall(this, this.target, this.arguments);
-        }
-
-        public structuralEquals(ast: InvocationExpression, includingPosition: boolean): boolean {
+        public structuralEquals(ast: QualifiedName, includingPosition: boolean): boolean {
             return super.structuralEquals(ast, includingPosition) &&
-                   structuralEquals(this.target, ast.target, includingPosition) &&
-                   structuralEquals(this.typeArguments, ast.typeArguments, includingPosition) &&
-                   structuralEquals(this.arguments, ast.arguments, includingPosition);
+                structuralEquals(this.left, ast.left, includingPosition) &&
+                structuralEquals(this.right, ast.right, includingPosition);
         }
     }
 
-    export class BinaryExpression extends AST {
-        constructor(private _nodeType: NodeType,
-                    public operand1: AST,
-                    public operand2: AST) {
+    export class ParameterList extends AST {
+        constructor(public openParenTrailingComments: Comment[], public parameters: ISeparatedSyntaxList2) {
             super();
+            parameters && (parameters.parent = this);
         }
 
-        public nodeType(): NodeType {
-            return this._nodeType;
-        }
-
-        public static getTextForBinaryToken(nodeType: NodeType): string {
-            switch (nodeType) {
-                case NodeType.CommaExpression: return ",";
-                case NodeType.AssignmentExpression: return "=";
-                case NodeType.AddAssignmentExpression: return "+=";
-                case NodeType.SubtractAssignmentExpression: return "-=";
-                case NodeType.MultiplyAssignmentExpression: return "*=";
-                case NodeType.DivideAssignmentExpression: return "/=";
-                case NodeType.ModuloAssignmentExpression: return "%=";
-                case NodeType.AndAssignmentExpression: return "&=";
-                case NodeType.ExclusiveOrAssignmentExpression: return "^=";
-                case NodeType.OrAssignmentExpression: return "|=";
-                case NodeType.LeftShiftAssignmentExpression: return "<<=";
-                case NodeType.SignedRightShiftAssignmentExpression: return ">>=";
-                case NodeType.UnsignedRightShiftAssignmentExpression: return ">>>=";
-                case NodeType.LogicalOrExpression: return "||";
-                case NodeType.LogicalAndExpression: return "&&";
-                case NodeType.BitwiseOrExpression: return "|";
-                case NodeType.BitwiseExclusiveOrExpression: return "^";
-                case NodeType.BitwiseAndExpression: return "&";
-                case NodeType.EqualsWithTypeConversionExpression: return "==";
-                case NodeType.NotEqualsWithTypeConversionExpression: return "!=";
-                case NodeType.EqualsExpression: return "===";
-                case NodeType.NotEqualsExpression: return "!==";
-                case NodeType.LessThanExpression: return "<";
-                case NodeType.GreaterThanExpression: return ">";
-                case NodeType.LessThanOrEqualExpression: return "<=";
-                case NodeType.GreaterThanOrEqualExpression: return ">=";
-                case NodeType.InstanceOfExpression: return "instanceof";
-                case NodeType.InExpression: return "in";
-                case NodeType.LeftShiftExpression: return "<<";
-                case NodeType.SignedRightShiftExpression: return ">>";
-                case NodeType.UnsignedRightShiftExpression: return ">>>";
-                case NodeType.MultiplyExpression: return "*";
-                case NodeType.DivideExpression: return "/";
-                case NodeType.ModuloExpression: return "%";
-                case NodeType.AddExpression: return "+";
-                case NodeType.SubtractExpression: return "-";
-            }
-
-            throw Errors.invalidOperation();
-        }
-
-        public emitWorker(emitter: Emitter) {
-            switch (this.nodeType()) {
-                case NodeType.MemberAccessExpression:
-                    if (!emitter.tryEmitConstant(this)) {
-                        this.operand1.emit(emitter);
-                        emitter.writeToOutput(".");
-                        emitter.emitName(<Identifier>this.operand2, false);
-                    }
-                    break;
-                case NodeType.ElementAccessExpression:
-                    emitter.emitIndex(this.operand1, this.operand2);
-                    break;
-
-                case NodeType.Member:
-                    if (this.operand2.nodeType() === NodeType.FunctionDeclaration && (<FunctionDeclaration>this.operand2).isAccessor()) {
-                        var funcDecl = <FunctionDeclaration>this.operand2;
-                        if (hasFlag(funcDecl.getFunctionFlags(), FunctionFlags.GetAccessor)) {
-                            emitter.writeToOutput("get ");
-                        }
-                        else {
-                            emitter.writeToOutput("set ");
-                        }
-                        this.operand1.emit(emitter);
-                    }
-                    else {
-                        this.operand1.emit(emitter);
-                        emitter.writeToOutputTrimmable(": ");
-                    }
-                    this.operand2.emit(emitter);
-                    break;
-                case NodeType.CommaExpression:
-                    this.operand1.emit(emitter);
-                    emitter.writeToOutput(", ");
-                    this.operand2.emit(emitter);
-                    break;
-                default:
-                    {
-                        this.operand1.emit(emitter);
-                        var binOp = BinaryExpression.getTextForBinaryToken(this.nodeType());
-                        if (binOp === "instanceof") {
-                            emitter.writeToOutput(" instanceof ");
-                        }
-                        else if (binOp === "in") {
-                            emitter.writeToOutput(" in ");
-                        }
-                        else {
-                            emitter.writeToOutputTrimmable(" " + binOp + " ");
-                        }
-                        this.operand2.emit(emitter);
-                    }
-            }
-        }
-
-        public structuralEquals(ast: BinaryExpression, includingPosition: boolean): boolean {
-            return super.structuralEquals(ast, includingPosition) &&
-                   structuralEquals(this.operand1, ast.operand1, includingPosition) &&
-                   structuralEquals(this.operand2, ast.operand2, includingPosition);
+        public kind(): SyntaxKind {
+            return SyntaxKind.ParameterList;
         }
     }
 
-    export class ConditionalExpression extends AST {
-        constructor(public operand1: AST,
-                    public operand2: AST,
-                    public operand3: AST) {
+    export class ConstructorType extends AST {
+        constructor(public typeParameterList: TypeParameterList, public parameterList: ParameterList, public type: AST) {
             super();
+            typeParameterList && (typeParameterList.parent = this);
+            parameterList && (parameterList.parent = this);
+            type && (type.parent = this);
         }
 
-        public nodeType(): NodeType {
-            return NodeType.ConditionalExpression;
-        }
-
-        public emitWorker(emitter: Emitter) {
-            this.operand1.emit(emitter);
-            emitter.writeToOutput(" ? ");
-            this.operand2.emit(emitter);
-            emitter.writeToOutput(" : ");
-            this.operand3.emit(emitter);
-        }
-
-        public structuralEquals(ast: ConditionalExpression, includingPosition: boolean): boolean {
-            return super.structuralEquals(ast, includingPosition) &&
-                   structuralEquals(this.operand1, ast.operand1, includingPosition) &&
-                   structuralEquals(this.operand2, ast.operand2, includingPosition) &&
-                   structuralEquals(this.operand3, ast.operand3, includingPosition);
+        public kind(): SyntaxKind {
+            return SyntaxKind.ConstructorType;
         }
     }
 
-    export class NumberLiteral extends AST {
-        private _text: string;
-
-        constructor(public value: number,
-                    text: string) {
+    export class FunctionType extends AST {
+        constructor(public typeParameterList: TypeParameterList, public parameterList: ParameterList, public type: AST) {
             super();
-            this._text = text;
+            typeParameterList && (typeParameterList.parent = this);
+            parameterList && (parameterList.parent = this);
+            type && (type.parent = this);
         }
 
-        public text(): string {
-            return this._text;
-        }
-
-        public nodeType(): NodeType {
-            return NodeType.NumericLiteral;
-        }
-
-        public emitWorker(emitter: Emitter) {
-            emitter.writeToOutput(this._text);
-        }
-
-        public structuralEquals(ast: NumberLiteral, includingPosition: boolean): boolean {
-            return super.structuralEquals(ast, includingPosition) &&
-                   this.value === ast.value &&
-                   this._text === ast._text;
+        public kind(): SyntaxKind {
+            return SyntaxKind.FunctionType;
         }
     }
 
-    export class RegexLiteral extends AST {
-        constructor(public text: string) {
+    export class ObjectType extends AST {
+        constructor(public typeMembers: ISeparatedSyntaxList2) {
             super();
+            typeMembers && (typeMembers.parent = this);
         }
 
-        public nodeType(): NodeType {
-            return NodeType.RegularExpressionLiteral;
+        public kind(): SyntaxKind {
+            return SyntaxKind.ObjectType;
         }
 
-        public emitWorker(emitter: Emitter) {
-            emitter.writeToOutput(this.text);
-        }
-
-        public structuralEquals(ast: RegexLiteral, includingPosition: boolean): boolean {
+        public structuralEquals(ast: ObjectType, includingPosition: boolean): boolean {
             return super.structuralEquals(ast, includingPosition) &&
-                   this.text === ast.text;
+                structuralEquals(this.typeMembers, ast.typeMembers, includingPosition);
         }
     }
 
-    export class StringLiteral extends AST {
-        private _text: string;
-
-        constructor(public actualText: string, text: string) {
+    export class ArrayType extends AST {
+        constructor(public type: AST) {
             super();
-            this._text = text;
+            type && (type.parent = this);
         }
 
-        public text(): string {
-            return this._text;
+        public kind(): SyntaxKind {
+            return SyntaxKind.ArrayType;
         }
 
-        public nodeType(): NodeType {
-            return NodeType.StringLiteral;
-        }
-
-        public emitWorker(emitter: Emitter) {
-            emitter.writeToOutput(this.actualText);
-        }
-
-        public structuralEquals(ast: StringLiteral, includingPosition: boolean): boolean {
+        public structuralEquals(ast: ArrayType, includingPosition: boolean): boolean {
             return super.structuralEquals(ast, includingPosition) &&
-                   this.actualText === ast.actualText;
+                structuralEquals(this.type, ast.type, includingPosition);
         }
     }
 
-    export class ImportDeclaration extends AST {
-        private _varFlags = VariableFlags.None;
-        constructor(public id: Identifier, public alias: AST) {
+    export class TypeArgumentList extends AST {
+        constructor(public typeArguments: ISeparatedSyntaxList2) {
             super();
+            typeArguments && (typeArguments.parent = this);
         }
 
-        public nodeType(): NodeType {
-            return NodeType.ImportDeclaration;
-        }
-
-        public isDeclaration() { return true; }
-
-        public getVarFlags(): VariableFlags {
-            return this._varFlags;
-        }
-
-        // Must only be called from SyntaxTreeVisitor
-        public setVarFlags(flags: VariableFlags): void {
-            this._varFlags = flags;
-        }
-
-        public isExternalImportDeclaration() {
-            if (this.alias.nodeType() == NodeType.Name) {
-                var text = (<Identifier>this.alias).actualText;
-                return isQuoted(text);
-            }
-
-            return false;
-        }
-
-        public emit(emitter: Emitter) {
-            emitter.emitImportDeclaration(this);
-        }
-
-        public getAliasName(aliasAST: AST = this.alias): string {
-            if (aliasAST.nodeType() == NodeType.TypeRef) {
-                aliasAST = (<TypeReference>aliasAST).term;
-            }
-
-            if (aliasAST.nodeType() === NodeType.Name) {
-                return (<Identifier>aliasAST).actualText;
-            } else {
-                var dotExpr = <BinaryExpression>aliasAST;
-                return this.getAliasName(dotExpr.operand1) + "." + this.getAliasName(dotExpr.operand2);
-            }
-        }
-
-        public firstAliasedModToString() {
-            if (this.alias.nodeType() === NodeType.Name) {
-                return (<Identifier>this.alias).actualText;
-            }
-            else {
-                var dotExpr = <TypeReference>this.alias;
-                var firstMod = <Identifier>(<BinaryExpression>dotExpr.term).operand1;
-                return firstMod.actualText;
-            }
-        }
-
-        public structuralEquals(ast: ImportDeclaration, includingPosition: boolean): boolean {
-            return super.structuralEquals(ast, includingPosition) &&
-                this._varFlags === ast._varFlags &&
-                structuralEquals(this.id, ast.id, includingPosition) &&
-                structuralEquals(this.alias, ast.alias, includingPosition);
-        }
-    }
-
-    export class ExportAssignment extends AST {
-        constructor(public id: Identifier) {
-            super();
-        }
-
-        public nodeType(): NodeType {
-            return NodeType.ExportAssignment;
-        }
-
-        public structuralEquals(ast: ExportAssignment, includingPosition: boolean): boolean {
-            return super.structuralEquals(ast, includingPosition) &&
-                   structuralEquals(this.id, ast.id, includingPosition);
-        }
-
-        public emit(emitter: Emitter) {
-            emitter.setExportAssignmentIdentifier(this.id.actualText);
-        }
-    }
-
-    export class BoundDecl extends AST {
-        public constantValue: number = null;
-        private _varFlags = VariableFlags.None;
-
-        constructor(public id: Identifier, public typeExpr: AST, public init: AST) {
-            super();
-        }
-
-        public isDeclaration() { return true; }
-
-        public getVarFlags(): VariableFlags {
-            return this._varFlags;
-        }
-
-        // Must only be called from SyntaxTreeVisitor
-        public setVarFlags(flags: VariableFlags): void {
-            this._varFlags = flags;
-        }
-
-        public isProperty() { return hasFlag(this.getVarFlags(), VariableFlags.Property); }
-
-        public structuralEquals(ast: BoundDecl, includingPosition: boolean): boolean {
-            return super.structuralEquals(ast, includingPosition) &&
-                   this._varFlags === ast._varFlags &&
-                   structuralEquals(this.init, ast.init, includingPosition) &&
-                   structuralEquals(this.typeExpr, ast.typeExpr, includingPosition) &&
-                   structuralEquals(this.id, ast.id, includingPosition);
-        }
-    }
-
-    export class VariableDeclarator extends BoundDecl {
-        constructor(id: Identifier, typeExpr: AST, init: AST) {
-            super(id, typeExpr, init);
-        }
-
-        public nodeType(): NodeType {
-            return NodeType.VariableDeclarator;
-        }
-
-        public isStatic() { return hasFlag(this.getVarFlags(), VariableFlags.Static); }
-
-        public emit(emitter: Emitter) {
-            emitter.emitVariableDeclarator(this);
-        }
-    }
-
-    export class Parameter extends BoundDecl {
-        constructor(id: Identifier, typeExpr: AST, init: AST, public isOptional: boolean) {
-            super(id, typeExpr, init);
-        }
-
-        public nodeType(): NodeType {
-            return NodeType.Parameter;
-        }
-
-        public isOptionalArg(): boolean { return this.isOptional || this.init; }
-
-        public emitWorker(emitter: Emitter) {
-            emitter.writeToOutput(this.id.actualText);
-        }
-
-        public structuralEquals(ast: Parameter, includingPosition: boolean): boolean {
-            return super.structuralEquals(ast, includingPosition) &&
-                   this.isOptional === ast.isOptional;
-        }
-    }
-
-    export class FunctionDeclaration extends AST {
-        public hint: string = null;
-        private _functionFlags = FunctionFlags.None;
-        public classDecl: ClassDeclaration = null;
-
-        public returnStatementsWithExpressions: ReturnStatement[];
-
-        constructor(public name: Identifier,
-                    public block: Block,
-                    public isConstructor: boolean,
-                    public typeArguments: ASTList,
-                    public arguments: ASTList,
-                    public returnTypeAnnotation: AST,
-                    public variableArgList: boolean) {
-            super();
-        }
-
-        public isDeclaration() { return true; }
-
-        public nodeType(): NodeType {
-            return NodeType.FunctionDeclaration;
-        }
-
-        public getFunctionFlags(): FunctionFlags {
-            return this._functionFlags;
-        }
-
-        // Must only be called from SyntaxTreeVisitor
-        public setFunctionFlags(flags: FunctionFlags): void {
-            this._functionFlags = flags;
-        }
-
-        public structuralEquals(ast: FunctionDeclaration, includingPosition: boolean): boolean {
-            return super.structuralEquals(ast, includingPosition) &&
-                   this._functionFlags === ast._functionFlags &&
-                   this.hint === ast.hint &&
-                   this.variableArgList === ast.variableArgList &&
-                   structuralEquals(this.name, ast.name, includingPosition) &&
-                   structuralEquals(this.block, ast.block, includingPosition) &&
-                   this.isConstructor === ast.isConstructor &&
-                   structuralEquals(this.typeArguments, ast.typeArguments, includingPosition) &&
-                   structuralEquals(this.arguments, ast.arguments, includingPosition);
-        }
-
-        public shouldEmit(): boolean {
-            return !hasFlag(this.getFunctionFlags(), FunctionFlags.Signature) &&
-                   !hasFlag(this.getFunctionFlags(), FunctionFlags.Ambient);
-        }
-
-        public emit(emitter: Emitter) {
-            emitter.emitFunction(this);
-        }
-
-        public getNameText() {
-            if (this.name) {
-                return this.name.actualText;
-            }
-            else {
-                return this.hint;
-            }
-        }
-
-        public isMethod() {
-            return (this.getFunctionFlags() & FunctionFlags.Method) !== FunctionFlags.None;
-        }
-
-        public isCallMember() { return hasFlag(this.getFunctionFlags(), FunctionFlags.CallMember); }
-        public isConstructMember() { return hasFlag(this.getFunctionFlags(), FunctionFlags.ConstructMember); }
-        public isIndexerMember() { return hasFlag(this.getFunctionFlags(), FunctionFlags.IndexerMember); }
-        public isSpecialFn() { return this.isCallMember() || this.isIndexerMember() || this.isConstructMember(); }
-        public isAccessor() { return hasFlag(this.getFunctionFlags(), FunctionFlags.GetAccessor) || hasFlag(this.getFunctionFlags(), FunctionFlags.SetAccessor); }
-        public isGetAccessor() { return hasFlag(this.getFunctionFlags(), FunctionFlags.GetAccessor); }
-        public isSetAccessor() { return hasFlag(this.getFunctionFlags(), FunctionFlags.SetAccessor); }
-        public isStatic() { return hasFlag(this.getFunctionFlags(), FunctionFlags.Static); }
-
-        public isSignature() { return (this.getFunctionFlags() & FunctionFlags.Signature) !== FunctionFlags.None; }
-    }
-
-    export class Script extends AST {
-        public moduleElements: ASTList = null;
-        public referencedFiles= new Array<string>();
-        public isDeclareFile = false;
-        public topLevelMod: ModuleDeclaration = null;
-
-        public nodeType(): NodeType {
-            return NodeType.Script;
-        }
-
-        public emit(emitter: Emitter) {
-            if (!this.isDeclareFile) {
-                emitter.emitScriptElements(this);
-            }
-        }
-
-        public structuralEquals(ast: Script, includingPosition: boolean): boolean {
-            return super.structuralEquals(ast, includingPosition) &&
-                   structuralEquals(this.moduleElements, ast.moduleElements, includingPosition);
-        }
-    }
-
-    export class ModuleDeclaration extends AST {
-        private _moduleFlags = ModuleFlags.None;
-        public prettyName: string;
-        public amdDependencies = new Array<string>();
-
-        constructor(public name: Identifier,
-                    public members: ASTList,
-                    public endingToken: ASTSpan) {
-            super();
-
-            this.prettyName = this.name.actualText;
-        }
-
-        public isDeclaration() {
-            return true;
-        }
-
-        public nodeType(): NodeType {
-            return NodeType.ModuleDeclaration;
-        }
-
-        public getModuleFlags(): ModuleFlags {
-            return this._moduleFlags;
-        }
-
-        // Must only be called from SyntaxTreeVisitor
-        public setModuleFlags(flags: ModuleFlags): void {
-            this._moduleFlags = flags;
-        }
-
-        public structuralEquals(ast: ModuleDeclaration, includingPosition: boolean): boolean {
-            return super.structuralEquals(ast, includingPosition) &&
-                this._moduleFlags === ast._moduleFlags &&
-                structuralEquals(this.name, ast.name, includingPosition) &&
-                structuralEquals(this.members, ast.members, includingPosition);
-        }
-
-        public isEnum() { return hasFlag(this.getModuleFlags(), ModuleFlags.IsEnum); }
-        public isWholeFile() { return hasFlag(this.getModuleFlags(), ModuleFlags.IsWholeFile); }
-
-        public shouldEmit(): boolean {
-            if (hasFlag(this.getModuleFlags(), ModuleFlags.Ambient)) {
-                return false;
-            }
-
-            // Always emit a non ambient enum (even empty ones).
-            if (hasFlag(this.getModuleFlags(), ModuleFlags.IsEnum)) {
-                return true;
-            }
-
-            for (var i = 0, n = this.members.members.length; i < n; i++) {
-                var member = this.members.members[i];
-
-                // We should emit *this* module if it contains any non-interface types. 
-                // Caveat: if we have contain a module, then we should be emitted *if we want to
-                // emit that inner module as well.
-                if (member.nodeType() === NodeType.ModuleDeclaration) {
-                    if ((<ModuleDeclaration>member).shouldEmit()) {
-                        return true;
-                    }
-                }
-                else if (member.nodeType() !== NodeType.InterfaceDeclaration) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        public emit(emitter: Emitter) {
-            if (this.shouldEmit()) {
-                emitter.emitComments(this, true);
-                emitter.emitModule(this);
-                emitter.emitComments(this, false);
-            }
-        }
-    }
-
-    export class TypeDeclaration extends AST {
-        private _varFlags = VariableFlags.None;
-
-        constructor(public name: Identifier,
-                    public typeParameters: ASTList,
-                    public extendsList: ASTList,
-                    public implementsList: ASTList,
-                    public members: ASTList) {
-            super();
-        }
-
-        public isDeclaration() {
-            return true;
-        }
-
-        public getVarFlags(): VariableFlags {
-            return this._varFlags;
-        }
-
-        // Must only be called from SyntaxTreeVisitor
-        public setVarFlags(flags: VariableFlags): void {
-            this._varFlags = flags;
-        }
-
-        public structuralEquals(ast: TypeDeclaration, includingPosition: boolean): boolean {
-            return super.structuralEquals(ast, includingPosition) &&
-                   this._varFlags === ast._varFlags &&
-                   structuralEquals(this.name, ast.name, includingPosition) &&
-                   structuralEquals(this.members, ast.members, includingPosition) &&
-                   structuralEquals(this.typeParameters, ast.typeParameters, includingPosition) &&
-                   structuralEquals(this.extendsList, ast.extendsList, includingPosition) &&
-                   structuralEquals(this.implementsList, ast.implementsList, includingPosition);
-        }
-    }
-
-    export class ClassDeclaration extends TypeDeclaration {
-        public constructorDecl: FunctionDeclaration = null;
-
-        constructor(name: Identifier,
-                    typeParameters: ASTList,
-                    members: ASTList,
-                    extendsList: ASTList,
-                    implementsList: ASTList,
-                    public endingToken: ASTSpan) {
-            super(name, typeParameters, extendsList, implementsList, members);
-        }
-
-        public nodeType(): NodeType {
-            return NodeType.ClassDeclaration;
-        }
-
-        public shouldEmit(): boolean {
-            return !hasFlag(this.getVarFlags(), VariableFlags.Ambient);
-        }
-
-        public emit(emitter: Emitter): void {
-            emitter.emitClass(this);
-        }
-    }
-
-    export class InterfaceDeclaration extends TypeDeclaration {
-        constructor(name: Identifier,
-                    typeParameters: ASTList,
-                    members: ASTList,
-                    extendsList: ASTList,
-                    implementsList: ASTList,
-                    public isObjectTypeLiteral: boolean) {
-            super(name, typeParameters, extendsList, implementsList, members);
-        }
-
-        public nodeType(): NodeType {
-            return NodeType.InterfaceDeclaration;
-        }
-
-        public shouldEmit(): boolean {
-            return false;
-        }
-    }
-
-    export class ThrowStatement extends AST {
-        constructor(public expression: AST) {
-            super();
-        }
-
-        public nodeType(): NodeType {
-            return NodeType.ThrowStatement;
-        }
-
-        public isStatement() {
-            return true;
-        }
-
-        public emitWorker(emitter: Emitter) {
-            emitter.writeToOutput("throw ");
-            this.expression.emit(emitter);
-            emitter.writeToOutput(";");
-        }
-
-        public structuralEquals(ast: ThrowStatement, includingPosition: boolean): boolean {
-            return super.structuralEquals(ast, includingPosition) &&
-            structuralEquals(this.expression, ast.expression, includingPosition);
-        }
-    }
-
-    export class ExpressionStatement extends AST {
-        constructor(public expression: AST) {
-            super();
-        }
-
-        public nodeType(): NodeType {
-            return NodeType.ExpressionStatement;
-        }
-
-        public isStatement() {
-            return true;
-        }
-
-        public emitWorker(emitter: Emitter) {
-            var isArrowExpression = this.expression.nodeType() === NodeType.FunctionDeclaration &&
-                hasFlag((<FunctionDeclaration>this.expression).getFunctionFlags(), FunctionFlags.IsFatArrowFunction);
-
-            if (isArrowExpression) {
-                emitter.writeToOutput("(");
-            }
-
-            this.expression.emit(emitter);
-
-            if (isArrowExpression) {
-                emitter.writeToOutput(")");
-            }
-
-            emitter.writeToOutput(";");
-        }
-
-        public structuralEquals(ast: ExpressionStatement, includingPosition: boolean): boolean {
-            return super.structuralEquals(ast, includingPosition) &&
-                   structuralEquals(this.expression, ast.expression, includingPosition);
-        }
-    }
-
-    export class LabeledStatement extends AST {
-        constructor(public identifier: Identifier, public statement: AST) {
-            super();
-        }
-
-        public nodeType(): NodeType {
-            return NodeType.LabeledStatement;
-        }
-
-        public isStatement() {
-            return true;
-        }
-
-        public emitWorker(emitter: Emitter) {
-            emitter.recordSourceMappingStart(this.identifier);
-            emitter.writeToOutput(this.identifier.actualText);
-            emitter.recordSourceMappingEnd(this.identifier);
-            emitter.writeLineToOutput(":");
-            emitter.emitJavascript(this.statement, true);
-        }
-
-        public structuralEquals(ast: LabeledStatement, includingPosition: boolean): boolean {
-            return super.structuralEquals(ast, includingPosition) &&
-                   structuralEquals(this.identifier, ast.identifier, includingPosition) &&
-                   structuralEquals(this.statement, ast.statement, includingPosition);
-        }
-    }
-
-    export class VariableDeclaration extends AST {
-        constructor(public declarators: ASTList) {
-            super();
-        }
-
-        public nodeType(): NodeType {
-            return NodeType.VariableDeclaration;
-        }
-
-        public emit(emitter: Emitter) {
-            emitter.emitVariableDeclaration(this);
-        }
-
-        public structuralEquals(ast: VariableDeclaration, includingPosition: boolean): boolean {
-            return super.structuralEquals(ast, includingPosition) &&
-                   structuralEquals(this.declarators, ast.declarators, includingPosition);
-        }
-    }
-
-    export class VariableStatement extends AST {
-        constructor(public declaration: VariableDeclaration) {
-            super();
-        }
-
-        public nodeType(): NodeType {
-            return NodeType.VariableStatement;
-        }
-
-        public isStatement() {
-            return true;
-        }
-
-        public shouldEmit(): boolean {
-            var varDecl = <VariableDeclarator>this.declaration.declarators.members[0];
-            return !hasFlag(varDecl.getVarFlags(), VariableFlags.Ambient) || varDecl.init !== null;
-        }
-
-        public emitWorker(emitter: Emitter) {
-            if (hasFlag(this.getFlags(), ASTFlags.EnumElement)) {
-                emitter.emitEnumElement(<VariableDeclarator>this.declaration.declarators.members[0]);
-            }
-            else {
-                this.declaration.emit(emitter);
-                emitter.writeToOutput(";");
-            }
-        }
-
-        public structuralEquals(ast: VariableStatement, includingPosition: boolean): boolean {
-            return super.structuralEquals(ast, includingPosition) &&
-                   structuralEquals(this.declaration, ast.declaration, includingPosition);
-        }
-    }
-
-    export class Block extends AST {
-        public closeBraceLeadingComments: Comment[] = null;
-
-        constructor(public statements: ASTList, public closeBraceSpan: IASTSpan) {
-            super();
-        }
-
-        public nodeType(): NodeType {
-            return NodeType.Block;
-        }
-
-        public isStatement() {
-            return true;
-        }
-
-        public emitWorker(emitter: Emitter) {
-            emitter.writeLineToOutput(" {");
-            emitter.indenter.increaseIndent();
-            if (this.statements) {
-                emitter.emitModuleElements(this.statements);
-            }
-            emitter.emitCommentsArray(this.closeBraceLeadingComments);
-            emitter.indenter.decreaseIndent();
-            emitter.emitIndent();
-            emitter.writeToOutput("}");
-        }
-
-        public structuralEquals(ast: Block, includingPosition: boolean): boolean {
-            return super.structuralEquals(ast, includingPosition) &&
-                   structuralEquals(this.statements, ast.statements, includingPosition);
-        }
-    }
-
-    export class Jump extends AST {
-        constructor(private _nodeType: NodeType, public target: string) {
-            super();
-        }
-
-        public nodeType(): NodeType {
-            return this._nodeType;
-        }
-
-        public isStatement() {
-            return true;
-        }
-        
-        public hasExplicitTarget() { return this.target; }
-
-        public emitWorker(emitter: Emitter) {
-            if (this.nodeType() === NodeType.BreakStatement) {
-                emitter.writeToOutput("break");
-            }
-            else {
-                emitter.writeToOutput("continue");
-            }
-            if (this.hasExplicitTarget()) {
-                emitter.writeToOutput(" " + this.target);
-            }
-            emitter.writeToOutput(";");
-        }
-
-        public structuralEquals(ast: Jump, includingPosition: boolean): boolean {
-            return super.structuralEquals(ast, includingPosition) &&
-                   this.target === ast.target;
-        }
-    }
-
-    export class WhileStatement extends AST {
-        constructor(public cond: AST, public body: AST) {
-            super();
-        }
-
-        public nodeType(): NodeType {
-            return NodeType.WhileStatement;
-        }
-
-        public isStatement() {
-            return true;
-        }
-
-        public emitWorker(emitter: Emitter) {
-            emitter.writeToOutput("while (");
-            this.cond.emit(emitter);
-            emitter.writeToOutput(")");
-            emitter.emitBlockOrStatement(this.body);
-        }
-
-        public structuralEquals(ast: WhileStatement, includingPosition: boolean): boolean {
-            return super.structuralEquals(ast, includingPosition) &&
-                   structuralEquals(this.cond, ast.cond, includingPosition) &&
-                   structuralEquals(this.body, ast.body, includingPosition);
-        }
-    }
-
-    export class DoStatement extends AST {
-        constructor(public body: AST, public cond: AST, public whileSpan: ASTSpan) {
-            super();
-        }
-
-        public nodeType(): NodeType {
-            return NodeType.DoStatement;
-        }
-
-        public isStatement() {
-            return true;
-        }
-
-        public emitWorker(emitter: Emitter) {
-            emitter.writeToOutput("do");
-            emitter.emitBlockOrStatement(this.body);
-            emitter.recordSourceMappingStart(this.whileSpan);
-            emitter.writeToOutput(" while");
-            emitter.recordSourceMappingEnd(this.whileSpan);
-            emitter.writeToOutput('(');
-            this.cond.emit(emitter);
-            emitter.writeToOutput(")");
-            emitter.writeToOutput(";");
-        }
-
-        public structuralEquals(ast: DoStatement, includingPosition: boolean): boolean {
-            return super.structuralEquals(ast, includingPosition) &&
-                   structuralEquals(this.body, ast.body, includingPosition) &&
-                   structuralEquals(this.cond, ast.cond, includingPosition);
-        }
-    }
-
-    export class IfStatement extends AST {
-        constructor(public cond: AST,
-                    public thenBod: AST,
-                    public elseBod: AST) {
-            super();
-        }
-
-        public nodeType(): NodeType {
-            return NodeType.IfStatement;
-        }
-
-        public isStatement() {
-            return true;
-        }
-
-        public emitWorker(emitter: Emitter) {
-            emitter.writeToOutput("if (");
-            this.cond.emit(emitter);
-            emitter.writeToOutput(")");
-
-            emitter.emitBlockOrStatement(this.thenBod);
-
-            if (this.elseBod) {
-                if (this.thenBod.nodeType() !== NodeType.Block) {
-                    emitter.writeLineToOutput("");
-                }
-                else {
-                    emitter.writeToOutput(" ");
-                }
-
-                if (this.elseBod.nodeType() === NodeType.IfStatement) {
-                    emitter.writeToOutput("else ");
-                    this.elseBod.emit(emitter);
-                }
-                else {
-                    emitter.writeToOutput("else");
-                    emitter.emitBlockOrStatement(this.elseBod);
-                }
-            }
-        }
-
-        public structuralEquals(ast: IfStatement, includingPosition: boolean): boolean {
-            return super.structuralEquals(ast, includingPosition) &&
-                   structuralEquals(this.cond, ast.cond, includingPosition) &&
-                   structuralEquals(this.thenBod, ast.thenBod, includingPosition) &&
-                   structuralEquals(this.elseBod, ast.elseBod, includingPosition);
-        }
-    }
-
-    export class ReturnStatement extends AST {
-        constructor(public returnExpression: AST) {
-            super();
-        }
-
-        public nodeType(): NodeType {
-            return NodeType.ReturnStatement;
-        }
-
-        public isStatement() {
-            return true;
-        }
-
-        public emitWorker(emitter: Emitter) {
-            if (this.returnExpression) {
-                emitter.writeToOutput("return ");
-                this.returnExpression.emit(emitter);
-                emitter.writeToOutput(";");
-            }
-            else {
-                emitter.writeToOutput("return;");
-            }
-        }
-
-        public structuralEquals(ast: ReturnStatement, includingPosition: boolean): boolean {
-            return super.structuralEquals(ast, includingPosition) &&
-                   structuralEquals(this.returnExpression, ast.returnExpression, includingPosition);
-        }
-    }
-
-    export class ForInStatement extends AST {
-        constructor(public lval: AST, public obj: AST, public body: AST) {
-            super();
-        }
-
-        public nodeType(): NodeType {
-            return NodeType.ForInStatement;
-        }
-
-        public isStatement() {
-            return true;
-        }
-
-        public emitWorker(emitter: Emitter) {
-            emitter.writeToOutput("for (");
-            this.lval.emit(emitter);
-            emitter.writeToOutput(" in ");
-            this.obj.emit(emitter);
-            emitter.writeToOutput(")");
-            emitter.emitBlockOrStatement(this.body);
-        }
-
-        public structuralEquals(ast: ForInStatement, includingPosition: boolean): boolean {
-            return super.structuralEquals(ast, includingPosition) &&
-                   structuralEquals(this.lval, ast.lval, includingPosition) &&
-                   structuralEquals(this.obj, ast.obj, includingPosition) &&
-                   structuralEquals(this.body, ast.body, includingPosition);
-        }
-    }
-
-    export class ForStatement extends AST {
-        constructor(public init: AST,
-                    public cond: AST,
-                    public incr: AST,
-                    public body: AST) {
-            super();
-        }
-
-        public nodeType(): NodeType {
-            return NodeType.ForStatement;
-        }
-
-        public isStatement() {
-            return true;
-        }
-
-        public emitWorker(emitter: Emitter) {
-            emitter.writeToOutput("for (");
-            if (this.init) {
-                if (this.init.nodeType() !== NodeType.List) {
-                    this.init.emit(emitter);
-                }
-                else {
-                    emitter.setInVarBlock((<ASTList>this.init).members.length);
-                    emitter.emitCommaSeparatedList(<ASTList>this.init);
-                }
-            }
-
-            emitter.writeToOutput("; ");
-            emitter.emitJavascript(this.cond, false);
-            emitter.writeToOutput(";");
-            if (this.incr) {
-                emitter.writeToOutput(" ");
-                emitter.emitJavascript(this.incr, false);
-            }
-            emitter.writeToOutput(")");
-            emitter.emitBlockOrStatement(this.body);
-        }
-
-        public structuralEquals(ast: ForStatement, includingPosition: boolean): boolean {
-            return super.structuralEquals(ast, includingPosition) &&
-                   structuralEquals(this.init, ast.init, includingPosition) &&
-                   structuralEquals(this.cond, ast.cond, includingPosition) &&
-                   structuralEquals(this.incr, ast.incr, includingPosition) &&
-                   structuralEquals(this.body, ast.body, includingPosition);
-        }
-    }
-
-    export class WithStatement extends AST {
-        constructor(public expr: AST, public body: AST) {
-            super();
-        }
-
-        public nodeType(): NodeType {
-            return NodeType.WithStatement;
-        }
-
-        public isStatement() {
-            return true;
-        }
-
-        public emitWorker(emitter: Emitter) {
-            emitter.writeToOutput("with (");
-            if (this.expr) {
-                this.expr.emit(emitter);
-            }
-
-            emitter.writeToOutput(")");
-            emitter.emitBlockOrStatement(this.body);
-        }
-
-        public structuralEquals(ast: WithStatement, includingPosition: boolean): boolean {
-            return super.structuralEquals(ast, includingPosition) &&
-                   structuralEquals(this.expr, ast.expr, includingPosition) &&
-                   structuralEquals(this.body, ast.body, includingPosition);
-        }
-    }
-
-    export class SwitchStatement extends AST {
-        constructor(public val: AST, public caseList: ASTList, public defaultCase: CaseClause, public statement: ASTSpan) {
-            super();
-        }
-
-        public nodeType(): NodeType {
-            return NodeType.SwitchStatement;
-        }
-
-        public isStatement() {
-            return true;
-        }
-
-        public emitWorker(emitter: Emitter) {
-            emitter.recordSourceMappingStart(this.statement);
-            emitter.writeToOutput("switch (");
-            this.val.emit(emitter);
-            emitter.writeToOutput(")");
-            emitter.recordSourceMappingEnd(this.statement);
-            emitter.writeLineToOutput(" {");
-            emitter.indenter.increaseIndent();
-
-            var lastEmittedNode: AST = null;
-            for (var i = 0, n = this.caseList.members.length; i < n; i++) {
-                var caseExpr = this.caseList.members[i];
-
-                emitter.emitSpaceBetweenConstructs(lastEmittedNode, caseExpr);
-                emitter.emitJavascript(caseExpr, true);
-
-                lastEmittedNode = caseExpr;
-            }
-            emitter.indenter.decreaseIndent();
-            emitter.emitIndent();
-            emitter.writeToOutput("}");
-        }
-
-        public structuralEquals(ast: SwitchStatement, includingPosition: boolean): boolean {
-            return super.structuralEquals(ast, includingPosition) &&
-                   structuralEquals(this.caseList, ast.caseList, includingPosition) &&
-                   structuralEquals(this.val, ast.val, includingPosition);
-        }
-    }
-
-    export class CaseClause extends AST {
-        constructor(public expr: AST, public body: ASTList) {
-            super();
-        }
-
-        public nodeType(): NodeType {
-            return NodeType.CaseClause;
-        }
-
-        public emitWorker(emitter: Emitter) {
-            if (this.expr) {
-                emitter.writeToOutput("case ");
-                this.expr.emit(emitter);
-            }
-            else {
-                emitter.writeToOutput("default");
-            }
-            emitter.writeToOutput(":");
-
-            if (this.body.members.length === 1 && this.body.members[0].nodeType() === NodeType.Block) {
-                // The case statement was written with curly braces, so emit it with the appropriate formatting
-                this.body.members[0].emit(emitter);
-                emitter.writeLineToOutput("");
-            }
-            else {
-                // No curly braces. Format in the expected way
-                emitter.writeLineToOutput("");
-                emitter.indenter.increaseIndent();
-                this.body.emit(emitter);
-                emitter.indenter.decreaseIndent();
-            }
-        }
-
-        public structuralEquals(ast: CaseClause, includingPosition: boolean): boolean {
-            return super.structuralEquals(ast, includingPosition) &&
-                   structuralEquals(this.expr, ast.expr, includingPosition) &&
-                   structuralEquals(this.body, ast.body, includingPosition);
-        }
-    }
-
-    export class TypeParameter extends AST {
-        constructor(public name: Identifier, public constraint: AST) {
-            super();
-        }
-
-        public nodeType(): NodeType {
-            return NodeType.TypeParameter;
-        }
-
-        public structuralEquals(ast: TypeParameter, includingPosition: boolean): boolean {
-            return super.structuralEquals(ast, includingPosition) &&
-                   structuralEquals(this.name, ast.name, includingPosition) &&
-                   structuralEquals(this.constraint, ast.constraint, includingPosition);
+        public kind(): SyntaxKind {
+            return SyntaxKind.TypeArgumentList;
         }
     }
 
     export class GenericType extends AST {
-        constructor(public name: AST, public typeArguments: ASTList) {
+        constructor(public name: AST, public typeArgumentList: TypeArgumentList) {
             super();
+            name && (name.parent = this);
+            typeArgumentList && (typeArgumentList.parent = this);
         }
 
-        public nodeType(): NodeType {
-            return NodeType.GenericType;
-        }
-
-        public emit(emitter: Emitter): void {
-            this.name.emit(emitter);
+        public kind(): SyntaxKind {
+            return SyntaxKind.GenericType;
         }
 
         public structuralEquals(ast: GenericType, includingPosition: boolean): boolean {
             return super.structuralEquals(ast, includingPosition) &&
-                   structuralEquals(this.name, ast.name, includingPosition) &&
-                   structuralEquals(this.typeArguments, ast.typeArguments, includingPosition);
+                structuralEquals(this.name, ast.name, includingPosition) &&
+                structuralEquals(this.typeArgumentList, ast.typeArgumentList, includingPosition);
         }
     }
 
     export class TypeQuery extends AST {
         constructor(public name: AST) {
             super();
+            name && (name.parent = this);
         }
 
-        public nodeType(): NodeType {
-            return NodeType.TypeQuery;
-        }
-
-        public emit(emitter: Emitter) {
-            Emitter.throwEmitterError(new Error(getLocalizedText(DiagnosticCode.Should_not_emit_a_type_query, null)));
+        public kind(): SyntaxKind {
+            return SyntaxKind.TypeQuery;
         }
 
         public structuralEquals(ast: TypeQuery, includingPosition: boolean): boolean {
@@ -1711,122 +922,679 @@ module TypeScript {
         }
     }
 
-    export class TypeReference extends AST {
-        constructor(public term: AST, public arrayCount: number) {
+    export class Block extends AST {
+        constructor(public statements: ISyntaxList2, public closeBraceLeadingComments: Comment[], public closeBraceToken: IASTSpan) {
             super();
-            this.minChar = term.minChar;
-            this.limChar = term.limChar;
+            statements && (statements.parent = this);
         }
 
-        public nodeType(): NodeType {
-            return NodeType.TypeRef;
+        public kind(): SyntaxKind {
+            return SyntaxKind.Block;
         }
 
-        public emit(emitter: Emitter) {
-            Emitter.throwEmitterError(new Error(getLocalizedText(DiagnosticCode.Should_not_emit_a_type_reference, null)));
-        }
-
-        public structuralEquals(ast: TypeReference, includingPosition: boolean): boolean {
+        public structuralEquals(ast: Block, includingPosition: boolean): boolean {
             return super.structuralEquals(ast, includingPosition) &&
-                   structuralEquals(this.term, ast.term, includingPosition) &&
-                   this.arrayCount === ast.arrayCount;
+                structuralEquals(this.statements, ast.statements, includingPosition);
         }
     }
 
-    export class TryStatement extends AST {
-        constructor(public tryBody: Block, public catchClause: CatchClause, public finallyBody: Block) {
+    export class Parameter extends AST {
+        constructor(public dotDotDotToken: ASTSpan, public modifiers: PullElementFlags[], public identifier: Identifier, public questionToken: ASTSpan, public typeAnnotation: TypeAnnotation, public equalsValueClause: EqualsValueClause) {
+            super();
+            identifier && (identifier.parent = this);
+            typeAnnotation && (typeAnnotation.parent = this);
+            equalsValueClause && (equalsValueClause.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.Parameter;
+        }
+    }
+
+    export class MemberAccessExpression extends AST {
+        constructor(public expression: AST, public name: Identifier) {
+            super();
+            expression && (expression.parent = this);
+            name && (name.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.MemberAccessExpression;
+        }
+
+        public structuralEquals(ast: MemberAccessExpression, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.expression, ast.expression, includingPosition) &&
+                structuralEquals(this.name, ast.name, includingPosition);
+        }
+    }
+
+    export class PostfixUnaryExpression extends AST {
+        constructor(private _nodeType: SyntaxKind, public operand: AST) {
+            super();
+            operand && (operand.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return this._nodeType;
+        }
+
+        public structuralEquals(ast: PostfixUnaryExpression, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.operand, ast.operand, includingPosition);
+        }
+    }
+
+    export class ElementAccessExpression extends AST {
+        constructor(public expression: AST, public argumentExpression: AST) {
+            super();
+            expression && (expression.parent = this);
+            argumentExpression && (argumentExpression.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.ElementAccessExpression;
+        }
+
+        public structuralEquals(ast: ElementAccessExpression, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.expression, ast.expression, includingPosition) &&
+                structuralEquals(this.argumentExpression, ast.argumentExpression, includingPosition);
+        }
+    }
+
+    export class InvocationExpression extends AST implements ICallExpression {
+        constructor(public expression: AST, public argumentList: ArgumentList) {
+            super();
+            expression && (expression.parent = this);
+            argumentList && (argumentList.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.InvocationExpression;
+        }
+
+        public structuralEquals(ast: InvocationExpression, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.expression, ast.expression, includingPosition) &&
+                structuralEquals(this.argumentList, ast.argumentList, includingPosition);
+        }
+    }
+
+    export class ArgumentList extends AST {
+        constructor(public typeArgumentList: TypeArgumentList, public arguments: ISeparatedSyntaxList2, public closeParenToken: ASTSpan) {
+            super();
+            typeArgumentList && (typeArgumentList.parent = this);
+            arguments && (arguments.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.ArgumentList;
+        }
+    }
+
+    export class BinaryExpression extends AST {
+        constructor(private _nodeType: SyntaxKind, public left: AST, public right: AST) {
+            super();
+            left && (left.parent = this);
+            right && (right.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return this._nodeType;
+        }
+
+        public structuralEquals(ast: BinaryExpression, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.left, ast.left, includingPosition) &&
+                structuralEquals(this.right, ast.right, includingPosition);
+        }
+    }
+
+    export class ConditionalExpression extends AST {
+        constructor(public condition: AST, public whenTrue: AST, public whenFalse: AST) {
+            super();
+            condition && (condition.parent = this);
+            whenTrue && (whenTrue.parent = this);
+            whenFalse && (whenFalse.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.ConditionalExpression;
+        }
+
+        public structuralEquals(ast: ConditionalExpression, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.condition, ast.condition, includingPosition) &&
+                structuralEquals(this.whenTrue, ast.whenTrue, includingPosition) &&
+                structuralEquals(this.whenFalse, ast.whenFalse, includingPosition);
+        }
+    }
+
+    export class ConstructSignature extends AST {
+        constructor(public callSignature: CallSignature) {
+            super();
+            callSignature && (callSignature.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.ConstructSignature;
+        }
+    }
+
+    export class MethodSignature extends AST {
+        constructor(public propertyName: IASTToken, public questionToken: ASTSpan, public callSignature: CallSignature) {
+            super();
+            propertyName && (propertyName.parent = this);
+            callSignature && (callSignature.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.MethodSignature;
+        }
+    }
+
+    export class IndexSignature extends AST {
+        constructor(public parameter: Parameter, public typeAnnotation: TypeAnnotation) {
+            super();
+            parameter && (parameter.parent = this);
+            typeAnnotation && (typeAnnotation.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.IndexSignature;
+        }
+    }
+
+    export class PropertySignature extends AST {
+        constructor(public propertyName: IASTToken, public questionToken: ASTSpan, public typeAnnotation: TypeAnnotation) {
+            super();
+            propertyName && (propertyName.parent = this);
+            typeAnnotation && (typeAnnotation.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.PropertySignature;
+        }
+    }
+
+    export class CallSignature extends AST {
+        constructor(public typeParameterList: TypeParameterList, public parameterList: ParameterList, public typeAnnotation: TypeAnnotation) {
+            super();
+            typeParameterList && (typeParameterList.parent = this);
+            parameterList && (parameterList.parent = this);
+            typeAnnotation && (typeAnnotation.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.CallSignature;
+        }
+    }
+
+    export class TypeParameter extends AST {
+        constructor(public identifier: Identifier, public constraint: Constraint) {
+            super();
+            identifier && (identifier.parent = this);
+            constraint && (constraint.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.TypeParameter;
+        }
+
+        public structuralEquals(ast: TypeParameter, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.identifier, ast.identifier, includingPosition) &&
+                structuralEquals(this.constraint, ast.constraint, includingPosition);
+        }
+    }
+
+    export class Constraint extends AST {
+        constructor(public type: AST) {
+            super();
+            type && (type.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.Constraint;
+        }
+    }
+
+    export class ElseClause extends AST {
+        constructor(public statement: AST) {
+            super();
+            statement && (statement.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.ElseClause;
+        }
+
+        public structuralEquals(ast: ElseClause, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.statement, ast.statement, includingPosition);
+        }
+    }
+
+    export class IfStatement extends AST {
+        constructor(public condition: AST, public statement: AST, public elseClause: ElseClause) {
+            super();
+            condition && (condition.parent = this);
+            statement && (statement.parent = this);
+            elseClause && (elseClause.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.IfStatement;
+        }
+
+        public structuralEquals(ast: IfStatement, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.condition, ast.condition, includingPosition) &&
+                structuralEquals(this.statement, ast.statement, includingPosition) &&
+                structuralEquals(this.elseClause, ast.elseClause, includingPosition);
+        }
+    }
+
+    export class ExpressionStatement extends AST {
+        constructor(public expression: AST) {
+            super();
+            expression && (expression.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.ExpressionStatement;
+        }
+
+        public structuralEquals(ast: ExpressionStatement, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.expression, ast.expression, includingPosition);
+        }
+    }
+
+    export class ConstructorDeclaration extends AST {
+        constructor(public parameterList: ParameterList, public block: Block) {
+            super();
+            parameterList && (parameterList.parent = this);
+            block && (block.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.ConstructorDeclaration;
+        }
+    }
+
+    export class MemberFunctionDeclaration extends AST {
+        constructor(public modifiers: PullElementFlags[], public propertyName: IASTToken, public callSignature: CallSignature, public block: Block) {
+            super();
+            propertyName && (propertyName.parent = this);
+            callSignature && (callSignature.parent = this);
+            block && (block.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.MemberFunctionDeclaration;
+        }
+    }
+
+    export class GetAccessor extends AST {
+        constructor(public modifiers: PullElementFlags[], public propertyName: IASTToken, public parameterList: ParameterList, public typeAnnotation: TypeAnnotation, public block: Block) {
+            super();
+            propertyName && (propertyName.parent = this);
+            parameterList && (parameterList.parent = this);
+            typeAnnotation && (typeAnnotation.parent = this);
+            block && (block.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.GetAccessor;
+        }
+    }
+
+    export class SetAccessor extends AST {
+        constructor(public modifiers: PullElementFlags[], public propertyName: IASTToken, public parameterList: ParameterList, public block: Block) {
+            super();
+            propertyName && (propertyName.parent = this);
+            parameterList && (parameterList.parent = this);
+            block && (block.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.SetAccessor;
+        }
+    }
+
+    export class MemberVariableDeclaration extends AST {
+        constructor(public modifiers: PullElementFlags[], public variableDeclarator: VariableDeclarator) {
+            super();
+            variableDeclarator && (variableDeclarator.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.MemberVariableDeclaration;
+        }
+    }
+
+    export class IndexMemberDeclaration extends AST {
+        constructor(public indexSignature: IndexSignature) {
+            super();
+            indexSignature && (indexSignature.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.IndexMemberDeclaration;
+        }
+    }
+
+    export class ThrowStatement extends AST {
+        constructor(public expression: AST) {
+            super();
+            expression && (expression.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.ThrowStatement;
+        }
+
+        public structuralEquals(ast: ThrowStatement, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.expression, ast.expression, includingPosition);
+        }
+    }
+
+    export class ReturnStatement extends AST {
+        constructor(public expression: AST) {
+            super();
+            expression && (expression.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.ReturnStatement;
+        }
+
+        public structuralEquals(ast: ReturnStatement, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.expression, ast.expression, includingPosition);
+        }
+    }
+
+    export class ObjectCreationExpression extends AST implements ICallExpression {
+        constructor(public expression: AST, public argumentList: ArgumentList) {
+            super();
+            expression && (expression.parent = this);
+            argumentList && (argumentList.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.ObjectCreationExpression;
+        }
+
+        public structuralEquals(ast: ObjectCreationExpression, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.expression, ast.expression, includingPosition) &&
+                structuralEquals(this.argumentList, ast.argumentList, includingPosition);
+        }
+    }
+
+    export class SwitchStatement extends AST {
+        constructor(public expression: AST, public closeParenToken: ASTSpan, public switchClauses: ISyntaxList2) {
+            super();
+            expression && (expression.parent = this);
+            switchClauses && (switchClauses.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.SwitchStatement;
+        }
+
+        public structuralEquals(ast: SwitchStatement, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.switchClauses, ast.switchClauses, includingPosition) &&
+                structuralEquals(this.expression, ast.expression, includingPosition);
+        }
+    }
+
+    export class CaseSwitchClause extends AST {
+        constructor(public expression: AST, public statements: ISyntaxList2) {
+            super();
+            expression && (expression.parent = this);
+            statements && (statements.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.CaseSwitchClause;
+        }
+
+        public structuralEquals(ast: CaseSwitchClause, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.expression, ast.expression, includingPosition) &&
+                structuralEquals(this.statements, ast.statements, includingPosition);
+        }
+    }
+
+    export class DefaultSwitchClause extends AST {
+        constructor(public statements: ISyntaxList2) {
+            super();
+            statements && (statements.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.DefaultSwitchClause;
+        }
+
+        public structuralEquals(ast: DefaultSwitchClause, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.statements, ast.statements, includingPosition);
+        }
+    }
+
+    export class BreakStatement extends AST {
+        constructor(public identifier: Identifier) {
             super();
         }
 
-        public nodeType(): NodeType {
-            return NodeType.TryStatement;
+        public kind(): SyntaxKind {
+            return SyntaxKind.BreakStatement;
         }
 
-        public isStatement() {
-            return true;
-        }
-
-        public emitWorker(emitter: Emitter) {
-            emitter.writeToOutput("try ");
-            this.tryBody.emit(emitter);
-            emitter.emitJavascript(this.catchClause, false);
-
-            if (this.finallyBody) {
-                emitter.writeToOutput(" finally");
-                this.finallyBody.emit(emitter);
-            }
-        }
-
-        public structuralEquals(ast: TryStatement, includingPosition: boolean): boolean {
-            return super.structuralEquals(ast, includingPosition) &&
-                   structuralEquals(this.tryBody, ast.tryBody, includingPosition) &&
-                   structuralEquals(this.catchClause, ast.catchClause, includingPosition) &&
-                   structuralEquals(this.finallyBody, ast.finallyBody, includingPosition);
-        }
-    }
-
-    export class CatchClause extends AST {
-        constructor(public param: VariableDeclarator, public body: Block) {
-            super();
-        }
-
-        public nodeType(): NodeType {
-            return NodeType.CatchClause;
-        }
-
-        public emitWorker(emitter: Emitter) {
-            emitter.writeToOutput(" ");
-            emitter.writeToOutput("catch (");
-            this.param.id.emit(emitter);
-            emitter.writeToOutput(")");
-            this.body.emit(emitter);
-        }
-
-        public structuralEquals(ast: CatchClause, includingPosition: boolean): boolean {
-            return super.structuralEquals(ast, includingPosition) &&
-                   structuralEquals(this.param, ast.param, includingPosition) &&
-                   structuralEquals(this.body, ast.body, includingPosition);
-        }
-    }
-
-    export class DebuggerStatement extends AST {
-        public nodeType(): NodeType {
-            return NodeType.DebuggerStatement;
-        }
-
-        public isStatement() {
-            return true;
-        }
-
-        public emitWorker(emitter: Emitter) {
-            emitter.writeToOutput("debugger;");
-        }
-    }
-
-    export class OmittedExpression extends AST {
-        public nodeType(): NodeType {
-            return NodeType.OmittedExpression;
-        }
-
-        public emitWorker(emitter: Emitter) {
-        }
-
-        public structuralEquals(ast: CatchClause, includingPosition: boolean): boolean {
+        public structuralEquals(ast: BreakStatement, includingPosition: boolean): boolean {
             return super.structuralEquals(ast, includingPosition);
+        }
+    }
+
+    export class ContinueStatement extends AST {
+        constructor(public identifier: Identifier) {
+            super();
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.ContinueStatement;
+        }
+
+        public structuralEquals(ast: ContinueStatement, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition);
+        }
+    }
+
+    export class ForStatement extends AST {
+        constructor(public variableDeclaration: VariableDeclaration, public initializer: AST, public condition: AST, public incrementor: AST, public statement: AST) {
+            super();
+            variableDeclaration && (variableDeclaration.parent = this);
+            initializer && (initializer.parent = this);
+            condition && (condition.parent = this);
+            incrementor && (incrementor.parent = this);
+            statement && (statement.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.ForStatement;
+        }
+
+        public structuralEquals(ast: ForStatement, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.initializer, ast.initializer, includingPosition) &&
+                structuralEquals(this.condition, ast.condition, includingPosition) &&
+                structuralEquals(this.incrementor, ast.incrementor, includingPosition) &&
+                structuralEquals(this.statement, ast.statement, includingPosition);
+        }
+    }
+
+    export class ForInStatement extends AST {
+        constructor(public variableDeclaration: VariableDeclaration, public left: AST, public expression: AST, public statement: AST) {
+            super();
+            variableDeclaration && (variableDeclaration.parent = this);
+            left && (left.parent = this);
+            expression && (expression.parent = this);
+            statement && (statement.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.ForInStatement;
+        }
+
+        public structuralEquals(ast: ForInStatement, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.variableDeclaration, ast.variableDeclaration, includingPosition) &&
+                structuralEquals(this.expression, ast.expression, includingPosition) &&
+                structuralEquals(this.statement, ast.statement, includingPosition);
+        }
+    }
+
+    export class WhileStatement extends AST {
+        constructor(public condition: AST, public statement: AST) {
+            super();
+            condition && (condition.parent = this);
+            statement && (statement.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.WhileStatement;
+        }
+
+        public structuralEquals(ast: WhileStatement, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.condition, ast.condition, includingPosition) &&
+                structuralEquals(this.statement, ast.statement, includingPosition);
+        }
+    }
+
+    export class WithStatement extends AST {
+        constructor(public condition: AST, public statement: AST) {
+            super();
+            condition && (condition.parent = this);
+            statement && (statement.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.WithStatement;
+        }
+
+        public structuralEquals(ast: WithStatement, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.condition, ast.condition, includingPosition) &&
+                structuralEquals(this.statement, ast.statement, includingPosition);
+        }
+    }
+
+    export class EnumDeclaration extends AST {
+        constructor(public modifiers: PullElementFlags[], public identifier: Identifier, public enumElements: ISeparatedSyntaxList2) {
+            super();
+            identifier && (identifier.parent = this);
+            enumElements && (enumElements.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.EnumDeclaration;
+        }
+    }
+
+    export class EnumElement extends AST {
+        constructor(public propertyName: IASTToken, public equalsValueClause: EqualsValueClause) {
+            super();
+            propertyName && (propertyName.parent = this);
+            equalsValueClause && (equalsValueClause.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.EnumElement;
+        }
+    }
+
+    export class CastExpression extends AST {
+        constructor(public type: AST, public expression: AST) {
+            super();
+            type && (type.parent = this);
+            expression && (expression.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.CastExpression;
+        }
+
+        public structuralEquals(ast: CastExpression, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.type, ast.type, includingPosition) &&
+                structuralEquals(this.expression, ast.expression, includingPosition);
+        }
+    }
+
+    export class ObjectLiteralExpression extends AST {
+        constructor(public propertyAssignments: ISeparatedSyntaxList2) {
+            super();
+            propertyAssignments && (propertyAssignments.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.ObjectLiteralExpression;
+        }
+
+        public structuralEquals(ast: ObjectLiteralExpression, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.propertyAssignments, ast.propertyAssignments, includingPosition);
+        }
+    }
+
+    export class SimplePropertyAssignment extends AST {
+        constructor(public propertyName: Identifier, public expression: AST) {
+            super();
+            propertyName && (propertyName.parent = this);
+            expression && (expression.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.SimplePropertyAssignment;
+        }
+    }
+
+    export class FunctionPropertyAssignment extends AST {
+        constructor(public propertyName: Identifier, public callSignature: CallSignature, public block: Block) {
+            super();
+            propertyName && (propertyName.parent = this);
+            callSignature && (callSignature.parent = this);
+            block && (block.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.FunctionPropertyAssignment;
+        }
+    }
+
+    export class FunctionExpression extends AST {
+        constructor(public identifier: Identifier, public callSignature: CallSignature, public block: Block) {
+            super();
+            identifier && (identifier.parent = this);
+            callSignature && (callSignature.parent = this);
+            block && (block.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.FunctionExpression;
         }
     }
 
     export class EmptyStatement extends AST {
-        public nodeType(): NodeType {
-            return NodeType.EmptyStatement;
-        }
-
-        public isStatement() {
-            return true;
-        }
-
-        public emitWorker(emitter: Emitter) {
-            emitter.writeToOutput(";");
+        public kind(): SyntaxKind {
+            return SyntaxKind.EmptyStatement;
         }
 
         public structuralEquals(ast: CatchClause, includingPosition: boolean): boolean {
@@ -1834,291 +1602,193 @@ module TypeScript {
         }
     }
 
-    export class Comment extends AST {
-        public text: string[] = null;
-        private docCommentText: string = null;
-
-        constructor(public content: string,
-                    public isBlockComment: boolean,
-                    public endsLine: boolean) {
+    export class TryStatement extends AST {
+        constructor(public block: Block, public catchClause: CatchClause, public finallyClause: FinallyClause) {
             super();
+            block && (block.parent = this);
+            catchClause && (catchClause.parent = this);
+            finallyClause && (finallyClause.parent = this);
         }
 
-        public nodeType(): NodeType {
-            return NodeType.Comment;
+        public kind(): SyntaxKind {
+            return SyntaxKind.TryStatement;
+        }
+
+        public structuralEquals(ast: TryStatement, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                   structuralEquals(this.block, ast.block, includingPosition) &&
+                   structuralEquals(this.catchClause, ast.catchClause, includingPosition) &&
+                   structuralEquals(this.finallyClause, ast.finallyClause, includingPosition);
+        }
+    }
+
+    export class CatchClause extends AST {
+        constructor(public identifier: Identifier, public typeAnnotation: TypeAnnotation, public block: Block) {
+            super();
+            identifier && (identifier.parent = this);
+            typeAnnotation && (typeAnnotation.parent = this);
+            block && (block.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.CatchClause;
+        }
+
+        public structuralEquals(ast: CatchClause, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                   structuralEquals(this.identifier, ast.identifier, includingPosition) &&
+                   structuralEquals(this.typeAnnotation, ast.typeAnnotation, includingPosition) &&
+                   structuralEquals(this.block, ast.block, includingPosition);
+        }
+    }
+
+    export class FinallyClause extends AST {
+        constructor(public block: Block) {
+            super();
+            block && (block.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.FinallyClause;
+        }
+
+        public structuralEquals(ast: CatchClause, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.block, ast.block, includingPosition);
+        }
+    }
+
+    export class LabeledStatement extends AST {
+        constructor(public identifier: Identifier, public statement: AST) {
+            super();
+            identifier && (identifier.parent = this);
+            statement && (statement.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.LabeledStatement;
+        }
+
+        public structuralEquals(ast: LabeledStatement, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.identifier, ast.identifier, includingPosition) &&
+                structuralEquals(this.statement, ast.statement, includingPosition);
+        }
+    }
+
+    export class DoStatement extends AST {
+        constructor(public statement: AST, public whileKeyword: ASTSpan, public condition: AST) {
+            super();
+            statement && (statement.parent = this);
+            condition && (condition.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.DoStatement;
+        }
+
+        public structuralEquals(ast: DoStatement, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.statement, ast.statement, includingPosition) &&
+                structuralEquals(this.condition, ast.condition, includingPosition);
+        }
+    }
+
+    export class TypeOfExpression extends AST {
+        constructor(public expression: AST) {
+            super();
+            expression && (expression.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.TypeOfExpression;
+        }
+
+        public structuralEquals(ast: TypeOfExpression, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.expression, ast.expression, includingPosition);
+        }
+    }
+
+    export class DeleteExpression extends AST {
+        constructor(public expression: AST) {
+            super();
+            expression && (expression.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.DeleteExpression;
+        }
+
+        public structuralEquals(ast: DeleteExpression, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.expression, ast.expression, includingPosition);
+        }
+    }
+
+    export class VoidExpression extends AST {
+        constructor(public expression: AST) {
+            super();
+            expression && (expression.parent = this);
+        }
+
+        public kind(): SyntaxKind {
+            return SyntaxKind.VoidExpression;
+        }
+
+        public structuralEquals(ast: VoidExpression, includingPosition: boolean): boolean {
+            return super.structuralEquals(ast, includingPosition) &&
+                structuralEquals(this.expression, ast.expression, includingPosition);
+        }
+    }
+
+    export class DebuggerStatement extends AST {
+        public kind(): SyntaxKind {
+            return SyntaxKind.DebuggerStatement;
+        }
+    }
+
+    export class Comment {
+        constructor(private _trivia: ISyntaxTrivia,
+                    public endsLine: boolean,
+                    public _start: number,
+                    public _end: number) {
+        }
+
+        public start(): number {
+            return this._start;
+        }
+
+        public end(): number {
+            return this._end;
+        }
+
+        public fullText(): string {
+            return this._trivia.fullText();
+        }
+
+        public kind(): SyntaxKind {
+            return this._trivia.kind();
         }
 
         public structuralEquals(ast: Comment, includingPosition: boolean): boolean {
-            return super.structuralEquals(ast, includingPosition) &&
-                   this.content === ast.content &&
-                   this.isBlockComment === ast.isBlockComment &&
+            if (includingPosition) {
+                if (this.start() !== ast.start() || this.end() !== ast.end()) {
+                    return false;
+                }
+            }
+
+            return this._trivia.fullText() === ast._trivia.fullText() &&
                    this.endsLine === ast.endsLine;
         }
+    }
 
-        public getText(): string[] {
-            if (this.text === null) {
-                if (this.isBlockComment) {
-                    this.text = this.content.split("\n");
-                    for (var i = 0; i < this.text.length; i++) {
-                        this.text[i] = this.text[i].replace(/^\s+|\s+$/g, '');
-                    }
-                }
-                else {
-                    this.text = [(this.content.replace(/^\s+|\s+$/g, ''))];
-                }
-            }
+    export function diagnosticFromDecl(decl: PullDecl, diagnosticKey: string, arguments: any[]= null): Diagnostic {
+        var span = decl.getSpan();
+        return new Diagnostic(decl.fileName(), decl.semanticInfoChain().lineMap(decl.fileName()), span.start(), span.length(), diagnosticKey, arguments);
+    }
 
-            return this.text;
-        }
-
-        public isDocComment() {
-            if (this.isBlockComment) {
-                return this.content.charAt(2) === "*" && this.content.charAt(3) !== "/";
-            }
-
-            return false;
-        }
-
-        public getDocCommentTextValue() {
-            if (this.docCommentText === null) {
-                this.docCommentText = Comment.cleanJSDocComment(this.content);
-            }
-
-            return this.docCommentText;
-        }
-
-        static consumeLeadingSpace(line: string, startIndex: number, maxSpacesToRemove?: number) {
-            var endIndex = line.length;
-            if (maxSpacesToRemove !== undefined) {
-                endIndex = min(startIndex + maxSpacesToRemove, endIndex);
-            }
-
-            for (; startIndex < endIndex; startIndex++) {
-                var charCode = line.charCodeAt(startIndex);
-                if (charCode !== CharacterCodes.space && charCode !== CharacterCodes.tab) {
-                    return startIndex;
-                }
-            }
-
-            if (endIndex !== line.length) {
-                return endIndex;
-            }
-
-            return -1;
-        }
-
-        static isSpaceChar(line: string, index: number) {
-            var length = line.length;
-            if (index < length) {
-                var charCode = line.charCodeAt(index);
-                // If the character is space
-                return charCode === CharacterCodes.space || charCode === CharacterCodes.tab;
-            }
-
-            // If the index is end of the line it is space
-            return index === length;
-        }
-
-        static cleanDocCommentLine(line: string, jsDocStyleComment: boolean, jsDocLineSpaceToRemove?: number) {
-            var nonSpaceIndex = Comment.consumeLeadingSpace(line, 0);
-            if (nonSpaceIndex !== -1) {
-                var jsDocSpacesRemoved = nonSpaceIndex;
-                if (jsDocStyleComment && line.charAt(nonSpaceIndex) === '*') { // remove leading * in case of jsDocComment
-                    var startIndex = nonSpaceIndex + 1;
-                    nonSpaceIndex = Comment.consumeLeadingSpace(line, startIndex, jsDocLineSpaceToRemove);
-
-                    if (nonSpaceIndex !== -1) {
-                        jsDocSpacesRemoved = nonSpaceIndex - startIndex;
-                    } else {
-                        return null;
-                    }
-                }
-
-                return {
-                    minChar: nonSpaceIndex,
-                    limChar: line.charAt(line.length - 1) === "\r" ? line.length - 1 : line.length,
-                    jsDocSpacesRemoved: jsDocSpacesRemoved
-                };
-            }
-
-            return null;
-        }
-
-        static cleanJSDocComment(content: string, spacesToRemove?: number) {
-
-            var docCommentLines = new Array<string>();
-            content = content.replace("/**", ""); // remove /**
-            if (content.length >= 2 && content.charAt(content.length - 1) === "/" && content.charAt(content.length - 2) === "*") {
-                content = content.substring(0, content.length - 2); // remove last */
-            }
-            var lines = content.split("\n");
-            var inParamTag = false;
-            for (var l = 0; l < lines.length; l++) {
-                var line = lines[l];
-                var cleanLinePos = Comment.cleanDocCommentLine(line, true, spacesToRemove);
-                if (!cleanLinePos) {
-                    // Whole line empty, read next line
-                    continue;
-                }
-
-                var docCommentText = "";
-                var prevPos = cleanLinePos.minChar;
-                for (var i = line.indexOf("@", cleanLinePos.minChar); 0 <= i && i < cleanLinePos.limChar; i = line.indexOf("@", i + 1)) {
-                    // We have encoutered @. 
-                    // If we were omitting param comment, we dont have to do anything
-                    // other wise the content of the text till @ tag goes as doc comment
-                    var wasInParamtag = inParamTag;
-
-                    // Parse contents next to @
-                    if (line.indexOf("param", i + 1) === i + 1 && Comment.isSpaceChar(line, i + 6)) {
-                        // It is param tag. 
-
-                        // If we were not in param tag earlier, push the contents from prev pos of the tag this tag start as docComment
-                        if (!wasInParamtag) {
-                            docCommentText += line.substring(prevPos, i);
-                        }
-
-                        // New start of contents 
-                        prevPos = i;
-                        inParamTag = true;
-                    } else if (wasInParamtag) {
-                        // Non param tag start
-                        prevPos = i;
-                        inParamTag = false;
-                    }
-                }
-
-                if (!inParamTag) {
-                    docCommentText += line.substring(prevPos, cleanLinePos.limChar);
-                }
-
-                // Add line to comment text if it is not only white space line
-                var newCleanPos = Comment.cleanDocCommentLine(docCommentText, false);
-                if (newCleanPos) {
-                    if (spacesToRemove === undefined) {
-                        spacesToRemove = cleanLinePos.jsDocSpacesRemoved;
-                    }
-                    docCommentLines.push(docCommentText);
-                }
-            }
-
-            return docCommentLines.join("\n");
-        }
-
-        static getDocCommentText(comments: Comment[]) {
-            var docCommentText = new Array<string>();
-            for (var c = 0 ; c < comments.length; c++) {
-                var commentText = comments[c].getDocCommentTextValue();
-                if (commentText !== "") {
-                    docCommentText.push(commentText);
-                }
-            }
-            return docCommentText.join("\n");
-        }
-
-        static getParameterDocCommentText(param: string, fncDocComments: Comment[]) {
-            if (fncDocComments.length === 0 || !fncDocComments[0].isBlockComment) {
-                // there were no fnc doc comments and the comment is not block comment then it cannot have 
-                // @param comment that can be parsed
-                return "";
-            }
-
-            for (var i = 0; i < fncDocComments.length; i++) {
-                var commentContents = fncDocComments[i].content;
-                for (var j = commentContents.indexOf("@param", 0); 0 <= j; j = commentContents.indexOf("@param", j)) {
-                    j += 6;
-                    if (!Comment.isSpaceChar(commentContents, j)) {
-                        // This is not param tag but a tag line @paramxxxxx
-                        continue;
-                    }
-
-                    // This is param tag. Check if it is what we are looking for
-                    j = Comment.consumeLeadingSpace(commentContents, j);
-                    if (j === -1) {
-                        break;
-                    }
-
-                    // Ignore the type expression
-                    if (commentContents.charCodeAt(j) === CharacterCodes.openBrace) {
-                        j++;
-                        // Consume the type
-                        var charCode = 0;
-                        for (var curlies = 1; j < commentContents.length; j++) {
-                            charCode = commentContents.charCodeAt(j);
-                            // { character means we need to find another } to match the found one
-                            if (charCode === CharacterCodes.openBrace) {
-                                curlies++;
-                                continue;
-                            }
-
-                            // } char
-                            if (charCode === CharacterCodes.closeBrace) {
-                                curlies--;
-                                if (curlies === 0) {
-                                    // We do not have any more } to match the type expression is ignored completely
-                                    break;
-                                } else {
-                                    // there are more { to be matched with }
-                                    continue;
-                                }
-                            }
-
-                            // Found start of another tag
-                            if (charCode === CharacterCodes.at) {
-                                break;
-                            }
-                        }
-
-                        // End of the comment
-                        if (j === commentContents.length) {
-                            break;
-                        }
-
-                        // End of the tag, go onto looking for next tag
-                        if (charCode === CharacterCodes.at) {
-                            continue;
-                        }
-
-                        j = Comment.consumeLeadingSpace(commentContents, j + 1);
-                        if (j === -1) {
-                            break;
-                        }
-                    }
-
-                    // Parameter name
-                    if (param !== commentContents.substr(j, param.length) || !Comment.isSpaceChar(commentContents, j + param.length)) {
-                        // this is not the parameter we are looking for
-                        continue;
-                    }
-
-                    // Found the parameter we were looking for
-                    j = Comment.consumeLeadingSpace(commentContents, j + param.length);
-                    if (j === -1) {
-                        return "";
-                    }
-
-                    var endOfParam = commentContents.indexOf("@", j);
-                    var paramHelpString = commentContents.substring(j, endOfParam < 0 ? commentContents.length : endOfParam);
-
-                    // Find alignement spaces to remove
-                    var paramSpacesToRemove: number = undefined;
-                    var paramLineIndex = commentContents.substring(0, j).lastIndexOf("\n") + 1;
-                    if (paramLineIndex !== 0) {
-                        if (paramLineIndex < j && commentContents.charAt(paramLineIndex + 1) === "\r") {
-                            paramLineIndex++;
-                        }
-                    }
-                    var startSpaceRemovalIndex = Comment.consumeLeadingSpace(commentContents, paramLineIndex);
-                    if (startSpaceRemovalIndex !== j && commentContents.charAt(startSpaceRemovalIndex) === "*") {
-                        paramSpacesToRemove = j - startSpaceRemovalIndex - 1;
-                    }
-
-                    // Clean jsDocComment and return
-                    return Comment.cleanJSDocComment(paramHelpString, paramSpacesToRemove);
-                }
-            }
-
-            return "";
-        }
+    function min(a: number, b: number): number {
+        return a <= b ? a : b;
     }
 }

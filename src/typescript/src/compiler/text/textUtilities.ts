@@ -1,8 +1,13 @@
 ///<reference path='references.ts' />
 
 module TypeScript.TextUtilities {
-    export function parseLineStarts(text: ISimpleText): number[]{
-        var length = text.length();
+    export interface ICharacterSequence {
+        charCodeAt(index: number): number;
+        length: number;
+    }
+
+    export function parseLineStarts(text: ICharacterSequence): number[]{
+        var length = text.length;
 
         // Corner case check
         if (0 === length) {
@@ -55,10 +60,10 @@ module TypeScript.TextUtilities {
         return arrayBuilder;
     }
 
-    export function getLengthOfLineBreakSlow(text: ISimpleText, index: number, c: number): number {
+    export function getLengthOfLineBreakSlow(text: ICharacterSequence, index: number, c: number): number {
         if (c === CharacterCodes.carriageReturn) {
             var next = index + 1;
-            return (next < text.length()) && CharacterCodes.lineFeed === text.charCodeAt(next) ? 2 : 1;
+            return (next < text.length) && CharacterCodes.lineFeed === text.charCodeAt(next) ? 2 : 1;
         }
         else if (isAnyLineBreakCharacter(c)) {
             return 1;
@@ -68,7 +73,7 @@ module TypeScript.TextUtilities {
         }
     }
 
-    export function getLengthOfLineBreak(text: ISimpleText, index: number): number {
+    export function getLengthOfLineBreak(text: ICharacterSequence, index: number): number {
         var c = text.charCodeAt(index);
 
         // common case - ASCII & not a line break

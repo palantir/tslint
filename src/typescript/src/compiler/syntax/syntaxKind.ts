@@ -172,8 +172,11 @@ module TypeScript {
         MemberFunctionDeclaration,
         MemberVariableDeclaration,
         ConstructorDeclaration,
-        GetMemberAccessorDeclaration,
-        SetMemberAccessorDeclaration,
+        IndexMemberDeclaration,
+
+        // ClassElement and PropertyAssignment
+        GetAccessor,
+        SetAccessor,
 
         // Type members.
         PropertySignature,
@@ -275,7 +278,8 @@ module TypeScript {
         TypeParameterList,
 
         // Clauses
-        HeritageClause,
+        ExtendsHeritageClause,
+        ImplementsHeritageClause,
         EqualsValueClause,
         CaseSwitchClause,
         DefaultSwitchClause,
@@ -289,8 +293,8 @@ module TypeScript {
 
         // Property Assignment
         SimplePropertyAssignment,
-        GetAccessorPropertyAssignment,
-        SetAccessorPropertyAssignment,
+        // GetAccessorPropertyAssignment,
+        // SetAccessorPropertyAssignment,
         FunctionPropertyAssignment,
 
         // Misc.
@@ -299,6 +303,7 @@ module TypeScript {
         TypeAnnotation,
         ExternalModuleReference,
         ModuleNameModuleReference,
+        Last = ModuleNameModuleReference,
 
         FirstStandardKeyword = BreakKeyword,
         LastStandardKeyword = WithKeyword,
@@ -323,5 +328,8 @@ module TypeScript {
 
         FirstFixedWidth = FirstKeyword,
         LastFixedWidth = LastPunctuation,
+
+        FirstTrivia = WhitespaceTrivia,
+        LastTrivia = SkippedTokenTrivia,
     }
 }

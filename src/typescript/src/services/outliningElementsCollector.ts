@@ -15,11 +15,12 @@
 
 ///<reference path='typescriptServices.ts' />
 
-module Services {
+module TypeScript.Services {
     export class OutliningElementsCollector extends TypeScript.DepthLimitedWalker {
         // The maximum depth for collecting spans; this will cause us to miss deeply nested function/modules spans, 
         // but will guarantee performance will not be closely tied to tree depth.
         private static MaximumDepth: number = 10;
+        private inObjectLiteralExpression: boolean = false;
 
         private elements: TypeScript.TextSpan[] = [];
 
@@ -67,14 +68,25 @@ module Services {
             super.visitMemberFunctionDeclaration(node);
         }
 
-        public visitGetMemberAccessorDeclaration(node: TypeScript.GetMemberAccessorDeclarationSyntax): void {
-            this.addOutlineRange(node, node.block, node.block);
-            super.visitGetMemberAccessorDeclaration(node);
+        public visitGetAccessor(node: TypeScript.GetAccessorSyntax): void {
+            if (!this.inObjectLiteralExpression) {
+                this.addOutlineRange(node, node.block, node.block);
+            }
+            super.visitGetAccessor(node);
         }
 
-        public visitSetMemberAccessorDeclaration(node: TypeScript.SetMemberAccessorDeclarationSyntax): void {
-            this.addOutlineRange(node, node.block, node.block);
-            super.visitSetMemberAccessorDeclaration(node);
+        public visitSetAccessor(node: TypeScript.SetAccessorSyntax): void {
+            if (!this.inObjectLiteralExpression) {
+                this.addOutlineRange(node, node.block, node.block);
+            }
+            super.visitSetAccessor(node);
+        }
+
+        public visitObjectLiteralExpression(node: TypeScript.ObjectLiteralExpressionSyntax): void {
+            var savedInObjectLiteralExpression = this.inObjectLiteralExpression;
+            this.inObjectLiteralExpression = true;
+            super.visitObjectLiteralExpression(node);
+            this.inObjectLiteralExpression = savedInObjectLiteralExpression;
         }
 
         private addOutlineRange(node: TypeScript.SyntaxNode, startElement: TypeScript.ISyntaxNodeOrToken, endElement: TypeScript.ISyntaxNodeOrToken) {

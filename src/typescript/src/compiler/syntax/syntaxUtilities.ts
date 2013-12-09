@@ -71,8 +71,8 @@ module TypeScript {
                 case SyntaxKind.ImportDeclaration:
                 case SyntaxKind.ConstructorDeclaration:
                 case SyntaxKind.MemberFunctionDeclaration:
-                case SyntaxKind.GetMemberAccessorDeclaration:
-                case SyntaxKind.SetMemberAccessorDeclaration:
+                case SyntaxKind.GetAccessor:
+                case SyntaxKind.SetAccessor:
                 case SyntaxKind.MemberVariableDeclaration:
                     if (node.isClassElement() || node.isModuleElement()) {
                         return SyntaxUtilities.isAmbientDeclarationSyntax(positionNode.containingNode());

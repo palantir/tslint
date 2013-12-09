@@ -60,7 +60,8 @@ module TypeScript.Syntax {
                 case SyntaxKind.CastExpression:
                     return (<CastExpressionSyntax>parent).type === nodeOrToken;
                 case SyntaxKind.TypeAnnotation:
-                case SyntaxKind.HeritageClause:
+                case SyntaxKind.ExtendsHeritageClause:
+                case SyntaxKind.ImplementsHeritageClause:
                 case SyntaxKind.TypeArgumentList:
                     return true;
                 // TODO: add more cases if necessary.  This list may not be complete.
@@ -493,24 +494,16 @@ module TypeScript.Syntax {
                     // (and not a hex integer).  i.e. -0xA is a legal expression, but it is not a 
                     // *literal*.
                     expression = (<PrefixUnaryExpressionSyntax>expression).operand;
-                    return isInteger((<ISyntaxToken>expression).text());
+                    return expression.isToken() && IntegerUtilities.isInteger((<ISyntaxToken>expression).text());
 
                 case SyntaxKind.NumericLiteral:
                     // If it doesn't have a + or -, then either an integer literal or a hex literal
                     // is acceptable.
                     var text = (<ISyntaxToken> expression).text();
-                    return isInteger(text) || isHexInteger(text);
+                    return IntegerUtilities.isInteger(text) || IntegerUtilities.isHexInteger(text);
             }
         }
 
         return false;
-    }
-
-    function isInteger(text: string): boolean {
-        return /^[0-9]+$/.test(text);
-    }
-
-    export function isHexInteger(text: string): boolean {
-        return /^0(x|X)[0-9a-fA-F]+$/.test(text);
     }
 }

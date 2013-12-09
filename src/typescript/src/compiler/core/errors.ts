@@ -3,31 +3,27 @@
 module TypeScript {
     export class Errors {
         public static argument(argument: string, message?: string): Error {
-            return new Error(message ?
-                             getDiagnosticMessage(DiagnosticCode.Invalid_argument_0_1, [argument, message]) :
-                             getDiagnosticMessage(DiagnosticCode.Invalid_argument_0, [argument]));
+            return new Error("Invalid argument: " + argument + ". " + message);
         }
 
         public static argumentOutOfRange(argument: string): Error {
-            return new Error(getDiagnosticMessage(DiagnosticCode.Argument_out_of_range_0, [argument]));
+            return new Error("Argument out of range: " + argument);
         }
 
         public static argumentNull(argument: string): Error {
-            return new Error(getDiagnosticMessage(DiagnosticCode.Argument_null_0, [argument]));
+            return new Error("Argument null: " + argument);
         }
 
         public static abstract(): Error {
-            return new Error(getDiagnosticMessage(DiagnosticCode.Operation_not_implemented_properly_by_subclass, null));
+            return new Error("Operation not implemented properly by subclass.");
         }
 
         public static notYetImplemented(): Error {
-            return new Error(getDiagnosticMessage(DiagnosticCode.Not_yet_implemented, null));
+            return new Error("Not yet implemented.");
         }
 
         public static invalidOperation(message?: string): Error {
-            return new Error(message ?
-                             getDiagnosticMessage(DiagnosticCode.Invalid_operation_0, [message]) :
-                             getDiagnosticMessage(DiagnosticCode.Invalid_operation, null));
+            return new Error("Invalid operation: " + message);
         }
     }
 }

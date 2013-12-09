@@ -33,7 +33,7 @@
 ///<reference path='breakpoints.ts' />
 ///<reference path='getScriptLexicalStructureWalker.ts' />
 
-module Services {
+module TypeScript.Services {
     export function copyDataObject(dst: any, src: any): any {
         for (var e in dst) {
             if (typeof dst[e] == "object") {
@@ -46,29 +46,15 @@ module Services {
         return dst;
     }
 
-    export function compareDataObjects(dst: any, src: any): boolean {
-        for (var e in dst) {
-            if (typeof dst[e] == "object") {
-                if (!compareDataObjects(dst[e], src[e]))
-                    return false;
-            }
-            else if (typeof dst[e] != "function") {
-                if (dst[e] !== src[e])
-                    return false;
-            }
-        }
-        return true;
-    }
-
     export class TypeScriptServicesFactory implements IShimFactory {
         private _shims: IShim[] = [];
 
-        public createPullLanguageService(host: Services.ILanguageServiceHost): Services.ILanguageService {
+        public createPullLanguageService(host: TypeScript.Services.ILanguageServiceHost): TypeScript.Services.ILanguageService {
             try {
-                return new Services.LanguageService(host);
+                return new TypeScript.Services.LanguageService(host);
             }
             catch (err) {
-                Services.logInternalError(host, err);
+                TypeScript.Services.logInternalError(host, err);
                 throw err;
             }
         }
@@ -80,47 +66,47 @@ module Services {
                 return new LanguageServiceShim(this, host, pullLanguageService);
             }
             catch (err) {
-                Services.logInternalError(host, err);
+                TypeScript.Services.logInternalError(host, err);
                 throw err;
             }
         }
 
-        public createClassifier(host: Services.IClassifierHost): Services.Classifier {
+        public createClassifier(host: TypeScript.Services.IClassifierHost): TypeScript.Services.Classifier {
             try {
-                return new Services.Classifier(host);
+                return new TypeScript.Services.Classifier(host);
             }
             catch (err) {
-                Services.logInternalError(host, err);
+                TypeScript.Services.logInternalError(host, err);
                 throw err;
             }
         }
 
-        public createClassifierShim(host: Services.IClassifierHost): ClassifierShim {
+        public createClassifierShim(host: TypeScript.Services.IClassifierHost): ClassifierShim {
             try {
                 return new ClassifierShim(this, host);
             }
             catch (err) {
-                Services.logInternalError(host, err);
+                TypeScript.Services.logInternalError(host, err);
                 throw err;
             }
         }
 
-        public createCoreServices(host: Services.ICoreServicesHost): Services.CoreServices {
+        public createCoreServices(host: TypeScript.Services.ICoreServicesHost): TypeScript.Services.CoreServices {
             try {
-                return new Services.CoreServices(host);
+                return new TypeScript.Services.CoreServices(host);
             }
             catch (err) {
-                Services.logInternalError(host.logger, err);
+                TypeScript.Services.logInternalError(host.logger, err);
                 throw err;
             }
         }
 
-        public createCoreServicesShim(host: Services.ICoreServicesHost): CoreServicesShim {
+        public createCoreServicesShim(host: TypeScript.Services.ICoreServicesHost): CoreServicesShim {
             try {
                 return new CoreServicesShim(this, host);
             }
             catch (err) {
-                Services.logInternalError(host.logger, err);
+                TypeScript.Services.logInternalError(host.logger, err);
                 throw err;
             }
         }

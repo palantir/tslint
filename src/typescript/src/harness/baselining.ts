@@ -112,7 +112,7 @@ function getIntellisenseSignatureRegions(scriptText: string): spanInformation[] 
     return getIntellisenseRegions(scriptText, function(ls, filename, i) { return ls.getSignatureAtPosition(filename, i); });
 }
 
-function getIntellisenseRegions(scriptText: string, getDataAtPoint: any): spanInformation[] {
+function getIntellisenseRegions(scriptText: string, getDataAtPoint: (ls: TypeScript.Services.ILanguageServiceShim, fileName: string, index: number) => any): spanInformation[] {
     var result: spanInformation[] = [];
 
     // Set up the compiler
@@ -122,31 +122,31 @@ function getIntellisenseRegions(scriptText: string, getDataAtPoint: any): spanIn
 
     // Get the language service
     var ls = typescriptLS.getLanguageService();
-    
+
     // Now walk through the characters of the script and generate the spans
 
     // Keep track of where in the document we are
     var line = 1;
     var col = 0;
-    
+
     var currentSpan: spanInformation = { start: 0, end: null, data: '' };
 
     var previous = getDataAtPoint(ls, filename, 0);
-    for(var i = 0; i < scriptText.length; i++) {
+    for (var i = 0; i < scriptText.length; i++) {
         var current = getDataAtPoint(ls, filename, i);
-        
-        if(current != previous) {
+
+        if (current != previous) {
             currentSpan.end = i;
-            
+
             if (currentSpan.data) {
                 result.push(currentSpan);
             }
-            
+
             currentSpan = { start: i, end: null, data: current };
         }
-        
+
         previous = current;
     }
-    
+
     return result;
 }

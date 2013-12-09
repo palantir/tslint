@@ -76,7 +76,7 @@ module TypeScript {
             this.visitToken(node.importKeyword);
             this.visitToken(node.identifier);
             this.visitToken(node.equalsToken);
-            this.visitNode(node.moduleReference);
+            this.visitNodeOrToken(node.moduleReference);
             this.visitToken(node.semicolonToken);
         }
 
@@ -115,7 +115,7 @@ module TypeScript {
         public visitModuleDeclaration(node: ModuleDeclarationSyntax): void {
             this.visitList(node.modifiers);
             this.visitToken(node.moduleKeyword);
-            this.visitOptionalNodeOrToken(node.moduleName);
+            this.visitOptionalNodeOrToken(node.name);
             this.visitOptionalToken(node.stringLiteral);
             this.visitToken(node.openBraceToken);
             this.visitList(node.moduleElements);
@@ -143,7 +143,7 @@ module TypeScript {
         }
 
         public visitVariableDeclarator(node: VariableDeclaratorSyntax): void {
-            this.visitToken(node.identifier);
+            this.visitToken(node.propertyName);
             this.visitOptionalNode(node.typeAnnotation);
             this.visitOptionalNode(node.equalsValueClause);
         }
@@ -176,13 +176,15 @@ module TypeScript {
         public visitSimpleArrowFunctionExpression(node: SimpleArrowFunctionExpressionSyntax): void {
             this.visitToken(node.identifier);
             this.visitToken(node.equalsGreaterThanToken);
-            this.visitNodeOrToken(node.body);
+            this.visitOptionalNode(node.block);
+            this.visitOptionalNodeOrToken(node.expression);
         }
 
         public visitParenthesizedArrowFunctionExpression(node: ParenthesizedArrowFunctionExpressionSyntax): void {
             this.visitNode(node.callSignature);
             this.visitToken(node.equalsGreaterThanToken);
-            this.visitNodeOrToken(node.body);
+            this.visitOptionalNode(node.block);
+            this.visitOptionalNodeOrToken(node.expression);
         }
 
         public visitQualifiedName(node: QualifiedNameSyntax): void {
@@ -247,7 +249,7 @@ module TypeScript {
 
         public visitParameter(node: ParameterSyntax): void {
             this.visitOptionalToken(node.dotDotDotToken);
-            this.visitOptionalToken(node.publicOrPrivateKeyword);
+            this.visitList(node.modifiers);
             this.visitToken(node.identifier);
             this.visitOptionalToken(node.questionToken);
             this.visitOptionalNode(node.typeAnnotation);
@@ -370,6 +372,7 @@ module TypeScript {
         }
 
         public visitConstructorDeclaration(node: ConstructorDeclarationSyntax): void {
+            this.visitList(node.modifiers);
             this.visitToken(node.constructorKeyword);
             this.visitNode(node.parameterList);
             this.visitOptionalNode(node.block);
@@ -384,7 +387,7 @@ module TypeScript {
             this.visitOptionalToken(node.semicolonToken);
         }
 
-        public visitGetMemberAccessorDeclaration(node: GetMemberAccessorDeclarationSyntax): void {
+        public visitGetAccessor(node: GetAccessorSyntax): void {
             this.visitList(node.modifiers);
             this.visitToken(node.getKeyword);
             this.visitToken(node.propertyName);
@@ -393,7 +396,7 @@ module TypeScript {
             this.visitNode(node.block);
         }
 
-        public visitSetMemberAccessorDeclaration(node: SetMemberAccessorDeclarationSyntax): void {
+        public visitSetAccessor(node: SetAccessorSyntax): void {
             this.visitList(node.modifiers);
             this.visitToken(node.setKeyword);
             this.visitToken(node.propertyName);
@@ -404,6 +407,12 @@ module TypeScript {
         public visitMemberVariableDeclaration(node: MemberVariableDeclarationSyntax): void {
             this.visitList(node.modifiers);
             this.visitNode(node.variableDeclarator);
+            this.visitToken(node.semicolonToken);
+        }
+
+        public visitIndexMemberDeclaration(node: IndexMemberDeclarationSyntax): void {
+            this.visitList(node.modifiers);
+            this.visitNode(node.indexSignature);
             this.visitToken(node.semicolonToken);
         }
 
@@ -536,24 +545,6 @@ module TypeScript {
         public visitFunctionPropertyAssignment(node: FunctionPropertyAssignmentSyntax): void {
             this.visitToken(node.propertyName);
             this.visitNode(node.callSignature);
-            this.visitNode(node.block);
-        }
-
-        public visitGetAccessorPropertyAssignment(node: GetAccessorPropertyAssignmentSyntax): void {
-            this.visitToken(node.getKeyword);
-            this.visitToken(node.propertyName);
-            this.visitToken(node.openParenToken);
-            this.visitToken(node.closeParenToken);
-            this.visitOptionalNode(node.typeAnnotation);
-            this.visitNode(node.block);
-        }
-
-        public visitSetAccessorPropertyAssignment(node: SetAccessorPropertyAssignmentSyntax): void {
-            this.visitToken(node.setKeyword);
-            this.visitToken(node.propertyName);
-            this.visitToken(node.openParenToken);
-            this.visitNode(node.parameter);
-            this.visitToken(node.closeParenToken);
             this.visitNode(node.block);
         }
 

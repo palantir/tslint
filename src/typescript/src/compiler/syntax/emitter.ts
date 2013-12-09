@@ -176,7 +176,7 @@ module TypeScript.Emitter1 {
                     var declarators = variableStatement.variableDeclaration.variableDeclarators;
                     for (var i = 0, n = declarators.nonSeparatorCount(); i < n; i++) {
                         var declarator = <VariableDeclaratorSyntax>declarators.nonSeparatorAt(i);
-                        elements.push(this.exportModuleElement(parentModule, moduleElement, declarator.identifier));
+                        elements.push(this.exportModuleElement(parentModule, moduleElement, declarator.propertyName));
                     }
                 }
             }
@@ -197,7 +197,7 @@ module TypeScript.Emitter1 {
                 var childModule = <ModuleDeclarationSyntax>moduleElement;
                 if (this.containsToken(childModule.modifiers, SyntaxKind.ExportKeyword)) {
                     elements.push(this.exportModuleElement(
-                        parentModule, moduleElement, this.leftmostName(childModule.moduleName)));
+                        parentModule, moduleElement, this.leftmostName(childModule.name)));
                 }
             }
         }
@@ -214,14 +214,14 @@ module TypeScript.Emitter1 {
             }
 
             // Handle the case where the child is an export.
-            var parentModule = this.rightmostName(node.moduleName);
+            var parentModule = this.rightmostName(node.name);
             for (var i = 0, n = node.moduleElements.childCount(); i < n; i++) {
                 this.handleExportedModuleElement(
                     parentModule, <IModuleElementSyntax>node.moduleElements.childAt(i), moduleElements);
             }
 
             // Break up the dotted name into pieces.
-            var names = EmitterImpl.splitModuleName(node.moduleName);
+            var names = EmitterImpl.splitModuleName(node.name);
             
             // Then, for all the names left of that name, wrap what we've created in a larger module.
             for (var nameIndex = names.length - 1; nameIndex >= 0; nameIndex--) {
@@ -325,8 +325,8 @@ module TypeScript.Emitter1 {
                 .withBlock(this.convertArrowFunctionBody(node)).withLeadingTrivia(node.leadingTrivia());
         }
 
-        private convertArrowFunctionBody(arrowFunction: ArrowFunctionExpressionSyntax): BlockSyntax {
-            var rewrittenBody = this.visitNodeOrToken(arrowFunction.body);
+        private convertArrowFunctionBody(arrowFunction: IArrowFunctionExpressionSyntax): BlockSyntax {
+            var rewrittenBody = arrowFunction.block ? this.visitNode(arrowFunction.block) : this.visitNodeOrToken(arrowFunction.expression);
 
             if (rewrittenBody.kind() === SyntaxKind.Block) {
                 return <BlockSyntax>rewrittenBody;
@@ -537,7 +537,7 @@ module TypeScript.Emitter1 {
             var receiver = MemberAccessExpressionSyntax.create1(
                 static ? <IExpressionSyntax>this.withNoTrivia(classDeclaration.identifier)
                        : Syntax.token(SyntaxKind.ThisKeyword),
-                this.withNoTrivia(declarator.identifier)).withTrailingTrivia(Syntax.spaceTriviaList);
+                this.withNoTrivia(declarator.propertyName)).withTrailingTrivia(Syntax.spaceTriviaList);
 
             return ExpressionStatementSyntax.create1(
                 Syntax.assignmentExpression(
@@ -630,7 +630,7 @@ module TypeScript.Emitter1 {
             var block = constructorDeclaration.block;
             var allStatements = <SyntaxNode[]>block.statements.toArray();
 
-            var normalStatements: IStatementSyntax[] = ArrayUtilities.select(ArrayUtilities.where(allStatements,
+            var normalStatements: IStatementSyntax[] = ArrayUtilities.select<any, any>(ArrayUtilities.where(allStatements,
                 s => !Syntax.isSuperInvocationExpressionStatement(s)), s => s.accept(this));
 
             var instanceAssignments = this.generatePropertyAssignments(classDeclaration, /*static:*/ false);
@@ -641,7 +641,7 @@ module TypeScript.Emitter1 {
             }
 
             var parameterPropertyAssignments = <ExpressionStatementSyntax[]>ArrayUtilities.select(
-                ArrayUtilities.where(<ParameterSyntax[]>constructorDeclaration.parameterList.parameters.toNonSeparatorArray(), p => p.publicOrPrivateKeyword !== null),
+                ArrayUtilities.where(<ParameterSyntax[]>constructorDeclaration.parameterList.parameters.toNonSeparatorArray(), p => p.modifiers.childCount() > 0),
                 p => this.generatePropertyAssignmentStatement(p));
 
             for (i = parameterPropertyAssignments.length - 1; i >= 0; i--) {
@@ -649,7 +649,7 @@ module TypeScript.Emitter1 {
                     parameterPropertyAssignments[i], /*changeFirstToken:*/ true, this.options.indentSpaces + constructorIndentationColumn));
             }
 
-            var superStatements: IStatementSyntax[] = ArrayUtilities.select(ArrayUtilities.where(allStatements,
+            var superStatements: IStatementSyntax[] = ArrayUtilities.select<any, any>(ArrayUtilities.where(allStatements,
                 s => Syntax.isSuperInvocationExpressionStatement(s)), s => s.accept(this));
 
             normalStatements.unshift.apply(normalStatements, superStatements);
@@ -727,11 +727,11 @@ module TypeScript.Emitter1 {
                         Syntax.list(blockStatements))))).withTrailingTrivia(blockTrailingTrivia);
         }
 
-        private convertMemberAccessor(memberAccessor: MemberAccessorDeclarationSyntax): PropertyAssignmentSyntax {
-            var propertyName = memberAccessor.kind() === SyntaxKind.GetMemberAccessorDeclaration
+        private convertMemberAccessor(memberAccessor: SyntaxNode): SimplePropertyAssignmentSyntax {
+            var propertyName = memberAccessor.kind() === SyntaxKind.GetAccessor
                 ? "get" : "set";
 
-            var parameterList = <ParameterListSyntax>memberAccessor.parameterList.accept(this);
+            var parameterList = <ParameterListSyntax>(<any>memberAccessor).parameterList.accept(this);
             if (!parameterList.hasTrailingTrivia()) {
                 parameterList = parameterList.withTrailingTrivia(Syntax.spaceTriviaList);
             }
@@ -742,27 +742,27 @@ module TypeScript.Emitter1 {
                 FunctionExpressionSyntax.create(
                     Syntax.token(SyntaxKind.FunctionKeyword),
                     CallSignatureSyntax.create(parameterList),
-                    memberAccessor.block.accept(this).withTrailingTrivia(Syntax.emptyTriviaList)))
+                    (<any>memberAccessor).block.accept(this).withTrailingTrivia(Syntax.emptyTriviaList)))
                         .withLeadingTrivia(this.indentationTriviaForStartOfNode(memberAccessor));
         }
 
         private convertMemberAccessorDeclaration(classDeclaration: ClassDeclarationSyntax,
-                                                 memberAccessor: MemberAccessorDeclarationSyntax,
+                                                 memberAccessor: SyntaxNode,
                                                  classElements: IClassElementSyntax[]): IStatementSyntax {
-            var name = <string>memberAccessor.propertyName.value();
+            var name = (<any>memberAccessor).propertyName.valueText();
             var i: number;
 
             // Find all the accessors with that name.
-            var accessors: MemberAccessorDeclarationSyntax[] = [memberAccessor];
+            var accessors: any[] = [memberAccessor];
 
             for (i = classElements.length - 1; i >= 0; i--) {
                 var element = classElements[i];
-                if (element.kind() === SyntaxKind.GetMemberAccessorDeclaration ||
-                    element.kind() === SyntaxKind.SetMemberAccessorDeclaration) {
+                if (element.kind() === SyntaxKind.GetAccessor ||
+                    element.kind() === SyntaxKind.SetAccessor) {
 
-                    var otherAccessor = <MemberAccessorDeclarationSyntax>element;
-                    if (otherAccessor.propertyName.value() === name &&
-                        otherAccessor.block !== null) {
+                    var otherAccessor = <SyntaxNode>element;
+                    if ((<any>otherAccessor).propertyName.value() === name &&
+                        (<any>otherAccessor).block !== null) {
                         accessors.push(otherAccessor);
                         classElements.splice(i, 1);
                     }
@@ -773,14 +773,14 @@ module TypeScript.Emitter1 {
                 <any>MemberAccessExpressionSyntax.create1(
                     this.withNoTrivia(classDeclaration.identifier), Syntax.identifierName("prototype")),
                 Syntax.token(SyntaxKind.CommaToken).withTrailingTrivia(this.space),
-                Syntax.stringLiteralExpression('"' + memberAccessor.propertyName.text() + '"'),
+                Syntax.stringLiteralExpression('"' + (<any>memberAccessor).propertyName.text() + '"'),
                 Syntax.token(SyntaxKind.CommaToken).withTrailingTrivia(this.space)
             ];
 
             var propertyAssignments: ISyntaxNodeOrToken[] = [];
             for (i = 0; i < accessors.length; i++) {
                 var converted = this.convertMemberAccessor(accessors[i]);
-                converted = <PropertyAssignmentSyntax>this.changeIndentation(
+                converted = <SimplePropertyAssignmentSyntax>this.changeIndentation(
                     converted, /*changeFirstToken:*/ true, this.options.indentSpaces);
                 propertyAssignments.push(converted);
                 propertyAssignments.push(
@@ -828,9 +828,9 @@ module TypeScript.Emitter1 {
                 else if (classElement.kind() === SyntaxKind.MemberVariableDeclaration) {
                     converted = this.generatePropertyAssignment(classDeclaration, /*static:*/ true, <MemberVariableDeclarationSyntax>classElement);
                 }
-                else if (classElement.kind() === SyntaxKind.GetMemberAccessorDeclaration ||
-                         classElement.kind() === SyntaxKind.SetMemberAccessorDeclaration) {
-                    converted = this.convertMemberAccessorDeclaration(classDeclaration, <MemberAccessorDeclarationSyntax>classElement, classElements);
+                else if (classElement.kind() === SyntaxKind.GetAccessor ||
+                         classElement.kind() === SyntaxKind.SetAccessor) {
+                    converted = this.convertMemberAccessorDeclaration(classDeclaration, <SyntaxNode>classElement, classElements);
                 }
 
                 if (converted !== null) {
@@ -930,10 +930,10 @@ module TypeScript.Emitter1 {
                 return result;
             }
 
-            var newTrailingTrivia = result.identifier.trailingTrivia().concat(result.typeAnnotation.trailingTrivia());
+            var newTrailingTrivia = result.propertyName.trailingTrivia().concat(result.typeAnnotation.trailingTrivia());
 
             return result.withTypeAnnotation(null)
-                         .withIdentifier(result.identifier.withTrailingTrivia(newTrailingTrivia));
+                         .withPropertyName(result.propertyName.withTrailingTrivia(newTrailingTrivia));
         }
 
         public visitCallSignature(node: CallSignatureSyntax): CallSignatureSyntax {
@@ -1060,20 +1060,20 @@ module TypeScript.Emitter1 {
 
             // Copy existing leading trivia of the enum declaration to this node.
             // var E;
-            var variableStatement = VariableStatementSyntax.create1(this.factory.variableDeclaration(
+            var variableStatement: IStatementSyntax = VariableStatementSyntax.create1(this.factory.variableDeclaration(
                 Syntax.token(SyntaxKind.VarKeyword).withTrailingTrivia(this.space),
                 Syntax.separatedList([VariableDeclaratorSyntax.create(identifier)])))
                     .withLeadingTrivia(node.leadingTrivia()).withTrailingTrivia(this.newLine);
 
             // (function(E) { E[E.e1 = ... })(E||(E={}));
-            var expressionStatement = ExpressionStatementSyntax.create1(
+            var expressionStatement: IStatementSyntax = ExpressionStatementSyntax.create1(
                 this.factory.invocationExpression(
                     ParenthesizedExpressionSyntax.create1(this.generateEnumFunctionExpression(node)),
                     ArgumentListSyntax.create1().withArgument(this.initializedVariable(identifier))))
                         .withLeadingTrivia(this.indentationTriviaForStartOfNode(node))
                         .withTrailingTrivia(this.newLine);
 
-            return [<IModuleElementSyntax>variableStatement, expressionStatement];
+            return [variableStatement, expressionStatement];
         }
 
         private convertSuperInvocationExpression(node: InvocationExpressionSyntax): InvocationExpressionSyntax {

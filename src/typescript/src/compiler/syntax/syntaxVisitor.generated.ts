@@ -55,9 +55,10 @@ module TypeScript {
         visitExpressionStatement(node: ExpressionStatementSyntax): any;
         visitConstructorDeclaration(node: ConstructorDeclarationSyntax): any;
         visitMemberFunctionDeclaration(node: MemberFunctionDeclarationSyntax): any;
-        visitGetMemberAccessorDeclaration(node: GetMemberAccessorDeclarationSyntax): any;
-        visitSetMemberAccessorDeclaration(node: SetMemberAccessorDeclarationSyntax): any;
+        visitGetAccessor(node: GetAccessorSyntax): any;
+        visitSetAccessor(node: SetAccessorSyntax): any;
         visitMemberVariableDeclaration(node: MemberVariableDeclarationSyntax): any;
+        visitIndexMemberDeclaration(node: IndexMemberDeclarationSyntax): any;
         visitThrowStatement(node: ThrowStatementSyntax): any;
         visitReturnStatement(node: ReturnStatementSyntax): any;
         visitObjectCreationExpression(node: ObjectCreationExpressionSyntax): any;
@@ -76,8 +77,6 @@ module TypeScript {
         visitObjectLiteralExpression(node: ObjectLiteralExpressionSyntax): any;
         visitSimplePropertyAssignment(node: SimplePropertyAssignmentSyntax): any;
         visitFunctionPropertyAssignment(node: FunctionPropertyAssignmentSyntax): any;
-        visitGetAccessorPropertyAssignment(node: GetAccessorPropertyAssignmentSyntax): any;
-        visitSetAccessorPropertyAssignment(node: SetAccessorPropertyAssignmentSyntax): any;
         visitFunctionExpression(node: FunctionExpressionSyntax): any;
         visitEmptyStatement(node: EmptyStatementSyntax): any;
         visitTryStatement(node: TryStatementSyntax): any;
@@ -308,15 +307,19 @@ module TypeScript {
             return this.defaultVisit(node);
         }
 
-        public visitGetMemberAccessorDeclaration(node: GetMemberAccessorDeclarationSyntax): any {
+        public visitGetAccessor(node: GetAccessorSyntax): any {
             return this.defaultVisit(node);
         }
 
-        public visitSetMemberAccessorDeclaration(node: SetMemberAccessorDeclarationSyntax): any {
+        public visitSetAccessor(node: SetAccessorSyntax): any {
             return this.defaultVisit(node);
         }
 
         public visitMemberVariableDeclaration(node: MemberVariableDeclarationSyntax): any {
+            return this.defaultVisit(node);
+        }
+
+        public visitIndexMemberDeclaration(node: IndexMemberDeclarationSyntax): any {
             return this.defaultVisit(node);
         }
 
@@ -389,14 +392,6 @@ module TypeScript {
         }
 
         public visitFunctionPropertyAssignment(node: FunctionPropertyAssignmentSyntax): any {
-            return this.defaultVisit(node);
-        }
-
-        public visitGetAccessorPropertyAssignment(node: GetAccessorPropertyAssignmentSyntax): any {
-            return this.defaultVisit(node);
-        }
-
-        public visitSetAccessorPropertyAssignment(node: SetAccessorPropertyAssignmentSyntax): any {
             return this.defaultVisit(node);
         }
 

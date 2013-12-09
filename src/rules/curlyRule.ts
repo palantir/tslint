@@ -78,7 +78,7 @@ class CurlyWalker extends Lint.RuleWalker {
         super.visitWhileStatement(node);
     }
 
-    private isStatementBraced(node: TypeScript.IExpressionSyntax): boolean {
+    private isStatementBraced(node: TypeScript.IStatementSyntax): boolean {
         var childCount = node.childCount();
         if (childCount === 3) {
             if (node.childAt(0).kind() === TypeScript.SyntaxKind.FirstPunctuation &&

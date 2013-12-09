@@ -16,7 +16,7 @@
 ///<reference path='typescriptServices.ts' />
 ///<reference path='diagnosticServices.ts' />
 
-module Services {
+module TypeScript.Services {
 
     //
     // Public interface of the host of a language service instance.
@@ -27,9 +27,9 @@ module Services {
         getScriptFileNames(): string[];
         getScriptVersion(fileName: string): number;
         getScriptIsOpen(fileName: string): boolean;
-        getScriptByteOrderMark(fileName: string): ByteOrderMark;
+        getScriptByteOrderMark(fileName: string): TypeScript.ByteOrderMark;
         getScriptSnapshot(fileName: string): TypeScript.IScriptSnapshot;
-        getDiagnosticsObject(): Services.ILanguageServicesDiagnostics;
+        getDiagnosticsObject(): TypeScript.Services.ILanguageServicesDiagnostics;
         getLocalizedDiagnosticMessages(): any;
     }
 
@@ -38,9 +38,10 @@ module Services {
     // with a language service host instance
     //
     export interface ILanguageService {
-        // TODO: This should be removed.  We should not be publicly exposing a way to refresh the 
-        // language service.
+        // Note: refresh is a no-op now.  It is only around for back compat purposes.
         refresh(): void;
+
+        cleanupSemanticCache(): void;
 
         getSyntacticDiagnostics(fileName: string): TypeScript.Diagnostic[];
         getSemanticDiagnostics(fileName: string): TypeScript.Diagnostic[];
@@ -66,14 +67,14 @@ module Services {
 
         getOutliningRegions(fileName: string): TypeScript.TextSpan[];
         getBraceMatchingAtPosition(fileName: string, position: number): TypeScript.TextSpan[];
-        getIndentationAtPosition(fileName: string, position: number, options: Services.EditorOptions): number;
+        getIndentationAtPosition(fileName: string, position: number, options: TypeScript.Services.EditorOptions): number;
 
         getFormattingEditsForRange(fileName: string, minChar: number, limChar: number, options: FormatCodeOptions): TextEdit[];
         getFormattingEditsForDocument(fileName: string, minChar: number, limChar: number, options: FormatCodeOptions): TextEdit[];
         getFormattingEditsOnPaste(fileName: string, minChar: number, limChar: number, options: FormatCodeOptions): TextEdit[];
         getFormattingEditsAfterKeystroke(fileName: string, position: number, key: string, options: FormatCodeOptions): TextEdit[];
 
-        getEmitOutput(fileName: string): EmitOutput;
+        getEmitOutput(fileName: string): TypeScript.EmitOutput;
 
         getSyntaxTree(fileName: string): TypeScript.SyntaxTree;
     }
@@ -106,15 +107,6 @@ module Services {
         public limChar: number = -1;
         public containerName: string = "";
         public containerKind: string = "";  // see ScriptElementKind
-    }
-
-    export class NavigateToContext {
-        public options = new TypeScript.AstWalkOptions();
-        public fileName: string = "";
-        public containerKinds: string[] = [];
-        public containerASTs: TypeScript.AST[] = [];
-        public path: TypeScript.AstPath = new TypeScript.AstPath();
-        public result: NavigateToItem[] = [];
     }
 
     export class TextEdit {
@@ -344,27 +336,5 @@ module Services {
         static error = "error";
         static warning = "warning";
         static message = "message";
-    }
-
-    export class ScriptSyntaxASTState {
-        public version: number;
-        public syntaxTree: TypeScript.SyntaxTree;
-        public fileName: string;
-
-        constructor() {
-            this.version = -1;
-            this.fileName = null;
-        }
-    }
-
-    export class EmitOutput {
-        public outputFiles: IOutputFile[] = [];
-        public diagnostics: TypeScript.Diagnostic[] = [];
-    }
-
-    export interface IOutputFile {
-        name: string;
-        writeByteOrderMark: boolean;
-        text: string;
     }
 }

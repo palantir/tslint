@@ -15,7 +15,7 @@
 
 ///<reference path='formatting.ts' />
 
-module TypeScript.Formatting {
+module TypeScript.Services.Formatting {
     export class Rule {
         constructor(
             public Descriptor: RuleDescriptor,

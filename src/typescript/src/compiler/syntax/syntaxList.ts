@@ -19,7 +19,7 @@ module TypeScript.Syntax {
         public isList(): boolean { return true; }
         public isSeparatedList(): boolean { return false; }
 
-        public toJSON(key: any) {
+        public toJSON(key: any): any {
             return [];
         }
 

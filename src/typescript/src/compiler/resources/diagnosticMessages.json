@@ -203,10 +203,6 @@
         "category": "Error",
         "code": 1049
     },
-    "'set' accessor parameter cannot have accessibility modifier.": {
-        "category": "Error",
-        "code": 1050
-    },
     "'set' accessor parameter cannot be optional.": {
         "category": "Error",
         "code": 1051
@@ -319,11 +315,11 @@
         "category": "Error",
         "code": 1079
     },
-    "Function overload must be static": {
+    "Function overload must be static.": {
         "category": "Error",
         "code": 1080
     },
-    "Function overload must not be static": {
+    "Function overload must not be static.": {
         "category": "Error",
         "code": 1081
     },
@@ -334,6 +330,26 @@
     "Parameter property declarations cannot be used in a constructor overload.": {
         "category": "Error",
         "code": 1083
+    },
+    "Invalid 'reference' directive syntax.": {
+        "category": "Error",
+        "code": 1084
+    },
+    "Octal literals are not available when targeting ECMAScript 5 and higher.": {
+        "category": "Error",
+        "code": 1085
+    },
+    "Accessors are not allowed in ambient contexts.": {
+        "category": "Error",
+        "code": 1086
+    },
+    "'{0}' modifier cannot appear on a constructor declaration.": {
+        "category": "Error",
+        "code": 1089
+    },
+    "'{0}' modifier cannot appear on a parameter.": {
+        "category": "Error",
+        "code": 1090
     },
     "Duplicate identifier '{0}'.": {
         "category": "Error",
@@ -402,10 +418,6 @@
     "Setter '{0}' already declared.": {
         "category": "Error",
         "code": 2016
-    },
-    "Accessors cannot have type parameters.": {
-        "category": "Error",
-        "code": 2017
     },
     "Exported class '{0}' extends private class '{1}'.": {
         "category": "Error",
@@ -639,10 +651,6 @@
         "category": "Error",
         "code": 2075
     },
-    "An interface cannot implement another type.": {
-        "category": "Error",
-        "code": 2076
-    },
     "Unable to resolve type.": {
         "category": "Error",
         "code": 2077
@@ -699,10 +707,6 @@
         "category": "Error",
         "code": 2090
     },
-    "Type of conditional expression cannot be determined. Best common type could not be found between '{0}' and '{1}'.": {
-        "category": "Error",
-        "code": 2091
-    },
     "Type of array literal cannot be determined. Best common type could not be found for array elements.": {
         "category": "Error",
         "code": 2092
@@ -739,7 +743,7 @@
         "category": "Error",
         "code": 2101
     },
-    "'super' property access is permitted only in a constructor, instance member function, or instance member accessor of a derived class.": {
+    "'super' property access is permitted only in a constructor, member function, or member accessor of a derived class.": {
         "category": "Error",
         "code": 2102
     },
@@ -795,7 +799,7 @@
         "category": "Error",
         "code": 2117
     },
-    "The left-hand side of an 'in' expression must be of types 'string' or 'any'.": {
+    "The left-hand side of an 'in' expression must be of types 'any', 'string' or 'number'.": {
         "category": "Error",
         "code": 2118
     },
@@ -919,7 +923,7 @@
         "category": "Error",
         "code": 2150
     },
-    "Overload signatures must all be exported or local.": {
+    "Overload signatures must all be exported or not exported.": {
         "category": "Error",
         "code": 2151
     },
@@ -938,10 +942,6 @@
     "'this' cannot be referenced in constructor arguments.": {
         "category": "Error",
         "code": 2155
-    },
-    "Static member cannot be accessed off an instance variable.": {
-        "category": "Error",
-        "code": 2156
     },
     "Instance member cannot be accessed off a class.": {
         "category": "Error",
@@ -971,11 +971,11 @@
         "category": "Error",
         "code": 2164
     },
-    "Export assignments may only be made with variables, functions, classes, interfaces, enums and internal modules": {
+    "Export assignments may only be made with variables, functions, classes, interfaces, enums and internal modules.": {
         "category": "Error",
         "code": 2165
     },
-    "Only public instance methods of the base class are accessible via the 'super' keyword.": {
+    "Only public methods of the base class are accessible via the 'super' keyword.": {
         "category": "Error",
         "code": 2166
     },
@@ -1055,13 +1055,177 @@
         "category": "Error",
         "code": 2185
     },
-    "Type reference '{0}' in extends clause doesn't reference constructor function for '{1}'.": {
+    "Type reference '{0}' in extends clause does not reference constructor function for '{1}'.": {
         "category": "Error",
         "code": 2186
     },
-    "Internal module reference '{0}' in import declaration doesn't reference module instance for '{1}'.": {
+    "Internal module reference '{0}' in import declaration does not reference module instance for '{1}'.": {
         "category": "Error",
         "code": 2187
+    },
+    "Module '{0}' cannot merge with previous declaration of '{1}' in a different file '{2}'.": {
+        "category": "Error",
+        "code": 2188
+    },
+    "Interface '{0}' cannot simultaneously extend types '{1}' and '{2}':{NL}{3}": {
+        "category": "Error",
+        "code": 2189
+    },
+    "Initializer of parameter '{0}' cannot reference identifier '{1}' declared after it.": {
+        "category": "Error",
+        "code": 2190
+    },
+    "Ambient external module declaration cannot be reopened.": {
+        "category": "Error",
+        "code": 2191
+    },
+    "All declarations of merged declaration '{0}' must be exported or not exported.": {
+        "category": "Error",
+        "code": 2192
+    },
+    "'super' cannot be referenced in constructor arguments.": {
+        "category": "Error",
+        "code": 2193
+    },
+    "Return type of constructor signature must be assignable to the instance type of the class.":{
+        "category": "Error",
+        "code": 2194
+    },
+    "Ambient external module declaration must be defined in global context.": {
+        "category": "Error",
+        "code": 2195
+    },
+    "Ambient external module declaration cannot specify relative module name.": {
+        "category": "Error",
+        "code": 2196
+    },
+    "Import declaration in an ambient external module declaration cannot reference external module through relative external module name.": {
+        "category": "Error",
+        "code": 2197
+    },
+    "Could not find the best common type of types of all return statement expressions.": {
+        "category": "Error",
+        "code": 2198
+    },
+    "Import declaration cannot refer to external module reference when --noResolve option is set.": {
+        "category": "Error",
+        "code": 2199
+    },
+    "Duplicate identifier '_this'. Compiler uses variable declaration '_this' to capture 'this' reference.": {
+        "category": "Error",
+        "code": 2200
+    },
+    "'continue' statement can only be used within an enclosing iteration statement.": {
+        "category": "Error",
+        "code": 2201
+    },
+    "'break' statement can only be used within an enclosing iteration or switch statement.": {
+        "category": "Error",
+        "code": 2202
+    },
+    "Jump target not found.": {
+        "category": "Error",
+        "code": 2203
+    },
+    "Jump target cannot cross function boundary.": {
+        "category": "Error",
+        "code": 2204
+    },
+    "Duplicate identifier '_super'. Compiler uses '_super' to capture base class reference.": {
+        "category": "Error",
+        "code": 2205
+    },
+    "Expression resolves to variable declaration '_this' that compiler uses to capture 'this' reference.": {
+        "category": "Error",
+        "code": 2206
+    },
+    "Expression resolves to '_super' that compiler uses to capture base class reference.": {
+        "category": "Error",
+        "code": 2207
+    },
+    "TypeParameter '{0}' of constructor signature from exported interface has or is using private type '{1}'.": {
+        "category": "Error",
+        "code": 2208
+    },
+    "TypeParameter '{0}' of call signature from exported interface has or is using private type '{1}'.": {
+        "category": "Error",
+        "code": 2209
+    },
+    "TypeParameter '{0}' of public static method from exported class has or is using private type '{1}'.": {
+        "category": "Error",
+        "code": 2210
+    },
+    "TypeParameter '{0}' of public method from exported class has or is using private type '{1}'.": {
+        "category": "Error",
+        "code": 2211
+    },
+    "TypeParameter '{0}' of method from exported interface has or is using private type '{1}'.": {
+        "category": "Error",
+        "code": 2212
+    },
+    "TypeParameter '{0}' of exported function has or is using private type '{1}'.": {
+        "category": "Error",
+        "code": 2213
+    },
+    "TypeParameter '{0}' of constructor signature from exported interface is using inaccessible module {1}.": {
+        "category": "Error",
+        "code": 2214
+    },
+    "TypeParameter '{0}' of call signature from exported interface is using inaccessible module {1}": {
+        "category": "Error",
+        "code": 2215
+    },
+    "TypeParameter '{0}' of public static method from exported class is using inaccessible module {1}.": {
+        "category": "Error",
+        "code": 2216
+    },
+    "TypeParameter '{0}' of public method from exported class is using inaccessible module {1}.": {
+        "category": "Error",
+        "code": 2217
+    },
+    "TypeParameter '{0}' of method from exported interface is using inaccessible module {1}.": {
+        "category": "Error",
+        "code": 2218
+    },
+    "TypeParameter '{0}' of exported function is using inaccessible module {1}.": {
+        "category": "Error",
+        "code": 2219
+    },
+    "TypeParameter '{0}' of exported class has or is using private type '{1}'.": {
+        "category": "Error",
+        "code": 2220
+    },
+    "TypeParameter '{0}' of exported interface has or is using private type '{1}'.": {
+        "category": "Error",
+        "code": 2221
+    },
+    "TypeParameter '{0}' of exported class is using inaccessible module {1}.": {
+        "category": "Error",
+        "code": 2222
+    },
+    "TypeParameter '{0}' of exported interface is using inaccessible module {1}.": {
+        "category": "Error",
+        "code": 2223
+    },
+    "Duplicate identifier '_i'. Compiler uses '_i' to initialize rest parameter.": {
+        "category": "Error",
+        "code": 2224
+    },
+    "Duplicate identifier 'arguments'. Compiler uses 'arguments' to initialize rest parameters.": {
+        "category": "Error",
+        "code": 2225
+    },
+    "Type of conditional '{0}' must be identical to '{1}' or '{2}'.": {
+        "category": "Error",
+        "code": 2226
+    },
+    "Type of conditional '{0}' must be identical to '{1}', '{2}' or '{3}'.": {
+        "category": "Error",
+        "code": 2227
+    },
+    "Duplicate identifier '{0}'. Compiler reserves name '{1}' in top level scope of an external module.": {
+        "category": "Error",
+        "code": 2228
     },
     "Type '{0}' is missing property '{1}' from type '{2}'.": {
         "category": "NoPrefix",
@@ -1105,7 +1269,7 @@
     },
     "Construct signatures of types '{0}' and '{1}' are incompatible:{NL}{2}": {
         "category": "NoPrefix",
-        "code": 40010
+        "code": 4010
     },
     "Type '{0}' requires a construct signature, but type '{1}' lacks one.": {
         "category": "NoPrefix",
@@ -1167,16 +1331,64 @@
         "category": "Message",
         "code": 4025
     },
+    "Variable declaration cannot have the same name as an import declaration.": {
+        "category": "Error",
+        "code": 4026
+    },
+    "Signature expected {0} type arguments, got {1} instead.": {
+        "category": "Error",
+        "code": 4027
+    },
+    "Property '{0}' defined as optional in type '{1}', but is required in type '{2}'.": {
+        "category": "NoPrefix",
+        "code": 4028
+    },
+    "Types '{0}' and '{1}' originating in inifinitely expanding type reference do not refer to same named type.": {
+        "category": "NoPrefix",
+        "code": 4029
+    },
+    "Types '{0}' and '{1}' originating in inifinitely expanding type reference have incompatible type arguments.": {
+        "category": "NoPrefix",
+        "code": 4030
+    },
+    "Types '{0}' and '{1}' originating in inifinitely expanding type reference have incompatible type arguments:{NL}{2}": {
+        "category": "NoPrefix",
+        "code": 4031
+    },
+	"Types of property '{0}' of types '{1}' and '{2}' are not identical.": {
+        "category": "NoPrefix",
+        "code": 4032
+    },
+	"Types of string indexer of types '{0}' and '{1}' are not identical.": {
+        "category": "NoPrefix",
+        "code": 4033
+    },
+	"Types of number indexer of types '{0}' and '{1}' are not identical.": {
+        "category": "NoPrefix",
+        "code": 4034
+    },
+	"Type of number indexer in type '{0}' is not a subtype of string indexer type in type '{1}'.{NL}{2}": {
+        "category": "NoPrefix",
+        "code": 4035
+    },
+	"Type of property '{0}' in type '{1}' is not a subtype of string indexer type in type '{2}'.{NL}{3}": {
+        "category": "NoPrefix",
+        "code": 4036
+    },
+	"Type of property '{0}' in type '{1}' is not a subtype of number indexer type in type '{2}'.{NL}{3}": {
+        "category": "NoPrefix",
+        "code": 4037
+    },
     "Current host does not support '{0}' option.": {
         "category": "Error",
         "code": 5001
     },
-    "ECMAScript target version '{0}' not supported.  Using default '{1}' code generation.": {
-        "category": "Warning",
+    "ECMAScript target version '{0}' not supported.  Specify a valid target version: '{1}' (default), or '{2}'": {
+        "category": "Error",
         "code": 5002
     },
     "Module code generation '{0}' not supported.": {
-        "category": "Warning",
+        "category": "Error",
         "code": 5003
     },
     "Could not find file: '{0}'.": {
@@ -1219,14 +1431,6 @@
         "category": "Error",
         "code": 5016
     },
-    "Should not emit a type query": {
-        "category": "Error",
-        "code": 5017
-    },
-    "Should not emit a type reference": {
-        "category": "Error",
-        "code": 5018
-    },
     "Invalid call to 'up'": {
         "category": "Error",
         "code": 5019
@@ -1235,57 +1439,21 @@
         "category": "Error",
         "code": 5020
     },
-    "Base64 value '{0}' finished with a continuation bit": {
+    "Base64 value '{0}' finished with a continuation bit.": {
         "category": "Error",
         "code": 5021
-    },
-    "Key was already in table": {
-        "category": "Error",
-        "code": 5022
     },
     "Unknown option '{0}'": {
         "category": "Error",
         "code": 5023
     },
-    "Expected {0} arguments to message, got {1} instead": {
+    "Expected {0} arguments to message, got {1} instead.": {
         "category": "Error",
         "code": 5024
     },
     "Expected the message '{0}' to have {1} arguments, but it had {2}": {
         "category": "Error",
         "code": 5025
-    },
-    "Invalid argument: {0}. {1}": {
-        "category": "Error",
-        "code": 5026
-    },
-    "Invalid argument: {0}.": {
-        "category": "Error",
-        "code": 5027
-    },
-    "Argument out of range: {0}.": {
-        "category": "Error",
-        "code": 5028
-    },
-    "Argument null: {0}.": {
-        "category": "Error",
-        "code": 5029
-    },
-    "Operation not implemented properly by subclass.": {
-        "category": "Error",
-        "code": 5030
-    },
-    "Not yet implemented.": {
-        "category": "Error",
-        "code": 5031
-    },
-    "Invalid operation: {0}": {
-        "category": "Error",
-        "code": 5032
-    },
-    "Invalid operation.": {
-        "category": "Error",
-        "code": 5033
     },
     "Could not delete file '{0}'": {
         "category": "Error",
@@ -1315,11 +1483,19 @@
         "category": "Error",
         "code": 5040
     },
-    "Concatenate and emit output to single file": {
+    "Option '{0}' specified without '{1}'": {
+        "category": "Error",
+        "code": 5041
+    },
+    "'codepage' option not supported on current platform.": {
+        "category": "Error",
+        "code": 5042
+    },
+    "Concatenate and emit output to single file.": {
         "category": "Message",
         "code": 6001
     },
-    "Generates corresponding {0} file": {
+    "Generates corresponding {0} file.": {
         "category": "Message",
         "code": 6002
     },
@@ -1331,31 +1507,31 @@
         "category": "Message",
         "code": 6004
     },
-    "Watch input files": {
+    "Watch input files.": {
         "category": "Message",
         "code": 6005
     },
-    "Redirect output structure to the directory": {
+    "Redirect output structure to the directory.": {
         "category": "Message",
         "code": 6006
     },
-    "Do not emit comments to output": {
+    "Do not emit comments to output.": {
         "category": "Message",
         "code": 6009
     },
-    "Skip resolution and preprocessing": {
+    "Skip resolution and preprocessing.": {
         "category": "Message",
         "code": 6010
     },
-    "Specify ECMAScript target version: \"{0}\" (default), or \"{1}\"": {
+    "Specify ECMAScript target version: '{0}' (default), or '{1}'": {
         "category": "Message",
         "code": 6015
     },
-    "Specify module code generation: \"{0}\" or \"{1}\"": {
+    "Specify module code generation: '{0}' or '{1}'": {
         "category": "Message",
         "code": 6016
     },
-    "Print this message": {
+    "Print this message.": {
         "category": "Message",
         "code": 6017
     },
@@ -1363,7 +1539,7 @@
         "category": "Message",
         "code": 6019
     },
-    "Allow use of deprecated \"{0}\" keyword when referencing an external module": {
+    "Allow use of deprecated '{0}' keyword when referencing an external module.": {
         "category": "Message",
         "code": 6021
     },
@@ -1403,7 +1579,7 @@
         "category": "Message",
         "code": 6030
     },
-    "Use the '{0}' flag to see options": {
+    "Use the '{0}' flag to see options.": {
         "category": "Message",
         "code": 6031
     },
@@ -1435,15 +1611,19 @@
         "category": "Message",
         "code": 6038
     },
+    "NUMBER": {
+        "category": "Message",
+        "code": 6039
+    },
+    "Specify the codepage to use when opening source files.": {
+        "category": "Message",
+        "code": 6040
+    },
     "This version of the Javascript runtime does not support the '{0}' function.": {
         "category": "Error",
         "code": 7000
     },
-    "Looking up path for identifier token did not result in an identifer.": {
-        "category": "Error",
-        "code": 7001
-    },
-    "Unknown rule": {
+    "Unknown rule.": {
         "category": "Error",
         "code": 7002
     },
@@ -1455,48 +1635,52 @@
         "category": "Message",
         "code": 7004
     },
-	"Variable '{0}' implicitly has an 'any' type.": {
-		"category": "Error",
-		"code": 7005
-	},
-	"Parameter '{0}' of '{1}' implicitly has an 'any' type.": {
-		"category": "Error",
-		"code": 7006
-	},
-	"Parameter '{0}' of function type implicitly has an 'any' type.": {
-		"category": "Error",
-		"code": 7007
-	},
-	"Member '{0}' of object type implicitly has an 'any' type.": {
-		"category": "Error",
-		"code": 7008
-	},
-	"\"New\" expression, which lacks a constructor signature, implicitly has an 'any' type.": {
-		"category": "Error",
-		"code": 7009
-	},
-	"'{0}', which lacks return-type annotation, implicitly has an 'any' return type.":{
-		"category": "Error",
-		"code": 7010
-	},
-	"Function expression, which lacks return-type annotation, implicitly has an 'any' return type.":{
-		"category": "Error",
-		"code": 7011
-	},
-	"Parameter '{0}' of lambda function implicitly has an 'any' type.":{
-		"category": "Error",
-		"code": 7012
-	},
-	"Constructor signature, which lacks return-type annotation, implicitly has an 'any' return type.":{
-		"category": "Error",
-		"code": 7013	
-	},
-	"Lambda Function, which lacks return-type annotation, implicitly has an 'any' return type.":{
-		"category": "Error",
-		"code": 7014
-	},
-	"Array Literal implicitly has an 'any' type from widening.":{
-		"category": "Error",
-		"code": 7014
-	},
+    "Variable '{0}' implicitly has an 'any' type.": {
+        "category": "Error",
+        "code": 7005
+    },
+    "Parameter '{0}' of '{1}' implicitly has an 'any' type.": {
+        "category": "Error",
+        "code": 7006
+    },
+    "Parameter '{0}' of function type implicitly has an 'any' type.": {
+        "category": "Error",
+        "code": 7007
+    },
+    "Member '{0}' of object type implicitly has an 'any' type.": {
+        "category": "Error",
+        "code": 7008
+    },
+    "'new' expression, which lacks a constructor signature, implicitly has an 'any' type.": {
+        "category": "Error",
+        "code": 7009
+    },
+    "'{0}', which lacks return-type annotation, implicitly has an 'any' return type.":{
+        "category": "Error",
+        "code": 7010
+    },
+    "Function expression, which lacks return-type annotation, implicitly has an 'any' return type.":{
+        "category": "Error",
+        "code": 7011
+    },
+    "Parameter '{0}' of lambda function implicitly has an 'any' type.":{
+        "category": "Error",
+        "code": 7012
+    },
+    "Constructor signature, which lacks return-type annotation, implicitly has an 'any' return type.":{
+        "category": "Error",
+        "code": 7013    
+    },
+    "Lambda Function, which lacks return-type annotation, implicitly has an 'any' return type.":{
+        "category": "Error",
+        "code": 7014
+    },
+    "Array Literal implicitly has an 'any' type from widening.":{
+        "category": "Error",
+        "code": 7015
+    },
+    "'{0}', which lacks 'get' accessor and parameter type annotation on 'set' accessor, implicitly has an 'any' type.":{
+        "category": "Error",
+        "code": 7016
+    },
 }

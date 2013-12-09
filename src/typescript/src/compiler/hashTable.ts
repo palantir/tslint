@@ -13,26 +13,38 @@
 // limitations under the License.
 //
 
-///<reference path='typescript.ts' />
+///<reference path='references.ts' />
 
 module TypeScript {
-    interface IIndexable<T> {
+    export interface IIndexable<T> {
         [s: string]: T;
     }
 
-    export class BlockIntrinsics {
-        public prototype: any = undefined;
-        public toString: any = undefined;
-        public toLocaleString: any = undefined;
-        public valueOf: any = undefined;
-        public hasOwnProperty: any = undefined;
-        public propertyIsEnumerable: any = undefined;
-        public isPrototypeOf: any = undefined;
+    var proto = "__proto__"
 
-        constructor () {
+    class BlockIntrinsics<T> {
+        public prototype: T = undefined;
+        public toString: T = undefined;
+        public toLocaleString: T = undefined;
+        public valueOf: T = undefined;
+        public hasOwnProperty: T = undefined;
+        public propertyIsEnumerable: T = undefined;
+        public isPrototypeOf: T = undefined;
+        [s: string]: T;
+
+        constructor() {
             // initialize the 'constructor' field
             this["constructor"] = undefined;
+
+            // First we set it to null, because that's the only way to erase the value in node. Then we set it to undefined in case we are not in node, since
+            // in StringHashTable below, we check for undefined explicitly.
+            this[proto] = null;
+            this[proto] = undefined;
         }
+    }
+
+    export function createIntrinsicsObject<T>(): IIndexable<T> {
+        return new BlockIntrinsics<T>();
     }
 
     export interface IHashTable<T> {
@@ -48,7 +60,7 @@ module TypeScript {
 
     export class StringHashTable<T> implements IHashTable<T> {
         private itemCount = 0;
-        private table: IIndexable<T> = <any>(new BlockIntrinsics());
+        private table: IIndexable<T> = createIntrinsicsObject<T>();
 
         public getAllKeys(): string[] {
             var result: string[] = [];
@@ -107,7 +119,7 @@ module TypeScript {
             return true;
         }
 
-        public some(fn: (k: string, value: any, context: any) => void , context: any) {
+        public some(fn: (k: string, value: T, context: any) => void , context: any) {
             for (var k in this.table) {
                 var data = this.table[k];
 
@@ -128,6 +140,13 @@ module TypeScript {
         public lookup(key: string) : T {
             var data = this.table[key];
             return data === undefined ? null : data;
+        }
+
+        public remove(key: string): void {
+            if (this.table[key] !== undefined) {
+                this.table[key] = undefined;
+                this.itemCount--;
+            }
         }
     }
 

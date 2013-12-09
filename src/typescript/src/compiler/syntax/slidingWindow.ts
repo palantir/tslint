@@ -11,7 +11,7 @@ module TypeScript {
     export class SlidingWindow {
 
         // The number of valid items in window.
-        private windowCount: number = 0;
+        public windowCount: number = 0;
 
         // The *absolute* index in the *full* array of items the *window* array starts at.  i.e.
         // if there were 100 items, and window contains tokens [70, 80), then this value would be
@@ -21,7 +21,7 @@ module TypeScript {
         // The index in the window array that we're at. i.e. if there 100 items and 
         // window contains tokens [70, 80), and we're on item 75, then this value would be '5'.
         // Note: it is not absolute.  It is relative to the start of the window.
-        private currentRelativeItemIndex: number = 0;
+        public currentRelativeItemIndex: number = 0;
 
         // The number of pinned points there are.  As long as there is at least one  pinned point, we 
         // will not advance the start of the window array past the item marked by that pin point.

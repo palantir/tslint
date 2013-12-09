@@ -15,7 +15,7 @@
 
 ///<reference path='typescriptServices.ts' />
 
-module Services {
+module TypeScript.Services {
     export class BraceMatcher {
 
         // Given a script name and position in the script, return a pair of text range if the 

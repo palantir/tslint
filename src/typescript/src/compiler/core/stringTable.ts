@@ -31,7 +31,7 @@ module TypeScript.Collections {
 
         constructor(capacity: number) {
             var size = Hash.getPrime(capacity);
-            this.entries = ArrayUtilities.createArray(size, null);
+            this.entries = ArrayUtilities.createArray<StringTableEntry>(size, null);
         }
 
         public addCharArray(key: number[], start: number, len: number): string {
@@ -119,7 +119,7 @@ module TypeScript.Collections {
             var newSize = Hash.expandPrime(this.entries.length);
 
             var oldEntries = this.entries;
-            var newEntries: StringTableEntry[] = ArrayUtilities.createArray(newSize, null);
+            var newEntries: StringTableEntry[] = ArrayUtilities.createArray<StringTableEntry>(newSize, null);
 
             this.entries = newEntries;
 

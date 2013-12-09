@@ -1,67 +1,17 @@
 // Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
 // See LICENSE.txt in the project root for complete license information.
 
-///<reference path='..\typescript.ts' />
+///<reference path='..\references.ts' />
 
 module TypeScript {
-
-    export function getPathToDecl(decl: PullDecl): PullDecl[] {
-        if (!decl) {
-            return [];
-        }
-
-        var decls: PullDecl[] = decl.getParentPath();
-
-        if (decls) {
-            return decls;
-        }
-        else {
-            decls = [decl];
-        }
-
-        var parentDecl: PullDecl = decl.getParentDecl();
-
-        while (parentDecl) {
-            if (parentDecl && decls[decls.length - 1] != parentDecl && !(parentDecl.kind & PullElementKind.ObjectLiteral)) {
-                decls[decls.length] = parentDecl;
-            }
-            parentDecl = parentDecl.getParentDecl();
-        }
-
-        decls = decls.reverse();
-
-        // PULLREVIEW: Only cache in batch compilation scenarios?
-        decl.setParentPath(decls);
-
-        return decls;
-    }
-
     export class PullSymbolBinder {
+    
+        private declsBeingBound: number[] = [];
 
-        private functionTypeParameterCache: any = new BlockIntrinsics();
-
-        private findTypeParameterInCache(name: string) {
-            return <PullTypeParameterSymbol>this.functionTypeParameterCache[name];
+        constructor(private semanticInfoChain: SemanticInfoChain) {
         }
 
-        private addTypeParameterToCache(typeParameter: PullTypeParameterSymbol) {
-            this.functionTypeParameterCache[typeParameter.getName()] = typeParameter;
-        }
-
-        public resetTypeParameterCache() {
-            this.functionTypeParameterCache = new BlockIntrinsics();
-        }
-
-        public semanticInfo: SemanticInfo = null;
-
-        constructor(public semanticInfoChain: SemanticInfoChain) {
-        }
-
-        public setUnit(fileName: string) {
-            this.semanticInfo = this.semanticInfoChain.getUnit(fileName);
-        }
-
-        public getParent(decl: PullDecl, returnInstanceType = false): PullTypeSymbol {
+        private getParent(decl: PullDecl, returnInstanceType = false): PullTypeSymbol {
 
             var parentDecl = decl.getParentDecl();
 
@@ -71,7 +21,7 @@ module TypeScript {
 
             var parent = parentDecl.getSymbol();
 
-            if (!parent && parentDecl && !parentDecl.isBound()) {
+            if (!parent && parentDecl && !parentDecl.hasBeenBound()) {
                 this.bindDeclToPullSymbol(parentDecl);
             }
 
@@ -87,7 +37,7 @@ module TypeScript {
 
             if (parent) {
                 if (returnInstanceType && parent.isType() && parent.isContainer()) {
-                    var instanceSymbol = (<PullContainerTypeSymbol>parent).getInstanceSymbol();
+                    var instanceSymbol = (<PullContainerSymbol>parent).getInstanceSymbol();
 
                     if (instanceSymbol) {
                         return instanceSymbol.type;
@@ -100,14 +50,14 @@ module TypeScript {
             return null;
         }
 
-        public findDeclsInContext(startingDecl: PullDecl, declKind: PullElementKind, searchGlobally: boolean): PullDecl[] {
+        private findDeclsInContext(startingDecl: PullDecl, declKind: PullElementKind, searchGlobally: boolean): PullDecl[] {
 
             if (!searchGlobally) {
                 var parentDecl = startingDecl.getParentDecl();
                 return parentDecl.searchChildDecls(startingDecl.name, declKind);
             }
 
-            var contextSymbolPath: PullDecl[] = getPathToDecl(startingDecl);
+            var contextSymbolPath = startingDecl.getParentPath();
 
             // next, link back up to the enclosing context
             if (contextSymbolPath.length) {
@@ -122,73 +72,367 @@ module TypeScript {
 
                 return this.semanticInfoChain.findDecls(copyOfContextSymbolPath, declKind);
             }
+        }
 
-            // finally, try searching globally
-            return this.semanticInfoChain.findDecls([name], declKind);
+        // Called by all the bind methods when searching for existing symbols to reuse. Returns the symbol, or null if it does not exist.
+        private getExistingSymbol(decl: PullDecl, searchKind: PullElementKind, parent: PullTypeSymbol): PullSymbol {
+            var lookingForValue = (searchKind & PullElementKind.SomeValue) !== 0;
+            var lookingForType = (searchKind & PullElementKind.SomeType) !== 0;
+            var lookingForContainer = (searchKind & PullElementKind.SomeContainer) !== 0;
+            var name = decl.name;
+            if (parent) {
+                var isExported = (decl.flags & PullElementFlags.Exported) !== 0;
+
+                // First search for a nonmember
+                var prevSymbol: PullSymbol = null;
+                if (lookingForValue) {
+                    prevSymbol = parent.findContainedNonMember(name);
+                }
+                else if (lookingForType) {
+                    prevSymbol = parent.findContainedNonMemberType(name, searchKind);
+                }
+                else if (lookingForContainer) {
+                    prevSymbol = parent.findContainedNonMemberContainer(name, searchKind);
+                }
+                var prevIsExported = !prevSymbol; // We didn't find it as a local, so it must be exported if it exists
+                if (!prevSymbol) {
+                    if (lookingForValue) {
+                        prevSymbol = parent.findMember(name, /*lookInParent*/ false);
+                    }
+                    else if (lookingForType) {
+                        prevSymbol = parent.findNestedType(name, searchKind);
+                    }
+                    else if (lookingForContainer) {
+                        prevSymbol = parent.findNestedContainer(name, searchKind);
+                    }
+                }
+
+                // If they are both exported, then they should definitely merge
+                if (isExported && prevIsExported) {
+                    return prevSymbol; // This could actually be null, but that is ok because it means we are not merging with anything
+                }
+                if (prevSymbol) {
+                    // Check if they have the same parent (we use the LAST declaration to get the most positive answer on this)
+                    var prevDecls = prevSymbol.getDeclarations();
+                    var lastPrevDecl = prevDecls[prevDecls.length - 1];
+                    var parentDecl = decl.getParentDecl();
+                    var prevParentDecl = lastPrevDecl && lastPrevDecl.getParentDecl();
+                    if (parentDecl !== prevParentDecl) {
+                        // no merge
+                        return null;
+                    }
+
+                    // They share the same parent, so merge them
+                    return prevSymbol;
+                }
+            }
+            else {
+                var parentDecl = decl.getParentDecl();
+                if (parentDecl && parentDecl.kind === PullElementKind.Script) {
+                    return this.semanticInfoChain.findTopLevelSymbol(name, searchKind, decl);
+                }
+                else {
+                    // The decl is in a control block (catch/with) that has no parent symbol. Luckily this type of parent can only have one decl.
+                    var prevDecls = parentDecl && parentDecl.searchChildDecls(name, searchKind);
+                    return prevDecls[0] && prevDecls[0].getSymbol();
+                }
+            }
+
+            // Did not find a symbol
+            return null;
+        }
+
+        // Reports an error and returns false if exports do not match. Otherwise, returns true.
+        private checkThatExportsMatch(decl: PullDecl, prevSymbol: PullSymbol, reportError = true): boolean {
+            // Get export status of each (check against the last decl of the previous symbol)
+            var isExported = (decl.flags & PullElementFlags.Exported) !== 0;
+            var prevDecls = prevSymbol.getDeclarations();
+            var prevIsExported = (prevDecls[prevDecls.length - 1].flags & PullElementFlags.Exported) !== 0;
+            if ((isExported !== prevIsExported) && !prevSymbol.isSignature() && (decl.kind & PullElementKind.SomeSignature) == 0) {
+                if (reportError) {
+                    var ast = this.semanticInfoChain.getASTForDecl(decl);
+                    this.semanticInfoChain.addDiagnosticFromAST(
+                        ast, DiagnosticCode.All_declarations_of_merged_declaration_0_must_be_exported_or_not_exported, [decl.getDisplayName()]);
+                }
+                return false;
+            }
+
+            return true;
         }
 
         //
         // decl binding
         //
 
-        public bindModuleDeclarationToPullSymbol(moduleContainerDecl: PullDecl) {
+        private bindEnumDeclarationToPullSymbol(enumContainerDecl: PullDecl) {
+            // 1. Test for existing decl - if it exists, use its symbol
+            // 2. If no other decl exists, create a new symbol and use that one
 
+            var enumName = enumContainerDecl.name;
+
+            var enumContainerSymbol: PullContainerSymbol = null;
+            var enumInstanceSymbol: PullSymbol = null;
+            var moduleInstanceTypeSymbol: PullTypeSymbol = null;
+
+            var enumInstanceDecl: PullDecl = enumContainerDecl.getValueDecl();
+
+            var enumDeclKind = enumContainerDecl.kind;
+
+            var parent = this.getParent(enumContainerDecl);
+            var parentInstanceSymbol = this.getParent(enumContainerDecl, true);
+            var parentDecl = enumContainerDecl.getParentDecl();
+            var enumAST = <EnumDeclaration>this.semanticInfoChain.getASTForDecl(enumContainerDecl);
+
+            var isExported = enumContainerDecl.flags & PullElementFlags.Exported;
+            var isInitializedModule = (enumContainerDecl.flags & PullElementFlags.SomeInitializedModule) != 0;
+
+            var createdNewSymbol = false;
+
+            enumContainerSymbol = <PullContainerSymbol>this.getExistingSymbol(enumContainerDecl, PullElementKind.Enum, parent);
+
+            if (enumContainerSymbol) {
+                if (enumContainerSymbol.kind !== enumDeclKind) {
+                    // duplicate symbol error
+                    if (isInitializedModule) {
+                        this.semanticInfoChain.addDiagnosticFromAST(enumAST, DiagnosticCode.Duplicate_identifier_0, [enumContainerDecl.getDisplayName()]);
+                    }
+                    enumContainerSymbol = null;
+                }
+                else if (!this.checkThatExportsMatch(enumContainerDecl, enumContainerSymbol)) {
+                    enumContainerSymbol = null;
+                }
+            }
+
+            if (enumContainerSymbol) {
+                enumInstanceSymbol = enumContainerSymbol.getInstanceSymbol();
+            }
+            else {
+                enumContainerSymbol = new PullContainerSymbol(enumName, enumDeclKind);
+                createdNewSymbol = true;
+
+                if (!parent) {
+                    this.semanticInfoChain.cacheGlobalSymbol(enumContainerSymbol, PullElementKind.Enum);
+                }
+            }
+
+            // We add the declaration early so that during any recursive binding of other module decls with the same name, this declaration is present.
+            enumContainerSymbol.addDeclaration(enumContainerDecl);
+            enumContainerDecl.setSymbol(enumContainerSymbol);
+
+            this.semanticInfoChain.setSymbolForAST(enumAST.identifier, enumContainerSymbol);
+            this.semanticInfoChain.setSymbolForAST(enumAST, enumContainerSymbol);
+
+            if (!enumInstanceSymbol && isInitializedModule) {
+                // search for a complementary instance symbol first
+                var variableSymbol: PullSymbol = null;
+                if (parentInstanceSymbol) {
+                    if (isExported) {
+                        // We search twice because export visibility does not need to agree
+                        variableSymbol = parentInstanceSymbol.findMember(enumName, /*lookInParent*/ false);
+
+                        if (!variableSymbol) {
+                            variableSymbol = parentInstanceSymbol.findContainedNonMember(enumName);
+                        }
+                    }
+                    else {
+                        variableSymbol = parentInstanceSymbol.findContainedNonMember(enumName);
+
+                        if (!variableSymbol) {
+                            variableSymbol = parentInstanceSymbol.findMember(enumName, /*lookInParent*/ false);
+                        }
+                    }
+
+                    if (variableSymbol) {
+                        var declarations = variableSymbol.getDeclarations();
+
+                        if (declarations.length) {
+                            var variableSymbolParentDecl = declarations[0].getParentDecl();
+
+                            if (parentDecl !== variableSymbolParentDecl) {
+                                variableSymbol = null;
+                            }
+                        }
+                    }
+                }
+                else if (!(enumContainerDecl.flags & PullElementFlags.Exported)) {
+                    // Search locally to this file for a previous declaration that's suitable for augmentation
+                    var siblingDecls = parentDecl.getChildDecls();
+                    var augmentedDecl: PullDecl = null;
+
+                    for (var i = 0; i < siblingDecls.length; i++) {
+                        if (siblingDecls[i] == enumContainerDecl) {
+                            break;
+                        }
+
+                        if ((siblingDecls[i].name == enumName) && (siblingDecls[i].kind & PullElementKind.SomeValue)) {
+                            augmentedDecl = siblingDecls[i];
+                            break;
+                        }
+                    }
+
+                    if (augmentedDecl) {
+                        variableSymbol = augmentedDecl.getSymbol();
+
+                        if (variableSymbol) {
+                            if (variableSymbol.isContainer()) {
+                                variableSymbol = (<PullContainerSymbol>variableSymbol).getInstanceSymbol();
+                            }
+                            else if (variableSymbol && variableSymbol.isType()) {
+                                variableSymbol = (<PullTypeSymbol>variableSymbol).getConstructorMethod();
+                            }
+                        }
+                    }
+                }
+
+                // The instance symbol is further set up in bindVariableDeclaration
+                if (variableSymbol) {
+                    enumInstanceSymbol = variableSymbol;
+                    moduleInstanceTypeSymbol = variableSymbol.type;
+                }
+                else {
+                    enumInstanceSymbol = new PullSymbol(enumName, PullElementKind.Variable);
+                }
+
+                enumContainerSymbol.setInstanceSymbol(enumInstanceSymbol);
+
+                if (!moduleInstanceTypeSymbol) {
+                    moduleInstanceTypeSymbol = new PullTypeSymbol("", PullElementKind.ObjectType);
+                    enumInstanceSymbol.type = moduleInstanceTypeSymbol;
+                }
+
+                moduleInstanceTypeSymbol.addDeclaration(enumContainerDecl);
+
+                if (!moduleInstanceTypeSymbol.getAssociatedContainerType()) {
+                    moduleInstanceTypeSymbol.setAssociatedContainerType(enumContainerSymbol);
+                }
+            }
+
+            // If we have an enum with more than one declaration, then this enum's first element
+            // must have an initializer.
+            var moduleDeclarations = enumContainerSymbol.getDeclarations();
+
+            if (moduleDeclarations.length > 1 && enumAST.enumElements.nonSeparatorCount() > 0) {
+                var multipleEnums = ArrayUtilities.where(moduleDeclarations, d => d.kind === PullElementKind.Enum).length > 1;
+                if (multipleEnums) {
+                    var firstVariable = <EnumElement>enumAST.enumElements.nonSeparatorAt(0);
+                    if (!firstVariable.equalsValueClause) {
+                        this.semanticInfoChain.addDiagnosticFromAST(
+                            firstVariable, DiagnosticCode.Enums_with_multiple_declarations_must_provide_an_initializer_for_the_first_enum_element, null);
+                    }
+                }
+            }
+
+            if (createdNewSymbol && parent) {
+                if (enumContainerDecl.flags & PullElementFlags.Exported) {
+                    parent.addEnclosedMemberType(enumContainerSymbol);
+                }
+                else {
+                    parent.addEnclosedNonMemberType(enumContainerSymbol);
+                }
+            }
+
+            this.bindEnumIndexerDeclsToPullSymbols(enumContainerDecl, enumContainerSymbol);
+
+            var valueDecl = enumContainerDecl.getValueDecl();
+
+            if (valueDecl) {
+                valueDecl.ensureSymbolIsBound();
+            }
+
+            var otherDecls = this.findDeclsInContext(enumContainerDecl, enumContainerDecl.kind, true);
+
+            if (otherDecls && otherDecls.length) {
+                for (var i = 0; i < otherDecls.length; i++) {
+                    otherDecls[i].ensureSymbolIsBound();
+                }
+            }
+        }
+
+        private bindEnumIndexerDeclsToPullSymbols(enumContainerDecl: PullDecl, enumContainerSymbol: PullContainerSymbol): void {
+            var indexSigDecl = enumContainerDecl.getChildDecls().filter(decl => decl.kind == PullElementKind.IndexSignature)[0];
+            var indexParamDecl = indexSigDecl.getChildDecls()[0];
+
+            var syntheticIndexerParameterSymbol = new PullSymbol(indexParamDecl.name, PullElementKind.Parameter);
+
+            syntheticIndexerParameterSymbol.type = this.semanticInfoChain.numberTypeSymbol;
+            syntheticIndexerParameterSymbol.setResolved();
+
+            var syntheticIndexerSignatureSymbol = new PullSignatureSymbol(PullElementKind.IndexSignature);
+            syntheticIndexerSignatureSymbol.addParameter(syntheticIndexerParameterSymbol);
+            syntheticIndexerSignatureSymbol.returnType = this.semanticInfoChain.stringTypeSymbol;
+            syntheticIndexerSignatureSymbol.setResolved();
+
+            var enumContainerInstanceTypeSymbol = enumContainerSymbol.getInstanceSymbol().type;
+            enumContainerInstanceTypeSymbol.addIndexSignature(syntheticIndexerSignatureSymbol);
+
+            indexSigDecl.setSignatureSymbol(syntheticIndexerSignatureSymbol);
+            indexParamDecl.setSymbol(syntheticIndexerParameterSymbol);
+
+            syntheticIndexerSignatureSymbol.addDeclaration(indexSigDecl);
+            syntheticIndexerParameterSymbol.addDeclaration(indexParamDecl);
+        }
+
+        private bindModuleDeclarationToPullSymbol(moduleContainerDecl: PullDecl) {
             // 1. Test for existing decl - if it exists, use its symbol
             // 2. If no other decl exists, create a new symbol and use that one
 
             var modName = moduleContainerDecl.name;
 
-            var moduleContainerTypeSymbol: PullContainerTypeSymbol = null;
+            var moduleContainerTypeSymbol: PullContainerSymbol = null;
             var moduleInstanceSymbol: PullSymbol = null;
             var moduleInstanceTypeSymbol: PullTypeSymbol = null;
-
-            var moduleInstanceDecl: PullDecl = moduleContainerDecl.getValueDecl();
 
             var moduleKind = moduleContainerDecl.kind;
 
             var parent = this.getParent(moduleContainerDecl);
             var parentInstanceSymbol = this.getParent(moduleContainerDecl, true);
             var parentDecl = moduleContainerDecl.getParentDecl();
-            var moduleAST = <ModuleDeclaration>this.semanticInfo.getASTForDecl(moduleContainerDecl);
+            var moduleNameAST = this.semanticInfoChain.getASTForDecl(moduleContainerDecl);
+            var moduleDeclAST: AST = getEnclosingModuleDeclaration(moduleNameAST);
+            if (!moduleDeclAST) {
+                Debug.assert(moduleContainerDecl.kind === PullElementKind.DynamicModule);
+                Debug.assert(moduleNameAST.kind() === SyntaxKind.SourceUnit);
+                // This is the module decl for the top level synthesized external module.
+                moduleDeclAST = moduleNameAST;
+            }
 
-            var isExported = moduleContainerDecl.flags & PullElementFlags.Exported;
-            var isEnum = (moduleKind & PullElementKind.Enum) != 0;
-            var searchKind = isEnum ? PullElementKind.Enum : PullElementKind.SomeContainer;
+            var isExported = hasFlag(moduleContainerDecl.flags, PullElementFlags.Exported);
+            var searchKind = PullElementKind.SomeContainer;
             var isInitializedModule = (moduleContainerDecl.flags & PullElementFlags.SomeInitializedModule) != 0;
+
+            if (parent && moduleKind == PullElementKind.DynamicModule) {
+                // Dynamic modules cannot be parented
+                this.semanticInfoChain.addDiagnosticFromAST(
+                    moduleNameAST, DiagnosticCode.Ambient_external_module_declaration_must_be_defined_in_global_context, null);
+            }
 
             var createdNewSymbol = false;
 
-            if (parent) {
-                if (isExported) {
-                    moduleContainerTypeSymbol = <PullContainerTypeSymbol>parent.findNestedType(modName, searchKind);
-                }
-                else {
-                    moduleContainerTypeSymbol = <PullContainerTypeSymbol>parent.findContainedNonMemberType(modName);
+            moduleContainerTypeSymbol = <PullContainerSymbol>this.getExistingSymbol(moduleContainerDecl, searchKind, parent);
 
-                    if (moduleContainerTypeSymbol && !(moduleContainerTypeSymbol.kind & searchKind)) {
-                        moduleContainerTypeSymbol = null;
+            if (moduleContainerTypeSymbol) {
+                if (moduleContainerTypeSymbol.kind !== moduleKind) {
+                    // duplicate symbol error
+                    if (isInitializedModule) {
+                        this.semanticInfoChain.addDiagnosticFromAST(moduleNameAST, DiagnosticCode.Duplicate_identifier_0, [moduleContainerDecl.getDisplayName()]);
                     }
-                }
-            }
-            else if (!isExported || moduleContainerDecl.kind === PullElementKind.DynamicModule) {
-                moduleContainerTypeSymbol = <PullContainerTypeSymbol>this.semanticInfoChain.findTopLevelSymbol(modName, searchKind, this.semanticInfo.getPath());
-            }
 
-            if (moduleContainerTypeSymbol && moduleContainerTypeSymbol.kind !== moduleKind) {
-                // duplicate symbol error
-                if (isInitializedModule) {
-                    moduleContainerDecl.addDiagnostic(
-                        new Diagnostic(this.semanticInfo.getPath(), moduleAST.minChar, moduleAST.getLength(), DiagnosticCode.Duplicate_identifier_0, [moduleContainerDecl.getDisplayName()]));
+                    moduleContainerTypeSymbol = null;
                 }
-
-                moduleContainerTypeSymbol = null;
+                else if (moduleKind == PullElementKind.DynamicModule) {
+                    // Dynamic modules cannot be reopened.
+                    this.semanticInfoChain.addDiagnosticFromAST(moduleNameAST, DiagnosticCode.Ambient_external_module_declaration_cannot_be_reopened);
+                }
+                else if (!this.checkThatExportsMatch(moduleContainerDecl, moduleContainerTypeSymbol)) {
+                    moduleContainerTypeSymbol = null;
+                }
             }
 
             if (moduleContainerTypeSymbol) {
                 moduleInstanceSymbol = moduleContainerTypeSymbol.getInstanceSymbol();
             }
             else {
-                moduleContainerTypeSymbol = new PullContainerTypeSymbol(modName, moduleKind);
+                moduleContainerTypeSymbol = new PullContainerSymbol(modName, moduleKind);
                 createdNewSymbol = true;
 
                 if (!parent) {
@@ -196,80 +440,89 @@ module TypeScript {
                 }
             }
 
-            if (!moduleInstanceSymbol && isInitializedModule) {
+            // We add the declaration early so that during any recursive binding of other module decls with the same name, this declaration is present.
+            moduleContainerTypeSymbol.addDeclaration(moduleContainerDecl);
+            moduleContainerDecl.setSymbol(moduleContainerTypeSymbol);
 
+            this.semanticInfoChain.setSymbolForAST(moduleNameAST, moduleContainerTypeSymbol);
+            this.semanticInfoChain.setSymbolForAST(moduleDeclAST, moduleContainerTypeSymbol);
+
+            if (!moduleInstanceSymbol && isInitializedModule) {
                 // search for a complementary instance symbol first
                 var variableSymbol: PullSymbol = null;
-                if (!isEnum) {
-                    if (parentInstanceSymbol) {
-                        if (isExported) {
-                            // We search twice because export visibility does not need to agree
-                            variableSymbol = parentInstanceSymbol.findMember(modName, false);
+                if (parentInstanceSymbol) {
+                    if (isExported) {
+                        // We search twice because export visibility does not need to agree
+                        variableSymbol = parentInstanceSymbol.findMember(modName, /*lookInParent*/ false);
 
-                            if (!variableSymbol) {
-                                variableSymbol = parentInstanceSymbol.findContainedNonMember(modName);
-                            }
-                        }
-                        else {
+                        if (!variableSymbol) {
                             variableSymbol = parentInstanceSymbol.findContainedNonMember(modName);
-
-                            if (!variableSymbol) {
-                                variableSymbol = parentInstanceSymbol.findMember(modName, false);
-                            }
                         }
-
-                        if (variableSymbol) {
-                            var declarations = variableSymbol.getDeclarations();
-
-                            if (declarations.length) {
-                                var variableSymbolParentDecl = declarations[0].getParentDecl();
-
-                                if (parentDecl !== variableSymbolParentDecl) {
-                                    variableSymbol = null;
-                                }
-                            }
-                        }
-                    }
-                    else if (!(moduleContainerDecl.flags & PullElementFlags.Exported)) {
-                        // Search locally to this file for a previous declaration that's suitable for augmentation
-                        var siblingDecls = parentDecl.getChildDecls();
-                        var augmentedDecl: PullDecl = null;
-
-                        for (var i = 0; i < siblingDecls.length; i++) {
-                            if (siblingDecls[i] == moduleContainerDecl) {
-                                break;
-                            }
-
-                            if ((siblingDecls[i].name == modName) && (siblingDecls[i].kind & (PullElementKind.Class | PullElementKind.SomeFunction))) {
-                                augmentedDecl = siblingDecls[i];
-                                break;
-                            }
-                        }
-
-                        if (augmentedDecl) {
-                            variableSymbol = augmentedDecl.getSymbol();
-
-                            if (variableSymbol && variableSymbol.isType()) {
-                                variableSymbol = (<PullTypeSymbol>variableSymbol).getConstructorMethod();
-                            }
-                        }
-                    }
-                }
-
-                if (variableSymbol) {
-                    var prevKind = variableSymbol.kind;
-                    var acceptableRedeclaration = (prevKind == PullElementKind.Function) || (prevKind == PullElementKind.ConstructorMethod) || variableSymbol.hasFlag(PullElementFlags.ImplicitVariable);
-
-                    if (acceptableRedeclaration) {
-                        moduleInstanceTypeSymbol = variableSymbol.type;
                     }
                     else {
-                        variableSymbol = null;
+                        variableSymbol = parentInstanceSymbol.findContainedNonMember(modName);
+
+                        if (!variableSymbol) {
+                            variableSymbol = parentInstanceSymbol.findMember(modName, /*lookInParent*/ false);
+                        }
+                    }
+
+                    if (variableSymbol) {
+                        var declarations = variableSymbol.getDeclarations();
+
+                        if (declarations.length) {
+                            var variableSymbolParentDecl = declarations[0].getParentDecl();
+
+                            if (parentDecl !== variableSymbolParentDecl) {
+                                variableSymbol = null;
+                            }
+                        }
                     }
                 }
+                else if (!isExported) {
+                    // Search locally to this file for a declaration that's suitable for augmentation.
+                    // Note: we have to check all declarations because it may be hte case (due to
+                    // recursive binding), that a later module gets bound before us.  
+                    var siblingDecls = parentDecl.getChildDecls();
+
+                    for (var i = 0; i < siblingDecls.length; i++) {
+                        var sibling = siblingDecls[i];
+                        if (sibling !== moduleContainerDecl &&
+                            sibling.name === modName &&
+                            hasFlag(sibling.kind, PullElementKind.SomeValue)) {
+
+                            // IMPORTANT: We don't want to just call sibling.getSymbol() here.  
+                            // That would force the sibling to get bound.  Something we don't want
+                            // to do while binding ourselves (to avoid recursion issues).
+                            if (sibling.hasSymbol()) {
+                                variableSymbol = sibling.getSymbol();
+                                if (variableSymbol.isContainer()) {
+                                    variableSymbol = (<PullContainerSymbol>variableSymbol).getInstanceSymbol();
+                                }
+                                else if (variableSymbol && variableSymbol.isType()) {
+                                    variableSymbol = (<PullTypeSymbol>variableSymbol).getConstructorMethod();
+                                }
+
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                // The instance symbol is further set up in bindVariableDeclaration
+                if (variableSymbol) {
+                    moduleInstanceSymbol = variableSymbol;
+                    moduleInstanceTypeSymbol = variableSymbol.type;
+                }
+                else {
+                    moduleInstanceSymbol = new PullSymbol(modName, PullElementKind.Variable);
+                }
+
+                moduleContainerTypeSymbol.setInstanceSymbol(moduleInstanceSymbol);
 
                 if (!moduleInstanceTypeSymbol) {
                     moduleInstanceTypeSymbol = new PullTypeSymbol("", PullElementKind.ObjectType);
+                    moduleInstanceSymbol.type = moduleInstanceTypeSymbol;
                 }
 
                 moduleInstanceTypeSymbol.addDeclaration(moduleContainerDecl);
@@ -277,71 +530,38 @@ module TypeScript {
                 if (!moduleInstanceTypeSymbol.getAssociatedContainerType()) {
                     moduleInstanceTypeSymbol.setAssociatedContainerType(moduleContainerTypeSymbol);
                 }
-
-                // The instance symbol is further set up in bindVariableDeclaration
-                // (We add the declaration there, invalidate previous decls on edit and add the instance symbol to the parent)
-                if (variableSymbol) {
-                    moduleInstanceSymbol = variableSymbol;
-                }
-                else {
-                    moduleInstanceSymbol = new PullSymbol(modName, PullElementKind.Variable);
-                    moduleInstanceSymbol.type = moduleInstanceTypeSymbol;
-                }
-
-                moduleContainerTypeSymbol.setInstanceSymbol(moduleInstanceSymbol);
             }
-
-            moduleContainerTypeSymbol.addDeclaration(moduleContainerDecl);
-            moduleContainerDecl.setSymbol(moduleContainerTypeSymbol);
-
-            this.semanticInfo.setSymbolForAST(moduleAST.name, moduleContainerTypeSymbol);
-            this.semanticInfo.setSymbolForAST(moduleAST, moduleContainerTypeSymbol);
 
             // If we have an enum with more than one declaration, then this enum's first element
             // must have an initializer.
             var moduleDeclarations = moduleContainerTypeSymbol.getDeclarations();
 
-            if (isEnum && moduleDeclarations.length > 1 && moduleAST.members.members.length > 0) {
-                var multipleEnums = ArrayUtilities.where(moduleDeclarations, d => d.kind === PullElementKind.Enum).length > 1;
-                if (multipleEnums) {
-                    var firstVariable = <VariableStatement>moduleAST.members.members[0];
-                    var firstVariableDeclarator = <VariableDeclarator>firstVariable.declaration.declarators.members[0];
-                    if (!firstVariableDeclarator.init) {
-                        moduleContainerDecl.addDiagnostic(new Diagnostic(
-                            this.semanticInfo.getPath(), firstVariableDeclarator.minChar, firstVariableDeclarator.getLength(), DiagnosticCode.Enums_with_multiple_declarations_must_provide_an_initializer_for_the_first_enum_element, null));
-                    }
-                }
-            }
-
             if (createdNewSymbol) {
                 if (parent) {
                     if (moduleContainerDecl.flags & PullElementFlags.Exported) {
-                        parent.addEnclosedMemberType(moduleContainerTypeSymbol);
+                        parent.addEnclosedMemberContainer(moduleContainerTypeSymbol);
                     }
                     else {
-                        parent.addEnclosedNonMemberType(moduleContainerTypeSymbol);
+                        parent.addEnclosedNonMemberContainer(moduleContainerTypeSymbol);
                     }
                 }
-            }
-
-            // if it's an enum, freshen the index signature
-            if (isEnum) {
-
-                moduleInstanceTypeSymbol = moduleContainerTypeSymbol.getInstanceSymbol().type;
-
-                var enumIndexSignature = new PullSignatureSymbol(PullElementKind.IndexSignature);
-                var enumIndexParameterSymbol = new PullSymbol("x", PullElementKind.Parameter);
-                enumIndexParameterSymbol.type = this.semanticInfoChain.numberTypeSymbol;
-                enumIndexSignature.addParameter(enumIndexParameterSymbol);
-                enumIndexSignature.returnType = this.semanticInfoChain.stringTypeSymbol;
-
-                moduleInstanceTypeSymbol.addIndexSignature(enumIndexSignature);
             }
 
             var valueDecl = moduleContainerDecl.getValueDecl();
 
             if (valueDecl) {
                 valueDecl.ensureSymbolIsBound();
+                // We associate the value decl to the module instance symbol. This should have
+                // already been achieved by ensureSymbolIsBound, but if bindModuleDeclarationToPullSymbol
+                // was called recursively while in the middle of binding the value decl, the cycle
+                // will be short-circuited. With a more organized binding pattern, this situation
+                // shouldn't be possible.
+                if (!valueDecl.hasSymbol()) {
+                    valueDecl.setSymbol(moduleInstanceSymbol);
+                    if (!moduleInstanceSymbol.hasDeclaration(valueDecl)) {
+                        moduleInstanceSymbol.addDeclaration(valueDecl);
+                    }
+                }
             }
 
             var otherDecls = this.findDeclsInContext(moduleContainerDecl, moduleContainerDecl.kind, true);
@@ -354,10 +574,10 @@ module TypeScript {
         }
 
         // aliases
-        public bindImportDeclaration(importDeclaration: PullDecl) {
+        private bindImportDeclaration(importDeclaration: PullDecl) {
             var declFlags = importDeclaration.flags;
             var declKind = importDeclaration.kind;
-            var importDeclAST = <VariableDeclarator>this.semanticInfo.getASTForDecl(importDeclaration);
+            var importDeclAST = <VariableDeclarator>this.semanticInfoChain.getASTForDecl(importDeclaration);
 
             var isExported = false;
             var importSymbol: PullTypeAliasSymbol = null;
@@ -365,36 +585,14 @@ module TypeScript {
             var parentHadSymbol = false;
             var parent = this.getParent(importDeclaration);
 
-            if (parent) {
-                importSymbol = <PullTypeAliasSymbol>parent.findMember(declName, false);
-
-                if (!importSymbol) {
-                    importSymbol = <PullTypeAliasSymbol>parent.findContainedNonMemberType(declName);
-
-                    if (importSymbol) {
-                        var declarations = importSymbol.getDeclarations();
-
-                        if (declarations.length) {
-                            var importSymbolParent = declarations[0].getParentDecl();
-
-                            if (importSymbolParent !== importDeclaration.getParentDecl()) {
-                                importSymbol = null;
-                            }
-                        }
-                    }
-                }
-            }
-            else if (!(importDeclaration.flags & PullElementFlags.Exported)) {
-                importSymbol = <PullTypeAliasSymbol>this.semanticInfoChain.findTopLevelSymbol(declName, PullElementKind.SomeContainer, this.semanticInfo.getPath());
-            }
+            importSymbol = <PullTypeAliasSymbol>this.getExistingSymbol(importDeclaration, PullElementKind.SomeContainer, parent);
 
             if (importSymbol) {
                 parentHadSymbol = true;
             }
 
             if (importSymbol) {
-                importDeclaration.addDiagnostic(
-                    new Diagnostic(this.semanticInfo.getPath(), importDeclAST.minChar, importDeclAST.getLength(), DiagnosticCode.Duplicate_identifier_0, [importDeclaration.getDisplayName()]));
+                this.semanticInfoChain.addDiagnosticFromAST(importDeclAST, DiagnosticCode.Duplicate_identifier_0, [importDeclaration.getDisplayName()]);
                 importSymbol = null;
             }
 
@@ -409,21 +607,21 @@ module TypeScript {
             importSymbol.addDeclaration(importDeclaration);
             importDeclaration.setSymbol(importSymbol);
 
-            this.semanticInfo.setSymbolForAST(importDeclAST, importSymbol);
+            this.semanticInfoChain.setSymbolForAST(importDeclAST, importSymbol);
 
             if (parent && !parentHadSymbol) {
 
                 if (declFlags & PullElementFlags.Exported) {
-                    parent.addEnclosedMemberType(importSymbol);
+                    parent.addEnclosedMemberContainer(importSymbol);
                 }
                 else {
-                    parent.addEnclosedNonMemberType(importSymbol);
+                    parent.addEnclosedNonMemberContainer(importSymbol);
                 }
             }
         }
 
         // classes
-        public bindClassDeclarationToPullSymbol(classDecl: PullDecl) {
+        private bindClassDeclarationToPullSymbol(classDecl: PullDecl) {
 
             var className = classDecl.name;
             var classSymbol: PullTypeSymbol = null;
@@ -431,49 +629,18 @@ module TypeScript {
             var constructorSymbol: PullSymbol = null;
             var constructorTypeSymbol: PullTypeSymbol = null;
 
-            var classAST = <ClassDeclaration>this.semanticInfo.getASTForDecl(classDecl);
+            var classAST = <ClassDeclaration>this.semanticInfoChain.getASTForDecl(classDecl);
 
             var parent = this.getParent(classDecl);
             var parentDecl = classDecl.getParentDecl();
             var isExported = classDecl.flags & PullElementFlags.Exported;
             var isGeneric = false;
 
-            if (parent) {
-                if (isExported) {
-                    classSymbol = parent.findNestedType(className);
+            classSymbol = <PullTypeSymbol>this.getExistingSymbol(classDecl, PullElementKind.SomeType, parent);
 
-                    if (!classSymbol) {
-                        classSymbol = <PullTypeSymbol>parent.findMember(className, false);
-                    }
-                }
-                else {
-                    classSymbol = <PullTypeSymbol>parent.findContainedNonMemberType(className);
-
-                    if (classSymbol && (classSymbol.kind & PullElementKind.Class)) {
-
-                        var declarations = classSymbol.getDeclarations();
-
-                        if (declarations.length) {
-
-                            var classSymbolParentDecl = declarations[0].getParentDecl();
-
-                            if (classSymbolParentDecl !== parentDecl) {
-                                classSymbol = null;
-                            }
-                        }
-                    }
-                    else {
-                        classSymbol = null;
-                    }
-                }
-            }
-            else {
-                classSymbol = <PullTypeSymbol>this.semanticInfoChain.findTopLevelSymbol(className, PullElementKind.Class, this.semanticInfo.getPath());
-            }
-
-            if (classSymbol) {
-                classDecl.addDiagnostic(
-                    new Diagnostic(this.semanticInfo.getPath(), classAST.minChar, classAST.getLength(), DiagnosticCode.Duplicate_identifier_0, [classDecl.getDisplayName()]));
+            // Only error if it is an interface (for classes and enums we will error when we bind the implicit variable)
+            if (classSymbol && classSymbol.kind === PullElementKind.Interface) {
+                this.semanticInfoChain.addDiagnosticFromAST(classAST, DiagnosticCode.Duplicate_identifier_0, [classDecl.getDisplayName()]);
                 classSymbol = null;
             }
 
@@ -489,8 +656,8 @@ module TypeScript {
 
             classDecl.setSymbol(classSymbol);
 
-            this.semanticInfo.setSymbolForAST(classAST.name, classSymbol);
-            this.semanticInfo.setSymbolForAST(classAST, classSymbol);
+            this.semanticInfoChain.setSymbolForAST(classAST.identifier, classSymbol);
+            this.semanticInfoChain.setSymbolForAST(classAST, classSymbol);
 
             if (parent) {
                 if (classDecl.flags & PullElementFlags.Exported) {
@@ -501,23 +668,30 @@ module TypeScript {
                 }
             }
 
-            this.resetTypeParameterCache();
-
-            // create the default constructor symbol, if necessary
-
-            // even if we've already tried to set these, we want to try again after we've walked the class members
             constructorSymbol = classSymbol.getConstructorMethod();
             constructorTypeSymbol = constructorSymbol ? constructorSymbol.type : null;
 
             if (!constructorSymbol) {
-                constructorSymbol = new PullSymbol(className, PullElementKind.ConstructorMethod);
-                constructorTypeSymbol = new PullTypeSymbol("", PullElementKind.ConstructorType);
+                // First, try to find a sibling value decl that is already bound. If there is one, reuse it.
+                var siblingValueDecls: PullDecl[] = null;
+                if (parentDecl) {
+                    siblingValueDecls = parentDecl.searchChildDecls(className, PullElementKind.SomeValue);
+                    // The first decl should have the right symbol
+                    if (siblingValueDecls && siblingValueDecls[0] && siblingValueDecls[0].hasSymbol()) {
+                        constructorSymbol = siblingValueDecls[0].getSymbol();
+                    }
+                }
 
-                constructorSymbol.setIsSynthesized();
+                if (constructorSymbol) {
+                    constructorTypeSymbol = constructorSymbol.type;
+                } else {
+                    constructorSymbol = new PullSymbol(className, PullElementKind.ConstructorMethod);
+                    constructorTypeSymbol = new PullTypeSymbol("", PullElementKind.ConstructorType);
+                    constructorSymbol.setIsSynthesized();
+                    constructorSymbol.type = constructorTypeSymbol;
+                }
 
-                constructorSymbol.type = constructorTypeSymbol;
                 classSymbol.setConstructorMethod(constructorSymbol);
-
                 classSymbol.setHasDefaultConstructor();
             }
 
@@ -533,65 +707,60 @@ module TypeScript {
 
             var typeParameters = classDecl.getTypeParameters();
             var typeParameter: PullTypeParameterSymbol;
-            var typeParameterDecls: PullDecl[] = null;
 
             // PULLREVIEW: Now that we clean type parameters, searching is redundant
             for (var i = 0; i < typeParameters.length; i++) {
 
                 typeParameter = classSymbol.findTypeParameter(typeParameters[i].name);
 
-                if (!typeParameter) {
-                    typeParameter = new PullTypeParameterSymbol(typeParameters[i].name, false);
-
-                    classSymbol.addTypeParameter(typeParameter);
-                    constructorTypeSymbol.addConstructorTypeParameter(typeParameter);
-                }
-                else {
-                    typeParameterDecls = typeParameter.getDeclarations();
-
-                    var typeParameterAST = this.semanticInfoChain.getASTForDecl(typeParameterDecls[0]);
-                    classDecl.addDiagnostic(
-                        new Diagnostic(this.semanticInfo.getPath(), typeParameterAST.minChar, typeParameterAST.getLength(), DiagnosticCode.Duplicate_identifier_0, [typeParameter.getName()]));
+                if (typeParameter != null) {
+                    var typeParameterAST = this.semanticInfoChain.getASTForDecl(typeParameter.getDeclarations()[0]);
+                    this.semanticInfoChain.addDiagnosticFromAST(typeParameterAST, DiagnosticCode.Duplicate_identifier_0, [typeParameter.getName()]);
                 }
 
+                typeParameter = new PullTypeParameterSymbol(typeParameters[i].name, /*_isFunctionTypeParameter*/ false);
+
+                classSymbol.addTypeParameter(typeParameter);
+                constructorTypeSymbol.addConstructorTypeParameter(typeParameter);
                 typeParameter.addDeclaration(typeParameters[i]);
                 typeParameters[i].setSymbol(typeParameter);
             }
-
 
             var valueDecl = classDecl.getValueDecl();
 
             if (valueDecl) {
                 valueDecl.ensureSymbolIsBound();
             }
+
+            // Create the constructorTypeSymbol
+            this.bindStaticPrototypePropertyOfClass(classSymbol, constructorTypeSymbol);
         }
 
         // interfaces
-        public bindInterfaceDeclarationToPullSymbol(interfaceDecl: PullDecl) {
+        private bindInterfaceDeclarationToPullSymbol(interfaceDecl: PullDecl) {
 
             // 1. Test for existing decl - if it exists, use its symbol
             // 2. If no other decl exists, create a new symbol and use that one
             var interfaceName = interfaceDecl.name;
             var interfaceSymbol: PullTypeSymbol = null;
 
-            var interfaceAST = <TypeDeclaration>this.semanticInfo.getASTForDecl(interfaceDecl);
+            var interfaceAST = <InterfaceDeclaration>this.semanticInfoChain.getASTForDecl(interfaceDecl);
             var createdNewSymbol = false;
             var parent = this.getParent(interfaceDecl);
 
             // We're not yet ready to support interfaces augmenting classes (or vice versa)
             var acceptableSharedKind = PullElementKind.Interface; // | PullElementKind.Class | PullElementKind.Enum;
 
-            if (parent) {
-                interfaceSymbol = parent.findNestedType(interfaceName, PullElementKind.SomeType);
-            }
-            else if (!(interfaceDecl.flags & PullElementFlags.Exported)) {
-                interfaceSymbol = <PullTypeSymbol>this.semanticInfoChain.findTopLevelSymbol(interfaceName, PullElementKind.Interface, this.semanticInfo.getPath());
-            }
+            interfaceSymbol = <PullTypeSymbol>this.getExistingSymbol(interfaceDecl, PullElementKind.SomeType, parent);
 
-            if (interfaceSymbol && !(interfaceSymbol.kind & acceptableSharedKind)) {
-                interfaceDecl.addDiagnostic(
-                    new Diagnostic(this.semanticInfo.getPath(), interfaceAST.minChar, interfaceAST.getLength(), DiagnosticCode.Duplicate_identifier_0, [interfaceDecl.getDisplayName()]));
-                interfaceSymbol = null;
+            if (interfaceSymbol) {
+                if (!(interfaceSymbol.kind & acceptableSharedKind)) {
+                    this.semanticInfoChain.addDiagnosticFromAST(interfaceAST, DiagnosticCode.Duplicate_identifier_0, [interfaceDecl.getDisplayName()]);
+                    interfaceSymbol = null;
+                }
+                else if (!this.checkThatExportsMatch(interfaceDecl, interfaceSymbol)) {
+                    interfaceSymbol = null;
+                }
             }
 
             if (!interfaceSymbol) {
@@ -618,8 +787,6 @@ module TypeScript {
                 }
             }
 
-            this.resetTypeParameterCache();
-
             var typeParameters = interfaceDecl.getTypeParameters();
             var typeParameter: PullTypeParameterSymbol;
             var typeParameterDecls: PullDecl[] = null;
@@ -630,7 +797,7 @@ module TypeScript {
                 typeParameter = interfaceSymbol.findTypeParameter(typeParameters[i].name);
 
                 if (!typeParameter) {
-                    typeParameter = new PullTypeParameterSymbol(typeParameters[i].name, false);
+                    typeParameter = new PullTypeParameterSymbol(typeParameters[i].name, /*_isFunctionTypeParameter*/ false);
 
                     interfaceSymbol.addTypeParameter(typeParameter);
                 }
@@ -644,8 +811,7 @@ module TypeScript {
 
                         if (typeParameterDeclParent && typeParameterDeclParent === interfaceDecl) {
                             var typeParameterAST = this.semanticInfoChain.getASTForDecl(typeParameterDecls[0]);
-                            interfaceDecl.addDiagnostic(
-                                new Diagnostic(this.semanticInfo.getPath(), typeParameterAST.minChar, typeParameterAST.getLength(), DiagnosticCode.Duplicate_identifier_0, [typeParameter.getName()]));
+                            this.semanticInfoChain.addDiagnosticFromAST(typeParameterAST, DiagnosticCode.Duplicate_identifier_0, [typeParameter.getName()]);
 
                             break;
                         }
@@ -665,93 +831,64 @@ module TypeScript {
             }
         }
 
-        public bindObjectTypeDeclarationToPullSymbol(objectDecl: PullDecl) {
-            var objectSymbolAST: AST = this.semanticInfo.getASTForDecl(objectDecl);
+        private bindObjectTypeDeclarationToPullSymbol(objectDecl: PullDecl) {
+            var objectSymbolAST: AST = this.semanticInfoChain.getASTForDecl(objectDecl);
 
             var objectSymbol = new PullTypeSymbol("", PullElementKind.ObjectType);
 
             objectSymbol.addDeclaration(objectDecl);
             objectDecl.setSymbol(objectSymbol);
 
-            this.semanticInfo.setSymbolForAST(objectSymbolAST, objectSymbol);
+            this.semanticInfoChain.setSymbolForAST(objectSymbolAST, objectSymbol);
 
             var childDecls = objectDecl.getChildDecls();
 
             for (var i = 0; i < childDecls.length; i++) {
                 this.bindDeclToPullSymbol(childDecls[i]);
             }
-
-            var typeParameters = objectDecl.getTypeParameters();
-            var typeParameter: PullTypeParameterSymbol;
-            var typeParameterDecls: PullDecl[] = null;
-
-            for (var i = 0; i < typeParameters.length; i++) {
-
-                typeParameter = objectSymbol.findTypeParameter(typeParameters[i].name);
-
-                if (!typeParameter) {
-                    typeParameter = new PullTypeParameterSymbol(typeParameters[i].name, false);
-
-                    objectSymbol.addTypeParameter(typeParameter);
-                }
-                else {
-                    typeParameterDecls = typeParameter.getDeclarations();
-
-                    var typeParameterAST = this.semanticInfoChain.getASTForDecl(typeParameterDecls[0]);
-                    objectDecl.addDiagnostic(
-                        new Diagnostic(this.semanticInfo.getPath(), typeParameterAST.minChar, typeParameterAST.getLength(), DiagnosticCode.Duplicate_identifier_0, [typeParameter.name]));
-                }
-
-                typeParameter.addDeclaration(typeParameters[i]);
-                typeParameters[i].setSymbol(typeParameter);
-            }
-
         }
 
-        public bindConstructorTypeDeclarationToPullSymbol(constructorTypeDeclaration: PullDecl) {
+        private bindConstructorTypeDeclarationToPullSymbol(constructorTypeDeclaration: PullDecl) {
             var declKind = constructorTypeDeclaration.kind;
             var declFlags = constructorTypeDeclaration.flags;
-            var constructorTypeAST = this.semanticInfo.getASTForDecl(constructorTypeDeclaration);
+            var constructorTypeAST = this.semanticInfoChain.getASTForDecl(constructorTypeDeclaration);
 
             var constructorTypeSymbol = new PullTypeSymbol("", PullElementKind.ConstructorType);
 
             constructorTypeDeclaration.setSymbol(constructorTypeSymbol);
             constructorTypeSymbol.addDeclaration(constructorTypeDeclaration);
-            this.semanticInfo.setSymbolForAST(constructorTypeAST, constructorTypeSymbol);
+            this.semanticInfoChain.setSymbolForAST(constructorTypeAST, constructorTypeSymbol);
 
-            var signature = new PullDefinitionSignatureSymbol(PullElementKind.ConstructSignature);
+            var signature = new PullSignatureSymbol(PullElementKind.ConstructSignature);
 
-            if ((<FunctionDeclaration>constructorTypeAST).variableArgList) {
+            var funcDecl = <ConstructorType>this.semanticInfoChain.getASTForDecl(constructorTypeDeclaration);
+            if (lastParameterIsRest(funcDecl.parameterList)) {
                 signature.hasVarArgs = true;
             }
 
             signature.addDeclaration(constructorTypeDeclaration);
             constructorTypeDeclaration.setSignatureSymbol(signature);
 
-            this.bindParameterSymbols(<FunctionDeclaration>this.semanticInfo.getASTForDecl(constructorTypeDeclaration), constructorTypeSymbol, signature);
+            this.bindParameterSymbols(funcDecl, Parameters.fromParameterList(funcDecl.parameterList), constructorTypeSymbol, signature);
 
             // add the implicit construct member for this function type
             constructorTypeSymbol.addConstructSignature(signature);
 
             var typeParameters = constructorTypeDeclaration.getTypeParameters();
             var typeParameter: PullTypeParameterSymbol;
-            var typeParameterDecls: PullDecl[] = null;
 
             for (var i = 0; i < typeParameters.length; i++) {
 
                 typeParameter = constructorTypeSymbol.findTypeParameter(typeParameters[i].name);
 
                 if (!typeParameter) {
-                    typeParameter = new PullTypeParameterSymbol(typeParameters[i].name, false);
+                    typeParameter = new PullTypeParameterSymbol(typeParameters[i].name, /*_isFunctionTypeParameter*/ false);
 
                     constructorTypeSymbol.addConstructorTypeParameter(typeParameter);
                 }
                 else {
-                    typeParameterDecls = typeParameter.getDeclarations();
-
-                    var typeParameterAST = this.semanticInfoChain.getASTForDecl(typeParameterDecls[0]);
-                    constructorTypeDeclaration.addDiagnostic(
-                        new Diagnostic(this.semanticInfo.getPath(), typeParameterAST.minChar, typeParameterAST.getLength(), DiagnosticCode.Duplicate_identifier_0, [typeParameter.name]));
+                    var typeParameterAST = this.semanticInfoChain.getASTForDecl(typeParameter.getDeclarations()[0]);
+                    this.semanticInfoChain.addDiagnosticFromAST(typeParameterAST, DiagnosticCode.Duplicate_identifier_0, [typeParameter.name]);
                 }
 
                 typeParameter.addDeclaration(typeParameters[i]);
@@ -760,10 +897,10 @@ module TypeScript {
         }
 
         // variables
-        public bindVariableDeclarationToPullSymbol(variableDeclaration: PullDecl) {
+        private bindVariableDeclarationToPullSymbol(variableDeclaration: PullDecl) {
             var declFlags = variableDeclaration.flags;
             var declKind = variableDeclaration.kind;
-            var varDeclAST = <VariableDeclarator>this.semanticInfo.getASTForDecl(variableDeclaration);
+            var varDeclAST = <VariableDeclarator>this.semanticInfoChain.getASTForDecl(variableDeclaration);
 
             var isExported = (declFlags & PullElementFlags.Exported) !== 0;
 
@@ -778,114 +915,90 @@ module TypeScript {
             var parentDecl = variableDeclaration.getParentDecl();
 
             var isImplicit = (declFlags & PullElementFlags.ImplicitVariable) !== 0;
-            var isModuleValue = (declFlags & (PullElementFlags.SomeInitializedModule)) != 0;
-            var isEnumValue = (declFlags & PullElementFlags.InitializedEnum) != 0;
+            var isModuleValue = (declFlags & (PullElementFlags.InitializedModule)) != 0;
+            var isEnumValue = (declFlags & PullElementFlags.Enum) != 0;
             var isClassConstructorVariable = (declFlags & PullElementFlags.ClassConstructorVariable) != 0;
 
-            if (parentDecl && !isImplicit) {
-                parentDecl.addVariableDeclToGroup(variableDeclaration);
-            }
-
-            // The code below accounts for the variable symbol being a type because
-            // modules may create instance variables
-
-            if (parent) {
-                if (isExported) {
-                    variableSymbol = parent.findMember(declName, false);
-                }
-                else {
-                    variableSymbol = parent.findContainedNonMember(declName);
-                }
-
-                if (variableSymbol) {
-                    var declarations = variableSymbol.getDeclarations();
-
-                    if (declarations.length) {
-                        var variableSymbolParentDecl = declarations[0].getParentDecl();
-
-                        if (parentDecl !== variableSymbolParentDecl) {
-                            variableSymbol = null;
-                        }
-                    }
-                }
-            }
-            else if (!(variableDeclaration.flags & PullElementFlags.Exported)) {
-                variableSymbol = this.semanticInfoChain.findTopLevelSymbol(declName, PullElementKind.SomeValue, this.semanticInfo.getPath());
-            }
+            variableSymbol = this.getExistingSymbol(variableDeclaration, PullElementKind.SomeValue, parent);
 
             if (variableSymbol && !variableSymbol.isType()) {
                 parentHadSymbol = true;
             }
 
-            var span: TextSpan;
             var decl: PullDecl;
             var decls: PullDecl[];
             var ast: AST;
             var members: PullSymbol[];
 
-            // PULLTODO: Keeping these two error clauses separate for now, so that we can add a better error message later
             if (variableSymbol) {
 
                 var prevKind = variableSymbol.kind;
-                var prevIsAmbient = variableSymbol.hasFlag(PullElementFlags.Ambient);
-                var prevIsEnum = variableSymbol.hasFlag(PullElementFlags.InitializedEnum);
-                var prevIsClassConstructorVariable = variableSymbol.hasFlag(PullElementFlags.ClassConstructorVariable);
-                var prevIsModuleValue = variableSymbol.hasFlag(PullElementFlags.SomeInitializedModule);
-                var prevIsImplicit = variableSymbol.hasFlag(PullElementFlags.ImplicitVariable);
-                var onlyOneIsEnum = (isEnumValue || prevIsEnum) && !(isEnumValue && prevIsEnum);
-                var isAmbient = (variableDeclaration.flags & PullElementFlags.Ambient) != 0;
+                var prevIsEnum = variableSymbol.anyDeclHasFlag(PullElementFlags.Enum);
+                var prevIsClassConstructorVariable = variableSymbol.anyDeclHasFlag(PullElementFlags.ClassConstructorVariable);
+                var prevIsModuleValue = variableSymbol.allDeclsHaveFlag(PullElementFlags.InitializedModule);
+                var prevIsImplicit = variableSymbol.anyDeclHasFlag(PullElementFlags.ImplicitVariable);
+                var prevIsFunction = prevKind == PullElementKind.Function;
+                var prevIsAmbient = variableSymbol.allDeclsHaveFlag(PullElementFlags.Ambient);
+                var isAmbientOrPrevIsAmbient = prevIsAmbient || (variableDeclaration.flags & PullElementFlags.Ambient) != 0;
                 var prevDecl = variableSymbol.getDeclarations()[0];
-                var bothAreGlobal = parentDecl && (parentDecl.kind == PullElementKind.Script) && (declKind == prevKind);
+                var prevParentDecl = prevDecl.getParentDecl();
+                var bothAreGlobal = parentDecl && (parentDecl.kind == PullElementKind.Script) && (prevParentDecl.kind == PullElementKind.Script);
                 var shareParent = bothAreGlobal || prevDecl.getParentDecl() == variableDeclaration.getParentDecl();
                 var prevIsParam = shareParent && prevKind == PullElementKind.Parameter && declKind == PullElementKind.Variable;
 
-                var acceptableRedeclaration = (!shareParent || prevIsParam) ||
+                var acceptableRedeclaration = prevIsParam ||
                     (isImplicit &&
-                    ((!isEnumValue && !isClassConstructorVariable && prevKind == PullElementKind.Function) || // Enums can't mix with functions
-                    (isModuleValue && prevIsModuleValue) || // modules and enums can mix freely
-                    (isClassConstructorVariable && prevIsModuleValue && isAmbient) || // an ambient class can be declared after a module
+                    ((!isEnumValue && !isClassConstructorVariable && prevIsFunction) || // Enums can't mix with functions
+                    ((isModuleValue || isEnumValue) && (prevIsModuleValue || prevIsEnum)) || // modules and enums can mix freely
+                    (isClassConstructorVariable && prevIsModuleValue && isAmbientOrPrevIsAmbient) || // an ambient class can be declared after a module
                     (isModuleValue && prevIsClassConstructorVariable))); // the module variable can come after the class constructor variable
 
                 // if the previous declaration is a non-ambient class, it must be located in the same file as this declaration
-                if (acceptableRedeclaration && prevIsClassConstructorVariable && !prevIsAmbient) {
-                    if (prevDecl.getScriptName() != variableDeclaration.getScriptName()) {
-                        acceptableRedeclaration = false;
+                if (acceptableRedeclaration && (prevIsClassConstructorVariable || prevIsFunction) && !isAmbientOrPrevIsAmbient) {
+                    if (prevDecl.fileName() != variableDeclaration.fileName()) {
+                        this.semanticInfoChain.addDiagnostic(diagnosticFromDecl(variableDeclaration,
+                            DiagnosticCode.Module_0_cannot_merge_with_previous_declaration_of_1_in_a_different_file_2, [declName, declName, prevDecl.fileName()]));
+                        variableSymbol.type = this.semanticInfoChain.getResolver().getNewErrorTypeSymbol(declName);
                     }
                 }
 
-                if (shareParent && !prevIsParam && (!acceptableRedeclaration || onlyOneIsEnum)) {
+                if (!acceptableRedeclaration || prevIsParam) {
                     // If neither of them are implicit (both explicitly declared as vars), we won't error now. We'll check that the types match during type check.
-                    // However, we will error when a variable clobbers a function.
-                    if (isImplicit || prevIsImplicit || (prevKind & PullElementKind.SomeFunction) !== 0) {
-                        span = variableDeclaration.getSpan();
-                        var errorDecl = isImplicit ? variableSymbol.getDeclarations()[0] : variableDeclaration;
-                        errorDecl.addDiagnostic(new Diagnostic(this.semanticInfo.getPath(), span.start(), span.length(), DiagnosticCode.Duplicate_identifier_0, [variableDeclaration.getDisplayName()]));
+                    // However, we will error when a variable clobbers a function, or when the two explicit var declarations are not in the same parent declaration
+                    if (!prevIsParam && (isImplicit || prevIsImplicit || (prevKind & PullElementKind.SomeFunction) !== 0) || !shareParent) {
+                        var diagnostic = diagnosticFromDecl(variableDeclaration, DiagnosticCode.Duplicate_identifier_0, [variableDeclaration.getDisplayName()]);
+                        this.semanticInfoChain.addDiagnostic(diagnostic);
+                        variableSymbol.type = this.semanticInfoChain.getResolver().getNewErrorTypeSymbol(declName);
                     }
-
-                    variableSymbol = null;
-                    parentHadSymbol = false;
+                    else { // double var declaration (keep them separate so we can verify type sameness during type check)
+                        this.checkThatExportsMatch(variableDeclaration, variableSymbol);
+                        variableSymbol = null;
+                        parentHadSymbol = false;
+                    }
                 }
-            }
-            else if (variableSymbol && (variableSymbol.kind !== PullElementKind.Variable) && !isImplicit) {
-                span = variableDeclaration.getSpan();
 
-                variableDeclaration.addDiagnostic(
-                    new Diagnostic(this.semanticInfo.getPath(), span.start(), span.length(), DiagnosticCode.Duplicate_identifier_0, [variableDeclaration.getDisplayName()]));
-                variableSymbol = null;
-                parentHadSymbol = false;
+                // If we haven't given an error so far and we merged two decls, check that the exports match
+                // Only report the error if they are not both initialized modules (if they are, the bind module code would report the error)
+                if (variableSymbol &&
+                    !(variableSymbol.type && variableSymbol.type.isError()) &&
+                    !this.checkThatExportsMatch(variableDeclaration, variableSymbol, !(isModuleValue && prevIsModuleValue))) {
+                        variableSymbol.type = this.semanticInfoChain.getResolver().getNewErrorTypeSymbol(declName);
+                }
             }
 
             if ((declFlags & PullElementFlags.ImplicitVariable) === 0) {
                 if (!variableSymbol) {
                     variableSymbol = new PullSymbol(declName, declKind);
-                    this.semanticInfoChain.cacheGlobalSymbol(variableSymbol, declKind);
+                    if (!parent && parentDecl.kind === PullElementKind.Script) {
+                        this.semanticInfoChain.cacheGlobalSymbol(variableSymbol, declKind);
+                    }
                 }
 
                 variableSymbol.addDeclaration(variableDeclaration);
                 variableDeclaration.setSymbol(variableSymbol);
 
-                this.semanticInfo.setSymbolForAST(varDeclAST.id, variableSymbol);
-                this.semanticInfo.setSymbolForAST(varDeclAST, variableSymbol);
+                this.semanticInfoChain.setSymbolForAST(varDeclAST.propertyName, variableSymbol);
+                this.semanticInfoChain.setSymbolForAST(varDeclAST, variableSymbol);
             }
             else if (!parentHadSymbol) {
 
@@ -925,7 +1038,7 @@ module TypeScript {
                         }
 
                         if (!classTypeSymbol) {
-                            classTypeSymbol = <PullTypeSymbol>this.semanticInfoChain.findTopLevelSymbol(declName, PullElementKind.SomeType, this.semanticInfo.getPath());
+                            classTypeSymbol = <PullTypeSymbol>this.semanticInfoChain.findTopLevelSymbol(declName, PullElementKind.SomeType, variableDeclaration);
                         }
                     }
 
@@ -949,11 +1062,7 @@ module TypeScript {
                         if (decls.length) {
 
                             decl = decls[decls.length - 1];
-                            ast = this.semanticInfo.getASTForDecl(decl);
-
-                            if (ast) {
-                                this.semanticInfo.setASTForDecl(variableDeclaration, ast);
-                            }
+                            ast = this.semanticInfoChain.getASTForDecl(decl);
                         }
                     }
                     else {
@@ -969,7 +1078,7 @@ module TypeScript {
                     }
                 }
                 else if (declFlags & PullElementFlags.SomeInitializedModule) {
-                    var moduleContainerTypeSymbol: PullContainerTypeSymbol = null;
+                    var moduleContainerTypeSymbol: PullContainerSymbol = null;
                     var moduleParent = this.getParent(variableDeclaration);
 
                     if (moduleParent) {
@@ -977,7 +1086,7 @@ module TypeScript {
 
                         for (var i = 0; i < members.length; i++) {
                             if ((members[i].name === declName) && (members[i].isContainer())) {
-                                moduleContainerTypeSymbol = <PullContainerTypeSymbol>members[i];
+                                moduleContainerTypeSymbol = <PullContainerSymbol>members[i];
                                 break;
                             }
                         }
@@ -994,16 +1103,16 @@ module TypeScript {
 
                                 for (var i = 0; i < childDecls.length; i++) {
                                     if (childDecls[i].getValueDecl() === variableDeclaration) {
-                                        moduleContainerTypeSymbol = <PullContainerTypeSymbol>childDecls[i].getSymbol();
+                                        moduleContainerTypeSymbol = <PullContainerSymbol>childDecls[i].getSymbol();
                                     }
                                 }
                             }
                         }
                         if (!moduleContainerTypeSymbol) {
-                            moduleContainerTypeSymbol = <PullContainerTypeSymbol>this.semanticInfoChain.findTopLevelSymbol(declName, PullElementKind.SomeContainer, this.semanticInfo.getPath());
+                            moduleContainerTypeSymbol = <PullContainerSymbol>this.semanticInfoChain.findTopLevelSymbol(declName, PullElementKind.SomeContainer, variableDeclaration);
 
                             if (!moduleContainerTypeSymbol) {
-                                moduleContainerTypeSymbol = <PullContainerTypeSymbol>this.semanticInfoChain.findTopLevelSymbol(declName, PullElementKind.Enum, this.semanticInfo.getPath());
+                                moduleContainerTypeSymbol = <PullContainerSymbol>this.semanticInfoChain.findTopLevelSymbol(declName, PullElementKind.Enum, variableDeclaration);
                             }
                         }
                     }
@@ -1015,24 +1124,15 @@ module TypeScript {
                     if (moduleContainerTypeSymbol) {
                         variableSymbol = moduleContainerTypeSymbol.getInstanceSymbol();
 
-                        variableSymbol.addDeclaration(variableDeclaration);
-                        variableDeclaration.setSymbol(variableSymbol);
-
-                        // set the AST to the constructor method's if possible
-                        decls = moduleContainerTypeSymbol.getDeclarations();
-
-                        if (decls.length) {
-
-                            decl = decls[decls.length - 1];
-                            ast = this.semanticInfo.getASTForDecl(decl);
-
-                            if (ast) {
-                                this.semanticInfo.setASTForDecl(variableDeclaration, ast);
-                            }
+                        // If this method calls bindModuleDeclarationToPullSymbol recursively,
+                        // we may associate the variable decl with its symbol in that recursive
+                        // call before we do it here. Therefore, make sure the symbol doesn't already
+                        // have the decl before adding it. Just like in bindModuleDeclarationToPullSymbol,
+                        // we shouldn't need this maneuver with a more iterative binding pattern.
+                        if (!variableSymbol.hasDeclaration(variableDeclaration)) {
+                            variableSymbol.addDeclaration(variableDeclaration);
                         }
-
-                        // we added the variable to the parent when binding the module
-                        //parentHadSymbol = true;
+                        variableDeclaration.setSymbol(variableSymbol);
                     }
                     else {
                         Debug.assert(false, "Attempted to bind invalid implicit variable symbol");
@@ -1040,7 +1140,9 @@ module TypeScript {
                 }
             }
             else {
-                variableSymbol.addDeclaration(variableDeclaration);
+                if (!variableSymbol.hasDeclaration(variableDeclaration)) {
+                    variableSymbol.addDeclaration(variableDeclaration);
+                }
                 variableDeclaration.setSymbol(variableSymbol);
             }
 
@@ -1053,13 +1155,105 @@ module TypeScript {
                     parent.addEnclosedNonMember(variableSymbol);
                 }
             }
+
+            var otherDecls = this.findDeclsInContext(variableDeclaration, variableDeclaration.kind, /*searchGlobally*/ false);
+
+            if (otherDecls && otherDecls.length) {
+                for (var i = 0; i < otherDecls.length; i++) {
+                    otherDecls[i].ensureSymbolIsBound();
+                }
+            }
+        }
+
+        private bindCatchVariableToPullSymbol(variableDeclaration: PullDecl) {
+            var declFlags = variableDeclaration.flags;
+            var declKind = variableDeclaration.kind;
+            var identifier = <Identifier>this.semanticInfoChain.getASTForDecl(variableDeclaration);
+
+            var declName = variableDeclaration.name;
+
+            //var parent = this.getParent(variableDeclaration, true);
+            //var parentDecl = variableDeclaration.getParentDecl();
+
+            var variableSymbol = new PullSymbol(declName, declKind);
+
+            variableSymbol.addDeclaration(variableDeclaration);
+            variableDeclaration.setSymbol(variableSymbol);
+
+            // Catch variable are of type 'any'.  So we don't need to actually resolve anything later.
+            variableSymbol.type = this.semanticInfoChain.anyTypeSymbol;
+
+            this.semanticInfoChain.setSymbolForAST(identifier, variableSymbol);
+
+            //if (parent && !parentHadSymbol) {
+
+            //    if (declFlags & PullElementFlags.Exported) {
+            //        parent.addMember(variableSymbol);
+            //    }
+            //    else {
+            //        parent.addEnclosedNonMember(variableSymbol);
+            //    }
+            //}
+
+            //var otherDecls = this.findDeclsInContext(variableDeclaration, variableDeclaration.kind, /*searchGlobally*/ false);
+
+            //if (otherDecls && otherDecls.length) {
+            //    for (var i = 0; i < otherDecls.length; i++) {
+            //        otherDecls[i].ensureSymbolIsBound();
+            //    }
+            //}
         }
 
         // properties
-        public bindPropertyDeclarationToPullSymbol(propertyDeclaration: PullDecl) {
+        private bindEnumMemberDeclarationToPullSymbol(propertyDeclaration: PullDecl) {
             var declFlags = propertyDeclaration.flags;
             var declKind = propertyDeclaration.kind;
-            var propDeclAST = <VariableDeclarator>this.semanticInfo.getASTForDecl(propertyDeclaration);
+            var propDeclAST = <EnumElement>this.semanticInfoChain.getASTForDecl(propertyDeclaration);
+
+            var declName = propertyDeclaration.name;
+
+            var parentHadSymbol = false;
+
+            var parent = this.getParent(propertyDeclaration, true);
+
+            var propertySymbol = parent.findMember(declName, /*lookInParent*/ false);
+
+            if (propertySymbol) {
+                this.semanticInfoChain.addDiagnostic(
+                    diagnosticFromDecl(propertyDeclaration, DiagnosticCode.Duplicate_identifier_0, [propertyDeclaration.getDisplayName()]));
+            }
+
+            if (propertySymbol) {
+                parentHadSymbol = true;
+            }
+
+            if (!parentHadSymbol) {
+                propertySymbol = new PullSymbol(declName, declKind);
+            }
+
+            propertySymbol.addDeclaration(propertyDeclaration);
+            propertyDeclaration.setSymbol(propertySymbol);
+
+            this.semanticInfoChain.setSymbolForAST(propDeclAST.propertyName, propertySymbol);
+            this.semanticInfoChain.setSymbolForAST(propDeclAST, propertySymbol);
+
+            if (parent && !parentHadSymbol) {
+                parent.addMember(propertySymbol);
+            }
+        }
+
+        private bindPropertyDeclarationToPullSymbol(propertyDeclaration: PullDecl) {
+            var declFlags = propertyDeclaration.flags;
+            var declKind = propertyDeclaration.kind;
+
+            var ast = this.semanticInfoChain.getASTForDecl(propertyDeclaration);
+            var astName = ast.kind() === SyntaxKind.MemberVariableDeclaration
+                ? (<MemberVariableDeclaration>ast).variableDeclarator.propertyName
+                : ast.kind() === SyntaxKind.PropertySignature
+                    ? (<PropertySignature>ast).propertyName
+                    : ast.kind() === SyntaxKind.Parameter
+                        ? (<Parameter>ast).identifier
+                        : (<VariableDeclarator>ast).propertyName;
 
             var isStatic = false;
             var isOptional = false;
@@ -1081,19 +1275,14 @@ module TypeScript {
             var parent = this.getParent(propertyDeclaration, true);
 
             if (parent.isClass() && isStatic) {
-                parent = parent.getConstructorMethod().type;           
+                parent = parent.getConstructorMethod().type;
             }
 
-            propertySymbol = parent.findMember(declName, false);
+            propertySymbol = parent.findMember(declName, /*lookInParent*/ false);
 
             if (propertySymbol) {
-
-                var span = propertyDeclaration.getSpan();
-
-                propertyDeclaration.addDiagnostic(
-                    new Diagnostic(this.semanticInfo.getPath(), span.start(), span.length(), DiagnosticCode.Duplicate_identifier_0, [propertyDeclaration.getDisplayName()]));
-
-                propertySymbol = null;
+                this.semanticInfoChain.addDiagnostic(
+                    diagnosticFromDecl(propertyDeclaration, DiagnosticCode.Duplicate_identifier_0, [propertyDeclaration.getDisplayName()]));
             }
 
             if (propertySymbol) {
@@ -1109,8 +1298,8 @@ module TypeScript {
             propertySymbol.addDeclaration(propertyDeclaration);
             propertyDeclaration.setSymbol(propertySymbol);
 
-            this.semanticInfo.setSymbolForAST(propDeclAST.id, propertySymbol);
-            this.semanticInfo.setSymbolForAST(propDeclAST, propertySymbol);
+            this.semanticInfoChain.setSymbolForAST(astName, propertySymbol);
+            this.semanticInfoChain.setSymbolForAST(ast, propertySymbol);
 
             if (isOptional) {
                 propertySymbol.isOptional = true;
@@ -1122,25 +1311,22 @@ module TypeScript {
         }
 
         // parameters
-        public bindParameterSymbols(funcDecl: FunctionDeclaration, funcType: PullTypeSymbol, signatureSymbol: PullSignatureSymbol) {
+        private bindParameterSymbols(functionDeclaration: AST, parameterList: IParameters, funcType: PullTypeSymbol, signatureSymbol: PullSignatureSymbol) {
             // create a symbol for each ast
             // if it's a property, add the symbol to the enclosing type's member list
             var parameters: PullSymbol[] = [];
-            var decl: PullDecl = null;
-            var argDecl: BoundDecl = null;
-            var parameterSymbol: PullSymbol = null;
-            var isProperty = false;
-            var params: any = new BlockIntrinsics();
+            var params = createIntrinsicsObject<boolean>();
+            var funcDecl = this.semanticInfoChain.getDeclForAST(functionDeclaration);
 
-            if (funcDecl.arguments) {
+            if (parameterList) {
+                for (var i = 0, n = parameterList.length; i < n; i++) {
+                    var argDecl = parameterList.astAt(i);
+                    var id = parameterList.identifierAt(i);
+                    var decl = this.semanticInfoChain.getDeclForAST(argDecl);
+                    var isProperty = hasFlag(decl.flags, PullElementFlags.PropertyParameter);
+                    var parameterSymbol = new PullSymbol(id.valueText(), PullElementKind.Parameter);
 
-                for (var i = 0; i < funcDecl.arguments.members.length; i++) {
-                    argDecl = <BoundDecl>funcDecl.arguments.members[i];
-                    decl = this.semanticInfo.getDeclForAST(argDecl);
-                    isProperty = hasFlag(argDecl.getVarFlags(), VariableFlags.Property);
-                    parameterSymbol = new PullSymbol(argDecl.id.text(), PullElementKind.Parameter);
-
-                    if (funcDecl.variableArgList && i === funcDecl.arguments.members.length - 1) {
+                    if ((i === (n - 1)) && parameterList.lastParameterIsRest()) {
                         parameterSymbol.isVarArg = true;
                     }
 
@@ -1148,12 +1334,11 @@ module TypeScript {
                         parameterSymbol.isOptional = true;
                     }
 
-                    if (params[argDecl.id.text()]) {
-                        decl.addDiagnostic(
-                            new Diagnostic(this.semanticInfo.getPath(), argDecl.minChar, argDecl.getLength(), DiagnosticCode.Duplicate_identifier_0, [argDecl.id.actualText]));
+                    if (params[id.valueText()]) {
+                        this.semanticInfoChain.addDiagnosticFromAST(argDecl, DiagnosticCode.Duplicate_identifier_0, [id.text()]);
                     }
                     else {
-                        params[argDecl.id.text()] = true;
+                        params[id.valueText()] = true;
                     }
                     if (decl) {
 
@@ -1184,10 +1369,10 @@ module TypeScript {
         }
 
         // function declarations
-        public bindFunctionDeclarationToPullSymbol(functionDeclaration: PullDecl) {
+        private bindFunctionDeclarationToPullSymbol(functionDeclaration: PullDecl) {
             var declKind = functionDeclaration.kind;
             var declFlags = functionDeclaration.flags;
-            var funcDeclAST = <FunctionDeclaration>this.semanticInfo.getASTForDecl(functionDeclaration);
+            var funcDeclAST = <FunctionDeclaration>this.semanticInfoChain.getASTForDecl(functionDeclaration);
 
             var isExported = (declFlags & PullElementFlags.Exported) !== 0;
 
@@ -1206,35 +1391,18 @@ module TypeScript {
             var functionSymbol: PullSymbol = null;
             var functionTypeSymbol: PullTypeSymbol = null;
 
-            if (parent) {
-                functionSymbol = parent.findMember(funcName, false);
+            functionSymbol = this.getExistingSymbol(functionDeclaration, PullElementKind.SomeValue, parent);
 
-                if (!functionSymbol) {
-                    functionSymbol = parent.findContainedNonMember(funcName);
-
-                    if (functionSymbol) {
-                        var declarations = functionSymbol.getDeclarations();
-
-                        if (declarations.length) {
-                            var funcSymbolParentDecl = declarations[0].getParentDecl();
-
-                            if (parentDecl !== funcSymbolParentDecl) {
-                                functionSymbol = null;
-                            }
-                        }
-                    }
+            if (functionSymbol) {
+                // Duplicate is acceptable if it is another signature (not a duplicate implementation), or an ambient fundule
+                var previousIsAmbient = functionSymbol.allDeclsHaveFlag(PullElementFlags.Ambient);
+                var isAmbientOrPreviousIsAmbient = previousIsAmbient || functionDeclaration.flags & PullElementFlags.Ambient;
+                var acceptableRedeclaration = functionSymbol.kind === PullElementKind.Function && (isSignature || functionSymbol.allDeclsHaveFlag(PullElementFlags.Signature)) ||
+                    functionSymbol.allDeclsHaveFlag(PullElementFlags.InitializedModule) && isAmbientOrPreviousIsAmbient;
+                if (!acceptableRedeclaration) {
+                    this.semanticInfoChain.addDiagnosticFromAST(funcDeclAST, DiagnosticCode.Duplicate_identifier_0, [functionDeclaration.getDisplayName()]);
+                    functionSymbol.type = this.semanticInfoChain.getResolver().getNewErrorTypeSymbol(funcName);
                 }
-            }
-            else if (!(functionDeclaration.flags & PullElementFlags.Exported)) {
-                functionSymbol = this.semanticInfoChain.findTopLevelSymbol(funcName, PullElementKind.SomeValue, this.semanticInfo.getPath());
-            }
-
-            if (functionSymbol &&
-                (functionSymbol.kind !== PullElementKind.Function ||
-                (!isSignature && !functionSymbol.allDeclsHaveFlag(PullElementFlags.Signature)))) {
-                functionDeclaration.addDiagnostic(
-                    new Diagnostic(this.semanticInfo.getPath(), funcDeclAST.minChar, funcDeclAST.getLength(), DiagnosticCode.Duplicate_identifier_0, [functionDeclaration.getDisplayName()]));
-                functionSymbol = null;
             }
 
             if (functionSymbol) {
@@ -1257,8 +1425,8 @@ module TypeScript {
             functionSymbol.addDeclaration(functionDeclaration);
             functionTypeSymbol.addDeclaration(functionDeclaration);
 
-            this.semanticInfo.setSymbolForAST(funcDeclAST.name, functionSymbol);
-            this.semanticInfo.setSymbolForAST(funcDeclAST, functionSymbol);
+            this.semanticInfoChain.setSymbolForAST(funcDeclAST.identifier, functionSymbol);
+            this.semanticInfoChain.setSymbolForAST(funcDeclAST, functionSymbol);
 
             if (parent && !parentHadSymbol) {
                 if (isExported) {
@@ -1274,31 +1442,28 @@ module TypeScript {
             signature.addDeclaration(functionDeclaration);
             functionDeclaration.setSignatureSymbol(signature);
 
-            if (funcDeclAST.variableArgList) {
+            if (lastParameterIsRest(funcDeclAST.callSignature.parameterList)) {
                 signature.hasVarArgs = true;
             }
 
-            this.bindParameterSymbols(<FunctionDeclaration>this.semanticInfo.getASTForDecl(functionDeclaration), functionTypeSymbol, signature);
+            var funcDecl = <FunctionDeclaration>this.semanticInfoChain.getASTForDecl(functionDeclaration);
+            this.bindParameterSymbols(funcDecl, Parameters.fromParameterList(funcDecl.callSignature.parameterList), functionTypeSymbol, signature);
 
             var typeParameters = functionDeclaration.getTypeParameters();
             var typeParameter: PullTypeParameterSymbol;
-            var typeParameterDecls: PullDecl[] = null;
 
             for (var i = 0; i < typeParameters.length; i++) {
 
                 typeParameter = signature.findTypeParameter(typeParameters[i].name);
 
                 if (!typeParameter) {
-                    typeParameter = new PullTypeParameterSymbol(typeParameters[i].name, true);
+                    typeParameter = new PullTypeParameterSymbol(typeParameters[i].name, /*_isFunctionTypeParameter*/ true);
 
                     signature.addTypeParameter(typeParameter);
                 }
                 else {
-                    typeParameterDecls = typeParameter.getDeclarations();
-
-                    var typeParameterAST = this.semanticInfoChain.getASTForDecl(typeParameterDecls[0]);
-                    functionDeclaration.addDiagnostic(
-                        new Diagnostic(this.semanticInfo.getPath(), typeParameterAST.minChar, typeParameterAST.getLength(), DiagnosticCode.Duplicate_identifier_0, [typeParameter.name]));
+                    var typeParameterAST = this.semanticInfoChain.getASTForDecl(typeParameter.getDeclarations()[0]);
+                    this.semanticInfoChain.addDiagnosticFromAST(typeParameterAST, DiagnosticCode.Duplicate_identifier_0, [typeParameter.name]);
                 }
 
                 typeParameter.addDeclaration(typeParameters[i]);
@@ -1317,10 +1482,15 @@ module TypeScript {
             }
         }
 
-        public bindFunctionExpressionToPullSymbol(functionExpressionDeclaration: PullDecl) {
+        private bindFunctionExpressionToPullSymbol(functionExpressionDeclaration: PullDecl) {
             var declKind = functionExpressionDeclaration.kind;
             var declFlags = functionExpressionDeclaration.flags;
-            var funcExpAST = <FunctionDeclaration>this.semanticInfo.getASTForDecl(functionExpressionDeclaration);
+            var ast = this.semanticInfoChain.getASTForDecl(functionExpressionDeclaration);
+
+            var parameters = ast.kind() === SyntaxKind.SimpleArrowFunctionExpression
+                ? Parameters.fromIdentifier((<SimpleArrowFunctionExpression>ast).identifier)
+                : Parameters.fromParameterList(getParameterList(ast));
+            var funcExpAST = ast;
 
             // 1. Test for existing decl - if it exists, use its symbol
             // 2. If no other decl exists, create a new symbol and use that one
@@ -1328,7 +1498,7 @@ module TypeScript {
             var functionName = declKind == PullElementKind.FunctionExpression ?
                 (<PullFunctionExpressionDecl>functionExpressionDeclaration).getFunctionExpressionName() :
                 functionExpressionDeclaration.name;
-            var functionSymbol: PullSymbol = new PullSymbol(functionName, PullElementKind.Function);
+            var functionSymbol: PullSymbol = new PullSymbol(functionName, declKind);
             var functionTypeSymbol = new PullTypeSymbol("", PullElementKind.FunctionType);
             functionTypeSymbol.setFunctionSymbol(functionSymbol);
 
@@ -1338,36 +1508,38 @@ module TypeScript {
             functionSymbol.addDeclaration(functionExpressionDeclaration);
             functionTypeSymbol.addDeclaration(functionExpressionDeclaration);
 
-            if (funcExpAST.name) {
-                this.semanticInfo.setSymbolForAST(funcExpAST.name, functionSymbol);
+            var name = funcExpAST.kind() === SyntaxKind.FunctionExpression
+                ? (<FunctionExpression>funcExpAST).identifier
+                : funcExpAST.kind() === SyntaxKind.FunctionPropertyAssignment
+                    ? (<FunctionPropertyAssignment>funcExpAST).propertyName
+                    : null;
+            if (name) {
+                this.semanticInfoChain.setSymbolForAST(name, functionSymbol);
             }
-            this.semanticInfo.setSymbolForAST(funcExpAST, functionSymbol);
+
+            this.semanticInfoChain.setSymbolForAST(funcExpAST, functionSymbol);
 
             var signature = new PullDefinitionSignatureSymbol(PullElementKind.CallSignature);
 
-            if (funcExpAST.variableArgList) {
+            if (parameters.lastParameterIsRest()) {
                 signature.hasVarArgs = true;
             }
 
             var typeParameters = functionExpressionDeclaration.getTypeParameters();
             var typeParameter: PullTypeParameterSymbol;
-            var typeParameterDecls: PullDecl[] = null;
 
             for (var i = 0; i < typeParameters.length; i++) {
 
                 typeParameter = signature.findTypeParameter(typeParameters[i].name);
 
                 if (!typeParameter) {
-                    typeParameter = new PullTypeParameterSymbol(typeParameters[i].name, true);
+                    typeParameter = new PullTypeParameterSymbol(typeParameters[i].name, /*_isFunctionTypeParamter*/ true);
 
                     signature.addTypeParameter(typeParameter);
                 }
                 else {
-                    typeParameterDecls = typeParameter.getDeclarations();
-
-                    var typeParameterAST = this.semanticInfoChain.getASTForDecl(typeParameterDecls[0]);
-                    functionExpressionDeclaration.addDiagnostic(
-                        new Diagnostic(this.semanticInfo.getPath(), typeParameterAST.minChar, typeParameterAST.getLength(), DiagnosticCode.Duplicate_identifier_0, [typeParameter.getName()]));
+                    var typeParameterAST = this.semanticInfoChain.getASTForDecl(typeParameter.getDeclarations()[0]);
+                    this.semanticInfoChain.addDiagnosticFromAST(typeParameterAST, DiagnosticCode.Duplicate_identifier_0, [typeParameter.getName()]);
                 }
 
                 typeParameter.addDeclaration(typeParameters[i]);
@@ -1377,16 +1549,16 @@ module TypeScript {
             signature.addDeclaration(functionExpressionDeclaration);
             functionExpressionDeclaration.setSignatureSymbol(signature);
 
-            this.bindParameterSymbols(<FunctionDeclaration>this.semanticInfo.getASTForDecl(functionExpressionDeclaration), functionTypeSymbol, signature);
+            this.bindParameterSymbols(funcExpAST, parameters, functionTypeSymbol, signature);
 
             // add the implicit call member for this function type
             functionTypeSymbol.addCallSignature(signature);
         }
 
-        public bindFunctionTypeDeclarationToPullSymbol(functionTypeDeclaration: PullDecl) {
+        private bindFunctionTypeDeclarationToPullSymbol(functionTypeDeclaration: PullDecl) {
             var declKind = functionTypeDeclaration.kind;
             var declFlags = functionTypeDeclaration.flags;
-            var funcTypeAST = <FunctionDeclaration>this.semanticInfo.getASTForDecl(functionTypeDeclaration);
+            var funcTypeAST = <FunctionType>this.semanticInfoChain.getASTForDecl(functionTypeDeclaration);
 
             // 1. Test for existing decl - if it exists, use its symbol
             // 2. If no other decl exists, create a new symbol and use that one
@@ -1395,32 +1567,30 @@ module TypeScript {
 
             functionTypeDeclaration.setSymbol(functionTypeSymbol);
             functionTypeSymbol.addDeclaration(functionTypeDeclaration);
-            this.semanticInfo.setSymbolForAST(funcTypeAST, functionTypeSymbol);
+            this.semanticInfoChain.setSymbolForAST(funcTypeAST, functionTypeSymbol);
 
             var isSignature: boolean = (declFlags & PullElementFlags.Signature) !== 0;
             var signature = isSignature ? new PullSignatureSymbol(PullElementKind.CallSignature) : new PullDefinitionSignatureSymbol(PullElementKind.CallSignature);
 
-            if (funcTypeAST.variableArgList) {
+            if (lastParameterIsRest(funcTypeAST.parameterList)) {
                 signature.hasVarArgs = true;
             }
 
             var typeParameters = functionTypeDeclaration.getTypeParameters();
             var typeParameter: PullTypeParameterSymbol;
-            var typeParameterDecls: PullDecl[] = null;
 
             for (var i = 0; i < typeParameters.length; i++) {
 
                 typeParameter = signature.findTypeParameter(typeParameters[i].name);
 
                 if (!typeParameter) {
-                    typeParameter = new PullTypeParameterSymbol(typeParameters[i].name, true);
+                    typeParameter = new PullTypeParameterSymbol(typeParameters[i].name, /*_isFunctionTypeParameter*/ true);
 
                     signature.addTypeParameter(typeParameter);
                 }
                 else {
-                    var typeParameterAST = this.semanticInfoChain.getASTForDecl(typeParameterDecls[0]);
-                    functionTypeDeclaration.addDiagnostic(
-                        new Diagnostic(this.semanticInfo.getPath(), typeParameterAST.minChar, typeParameterAST.getLength(), DiagnosticCode.Duplicate_identifier_0, [typeParameter.name]));
+                    var typeParameterAST = this.semanticInfoChain.getASTForDecl(typeParameter.getDeclarations()[0]);
+                    this.semanticInfoChain.addDiagnosticFromAST(typeParameterAST, DiagnosticCode.Duplicate_identifier_0, [typeParameter.name]);
                 }
 
                 typeParameter.addDeclaration(typeParameters[i]);
@@ -1430,17 +1600,17 @@ module TypeScript {
             signature.addDeclaration(functionTypeDeclaration);
             functionTypeDeclaration.setSignatureSymbol(signature);
 
-            this.bindParameterSymbols(<FunctionDeclaration>this.semanticInfo.getASTForDecl(functionTypeDeclaration), functionTypeSymbol, signature);
+            this.bindParameterSymbols(funcTypeAST, Parameters.fromParameterList(funcTypeAST.parameterList), functionTypeSymbol, signature);
 
             // add the implicit call member for this function type
             functionTypeSymbol.addCallSignature(signature);
         }
 
         // method declarations
-        public bindMethodDeclarationToPullSymbol(methodDeclaration: PullDecl) {
+        private bindMethodDeclarationToPullSymbol(methodDeclaration: PullDecl) {
             var declKind = methodDeclaration.kind;
             var declFlags = methodDeclaration.flags;
-            var methodAST = <FunctionDeclaration>this.semanticInfo.getASTForDecl(methodDeclaration);
+            var methodAST = this.semanticInfoChain.getASTForDecl(methodDeclaration);
 
             var isPrivate = (declFlags & PullElementFlags.Private) !== 0;
             var isStatic = (declFlags & PullElementFlags.Static) !== 0;
@@ -1460,13 +1630,12 @@ module TypeScript {
                 parent = parent.getConstructorMethod().type;
             }
 
-            methodSymbol = parent.findMember(methodName, false);
+            methodSymbol = parent.findMember(methodName, /*lookInParent*/ false);
 
             if (methodSymbol &&
                 (methodSymbol.kind !== PullElementKind.Method ||
                 (!isSignature && !methodSymbol.allDeclsHaveFlag(PullElementFlags.Signature)))) {
-                methodDeclaration.addDiagnostic(
-                    new Diagnostic(this.semanticInfo.getPath(), methodAST.minChar, methodAST.getLength(), DiagnosticCode.Duplicate_identifier_0, [methodDeclaration.getDisplayName()]));
+                    this.semanticInfoChain.addDiagnosticFromAST(methodAST, DiagnosticCode.Duplicate_identifier_0, [methodDeclaration.getDisplayName()]);
                 methodSymbol = null;
             }
 
@@ -1489,8 +1658,15 @@ module TypeScript {
             methodDeclaration.setSymbol(methodSymbol);
             methodSymbol.addDeclaration(methodDeclaration);
             methodTypeSymbol.addDeclaration(methodDeclaration);
-            this.semanticInfo.setSymbolForAST(methodAST.name, methodSymbol);
-            this.semanticInfo.setSymbolForAST(methodAST, methodSymbol);
+
+            var nameAST = methodAST.kind() === SyntaxKind.MemberFunctionDeclaration
+                ? (<MemberFunctionDeclaration>methodAST).propertyName
+                : (<MethodSignature>methodAST).propertyName;
+
+            Debug.assert(nameAST)
+
+            this.semanticInfoChain.setSymbolForAST(nameAST, methodSymbol);
+            this.semanticInfoChain.setSymbolForAST(methodAST, methodSymbol);
 
             if (isOptional) {
                 methodSymbol.isOptional = true;
@@ -1504,45 +1680,28 @@ module TypeScript {
 
             var signature = isSignature ? new PullSignatureSymbol(sigKind) : new PullDefinitionSignatureSymbol(sigKind);
 
-            if (methodAST.variableArgList) {
+            var parameterList = getParameterList(methodAST);
+            if (lastParameterIsRest(parameterList)) {
                 signature.hasVarArgs = true;
             }
 
             var typeParameters = methodDeclaration.getTypeParameters();
             var typeParameter: PullTypeParameterSymbol;
-            var typeParameterDecls: PullDecl[] = null;
             var typeParameterName: string;
             var typeParameterAST: TypeParameter;
 
             for (var i = 0; i < typeParameters.length; i++) {
                 typeParameterName = typeParameters[i].name;
-                typeParameterAST = <TypeParameter>this.semanticInfo.getASTForDecl(typeParameters[i]);
+                typeParameterAST = <TypeParameter>this.semanticInfoChain.getASTForDecl(typeParameters[i]);
 
                 typeParameter = signature.findTypeParameter(typeParameterName);
 
-
                 if (!typeParameter) {
-
-                    if (!typeParameterAST.constraint) {
-                        typeParameter = this.findTypeParameterInCache(typeParameterName);
-                    }
-
-                    if (!typeParameter) {
-                        typeParameter = new PullTypeParameterSymbol(typeParameterName, true);
-
-                        if (!typeParameterAST.constraint) {
-                            this.addTypeParameterToCache(typeParameter);
-                        }
-                    }
-
+                    typeParameter = new PullTypeParameterSymbol(typeParameterName, /*_isFunctionTypeParameter*/ true);
                     signature.addTypeParameter(typeParameter);
                 }
                 else {
-                    typeParameterDecls = typeParameter.getDeclarations();
-
-                    typeParameterAST = <TypeParameter>this.semanticInfoChain.getASTForDecl(typeParameterDecls[0]);
-                    methodDeclaration.addDiagnostic(
-                        new Diagnostic(this.semanticInfo.getPath(), typeParameterAST.minChar, typeParameterAST.getLength(), DiagnosticCode.Duplicate_identifier_0, [typeParameter.getName()]));
+                    this.semanticInfoChain.addDiagnosticFromAST(typeParameterAST, DiagnosticCode.Duplicate_identifier_0, [typeParameter.getName()]);
                 }
 
                 typeParameter.addDeclaration(typeParameters[i]);
@@ -1552,7 +1711,8 @@ module TypeScript {
             signature.addDeclaration(methodDeclaration);
             methodDeclaration.setSignatureSymbol(signature);
 
-            this.bindParameterSymbols(<FunctionDeclaration>this.semanticInfo.getASTForDecl(methodDeclaration), methodTypeSymbol, signature);
+            var funcDecl = this.semanticInfoChain.getASTForDecl(methodDeclaration);
+            this.bindParameterSymbols(funcDecl, Parameters.fromParameterList(getParameterList(funcDecl)), methodTypeSymbol, signature);
 
             // add the implicit call member for this function type
             methodTypeSymbol.addCallSignature(signature);
@@ -1566,11 +1726,42 @@ module TypeScript {
             }
         }
 
+        private bindStaticPrototypePropertyOfClass(classTypeSymbol: PullTypeSymbol, constructorTypeSymbol: PullTypeSymbol) {
+            var prototypeStr = "prototype";
+
+            var prototypeSymbol = constructorTypeSymbol.findMember(prototypeStr, /*lookInParent*/ false);
+            if (prototypeSymbol && !prototypeSymbol.getIsSynthesized()) {
+                // Report duplicate symbol error on existing prototype symbol since class has explicit prototype symbol
+                // This kind of scenario can happen with augmented module and class with module member named prototype
+                this.semanticInfoChain.addDiagnostic(
+                    diagnosticFromDecl(prototypeSymbol.getDeclarations()[0], DiagnosticCode.Duplicate_identifier_0, [prototypeSymbol.getDisplayName()]));
+            }
+
+            // Add synthetic prototype decl and symbol
+            if (!prototypeSymbol || !prototypeSymbol.getIsSynthesized()) {
+                var prototypeDecl = new PullSynthesizedDecl(prototypeStr, prototypeStr, PullElementKind.Property,
+                    PullElementFlags.Public | PullElementFlags.Static, constructorTypeSymbol.getDeclarations()[0],
+                    classTypeSymbol.getDeclarations()[0].getSpan(), this.semanticInfoChain);
+
+                prototypeSymbol = new PullSymbol(prototypeStr, PullElementKind.Property);
+                prototypeSymbol.setIsSynthesized();
+                prototypeSymbol.addDeclaration(prototypeDecl);
+                prototypeSymbol.type = classTypeSymbol;
+                constructorTypeSymbol.addMember(prototypeSymbol);
+
+                if (prototypeSymbol.type && prototypeSymbol.type.isGeneric()) {
+                    var resolver = this.semanticInfoChain.getResolver();
+                    prototypeSymbol.type = resolver.instantiateTypeToAny(prototypeSymbol.type, new PullTypeResolutionContext(resolver));
+                }
+                prototypeSymbol.setResolved();
+            }
+        }
+
         // class constructor declarations
-        public bindConstructorDeclarationToPullSymbol(constructorDeclaration: PullDecl) {
+        private bindConstructorDeclarationToPullSymbol(constructorDeclaration: PullDecl) {
             var declKind = constructorDeclaration.kind;
             var declFlags = constructorDeclaration.flags;
-            var constructorAST = <FunctionDeclaration>this.semanticInfo.getASTForDecl(constructorDeclaration);
+            var constructorAST = <ConstructorDeclaration>this.semanticInfoChain.getASTForDecl(constructorDeclaration);
 
             var constructorName = constructorDeclaration.name;
 
@@ -1593,15 +1784,14 @@ module TypeScript {
                 var constructorSigs = constructorSymbol.type.getConstructSignatures();
 
                 for (var i = 0; i < constructorSigs.length; i++) {
-                    if (!constructorSigs[i].hasFlag(PullElementFlags.Signature)) {
+                    if (!constructorSigs[i].anyDeclHasFlag(PullElementFlags.Signature)) {
                         hasDefinitionSignature = true;
                         break;
                     }
                 }
 
                 if (hasDefinitionSignature) {
-                    constructorDeclaration.addDiagnostic(
-                        new Diagnostic(this.semanticInfo.getPath(), constructorAST.minChar, constructorAST.getLength(), DiagnosticCode.Multiple_constructor_implementations_are_not_allowed, null));
+                    this.semanticInfoChain.addDiagnosticFromAST(constructorAST, DiagnosticCode.Multiple_constructor_implementations_are_not_allowed);
 
                     constructorSymbol = null;
                 }
@@ -1623,7 +1813,7 @@ module TypeScript {
             constructorSymbol.addDeclaration(constructorDeclaration);
             constructorTypeSymbol.addDeclaration(constructorDeclaration);
             constructorSymbol.setIsSynthesized(false);
-            this.semanticInfo.setSymbolForAST(constructorAST, constructorSymbol);
+            this.semanticInfoChain.setSymbolForAST(constructorAST, constructorSymbol);
 
             // add a call signature to the constructor method, and a construct signature to the parent class type
             var constructSignature = isSignature ? new PullSignatureSymbol(PullElementKind.ConstructSignature) : new PullDefinitionSignatureSymbol(PullElementKind.ConstructSignature);
@@ -1633,7 +1823,7 @@ module TypeScript {
             constructSignature.addDeclaration(constructorDeclaration);
             constructorDeclaration.setSignatureSymbol(constructSignature);
 
-            this.bindParameterSymbols(constructorAST, constructorTypeSymbol, constructSignature);
+            this.bindParameterSymbols(constructorAST, Parameters.fromParameterList(constructorAST.parameterList), constructorTypeSymbol, constructSignature);
 
             var typeParameters = constructorTypeSymbol.getTypeParameters();
 
@@ -1641,7 +1831,7 @@ module TypeScript {
                 constructSignature.addTypeParameter(typeParameters[i]);
             }
 
-            if (constructorAST.variableArgList) {
+            if (lastParameterIsRest(constructorAST.parameterList)) {
                 constructSignature.hasVarArgs = true;
             }
 
@@ -1654,37 +1844,36 @@ module TypeScript {
                     otherDecls[i].ensureSymbolIsBound();
                 }
             }
+
+            // Create the constructorTypeSymbol
+            this.bindStaticPrototypePropertyOfClass(parent, constructorTypeSymbol);
         }
 
-        public bindConstructSignatureDeclarationToPullSymbol(constructSignatureDeclaration: PullDecl) {
+        private bindConstructSignatureDeclarationToPullSymbol(constructSignatureDeclaration: PullDecl) {
             var parent = this.getParent(constructSignatureDeclaration, true);
-            var constructorAST = <FunctionDeclaration>this.semanticInfo.getASTForDecl(constructSignatureDeclaration);
+            var constructorAST = <ConstructSignature>this.semanticInfoChain.getASTForDecl(constructSignatureDeclaration);
 
             var constructSignature = new PullSignatureSymbol(PullElementKind.ConstructSignature);
 
-            if (constructorAST.variableArgList) {
+            if (lastParameterIsRest(constructorAST.callSignature.parameterList)) {
                 constructSignature.hasVarArgs = true;
             }
 
             var typeParameters = constructSignatureDeclaration.getTypeParameters();
             var typeParameter: PullTypeParameterSymbol;
-            var typeParameterDecls: PullDecl[] = null;
 
             for (var i = 0; i < typeParameters.length; i++) {
 
                 typeParameter = constructSignature.findTypeParameter(typeParameters[i].name);
 
                 if (!typeParameter) {
-                    typeParameter = new PullTypeParameterSymbol(typeParameters[i].name, true);
+                    typeParameter = new PullTypeParameterSymbol(typeParameters[i].name, /*_isFunctionTypeParamter*/ true);
 
                     constructSignature.addTypeParameter(typeParameter);
                 }
                 else {
-                    typeParameterDecls = typeParameter.getDeclarations();
-
-                    var typeParameterAST = this.semanticInfoChain.getASTForDecl(typeParameterDecls[0]);
-                    constructSignatureDeclaration.addDiagnostic(
-                        new Diagnostic(this.semanticInfo.getPath(), typeParameterAST.minChar, typeParameterAST.getLength(), DiagnosticCode.Duplicate_identifier_0, [typeParameter.getName()]));
+                    var typeParameterAST = this.semanticInfoChain.getASTForDecl(typeParameter.getDeclarations()[0]);
+                    this.semanticInfoChain.addDiagnosticFromAST(typeParameterAST, DiagnosticCode.Duplicate_identifier_0, [typeParameter.getName()]);
                 }
 
                 typeParameter.addDeclaration(typeParameters[i]);
@@ -1694,42 +1883,39 @@ module TypeScript {
             constructSignature.addDeclaration(constructSignatureDeclaration);
             constructSignatureDeclaration.setSignatureSymbol(constructSignature);
 
-            this.bindParameterSymbols(<FunctionDeclaration>this.semanticInfo.getASTForDecl(constructSignatureDeclaration), null, constructSignature);
+            var funcDecl = this.semanticInfoChain.getASTForDecl(constructSignatureDeclaration);
+            this.bindParameterSymbols(funcDecl, Parameters.fromParameterList(getParameterList(funcDecl)), null, constructSignature);
 
-            this.semanticInfo.setSymbolForAST(this.semanticInfo.getASTForDecl(constructSignatureDeclaration), constructSignature);
+            this.semanticInfoChain.setSymbolForAST(this.semanticInfoChain.getASTForDecl(constructSignatureDeclaration), constructSignature);
 
             parent.addConstructSignature(constructSignature);
         }
 
-        public bindCallSignatureDeclarationToPullSymbol(callSignatureDeclaration: PullDecl) {
+        private bindCallSignatureDeclarationToPullSymbol(callSignatureDeclaration: PullDecl) {
             var parent = this.getParent(callSignatureDeclaration, true);
-            var callSignatureAST = <FunctionDeclaration>this.semanticInfo.getASTForDecl(callSignatureDeclaration);
+            var callSignatureAST = <CallSignature>this.semanticInfoChain.getASTForDecl(callSignatureDeclaration);
 
             var callSignature = new PullSignatureSymbol(PullElementKind.CallSignature);
 
-            if (callSignatureAST.variableArgList) {
+            if (lastParameterIsRest(callSignatureAST.parameterList)) {
                 callSignature.hasVarArgs = true;
             }
 
             var typeParameters = callSignatureDeclaration.getTypeParameters();
             var typeParameter: PullTypeParameterSymbol;
-            var typeParameterDecls: PullDecl[] = null;
 
             for (var i = 0; i < typeParameters.length; i++) {
 
                 typeParameter = callSignature.findTypeParameter(typeParameters[i].name);
 
                 if (!typeParameter) {
-                    typeParameter = new PullTypeParameterSymbol(typeParameters[i].name, true);
+                    typeParameter = new PullTypeParameterSymbol(typeParameters[i].name, /*_isFunctionTypeParameter*/ true);
 
                     callSignature.addTypeParameter(typeParameter);
                 }
                 else {
-                    typeParameterDecls = typeParameter.getDeclarations();
-
-                    var typeParameterAST = this.semanticInfoChain.getASTForDecl(typeParameterDecls[0]);
-                    callSignatureDeclaration.addDiagnostic(
-                        new Diagnostic(this.semanticInfo.getPath(), typeParameterAST.minChar, typeParameterAST.getLength(), DiagnosticCode.Duplicate_identifier_0, [typeParameter.getName()]));
+                    var typeParameterAST = this.semanticInfoChain.getASTForDecl(typeParameter.getDeclarations()[0]);
+                    this.semanticInfoChain.addDiagnosticFromAST(typeParameterAST, DiagnosticCode.Duplicate_identifier_0, [typeParameter.getName()]);
                 }
 
                 typeParameter.addDeclaration(typeParameters[i]);
@@ -1739,59 +1925,35 @@ module TypeScript {
             callSignature.addDeclaration(callSignatureDeclaration);
             callSignatureDeclaration.setSignatureSymbol(callSignature);
 
-            this.bindParameterSymbols(<FunctionDeclaration>this.semanticInfo.getASTForDecl(callSignatureDeclaration), null, callSignature);
+            var funcDecl = <CallSignature>this.semanticInfoChain.getASTForDecl(callSignatureDeclaration);
+            this.bindParameterSymbols(funcDecl, Parameters.fromParameterList(funcDecl.parameterList), null, callSignature);
 
-            this.semanticInfo.setSymbolForAST(this.semanticInfo.getASTForDecl(callSignatureDeclaration), callSignature);
+            this.semanticInfoChain.setSymbolForAST(this.semanticInfoChain.getASTForDecl(callSignatureDeclaration), callSignature);
 
             parent.addCallSignature(callSignature);
         }
 
-        public bindIndexSignatureDeclarationToPullSymbol(indexSignatureDeclaration: PullDecl) {
-            var parent = this.getParent(indexSignatureDeclaration, true);
-
+        private bindIndexSignatureDeclarationToPullSymbol(indexSignatureDeclaration: PullDecl) {
             var indexSignature = new PullSignatureSymbol(PullElementKind.IndexSignature);
-
-            var typeParameters = indexSignatureDeclaration.getTypeParameters();
-            var typeParameter: PullTypeParameterSymbol;
-            var typeParameterDecls: PullDecl[] = null;
-
-            for (var i = 0; i < typeParameters.length; i++) {
-
-                typeParameter = indexSignature.findTypeParameter(typeParameters[i].name);
-
-                if (!typeParameter) {
-                    typeParameter = new PullTypeParameterSymbol(typeParameters[i].name, true);
-
-                    indexSignature.addTypeParameter(typeParameter);
-                }
-                else {
-                    typeParameterDecls = typeParameter.getDeclarations();
-
-                    var typeParameterAST = this.semanticInfoChain.getASTForDecl(typeParameterDecls[0]);
-                    indexSignatureDeclaration.addDiagnostic(
-                        new Diagnostic(this.semanticInfo.getPath(), typeParameterAST.minChar, typeParameterAST.getLength(), DiagnosticCode.Duplicate_identifier_0, [typeParameter.name]));
-                }
-
-                typeParameter.addDeclaration(typeParameters[i]);
-                typeParameters[i].setSymbol(typeParameter);
-            }
 
             indexSignature.addDeclaration(indexSignatureDeclaration);
             indexSignatureDeclaration.setSignatureSymbol(indexSignature);
 
-            this.bindParameterSymbols(<FunctionDeclaration>this.semanticInfo.getASTForDecl(indexSignatureDeclaration), null, indexSignature);
+            var funcDecl = <IndexSignature>this.semanticInfoChain.getASTForDecl(indexSignatureDeclaration);
+            this.bindParameterSymbols(funcDecl, Parameters.fromParameter(funcDecl.parameter), null, indexSignature);
 
-            this.semanticInfo.setSymbolForAST(this.semanticInfo.getASTForDecl(indexSignatureDeclaration), indexSignature);
+            this.semanticInfoChain.setSymbolForAST(this.semanticInfoChain.getASTForDecl(indexSignatureDeclaration), indexSignature);
 
+            var parent = this.getParent(indexSignatureDeclaration);
             parent.addIndexSignature(indexSignature);
+            indexSignature.setContainer(parent);
         }
 
         // getters and setters
-
-        public bindGetAccessorDeclarationToPullSymbol(getAccessorDeclaration: PullDecl) {
+        private bindGetAccessorDeclarationToPullSymbol(getAccessorDeclaration: PullDecl) {
             var declKind = getAccessorDeclaration.kind;
             var declFlags = getAccessorDeclaration.flags;
-            var funcDeclAST = <FunctionDeclaration>this.semanticInfo.getASTForDecl(getAccessorDeclaration);
+            var funcDeclAST = <GetAccessor>this.semanticInfoChain.getASTForDecl(getAccessorDeclaration);
 
             var isExported = (declFlags & PullElementFlags.Exported) !== 0;
 
@@ -1815,20 +1977,18 @@ module TypeScript {
                 parent = parent.getConstructorMethod().type;
             }
 
-            accessorSymbol = <PullAccessorSymbol>parent.findMember(funcName, false);
+            accessorSymbol = <PullAccessorSymbol>parent.findMember(funcName, /*lookInParent*/ false);
 
             if (accessorSymbol) {
                 if (!accessorSymbol.isAccessor()) {
-                    getAccessorDeclaration.addDiagnostic(
-                        new Diagnostic(this.semanticInfo.getPath(), funcDeclAST.minChar, funcDeclAST.getLength(), DiagnosticCode.Duplicate_identifier_0, [getAccessorDeclaration.getDisplayName()]));
+                    this.semanticInfoChain.addDiagnosticFromAST(funcDeclAST, DiagnosticCode.Duplicate_identifier_0, [getAccessorDeclaration.getDisplayName()]);
                     accessorSymbol = null;
                 }
                 else {
                     getterSymbol = accessorSymbol.getGetter();
 
                     if (getterSymbol) {
-                        getAccessorDeclaration.addDiagnostic(
-                            new Diagnostic(this.semanticInfo.getPath(), funcDeclAST.minChar, funcDeclAST.getLength(), DiagnosticCode.Getter_0_already_declared, [getAccessorDeclaration.getDisplayName()]));
+                        this.semanticInfoChain.addDiagnosticFromAST(funcDeclAST, DiagnosticCode.Getter_0_already_declared, [getAccessorDeclaration.getDisplayName()]);
                         accessorSymbol = null;
                         getterSymbol = null;
                     }
@@ -1862,8 +2022,14 @@ module TypeScript {
             accessorSymbol.addDeclaration(getAccessorDeclaration);
             getterSymbol.addDeclaration(getAccessorDeclaration);
 
-            this.semanticInfo.setSymbolForAST(funcDeclAST.name, getterSymbol);
-            this.semanticInfo.setSymbolForAST(funcDeclAST, getterSymbol);
+            // Note that the name AST binds to the full accessor symbol, whereas the declaration AST
+            // binds to just the getter symbol. This is because when the resolver resolves an
+            // accessor declaration AST, it just expects the getter/setter symbol. But when
+            // the language service looks up the name of an accessor, it should treat it as a
+            // property and display it to the user as such.
+            var nameAST = funcDeclAST.propertyName;
+            this.semanticInfoChain.setSymbolForAST(nameAST, accessorSymbol);
+            this.semanticInfoChain.setSymbolForAST(funcDeclAST, getterSymbol);
 
             if (!parentHadSymbol) {
                 parent.addMember(accessorSymbol);
@@ -1874,24 +2040,16 @@ module TypeScript {
             signature.addDeclaration(getAccessorDeclaration);
             getAccessorDeclaration.setSignatureSymbol(signature);
 
-            this.bindParameterSymbols(<FunctionDeclaration>this.semanticInfo.getASTForDecl(getAccessorDeclaration), getterTypeSymbol, signature);
-
-            var typeParameters = getAccessorDeclaration.getTypeParameters();
-
-            if (typeParameters.length) {
-                getAccessorDeclaration.addDiagnostic(
-                    new Diagnostic(this.semanticInfo.getPath(), funcDeclAST.minChar, funcDeclAST.getLength(),
-                        DiagnosticCode.Accessors_cannot_have_type_parameters, null));
-            }
+            this.bindParameterSymbols(funcDeclAST, Parameters.fromParameterList(funcDeclAST.parameterList), getterTypeSymbol, signature);
 
             // add the implicit call member for this function type
             getterTypeSymbol.addCallSignature(signature);
         }
 
-        public bindSetAccessorDeclarationToPullSymbol(setAccessorDeclaration: PullDecl) {
+        private bindSetAccessorDeclarationToPullSymbol(setAccessorDeclaration: PullDecl) {
             var declKind = setAccessorDeclaration.kind;
             var declFlags = setAccessorDeclaration.flags;
-            var funcDeclAST = <FunctionDeclaration>this.semanticInfo.getASTForDecl(setAccessorDeclaration);
+            var funcDeclAST = <SetAccessor>this.semanticInfoChain.getASTForDecl(setAccessorDeclaration);
 
             var isExported = (declFlags & PullElementFlags.Exported) !== 0;
 
@@ -1915,20 +2073,18 @@ module TypeScript {
                 parent = parent.getConstructorMethod().type;
             }
 
-            accessorSymbol = <PullAccessorSymbol>parent.findMember(funcName, false);
+            accessorSymbol = <PullAccessorSymbol>parent.findMember(funcName, /*lookInParent*/ false);
 
             if (accessorSymbol) {
                 if (!accessorSymbol.isAccessor()) {
-                    setAccessorDeclaration.addDiagnostic(
-                        new Diagnostic(this.semanticInfo.getPath(), funcDeclAST.minChar, funcDeclAST.getLength(), DiagnosticCode.Duplicate_identifier_0, [setAccessorDeclaration.getDisplayName()]));
+                    this.semanticInfoChain.addDiagnosticFromAST(funcDeclAST, DiagnosticCode.Duplicate_identifier_0, [setAccessorDeclaration.getDisplayName()]);
                     accessorSymbol = null;
                 }
                 else {
                     setterSymbol = accessorSymbol.getSetter();
 
                     if (setterSymbol) {
-                        setAccessorDeclaration.addDiagnostic(
-                            new Diagnostic(this.semanticInfo.getPath(), funcDeclAST.minChar, funcDeclAST.getLength(), DiagnosticCode.Setter_0_already_declared, [setAccessorDeclaration.getDisplayName()]));
+                        this.semanticInfoChain.addDiagnosticFromAST(funcDeclAST, DiagnosticCode.Setter_0_already_declared, [setAccessorDeclaration.getDisplayName()]);
                         accessorSymbol = null;
                         setterSymbol = null;
                     }
@@ -1962,8 +2118,15 @@ module TypeScript {
             accessorSymbol.addDeclaration(setAccessorDeclaration);
             setterSymbol.addDeclaration(setAccessorDeclaration);
 
-            this.semanticInfo.setSymbolForAST(funcDeclAST.name, setterSymbol);
-            this.semanticInfo.setSymbolForAST(funcDeclAST, setterSymbol);
+            // Note that the name AST binds to the full accessor symbol, whereas the declaration AST
+            // binds to just the setter symbol. This is because when the resolver resolves an
+            // accessor declaration AST, it just expects the getter/setter symbol. But when
+            // the language service looks up the name of an accessor, it should treat it as a
+            // property and display it to the user as such.
+
+            var nameAST = funcDeclAST.propertyName;
+            this.semanticInfoChain.setSymbolForAST(nameAST, accessorSymbol);
+            this.semanticInfoChain.setSymbolForAST(funcDeclAST, setterSymbol);
 
             if (!parentHadSymbol) {
                 parent.addMember(accessorSymbol);
@@ -1975,14 +2138,7 @@ module TypeScript {
             setAccessorDeclaration.setSignatureSymbol(signature);
 
             // PULLTODO: setter should not have a parameters
-            this.bindParameterSymbols(<FunctionDeclaration>this.semanticInfo.getASTForDecl(setAccessorDeclaration), setterTypeSymbol, signature);
-
-            var typeParameters = setAccessorDeclaration.getTypeParameters();
-
-            if (typeParameters.length) {
-                setAccessorDeclaration.addDiagnostic(
-                    new Diagnostic(this.semanticInfo.getPath(), funcDeclAST.minChar, funcDeclAST.getLength(), DiagnosticCode.Accessors_cannot_have_type_parameters, null));
-            }
+            this.bindParameterSymbols(funcDeclAST, Parameters.fromParameterList(funcDeclAST.parameterList), setterTypeSymbol, signature);
 
             // add the implicit call member for this function type
             setterTypeSymbol.addCallSignature(signature);
@@ -1990,19 +2146,20 @@ module TypeScript {
 
         // binding
         public bindDeclToPullSymbol(decl: PullDecl) {
-
-            if (decl.isBound()) {
+            if (decl.hasBeenBound()) {
+                // The decl has a symbol attached to it
                 return;
             }
 
-            // if (globalLogger) {
-            //     globalLogger.log("Binding " + decl.getName());
-            // }
+            if (this.declsBeingBound.indexOf(decl.declID) >= 0) {
+                // We are already binding it now
+                return;
+            }
 
-            decl.setIsBound(true);
+            // Add it to the list in case we revisit it during binding
+            this.declsBeingBound.push(decl.declID);
 
             switch (decl.kind) {
-
                 case PullElementKind.Script:
                     var childDecls = decl.getChildDecls();
                     for (var i = 0; i < childDecls.length; i++) {
@@ -2011,6 +2168,9 @@ module TypeScript {
                     break;
 
                 case PullElementKind.Enum:
+                    this.bindEnumDeclarationToPullSymbol(decl);
+                    break;
+
                 case PullElementKind.DynamicModule:
                 case PullElementKind.Container:
                     this.bindModuleDeclarationToPullSymbol(decl);
@@ -2032,7 +2192,14 @@ module TypeScript {
                     this.bindVariableDeclarationToPullSymbol(decl);
                     break;
 
+                case PullElementKind.CatchVariable:
+                    this.bindCatchVariableToPullSymbol(decl);
+                    break;
+
                 case PullElementKind.EnumMember:
+                    this.bindEnumMemberDeclarationToPullSymbol(decl);
+                    break;
+
                 case PullElementKind.Property:
                     this.bindPropertyDeclarationToPullSymbol(decl);
                     break;
@@ -2087,7 +2254,9 @@ module TypeScript {
 
                 case PullElementKind.Parameter:
                 case PullElementKind.TypeParameter:
-                    // parameters are bound by their enclosing function or type
+                    // parameters are bound by their enclosing function or type.  Ensure that that
+                    // decl is bound.
+                    decl.getParentDecl().getSymbol();
                     break;
 
                 case PullElementKind.CatchBlock:
@@ -2098,16 +2267,15 @@ module TypeScript {
                 default:
                     CompilerDiagnostics.assert(false, "Unrecognized type declaration");
             }
+
+            // Rremove the decl from the list
+            Debug.assert(ArrayUtilities.last(this.declsBeingBound) === decl.declID);
+            this.declsBeingBound.pop();
         }
 
-        public bindDeclsForUnit(filePath: string) {
-            this.setUnit(filePath);
-
-            var topLevelDecls = this.semanticInfo.getTopLevelDecls();
-
-            for (var i = 0; i < topLevelDecls.length; i++) {
-                this.bindDeclToPullSymbol(topLevelDecls[i]);
-            }
-        }
+        //public bindTopLevelDecl() {
+        //    var topLevelDecl = this.semanticInfoChain.getTopLevelDecl(this.fileName);
+        //    this.bindDeclToPullSymbol(topLevelDecl);
+        //}
     }
 }

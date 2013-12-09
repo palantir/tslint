@@ -13,12 +13,12 @@
 // limitations under the License.
 //
 
-/// <references path="formatting.ts"/>
+/// <reference path="formatting.ts"/>
 
-module TypeScript.Formatting {
+module TypeScript.Services.Formatting {
     export class RulesProvider {
         private globalRules: Rules;
-        private options: Services.FormatCodeOptions;
+        private options: TypeScript.Services.FormatCodeOptions;
         private activeRules: Rule[];
         private rulesMap: RulesMap;
 
@@ -38,18 +38,18 @@ module TypeScript.Formatting {
             return this.rulesMap;
         }
 
-        public ensureUpToDate(options: Services.FormatCodeOptions) {
-            if (this.options == null || !Services.compareDataObjects(this.options, options)) {
+        public ensureUpToDate(options: TypeScript.Services.FormatCodeOptions) {
+            if (this.options == null || !TypeScript.compareDataObjects(this.options, options)) {
                 var activeRules: Rule[] = TypeScript.timeFunction(this.logger, "RulesProvider: createActiveRules()", () => { return this.createActiveRules(options); });
                 var rulesMap: RulesMap = TypeScript.timeFunction(this.logger, "RulesProvider: RulesMap.create()", () => { return RulesMap.create(activeRules); });
 
                 this.activeRules = activeRules;
                 this.rulesMap = rulesMap;
-                this.options = Services.FormatCodeOptions.clone(options);
+                this.options = TypeScript.Services.FormatCodeOptions.clone(options);
             }
         }
 
-        private createActiveRules(options: Services.FormatCodeOptions): Rule[] {
+        private createActiveRules(options: TypeScript.Services.FormatCodeOptions): Rule[] {
             var rules = this.globalRules.HighPriorityCommonRules.slice(0);
 
             if (options.InsertSpaceAfterCommaDelimiter) {

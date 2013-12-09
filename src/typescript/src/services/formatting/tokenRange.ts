@@ -15,7 +15,7 @@
 
 ///<reference path='formatting.ts' />
 
-module TypeScript.Formatting {
+module TypeScript.Services.Formatting {
     export module Shared {
         export interface ITokenAccess {
             GetTokens(): SyntaxKind[];
