@@ -26,7 +26,7 @@ module Lint {
         var compilationSettings = createCompilationSettings();
         var settings = TypeScript.ImmutableCompilationSettings.fromCompilationSettings(compilationSettings);
 
-        return TypeScript.Parser.parse(fileName, text, isDTSFile, TypeScript.getParseOptions(settings));        
+        return TypeScript.Parser.parse(fileName, text, isDTSFile, TypeScript.getParseOptions(settings));
     }
 
     function createCompilationSettings(): TypeScript.CompilationSettings {
