@@ -1,4 +1,5 @@
 .gitmodules
+.project
 .travis.yml
 .tslintrc
 Gruntfile.js
