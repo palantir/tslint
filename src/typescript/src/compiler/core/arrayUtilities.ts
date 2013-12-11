@@ -6,7 +6,7 @@ module TypeScript {
             return Object.prototype.toString.apply(value, []) === '[object Array]';
         }
 
-        public static sequenceEquals(array1: any[], array2: any[], equals: (v1: any, v2: any) => boolean) {
+        public static sequenceEquals<T>(array1: T[], array2: T[], equals: (v1: T, v2: T) => boolean) {
             if (array1 === array2) {
                 return true;
             }
@@ -28,7 +28,7 @@ module TypeScript {
             return true;
         }
 
-        public static contains(array: any[], value: any): boolean {
+        public static contains<T>(array: T[], value: T): boolean {
             for (var i = 0; i < array.length; i++) {
                 if (array[i] === value) {
                     return true;
@@ -53,7 +53,29 @@ module TypeScript {
             return result;
         }
 
-        public static min(array: any[], func: (v: any) => number): number {
+
+        // Gets unique element array
+        public static distinct<T>(array: T[], equalsFn?: (a: T, b: T) => boolean): T[] {
+            var result: T[] = [];
+
+            // TODO: use map when available
+            for (var i = 0, n = array.length; i < n; i++) {
+                var current = array[i];
+                for (var j = 0; j < result.length; j++) {
+                    if (equalsFn(result[j], current)) {
+                        break;
+                    }
+                }
+
+                if (j === result.length) {
+                    result.push(current);
+                }
+            }
+
+            return result;
+        }
+
+        public static min<T>(array: T[], func: (v: T) => number): number {
             // Debug.assert(array.length > 0);
             var min = func(array[0]);
 
@@ -67,7 +89,7 @@ module TypeScript {
             return min;
         }
 
-        public static max(array: any[], func: (v: any) => number): number {
+        public static max<T>(array: T[], func: (v: T) => number): number {
             // Debug.assert(array.length > 0);
             var max = func(array[0]);
 
@@ -89,15 +111,37 @@ module TypeScript {
             return array[array.length - 1];
         }
 
-        public static firstOrDefault<T>(array: T[], func: (v: T) => boolean): T {
+        public static lastOrDefault<T>(array: T[], predicate: (v: T, index: number) => boolean): T {
+            for (var i = array.length - 1; i >= 0; i--) {
+                var v = array[i];
+                if (predicate(v, i)) {
+                    return v;
+                }
+            }
+
+            return null;
+        }
+
+        public static firstOrDefault<T>(array: T[], func: (v: T, index: number) => boolean): T {
             for (var i = 0, n = array.length; i < n; i++) {
                 var value = array[i];
-                if (func(value)) {
+                if (func(value, i)) {
                     return value;
                 }
             }
 
             return null;
+        }
+
+        public static first<T>(array: T[], func?: (v: T, index: number) => boolean): T {
+            for (var i = 0, n = array.length; i < n; i++) {
+                var value = array[i];
+                if (!func || func(value, i)) {
+                    return value;
+                }
+            }
+
+            throw Errors.invalidOperation();
         }
 
         public static sum<T>(array: T[], func: (v: T) => number): number {
@@ -110,20 +154,8 @@ module TypeScript {
             return result;
         }
 
-        public static whereNotNull<T>(array: T[]): T[] {
-            var result: T[] = [];
-            for (var i = 0; i < array.length; i++) {
-                var value: T = array[i];
-                if (value !== null) {
-                    result.push(value);
-                }
-            }
-
-            return result;
-        }
-
         public static select<T,S>(values: T[], func: (v: T) => S): S[] {
-            var result: S[] = new Array(values.length);
+            var result: S[] = new Array<S>(values.length);
 
             for (var i = 0; i < values.length; i++) {
                 result[i] = func(values[i]);
@@ -206,6 +238,16 @@ module TypeScript {
             for (var i = 0; i < length; i++) {
                 destinationArray[destinationIndex + i] = sourceArray[sourceIndex + i];
             }
+        }
+
+        public static indexOf<T>(array: T[], predicate: (v: T) => boolean): number {
+            for (var i = 0, n = array.length; i < n; i++) {
+                if (predicate(array[i])) {
+                    return i;
+                }
+            }
+
+            return -1;
         }
     }
 }

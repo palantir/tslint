@@ -5,6 +5,9 @@ module TypeScript {
         public static isDecimalDigit(c: number): boolean {
             return c >= CharacterCodes._0 && c <= CharacterCodes._9;
         }
+        public static isOctalDigit(c: number): boolean {
+            return c >= CharacterCodes._0 && c <= CharacterCodes._7;
+        }
 
         public static isHexDigit(c: number): boolean {
             return CharacterInfo.isDecimalDigit(c) ||

@@ -3,11 +3,11 @@
 module TypeScript.Collections {
     export var DefaultHashTableCapacity = 1024;
 
-    class HashTableEntry<TKey, TValue> {
-        constructor(public Key: TKey,
-                    public Value: TValue,
+    class HashTableEntry<TEntryKey, TEntryValue> {
+        constructor(public Key: TEntryKey,
+                    public Value: TEntryValue,
                     public HashCode: number,
-                    public Next: HashTableEntry<TKey,TValue>) {
+                    public Next: HashTableEntry<TEntryKey,TEntryValue>) {
         }
     }
 
@@ -18,7 +18,7 @@ module TypeScript.Collections {
         constructor(capacity: number,
                     private hash: (k: TKey) => number) {
             var size = Hash.getPrime(capacity);
-            this.entries = ArrayUtilities.createArray(size, null);
+            this.entries = ArrayUtilities.createArray<HashTableEntry<TKey, TValue>>(size, null);
         }
 
         // Maps 'key' to 'value' in this table.  Does not throw if 'key' is already in the table.
@@ -62,7 +62,7 @@ module TypeScript.Collections {
             var entry = this.findEntry(key, hashCode);
             if (entry !== null) {
                 if (throwOnExistingEntry) {
-                    throw Errors.argument('key', getLocalizedText(DiagnosticCode.Key_was_already_in_table, null));
+                    throw Errors.argument('key', "Key was already in table.");
                 }
 
                 entry.Key = key;
@@ -88,7 +88,7 @@ module TypeScript.Collections {
         private addEntry(key: TKey, value: TValue, hashCode: number): TKey {
             var index = hashCode % this.entries.length;
 
-            var e = new HashTableEntry<TKey,TValue>(key, value, hashCode, this.entries[index]);
+            var e = new HashTableEntry(key, value, hashCode, this.entries[index]);
 
             this.entries[index] = e;
 
@@ -126,7 +126,7 @@ module TypeScript.Collections {
             var newSize = Hash.expandPrime(this.entries.length);
 
             var oldEntries = this.entries;
-            var newEntries: HashTableEntry<TKey,TValue>[] = ArrayUtilities.createArray(newSize, null);
+            var newEntries: HashTableEntry<TKey, TValue>[] = ArrayUtilities.createArray<HashTableEntry<TKey, TValue>>(newSize, null);
 
             this.entries = newEntries;
 

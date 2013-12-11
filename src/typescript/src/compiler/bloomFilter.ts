@@ -81,7 +81,7 @@ module TypeScript {
             return Hash.computeMurmur2StringHashCode(key, seed);
         }
 
-        public addKeys(keys: BlockIntrinsics) {
+        public addKeys(keys: IIndexable<any>) {
             for (var name in keys) {
                 if (keys[name]) {
                     this.add(name);

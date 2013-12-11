@@ -4,29 +4,63 @@
 
 ///<reference path='typescriptServices.ts' />
 
-module Services {
-
+module TypeScript.Services {
     export class FindReferenceHelpers {
-        public static getCorrectASTForReferencedSymbolName(matchingAST: TypeScript.AST, symbolName: string): TypeScript.AST {
-
-            if (matchingAST.nodeType() == TypeScript.NodeType.MemberAccessExpression) {
-                var binaryExpression: TypeScript.BinaryExpression = <TypeScript.BinaryExpression>matchingAST;
-                var identifierOperand1: TypeScript.Identifier = <TypeScript.Identifier>binaryExpression.operand1;
-                var identifierOperand2: TypeScript.Identifier = <TypeScript.Identifier>binaryExpression.operand2;
-                if (identifierOperand1.actualText === symbolName) {
-                    return binaryExpression.operand1;
-                }
-                else if (identifierOperand2.actualText === symbolName) {
-                    return binaryExpression.operand2;
+        public static compareSymbolsForLexicalIdentity(firstSymbol: TypeScript.PullSymbol, secondSymbol: TypeScript.PullSymbol): boolean {
+            // Unwrap modules so that we're always referring to the variable.
+            if (!firstSymbol.isAlias() && firstSymbol.isContainer()) {
+                var containerForFirstSymbol = (<TypeScript.PullContainerSymbol>firstSymbol);
+                if (containerForFirstSymbol.getInstanceSymbol()) {
+                    firstSymbol = containerForFirstSymbol.getInstanceSymbol();
                 }
             }
-            return matchingAST;
-        }
 
-        public static compareSymbolsForLexicalIdentity(firstSymbol: TypeScript.PullSymbol, secondSymbol: TypeScript.PullSymbol): boolean {
-            if (firstSymbol.kind === secondSymbol.kind)
-            {
-                return firstSymbol === secondSymbol;
+            if (!secondSymbol.isAlias() && secondSymbol.isContainer()) {
+                var containerForSecondSymbol = (<TypeScript.PullContainerSymbol>secondSymbol);
+                if (containerForSecondSymbol.getInstanceSymbol()) {
+                    secondSymbol = containerForSecondSymbol.getInstanceSymbol();
+                }
+            }
+
+            if (firstSymbol.kind === secondSymbol.kind) {
+                if (firstSymbol === secondSymbol) {
+                    return true;
+                }
+
+                // If we have two variables and they have the same name and the same parent, then 
+                // they are the same symbol.
+                if (firstSymbol.kind === TypeScript.PullElementKind.Variable &&
+                    firstSymbol.name === secondSymbol.name &&
+                    firstSymbol.getDeclarations() && firstSymbol.getDeclarations().length >= 1 &&
+                    secondSymbol.getDeclarations() && secondSymbol.getDeclarations().length >= 1) {
+
+                    var firstSymbolDecl = firstSymbol.getDeclarations()[0];
+                    var secondSymbolDecl = secondSymbol.getDeclarations()[0];
+
+                    return firstSymbolDecl.getParentDecl() === secondSymbolDecl.getParentDecl();
+                }
+
+                // If we have two properties that belong to an object literal, then we need ot see
+                // if they came from teh same object literal ast.
+                if (firstSymbol.kind === TypeScript.PullElementKind.Property &&
+                    firstSymbol.name === secondSymbol.name &&
+                    firstSymbol.getDeclarations() && firstSymbol.getDeclarations().length >= 1 &&
+                    secondSymbol.getDeclarations() && secondSymbol.getDeclarations().length >= 1) {
+
+                    var firstSymbolDecl = firstSymbol.getDeclarations()[0];
+                    var secondSymbolDecl = secondSymbol.getDeclarations()[0];
+
+                    var firstParentDecl = firstSymbolDecl.getParentDecl();
+                    var secondParentDecl = secondSymbolDecl.getParentDecl()
+
+                    if (firstParentDecl.kind === TypeScript.PullElementKind.ObjectLiteral &&
+                        secondParentDecl.kind === TypeScript.PullElementKind.ObjectLiteral) {
+
+                        return firstParentDecl.ast() === secondParentDecl.ast();
+                    }
+                }
+
+                return false;
             }
             else {
                 switch (firstSymbol.kind) {
@@ -46,7 +80,7 @@ module Services {
                                 return true;
                             }
                         }
-                        return false;   
+                        return false;
                     }
                     case TypeScript.PullElementKind.Function: {
                         if (secondSymbol.isAccessor()) {

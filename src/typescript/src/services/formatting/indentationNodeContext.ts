@@ -15,7 +15,7 @@
 
 ///<reference path='formatting.ts' />
 
-module TypeScript.Formatting {
+module TypeScript.Services.Formatting {
     export class IndentationNodeContext {
         private _node: SyntaxNode;
         private _parent: IndentationNodeContext;

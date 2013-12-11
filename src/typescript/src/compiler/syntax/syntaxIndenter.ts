@@ -156,7 +156,7 @@ module TypeScript {
             // with a newline.  The indenter will track that for us.
 
             var indenter = new SyntaxIndenter(indentFirstToken, indentAmount, options);
-            var result: SyntaxNode[] = ArrayUtilities.select(nodes, n => n.accept(indenter));
+            var result: SyntaxNode[] = ArrayUtilities.select<any, any>(nodes, n => n.accept(indenter));
 
             return result;
         }

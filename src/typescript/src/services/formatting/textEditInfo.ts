@@ -15,7 +15,7 @@
 
 ///<reference path='formatting.ts' />
 
-module TypeScript.Formatting {
+module TypeScript.Services.Formatting {
     export class TextEditInfo {
 
         constructor(public position: number, public length: number, public replaceWith: string) {

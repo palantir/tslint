@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 
-///<reference path='typescript.ts' />
+///<reference path='references.ts' />
 
 module TypeScript {
     export module CompilerDiagnostics {
@@ -46,10 +46,6 @@ module TypeScript {
             }
         }
 
-    }
-
-    export interface IDiagnosticReporter {
-        addDiagnostic(diagnostic: TypeScript.Diagnostic): void;
     }
 
     export interface ILogger {

@@ -60,7 +60,7 @@ module.exports = function(grunt) {
           target: 'es5'
         },
         src: ['lib/tslint.d.ts', 'src/rules/*.ts'],
-        dest: ['build/rules/']
+        dest: 'build/rules/'
       },
 
       core_formatters: {
@@ -70,7 +70,7 @@ module.exports = function(grunt) {
           target: 'es5'
         },
         src: ['lib/tslint.d.ts', 'src/formatters/*.ts'],
-        dest: ['build/formatters/']
+        dest: 'build/formatters/'
       },
 
       test: {

@@ -24,7 +24,7 @@ declare var run: any;
 declare var __dirname: any; // Node-specific
 
 function switchToForwardSlashes(path: string) {
-    return path.replace(/\\/g, "/");
+    return path.replace(/\\/g, "/").replace(/\/\//g, '/');
 }
 
 function filePath(fullPath: string) {
@@ -34,8 +34,8 @@ function filePath(fullPath: string) {
     return path.join("/") + "/";
 }
 
-var typescriptServiceFileName = filePath(IO.getExecutingFilePath()) + "typescriptServices.js";
-var typescriptServiceFile = IO.readFile(typescriptServiceFileName).contents;
+var typescriptServiceFileName = filePath(TypeScript.IO.getExecutingFilePath()) + "typescriptServices.js";
+var typescriptServiceFile = TypeScript.IO.readFile(typescriptServiceFileName, /*codepage:*/ null).contents;
 if (typeof ActiveXObject === "function") {
     eval(typescriptServiceFile);
 } else if (typeof require === "function") {
@@ -51,6 +51,10 @@ declare module process {
 }
 
 module Harness {
+    export interface SourceMapEmitterCallback {
+        (emittedFile: string, emittedLine: number, emittedColumn: number, sourceFile: string, sourceLine: number, sourceColumn: number, sourceName: string): void;
+    }
+
     // Settings 
     export var userSpecifiedroot = "";
     var global = <any>Function("return this").call(null);
@@ -110,7 +114,7 @@ module Harness {
         export function arrayLengthIs(arr: any[], length: number) {
             if (arr.length != length) {
                 var actual = '';
-                arr.forEach(n => actual = actual + '\n      ' + n.toString());
+                arr.forEach(n => actual = actual + '\n      ' + JSON.stringify(n));
                 throwAssertError(new Error('Expected array to have ' + length + ' elements. Found ' + arr.length + '. Actual elements were:' + actual));
             }
         }
@@ -218,7 +222,7 @@ module Harness {
             path = "tests/" + path;
         }
 
-        var content = IO.readFile(Harness.userSpecifiedroot + path);
+        var content = TypeScript.IO.readFile(Harness.userSpecifiedroot + path, /*codepage:*/ null);
         if (content === null) {
             throw new Error("failed to read file at: '" + Harness.userSpecifiedroot + path + "'");
         }
@@ -337,7 +341,7 @@ module Harness {
 
         public runChild(index: number, done: IDone) {
             var that = this;
-            return this.call(<any>((done) => that.children[index].run(done)), done);
+            return this.call(<any>((done: IDone) => that.children[index].run(done)), done);
         }
 
         static errorHandlerStack: { (e: Error): void; }[] = [];
@@ -354,7 +358,7 @@ module Harness {
 
         static handleError(e: Error) {
             if (Runnable.errorHandlerStack.length === 0) {
-                IO.printLine('Global error: ' + e);
+                TypeScript.IO.printLine('Global error: ' + e);
             } else {
                 Runnable.errorHandlerStack[Runnable.errorHandlerStack.length - 1](e);
             }
@@ -383,7 +387,7 @@ module Harness {
             emitLog('testStart', { desc: this.description });
 
             if (this.block) {
-                var async = this.runBlock(<any>function (e) {
+                var async = this.runBlock(<any>function (e: Error) {
                     if (e) {
                         that.passed = false;
                         that.error = e;
@@ -421,7 +425,7 @@ module Harness {
 
             emitLog('scenarioStart', { desc: this.description });
 
-            var async = this.runBlock(<any>function (e) {
+            var async = this.runBlock(<any>function (e:Error) {
                 Runnable.currentStack.pop();
                 if (e) {
                     that.passed = false;
@@ -447,7 +451,7 @@ module Harness {
             var async = false;
 
             for (; index < this.children.length; index++) {
-                async = this.runChild(index, <any>function (e) {
+                async = this.runChild(index, <any>function (e: Error) {
                     that.passed = that.passed && that.children[index].passed;
 
                     if (async)
@@ -485,7 +489,7 @@ module Harness {
                 // Clear out bug descriptions
                 assert.bugIds = [];
 
-                async = this.runChild(index, <any>function (e) {
+                async = this.runChild(index, <any>function (e: Error) {
                     if (async) {
                         that.runChildren(index + 1);
                     }
@@ -693,30 +697,35 @@ module Harness {
          */
         export class WriterAggregator implements ITextWriter {
             public lines: string[] = [];
-            public currentLine = "";
+            public currentLine = <string>undefined;
 
             public Write(str: string) {
-                this.currentLine += str;
+                this.currentLine = (this.currentLine || '') + str;
             }
 
             public WriteLine(str: string) {
-                this.lines.push(this.currentLine + str);
-                this.currentLine = "";
+                this.lines.push((this.currentLine || '') + str);
+                this.currentLine = undefined;
             }
 
             public Close() {
-                if (this.currentLine.length > 0) { this.lines.push(this.currentLine); }
-                this.currentLine = "";
+                if (this.currentLine !== undefined) { this.lines.push(this.currentLine); }
+                this.currentLine = undefined;
             }
 
             public reset() {
                 this.lines = [];
-                this.currentLine = "";
+                this.currentLine = undefined;
             }
         }
 
+        export interface IEmitterIOHost {
+            writeFile(path: string, contents: string, writeByteOrderMark: boolean): void;
+            resolvePath(path: string): string;
+        }
+
         /** Mimics having multiple files, later concatenated to a single file. */
-        export class EmitterIOHost implements TypeScript.EmitterIOHost {
+        export class EmitterIOHost implements IEmitterIOHost {
             private fileCollection = {};
 
             /** create file gets the whole path to create, so this works as expected with the --out parameter */
@@ -734,8 +743,6 @@ module Harness {
                 writer.Close();
             }
 
-            public directoryExists(s: string) { return false; }
-            public fileExists(s: string) { return typeof this.fileCollection[s] !== 'undefined'; }
             public resolvePath(s: string) { return s; }
 
             public reset() { this.fileCollection = {}; }
@@ -756,40 +763,64 @@ module Harness {
         }
 
         var libFolder: string = global['WScript'] ? TypeScript.filePath(global['WScript'].ScriptFullName) : (__dirname + '/');
-        export var libText = IO ? IO.readFile(libFolder + "lib.d.ts").contents : '';
-        export var libTextMinimal = IO ? IO.readFile(libFolder + "../../tests/minimal.lib.d.ts").contents : '';
+        export var libText = TypeScript.IO ? TypeScript.IO.readFile(libFolder + "lib.d.ts", /*codepage:*/ null).contents : '';
+        export var libTextMinimal = TypeScript.IO ? TypeScript.IO.readFile(libFolder + "../../tests/minimal.lib.d.ts", /*codepage:*/ null).contents : '';
+
+        export enum ErrorType {
+            Resolution,
+            Syntactic,
+            Semantic,
+            Emit,
+            Declaration
+        }
+
+        export interface ReportedError {
+            errorType: ErrorType;
+            fileName: string;
+            line: number;
+            column: number;
+            length: number;
+            message: string;
+        }
 
         /** This is the harness's own version of the batch compiler that encapsulates state about resolution */
         export class HarnessCompiler implements TypeScript.IReferenceResolverHost {
             private inputFiles: string[] = [];
             private resolvedFiles: TypeScript.IResolvedFile[] = [];
-            private useMinimalDefaultLib: boolean;
             private compiler: TypeScript.TypeScriptCompiler;
-            // updateSourceUnit is sufficient if an existing unit is updated, if a new unit is added we need to do a full typecheck
-            private needsFullTypeCheck = true;
-            private fileNameToScriptSnapshot = new TypeScript.StringHashTable();
-            
-            constructor(useMinimalDefaultLib = true, noImplicitAny = false) {
-                this.useMinimalDefaultLib = useMinimalDefaultLib;
+            private fileNameToScriptSnapshot = new TypeScript.StringHashTable<TypeScript.IScriptSnapshot>();
+            public ioHost = new Harness.Compiler.EmitterIOHost();
+            private sourcemapRecorder = new WriterAggregator();
+
+            private errorList: ReportedError[] = [];
+            private useMinimalDefaultLib: boolean;
+
+            constructor(options?: { useMinimalDefaultLib: boolean; noImplicitAny: boolean; }) {
                 this.compiler = new TypeScript.TypeScriptCompiler();
-                this.compiler.settings = makeDefaultCompilerSettings(useMinimalDefaultLib, noImplicitAny);
-                var libCode = useMinimalDefaultLib ? Compiler.libTextMinimal : Compiler.libText;
-                this.compiler.addSourceUnit("lib.d.ts", TypeScript.ScriptSnapshot.fromString(libCode), ByteOrderMark.None, /*version:*/ 0, /*isOpen:*/ false);
+                this.useMinimalDefaultLib = options ? options.useMinimalDefaultLib : true;
+                var settings = makeDefaultCompilerSettings(options);
+                //settings.moduleGenTarget = TypeScript.ModuleGenTarget.Unspecified;
+                settings.codeGenTarget = TypeScript.LanguageVersion.EcmaScript5;
+                this.compiler.setCompilationSettings(
+                    TypeScript.ImmutableCompilationSettings.fromCompilationSettings(settings));
+
+                var libCode = this.useMinimalDefaultLib ? Compiler.libTextMinimal : Compiler.libText;
+                this.compiler.addFile("lib.d.ts", TypeScript.ScriptSnapshot.fromString(libCode), TypeScript.ByteOrderMark.None, /*version:*/ 0, /*isOpen:*/ false);
             }
 
-            private resolve() {
+            public resolve() {
                 var resolvedFiles: TypeScript.IResolvedFile[] = [];
 
                 // This is the branch that we want to use to ensure proper testing of file resolution, though there is an alternative
-                if (!this.compiler.settings.noResolve) {
+                if (!this.compiler.compilationSettings().noResolve()) {
                     // Resolve references
-                    var resolutionResults = TypeScript.ReferenceResolver.resolve(this.inputFiles, this, this.compiler.settings);
+                    var resolutionResults = TypeScript.ReferenceResolver.resolve(
+                        this.inputFiles,
+                        this,
+                        this.compiler.compilationSettings().useCaseSensitiveFileResolution()
+                    );
                     resolvedFiles = resolutionResults.resolvedFiles;
-
-                    // TODO: make HarnessCompiler implement TypeScript.IDiagnosticReporter so resolution errors are reported here
-                    for (var i = 0, n = resolutionResults.diagnostics.length; i < n; i++) {
-                        //this.compiler.addDiagnostic(resolutionResults.diagnostics[i]);
-                    }
+                    resolutionResults.diagnostics.forEach(diag => this.addError(ErrorType.Resolution, diag));
                 }
                 else {
                     for (var i = 0, n = this.inputFiles.length; i < n; i++) {
@@ -798,9 +829,9 @@ module Harness {
                         var importedFiles: string[] = [];
 
                         // If declaration files are going to be emitted, preprocess the file contents and add in referenced files as well
-                        if (this.compiler.settings.generateDeclarationFiles) {
+                        if (this.compiler.compilationSettings().generateDeclarationFiles()) {
                             var references = TypeScript.getReferencedFiles(inputFile, this.getScriptSnapshot(inputFile));
-                            references.forEach((reference) => { referencedFiles.push(reference.path); });
+                            references.forEach(reference => { referencedFiles.push(reference.path); });
                         }
 
                         resolvedFiles.push({
@@ -821,176 +852,222 @@ module Harness {
                 // Prepend the library to the resolved list
                 resolvedFiles = [libraryResolvedFile].concat(resolvedFiles);
 
-                this.resolvedFiles = resolvedFiles;
+                return resolvedFiles.map(file => {
+                    return <TypeScript.IResolvedFile>
+                        {
+                            path: switchToForwardSlashes(file.path),
+                            referencedFiles: file.referencedFiles,
+                            importedFiles: file.importedFiles
+                        }
+                    });
             }
 
-            public compile(resolve = true) {
+            /* Compile the current set of input files (if resolve = false) or trigger resolution and compile the resulting set of files */
+            public compile(options?: { noResolve: boolean }) {
                 // TODO: unsure I actually need resolve = false for unit tests
                 var addScriptSnapshot = (path: string, referencedFiles?: string[]) => {
-                    var scriptSnapshot = this.getScriptSnapshot(path);
                     if (path.indexOf('lib.d.ts') === -1) {
-                        this.compiler.addSourceUnit(path, scriptSnapshot, /*BOM*/ null, /*version:*/ 0, /*isOpen:*/ false, referencedFiles);
+                        var scriptSnapshot = this.getScriptSnapshot(path);
+                        this.compiler.addFile(path, scriptSnapshot, /*BOM*/ null, /*version:*/ 0, /*isOpen:*/ false, referencedFiles);
                     }
                 }
 
-                if (resolve) {
-                    this.resolve();
-                    for (var i = 0, n = this.resolvedFiles.length; i < n; i++) {
-                        var resolvedFile = this.resolvedFiles[i];
-                        addScriptSnapshot(resolvedFile.path, resolvedFile.referencedFiles);
-                    }
-                }
-                else {
+                if (options && options.noResolve) {
                     for (var i = 0, n = this.inputFiles.length; i < n; i++) {
                         var inputFile = this.inputFiles[i];
                         addScriptSnapshot(inputFile, []);
                     }
                 }
-
-                if (this.needsFullTypeCheck) {
-                    this.compiler.pullTypeCheck();
-                    if (!resolve) {
-                        // TODO: not sure this is necessary anymore
-                        this.compiler.resolveAllFiles();
-                    }
-                    this.needsFullTypeCheck = false;
-                }
-                else {
-                    // don't only use inputFiles in case someone has used addSourceUnit
-                    this.getAllFilesInCompiler().forEach(file => {
-                        this.compiler.updateSourceUnit(file, this.getScriptSnapshot(file), 0, true, null);
-                    });
-                }
-            }
-
-            public reset() {
-                stdout.reset();
-                stderr.reset();
-                var files = this.getAllFilesInCompiler();
-                
-                for (var i = 0; i < files.length; i++) {
-                    // TODO: need to handle paths correctly in the future (ex when projects tests become compiler baselines)
-                    var justName = getFileName(files[i]);
-                    var fname = files[i];
-                    if (justName !== 'lib.d.ts' && justName !== 'fourslash.ts') {
-                        this.updateUnit('', fname);
+                else {                    
+                    this.resolvedFiles = this.resolve();
+                    for (var i = 0, n = this.resolvedFiles.length; i < n; i++) {
+                        var resolvedFile = this.resolvedFiles[i];
+                        addScriptSnapshot(resolvedFile.path, resolvedFile.referencedFiles);
                     }
                 }
-
-                this.deleteAllUnits();
-
-                // TODO: make sure we're actually re-using the existing lib.d.ts for perf savings
-                if (this.inputFiles) {
-                    this.inputFiles = this.inputFiles.filter(file => file.indexOf('lib.d.ts') > -1);
-                }
-                if (this.resolvedFiles) {
-                    this.resolvedFiles = this.resolvedFiles.filter(file => file.path.indexOf('lib.d.ts') > -1);
-                }
-            }
-            public getAllFilesInCompiler() {
-                return this.compiler.fileNameToDocument.getAllKeys();
             }
 
-            public getDocumentFromCompiler(documentName: string) {
-                return this.compiler.getDocument(documentName);
-            }
+            /* Compiles the provided files with file resolution enabled and the given compiler settings 
+             * inputFiles is the set of files equivalent to what you would pass to your command line tsc invocation
+             * otherFiles is a set of file information for other files that the input files need, but which do not actually exist on the file system
+             * due to how we write multi-file tests in a single source file.
+            */
+            public compileFiles(
+                inputFiles: { unitName: string; content: string }[],
+                otherFiles: { unitName: string; content?: string }[],
+                onComplete: (result: CompilerResult) => void,
+                settingsCallback?: (settings: TypeScript.ImmutableCompilationSettings) => void,
+                options?: { noResolve: boolean }) {
 
-            public getTypeInfoAtPosition(targetPosition: number, document: TypeScript.Document) {
-                return this.compiler.pullGetTypeInfoAtPosition(targetPosition, document);
-            }
-
-            /** Use only when you want to add a piece of code to the compiler without invoking reference resolution on it */
-            public addSourceUnit(code: string, unitName: string, isDeclareFile?: boolean, references?: string[]) {
-                this.needsFullTypeCheck = true;
-
-                var script: TypeScript.Script = null;
-                var uName = unitName || '0' + (isDeclareFile ? '.d.ts' : '.ts');
-
-                var fileNames = this.getAllFilesInCompiler();
-                for (var i = 0; i < fileNames.length; i++) {
-                    if (fileNames[i] === uName) {
-                        this.updateUnit(code, uName);
-                        script = this.getDocumentFromCompiler(fileNames[i]).script;
-                    }
-                }
-
-                if (!script) {
-                    var document = this.compiler.addSourceUnit(uName, TypeScript.ScriptSnapshot.fromString(code),
-                        ByteOrderMark.None, /*version:*/ 0, /*isOpen:*/ true, references);
-                    script = document.script;
-                    this.needsFullTypeCheck = true;
-                }
-            }
-
-            /** Used for general purpose addition of code units, equivalent to adding the file to the command line list of files for a compilation */
-            public addInputFile(unitName: string) {
-                this.needsFullTypeCheck = true;
-                this.inputFiles.push(unitName);
-            }
-
-            /** Updates an existing unit in the compiler with new code. */
-            public updateUnit(code: string, unitName: string) {
-                this.compiler.updateSourceUnit(unitName, TypeScript.ScriptSnapshot.fromString(code), /*version:*/ 0, /*isOpen:*/ true, null);
-            }
-
-            /** Removes all non-lib.d.ts units of code from the compiler's internal data structures */
-            private deleteAllUnits() {
-                // The compiler uses fileNameToDocument as a map of what currently exists in a compilation session
-                // deleting units just means replacing that table with a new one containing the units we want                
-                var newTable = new TypeScript.StringHashTable<TypeScript.Document>();
-                var document = this.compiler.getDocument('lib.d.ts');
-                newTable.add('lib.d.ts', document);
-                // TODO: Blocked by 712326
-                // This function was original deleteUnit(unitName:string) but the below doesn't work
-                // so we'll just delete all units. Would be nice to have more precision in what's deleted.
-                //this.compiler.fileNameToDocument.map((key: string, doc: TypeScript.Document, ctxt) => {
-                //    if (key !== unitName) {
-                //        newTable.add(key, doc);
-                //    }
-                //});
-                this.compiler.fileNameToDocument = newTable;
-            }
-
-            public compileUnit(fileName: string, callback: (res: { commonJSResult: Compiler.CompilerResult; amdResult: Compiler.CompilerResult; }) => void , settingsCallback?: (settings?: TypeScript.CompilationSettings) => void, references?: string[]) {
                 var restoreSavedCompilerSettings = this.saveCompilerSettings();
+                this.reset();
+
+                this.addInputFiles(inputFiles);
+                otherFiles.forEach(file => this.registerFile(file.unitName, file.content));
 
                 if (settingsCallback) {
-                    settingsCallback(this.compiler.settings);
-                    this.compiler.emitOptions = new TypeScript.EmitOptions(this.compiler.settings);
+                    settingsCallback(this.compiler.compilationSettings());
                 }
 
                 try {
-                    this.compileStringForCommonJSAndAMD(fileName, callback, references);
+                    this.compile(options);
+
+                    this.reportCompilationErrors();
+                    var result = new CompilerResult(this.ioHost.toArray(), this.errorList.slice(0), this.sourcemapRecorder.lines);
+
+                    onComplete(result);
                 } finally {
-                    // If settingsCallback exists, assume that it modified the compiler instance's settings in some way.
-                    // So that a test doesn't have side effects for tests run after it, restore the compiler settings to their previous state.
                     if (settingsCallback) {
                         restoreSavedCompilerSettings();
                     }
                 }
             }
 
-            public emitAll(ioHost: TypeScript.EmitterIOHost): TypeScript.Diagnostic[] {
-                return this.compiler.emitAll(ioHost);
+            /** Compiles a given piece of code with the provided unitName, skipping reference resolution. The compilation results are available to the provided callback in a CompilerResult object */
+            public compileString(code: string, unitName: string, callback: (res: Compiler.CompilerResult) => void) {
+                this.reset();
+
+                var justName = getFileName(unitName);
+                if (justName.indexOf('.ts') === -1) {
+                    justName += '.ts';
+                }
+
+                this.registerFile(justName, code);
+                this.inputFiles.push(justName);
+                var fileNames = this.getAllFilesInCompiler();
+                var updatedExistingFile = false;
+                for (var i = 0; i < fileNames.length; i++) {
+                    if (fileNames[i] === justName) {
+                        this.updateUnit(code, justName);
+                        updatedExistingFile = true;
+                    }
+                }
+
+                if (!updatedExistingFile) {
+                    this.compiler.addFile(justName, TypeScript.ScriptSnapshot.fromString(code), TypeScript.ByteOrderMark.None, /*version:*/ 0, /*isOpen:*/ true, []);
+                }
+
+                this.compile({ noResolve: true });
+
+                this.reportCompilationErrors();
+
+                callback(new CompilerResult(this.ioHost.toArray(), this.errorList.slice(0), this.sourcemapRecorder.lines));
+            }
+
+            public reset() {
+                this.ioHost.reset();
+                this.errorList = [];
+
+                var fileNames = this.compiler.fileNames();
+                for (var i = 0, n = fileNames.length; i < n; i++) {
+                    var fileName = fileNames[i];
+                    if (fileName.indexOf("lib.d.ts") < 0) {
+                        this.compiler.removeFile(fileNames[i]);
+                    }
+                }
+
+                this.inputFiles = [];
+                this.resolvedFiles = [];
+                this.fileNameToScriptSnapshot = new TypeScript.StringHashTable<TypeScript.IScriptSnapshot>();
+            }
+
+            public getAllFilesInCompiler() {
+                // returns what's actually in the compiler, not the contents of this.fileNameToSriptSnapshot because the latter
+                // really means what's 'on the filesystem' not in compiler
+                return this.compiler.fileNames().filter(file => file.indexOf('lib.d.ts') === -1);
+            }
+
+            public getDocumentFromCompiler(documentName: string) {
+                return this.compiler.getDocument(documentName);
+            }
+
+            public getContentForFile(fileName: string) {
+                var snapshot: TypeScript.IScriptSnapshot = this.fileNameToScriptSnapshot.lookup(fileName)
+                return snapshot.getText(0, snapshot.getLength());
+            }
+
+            /** Tell the compiler that a file with the given name and contents exist for resolution purposes.
+              * A multi-file test could have many sub parts which we want to resolve correctly but which are not
+              * input files. Now subfile1, which references subfile0, can be the only input file, and when resolution
+              * asks if subfile0 exists we can confirm that it does even though it is not on the file system itself.
+              */
+            public registerFile(unitName: string, content: string) {
+                this.fileNameToScriptSnapshot.add(this.fixFilename(switchToForwardSlashes(unitName)), TypeScript.ScriptSnapshot.fromString(content));
+            }
+
+            /** The primary way to add test content. Functionally equivalent to adding files to the command line for a tsc invocation. */
+            public addInputFile(file: { unitName: string; content: string }) {
+                var normalizedName = this.fixFilename(switchToForwardSlashes(file.unitName));
+                this.inputFiles.push(normalizedName);
+                this.fileNameToScriptSnapshot.add(normalizedName, TypeScript.ScriptSnapshot.fromString(file.content));
+            }
+
+            /** The primary way to add test content. Functionally equivalent to adding files to the command line for a tsc invocation. */
+            public addInputFiles(files: { unitName: string; content: string }[]) {
+                files.forEach(file => this.addInputFile(file));
+            }
+
+            /** Updates an existing unit in the compiler with new code. */
+            public updateUnit(code: string, unitName: string) {
+                this.compiler.updateFile(unitName, TypeScript.ScriptSnapshot.fromString(code), /*version:*/ 0, /*isOpen:*/ true, null);
+            }
+
+            public emitAll(ioHost?: IEmitterIOHost): TypeScript.Diagnostic[] {
+                var host = typeof ioHost === "undefined" ? this.ioHost : ioHost;
+
+                this.sourcemapRecorder.reset();
+                var prevSourceFile = "";
+                var sourceMapEmitterCallback = (emittedFile: string, emittedLine: number, emittedColumn: number, sourceFile: string, sourceLine: number, sourceColumn: number, sourceName: string): void => {
+                    if (prevSourceFile != sourceFile) {
+                        this.sourcemapRecorder.WriteLine("");
+                        this.sourcemapRecorder.WriteLine("EmittedFile: (" + emittedFile + ") sourceFile: (" + sourceFile + ")");
+                        this.sourcemapRecorder.WriteLine("-------------------------------------------------------------------");
+                        prevSourceFile = sourceFile;
+                    }
+                    this.sourcemapRecorder.Write("Emitted (" + emittedLine + ", " + emittedColumn + ") source (" + sourceLine + ", " + sourceColumn + ")");
+                    if (sourceName) {
+                        this.sourcemapRecorder.Write(" name (" + sourceName + ")");
+                    }
+                    this.sourcemapRecorder.WriteLine("");
+                };
+
+                var output = this.compiler.emitAll(path => host.resolvePath(path));
+                output.outputFiles.forEach(o => {
+                    host.writeFile(o.name, o.text, o.writeByteOrderMark);
+
+                    o.sourceMapEntries.forEach(s => sourceMapEmitterCallback(s.emittedFile, s.emittedLine, s.emittedColumn, s.sourceFile, s.sourceLine, s.sourceColumn, s.sourceName));
+                });
+
+                return output.diagnostics;
+            }
+
+            public emitAllDeclarations(ioHost: IEmitterIOHost) {
+                var output = this.compiler.emitAllDeclarations((path: string) => ioHost.resolvePath(path));
+                output.outputFiles.forEach(o => ioHost.writeFile(o.name, o.text, o.writeByteOrderMark));
+
+                return output.diagnostics;
             }
 
             /** If the compiler already contains the contents of interest, this will re-emit for AMD without re-adding or recompiling the current compiler units */
-            public emitCurrentCompilerContentsAsAMD() {
-                var oldModuleType = this.compiler.settings.moduleGenTarget;
-                this.compiler.settings.moduleGenTarget = TypeScript.ModuleGenTarget.Asynchronous;
+            private emitCurrentCompilerContentsAsAMD() {
+                var oldSettings = this.compiler.compilationSettings();
 
-                stdout.reset();
-                stderr.reset();
-                this.compiler.emitAll(stdout);
-                this.compiler.emitAllDeclarations();
-                var result = new CompilerResult(stdout.toArray(), stderr.lines);
+                var settings = this.compiler.compilationSettings().toCompilationSettings();
+                settings.moduleGenTarget = TypeScript.ModuleGenTarget.Asynchronous;
+                this.compiler.setCompilationSettings(TypeScript.ImmutableCompilationSettings.fromCompilationSettings(settings));
 
-                this.compiler.settings.moduleGenTarget = oldModuleType;
+                this.ioHost.reset();
+                this.errorList = [];
+                this.emitAll(this.ioHost);
+                this.emitAllDeclarations(this.ioHost);
+                var result = new CompilerResult(this.ioHost.toArray(), this.errorList, this.sourcemapRecorder.lines);
+
+                this.compiler.setCompilationSettings(oldSettings);
                 return result;
             }
 
             /** Reports all compilation errors except resolution specific errors */
-            public reportCompilationErrors(errAggregator?: WriterAggregator) {
+            public reportCompilationErrors() {
                 var units: string[] = [];
 
                 var files = this.getAllFilesInCompiler();
@@ -1000,99 +1077,45 @@ module Harness {
                     }
                 });
 
-                var errorTarget = (typeof errAggregator == "undefined") ? stderr : errAggregator;
-                var errorReporter = {
-                    addDiagnostic: (diagnostic: TypeScript.Diagnostic) => {
-                        if (diagnostic.fileName()) {
-                            var document = this.getDocumentFromCompiler(diagnostic.fileName());
-                            var lineCol = { line: -1, character: -1 };
-                            document.lineMap.fillLineAndCharacterFromPosition(diagnostic.start(), lineCol);
-                            errorTarget.Write(diagnostic.fileName() + "(" + (lineCol.line + 1) + "," + (lineCol.character + 1) + "): ");
-                        }
-
-                        errorTarget.WriteLine(diagnostic.message());
-                    }
-                };
-
                 units.forEach(u => {
-                    var syntacticDiagnostics = this.compiler.getSyntacticDiagnostics(u);
-                    this.compiler.reportDiagnostics(syntacticDiagnostics, errorReporter);
-
-                    var semanticDiagnostics = this.compiler.getSemanticDiagnostics(u);
-                    this.compiler.reportDiagnostics(semanticDiagnostics, errorReporter);
+                    this.compiler.getSyntacticDiagnostics(u).forEach(d => this.addError(ErrorType.Syntactic, d));
+                    this.compiler.getSemanticDiagnostics(u).forEach(d => this.addError(ErrorType.Semantic, d));
                 });
 
-                var emitDiagnostics = this.emitAll(stdout);
-                this.compiler.reportDiagnostics(emitDiagnostics, errorReporter);
+                // Emit (note: reportDiagnostics is what causes the emit to happen)
+                var emitDiagnostics = this.emitAll(this.ioHost);
+                emitDiagnostics.forEach(d => this.addError(ErrorType.Emit, d));
 
-                var emitDeclarationsDiagnostics = this.compiler.emitAllDeclarations();
-                this.compiler.reportDiagnostics(emitDeclarationsDiagnostics, errorReporter);
+                // Emit declarations
+                var emitDeclarationsDiagnostics = this.emitAllDeclarations(this.ioHost);
+                emitDeclarationsDiagnostics.forEach(d => this.addError(ErrorType.Declaration, d));
 
-                return errorTarget.lines;
+                return this.errorList;
             }
 
-            /** Compiles a given piece of code with the provided unitName, skipping reference resolution. The compilation results are available to the provided callback in a CompilerResult object */
-            public compileString(code: string, unitName: string, callback: (res: Compiler.CompilerResult) => void) {
-                this.reset();
-
-                var isDeclareFile = TypeScript.isDTSFile(unitName);
-                // for single file tests just add them as using the old '0.ts' naming scheme
-                //var uName = unitName ? unitName : isDeclareFile ? '0.d.ts' : '0.ts';
-                this.addSourceUnit(code, unitName, isDeclareFile);
-                this.compile(false);
-
-                this.reportCompilationErrors();
-
-                callback(new CompilerResult(stdout.toArray(), stderr.lines));
-            }
-
-            /** Compiles a given piece of code with the provided unitName and emits Javascript for both CommonJS and AMD. The compilation results are available to the provided callback in one CompilerResult object for each emit type */
-            public compileStringForCommonJSAndAMD(unitName: string, callback: (res: { commonJSResult: Compiler.CompilerResult; amdResult: Compiler.CompilerResult; }) => void, references?: string[]) {
-                this.reset();
-
-                var isDeclareFile = TypeScript.isDTSFile(unitName);
-                var uName = unitName ? unitName : isDeclareFile ? '0.d.ts' : '0.ts';
-                this.addInputFile(uName);
-                this.compile();
-
-                this.reportCompilationErrors();
-                var commonJSResult = new CompilerResult(stdout.toArray(), stderr.lines)
-                var amdCompilerResult = this.emitCurrentCompilerContentsAsAMD();
-
-                callback(
-                    {
-                        commonJSResult: commonJSResult,
-                        amdResult: amdCompilerResult
-                    }
-                );
-            }
-
-            public compileFile(path: string, callback: (res: { commonJSResult: Compiler.CompilerResult; amdResult: Compiler.CompilerResult; }) => void , settingsCallback?: (settings?: TypeScript.CompilationSettings) => void, references?: string[]) {
-                path = switchToForwardSlashes(path);
-                var fileName = getFileName(path)[0];
-                var code = readFile(path).contents;
-
-                this.compileUnit(fileName, callback, settingsCallback, references);
-            }
 
             /** Modify the given compiler's settings as specified in the test case settings.
              *  The caller of this function is responsible for saving the existing settings if they want to restore them to the original settings later.
              */
             public setCompilerSettings(tcSettings: Harness.TestCaseParser.CompilerSetting[]) {
+                var settings: TypeScript.CompilationSettings = this.compiler.compilationSettings().toCompilationSettings();
+
                 tcSettings.forEach((item) => {
                     var idx = this.supportedFlags.filter((x) => x.flag === item.flag.toLowerCase());
                     if (idx && idx.length != 1) {
                         throw new Error('Unsupported flag \'' + item.flag + '\'');
                     }
-                    idx[0].setFlag(this.compiler.settings, item.value);
+
+                    idx[0].setFlag(settings, item.value);
                 });
-                this.compiler.emitOptions = new TypeScript.EmitOptions(this.compiler.settings);
+
+                this.compiler.setCompilationSettings(TypeScript.ImmutableCompilationSettings.fromCompilationSettings(settings));
             }
 
             /** The compiler flags which tests are allowed to change and functions that can change them appropriately.
              *  Every flag here needs to also be present in the fileMetadataNames array in the TestCaseParser class in harness.ts. They must be all lowercase in both places.
              */
-            private supportedFlags: { flag: string; setFlag: (x: TypeScript.CompilationSettings, value: string) => void ; }[] = [
+            private supportedFlags: { flag: string; setFlag: (x: TypeScript.CompilationSettings, value: string) => void; }[] = [
                 { flag: 'comments', setFlag: (x: TypeScript.CompilationSettings, value: string) => { x.removeComments = value.toLowerCase() === 'true' ? false : true; } },
                 { flag: 'declaration', setFlag: (x: TypeScript.CompilationSettings, value: string) => { x.generateDeclarationFiles = value.toLowerCase() === 'true' ? true : false; } },
                 {
@@ -1115,107 +1138,50 @@ module Harness {
                 { flag: 'out', setFlag: (x: TypeScript.CompilationSettings, value: string) => { x.outFileOption = value; } },
                 { flag: 'outDir', setFlag: (x: TypeScript.CompilationSettings, value: string) => { x.outDirOption = value; } },
                 { flag: 'filename', setFlag: (x: TypeScript.CompilationSettings, value: string) => { /* used for multifile tests, doesn't change any compiler settings */; } },
-                { flag: 'noimplicitany', setFlag: (x: TypeScript.CompilationSettings, value: string) => { x.noImplicitAny = value.toLowerCase() === 'true' ? true : false; } }, 
+                { flag: 'noimplicitany', setFlag: (x: TypeScript.CompilationSettings, value: string) => { x.noImplicitAny = value.toLowerCase() === 'true' ? true : false; } },
+                { flag: 'noresolve', setFlag: (x: TypeScript.CompilationSettings, value: string) => { x.noResolve = value.toLowerCase() === 'true' ? true : false; } },
             ];
 
             /** Does a deep copy of the given compiler's settings and emit options and returns
               * a function which will restore the old settings when executed */
             public saveCompilerSettings() {
-                // not recursive
-                function clone<T>(source: T, target: T) {
-                    for (var prop in source) {
-                        target[prop] = source[prop];
-                    }
-                }
-
-                var oldCompilerSettings = new TypeScript.CompilationSettings();
-                clone(this.compiler.settings, oldCompilerSettings);
-                var oldEmitSettings = new TypeScript.EmitOptions(this.compiler.settings);
-                clone(this.compiler.emitOptions, oldEmitSettings);
+                var oldCompilerSettings = this.compiler.compilationSettings();
 
                 return () => {
-                    this.compiler.settings = oldCompilerSettings;
-                    this.compiler.emitOptions = oldEmitSettings;
+                    this.compiler.setCompilationSettings(oldCompilerSettings);
                 };
+            }
+
+            private fixFilename(filename: string) {
+                // Expecting filename to be rooted at typescript\public\tests
+                var idx = filename.indexOf('tests/'); // idx is -1 for tests using compileString and samples
+                var fixedPath = filename.substr(idx === -1 ? 0 : idx);
+                return fixedPath;
             }
 
             // IReferenceResolverHost methods
             getScriptSnapshot(filename: string): TypeScript.IScriptSnapshot {
-                var snapshot = this.fileNameToScriptSnapshot.lookup(filename);
+                var fixedPath = this.fixFilename(filename);
+                var snapshot = this.fileNameToScriptSnapshot.lookup(fixedPath);
                 if (!snapshot) {
-                    var fileContents: any = null;
-                    try {
-                        /* Cases we could be in:
-                           1. filename = a single file test, there will only be 1 unit made from the test
-                           2. filename = a multi-file test, there will be multiple units, and we will resolve the
-                                current filename to the last unit since all others will be resolved through a reference
-                           3. filename = the name of a sub-file in a multi-file test, ie someTestFile_A.ts where someTestFile.ts exists
-                                we'll read the real file the sub-file comes from and return the appropriate sub-unit
-                        */
-                        var justName = getFileName(filename);
-                        if (IO.fileExists(filename)) {
-                            var code = IO.readFile(filename).contents;
-                            var units = TestCaseParser.makeUnitsFromTest(code, filename);
-                            var lastUnit = units.testUnitData[units.testUnitData.length - 1];
-                            fileContents = lastUnit.content;
-                        }
-                        else if (justName.indexOf('_') !== -1) {
-                            // Only sub-files in a multi-file test should have _ in their name
-                            var filenameMatches = /_(\w*)*\./.exec(filename);
-                            var realFile = filename.replace(filenameMatches[0], '.');
-                            var code = IO.readFile(realFile).contents;
-                            var units = TestCaseParser.makeUnitsFromTest(code, realFile);
-                            for (var i = 0; i < units.testUnitData.length; i++) {
-                                var currentUnit = units.testUnitData[i];
-                                if (currentUnit.name === justName) {
-                                    fileContents = currentUnit.content;
-                                    break;
-                                }
-                            }
-                            if (!fileContents) {
-                                fileContents = '';
-                            }
-                        }
-                        else {
-                            // someone may have added the unit via addSourceUnit rather than as an input file
-                            var compilerFiles = this.getAllFilesInCompiler();
-                            for (var i = 0; i < compilerFiles.length; i++) {
-                                var file = compilerFiles[i];
-                                if (file == justName) {
-                                    fileContents = this.fileNameToScriptSnapshot.lookup(file);
-                                    break;
-                                }
-                            }
-                            if (!fileContents) {
-                                fileContents = IO.readFile(filename);
-                            }
-                        }
-                    }
-                    catch (e) {
-                        // TODO: add a useful diagnostic?
-                        //this.compiler.addDiagnostic(new TypeScript.Diagnostic(null, 0, 0, TypeScript.DiagnosticCode.Cannot_read_file_0_1, [filename, e.message]));
-                        fileContents = e.message; // could be empty if we gave a real diagnostic
-                    }
-
-                    snapshot = TypeScript.ScriptSnapshot.fromString(fileContents);
-                    this.fileNameToScriptSnapshot.add(justName, snapshot);
+                    this.addError(ErrorType.Resolution, new TypeScript.Diagnostic(null, null, 0, 0, TypeScript.DiagnosticCode.Cannot_read_file_0_1, [filename, '']));
                 }
 
                 return snapshot;
             }
 
             resolveRelativePath(path: string, directory: string): string {
-                var unQuotedPath = TypeScript.stripQuotes(path);
+                var unQuotedPath = TypeScript.stripStartAndEndQuotes(path);
                 var normalizedPath: string;
 
                 if (TypeScript.isRooted(unQuotedPath) || !directory) {
                     normalizedPath = unQuotedPath;
                 } else {
-                    normalizedPath = IOUtils.combine(directory, unQuotedPath);
+                    normalizedPath = TypeScript.IOUtils.combine(directory, unQuotedPath);
                 }
 
                 // get the absolute path
-                normalizedPath = IO.resolvePath(normalizedPath);
+                normalizedPath = TypeScript.IO.resolvePath(normalizedPath);
 
                 // Switch to forward slashes
                 normalizedPath = TypeScript.switchToForwardSlashes(normalizedPath);
@@ -1224,41 +1190,54 @@ module Harness {
             }
 
             fileExists(path: string): boolean {
-                /* 1. path could be a real file:
-                 *  a. single file test
-                 *  b. multi-file test
-                 * 2. path could be a fake file, i.e., the name of a sub-file in a multi-file test in which case we'll just
-                 * double check that the associated real file does claim this sub-file exists
-                */
-                var justName = getFileName(path);
-                if (justName.indexOf('_') !== -1) {
-                    // only sub-files in multi-file tests should have _ in the name
-                    for(var i = 0; i < this.inputFiles.length; i++) {
-                        var file = this.inputFiles[i];
-                        var contents = IO.readFile(Harness.userSpecifiedroot + file).contents;
-                        var hasAdditionalFilenames = new RegExp('//\\s*@Filename:\\s*' + justName);
-                        if (hasAdditionalFilenames.test(contents)) {
-                            return true;
-                        }
+                var idx = path.indexOf('tests/');
+                var fixedPath = path.substr(idx === -1 ? 0 : idx);
+                var result = this.fileNameToScriptSnapshot.lookup(fixedPath);
+                if (!result) {
+                    // if the file didn't exist in the 'virtual' file system (ie fileNameToScriptSnapshot)
+                    // see if it is a real file, and if so, make sure to register it with the virtual 
+                    // file system for later lookup with other resolution calls
+                    if (TypeScript.IO.fileExists(path)) {
+                        var contents = TypeScript.IO.readFile(path, null).contents;
+                        result = TypeScript.ScriptSnapshot.fromString(contents);
+                        this.fileNameToScriptSnapshot.add(fixedPath, result);
                     }
-                    return false;
                 }
-                else {
-                    return IO.fileExists(Harness.userSpecifiedroot + path);
-                }
+                return (result !== null && result !== undefined);
             }
+
             directoryExists(path: string): boolean {
-                return IO.directoryExists(path);
+                return TypeScript.IO.directoryExists(path);
             }
+
             getParentDirectory(path: string): string {
-                return IO.dirName(path);
+                return TypeScript.IO.dirName(path);
             }
+
+            addError(type: ErrorType, diagnostic: TypeScript.Diagnostic) {
+                var line = -1, col = -1, length = -1;
+
+                if (diagnostic.fileName()) {
+                    line = diagnostic.line() + 1; // We use 1-based numbers in tests, but these are 0-based
+                    col = diagnostic.character() + 1; // Same as above
+                    length = diagnostic.length();
+                }
+
+                this.errorList.push({
+                    fileName: diagnostic.fileName(),
+                    errorType: type,
+                    line: line,
+                    column: col,
+                    length: length,
+                    message: diagnostic.message()
+                });
+            }
+
         }
 
-        var stdout = new EmitterIOHost();
-        var stderr = new WriterAggregator();        
-
-        export function makeDefaultCompilerSettings(useMinimalDefaultLib = true, noImplicitAny = false) {
+        export function makeDefaultCompilerSettings(options?: { useMinimalDefaultLib: boolean; noImplicitAny: boolean; }) {
+            var useMinimalDefaultLib = options ? options.useMinimalDefaultLib : true;
+            var noImplicitAny = options ? options.noImplicitAny : false;
             var settings = new TypeScript.CompilationSettings();
             settings.codeGenTarget = TypeScript.LanguageVersion.EcmaScript5;
             settings.moduleGenTarget = TypeScript.ModuleGenTarget.Synchronous;
@@ -1269,12 +1248,14 @@ module Harness {
         }
 
         /** Recreate the appropriate compiler instance to its default settings */
-        export function recreate(compilerInstance: CompilerInstance, useMinimalDefaultLib = true, noImplicitAny = false) {
+        export function recreate(compilerInstance: CompilerInstance, options?: { useMinimalDefaultLib: boolean; noImplicitAny: boolean; }) {
+            var useMinimalDefaultLibValue = options ? options.useMinimalDefaultLib : true;
+            var noImplicitAnyValue = options ? options.noImplicitAny : false;
+            var optionsWithDefaults = { useMinimalDefaultLib: useMinimalDefaultLibValue, noImplicitAny: noImplicitAnyValue };
             if (compilerInstance === CompilerInstance.RunTime) {
-                runTimeCompiler = new HarnessCompiler(useMinimalDefaultLib, noImplicitAny);
-            }
-            else {
-                designTimeCompiler = new HarnessCompiler(useMinimalDefaultLib, noImplicitAny);
+                runTimeCompiler = new HarnessCompiler(optionsWithDefaults);
+            } else {
+                designTimeCompiler = new HarnessCompiler(optionsWithDefaults);
             }
         }
 
@@ -1299,272 +1280,41 @@ module Harness {
             harnessCompiler.compileString(code, unitName, callback);
         }
 
-        // Types
-        export class Type {
-            constructor(public type: any, public code: any, public identifier: any) { }
-
-            public normalizeToArray(arg: any) {
-                if ((Array.isArray && Array.isArray(arg)) || arg instanceof Array)
-                    return arg;
-                
-                return [arg];
-            }
-
-            public compilesOk(testCode: string): boolean {
-                var errors: any = null;
-                var harnessCompiler = Harness.Compiler.getCompiler(Harness.Compiler.CompilerInstance.RunTime);
-                harnessCompiler.compileString(testCode, '0.ts', function (compilerResult) {
-                    errors = compilerResult.errors;
-                })
-
-                return errors.length === 0;
-            }
-
-            public isSubtypeOf(other: Type) {
-                var testCode = 'class __test1__ {\n';
-                testCode += '    public test() {\n';
-                testCode += '        ' + other.code + ';\n';
-                testCode += '        return ' + other.identifier + ';\n';
-                testCode += '    }\n';
-                testCode += '}\n';
-                testCode += 'class __test2__ extends __test1__ {\n';
-                testCode += '    public test() {\n';
-                testCode += '        ' + this.code + ';\n';
-                testCode += '        return ' + other.identifier + ';\n';
-                testCode += '    }\n';
-                testCode += '}\n';
-
-                return this.compilesOk(testCode);
-            }
-
-            // TODO: Find an implementation of isIdenticalTo that works.
-            //public isIdenticalTo(other: Type) {
-            //    var testCode = 'module __test1__ {\n';
-            //    testCode += '    ' + this.code + ';\n';
-            //    testCode += '    export var __val__ = ' + this.identifier + ';\n';
-            //    testCode += '}\n';
-            //    testCode += 'var __test1__val__ = __test1__.__val__;\n';
-
-            //    testCode += 'module __test2__ {\n';
-            //    testCode += '    ' + other.code + ';\n';
-            //    testCode += '    export var __val__ = ' + other.identifier + ';\n';
-            //    testCode += '}\n';
-            //    testCode += 'var __test2__val__ = __test2__.__val__;\n';
-
-            //    testCode += 'function __test__function__() { if(true) { return __test1__val__ }; return __test2__val__; }';
-
-            //    return this.compilesOk(testCode);
-            //}
-
-            public assertSubtypeOf(others: any) {
-                others = this.normalizeToArray(others);
-
-                for (var i = 0; i < others.length; i++) {
-                    if (!this.isSubtypeOf(others[i])) {
-                        throw new Error("Expected " + this.type + " to be a subtype of " + others[i].type);
-                    }
-                }
-            }
-
-            public assertNotSubtypeOf(others: any) {
-                others = this.normalizeToArray(others);
-
-                for (var i = 0; i < others.length; i++) {
-                    if (this.isSubtypeOf(others[i])) {
-                        throw new Error("Expected " + this.type + " to be a subtype of " + others[i].type);
-                    }
-                }
-            }
-
-            //public assertIdenticalTo(other: Type) {
-            //    if (!this.isIdenticalTo(other)) {
-            //        throw new Error("Expected " + this.type + " to be identical to " + other.type);
-            //    }
-            //}
-
-            //public assertNotIdenticalTo(other: Type) {
-            //    if (!this.isIdenticalTo(other)) {
-            //        throw new Error("Expected " + this.type + " to not be identical to " + other.type);
-            //    }
-            //}
-
-            public isAssignmentCompatibleWith(other: Type) {
-                var thisValName = '__val__' + this.identifier;
-                var otherValName = '__val__' + other.identifier;
-                var testCode = 'module __test1__ {\n';
-                testCode += '    export ' + this.code + ';\n';
-                testCode += '    export var ' + thisValName + ' = ' + this.identifier + ';\n';
-                testCode += '}\n';
-
-                testCode += 'module __test2__ {\n';
-                testCode += '    export ' + other.code + ';\n';
-                testCode += '    export var ' + otherValName + ' = ' + other.identifier + ';\n';
-                testCode += '}\n';
-
-                testCode += '__test2__.' + otherValName + ' = __test1__.' + thisValName;
-
-                return this.compilesOk(testCode);
-            }
-
-            /** Throws if this type object cannot be assigned to all of the given other types */
-            public assertAssignmentCompatibleWith(others: any) {
-                others = this.normalizeToArray(others);
-
-                for (var i = 0; i < others.length; i++) {
-                    var other = others[i];
-
-                    if (!this.isAssignmentCompatibleWith(other)) {
-                        throw new Error("Expected " + this.type + " to be assignment compatible with " + other.type);
-                    }
-                }
-            }
-
-            /** Throws if this type object can be assigned to any of the given other types */
-            public assertNotAssignmentCompatibleWith(others: any) {
-                others = this.normalizeToArray(others);
-
-                for (var i = 0; i < others.length; i++) {
-                    var other = others[i];
-
-                    if (this.isAssignmentCompatibleWith(other)) {
-                        throw new Error("Expected " + this.type + " to not be assignment compatible with " + other.type);
-                    }
-                }
-            }
-
-            public assertThisCanBeAssignedTo(desc: string, these: any[], notThese: any[]) {
-                it(desc + " is assignable to ", () => {
-                    this.assertAssignmentCompatibleWith(these);
-                });
-                
-                it(desc + " not assignable to ", () => {
-                    this.assertNotAssignmentCompatibleWith(notThese);
-                });
-            }
-
+        export interface GeneratedFile {
+            fileName: string;
+            code: string;
         }
-
-        export class TypeFactory {
-            public any: Type;
-            public number: Type;
-            public string: Type;
-            public boolean: Type;
-
-            constructor() {
-                this.any = this.get('var x : any', 'x');
-                this.number = this.get('var x : number', 'x');
-                this.string = this.get('var x : string', 'x');
-                this.boolean = this.get('var x : boolean', 'x');
-            }
-
-            public get(code: string, target: any) {
-                var targetIdentifier = '';
-                var targetPosition = -1;
-                if (typeof target === "string") {
-                    targetIdentifier = target;
-                    targetPosition = code.indexOf(target);
-                }
-                else if (typeof target === "number") {
-                    targetPosition = target;
-                }
-                else {
-                    throw new Error("Expected string or number not " + (typeof target));
-                }
-
-                var errors: any = null;
-                var harnessCompiler = getCompiler(CompilerInstance.RunTime);
-                harnessCompiler.compileString(code, 'test.ts', function (compilerResult) {
-                    errors = compilerResult.errors;
-                });
-
-                if (errors.length > 0)
-                    throw new Error("Type definition contains errors: " + errors.join(","));
-
-                var matchingIdentifiers: Type[] = [];
-                
-                var fileNames = harnessCompiler.getAllFilesInCompiler();
-                for (var m = 0; m < fileNames.length; m++) {
-                    var document2 = harnessCompiler.getDocumentFromCompiler(fileNames[m]);
-                    if (document2.fileName !== 'lib.d.ts') {
-                        if (targetPosition > -1) {
-                            var tyInfo = harnessCompiler.getTypeInfoAtPosition(targetPosition, document2);
-                            var name = this.getTypeInfoName(tyInfo.ast);
-                            var foundValue = new Type(tyInfo.symbol.getTypeName(), code, name);
-                            if (!matchingIdentifiers.some(value => (value.identifier === foundValue.identifier) && (value.code === foundValue.code) && (value.type === foundValue.type))) {
-                                matchingIdentifiers.push(foundValue);
-                            }
-                        }
-                        else {
-                            for (var pos = 0; pos < code.length; pos++) {
-                                tyInfo = harnessCompiler.getTypeInfoAtPosition(targetPosition, document2);
-                                name = this.getTypeInfoName(tyInfo.ast);
-                                if (name === targetIdentifier) {
-                                    foundValue = new Type(tyInfo.symbol.getTypeName(), code, targetIdentifier);
-                                    if (!matchingIdentifiers.some(value => (value.identifier === foundValue.identifier) && (value.code === foundValue.code) && (value.type === foundValue.type))) {
-                                        matchingIdentifiers.push(foundValue);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (matchingIdentifiers.length === 0) {
-                    if (targetPosition > -1) {
-                        throw new Error("Could not find an identifier at position " + targetPosition);
-                    }
-                    else {
-                        throw new Error("Could not find an identifier " + targetIdentifier + " in any known scopes");
-                    }
-                }
-                else if (matchingIdentifiers.length > 1) {
-                    throw new Error("Found multiple matching identifiers for " + target);
-                }
-                else {
-                    return matchingIdentifiers[0];
-                }
-            }
-
-            private getTypeInfoName(ast: TypeScript.IAST) {
-                var name = '';
-                // Depending on the node type one of these properties will be there and have the value we care about
-                var a = <any>ast;
-                name = a.id ? a.id.actualText : a.name ? a.name.actualText : a.text ? a.text : '';
-
-                return name;
-            }
-
-            public isOfType(expr: string, expectedType: string) {
-                var actualType = this.get('var _v_a_r_ = ' + expr, '_v_a_r_');
-
-                it('Expression "' + expr + '" is of type "' + expectedType + '"', function () {
-                    assert.equal(actualType.type, expectedType);
-                });
-            }
-        }
-
         /** Contains the code and errors of a compilation and some helper methods to check its status. */
         export class CompilerResult {
-            public code: string;
-            public errors: CompilerError[];
+            public files: GeneratedFile[] = [];
+            public errors: ReportedError[] = [];
+            public declFilesCode: GeneratedFile[] = [];
+            public sourceMaps: GeneratedFile[] = []; 
+            public sourceMapRecord: string;
 
             /** @param fileResults an array of strings for the fileName and an ITextWriter with its code */
-            constructor(public fileResults: { fileName: string; file: WriterAggregator; }[], errorLines: string[]) {
+            constructor(fileResults: { fileName: string; file: WriterAggregator; }[], errors: ReportedError[], sourceMapRecordLines: string[]) {
                 var lines: string[] = [];
-                fileResults.forEach(v => lines = lines.concat(v.file.lines));
-                this.code = lines.join("\r\n")
 
-                this.errors = [];
+                var endsWith = (str: string, end: string) => str.substr(str.length - end.length) === end;
+                
+                fileResults.forEach(emittedFile => {
+                    var fileObj = { fileName: emittedFile.fileName, code: emittedFile.file.lines.join('\r\n') };
+                    if (endsWith(emittedFile.fileName, '.d.ts')) {
+                        // .d.ts file, add to declFiles emit
+                        this.declFilesCode.push(fileObj);
+                    } else if (endsWith(emittedFile.fileName, '.js')) {
+                        // .js file, add to files
+                        this.files.push(fileObj);
+                    } else if (endsWith(emittedFile.fileName, '.js.map')) {
+                        this.sourceMaps.push(fileObj);
+                    } else {
+                        throw new Error('Unrecognized file extension for file ' + emittedFile.fileName);
+                    }
+                });
 
-                for (var i = 0; i < errorLines.length; i++) {
-                    var match = errorLines[i].match(/([^\(]*)\((\d+),(\d+)\):\s+((.*[\s\r\n]*.*)+)\s*$/);
-                    if (match) {
-                        this.errors.push(new CompilerError(match[1], parseFloat(match[2]), parseFloat(match[3]), match[4]));
-                    }
-                    else {
-                        WScript.Echo("non-match on: " + errorLines[i]);
-                    }
-                }
+                this.errors = errors;
+                this.sourceMapRecord = sourceMapRecordLines.join('\r\n');
             }
 
             public isErrorAt(line: number, column: number, message: string) {
@@ -1576,19 +1326,6 @@ module Harness {
                 return false;
             }
         }
-
-        // Compiler Error.
-        export class CompilerError {
-            constructor(public file: string,
-                public line: number,
-                public column: number,
-                public message: string) {
-            }
-
-            public toString() {
-                return this.file + "(" + this.line + "," + this.column + "): " + this.message;
-            }
-        }      
     }
 
     /** Parses the test cases files 
@@ -1614,7 +1351,7 @@ module Harness {
         var optionRegex = /^[\/]{2}\s*@(\w+)\s*:\s*(\S*)/gm;  // multiple matches on multiple lines
 
         // List of allowed metadata names
-        var fileMetadataNames = ["filename", "comments", "declaration", "module", "nolib", "sourcemap", "target", "out", "outDir", "noimplicitany"];
+        var fileMetadataNames = ["filename", "comments", "declaration", "module", "nolib", "sourcemap", "target", "out", "outDir", "noimplicitany", "noresolve"];
 
         function extractCompilerSettings(content: string): CompilerSetting[] {
 
@@ -1695,7 +1432,7 @@ module Harness {
             }
 
             // normalize the fileName for the single file case
-            currentFileName = files.length > 0 ? currentFileName : '0.ts';
+            currentFileName = files.length > 0 ? currentFileName : getFileName(fileName);
 
             // EOF, push whatever remains
             var newTestFile2 = {
@@ -1716,13 +1453,13 @@ module Harness {
         public editRanges: { length: number; textChangeRange: TypeScript.TextChangeRange; }[] = [];
         public lineMap: TypeScript.LineMap = null;
 
-        constructor(public fileName: string, public content: string, public isOpen = true, public byteOrderMark: ByteOrderMark = ByteOrderMark.None) {
+        constructor(public fileName: string, public content: string, public isOpen = true, public byteOrderMark: TypeScript.ByteOrderMark = TypeScript.ByteOrderMark.None) {
             this.setContent(content);
         }
 
         private setContent(content: string): void {
             this.content = content;
-            this.lineMap = TypeScript.LineMap.fromString(content);
+            this.lineMap = TypeScript.LineMap1.fromString(content);
         }
 
         public updateContent(content: string): void {
@@ -1763,7 +1500,7 @@ module Harness {
         }
     }
 
-    class ScriptSnapshotShim implements Services.IScriptSnapshotShim {
+    class ScriptSnapshotShim implements TypeScript.Services.IScriptSnapshotShim {
         private lineMap: TypeScript.LineMap = null;
         private textSnapshot: string;
         private version: number;
@@ -1783,7 +1520,7 @@ module Harness {
 
         public getLineStartPositions(): string {
             if (this.lineMap === null) {
-                this.lineMap = TypeScript.LineMap.fromString(this.textSnapshot);
+                this.lineMap = TypeScript.LineMap1.fromString(this.textSnapshot);
             }
 
             return JSON.stringify(this.lineMap.lineStarts());
@@ -1799,10 +1536,10 @@ module Harness {
         }
     }
 
-    export class TypeScriptLS implements Services.ILanguageServiceShimHost {
-        private ls: Services.ILanguageServiceShim = null;
+    export class TypeScriptLS implements TypeScript.Services.ILanguageServiceShimHost {
+        private ls: TypeScript.Services.ILanguageServiceShim = null;
 
-        private fileNameToScript = new TypeScript.StringHashTable();
+        private fileNameToScript = new TypeScript.StringHashTable<ScriptInfo>();
 
         public addDefaultLibrary() {
             this.addScript("lib.d.ts", Harness.Compiler.libText);
@@ -1853,7 +1590,7 @@ module Harness {
 
         public log(s: string): void {
             // For debugging...
-            //IO.printLine("TypeScriptLS:" + s);
+            //TypeScript.IO.printLine("TypeScriptLS:" + s);
         }
 
         //////////////////////////////////////////////////////////////////////
@@ -1868,7 +1605,7 @@ module Harness {
             return JSON.stringify(this.fileNameToScript.getAllKeys());
         }
 
-        public getScriptSnapshot(fileName: string): Services.IScriptSnapshotShim {
+        public getScriptSnapshot(fileName: string): TypeScript.Services.IScriptSnapshotShim {
             return new ScriptSnapshotShim(this.getScriptInfo(fileName));
         }
 
@@ -1880,11 +1617,11 @@ module Harness {
             return this.getScriptInfo(fileName).isOpen;
         }
 
-        public getScriptByteOrderMark(fileName: string): ByteOrderMark {
+        public getScriptByteOrderMark(fileName: string): TypeScript.ByteOrderMark {
             return this.getScriptInfo(fileName).byteOrderMark;
         }
 
-        public getDiagnosticsObject(): Services.ILanguageServicesDiagnostics {
+        public getDiagnosticsObject(): TypeScript.Services.ILanguageServicesDiagnostics {
             return new LanguageServicesDiagnostics("");
         }
 
@@ -1893,50 +1630,50 @@ module Harness {
         }
 
         public fileExists(s: string) {
-            return IO.fileExists(s);
+            return TypeScript.IO.fileExists(s);
         }
 
         public directoryExists(s: string) {
-            return IO.directoryExists(s);
+            return TypeScript.IO.directoryExists(s);
         }
 
         public resolveRelativePath(path: string, directory: string): string {
             if (TypeScript.isRooted(path) || !directory) {
-                return IO.resolvePath(path);
+                return TypeScript.IO.resolvePath(path);
             }
             else {
-                return IO.resolvePath(IOUtils.combine(directory, path));
+                return TypeScript.IO.resolvePath(TypeScript.IOUtils.combine(directory, path));
             }
         }
 
         public getParentDirectory(path: string): string {
-            return IO.dirName(path);
+            return TypeScript.IO.dirName(path);
         }
 
         /** Return a new instance of the language service shim, up-to-date wrt to typecheck.
          *  To access the non-shim (i.e. actual) language service, use the "ls.languageService" property.
          */
-        public getLanguageService(): Services.ILanguageServiceShim {
-            var ls = new Services.TypeScriptServicesFactory().createLanguageServiceShim(this);
-            ls.refresh(true);
+        public getLanguageService(): TypeScript.Services.ILanguageServiceShim {
+            var ls = new TypeScript.Services.TypeScriptServicesFactory().createLanguageServiceShim(this);
             this.ls = ls;
             return ls;
         }
 
         /** Parse file given its source text */
-        public parseSourceText(fileName: string, sourceText: TypeScript.IScriptSnapshot): TypeScript.Script {
+        public parseSourceText(fileName: string, sourceText: TypeScript.IScriptSnapshot): TypeScript.SourceUnit {
             var compilationSettings = new TypeScript.CompilationSettings();
             compilationSettings.codeGenTarget = TypeScript.LanguageVersion.EcmaScript5;
 
-            var parseOptions = TypeScript.getParseOptions(compilationSettings);
+            var settings = TypeScript.ImmutableCompilationSettings.fromCompilationSettings(compilationSettings);
+            var parseOptions = TypeScript.getParseOptions(settings);
             return TypeScript.SyntaxTreeToAstVisitor.visit(
                 TypeScript.Parser.parse(fileName, TypeScript.SimpleText.fromScriptSnapshot(sourceText), TypeScript.isDTSFile(fileName), parseOptions),
-                fileName, compilationSettings, /*incrementalAST: */ true);
+                fileName, settings, /*incrementalAST: */ true);
         }
 
         /** Parse a file on disk given its fileName */
         public parseFile(fileName: string) {
-            var sourceText = TypeScript.ScriptSnapshot.fromString(IO.readFile(fileName).contents)
+            var sourceText = TypeScript.ScriptSnapshot.fromString(TypeScript.IO.readFile(fileName, /*codepage:*/ null).contents)
             return this.parseSourceText(fileName, sourceText);
         }
 
@@ -1969,7 +1706,7 @@ module Harness {
         }
 
         /** Verify that applying edits to sourceFileName result in the content of the file baselineFileName */
-        public checkEdits(sourceFileName: string, baselineFileName: string, edits: Services.TextEdit[]) {
+        public checkEdits(sourceFileName: string, baselineFileName: string, edits: TypeScript.Services.TextEdit[]) {
             var script = readFile(sourceFileName);
             var formattedScript = this.applyEdits(script.contents, edits);
             var baseline = readFile(baselineFileName).contents;
@@ -1980,7 +1717,7 @@ module Harness {
 
 
         /** Apply an array of text edits to a string, and return the resulting string. */
-        public applyEdits(content: string, edits: Services.TextEdit[]): string {
+        public applyEdits(content: string, edits: TypeScript.Services.TextEdit[]): string {
             var result = content;
             edits = this.normalizeEdits(edits);
 
@@ -1995,11 +1732,11 @@ module Harness {
         }
 
         /** Normalize an array of edits by removing overlapping entries and sorting entries on the minChar position. */
-        private normalizeEdits(edits: Services.TextEdit[]): Services.TextEdit[] {
-            var result: Services.TextEdit[] = [];
+        private normalizeEdits(edits: TypeScript.Services.TextEdit[]): TypeScript.Services.TextEdit[] {
+            var result: TypeScript.Services.TextEdit[] = [];
 
-            function mapEdits(edits: Services.TextEdit[]): { edit: Services.TextEdit; index: number; }[] {
-                var result: { edit: Services.TextEdit; index: number; }[] = [];
+            function mapEdits(edits: TypeScript.Services.TextEdit[]): { edit: TypeScript.Services.TextEdit; index: number; }[] {
+                var result: { edit: TypeScript.Services.TextEdit; index: number; }[] = [];
                 for (var i = 0; i < edits.length; i++) {
                     result.push({ edit: edits[i], index: i });
                 }
@@ -2051,7 +1788,7 @@ module Harness {
         }
     }
 
-    export class LanguageServicesDiagnostics implements Services.ILanguageServicesDiagnostics {
+    export class LanguageServicesDiagnostics implements TypeScript.Services.ILanguageServicesDiagnostics {
 
         constructor(private destination: string) { }
 
@@ -2123,7 +1860,7 @@ module Harness {
         export function runString(code: string, unitName: string, callback: (error: Error, result: any) => void ) {
             var harnessCompiler = Harness.Compiler.getCompiler(Harness.Compiler.CompilerInstance.RunTime);
             harnessCompiler.compileString(code, unitName, function (res) {
-                runJSString(res.code, callback);
+                runJSString(res.files[0].code, callback);
             });
         }
     }
@@ -2152,12 +1889,12 @@ module Harness {
 
         function generateActual(actualFilename: string, generateContent: () => string): string {
             // Create folders if needed
-            IO.createDirectory(IO.dirName(IO.dirName(actualFilename)));
-            IO.createDirectory(IO.dirName(actualFilename));
+            TypeScript.IO.createDirectory(TypeScript.IO.dirName(TypeScript.IO.dirName(actualFilename)));
+            TypeScript.IO.createDirectory(TypeScript.IO.dirName(actualFilename));
 
             // Delete the actual file in case it fails
-            if (IO.fileExists(actualFilename)) {
-                IO.deleteFile(actualFilename);
+            if (TypeScript.IO.fileExists(actualFilename)) {
+                TypeScript.IO.deleteFile(actualFilename);
             }
 
             var actual = generateContent();
@@ -2169,7 +1906,7 @@ module Harness {
             // Store the content in the 'local' folder so we
             // can accept it later (manually)
             if (actual !== null) {
-                IO.writeFile(actualFilename, actual, /*writeByteOrderMark:*/ false);
+                TypeScript.IO.writeFile(actualFilename, actual, /*writeByteOrderMark:*/ false);
             }
 
             return actual;
@@ -2190,8 +1927,8 @@ module Harness {
             }
 
             var expected = '<no content>';
-            if (IO.fileExists(refFilename)) {
-                expected = IO.readFile(refFilename).contents;
+            if (TypeScript.IO.fileExists(refFilename)) {
+                expected = TypeScript.IO.readFile(refFilename, /*codepage:*/ null).contents;
             }
 
             var lineEndingSensitive = opts && opts.LineEndingSensitive;
@@ -2208,7 +1945,7 @@ module Harness {
             if (expected != actual) {
                 // Overwrite & issue error
                 var errMsg = 'The baseline file ' + relativeFilename + ' has changed. Please refer to baseline-report.html and ';
-                errMsg += 'either fix the regression (if unintended) or run nmake baseline-accept (if intended).'
+                errMsg += 'either fix the regression (if unintended) or run jake baseline-accept (if intended).'
 
                 var refFilename = referencePath(relativeFilename);
                 htmlBaselineReport.addDifference(descriptionForDescribe, actualFilename, refFilename, expected, actual, /*includeUnchangedRegions:*/ true);
@@ -2257,3 +1994,6 @@ module Harness {
     global.it = it;
     global.assert = Harness.Assert;
 }
+
+import assert = Harness.Assert;
+

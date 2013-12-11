@@ -17,14 +17,13 @@
 ///<reference path='..\compiler\io.ts'/>
 ///<reference path='..\compiler\typescript.ts'/>
 ///<reference path='harness.ts'/>
-///<reference path='dumpAST-baselining.ts'/>
 ///<reference path='exec.ts'/>
 ///<reference path='diff.ts'/>
 ///<reference path='..\..\tests\runners\runnerfactory.ts' />
-///<reference path='..\..\tests\runners\compiler\runner.ts' />
-///<reference path='..\..\tests\runners\fourslash\fsrunner.ts' />
-///<reference path='..\..\tests\runners\projects\runner.ts' />
-///<reference path='..\..\tests\runners\unittest\unittestrunner.ts' />
+///<reference path='..\..\tests\runners\compiler\compilerRunner.ts' />
+///<reference path='..\..\tests\runners\fourslash\fourslashRunner.ts' />
+///<reference path='..\..\tests\runners\projects\projectsRunner.ts' />
+///<reference path='..\..\tests\runners\unittest\unittestRunner.ts' />
 
 declare var _inheritsFrom: any; // reference base inheritsFrom in child contexts.
 
@@ -63,56 +62,54 @@ class ConsoleLogger extends Harness.Logger {
     }
 
     public start() {
-        IO.printLine("Running tests" + (iterations > 1 ? " " + iterations + " times" : "") + (reverse ? " in reverse." : "."));
+        TypeScript.IO.printLine("Running tests" + (iterations > 1 ? " " + iterations + " times" : "") + (reverse ? " in reverse." : "."));
     }
 
     public end() {
         // Test execution is complete
-        IO.printLine('');
-        IO.printLine('');
-        IO.printLine(this.errorString);
-        IO.printLine('');
+        TypeScript.IO.printLine('');
+        TypeScript.IO.printLine('');
+        TypeScript.IO.printLine(this.errorString);
+        TypeScript.IO.printLine('');
 
-        IO.printLine('Scenarios: ' + (this.passCounts['Scenario'] || 0) + ' passed, ' + (this.failCounts['Scenario'] || 0) + ' failed.');
-        IO.printLine('Testcases: ' + (this.passCounts['Testcase'] || 0) + ' passed, ' + (this.failCounts['Testcase'] || 0) + ' failed.');
-        IO.printLine('  Blocked: ' + this.blockedScenarioCount);
+        TypeScript.IO.printLine('Scenarios: ' + (this.passCounts['Scenario'] || 0) + ' passed, ' + (this.failCounts['Scenario'] || 0) + ' failed.');
+        TypeScript.IO.printLine('Testcases: ' + (this.passCounts['Testcase'] || 0) + ' passed, ' + (this.failCounts['Testcase'] || 0) + ' failed.');
+        TypeScript.IO.printLine('  Blocked: ' + this.blockedScenarioCount);
         return;
     }
 
     public testStart(test: Harness.ITestMetadata) {
         this.descriptionStack.push(test.desc);
-        //IO.printLine(test.id);
-        //IO.printLine(test.desc);
     }
 
     public pass(test: Harness.ITestMetadata) {
         if (test.perfResults) {
-            IO.printLine(test.desc + ": " + test.perfResults.trials.length + " trials");
-            IO.printLine('    mean: ' + test.perfResults.mean.toFixed(1) + "ms");
-            IO.printLine('     min: ' + test.perfResults.min.toFixed(1) + "ms");
-            IO.printLine('     max: ' + test.perfResults.max.toFixed(1) + "ms");
-            IO.printLine('  stdDev: ' + test.perfResults.stdDev.toFixed(1) + "ms");
-            IO.printLine('');
+            TypeScript.IO.printLine(test.desc + ": " + test.perfResults.trials.length + " trials");
+            TypeScript.IO.printLine('    mean: ' + test.perfResults.mean.toFixed(1) + "ms");
+            TypeScript.IO.printLine('     min: ' + test.perfResults.min.toFixed(1) + "ms");
+            TypeScript.IO.printLine('     max: ' + test.perfResults.max.toFixed(1) + "ms");
+            TypeScript.IO.printLine('  stdDev: ' + test.perfResults.stdDev.toFixed(1) + "ms");
+            TypeScript.IO.printLine('');
             this.descriptionStack.pop();
         } else {
-            IO.print(".");
+            TypeScript.IO.print(".");
             this.passCounts.Testcase++;
             this.descriptionStack.pop();
         }
     }
 
     public bug(test: Harness.ITestMetadata) {
-        IO.print('*');
+        TypeScript.IO.print('*');
     }
 
     public fail(test: Harness.ITestMetadata) {
-        IO.print("F");
+        TypeScript.IO.print("F");
         this.failCounts.Testcase++;
         this.descriptionStack.pop();
     }
 
     public error(test: Harness.ITestMetadata, error: Error) {
-        IO.print("F");
+        TypeScript.IO.print("F");
         this.failCounts.Testcase++;
         this.addError(error);
         this.descriptionStack.pop();
@@ -120,8 +117,8 @@ class ConsoleLogger extends Harness.Logger {
 
     public scenarioStart(scenario: Harness.IScenarioMetadata) {
         this.descriptionStack.push(scenario.desc);
-        //IO.printLine(scenario.id);
-        //IO.printLine(scenario.desc);
+        //TypeScript.IO.printLine(scenario.id);
+        //TypeScript.IO.printLine(scenario.desc);
     }
 
     public scenarioEnd(scenario: Harness.IScenarioMetadata, error?: Error) {
@@ -188,7 +185,7 @@ class JSONLogger extends Harness.Logger {
     }
 
     public end() {
-        IO.writeFile(this.path, JSON.stringify(this.root), /*writeByteOrderMark:*/ false);
+        TypeScript.IO.writeFile(this.path, JSON.stringify(this.root), /*writeByteOrderMark:*/ false);
     }
 }
 
@@ -211,13 +208,20 @@ global.runners = runners;
 var reverse: boolean = false;
 var iterations: number = 1;
 
-var opts = new TypeScript.OptionsParser(IO, "testCompiler");
+var opts = new TypeScript.OptionsParser(TypeScript.IO, "testCompiler");
 
 opts.flag('compiler', {
     set: function () {
-        runners.push(new CompilerBaselineRunner());
-        runners.push(new UnitTestRunner('compiler'));        
+        runners.push(new CompilerBaselineRunner(CompilerTestType.Conformance));
+        runners.push(new CompilerBaselineRunner(CompilerTestType.Regressions));
+        runners.push(new UnitTestRunner(UnittestTestType.Compiler));
         runners.push(new ProjectRunner());
+    }
+});
+
+opts.flag('conformance', {
+    set: function () {
+        runners.push(new CompilerBaselineRunner(CompilerTestType.Conformance));
     }
 });
 
@@ -239,42 +243,40 @@ opts.flag('fourslash-generated', {
     }
 });
 
-// for running fourslash tests written against 0.8.3 in the fourslash_old directory
-opts.option('fourslash-all', {
-    experimental: true,
-    set: function (str) {
-        runners.push(new FourslashRunner('all'));
-    }
-});
-
 opts.flag('unittests', {
     set: function () {
-        runners.push(new UnitTestRunner('compiler'));
-        runners.push(new UnitTestRunner('samples'));
+        runners.push(new UnitTestRunner(UnittestTestType.Compiler));
+        runners.push(new UnitTestRunner(UnittestTestType.Samples));
     }
 });
 
 opts.flag('samples', {
     set: function () {
-        runners.push(new UnitTestRunner('samples'));
+        runners.push(new UnitTestRunner(UnittestTestType.Samples));
+    }
+});
+
+opts.flag('rwc', {
+    set: function () {
+        runners.push(new RWCRunner());
     }
 });
 
 opts.flag('ls', {
     set: function () {
-        runners.push(new UnitTestRunner('ls'));
+        runners.push(new UnitTestRunner(UnittestTestType.LanguageService));
     }
 });
 
 opts.flag('services', {
     set: function () {
-        runners.push(new UnitTestRunner('services'));
+        runners.push(new UnitTestRunner(UnittestTestType.Services));
     }
 });
 
 opts.flag('harness', {
     set: function () {
-        runners.push(new UnitTestRunner('harness'));
+        runners.push(new UnitTestRunner(UnittestTestType.Harness));
     }
 });
 
@@ -309,22 +311,26 @@ opts.option('iterations', {
 });
 
 // For running only compiler baselines with specific options like emit, decl files, etc
-opts.option('compiler-baselines', {
-    experimental: true,
+opts.flag('compiler-baselines', {
     set: function (str) {
-        var runner = new CompilerBaselineRunner();
-        runner.options = str;
-        runners.push(runner);
+        var conformanceRunner = new CompilerBaselineRunner(CompilerTestType.Conformance);
+        conformanceRunner.options = str;
+        runners.push(conformanceRunner);
+
+        var regressionRunner = new CompilerBaselineRunner(CompilerTestType.Regressions);
+        regressionRunner.options = str;
+        runners.push(regressionRunner);
     }
 });
 
-opts.parse(IO.arguments)
+opts.parse(TypeScript.IO.arguments)
 
 if (runners.length === 0) {
     if (opts.unnamed.length === 0) {
         // compiler
-        runners.push(new CompilerBaselineRunner());
-        runners.push(new UnitTestRunner('compiler'));        
+        runners.push(new CompilerBaselineRunner(CompilerTestType.Conformance));
+        runners.push(new CompilerBaselineRunner(CompilerTestType.Regressions));
+        runners.push(new UnitTestRunner(UnittestTestType.Compiler));
         runners.push(new ProjectRunner());
 
         // language services
@@ -332,7 +338,7 @@ if (runners.length === 0) {
         runners.push(new GeneratedFourslashRunner());
 
         // samples
-        runners.push(new UnitTestRunner('samples'));
+        runners.push(new UnitTestRunner(UnittestTestType.Samples));
     } else {
         var runnerFactory = new RunnerFactory();
         var tests = opts.unnamed[0].split(' ');

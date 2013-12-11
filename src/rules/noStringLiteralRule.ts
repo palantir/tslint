@@ -41,7 +41,7 @@ class NoStringLiteralWalker extends Lint.RuleWalker {
 
         var unquotedString = id.substring(1, id.length - 1);
         var simpleText = TypeScript.SimpleText.fromString(unquotedString);
-        var isValidIdentifier = TypeScript.Scanner.isValidIdentifier(simpleText, TypeScript.LanguageVersion);
+        var isValidIdentifier = TypeScript.Scanner.isValidIdentifier(simpleText, TypeScript.LanguageVersion.EcmaScript5);
 
         // only create a failure if the identifier is valid, in which case there's no need to use string literals
         if (isValidIdentifier) {

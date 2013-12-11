@@ -15,7 +15,7 @@
 
 ///<reference path='typescriptServices.ts' />
 
-module Services {
+module TypeScript.Services {
     export enum EndOfLineState {
         Start,
         InMultiLineCommentTrivia,
@@ -51,7 +51,7 @@ module Services {
 
     export class Classifier {
         private scanner: TypeScript.Scanner;
-        private characterWindow: number[] = TypeScript.ArrayUtilities.createArray(2048, 0);
+        private characterWindow: number[] = TypeScript.ArrayUtilities.createArray<number>(2048, 0);
         private diagnostics: TypeScript.Diagnostic[] = [];
 
         constructor(public host: IClassifierHost) {

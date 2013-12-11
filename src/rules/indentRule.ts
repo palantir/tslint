@@ -74,7 +74,7 @@ class IndentWalker extends Lint.RuleWalker {
     public visitModuleDeclaration(node: TypeScript.ModuleDeclarationSyntax): void {
         this.visitList(node.modifiers);
         this.visitToken(node.moduleKeyword);
-        this.visitOptionalNodeOrToken(node.moduleName);
+        this.visitOptionalNodeOrToken(node.name);
         if (node.stringLiteral !== null) {
             this.visitToken(node.stringLiteral);
         }

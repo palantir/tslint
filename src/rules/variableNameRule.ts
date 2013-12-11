@@ -28,12 +28,12 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class VariableNameWalker extends Lint.RuleWalker {
     public visitVariableDeclarator(node: TypeScript.VariableDeclaratorSyntax): void {
-        var identifier = node.identifier;
-        var variableName = identifier.text();
-        var position = this.position() + identifier.leadingTriviaWidth();
+        var propertyName = node.propertyName;
+        var variableName = propertyName.text();
+        var position = this.position() + propertyName.leadingTriviaWidth();
 
         if (!this.isCamelCase(variableName) && !this.isUpperCase(variableName)) {
-            this.addFailure(this.createFailure(position, identifier.width(), Rule.FAILURE_STRING));
+            this.addFailure(this.createFailure(position, propertyName.width(), Rule.FAILURE_STRING));
         }
 
         super.visitVariableDeclarator(node);

@@ -36,21 +36,16 @@ module TypeScript {
         }
     }
 
-    useDirectTypeStorage = true;
-
-    export class BatchCompiler implements IReferenceResolverHost, IDiagnosticReporter, EmitterIOHost {
-        public compilerVersion = "0.9.1.0";
+    export class BatchCompiler implements IReferenceResolverHost {
+        public compilerVersion = "0.9.5.0";
         private inputFiles: string[] = [];
-        private compilationSettings: CompilationSettings;
+        private compilationSettings: ImmutableCompilationSettings;
         private resolvedFiles: IResolvedFile[] = [];
-        private inputFileNameToOutputFileName = new StringHashTable();
-        private fileNameToSourceFile = new StringHashTable();
+        private fileNameToSourceFile = new StringHashTable<SourceFile>();
         private hasErrors: boolean = false;
         private logger: ILogger = null;
-        private tcOnly = false;
 
         constructor(private ioHost: IIO) {
-            this.compilationSettings = new CompilationSettings();
         }
 
         // Begin batch compilation
@@ -61,9 +56,9 @@ module TypeScript {
 
             // Parse command line options
             if (this.parseOptions()) {
-                this.logger = this.compilationSettings.gatherDiagnostics ? <ILogger>new DiagnosticsLogger(this.ioHost) : new NullLogger();
+                this.logger = this.compilationSettings.gatherDiagnostics() ? <ILogger>new DiagnosticsLogger(this.ioHost) : new NullLogger();
 
-                if (this.compilationSettings.watch) {
+                if (this.compilationSettings.watch()) {
                     // Watch will cause the program to stick around as long as the files exist
                     this.watchFiles();
                     return;
@@ -72,48 +67,54 @@ module TypeScript {
                 // Resolve the compilation environemnt
                 this.resolve();
 
-                if (!this.compilationSettings.updateTC) {
-                    this.compile();
+                this.compile();
 
-                    if (this.compilationSettings.gatherDiagnostics) {
-                        this.logger.log("");
-                        this.logger.log("File resolution time:                     " + TypeScript.fileResolutionTime);
-                        this.logger.log("SyntaxTree parse time:                    " + TypeScript.syntaxTreeParseTime);
-                        this.logger.log("Syntax Diagnostics time:                  " + TypeScript.syntaxDiagnosticsTime);
-                        this.logger.log("AST translation time:                     " + TypeScript.astTranslationTime);
-                        this.logger.log("");
-                        this.logger.log("Type check time:                          " + TypeScript.typeCheckTime);
-                        this.logger.log("");
-                        this.logger.log("Emit time:                                " + TypeScript.emitTime);
-                        this.logger.log("Declaration emit time:                    " + TypeScript.declarationEmitTime);
+                if (this.compilationSettings.gatherDiagnostics()) {
+                    this.logger.log("");
+                    this.logger.log("File resolution time:                     " + TypeScript.fileResolutionTime);
+                    this.logger.log("           file read:                     " + TypeScript.fileResolutionIOTime);
+                    this.logger.log("        scan imports:                     " + TypeScript.fileResolutionScanImportsTime);
+                    this.logger.log("       import search:                     " + TypeScript.fileResolutionImportFileSearchTime);
+                    this.logger.log("        get lib.d.ts:                     " + TypeScript.fileResolutionGetDefaultLibraryTime);
 
-                        this.logger.log("  IsExternallyVisibleTime:                " + TypeScript.declarationEmitIsExternallyVisibleTime);
-                        this.logger.log("  TypeSignatureTime:                      " + TypeScript.declarationEmitTypeSignatureTime);
-                        this.logger.log("  GetBoundDeclTypeTime:                   " + TypeScript.declarationEmitGetBoundDeclTypeTime);
-                        this.logger.log("  IsOverloadedCallSignatureTime:          " + TypeScript.declarationEmitIsOverloadedCallSignatureTime);
-                        this.logger.log("  FunctionDeclarationGetSymbolTime:       " + TypeScript.declarationEmitFunctionDeclarationGetSymbolTime);
-                        this.logger.log("  GetBaseTypeTime:                        " + TypeScript.declarationEmitGetBaseTypeTime);
-                        this.logger.log("  GetAccessorFunctionTime:                " + TypeScript.declarationEmitGetAccessorFunctionTime);
-                        this.logger.log("  GetTypeParameterSymbolTime:             " + TypeScript.declarationEmitGetTypeParameterSymbolTime);
-                        this.logger.log("  GetImportDeclarationSymbolTime:         " + TypeScript.declarationEmitGetImportDeclarationSymbolTime);
+                    this.logger.log("SyntaxTree parse time:                    " + TypeScript.syntaxTreeParseTime);
+                    this.logger.log("Syntax Diagnostics time:                  " + TypeScript.syntaxDiagnosticsTime);
+                    this.logger.log("AST translation time:                     " + TypeScript.astTranslationTime);
+                    this.logger.log("");
+                    this.logger.log("Type check time:                          " + TypeScript.typeCheckTime);
+                    this.logger.log("");
+                    this.logger.log("Emit time:                                " + TypeScript.emitTime);
+                    this.logger.log("Declaration emit time:                    " + TypeScript.declarationEmitTime);
 
-                        this.logger.log("Emit write file time:                     " + TypeScript.emitWriteFileTime);
-                        this.logger.log("Emit directory exists time:               " + TypeScript.emitDirectoryExistsTime);
-                        this.logger.log("Emit file exists time:                    " + TypeScript.emitFileExistsTime);
-                        this.logger.log("Emit resolve path time:                   " + TypeScript.emitResolvePathTime);
+                    this.logger.log("Total number of symbols created:          " + TypeScript.pullSymbolID);
+                    this.logger.log("Specialized types created:                " + TypeScript.nSpecializationsCreated);
+                    this.logger.log("Specialized signatures created:           " + TypeScript.nSpecializedSignaturesCreated);
 
-                        this.logger.log("IO host resolve path time:                " + TypeScript.ioHostResolvePathTime);
-                        this.logger.log("IO host directory name time:              " + TypeScript.ioHostDirectoryNameTime);
-                        this.logger.log("IO host create directory structure time:  " + TypeScript.ioHostCreateDirectoryStructureTime);
-                        this.logger.log("IO host write file time:                  " + TypeScript.ioHostWriteFileTime);
+                    this.logger.log("  IsExternallyVisibleTime:                " + TypeScript.declarationEmitIsExternallyVisibleTime);
+                    this.logger.log("  TypeSignatureTime:                      " + TypeScript.declarationEmitTypeSignatureTime);
+                    this.logger.log("  GetBoundDeclTypeTime:                   " + TypeScript.declarationEmitGetBoundDeclTypeTime);
+                    this.logger.log("  IsOverloadedCallSignatureTime:          " + TypeScript.declarationEmitIsOverloadedCallSignatureTime);
+                    this.logger.log("  FunctionDeclarationGetSymbolTime:       " + TypeScript.declarationEmitFunctionDeclarationGetSymbolTime);
+                    this.logger.log("  GetBaseTypeTime:                        " + TypeScript.declarationEmitGetBaseTypeTime);
+                    this.logger.log("  GetAccessorFunctionTime:                " + TypeScript.declarationEmitGetAccessorFunctionTime);
+                    this.logger.log("  GetTypeParameterSymbolTime:             " + TypeScript.declarationEmitGetTypeParameterSymbolTime);
+                    this.logger.log("  GetImportDeclarationSymbolTime:         " + TypeScript.declarationEmitGetImportDeclarationSymbolTime);
 
-                        this.logger.log("Node make directory time:                 " + TypeScript.nodeMakeDirectoryTime);
-                        this.logger.log("Node writeFileSync time:                  " + TypeScript.nodeWriteFileSyncTime);
-                        this.logger.log("Node createBuffer time:                   " + TypeScript.nodeCreateBufferTime);
-                    }
-                }
-                else {
-                    this.updateCompile();
+                    this.logger.log("Emit write file time:                     " + TypeScript.emitWriteFileTime);
+
+                    this.logger.log("Compiler resolve path time:               " + TypeScript.compilerResolvePathTime);
+                    this.logger.log("Compiler directory name time:             " + TypeScript.compilerDirectoryNameTime);
+                    this.logger.log("Compiler directory exists time:           " + TypeScript.compilerDirectoryExistsTime);
+                    this.logger.log("Compiler file exists time:                " + TypeScript.compilerFileExistsTime);
+
+                    this.logger.log("IO host resolve path time:                " + TypeScript.ioHostResolvePathTime);
+                    this.logger.log("IO host directory name time:              " + TypeScript.ioHostDirectoryNameTime);
+                    this.logger.log("IO host create directory structure time:  " + TypeScript.ioHostCreateDirectoryStructureTime);
+                    this.logger.log("IO host write file time:                  " + TypeScript.ioHostWriteFileTime);
+
+                    this.logger.log("Node make directory time:                 " + TypeScript.nodeMakeDirectoryTime);
+                    this.logger.log("Node writeFileSync time:                  " + TypeScript.nodeWriteFileSyncTime);
+                    this.logger.log("Node createBuffer time:                   " + TypeScript.nodeCreateBufferTime);
                 }
             }
 
@@ -123,23 +124,21 @@ module TypeScript {
 
         private resolve() {
             // Resolve file dependencies, if requested
-            var includeDefaultLibrary = !this.compilationSettings.noLib;
+            var includeDefaultLibrary = !this.compilationSettings.noLib();
             var resolvedFiles: IResolvedFile[] = [];
 
             var start = new Date().getTime();
 
-            if (!this.compilationSettings.noResolve) {
+            if (!this.compilationSettings.noResolve()) {
                 // Resolve references
-                var resolutionResults = ReferenceResolver.resolve(this.inputFiles, this, this.compilationSettings);
+                var resolutionResults = ReferenceResolver.resolve(this.inputFiles, this, this.compilationSettings.useCaseSensitiveFileResolution());
                 resolvedFiles = resolutionResults.resolvedFiles;
 
                 // Only include the library if useDefaultLib is set to true and did not see any 'no-default-lib' comments
-                includeDefaultLibrary = !this.compilationSettings.noLib && !resolutionResults.seenNoDefaultLibTag;
+                includeDefaultLibrary = !this.compilationSettings.noLib() && !resolutionResults.seenNoDefaultLibTag;
 
                 // Populate any diagnostic messages generated during resolution
-                for (var i = 0, n = resolutionResults.diagnostics.length; i < n; i++) {
-                    this.addDiagnostic(resolutionResults.diagnostics[i]);
-                }
+                resolutionResults.diagnostics.forEach(d => this.addDiagnostic(d));
             }
             else {
                 for (var i = 0, n = this.inputFiles.length; i < n; i++) {
@@ -148,9 +147,13 @@ module TypeScript {
                     var importedFiles: string[] = [];
 
                     // If declaration files are going to be emitted, preprocess the file contents and add in referenced files as well
-                    if (this.compilationSettings.generateDeclarationFiles) {
+                    if (this.compilationSettings.generateDeclarationFiles()) {
                         var references = getReferencedFiles(inputFile, this.getScriptSnapshot(inputFile));
-                        references.forEach((reference) => { referencedFiles.push(reference.path); });
+                        for (var j = 0; j < references.length; j++) {
+                            referencedFiles.push(references[j].path);
+                        }
+
+                        inputFile = this.resolvePath(inputFile);
                     }
 
                     resolvedFiles.push({
@@ -161,6 +164,7 @@ module TypeScript {
                 }
             }
 
+            var defaultLibStart = new Date().getTime();
             if (includeDefaultLibrary) {
                 var libraryResolvedFile: IResolvedFile = {
                     path: this.getDefaultLibraryFilePath(),
@@ -171,156 +175,45 @@ module TypeScript {
                 // Prepend the library to the resolved list
                 resolvedFiles = [libraryResolvedFile].concat(resolvedFiles);
             }
+            TypeScript.fileResolutionGetDefaultLibraryTime += new Date().getTime() - defaultLibStart;
 
             this.resolvedFiles = resolvedFiles;
 
             TypeScript.fileResolutionTime = new Date().getTime() - start;
         }
 
-        /// Do the actual compilation reading from input files and
-        /// writing to output file(s).
-        private compile(): boolean {
+        // Returns true if compilation failed from some reason.
+        private compile(): void {
             var compiler = new TypeScriptCompiler(this.logger, this.compilationSettings);
 
-            var anySyntacticErrors = false;
-            var anySemanticErrors = false;
-
-            for (var i = 0, n = this.resolvedFiles.length; i < n; i++) {
-                var resolvedFile = this.resolvedFiles[i];
+            this.resolvedFiles.forEach(resolvedFile => {
                 var sourceFile = this.getSourceFile(resolvedFile.path);
-                compiler.addSourceUnit(resolvedFile.path, sourceFile.scriptSnapshot, sourceFile.byteOrderMark, /*version:*/ 0, /*isOpen:*/ false, resolvedFile.referencedFiles);
+                compiler.addFile(resolvedFile.path, sourceFile.scriptSnapshot, sourceFile.byteOrderMark, /*version:*/ 0, /*isOpen:*/ false, resolvedFile.referencedFiles);
+            });
 
-                var syntacticDiagnostics = compiler.getSyntacticDiagnostics(resolvedFile.path);
-                compiler.reportDiagnostics(syntacticDiagnostics, this);
+            for (var it = compiler.compile((path: string) => this.resolvePath(path)); it.moveNext();) {
+                var result = it.current();
 
-                if (syntacticDiagnostics.length > 0) {
-                    anySyntacticErrors = true;
+                result.diagnostics.forEach(d => this.addDiagnostic(d));
+                if (!this.tryWriteOutputFiles(result.outputFiles)) {
+                    return;
                 }
             }
-
-            if (anySyntacticErrors) {
-                return true;
-            }
-
-            compiler.pullTypeCheck();
-            var fileNames = compiler.fileNameToDocument.getAllKeys();
-            var n = fileNames.length;
-            for (var i = 0; i < n; i++) {
-                var fileName = fileNames[i];
-                var semanticDiagnostics = compiler.getSemanticDiagnostics(fileName);
-                if (semanticDiagnostics.length > 0) {
-                    anySemanticErrors = true;
-                    compiler.reportDiagnostics(semanticDiagnostics, this);
-                }
-            }
-
-            if (!this.tcOnly) {
-                var mapInputToOutput = (inputFile: string, outputFile: string): void => {
-                    this.inputFileNameToOutputFileName.addOrUpdate(inputFile, outputFile);
-                };
-
-                // TODO: if there are any emit diagnostics.  Don't proceed.
-                var emitDiagnostics = compiler.emitAll(this, mapInputToOutput);
-                compiler.reportDiagnostics(emitDiagnostics, this);
-                if (emitDiagnostics.length > 0) {
-                    return true;
-                }
-
-                // Don't emit declarations if we have any semantic diagnostics.
-                if (anySemanticErrors) {
-                    return true;
-                }
-
-                var emitDeclarationsDiagnostics = compiler.emitAllDeclarations();
-                compiler.reportDiagnostics(emitDeclarationsDiagnostics, this);
-                if (emitDeclarationsDiagnostics.length > 0) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        public updateCompile(): boolean {
-            var compiler = new TypeScript.TypeScriptCompiler(this.logger, this.compilationSettings);
-
-            var anySyntacticErrors = false;
-            var foundLib = false;
-
-            for (var iCode = 0, n = this.resolvedFiles.length; iCode < n; iCode++) {
-                var resolvedFile = this.resolvedFiles[iCode];
-
-                if (resolvedFile.path.indexOf("lib.d.ts") != -1) {
-                    foundLib = true;
-                }
-                else if ((foundLib && iCode > 1) || (!foundLib && iCode > 0)) {
-                    break;
-                }
-
-                this.ioHost.stdout.WriteLine("Consuming " + resolvedFile.path + "...");
-
-                // if file resolving is disabled, the file's content will not yet be loaded
-
-                var sourceFile = this.getSourceFile(resolvedFile.path);
-                compiler.addSourceUnit(resolvedFile.path, sourceFile.scriptSnapshot, sourceFile.byteOrderMark, /*version:*/ 0, /*isOpen:*/ true, resolvedFile.referencedFiles);
-
-                var syntacticDiagnostics = compiler.getSyntacticDiagnostics(resolvedFile.path);
-                compiler.reportDiagnostics(syntacticDiagnostics, this);
-
-                if (syntacticDiagnostics.length > 0) {
-                    anySyntacticErrors = true;
-                }
-            }
-
-            //if (anySyntacticErrors) {
-            //    return true;
-            //}
-
-            this.ioHost.stdout.WriteLine("**** Initial type check errors:");
-            compiler.pullTypeCheck();
-
-            var semanticDiagnostics: TypeScript.Diagnostic[];
-
-            for (var i = 0; i < iCode; i++) {
-                semanticDiagnostics = compiler.getSemanticDiagnostics(this.resolvedFiles[i].path);
-                compiler.reportDiagnostics(semanticDiagnostics, this);
-            }
-
-            // Note: we continue even if there were type check warnings.
-
-            // ok, now we got through the remaining files, 1-by-1, substituting the new code in for the old
-            if (iCode && iCode <= this.resolvedFiles.length - 1) {
-                var lastTypecheckedFileName = this.resolvedFiles[iCode - 1].path;
-                var snapshot: TypeScript.IScriptSnapshot;
-
-                for (; iCode < this.resolvedFiles.length; iCode++) {
-                    var resolvedFile = this.resolvedFiles[iCode];
-                    var sourceFile = this.getSourceFile(resolvedFile.path);
-                    this.ioHost.stdout.WriteLine("**** Update type check and errors for " + resolvedFile.path + ":");
-
-                    compiler.updateSourceUnit(lastTypecheckedFileName, sourceFile.scriptSnapshot, /*version:*/ 0, /*isOpen:*/ true, null);
-                    // resolve the file to simulate an IDE-driven pull
-                    //compiler.pullResolveFile(lastTypecheckedFileName);
-                    semanticDiagnostics = compiler.getSemanticDiagnostics(lastTypecheckedFileName);
-                    compiler.reportDiagnostics(semanticDiagnostics, this);
-                }
-            }
-
-            return false;
         }
 
         // Parse command line options
         private parseOptions() {
             var opts = new OptionsParser(this.ioHost, this.compilerVersion);
 
+            var mutableSettings = new CompilationSettings();
             opts.option('out', {
                 usage: {
-                    locCode: DiagnosticCode.Concatenate_and_emit_output_to_single_file, 
+                    locCode: DiagnosticCode.Concatenate_and_emit_output_to_single_file,
                     args: null
                 },
-                type: DiagnosticCode.FILE,
+                type: DiagnosticCode.file2,
                 set: (str) => {
-                    this.compilationSettings.outFileOption = str;
+                    mutableSettings.outFileOption = str;
                 }
             });
 
@@ -331,7 +224,7 @@ module TypeScript {
                 },
                 type: DiagnosticCode.DIRECTORY,
                 set: (str) => {
-                    this.compilationSettings.outDirOption = str;
+                    mutableSettings.outDirOption = str;
                 }
             });
 
@@ -341,7 +234,7 @@ module TypeScript {
                     args: ['.map']
                 },
                 set: () => {
-                    this.compilationSettings.mapSourceFiles = true;
+                    mutableSettings.mapSourceFiles = true;
                 }
             });
 
@@ -352,7 +245,7 @@ module TypeScript {
                 },
                 type: DiagnosticCode.LOCATION,
                 set: (str) => {
-                    this.compilationSettings.mapRoot = str;
+                    mutableSettings.mapRoot = str;
                 }
             });
 
@@ -363,7 +256,7 @@ module TypeScript {
                 },
                 type: DiagnosticCode.LOCATION,
                 set: (str) => {
-                    this.compilationSettings.sourceRoot = str;
+                    mutableSettings.sourceRoot = str;
                 }
             });
 
@@ -373,7 +266,7 @@ module TypeScript {
                     args: ['.d.ts']
                 },
                 set: () => {
-                    this.compilationSettings.generateDeclarationFiles = true;
+                    mutableSettings.generateDeclarationFiles = true;
                 }
             }, 'd');
 
@@ -384,14 +277,14 @@ module TypeScript {
                         args: null
                     },
                     set: () => {
-                        this.compilationSettings.watch = true;
+                        mutableSettings.watch = true;
                     }
                 }, 'w');
             }
 
             opts.flag('propagateEnumConstants', {
                 experimental: true,
-                set: () => { this.compilationSettings.propagateEnumConstants = true; }
+                set: () => { mutableSettings.propagateEnumConstants = true; }
             });
 
             opts.flag('removeComments', {
@@ -400,7 +293,7 @@ module TypeScript {
                     args: null
                 },
                 set: () => {
-                    this.compilationSettings.removeComments = true;
+                    mutableSettings.removeComments = true;
                 }
             });
 
@@ -410,28 +303,21 @@ module TypeScript {
                     args: null
                 },
                 set: () => {
-                    this.compilationSettings.noResolve = true;
+                    mutableSettings.noResolve = true;
                 }
             });
 
             opts.flag('noLib', {
                 experimental: true,
                 set: () => {
-                    this.compilationSettings.noLib = true;
+                    mutableSettings.noLib = true;
                 }
             });
 
             opts.flag('diagnostics', {
                 experimental: true,
                 set: () => {
-                    this.compilationSettings.gatherDiagnostics = true;
-                }
-            });
-
-            opts.flag('update', {
-                experimental: true,
-                set: () => {
-                    this.compilationSettings.updateTC = true;
+                    mutableSettings.gatherDiagnostics = true;
                 }
             });
 
@@ -445,14 +331,14 @@ module TypeScript {
                     type = type.toLowerCase();
 
                     if (type === 'es3') {
-                        this.compilationSettings.codeGenTarget = LanguageVersion.EcmaScript3;
+                        mutableSettings.codeGenTarget = LanguageVersion.EcmaScript3;
                     }
                     else if (type === 'es5') {
-                        this.compilationSettings.codeGenTarget = LanguageVersion.EcmaScript5;
+                        mutableSettings.codeGenTarget = LanguageVersion.EcmaScript5;
                     }
                     else {
                         this.addDiagnostic(
-                            new Diagnostic(null, 0, 0, DiagnosticCode.ECMAScript_target_version_0_not_supported_Using_default_1_code_generation, [type, "ES3"]));
+                            new Diagnostic(null, null, 0, 0, DiagnosticCode.ECMAScript_target_version_0_not_supported_Specify_a_valid_target_version_1_default_or_2, [type, "ES3", "ES5"]));
                     }
                 }
             }, 't');
@@ -467,14 +353,14 @@ module TypeScript {
                     type = type.toLowerCase();
 
                     if (type === 'commonjs') {
-                        this.compilationSettings.moduleGenTarget = ModuleGenTarget.Synchronous;
+                        mutableSettings.moduleGenTarget = ModuleGenTarget.Synchronous;
                     }
                     else if (type === 'amd') {
-                        this.compilationSettings.moduleGenTarget = ModuleGenTarget.Asynchronous;
+                        mutableSettings.moduleGenTarget = ModuleGenTarget.Asynchronous;
                     }
                     else {
                         this.addDiagnostic(
-                            new Diagnostic(null, 0, 0, DiagnosticCode.Module_code_generation_0_not_supported, [type]));
+                            new Diagnostic(null, null, 0, 0, DiagnosticCode.Module_code_generation_0_not_supported, [type]));
                     }
                 }
             }, 'm');
@@ -493,7 +379,7 @@ module TypeScript {
             opts.flag('useCaseSensitiveFileResolution', {
                 experimental: true,
                 set: () => {
-                    this.compilationSettings.useCaseSensitiveFileResolution = true;
+                    mutableSettings.useCaseSensitiveFileResolution = true;
                 }
             });
             var shouldPrintVersionOnly = false;
@@ -526,11 +412,26 @@ module TypeScript {
                     args: null
                 },
                 set: () => {
-                    this.compilationSettings.noImplicitAny = true;
+                    mutableSettings.noImplicitAny = true;
                 }
             });
 
+            if (Environment.supportsCodePage()) {
+                opts.option('codepage', {
+                    usage: {
+                        locCode: DiagnosticCode.Specify_the_codepage_to_use_when_opening_source_files,
+                        args: null
+                    },
+                    type: DiagnosticCode.NUMBER,
+                    set: (arg) => {
+                        mutableSettings.codepage = parseInt(arg, 10);
+                    }
+                });
+            }
+
             opts.parse(this.ioHost.arguments);
+
+            this.compilationSettings = ImmutableCompilationSettings.fromCompilationSettings(mutableSettings);
 
             if (locale) {
                 if (!this.setLocale(locale)) {
@@ -538,9 +439,7 @@ module TypeScript {
                 }
             }
 
-            for (var i = 0, n = opts.unnamed.length; i < n; i++) {
-                this.inputFiles.push(opts.unnamed[i]);
-            }
+            this.inputFiles.push.apply(this.inputFiles, opts.unnamed);
 
             // If no source files provided to compiler - print usage information
             if (this.inputFiles.length === 0 || needsHelp) {
@@ -557,7 +456,7 @@ module TypeScript {
         private setLocale(locale: string): boolean {
             var matchResult = /^([a-z]+)([_\-]([a-z]+))?$/.exec(locale.toLowerCase());
             if (!matchResult) {
-                this.addDiagnostic(new Diagnostic(null, 0, 0, DiagnosticCode.Locale_must_be_of_the_form_language_or_language_territory_For_example_0_or_1, ['en', 'ja-jp']));
+                this.addDiagnostic(new Diagnostic(null, null, 0, 0, DiagnosticCode.Locale_must_be_of_the_form_language_or_language_territory_For_example_0_or_1, ['en', 'ja-jp']));
                 return false;
             }
 
@@ -568,7 +467,7 @@ module TypeScript {
             if (!this.setLanguageAndTerritory(language, territory) &&
                 !this.setLanguageAndTerritory(language, null)) {
 
-                this.addDiagnostic(new Diagnostic(null, 0, 0, DiagnosticCode.Unsupported_locale_0, [locale]));
+                this.addDiagnostic(new Diagnostic(null, null, 0, 0, DiagnosticCode.Unsupported_locale_0, [locale]));
                 return false;
             }
 
@@ -585,13 +484,13 @@ module TypeScript {
                 filePath = filePath + "-" + territory;
             }
 
-            filePath = this.ioHost.resolvePath(IOUtils.combine(filePath, "diagnosticMessages.generated.json"));
+            filePath = this.resolvePath(IOUtils.combine(filePath, "diagnosticMessages.generated.json"));
 
-            if (!this.ioHost.fileExists(filePath)) {
+            if (!this.fileExists(filePath)) {
                 return false;
             }
 
-            var fileContents = this.ioHost.readFile(filePath);
+            var fileContents = this.ioHost.readFile(filePath, this.compilationSettings.codepage());
             TypeScript.LocalizedDiagnosticMessages = JSON.parse(fileContents.contents);
             return true;
         }
@@ -600,7 +499,7 @@ module TypeScript {
         private watchFiles() {
             if (!this.ioHost.watchFile) {
                 this.addDiagnostic(
-                    new Diagnostic(null, 0, 0, DiagnosticCode.Current_host_does_not_support_0_option, ['-w[atch]']));
+                    new Diagnostic(null, null, 0, 0, DiagnosticCode.Current_host_does_not_support_0_option, ['-w[atch]']));
                 return;
             }
 
@@ -633,7 +532,7 @@ module TypeScript {
                 this.hasErrors = false;
 
                 // Clear out any source file data we've cached.
-                this.fileNameToSourceFile = new StringHashTable();
+                this.fileNameToSourceFile = new StringHashTable<SourceFile>();
 
                 // Resolve file dependencies, if requested
                 this.resolve();
@@ -679,7 +578,9 @@ module TypeScript {
                 // Print header
                 if (!firstTime) {
                     var fileNames = "";
-                    lastResolvedFileSet.forEach((f) => { fileNames += Environment.newLine + "    " + f; });
+                    for (var k = 0; k < lastResolvedFileSet.length; k++) {
+                        fileNames += Environment.newLine + "    " + lastResolvedFileSet[k];
+                    }
                     this.ioHost.printLine(getLocalizedText(DiagnosticCode.NL_Recompiling_0, [fileNames]));
                 }
                 else {
@@ -703,10 +604,10 @@ module TypeScript {
                 var fileInformation: FileInformation;
 
                 try {
-                    fileInformation = this.ioHost.readFile(fileName);
+                    fileInformation = this.ioHost.readFile(fileName, this.compilationSettings.codepage());
                 }
                 catch (e) {
-                    this.addDiagnostic(new Diagnostic(null, 0, 0, DiagnosticCode.Cannot_read_file_0_1, [fileName, e.message]));
+                    this.addDiagnostic(new Diagnostic(null, null, 0, 0, DiagnosticCode.Cannot_read_file_0_1, [fileName, e.message]));
                     fileInformation = new FileInformation("", ByteOrderMark.None);
                 }
 
@@ -721,7 +622,7 @@ module TypeScript {
         private getDefaultLibraryFilePath(): string {
             var compilerFilePath = this.ioHost.getExecutingFilePath();
             var containingDirectoryPath = this.ioHost.dirName(compilerFilePath);
-            var libraryFilePath = this.ioHost.resolvePath(IOUtils.combine(containingDirectoryPath, "lib.d.ts"));
+            var libraryFilePath = this.resolvePath(IOUtils.combine(containingDirectoryPath, "lib.d.ts"));
 
             return libraryFilePath;
         }
@@ -732,7 +633,9 @@ module TypeScript {
         }
 
         resolveRelativePath(path: string, directory: string): string {
-            var unQuotedPath = stripQuotes(path);
+            var start = new Date().getTime();
+
+            var unQuotedPath = stripStartAndEndQuotes(path);
             var normalizedPath: string;
 
             if (isRooted(unQuotedPath) || !directory) {
@@ -750,34 +653,58 @@ module TypeScript {
             return normalizedPath;
         }
 
+        private fileExistsCache = createIntrinsicsObject<boolean>();
+
         fileExists(path: string): boolean {
-            var start = new Date().getTime();
-            var result = this.ioHost.fileExists(path);
-            TypeScript.emitFileExistsTime += new Date().getTime() - start;
-            return result;
+            var exists = this.fileExistsCache[path];
+            if (exists === undefined) {
+                var start = new Date().getTime();
+                exists = this.ioHost.fileExists(path);
+                this.fileExistsCache[path] = exists;
+                TypeScript.compilerFileExistsTime += new Date().getTime() - start;
+            }
+
+            return exists;
         }
 
         getParentDirectory(path: string): string {
-            return this.ioHost.dirName(path);
+            var start = new Date().getTime();
+            var result = this.ioHost.dirName(path);
+            TypeScript.compilerDirectoryNameTime += new Date().getTime() - start;
+
+            return result;
         }
 
-        /// IDiagnosticsReporter methods
-        addDiagnostic(diagnostic: Diagnostic) {
-            this.hasErrors = true;
+        private addDiagnostic(diagnostic: Diagnostic) {
+            var diagnosticInfo = diagnostic.info();
+            if (diagnosticInfo.category === DiagnosticCategory.Error) {
+                this.hasErrors = true;
+            }
 
             if (diagnostic.fileName()) {
-                var scriptSnapshot = this.getScriptSnapshot(diagnostic.fileName());
-                var lineMap = new LineMap(scriptSnapshot.getLineStartPositions(), scriptSnapshot.getLength());
-                var lineCol = { line: -1, character: -1 };
-                lineMap.fillLineAndCharacterFromPosition(diagnostic.start(), lineCol);
-
-                this.ioHost.stderr.Write(diagnostic.fileName() + "(" + (lineCol.line + 1) + "," + (lineCol.character + 1) + "): ");
+                this.ioHost.stderr.Write(diagnostic.fileName() + "(" + (diagnostic.line() + 1) + "," + (diagnostic.character() + 1) + "): ");
             }
 
             this.ioHost.stderr.WriteLine(diagnostic.message());
         }
 
-        /// EmitterIOHost methods
+        private tryWriteOutputFiles(outputFiles: OutputFile[]): boolean {
+            for (var i = 0, n = outputFiles.length; i < n; i++) {
+                var outputFile = outputFiles[i];
+
+                try {
+                    this.writeFile(outputFile.name, outputFile.text, outputFile.writeByteOrderMark);
+                }
+                catch (e) {
+                    this.addDiagnostic(
+                        new Diagnostic(outputFile.name, null, 0, 0, DiagnosticCode.Emit_Error_0, [e.message]));
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         writeFile(fileName: string, contents: string, writeByteOrderMark: boolean): void {
             var start = new Date().getTime();
             IOUtils.writeFileAndFolderStructure(this.ioHost, fileName, contents, writeByteOrderMark);
@@ -787,19 +714,28 @@ module TypeScript {
         directoryExists(path: string): boolean {
             var start = new Date().getTime();
             var result = this.ioHost.directoryExists(path);
-            TypeScript.emitDirectoryExistsTime += new Date().getTime() - start;
+            TypeScript.compilerDirectoryExistsTime += new Date().getTime() - start;
             return result;
         }
+
+        // For performance reasons we cache the results of resolvePath.  This avoids costly lookup
+        // on the disk once we've already resolved a path once.
+        private resolvePathCache = createIntrinsicsObject<string>();
 
         resolvePath(path: string): string {
-            var start = new Date().getTime();
-            var result = this.ioHost.resolvePath(path);
-            TypeScript.emitResolvePathTime += new Date().getTime() - start;
-            return result;
+            var cachedValue = this.resolvePathCache[path];
+            if (!cachedValue) {
+                var start = new Date().getTime();
+                cachedValue = this.ioHost.resolvePath(path);
+                this.resolvePathCache[path] = cachedValue;
+                TypeScript.compilerResolvePathTime += new Date().getTime() - start;
+            }
+
+            return cachedValue;
         }
     }
-}
 
-// Start the batch compilation using the current hosts IO
-var batch = new TypeScript.BatchCompiler(IO);
-batch.batchCompile();
+    // Start the batch compilation using the current hosts IO
+    var batch = new TypeScript.BatchCompiler(IO);
+    batch.batchCompile();
+}

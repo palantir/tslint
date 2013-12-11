@@ -16,7 +16,7 @@
 
 /// <reference path='../../lib/tslint.d.ts' />
 
-import BanRule = require("banRule");
+import BanRule = require("./banRule");
 
 export class Rule extends BanRule.Rule {
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {

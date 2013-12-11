@@ -21,7 +21,7 @@
 // Access to "Debug" object 
 var debugObjectHost = (<any>this);
 
-module Services {
+module TypeScript.Services {
 
     export interface ICoreServicesHost {
         logger: TypeScript.ILogger;
@@ -32,10 +32,7 @@ module Services {
         }
 
         public getPreProcessedFileInfo(fileName: string, sourceText: TypeScript.IScriptSnapshot): TypeScript.IPreProcessedFileInfo {
-            var settings = new TypeScript.CompilationSettings();
-            settings.codeGenTarget = TypeScript.LanguageVersion.EcmaScript5;
-            var result = TypeScript.preProcessFile(fileName, sourceText, settings);
-            return result;
+            return TypeScript.preProcessFile(fileName, sourceText);
         }
 
         public getDefaultCompilationSettings(): TypeScript.CompilationSettings {

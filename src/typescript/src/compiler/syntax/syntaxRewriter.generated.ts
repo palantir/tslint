@@ -85,7 +85,7 @@ module TypeScript {
                 this.visitToken(node.importKeyword),
                 this.visitToken(node.identifier),
                 this.visitToken(node.equalsToken),
-                <ModuleReferenceSyntax>this.visitNode(node.moduleReference),
+                <IModuleReferenceSyntax>this.visitNodeOrToken(node.moduleReference),
                 this.visitToken(node.semicolonToken));
         }
 
@@ -121,6 +121,7 @@ module TypeScript {
 
         public visitHeritageClause(node: HeritageClauseSyntax): any {
             return node.update(
+                node.kind(),
                 this.visitToken(node.extendsOrImplementsKeyword),
                 this.visitSeparatedList(node.typeNames));
         }
@@ -129,7 +130,7 @@ module TypeScript {
             return node.update(
                 this.visitList(node.modifiers),
                 this.visitToken(node.moduleKeyword),
-                node.moduleName === null ? null : <INameSyntax>this.visitNodeOrToken(node.moduleName),
+                node.name === null ? null : <INameSyntax>this.visitNodeOrToken(node.name),
                 node.stringLiteral === null ? null : this.visitToken(node.stringLiteral),
                 this.visitToken(node.openBraceToken),
                 this.visitList(node.moduleElements),
@@ -161,7 +162,7 @@ module TypeScript {
 
         public visitVariableDeclarator(node: VariableDeclaratorSyntax): any {
             return node.update(
-                this.visitToken(node.identifier),
+                this.visitToken(node.propertyName),
                 node.typeAnnotation === null ? null : <TypeAnnotationSyntax>this.visitNode(node.typeAnnotation),
                 node.equalsValueClause === null ? null : <EqualsValueClauseSyntax>this.visitNode(node.equalsValueClause));
         }
@@ -201,14 +202,16 @@ module TypeScript {
             return node.update(
                 this.visitToken(node.identifier),
                 this.visitToken(node.equalsGreaterThanToken),
-                <ISyntaxNodeOrToken>this.visitNodeOrToken(node.body));
+                node.block === null ? null : <BlockSyntax>this.visitNode(node.block),
+                node.expression === null ? null : <IExpressionSyntax>this.visitNodeOrToken(node.expression));
         }
 
         public visitParenthesizedArrowFunctionExpression(node: ParenthesizedArrowFunctionExpressionSyntax): any {
             return node.update(
                 <CallSignatureSyntax>this.visitNode(node.callSignature),
                 this.visitToken(node.equalsGreaterThanToken),
-                <ISyntaxNodeOrToken>this.visitNodeOrToken(node.body));
+                node.block === null ? null : <BlockSyntax>this.visitNode(node.block),
+                node.expression === null ? null : <IExpressionSyntax>this.visitNodeOrToken(node.expression));
         }
 
         public visitQualifiedName(node: QualifiedNameSyntax): any {
@@ -284,7 +287,7 @@ module TypeScript {
         public visitParameter(node: ParameterSyntax): any {
             return node.update(
                 node.dotDotDotToken === null ? null : this.visitToken(node.dotDotDotToken),
-                node.publicOrPrivateKeyword === null ? null : this.visitToken(node.publicOrPrivateKeyword),
+                this.visitList(node.modifiers),
                 this.visitToken(node.identifier),
                 node.questionToken === null ? null : this.visitToken(node.questionToken),
                 node.typeAnnotation === null ? null : <TypeAnnotationSyntax>this.visitNode(node.typeAnnotation),
@@ -301,7 +304,7 @@ module TypeScript {
         public visitPostfixUnaryExpression(node: PostfixUnaryExpressionSyntax): any {
             return node.update(
                 node.kind(),
-                <IExpressionSyntax>this.visitNodeOrToken(node.operand),
+                <IMemberExpressionSyntax>this.visitNodeOrToken(node.operand),
                 this.visitToken(node.operatorToken));
         }
 
@@ -315,7 +318,7 @@ module TypeScript {
 
         public visitInvocationExpression(node: InvocationExpressionSyntax): any {
             return node.update(
-                <IExpressionSyntax>this.visitNodeOrToken(node.expression),
+                <IMemberExpressionSyntax>this.visitNodeOrToken(node.expression),
                 <ArgumentListSyntax>this.visitNode(node.argumentList));
         }
 
@@ -429,6 +432,7 @@ module TypeScript {
 
         public visitConstructorDeclaration(node: ConstructorDeclarationSyntax): any {
             return node.update(
+                this.visitList(node.modifiers),
                 this.visitToken(node.constructorKeyword),
                 <ParameterListSyntax>this.visitNode(node.parameterList),
                 node.block === null ? null : <BlockSyntax>this.visitNode(node.block),
@@ -444,7 +448,7 @@ module TypeScript {
                 node.semicolonToken === null ? null : this.visitToken(node.semicolonToken));
         }
 
-        public visitGetMemberAccessorDeclaration(node: GetMemberAccessorDeclarationSyntax): any {
+        public visitGetAccessor(node: GetAccessorSyntax): any {
             return node.update(
                 this.visitList(node.modifiers),
                 this.visitToken(node.getKeyword),
@@ -454,7 +458,7 @@ module TypeScript {
                 <BlockSyntax>this.visitNode(node.block));
         }
 
-        public visitSetMemberAccessorDeclaration(node: SetMemberAccessorDeclarationSyntax): any {
+        public visitSetAccessor(node: SetAccessorSyntax): any {
             return node.update(
                 this.visitList(node.modifiers),
                 this.visitToken(node.setKeyword),
@@ -467,6 +471,13 @@ module TypeScript {
             return node.update(
                 this.visitList(node.modifiers),
                 <VariableDeclaratorSyntax>this.visitNode(node.variableDeclarator),
+                this.visitToken(node.semicolonToken));
+        }
+
+        public visitIndexMemberDeclaration(node: IndexMemberDeclarationSyntax): any {
+            return node.update(
+                this.visitList(node.modifiers),
+                <IndexSignatureSyntax>this.visitNode(node.indexSignature),
                 this.visitToken(node.semicolonToken));
         }
 
@@ -487,7 +498,7 @@ module TypeScript {
         public visitObjectCreationExpression(node: ObjectCreationExpressionSyntax): any {
             return node.update(
                 this.visitToken(node.newKeyword),
-                <IExpressionSyntax>this.visitNodeOrToken(node.expression),
+                <IMemberExpressionSyntax>this.visitNodeOrToken(node.expression),
                 node.argumentList === null ? null : <ArgumentListSyntax>this.visitNode(node.argumentList));
         }
 
@@ -620,26 +631,6 @@ module TypeScript {
                 <BlockSyntax>this.visitNode(node.block));
         }
 
-        public visitGetAccessorPropertyAssignment(node: GetAccessorPropertyAssignmentSyntax): any {
-            return node.update(
-                this.visitToken(node.getKeyword),
-                this.visitToken(node.propertyName),
-                this.visitToken(node.openParenToken),
-                this.visitToken(node.closeParenToken),
-                node.typeAnnotation === null ? null : <TypeAnnotationSyntax>this.visitNode(node.typeAnnotation),
-                <BlockSyntax>this.visitNode(node.block));
-        }
-
-        public visitSetAccessorPropertyAssignment(node: SetAccessorPropertyAssignmentSyntax): any {
-            return node.update(
-                this.visitToken(node.setKeyword),
-                this.visitToken(node.propertyName),
-                this.visitToken(node.openParenToken),
-                <ParameterSyntax>this.visitNode(node.parameter),
-                this.visitToken(node.closeParenToken),
-                <BlockSyntax>this.visitNode(node.block));
-        }
-
         public visitFunctionExpression(node: FunctionExpressionSyntax): any {
             return node.update(
                 this.visitToken(node.functionKeyword),
@@ -698,19 +689,19 @@ module TypeScript {
         public visitTypeOfExpression(node: TypeOfExpressionSyntax): any {
             return node.update(
                 this.visitToken(node.typeOfKeyword),
-                <IExpressionSyntax>this.visitNodeOrToken(node.expression));
+                <IUnaryExpressionSyntax>this.visitNodeOrToken(node.expression));
         }
 
         public visitDeleteExpression(node: DeleteExpressionSyntax): any {
             return node.update(
                 this.visitToken(node.deleteKeyword),
-                <IExpressionSyntax>this.visitNodeOrToken(node.expression));
+                <IUnaryExpressionSyntax>this.visitNodeOrToken(node.expression));
         }
 
         public visitVoidExpression(node: VoidExpressionSyntax): any {
             return node.update(
                 this.visitToken(node.voidKeyword),
-                <IExpressionSyntax>this.visitNodeOrToken(node.expression));
+                <IUnaryExpressionSyntax>this.visitNodeOrToken(node.expression));
         }
 
         public visitDebuggerStatement(node: DebuggerStatementSyntax): any {

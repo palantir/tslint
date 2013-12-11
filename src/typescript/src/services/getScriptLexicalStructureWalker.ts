@@ -1,4 +1,4 @@
-module Services {
+module TypeScript.Services {
     export class GetScriptLexicalStructureWalker extends TypeScript.PositionTrackingWalker {
         private nameStack: string[] = [];
         private kindStack: string[] = [];
@@ -10,14 +10,17 @@ module Services {
             super();
         }
 
+        static getListsOfAllScriptLexicalStructure(items: NavigateToItem[], fileName: string, unit: TypeScript.SourceUnitSyntax) {
+            var visitor = new GetScriptLexicalStructureWalker(items, fileName);
+            unit.accept(visitor);
+        }
+
         private createItem(
                 node: TypeScript.SyntaxNode,
                 modifiers: TypeScript.ISyntaxList,
                 kind: string,
-                name: string): NavigateToItem {
-
+                name: string): void {
             var item = new NavigateToItem();
-
             item.name = name;
             item.kind = kind;
             item.matchKind = MatchKind.exact;
@@ -29,8 +32,6 @@ module Services {
             item.containerKind = this.kindStack.length === 0 ? "" : TypeScript.ArrayUtilities.last(this.kindStack);
 
             this.items.push(item);
-
-            return item;
         }
 
         private getKindModifiers(modifiers: TypeScript.ISyntaxList): string {
@@ -76,10 +77,12 @@ module Services {
                 var modifiers = nameIndex === 0
                     ? node.modifiers
                     : TypeScript.Syntax.list([TypeScript.Syntax.token(TypeScript.SyntaxKind.ExportKeyword)]);
-                var item = this.createItem(node, node.modifiers, ScriptElementKind.moduleElement, names[nameIndex]);
+                var name = names[nameIndex];
+                var kind = ScriptElementKind.moduleElement;
+                this.createItem(node, node.modifiers, kind, name);
 
-                this.nameStack.push(item.name);
-                this.kindStack.push(item.kind);
+                this.nameStack.push(name);
+                this.kindStack.push(kind);
 
                 this.visitModuleDeclarationWorker(node, names, nameIndex + 1);
 
@@ -95,7 +98,7 @@ module Services {
                 result.push(node.stringLiteral.text());
             }
             else {
-                this.getModuleNamesHelper(node.moduleName, result);
+                this.getModuleNamesHelper(node.name, result);
             }
 
             return result;
@@ -113,10 +116,13 @@ module Services {
         }
 
         public visitClassDeclaration(node: TypeScript.ClassDeclarationSyntax): void {
-            var item = this.createItem(node, node.modifiers, ScriptElementKind.classElement, node.identifier.text());
+            var name = node.identifier.text();
+            var kind = ScriptElementKind.classElement;
 
-            this.nameStack.push(item.name);
-            this.kindStack.push(item.kind);
+            this.createItem(node, node.modifiers, kind, name);
+
+            this.nameStack.push(name);
+            this.kindStack.push(kind);
 
             super.visitClassDeclaration(node);
 
@@ -125,10 +131,13 @@ module Services {
         }
 
         public visitInterfaceDeclaration(node: TypeScript.InterfaceDeclarationSyntax): void {
-            var item = this.createItem(node, node.modifiers, ScriptElementKind.interfaceElement, node.identifier.text());
+            var name = node.identifier.text();
+            var kind = ScriptElementKind.interfaceElement;
 
-            this.nameStack.push(item.name);
-            this.kindStack.push(item.kind);
+            this.createItem(node, node.modifiers, kind, name);
+
+            this.nameStack.push(name);
+            this.kindStack.push(kind);
 
             this.currentInterfaceDeclaration = node;
             super.visitInterfaceDeclaration(node);
@@ -150,10 +159,13 @@ module Services {
         }
 
         public visitEnumDeclaration(node: TypeScript.EnumDeclarationSyntax): void {
-            var item = this.createItem(node, node.modifiers, ScriptElementKind.enumElement, node.identifier.text());
+            var name = node.identifier.text();
+            var kind = ScriptElementKind.enumElement;
 
-            this.nameStack.push(item.name);
-            this.kindStack.push(item.kind);
+            this.createItem(node, node.modifiers, kind, name);
+
+            this.nameStack.push(name);
+            this.kindStack.push(kind);
 
             super.visitEnumDeclaration(node);
 
@@ -175,14 +187,14 @@ module Services {
             this.skip(node);
         }
 
-        public visitGetMemberAccessorDeclaration(node: TypeScript.GetMemberAccessorDeclarationSyntax): void {
+        public visitGetAccessor(node: TypeScript.GetAccessorSyntax): void {
             var item = this.createItem(node, node.modifiers, ScriptElementKind.memberGetAccessorElement, node.propertyName.text());
 
             // No need to descend into a member accessor;
             this.skip(node);
         }
 
-        public visitSetMemberAccessorDeclaration(node: TypeScript.SetMemberAccessorDeclarationSyntax): void {
+        public visitSetAccessor(node: TypeScript.SetAccessorSyntax): void {
             var item = this.createItem(node, node.modifiers, ScriptElementKind.memberSetAccessorElement, node.propertyName.text());
 
             // No need to descend into a member accessor;
@@ -208,7 +220,7 @@ module Services {
             var kind = this.currentMemberVariableDeclaration
                 ? ScriptElementKind.memberVariableElement
                 : ScriptElementKind.variableElement;
-            var item = this.createItem(node, modifiers, kind, node.identifier.text());
+            var item = this.createItem(node, modifiers, kind, node.propertyName.text());
 
             // No need to descend into a variable declarator;
             this.skip(node);

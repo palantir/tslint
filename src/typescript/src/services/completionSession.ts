@@ -14,7 +14,7 @@
 //
 ///<reference path='typescriptServices.ts' />
 
-module Services {
+module TypeScript.Services {
 
     export interface CachedCompletionEntryDetails extends CompletionEntryDetails{
         isResolved(): boolean;

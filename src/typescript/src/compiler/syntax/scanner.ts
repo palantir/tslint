@@ -1,10 +1,10 @@
 ///<reference path='references.ts' />
 
 module TypeScript {
-    var isKeywordStartCharacter: boolean[] = ArrayUtilities.createArray(CharacterCodes.maxAsciiCharacter, false);
-    var isIdentifierStartCharacter: boolean[] = ArrayUtilities.createArray(CharacterCodes.maxAsciiCharacter, false);
-    var isIdentifierPartCharacter: boolean[] = ArrayUtilities.createArray(CharacterCodes.maxAsciiCharacter, false);
-    var isNumericLiteralStart: boolean[] = ArrayUtilities.createArray(CharacterCodes.maxAsciiCharacter, false);
+    var isKeywordStartCharacter: boolean[] = ArrayUtilities.createArray<boolean>(CharacterCodes.maxAsciiCharacter, false);
+    var isIdentifierStartCharacter: boolean[] = ArrayUtilities.createArray<boolean>(CharacterCodes.maxAsciiCharacter, false);
+    var isIdentifierPartCharacter: boolean[] = ArrayUtilities.createArray<boolean>(CharacterCodes.maxAsciiCharacter, false);
+    var isNumericLiteralStart: boolean[] = ArrayUtilities.createArray<boolean>(CharacterCodes.maxAsciiCharacter, false);
 
     for (var character = 0; character < CharacterCodes.maxAsciiCharacter; character++) {
         if (character >= CharacterCodes.a && character <= CharacterCodes.z) {
@@ -40,7 +40,7 @@ module TypeScript {
         constructor(fileName: string,
                     text: ISimpleText,
                     languageVersion: LanguageVersion,
-                    window: number[] = ArrayUtilities.createArray(2048, 0)) {
+                    window: number[] = ArrayUtilities.createArray<number>(2048, 0)) {
             this.slidingWindow = new SlidingWindow(this, window, 0, text.length());
             this.fileName = fileName;
             this.text = text;
@@ -79,12 +79,15 @@ module TypeScript {
             var leadingTriviaInfo = this.scanTriviaInfo(diagnostics, /*isTrailing: */ false);
 
             var start = this.slidingWindow.absoluteIndex();
-            var kind = this.scanSyntaxToken(diagnostics, allowRegularExpression);
+            var kindAndFlags = this.scanSyntaxToken(diagnostics, allowRegularExpression);
             var end = this.slidingWindow.absoluteIndex();
 
             var trailingTriviaInfo = this.scanTriviaInfo(diagnostics,/*isTrailing: */true);
 
-            var token = this.createToken(fullStart, leadingTriviaInfo, start, kind, end, trailingTriviaInfo);
+            var isVariableWidthKeyword = (kindAndFlags & SyntaxConstants.IsVariableWidthKeyword) !== 0;
+            var kind = kindAndFlags & ~SyntaxConstants.IsVariableWidthKeyword;
+
+            var token = this.createToken(fullStart, leadingTriviaInfo, start, kind, end, trailingTriviaInfo, isVariableWidthKeyword);
 
             // If we produced any diagnostics while creating this token, then realize the token so 
             // it won't be reused in incremental scenarios.
@@ -93,8 +96,16 @@ module TypeScript {
                 : token;
         }
 
-        private createToken(fullStart: number, leadingTriviaInfo: number, start: number, kind: SyntaxKind, end: number, trailingTriviaInfo: number): ISyntaxToken {
-            if (kind >= SyntaxKind.FirstFixedWidth) {
+        private createToken(
+            fullStart: number,
+            leadingTriviaInfo: number,
+            start: number,
+            kind: SyntaxKind,
+            end: number,
+            trailingTriviaInfo: number,
+            isVariableWidthKeyword: boolean): ISyntaxToken {
+
+            if (!isVariableWidthKeyword && kind >= SyntaxKind.FirstFixedWidth) {
                 if (leadingTriviaInfo === 0) {
                     if (trailingTriviaInfo === 0) {
                         return new Syntax.FixedWidthTokenWithNoTrivia(kind);
@@ -129,16 +140,21 @@ module TypeScript {
             }
         }
 
-        private static triviaWindow: Array<any> = ArrayUtilities.createArray(2048, 0);
+        private static triviaWindow: number[] = ArrayUtilities.createArray<number>(2048, 0);
 
         // Scans a subsection of 'text' as trivia.
         public static scanTrivia(text: ISimpleText, start: number, length: number, isTrailing: boolean): ISyntaxTriviaList {
             // Debug.assert(length > 0);
+
+            // Note: the scanner operates upon a subrange of the text passed in. However, we also
+            // pass hte originl text along to 'scanTrivia' so the trivia can point back at it
+            // directly (and not at the subtext wrapper).  This allows the subtext to get GC'ed
+            // and means trivia can be represented with only a single allocation.
             var scanner = new Scanner(/*fileName:*/ null, text.subText(new TextSpan(start, length)), LanguageVersion.EcmaScript5, Scanner.triviaWindow);
-            return scanner.scanTrivia(isTrailing);
+            return scanner.scanTrivia(text, start, isTrailing);
         }
 
-        private scanTrivia(isTrailing: boolean): ISyntaxTriviaList {
+        private scanTrivia(underlyingText: ISimpleText, underlyingTextStart: number, isTrailing: boolean): ISyntaxTriviaList {
             // Keep this exactly in sync with scanTriviaInfo
             var trivia = new Array<ISyntaxTrivia>();
 
@@ -170,19 +186,19 @@ module TypeScript {
                         case CharacterCodes.formFeed:
                         case CharacterCodes.byteOrderMark:
                             // Normal whitespace.  Consume and continue.
-                            trivia.push(this.scanWhitespaceTrivia());
+                            trivia.push(this.scanWhitespaceTrivia(underlyingText, underlyingTextStart));
                             continue;
 
                         case CharacterCodes.slash:
                             // Potential comment.  Consume if so.  Otherwise, break out and return.
                             var ch2 = this.slidingWindow.peekItemN(1);
                             if (ch2 === CharacterCodes.slash) {
-                                trivia.push(this.scanSingleLineCommentTrivia());
+                                trivia.push(this.scanSingleLineCommentTrivia(underlyingText, underlyingTextStart));
                                 continue;
                             }
 
                             if (ch2 === CharacterCodes.asterisk) {
-                                trivia.push(this.scanMultiLineCommentTrivia());
+                                trivia.push(this.scanMultiLineCommentTrivia(underlyingText, underlyingTextStart));
                                 continue;
                             }
 
@@ -301,10 +317,10 @@ module TypeScript {
             }
         }
 
-        private scanWhitespaceTrivia(): ISyntaxTrivia {
+        private scanWhitespaceTrivia(underlyingText: ISimpleText, underlyingTextStart: number): ISyntaxTrivia {
             // We're going to be extracting text out of sliding window.  Make sure it can't move past
             // this point.
-            var absoluteStartIndex = this.slidingWindow.getAndPinAbsoluteIndex();
+            var absoluteStartIndex = this.absoluteIndex();
 
             var width = 0;
             while (true) {
@@ -342,21 +358,16 @@ module TypeScript {
                 break;
             }
 
-            // TODO: we probably should intern whitespace.
-            var text = this.substring(absoluteStartIndex, absoluteStartIndex + width, /*intern:*/ false);
-            this.slidingWindow.releaseAndUnpinAbsoluteIndex(absoluteStartIndex);
-
-            return Syntax.whitespace(text);
+            return Syntax.deferredTrivia(SyntaxKind.WhitespaceTrivia,
+                underlyingText, underlyingTextStart + absoluteStartIndex, width);
         }
 
-        private scanSingleLineCommentTrivia(): ISyntaxTrivia {
-            var absoluteStartIndex = this.slidingWindow.getAndPinAbsoluteIndex();
+        private scanSingleLineCommentTrivia(underlyingText: ISimpleText, underlyingTextStart: number): ISyntaxTrivia {
+            var absoluteStartIndex = this.slidingWindow.absoluteIndex();
             var width = this.scanSingleLineCommentTriviaLength();
 
-            var text = this.substring(absoluteStartIndex, absoluteStartIndex + width, /*intern:*/ false);
-            this.slidingWindow.releaseAndUnpinAbsoluteIndex(absoluteStartIndex);
-
-            return Syntax.singleLineComment(text);
+            return Syntax.deferredTrivia(SyntaxKind.SingleLineCommentTrivia,
+                underlyingText, underlyingTextStart + absoluteStartIndex, width);
         }
 
         private scanSingleLineCommentTriviaLength(): number {
@@ -375,14 +386,12 @@ module TypeScript {
             }
         }
 
-        private scanMultiLineCommentTrivia(): ISyntaxTrivia {
-            var absoluteStartIndex = this.slidingWindow.getAndPinAbsoluteIndex();
+        private scanMultiLineCommentTrivia(underlyingText: ISimpleText, underlyingTextStart: number): ISyntaxTrivia {
+            var absoluteStartIndex = this.absoluteIndex();
             var width = this.scanMultiLineCommentTriviaLength(null);
 
-            var text = this.substring(absoluteStartIndex, absoluteStartIndex + width, /*intern:*/ false);
-            this.slidingWindow.releaseAndUnpinAbsoluteIndex(absoluteStartIndex);
-
-            return Syntax.multiLineComment(text);
+            return Syntax.deferredTrivia(SyntaxKind.MultiLineCommentTrivia,
+                underlyingText, underlyingTextStart + absoluteStartIndex, width);
         }
 
         private scanMultiLineCommentTriviaLength(diagnostics: Diagnostic[]): number {
@@ -396,6 +405,7 @@ module TypeScript {
                     if (diagnostics !== null) {
                         diagnostics.push(new Diagnostic(
                             this.fileName,
+                            this.text.lineMap(),
                             this.slidingWindow.absoluteIndex(), 0, DiagnosticCode.AsteriskSlash_expected, null));
                     }
 
@@ -456,7 +466,7 @@ module TypeScript {
                     return this.scanSlashToken(allowRegularExpression);
 
                 case CharacterCodes.dot:
-                    return this.scanDotToken();
+                    return this.scanDotToken(diagnostics);
 
                 case CharacterCodes.minus:
                     return this.scanMinusToken();
@@ -528,7 +538,7 @@ module TypeScript {
             }
 
             if (isNumericLiteralStart[character]) {
-                return this.scanNumericLiteral();
+                return this.scanNumericLiteral(diagnostics);
             }
 
             // We run into so many identifiers (and keywords) when scanning, that we want the code to
@@ -542,7 +552,7 @@ module TypeScript {
             }
 
             if (this.isIdentifierStart(this.peekCharOrUnicodeEscape())) {
-                return this.slowScanIdentifier(diagnostics);
+                return this.slowScanIdentifierOrKeyword(diagnostics);
             }
 
             return this.scanDefaultCharacter(character, diagnostics);
@@ -565,98 +575,171 @@ module TypeScript {
         }
 
         private tryFastScanIdentifierOrKeyword(firstCharacter: number): SyntaxKind {
-            var startIndex = this.slidingWindow.getAndPinAbsoluteIndex();
+            var slidingWindow = this.slidingWindow;
+            var window: number[] = slidingWindow.window;
 
-            while (true) {
-                var character = this.currentCharCode();
-                if (isIdentifierPartCharacter[character]) {
-                    // Still part of an identifier.  Move to the next caracter.
-                    this.slidingWindow.moveToNextItem();
+            var startIndex = slidingWindow.currentRelativeItemIndex;
+            var endIndex = slidingWindow.windowCount;
+            var currentIndex = startIndex;
+            var character: number = 0;
+
+            // Note that we go up to the windowCount-1 so that we can read the character at the end
+            // of the window and check if it's *not* an identifier part character.
+            while (currentIndex < endIndex) {
+                character = window[currentIndex];
+                if (!isIdentifierPartCharacter[character]) {
+                    break;
                 }
-                else if (character === CharacterCodes.backslash || character > CharacterCodes.maxAsciiCharacter) {
-                    // We saw a \ (which could start a unicode escape), or we saw a unicode character.
-                    // This can't be scanned quickly.  Reset to the beginning and bail out.  We'll 
-                    // go and try the slow path instead.
-                    this.slidingWindow.rewindToPinnedIndex(startIndex);
-                    this.slidingWindow.releaseAndUnpinAbsoluteIndex(startIndex);
-                    return SyntaxKind.None;
+
+                currentIndex++;
+            }
+
+            if (currentIndex === endIndex) {
+                // We reached the end of the characters in the sliding window.  They were all 
+                // identifier characters.  Since we don't know what the next character is, we can't
+                // tell what we've got here.  So just bail out to the slow path.
+                return SyntaxKind.None;
+            }
+            else if (character === CharacterCodes.backslash || character > CharacterCodes.maxAsciiCharacter) {
+                // We saw a \ (which could start a unicode escape), or we saw a unicode character.
+                // This can't be scanned quickly.  Don't update the window position and just bail out
+                // to the slow path.
+                return SyntaxKind.None;
+            }
+            else {
+                // Saw an ascii character that wasn't a backslash and wasn't an identifier 
+                // character.  This identifier is done.
+
+                // Also check if it a keyword if it started with a lowercase letter.
+                var kind: SyntaxKind;
+                var identifierLength = currentIndex - startIndex;
+                if (isKeywordStartCharacter[firstCharacter]) {
+                    kind = ScannerUtilities.identifierKind(window, startIndex, identifierLength);
                 }
                 else {
-                    // Saw an ascii character that wasn't a backslash and wasn't an identifier 
-                    // character.  This identifier is done.
-                    var endIndex = this.slidingWindow.absoluteIndex();
-
-                    // Also check if it a keyword if it started with a lowercase letter.
-                    var kind: SyntaxKind;
-                    if (isKeywordStartCharacter[firstCharacter]) {
-                        var offset = startIndex - this.slidingWindow.windowAbsoluteStartIndex;
-                        kind = ScannerUtilities.identifierKind(this.slidingWindow.window, offset, endIndex - startIndex);
-                    }
-                    else {
-                        kind = SyntaxKind.IdentifierName;
-                    }
-
-                    this.slidingWindow.releaseAndUnpinAbsoluteIndex(startIndex);
-                    return kind;
+                    kind = SyntaxKind.IdentifierName;
                 }
+
+                // Now, update the position of the sliding window so it's pointing at the right place.
+                slidingWindow.setAbsoluteIndex(slidingWindow.absoluteIndex() + identifierLength);
+
+                return kind;
             }
         }
 
         // A slow path for scanning identifiers.  Called when we run into a unicode character or 
         // escape sequence while processing the fast path.
-        private slowScanIdentifier(diagnostics: Diagnostic[]): SyntaxKind {
+        private slowScanIdentifierOrKeyword(diagnostics: Diagnostic[]): SyntaxKind {
             var startIndex = this.slidingWindow.absoluteIndex();
+            var sawUnicodeEscape = false;
 
             do {
-                this.scanCharOrUnicodeEscape(diagnostics);
+                var unicodeEscape = this.scanCharOrUnicodeEscape(diagnostics);
+                sawUnicodeEscape = sawUnicodeEscape || unicodeEscape;
             }
             while (this.isIdentifierPart(this.peekCharOrUnicodeEscape()));
+
+            // From ES6 specification.
+            // The ReservedWord definitions are specified as literal sequences of Unicode 
+            // characters.However, any Unicode character in a ReservedWord can also be 
+            // expressed by a \ UnicodeEscapeSequence that expresses that same Unicode 
+            // character's code point.Use of such escape sequences does not change the meaning 
+            // of the ReservedWord.
+            //
+            // i.e. "\u0076ar" is the keyword 'var'.  Check for that here.
+            var length = this.slidingWindow.absoluteIndex() - startIndex;
+            var text = this.text.substr(startIndex, length, /*intern:*/ false);
+            var valueText = Syntax.massageEscapes(text);
+
+            var keywordKind = SyntaxFacts.getTokenKind(valueText);
+            if (keywordKind >= SyntaxKind.FirstKeyword && keywordKind <= SyntaxKind.LastKeyword) {
+                if (sawUnicodeEscape) {
+                    return keywordKind | SyntaxConstants.IsVariableWidthKeyword;
+                }
+                else {
+                    return keywordKind;
+                }
+            }
 
             return SyntaxKind.IdentifierName;
         }
 
-        private scanNumericLiteral(): SyntaxKind {
+        private scanNumericLiteral(diagnostics: Diagnostic[]): SyntaxKind {
             if (this.isHexNumericLiteral()) {
-                return this.scanHexNumericLiteral();
+                this.scanHexNumericLiteral();
+            }
+            else if (this.isOctalNumericLiteral()) {
+                this.scanOctalNumericLiteral(diagnostics);
             }
             else {
-                return this.scanDecimalNumericLiteral();
-            }
-        }
-
-        private scanDecimalNumericLiteral(): SyntaxKind {
-            while (CharacterInfo.isDecimalDigit(this.currentCharCode())) {
-                this.slidingWindow.moveToNextItem();
-            }
-
-            if (this.currentCharCode() === CharacterCodes.dot) {
-                this.slidingWindow.moveToNextItem();
-            }
-
-            while (CharacterInfo.isDecimalDigit(this.currentCharCode())) {
-                this.slidingWindow.moveToNextItem();
-            }
-
-            var ch = this.currentCharCode();
-            if (ch === CharacterCodes.e || ch === CharacterCodes.E) {
-                this.slidingWindow.moveToNextItem();
-
-                ch = this.currentCharCode();
-                if (ch === CharacterCodes.minus || ch === CharacterCodes.plus) {
-                    if (CharacterInfo.isDecimalDigit(this.slidingWindow.peekItemN(1))) {
-                        this.slidingWindow.moveToNextItem();
-                    }
-                }
-            }
-
-            while (CharacterInfo.isDecimalDigit(this.currentCharCode())) {
-                this.slidingWindow.moveToNextItem();
+                this.scanDecimalNumericLiteral();
             }
 
             return SyntaxKind.NumericLiteral;
         }
 
-        private scanHexNumericLiteral(): SyntaxKind {
+        private isOctalNumericLiteral(): boolean {
+            return this.currentCharCode() === CharacterCodes._0 && CharacterInfo.isOctalDigit(this.slidingWindow.peekItemN(1));
+        }
+
+        private scanOctalNumericLiteral(diagnostics: Diagnostic[]): void {
+            var position = this.absoluteIndex();
+
+            while (CharacterInfo.isOctalDigit(this.currentCharCode())) {
+                this.slidingWindow.moveToNextItem();
+            }
+
+            if (this.languageVersion() >= LanguageVersion.EcmaScript5) {
+                diagnostics.push(new Diagnostic(this.fileName, this.text.lineMap(),
+                    position, this.absoluteIndex() - position, DiagnosticCode.Octal_literals_are_not_available_when_targeting_ECMAScript_5_and_higher, null));
+            }
+        }
+
+        private scanDecimalDigits(): void {
+            while (CharacterInfo.isDecimalDigit(this.currentCharCode())) {
+                this.slidingWindow.moveToNextItem();
+            }
+        }
+
+        private scanDecimalNumericLiteral(): void {
+            this.scanDecimalDigits();
+
+            if (this.currentCharCode() === CharacterCodes.dot) {
+                this.slidingWindow.moveToNextItem();
+            }
+
+            this.scanDecimalDigits();
+
+            // If we see an 'e' or 'E' we should only consume it if its of the form:
+            // e<number> or E<number> 
+            // e+<number>   E+<number>
+            // e-<number>   E-<number>
+            var ch = this.currentCharCode();
+            if (ch === CharacterCodes.e || ch === CharacterCodes.E) {
+                // Ok, we've got 'e' or 'E'.  Make sure it's followed correctly.
+                var nextChar1 = this.slidingWindow.peekItemN(1);
+
+                if (CharacterInfo.isDecimalDigit(nextChar1)) {
+                    // e<number> or E<number>
+                    // Consume 'e' or 'E' and the number portion.
+                    this.slidingWindow.moveToNextItem();
+                    this.scanDecimalDigits();
+                }
+                else if (nextChar1 === CharacterCodes.minus || nextChar1 === CharacterCodes.plus) {
+                    // e+ or E+ or e- or E-
+                    var nextChar2 = this.slidingWindow.peekItemN(2);
+                    if (CharacterInfo.isDecimalDigit(nextChar2)) {
+                        // e+<number> or E+<number> or e-<number> or E-<number>
+                        // Consume first two characters and the number portion.
+                        this.slidingWindow.moveToNextItem();
+                        this.slidingWindow.moveToNextItem();
+                        this.scanDecimalDigits();
+                    }
+                }
+            }
+        }
+
+        private scanHexNumericLiteral(): void {
             // Debug.assert(this.isHexNumericLiteral());
 
             // Move past the 0x.
@@ -666,8 +749,6 @@ module TypeScript {
             while (CharacterInfo.isHexDigit(this.currentCharCode())) {
                 this.slidingWindow.moveToNextItem();
             }
-
-            return SyntaxKind.NumericLiteral;
         }
 
         private isHexNumericLiteral(): boolean {
@@ -840,9 +921,9 @@ module TypeScript {
             return false;
         }
 
-        private scanDotToken(): SyntaxKind {
+        private scanDotToken(diagnostics: Diagnostic[]): SyntaxKind {
             if (this.isDotPrefixedNumericLiteral()) {
-                return this.scanNumericLiteral();
+                return this.scanNumericLiteral(diagnostics);
             }
 
             this.slidingWindow.moveToNextItem();
@@ -884,74 +965,73 @@ module TypeScript {
             // Debug.assert(this.currentCharCode() === CharacterCodes.slash);
 
             var startIndex = this.slidingWindow.getAndPinAbsoluteIndex();
-            try {
+
+            this.slidingWindow.moveToNextItem();
+
+            var inEscape = false;
+            var inCharacterClass = false;
+            while (true) {
+                var ch = this.currentCharCode();
+
+                if (this.isNewLineCharacter(ch) || this.slidingWindow.isAtEndOfSource()) {
+                    this.slidingWindow.rewindToPinnedIndex(startIndex);
+                    this.slidingWindow.releaseAndUnpinAbsoluteIndex(startIndex);
+                    return SyntaxKind.None;
+                }
+
                 this.slidingWindow.moveToNextItem();
+                if (inEscape) {
+                    inEscape = false;
+                    continue;
+                }
 
-                var inEscape = false;
-                var inCharacterClass = false;
-                while (true) {
-                    var ch = this.currentCharCode();
-                    if (this.isNewLineCharacter(ch) || this.slidingWindow.isAtEndOfSource()) {
-                        this.slidingWindow.rewindToPinnedIndex(startIndex);
-                        return SyntaxKind.None;
-                    }
-
-                    this.slidingWindow.moveToNextItem();
-                    if (inEscape) {
-                        inEscape = false;
+                switch (ch) {
+                    case CharacterCodes.backslash:
+                        // We're now in an escape.  Consume the next character we see (unless it's
+                        // a newline or null.
+                        inEscape = true;
                         continue;
-                    }
 
-                    switch (ch) {
-                        case CharacterCodes.backslash:
-                            // We're now in an escape.  Consume the next character we see (unless it's
-                            // a newline or null.
-                            inEscape = true;
+                    case CharacterCodes.openBracket:
+                        // If we see a [ then we're starting an character class.  Note: it's ok if 
+                        // we then hit another [ inside a character class.  We'll just set the value
+                        // to true again and that's ok.
+                        inCharacterClass = true;
+                        continue;
+
+                    case CharacterCodes.closeBracket:
+                        // If we ever hit a cloe bracket then we're now no longer in a character 
+                        // class.  If we weren't in a character class to begin with, then this has 
+                        // no effect.
+                        inCharacterClass = false;
+                        continue;
+
+                    case CharacterCodes.slash:
+                        // If we see a slash, and we're in a character class, then ignore it.
+                        if (inCharacterClass) {
                             continue;
+                        }
 
-                        case CharacterCodes.openBracket:
-                            // If we see a [ then we're starting an character class.  Note: it's ok if 
-                            // we then hit another [ inside a character class.  We'll just set the value
-                            // to true again and that's ok.
-                            inCharacterClass = true;
-                            continue;
+                        // We're done with the regex.  Break out of the switch (which will break 
+                        // out of hte loop.
+                        break;
 
-                        case CharacterCodes.closeBracket:
-                            // If we ever hit a cloe bracket then we're now no longer in a character 
-                            // class.  If we weren't in a character class to begin with, then this has 
-                            // no effect.
-                            inCharacterClass = false;
-                            continue;
-
-                        case CharacterCodes.slash:
-                            // If we see a slash, and we're in a character class, then ignore it.
-                            if (inCharacterClass) {
-                                continue;
-                            }
-
-                            // We're done with the regex.  Break out of the switch (which will break 
-                            // out of hte loop.
-                            break;
-
-                        default:
-                            // Just consume any other characters.
-                            continue;
-                    }
-
-                    break;
+                    default:
+                        // Just consume any other characters.
+                        continue;
                 }
 
-                // TODO: The grammar says any identifier part is allowed here.  Do we need to support
-                // \u identifiers here?  The existing typescript parser does not.  
-                while (isIdentifierPartCharacter[this.currentCharCode()]) {
-                    this.slidingWindow.moveToNextItem();
-                }
+                break;
+            }
 
-                return SyntaxKind.RegularExpressionLiteral;
+            // TODO: The grammar says any identifier part is allowed here.  Do we need to support
+            // \u identifiers here?  The existing typescript parser does not.  
+            while (isIdentifierPartCharacter[this.currentCharCode()]) {
+                this.slidingWindow.moveToNextItem();
             }
-            finally {
-                this.slidingWindow.releaseAndUnpinAbsoluteIndex(startIndex);
-            }
+
+            this.slidingWindow.releaseAndUnpinAbsoluteIndex(startIndex);
+            return SyntaxKind.RegularExpressionLiteral;
         }
 
         private scanExclamationToken(): SyntaxKind {
@@ -979,7 +1059,7 @@ module TypeScript {
 
             var text = String.fromCharCode(character);
             var messageText = this.getErrorMessageText(text);
-            diagnostics.push(new Diagnostic(this.fileName,
+            diagnostics.push(new Diagnostic(this.fileName, this.text.lineMap(),
                 position, 1, DiagnosticCode.Unexpected_character_0, [messageText]));
 
             return SyntaxKind.ErrorToken;
@@ -1001,53 +1081,51 @@ module TypeScript {
             // Debug.assert(this.currentCharCode() === CharacterCodes.backslash);
 
             var rewindPoint = this.slidingWindow.getAndPinAbsoluteIndex();
-            try {
-                // Consume the backslash.
-                this.slidingWindow.moveToNextItem();
 
-                // Get the char after the backslash
-                var ch = this.currentCharCode();
-                this.slidingWindow.moveToNextItem();
-                switch (ch) {
-                    case CharacterCodes.x:
-                    case CharacterCodes.u:
-                        this.slidingWindow.rewindToPinnedIndex(rewindPoint);
-                        var value = this.scanUnicodeOrHexEscape(diagnostics);
-                        return;
+            // Consume the backslash.
+            this.slidingWindow.moveToNextItem();
 
-                    case CharacterCodes.carriageReturn:
-                        // If it's \r\n then consume both characters.
-                        if (this.currentCharCode() === CharacterCodes.lineFeed) {
-                            this.slidingWindow.moveToNextItem();
-                        }
-                        return;
+            // Get the char after the backslash
+            var ch = this.currentCharCode();
+            this.slidingWindow.moveToNextItem();
+            switch (ch) {
+                case CharacterCodes.x:
+                case CharacterCodes.u:
+                    this.slidingWindow.rewindToPinnedIndex(rewindPoint);
+                    var value = this.scanUnicodeOrHexEscape(diagnostics);
+                    break;
 
-                    // We don't have to do anything special about these characters.  I'm including them
-                    // Just so it's clear that we intentially process them in the exact same way:
-                    //case CharacterCodes.singleQuote:
-                    //case CharacterCodes.doubleQuote:
-                    //case CharacterCodes.backslash:
-                    //case CharacterCodes._0:
-                    //case CharacterCodes.b:
-                    //case CharacterCodes.f:
-                    //case CharacterCodes.n:
-                    //case CharacterCodes.r:
-                    //case CharacterCodes.t:
-                    //case CharacterCodes.v:
-                    //case CharacterCodes.lineFeed:
-                    //case CharacterCodes.paragraphSeparator:
-                    //case CharacterCodes.lineSeparator:
-                    default:
-                        // Any other character is ok as well.  As per rule:
-                        // EscapeSequence :: CharacterEscapeSequence
-                        // CharacterEscapeSequence :: NonEscapeCharacter
-                        // NonEscapeCharacter :: SourceCharacter but notEscapeCharacter or LineTerminator
-                        return;
-                }
+                case CharacterCodes.carriageReturn:
+                    // If it's \r\n then consume both characters.
+                    if (this.currentCharCode() === CharacterCodes.lineFeed) {
+                        this.slidingWindow.moveToNextItem();
+                    }
+                    break;
+
+                // We don't have to do anything special about these characters.  I'm including them
+                // Just so it's clear that we intentially process them in the exact same way:
+                //case CharacterCodes.singleQuote:
+                //case CharacterCodes.doubleQuote:
+                //case CharacterCodes.backslash:
+                //case CharacterCodes._0:
+                //case CharacterCodes.b:
+                //case CharacterCodes.f:
+                //case CharacterCodes.n:
+                //case CharacterCodes.r:
+                //case CharacterCodes.t:
+                //case CharacterCodes.v:
+                //case CharacterCodes.lineFeed:
+                //case CharacterCodes.paragraphSeparator:
+                //case CharacterCodes.lineSeparator:
+                default:
+                    // Any other character is ok as well.  As per rule:
+                    // EscapeSequence :: CharacterEscapeSequence
+                    // CharacterEscapeSequence :: NonEscapeCharacter
+                    // NonEscapeCharacter :: SourceCharacter but notEscapeCharacter or LineTerminator
+                    break;
             }
-            finally {
-                this.slidingWindow.releaseAndUnpinAbsoluteIndex(rewindPoint);
-            }
+
+            this.slidingWindow.releaseAndUnpinAbsoluteIndex(rewindPoint);
         }
 
         private scanStringLiteral(diagnostics: Diagnostic[]): SyntaxKind {
@@ -1067,8 +1145,8 @@ module TypeScript {
                     break;
                 }
                 else if (this.isNewLineCharacter(ch) || this.slidingWindow.isAtEndOfSource()) {
-                    diagnostics.push(new Diagnostic(this.fileName,
-                        this.slidingWindow.absoluteIndex(), 1, DiagnosticCode.Missing_close_quote_character, null));
+                    diagnostics.push(new Diagnostic(this.fileName, this.text.lineMap(),
+                        MathPrototype.min(this.slidingWindow.absoluteIndex(), this.text.length()), 1, DiagnosticCode.Missing_close_quote_character, null));
                     break;
                 }
                 else {
@@ -1077,10 +1155,6 @@ module TypeScript {
             }
 
             return SyntaxKind.StringLiteral;
-        }
-
-        private isUnicodeOrHexEscape(character: number): boolean {
-            return this.isUnicodeEscape(character) || this.isHexEscape(character);
         }
 
         private isUnicodeEscape(character: number): boolean {
@@ -1092,27 +1166,6 @@ module TypeScript {
             }
 
             return false;
-        }
-
-        private isHexEscape(character: number): boolean {
-            if (character === CharacterCodes.backslash) {
-                var ch2 = this.slidingWindow.peekItemN(1);
-                if (ch2 === CharacterCodes.x) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        private peekCharOrUnicodeOrHexEscape(): number {
-            var character = this.currentCharCode();
-            if (this.isUnicodeOrHexEscape(character)) {
-                return this.peekUnicodeOrHexEscape();
-            }
-            else {
-                return character;
-            }
         }
 
         private peekCharOrUnicodeEscape(): number {
@@ -1137,30 +1190,19 @@ module TypeScript {
             return ch;
         }
 
-        private scanCharOrUnicodeEscape(errors: Diagnostic[]): number {
+        // Returns true if this was a unicode escape.
+        private scanCharOrUnicodeEscape(errors: Diagnostic[]): boolean {
             var ch = this.currentCharCode();
             if (ch === CharacterCodes.backslash) {
                 var ch2 = this.slidingWindow.peekItemN(1);
                 if (ch2 === CharacterCodes.u) {
-                    return this.scanUnicodeOrHexEscape(errors);
+                    this.scanUnicodeOrHexEscape(errors);
+                    return true;
                 }
             }
 
             this.slidingWindow.moveToNextItem();
-            return ch;
-        }
-
-        private scanCharOrUnicodeOrHexEscape(errors: Diagnostic[]): number {
-            var ch = this.currentCharCode();
-            if (ch === CharacterCodes.backslash) {
-                var ch2 = this.slidingWindow.peekItemN(1);
-                if (ch2 === CharacterCodes.u || ch2 === CharacterCodes.x) {
-                    return this.scanUnicodeOrHexEscape(errors);
-                }
-            }
-
-            this.slidingWindow.moveToNextItem();
-            return ch;
+            return false;
         }
 
         private scanUnicodeOrHexEscape(errors: Diagnostic[]): number {
@@ -1205,17 +1247,17 @@ module TypeScript {
                 return Collections.DefaultStringTable.addCharArray(this.slidingWindow.window, offset, length);
             }
             else {
-                return StringUtilities.fromCharCodeArray(this.slidingWindow.window.slice(offset, offset + length));
+                return StringUtilities.fromCharCodeArray(<number[]>this.slidingWindow.window.slice(offset, offset + length));
             }
         }
 
         private createIllegalEscapeDiagnostic(start: number, end: number): Diagnostic {
-            return new Diagnostic(this.fileName, start, end - start,
+            return new Diagnostic(this.fileName, this.text.lineMap(),start, end - start,
                 DiagnosticCode.Unrecognized_escape_sequence, null);
         }
 
         public static isValidIdentifier(text: ISimpleText, languageVersion: LanguageVersion): boolean {
-            var scanner = new Scanner(/*fileName:*/ null, text, LanguageVersion, Scanner.triviaWindow);
+            var scanner = new Scanner(/*fileName:*/ null, text, languageVersion, Scanner.triviaWindow);
             var errors = new Array<Diagnostic>();
             var token = scanner.scan(errors, false);
 

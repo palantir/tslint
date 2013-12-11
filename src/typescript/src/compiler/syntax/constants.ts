@@ -29,5 +29,8 @@ module TypeScript {
         NodeIncrementallyUnusableMask = 0x00000002, // 0000 0000 0000 0000 0000 0000 0000 0010
         NodeParsedInStrictModeMask    = 0x00000004, // 0000 0000 0000 0000 0000 0000 0000 0100
         NodeFullWidthShift            = 3,          // 1111 1111 1111 1111 1111 1111 1111 1000
+
+        // Set when the scanner sees a keyword that isn't fixed width.  i.e. a keyword like: \u0076ar
+        IsVariableWidthKeyword        = 1 << 31
     }
 }

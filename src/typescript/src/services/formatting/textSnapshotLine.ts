@@ -15,7 +15,7 @@
 
 ///<reference path='formatting.ts' />
 
-module TypeScript.Formatting {
+module TypeScript.Services.Formatting {
     export interface ITextSnapshotLine {
         snapshot(): ITextSnapshot;
 

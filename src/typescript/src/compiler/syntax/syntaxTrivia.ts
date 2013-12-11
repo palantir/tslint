@@ -21,38 +21,43 @@ module TypeScript {
 }
 
 module TypeScript.Syntax {
-    class SyntaxTrivia implements ISyntaxTrivia {
-        private _kind: SyntaxKind;
-        private _textOrToken: any;
+    class AbstractTrivia implements ISyntaxTrivia {
+        constructor(private _kind: SyntaxKind) {
+        }
 
-        constructor(kind: SyntaxKind, textOrToken: any) {
-            this._kind = kind;
-            this._textOrToken = textOrToken;
+        public fullWidth(): number {
+            throw Errors.abstract();
+        }
+
+        public fullText(): string {
+            throw Errors.abstract();
+        }
+
+        public skippedToken(): ISyntaxToken {
+            throw Errors.abstract();
         }
 
         public toJSON(key: any): any {
             var result: any = {};
-            result.kind = SyntaxKind[this._kind];
+
+            for (var name in SyntaxKind) {
+                if (<any>SyntaxKind[name] === this._kind) {
+                    result.kind = name;
+                    break;
+                }
+            }
 
             if (this.isSkippedToken()) {
-                result.skippedToken = this._textOrToken;
+                result.skippedToken = this.skippedToken();
             }
             else {
-                result.text = this._textOrToken;
+                result.text = this.fullText();
             }
             return result;
         }
 
         public kind(): SyntaxKind {
             return this._kind;
-        }
-
-        public fullWidth(): number {
-            return this.fullText().length;
-        }
-
-        public fullText(): string {
-            return this.isSkippedToken() ? this.skippedToken().fullText() : this._textOrToken;
         }
 
         public isWhitespace(): boolean {
@@ -71,27 +76,87 @@ module TypeScript.Syntax {
             return this.kind() === SyntaxKind.SkippedTokenTrivia;
         }
 
-        public skippedToken(): ISyntaxToken {
-            Debug.assert(this.isSkippedToken());
-            return this._textOrToken;
-        }
-
         public collectTextElements(elements: string[]): void {
             elements.push(this.fullText());
         }
     }
 
+    class NormalTrivia extends AbstractTrivia {
+        constructor(kind: SyntaxKind, private _text: string) {
+            super(kind);
+        }
+
+        public fullWidth(): number {
+            return this.fullText().length;
+        }
+
+        public fullText(): string {
+            return this._text;
+        }
+
+        public skippedToken(): ISyntaxToken {
+            throw Errors.invalidOperation();
+        }
+    }
+
+    class SkippedTokenTrivia extends AbstractTrivia {
+        constructor(private _skippedToken: ISyntaxToken) {
+            super(SyntaxKind.SkippedTokenTrivia);
+        }
+
+        public fullWidth(): number {
+            return this.fullText().length;
+        }
+
+        public fullText(): string {
+            return this.skippedToken().fullText();
+        }
+
+        public skippedToken(): ISyntaxToken {
+            return this._skippedToken;
+        }
+    }
+
+    class DeferredTrivia extends AbstractTrivia {
+        private _fullText: string = null;
+
+        constructor(kind: SyntaxKind, private _text: ISimpleText, private _fullStart: number, private _fullWidth: number) {
+            super(kind);
+        }
+
+        public fullWidth(): number {
+            return this._fullWidth;
+        }
+
+        public fullText(): string {
+            if (!this._fullText) {
+                this._fullText = this._text.substr(this._fullStart, this._fullWidth, /*intern:*/ false);
+                this._text = null;
+            }
+
+            return this._fullText;
+        }
+
+        public skippedToken(): ISyntaxToken {
+            throw Errors.invalidOperation();
+        }
+    }
+
+    export function deferredTrivia(kind: SyntaxKind, text: ISimpleText, fullStart: number, fullWidth: number): ISyntaxTrivia {
+        return new DeferredTrivia(kind, text, fullStart, fullWidth);
+    }
+
     export function trivia(kind: SyntaxKind, text: string): ISyntaxTrivia {
         // Debug.assert(kind === SyntaxKind.MultiLineCommentTrivia || kind === SyntaxKind.NewLineTrivia || kind === SyntaxKind.SingleLineCommentTrivia || kind === SyntaxKind.WhitespaceTrivia || kind === SyntaxKind.SkippedTextTrivia);
         // Debug.assert(text.length > 0);
-        return new SyntaxTrivia(kind, text);
+        return new NormalTrivia(kind, text);
     }
 
     export function skippedTokenTrivia(token: ISyntaxToken): ISyntaxTrivia {
         Debug.assert(!token.hasLeadingTrivia());
         Debug.assert(!token.hasTrailingTrivia());
         Debug.assert(token.fullWidth() > 0);
-        return new SyntaxTrivia(SyntaxKind.SkippedTokenTrivia, token);
+        return new SkippedTokenTrivia(token);
     }
 
     export function spaces(count: number): ISyntaxTrivia {

@@ -15,9 +15,9 @@
 
 ///<reference path='typescriptServices.ts' />
 
-module Services {
+module TypeScript.Services {
     export class Indenter {
-        public static getIndentation(node: TypeScript.SourceUnitSyntax, soruceText: TypeScript.IScriptSnapshot, position: number, editorOptions: Services.EditorOptions): number {
+        public static getIndentation(node: TypeScript.SourceUnitSyntax, soruceText: TypeScript.IScriptSnapshot, position: number, editorOptions: TypeScript.Services.EditorOptions): number {
             
             var indentation = 0;
             var currentToken = node.findToken(position);
@@ -108,10 +108,8 @@ module Services {
 
                 case TypeScript.SyntaxKind.FunctionDeclaration:
                 case TypeScript.SyntaxKind.MemberFunctionDeclaration:
-                case TypeScript.SyntaxKind.GetMemberAccessorDeclaration:
-                case TypeScript.SyntaxKind.SetMemberAccessorDeclaration:
-                case TypeScript.SyntaxKind.GetAccessorPropertyAssignment:
-                case TypeScript.SyntaxKind.SetAccessorPropertyAssignment:
+                case TypeScript.SyntaxKind.GetAccessor:
+                case TypeScript.SyntaxKind.SetAccessor:
                 case TypeScript.SyntaxKind.FunctionExpression:
                 case TypeScript.SyntaxKind.CatchClause:
                 case TypeScript.SyntaxKind.FinallyClause:

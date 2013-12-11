@@ -15,7 +15,7 @@
 
 ///<reference path='formatting.ts' />
 
-module TypeScript.Formatting {
+module TypeScript.Services.Formatting {
     export class RulesMap {
         public map: RulesBucket[];
         public mapRowLength: number;

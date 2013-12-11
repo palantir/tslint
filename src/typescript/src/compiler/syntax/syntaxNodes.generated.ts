@@ -73,29 +73,7 @@ module TypeScript {
     }
     }
 
-    export class ModuleReferenceSyntax extends SyntaxNode implements IModuleReferenceSyntax {
-        constructor(parsedInStrictMode: boolean) {
-            super(parsedInStrictMode); 
-        }
-
-    public isModuleReference(): boolean {
-        return true;
-    }
-
-    public withLeadingTrivia(trivia: ISyntaxTriviaList): ModuleReferenceSyntax {
-        return <ModuleReferenceSyntax>super.withLeadingTrivia(trivia);
-    }
-
-    public withTrailingTrivia(trivia: ISyntaxTriviaList): ModuleReferenceSyntax {
-        return <ModuleReferenceSyntax>super.withTrailingTrivia(trivia);
-    }
-
-    public isTypeScriptSpecific(): boolean {
-        return true;
-    }
-    }
-
-    export class ExternalModuleReferenceSyntax extends ModuleReferenceSyntax {
+    export class ExternalModuleReferenceSyntax extends SyntaxNode implements IModuleReferenceSyntax {
 
         constructor(public requireKeyword: ISyntaxToken,
                     public openParenToken: ISyntaxToken,
@@ -126,6 +104,10 @@ module TypeScript {
             case 3: return this.closeParenToken;
             default: throw Errors.invalidOperation();
         }
+    }
+
+    public isModuleReference(): boolean {
+        return true;
     }
 
     public update(requireKeyword: ISyntaxToken,
@@ -172,7 +154,7 @@ module TypeScript {
     }
     }
 
-    export class ModuleNameModuleReferenceSyntax extends ModuleReferenceSyntax {
+    export class ModuleNameModuleReferenceSyntax extends SyntaxNode implements IModuleReferenceSyntax {
 
         constructor(public moduleName: INameSyntax,
                     parsedInStrictMode: boolean) {
@@ -197,6 +179,10 @@ module TypeScript {
             case 0: return this.moduleName;
             default: throw Errors.invalidOperation();
         }
+    }
+
+    public isModuleReference(): boolean {
+        return true;
     }
 
     public update(moduleName: INameSyntax): ModuleNameModuleReferenceSyntax {
@@ -230,7 +216,7 @@ module TypeScript {
                     public importKeyword: ISyntaxToken,
                     public identifier: ISyntaxToken,
                     public equalsToken: ISyntaxToken,
-                    public moduleReference: ModuleReferenceSyntax,
+                    public moduleReference: IModuleReferenceSyntax,
                     public semicolonToken: ISyntaxToken,
                     parsedInStrictMode: boolean) {
             super(parsedInStrictMode); 
@@ -269,7 +255,7 @@ module TypeScript {
                   importKeyword: ISyntaxToken,
                   identifier: ISyntaxToken,
                   equalsToken: ISyntaxToken,
-                  moduleReference: ModuleReferenceSyntax,
+                  moduleReference: IModuleReferenceSyntax,
                   semicolonToken: ISyntaxToken): ImportDeclarationSyntax {
         if (this.modifiers === modifiers && this.importKeyword === importKeyword && this.identifier === identifier && this.equalsToken === equalsToken && this.moduleReference === moduleReference && this.semicolonToken === semicolonToken) {
             return this;
@@ -281,13 +267,13 @@ module TypeScript {
     public static create(importKeyword: ISyntaxToken,
                          identifier: ISyntaxToken,
                          equalsToken: ISyntaxToken,
-                         moduleReference: ModuleReferenceSyntax,
+                         moduleReference: IModuleReferenceSyntax,
                          semicolonToken: ISyntaxToken): ImportDeclarationSyntax {
         return new ImportDeclarationSyntax(Syntax.emptyList, importKeyword, identifier, equalsToken, moduleReference, semicolonToken, /*parsedInStrictMode:*/ false);
     }
 
     public static create1(identifier: ISyntaxToken,
-                          moduleReference: ModuleReferenceSyntax): ImportDeclarationSyntax {
+                          moduleReference: IModuleReferenceSyntax): ImportDeclarationSyntax {
         return new ImportDeclarationSyntax(Syntax.emptyList, Syntax.token(SyntaxKind.ImportKeyword), identifier, Syntax.token(SyntaxKind.EqualsToken), moduleReference, Syntax.token(SyntaxKind.SemicolonToken), /*parsedInStrictMode:*/ false);
     }
 
@@ -319,7 +305,7 @@ module TypeScript {
         return this.update(this.modifiers, this.importKeyword, this.identifier, equalsToken, this.moduleReference, this.semicolonToken);
     }
 
-    public withModuleReference(moduleReference: ModuleReferenceSyntax): ImportDeclarationSyntax {
+    public withModuleReference(moduleReference: IModuleReferenceSyntax): ImportDeclarationSyntax {
         return this.update(this.modifiers, this.importKeyword, this.identifier, this.equalsToken, moduleReference, this.semicolonToken);
     }
 
@@ -651,20 +637,19 @@ module TypeScript {
     }
 
     export class HeritageClauseSyntax extends SyntaxNode {
+    private _kind: SyntaxKind;
 
-        constructor(public extendsOrImplementsKeyword: ISyntaxToken,
+        constructor(kind: SyntaxKind,
+                    public extendsOrImplementsKeyword: ISyntaxToken,
                     public typeNames: ISeparatedSyntaxList,
                     parsedInStrictMode: boolean) {
             super(parsedInStrictMode); 
 
+            this._kind = kind;
         }
 
     public accept(visitor: ISyntaxVisitor): any {
         return visitor.visitHeritageClause(this);
-    }
-
-    public kind(): SyntaxKind {
-        return SyntaxKind.HeritageClause;
     }
 
     public childCount(): number {
@@ -679,13 +664,18 @@ module TypeScript {
         }
     }
 
-    public update(extendsOrImplementsKeyword: ISyntaxToken,
+    public kind(): SyntaxKind {
+        return this._kind;
+    }
+
+    public update(kind: SyntaxKind,
+                  extendsOrImplementsKeyword: ISyntaxToken,
                   typeNames: ISeparatedSyntaxList): HeritageClauseSyntax {
-        if (this.extendsOrImplementsKeyword === extendsOrImplementsKeyword && this.typeNames === typeNames) {
+        if (this._kind === kind && this.extendsOrImplementsKeyword === extendsOrImplementsKeyword && this.typeNames === typeNames) {
             return this;
         }
 
-        return new HeritageClauseSyntax(extendsOrImplementsKeyword, typeNames, /*parsedInStrictMode:*/ this.parsedInStrictMode());
+        return new HeritageClauseSyntax(kind, extendsOrImplementsKeyword, typeNames, /*parsedInStrictMode:*/ this.parsedInStrictMode());
     }
 
     public withLeadingTrivia(trivia: ISyntaxTriviaList): HeritageClauseSyntax {
@@ -696,12 +686,16 @@ module TypeScript {
         return <HeritageClauseSyntax>super.withTrailingTrivia(trivia);
     }
 
+    public withKind(kind: SyntaxKind): HeritageClauseSyntax {
+        return this.update(kind, this.extendsOrImplementsKeyword, this.typeNames);
+    }
+
     public withExtendsOrImplementsKeyword(extendsOrImplementsKeyword: ISyntaxToken): HeritageClauseSyntax {
-        return this.update(extendsOrImplementsKeyword, this.typeNames);
+        return this.update(this._kind, extendsOrImplementsKeyword, this.typeNames);
     }
 
     public withTypeNames(typeNames: ISeparatedSyntaxList): HeritageClauseSyntax {
-        return this.update(this.extendsOrImplementsKeyword, typeNames);
+        return this.update(this._kind, this.extendsOrImplementsKeyword, typeNames);
     }
 
     public withTypeName(typeName: INameSyntax): HeritageClauseSyntax {
@@ -717,7 +711,7 @@ module TypeScript {
 
         constructor(public modifiers: ISyntaxList,
                     public moduleKeyword: ISyntaxToken,
-                    public moduleName: INameSyntax,
+                    public name: INameSyntax,
                     public stringLiteral: ISyntaxToken,
                     public openBraceToken: ISyntaxToken,
                     public moduleElements: ISyntaxList,
@@ -743,7 +737,7 @@ module TypeScript {
         switch (slot) {
             case 0: return this.modifiers;
             case 1: return this.moduleKeyword;
-            case 2: return this.moduleName;
+            case 2: return this.name;
             case 3: return this.stringLiteral;
             case 4: return this.openBraceToken;
             case 5: return this.moduleElements;
@@ -758,16 +752,16 @@ module TypeScript {
 
     public update(modifiers: ISyntaxList,
                   moduleKeyword: ISyntaxToken,
-                  moduleName: INameSyntax,
+                  name: INameSyntax,
                   stringLiteral: ISyntaxToken,
                   openBraceToken: ISyntaxToken,
                   moduleElements: ISyntaxList,
                   closeBraceToken: ISyntaxToken): ModuleDeclarationSyntax {
-        if (this.modifiers === modifiers && this.moduleKeyword === moduleKeyword && this.moduleName === moduleName && this.stringLiteral === stringLiteral && this.openBraceToken === openBraceToken && this.moduleElements === moduleElements && this.closeBraceToken === closeBraceToken) {
+        if (this.modifiers === modifiers && this.moduleKeyword === moduleKeyword && this.name === name && this.stringLiteral === stringLiteral && this.openBraceToken === openBraceToken && this.moduleElements === moduleElements && this.closeBraceToken === closeBraceToken) {
             return this;
         }
 
-        return new ModuleDeclarationSyntax(modifiers, moduleKeyword, moduleName, stringLiteral, openBraceToken, moduleElements, closeBraceToken, /*parsedInStrictMode:*/ this.parsedInStrictMode());
+        return new ModuleDeclarationSyntax(modifiers, moduleKeyword, name, stringLiteral, openBraceToken, moduleElements, closeBraceToken, /*parsedInStrictMode:*/ this.parsedInStrictMode());
     }
 
     public static create(moduleKeyword: ISyntaxToken,
@@ -789,7 +783,7 @@ module TypeScript {
     }
 
     public withModifiers(modifiers: ISyntaxList): ModuleDeclarationSyntax {
-        return this.update(modifiers, this.moduleKeyword, this.moduleName, this.stringLiteral, this.openBraceToken, this.moduleElements, this.closeBraceToken);
+        return this.update(modifiers, this.moduleKeyword, this.name, this.stringLiteral, this.openBraceToken, this.moduleElements, this.closeBraceToken);
     }
 
     public withModifier(modifier: ISyntaxToken): ModuleDeclarationSyntax {
@@ -797,23 +791,23 @@ module TypeScript {
     }
 
     public withModuleKeyword(moduleKeyword: ISyntaxToken): ModuleDeclarationSyntax {
-        return this.update(this.modifiers, moduleKeyword, this.moduleName, this.stringLiteral, this.openBraceToken, this.moduleElements, this.closeBraceToken);
+        return this.update(this.modifiers, moduleKeyword, this.name, this.stringLiteral, this.openBraceToken, this.moduleElements, this.closeBraceToken);
     }
 
-    public withModuleName(moduleName: INameSyntax): ModuleDeclarationSyntax {
-        return this.update(this.modifiers, this.moduleKeyword, moduleName, this.stringLiteral, this.openBraceToken, this.moduleElements, this.closeBraceToken);
+    public withName(name: INameSyntax): ModuleDeclarationSyntax {
+        return this.update(this.modifiers, this.moduleKeyword, name, this.stringLiteral, this.openBraceToken, this.moduleElements, this.closeBraceToken);
     }
 
     public withStringLiteral(stringLiteral: ISyntaxToken): ModuleDeclarationSyntax {
-        return this.update(this.modifiers, this.moduleKeyword, this.moduleName, stringLiteral, this.openBraceToken, this.moduleElements, this.closeBraceToken);
+        return this.update(this.modifiers, this.moduleKeyword, this.name, stringLiteral, this.openBraceToken, this.moduleElements, this.closeBraceToken);
     }
 
     public withOpenBraceToken(openBraceToken: ISyntaxToken): ModuleDeclarationSyntax {
-        return this.update(this.modifiers, this.moduleKeyword, this.moduleName, this.stringLiteral, openBraceToken, this.moduleElements, this.closeBraceToken);
+        return this.update(this.modifiers, this.moduleKeyword, this.name, this.stringLiteral, openBraceToken, this.moduleElements, this.closeBraceToken);
     }
 
     public withModuleElements(moduleElements: ISyntaxList): ModuleDeclarationSyntax {
-        return this.update(this.modifiers, this.moduleKeyword, this.moduleName, this.stringLiteral, this.openBraceToken, moduleElements, this.closeBraceToken);
+        return this.update(this.modifiers, this.moduleKeyword, this.name, this.stringLiteral, this.openBraceToken, moduleElements, this.closeBraceToken);
     }
 
     public withModuleElement(moduleElement: IModuleElementSyntax): ModuleDeclarationSyntax {
@@ -821,7 +815,7 @@ module TypeScript {
     }
 
     public withCloseBraceToken(closeBraceToken: ISyntaxToken): ModuleDeclarationSyntax {
-        return this.update(this.modifiers, this.moduleKeyword, this.moduleName, this.stringLiteral, this.openBraceToken, this.moduleElements, closeBraceToken);
+        return this.update(this.modifiers, this.moduleKeyword, this.name, this.stringLiteral, this.openBraceToken, this.moduleElements, closeBraceToken);
     }
 
     public isTypeScriptSpecific(): boolean {
@@ -934,7 +928,7 @@ module TypeScript {
     }
 
     public isTypeScriptSpecific(): boolean {
-        if (this.modifiers.isTypeScriptSpecific()) { return true; }
+        if (this.modifiers.childCount() > 0) { return true; }
         if (this.callSignature.isTypeScriptSpecific()) { return true; }
         if (this.block !== null && this.block.isTypeScriptSpecific()) { return true; }
         return false;
@@ -1024,7 +1018,7 @@ module TypeScript {
     }
 
     public isTypeScriptSpecific(): boolean {
-        if (this.modifiers.isTypeScriptSpecific()) { return true; }
+        if (this.modifiers.childCount() > 0) { return true; }
         if (this.variableDeclaration.isTypeScriptSpecific()) { return true; }
         return false;
     }
@@ -1100,7 +1094,7 @@ module TypeScript {
 
     export class VariableDeclaratorSyntax extends SyntaxNode {
 
-        constructor(public identifier: ISyntaxToken,
+        constructor(public propertyName: ISyntaxToken,
                     public typeAnnotation: TypeAnnotationSyntax,
                     public equalsValueClause: EqualsValueClauseSyntax,
                     parsedInStrictMode: boolean) {
@@ -1122,29 +1116,29 @@ module TypeScript {
 
     public childAt(slot: number): ISyntaxElement {
         switch (slot) {
-            case 0: return this.identifier;
+            case 0: return this.propertyName;
             case 1: return this.typeAnnotation;
             case 2: return this.equalsValueClause;
             default: throw Errors.invalidOperation();
         }
     }
 
-    public update(identifier: ISyntaxToken,
+    public update(propertyName: ISyntaxToken,
                   typeAnnotation: TypeAnnotationSyntax,
                   equalsValueClause: EqualsValueClauseSyntax): VariableDeclaratorSyntax {
-        if (this.identifier === identifier && this.typeAnnotation === typeAnnotation && this.equalsValueClause === equalsValueClause) {
+        if (this.propertyName === propertyName && this.typeAnnotation === typeAnnotation && this.equalsValueClause === equalsValueClause) {
             return this;
         }
 
-        return new VariableDeclaratorSyntax(identifier, typeAnnotation, equalsValueClause, /*parsedInStrictMode:*/ this.parsedInStrictMode());
+        return new VariableDeclaratorSyntax(propertyName, typeAnnotation, equalsValueClause, /*parsedInStrictMode:*/ this.parsedInStrictMode());
     }
 
-    public static create(identifier: ISyntaxToken): VariableDeclaratorSyntax {
-        return new VariableDeclaratorSyntax(identifier, null, null, /*parsedInStrictMode:*/ false);
+    public static create(propertyName: ISyntaxToken): VariableDeclaratorSyntax {
+        return new VariableDeclaratorSyntax(propertyName, null, null, /*parsedInStrictMode:*/ false);
     }
 
-    public static create1(identifier: ISyntaxToken): VariableDeclaratorSyntax {
-        return new VariableDeclaratorSyntax(identifier, null, null, /*parsedInStrictMode:*/ false);
+    public static create1(propertyName: ISyntaxToken): VariableDeclaratorSyntax {
+        return new VariableDeclaratorSyntax(propertyName, null, null, /*parsedInStrictMode:*/ false);
     }
 
     public withLeadingTrivia(trivia: ISyntaxTriviaList): VariableDeclaratorSyntax {
@@ -1155,16 +1149,16 @@ module TypeScript {
         return <VariableDeclaratorSyntax>super.withTrailingTrivia(trivia);
     }
 
-    public withIdentifier(identifier: ISyntaxToken): VariableDeclaratorSyntax {
-        return this.update(identifier, this.typeAnnotation, this.equalsValueClause);
+    public withPropertyName(propertyName: ISyntaxToken): VariableDeclaratorSyntax {
+        return this.update(propertyName, this.typeAnnotation, this.equalsValueClause);
     }
 
     public withTypeAnnotation(typeAnnotation: TypeAnnotationSyntax): VariableDeclaratorSyntax {
-        return this.update(this.identifier, typeAnnotation, this.equalsValueClause);
+        return this.update(this.propertyName, typeAnnotation, this.equalsValueClause);
     }
 
     public withEqualsValueClause(equalsValueClause: EqualsValueClauseSyntax): VariableDeclaratorSyntax {
-        return this.update(this.identifier, this.typeAnnotation, equalsValueClause);
+        return this.update(this.propertyName, this.typeAnnotation, equalsValueClause);
     }
 
     public isTypeScriptSpecific(): boolean {
@@ -1314,7 +1308,7 @@ module TypeScript {
     }
     }
 
-    export class ArrayLiteralExpressionSyntax extends SyntaxNode implements IUnaryExpressionSyntax {
+    export class ArrayLiteralExpressionSyntax extends SyntaxNode implements IPrimaryExpressionSyntax {
 
         constructor(public openBracketToken: ISyntaxToken,
                     public expressions: ISeparatedSyntaxList,
@@ -1343,6 +1337,18 @@ module TypeScript {
             case 2: return this.closeBracketToken;
             default: throw Errors.invalidOperation();
         }
+    }
+
+    public isPrimaryExpression(): boolean {
+        return true;
+    }
+
+    public isMemberExpression(): boolean {
+        return true;
+    }
+
+    public isPostfixExpression(): boolean {
+        return true;
     }
 
     public isUnaryExpression(): boolean {
@@ -1444,7 +1450,7 @@ module TypeScript {
     }
     }
 
-    export class ParenthesizedExpressionSyntax extends SyntaxNode implements IUnaryExpressionSyntax {
+    export class ParenthesizedExpressionSyntax extends SyntaxNode implements IPrimaryExpressionSyntax {
 
         constructor(public openParenToken: ISyntaxToken,
                     public expression: IExpressionSyntax,
@@ -1473,6 +1479,18 @@ module TypeScript {
             case 2: return this.closeParenToken;
             default: throw Errors.invalidOperation();
         }
+    }
+
+    public isPrimaryExpression(): boolean {
+        return true;
+    }
+
+    public isMemberExpression(): boolean {
+        return true;
+    }
+
+    public isPostfixExpression(): boolean {
+        return true;
     }
 
     public isUnaryExpression(): boolean {
@@ -1523,41 +1541,14 @@ module TypeScript {
     }
     }
 
-    export class ArrowFunctionExpressionSyntax extends SyntaxNode implements IUnaryExpressionSyntax {
-        constructor(public equalsGreaterThanToken: ISyntaxToken,
-                    public body: ISyntaxNodeOrToken,
-                    parsedInStrictMode: boolean) {
-            super(parsedInStrictMode); 
-        }
-
-    public isUnaryExpression(): boolean {
-        return true;
-    }
-
-    public isExpression(): boolean {
-        return true;
-    }
-
-    public withLeadingTrivia(trivia: ISyntaxTriviaList): ArrowFunctionExpressionSyntax {
-        return <ArrowFunctionExpressionSyntax>super.withLeadingTrivia(trivia);
-    }
-
-    public withTrailingTrivia(trivia: ISyntaxTriviaList): ArrowFunctionExpressionSyntax {
-        return <ArrowFunctionExpressionSyntax>super.withTrailingTrivia(trivia);
-    }
-
-    public isTypeScriptSpecific(): boolean {
-        return true;
-    }
-    }
-
-    export class SimpleArrowFunctionExpressionSyntax extends ArrowFunctionExpressionSyntax {
+    export class SimpleArrowFunctionExpressionSyntax extends SyntaxNode implements IArrowFunctionExpressionSyntax {
 
         constructor(public identifier: ISyntaxToken,
-                    equalsGreaterThanToken: ISyntaxToken,
-                    body: ISyntaxNodeOrToken,
+                    public equalsGreaterThanToken: ISyntaxToken,
+                    public block: BlockSyntax,
+                    public expression: IExpressionSyntax,
                     parsedInStrictMode: boolean) {
-            super(equalsGreaterThanToken, body, parsedInStrictMode); 
+            super(parsedInStrictMode); 
 
         }
 
@@ -1570,31 +1561,49 @@ module TypeScript {
     }
 
     public childCount(): number {
-        return 3;
+        return 4;
     }
 
     public childAt(slot: number): ISyntaxElement {
         switch (slot) {
             case 0: return this.identifier;
             case 1: return this.equalsGreaterThanToken;
-            case 2: return this.body;
+            case 2: return this.block;
+            case 3: return this.expression;
             default: throw Errors.invalidOperation();
         }
     }
 
+    public isArrowFunctionExpression(): boolean {
+        return true;
+    }
+
+    public isUnaryExpression(): boolean {
+        return true;
+    }
+
+    public isExpression(): boolean {
+        return true;
+    }
+
     public update(identifier: ISyntaxToken,
                   equalsGreaterThanToken: ISyntaxToken,
-                  body: ISyntaxNodeOrToken): SimpleArrowFunctionExpressionSyntax {
-        if (this.identifier === identifier && this.equalsGreaterThanToken === equalsGreaterThanToken && this.body === body) {
+                  block: BlockSyntax,
+                  expression: IExpressionSyntax): SimpleArrowFunctionExpressionSyntax {
+        if (this.identifier === identifier && this.equalsGreaterThanToken === equalsGreaterThanToken && this.block === block && this.expression === expression) {
             return this;
         }
 
-        return new SimpleArrowFunctionExpressionSyntax(identifier, equalsGreaterThanToken, body, /*parsedInStrictMode:*/ this.parsedInStrictMode());
+        return new SimpleArrowFunctionExpressionSyntax(identifier, equalsGreaterThanToken, block, expression, /*parsedInStrictMode:*/ this.parsedInStrictMode());
     }
 
-    public static create1(identifier: ISyntaxToken,
-                          body: ISyntaxNodeOrToken): SimpleArrowFunctionExpressionSyntax {
-        return new SimpleArrowFunctionExpressionSyntax(identifier, Syntax.token(SyntaxKind.EqualsGreaterThanToken), body, /*parsedInStrictMode:*/ false);
+    public static create(identifier: ISyntaxToken,
+                         equalsGreaterThanToken: ISyntaxToken): SimpleArrowFunctionExpressionSyntax {
+        return new SimpleArrowFunctionExpressionSyntax(identifier, equalsGreaterThanToken, null, null, /*parsedInStrictMode:*/ false);
+    }
+
+    public static create1(identifier: ISyntaxToken): SimpleArrowFunctionExpressionSyntax {
+        return new SimpleArrowFunctionExpressionSyntax(identifier, Syntax.token(SyntaxKind.EqualsGreaterThanToken), null, null, /*parsedInStrictMode:*/ false);
     }
 
     public withLeadingTrivia(trivia: ISyntaxTriviaList): SimpleArrowFunctionExpressionSyntax {
@@ -1606,15 +1615,19 @@ module TypeScript {
     }
 
     public withIdentifier(identifier: ISyntaxToken): SimpleArrowFunctionExpressionSyntax {
-        return this.update(identifier, this.equalsGreaterThanToken, this.body);
+        return this.update(identifier, this.equalsGreaterThanToken, this.block, this.expression);
     }
 
     public withEqualsGreaterThanToken(equalsGreaterThanToken: ISyntaxToken): SimpleArrowFunctionExpressionSyntax {
-        return this.update(this.identifier, equalsGreaterThanToken, this.body);
+        return this.update(this.identifier, equalsGreaterThanToken, this.block, this.expression);
     }
 
-    public withBody(body: ISyntaxNodeOrToken): SimpleArrowFunctionExpressionSyntax {
-        return this.update(this.identifier, this.equalsGreaterThanToken, body);
+    public withBlock(block: BlockSyntax): SimpleArrowFunctionExpressionSyntax {
+        return this.update(this.identifier, this.equalsGreaterThanToken, block, this.expression);
+    }
+
+    public withExpression(expression: IExpressionSyntax): SimpleArrowFunctionExpressionSyntax {
+        return this.update(this.identifier, this.equalsGreaterThanToken, this.block, expression);
     }
 
     public isTypeScriptSpecific(): boolean {
@@ -1622,13 +1635,14 @@ module TypeScript {
     }
     }
 
-    export class ParenthesizedArrowFunctionExpressionSyntax extends ArrowFunctionExpressionSyntax {
+    export class ParenthesizedArrowFunctionExpressionSyntax extends SyntaxNode implements IArrowFunctionExpressionSyntax {
 
         constructor(public callSignature: CallSignatureSyntax,
-                    equalsGreaterThanToken: ISyntaxToken,
-                    body: ISyntaxNodeOrToken,
+                    public equalsGreaterThanToken: ISyntaxToken,
+                    public block: BlockSyntax,
+                    public expression: IExpressionSyntax,
                     parsedInStrictMode: boolean) {
-            super(equalsGreaterThanToken, body, parsedInStrictMode); 
+            super(parsedInStrictMode); 
 
         }
 
@@ -1641,30 +1655,49 @@ module TypeScript {
     }
 
     public childCount(): number {
-        return 3;
+        return 4;
     }
 
     public childAt(slot: number): ISyntaxElement {
         switch (slot) {
             case 0: return this.callSignature;
             case 1: return this.equalsGreaterThanToken;
-            case 2: return this.body;
+            case 2: return this.block;
+            case 3: return this.expression;
             default: throw Errors.invalidOperation();
         }
     }
 
+    public isArrowFunctionExpression(): boolean {
+        return true;
+    }
+
+    public isUnaryExpression(): boolean {
+        return true;
+    }
+
+    public isExpression(): boolean {
+        return true;
+    }
+
     public update(callSignature: CallSignatureSyntax,
                   equalsGreaterThanToken: ISyntaxToken,
-                  body: ISyntaxNodeOrToken): ParenthesizedArrowFunctionExpressionSyntax {
-        if (this.callSignature === callSignature && this.equalsGreaterThanToken === equalsGreaterThanToken && this.body === body) {
+                  block: BlockSyntax,
+                  expression: IExpressionSyntax): ParenthesizedArrowFunctionExpressionSyntax {
+        if (this.callSignature === callSignature && this.equalsGreaterThanToken === equalsGreaterThanToken && this.block === block && this.expression === expression) {
             return this;
         }
 
-        return new ParenthesizedArrowFunctionExpressionSyntax(callSignature, equalsGreaterThanToken, body, /*parsedInStrictMode:*/ this.parsedInStrictMode());
+        return new ParenthesizedArrowFunctionExpressionSyntax(callSignature, equalsGreaterThanToken, block, expression, /*parsedInStrictMode:*/ this.parsedInStrictMode());
     }
 
-    public static create1(body: ISyntaxNodeOrToken): ParenthesizedArrowFunctionExpressionSyntax {
-        return new ParenthesizedArrowFunctionExpressionSyntax(CallSignatureSyntax.create1(), Syntax.token(SyntaxKind.EqualsGreaterThanToken), body, /*parsedInStrictMode:*/ false);
+    public static create(callSignature: CallSignatureSyntax,
+                         equalsGreaterThanToken: ISyntaxToken): ParenthesizedArrowFunctionExpressionSyntax {
+        return new ParenthesizedArrowFunctionExpressionSyntax(callSignature, equalsGreaterThanToken, null, null, /*parsedInStrictMode:*/ false);
+    }
+
+    public static create1(): ParenthesizedArrowFunctionExpressionSyntax {
+        return new ParenthesizedArrowFunctionExpressionSyntax(CallSignatureSyntax.create1(), Syntax.token(SyntaxKind.EqualsGreaterThanToken), null, null, /*parsedInStrictMode:*/ false);
     }
 
     public withLeadingTrivia(trivia: ISyntaxTriviaList): ParenthesizedArrowFunctionExpressionSyntax {
@@ -1676,15 +1709,19 @@ module TypeScript {
     }
 
     public withCallSignature(callSignature: CallSignatureSyntax): ParenthesizedArrowFunctionExpressionSyntax {
-        return this.update(callSignature, this.equalsGreaterThanToken, this.body);
+        return this.update(callSignature, this.equalsGreaterThanToken, this.block, this.expression);
     }
 
     public withEqualsGreaterThanToken(equalsGreaterThanToken: ISyntaxToken): ParenthesizedArrowFunctionExpressionSyntax {
-        return this.update(this.callSignature, equalsGreaterThanToken, this.body);
+        return this.update(this.callSignature, equalsGreaterThanToken, this.block, this.expression);
     }
 
-    public withBody(body: ISyntaxNodeOrToken): ParenthesizedArrowFunctionExpressionSyntax {
-        return this.update(this.callSignature, this.equalsGreaterThanToken, body);
+    public withBlock(block: BlockSyntax): ParenthesizedArrowFunctionExpressionSyntax {
+        return this.update(this.callSignature, this.equalsGreaterThanToken, block, this.expression);
+    }
+
+    public withExpression(expression: IExpressionSyntax): ParenthesizedArrowFunctionExpressionSyntax {
+        return this.update(this.callSignature, this.equalsGreaterThanToken, this.block, expression);
     }
 
     public isTypeScriptSpecific(): boolean {
@@ -1728,14 +1765,6 @@ module TypeScript {
     }
 
     public isType(): boolean {
-        return true;
-    }
-
-    public isUnaryExpression(): boolean {
-        return true;
-    }
-
-    public isExpression(): boolean {
         return true;
     }
 
@@ -1897,14 +1926,6 @@ module TypeScript {
         return true;
     }
 
-    public isUnaryExpression(): boolean {
-        return true;
-    }
-
-    public isExpression(): boolean {
-        return true;
-    }
-
     public update(newKeyword: ISyntaxToken,
                   typeParameterList: TypeParameterListSyntax,
                   parameterList: ParameterListSyntax,
@@ -1998,14 +2019,6 @@ module TypeScript {
         return true;
     }
 
-    public isUnaryExpression(): boolean {
-        return true;
-    }
-
-    public isExpression(): boolean {
-        return true;
-    }
-
     public update(typeParameterList: TypeParameterListSyntax,
                   parameterList: ParameterListSyntax,
                   equalsGreaterThanToken: ISyntaxToken,
@@ -2088,14 +2101,6 @@ module TypeScript {
     }
 
     public isType(): boolean {
-        return true;
-    }
-
-    public isUnaryExpression(): boolean {
-        return true;
-    }
-
-    public isExpression(): boolean {
         return true;
     }
 
@@ -2182,14 +2187,6 @@ module TypeScript {
         return true;
     }
 
-    public isUnaryExpression(): boolean {
-        return true;
-    }
-
-    public isExpression(): boolean {
-        return true;
-    }
-
     public update(type: ITypeSyntax,
                   openBracketToken: ISyntaxToken,
                   closeBracketToken: ISyntaxToken): ArrayTypeSyntax {
@@ -2262,14 +2259,6 @@ module TypeScript {
         return true;
     }
 
-    public isUnaryExpression(): boolean {
-        return true;
-    }
-
-    public isExpression(): boolean {
-        return true;
-    }
-
     public update(name: INameSyntax,
                   typeArgumentList: TypeArgumentListSyntax): GenericTypeSyntax {
         if (this.name === name && this.typeArgumentList === typeArgumentList) {
@@ -2334,14 +2323,6 @@ module TypeScript {
     }
 
     public isType(): boolean {
-        return true;
-    }
-
-    public isUnaryExpression(): boolean {
-        return true;
-    }
-
-    public isExpression(): boolean {
         return true;
     }
 
@@ -2533,7 +2514,7 @@ module TypeScript {
     export class ParameterSyntax extends SyntaxNode {
 
         constructor(public dotDotDotToken: ISyntaxToken,
-                    public publicOrPrivateKeyword: ISyntaxToken,
+                    public modifiers: ISyntaxList,
                     public identifier: ISyntaxToken,
                     public questionToken: ISyntaxToken,
                     public typeAnnotation: TypeAnnotationSyntax,
@@ -2558,7 +2539,7 @@ module TypeScript {
     public childAt(slot: number): ISyntaxElement {
         switch (slot) {
             case 0: return this.dotDotDotToken;
-            case 1: return this.publicOrPrivateKeyword;
+            case 1: return this.modifiers;
             case 2: return this.identifier;
             case 3: return this.questionToken;
             case 4: return this.typeAnnotation;
@@ -2568,24 +2549,24 @@ module TypeScript {
     }
 
     public update(dotDotDotToken: ISyntaxToken,
-                  publicOrPrivateKeyword: ISyntaxToken,
+                  modifiers: ISyntaxList,
                   identifier: ISyntaxToken,
                   questionToken: ISyntaxToken,
                   typeAnnotation: TypeAnnotationSyntax,
                   equalsValueClause: EqualsValueClauseSyntax): ParameterSyntax {
-        if (this.dotDotDotToken === dotDotDotToken && this.publicOrPrivateKeyword === publicOrPrivateKeyword && this.identifier === identifier && this.questionToken === questionToken && this.typeAnnotation === typeAnnotation && this.equalsValueClause === equalsValueClause) {
+        if (this.dotDotDotToken === dotDotDotToken && this.modifiers === modifiers && this.identifier === identifier && this.questionToken === questionToken && this.typeAnnotation === typeAnnotation && this.equalsValueClause === equalsValueClause) {
             return this;
         }
 
-        return new ParameterSyntax(dotDotDotToken, publicOrPrivateKeyword, identifier, questionToken, typeAnnotation, equalsValueClause, /*parsedInStrictMode:*/ this.parsedInStrictMode());
+        return new ParameterSyntax(dotDotDotToken, modifiers, identifier, questionToken, typeAnnotation, equalsValueClause, /*parsedInStrictMode:*/ this.parsedInStrictMode());
     }
 
     public static create(identifier: ISyntaxToken): ParameterSyntax {
-        return new ParameterSyntax(null, null, identifier, null, null, null, /*parsedInStrictMode:*/ false);
+        return new ParameterSyntax(null, Syntax.emptyList, identifier, null, null, null, /*parsedInStrictMode:*/ false);
     }
 
     public static create1(identifier: ISyntaxToken): ParameterSyntax {
-        return new ParameterSyntax(null, null, identifier, null, null, null, /*parsedInStrictMode:*/ false);
+        return new ParameterSyntax(null, Syntax.emptyList, identifier, null, null, null, /*parsedInStrictMode:*/ false);
     }
 
     public withLeadingTrivia(trivia: ISyntaxTriviaList): ParameterSyntax {
@@ -2597,32 +2578,36 @@ module TypeScript {
     }
 
     public withDotDotDotToken(dotDotDotToken: ISyntaxToken): ParameterSyntax {
-        return this.update(dotDotDotToken, this.publicOrPrivateKeyword, this.identifier, this.questionToken, this.typeAnnotation, this.equalsValueClause);
+        return this.update(dotDotDotToken, this.modifiers, this.identifier, this.questionToken, this.typeAnnotation, this.equalsValueClause);
     }
 
-    public withPublicOrPrivateKeyword(publicOrPrivateKeyword: ISyntaxToken): ParameterSyntax {
-        return this.update(this.dotDotDotToken, publicOrPrivateKeyword, this.identifier, this.questionToken, this.typeAnnotation, this.equalsValueClause);
+    public withModifiers(modifiers: ISyntaxList): ParameterSyntax {
+        return this.update(this.dotDotDotToken, modifiers, this.identifier, this.questionToken, this.typeAnnotation, this.equalsValueClause);
+    }
+
+    public withModifier(modifier: ISyntaxToken): ParameterSyntax {
+        return this.withModifiers(Syntax.list([modifier]));
     }
 
     public withIdentifier(identifier: ISyntaxToken): ParameterSyntax {
-        return this.update(this.dotDotDotToken, this.publicOrPrivateKeyword, identifier, this.questionToken, this.typeAnnotation, this.equalsValueClause);
+        return this.update(this.dotDotDotToken, this.modifiers, identifier, this.questionToken, this.typeAnnotation, this.equalsValueClause);
     }
 
     public withQuestionToken(questionToken: ISyntaxToken): ParameterSyntax {
-        return this.update(this.dotDotDotToken, this.publicOrPrivateKeyword, this.identifier, questionToken, this.typeAnnotation, this.equalsValueClause);
+        return this.update(this.dotDotDotToken, this.modifiers, this.identifier, questionToken, this.typeAnnotation, this.equalsValueClause);
     }
 
     public withTypeAnnotation(typeAnnotation: TypeAnnotationSyntax): ParameterSyntax {
-        return this.update(this.dotDotDotToken, this.publicOrPrivateKeyword, this.identifier, this.questionToken, typeAnnotation, this.equalsValueClause);
+        return this.update(this.dotDotDotToken, this.modifiers, this.identifier, this.questionToken, typeAnnotation, this.equalsValueClause);
     }
 
     public withEqualsValueClause(equalsValueClause: EqualsValueClauseSyntax): ParameterSyntax {
-        return this.update(this.dotDotDotToken, this.publicOrPrivateKeyword, this.identifier, this.questionToken, this.typeAnnotation, equalsValueClause);
+        return this.update(this.dotDotDotToken, this.modifiers, this.identifier, this.questionToken, this.typeAnnotation, equalsValueClause);
     }
 
     public isTypeScriptSpecific(): boolean {
         if (this.dotDotDotToken !== null) { return true; }
-        if (this.publicOrPrivateKeyword !== null) { return true; }
+        if (this.modifiers.isTypeScriptSpecific()) { return true; }
         if (this.questionToken !== null) { return true; }
         if (this.typeAnnotation !== null) { return true; }
         if (this.equalsValueClause !== null) { return true; }
@@ -2630,7 +2615,7 @@ module TypeScript {
     }
     }
 
-    export class MemberAccessExpressionSyntax extends SyntaxNode implements IUnaryExpressionSyntax {
+    export class MemberAccessExpressionSyntax extends SyntaxNode implements IMemberExpressionSyntax {
 
         constructor(public expression: IExpressionSyntax,
                     public dotToken: ISyntaxToken,
@@ -2659,6 +2644,14 @@ module TypeScript {
             case 2: return this.name;
             default: throw Errors.invalidOperation();
         }
+    }
+
+    public isMemberExpression(): boolean {
+        return true;
+    }
+
+    public isPostfixExpression(): boolean {
+        return true;
     }
 
     public isUnaryExpression(): boolean {
@@ -2710,11 +2703,11 @@ module TypeScript {
     }
     }
 
-    export class PostfixUnaryExpressionSyntax extends SyntaxNode implements IUnaryExpressionSyntax {
+    export class PostfixUnaryExpressionSyntax extends SyntaxNode implements IPostfixExpressionSyntax {
     private _kind: SyntaxKind;
 
         constructor(kind: SyntaxKind,
-                    public operand: IExpressionSyntax,
+                    public operand: IMemberExpressionSyntax,
                     public operatorToken: ISyntaxToken,
                     parsedInStrictMode: boolean) {
             super(parsedInStrictMode); 
@@ -2738,6 +2731,10 @@ module TypeScript {
         }
     }
 
+    public isPostfixExpression(): boolean {
+        return true;
+    }
+
     public isUnaryExpression(): boolean {
         return true;
     }
@@ -2751,7 +2748,7 @@ module TypeScript {
     }
 
     public update(kind: SyntaxKind,
-                  operand: IExpressionSyntax,
+                  operand: IMemberExpressionSyntax,
                   operatorToken: ISyntaxToken): PostfixUnaryExpressionSyntax {
         if (this._kind === kind && this.operand === operand && this.operatorToken === operatorToken) {
             return this;
@@ -2772,7 +2769,7 @@ module TypeScript {
         return this.update(kind, this.operand, this.operatorToken);
     }
 
-    public withOperand(operand: IExpressionSyntax): PostfixUnaryExpressionSyntax {
+    public withOperand(operand: IMemberExpressionSyntax): PostfixUnaryExpressionSyntax {
         return this.update(this._kind, operand, this.operatorToken);
     }
 
@@ -2786,7 +2783,7 @@ module TypeScript {
     }
     }
 
-    export class ElementAccessExpressionSyntax extends SyntaxNode implements IUnaryExpressionSyntax {
+    export class ElementAccessExpressionSyntax extends SyntaxNode implements IMemberExpressionSyntax {
 
         constructor(public expression: IExpressionSyntax,
                     public openBracketToken: ISyntaxToken,
@@ -2817,6 +2814,14 @@ module TypeScript {
             case 3: return this.closeBracketToken;
             default: throw Errors.invalidOperation();
         }
+    }
+
+    public isMemberExpression(): boolean {
+        return true;
+    }
+
+    public isPostfixExpression(): boolean {
+        return true;
     }
 
     public isUnaryExpression(): boolean {
@@ -2874,9 +2879,9 @@ module TypeScript {
     }
     }
 
-    export class InvocationExpressionSyntax extends SyntaxNode implements IUnaryExpressionSyntax {
+    export class InvocationExpressionSyntax extends SyntaxNode implements IMemberExpressionSyntax {
 
-        constructor(public expression: IExpressionSyntax,
+        constructor(public expression: IMemberExpressionSyntax,
                     public argumentList: ArgumentListSyntax,
                     parsedInStrictMode: boolean) {
             super(parsedInStrictMode); 
@@ -2903,6 +2908,14 @@ module TypeScript {
         }
     }
 
+    public isMemberExpression(): boolean {
+        return true;
+    }
+
+    public isPostfixExpression(): boolean {
+        return true;
+    }
+
     public isUnaryExpression(): boolean {
         return true;
     }
@@ -2911,7 +2924,7 @@ module TypeScript {
         return true;
     }
 
-    public update(expression: IExpressionSyntax,
+    public update(expression: IMemberExpressionSyntax,
                   argumentList: ArgumentListSyntax): InvocationExpressionSyntax {
         if (this.expression === expression && this.argumentList === argumentList) {
             return this;
@@ -2920,7 +2933,7 @@ module TypeScript {
         return new InvocationExpressionSyntax(expression, argumentList, /*parsedInStrictMode:*/ this.parsedInStrictMode());
     }
 
-    public static create1(expression: IExpressionSyntax): InvocationExpressionSyntax {
+    public static create1(expression: IMemberExpressionSyntax): InvocationExpressionSyntax {
         return new InvocationExpressionSyntax(expression, ArgumentListSyntax.create1(), /*parsedInStrictMode:*/ false);
     }
 
@@ -2932,7 +2945,7 @@ module TypeScript {
         return <InvocationExpressionSyntax>super.withTrailingTrivia(trivia);
     }
 
-    public withExpression(expression: IExpressionSyntax): InvocationExpressionSyntax {
+    public withExpression(expression: IMemberExpressionSyntax): InvocationExpressionSyntax {
         return this.update(expression, this.argumentList);
     }
 
@@ -3355,7 +3368,7 @@ module TypeScript {
     }
     }
 
-    export class IndexSignatureSyntax extends SyntaxNode implements ITypeMemberSyntax, IClassElementSyntax {
+    export class IndexSignatureSyntax extends SyntaxNode implements ITypeMemberSyntax {
 
         constructor(public openBracketToken: ISyntaxToken,
                     public parameter: ParameterSyntax,
@@ -3389,10 +3402,6 @@ module TypeScript {
     }
 
     public isTypeMember(): boolean {
-        return true;
-    }
-
-    public isClassElement(): boolean {
         return true;
     }
 
@@ -4143,7 +4152,8 @@ module TypeScript {
 
     export class ConstructorDeclarationSyntax extends SyntaxNode implements IClassElementSyntax {
 
-        constructor(public constructorKeyword: ISyntaxToken,
+        constructor(public modifiers: ISyntaxList,
+                    public constructorKeyword: ISyntaxToken,
                     public parameterList: ParameterListSyntax,
                     public block: BlockSyntax,
                     public semicolonToken: ISyntaxToken,
@@ -4161,15 +4171,16 @@ module TypeScript {
     }
 
     public childCount(): number {
-        return 4;
+        return 5;
     }
 
     public childAt(slot: number): ISyntaxElement {
         switch (slot) {
-            case 0: return this.constructorKeyword;
-            case 1: return this.parameterList;
-            case 2: return this.block;
-            case 3: return this.semicolonToken;
+            case 0: return this.modifiers;
+            case 1: return this.constructorKeyword;
+            case 2: return this.parameterList;
+            case 3: return this.block;
+            case 4: return this.semicolonToken;
             default: throw Errors.invalidOperation();
         }
     }
@@ -4178,24 +4189,25 @@ module TypeScript {
         return true;
     }
 
-    public update(constructorKeyword: ISyntaxToken,
+    public update(modifiers: ISyntaxList,
+                  constructorKeyword: ISyntaxToken,
                   parameterList: ParameterListSyntax,
                   block: BlockSyntax,
                   semicolonToken: ISyntaxToken): ConstructorDeclarationSyntax {
-        if (this.constructorKeyword === constructorKeyword && this.parameterList === parameterList && this.block === block && this.semicolonToken === semicolonToken) {
+        if (this.modifiers === modifiers && this.constructorKeyword === constructorKeyword && this.parameterList === parameterList && this.block === block && this.semicolonToken === semicolonToken) {
             return this;
         }
 
-        return new ConstructorDeclarationSyntax(constructorKeyword, parameterList, block, semicolonToken, /*parsedInStrictMode:*/ this.parsedInStrictMode());
+        return new ConstructorDeclarationSyntax(modifiers, constructorKeyword, parameterList, block, semicolonToken, /*parsedInStrictMode:*/ this.parsedInStrictMode());
     }
 
     public static create(constructorKeyword: ISyntaxToken,
                          parameterList: ParameterListSyntax): ConstructorDeclarationSyntax {
-        return new ConstructorDeclarationSyntax(constructorKeyword, parameterList, null, null, /*parsedInStrictMode:*/ false);
+        return new ConstructorDeclarationSyntax(Syntax.emptyList, constructorKeyword, parameterList, null, null, /*parsedInStrictMode:*/ false);
     }
 
     public static create1(): ConstructorDeclarationSyntax {
-        return new ConstructorDeclarationSyntax(Syntax.token(SyntaxKind.ConstructorKeyword), ParameterListSyntax.create1(), null, null, /*parsedInStrictMode:*/ false);
+        return new ConstructorDeclarationSyntax(Syntax.emptyList, Syntax.token(SyntaxKind.ConstructorKeyword), ParameterListSyntax.create1(), null, null, /*parsedInStrictMode:*/ false);
     }
 
     public withLeadingTrivia(trivia: ISyntaxTriviaList): ConstructorDeclarationSyntax {
@@ -4206,20 +4218,28 @@ module TypeScript {
         return <ConstructorDeclarationSyntax>super.withTrailingTrivia(trivia);
     }
 
+    public withModifiers(modifiers: ISyntaxList): ConstructorDeclarationSyntax {
+        return this.update(modifiers, this.constructorKeyword, this.parameterList, this.block, this.semicolonToken);
+    }
+
+    public withModifier(modifier: ISyntaxToken): ConstructorDeclarationSyntax {
+        return this.withModifiers(Syntax.list([modifier]));
+    }
+
     public withConstructorKeyword(constructorKeyword: ISyntaxToken): ConstructorDeclarationSyntax {
-        return this.update(constructorKeyword, this.parameterList, this.block, this.semicolonToken);
+        return this.update(this.modifiers, constructorKeyword, this.parameterList, this.block, this.semicolonToken);
     }
 
     public withParameterList(parameterList: ParameterListSyntax): ConstructorDeclarationSyntax {
-        return this.update(this.constructorKeyword, parameterList, this.block, this.semicolonToken);
+        return this.update(this.modifiers, this.constructorKeyword, parameterList, this.block, this.semicolonToken);
     }
 
     public withBlock(block: BlockSyntax): ConstructorDeclarationSyntax {
-        return this.update(this.constructorKeyword, this.parameterList, block, this.semicolonToken);
+        return this.update(this.modifiers, this.constructorKeyword, this.parameterList, block, this.semicolonToken);
     }
 
     public withSemicolonToken(semicolonToken: ISyntaxToken): ConstructorDeclarationSyntax {
-        return this.update(this.constructorKeyword, this.parameterList, this.block, semicolonToken);
+        return this.update(this.modifiers, this.constructorKeyword, this.parameterList, this.block, semicolonToken);
     }
 
     public isTypeScriptSpecific(): boolean {
@@ -4328,55 +4348,25 @@ module TypeScript {
     }
     }
 
-    export class MemberAccessorDeclarationSyntax extends SyntaxNode implements IMemberDeclarationSyntax {
+    export class GetAccessorSyntax extends SyntaxNode implements IMemberDeclarationSyntax, IPropertyAssignmentSyntax {
+
         constructor(public modifiers: ISyntaxList,
+                    public getKeyword: ISyntaxToken,
                     public propertyName: ISyntaxToken,
                     public parameterList: ParameterListSyntax,
+                    public typeAnnotation: TypeAnnotationSyntax,
                     public block: BlockSyntax,
                     parsedInStrictMode: boolean) {
             super(parsedInStrictMode); 
-        }
-
-    public isMemberDeclaration(): boolean {
-        return true;
-    }
-
-    public isClassElement(): boolean {
-        return true;
-    }
-
-    public withLeadingTrivia(trivia: ISyntaxTriviaList): MemberAccessorDeclarationSyntax {
-        return <MemberAccessorDeclarationSyntax>super.withLeadingTrivia(trivia);
-    }
-
-    public withTrailingTrivia(trivia: ISyntaxTriviaList): MemberAccessorDeclarationSyntax {
-        return <MemberAccessorDeclarationSyntax>super.withTrailingTrivia(trivia);
-    }
-
-    public isTypeScriptSpecific(): boolean {
-        return true;
-    }
-    }
-
-    export class GetMemberAccessorDeclarationSyntax extends MemberAccessorDeclarationSyntax {
-
-        constructor(modifiers: ISyntaxList,
-                    public getKeyword: ISyntaxToken,
-                    propertyName: ISyntaxToken,
-                    parameterList: ParameterListSyntax,
-                    public typeAnnotation: TypeAnnotationSyntax,
-                    block: BlockSyntax,
-                    parsedInStrictMode: boolean) {
-            super(modifiers, propertyName, parameterList, block, parsedInStrictMode); 
 
         }
 
     public accept(visitor: ISyntaxVisitor): any {
-        return visitor.visitGetMemberAccessorDeclaration(this);
+        return visitor.visitGetAccessor(this);
     }
 
     public kind(): SyntaxKind {
-        return SyntaxKind.GetMemberAccessorDeclaration;
+        return SyntaxKind.GetAccessor;
     }
 
     public childCount(): number {
@@ -4395,89 +4385,105 @@ module TypeScript {
         }
     }
 
+    public isMemberDeclaration(): boolean {
+        return true;
+    }
+
+    public isPropertyAssignment(): boolean {
+        return true;
+    }
+
+    public isClassElement(): boolean {
+        return true;
+    }
+
     public update(modifiers: ISyntaxList,
                   getKeyword: ISyntaxToken,
                   propertyName: ISyntaxToken,
                   parameterList: ParameterListSyntax,
                   typeAnnotation: TypeAnnotationSyntax,
-                  block: BlockSyntax): GetMemberAccessorDeclarationSyntax {
+                  block: BlockSyntax): GetAccessorSyntax {
         if (this.modifiers === modifiers && this.getKeyword === getKeyword && this.propertyName === propertyName && this.parameterList === parameterList && this.typeAnnotation === typeAnnotation && this.block === block) {
             return this;
         }
 
-        return new GetMemberAccessorDeclarationSyntax(modifiers, getKeyword, propertyName, parameterList, typeAnnotation, block, /*parsedInStrictMode:*/ this.parsedInStrictMode());
+        return new GetAccessorSyntax(modifiers, getKeyword, propertyName, parameterList, typeAnnotation, block, /*parsedInStrictMode:*/ this.parsedInStrictMode());
     }
 
     public static create(getKeyword: ISyntaxToken,
                          propertyName: ISyntaxToken,
                          parameterList: ParameterListSyntax,
-                         block: BlockSyntax): GetMemberAccessorDeclarationSyntax {
-        return new GetMemberAccessorDeclarationSyntax(Syntax.emptyList, getKeyword, propertyName, parameterList, null, block, /*parsedInStrictMode:*/ false);
+                         block: BlockSyntax): GetAccessorSyntax {
+        return new GetAccessorSyntax(Syntax.emptyList, getKeyword, propertyName, parameterList, null, block, /*parsedInStrictMode:*/ false);
     }
 
-    public static create1(propertyName: ISyntaxToken): GetMemberAccessorDeclarationSyntax {
-        return new GetMemberAccessorDeclarationSyntax(Syntax.emptyList, Syntax.token(SyntaxKind.GetKeyword), propertyName, ParameterListSyntax.create1(), null, BlockSyntax.create1(), /*parsedInStrictMode:*/ false);
+    public static create1(propertyName: ISyntaxToken): GetAccessorSyntax {
+        return new GetAccessorSyntax(Syntax.emptyList, Syntax.token(SyntaxKind.GetKeyword), propertyName, ParameterListSyntax.create1(), null, BlockSyntax.create1(), /*parsedInStrictMode:*/ false);
     }
 
-    public withLeadingTrivia(trivia: ISyntaxTriviaList): GetMemberAccessorDeclarationSyntax {
-        return <GetMemberAccessorDeclarationSyntax>super.withLeadingTrivia(trivia);
+    public withLeadingTrivia(trivia: ISyntaxTriviaList): GetAccessorSyntax {
+        return <GetAccessorSyntax>super.withLeadingTrivia(trivia);
     }
 
-    public withTrailingTrivia(trivia: ISyntaxTriviaList): GetMemberAccessorDeclarationSyntax {
-        return <GetMemberAccessorDeclarationSyntax>super.withTrailingTrivia(trivia);
+    public withTrailingTrivia(trivia: ISyntaxTriviaList): GetAccessorSyntax {
+        return <GetAccessorSyntax>super.withTrailingTrivia(trivia);
     }
 
-    public withModifiers(modifiers: ISyntaxList): GetMemberAccessorDeclarationSyntax {
+    public withModifiers(modifiers: ISyntaxList): GetAccessorSyntax {
         return this.update(modifiers, this.getKeyword, this.propertyName, this.parameterList, this.typeAnnotation, this.block);
     }
 
-    public withModifier(modifier: ISyntaxToken): GetMemberAccessorDeclarationSyntax {
+    public withModifier(modifier: ISyntaxToken): GetAccessorSyntax {
         return this.withModifiers(Syntax.list([modifier]));
     }
 
-    public withGetKeyword(getKeyword: ISyntaxToken): GetMemberAccessorDeclarationSyntax {
+    public withGetKeyword(getKeyword: ISyntaxToken): GetAccessorSyntax {
         return this.update(this.modifiers, getKeyword, this.propertyName, this.parameterList, this.typeAnnotation, this.block);
     }
 
-    public withPropertyName(propertyName: ISyntaxToken): GetMemberAccessorDeclarationSyntax {
+    public withPropertyName(propertyName: ISyntaxToken): GetAccessorSyntax {
         return this.update(this.modifiers, this.getKeyword, propertyName, this.parameterList, this.typeAnnotation, this.block);
     }
 
-    public withParameterList(parameterList: ParameterListSyntax): GetMemberAccessorDeclarationSyntax {
+    public withParameterList(parameterList: ParameterListSyntax): GetAccessorSyntax {
         return this.update(this.modifiers, this.getKeyword, this.propertyName, parameterList, this.typeAnnotation, this.block);
     }
 
-    public withTypeAnnotation(typeAnnotation: TypeAnnotationSyntax): GetMemberAccessorDeclarationSyntax {
+    public withTypeAnnotation(typeAnnotation: TypeAnnotationSyntax): GetAccessorSyntax {
         return this.update(this.modifiers, this.getKeyword, this.propertyName, this.parameterList, typeAnnotation, this.block);
     }
 
-    public withBlock(block: BlockSyntax): GetMemberAccessorDeclarationSyntax {
+    public withBlock(block: BlockSyntax): GetAccessorSyntax {
         return this.update(this.modifiers, this.getKeyword, this.propertyName, this.parameterList, this.typeAnnotation, block);
     }
 
     public isTypeScriptSpecific(): boolean {
-        return true;
+        if (this.modifiers.childCount() > 0) { return true; }
+        if (this.parameterList.isTypeScriptSpecific()) { return true; }
+        if (this.typeAnnotation !== null) { return true; }
+        if (this.block.isTypeScriptSpecific()) { return true; }
+        return false;
     }
     }
 
-    export class SetMemberAccessorDeclarationSyntax extends MemberAccessorDeclarationSyntax {
+    export class SetAccessorSyntax extends SyntaxNode implements IMemberDeclarationSyntax, IPropertyAssignmentSyntax {
 
-        constructor(modifiers: ISyntaxList,
+        constructor(public modifiers: ISyntaxList,
                     public setKeyword: ISyntaxToken,
-                    propertyName: ISyntaxToken,
-                    parameterList: ParameterListSyntax,
-                    block: BlockSyntax,
+                    public propertyName: ISyntaxToken,
+                    public parameterList: ParameterListSyntax,
+                    public block: BlockSyntax,
                     parsedInStrictMode: boolean) {
-            super(modifiers, propertyName, parameterList, block, parsedInStrictMode); 
+            super(parsedInStrictMode); 
 
         }
 
     public accept(visitor: ISyntaxVisitor): any {
-        return visitor.visitSetMemberAccessorDeclaration(this);
+        return visitor.visitSetAccessor(this);
     }
 
     public kind(): SyntaxKind {
-        return SyntaxKind.SetMemberAccessorDeclaration;
+        return SyntaxKind.SetAccessor;
     }
 
     public childCount(): number {
@@ -4495,58 +4501,70 @@ module TypeScript {
         }
     }
 
+    public isMemberDeclaration(): boolean {
+        return true;
+    }
+
+    public isPropertyAssignment(): boolean {
+        return true;
+    }
+
+    public isClassElement(): boolean {
+        return true;
+    }
+
     public update(modifiers: ISyntaxList,
                   setKeyword: ISyntaxToken,
                   propertyName: ISyntaxToken,
                   parameterList: ParameterListSyntax,
-                  block: BlockSyntax): SetMemberAccessorDeclarationSyntax {
+                  block: BlockSyntax): SetAccessorSyntax {
         if (this.modifiers === modifiers && this.setKeyword === setKeyword && this.propertyName === propertyName && this.parameterList === parameterList && this.block === block) {
             return this;
         }
 
-        return new SetMemberAccessorDeclarationSyntax(modifiers, setKeyword, propertyName, parameterList, block, /*parsedInStrictMode:*/ this.parsedInStrictMode());
+        return new SetAccessorSyntax(modifiers, setKeyword, propertyName, parameterList, block, /*parsedInStrictMode:*/ this.parsedInStrictMode());
     }
 
     public static create(setKeyword: ISyntaxToken,
                          propertyName: ISyntaxToken,
                          parameterList: ParameterListSyntax,
-                         block: BlockSyntax): SetMemberAccessorDeclarationSyntax {
-        return new SetMemberAccessorDeclarationSyntax(Syntax.emptyList, setKeyword, propertyName, parameterList, block, /*parsedInStrictMode:*/ false);
+                         block: BlockSyntax): SetAccessorSyntax {
+        return new SetAccessorSyntax(Syntax.emptyList, setKeyword, propertyName, parameterList, block, /*parsedInStrictMode:*/ false);
     }
 
-    public static create1(propertyName: ISyntaxToken): SetMemberAccessorDeclarationSyntax {
-        return new SetMemberAccessorDeclarationSyntax(Syntax.emptyList, Syntax.token(SyntaxKind.SetKeyword), propertyName, ParameterListSyntax.create1(), BlockSyntax.create1(), /*parsedInStrictMode:*/ false);
+    public static create1(propertyName: ISyntaxToken): SetAccessorSyntax {
+        return new SetAccessorSyntax(Syntax.emptyList, Syntax.token(SyntaxKind.SetKeyword), propertyName, ParameterListSyntax.create1(), BlockSyntax.create1(), /*parsedInStrictMode:*/ false);
     }
 
-    public withLeadingTrivia(trivia: ISyntaxTriviaList): SetMemberAccessorDeclarationSyntax {
-        return <SetMemberAccessorDeclarationSyntax>super.withLeadingTrivia(trivia);
+    public withLeadingTrivia(trivia: ISyntaxTriviaList): SetAccessorSyntax {
+        return <SetAccessorSyntax>super.withLeadingTrivia(trivia);
     }
 
-    public withTrailingTrivia(trivia: ISyntaxTriviaList): SetMemberAccessorDeclarationSyntax {
-        return <SetMemberAccessorDeclarationSyntax>super.withTrailingTrivia(trivia);
+    public withTrailingTrivia(trivia: ISyntaxTriviaList): SetAccessorSyntax {
+        return <SetAccessorSyntax>super.withTrailingTrivia(trivia);
     }
 
-    public withModifiers(modifiers: ISyntaxList): SetMemberAccessorDeclarationSyntax {
+    public withModifiers(modifiers: ISyntaxList): SetAccessorSyntax {
         return this.update(modifiers, this.setKeyword, this.propertyName, this.parameterList, this.block);
     }
 
-    public withModifier(modifier: ISyntaxToken): SetMemberAccessorDeclarationSyntax {
+    public withModifier(modifier: ISyntaxToken): SetAccessorSyntax {
         return this.withModifiers(Syntax.list([modifier]));
     }
 
-    public withSetKeyword(setKeyword: ISyntaxToken): SetMemberAccessorDeclarationSyntax {
+    public withSetKeyword(setKeyword: ISyntaxToken): SetAccessorSyntax {
         return this.update(this.modifiers, setKeyword, this.propertyName, this.parameterList, this.block);
     }
 
-    public withPropertyName(propertyName: ISyntaxToken): SetMemberAccessorDeclarationSyntax {
+    public withPropertyName(propertyName: ISyntaxToken): SetAccessorSyntax {
         return this.update(this.modifiers, this.setKeyword, propertyName, this.parameterList, this.block);
     }
 
-    public withParameterList(parameterList: ParameterListSyntax): SetMemberAccessorDeclarationSyntax {
+    public withParameterList(parameterList: ParameterListSyntax): SetAccessorSyntax {
         return this.update(this.modifiers, this.setKeyword, this.propertyName, parameterList, this.block);
     }
 
-    public withBlock(block: BlockSyntax): SetMemberAccessorDeclarationSyntax {
+    public withBlock(block: BlockSyntax): SetAccessorSyntax {
         return this.update(this.modifiers, this.setKeyword, this.propertyName, this.parameterList, block);
     }
 
@@ -4635,6 +4653,89 @@ module TypeScript {
 
     public withSemicolonToken(semicolonToken: ISyntaxToken): MemberVariableDeclarationSyntax {
         return this.update(this.modifiers, this.variableDeclarator, semicolonToken);
+    }
+
+    public isTypeScriptSpecific(): boolean {
+        return true;
+    }
+    }
+
+    export class IndexMemberDeclarationSyntax extends SyntaxNode implements IClassElementSyntax {
+
+        constructor(public modifiers: ISyntaxList,
+                    public indexSignature: IndexSignatureSyntax,
+                    public semicolonToken: ISyntaxToken,
+                    parsedInStrictMode: boolean) {
+            super(parsedInStrictMode); 
+
+        }
+
+    public accept(visitor: ISyntaxVisitor): any {
+        return visitor.visitIndexMemberDeclaration(this);
+    }
+
+    public kind(): SyntaxKind {
+        return SyntaxKind.IndexMemberDeclaration;
+    }
+
+    public childCount(): number {
+        return 3;
+    }
+
+    public childAt(slot: number): ISyntaxElement {
+        switch (slot) {
+            case 0: return this.modifiers;
+            case 1: return this.indexSignature;
+            case 2: return this.semicolonToken;
+            default: throw Errors.invalidOperation();
+        }
+    }
+
+    public isClassElement(): boolean {
+        return true;
+    }
+
+    public update(modifiers: ISyntaxList,
+                  indexSignature: IndexSignatureSyntax,
+                  semicolonToken: ISyntaxToken): IndexMemberDeclarationSyntax {
+        if (this.modifiers === modifiers && this.indexSignature === indexSignature && this.semicolonToken === semicolonToken) {
+            return this;
+        }
+
+        return new IndexMemberDeclarationSyntax(modifiers, indexSignature, semicolonToken, /*parsedInStrictMode:*/ this.parsedInStrictMode());
+    }
+
+    public static create(indexSignature: IndexSignatureSyntax,
+                         semicolonToken: ISyntaxToken): IndexMemberDeclarationSyntax {
+        return new IndexMemberDeclarationSyntax(Syntax.emptyList, indexSignature, semicolonToken, /*parsedInStrictMode:*/ false);
+    }
+
+    public static create1(indexSignature: IndexSignatureSyntax): IndexMemberDeclarationSyntax {
+        return new IndexMemberDeclarationSyntax(Syntax.emptyList, indexSignature, Syntax.token(SyntaxKind.SemicolonToken), /*parsedInStrictMode:*/ false);
+    }
+
+    public withLeadingTrivia(trivia: ISyntaxTriviaList): IndexMemberDeclarationSyntax {
+        return <IndexMemberDeclarationSyntax>super.withLeadingTrivia(trivia);
+    }
+
+    public withTrailingTrivia(trivia: ISyntaxTriviaList): IndexMemberDeclarationSyntax {
+        return <IndexMemberDeclarationSyntax>super.withTrailingTrivia(trivia);
+    }
+
+    public withModifiers(modifiers: ISyntaxList): IndexMemberDeclarationSyntax {
+        return this.update(modifiers, this.indexSignature, this.semicolonToken);
+    }
+
+    public withModifier(modifier: ISyntaxToken): IndexMemberDeclarationSyntax {
+        return this.withModifiers(Syntax.list([modifier]));
+    }
+
+    public withIndexSignature(indexSignature: IndexSignatureSyntax): IndexMemberDeclarationSyntax {
+        return this.update(this.modifiers, indexSignature, this.semicolonToken);
+    }
+
+    public withSemicolonToken(semicolonToken: ISyntaxToken): IndexMemberDeclarationSyntax {
+        return this.update(this.modifiers, this.indexSignature, semicolonToken);
     }
 
     public isTypeScriptSpecific(): boolean {
@@ -4805,10 +4906,10 @@ module TypeScript {
     }
     }
 
-    export class ObjectCreationExpressionSyntax extends SyntaxNode implements IUnaryExpressionSyntax {
+    export class ObjectCreationExpressionSyntax extends SyntaxNode implements IMemberExpressionSyntax {
 
         constructor(public newKeyword: ISyntaxToken,
-                    public expression: IExpressionSyntax,
+                    public expression: IMemberExpressionSyntax,
                     public argumentList: ArgumentListSyntax,
                     parsedInStrictMode: boolean) {
             super(parsedInStrictMode); 
@@ -4836,6 +4937,14 @@ module TypeScript {
         }
     }
 
+    public isMemberExpression(): boolean {
+        return true;
+    }
+
+    public isPostfixExpression(): boolean {
+        return true;
+    }
+
     public isUnaryExpression(): boolean {
         return true;
     }
@@ -4845,7 +4954,7 @@ module TypeScript {
     }
 
     public update(newKeyword: ISyntaxToken,
-                  expression: IExpressionSyntax,
+                  expression: IMemberExpressionSyntax,
                   argumentList: ArgumentListSyntax): ObjectCreationExpressionSyntax {
         if (this.newKeyword === newKeyword && this.expression === expression && this.argumentList === argumentList) {
             return this;
@@ -4855,11 +4964,11 @@ module TypeScript {
     }
 
     public static create(newKeyword: ISyntaxToken,
-                         expression: IExpressionSyntax): ObjectCreationExpressionSyntax {
+                         expression: IMemberExpressionSyntax): ObjectCreationExpressionSyntax {
         return new ObjectCreationExpressionSyntax(newKeyword, expression, null, /*parsedInStrictMode:*/ false);
     }
 
-    public static create1(expression: IExpressionSyntax): ObjectCreationExpressionSyntax {
+    public static create1(expression: IMemberExpressionSyntax): ObjectCreationExpressionSyntax {
         return new ObjectCreationExpressionSyntax(Syntax.token(SyntaxKind.NewKeyword), expression, null, /*parsedInStrictMode:*/ false);
     }
 
@@ -4875,7 +4984,7 @@ module TypeScript {
         return this.update(newKeyword, this.expression, this.argumentList);
     }
 
-    public withExpression(expression: IExpressionSyntax): ObjectCreationExpressionSyntax {
+    public withExpression(expression: IMemberExpressionSyntax): ObjectCreationExpressionSyntax {
         return this.update(this.newKeyword, expression, this.argumentList);
     }
 
@@ -4996,7 +5105,7 @@ module TypeScript {
         return this.update(this.switchKeyword, this.openParenToken, this.expression, this.closeParenToken, this.openBraceToken, switchClauses, this.closeBraceToken);
     }
 
-    public withSwitchClause(switchClause: SwitchClauseSyntax): SwitchStatementSyntax {
+    public withSwitchClause(switchClause: ISwitchClauseSyntax): SwitchStatementSyntax {
         return this.withSwitchClauses(Syntax.list([switchClause]));
     }
 
@@ -5011,38 +5120,14 @@ module TypeScript {
     }
     }
 
-    export class SwitchClauseSyntax extends SyntaxNode implements ISwitchClauseSyntax {
-        constructor(public colonToken: ISyntaxToken,
-                    public statements: ISyntaxList,
-                    parsedInStrictMode: boolean) {
-            super(parsedInStrictMode); 
-        }
-
-    public isSwitchClause(): boolean {
-        return true;
-    }
-
-    public withLeadingTrivia(trivia: ISyntaxTriviaList): SwitchClauseSyntax {
-        return <SwitchClauseSyntax>super.withLeadingTrivia(trivia);
-    }
-
-    public withTrailingTrivia(trivia: ISyntaxTriviaList): SwitchClauseSyntax {
-        return <SwitchClauseSyntax>super.withTrailingTrivia(trivia);
-    }
-
-    public isTypeScriptSpecific(): boolean {
-        return false;
-    }
-    }
-
-    export class CaseSwitchClauseSyntax extends SwitchClauseSyntax {
+    export class CaseSwitchClauseSyntax extends SyntaxNode implements ISwitchClauseSyntax {
 
         constructor(public caseKeyword: ISyntaxToken,
                     public expression: IExpressionSyntax,
-                    colonToken: ISyntaxToken,
-                    statements: ISyntaxList,
+                    public colonToken: ISyntaxToken,
+                    public statements: ISyntaxList,
                     parsedInStrictMode: boolean) {
-            super(colonToken, statements, parsedInStrictMode); 
+            super(parsedInStrictMode); 
 
         }
 
@@ -5066,6 +5151,10 @@ module TypeScript {
             case 3: return this.statements;
             default: throw Errors.invalidOperation();
         }
+    }
+
+    public isSwitchClause(): boolean {
+        return true;
     }
 
     public update(caseKeyword: ISyntaxToken,
@@ -5124,13 +5213,13 @@ module TypeScript {
     }
     }
 
-    export class DefaultSwitchClauseSyntax extends SwitchClauseSyntax {
+    export class DefaultSwitchClauseSyntax extends SyntaxNode implements ISwitchClauseSyntax {
 
         constructor(public defaultKeyword: ISyntaxToken,
-                    colonToken: ISyntaxToken,
-                    statements: ISyntaxList,
+                    public colonToken: ISyntaxToken,
+                    public statements: ISyntaxList,
                     parsedInStrictMode: boolean) {
-            super(colonToken, statements, parsedInStrictMode); 
+            super(parsedInStrictMode); 
 
         }
 
@@ -5153,6 +5242,10 @@ module TypeScript {
             case 2: return this.statements;
             default: throw Errors.invalidOperation();
         }
+    }
+
+    public isSwitchClause(): boolean {
+        return true;
     }
 
     public update(defaultKeyword: ISyntaxToken,
@@ -5370,72 +5463,20 @@ module TypeScript {
     }
     }
 
-    export class IterationStatementSyntax extends SyntaxNode implements IStatementSyntax {
-        constructor(public openParenToken: ISyntaxToken,
-                    public closeParenToken: ISyntaxToken,
-                    public statement: IStatementSyntax,
-                    parsedInStrictMode: boolean) {
-            super(parsedInStrictMode); 
-        }
+    export class ForStatementSyntax extends SyntaxNode implements IIterationStatementSyntax {
 
-    public isStatement(): boolean {
-        return true;
-    }
-
-    public isModuleElement(): boolean {
-        return true;
-    }
-
-    public withLeadingTrivia(trivia: ISyntaxTriviaList): IterationStatementSyntax {
-        return <IterationStatementSyntax>super.withLeadingTrivia(trivia);
-    }
-
-    public withTrailingTrivia(trivia: ISyntaxTriviaList): IterationStatementSyntax {
-        return <IterationStatementSyntax>super.withTrailingTrivia(trivia);
-    }
-
-    public isTypeScriptSpecific(): boolean {
-        return false;
-    }
-    }
-
-    export class BaseForStatementSyntax extends IterationStatementSyntax {
         constructor(public forKeyword: ISyntaxToken,
-                    openParenToken: ISyntaxToken,
+                    public openParenToken: ISyntaxToken,
                     public variableDeclaration: VariableDeclarationSyntax,
-                    closeParenToken: ISyntaxToken,
-                    statement: IStatementSyntax,
-                    parsedInStrictMode: boolean) {
-            super(openParenToken, closeParenToken, statement, parsedInStrictMode); 
-        }
-
-    public withLeadingTrivia(trivia: ISyntaxTriviaList): BaseForStatementSyntax {
-        return <BaseForStatementSyntax>super.withLeadingTrivia(trivia);
-    }
-
-    public withTrailingTrivia(trivia: ISyntaxTriviaList): BaseForStatementSyntax {
-        return <BaseForStatementSyntax>super.withTrailingTrivia(trivia);
-    }
-
-    public isTypeScriptSpecific(): boolean {
-        return false;
-    }
-    }
-
-    export class ForStatementSyntax extends BaseForStatementSyntax {
-
-        constructor(forKeyword: ISyntaxToken,
-                    openParenToken: ISyntaxToken,
-                    variableDeclaration: VariableDeclarationSyntax,
                     public initializer: IExpressionSyntax,
                     public firstSemicolonToken: ISyntaxToken,
                     public condition: IExpressionSyntax,
                     public secondSemicolonToken: ISyntaxToken,
                     public incrementor: IExpressionSyntax,
-                    closeParenToken: ISyntaxToken,
-                    statement: IStatementSyntax,
+                    public closeParenToken: ISyntaxToken,
+                    public statement: IStatementSyntax,
                     parsedInStrictMode: boolean) {
-            super(forKeyword, openParenToken, variableDeclaration, closeParenToken, statement, parsedInStrictMode); 
+            super(parsedInStrictMode); 
 
         }
 
@@ -5465,6 +5506,18 @@ module TypeScript {
             case 9: return this.statement;
             default: throw Errors.invalidOperation();
         }
+    }
+
+    public isIterationStatement(): boolean {
+        return true;
+    }
+
+    public isStatement(): boolean {
+        return true;
+    }
+
+    public isModuleElement(): boolean {
+        return true;
     }
 
     public update(forKeyword: ISyntaxToken,
@@ -5555,18 +5608,18 @@ module TypeScript {
     }
     }
 
-    export class ForInStatementSyntax extends BaseForStatementSyntax {
+    export class ForInStatementSyntax extends SyntaxNode implements IIterationStatementSyntax {
 
-        constructor(forKeyword: ISyntaxToken,
-                    openParenToken: ISyntaxToken,
-                    variableDeclaration: VariableDeclarationSyntax,
+        constructor(public forKeyword: ISyntaxToken,
+                    public openParenToken: ISyntaxToken,
+                    public variableDeclaration: VariableDeclarationSyntax,
                     public left: IExpressionSyntax,
                     public inKeyword: ISyntaxToken,
                     public expression: IExpressionSyntax,
-                    closeParenToken: ISyntaxToken,
-                    statement: IStatementSyntax,
+                    public closeParenToken: ISyntaxToken,
+                    public statement: IStatementSyntax,
                     parsedInStrictMode: boolean) {
-            super(forKeyword, openParenToken, variableDeclaration, closeParenToken, statement, parsedInStrictMode); 
+            super(parsedInStrictMode); 
 
         }
 
@@ -5594,6 +5647,18 @@ module TypeScript {
             case 7: return this.statement;
             default: throw Errors.invalidOperation();
         }
+    }
+
+    public isIterationStatement(): boolean {
+        return true;
+    }
+
+    public isStatement(): boolean {
+        return true;
+    }
+
+    public isModuleElement(): boolean {
+        return true;
     }
 
     public update(forKeyword: ISyntaxToken,
@@ -5674,15 +5739,15 @@ module TypeScript {
     }
     }
 
-    export class WhileStatementSyntax extends IterationStatementSyntax {
+    export class WhileStatementSyntax extends SyntaxNode implements IIterationStatementSyntax {
 
         constructor(public whileKeyword: ISyntaxToken,
-                    openParenToken: ISyntaxToken,
+                    public openParenToken: ISyntaxToken,
                     public condition: IExpressionSyntax,
-                    closeParenToken: ISyntaxToken,
-                    statement: IStatementSyntax,
+                    public closeParenToken: ISyntaxToken,
+                    public statement: IStatementSyntax,
                     parsedInStrictMode: boolean) {
-            super(openParenToken, closeParenToken, statement, parsedInStrictMode); 
+            super(parsedInStrictMode); 
 
         }
 
@@ -5707,6 +5772,18 @@ module TypeScript {
             case 4: return this.statement;
             default: throw Errors.invalidOperation();
         }
+    }
+
+    public isIterationStatement(): boolean {
+        return true;
+    }
+
+    public isStatement(): boolean {
+        return true;
+    }
+
+    public isModuleElement(): boolean {
+        return true;
     }
 
     public update(whileKeyword: ISyntaxToken,
@@ -6120,7 +6197,7 @@ module TypeScript {
     }
     }
 
-    export class ObjectLiteralExpressionSyntax extends SyntaxNode implements IUnaryExpressionSyntax {
+    export class ObjectLiteralExpressionSyntax extends SyntaxNode implements IPrimaryExpressionSyntax {
 
         constructor(public openBraceToken: ISyntaxToken,
                     public propertyAssignments: ISeparatedSyntaxList,
@@ -6149,6 +6226,18 @@ module TypeScript {
             case 2: return this.closeBraceToken;
             default: throw Errors.invalidOperation();
         }
+    }
+
+    public isPrimaryExpression(): boolean {
+        return true;
+    }
+
+    public isMemberExpression(): boolean {
+        return true;
+    }
+
+    public isPostfixExpression(): boolean {
+        return true;
     }
 
     public isUnaryExpression(): boolean {
@@ -6194,7 +6283,7 @@ module TypeScript {
         return this.update(this.openBraceToken, propertyAssignments, this.closeBraceToken);
     }
 
-    public withPropertyAssignment(propertyAssignment: PropertyAssignmentSyntax): ObjectLiteralExpressionSyntax {
+    public withPropertyAssignment(propertyAssignment: IPropertyAssignmentSyntax): ObjectLiteralExpressionSyntax {
         return this.withPropertyAssignments(Syntax.separatedList([propertyAssignment]));
     }
 
@@ -6208,32 +6297,13 @@ module TypeScript {
     }
     }
 
-    export class PropertyAssignmentSyntax extends SyntaxNode {
+    export class SimplePropertyAssignmentSyntax extends SyntaxNode implements IPropertyAssignmentSyntax {
+
         constructor(public propertyName: ISyntaxToken,
-                    parsedInStrictMode: boolean) {
-            super(parsedInStrictMode); 
-        }
-
-    public withLeadingTrivia(trivia: ISyntaxTriviaList): PropertyAssignmentSyntax {
-        return <PropertyAssignmentSyntax>super.withLeadingTrivia(trivia);
-    }
-
-    public withTrailingTrivia(trivia: ISyntaxTriviaList): PropertyAssignmentSyntax {
-        return <PropertyAssignmentSyntax>super.withTrailingTrivia(trivia);
-    }
-
-    public isTypeScriptSpecific(): boolean {
-        return false;
-    }
-    }
-
-    export class SimplePropertyAssignmentSyntax extends PropertyAssignmentSyntax {
-
-        constructor(propertyName: ISyntaxToken,
                     public colonToken: ISyntaxToken,
                     public expression: IExpressionSyntax,
                     parsedInStrictMode: boolean) {
-            super(propertyName, parsedInStrictMode); 
+            super(parsedInStrictMode); 
 
         }
 
@@ -6256,6 +6326,10 @@ module TypeScript {
             case 2: return this.expression;
             default: throw Errors.invalidOperation();
         }
+    }
+
+    public isPropertyAssignment(): boolean {
+        return true;
     }
 
     public update(propertyName: ISyntaxToken,
@@ -6299,13 +6373,13 @@ module TypeScript {
     }
     }
 
-    export class FunctionPropertyAssignmentSyntax extends PropertyAssignmentSyntax {
+    export class FunctionPropertyAssignmentSyntax extends SyntaxNode implements IPropertyAssignmentSyntax {
 
-        constructor(propertyName: ISyntaxToken,
+        constructor(public propertyName: ISyntaxToken,
                     public callSignature: CallSignatureSyntax,
                     public block: BlockSyntax,
                     parsedInStrictMode: boolean) {
-            super(propertyName, parsedInStrictMode); 
+            super(parsedInStrictMode); 
 
         }
 
@@ -6328,6 +6402,10 @@ module TypeScript {
             case 2: return this.block;
             default: throw Errors.invalidOperation();
         }
+    }
+
+    public isPropertyAssignment(): boolean {
+        return true;
     }
 
     public update(propertyName: ISyntaxToken,
@@ -6371,224 +6449,7 @@ module TypeScript {
     }
     }
 
-    export class AccessorPropertyAssignmentSyntax extends PropertyAssignmentSyntax {
-        constructor(propertyName: ISyntaxToken,
-                    public openParenToken: ISyntaxToken,
-                    public closeParenToken: ISyntaxToken,
-                    public block: BlockSyntax,
-                    parsedInStrictMode: boolean) {
-            super(propertyName, parsedInStrictMode); 
-        }
-
-    public withLeadingTrivia(trivia: ISyntaxTriviaList): AccessorPropertyAssignmentSyntax {
-        return <AccessorPropertyAssignmentSyntax>super.withLeadingTrivia(trivia);
-    }
-
-    public withTrailingTrivia(trivia: ISyntaxTriviaList): AccessorPropertyAssignmentSyntax {
-        return <AccessorPropertyAssignmentSyntax>super.withTrailingTrivia(trivia);
-    }
-
-    public isTypeScriptSpecific(): boolean {
-        return false;
-    }
-    }
-
-    export class GetAccessorPropertyAssignmentSyntax extends AccessorPropertyAssignmentSyntax {
-
-        constructor(public getKeyword: ISyntaxToken,
-                    propertyName: ISyntaxToken,
-                    openParenToken: ISyntaxToken,
-                    closeParenToken: ISyntaxToken,
-                    public typeAnnotation: TypeAnnotationSyntax,
-                    block: BlockSyntax,
-                    parsedInStrictMode: boolean) {
-            super(propertyName, openParenToken, closeParenToken, block, parsedInStrictMode); 
-
-        }
-
-    public accept(visitor: ISyntaxVisitor): any {
-        return visitor.visitGetAccessorPropertyAssignment(this);
-    }
-
-    public kind(): SyntaxKind {
-        return SyntaxKind.GetAccessorPropertyAssignment;
-    }
-
-    public childCount(): number {
-        return 6;
-    }
-
-    public childAt(slot: number): ISyntaxElement {
-        switch (slot) {
-            case 0: return this.getKeyword;
-            case 1: return this.propertyName;
-            case 2: return this.openParenToken;
-            case 3: return this.closeParenToken;
-            case 4: return this.typeAnnotation;
-            case 5: return this.block;
-            default: throw Errors.invalidOperation();
-        }
-    }
-
-    public update(getKeyword: ISyntaxToken,
-                  propertyName: ISyntaxToken,
-                  openParenToken: ISyntaxToken,
-                  closeParenToken: ISyntaxToken,
-                  typeAnnotation: TypeAnnotationSyntax,
-                  block: BlockSyntax): GetAccessorPropertyAssignmentSyntax {
-        if (this.getKeyword === getKeyword && this.propertyName === propertyName && this.openParenToken === openParenToken && this.closeParenToken === closeParenToken && this.typeAnnotation === typeAnnotation && this.block === block) {
-            return this;
-        }
-
-        return new GetAccessorPropertyAssignmentSyntax(getKeyword, propertyName, openParenToken, closeParenToken, typeAnnotation, block, /*parsedInStrictMode:*/ this.parsedInStrictMode());
-    }
-
-    public static create(getKeyword: ISyntaxToken,
-                         propertyName: ISyntaxToken,
-                         openParenToken: ISyntaxToken,
-                         closeParenToken: ISyntaxToken,
-                         block: BlockSyntax): GetAccessorPropertyAssignmentSyntax {
-        return new GetAccessorPropertyAssignmentSyntax(getKeyword, propertyName, openParenToken, closeParenToken, null, block, /*parsedInStrictMode:*/ false);
-    }
-
-    public static create1(propertyName: ISyntaxToken): GetAccessorPropertyAssignmentSyntax {
-        return new GetAccessorPropertyAssignmentSyntax(Syntax.token(SyntaxKind.GetKeyword), propertyName, Syntax.token(SyntaxKind.OpenParenToken), Syntax.token(SyntaxKind.CloseParenToken), null, BlockSyntax.create1(), /*parsedInStrictMode:*/ false);
-    }
-
-    public withLeadingTrivia(trivia: ISyntaxTriviaList): GetAccessorPropertyAssignmentSyntax {
-        return <GetAccessorPropertyAssignmentSyntax>super.withLeadingTrivia(trivia);
-    }
-
-    public withTrailingTrivia(trivia: ISyntaxTriviaList): GetAccessorPropertyAssignmentSyntax {
-        return <GetAccessorPropertyAssignmentSyntax>super.withTrailingTrivia(trivia);
-    }
-
-    public withGetKeyword(getKeyword: ISyntaxToken): GetAccessorPropertyAssignmentSyntax {
-        return this.update(getKeyword, this.propertyName, this.openParenToken, this.closeParenToken, this.typeAnnotation, this.block);
-    }
-
-    public withPropertyName(propertyName: ISyntaxToken): GetAccessorPropertyAssignmentSyntax {
-        return this.update(this.getKeyword, propertyName, this.openParenToken, this.closeParenToken, this.typeAnnotation, this.block);
-    }
-
-    public withOpenParenToken(openParenToken: ISyntaxToken): GetAccessorPropertyAssignmentSyntax {
-        return this.update(this.getKeyword, this.propertyName, openParenToken, this.closeParenToken, this.typeAnnotation, this.block);
-    }
-
-    public withCloseParenToken(closeParenToken: ISyntaxToken): GetAccessorPropertyAssignmentSyntax {
-        return this.update(this.getKeyword, this.propertyName, this.openParenToken, closeParenToken, this.typeAnnotation, this.block);
-    }
-
-    public withTypeAnnotation(typeAnnotation: TypeAnnotationSyntax): GetAccessorPropertyAssignmentSyntax {
-        return this.update(this.getKeyword, this.propertyName, this.openParenToken, this.closeParenToken, typeAnnotation, this.block);
-    }
-
-    public withBlock(block: BlockSyntax): GetAccessorPropertyAssignmentSyntax {
-        return this.update(this.getKeyword, this.propertyName, this.openParenToken, this.closeParenToken, this.typeAnnotation, block);
-    }
-
-    public isTypeScriptSpecific(): boolean {
-        if (this.typeAnnotation !== null && this.typeAnnotation.isTypeScriptSpecific()) { return true; }
-        if (this.block.isTypeScriptSpecific()) { return true; }
-        return false;
-    }
-    }
-
-    export class SetAccessorPropertyAssignmentSyntax extends AccessorPropertyAssignmentSyntax {
-
-        constructor(public setKeyword: ISyntaxToken,
-                    propertyName: ISyntaxToken,
-                    openParenToken: ISyntaxToken,
-                    public parameter: ParameterSyntax,
-                    closeParenToken: ISyntaxToken,
-                    block: BlockSyntax,
-                    parsedInStrictMode: boolean) {
-            super(propertyName, openParenToken, closeParenToken, block, parsedInStrictMode); 
-
-        }
-
-    public accept(visitor: ISyntaxVisitor): any {
-        return visitor.visitSetAccessorPropertyAssignment(this);
-    }
-
-    public kind(): SyntaxKind {
-        return SyntaxKind.SetAccessorPropertyAssignment;
-    }
-
-    public childCount(): number {
-        return 6;
-    }
-
-    public childAt(slot: number): ISyntaxElement {
-        switch (slot) {
-            case 0: return this.setKeyword;
-            case 1: return this.propertyName;
-            case 2: return this.openParenToken;
-            case 3: return this.parameter;
-            case 4: return this.closeParenToken;
-            case 5: return this.block;
-            default: throw Errors.invalidOperation();
-        }
-    }
-
-    public update(setKeyword: ISyntaxToken,
-                  propertyName: ISyntaxToken,
-                  openParenToken: ISyntaxToken,
-                  parameter: ParameterSyntax,
-                  closeParenToken: ISyntaxToken,
-                  block: BlockSyntax): SetAccessorPropertyAssignmentSyntax {
-        if (this.setKeyword === setKeyword && this.propertyName === propertyName && this.openParenToken === openParenToken && this.parameter === parameter && this.closeParenToken === closeParenToken && this.block === block) {
-            return this;
-        }
-
-        return new SetAccessorPropertyAssignmentSyntax(setKeyword, propertyName, openParenToken, parameter, closeParenToken, block, /*parsedInStrictMode:*/ this.parsedInStrictMode());
-    }
-
-    public static create1(propertyName: ISyntaxToken,
-                          parameter: ParameterSyntax): SetAccessorPropertyAssignmentSyntax {
-        return new SetAccessorPropertyAssignmentSyntax(Syntax.token(SyntaxKind.SetKeyword), propertyName, Syntax.token(SyntaxKind.OpenParenToken), parameter, Syntax.token(SyntaxKind.CloseParenToken), BlockSyntax.create1(), /*parsedInStrictMode:*/ false);
-    }
-
-    public withLeadingTrivia(trivia: ISyntaxTriviaList): SetAccessorPropertyAssignmentSyntax {
-        return <SetAccessorPropertyAssignmentSyntax>super.withLeadingTrivia(trivia);
-    }
-
-    public withTrailingTrivia(trivia: ISyntaxTriviaList): SetAccessorPropertyAssignmentSyntax {
-        return <SetAccessorPropertyAssignmentSyntax>super.withTrailingTrivia(trivia);
-    }
-
-    public withSetKeyword(setKeyword: ISyntaxToken): SetAccessorPropertyAssignmentSyntax {
-        return this.update(setKeyword, this.propertyName, this.openParenToken, this.parameter, this.closeParenToken, this.block);
-    }
-
-    public withPropertyName(propertyName: ISyntaxToken): SetAccessorPropertyAssignmentSyntax {
-        return this.update(this.setKeyword, propertyName, this.openParenToken, this.parameter, this.closeParenToken, this.block);
-    }
-
-    public withOpenParenToken(openParenToken: ISyntaxToken): SetAccessorPropertyAssignmentSyntax {
-        return this.update(this.setKeyword, this.propertyName, openParenToken, this.parameter, this.closeParenToken, this.block);
-    }
-
-    public withParameter(parameter: ParameterSyntax): SetAccessorPropertyAssignmentSyntax {
-        return this.update(this.setKeyword, this.propertyName, this.openParenToken, parameter, this.closeParenToken, this.block);
-    }
-
-    public withCloseParenToken(closeParenToken: ISyntaxToken): SetAccessorPropertyAssignmentSyntax {
-        return this.update(this.setKeyword, this.propertyName, this.openParenToken, this.parameter, closeParenToken, this.block);
-    }
-
-    public withBlock(block: BlockSyntax): SetAccessorPropertyAssignmentSyntax {
-        return this.update(this.setKeyword, this.propertyName, this.openParenToken, this.parameter, this.closeParenToken, block);
-    }
-
-    public isTypeScriptSpecific(): boolean {
-        if (this.parameter.isTypeScriptSpecific()) { return true; }
-        if (this.block.isTypeScriptSpecific()) { return true; }
-        return false;
-    }
-    }
-
-    export class FunctionExpressionSyntax extends SyntaxNode implements IUnaryExpressionSyntax {
+    export class FunctionExpressionSyntax extends SyntaxNode implements IPrimaryExpressionSyntax {
 
         constructor(public functionKeyword: ISyntaxToken,
                     public identifier: ISyntaxToken,
@@ -6619,6 +6480,18 @@ module TypeScript {
             case 3: return this.block;
             default: throw Errors.invalidOperation();
         }
+    }
+
+    public isPrimaryExpression(): boolean {
+        return true;
+    }
+
+    public isMemberExpression(): boolean {
+        return true;
+    }
+
+    public isPostfixExpression(): boolean {
+        return true;
     }
 
     public isUnaryExpression(): boolean {
@@ -7083,17 +6956,17 @@ module TypeScript {
     }
     }
 
-    export class DoStatementSyntax extends IterationStatementSyntax {
+    export class DoStatementSyntax extends SyntaxNode implements IIterationStatementSyntax {
 
         constructor(public doKeyword: ISyntaxToken,
-                    statement: IStatementSyntax,
+                    public statement: IStatementSyntax,
                     public whileKeyword: ISyntaxToken,
-                    openParenToken: ISyntaxToken,
+                    public openParenToken: ISyntaxToken,
                     public condition: IExpressionSyntax,
-                    closeParenToken: ISyntaxToken,
+                    public closeParenToken: ISyntaxToken,
                     public semicolonToken: ISyntaxToken,
                     parsedInStrictMode: boolean) {
-            super(openParenToken, closeParenToken, statement, parsedInStrictMode); 
+            super(parsedInStrictMode); 
 
         }
 
@@ -7120,6 +6993,18 @@ module TypeScript {
             case 6: return this.semicolonToken;
             default: throw Errors.invalidOperation();
         }
+    }
+
+    public isIterationStatement(): boolean {
+        return true;
+    }
+
+    public isStatement(): boolean {
+        return true;
+    }
+
+    public isModuleElement(): boolean {
+        return true;
     }
 
     public update(doKeyword: ISyntaxToken,
@@ -7187,7 +7072,7 @@ module TypeScript {
     export class TypeOfExpressionSyntax extends SyntaxNode implements IUnaryExpressionSyntax {
 
         constructor(public typeOfKeyword: ISyntaxToken,
-                    public expression: IExpressionSyntax,
+                    public expression: IUnaryExpressionSyntax,
                     parsedInStrictMode: boolean) {
             super(parsedInStrictMode); 
 
@@ -7222,7 +7107,7 @@ module TypeScript {
     }
 
     public update(typeOfKeyword: ISyntaxToken,
-                  expression: IExpressionSyntax): TypeOfExpressionSyntax {
+                  expression: IUnaryExpressionSyntax): TypeOfExpressionSyntax {
         if (this.typeOfKeyword === typeOfKeyword && this.expression === expression) {
             return this;
         }
@@ -7230,7 +7115,7 @@ module TypeScript {
         return new TypeOfExpressionSyntax(typeOfKeyword, expression, /*parsedInStrictMode:*/ this.parsedInStrictMode());
     }
 
-    public static create1(expression: IExpressionSyntax): TypeOfExpressionSyntax {
+    public static create1(expression: IUnaryExpressionSyntax): TypeOfExpressionSyntax {
         return new TypeOfExpressionSyntax(Syntax.token(SyntaxKind.TypeOfKeyword), expression, /*parsedInStrictMode:*/ false);
     }
 
@@ -7246,7 +7131,7 @@ module TypeScript {
         return this.update(typeOfKeyword, this.expression);
     }
 
-    public withExpression(expression: IExpressionSyntax): TypeOfExpressionSyntax {
+    public withExpression(expression: IUnaryExpressionSyntax): TypeOfExpressionSyntax {
         return this.update(this.typeOfKeyword, expression);
     }
 
@@ -7259,7 +7144,7 @@ module TypeScript {
     export class DeleteExpressionSyntax extends SyntaxNode implements IUnaryExpressionSyntax {
 
         constructor(public deleteKeyword: ISyntaxToken,
-                    public expression: IExpressionSyntax,
+                    public expression: IUnaryExpressionSyntax,
                     parsedInStrictMode: boolean) {
             super(parsedInStrictMode); 
 
@@ -7294,7 +7179,7 @@ module TypeScript {
     }
 
     public update(deleteKeyword: ISyntaxToken,
-                  expression: IExpressionSyntax): DeleteExpressionSyntax {
+                  expression: IUnaryExpressionSyntax): DeleteExpressionSyntax {
         if (this.deleteKeyword === deleteKeyword && this.expression === expression) {
             return this;
         }
@@ -7302,7 +7187,7 @@ module TypeScript {
         return new DeleteExpressionSyntax(deleteKeyword, expression, /*parsedInStrictMode:*/ this.parsedInStrictMode());
     }
 
-    public static create1(expression: IExpressionSyntax): DeleteExpressionSyntax {
+    public static create1(expression: IUnaryExpressionSyntax): DeleteExpressionSyntax {
         return new DeleteExpressionSyntax(Syntax.token(SyntaxKind.DeleteKeyword), expression, /*parsedInStrictMode:*/ false);
     }
 
@@ -7318,7 +7203,7 @@ module TypeScript {
         return this.update(deleteKeyword, this.expression);
     }
 
-    public withExpression(expression: IExpressionSyntax): DeleteExpressionSyntax {
+    public withExpression(expression: IUnaryExpressionSyntax): DeleteExpressionSyntax {
         return this.update(this.deleteKeyword, expression);
     }
 
@@ -7331,7 +7216,7 @@ module TypeScript {
     export class VoidExpressionSyntax extends SyntaxNode implements IUnaryExpressionSyntax {
 
         constructor(public voidKeyword: ISyntaxToken,
-                    public expression: IExpressionSyntax,
+                    public expression: IUnaryExpressionSyntax,
                     parsedInStrictMode: boolean) {
             super(parsedInStrictMode); 
 
@@ -7366,7 +7251,7 @@ module TypeScript {
     }
 
     public update(voidKeyword: ISyntaxToken,
-                  expression: IExpressionSyntax): VoidExpressionSyntax {
+                  expression: IUnaryExpressionSyntax): VoidExpressionSyntax {
         if (this.voidKeyword === voidKeyword && this.expression === expression) {
             return this;
         }
@@ -7374,7 +7259,7 @@ module TypeScript {
         return new VoidExpressionSyntax(voidKeyword, expression, /*parsedInStrictMode:*/ this.parsedInStrictMode());
     }
 
-    public static create1(expression: IExpressionSyntax): VoidExpressionSyntax {
+    public static create1(expression: IUnaryExpressionSyntax): VoidExpressionSyntax {
         return new VoidExpressionSyntax(Syntax.token(SyntaxKind.VoidKeyword), expression, /*parsedInStrictMode:*/ false);
     }
 
@@ -7390,7 +7275,7 @@ module TypeScript {
         return this.update(voidKeyword, this.expression);
     }
 
-    public withExpression(expression: IExpressionSyntax): VoidExpressionSyntax {
+    public withExpression(expression: IUnaryExpressionSyntax): VoidExpressionSyntax {
         return this.update(this.voidKeyword, expression);
     }
 

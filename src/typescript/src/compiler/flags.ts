@@ -13,84 +13,11 @@
 // limitations under the License.
 //
 
-///<reference path='typescript.ts' />
+///<reference path='references.ts' />
 
 module TypeScript {
-
     export function hasFlag(val: number, flag: number): boolean {
         return (val & flag) !== 0;
-    }
-
-    export function withoutFlag(val: number, flag: number): number {
-        return val & ~flag;
-    }
-
-    export enum ASTFlags {
-        None = 0,
-        SingleLine = 1 << 1,
-        OptionalName = 1 << 2,
-        TypeReference = 1 << 3,
-        EnumElement = 1 << 4,
-    }
-
-    export enum DeclFlags {
-        None = 0,
-        Exported = 1,
-        Private = 1 << 1,
-        Public = 1 << 2,
-        Ambient = 1 << 3,
-        Static = 1 << 4,
-    }
-
-    export enum ModuleFlags {
-        None = 0,
-        Exported = 1,
-        Private = 1 << 1,
-        Public = 1 << 2,
-        Ambient = 1 << 3,
-        Static = 1 << 4,
-        IsEnum = 1 << 7,
-        IsWholeFile = 1 << 8,
-        IsDynamic = 1 << 9,
-    }
-
-    export enum VariableFlags {
-        None = 0,
-        Exported = 1,
-        Private = 1 << 1,
-        Public = 1 << 2,
-        Ambient = 1 << 3,
-        Static = 1 << 4,
-        Property = 1 << 8,
-        ClassProperty = 1 << 11,
-        EnumElement = 1 << 13,
-        ForInVariable = 1 << 14,
-    }
-
-    export enum FunctionFlags {
-        None = 0,
-        Exported = 1,
-        Private = 1 << 1,
-        Public = 1 << 2,
-        Ambient = 1 << 3,
-        Static = 1 << 4,
-        GetAccessor = 1 << 5,
-        SetAccessor = 1 << 6,
-        Signature = 1 << 7,
-        Method = 1 << 8,
-        CallMember = 1 << 9,
-        ConstructMember = 1 << 10,
-        IsFatArrowFunction = 1 << 11,
-        IndexerMember = 1 << 12,
-        IsFunctionExpression = 1 << 13,
-        IsFunctionProperty = 1 << 14,       // function property in an object literal expression
-    }
-
-    export function ToDeclFlags(functionFlags: FunctionFlags) : DeclFlags;
-    export function ToDeclFlags(varFlags: VariableFlags) : DeclFlags;
-    export function ToDeclFlags(moduleFlags: ModuleFlags): DeclFlags;
-    export function ToDeclFlags(fncOrVarOrModuleFlags: any) {
-        return <DeclFlags>fncOrVarOrModuleFlags;
     }
 
     export enum TypeRelationshipFlags {

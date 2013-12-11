@@ -793,9 +793,9 @@ module Diff {
         constructor(private reportFileName: string) {
             var htmlTrailer = '</body></html>';
 
-            if (Environment.fileExists(this.reportFileName)) {
+            if (TypeScript.Environment.fileExists(this.reportFileName)) {
                 // Suck in the existing baseline if we have one.
-                this.reportContent = Environment.readFile(this.reportFileName).contents;
+                this.reportContent = TypeScript.Environment.readFile(this.reportFileName, /*codepage:*/ null).contents;
             } else {
                 // Otherwise, set the content to the default.
                 this.reportContent = HtmlBaselineReport.htmlLeader;
@@ -803,8 +803,8 @@ module Diff {
         }
 
         public reset(): void {
-            if (Environment.fileExists(this.reportFileName)) {
-                Environment.deleteFile(this.reportFileName);
+            if (TypeScript.Environment.fileExists(this.reportFileName)) {
+                TypeScript.Environment.deleteFile(this.reportFileName);
             }
 
             this.reportContent = HtmlBaselineReport.htmlLeader;
@@ -827,7 +827,7 @@ module Diff {
             this.reportContent += header + '<div class="code">' + diff.mergedHtml + '</div>' + '<hr>';
             this.reportContent += HtmlBaselineReport.htmlTrailer;
 
-            Environment.writeFile(this.reportFileName, this.reportContent, /*writeByteOrderMark:*/ false);
+            TypeScript.Environment.writeFile(this.reportFileName, this.reportContent, /*writeByteOrderMark:*/ false);
         }
     }
 }

@@ -37,11 +37,14 @@ module TypeScript {
 
         // Find the option record for the given string. Returns null if not found.
         private findOption(arg: string) {
+            var upperCaseArg = arg && arg.toUpperCase();
 
             for (var i = 0; i < this.options.length; i++) {
+                var current = this.options[i];
 
-                if (arg === this.options[i].short || arg === this.options[i].name) {
-                    return this.options[i];
+                if (upperCaseArg === (current.short && current.short.toUpperCase()) ||
+                    upperCaseArg === (current.name && current.name.toUpperCase())) {
+                    return current;
                 }
             }
 
@@ -59,7 +62,7 @@ module TypeScript {
             this.printVersion();
 
             var optionsWord = getLocalizedText(DiagnosticCode.options, null);
-            var fileWord = getLocalizedText(DiagnosticCode.file, null);
+            var fileWord = getLocalizedText(DiagnosticCode.file1, null);
             var tscSyntax = "tsc [" + optionsWord + "] [" + fileWord + " ..]";
             var syntaxHelp = getLocalizedText(DiagnosticCode.Syntax_0, [tscSyntax]);
             this.host.printLine(syntaxHelp);
@@ -232,7 +235,7 @@ module TypeScript {
 
                 if (match) {
                     if (match[1] === '@') {
-                        this.parseString(this.host.readFile(match[2]).contents);
+                        this.parseString(this.host.readFile(match[2], null).contents);
                     } else {
                         var arg = match[2];
                         var option = this.findOption(arg);
@@ -241,8 +244,15 @@ module TypeScript {
                             this.host.printLine(getDiagnosticMessage(DiagnosticCode.Unknown_option_0, [arg]));
                             this.host.printLine(getLocalizedText(DiagnosticCode.Use_the_0_flag_to_see_options, ["--help"]));
                         } else {
-                            if (!option.flag)
+                            if (!option.flag) {
                                 value = consume();
+                                if (value === undefined) {
+                                    // No value provided
+                                    this.host.printLine(getDiagnosticMessage(DiagnosticCode.Option_0_specified_without_1, [arg, getLocalizedText(option.type, null)]));
+                                    this.host.printLine(getLocalizedText(DiagnosticCode.Use_the_0_flag_to_see_options, ["--help"]));
+                                    continue;
+                                }
+                            }
 
                             option.set(value);
                         }

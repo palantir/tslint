@@ -15,7 +15,7 @@
 
 ///<reference path='formatting.ts' />
 
-module TypeScript.Formatting {
+module TypeScript.Services.Formatting {
     export class IndentationTrackingWalker extends SyntaxWalker {
         private _position: number = 0;
         private _parent: IndentationNodeContext = null;
@@ -191,8 +191,9 @@ module TypeScript.Formatting {
                 case SyntaxKind.FunctionDeclaration:
                 case SyntaxKind.FunctionExpression:
                 case SyntaxKind.MemberFunctionDeclaration:
-                case SyntaxKind.GetMemberAccessorDeclaration:
-                case SyntaxKind.SetMemberAccessorDeclaration:
+                case SyntaxKind.GetAccessor:
+                case SyntaxKind.SetAccessor:
+                case SyntaxKind.IndexMemberDeclaration:
                 case SyntaxKind.CatchClause:
                 // Statements introducing []
                 case SyntaxKind.ArrayLiteralExpression:

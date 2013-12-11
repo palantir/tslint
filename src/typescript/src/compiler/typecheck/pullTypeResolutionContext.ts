@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
 // See LICENSE.txt in the project root for complete license information.
 
-///<reference path='..\typescript.ts' />
+///<reference path='..\references.ts' />
 
 module TypeScript {
     export class CandidateInferenceInfo {
@@ -17,38 +17,56 @@ module TypeScript {
     }
 
     export class ArgumentInferenceContext {
-        public inferenceCache: any = {};
-        public candidateCache: any = {};
+        public inferenceCache: IBitMatrix = BitMatrix.getBitMatrix(/*allowUndefinedValues:*/ false);
+        public candidateCache: CandidateInferenceInfo[] = [];
+        public fixedParameterTypes: PullTypeSymbol[] = null;
+        public resolver: PullTypeResolver = null;
+        public argumentASTs: ISeparatedSyntaxList2 = null;
 
+
+        // When inferences are being performed at function call sites, use this overloads
+        constructor(resolver: PullTypeResolver, argumentASTs: ISeparatedSyntaxList2);
+
+        // during contextual instantiation, use this overload
+        constructor(resolver: PullTypeResolver, fixedParameterTypes: PullTypeSymbol[]);
+        constructor(resolver: PullTypeResolver, argumentsOrParameters: any) {
+            this.resolver = resolver;
+
+            if (argumentsOrParameters.nonSeparatorAt != undefined) {
+                this.argumentASTs = argumentsOrParameters;
+            }
+            else {
+                this.fixedParameterTypes = argumentsOrParameters;
+            }
+        }
 
         public alreadyRelatingTypes(objectType: PullTypeSymbol, parameterType: PullTypeSymbol) {
-            var comboID = objectType.pullSymbolIDString + "#" + parameterType.pullSymbolIDString;
-
-            if (this.inferenceCache[comboID]) {
+            if (this.inferenceCache.valueAt(objectType.pullSymbolID, parameterType.pullSymbolID)) {
                 return true;
             }
             else {
-                this.inferenceCache[comboID] = true;
+                this.inferenceCache.setValueAt(objectType.pullSymbolID, parameterType.pullSymbolID, true);
                 return false;
-            }            
+            }
         }
 
         public resetRelationshipCache() {
-            this.inferenceCache = {};
+            this.inferenceCache.release();
+            this.inferenceCache = BitMatrix.getBitMatrix(/*allowUndefinedValues:*/ false);
         }
 
         public addInferenceRoot(param: PullTypeParameterSymbol) {
-            var info = <CandidateInferenceInfo>this.candidateCache[param.pullSymbolIDString];
+            var info = this.candidateCache[param.pullSymbolID];
 
             if (!info) {
                 info = new CandidateInferenceInfo();
                 info.typeParameter = param;
-                this.candidateCache[param.pullSymbolIDString] = info;
-            }        
+                this.candidateCache[param.pullSymbolID] = info;
+            }
         }
 
-        public getInferenceInfo(param: PullTypeParameterSymbol) {
-            return <CandidateInferenceInfo>this.candidateCache[param.pullSymbolIDString];
+        public getInferenceInfo(param: PullTypeParameterSymbol): CandidateInferenceInfo {
+            return this.candidateCache[param.pullSymbolID];
         }
 
         public addCandidateForInference(param: PullTypeParameterSymbol, candidate: PullTypeSymbol, fix: boolean) {
@@ -66,18 +84,41 @@ module TypeScript {
             }
         }
 
-        public getInferenceCandidates(): any[] {
-            var inferenceCandidates: any[] = [];
-            var info: CandidateInferenceInfo;
-            var val: any;
+        public getInferenceArgumentCount(): number {
+            if (this.fixedParameterTypes) {
+                return this.fixedParameterTypes.length;
+            }
+            else {
+                return this.argumentASTs.nonSeparatorCount();
+            }
+        }
+
+        public getArgumentTypeSymbolAtIndex(i: number, context: PullTypeResolutionContext): PullTypeSymbol {
+
+            Debug.assert(i >= 0, "invalid inference argument position");
+
+            if (this.fixedParameterTypes && i < this.getInferenceArgumentCount()) {
+                return this.fixedParameterTypes[i];
+            }
+            else if (i < this.getInferenceArgumentCount()) {
+                return this.resolver.resolveAST(this.argumentASTs.nonSeparatorAt(i), true, context).type;
+            }
+
+            return null;
+        }
+
+        public getInferenceCandidates(): PullTypeSymbol[][] {
+            var inferenceCandidates: PullTypeSymbol[][] = [];
 
             for (var infoKey in this.candidateCache) {
-                info = <CandidateInferenceInfo>this.candidateCache[infoKey];
+                if (this.candidateCache.hasOwnProperty(infoKey)) {
+                    var info = this.candidateCache[infoKey];
 
-                for (var i = 0; i < info.inferenceCandidates.length; i++) {
-                    val = {};
-                    val[info.typeParameter.pullSymbolIDString] = info.inferenceCandidates[i];
-                    inferenceCandidates[inferenceCandidates.length] = val;
+                    for (var i = 0; i < info.inferenceCandidates.length; i++) {
+                        var val: PullTypeSymbol[] = [];
+                        val[info.typeParameter.pullSymbolID] = info.inferenceCandidates[i];
+                        inferenceCandidates.push(val);
+                    }
                 }
             }
 
@@ -85,8 +126,6 @@ module TypeScript {
         }
 
         public inferArgumentTypes(resolver: PullTypeResolver, context: PullTypeResolutionContext): { results: { param: PullTypeParameterSymbol; type: PullTypeSymbol; }[]; unfit: boolean; } {
-            var info: CandidateInferenceInfo = null;
-
             var collection: IPullTypeCollection;
 
             var bestCommonType: PullTypeSymbol;
@@ -96,36 +135,37 @@ module TypeScript {
             var unfit = false;
 
             for (var infoKey in this.candidateCache) {
-                info = <CandidateInferenceInfo>this.candidateCache[infoKey];
+                if (this.candidateCache.hasOwnProperty(infoKey)) {
+                    var info = this.candidateCache[infoKey];
 
-                if (!info.inferenceCandidates.length) {
-                    results[results.length] = { param: info.typeParameter, type: resolver.semanticInfoChain.anyTypeSymbol };
-                    continue;
-                }
-
-                collection = {
-                    getLength: () => { return info.inferenceCandidates.length; },
-                    setTypeAtIndex: (index: number, type: PullTypeSymbol) => { },
-                    getTypeAtIndex: (index: number) => {
-                        return info.inferenceCandidates[index].type;
+                    if (!info.inferenceCandidates.length) {
+                        results[results.length] = { param: info.typeParameter, type: null };
+                        continue;
                     }
-                };
 
-                bestCommonType = resolver.widenType(resolver.findBestCommonType(info.inferenceCandidates[0], null, collection, context, new TypeComparisonInfo()));
+                    collection = {
+                        getLength: () => { return info.inferenceCandidates.length; },
+                        getTypeAtIndex: (index: number) => {
+                            return info.inferenceCandidates[index].type;
+                        }
+                    };
 
-                if (!bestCommonType) {
-                    unfit = true;
-                }
-                else {
-                    // is there already a substitution for this type?
-                    for (var i = 0; i < results.length; i++) {
-                        if (results[i].type == info.typeParameter) {
-                            results[i].type = bestCommonType;
+                    bestCommonType = resolver.widenType(resolver.findBestCommonType(collection, context, new TypeComparisonInfo()));
+
+                    if (!bestCommonType) {
+                        unfit = true;
+                    }
+                    else {
+                        // is there already a substitution for this type?
+                        for (var i = 0; i < results.length; i++) {
+                            if (results[i].type == info.typeParameter) {
+                                results[i].type = bestCommonType;
+                            }
                         }
                     }
-                }
 
-                results[results.length] = { param: info.typeParameter, type: bestCommonType };
+                    results[results.length] = { param: info.typeParameter, type: bestCommonType };
+                }
             }
 
             return { results: results, unfit: unfit };
@@ -134,11 +174,12 @@ module TypeScript {
 
     export class PullContextualTypeContext {
         public provisionallyTypedSymbols: PullSymbol[] = [];
-        public provisionalDiagnostic: Diagnostic[] = [];
+        public hasProvisionalErrors = false;
+        private astSymbolMap: PullSymbol[] = []
 
         constructor(public contextualType: PullTypeSymbol,
-                     public provisional: boolean,
-                     public substitutions: any) { }
+                    public provisional: boolean,
+                    public substitutions: PullTypeSymbol[]) { }
 
         public recordProvisionallyTypedSymbol(symbol: PullSymbol) {
             this.provisionallyTypedSymbols[this.provisionallyTypedSymbols.length] = symbol;
@@ -146,47 +187,52 @@ module TypeScript {
 
         public invalidateProvisionallyTypedSymbols() {
             for (var i = 0; i < this.provisionallyTypedSymbols.length; i++) {
-                this.provisionallyTypedSymbols[i].invalidate();
+                this.provisionallyTypedSymbols[i].setUnresolved();
             }
         }
 
-        public postDiagnostic(error: Diagnostic) {
-            this.provisionalDiagnostic[this.provisionalDiagnostic.length] = error;
+        public setSymbolForAST(ast: AST, symbol: PullSymbol): void {
+            this.astSymbolMap[ast.syntaxID()] = symbol;
         }
 
-        public hadProvisionalErrors() {
-            return this.provisionalDiagnostic.length > 0;
+        public getSymbolForAST(ast: AST): PullSymbol {
+            return this.astSymbolMap[ast.syntaxID()];
         }
     }
 
     export class PullTypeResolutionContext {
         private contextStack: PullContextualTypeContext[] = [];
-        private typeSpecializationStack: any[] = [];
-        private genericASTResolutionStack: AST[] = [];
+        private typeCheckedNodes: IBitVector = null;
 
-        public resolvingTypeReference = false;
-        public resolvingNamespaceMemberAccess = false;
+        constructor(private resolver: PullTypeResolver, public inTypeCheck = false, public fileName: string = null) {
+            if (inTypeCheck) {
+                Debug.assert(fileName, "A file name must be provided if you are typechecking");
+                this.typeCheckedNodes = BitVector.getBitVector(/*allowUndefinedValues:*/ false);
+            }
+        }
 
-        public resolveAggressively = false;
+        public setTypeChecked(ast: AST): void {
+            if (!this.inProvisionalResolution()) {
+                this.typeCheckedNodes.setValueAt(ast.syntaxID(), true);
+            }
+        }
 
-        public canUseTypeSymbol = false;
+        public canTypeCheckAST(ast: AST): boolean {
+            // If we're in a context where we're type checking, and the ast we're typechecking
+            // hasn't been typechecked in this phase yet, *and* the ast is from the file we're
+            // currently typechecking, then we can typecheck.
+            //
+            // If the ast has been typechecked in this phase, then there's no need to typecheck
+            // it again.  Also, if it's from another file, there's no need to typecheck it since
+            // whatever host we're in will eventually get around to typechecking it.  This is 
+            // also important as it's very possible to stack overflow when typechecking if we 
+            // keep jumping around to AST nodes all around a large project.
+            return this.typeCheck() &&
+                !this.typeCheckedNodes.valueAt(ast.syntaxID()) &&
+                this.fileName === ast.fileName();
+        }
 
-        public specializingToAny = false;
-        public specializingToObject = false;
-        public isResolvingClassExtendedType = false; 
-        public isSpecializingSignatureAtCallSite = false;
-        public isSpecializingConstructorMethod = false;
-        public isComparingSpecializedSignatures = false;
-        public isResolvingSuperConstructorTarget = false;
-        public inConstructorArguments = false;
-        public inImportDeclaration = false;
-        public isInStaticInitializer = false;
-        public isInInvocationExpression = false;
-        public resolvingTypeNameAsNameExpression = false;
-
-        constructor(public inTypeCheck = false) { }
-
-        public pushContextualType(type: PullTypeSymbol, provisional: boolean, substitutions: any) {
+        public pushContextualType(type: PullTypeSymbol, provisional: boolean, substitutions: PullTypeSymbol[]) {
             this.contextStack.push(new PullContextualTypeContext(type, provisional, substitutions));
         }
 
@@ -195,7 +241,18 @@ module TypeScript {
 
             tc.invalidateProvisionallyTypedSymbols();
 
+            // If the context we just popped off had provisional errors, and we are *still* in a provisional context,
+            // we need to not forget that we had provisional errors in a deeper context. We do this by setting the 
+            // hasProvisioanlErrors flag on the now top context on the stack. 
+            if (tc.hasProvisionalErrors && this.inProvisionalResolution()) {
+                this.contextStack[this.contextStack.length - 1].hasProvisionalErrors = true;
+            }
+
             return tc;
+        }
+
+        public hasProvisionalErrors() {
+            return this.contextStack.length ? this.contextStack[this.contextStack.length - 1].hasProvisionalErrors : false;
         }
 
         public findSubstitution(type: PullTypeSymbol) {
@@ -204,7 +261,7 @@ module TypeScript {
             if (this.contextStack.length) {
                 for (var i = this.contextStack.length - 1; i >= 0; i--) {
                     if (this.contextStack[i].substitutions) {
-                        substitution = this.contextStack[i].substitutions[type.pullSymbolIDString];
+                        substitution = this.contextStack[i].substitutions[type.pullSymbolID];
 
                         if (substitution) {
                             break;
@@ -243,8 +300,6 @@ module TypeScript {
             return (!this.contextStack.length ? false : this.contextStack[this.contextStack.length - 1].provisional);
         }
 
-        public inSpecialization = false;
-        public suppressErrors = false;
         private inBaseTypeResolution = false;
 
         public isInBaseTypeResolution() { return this.inBaseTypeResolution; }
@@ -269,69 +324,40 @@ module TypeScript {
             }
         }
 
-        public pushTypeSpecializationCache(cache: any) {
-            this.typeSpecializationStack[this.typeSpecializationStack.length] = cache;
-        }
-
-        public popTypeSpecializationCache() {
-            if (this.typeSpecializationStack.length) {
-                this.typeSpecializationStack.length--;
-            }
-        }
-
-        public findSpecializationForType(type: PullTypeSymbol) {
-            var specialization: PullTypeSymbol = null;
-
-            for (var i = this.typeSpecializationStack.length - 1; i >= 0; i--) {
-                specialization = (this.typeSpecializationStack[i])[type.pullSymbolIDString];
-
-                if (specialization) {
-                    return specialization;
+        public postDiagnostic(diagnostic: Diagnostic): void {
+            if (diagnostic) {
+                if (this.inProvisionalResolution()) {
+                    (this.contextStack[this.contextStack.length - 1]).hasProvisionalErrors = true;
                 }
-            }
-
-            return type;
-        }
-
-        public postError(fileName: string, offset: number, length: number, diagnosticKey: string, arguments: any[], enclosingDecl: PullDecl, post=true): Diagnostic {
-            var diagnostic = new Diagnostic(fileName, offset, length, diagnosticKey, arguments);
-
-            if (post) {
-                this.postDiagnostic(diagnostic, enclosingDecl);
-            }
-
-            return diagnostic;
-        }
-
-        public postDiagnostic(diagnostic: Diagnostic, enclosingDecl: PullDecl): void {
-            if (this.inProvisionalResolution()) {
-                (this.contextStack[this.contextStack.length - 1]).postDiagnostic(diagnostic);
-            }
-            else if (this.inTypeCheck && !this.suppressErrors && enclosingDecl) {
-                enclosingDecl.addDiagnostic(diagnostic);
+                else if (this.inTypeCheck && this.resolver) {
+                    this.resolver.semanticInfoChain.addDiagnostic(diagnostic);
+                }
             }
         }
 
         public typeCheck() {
-            return this.inTypeCheck && !this.inSpecialization;
+            return this.inTypeCheck && !this.inProvisionalResolution();
         }
 
-        public startResolvingTypeArguments(ast: AST) {
-            this.genericASTResolutionStack[this.genericASTResolutionStack.length] = ast;
+        public setSymbolForAST(ast: AST, symbol: PullSymbol): void {
+            this.contextStack[this.contextStack.length - 1].setSymbolForAST(ast, symbol);
         }
 
-        public isResolvingTypeArguments(ast: AST): boolean {
-            for (var i = 0; i < this.genericASTResolutionStack.length; i++) {
-                if (this.genericASTResolutionStack[i].astID === ast.astID) {
-                    return true;
+        public getSymbolForAST(ast: AST): PullSymbol {
+            for (var i = this.contextStack.length - 1; i >= 0; i--) {
+                var typeContext = this.contextStack[i];
+                if (!typeContext.provisional) {
+                    // Only provisional contexts have caches
+                    break;
+                }
+
+                var symbol = typeContext.getSymbolForAST(ast);
+                if (symbol) {
+                    return symbol;
                 }
             }
 
-            return false;
-        }
-
-        public doneResolvingTypeArguments() {
-            this.genericASTResolutionStack.length--;
+            return null;
         }
     }
 }

@@ -65,12 +65,18 @@ module TypeScript {
     }
 
     export interface IModuleReferenceSyntax extends ISyntaxNode {
+        isModuleReference(): boolean;
     }
 
     export interface IModuleElementSyntax extends ISyntaxNode {
     }
 
     export interface IStatementSyntax extends IModuleElementSyntax {
+        isStatement(): boolean;
+    }
+
+    export interface IIterationStatementSyntax extends IStatementSyntax {
+        isIterationStatement(): boolean;
     }
 
     export interface ITypeMemberSyntax extends ISyntaxNode {
@@ -82,16 +88,44 @@ module TypeScript {
     export interface IMemberDeclarationSyntax extends IClassElementSyntax {
     }
 
+    export interface IPropertyAssignmentSyntax extends IClassElementSyntax {
+    }
+
     export interface ISwitchClauseSyntax extends ISyntaxNode {
+        isSwitchClause(): boolean;
+        statements: ISyntaxList;
     }
 
     export interface IExpressionSyntax extends ISyntaxNodeOrToken {
+        isExpression(): boolean;
+        withLeadingTrivia(trivia: ISyntaxTriviaList): IExpressionSyntax;
+        withTrailingTrivia(trivia: ISyntaxTriviaList): IExpressionSyntax;
     }
 
     export interface IUnaryExpressionSyntax extends IExpressionSyntax {
+        isUnaryExpression(): boolean;
     }
 
-    export interface ITypeSyntax extends IUnaryExpressionSyntax {
+    export interface IArrowFunctionExpressionSyntax extends IUnaryExpressionSyntax {
+        isArrowFunctionExpression(): boolean;
+        equalsGreaterThanToken: ISyntaxToken;
+        block: BlockSyntax;
+        expression: IExpressionSyntax;
+    }
+
+    export interface IPostfixExpressionSyntax extends IUnaryExpressionSyntax {
+        isPostfixExpression(): boolean;
+    }
+
+    export interface IMemberExpressionSyntax extends IPostfixExpressionSyntax {
+        isMemberExpression(): boolean;
+    }
+
+    export interface IPrimaryExpressionSyntax extends IMemberExpressionSyntax {
+        isPrimaryExpression(): boolean;
+    }
+
+    export interface ITypeSyntax extends ISyntaxNodeOrToken {
     }
 
     export interface INameSyntax extends ITypeSyntax {

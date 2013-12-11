@@ -15,7 +15,7 @@
 */
 
 /// <reference path='../../typescript/src/compiler/syntax/syntaxTree.ts'/>
-/// <reference path='../../typescript/src/compiler/text/linePosition.ts'/>
+/// <reference path='../../typescript/src/compiler/core/linePosition.ts'/>
 
 module Lint {
 

@@ -30,14 +30,14 @@ class NoDuplicateVariableWalker extends Lint.ScopeAwareRuleWalker<ScopeInfo> {
     }
 
     public visitVariableDeclarator(node: TypeScript.VariableDeclaratorSyntax): void {
-        var identifier = node.identifier,
-            variableName = identifier.text(),
-            position = this.position() + identifier.leadingTriviaWidth(),
+        var propertyName = node.propertyName,
+            variableName = propertyName.text(),
+            position = this.position() + propertyName.leadingTriviaWidth(),
             currentScope = this.getCurrentScope();
 
         if (currentScope.variableNames.indexOf(variableName) >= 0) {
             var failureString = Rule.FAILURE_STRING + variableName + "'";
-            this.addFailure(this.createFailure(position, identifier.width(), failureString));
+            this.addFailure(this.createFailure(position, propertyName.width(), failureString));
         } else {
             currentScope.variableNames.push(variableName);
         }

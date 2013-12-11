@@ -13,9 +13,9 @@
 // limitations under the License.
 //
 
-/// <references path="formatting.ts"/>
+/// <reference path="formatting.ts"/>
 
-module TypeScript.Formatting {
+module TypeScript.Services.Formatting {
     export enum FormattingRequestKind {
         FormatDocument,
         FormatSelection,

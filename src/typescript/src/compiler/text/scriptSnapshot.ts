@@ -24,6 +24,8 @@ module TypeScript {
 
     export module ScriptSnapshot {
         class StringScriptSnapshot implements IScriptSnapshot {
+            private _lineStartPositions: number[] = null;
+
             constructor(private text: string) {
             }
 
@@ -35,8 +37,12 @@ module TypeScript {
                 return this.text.length;
             }
 
-            public getLineStartPositions(): number[] {
-                return TextUtilities.parseLineStarts(SimpleText.fromString(this.text));
+            public getLineStartPositions(): number[]{
+                if (!this._lineStartPositions) {
+                    this._lineStartPositions = TextUtilities.parseLineStarts(this.text);
+                }
+
+                return this._lineStartPositions;
             }
 
             public getTextChangeRangeSinceVersion(scriptVersion: number): TypeScript.TextChangeRange {

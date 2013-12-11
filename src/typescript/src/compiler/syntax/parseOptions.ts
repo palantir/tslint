@@ -11,9 +11,10 @@ module TypeScript {
             this._allowAutomaticSemicolonInsertion = allowAutomaticSemicolonInsertion;
         }
 
+
         public toJSON(key: any) {
             return { allowAutomaticSemicolonInsertion: this._allowAutomaticSemicolonInsertion };
-        }
+         }
 
         public languageVersion(): LanguageVersion {
             return this._languageVersion;

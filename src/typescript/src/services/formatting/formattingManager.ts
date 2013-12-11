@@ -13,34 +13,34 @@
 // limitations under the License.
 //
 
-/// <references path="formatting.ts"/>
+/// <reference path="formatting.ts"/>
 
-module TypeScript.Formatting {
+module TypeScript.Services.Formatting {
     export class FormattingManager {
         private options: FormattingOptions;
 
-        constructor(private syntaxTree: SyntaxTree, private snapshot: ITextSnapshot, private rulesProvider: RulesProvider, editorOptions: Services.EditorOptions) {
+        constructor(private syntaxTree: SyntaxTree, private snapshot: ITextSnapshot, private rulesProvider: RulesProvider, editorOptions: TypeScript.Services.EditorOptions) {
             //
             // TODO: convert to use FormattingOptions instead of EditorOptions
             this.options = new FormattingOptions(!editorOptions.ConvertTabsToSpaces, editorOptions.TabSize, editorOptions.IndentSize, editorOptions.NewLineCharacter)
         }
 
-        public formatSelection(minChar: number, limChar: number): Services.TextEdit[] {
+        public formatSelection(minChar: number, limChar: number): TypeScript.Services.TextEdit[] {
             var span = TextSpan.fromBounds(minChar, limChar);
             return this.formatSpan(span, FormattingRequestKind.FormatSelection);
         }
 
-        public formatDocument(minChar: number, limChar: number): Services.TextEdit[] {
+        public formatDocument(minChar: number, limChar: number): TypeScript.Services.TextEdit[] {
             var span = TextSpan.fromBounds(minChar, limChar);
             return this.formatSpan(span, FormattingRequestKind.FormatDocument);
         }
 
-        public formatOnPaste(minChar: number, limChar: number): Services.TextEdit[] {
+        public formatOnPaste(minChar: number, limChar: number): TypeScript.Services.TextEdit[] {
             var span = TextSpan.fromBounds(minChar, limChar);
             return this.formatSpan(span, FormattingRequestKind.FormatOnPaste);
         }
 
-        public formatOnSemicolon(caretPosition: number): Services.TextEdit[] {
+        public formatOnSemicolon(caretPosition: number): TypeScript.Services.TextEdit[] {
             var sourceUnit = this.syntaxTree.sourceUnit();
             var semicolonPositionedToken = sourceUnit.findToken(caretPosition - 1);
 
@@ -63,7 +63,7 @@ module TypeScript.Formatting {
             return [];
         }
 
-        public formatOnClosingCurlyBrace(caretPosition: number): Services.TextEdit[] {
+        public formatOnClosingCurlyBrace(caretPosition: number): TypeScript.Services.TextEdit[] {
             var sourceUnit = this.syntaxTree.sourceUnit();
             var closeBracePositionedToken = sourceUnit.findToken(caretPosition - 1);
 
@@ -86,7 +86,7 @@ module TypeScript.Formatting {
             return [];
         }
 
-        public formatOnEnter(caretPosition: number): Services.TextEdit[] {
+        public formatOnEnter(caretPosition: number): TypeScript.Services.TextEdit[] {
             var lineNumber = this.snapshot.getLineNumberFromPosition(caretPosition);
 
             if (lineNumber > 0) {
@@ -103,19 +103,19 @@ module TypeScript.Formatting {
             return [];
         }
 
-        private formatSpan(span: TextSpan, formattingRequestKind: FormattingRequestKind): Services.TextEdit[] {
+        private formatSpan(span: TextSpan, formattingRequestKind: FormattingRequestKind): TypeScript.Services.TextEdit[] {
             // Always format from the beginning of the line
             var startLine = this.snapshot.getLineFromPosition(span.start());
             span = TextSpan.fromBounds(startLine.startPosition(), span.end());
 
-            var result: Services.TextEdit[] = [];
+            var result: TypeScript.Services.TextEdit[] = [];
 
             var formattingEdits = Formatter.getEdits(span, this.syntaxTree.sourceUnit(), this.options, true, this.snapshot, this.rulesProvider, formattingRequestKind);
 
             //
             // TODO: Change the ILanguageService interface to return TextEditInfo (with start, and length) instead of TextEdit (with minChar and limChar)
             formattingEdits.forEach((item) => {
-                var edit = new Services.TextEdit(item.position, item.position + item.length, item.replaceWith);
+                var edit = new TypeScript.Services.TextEdit(item.position, item.position + item.length, item.replaceWith);
                 result.push(edit);
             });
 

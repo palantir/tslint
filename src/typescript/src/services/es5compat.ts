@@ -88,14 +88,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 // Compatibility with non ES5 compliant engines
 if (!String.prototype.trim) {
-    (<any>String.prototype.trim) = function() {
+    String.prototype.trim = function() {
         return this.replace(/^\s+|\s+$/g, '');
     };
 }
 
 // Compatibility with non ES5 compliant engines
 if (!Array.prototype.indexOf) {
-    (<any>Array.prototype.indexOf) = function (searchElement: any, fromIndex?: any) {
+    Array.prototype.indexOf = function (searchElement: any, fromIndex?: any) {
         "use strict";
         if (this == null) {
             throw new TypeError();
@@ -129,7 +129,7 @@ if (!Array.prototype.indexOf) {
 
 if (!Array.prototype.filter)
 {
-  (<any>Array.prototype.filter) = function(fun: any, thisp?: any)
+  Array.prototype.filter = function(fun: any, thisp?: any)
   {
     "use strict";
  
@@ -159,7 +159,7 @@ if (!Array.prototype.filter)
 // Production steps of ECMA-262, Edition 5, 15.4.4.19
 // Reference: http://es5.github.com/#x15.4.4.19
 if (!Array.prototype.map) {
-  (<any>Array.prototype.map) = function(callback: any, thisArg?: any) {
+  Array.prototype.map = function(callback: any, thisArg?: any) {
  
     var T: any = undefined, A: any, k: any;
  
@@ -231,7 +231,7 @@ if (!Array.prototype.map) {
 }
 
 if (!Array.prototype.reduce) {
-  (<any>Array.prototype.reduce) = function reduce(accumulator: any){
+  Array.prototype.reduce = function reduce(accumulator: any){
     if (this===null || this===undefined) throw new TypeError("Object is null or undefined");
     var i = 0, l = this.length >> 0, curr: any;
  
@@ -259,8 +259,7 @@ if (!Array.prototype.reduce) {
 // Production steps of ECMA-262, Edition 5, 15.4.4.18
 // Reference: http://es5.github.com/#x15.4.4.18
 if (!Array.prototype.forEach) {
-
-    (<any>Array.prototype.forEach) = function(callback: any, thisArg?: any) {
+    Array.prototype.forEach = function(callback: any, thisArg?: any) {
 
       var T: any, k: any;
 
@@ -320,7 +319,7 @@ if (!Array.prototype.forEach) {
 
 // Compatibility with non ES5 compliant engines
 if (!Date.now) {
-    (<any>Date).now = function() {
+    Date.now = function() {
         return (new Date()).getTime();
     };
 }
@@ -329,7 +328,7 @@ if (!Date.now) {
 // Production steps of ECMA-262, Edition 5.1, 15.4.4.17
 if (!Array.prototype.some)
 {
-  (<any>Array.prototype.some) = function(fun: any /*, thisp */)
+  Array.prototype.some = function(fun: any /*, thisp */)
   {
     "use strict";
  

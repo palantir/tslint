@@ -13,58 +13,32 @@
 // limitations under the License.
 //
 
-///<reference path='resources\references.ts' />
-///<reference path='core\references.ts' />
-///<reference path='text\references.ts' />
-///<reference path='syntax\references.ts' />
-///<reference path='diagnostics.ts' />
-///<reference path='flags.ts' />
-///<reference path='nodeTypes.ts' />
-///<reference path='hashTable.ts' />
-///<reference path='ast.ts' />
-///<reference path='astWalker.ts' />
-///<reference path='astPath.ts' />
-///<reference path='base64.ts' />
-///<reference path='sourceMapping.ts' />
-///<reference path='emitter.ts' />
-///<reference path='types.ts' />
-///<reference path='pathUtils.ts' />
-///<reference path='referenceResolution.ts' />
-///<reference path='precompile.ts' />
-///<reference path='referenceResolver.ts' />
-///<reference path='declarationEmitter.ts' />
-///<reference path='bloomFilter.ts' />
-///<reference path='identifierWalker.ts' />
-///<reference path='typecheck\dataMap.ts' />
-///<reference path='typecheck\pullFlags.ts' />
-///<reference path='typecheck\pullDecls.ts' />
-///<reference path='typecheck\pullSymbols.ts' />
-///<reference path='typecheck\pullSymbolBindingContext.ts' />
-///<reference path='typecheck\pullTypeResolutionContext.ts' />
-///<reference path='typecheck\pullTypeResolution.ts' />
-///<reference path='typecheck\pullSemanticInfo.ts' />
-///<reference path='typecheck\pullDeclCollection.ts' />
-///<reference path='typecheck\pullSymbolBinder.ts' />
-///<reference path='typecheck\semanticDiagnostic.ts' />
-///<reference path='typecheck\pullHelpers.ts' />
-///<reference path='syntaxTreeToAstVisitor.ts' />
+///<reference path='references.ts' />
+
+if (Error) (<any>Error).stackTraceLimit = 1000;
 
 module TypeScript {
 
     declare var IO: any;
 
     export var fileResolutionTime = 0;
+    export var fileResolutionIOTime = 0;
+    export var fileResolutionScanImportsTime = 0;
+    export var fileResolutionImportFileSearchTime = 0;
+    export var fileResolutionGetDefaultLibraryTime = 0;
     export var sourceCharactersCompiled = 0;
     export var syntaxTreeParseTime = 0;
     export var syntaxDiagnosticsTime = 0;
     export var astTranslationTime = 0;
     export var typeCheckTime = 0;
 
+    export var compilerResolvePathTime = 0;
+    export var compilerDirectoryNameTime = 0;
+    export var compilerDirectoryExistsTime = 0;
+    export var compilerFileExistsTime = 0;
+
     export var emitTime = 0;
     export var emitWriteFileTime = 0;
-    export var emitDirectoryExistsTime = 0;
-    export var emitFileExistsTime = 0;
-    export var emitResolvePathTime = 0;
 
     export var declarationEmitTime = 0;
     export var declarationEmitIsExternallyVisibleTime = 0;
@@ -82,31 +56,9 @@ module TypeScript {
     export var ioHostCreateDirectoryStructureTime = 0;
     export var ioHostWriteFileTime = 0;
 
-    export interface EmitterIOHost {
-        // function that can even create a folder structure if needed
-        writeFile(path: string, contents: string, writeByteOrderMark: boolean): void;
-
-        // function to check if file exists on the disk
-        fileExists(path: string): boolean;
-
-        // Function to check if the directory exists on the disk
-        directoryExists(path: string): boolean;
-
-        // Resolves the path
-        resolvePath(path: string): string;
-    }
-
-    export interface PullTypeInfoAtPositionInfo {
-        symbol: PullSymbol;
-        ast: IAST;
-        enclosingScopeSymbol: PullSymbol;
-        candidateSignature: PullSignatureSymbol;
-        callSignatures: PullSignatureSymbol[];
-        isConstructorCall: boolean;
-    }
-
     export interface PullSymbolInfo {
         symbol: PullSymbol;
+        aliasSymbol: PullTypeAliasSymbol;
         ast: AST;
         enclosingScopeSymbol: PullSymbol;
     }
@@ -125,345 +77,172 @@ module TypeScript {
         enclosingScopeSymbol: PullSymbol;
     }
 
-    export class Document {
-        private _diagnostics: Diagnostic[] = null;
-        private _syntaxTree: SyntaxTree = null;
-        private _bloomFilter: BloomFilter = null;
-        public script: Script;
-        public lineMap: LineMap;
-
-        constructor(public fileName: string,
-                    private compilationSettings: CompilationSettings,
-                    private scriptSnapshot: IScriptSnapshot,
-                    public byteOrderMark: ByteOrderMark,
-                    public version: number,
-                    public isOpen: boolean,
-                    syntaxTree: SyntaxTree) {
-
-            if (isOpen) {
-                this._syntaxTree = syntaxTree;
-            }
-            else {
-                // Don't store the syntax tree for a closed file.
-                var start = new Date().getTime();
-                this._diagnostics = syntaxTree.diagnostics();
-                TypeScript.syntaxDiagnosticsTime += new Date().getTime() - start;
-            }
-
-            this.lineMap = syntaxTree.lineMap();
-
-            var start = new Date().getTime();
-            this.script = SyntaxTreeToAstVisitor.visit(syntaxTree, fileName, compilationSettings, isOpen);
-            TypeScript.astTranslationTime += new Date().getTime() - start;
-        }
-
-        public diagnostics(): Diagnostic[] {
-            if (this._diagnostics === null) {
-                this._diagnostics = this._syntaxTree.diagnostics();
-            }
-
-            return this._diagnostics;
-        }
-
-        public syntaxTree(): SyntaxTree {
-            if (this._syntaxTree) {
-                return this._syntaxTree;
-            }
-
-            return Parser.parse(
-                this.fileName,
-                SimpleText.fromScriptSnapshot(this.scriptSnapshot),
-                TypeScript.isDTSFile(this.fileName),
-                getParseOptions(this.compilationSettings));
-        }
-
-        public bloomFilter(): BloomFilter {
-            if (!this._bloomFilter) {
-                var identifiers: BlockIntrinsics = new BlockIntrinsics();
-                var pre = function (cur: TypeScript.AST, parent: TypeScript.AST, walker: IAstWalker) {
-                    if (isValidAstNode(cur)) {
-                        if (cur.nodeType() === NodeType.Name) {
-                            var nodeText = (<TypeScript.Identifier>cur).text();
-
-                            identifiers[nodeText] = true;
-                        }
-                    }
-
-                    return cur;
-                };
-
-                TypeScript.getAstWalkerFactory().walk(this.script, pre, null, null, identifiers);
-
-                var identifierCount = 0;
-                for (var name in identifiers) {
-                    if (identifiers[name]) {
-                        identifierCount++;
-                    }
-                }
-
-                this._bloomFilter = new BloomFilter(identifierCount);
-                this._bloomFilter.addKeys(identifiers);
-            }
-            return this._bloomFilter;
-        }
-
-        public update(scriptSnapshot: IScriptSnapshot, version: number, isOpen: boolean, textChangeRange: TextChangeRange, settings: CompilationSettings): Document {
-
-            var oldScript = this.script;
-            var oldSyntaxTree = this._syntaxTree;
-
-            var text = SimpleText.fromScriptSnapshot(scriptSnapshot);
-
-            // If we don't have a text change, or we don't have an old syntax tree, then do a full
-            // parse.  Otherwise, do an incremental parse.
-            var newSyntaxTree = textChangeRange === null || oldSyntaxTree === null
-                ? TypeScript.Parser.parse(this.fileName, text, TypeScript.isDTSFile(this.fileName), getParseOptions(this.compilationSettings))
-                : TypeScript.Parser.incrementalParse(oldSyntaxTree, textChangeRange, text);
-
-            return new Document(this.fileName, this.compilationSettings, scriptSnapshot, this.byteOrderMark, version, isOpen, newSyntaxTree);
-        }
-
-        public static create(fileName: string, scriptSnapshot: IScriptSnapshot, byteOrderMark: ByteOrderMark, version: number, isOpen: boolean, referencedFiles: string[], compilationSettings: CompilationSettings): Document {
-            // for an open file, make a syntax tree and a script, and store both around.
-            var start = new Date().getTime();
-            var syntaxTree = Parser.parse(fileName, SimpleText.fromScriptSnapshot(scriptSnapshot), TypeScript.isDTSFile(fileName), getParseOptions(compilationSettings));
-            TypeScript.syntaxTreeParseTime += new Date().getTime() - start;
-
-            var document = new Document(fileName, compilationSettings, scriptSnapshot, byteOrderMark, version, isOpen, syntaxTree);
-            document.script.referencedFiles = referencedFiles;
-
-            return document;
-        }
-
-        //public static fromClosed(fileName: string, scriptSnapshot: IScriptSnapshot, script: Script, syntaxTree: SyntaxTree): Document {
-        //    return new Document(fileName, scriptSnapshot, script, null, syntaxTree.diagnostics());
-        //}
+    export class EmitOutput {
+        public outputFiles: OutputFile[] = [];
+        public diagnostics: TypeScript.Diagnostic[] = [];
     }
 
-    export var globalSemanticInfoChain: SemanticInfoChain = null;
-    export var globalBinder: PullSymbolBinder = null;
-    export var globalLogger: ILogger = null;
+    export enum OutputFileType {
+        JavaScript,
+        SourceMap,
+        Declaration
+    }
 
-    export var useDirectTypeStorage = false;
+    export class OutputFile {
+        constructor(public name: string,
+            public writeByteOrderMark: boolean,
+            public text: string,
+            public fileType: OutputFileType,
+            public sourceMapEntries: SourceMapEntry[] = []) {
+        }
+    }
+
+    // Represents the results of the last "pull" on the compiler when using the streaming
+    // 'compile' method.  The compile result for a single pull can have diagnostics (if 
+    // something went wrong), and/or OutputFiles that need to get written.
+    export class CompileResult {
+        public diagnostics: Diagnostic[] = [];
+        public outputFiles: OutputFile[] = [];
+
+        public static fromDiagnostics(diagnostics: Diagnostic[]): CompileResult {
+            var result = new CompileResult();
+            result.diagnostics = diagnostics;
+            return result;
+        }
+
+        public static fromOutputFiles(outputFiles: OutputFile[]): CompileResult {
+            var result = new CompileResult();
+            result.outputFiles = outputFiles;
+            return result;
+        }
+    }
 
     export class TypeScriptCompiler {
-
-        public resolver: PullTypeResolver = null;
-
-        public semanticInfoChain: SemanticInfoChain = null;
-
-        public emitOptions: EmitOptions;
-
-        public fileNameToDocument = new TypeScript.StringHashTable<Document>();
+        private semanticInfoChain: SemanticInfoChain = null;
 
         constructor(public logger: ILogger = new NullLogger(),
-                    public settings: CompilationSettings = new CompilationSettings()) {
-            this.emitOptions = new EmitOptions(this.settings);
-            globalLogger = logger;
+                    private _settings: ImmutableCompilationSettings = ImmutableCompilationSettings.defaultSettings()) {
+            this.semanticInfoChain = new SemanticInfoChain(this, logger);
+        }
+
+        public compilationSettings(): ImmutableCompilationSettings {
+            return this._settings;
+        }
+
+        public setCompilationSettings(newSettings: ImmutableCompilationSettings) {
+            var oldSettings = this._settings;
+            this._settings = newSettings;
+
+            if (!compareDataObjects(oldSettings, newSettings)) {
+                // If our options have changed at all, we have to consider any cached semantic 
+                // data we have invalid.
+                this.semanticInfoChain.invalidate(oldSettings, newSettings);
+            }
         }
 
         public getDocument(fileName: string): Document {
-            return this.fileNameToDocument.lookup(TypeScript.switchToForwardSlashes(fileName));
+            fileName = TypeScript.switchToForwardSlashes(fileName);
+            return this.semanticInfoChain.getDocument(fileName);
         }
 
-        public timeFunction(funcDescription: string, func: () => any): any {
-            return TypeScript.timeFunction(this.logger, funcDescription, func);
+        public cleanupSemanticCache(): void {
+            this.semanticInfoChain.invalidate();
         }
 
-        public addSourceUnit(fileName: string,
+        public addFile(fileName: string,
             scriptSnapshot: IScriptSnapshot,
             byteOrderMark: ByteOrderMark,
             version: number,
             isOpen: boolean,
-            referencedFiles: string[]= []): Document {
+            referencedFiles: string[] = []): void {
 
             fileName = TypeScript.switchToForwardSlashes(fileName);
 
             TypeScript.sourceCharactersCompiled += scriptSnapshot.getLength();
 
-            var document = Document.create(fileName, scriptSnapshot, byteOrderMark, version, isOpen, referencedFiles, this.emitOptions.compilationSettings);
-            this.fileNameToDocument.addOrUpdate(fileName, document);
+            var document = Document.create(this, this.semanticInfoChain, fileName, scriptSnapshot, byteOrderMark, version, isOpen, referencedFiles);
 
-            return document;
+            this.semanticInfoChain.addDocument(document);
         }
 
-        public updateSourceUnit(fileName: string, scriptSnapshot: IScriptSnapshot, version: number, isOpen: boolean, textChangeRange: TextChangeRange): Document {
+        public updateFile(fileName: string, scriptSnapshot: IScriptSnapshot, version: number, isOpen: boolean, textChangeRange: TextChangeRange): void {
             fileName = TypeScript.switchToForwardSlashes(fileName);
-            return this.timeFunction("pullUpdateUnit(" + fileName + ")", () => {
-                var document = this.getDocument(fileName);
-                var updatedDocument = document.update(scriptSnapshot, version, isOpen, textChangeRange, this.settings);
 
-                this.fileNameToDocument.addOrUpdate(fileName, updatedDocument);
+            var document = this.getDocument(fileName);
+            var updatedDocument = document.update(scriptSnapshot, version, isOpen, textChangeRange);
 
-                this.pullUpdateScript(document, updatedDocument);
-
-                return updatedDocument;
-            });
+            // Note: the semantic info chain will recognize that this is a replacement of an
+            // existing script, and will handle it appropriately.
+            this.semanticInfoChain.addDocument(updatedDocument);
         }
 
-        private isDynamicModuleCompilation(): boolean {
-            var fileNames = this.fileNameToDocument.getAllKeys();
+        public removeFile(fileName: string): void {
+            fileName = TypeScript.switchToForwardSlashes(fileName);
+            this.semanticInfoChain.removeDocument(fileName);
+        }
+
+        public _isDynamicModuleCompilation(): boolean {
+            var fileNames = this.fileNames();
             for (var i = 0, n = fileNames.length; i < n; i++) {
                 var document = this.getDocument(fileNames[i]);
-                var script = document.script;
-                if (!script.isDeclareFile && script.topLevelMod !== null) {
+                if (!document.isDeclareFile() && document.isExternalModule()) {
                     return true;
                 }
             }
             return false;
         }
 
-        private updateCommonDirectoryPath(): Diagnostic {
-            var commonComponents: string[] = [];
-            var commonComponentsLength = -1;
-
-            var fileNames = this.fileNameToDocument.getAllKeys();
-            for (var i = 0, len = fileNames.length; i < len; i++) {
-                var fileName = fileNames[i];
-                var document = this.getDocument(fileNames[i]);
-                var script = document.script;
-
-                if (!script.isDeclareFile) {
-                    var fileComponents = filePathComponents(fileName);
-                    if (commonComponentsLength === -1) {
-                        // First time at finding common path
-                        // So common path = directory of file
-                        commonComponents = fileComponents;
-                        commonComponentsLength = commonComponents.length;
-                    } else {
-                        var updatedPath = false;
-                        for (var j = 0; j < commonComponentsLength && j < fileComponents.length; j++) {
-                            if (commonComponents[j] !== fileComponents[j]) {
-                                // The new components = 0 ... j -1
-                                commonComponentsLength = j;
-                                updatedPath = true;
-
-                                if (j === 0) {
-                                    if (this.emitOptions.compilationSettings.outDirOption || this.emitOptions.compilationSettings.sourceRoot) {
-                                        // Its error to not have common path
-                                        return new Diagnostic(null, 0, 0, DiagnosticCode.Cannot_find_the_common_subdirectory_path_for_the_input_files, null);
-                                    } else {
-                                        this.emitOptions.commonDirectoryPath = "";
-                                        return null;
-                                    }
-                                }
-
-                                break;
-                            }
-                        }
-
-                        // If the fileComponent path completely matched and less than already found update the length
-                        if (!updatedPath && fileComponents.length < commonComponentsLength) {
-                            commonComponentsLength = fileComponents.length;
-                        }
-                    }
+        public mapOutputFileName(document: Document, emitOptions: EmitOptions, extensionChanger: (fname: string, wholeFileNameReplaced: boolean) => string) {
+            if (document.emitToOwnOutputFile()) {
+                var updatedFileName = document.fileName;
+                if (emitOptions.outputDirectory() !== "") {
+                    // Replace the common directory path with the option specified
+                    updatedFileName = document.fileName.replace(emitOptions.commonDirectoryPath(), "");
+                    updatedFileName = emitOptions.outputDirectory() + updatedFileName;
                 }
-            }
-
-            this.emitOptions.commonDirectoryPath = commonComponents.slice(0, commonComponentsLength).join("/") + "/";
-            return null;
-        }
-
-        private convertToDirectoryPath(dirPath: string) {
-            if (dirPath && dirPath.charAt(dirPath.length - 1) !== "/") {
-                dirPath += "/";
-            }
-
-            return dirPath;
-        }
-
-        public setEmitOptions(ioHost: EmitterIOHost): Diagnostic {
-            this.emitOptions.ioHost = ioHost;
-
-            if (this.emitOptions.compilationSettings.moduleGenTarget === ModuleGenTarget.Unspecified && this.isDynamicModuleCompilation()) {
-                return new Diagnostic(null, 0, 0, DiagnosticCode.Cannot_compile_external_modules_unless_the_module_flag_is_provided, null);
-            }
-
-            if (!this.emitOptions.compilationSettings.mapSourceFiles) {
-                // Error to specify --mapRoot or --sourceRoot without mapSourceFiles
-                if (this.emitOptions.compilationSettings.mapRoot) {
-                    if (this.emitOptions.compilationSettings.sourceRoot) {
-                        return new Diagnostic(null, 0, 0, DiagnosticCode.Options_mapRoot_and_sourceRoot_cannot_be_specified_without_specifying_sourcemap_option, null);
-                    } else {
-                        return new Diagnostic(null, 0, 0, DiagnosticCode.Option_mapRoot_cannot_be_specified_without_specifying_sourcemap_option, null);
-                    }
-                } else if (this.emitOptions.compilationSettings.sourceRoot) {
-                    return new Diagnostic(null, 0, 0, DiagnosticCode.Option_sourceRoot_cannot_be_specified_without_specifying_sourcemap_option, null);
-                }
-            }
-
-            this.emitOptions.compilationSettings.mapRoot = this.convertToDirectoryPath(switchToForwardSlashes(this.emitOptions.compilationSettings.mapRoot));
-            this.emitOptions.compilationSettings.sourceRoot = this.convertToDirectoryPath(switchToForwardSlashes(this.emitOptions.compilationSettings.sourceRoot));
-
-            if (!this.emitOptions.compilationSettings.outFileOption && !this.emitOptions.compilationSettings.outDirOption && !this.emitOptions.compilationSettings.mapRoot && !this.emitOptions.compilationSettings.sourceRoot) {
-                this.emitOptions.outputMany = true;
-                this.emitOptions.commonDirectoryPath = "";
-                return null;
-            }
-
-            if (this.emitOptions.compilationSettings.outFileOption) {
-                this.emitOptions.compilationSettings.outFileOption = switchToForwardSlashes(this.emitOptions.ioHost.resolvePath(this.emitOptions.compilationSettings.outFileOption));
-                this.emitOptions.outputMany = false;
+                return extensionChanger(updatedFileName, false);
             } else {
-                this.emitOptions.outputMany = true;
-            } 
-
-            if (this.emitOptions.compilationSettings.outDirOption) {
-                this.emitOptions.compilationSettings.outDirOption = switchToForwardSlashes(this.emitOptions.ioHost.resolvePath(this.emitOptions.compilationSettings.outDirOption));
-                this.emitOptions.compilationSettings.outDirOption = this.convertToDirectoryPath(this.emitOptions.compilationSettings.outDirOption);
+                return extensionChanger(emitOptions.sharedOutputFile(), true);
             }
-           
-            // Parse the directory structure
-            if (this.emitOptions.compilationSettings.outDirOption || this.emitOptions.compilationSettings.mapRoot || this.emitOptions.compilationSettings.sourceRoot) {
-                return this.updateCommonDirectoryPath();
-            }
-
-            return null;
-        }
-
-        public getScripts(): Script[] {
-            var result: TypeScript.Script[] = [];
-            var fileNames = this.fileNameToDocument.getAllKeys();
-
-            for (var i = 0, n = fileNames.length; i < n; i++) {
-                var document = this.getDocument(fileNames[i]);
-                result.push(document.script);
-            }
-
-            return result;
-        }
-
-        public getDocuments(): Document[] {
-            var result: TypeScript.Document[] = [];
-            var fileNames = this.fileNameToDocument.getAllKeys();
-
-            for (var i = 0, n = fileNames.length; i < n; i++) {
-                var document = this.getDocument(fileNames[i]);
-                result.push(document);
-            }
-
-            return result;
         }
 
         private writeByteOrderMarkForDocument(document: Document) {
-            // If module its always emitted in its own file
-            if (this.emitOptions.outputMany || document.script.topLevelMod) {
-                return document.byteOrderMark !== ByteOrderMark.None;
-            } else {
-                var fileNames = this.fileNameToDocument.getAllKeys();
+            // Set this to 'true' if you want to know why the compiler emitted a document with a 
+            // byte order mark.
+            var printReason = false;
 
+            // If module its always emitted in its own file
+            if (document.emitToOwnOutputFile()) {
+                var result = document.byteOrderMark !== ByteOrderMark.None;
+                if (printReason) {
+                    Environment.standardOut.WriteLine("Emitting byte order mark because of: " + document.fileName);
+                }
+                return result;
+            }
+            else {
+                var fileNames = this.fileNames();
+
+                var result = false;
                 for (var i = 0, n = fileNames.length; i < n; i++) {
-                    if (document.script.topLevelMod) {
+                    var document = this.getDocument(fileNames[i]);
+
+                    if (document.isExternalModule()) {
                         // Dynamic module never contributes to the single file
                         continue;
                     }
-                    var document = this.getDocument(fileNames[i]);
+
                     if (document.byteOrderMark !== ByteOrderMark.None) {
-                        return true;
+                        if (printReason) {
+                            Environment.standardOut.WriteLine("Emitting byte order mark because of: " + document.fileName);
+                            result = true;
+                        }
+                        else {
+                            return true;
+                        }
                     }
                 }
 
-                return false;
+                return result;
             }
         }
 
@@ -471,105 +250,116 @@ module TypeScript {
             return getDeclareFilePath(fileName);
         }
 
-        private canEmitDeclarations(script?: Script) {
-            if (!this.settings.generateDeclarationFiles) {
-                return false;
-            }
-
+        public _shouldEmit(document: Document) {
             // If its already a declare file or is resident or does not contain body 
-            if (!!script && (script.isDeclareFile || script.moduleElements === null)) {
-                return false;
-            }
-
-            return true;
+            return !document.isDeclareFile();
         }
 
-        // Caller is responsible for closing emitter.
-        private emitDeclarations(document: Document, declarationEmitter?: DeclarationEmitter): DeclarationEmitter {
-            var script = document.script;
-            if (this.canEmitDeclarations(script)) {
-                if (declarationEmitter) {
-                    declarationEmitter.document = document;
-                } else {
-                    var declareFileName = this.emitOptions.mapOutputFileName(document, TypeScriptCompiler.mapToDTSFileName);
-                    declarationEmitter = new DeclarationEmitter(declareFileName, document, this);
-                }
-
-                declarationEmitter.emitDeclarations(script);
+        public _shouldEmitDeclarations(document: Document) {
+            if (!this.compilationSettings().generateDeclarationFiles()) {
+                return false;
             }
 
+            return this._shouldEmit(document);
+        }
+
+        // Does the actual work of emittin the declarations from the provided document into the
+        // provided emitter.  If no emitter is provided a new one is created.  
+        private emitDocumentDeclarationsWorker(
+            document: Document,
+            emitOptions: EmitOptions,
+            declarationEmitter?: DeclarationEmitter): DeclarationEmitter {
+
+            var sourceUnit = document.sourceUnit();
+            Debug.assert(this._shouldEmitDeclarations(document));
+
+            if (declarationEmitter) {
+                declarationEmitter.document = document;
+            } else {
+                var declareFileName = this.mapOutputFileName(document, emitOptions, TypeScriptCompiler.mapToDTSFileName);
+                declarationEmitter = new DeclarationEmitter(declareFileName, document, this, emitOptions, this.semanticInfoChain);
+            }
+
+            declarationEmitter.emitDeclarations(sourceUnit);
             return declarationEmitter;
         }
 
+        public _emitDocumentDeclarations(
+            document: Document,
+            emitOptions: EmitOptions,
+            onSingleFileEmitComplete: (files: OutputFile) => void,
+            sharedEmitter: DeclarationEmitter): DeclarationEmitter {
+
+            if (this._shouldEmitDeclarations(document)) {
+                if (document.emitToOwnOutputFile()) {
+                    var singleEmitter = this.emitDocumentDeclarationsWorker(document, emitOptions);
+                    if (singleEmitter) {
+                        onSingleFileEmitComplete(singleEmitter.getOutputFile());
+                    }
+                }
+                else {
+                    // Create or reuse file
+                    sharedEmitter = this.emitDocumentDeclarationsWorker(document, emitOptions, sharedEmitter);
+                }
+            }
+
+            return sharedEmitter;
+        }
+
         // Will not throw exceptions.
-        public emitAllDeclarations(): Diagnostic[] {
+        public emitAllDeclarations(resolvePath: (path: string) => string): EmitOutput {
             var start = new Date().getTime();
+            var emitOutput = new EmitOutput();
 
-            if (this.canEmitDeclarations()) {
-                var sharedEmitter: DeclarationEmitter = null;
-                var fileNames = this.fileNameToDocument.getAllKeys();
+            var emitOptions = new EmitOptions(this, resolvePath);
+            if (emitOptions.diagnostic()) {
+                emitOutput.diagnostics.push(emitOptions.diagnostic());
+                return emitOutput;
+            }
 
-                for (var i = 0, n = fileNames.length; i < n; i++) {
-                    var fileName = fileNames[i];
+            var sharedEmitter: DeclarationEmitter = null;
+            var fileNames = this.fileNames();
 
-                    try {
-                        var document = this.getDocument(fileNames[i]);
+            for (var i = 0, n = fileNames.length; i < n; i++) {
+                var fileName = fileNames[i];
 
-                        // Emitting module or multiple files, always goes to single file
-                        if (this.emitOptions.outputMany || document.script.topLevelMod) {
-                            var singleEmitter = this.emitDeclarations(document);
-                            if (singleEmitter) {
-                                singleEmitter.close();
-                            }
-                        }
-                        else {
-                            // Create or reuse file
-                            sharedEmitter = this.emitDeclarations(document, sharedEmitter);
-                        }
-                    }
-                    catch (ex1) {
-                        return Emitter.handleEmitterError(fileName, ex1);
-                    }
-                }
+                var document = this.getDocument(fileNames[i]);
 
-                if (sharedEmitter) {
-                    try {
-                        sharedEmitter.close();
-                    }
-                    catch (ex2) {
-                        return Emitter.handleEmitterError(sharedEmitter.document.fileName, ex2);
-                    }
-                }
+                sharedEmitter = this._emitDocumentDeclarations(document, emitOptions,
+                    file => emitOutput.outputFiles.push(file), sharedEmitter);
+            }
+
+            if (sharedEmitter) {
+                emitOutput.outputFiles.push(sharedEmitter.getOutputFile());
             }
 
             declarationEmitTime += new Date().getTime() - start;
 
-            return [];
+            return emitOutput;
         }
 
         // Will not throw exceptions.
-        public emitUnitDeclarations(fileName: string): Diagnostic[] {
-            if (this.canEmitDeclarations()) {
-                var document = this.getDocument(fileName);
-                // Emitting module or multiple files, always goes to single file
-                if (this.emitOptions.outputMany || document.script.topLevelMod) {
-                    try {
-                        var emitter = this.emitDeclarations(document);
-                        if (emitter) {
-                            emitter.close();
-                        }
-                    }
-                    catch (ex1) {
-                        return Emitter.handleEmitterError(fileName, ex1);
-                    }
-                }
-                else
-                {
-                    return this.emitAllDeclarations();
-                }
+        public emitDeclarations(fileName: string, resolvePath: (path: string) => string): EmitOutput {
+            fileName = TypeScript.switchToForwardSlashes(fileName);
+            var emitOutput = new EmitOutput();
+
+            var emitOptions = new EmitOptions(this, resolvePath);
+            if (emitOptions.diagnostic()) {
+                emitOutput.diagnostics.push(emitOptions.diagnostic());
+                return emitOutput;
             }
 
-            return [];
+            var document = this.getDocument(fileName);
+
+            // Emitting module or multiple files, always goes to single file
+            if (document.emitToOwnOutputFile()) {
+                this._emitDocumentDeclarations(document, emitOptions,
+                    file => emitOutput.outputFiles.push(file), /*sharedEmitter:*/ null);
+                return emitOutput;
+            }
+            else {
+                return this.emitAllDeclarations(resolvePath);
+            }
         }
 
         static mapToFileNameExtension(extension: string, fileName: string, wholeFileNameReplaced: boolean) {
@@ -590,54 +380,73 @@ module TypeScript {
 
         // Caller is responsible for closing the returned emitter.
         // May throw exceptions.
-        private emit(document: Document,
-                     inputOutputMapper?: (inputName: string, outputName: string) => void ,
-                     emitter?: Emitter): Emitter {
+        private emitDocumentWorker(document: Document, emitOptions: EmitOptions, emitter?: Emitter): Emitter {
+            var sourceUnit = document.sourceUnit();
+            Debug.assert(this._shouldEmit(document));
 
-            var script = document.script;
-            if (!script.isDeclareFile) {
-                var typeScriptFileName = document.fileName;
-                if (!emitter) {
-                    var javaScriptFileName = this.emitOptions.mapOutputFileName(document, TypeScriptCompiler.mapToJSFileName);
-                    var outFile = this.createFile(javaScriptFileName, this.writeByteOrderMarkForDocument(document));
+            var typeScriptFileName = document.fileName;
+            if (!emitter) {
+                var javaScriptFileName = this.mapOutputFileName(document, emitOptions, TypeScriptCompiler.mapToJSFileName);
+                var outFile = new TextWriter(javaScriptFileName, this.writeByteOrderMarkForDocument(document), OutputFileType.JavaScript);
 
-                    emitter = new Emitter(javaScriptFileName, outFile, this.emitOptions, this.semanticInfoChain);
+                emitter = new Emitter(javaScriptFileName, outFile, emitOptions, this.semanticInfoChain);
 
-                    if (this.settings.mapSourceFiles) {
-                        // We always create map files next to the jsFiles
-                        var sourceMapFile = this.createFile(javaScriptFileName + SourceMapper.MapFileExtension, /*writeByteOrderMark:*/ false); 
-                        var sourceMapSourceInfo = this.emitOptions.decodeSourceMapOptions(document, javaScriptFileName);
-                        emitter.setSourceMappings(new SourceMapper(outFile, sourceMapFile, sourceMapSourceInfo));
-                    }
-
-                    if (inputOutputMapper) {
-                        // Remember the name of the outfile for this source file
-                        inputOutputMapper(typeScriptFileName, javaScriptFileName);
-                    }
+                if (this.compilationSettings().mapSourceFiles()) {
+                    // We always create map files next to the jsFiles
+                    var sourceMapFile = new TextWriter(javaScriptFileName + SourceMapper.MapFileExtension, /*writeByteOrderMark:*/ false, OutputFileType.SourceMap); 
+                    emitter.createSourceMapper(document, javaScriptFileName, outFile, sourceMapFile, emitOptions.resolvePath);
                 }
-                else if (this.settings.mapSourceFiles) {
-                    var sourceMapSourceInfo = this.emitOptions.decodeSourceMapOptions(document, emitter.emittingFileName, emitter.sourceMapper.sourceMapSourceInfo);
-                    emitter.setSourceMappings(new SourceMapper(emitter.outfile, emitter.sourceMapper.sourceMapOut, sourceMapSourceInfo));
-                }
-
-                // Set location info
-                emitter.setDocument(document);
-                emitter.emitJavascript(script, /*startLine:*/false);
             }
+            else if (this.compilationSettings().mapSourceFiles()) {
+                // Already emitting into js file, update the mapper for new source info
+                emitter.setSourceMapperNewSourceFile(document);
+            }
+
+            // Set location info
+            emitter.setDocument(document);
+            emitter.emitJavascript(sourceUnit, /*startLine:*/false);
 
             return emitter;
         }
 
-        // Will not throw exceptions.
-        public emitAll(ioHost: EmitterIOHost, inputOutputMapper?: (inputFile: string, outputFile: string) => void ): Diagnostic[] {
-            var start = new Date().getTime();
+        // Private.  only for use by compiler or CompilerIterator
+        public _emitDocument(
+            document: Document,
+            emitOptions: EmitOptions,
+            onSingleFileEmitComplete: (files: OutputFile[]) => void,
+            sharedEmitter: Emitter): Emitter {
 
-            var optionsDiagnostic = this.setEmitOptions(ioHost);
-            if (optionsDiagnostic) {
-                return [optionsDiagnostic];
+            // Emitting module or multiple files, always goes to single file
+                if (this._shouldEmit(document)) {
+                if (document.emitToOwnOutputFile()) {
+                    // We're outputting to mulitple files.  We don't want to reuse an emitter in that case.
+                    var singleEmitter = this.emitDocumentWorker(document, emitOptions);
+                    if (singleEmitter) {
+                        onSingleFileEmitComplete(singleEmitter.getOutputFiles());
+                    }
+                }
+                else {
+                    // We're not outputting to multiple files.  Keep using the same emitter and don't
+                    // close until below.
+                    sharedEmitter = this.emitDocumentWorker(document, emitOptions, sharedEmitter);
+                }
             }
 
-            var fileNames = this.fileNameToDocument.getAllKeys();
+            return sharedEmitter;
+        }
+
+        // Will not throw exceptions.
+        public emitAll(resolvePath: (path: string) => string): EmitOutput {
+            var start = new Date().getTime();
+            var emitOutput = new EmitOutput();
+
+            var emitOptions = new EmitOptions(this, resolvePath);
+            if (emitOptions.diagnostic()) {
+                emitOutput.diagnostics.push(emitOptions.diagnostic());
+                return emitOutput;
+            }
+
+            var fileNames = this.fileNames();
             var sharedEmitter: Emitter = null;
 
             // Iterate through the files, as long as we don't get an error.
@@ -646,98 +455,62 @@ module TypeScript {
 
                 var document = this.getDocument(fileName);
 
-                try {
-                    // Emitting module or multiple files, always goes to single file
-                    if (this.emitOptions.outputMany || document.script.topLevelMod) {
-                        // We're outputting to mulitple files.  We don't want to reuse an emitter in that case.
-                        var singleEmitter = this.emit(document, inputOutputMapper);
-
-                        // Close the emitter after each emitted file.
-                        if (singleEmitter) {
-                            singleEmitter.emitSourceMapsAndClose();
-                        }
-                    }
-                    else {
-                        // We're not outputting to multiple files.  Keep using the same emitter and don't
-                        // close until below.
-                        sharedEmitter = this.emit(document, inputOutputMapper, sharedEmitter);
-                    }
-                }
-                catch (ex1) {
-                    return Emitter.handleEmitterError(fileName, ex1);
-                }
+                sharedEmitter = this._emitDocument(document, emitOptions,
+                    files => emitOutput.outputFiles.push.apply(emitOutput.outputFiles, files),
+                    sharedEmitter);
             }
 
             if (sharedEmitter) {
-                try {
-                    sharedEmitter.emitSourceMapsAndClose();
-                }
-                catch (ex2) {
-                    return Emitter.handleEmitterError(sharedEmitter.document.fileName, ex2);
-                }
+                emitOutput.outputFiles.push.apply(emitOutput.outputFiles, sharedEmitter.getOutputFiles());
             }
 
             emitTime += new Date().getTime() - start;
-            return [];
+            return emitOutput;
         }
 
         // Emit single file if outputMany is specified, else emit all
         // Will not throw exceptions.
-        public emitUnit(fileName: string, ioHost: EmitterIOHost, inputOutputMapper?: (inputFile: string, outputFile: string) => void ): Diagnostic[] {
-            var optionsDiagnostic = this.setEmitOptions(ioHost);
-            if (optionsDiagnostic) {
-                return [optionsDiagnostic];
+        public emit(fileName: string, resolvePath: (path: string) => string): EmitOutput {
+            fileName = TypeScript.switchToForwardSlashes(fileName);
+            var emitOutput = new EmitOutput();
+
+            var emitOptions = new EmitOptions(this, resolvePath);
+            if (emitOptions.diagnostic()) {
+                emitOutput.diagnostics.push(emitOptions.diagnostic());
+                return emitOutput;
             }
 
             var document = this.getDocument(fileName);
             // Emitting module or multiple files, always goes to single file
-            if (this.emitOptions.outputMany || document.script.topLevelMod) {
-                // In outputMany mode, only emit the document specified and its sourceMap if needed
-                try {
-                    var emitter = this.emit(document, inputOutputMapper);
-
-                    // Close the emitter
-                    if (emitter) {
-                        emitter.emitSourceMapsAndClose();
-                    }
-                }
-                catch (ex1) {
-                    return Emitter.handleEmitterError(fileName, ex1);
-                }
-
-                return [];
+            if (document.emitToOwnOutputFile()) {
+                this._emitDocument(document, emitOptions,
+                    files => emitOutput.outputFiles.push.apply(emitOutput.outputFiles, files), /*sharedEmitter:*/ null);
+                return emitOutput;
             }
             else {
                 // In output Single file mode, emit everything
-                return this.emitAll(ioHost, inputOutputMapper);
+                return this.emitAll(resolvePath);
             }
         }
 
-        private createFile(fileName: string, writeByteOrderMark: boolean): ITextWriter {
-            return new TextWriter(this.emitOptions.ioHost, fileName, writeByteOrderMark);
+        // Returns an iterator that will stream compilation results from this compiler.  Syntactic
+        // diagnostics will be returned first, then semantic diagnostics, then emit results, then
+        // declaration emit results.
+        //
+        // The continueOnDiagnostics flag governs whether or not iteration follows the batch compiler
+        // logic and doesn't perform further analysis once diagnostics are produced.  For example,
+        // in batch compilation nothing is done if there are any syntactic diagnostics.  Clients
+        // can override this if they still want to procede in those cases.
+        public compile(resolvePath: (path: string) => string, continueOnDiagnostics = false): Iterator<CompileResult> {
+            return new CompilerIterator(this, resolvePath, continueOnDiagnostics);
         }
 
         //
         // Pull typecheck infrastructure
         //
 
-        public pullResolveFile(fileName: string): boolean {
-
-
-            var unit = this.semanticInfoChain.getUnit(fileName);
-
-            if (!unit) {
-                return false;
-            }
-
-            this.setUnit(fileName);
-
-            this.resolver.resolveBoundDecls(unit.getTopLevelDecls()[0], new PullTypeResolutionContext());
-
-            return true;
-        }
-
-        public getSyntacticDiagnostics(fileName: string): Diagnostic[]{
+        public getSyntacticDiagnostics(fileName: string): Diagnostic[] {
+            fileName = TypeScript.switchToForwardSlashes(fileName)
             return this.getDocument(fileName).diagnostics();
         }
 
@@ -745,531 +518,157 @@ module TypeScript {
         private getSyntaxTree(fileName: string): SyntaxTree {
             return this.getDocument(fileName).syntaxTree();
         }
-        private getScript(fileName: string): Script {
-            return this.getDocument(fileName).script;
+
+        private getSourceUnit(fileName: string): SourceUnit {
+            return this.getDocument(fileName).sourceUnit();
         }
 
         public getSemanticDiagnostics(fileName: string): Diagnostic[] {
-            var errors: Diagnostic[] = [];
-            var unit = this.semanticInfoChain.getUnit(fileName);
+            fileName = TypeScript.switchToForwardSlashes(fileName);
 
-            globalSemanticInfoChain = this.semanticInfoChain;
-            if (globalBinder) {
-                globalBinder.semanticInfoChain = this.semanticInfoChain;
-            }
+            var document = this.getDocument(fileName);
 
-            if (unit) {
-                var document = this.getDocument(fileName);
-                var script = document.script;
+            var startTime = (new Date()).getTime();
+            PullTypeResolver.typeCheck(this.compilationSettings(), this.semanticInfoChain, document)
+            var endTime = (new Date()).getTime();
 
-                if (script) {
-                    var startTime = (new Date()).getTime();
-                    PullTypeResolver.typeCheck(this.settings, this.semanticInfoChain, fileName, script)
-                    var endTime = (new Date()).getTime();
+            typeCheckTime += endTime - startTime;
 
-                    typeCheckTime += endTime - startTime;
+            var errors = this.semanticInfoChain.getDiagnostics(fileName);
 
-                    unit.getDiagnostics(errors);
+            errors = ArrayUtilities.distinct(errors, Diagnostic.equals);
+            errors.sort((d1, d2) => {
+                if (d1.fileName() < d2.fileName()) {
+                    return -1;
                 }
-            }
+                else if (d1.fileName() > d2.fileName()) {
+                    return 1;
+                }
+
+                if (d1.start() < d2.start()) {
+                    return -1;
+                }
+                else if (d1.start() > d2.start()) {
+                    return 1;
+                }
+
+                // For multiple errors reported on the same file at the same position.
+                var code1 = diagnosticInformationMap[d1.diagnosticKey()].code;
+                var code2 = diagnosticInformationMap[d2.diagnosticKey()].code;
+                if (code1 < code2) {
+                    return -1;
+                }
+                else if (code1 > code2) {
+                    return 1;
+                }
+
+                return 0;
+            });
 
             return errors;
         }
 
         public resolveAllFiles() {
-            var fileNames = this.fileNameToDocument.getAllKeys();
+            var fileNames = this.fileNames();
             for (var i = 0, n = fileNames.length; i < n; i++) {
                 this.getSemanticDiagnostics(fileNames[i]);
             }
-        }
-
-        public setUnit(unitPath: string) {
-            if (!this.resolver) {
-                this.resolver = new PullTypeResolver(this.settings, this.semanticInfoChain, unitPath);
-            }
-
-            this.resolver.setUnitPath(unitPath);
-        }
-
-        public pullTypeCheck() {
-            var start = new Date().getTime();
-
-            this.semanticInfoChain = new SemanticInfoChain();
-            globalSemanticInfoChain = this.semanticInfoChain;
-
-            if (this.resolver) {
-                this.resolver.semanticInfoChain = this.semanticInfoChain;
-            }
-
-            var declCollectionContext: DeclCollectionContext = null;
-            var i: number, n: number;
-
-            var createDeclsStartTime = new Date().getTime();
-
-            var fileNames = this.fileNameToDocument.getAllKeys();
-            var n = fileNames.length;
-            for (var i = 0; i < n; i++) {
-                var fileName = fileNames[i];
-                var document = this.getDocument(fileName);
-                var semanticInfo = new SemanticInfo(fileName);
-
-                declCollectionContext = new DeclCollectionContext(semanticInfo, fileName);
-
-                // create decls
-                getAstWalkerFactory().walk(document.script, preCollectDecls, postCollectDecls, null, declCollectionContext);
-
-                semanticInfo.addTopLevelDecl(declCollectionContext.getParent());
-
-                this.semanticInfoChain.addUnit(semanticInfo);
-            }
-
-            var createDeclsEndTime = new Date().getTime();
-
-            // bind declaration symbols
-            var bindStartTime = new Date().getTime();
-
-            var binder = new PullSymbolBinder(this.semanticInfoChain);
-            globalBinder = binder;
-
-            // start at '1', so as to skip binding for global primitives such as 'any'
-            for (var i = 1; i < this.semanticInfoChain.units.length; i++) {
-                binder.bindDeclsForUnit(this.semanticInfoChain.units[i].getPath());
-            }
-
-            var bindEndTime = new Date().getTime();
-
-            this.logger.log("Decl creation: " + (createDeclsEndTime - createDeclsStartTime));
-            this.logger.log("Binding: " + (bindEndTime - bindStartTime));
-            this.logger.log("    Time in findSymbol: " + time_in_findSymbol);
-            this.logger.log("Number of symbols created: " + pullSymbolID);
-            this.logger.log("Number of specialized types created: " + nSpecializationsCreated);
-            this.logger.log("Number of specialized signatures created: " + nSpecializedSignaturesCreated);
-        }
-
-        private pullUpdateScript(oldDocument: Document, newDocument: Document): void {
-            this.timeFunction("pullUpdateScript: ", () => {
-
-                var oldScript = oldDocument.script;
-                var newScript = newDocument.script;
-                
-                // want to name the new script semantic info the same as the old one
-                var newScriptSemanticInfo = new SemanticInfo(oldDocument.fileName);
-                var oldScriptSemanticInfo = this.semanticInfoChain.getUnit(oldDocument.fileName);
-
-                lastBoundPullDeclId = pullDeclID;
-
-                var declCollectionContext = new DeclCollectionContext(newScriptSemanticInfo, oldDocument.fileName);
-
-                // create decls
-                getAstWalkerFactory().walk(newScript, preCollectDecls, postCollectDecls, null, declCollectionContext);
-
-                var oldTopLevelDecl = oldScriptSemanticInfo.getTopLevelDecls()[0];
-                var newTopLevelDecl = declCollectionContext.getParent();
-
-                newScriptSemanticInfo.addTopLevelDecl(newTopLevelDecl);
-
-                // If we havne't yet created a new resolver, clean any cached symbols
-                if (this.resolver) {
-                    this.resolver.cleanCachedGlobals();
-                }
-
-                // replace the old semantic info               
-                this.semanticInfoChain.updateUnit(oldScriptSemanticInfo, newScriptSemanticInfo);
-
-                this.logger.log("Cleaning symbols...");
-                var cleanStart = new Date().getTime();
-                this.semanticInfoChain.update();
-                var cleanEnd = new Date().getTime();
-                this.logger.log("   time to clean: " +(cleanEnd - cleanStart));
-
-                // reset the resolver's current unit, since we've replaced those decls they won't
-                // be cleaned
-                if (this.resolver) {
-                    this.resolver.setUnitPath(oldDocument.fileName);
-                }
-            } );
         }
 
         public getSymbolOfDeclaration(decl: PullDecl): PullSymbol {
             if (!decl) {
                 return null;
             }
-            var ast = this.resolver.getASTForDecl(decl);
+
+            var resolver = this.semanticInfoChain.getResolver();
+            var ast = this.semanticInfoChain.getASTForDecl(decl);
             if (!ast) {
                 return null;
             }
-            var enlosingDecl = this.resolver.getEnclosingDecl(decl);
-            if (ast.nodeType() === NodeType.Member) {
-                return this.getSymbolOfDeclaration(enlosingDecl);
-            }
-            var resolutionContext = new PullTypeResolutionContext();
-            return this.resolver.resolveAST(ast, /*inContextuallyTypedAssignment:*/false, enlosingDecl, resolutionContext);
-        }
 
-        public resolvePosition(pos: number, document: Document): PullTypeInfoAtPositionInfo {
-
-            // find the enclosing decl
-            var declStack: PullDecl[] = [];
-            var resultASTs: AST[] = [];
-            var script = document.script;
-            var scriptName = document.fileName;
-
-            var semanticInfo = this.semanticInfoChain.getUnit(scriptName);
-            var lastDeclAST: AST = null;
-            var foundAST: AST = null;
-            var symbol: PullSymbol = null;
-            var candidateSignature: PullSignatureSymbol = null;
-            var callSignatures: PullSignatureSymbol[] = null;
-
-            // these are used to track intermediate nodes so that we can properly apply contextual types
-            var lambdaAST: FunctionDeclaration = null;
-            var declarationInitASTs: VariableDeclarator[] = [];
-            var objectLitAST: UnaryExpression = null;
-            var asgAST: BinaryExpression = null;
-            var typeAssertionASTs: UnaryExpression[] = [];
-            var resolutionContext = new PullTypeResolutionContext();
-            var inTypeReference = false;
-            var enclosingDecl: PullDecl = null;
-            var isConstructorCall = false;
-
-            globalSemanticInfoChain = this.semanticInfoChain;
-            if (globalBinder) {
-                globalBinder.semanticInfoChain = this.semanticInfoChain;
-            }            
-
-            var pre = (cur: AST, parent: AST): AST => {
-                if (isValidAstNode(cur)) {
-                    if (pos >= cur.minChar && pos <= cur.limChar) {
-
-                        var previous = resultASTs[resultASTs.length - 1];
-
-                        if (previous === undefined || (cur.minChar >= previous.minChar && cur.limChar <= previous.limChar)) {
-
-                            var decl = semanticInfo.getDeclForAST(cur);
-
-                            if (decl) {
-                                declStack[declStack.length] = decl;
-                                lastDeclAST = cur;
-                            }
-
-                            if (cur.nodeType() === NodeType.FunctionDeclaration && hasFlag((<FunctionDeclaration>cur).getFunctionFlags(), FunctionFlags.IsFunctionExpression)) {
-                                lambdaAST = <FunctionDeclaration>cur;
-                            }
-                            else if (cur.nodeType() === NodeType.VariableDeclarator) {
-                                declarationInitASTs[declarationInitASTs.length] = <VariableDeclarator>cur;
-                            }
-                            else if (cur.nodeType() === NodeType.ObjectLiteralExpression) {
-                                objectLitAST = <UnaryExpression>cur;
-                            }
-                            else if (cur.nodeType() === NodeType.CastExpression) {
-                                typeAssertionASTs[typeAssertionASTs.length] = <UnaryExpression>cur;
-                            }
-                            else if (cur.nodeType() === NodeType.AssignmentExpression) {
-                                asgAST = <BinaryExpression>cur;
-                            }
-                            else if (cur.nodeType() === NodeType.TypeRef) {
-                                inTypeReference = true;
-                            }
-
-                            resultASTs[resultASTs.length] = cur;
-                        }
-                    }
-                }
-                return cur;
-            };
-
-            getAstWalkerFactory().walk(script, pre);
-
-            if (resultASTs.length) {
-
-                this.setUnit(scriptName);
-
-                foundAST = resultASTs[resultASTs.length - 1];
-
-                // Check if is a name of a container
-                if (foundAST.nodeType() === NodeType.Name && resultASTs.length > 1) {
-                    var previousAST = resultASTs[resultASTs.length - 2];
-                    switch (previousAST.nodeType()) {
-                        case NodeType.InterfaceDeclaration:
-                            if (foundAST === (<InterfaceDeclaration>previousAST).name) {
-                                foundAST = previousAST;
-                            }
-                            break;
-                        case NodeType.ClassDeclaration:
-                            if (foundAST === (<ClassDeclaration>previousAST).name) {
-                                foundAST = previousAST;
-                            }
-                            break;
-                        case NodeType.ModuleDeclaration:
-                            if (foundAST === (<ModuleDeclaration>previousAST).name) {
-                                foundAST = previousAST;
-                            }
-                            break;
-
-                        case NodeType.VariableDeclarator:
-                            if (foundAST === (<VariableDeclarator>previousAST).id) {
-                                foundAST = previousAST;
-                            }
-                            break;
-
-                        case NodeType.FunctionDeclaration:
-                            if (foundAST === (<FunctionDeclaration>previousAST).name) {
-                                foundAST = previousAST;
-                            }
-                            break;
-                    }
-                }
-
-                // are we within a decl?  if so, just grab its symbol
-                var funcDecl: FunctionDeclaration = null;
-                if (lastDeclAST === foundAST) {
-                    symbol = declStack[declStack.length - 1].getSymbol();
-                    this.resolver.resolveDeclaredSymbol(symbol, null, resolutionContext);
-                    symbol.setUnresolved();
-                    enclosingDecl = declStack[declStack.length - 1].getParentDecl();
-                    if (foundAST.nodeType() === NodeType.FunctionDeclaration) {
-                        funcDecl = <FunctionDeclaration>foundAST;
-                    }
-                }
-                else {
-                    // otherwise, it's an expression that needs to be resolved, so we must pull...
-
-                    // first, find the enclosing decl
-                    for (var i = declStack.length - 1; i >= 0; i--) {
-                        if (!(declStack[i].kind & (PullElementKind.Variable | PullElementKind.Parameter))) {
-                            enclosingDecl = declStack[i];
-                            break;
-                        }
-                    }
-
-                    // next, obtain the assigning AST, if applicable
-                    // (this would be the ast for the last decl on the decl stack)
-
-                    // if the found AST is a named, we want to check for previous dotted expressions,
-                    // since those will give us the right typing
-                    var callExpression: ICallExpression = null;
-                    if ((foundAST.nodeType() === NodeType.SuperExpression || foundAST.nodeType() === NodeType.ThisExpression || foundAST.nodeType() === NodeType.Name) &&
-                    resultASTs.length > 1) {
-                        for (var i = resultASTs.length - 2; i >= 0; i--) {
-                            if (resultASTs[i].nodeType() === NodeType.MemberAccessExpression &&
-                            (<BinaryExpression>resultASTs[i]).operand2 === resultASTs[i + 1]) {
-                                foundAST = resultASTs[i];
-                            }
-                            else if ((resultASTs[i].nodeType() === NodeType.InvocationExpression || resultASTs[i].nodeType() === NodeType.ObjectCreationExpression) &&
-                                (<InvocationExpression>resultASTs[i]).target === resultASTs[i + 1]) {
-                                callExpression = <ICallExpression><any>resultASTs[i];
-                                break;
-                            } else if (resultASTs[i].nodeType() === NodeType.FunctionDeclaration && (<FunctionDeclaration>resultASTs[i]).name === resultASTs[i + 1]) {
-                                funcDecl = <FunctionDeclaration>resultASTs[i];
-                                break;
-                            } else {
-                                break;
-                            }
-                        }
-                    }
-
-                    // if it's a list, we may not have an exact AST, so find the next nearest one
-                    if (foundAST.nodeType() === NodeType.List) {
-                        for (var i = 0; i < (<ASTList>foundAST).members.length; i++) {
-                            if ((<ASTList>foundAST).members[i].minChar > pos) {
-                                foundAST = (<ASTList>foundAST).members[i];
-                                break;
-                            }
-                        }
-                    }
-
-                    resolutionContext.resolvingTypeReference = inTypeReference;
-
-                    var inContextuallyTypedAssignment = false;
-
-                    if (declarationInitASTs.length) {
-                        var assigningAST: VariableDeclarator;
-
-                        for (var i = 0; i < declarationInitASTs.length; i++) {
-
-                            assigningAST = declarationInitASTs[i];
-                            inContextuallyTypedAssignment = (assigningAST !== null) && (assigningAST.typeExpr !== null);
-
-                            this.resolver.resolveAST(assigningAST, /*inContextuallyTypedAssignment:*/false, null, resolutionContext);
-                            var varSymbol = this.semanticInfoChain.getSymbolForAST(assigningAST, scriptName);
-
-                            if (varSymbol && inContextuallyTypedAssignment) {
-                                var contextualType = varSymbol.type;
-                                resolutionContext.pushContextualType(contextualType, false, null);
-                            }
-
-                            if (assigningAST.init) {
-                                this.resolver.resolveAST(assigningAST.init, inContextuallyTypedAssignment, enclosingDecl, resolutionContext);
-                            }
-                        }
-                    }
-
-                    if (typeAssertionASTs.length) {
-                        for (var i = 0; i < typeAssertionASTs.length; i++) {
-                            this.resolver.resolveAST(typeAssertionASTs[i], inContextuallyTypedAssignment, enclosingDecl, resolutionContext);
-                        }
-                    }
-
-                    if (asgAST) {
-                        this.resolver.resolveAST(asgAST, inContextuallyTypedAssignment, enclosingDecl, resolutionContext);
-                    }
-
-                    if (objectLitAST) {
-                        this.resolver.resolveAST(objectLitAST, inContextuallyTypedAssignment, enclosingDecl, resolutionContext);
-                    }
-
-                    if (lambdaAST) {
-                        this.resolver.resolveAST(lambdaAST, true, enclosingDecl, resolutionContext);
-                        enclosingDecl = semanticInfo.getDeclForAST(lambdaAST);
-                    }
-
-                    symbol = this.resolver.resolveAST(foundAST, inContextuallyTypedAssignment, enclosingDecl, resolutionContext);
-                    if (callExpression) {
-                        var isPropertyOrVar = symbol.kind === PullElementKind.Property || symbol.kind === PullElementKind.Variable;
-                        var typeSymbol = symbol.type;
-                        if (isPropertyOrVar) {
-                            isPropertyOrVar = (typeSymbol.kind !== PullElementKind.Interface && typeSymbol.kind !== PullElementKind.ObjectType) || typeSymbol.name === "";
-                        }
-
-                        if (!isPropertyOrVar) {
-                            isConstructorCall = foundAST.nodeType() === NodeType.SuperExpression || callExpression.nodeType() === NodeType.ObjectCreationExpression;
-
-                            if (foundAST.nodeType() === NodeType.SuperExpression) {
-                                if (symbol.kind === PullElementKind.Class) {
-                                    callSignatures = (<PullTypeSymbol>symbol).getConstructorMethod().type.getConstructSignatures();
-                                }
-                            } else {
-                                callSignatures = callExpression.nodeType() === NodeType.InvocationExpression ? typeSymbol.getCallSignatures() : typeSymbol.getConstructSignatures();
-                            }
-
-                            var callResolutionResults = new PullAdditionalCallResolutionData();
-                            if (callExpression.nodeType() === NodeType.InvocationExpression) {
-                                this.resolver.resolveInvocationExpression(<InvocationExpression>callExpression, inContextuallyTypedAssignment, enclosingDecl, resolutionContext, callResolutionResults);
-                            } else {
-                                this.resolver.resolveObjectCreationExpression(<ObjectCreationExpression>callExpression, inContextuallyTypedAssignment, enclosingDecl, resolutionContext, callResolutionResults);
-                            }
-
-                            if (callResolutionResults.candidateSignature) {
-                                candidateSignature = callResolutionResults.candidateSignature;
-                            }
-                            if (callResolutionResults.targetSymbol && callResolutionResults.targetSymbol.name !== "") {
-                                symbol = callResolutionResults.targetSymbol;
-                            }
-                            foundAST = <AST><any>callExpression;
-                        }
-                    }
-                }
-
-                if (funcDecl) {
-                    if (symbol && symbol.kind !== PullElementKind.Property) {
-                        var signatureInfo = PullHelpers.getSignatureForFuncDecl(funcDecl, this.semanticInfoChain.getUnit(scriptName));
-                        candidateSignature = signatureInfo.signature;
-                        callSignatures = signatureInfo.allSignatures;
-                    }
-                } else if (!callSignatures && symbol &&
-                (symbol.kind === PullElementKind.Method || symbol.kind === PullElementKind.Function)) {
-                    var typeSym = symbol.type;
-                    if (typeSym) {
-                        callSignatures = typeSym.getCallSignatures();
-                    }
-                }
+            var enclosingDecl = resolver.getEnclosingDecl(decl);
+            if (ast.kind() === SyntaxKind.GetAccessor || ast.kind() === SyntaxKind.SetAccessor) {
+                return this.getSymbolOfDeclaration(enclosingDecl);
             }
 
-            var enclosingScopeSymbol = this.getSymbolOfDeclaration(enclosingDecl);
-
-            return {
-                symbol: symbol,
-                ast: foundAST,
-                enclosingScopeSymbol: enclosingScopeSymbol,
-                candidateSignature: candidateSignature,
-                callSignatures: callSignatures,
-                isConstructorCall: isConstructorCall
-            };
+            return resolver.resolveAST(ast, /*inContextuallyTypedAssignment:*/false, new PullTypeResolutionContext(resolver));
         }
 
-        private extractResolutionContextFromPath(path: AstPath, document: Document, propagateContextualTypes: boolean): { ast: AST; enclosingDecl: PullDecl; resolutionContext: PullTypeResolutionContext; inContextuallyTypedAssignment: boolean; } {
-            var script = document.script;
+        private extractResolutionContextFromAST(resolver: PullTypeResolver, ast: AST, document: Document, propagateContextualTypes: boolean): { ast: AST; enclosingDecl: PullDecl; resolutionContext: PullTypeResolutionContext; inContextuallyTypedAssignment: boolean; inWithBlock: boolean; } {
             var scriptName = document.fileName;
 
-            var semanticInfo = this.semanticInfoChain.getUnit(scriptName);
             var enclosingDecl: PullDecl = null;
             var enclosingDeclAST: AST = null;
             var inContextuallyTypedAssignment = false;
+            var inWithBlock = false;
 
-            globalSemanticInfoChain = this.semanticInfoChain;
-            if (globalBinder) {
-                globalBinder.semanticInfoChain = this.semanticInfoChain;
-            }            
+            var resolutionContext = new PullTypeResolutionContext(resolver);
 
-            var resolutionContext = new PullTypeResolutionContext();
-            resolutionContext.resolveAggressively = true;
-
-            if (path.count() === 0) {
+            if (!ast) {
                 return null;
             }
 
-            this.setUnit(semanticInfo.getPath());
+            var path = this.getASTPath(ast);
 
             // Extract infromation from path
-            for (var i = 0 , n = path.count(); i < n; i++) {
-                var current = path.asts[i];
+            for (var i = 0 , n = path.length; i < n; i++) {
+                var current = path[i];
 
-                switch (current.nodeType()) {
-                    case NodeType.FunctionDeclaration:
-                        // A function expression does not have a decl, so we need to resolve it first to get the decl created.
-                        if (hasFlag((<FunctionDeclaration>current).getFunctionFlags(), FunctionFlags.IsFunctionExpression)) {
-                            this.resolver.resolveAST((<FunctionDeclaration>current), true, enclosingDecl, resolutionContext);
-                        }
-
-                        break;
-
-                    case NodeType.VariableDeclarator:
-                        var assigningAST = <VariableDeclarator> current;
-                        inContextuallyTypedAssignment = (assigningAST.typeExpr !== null);
-
-                        if (inContextuallyTypedAssignment) {
-                            if (propagateContextualTypes) {
-                                this.resolver.resolveAST(assigningAST, /*inContextuallyTypedAssignment*/false, null, resolutionContext);
-                                var varSymbol = this.semanticInfoChain.getSymbolForAST(assigningAST, scriptName);
-
-                                var contextualType: PullTypeSymbol = null;
-                                if (varSymbol && inContextuallyTypedAssignment) {
-                                    contextualType = varSymbol.type;
-                                }
-
-                                resolutionContext.pushContextualType(contextualType, false, null);
-
-                                if (assigningAST.init) {
-                                    this.resolver.resolveAST(assigningAST.init, inContextuallyTypedAssignment, enclosingDecl, resolutionContext);
-                                }
-                            }
-                        }
-
-                        break;
-
-                    case NodeType.InvocationExpression:
-                    case NodeType.ObjectCreationExpression:
+                switch (current.kind()) {
+                    case SyntaxKind.FunctionExpression:
+                    case SyntaxKind.SimpleArrowFunctionExpression:
+                    case SyntaxKind.ParenthesizedArrowFunctionExpression:
                         if (propagateContextualTypes) {
-                            var isNew = current.nodeType() === NodeType.ObjectCreationExpression;
+                            resolver.resolveAST(current, /*inContextuallyTypedAssignment*/ true, resolutionContext);
+                        }
+                        break;
+
+                    //case SyntaxKind.Parameter:
+                    //    var parameter = <Parameter> current;
+                    //    inContextuallyTypedAssignment = parameter.typeExpr !== null;
+
+                    //    this.extractResolutionContextForVariable(inContextuallyTypedAssignment, propagateContextualTypes, resolver, resolutionContext, enclosingDecl, parameter, parameter.init);
+                    //    break;
+
+                    case SyntaxKind.MemberVariableDeclaration:
+                        var memberVariable = <MemberVariableDeclaration> current;
+                        inContextuallyTypedAssignment = memberVariable.variableDeclarator.typeAnnotation !== null;
+
+                        this.extractResolutionContextForVariable(inContextuallyTypedAssignment, propagateContextualTypes, resolver, resolutionContext, enclosingDecl, memberVariable, memberVariable.variableDeclarator.equalsValueClause);
+                        break;
+
+                    case SyntaxKind.VariableDeclarator:
+                        var variableDeclarator = <VariableDeclarator>current;
+                        inContextuallyTypedAssignment = variableDeclarator.typeAnnotation !== null;
+
+                        this.extractResolutionContextForVariable(inContextuallyTypedAssignment, propagateContextualTypes, resolver, resolutionContext, enclosingDecl, variableDeclarator, variableDeclarator.equalsValueClause);
+                        break;
+
+                    case SyntaxKind.InvocationExpression:
+                    case SyntaxKind.ObjectCreationExpression:
+                        if (propagateContextualTypes) {
+                            var isNew = current.kind() === SyntaxKind.ObjectCreationExpression;
                             var callExpression = <InvocationExpression>current;
                             var contextualType: PullTypeSymbol = null;
 
                             // Check if we are in an argumnt for a call, propagate the contextual typing
-                            if ((i + 1 < n) && callExpression.arguments === path.asts[i + 1]) {
+                            if ((i + 2 < n) && callExpression.argumentList === path[i + 1] && callExpression.argumentList.arguments === path[i + 2]) {
+                                var arguments = callExpression.argumentList.arguments;
+
                                 var callResolutionResults = new PullAdditionalCallResolutionData();
                                 if (isNew) {
-                                    this.resolver.resolveObjectCreationExpression(callExpression, inContextuallyTypedAssignment, enclosingDecl, resolutionContext, callResolutionResults);
+                                    resolver.resolveObjectCreationExpression(callExpression, resolutionContext, callResolutionResults);
                                 }
                                 else {
-                                    this.resolver.resolveInvocationExpression(callExpression, inContextuallyTypedAssignment, enclosingDecl, resolutionContext, callResolutionResults);
+                                    resolver.resolveInvocationExpression(callExpression, resolutionContext, callResolutionResults);
                                 }
 
                                 // Find the index in the arguments list
                                 if (callResolutionResults.actualParametersContextTypeSymbols) {
-                                    var argExpression = (path.asts[i + 1] && path.asts[i + 1].nodeType() === NodeType.List) ? path.asts[i + 2] : path.asts[i + 1];
+                                    var argExpression = path[i + 3];
                                     if (argExpression) {
-                                        for (var j = 0, m = callExpression.arguments.members.length; j < m; j++) {
-                                            if (callExpression.arguments.members[j] === argExpression) {
+                                        for (var j = 0, m = callExpression.argumentList.arguments.nonSeparatorCount(); j < m; j++) {
+                                            if (callExpression.argumentList.arguments.nonSeparatorAt(j) === argExpression) {
                                                 var callContextualType = callResolutionResults.actualParametersContextTypeSymbols[j];
                                                 if (callContextualType) {
                                                     contextualType = callContextualType;
@@ -1283,10 +682,10 @@ module TypeScript {
                             else {
                                 // Just resolve the call expression
                                 if (isNew) {
-                                    this.resolver.resolveObjectCreationExpression(callExpression, inContextuallyTypedAssignment, enclosingDecl, resolutionContext);
+                                    resolver.resolveObjectCreationExpression(callExpression, resolutionContext);
                                 }
                                 else {
-                                    this.resolver.resolveInvocationExpression(callExpression, inContextuallyTypedAssignment, enclosingDecl, resolutionContext);
+                                    resolver.resolveInvocationExpression(callExpression, resolutionContext);
                                 }
                             }
 
@@ -1295,12 +694,12 @@ module TypeScript {
 
                         break;
 
-                    case NodeType.ArrayLiteralExpression:
+                    case SyntaxKind.ArrayLiteralExpression:
                         if (propagateContextualTypes) {
                             // Propagate the child element type
                             var contextualType: PullTypeSymbol = null;
                             var currentContextualType = resolutionContext.getContextualType();
-                            if (currentContextualType && currentContextualType.isArray()) {
+                            if (currentContextualType && currentContextualType.isArrayNamedTypeReference()) {
                                 contextualType = currentContextualType.getElementType();
                             }
 
@@ -1309,21 +708,21 @@ module TypeScript {
 
                         break;
 
-                    case NodeType.ObjectLiteralExpression:
+                    case SyntaxKind.ObjectLiteralExpression:
                         if (propagateContextualTypes) {
-                            var objectLiteralExpression = <UnaryExpression>current;
+                            var objectLiteralExpression = <ObjectLiteralExpression>current;
                             var objectLiteralResolutionContext = new PullAdditionalObjectLiteralResolutionData();
-                            this.resolver.resolveObjectLiteralExpression(objectLiteralExpression, inContextuallyTypedAssignment, enclosingDecl, resolutionContext, objectLiteralResolutionContext);
+                            resolver.resolveObjectLiteralExpression(objectLiteralExpression, inContextuallyTypedAssignment, resolutionContext, objectLiteralResolutionContext);
 
                             // find the member in the path
-                            var memeberAST = (path.asts[i + 1] && path.asts[i + 1].nodeType() === NodeType.List) ? path.asts[i + 2] : path.asts[i + 1];
+                            var memeberAST = (path[i + 1] && path[i + 1].kind() === SyntaxKind.SeparatedList) ? path[i + 2] : path[i + 1];
                             if (memeberAST) {
                                 // Propagate the member contextual type
                                 var contextualType: PullTypeSymbol = null;
-                                var memberDecls = <ASTList>objectLiteralExpression.operand;
+                                var memberDecls = objectLiteralExpression.propertyAssignments;
                                 if (memberDecls && objectLiteralResolutionContext.membersContextTypeSymbols) {
-                                    for (var j = 0, m = memberDecls.members.length; j < m; j++) {
-                                        if (memberDecls.members[j] === memeberAST) {
+                                    for (var j = 0, m = memberDecls.nonSeparatorCount(); j < m; j++) {
+                                        if (memberDecls.nonSeparatorAt(j) === memeberAST) {
                                             var memberContextualType = objectLiteralResolutionContext.membersContextTypeSymbols[j];
                                             if (memberContextualType) {
                                                 contextualType = memberContextualType;
@@ -1339,14 +738,14 @@ module TypeScript {
 
                         break;
 
-                    case NodeType.AssignmentExpression:
+                    case SyntaxKind.AssignmentExpression:
                         if (propagateContextualTypes) {
                             var assignmentExpression = <BinaryExpression>current;
                             var contextualType: PullTypeSymbol = null;
 
-                            if (path.asts[i + 1] && path.asts[i + 1] === assignmentExpression.operand2) {
+                            if (path[i + 1] && path[i + 1] === assignmentExpression.right) {
                                 // propagate the left hand side type as a contextual type
-                                var leftType = this.resolver.resolveAST(assignmentExpression.operand1, inContextuallyTypedAssignment, enclosingDecl, resolutionContext).type;
+                                var leftType = resolver.resolveAST(assignmentExpression.left, inContextuallyTypedAssignment, resolutionContext).type;
                                 if (leftType) {
                                     inContextuallyTypedAssignment = true;
                                     contextualType = leftType;
@@ -1358,43 +757,16 @@ module TypeScript {
 
                         break;
 
-                    case NodeType.CastExpression:
-                        var castExpression = <UnaryExpression>current;
-
-                        if (i + 1 < n && path.asts[i + 1] === castExpression.castTerm) {
-                            // We are inside the cast term
-                            resolutionContext.resolvingTypeReference = true;
-                        }
-                        else {
-                            if (propagateContextualTypes) {
-                                var contextualType: PullTypeSymbol = null;
-                                var typeSymbol = this.resolver.resolveTypeAssertionExpression(castExpression, inContextuallyTypedAssignment, enclosingDecl, resolutionContext);
-
-                                // Set the context type
-                                if (typeSymbol) {
-                                    inContextuallyTypedAssignment = true;
-                                    contextualType = typeSymbol;
-                                }
-
-                                resolutionContext.pushContextualType(contextualType, false, null);
-                            }
-                        }
-
-                        break;
-
-                    case NodeType.ReturnStatement:
+                    case SyntaxKind.ReturnStatement:
                         if (propagateContextualTypes) {
                             var returnStatement = <ReturnStatement>current;
                             var contextualType: PullTypeSymbol = null;
 
                             if (enclosingDecl && (enclosingDecl.kind & PullElementKind.SomeFunction)) {
-                                var functionDeclaration = <FunctionDeclaration>enclosingDeclAST;
-                                if (functionDeclaration.returnTypeAnnotation) {
+                                var typeAnnotation = getType(enclosingDeclAST);
+                                if (typeAnnotation) {
                                     // The containing function has a type annotation, propagate it as the contextual type
-                                    var currentResolvingTypeReference = resolutionContext.resolvingTypeReference;
-                                    resolutionContext.resolvingTypeReference = true;
-                                    var returnTypeSymbol = this.resolver.resolveTypeReference(<TypeReference>functionDeclaration.returnTypeAnnotation, enclosingDecl, resolutionContext);
-                                    resolutionContext.resolvingTypeReference = currentResolvingTypeReference;
+                                    var returnTypeSymbol = resolver.resolveTypeReference(typeAnnotation, resolutionContext);
                                     if (returnTypeSymbol) {
                                         inContextuallyTypedAssignment = true;
                                         contextualType = returnTypeSymbol;
@@ -1419,38 +791,23 @@ module TypeScript {
 
                         break;
 
-                    case NodeType.TypeRef:
-                    case NodeType.TypeParameter:
-                        resolutionContext.resolvingTypeReference = true;
-                        break;
-
-                    case NodeType.ClassDeclaration:
-                        var classDeclaration = <ClassDeclaration>current;
-                        if (path.asts[i + 1]) {
-                            if (path.asts[i + 1] === classDeclaration.extendsList ||
-                                path.asts[i + 1] === classDeclaration.implementsList) {
-                                resolutionContext.resolvingTypeReference = true;
-                            }
+                    case SyntaxKind.ObjectType:
+                        // ObjectType are just like Object Literals are bound when needed, ensure we have a decl, by forcing it to be 
+                        // resolved before descending into it.
+                        if (propagateContextualTypes && TypeScript.isTypesOnlyLocation(current)) {
+                            resolver.resolveAST(current, /*inContextuallyTypedAssignment*/ false, resolutionContext);
                         }
 
                         break;
 
-                    case NodeType.InterfaceDeclaration:
-                        var interfaceDeclaration = <InterfaceDeclaration>current;
-                        if (path.asts[i + 1]) {
-                            if (path.asts[i + 1] === interfaceDeclaration.extendsList ||
-                                path.asts[i + 1] === interfaceDeclaration.implementsList ||
-                                path.asts[i + 1] === interfaceDeclaration.name) {
-                                resolutionContext.resolvingTypeReference = true;
-                            }
-                        }
-
+                    case SyntaxKind.WithStatement:
+                        inWithBlock = true;
                         break;
                 }
 
                 // Record enclosing Decl
-                var decl = semanticInfo.getDeclForAST(current);
-                if (decl && !(decl.kind & (PullElementKind.Variable | PullElementKind.Parameter | PullElementKind.TypeParameter))) {
+                var decl = this.semanticInfoChain.getDeclForAST(current);
+                if (decl) {
                     enclosingDecl = decl;
                     enclosingDeclAST = current;
                 }
@@ -1458,131 +815,138 @@ module TypeScript {
 
             // if the found AST is a named, we want to check for previous dotted expressions,
             // since those will give us the right typing
-            if (path.ast().nodeType() === NodeType.Name && path.count() > 1) {
-                for (var i = path.count() - 1; i >= 0; i--) {
-                    if (path.asts[path.top - 1].nodeType() === NodeType.MemberAccessExpression &&
-                    (<BinaryExpression>path.asts[path.top - 1]).operand2 === path.asts[path.top]) {
-                        path.pop();
+            if (ast && ast.parent && ast.kind() === SyntaxKind.IdentifierName) {
+                if (ast.parent.kind() === SyntaxKind.MemberAccessExpression) {
+                    if ((<MemberAccessExpression>ast.parent).name === ast) {
+                        ast = ast.parent;
                     }
-                    else {
-                        break;
+                }
+                else if (ast.parent.kind() === SyntaxKind.QualifiedName) {
+                    if ((<QualifiedName>ast.parent).right === ast) {
+                        ast = ast.parent;
                     }
                 }
             }
 
             return {
-                ast: path.ast(),
+                ast: ast,
                 enclosingDecl: enclosingDecl,
                 resolutionContext: resolutionContext,
-                inContextuallyTypedAssignment: inContextuallyTypedAssignment
+                inContextuallyTypedAssignment: inContextuallyTypedAssignment,
+                inWithBlock: inWithBlock
             };
         }
 
-        public pullGetSymbolInformationFromPath(path: AstPath, document: Document): PullSymbolInfo {
-            var context = this.extractResolutionContextFromPath(path, document, /*propagateContextualTypes*/ true);
-            if (!context) {
+        private extractResolutionContextForVariable(
+            inContextuallyTypedAssignment: boolean,
+            propagateContextualTypes: boolean,
+            resolver: PullTypeResolver,
+            resolutionContext: PullTypeResolutionContext,
+            enclosingDecl: PullDecl,
+            assigningAST: AST,
+            init: AST): void {
+            if (inContextuallyTypedAssignment) {
+                if (propagateContextualTypes) {
+                    resolver.resolveAST(assigningAST, /*inContextuallyTypedAssignment*/false, resolutionContext);
+                    var varSymbol = this.semanticInfoChain.getSymbolForAST(assigningAST);
+
+                    var contextualType: PullTypeSymbol = null;
+                    if (varSymbol && inContextuallyTypedAssignment) {
+                        contextualType = varSymbol.type;
+                    }
+
+                    resolutionContext.pushContextualType(contextualType, false, null);
+
+                    if (init) {
+                        resolver.resolveAST(init, inContextuallyTypedAssignment, resolutionContext);
+                    }
+                }
+            }
+        }
+
+        private getASTPath(ast: AST): AST[] {
+            var result: AST[] = [];
+
+            while (ast) {
+                result.unshift(ast);
+                ast = ast.parent;
+            }
+
+            return result;
+        }
+
+        public pullGetSymbolInformationFromAST(ast: AST, document: Document): PullSymbolInfo {
+            var resolver = this.semanticInfoChain.getResolver();
+            var context = this.extractResolutionContextFromAST(resolver, ast, document, /*propagateContextualTypes*/ true);
+            if (!context || context.inWithBlock) {
                 return null;
             }
 
-            globalSemanticInfoChain = this.semanticInfoChain;
-            if (globalBinder) {
-                globalBinder.semanticInfoChain = this.semanticInfoChain;
-            }            
+            ast = context.ast;
+            var symbol = resolver.resolveAST(ast, context.inContextuallyTypedAssignment, context.resolutionContext);
 
-            var symbol = this.resolver.resolveAST(path.ast(), context.inContextuallyTypedAssignment, context.enclosingDecl, context.resolutionContext);
+            if (!symbol) {
+                Debug.assert(
+                    ast.kind() == SyntaxKind.SourceUnit,
+                    "No symbol was found for ast and ast was not source unit. Ast Kind: " + SyntaxKind[ast.kind()] );
+                return null;
+            }
+
+            if (symbol.isTypeReference()) {
+                symbol = (<PullTypeReferenceSymbol>symbol).getReferencedTypeSymbol();
+            }
+
+            var aliasSymbol = this.semanticInfoChain.getAliasSymbolForAST(ast);
 
             return {
                 symbol: symbol,
-                ast: path.ast(),
+                aliasSymbol: aliasSymbol,
+                ast: ast,
                 enclosingScopeSymbol: this.getSymbolOfDeclaration(context.enclosingDecl)
             };
         }
 
-        public pullGetDeclarationSymbolInformation(path: AstPath, document: Document): PullSymbolInfo {
-            var script = document.script;
-            var scriptName = document.fileName;
-
-            var ast = path.ast();
-
-            if (ast.nodeType() !== NodeType.ClassDeclaration && ast.nodeType() !== NodeType.InterfaceDeclaration && ast.nodeType() !== NodeType.ModuleDeclaration && ast.nodeType() !== NodeType.FunctionDeclaration && ast.nodeType() !== NodeType.VariableDeclarator) {
-                return null;
-            }
-
-            var context = this.extractResolutionContextFromPath(path, document, /*propagateContextualTypes*/ true);
-            if (!context) {
-                return null;
-            }
-
-            globalSemanticInfoChain = this.semanticInfoChain;
-            if (globalBinder) {
-                globalBinder.semanticInfoChain = this.semanticInfoChain;
-            }
-
-            var semanticInfo = this.semanticInfoChain.getUnit(scriptName);
-            var decl = semanticInfo.getDeclForAST(ast);
-            var symbol = (decl.kind & PullElementKind.SomeSignature) ? decl.getSignatureSymbol() : decl.getSymbol();
-            this.resolver.resolveDeclaredSymbol(symbol, null, context.resolutionContext);
-
-            // we set the symbol as unresolved so as not to interfere with typecheck
-            symbol.setUnresolved();
-
-            return {
-                symbol: symbol,
-                ast: path.ast(),
-                enclosingScopeSymbol: this.getSymbolOfDeclaration(context.enclosingDecl)
-            };
-        }
-
-        public pullGetCallInformationFromPath(path: AstPath, document: Document): PullCallSymbolInfo {
+        public pullGetCallInformationFromAST(ast: AST, document: Document): PullCallSymbolInfo {
             // AST has to be a call expression
-            if (path.ast().nodeType() !== NodeType.InvocationExpression && path.ast().nodeType() !== NodeType.ObjectCreationExpression) {
+            if (ast.kind() !== SyntaxKind.InvocationExpression && ast.kind() !== SyntaxKind.ObjectCreationExpression) {
                 return null;
             }
 
-            var isNew = (path.ast().nodeType() === NodeType.ObjectCreationExpression);
+            var isNew = ast.kind() === SyntaxKind.ObjectCreationExpression;
 
-            var context = this.extractResolutionContextFromPath(path, document, /*propagateContextualTypes*/ true);
-            if (!context) {
+            var resolver = this.semanticInfoChain.getResolver();
+            var context = this.extractResolutionContextFromAST(resolver, ast, document, /*propagateContextualTypes*/ true);
+            if (!context || context.inWithBlock) {
                 return null;
             }
-
-            globalSemanticInfoChain = this.semanticInfoChain;
-            if (globalBinder) {
-                globalBinder.semanticInfoChain = this.semanticInfoChain;
-            }            
 
             var callResolutionResults = new PullAdditionalCallResolutionData();
 
             if (isNew) {
-                this.resolver.resolveObjectCreationExpression(<ObjectCreationExpression>path.ast(), context.inContextuallyTypedAssignment, context.enclosingDecl, context.resolutionContext, callResolutionResults);
+                resolver.resolveObjectCreationExpression(<ObjectCreationExpression>ast, context.resolutionContext, callResolutionResults);
             }
             else {
-                this.resolver.resolveInvocationExpression(<InvocationExpression>path.ast(), context.inContextuallyTypedAssignment, context.enclosingDecl, context.resolutionContext, callResolutionResults);
+                resolver.resolveInvocationExpression(<InvocationExpression>ast, context.resolutionContext, callResolutionResults);
             }
 
             return {
                 targetSymbol: callResolutionResults.targetSymbol,
                 resolvedSignatures: callResolutionResults.resolvedSignatures,
                 candidateSignature: callResolutionResults.candidateSignature,
-                ast: path.ast(),
+                ast: ast,
                 enclosingScopeSymbol: this.getSymbolOfDeclaration(context.enclosingDecl),
                 isConstructorCall: isNew
             };
         }
 
-        public pullGetVisibleMemberSymbolsFromPath(path: AstPath, document: Document): PullVisibleSymbolsInfo {
-
-            globalSemanticInfoChain = this.semanticInfoChain;
-            if (globalBinder) {
-                globalBinder.semanticInfoChain = this.semanticInfoChain;
-            }
-
-            var context = this.extractResolutionContextFromPath(path, document, /*propagateContextualTypes*/ true);
-            if (!context) {
+        public pullGetVisibleMemberSymbolsFromAST(ast: AST, document: Document): PullVisibleSymbolsInfo {
+            var resolver = this.semanticInfoChain.getResolver();
+            var context = this.extractResolutionContextFromAST(resolver, ast, document, /*propagateContextualTypes*/ true);
+            if (!context || context.inWithBlock) {
                 return null;
             }
 
-            var symbols = this.resolver.getVisibleMembersFromExpression(path.ast(), context.enclosingDecl, context.resolutionContext);
+            var symbols = resolver.getVisibleMembersFromExpression(ast, context.enclosingDecl, context.resolutionContext);
             if (!symbols) {
                 return null;
             }
@@ -1593,39 +957,29 @@ module TypeScript {
             };
         }
 
-        public pullGetVisibleDeclsFromPath(path: AstPath, document: Document): PullDecl[] {
-
-            globalSemanticInfoChain = this.semanticInfoChain;
-            if (globalBinder) {
-                globalBinder.semanticInfoChain = this.semanticInfoChain;
-            }
-
-            var context = this.extractResolutionContextFromPath(path, document, /*propagateContextualTypes*/ false);
-            if (!context) {
+        public pullGetVisibleDeclsFromAST(ast: AST, document: Document): PullDecl[] {
+            var resolver = this.semanticInfoChain.getResolver();
+            var context = this.extractResolutionContextFromAST(resolver, ast, document, /*propagateContextualTypes*/ false);
+            if (!context || context.inWithBlock) {
                 return null;
             }
 
-            return this.resolver.getVisibleDecls(context.enclosingDecl, context.resolutionContext);
+            return resolver.getVisibleDecls(context.enclosingDecl);
         }
 
-        public pullGetContextualMembersFromPath(path: AstPath, document: Document): PullVisibleSymbolsInfo {
-
-            globalSemanticInfoChain = this.semanticInfoChain;
-            if (globalBinder) {
-                globalBinder.semanticInfoChain = this.semanticInfoChain;
-            }
-
+        public pullGetContextualMembersFromAST(ast: AST, document: Document): PullVisibleSymbolsInfo {
             // Input has to be an object literal
-            if (path.ast().nodeType() !== NodeType.ObjectLiteralExpression) {
+            if (ast.kind() !== SyntaxKind.ObjectLiteralExpression) {
                 return null;
             }
 
-            var context = this.extractResolutionContextFromPath(path, document, /*propagateContextualTypes*/ true);
-            if (!context) {
+            var resolver = this.semanticInfoChain.getResolver();
+            var context = this.extractResolutionContextFromAST(resolver, ast, document, /*propagateContextualTypes*/ true);
+            if (!context || context.inWithBlock) {
                 return null;
             }
 
-            var members = this.resolver.getVisibleContextSymbols(context.enclosingDecl, context.resolutionContext);
+            var members = resolver.getVisibleContextSymbols(context.enclosingDecl, context.resolutionContext);
 
             return {
                 symbols: members,
@@ -1633,50 +987,285 @@ module TypeScript {
             };
         }
 
-        public pullGetDeclInformation(decl: PullDecl, path: AstPath, document: Document): PullSymbolInfo {
-            var context = this.extractResolutionContextFromPath(path, document, /*propagateContextualTypes*/ true);
-            if (!context) {
+        public pullGetDeclInformation(decl: PullDecl, ast: AST, document: Document): PullSymbolInfo {
+            var resolver = this.semanticInfoChain.getResolver();
+
+            // Note: we not only need to resolve down to the path the ast is at, but we also need to 
+            // resolve the path to where the decl is at.  This is because, currently, some decls 
+            // can't fin their symbols unless they are first resolved.  For example, a property of 
+            // an object literal must be resolved before its symbol can be retrieved.
+            var context = this.extractResolutionContextFromAST(resolver, ast, document, /*propagateContextualTypes*/ true);
+            if (!context || context.inWithBlock) {
                 return null;
             }
 
-            globalSemanticInfoChain = this.semanticInfoChain;
-            if (globalBinder) {
-                globalBinder.semanticInfoChain = this.semanticInfoChain;
+            var astForDecl = decl.ast();
+            if (!astForDecl) {
+                return null;
+            }
+
+            var astForDeclContext = this.extractResolutionContextFromAST(resolver, astForDecl, this.getDocument(astForDecl.fileName()), /*propagateContextualTypes*/ true);
+            if (!astForDeclContext) {
+                return null;
             }
 
             var symbol = decl.getSymbol();
-            this.resolver.resolveDeclaredSymbol(symbol, context.enclosingDecl, context.resolutionContext);
+            resolver.resolveDeclaredSymbol(symbol, context.resolutionContext);
             symbol.setUnresolved();
 
             return {
                 symbol: symbol,
-                ast: path.ast(),
+                aliasSymbol: null,
+                ast: ast,
                 enclosingScopeSymbol: this.getSymbolOfDeclaration(context.enclosingDecl)
             };
         }
 
-        public pullGetTypeInfoAtPosition(pos: number, document: Document): PullTypeInfoAtPositionInfo {
-            return this.timeFunction("pullGetTypeInfoAtPosition for pos " + pos + ":", () => {
-                return this.resolvePosition(pos, document);
-            });
+        public topLevelDeclaration(fileName: string) : PullDecl {
+            return this.semanticInfoChain.topLevelDecl(fileName);
         }
 
-        public getTopLevelDeclarations(scriptName: string): PullDecl[] {
-            //this.pullResolveFile(scriptName);
+        public getDeclForAST(ast: AST): PullDecl {
+            return this.semanticInfoChain.getDeclForAST(ast);
+        }
 
-            var unit = this.semanticInfoChain.getUnit(scriptName);
+        public fileNames(): string[] {
+            return this.semanticInfoChain.fileNames();
+        }
 
-            if (!unit) {
-                return null;
+        public topLevelDecl(fileName: string): PullDecl {
+            return this.semanticInfoChain.topLevelDecl(fileName);
+        }
+    }
+
+    enum CompilerPhase {
+        Syntax,
+        Semantics,
+        EmitOptionsValidation,
+        Emit,
+        DeclarationEmit,
+    }
+
+    class CompilerIterator implements Iterator<CompileResult> {
+        private compilerPhase: CompilerPhase;
+        private index: number = -1;
+        private fileNames: string[] = null;
+        private _current: CompileResult = null;
+        private _emitOptions: EmitOptions = null;
+        private _sharedEmitter: Emitter = null;
+        private _sharedDeclarationEmitter: DeclarationEmitter = null;
+        private hadSyntacticDiagnostics: boolean = false;
+        private hadSemanticDiagnostics: boolean = false;
+        private hadEmitDiagnostics: boolean = false;
+
+        constructor(private compiler: TypeScriptCompiler,
+                    private resolvePath: (path: string) => string,
+                    private continueOnDiagnostics: boolean,
+                    startingPhase = CompilerPhase.Syntax) {
+            this.fileNames = compiler.fileNames();
+            this.compilerPhase = startingPhase;
+        }
+
+        public current(): CompileResult {
+            return this._current;
+        }
+
+        public moveNext(): boolean {
+            this._current = null;
+
+            // Attempt to move the iterator 'one step' forward.  Note: this may produce no result
+            // (for example, if we're emitting everything to a single file).  So only return once
+            // we actually have a result, or we're done enumerating.
+            while (this.moveNextInternal()) {
+                if (this._current) {
+                    return true;
+                }
             }
 
-            return unit.getTopLevelDecls();
+            return false;
         }
 
-        public reportDiagnostics(errors: Diagnostic[], errorReporter: TypeScript.IDiagnosticReporter): void {
-            for (var i = 0; i < errors.length; i++) {
-                errorReporter.addDiagnostic(errors[i]);
+        private moveNextInternal(): boolean {
+            this.index++;
+
+            // If we're at the end of hte set of files the compiler knows about, then move to the
+            // next phase of compilation.
+            while (this.shouldMoveToNextPhase()) {
+                this.index = 0;
+                this.compilerPhase++;
+            }
+
+            if (this.compilerPhase > CompilerPhase.DeclarationEmit) {
+                // We're totally done.
+                return false;
+            }
+
+            switch (this.compilerPhase) {
+                case CompilerPhase.Syntax:
+                    return this.moveNextSyntaxPhase();
+                case CompilerPhase.Semantics:
+                    return this.moveNextSemanticsPhase();
+                case CompilerPhase.EmitOptionsValidation:
+                    return this.moveNextEmitOptionsValidationPhase();
+                case CompilerPhase.Emit:
+                    return this.moveNextEmitPhase();
+                case CompilerPhase.DeclarationEmit:
+                    return this.moveNextDeclarationEmitPhase();
             }
         }
+
+        private shouldMoveToNextPhase(): boolean {
+            switch (this.compilerPhase) {
+                case CompilerPhase.EmitOptionsValidation:
+                    // Only one step in emit validation.  We're done once we do that step.
+                    return this.index === 1;
+
+                case CompilerPhase.Syntax:
+                case CompilerPhase.Semantics:
+                    // Each of these phases are done when we've processed the last file.
+                    return this.index == this.fileNames.length;
+
+                case CompilerPhase.Emit:
+                case CompilerPhase.DeclarationEmit:
+                    // Emitting is done when we get 'one' past the end of hte file list.  This is
+                    // because we use that step to collect the results from the shared emitter.
+                    return this.index == (this.fileNames.length + 1);
+            }
+
+            return false;
+        }
+
+        private moveNextSyntaxPhase(): boolean {
+            Debug.assert(this.index >= 0 && this.index < this.fileNames.length);
+            var fileName = this.fileNames[this.index];
+
+            var diagnostics = this.compiler.getSyntacticDiagnostics(fileName);
+            if (diagnostics.length) {
+                if (!this.continueOnDiagnostics) {
+                    this.hadSyntacticDiagnostics = true;
+                }
+
+                this._current = CompileResult.fromDiagnostics(diagnostics);
+            }
+
+            return true;
+        }
+
+        private moveNextSemanticsPhase(): boolean {
+            // Don't move forward if there were syntax diagnostics.
+            if (this.hadSyntacticDiagnostics) {
+                return false;
+            }
+
+            Debug.assert(this.index >= 0 && this.index < this.fileNames.length);
+            var fileName = this.fileNames[this.index];
+            var diagnostics = this.compiler.getSemanticDiagnostics(fileName);
+            if (diagnostics.length) {
+                if (!this.continueOnDiagnostics) {
+                    this.hadSemanticDiagnostics = true;
+                }
+
+                this._current = CompileResult.fromDiagnostics(diagnostics);
+            }
+
+            return true;
+        }
+
+        private moveNextEmitOptionsValidationPhase(): boolean {
+            Debug.assert(!this.hadSyntacticDiagnostics);
+
+            if (!this._emitOptions) {
+                this._emitOptions = new EmitOptions(this.compiler, this.resolvePath);
+            }
+
+            if (this._emitOptions.diagnostic()) {
+                if (!this.continueOnDiagnostics) {
+                    this.hadEmitDiagnostics = true;
+                }
+
+                this._current = CompileResult.fromDiagnostics([this._emitOptions.diagnostic()]);
+            }
+
+            return true;
+        }
+
+        private moveNextEmitPhase(): boolean {
+            Debug.assert(!this.hadSyntacticDiagnostics);
+            Debug.assert(this._emitOptions);
+
+            if (this.hadEmitDiagnostics) {
+                return false;
+            }
+
+            Debug.assert(this.index >= 0 && this.index <= this.fileNames.length);
+            if (this.index < this.fileNames.length) {
+                var fileName = this.fileNames[this.index];
+                var document = this.compiler.getDocument(fileName);
+
+                // Try to emit this single document.  It will either get emitted to its own file
+                // (in which case we'll have our call back triggered), or it will get added to the
+                // shared emitter (and we'll take care of it after all the files are done.
+                this._sharedEmitter = this.compiler._emitDocument(
+                    document, this._emitOptions,
+                    outputFiles => { this._current = CompileResult.fromOutputFiles(outputFiles) },
+                    this._sharedEmitter);
+                return true;
+            }
+
+            // If we've moved past all the files, and we have a multi-input->single-output
+            // emitter set up.  Then add the outputs of that emitter to the results.
+            if (this.index === this.fileNames.length && this._sharedEmitter) {
+                // Collect shared emit result.
+                this._current = CompileResult.fromOutputFiles(this._sharedEmitter.getOutputFiles());
+            }
+
+            return true;
+        }
+
+        private moveNextDeclarationEmitPhase(): boolean {
+            Debug.assert(!this.hadSyntacticDiagnostics);
+            Debug.assert(!this.hadEmitDiagnostics);
+            if (this.hadSemanticDiagnostics) {
+                return false;
+            }
+
+            if (!this.compiler.compilationSettings().generateDeclarationFiles()) {
+                return false;
+            }
+
+            Debug.assert(this.index >= 0 && this.index <= this.fileNames.length);
+            if (this.index < this.fileNames.length) {
+                var fileName = this.fileNames[this.index];
+                var document = this.compiler.getDocument(fileName);
+
+                this._sharedDeclarationEmitter = this.compiler._emitDocumentDeclarations(
+                    document, this._emitOptions,
+                    file => { this._current = CompileResult.fromOutputFiles([file]); },
+                    this._sharedDeclarationEmitter);
+                return true;
+            }
+
+            // If we've moved past all the files, and we have a multi-input->single-output
+            // emitter set up.  Then add the outputs of that emitter to the results.
+            if (this.index === this.fileNames.length && this._sharedDeclarationEmitter) {
+                this._current = CompileResult.fromOutputFiles([this._sharedDeclarationEmitter.getOutputFile()]);
+            }
+
+            return true;
+        }
+    }
+
+    export function compareDataObjects(dst: any, src: any): boolean {
+        for (var e in dst) {
+            if (typeof dst[e] == "object") {
+                if (!compareDataObjects(dst[e], src[e]))
+                    return false;
+            }
+            else if (typeof dst[e] != "function") {
+                if (dst[e] !== src[e])
+                    return false;
+            }
+        }
+        return true;
     }
 }

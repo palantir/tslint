@@ -1,7 +1,7 @@
 ///<reference path='references.ts' />
 
 module TypeScript {
-    export interface ISyntaxToken extends ISyntaxNodeOrToken, INameSyntax {
+    export interface ISyntaxToken extends ISyntaxNodeOrToken, INameSyntax, IPrimaryExpressionSyntax {
         // Same as kind(), just exposed through a property for perf.
         tokenKind: SyntaxKind;
 
@@ -40,6 +40,23 @@ module TypeScript {
 }
 
 module TypeScript.Syntax {
+    export function isExpression(token: ISyntaxToken): boolean {
+        switch (token.tokenKind) {
+            case SyntaxKind.IdentifierName:
+            case SyntaxKind.RegularExpressionLiteral:
+            case SyntaxKind.NumericLiteral:
+            case SyntaxKind.StringLiteral:
+            case SyntaxKind.FalseKeyword:
+            case SyntaxKind.NullKeyword:
+            case SyntaxKind.ThisKeyword:
+            case SyntaxKind.TrueKeyword:
+            case SyntaxKind.SuperKeyword:
+                return true;
+        }
+
+        return false;
+    }
+
     export function realizeToken(token: ISyntaxToken): ISyntaxToken {
         return new RealizedToken(token.tokenKind,
             token.leadingTrivia(), token.text(), token.value(), token.valueText(), token.trailingTrivia());
@@ -189,6 +206,20 @@ module TypeScript.Syntax {
                             i += 4;
                             continue;
 
+                        case CharacterCodes.carriageReturn:
+                            var nextIndex = i + 1;
+                            if (nextIndex < text.length && text.charCodeAt(nextIndex) == CharacterCodes.lineFeed) {
+                                // Skip the entire \r\n sequence.
+                                i++;
+                            }
+                            continue;
+
+                        case CharacterCodes.lineFeed:
+                        case CharacterCodes.paragraphSeparator:
+                        case CharacterCodes.lineSeparator:
+                            // From ES5: LineContinuation is the empty character sequence.
+                            continue;
+
                         default:
                             // Any other character is ok as well.  As per rule:
                             // EscapeSequence :: CharacterEscapeSequence
@@ -238,7 +269,7 @@ module TypeScript.Syntax {
         }
 
         if (kind === SyntaxKind.NumericLiteral) {
-            return isHexInteger(text) ? parseInt(text, /*radix:*/ 16) : parseFloat(text);
+            return IntegerUtilities.isHexInteger(text) ? parseInt(text, /*radix:*/ 16) : parseFloat(text);
         }
         else if (kind === SyntaxKind.StringLiteral) {
             if (text.length > 1 && text.charCodeAt(text.length - 1) === text.charCodeAt(0)) {
@@ -252,21 +283,25 @@ module TypeScript.Syntax {
             }
         }
         else if (kind === SyntaxKind.RegularExpressionLiteral) {
-            try {
-                var lastSlash = text.lastIndexOf("/");
-                var body = text.substring(1, lastSlash);
-                var flags = text.substring(lastSlash + 1);
-                return new RegExp(body, flags);
-            }
-            catch (e) {
-                return null;
-            }
+            return regularExpressionValue(text);
         }
         else if (kind === SyntaxKind.EndOfFileToken || kind === SyntaxKind.ErrorToken) {
             return null;
         }
         else {
             throw Errors.invalidOperation();
+        }
+    }
+
+    function regularExpressionValue(text: string): RegExp {
+        try {
+            var lastSlash = text.lastIndexOf("/");
+            var body = text.substring(1, lastSlash);
+            var flags = text.substring(lastSlash + 1);
+            return new RegExp(body, flags);
+        }
+        catch (e) {
+            return null;
         }
     }
 
@@ -350,6 +385,26 @@ module TypeScript.Syntax {
 
         public withTrailingTrivia(trailingTrivia: ISyntaxTriviaList): ISyntaxToken {
             return this.realize().withTrailingTrivia(trailingTrivia);
+        }
+
+        public isExpression(): boolean {
+            return isExpression(this);
+        }
+
+        public isPrimaryExpression(): boolean {
+            return this.isExpression();
+        }
+
+        public isMemberExpression(): boolean {
+            return this.isExpression();
+        }
+
+        public isPostfixExpression(): boolean {
+            return this.isExpression();
+        }
+
+        public isUnaryExpression(): boolean {
+            return this.isExpression();
         }
     }
 
@@ -455,6 +510,26 @@ module TypeScript.Syntax {
         public withTrailingTrivia(trailingTrivia: ISyntaxTriviaList): ISyntaxToken {
             return new RealizedToken(
                 this.tokenKind,  this._leadingTrivia, this._text, this._value, this._valueText, trailingTrivia);
+        }
+
+        public isExpression(): boolean {
+            return isExpression(this);
+        }
+
+        public isPrimaryExpression(): boolean {
+            return this.isExpression();
+        }
+
+        public isMemberExpression(): boolean {
+            return this.isExpression();
+        }
+
+        public isPostfixExpression(): boolean {
+            return this.isExpression();
+        }
+
+        public isUnaryExpression(): boolean {
+            return this.isExpression();
         }
     }
 

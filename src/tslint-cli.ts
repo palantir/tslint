@@ -72,7 +72,7 @@ if (argv.o !== undefined) {
     outputStream = fs.createWriteStream(argv.o, {
         end: false,
         flags: "w+",
-        mode: 0644
+        mode: 420
     });
 } else {
     outputStream = process.stdout;

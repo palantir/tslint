@@ -3,7 +3,7 @@
 
 ///<reference path='typescriptServices.ts' />
 
-module Services {
+module TypeScript.Services {
     export class CompletionHelpers {
         public static filterContextualMembersList(contextualMemberSymbols: TypeScript.PullSymbol[], existingMembers: TypeScript.PullVisibleSymbolsInfo): TypeScript.PullSymbol[] {
             if (!existingMembers || !existingMembers.symbols || existingMembers.symbols.length === 0) {
@@ -11,25 +11,20 @@ module Services {
             }
 
             var existingMemberSymbols = existingMembers.symbols;
-            var existingMemberNames: { [s: string]: boolean; } = {};
+            var existingMemberNames = TypeScript.createIntrinsicsObject<boolean>();
             for (var i = 0, n = existingMemberSymbols.length; i < n; i++) {
-                existingMemberNames[TypeScript.stripQuotes(existingMemberSymbols[i].getDisplayName())] = true;
+                existingMemberNames[TypeScript.stripStartAndEndQuotes(existingMemberSymbols[i].getDisplayName())] = true;
             }
 
             var filteredMembers: TypeScript.PullSymbol[] = [];
             for (var j = 0, m = contextualMemberSymbols.length; j < m; j++) {
                 var contextualMemberSymbol = contextualMemberSymbols[j];
-                if (!existingMemberNames[TypeScript.stripQuotes(contextualMemberSymbol.getDisplayName())]) {
+                if (!existingMemberNames[TypeScript.stripStartAndEndQuotes(contextualMemberSymbol.getDisplayName())]) {
                     filteredMembers.push(contextualMemberSymbol);
                 }
             }
 
             return filteredMembers;
-        }
-
-        public static isRightOfDot(path: TypeScript.AstPath, position: number): boolean {
-            return (path.count() >= 1 && path.asts[path.top].nodeType() === TypeScript.NodeType.MemberAccessExpression && (<TypeScript.BinaryExpression>path.asts[path.top]).operand1.limChar < position) ||
-                (path.count() >= 2 && path.asts[path.top].nodeType() === TypeScript.NodeType.Name && path.asts[path.top - 1].nodeType() === TypeScript.NodeType.MemberAccessExpression && (<TypeScript.BinaryExpression>path.asts[path.top - 1]).operand2 === path.asts[path.top]);
         }
 
         public static isCompletionListBlocker(sourceUnit: TypeScript.SourceUnitSyntax, position: number): boolean {
@@ -147,15 +142,16 @@ module Services {
             return false;
         }
 
-        public static getValidCompletionEntryDisplayName(displayName: string, languageVersion: TypeScript.LanguageVersion): string {
+        public static getValidCompletionEntryDisplayName(displayName: string): string {
             if (displayName && displayName.length > 0) {
                 var firstChar = displayName.charCodeAt(0);
                 if (firstChar === TypeScript.CharacterCodes.singleQuote || firstChar === TypeScript.CharacterCodes.doubleQuote) {
                     // If the user entered name for the symbol was quoted, removing the quotes is not enough, as the name could be an
-                    // invalid identifer name. We need to check if whatever was inside the qouates is actually a valid identifier name.
-                    displayName = TypeScript.stripQuotes(displayName);
+                    // invalid identifer name. We need to check if whatever was inside the quotes is actually a valid identifier name.
+                    displayName = TypeScript.stripStartAndEndQuotes(displayName);
 
-                    if (TypeScript.Scanner.isValidIdentifier(TypeScript.SimpleText.fromString(displayName), languageVersion)) {
+                    if (TypeScript.Scanner.isValidIdentifier(
+                        TypeScript.SimpleText.fromString(displayName), TypeScript.LanguageVersion.EcmaScript5)) {
                         return displayName;
                     }
                 }
