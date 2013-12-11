@@ -6,4 +6,5 @@ class Clazz { // this comment is correct
         //This comment is on its own line, and starts with a capital _and_ no space
         console.log("test"); //this comment has no space
     }
+    /// <reference or something>
 }
