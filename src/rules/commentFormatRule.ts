@@ -64,7 +64,8 @@ class CommentWalker extends Lint.RuleWalker {
         }
 
         var firstCharacter = commentText.charAt(2); // first character after the space
-        return firstCharacter === " ";
+        // three slashes (///) also works, to allow for ///<reference>
+        return firstCharacter === " " || firstCharacter === "/";
     }
 
     private startsWithLowercase(commentText: string): boolean {

@@ -38,5 +38,6 @@ describe("<comment-format>", () => {
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure3);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure4);
+        assert.lengthOf(actualFailures, 4);
     });
 });
