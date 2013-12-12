@@ -21,12 +21,13 @@ describe("<jsdoc-format>", () => {
 
     it("ensures jsdoc comments have properly lined up asterisks and start with spaces", () => {
         var fileName = "rules/jsdoc.test.ts";
-        var createFailure = Lint.Test.createFailuresOnFile(fileName, JsdocFormatRule.FAILURE_STRING);
-        var expectedFailure1 = createFailure([18, 5], [21, 8]);
-        var expectedFailure2 = createFailure([23, 5], [26, 6]);
-        var expectedFailure3 = createFailure([28, 5], [30, 8]);
-        var expectedFailure4 = createFailure([32, 5], [35, 8]);
-        var expectedFailure5 = createFailure([37, 5], [40, 8]);
+        var createFormatFailure = Lint.Test.createFailuresOnFile(fileName, JsdocFormatRule.FORMAT_FAILURE_STRING);
+        var createAlignmentFailure = Lint.Test.createFailuresOnFile(fileName, JsdocFormatRule.ALIGNMENT_FAILURE_STRING);
+        var expectedFailure1 = createFormatFailure([20, 1], [20, 40]);
+        var expectedFailure2 = createAlignmentFailure([26, 1], [26, 6]);
+        var expectedFailure3 = createFormatFailure([30, 1], [30, 8]);
+        var expectedFailure4 = createFormatFailure([34, 1], [34, 7]);
+        var expectedFailure5 = createAlignmentFailure([39, 1], [39, 19]);
 
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, JsdocFormatRule);
 
