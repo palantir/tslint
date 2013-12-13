@@ -17,6 +17,10 @@ Supported Rules
 * `forin` enforces a `for ... in` statement to be filtered with an `if` statement.*
 * `indent` enforces consistent indentation levels (currently disabled).
 * `interface-name` enforces the rule that interface names must begin with a capital 'I'
+* `jsdoc-format` enforces basic format rules for jsdoc comments -- comments starting with `/**`
+    * each line contains an asterisk and asterisks must be aligned
+    * each asterisk must be followed by either a space or a newline (except for the first and the last)
+    * the only characters before the asterisk on each line must be whitepace characters
 * `label-position` enforces labels only on sensible statements.
 * `label-undefined` checks that labels are defined before usage.
 * `max-line-length` sets the maximum length of a line.
