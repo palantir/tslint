@@ -33,7 +33,7 @@ module Lint {
             if (isNewScope) {
                 this.scopeStack.push(this.createScope());
             }
-            
+
             super.visitNode(node);
 
             if (isNewScope) {
@@ -49,6 +49,11 @@ module Lint {
         // get the current scope
         public getCurrentScope(): T {
             return this.scopeStack[this.scopeStack.length - 1];
+        }
+
+        // get the depth of the scope stack
+        public getCurrentDepth(): number {
+            return this.scopeStack.length;
         }
 
         private isScopeBoundary(node: TypeScript.SyntaxNode): boolean {

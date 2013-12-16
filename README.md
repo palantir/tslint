@@ -58,6 +58,9 @@ Supported Rules
     * `"callSignature"` checks return type of functions
     * `"catchClause"` checks type in exception catch blocks
     * `"indexSignature"` checks index type specifier of indexers
+* `use-strict` enforces ECMAScript 5's strict mode
+    * `check-module` checks that all top-level modules are using strict mode
+    * `check-function` checks that all top-level functions are using strict mode
 * `variable-name` allows only camelCased or UPPER_CASED variable names. Rule options:
 	* `"allow-leading-underscore"` allows underscores at the beginnning.
 * `whitespace` enforces spacing whitespace. Rule options:

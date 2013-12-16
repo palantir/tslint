@@ -9559,6 +9559,7 @@ declare module Lint {
         public visitNode(node: TypeScript.SyntaxNode): void;
         public createScope(): T;
         public getCurrentScope(): T;
+        public getCurrentDepth(): number;
         private isScopeBoundary(node);
     }
 }
