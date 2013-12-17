@@ -32,3 +32,10 @@ function checkDepth() {
     }
 }
 
+module TestModuleWithFunction() {
+    "use strict";
+
+    function hello() {
+        // there shouldn't be a failure here since it isn't top level
+    }
+}
