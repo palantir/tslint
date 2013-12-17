@@ -20,7 +20,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "forbidden eval";
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoEvalWalker(syntaxTree));
+        return this.applyWithWalker(new NoEvalWalker(syntaxTree, this.getOptions()));
     }
 }
 

@@ -20,7 +20,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "for (... in ...) statements must be filtered with an if statement";
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new ForInWalker(syntaxTree));
+        return this.applyWithWalker(new ForInWalker(syntaxTree, this.getOptions()));
     }
 }
 
@@ -64,7 +64,7 @@ class ForInWalker extends Lint.RuleWalker {
         var failure = this.createFailure(position, node.width(), Rule.FAILURE_STRING);
         this.addFailure(failure);
     }
-    
+
     private nodeIsContinue(node: TypeScript.ISyntaxElement): boolean {
         var kind = node.kind();
 

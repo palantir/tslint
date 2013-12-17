@@ -24,17 +24,19 @@ module Lint {
     export class RuleWalker extends TypeScript.PositionTrackingWalker {
         private limit: number;
         private fileName: string;
-        private options: any;
+        private options: any[];
         private failures: RuleFailure[];
         private syntaxTree: TypeScript.SyntaxTree;
+        private disabledIntervals: Lint.IDisabledInterval[];
 
-        constructor(syntaxTree: TypeScript.SyntaxTree, options?: any) {
+        constructor(syntaxTree: TypeScript.SyntaxTree, options: Lint.IOptions) {
             super();
 
             this.failures = [];
-            this.options = options;
+            this.options = options.options;
             this.syntaxTree = syntaxTree;
             this.limit = this.syntaxTree.sourceUnit().fullWidth();
+            this.disabledIntervals = options.disabledIntervals;
         }
 
         public getSyntaxTree(): TypeScript.SyntaxTree {
@@ -77,7 +79,9 @@ module Lint {
 
         public addFailure(failure: RuleFailure) {
             if (!this.existsFailure(failure)) {
-                this.failures.push(failure);
+                if (!Lint.intersectionExists(failure, this.disabledIntervals)) {
+                    this.failures.push(failure);
+                }
             }
         }
 

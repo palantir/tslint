@@ -19,19 +19,23 @@
 /// <reference path='rule.ts'/>
 
 module Lint.Rules {
-
     export class AbstractRule implements Lint.Rule {
         private value: any;
+        private disabledIntervals: Lint.IDisabledInterval[];
 
-        constructor(value: any) {
+        constructor(value: any, disabledIntervals: Lint.IDisabledInterval[]) {
             this.value = value;
+            this.disabledIntervals = disabledIntervals;
         }
 
-        public getOptions(): any[] {
+        public getOptions(): Lint.IOptions {
             var value = this.value;
+            var options = [];
             if (Array.isArray(value) && value.length > 1) {
-                return value.slice(1);
+                options = value.slice(1);
             }
+            return {disabledIntervals: this.disabledIntervals, options: options};
+
         }
 
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {

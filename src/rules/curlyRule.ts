@@ -24,7 +24,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static WHILE_FAILURE_STRING = "while statements must be braced";
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new CurlyWalker(syntaxTree));
+        return this.applyWithWalker(new CurlyWalker(syntaxTree, this.getOptions()));
     }
 }
 

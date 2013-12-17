@@ -39,4 +39,18 @@ module Lint {
 
         return settings;
     }
+
+    export function intersectionExists(failure: RuleFailure, disabledIntervals: Lint.IDisabledInterval[]) {
+        var intersectionExists = false;
+
+        disabledIntervals.forEach((disabledInterval) => {
+            var maxStart = Math.max(disabledInterval.startPosition, failure.getStartPosition().getPosition());
+            var minEnd = Math.min(disabledInterval.endPosition, failure.getEndPosition().getPosition());
+            if (maxStart < minEnd) {
+                // intervals intersect
+                intersectionExists = true;
+            }
+        });
+        return intersectionExists;
+    }
 }

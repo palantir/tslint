@@ -20,7 +20,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "undefined label: '";
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new LabelUndefinedWalker(syntaxTree));
+        return this.applyWithWalker(new LabelUndefinedWalker(syntaxTree, this.getOptions()));
     }
 }
 

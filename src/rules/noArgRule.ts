@@ -20,7 +20,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "access forbidden to arguments property";
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoArgWalker(syntaxTree));
+        return this.applyWithWalker(new NoArgWalker(syntaxTree, this.getOptions()));
     }
   }
 

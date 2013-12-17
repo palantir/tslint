@@ -20,7 +20,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "missing radix parameter";
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new RadixWalker(syntaxTree));
+        return this.applyWithWalker(new RadixWalker(syntaxTree, this.getOptions()));
     }
 }
 

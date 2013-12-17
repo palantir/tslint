@@ -67,6 +67,17 @@ Supported Rules
 	* `"check-separator"` checks for whitespace after separator tokens (`,`/`;`)
 	* `"check-type"` checks for whitespace before a variable type specification
 
+tslint rule flags
+-----
+You can disable/enable tslint inside a file, or some subset of the tslint rules, with the following comment rule flags:
+
+* `/* tslint:disable */` will disable all rules for the rest of the file
+* `/* tslint:enable */` will enable all rules for the rest of the file
+* `/* tslint:disable:rule1 rule2 rule3... */` will disable the listed rules for the rest of the file
+* `/* tslint:enable:rule1 rule2 rule3... */` will enable the listed rules for the rest of the file
+
+Later rules flags will overwrite all previous ones, i.e. a disable followed by code followed by an enable will disable the rules only after the disable and before the enable.
+Enabling already enabled rules and disabling already disabled rules will have no effect.
 
 Installation
 ------------

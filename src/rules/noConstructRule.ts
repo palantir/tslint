@@ -20,7 +20,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "undesirable constructor use";
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoConstructWalker(syntaxTree));
+        return this.applyWithWalker(new NoConstructWalker(syntaxTree, this.getOptions()));
     }
 }
 

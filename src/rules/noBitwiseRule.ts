@@ -20,7 +20,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "forbidden bitwise operation";
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoBitwiseWalker(syntaxTree));
+        return this.applyWithWalker(new NoBitwiseWalker(syntaxTree, this.getOptions()));
     }
 }
 

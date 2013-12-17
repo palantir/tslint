@@ -25,7 +25,13 @@ module Lint {
     var moduleDirectory = path.dirname(module.filename);
     var CORE_RULES_DIRECTORY = path.resolve(moduleDirectory, "..", "build", "rules");
 
-    export function loadRules(ruleConfiguration, rulesDirectory?: string): Rule[] {
+    export interface IEnableDisablePosition {
+        isEnable: boolean;
+        position: number;
+    }
+
+    export function loadRules(ruleConfiguration, enableDisableRuleMap: {[rulename: string]: Lint.IEnableDisablePosition[]},
+        rulesDirectory?: string): Rule[] {
         var rules = [];
 
         for (var ruleName in ruleConfiguration) {
@@ -33,7 +39,11 @@ module Lint {
                 var ruleValue = ruleConfiguration[ruleName];
                 var Rule = findRule(ruleName, rulesDirectory);
                 if (Rule !== undefined) {
-                    rules.push(new Rule(ruleValue));
+                    var all = "all"; // make the linter happy until we can turn it on and off
+                    var allList = (all in enableDisableRuleMap ? enableDisableRuleMap[all] : []);
+                    var ruleSpecificList = (ruleName in enableDisableRuleMap ? enableDisableRuleMap[ruleName] : []);
+                    var disabledIntervals = buildDisabledIntervalsFromSwitches(ruleSpecificList, allList);
+                    rules.push(new Rule(ruleValue, disabledIntervals));
                 }
             }
         }
@@ -87,5 +97,49 @@ module Lint {
         }
 
         return undefined;
+    }
+
+    function buildDisabledIntervalsFromSwitches(ruleSpecificList: IEnableDisablePosition[], allList: IEnableDisablePosition[]) {
+        // we're assuming both lists are already sorted top-down
+        // so compare the tops, use the smallest of the two, and build the intervals that way
+
+        var isCurrentlyDisabled = false;
+        var disabledStartPosition: number;
+        var disabledIntervalList: Lint.IDisabledInterval[] = [];
+        var i = 0;
+        var j = 0;
+        while (i < ruleSpecificList.length || j < allList.length) {
+            var ruleSpecificTopPositon = (i < ruleSpecificList.length ? ruleSpecificList[i].position : Infinity);
+            var allTopPositon = (j < allList.length ? allList[j].position : Infinity);
+            var newPositionToCheck: IEnableDisablePosition;
+            if (ruleSpecificTopPositon < allTopPositon) {
+                newPositionToCheck = ruleSpecificList[i];
+                i++;
+            } else {
+                newPositionToCheck = allList[j];
+                j++;
+            }
+
+            // we're currently disabled and enabling, or currently enabled and disabling -- a switch
+            if (newPositionToCheck.isEnable === isCurrentlyDisabled) {
+                if (!isCurrentlyDisabled) {
+                    // start a new interval
+                    disabledStartPosition = newPositionToCheck.position;
+                    isCurrentlyDisabled = true;
+                } else {
+                    // we're currently disabled and about to enable -- end the interval
+                    disabledIntervalList.push({startPosition: disabledStartPosition, endPosition: newPositionToCheck.position});
+                    isCurrentlyDisabled = false;
+                }
+            }
+
+        }
+
+        if (isCurrentlyDisabled) {
+            // we started an interval but didn't finish one -- so finish it with an Infinity
+            disabledIntervalList.push({startPosition: disabledStartPosition, endPosition: Infinity});
+        }
+
+        return disabledIntervalList;
     }
 }

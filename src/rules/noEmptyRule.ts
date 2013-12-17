@@ -20,7 +20,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "block is empty";
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new BlockWalker(syntaxTree));
+        return this.applyWithWalker(new BlockWalker(syntaxTree, this.getOptions()));
     }
 }
 

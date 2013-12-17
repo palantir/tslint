@@ -20,7 +20,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "file should end with a newline";
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new EofWalker(syntaxTree));
+        return this.applyWithWalker(new EofWalker(syntaxTree, this.getOptions()));
     }
 }
 
