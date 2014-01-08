@@ -33,7 +33,7 @@ module Lint {
             if (isNewScope) {
                 this.scopeStack.push(this.createScope());
             }
-            
+
             super.visitNode(node);
 
             if (isNewScope) {
@@ -51,10 +51,16 @@ module Lint {
             return this.scopeStack[this.scopeStack.length - 1];
         }
 
+        // get the depth of the scope stack
+        public getCurrentDepth(): number {
+            return this.scopeStack.length;
+        }
+
         private isScopeBoundary(node: TypeScript.SyntaxNode): boolean {
             return node instanceof TypeScript.FunctionDeclarationSyntax
                 || node instanceof TypeScript.FunctionExpressionSyntax
                 || node instanceof TypeScript.MemberFunctionDeclarationSyntax
+                || node instanceof TypeScript.ModuleDeclarationSyntax
                 || node instanceof TypeScript.SimpleArrowFunctionExpressionSyntax
                 || node instanceof TypeScript.ParenthesizedArrowFunctionExpressionSyntax
                 || node instanceof TypeScript.ClassDeclarationSyntax
