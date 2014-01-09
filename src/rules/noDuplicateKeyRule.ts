@@ -19,7 +19,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "duplicate key '";
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoDuplicateKeyWalker(syntaxTree));
+        return this.applyWithWalker(new NoDuplicateKeyWalker(syntaxTree, this.getOptions()));
     }
 }
 

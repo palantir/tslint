@@ -20,15 +20,15 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "unreachable code";
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new UnreachableWalker(syntaxTree));
+        return this.applyWithWalker(new UnreachableWalker(syntaxTree, this.getOptions()));
     }
 }
 
 class UnreachableWalker extends Lint.RuleWalker {
     private hasReturned: boolean;
 
-    constructor(syntaxTree: TypeScript.SyntaxTree) {
-        super(syntaxTree);
+    constructor(syntaxTree: TypeScript.SyntaxTree, options: Lint.IOptions) {
+        super(syntaxTree, options);
         this.hasReturned = false;
     }
 

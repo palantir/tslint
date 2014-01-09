@@ -20,7 +20,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "duplicate variable: '";
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoDuplicateVariableWalker(syntaxTree));
+        return this.applyWithWalker(new NoDuplicateVariableWalker(syntaxTree, this.getOptions()));
     }
 }
 

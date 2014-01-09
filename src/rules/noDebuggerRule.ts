@@ -20,7 +20,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "use of debugger statements is disallowed";
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoDebuggerWalker(syntaxTree));
+        return this.applyWithWalker(new NoDebuggerWalker(syntaxTree, this.getOptions()));
     }
 }
 

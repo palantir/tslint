@@ -27,7 +27,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public isEnabled(): boolean {
         if (super.isEnabled()) {
-            var quoteMarkString = this.getOptions()[0];
+            var quoteMarkString = this.getOptions().ruleArguments[0];
             return (quoteMarkString === "single" || quoteMarkString === "double");
         }
 
@@ -35,26 +35,22 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        var quoteMark: QuoteMark;
-        var quoteMarkString = this.getOptions()[0];
-        var sourceUnit = syntaxTree.sourceUnit();
-
-        if (quoteMarkString === "single") {
-            quoteMark = QuoteMark.SINGLE_QUOTES;
-        } else {
-            quoteMark = QuoteMark.DOUBLE_QUOTES;
-        }
-
-        return this.applyWithWalker(new QuoteWalker(syntaxTree, quoteMark));
+        return this.applyWithWalker(new QuoteWalker(syntaxTree, this.getOptions()));
     }
 }
 
 class QuoteWalker extends Lint.RuleWalker {
     private quoteMark: QuoteMark;
 
-    constructor(syntaxTree: TypeScript.SyntaxTree, quoteMark: QuoteMark) {
-        super(syntaxTree);
-        this.quoteMark = quoteMark;
+    constructor(syntaxTree: TypeScript.SyntaxTree, options: Lint.IOptions) {
+        super(syntaxTree, options);
+        var quoteMarkString = this.getOptions()[0];
+
+        if (quoteMarkString === "single") {
+            this.quoteMark = QuoteMark.SINGLE_QUOTES;
+        } else {
+            this.quoteMark = QuoteMark.DOUBLE_QUOTES;
+        }
     }
 
     public visitToken(token : TypeScript.ISyntaxToken): void {

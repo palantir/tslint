@@ -21,6 +21,7 @@
 /// <reference path='language/utils.ts'/>
 /// <reference path='language/rule/abstractRule.ts'/>
 /// <reference path='language/formatter/abstractFormatter.ts'/>
+/// <reference path='language/walker/ruleWalker.ts'/>
 /// <reference path='language/walker/scopeAwareRuleWalker.ts'/>
 /// <reference path='language/walker/stateAwareRuleWalker.ts'/>
 
@@ -32,6 +33,50 @@ module Lint {
         failureCount: number;
         format: string;
         output: string;
+    }
+
+    class EnableDisableRulesWalker extends Lint.RuleWalker {
+
+        public enableDisableRuleMap: {[rulename: string]: Lint.IEnableDisablePosition[]} = {};
+
+        public visitToken(token: TypeScript.ISyntaxToken): void {
+            this.findSwitchesInTrivia(token.leadingTrivia().toArray(), this.position());
+            this.findSwitchesInTrivia(token.trailingTrivia().toArray(), this.position() + token.leadingTriviaWidth() + token.width());
+
+            super.visitToken(token);
+        }
+
+        private findSwitchesInTrivia(triviaList: TypeScript.ISyntaxTrivia[], startingPosition: number) {
+            var currentPosition = startingPosition;
+            triviaList.forEach((triviaItem) => {
+                if (triviaItem.kind() === TypeScript.SyntaxKind.MultiLineCommentTrivia) {
+                    var commentText = triviaItem.fullText();
+                    // regex is: start of string followed by "/*" followed by any amount of whitespace followed by "tslint:"
+                    if (commentText.match(/^\/\*\s*tslint:/)) {
+                        var commentTextParts = commentText.split(":");
+                        // regex is: start of string followed by either "enable" or "disable"
+                        // followed by either whitespace or end of string
+                        var enableOrDisableMatch = commentTextParts[1].match(/^(enable|disable)(\s|$)/);
+                        if (enableOrDisableMatch != null) {
+                            var isEnabled = enableOrDisableMatch[1] === "enable";
+                            var position = currentPosition;
+                            var rulesList = ["all"];
+                            if (commentTextParts.length > 2) {
+                                rulesList = commentTextParts[2].split(/\s+/);
+                            }
+                            rulesList.forEach((ruleToAdd) => {
+                                if (!(ruleToAdd in this.enableDisableRuleMap)) {
+                                    this.enableDisableRuleMap[ruleToAdd] = [];
+                                }
+                                this.enableDisableRuleMap[ruleToAdd].push({position: position, isEnabled: isEnabled});
+                            });
+                        }
+
+                    }
+                }
+                currentPosition += triviaItem.fullWidth();
+            });
+        }
     }
 
     export class Linter {
@@ -49,8 +94,14 @@ module Lint {
             var i, failures = [];
             var syntaxTree = Lint.getSyntaxTree(this.fileName, this.source);
 
+            // this walker walks the code first, to find all the intervals where rules are disabled
+            var rulesWalker: EnableDisableRulesWalker = new EnableDisableRulesWalker(syntaxTree, {disabledIntervals: []});
+            var sourceUnit = syntaxTree.sourceUnit();
+            sourceUnit.accept(rulesWalker);
+            var enableDisableRuleMap = rulesWalker.enableDisableRuleMap;
+
             var rulesDirectory = this.getRelativePath(this.options.rulesDirectory);
-            var configuredRules = Lint.loadRules(this.options.configuration.rules, rulesDirectory);
+            var configuredRules = Lint.loadRules(this.options.configuration.rules, enableDisableRuleMap, rulesDirectory);
             for (i = 0; i < configuredRules.length; ++i) {
                 var rule = configuredRules[i];
                 if (rule.isEnabled()) {

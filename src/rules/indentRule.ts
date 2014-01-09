@@ -24,19 +24,18 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        var tabWidth = this.getOptions()[0];
-        return this.applyWithWalker(new IndentWalker(syntaxTree, tabWidth));
+        return this.applyWithWalker(new IndentWalker(syntaxTree, this.getOptions()));
     }
 }
 
 class IndentWalker extends Lint.RuleWalker {
     private tabWidth: number;
-    private currentLevel;
+    private currentLevel: number;
 
-    constructor(syntaxTree: TypeScript.SyntaxTree, tabWidth: number) {
-        super(syntaxTree);
+    constructor(syntaxTree: TypeScript.SyntaxTree, options: Lint.IOptions) {
+        super(syntaxTree, options);
         this.currentLevel = 0;
-        this.tabWidth = tabWidth;
+        this.tabWidth = this.getOptions()[0];
     }
 
     // class indentation

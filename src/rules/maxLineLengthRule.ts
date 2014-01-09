@@ -21,7 +21,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public isEnabled(): boolean {
         if (super.isEnabled()) {
-            var option = this.getOptions()[0];
+            var option = this.getOptions().ruleArguments[0];
             if (typeof option === "number" && option > 0) {
                 return true;
             }
@@ -32,16 +32,19 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
         var ruleFailures = [];
-        var lineLimit = this.getOptions()[0];
+        var lineLimit = this.getOptions().ruleArguments[0];
         var lineMap = syntaxTree.lineMap();
         var lineStarts = lineMap.lineStarts();
         var errorString = Rule.FAILURE_STRING + lineLimit;
+        var disabledIntervals = this.getOptions().disabledIntervals;
 
         for (var i = 0; i < lineStarts.length - 1; ++i) {
             var from = lineStarts[i], to = lineStarts[i + 1];
             if ((to - from - 1) > lineLimit) {
                 var ruleFailure = new Lint.RuleFailure(syntaxTree, from, to - 1, errorString);
-                ruleFailures.push(ruleFailure);
+                if (!Lint.doesIntersect(ruleFailure, disabledIntervals)) {
+                    ruleFailures.push(ruleFailure);
+                }
             }
           }
 

@@ -20,7 +20,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "trailing whitespace";
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoTrailingWhitespaceWalker(syntaxTree));
+        return this.applyWithWalker(new NoTrailingWhitespaceWalker(syntaxTree, this.getOptions()));
     }
 }
 

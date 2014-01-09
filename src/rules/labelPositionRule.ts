@@ -20,7 +20,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "unexpected label on statement";
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new LabelPosWalker(syntaxTree));
+        return this.applyWithWalker(new LabelPosWalker(syntaxTree, this.getOptions()));
     }
 }
 

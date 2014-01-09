@@ -18,9 +18,18 @@
 /// <reference path='../../typescript/src/compiler/core/linePosition.ts'/>
 
 module Lint {
+    export interface IOptions {
+        ruleArguments?: any[];
+        disabledIntervals: Lint.IDisabledInterval[];
+    }
+
+    export interface IDisabledInterval {
+        startPosition: number;
+        endPosition: number;
+    }
 
     export interface Rule {
-        getOptions(): any[];
+        getOptions(): IOptions;
 
         isEnabled(): boolean;
 

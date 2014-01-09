@@ -23,6 +23,8 @@ export class Rule extends Lint.Rules.AbstractRule {
         var ruleFailures = [];
         var diagnostics = syntaxTree.diagnostics();
 
+        var disabledIntervals = this.getOptions().disabledIntervals;
+
         for (var i = 0; i < diagnostics.length; ++i) {
             var diagnostic = diagnostics[i];
             var diagnosticKey = diagnostic.diagnosticKey();
@@ -31,8 +33,9 @@ export class Rule extends Lint.Rules.AbstractRule {
                 var position = diagnostic.start();
                 var lineAndCharacter = syntaxTree.lineMap().getLineAndCharacterFromPosition(position);
                 var ruleFailure = new Lint.RuleFailure(syntaxTree, position, position, Rule.FAILURE_STRING);
-
-                ruleFailures.push(ruleFailure);
+                if (!Lint.doesIntersect(ruleFailure, disabledIntervals)) {
+                    ruleFailures.push(ruleFailure);
+                }
             }
         }
 
