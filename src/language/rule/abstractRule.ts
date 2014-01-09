@@ -34,7 +34,7 @@ module Lint.Rules {
             if (Array.isArray(value) && value.length > 1) {
                 options = value.slice(1);
             }
-            return {disabledIntervals: this.disabledIntervals, options: options};
+            return {disabledIntervals: this.disabledIntervals, ruleArguments: options};
 
         }
 
