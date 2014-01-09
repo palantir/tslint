@@ -23,7 +23,7 @@ var optimist = require("optimist")
     .check((argv) => {
         // f is required unless we're asking for help; throw an error if f is missing unless help is there
         if (!("f" in argv) && !("help" in argv)) {
-            throw 'Missing required arguments: f';
+            throw "Missing required arguments: f";
         }
     })
     .options({
