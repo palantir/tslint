@@ -40,7 +40,7 @@ module Lint {
         return settings;
     }
 
-    export function intersectionExists(failure: RuleFailure, disabledIntervals: Lint.IDisabledInterval[]) {
+    export function doesIntersect(failure: RuleFailure, disabledIntervals: Lint.IDisabledInterval[]) {
         var intersectionExists = false;
 
         disabledIntervals.forEach((disabledInterval) => {

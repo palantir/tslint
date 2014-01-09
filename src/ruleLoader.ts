@@ -26,7 +26,7 @@ module Lint {
     var CORE_RULES_DIRECTORY = path.resolve(moduleDirectory, "..", "build", "rules");
 
     export interface IEnableDisablePosition {
-        isEnable: boolean;
+        isEnabled: boolean;
         position: number;
     }
 
@@ -99,9 +99,11 @@ module Lint {
         return undefined;
     }
 
+    /*
+     * we're assuming both lists are already sorted top-down
+     * so compare the tops, use the smallest of the two, and build the intervals that way
+     */
     function buildDisabledIntervalsFromSwitches(ruleSpecificList: IEnableDisablePosition[], allList: IEnableDisablePosition[]) {
-        // we're assuming both lists are already sorted top-down
-        // so compare the tops, use the smallest of the two, and build the intervals that way
 
         var isCurrentlyDisabled = false;
         var disabledStartPosition: number;
@@ -121,7 +123,7 @@ module Lint {
             }
 
             // we're currently disabled and enabling, or currently enabled and disabling -- a switch
-            if (newPositionToCheck.isEnable === isCurrentlyDisabled) {
+            if (newPositionToCheck.isEnabled === isCurrentlyDisabled) {
                 if (!isCurrentlyDisabled) {
                     // start a new interval
                     disabledStartPosition = newPositionToCheck.position;

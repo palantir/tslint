@@ -35,7 +35,7 @@ module Lint {
         output: string;
     }
 
-    class DisableEnableRulesWalker extends Lint.RuleWalker {
+    class EnableDisableRulesWalker extends Lint.RuleWalker {
 
         public enableDisableRuleMap: {[rulename: string]: Lint.IEnableDisablePosition[]} = {};
 
@@ -58,7 +58,7 @@ module Lint {
                         // followed by either whitespace or end of string
                         var enableOrDisableMatch = commentTextParts[1].match(/^(enable|disable)(\s|$)/);
                         if (enableOrDisableMatch != null) {
-                            var isEnable = enableOrDisableMatch[1] === "enable";
+                            var isEnabled = enableOrDisableMatch[1] === "enable";
                             var position = currentPosition;
                             var rulesList = ["all"];
                             if (commentTextParts.length > 2) {
@@ -68,7 +68,7 @@ module Lint {
                                 if (!(ruleToAdd in this.enableDisableRuleMap)) {
                                     this.enableDisableRuleMap[ruleToAdd] = [];
                                 }
-                                this.enableDisableRuleMap[ruleToAdd].push({position: position, isEnable: isEnable});
+                                this.enableDisableRuleMap[ruleToAdd].push({position: position, isEnabled: isEnabled});
                             });
                         }
 
@@ -94,7 +94,8 @@ module Lint {
             var i, failures = [];
             var syntaxTree = Lint.getSyntaxTree(this.fileName, this.source);
 
-            var rulesWalker: DisableEnableRulesWalker = new DisableEnableRulesWalker(syntaxTree, {disabledIntervals: []});
+            // this walker walks the code first, to find all the intervals where rules are disabled
+            var rulesWalker: EnableDisableRulesWalker = new EnableDisableRulesWalker(syntaxTree, {disabledIntervals: []});
             var sourceUnit = syntaxTree.sourceUnit();
             sourceUnit.accept(rulesWalker);
             var enableDisableRuleMap = rulesWalker.enableDisableRuleMap;

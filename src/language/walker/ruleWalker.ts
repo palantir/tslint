@@ -33,7 +33,7 @@ module Lint {
             super();
 
             this.failures = [];
-            this.options = options.options;
+            this.options = options.ruleArguments;
             this.syntaxTree = syntaxTree;
             this.limit = this.syntaxTree.sourceUnit().fullWidth();
             this.disabledIntervals = options.disabledIntervals;
@@ -79,7 +79,8 @@ module Lint {
 
         public addFailure(failure: RuleFailure) {
             if (!this.existsFailure(failure)) {
-                if (!Lint.intersectionExists(failure, this.disabledIntervals)) {
+                // don't add failures for a rule if the failure intersects an interval where that rule is disabled
+                if (!Lint.doesIntersect(failure, this.disabledIntervals)) {
                     this.failures.push(failure);
                 }
             }

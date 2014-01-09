@@ -33,7 +33,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 var position = diagnostic.start();
                 var lineAndCharacter = syntaxTree.lineMap().getLineAndCharacterFromPosition(position);
                 var ruleFailure = new Lint.RuleFailure(syntaxTree, position, position, Rule.FAILURE_STRING);
-                if (!Lint.intersectionExists(ruleFailure, disabledIntervals)) {
+                if (!Lint.doesIntersect(ruleFailure, disabledIntervals)) {
                     ruleFailures.push(ruleFailure);
                 }
             }

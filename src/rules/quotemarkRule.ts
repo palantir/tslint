@@ -27,7 +27,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public isEnabled(): boolean {
         if (super.isEnabled()) {
-            var quoteMarkString = this.getOptions().options[0];
+            var quoteMarkString = this.getOptions().ruleArguments[0];
             return (quoteMarkString === "single" || quoteMarkString === "double");
         }
 

@@ -22,7 +22,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
         var options = this.getOptions();
         var banFunctionWalker = new BanFunctionWalker(syntaxTree, options);
-        var functionsToBan = options.options;
+        var functionsToBan = options.ruleArguments;
         functionsToBan.forEach((functionToBan) => {
             banFunctionWalker.addBannedFunction(functionToBan);
         });

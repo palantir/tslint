@@ -76,8 +76,10 @@ You can disable/enable tslint inside a file, or some subset of the tslint rules,
 * `/* tslint:disable:rule1 rule2 rule3... */` will disable the listed rules for the rest of the file
 * `/* tslint:enable:rule1 rule2 rule3... */` will enable the listed rules for the rest of the file
 
-Later rules flags will overwrite all previous ones, i.e. a disable followed by code followed by an enable will disable the rules only after the disable and before the enable.
-Enabling already enabled rules and disabling already disabled rules will have no effect.
+Rules flags will enable and disable rules as they are passed, each directive will turn the rules listed in the flag on or off until a later flag turns the rule on or off.
+Disabling an already disabled rule and enabling an already enabled rule will have no effect.
+
+For instance: imagine we have a file with `/* tslint:disable */` on the first line of a file, `/* tslint:enable:ban class-name */` on the tenth line and a `/* tslint:enable */` on the twentieth. No rules will be checked between the first line and the tenth, only the ban and class-name rules will be checked between the tenth and twentieth, and all rules will be checked for the remainder of the file.
 
 Installation
 ------------
