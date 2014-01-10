@@ -158,7 +158,7 @@ tslint accepts the following commandline options:
         The formatter to use to format the results of the linter before
         outputting it to stdout or the file passed in --out. The core
         formatters are prose (human readable) and json (machine readable),
-        and prose is the default if this option is not used. Additonal
+        and prose is the default if this option is not used. Additional
         formatters can be added and used if the --formatters-dir option
         is set.
 
