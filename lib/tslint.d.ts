@@ -6474,8 +6474,16 @@ declare module TypeScript {
     }
 }
 declare module Lint {
+    interface IOptions {
+        ruleArguments?: any[];
+        disabledIntervals: IDisabledInterval[];
+    }
+    interface IDisabledInterval {
+        startPosition: number;
+        endPosition: number;
+    }
     interface Rule {
-        getOptions(): any[];
+        getOptions(): IOptions;
         isEnabled(): boolean;
         apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[];
         applyWithWalker(walker: Lint.RuleWalker): RuleFailure[];
@@ -6515,7 +6523,8 @@ declare module Lint {
         private options;
         private failures;
         private syntaxTree;
-        constructor(syntaxTree: TypeScript.SyntaxTree, options?: any);
+        private disabledIntervals;
+        constructor(syntaxTree: TypeScript.SyntaxTree, options: Lint.IOptions);
         public getSyntaxTree(): TypeScript.SyntaxTree;
         public getFailures(): Lint.RuleFailure[];
         public positionAfter(...elements: TypeScript.ISyntaxElement[]): number;
@@ -6527,7 +6536,13 @@ declare module Lint {
     }
 }
 declare module Lint {
-    function loadRules(ruleConfiguration: any, rulesDirectory?: string): Rule[];
+    interface IEnableDisablePosition {
+        isEnabled: boolean;
+        position: number;
+    }
+    function loadRules(ruleConfiguration: any, enableDisableRuleMap: {
+        [rulename: string]: IEnableDisablePosition[];
+    }, rulesDirectory?: string): Rule[];
     function findRule(name: string, rulesDirectory?: string): any;
 }
 declare module Lint.Configuration {
@@ -9536,12 +9551,14 @@ declare module TypeScript {
 }
 declare module Lint {
     function getSyntaxTree(fileName: string, source: string): TypeScript.SyntaxTree;
+    function doesIntersect(failure: RuleFailure, disabledIntervals: IDisabledInterval[]): boolean;
 }
 declare module Lint.Rules {
     class AbstractRule implements Lint.Rule {
         private value;
-        constructor(value: any);
-        public getOptions(): any[];
+        private disabledIntervals;
+        constructor(value: any, disabledIntervals: Lint.IDisabledInterval[]);
+        public getOptions(): Lint.IOptions;
         public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[];
         public applyWithWalker(walker: Lint.RuleWalker): Lint.RuleFailure[];
         public isEnabled(): boolean;
