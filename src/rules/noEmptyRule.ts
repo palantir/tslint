@@ -25,16 +25,45 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class BlockWalker extends Lint.RuleWalker {
+    private ignoredBlocks: TypeScript.BlockSyntax[] = [];
+    
     public visitBlock(node: TypeScript.BlockSyntax): void {
         var hasCommentAfter = node.openBraceToken.trailingTrivia().hasComment();
         var hasCommentBefore = node.closeBraceToken.leadingTrivia().hasComment();
+        var isSkipped = this.ignoredBlocks.indexOf(node) !== -1;
 
-        if (node.statements.childCount() <= 0 && !hasCommentAfter && !hasCommentBefore) {
+        if (node.statements.childCount() <= 0 && !hasCommentAfter && !hasCommentBefore && !isSkipped) {
             var position = this.position() + node.leadingTriviaWidth();
             var width = node.width();
             this.addFailure(this.createFailure(position, width, Rule.FAILURE_STRING));
         }
 
         super.visitBlock(node);
+    }
+
+    public visitConstructorDeclaration(node: TypeScript.ConstructorDeclarationSyntax): void {
+        var isSkipped = false;
+
+        for (var i = 0; i < node.parameterList.parameters.childCount(); i++) {
+            var param = <TypeScript.ParameterSyntax>node.parameterList.parameters.childAt(i);
+
+            for (var j = 0; j < param.modifiers.childCount(); j++) {
+                var modifier = param.modifiers.childAt(j).kind();
+
+                if (modifier === TypeScript.SyntaxKind.PublicKeyword || modifier === TypeScript.SyntaxKind.PrivateKeyword) {
+                    isSkipped = true;
+
+                    this.ignoredBlocks.push(node.block);
+
+                    break;
+                }
+            }
+
+            if (isSkipped) {
+                break;
+            }
+        }
+
+        super.visitConstructorDeclaration(node);
     }
 }
