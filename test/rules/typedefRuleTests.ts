@@ -79,7 +79,10 @@ describe("<typedef, enabled>", () => {
     });
 
     it("enforces typedef in propertySignature", () => {
-        var expectedFailure = Lint.Test.createFailure(fileName, [10, 9], [10, 10], "expected propertySignature: 'Prop' to have a typedef.");
+        var expectedFailure = Lint.Test.createFailure(fileName,
+            [10, 9],
+            [10, 10],
+            "expected propertySignature: 'Prop' to have a typedef.");
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
