@@ -43,4 +43,13 @@ describe("<no-empty>", () => {
         var expectedFailure = createFailure([11, 29], [11, 32]);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
+
+    it("forbids empty constructors", () => {
+        var expectedFailure = createFailure([24, 34], [25, 6]);
+        Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
+    });
+
+    it("non empty blocks are allowed", () => {
+        assert.lengthOf(actualFailures, 5);
+    });
 });

@@ -14,3 +14,13 @@ for (var x = 0; x < 1; ++x) { }
 for (var y = 0; y < 1; ++y) {
     // empty here
 }
+
+class testClass {
+    constructor(private allowed: any) {
+    }
+}
+
+class testClass2 {
+    constructor(notAllowed: any) {
+    }
+}
