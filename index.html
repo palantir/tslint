@@ -1,247 +1,303 @@
-<!doctype html>
+﻿<!doctype html>
 <html>
-  <head>
+<head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <title>TSLint by palantir</title>
-
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <link href="stylesheets/app.min.css" rel="stylesheet" />
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-  </head>
-  <body>
+</head>
+<body>
     <div class="wrapper">
-      <header>
-        <h1>TSLint</h1>
-        <p>A Linter for the TypeScript language.</p>
+        <header>
+            <h1>TSLint</h1>
+            <p>A Linter for the TypeScript language.</p>
 
-        <p class="view"><a href="https://github.com/palantir/tslint">View the Project on GitHub <small>palantir/tslint</small></a></p>
+            <p class="view"><a href="https://github.com/palantir/tslint">View the Project on GitHub <small>palantir/tslint</small></a></p>
 
 
-        <ul>
-          <li><a href="https://github.com/palantir/tslint/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/palantir/tslint/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/palantir/tslint">View On <strong>GitHub</strong></a></li>
-        </ul>
-      </header>
-      <section>
-        <h1>
-<a name="tslint--" class="anchor" href="#tslint--"><span class="octicon octicon-link"></span></a>tslint <a href="http://badge.fury.io/js/tslint"><img src="https://badge.fury.io/js/tslint.png" alt="NPM version"></a> <a href="https://travis-ci.org/palantir/tslint"><img src="https://api.travis-ci.org/repositories/palantir/tslint.png?branch=master" alt="Builds"></a>
-</h1>
+            <ul>
+                <li><a href="https://github.com/palantir/tslint/zipball/master">Download <strong>ZIP File</strong></a></li>
+                <li><a href="https://github.com/palantir/tslint/tarball/master">Download <strong>TAR Ball</strong></a></li>
+                <li><a href="https://github.com/palantir/tslint">View On <strong>GitHub</strong></a></li>
+            </ul>
+        </header>
+        <section>
+            <h1>
+                <a name="tslint--" class="anchor" href="#tslint--"><span class="octicon octicon-link"></span></a>tslint <a href="http://badge.fury.io/js/tslint"><img src="https://badge.fury.io/js/tslint.png" alt="NPM version"></a> <a href="https://travis-ci.org/palantir/tslint"><img src="https://api.travis-ci.org/repositories/palantir/tslint.png?branch=master" alt="Builds"></a>
+            </h1>
 
-<p>A linter for the TypeScript language.</p>
+            <p>A linter for the TypeScript language.</p>
 
-<h2>
-<a name="supported-rules" class="anchor" href="#supported-rules"><span class="octicon octicon-link"></span></a>Supported Rules</h2>
+            <h2>
+                <a name="supported-rules" class="anchor" href="#supported-rules"><span class="octicon octicon-link"></span></a>Supported Rules
+            </h2>
 
-<ul>
-<li>
-<code>ban</code> bans the use of specific functions. Options are ["object", "function"] pairs that ban the use of object.function()</li>
-<li>
-<code>class-name</code> enforces PascalCased class and interface names.</li>
-<li>
-<code>comment-format</code> enforces rules for single-line comments. Rule options:
+            <ul>
+                <li>
+                    <code>ban</code> bans the use of specific functions. Options are ["object", "function"] pairs that ban the use of object.function()
+                </li>
+                <li>
+                    <code>class-name</code> enforces PascalCased class and interface names.
+                </li>
+                <li>
+                    <code>comment-format</code> enforces rules for single-line comments. Rule options:
 
-<ul>
-<li>
-<code>"check-space"</code> enforces the rule that all single-line comments must begin with a space, as in <code>// comment</code>
+                    <ul>
+                        <li>
+                            <code>"check-space"</code> enforces the rule that all single-line comments must begin with a space, as in <code>// comment</code>
 
-<ul>
-<li>note that comments starting with <code>///</code> are also allowed, for things such as ///</li>
-</ul>
-</li>
-<li>
-<code>"check-lowercase"</code> enforces the rule that the first non-whitespace character of a comment must be lowercase, if applicable</li>
-</ul>
-</li>
-<li>
-<code>curly</code> enforces braces for <code>if</code>/<code>for</code>/<code>do</code>/<code>while</code> statements.</li>
-<li>
-<code>eofline</code> enforces the file to end with a newline.</li>
-<li>
-<code>forin</code> enforces a <code>for ... in</code> statement to be filtered with an <code>if</code> statement.*</li>
-<li>
-<code>indent</code> enforces consistent indentation levels (currently disabled).</li>
-<li>
-<code>interface-name</code> enforces the rule that interface names must begin with a capital 'I'</li>
-<li>
-<code>jsdoc-format</code> enforces basic format rules for jsdoc comments -- comments starting with <code>/**</code>
+                            <ul>
+                                <li>note that comments starting with <code>///</code> are also allowed, for things such as ///</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <code>"check-lowercase"</code> enforces the rule that the first non-whitespace character of a comment must be lowercase, if applicable
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <code>curly</code> enforces braces for <code>if</code>/<code>for</code>/<code>do</code>/<code>while</code> statements.
+                </li>
+                <li>
+                    <code>eofline</code> enforces the file to end with a newline.
+                </li>
+                <li>
+                    <code>forin</code> enforces a <code>for ... in</code> statement to be filtered with an <code>if</code> statement.*
+                </li>
+                <li>
+                    <code>indent</code> enforces consistent indentation levels (currently disabled).
+                </li>
+                <li>
+                    <code>interface-name</code> enforces the rule that interface names must begin with a capital 'I'
+                </li>
+                <li>
+                    <code>jsdoc-format</code> enforces basic format rules for jsdoc comments -- comments starting with <code>/**</code>
 
-<ul>
-<li>each line contains an asterisk and asterisks must be aligned</li>
-<li>each asterisk must be followed by either a space or a newline (except for the first and the last)</li>
-<li>the only characters before the asterisk on each line must be whitepace characters</li>
-</ul>
-</li>
-<li>
-<code>label-position</code> enforces labels only on sensible statements.</li>
-<li>
-<code>label-undefined</code> checks that labels are defined before usage.</li>
-<li>
-<code>max-line-length</code> sets the maximum length of a line.</li>
-<li>
-<code>no-arg</code> disallows access to <code>arguments.callee</code>.</li>
-<li>
-<code>no-bitwise</code> disallows bitwise operators.</li>
-<li>
-<code>no-console</code> disallows access to the specified functions on <code>console</code>. Rule options are functions to ban on the console variable.</li>
-<li>
-<code>no-consecutive-blank-lines</code> disallows having more than one blank line in a row in a file</li>
-<li>
-<code>no-construct</code> disallows access to the constructors of <code>String</code>, <code>Number</code>, and <code>Boolean</code>.</li>
-<li>
-<code>no-debugger</code> disallows <code>debugger</code> statements.</li>
-<li>
-<code>no-duplicate-key</code> disallows duplicate keys in object literals.</li>
-<li>
-<code>no-duplicate-variable</code> disallows duplicate variable declarations.</li>
-<li>
-<code>no-empty</code> disallows empty blocks.</li>
-<li>
-<code>no-eval</code> disallows <code>eval</code> function invocations.</li>
-<li>
-<code>no-string-literal</code> disallows object access via string literals.</li>
-<li>
-<code>no-trailing-whitespace</code> disallows trailing whitespace at the end of a line.</li>
-<li>
-<code>no-unreachable</code> disallows unreachable code after <code>break</code>, <code>catch</code>, <code>throw</code>, and <code>return</code> statements.</li>
-<li>
-<code>one-line</code> enforces the specified tokens to be on the same line as the expression preceding it. Rule options:
+                    <ul>
+                        <li>each line contains an asterisk and asterisks must be aligned</li>
+                        <li>each asterisk must be followed by either a space or a newline (except for the first and the last)</li>
+                        <li>the only characters before the asterisk on each line must be whitepace characters</li>
+                    </ul>
+                </li>
+                <li>
+                    <code>label-position</code> enforces labels only on sensible statements.
+                </li>
+                <li>
+                    <code>label-undefined</code> checks that labels are defined before usage.
+                </li>
+                <li>
+                    <code>max-line-length</code> sets the maximum length of a line.
+                </li>
+                <li>
+                    <code>no-arg</code> disallows access to <code>arguments.callee</code>.
+                </li>
+                <li>
+                    <code>no-bitwise</code> disallows bitwise operators.
+                </li>
+                <li>
+                    <code>no-console</code> disallows access to the specified functions on <code>console</code>. Rule options are functions to ban on the console variable.
+                </li>
+                <li>
+                    <code>no-consecutive-blank-lines</code> disallows having more than one blank line in a row in a file
+                </li>
+                <li>
+                    <code>no-construct</code> disallows access to the constructors of <code>String</code>, <code>Number</code>, and <code>Boolean</code>.
+                </li>
+                <li>
+                    <code>no-debugger</code> disallows <code>debugger</code> statements.
+                </li>
+                <li>
+                    <code>no-duplicate-key</code> disallows duplicate keys in object literals.
+                </li>
+                <li>
+                    <code>no-duplicate-variable</code> disallows duplicate variable declarations.
+                </li>
+                <li>
+                    <code>no-empty</code> disallows empty blocks.
+                </li>
+                <li>
+                    <code>no-eval</code> disallows <code>eval</code> function invocations.
+                </li>
+                <li>
+                    <code>no-string-literal</code> disallows object access via string literals.
+                </li>
+                <li>
+                    <code>no-trailing-whitespace</code> disallows trailing whitespace at the end of a line.
+                </li>
+                <li>
+                    <code>no-unreachable</code> disallows unreachable code after <code>break</code>, <code>catch</code>, <code>throw</code>, and <code>return</code> statements.
+                </li>
+                <li>
+                    <code>one-line</code> enforces the specified tokens to be on the same line as the expression preceding it. Rule options:
 
-<ul>
-<li>
-<code>"check-catch"</code> checks that <code>catch</code> is on the same line as the closing brace for <code>try</code>
-</li>
-<li>
-<code>"check-else"</code> checks that <code>else</code> is on the same line as the closing brace for <code>if</code>
-</li>
-<li>
-<code>"check-open-brace"</code> checks that an open brace falls on the same line as its preceding expression.</li>
-<li>
-<code>"check-whitespace"</code> checks preceding whitespace for the specified tokens.</li>
-</ul>
-</li>
-<li>
-<code>quotemark</code> enforces consistent single or double quoted string literals.</li>
-<li>
-<code>radix</code> enforces the radix parameter of <code>parseInt</code>
-</li>
-<li>
-<code>semicolon</code> enforces semicolons at the end of every statement.</li>
-<li>
-<code>triple-equals</code> enforces === and !== in favor of == and !=.</li>
-<li>
-<code>typedef</code> enforces type definitions to exist. Rule options:
+                    <ul>
+                        <li>
+                            <code>"check-catch"</code> checks that <code>catch</code> is on the same line as the closing brace for <code>try</code>
+                        </li>
+                        <li>
+                            <code>"check-else"</code> checks that <code>else</code> is on the same line as the closing brace for <code>if</code>
+                        </li>
+                        <li>
+                            <code>"check-open-brace"</code> checks that an open brace falls on the same line as its preceding expression.
+                        </li>
+                        <li>
+                            <code>"check-whitespace"</code> checks preceding whitespace for the specified tokens.
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <code>quotemark</code> enforces consistent single or double quoted string literals.
+                </li>
+                <li>
+                    <code>radix</code> enforces the radix parameter of <code>parseInt</code>
+                </li>
+                <li>
+                    <code>semicolon</code> enforces semicolons at the end of every statement.
+                </li>
+                <li>
+                    <code>triple-equals</code> enforces === and !== in favor of == and !=.
+                </li>
+                <li>
+                    <code>typedef</code> enforces type definitions to exist. Rule options:
 
-<ul>
-<li>
-<code>"callSignature"</code> checks return type of functions</li>
-<li>
-<code>"catchClause"</code> checks type in exception catch blocks</li>
-<li>
-<code>"indexSignature"</code> checks index type specifier of indexers</li>
-<li>
-<code>"parameter"</code> checks type specifier of parameters</li>
-<li>
-<code>"propertySignature"</code> checks return types of interface properties</li>
-<li>
-<code>"variableDeclarator"</code> checks variable declarations</li>
-</ul>
-</li>
-<li>
-<code>typedef-whitespace</code> enforces spacing whitespace for type definitions. Each rule option requires a value of <code>"space"</code> or <code>"nospace"</code>
-to require a space or no space before the type specifier's colon. Rule options:
+                    <ul>
+                        <li>
+                            <code>"callSignature"</code> checks return type of functions
+                        </li>
+                        <li>
+                            <code>"catchClause"</code> checks type in exception catch blocks
+                        </li>
+                        <li>
+                            <code>"indexSignature"</code> checks index type specifier of indexers
+                        </li>
+                        <li>
+                            <code>"parameter"</code> checks type specifier of parameters
+                        </li>
+                        <li>
+                            <code>"propertySignature"</code> checks return types of interface properties
+                        </li>
+                        <li>
+                            <code>"variableDeclarator"</code> checks variable declarations
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <code>typedef-whitespace</code> enforces spacing whitespace for type definitions. Each rule option requires a value of <code>"space"</code> or <code>"nospace"</code>
+                    to require a space or no space before the type specifier's colon. Rule options:
 
-<ul>
-<li>
-<code>"callSignature"</code> checks return type of functions</li>
-<li>
-<code>"catchClause"</code> checks type in exception catch blocks</li>
-<li>
-<code>"indexSignature"</code> checks index type specifier of indexers</li>
-</ul>
-</li>
-<li>
-<code>use-strict</code> enforces ECMAScript 5's strict mode
+                    <ul>
+                        <li>
+                            <code>"callSignature"</code> checks return type of functions
+                        </li>
+                        <li>
+                            <code>"catchClause"</code> checks type in exception catch blocks
+                        </li>
+                        <li>
+                            <code>"indexSignature"</code> checks index type specifier of indexers
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <code>use-strict</code> enforces ECMAScript 5's strict mode
 
-<ul>
-<li>
-<code>check-module</code> checks that all top-level modules are using strict mode</li>
-<li>
-<code>check-function</code> checks that all top-level functions are using strict mode</li>
-</ul>
-</li>
-<li>
-<code>variable-name</code> allows only camelCased or UPPER_CASED variable names. Rule options:
+                    <ul>
+                        <li>
+                            <code>check-module</code> checks that all top-level modules are using strict mode
+                        </li>
+                        <li>
+                            <code>check-function</code> checks that all top-level functions are using strict mode
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <code>variable-name</code> allows only camelCased or UPPER_CASED variable names. Rule options:
 
-<ul>
-<li>
-<code>"allow-leading-underscore"</code> allows underscores at the beginnning.</li>
-</ul>
-</li>
-<li>
-<code>whitespace</code> enforces spacing whitespace. Rule options:
+                    <ul>
+                        <li>
+                            <code>"allow-leading-underscore"</code> allows underscores at the beginnning.
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <code>whitespace</code> enforces spacing whitespace. Rule options:
 
-<ul>
-<li>
-<code>"check-branch"</code> checks branching statements (<code>if</code>/<code>else</code>/<code>for</code>/<code>while</code>) are followed by whitespace</li>
-<li>
-<code>"check-decl"</code>checks that variable declarations have whitespace around the equals token</li>
-<li>
-<code>"check-operator"</code> checks for whitespace around operator tokens</li>
-<li>
-<code>"check-separator"</code> checks for whitespace after separator tokens (<code>,</code>/<code>;</code>)</li>
-<li>
-<code>"check-type"</code> checks for whitespace before a variable type specification</li>
-</ul>
-</li>
-</ul><h2>
-<a name="tslint-rule-flags" class="anchor" href="#tslint-rule-flags"><span class="octicon octicon-link"></span></a>tslint rule flags</h2>
+                    <ul>
+                        <li>
+                            <code>"check-branch"</code> checks branching statements (<code>if</code>/<code>else</code>/<code>for</code>/<code>while</code>) are followed by whitespace
+                        </li>
+                        <li>
+                            <code>"check-decl"</code>checks that variable declarations have whitespace around the equals token
+                        </li>
+                        <li>
+                            <code>"check-operator"</code> checks for whitespace around operator tokens
+                        </li>
+                        <li>
+                            <code>"check-separator"</code> checks for whitespace after separator tokens (<code>,</code>/<code>;</code>)
+                        </li>
+                        <li>
+                            <code>"check-type"</code> checks for whitespace before a variable type specification
+                        </li>
+                    </ul>
+                </li>
+            </ul><h2>
+                <a name="tslint-rule-flags" class="anchor" href="#tslint-rule-flags"><span class="octicon octicon-link"></span></a>tslint rule flags
+            </h2>
 
-<p>You can disable/enable tslint inside a file, or some subset of the tslint rules, with the following comment rule flags:</p>
+            <p>You can disable/enable tslint inside a file, or some subset of the tslint rules, with the following comment rule flags:</p>
 
-<ul>
-<li>
-<code>/* tslint:disable */</code> will disable all rules for the rest of the file</li>
-<li>
-<code>/* tslint:enable */</code> will enable all rules for the rest of the file</li>
-<li>
-<code>/* tslint:disable:rule1 rule2 rule3... */</code> will disable the listed rules for the rest of the file</li>
-<li>
-<code>/* tslint:enable:rule1 rule2 rule3... */</code> will enable the listed rules for the rest of the file</li>
-</ul><p>Rules flags will enable and disable rules as they are passed, each directive will turn the rules listed in the flag on or off until a later flag turns the rule on or off.
-Disabling an already disabled rule and enabling an already enabled rule will have no effect.</p>
+            <ul>
+                <li>
+                    <code>/* tslint:disable */</code> will disable all rules for the rest of the file
+                </li>
+                <li>
+                    <code>/* tslint:enable */</code> will enable all rules for the rest of the file
+                </li>
+                <li>
+                    <code>/* tslint:disable:rule1 rule2 rule3... */</code> will disable the listed rules for the rest of the file
+                </li>
+                <li>
+                    <code>/* tslint:enable:rule1 rule2 rule3... */</code> will enable the listed rules for the rest of the file
+                </li>
+            </ul><p>
+                Rules flags will enable and disable rules as they are passed, each directive will turn the rules listed in the flag on or off until a later flag turns the rule on or off.
+                Disabling an already disabled rule and enabling an already enabled rule will have no effect.
+            </p>
 
-<p>For instance: imagine we have a file with <code>/* tslint:disable */</code> on the first line of a file, <code>/* tslint:enable:ban class-name */</code> on the tenth line and a <code>/* tslint:enable */</code> on the twentieth. No rules will be checked between the first line and the tenth, only the ban and class-name rules will be checked between the tenth and twentieth, and all rules will be checked for the remainder of the file.</p>
+            <p>For instance: imagine we have a file with <code>/* tslint:disable */</code> on the first line of a file, <code>/* tslint:enable:ban class-name */</code> on the tenth line and a <code>/* tslint:enable */</code> on the twentieth. No rules will be checked between the first line and the tenth, only the ban and class-name rules will be checked between the tenth and twentieth, and all rules will be checked for the remainder of the file.</p>
 
-<h2>
-<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
+            <h2>
+                <a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation
+            </h2>
 
-<h5>
-<a name="cli" class="anchor" href="#cli"><span class="octicon octicon-link"></span></a>CLI</h5>
+            <h5>
+                <a name="cli" class="anchor" href="#cli"><span class="octicon octicon-link"></span></a>CLI
+            </h5>
 
 <pre><code>sudo npm install tslint -g
 </code></pre>
 
-<h5>
-<a name="library" class="anchor" href="#library"><span class="octicon octicon-link"></span></a>Library</h5>
+            <h5>
+                <a name="library" class="anchor" href="#library"><span class="octicon octicon-link"></span></a>Library
+            </h5>
 
 <pre><code>npm install tslint
 </code></pre>
 
-<h2>
-<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
+            <h2>
+                <a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage
+            </h2>
 
-<p>Please first ensure that the TypeScript source files compile correctly.</p>
+            <p>Please first ensure that the TypeScript source files compile correctly.</p>
 
-<h5>
-<a name="cli-1" class="anchor" href="#cli-1"><span class="octicon octicon-link"></span></a>CLI</h5>
+            <h5>
+                <a name="cli-1" class="anchor" href="#cli-1"><span class="octicon octicon-link"></span></a>CLI
+            </h5>
 
 <pre><code>usage: tslint
-
 Options:
   -c, --config           configuration file
   -f, --file             file to lint                 [required]
@@ -251,10 +307,11 @@ Options:
   -t, --format           output format (prose, json)  [default: "prose"]
 </code></pre>
 
-<p>By default, configuration is loaded from <code>tslint.json</code>, if it exists in the current path.</p>
+            <p>By default, configuration is loaded from <code>tslint.json</code>, if it exists in the current path.</p>
 
-<h5>
-<a name="library-1" class="anchor" href="#library-1"><span class="octicon octicon-link"></span></a>Library</h5>
+            <h5>
+                <a name="library-1" class="anchor" href="#library-1"><span class="octicon octicon-link"></span></a>Library
+            </h5>
 
 <pre><code>var options = {
     formatter: "json",
@@ -262,18 +319,45 @@ Options:
     rulesDirectory: "customRules/",
     formattersDirectory: "customFormatters/"
 };
-
 var Linter = require("tslint");
-
 var ll = new Linter(fileName, contents, options);
 var result = ll.lint();
 </code></pre>
 
-<h2>
-<a name="development" class="anchor" href="#development"><span class="octicon octicon-link"></span></a>Development</h2>
+            <h5>
+                <a name="library-1" class="anchor" href="#library-1"><span class="octicon octicon-link"></span></a>Here is the sample <code>jsonFormatter.js</code>
+            </h5>
 
-<h3>
-<a name="setup" class="anchor" href="#setup"><span class="octicon octicon-link"></span></a>Setup</h3>
+<pre><code>/* jshint node: true */
+"use strict";
+function PathFormatter() { }
+PathFormatter.prototype.format = function (failures) {
+    var messageItems = failures.map(function (result) {
+        var lineAndCharacter = result.getStartPosition()
+                                     .getLineAndCharacter();
+        return {
+            Line: lineAndCharacter.line() + 1
+          , Column: lineAndCharacter.character() + 1
+          , Message: "TsLint: " + result.getFailure()
+          , FileName: result.getFileName()
+        };
+    }).sort(function (a, b) {
+        return a.Line < b.Line ? -1 : (a.Line > b.Line ? 1 : 0);
+    });
+    return JSON.stringify(messageItems);
+};
+module.exports = {
+    Formatter: PathFormatter
+};
+</code></pre>
+
+            <h2>
+                <a name="development" class="anchor" href="#development"><span class="octicon octicon-link"></span></a>Development
+            </h2>
+
+            <h3>
+                <a name="setup" class="anchor" href="#setup"><span class="octicon octicon-link"></span></a>Setup
+            </h3>
 
 <pre><code>git clone git@github.com:palantir/tslint.git
 cd tslint
@@ -281,27 +365,29 @@ git submodule init
 git submodule update
 </code></pre>
 
-<h3>
-<a name="build" class="anchor" href="#build"><span class="octicon octicon-link"></span></a>Build</h3>
+            <h3>
+                <a name="build" class="anchor" href="#build"><span class="octicon octicon-link"></span></a>Build
+            </h3>
 
 <pre><code>npm install
 grunt
 </code></pre>
 
-<h2>
-<a name="todo" class="anchor" href="#todo"><span class="octicon octicon-link"></span></a>TODO</h2>
+            <h2>
+                <a name="todo" class="anchor" href="#todo"><span class="octicon octicon-link"></span></a>TODO
+            </h2>
 
-<ul>
-<li>Add more rules from jshint</li>
-<li>Disallow unused variables</li>
-</ul>
-      </section>
-      <footer>
-        <p>This project is maintained by <a href="https://github.com/palantir">palantir</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
-      </footer>
+            <ul>
+                <li>Add more rules from jshint</li>
+                <li>Disallow unused variables</li>
+            </ul>
+        </section>
+        <footer>
+            <p>This project is maintained by <a href="https://github.com/palantir">palantir</a></p>
+            <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+        </footer>
     </div>
-    <script src="javascripts/scale.fix.js"></script>
-    
-  </body>
+    <script src="javascripts/app.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</body>
 </html>
