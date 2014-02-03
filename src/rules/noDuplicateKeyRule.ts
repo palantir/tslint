@@ -27,9 +27,9 @@ class NoDuplicateKeyWalker extends Lint.RuleWalker {
     private objectKeys;
 
     public visitObjectLiteralExpression(node: TypeScript.ObjectLiteralExpressionSyntax): void {
-        this.objectKeys = {};
+        this.objectKeys = Object.create(null);
         super.visitObjectLiteralExpression(node);
-        this.objectKeys = {};
+        this.objectKeys = Object.create(null);
     }
 
     public visitSimplePropertyAssignment(node: TypeScript.SimplePropertyAssignmentSyntax): void {
