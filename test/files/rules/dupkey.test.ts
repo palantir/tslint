@@ -24,3 +24,8 @@ var z = {
     a: 1,
     b: "a"
 };
+
+var n = {
+    constructor: function () {},
+    hasOwnProperty: function () {}
+};
