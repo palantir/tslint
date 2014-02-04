@@ -6556,6 +6556,15 @@ declare module Lint {
 declare module Lint {
     function findFormatter(name: string, formattersDirectory?: string): any;
 }
+declare module Lint {
+    class EnableDisableRulesWalker extends Lint.RuleWalker {
+        public enableDisableRuleMap: {
+            [rulename: string]: Lint.IEnableDisablePosition[];
+        };
+        public visitToken(token: TypeScript.ISyntaxToken): void;
+        private findSwitchesInTrivia(triviaList, startingPosition);
+    }
+}
 declare module TypeScript {
     module CompilerDiagnostics {
         var debug: boolean;
