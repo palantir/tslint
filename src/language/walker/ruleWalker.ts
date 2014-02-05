@@ -23,7 +23,6 @@ module Lint {
 
     export class RuleWalker extends TypeScript.PositionTrackingWalker {
         private limit: number;
-        private fileName: string;
         private options: any[];
         private failures: RuleFailure[];
         private syntaxTree: TypeScript.SyntaxTree;

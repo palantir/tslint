@@ -6520,7 +6520,6 @@ declare module Lint {
 declare module Lint {
     class RuleWalker extends TypeScript.PositionTrackingWalker {
         private limit;
-        private fileName;
         private options;
         private failures;
         private syntaxTree;
