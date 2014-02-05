@@ -51,7 +51,11 @@ var optimist = require("optimist")
             alias: "format",
             describe: "output format (prose, json)",
             default: "prose"
-        }
+        },
+        "h": {
+            alias: "help",
+            describe: "display detailed help"
+        },
     });
 var argv = optimist.argv;
 
@@ -67,8 +71,8 @@ if (argv.o !== undefined) {
 }
 
 if ("help" in argv) {
-    optimist.showHelp(outputStream.write);
-    var outputString = "tslint accepts the following commandline options:\n" +
+    outputStream.write(optimist.help());
+    var outputString = "\ntslint accepts the following commandline options:\n" +
         "\n" +
         "    -f, --file:\n" +
         "        The location of the TypeScript file that you wish to lint. This\n" +
@@ -116,7 +120,7 @@ if ("help" in argv) {
         "        formatters can be added and used if the --formatters-dir option\n" +
         "        is set.\n" +
         "\n" +
-        "    --help:\n" +
+        "    -h, --help:\n" +
         "       Prints this help message.\n";
     outputStream.write(outputString);
     process.exit(0);
