@@ -9587,6 +9587,8 @@ declare module Lint {
         public createScope(): T;
         public getCurrentScope(): T;
         public getCurrentDepth(): number;
+        public onScopeStart(): void;
+        public onScopeEnd(): void;
         private isScopeBoundary(node);
     }
 }

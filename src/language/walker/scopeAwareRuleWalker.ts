@@ -34,7 +34,9 @@ module Lint {
                 this.scopeStack.push(this.createScope());
             }
 
+            this.onScopeStart();
             super.visitNode(node);
+            this.onScopeEnd();
 
             if (isNewScope) {
                 this.scopeStack.pop();
@@ -54,6 +56,16 @@ module Lint {
         // get the depth of the scope stack
         public getCurrentDepth(): number {
             return this.scopeStack.length;
+        }
+
+        // callback notifier when a scope begins
+        public onScopeStart(): void {
+            return;
+        }
+
+        // callback notifier when a scope ends
+        public onScopeEnd(): void {
+            return;
         }
 
         private isScopeBoundary(node: TypeScript.SyntaxNode): boolean {

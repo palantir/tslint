@@ -27,28 +27,132 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-class NoUnusedVariablesWalker extends Lint.RuleWalker {
+class NoUnusedVariablesWalker extends Lint.ScopeAwareRuleWalker<ScopeInfo> {
     private fileName: string;
+    private skipVariableDeclaration: boolean;
     private languageServices: TypeScript.Services.LanguageService;
 
     constructor(syntaxTree: TypeScript.SyntaxTree, options: Lint.IOptions, languageServices: TypeScript.Services.LanguageService) {
         super(syntaxTree, options);
         this.fileName = syntaxTree.fileName();
+        this.skipVariableDeclaration = false;
         this.languageServices = languageServices;
+    }
+
+    public createScope(): ScopeInfo {
+        return new ScopeInfo();
     }
 
     public visitImportDeclaration(node: TypeScript.ImportDeclarationSyntax): void {
         var position = this.positionAfter(node.importKeyword);
-        var references = this.languageServices.getReferencesAtPosition(this.fileName, position);
-
-        if (references.length <= 1) {
-            var failureString = Rule.FAILURE_STRING + "'" + node.identifier.text() + "'";
-            var failure = this.createFailure(position, node.identifier.width(), failureString);
-            this.addFailure(failure);
-        }
-
+        this.validateReferencesForVariable(node.identifier.text(), position);
         super.visitImportDeclaration(node);
     }
+
+    // check variable declarations
+    public visitVariableDeclarator(node: TypeScript.VariableDeclaratorSyntax): void {
+        var propertyName = node.propertyName,
+            variableName = propertyName.text(),
+            position = this.position() + propertyName.leadingTriviaWidth(),
+            currentScope = this.getCurrentScope();
+
+        if (!this.skipVariableDeclaration) {
+            currentScope.variables[variableName] = position;
+        }
+
+        super.visitVariableDeclarator(node);
+    }
+
+    // skip exported variables
+    public visitVariableStatement(node: TypeScript.VariableStatementSyntax): void {
+        if (this.hasModifier(node.modifiers, "export")) {
+            this.skipVariableDeclaration = true;
+        }
+
+        super.visitVariableStatement(node);
+        this.skipVariableDeclaration = false;
+    }
+
+    // check function declarations (skipping exports)
+    public visitFunctionDeclaration(node: TypeScript.FunctionDeclarationSyntax): void {
+        var currentScope = this.getCurrentScope();
+        var variableName = node.identifier.text();
+        var position = this.positionAfter(node.modifiers, node.functionKeyword);
+
+        if (!this.hasModifier(node.modifiers, "export")) {
+            currentScope.variables[variableName] = position;
+        }
+
+        super.visitFunctionDeclaration(node);
+    }
+
+    // check private member variables
+    public visitMemberVariableDeclaration(node: TypeScript.MemberVariableDeclarationSyntax): void {
+        var modifiers = node.modifiers;
+
+        // if no modifier is specified, the default is public, so skip the current declaration
+        if (modifiers.childCount() === 0) {
+            this.skipVariableDeclaration = true;
+        }
+
+        // if an explicit 'public' modifier is specified, skip the current declaration
+        if (this.hasModifier(modifiers, "public")) {
+            this.skipVariableDeclaration = true;
+        }
+
+        super.visitMemberVariableDeclaration(node);
+        this.skipVariableDeclaration = false;
+    }
+
+    // check private member functions
+    public visitMemberFunctionDeclaration(node: TypeScript.MemberFunctionDeclarationSyntax): void {
+        var modifiers = node.modifiers;
+        var currentScope = this.getCurrentScope();
+        var position = this.positionAfter(node.modifiers);
+
+        if (this.hasModifier(modifiers, "private")) {
+            currentScope.variables[node.propertyName.text()] = position;
+        }
+
+        super.visitMemberFunctionDeclaration(node);
+    }
+
+    public onScopeEnd() {
+        var variables = this.getCurrentScope().variables;
+        for (var variableName in variables) {
+            if (variables.hasOwnProperty(variableName)) {
+                var position = variables[variableName];
+                this.validateReferencesForVariable(variableName, position);
+            }
+        }
+    }
+
+    private hasModifier(modifiers: TypeScript.ISyntaxElement, text: string) {
+        for (var i = 0, n = modifiers.childCount(); i < n; i++) {
+            var modifier = modifiers.childAt(i);
+            if (modifier.isToken()) {
+                var modifierText = (<TypeScript.ISyntaxToken> modifier).text();
+                if (modifierText === text) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private validateReferencesForVariable(name: string, position: number) {
+        var references = this.languageServices.getReferencesAtPosition(this.fileName, position);
+        if (references.length <= 1) {
+            var failureString = Rule.FAILURE_STRING + "'" + name + "'";
+            var failure = this.createFailure(position, name.length, failureString);
+            this.addFailure(failure);
+        }
+    }
+}
+
+class ScopeInfo {
+    public variables: { [name: string]: number; } = {};
 }
 
 class LanguageServiceHost extends TypeScript.NullLogger implements TypeScript.Services.ILanguageServiceHost {
