@@ -30,10 +30,11 @@ module Lint {
         position: number;
     }
 
-    export function loadRules(ruleConfiguration, enableDisableRuleMap: {[rulename: string]: Lint.IEnableDisablePosition[]},
-        rulesDirectory?: string): Rule[] {
+    export function loadRules(ruleConfiguration,
+                              source: string,
+                              enableDisableRuleMap: {[rulename: string]: Lint.IEnableDisablePosition[]},
+                              rulesDirectory?: string): Rule[] {
         var rules = [];
-
         for (var ruleName in ruleConfiguration) {
             if (ruleConfiguration.hasOwnProperty(ruleName)) {
                 var ruleValue = ruleConfiguration[ruleName];
@@ -43,7 +44,7 @@ module Lint {
                     var allList = (all in enableDisableRuleMap ? enableDisableRuleMap[all] : []);
                     var ruleSpecificList = (ruleName in enableDisableRuleMap ? enableDisableRuleMap[ruleName] : []);
                     var disabledIntervals = buildDisabledIntervalsFromSwitches(ruleSpecificList, allList);
-                    rules.push(new Rule(ruleValue, disabledIntervals));
+                    rules.push(new Rule(ruleValue, source, disabledIntervals));
                 }
             }
         }

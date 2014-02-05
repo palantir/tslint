@@ -29,7 +29,7 @@ module Lint {
         return TypeScript.Parser.parse(fileName, text, isDTSFile, TypeScript.getParseOptions(settings));
     }
 
-    function createCompilationSettings(): TypeScript.CompilationSettings {
+    export function createCompilationSettings(): TypeScript.CompilationSettings {
         var settings = new TypeScript.CompilationSettings();
 
         // set target to ES5

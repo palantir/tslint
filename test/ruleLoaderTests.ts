@@ -29,7 +29,7 @@ describe("Rule Loader", () => {
             "no-debugger": true
         };
 
-        var rules = Lint.loadRules(validConfiguration, {}, rulesDirectory);
+        var rules = Lint.loadRules(validConfiguration, "", {}, rulesDirectory);
         assert.equal(rules.length, 5);
     });
 
@@ -39,7 +39,7 @@ describe("Rule Loader", () => {
             "invalidConfig2": false
         };
 
-        var rules = Lint.loadRules(invalidConfiguration, {}, rulesDirectory);
+        var rules = Lint.loadRules(invalidConfiguration, "", {}, rulesDirectory);
         assert.deepEqual(rules, []);
     });
 });

@@ -21,21 +21,25 @@
 module Lint.Rules {
     export class AbstractRule implements Lint.Rule {
         private value: any;
-        private disabledIntervals: Lint.IDisabledInterval[];
+        private options: Lint.IOptions;
 
-        constructor(value: any, disabledIntervals: Lint.IDisabledInterval[]) {
+        constructor(value: any, source: string, disabledIntervals: Lint.IDisabledInterval[]) {
+            var ruleArguments = [];
+
+            if (Array.isArray(value) && value.length > 1) {
+                ruleArguments = value.slice(1);
+            }
+
             this.value = value;
-            this.disabledIntervals = disabledIntervals;
+            this.options = {
+                ruleArguments: ruleArguments,
+                source: source,
+                disabledIntervals: disabledIntervals
+            };
         }
 
         public getOptions(): Lint.IOptions {
-            var value = this.value;
-            var options = [];
-            if (Array.isArray(value) && value.length > 1) {
-                options = value.slice(1);
-            }
-            return {disabledIntervals: this.disabledIntervals, ruleArguments: options};
-
+            return this.options;
         }
 
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {

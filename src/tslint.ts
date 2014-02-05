@@ -26,6 +26,9 @@
 /// <reference path='language/walker/scopeAwareRuleWalker.ts'/>
 /// <reference path='language/walker/stateAwareRuleWalker.ts'/>
 
+/// <reference path='typescript/src/services/languageService.ts'/>
+/// <reference path='typescript/src/services/diagnosticServices.ts'/>
+
 module Lint {
     var path = require("path");
     var moduleDirectory = path.dirname(module.filename);
@@ -52,13 +55,14 @@ module Lint {
             var syntaxTree = Lint.getSyntaxTree(this.fileName, this.source);
 
             // walk the code first to find all the intervals where rules are disabled
-            var rulesWalker: EnableDisableRulesWalker = new EnableDisableRulesWalker(syntaxTree, {disabledIntervals: []});
+            var rulesWalker = new EnableDisableRulesWalker(syntaxTree, {source: this.source, disabledIntervals: []});
             var sourceUnit = syntaxTree.sourceUnit();
             sourceUnit.accept(rulesWalker);
             var enableDisableRuleMap = rulesWalker.enableDisableRuleMap;
 
             var rulesDirectory = this.getRelativePath(this.options.rulesDirectory);
-            var configuredRules = Lint.loadRules(this.options.configuration.rules, enableDisableRuleMap, rulesDirectory);
+            var configuration = this.options.configuration.rules;
+            var configuredRules = Lint.loadRules(configuration, this.source, enableDisableRuleMap, rulesDirectory);
             for (i = 0; i < configuredRules.length; ++i) {
                 var rule = configuredRules[i];
                 if (rule.isEnabled()) {

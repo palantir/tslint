@@ -25,6 +25,7 @@
     "no-eval": true,
     "no-string-literal": true,
     "no-trailing-whitespace": true,
+    "no-unused-variables": true,
     "no-unreachable": true,
     "one-line": [true,
         "check-open-brace",

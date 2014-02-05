@@ -31,7 +31,6 @@ export class Rule extends Lint.Rules.AbstractRule {
   }
 
 export class BanFunctionWalker extends Lint.RuleWalker {
-
     private bannedFunctions: string[][] = [];
 
     public addBannedFunction(bannedFunction: string[]) {
