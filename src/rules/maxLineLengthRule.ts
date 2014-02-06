@@ -38,9 +38,16 @@ export class Rule extends Lint.Rules.AbstractRule {
         var errorString = Rule.FAILURE_STRING + lineLimit;
         var disabledIntervals = this.getOptions().disabledIntervals;
 
+        var source = syntaxTree.sourceUnit().fullText();
+
         for (var i = 0; i < lineStarts.length - 1; ++i) {
             var from = lineStarts[i], to = lineStarts[i + 1];
-            if ((to - from - 1) > lineLimit) {
+            if ((to - from - 1) > lineLimit && !((to - from - 2) === lineLimit && source[to - 2] === "\r")) {
+                // first condition above is whether the line (minus the newline) is larger than the line limit
+                // second two check for windows line endings, that is, check to make sure it is not the case
+                // that we are only over by the limit by exactly one and that the character we are over the
+                // limit by is a '\r' character which does not count against the limit
+                // (and thus we are not actually over the limit).
                 var ruleFailure = new Lint.RuleFailure(syntaxTree, from, to - 1, errorString);
                 if (!Lint.doesIntersect(ruleFailure, disabledIntervals)) {
                     ruleFailures.push(ruleFailure);
