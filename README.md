@@ -192,8 +192,3 @@ Development
 
     npm install
     grunt
-
-TODO
-----
-* Add more rules from jshint
-* Disallow unused variables
