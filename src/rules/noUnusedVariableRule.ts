@@ -27,7 +27,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-class NoUnusedVariablesWalker extends Lint.ScopeAwareRuleWalker<ScopeInfo> {
+class NoUnusedVariablesWalker extends Lint.RuleWalker {
     private fileName: string;
     private skipVariableDeclaration: boolean;
     private languageServices: TypeScript.Services.LanguageService;
@@ -37,10 +37,6 @@ class NoUnusedVariablesWalker extends Lint.ScopeAwareRuleWalker<ScopeInfo> {
         this.fileName = syntaxTree.fileName();
         this.skipVariableDeclaration = false;
         this.languageServices = languageServices;
-    }
-
-    public createScope(): ScopeInfo {
-        return new ScopeInfo();
     }
 
     public visitImportDeclaration(node: TypeScript.ImportDeclarationSyntax): void {
@@ -53,11 +49,10 @@ class NoUnusedVariablesWalker extends Lint.ScopeAwareRuleWalker<ScopeInfo> {
     public visitVariableDeclarator(node: TypeScript.VariableDeclaratorSyntax): void {
         var propertyName = node.propertyName,
             variableName = propertyName.text(),
-            position = this.position() + propertyName.leadingTriviaWidth(),
-            currentScope = this.getCurrentScope();
+            position = this.position() + propertyName.leadingTriviaWidth();
 
         if (!this.skipVariableDeclaration) {
-            currentScope.variables[variableName] = position;
+            this.validateReferencesForVariable(variableName, position);
         }
 
         super.visitVariableDeclarator(node);
@@ -75,12 +70,11 @@ class NoUnusedVariablesWalker extends Lint.ScopeAwareRuleWalker<ScopeInfo> {
 
     // check function declarations (skipping exports)
     public visitFunctionDeclaration(node: TypeScript.FunctionDeclarationSyntax): void {
-        var currentScope = this.getCurrentScope();
         var variableName = node.identifier.text();
         var position = this.positionAfter(node.modifiers, node.functionKeyword);
 
         if (!this.hasModifier(node.modifiers, "export")) {
-            currentScope.variables[variableName] = position;
+            this.validateReferencesForVariable(variableName, position);
         }
 
         super.visitFunctionDeclaration(node);
@@ -107,24 +101,14 @@ class NoUnusedVariablesWalker extends Lint.ScopeAwareRuleWalker<ScopeInfo> {
     // check private member functions
     public visitMemberFunctionDeclaration(node: TypeScript.MemberFunctionDeclarationSyntax): void {
         var modifiers = node.modifiers;
-        var currentScope = this.getCurrentScope();
+        var variableName = node.propertyName.text();
         var position = this.positionAfter(node.modifiers);
 
         if (this.hasModifier(modifiers, "private")) {
-            currentScope.variables[node.propertyName.text()] = position;
+            this.validateReferencesForVariable(variableName, position);
         }
 
         super.visitMemberFunctionDeclaration(node);
-    }
-
-    public onScopeEnd() {
-        var variables = this.getCurrentScope().variables;
-        for (var variableName in variables) {
-            if (variables.hasOwnProperty(variableName)) {
-                var position = variables[variableName];
-                this.validateReferencesForVariable(variableName, position);
-            }
-        }
     }
 
     private hasModifier(modifiers: TypeScript.ISyntaxElement, text: string) {
@@ -149,10 +133,6 @@ class NoUnusedVariablesWalker extends Lint.ScopeAwareRuleWalker<ScopeInfo> {
             this.addFailure(failure);
         }
     }
-}
-
-class ScopeInfo {
-    public variables: { [name: string]: number; } = {};
 }
 
 class LanguageServiceHost extends TypeScript.NullLogger implements TypeScript.Services.ILanguageServiceHost {
