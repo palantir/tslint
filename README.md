@@ -35,6 +35,7 @@ Supported Rules
 * `no-empty` disallows empty blocks.
 * `no-eval` disallows `eval` function invocations.
 * `no-string-literal` disallows object access via string literals.
+* `no-trailing-comma` disallows trailing comma within object literals.
 * `no-trailing-whitespace` disallows trailing whitespace at the end of a line.
 * `no-unused-variable` disallows unused imports, variables, functions and private class members.
 * `no-unreachable` disallows unreachable code after `break`, `catch`, `throw`, and `return` statements.
