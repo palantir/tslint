@@ -23,7 +23,7 @@ module Lint.Rules {
         private value: any;
         private options: Lint.IOptions;
 
-        constructor(value: any, source: string, disabledIntervals: Lint.IDisabledInterval[]) {
+        constructor(ruleName: string, value: any, disabledIntervals: Lint.IDisabledInterval[]) {
             var ruleArguments = [];
 
             if (Array.isArray(value) && value.length > 1) {
@@ -33,7 +33,7 @@ module Lint.Rules {
             this.value = value;
             this.options = {
                 ruleArguments: ruleArguments,
-                source: source,
+                ruleName: ruleName,
                 disabledIntervals: disabledIntervals
             };
         }

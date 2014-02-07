@@ -40,7 +40,7 @@ module Lint.Test {
 
     export function applyRuleOnFile(fileName: string, Rule: any, ruleValue: any = true): Lint.RuleFailure[] {
         var syntaxTree = getSyntaxTree(fileName);
-        var rule = new Rule(ruleValue, "", []);
+        var rule = new Rule("", ruleValue, []);
         return rule.apply(syntaxTree);
     }
 

@@ -20,7 +20,7 @@
 module Lint {
     export interface IOptions {
         ruleArguments?: any[];
-        source: string;
+        ruleName: string;
         disabledIntervals: Lint.IDisabledInterval[];
     }
 
