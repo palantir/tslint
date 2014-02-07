@@ -7805,6 +7805,29 @@ declare module TypeScript {
     }
 }
 declare module TypeScript {
+    function stripStartAndEndQuotes(str: string): string;
+    function isSingleQuoted(str: string): boolean;
+    function isDoubleQuoted(str: string): boolean;
+    function isQuoted(str: string): boolean;
+    function quoteStr(str: string): string;
+    function switchToForwardSlashes(path: string): string;
+    function trimModName(modName: string): string;
+    function getDeclareFilePath(fname: string): string;
+    function isTSFile(fname: string): boolean;
+    function isDTSFile(fname: string): boolean;
+    function getPrettyName(modPath: string, quote?: boolean, treatAsFileName?: boolean): any;
+    function getPathComponents(path: string): string[];
+    function getRelativePathToFixedPath(fixedModFilePath: string, absoluteModPath: string, isAbsoultePathURL?: boolean): string;
+    function changePathToDTS(modPath: string): string;
+    function isRelative(path: string): boolean;
+    function isRooted(path: string): boolean;
+    function getRootFilePath(outFname: string): string;
+    function filePathComponents(fullPath: string): string[];
+    function filePath(fullPath: string): string;
+    function convertToDirectoryPath(dirPath: string): string;
+    function normalizePath(path: string): string;
+}
+declare module TypeScript {
     interface IFileReference extends TypeScript.ILineAndCharacter {
         path: string;
         isResident: boolean;
@@ -9185,129 +9208,6 @@ declare module TypeScript {
     }
 }
 declare module TypeScript {
-    var fileResolutionTime: number;
-    var fileResolutionIOTime: number;
-    var fileResolutionScanImportsTime: number;
-    var fileResolutionImportFileSearchTime: number;
-    var fileResolutionGetDefaultLibraryTime: number;
-    var sourceCharactersCompiled: number;
-    var syntaxTreeParseTime: number;
-    var syntaxDiagnosticsTime: number;
-    var astTranslationTime: number;
-    var typeCheckTime: number;
-    var compilerResolvePathTime: number;
-    var compilerDirectoryNameTime: number;
-    var compilerDirectoryExistsTime: number;
-    var compilerFileExistsTime: number;
-    var emitTime: number;
-    var emitWriteFileTime: number;
-    var declarationEmitTime: number;
-    var declarationEmitIsExternallyVisibleTime: number;
-    var declarationEmitTypeSignatureTime: number;
-    var declarationEmitGetBoundDeclTypeTime: number;
-    var declarationEmitIsOverloadedCallSignatureTime: number;
-    var declarationEmitFunctionDeclarationGetSymbolTime: number;
-    var declarationEmitGetBaseTypeTime: number;
-    var declarationEmitGetAccessorFunctionTime: number;
-    var declarationEmitGetTypeParameterSymbolTime: number;
-    var declarationEmitGetImportDeclarationSymbolTime: number;
-    var ioHostResolvePathTime: number;
-    var ioHostDirectoryNameTime: number;
-    var ioHostCreateDirectoryStructureTime: number;
-    var ioHostWriteFileTime: number;
-    interface PullSymbolInfo {
-        symbol: TypeScript.PullSymbol;
-        aliasSymbol: TypeScript.PullTypeAliasSymbol;
-        ast: TypeScript.AST;
-        enclosingScopeSymbol: TypeScript.PullSymbol;
-    }
-    interface PullCallSymbolInfo {
-        targetSymbol: TypeScript.PullSymbol;
-        resolvedSignatures: TypeScript.PullSignatureSymbol[];
-        candidateSignature: TypeScript.PullSignatureSymbol;
-        isConstructorCall: boolean;
-        ast: TypeScript.AST;
-        enclosingScopeSymbol: TypeScript.PullSymbol;
-    }
-    interface PullVisibleSymbolsInfo {
-        symbols: TypeScript.PullSymbol[];
-        enclosingScopeSymbol: TypeScript.PullSymbol;
-    }
-    class EmitOutput {
-        public outputFiles: OutputFile[];
-        public diagnostics: TypeScript.Diagnostic[];
-    }
-    enum OutputFileType {
-        JavaScript = 0,
-        SourceMap = 1,
-        Declaration = 2,
-    }
-    class OutputFile {
-        public name: string;
-        public writeByteOrderMark: boolean;
-        public text: string;
-        public fileType: OutputFileType;
-        public sourceMapEntries: TypeScript.SourceMapEntry[];
-        constructor(name: string, writeByteOrderMark: boolean, text: string, fileType: OutputFileType, sourceMapEntries?: TypeScript.SourceMapEntry[]);
-    }
-    class CompileResult {
-        public diagnostics: TypeScript.Diagnostic[];
-        public outputFiles: OutputFile[];
-        static fromDiagnostics(diagnostics: TypeScript.Diagnostic[]): CompileResult;
-        static fromOutputFiles(outputFiles: OutputFile[]): CompileResult;
-    }
-    class TypeScriptCompiler {
-        public logger: TypeScript.ILogger;
-        private _settings;
-        private semanticInfoChain;
-        constructor(logger?: TypeScript.ILogger, _settings?: TypeScript.ImmutableCompilationSettings);
-        public compilationSettings(): TypeScript.ImmutableCompilationSettings;
-        public setCompilationSettings(newSettings: TypeScript.ImmutableCompilationSettings): void;
-        public getDocument(fileName: string): TypeScript.Document;
-        public cleanupSemanticCache(): void;
-        public addFile(fileName: string, scriptSnapshot: TypeScript.IScriptSnapshot, byteOrderMark: TypeScript.ByteOrderMark, version: number, isOpen: boolean, referencedFiles?: string[]): void;
-        public updateFile(fileName: string, scriptSnapshot: TypeScript.IScriptSnapshot, version: number, isOpen: boolean, textChangeRange: TypeScript.TextChangeRange): void;
-        public removeFile(fileName: string): void;
-        public _isDynamicModuleCompilation(): boolean;
-        public mapOutputFileName(document: TypeScript.Document, emitOptions: TypeScript.EmitOptions, extensionChanger: (fname: string, wholeFileNameReplaced: boolean) => string): string;
-        private writeByteOrderMarkForDocument(document);
-        static mapToDTSFileName(fileName: string, wholeFileNameReplaced: boolean): string;
-        public _shouldEmit(document: TypeScript.Document): boolean;
-        public _shouldEmitDeclarations(document: TypeScript.Document): boolean;
-        private emitDocumentDeclarationsWorker(document, emitOptions, declarationEmitter?);
-        public _emitDocumentDeclarations(document: TypeScript.Document, emitOptions: TypeScript.EmitOptions, onSingleFileEmitComplete: (files: OutputFile) => void, sharedEmitter: TypeScript.DeclarationEmitter): TypeScript.DeclarationEmitter;
-        public emitAllDeclarations(resolvePath: (path: string) => string): EmitOutput;
-        public emitDeclarations(fileName: string, resolvePath: (path: string) => string): EmitOutput;
-        static mapToFileNameExtension(extension: string, fileName: string, wholeFileNameReplaced: boolean): string;
-        static mapToJSFileName(fileName: string, wholeFileNameReplaced: boolean): string;
-        private emitDocumentWorker(document, emitOptions, emitter?);
-        public _emitDocument(document: TypeScript.Document, emitOptions: TypeScript.EmitOptions, onSingleFileEmitComplete: (files: OutputFile[]) => void, sharedEmitter: TypeScript.Emitter): TypeScript.Emitter;
-        public emitAll(resolvePath: (path: string) => string): EmitOutput;
-        public emit(fileName: string, resolvePath: (path: string) => string): EmitOutput;
-        public compile(resolvePath: (path: string) => string, continueOnDiagnostics?: boolean): TypeScript.Iterator<CompileResult>;
-        public getSyntacticDiagnostics(fileName: string): TypeScript.Diagnostic[];
-        private getSyntaxTree(fileName);
-        private getSourceUnit(fileName);
-        public getSemanticDiagnostics(fileName: string): TypeScript.Diagnostic[];
-        public resolveAllFiles(): void;
-        public getSymbolOfDeclaration(decl: TypeScript.PullDecl): TypeScript.PullSymbol;
-        private extractResolutionContextFromAST(resolver, ast, document, propagateContextualTypes);
-        private extractResolutionContextForVariable(inContextuallyTypedAssignment, propagateContextualTypes, resolver, resolutionContext, enclosingDecl, assigningAST, init);
-        private getASTPath(ast);
-        public pullGetSymbolInformationFromAST(ast: TypeScript.AST, document: TypeScript.Document): PullSymbolInfo;
-        public pullGetCallInformationFromAST(ast: TypeScript.AST, document: TypeScript.Document): PullCallSymbolInfo;
-        public pullGetVisibleMemberSymbolsFromAST(ast: TypeScript.AST, document: TypeScript.Document): PullVisibleSymbolsInfo;
-        public pullGetVisibleDeclsFromAST(ast: TypeScript.AST, document: TypeScript.Document): TypeScript.PullDecl[];
-        public pullGetContextualMembersFromAST(ast: TypeScript.AST, document: TypeScript.Document): PullVisibleSymbolsInfo;
-        public pullGetDeclInformation(decl: TypeScript.PullDecl, ast: TypeScript.AST, document: TypeScript.Document): PullSymbolInfo;
-        public topLevelDeclaration(fileName: string): TypeScript.PullDecl;
-        public getDeclForAST(ast: TypeScript.AST): TypeScript.PullDecl;
-        public fileNames(): string[];
-        public topLevelDecl(fileName: string): TypeScript.PullDecl;
-    }
-    function compareDataObjects(dst: any, src: any): boolean;
-}
-declare module TypeScript {
     enum GenerativeTypeClassification {
         Unknown = 0,
         Open = 1,
@@ -9536,72 +9436,127 @@ declare module TypeScript {
     }
 }
 declare module TypeScript {
-    function stripStartAndEndQuotes(str: string): string;
-    function isSingleQuoted(str: string): boolean;
-    function isDoubleQuoted(str: string): boolean;
-    function isQuoted(str: string): boolean;
-    function quoteStr(str: string): string;
-    function switchToForwardSlashes(path: string): string;
-    function trimModName(modName: string): string;
-    function getDeclareFilePath(fname: string): string;
-    function isTSFile(fname: string): boolean;
-    function isDTSFile(fname: string): boolean;
-    function getPrettyName(modPath: string, quote?: boolean, treatAsFileName?: boolean): any;
-    function getPathComponents(path: string): string[];
-    function getRelativePathToFixedPath(fixedModFilePath: string, absoluteModPath: string, isAbsoultePathURL?: boolean): string;
-    function changePathToDTS(modPath: string): string;
-    function isRelative(path: string): boolean;
-    function isRooted(path: string): boolean;
-    function getRootFilePath(outFname: string): string;
-    function filePathComponents(fullPath: string): string[];
-    function filePath(fullPath: string): string;
-    function convertToDirectoryPath(dirPath: string): string;
-    function normalizePath(path: string): string;
-}
-declare module Lint {
-    function getSyntaxTree(fileName: string, source: string): TypeScript.SyntaxTree;
-    function createCompilationSettings(): TypeScript.CompilationSettings;
-    function doesIntersect(failure: RuleFailure, disabledIntervals: IDisabledInterval[]): boolean;
-}
-declare module Lint.Rules {
-    class AbstractRule implements Lint.Rule {
-        private value;
-        private options;
-        constructor(value: any, source: string, disabledIntervals: Lint.IDisabledInterval[]);
-        public getOptions(): Lint.IOptions;
-        public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[];
-        public applyWithWalker(walker: Lint.RuleWalker): Lint.RuleFailure[];
-        public isEnabled(): boolean;
+    var fileResolutionTime: number;
+    var fileResolutionIOTime: number;
+    var fileResolutionScanImportsTime: number;
+    var fileResolutionImportFileSearchTime: number;
+    var fileResolutionGetDefaultLibraryTime: number;
+    var sourceCharactersCompiled: number;
+    var syntaxTreeParseTime: number;
+    var syntaxDiagnosticsTime: number;
+    var astTranslationTime: number;
+    var typeCheckTime: number;
+    var compilerResolvePathTime: number;
+    var compilerDirectoryNameTime: number;
+    var compilerDirectoryExistsTime: number;
+    var compilerFileExistsTime: number;
+    var emitTime: number;
+    var emitWriteFileTime: number;
+    var declarationEmitTime: number;
+    var declarationEmitIsExternallyVisibleTime: number;
+    var declarationEmitTypeSignatureTime: number;
+    var declarationEmitGetBoundDeclTypeTime: number;
+    var declarationEmitIsOverloadedCallSignatureTime: number;
+    var declarationEmitFunctionDeclarationGetSymbolTime: number;
+    var declarationEmitGetBaseTypeTime: number;
+    var declarationEmitGetAccessorFunctionTime: number;
+    var declarationEmitGetTypeParameterSymbolTime: number;
+    var declarationEmitGetImportDeclarationSymbolTime: number;
+    var ioHostResolvePathTime: number;
+    var ioHostDirectoryNameTime: number;
+    var ioHostCreateDirectoryStructureTime: number;
+    var ioHostWriteFileTime: number;
+    interface PullSymbolInfo {
+        symbol: TypeScript.PullSymbol;
+        aliasSymbol: TypeScript.PullTypeAliasSymbol;
+        ast: TypeScript.AST;
+        enclosingScopeSymbol: TypeScript.PullSymbol;
     }
-}
-declare module Lint.Formatters {
-    class AbstractFormatter implements Lint.Formatter {
-        public format(failures: Lint.RuleFailure[]): string;
+    interface PullCallSymbolInfo {
+        targetSymbol: TypeScript.PullSymbol;
+        resolvedSignatures: TypeScript.PullSignatureSymbol[];
+        candidateSignature: TypeScript.PullSignatureSymbol;
+        isConstructorCall: boolean;
+        ast: TypeScript.AST;
+        enclosingScopeSymbol: TypeScript.PullSymbol;
     }
-}
-declare module Lint {
-    class ScopeAwareRuleWalker<T> extends Lint.RuleWalker {
-        private scopeStack;
-        constructor(syntaxTree: TypeScript.SyntaxTree, options?: any);
-        public visitNode(node: TypeScript.SyntaxNode): void;
-        public createScope(): T;
-        public getCurrentScope(): T;
-        public getCurrentDepth(): number;
-        public onScopeStart(): void;
-        public onScopeEnd(): void;
-        private isScopeBoundary(node);
+    interface PullVisibleSymbolsInfo {
+        symbols: TypeScript.PullSymbol[];
+        enclosingScopeSymbol: TypeScript.PullSymbol;
     }
-}
-declare module Lint {
-    interface RuleWalkerState {
-        position: number;
-        token: TypeScript.ISyntaxToken;
+    class EmitOutput {
+        public outputFiles: OutputFile[];
+        public diagnostics: TypeScript.Diagnostic[];
     }
-    class StateAwareRuleWalker extends Lint.RuleWalker {
-        private lastState;
-        public visitToken(token: TypeScript.ISyntaxToken): void;
-        public getLastState(): RuleWalkerState;
+    enum OutputFileType {
+        JavaScript = 0,
+        SourceMap = 1,
+        Declaration = 2,
     }
+    class OutputFile {
+        public name: string;
+        public writeByteOrderMark: boolean;
+        public text: string;
+        public fileType: OutputFileType;
+        public sourceMapEntries: TypeScript.SourceMapEntry[];
+        constructor(name: string, writeByteOrderMark: boolean, text: string, fileType: OutputFileType, sourceMapEntries?: TypeScript.SourceMapEntry[]);
+    }
+    class CompileResult {
+        public diagnostics: TypeScript.Diagnostic[];
+        public outputFiles: OutputFile[];
+        static fromDiagnostics(diagnostics: TypeScript.Diagnostic[]): CompileResult;
+        static fromOutputFiles(outputFiles: OutputFile[]): CompileResult;
+    }
+    class TypeScriptCompiler {
+        public logger: TypeScript.ILogger;
+        private _settings;
+        private semanticInfoChain;
+        constructor(logger?: TypeScript.ILogger, _settings?: TypeScript.ImmutableCompilationSettings);
+        public compilationSettings(): TypeScript.ImmutableCompilationSettings;
+        public setCompilationSettings(newSettings: TypeScript.ImmutableCompilationSettings): void;
+        public getDocument(fileName: string): TypeScript.Document;
+        public cleanupSemanticCache(): void;
+        public addFile(fileName: string, scriptSnapshot: TypeScript.IScriptSnapshot, byteOrderMark: TypeScript.ByteOrderMark, version: number, isOpen: boolean, referencedFiles?: string[]): void;
+        public updateFile(fileName: string, scriptSnapshot: TypeScript.IScriptSnapshot, version: number, isOpen: boolean, textChangeRange: TypeScript.TextChangeRange): void;
+        public removeFile(fileName: string): void;
+        public _isDynamicModuleCompilation(): boolean;
+        public mapOutputFileName(document: TypeScript.Document, emitOptions: TypeScript.EmitOptions, extensionChanger: (fname: string, wholeFileNameReplaced: boolean) => string): string;
+        private writeByteOrderMarkForDocument(document);
+        static mapToDTSFileName(fileName: string, wholeFileNameReplaced: boolean): string;
+        public _shouldEmit(document: TypeScript.Document): boolean;
+        public _shouldEmitDeclarations(document: TypeScript.Document): boolean;
+        private emitDocumentDeclarationsWorker(document, emitOptions, declarationEmitter?);
+        public _emitDocumentDeclarations(document: TypeScript.Document, emitOptions: TypeScript.EmitOptions, onSingleFileEmitComplete: (files: OutputFile) => void, sharedEmitter: TypeScript.DeclarationEmitter): TypeScript.DeclarationEmitter;
+        public emitAllDeclarations(resolvePath: (path: string) => string): EmitOutput;
+        public emitDeclarations(fileName: string, resolvePath: (path: string) => string): EmitOutput;
+        static mapToFileNameExtension(extension: string, fileName: string, wholeFileNameReplaced: boolean): string;
+        static mapToJSFileName(fileName: string, wholeFileNameReplaced: boolean): string;
+        private emitDocumentWorker(document, emitOptions, emitter?);
+        public _emitDocument(document: TypeScript.Document, emitOptions: TypeScript.EmitOptions, onSingleFileEmitComplete: (files: OutputFile[]) => void, sharedEmitter: TypeScript.Emitter): TypeScript.Emitter;
+        public emitAll(resolvePath: (path: string) => string): EmitOutput;
+        public emit(fileName: string, resolvePath: (path: string) => string): EmitOutput;
+        public compile(resolvePath: (path: string) => string, continueOnDiagnostics?: boolean): TypeScript.Iterator<CompileResult>;
+        public getSyntacticDiagnostics(fileName: string): TypeScript.Diagnostic[];
+        private getSyntaxTree(fileName);
+        private getSourceUnit(fileName);
+        public getSemanticDiagnostics(fileName: string): TypeScript.Diagnostic[];
+        public resolveAllFiles(): void;
+        public getSymbolOfDeclaration(decl: TypeScript.PullDecl): TypeScript.PullSymbol;
+        private extractResolutionContextFromAST(resolver, ast, document, propagateContextualTypes);
+        private extractResolutionContextForVariable(inContextuallyTypedAssignment, propagateContextualTypes, resolver, resolutionContext, enclosingDecl, assigningAST, init);
+        private getASTPath(ast);
+        public pullGetSymbolInformationFromAST(ast: TypeScript.AST, document: TypeScript.Document): PullSymbolInfo;
+        public pullGetCallInformationFromAST(ast: TypeScript.AST, document: TypeScript.Document): PullCallSymbolInfo;
+        public pullGetVisibleMemberSymbolsFromAST(ast: TypeScript.AST, document: TypeScript.Document): PullVisibleSymbolsInfo;
+        public pullGetVisibleDeclsFromAST(ast: TypeScript.AST, document: TypeScript.Document): TypeScript.PullDecl[];
+        public pullGetContextualMembersFromAST(ast: TypeScript.AST, document: TypeScript.Document): PullVisibleSymbolsInfo;
+        public pullGetDeclInformation(decl: TypeScript.PullDecl, ast: TypeScript.AST, document: TypeScript.Document): PullSymbolInfo;
+        public topLevelDeclaration(fileName: string): TypeScript.PullDecl;
+        public getDeclForAST(ast: TypeScript.AST): TypeScript.PullDecl;
+        public fileNames(): string[];
+        public topLevelDecl(fileName: string): TypeScript.PullDecl;
+    }
+    function compareDataObjects(dst: any, src: any): boolean;
 }
 declare module TypeScript.Services {
     enum EndOfLineState {
@@ -10810,6 +10765,73 @@ declare module TypeScript.Services {
         static error: string;
         static warning: string;
         static message: string;
+    }
+}
+declare module Lint {
+    class LanguageServiceHost extends TypeScript.NullLogger implements TypeScript.Services.ILanguageServiceHost {
+        private syntaxTree;
+        private source;
+        constructor(syntaxTree: TypeScript.SyntaxTree, source: string);
+        public getCompilationSettings(): TypeScript.CompilationSettings;
+        public getScriptFileNames(): string[];
+        public getScriptVersion(fileName: string): number;
+        public getScriptIsOpen(fileName: string): boolean;
+        public getScriptByteOrderMark(fileName: string): TypeScript.ByteOrderMark;
+        public getScriptSnapshot(fileName: string): TypeScript.IScriptSnapshot;
+        public getDiagnosticsObject(): LanguageServicesDiagnostics;
+        public getLocalizedDiagnosticMessages(): string;
+        public resolveRelativePath(path: string, directory: string): string;
+        public fileExists(path: string): boolean;
+        public directoryExists(path: string): boolean;
+        public getParentDirectory(path: string): string;
+    }
+    class LanguageServicesDiagnostics implements TypeScript.Services.ILanguageServicesDiagnostics {
+        public log(content: string): void;
+    }
+}
+declare module Lint {
+    function getSyntaxTree(fileName: string, source: string): TypeScript.SyntaxTree;
+    function createCompilationSettings(): TypeScript.CompilationSettings;
+    function doesIntersect(failure: RuleFailure, disabledIntervals: IDisabledInterval[]): boolean;
+}
+declare module Lint.Formatters {
+    class AbstractFormatter implements Lint.Formatter {
+        public format(failures: Lint.RuleFailure[]): string;
+    }
+}
+declare module Lint.Rules {
+    class AbstractRule implements Lint.Rule {
+        private value;
+        private options;
+        constructor(value: any, source: string, disabledIntervals: Lint.IDisabledInterval[]);
+        public getOptions(): Lint.IOptions;
+        public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[];
+        public applyWithWalker(walker: Lint.RuleWalker): Lint.RuleFailure[];
+        public isEnabled(): boolean;
+    }
+}
+declare module Lint {
+    class ScopeAwareRuleWalker<T> extends Lint.RuleWalker {
+        private scopeStack;
+        constructor(syntaxTree: TypeScript.SyntaxTree, options?: any);
+        public visitNode(node: TypeScript.SyntaxNode): void;
+        public createScope(): T;
+        public getCurrentScope(): T;
+        public getCurrentDepth(): number;
+        public onScopeStart(): void;
+        public onScopeEnd(): void;
+        private isScopeBoundary(node);
+    }
+}
+declare module Lint {
+    interface RuleWalkerState {
+        position: number;
+        token: TypeScript.ISyntaxToken;
+    }
+    class StateAwareRuleWalker extends Lint.RuleWalker {
+        private lastState;
+        public visitToken(token: TypeScript.ISyntaxToken): void;
+        public getLastState(): RuleWalkerState;
     }
 }
 declare module Lint {

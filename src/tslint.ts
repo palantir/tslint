@@ -19,15 +19,13 @@
 /// <reference path='formatterLoader.ts'/>
 /// <reference path='enableDisableRules.ts'/>
 
+/// <reference path='language/languageServiceHost.ts'/>
 /// <reference path='language/utils.ts'/>
-/// <reference path='language/rule/abstractRule.ts'/>
 /// <reference path='language/formatter/abstractFormatter.ts'/>
+/// <reference path='language/rule/abstractRule.ts'/>
 /// <reference path='language/walker/ruleWalker.ts'/>
 /// <reference path='language/walker/scopeAwareRuleWalker.ts'/>
 /// <reference path='language/walker/stateAwareRuleWalker.ts'/>
-
-/// <reference path='typescript/src/services/languageService.ts'/>
-/// <reference path='typescript/src/services/diagnosticServices.ts'/>
 
 module Lint {
     var path = require("path");

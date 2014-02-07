@@ -20,7 +20,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "unused variable: ";
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        var languageServiceHost = new LanguageServiceHost(syntaxTree, this.getOptions().source);
+        var languageServiceHost = new Lint.LanguageServiceHost(syntaxTree, this.getOptions().source);
         var languageServices = new TypeScript.Services.LanguageService(languageServiceHost);
 
         return this.applyWithWalker(new NoUnusedVariablesWalker(syntaxTree, this.getOptions(), languageServices));
@@ -132,70 +132,5 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
             var failure = this.createFailure(position, name.length, failureString);
             this.addFailure(failure);
         }
-    }
-}
-
-class LanguageServiceHost extends TypeScript.NullLogger implements TypeScript.Services.ILanguageServiceHost {
-    private syntaxTree: TypeScript.SyntaxTree;
-    private source: string;
-
-    constructor(syntaxTree: TypeScript.SyntaxTree, source: string) {
-        super();
-        this.syntaxTree = syntaxTree;
-        this.source = source;
-    }
-
-    public getCompilationSettings() {
-        return Lint.createCompilationSettings();
-    }
-
-    public getScriptFileNames() {
-        return [ this.syntaxTree.fileName() ];
-    }
-
-    public getScriptVersion(fileName: string) {
-        return 1;
-    }
-
-    public getScriptIsOpen(fileName: string) {
-        return false;
-    }
-
-    public getScriptByteOrderMark(fileName: string) {
-        return TypeScript.ByteOrderMark.None;
-    }
-
-    public getScriptSnapshot(fileName: string): TypeScript.IScriptSnapshot {
-        return TypeScript.ScriptSnapshot.fromString(this.source);
-    }
-
-    public getDiagnosticsObject() {
-        return new LanguageServicesDiagnostics();
-    }
-
-    public getLocalizedDiagnosticMessages() {
-        return "";
-    }
-
-    public resolveRelativePath(path: string, directory: string) {
-        return path;
-    }
-    
-    public fileExists(path: string) {
-        return true;
-    }
-
-    public directoryExists(path: string) {
-        return true;
-    }
-    
-    public getParentDirectory(path: string) {
-        return path;
-    }
-}
-
-class LanguageServicesDiagnostics implements TypeScript.Services.ILanguageServicesDiagnostics {
-    public log(content: string) {
-        // do nothing
     }
 }

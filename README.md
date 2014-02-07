@@ -39,6 +39,7 @@ Supported Rules
 * `no-trailing-whitespace` disallows trailing whitespace at the end of a line.
 * `no-unused-variable` disallows unused imports, variables, functions and private class members.
 * `no-unreachable` disallows unreachable code after `break`, `catch`, `throw`, and `return` statements.
+* `no-use-before-declare` disallows usage of variables before their declaration.
 * `one-line` enforces the specified tokens to be on the same line as the expression preceding it. Rule options:
 	* `"check-catch"` checks that `catch` is on the same line as the closing brace for `try`
 	* `"check-else"` checks that `else` is on the same line as the closing brace for `if`

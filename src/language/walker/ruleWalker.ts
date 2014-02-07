@@ -20,7 +20,6 @@
 /// <reference path='../rule/rule.ts'/>
 
 module Lint {
-
     export class RuleWalker extends TypeScript.PositionTrackingWalker {
         private limit: number;
         private options: any[];
