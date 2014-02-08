@@ -24,7 +24,7 @@ tslint accepts the following commandline options:
         stdout, which is usually the console where you're running it from.
 
     -r, --rules-dir:
-        An additional rules directory, for additional user-created rules.
+        An additional rules directory, for user-created rules.
         tslint will always check its default rules directory, in
         node_modules/tslint/build/rules, before checking the user-provided
         rules directory, so rules in the user-provided rules directory

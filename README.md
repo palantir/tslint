@@ -73,19 +73,18 @@ Supported Rules
 	* `"check-separator"` checks for whitespace after separator tokens (`,`/`;`)
 	* `"check-type"` checks for whitespace before a variable type specification
 
-TSLint rule flags
+TSLint Rule Flags
 -----
-You can disable/enable TSLint inside a file, or some subset of the TSLint rules, with the following comment rule flags:
+You can enable/disable TSLint or a subset of rules within a file with the following comment rule flags:
 
-* `/* tslint:disable */` will disable all rules for the rest of the file
-* `/* tslint:enable */` will enable all rules for the rest of the file
-* `/* tslint:disable:rule1 rule2 rule3... */` will disable the listed rules for the rest of the file
-* `/* tslint:enable:rule1 rule2 rule3... */` will enable the listed rules for the rest of the file
+* `/* tslint:disable */` - Disable all rules for the rest of the file
+* `/* tslint:enable */` - Enable all rules for the rest of the file
+* `/* tslint:disable:rule1 rule2 rule3... */` - Disable the listed rules for the rest of the file
+* `/* tslint:enable:rule1 rule2 rule3... */` - Enable the listed rules for the rest of the file
 
-Rules flags will enable and disable rules as they are passed, each directive will turn the rules listed in the flag on or off until a later flag turns the rule on or off.
-Disabling an already disabled rule and enabling an already enabled rule will have no effect.
+Rules flags enable or disable rules as they are parsed. A rule is enabled or disabled until a later directive commands otherwise. Disabling an already disabled rule or enabling an already enabled rule has no effect.
 
-For instance: imagine we have a file with `/* tslint:disable */` on the first line of a file, `/* tslint:enable:ban class-name */` on the tenth line and a `/* tslint:enable */` on the twentieth. No rules will be checked between the first line and the tenth, only the ban and class-name rules will be checked between the tenth and twentieth, and all rules will be checked for the remainder of the file.
+For example, imagine the directive `/* tslint:disable */` on the first line of a file, `/* tslint:enable:ban class-name */` on the 10th line and `/* tslint:enable */` on the 20th. No rules will be checked between the 1st and 10th lines, only the `ban` and `class-name` rules will be checked between the 10th and 20th, and all rules will be checked for the remainder of the file.
 
 Installation
 ------------
@@ -143,7 +142,7 @@ tslint accepts the following commandline options:
         stdout, which is usually the console where you're running it from.
 
     -r, --rules-dir:
-        An additional rules directory, for additional user-created rules.
+        An additional rules directory, for user-created rules.
         tslint will always check its default rules directory, in
         node_modules/tslint/build/rules, before checking the user-provided
         rules directory, so rules in the user-provided rules directory
