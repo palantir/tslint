@@ -1,4 +1,4 @@
-tslint [![NPM version](https://badge.fury.io/js/tslint.png)](http://badge.fury.io/js/tslint) [![Builds](https://api.travis-ci.org/repositories/palantir/tslint.png?branch=master)](https://travis-ci.org/palantir/tslint)
+TSLint [![NPM version](https://badge.fury.io/js/tslint.png)](http://badge.fury.io/js/tslint) [![Builds](https://api.travis-ci.org/repositories/palantir/tslint.png?branch=master)](https://travis-ci.org/palantir/tslint)
 ======
 
 A linter for the TypeScript language.
@@ -73,9 +73,9 @@ Supported Rules
 	* `"check-separator"` checks for whitespace after separator tokens (`,`/`;`)
 	* `"check-type"` checks for whitespace before a variable type specification
 
-tslint rule flags
+TSLint rule flags
 -----
-You can disable/enable tslint inside a file, or some subset of the tslint rules, with the following comment rule flags:
+You can disable/enable TSLint inside a file, or some subset of the TSLint rules, with the following comment rule flags:
 
 * `/* tslint:disable */` will disable all rules for the rest of the file
 * `/* tslint:enable */` will enable all rules for the rest of the file
