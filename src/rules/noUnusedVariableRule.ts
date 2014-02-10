@@ -80,6 +80,14 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         super.visitFunctionDeclaration(node);
     }
 
+    public visitParameter(node: TypeScript.ParameterSyntax): void {
+        var variableName = node.identifier.text();
+
+        this.validateReferencesForVariable(variableName, this.position());
+
+        super.visitParameter(node);
+    }
+
     // check private member variables
     public visitMemberVariableDeclaration(node: TypeScript.MemberVariableDeclarationSyntax): void {
         var modifiers = node.modifiers;

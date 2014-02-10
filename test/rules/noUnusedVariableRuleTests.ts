@@ -59,4 +59,22 @@ describe("<no-unused-variable>", () => {
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule);
         Lint.Test.assertContainsFailure(actualFailures, failure);
     });
+
+    it("restricts unused parameters", () => {
+        var fileName = "rules/nounusedvariable-parameter.test.ts";
+        var Rule = Lint.Test.getRule("no-unused-variable");
+
+        var failure1 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING + "'args'")([1, 45], [1, 49]);
+        var failure2 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING + "'y'")([5, 34], [5, 35]);
+        var failure3 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING + "'args'")([5, 45], [5, 49]);
+        var failure4 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING + "'y'")([9, 35], [9, 36]);
+
+        var actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule);
+
+        assert.lengthOf(actualFailures, 4);
+        Lint.Test.assertContainsFailure(actualFailures, failure1);
+        Lint.Test.assertContainsFailure(actualFailures, failure2);
+        Lint.Test.assertContainsFailure(actualFailures, failure3);
+        Lint.Test.assertContainsFailure(actualFailures, failure4);
+    });
 });
