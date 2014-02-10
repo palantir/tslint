@@ -49,7 +49,7 @@ var optimist = require("optimist")
         },
         "t": {
             alias: "format",
-            describe: "output format (prose, json)",
+            describe: "output format (prose, json, verbose)",
             default: "prose"
         },
         "h": {
@@ -115,10 +115,9 @@ if ("help" in argv) {
         "    -t, --format:\n" +
         "        The formatter to use to format the results of the linter before\n" +
         "        outputting it to stdout or the file passed in --out. The core\n" +
-        "        formatters are prose (human readable) and json (machine readable),\n" +
-        "        and prose is the default if this option is not used. Additonal\n" +
-        "        formatters can be added and used if the --formatters-dir option\n" +
-        "        is set.\n" +
+        "        formatters are prose (human readable), json (machine readable)\n" +
+        "        and verbose. prose is the default if this option is not used. Additonal\n" +
+        "        formatters can be added and used if the --formatters-dir option is set.\n" +
         "\n" +
         "    -h, --help:\n" +
         "       Prints this help message.\n";
