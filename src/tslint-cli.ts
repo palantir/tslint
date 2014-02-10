@@ -17,7 +17,6 @@
 /// <reference path='tslint.ts'/>
 
 var fs = require("fs");
-var path = require("path");
 var optimist = require("optimist")
     .usage("usage: $0")
     .check((argv) => {
