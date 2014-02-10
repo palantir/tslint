@@ -29,7 +29,7 @@ export class Formatter extends Lint.Formatters.AbstractFormatter {
             var line = lineAndCharacter.line() + 1;
             var character = lineAndCharacter.character() + 1;
 
-            output += fileName + "[" + line + ", " + character + "]: " + failureString + " (" + ruleName + ")\n";
+            output += "(" + ruleName + ") " + fileName + "[" + line + ", " + character + "]: " + failureString + "\n";
         }
         return output;
     }
