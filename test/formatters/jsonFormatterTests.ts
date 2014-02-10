@@ -30,9 +30,9 @@ describe("JSON Formatter", () => {
         var maxPosition = syntaxTree.sourceUnit().fullWidth();
 
         var failures = [
-            new Lint.RuleFailure(syntaxTree, 0, 1, "first failure"),
-            new Lint.RuleFailure(syntaxTree, maxPosition - 1, maxPosition, "last failure"),
-            new Lint.RuleFailure(syntaxTree, 0, maxPosition, "full failure")
+            new Lint.RuleFailure(syntaxTree, 0, 1, "first failure", "first-name"),
+            new Lint.RuleFailure(syntaxTree, maxPosition - 1, maxPosition, "last failure", "last-name"),
+            new Lint.RuleFailure(syntaxTree, 0, maxPosition, "full failure", "full-name")
         ];
 
         var expectedResult = [{
@@ -47,7 +47,8 @@ describe("JSON Formatter", () => {
                 position: 1,
                 line: 0,
                 character: 1
-            }
+            },
+            ruleName: "first-name"
         },
         {
             name: TEST_FILE,
@@ -61,7 +62,8 @@ describe("JSON Formatter", () => {
                 position: maxPosition,
                 line: 6,
                 character: 0
-            }
+            },
+            ruleName: "last-name"
         },
         {
             name: TEST_FILE,
@@ -75,7 +77,8 @@ describe("JSON Formatter", () => {
                 position: maxPosition,
                 line: 6,
                 character: 0
-            }
+            },
+            ruleName: "full-name"
         }];
 
         var actualResult = JSON.parse(formatter.format(failures));

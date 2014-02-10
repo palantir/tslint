@@ -30,9 +30,9 @@ describe("External Formatter", () => {
         var maxPosition = syntaxTree.sourceUnit().fullWidth();
 
         var failures = [
-            new Lint.RuleFailure(syntaxTree, 0, 1, "first failure"),
-            new Lint.RuleFailure(syntaxTree, 32, 36, "mid failure"),
-            new Lint.RuleFailure(syntaxTree, maxPosition - 1, maxPosition, "last failure")
+            new Lint.RuleFailure(syntaxTree, 0, 1, "first failure", "first-name"),
+            new Lint.RuleFailure(syntaxTree, 32, 36, "mid failure", "mid-name"),
+            new Lint.RuleFailure(syntaxTree, maxPosition - 1, maxPosition, "last failure", "last-name")
         ];
 
         var expectedResult =
