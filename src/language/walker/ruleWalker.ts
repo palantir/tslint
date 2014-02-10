@@ -26,6 +26,7 @@ module Lint {
         private failures: RuleFailure[];
         private syntaxTree: TypeScript.SyntaxTree;
         private disabledIntervals: Lint.IDisabledInterval[];
+        private ruleName: string;
 
         constructor(syntaxTree: TypeScript.SyntaxTree, options: Lint.IOptions) {
             super();
@@ -35,6 +36,7 @@ module Lint {
             this.syntaxTree = syntaxTree;
             this.limit = this.syntaxTree.sourceUnit().fullWidth();
             this.disabledIntervals = options.disabledIntervals;
+            this.ruleName = options.ruleName;
         }
 
         public getSyntaxTree(): TypeScript.SyntaxTree {
@@ -72,7 +74,7 @@ module Lint {
             var from = (start > this.limit) ? this.limit : start;
             var to = ((start + width) > this.limit) ? this.limit : (start + width);
 
-            return new Lint.RuleFailure(this.syntaxTree, from, to, failure);
+            return new Lint.RuleFailure(this.syntaxTree, from, to, failure, this.ruleName);
         }
 
         public addFailure(failure: RuleFailure) {

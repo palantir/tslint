@@ -53,7 +53,7 @@ module Lint {
             var syntaxTree = Lint.getSyntaxTree(this.fileName, this.source);
 
             // walk the code first to find all the intervals where rules are disabled
-            var rulesWalker = new EnableDisableRulesWalker(syntaxTree, {source: this.source, disabledIntervals: []});
+            var rulesWalker = new EnableDisableRulesWalker(syntaxTree, {ruleName: "", disabledIntervals: []});
             var sourceUnit = syntaxTree.sourceUnit();
             sourceUnit.accept(rulesWalker);
             var enableDisableRuleMap = rulesWalker.enableDisableRuleMap;

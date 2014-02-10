@@ -21,7 +21,7 @@ describe("Prose Formatter", () => {
     var syntaxTree, formatter;
 
     before(function() {
-        var Formatter = Lint.Test.getFormatter("prose");
+        var Formatter = Lint.Test.getFormatter("verbose");
         syntaxTree = Lint.Test.getSyntaxTree(TEST_FILE);
         formatter = new Formatter();
     });
@@ -36,9 +36,9 @@ describe("Prose Formatter", () => {
         ];
 
         var expectedResult =
-            TEST_FILE + getPositionString(1, 1) + "first failure\n" +
-            TEST_FILE + getPositionString(2, 12) + "mid failure\n" +
-            TEST_FILE + getPositionString(9, 2) + "last failure\n";
+            "(first-name) " + TEST_FILE + getPositionString(1, 1) + "first failure\n" +
+            "(mid-name) " + TEST_FILE + getPositionString(2, 12) + "mid failure\n" +
+            "(last-name) " + TEST_FILE + getPositionString(9, 2) + "last failure\n";
 
         var actualResult = formatter.format(failures);
         assert.equal(actualResult, expectedResult);

@@ -44,7 +44,7 @@ module Lint {
                     var allList = (all in enableDisableRuleMap ? enableDisableRuleMap[all] : []);
                     var ruleSpecificList = (ruleName in enableDisableRuleMap ? enableDisableRuleMap[ruleName] : []);
                     var disabledIntervals = buildDisabledIntervalsFromSwitches(ruleSpecificList, allList);
-                    rules.push(new Rule(ruleValue, source, disabledIntervals));
+                    rules.push(new Rule(ruleName, ruleValue, disabledIntervals));
                 }
             }
         }

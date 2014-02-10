@@ -21,7 +21,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_POSTFIX = "' used before declaration";
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        var languageServiceHost = new Lint.LanguageServiceHost(syntaxTree, this.getOptions().source);
+        var languageServiceHost = new Lint.LanguageServiceHost(syntaxTree, syntaxTree.sourceUnit().fullText());
         var languageServices = new TypeScript.Services.LanguageService(languageServiceHost);
 
         return this.applyWithWalker(new NoUseBeforeDeclareWalker(syntaxTree, this.getOptions(), languageServices));
