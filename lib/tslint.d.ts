@@ -10847,6 +10847,7 @@ declare module Lint {
         private fileName;
         private source;
         private options;
+        static VERSION: string;
         constructor(fileName: string, source: string, options: any);
         public lint(): LintResult;
         private getRelativePath(directory);
