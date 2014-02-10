@@ -9,3 +9,16 @@ export function func2(x: number, y: number, ...args: number[]) {
 export function func3(x?: number, y?: number) {
     return x;
 }
+
+export interface ITestInterface {
+    func4(x: number, y: number): number;
+}
+
+export class ABCD {
+    constructor(private x: number, public y: number, private z: number) {
+    }
+
+    func5() {
+        return this.z;
+    }
+}
