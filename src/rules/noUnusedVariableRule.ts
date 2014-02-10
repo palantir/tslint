@@ -60,10 +60,17 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         super.visitVariableDeclarator(node);
     }
 
-    // skip paramaters in method signatures
+    // skip parameters in method signatures
     public visitMethodSignature(node: TypeScript.MethodSignatureSyntax): void {
         this.skipParameterDeclaration = true;
         super.visitMethodSignature(node);
+        this.skipParameterDeclaration = false;
+    }
+
+    // skip parameters in index signatures (stuff like [key: string]: string)
+    public visitIndexSignature(node: TypeScript.IndexSignatureSyntax): void {
+        this.skipParameterDeclaration = true;
+        super.visitIndexSignature(node);
         this.skipParameterDeclaration = false;
     }
 

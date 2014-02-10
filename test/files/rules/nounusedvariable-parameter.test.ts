@@ -22,3 +22,7 @@ export class ABCD {
         return this.z;
     }
 }
+
+export interface ITestMapInterface {
+    [key: string]: string;
+}
