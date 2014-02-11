@@ -20,7 +20,6 @@ var fs = require("fs");
 
 describe("Enable and Disable Rules", () => {
     var path = require("path");
-    var rulesDirectory = path.join(global.process.cwd(), "build/rules");
 
     it("is enabled and disabled in all the right places", () => {
         var validConfiguration = {rules: {

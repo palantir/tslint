@@ -112,14 +112,6 @@ class IndentWalker extends Lint.RuleWalker {
         this.checkAndVisitList(node.statements);
     }
 
-    private arePositionsOnSameLine(pos1: number, pos2: number): boolean {
-        var lineMap = this.getSyntaxTree().lineMap();
-        var line1 = lineMap.getLineAndCharacterFromPosition(pos1).line();
-        var line2 = lineMap.getLineAndCharacterFromPosition(pos2).line();
-
-        return (line1 === line2);
-    }
-
     private checkAndVisitList(list: TypeScript.ISyntaxList): void {
         this.currentLevel += 1;
         for (var i = 0 ; i < list.childCount(); i++) {
