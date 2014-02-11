@@ -80,12 +80,6 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
         }
     }
 
-    private addNotImplementedFailure(option: string) : void {
-        if (this.hasOption(option)) {
-            this.addFailure(this.createFailure(0, 1, option + " not implemented."));
-        }
-    }
-
     public hasOption(option: string): boolean {
         var allOptions = this.getOptions();
         if (!allOptions || allOptions.length === 0) {
