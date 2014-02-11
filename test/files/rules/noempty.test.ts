@@ -16,7 +16,7 @@ for (var y = 0; y < 1; ++y) {
 }
 
 class testClass {
-    constructor(private allowed: any) {
+    constructor(private allowed: any, private alsoAllowed: any) {
     }
 }
 

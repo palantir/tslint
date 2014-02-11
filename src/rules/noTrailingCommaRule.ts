@@ -30,7 +30,9 @@ class NoTrailingCommaWalker extends Lint.RuleWalker {
         var lastPosition = this.positionAfter(node.openBraceToken, node.propertyAssignments);
         lastPosition -= node.propertyAssignments.trailingTriviaWidth() + 1;
 
-        if (propertyAssignments.separatorCount() === propertyAssignments.nonSeparatorCount()) {
+        if (propertyAssignments.separatorCount() === propertyAssignments.nonSeparatorCount()
+            && propertyAssignments.nonSeparatorCount() > 0) {
+
             this.addFailure(this.createFailure(lastPosition, 1, Rule.FAILURE_STRING));
         }
     }

@@ -26,7 +26,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class BlockWalker extends Lint.RuleWalker {
     private ignoredBlocks: TypeScript.BlockSyntax[] = [];
-    
+
     public visitBlock(node: TypeScript.BlockSyntax): void {
         var hasCommentAfter = node.openBraceToken.trailingTrivia().hasComment();
         var hasCommentBefore = node.closeBraceToken.leadingTrivia().hasComment();
@@ -43,9 +43,8 @@ class BlockWalker extends Lint.RuleWalker {
 
     public visitConstructorDeclaration(node: TypeScript.ConstructorDeclarationSyntax): void {
         var isSkipped = false;
-
-        for (var i = 0; i < node.parameterList.parameters.childCount(); i++) {
-            var param = <TypeScript.ParameterSyntax>node.parameterList.parameters.childAt(i);
+        for (var i = 0; i < node.parameterList.parameters.nonSeparatorCount(); i++) {
+            var param = <TypeScript.ParameterSyntax>node.parameterList.parameters.nonSeparatorAt(i);
 
             for (var j = 0; j < param.modifiers.childCount(); j++) {
                 var modifier = param.modifiers.childAt(j).kind();

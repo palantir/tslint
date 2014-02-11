@@ -48,7 +48,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 // that we are only over by the limit by exactly one and that the character we are over the
                 // limit by is a '\r' character which does not count against the limit
                 // (and thus we are not actually over the limit).
-                var ruleFailure = new Lint.RuleFailure(syntaxTree, from, to - 1, errorString);
+                var ruleFailure = new Lint.RuleFailure(syntaxTree, from, to - 1, errorString, this.getOptions().ruleName);
                 if (!Lint.doesIntersect(ruleFailure, disabledIntervals)) {
                     ruleFailures.push(ruleFailure);
                 }

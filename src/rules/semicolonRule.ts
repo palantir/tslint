@@ -31,8 +31,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
             if (diagnosticKey === TypeScript.DiagnosticCode.Automatic_semicolon_insertion_not_allowed) {
                 var position = diagnostic.start();
-                var lineAndCharacter = syntaxTree.lineMap().getLineAndCharacterFromPosition(position);
-                var ruleFailure = new Lint.RuleFailure(syntaxTree, position, position, Rule.FAILURE_STRING);
+                var ruleFailure = new Lint.RuleFailure(syntaxTree, position, position, Rule.FAILURE_STRING, this.getOptions().ruleName);
                 if (!Lint.doesIntersect(ruleFailure, disabledIntervals)) {
                     ruleFailures.push(ruleFailure);
                 }

@@ -6476,7 +6476,7 @@ declare module TypeScript {
 declare module Lint {
     interface IOptions {
         ruleArguments?: any[];
-        source: string;
+        ruleName: string;
         disabledIntervals: IDisabledInterval[];
     }
     interface IDisabledInterval {
@@ -6507,8 +6507,10 @@ declare module Lint {
         private startPosition;
         private endPosition;
         private failure;
-        constructor(syntaxTree: TypeScript.SyntaxTree, start: number, end: number, failure: string);
+        private ruleName;
+        constructor(syntaxTree: TypeScript.SyntaxTree, start: number, end: number, failure: string, ruleName: string);
         public getFileName(): string;
+        public getRuleName(): string;
         public getStartPosition(): RuleFailurePosition;
         public getEndPosition(): RuleFailurePosition;
         public getFailure(): string;
@@ -6524,6 +6526,7 @@ declare module Lint {
         private failures;
         private syntaxTree;
         private disabledIntervals;
+        private ruleName;
         constructor(syntaxTree: TypeScript.SyntaxTree, options: Lint.IOptions);
         public getSyntaxTree(): TypeScript.SyntaxTree;
         public getFailures(): Lint.RuleFailure[];
@@ -10803,7 +10806,7 @@ declare module Lint.Rules {
     class AbstractRule implements Lint.Rule {
         private value;
         private options;
-        constructor(value: any, source: string, disabledIntervals: Lint.IDisabledInterval[]);
+        constructor(ruleName: string, value: any, disabledIntervals: Lint.IDisabledInterval[]);
         public getOptions(): Lint.IOptions;
         public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[];
         public applyWithWalker(walker: Lint.RuleWalker): Lint.RuleFailure[];
@@ -10844,6 +10847,7 @@ declare module Lint {
         private fileName;
         private source;
         private options;
+        static VERSION: string;
         constructor(fileName: string, source: string, options: any);
         public lint(): LintResult;
         private getRelativePath(directory);

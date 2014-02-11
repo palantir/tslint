@@ -20,7 +20,7 @@
 module Lint {
     export interface IOptions {
         ruleArguments?: any[];
-        source: string;
+        ruleName: string;
         disabledIntervals: Lint.IDisabledInterval[];
     }
 
@@ -79,20 +79,27 @@ module Lint {
         private startPosition: Lint.RuleFailurePosition;
         private endPosition: Lint.RuleFailurePosition;
         private failure: string;
+        private ruleName: string;
 
         constructor(syntaxTree: TypeScript.SyntaxTree,
                     start: number,
                     end: number,
-                    failure: string) {
+                    failure: string,
+                    ruleName: string) {
 
             this.failure = failure;
             this.fileName = syntaxTree.fileName();
             this.startPosition = this.createFailurePosition(syntaxTree, start);
             this.endPosition = this.createFailurePosition(syntaxTree, end);
+            this.ruleName = ruleName;
         }
 
         public getFileName() {
             return this.fileName;
+        }
+
+        public getRuleName() {
+            return this.ruleName;
         }
 
         public getStartPosition(): Lint.RuleFailurePosition {
@@ -112,7 +119,8 @@ module Lint {
                 name: this.fileName,
                 failure: this.failure,
                 startPosition: this.startPosition.toJson(),
-                endPosition: this.endPosition.toJson()
+                endPosition: this.endPosition.toJson(),
+                ruleName: this.ruleName
             };
         }
 

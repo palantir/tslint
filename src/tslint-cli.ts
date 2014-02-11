@@ -17,12 +17,11 @@
 /// <reference path='tslint.ts'/>
 
 var fs = require("fs");
-var path = require("path");
 var optimist = require("optimist")
     .usage("usage: $0")
     .check((argv) => {
-        // f is required unless we're asking for help; throw an error if f is missing unless help is there
-        if (!("f" in argv) && !("help" in argv)) {
+        // at least one of file or help or version must be present
+        if (!(argv.f || argv.h || argv.v)) {
             throw "Missing required arguments: f";
         }
     })
@@ -34,6 +33,10 @@ var optimist = require("optimist")
         "f": {
             alias: "file",
             describe: "file to lint"
+        },
+        "h": {
+            alias: "help",
+            describe: "display detailed help"
         },
         "o": {
             alias: "out",
@@ -49,13 +52,13 @@ var optimist = require("optimist")
         },
         "t": {
             alias: "format",
-            describe: "output format (prose, json)",
+            describe: "output format (prose, json, verbose)",
             default: "prose"
         },
-        "h": {
-            alias: "help",
-            describe: "display detailed help"
-        },
+        "v": {
+            alias: "version",
+            describe: "current version"
+        }
     });
 var argv = optimist.argv;
 
@@ -68,6 +71,11 @@ if (argv.o !== undefined) {
     });
 } else {
     outputStream = process.stdout;
+}
+
+if (argv.v !== undefined) {
+    outputStream.write(Lint.Linter.VERSION + "\n");
+    process.exit(0);
 }
 
 if ("help" in argv) {
@@ -115,10 +123,12 @@ if ("help" in argv) {
         "    -t, --format:\n" +
         "        The formatter to use to format the results of the linter before\n" +
         "        outputting it to stdout or the file passed in --out. The core\n" +
-        "        formatters are prose (human readable) and json (machine readable),\n" +
-        "        and prose is the default if this option is not used. Additonal\n" +
-        "        formatters can be added and used if the --formatters-dir option\n" +
-        "        is set.\n" +
+        "        formatters are prose (human readable), json (machine readable)\n" +
+        "        and verbose. prose is the default if this option is not used. Additonal\n" +
+        "        formatters can be added and used if the --formatters-dir option is set.\n" +
+        "\n" +
+        "    -v, --version:\n" +
+        "        The current version of tslint.\n" +
         "\n" +
         "    -h, --help:\n" +
         "       Prints this help message.\n";

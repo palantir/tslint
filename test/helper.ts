@@ -40,7 +40,7 @@ module Lint.Test {
 
     export function applyRuleOnFile(fileName: string, Rule: any, ruleValue: any = true): Lint.RuleFailure[] {
         var syntaxTree = getSyntaxTree(fileName);
-        var rule = new Rule(ruleValue, "", []);
+        var rule = new Rule("", ruleValue, []);
         return rule.apply(syntaxTree);
     }
 
@@ -52,7 +52,7 @@ module Lint.Test {
         var startPosition = lineMap.getPosition(start[0] - 1, start[1] - 1);
         var endPosition = lineMap.getPosition(end[0] - 1, end[1] - 1);
 
-        return new Lint.RuleFailure(getSyntaxTree(fileName), startPosition, endPosition, failure);
+        return new Lint.RuleFailure(getSyntaxTree(fileName), startPosition, endPosition, failure, "");
     }
 
     // return a partial on createFailure
