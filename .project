@@ -8,4 +8,15 @@
 	</buildSpec>
 	<natures>
 	</natures>
+	<filteredResources>
+		<filter>
+			<id>1386959768651</id>
+			<name></name>
+			<type>22</type>
+			<matcher>
+				<id>org.eclipse.ui.ide.multiFilter</id>
+				<arguments>1.0-name-matches-false-false-tslint.d.ts</arguments>
+			</matcher>
+		</filter>
+	</filteredResources>
 </projectDescription>
