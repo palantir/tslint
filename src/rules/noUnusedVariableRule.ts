@@ -30,12 +30,14 @@ export class Rule extends Lint.Rules.AbstractRule {
 class NoUnusedVariablesWalker extends Lint.RuleWalker {
     private fileName: string;
     private skipVariableDeclaration: boolean;
+    private skipParameterDeclaration: boolean;
     private languageServices: TypeScript.Services.LanguageService;
 
     constructor(syntaxTree: TypeScript.SyntaxTree, options: Lint.IOptions, languageServices: TypeScript.Services.LanguageService) {
         super(syntaxTree, options);
         this.fileName = syntaxTree.fileName();
         this.skipVariableDeclaration = false;
+        this.skipParameterDeclaration = false;
         this.languageServices = languageServices;
     }
 
@@ -58,6 +60,20 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         super.visitVariableDeclarator(node);
     }
 
+    // skip parameters in method signatures
+    public visitMethodSignature(node: TypeScript.MethodSignatureSyntax): void {
+        this.skipParameterDeclaration = true;
+        super.visitMethodSignature(node);
+        this.skipParameterDeclaration = false;
+    }
+
+    // skip parameters in index signatures (stuff like [key: string]: string)
+    public visitIndexSignature(node: TypeScript.IndexSignatureSyntax): void {
+        this.skipParameterDeclaration = true;
+        super.visitIndexSignature(node);
+        this.skipParameterDeclaration = false;
+    }
+
     // skip exported variables
     public visitVariableStatement(node: TypeScript.VariableStatementSyntax): void {
         if (this.hasModifier(node.modifiers, "export")) {
@@ -78,6 +94,17 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         }
 
         super.visitFunctionDeclaration(node);
+    }
+
+    public visitParameter(node: TypeScript.ParameterSyntax): void {
+        var variableName = node.identifier.text();
+        var position = this.positionAfter(node.modifiers);
+
+        if (!this.hasModifier(node.modifiers, "public") && !this.skipParameterDeclaration) {
+            this.validateReferencesForVariable(variableName, position);
+        }
+
+        super.visitParameter(node);
     }
 
     // check private member variables
