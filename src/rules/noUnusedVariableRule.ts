@@ -14,6 +14,8 @@
  * limitations under the License.
 */
 
+var OPTION_CHECK_PARAMETERS = "check-parameters";
+
 /// <reference path='../../lib/tslint.d.ts' />
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -100,7 +102,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         var variableName = node.identifier.text();
         var position = this.positionAfter(node.modifiers);
 
-        if (!this.hasModifier(node.modifiers, "public") && !this.skipParameterDeclaration) {
+        if (!this.hasModifier(node.modifiers, "public") && !this.skipParameterDeclaration && this.hasOption(OPTION_CHECK_PARAMETERS)) {
             this.validateReferencesForVariable(variableName, position);
         }
 
