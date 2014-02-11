@@ -1,6 +1,10 @@
 Change Log
 ===
 
+v0.4.4
+---
+* [bug] `no-unused-variable` validates function parameters and constructor methods
+* [bug] `no-empty` and `no-trailing-comma` rules handle empty objects
 
 v0.4.3
 ---

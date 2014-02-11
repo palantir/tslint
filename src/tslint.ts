@@ -42,7 +42,7 @@ module Lint {
         private source: string;
         private options: any;
 
-        public static VERSION = "0.4.3";
+        public static VERSION = "0.4.4";
 
         constructor(fileName: string, source: string, options: any) {
             this.fileName = fileName;
