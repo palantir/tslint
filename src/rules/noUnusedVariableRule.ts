@@ -100,7 +100,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
 
     public visitParameter(node: TypeScript.ParameterSyntax): void {
         var variableName = node.identifier.text();
-        var position = this.positionAfter(node.modifiers);
+        var position = this.positionAfter(node.dotDotDotToken, node.modifiers) + node.leadingTriviaWidth();
 
         if (!this.hasModifier(node.modifiers, "public") && !this.skipParameterDeclaration && this.hasOption(OPTION_CHECK_PARAMETERS)) {
             this.validateReferencesForVariable(variableName, position);

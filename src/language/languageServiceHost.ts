@@ -17,6 +17,8 @@
 /// <reference path='../typescript/src/services/languageService.ts'/>
 /// <reference path='../typescript/src/services/diagnosticServices.ts'/>
 
+/* tslint:disable:no-unused-variable */
+
 module Lint {
     export class LanguageServiceHost extends TypeScript.NullLogger implements TypeScript.Services.ILanguageServiceHost {
         private syntaxTree: TypeScript.SyntaxTree;
@@ -63,7 +65,7 @@ module Lint {
         public resolveRelativePath(path: string, directory: string) {
             return path;
         }
-        
+
         public fileExists(path: string) {
             return true;
         }
@@ -71,7 +73,7 @@ module Lint {
         public directoryExists(path: string) {
             return true;
         }
-        
+
         public getParentDirectory(path: string) {
             return path;
         }

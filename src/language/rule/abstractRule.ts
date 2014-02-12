@@ -42,9 +42,11 @@ module Lint.Rules {
             return this.options;
         }
 
+        /* tslint:disable:no-unused-variable */
         public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
             throw TypeScript.Errors.abstract();
         }
+        /* tslint:enable:no-unused-variable */
 
         public applyWithWalker(walker: Lint.RuleWalker): RuleFailure[] {
             var sourceUnit = walker.getSyntaxTree().sourceUnit();

@@ -26,3 +26,7 @@ export class ABCD {
 export interface ITestMapInterface {
     [key: string]: string;
 }
+
+export function func6(...args: number[]) {
+    return args;
+}
