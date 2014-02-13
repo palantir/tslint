@@ -1,6 +1,11 @@
 Change Log
 ===
 
+v0.4.5
+---
+* [feature] `no-unused-variable` no longer checks parameters by defualt. Parameters are now only checked if the `check-parameters` option is set.
+* [bug] `no-unused-variable` parameter check no longer fails on variable argument parameters (like ...args) and on cases where the parameters are broken up by newlines.
+
 v0.4.4
 ---
 * [bug] `no-unused-variable` validates function parameters and constructor methods

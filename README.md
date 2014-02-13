@@ -38,6 +38,8 @@ Supported Rules
 * `no-trailing-comma` disallows trailing comma within object literals.
 * `no-trailing-whitespace` disallows trailing whitespace at the end of a line.
 * `no-unused-variable` disallows unused imports, variables, functions and private class members.
+    * `"check-parameters"` disallows unused function and constructor parameters.
+        * NOTE: this option is experimental and does not work with classes that use abstract method declarations, among other things. Use at your own risk.
 * `no-unreachable` disallows unreachable code after `break`, `catch`, `throw`, and `return` statements.
 * `no-use-before-declare` disallows usage of variables before their declaration.
 * `one-line` enforces the specified tokens to be on the same line as the expression preceding it. Rule options:
