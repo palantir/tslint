@@ -6543,7 +6543,7 @@ declare module Lint {
         isEnabled: boolean;
         position: number;
     }
-    function loadRules(ruleConfiguration: any, source: string, enableDisableRuleMap: {
+    function loadRules(ruleConfiguration: any, enableDisableRuleMap: {
         [rulename: string]: IEnableDisablePosition[];
     }, rulesDirectory?: string): Rule[];
     function findRule(name: string, rulesDirectory?: string): any;
