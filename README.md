@@ -93,11 +93,11 @@ Installation
 
 ##### CLI
 
-    sudo npm install tslint -g
+```sudo npm install tslint -g```
 
 ##### Library
 
-    npm install tslint
+```npm install tslint```
 
 Usage
 -----
@@ -171,26 +171,27 @@ tslint accepts the following commandline options:
 
 ##### Library
 
-	var options = {
-		formatter: "json",
-	    configuration: configuration,
-	    rulesDirectory: "customRules/",
-	    formattersDirectory: "customFormatters/"
-	};
+```javascript
+var options = {
+	formatter: "json",
+	configuration: configuration,
+	rulesDirectory: "customRules/",
+	formattersDirectory: "customFormatters/"
+};
 
-	var Linter = require("tslint");
+var Linter = require("tslint");
 
-	var ll = new Linter(fileName, contents, options);
-	var result = ll.lint();
+var ll = new Linter(fileName, contents, options);
+var result = ll.lint();
+```
 
 Development
 -----------
 
-### Setup ###
+To develop tslint simply clone the repository, install dependencies and run grunt:
 
-    git clone git@github.com:palantir/tslint.git
-
-### Build ###
-
-    npm install
-    grunt
+```bash
+git clone git@github.com:palantir/tslint.git
+npm install
+grunt
+```
