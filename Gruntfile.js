@@ -34,13 +34,17 @@ module.exports = function(grunt) {
       ]
     },
 
-    typescript: {
+    ts: {
+      options:{
+        sourceMap: false
+      },
+    
       bin: {
         options: {
           target: 'es5'
         },
         src: ['src/tslint-cli.ts'],
-        dest: 'bin/tslint-cli.js'
+        out: 'bin/tslint-cli.js'
       },
 
       core: {
@@ -50,7 +54,7 @@ module.exports = function(grunt) {
           target: 'es5'
         },
         src: ['src/tslint.ts'],
-        dest: 'lib/tslint.js'
+        out: 'lib/tslint.js'
       },
 
       core_rules: {
@@ -60,7 +64,7 @@ module.exports = function(grunt) {
           target: 'es5'
         },
         src: ['lib/tslint.d.ts', 'src/rules/*.ts'],
-        dest: 'build/rules/'
+        outDir: 'build/rules/'
       },
 
       core_formatters: {
@@ -70,7 +74,7 @@ module.exports = function(grunt) {
           target: 'es5'
         },
         src: ['lib/tslint.d.ts', 'src/formatters/*.ts'],
-        dest: 'build/formatters/'
+        outDir: 'build/formatters/'
       },
 
       test: {
@@ -78,7 +82,7 @@ module.exports = function(grunt) {
           target: 'es5'
         },
         src: ['test/**/*.ts', '!test/files/**/*.ts'],
-        dest: 'build/tslint-tests.js'
+        out: 'build/tslint-tests.js'
       }
     }
   });
@@ -87,12 +91,12 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-mocha-test');
   grunt.loadNpmTasks('grunt-tslint');
-  grunt.loadNpmTasks('grunt-typescript');
+  grunt.loadNpmTasks('grunt-ts');
 
   // register custom tasks
-  grunt.registerTask('core', ['clean:core', 'typescript:core', 'typescript:core_rules', 'typescript:core_formatters']);
-  grunt.registerTask('bin', ['clean:bin', 'typescript:bin', 'tslint:src']);
-  grunt.registerTask('test', ['clean:test', 'typescript:test', 'tslint:test', 'mochaTest']);
+  grunt.registerTask('core', ['clean:core', 'ts:core', 'ts:core_rules', 'ts:core_formatters']);
+  grunt.registerTask('bin', ['clean:bin', 'ts:bin', 'tslint:src']);
+  grunt.registerTask('test', ['clean:test', 'ts:test', 'tslint:test', 'mochaTest']);
 
   // create default task
   grunt.registerTask('default', ['core', 'bin', 'test']);
