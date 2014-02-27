@@ -60,6 +60,27 @@ class UnreachableWalker extends Lint.RuleWalker {
         this.hasReturned = false;
     }
 
+    public visitIfStatement(node: TypeScript.IfStatementSyntax): void {
+        this.hasReturned = false;
+        super.visitIfStatement(node);
+        this.hasReturned = false;
+    }
+
+    public visitElseClause(node: TypeScript.ElseClauseSyntax): void {
+        this.hasReturned = false;
+        super.visitElseClause(node);
+        this.hasReturned = false;
+    }
+
+    public visitOptionalNode(node: TypeScript.SyntaxNode): void {
+        if (node != null && node.kind() === TypeScript.SyntaxKind.ElseClause) {
+            // if we're an else clause then we're in the middle of processing an if statement
+            // and thus we want to disregard the case where the previous statement ended with a return
+            this.hasReturned = false;
+        }
+        super.visitOptionalNode(node);
+    }
+
     public visitBreakStatement(node: TypeScript.BreakStatementSyntax): void {
         super.visitBreakStatement(node);
         this.hasReturned = true;
