@@ -17,32 +17,37 @@
 module Lint.Configuration {
     var fs = require("fs");
     var path = require("path");
+    var findup = require("findup-sync");
 
     var CONFIG_FILENAME = "tslint.json";
 
     export function findConfiguration(configFile): any {
-        if (!configFile) {
-            var currentPath = global.process.cwd();
-            var parentPath = currentPath;
+        if (configFile) {
+            return JSON.parse(fs.readFileSync(configFile, "utf8"));
+        }
 
-            while (true) {
-                var filePath = path.join(currentPath, CONFIG_FILENAME);
+        // First look for package.json
+        configFile = findup("pacakge.json", { nocase: true });
 
-                if (fs.existsSync(filePath)) {
-                    configFile = filePath;
-                    break;
-                }
+        if (configFile) {
+            var content = require(configFile);
 
-                // check if there's nowhere else to go
-                parentPath = path.resolve(currentPath, "..");
-                if (parentPath === currentPath) {
-                    return undefined;
-                }
-
-                currentPath = parentPath;
+            if (content.tslintConfig) {
+                return content.tslintConfig;
             }
         }
 
-        return JSON.parse(fs.readFileSync(configFile, "utf8"));
+        // Next look for tslint.json
+        var environment = global.process.env;
+        var defaultPath = path.join((environment.HOME || environment.HOMEPATH || environment.USERPROFILE),
+                                     CONFIG_FILENAME);
+
+        configFile = findup(CONFIG_FILENAME, { nocase: true });
+
+        if (!configFile && fs.existsSync(defaultPath)) {
+            configFile = defaultPath;
+        }
+
+        return configFile ? JSON.parse(fs.readFileSync(configFile, "utf8")) : undefined;
     }
 }
