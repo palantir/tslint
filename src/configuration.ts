@@ -27,7 +27,7 @@ module Lint.Configuration {
         }
 
         // First look for package.json
-        configFile = findup("pacakge.json", { nocase: true });
+        configFile = findup("package.json", { nocase: true });
 
         if (configFile) {
             var content = require(configFile);
