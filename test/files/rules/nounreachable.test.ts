@@ -51,3 +51,18 @@ switch (x) {
         i = 4;
         break;
 }
+
+function f4() {
+    var x = 3;
+    if (x === 4) return;
+    else x = 4;
+    var y = 7;
+}
+
+function f5() {
+    var x = 3;
+    if (x === 4) x = 5;
+    else return;
+    var y = 7;
+}
+
