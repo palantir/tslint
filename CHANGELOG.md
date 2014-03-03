@@ -1,6 +1,13 @@
 Change Log
 ===
 
+v0.4.6
+---
+* [build] migrated build to use `grunt-ts` instead of `grunt-typescript`
+* [feature] `package.json` now contains a `tslintConfig` paramater to allow users to specify the location of the configuration file there
+* [feature] tslint now searches for the configuration file in the user's home directory if not found in the current path
+* [bug] unbraced conditionals no longer cause false positives for the `no-unreachable` rule
+
 v0.4.5
 ---
 * [feature] `no-unused-variable` no longer checks parameters by defualt. Parameters are now only checked if the `check-parameters` option is set.

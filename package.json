@@ -1,6 +1,6 @@
 {
   "name": "tslint",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "description": "a static analysis linter for TypeScript",
   "bin": {
     "tslint": "./bin/tslint"
@@ -29,7 +29,7 @@
     "grunt-cli": "~0.1.9",
     "grunt-contrib-clean": "~0.5.0",
     "grunt-mocha-test": "~0.6.2",
-    "grunt-tslint": "~0.4.0",    
+    "grunt-tslint": "~0.4.0",
     "grunt-ts": "~1.7.2"
   },
   "license": "Apache 2.0"

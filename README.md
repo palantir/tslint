@@ -116,7 +116,7 @@ Please first ensure that the TypeScript source files compile correctly.
       -s, --formatters-dir   formatters directory
 	  -t, --format  		 output format (prose, json)  [default: "prose"]
 
-By default, configuration is loaded from `tslint.json`, if it exists in the current path.
+By default, configuration is loaded from `tslint.json`, if it exists in the current path, or the user's home directory, in that order.
 
 tslint accepts the following commandline options:
 
