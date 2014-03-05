@@ -61,55 +61,42 @@ class WhitespaceWalker extends Lint.RuleWalker {
 
     // check for spaces between the => symbol
     public visitSimpleArrowFunctionExpression(node: TypeScript.SimpleArrowFunctionExpressionSyntax): void {
-        var equalsGreaterThanToken = node.equalsGreaterThanToken;
-        if (this.hasOption(OPTION_OPERATOR)) {
-            var position = this.positionAfter(node.identifier);
-            this.checkForLeadingSpace(position, node.identifier.trailingTrivia());
-
-            position += equalsGreaterThanToken.fullWidth();
-            this.checkForLeadingSpace(position, equalsGreaterThanToken.trailingTrivia());
-        }
+        var position = this.positionAfter(node.identifier);
+        this.checkEqualsGreaterThan(node.equalsGreaterThanToken, node.identifier, position);
 
         super.visitSimpleArrowFunctionExpression(node);
     }
 
     public visitParenthesizedArrowFunctionExpression(node: TypeScript.ParenthesizedArrowFunctionExpressionSyntax): void {
-        var equalsGreaterThanToken = node.equalsGreaterThanToken;
-        if (this.hasOption(OPTION_OPERATOR)) {
-            var position = this.positionAfter(node.callSignature);
-            this.checkForLeadingSpace(position, node.callSignature.trailingTrivia());
-
-            position += equalsGreaterThanToken.fullWidth();
-            this.checkForLeadingSpace(position, equalsGreaterThanToken.trailingTrivia());
-        }
+        var position = this.positionAfter(node.callSignature);
+        this.checkEqualsGreaterThan(node.equalsGreaterThanToken, node.callSignature, position);
 
         super.visitParenthesizedArrowFunctionExpression(node);
     }
 
     public visitConstructorType(node: TypeScript.ConstructorTypeSyntax): void {
-        var equalsGreaterThanToken = node.equalsGreaterThanToken;
-        if (this.hasOption(OPTION_OPERATOR)) {
-            var position = this.positionAfter(node.newKeyword, node.typeParameterList, node.parameterList);
-            this.checkForLeadingSpace(position, node.parameterList.trailingTrivia());
-
-            position += equalsGreaterThanToken.fullWidth();
-            this.checkForLeadingSpace(position, equalsGreaterThanToken.trailingTrivia());
-        }
+        var position = this.positionAfter(node.newKeyword, node.typeParameterList, node.parameterList);
+        this.checkEqualsGreaterThan(node.equalsGreaterThanToken, node.parameterList, position);
 
         super.visitConstructorType(node);
     }
 
     public visitFunctionType(node: TypeScript.FunctionTypeSyntax): void {
-        var equalsGreaterThanToken = node.equalsGreaterThanToken;
+        var position = this.positionAfter(node.typeParameterList, node.parameterList);
+        this.checkEqualsGreaterThan(node.equalsGreaterThanToken, node.parameterList, position);
+
+        super.visitFunctionType(node);
+    }
+
+    private checkEqualsGreaterThan(equalsGreaterThanToken: TypeScript.ISyntaxToken,
+        previousNode: TypeScript.ISyntaxNodeOrToken, position: number) {
+
         if (this.hasOption(OPTION_OPERATOR)) {
-            var position = this.positionAfter(node.typeParameterList, node.parameterList);
-            this.checkForLeadingSpace(position, node.parameterList.trailingTrivia());
+            this.checkForLeadingSpace(position, previousNode.trailingTrivia());
 
             position += equalsGreaterThanToken.fullWidth();
             this.checkForLeadingSpace(position, equalsGreaterThanToken.trailingTrivia());
         }
-
-        super.visitFunctionType(node);
     }
 
     // check for spaces between ternary operator symbols
