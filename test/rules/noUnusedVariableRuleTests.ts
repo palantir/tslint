@@ -24,6 +24,8 @@ describe("<no-unused-variable>", () => {
         var failure = Lint.Test.createFailuresOnFile(fileName, failureString)([3, 9], [3, 12]);
 
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule);
+
+        assert.lengthOf(actualFailures, 1);
         Lint.Test.assertContainsFailure(actualFailures, failure);
     });
 
@@ -34,6 +36,8 @@ describe("<no-unused-variable>", () => {
         var failure = Lint.Test.createFailuresOnFile(fileName, failureString)([3, 5], [3, 6]);
 
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule);
+
+        assert.lengthOf(actualFailures, 1);
         Lint.Test.assertContainsFailure(actualFailures, failure);
     });
 
@@ -46,6 +50,7 @@ describe("<no-unused-variable>", () => {
 
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule);
 
+        assert.lengthOf(actualFailures, 2);
         Lint.Test.assertContainsFailure(actualFailures, failure1);
         Lint.Test.assertContainsFailure(actualFailures, failure2);
     });
@@ -53,11 +58,14 @@ describe("<no-unused-variable>", () => {
     it("restricts unused class members", () => {
         var fileName = "rules/nounusedvariable-class.test.ts";
         var Rule = Lint.Test.getRule("no-unused-variable");
-        var failureString = Rule.FAILURE_STRING + "'mfunc4'";
-        var failure = Lint.Test.createFailuresOnFile(fileName, failureString)([18, 13], [18, 19]);
+        var failure1 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING + "'z2'")([2, 13], [2, 15]);
+        var failure2 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING + "'mfunc4'")([18, 13], [18, 19]);
 
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule);
-        Lint.Test.assertContainsFailure(actualFailures, failure);
+
+        assert.lengthOf(actualFailures, 2);
+        Lint.Test.assertContainsFailure(actualFailures, failure1);
+        Lint.Test.assertContainsFailure(actualFailures, failure2);
     });
 
     it("restricts unused parameters", () => {
