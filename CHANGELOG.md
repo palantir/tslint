@@ -1,6 +1,8 @@
 Change Log
 ===
 
+* [bug] `export import` statements no longer false positives for `no-unused-variable-rule`
+
 v0.4.6
 ---
 * [build] migrated build to use `grunt-ts` instead of `grunt-typescript`

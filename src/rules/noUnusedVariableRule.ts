@@ -44,8 +44,10 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     }
 
     public visitImportDeclaration(node: TypeScript.ImportDeclarationSyntax): void {
-        var position = this.positionAfter(node.importKeyword);
-        this.validateReferencesForVariable(node.identifier.text(), position);
+        if (!this.hasModifier(node.modifiers, TypeScript.SyntaxKind.ExportKeyword)) {
+            var position = this.positionAfter(node.importKeyword);
+            this.validateReferencesForVariable(node.identifier.text(), position);
+        }
         super.visitImportDeclaration(node);
     }
 
@@ -78,7 +80,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
 
     // skip exported variables
     public visitVariableStatement(node: TypeScript.VariableStatementSyntax): void {
-        if (this.hasModifier(node.modifiers, "export")) {
+        if (this.hasModifier(node.modifiers, TypeScript.SyntaxKind.ExportKeyword)) {
             this.skipVariableDeclaration = true;
         }
 
@@ -91,7 +93,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         var variableName = node.identifier.text();
         var position = this.positionAfter(node.modifiers, node.functionKeyword);
 
-        if (!this.hasModifier(node.modifiers, "export")) {
+        if (!this.hasModifier(node.modifiers, TypeScript.SyntaxKind.ExportKeyword)) {
             this.validateReferencesForVariable(variableName, position);
         }
 
@@ -102,7 +104,8 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         var variableName = node.identifier.text();
         var position = this.positionAfter(node.dotDotDotToken, node.modifiers) + node.leadingTriviaWidth();
 
-        if (!this.hasModifier(node.modifiers, "public") && !this.skipParameterDeclaration && this.hasOption(OPTION_CHECK_PARAMETERS)) {
+        if (!this.hasModifier(node.modifiers, TypeScript.SyntaxKind.PublicKeyword)
+            && !this.skipParameterDeclaration && this.hasOption(OPTION_CHECK_PARAMETERS)) {
             this.validateReferencesForVariable(variableName, position);
         }
 
@@ -119,7 +122,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         }
 
         // if an explicit 'public' modifier is specified, skip the current declaration
-        if (this.hasModifier(modifiers, "public")) {
+        if (this.hasModifier(modifiers, TypeScript.SyntaxKind.PublicKeyword)) {
             this.skipVariableDeclaration = true;
         }
 
@@ -133,21 +136,18 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         var variableName = node.propertyName.text();
         var position = this.positionAfter(node.modifiers);
 
-        if (this.hasModifier(modifiers, "private")) {
+        if (this.hasModifier(modifiers, TypeScript.SyntaxKind.PrivateKeyword)) {
             this.validateReferencesForVariable(variableName, position);
         }
 
         super.visitMemberFunctionDeclaration(node);
     }
 
-    private hasModifier(modifiers: TypeScript.ISyntaxElement, text: string) {
+    private hasModifier(modifiers: TypeScript.ISyntaxElement, modifierKind: TypeScript.SyntaxKind) {
         for (var i = 0, n = modifiers.childCount(); i < n; i++) {
             var modifier = modifiers.childAt(i);
-            if (modifier.isToken()) {
-                var modifierText = (<TypeScript.ISyntaxToken> modifier).text();
-                if (modifierText === text) {
-                    return true;
-                }
+            if (modifier.kind() === modifierKind) {
+                return true;
             }
         }
 
