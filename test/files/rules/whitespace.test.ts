@@ -24,4 +24,13 @@ module M {
     while(i < 1) {
         ++i;
     }
+
+    var q;
+    q.forEach(()=>3);
+    q.forEach(()=>{
+        return 3;
+    });
+
+    var r: ()=>string;
+    var s: new ()=>string;
 }

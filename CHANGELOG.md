@@ -1,6 +1,7 @@
 Change Log
 ===
 
+* [feature] the `check-operator` option for the `whitespace` rule now checks whitespace around the => token
 * [bug] `export import` statements no longer false positives for `no-unused-variable-rule`
 
 v0.4.6

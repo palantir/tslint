@@ -17,7 +17,7 @@
 /// <reference path='../references.ts' />
 
 describe("<whitespace>", () => {
-    var actualFailures;
+    var actualFailures: Lint.RuleFailure[];
     var fileName = "rules/whitespace.test.ts";
     var WhitespaceRule = Lint.Test.getRule("whitespace");
     var failureString = WhitespaceRule.FAILURE_STRING;
@@ -118,5 +118,19 @@ describe("<whitespace>", () => {
     it("enforces whitespace in label definitions", () => {
         var expectedFailure = createFailure([21, 14], [21, 15]);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
+    });
+
+    it("enforces whitespace around the => token", () => {
+        var expectedFailure1 = createFailure([29, 17], [29, 18]);
+        var expectedFailure2 = createFailure([29, 19], [29, 20]);
+        var expectedFailure3 = createFailure([30, 17], [30, 18]);
+        var expectedFailure4 = createFailure([30, 19], [30, 20]);
+        var expectedFailure5 = createFailure([34, 14], [34, 15]);
+        var expectedFailure6 = createFailure([34, 16], [34, 17]);
+        var expectedFailure7 = createFailure([35, 14], [35, 15]);
+        var expectedFailure8 = createFailure([35, 16], [35, 17]);
+
+        Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
+        Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);
     });
 });
