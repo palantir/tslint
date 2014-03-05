@@ -127,10 +127,16 @@ describe("<whitespace>", () => {
         var expectedFailure4 = createFailure([30, 19], [30, 20]);
         var expectedFailure5 = createFailure([34, 14], [34, 15]);
         var expectedFailure6 = createFailure([34, 16], [34, 17]);
-        var expectedFailure7 = createFailure([35, 14], [35, 15]);
-        var expectedFailure8 = createFailure([35, 16], [35, 17]);
+        var expectedFailure7 = createFailure([35, 18], [35, 19]);
+        var expectedFailure8 = createFailure([35, 20], [35, 21]);
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);
+        Lint.Test.assertContainsFailure(actualFailures, expectedFailure3);
+        Lint.Test.assertContainsFailure(actualFailures, expectedFailure4);
+        Lint.Test.assertContainsFailure(actualFailures, expectedFailure5);
+        Lint.Test.assertContainsFailure(actualFailures, expectedFailure6);
+        Lint.Test.assertContainsFailure(actualFailures, expectedFailure7);
+        Lint.Test.assertContainsFailure(actualFailures, expectedFailure8);
     });
 });
