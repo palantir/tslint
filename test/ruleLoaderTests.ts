@@ -42,4 +42,16 @@ describe("Rule Loader", () => {
         var rules = Lint.loadRules(invalidConfiguration, {}, rulesDirectory);
         assert.deepEqual(rules, []);
     });
+
+    it("doesn't ignore leading or trailing underscores or dashes", () => {
+        var invalidConfiguration = {
+            "_indent": 6,
+            "forin_": true,
+            "-quotemark": "single",
+            "eofline-": true
+        };
+
+        var rules = Lint.loadRules(invalidConfiguration, {}, rulesDirectory);
+        assert.deepEqual(rules, []);
+    });
 });

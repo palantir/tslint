@@ -52,7 +52,7 @@ module Lint {
     }
 
     export function findRule(name: string, rulesDirectory?: string) {
-        var camelizedName = _s.camelize(name + "Rule");
+        var camelizedName = transformName(name);
 
         // first check for core rules
         var Rule = loadRule(CORE_RULES_DIRECTORY, camelizedName);
@@ -74,7 +74,7 @@ module Lint {
             var subDirectory = _s.strLeft(rulesDirectory, "-");
             var ruleName = _s.strRight(rulesDirectory, "-");
             if (subDirectory !== rulesDirectory && ruleName !== rulesDirectory) {
-                camelizedName = _s.camelize(ruleName + "Rule");
+                camelizedName = transformName(ruleName);
                 Rule = loadRule(rulesDirectory, subDirectory, camelizedName);
                 if (Rule) {
                     return Rule;
@@ -83,6 +83,16 @@ module Lint {
         }
 
         return undefined;
+    }
+
+    function transformName(name: string) {
+        // camelize strips out leading and trailing underscores and dashes, so make sure they aren't passed to camelize
+        // the regex matches the groups (leading underscores and dashes)(other characters)(trailing underscores and dashes)
+        var nameMatch = name.match(/^([-_]*)(.*?)([-_]*)$/);
+        if (nameMatch == null) {
+            return name + "Rule";
+        }
+        return nameMatch[1] + _s.camelize(nameMatch[2]) + nameMatch[3] + "Rule";
     }
 
     function loadRule(...paths: string[]) {
