@@ -66,3 +66,24 @@ function f5() {
     var y = 7;
 }
 
+function f6() {
+    hoisted();
+    return 0;
+
+    function hoisted() {
+        return 0;
+    }
+}
+
+// more invalid code
+
+function f7() {
+    hoisted();
+    return 0;
+
+    function hoisted() {
+        return 0;
+    }
+
+    var y = 7;
+}

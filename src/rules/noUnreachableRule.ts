@@ -33,6 +33,12 @@ class UnreachableWalker extends Lint.RuleWalker {
     }
 
     public visitNode(node: TypeScript.SyntaxNode): void {
+        var previousReturned = this.hasReturned;
+        // function declarations can be hoisted -- so set hasReturned to false until we're done with the function
+        if (node.kind() === TypeScript.SyntaxKind.FunctionDeclaration) {
+            this.hasReturned = false;
+        }
+
         if (this.hasReturned) {
             this.hasReturned = false;
             var position = this.position() + node.leadingTriviaWidth();
@@ -40,34 +46,35 @@ class UnreachableWalker extends Lint.RuleWalker {
         }
 
         super.visitNode(node);
+
+        // if there is further code after the hoisted function and we returned before that code is unreachable
+        // so reset hasReturned to its previous state to check for that
+        if (node.kind() === TypeScript.SyntaxKind.FunctionDeclaration) {
+            this.hasReturned = previousReturned;
+        }
     }
 
     public visitBlock(node: TypeScript.BlockSyntax): void {
-        this.hasReturned = false;
         super.visitBlock(node);
         this.hasReturned = false;
     }
 
     public visitCaseSwitchClause(node: TypeScript.CaseSwitchClauseSyntax): void {
-        this.hasReturned = false;
         super.visitCaseSwitchClause(node);
         this.hasReturned = false;
     }
 
     public visitDefaultSwitchClause(node: TypeScript.DefaultSwitchClauseSyntax): void {
-        this.hasReturned = false;
         super.visitDefaultSwitchClause(node);
         this.hasReturned = false;
     }
 
     public visitIfStatement(node: TypeScript.IfStatementSyntax): void {
-        this.hasReturned = false;
         super.visitIfStatement(node);
         this.hasReturned = false;
     }
 
     public visitElseClause(node: TypeScript.ElseClauseSyntax): void {
-        this.hasReturned = false;
         super.visitElseClause(node);
         this.hasReturned = false;
     }

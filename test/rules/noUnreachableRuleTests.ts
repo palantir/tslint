@@ -25,7 +25,8 @@ describe("<no-unreachable>", () => {
             createFailure([6, 5], [6, 11]),
             createFailure([13, 9], [13, 15]),
             createFailure([25, 9], [25, 27]),
-            createFailure([28, 9], [28, 15])
+            createFailure([28, 9], [28, 15]),
+            createFailure([88, 5], [88, 15])
         ];
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, NoUnreachableRule);
 
