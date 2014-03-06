@@ -32,6 +32,7 @@ describe("<whitespace>", () => {
             "check-type"
         ];
         actualFailures = Lint.Test.applyRuleOnFile(fileName, WhitespaceRule, options);
+        assert.lengthOf(actualFailures, 30);
     });
 
     it("enforces rules only when enabled", () => {
@@ -103,11 +104,13 @@ describe("<whitespace>", () => {
     });
 
     it("enforces whitespace in for statements", () => {
-        var expectedFailure1 = createFailure([20, 15], [20, 16]);
-        var expectedFailure2 = createFailure([20, 18], [20, 19]);
+        var expectedFailure1 = createFailure([20, 8], [20, 9]);
+        var expectedFailure2 = createFailure([20, 15], [20, 16]);
+        var expectedFailure3 = createFailure([20, 18], [20, 19]);
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);
+        Lint.Test.assertContainsFailure(actualFailures, expectedFailure3);
     });
 
     it("enforces whitespace in while statements", () => {

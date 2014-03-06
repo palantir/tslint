@@ -1,6 +1,7 @@
 Change Log
 ===
 
+* [bug] semicolon at end of file no longer triggers false positives for `whitespace` rule
 * [bug] hoisted functions no longer cause false positives for the `no-unreachable` rule
 * [bug] the rule loader no longer transforms/ignores the leading and trailing underscores and dashes of rule names in the config file
 * [feature] the `check-operator` option for the `whitespace` rule now checks whitespace around the => token
