@@ -1,6 +1,7 @@
 Change Log
 ===
 
+* [bug] the rule loader no longer transforms/ignores the leading and trailing underscores and dashes of rule names in the config file
 * [feature] the `check-operator` option for the `whitespace` rule now checks whitespace around the => token
 * [bug] `export import` statements no longer false positives for `no-unused-variable-rule`
 
