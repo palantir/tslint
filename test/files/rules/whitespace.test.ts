@@ -34,3 +34,5 @@ module M {
     var r: ()=>string;
     var s: new ()=>string;
 }
+
+var a;

@@ -31,6 +31,13 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class WhitespaceWalker extends Lint.RuleWalker {
+    private lastPosition: number;
+
+    constructor(syntaxTree: TypeScript.SyntaxTree, options: Lint.IOptions) {
+        super(syntaxTree, options);
+        this.lastPosition = this.getSyntaxTree().sourceUnit().fullWidth();
+    }
+
     // check for trailing space after the given tokens
     public visitToken(token: TypeScript.ISyntaxToken): void {
         super.visitToken(token);
@@ -166,6 +173,10 @@ class WhitespaceWalker extends Lint.RuleWalker {
 
     private checkForLeadingSpace(position: number, trivia: TypeScript.ISyntaxTriviaList) {
         var failure: Lint.RuleFailure = null;
+        if (position === this.lastPosition) {
+            // don't check for trailing whitespace if we're the last character in the file. There won't be any.
+            return;
+        }
 
         if (trivia.count() < 1) {
             failure = this.createFailure(position, 1, Rule.FAILURE_STRING);
