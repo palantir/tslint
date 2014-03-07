@@ -21,7 +21,7 @@ module Lint.Configuration {
 
     var CONFIG_FILENAME = "tslint.json";
 
-    export function findConfiguration(configFile): any {
+    export function findConfiguration(configFile: string): any {
         if (configFile) {
             return JSON.parse(fs.readFileSync(configFile, "utf8"));
         }

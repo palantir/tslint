@@ -19,7 +19,7 @@
 var fs = require("fs");
 var optimist = require("optimist")
     .usage("usage: $0")
-    .check((argv) => {
+    .check((argv: any) => {
         // at least one of file or help or version must be present
         if (!(argv.f || argv.h || argv.v)) {
             throw "Missing required arguments: f";
@@ -62,7 +62,7 @@ var optimist = require("optimist")
     });
 var argv = optimist.argv;
 
-var outputStream;
+var outputStream: any;
 if (argv.o !== undefined) {
     outputStream = fs.createWriteStream(argv.o, {
         end: false,

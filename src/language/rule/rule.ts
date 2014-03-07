@@ -131,7 +131,7 @@ module Lint {
                     this.endPosition.equals(ruleFailure.getEndPosition()));
         }
 
-        private createFailurePosition(syntaxTree, position): RuleFailurePosition {
+        private createFailurePosition(syntaxTree: TypeScript.SyntaxTree, position: number): RuleFailurePosition {
             var lineAndCharacter = syntaxTree.lineMap().getLineAndCharacterFromPosition(position);
             var failurePosition = new RuleFailurePosition(position, lineAndCharacter);
             return failurePosition;

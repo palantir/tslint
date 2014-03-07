@@ -35,7 +35,7 @@ class NameWalker extends Lint.RuleWalker {
         super.visitInterfaceDeclaration(node);
     }
 
-    private startsWithI(name): boolean {
+    private startsWithI(name: string): boolean {
         if (name.length <= 0) {
             return true;
         }
@@ -44,7 +44,7 @@ class NameWalker extends Lint.RuleWalker {
         return (firstCharacter === "I");
     }
 
-    private addFailureAt(position, width) {
+    private addFailureAt(position: number, width: number) {
         var failure = this.createFailure(position, width, Rule.FAILURE_STRING);
         this.addFailure(failure);
     }

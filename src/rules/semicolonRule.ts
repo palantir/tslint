@@ -20,7 +20,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "missing semicolon";
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        var ruleFailures = [];
+        var ruleFailures: Lint.RuleFailure[] = [];
         var diagnostics = syntaxTree.diagnostics();
 
         var disabledIntervals = this.getOptions().disabledIntervals;

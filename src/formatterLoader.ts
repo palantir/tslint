@@ -58,7 +58,7 @@ module Lint {
     }
 
     function loadFormatterModule(name: string) {
-        var src;
+        var src: string;
         try {
             src = require.resolve(name);
         } catch (e) {

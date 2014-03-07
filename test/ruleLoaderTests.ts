@@ -21,7 +21,7 @@ describe("Rule Loader", () => {
     var rulesDirectory = path.join(global.process.cwd(), "build/rules");
 
     it("loads core rules", () => {
-        var validConfiguration = {
+        var validConfiguration: {[name: string]: any} = {
             "forin": false,
             "quotemark": "single",
             "eofline": true,
@@ -34,7 +34,7 @@ describe("Rule Loader", () => {
     });
 
     it("skips invalid rules", () => {
-        var invalidConfiguration = {
+        var invalidConfiguration: {[name: string]: any} = {
             "invalidConfig1": true,
             "invalidConfig2": false
         };
@@ -44,7 +44,7 @@ describe("Rule Loader", () => {
     });
 
     it("doesn't ignore leading or trailing underscores or dashes", () => {
-        var invalidConfiguration = {
+        var invalidConfiguration: {[name: string]: any} = {
             "_indent": 6,
             "forin_": true,
             "-quotemark": "single",

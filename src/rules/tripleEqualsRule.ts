@@ -49,8 +49,8 @@ class ComparisonWalker extends Lint.RuleWalker {
     }
 
     private handleOperatorToken(position: number, operatorToken: TypeScript.ISyntaxToken) {
-        var failure = null;
-        var operatorKind = operatorToken.kind();
+        var failure: Lint.RuleFailure = null;
+        var operatorKind: TypeScript.SyntaxKind = operatorToken.kind();
 
         if (operatorKind === TypeScript.SyntaxKind.EqualsEqualsToken) {
             failure = this.createFailure(position, operatorToken.width(), Rule.EQ_FAILURE_STRING);

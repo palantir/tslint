@@ -45,7 +45,7 @@ class NameWalker extends Lint.RuleWalker {
         super.visitInterfaceDeclaration(node);
     }
 
-    private isPascalCased(name): boolean {
+    private isPascalCased(name: string): boolean {
         if (name.length <= 0) {
             return true;
         }
@@ -54,7 +54,7 @@ class NameWalker extends Lint.RuleWalker {
         return ((firstCharacter === firstCharacter.toUpperCase()) && name.indexOf("_") === -1);
     }
 
-    private addFailureAt(position, width) {
+    private addFailureAt(position: number, width: number) {
         var failure = this.createFailure(position, width, Rule.FAILURE_STRING);
         this.addFailure(failure);
     }

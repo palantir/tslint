@@ -35,7 +35,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class BraceWalker extends Lint.StateAwareRuleWalker {
     public visitToken(token: TypeScript.ISyntaxToken): void {
-        var failure;
+        var failure: Lint.RuleFailure;
         var kind = token.kind();
         var lastState = this.getLastState();
 
@@ -90,7 +90,7 @@ class BraceWalker extends Lint.StateAwareRuleWalker {
         super.visitCatchClause(node);
     }
 
-    private getLine(position): number {
+    private getLine(position: number): number {
         return this.getSyntaxTree().lineMap().getLineAndCharacterFromPosition(position).line();
     }
 

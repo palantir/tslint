@@ -25,7 +25,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class LabelPosWalker extends Lint.RuleWalker {
-    private isValidLabel;
+    private isValidLabel: boolean;
 
     public visitLabeledStatement(node: TypeScript.LabeledStatementSyntax): void {
         var width = node.identifier.width();

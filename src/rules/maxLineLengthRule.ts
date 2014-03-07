@@ -31,7 +31,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        var ruleFailures = [];
+        var ruleFailures: Lint.RuleFailure[] = [];
         var lineLimit = this.getOptions().ruleArguments[0];
         var lineMap = syntaxTree.lineMap();
         var lineStarts = lineMap.lineStarts();

@@ -51,7 +51,7 @@ module Lint {
         }
 
         public lint(): LintResult {
-            var i, failures = [];
+            var failures: RuleFailure[] = [];
             var syntaxTree = Lint.getSyntaxTree(this.fileName, this.source);
 
             // walk the code first to find all the intervals where rules are disabled
@@ -63,7 +63,7 @@ module Lint {
             var rulesDirectory = this.getRelativePath(this.options.rulesDirectory);
             var configuration = this.options.configuration.rules;
             var configuredRules = Lint.loadRules(configuration, enableDisableRuleMap, rulesDirectory);
-            for (i = 0; i < configuredRules.length; ++i) {
+            for (var i = 0; i < configuredRules.length; ++i) {
                 var rule = configuredRules[i];
                 if (rule.isEnabled()) {
                     var ruleFailures = rule.apply(syntaxTree);

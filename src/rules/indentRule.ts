@@ -46,7 +46,7 @@ class IndentWalker extends Lint.RuleWalker {
     }
 
     public visitMemberVariableDeclaration(node: TypeScript.MemberVariableDeclarationSyntax): void {
-        var firstElement;
+        var firstElement: TypeScript.ISyntaxNodeOrToken;
         if (node.modifiers.childCount() > 0) {
             firstElement = node.modifiers.childAt(0);
         } else {
@@ -58,7 +58,7 @@ class IndentWalker extends Lint.RuleWalker {
     }
 
     public visitMemberFunctionDeclaration(node: TypeScript.MemberFunctionDeclarationSyntax): void {
-        var firstElement;
+        var firstElement: TypeScript.ISyntaxNodeOrToken;
         if (node.modifiers.childCount() > 0) {
             firstElement = node.modifiers.childAt(0);
         } else {

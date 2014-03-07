@@ -24,7 +24,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class NoDuplicateKeyWalker extends Lint.RuleWalker {
-    private objectKeys;
+    private objectKeys: {[key: string]: boolean};
 
     public visitObjectLiteralExpression(node: TypeScript.ObjectLiteralExpressionSyntax): void {
         this.objectKeys = Object.create(null);

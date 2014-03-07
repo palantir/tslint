@@ -24,7 +24,7 @@ module Lint.Rules {
         private options: Lint.IOptions;
 
         constructor(ruleName: string, value: any, disabledIntervals: Lint.IDisabledInterval[]) {
-            var ruleArguments = [];
+            var ruleArguments: any[] = [];
 
             if (Array.isArray(value) && value.length > 1) {
                 ruleArguments = value.slice(1);

@@ -59,7 +59,7 @@ class QuoteWalker extends Lint.RuleWalker {
     }
 
     private handleToken(token: TypeScript.ISyntaxToken) {
-        var failure = null;
+        var failure: Lint.RuleFailure = null;
         if (token.kind() === TypeScript.SyntaxKind.StringLiteral) {
             var fullText = token.fullText();
             var width = token.width();

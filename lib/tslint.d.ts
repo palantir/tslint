@@ -6543,13 +6543,15 @@ declare module Lint {
         isEnabled: boolean;
         position: number;
     }
-    function loadRules(ruleConfiguration: any, enableDisableRuleMap: {
+    function loadRules(ruleConfiguration: {
+        [name: string]: any;
+    }, enableDisableRuleMap: {
         [rulename: string]: IEnableDisablePosition[];
     }, rulesDirectory?: string): Rule[];
     function findRule(name: string, rulesDirectory?: string): any;
 }
 declare module Lint.Configuration {
-    function findConfiguration(configFile: any): any;
+    function findConfiguration(configFile: string): any;
 }
 declare module Lint {
     interface Formatter {

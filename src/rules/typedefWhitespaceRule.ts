@@ -118,13 +118,13 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
     }
 
     private findPrecedingChild(node: TypeScript.SyntaxNode, startIndex: number): TypeScript.ISyntaxElement {
-        var precedingChild,
-            offset = 0;
+        var precedingChild: TypeScript.ISyntaxElement, offset = 0;
 
         while (!precedingChild) {
             offset++;
             precedingChild = node.childAt(startIndex - offset);
         }
+
         return precedingChild;
     }
 
