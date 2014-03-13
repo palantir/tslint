@@ -37,6 +37,7 @@ Supported Rules
 * `no-string-literal` disallows object access via string literals.
 * `no-trailing-comma` disallows trailing comma within object literals.
 * `no-trailing-whitespace` disallows trailing whitespace at the end of a line.
+* `no-unused-expression` disallows unused expression statements, that is, expression statements that are not assignments or function invocations (and thus no-ops).
 * `no-unused-variable` disallows unused imports, variables, functions and private class members.
     * `"check-parameters"` disallows unused function and constructor parameters.
         * NOTE: this option is experimental and does not work with classes that use abstract method declarations, among other things. Use at your own risk.
