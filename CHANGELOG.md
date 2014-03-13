@@ -1,6 +1,7 @@
 Change Log
 ===
 
+* [bug] `no-use-before-declare-rule` no longer triggers false positives for member variables of classes used before the class is declared
 * [feature] added `no-unused-expression` rule which disallows unused expression statements
 * [bug] semicolon at end of file no longer triggers false positives for `whitespace` rule
 * [bug] hoisted functions no longer cause false positives for the `no-unreachable` rule

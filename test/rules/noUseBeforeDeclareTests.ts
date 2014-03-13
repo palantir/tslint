@@ -25,19 +25,22 @@ describe("<no-use-before-declare>", () => {
 
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule);
 
-        assert.equal(actualFailures.length, 3);
+        assert.equal(actualFailures.length, 4);
         Lint.Test.assertContainsFailure(actualFailures, failure);
     });
 
     it("restricts usage of variables before declaration", () => {
         var fileName = "rules/nousebeforedeclare.test.ts";
         var Rule = Lint.Test.getRule("no-use-before-declare");
-        var failureString = Rule.FAILURE_STRING_PREFIX + "varb" + Rule.FAILURE_STRING_POSTFIX;
-        var failure = Lint.Test.createFailuresOnFile(fileName, failureString)([3, 12], [3, 16]);
+        var failureString1 = Rule.FAILURE_STRING_PREFIX + "varb" + Rule.FAILURE_STRING_POSTFIX;
+        var failureString2 = Rule.FAILURE_STRING_PREFIX + "j" + Rule.FAILURE_STRING_POSTFIX;
+        var failure1 = Lint.Test.createFailuresOnFile(fileName, failureString1)([3, 12], [3, 16]);
+        var failure2 = Lint.Test.createFailuresOnFile(fileName, failureString2)([13, 9], [13, 10]);
 
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule);
-        assert.equal(actualFailures.length, 3);
-        Lint.Test.assertContainsFailure(actualFailures, failure);
+        assert.equal(actualFailures.length, 4);
+        Lint.Test.assertContainsFailure(actualFailures, failure1);
+        Lint.Test.assertContainsFailure(actualFailures, failure2);
     });
 
     it("restricts usage of class variables before declaration", () => {
@@ -47,7 +50,7 @@ describe("<no-use-before-declare>", () => {
         var failure = Lint.Test.createFailuresOnFile(fileName, failureString)([7, 14], [7, 15]);
 
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule);
-        assert.equal(actualFailures.length, 3);
+        assert.equal(actualFailures.length, 4);
         Lint.Test.assertContainsFailure(actualFailures, failure);
     });
 });
