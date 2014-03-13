@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Palantir Technologies, Inc.
+ * Copyright 2014 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,26 +17,26 @@
 /// <reference path='../../lib/tslint.d.ts' />
 
 export class Rule extends Lint.Rules.AbstractRule {
-    public static FAILURE_STRING = "expected an assignment or function call and instead saw an expression";
+    public static FAILURE_STRING = "expected an assignment or function call";
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new BareExpressionWalker(syntaxTree, this.getOptions()));
+        return this.applyWithWalker(new UnusedExpressionWalker(syntaxTree, this.getOptions()));
     }
 }
 
-class BareExpressionWalker extends Lint.RuleWalker {
-    private expressionIsBare: boolean;
+class UnusedExpressionWalker extends Lint.RuleWalker {
+    private expressionIsUnused: boolean;
 
     constructor(syntaxTree: TypeScript.SyntaxTree, options: Lint.IOptions) {
         super(syntaxTree, options);
-        this.expressionIsBare = true;
+        this.expressionIsUnused = true;
     }
 
     public visitExpressionStatement(node: TypeScript.ExpressionStatementSyntax) {
-        this.expressionIsBare = true;
+        this.expressionIsUnused = true;
         var position = this.position() + node.leadingTriviaWidth();
         super.visitExpressionStatement(node);
-        if (this.expressionIsBare) {
+        if (this.expressionIsUnused) {
             this.addFailure(this.createFailure(position, node.width(), Rule.FAILURE_STRING));
         }
     }
@@ -56,10 +56,10 @@ class BareExpressionWalker extends Lint.RuleWalker {
             case TypeScript.SyntaxKind.LeftShiftAssignmentExpression:
             case TypeScript.SyntaxKind.SignedRightShiftAssignmentExpression:
             case TypeScript.SyntaxKind.UnsignedRightShiftAssignmentExpression:
-                this.expressionIsBare = false;
+                this.expressionIsUnused = false;
                 break;
             default:
-                this.expressionIsBare = true;
+                this.expressionIsUnused = true;
         }
     }
 
@@ -68,58 +68,51 @@ class BareExpressionWalker extends Lint.RuleWalker {
         switch (node.kind()) {
             case TypeScript.SyntaxKind.PreIncrementExpression:
             case TypeScript.SyntaxKind.PreDecrementExpression:
-                this.expressionIsBare = false;
+                this.expressionIsUnused = false;
                 break;
             default:
-                this.expressionIsBare = true;
+                this.expressionIsUnused = true;
         }
     }
 
     public visitPostfixUnaryExpression(node: TypeScript.PostfixUnaryExpressionSyntax) {
         super.visitPostfixUnaryExpression(node);
-        switch (node.kind()) {
-            case TypeScript.SyntaxKind.PostIncrementExpression:
-            case TypeScript.SyntaxKind.PostDecrementExpression:
-                this.expressionIsBare = false;
-                break;
-            default: // there currently aren't any other postfix unary expressions, but leave this here for completeness
-                this.expressionIsBare = true;
-        }
+        this.expressionIsUnused = false; // the only kinds of postfix expressions are postincrement and postdecrement
     }
 
     public visitBlock(node: TypeScript.BlockSyntax) {
         super.visitBlock(node);
-        this.expressionIsBare = true;
+        this.expressionIsUnused = true;
     }
 
     public visitSimpleArrowFunctionExpression(node: TypeScript.SimpleArrowFunctionExpressionSyntax) {
         super.visitSimpleArrowFunctionExpression(node);
-        this.expressionIsBare = true;
+        this.expressionIsUnused = true;
     }
 
     public visitParenthesizedArrowFunctionExpression(node: TypeScript.ParenthesizedArrowFunctionExpressionSyntax) {
         super.visitParenthesizedArrowFunctionExpression(node);
-        this.expressionIsBare = true;
+        this.expressionIsUnused = true;
     }
 
     public visitInvocationExpression(node: TypeScript.InvocationExpressionSyntax) {
         super.visitInvocationExpression(node);
-        this.expressionIsBare = false;
+        this.expressionIsUnused = false;
     }
 
     public visitConditionalExpression(node: TypeScript.ConditionalExpressionSyntax) {
         this.visitNodeOrToken(node.condition);
-        this.expressionIsBare = true;
+        this.expressionIsUnused = true;
         this.visitToken(node.questionToken);
         this.visitNodeOrToken(node.whenTrue);
-        var firstExpressionIsBare = this.expressionIsBare;
-        this.expressionIsBare = true;
+        var firstExpressionIsUnused = this.expressionIsUnused;
+        this.expressionIsUnused = true;
         this.visitToken(node.colonToken);
         this.visitNodeOrToken(node.whenFalse);
-        var secondExpressionIsBare = this.expressionIsBare;
-        // if either expression is bare, then that expression's branch is a no-op unless it's
-        // being assigned to something or passed to a function, so consider the entire expression bare
-        this.expressionIsBare = firstExpressionIsBare || secondExpressionIsBare;
+        var secondExpressionIsUnused = this.expressionIsUnused;
+        // if either expression is unused, then that expression's branch is a no-op unless it's
+        // being assigned to something or passed to a function, so consider the entire expression unused
+        this.expressionIsUnused = firstExpressionIsUnused || secondExpressionIsUnused;
     }
 
 }

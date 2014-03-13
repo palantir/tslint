@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Palantir Technologies, Inc.
+ * Copyright 2014 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 
 /// <reference path='../references.ts' />
 
-describe("<no-bare-expression>", () => {
-    var NoBareExpressionRule = Lint.Test.getRule("no-bare-expression");
+describe("<no-unused-expression>", () => {
+    var NoUnusedExpressionRule = Lint.Test.getRule("no-unused-expression");
 
-    it("disalows bare expression statements", () => {
-        var fileName = "rules/bare.expression.test.ts";
-        var createFailure = Lint.Test.createFailuresOnFile(fileName, NoBareExpressionRule.FAILURE_STRING);
+    it("disallows unused expression statements", () => {
+        var fileName = "rules/unused.expression.test.ts";
+        var createFailure = Lint.Test.createFailuresOnFile(fileName, NoUnusedExpressionRule.FAILURE_STRING);
         var expectedFailures: Lint.RuleFailure[] = [
             createFailure([33, 1], [33, 3]),
             createFailure([34, 1], [34, 3]),
@@ -35,7 +35,7 @@ describe("<no-bare-expression>", () => {
             createFailure([42, 1], [42, 14]),
             createFailure([43, 1], [43, 24]),
         ];
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, NoBareExpressionRule);
+        var actualFailures = Lint.Test.applyRuleOnFile(fileName, NoUnusedExpressionRule);
 
         Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
     });

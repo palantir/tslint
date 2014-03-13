@@ -25,7 +25,6 @@ Supported Rules
 * `label-undefined` checks that labels are defined before usage.
 * `max-line-length` sets the maximum length of a line.
 * `no-arg` disallows access to `arguments.callee`.
-* `no-bare-expression` disallows bare expression statements, that is, expression statements that are not assignments or function invocations (and thus no-ops).
 * `no-bitwise` disallows bitwise operators.
 * `no-console` disallows access to the specified functions on `console`. Rule options are functions to ban on the console variable.
 * `no-consecutive-blank-lines` disallows having more than one blank line in a row in a file
@@ -38,6 +37,7 @@ Supported Rules
 * `no-string-literal` disallows object access via string literals.
 * `no-trailing-comma` disallows trailing comma within object literals.
 * `no-trailing-whitespace` disallows trailing whitespace at the end of a line.
+* `no-unused-expression` disallows unused expression statements, that is, expression statements that are not assignments or function invocations (and thus no-ops).
 * `no-unused-variable` disallows unused imports, variables, functions and private class members.
     * `"check-parameters"` disallows unused function and constructor parameters.
         * NOTE: this option is experimental and does not work with classes that use abstract method declarations, among other things. Use at your own risk.
