@@ -31,11 +31,19 @@ export class Rule extends Lint.Rules.AbstractRule {
 class NoUseBeforeDeclareWalker extends Lint.RuleWalker {
     private fileName: string;
     private languageServices: TypeScript.Services.LanguageService;
+    private classStartPosition: number;
 
     constructor(syntaxTree: TypeScript.SyntaxTree, options: Lint.IOptions, languageServices: TypeScript.Services.LanguageService) {
         super(syntaxTree, options);
         this.fileName = syntaxTree.fileName();
         this.languageServices = languageServices;
+        this.classStartPosition = 0;
+    }
+
+    public visitClassDeclaration(node: TypeScript.ClassDeclarationSyntax): void {
+        this.classStartPosition = this.position(); // class variables used before the class is declared are fine
+        super.visitClassDeclaration(node);
+        this.classStartPosition = 0; // reset to beginning of file
     }
 
     public visitImportDeclaration(node: TypeScript.ImportDeclarationSyntax): void {
@@ -54,7 +62,7 @@ class NoUseBeforeDeclareWalker extends Lint.RuleWalker {
         var references = this.languageServices.getReferencesAtPosition(this.fileName, position);
         references.forEach((reference) => {
             var referencePosition = reference.minChar;
-            if (referencePosition < position) {
+            if (this.classStartPosition <= referencePosition && referencePosition < position) {
                 var failureString = Rule.FAILURE_STRING_PREFIX + name + Rule.FAILURE_STRING_POSTFIX;
                 var failure = this.createFailure(referencePosition, name.length, failureString);
                 this.addFailure(failure);

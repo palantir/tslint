@@ -9,3 +9,18 @@ class Test {
 
     private a: number;
 }
+
+var i = j;
+
+class ClassA {
+    prop: number;
+    constructor(object: ClassB) {
+        this.prop = object.prop;
+    }
+}
+
+class ClassB {
+    prop: number;
+}
+
+var j: number;
