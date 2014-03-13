@@ -25,6 +25,7 @@ Supported Rules
 * `label-undefined` checks that labels are defined before usage.
 * `max-line-length` sets the maximum length of a line.
 * `no-arg` disallows access to `arguments.callee`.
+* `no-bare-expression` disallows bare expression statements, that is, expression statements that are not assignments or function invocations (and thus no-ops).
 * `no-bitwise` disallows bitwise operators.
 * `no-console` disallows access to the specified functions on `console`. Rule options are functions to ban on the console variable.
 * `no-consecutive-blank-lines` disallows having more than one blank line in a row in a file

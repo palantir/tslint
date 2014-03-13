@@ -9,6 +9,7 @@
     "label-undefined": true,
     "max-line-length": [true, 140],
     "no-arg": true,
+    "no-bare-expression": true,
     "no-bitwise": true,
     "no-console": [true,
         "debug",
