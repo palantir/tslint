@@ -61,9 +61,9 @@
     ],
     "typedef-whitespace": [true,
         ["callSignature", "noSpace"],
-        [catchClause", "noSpace"],
-        "indexSignature: "space"]
-    ]
+        ["catchClause", "noSpace"],
+        ["indexSignature", "space"]
+    ],
     "use-strict": [true,
         "check-module",
         "check-function"
