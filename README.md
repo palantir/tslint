@@ -6,7 +6,7 @@ A linter for the TypeScript language.
 Supported Rules
 -----
 
-A sample configuration file with all options is available [here](https://github.com/palantir/tslint/blob/master/docs/sample.tslint.json)
+A sample configuration file with all options is available [here](https://github.com/palantir/tslint/blob/master/docs/sample.tslint.json).
 
 * `ban` bans the use of specific functions. Options are ["object", "function"] pairs that ban the use of object.function()
 * `class-name` enforces PascalCased class and interface names.
