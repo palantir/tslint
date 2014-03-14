@@ -91,9 +91,9 @@ For example, imagine the directive `/* tslint:disable */` on the first line of a
 
 Custom Rules
 ------------
-TSLint ships with a set of core rules that can be configured. However, users are also allowed to write their own rules, which allows them to enforce specific behavior not covered by the core of TSLint. TSLint's core rules are itself written to be pluggable, so adding new rules are as simple as creating new rule files named by convention. New rules can be written in either TypeScript or Javascript; if written in TypeScript, the code must be compiled to Javascript before invoking TSLint.
+TSLint ships with a set of core rules that can be configured. However, users are also allowed to write their own rules, which allows them to enforce specific behavior not covered by the core of TSLint. TSLint's internal rules are itself written to be pluggable, so adding a new rule is as simple as creating a new rule file named by convention. New rules can be written in either TypeScript or Javascript; if written in TypeScript, the code must be compiled to Javascript before invoking TSLint.
 
-Rule names are always camel-cased and *must* contain the suffix `Rule`. Let us take the example of how to write a new rule to forbid all import statements (you know, *for science*). Let us name the rule file `noImportsRule.java`. Rules can be referenced in `tslint.json` in their dasherized forms, so `"no-imports": true` would turn on the rule.
+Rule names are always camel-cased and *must* contain the suffix `Rule`. Let us take the example of how to write a new rule to forbid all import statements (you know, *for science*). Let us name the rule file `noImportsRule.ts`. Rules can be referenced in `tslint.json` in their dasherized forms, so `"no-imports": true` would turn on the rule.
 
 Now, let us first write the rule in TypeScript. At the top, we reference TSLint's [definition](https://github.com/palantir/tslint/blob/master/lib/tslint.d.ts) file. The exported class name must always be named `Rule` and extend from `Lint.Rules.AbstractRule`. 
 
@@ -123,9 +123,9 @@ class NoImportsWalker extends Lint.RuleWalker {
 }
 ```
 
-Given a walker, TypeScript's parser visits the AST using the visitor pattern. So the rule walkers only need to override the appropriate visitor methods to enforce its checks. For reference, the base walker can be found in `syntaxWalker.generated.ts` within the TypeScript source code.
+Given a walker, TypeScript's parser visits the AST using the visitor pattern. So the rule walkers only need to override the appropriate visitor methods to enforce its checks. For reference, the base walker can be found in [syntaxWalker.generated.ts](https://github.com/palantir/tslint/blob/master/src/typescript/src/compiler/syntax/syntaxWalker.generated.ts) within the TypeScript source code.
 
-We still need to hook up this new rule to TSLint. First make sure to compile `noImportsRule.ts`. Then, if using the CLI, provide the directory that contains this rule as an option to `--rules-dir`. If using TSLint as a library or via `grunt-tslint`, the `options` hash must contain `"rulesDirectory": "..."`. That's it, we have now successfully banned all import statements via TSLint!
+We still need to hook up this new rule to TSLint. First make sure to compile `noImportsRule.ts`: `tsc -m commonjs noImportsRule.ts tslint.d.ts`. Then, if using the CLI, provide the directory that contains this rule as an option to `--rules-dir`. If using TSLint as a library or via `grunt-tslint`, the `options` hash must contain `"rulesDirectory": "..."`. If you run the linter, you'll see that we have now successfully banned all import statements via TSLint!
 
 Now, let us rewrite the same rule in Javascript.
 
@@ -180,7 +180,7 @@ export class Formatter extends Lint.Formatters.AbstractFormatter {
 }
 ```
 
-Formatter files are always named with the suffix `Formatter`, and referenced from TSLint without its suffix.
+Such custom formatters can also be written in Javascript. Additionally, formatter files are always named with the suffix `Formatter`, and referenced from TSLint without its suffix.
 
 Installation
 ------------
