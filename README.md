@@ -6,6 +6,8 @@ A linter for the TypeScript language.
 Supported Rules
 -----
 
+A sample rules file with all options is available [here](https://github.com/palantir/tslint/blob/master/docs/sample.tslint.json)
+
 * `ban` bans the use of specific functions. Options are ["object", "function"] pairs that ban the use of object.function()
 * `class-name` enforces PascalCased class and interface names.
 * `comment-format` enforces rules for single-line comments. Rule options:
@@ -95,7 +97,7 @@ TSLint ships with a set of core rules that can be configured. However, users are
 
 Rule names are always camel-cased and *must* contain the suffix `Rule`. Let us take the example of how to write a new rule to forbid all import statements (you know, *for science*). Let us name the rule file `noImportsRule.ts`. Rules can be referenced in `tslint.json` in their dasherized forms, so `"no-imports": true` would turn on the rule.
 
-Now, let us first write the rule in TypeScript. At the top, we reference TSLint's [definition](https://github.com/palantir/tslint/blob/master/lib/tslint.d.ts) file. The exported class name must always be named `Rule` and extend from `Lint.Rules.AbstractRule`. 
+Now, let us first write the rule in TypeScript. At the top, we reference TSLint's [definition](https://github.com/palantir/tslint/blob/master/lib/tslint.d.ts) file. The exported class name must always be named `Rule` and extend from `Lint.Rules.AbstractRule`.
 
 ```javascript
 /// <reference path='tslint.d.ts' />

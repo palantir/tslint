@@ -9,6 +9,7 @@ Change Log
 * [bug] the rule loader no longer transforms/ignores the leading and trailing underscores and dashes of rule names in the config file
 * [bug] `export import` statements no longer false positives for `no-unused-variable-rule`
 * [docs] added documentation for creating custom rules and formatters
+* [docs] added sample `tslint.json` file, under `docs/sample.tslint.json`
 
 v0.4.6
 ---
