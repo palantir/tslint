@@ -54,7 +54,7 @@
     "typedef": [true,
         "callSignature",
         "catchClause",
-        indexSignature",
+        "indexSignature",
         "parameter",
         "propertySignature",
         "variableDeclarator"
