@@ -119,6 +119,9 @@ class NoImportsWalker extends Lint.RuleWalker {
 
 		// create a failure at the current position
 		this.addFailure(this.createFailure(position, node.width(), Rule.FAILURE_STRING));
+
+		// call the base version of this visitor to actually parse this node
+		super.visitImportDeclaration(node);
 	}
 }
 ```
@@ -151,6 +154,9 @@ NoImportsWalker.prototype.visitImportDeclaration = function (node) {
 
     // create a failure at the current position
     this.addFailure(this.createFailure(position, node.width(), "import statement forbidden"));
+
+	// call the base version of this visitor to actually parse this node
+    Lint.RuleWalker.prototype.visitImportDeclaration.call(this, node);
 };
 
 exports.Rule = Rule;
