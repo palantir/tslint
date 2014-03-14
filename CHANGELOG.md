@@ -1,6 +1,9 @@
 Change Log
 ===
 
+v0.4.7
+---
+
 * [new-rule] added `no-unused-expression` rule which disallows unused expression statements
 * [feature] the `check-operator` option for the `whitespace` rule now checks whitespace around the => token
 * [bug] `no-use-before-declare-rule` no longer triggers false positives for member variables of classes used before the class is declared
