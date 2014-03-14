@@ -8,6 +8,7 @@ Change Log
 * [bug] hoisted functions no longer cause false positives for the `no-unreachable` rule
 * [bug] the rule loader no longer transforms/ignores the leading and trailing underscores and dashes of rule names in the config file
 * [bug] `export import` statements no longer false positives for `no-unused-variable-rule`
+* [docs] added documentation for creating custom rules and formatters
 
 v0.4.6
 ---
