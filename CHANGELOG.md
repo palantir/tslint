@@ -1,6 +1,7 @@
 Change Log
 ===
 
+* [bug] `no-unused-variable` rule no longer triggers false positives for class members labeled only `static`
 * [bug] `no-unused-expression` rule no longer triggers false positives for `"use strict";` expressions
 
 v0.4.7
