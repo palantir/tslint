@@ -1,6 +1,8 @@
 Change Log
 ===
 
+* [bug] `no-unused-expression` rule no longer triggers false positives for `"use strict";` expressions
+
 v0.4.7
 ---
 

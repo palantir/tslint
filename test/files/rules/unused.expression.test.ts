@@ -27,6 +27,7 @@ i = fun1() + fun1();
 j = (j === 0 ? 5 : 6);
 (j === 0 ? fun1() : fun2(j));
 (a => 5)(4);
+"use strict";
 
 // invalid code:
 
@@ -41,3 +42,4 @@ fun1() + 4;
 (j === 0 ? i : fun2(j));
 a => fun2(a);
 () => {return fun1();};
+"use strct";
