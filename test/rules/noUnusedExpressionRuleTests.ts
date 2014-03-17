@@ -23,17 +23,18 @@ describe("<no-unused-expression>", () => {
         var fileName = "rules/unused.expression.test.ts";
         var createFailure = Lint.Test.createFailuresOnFile(fileName, NoUnusedExpressionRule.FAILURE_STRING);
         var expectedFailures: Lint.RuleFailure[] = [
-            createFailure([33, 1], [33, 3]),
             createFailure([34, 1], [34, 3]),
-            createFailure([35, 1], [35, 7]),
-            createFailure([36, 1], [36, 17]),
-            createFailure([37, 1], [37, 21]),
-            createFailure([38, 1], [38, 12]),
-            createFailure([39, 1], [39, 13]),
-            createFailure([40, 1], [40, 24]),
-            createFailure([41, 1], [41, 25]),
-            createFailure([42, 1], [42, 14]),
-            createFailure([43, 1], [43, 24]),
+            createFailure([35, 1], [35, 3]),
+            createFailure([36, 1], [36, 7]),
+            createFailure([37, 1], [37, 17]),
+            createFailure([38, 1], [38, 21]),
+            createFailure([39, 1], [39, 12]),
+            createFailure([40, 1], [40, 13]),
+            createFailure([41, 1], [41, 24]),
+            createFailure([42, 1], [42, 25]),
+            createFailure([43, 1], [43, 14]),
+            createFailure([44, 1], [44, 24]),
+            createFailure([45, 1], [45, 13]),
         ];
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, NoUnusedExpressionRule);
 
