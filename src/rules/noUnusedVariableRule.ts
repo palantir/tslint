@@ -116,13 +116,8 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     public visitMemberVariableDeclaration(node: TypeScript.MemberVariableDeclarationSyntax): void {
         var modifiers = node.modifiers;
 
-        // if no modifier is specified, the default is public, so skip the current declaration
-        if (modifiers.childCount() === 0) {
-            this.skipVariableDeclaration = true;
-        }
-
-        // if an explicit 'public' modifier is specified, skip the current declaration
-        if (this.hasModifier(modifiers, TypeScript.SyntaxKind.PublicKeyword)) {
+        // unless an explicit 'private' modifier is specified, variable is public, so skip the current declaration
+        if (!this.hasModifier(modifiers, TypeScript.SyntaxKind.PrivateKeyword)) {
             this.skipVariableDeclaration = true;
         }
 

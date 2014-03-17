@@ -18,4 +18,5 @@ class ABCD {
     private mfunc4() {
         //
     }
+    static stillPublic: number;
 }
