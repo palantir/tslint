@@ -39,7 +39,7 @@ class UnusedExpressionWalker extends Lint.RuleWalker {
         if (this.expressionIsUnused) {
             if (node.expression.kind() === TypeScript.SyntaxKind.StringLiteral) {
                 var expressionText = (<TypeScript.ISyntaxToken> node.expression).text();
-                if (expressionText === "\"use strict\"") {
+                if (expressionText === "\"use strict\"" || expressionText === "'use strict'") {
                     return; // "use strict" is a valid unused expression
                 }
             }
