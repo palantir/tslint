@@ -1,6 +1,7 @@
 Change Log
 ===
 
+* [new-rule] `no-var-requires` disallows require statements not part of an import statement
 * [bug] `no-unused-variable` rule no longer triggers false positives for class members labeled only `static`
 * [bug] `no-unused-expression` rule no longer triggers false positives for `"use strict";` expressions
 
