@@ -24,14 +24,18 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-class RequiresWalker extends Lint.RuleWalker {
+class RequiresWalker extends Lint.ScopeAwareRuleWalker<{}> {
 
     constructor(syntaxTree: TypeScript.SyntaxTree, options: Lint.IOptions) {
         super(syntaxTree, options);
     }
 
+    public createScope(): {} {
+        return {};
+    }
+
     public visitInvocationExpression(node: TypeScript.InvocationExpressionSyntax) {
-        if (node.expression.isExpression()) {
+        if (this.getCurrentDepth() <= 1 && node.expression.isToken()) {
             var expressionText = (<TypeScript.ISyntaxToken> node.expression).text();
             if (expressionText === "require") {
                 // if we're using require as invocation then it's not part of an import statement
