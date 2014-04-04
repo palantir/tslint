@@ -45,6 +45,7 @@ A sample configuration file with all options is available [here](https://github.
         * NOTE: this option is experimental and does not work with classes that use abstract method declarations, among other things. Use at your own risk.
 * `no-unreachable` disallows unreachable code after `break`, `catch`, `throw`, and `return` statements.
 * `no-use-before-declare` disallows usage of variables before their declaration.
+* `no-var-requires` disallows the use of require statements except in import statements, banning the use of forms such as `var module = require("module")`
 * `one-line` enforces the specified tokens to be on the same line as the expression preceding it. Rule options:
 	* `"check-catch"` checks that `catch` is on the same line as the closing brace for `try`
 	* `"check-else"` checks that `else` is on the same line as the closing brace for `if`
