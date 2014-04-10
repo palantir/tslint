@@ -38,16 +38,31 @@ module Lint.Configuration {
         }
 
         // Next look for tslint.json
-        var environment = global.process.env;
-        var defaultPath = path.join((environment.HOME || environment.HOMEPATH || environment.USERPROFILE),
-                                     CONFIG_FILENAME);
+        var homeDir = getHomeDir();
 
-        configFile = findup(CONFIG_FILENAME, { nocase: true });
-
-        if (!configFile && fs.existsSync(defaultPath)) {
-            configFile = defaultPath;
+        if (!homeDir) {
+            return undefined;
         }
 
+        var defaultPath = path.join(homeDir, CONFIG_FILENAME);
+
+        configFile = findup(CONFIG_FILENAME, { nocase: true }) || defaultPath;
+
         return configFile ? JSON.parse(fs.readFileSync(configFile, "utf8")) : undefined;
+    }
+
+    function getHomeDir() {
+        var environment = global.process.env;
+        var paths = [environment.HOME, environment.USERPROFILE, environment.HOMEPATH, environment.HOMEDRIVE + environment.HOMEPATH];
+
+        for (var homeIndex in paths) {
+            if (paths.hasOwnProperty(homeIndex)) {
+                var homePath = paths[homeIndex];
+
+                if (homePath && fs.existsSync(homePath)) {
+                    return homePath;
+                }
+            }
+        }
     }
 }
