@@ -3,4 +3,4 @@ build/
 bin/tslint-cli.js
 lib/tslint.js
 node_modules/
-tscommand.tmp.txt
+tscommand*.txt
