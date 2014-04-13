@@ -28,13 +28,13 @@ describe("<use-strict>", () => {
     });
 
     it("enforces checks for 'use strict' in functions", () => {
-        var expectedFailures = Lint.Test.createFailure(fileName, [12, 1], [12, 9], UseStrictRule.FAILURE_STRING);
+        var expectedFailures = Lint.Test.createFailure(fileName, [14, 1], [14, 9], UseStrictRule.FAILURE_STRING);
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailures);
     });
 
     it("enforces checks for 'use strict' in modules", () => {
-        var expectedFailures = Lint.Test.createFailure(fileName, [22, 1], [22, 7], UseStrictRule.FAILURE_STRING);
+        var expectedFailures = Lint.Test.createFailure(fileName, [24, 1], [24, 7], UseStrictRule.FAILURE_STRING);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailures);
     });
 });

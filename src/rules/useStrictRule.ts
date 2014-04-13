@@ -48,7 +48,7 @@ class UseStrictWalker extends Lint.ScopeAwareRuleWalker<{}> {
     public visitFunctionDeclaration(node: TypeScript.FunctionDeclarationSyntax): void {
         // current depth is 2: global scope and the scope created by this function
         if (this.getCurrentDepth() === 2) {
-            if (this.hasOption(UseStrictWalker.OPTION_CHECK_FUNCTION)) {
+            if (node.block && this.hasOption(UseStrictWalker.OPTION_CHECK_FUNCTION)) {
                 this.checkUseStrict(node, node.block.statements);
             }
         }

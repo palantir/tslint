@@ -1,3 +1,5 @@
+declare function foo(): void;
+
 function testDoubleQuotes() {
     // hello
     "use strict"; // bye
