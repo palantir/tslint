@@ -45,7 +45,8 @@ describe("<typedef, enabled>", () => {
             "indexSignature",
             "parameter",
             "propertySignature",
-            "variableDeclarator"
+            "variableDeclarator",
+            "memberVariableDeclarator"
         ];
         actualFailures = Lint.Test.applyRuleOnFile(fileName, TypedefRule, options);
     });
@@ -97,8 +98,8 @@ describe("<typedef, enabled>", () => {
             [24, 3],
             "expected variableDeclarator: 'NoTypesFn' to have a typedef.");
         var expectedFailure3 = Lint.Test.createFailure(fileName,
-            [16, 18],
-            [16, 19],
+            [17, 18],
+            [17, 19],
             "expected variableDeclarator: 'c' to have a typedef.");
         var expectedFailure4 = Lint.Test.createFailure(fileName,
             [17, 18],
@@ -107,7 +108,7 @@ describe("<typedef, enabled>", () => {
         var expectedFailure5 = Lint.Test.createFailure(fileName,
             [29, 27],
             [29, 28],
-            "expected variableDeclarator: 'Prop' to have a typedef.");
+            "expected memberVariableDeclarator: 'Prop' to have a typedef.");
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);

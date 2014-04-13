@@ -13,8 +13,8 @@ interface NoTypeInterface {
 var NoTypesFn = function (
     a,
     b) {
-    var c = a + b;
-    var d = a - b;
+    var c = a + b,
+        d = a - b;
 
     try {
         return c / d;

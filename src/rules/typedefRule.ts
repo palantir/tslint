@@ -55,10 +55,21 @@ class TypedefWalker extends Lint.RuleWalker {
         super.visitPropertySignature(node);
     }
 
-    public visitVariableDeclarator(node: TypeScript.VariableDeclaratorSyntax): void {
-        this.checkTypeAnnotation("variableDeclarator", node, node.typeAnnotation, node.propertyName);
+    public visitVariableDeclaration(node: TypeScript.VariableDeclarationSyntax): void {
+        for (var i = 0, n = node.variableDeclarators.childCount(); i < n; i++) {
+            var item = <TypeScript.VariableDeclaratorSyntax>node.variableDeclarators.childAt(i);
+            this.checkTypeAnnotation("variableDeclarator", node, item.typeAnnotation, item.propertyName);
+        }
 
-        super.visitVariableDeclarator(node);
+        super.visitVariableDeclaration(node);
+    }
+
+    public visitMemberVariableDeclaration(node: TypeScript.MemberVariableDeclarationSyntax): void {
+        var variableDeclarator =  node.variableDeclarator;
+        this.checkTypeAnnotation("memberVariableDeclarator", variableDeclarator, variableDeclarator.typeAnnotation,
+            variableDeclarator.propertyName);
+
+        super.visitMemberVariableDeclaration(node);
     }
 
     public checkTypeAnnotation(option: string,
