@@ -2,8 +2,11 @@ Change Log
 ===
 
 * [new-rule] `no-var-requires` disallows require statements not part of an import statement
-* [bug] `no-unused-variable` rule no longer triggers false positives for class members labeled only `static`
-* [bug] `no-unused-expression` rule no longer triggers false positives for `"use strict";` expressions
+* [new-rule] `typedef` rule also checks for member variables
+* [bug] `no-unused-variable` no longer triggers false positives for class members labeled only `static`
+* [bug] `no-unused-expression` no longer triggers false positives for `"use strict";` expressions
+* [bug] `use-strict` works correctly on function declarations
+* [bug] config file is now discoverable from other drives on Windows
 
 v0.4.7
 ---
@@ -38,9 +41,9 @@ v0.4.4
 v0.4.3
 ---
 
-* [new rule] `no-unused-variable`
-* [new rule] `no-trailing-comma`
-* [new rule] `no-use-before-declare`
+* [new-rule] `no-unused-variable`
+* [new-rule] `no-trailing-comma`
+* [new-rule] `no-use-before-declare`
 * [feature] support `--version` in CLI
 * [feature] expose rule names to custom formatters
 * [feature] add `verbose` formatter

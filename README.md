@@ -62,6 +62,7 @@ A sample configuration file with all options is available [here](https://github.
     * `"parameter"` checks type specifier of parameters
     * `"propertySignature"` checks return types of interface properties
     * `"variableDeclarator"` checks variable declarations
+    * `"memberVariableDeclarator"` checks member variable declarations
 * `typedef-whitespace` enforces spacing whitespace for type definitions. Each rule option requires a value of `"space"` or `"nospace"`
    to require a space or no space before the type specifier's colon. Rule options:
     * `"callSignature"` checks return type of functions
