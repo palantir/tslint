@@ -1,6 +1,9 @@
 Change Log
 ===
 
+v0.4.8
+---
+
 * [new-rule] `no-var-requires` disallows require statements not part of an import statement
 * [new-rule] `typedef` rule also checks for member variables
 * [bug] `no-unused-variable` no longer triggers false positives for class members labeled only `static`
