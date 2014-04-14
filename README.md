@@ -299,3 +299,13 @@ git clone git@github.com:palantir/tslint.git
 npm install
 grunt
 ```
+
+Creating a new release
+----------------------
+
+1. Bump up the version number in package.json and tslint.ts
+2. Add a section for the new release in CHANGELOG.md
+3. Run `grunt` to build the latest sources
+4. Commit
+5. Run `npm publish`
+6. Create a git tag for the new release and push it
