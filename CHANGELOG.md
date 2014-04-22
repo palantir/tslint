@@ -1,6 +1,8 @@
 Change Log
 ===
 
+* [new-rule] `no-any` disallows all uses of `any`
+
 v0.4.8
 ---
 
