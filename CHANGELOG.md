@@ -2,6 +2,8 @@ Change Log
 ===
 
 * [new-rule] `no-any` disallows all uses of `any`
+* [bug] /* tslint:disable */ now disables semicolon rule as well
+* [bug] delete operator no longer results in a false positive for `no-unused-expression`
 
 v0.4.8
 ---
