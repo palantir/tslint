@@ -43,3 +43,8 @@ fun1() + 4;
 a => fun2(a);
 () => {return fun1();};
 "use strct";
+
+// sigh, valid code again:
+
+var obj = {};
+delete obj.key;

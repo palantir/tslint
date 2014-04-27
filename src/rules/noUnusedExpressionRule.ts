@@ -37,12 +37,16 @@ class UnusedExpressionWalker extends Lint.RuleWalker {
         var position = this.position() + node.leadingTriviaWidth();
         super.visitExpressionStatement(node);
         if (this.expressionIsUnused) {
+            // ignore valid unused expressions
             if (node.expression.kind() === TypeScript.SyntaxKind.StringLiteral) {
                 var expressionText = (<TypeScript.ISyntaxToken> node.expression).text();
                 if (expressionText === "\"use strict\"" || expressionText === "'use strict'") {
-                    return; // "use strict" is a valid unused expression
+                    return;
                 }
+            } else if (node.expression.kind() === TypeScript.SyntaxKind.DeleteExpression) {
+                return;
             }
+
             this.addFailure(this.createFailure(position, node.width(), Rule.FAILURE_STRING));
         }
     }
