@@ -46,7 +46,7 @@ module Lint {
         disabledIntervals.forEach((disabledInterval) => {
             var maxStart = Math.max(disabledInterval.startPosition, failure.getStartPosition().getPosition());
             var minEnd = Math.min(disabledInterval.endPosition, failure.getEndPosition().getPosition());
-            if (maxStart < minEnd) {
+            if (maxStart <= minEnd) {
                 // intervals intersect
                 intersectionExists = true;
             }
