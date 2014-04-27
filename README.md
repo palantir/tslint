@@ -300,7 +300,7 @@ npm install
 grunt
 ```
 
-Creating a new release
+Creating a new Release
 ----------------------
 
 1. Bump up the version number in package.json and tslint.ts
