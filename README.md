@@ -26,6 +26,7 @@ A sample configuration file with all options is available [here](https://github.
 * `label-position` enforces labels only on sensible statements.
 * `label-undefined` checks that labels are defined before usage.
 * `max-line-length` sets the maximum length of a line.
+* `no-any` diallows usages of `any` as a type decoration.
 * `no-arg` disallows access to `arguments.callee`.
 * `no-bitwise` disallows bitwise operators.
 * `no-console` disallows access to the specified functions on `console`. Rule options are functions to ban on the console variable.
