@@ -15,12 +15,6 @@ var NoTypesFn = function (
     b) {
     var c = a + b,
         d = a - b;
-
-    try {
-        return c / d;
-    } catch (ex) {
-        console.log(ex);
-    }
 };
 
 class NoTypesClass {
