@@ -42,3 +42,12 @@ module MyModule {
         id: string;
     }
 }
+
+var a = {
+    foo(): void {
+        var bar = 1;
+    },
+    baz(): void {
+        var bar = 1;
+    }
+};
