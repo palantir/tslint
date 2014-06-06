@@ -73,6 +73,7 @@ module Lint {
                 || node instanceof TypeScript.FunctionExpressionSyntax
                 || node instanceof TypeScript.FunctionPropertyAssignmentSyntax
                 || node instanceof TypeScript.MemberFunctionDeclarationSyntax
+                || node instanceof TypeScript.ConstructorDeclarationSyntax
                 || node instanceof TypeScript.ModuleDeclarationSyntax
                 || node instanceof TypeScript.SimpleArrowFunctionExpressionSyntax
                 || node instanceof TypeScript.ParenthesizedArrowFunctionExpressionSyntax
