@@ -51,3 +51,16 @@ var a = {
         var bar = 1;
     }
 };
+
+class AccessorTest {
+    get accesor1(): number {
+        var x = 0;
+        return x;
+    }
+
+    get accesor2(): number {
+        var x = 0;
+        return x;
+    }
+
+}
