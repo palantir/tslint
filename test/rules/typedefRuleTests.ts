@@ -41,7 +41,6 @@ describe("<typedef, enabled>", () => {
     before(() => {
         var options = [true,
             "callSignature",
-            "catchClause",
             "indexSignature",
             "parameter",
             "propertySignature",
@@ -57,14 +56,9 @@ describe("<typedef, enabled>", () => {
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 
-    it("enforces typedef in catch clauses", () => {
-        var expectedFailure = Lint.Test.createFailure(fileName, [24, 1], [24, 2], "expected catchClause: 'ex' to have a typedef.");
-
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
-    });
 
     it("enforces typedef in indexSignature", () => {
-        var expectedFailure = Lint.Test.createFailure(fileName, [28, 1], [28, 2], "expected indexSignature to have a typedef.");
+        var expectedFailure = Lint.Test.createFailure(fileName, [22, 1], [22, 2], "expected indexSignature to have a typedef.");
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
@@ -72,7 +66,7 @@ describe("<typedef, enabled>", () => {
     it("enforces typedef in parameter", () => {
         var expectedFailure1 = Lint.Test.createFailure(fileName, [14, 6], [14, 7], "expected parameter: 'a' to have a typedef.");
         var expectedFailure2 = Lint.Test.createFailure(fileName, [15, 6], [15, 7], "expected parameter: 'b' to have a typedef.");
-        var expectedFailure3 = Lint.Test.createFailure(fileName, [27, 11], [27, 12], "expected parameter: 'index' to have a typedef.");
+        var expectedFailure3 = Lint.Test.createFailure(fileName, [21, 11], [21, 12], "expected parameter: 'index' to have a typedef.");
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);
@@ -94,8 +88,8 @@ describe("<typedef, enabled>", () => {
             [7, 3],
             "expected variableDeclarator: 'NoTypeObjectLiteralWithPropertyGetter' to have a typedef.");
         var expectedFailure2 = Lint.Test.createFailure(fileName,
-            [24, 2],
-            [24, 3],
+            [18, 2],
+            [18, 3],
             "expected variableDeclarator: 'NoTypesFn' to have a typedef.");
         var expectedFailure3 = Lint.Test.createFailure(fileName,
             [17, 18],
@@ -106,8 +100,8 @@ describe("<typedef, enabled>", () => {
             [17, 19],
             "expected variableDeclarator: 'd' to have a typedef.");
         var expectedFailure5 = Lint.Test.createFailure(fileName,
-            [29, 27],
-            [29, 28],
+            [23, 27],
+            [23, 28],
             "expected memberVariableDeclarator: 'Prop' to have a typedef.");
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);

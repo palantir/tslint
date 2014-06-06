@@ -32,12 +32,6 @@ class TypedefWalker extends Lint.RuleWalker {
         super.visitCallSignature(node);
     }
 
-    public visitCatchClause(node: TypeScript.CatchClauseSyntax): void {
-        this.checkTypeAnnotation("catchClause", node, node.typeAnnotation, node.identifier);
-
-        super.visitCatchClause(node);
-    }
-
     public visitIndexSignature(node: TypeScript.IndexSignatureSyntax): void {
         this.checkTypeAnnotation("indexSignature", node, node.typeAnnotation);
 
