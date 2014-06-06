@@ -64,3 +64,12 @@ class AccessorTest {
     }
 
 }
+
+class NoDupConstructor {
+    private test: string;
+    constructor() {
+        var test = "test";
+        this.test = test;
+    }
+}
+
