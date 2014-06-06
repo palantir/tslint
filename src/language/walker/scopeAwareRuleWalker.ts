@@ -71,6 +71,7 @@ module Lint {
         private isScopeBoundary(node: TypeScript.SyntaxNode): boolean {
             return node instanceof TypeScript.FunctionDeclarationSyntax
                 || node instanceof TypeScript.FunctionExpressionSyntax
+                || node instanceof TypeScript.FunctionPropertyAssignmentSyntax
                 || node instanceof TypeScript.MemberFunctionDeclarationSyntax
                 || node instanceof TypeScript.ModuleDeclarationSyntax
                 || node instanceof TypeScript.SimpleArrowFunctionExpressionSyntax
