@@ -142,6 +142,11 @@ if (configuration === undefined) {
     process.exit(1);
 }
 
+if (!fs.existsSync(argv.f)) {
+    console.error("Unable to open file: " + argv.f);
+    process.exit(1);
+}
+
 var file = argv.f;
 var contents = fs.readFileSync(file, "utf8");
 
