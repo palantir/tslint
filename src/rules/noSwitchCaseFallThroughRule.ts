@@ -25,5 +25,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 export class NoSwitchCaseFallThroughWalker extends Lint.RuleWalker {
-
+    public visitSwitchStatement(node: TypeScript.SwitchStatementSyntax) {
+        super.visitSwitchStatement(node);
+    }
 }
