@@ -40,11 +40,11 @@ A sample configuration file with all options is available [here](https://github.
 * `no-string-literal` disallows object access via string literals.
 * `no-trailing-comma` disallows trailing comma within object literals.
 * `no-trailing-whitespace` disallows trailing whitespace at the end of a line.
+* `no-unreachable` disallows unreachable code after `break`, `catch`, `throw`, and `return` statements.
 * `no-unused-expression` disallows unused expression statements, that is, expression statements that are not assignments or function invocations (and thus no-ops).
 * `no-unused-variable` disallows unused imports, variables, functions and private class members.
     * `"check-parameters"` disallows unused function and constructor parameters.
         * NOTE: this option is experimental and does not work with classes that use abstract method declarations, among other things. Use at your own risk.
-* `no-unreachable` disallows unreachable code after `break`, `catch`, `throw`, and `return` statements.
 * `no-use-before-declare` disallows usage of variables before their declaration.
 * `no-var-requires` disallows the use of require statements except in import statements, banning the use of forms such as `var module = require("module")`
 * `one-line` enforces the specified tokens to be on the same line as the expression preceding it. Rule options:
