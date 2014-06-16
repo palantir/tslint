@@ -25,7 +25,33 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 export class NoSwitchCaseFallThroughWalker extends Lint.RuleWalker {
+
+    private hasLastCaseStatementReturn: boolean = undefined;
+
     public visitSwitchStatement(node: TypeScript.SwitchStatementSyntax) {
+        this.hasLastCaseStatementReturn = undefined;
         super.visitSwitchStatement(node);
+    }
+
+    public visitCaseSwitchClause(node: TypeScript.CaseSwitchClauseSyntax): void {
+        if (node.statements.childCount() === 0) {
+            // Empty case statement
+            return;
+        }
+        for (var i = 0; i < node.childCount(); i++) {
+            var nodeKind = node.childAt(i).kind();
+            if (nodeKind === TypeScript.SyntaxKind.BreakStatement) {
+                this.hasLastCaseStatementReturn = true;
+                return;
+            }
+        }
+        this.hasLastCaseStatementReturn = false;
+        this.addFailure(this.createFailure(this.position(), 1, Rule.FAILURE_STRING_PART));
+    }
+
+    public visitDefaultSwitchClause(node: TypeScript.DefaultSwitchClauseSyntax): void {
+        if (this.hasLastCaseStatementReturn === false) {
+            this.addFailure(this.createFailure(this.position(), 1, Rule.FAILURE_STRING_PART));
+        }
     }
 }
