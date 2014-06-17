@@ -58,7 +58,6 @@ A sample configuration file with all options is available [here](https://github.
 * `triple-equals` enforces === and !== in favor of == and !=.
 * `typedef` enforces type definitions to exist. Rule options:
     * `"callSignature"` checks return type of functions
-    * `"catchClause"` checks type in exception catch blocks
     * `"indexSignature"` checks index type specifier of indexers
     * `"parameter"` checks type specifier of parameters
     * `"propertySignature"` checks return types of interface properties
