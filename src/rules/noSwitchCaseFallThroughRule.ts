@@ -17,7 +17,7 @@
 /// <reference path='../../lib/tslint.d.ts' />
 
 export class Rule extends Lint.Rules.AbstractRule {
-    public static FAILURE_STRING_PART = "Switch Case fall through: ";
+    public static FAILURE_STRING_PART = "Expected a 'break' before ";
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
         return this.applyWithWalker(new NoSwitchCaseFallThroughWalker(syntaxTree, this.getOptions()));
@@ -26,32 +26,46 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 export class NoSwitchCaseFallThroughWalker extends Lint.RuleWalker {
 
-    private hasLastCaseStatementReturn: boolean = undefined;
-
     public visitSwitchStatement(node: TypeScript.SwitchStatementSyntax) {
-        this.hasLastCaseStatementReturn = undefined;
+        var isFallingThrough = false;
+        // get position for first case statement
+        var position = this.positionAfter(node.switchKeyword, node.openParenToken, node.expression, node.closeParenToken, node.openBraceToken);
+        for (var i = 0; i < node.switchClauses.childCount(); i++) {
+            var child = node.switchClauses.childAt(i);
+            var kind = child.kind();
+            var fullWidth = child.fullWidth();
+            if (kind === TypeScript.SyntaxKind.CaseSwitchClause) {
+                position += fullWidth;
+                var switchClause = <TypeScript.CaseSwitchClauseSyntax>child;
+                isFallingThrough = !this.hasBreakStatement(switchClause.statements);
+                // no break statements and no statements means the fallthrough is expected.
+                // last item doesn't need a break
+                if (isFallingThrough && switchClause.statements.childCount() > 0 && ((node.switchClauses.childCount() - 1) > i)) {
+                    // remove trailing trivia (new line)
+                    this.addFailure(this.createFailure(position - child.trailingTriviaWidth(), 1, Rule.FAILURE_STRING_PART + "'case'"));
+                }
+            } else {
+                // case statement falling through a default, this is always an error
+                if (isFallingThrough) {
+                    // remove trailing trivia (new line)
+                    this.addFailure(this.createFailure(position - child.trailingTriviaWidth(), 1, Rule.FAILURE_STRING_PART + "'default'"));
+                }
+                // add the width after setting the failure, the error isn't at the end of the default but right before it.
+                position += fullWidth;
+            }
+        }
         super.visitSwitchStatement(node);
     }
 
-    public visitCaseSwitchClause(node: TypeScript.CaseSwitchClauseSyntax): void {
-        if (node.statements.childCount() === 0) {
-            // Empty case statement
-            return;
-        }
-        for (var i = 0; i < node.childCount(); i++) {
-            var nodeKind = node.childAt(i).kind();
-            if (nodeKind === TypeScript.SyntaxKind.BreakStatement) {
-                this.hasLastCaseStatementReturn = true;
-                return;
+    private hasBreakStatement(list: TypeScript.ISyntaxList) {
+        for (var i = 0; i < list.childCount(); i++) {
+            var nodeKind = list.childAt(i).kind();
+            if (nodeKind === TypeScript.SyntaxKind.BreakStatement ||
+                nodeKind === TypeScript.SyntaxKind.ThrowStatement ||
+                nodeKind === TypeScript.SyntaxKind.ReturnStatement) {
+                return true;
             }
         }
-        this.hasLastCaseStatementReturn = false;
-        this.addFailure(this.createFailure(this.position(), 1, Rule.FAILURE_STRING_PART));
-    }
-
-    public visitDefaultSwitchClause(node: TypeScript.DefaultSwitchClauseSyntax): void {
-        if (this.hasLastCaseStatementReturn === false) {
-            this.addFailure(this.createFailure(this.position(), 1, Rule.FAILURE_STRING_PART));
-        }
+        return false;
     }
 }
