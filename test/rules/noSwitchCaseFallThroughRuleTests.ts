@@ -33,8 +33,6 @@ describe("<no-switch-case-fall-through>", () => {
             failureDefault([32, 21], [32, 22])
         ];
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule);
-        console.log(actualFailures);
-        console.log(expectedFailures);
 
         assert.lengthOf(actualFailures, 7);
 

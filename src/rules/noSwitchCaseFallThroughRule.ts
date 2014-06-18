@@ -29,7 +29,8 @@ export class NoSwitchCaseFallThroughWalker extends Lint.RuleWalker {
     public visitSwitchStatement(node: TypeScript.SwitchStatementSyntax) {
         var isFallingThrough = false;
         // get position for first case statement
-        var position = this.positionAfter(node.switchKeyword, node.openParenToken, node.expression, node.closeParenToken, node.openBraceToken);
+        var position = this.positionAfter(node.switchKeyword, node.openParenToken, node.expression,
+            node.closeParenToken, node.openBraceToken);
         for (var i = 0; i < node.switchClauses.childCount(); i++) {
             var child = node.switchClauses.childAt(i);
             var kind = child.kind();

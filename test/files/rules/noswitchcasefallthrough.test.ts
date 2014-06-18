@@ -56,3 +56,13 @@ switch (foo) {
     case 3:
         throw "error";
 }
+
+// valid
+switch (foo) {
+    case 1:
+        break;
+    case 2:
+    case 3:
+        break;
+    default:
+}
