@@ -31,17 +31,18 @@ export class NoSwitchCaseFallThroughWalker extends Lint.RuleWalker {
         // get position for first case statement
         var position = this.positionAfter(node.switchKeyword, node.openParenToken, node.expression,
             node.closeParenToken, node.openBraceToken);
-        for (var i = 0; i < node.switchClauses.childCount(); i++) {
-            var child = node.switchClauses.childAt(i);
+        var switchClauses = node.switchClauses;
+        for (var i = 0; i < switchClauses.childCount(); i++) {
+            var child = switchClauses.childAt(i);
             var kind = child.kind();
             var fullWidth = child.fullWidth();
             if (kind === TypeScript.SyntaxKind.CaseSwitchClause) {
                 position += fullWidth;
                 var switchClause = <TypeScript.CaseSwitchClauseSyntax>child;
-                isFallingThrough = !this.hasBreakStatement(switchClause.statements);
+                isFallingThrough = this.fallsThrough(switchClause.statements);
                 // no break statements and no statements means the fallthrough is expected.
                 // last item doesn't need a break
-                if (isFallingThrough && switchClause.statements.childCount() > 0 && ((node.switchClauses.childCount() - 1) > i)) {
+                if (isFallingThrough && switchClause.statements.childCount() > 0 && ((switchClauses.childCount() - 1) > i)) {
                     // remove trailing trivia (new line)
                     this.addFailure(this.createFailure(position - child.trailingTriviaWidth(), 1, Rule.FAILURE_STRING_PART + "'case'"));
                 }
@@ -58,15 +59,15 @@ export class NoSwitchCaseFallThroughWalker extends Lint.RuleWalker {
         super.visitSwitchStatement(node);
     }
 
-    private hasBreakStatement(list: TypeScript.ISyntaxList) {
+    private fallsThrough(list: TypeScript.ISyntaxList) {
         for (var i = 0; i < list.childCount(); i++) {
             var nodeKind = list.childAt(i).kind();
             if (nodeKind === TypeScript.SyntaxKind.BreakStatement ||
                 nodeKind === TypeScript.SyntaxKind.ThrowStatement ||
                 nodeKind === TypeScript.SyntaxKind.ReturnStatement) {
-                return true;
+                return false;
             }
         }
-        return false;
+        return true;
     }
 }
