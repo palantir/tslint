@@ -1,1 +1,1 @@
-Dick van den Brink ([github](https://github.com/DickvdBrink))
+* Dick van den Brink ([github](https://github.com/DickvdBrink))
