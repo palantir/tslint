@@ -38,6 +38,7 @@ A sample configuration file with all options is available [here](https://github.
 * `no-empty` disallows empty blocks.
 * `no-eval` disallows `eval` function invocations.
 * `no-string-literal` disallows object access via string literals.
+* `no-switch-case-fall-through` disallows falling through case statements.
 * `no-trailing-comma` disallows trailing comma within object literals.
 * `no-trailing-whitespace` disallows trailing whitespace at the end of a line.
 * `no-unreachable` disallows unreachable code after `break`, `catch`, `throw`, and `return` statements.
