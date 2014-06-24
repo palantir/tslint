@@ -37,14 +37,21 @@ module Lint {
         output: string;
     }
 
+    export interface ILinterOptions {
+        configuration: any;
+        formatter: string;
+        formattersDirectory: string;
+        rulesDirectory: string;
+    }
+
     export class Linter {
         private fileName: string;
         private source: string;
-        private options: any;
+        private options: ILinterOptions;
 
         public static VERSION = "0.4.10";
 
-        constructor(fileName: string, source: string, options: any) {
+        constructor(fileName: string, source: string, options: ILinterOptions) {
             this.fileName = fileName;
             this.source = source;
             this.options = options;
