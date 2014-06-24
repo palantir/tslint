@@ -10845,12 +10845,18 @@ declare module Lint {
         format: string;
         output: string;
     }
+    interface ILinterOptions {
+        configuration: any;
+        formatter: string;
+        formattersDirectory: string;
+        rulesDirectory: string;
+    }
     class Linter {
         private fileName;
         private source;
         private options;
         static VERSION: string;
-        constructor(fileName: string, source: string, options: any);
+        constructor(fileName: string, source: string, options: ILinterOptions);
         public lint(): LintResult;
         private getRelativePath(directory);
         private containsRule(rules, rule);
