@@ -6483,7 +6483,7 @@ declare module Lint {
         startPosition: number;
         endPosition: number;
     }
-    interface Rule {
+    interface IRule {
         getOptions(): IOptions;
         isEnabled(): boolean;
         apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[];
@@ -6547,7 +6547,7 @@ declare module Lint {
         [name: string]: any;
     }, enableDisableRuleMap: {
         [rulename: string]: IEnableDisablePosition[];
-    }, rulesDirectory?: string): Rule[];
+    }, rulesDirectory?: string): IRule[];
     function findRule(name: string, rulesDirectory?: string): any;
 }
 declare module Lint.Configuration {
@@ -10805,7 +10805,7 @@ declare module Lint.Formatters {
     }
 }
 declare module Lint.Rules {
-    class AbstractRule implements Lint.Rule {
+    class AbstractRule implements Lint.IRule {
         private value;
         private options;
         constructor(ruleName: string, value: any, disabledIntervals: Lint.IDisabledInterval[]);
