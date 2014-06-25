@@ -18,7 +18,7 @@
 /// <reference-path='../rule/rule.ts'/>
 
 module Lint {
-    export interface Formatter {
+    export interface IFormatter {
         format(failures: Lint.RuleFailure[]): string;
     }
 }

@@ -18,7 +18,7 @@
 /// <reference path='formatter.ts' />
 
 module Lint.Formatters {
-    export class AbstractFormatter implements Lint.Formatter {
+    export class AbstractFormatter implements Lint.IFormatter {
         /* tslint:disable:no-unused-variable */
         public format(failures: Lint.RuleFailure[]): string {
             throw TypeScript.Errors.abstract();

@@ -6554,7 +6554,7 @@ declare module Lint.Configuration {
     function findConfiguration(configFile: string): any;
 }
 declare module Lint {
-    interface Formatter {
+    interface IFormatter {
         format(failures: Lint.RuleFailure[]): string;
     }
 }
@@ -10800,7 +10800,7 @@ declare module Lint {
     function doesIntersect(failure: RuleFailure, disabledIntervals: IDisabledInterval[]): boolean;
 }
 declare module Lint.Formatters {
-    class AbstractFormatter implements Lint.Formatter {
+    class AbstractFormatter implements Lint.IFormatter {
         public format(failures: Lint.RuleFailure[]): string;
     }
 }

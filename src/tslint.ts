@@ -82,7 +82,7 @@ module Lint {
                 }
             }
 
-            var formatter: Lint.Formatter;
+            var formatter: Lint.IFormatter;
             var formattersDirectory = this.getRelativePath(this.options.formattersDirectory);
 
             var Formatter = Lint.findFormatter(this.options.formatter, formattersDirectory);
