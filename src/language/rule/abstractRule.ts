@@ -19,7 +19,7 @@
 /// <reference path='rule.ts'/>
 
 module Lint.Rules {
-    export class AbstractRule implements Lint.Rule {
+    export class AbstractRule implements Lint.IRule {
         private value: any;
         private options: Lint.IOptions;
 

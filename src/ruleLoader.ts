@@ -32,8 +32,8 @@ module Lint {
 
     export function loadRules(ruleConfiguration: {[name: string]: any},
                               enableDisableRuleMap: {[rulename: string]: Lint.IEnableDisablePosition[]},
-                              rulesDirectory?: string): Rule[] {
-        var rules: Rule[] = [];
+                              rulesDirectory?: string): IRule[] {
+        var rules: IRule[] = [];
         for (var ruleName in ruleConfiguration) {
             if (ruleConfiguration.hasOwnProperty(ruleName)) {
                 var ruleValue = ruleConfiguration[ruleName];
