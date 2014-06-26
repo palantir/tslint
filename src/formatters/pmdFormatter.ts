@@ -28,13 +28,13 @@ export class Formatter extends Lint.Formatters.AbstractFormatter {
             var line = lineAndCharacter.line() + 1;
             var character = lineAndCharacter.character() + 1;
 
-	    output += "<file name=\"" + fileName;
-	    output += "\"><violation begincolumn=\"" + character;
+            output += "<file name=\"" + fileName;
+            output += "\"><violation begincolumn=\"" + character;
             output += "\" beginline=\"" + line;
-	    output += "\" priority=\"1\"";
-	    output += " rule=\"" + failureString + "\"> </violation></file>";
-}
+            output += "\" priority=\"1\"";
+            output += " rule=\"" + failureString + "\"> </violation></file>";
+        }
         output += "</pmd>";
-	return output;
+        return output;
     }
 }
