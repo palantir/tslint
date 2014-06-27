@@ -25,29 +25,36 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class NoTrailingWhitespaceWalker extends Lint.RuleWalker {
-    public visitToken(token: TypeScript.ISyntaxToken): void {
+
+    public visitToken(token: TypeScript.ISyntaxToken) {
+        var leadingTrivia = token.leadingTrivia();
+        var trailingTrivia = token.trailingTrivia();
+        var position = this.position();
+        var trailingPosition = position + leadingTrivia.fullWidth() + token.width();
+
+        this.checkForTrailingWhitespace(leadingTrivia, position);
+        this.checkForTrailingWhitespace(trailingTrivia, trailingPosition);
+
         super.visitToken(token);
-        this.checkForTrailingWhitespace(token.trailingTrivia());
     }
 
-    public visitNode(node: TypeScript.SyntaxNode): void {
-        super.visitNode(node);
-        this.checkForTrailingWhitespace(node.trailingTrivia());
-    }
+    private checkForTrailingWhitespace(triviaList: TypeScript.ISyntaxTriviaList, position: number) {
+        var start = position;
 
-    private checkForTrailingWhitespace(triviaList: TypeScript.ISyntaxTriviaList) {
-        if (triviaList.count() < 2) {
-            return;
-        }
+        for (var i = 0; i < triviaList.count() - 1; i++) {
+            var trivia = triviaList.syntaxTriviaAt(i);
+            var nextTrivia = triviaList.syntaxTriviaAt(i + 1);
 
-        // skip the newline
-        var lastButOne = triviaList.count() - 2;
-        var trivia = triviaList.syntaxTriviaAt(lastButOne);
-        var triviaKind = trivia.kind();
-        if (triviaList.hasNewLine() && triviaKind === TypeScript.SyntaxKind.WhitespaceTrivia) {
-            var start = this.position() - trivia.fullWidth() - 1;
-            var failure = this.createFailure(start, trivia.fullWidth(), Rule.FAILURE_STRING);
-            this.addFailure(failure);
+            // look for whitespace trivia immediately preceding new line trivia
+            if (trivia.kind() === TypeScript.SyntaxKind.WhitespaceTrivia && nextTrivia.kind() === TypeScript.SyntaxKind.NewLineTrivia) {
+                var width = trivia.fullWidth();
+                var failure = this.createFailure(start, width, Rule.FAILURE_STRING);
+
+                this.addFailure(failure);
+            }
+
+            // update the position
+            start += trivia.fullWidth();
         }
     }
 }
