@@ -4,6 +4,12 @@ Change Log
 v0.4.10
 ---
 
+* [bugs] #136, #163
+* internal refactors
+
+v0.4.10
+---
+
 * [bugs] #138, #145, #146, #148
 
 v0.4.9
