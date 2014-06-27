@@ -26,10 +26,14 @@ describe("<no-trailing-whitespace>", () => {
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, NoTrailingWhitespaceRule);
         var expectedFailure1 = createFailure([2, 24], [2, 28]);
         var expectedFailure2 = createFailure([3, 32], [3, 36]);
-        var expectedFailure3 = createFailure([5, 2], [5, 6]);
+        var expectedFailure3 = createFailure([5, 1], [5, 5]);
+        var expectedFailure4 = createFailure([6, 1], [6, 5]);
+        var expectedFailure5 = createFailure([9, 2], [9, 6]);
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure3);
+        Lint.Test.assertContainsFailure(actualFailures, expectedFailure4);
+        Lint.Test.assertContainsFailure(actualFailures, expectedFailure5);
     });
 });
