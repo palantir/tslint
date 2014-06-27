@@ -25,7 +25,7 @@ describe("<forin>", () => {
         var secondFailure = Lint.Test.createFailure(fileName, [6, 5], [11, 6], failureString);
         var expectedFailures = [firstFailure, secondFailure];
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, ForInRule);
-        
+
         Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
     });
 });
