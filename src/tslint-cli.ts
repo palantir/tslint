@@ -84,7 +84,7 @@ if ("help" in argv) {
         "\n" +
         "    -f, --file:\n" +
         "        The location of the TypeScript file that you wish to lint. This\n" +
-        "        option is required.\n" +
+        "        option is required. Muliptle files are processed consecutively.\n" +
         "\n" +
         "    -c, --config:\n" +
         "        The location of the configuration file that tslint will use to\n" +
