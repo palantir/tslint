@@ -167,10 +167,12 @@ var processFile = (file: string) => {
 
 var fileOrFiles = argv.f;
 
-if (typeof fileOrFiles == 'string') {
+if (typeof fileOrFiles === "string") {
     processFile(fileOrFiles);
 } else {
     for (var ix in fileOrFiles) {
-        processFile(fileOrFiles[ix]);
+        if (fileOrFiles.hasOwnProperty(ix)) {
+            processFile(fileOrFiles[ix]);
+        }
     }
 }
