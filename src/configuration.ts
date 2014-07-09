@@ -21,13 +21,13 @@ module Lint.Configuration {
 
     var CONFIG_FILENAME = "tslint.json";
 
-    export function findConfiguration(configFile: string): any {
+    export function findConfiguration(configFile: string, inputFileLocation: string): any {
         if (configFile) {
             return JSON.parse(fs.readFileSync(configFile, "utf8"));
         }
 
-        // First look for package.json
-        configFile = findup("package.json", { nocase: true });
+        // First look for package.json from input file location
+        configFile = findup("package.json", { cwd: inputFileLocation, nocase: true });
 
         if (configFile) {
             var content = require(configFile);
@@ -46,7 +46,7 @@ module Lint.Configuration {
 
         var defaultPath = path.join(homeDir, CONFIG_FILENAME);
 
-        configFile = findup(CONFIG_FILENAME, { nocase: true }) || defaultPath;
+        configFile = findup(CONFIG_FILENAME, { cwd: inputFileLocation, nocase: true }) || defaultPath;
 
         return configFile ? JSON.parse(fs.readFileSync(configFile, "utf8")) : undefined;
     }
