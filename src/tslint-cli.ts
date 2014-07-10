@@ -84,7 +84,7 @@ if ("help" in argv) {
         "\n" +
         "    -f, --file:\n" +
         "        The location of the TypeScript file that you wish to lint. This\n" +
-        "        option is required.\n" +
+        "        option is required. Muliptle files are processed consecutively.\n" +
         "\n" +
         "    -c, --config:\n" +
         "        The location of the configuration file that tslint will use to\n" +
@@ -147,19 +147,32 @@ if (!fs.existsSync(argv.f)) {
     process.exit(1);
 }
 
-var file = argv.f;
-var contents = fs.readFileSync(file, "utf8");
+var processFile = (file: string) => {
+    var contents = fs.readFileSync(file, "utf8");
 
-var linter = new Lint.Linter(file, contents, {
-    configuration: configuration,
-    formatter: argv.t,
-    rulesDirectory: argv.r,
-    formattersDirectory: argv.s
-});
-var lintResult = linter.lint();
-
-if (lintResult.failureCount > 0) {
-    outputStream.write(lintResult.output, () => {
-        process.exit(2);
+    var linter = new Lint.Linter(file, contents, {
+        configuration: configuration,
+        formatter: argv.t,
+        rulesDirectory: argv.r,
+        formattersDirectory: argv.s
     });
+    var lintResult = linter.lint();
+
+    if (lintResult.failureCount > 0) {
+        outputStream.write(lintResult.output, () => {
+            process.exit(2);
+        });
+    }
+};
+
+var fileOrFiles = argv.f;
+
+if (typeof fileOrFiles === "string") {
+    processFile(fileOrFiles);
+} else {
+    for (var ix in fileOrFiles) {
+        if (fileOrFiles.hasOwnProperty(ix)) {
+            processFile(fileOrFiles[ix]);
+        }
+    }
 }
