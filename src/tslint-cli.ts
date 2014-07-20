@@ -136,12 +136,6 @@ if ("help" in argv) {
     process.exit(0);
 }
 
-var configuration = Lint.Configuration.findConfiguration(argv.c);
-if (configuration === undefined) {
-    console.error("unable to find tslint configuration");
-    process.exit(1);
-}
-
 if (!fs.existsSync(argv.f)) {
     console.error("Unable to open file: " + argv.f);
     process.exit(1);
@@ -149,6 +143,12 @@ if (!fs.existsSync(argv.f)) {
 
 var processFile = (file: string) => {
     var contents = fs.readFileSync(file, "utf8");
+    var configuration = Lint.Configuration.findConfiguration(argv.c, file);
+
+    if (configuration === undefined) {
+        console.error("unable to find tslint configuration");
+        process.exit(1);
+    }
 
     var linter = new Lint.Linter(file, contents, {
         configuration: configuration,
@@ -156,6 +156,7 @@ var processFile = (file: string) => {
         rulesDirectory: argv.r,
         formattersDirectory: argv.s
     });
+
     var lintResult = linter.lint();
 
     if (lintResult.failureCount > 0) {
