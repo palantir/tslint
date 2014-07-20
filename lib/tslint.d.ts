@@ -6551,7 +6551,7 @@ declare module Lint {
     function findRule(name: string, rulesDirectory?: string): any;
 }
 declare module Lint.Configuration {
-    function findConfiguration(configFile: string): any;
+    function findConfiguration(configFile: string, inputFileLocation: string): any;
 }
 declare module Lint {
     interface IFormatter {

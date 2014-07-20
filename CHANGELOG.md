@@ -1,6 +1,12 @@
 Change Log
 ===
 
+v0.4.12
+---
+
+* multiple files with -f on cli
+* config file search starts with input file
+
 v0.4.11
 ---
 
