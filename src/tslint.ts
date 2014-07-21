@@ -126,3 +126,5 @@ global.TypeScript = TypeScript;
 
 // export Lint.Linter as the API interface for this module
 module.exports = Lint.Linter;
+// also export Lint.Configuration.findConfiguration so implementers can consume
+module.exports.findConfiguration = Lint.Configuration.findConfiguration;
