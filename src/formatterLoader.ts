@@ -25,6 +25,10 @@ module Lint {
     var CORE_FORMATTERS_DIRECTORY = path.resolve(moduleDirectory, "..", "build", "formatters");
 
     export function findFormatter(name: string, formattersDirectory?: string) {
+        if (typeof(name) === "function") {
+            return name;
+        }
+
         var camelizedName = _s.camelize(name + "Formatter");
 
         // first check for core formatters
