@@ -19,10 +19,6 @@
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "unexpected tab width: ";
 
-    public isEnabled(): boolean {
-        return false;
-    }
-
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
         return this.applyWithWalker(new IndentWalker(syntaxTree, this.getOptions()));
     }
