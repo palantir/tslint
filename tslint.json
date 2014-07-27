@@ -4,7 +4,7 @@
     "curly": true,
     "eofline": true,
     "forin": true,
-    "indent": [true, 4],
+    "indent": false,
     "label-position": true,
     "label-undefined": true,
     "max-line-length": [true, 140],
