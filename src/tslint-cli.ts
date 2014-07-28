@@ -137,14 +137,14 @@ if ("help" in argv) {
 }
 
 var processFile = (file: string) => {
-    var contents;
+    var contents: string;
     try {
         contents = fs.readFileSync(file, "utf8");
-    } catch(e) {
+    } catch (e) {
         console.error("Unable to open file: " + file);
         process.exit(1);
     }
-    
+
     var configuration = Lint.Configuration.findConfiguration(argv.c, file);
 
     if (configuration === undefined) {
