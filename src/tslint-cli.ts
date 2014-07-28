@@ -136,12 +136,12 @@ if ("help" in argv) {
     process.exit(0);
 }
 
-if (!fs.existsSync(argv.f)) {
-    console.error("Unable to open file: " + argv.f);
-    process.exit(1);
-}
-
 var processFile = (file: string) => {
+    if (!fs.existsSync(file)) {
+        console.error("Unable to open file: " + file);
+        process.exit(1);
+    }
+
     var contents = fs.readFileSync(file, "utf8");
     var configuration = Lint.Configuration.findConfiguration(argv.c, file);
 
