@@ -53,7 +53,7 @@ module Lint.Configuration {
 
     function getHomeDir() {
         var environment = global.process.env;
-        var paths = [environment.HOME, environment.USERPROFILE, environment.HOMEPATH, environment.HOMEDRIVE + environment.HOMEPATH];
+        var paths = [environment.USERPROFILE, environment.HOME, environment.HOMEPATH, environment.HOMEDRIVE + environment.HOMEPATH];
 
         for (var homeIndex in paths) {
             if (paths.hasOwnProperty(homeIndex)) {
