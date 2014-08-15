@@ -34,7 +34,7 @@ function checkDepth() {
     }
 }
 
-module TestModuleWithFunction() {
+module TestModuleWithFunction {
     "use strict";
 
     function hello() {
