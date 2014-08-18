@@ -21,7 +21,8 @@
   "dependencies": {
     "optimist": "~0.6.0",
     "underscore.string": "~2.3.3",
-    "findup-sync": "~0.1.2"
+    "findup-sync": "~0.1.2",
+    "minimatch": "1.0.0"
   },
   "devDependencies": {
     "chai": "~1.7.2",
