@@ -34,10 +34,16 @@ function checkDepth() {
     }
 }
 
-module TestModuleWithFunction() {
+module TestModuleWithFunction {
     "use strict";
 
     function hello() {
         // there shouldn't be a failure here since it isn't top level
+    }
+}
+
+declare module foo {
+    // shouldn't error because of the declare
+    export class bar {
     }
 }
