@@ -22,7 +22,12 @@ export class Formatter extends Lint.Formatters.AbstractFormatter {
         for (var i = 0; i < failures.length; ++i) {
             var failure = failures[i];
             var fileName = failure.getFileName();
-            var failureString = failure.getFailure();
+            var failureString = failure.getFailure()
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\'/g, "&#39;")
+                .replace(/\"/g, "&quot;");
 
             var lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
             var line = lineAndCharacter.line() + 1;
