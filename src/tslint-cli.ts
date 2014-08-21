@@ -16,7 +16,9 @@
 
 /// <reference path='tslint.ts'/>
 
-var fs = require("fs");
+var fs = require("fs"),
+    minimatch = require("minimatch");
+
 var optimist = require("optimist")
     .usage("usage: $0")
     .check((argv: any) => {
@@ -37,6 +39,10 @@ var optimist = require("optimist")
         "h": {
             alias: "help",
             describe: "display detailed help"
+        },
+        "i": {
+            alias: "ignore",
+            describe: "path to ignore file"
         },
         "o": {
             alias: "out",
@@ -136,10 +142,32 @@ if ("help" in argv) {
     process.exit(0);
 }
 
+var patterns: string[] = null;
+if (argv.i) {
+    if (!fs.existsSync(argv.i)) {
+        console.error("Unable to ignore file: " + argv.i);
+        process.exit(1);
+    } else {
+        patterns = fs.readFileSync(argv.i, "utf8").split("\n")
+                        .filter(function(line: string) {
+                            return line.trim() !== "";
+                        });
+    }
+}
+
 var processFile = (file: string) => {
     if (!fs.existsSync(file)) {
         console.error("Unable to open file: " + file);
         process.exit(1);
+    }
+
+    var skip = patterns && patterns.some(function(pattern) {
+        if (minimatch(file, pattern, { nocase: true })) {
+            return true;
+        }
+    });
+    if (skip) {
+        return;
     }
 
     var contents = fs.readFileSync(file, "utf8");
