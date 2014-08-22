@@ -136,6 +136,12 @@ if ("help" in argv) {
     process.exit(0);
 }
 
+// When provided it should point to an existing location
+if (argv.c && !fs.existsSync(argv.c)) {
+    console.error("Invalid option for configuration: " + argv.c);
+    process.exit(1);
+}
+
 var processFile = (file: string) => {
     if (!fs.existsSync(file)) {
         console.error("Unable to open file: " + file);
