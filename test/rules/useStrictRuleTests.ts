@@ -25,6 +25,7 @@ describe("<use-strict>", () => {
     before(() => {
         var options = [true, "check-function", "check-module"];
         actualFailures = Lint.Test.applyRuleOnFile(fileName, UseStrictRule, options);
+        assert.lengthOf(actualFailures, 2);
     });
 
     it("enforces checks for 'use strict' in functions", () => {
