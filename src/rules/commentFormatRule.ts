@@ -63,6 +63,11 @@ class CommentWalker extends Lint.RuleWalker {
             return true; // comment is "//"? Technically not a violation.
         }
 
+        // whitelist //#region and //#endregion
+        if ((/^#(end)?region/).test(commentText.substring(2))) {
+            return true;
+        }
+
         var firstCharacter = commentText.charAt(2); // first character after the space
         // three slashes (///) also works, to allow for ///<reference>
         return firstCharacter === " " || firstCharacter === "/";
