@@ -8,3 +8,6 @@ class Clazz { // this comment is correct
     }
     /// <reference or something>
 }
+
+//#region test
+//#endregion
