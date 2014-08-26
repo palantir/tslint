@@ -25,10 +25,12 @@ describe("<no-duplicate-key>", () => {
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, NoDuplicateKeyRule);
         var createFailure1 = Lint.Test.createFailuresOnFile(fileName, failureString + "axa'");
         var createFailure2 = Lint.Test.createFailuresOnFile(fileName, failureString + "bd'");
+        var createFailure3 = Lint.Test.createFailuresOnFile(fileName, failureString + "duplicated'");
         var expectedFailures = [
             createFailure1([10, 5], [10, 8]),
             createFailure2([13, 5], [13, 7]),
-            createFailure1([14, 5], [14, 8])
+            createFailure1([14, 5], [14, 8]),
+            createFailure3([31, 5], [31, 15])
         ];
 
         Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
