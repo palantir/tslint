@@ -25,6 +25,12 @@ var z = {
     b: "a"
 };
 
+var interspersed = {
+    duplicated: 1,
+    newContext: {},
+    duplicated: 2
+};
+
 var n = {
     constructor: function () {},
     hasOwnProperty: function () {}

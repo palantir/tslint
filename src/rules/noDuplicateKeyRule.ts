@@ -24,23 +24,24 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class NoDuplicateKeyWalker extends Lint.RuleWalker {
-    private objectKeys: {[key: string]: boolean};
+    private objectKeysStack: {[key: string]: boolean}[] = [];
 
     public visitObjectLiteralExpression(node: TypeScript.ObjectLiteralExpressionSyntax): void {
-        this.objectKeys = Object.create(null);
+        this.objectKeysStack.push(Object.create(null));
         super.visitObjectLiteralExpression(node);
-        this.objectKeys = Object.create(null);
+        this.objectKeysStack.pop();
     }
 
     public visitSimplePropertyAssignment(node: TypeScript.SimplePropertyAssignmentSyntax): void {
+        var objectKeys = this.objectKeysStack[this.objectKeysStack.length - 1];
         var keyToken = node.propertyName;
         var key = keyToken.text();
-        if (this.objectKeys[key]) {
+        if (objectKeys[key]) {
             var position = this.position() + node.leadingTriviaWidth();
             var failureString = Rule.FAILURE_STRING + key + "'";
             this.addFailure(this.createFailure(position, keyToken.width(), failureString));
         } else {
-            this.objectKeys[key] = true;
+            objectKeys[key] = true;
         }
 
         super.visitSimplePropertyAssignment(node);
