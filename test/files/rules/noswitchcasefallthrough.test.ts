@@ -57,6 +57,18 @@ switch (foo) {
         throw "error";
 }
 
+switch (foo) {
+    case 1:
+        bar();
+        /* falls through */
+    case 2:
+        bar();
+        /* Testing */
+        /* falls through */
+    case 3:
+    break;
+}
+
 // valid
 switch (foo) {
     case 1:
