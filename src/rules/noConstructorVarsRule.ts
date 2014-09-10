@@ -17,7 +17,7 @@
 /// <reference path='../../lib/tslint.d.ts' />
 
 export class Rule extends Lint.Rules.AbstractRule {
-    public static FAILURE_STRING_PART = "No constructor variable declarations";
+    public static FAILURE_STRING_PART = " cannot be declared in the constructor";
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
         return this.applyWithWalker(new NoConstructorVariableDeclarationsWalker(syntaxTree, this.getOptions()));
@@ -37,9 +37,10 @@ export class NoConstructorVariableDeclarationsWalker extends Lint.RuleWalker {
                 position += element.fullWidth();
                 continue;
             }
-            var parameter = <TypeScript.ParameterSyntax>element;
+            var parameter = <TypeScript.ParameterSyntax> element;
             if (parameter.modifiers.childCount() > 0) {
-                this.addFailure(this.createFailure(position, parameter.modifiers.fullWidth(), Rule.FAILURE_STRING_PART));
+                this.addFailure(this.createFailure(position, parameter.modifiers.fullWidth(),
+                    "'" + parameter.identifier.text() + "'" + Rule.FAILURE_STRING_PART));
             }
             position += parameter.fullWidth();
         }

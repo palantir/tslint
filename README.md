@@ -129,7 +129,7 @@ A sample configuration file with all options is available [here](https://github.
 * `no-console` disallows access to the specified functions on `console`. Rule options are functions to ban on the console variable.
 * `no-consecutive-blank-lines` disallows having more than one blank line in a row in a file
 * `no-construct` disallows access to the constructors of `String`, `Number`, and `Boolean`.
-* `no-constructor-variable-declarations` disallows the `public` and `private` modifiers for constructor parameters.
+* `no-constructor-vars` disallows the `public` and `private` modifiers for constructor parameters.
 * `no-debugger` disallows `debugger` statements.
 * `no-duplicate-key` disallows duplicate keys in object literals.
 * `no-duplicate-variable` disallows duplicate variable declarations.

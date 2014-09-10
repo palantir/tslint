@@ -18,15 +18,17 @@
 
 describe("<no-constructor-variable-declarations>", () => {
     it("No constrctor variable declarations", () => {
-        var fileName = "rules/noconstructorvariabledeclarations.test.ts";
-        var Rule = Lint.Test.getRule("no-constructor-variable-declarations");
+        var fileName = "rules/noconstructorvars.test.ts";
+        var Rule = Lint.Test.getRule("no-constructor-vars");
         var failureString = Rule.FAILURE_STRING_PART;
 
-        var failure = Lint.Test.createFailuresOnFile(fileName, failureString);
+        var failureFoo = Lint.Test.createFailuresOnFile(fileName, "'foo'" + failureString);
+        var failureBar = Lint.Test.createFailuresOnFile(fileName, "'bar'" + failureString);
+
         var expectedFailures = [
-            failure([3, 17], [3, 25]),
-            failure([9, 17], [9, 25]),
-            failure([9, 38], [9, 45])
+            failureFoo([3, 17], [3, 25]),
+            failureFoo([9, 17], [9, 25]),
+            failureBar([9, 38], [9, 45])
         ];
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule);
         assert.lengthOf(actualFailures, 3);
