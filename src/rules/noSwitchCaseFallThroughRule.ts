@@ -44,11 +44,14 @@ export class NoSwitchCaseFallThroughWalker extends Lint.RuleWalker {
                 // last item doesn't need a break
                 if (isFallingThrough && switchClause.statements.childCount() > 0 && ((switchClauses.childCount() - 1) > i)) {
                     // remove trailing trivia (new line)
-                    this.addFailure(this.createFailure(position - child.trailingTriviaWidth(), 1, Rule.FAILURE_STRING_PART + "'case'"));
+                    if (!this.fallThroughAllowed(switchClauses.childAt(i + 1))) {
+                        this.addFailure(this.createFailure(position - child.trailingTriviaWidth(), 1,
+                            Rule.FAILURE_STRING_PART + "'case'"));
+                    }
                 }
             } else {
-                // case statement falling through a default, this is always an error
-                if (isFallingThrough) {
+                // case statement falling through a default
+                if (isFallingThrough && !this.fallThroughAllowed(child)) {
                     // remove trailing trivia (new line)
                     this.addFailure(this.createFailure(position - child.trailingTriviaWidth(), 1, Rule.FAILURE_STRING_PART + "'default'"));
                 }
@@ -57,6 +60,23 @@ export class NoSwitchCaseFallThroughWalker extends Lint.RuleWalker {
             }
         }
         super.visitSwitchStatement(node);
+    }
+
+    private fallThroughAllowed(nextCaseOrDefaultStatement: TypeScript.ISyntaxNodeOrToken): boolean {
+        var childCount = nextCaseOrDefaultStatement.childCount();
+        var triviaList = childCount > 0 ? nextCaseOrDefaultStatement.childAt(0).leadingTrivia() : null;
+        if (triviaList) {
+            // This list also contains elements for spaces, comments and newlines
+            for (var i = 0; i < triviaList.count(); i++) {
+                var trivia = triviaList.syntaxTriviaAt(i);
+                if (trivia.isComment()) {
+                    if (trivia.fullText() === "/* falls through */") {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     private fallsThrough(list: TypeScript.ISyntaxList) {
