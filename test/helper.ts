@@ -81,6 +81,8 @@ module Lint.Test {
             }
         }
 
-        assert.fail(needle, haystack, "expected failure not found");
+        var line = needle.getStartPosition().getLineAndCharacter().line() + 1,
+            character =  needle.getStartPosition().getLineAndCharacter().character() + 1;
+        assert(false, "expected failure not found on [" + line + ", " + character + "]");
     }
 }
