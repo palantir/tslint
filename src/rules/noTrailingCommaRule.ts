@@ -27,13 +27,14 @@ export class Rule extends Lint.Rules.AbstractRule {
 class NoTrailingCommaWalker extends Lint.RuleWalker {
     public visitObjectLiteralExpression(node: TypeScript.ObjectLiteralExpressionSyntax): void {
         var propertyAssignments = node.propertyAssignments;
-        var lastPosition = this.positionAfter(node.openBraceToken, node.propertyAssignments);
-        lastPosition -= node.propertyAssignments.trailingTriviaWidth() + 1;
+        var lastPosition = this.positionAfter(node.openBraceToken, propertyAssignments);
+        lastPosition -= propertyAssignments.trailingTriviaWidth() + 1;
 
         if (propertyAssignments.separatorCount() === propertyAssignments.nonSeparatorCount()
             && propertyAssignments.nonSeparatorCount() > 0) {
 
             this.addFailure(this.createFailure(lastPosition, 1, Rule.FAILURE_STRING));
         }
+        super.visitObjectLiteralExpression(node);
     }
 }
