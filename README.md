@@ -114,6 +114,7 @@ A sample configuration file with all options is available [here](https://github.
 * `curly` enforces braces for `if`/`for`/`do`/`while` statements.
 * `eofline` enforces the file to end with a newline.
 * `forin` enforces a `for ... in` statement to be filtered with an `if` statement.*
+* `header` enforces file having a header at the top. Required option is the pattern that should match the first line.
 * `indent` enforces consistent indentation levels (currently disabled).
 * `interface-name` enforces the rule that interface names must begin with a capital 'I'
 * `jsdoc-format` enforces basic format rules for jsdoc comments -- comments starting with `/**`
