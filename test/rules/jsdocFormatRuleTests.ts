@@ -30,7 +30,6 @@ describe("<jsdoc-format>", () => {
         var expectedFailure5 = createAlignmentFailure([39, 1], [39, 19]);
         var expectedFailure6 = createFormatFailure([42, 5], [42, 26]);
         var expectedFailure7 = createFormatFailure([44, 5], [44, 32]);
-        var expectedFailure8 = createFormatFailure([48, 5], [48, 12]);
 
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, JsdocFormatRule);
 
@@ -41,7 +40,6 @@ describe("<jsdoc-format>", () => {
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure5);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure6);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure7);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure8);
-        assert.lengthOf(actualFailures, 8);
+        assert.lengthOf(actualFailures, 7);
     });
 });
