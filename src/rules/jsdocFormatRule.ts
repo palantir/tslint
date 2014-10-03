@@ -48,7 +48,7 @@ class JsdocWalker extends Lint.RuleWalker {
                     var lineMap = this.getSyntaxTree().lineMap();
 
                     if (lines.length === 1) {
-                        var firstLineMatch = firstLine.match(/^\s*\/\*\* .+ \*\/$/);
+                        var firstLineMatch = firstLine.match(/^\s*\/\*\* (.+ )?\*\/$/);
                         if (firstLineMatch == null) {
                             this.addFailureAt(jsdocPosition, firstLine.length, Rule.FORMAT_FAILURE_STRING);
                         }

@@ -43,6 +43,10 @@ one  *
 
     /** another bad one liner*/
 
+    /** */
+
+    /**  */
+
     /** a good one */
 
 }
