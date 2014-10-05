@@ -40,16 +40,25 @@ class JsdocWalker extends Lint.RuleWalker {
                 var commentText = triviaItem.fullText();
                 var lines = commentText.split("\n");
                 var jsdocPosition = currentPosition;
-
                 var firstLine = lines[0];
+
                 // regex is: start of string, followed by any amount of whitespace, followed by /**
                 var isJsdocMatch = firstLine.match(/^\s*\/\*\*/);
                 if (isJsdocMatch != null) {
                     var lineMap = this.getSyntaxTree().lineMap();
+
+                    if (lines.length === 1) {
+                        var firstLineMatch = firstLine.match(/^\s*\/\*\* (.* )?\*\/$/);
+                        if (firstLineMatch == null) {
+                            this.addFailureAt(jsdocPosition, firstLine.length, Rule.FORMAT_FAILURE_STRING);
+                        }
+                        currentPosition += triviaItem.fullWidth();
+                        return;
+                    }
                     var indexToMatch = firstLine.indexOf("**") + lineMap.getLineAndCharacterFromPosition(currentPosition).character();
                     // all lines but the first and last
                     var otherLines = lines.splice(1, lines.length - 2);
-                    jsdocPosition += lines[0].length + 1; // + 1 for the splitted-out newline
+                    jsdocPosition += firstLine.length + 1; // + 1 for the splitted-out newline
                     otherLines.forEach((line) => {
                         // regex is: start of string, followed by any amount of whitespace, followed by *,
                         // followed by either a space or the end of the string

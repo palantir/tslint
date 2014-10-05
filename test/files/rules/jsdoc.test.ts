@@ -39,4 +39,14 @@ one  *
    * oh right this
      */
 
+    /**a bad one liner */
+
+    /** another bad one liner*/
+
+    /** */
+
+    /**  */
+
+    /** a good one */
+
 }
