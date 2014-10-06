@@ -109,7 +109,7 @@ A sample configuration file with all options is available [here](https://github.
 * `class-name` enforces PascalCased class and interface names.
 * `comment-format` enforces rules for single-line comments. Rule options:
     * `"check-space"` enforces the rule that all single-line comments must begin with a space, as in `// comment`
-        * note that comments starting with `///` are also allowed, for things such as ///<reference>
+        * note that comments starting with `///` are also allowed, for things such as `///<reference>`
     * `"check-lowercase"` enforces the rule that the first non-whitespace character of a comment must be lowercase, if applicable
 * `curly` enforces braces for `if`/`for`/`do`/`while` statements.
 * `eofline` enforces the file to end with a newline.
