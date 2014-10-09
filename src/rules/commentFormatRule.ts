@@ -41,9 +41,10 @@ class CommentWalker extends Lint.RuleWalker {
         triviaList.forEach((triviaItem) => {
             if (triviaItem.kind() === TypeScript.SyntaxKind.SingleLineCommentTrivia) {
                 var commentText = triviaItem.fullText();
+                var fullWidth = triviaItem.fullWidth();
                 if (this.hasOption(OPTION_SPACE)) {
                     if (!this.startsWithSpace(commentText)) {
-                        var leadingSpaceFailure = this.createFailure(currentPosition + 2, triviaItem.fullWidth() - 2, Rule.LEADING_SPACE_FAILURE);
+                        var leadingSpaceFailure = this.createFailure(currentPosition + 2, fullWidth - 2, Rule.LEADING_SPACE_FAILURE);
                         this.addFailure(leadingSpaceFailure);
                     }
                 }
@@ -56,8 +57,8 @@ class CommentWalker extends Lint.RuleWalker {
                         // first character isn't alphanumeric/doesn't exist? Technically not a violation
                         var firstCharacter = firstCharacterMatch[1];
                         if (firstCharacter !== firstCharacter.toLowerCase()) {
-                            var charPos: number = regexp.lastIndex - 1;
-                            var lowercaseFailure = this.createFailure(currentPosition + charPos, triviaItem.fullWidth() - charPos, Rule.LOWERCASE_FAILURE);
+                            var pos: number = regexp.lastIndex - 1;
+                            var lowercaseFailure = this.createFailure(currentPosition + pos, fullWidth - pos, Rule.LOWERCASE_FAILURE);
                             this.addFailure(lowercaseFailure);
                         }
                     }
