@@ -17,8 +17,8 @@
 /// <reference path='../../lib/tslint.d.ts' />
 
 export class Rule extends Lint.Rules.AbstractRule {
-    public static NOT_FOUND_FAILURE_STRING = "no header found at the start of the file"
-    public static WHITESPACE_FAILURE_STRING = "whitespace found at the start of the file instead of a header"
+    public static NOT_FOUND_FAILURE_STRING = "no header found at the start of the file";
+    public static WHITESPACE_FAILURE_STRING = "whitespace found at the start of the file instead of a header";
     public static PATTERN_FAILURE_STRING = "header must match expression provided";
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
@@ -33,7 +33,7 @@ class HeaderWalker extends Lint.RuleWalker {
     private pattern: RegExp;
 
     constructor(syntaxTree: TypeScript.SyntaxTree, options: Lint.IOptions) {
-        super(syntaxTree, options)
+        super(syntaxTree, options);
         this.pattern = new RegExp(options.ruleArguments[0]);
     }
 
@@ -52,7 +52,7 @@ class HeaderWalker extends Lint.RuleWalker {
                         break;
                     case TypeScript.SyntaxKind.MultiLineCommentTrivia:
                         var fullText = triviaItem.fullText();
-                        var text = fullText.replace(/\n\s*\*\/$|^(\/\*\n|\s*\* ?)/gm, '');
+                        var text = fullText.replace(/\n\s*\*\/$|^(\/\*\n|\s*\* ?)/gm, "");
                         if (!this.pattern.test(text)) {
                             this.addFailureAt(this.position(), fullText.length, Rule.PATTERN_FAILURE_STRING);
                         }
