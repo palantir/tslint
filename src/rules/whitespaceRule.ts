@@ -21,6 +21,7 @@ var OPTION_DECL = "check-decl";
 var OPTION_OPERATOR = "check-operator";
 var OPTION_SEPARATOR = "check-separator";
 var OPTION_TYPE = "check-type";
+var OPTION_TYPECAST = "check-typecast";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "missing whitespace";
@@ -155,6 +156,14 @@ class WhitespaceWalker extends Lint.RuleWalker {
         }
 
         super.visitExportAssignment(node);
+    }
+
+    public visitCastExpression(node: TypeScript.CastExpressionSyntax): void {
+        if (this.hasOption(OPTION_TYPECAST)) {
+            var position = this.position() + node.lessThanToken.fullWidth() + node.type.fullWidth() + node.greaterThanToken.fullWidth();
+            this.checkForLeadingSpace(position, node.greaterThanToken.trailingTrivia());
+        }
+        super.visitCastExpression(node);
     }
 
     private isBranchKind(kind: TypeScript.SyntaxKind): boolean {

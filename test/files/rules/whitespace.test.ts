@@ -33,6 +33,8 @@ module M {
 
     var r: ()=>string;
     var s: new ()=>string;
+    var a = <number>"10";
+    var a = <number> "10";
 }
 
 var a;

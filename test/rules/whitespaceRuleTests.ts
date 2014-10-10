@@ -29,10 +29,11 @@ describe("<whitespace>", () => {
             "check-decl",
             "check-operator",
             "check-separator",
-            "check-type"
+            "check-type",
+            "check-typecast"
         ];
         actualFailures = Lint.Test.applyRuleOnFile(fileName, WhitespaceRule, options);
-        assert.lengthOf(actualFailures, 30);
+        assert.lengthOf(actualFailures, 31);
     });
 
     it("enforces rules only when enabled", () => {
@@ -132,5 +133,9 @@ describe("<whitespace>", () => {
         Lint.Test.assertContainsFailure(actualFailures, createFailure([34, 16], [34, 17]));
         Lint.Test.assertContainsFailure(actualFailures, createFailure([35, 18], [35, 19]));
         Lint.Test.assertContainsFailure(actualFailures, createFailure([35, 20], [35, 21]));
+    });
+
+    it("enforces whitespace around typecasts", () => {
+        Lint.Test.assertContainsFailure(actualFailures, createFailure([36, 21], [36, 22]));
     });
 });
