@@ -179,6 +179,7 @@ A sample configuration file with all options is available [here](https://github.
 	* `"check-operator"` checks for whitespace around operator tokens
 	* `"check-separator"` checks for whitespace after separator tokens (`,`/`;`)
 	* `"check-type"` checks for whitespace before a variable type specification
+	* `"check-typecast"` checks for whitespace between a typecast and its target
 
 TSLint Rule Flags
 -----
