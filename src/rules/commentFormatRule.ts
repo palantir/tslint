@@ -41,26 +41,18 @@ class CommentWalker extends Lint.RuleWalker {
         triviaList.forEach((triviaItem) => {
             if (triviaItem.kind() === TypeScript.SyntaxKind.SingleLineCommentTrivia) {
                 var commentText = triviaItem.fullText();
-                var fullWidth = triviaItem.fullWidth();
+                var startPosition = currentPosition + 2;
+                var endPosition = triviaItem.fullWidth() - 2;
                 if (this.hasOption(OPTION_SPACE)) {
                     if (!this.startsWithSpace(commentText)) {
-                        var leadingSpaceFailure = this.createFailure(currentPosition + 2, fullWidth - 2, Rule.LEADING_SPACE_FAILURE);
+                        var leadingSpaceFailure = this.createFailure(startPosition, endPosition, Rule.LEADING_SPACE_FAILURE);
                         this.addFailure(leadingSpaceFailure);
                     }
                 }
-                if (this.hasOption(OPTION_LOWERCASE) && commentText.length > 2) { // comment is "//"? Technically not a violation.
-                    // regex is "start of string"//"any amount of whitespace"("word character")
-                    var regexp = /^\/\/\s*(\w)/g;
-                    var firstCharacterMatch = regexp.exec(commentText);
-                    if (firstCharacterMatch != null) {
-                        // the first group matched, i.e. the thing in the parens, is the first non-space character, if it's alphanumeric
-                        // first character isn't alphanumeric/doesn't exist? Technically not a violation
-                        var firstCharacter = firstCharacterMatch[1];
-                        if (firstCharacter !== firstCharacter.toLowerCase()) {
-                            var pos: number = regexp.lastIndex - 1;
-                            var lowercaseFailure = this.createFailure(currentPosition + pos, fullWidth - pos, Rule.LOWERCASE_FAILURE);
-                            this.addFailure(lowercaseFailure);
-                        }
+                if (this.hasOption(OPTION_LOWERCASE)) {
+                    if (!this.startsWithLowercase(commentText)) {
+                        var lowercaseFailure = this.createFailure(startPosition, endPosition, Rule.LOWERCASE_FAILURE);
+                        this.addFailure(lowercaseFailure);
                     }
                 }
             }
@@ -81,6 +73,23 @@ class CommentWalker extends Lint.RuleWalker {
         var firstCharacter = commentText.charAt(2); // first character after the space
         // three slashes (///) also works, to allow for ///<reference>
         return firstCharacter === " " || firstCharacter === "/";
+    }
+
+    private startsWithLowercase(commentText: string): boolean {
+        if (commentText.length <= 2) {
+            return true; // comment is "//"? Technically not a violation.
+        }
+
+        // regex is "start of string"//"any amount of whitespace"("word character")
+        var firstCharacterMatch = commentText.match(/^\/\/\s*(\w)/);
+        if (firstCharacterMatch != null) {
+            // the first group matched, i.e. the thing in the parens, is the first non-space character, if it's alphanumeric
+            var firstCharacter = firstCharacterMatch[1];
+            return firstCharacter === firstCharacter.toLowerCase();
+        } else {
+            // first character isn't alphanumeric/doesn't exist? Technically not a violation
+            return true;
+        }
     }
 
 }
