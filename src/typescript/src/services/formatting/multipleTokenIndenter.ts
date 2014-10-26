@@ -36,7 +36,7 @@ module TypeScript.Services.Formatting {
 
             // Be strict, and only consider nodes that fall inside the span. This avoids indenting a multiline string
             // on enter at the end of, as the whole token was not included in the span
-            var tokenSpan = new TextSpan(this.position() + token.leadingTriviaWidth(), token.width());
+            var tokenSpan = new TextSpan(this.position() + token.leadingTriviaWidth(), width(token));
             if (!this.textSpan().containsTextSpan(tokenSpan)) {
                 return;
             }

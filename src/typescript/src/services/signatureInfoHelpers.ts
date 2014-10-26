@@ -1,14 +1,19 @@
 // Copyright (c) Microsoft. All rights reserved. Licensed under the Apache License, Version 2.0. 
 // See LICENSE.txt in the project root for complete license information.
 
-///<reference path='typescriptServices.ts' />
+///<reference path='references.ts' />
 
 module TypeScript.Services {
 
     export interface IPartiallyWrittenTypeArgumentListInformation {
-        genericIdentifer: TypeScript.PositionedToken;
-        lessThanToken: TypeScript.PositionedToken;
+        genericIdentifer: TypeScript.ISyntaxToken;
+        lessThanToken: TypeScript.ISyntaxToken;
         argumentIndex: number;
+    }
+
+    export interface IExpressionWithArgumentListSyntax extends IExpressionSyntax {
+        expression: IExpressionSyntax;
+        argumentList: ArgumentListSyntax;
     }
 
     export class SignatureInfoHelpers {
@@ -19,7 +24,7 @@ module TypeScript.Services {
         // will return the generic identifier that started the expression (e.g. "foo" in "foo<any, |"). It is then up to the caller to ensure that this is a valid generic expression through 
         // looking up the type. The method will also keep track of the parameter index inside the expression.
         public static isInPartiallyWrittenTypeArgumentList(syntaxTree: TypeScript.SyntaxTree, position: number): IPartiallyWrittenTypeArgumentListInformation {
-            var token = syntaxTree.sourceUnit().findTokenOnLeft(position, /*includeSkippedTokens*/ true);
+            var token = Syntax.findTokenOnLeft(syntaxTree.sourceUnit(), position, /*includeSkippedTokens*/ true);
 
             if (token && TypeScript.Syntax.hasAncestorOfKind(token, TypeScript.SyntaxKind.TypeParameterList)) {
                 // We are in the wrong generic list. bail out
@@ -36,7 +41,7 @@ module TypeScript.Services {
                         if (stack === 0) {
                             // Found the beginning of the generic argument expression
                             var lessThanToken = token;
-                            token = token.previousToken(/*includeSkippedTokens*/ true);
+                            token = previousToken(token, /*includeSkippedTokens*/ true);
                             if (!token || token.kind() !== TypeScript.SyntaxKind.IdentifierName) {
                                 break whileLoop;
                             }
@@ -88,7 +93,7 @@ module TypeScript.Services {
 
                     case TypeScript.SyntaxKind.EqualsGreaterThanToken:
                         // This can be a function type or a constructor type. In either case, we want to skip the function defintion
-                        token = token.previousToken(/*includeSkippedTokens*/ true);
+                        token = previousToken(token, /*includeSkippedTokens*/ true);
 
                         if (token && token.kind() === TypeScript.SyntaxKind.CloseParenToken) {
                             // Skip untill the matching open paren token
@@ -101,7 +106,7 @@ module TypeScript.Services {
 
                             if (token && token.kind() === TypeScript.SyntaxKind.NewKeyword) {
                                 // In case this was a constructor type, skip the new keyword
-                                token = token.previousToken(/*includeSkippedTokens*/ true);
+                                token = previousToken(token, /*includeSkippedTokens*/ true);
                             }
 
                             if (!token) {
@@ -132,7 +137,7 @@ module TypeScript.Services {
                         break whileLoop;
                 }
 
-                token = token.previousToken(/*includeSkippedTokens*/ true);
+                token = previousToken(token, /*includeSkippedTokens*/ true);
             }
 
             return null;
@@ -224,7 +229,7 @@ module TypeScript.Services {
             return [signatureGroupInfo];
         }
 
-        public static getActualSignatureInfoFromCallExpression(ast: TypeScript.ICallExpression, caretPosition: number, typeParameterInformation: IPartiallyWrittenTypeArgumentListInformation): ActualSignatureInfo {
+        public static getActualSignatureInfoFromCallExpression(ast: IExpressionWithArgumentListSyntax, caretPosition: number, typeParameterInformation: IPartiallyWrittenTypeArgumentListInformation): ActualSignatureInfo {
             if (!ast) {
                 return null;
             }
@@ -237,13 +242,14 @@ module TypeScript.Services {
             var parameterLimChar = caretPosition;
 
             if (ast.argumentList.typeArgumentList) {
-                parameterMinChar = Math.min(ast.argumentList.typeArgumentList.start());
-                parameterLimChar = Math.max(Math.max(ast.argumentList.typeArgumentList.start(), ast.argumentList.typeArgumentList.end() + ast.argumentList.typeArgumentList.trailingTriviaWidth()));
+                parameterMinChar = Math.min(start(ast.argumentList.typeArgumentList));
+                parameterLimChar = Math.max(Math.max(start(ast.argumentList.typeArgumentList), end(ast.argumentList.typeArgumentList) + trailingTriviaWidth(ast.argumentList.typeArgumentList)));
             }
 
             if (ast.argumentList.arguments) {
-                parameterMinChar = Math.min(parameterMinChar, ast.argumentList.arguments.start());
-                parameterLimChar = Math.max(parameterLimChar, Math.max(ast.argumentList.arguments.start(), ast.argumentList.arguments.end() + ast.argumentList.arguments.trailingTriviaWidth()));
+                parameterMinChar = Math.min(parameterMinChar, end(ast.argumentList.openParenToken));
+                parameterLimChar = Math.max(parameterLimChar,
+                    ast.argumentList.closeParenToken.fullWidth() > 0 ? start(ast.argumentList.closeParenToken) : fullEnd(ast.argumentList));
             }
 
             result.parameterMinChar = parameterMinChar;
@@ -255,10 +261,10 @@ module TypeScript.Services {
                 result.currentParameterIsTypeParameter = true;
                 result.currentParameter = typeParameterInformation.argumentIndex;
             }
-            else if (ast.argumentList.arguments && ast.argumentList.arguments.nonSeparatorCount() > 0) {
+            else if (ast.argumentList.arguments && ast.argumentList.arguments.length > 0) {
                 result.currentParameter = 0;
-                for (var index = 0; index < ast.argumentList.arguments.nonSeparatorCount(); index++) {
-                    if (caretPosition > ast.argumentList.arguments.nonSeparatorAt(index).end() + ast.argumentList.arguments.nonSeparatorAt(index).trailingTriviaWidth()) {
+                for (var index = 0; index < ast.argumentList.arguments.length; index++) {
+                    if (caretPosition > end(ast.argumentList.arguments[index]) + lastToken(ast.argumentList.arguments[index]).trailingTriviaWidth()) {
                         result.currentParameter++;
                     }
                 }
@@ -270,8 +276,8 @@ module TypeScript.Services {
         public static getActualSignatureInfoFromPartiallyWritenGenericExpression(caretPosition: number, typeParameterInformation: IPartiallyWrittenTypeArgumentListInformation): ActualSignatureInfo {
             var result = new ActualSignatureInfo();
 
-            result.parameterMinChar = typeParameterInformation.lessThanToken.start();
-            result.parameterLimChar = Math.max(typeParameterInformation.lessThanToken.fullEnd(), caretPosition);
+            result.parameterMinChar = start(typeParameterInformation.lessThanToken);
+            result.parameterLimChar = Math.max(fullEnd(typeParameterInformation.lessThanToken), caretPosition);
             result.currentParameterIsTypeParameter = true;
             result.currentParameter = typeParameterInformation.argumentIndex;
 
@@ -283,33 +289,33 @@ module TypeScript.Services {
             // isEntirelyInsideComment can't handle when the position is out of bounds, 
             // callers should be fixed, however we should be resiliant to bad inputs
             // so we return true (this position is a blocker for getting signature help)
-            if (position < 0 || position > sourceUnit.fullWidth()) {
+            if (position < 0 || position > fullWidth(sourceUnit)) {
                 return true;
             }
 
             return TypeScript.Syntax.isEntirelyInsideComment(sourceUnit, position);
         }
 
-        public static isTargetOfObjectCreationExpression(positionedToken: TypeScript.PositionedToken): boolean {
+        public static isTargetOfObjectCreationExpression(positionedToken: TypeScript.ISyntaxToken): boolean {
             var positionedParent = TypeScript.Syntax.getAncestorOfKind(positionedToken, TypeScript.SyntaxKind.ObjectCreationExpression);
             if (positionedParent) {
-                var objectCreationExpression = <TypeScript.ObjectCreationExpressionSyntax> positionedParent.element();
+                var objectCreationExpression = <TypeScript.ObjectCreationExpressionSyntax> positionedParent;
                 var expressionRelativeStart = objectCreationExpression.newKeyword.fullWidth();
-                var tokenRelativeStart = positionedToken.fullStart() - positionedParent.fullStart();
+                var tokenRelativeStart = positionedToken.fullStart() - fullStart(positionedParent);
                 return tokenRelativeStart >= expressionRelativeStart &&
-                    tokenRelativeStart <= (expressionRelativeStart + objectCreationExpression.expression.fullWidth());
+                    tokenRelativeStart <= (expressionRelativeStart + fullWidth(objectCreationExpression.expression));
             }
 
             return false;
         }
 
-        private static moveBackUpTillMatchingTokenKind(token: TypeScript.PositionedToken, tokenKind: TypeScript.SyntaxKind, matchingTokenKind: TypeScript.SyntaxKind): TypeScript.PositionedToken {
+        private static moveBackUpTillMatchingTokenKind(token: TypeScript.ISyntaxToken, tokenKind: TypeScript.SyntaxKind, matchingTokenKind: TypeScript.SyntaxKind): TypeScript.ISyntaxToken {
             if (!token || token.kind() !== tokenKind) {
                 throw TypeScript.Errors.invalidOperation();
             }
 
             // Skip the current token
-            token = token.previousToken(/*includeSkippedTokens*/ true);
+            token = previousToken(token, /*includeSkippedTokens*/ true);
 
             var stack = 0;
 
@@ -332,7 +338,7 @@ module TypeScript.Services {
                 }
 
                 // Move back
-                token = token.previousToken(/*includeSkippedTokens*/ true);
+                token = previousToken(token, /*includeSkippedTokens*/ true);
             }
 
             // Did not find matching token

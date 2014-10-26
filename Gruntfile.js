@@ -1,6 +1,9 @@
 module.exports = function(grunt) {
-  grunt.initConfig({
+  grunt.initConfig({    
     pkg: grunt.file.readJSON('package.json'),
+
+    ts_compilerDirectory: "src/typescript/src/compiler",
+    ts_servicesDirectory: "src/typescript/src/services",
 
     clean: {
       bin: ['bin/tslint-cli.js'],
@@ -38,7 +41,7 @@ module.exports = function(grunt) {
       options:{
         sourceMap: false
       },
-    
+
       bin: {
         options: {
           target: 'es5'
@@ -47,6 +50,32 @@ module.exports = function(grunt) {
         out: 'bin/tslint-cli.js'
       },
 
+      compiler: {
+        options: {
+          declaration: true,
+          target: 'es5'
+        },
+        src: [
+          "<%= ts_compilerDirectory %>/core.ts",
+          "<%= ts_compilerDirectory %>/sys.ts",
+          "<%= ts_compilerDirectory %>/types.ts",
+          "<%= ts_compilerDirectory %>/scanner.ts",
+          "<%= ts_compilerDirectory %>/parser.ts",
+          "<%= ts_compilerDirectory %>/binder.ts",
+          "<%= ts_compilerDirectory %>/checker.ts",
+          "<%= ts_compilerDirectory %>/emitter.ts",
+          "<%= ts_compilerDirectory %>/commandLineParser.ts",
+          "<%= ts_compilerDirectory %>/tsc.ts",
+          "<%= ts_compilerDirectory %>/diagnosticInformationMap.generated.ts",
+
+          "<%= ts_servicesDirectory %>/breakpoints.ts",
+          "<%= ts_servicesDirectory %>/services.ts",
+          "<%= ts_servicesDirectory %>/shims.ts",
+          "<%= ts_servicesDirectory %>/outliningElementsCollector.ts"
+        ],
+        out: 'bin/compiler.js'
+      },
+    
       core: {
         options: {
           declaration: true,

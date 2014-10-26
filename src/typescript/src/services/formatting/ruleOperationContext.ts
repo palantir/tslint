@@ -28,7 +28,7 @@ module TypeScript.Services.Formatting {
 
 
         public IsAny(): boolean {
-            { return this == RuleOperationContext.Any; }
+            return this == RuleOperationContext.Any;
         }
 
         public  InContext(context: FormattingContext): boolean {

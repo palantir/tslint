@@ -1,741 +1,471 @@
-//
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-// 
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//   http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
+/// <reference path="core.ts"/>
+/// <reference path="sys.ts"/>
+/// <reference path="types.ts"/>
+/// <reference path="scanner.ts"/>
+/// <reference path="parser.ts"/>
+/// <reference path="binder.ts"/>
+/// <reference path="checker.ts"/>
+/// <reference path="emitter.ts"/>
+/// <reference path="commandLineParser.ts"/>
 
-///<reference path='typescript.ts'/>
-///<reference path='io.ts'/>
-///<reference path='optionsParser.ts'/>
+module ts {
+    var version = "1.1.0.1";
 
-module TypeScript {
-    class SourceFile {
-        constructor(public scriptSnapshot: IScriptSnapshot, public byteOrderMark: ByteOrderMark) {
+    /**
+     * Checks to see if the locale is in the appropriate format,
+     * and if it is, attempts to set the appropriate language.
+     */
+    function validateLocaleAndSetLanguage(locale: string, errors: Diagnostic[]): boolean {
+        var matchResult = /^([a-z]+)([_\-]([a-z]+))?$/.exec(locale.toLowerCase());
+
+        if (!matchResult) {
+            errors.push(createCompilerDiagnostic(Diagnostics.Locale_must_be_of_the_form_language_or_language_territory_For_example_0_or_1, 'en', 'ja-jp'));
+            return false;
+        }
+
+        var language = matchResult[1];
+        var territory = matchResult[3];
+
+        // First try the entire locale, then fall back to just language if that's all we have.
+        if (!trySetLanguageAndTerritory(language, territory, errors) &&
+            !trySetLanguageAndTerritory(language, undefined, errors)) {
+
+            errors.push(createCompilerDiagnostic(Diagnostics.Unsupported_locale_0, locale));
+            return false;
+        }
+
+        return true;
+    }
+
+    function trySetLanguageAndTerritory(language: string, territory: string, errors: Diagnostic[]): boolean {
+        var compilerFilePath = normalizePath(sys.getExecutingFilePath());
+        var containingDirectoryPath = getDirectoryPath(compilerFilePath);
+
+        var filePath = combinePaths(containingDirectoryPath, language);
+
+        if (territory) {
+            filePath = filePath + "-" + territory;
+        }
+
+        filePath = sys.resolvePath(combinePaths(filePath, "diagnosticMessages.generated.json"));
+
+        if (!sys.fileExists(filePath)) {
+            return false;
+        }
+
+        // TODO: Add codePage support for readFile?
+        try {
+            var fileContents = sys.readFile(filePath);
+        }
+        catch (e) {
+            errors.push(createCompilerDiagnostic(Diagnostics.Unable_to_open_file_0, filePath));
+            return false;
+        }
+        try {
+            ts.localizedDiagnosticMessages = JSON.parse(fileContents);
+        }
+        catch (e) {
+            errors.push(createCompilerDiagnostic(Diagnostics.Corrupted_locale_file_0, filePath));
+            return false;
+        }
+
+        return true;
+    }
+
+    function countLines(program: Program): number {
+        var count = 0;
+        forEach(program.getSourceFiles(), file => {
+            count += file.getLineAndCharacterFromPosition(file.end).line;
+        });
+        return count;
+    }
+
+    function getDiagnosticText(message: DiagnosticMessage, ...args: any[]): string {
+        var diagnostic: Diagnostic = createCompilerDiagnostic.apply(undefined, arguments);
+        return diagnostic.messageText;
+    }
+
+    function reportDiagnostic(diagnostic: Diagnostic) {
+        var output = "";
+        
+        if (diagnostic.file) {
+            var loc = diagnostic.file.getLineAndCharacterFromPosition(diagnostic.start);
+
+            output += diagnostic.file.filename + "(" + loc.line + "," + loc.character + "): ";
+        }
+
+        var category = DiagnosticCategory[diagnostic.category].toLowerCase();
+        output += category + " TS" + diagnostic.code + ": " + diagnostic.messageText + sys.newLine;
+
+        sys.write(output);
+    }
+
+    function reportDiagnostics(diagnostics: Diagnostic[]) {
+        for (var i = 0; i < diagnostics.length; i++) {
+            reportDiagnostic(diagnostics[i]);
         }
     }
 
-    class DiagnosticsLogger implements ILogger {
-        constructor(public ioHost: IIO) {
+    function padLeft(s: string, length: number) {
+        while (s.length < length) {
+            s = " " + s;
         }
-        public information(): boolean { return false; }
-        public debug(): boolean { return false; }
-        public warning(): boolean { return false; }
-        public error(): boolean { return false; }
-        public fatal(): boolean { return false; }
-        public log(s: string): void {
-            this.ioHost.stdout.WriteLine(s);
+        return s;
+    }
+
+    function padRight(s: string, length: number) {
+        while (s.length < length) {
+            s = s + " ";
+        }
+
+        return s;
+    }
+
+    function reportStatisticalValue(name: string, value: string) {
+        sys.write(padRight(name + ":", 12) + padLeft(value.toString(), 10) + sys.newLine);
+    }
+
+    function reportCountStatistic(name: string, count: number) {
+        reportStatisticalValue(name, "" + count);
+    }
+
+    function reportTimeStatistic(name: string, time: number) {
+        reportStatisticalValue(name, (time / 1000).toFixed(2) + "s");
+    }
+
+    function createCompilerHost(options: CompilerOptions): CompilerHost {
+        var currentDirectory: string;
+        var existingDirectories: Map<boolean> = {};
+
+        function getCanonicalFileName(fileName: string): string {
+            // if underlying system can distinguish between two files whose names differs only in cases then file name already in canonical form.
+            // otherwise use toLowerCase as a canonical form.
+            return sys.useCaseSensitiveFileNames ? fileName : fileName.toLowerCase();
+        }
+
+        function getSourceFile(filename: string, languageVersion: ScriptTarget, onError?: (message: string) => void): SourceFile {
+            try {
+                var text = sys.readFile(filename, options.charset);
+            }
+            catch (e) {
+                if (onError) {
+                    onError(e.message);
+                }
+                text = "";
+            }
+            return text !== undefined ? createSourceFile(filename, text, languageVersion, /*version:*/ "0") : undefined;
+        }
+
+        function writeFile(fileName: string, data: string, writeByteOrderMark: boolean, onError?: (message: string) => void) {
+
+            function directoryExists(directoryPath: string): boolean {
+                if (hasProperty(existingDirectories, directoryPath)) {
+                    return true;
+                }
+                if (sys.directoryExists(directoryPath)) {
+                    existingDirectories[directoryPath] = true;
+                    return true;
+                }
+                return false;
+            }
+
+            function ensureDirectoriesExist(directoryPath: string) {
+                if (directoryPath.length > getRootLength(directoryPath) && !directoryExists(directoryPath)) {
+                    var parentDirectory = getDirectoryPath(directoryPath);
+                    ensureDirectoriesExist(parentDirectory);
+                    sys.createDirectory(directoryPath);
+                }
+            }
+
+            try {
+                ensureDirectoriesExist(getDirectoryPath(normalizePath(fileName)));
+                sys.writeFile(fileName, data, writeByteOrderMark);
+            }
+            catch (e) {
+                if (onError) onError(e.message);
+            }
+        }
+
+        return {
+            getSourceFile: getSourceFile,
+            getDefaultLibFilename: () => combinePaths(getDirectoryPath(normalizePath(sys.getExecutingFilePath())), "lib.d.ts"),
+            writeFile: writeFile,
+            getCurrentDirectory: () => currentDirectory || (currentDirectory = sys.getCurrentDirectory()),
+            useCaseSensitiveFileNames: () => sys.useCaseSensitiveFileNames,
+            getCanonicalFileName: getCanonicalFileName,
+            getNewLine: () => sys.newLine
+        };
+    }
+
+    export function executeCommandLine(args: string[]): void {
+        var commandLine = parseCommandLine(args);
+
+        if (commandLine.options.locale) {
+            if (typeof JSON === "undefined") {
+                reportDiagnostic(createCompilerDiagnostic(Diagnostics.The_current_host_does_not_support_the_0_option, "--locale"));
+                return sys.exit(1);
+            }
+
+            validateLocaleAndSetLanguage(commandLine.options.locale, commandLine.errors);
+        }
+
+        // If there are any errors due to command line parsing and/or
+        // setting up localization, report them and quit.
+        if (commandLine.errors.length > 0) {
+            reportDiagnostics(commandLine.errors);
+            return sys.exit(1);
+        }
+
+        if (commandLine.options.version) {
+            reportDiagnostic(createCompilerDiagnostic(Diagnostics.Version_0, version));
+            return sys.exit(0);
+        }
+
+        if (commandLine.options.help || commandLine.filenames.length === 0) {
+            printVersion();
+            printHelp();
+            return sys.exit(0);
+        }
+
+        var defaultCompilerHost = createCompilerHost(commandLine.options);
+        
+        if (commandLine.options.watch) {
+            if (!sys.watchFile) {
+                reportDiagnostic(createCompilerDiagnostic(Diagnostics.The_current_host_does_not_support_the_0_option, "--watch"));
+                return sys.exit(1);
+            }
+
+            watchProgram(commandLine, defaultCompilerHost);
+        }
+        else {
+            var result = compile(commandLine, defaultCompilerHost).errors.length > 0 ? 1 : 0;
+            return sys.exit(result);
         }
     }
 
-    export class BatchCompiler implements IReferenceResolverHost {
-        public compilerVersion = "0.9.5.0";
-        private inputFiles: string[] = [];
-        private compilationSettings: ImmutableCompilationSettings;
-        private resolvedFiles: IResolvedFile[] = [];
-        private fileNameToSourceFile = new StringHashTable<SourceFile>();
-        private hasErrors: boolean = false;
-        private logger: ILogger = null;
+    /**
+     * Compiles the program once, and then watches all given and referenced files for changes.
+     * Upon detecting a file change, watchProgram will queue up file modification events for the next
+     * 250ms and then perform a recompilation. The reasoning is that in some cases, an editor can
+     * save all files at once, and we'd like to just perform a single recompilation.
+     */
+    function watchProgram(commandLine: ParsedCommandLine, compilerHost: CompilerHost): void {
+        var watchers: Map<FileWatcher> = {};
+        var updatedFiles: Map<boolean> = {};
 
-        constructor(private ioHost: IIO) {
+        // Compile the program the first time and watch all given/referenced files.
+        var program = compile(commandLine, compilerHost).program;
+        reportDiagnostic(createCompilerDiagnostic(Diagnostics.Compilation_complete_Watching_for_file_changes));
+        addWatchers(program);
+        return;
+
+        function addWatchers(program: Program) {
+            forEach(program.getSourceFiles(), f => {
+                var filename = getCanonicalName(f.filename);
+                watchers[filename] = sys.watchFile(filename, fileUpdated);
+            });
         }
 
-        // Begin batch compilation
-        public batchCompile() {
-            var start = new Date().getTime();
-
-            CompilerDiagnostics.diagnosticWriter = { Alert: (s: string) => { this.ioHost.printLine(s); } };
-
-            // Parse command line options
-            if (this.parseOptions()) {
-                this.logger = this.compilationSettings.gatherDiagnostics() ? <ILogger>new DiagnosticsLogger(this.ioHost) : new NullLogger();
-
-                if (this.compilationSettings.watch()) {
-                    // Watch will cause the program to stick around as long as the files exist
-                    this.watchFiles();
-                    return;
+        function removeWatchers(program: Program) {
+            forEach(program.getSourceFiles(), f => {
+                var filename = getCanonicalName(f.filename);
+                if (hasProperty(watchers, filename)) {
+                    watchers[filename].close();
                 }
-
-                // Resolve the compilation environemnt
-                this.resolve();
-
-                this.compile();
-
-                if (this.compilationSettings.gatherDiagnostics()) {
-                    this.logger.log("");
-                    this.logger.log("File resolution time:                     " + TypeScript.fileResolutionTime);
-                    this.logger.log("           file read:                     " + TypeScript.fileResolutionIOTime);
-                    this.logger.log("        scan imports:                     " + TypeScript.fileResolutionScanImportsTime);
-                    this.logger.log("       import search:                     " + TypeScript.fileResolutionImportFileSearchTime);
-                    this.logger.log("        get lib.d.ts:                     " + TypeScript.fileResolutionGetDefaultLibraryTime);
-
-                    this.logger.log("SyntaxTree parse time:                    " + TypeScript.syntaxTreeParseTime);
-                    this.logger.log("Syntax Diagnostics time:                  " + TypeScript.syntaxDiagnosticsTime);
-                    this.logger.log("AST translation time:                     " + TypeScript.astTranslationTime);
-                    this.logger.log("");
-                    this.logger.log("Type check time:                          " + TypeScript.typeCheckTime);
-                    this.logger.log("");
-                    this.logger.log("Emit time:                                " + TypeScript.emitTime);
-                    this.logger.log("Declaration emit time:                    " + TypeScript.declarationEmitTime);
-
-                    this.logger.log("Total number of symbols created:          " + TypeScript.pullSymbolID);
-                    this.logger.log("Specialized types created:                " + TypeScript.nSpecializationsCreated);
-                    this.logger.log("Specialized signatures created:           " + TypeScript.nSpecializedSignaturesCreated);
-
-                    this.logger.log("  IsExternallyVisibleTime:                " + TypeScript.declarationEmitIsExternallyVisibleTime);
-                    this.logger.log("  TypeSignatureTime:                      " + TypeScript.declarationEmitTypeSignatureTime);
-                    this.logger.log("  GetBoundDeclTypeTime:                   " + TypeScript.declarationEmitGetBoundDeclTypeTime);
-                    this.logger.log("  IsOverloadedCallSignatureTime:          " + TypeScript.declarationEmitIsOverloadedCallSignatureTime);
-                    this.logger.log("  FunctionDeclarationGetSymbolTime:       " + TypeScript.declarationEmitFunctionDeclarationGetSymbolTime);
-                    this.logger.log("  GetBaseTypeTime:                        " + TypeScript.declarationEmitGetBaseTypeTime);
-                    this.logger.log("  GetAccessorFunctionTime:                " + TypeScript.declarationEmitGetAccessorFunctionTime);
-                    this.logger.log("  GetTypeParameterSymbolTime:             " + TypeScript.declarationEmitGetTypeParameterSymbolTime);
-                    this.logger.log("  GetImportDeclarationSymbolTime:         " + TypeScript.declarationEmitGetImportDeclarationSymbolTime);
-
-                    this.logger.log("Emit write file time:                     " + TypeScript.emitWriteFileTime);
-
-                    this.logger.log("Compiler resolve path time:               " + TypeScript.compilerResolvePathTime);
-                    this.logger.log("Compiler directory name time:             " + TypeScript.compilerDirectoryNameTime);
-                    this.logger.log("Compiler directory exists time:           " + TypeScript.compilerDirectoryExistsTime);
-                    this.logger.log("Compiler file exists time:                " + TypeScript.compilerFileExistsTime);
-
-                    this.logger.log("IO host resolve path time:                " + TypeScript.ioHostResolvePathTime);
-                    this.logger.log("IO host directory name time:              " + TypeScript.ioHostDirectoryNameTime);
-                    this.logger.log("IO host create directory structure time:  " + TypeScript.ioHostCreateDirectoryStructureTime);
-                    this.logger.log("IO host write file time:                  " + TypeScript.ioHostWriteFileTime);
-
-                    this.logger.log("Node make directory time:                 " + TypeScript.nodeMakeDirectoryTime);
-                    this.logger.log("Node writeFileSync time:                  " + TypeScript.nodeWriteFileSyncTime);
-                    this.logger.log("Node createBuffer time:                   " + TypeScript.nodeCreateBufferTime);
-                }
-            }
-
-            // Exit with the appropriate error code
-            this.ioHost.quit(this.hasErrors ? 1 : 0);
-        }
-
-        private resolve() {
-            // Resolve file dependencies, if requested
-            var includeDefaultLibrary = !this.compilationSettings.noLib();
-            var resolvedFiles: IResolvedFile[] = [];
-
-            var start = new Date().getTime();
-
-            if (!this.compilationSettings.noResolve()) {
-                // Resolve references
-                var resolutionResults = ReferenceResolver.resolve(this.inputFiles, this, this.compilationSettings.useCaseSensitiveFileResolution());
-                resolvedFiles = resolutionResults.resolvedFiles;
-
-                // Only include the library if useDefaultLib is set to true and did not see any 'no-default-lib' comments
-                includeDefaultLibrary = !this.compilationSettings.noLib() && !resolutionResults.seenNoDefaultLibTag;
-
-                // Populate any diagnostic messages generated during resolution
-                resolutionResults.diagnostics.forEach(d => this.addDiagnostic(d));
-            }
-            else {
-                for (var i = 0, n = this.inputFiles.length; i < n; i++) {
-                    var inputFile = this.inputFiles[i];
-                    var referencedFiles: string[] = [];
-                    var importedFiles: string[] = [];
-
-                    // If declaration files are going to be emitted, preprocess the file contents and add in referenced files as well
-                    if (this.compilationSettings.generateDeclarationFiles()) {
-                        var references = getReferencedFiles(inputFile, this.getScriptSnapshot(inputFile));
-                        for (var j = 0; j < references.length; j++) {
-                            referencedFiles.push(references[j].path);
-                        }
-
-                        inputFile = this.resolvePath(inputFile);
-                    }
-
-                    resolvedFiles.push({
-                        path: inputFile,
-                        referencedFiles: referencedFiles,
-                        importedFiles: importedFiles
-                    });
-                }
-            }
-
-            var defaultLibStart = new Date().getTime();
-            if (includeDefaultLibrary) {
-                var libraryResolvedFile: IResolvedFile = {
-                    path: this.getDefaultLibraryFilePath(),
-                    referencedFiles: [],
-                    importedFiles: []
-                };
-
-                // Prepend the library to the resolved list
-                resolvedFiles = [libraryResolvedFile].concat(resolvedFiles);
-            }
-            TypeScript.fileResolutionGetDefaultLibraryTime += new Date().getTime() - defaultLibStart;
-
-            this.resolvedFiles = resolvedFiles;
-
-            TypeScript.fileResolutionTime = new Date().getTime() - start;
-        }
-
-        // Returns true if compilation failed from some reason.
-        private compile(): void {
-            var compiler = new TypeScriptCompiler(this.logger, this.compilationSettings);
-
-            this.resolvedFiles.forEach(resolvedFile => {
-                var sourceFile = this.getSourceFile(resolvedFile.path);
-                compiler.addFile(resolvedFile.path, sourceFile.scriptSnapshot, sourceFile.byteOrderMark, /*version:*/ 0, /*isOpen:*/ false, resolvedFile.referencedFiles);
             });
 
-            for (var it = compiler.compile((path: string) => this.resolvePath(path)); it.moveNext();) {
-                var result = it.current();
+            watchers = {};
+        }
 
-                result.diagnostics.forEach(d => this.addDiagnostic(d));
-                if (!this.tryWriteOutputFiles(result.outputFiles)) {
-                    return;
-                }
+        // Fired off whenever a file is changed.
+        function fileUpdated(filename: string) {
+            var firstNotification = isEmpty(updatedFiles);
+            updatedFiles[getCanonicalName(filename)] = true;
+
+            // Only start this off when the first file change comes in,
+            // so that we can batch up all further changes.
+            if (firstNotification) {
+                setTimeout(() => {
+                    var changedFiles = updatedFiles;
+                    updatedFiles = {};
+
+                    recompile(changedFiles);
+                }, 250);
             }
         }
 
-        // Parse command line options
-        private parseOptions() {
-            var opts = new OptionsParser(this.ioHost, this.compilerVersion);
+        function recompile(changedFiles: Map<boolean>) {
+            reportDiagnostic(createCompilerDiagnostic(Diagnostics.File_change_detected_Compiling));
+            // Remove all the watchers, as we may not be watching every file
+            // specified since the last compilation cycle.
+            removeWatchers(program);
 
-            var mutableSettings = new CompilationSettings();
-            opts.option('out', {
-                usage: {
-                    locCode: DiagnosticCode.Concatenate_and_emit_output_to_single_file,
-                    args: null
-                },
-                type: DiagnosticCode.file2,
-                set: (str) => {
-                    mutableSettings.outFileOption = str;
+            // Reuse source files from the last compilation so long as they weren't changed.
+            var oldSourceFiles = arrayToMap(
+                filter(program.getSourceFiles(), file => !hasProperty(changedFiles, getCanonicalName(file.filename))),
+                file => getCanonicalName(file.filename));
+
+            // We create a new compiler host for this compilation cycle.
+            // This new host is effectively the same except that 'getSourceFile'
+            // will try to reuse the SourceFiles from the last compilation cycle
+            // so long as they were not modified.
+            var newCompilerHost = clone(compilerHost);
+            newCompilerHost.getSourceFile = (fileName, languageVersion, onError) => {
+                fileName = getCanonicalName(fileName);
+
+                var sourceFile = lookUp(oldSourceFiles, fileName);
+                if (sourceFile) {
+                    return sourceFile;
                 }
-            });
 
-            opts.option('outDir', {
-                usage: {
-                    locCode: DiagnosticCode.Redirect_output_structure_to_the_directory,
-                    args: null
-                },
-                type: DiagnosticCode.DIRECTORY,
-                set: (str) => {
-                    mutableSettings.outDirOption = str;
-                }
-            });
-
-            opts.flag('sourcemap', {
-                usage: {
-                    locCode: DiagnosticCode.Generates_corresponding_0_file,
-                    args: ['.map']
-                },
-                set: () => {
-                    mutableSettings.mapSourceFiles = true;
-                }
-            });
-
-            opts.option('mapRoot', {
-                usage: {
-                    locCode: DiagnosticCode.Specifies_the_location_where_debugger_should_locate_map_files_instead_of_generated_locations,
-                    args: null
-                },
-                type: DiagnosticCode.LOCATION,
-                set: (str) => {
-                    mutableSettings.mapRoot = str;
-                }
-            });
-
-            opts.option('sourceRoot', {
-                usage: {
-                    locCode: DiagnosticCode.Specifies_the_location_where_debugger_should_locate_TypeScript_files_instead_of_source_locations,
-                    args: null
-                },
-                type: DiagnosticCode.LOCATION,
-                set: (str) => {
-                    mutableSettings.sourceRoot = str;
-                }
-            });
-
-            opts.flag('declaration', {
-                usage: {
-                    locCode: DiagnosticCode.Generates_corresponding_0_file,
-                    args: ['.d.ts']
-                },
-                set: () => {
-                    mutableSettings.generateDeclarationFiles = true;
-                }
-            }, 'd');
-
-            if (this.ioHost.watchFile) {
-                opts.flag('watch', {
-                    usage: {
-                        locCode: DiagnosticCode.Watch_input_files,
-                        args: null
-                    },
-                    set: () => {
-                        mutableSettings.watch = true;
-                    }
-                }, 'w');
-            }
-
-            opts.flag('propagateEnumConstants', {
-                experimental: true,
-                set: () => { mutableSettings.propagateEnumConstants = true; }
-            });
-
-            opts.flag('removeComments', {
-                usage: {
-                    locCode: DiagnosticCode.Do_not_emit_comments_to_output,
-                    args: null
-                },
-                set: () => {
-                    mutableSettings.removeComments = true;
-                }
-            });
-
-            opts.flag('noResolve', {
-                usage: {
-                    locCode: DiagnosticCode.Skip_resolution_and_preprocessing,
-                    args: null
-                },
-                set: () => {
-                    mutableSettings.noResolve = true;
-                }
-            });
-
-            opts.flag('noLib', {
-                experimental: true,
-                set: () => {
-                    mutableSettings.noLib = true;
-                }
-            });
-
-            opts.flag('diagnostics', {
-                experimental: true,
-                set: () => {
-                    mutableSettings.gatherDiagnostics = true;
-                }
-            });
-
-            opts.option('target', {
-                usage: {
-                    locCode: DiagnosticCode.Specify_ECMAScript_target_version_0_default_or_1,
-                    args: ['ES3', 'ES5']
-                },
-                type: DiagnosticCode.VERSION,
-                set: (type) => {
-                    type = type.toLowerCase();
-
-                    if (type === 'es3') {
-                        mutableSettings.codeGenTarget = LanguageVersion.EcmaScript3;
-                    }
-                    else if (type === 'es5') {
-                        mutableSettings.codeGenTarget = LanguageVersion.EcmaScript5;
-                    }
-                    else {
-                        this.addDiagnostic(
-                            new Diagnostic(null, null, 0, 0, DiagnosticCode.ECMAScript_target_version_0_not_supported_Specify_a_valid_target_version_1_default_or_2, [type, "ES3", "ES5"]));
-                    }
-                }
-            }, 't');
-
-            opts.option('module', {
-                usage: {
-                    locCode: DiagnosticCode.Specify_module_code_generation_0_or_1,
-                    args: ['commonjs', 'amd']
-                },
-                type: DiagnosticCode.KIND,
-                set: (type) => {
-                    type = type.toLowerCase();
-
-                    if (type === 'commonjs') {
-                        mutableSettings.moduleGenTarget = ModuleGenTarget.Synchronous;
-                    }
-                    else if (type === 'amd') {
-                        mutableSettings.moduleGenTarget = ModuleGenTarget.Asynchronous;
-                    }
-                    else {
-                        this.addDiagnostic(
-                            new Diagnostic(null, null, 0, 0, DiagnosticCode.Module_code_generation_0_not_supported, [type]));
-                    }
-                }
-            }, 'm');
-
-            var needsHelp = false;
-            opts.flag('help', {
-                usage: {
-                    locCode: DiagnosticCode.Print_this_message,
-                    args: null
-                },
-                set: () => {
-                    needsHelp = true;
-                }
-            }, 'h');
-
-            opts.flag('useCaseSensitiveFileResolution', {
-                experimental: true,
-                set: () => {
-                    mutableSettings.useCaseSensitiveFileResolution = true;
-                }
-            });
-            var shouldPrintVersionOnly = false;
-            opts.flag('version', {
-                usage: {
-                    locCode: DiagnosticCode.Print_the_compiler_s_version_0,
-                    args: [this.compilerVersion]
-                },
-                set: () => {
-                    shouldPrintVersionOnly = true;
-                }
-            }, 'v');
-
-            var locale: string = null;
-            opts.option('locale', {
-                experimental: true,
-                usage: {
-                    locCode: DiagnosticCode.Specify_locale_for_errors_and_messages_For_example_0_or_1,
-                    args: ['en', 'ja-jp']
-                },
-                type: DiagnosticCode.STRING,
-                set: (value) => {
-                    locale = value;
-                }
-            });
-
-            opts.flag('noImplicitAny', {
-                usage: {
-                    locCode: DiagnosticCode.Warn_on_expressions_and_declarations_with_an_implied_any_type,
-                    args: null
-                },
-                set: () => {
-                    mutableSettings.noImplicitAny = true;
-                }
-            });
-
-            if (Environment.supportsCodePage()) {
-                opts.option('codepage', {
-                    usage: {
-                        locCode: DiagnosticCode.Specify_the_codepage_to_use_when_opening_source_files,
-                        args: null
-                    },
-                    type: DiagnosticCode.NUMBER,
-                    set: (arg) => {
-                        mutableSettings.codepage = parseInt(arg, 10);
-                    }
-                });
-            }
-
-            opts.parse(this.ioHost.arguments);
-
-            this.compilationSettings = ImmutableCompilationSettings.fromCompilationSettings(mutableSettings);
-
-            if (locale) {
-                if (!this.setLocale(locale)) {
-                    return false;
-                }
-            }
-
-            this.inputFiles.push.apply(this.inputFiles, opts.unnamed);
-
-            // If no source files provided to compiler - print usage information
-            if (this.inputFiles.length === 0 || needsHelp) {
-                opts.printUsage();
-                return false;
-            }
-            else if (shouldPrintVersionOnly) {
-                opts.printVersion();
-            }
-
-            return !this.hasErrors;
-        }
-
-        private setLocale(locale: string): boolean {
-            var matchResult = /^([a-z]+)([_\-]([a-z]+))?$/.exec(locale.toLowerCase());
-            if (!matchResult) {
-                this.addDiagnostic(new Diagnostic(null, null, 0, 0, DiagnosticCode.Locale_must_be_of_the_form_language_or_language_territory_For_example_0_or_1, ['en', 'ja-jp']));
-                return false;
-            }
-
-            var language = matchResult[1];
-            var territory = matchResult[3];
-
-            // First try the entire locale, then fall back to just language if that's all we have.
-            if (!this.setLanguageAndTerritory(language, territory) &&
-                !this.setLanguageAndTerritory(language, null)) {
-
-                this.addDiagnostic(new Diagnostic(null, null, 0, 0, DiagnosticCode.Unsupported_locale_0, [locale]));
-                return false;
-            }
-
-            return true;
-        }
-
-        private setLanguageAndTerritory(language: string, territory: string): boolean {
-
-            var compilerFilePath = this.ioHost.getExecutingFilePath();
-            var containingDirectoryPath = this.ioHost.dirName(compilerFilePath);
-
-            var filePath = IOUtils.combine(containingDirectoryPath, language);
-            if (territory) {
-                filePath = filePath + "-" + territory;
-            }
-
-            filePath = this.resolvePath(IOUtils.combine(filePath, "diagnosticMessages.generated.json"));
-
-            if (!this.fileExists(filePath)) {
-                return false;
-            }
-
-            var fileContents = this.ioHost.readFile(filePath, this.compilationSettings.codepage());
-            TypeScript.LocalizedDiagnosticMessages = JSON.parse(fileContents.contents);
-            return true;
-        }
-
-        // Handle -watch switch
-        private watchFiles() {
-            if (!this.ioHost.watchFile) {
-                this.addDiagnostic(
-                    new Diagnostic(null, null, 0, 0, DiagnosticCode.Current_host_does_not_support_0_option, ['-w[atch]']));
-                return;
-            }
-
-            var lastResolvedFileSet: string[] = []
-            var watchers: { [x: string]: IFileWatcher; } = {};
-            var firstTime = true;
-
-            var addWatcher = (fileName: string) => {
-                if (!watchers[fileName]) {
-                    var watcher = this.ioHost.watchFile(fileName, onWatchedFileChange);
-                    watchers[fileName] = watcher;
-                }
-                else {
-                    CompilerDiagnostics.debugPrint("Cannot watch file, it is already watched.");
-                }
+                return compilerHost.getSourceFile(fileName, languageVersion, onError);
             };
 
-            var removeWatcher = (fileName: string) => {
-                if (watchers[fileName]) {
-                    watchers[fileName].close();
-                    delete watchers[fileName];
-                }
-                else {
-                    CompilerDiagnostics.debugPrint("Cannot stop watching file, it is not being watched.");
-                }
-            };
-
-            var onWatchedFileChange = () => {
-                // Clean errors for previous compilation
-                this.hasErrors = false;
-
-                // Clear out any source file data we've cached.
-                this.fileNameToSourceFile = new StringHashTable<SourceFile>();
-
-                // Resolve file dependencies, if requested
-                this.resolve();
-
-                // Check if any new files were added to the environment as a result of the file change
-                var oldFiles = lastResolvedFileSet;
-                var newFiles = this.resolvedFiles.map(resolvedFile => resolvedFile.path).sort();
-
-                var i = 0, j = 0;
-                while (i < oldFiles.length && j < newFiles.length) {
-
-                    var compareResult = oldFiles[i].localeCompare(newFiles[j]);
-                    if (compareResult === 0) {
-                        // No change here
-                        i++;
-                        j++;
-                    }
-                    else if (compareResult < 0) {
-                        // Entry in old list does not exist in the new one, it was removed
-                        removeWatcher(oldFiles[i]);
-                        i++;
-                    }
-                    else {
-                        // Entry in new list does exist in the new one, it was added
-                        addWatcher(newFiles[j]);
-                        j++;
-                    }
-                }
-
-                // All remaining unmatched items in the old list have been removed
-                for (var k = i; k < oldFiles.length; k++) {
-                    removeWatcher(oldFiles[k]);
-                }
-
-                // All remaing unmatched items in the new list have been added
-                for (k = j; k < newFiles.length; k++) {
-                    addWatcher(newFiles[k]);
-                }
-
-                // Update the state
-                lastResolvedFileSet = newFiles;
-
-                // Print header
-                if (!firstTime) {
-                    var fileNames = "";
-                    for (var k = 0; k < lastResolvedFileSet.length; k++) {
-                        fileNames += Environment.newLine + "    " + lastResolvedFileSet[k];
-                    }
-                    this.ioHost.printLine(getLocalizedText(DiagnosticCode.NL_Recompiling_0, [fileNames]));
-                }
-                else {
-                    firstTime = false;
-                }
-
-                // Trigger a new compilation
-                this.compile();
-            };
-
-            // Switch to using stdout for all error messages
-            this.ioHost.stderr = this.ioHost.stdout;
-
-            onWatchedFileChange();
+            program = compile(commandLine, newCompilerHost).program;
+            reportDiagnostic(createCompilerDiagnostic(Diagnostics.Compilation_complete_Watching_for_file_changes));
+            addWatchers(program);
         }
 
-        private getSourceFile(fileName: string): SourceFile {
-            var sourceFile: SourceFile = this.fileNameToSourceFile.lookup(fileName);
-            if (!sourceFile) {
-                // Attempt to read the file
-                var fileInformation: FileInformation;
-
-                try {
-                    fileInformation = this.ioHost.readFile(fileName, this.compilationSettings.codepage());
-                }
-                catch (e) {
-                    this.addDiagnostic(new Diagnostic(null, null, 0, 0, DiagnosticCode.Cannot_read_file_0_1, [fileName, e.message]));
-                    fileInformation = new FileInformation("", ByteOrderMark.None);
-                }
-
-                var snapshot = ScriptSnapshot.fromString(fileInformation.contents);
-                var sourceFile = new SourceFile(snapshot, fileInformation.byteOrderMark);
-                this.fileNameToSourceFile.add(fileName, sourceFile);
-            }
-
-            return sourceFile;
-        }
-
-        private getDefaultLibraryFilePath(): string {
-            var compilerFilePath = this.ioHost.getExecutingFilePath();
-            var containingDirectoryPath = this.ioHost.dirName(compilerFilePath);
-            var libraryFilePath = this.resolvePath(IOUtils.combine(containingDirectoryPath, "lib.d.ts"));
-
-            return libraryFilePath;
-        }
-
-        /// IReferenceResolverHost methods
-        getScriptSnapshot(fileName: string): IScriptSnapshot {
-            return this.getSourceFile(fileName).scriptSnapshot;
-        }
-
-        resolveRelativePath(path: string, directory: string): string {
-            var start = new Date().getTime();
-
-            var unQuotedPath = stripStartAndEndQuotes(path);
-            var normalizedPath: string;
-
-            if (isRooted(unQuotedPath) || !directory) {
-                normalizedPath = unQuotedPath;
-            } else {
-                normalizedPath = IOUtils.combine(directory, unQuotedPath);
-            }
-
-            // get the absolute path
-            normalizedPath = this.resolvePath(normalizedPath);
-
-            // Switch to forward slashes
-            normalizedPath = switchToForwardSlashes(normalizedPath);
-
-            return normalizedPath;
-        }
-
-        private fileExistsCache = createIntrinsicsObject<boolean>();
-
-        fileExists(path: string): boolean {
-            var exists = this.fileExistsCache[path];
-            if (exists === undefined) {
-                var start = new Date().getTime();
-                exists = this.ioHost.fileExists(path);
-                this.fileExistsCache[path] = exists;
-                TypeScript.compilerFileExistsTime += new Date().getTime() - start;
-            }
-
-            return exists;
-        }
-
-        getParentDirectory(path: string): string {
-            var start = new Date().getTime();
-            var result = this.ioHost.dirName(path);
-            TypeScript.compilerDirectoryNameTime += new Date().getTime() - start;
-
-            return result;
-        }
-
-        private addDiagnostic(diagnostic: Diagnostic) {
-            var diagnosticInfo = diagnostic.info();
-            if (diagnosticInfo.category === DiagnosticCategory.Error) {
-                this.hasErrors = true;
-            }
-
-            if (diagnostic.fileName()) {
-                this.ioHost.stderr.Write(diagnostic.fileName() + "(" + (diagnostic.line() + 1) + "," + (diagnostic.character() + 1) + "): ");
-            }
-
-            this.ioHost.stderr.WriteLine(diagnostic.message());
-        }
-
-        private tryWriteOutputFiles(outputFiles: OutputFile[]): boolean {
-            for (var i = 0, n = outputFiles.length; i < n; i++) {
-                var outputFile = outputFiles[i];
-
-                try {
-                    this.writeFile(outputFile.name, outputFile.text, outputFile.writeByteOrderMark);
-                }
-                catch (e) {
-                    this.addDiagnostic(
-                        new Diagnostic(outputFile.name, null, 0, 0, DiagnosticCode.Emit_Error_0, [e.message]));
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        writeFile(fileName: string, contents: string, writeByteOrderMark: boolean): void {
-            var start = new Date().getTime();
-            IOUtils.writeFileAndFolderStructure(this.ioHost, fileName, contents, writeByteOrderMark);
-            TypeScript.emitWriteFileTime += new Date().getTime() - start;
-        }
-
-        directoryExists(path: string): boolean {
-            var start = new Date().getTime();
-            var result = this.ioHost.directoryExists(path);
-            TypeScript.compilerDirectoryExistsTime += new Date().getTime() - start;
-            return result;
-        }
-
-        // For performance reasons we cache the results of resolvePath.  This avoids costly lookup
-        // on the disk once we've already resolved a path once.
-        private resolvePathCache = createIntrinsicsObject<string>();
-
-        resolvePath(path: string): string {
-            var cachedValue = this.resolvePathCache[path];
-            if (!cachedValue) {
-                var start = new Date().getTime();
-                cachedValue = this.ioHost.resolvePath(path);
-                this.resolvePathCache[path] = cachedValue;
-                TypeScript.compilerResolvePathTime += new Date().getTime() - start;
-            }
-
-            return cachedValue;
+        function getCanonicalName(fileName: string) {
+            return compilerHost.getCanonicalFileName(fileName);
         }
     }
 
-    // Start the batch compilation using the current hosts IO
-    var batch = new TypeScript.BatchCompiler(IO);
-    batch.batchCompile();
+    function compile(commandLine: ParsedCommandLine, compilerHost: CompilerHost) {
+        var parseStart = new Date().getTime();
+        var program = createProgram(commandLine.filenames, commandLine.options, compilerHost);
+
+        var bindStart = new Date().getTime();
+        var errors = program.getDiagnostics();
+        if (errors.length) {
+            var checkStart = bindStart;
+            var emitStart = bindStart;
+            var reportStart = bindStart;
+        }
+        else {
+            var checker = program.getTypeChecker(/*fullTypeCheckMode*/ true);
+            var checkStart = new Date().getTime();
+            var semanticErrors = checker.getDiagnostics();
+            var emitStart = new Date().getTime();
+            var emitErrors = checker.emitFiles().errors;
+            var reportStart = new Date().getTime();
+            errors = concatenate(semanticErrors, emitErrors);
+        }
+
+        reportDiagnostics(errors);
+        if (commandLine.options.diagnostics) {
+            var memoryUsed = sys.getMemoryUsage ? sys.getMemoryUsage() : -1;
+            reportCountStatistic("Files", program.getSourceFiles().length);
+            reportCountStatistic("Lines", countLines(program));
+            reportCountStatistic("Nodes", checker ? checker.getNodeCount() : 0);
+            reportCountStatistic("Identifiers", checker ? checker.getIdentifierCount() : 0);
+            reportCountStatistic("Symbols", checker ? checker.getSymbolCount() : 0);
+            reportCountStatistic("Types", checker ? checker.getTypeCount() : 0);
+            if (memoryUsed >= 0) {
+                reportStatisticalValue("Memory used", Math.round(memoryUsed / 1000) + "K");
+            }
+            reportTimeStatistic("Parse time", bindStart - parseStart);
+            reportTimeStatistic("Bind time", checkStart - bindStart);
+            reportTimeStatistic("Check time", emitStart - checkStart);
+            reportTimeStatistic("Emit time", reportStart - emitStart);
+            reportTimeStatistic("Total time", reportStart - parseStart);
+        }
+
+        return { program: program, errors: errors };
+
+    }
+
+    function printVersion() {
+        sys.write(getDiagnosticText(Diagnostics.Version_0, version) + sys.newLine);
+    }
+
+    function printHelp() {
+        var output = "";
+
+        // We want to align our "syntax" and "examples" commands to a certain margin.
+        var syntaxLength = getDiagnosticText(Diagnostics.Syntax_Colon_0, "").length;
+        var examplesLength = getDiagnosticText(Diagnostics.Examples_Colon_0, "").length;
+        var marginLength = Math.max(syntaxLength, examplesLength);
+
+        // Build up the syntactic skeleton.
+        var syntax = makePadding(marginLength - syntaxLength);
+        syntax += "tsc [" + getDiagnosticText(Diagnostics.options) + "] [" + getDiagnosticText(Diagnostics.file) + " ...]";
+
+        output += getDiagnosticText(Diagnostics.Syntax_Colon_0, syntax);
+        output += sys.newLine + sys.newLine;
+
+        // Build up the list of examples.
+        var padding = makePadding(marginLength);
+        output += getDiagnosticText(Diagnostics.Examples_Colon_0, makePadding(marginLength - examplesLength) + "tsc hello.ts") + sys.newLine;
+        output += padding + "tsc --out foo.js foo.ts" + sys.newLine;
+        output += padding + "tsc @args.txt" + sys.newLine;
+        output += sys.newLine;
+
+        output += getDiagnosticText(Diagnostics.Options_Colon) + sys.newLine;
+
+        // Sort our options by their names, (e.g. "--noImplicitAny" comes before "--watch")
+        var optsList = optionDeclarations.slice();
+        optsList.sort((a, b) => compareValues<string>(a.name.toLowerCase(), b.name.toLowerCase()));
+
+        // We want our descriptions to align at the same column in our output,
+        // so we keep track of the longest option usage string.
+        var marginLength = 0;
+        var usageColumn: string[] = []; // Things like "-d, --declaration" go in here.
+        var descriptionColumn: string[] = [];
+
+        for (var i = 0; i < optsList.length; i++) {
+            var option = optsList[i];
+
+            // If an option lacks a description,
+            // it is not officially supported.
+            if (!option.description) {
+                continue;
+            }
+
+            var usageText = " ";
+            if (option.shortName) {
+                usageText += "-" + option.shortName;
+                usageText += getParamName(option);
+                usageText += ", ";
+            }
+
+            usageText += "--" + option.name;
+            usageText += getParamName(option);
+
+            usageColumn.push(usageText);
+            descriptionColumn.push(getDiagnosticText(option.description));
+
+            // Set the new margin for the description column if necessary.
+            marginLength = Math.max(usageText.length, marginLength);
+        }
+
+        // Special case that can't fit in the loop.
+        var usageText = " @<" + getDiagnosticText(Diagnostics.file) + ">";
+        usageColumn.push(usageText);
+        descriptionColumn.push(getDiagnosticText(Diagnostics.Insert_command_line_options_and_files_from_a_file));
+        marginLength = Math.max(usageText.length, marginLength);
+
+        // Print out each row, aligning all the descriptions on the same column.
+        for (var i = 0; i < usageColumn.length; i++) {
+            var usage = usageColumn[i];
+            var description = descriptionColumn[i];
+            output += usage + makePadding(marginLength - usage.length + 2) + description + sys.newLine;
+        }
+
+        sys.write(output);
+        return;
+
+        function getParamName(option: CommandLineOption) {
+            if (option.paramName !== undefined) {
+                return " " + getDiagnosticText(option.paramName);
+            }
+            return "";
+        }
+
+        function makePadding(paddingLength: number): string {
+            return Array(paddingLength + 1).join(" ");
+        }
+    }
 }
+
+ts.executeCommandLine(sys.args);

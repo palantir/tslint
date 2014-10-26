@@ -17,7 +17,7 @@
 
 module TypeScript.Services.Formatting {
     export class IndentationNodeContext {
-        private _node: SyntaxNode;
+        private _node: ISyntaxNode;
         private _parent: IndentationNodeContext;
         private _fullStart: number;
         private _indentationAmount: number;
@@ -25,7 +25,7 @@ module TypeScript.Services.Formatting {
         private _depth: number;
         private _hasSkippedOrMissingTokenChild: boolean;
 
-        constructor(parent: IndentationNodeContext, node: SyntaxNode, fullStart: number, indentationAmount: number, childIndentationAmountDelta: number) {
+        constructor(parent: IndentationNodeContext, node: ISyntaxNode, fullStart: number, indentationAmount: number, childIndentationAmountDelta: number) {
             this.update(parent, node, fullStart, indentationAmount, childIndentationAmountDelta);
         }
 
@@ -33,7 +33,7 @@ module TypeScript.Services.Formatting {
             return this._parent;
         }
 
-        public node(): SyntaxNode {
+        public node(): ISyntaxNode {
             return this._node;
         }
 
@@ -42,15 +42,15 @@ module TypeScript.Services.Formatting {
         }
 
         public fullWidth(): number {
-            return this._node.fullWidth();
+            return fullWidth(this._node);
         }
 
         public start(): number {
-            return this._fullStart + this._node.leadingTriviaWidth();
+            return this._fullStart + leadingTriviaWidth(this._node);
         }
 
         public end(): number {
-            return this._fullStart + this._node.leadingTriviaWidth() + this._node.width();
+            return this._fullStart + leadingTriviaWidth(this._node) + width(this._node);
         }
 
         public indentationAmount(): number {
@@ -84,7 +84,7 @@ module TypeScript.Services.Formatting {
             return pool.getNode(parent, this._node, this._fullStart, this._indentationAmount, this._childIndentationAmountDelta);
         }
 
-        public update(parent: IndentationNodeContext, node: SyntaxNode, fullStart: number, indentationAmount: number, childIndentationAmountDelta: number) {
+        public update(parent: IndentationNodeContext, node: ISyntaxNode, fullStart: number, indentationAmount: number, childIndentationAmountDelta: number) {
             this._parent = parent;
             this._node = node;
             this._fullStart = fullStart;

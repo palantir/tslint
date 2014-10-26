@@ -18,15 +18,8 @@
 
 module TypeScript.Services.Formatting {
     export class TokenSpan extends TextSpan {
-        private _kind: SyntaxKind;
-
-        constructor(kind: SyntaxKind, start: number, length: number) {
+        constructor(public kind: SyntaxKind, start: number, length: number) {
             super(start, length);
-            this._kind = kind;
-        }
-
-        public kind(): SyntaxKind {
-            return this._kind;
         }
     }
 }

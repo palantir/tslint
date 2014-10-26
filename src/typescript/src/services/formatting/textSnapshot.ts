@@ -17,6 +17,7 @@
 
 module TypeScript.Services.Formatting {
     export interface ITextSnapshot {
+        getLength(): number;
         getText(span: TextSpan): string;
         getLineNumberFromPosition(position: number): number;
         getLineFromPosition(position: number): ITextSnapshotLine;
@@ -30,8 +31,12 @@ module TypeScript.Services.Formatting {
             this.lines = [];
         }
 
+        public getLength(): number {
+            return this.snapshot.length();
+        }
+
         public getText(span: TextSpan): string {
-            return this.snapshot.substr(span.start(), span.length(), false);
+            return this.snapshot.substr(span.start(), span.length());
         }
 
         public getLineNumberFromPosition(position: number): number {
@@ -68,14 +73,14 @@ module TypeScript.Services.Formatting {
             else {
                 endIncludingLineBreak = (lineMapIndex >= lineMap.length - 1 ? this.snapshot.length() : lineMap[lineMapIndex + 1]);
                 for (var p = endIncludingLineBreak - 1; p >= start; p--) {
-                    var c = this.snapshot.substr(p, 1, false);
+                    var c = this.snapshot.substr(p, 1);
                     //TODO: Other ones?
                     if (c != "\r" && c != "\n") {
                         break;
                     }
                 }
                 end = p + 1;
-                lineBreak = this.snapshot.substr(end, endIncludingLineBreak - end, false);
+                lineBreak = this.snapshot.substr(end, endIncludingLineBreak - end);
             }
             var result = new TextSnapshotLine(this, lineNumber, start, end, lineBreak);
             return result;

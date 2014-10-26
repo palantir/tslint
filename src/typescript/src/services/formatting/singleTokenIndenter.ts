@@ -28,7 +28,7 @@ module TypeScript.Services.Formatting {
 
         public static getIndentationAmount(position: number, sourceUnit: SourceUnitSyntax, snapshot: ITextSnapshot, options: FormattingOptions): number {
             var walker = new SingleTokenIndenter(position, sourceUnit, snapshot, true, options);
-            sourceUnit.accept(walker);
+            visitNodeOrToken(walker, sourceUnit);
             return walker.indentationAmount;
         }
 
@@ -37,7 +37,8 @@ module TypeScript.Services.Formatting {
             if (token.fullWidth() === 0 || (this.indentationPosition - this.position() < token.leadingTriviaWidth())) {
                 // The position is in the leading trivia, use comment indentation
                 this.indentationAmount = commentIndentationAmount;
-            } else {
+            }
+            else {
                 this.indentationAmount = indentationAmount;
             }
         }

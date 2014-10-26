@@ -23,6 +23,7 @@ module TypeScript.Services.Formatting {
         private _snapshot: ITextSnapshot;
         private _lastTriviaWasNewLine: boolean;
         private _indentationNodeContextPool: IndentationNodeContextPool;
+        private _text: ISimpleText;
 
         constructor(textSpan: TextSpan, sourceUnit: SourceUnitSyntax, snapshot: ITextSnapshot, indentFirstToken: boolean, public options: FormattingOptions) {
             super();
@@ -31,6 +32,7 @@ module TypeScript.Services.Formatting {
             this._indentationNodeContextPool = new IndentationNodeContextPool();
 
             this._textSpan = textSpan;
+            this._text = sourceUnit.syntaxTree.text;
             this._snapshot = snapshot;
             this._parent = this._indentationNodeContextPool.getNode(null, sourceUnit, 0, 0, 0);
 
@@ -91,15 +93,15 @@ module TypeScript.Services.Formatting {
 
                 // Only track new lines on tokens within the range. Make sure to check that the last trivia is a newline, and not just one of the trivia
                 var trivia = token.trailingTrivia();
-                this._lastTriviaWasNewLine = token.hasTrailingNewLine() && trivia.syntaxTriviaAt(trivia.count() - 1).kind() == SyntaxKind.NewLineTrivia;
+                this._lastTriviaWasNewLine = trivia.hasNewLine() && trivia.syntaxTriviaAt(trivia.count() - 1).kind() == SyntaxKind.NewLineTrivia;
             }
 
             // Update the position
             this._position += token.fullWidth();
         }
 
-        public visitNode(node: SyntaxNode): void {
-            var nodeSpan = new TextSpan(this._position, node.fullWidth());
+        public visitNode(node: ISyntaxNode): void {
+            var nodeSpan = new TextSpan(this._position, fullWidth(node));
 
             if (nodeSpan.intersectsWithTextSpan(this._textSpan)) {
                 // Update indentation level
@@ -110,7 +112,7 @@ module TypeScript.Services.Formatting {
                 this._parent = this._indentationNodeContextPool.getNode(currentParent, node, this._position, indentation.indentationAmount, indentation.indentationAmountDelta);
 
                 // Visit node
-                node.accept(this);
+                visitNodeOrToken(this, node);
 
                 // Reset state
                 this._indentationNodeContextPool.releaseNode(this._parent);
@@ -118,7 +120,7 @@ module TypeScript.Services.Formatting {
             }
             else {
                 // We're skipping the node, so update our position accordingly.
-                this._position += node.fullWidth();
+                this._position += fullWidth(node);
             }
         }
 
@@ -129,7 +131,7 @@ module TypeScript.Services.Formatting {
             // class {
             // }
             // Also in a do-while statement, the while should be indented like the parent.
-            if (this._parent.node().firstToken() === token ||
+            if (firstToken(this._parent.node()) === token ||
                 token.kind() === SyntaxKind.OpenBraceToken || token.kind() === SyntaxKind.CloseBraceToken ||
                 token.kind() === SyntaxKind.OpenBracketToken || token.kind() === SyntaxKind.CloseBracketToken ||
                 (token.kind() === SyntaxKind.WhileKeyword && this._parent.node().kind() == SyntaxKind.DoStatement)) {
@@ -149,26 +151,51 @@ module TypeScript.Services.Formatting {
             return this._parent.indentationAmount();
         }
 
-        private getNodeIndentation(node: SyntaxNode, newLineInsertedByFormatting?: boolean): { indentationAmount: number; indentationAmountDelta: number; } {
-            var parent = this._parent.node();
+        private getNodeIndentation(node: ISyntaxNode, newLineInsertedByFormatting?: boolean): { indentationAmount: number; indentationAmountDelta: number; } {
+            var parent = this._parent;
+
             // We need to get the parent's indentation, which could be one of 2 things. If first token of the parent is in the span, use the parent's computed indentation.
             // If the parent was outside the span, use the actual indentation of the parent.
             var parentIndentationAmount: number;
-            if (this._textSpan.containsPosition(this._parent.start())) {
-                parentIndentationAmount = this._parent.indentationAmount();
+            if (this._textSpan.containsPosition(parent.start())) {
+                parentIndentationAmount = parent.indentationAmount();
             }
             else {
-                var line = this._snapshot.getLineFromPosition(this._parent.start()).getText();
+                if (parent.kind() === SyntaxKind.Block && !this.shouldIndentBlockInParent(this._parent.parent())) {
+                    // Blocks preserve the indentation of their containing node (unless they're a 
+                    // standalone block in a list).  i.e. if you have:
+                    //
+                    //  function foo(
+                    //      a: number) {
+                    //
+                    // Then we expect the indentation of the block to be tied to the function, not to
+                    // the line that the block is defined on.  If we were to do the latter, then the 
+                    // indentation would be here:
+                    //
+                    //  function foo(
+                    //      a: number) {
+                    //          |
+                    //
+                    // Instead of:
+                    //
+                    //  function foo(
+                    //      a: number) {
+                    //      |
+                    parent = this._parent.parent();
+                }
+
+                var line = this._snapshot.getLineFromPosition(parent.start()).getText();
                 var firstNonWhiteSpacePosition = Indentation.firstNonWhitespacePosition(line);
                 parentIndentationAmount = Indentation.columnForPositionInString(line, firstNonWhiteSpacePosition, this.options);
             }
-            var parentIndentationAmountDelta = this._parent.childIndentationAmountDelta();
+            var parentIndentationAmountDelta = parent.childIndentationAmountDelta();
 
             // The indentation level of the node
             var indentationAmount: number;
 
             // The delta it adds to its children. 
             var indentationAmountDelta: number;
+            var parentNode = parent.node();
 
             switch (node.kind()) {
                 default:
@@ -229,8 +256,7 @@ module TypeScript.Services.Formatting {
 
                 case SyntaxKind.IfStatement:
                     if (parent.kind() === SyntaxKind.ElseClause &&
-                        !(<ElseClauseSyntax>parent).elseKeyword.hasTrailingNewLine() &&
-                        !(<IfStatementSyntax>node).ifKeyword.hasLeadingNewLine()) {
+                        !SyntaxUtilities.isLastTokenOnLine((<ElseClauseSyntax>parentNode).elseKeyword, this._text)) {
                         // This is an else if statement with the if on the same line as the else, do not indent the if statmement.
                         // Note: Children indentation has already been set by the parent if statement, so no need to increment
                         indentationAmount = parentIndentationAmount;
@@ -252,18 +278,11 @@ module TypeScript.Services.Formatting {
 
                 case SyntaxKind.Block:
                     // Check if the block is a member in a list of statements (if the parent is a source unit, module, or block, or switch clause)
-                    switch (parent.kind()) {
-                        case SyntaxKind.SourceUnit:
-                        case SyntaxKind.ModuleDeclaration:
-                        case SyntaxKind.Block:
-                        case SyntaxKind.CaseSwitchClause:
-                        case SyntaxKind.DefaultSwitchClause:
-                            indentationAmount = parentIndentationAmount + parentIndentationAmountDelta;
-                            break;
-
-                        default:
-                            indentationAmount = parentIndentationAmount;
-                            break;
+                    if (this.shouldIndentBlockInParent(parent)) {
+                        indentationAmount = parentIndentationAmount + parentIndentationAmountDelta;
+                    }
+                    else {
+                        indentationAmount = parentIndentationAmount;
                     }
 
                     indentationAmountDelta = this.options.indentSpaces;
@@ -285,10 +304,10 @@ module TypeScript.Services.Formatting {
             //      || b;
             // Lastly, it is possible the node indentation needs to be recomputed because the formatter inserted a newline before its first token.
             // If this is the case, we know the node no longer starts on the same line as its parent (or at least we shouldn't treat it as such).
-            if (parent) {
+            if (parentNode) {
                 if (!newLineInsertedByFormatting /*This could be false or undefined here*/) {
-                    var parentStartLine = this._snapshot.getLineNumberFromPosition(this._parent.start());
-                    var currentNodeStartLine = this._snapshot.getLineNumberFromPosition(this._position + node.leadingTriviaWidth());
+                    var parentStartLine = this._snapshot.getLineNumberFromPosition(parent.start());
+                    var currentNodeStartLine = this._snapshot.getLineNumberFromPosition(this._position + leadingTriviaWidth(node));
                     if (parentStartLine === currentNodeStartLine || newLineInsertedByFormatting === false /*meaning a new line was removed and we are force recomputing*/) {
                         indentationAmount = parentIndentationAmount;
                         indentationAmountDelta = Math.min(this.options.indentSpaces, parentIndentationAmountDelta + indentationAmountDelta);
@@ -300,6 +319,20 @@ module TypeScript.Services.Formatting {
                 indentationAmount: indentationAmount,
                 indentationAmountDelta: indentationAmountDelta
             };
+        }
+
+        private shouldIndentBlockInParent(parent: IndentationNodeContext): boolean {
+            switch (parent.kind()) {
+                case SyntaxKind.SourceUnit:
+                case SyntaxKind.ModuleDeclaration:
+                case SyntaxKind.Block:
+                case SyntaxKind.CaseSwitchClause:
+                case SyntaxKind.DefaultSwitchClause:
+                    return true;
+
+                default:
+                    return false;
+            }
         }
 
         private forceRecomputeIndentationOfParent(tokenStart: number, newLineAdded: boolean /*as opposed to removed*/): void {

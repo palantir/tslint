@@ -18,11 +18,11 @@
 module TypeScript.Services.Formatting {
     export class RulesProvider {
         private globalRules: Rules;
-        private options: TypeScript.Services.FormatCodeOptions;
+        private options: ts.FormatCodeOptions;
         private activeRules: Rule[];
         private rulesMap: RulesMap;
 
-        constructor(private logger: TypeScript.ILogger) {
+        constructor(private logger: TypeScript.Logger) {
             this.globalRules = new Rules();
         }
 
@@ -38,18 +38,18 @@ module TypeScript.Services.Formatting {
             return this.rulesMap;
         }
 
-        public ensureUpToDate(options: TypeScript.Services.FormatCodeOptions) {
-            if (this.options == null || !TypeScript.compareDataObjects(this.options, options)) {
-                var activeRules: Rule[] = TypeScript.timeFunction(this.logger, "RulesProvider: createActiveRules()", () => { return this.createActiveRules(options); });
-                var rulesMap: RulesMap = TypeScript.timeFunction(this.logger, "RulesProvider: RulesMap.create()", () => { return RulesMap.create(activeRules); });
+        public ensureUpToDate(options: ts.FormatCodeOptions) {
+            if (this.options == null || !ts.compareDataObjects(this.options, options)) {
+                var activeRules = this.createActiveRules(options);
+                var rulesMap = RulesMap.create(activeRules);
 
                 this.activeRules = activeRules;
                 this.rulesMap = rulesMap;
-                this.options = TypeScript.Services.FormatCodeOptions.clone(options);
+                this.options = ts.clone(options);
             }
         }
 
-        private createActiveRules(options: TypeScript.Services.FormatCodeOptions): Rule[] {
+        private createActiveRules(options: ts.FormatCodeOptions): Rule[] {
             var rules = this.globalRules.HighPriorityCommonRules.slice(0);
 
             if (options.InsertSpaceAfterCommaDelimiter) {

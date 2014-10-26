@@ -73,7 +73,7 @@ module TypeScript.Services.Formatting {
         }
 
         public GetRule(context: FormattingContext): Rule {
-            var bucketIndex = this.GetRuleBucketIndex(context.currentTokenSpan.kind(), context.nextTokenSpan.kind());
+            var bucketIndex = this.GetRuleBucketIndex(context.currentTokenSpan.kind, context.nextTokenSpan.kind);
             var bucket = this.map[bucketIndex];
             if (bucket != null) {
                 for (var i = 0, len = bucket.Rules().length; i < len; i++) {
