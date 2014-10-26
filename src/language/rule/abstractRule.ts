@@ -14,7 +14,6 @@
  * limitations under the License.
 */
 
-/// <reference path='../../typescript/src/compiler/core/errors.ts'/>
 /// <reference path='../walker/ruleWalker.ts'/>
 /// <reference path='rule.ts'/>
 
@@ -50,7 +49,7 @@ module Lint.Rules {
 
         public applyWithWalker(walker: Lint.RuleWalker): RuleFailure[] {
             var sourceUnit = walker.getSyntaxTree().sourceUnit();
-            sourceUnit.accept(walker);
+            walker.visitSourceUnit(sourceUnit);
             return walker.getFailures();
         }
 

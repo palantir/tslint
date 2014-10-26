@@ -14,7 +14,6 @@
  * limitations under the License.
 */
 
-/// <reference path='../../typescript/src/compiler/syntax/syntaxTree.ts'/>
 /// <reference-path='../rule/rule.ts'/>
 
 module Lint {

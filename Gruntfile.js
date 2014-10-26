@@ -45,6 +45,17 @@ module.exports = function(grunt) {
         target: 'es5'
       },
 
+      upgrade: {
+        options: {
+          module: 'commonjs'
+        },
+        src: [
+          'lib/typescript.d.ts',
+          'src/language/**/*.ts'
+        ],
+        out: 'lib/tslint.js'
+      },
+
       bin: {
         src: ['src/tslint-cli.ts'],
         out: 'bin/tslint-cli.js'

@@ -14,14 +14,13 @@
  * limitations under the License.
 */
 
-/// <reference path='../../typescript/src/compiler/core/errors.ts'/>
-/// <reference path='../../typescript/src/compiler/syntax/positionTrackingWalker.ts'/>
-/// <reference path='../../typescript/src/compiler/syntax/syntaxKind.ts'/>
 /// <reference path='../rule/rule.ts'/>
+/// <reference path='../utils.ts'/>
 
 module Lint {
-    export class RuleWalker extends TypeScript.PositionTrackingWalker {
+    export class RuleWalker extends TypeScript.SyntaxWalker {
         private limit: number;
+        private position: number;
         private options: any[];
         private failures: RuleFailure[];
         private syntaxTree: TypeScript.SyntaxTree;
@@ -31,10 +30,11 @@ module Lint {
         constructor(syntaxTree: TypeScript.SyntaxTree, options: Lint.IOptions) {
             super();
 
+            this.position = 0;
             this.failures = [];
             this.options = options.ruleArguments;
             this.syntaxTree = syntaxTree;
-            this.limit = this.syntaxTree.sourceUnit().fullWidth();
+            this.limit = TypeScript.fullWidth(this.syntaxTree.sourceUnit());
             this.disabledIntervals = options.disabledIntervals;
             this.ruleName = options.ruleName;
         }
@@ -47,11 +47,15 @@ module Lint {
             return this.failures;
         }
 
+        public getPosition() {
+            return this.position;
+        }
+
         public positionAfter(...elements: TypeScript.ISyntaxElement[]): number {
-            var position = this.position();
+            var position = this.getPosition();
             elements.forEach((element) => {
                 if (element !== null) {
-                    position += element.fullWidth();
+                    position += TypeScript.fullWidth(element);
                 }
             });
             return position;
@@ -67,6 +71,15 @@ module Lint {
             } else {
                 return false;
             }
+        }
+
+        public skip(element: TypeScript.ISyntaxElement) {
+            this.position += TypeScript.fullWidth(element);
+        }
+
+        public visitToken(token: TypeScript.ISyntaxToken): void {
+            super.visitToken(token);
+            this.position += TypeScript.fullWidth(token);
         }
 
         // create a failure at the given position

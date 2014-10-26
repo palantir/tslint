@@ -14,9 +14,6 @@
  * limitations under the License.
 */
 
-/// <reference path='../../typescript/src/compiler/syntax/syntaxTree.ts'/>
-/// <reference path='../../typescript/src/compiler/core/linePosition.ts'/>
-
 module Lint {
     export interface IOptions {
         ruleArguments?: any[];

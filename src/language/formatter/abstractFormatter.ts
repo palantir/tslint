@@ -14,7 +14,6 @@
  * limitations under the License.
 */
 
-/// <reference path='../../typescript/src/compiler/core/errors.ts' />
 /// <reference path='formatter.ts' />
 
 module Lint.Formatters {

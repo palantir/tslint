@@ -28,9 +28,9 @@ module Lint {
 
         public visitToken(token: TypeScript.ISyntaxToken): void {
             // Skip compiler insertions of empty tokens
-            if (token.value() !== null) {
+            if (TypeScript.tokenValue(token) !== null) {
                 this.lastState = {
-                    position: this.position() + token.leadingTriviaWidth(),
+                    position: this.getPosition() + TypeScript.leadingTriviaWidth(token),
                     token: token
                 };
             }

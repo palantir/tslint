@@ -14,30 +14,20 @@
  * limitations under the License.
 */
 
-/// <reference path='../typescript/src/compiler/pathUtils.ts'/>
-/// <reference path='../typescript/src/compiler/text/scriptSnapshot.ts' />
-
 module Lint {
     export function getSyntaxTree(fileName: string, source: string): TypeScript.SyntaxTree {
         var isDTSFile = TypeScript.isDTSFile(fileName);
         var scriptSnapshot = TypeScript.ScriptSnapshot.fromString(source);
+        var compilerOptions = createCompilerOptions();
+        var sourceFile = ts.createSourceFile(fileName, source, compilerOptions.target, "0");
 
-        var text = TypeScript.SimpleText.fromScriptSnapshot(scriptSnapshot);
-        var compilationSettings = createCompilationSettings();
-        var settings = TypeScript.ImmutableCompilationSettings.fromCompilationSettings(compilationSettings);
-
-        return TypeScript.Parser.parse(fileName, text, isDTSFile, TypeScript.getParseOptions(settings));
+        return sourceFile.getSyntaxTree();
     }
 
-    export function createCompilationSettings(): TypeScript.CompilationSettings {
-        var settings = new TypeScript.CompilationSettings();
-
-        // set target to ES5
-        settings.codeGenTarget = TypeScript.LanguageVersion.EcmaScript5;
-        // disable automatic semicolon insertions
-        settings.allowAutomaticSemicolonInsertion = false;
-
-        return settings;
+    export function createCompilerOptions(): ts.CompilerOptions {
+        return {
+            target: ts.ScriptTarget.ES5
+        }
     }
 
     export function doesIntersect(failure: RuleFailure, disabledIntervals: Lint.IDisabledInterval[]) {

@@ -14,13 +14,10 @@
  * limitations under the License.
 */
 
-/// <reference path='../typescript/src/services/languageService.ts'/>
-/// <reference path='../typescript/src/services/diagnosticServices.ts'/>
-
 /* tslint:disable:no-unused-variable */
 
 module Lint {
-    export class LanguageServiceHost extends TypeScript.NullLogger implements TypeScript.Services.ILanguageServiceHost {
+    export class LanguageServiceHost extends TypeScript.NullLogger implements ts.LanguageServiceHost {
         private syntaxTree: TypeScript.SyntaxTree;
         private source: string;
 
@@ -31,7 +28,7 @@ module Lint {
         }
 
         public getCompilationSettings() {
-            return Lint.createCompilationSettings();
+            return Lint.createCompilerOptions();
         }
 
         public getScriptFileNames() {
@@ -39,49 +36,28 @@ module Lint {
         }
 
         public getScriptVersion(fileName: string) {
-            return 1;
+            return "0";
         }
 
         public getScriptIsOpen(fileName: string) {
             return false;
         }
 
-        public getScriptByteOrderMark(fileName: string) {
-            return TypeScript.ByteOrderMark.None;
-        }
-
         public getScriptSnapshot(fileName: string): TypeScript.IScriptSnapshot {
-            return TypeScript.ScriptSnapshot.fromString(this.syntaxTree.sourceUnit().fullText());
-        }
-
-        public getDiagnosticsObject() {
-            return new LanguageServicesDiagnostics();
+            var sourceUnit = this.syntaxTree.sourceUnit();
+            return TypeScript.ScriptSnapshot.fromString(TypeScript.fullText(sourceUnit));
         }
 
         public getLocalizedDiagnosticMessages() {
             return "";
         }
 
-        public resolveRelativePath(path: string, directory: string) {
-            return path;
-        }
-
-        public fileExists(path: string) {
-            return true;
-        }
-
-        public directoryExists(path: string) {
-            return true;
-        }
-
-        public getParentDirectory(path: string) {
-            return path;
-        }
-    }
-
-    export class LanguageServicesDiagnostics implements TypeScript.Services.ILanguageServicesDiagnostics {
-        public log(content: string) {
-            // do nothing
+        public getCancellationToken() {
+            return {
+                isCancellationRequested() {
+                    return false;
+                }
+            }
         }
     }
 }

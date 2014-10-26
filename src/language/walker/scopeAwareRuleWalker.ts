@@ -69,18 +69,18 @@ module Lint {
         }
 
         private isScopeBoundary(node: TypeScript.SyntaxNode): boolean {
-            return node instanceof TypeScript.FunctionDeclarationSyntax
-                || node instanceof TypeScript.FunctionExpressionSyntax
-                || node instanceof TypeScript.FunctionPropertyAssignmentSyntax
-                || node instanceof TypeScript.MemberFunctionDeclarationSyntax
-                || node instanceof TypeScript.ConstructorDeclarationSyntax
-                || node instanceof TypeScript.ModuleDeclarationSyntax
-                || node instanceof TypeScript.SimpleArrowFunctionExpressionSyntax
-                || node instanceof TypeScript.ParenthesizedArrowFunctionExpressionSyntax
-                || node instanceof TypeScript.ClassDeclarationSyntax
-                || node instanceof TypeScript.InterfaceDeclarationSyntax
-                || node instanceof TypeScript.GetAccessorSyntax
-                || node instanceof TypeScript.SetAccessorSyntax;
+            return node instanceof TypeScript.Syntax.Concrete.FunctionDeclarationSyntax
+                || node instanceof TypeScript.Syntax.Concrete.FunctionExpressionSyntax
+                || node instanceof TypeScript.Syntax.Concrete.FunctionPropertyAssignmentSyntax
+                || node instanceof TypeScript.Syntax.Concrete.MemberFunctionDeclarationSyntax
+                || node instanceof TypeScript.Syntax.Concrete.ConstructorDeclarationSyntax
+                || node instanceof TypeScript.Syntax.Concrete.ModuleDeclarationSyntax
+                || node instanceof TypeScript.Syntax.Concrete.SimpleArrowFunctionExpressionSyntax
+                || node instanceof TypeScript.Syntax.Concrete.ParenthesizedArrowFunctionExpressionSyntax
+                || node instanceof TypeScript.Syntax.Concrete.ClassDeclarationSyntax
+                || node instanceof TypeScript.Syntax.Concrete.InterfaceDeclarationSyntax
+                || node instanceof TypeScript.Syntax.Concrete.GetAccessorSyntax
+                || node instanceof TypeScript.Syntax.Concrete.SetAccessorSyntax;
         }
     }
 }
