@@ -2,13 +2,15 @@ module.exports = function(grunt) {
   grunt.initConfig({    
     pkg: grunt.file.readJSON('package.json'),
 
+    // typescript source folders from the compiler's Jakefile
     ts_compilerDirectory: "src/typescript/src/compiler",
     ts_servicesDirectory: "src/typescript/src/services",
 
     clean: {
       bin: ['bin/tslint-cli.js'],
-      core: ['build/rules/', 'build/formatters', 'lib/*'],
-      test: ['build/test/']
+      core: ['build/rules/', 'build/formatters', 'lib/tslint.*'],
+      test: ['build/test/'],
+      typescript: ['lib/typescript.*']
     },
 
     mochaTest: {
@@ -39,21 +41,52 @@ module.exports = function(grunt) {
 
     ts: {
       options:{
-        sourceMap: false
+        sourceMap: false,
+        target: 'es5'
       },
 
       bin: {
-        options: {
-          target: 'es5'
-        },
         src: ['src/tslint-cli.ts'],
         out: 'bin/tslint-cli.js'
       },
 
-      compiler: {
+      core: {
         options: {
           declaration: true,
-          target: 'es5'
+          module: 'commonjs'
+        },
+        src: ['src/tslint.ts'],
+        out: 'lib/tslint.js'
+      },
+
+      core_rules: {
+        options: {
+          base_path: 'src/rules',
+          noImplicitAny: true,
+          module: 'commonjs'
+        },
+        src: ['lib/tslint.d.ts', 'src/rules/*.ts'],
+        outDir: 'build/rules/'
+      },
+
+      core_formatters: {
+        options: {
+          base_path: 'src/formatters',
+          noImplicitAny: true,
+          module: 'commonjs'
+        },
+        src: ['lib/tslint.d.ts', 'src/formatters/*.ts'],
+        outDir: 'build/formatters/'
+      },
+
+      test: {
+        src: ['test/**/*.ts', '!test/files/**/*.ts'],
+        out: 'build/tslint-tests.js'
+      },
+
+      typescript: {
+        options: {
+          declaration: true
         },
         src: [
           "<%= ts_compilerDirectory %>/core.ts",
@@ -73,47 +106,7 @@ module.exports = function(grunt) {
           "<%= ts_servicesDirectory %>/shims.ts",
           "<%= ts_servicesDirectory %>/outliningElementsCollector.ts"
         ],
-        out: 'bin/compiler.js'
-      },
-    
-      core: {
-        options: {
-          declaration: true,
-          module: 'commonjs',
-          target: 'es5'
-        },
-        src: ['src/tslint.ts'],
-        out: 'lib/tslint.js'
-      },
-
-      core_rules: {
-        options: {
-          base_path: 'src/rules',
-          noImplicitAny: true,
-          module: 'commonjs',
-          target: 'es5'
-        },
-        src: ['lib/tslint.d.ts', 'src/rules/*.ts'],
-        outDir: 'build/rules/'
-      },
-
-      core_formatters: {
-        options: {
-          base_path: 'src/formatters',
-          noImplicitAny: true,
-          module: 'commonjs',
-          target: 'es5'
-        },
-        src: ['lib/tslint.d.ts', 'src/formatters/*.ts'],
-        outDir: 'build/formatters/'
-      },
-
-      test: {
-        options: {
-          target: 'es5'
-        },
-        src: ['test/**/*.ts', '!test/files/**/*.ts'],
-        out: 'build/tslint-tests.js'
+        out: 'lib/typescript.js'
       }
     }
   });
@@ -125,10 +118,11 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-ts');
 
   // register custom tasks
+  grunt.registerTask('typescript', ['clean:typescript', 'ts:typescript']);
   grunt.registerTask('core', ['clean:core', 'ts:core', 'ts:core_rules', 'ts:core_formatters']);
   grunt.registerTask('bin', ['clean:bin', 'ts:bin', 'tslint:src']);
   grunt.registerTask('test', ['clean:test', 'ts:test', 'tslint:test', 'mochaTest']);
 
   // create default task
-  grunt.registerTask('default', ['core', 'bin', 'test']);
+  grunt.registerTask('default', ['typescript', 'core', 'bin', 'test']);
 };
