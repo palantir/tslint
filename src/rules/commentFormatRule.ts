@@ -41,15 +41,17 @@ class CommentWalker extends Lint.RuleWalker {
         triviaList.forEach((triviaItem) => {
             if (triviaItem.kind() === TypeScript.SyntaxKind.SingleLineCommentTrivia) {
                 var commentText = triviaItem.fullText();
+                var startPosition = currentPosition + 2;
+                var endPosition = triviaItem.fullWidth() - 2;
                 if (this.hasOption(OPTION_SPACE)) {
                     if (!this.startsWithSpace(commentText)) {
-                        var leadingSpaceFailure = this.createFailure(currentPosition, triviaItem.fullWidth(), Rule.LEADING_SPACE_FAILURE);
+                        var leadingSpaceFailure = this.createFailure(startPosition, endPosition, Rule.LEADING_SPACE_FAILURE);
                         this.addFailure(leadingSpaceFailure);
                     }
                 }
                 if (this.hasOption(OPTION_LOWERCASE)) {
                     if (!this.startsWithLowercase(commentText)) {
-                        var lowercaseFailure = this.createFailure(currentPosition, triviaItem.fullWidth(), Rule.LOWERCASE_FAILURE);
+                        var lowercaseFailure = this.createFailure(startPosition, endPosition, Rule.LOWERCASE_FAILURE);
                         this.addFailure(lowercaseFailure);
                     }
                 }

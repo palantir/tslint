@@ -23,10 +23,10 @@ describe("<comment-format>", () => {
         var fileName = "rules/comment.test.ts";
         var createLowercaseFailure = Lint.Test.createFailuresOnFile(fileName, CommentFormatRule.LOWERCASE_FAILURE);
         var createLeadingSpaceFailure = Lint.Test.createFailuresOnFile(fileName, CommentFormatRule.LEADING_SPACE_FAILURE);
-        var expectedFailure1 = createLowercaseFailure([5, 25], [5, 73]);
-        var expectedFailure2 = createLowercaseFailure([6, 9], [6, 84]);
-        var expectedFailure3 = createLeadingSpaceFailure([6, 9], [6, 84]);
-        var expectedFailure4 = createLeadingSpaceFailure([7, 30], [7, 57]);
+        var expectedFailure1 = createLowercaseFailure([5, 27], [5, 73]);
+        var expectedFailure2 = createLowercaseFailure([6, 11], [6, 84]);
+        var expectedFailure3 = createLeadingSpaceFailure([6, 11], [6, 84]);
+        var expectedFailure4 = createLeadingSpaceFailure([7, 32], [7, 57]);
 
         var options = [true,
             "check-space",
