@@ -14,6 +14,8 @@
  * limitations under the License.
 */
 
+/// <reference path='../lib/typescript.d.ts'/>
+
 /// <reference path='ruleLoader.ts'/>
 /// <reference path='configuration.ts'/>
 /// <reference path='formatterLoader.ts'/>
@@ -64,7 +66,7 @@ module Lint {
             // walk the code first to find all the intervals where rules are disabled
             var rulesWalker = new EnableDisableRulesWalker(syntaxTree, {ruleName: "", disabledIntervals: []});
             var sourceUnit = syntaxTree.sourceUnit();
-            sourceUnit.accept(rulesWalker);
+            rulesWalker.visitSourceUnit(sourceUnit);
             var enableDisableRuleMap = rulesWalker.enableDisableRuleMap;
 
             var rulesDirectory = this.getRelativePath(this.options.rulesDirectory);

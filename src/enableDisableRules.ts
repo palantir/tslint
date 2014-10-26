@@ -21,8 +21,10 @@ module Lint {
         public enableDisableRuleMap: {[rulename: string]: Lint.IEnableDisablePosition[]} = {};
 
         public visitToken(token: TypeScript.ISyntaxToken): void {
-            this.findSwitchesInTrivia(token.leadingTrivia().toArray(), this.position());
-            this.findSwitchesInTrivia(token.trailingTrivia().toArray(), this.position() + token.leadingTriviaWidth() + token.width());
+            this.findSwitchesInTrivia(token.leadingTrivia().toArray(), this.getPosition());
+
+            var remainingWidth = token.fullWidth() - token.trailingTriviaWidth();
+            this.findSwitchesInTrivia(token.trailingTrivia().toArray(), this.getPosition() + remainingWidth);
 
             super.visitToken(token);
         }

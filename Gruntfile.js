@@ -47,12 +47,10 @@ module.exports = function(grunt) {
 
       upgrade: {
         options: {
+          declaration: true,
           module: 'commonjs'
         },
-        src: [
-          'lib/typescript.d.ts',
-          'src/language/**/*.ts'
-        ],
+        src: ['src/tslint.ts'],
         out: 'lib/tslint.js'
       },
 
