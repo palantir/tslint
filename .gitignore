@@ -1,4 +1,5 @@
 .DS_Store
+.tscache/
 build/
 bin/tslint-cli.js
 lib/tslint.js

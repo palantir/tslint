@@ -41,8 +41,7 @@ module.exports = function(grunt) {
     
       bin: {
         options: {
-          target: 'es5',
-          noImplicitAny: true
+          target: 'es5'
         },
         src: ['src/tslint-cli.ts'],
         out: 'bin/tslint-cli.js'
@@ -51,7 +50,6 @@ module.exports = function(grunt) {
       core: {
         options: {
           declaration: true,
-          noImplicitAny: true,
           module: 'commonjs',
           target: 'es5'
         },
