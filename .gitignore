@@ -3,6 +3,5 @@
 build/
 bin/tslint-cli.js
 lib/tslint.js
-lib/typescript.js
 node_modules/
 tscommand*.txt
