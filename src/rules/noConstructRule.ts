@@ -32,10 +32,10 @@ class NoConstructWalker extends Lint.RuleWalker {
     ];
 
     public visitObjectCreationExpression(node: TypeScript.ObjectCreationExpressionSyntax): void {
-        var constructorName = node.expression.fullText().trim();
+        var constructorName = TypeScript.fullText(node.expression).trim();
         if (NoConstructWalker.FORBIDDEN_CONSTRUCTORS.indexOf(constructorName) !== -1) {
-            var position = this.position() + node.leadingTriviaWidth();
-            var width = node.newKeyword.fullWidth() + node.expression.fullWidth();
+            var position = this.getPosition() + TypeScript.leadingTriviaWidth(node);
+            var width = TypeScript.fullWidth(node.newKeyword) + TypeScript.fullWidth(node.expression);
             var failure = this.createFailure(position, width, Rule.FAILURE_STRING);
             this.addFailure(failure);
         }

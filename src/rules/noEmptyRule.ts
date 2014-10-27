@@ -32,9 +32,9 @@ class BlockWalker extends Lint.RuleWalker {
         var hasCommentBefore = node.closeBraceToken.leadingTrivia().hasComment();
         var isSkipped = this.ignoredBlocks.indexOf(node) !== -1;
 
-        if (node.statements.childCount() <= 0 && !hasCommentAfter && !hasCommentBefore && !isSkipped) {
-            var position = this.position() + node.leadingTriviaWidth();
-            var width = node.width();
+        if (TypeScript.childCount(node.statements) <= 0 && !hasCommentAfter && !hasCommentBefore && !isSkipped) {
+            var position = this.getPosition() + TypeScript.leadingTriviaWidth(node);
+            var width = TypeScript.width(node);
             this.addFailure(this.createFailure(position, width, Rule.FAILURE_STRING));
         }
 
@@ -43,11 +43,13 @@ class BlockWalker extends Lint.RuleWalker {
 
     public visitConstructorDeclaration(node: TypeScript.ConstructorDeclarationSyntax): void {
         var isSkipped = false;
-        for (var i = 0; i < node.parameterList.parameters.nonSeparatorCount(); i++) {
-            var param = <TypeScript.ParameterSyntax>node.parameterList.parameters.nonSeparatorAt(i);
+        var parameters = node.callSignature.parameterList.parameters;
 
-            for (var j = 0; j < param.modifiers.childCount(); j++) {
-                var modifier = param.modifiers.childAt(j).kind();
+        for (var i = 0; i < parameters.length; i++) {
+            var param = <TypeScript.ParameterSyntax> parameters[i];
+
+            for (var j = 0; j < TypeScript.childCount(param.modifiers); j++) {
+                var modifier = TypeScript.childAt(param.modifiers, j).kind();
 
                 if (modifier === TypeScript.SyntaxKind.PublicKeyword || modifier === TypeScript.SyntaxKind.PrivateKeyword) {
                     isSkipped = true;

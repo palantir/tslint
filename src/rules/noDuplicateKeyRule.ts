@@ -37,9 +37,9 @@ class NoDuplicateKeyWalker extends Lint.RuleWalker {
         var keyToken = node.propertyName;
         var key = keyToken.text();
         if (objectKeys[key]) {
-            var position = this.position() + node.leadingTriviaWidth();
+            var position = this.getPosition() + TypeScript.leadingTriviaWidth(node);
             var failureString = Rule.FAILURE_STRING + key + "'";
-            this.addFailure(this.createFailure(position, keyToken.width(), failureString));
+            this.addFailure(this.createFailure(position, TypeScript.width(keyToken), failureString));
         } else {
             objectKeys[key] = true;
         }

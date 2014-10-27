@@ -95,7 +95,14 @@ module.exports = function(grunt) {
           'src/rules/noArgRule.ts',
           'src/rules/noBitwiseRule.ts',
           'src/rules/noConsecutiveBlankLinesRule.ts',
-          'src/rules/noConsoleRule.ts'
+          'src/rules/noConsoleRule.ts',
+          'src/rules/noConstructorVarsRule.ts',
+          'src/rules/noConstructRule.ts',
+          'src/rules/noDebuggerRule.ts',
+          'src/rules/noDuplicateKeyRule.ts',
+          'src/rules/noDuplicateVariableRule.ts',
+          'src/rules/noEmptyRule.ts',
+          'src/rules/noEvalRule.ts'
         ],
         outDir: 'build/rules/'
       },
@@ -132,7 +139,14 @@ module.exports = function(grunt) {
           'test/rules/noArgRuleTests.ts',
           'test/rules/noBitwiseRuleTests.ts',
           'test/rules/noConsecutiveBlankLinesRuleTests.ts',
-          'test/rules/noConsoleRuleTests.ts'
+          'test/rules/noConsoleRuleTests.ts',
+          'test/rules/noConstructorVarsRuleTests.ts',
+          'test/rules/noConstructRuleTests.ts',
+          'test/rules/noDebuggerRuleTests.ts',
+          'test/rules/noDuplicateKeyRuleTests.ts',
+          'test/rules/noDuplicateVariableRuleTests.ts',
+          'test/rules/noEmptyRuleTests.ts',
+          'test/rules/noEvalRuleTests.ts'
         ],
         out: 'build/tslint-tests.js'
       }

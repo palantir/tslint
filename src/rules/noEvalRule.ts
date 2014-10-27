@@ -27,11 +27,11 @@ export class Rule extends Lint.Rules.AbstractRule {
 class NoEvalWalker extends Lint.RuleWalker {
     public visitInvocationExpression(node: TypeScript.InvocationExpressionSyntax): void {
         var expression = node.expression;
-        if (expression.isToken() && expression.kind() === TypeScript.SyntaxKind.IdentifierName) {
-            var firstToken = expression.firstToken();
+        if (TypeScript.isToken(expression) && expression.kind() === TypeScript.SyntaxKind.IdentifierName) {
+            var firstToken = TypeScript.firstToken(expression);
             if (firstToken.text() === "eval") {
-                var position = this.position() + node.leadingTriviaWidth();
-                this.addFailure(this.createFailure(position, firstToken.width(), Rule.FAILURE_STRING));
+                var position = this.getPosition() + TypeScript.leadingTriviaWidth(node);
+                this.addFailure(this.createFailure(position, TypeScript.width(firstToken), Rule.FAILURE_STRING));
             }
         }
 

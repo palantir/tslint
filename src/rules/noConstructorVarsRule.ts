@@ -27,22 +27,22 @@ export class Rule extends Lint.Rules.AbstractRule {
 export class NoConstructorVariableDeclarationsWalker extends Lint.RuleWalker {
 
     public visitConstructorDeclaration(node: TypeScript.ConstructorDeclarationSyntax): void {
-        var position = this.positionAfter(node.modifiers, node.constructorKeyword,
-            node.parameterList.openParenToken);
-        var list = node.parameterList.parameters;
-        for (var i = 0; i < list.childCount(); i++) {
-            var element = list.childAt(i);
+        var parameterList = node.callSignature.parameterList;
+        var position = this.positionAfter(node.modifiers, node.constructorKeyword, parameterList.openParenToken);
+        var parameters = parameterList.parameters;
+        for (var i = 0; i < TypeScript.childCount(parameters); i++) {
+            var element = TypeScript.childAt(parameters, i);
             if (element.kind() !== TypeScript.SyntaxKind.Parameter) {
                 // trivia is also part of this list
-                position += element.fullWidth();
+                position += TypeScript.fullWidth(element);
                 continue;
             }
             var parameter = <TypeScript.ParameterSyntax> element;
-            if (parameter.modifiers.childCount() > 0) {
-                this.addFailure(this.createFailure(position, parameter.modifiers.fullWidth(),
+            if (TypeScript.childCount(parameter.modifiers) > 0) {
+                this.addFailure(this.createFailure(position, TypeScript.fullWidth(parameter.modifiers),
                     "'" + parameter.identifier.text() + "'" + Rule.FAILURE_STRING_PART));
             }
-            position += parameter.fullWidth();
+            position += TypeScript.fullWidth(parameter);
         }
         super.visitConstructorDeclaration(node);
     }
