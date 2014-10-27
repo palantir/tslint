@@ -81,7 +81,10 @@ module.exports = function(grunt) {
           'src/rules/banRule.ts',
           'src/rules/classNameRule.ts',
           'src/rules/commentFormatRule.ts',
-          'src/rules/curlyRule.ts'
+          'src/rules/curlyRule.ts',
+          'src/rules/eoflineRule.ts',
+          'src/rules/forinRule.ts',
+          'src/rules/indentRule.ts'
         ],
         outDir: 'build/rules/'
       },
@@ -104,7 +107,10 @@ module.exports = function(grunt) {
           'test/rules/banRuleTests.ts',
           'test/rules/classNameRuleTests.ts',
           'test/rules/commentFormatRuleTests.ts',
-          'test/rules/curlyRuleTests.ts'
+          'test/rules/curlyRuleTests.ts',
+          'test/rules/eoflineRuleTests.ts',
+          'test/rules/forinRuleTests.ts',
+          'test/rules/indentRuleTests.ts'
         ],
         out: 'build/tslint-tests.js'
       }

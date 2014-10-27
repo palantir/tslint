@@ -43,11 +43,11 @@ class ForInWalker extends Lint.RuleWalker {
         if (statementKind === TypeScript.SyntaxKind.Block) {
             var blockNode = <TypeScript.BlockSyntax> statement;
             var blockStatements = blockNode.statements;
-            if (blockStatements.childCount() >= 1) {
-                var firstBlockStatement = blockStatements.childAt(0);
+            if (TypeScript.childCount(blockStatements) >= 1) {
+                var firstBlockStatement = TypeScript.childAt(blockStatements, 0);
                 if (firstBlockStatement.kind() === TypeScript.SyntaxKind.IfStatement) {
                     // if this "if" statement is the only statement within the block
-                    if (blockStatements.childCount() === 1) {
+                    if (TypeScript.childCount(blockStatements) === 1) {
                         return;
                     }
 
@@ -60,8 +60,8 @@ class ForInWalker extends Lint.RuleWalker {
             }
         }
 
-        var position = this.position() + node.leadingTriviaWidth();
-        var failure = this.createFailure(position, node.width(), Rule.FAILURE_STRING);
+        var position = this.getPosition() + TypeScript.leadingTriviaWidth(node);
+        var failure = this.createFailure(position, TypeScript.width(node), Rule.FAILURE_STRING);
         this.addFailure(failure);
     }
 
@@ -74,8 +74,8 @@ class ForInWalker extends Lint.RuleWalker {
 
         if (kind === TypeScript.SyntaxKind.Block) {
             var blockStatements = (<TypeScript.BlockSyntax>node).statements;
-            if (blockStatements.childCount() === 1 &&
-                blockStatements.childAt(0).kind() === TypeScript.SyntaxKind.ContinueStatement) {
+            if (TypeScript.childCount(blockStatements) === 1 &&
+                TypeScript.childAt(blockStatements, 0).kind() === TypeScript.SyntaxKind.ContinueStatement) {
                 return true;
             }
         }

@@ -1,5 +1,5 @@
-/// <reference path="typescriptServices.d.ts" />
 /// <reference path="../typings/node.d.ts" />
+/// <reference path="../typings/typescriptServices.d.ts" />
 declare module Lint {
     interface IOptions {
         ruleArguments?: any[];
