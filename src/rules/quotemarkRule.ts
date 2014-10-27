@@ -62,8 +62,8 @@ class QuoteWalker extends Lint.RuleWalker {
         var failure: Lint.RuleFailure = null;
         if (token.kind() === TypeScript.SyntaxKind.StringLiteral) {
             var fullText = token.fullText();
-            var width = token.width();
-            var position = this.position() + token.leadingTriviaWidth();
+            var width = TypeScript.width(token);
+            var position = this.getPosition() + TypeScript.leadingTriviaWidth(token);
 
             var textStart = token.leadingTriviaWidth();
             var textEnd = textStart + width - 1;

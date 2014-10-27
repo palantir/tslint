@@ -35,12 +35,12 @@ class RequiresWalker extends Lint.ScopeAwareRuleWalker<{}> {
     }
 
     public visitInvocationExpression(node: TypeScript.InvocationExpressionSyntax) {
-        if (this.getCurrentDepth() <= 1 && node.expression.isToken()) {
+        if (this.getCurrentDepth() <= 1 && TypeScript.isToken(node.expression)) {
             var expressionText = (<TypeScript.ISyntaxToken> node.expression).text();
             if (expressionText === "require") {
                 // if we're using require as invocation then it's not part of an import statement
-                var position = this.position() + node.leadingTriviaWidth();
-                this.addFailure(this.createFailure(position, node.width(), Rule.FAILURE_STRING));
+                var position = this.getPosition() + TypeScript.leadingTriviaWidth(node);
+                this.addFailure(this.createFailure(position, TypeScript.width(node), Rule.FAILURE_STRING));
             }
         }
         super.visitInvocationExpression(node);

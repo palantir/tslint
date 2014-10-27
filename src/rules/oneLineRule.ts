@@ -50,13 +50,13 @@ class BraceWalker extends Lint.StateAwareRuleWalker {
                 lastKind === TypeScript.SyntaxKind.EqualsToken) {
 
                 var lastLine = this.getLine(lastState.position);
-                var currentLine = this.getLine(this.position());
-                var position = this.position() + token.leadingTriviaWidth();
+                var currentLine = this.getLine(this.getPosition());
+                var position = this.getPosition() + TypeScript.leadingTriviaWidth(token);
 
                 if (this.hasOption(OPTION_BRACE) && currentLine !== lastLine) {
-                    failure = this.createFailure(position, token.width(), Rule.BRACE_FAILURE_STRING);
+                    failure = this.createFailure(position, TypeScript.width(token), Rule.BRACE_FAILURE_STRING);
                 } else if (this.hasOption(OPTION_WHITESPACE) && !this.hasTrailingWhiteSpace(lastState.token)) {
-                    failure = this.createFailure(position, token.width(), Rule.WHITESPACE_FAILURE_STRING);
+                    failure = this.createFailure(position, TypeScript.width(token), Rule.WHITESPACE_FAILURE_STRING);
                 }
             }
         }
@@ -70,9 +70,9 @@ class BraceWalker extends Lint.StateAwareRuleWalker {
 
     public visitElseClause(node: TypeScript.ElseClauseSyntax): void {
         var lastState = this.getLastState();
-        var position = this.position() + node.leadingTriviaWidth();
+        var position = this.getPosition() + TypeScript.leadingTriviaWidth(node);
         if (this.hasOption(OPTION_ELSE) && lastState !== undefined && !this.hasTrailingWhiteSpace(lastState.token)) {
-            var failure = this.createFailure(position, node.elseKeyword.width(), Rule.ELSE_FAILURE_STRING);
+            var failure = this.createFailure(position, TypeScript.width(node.elseKeyword), Rule.ELSE_FAILURE_STRING);
             this.addFailure(failure);
         }
 
@@ -81,9 +81,9 @@ class BraceWalker extends Lint.StateAwareRuleWalker {
 
     public visitCatchClause(node: TypeScript.CatchClauseSyntax): void {
         var lastState = this.getLastState();
-        var position = this.position() + node.leadingTriviaWidth();
+        var position = this.getPosition() + TypeScript.leadingTriviaWidth(node);
         if (this.hasOption(OPTION_CATCH) && lastState !== undefined && !this.hasTrailingWhiteSpace(lastState.token)) {
-            var failure = this.createFailure(position, node.catchKeyword.width(), Rule.CATCH_FAILURE_STRING);
+            var failure = this.createFailure(position, TypeScript.width(node.catchKeyword), Rule.CATCH_FAILURE_STRING);
             this.addFailure(failure);
         }
 

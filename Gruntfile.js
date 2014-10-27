@@ -109,7 +109,9 @@ module.exports = function(grunt) {
           'src/rules/noTrailingWhitespaceRule.ts',
           'src/rules/noUnreachableRule.ts',
           'src/rules/noUnusedExpressionRule.ts',
-          
+          'src/rules/noVarRequiresRule.ts',
+          'src/rules/oneLineRule.ts',
+          'src/rules/quotemarkRule.ts',
           'src/rules/radixRule.ts',
 //          'src/rules/semicolonRule.ts',
           'src/rules/tripleEqualsRule.ts',
@@ -165,7 +167,9 @@ module.exports = function(grunt) {
           'test/rules/noTrailingCommaRuleTests.ts',
           'test/rules/noUnreachableRuleTests.ts',
           'test/rules/noUnusedExpressionRuleTests.ts',
-          
+          'test/rules/noVarRequiresRuleTests.ts',
+          'test/rules/oneLineRuleTests.ts',
+          'test/rules/quotemarkRuleTests.ts',
           'test/rules/radixRuleTests.ts',
 //          'test/rules/semicolonRuleTests.ts',
           'test/rules/tripleEqualsRuleTests.ts',
