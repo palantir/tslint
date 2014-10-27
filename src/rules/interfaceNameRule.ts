@@ -29,7 +29,7 @@ class NameWalker extends Lint.RuleWalker {
         var interfaceName = node.identifier.text();
         if (!this.startsWithI(interfaceName)) {
             var position = this.positionAfter(node.modifiers, node.interfaceKeyword);
-            this.addFailureAt(position, node.identifier.width());
+            this.addFailureAt(position, TypeScript.width(node.identifier));
         }
 
         super.visitInterfaceDeclaration(node);

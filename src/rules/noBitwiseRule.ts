@@ -26,23 +26,24 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class NoBitwiseWalker extends Lint.RuleWalker {
     public visitNode(node: TypeScript.SyntaxNode): void {
-        if (node.kind() === TypeScript.SyntaxKind.BitwiseAndExpression ||
-            node.kind() === TypeScript.SyntaxKind.AndAssignmentExpression ||
-            node.kind() === TypeScript.SyntaxKind.BitwiseOrExpression ||
-            node.kind() === TypeScript.SyntaxKind.OrAssignmentExpression ||
-            node.kind() === TypeScript.SyntaxKind.BitwiseExclusiveOrExpression ||
-            node.kind() === TypeScript.SyntaxKind.ExclusiveOrAssignmentExpression ||
-            node.kind() === TypeScript.SyntaxKind.LeftShiftExpression ||
-            node.kind() === TypeScript.SyntaxKind.LeftShiftAssignmentExpression ||
-            node.kind() === TypeScript.SyntaxKind.SignedRightShiftExpression ||
-            node.kind() === TypeScript.SyntaxKind.SignedRightShiftAssignmentExpression ||
-            node.kind() === TypeScript.SyntaxKind.UnsignedRightShiftExpression ||
-            node.kind() === TypeScript.SyntaxKind.UnsignedRightShiftAssignmentExpression ||
-            node.kind() === TypeScript.SyntaxKind.BitwiseNotExpression) {
+        var kind = node.kind();
+        if (kind === TypeScript.SyntaxKind.BitwiseAndExpression ||
+            kind === TypeScript.SyntaxKind.AndAssignmentExpression ||
+            kind === TypeScript.SyntaxKind.BitwiseOrExpression ||
+            kind === TypeScript.SyntaxKind.OrAssignmentExpression ||
+            kind === TypeScript.SyntaxKind.BitwiseExclusiveOrExpression ||
+            kind === TypeScript.SyntaxKind.ExclusiveOrAssignmentExpression ||
+            kind === TypeScript.SyntaxKind.LeftShiftExpression ||
+            kind === TypeScript.SyntaxKind.LeftShiftAssignmentExpression ||
+            kind === TypeScript.SyntaxKind.SignedRightShiftExpression ||
+            kind === TypeScript.SyntaxKind.SignedRightShiftAssignmentExpression ||
+            kind === TypeScript.SyntaxKind.UnsignedRightShiftExpression ||
+            kind === TypeScript.SyntaxKind.UnsignedRightShiftAssignmentExpression ||
+            kind === TypeScript.SyntaxKind.BitwiseNotExpression) {
 
             this.addFailure(this.createFailure(
-                this.position() + node.leadingTriviaWidth(),
-                node.width(),
+                this.getPosition() + TypeScript.leadingTriviaWidth(node),
+                TypeScript.width(node),
                 Rule.FAILURE_STRING));
         }
 

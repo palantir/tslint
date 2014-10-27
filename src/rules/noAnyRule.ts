@@ -33,8 +33,8 @@ class NoAnyWalker extends Lint.RuleWalker {
 
     private handleToken(token: TypeScript.ISyntaxToken) {
         if (token.kind() === TypeScript.SyntaxKind.AnyKeyword) {
-            var position = this.position() + token.leadingTriviaWidth();
-            this.addFailure(this.createFailure(position, token.width(), Rule.FAILURE_STRING));
+            var position = this.getPosition() + TypeScript.leadingTriviaWidth(token);
+            this.addFailure(this.createFailure(position, TypeScript.width(token), Rule.FAILURE_STRING));
         }
     }
 }

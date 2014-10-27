@@ -28,12 +28,12 @@ class NoArgWalker extends Lint.RuleWalker {
     public visitMemberAccessExpression(node: TypeScript.MemberAccessExpressionSyntax): void {
         var expression = node.expression;
         var name = node.name;
-        var position = this.position() + node.expression.leadingTriviaWidth();
+        var position = this.getPosition() + TypeScript.leadingTriviaWidth(node.expression);
 
-        if (expression.isToken() && name.text() === "callee") {
+        if (TypeScript.isToken(expression) && name.text() === "callee") {
             var tokenExpression = <TypeScript.ISyntaxToken> expression;
             if (tokenExpression.text() === "arguments") {
-                this.addFailure(this.createFailure(position, expression.width(), Rule.FAILURE_STRING));
+                this.addFailure(this.createFailure(position, TypeScript.width(expression), Rule.FAILURE_STRING));
             }
           }
 

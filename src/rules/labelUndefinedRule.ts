@@ -38,14 +38,14 @@ class LabelUndefinedWalker extends Lint.ScopeAwareRuleWalker<any> {
     }
 
     public visitBreakStatement(node: TypeScript.BreakStatementSyntax): void {
-        var position = this.position() + node.leadingTriviaWidth();
-        this.validateLabelAt(node.identifier, position, node.breakKeyword.width());
+        var position = this.getPosition() + TypeScript.leadingTriviaWidth(node);
+        this.validateLabelAt(node.identifier, position, TypeScript.width(node.breakKeyword));
         super.visitBreakStatement(node);
     }
 
     public visitContinueStatement(node: TypeScript.ContinueStatementSyntax): void {
-        var position = this.position() + node.leadingTriviaWidth();
-        this.validateLabelAt(node.identifier, position, node.continueKeyword.width());
+        var position = this.getPosition() + TypeScript.leadingTriviaWidth(node);
+        this.validateLabelAt(node.identifier, position, TypeScript.width(node.continueKeyword));
         super.visitContinueStatement(node);
     }
 

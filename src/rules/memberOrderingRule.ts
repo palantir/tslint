@@ -32,8 +32,11 @@ interface IModifiers {
     isInstance: boolean;
 }
 
-function getModifiers(isMethod: boolean, modifiers?: TypeScript.ISyntaxList): IModifiers {
-    var modifierStrings = modifiers.toArray().map((x) => x.firstToken().text());
+function getModifiers(isMethod: boolean, modifiers?: TypeScript.ISyntaxToken[]): IModifiers {
+    var modifierStrings = modifiers.map((x) => {
+        return x.text();
+    });
+
     return {
         isMethod: isMethod,
         isPrivate: modifierStrings.indexOf("private") !== -1,
@@ -76,12 +79,12 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
         super.visitMemberVariableDeclaration(node);
     }
 
-    private checkAndSetModifiers(node: TypeScript.SyntaxNode, current: IModifiers): void {
+    private checkAndSetModifiers(node: TypeScript.ISyntaxElement, current: IModifiers): void {
         if (!this.canAppearAfter(this.previous, current)) {
-            var position = this.position() + node.leadingTriviaWidth();
+            var position = this.getPosition() + TypeScript.leadingTriviaWidth(node);
             var message = "Declaration of " + toString(current) +
                 " not allowed to appear after declaration of " + toString(this.previous);
-            this.addFailure(this.createFailure(position, node.width(), message));
+            this.addFailure(this.createFailure(position, TypeScript.width(node), message));
         }
         this.previous = current;
     }

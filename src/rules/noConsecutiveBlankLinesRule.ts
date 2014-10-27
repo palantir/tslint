@@ -29,10 +29,10 @@ class BlankLinesWalker extends Lint.RuleWalker {
     private newLinesInARowSeenSoFar = 1;
 
     public visitToken(token: TypeScript.ISyntaxToken): void {
-        this.findConsecutiveBlankLinesFromTriva(token.leadingTrivia().toArray(), this.position());
+        this.findConsecutiveBlankLinesFromTriva(token.leadingTrivia().toArray(), this.getPosition());
         this.newLinesInARowSeenSoFar = 0;
         this.findConsecutiveBlankLinesFromTriva(token.trailingTrivia().toArray(),
-            this.position() + token.leadingTriviaWidth() + token.width());
+            this.getPosition() + TypeScript.leadingTriviaWidth(token) + TypeScript.width(token));
 
         super.visitToken(token);
     }

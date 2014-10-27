@@ -84,7 +84,18 @@ module.exports = function(grunt) {
           'src/rules/curlyRule.ts',
           'src/rules/eoflineRule.ts',
           'src/rules/forinRule.ts',
-          '!src/rules/indentRule.ts'
+          '!src/rules/indentRule.ts',
+          'src/rules/interfaceNameRule.ts',
+          'src/rules/jsdocFormatRule.ts',
+          'src/rules/labelPositionRule.ts',
+          'src/rules/labelUndefinedRule.ts',
+          'src/rules/maxLineLengthRule.ts',
+          'src/rules/memberOrderingRule.ts',
+          'src/rules/noAnyRule.ts',
+          'src/rules/noArgRule.ts',
+          'src/rules/noBitwiseRule.ts',
+          'src/rules/noConsecutiveBlankLinesRule.ts',
+          'src/rules/noConsoleRule.ts'
         ],
         outDir: 'build/rules/'
       },
@@ -110,7 +121,18 @@ module.exports = function(grunt) {
           'test/rules/curlyRuleTests.ts',
           'test/rules/eoflineRuleTests.ts',
           'test/rules/forinRuleTests.ts',
-          '!test/rules/indentRuleTests.ts'
+          '!test/rules/indentRuleTests.ts',
+          'test/rules/interfaceNameRuleTests.ts',
+          'test/rules/jsdocFormatRuleTests.ts',
+          'test/rules/labelPositionRuleTests.ts',
+          'test/rules/labelUndefinedRuleTests.ts',
+          'test/rules/maxLineLengthRuleTests.ts',
+          'test/rules/memberOrderingRuleTests.ts',
+          'test/rules/noAnyRuleTests.ts',
+          'test/rules/noArgRuleTests.ts',
+          'test/rules/noBitwiseRuleTests.ts',
+          'test/rules/noConsecutiveBlankLinesRuleTests.ts',
+          'test/rules/noConsoleRuleTests.ts'
         ],
         out: 'build/tslint-tests.js'
       }

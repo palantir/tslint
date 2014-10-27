@@ -38,7 +38,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         var errorString = Rule.FAILURE_STRING + lineLimit;
         var disabledIntervals = this.getOptions().disabledIntervals;
 
-        var source = syntaxTree.sourceUnit().fullText();
+        var source = TypeScript.fullText(syntaxTree.sourceUnit());
 
         for (var i = 0; i < lineStarts.length - 1; ++i) {
             var from = lineStarts[i], to = lineStarts[i + 1];

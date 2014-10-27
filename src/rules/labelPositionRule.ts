@@ -28,8 +28,8 @@ class LabelPosWalker extends Lint.RuleWalker {
     private isValidLabel: boolean;
 
     public visitLabeledStatement(node: TypeScript.LabeledStatementSyntax): void {
-        var width = node.identifier.width();
-        var position = this.position() + node.leadingTriviaWidth();
+        var width = TypeScript.width(node.identifier);
+        var position = this.getPosition() + TypeScript.leadingTriviaWidth(node);
 
         // set the validity flag to false, visit the labeled statement,
         // and check whether the flag is still set to false.
