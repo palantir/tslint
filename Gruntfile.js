@@ -108,7 +108,14 @@ module.exports = function(grunt) {
           'src/rules/noTrailingCommaRule.ts',
           'src/rules/noTrailingWhitespaceRule.ts',
           'src/rules/noUnreachableRule.ts',
-          'src/rules/noUnusedExpressionRule.ts'
+          'src/rules/noUnusedExpressionRule.ts',
+          
+          'src/rules/radixRule.ts',
+//          'src/rules/semicolonRule.ts',
+          'src/rules/tripleEqualsRule.ts',
+          'src/rules/typedefRule.ts',
+          'src/rules/useStrictRule.ts',
+          'src/rules/variableNameRule.ts'
         ],
         outDir: 'build/rules/'
       },
@@ -157,7 +164,14 @@ module.exports = function(grunt) {
           'test/rules/noSwitchCaseFallThroughRuleTests.ts',
           'test/rules/noTrailingCommaRuleTests.ts',
           'test/rules/noUnreachableRuleTests.ts',
-          'test/rules/noUnusedExpressionRuleTests.ts'
+          'test/rules/noUnusedExpressionRuleTests.ts',
+          
+          'test/rules/radixRuleTests.ts',
+//          'test/rules/semicolonRuleTests.ts',
+          'test/rules/tripleEqualsRuleTests.ts',
+          'test/rules/typedefRuleTests.ts',
+          'test/rules/useStrictRuleTests.ts',
+          'test/rules/variableNameRuleTests.ts'
         ],
         out: 'build/tslint-tests.js'
       }
