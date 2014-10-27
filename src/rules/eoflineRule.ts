@@ -47,7 +47,7 @@ class EofWalker extends Lint.StateAwareRuleWalker {
             }
 
             if (!endsWithNewLine) {
-                this.addFailure(this.createFailure(this.position(), 1, Rule.FAILURE_STRING));
+                this.addFailure(this.createFailure(this.getPosition(), 1, Rule.FAILURE_STRING));
             }
         }
     }
