@@ -50,7 +50,7 @@ module.exports = function(grunt) {
           declaration: true,
           module: 'commonjs'
         },
-        src: ['src/tslint.ts'],
+        src: ['src/tslint.ts', 'src/tslint-cli.ts'],
         out: 'lib/tslint.js'
       },
 
