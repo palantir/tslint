@@ -14,8 +14,8 @@
  * limitations under the License.
 */
 
-/// <reference path='../lib/typescriptServices.d.ts'/>
 /// <reference path='../typings/node.d.ts'/>
+/// <reference path='../typings/typescriptServices.d.ts'/>
 
 /// <reference path='ruleLoader.ts'/>
 /// <reference path='configuration.ts'/>

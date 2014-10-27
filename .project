@@ -5,17 +5,32 @@
 	<projects>
 	</projects>
 	<buildSpec>
+		<buildCommand>
+			<name>com.palantir.typescript.typeScriptBuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
 	</buildSpec>
 	<natures>
+		<nature>com.palantir.typescript.typeScriptNature</nature>
 	</natures>
 	<filteredResources>
 		<filter>
-			<id>1386959768651</id>
+			<id>1414432614134</id>
 			<name></name>
 			<type>22</type>
 			<matcher>
 				<id>org.eclipse.ui.ide.multiFilter</id>
 				<arguments>1.0-name-matches-false-false-tslint.d.ts</arguments>
+			</matcher>
+		</filter>
+		<filter>
+			<id>1414431975439</id>
+			<name>test</name>
+			<type>10</type>
+			<matcher>
+				<id>org.eclipse.ui.ide.multiFilter</id>
+				<arguments>1.0-name-matches-true-false-files</arguments>
 			</matcher>
 		</filter>
 	</filteredResources>
