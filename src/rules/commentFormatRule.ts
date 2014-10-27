@@ -30,8 +30,9 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class CommentWalker extends Lint.RuleWalker {
     public visitToken(token: TypeScript.ISyntaxToken): void {
-        this.findFailuresForTrivia(token.leadingTrivia().toArray(), this.position());
-        this.findFailuresForTrivia(token.trailingTrivia().toArray(), this.position() + token.leadingTriviaWidth() + token.width());
+        var tokenWidth = token.text().length;
+        this.findFailuresForTrivia(token.leadingTrivia().toArray(), this.getPosition());
+        this.findFailuresForTrivia(token.trailingTrivia().toArray(), this.getPosition() + token.leadingTriviaWidth() + tokenWidth);
 
         super.visitToken(token);
     }

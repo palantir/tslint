@@ -78,7 +78,9 @@ module.exports = function(grunt) {
         },
         src: [
           'lib/tslint.d.ts',
-          'src/rules/banRule.ts'
+          'src/rules/banRule.ts',
+          'src/rules/classNameRule.ts',
+          'src/rules/commentFormatRule.ts'
         ],
         outDir: 'build/rules/'
       },
@@ -98,7 +100,9 @@ module.exports = function(grunt) {
           'test/**/*.ts',
           '!test/files/**/*.ts',
           '!test/rules/*.ts',
-          'test/rules/banRuleTests.ts'
+          'test/rules/banRuleTests.ts',
+          'test/rules/classNameRuleTests.ts',
+          'test/rules/commentFormatRuleTests.ts'
         ],
         out: 'build/tslint-tests.js'
       }

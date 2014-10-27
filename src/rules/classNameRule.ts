@@ -29,7 +29,7 @@ class NameWalker extends Lint.RuleWalker {
         var className = node.identifier.text();
         if (!this.isPascalCased(className)) {
             var position = this.positionAfter(node.modifiers, node.classKeyword);
-            this.addFailureAt(position, node.identifier.width());
+            this.addFailureAt(position, node.identifier.text().length);
         }
 
         super.visitClassDeclaration(node);
@@ -39,7 +39,7 @@ class NameWalker extends Lint.RuleWalker {
         var interfaceName = node.identifier.text();
         if (!this.isPascalCased(interfaceName)) {
             var position = this.positionAfter(node.modifiers, node.interfaceKeyword);
-            this.addFailureAt(position, node.identifier.width());
+            this.addFailureAt(position, node.identifier.text().length);
         }
 
         super.visitInterfaceDeclaration(node);
