@@ -16,12 +16,12 @@
 
 module Lint {
     export function getSyntaxTree(fileName: string, source: string): TypeScript.SyntaxTree {
-        var isDTSFile = TypeScript.isDTSFile(fileName);
-        var scriptSnapshot = TypeScript.ScriptSnapshot.fromString(source);
         var compilerOptions = createCompilerOptions();
+        var isDTSFile = TypeScript.isDTSFile(fileName);
+        var simpleText = TypeScript.SimpleText.fromString(source);
         var sourceFile = ts.createSourceFile(fileName, source, compilerOptions.target, "0");
 
-        return sourceFile.getSyntaxTree();
+        return TypeScript.Parser.parse(fileName, simpleText, compilerOptions.target, isDTSFile);
     }
 
     export function createCompilerOptions(): ts.CompilerOptions {
