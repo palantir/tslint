@@ -27,7 +27,7 @@ describe("External Formatter", () => {
         formatter = new Formatter();
     });
     it("formats failures", () => {
-        var maxPosition = syntaxTree.sourceUnit().fullWidth();
+        var maxPosition =  TypeScript.fullWidth(syntaxTree.sourceUnit());
 
         var failures = [
             new Lint.RuleFailure(syntaxTree, 0, 1, "first failure", "first-name"),
