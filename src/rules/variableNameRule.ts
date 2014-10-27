@@ -30,19 +30,19 @@ class VariableNameWalker extends Lint.RuleWalker {
     public visitVariableDeclarator(node: TypeScript.VariableDeclaratorSyntax): void {
         var propertyName = node.propertyName;
         var variableName = propertyName.text();
-        var position = this.position() + propertyName.leadingTriviaWidth();
+        var position = this.getPosition() + propertyName.leadingTriviaWidth();
 
         if (!this.isCamelCase(variableName) && !this.isUpperCase(variableName)) {
-            this.addFailure(this.createFailure(position, propertyName.width(), Rule.FAILURE_STRING));
+            this.addFailure(this.createFailure(position, TypeScript.width(propertyName), Rule.FAILURE_STRING));
         }
 
         super.visitVariableDeclarator(node);
     }
 
     public visitVariableStatement(node: TypeScript.VariableStatementSyntax): void {
-        for (var i = 0; i < node.modifiers.childCount(); i++) {
+        for (var i = 0; i < TypeScript.childCount(node.modifiers); i++) {
             // skip declaration statements
-            if (node.modifiers.childAt(i).kind() === TypeScript.SyntaxKind.DeclareKeyword) {
+            if (TypeScript.childAt(node.modifiers, i).kind() === TypeScript.SyntaxKind.DeclareKeyword) {
                 return;
             }
         }

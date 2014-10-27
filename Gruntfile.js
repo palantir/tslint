@@ -104,7 +104,10 @@ module.exports = function(grunt) {
           'src/rules/noEmptyRule.ts',
           'src/rules/noEvalRule.ts',
           'src/rules/noStringLiteralRule.ts',
-          'src/rules/noSwitchCaseFallThroughRule.ts'
+          'src/rules/noSwitchCaseFallThroughRule.ts',
+          
+          'src/rules/useStrictRule.ts',
+          'src/rules/variableNameRule.ts'
         ],
         outDir: 'build/rules/'
       },
@@ -150,7 +153,10 @@ module.exports = function(grunt) {
           'test/rules/noEmptyRuleTests.ts',
           'test/rules/noEvalRuleTests.ts',
           'test/rules/noStringLiteralRuleTests.ts',
-          'test/rules/noSwitchCaseFallThroughRuleTests.ts'
+          'test/rules/noSwitchCaseFallThroughRuleTests.ts',
+          
+          'test/rules/useStrictRuleTests.ts',
+          'test/rules/variableNameRuleTests.ts'
         ],
         out: 'build/tslint-tests.js'
       }

@@ -38,7 +38,7 @@ class UseStrictWalker extends Lint.ScopeAwareRuleWalker<{}> {
         // current depth is 2: global scope and the scope created by this module
         // but skip declare module statements
         if (this.getCurrentDepth() === 2 &&
-            !(node.modifiers.childCount() > 0 && node.modifiers.childAt(0).kind() === TypeScript.SyntaxKind.DeclareKeyword)) {
+            !(TypeScript.childCount(node.modifiers) > 0 && TypeScript.childAt(node.modifiers, 0).kind() === TypeScript.SyntaxKind.DeclareKeyword)) {
             if (this.hasOption(UseStrictWalker.OPTION_CHECK_MODULE)) {
                 this.checkUseStrict(node, node.moduleElements);
             }
@@ -58,19 +58,19 @@ class UseStrictWalker extends Lint.ScopeAwareRuleWalker<{}> {
         super.visitFunctionDeclaration(node);
     }
 
-    private checkUseStrict(node: TypeScript.SyntaxNode, syntaxList: TypeScript.ISyntaxList) {
+    private checkUseStrict(node: TypeScript.ISyntaxNode, syntaxList: TypeScript.ISyntaxElement[]) {
         var isFailure = true;
 
-        if (syntaxList.childCount() > 0) {
-            var firstStatement = syntaxList.childAt(0);
+        if (syntaxList.length > 0) {
+            var firstStatement = syntaxList[0];
 
-            if (firstStatement.kind() === TypeScript.SyntaxKind.ExpressionStatement && firstStatement.childCount() === 2) {
-                var firstChild = firstStatement.childAt(0);
-                var secondChild = firstStatement.childAt(1);
+            if (firstStatement.kind() === TypeScript.SyntaxKind.ExpressionStatement && TypeScript.childCount(firstStatement) === 2) {
+                var firstChild = TypeScript.childAt(firstStatement, 0);
+                var secondChild = TypeScript.childAt(firstStatement, 1);
 
-                if (firstChild.isToken()) {
-                    var firstToken = firstChild.firstToken();
-                    if (firstToken.valueText() === UseStrictWalker.USE_STRICT_STRING) {
+                if (TypeScript.isToken(firstChild)) {
+                    var firstToken = TypeScript.firstToken(firstChild);
+                    if (TypeScript.tokenValueText(firstToken) === UseStrictWalker.USE_STRICT_STRING) {
                         if (secondChild.kind() === TypeScript.SyntaxKind.SemicolonToken) {
                             isFailure = false;
                         }
@@ -84,8 +84,8 @@ class UseStrictWalker extends Lint.ScopeAwareRuleWalker<{}> {
         }
     }
 
-    private addUseStrictFailure(node: TypeScript.SyntaxNode) {
-        var position = this.position() + node.leadingTriviaWidth();
-        this.addFailure(this.createFailure(position, node.firstToken().width(), Rule.FAILURE_STRING));
+    private addUseStrictFailure(node: TypeScript.ISyntaxNode) {
+        var position = this.getPosition() + TypeScript.leadingTriviaWidth(node);
+        this.addFailure(this.createFailure(position, TypeScript.width(TypeScript.firstToken(node)), Rule.FAILURE_STRING));
     }
 }
