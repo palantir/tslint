@@ -32,7 +32,7 @@ class NoStringLiteralWalker extends Lint.RuleWalker {
 
     private handleElementAccessExpression(node: TypeScript.ElementAccessExpressionSyntax) {
         var argument = node.argumentExpression;
-        var id = argument.fullText();
+        var id = TypeScript.fullText(argument);
 
         // the argument expression should be a string of length at least 2 (due to quote characters)
         if (argument.kind() !== TypeScript.SyntaxKind.StringLiteral || id.length < 2) {
@@ -41,12 +41,12 @@ class NoStringLiteralWalker extends Lint.RuleWalker {
 
         var unquotedString = id.substring(1, id.length - 1);
         var simpleText = TypeScript.SimpleText.fromString(unquotedString);
-        var isValidIdentifier = TypeScript.Scanner.isValidIdentifier(simpleText, TypeScript.LanguageVersion.EcmaScript5);
+        var isValidIdentifier = TypeScript.Scanner.isValidIdentifier(simpleText, ts.ScriptTarget.ES5);
 
         // only create a failure if the identifier is valid, in which case there's no need to use string literals
         if (isValidIdentifier) {
             var position = this.positionAfter(node.expression, node.openBracketToken);
-            this.addFailure(this.createFailure(position, argument.width(), Rule.FAILURE_STRING));
+            this.addFailure(this.createFailure(position, TypeScript.width(argument), Rule.FAILURE_STRING));
         }
     }
 }

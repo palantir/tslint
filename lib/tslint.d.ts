@@ -124,6 +124,9 @@ declare module Lint {
         };
     }
 }
+declare module TypeScript {
+    function leadingTrivia(element: ISyntaxElement, text?: ISimpleText): ISyntaxTriviaList;
+}
 declare module Lint.Formatters {
     class AbstractFormatter implements IFormatter {
         format(failures: RuleFailure[]): string;

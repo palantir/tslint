@@ -28,24 +28,26 @@ export class NoSwitchCaseFallThroughWalker extends Lint.RuleWalker {
 
     public visitSwitchStatement(node: TypeScript.SwitchStatementSyntax) {
         var isFallingThrough = false;
-        // get position for first case statement
-        var position = this.positionAfter(node.switchKeyword, node.openParenToken, node.expression,
-            node.closeParenToken, node.openBraceToken);
+        // get the position for the first case statement
+        var position = this.positionAfter(node.switchKeyword,
+                                          node.openParenToken, node.expression,
+                                          node.closeParenToken, node.openBraceToken);
+
         var switchClauses = node.switchClauses;
-        for (var i = 0; i < switchClauses.childCount(); i++) {
-            var child = switchClauses.childAt(i);
+        for (var i = 0; i < switchClauses.length; i++) {
+            var child = switchClauses[i];
             var kind = child.kind();
-            var fullWidth = child.fullWidth();
+            var fullWidth = TypeScript.fullWidth(child);
             if (kind === TypeScript.SyntaxKind.CaseSwitchClause) {
                 position += fullWidth;
                 var switchClause = <TypeScript.CaseSwitchClauseSyntax>child;
                 isFallingThrough = this.fallsThrough(switchClause.statements);
                 // no break statements and no statements means the fallthrough is expected.
                 // last item doesn't need a break
-                if (isFallingThrough && switchClause.statements.childCount() > 0 && ((switchClauses.childCount() - 1) > i)) {
+                if (isFallingThrough && switchClause.statements.length > 0 && ((switchClauses.length - 1) > i)) {
                     // remove trailing trivia (new line)
-                    if (!this.fallThroughAllowed(switchClauses.childAt(i + 1))) {
-                        this.addFailure(this.createFailure(position - child.trailingTriviaWidth(), 1,
+                    if (!this.fallThroughAllowed(switchClauses[i + 1])) {
+                        this.addFailure(this.createFailure(position - TypeScript.trailingTriviaWidth(child), 1,
                             Rule.FAILURE_STRING_PART + "'case'"));
                     }
                 }
@@ -53,7 +55,7 @@ export class NoSwitchCaseFallThroughWalker extends Lint.RuleWalker {
                 // case statement falling through a default
                 if (isFallingThrough && !this.fallThroughAllowed(child)) {
                     // remove trailing trivia (new line)
-                    this.addFailure(this.createFailure(position - child.trailingTriviaWidth(), 1, Rule.FAILURE_STRING_PART + "'default'"));
+                    this.addFailure(this.createFailure(position - TypeScript.trailingTriviaWidth(child), 1, Rule.FAILURE_STRING_PART + "'default'"));
                 }
                 // add the width after setting the failure, the error isn't at the end of the default but right before it.
                 position += fullWidth;
@@ -63,8 +65,9 @@ export class NoSwitchCaseFallThroughWalker extends Lint.RuleWalker {
     }
 
     private fallThroughAllowed(nextCaseOrDefaultStatement: TypeScript.ISyntaxNodeOrToken): boolean {
-        var childCount = nextCaseOrDefaultStatement.childCount();
-        var triviaList = childCount > 0 ? nextCaseOrDefaultStatement.childAt(0).leadingTrivia() : null;
+        var childCount = TypeScript.childCount(nextCaseOrDefaultStatement);
+        var firstChild = TypeScript.childAt(nextCaseOrDefaultStatement, 0);
+        var triviaList = childCount > 0 ? TypeScript.leadingTrivia(firstChild) : null;
         if (triviaList) {
             // This list also contains elements for spaces, comments and newlines
             for (var i = 0; i < triviaList.count(); i++) {
@@ -79,9 +82,9 @@ export class NoSwitchCaseFallThroughWalker extends Lint.RuleWalker {
         return false;
     }
 
-    private fallsThrough(list: TypeScript.ISyntaxList) {
-        for (var i = 0; i < list.childCount(); i++) {
-            var nodeKind = list.childAt(i).kind();
+    private fallsThrough(list: TypeScript.ISyntaxElement[]) {
+        for (var i = 0; i < list.length; i++) {
+            var nodeKind = list[i].kind();
             if (nodeKind === TypeScript.SyntaxKind.BreakStatement ||
                 nodeKind === TypeScript.SyntaxKind.ThrowStatement ||
                 nodeKind === TypeScript.SyntaxKind.ReturnStatement) {

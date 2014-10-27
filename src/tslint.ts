@@ -24,6 +24,7 @@
 
 /// <reference path='language/languageServiceHost.ts'/>
 /// <reference path='language/utils.ts'/>
+/// <reference path='language/typescriptUtils.ts'/>
 /// <reference path='language/formatter/abstractFormatter.ts'/>
 /// <reference path='language/rule/abstractRule.ts'/>
 /// <reference path='language/walker/ruleWalker.ts'/>
