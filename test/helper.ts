@@ -81,8 +81,6 @@ module Lint.Test {
             }
         }
 
-        var line = needle.getStartPosition().getLineAndCharacter().line() + 1,
-            character =  needle.getStartPosition().getLineAndCharacter().character() + 1;
-        assert(false, "expected failure not found on [" + line + ", " + character + "]");
+        assert(false, "expected " + JSON.stringify(needle.toJson(), null, 2) + " within " + JSON.stringify(haystack, null, 2));
     }
 }

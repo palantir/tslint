@@ -79,11 +79,11 @@ class CurlyWalker extends Lint.RuleWalker {
     }
 
     private isStatementBraced(node: TypeScript.IStatementSyntax): boolean {
-        var childCount = node.childCount();
+        var childCount = TypeScript.childCount(node);
         if (childCount === 3) {
-            if (node.childAt(0).kind() === TypeScript.SyntaxKind.FirstPunctuation &&
-                node.childAt(1).kind() === TypeScript.SyntaxKind.List &&
-                node.childAt(2).kind() === TypeScript.SyntaxKind.CloseBraceToken) {
+            if (TypeScript.childAt(node, 0).kind() === TypeScript.SyntaxKind.FirstPunctuation &&
+                TypeScript.childAt(node, 1).kind() === TypeScript.SyntaxKind.List &&
+                TypeScript.childAt(node, 2).kind() === TypeScript.SyntaxKind.CloseBraceToken) {
 
                 return true;
             }
@@ -93,9 +93,9 @@ class CurlyWalker extends Lint.RuleWalker {
     }
 
     private addFailureForNode(node: TypeScript.ISyntaxElement, failure: string) {
-        var leadingWidth = node.leadingTriviaWidth();
-        var start = this.position() + leadingWidth;
-        var end = node.width();
+        var leadingWidth = TypeScript.leadingTriviaWidth(node);
+        var start = this.getPosition() + leadingWidth;
+        var end = TypeScript.width(node);
 
         this.addFailure(this.createFailure(start, end, failure));
     }

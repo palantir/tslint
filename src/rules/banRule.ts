@@ -55,7 +55,7 @@ export class BanFunctionWalker extends Lint.RuleWalker {
                     if (firstText === bannedFunction[0] && thirdText === bannedFunction[1]) {
                         var position = this.getPosition() + TypeScript.leadingTriviaWidth(node);
                         var failure = this.createFailure(position,
-                                                         TypeScript.fullWidth(expression),
+                                                         TypeScript.width(expression),
                                                          Rule.FAILURE_STRING_PART + firstText + "." + thirdText)
                         this.addFailure(failure);
                     }
