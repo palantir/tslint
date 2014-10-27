@@ -1,4 +1,5 @@
-/// <reference path="typescript.d.ts" />
+/// <reference path="typescriptServices.d.ts" />
+/// <reference path="../typings/node.d.ts" />
 declare module Lint {
     interface IOptions {
         ruleArguments?: any[];
@@ -111,6 +112,8 @@ declare module Lint {
         private source;
         constructor(syntaxTree: TypeScript.SyntaxTree, source: string);
         getCompilationSettings(): ts.CompilerOptions;
+        getCurrentDirectory(): string;
+        getDefaultLibFilename(): string;
         getScriptFileNames(): string[];
         getScriptVersion(fileName: string): string;
         getScriptIsOpen(fileName: string): boolean;

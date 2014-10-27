@@ -31,6 +31,14 @@ module Lint {
             return Lint.createCompilerOptions();
         }
 
+        public getCurrentDirectory(): string {
+            return "";
+        }
+
+        public getDefaultLibFilename(): string {
+            return "";
+        }
+
         public getScriptFileNames() {
             return [ this.syntaxTree.fileName() ];
         }

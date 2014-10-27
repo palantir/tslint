@@ -13,12 +13,19 @@ module.exports = function(grunt) {
       typescript: ['lib/typescript.*']
     },
 
+    concat: {
+      test: {
+        src: ['lib/typescriptServices.js', 'build/tslint-tests.js'],
+        dest: 'build/tslint-tests2.js'
+      }
+    },
+
     mochaTest: {
       test: {
         options: {
           reporter: 'spec'
         },
-        src: ['build/*-tests.js']
+        src: ['build/tslint-tests2.js']
       }
     },
 
@@ -106,8 +113,6 @@ module.exports = function(grunt) {
           "<%= ts_compilerDirectory %>/binder.ts",
           "<%= ts_compilerDirectory %>/checker.ts",
           "<%= ts_compilerDirectory %>/emitter.ts",
-          "<%= ts_compilerDirectory %>/commandLineParser.ts",
-          "<%= ts_compilerDirectory %>/tsc.ts",
           "<%= ts_compilerDirectory %>/diagnosticInformationMap.generated.ts",
 
           "<%= ts_servicesDirectory %>/breakpoints.ts",
@@ -122,6 +127,7 @@ module.exports = function(grunt) {
 
   // load NPM tasks
   grunt.loadNpmTasks('grunt-contrib-clean');
+  grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-mocha-test');
   grunt.loadNpmTasks('grunt-tslint');
   grunt.loadNpmTasks('grunt-ts');
@@ -130,7 +136,7 @@ module.exports = function(grunt) {
   grunt.registerTask('typescript', ['clean:typescript', 'ts:typescript']);
   grunt.registerTask('core', ['clean:core', 'ts:core', 'ts:core_rules', 'ts:core_formatters']);
   grunt.registerTask('bin', ['clean:bin', 'ts:bin', 'tslint:src']);
-  grunt.registerTask('test', ['clean:test', 'ts:test', 'tslint:test', 'mochaTest']);
+  grunt.registerTask('test', ['clean:test', 'ts:test', 'tslint:test', 'concat:test', 'mochaTest']);
 
   // create default task
   grunt.registerTask('default', ['typescript', 'core', 'bin', 'test']);
