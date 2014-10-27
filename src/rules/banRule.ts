@@ -41,18 +41,23 @@ export class BanFunctionWalker extends Lint.RuleWalker {
         var expression = node.expression;
 
         if (expression.kind() === TypeScript.SyntaxKind.MemberAccessExpression &&
-            expression.childCount() >= 3) {
+            TypeScript.childCount(expression) >= 3) {
 
-            var firstToken = expression.firstToken();
-            var secondToken = expression.childAt(1);
-            var thirdToken = expression.childAt(2);
+            var firstToken = TypeScript.firstToken(expression);
+            var secondToken = TypeScript.childAt(expression, 1);
+            var thirdToken = TypeScript.childAt(expression, 2);
+
+            var firstText = firstToken.text();
+            var thirdText = TypeScript.fullText(thirdToken);
 
             if (secondToken.kind() === TypeScript.SyntaxKind.DotToken) {
                 this.bannedFunctions.forEach((bannedFunction) => {
-                    if (firstToken.text() === bannedFunction[0] && thirdToken.fullText() === bannedFunction[1]) {
-                        var position = this.position() + node.leadingTriviaWidth();
-                        this.addFailure(this.createFailure(position, expression.width(), Rule.FAILURE_STRING_PART +
-                            firstToken.text() + "." + thirdToken.fullText()));
+                    if (firstText === bannedFunction[0] && thirdText === bannedFunction[1]) {
+                        var position = this.getPosition() + TypeScript.leadingTriviaWidth(node);
+                        var failure = this.createFailure(position,
+                                                         TypeScript.fullWidth(expression),
+                                                         Rule.FAILURE_STRING_PART + firstText + "." + thirdText)
+                        this.addFailure(failure);
                     }
                 });
             }

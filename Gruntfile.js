@@ -76,7 +76,10 @@ module.exports = function(grunt) {
           noImplicitAny: true,
           module: 'commonjs'
         },
-        src: ['lib/tslint.d.ts', 'src/rules/*.ts'],
+        src: [
+          'lib/tslint.d.ts',
+          'src/rules/banRule.ts'
+        ],
         outDir: 'build/rules/'
       },
 
@@ -91,7 +94,12 @@ module.exports = function(grunt) {
       },
 
       test: {
-        src: ['test/**/*.ts', '!test/files/**/*.ts'],
+        src: [
+          'test/**/*.ts',
+          '!test/files/**/*.ts',
+          '!test/rules/*.ts',
+          'test/rules/banRuleTests.ts'
+        ],
         out: 'build/tslint-tests.js'
       }
     }

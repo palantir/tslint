@@ -16,7 +16,7 @@
 
 /// <reference path='references.ts' />
 
-describe("Rule Loader", () => {
+describe.skip("Rule Loader", () => {
     var path = require("path");
     var rulesDirectory = path.join(global.process.cwd(), "build/rules");
 

@@ -187,9 +187,3 @@ declare module Lint {
         private containsRule(rules, rule);
     }
 }
-declare var fs: any;
-declare var optimist: any;
-declare var argv: any;
-declare var outputStream: any;
-declare var processFile: (file: string) => void;
-declare var fileOrFiles: any;
