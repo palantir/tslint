@@ -106,6 +106,10 @@ module.exports = function(grunt) {
           'src/rules/noStringLiteralRule.ts',
           'src/rules/noSwitchCaseFallThroughRule.ts',
           
+          'src/rules/radixRule.ts',
+//          'src/rules/semicolonRule.ts',
+          'src/rules/tripleEqualsRule.ts',
+          'src/rules/typedefRule.ts',
           'src/rules/useStrictRule.ts',
           'src/rules/variableNameRule.ts'
         ],
@@ -155,6 +159,10 @@ module.exports = function(grunt) {
           'test/rules/noStringLiteralRuleTests.ts',
           'test/rules/noSwitchCaseFallThroughRuleTests.ts',
           
+          'test/rules/radixRuleTests.ts',
+//          'test/rules/semicolonRuleTests.ts',
+          'test/rules/tripleEqualsRuleTests.ts',
+          'test/rules/typedefRuleTests.ts',
           'test/rules/useStrictRuleTests.ts',
           'test/rules/variableNameRuleTests.ts'
         ],

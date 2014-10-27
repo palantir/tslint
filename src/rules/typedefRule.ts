@@ -50,8 +50,8 @@ class TypedefWalker extends Lint.RuleWalker {
     }
 
     public visitVariableDeclaration(node: TypeScript.VariableDeclarationSyntax): void {
-        for (var i = 0, n = node.variableDeclarators.nonSeparatorCount(); i < n; i++) {
-            var item = <TypeScript.VariableDeclaratorSyntax>node.variableDeclarators.nonSeparatorAt(i);
+        for (var i = 0, n = node.variableDeclarators.length; i < n; i++) {
+            var item = <TypeScript.VariableDeclaratorSyntax>node.variableDeclarators[i];
             this.checkTypeAnnotation("variableDeclarator", node, item.typeAnnotation, item.propertyName);
         }
 
@@ -67,7 +67,7 @@ class TypedefWalker extends Lint.RuleWalker {
     }
 
     public checkTypeAnnotation(option: string,
-                               node: TypeScript.SyntaxNode,
+                               node: TypeScript.ISyntaxNode,
                                typeAnnotation: TypeScript.TypeAnnotationSyntax,
                                name?: TypeScript.ISyntaxToken): void {
 
