@@ -28,10 +28,10 @@ class NoTrailingCommaWalker extends Lint.RuleWalker {
     public visitObjectLiteralExpression(node: TypeScript.ObjectLiteralExpressionSyntax): void {
         var propertyAssignments = node.propertyAssignments;
         var lastPosition = this.positionAfter(node.openBraceToken, propertyAssignments);
-        lastPosition -= propertyAssignments.trailingTriviaWidth() + 1;
+        lastPosition -= TypeScript.trailingTriviaWidth(propertyAssignments) + 1;
 
-        if (propertyAssignments.separatorCount() === propertyAssignments.nonSeparatorCount()
-            && propertyAssignments.nonSeparatorCount() > 0) {
+        if (propertyAssignments.separatorCount() === propertyAssignments.length
+            && propertyAssignments.length > 0) {
 
             this.addFailure(this.createFailure(lastPosition, 1, Rule.FAILURE_STRING));
         }

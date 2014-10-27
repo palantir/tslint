@@ -29,8 +29,8 @@ class NoTrailingWhitespaceWalker extends Lint.RuleWalker {
     public visitToken(token: TypeScript.ISyntaxToken) {
         var leadingTrivia = token.leadingTrivia();
         var trailingTrivia = token.trailingTrivia();
-        var position = this.position();
-        var trailingPosition = position + leadingTrivia.fullWidth() + token.width();
+        var position = this.getPosition();
+        var trailingPosition = position + token.leadingTriviaWidth() + TypeScript.width(token);
 
         this.checkForTrailingWhitespace(leadingTrivia, position);
         this.checkForTrailingWhitespace(trailingTrivia, trailingPosition);

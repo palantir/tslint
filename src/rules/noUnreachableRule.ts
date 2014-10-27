@@ -41,8 +41,8 @@ class UnreachableWalker extends Lint.RuleWalker {
 
         if (this.hasReturned) {
             this.hasReturned = false;
-            var position = this.position() + node.leadingTriviaWidth();
-            this.addFailure(this.createFailure(position, node.width(), Rule.FAILURE_STRING));
+            var position = this.getPosition() + TypeScript.leadingTriviaWidth(node);
+            this.addFailure(this.createFailure(position, TypeScript.width(node), Rule.FAILURE_STRING));
         }
 
         super.visitNode(node);
