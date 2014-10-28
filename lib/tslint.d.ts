@@ -64,6 +64,7 @@ declare module Lint {
         getSyntaxTree(): TypeScript.SyntaxTree;
         getFailures(): RuleFailure[];
         getPosition(): number;
+        getLimit(): number;
         positionAfter(...elements: TypeScript.ISyntaxElement[]): number;
         getOptions(): any;
         hasOption(option: string): boolean;

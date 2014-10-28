@@ -20,24 +20,80 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "missing semicolon";
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        var ruleFailures: Lint.RuleFailure[] = [];
-        var diagnostics = syntaxTree.diagnostics();
+        return this.applyWithWalker(new SemicolonWalker(syntaxTree, this.getOptions()));
+    }
+}
 
-        var disabledIntervals = this.getOptions().disabledIntervals;
+class SemicolonWalker extends Lint.RuleWalker {
+    public visitVariableStatement(node: TypeScript.VariableStatementSyntax) {
+        var position = this.positionAfter(node.modifiers, node.variableDeclaration);
+        this.checkSemicolonAt(node.semicolonToken, position);
 
-        for (var i = 0; i < diagnostics.length; ++i) {
-            var diagnostic = diagnostics[i];
-            var diagnosticKey = diagnostic.diagnosticKey();
+        super.visitVariableStatement(node);
+    }
 
-            if (diagnosticKey === TypeScript.DiagnosticCode.Automatic_semicolon_insertion_not_allowed) {
-                var position = diagnostic.start();
-                var ruleFailure = new Lint.RuleFailure(syntaxTree, position, position, Rule.FAILURE_STRING, this.getOptions().ruleName);
-                if (!Lint.doesIntersect(ruleFailure, disabledIntervals)) {
-                    ruleFailures.push(ruleFailure);
-                }
-            }
+    public visitExpressionStatement(node: TypeScript.ExpressionStatementSyntax) {
+        var position = this.positionAfter(node.expression);
+        this.checkSemicolonAt(node.semicolonToken, position);
+
+        super.visitExpressionStatement(node);
+    }
+
+    public visitReturnStatement(node: TypeScript.ReturnStatementSyntax) {
+        var position = this.positionAfter(node.returnKeyword, node.expression);
+        this.checkSemicolonAt(node.semicolonToken, position);
+
+        super.visitReturnStatement(node);
+    }
+
+    public visitBreakStatement(node: TypeScript.BreakStatementSyntax) {
+        var position = this.positionAfter(node.breakKeyword, node.identifier);
+        this.checkSemicolonAt(node.semicolonToken, position);
+
+        super.visitBreakStatement(node);
+    }
+
+    public visitContinueStatement(node: TypeScript.ContinueStatementSyntax) {
+        var position = this.positionAfter(node.continueKeyword, node.identifier);
+        this.checkSemicolonAt(node.semicolonToken, position);
+
+        super.visitContinueStatement(node);
+    }
+
+    public visitThrowStatement(node: TypeScript.ThrowStatementSyntax) {
+        var position = this.positionAfter(node.throwKeyword, node.expression);
+        this.checkSemicolonAt(node.semicolonToken, position);
+
+        super.visitThrowStatement(node);
+    }
+
+    public visitDoStatement(node: TypeScript.DoStatementSyntax) {
+        var position = this.positionAfter(node.doKeyword,
+                                          node.statement,
+                                          node.whileKeyword,
+                                          node.openParenToken,
+                                          node.condition,
+                                          node.closeParenToken);
+        this.checkSemicolonAt(node.semicolonToken, position);
+
+        super.visitDoStatement(node);
+    }
+
+    public visitDebuggerStatement(node: TypeScript.DebuggerStatementSyntax) {
+        var position = this.positionAfter(node.debuggerKeyword);
+        this.checkSemicolonAt(node.semicolonToken, position);
+
+        super.visitDebuggerStatement(node);
+    }
+
+    private checkSemicolonAt(token: TypeScript.ISyntaxToken, position: number) {
+        // if there is a semi-colon token, just return
+        if (token != null) {
+            return;
         }
 
-        return ruleFailures;
+        // otherwise, add a failure at the given position
+        var adjustedPosition = (position <= this.getLimit()) ? position - 1 : position;
+        this.addFailure(this.createFailure(adjustedPosition, 0, Rule.FAILURE_STRING));
     }
 }

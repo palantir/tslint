@@ -51,6 +51,10 @@ module Lint {
             return this.position;
         }
 
+        public getLimit() {
+            return this.limit;
+        }
+
         public positionAfter(...elements: TypeScript.ISyntaxElement[]): number {
             var position = this.getPosition();
             elements.forEach((element) => {

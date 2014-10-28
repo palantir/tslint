@@ -96,8 +96,7 @@ module.exports = function(grunt) {
       test: {
         src: [
           'test/**/*.ts',
-          '!test/files/**/*.ts',
-          '!test/rules/semicolonRuleTests.ts',
+          '!test/files/**/*.ts'
         ],
         out: 'build/tslint-tests.js'
       }
