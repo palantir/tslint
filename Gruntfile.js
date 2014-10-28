@@ -78,8 +78,7 @@ module.exports = function(grunt) {
         },
         src: [
           'lib/tslint.d.ts',
-          'src/rules/*.ts',
-          '!src/rules/semicolonRule.ts'
+          'src/rules/*.ts'
         ],
         outDir: 'build/rules/'
       },
