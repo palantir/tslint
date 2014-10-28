@@ -54,8 +54,9 @@ export class NoSwitchCaseFallThroughWalker extends Lint.RuleWalker {
             } else {
                 // case statement falling through a default
                 if (isFallingThrough && !this.fallThroughAllowed(child)) {
+                    var failureString = Rule.FAILURE_STRING_PART + "'default'";
                     // remove trailing trivia (new line)
-                    this.addFailure(this.createFailure(position - TypeScript.trailingTriviaWidth(child), 1, Rule.FAILURE_STRING_PART + "'default'"));
+                    this.addFailure(this.createFailure(position - TypeScript.trailingTriviaWidth(child), 1, failureString));
                 }
                 // add the width after setting the failure, the error isn't at the end of the default but right before it.
                 position += fullWidth;

@@ -35,10 +35,13 @@ class UseStrictWalker extends Lint.ScopeAwareRuleWalker<{}> {
     }
 
     public visitModuleDeclaration(node: TypeScript.ModuleDeclarationSyntax): void {
+        var childCount = TypeScript.childCount(node.modifiers);
+
         // current depth is 2: global scope and the scope created by this module
         // but skip declare module statements
         if (this.getCurrentDepth() === 2 &&
-            !(TypeScript.childCount(node.modifiers) > 0 && TypeScript.childAt(node.modifiers, 0).kind() === TypeScript.SyntaxKind.DeclareKeyword)) {
+            !(childCount > 0 && TypeScript.childAt(node.modifiers, 0).kind() === TypeScript.SyntaxKind.DeclareKeyword)) {
+
             if (this.hasOption(UseStrictWalker.OPTION_CHECK_MODULE)) {
                 this.checkUseStrict(node, node.moduleElements);
             }

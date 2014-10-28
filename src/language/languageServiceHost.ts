@@ -65,7 +65,7 @@ module Lint {
                 isCancellationRequested() {
                     return false;
                 }
-            }
+            };
         }
     }
 }

@@ -27,7 +27,7 @@ module Lint {
     export function createCompilerOptions(): ts.CompilerOptions {
         return {
             target: ts.ScriptTarget.ES5
-        }
+        };
     }
 
     export function doesIntersect(failure: RuleFailure, disabledIntervals: Lint.IDisabledInterval[]) {

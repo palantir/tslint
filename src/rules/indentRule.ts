@@ -24,6 +24,6 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        /*  */
+        throw TypeScript.Errors.notYetImplemented();
     }
 }
