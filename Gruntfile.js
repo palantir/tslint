@@ -11,7 +11,7 @@ module.exports = function(grunt) {
     concat: {
       test: {
         src: ['lib/typescriptServices.js', 'build/tslint-tests.js'],
-        dest: 'build/tslint-tests2.js'
+        dest: 'build/tslint-tests.js'
       }
     },
 
@@ -20,7 +20,7 @@ module.exports = function(grunt) {
         options: {
           reporter: 'spec'
         },
-        src: ['build/tslint-tests2.js']
+        src: ['build/tslint-tests.js']
       }
     },
 

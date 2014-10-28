@@ -18,7 +18,7 @@
 
 var fs = require("fs");
 
-describe.skip("Enable and Disable Rules", () => {
+describe("Enable and Disable Rules", () => {
     var path = require("path");
 
     it("is enabled and disabled in all the right places", () => {

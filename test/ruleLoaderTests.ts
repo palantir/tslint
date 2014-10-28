@@ -16,7 +16,7 @@
 
 /// <reference path='references.ts' />
 
-describe.skip("Rule Loader", () => {
+describe("Rule Loader", () => {
     var path = require("path");
     var rulesDirectory = path.join(global.process.cwd(), "build/rules");
 
@@ -25,7 +25,7 @@ describe.skip("Rule Loader", () => {
             "forin": false,
             "quotemark": "single",
             "eofline": true,
-            "indent": 6,
+            "class-name": true,
             "no-debugger": true
         };
 
