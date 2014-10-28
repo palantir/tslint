@@ -22,8 +22,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "unused variable: ";
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        var languageServiceHost = new Lint.LanguageServiceHost(syntaxTree, syntaxTree.sourceUnit().fullText());
-        var languageServices = new TypeScript.Services.LanguageService(languageServiceHost);
+        var documentRegistry = ts.createDocumentRegistry();
+        var languageServiceHost = new Lint.LanguageServiceHost(syntaxTree, TypeScript.fullText(syntaxTree.sourceUnit()));
+        var languageServices = ts.createLanguageService(languageServiceHost, documentRegistry);
 
         return this.applyWithWalker(new NoUnusedVariablesWalker(syntaxTree, this.getOptions(), languageServices));
     }
@@ -33,9 +34,9 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     private fileName: string;
     private skipVariableDeclaration: boolean;
     private skipParameterDeclaration: boolean;
-    private languageServices: TypeScript.Services.LanguageService;
+    private languageServices: ts.LanguageService;
 
-    constructor(syntaxTree: TypeScript.SyntaxTree, options: Lint.IOptions, languageServices: TypeScript.Services.LanguageService) {
+    constructor(syntaxTree: TypeScript.SyntaxTree, options: Lint.IOptions, languageServices: ts.LanguageService) {
         super(syntaxTree, options);
         this.fileName = syntaxTree.fileName();
         this.skipVariableDeclaration = false;
@@ -55,7 +56,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     public visitVariableDeclarator(node: TypeScript.VariableDeclaratorSyntax): void {
         var propertyName = node.propertyName,
             variableName = propertyName.text(),
-            position = this.position() + propertyName.leadingTriviaWidth();
+            position = this.getPosition() + propertyName.leadingTriviaWidth();
 
         if (!this.skipVariableDeclaration) {
             this.validateReferencesForVariable(variableName, position);
@@ -102,7 +103,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
 
     public visitParameter(node: TypeScript.ParameterSyntax): void {
         var variableName = node.identifier.text();
-        var position = this.positionAfter(node.dotDotDotToken, node.modifiers) + node.leadingTriviaWidth();
+        var position = this.positionAfter(node.dotDotDotToken, node.modifiers) + TypeScript.leadingTriviaWidth(node);
 
         if (!this.hasModifier(node.modifiers, TypeScript.SyntaxKind.PublicKeyword)
             && !this.skipParameterDeclaration && this.hasOption(OPTION_CHECK_PARAMETERS)) {
@@ -138,9 +139,9 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         super.visitMemberFunctionDeclaration(node);
     }
 
-    private hasModifier(modifiers: TypeScript.ISyntaxElement, modifierKind: TypeScript.SyntaxKind) {
-        for (var i = 0, n = modifiers.childCount(); i < n; i++) {
-            var modifier = modifiers.childAt(i);
+    private hasModifier(modifiers: TypeScript.ISyntaxToken[], modifierKind: TypeScript.SyntaxKind) {
+        for (var i = 0, n = modifiers.length; i < n; i++) {
+            var modifier = modifiers[i];
             if (modifier.kind() === modifierKind) {
                 return true;
             }

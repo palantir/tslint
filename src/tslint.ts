@@ -126,6 +126,7 @@ module Lint {
 
 // add the Lint and TypeScript modules to global for pluggable formatters/rules
 global.Lint = Lint;
+global.ts = ts;
 global.TypeScript = TypeScript;
 
 // export Lint.Linter as the API interface for this module
