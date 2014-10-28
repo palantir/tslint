@@ -120,7 +120,8 @@ module.exports = function(grunt) {
           'src/rules/typedefRule.ts',
           'src/rules/typedefWhitespaceRule.ts',
           'src/rules/useStrictRule.ts',
-          'src/rules/variableNameRule.ts'
+          'src/rules/variableNameRule.ts',
+          'src/rules/whitespaceRule.ts'
         ],
         outDir: 'build/rules/'
       },
@@ -181,7 +182,8 @@ module.exports = function(grunt) {
           'test/rules/typedefRuleTests.ts',
           'test/rules/typedefWhitespaceRuleTests.ts',
           'test/rules/useStrictRuleTests.ts',
-          'test/rules/variableNameRuleTests.ts'
+          'test/rules/variableNameRuleTests.ts',
+          'test/rules/whitespaceRuleTests.ts'
         ],
         out: 'build/tslint-tests.js'
       }

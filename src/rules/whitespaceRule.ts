@@ -36,7 +36,7 @@ class WhitespaceWalker extends Lint.RuleWalker {
 
     constructor(syntaxTree: TypeScript.SyntaxTree, options: Lint.IOptions) {
         super(syntaxTree, options);
-        this.lastPosition = this.getSyntaxTree().sourceUnit().fullWidth();
+        this.lastPosition = TypeScript.fullWidth(this.getSyntaxTree().sourceUnit());
     }
 
     // check for trailing space after the given tokens
@@ -49,7 +49,7 @@ class WhitespaceWalker extends Lint.RuleWalker {
             (this.hasOption(OPTION_DECL) && kind === TypeScript.SyntaxKind.EqualsToken) ||
             (this.hasOption(OPTION_TYPE) && kind === TypeScript.SyntaxKind.ColonToken)) {
 
-            this.checkForLeadingSpace(this.position(), token.trailingTrivia());
+            this.checkForLeadingSpace(this.getPosition(), token.trailingTrivia());
         }
     }
 
@@ -58,7 +58,7 @@ class WhitespaceWalker extends Lint.RuleWalker {
         var operator = node.operatorToken;
         if (this.hasOption(OPTION_OPERATOR) && operator.kind() !== TypeScript.SyntaxKind.CommaToken) {
             var position = this.positionAfter(node.left);
-            this.checkForLeadingSpace(position, node.left.trailingTrivia());
+            this.checkForLeadingSpace(position, TypeScript.trailingTrivia(node.left));
 
             position += operator.fullWidth();
             this.checkForLeadingSpace(position, operator.trailingTrivia());
@@ -69,8 +69,8 @@ class WhitespaceWalker extends Lint.RuleWalker {
 
     // check for spaces between the => symbol
     public visitSimpleArrowFunctionExpression(node: TypeScript.SimpleArrowFunctionExpressionSyntax): void {
-        var position = this.positionAfter(node.identifier);
-        this.checkEqualsGreaterThan(node.equalsGreaterThanToken, node.identifier, position);
+        var position = this.positionAfter(node.parameter);
+        this.checkEqualsGreaterThan(node.equalsGreaterThanToken, node.parameter, position);
 
         super.visitSimpleArrowFunctionExpression(node);
     }
@@ -100,7 +100,7 @@ class WhitespaceWalker extends Lint.RuleWalker {
         previousNode: TypeScript.ISyntaxNodeOrToken, position: number) {
 
         if (this.hasOption(OPTION_OPERATOR)) {
-            this.checkForLeadingSpace(position, previousNode.trailingTrivia());
+            this.checkForLeadingSpace(position, TypeScript.trailingTrivia(previousNode));
 
             position += equalsGreaterThanToken.fullWidth();
             this.checkForLeadingSpace(position, equalsGreaterThanToken.trailingTrivia());
@@ -111,13 +111,13 @@ class WhitespaceWalker extends Lint.RuleWalker {
     public visitConditionalExpression(node: TypeScript.ConditionalExpressionSyntax): void {
         if (this.hasOption(OPTION_OPERATOR)) {
             var position = this.positionAfter(node.condition);
-            this.checkForLeadingSpace(position, node.condition.trailingTrivia());
+            this.checkForLeadingSpace(position, TypeScript.trailingTrivia(node.condition));
 
             position += node.questionToken.fullWidth();
             this.checkForLeadingSpace(position, node.questionToken.trailingTrivia());
 
-            position += node.whenTrue.fullWidth();
-            this.checkForLeadingSpace(position, node.whenTrue.trailingTrivia());
+            position += TypeScript.fullWidth(node.whenTrue);
+            this.checkForLeadingSpace(position, TypeScript.trailingTrivia(node.whenTrue));
         }
 
         super.visitConditionalExpression(node);
@@ -129,7 +129,7 @@ class WhitespaceWalker extends Lint.RuleWalker {
 
         if (this.hasOption(OPTION_DECL) && node.equalsValueClause !== null) {
             if (node.typeAnnotation !== null) {
-                this.checkForLeadingSpace(position, node.typeAnnotation.trailingTrivia());
+                this.checkForLeadingSpace(position, TypeScript.trailingTrivia(node.typeAnnotation));
             } else {
                 this.checkForLeadingSpace(position, node.propertyName.trailingTrivia());
             }
@@ -160,7 +160,8 @@ class WhitespaceWalker extends Lint.RuleWalker {
 
     public visitCastExpression(node: TypeScript.CastExpressionSyntax): void {
         if (this.hasOption(OPTION_TYPECAST)) {
-            var position = this.position() + node.lessThanToken.fullWidth() + node.type.fullWidth() + node.greaterThanToken.fullWidth();
+            var typeWidth = TypeScript.fullWidth(node.type);
+            var position = this.getPosition() + node.lessThanToken.fullWidth() + typeWidth + node.greaterThanToken.fullWidth();
             this.checkForLeadingSpace(position, node.greaterThanToken.trailingTrivia());
         }
         super.visitCastExpression(node);
