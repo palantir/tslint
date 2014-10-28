@@ -9,6 +9,14 @@ module.exports = function(grunt) {
     },
 
     concat: {
+      bin: {
+        src: ['lib/typescriptServices.js', 'bin/tslint-cli.js'],
+        dest: 'bin/tslint-cli.js'
+      },
+      core: {
+        src: ['lib/typescriptServices.js', 'lib/tslint.js'],
+        dest: 'lib/tslint.js'
+      },
       test: {
         src: ['lib/typescriptServices.js', 'build/tslint-tests.js'],
         dest: 'build/tslint-tests.js'
@@ -45,15 +53,6 @@ module.exports = function(grunt) {
       options:{
         sourceMap: false,
         target: 'es5'
-      },
-
-      upgrade: {
-        options: {
-          declaration: true,
-          module: 'commonjs'
-        },
-        src: ['src/tslint.ts', 'src/tslint-cli.ts'],
-        out: 'lib/tslint.js'
       },
 
       bin: {
@@ -111,8 +110,8 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-ts');
 
   // register custom tasks
-  grunt.registerTask('core', ['clean:core', 'ts:core', 'ts:core_rules', 'ts:core_formatters']);
-  grunt.registerTask('bin', ['clean:bin', 'ts:bin', 'tslint:src']);
+  grunt.registerTask('core', ['clean:core', 'ts:core', 'concat:core', 'ts:core_rules', 'ts:core_formatters']);
+  grunt.registerTask('bin', ['clean:bin', 'ts:bin', 'tslint:src', 'concat:bin']);
   grunt.registerTask('test', ['clean:test', 'ts:test', 'tslint:test', 'concat:test', 'mochaTest']);
 
   // create default task
