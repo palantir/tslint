@@ -23,21 +23,21 @@ export class Rule extends Lint.Rules.AbstractRule {
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
         var documentRegistry = ts.createDocumentRegistry();
         var languageServiceHost = new Lint.LanguageServiceHost(syntaxTree, TypeScript.fullText(syntaxTree.sourceUnit()));
-        var languageServices = ts.createLanguageService(languageServiceHost, documentRegistry);
+        var languageService = ts.createLanguageService(languageServiceHost, documentRegistry);
 
-        return this.applyWithWalker(new NoUseBeforeDeclareWalker(syntaxTree, this.getOptions(), languageServices));
+        return this.applyWithWalker(new NoUseBeforeDeclareWalker(syntaxTree, this.getOptions(), languageService));
     }
 }
 
 class NoUseBeforeDeclareWalker extends Lint.RuleWalker {
     private fileName: string;
-    private languageServices: ts.LanguageService;
+    private languageService: ts.LanguageService;
     private classStartPosition: number;
 
-    constructor(syntaxTree: TypeScript.SyntaxTree, options: Lint.IOptions, languageServices: ts.LanguageService) {
+    constructor(syntaxTree: TypeScript.SyntaxTree, options: Lint.IOptions, languageService: ts.LanguageService) {
         super(syntaxTree, options);
         this.fileName = syntaxTree.fileName();
-        this.languageServices = languageServices;
+        this.languageService = languageService;
         this.classStartPosition = 0;
     }
 
@@ -60,7 +60,7 @@ class NoUseBeforeDeclareWalker extends Lint.RuleWalker {
     }
 
     private validateUsageForVariable(name: string, position: number) {
-        var references = this.languageServices.getReferencesAtPosition(this.fileName, position);
+        var references = this.languageService.getReferencesAtPosition(this.fileName, position);
         references.forEach((reference) => {
             var referencePosition = reference.textSpan.start();
             if (this.classStartPosition <= referencePosition && referencePosition < position) {

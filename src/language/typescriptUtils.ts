@@ -17,6 +17,11 @@
 module TypeScript {
     export function leadingTrivia(element: ISyntaxElement, text?: ISimpleText): ISyntaxTriviaList {
         var token = firstToken(element);
-        return token ? token.leadingTrivia() : TypeScript.Syntax.emptyTriviaList;
+        return token ? token.leadingTrivia(text) : TypeScript.Syntax.emptyTriviaList;
+    }
+
+    export function trailingTrivia(element: ISyntaxElement, text?: ISimpleText): ISyntaxTriviaList {
+        var token = lastToken(element);
+        return token ? token.trailingTrivia(text) : TypeScript.Syntax.emptyTriviaList;
     }
 }

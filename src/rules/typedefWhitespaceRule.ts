@@ -62,11 +62,12 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
         super.visitVariableDeclarator(node);
     }
 
-    public checkSpace(option: string, node: TypeScript.SyntaxNode, typeAnnotation: TypeScript.TypeAnnotationSyntax) : void {
+    public checkSpace(option: string, node: TypeScript.ISyntaxElement, typeAnnotation: TypeScript.TypeAnnotationSyntax) : void {
         if (this.hasOption(option) && typeAnnotation) {
-            var typeAnnotationChildIndex = this.getTypeAnnotationIndex(node),
-                precedingChild = this.findPrecedingChild(node, typeAnnotationChildIndex),
-                hasLeadingWhitespace = this.hasLeadingWhitespace(precedingChild.trailingTrivia());
+            var typeAnnotationChildIndex = this.getTypeAnnotationIndex(node);
+            var precedingChild = this.findPrecedingChild(node, typeAnnotationChildIndex);
+            var trailingTrivia = TypeScript.trailingTrivia(precedingChild);
+            var hasLeadingWhitespace = this.hasLeadingWhitespace(trailingTrivia);
 
             if (hasLeadingWhitespace !== (this.getOption(option) === "space")) {
                 this.addFailure(
@@ -106,23 +107,24 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
         return options[option];
     }
 
-    private getTypeAnnotationIndex(node: TypeScript.SyntaxNode): number {
-        var index = 0,
-            current = node.childAt(index);
+    private getTypeAnnotationIndex(node: TypeScript.ISyntaxElement): number {
+        var index = 0;
+        var current = TypeScript.childAt(node, index);
 
-        while (!(current instanceof TypeScript.TypeAnnotationSyntax)) {
+        while (!(current instanceof TypeScript.Syntax.Concrete.TypeAnnotationSyntax)) {
             index++;
-            current = node.childAt(index);
+            current = TypeScript.childAt(node, index);
         }
         return index;
     }
 
-    private findPrecedingChild(node: TypeScript.SyntaxNode, startIndex: number): TypeScript.ISyntaxElement {
-        var precedingChild: TypeScript.ISyntaxElement, offset = 0;
+    private findPrecedingChild(node: TypeScript.ISyntaxElement, startIndex: number): TypeScript.ISyntaxElement {
+        var offset = 0;
+        var precedingChild: TypeScript.ISyntaxElement;
 
         while (!precedingChild) {
             offset++;
-            precedingChild = node.childAt(startIndex - offset);
+            precedingChild = TypeScript.childAt(node, startIndex - offset);
         }
 
         return precedingChild;

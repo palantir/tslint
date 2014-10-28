@@ -24,9 +24,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
         var documentRegistry = ts.createDocumentRegistry();
         var languageServiceHost = new Lint.LanguageServiceHost(syntaxTree, TypeScript.fullText(syntaxTree.sourceUnit()));
-        var languageServices = ts.createLanguageService(languageServiceHost, documentRegistry);
+        var languageService = ts.createLanguageService(languageServiceHost, documentRegistry);
 
-        return this.applyWithWalker(new NoUnusedVariablesWalker(syntaxTree, this.getOptions(), languageServices));
+        return this.applyWithWalker(new NoUnusedVariablesWalker(syntaxTree, this.getOptions(), languageService));
     }
 }
 
@@ -34,14 +34,14 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     private fileName: string;
     private skipVariableDeclaration: boolean;
     private skipParameterDeclaration: boolean;
-    private languageServices: ts.LanguageService;
+    private languageService: ts.LanguageService;
 
-    constructor(syntaxTree: TypeScript.SyntaxTree, options: Lint.IOptions, languageServices: ts.LanguageService) {
+    constructor(syntaxTree: TypeScript.SyntaxTree, options: Lint.IOptions, languageService: ts.LanguageService) {
         super(syntaxTree, options);
         this.fileName = syntaxTree.fileName();
         this.skipVariableDeclaration = false;
         this.skipParameterDeclaration = false;
-        this.languageServices = languageServices;
+        this.languageService = languageService;
     }
 
     public visitImportDeclaration(node: TypeScript.ImportDeclarationSyntax): void {
@@ -151,7 +151,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     }
 
     private validateReferencesForVariable(name: string, position: number) {
-        var references = this.languageServices.getReferencesAtPosition(this.fileName, position);
+        var references = this.languageService.getReferencesAtPosition(this.fileName, position);
         if (references.length <= 1) {
             var failureString = Rule.FAILURE_STRING + "'" + name + "'";
             var failure = this.createFailure(position, name.length, failureString);
