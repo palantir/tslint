@@ -79,7 +79,6 @@ module.exports = function(grunt) {
         src: [
           'lib/tslint.d.ts',
           'src/rules/*.ts',
-          '!src/rules/indentRule.ts',
           '!src/rules/semicolonRule.ts'
         ],
         outDir: 'build/rules/'
@@ -99,7 +98,6 @@ module.exports = function(grunt) {
         src: [
           'test/**/*.ts',
           '!test/files/**/*.ts',
-          '!test/rules/indentRuleTests.ts',
           '!test/rules/semicolonRuleTests.ts',
         ],
         out: 'build/tslint-tests.js'

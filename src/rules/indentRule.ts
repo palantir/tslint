@@ -47,8 +47,8 @@ class IndentWalker extends Lint.RuleWalker {
 
     public visitMemberVariableDeclaration(node: TypeScript.MemberVariableDeclarationSyntax): void {
         var firstElement: TypeScript.ISyntaxNodeOrToken;
-        if (node.modifiers.childCount() > 0) {
-            firstElement = node.modifiers.childAt(0);
+        if (node.modifiers.length > 0) {
+            firstElement = node.modifiers[0];
         } else {
             firstElement = node.variableDeclarator;
         }
@@ -59,8 +59,8 @@ class IndentWalker extends Lint.RuleWalker {
 
     public visitMemberFunctionDeclaration(node: TypeScript.MemberFunctionDeclarationSyntax): void {
         var firstElement: TypeScript.ISyntaxNodeOrToken;
-        if (node.modifiers.childCount() > 0) {
-            firstElement = node.modifiers.childAt(0);
+        if (node.modifiers.length > 0) {
+            firstElement = node.modifiers[0];
         } else {
             firstElement = node.propertyName;
         }
@@ -112,18 +112,18 @@ class IndentWalker extends Lint.RuleWalker {
         this.checkAndVisitList(node.statements);
     }
 
-    private checkAndVisitList(list: TypeScript.ISyntaxList): void {
+    private checkAndVisitList(list: TypeScript.ISyntaxElement[]): void {
         this.currentLevel += 1;
-        for (var i = 0 ; i < list.childCount(); i++) {
-            this.checkAndVisitNodeOrToken(list.childAt(i));
+        for (var i = 0 ; i < list.length; i++) {
+            this.checkAndVisitNodeOrToken(list[i]);
         }
         this.currentLevel -= 1;
     }
 
-    private checkAndVisitSeparatedList(list: TypeScript.ISeparatedSyntaxList): void {
+    private checkAndVisitSeparatedList(list: TypeScript.ISyntaxElement[]): void {
         this.currentLevel += 1;
-        for (var i = 0, n = list.childCount(); i < n; i++) {
-            var element = list.childAt(i);
+        for (var i = 0, n = list.length; i < n; i++) {
+            var element = list[i];
             // do not check separator tokens
             if (element.kind() === TypeScript.SyntaxKind.CommaToken ||
                 element.kind() === TypeScript.SyntaxKind.SemicolonToken) {
@@ -145,18 +145,18 @@ class IndentWalker extends Lint.RuleWalker {
         var actualIndentation = this.getImmediateIndentation(nodeOrToken);
 
         if (expectedIndentation !== actualIndentation) {
-            var position = this.position() + nodeOrToken.leadingTriviaWidth();
+            var position = this.getPosition() + TypeScript.leadingTriviaWidth(nodeOrToken);
             var error = Rule.FAILURE_STRING +
                         "expected " + expectedIndentation + ", " +
                         "got " + actualIndentation;
 
-            this.addFailure(this.createFailure(position, nodeOrToken.width(), error));
+            this.addFailure(this.createFailure(position, TypeScript.width(nodeOrToken), error));
         }
     }
 
     private getImmediateIndentation(element: TypeScript.ISyntaxNodeOrToken): number {
         var indentationCount = 0;
-        var triviaList = element.leadingTrivia();
+        var triviaList = TypeScript.leadingTrivia(element);
 
         var listCount = triviaList.count();
         if (listCount > 0) {
