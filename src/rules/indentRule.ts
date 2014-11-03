@@ -1,29 +1,41 @@
-/*
- * Copyright 2013 Palantir Technologies, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
-*/
-
 /// <reference path='../../lib/tslint.d.ts' />
 
-export class Rule extends Lint.Rules.AbstractRule {
-    public static FAILURE_STRING = "unexpected tab width: ";
+// If not explicitly specified, uses spaces as default
+var OPTION_USE_TABS = "tabs";
 
-    public isEnabled(): boolean {
-        return false;
-    }
+export class Rule extends Lint.Rules.AbstractRule {
+    public static FAILURE_STRING_TABS = "Indent using only tabs";
+    public static FAILURE_STRING_SPACES = "Indent using only spaces";
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        throw TypeScript.Errors.notYetImplemented();
+        return this.applyWithWalker(new IndentWalker(syntaxTree, this.getOptions()));
     }
+}
+
+// Will visit every token and enforce only that the right char is used to indent 
+// (tab/space), will *NOT* check indentation size
+class IndentWalker extends Lint.RuleWalker {
+    private failureString: string;
+    private reg: RegExp;
+
+    constructor(syntaxTree: TypeScript.SyntaxTree, options: Lint.IOptions) {
+        super(syntaxTree, options);
+
+        if (this.hasOption(OPTION_USE_TABS)) {
+            this.reg = new RegExp(" ");
+            this.failureString = Rule.FAILURE_STRING_TABS;
+        } else {
+            this.reg = new RegExp("\t");
+            this.failureString = Rule.FAILURE_STRING_SPACES;
+        }
+    }
+
+    public visitToken(token: TypeScript.ISyntaxToken) {
+        var position = this.getPosition() + token.leadingTriviaWidth();
+        if (!token.hasLeadingComment() && token.leadingTrivia().fullText().match(this.reg)) {
+            this.addFailure(this.createFailure(position, token.fullWidth(), this.failureString));
+        }
+        super.visitToken(token);
+    }
+
 }
