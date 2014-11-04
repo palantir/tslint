@@ -1,7 +1,7 @@
 /// <reference path='../../lib/tslint.d.ts' />
 
-// If not explicitly specified, uses spaces as default
-var OPTION_USE_TABS = "tabs";
+var OPTION_USE_TABS = "tabs",
+    OPTION_USE_SPACES = "spaces";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_TABS = "Indent using only tabs";
@@ -24,16 +24,18 @@ class IndentWalker extends Lint.RuleWalker {
         if (this.hasOption(OPTION_USE_TABS)) {
             this.reg = new RegExp(" ");
             this.failureString = Rule.FAILURE_STRING_TABS;
-        } else {
+        } else if (this.hasOption(OPTION_USE_SPACES)) {
             this.reg = new RegExp("\t");
             this.failureString = Rule.FAILURE_STRING_SPACES;
         }
     }
 
     public visitToken(token: TypeScript.ISyntaxToken) {
-        var position = this.getPosition() + token.leadingTriviaWidth();
-        if (!token.hasLeadingComment() && token.leadingTrivia().fullText().match(this.reg)) {
-            this.addFailure(this.createFailure(position, token.fullWidth(), this.failureString));
+        if (this.hasOption(OPTION_USE_TABS) || this.hasOption(OPTION_USE_SPACES)) {
+            var position = this.getPosition() + token.leadingTriviaWidth();
+            if (!token.hasLeadingComment() && token.leadingTrivia().fullText().match(this.reg)) {
+                this.addFailure(this.createFailure(position, token.fullWidth(), this.failureString));
+            }
         }
         super.visitToken(token);
     }
