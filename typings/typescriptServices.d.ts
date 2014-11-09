@@ -6920,6 +6920,7 @@ declare module ts {
         getFormattingEditsForDocument(fileName: string, options: FormatCodeOptions): TextChange[];
         getFormattingEditsAfterKeystroke(fileName: string, position: number, key: string, options: FormatCodeOptions): TextChange[];
         getEmitOutput(fileName: string): EmitOutput;
+        getSourceFile(filename: string): SourceFile;
         dispose(): void;
     }
     interface SignatureInfo {
@@ -7119,7 +7120,7 @@ declare module ts {
         classification: TokenClass;
     }
     interface Classifier {
-        getClassificationsForLine(text: string, lexState: EndOfLineState): ClassificationResult;
+        getClassificationsForLine(text: string, lexState: EndOfLineState, classifyKeywordsInGenerics?: boolean): ClassificationResult;
     }
     interface DocumentRegistry {
         acquireDocument(filename: string, compilationSettings: CompilerOptions, scriptSnapshot: TypeScript.IScriptSnapshot, version: string, isOpen: boolean): SourceFile;
@@ -7284,7 +7285,7 @@ declare module ts {
         getEmitOutput(fileName: string): string;
     }
     interface ClassifierShim extends Shim {
-        getClassificationsForLine(text: string, lexState: EndOfLineState): string;
+        getClassificationsForLine(text: string, lexState: EndOfLineState, classifyKeywordsInGenerics?: boolean): string;
     }
     interface CoreServicesShim extends Shim {
         getPreProcessedFileInfo(fileName: string, sourceText: TypeScript.IScriptSnapshot): string;
