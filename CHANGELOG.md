@@ -1,7 +1,7 @@
 Change Log
 ===
 
-v1.0
+v1.0.0
 ---
 
 * upgrade TypeScript compiler to 1.3
