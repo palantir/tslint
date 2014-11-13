@@ -1,6 +1,16 @@
 Change Log
 ===
 
+v1.0
+---
+
+* upgrade TypeScript compiler to 1.3
+* **BREAKING CHANGES**
+	* all error messages now start with a lower-case character and do not end with a period
+	* all rule options are consistent in nomenclature. The `typedef` and `typedef-whitespace` rules now take in hyphenated options
+	* `unused-variables` rule cannot find unused private variables defined in the constructor due to a bug in 1.3 compiler
+	* `indent` rule has changed to only check for tabs or spaces and not enforce indentation levels
+
 v0.4.12
 ---
 

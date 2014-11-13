@@ -1,31 +1,30 @@
 /// <reference path='../../lib/tslint.d.ts' />
 
-var OPTION_USE_TABS = "tabs",
-    OPTION_USE_SPACES = "spaces";
+var OPTION_USE_TABS = "tabs";
+var OPTION_USE_SPACES = "spaces";
 
 export class Rule extends Lint.Rules.AbstractRule {
-    public static FAILURE_STRING_TABS = "Indent using only tabs";
-    public static FAILURE_STRING_SPACES = "Indent using only spaces";
+    public static FAILURE_STRING_TABS = "tab indentation expected";
+    public static FAILURE_STRING_SPACES = "space indentation expected";
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
         return this.applyWithWalker(new IndentWalker(syntaxTree, this.getOptions()));
     }
 }
 
-// Will visit every token and enforce only that the right char is used to indent 
-// (tab/space), will *NOT* check indentation size
+// Visit every token and enforce that only the right character is used for indentation
 class IndentWalker extends Lint.RuleWalker {
     private failureString: string;
-    private reg: RegExp;
+    private regExp: RegExp;
 
     constructor(syntaxTree: TypeScript.SyntaxTree, options: Lint.IOptions) {
         super(syntaxTree, options);
 
         if (this.hasOption(OPTION_USE_TABS)) {
-            this.reg = new RegExp(" ");
+            this.regExp = new RegExp(" ");
             this.failureString = Rule.FAILURE_STRING_TABS;
         } else if (this.hasOption(OPTION_USE_SPACES)) {
-            this.reg = new RegExp("\t");
+            this.regExp = new RegExp("\t");
             this.failureString = Rule.FAILURE_STRING_SPACES;
         }
     }
@@ -33,11 +32,10 @@ class IndentWalker extends Lint.RuleWalker {
     public visitToken(token: TypeScript.ISyntaxToken) {
         if (this.hasOption(OPTION_USE_TABS) || this.hasOption(OPTION_USE_SPACES)) {
             var position = this.getPosition() + token.leadingTriviaWidth();
-            if (!token.hasLeadingComment() && token.leadingTrivia().fullText().match(this.reg)) {
+            if (!token.hasLeadingComment() && token.leadingTrivia().fullText().match(this.regExp)) {
                 this.addFailure(this.createFailure(position, token.fullWidth(), this.failureString));
             }
         }
         super.visitToken(token);
     }
-
 }

@@ -22,7 +22,7 @@ describe("<no-any>", () => {
 
     it("var declaration with type of 'any' should not be allowed", () => {
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, NoAnyRule);
-        var expectedFailure = Lint.Test.createFailure(fileName, [1, 8], [1, 11], "Type decoration of 'any' is forbidden.");
+        var expectedFailure = Lint.Test.createFailure(fileName, [1, 8], [1, 11], "type decoration of 'any' is forbidden");
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });

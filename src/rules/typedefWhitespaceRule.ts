@@ -27,19 +27,19 @@ export class Rule extends Lint.Rules.AbstractRule {
 class TypedefWhitespaceWalker extends Lint.RuleWalker {
 
     public visitCallSignature(node: TypeScript.CallSignatureSyntax): void {
-        this.checkSpace("callSignature", node, node.typeAnnotation);
+        this.checkSpace("call-signature", node, node.typeAnnotation);
 
         super.visitCallSignature(node);
     }
 
     public visitCatchClause(node: TypeScript.CatchClauseSyntax): void {
-        this.checkSpace("catchClause", node, node.typeAnnotation);
+        this.checkSpace("catch-clause", node, node.typeAnnotation);
 
         super.visitCatchClause(node);
     }
 
     public visitIndexSignature(node: TypeScript.IndexSignatureSyntax): void {
-        this.checkSpace("indexSignature", node, node.typeAnnotation);
+        this.checkSpace("index-signature", node, node.typeAnnotation);
 
         super.visitIndexSignature(node);
     }
@@ -51,13 +51,13 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
     }
 
     public visitPropertySignature(node: TypeScript.PropertySignatureSyntax): void {
-        this.checkSpace("propertySignature", node, node.typeAnnotation);
+        this.checkSpace("property-signature", node, node.typeAnnotation);
 
         super.visitPropertySignature(node);
     }
 
     public visitVariableDeclarator(node: TypeScript.VariableDeclaratorSyntax): void {
-        this.checkSpace("variableDeclarator", node, node.typeAnnotation);
+        this.checkSpace("variable-declarator", node, node.typeAnnotation);
 
         super.visitVariableDeclarator(node);
     }
@@ -70,13 +70,11 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
             var hasLeadingWhitespace = this.hasLeadingWhitespace(trailingTrivia);
 
             if (hasLeadingWhitespace !== (this.getOption(option) === "space")) {
-                this.addFailure(
-                    this.createFailure(
-                        this.positionAfter(precedingChild),
-                        1,
-                        "expected " + this.getOption(option) + " in " + option + "."
-                    )
-                );
+                var position = this.positionAfter(precedingChild);
+                var message = "expected " + this.getOption(option) + " in " + option;
+                var failure = this.createFailure(position, 1, message);
+
+                this.addFailure(failure);
             }
         }
     }

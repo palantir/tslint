@@ -41,39 +41,39 @@ describe("<typedefWhitespace, required>", () => {
     before(() => {
         var options = [true,
             {
-                "callSignature": "space",
-                "catchClause": "space",
-                "indexSignature": "space",
+                "call-signature": "space",
+                "catch-clause": "space",
+                "index-signature": "space",
                 "parameter": "space",
-                "propertySignature": "space",
-                "variableDeclarator": "space"
+                "property-signature": "space",
+                "variable-declarator": "space"
             }
         ];
         actualFailures = Lint.Test.applyRuleOnFile(fileName, TypedefWhitespaceRule, options);
     });
 
     it("enforces whitespace in call signatures", () => {
-        var expectedFailure = Lint.Test.createFailure(fileName, [25, 59], [25, 60], "expected space in callSignature.");
+        var expectedFailure = Lint.Test.createFailure(fileName, [25, 59], [25, 60], "expected space in call-signature");
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 
     it("enforces whitespace in catch clauses", () => {
-        var expectedFailure = Lint.Test.createFailure(fileName, [31, 9], [31, 10], "expected space in catchClause.");
+        var expectedFailure = Lint.Test.createFailure(fileName, [31, 9], [31, 10], "expected space in catch-clause");
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 
     it("enforces whitespace in indexSignature", () => {
-        var expectedFailure = Lint.Test.createFailure(fileName, [48, 2], [48, 3], "expected space in indexSignature.");
+        var expectedFailure = Lint.Test.createFailure(fileName, [48, 2], [48, 3], "expected space in index-signature");
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 
     it("enforces whitespace in parameter", () => {
-        var expectedFailure1 = Lint.Test.createFailure(fileName, [25, 39], [25, 40], "expected space in parameter.");
-        var expectedFailure2 = Lint.Test.createFailure(fileName, [25, 50], [25, 51], "expected space in parameter.");
-        var expectedFailure3 = Lint.Test.createFailure(fileName, [48, 11], [48, 12], "expected space in parameter.");
+        var expectedFailure1 = Lint.Test.createFailure(fileName, [25, 39], [25, 40], "expected space in parameter");
+        var expectedFailure2 = Lint.Test.createFailure(fileName, [25, 50], [25, 51], "expected space in parameter");
+        var expectedFailure3 = Lint.Test.createFailure(fileName, [48, 11], [48, 12], "expected space in parameter");
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);
@@ -81,14 +81,14 @@ describe("<typedefWhitespace, required>", () => {
     });
 
     it("enforces whitespace in propertySignature", () => {
-        var expectedFailure = Lint.Test.createFailure(fileName, [18, 9], [18, 10], "expected space in propertySignature.");
+        var expectedFailure = Lint.Test.createFailure(fileName, [18, 9], [18, 10], "expected space in property-signature");
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 
     it("enforces whitespace in variable declarator", () => {
-        var expectedFailure1 = Lint.Test.createFailure(fileName, [26, 10], [26, 11], "expected space in variableDeclarator.");
-        var expectedFailure2 = Lint.Test.createFailure(fileName, [27, 10], [27, 11], "expected space in variableDeclarator.");
+        var expectedFailure1 = Lint.Test.createFailure(fileName, [26, 10], [26, 11], "expected space in variable-declarator");
+        var expectedFailure2 = Lint.Test.createFailure(fileName, [27, 10], [27, 11], "expected space in variable-declarator");
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);
@@ -103,39 +103,39 @@ describe("<typedefWhitespace, not allowed>", () => {
     before(() => {
         var options = [true,
             {
-                "callSignature": "nospace",
-                "catchClause": "nospace",
-                "indexSignature": "nospace",
+                "call-signature": "nospace",
+                "catch-clause": "nospace",
+                "index-signature": "nospace",
                 "parameter": "nospace",
-                "propertySignature": "nospace",
-                "variableDeclarator": "nospace"
+                "property-signature": "nospace",
+                "variable-declarator": "nospace"
             }
         ];
         actualFailures = Lint.Test.applyRuleOnFile(fileName, TypedefWhitespaceRule, options);
     });
 
     it("enforces no whitespace in call signatures", () => {
-        var expectedFailure = Lint.Test.createFailure(fileName, [36, 64], [36, 65], "expected nospace in callSignature.");
+        var expectedFailure = Lint.Test.createFailure(fileName, [36, 64], [36, 65], "expected nospace in call-signature");
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 
     it("enforces no whitespace in catch clauses", () => {
-        var expectedFailure = Lint.Test.createFailure(fileName, [42, 10], [42, 11], "expected nospace in catchClause.");
+        var expectedFailure = Lint.Test.createFailure(fileName, [42, 10], [42, 11], "expected nospace in catch-clause");
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 
     it("enforces no whitespace in indexSignature", () => {
-        var expectedFailure = Lint.Test.createFailure(fileName, [58, 3], [58, 4], "expected nospace in indexSignature.");
+        var expectedFailure = Lint.Test.createFailure(fileName, [58, 3], [58, 4], "expected nospace in index-signature");
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 
     it("enforces no whitespace in parameter", () => {
-        var expectedFailure1 = Lint.Test.createFailure(fileName, [36, 42], [36, 43], "expected nospace in parameter.");
-        var expectedFailure2 = Lint.Test.createFailure(fileName, [36, 54], [36, 55], "expected nospace in parameter.");
-        var expectedFailure3 = Lint.Test.createFailure(fileName, [58, 12], [58, 13], "expected nospace in parameter.");
+        var expectedFailure1 = Lint.Test.createFailure(fileName, [36, 42], [36, 43], "expected nospace in parameter");
+        var expectedFailure2 = Lint.Test.createFailure(fileName, [36, 54], [36, 55], "expected nospace in parameter");
+        var expectedFailure3 = Lint.Test.createFailure(fileName, [58, 12], [58, 13], "expected nospace in parameter");
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);
@@ -143,14 +143,14 @@ describe("<typedefWhitespace, not allowed>", () => {
     });
 
     it("enforces no whitespace in propertySignature", () => {
-        var expectedFailure = Lint.Test.createFailure(fileName, [22, 10], [22, 11], "expected nospace in propertySignature.");
+        var expectedFailure = Lint.Test.createFailure(fileName, [22, 10], [22, 11], "expected nospace in property-signature");
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 
     it("enforces no whitespace in variable declarator", () => {
-        var expectedFailure1 = Lint.Test.createFailure(fileName, [37, 11], [37, 12], "expected nospace in variableDeclarator.");
-        var expectedFailure2 = Lint.Test.createFailure(fileName, [38, 11], [38, 12], "expected nospace in variableDeclarator.");
+        var expectedFailure1 = Lint.Test.createFailure(fileName, [37, 11], [37, 12], "expected nospace in variable-declarator");
+        var expectedFailure2 = Lint.Test.createFailure(fileName, [38, 11], [38, 12], "expected nospace in variable-declarator");
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);

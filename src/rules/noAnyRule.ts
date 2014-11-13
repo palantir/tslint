@@ -17,7 +17,7 @@
 /// <reference path="../../lib/tslint.d.ts" />
 
 export class Rule extends Lint.Rules.AbstractRule {
-    public static FAILURE_STRING = "Type decoration of 'any' is forbidden.";
+    public static FAILURE_STRING = "type decoration of 'any' is forbidden";
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
         return this.applyWithWalker(<Lint.RuleWalker>(new NoAnyWalker(syntaxTree, this.getOptions())));

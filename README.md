@@ -157,17 +157,17 @@ A sample configuration file with all options is available [here](https://github.
 * `semicolon` enforces semicolons at the end of every statement.
 * `triple-equals` enforces === and !== in favor of == and !=.
 * `typedef` enforces type definitions to exist. Rule options:
-    * `"callSignature"` checks return type of functions
-    * `"indexSignature"` checks index type specifier of indexers
+    * `"call-signature"` checks return type of functions
+    * `"index-signature"` checks index type specifier of indexers
     * `"parameter"` checks type specifier of parameters
-    * `"propertySignature"` checks return types of interface properties
-    * `"variableDeclarator"` checks variable declarations
-    * `"memberVariableDeclarator"` checks member variable declarations
+    * `"property-signature"` checks return types of interface properties
+    * `"variable-declarator"` checks variable declarations
+    * `"member-variable-declarator"` checks member variable declarations
 * `typedef-whitespace` enforces spacing whitespace for type definitions. Each rule option requires a value of `"space"` or `"nospace"`
    to require a space or no space before the type specifier's colon. Rule options:
-    * `"callSignature"` checks return type of functions
-    * `"catchClause"` checks type in exception catch blocks
-    * `"indexSignature"` checks index type specifier of indexers
+    * `"call-signature"` checks return type of functions
+    * `"catch-clause"` checks type in exception catch blocks
+    * `"index-signature"` checks index type specifier of indexers
 * `use-strict` enforces ECMAScript 5's strict mode
     * `check-module` checks that all top-level modules are using strict mode
     * `check-function` checks that all top-level functions are using strict mode

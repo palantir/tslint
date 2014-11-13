@@ -27,13 +27,13 @@ export class Rule extends Lint.Rules.AbstractRule {
 class TypedefWalker extends Lint.RuleWalker {
 
     public visitCallSignature(node: TypeScript.CallSignatureSyntax): void {
-        this.checkTypeAnnotation("callSignature", node, node.typeAnnotation);
+        this.checkTypeAnnotation("call-signature", node, node.typeAnnotation);
 
         super.visitCallSignature(node);
     }
 
     public visitIndexSignature(node: TypeScript.IndexSignatureSyntax): void {
-        this.checkTypeAnnotation("indexSignature", node, node.typeAnnotation);
+        this.checkTypeAnnotation("index-signature", node, node.typeAnnotation);
 
         super.visitIndexSignature(node);
     }
@@ -44,7 +44,7 @@ class TypedefWalker extends Lint.RuleWalker {
     }
 
     public visitPropertySignature(node: TypeScript.PropertySignatureSyntax): void {
-        this.checkTypeAnnotation("propertySignature", node, node.typeAnnotation, node.propertyName);
+        this.checkTypeAnnotation("property-signature", node, node.typeAnnotation, node.propertyName);
 
         super.visitPropertySignature(node);
     }
@@ -52,7 +52,7 @@ class TypedefWalker extends Lint.RuleWalker {
     public visitVariableDeclaration(node: TypeScript.VariableDeclarationSyntax): void {
         for (var i = 0, n = node.variableDeclarators.length; i < n; i++) {
             var item = <TypeScript.VariableDeclaratorSyntax>node.variableDeclarators[i];
-            this.checkTypeAnnotation("variableDeclarator", node, item.typeAnnotation, item.propertyName);
+            this.checkTypeAnnotation("variable-declarator", node, item.typeAnnotation, item.propertyName);
         }
 
         super.visitVariableDeclaration(node);
@@ -60,7 +60,7 @@ class TypedefWalker extends Lint.RuleWalker {
 
     public visitMemberVariableDeclaration(node: TypeScript.MemberVariableDeclarationSyntax): void {
         var variableDeclarator =  node.variableDeclarator;
-        this.checkTypeAnnotation("memberVariableDeclarator", variableDeclarator, variableDeclarator.typeAnnotation,
+        this.checkTypeAnnotation("member-variable-declarator", variableDeclarator, variableDeclarator.typeAnnotation,
             variableDeclarator.propertyName);
 
         super.visitMemberVariableDeclaration(node);
@@ -73,7 +73,7 @@ class TypedefWalker extends Lint.RuleWalker {
 
         if (this.hasOption(option) && !typeAnnotation) {
             var ns = name ? ": '" + name.text() + "'" : "";
-            var failure = this.createFailure(this.positionAfter(node), 1, "expected " + option + ns + " to have a typedef.");
+            var failure = this.createFailure(this.positionAfter(node), 1, "expected " + option + ns + " to have a typedef");
             this.addFailure(failure);
         }
     }

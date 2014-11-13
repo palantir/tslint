@@ -17,7 +17,7 @@
 /// <reference path='../../lib/tslint.d.ts' />
 
 export class Rule extends Lint.Rules.AbstractRule {
-    static FAILURE_STRING = "interface name must start with capital I";
+    static FAILURE_STRING = "interface name must be a capitalized I";
 
     public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
         return this.applyWithWalker(new NameWalker(syntaxTree, this.getOptions()));
