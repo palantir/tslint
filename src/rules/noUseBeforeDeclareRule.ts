@@ -61,13 +61,15 @@ class NoUseBeforeDeclareWalker extends Lint.RuleWalker {
 
     private validateUsageForVariable(name: string, position: number) {
         var references = this.languageService.getReferencesAtPosition(this.fileName, position);
-        references.forEach((reference) => {
-            var referencePosition = reference.textSpan.start();
-            if (this.classStartPosition <= referencePosition && referencePosition < position) {
-                var failureString = Rule.FAILURE_STRING_PREFIX + name + Rule.FAILURE_STRING_POSTFIX;
-                var failure = this.createFailure(referencePosition, name.length, failureString);
-                this.addFailure(failure);
-            }
-        });
+        if (references) {
+            references.forEach((reference) => {
+                var referencePosition = reference.textSpan.start();
+                if (this.classStartPosition <= referencePosition && referencePosition < position) {
+                    var failureString = Rule.FAILURE_STRING_PREFIX + name + Rule.FAILURE_STRING_POSTFIX;
+                    var failure = this.createFailure(referencePosition, name.length, failureString);
+                    this.addFailure(failure);
+                }
+            });
+        }
     }
 }
