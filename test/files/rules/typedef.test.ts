@@ -1,8 +1,8 @@
 var NoTypeObjectLiteralWithPropertyGetter = {
     Prop: "some property",
 
-    get Prop() {
-        return Prop;
+    get PropDef() {
+        return this.Prop;
     }
 };
 
@@ -24,5 +24,11 @@ class NoTypesClass {
 
     public get name() {
         return "some name";
+    }
+}
+
+class ConstructorUnTyped {
+    constructor(type) {
+
     }
 }

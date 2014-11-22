@@ -38,6 +38,15 @@ describe("<typedef, enabled>", () => {
     var fileName = "rules/typedef.test.ts";
     var TypedefRule = Lint.Test.getRule("typedef");
 
+    function assertFailures(...failures) {
+        failures.forEach(function(failure) {
+            Lint.Test.assertContainsFailure(actualFailures, failure);
+            actualFailures = actualFailures.filter(function(actualFailure) {
+                return !actualFailure.equals(failure);
+            });
+        });
+    }
+
     before(() => {
         var options = [true,
             "call-signature",
@@ -51,26 +60,27 @@ describe("<typedef, enabled>", () => {
     });
 
     it("enforces typedef in call signatures", () => {
-        var expectedFailure = Lint.Test.createFailure(fileName, [15, 8], [15, 9], "expected call-signature to have a typedef");
+        var expectedFailure1 = Lint.Test.createFailure(fileName, [15, 8], [15, 9], "expected call-signature to have a typedef");
+        var expectedFailure2 = Lint.Test.createFailure(fileName, [4, 19], [4, 20], "expected call-signature: 'PropDef' to have a typedef");
+        var expectedFailure3 = Lint.Test.createFailure(fileName, [25, 23], [25, 24], "expected call-signature: 'name' to have a typedef");
 
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
+        assertFailures(expectedFailure1, expectedFailure2, expectedFailure3);
     });
 
 
     it("enforces typedef in indexSignature", () => {
         var expectedFailure = Lint.Test.createFailure(fileName, [22, 1], [22, 2], "expected index-signature to have a typedef");
 
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
+        assertFailures(expectedFailure);
     });
 
     it("enforces typedef in parameter", () => {
         var expectedFailure1 = Lint.Test.createFailure(fileName, [14, 6], [14, 7], "expected parameter: 'a' to have a typedef");
         var expectedFailure2 = Lint.Test.createFailure(fileName, [15, 6], [15, 7], "expected parameter: 'b' to have a typedef");
         var expectedFailure3 = Lint.Test.createFailure(fileName, [21, 11], [21, 12], "expected parameter: 'index' to have a typedef");
+        var expectedFailure4 = Lint.Test.createFailure(fileName, [31, 21], [31, 22], "expected parameter: 'type' to have a typedef");
 
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure3);
+        assertFailures(expectedFailure1, expectedFailure2, expectedFailure3, expectedFailure4);
     });
 
     it("enforces typedef in property-signature", () => {
@@ -79,7 +89,7 @@ describe("<typedef, enabled>", () => {
             [10, 10],
             "expected property-signature: 'Prop' to have a typedef");
 
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
+        assertFailures(expectedFailure);
     });
 
     it("enforces typedef in variable declarator", () => {
@@ -103,11 +113,13 @@ describe("<typedef, enabled>", () => {
             [23, 27],
             [23, 28],
             "expected member-variable-declarator: 'Prop' to have a typedef");
-
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure3);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure4);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure5);
+        assertFailures(expectedFailure1, expectedFailure2, expectedFailure3, expectedFailure4, expectedFailure5);
     });
+
+    it("only has the expected failures", function() {
+        if (actualFailures.length > 0) {
+            assert(false, "got these extra errors " + JSON.stringify(actualFailures, null, 2));
+        }
+    });
+
 });
