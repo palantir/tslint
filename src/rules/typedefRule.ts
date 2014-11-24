@@ -27,8 +27,9 @@ export class Rule extends Lint.Rules.AbstractRule {
 class TypedefWalker extends Lint.RuleWalker {
 
     public visitCallSignature(node: TypeScript.CallSignatureSyntax): void {
-        this.checkTypeAnnotation("call-signature", node, node.typeAnnotation);
-
+        if (!(<TypeScript.ConstructorDeclarationSyntax>node.parent).constructorKeyword) {
+            this.checkTypeAnnotation("call-signature", node, node.typeAnnotation, node.parent.propertyName);
+        }
         super.visitCallSignature(node);
     }
 
