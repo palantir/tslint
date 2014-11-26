@@ -124,6 +124,10 @@ A sample configuration file with all options is available [here](https://github.
 * `label-position` enforces labels only on sensible statements.
 * `label-undefined` checks that labels are defined before usage.
 * `max-line-length` sets the maximum length of a line.
+* `member-ordering` enforces member ordering. Rule options:
+    * `public-before-private` All public members must be declared before private members
+    * `static-before-instance` All static members must be declared before instance members
+    * `variables-before-functions` All variables needs to be declared before functions
 * `no-any` diallows usages of `any` as a type decoration.
 * `no-arg` disallows access to `arguments.callee`.
 * `no-bitwise` disallows bitwise operators.
