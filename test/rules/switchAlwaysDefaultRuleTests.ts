@@ -28,10 +28,6 @@ describe("<switch-always-default>", () => {
             failureDefault([35, 9], [35, 10])
         ];
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule);
-        actualFailures.every((i) => {
-            //console.log(i.toJson());
-            return true;
-        });
         Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
     });
 });
