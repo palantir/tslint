@@ -58,6 +58,7 @@
     "quotemark": [true, "double"],
     "radix": true,
     "semicolon": true,
+    "switch-always-default": true,
     "triple-equals": [true, "allow-null-check"],
     "typedef": [true,
         "callSignature",
