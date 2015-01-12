@@ -53,7 +53,7 @@ module Lint {
         private source: string;
         private options: ILinterOptions;
 
-        public static VERSION = "1.0.1";
+        public static VERSION = "1.2.0";
 
         constructor(fileName: string, source: string, options: ILinterOptions) {
             this.fileName = fileName;
