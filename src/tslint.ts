@@ -20,7 +20,6 @@
 /// <reference path='ruleLoader.ts'/>
 /// <reference path='configuration.ts'/>
 /// <reference path='formatterLoader.ts'/>
-/// <reference path='enableDisableRules.ts'/>
 
 /// <reference path='language/languageServiceHost.ts'/>
 /// <reference path='language/utils.ts'/>
@@ -63,21 +62,23 @@ module Lint {
 
         public lint(): LintResult {
             var failures: RuleFailure[] = [];
-            var syntaxTree = Lint.getSyntaxTree(this.fileName, this.source);
+            var sourceFile = Lint.getSourceFile(this.fileName, this.source);
 
             // walk the code first to find all the intervals where rules are disabled
+            /*
             var rulesWalker = new EnableDisableRulesWalker(syntaxTree, {ruleName: "", disabledIntervals: []});
             var sourceUnit = syntaxTree.sourceUnit();
             rulesWalker.visitSourceUnit(sourceUnit);
             var enableDisableRuleMap = rulesWalker.enableDisableRuleMap;
+            */
 
             var rulesDirectory = this.getRelativePath(this.options.rulesDirectory);
             var configuration = this.options.configuration.rules;
-            var configuredRules = Lint.loadRules(configuration, enableDisableRuleMap, rulesDirectory);
+            var configuredRules = Lint.loadRules(configuration, {}, rulesDirectory);
             for (var i = 0; i < configuredRules.length; ++i) {
                 var rule = configuredRules[i];
                 if (rule.isEnabled()) {
-                    var ruleFailures = rule.apply(syntaxTree);
+                    var ruleFailures = rule.apply(sourceFile);
                     ruleFailures.forEach ((ruleFailure) => {
                         if (!this.containsRule(failures, ruleFailure)) {
                             failures.push(ruleFailure);
@@ -127,7 +128,6 @@ module Lint {
 // add the Lint and TypeScript modules to global for pluggable formatters/rules
 global.Lint = Lint;
 global.ts = ts;
-global.TypeScript = TypeScript;
 
 // export Lint.Linter as the API interface for this module
 module.exports = Lint.Linter;

@@ -14,33 +14,34 @@
  * limitations under the License.
 */
 
+/// <reference path='syntaxWalker.ts'/>
 /// <reference path='../rule/rule.ts'/>
 /// <reference path='../utils.ts'/>
 
 module Lint {
-    export class RuleWalker extends TypeScript.SyntaxWalker {
+    export class RuleWalker extends Lint.SyntaxWalker {
         private limit: number;
         private position: number;
         private options: any[];
         private failures: RuleFailure[];
-        private syntaxTree: TypeScript.SyntaxTree;
+        private sourceFile: ts.SourceFile;
         private disabledIntervals: Lint.IDisabledInterval[];
         private ruleName: string;
 
-        constructor(syntaxTree: TypeScript.SyntaxTree, options: Lint.IOptions) {
+        constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
             super();
 
             this.position = 0;
             this.failures = [];
             this.options = options.ruleArguments;
-            this.syntaxTree = syntaxTree;
-            this.limit = TypeScript.fullWidth(this.syntaxTree.sourceUnit());
+            this.sourceFile = sourceFile;
+            this.limit = this.sourceFile.getFullWidth();
             this.disabledIntervals = options.disabledIntervals;
             this.ruleName = options.ruleName;
         }
 
-        public getSyntaxTree(): TypeScript.SyntaxTree {
-            return this.syntaxTree;
+        public getSourceFile(): ts.SourceFile {
+            return this.sourceFile;
         }
 
         public getFailures(): RuleFailure[] {
@@ -55,11 +56,11 @@ module Lint {
             return this.limit;
         }
 
-        public positionAfter(...elements: TypeScript.ISyntaxElement[]): number {
+        public positionAfter(...nodes: ts.Node[]): number {
             var position = this.getPosition();
-            elements.forEach((element) => {
-                if (element !== null) {
-                    position += TypeScript.fullWidth(element);
+            nodes.forEach((node) => {
+                if (node !== null) {
+                    position += node.getFullWidth();
                 }
             });
             return position;
@@ -77,21 +78,24 @@ module Lint {
             }
         }
 
-        public skip(element: TypeScript.ISyntaxElement) {
-            this.position += TypeScript.fullWidth(element);
+        public skip(node: ts.Node) {
+            this.position += node.getFullWidth();
         }
 
-        public visitToken(token: TypeScript.ISyntaxToken): void {
+        // TODO: no idea yet about what to do here
+        /*
+        public visitToken(token: ts.Node): void {
             super.visitToken(token);
-            this.position += TypeScript.fullWidth(token);
+            this.position += token.getFullWidth();
         }
+        */
 
         // create a failure at the given position
         public createFailure(start: number, width: number, failure: string): Lint.RuleFailure {
             var from = (start > this.limit) ? this.limit : start;
             var to = ((start + width) > this.limit) ? this.limit : (start + width);
 
-            return new Lint.RuleFailure(this.syntaxTree, from, to, failure, this.ruleName);
+            return new Lint.RuleFailure(this.sourceFile, from, to, failure, this.ruleName);
         }
 
         public addFailure(failure: RuleFailure) {

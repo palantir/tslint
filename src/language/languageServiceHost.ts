@@ -17,55 +17,25 @@
 /* tslint:disable:no-unused-variable */
 
 module Lint {
-    export class LanguageServiceHost extends TypeScript.NullLogger implements ts.LanguageServiceHost {
-        private syntaxTree: TypeScript.SyntaxTree;
-        private source: string;
+    export function createLanguageServiceHost(fileName: string, source: string) {
+        var host: ts.LanguageServiceHost = {
+            getScriptFileNames: () => [fileName],
+            getScriptVersion: (filename) => "1",
+            getScriptSnapshot: (filename) => {
+                return {
+                    getText: (start, end) => source.substring(start, end),
+                    getLength: () => source.length,
+                    getLineStartPositions: () => [],
+                    getChangeRange: (oldSnapshot) => undefined
+                };
+            },
+            getCurrentDirectory: () => "",
+            getScriptIsOpen: () => false,
+            getCompilationSettings: () => Lint.createCompilerOptions(),
+            getDefaultLibFilename:(options) => "lib.d.ts",
+            log: (message) => { /* */ }
+        };
 
-        constructor(syntaxTree: TypeScript.SyntaxTree, source: string) {
-            super();
-            this.syntaxTree = syntaxTree;
-            this.source = source;
-        }
-
-        public getCompilationSettings() {
-            return Lint.createCompilerOptions();
-        }
-
-        public getCurrentDirectory(): string {
-            return "";
-        }
-
-        public getDefaultLibFilename(): string {
-            return "";
-        }
-
-        public getScriptFileNames() {
-            return [ this.syntaxTree.fileName() ];
-        }
-
-        public getScriptVersion(fileName: string) {
-            return "0";
-        }
-
-        public getScriptIsOpen(fileName: string) {
-            return false;
-        }
-
-        public getScriptSnapshot(fileName: string): TypeScript.IScriptSnapshot {
-            var sourceUnit = this.syntaxTree.sourceUnit();
-            return TypeScript.ScriptSnapshot.fromString(TypeScript.fullText(sourceUnit));
-        }
-
-        public getLocalizedDiagnosticMessages() {
-            return "";
-        }
-
-        public getCancellationToken() {
-            return {
-                isCancellationRequested() {
-                    return false;
-                }
-            };
-        }
+        return host;
     }
 }

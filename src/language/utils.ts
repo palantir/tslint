@@ -17,14 +17,11 @@
 module Lint {
     var path = require("path");
 
-    export function getSyntaxTree(fileName: string, source: string): TypeScript.SyntaxTree {
+    export function getSourceFile(fileName: string, source: string): ts.SourceFile {
         var normalizedName = path.normalize(fileName);
         var compilerOptions = createCompilerOptions();
-        var isDTSFile = TypeScript.isDTSFile(normalizedName);
-        var simpleText = TypeScript.SimpleText.fromString(source);
-        var sourceFile = ts.createSourceFile(normalizedName, source, compilerOptions.target, "0");
 
-        return TypeScript.Parser.parse(normalizedName, simpleText, compilerOptions.target, isDTSFile);
+        return ts.createSourceFile(normalizedName, source, compilerOptions.target, "0");
     }
 
     export function createCompilerOptions(): ts.CompilerOptions {
@@ -45,5 +42,9 @@ module Lint {
             }
         });
         return intersectionExists;
+    }
+
+    export function abstract() {
+        return "abstract method not implemented";
     }
 }

@@ -20,13 +20,15 @@ module Lint {
 
     export interface RuleWalkerState {
         position: number;
-        token: TypeScript.ISyntaxToken;
+        token: ts.Node;
     }
 
+    // TODO: check if this class is needed
+    /*
     export class StateAwareRuleWalker extends RuleWalker {
         private lastState: RuleWalkerState;
 
-        public visitToken(token: TypeScript.ISyntaxToken): void {
+        public visitToken(token: ts.Node): void {
             // Skip compiler insertions of empty tokens
             if (TypeScript.tokenValue(token) !== null) {
                 this.lastState = {
@@ -42,5 +44,5 @@ module Lint {
             return this.lastState;
         }
     }
-
+    */
 }

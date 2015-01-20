@@ -20,14 +20,14 @@ module Lint {
     export class ScopeAwareRuleWalker<T> extends RuleWalker {
         private scopeStack: T[];
 
-        constructor(syntaxTree: TypeScript.SyntaxTree, options?: any) {
-            super(syntaxTree, options);
+        constructor(sourceFile: ts.SourceFile, options?: any) {
+            super(sourceFile, options);
 
             // initialize stack with global scope
             this.scopeStack = [this.createScope()];
         }
 
-        public visitNode(node: TypeScript.SyntaxNode): void {
+        public visitNode(node: ts.Node): void {
             var isNewScope = this.isScopeBoundary(node);
 
             if (isNewScope) {
@@ -45,7 +45,7 @@ module Lint {
 
         // create a new scope
         public createScope(): T {
-            throw TypeScript.Errors.abstract();
+            throw Lint.abstract();
         }
 
         // get the current scope
@@ -68,19 +68,20 @@ module Lint {
             return;
         }
 
-        private isScopeBoundary(node: TypeScript.SyntaxNode): boolean {
-            return node instanceof TypeScript.Syntax.Concrete.FunctionDeclarationSyntax
-                || node instanceof TypeScript.Syntax.Concrete.FunctionExpressionSyntax
-                || node instanceof TypeScript.Syntax.Concrete.FunctionPropertyAssignmentSyntax
-                || node instanceof TypeScript.Syntax.Concrete.MemberFunctionDeclarationSyntax
-                || node instanceof TypeScript.Syntax.Concrete.ConstructorDeclarationSyntax
-                || node instanceof TypeScript.Syntax.Concrete.ModuleDeclarationSyntax
-                || node instanceof TypeScript.Syntax.Concrete.SimpleArrowFunctionExpressionSyntax
-                || node instanceof TypeScript.Syntax.Concrete.ParenthesizedArrowFunctionExpressionSyntax
-                || node instanceof TypeScript.Syntax.Concrete.ClassDeclarationSyntax
-                || node instanceof TypeScript.Syntax.Concrete.InterfaceDeclarationSyntax
-                || node instanceof TypeScript.Syntax.Concrete.GetAccessorSyntax
-                || node instanceof TypeScript.Syntax.Concrete.SetAccessorSyntax;
+        private isScopeBoundary(node: ts.Node): boolean {
+            return node.kind === ts.SyntaxKind.FunctionDeclaration
+                || node.kind === ts.SyntaxKind.FunctionExpression
+                || node.kind === ts.SyntaxKind.PropertyAssignment
+                || node.kind === ts.SyntaxKind.ShorthandPropertyAssignment
+                || node.kind === ts.SyntaxKind.Method
+                || node.kind === ts.SyntaxKind.Constructor
+                || node.kind === ts.SyntaxKind.ModuleDeclaration
+                || node.kind === ts.SyntaxKind.ArrowFunction
+                || node.kind === ts.SyntaxKind.ParenthesizedExpression
+                || node.kind === ts.SyntaxKind.ClassDeclaration
+                || node.kind === ts.SyntaxKind.InterfaceDeclaration
+                || node.kind === ts.SyntaxKind.GetAccessor
+                || node.kind === ts.SyntaxKind.SetAccessor;
         }
     }
 }
