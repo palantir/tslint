@@ -18,22 +18,22 @@
 
 describe("PMD Formatter", () => {
     var TEST_FILE = "formatters/pmdFormatter.test.ts";
-    var syntaxTree, formatter;
+    var sourceFile, formatter;
 
     before(function() {
         var Formatter = Lint.Test.getFormatter("pmd");
-        syntaxTree = Lint.Test.getSyntaxTree(TEST_FILE);
+        sourceFile = Lint.Test.getSourceFile(TEST_FILE);
         formatter = new Formatter();
     });
 
     it("formats failures", () => {
-        var maxPosition = TypeScript.fullWidth(syntaxTree.sourceUnit());
+        var maxPosition = sourceFile.getFullWidth();
 
         var failures = [
-            new Lint.RuleFailure(syntaxTree, 0, 1, "first failure", "first-name"),
-            new Lint.RuleFailure(syntaxTree, 2, 3, "&<>'\" should be escaped", "escape"),
-            new Lint.RuleFailure(syntaxTree, maxPosition - 1, maxPosition, "last failure", "last-name"),
-            new Lint.RuleFailure(syntaxTree, 0, maxPosition, "full failure", "full-name")
+            new Lint.RuleFailure(sourceFile, 0, 1, "first failure", "first-name"),
+            new Lint.RuleFailure(sourceFile, 2, 3, "&<>'\" should be escaped", "escape"),
+            new Lint.RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name"),
+            new Lint.RuleFailure(sourceFile, 0, maxPosition, "full failure", "full-name")
         ];
         var expectedResult =
             "<pmd version=\"tslint\">" +

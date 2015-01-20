@@ -95,6 +95,10 @@ module.exports = function(grunt) {
       test: {
         src: [
           'test/**/*.ts',
+          
+          '!test/rules/*.ts',
+          'test/rules/banRuleTests.ts',
+
           '!test/files/**/*.ts'
         ],
         out: 'build/tslint-tests.js'

@@ -19,20 +19,20 @@
 describe("External Formatter", () => {
     var TEST_FILE = "formatters/externalFormatter.test.ts";
     var TEST_MODULE = "../test/files/formatters/simple";
-    var syntaxTree, formatter;
+    var sourceFile, formatter;
 
     before(function() {
         var Formatter = Lint.Test.getFormatter(TEST_MODULE);
-        syntaxTree = Lint.Test.getSyntaxTree(TEST_FILE);
+        sourceFile = Lint.Test.getSourceFile(TEST_FILE);
         formatter = new Formatter();
     });
     it("formats failures", () => {
-        var maxPosition =  TypeScript.fullWidth(syntaxTree.sourceUnit());
+        var maxPosition = sourceFile.getFullWidth();
 
         var failures = [
-            new Lint.RuleFailure(syntaxTree, 0, 1, "first failure", "first-name"),
-            new Lint.RuleFailure(syntaxTree, 32, 36, "mid failure", "mid-name"),
-            new Lint.RuleFailure(syntaxTree, maxPosition - 1, maxPosition, "last failure", "last-name")
+            new Lint.RuleFailure(sourceFile, 0, 1, "first failure", "first-name"),
+            new Lint.RuleFailure(sourceFile, 32, 36, "mid failure", "mid-name"),
+            new Lint.RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name")
         ];
 
         var expectedResult =
@@ -41,6 +41,7 @@ describe("External Formatter", () => {
             getPositionString(9, 2) + TEST_FILE + "\n";
 
         var actualResult = formatter.format(failures);
+
         assert.equal(actualResult, expectedResult);
     });
 

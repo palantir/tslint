@@ -18,21 +18,21 @@
 
 describe("Prose Formatter", () => {
     var TEST_FILE = "formatters/proseFormatter.test.ts";
-    var syntaxTree, formatter;
+    var sourceFile, formatter;
 
     before(function() {
         var Formatter = Lint.Test.getFormatter("prose");
-        syntaxTree = Lint.Test.getSyntaxTree(TEST_FILE);
+        sourceFile = Lint.Test.getSourceFile(TEST_FILE);
         formatter = new Formatter();
     });
 
     it("formats failures", () => {
-        var maxPosition = TypeScript.fullWidth(syntaxTree.sourceUnit());
+        var maxPosition = sourceFile.getFullWidth();
 
         var failures = [
-            new Lint.RuleFailure(syntaxTree, 0, 1, "first failure", "first-name"),
-            new Lint.RuleFailure(syntaxTree, 32, 36, "mid failure", "mid-name"),
-            new Lint.RuleFailure(syntaxTree, maxPosition - 1, maxPosition, "last failure", "last-name")
+            new Lint.RuleFailure(sourceFile, 0, 1, "first failure", "first-name"),
+            new Lint.RuleFailure(sourceFile, 32, 36, "mid failure", "mid-name"),
+            new Lint.RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name")
         ];
 
         var expectedResult =

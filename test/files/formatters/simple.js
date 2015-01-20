@@ -13,8 +13,8 @@ SimpleFormatter.prototype = Object.create({
             var fileName = failure.getFileName();
 
             var lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
-            var line = lineAndCharacter.line() + 1;
-            var character = lineAndCharacter.character() + 1;
+            var line = lineAndCharacter.line;
+            var character = lineAndCharacter.character;
 
             output += "[" + line + ", " + character + "]" + fileName + "\n";
         }

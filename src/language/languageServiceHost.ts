@@ -32,7 +32,7 @@ module Lint {
             getCurrentDirectory: () => "",
             getScriptIsOpen: () => false,
             getCompilationSettings: () => Lint.createCompilerOptions(),
-            getDefaultLibFilename:(options) => "lib.d.ts",
+            getDefaultLibFilename: (options) => "lib.d.ts",
             log: (message) => { /* */ }
         };
 
