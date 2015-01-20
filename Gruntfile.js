@@ -1,5 +1,5 @@
 module.exports = function(grunt) {
-  grunt.initConfig({    
+  grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
 
     clean: {
@@ -77,7 +77,9 @@ module.exports = function(grunt) {
         },
         src: [
           'lib/tslint.d.ts',
-          'src/rules/banRule.ts'
+          'src/rules/banRule.ts',
+          'src/rules/classNameRule.ts',
+          'src/rules/curlyRule.ts'
         ],
         outDir: 'build/rules/'
       },

@@ -52,6 +52,12 @@ declare module Lint {
         visitBinaryExpression(node: ts.BinaryExpression): void;
         visitClassDeclaration(node: ts.ClassDeclaration): void;
         visitInterfaceDeclaration(node: ts.InterfaceDeclaration): void;
+        visitCallExpression(node: ts.CallExpression): void;
+        visitForInStatement(node: ts.ForInStatement): void;
+        visitForStatement(node: ts.ForStatement): void;
+        visitIfStatement(node: ts.IfStatement): void;
+        visitDoStatement(node: ts.DoStatement): void;
+        visitWhileStatement(node: ts.WhileStatement): void;
         visitNode(node: ts.Node): void;
         walk(node: ts.Node): void;
     }

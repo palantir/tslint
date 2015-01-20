@@ -14,14 +14,12 @@
  * limitations under the License.
 */
 
-/// <reference path='../../lib/tslint.d.ts' />
-
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_PART = "function invocation disallowed: ";
 
-    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
+    public apply(source: ts.SourceFile): Lint.RuleFailure[] {
         var options = this.getOptions();
-        var banFunctionWalker = new BanFunctionWalker(syntaxTree, options);
+        var banFunctionWalker = new BanFunctionWalker(source, options);
         var functionsToBan = options.ruleArguments;
         functionsToBan.forEach((functionToBan) => {
             banFunctionWalker.addBannedFunction(functionToBan);
@@ -37,25 +35,24 @@ export class BanFunctionWalker extends Lint.RuleWalker {
         this.bannedFunctions.push(bannedFunction);
     }
 
-    public visitInvocationExpression(node: TypeScript.InvocationExpressionSyntax): void {
+    public visitCallExpression(node: ts.CallExpression): void {
         var expression = node.expression;
 
-        if (expression.kind() === TypeScript.SyntaxKind.MemberAccessExpression &&
-            TypeScript.childCount(expression) >= 3) {
+        if (expression.kind === ts.SyntaxKind.PropertyAccessExpression &&
+            expression.getChildCount() >= 3) {
 
-            var firstToken = TypeScript.firstToken(expression);
-            var secondToken = TypeScript.childAt(expression, 1);
-            var thirdToken = TypeScript.childAt(expression, 2);
+            var firstToken = expression.getFirstToken();
+            var secondToken = expression.getChildAt(1);
+            var thirdToken = expression.getChildAt(2);
 
-            var firstText = firstToken.text();
-            var thirdText = TypeScript.fullText(thirdToken);
+            var firstText = firstToken.getText();
+            var thirdText = thirdToken.getFullText();
 
-            if (secondToken.kind() === TypeScript.SyntaxKind.DotToken) {
+            if (secondToken.kind === ts.SyntaxKind.DotToken) {
                 this.bannedFunctions.forEach((bannedFunction) => {
                     if (firstText === bannedFunction[0] && thirdText === bannedFunction[1]) {
-                        var position = this.getPosition() + TypeScript.leadingTriviaWidth(node);
-                        var failure = this.createFailure(position,
-                                                         TypeScript.width(expression),
+                        var failure = this.createFailure(expression.getStart(),
+                                                         expression.getWidth(),
                                                          Rule.FAILURE_STRING_PART + firstText + "." + thirdText);
                         this.addFailure(failure);
                     }
@@ -63,6 +60,6 @@ export class BanFunctionWalker extends Lint.RuleWalker {
             }
         }
 
-        super.visitInvocationExpression(node);
+        super.visitCallExpression(node);
     }
 }

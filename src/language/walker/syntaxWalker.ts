@@ -29,6 +29,30 @@ module Lint {
             //
         }
 
+        public visitCallExpression(node: ts.CallExpression) {
+            //
+        }
+
+        public visitForInStatement(node: ts.ForInStatement) {
+            //
+        }
+
+        public visitForStatement(node: ts.ForStatement) {
+            //
+        }
+
+        public visitIfStatement(node: ts.IfStatement) {
+            //
+        }
+
+        public visitDoStatement(node: ts.DoStatement) {
+            //
+        }
+
+        public visitWhileStatement(node: ts.WhileStatement) {
+            //
+        }
+
         public visitNode(node: ts.Node) {
             //
         }
@@ -47,6 +71,30 @@ module Lint {
 
                 case ts.SyntaxKind.BinaryExpression:
                     this.visitBinaryExpression(<ts.BinaryExpression> node);
+                    break;
+
+                case ts.SyntaxKind.CallExpression:
+                    this.visitCallExpression(<ts.CallExpression> node);
+                    break;
+
+                case ts.SyntaxKind.ForInStatement:
+                    this.visitForInStatement(<ts.ForInStatement> node);
+                    break;
+
+                case ts.SyntaxKind.ForStatement:
+                    this.visitForStatement(<ts.ForStatement> node);
+                    break;
+
+                case ts.SyntaxKind.IfStatement:
+                    this.visitIfStatement(<ts.IfStatement> node);
+                    break;
+
+                case ts.SyntaxKind.DoStatement:
+                    this.visitDoStatement(<ts.DoStatement> node);
+                    break;
+
+                case ts.SyntaxKind.WhileStatement:
+                    this.visitWhileStatement(<ts.WhileStatement> node);
                     break;
             }
 

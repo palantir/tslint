@@ -14,8 +14,6 @@
  * limitations under the License.
 */
 
-/// <reference path='../../lib/tslint.d.ts' />
-
 export class Rule extends Lint.Rules.AbstractRule {
     public static DO_FAILURE_STRING = "do statements must be braced";
     public static ELSE_FAILURE_STRING = "else statements must be braced";
@@ -23,13 +21,13 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static IF_FAILURE_STRING = "if statements must be braced";
     public static WHILE_FAILURE_STRING = "while statements must be braced";
 
-    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new CurlyWalker(syntaxTree, this.getOptions()));
+    public apply(source: ts.SourceFile): Lint.RuleFailure[] {
+        return this.applyWithWalker(new CurlyWalker(source, this.getOptions()));
     }
 }
 
 class CurlyWalker extends Lint.RuleWalker {
-    public visitForInStatement(node: TypeScript.ForInStatementSyntax): void {
+    public visitForInStatement(node: ts.ForInStatement): void {
         if (!this.isStatementBraced(node.statement)) {
             this.addFailureForNode(node, Rule.FOR_FAILURE_STRING);
         }
@@ -37,7 +35,7 @@ class CurlyWalker extends Lint.RuleWalker {
         super.visitForInStatement(node);
     }
 
-    public visitForStatement(node: TypeScript.ForStatementSyntax): void {
+    public visitForStatement(node: ts.ForStatement): void {
         if (!this.isStatementBraced(node.statement)) {
             this.addFailureForNode(node, Rule.FOR_FAILURE_STRING);
         }
@@ -45,24 +43,18 @@ class CurlyWalker extends Lint.RuleWalker {
         super.visitForStatement(node);
     }
 
-    public visitIfStatement(node: TypeScript.IfStatementSyntax): void {
-        if (!this.isStatementBraced(node.statement)) {
+    public visitIfStatement(node: ts.IfStatement): void {
+        if (!this.isStatementBraced(node.thenStatement)) {
             this.addFailureForNode(node, Rule.IF_FAILURE_STRING);
+        }
+        if (node.elseStatement != null && !this.isStatementBraced(node.elseStatement)) {
+            this.addFailureForNode(node, Rule.ELSE_FAILURE_STRING);
         }
 
         super.visitIfStatement(node);
     }
 
-    public visitElseClause(node: TypeScript.ElseClauseSyntax): void {
-        if (node.statement.kind() !== TypeScript.SyntaxKind.IfStatement &&
-            !this.isStatementBraced(node.statement)) {
-            this.addFailureForNode(node, Rule.ELSE_FAILURE_STRING);
-        }
-
-        super.visitElseClause(node);
-    }
-
-    public visitDoStatement(node: TypeScript.DoStatementSyntax): void {
+    public visitDoStatement(node: ts.DoStatement): void {
         if (!this.isStatementBraced(node.statement)) {
             this.addFailureForNode(node, Rule.DO_FAILURE_STRING);
         }
@@ -70,7 +62,7 @@ class CurlyWalker extends Lint.RuleWalker {
         super.visitDoStatement(node);
     }
 
-    public visitWhileStatement(node: TypeScript.WhileStatementSyntax): void {
+    public visitWhileStatement(node: ts.WhileStatement): void {
         if (!this.isStatementBraced(node.statement)) {
             this.addFailureForNode(node, Rule.WHILE_FAILURE_STRING);
         }
@@ -78,25 +70,14 @@ class CurlyWalker extends Lint.RuleWalker {
         super.visitWhileStatement(node);
     }
 
-    private isStatementBraced(node: TypeScript.IStatementSyntax): boolean {
-        var childCount = TypeScript.childCount(node);
-        if (childCount === 3) {
-            if (TypeScript.childAt(node, 0).kind() === TypeScript.SyntaxKind.FirstPunctuation &&
-                TypeScript.childAt(node, 1).kind() === TypeScript.SyntaxKind.List &&
-                TypeScript.childAt(node, 2).kind() === TypeScript.SyntaxKind.CloseBraceToken) {
-
-                return true;
-            }
+    private isStatementBraced(node: ts.Statement): boolean {
+        if (node.kind === ts.SyntaxKind.Block) {
+            return true;
         }
-
         return false;
     }
 
-    private addFailureForNode(node: TypeScript.ISyntaxElement, failure: string) {
-        var leadingWidth = TypeScript.leadingTriviaWidth(node);
-        var start = this.getPosition() + leadingWidth;
-        var end = TypeScript.width(node);
-
-        this.addFailure(this.createFailure(start, end, failure));
+    private addFailureForNode(node: ts.Node, failure: string) {
+        this.addFailure(this.createFailure(node.getStart(), node.getWidth(), failure));
     }
 }
