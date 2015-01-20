@@ -26,8 +26,8 @@ export class Formatter extends Lint.Formatters.AbstractFormatter {
             var ruleName = failure.getRuleName();
 
             var lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
-            var line = lineAndCharacter.line() + 1;
-            var character = lineAndCharacter.character() + 1;
+            var line = lineAndCharacter.line + 1;
+            var character = lineAndCharacter.character + 1;
 
             output += "(" + ruleName + ") " + fileName + "[" + line + ", " + character + "]: " + failureString + "\n";
         }

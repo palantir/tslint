@@ -77,7 +77,7 @@ module.exports = function(grunt) {
         },
         src: [
           'lib/tslint.d.ts',
-          'src/rules/*.ts'
+          'src/rules/banRule.ts'
         ],
         outDir: 'build/rules/'
       },
