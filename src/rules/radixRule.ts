@@ -27,11 +27,15 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class RadixWalker extends Lint.RuleWalker {
     public visitCallExpression(node: ts.CallExpression): void {
-        if (node.expression.kind === ts.SyntaxKind.Identifier &&
+        var expression = node.expression;
+
+        if (expression.kind === ts.SyntaxKind.Identifier &&
                 node.getFirstToken().getText() === "parseInt" &&
                 node.arguments.length < 2) {
-            var position = this.getPosition() + node.getLeadingTriviaWidth();
-            this.addFailure(this.createFailure(position, node.getWidth(), Rule.FAILURE_STRING));
+
+            this.addFailure(this.createFailure(node.getStart(),
+                                               node.getWidth(),
+                                               Rule.FAILURE_STRING));
         }
 
         super.visitCallExpression(node);

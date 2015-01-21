@@ -83,7 +83,7 @@ module.exports = function(grunt) {
           'src/rules/eoflineRule.ts',
           'src/rules/forInRule.ts',
           'src/rules/interfaceNameRule.ts',
-          'src/rules/labelPositionRule.ts'
+          'src/rules/labelPositionRule.ts',
           'src/rules/radixRule.ts'
         ],
         outDir: 'build/rules/'

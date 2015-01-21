@@ -22,7 +22,7 @@ describe("<radix>", () => {
         var RadixRule = Lint.Test.getRule("radix");
         var failureString = RadixRule.FAILURE_STRING;
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, RadixRule);
-        var expectedFailure = Lint.Test.createFailure(fileName, [1, 9], [1, 20], failureString);
+        var expectedFailure = Lint.Test.createFailure(fileName, [2, 9], [2, 20], failureString);
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
