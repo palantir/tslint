@@ -100,6 +100,8 @@ module.exports = function(grunt) {
           
           '!test/rules/*.ts',
           'test/rules/banRuleTests.ts',
+          'test/rules/classNameRuleTests.ts',
+          'test/rules/curlyRuleTests.ts',
 
           '!test/files/**/*.ts'
         ],
