@@ -19,81 +19,78 @@
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "missing semicolon";
 
-    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new SemicolonWalker(syntaxTree, this.getOptions()));
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        return this.applyWithWalker(new SemicolonWalker(sourceFile, this.getOptions()));
     }
 }
 
 class SemicolonWalker extends Lint.RuleWalker {
-    public visitVariableStatement(node: TypeScript.VariableStatementSyntax) {
-        var position = this.positionAfter(node.modifiers, node.variableDeclaration);
-        this.checkSemicolonAt(node.semicolonToken, position);
+    public visitVariableStatement(node: ts.VariableStatement) {
+        this.checkSemicolonAt(node);
 
         super.visitVariableStatement(node);
     }
 
-    public visitExpressionStatement(node: TypeScript.ExpressionStatementSyntax) {
-        var position = this.positionAfter(node.expression);
-        this.checkSemicolonAt(node.semicolonToken, position);
+    public visitExpressionStatement(node: ts.ExpressionStatement) {
+        this.checkSemicolonAt(node);
 
         super.visitExpressionStatement(node);
     }
 
-    public visitReturnStatement(node: TypeScript.ReturnStatementSyntax) {
-        var position = this.positionAfter(node.returnKeyword, node.expression);
-        this.checkSemicolonAt(node.semicolonToken, position);
+    public visitReturnStatement(node: ts.ReturnStatement) {
+        this.checkSemicolonAt(node);
 
         super.visitReturnStatement(node);
     }
 
-    public visitBreakStatement(node: TypeScript.BreakStatementSyntax) {
-        var position = this.positionAfter(node.breakKeyword, node.identifier);
-        this.checkSemicolonAt(node.semicolonToken, position);
+    public visitBreakStatement(node: ts.BreakOrContinueStatement) {
+        this.checkSemicolonAt(node);
 
         super.visitBreakStatement(node);
     }
 
-    public visitContinueStatement(node: TypeScript.ContinueStatementSyntax) {
-        var position = this.positionAfter(node.continueKeyword, node.identifier);
-        this.checkSemicolonAt(node.semicolonToken, position);
+    public visitContinueStatement(node: ts.BreakOrContinueStatement) {
+        this.checkSemicolonAt(node);
 
         super.visitContinueStatement(node);
     }
 
-    public visitThrowStatement(node: TypeScript.ThrowStatementSyntax) {
-        var position = this.positionAfter(node.throwKeyword, node.expression);
-        this.checkSemicolonAt(node.semicolonToken, position);
+    public visitThrowStatement(node: ts.ThrowStatement) {
+        this.checkSemicolonAt(node);
 
         super.visitThrowStatement(node);
     }
 
-    public visitDoStatement(node: TypeScript.DoStatementSyntax) {
-        var position = this.positionAfter(node.doKeyword,
-                                          node.statement,
-                                          node.whileKeyword,
-                                          node.openParenToken,
-                                          node.condition,
-                                          node.closeParenToken);
-        this.checkSemicolonAt(node.semicolonToken, position);
+    public visitImportDeclaration(node: ts.ImportDeclaration) {
+        this.checkSemicolonAt(node);
+
+        super.visitImportDeclaration(node);
+    }
+
+    public visitDoStatement(node: ts.DoStatement) {
+        this.checkSemicolonAt(node);
 
         super.visitDoStatement(node);
     }
 
-    public visitDebuggerStatement(node: TypeScript.DebuggerStatementSyntax) {
-        var position = this.positionAfter(node.debuggerKeyword);
-        this.checkSemicolonAt(node.semicolonToken, position);
+    public visitDebuggerStatement(node: ts.Statement) {
+        this.checkSemicolonAt(node);
 
         super.visitDebuggerStatement(node);
     }
 
-    private checkSemicolonAt(token: TypeScript.ISyntaxToken, position: number) {
-        // if there is a semi-colon token, just return
-        if (token != null) {
-            return;
+    private checkSemicolonAt(node: ts.Node) {
+        var children = node.getChildren(this.getSourceFile());
+        for (var i = 0; i < children.length; i++) {
+            var child = children[i];
+            if (child.kind === ts.SyntaxKind.SemicolonToken) {
+                return;
+            }
         }
 
-        // otherwise, add a failure at the given position
-        var adjustedPosition = (position <= this.getLimit()) ? position - 1 : position;
-        this.addFailure(this.createFailure(adjustedPosition, 0, Rule.FAILURE_STRING));
+        // no semicolon token was found, so add a failure at the given position
+        var sourceFile = this.getSourceFile();
+        var position = node.getStart(sourceFile) + node.getWidth(sourceFile);
+        this.addFailure(this.createFailure(Math.min(position, this.getLimit()), 0, Rule.FAILURE_STRING));
     }
 }

@@ -61,6 +61,10 @@ module Lint {
             //
         }
 
+        public visitImportDeclaration(node: ts.ImportDeclaration) {
+            //
+        }
+
         public visitInterfaceDeclaration(node: ts.InterfaceDeclaration) {
             //
         }
@@ -141,6 +145,10 @@ module Lint {
 
                 case ts.SyntaxKind.IfStatement:
                     this.visitIfStatement(<ts.IfStatement> node);
+                    break;
+
+                case ts.SyntaxKind.ImportDeclaration:
+                    this.visitImportDeclaration(<ts.ImportDeclaration> node);
                     break;
 
                 case ts.SyntaxKind.InterfaceDeclaration:

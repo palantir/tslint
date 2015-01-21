@@ -23,11 +23,11 @@ throw new Error("some error")
 
 do {
     var a = 4
-} while(x == 3)  
+} while(x == 3)
 
 debugger
 
-var v = import("i")
+import v = require("i")
 module M {
     export var x
 }
