@@ -48,8 +48,8 @@ module Lint.Test {
     // being (one-indexed) line and character positions respectively
     export function createFailure(fileName: string, start: number[], end: number[], failure: string): Lint.RuleFailure {
         var sourceFile = getSourceFile(fileName);
-        var startPosition = sourceFile.getPositionFromLineAndCharacter(start[0] - 1, start[1] - 1);
-        var endPosition = sourceFile.getPositionFromLineAndCharacter(end[0] - 1, end[1] - 1);
+        var startPosition = sourceFile.getPositionFromLineAndCharacter(start[0], start[1]);
+        var endPosition = sourceFile.getPositionFromLineAndCharacter(end[0], end[1]);
 
         return new Lint.RuleFailure(sourceFile, startPosition, endPosition, failure, "");
     }
@@ -80,6 +80,9 @@ module Lint.Test {
             }
         }
 
-        assert(false, "expected " + JSON.stringify(needle.toJson(), null, 2) + " within " + JSON.stringify(haystack, null, 2));
+        console.log("hay", haystack);
+
+        assert(false, "expected " + JSON.stringify(needle.toJson(), null, 2) + " within " +
+            JSON.stringify(haystack.map((hay) => hay.toJson()), null, 2));
     }
 }

@@ -20,8 +20,21 @@ module Lint {
     export function getSourceFile(fileName: string, source: string): ts.SourceFile {
         var normalizedName = path.normalize(fileName);
         var compilerOptions = createCompilerOptions();
+        var compilerHost = {
+            getSourceFile: function(filenameToGet, languageVersion) {
+                if (filenameToGet === fileName)
+                    return ts.createSourceFile(filenameToGet, source, compilerOptions.target, "0");
+                return undefined;
+            },
+            writeFile: () => {},
+            getDefaultLibFilename: function() { return "lib.d.ts"; },
+            useCaseSensitiveFileNames: function() { return false; },
+            getCanonicalFileName: function(filename) { return filename; },
+            getCurrentDirectory: function() { return ""; },
+            getNewLine: function() { return "\n"; }
+        };
 
-        return ts.createSourceFile(normalizedName, source, compilerOptions.target, "0");
+        return ts.createProgram([normalizedName], compilerOptions, compilerHost).getSourceFile(normalizedName);
     }
 
     export function createCompilerOptions(): ts.CompilerOptions {
