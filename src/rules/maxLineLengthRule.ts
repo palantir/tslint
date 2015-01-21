@@ -14,8 +14,6 @@
  * limitations under the License.
 */
 
-/// <reference path='../../lib/tslint.d.ts' />
-
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "exceeds maximum line length of ";
 
@@ -30,15 +28,14 @@ export class Rule extends Lint.Rules.AbstractRule {
         return false;
     }
 
-    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         var ruleFailures: Lint.RuleFailure[] = [];
         var lineLimit = this.getOptions().ruleArguments[0];
-        var lineMap = syntaxTree.lineMap();
-        var lineStarts = lineMap.lineStarts();
+        var lineStarts = sourceFile.getLineStarts();
         var errorString = Rule.FAILURE_STRING + lineLimit;
         var disabledIntervals = this.getOptions().disabledIntervals;
 
-        var source = TypeScript.fullText(syntaxTree.sourceUnit());
+        var source = sourceFile.getFullText();
 
         for (var i = 0; i < lineStarts.length - 1; ++i) {
             var from = lineStarts[i], to = lineStarts[i + 1];
@@ -48,7 +45,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 // that we are only over by the limit by exactly one and that the character we are over the
                 // limit by is a '\r' character which does not count against the limit
                 // (and thus we are not actually over the limit).
-                var ruleFailure = new Lint.RuleFailure(syntaxTree, from, to - 1, errorString, this.getOptions().ruleName);
+                var ruleFailure = new Lint.RuleFailure(sourceFile, from, to - 1, errorString, this.getOptions().ruleName);
                 if (!Lint.doesIntersect(ruleFailure, disabledIntervals)) {
                     ruleFailures.push(ruleFailure);
                 }
