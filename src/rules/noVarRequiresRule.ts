@@ -19,31 +19,33 @@
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "require statement not part of an import statment";
 
-    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new RequiresWalker(syntaxTree, this.getOptions()));
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        var requiresWalker = new RequiresWalker(sourceFile, this.getOptions());
+        return this.applyWithWalker(requiresWalker);
     }
 }
 
 class RequiresWalker extends Lint.ScopeAwareRuleWalker<{}> {
 
-    constructor(syntaxTree: TypeScript.SyntaxTree, options: Lint.IOptions) {
-        super(syntaxTree, options);
+    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
+        super(sourceFile, options);
     }
 
     public createScope(): {} {
         return {};
     }
 
-    public visitInvocationExpression(node: TypeScript.InvocationExpressionSyntax) {
-        if (this.getCurrentDepth() <= 1 && TypeScript.isToken(node.expression)) {
-            var expressionText = (<TypeScript.ISyntaxToken> node.expression).text();
-            if (expressionText === "require") {
-                // if we're using require as invocation then it's not part of an import statement
-                var position = this.getPosition() + TypeScript.leadingTriviaWidth(node);
-                this.addFailure(this.createFailure(position, TypeScript.width(node), Rule.FAILURE_STRING));
-            }
+    public visitCallExpression(node: ts.CallExpression) {
+        var expression = node.expression;
+
+        if (this.getCurrentDepth() <= 1 &&
+                expression.kind === ts.SyntaxKind.Identifier &&
+                node.getFirstToken().getText() === "require") {
+            // if we're calling (invoking) require, then it's not part of an import statement
+            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
         }
-        super.visitInvocationExpression(node);
+
+        super.visitCallExpression(node);
     }
 
 }
