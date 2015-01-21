@@ -21,11 +21,9 @@ export class Rule extends Lint.Rules.AbstractRule {
         var eofToken = sourceFile.endOfFileToken;
         var eofTokenFullText = eofToken.getFullText();
         if (eofTokenFullText.length === 0 || eofTokenFullText.charAt(eofTokenFullText.length - 1) !== "\n") {
-            return [new Lint.RuleFailure(sourceFile,
-                eofToken.getStart(),
-                eofToken.getStart(),
-                Rule.FAILURE_STRING,
-                this.getOptions().ruleName)];
+            var start = eofToken.getStart();
+            var failure = new Lint.RuleFailure(sourceFile, start, start, Rule.FAILURE_STRING, this.getOptions().ruleName);
+            return [failure];
         }
 
         return [];
