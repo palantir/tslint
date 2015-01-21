@@ -17,9 +17,9 @@
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_PART = "function invocation disallowed: ";
 
-    public apply(source: ts.SourceFile): Lint.RuleFailure[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         var options = this.getOptions();
-        var banFunctionWalker = new BanFunctionWalker(source, options);
+        var banFunctionWalker = new BanFunctionWalker(sourceFile, options);
         var functionsToBan = options.ruleArguments;
         functionsToBan.forEach((functionToBan) => {
             banFunctionWalker.addBannedFunction(functionToBan);

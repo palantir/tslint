@@ -17,8 +17,8 @@
 export class Rule extends Lint.Rules.AbstractRule {
     static FAILURE_STRING = "name must be in pascal case";
 
-    public apply(source: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NameWalker(source, this.getOptions()));
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        return this.applyWithWalker(new NameWalker(sourceFile, this.getOptions()));
     }
 }
 
