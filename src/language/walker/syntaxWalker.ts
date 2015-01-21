@@ -61,14 +61,6 @@ module Lint {
             this.visitNode(node);
 
             switch (node.kind) {
-                case ts.SyntaxKind.ClassDeclaration:
-                    this.visitClassDeclaration(<ts.ClassDeclaration> node);
-                    break;
-
-                case ts.SyntaxKind.InterfaceDeclaration:
-                    this.visitInterfaceDeclaration(<ts.InterfaceDeclaration> node);
-                    break;
-
                 case ts.SyntaxKind.BinaryExpression:
                     this.visitBinaryExpression(<ts.BinaryExpression> node);
                     break;
@@ -77,20 +69,28 @@ module Lint {
                     this.visitCallExpression(<ts.CallExpression> node);
                     break;
 
-                case ts.SyntaxKind.ForInStatement:
-                    this.visitForInStatement(<ts.ForInStatement> node);
+                case ts.SyntaxKind.ClassDeclaration:
+                    this.visitClassDeclaration(<ts.ClassDeclaration> node);
+                    break;
+
+                case ts.SyntaxKind.DoStatement:
+                    this.visitDoStatement(<ts.DoStatement> node);
                     break;
 
                 case ts.SyntaxKind.ForStatement:
                     this.visitForStatement(<ts.ForStatement> node);
                     break;
 
+                case ts.SyntaxKind.ForInStatement:
+                    this.visitForInStatement(<ts.ForInStatement> node);
+                    break;
+
                 case ts.SyntaxKind.IfStatement:
                     this.visitIfStatement(<ts.IfStatement> node);
                     break;
 
-                case ts.SyntaxKind.DoStatement:
-                    this.visitDoStatement(<ts.DoStatement> node);
+                case ts.SyntaxKind.InterfaceDeclaration:
+                    this.visitInterfaceDeclaration(<ts.InterfaceDeclaration> node);
                     break;
 
                 case ts.SyntaxKind.WhileStatement:
