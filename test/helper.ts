@@ -80,8 +80,6 @@ module Lint.Test {
             }
         }
 
-        console.log("hay", haystack);
-
         assert(false, "expected " + JSON.stringify(needle.toJson(), null, 2) + " within " +
             JSON.stringify(haystack.map((hay) => hay.toJson()), null, 2));
     }

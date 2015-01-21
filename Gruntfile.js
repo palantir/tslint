@@ -97,7 +97,7 @@ module.exports = function(grunt) {
       test: {
         src: [
           'test/**/*.ts',
-          
+
           '!test/rules/*.ts',
           'test/rules/banRuleTests.ts',
           'test/rules/classNameRuleTests.ts',

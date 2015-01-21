@@ -51,4 +51,14 @@ describe("<curly>", () => {
         var expectedFailure1 = Lint.Test.createFailure(fileName, [50, 1], [52, 16], failureString);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
     });
+
+    it("ensures else statements are always braced", () => {
+        var failureString = CurlyRule.ELSE_FAILURE_STRING;
+        var expectedFailure = Lint.Test.createFailure(fileName, [56, 3], [56, 25], failureString);
+        Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
+    });
+
+    it("does have false positives for curly rule", () => {
+        assert.lengthOf(actualFailures, 6);
+    });
 });
