@@ -80,7 +80,8 @@ module.exports = function(grunt) {
           'src/rules/banRule.ts',
           'src/rules/classNameRule.ts',
           'src/rules/curlyRule.ts',
-          'src/rules/eoflineRule.ts'
+          'src/rules/eoflineRule.ts',
+          'src/rules/forInRule.ts'
         ],
         outDir: 'build/rules/'
       },
@@ -104,6 +105,7 @@ module.exports = function(grunt) {
           'test/rules/classNameRuleTests.ts',
           'test/rules/curlyRuleTests.ts',
           'test/rules/eofLineRuleTests.ts',
+          'test/rules/forInRuleTests.ts',
 
           '!test/files/**/*.ts'
         ],
