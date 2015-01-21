@@ -21,19 +21,15 @@ module Lint {
             //
         }
 
-        public visitClassDeclaration(node: ts.ClassDeclaration) {
-            //
-        }
-
-        public visitInterfaceDeclaration(node: ts.InterfaceDeclaration) {
-            //
-        }
-
         public visitCallExpression(node: ts.CallExpression) {
             //
         }
 
-        public visitForInStatement(node: ts.ForInStatement) {
+        public visitClassDeclaration(node: ts.ClassDeclaration) {
+            //
+        }
+
+        public visitDoStatement(node: ts.DoStatement) {
             //
         }
 
@@ -41,11 +37,19 @@ module Lint {
             //
         }
 
+        public visitForInStatement(node: ts.ForInStatement) {
+            //
+        }
+
         public visitIfStatement(node: ts.IfStatement) {
             //
         }
 
-        public visitDoStatement(node: ts.DoStatement) {
+        public visitInterfaceDeclaration(node: ts.InterfaceDeclaration) {
+            //
+        }
+
+        public visitLabeledStatement(node: ts.LabeledStatement) {
             //
         }
 
@@ -91,6 +95,10 @@ module Lint {
 
                 case ts.SyntaxKind.InterfaceDeclaration:
                     this.visitInterfaceDeclaration(<ts.InterfaceDeclaration> node);
+                    break;
+
+                case ts.SyntaxKind.LabeledStatement:
+                    this.visitLabeledStatement(<ts.LabeledStatement> node);
                     break;
 
                 case ts.SyntaxKind.WhileStatement:

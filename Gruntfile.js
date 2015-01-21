@@ -82,7 +82,8 @@ module.exports = function(grunt) {
           'src/rules/curlyRule.ts',
           'src/rules/eoflineRule.ts',
           'src/rules/forInRule.ts',
-          'src/rules/interfaceNameRule.ts'
+          'src/rules/interfaceNameRule.ts',
+          'src/rules/labelPositionRule.ts'
         ],
         outDir: 'build/rules/'
       },
@@ -108,6 +109,7 @@ module.exports = function(grunt) {
           'test/rules/eofLineRuleTests.ts',
           'test/rules/forInRuleTests.ts',
           'test/rules/interfaceNameRuleTests.ts',
+          'test/rules/labelPositionRuleTests.ts',
 
           '!test/files/**/*.ts'
         ],
