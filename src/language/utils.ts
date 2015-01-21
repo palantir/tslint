@@ -20,11 +20,12 @@ module Lint {
     export function getSourceFile(fileName: string, source: string): ts.SourceFile {
         var normalizedName = path.normalize(fileName);
         var compilerOptions = createCompilerOptions();
+
         var compilerHost = {
             getSourceFile: function(filenameToGet, languageVersion) {
-                if (filenameToGet === fileName)
+                if (filenameToGet === fileName) {
                     return ts.createSourceFile(filenameToGet, source, compilerOptions.target, "0");
-                return undefined;
+                }
             },
             writeFile: () => {},
             getDefaultLibFilename: function() { return "lib.d.ts"; },
