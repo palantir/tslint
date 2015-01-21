@@ -50,14 +50,21 @@ declare module Lint {
 declare module Lint {
     class SyntaxWalker {
         visitBinaryExpression(node: ts.BinaryExpression): void;
+        visitBreakStatement(node: ts.BreakOrContinueStatement): void;
         visitCallExpression(node: ts.CallExpression): void;
         visitClassDeclaration(node: ts.ClassDeclaration): void;
+        visitContinueStatement(node: ts.BreakOrContinueStatement): void;
+        visitDebuggerStatement(node: ts.Statement): void;
         visitDoStatement(node: ts.DoStatement): void;
+        visitExpressionStatement(node: ts.ExpressionStatement): void;
         visitForStatement(node: ts.ForStatement): void;
         visitForInStatement(node: ts.ForInStatement): void;
         visitIfStatement(node: ts.IfStatement): void;
         visitInterfaceDeclaration(node: ts.InterfaceDeclaration): void;
         visitLabeledStatement(node: ts.LabeledStatement): void;
+        visitReturnStatement(node: ts.ReturnStatement): void;
+        visitThrowStatement(node: ts.ThrowStatement): void;
+        visitVariableStatement(node: ts.VariableStatement): void;
         visitWhileStatement(node: ts.WhileStatement): void;
         visitNode(node: ts.Node): void;
         walk(node: ts.Node): void;

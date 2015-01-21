@@ -21,6 +21,10 @@ module Lint {
             //
         }
 
+        public visitBreakStatement(node: ts.BreakOrContinueStatement) {
+            //
+        }
+
         public visitCallExpression(node: ts.CallExpression) {
             //
         }
@@ -29,7 +33,19 @@ module Lint {
             //
         }
 
+        public visitContinueStatement(node: ts.BreakOrContinueStatement) {
+            //
+        }
+
+        public visitDebuggerStatement(node: ts.Statement) {
+            //
+        }
+
         public visitDoStatement(node: ts.DoStatement) {
+            //
+        }
+
+        public visitExpressionStatement(node: ts.ExpressionStatement) {
             //
         }
 
@@ -53,6 +69,18 @@ module Lint {
             //
         }
 
+        public visitReturnStatement(node: ts.ReturnStatement) {
+            //
+        }
+
+        public visitThrowStatement(node: ts.ThrowStatement) {
+            //
+        }
+
+        public visitVariableStatement(node: ts.VariableStatement) {
+            //
+        }
+
         public visitWhileStatement(node: ts.WhileStatement) {
             //
         }
@@ -69,6 +97,10 @@ module Lint {
                     this.visitBinaryExpression(<ts.BinaryExpression> node);
                     break;
 
+                case ts.SyntaxKind.BreakStatement:
+                    this.visitBreakStatement(<ts.BreakOrContinueStatement> node);
+                    break;
+
                 case ts.SyntaxKind.CallExpression:
                     this.visitCallExpression(<ts.CallExpression> node);
                     break;
@@ -77,8 +109,20 @@ module Lint {
                     this.visitClassDeclaration(<ts.ClassDeclaration> node);
                     break;
 
+                case ts.SyntaxKind.ContinueStatement:
+                    this.visitContinueStatement(<ts.BreakOrContinueStatement> node);
+                    break;
+
+                case ts.SyntaxKind.DebuggerStatement:
+                    this.visitDebuggerStatement(<ts.Statement> node);
+                    break;
+
                 case ts.SyntaxKind.DoStatement:
                     this.visitDoStatement(<ts.DoStatement> node);
+                    break;
+
+                case ts.SyntaxKind.ExpressionStatement:
+                    this.visitExpressionStatement(<ts.ExpressionStatement> node);
                     break;
 
                 case ts.SyntaxKind.ForStatement:
@@ -99,6 +143,18 @@ module Lint {
 
                 case ts.SyntaxKind.LabeledStatement:
                     this.visitLabeledStatement(<ts.LabeledStatement> node);
+                    break;
+
+                case ts.SyntaxKind.ReturnStatement:
+                    this.visitReturnStatement(<ts.ReturnStatement> node);
+                    break;
+
+                case ts.SyntaxKind.ThrowStatement:
+                    this.visitThrowStatement(<ts.ThrowStatement> node);
+                    break;
+
+                case ts.SyntaxKind.VariableStatement:
+                    this.visitVariableStatement(<ts.VariableStatement> node);
                     break;
 
                 case ts.SyntaxKind.WhileStatement:
