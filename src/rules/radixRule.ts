@@ -19,23 +19,25 @@
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "missing radix parameter";
 
-    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new RadixWalker(syntaxTree, this.getOptions()));
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        var radixWalker = new RadixWalker(sourceFile, this.getOptions());
+        return this.applyWithWalker(radixWalker);
     }
 }
 
 class RadixWalker extends Lint.RuleWalker {
-    public visitInvocationExpression(node: TypeScript.InvocationExpressionSyntax): void {
+    public visitCallExpression(node: ts.CallExpression): void {
         var expression = node.expression;
-        if (TypeScript.isToken(expression) && expression.kind() === TypeScript.SyntaxKind.IdentifierName) {
-            var firstToken = TypeScript.firstToken(expression);
-            var arguments = node.argumentList.arguments;
-            if (firstToken.text() === "parseInt" && arguments.length < 2) {
-                var position = this.getPosition() + TypeScript.leadingTriviaWidth(node);
-                this.addFailure(this.createFailure(position, TypeScript.width(node), Rule.FAILURE_STRING));
-            }
+
+        if (expression.kind === ts.SyntaxKind.Identifier &&
+                node.getFirstToken().getText() === "parseInt" &&
+                node.arguments.length < 2) {
+
+            this.addFailure(this.createFailure(node.getStart(),
+                                               node.getWidth(),
+                                               Rule.FAILURE_STRING));
         }
 
-        super.visitInvocationExpression(node);
+        super.visitCallExpression(node);
     }
 }
