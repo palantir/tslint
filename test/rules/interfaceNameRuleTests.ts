@@ -26,5 +26,6 @@ describe("<interface-name>", () => {
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, InterfaceNameRule);
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
+        assert.lengthOf(actualFailures, 1);
     });
 });
