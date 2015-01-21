@@ -85,13 +85,11 @@ module Lint {
             //
         }
 
-        public visitNode(node: ts.Node) {
-            //
-        }
-
         public walk(node: ts.Node) {
             this.visitNode(node);
+        }
 
+        public visitNode(node: ts.Node) {
             switch (node.kind) {
                 case ts.SyntaxKind.BinaryExpression:
                     this.visitBinaryExpression(<ts.BinaryExpression> node);
