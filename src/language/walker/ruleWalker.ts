@@ -48,14 +48,17 @@ module Lint {
             return this.failures;
         }
 
+        /*
         public getPosition() {
             return this.position;
         }
+        */
 
         public getLimit() {
             return this.limit;
         }
 
+        /*
         public positionAfter(...nodes: ts.Node[]): number {
             var position = this.getPosition();
             nodes.forEach((node) => {
@@ -65,6 +68,7 @@ module Lint {
             });
             return position;
         }
+        */
 
         public getOptions(): any {
             return this.options;

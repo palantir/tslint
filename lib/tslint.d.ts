@@ -88,9 +88,7 @@ declare module Lint {
         constructor(sourceFile: ts.SourceFile, options: Lint.IOptions);
         getSourceFile(): ts.SourceFile;
         getFailures(): RuleFailure[];
-        getPosition(): number;
         getLimit(): number;
-        positionAfter(...nodes: ts.Node[]): number;
         getOptions(): any;
         hasOption(option: string): boolean;
         skip(node: ts.Node): void;
