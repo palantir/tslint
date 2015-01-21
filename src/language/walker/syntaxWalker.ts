@@ -69,6 +69,14 @@ module Lint {
             //
         }
 
+        public visitMethodDeclaration(node: ts.MethodDeclaration) {
+            //
+        }
+
+        public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
+            //
+        }
+
         public visitReturnStatement(node: ts.ReturnStatement) {
             //
         }
@@ -141,6 +149,14 @@ module Lint {
 
                 case ts.SyntaxKind.LabeledStatement:
                     this.visitLabeledStatement(<ts.LabeledStatement> node);
+                    break;
+
+                case ts.SyntaxKind.Method:
+                    this.visitMethodDeclaration(<ts.MethodDeclaration> node);
+                    break;
+
+                case ts.SyntaxKind.Property:
+                    this.visitPropertyDeclaration(<ts.PropertyDeclaration> node);
                     break;
 
                 case ts.SyntaxKind.ReturnStatement:

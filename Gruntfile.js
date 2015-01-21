@@ -86,6 +86,7 @@ module.exports = function(grunt) {
           'src/rules/labelPositionRule.ts',
           'src/rules/labelUndefinedRule.ts',
           'src/rules/maxLineLengthRule.ts',
+          'src/rules/memberOrderingRule.ts',
           'src/rules/radixRule.ts'
         ],
         outDir: 'build/rules/'
@@ -115,6 +116,7 @@ module.exports = function(grunt) {
           'test/rules/labelPositionRuleTests.ts',
           'test/rules/labelUndefinedRuleTests.ts',
           'test/rules/maxLineLengthRuleTests.ts',
+          'test/rules/memberOrderingRuleTests.ts',
           'test/rules/radixRuleTests.ts',
 
           '!test/files/**/*.ts'

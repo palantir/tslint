@@ -62,6 +62,8 @@ declare module Lint {
         visitIfStatement(node: ts.IfStatement): void;
         visitInterfaceDeclaration(node: ts.InterfaceDeclaration): void;
         visitLabeledStatement(node: ts.LabeledStatement): void;
+        visitMethodDeclaration(node: ts.MethodDeclaration): void;
+        visitPropertyDeclaration(node: ts.PropertyDeclaration): void;
         visitReturnStatement(node: ts.ReturnStatement): void;
         visitThrowStatement(node: ts.ThrowStatement): void;
         visitVariableStatement(node: ts.VariableStatement): void;

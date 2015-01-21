@@ -14,15 +14,13 @@
  * limitations under the License.
 */
 
-/// <reference path='../../lib/tslint.d.ts' />
-
 var OPTION_VARIABLES_BEFORE_FUNCTIONS = "variables-before-functions";
 var OPTION_STATIC_BEFORE_INSTANCE = "static-before-instance";
 var OPTION_PUBLIC_BEFORE_PRIVATE = "public-before-private";
 
 export class Rule extends Lint.Rules.AbstractRule {
-    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new MemberOrderingWalker(syntaxTree, this.getOptions()));
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        return this.applyWithWalker(new MemberOrderingWalker(sourceFile, this.getOptions()));
     }
 }
 
@@ -32,10 +30,13 @@ interface IModifiers {
     isInstance: boolean;
 }
 
-function getModifiers(isMethod: boolean, modifiers?: TypeScript.ISyntaxToken[]): IModifiers {
-    var modifierStrings = modifiers.map((x) => {
-        return x.text();
-    });
+function getModifiers(isMethod: boolean, modifiers?: ts.ModifiersArray): IModifiers {
+    var modifierStrings: string[] = [];
+    if (modifiers != null) {
+        modifierStrings = modifiers.map((x) => {
+            return x.getText();
+        });
+    }
 
     return {
         isMethod: isMethod,
@@ -56,11 +57,11 @@ function toString(modifiers: IModifiers): string {
 export class MemberOrderingWalker extends Lint.RuleWalker {
     private previous: IModifiers;
 
-    constructor(syntaxTree: TypeScript.SyntaxTree, options: Lint.IOptions) {
-        super(syntaxTree, options);
+    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
+        super(sourceFile, options);
     }
 
-    public visitClassDeclaration(node: TypeScript.ClassDeclarationSyntax): void {
+    public visitClassDeclaration(node: ts.ClassDeclaration): void {
         this.previous = {
             isMethod: false,
             isPrivate: false,
@@ -69,22 +70,21 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
         super.visitClassDeclaration(node);
     }
 
-    public visitMemberFunctionDeclaration(node: TypeScript.MemberFunctionDeclarationSyntax): void {
+    public visitMethodDeclaration(node: ts.MethodDeclaration): void {
         this.checkAndSetModifiers(node, getModifiers(true, node.modifiers));
-        super.visitMemberFunctionDeclaration(node);
+        super.visitMethodDeclaration(node);
     }
 
-    public visitMemberVariableDeclaration(node: TypeScript.MemberVariableDeclarationSyntax): void {
+    public visitPropertyDeclaration(node: ts.PropertyDeclaration): void {
         this.checkAndSetModifiers(node, getModifiers(false, node.modifiers));
-        super.visitMemberVariableDeclaration(node);
+        super.visitPropertyDeclaration(node);
     }
 
-    private checkAndSetModifiers(node: TypeScript.ISyntaxElement, current: IModifiers): void {
+    private checkAndSetModifiers(node: ts.Declaration, current: IModifiers): void {
         if (!this.canAppearAfter(this.previous, current)) {
-            var position = this.getPosition() + TypeScript.leadingTriviaWidth(node);
             var message = "Declaration of " + toString(current) +
                 " not allowed to appear after declaration of " + toString(this.previous);
-            this.addFailure(this.createFailure(position, TypeScript.width(node), message));
+            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), message));
         }
         this.previous = current;
     }
