@@ -79,7 +79,8 @@ module.exports = function(grunt) {
           'lib/tslint.d.ts',
           'src/rules/banRule.ts',
           'src/rules/classNameRule.ts',
-          'src/rules/curlyRule.ts'
+          'src/rules/curlyRule.ts',
+          'src/rules/eoflineRule.ts'
         ],
         outDir: 'build/rules/'
       },
@@ -102,6 +103,7 @@ module.exports = function(grunt) {
           'test/rules/banRuleTests.ts',
           'test/rules/classNameRuleTests.ts',
           'test/rules/curlyRuleTests.ts',
+          'test/rules/eofLineRuleTests.ts',
 
           '!test/files/**/*.ts'
         ],
