@@ -14,27 +14,24 @@
  * limitations under the License.
 */
 
-/// <reference path='../../lib/tslint.d.ts' />
-
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "forbidden eval";
 
-    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoEvalWalker(syntaxTree, this.getOptions()));
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        return this.applyWithWalker(new NoEvalWalker(sourceFile, this.getOptions()));
     }
 }
 
 class NoEvalWalker extends Lint.RuleWalker {
-    public visitInvocationExpression(node: TypeScript.InvocationExpressionSyntax): void {
+    public visitCallExpression(node: ts.CallExpression): void {
         var expression = node.expression;
-        if (TypeScript.isToken(expression) && expression.kind() === TypeScript.SyntaxKind.IdentifierName) {
-            var firstToken = TypeScript.firstToken(expression);
-            if (firstToken.text() === "eval") {
-                var position = this.getPosition() + TypeScript.leadingTriviaWidth(node);
-                this.addFailure(this.createFailure(position, TypeScript.width(firstToken), Rule.FAILURE_STRING));
+        if (expression.kind === ts.SyntaxKind.Identifier) {
+            var expressionName = (<ts.Identifier> expression).text;
+            if (expressionName === "eval") {
+                this.addFailure(this.createFailure(expression.getStart(), expression.getWidth(), Rule.FAILURE_STRING));
             }
         }
 
-        super.visitInvocationExpression(node);
+        super.visitCallExpression(node);
     }
 }
