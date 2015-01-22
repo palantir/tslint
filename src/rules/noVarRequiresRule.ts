@@ -38,11 +38,12 @@ class RequiresWalker extends Lint.ScopeAwareRuleWalker<{}> {
     public visitCallExpression(node: ts.CallExpression) {
         var expression = node.expression;
 
-        if (this.getCurrentDepth() <= 1 &&
-                expression.kind === ts.SyntaxKind.Identifier &&
-                node.getFirstToken().getText() === "require") {
-            // if we're calling (invoking) require, then it's not part of an import statement
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+        if (this.getCurrentDepth() <= 1 && expression.kind === ts.SyntaxKind.Identifier) {
+            var identifierName = (<ts.Identifier> expression).text;
+            if (identifierName === "require") {
+                // if we're calling (invoking) require, then it's not part of an import statement
+                this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+            }
         }
 
         super.visitCallExpression(node);
