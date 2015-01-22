@@ -90,7 +90,8 @@ module.exports = function(grunt) {
           'src/rules/noVarRequiresRule.ts',
           'src/rules/quoteMarkRule.ts',
           'src/rules/radixRule.ts',
-          'src/rules/semicolonRule.ts'
+          'src/rules/semicolonRule.ts',
+          'src/rules/tripleEqualsRule.ts'
         ],
         outDir: 'build/rules/'
       },
@@ -124,6 +125,7 @@ module.exports = function(grunt) {
           'test/rules/quoteMarkRuleTests.ts',
           'test/rules/radixRuleTests.ts',
           'test/rules/semicolonRuleTests.ts',
+          'test/rules/tripleEqualsRuleTests.ts',
 
           '!test/files/**/*.ts'
         ],
