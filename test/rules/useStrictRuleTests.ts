@@ -30,7 +30,6 @@ describe("<use-strict>", () => {
 
     it("enforces checks for 'use strict' in functions", () => {
         var expectedFailures = Lint.Test.createFailure(fileName, [14, 1], [14, 9], UseStrictRule.FAILURE_STRING);
-
         Lint.Test.assertContainsFailure(actualFailures, expectedFailures);
     });
 
