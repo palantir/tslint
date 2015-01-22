@@ -14,14 +14,12 @@
  * limitations under the License.
 */
 
-/// <reference path='../../lib/tslint.d.ts' />
-
 import BanRule = require("./banRule");
 
 export class Rule extends BanRule.Rule {
-    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         var options = this.getOptions();
-        var consoleBanWalker = new BanRule.BanFunctionWalker(syntaxTree, this.getOptions());
+        var consoleBanWalker = new BanRule.BanFunctionWalker(sourceFile, this.getOptions());
         options.ruleArguments.forEach((option) => {
             consoleBanWalker.addBannedFunction(["console", option]);
         });
