@@ -91,11 +91,19 @@ module Lint {
             this.walkChildren(node);
         }
 
+        public visitObjectLiteralExpression(node: ts.ObjectLiteralExpression) {
+            this.walkChildren(node);
+        }
+
         public visitPrefixUnaryExpression(node: ts.PrefixUnaryExpression) {
             this.walkChildren(node);
         }
 
         public visitPropertyAccessExpression(node: ts.PropertyAccessExpression) {
+            this.walkChildren(node);
+        }
+
+        public visitPropertyAssignment(node: ts.PropertyAssignment) {
             this.walkChildren(node);
         }
 
@@ -205,12 +213,20 @@ module Lint {
                     this.visitNewExpression(<ts.NewExpression> node);
                     break;
 
+                case ts.SyntaxKind.ObjectLiteralExpression:
+                    this.visitObjectLiteralExpression(<ts.ObjectLiteralExpression> node);
+                    break;
+
                 case ts.SyntaxKind.PrefixUnaryExpression:
                     this.visitPrefixUnaryExpression(<ts.PrefixUnaryExpression> node);
                     break;
 
                 case ts.SyntaxKind.PropertyAccessExpression:
                     this.visitPropertyAccessExpression(<ts.PropertyAccessExpression> node);
+                    break;
+
+                case ts.SyntaxKind.PropertyAssignment:
+                    this.visitPropertyAssignment(<ts.PropertyAssignment> node);
                     break;
 
                 case ts.SyntaxKind.Property:

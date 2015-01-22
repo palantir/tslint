@@ -14,36 +14,36 @@
  * limitations under the License.
 */
 
-/// <reference path='../../lib/tslint.d.ts' />
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "duplicate key '";
 
-    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoDuplicateKeyWalker(syntaxTree, this.getOptions()));
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        return this.applyWithWalker(new NoDuplicateKeyWalker(sourceFile, this.getOptions()));
     }
 }
 
 class NoDuplicateKeyWalker extends Lint.RuleWalker {
     private objectKeysStack: {[key: string]: boolean}[] = [];
 
-    public visitObjectLiteralExpression(node: TypeScript.ObjectLiteralExpressionSyntax): void {
+    public visitObjectLiteralExpression(node: ts.ObjectLiteralExpression): void {
         this.objectKeysStack.push(Object.create(null));
         super.visitObjectLiteralExpression(node);
         this.objectKeysStack.pop();
     }
 
-    public visitSimplePropertyAssignment(node: TypeScript.SimplePropertyAssignmentSyntax): void {
+    public visitPropertyAssignment(node: ts.PropertyAssignment): void {
         var objectKeys = this.objectKeysStack[this.objectKeysStack.length - 1];
-        var keyToken = node.propertyName;
-        var key = keyToken.text();
-        if (objectKeys[key]) {
-            var position = this.getPosition() + TypeScript.leadingTriviaWidth(node);
-            var failureString = Rule.FAILURE_STRING + key + "'";
-            this.addFailure(this.createFailure(position, TypeScript.width(keyToken), failureString));
-        } else {
-            objectKeys[key] = true;
+        var keyNode = node.name;
+        if (keyNode.kind === ts.SyntaxKind.Identifier) {
+            var key = (<ts.Identifier> keyNode).text;
+            if (objectKeys[key]) {
+                var failureString = Rule.FAILURE_STRING + key + "'";
+                this.addFailure(this.createFailure(keyNode.getStart(), keyNode.getWidth(), failureString));
+            } else {
+                objectKeys[key] = true;
+            }
         }
 
-        super.visitSimplePropertyAssignment(node);
+        super.visitPropertyAssignment(node);
     }
 }
