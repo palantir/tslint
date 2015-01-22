@@ -14,13 +14,14 @@
  * limitations under the License.
 */
 
-/// <reference path='../../lib/tslint.d.ts' />
+///<reference path='../../lib/tslint.d.ts' />
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "missing 'use strict'";
 
-    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new UseStrictWalker(syntaxTree, this.getOptions()));
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        var useStrictWalker = new UseStrictWalker(sourceFile, this.getOptions());
+        return this.applyWithWalker(useStrictWalker);
     }
 }
 
@@ -34,61 +35,51 @@ class UseStrictWalker extends Lint.ScopeAwareRuleWalker<{}> {
         return {};
     }
 
-    public visitModuleDeclaration(node: TypeScript.ModuleDeclarationSyntax): void {
-        var childCount = TypeScript.childCount(node.modifiers);
+    public visitModuleDeclaration(node: ts.ModuleDeclaration) {
+        var modifiers = node.modifiers;
+        var hasDeclareModifier = (modifiers != null) && (modifiers.length > 0) && (modifiers[0].kind === ts.SyntaxKind.DeclareKeyword);
 
         // current depth is 2: global scope and the scope created by this module
-        // but skip declare module statements
-        if (this.getCurrentDepth() === 2 &&
-            !(childCount > 0 && TypeScript.childAt(node.modifiers, 0).kind() === TypeScript.SyntaxKind.DeclareKeyword)) {
-
-            if (this.hasOption(UseStrictWalker.OPTION_CHECK_MODULE)) {
-                this.checkUseStrict(node, node.moduleElements);
+        if (this.getCurrentDepth() === 2 && !hasDeclareModifier) {
+            if (node.body != null && this.hasOption(UseStrictWalker.OPTION_CHECK_MODULE)) {
+                this.handleBlock(node, <ts.Block> node.body);
             }
         }
 
         super.visitModuleDeclaration(node);
     }
 
-    public visitFunctionDeclaration(node: TypeScript.FunctionDeclarationSyntax): void {
+    public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
         // current depth is 2: global scope and the scope created by this function
-        if (this.getCurrentDepth() === 2) {
-            if (node.block && this.hasOption(UseStrictWalker.OPTION_CHECK_FUNCTION)) {
-                this.checkUseStrict(node, node.block.statements);
-            }
+        if (this.getCurrentDepth() === 2 &&
+                node.body != null &&
+                this.hasOption(UseStrictWalker.OPTION_CHECK_FUNCTION)) {
+            this.handleBlock(node, node.body);
         }
 
         super.visitFunctionDeclaration(node);
     }
 
-    private checkUseStrict(node: TypeScript.ISyntaxNode, syntaxList: TypeScript.ISyntaxElement[]) {
+    private handleBlock(node: ts.Declaration, block: ts.Block) {
         var isFailure = true;
 
-        if (syntaxList.length > 0) {
-            var firstStatement = syntaxList[0];
+        if (block.statements != null && block.statements.length > 0) {
+            var firstStatement = block.statements[0];
 
-            if (firstStatement.kind() === TypeScript.SyntaxKind.ExpressionStatement && TypeScript.childCount(firstStatement) === 2) {
-                var firstChild = TypeScript.childAt(firstStatement, 0);
-                var secondChild = TypeScript.childAt(firstStatement, 1);
+            if (firstStatement.kind === ts.SyntaxKind.ExpressionStatement && firstStatement.getChildCount() === 2) {
+                var firstChild = firstStatement.getChildAt(0);
+                var secondChild = firstStatement.getChildAt(1);
 
-                if (TypeScript.isToken(firstChild)) {
-                    var firstToken = TypeScript.firstToken(firstChild);
-                    if (TypeScript.tokenValueText(firstToken) === UseStrictWalker.USE_STRICT_STRING) {
-                        if (secondChild.kind() === TypeScript.SyntaxKind.SemicolonToken) {
-                            isFailure = false;
-                        }
-                    }
+                if (firstChild.kind === ts.SyntaxKind.StringLiteral &&
+                        (<ts.StringLiteralExpression> firstChild).text === UseStrictWalker.USE_STRICT_STRING &&
+                        secondChild.kind === ts.SyntaxKind.SemicolonToken) {
+                    isFailure = false;
                 }
             }
         }
 
         if (isFailure) {
-            this.addUseStrictFailure(node);
+            this.addFailure(this.createFailure(node.getStart(), node.getFirstToken().getWidth(), Rule.FAILURE_STRING));
         }
-    }
-
-    private addUseStrictFailure(node: TypeScript.ISyntaxNode) {
-        var position = this.getPosition() + TypeScript.leadingTriviaWidth(node);
-        this.addFailure(this.createFailure(position, TypeScript.width(TypeScript.firstToken(node)), Rule.FAILURE_STRING));
     }
 }

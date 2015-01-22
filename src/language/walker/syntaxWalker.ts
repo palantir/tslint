@@ -67,6 +67,10 @@ module Lint {
             this.walkChildren(node);
         }
 
+        public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
+            this.walkChildren(node);
+        }
+
         public visitIfStatement(node: ts.IfStatement) {
             this.walkChildren(node);
         }
@@ -96,6 +100,10 @@ module Lint {
         }
 
         public visitPrefixUnaryExpression(node: ts.PrefixUnaryExpression) {
+            this.walkChildren(node);
+        }
+
+        public visitModuleDeclaration(node: ts.ModuleDeclaration) {
             this.walkChildren(node);
         }
 
@@ -189,6 +197,10 @@ module Lint {
                     this.visitForInStatement(<ts.ForInStatement> node);
                     break;
 
+                case ts.SyntaxKind.FunctionDeclaration:
+                    this.visitFunctionDeclaration(<ts.FunctionDeclaration> node);
+                    break;
+
                 case ts.SyntaxKind.IfStatement:
                     this.visitIfStatement(<ts.IfStatement> node);
                     break;
@@ -207,6 +219,10 @@ module Lint {
 
                 case ts.SyntaxKind.Method:
                     this.visitMethodDeclaration(<ts.MethodDeclaration> node);
+                    break;
+
+                case ts.SyntaxKind.ModuleDeclaration:
+                    this.visitModuleDeclaration(<ts.ModuleDeclaration> node);
                     break;
 
                 case ts.SyntaxKind.NewExpression:
