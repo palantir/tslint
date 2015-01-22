@@ -14,39 +14,39 @@
  * limitations under the License.
 */
 
-/// <reference path='../../lib/tslint.d.ts' />
-
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "forbidden bitwise operation";
 
-    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoBitwiseWalker(syntaxTree, this.getOptions()));
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        return this.applyWithWalker(new NoBitwiseWalker(sourceFile, this.getOptions()));
     }
 }
 
 class NoBitwiseWalker extends Lint.RuleWalker {
-    public visitNode(node: TypeScript.SyntaxNode): void {
-        var kind = node.kind();
-        if (kind === TypeScript.SyntaxKind.BitwiseAndExpression ||
-            kind === TypeScript.SyntaxKind.AndAssignmentExpression ||
-            kind === TypeScript.SyntaxKind.BitwiseOrExpression ||
-            kind === TypeScript.SyntaxKind.OrAssignmentExpression ||
-            kind === TypeScript.SyntaxKind.BitwiseExclusiveOrExpression ||
-            kind === TypeScript.SyntaxKind.ExclusiveOrAssignmentExpression ||
-            kind === TypeScript.SyntaxKind.LeftShiftExpression ||
-            kind === TypeScript.SyntaxKind.LeftShiftAssignmentExpression ||
-            kind === TypeScript.SyntaxKind.SignedRightShiftExpression ||
-            kind === TypeScript.SyntaxKind.SignedRightShiftAssignmentExpression ||
-            kind === TypeScript.SyntaxKind.UnsignedRightShiftExpression ||
-            kind === TypeScript.SyntaxKind.UnsignedRightShiftAssignmentExpression ||
-            kind === TypeScript.SyntaxKind.BitwiseNotExpression) {
-
-            this.addFailure(this.createFailure(
-                this.getPosition() + TypeScript.leadingTriviaWidth(node),
-                TypeScript.width(node),
-                Rule.FAILURE_STRING));
+    public visitBinaryExpression(node: ts.BinaryExpression): void {
+        switch(node.operator){
+            case ts.SyntaxKind.AmpersandToken:
+            case ts.SyntaxKind.AmpersandEqualsToken:
+            case ts.SyntaxKind.BarToken:
+            case ts.SyntaxKind.BarEqualsToken:
+            case ts.SyntaxKind.CaretToken:
+            case ts.SyntaxKind.CaretEqualsToken:
+            case ts.SyntaxKind.LessThanLessThanToken:
+            case ts.SyntaxKind.LessThanLessThanEqualsToken:
+            case ts.SyntaxKind.GreaterThanGreaterThanToken:
+            case ts.SyntaxKind.GreaterThanGreaterThanEqualsToken:
+            case ts.SyntaxKind.GreaterThanGreaterThanGreaterThanToken:
+            case ts.SyntaxKind.GreaterThanGreaterThanGreaterThanEqualsToken:
+                this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+                break;
         }
+        super.visitBinaryExpression(node);
+    }
 
-        super.visitNode(node);
+    public visitPrefixUnaryExpression(node: ts.PrefixUnaryExpression): void {
+        if (node.operator === ts.SyntaxKind.TildeToken) {
+            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+        }
+        super.visitPrefixUnaryExpression(node);
     }
 }

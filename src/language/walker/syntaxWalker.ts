@@ -81,6 +81,10 @@ module Lint {
             //
         }
 
+        public visitPrefixUnaryExpression(node: ts.PrefixUnaryExpression) {
+            //
+        }
+
         public visitPropertyAccessExpression(node: ts.PropertyAccessExpression) {
             //
         }
@@ -173,6 +177,10 @@ module Lint {
 
                 case ts.SyntaxKind.Method:
                     this.visitMethodDeclaration(<ts.MethodDeclaration> node);
+                    break;
+
+                case ts.SyntaxKind.PrefixUnaryExpression:
+                    this.visitPrefixUnaryExpression(<ts.PrefixUnaryExpression> node);
                     break;
 
                 case ts.SyntaxKind.PropertyAccessExpression:
