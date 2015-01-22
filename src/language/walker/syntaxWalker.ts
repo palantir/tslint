@@ -17,6 +17,10 @@
 module Lint {
     // TODO: rename this class
     export class SyntaxWalker {
+        public visitAnyKeyword(node: ts.Node) {
+            //
+        }
+
         public visitBinaryExpression(node: ts.BinaryExpression) {
             //
         }
@@ -103,6 +107,10 @@ module Lint {
 
         public visitNode(node: ts.Node) {
             switch (node.kind) {
+                case ts.SyntaxKind.AnyKeyword:
+                    this.visitAnyKeyword(node);
+                    break;
+
                 case ts.SyntaxKind.BinaryExpression:
                     this.visitBinaryExpression(<ts.BinaryExpression> node);
                     break;

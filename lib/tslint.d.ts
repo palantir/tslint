@@ -49,6 +49,7 @@ declare module Lint {
 }
 declare module Lint {
     class SyntaxWalker {
+        visitAnyKeyword(node: ts.Node): void;
         visitBinaryExpression(node: ts.BinaryExpression): void;
         visitBreakStatement(node: ts.BreakOrContinueStatement): void;
         visitCallExpression(node: ts.CallExpression): void;
