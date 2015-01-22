@@ -14,6 +14,8 @@
  * limitations under the License.
 */
 
+///<reference path="../../../typings/typescriptServices.d.ts" />
+
 module Lint {
     // TODO: rename this class
     export class SyntaxWalker {
@@ -106,6 +108,10 @@ module Lint {
         }
 
         public visitThrowStatement(node: ts.ThrowStatement) {
+            this.walkChildren(node);
+        }
+
+        public visitVariableDeclaration(node: ts.VariableDeclaration) {
             this.walkChildren(node);
         }
 
@@ -217,6 +223,10 @@ module Lint {
 
                 case ts.SyntaxKind.ThrowStatement:
                     this.visitThrowStatement(<ts.ThrowStatement> node);
+                    break;
+
+                case ts.SyntaxKind.VariableDeclaration:
+                    this.visitVariableDeclaration(<ts.VariableDeclaration> node);
                     break;
 
                 case ts.SyntaxKind.VariableStatement:
