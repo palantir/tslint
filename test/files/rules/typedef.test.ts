@@ -3,11 +3,24 @@ var NoTypeObjectLiteralWithPropertyGetter = {
 
     get PropDef() {
         return this.Prop;
+    },
+
+    methodDef() {
+        return 'untyped';
+    },
+
+    anotherMethodDef: function() {
+        return 'also untyped';
+    },
+
+    arrowMethodDef: () => {
+        return 'also untyped';
     }
 };
 
 interface NoTypeInterface {
     Prop;
+    PropWithType: string;
 }
 
 var NoTypesFn = function (
@@ -18,12 +31,16 @@ var NoTypesFn = function (
 };
 
 class NoTypesClass {
-    [index]
+    [index: number]: number;
 
-    Prop = "some property";
+    Member = "some property";
 
     public get name() {
         return "some name";
+    }
+
+    private unTyped() {
+        return null;
     }
 }
 
@@ -31,4 +48,8 @@ class ConstructorUnTyped {
     constructor(type) {
 
     }
+}
+
+function anotherNoTypesFn(a, b) {
+    return b;
 }

@@ -99,6 +99,14 @@ module Lint {
             this.walkChildren(node);
         }
 
+        public visitFunctionExpression(node: ts.FunctionExpression) {
+            this.walkChildren(node);
+        }
+
+        public visitGetAccessor(node: ts.AccessorDeclaration) {
+            this.walkChildren(node);
+        }
+
         public visitIfStatement(node: ts.IfStatement) {
             this.walkChildren(node);
         }
@@ -131,6 +139,10 @@ module Lint {
             this.walkChildren(node);
         }
 
+        public visitParameterDeclaration(node: ts.ParameterDeclaration) {
+            this.walkChildren(node);
+        }
+
         public visitPostfixUnaryExpression(node: ts.PostfixUnaryExpression) {
             this.walkChildren(node);
         }
@@ -152,6 +164,10 @@ module Lint {
         }
 
         public visitReturnStatement(node: ts.ReturnStatement) {
+            this.walkChildren(node);
+        }
+
+        public visitSetAccessor(node: ts.AccessorDeclaration) {
             this.walkChildren(node);
         }
 
@@ -192,7 +208,7 @@ module Lint {
         }
 
         public walkChildren(node: ts.Node) {
-            ts.forEachChild(node, (child) => this.walk(child));
+            ts.forEachChild(node, (child) => this.visitNode(child));
         }
 
         public visitNode(node: ts.Node) {
@@ -277,6 +293,14 @@ module Lint {
                     this.visitFunctionDeclaration(<ts.FunctionDeclaration> node);
                     break;
 
+                case ts.SyntaxKind.FunctionExpression:
+                    this.visitFunctionExpression(<ts.FunctionExpression> node);
+                    break;
+
+                case ts.SyntaxKind.GetAccessor:
+                    this.visitGetAccessor(<ts.AccessorDeclaration> node);
+                    break;
+
                 case ts.SyntaxKind.IfStatement:
                     this.visitIfStatement(<ts.IfStatement> node);
                     break;
@@ -309,6 +333,10 @@ module Lint {
                     this.visitObjectLiteralExpression(<ts.ObjectLiteralExpression> node);
                     break;
 
+                case ts.SyntaxKind.Parameter:
+                    this.visitParameterDeclaration(<ts.ParameterDeclaration> node);
+                    break;
+
                 case ts.SyntaxKind.PostfixUnaryExpression:
                     this.visitPostfixUnaryExpression(<ts.PostfixUnaryExpression> node);
                     break;
@@ -331,6 +359,10 @@ module Lint {
 
                 case ts.SyntaxKind.ReturnStatement:
                     this.visitReturnStatement(<ts.ReturnStatement> node);
+                    break;
+
+                case ts.SyntaxKind.SetAccessor:
+                    this.visitSetAccessor(<ts.AccessorDeclaration> node);
                     break;
 
                 case ts.SyntaxKind.SourceFile:

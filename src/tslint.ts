@@ -77,7 +77,7 @@ module Lint {
                 var rule = configuredRules[i];
                 if (rule.isEnabled()) {
                     var ruleFailures = rule.apply(sourceFile);
-                    ruleFailures.forEach ((ruleFailure) => {
+                    ruleFailures.forEach((ruleFailure) => {
                         if (!this.containsRule(failures, ruleFailure)) {
                             failures.push(ruleFailure);
                         }

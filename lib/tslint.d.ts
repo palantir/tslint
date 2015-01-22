@@ -69,6 +69,8 @@ declare module Lint {
         visitForStatement(node: ts.ForStatement): void;
         visitForInStatement(node: ts.ForInStatement): void;
         visitFunctionDeclaration(node: ts.FunctionDeclaration): void;
+        visitFunctionExpression(node: ts.FunctionExpression): void;
+        visitGetAccessor(node: ts.AccessorDeclaration): void;
         visitIfStatement(node: ts.IfStatement): void;
         visitImportDeclaration(node: ts.ImportDeclaration): void;
         visitInterfaceDeclaration(node: ts.InterfaceDeclaration): void;
@@ -77,12 +79,14 @@ declare module Lint {
         visitModuleDeclaration(node: ts.ModuleDeclaration): void;
         visitNewExpression(node: ts.NewExpression): void;
         visitObjectLiteralExpression(node: ts.ObjectLiteralExpression): void;
+        visitParameterDeclaration(node: ts.ParameterDeclaration): void;
         visitPostfixUnaryExpression(node: ts.PostfixUnaryExpression): void;
         visitPrefixUnaryExpression(node: ts.PrefixUnaryExpression): void;
         visitPropertyAccessExpression(node: ts.PropertyAccessExpression): void;
         visitPropertyAssignment(node: ts.PropertyAssignment): void;
         visitPropertyDeclaration(node: ts.PropertyDeclaration): void;
         visitReturnStatement(node: ts.ReturnStatement): void;
+        visitSetAccessor(node: ts.AccessorDeclaration): void;
         visitSourceFile(node: ts.SourceFile): void;
         visitSwitchStatement(node: ts.SwitchStatement): void;
         visitThrowStatement(node: ts.ThrowStatement): void;

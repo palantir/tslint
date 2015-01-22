@@ -162,11 +162,10 @@ A sample configuration file with all options is available [here](https://github.
 * `triple-equals` enforces === and !== in favor of == and !=.
 * `typedef` enforces type definitions to exist. Rule options:
     * `"call-signature"` checks return type of functions
-    * `"index-signature"` checks index type specifier of indexers
-    * `"parameter"` checks type specifier of parameters
-    * `"property-signature"` checks return types of interface properties
-    * `"variable-declarator"` checks variable declarations
-    * `"member-variable-declarator"` checks member variable declarations
+    * `"parameter"` checks type specifier of function parameters
+    * `"property-declaration"` checks return types of interface properties
+    * `"variable-declaration"` checks variable declarations
+    * `"member-variable-declaration"` checks member variable declarations
 * `typedef-whitespace` enforces spacing whitespace for type definitions. Each rule option requires a value of `"space"` or `"nospace"`
    to require a space or no space before the type specifier's colon. Rule options:
     * `"call-signature"` checks return type of functions
