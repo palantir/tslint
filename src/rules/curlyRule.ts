@@ -52,9 +52,7 @@ class CurlyWalker extends Lint.RuleWalker {
             && !this.isStatementBraced(node.elseStatement)) {
 
             // find the else keyword to place the error appropriately
-            var elseKeywordNode = node.getChildren().filter((child) => {
-                return child.kind === ts.SyntaxKind.ElseKeyword
-            })[0];
+            var elseKeywordNode = node.getChildren().filter((child) => child.kind === ts.SyntaxKind.ElseKeyword)[0];
 
             this.addFailure(this.createFailure(elseKeywordNode.getStart(),
                 node.elseStatement.getEnd() - elseKeywordNode.getStart(),

@@ -14,6 +14,10 @@
  * limitations under the License.
 */
 
+///<reference path="../../typings/node.d.ts" />
+///<reference path="../../typings/typescriptServices.d.ts" />
+///<reference path='./rule/rule.ts'/>
+
 module Lint {
     var path = require("path");
 
@@ -22,17 +26,17 @@ module Lint {
         var compilerOptions = createCompilerOptions();
 
         var compilerHost = {
-            getSourceFile: function(filenameToGet, languageVersion) {
+            getSourceFile: function(filenameToGet: string) {
                 if (filenameToGet === fileName) {
                     return ts.createSourceFile(filenameToGet, source, compilerOptions.target, "0");
                 }
             },
-            writeFile: () => {},
-            getDefaultLibFilename: function() { return "lib.d.ts"; },
-            useCaseSensitiveFileNames: function() { return false; },
-            getCanonicalFileName: function(filename) { return filename; },
-            getCurrentDirectory: function() { return ""; },
-            getNewLine: function() { return "\n"; }
+            writeFile: () => null,
+            getDefaultLibFilename: () => "lib.d.ts",
+            useCaseSensitiveFileNames: () => false,
+            getCanonicalFileName: (filename: string) => filename,
+            getCurrentDirectory: () => "",
+            getNewLine: () => "\n"
         };
 
         return ts.createProgram([normalizedName], compilerOptions, compilerHost).getSourceFile(normalizedName);
