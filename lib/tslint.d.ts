@@ -66,6 +66,7 @@ declare module Lint {
         visitInterfaceDeclaration(node: ts.InterfaceDeclaration): void;
         visitLabeledStatement(node: ts.LabeledStatement): void;
         visitMethodDeclaration(node: ts.MethodDeclaration): void;
+        visitNewExpression(node: ts.NewExpression): void;
         visitPrefixUnaryExpression(node: ts.PrefixUnaryExpression): void;
         visitPropertyAccessExpression(node: ts.PropertyAccessExpression): void;
         visitPropertyDeclaration(node: ts.PropertyDeclaration): void;

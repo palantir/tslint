@@ -85,6 +85,10 @@ module Lint {
             this.walkChildren(node);
         }
 
+        public visitNewExpression(node: ts.NewExpression) {
+            this.walkChildren(node);
+        }
+
         public visitPrefixUnaryExpression(node: ts.PrefixUnaryExpression) {
             this.walkChildren(node);
         }
@@ -189,6 +193,10 @@ module Lint {
 
                 case ts.SyntaxKind.Method:
                     this.visitMethodDeclaration(<ts.MethodDeclaration> node);
+                    break;
+
+                case ts.SyntaxKind.NewExpression:
+                    this.visitNewExpression(<ts.NewExpression> node);
                     break;
 
                 case ts.SyntaxKind.PrefixUnaryExpression:

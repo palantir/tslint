@@ -14,13 +14,11 @@
  * limitations under the License.
 */
 
-/// <reference path='../../lib/tslint.d.ts' />
-
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "undesirable constructor use";
 
-    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoConstructWalker(syntaxTree, this.getOptions()));
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        return this.applyWithWalker(new NoConstructWalker(sourceFile, this.getOptions()));
     }
 }
 
@@ -31,15 +29,16 @@ class NoConstructWalker extends Lint.RuleWalker {
         "String"
     ];
 
-    public visitObjectCreationExpression(node: TypeScript.ObjectCreationExpressionSyntax): void {
-        var constructorName = TypeScript.fullText(node.expression).trim();
-        if (NoConstructWalker.FORBIDDEN_CONSTRUCTORS.indexOf(constructorName) !== -1) {
-            var position = this.getPosition() + TypeScript.leadingTriviaWidth(node);
-            var width = TypeScript.fullWidth(node.newKeyword) + TypeScript.fullWidth(node.expression);
-            var failure = this.createFailure(position, width, Rule.FAILURE_STRING);
-            this.addFailure(failure);
+    public visitNewExpression(node: ts.NewExpression): void {
+        if (node.expression.kind === ts.SyntaxKind.Identifier) {
+            var identifier = <ts.Identifier> node.expression;
+            var constructorName = identifier.text;
+            if (NoConstructWalker.FORBIDDEN_CONSTRUCTORS.indexOf(constructorName) !== -1) {
+                var failure = this.createFailure(node.getStart(), identifier.getEnd() - node.getStart(), Rule.FAILURE_STRING);
+                this.addFailure(failure);
+            }
         }
 
-        super.visitObjectCreationExpression(node);
+        super.visitNewExpression(node);
     }
 }
