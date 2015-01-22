@@ -34,18 +34,18 @@ export class Rule extends Lint.Rules.AbstractRule {
         return false;
     }
 
-    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new QuoteWalker(syntaxTree, this.getOptions()));
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        return this.applyWithWalker(new QuoteWalker(sourceFile, this.getOptions()));
     }
 }
 
 class QuoteWalker extends Lint.RuleWalker {
     private quoteMark: QuoteMark;
 
-    constructor(syntaxTree: TypeScript.SyntaxTree, options: Lint.IOptions) {
-        super(syntaxTree, options);
-        var quoteMarkString = this.getOptions()[0];
+    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
+        super(sourceFile, options);
 
+        var quoteMarkString = this.getOptions()[0];
         if (quoteMarkString === "single") {
             this.quoteMark = QuoteMark.SINGLE_QUOTES;
         } else {
@@ -53,22 +53,21 @@ class QuoteWalker extends Lint.RuleWalker {
         }
     }
 
-    public visitToken(token : TypeScript.ISyntaxToken): void {
-        this.handleToken(token);
-        super.visitToken(token);
+    public visitNode(node : ts.Node) {
+        this.handleNode(node);
+        super.visitNode(node);
     }
 
-    private handleToken(token: TypeScript.ISyntaxToken) {
+    private handleNode(node: ts.Node) {
         var failure: Lint.RuleFailure = null;
-        if (token.kind() === TypeScript.SyntaxKind.StringLiteral) {
-            var fullText = token.fullText();
-            var width = TypeScript.width(token);
-            var position = this.getPosition() + TypeScript.leadingTriviaWidth(token);
 
-            var textStart = token.leadingTriviaWidth();
-            var textEnd = textStart + width - 1;
-            var firstCharacter = fullText.charAt(textStart);
-            var lastCharacter = fullText.charAt(textEnd);
+        if (node.kind === ts.SyntaxKind.StringLiteral) {
+            var text = node.getText();
+            var width = node.getWidth();
+            var position = node.getStart();
+
+            var firstCharacter = text.charAt(0);
+            var lastCharacter = text.charAt(text.length - 1);
 
             if (this.quoteMark === QuoteMark.SINGLE_QUOTES) {
                 if (firstCharacter !== "'" || lastCharacter !== "'") {
