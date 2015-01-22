@@ -14,13 +14,11 @@
  * limitations under the License.
 */
 
-/// <reference path='../../lib/tslint.d.ts' />
-
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "duplicate variable: '";
 
-    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoDuplicateVariableWalker(syntaxTree, this.getOptions()));
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        return this.applyWithWalker(new NoDuplicateVariableWalker(sourceFile, this.getOptions()));
     }
 }
 
@@ -29,20 +27,19 @@ class NoDuplicateVariableWalker extends Lint.ScopeAwareRuleWalker<ScopeInfo> {
         return new ScopeInfo();
     }
 
-    public visitVariableDeclarator(node: TypeScript.VariableDeclaratorSyntax): void {
-        var propertyName = node.propertyName,
-            variableName = propertyName.text(),
-            position = this.getPosition() + TypeScript.leadingTriviaWidth(propertyName),
-            currentScope = this.getCurrentScope();
+    public visitVariableDeclaration(node: ts.VariableDeclaration): void {
+        var propertyName = node.name;
+        var variableName = propertyName.text;
+        var currentScope = this.getCurrentScope();
 
         if (currentScope.variableNames.indexOf(variableName) >= 0) {
             var failureString = Rule.FAILURE_STRING + variableName + "'";
-            this.addFailure(this.createFailure(position, TypeScript.width(propertyName), failureString));
+            this.addFailure(this.createFailure(propertyName.getStart(), propertyName.getWidth(), failureString));
         } else {
             currentScope.variableNames.push(variableName);
         }
 
-        super.visitVariableDeclarator(node);
+        super.visitVariableDeclaration(node);
     }
 }
 
