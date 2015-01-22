@@ -41,7 +41,10 @@ class UseStrictWalker extends Lint.ScopeAwareRuleWalker<{}> {
 
         // current depth is 2: global scope and the scope created by this module
         if (this.getCurrentDepth() === 2 && !hasDeclareModifier) {
-            if (node.body != null && this.hasOption(UseStrictWalker.OPTION_CHECK_MODULE)) {
+            if (this.hasOption(UseStrictWalker.OPTION_CHECK_MODULE) &&
+                    node.body != null &&
+                    node.body.kind === ts.SyntaxKind.ModuleBlock &&
+                    this.hasOption(UseStrictWalker.OPTION_CHECK_MODULE)) {
                 this.handleBlock(node, <ts.Block> node.body);
             }
         }
@@ -52,8 +55,8 @@ class UseStrictWalker extends Lint.ScopeAwareRuleWalker<{}> {
     public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
         // current depth is 2: global scope and the scope created by this function
         if (this.getCurrentDepth() === 2 &&
-                node.body != null &&
-                this.hasOption(UseStrictWalker.OPTION_CHECK_FUNCTION)) {
+                this.hasOption(UseStrictWalker.OPTION_CHECK_FUNCTION) &&
+                node.body != null) {
             this.handleBlock(node, node.body);
         }
 
