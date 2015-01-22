@@ -33,8 +33,8 @@ class ComparisonWalker extends Lint.RuleWalker {
 
     public visitBinaryExpression(node: ts.BinaryExpression) {
         if (!this.isExpressionAllowed(node)) {
-            var endOfLeftExpression = node.left.getEnd();
-            this.handleOperatorToken(endOfLeftExpression + 1, node.operator);
+            var position = node.getChildAt(1).getStart();
+            this.handleOperatorToken(position, node.operator);
         }
         super.visitBinaryExpression(node);
     }
