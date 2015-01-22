@@ -18,99 +18,103 @@ module Lint {
     // TODO: rename this class
     export class SyntaxWalker {
         public visitAnyKeyword(node: ts.Node) {
-            //
+            this.walkChildren(node);
         }
 
         public visitBinaryExpression(node: ts.BinaryExpression) {
-            //
+            this.walkChildren(node);
         }
 
         public visitBreakStatement(node: ts.BreakOrContinueStatement) {
-            //
+            this.walkChildren(node);
         }
 
         public visitCallExpression(node: ts.CallExpression) {
-            //
+            this.walkChildren(node);
         }
 
         public visitClassDeclaration(node: ts.ClassDeclaration) {
-            //
+            this.walkChildren(node);
         }
 
         public visitContinueStatement(node: ts.BreakOrContinueStatement) {
-            //
+            this.walkChildren(node);
         }
 
         public visitDebuggerStatement(node: ts.Statement) {
-            //
+            this.walkChildren(node);
         }
 
         public visitDoStatement(node: ts.DoStatement) {
-            //
+            this.walkChildren(node);
         }
 
         public visitExpressionStatement(node: ts.ExpressionStatement) {
-            //
+            this.walkChildren(node);
         }
 
         public visitForStatement(node: ts.ForStatement) {
-            //
+            this.walkChildren(node);
         }
 
         public visitForInStatement(node: ts.ForInStatement) {
-            //
+            this.walkChildren(node);
         }
 
         public visitIfStatement(node: ts.IfStatement) {
-            //
+            this.walkChildren(node);
         }
 
         public visitImportDeclaration(node: ts.ImportDeclaration) {
-            //
+            this.walkChildren(node);
         }
 
         public visitInterfaceDeclaration(node: ts.InterfaceDeclaration) {
-            //
+            this.walkChildren(node);
         }
 
         public visitLabeledStatement(node: ts.LabeledStatement) {
-            //
+            this.walkChildren(node);
         }
 
         public visitMethodDeclaration(node: ts.MethodDeclaration) {
-            //
+            this.walkChildren(node);
         }
 
         public visitPrefixUnaryExpression(node: ts.PrefixUnaryExpression) {
-            //
+            this.walkChildren(node);
         }
 
         public visitPropertyAccessExpression(node: ts.PropertyAccessExpression) {
-            //
+            this.walkChildren(node);
         }
 
         public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
-            //
+            this.walkChildren(node);
         }
 
         public visitReturnStatement(node: ts.ReturnStatement) {
-            //
+            this.walkChildren(node);
         }
 
         public visitThrowStatement(node: ts.ThrowStatement) {
-            //
+            this.walkChildren(node);
         }
 
         public visitVariableStatement(node: ts.VariableStatement) {
-            //
+            this.walkChildren(node);
         }
 
         public visitWhileStatement(node: ts.WhileStatement) {
-            //
+            this.walkChildren(node);
         }
 
         public walk(node: ts.Node) {
             this.visitNode(node);
+        }
+
+        public walkChildren(node: ts.Node) {
+            ts.forEachChild(node, (child) => this.walk(child));
         }
 
         public visitNode(node: ts.Node) {
@@ -206,9 +210,11 @@ module Lint {
                 case ts.SyntaxKind.WhileStatement:
                     this.visitWhileStatement(<ts.WhileStatement> node);
                     break;
-            }
 
-            ts.forEachChild(node, (child) => this.walk(child));
+                default:
+                    this.walkChildren(node);
+                    break;
+            }
         }
     }
 }

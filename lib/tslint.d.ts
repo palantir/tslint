@@ -73,6 +73,7 @@ declare module Lint {
         visitVariableStatement(node: ts.VariableStatement): void;
         visitWhileStatement(node: ts.WhileStatement): void;
         walk(node: ts.Node): void;
+        walkChildren(node: ts.Node): void;
         visitNode(node: ts.Node): void;
     }
 }
