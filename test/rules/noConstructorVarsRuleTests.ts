@@ -26,9 +26,9 @@ describe("<no-constructor-variable-declarations>", () => {
         var failureBar = Lint.Test.createFailuresOnFile(fileName, "'bar'" + failureString);
 
         var expectedFailures = [
-            failureFoo([3, 17], [3, 25]),
-            failureFoo([9, 17], [9, 25]),
-            failureBar([9, 38], [9, 45])
+            failureFoo([3, 17], [3, 24]),
+            failureFoo([9, 17], [9, 24]),
+            failureBar([9, 38], [9, 44])
         ];
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule);
         assert.lengthOf(actualFailures, 3);

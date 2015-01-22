@@ -37,6 +37,10 @@ module Lint {
             this.walkChildren(node);
         }
 
+        public visitConstructorDeclaration(node: ts.ConstructorDeclaration) {
+            this.walkChildren(node);
+        }
+
         public visitContinueStatement(node: ts.BreakOrContinueStatement) {
             this.walkChildren(node);
         }
@@ -137,6 +141,10 @@ module Lint {
 
                 case ts.SyntaxKind.ClassDeclaration:
                     this.visitClassDeclaration(<ts.ClassDeclaration> node);
+                    break;
+
+                case ts.SyntaxKind.Constructor:
+                    this.visitConstructorDeclaration(<ts.ConstructorDeclaration> node);
                     break;
 
                 case ts.SyntaxKind.ContinueStatement:

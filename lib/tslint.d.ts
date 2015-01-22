@@ -54,6 +54,7 @@ declare module Lint {
         visitBreakStatement(node: ts.BreakOrContinueStatement): void;
         visitCallExpression(node: ts.CallExpression): void;
         visitClassDeclaration(node: ts.ClassDeclaration): void;
+        visitConstructorDeclaration(node: ts.ConstructorDeclaration): void;
         visitContinueStatement(node: ts.BreakOrContinueStatement): void;
         visitDebuggerStatement(node: ts.Statement): void;
         visitDoStatement(node: ts.DoStatement): void;
