@@ -87,10 +87,10 @@ module.exports = function(grunt) {
           'src/rules/labelUndefinedRule.ts',
           'src/rules/maxLineLengthRule.ts',
           'src/rules/memberOrderingRule.ts',
+          'src/rules/noVarRequiresRule.ts',
           'src/rules/quoteMarkRule.ts',
           'src/rules/radixRule.ts',
-          'src/rules/semicolonRule.ts',
-          'src/rules/noVarRequiresRule.ts'
+          'src/rules/semicolonRule.ts'
         ],
         outDir: 'build/rules/'
       },
