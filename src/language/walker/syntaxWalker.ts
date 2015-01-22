@@ -81,6 +81,10 @@ module Lint {
             //
         }
 
+        public visitPropertyAccessExpression(node: ts.PropertyAccessExpression) {
+            //
+        }
+
         public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
             //
         }
@@ -169,6 +173,10 @@ module Lint {
 
                 case ts.SyntaxKind.Method:
                     this.visitMethodDeclaration(<ts.MethodDeclaration> node);
+                    break;
+
+                case ts.SyntaxKind.PropertyAccessExpression:
+                    this.visitPropertyAccessExpression(<ts.PropertyAccessExpression> node);
                     break;
 
                 case ts.SyntaxKind.Property:
