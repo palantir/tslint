@@ -123,6 +123,10 @@ module Lint {
             this.walkChildren(node);
         }
 
+        public visitSwitchStatement(node: ts.SwitchStatement) {
+            this.walkChildren(node);
+        }
+
         public visitThrowStatement(node: ts.ThrowStatement) {
             this.walkChildren(node);
         }
@@ -251,6 +255,10 @@ module Lint {
 
                 case ts.SyntaxKind.ReturnStatement:
                     this.visitReturnStatement(<ts.ReturnStatement> node);
+                    break;
+
+                case ts.SyntaxKind.SwitchStatement:
+                    this.visitSwitchStatement(<ts.SwitchStatement> node);
                     break;
 
                 case ts.SyntaxKind.ThrowStatement:
