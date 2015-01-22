@@ -1,5 +1,5 @@
-/// <reference path="../typings/node.d.ts" />
 /// <reference path="../typings/typescriptServices.d.ts" />
+/// <reference path="../typings/node.d.ts" />
 declare module Lint {
     interface IOptions {
         ruleArguments?: any[];
@@ -72,6 +72,7 @@ declare module Lint {
         visitPropertyDeclaration(node: ts.PropertyDeclaration): void;
         visitReturnStatement(node: ts.ReturnStatement): void;
         visitThrowStatement(node: ts.ThrowStatement): void;
+        visitVariableDeclaration(node: ts.VariableDeclaration): void;
         visitVariableStatement(node: ts.VariableStatement): void;
         visitWhileStatement(node: ts.WhileStatement): void;
         walk(node: ts.Node): void;
