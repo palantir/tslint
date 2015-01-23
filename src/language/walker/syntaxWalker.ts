@@ -27,11 +27,19 @@ module Lint {
             this.walkChildren(node);
         }
 
+        public visitBlock(node: ts.Block) {
+            this.walkChildren(node);
+        }
+
         public visitBreakStatement(node: ts.BreakOrContinueStatement) {
             this.walkChildren(node);
         }
 
         public visitCallExpression(node: ts.CallExpression) {
+            this.walkChildren(node);
+        }
+
+        public visitCaseClause(node: ts.CaseClause) {
             this.walkChildren(node);
         }
 
@@ -48,6 +56,10 @@ module Lint {
         }
 
         public visitDebuggerStatement(node: ts.Statement) {
+            this.walkChildren(node);
+        }
+
+        public visitDefaultClause(node: ts.DefaultClause) {
             this.walkChildren(node);
         }
 
@@ -161,12 +173,20 @@ module Lint {
                     this.visitBinaryExpression(<ts.BinaryExpression> node);
                     break;
 
+                case ts.SyntaxKind.Block:
+                    this.visitBlock(<ts.Block> node);
+                    break;
+
                 case ts.SyntaxKind.BreakStatement:
                     this.visitBreakStatement(<ts.BreakOrContinueStatement> node);
                     break;
 
                 case ts.SyntaxKind.CallExpression:
                     this.visitCallExpression(<ts.CallExpression> node);
+                    break;
+
+                case ts.SyntaxKind.CaseClause:
+                    this.visitCaseClause(<ts.CaseClause> node);
                     break;
 
                 case ts.SyntaxKind.ClassDeclaration:
@@ -183,6 +203,10 @@ module Lint {
 
                 case ts.SyntaxKind.DebuggerStatement:
                     this.visitDebuggerStatement(<ts.Statement> node);
+                    break;
+
+                case ts.SyntaxKind.DefaultClause:
+                    this.visitDefaultClause(<ts.DefaultClause> node);
                     break;
 
                 case ts.SyntaxKind.DoStatement:
