@@ -23,6 +23,10 @@ module Lint {
             this.walkChildren(node);
         }
 
+        public visitArrowFunction(node: ts.FunctionLikeDeclaration) {
+            this.walkChildren(node);
+        }
+
         public visitBinaryExpression(node: ts.BinaryExpression) {
             this.walkChildren(node);
         }
@@ -44,6 +48,10 @@ module Lint {
         }
 
         public visitClassDeclaration(node: ts.ClassDeclaration) {
+            this.walkChildren(node);
+        }
+
+        public visitConditionalExpression(node: ts.ConditionalExpression) {
             this.walkChildren(node);
         }
 
@@ -103,6 +111,10 @@ module Lint {
             this.walkChildren(node);
         }
 
+        public visitModuleDeclaration(node: ts.ModuleDeclaration) {
+            this.walkChildren(node);
+        }
+
         public visitNewExpression(node: ts.NewExpression) {
             this.walkChildren(node);
         }
@@ -111,11 +123,11 @@ module Lint {
             this.walkChildren(node);
         }
 
-        public visitPrefixUnaryExpression(node: ts.PrefixUnaryExpression) {
+        public visitPostfixUnaryExpression(node: ts.PostfixUnaryExpression) {
             this.walkChildren(node);
         }
 
-        public visitModuleDeclaration(node: ts.ModuleDeclaration) {
+        public visitPrefixUnaryExpression(node: ts.PrefixUnaryExpression) {
             this.walkChildren(node);
         }
 
@@ -169,6 +181,10 @@ module Lint {
                     this.visitAnyKeyword(node);
                     break;
 
+                case ts.SyntaxKind.ArrowFunction:
+                    this.visitArrowFunction(<ts.FunctionLikeDeclaration> node);
+                    break;
+
                 case ts.SyntaxKind.BinaryExpression:
                     this.visitBinaryExpression(<ts.BinaryExpression> node);
                     break;
@@ -191,6 +207,10 @@ module Lint {
 
                 case ts.SyntaxKind.ClassDeclaration:
                     this.visitClassDeclaration(<ts.ClassDeclaration> node);
+                    break;
+
+                case ts.SyntaxKind.ConditionalExpression:
+                    this.visitConditionalExpression(<ts.ConditionalExpression> node);
                     break;
 
                 case ts.SyntaxKind.Constructor:
@@ -259,6 +279,10 @@ module Lint {
 
                 case ts.SyntaxKind.ObjectLiteralExpression:
                     this.visitObjectLiteralExpression(<ts.ObjectLiteralExpression> node);
+                    break;
+
+                case ts.SyntaxKind.PostfixUnaryExpression:
+                    this.visitPostfixUnaryExpression(<ts.PostfixUnaryExpression> node);
                     break;
 
                 case ts.SyntaxKind.PrefixUnaryExpression:

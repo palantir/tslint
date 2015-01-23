@@ -50,12 +50,14 @@ declare module Lint {
 declare module Lint {
     class SyntaxWalker {
         visitAnyKeyword(node: ts.Node): void;
+        visitArrowFunction(node: ts.FunctionLikeDeclaration): void;
         visitBinaryExpression(node: ts.BinaryExpression): void;
         visitBlock(node: ts.Block): void;
         visitBreakStatement(node: ts.BreakOrContinueStatement): void;
         visitCallExpression(node: ts.CallExpression): void;
         visitCaseClause(node: ts.CaseClause): void;
         visitClassDeclaration(node: ts.ClassDeclaration): void;
+        visitConditionalExpression(node: ts.ConditionalExpression): void;
         visitConstructorDeclaration(node: ts.ConstructorDeclaration): void;
         visitContinueStatement(node: ts.BreakOrContinueStatement): void;
         visitDebuggerStatement(node: ts.Statement): void;
@@ -70,10 +72,11 @@ declare module Lint {
         visitInterfaceDeclaration(node: ts.InterfaceDeclaration): void;
         visitLabeledStatement(node: ts.LabeledStatement): void;
         visitMethodDeclaration(node: ts.MethodDeclaration): void;
+        visitModuleDeclaration(node: ts.ModuleDeclaration): void;
         visitNewExpression(node: ts.NewExpression): void;
         visitObjectLiteralExpression(node: ts.ObjectLiteralExpression): void;
+        visitPostfixUnaryExpression(node: ts.PostfixUnaryExpression): void;
         visitPrefixUnaryExpression(node: ts.PrefixUnaryExpression): void;
-        visitModuleDeclaration(node: ts.ModuleDeclaration): void;
         visitPropertyAccessExpression(node: ts.PropertyAccessExpression): void;
         visitPropertyAssignment(node: ts.PropertyAssignment): void;
         visitPropertyDeclaration(node: ts.PropertyDeclaration): void;
