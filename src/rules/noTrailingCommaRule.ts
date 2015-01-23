@@ -14,26 +14,26 @@
  * limitations under the License.
 */
 
-/// <reference path='../../lib/tslint.d.ts' />
-
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "trailing comma";
 
-    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoTrailingCommaWalker(syntaxTree, this.getOptions()));
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        return this.applyWithWalker(new NoTrailingCommaWalker(sourceFile, this.getOptions()));
     }
 }
 
 class NoTrailingCommaWalker extends Lint.RuleWalker {
-    public visitObjectLiteralExpression(node: TypeScript.ObjectLiteralExpressionSyntax): void {
-        var propertyAssignments = node.propertyAssignments;
-        var lastPosition = this.positionAfter(node.openBraceToken, propertyAssignments);
-        lastPosition -= TypeScript.trailingTriviaWidth(propertyAssignments) + 1;
+    public visitObjectLiteralExpression(node: ts.ObjectLiteralExpression): void {
+        var child = node.getChildAt(1);
+        if (child != null && child.kind === ts.SyntaxKind.SyntaxList) {
+            var grandChildren = child.getChildren();
+            if (grandChildren.length > 0) {
+                var lastGrandChild = grandChildren[grandChildren.length - 1];
 
-        if (propertyAssignments.separatorCount() === propertyAssignments.length
-            && propertyAssignments.length > 0) {
-
-            this.addFailure(this.createFailure(lastPosition, 1, Rule.FAILURE_STRING));
+                if (lastGrandChild.kind === ts.SyntaxKind.CommaToken) {
+                    this.addFailure(this.createFailure(lastGrandChild.getStart(), 1, Rule.FAILURE_STRING));
+                }
+            }
         }
         super.visitObjectLiteralExpression(node);
     }
