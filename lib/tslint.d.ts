@@ -57,12 +57,14 @@ declare module Lint {
         visitCallExpression(node: ts.CallExpression): void;
         visitCaseClause(node: ts.CaseClause): void;
         visitClassDeclaration(node: ts.ClassDeclaration): void;
+        visitCatchClause(node: ts.CatchClause): void;
         visitConditionalExpression(node: ts.ConditionalExpression): void;
         visitConstructorDeclaration(node: ts.ConstructorDeclaration): void;
         visitContinueStatement(node: ts.BreakOrContinueStatement): void;
         visitDebuggerStatement(node: ts.Statement): void;
         visitDefaultClause(node: ts.DefaultClause): void;
         visitDoStatement(node: ts.DoStatement): void;
+        visitEnumDeclaration(node: ts.EnumDeclaration): void;
         visitExpressionStatement(node: ts.ExpressionStatement): void;
         visitForStatement(node: ts.ForStatement): void;
         visitForInStatement(node: ts.ForInStatement): void;
@@ -84,6 +86,7 @@ declare module Lint {
         visitSwitchStatement(node: ts.SwitchStatement): void;
         visitThrowStatement(node: ts.ThrowStatement): void;
         visitTryBlock(node: ts.Block): void;
+        visitTryStatement(node: ts.TryStatement): void;
         visitVariableDeclaration(node: ts.VariableDeclaration): void;
         visitVariableStatement(node: ts.VariableStatement): void;
         visitWhileStatement(node: ts.WhileStatement): void;
