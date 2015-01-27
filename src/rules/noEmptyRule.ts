@@ -14,47 +14,48 @@
  * limitations under the License.
 */
 
-/// <reference path='../../lib/tslint.d.ts' />
-
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "block is empty";
 
-    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new BlockWalker(syntaxTree, this.getOptions()));
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        return this.applyWithWalker(new BlockWalker(sourceFile, this.getOptions()));
     }
 }
 
 class BlockWalker extends Lint.RuleWalker {
-    private ignoredBlocks: TypeScript.BlockSyntax[] = [];
+    private ignoredBlocks: ts.Block[] = [];
 
-    public visitBlock(node: TypeScript.BlockSyntax): void {
-        var hasCommentAfter = node.openBraceToken.trailingTrivia().hasComment();
-        var hasCommentBefore = node.closeBraceToken.leadingTrivia().hasComment();
+    public visitBlock(node: ts.Block): void {
+        var openBrace = node.getChildAt(0);
+        var closeBrace = node.getChildAt(node.getChildCount() - 1);
+
+        var sourceFileText = node.getSourceFile().text;
+
+        var hasCommentAfter = ts.getTrailingCommentRanges(sourceFileText, openBrace.getEnd()) != null;
+        var hasCommentBefore = ts.getLeadingCommentRanges(sourceFileText, closeBrace.getFullStart()) != null;
         var isSkipped = this.ignoredBlocks.indexOf(node) !== -1;
 
-        if (TypeScript.childCount(node.statements) <= 0 && !hasCommentAfter && !hasCommentBefore && !isSkipped) {
-            var position = this.getPosition() + TypeScript.leadingTriviaWidth(node);
-            var width = TypeScript.width(node);
-            this.addFailure(this.createFailure(position, width, Rule.FAILURE_STRING));
+        if (node.statements.length <= 0 && !hasCommentAfter && !hasCommentBefore && !isSkipped) {
+            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
         }
 
         super.visitBlock(node);
     }
 
-    public visitConstructorDeclaration(node: TypeScript.ConstructorDeclarationSyntax): void {
+    public visitConstructorDeclaration(node: ts.ConstructorDeclaration): void {
         var isSkipped = false;
-        var parameters = node.callSignature.parameterList.parameters;
+        var parameters = node.parameters;
 
         for (var i = 0; i < parameters.length; i++) {
-            var param = <TypeScript.ParameterSyntax> parameters[i];
+            var param = parameters[i];
 
-            for (var j = 0; j < TypeScript.childCount(param.modifiers); j++) {
-                var modifier = TypeScript.childAt(param.modifiers, j).kind();
+            for (var j = 0; param.modifiers != null && j < param.modifiers.length; j++) {
+                var modifier = param.modifiers[j].kind;
 
-                if (modifier === TypeScript.SyntaxKind.PublicKeyword || modifier === TypeScript.SyntaxKind.PrivateKeyword) {
+                if (modifier === ts.SyntaxKind.PublicKeyword || modifier === ts.SyntaxKind.PrivateKeyword) {
                     isSkipped = true;
 
-                    this.ignoredBlocks.push(node.block);
+                    this.ignoredBlocks.push(node.body);
 
                     break;
                 }
