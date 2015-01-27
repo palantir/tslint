@@ -155,6 +155,10 @@ module Lint {
             this.walkChildren(node);
         }
 
+        public visitTryBlock(node: ts.Block) {
+            this.walkChildren(node);
+        }
+
         public visitVariableDeclaration(node: ts.VariableDeclaration) {
             this.walkChildren(node);
         }
@@ -311,6 +315,10 @@ module Lint {
 
                 case ts.SyntaxKind.ThrowStatement:
                     this.visitThrowStatement(<ts.ThrowStatement> node);
+                    break;
+
+                case ts.SyntaxKind.TryBlock:
+                    this.visitTryBlock(<ts.Block> node);
                     break;
 
                 case ts.SyntaxKind.VariableDeclaration:

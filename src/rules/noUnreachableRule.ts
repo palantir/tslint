@@ -56,6 +56,11 @@ class UnreachableWalker extends Lint.RuleWalker {
         this.hasReturned = false;
     }
 
+    public visitTryBlock(node: ts.Block): void {
+        super.visitTryBlock(node);
+        this.hasReturned = false;
+    }
+
     public visitCaseClause(node: ts.CaseClause): void {
         super.visitCaseClause(node);
         this.hasReturned = false;

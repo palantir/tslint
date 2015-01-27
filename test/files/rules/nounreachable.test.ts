@@ -87,3 +87,13 @@ function f7() {
 
     var y = 7;
 }
+
+// more valid code
+
+function f8() {
+    try {
+        return 0;
+    } catch (e) {
+        console.log("here");
+    }
+}

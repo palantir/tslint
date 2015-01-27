@@ -83,6 +83,7 @@ declare module Lint {
         visitReturnStatement(node: ts.ReturnStatement): void;
         visitSwitchStatement(node: ts.SwitchStatement): void;
         visitThrowStatement(node: ts.ThrowStatement): void;
+        visitTryBlock(node: ts.Block): void;
         visitVariableDeclaration(node: ts.VariableDeclaration): void;
         visitVariableStatement(node: ts.VariableStatement): void;
         visitWhileStatement(node: ts.WhileStatement): void;
