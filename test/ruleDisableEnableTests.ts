@@ -18,7 +18,7 @@
 
 var fs = require("fs");
 
-describe.skip("Enable and Disable Rules", () => {
+describe("Enable and Disable Rules", () => {
     var path = require("path");
 
     it("is enabled and disabled in all the right places", () => {
@@ -57,8 +57,8 @@ describe.skip("Enable and Disable Rules", () => {
         var parsedResult = JSON.parse(result.output);
         var actualFailures: Lint.RuleFailure[] = [];
         parsedResult.forEach((failure) => {
-            var startArray = [failure.startPosition.line + 1, failure.startPosition.character + 1];
-            var endArray = [failure.endPosition.line + 1, failure.endPosition.character + 1];
+            var startArray = [failure.startPosition.line, failure.startPosition.character];
+            var endArray = [failure.endPosition.line, failure.endPosition.character];
             actualFailures.push(Lint.Test.createFailure("rules/enabledisable.test.ts", startArray, endArray, failure.failure));
         });
 

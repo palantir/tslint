@@ -147,6 +147,15 @@ declare module Lint {
     function findFormatter(name: string, formattersDirectory?: string): any;
 }
 declare module Lint {
+    class EnableDisableRulesWalker extends Lint.RuleWalker {
+        enableDisableRuleMap: {
+            [rulename: string]: Lint.IEnableDisablePosition[];
+        };
+        visitSourceFile(node: ts.SourceFile): void;
+        private handlePossibleTslintSwitch(commentText, startingPosition);
+    }
+}
+declare module Lint {
     function createLanguageServiceHost(fileName: string, source: string): ts.LanguageServiceHost;
 }
 declare module TypeScript {

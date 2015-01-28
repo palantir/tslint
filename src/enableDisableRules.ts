@@ -20,45 +20,42 @@ module Lint {
     export class EnableDisableRulesWalker extends Lint.RuleWalker {
         public enableDisableRuleMap: {[rulename: string]: Lint.IEnableDisablePosition[]} = {};
 
-        public visitToken(token: TypeScript.ISyntaxToken): void {
-            this.findSwitchesInTrivia(token.leadingTrivia().toArray(), this.getPosition());
-
-            var remainingWidth = token.fullWidth() - token.trailingTriviaWidth();
-            this.findSwitchesInTrivia(token.trailingTrivia().toArray(), this.getPosition() + remainingWidth);
-
-            super.visitToken(token);
+        public visitSourceFile(node: ts.SourceFile): void {
+            var scanner = ts.createScanner(ts.ScriptTarget.ES5, false, node.text);
+            while (scanner.scan() !== ts.SyntaxKind.EndOfFileToken) {
+                if (scanner.getToken() === ts.SyntaxKind.MultiLineCommentTrivia) {
+                    var commentText = scanner.getTokenText();
+                    var startPosition = scanner.getTokenPos();
+                    this.handlePossibleTslintSwitch(commentText, startPosition);
+                }
+            }
+            // no need to call super to visit the rest of the nodes, so don't call super here
         }
 
-        private findSwitchesInTrivia(triviaList: TypeScript.ISyntaxTrivia[], startingPosition: number) {
+        private handlePossibleTslintSwitch(commentText: string, startingPosition: number) {
             var currentPosition = startingPosition;
-            triviaList.forEach((triviaItem) => {
-                if (triviaItem.kind() === TypeScript.SyntaxKind.MultiLineCommentTrivia) {
-                    var commentText = triviaItem.fullText();
-                    // regex is: start of string followed by "/*" followed by any amount of whitespace followed by "tslint:"
-                    if (commentText.match(/^\/\*\s*tslint:/)) {
-                        var commentTextParts = commentText.split(":");
-                        // regex is: start of string followed by either "enable" or "disable"
-                        // followed by either whitespace or end of string
-                        var enableOrDisableMatch = commentTextParts[1].match(/^(enable|disable)(\s|$)/);
-                        if (enableOrDisableMatch != null) {
-                            var isEnabled = enableOrDisableMatch[1] === "enable";
-                            var position = currentPosition;
-                            var rulesList = ["all"];
-                            if (commentTextParts.length > 2) {
-                                rulesList = commentTextParts[2].split(/\s+/);
-                            }
-                            rulesList.forEach((ruleToAdd) => {
-                                if (!(ruleToAdd in this.enableDisableRuleMap)) {
-                                    this.enableDisableRuleMap[ruleToAdd] = [];
-                                }
-                                this.enableDisableRuleMap[ruleToAdd].push({position: position, isEnabled: isEnabled});
-                            });
-                        }
-
+            // regex is: start of string followed by "/*" followed by any amount of whitespace followed by "tslint:"
+            if (commentText.match(/^\/\*\s*tslint:/)) {
+                var commentTextParts = commentText.split(":");
+                // regex is: start of string followed by either "enable" or "disable"
+                // followed by either whitespace or end of string
+                var enableOrDisableMatch = commentTextParts[1].match(/^(enable|disable)(\s|$)/);
+                if (enableOrDisableMatch != null) {
+                    var isEnabled = enableOrDisableMatch[1] === "enable";
+                    var position = currentPosition;
+                    var rulesList = ["all"];
+                    if (commentTextParts.length > 2) {
+                        rulesList = commentTextParts[2].split(/\s+/);
                     }
+                    rulesList.forEach((ruleToAdd) => {
+                        if (!(ruleToAdd in this.enableDisableRuleMap)) {
+                            this.enableDisableRuleMap[ruleToAdd] = [];
+                        }
+                        this.enableDisableRuleMap[ruleToAdd].push({position: position, isEnabled: isEnabled});
+                    });
                 }
-                currentPosition += triviaItem.fullWidth();
-            });
+
+            }
         }
     }
 }
