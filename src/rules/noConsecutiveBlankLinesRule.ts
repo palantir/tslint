@@ -14,42 +14,30 @@
  * limitations under the License.
 */
 
-/// <reference path='../../lib/tslint.d.ts' />
-
 export class Rule extends Lint.Rules.AbstractRule {
     static FAILURE_STRING = "consecutive blank lines are disallowed";
 
-    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new BlankLinesWalker(syntaxTree, this.getOptions()));
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        return this.applyWithWalker(new BlankLinesWalker(sourceFile, this.getOptions()));
     }
 }
 
 class BlankLinesWalker extends Lint.RuleWalker {
-    // starting with 1 to cover the case where the file starts with two blank lines
-    private newLinesInARowSeenSoFar = 1;
-
-    public visitToken(token: TypeScript.ISyntaxToken): void {
-        this.findConsecutiveBlankLinesFromTriva(token.leadingTrivia().toArray(), this.getPosition());
-        this.newLinesInARowSeenSoFar = 0;
-        this.findConsecutiveBlankLinesFromTriva(token.trailingTrivia().toArray(),
-            this.getPosition() + TypeScript.leadingTriviaWidth(token) + TypeScript.width(token));
-
-        super.visitToken(token);
-    }
-
-    private findConsecutiveBlankLinesFromTriva(triviaList: TypeScript.ISyntaxTrivia[], currentPosition: number) {
-        triviaList.forEach((triviaItem) => {
-            if (triviaItem.isNewLine()) {
-                this.newLinesInARowSeenSoFar += 1;
-                if (this.newLinesInARowSeenSoFar >= 3) {
-                    var failure = this.createFailure(currentPosition, 1, Rule.FAILURE_STRING);
+    public visitSourceFile(node: ts.SourceFile): void {
+        var scanner = ts.createScanner(ts.ScriptTarget.ES5, false, node.text);
+        // starting with 1 to cover the case where the file starts with two blank lines
+        var newLinesInARowSeenSoFar = 1;
+        while (scanner.scan() !== ts.SyntaxKind.EndOfFileToken) {
+            if (scanner.getToken() === ts.SyntaxKind.NewLineTrivia) {
+                newLinesInARowSeenSoFar += 1;
+                if (newLinesInARowSeenSoFar >= 3) {
+                    var failure = this.createFailure(scanner.getStartPos(), 1, Rule.FAILURE_STRING);
                     this.addFailure(failure);
                 }
             } else {
-                this.newLinesInARowSeenSoFar = 0;
+                newLinesInARowSeenSoFar = 0;
             }
-            currentPosition += triviaItem.fullWidth();
-        });
+        }
+        // no need to call super to visit the rest of the nodes, so don't call super here
     }
-
 }
