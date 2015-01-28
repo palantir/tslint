@@ -60,11 +60,11 @@
     "semicolon": true,
     "triple-equals": [true, "allow-null-check"],
     "typedef": [true,
-        "callSignature",
-        "indexSignature",
+        "call-signature",
         "parameter",
-        "propertySignature",
-        "variableDeclarator"
+        "property-declaration",
+        "variable-declaration",
+        "member-variable-declaration"
     ],
     "typedef-whitespace": [true,
         ["callSignature", "noSpace"],

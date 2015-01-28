@@ -113,6 +113,7 @@ module.exports = function(grunt) {
           'src/rules/radixRule.ts',
           'src/rules/semicolonRule.ts',
           'src/rules/tripleEqualsRule.ts',
+          'src/rules/typedefRule.ts',
           'src/rules/variableNameRule.ts',
           'src/rules/useStrictRule.ts'
         ],
@@ -170,6 +171,7 @@ module.exports = function(grunt) {
           'test/rules/radixRuleTests.ts',
           'test/rules/semicolonRuleTests.ts',
           'test/rules/tripleEqualsRuleTests.ts',
+          'test/rules/typedefRuleTests.ts',
           'test/rules/variableNameRuleTests.ts',
           'test/rules/useStrictRuleTests.ts',
 
