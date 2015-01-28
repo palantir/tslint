@@ -155,6 +155,10 @@ module Lint {
             this.walkChildren(node);
         }
 
+        public visitSourceFile(node: ts.SourceFile) {
+            this.walkChildren(node);
+        }
+
         public visitSwitchStatement(node: ts.SwitchStatement) {
             this.walkChildren(node);
         }
@@ -327,6 +331,10 @@ module Lint {
 
                 case ts.SyntaxKind.ReturnStatement:
                     this.visitReturnStatement(<ts.ReturnStatement> node);
+                    break;
+
+                case ts.SyntaxKind.SourceFile:
+                    this.visitSourceFile(<ts.SourceFile> node);
                     break;
 
                 case ts.SyntaxKind.SwitchStatement:

@@ -83,6 +83,7 @@ declare module Lint {
         visitPropertyAssignment(node: ts.PropertyAssignment): void;
         visitPropertyDeclaration(node: ts.PropertyDeclaration): void;
         visitReturnStatement(node: ts.ReturnStatement): void;
+        visitSourceFile(node: ts.SourceFile): void;
         visitSwitchStatement(node: ts.SwitchStatement): void;
         visitThrowStatement(node: ts.ThrowStatement): void;
         visitTryBlock(node: ts.Block): void;
