@@ -64,23 +64,20 @@ module Lint.Test {
     // assert on array equality for failures
     export function assertFailuresEqual(actualFailures: Lint.RuleFailure[], expectedFailures: Lint.RuleFailure[]) {
         assert.equal(actualFailures.length, expectedFailures.length);
-        for (var i = 0; i < actualFailures.length; ++i) {
-            var actualFailure = actualFailures[i];
-            var expectedFailure = expectedFailures[i];
-
-            assert.isTrue(actualFailure.equals(expectedFailure));
-        }
+        actualFailures.forEach((actualFailure, i) => {
+            assert.isTrue(actualFailure.equals(expectedFailures[i]));
+        });
     }
 
     // assert whether a failure array contains the given failure
     export function assertContainsFailure(haystack: Lint.RuleFailure[], needle: Lint.RuleFailure) {
-        for (var i = 0; i < haystack.length; ++i) {
-            if (haystack[i].equals(needle)) {
-                return;
-            }
-        }
+        var haystackContainsNeedle = haystack.some((item) => item.equals(needle));
 
-        assert(false, "expected " + JSON.stringify(needle.toJson(), null, 2) + " within " +
-            JSON.stringify(haystack.map((hay) => hay.toJson()), null, 2));
+        if (!haystackContainsNeedle) {
+            var stringifiedNeedle = JSON.stringify(needle.toJson(), null, 2);
+            var stringifiedHaystack = JSON.stringify(haystack.map((hay) => hay.toJson()), null, 2);
+
+            assert(false, "expected " + stringifiedNeedle + " within " + stringifiedHaystack);
+        }
     }
 }

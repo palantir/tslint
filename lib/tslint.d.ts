@@ -64,6 +64,7 @@ declare module Lint {
         visitDebuggerStatement(node: ts.Statement): void;
         visitDefaultClause(node: ts.DefaultClause): void;
         visitDoStatement(node: ts.DoStatement): void;
+        visitElementAccessExpression(node: ts.ElementAccessExpression): void;
         visitEnumDeclaration(node: ts.EnumDeclaration): void;
         visitExpressionStatement(node: ts.ExpressionStatement): void;
         visitForStatement(node: ts.ForStatement): void;
