@@ -14,47 +14,34 @@
  * limitations under the License.
 */
 
-/// <reference path='../../lib/tslint.d.ts' />
-
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "trailing whitespace";
 
-    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoTrailingWhitespaceWalker(syntaxTree, this.getOptions()));
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        return this.applyWithWalker(new NoTrailingWhitespaceWalker(sourceFile, this.getOptions()));
     }
 }
 
 class NoTrailingWhitespaceWalker extends Lint.RuleWalker {
-
-    public visitToken(token: TypeScript.ISyntaxToken) {
-        var leadingTrivia = token.leadingTrivia();
-        var trailingTrivia = token.trailingTrivia();
-        var position = this.getPosition();
-        var trailingPosition = position + token.leadingTriviaWidth() + TypeScript.width(token);
-
-        this.checkForTrailingWhitespace(leadingTrivia, position);
-        this.checkForTrailingWhitespace(trailingTrivia, trailingPosition);
-
-        super.visitToken(token);
-    }
-
-    private checkForTrailingWhitespace(triviaList: TypeScript.ISyntaxTriviaList, position: number) {
-        var start = position;
-
-        for (var i = 0; i < triviaList.count() - 1; i++) {
-            var trivia = triviaList.syntaxTriviaAt(i);
-            var nextTrivia = triviaList.syntaxTriviaAt(i + 1);
-
-            // look for whitespace trivia immediately preceding new line trivia
-            if (trivia.kind() === TypeScript.SyntaxKind.WhitespaceTrivia && nextTrivia.kind() === TypeScript.SyntaxKind.NewLineTrivia) {
-                var width = trivia.fullWidth();
-                var failure = this.createFailure(start, width, Rule.FAILURE_STRING);
-
-                this.addFailure(failure);
+    public visitSourceFile(node: ts.SourceFile): void {
+        var scanner = ts.createScanner(ts.ScriptTarget.ES5, false, node.text);
+        var lastSeenWasWhitespace = false;
+        var lastSeenWhitespacePosition = 0;
+        while (scanner.scan() !== ts.SyntaxKind.EndOfFileToken) {
+            if (scanner.getToken() === ts.SyntaxKind.NewLineTrivia) {
+                if (lastSeenWasWhitespace) {
+                    var width = scanner.getStartPos() - lastSeenWhitespacePosition;
+                    var failure = this.createFailure(lastSeenWhitespacePosition, width, Rule.FAILURE_STRING);
+                    this.addFailure(failure);
+                }
+               lastSeenWasWhitespace = false;
+            } else if (scanner.getToken() === ts.SyntaxKind.WhitespaceTrivia) {
+                lastSeenWasWhitespace = true;
+                lastSeenWhitespacePosition = scanner.getStartPos();
+            } else {
+                lastSeenWasWhitespace = false;
             }
-
-            // update the position
-            start += trivia.fullWidth();
         }
+        // no need to call super to visit the rest of the nodes, so don't call super here
     }
 }
