@@ -29,7 +29,6 @@ export class Rule extends Lint.Rules.AbstractRule {
 class CommentWalker extends Lint.RuleWalker {
     public visitSourceFile(node: ts.SourceFile): void {
         var scanner = ts.createScanner(ts.ScriptTarget.ES5, false, node.text);
-        var options = this.getOptions();
         while (scanner.scan() !== ts.SyntaxKind.EndOfFileToken) {
             if (scanner.getToken() === ts.SyntaxKind.SingleLineCommentTrivia) {
                 var commentText = scanner.getTokenText();
