@@ -20,11 +20,17 @@ describe("<no-string-literal>", () => {
     it("forbids object access via string literals", () => {
         var fileName = "rules/sub.test.ts";
         var NoStringLiteralRule = Lint.Test.getRule("no-string-literal");
-        var failureString = NoStringLiteralRule.FAILURE_STRING;
 
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, NoStringLiteralRule);
-        var expectedFailure = Lint.Test.createFailure(fileName, [11, 21], [11, 24], failureString);
+        var expectedFailures = [
+            Lint.Test.createFailure(fileName, [10, 20], [10, 25], NoStringLiteralRule.FAILURE_STRING),
+            Lint.Test.createFailure(fileName, [11, 21], [11, 24], NoStringLiteralRule.FAILURE_STRING),
+            Lint.Test.createFailure(fileName, [15, 5], [15, 23], NoStringLiteralRule.FAILURE_STRING),
+            Lint.Test.createFailure(fileName, [16, 5], [16, 30], NoStringLiteralRule.FAILURE_STRING)
+        ];
 
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
+        expectedFailures.forEach((expectedFailure) => {
+            Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
+        });
     });
 });

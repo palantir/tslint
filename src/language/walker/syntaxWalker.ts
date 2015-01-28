@@ -79,6 +79,10 @@ module Lint {
             this.walkChildren(node);
         }
 
+        public visitElementAccessExpression(node: ts.ElementAccessExpression) {
+            this.walkChildren(node);
+        }
+
         public visitEnumDeclaration(node: ts.EnumDeclaration) {
             this.walkChildren(node);
         }
@@ -271,6 +275,10 @@ module Lint {
 
                 case ts.SyntaxKind.DoStatement:
                     this.visitDoStatement(<ts.DoStatement> node);
+                    break;
+
+                case ts.SyntaxKind.ElementAccessExpression:
+                    this.visitElementAccessExpression(<ts.ElementAccessExpression> node);
                     break;
 
                 case ts.SyntaxKind.EnumDeclaration:
