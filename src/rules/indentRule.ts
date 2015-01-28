@@ -1,4 +1,18 @@
-/// <reference path='../../lib/tslint.d.ts' />
+/*
+ * Copyright 2013 Palantir Technologies, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+*/
 
 var OPTION_USE_TABS = "tabs";
 var OPTION_USE_SPACES = "spaces";
@@ -7,8 +21,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_TABS = "tab indentation expected";
     public static FAILURE_STRING_SPACES = "space indentation expected";
 
-    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new IndentWalker(syntaxTree, this.getOptions()));
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        return this.applyWithWalker(new IndentWalker(sourceFile, this.getOptions()));
     }
 }
 
@@ -17,8 +31,8 @@ class IndentWalker extends Lint.RuleWalker {
     private failureString: string;
     private regExp: RegExp;
 
-    constructor(syntaxTree: TypeScript.SyntaxTree, options: Lint.IOptions) {
-        super(syntaxTree, options);
+    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
+        super(sourceFile, options);
 
         if (this.hasOption(OPTION_USE_TABS)) {
             this.regExp = new RegExp(" ");
@@ -29,13 +43,35 @@ class IndentWalker extends Lint.RuleWalker {
         }
     }
 
-    public visitToken(token: TypeScript.ISyntaxToken) {
-        if (this.hasOption(OPTION_USE_TABS) || this.hasOption(OPTION_USE_SPACES)) {
-            var position = this.getPosition() + token.leadingTriviaWidth();
-            if (!token.hasLeadingComment() && token.leadingTrivia().fullText().match(this.regExp)) {
-                this.addFailure(this.createFailure(position, token.fullWidth(), this.failureString));
-            }
+    public visitSourceFile(node: ts.SourceFile): void {
+        if (!this.hasOption(OPTION_USE_TABS) && !this.hasOption(OPTION_USE_SPACES)) {
+            // if we don't have either option, no need to check anything, and no need to call super, so just return
+            return;
         }
-        super.visitToken(token);
+        var scanner = ts.createScanner(ts.ScriptTarget.ES5, false, node.text);
+        var lineStarts = node.getLineStarts();
+        lineStarts.forEach((lineStart) => {
+            scanner.setTextPos(lineStart);
+            var currentScannedType = scanner.scan();
+            var fullLeadingWhitespace = "";
+            while (currentScannedType === ts.SyntaxKind.WhitespaceTrivia) {
+                fullLeadingWhitespace += scanner.getTokenText();
+                currentScannedType = scanner.scan();
+            }
+
+            if (currentScannedType === ts.SyntaxKind.SingleLineCommentTrivia ||
+                currentScannedType === ts.SyntaxKind.MultiLineCommentTrivia ||
+                currentScannedType === ts.SyntaxKind.NewLineTrivia) {
+
+                // ignore lines that have comments before the first token
+
+                return;
+            }
+
+            if (fullLeadingWhitespace.match(this.regExp)) {
+                this.addFailure(this.createFailure(lineStart, fullLeadingWhitespace.length, this.failureString));
+            }
+        });
+        // no need to call super to visit the rest of the nodes, so don't call super here
     }
 }
