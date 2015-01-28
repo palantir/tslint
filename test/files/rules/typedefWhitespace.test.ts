@@ -1,16 +1,16 @@
 var noPreceedingSpaceObjectLiteralWithPropertyGetter = {
-    Prop: "some property",
-    
+    _Prop: "some property",
+
     get Prop(): string {
-        return Prop;
+        return this._Prop;
     }
 };
 
 var withPreceedingSpaceObjectLiteralWithPropertyGetter = {
-    Prop: "some property",
+    _Prop: "some property",
 
     get Prop() : string {
-        return Prop;
+        return this._Prop;
     }
 };
 
