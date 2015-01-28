@@ -51,6 +51,10 @@ module Lint {
             this.walkChildren(node);
         }
 
+        public visitCatchClause(node: ts.CatchClause) {
+            this.walkChildren(node);
+        }
+
         public visitConditionalExpression(node: ts.ConditionalExpression) {
             this.walkChildren(node);
         }
@@ -72,6 +76,10 @@ module Lint {
         }
 
         public visitDoStatement(node: ts.DoStatement) {
+            this.walkChildren(node);
+        }
+
+        public visitEnumDeclaration(node: ts.EnumDeclaration) {
             this.walkChildren(node);
         }
 
@@ -159,6 +167,10 @@ module Lint {
             this.walkChildren(node);
         }
 
+        public visitTryStatement(node: ts.TryStatement) {
+            this.walkChildren(node);
+        }
+
         public visitVariableDeclaration(node: ts.VariableDeclaration) {
             this.walkChildren(node);
         }
@@ -213,6 +225,10 @@ module Lint {
                     this.visitClassDeclaration(<ts.ClassDeclaration> node);
                     break;
 
+                case ts.SyntaxKind.CatchClause:
+                    this.visitCatchClause(<ts.CatchClause> node);
+                    break;
+
                 case ts.SyntaxKind.ConditionalExpression:
                     this.visitConditionalExpression(<ts.ConditionalExpression> node);
                     break;
@@ -235,6 +251,10 @@ module Lint {
 
                 case ts.SyntaxKind.DoStatement:
                     this.visitDoStatement(<ts.DoStatement> node);
+                    break;
+
+                case ts.SyntaxKind.EnumDeclaration:
+                    this.visitEnumDeclaration(<ts.EnumDeclaration> node);
                     break;
 
                 case ts.SyntaxKind.ExpressionStatement:
@@ -319,6 +339,10 @@ module Lint {
 
                 case ts.SyntaxKind.TryBlock:
                     this.visitTryBlock(<ts.Block> node);
+                    break;
+
+                case ts.SyntaxKind.TryStatement:
+                    this.visitTryStatement(<ts.TryStatement> node);
                     break;
 
                 case ts.SyntaxKind.VariableDeclaration:

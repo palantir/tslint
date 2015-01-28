@@ -23,7 +23,7 @@ module Module
 
 interface Class
 {
-    public variable;
+    variable: string;
 }
 
 var object =
