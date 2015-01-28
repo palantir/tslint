@@ -116,7 +116,8 @@ module.exports = function(grunt) {
           'src/rules/tripleEqualsRule.ts',
           'src/rules/typedefRule.ts',
           'src/rules/variableNameRule.ts',
-          'src/rules/useStrictRule.ts'
+          'src/rules/useStrictRule.ts',
+          'src/rules/whitespaceRule.ts'
         ],
         outDir: 'build/rules/'
       },
@@ -176,6 +177,7 @@ module.exports = function(grunt) {
           'test/rules/typedefRuleTests.ts',
           'test/rules/variableNameRuleTests.ts',
           'test/rules/useStrictRuleTests.ts',
+          'test/rules/whitespaceRuleTests.ts',
 
           '!test/files/**/*.ts'
         ],

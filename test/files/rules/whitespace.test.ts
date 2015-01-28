@@ -1,6 +1,6 @@
 import ast=AST;
 module M {
-    export ast=AST;
+    export var ast=AST;
 
     var x:number;
 
@@ -38,3 +38,5 @@ module M {
 }
 
 var a;
+
+export=a;

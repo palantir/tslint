@@ -63,6 +63,10 @@ module Lint {
             this.walkChildren(node);
         }
 
+        public visitConstructorType(node: ts.Node) {
+            this.walkChildren(node);
+        }
+
         public visitContinueStatement(node: ts.BreakOrContinueStatement) {
             this.walkChildren(node);
         }
@@ -87,6 +91,10 @@ module Lint {
             this.walkChildren(node);
         }
 
+        public visitExportAssignment(node: ts.ExportAssignment) {
+            this.walkChildren(node);
+        }
+
         public visitExpressionStatement(node: ts.ExpressionStatement) {
             this.walkChildren(node);
         }
@@ -104,6 +112,10 @@ module Lint {
         }
 
         public visitFunctionExpression(node: ts.FunctionExpression) {
+            this.walkChildren(node);
+        }
+
+        public visitFunctionType(node: ts.Node) {
             this.walkChildren(node);
         }
 
@@ -195,6 +207,10 @@ module Lint {
             this.walkChildren(node);
         }
 
+        public visitTypeAssertionExpression(node: ts.TypeAssertion) {
+            this.walkChildren(node);
+        }
+
         public visitVariableDeclaration(node: ts.VariableDeclaration) {
             this.walkChildren(node);
         }
@@ -261,6 +277,10 @@ module Lint {
                     this.visitConstructorDeclaration(<ts.ConstructorDeclaration> node);
                     break;
 
+                case ts.SyntaxKind.ConstructorType:
+                    this.visitConstructorType(node);
+                    break;
+
                 case ts.SyntaxKind.ContinueStatement:
                     this.visitContinueStatement(<ts.BreakOrContinueStatement> node);
                     break;
@@ -285,6 +305,10 @@ module Lint {
                     this.visitEnumDeclaration(<ts.EnumDeclaration> node);
                     break;
 
+                case ts.SyntaxKind.ExportAssignment:
+                    this.visitExportAssignment(<ts.ExportAssignment> node);
+                    break;
+
                 case ts.SyntaxKind.ExpressionStatement:
                     this.visitExpressionStatement(<ts.ExpressionStatement> node);
                     break;
@@ -303,6 +327,10 @@ module Lint {
 
                 case ts.SyntaxKind.FunctionExpression:
                     this.visitFunctionExpression(<ts.FunctionExpression> node);
+                    break;
+
+                case ts.SyntaxKind.FunctionType:
+                    this.visitFunctionType(node);
                     break;
 
                 case ts.SyntaxKind.GetAccessor:
@@ -391,6 +419,10 @@ module Lint {
 
                 case ts.SyntaxKind.TryStatement:
                     this.visitTryStatement(<ts.TryStatement> node);
+                    break;
+
+                case ts.SyntaxKind.TypeAssertionExpression:
+                    this.visitTypeAssertionExpression(<ts.TypeAssertion> node);
                     break;
 
                 case ts.SyntaxKind.VariableDeclaration:

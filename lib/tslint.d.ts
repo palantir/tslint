@@ -60,17 +60,20 @@ declare module Lint {
         visitCatchClause(node: ts.CatchClause): void;
         visitConditionalExpression(node: ts.ConditionalExpression): void;
         visitConstructorDeclaration(node: ts.ConstructorDeclaration): void;
+        visitConstructorType(node: ts.Node): void;
         visitContinueStatement(node: ts.BreakOrContinueStatement): void;
         visitDebuggerStatement(node: ts.Statement): void;
         visitDefaultClause(node: ts.DefaultClause): void;
         visitDoStatement(node: ts.DoStatement): void;
         visitElementAccessExpression(node: ts.ElementAccessExpression): void;
         visitEnumDeclaration(node: ts.EnumDeclaration): void;
+        visitExportAssignment(node: ts.ExportAssignment): void;
         visitExpressionStatement(node: ts.ExpressionStatement): void;
         visitForStatement(node: ts.ForStatement): void;
         visitForInStatement(node: ts.ForInStatement): void;
         visitFunctionDeclaration(node: ts.FunctionDeclaration): void;
         visitFunctionExpression(node: ts.FunctionExpression): void;
+        visitFunctionType(node: ts.Node): void;
         visitGetAccessor(node: ts.AccessorDeclaration): void;
         visitIfStatement(node: ts.IfStatement): void;
         visitImportDeclaration(node: ts.ImportDeclaration): void;
@@ -93,6 +96,7 @@ declare module Lint {
         visitThrowStatement(node: ts.ThrowStatement): void;
         visitTryBlock(node: ts.Block): void;
         visitTryStatement(node: ts.TryStatement): void;
+        visitTypeAssertionExpression(node: ts.TypeAssertion): void;
         visitVariableDeclaration(node: ts.VariableDeclaration): void;
         visitVariableStatement(node: ts.VariableStatement): void;
         visitWhileStatement(node: ts.WhileStatement): void;
