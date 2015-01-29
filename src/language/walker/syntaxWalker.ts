@@ -183,6 +183,10 @@ module Lint {
             this.walkChildren(node);
         }
 
+        public visitRegularExpressionLiteral(node: ts.Node) {
+            this.walkChildren(node);
+        }
+
         public visitReturnStatement(node: ts.ReturnStatement) {
             this.walkChildren(node);
         }
@@ -399,6 +403,10 @@ module Lint {
 
                 case ts.SyntaxKind.Property:
                     this.visitPropertyDeclaration(<ts.PropertyDeclaration> node);
+                    break;
+
+                case ts.SyntaxKind.RegularExpressionLiteral:
+                    this.visitRegularExpressionLiteral(node);
                     break;
 
                 case ts.SyntaxKind.ReturnStatement:

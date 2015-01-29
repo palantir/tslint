@@ -17,7 +17,7 @@
 /// <reference path='../references.ts' />
 
 describe("<no-use-before-declare>", () => {
-    it ("restricts usage before declaration", () => {
+    it("restricts usage before declaration", () => {
         var fileName = "rules/nousebeforedeclare.test.ts";
         var Rule = Lint.Test.getRule("no-use-before-declare");
 

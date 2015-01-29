@@ -31,23 +31,37 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class WhitespaceWalker extends Lint.RuleWalker {
     private scanner: ts.Scanner;
+    private regexStartEndMap: {[start: number]: number};
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
         this.scanner = ts.createScanner(ts.ScriptTarget.ES5, false, sourceFile.text);
+        this.regexStartEndMap = {};
     }
 
     public visitSourceFile(node: ts.SourceFile): void {
+        super.visitSourceFile(node);
+
         var lastShouldBeFollowedByWhitespace = false;
+        this.scanner.setTextPos(0);
         while (this.scanner.scan() !== ts.SyntaxKind.EndOfFileToken) {
+            var startPos = this.scanner.getStartPos();
             var tokenKind = this.scanner.getToken();
             if (tokenKind === ts.SyntaxKind.WhitespaceTrivia || tokenKind === ts.SyntaxKind.NewLineTrivia) {
                 lastShouldBeFollowedByWhitespace = false;
             } else if (lastShouldBeFollowedByWhitespace) {
-                var failure = this.createFailure(this.scanner.getStartPos(), 1, Rule.FAILURE_STRING);
+                var failure = this.createFailure(startPos, 1, Rule.FAILURE_STRING);
                 this.addFailure(failure);
                 lastShouldBeFollowedByWhitespace = false;
             }
+
+            if (this.regexStartEndMap[startPos] != null) {
+                // if we're at the start of a regex, the scanner doesn't know this, and will think the characters there
+                // are tokens. So skip to the end of the regex and keep scanning from there
+                this.scanner.setTextPos(this.regexStartEndMap[startPos]);
+                continue;
+            }
+
             // check for trailing space after the given tokens
             switch (tokenKind) {
                 case ts.SyntaxKind.CatchKeyword:
@@ -79,7 +93,11 @@ class WhitespaceWalker extends Lint.RuleWalker {
 
             }
         }
-        super.visitSourceFile(node);
+    }
+
+    public visitRegularExpressionLiteral(node: ts.Node) {
+        this.regexStartEndMap[node.getStart()] = node.getEnd();
+        super.visitRegularExpressionLiteral(node);
     }
 
     // check for spaces between the operator symbol (except in the case of comma statements)
@@ -89,7 +107,7 @@ class WhitespaceWalker extends Lint.RuleWalker {
             var position = node.left.getEnd();
             this.checkForTrailingWhitespace(position);
 
-            position = node.getChildAt(1).getEnd();
+            position = node.right.getFullStart();
             this.checkForTrailingWhitespace(position);
         }
 

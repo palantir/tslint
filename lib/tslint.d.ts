@@ -90,6 +90,7 @@ declare module Lint {
         visitPropertyAccessExpression(node: ts.PropertyAccessExpression): void;
         visitPropertyAssignment(node: ts.PropertyAssignment): void;
         visitPropertyDeclaration(node: ts.PropertyDeclaration): void;
+        visitRegularExpressionLiteral(node: ts.Node): void;
         visitReturnStatement(node: ts.ReturnStatement): void;
         visitSetAccessor(node: ts.AccessorDeclaration): void;
         visitSourceFile(node: ts.SourceFile): void;
