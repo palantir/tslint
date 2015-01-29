@@ -46,7 +46,7 @@ describe("Prose Formatter", () => {
 
     it("handles no failures", () => {
         var result = formatter.format([]);
-        assert.equal(result, "");
+        assert.equal(result, "\n");
     });
 
     function getPositionString(line, character) {

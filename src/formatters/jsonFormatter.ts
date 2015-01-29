@@ -18,11 +18,7 @@
 
 export class Formatter extends Lint.Formatters.AbstractFormatter {
     public format(failures: Lint.RuleFailure[]): string {
-        var failuresJSON: any[] = [];
-
-        for (var i = 0; i < failures.length; ++i) {
-            failuresJSON.push(failures[i].toJson());
-        }
+        var failuresJSON = failures.map((failure) => failure.toJson());
 
         return JSON.stringify(failuresJSON);
     }

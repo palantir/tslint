@@ -19,9 +19,8 @@
 export class Formatter extends Lint.Formatters.AbstractFormatter {
     public format(failures: Lint.RuleFailure[]): string {
         var output = "<pmd version=\"tslint\">";
-        for (var i = 0; i < failures.length; ++i) {
-            var failure = failures[i];
-            var fileName = failure.getFileName();
+
+        failures.forEach((failure: Lint.RuleFailure) => {
             var failureString = failure.getFailure()
                 .replace(/&/g, "&amp;")
                 .replace(/</g, "&lt;")
@@ -30,15 +29,14 @@ export class Formatter extends Lint.Formatters.AbstractFormatter {
                 .replace(/\"/g, "&quot;");
 
             var lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
-            var line = lineAndCharacter.line;
-            var character = lineAndCharacter.character;
 
-            output += "<file name=\"" + fileName;
-            output += "\"><violation begincolumn=\"" + character;
-            output += "\" beginline=\"" + line;
+            output += "<file name=\"" + failure.getFileName();
+            output += "\"><violation begincolumn=\"" + lineAndCharacter.character;
+            output += "\" beginline=\"" + lineAndCharacter.line;
             output += "\" priority=\"1\"";
             output += " rule=\"" + failureString + "\"> </violation></file>";
-        }
+        });
+
         output += "</pmd>";
         return output;
     }

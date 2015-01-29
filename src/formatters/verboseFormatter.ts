@@ -18,19 +18,18 @@
 
 export class Formatter extends Lint.Formatters.AbstractFormatter {
     public format(failures: Lint.RuleFailure[]): string {
-        var output = "";
-        for (var i = 0; i < failures.length; ++i) {
-            var failure = failures[i];
+
+        var outputLines = failures.map((failure: Lint.RuleFailure) => {
             var fileName = failure.getFileName();
             var failureString = failure.getFailure();
             var ruleName = failure.getRuleName();
 
             var lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
-            var line = lineAndCharacter.line;
-            var character = lineAndCharacter.character;
+            var positionTuple = "[" + lineAndCharacter.line + ", " + lineAndCharacter.character + "]";
 
-            output += "(" + ruleName + ") " + fileName + "[" + line + ", " + character + "]: " + failureString + "\n";
-        }
-        return output;
+            return "(" + ruleName + ") " + fileName + positionTuple + ": " + failureString;
+        });
+
+        return outputLines.join("\n") + "\n";
     }
 }
