@@ -28,12 +28,12 @@ module Lint {
         var compilerHost = {
             getSourceFile: function(filenameToGet: string) {
                 if (filenameToGet === fileName) {
-                    return ts.createSourceFile(filenameToGet, source, compilerOptions.target, "0");
+                    return ts.createSourceFile(filenameToGet, source, compilerOptions.target, "1", true);
                 }
             },
             writeFile: () => null,
             getDefaultLibFilename: () => "lib.d.ts",
-            useCaseSensitiveFileNames: () => false,
+            useCaseSensitiveFileNames: () => true,
             getCanonicalFileName: (filename: string) => filename,
             getCurrentDirectory: () => "",
             getNewLine: () => "\n"
