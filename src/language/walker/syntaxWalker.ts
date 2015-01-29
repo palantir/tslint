@@ -131,6 +131,10 @@ module Lint {
             this.walkChildren(node);
         }
 
+        public visitIndexSignatureDeclaration(node: ts.IndexSignatureDeclaration) {
+            this.walkChildren(node);
+        }
+
         public visitInterfaceDeclaration(node: ts.InterfaceDeclaration) {
             this.walkChildren(node);
         }
@@ -343,6 +347,10 @@ module Lint {
 
                 case ts.SyntaxKind.ImportDeclaration:
                     this.visitImportDeclaration(<ts.ImportDeclaration> node);
+                    break;
+
+                case ts.SyntaxKind.IndexSignature:
+                    this.visitIndexSignatureDeclaration(<ts.IndexSignatureDeclaration> node);
                     break;
 
                 case ts.SyntaxKind.InterfaceDeclaration:

@@ -77,6 +77,7 @@ declare module Lint {
         visitGetAccessor(node: ts.AccessorDeclaration): void;
         visitIfStatement(node: ts.IfStatement): void;
         visitImportDeclaration(node: ts.ImportDeclaration): void;
+        visitIndexSignatureDeclaration(node: ts.IndexSignatureDeclaration): void;
         visitInterfaceDeclaration(node: ts.InterfaceDeclaration): void;
         visitLabeledStatement(node: ts.LabeledStatement): void;
         visitMethodDeclaration(node: ts.MethodDeclaration): void;

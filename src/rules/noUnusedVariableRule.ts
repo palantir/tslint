@@ -21,67 +21,63 @@ var OPTION_CHECK_PARAMETERS = "check-parameters";
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "unused variable: ";
 
-    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         var documentRegistry = ts.createDocumentRegistry();
-        var languageServiceHost = new Lint.LanguageServiceHost(syntaxTree, TypeScript.fullText(syntaxTree.sourceUnit()));
+        var languageServiceHost = Lint.createLanguageServiceHost("file.ts", sourceFile.getFullText());
         var languageService = ts.createLanguageService(languageServiceHost, documentRegistry);
 
-        return this.applyWithWalker(new NoUnusedVariablesWalker(syntaxTree, this.getOptions(), languageService));
+        return this.applyWithWalker(new NoUnusedVariablesWalker(sourceFile, this.getOptions(), languageService));
     }
 }
 
 class NoUnusedVariablesWalker extends Lint.RuleWalker {
-    private fileName: string;
     private skipVariableDeclaration: boolean;
     private skipParameterDeclaration: boolean;
     private languageService: ts.LanguageService;
 
-    constructor(syntaxTree: TypeScript.SyntaxTree, options: Lint.IOptions, languageService: ts.LanguageService) {
-        super(syntaxTree, options);
-        this.fileName = syntaxTree.fileName();
+    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions, languageService: ts.LanguageService) {
+        super(sourceFile, options);
         this.skipVariableDeclaration = false;
         this.skipParameterDeclaration = false;
         this.languageService = languageService;
     }
 
-    public visitImportDeclaration(node: TypeScript.ImportDeclarationSyntax): void {
-        if (!this.hasModifier(node.modifiers, TypeScript.SyntaxKind.ExportKeyword)) {
-            var position = this.positionAfter(node.importKeyword);
-            this.validateReferencesForVariable(node.identifier.text(), position);
+    public visitImportDeclaration(node: ts.ImportDeclaration): void {
+        if (!this.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword)) {
+            this.validateReferencesForVariable(node.name.text, node.name.getStart());
         }
         super.visitImportDeclaration(node);
     }
 
     // check variable declarations
-    public visitVariableDeclarator(node: TypeScript.VariableDeclaratorSyntax): void {
-        var propertyName = node.propertyName,
-            variableName = propertyName.text(),
-            position = this.getPosition() + propertyName.leadingTriviaWidth();
+    public visitVariableDeclaration(node: ts.VariableDeclaration): void {
+        var propertyName = node.name,
+            variableName = propertyName.text;
 
         if (!this.skipVariableDeclaration) {
-            this.validateReferencesForVariable(variableName, position);
+            this.validateReferencesForVariable(variableName, propertyName.getStart());
         }
 
-        super.visitVariableDeclarator(node);
+        super.visitVariableDeclaration(node);
     }
 
-    // skip parameters in method signatures
-    public visitMethodSignature(node: TypeScript.MethodSignatureSyntax): void {
+    // skip parameters in interfaces
+    public visitInterfaceDeclaration(node: ts.InterfaceDeclaration): void {
         this.skipParameterDeclaration = true;
-        super.visitMethodSignature(node);
+        super.visitInterfaceDeclaration(node);
         this.skipParameterDeclaration = false;
     }
 
     // skip parameters in index signatures (stuff like [key: string]: string)
-    public visitIndexSignature(node: TypeScript.IndexSignatureSyntax): void {
+    public visitIndexSignatureDeclaration(node: ts.IndexSignatureDeclaration): void {
         this.skipParameterDeclaration = true;
-        super.visitIndexSignature(node);
+        super.visitIndexSignatureDeclaration(node);
         this.skipParameterDeclaration = false;
     }
 
     // skip exported variables
-    public visitVariableStatement(node: TypeScript.VariableStatementSyntax): void {
-        if (this.hasModifier(node.modifiers, TypeScript.SyntaxKind.ExportKeyword)) {
+    public visitVariableStatement(node: ts.VariableStatement): void {
+        if (this.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword)) {
             this.skipVariableDeclaration = true;
         }
 
@@ -90,59 +86,63 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     }
 
     // check function declarations (skipping exports)
-    public visitFunctionDeclaration(node: TypeScript.FunctionDeclarationSyntax): void {
-        var variableName = node.identifier.text();
-        var position = this.positionAfter(node.modifiers, node.functionKeyword);
+    public visitFunctionDeclaration(node: ts.FunctionDeclaration): void {
+        var variableName = node.name.text;
 
-        if (!this.hasModifier(node.modifiers, TypeScript.SyntaxKind.ExportKeyword)) {
-            this.validateReferencesForVariable(variableName, position);
+        if (!this.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword)) {
+            this.validateReferencesForVariable(variableName, node.name.getStart());
         }
 
         super.visitFunctionDeclaration(node);
     }
 
-    public visitParameter(node: TypeScript.ParameterSyntax): void {
-        var variableName = node.identifier.text();
-        var position = this.positionAfter(node.dotDotDotToken, node.modifiers) + TypeScript.leadingTriviaWidth(node);
+    public visitParameterDeclaration(node: ts.ParameterDeclaration): void {
+        var variableName = node.name.text;
 
-        if (!this.hasModifier(node.modifiers, TypeScript.SyntaxKind.PublicKeyword)
+        if (!this.hasModifier(node.modifiers, ts.SyntaxKind.PublicKeyword)
             && !this.skipParameterDeclaration && this.hasOption(OPTION_CHECK_PARAMETERS)) {
-            this.validateReferencesForVariable(variableName, position);
+            this.validateReferencesForVariable(variableName, node.name.getStart());
         }
 
-        super.visitParameter(node);
+        super.visitParameterDeclaration(node);
     }
 
     // check private member variables
-    public visitMemberVariableDeclaration(node: TypeScript.MemberVariableDeclarationSyntax): void {
-        var modifiers = node.modifiers;
+    public visitPropertyDeclaration(node: ts.PropertyDeclaration): void {
+        if (node.name != null && node.name.kind === ts.SyntaxKind.Identifier) {
+            var modifiers = node.modifiers;
+            var variableName = (<ts.Identifier> node.name).text;
 
-        // unless an explicit 'private' modifier is specified, variable is public, so skip the current declaration
-        if (!this.hasModifier(modifiers, TypeScript.SyntaxKind.PrivateKeyword)) {
-            this.skipVariableDeclaration = true;
+            // check only if an explicit 'private' modifier is specified
+            if (this.hasModifier(modifiers, ts.SyntaxKind.PrivateKeyword)) {
+                this.validateReferencesForVariable(variableName, node.name.getStart());
+            }
         }
 
-        super.visitMemberVariableDeclaration(node);
-        this.skipVariableDeclaration = false;
+        super.visitPropertyDeclaration(node);
     }
 
     // check private member functions
-    public visitMemberFunctionDeclaration(node: TypeScript.MemberFunctionDeclarationSyntax): void {
-        var modifiers = node.modifiers;
-        var variableName = node.propertyName.text();
-        var position = this.positionAfter(node.modifiers);
+    public visitMethodDeclaration(node: ts.MethodDeclaration): void {
+        if (node.name != null && node.name.kind === ts.SyntaxKind.Identifier) {
+            var modifiers = node.modifiers;
+            var variableName = (<ts.Identifier> node.name).text;
 
-        if (this.hasModifier(modifiers, TypeScript.SyntaxKind.PrivateKeyword)) {
-            this.validateReferencesForVariable(variableName, position);
+            if (this.hasModifier(modifiers, ts.SyntaxKind.PrivateKeyword)) {
+                this.validateReferencesForVariable(variableName, node.name.getStart());
+            }
         }
 
-        super.visitMemberFunctionDeclaration(node);
+        super.visitMethodDeclaration(node);
     }
 
-    private hasModifier(modifiers: TypeScript.ISyntaxToken[], modifierKind: TypeScript.SyntaxKind) {
+    private hasModifier(modifiers: ts.ModifiersArray, modifierKind: ts.SyntaxKind) {
+        if (modifiers == null) {
+            return false;
+        }
         for (var i = 0, n = modifiers.length; i < n; i++) {
             var modifier = modifiers[i];
-            if (modifier.kind() === modifierKind) {
+            if (modifier.kind === modifierKind) {
                 return true;
             }
         }
@@ -151,7 +151,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     }
 
     private validateReferencesForVariable(name: string, position: number) {
-        var references = this.languageService.getReferencesAtPosition(this.fileName, position);
+        var references = this.languageService.getReferencesAtPosition("file.ts", position);
         if (references.length <= 1) {
             var failureString = Rule.FAILURE_STRING + "'" + name + "'";
             var failure = this.createFailure(position, name.length, failureString);
