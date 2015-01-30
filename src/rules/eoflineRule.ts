@@ -18,6 +18,10 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "file should end with a newline";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        if (sourceFile.text === "") {
+            // if the file is empty, it "ends with a newline", so don't return a failure
+            return [];
+        }
         var eofToken = sourceFile.endOfFileToken;
         var eofTokenFullText = eofToken.getFullText();
         if (eofTokenFullText.length === 0 || eofTokenFullText.charAt(eofTokenFullText.length - 1) !== "\n") {
