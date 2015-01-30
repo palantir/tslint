@@ -90,6 +90,9 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
     }
 
     private canAppearAfter(previous: IModifiers, current: IModifiers): boolean {
+        if (previous == null || current == null) {
+            return true;
+        }
         if (this.hasOption(OPTION_VARIABLES_BEFORE_FUNCTIONS) && previous.isMethod !== current.isMethod) {
             return Number(previous.isMethod) < Number(current.isMethod);
         }
