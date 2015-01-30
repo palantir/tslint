@@ -59,3 +59,9 @@ catch (e)
 while(x < 10){
     x++;
 }
+
+function f():
+    number {
+
+    return 5;
+}

@@ -40,3 +40,9 @@ module M {
 var a;
 
 export=a;
+
+a.then(() => {
+    return 1;
+}).if(() => {
+    return 1;
+});

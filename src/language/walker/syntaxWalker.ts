@@ -123,6 +123,10 @@ module Lint {
             this.walkChildren(node);
         }
 
+        public visitIdentifier(node: ts.Identifier) {
+            this.walkChildren(node);
+        }
+
         public visitIfStatement(node: ts.IfStatement) {
             this.walkChildren(node);
         }
@@ -343,6 +347,10 @@ module Lint {
 
                 case ts.SyntaxKind.GetAccessor:
                     this.visitGetAccessor(<ts.AccessorDeclaration> node);
+                    break;
+
+                case ts.SyntaxKind.Identifier:
+                    this.visitIdentifier(<ts.Identifier> node);
                     break;
 
                 case ts.SyntaxKind.IfStatement:

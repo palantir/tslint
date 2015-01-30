@@ -28,6 +28,7 @@ describe("<one-line>", () => {
     before(() => {
         var options = [true, "check-open-brace", "check-catch", "check-else", "check-whitespace"];
         actualFailures = Lint.Test.applyRuleOnFile(fileName, OneLineRule, options);
+        assert.lengthOf(actualFailures, 13);
     });
 
     it("enforces rules only when enabled", () => {

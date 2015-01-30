@@ -31,12 +31,12 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class WhitespaceWalker extends Lint.RuleWalker {
     private scanner: ts.Scanner;
-    private regexStartEndMap: {[start: number]: number};
+    private tokensToSkipStartEndMap: {[start: number]: number};
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
         this.scanner = ts.createScanner(ts.ScriptTarget.ES5, false, sourceFile.text);
-        this.regexStartEndMap = {};
+        this.tokensToSkipStartEndMap = {};
     }
 
     public visitSourceFile(node: ts.SourceFile): void {
@@ -55,10 +55,10 @@ class WhitespaceWalker extends Lint.RuleWalker {
                 lastShouldBeFollowedByWhitespace = false;
             }
 
-            if (this.regexStartEndMap[startPos] != null) {
-                // if we're at the start of a regex, the scanner doesn't know this, and will think the characters there
-                // are tokens. So skip to the end of the regex and keep scanning from there
-                this.scanner.setTextPos(this.regexStartEndMap[startPos]);
+            if (this.tokensToSkipStartEndMap[startPos] != null) {
+                // tokens to skip are places where the scanner gets confused about what the token is, without the proper context
+                // (specifically, regex and identifiers). So skip those tokens.
+                this.scanner.setTextPos(this.tokensToSkipStartEndMap[startPos]);
                 continue;
             }
 
@@ -96,8 +96,13 @@ class WhitespaceWalker extends Lint.RuleWalker {
     }
 
     public visitRegularExpressionLiteral(node: ts.Node) {
-        this.regexStartEndMap[node.getStart()] = node.getEnd();
+        this.tokensToSkipStartEndMap[node.getStart()] = node.getEnd();
         super.visitRegularExpressionLiteral(node);
+    }
+
+    public visitIdentifier(node: ts.Identifier) {
+        this.tokensToSkipStartEndMap[node.getStart()] = node.getEnd();
+        super.visitIdentifier(node);
     }
 
     // check for spaces between the operator symbol (except in the case of comma statements)
