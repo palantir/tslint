@@ -169,8 +169,10 @@ A sample configuration file with all options is available [here](https://github.
 * `typedef-whitespace` enforces spacing whitespace for type definitions. Each rule option requires a value of `"space"` or `"nospace"`
    to require a space or no space before the type specifier's colon. Rule options:
     * `"call-signature"` checks return type of functions
-    * `"catch-clause"` checks type in exception catch blocks
     * `"index-signature"` checks index type specifier of indexers
+    * `"parameter"` checks function parameters
+    * `"property-declaration"` checks object property declarations
+    * `"variable-declaration"` checks variable declaration
 * `use-strict` enforces ECMAScript 5's strict mode
     * `check-module` checks that all top-level modules are using strict mode
     * `check-function` checks that all top-level functions are using strict mode
