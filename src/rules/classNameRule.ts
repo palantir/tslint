@@ -14,32 +14,28 @@
  * limitations under the License.
 */
 
-/// <reference path='../../lib/tslint.d.ts' />
-
 export class Rule extends Lint.Rules.AbstractRule {
     static FAILURE_STRING = "name must be in pascal case";
 
-    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NameWalker(syntaxTree, this.getOptions()));
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        return this.applyWithWalker(new NameWalker(sourceFile, this.getOptions()));
     }
 }
 
 class NameWalker extends Lint.RuleWalker {
-    public visitClassDeclaration(node: TypeScript.ClassDeclarationSyntax): void {
-        var className = node.identifier.text();
+    public visitClassDeclaration(node: ts.ClassDeclaration): void {
+        var className = node.name.getText();
         if (!this.isPascalCased(className)) {
-            var position = this.positionAfter(node.modifiers, node.classKeyword);
-            this.addFailureAt(position, TypeScript.width(node.identifier));
+            this.addFailureAt(node.name.getStart(), node.name.getWidth());
         }
 
         super.visitClassDeclaration(node);
     }
 
-    public visitInterfaceDeclaration(node: TypeScript.InterfaceDeclarationSyntax): void {
-        var interfaceName = node.identifier.text();
+    public visitInterfaceDeclaration(node: ts.InterfaceDeclaration): void {
+        var interfaceName = node.name.getText();
         if (!this.isPascalCased(interfaceName)) {
-            var position = this.positionAfter(node.modifiers, node.interfaceKeyword);
-            this.addFailureAt(position, TypeScript.width(node.identifier));
+            this.addFailureAt(node.name.getStart(), node.name.getWidth());
         }
 
         super.visitInterfaceDeclaration(node);

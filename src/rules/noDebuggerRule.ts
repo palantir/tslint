@@ -14,26 +14,18 @@
  * limitations under the License.
 */
 
-/// <reference path='../../lib/tslint.d.ts' />
-
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "use of debugger statements is disallowed";
 
-    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoDebuggerWalker(syntaxTree, this.getOptions()));
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        return this.applyWithWalker(new NoDebuggerWalker(sourceFile, this.getOptions()));
     }
 }
 
 class NoDebuggerWalker extends Lint.RuleWalker {
-    public visitToken(token : TypeScript.ISyntaxToken): void {
-        this.handleToken(token);
-        super.visitToken(token);
+    public visitDebuggerStatement(node: ts.Statement): void {
+        var debuggerKeywordNode = node.getChildAt(0);
+        this.addFailure(this.createFailure(debuggerKeywordNode.getStart(), debuggerKeywordNode.getWidth(), Rule.FAILURE_STRING));
+        super.visitDebuggerStatement(node);
    }
-
-    private handleToken(token: TypeScript.ISyntaxToken) {
-        if (token.kind() === TypeScript.SyntaxKind.DebuggerKeyword) {
-            var position = this.getPosition() + TypeScript.leadingTriviaWidth(token);
-            this.addFailure(this.createFailure(position, TypeScript.width(token), Rule.FAILURE_STRING));
-        }
-    }
 }

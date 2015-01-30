@@ -14,22 +14,19 @@
  * limitations under the License.
 */
 
-/// <reference path='../../lib/tslint.d.ts' />
-
 export class Rule extends Lint.Rules.AbstractRule {
     static FAILURE_STRING = "interface name must be a capitalized I";
 
-    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NameWalker(syntaxTree, this.getOptions()));
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        return this.applyWithWalker(new NameWalker(sourceFile, this.getOptions()));
     }
 }
 
 class NameWalker extends Lint.RuleWalker {
-    public visitInterfaceDeclaration(node: TypeScript.InterfaceDeclarationSyntax): void {
-        var interfaceName = node.identifier.text();
+    public visitInterfaceDeclaration(node: ts.InterfaceDeclaration): void {
+        var interfaceName = node.name.text;
         if (!this.startsWithI(interfaceName)) {
-            var position = this.positionAfter(node.modifiers, node.interfaceKeyword);
-            this.addFailureAt(position, TypeScript.width(node.identifier));
+            this.addFailureAt(node.name.getStart(), node.name.getWidth());
         }
 
         super.visitInterfaceDeclaration(node);

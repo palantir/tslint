@@ -8,7 +8,7 @@ Installation
 
 ##### CLI
 
-```sudo npm install tslint -g```
+```npm install tslint -g```
 
 ##### Library
 
@@ -21,15 +21,15 @@ Please first ensure that the TypeScript source files compile correctly.
 
 ##### CLI
 
-    usage: tslint
+  usage: tslint
 
-	Options:
-	  -c, --config  		 configuration file
-	  -f, --file    		 file to lint                 [required]
-	  -o, --out     		 output file
-      -r, --rules-dir   	 rules directory
-      -s, --formatters-dir   formatters directory
-	  -t, --format  		 output format (prose, json)  [default: "prose"]
+  Options:
+    -c, --config              configuration file
+    -f, --file                file to lint                  [required]
+    -o, --out                 output file
+    -r, --rules-dir           rules directory
+    -s, --formatters-dir      formatters directory
+    -t, --format              output format (prose, json)   [default: "prose"]
 
 By default, configuration is loaded from `tslint.json`, if it exists in the current path, or the user's home directory, in that order.
 
@@ -88,10 +88,10 @@ tslint accepts the following commandline options:
 
 ```javascript
 var options = {
-	formatter: "json",
-	configuration: configuration,
-	rulesDirectory: "customRules/",
-	formattersDirectory: "customFormatters/"
+  formatter: "json",
+  configuration: configuration,
+  rulesDirectory: "customRules/",
+  formattersDirectory: "customFormatters/"
 };
 
 var Linter = require("tslint");
@@ -152,38 +152,39 @@ A sample configuration file with all options is available [here](https://github.
 * `no-use-before-declare` disallows usage of variables before their declaration.
 * `no-var-requires` disallows the use of require statements except in import statements, banning the use of forms such as `var module = require("module")`
 * `one-line` enforces the specified tokens to be on the same line as the expression preceding it. Rule options:
-	* `"check-catch"` checks that `catch` is on the same line as the closing brace for `try`
-	* `"check-else"` checks that `else` is on the same line as the closing brace for `if`
-	* `"check-open-brace"` checks that an open brace falls on the same line as its preceding expression.
-	* `"check-whitespace"` checks preceding whitespace for the specified tokens.
+  * `"check-catch"` checks that `catch` is on the same line as the closing brace for `try`
+  * `"check-else"` checks that `else` is on the same line as the closing brace for `if`
+  * `"check-open-brace"` checks that an open brace falls on the same line as its preceding expression.
+  * `"check-whitespace"` checks preceding whitespace for the specified tokens.
 * `quotemark` enforces consistent single or double quoted string literals.
 * `radix` enforces the radix parameter of `parseInt`
 * `semicolon` enforces semicolons at the end of every statement.
 * `triple-equals` enforces === and !== in favor of == and !=.
 * `typedef` enforces type definitions to exist. Rule options:
     * `"call-signature"` checks return type of functions
-    * `"index-signature"` checks index type specifier of indexers
-    * `"parameter"` checks type specifier of parameters
-    * `"property-signature"` checks return types of interface properties
-    * `"variable-declarator"` checks variable declarations
-    * `"member-variable-declarator"` checks member variable declarations
+    * `"parameter"` checks type specifier of function parameters
+    * `"property-declaration"` checks return types of interface properties
+    * `"variable-declaration"` checks variable declarations
+    * `"member-variable-declaration"` checks member variable declarations
 * `typedef-whitespace` enforces spacing whitespace for type definitions. Each rule option requires a value of `"space"` or `"nospace"`
    to require a space or no space before the type specifier's colon. Rule options:
     * `"call-signature"` checks return type of functions
-    * `"catch-clause"` checks type in exception catch blocks
     * `"index-signature"` checks index type specifier of indexers
+    * `"parameter"` checks function parameters
+    * `"property-declaration"` checks object property declarations
+    * `"variable-declaration"` checks variable declaration
 * `use-strict` enforces ECMAScript 5's strict mode
     * `check-module` checks that all top-level modules are using strict mode
     * `check-function` checks that all top-level functions are using strict mode
 * `variable-name` allows only camelCased or UPPER_CASED variable names. Rule options:
-	* `"allow-leading-underscore"` allows underscores at the beginnning.
+  * `"allow-leading-underscore"` allows underscores at the beginnning.
 * `whitespace` enforces spacing whitespace. Rule options:
-	* `"check-branch"` checks branching statements (`if`/`else`/`for`/`while`) are followed by whitespace
-	* `"check-decl"`checks that variable declarations have whitespace around the equals token
-	* `"check-operator"` checks for whitespace around operator tokens
-	* `"check-separator"` checks for whitespace after separator tokens (`,`/`;`)
-	* `"check-type"` checks for whitespace before a variable type specification
-	* `"check-typecast"` checks for whitespace between a typecast and its target
+  * `"check-branch"` checks branching statements (`if`/`else`/`for`/`while`) are followed by whitespace
+  * `"check-decl"`checks that variable declarations have whitespace around the equals token
+  * `"check-operator"` checks for whitespace around operator tokens
+  * `"check-separator"` checks for whitespace after separator tokens (`,`/`;`)
+  * `"check-type"` checks for whitespace before a variable type specification
+  * `"check-typecast"` checks for whitespace between a typecast and its target
 
 TSLint Rule Flags
 -----
@@ -206,38 +207,35 @@ Rule names are always camel-cased and *must* contain the suffix `Rule`. Let us t
 
 Now, let us first write the rule in TypeScript. At the top, we reference TSLint's [definition](https://github.com/palantir/tslint/blob/master/lib/tslint.d.ts) file. The exported class name must always be named `Rule` and extend from `Lint.Rules.AbstractRule`.
 
-```javascript
+```typescript
 /// <reference path='tslint.d.ts' />
 
 export class Rule extends Lint.Rules.AbstractRule {
-	public static FAILURE_STRING = "import statement forbidden";
+    public static FAILURE_STRING = "import statement forbidden";
 
-    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoImportsWalker(syntaxTree, this.getOptions()));
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        return this.applyWithWalker(new NoImportsWalker(sourceFile, this.getOptions()));
     }
 }
 ```
 
 The walker takes care of all the work.
 
-```javascript
+```typescript
 class NoImportsWalker extends Lint.RuleWalker {
-	public visitImportDeclaration(node: TypeScript.ImportDeclarationSyntax) {
-		// get the current position and skip over any leading whitespace
-		var position = this.position() + node.leadingTriviaWidth();
+    public visitImportDeclaration(node: ts.ImportDeclaration) {
+        // create a failure at the current position
+        this.addFailure(this.createFailure(node.getStart(), node.width(), Rule.FAILURE_STRING));
 
-		// create a failure at the current position
-		this.addFailure(this.createFailure(position, node.width(), Rule.FAILURE_STRING));
-
-		// call the base version of this visitor to actually parse this node
-		super.visitImportDeclaration(node);
-	}
+        // call the base version of this visitor to actually parse this node
+        super.visitImportDeclaration(node);
+    }
 }
 ```
 
-Given a walker, TypeScript's parser visits the AST using the visitor pattern. So the rule walkers only need to override the appropriate visitor methods to enforce its checks. For reference, the base walker can be found in [syntaxWalker.generated.ts](https://github.com/palantir/tslint/blob/master/src/typescript/src/compiler/syntax/syntaxWalker.generated.ts) within the TypeScript source code.
+Given a walker, TypeScript's parser visits the AST using the visitor pattern. So the rule walkers only need to override the appropriate visitor methods to enforce its checks. For reference, the base walker can be found in [syntaxWalker.ts](https://github.com/palantir/tslint/blob/1.4/src/language/walker/syntaxWalker.ts).
 
-We still need to hook up this new rule to TSLint. First make sure to compile `noImportsRule.ts`: `tsc -m commonjs noImportsRule.ts tslint.d.ts`. Then, if using the CLI, provide the directory that contains this rule as an option to `--rules-dir`. If using TSLint as a library or via `grunt-tslint`, the `options` hash must contain `"rulesDirectory": "..."`. If you run the linter, you'll see that we have now successfully banned all import statements via TSLint!
+We still need to hook up this new rule to TSLint. First make sure to compile `noImportsRule.ts`: `tsc -m commonjs --noImplicitAny noImportsRule.ts tslint.d.ts`. Then, if using the CLI, provide the directory that contains this rule as an option to `--rules-dir`. If using TSLint as a library or via `grunt-tslint`, the `options` hash must contain `"rulesDirectory": "..."`. If you run the linter, you'll see that we have now successfully banned all import statements via TSLint!
 
 Now, let us rewrite the same rule in Javascript.
 
@@ -248,8 +246,8 @@ function Rule() {
 }
 
 Rule.prototype = Object.create(Lint.Rules.AbstractRule.prototype);
-Rule.prototype.apply = function(syntaxTree) {
-    return this.applyWithWalker(new NoImportsWalker(syntaxTree, this.getOptions()));
+Rule.prototype.apply = function(sourceFile) {
+    return this.applyWithWalker(new NoImportsWalker(sourceFile, this.getOptions()));
 };
 
 function NoImportsWalker() {
@@ -258,13 +256,10 @@ function NoImportsWalker() {
 
 NoImportsWalker.prototype = Object.create(Lint.RuleWalker.prototype);
 NoImportsWalker.prototype.visitImportDeclaration = function (node) {
-    // get the current position and skip over any leading whitespace
-    var position = this.position() + node.leadingTriviaWidth();
-
     // create a failure at the current position
-    this.addFailure(this.createFailure(position, node.width(), "import statement forbidden"));
+    this.addFailure(this.createFailure(node.getStart(), node.width(), "import statement forbidden"));
 
-	// call the base version of this visitor to actually parse this node
+    // call the base version of this visitor to actually parse this node
     Lint.RuleWalker.prototype.visitImportDeclaration.call(this, node);
 };
 
@@ -284,12 +279,7 @@ Just like rules, additional formatters can also be supplied to TSLint via `--for
 
 export class Formatter extends Lint.Formatters.AbstractFormatter {
     public format(failures: Lint.RuleFailure[]): string {
-        var failuresJSON: any[] = [];
-
-        for (var i = 0; i < failures.length; ++i) {
-            failuresJSON.push(failures[i].toJson());
-        }
-
+        var failuresJSON = failures.map((failure: Lint.RuleFailure) => failure.toJson());
         return JSON.stringify(failuresJSON);
     }
 }

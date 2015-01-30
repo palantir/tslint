@@ -14,45 +14,43 @@
  * limitations under the License.
 */
 
-/// <reference path='../../lib/tslint.d.ts' />
-
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "for (... in ...) statements must be filtered with an if statement";
 
-    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new ForInWalker(syntaxTree, this.getOptions()));
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        return this.applyWithWalker(new ForInWalker(sourceFile, this.getOptions()));
     }
 }
 
 class ForInWalker extends Lint.RuleWalker {
-    public visitForInStatement(node: TypeScript.ForInStatementSyntax): void {
+    public visitForInStatement(node: ts.ForInStatement): void {
         this.handleForInStatement(node);
         super.visitForInStatement(node);
     }
 
-    private handleForInStatement(node: TypeScript.ForInStatementSyntax) {
+    private handleForInStatement(node: ts.ForInStatement) {
         var statement = node.statement;
-        var statementKind = node.statement.kind();
+        var statementKind = node.statement.kind;
 
         // a direct if statement under a for...in is valid
-        if (statementKind === TypeScript.SyntaxKind.IfStatement) {
+        if (statementKind === ts.SyntaxKind.IfStatement) {
             return;
         }
 
         // if there is a block, verify that it has a single if statement or starts with if (..) continue;
-        if (statementKind === TypeScript.SyntaxKind.Block) {
-            var blockNode = <TypeScript.BlockSyntax> statement;
+        if (statementKind === ts.SyntaxKind.Block) {
+            var blockNode = <ts.Block> statement;
             var blockStatements = blockNode.statements;
-            if (TypeScript.childCount(blockStatements) >= 1) {
-                var firstBlockStatement = TypeScript.childAt(blockStatements, 0);
-                if (firstBlockStatement.kind() === TypeScript.SyntaxKind.IfStatement) {
+            if (blockStatements.length >= 1) {
+                var firstBlockStatement = blockStatements[0];
+                if (firstBlockStatement.kind === ts.SyntaxKind.IfStatement) {
                     // if this "if" statement is the only statement within the block
-                    if (TypeScript.childCount(blockStatements) === 1) {
+                    if (blockStatements.length === 1) {
                         return;
                     }
 
                     // if this "if" statement has a single continue block
-                    var ifStatement = (<TypeScript.IfStatementSyntax> firstBlockStatement).statement;
+                    var ifStatement = (<ts.IfStatement> firstBlockStatement).thenStatement;
                     if (this.nodeIsContinue(ifStatement)) {
                         return;
                     }
@@ -60,22 +58,21 @@ class ForInWalker extends Lint.RuleWalker {
             }
         }
 
-        var position = this.getPosition() + TypeScript.leadingTriviaWidth(node);
-        var failure = this.createFailure(position, TypeScript.width(node), Rule.FAILURE_STRING);
+        var failure = this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING);
         this.addFailure(failure);
     }
 
-    private nodeIsContinue(node: TypeScript.ISyntaxElement): boolean {
-        var kind = node.kind();
+    private nodeIsContinue(node: ts.Node): boolean {
+        var kind = node.kind;
 
-        if (kind === TypeScript.SyntaxKind.ContinueStatement) {
+        if (kind === ts.SyntaxKind.ContinueStatement) {
             return true;
         }
 
-        if (kind === TypeScript.SyntaxKind.Block) {
-            var blockStatements = (<TypeScript.BlockSyntax>node).statements;
-            if (TypeScript.childCount(blockStatements) === 1 &&
-                TypeScript.childAt(blockStatements, 0).kind() === TypeScript.SyntaxKind.ContinueStatement) {
+        if (kind === ts.SyntaxKind.Block) {
+            var blockStatements = (<ts.Block>node).statements;
+            if (blockStatements.length === 1 &&
+                blockStatements[0].kind === ts.SyntaxKind.ContinueStatement) {
                 return true;
             }
         }

@@ -20,7 +20,7 @@ describe("Rule Loader", () => {
     var path = require("path");
     var rulesDirectory = path.join(global.process.cwd(), "build/rules");
 
-    it("loads core rules", () => {
+    it.skip("loads core rules", () => {
         var validConfiguration: {[name: string]: any} = {
             "forin": false,
             "quotemark": "single",

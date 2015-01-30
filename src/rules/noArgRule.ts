@@ -14,29 +14,26 @@
  * limitations under the License.
 */
 
-/// <reference path='../../lib/tslint.d.ts' />
-
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "access forbidden to arguments property";
 
-    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoArgWalker(syntaxTree, this.getOptions()));
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        return this.applyWithWalker(new NoArgWalker(sourceFile, this.getOptions()));
     }
   }
 
 class NoArgWalker extends Lint.RuleWalker {
-    public visitMemberAccessExpression(node: TypeScript.MemberAccessExpressionSyntax): void {
+    public visitPropertyAccessExpression(node: ts.PropertyAccessExpression): void {
         var expression = node.expression;
         var name = node.name;
-        var position = this.getPosition() + TypeScript.leadingTriviaWidth(node.expression);
 
-        if (TypeScript.isToken(expression) && name.text() === "callee") {
-            var tokenExpression = <TypeScript.ISyntaxToken> expression;
-            if (tokenExpression.text() === "arguments") {
-                this.addFailure(this.createFailure(position, TypeScript.width(expression), Rule.FAILURE_STRING));
+        if (expression.kind === ts.SyntaxKind.Identifier && name.text === "callee") {
+            var identifierExpression = <ts.Identifier> expression;
+            if (identifierExpression.text === "arguments") {
+                this.addFailure(this.createFailure(expression.getStart(), expression.getWidth(), Rule.FAILURE_STRING));
             }
           }
 
-        super.visitMemberAccessExpression(node);
+        super.visitPropertyAccessExpression(node);
     }
 }

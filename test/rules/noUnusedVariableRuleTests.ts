@@ -79,8 +79,7 @@ describe("<no-unused-variable>", () => {
 
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule, [true, "check-parameters"]);
 
-        /* there should only be 4 failures -- tracked by issue #975 */
-        assert.lengthOf(actualFailures, 5);
+        assert.lengthOf(actualFailures, 4);
 
         Lint.Test.assertContainsFailure(actualFailures, failure1);
         Lint.Test.assertContainsFailure(actualFailures, failure2);

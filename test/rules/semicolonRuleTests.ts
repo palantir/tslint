@@ -62,7 +62,7 @@ describe("<semicolon>", () => {
     });
 
     it("warns on do while statements", () => {
-        Lint.Test.assertContainsFailure(actualFailures, createFailure([26, 18], [26, 18]));
+        Lint.Test.assertContainsFailure(actualFailures, createFailure([26, 16], [26, 16]));
     });
 
     it("warns on debugger statements", () => {
@@ -70,7 +70,7 @@ describe("<semicolon>", () => {
     });
 
     it("warns on import and export statements", () => {
-        Lint.Test.assertContainsFailure(actualFailures, createFailure([30, 20], [30, 20]));
+        Lint.Test.assertContainsFailure(actualFailures, createFailure([30, 24], [30, 24]));
         Lint.Test.assertContainsFailure(actualFailures, createFailure([32, 17], [32, 17]));
     });
 });

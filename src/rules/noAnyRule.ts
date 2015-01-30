@@ -14,27 +14,17 @@
  * limitations under the License.
  */
 
-/// <reference path="../../lib/tslint.d.ts" />
-
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "type decoration of 'any' is forbidden";
 
-    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(<Lint.RuleWalker>(new NoAnyWalker(syntaxTree, this.getOptions())));
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        return this.applyWithWalker(<Lint.RuleWalker>(new NoAnyWalker(sourceFile, this.getOptions())));
     }
 }
 
 class NoAnyWalker extends Lint.RuleWalker {
-
-    public visitToken(token : TypeScript.ISyntaxToken): void {
-        this.handleToken(token);
-        super.visitToken(token);
-    }
-
-    private handleToken(token: TypeScript.ISyntaxToken) {
-        if (token.kind() === TypeScript.SyntaxKind.AnyKeyword) {
-            var position = this.getPosition() + TypeScript.leadingTriviaWidth(token);
-            this.addFailure(this.createFailure(position, TypeScript.width(token), Rule.FAILURE_STRING));
-        }
+    public visitAnyKeyword(node: ts.Node): void {
+        this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+        super.visitAnyKeyword(node);
     }
 }

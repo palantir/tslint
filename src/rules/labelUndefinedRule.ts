@@ -14,13 +14,11 @@
  * limitations under the License.
 */
 
-/// <reference path='../../lib/tslint.d.ts' />
-
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "undefined label: '";
 
-    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new LabelUndefinedWalker(syntaxTree, this.getOptions()));
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        return this.applyWithWalker(new LabelUndefinedWalker(sourceFile, this.getOptions()));
     }
 }
 
@@ -29,31 +27,29 @@ class LabelUndefinedWalker extends Lint.ScopeAwareRuleWalker<any> {
         return {};
     }
 
-    public visitLabeledStatement(node: TypeScript.LabeledStatementSyntax): void {
-        var label = node.identifier.text();
+    public visitLabeledStatement(node: ts.LabeledStatement): void {
+        var label = node.label.text;
         var currentScope = this.getCurrentScope();
 
         currentScope[label] = true;
         super.visitLabeledStatement(node);
     }
 
-    public visitBreakStatement(node: TypeScript.BreakStatementSyntax): void {
-        var position = this.getPosition() + TypeScript.leadingTriviaWidth(node);
-        this.validateLabelAt(node.identifier, position, TypeScript.width(node.breakKeyword));
+    public visitBreakStatement(node: ts.BreakOrContinueStatement): void {
+        this.validateLabelAt(node.label, node.getStart(), node.getChildAt(0).getWidth());
         super.visitBreakStatement(node);
     }
 
-    public visitContinueStatement(node: TypeScript.ContinueStatementSyntax): void {
-        var position = this.getPosition() + TypeScript.leadingTriviaWidth(node);
-        this.validateLabelAt(node.identifier, position, TypeScript.width(node.continueKeyword));
+    public visitContinueStatement(node: ts.BreakOrContinueStatement): void {
+        this.validateLabelAt(node.label, node.getStart(), node.getChildAt(0).getWidth());
         super.visitContinueStatement(node);
     }
 
-    private validateLabelAt(label: TypeScript.ISyntaxToken, position: number, width: number): void {
+    private validateLabelAt(label: ts.Identifier, position: number, width: number): void {
         var currentScope = this.getCurrentScope();
 
-        if (label !== null && !currentScope[label.text()]) {
-            var failureString = Rule.FAILURE_STRING + label.text() + "'";
+        if (label != null && !currentScope[label.text]) {
+            var failureString = Rule.FAILURE_STRING + label.text + "'";
             var failure = this.createFailure(position, width, failureString);
             this.addFailure(failure);
         }

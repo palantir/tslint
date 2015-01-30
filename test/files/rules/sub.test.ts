@@ -12,7 +12,10 @@ function test() {
     var d = obj[b];
 }
 
-// valid code
+obj["invalid_accessor"];
+obj["_AnotherInvalidAccessor"];
+
+// valid accessors
 obj["a-2"];
 obj["2a"];
 obj["?a#$!$^&%&"];

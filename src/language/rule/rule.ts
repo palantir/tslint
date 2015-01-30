@@ -31,16 +31,16 @@ module Lint {
 
         isEnabled(): boolean;
 
-        apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[];
+        apply(sourceFile: ts.SourceFile): RuleFailure[];
 
         applyWithWalker(walker: Lint.RuleWalker): RuleFailure[];
     }
 
     export class RuleFailurePosition {
         private position: number;
-        private lineAndCharacter: TypeScript.LineAndCharacter;
+        private lineAndCharacter: ts.LineAndCharacter;
 
-        constructor(position: number, lineAndCharacter: TypeScript.LineAndCharacter) {
+        constructor(position: number, lineAndCharacter: ts.LineAndCharacter) {
             this.position = position;
             this.lineAndCharacter = lineAndCharacter;
         }
@@ -56,8 +56,8 @@ module Lint {
         public toJson() {
             return {
                 position: this.position,
-                line: this.lineAndCharacter.line(),
-                character: this.lineAndCharacter.character()
+                line: this.lineAndCharacter.line,
+                character: this.lineAndCharacter.character
             };
         }
 
@@ -66,28 +66,31 @@ module Lint {
             var rr = ruleFailurePosition.lineAndCharacter;
 
             return (this.position === ruleFailurePosition.position &&
-                    ll.line() === rr.line() &&
-                    ll.character() === rr.character());
+                    ll.line === rr.line &&
+                    ll.character === rr.character);
         }
     }
 
     export class RuleFailure {
+        private sourceFile: ts.SourceFile;
         private fileName: string;
         private startPosition: Lint.RuleFailurePosition;
         private endPosition: Lint.RuleFailurePosition;
         private failure: string;
         private ruleName: string;
 
-        constructor(syntaxTree: TypeScript.SyntaxTree,
+        // TODO: reorder arguments so that ruleName is right after fileName
+        constructor(sourceFile: ts.SourceFile,
                     start: number,
                     end: number,
                     failure: string,
                     ruleName: string) {
 
+            this.sourceFile = sourceFile;
+            this.fileName = sourceFile.filename;
+            this.startPosition = this.createFailurePosition(start);
+            this.endPosition = this.createFailurePosition(end);
             this.failure = failure;
-            this.fileName = syntaxTree.fileName();
-            this.startPosition = this.createFailurePosition(syntaxTree, start);
-            this.endPosition = this.createFailurePosition(syntaxTree, end);
             this.ruleName = ruleName;
         }
 
@@ -128,8 +131,8 @@ module Lint {
                     this.endPosition.equals(ruleFailure.getEndPosition()));
         }
 
-        private createFailurePosition(syntaxTree: TypeScript.SyntaxTree, position: number): RuleFailurePosition {
-            var lineAndCharacter = syntaxTree.lineMap().getLineAndCharacterFromPosition(position);
+        private createFailurePosition(position: number): RuleFailurePosition {
+            var lineAndCharacter = this.sourceFile.getLineAndCharacterFromPosition(position);
             var failurePosition = new RuleFailurePosition(position, lineAndCharacter);
             return failurePosition;
         }

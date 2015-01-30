@@ -37,7 +37,7 @@ describe("<no-construct>", () => {
     });
 
     it("forbids access to Boolean constructor", () => {
-        var expectedFailure = createFailure([8, 10], [8, 25]);
+        var expectedFailure = createFailure([8, 10], [8, 21]);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 });

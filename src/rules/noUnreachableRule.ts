@@ -14,96 +14,89 @@
  * limitations under the License.
 */
 
-/// <reference path='../../lib/tslint.d.ts' />
-
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "unreachable code";
 
-    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new UnreachableWalker(syntaxTree, this.getOptions()));
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        return this.applyWithWalker(new UnreachableWalker(sourceFile, this.getOptions()));
     }
 }
 
 class UnreachableWalker extends Lint.RuleWalker {
     private hasReturned: boolean;
 
-    constructor(syntaxTree: TypeScript.SyntaxTree, options: Lint.IOptions) {
-        super(syntaxTree, options);
+    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
+        super(sourceFile, options);
         this.hasReturned = false;
     }
 
-    public visitNode(node: TypeScript.SyntaxNode): void {
+    public visitNode(node: ts.Node): void {
         var previousReturned = this.hasReturned;
         // function declarations can be hoisted -- so set hasReturned to false until we're done with the function
-        if (node.kind() === TypeScript.SyntaxKind.FunctionDeclaration) {
+        if (node.kind === ts.SyntaxKind.FunctionDeclaration) {
             this.hasReturned = false;
         }
 
         if (this.hasReturned) {
             this.hasReturned = false;
-            var position = this.getPosition() + TypeScript.leadingTriviaWidth(node);
-            this.addFailure(this.createFailure(position, TypeScript.width(node), Rule.FAILURE_STRING));
+            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
         }
 
         super.visitNode(node);
 
         // if there is further code after the hoisted function and we returned before that code is unreachable
         // so reset hasReturned to its previous state to check for that
-        if (node.kind() === TypeScript.SyntaxKind.FunctionDeclaration) {
+        if (node.kind === ts.SyntaxKind.FunctionDeclaration) {
             this.hasReturned = previousReturned;
         }
     }
 
-    public visitBlock(node: TypeScript.BlockSyntax): void {
+    public visitBlock(node: ts.Block): void {
         super.visitBlock(node);
         this.hasReturned = false;
     }
 
-    public visitCaseSwitchClause(node: TypeScript.CaseSwitchClauseSyntax): void {
-        super.visitCaseSwitchClause(node);
+    public visitTryBlock(node: ts.Block): void {
+        super.visitTryBlock(node);
         this.hasReturned = false;
     }
 
-    public visitDefaultSwitchClause(node: TypeScript.DefaultSwitchClauseSyntax): void {
-        super.visitDefaultSwitchClause(node);
+    public visitCaseClause(node: ts.CaseClause): void {
+        super.visitCaseClause(node);
         this.hasReturned = false;
     }
 
-    public visitIfStatement(node: TypeScript.IfStatementSyntax): void {
-        super.visitIfStatement(node);
+    public visitDefaultClause(node: ts.DefaultClause): void {
+        super.visitDefaultClause(node);
         this.hasReturned = false;
     }
 
-    public visitElseClause(node: TypeScript.ElseClauseSyntax): void {
-        super.visitElseClause(node);
+    public visitIfStatement(node: ts.IfStatement): void {
+        this.visitNode(node.expression);
+        this.visitNode(node.thenStatement);
         this.hasReturned = false;
-    }
-
-    public visitOptionalNode(node: TypeScript.SyntaxNode): void {
-        if (node != null && node.kind() === TypeScript.SyntaxKind.ElseClause) {
-            // if we're an else clause then we're in the middle of processing an if statement
-            // and thus we want to disregard the case where the previous statement ended with a return
+        if (node.elseStatement != null) {
+            this.visitNode(node.elseStatement);
             this.hasReturned = false;
         }
-        super.visitOptionalNode(node);
     }
 
-    public visitBreakStatement(node: TypeScript.BreakStatementSyntax): void {
+    public visitBreakStatement(node: ts.BreakOrContinueStatement): void {
         super.visitBreakStatement(node);
         this.hasReturned = true;
     }
 
-    public visitContinueStatement(node: TypeScript.ContinueStatementSyntax): void {
+    public visitContinueStatement(node: ts.BreakOrContinueStatement): void {
         super.visitContinueStatement(node);
         this.hasReturned = true;
     }
 
-    public visitReturnStatement(node: TypeScript.ReturnStatementSyntax): void {
+    public visitReturnStatement(node: ts.ReturnStatement): void {
         super.visitReturnStatement(node);
         this.hasReturned = true;
     }
 
-    public visitThrowStatement(node: TypeScript.ThrowStatementSyntax): void {
+    public visitThrowStatement(node: ts.ThrowStatement): void {
         super.visitThrowStatement(node);
         this.hasReturned = true;
     }

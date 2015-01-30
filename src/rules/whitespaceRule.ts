@@ -14,8 +14,6 @@
  * limitations under the License.
 */
 
-/// <reference path='../../lib/tslint.d.ts' />
-
 var OPTION_BRANCH = "check-branch";
 var OPTION_DECL = "check-decl";
 var OPTION_OPERATOR = "check-operator";
@@ -26,178 +24,203 @@ var OPTION_TYPECAST = "check-typecast";
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "missing whitespace";
 
-    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new WhitespaceWalker(syntaxTree, this.getOptions()));
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        return this.applyWithWalker(new WhitespaceWalker(sourceFile, this.getOptions()));
     }
 }
 
 class WhitespaceWalker extends Lint.RuleWalker {
-    private lastPosition: number;
+    private scanner: ts.Scanner;
+    private tokensToSkipStartEndMap: {[start: number]: number};
 
-    constructor(syntaxTree: TypeScript.SyntaxTree, options: Lint.IOptions) {
-        super(syntaxTree, options);
-        this.lastPosition = TypeScript.fullWidth(this.getSyntaxTree().sourceUnit());
+    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
+        super(sourceFile, options);
+        this.scanner = ts.createScanner(ts.ScriptTarget.ES5, false, sourceFile.text);
+        this.tokensToSkipStartEndMap = {};
     }
 
-    // check for trailing space after the given tokens
-    public visitToken(token: TypeScript.ISyntaxToken): void {
-        super.visitToken(token);
+    public visitSourceFile(node: ts.SourceFile): void {
+        super.visitSourceFile(node);
 
-        var kind = token.kind();
-        if ((this.hasOption(OPTION_BRANCH) && this.isBranchKind(kind)) ||
-            (this.hasOption(OPTION_SEPARATOR) && this.isSeparatorKind(kind)) ||
-            (this.hasOption(OPTION_DECL) && kind === TypeScript.SyntaxKind.EqualsToken) ||
-            (this.hasOption(OPTION_TYPE) && kind === TypeScript.SyntaxKind.ColonToken)) {
+        var lastShouldBeFollowedByWhitespace = false;
+        this.scanner.setTextPos(0);
+        while (this.scanner.scan() !== ts.SyntaxKind.EndOfFileToken) {
+            var startPos = this.scanner.getStartPos();
+            var tokenKind = this.scanner.getToken();
+            if (tokenKind === ts.SyntaxKind.WhitespaceTrivia || tokenKind === ts.SyntaxKind.NewLineTrivia) {
+                lastShouldBeFollowedByWhitespace = false;
+            } else if (lastShouldBeFollowedByWhitespace) {
+                var failure = this.createFailure(startPos, 1, Rule.FAILURE_STRING);
+                this.addFailure(failure);
+                lastShouldBeFollowedByWhitespace = false;
+            }
 
-            this.checkForLeadingSpace(this.getPosition(), token.trailingTrivia());
+            if (this.tokensToSkipStartEndMap[startPos] != null) {
+                // tokens to skip are places where the scanner gets confused about what the token is, without the proper context
+                // (specifically, regex and identifiers). So skip those tokens.
+                this.scanner.setTextPos(this.tokensToSkipStartEndMap[startPos]);
+                continue;
+            }
+
+            // check for trailing space after the given tokens
+            switch (tokenKind) {
+                case ts.SyntaxKind.CatchKeyword:
+                case ts.SyntaxKind.ForKeyword:
+                case ts.SyntaxKind.IfKeyword:
+                case ts.SyntaxKind.SwitchKeyword:
+                case ts.SyntaxKind.WhileKeyword:
+                case ts.SyntaxKind.WithKeyword:
+                    if (this.hasOption(OPTION_BRANCH)) {
+                        lastShouldBeFollowedByWhitespace = true;
+                    }
+                    break;
+                case ts.SyntaxKind.CommaToken:
+                case ts.SyntaxKind.SemicolonToken:
+                    if (this.hasOption(OPTION_SEPARATOR)) {
+                        lastShouldBeFollowedByWhitespace = true;
+                    }
+                    break;
+                case ts.SyntaxKind.EqualsToken:
+                    if (this.hasOption(OPTION_DECL)) {
+                        lastShouldBeFollowedByWhitespace = true;
+                    }
+                    break;
+                case ts.SyntaxKind.ColonToken:
+                    if (this.hasOption(OPTION_TYPE)) {
+                        lastShouldBeFollowedByWhitespace = true;
+                    }
+                    break;
+
+            }
         }
     }
 
-    // check for spaces between the operator symbol (except in the case of comma statements)
-    public visitBinaryExpression(node: TypeScript.BinaryExpressionSyntax): void {
-        var operator = node.operatorToken;
-        if (this.hasOption(OPTION_OPERATOR) && operator.kind() !== TypeScript.SyntaxKind.CommaToken) {
-            var position = this.positionAfter(node.left);
-            this.checkForLeadingSpace(position, TypeScript.trailingTrivia(node.left));
+    public visitRegularExpressionLiteral(node: ts.Node) {
+        this.tokensToSkipStartEndMap[node.getStart()] = node.getEnd();
+        super.visitRegularExpressionLiteral(node);
+    }
 
-            position += operator.fullWidth();
-            this.checkForLeadingSpace(position, operator.trailingTrivia());
+    public visitIdentifier(node: ts.Identifier) {
+        this.tokensToSkipStartEndMap[node.getStart()] = node.getEnd();
+        super.visitIdentifier(node);
+    }
+
+    // check for spaces between the operator symbol (except in the case of comma statements)
+    public visitBinaryExpression(node: ts.BinaryExpression): void {
+        var operatorKind = node.operator;
+        if (this.hasOption(OPTION_OPERATOR) && operatorKind !== ts.SyntaxKind.CommaToken) {
+            var position = node.left.getEnd();
+            this.checkForTrailingWhitespace(position);
+
+            position = node.right.getFullStart();
+            this.checkForTrailingWhitespace(position);
         }
 
         super.visitBinaryExpression(node);
     }
 
     // check for spaces between the => symbol
-    public visitSimpleArrowFunctionExpression(node: TypeScript.SimpleArrowFunctionExpressionSyntax): void {
-        var position = this.positionAfter(node.parameter);
-        this.checkEqualsGreaterThan(node.equalsGreaterThanToken, node.parameter, position);
-
-        super.visitSimpleArrowFunctionExpression(node);
+    public visitArrowFunction(node: ts.FunctionLikeDeclaration): void {
+        this.checkEqualsGreaterThanTokenInNode(node);
+        super.visitArrowFunction(node);
     }
 
-    public visitParenthesizedArrowFunctionExpression(node: TypeScript.ParenthesizedArrowFunctionExpressionSyntax): void {
-        var position = this.positionAfter(node.callSignature);
-        this.checkEqualsGreaterThan(node.equalsGreaterThanToken, node.callSignature, position);
-
-        super.visitParenthesizedArrowFunctionExpression(node);
-    }
-
-    public visitConstructorType(node: TypeScript.ConstructorTypeSyntax): void {
-        var position = this.positionAfter(node.newKeyword, node.typeParameterList, node.parameterList);
-        this.checkEqualsGreaterThan(node.equalsGreaterThanToken, node.parameterList, position);
-
+    public visitConstructorType(node: ts.Node): void {
+        this.checkEqualsGreaterThanTokenInNode(node);
         super.visitConstructorType(node);
     }
 
-    public visitFunctionType(node: TypeScript.FunctionTypeSyntax): void {
-        var position = this.positionAfter(node.typeParameterList, node.parameterList);
-        this.checkEqualsGreaterThan(node.equalsGreaterThanToken, node.parameterList, position);
-
+    public visitFunctionType(node: ts.Node): void {
+        this.checkEqualsGreaterThanTokenInNode(node);
         super.visitFunctionType(node);
     }
 
-    private checkEqualsGreaterThan(equalsGreaterThanToken: TypeScript.ISyntaxToken,
-        previousNode: TypeScript.ISyntaxNodeOrToken, position: number) {
-
-        if (this.hasOption(OPTION_OPERATOR)) {
-            this.checkForLeadingSpace(position, TypeScript.trailingTrivia(previousNode));
-
-            position += equalsGreaterThanToken.fullWidth();
-            this.checkForLeadingSpace(position, equalsGreaterThanToken.trailingTrivia());
-        }
-    }
-
     // check for spaces between ternary operator symbols
-    public visitConditionalExpression(node: TypeScript.ConditionalExpressionSyntax): void {
+    public visitConditionalExpression(node: ts.ConditionalExpression): void {
         if (this.hasOption(OPTION_OPERATOR)) {
-            var position = this.positionAfter(node.condition);
-            this.checkForLeadingSpace(position, TypeScript.trailingTrivia(node.condition));
+            var position = node.condition.getEnd();
+            this.checkForTrailingWhitespace(position);
 
-            position += node.questionToken.fullWidth();
-            this.checkForLeadingSpace(position, node.questionToken.trailingTrivia());
+            position = node.whenTrue.getFullStart();
+            this.checkForTrailingWhitespace(position);
 
-            position += TypeScript.fullWidth(node.whenTrue);
-            this.checkForLeadingSpace(position, TypeScript.trailingTrivia(node.whenTrue));
+            position = node.whenTrue.getEnd();
+            this.checkForTrailingWhitespace(position);
         }
 
         super.visitConditionalExpression(node);
     }
 
     // check for spaces in variable declarations
-    public visitVariableDeclarator(node: TypeScript.VariableDeclaratorSyntax): void {
-        var position = this.positionAfter(node.propertyName, node.typeAnnotation);
-
-        if (this.hasOption(OPTION_DECL) && node.equalsValueClause !== null) {
-            if (node.typeAnnotation !== null) {
-                this.checkForLeadingSpace(position, TypeScript.trailingTrivia(node.typeAnnotation));
+    public visitVariableDeclaration(node: ts.VariableDeclaration): void {
+        if (this.hasOption(OPTION_DECL) && node.initializer != null) {
+            if (node.type != null) {
+                this.checkForTrailingWhitespace(node.type.getEnd());
             } else {
-                this.checkForLeadingSpace(position, node.propertyName.trailingTrivia());
+                this.checkForTrailingWhitespace(node.name.getEnd());
             }
         }
 
-        super.visitVariableDeclarator(node);
+        super.visitVariableDeclaration(node);
     }
 
     // check for spaces within imports
-    public visitImportDeclaration(node: TypeScript.ImportDeclarationSyntax): void {
+    public visitImportDeclaration(node: ts.ImportDeclaration): void {
         if (this.hasOption(OPTION_DECL)) {
-            var position = this.positionAfter(node.importKeyword, node.identifier);
-            this.checkForLeadingSpace(position, node.identifier.trailingTrivia());
+            var position = node.name.getEnd();
+            this.checkForTrailingWhitespace(position);
         }
 
         super.visitImportDeclaration(node);
     }
 
     // check for spaces within exports
-    public visitExportAssignment(node: TypeScript.ExportAssignmentSyntax): void {
+    public visitExportAssignment(node: ts.ExportAssignment): void {
         if (this.hasOption(OPTION_DECL)) {
-            var position = this.positionAfter(node.exportKeyword);
-            this.checkForLeadingSpace(position, node.exportKeyword.trailingTrivia());
+            var exportKeyword = node.getChildAt(0);
+            var position = exportKeyword.getEnd();
+            this.checkForTrailingWhitespace(position);
         }
 
         super.visitExportAssignment(node);
     }
 
-    public visitCastExpression(node: TypeScript.CastExpressionSyntax): void {
+    public visitTypeAssertionExpression(node: ts.TypeAssertion): void {
         if (this.hasOption(OPTION_TYPECAST)) {
-            var typeWidth = TypeScript.fullWidth(node.type);
-            var position = this.getPosition() + node.lessThanToken.fullWidth() + typeWidth + node.greaterThanToken.fullWidth();
-            this.checkForLeadingSpace(position, node.greaterThanToken.trailingTrivia());
+            var position = node.expression.getFullStart();
+            this.checkForTrailingWhitespace(position);
         }
-        super.visitCastExpression(node);
+        super.visitTypeAssertionExpression(node);
     }
 
-    private isBranchKind(kind: TypeScript.SyntaxKind): boolean {
-        return (kind === TypeScript.SyntaxKind.CatchKeyword ||
-                kind === TypeScript.SyntaxKind.ForKeyword ||
-                kind === TypeScript.SyntaxKind.IfKeyword ||
-                kind === TypeScript.SyntaxKind.SwitchKeyword ||
-                kind === TypeScript.SyntaxKind.WhileKeyword ||
-                kind === TypeScript.SyntaxKind.WithKeyword);
-    }
+    private checkEqualsGreaterThanTokenInNode(node: ts.Node) {
+        var arrowChildNumber = -1;
+        node.getChildren().forEach((child, i) => {
+            if (child.kind === ts.SyntaxKind.EqualsGreaterThanToken) {
+                arrowChildNumber = i;
+            }
+        });
+        // condition so we don't crash if the arrow is somehow missing
+        if (arrowChildNumber !== -1) {
+            var equalsGreaterThanToken = node.getChildAt(arrowChildNumber);
+            if (this.hasOption(OPTION_OPERATOR)) {
+                var position = equalsGreaterThanToken.getFullStart();
+                this.checkForTrailingWhitespace(position);
 
-    private isSeparatorKind(kind: TypeScript.SyntaxKind): boolean {
-        return (kind === TypeScript.SyntaxKind.CommaToken ||
-                kind === TypeScript.SyntaxKind.SemicolonToken);
-    }
-
-    private checkForLeadingSpace(position: number, trivia: TypeScript.ISyntaxTriviaList) {
-        var failure: Lint.RuleFailure = null;
-        if (position === this.lastPosition) {
-            // don't check for trailing whitespace if we're the last character in the file. There won't be any.
-            return;
-        }
-
-        if (trivia.count() < 1) {
-            failure = this.createFailure(position, 1, Rule.FAILURE_STRING);
-        } else {
-            var kind = trivia.syntaxTriviaAt(0).kind();
-            if (kind !== TypeScript.SyntaxKind.WhitespaceTrivia && kind !== TypeScript.SyntaxKind.NewLineTrivia) {
-                failure = this.createFailure(position, 1, Rule.FAILURE_STRING);
+                position = equalsGreaterThanToken.getEnd();
+                this.checkForTrailingWhitespace(position);
             }
         }
+    }
 
-        if (failure) {
+    private checkForTrailingWhitespace(position: number) {
+        this.scanner.setTextPos(position);
+        var nextTokenType = this.scanner.scan();
+        if (nextTokenType !== ts.SyntaxKind.WhitespaceTrivia &&
+            nextTokenType !== ts.SyntaxKind.NewLineTrivia &&
+            nextTokenType !== ts.SyntaxKind.EndOfFileToken) {
+
+            var failure = this.createFailure(position, 1, Rule.FAILURE_STRING);
             this.addFailure(failure);
         }
     }

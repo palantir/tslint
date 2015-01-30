@@ -14,58 +14,55 @@
  * limitations under the License.
 */
 
-/// <reference path='../../lib/tslint.d.ts' />
-
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "expected an assignment or function call";
 
-    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new UnusedExpressionWalker(syntaxTree, this.getOptions()));
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        return this.applyWithWalker(new UnusedExpressionWalker(sourceFile, this.getOptions()));
     }
 }
 
 class UnusedExpressionWalker extends Lint.RuleWalker {
     private expressionIsUnused: boolean;
 
-    constructor(syntaxTree: TypeScript.SyntaxTree, options: Lint.IOptions) {
-        super(syntaxTree, options);
+    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
+        super(sourceFile, options);
         this.expressionIsUnused = true;
     }
 
-    public visitExpressionStatement(node: TypeScript.ExpressionStatementSyntax) {
+    public visitExpressionStatement(node: ts.ExpressionStatement) {
         this.expressionIsUnused = true;
-        var position = this.getPosition() + TypeScript.leadingTriviaWidth(node);
         super.visitExpressionStatement(node);
         if (this.expressionIsUnused) {
             // ignore valid unused expressions
-            if (node.expression.kind() === TypeScript.SyntaxKind.StringLiteral) {
-                var expressionText = (<TypeScript.ISyntaxToken> node.expression).text();
+            if (node.expression.kind === ts.SyntaxKind.StringLiteral) {
+                var expressionText = node.expression.getText();
                 if (expressionText === "\"use strict\"" || expressionText === "'use strict'") {
                     return;
                 }
-            } else if (node.expression.kind() === TypeScript.SyntaxKind.DeleteExpression) {
+            } else if (node.expression.kind === ts.SyntaxKind.DeleteExpression) {
                 return;
             }
 
-            this.addFailure(this.createFailure(position, TypeScript.width(node), Rule.FAILURE_STRING));
+            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
         }
     }
 
-    public visitBinaryExpression(node: TypeScript.BinaryExpressionSyntax) {
+    public visitBinaryExpression(node: ts.BinaryExpression) {
         super.visitBinaryExpression(node);
-        switch (node.kind()) {
-            case TypeScript.SyntaxKind.AssignmentExpression:
-            case TypeScript.SyntaxKind.AddAssignmentExpression:
-            case TypeScript.SyntaxKind.SubtractAssignmentExpression:
-            case TypeScript.SyntaxKind.MultiplyAssignmentExpression:
-            case TypeScript.SyntaxKind.DivideAssignmentExpression:
-            case TypeScript.SyntaxKind.ModuloAssignmentExpression:
-            case TypeScript.SyntaxKind.AndAssignmentExpression:
-            case TypeScript.SyntaxKind.ExclusiveOrAssignmentExpression:
-            case TypeScript.SyntaxKind.OrAssignmentExpression:
-            case TypeScript.SyntaxKind.LeftShiftAssignmentExpression:
-            case TypeScript.SyntaxKind.SignedRightShiftAssignmentExpression:
-            case TypeScript.SyntaxKind.UnsignedRightShiftAssignmentExpression:
+        switch (node.operator) {
+            case ts.SyntaxKind.EqualsToken:
+            case ts.SyntaxKind.PlusEqualsToken:
+            case ts.SyntaxKind.MinusEqualsToken:
+            case ts.SyntaxKind.AsteriskEqualsToken:
+            case ts.SyntaxKind.SlashEqualsToken:
+            case ts.SyntaxKind.PercentEqualsToken:
+            case ts.SyntaxKind.AmpersandEqualsToken:
+            case ts.SyntaxKind.CaretEqualsToken:
+            case ts.SyntaxKind.BarEqualsToken:
+            case ts.SyntaxKind.LessThanLessThanEqualsToken:
+            case ts.SyntaxKind.GreaterThanGreaterThanEqualsToken:
+            case ts.SyntaxKind.GreaterThanGreaterThanGreaterThanEqualsToken:
                 this.expressionIsUnused = false;
                 break;
             default:
@@ -73,11 +70,11 @@ class UnusedExpressionWalker extends Lint.RuleWalker {
         }
     }
 
-    public visitPrefixUnaryExpression(node: TypeScript.PrefixUnaryExpressionSyntax) {
+    public visitPrefixUnaryExpression(node: ts.PrefixUnaryExpression) {
         super.visitPrefixUnaryExpression(node);
-        switch (node.kind()) {
-            case TypeScript.SyntaxKind.PreIncrementExpression:
-            case TypeScript.SyntaxKind.PreDecrementExpression:
+        switch (node.operator) {
+            case ts.SyntaxKind.PlusPlusToken:
+            case ts.SyntaxKind.MinusMinusToken:
                 this.expressionIsUnused = false;
                 break;
             default:
@@ -85,40 +82,33 @@ class UnusedExpressionWalker extends Lint.RuleWalker {
         }
     }
 
-    public visitPostfixUnaryExpression(node: TypeScript.PostfixUnaryExpressionSyntax) {
+    public visitPostfixUnaryExpression(node: ts.PostfixUnaryExpression) {
         super.visitPostfixUnaryExpression(node);
         this.expressionIsUnused = false; // the only kinds of postfix expressions are postincrement and postdecrement
     }
 
-    public visitBlock(node: TypeScript.BlockSyntax) {
+    public visitBlock(node: ts.Block) {
         super.visitBlock(node);
         this.expressionIsUnused = true;
     }
 
-    public visitSimpleArrowFunctionExpression(node: TypeScript.SimpleArrowFunctionExpressionSyntax) {
-        super.visitSimpleArrowFunctionExpression(node);
+    public visitArrowFunction(node: ts.FunctionLikeDeclaration) {
+        super.visitArrowFunction(node);
         this.expressionIsUnused = true;
     }
 
-    public visitParenthesizedArrowFunctionExpression(node: TypeScript.ParenthesizedArrowFunctionExpressionSyntax) {
-        super.visitParenthesizedArrowFunctionExpression(node);
-        this.expressionIsUnused = true;
-    }
-
-    public visitInvocationExpression(node: TypeScript.InvocationExpressionSyntax) {
-        super.visitInvocationExpression(node);
+    public visitCallExpression(node: ts.CallExpression) {
+        super.visitCallExpression(node);
         this.expressionIsUnused = false;
     }
 
-    public visitConditionalExpression(node: TypeScript.ConditionalExpressionSyntax) {
-        this.visitNodeOrToken(node.condition);
+    public visitConditionalExpression(node: ts.ConditionalExpression) {
+        this.visitNode(node.condition);
         this.expressionIsUnused = true;
-        this.visitToken(node.questionToken);
-        this.visitNodeOrToken(node.whenTrue);
+        this.visitNode(node.whenTrue);
         var firstExpressionIsUnused = this.expressionIsUnused;
         this.expressionIsUnused = true;
-        this.visitToken(node.colonToken);
-        this.visitNodeOrToken(node.whenFalse);
+        this.visitNode(node.whenFalse);
         var secondExpressionIsUnused = this.expressionIsUnused;
         // if either expression is unused, then that expression's branch is a no-op unless it's
         // being assigned to something or passed to a function, so consider the entire expression unused

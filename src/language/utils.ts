@@ -14,17 +14,32 @@
  * limitations under the License.
 */
 
+///<reference path="../../typings/node.d.ts" />
+///<reference path="../../typings/typescriptServices.d.ts" />
+///<reference path='./rule/rule.ts'/>
+
 module Lint {
     var path = require("path");
 
-    export function getSyntaxTree(fileName: string, source: string): TypeScript.SyntaxTree {
+    export function getSourceFile(fileName: string, source: string): ts.SourceFile {
         var normalizedName = path.normalize(fileName);
         var compilerOptions = createCompilerOptions();
-        var isDTSFile = TypeScript.isDTSFile(normalizedName);
-        var simpleText = TypeScript.SimpleText.fromString(source);
-        var sourceFile = ts.createSourceFile(normalizedName, source, compilerOptions.target, "0");
 
-        return TypeScript.Parser.parse(normalizedName, simpleText, compilerOptions.target, isDTSFile);
+        var compilerHost = {
+            getSourceFile: function(filenameToGet: string) {
+                if (filenameToGet === fileName) {
+                    return ts.createSourceFile(filenameToGet, source, compilerOptions.target, "1", true);
+                }
+            },
+            writeFile: () => null,
+            getDefaultLibFilename: () => "lib.d.ts",
+            useCaseSensitiveFileNames: () => true,
+            getCanonicalFileName: (filename: string) => filename,
+            getCurrentDirectory: () => "",
+            getNewLine: () => "\n"
+        };
+
+        return ts.createProgram([normalizedName], compilerOptions, compilerHost).getSourceFile(normalizedName);
     }
 
     export function createCompilerOptions(): ts.CompilerOptions {
@@ -45,5 +60,9 @@ module Lint {
             }
         });
         return intersectionExists;
+    }
+
+    export function abstract() {
+        return "abstract method not implemented";
     }
 }

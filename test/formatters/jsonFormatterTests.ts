@@ -18,21 +18,21 @@
 
 describe("JSON Formatter", () => {
     var TEST_FILE = "formatters/jsonFormatter.test.ts";
-    var syntaxTree, formatter;
+    var sourceFile, formatter;
 
     before(function() {
         var Formatter = Lint.Test.getFormatter("json");
-        syntaxTree = Lint.Test.getSyntaxTree(TEST_FILE);
+        sourceFile = Lint.Test.getSourceFile(TEST_FILE);
         formatter = new Formatter();
     });
 
     it("formats failures", () => {
-        var maxPosition = TypeScript.fullWidth(syntaxTree.sourceUnit());
+        var maxPosition = sourceFile.getFullWidth();
 
         var failures = [
-            new Lint.RuleFailure(syntaxTree, 0, 1, "first failure", "first-name"),
-            new Lint.RuleFailure(syntaxTree, maxPosition - 1, maxPosition, "last failure", "last-name"),
-            new Lint.RuleFailure(syntaxTree, 0, maxPosition, "full failure", "full-name")
+            new Lint.RuleFailure(sourceFile, 0, 1, "first failure", "first-name"),
+            new Lint.RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name"),
+            new Lint.RuleFailure(sourceFile, 0, maxPosition, "full failure", "full-name")
         ];
 
         var expectedResult = [{
@@ -40,13 +40,13 @@ describe("JSON Formatter", () => {
             failure: "first failure",
             startPosition: {
                 position: 0,
-                line: 0,
-                character: 0
+                line: 1,
+                character: 1
             },
             endPosition: {
                 position: 1,
-                line: 0,
-                character: 1
+                line: 1,
+                character: 2
             },
             ruleName: "first-name"
         },
@@ -55,13 +55,13 @@ describe("JSON Formatter", () => {
             failure: "last failure",
             startPosition: {
                 position: maxPosition - 1,
-                line: 5,
-                character: 2
+                line: 6,
+                character: 3
             },
             endPosition: {
                 position: maxPosition,
-                line: 6,
-                character: 0
+                line: 7,
+                character: 1
             },
             ruleName: "last-name"
         },
@@ -70,13 +70,13 @@ describe("JSON Formatter", () => {
             failure: "full failure",
             startPosition: {
                 position: 0,
-                line: 0,
-                character: 0
+                line: 1,
+                character: 1
             },
             endPosition: {
                 position: maxPosition,
-                line: 6,
-                character: 0
+                line: 7,
+                character: 1
             },
             ruleName: "full-name"
         }];

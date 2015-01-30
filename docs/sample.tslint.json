@@ -60,17 +60,19 @@
     "semicolon": true,
     "triple-equals": [true, "allow-null-check"],
     "typedef": [true,
-        "callSignature",
-        "indexSignature",
+        "call-signature",
         "parameter",
-        "propertySignature",
-        "variableDeclarator"
+        "property-declaration",
+        "variable-declaration",
+        "member-variable-declaration"
     ],
-    "typedef-whitespace": [true,
-        ["callSignature", "noSpace"],
-        ["catchClause", "noSpace"],
-        ["indexSignature", "space"]
-    ],
+    "typedef-whitespace": [true, {
+        "call-signature": "nospace",
+        "index-signature": "nospace",
+        "parameter": "nospace",
+        "property-declaration": "nospace",
+        "variable-declaration": "nospace"
+    }],
     "use-strict": [true,
         "check-module",
         "check-function"

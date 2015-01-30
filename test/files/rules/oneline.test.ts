@@ -23,7 +23,7 @@ module Module
 
 interface Class
 {
-    public variable;
+    variable: string;
 }
 
 var object =
@@ -58,4 +58,10 @@ catch (e)
 
 while(x < 10){
     x++;
+}
+
+function f():
+    number {
+
+    return 5;
 }

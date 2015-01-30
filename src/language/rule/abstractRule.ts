@@ -42,14 +42,13 @@ module Lint.Rules {
         }
 
         /* tslint:disable:no-unused-variable */
-        public apply(syntaxTree: TypeScript.SyntaxTree): RuleFailure[] {
-            throw TypeScript.Errors.abstract();
+        public apply(sourceFile: ts.SourceFile): RuleFailure[] {
+            throw Lint.abstract();
         }
         /* tslint:enable:no-unused-variable */
 
         public applyWithWalker(walker: Lint.RuleWalker): RuleFailure[] {
-            var sourceUnit = walker.getSyntaxTree().sourceUnit();
-            walker.visitSourceUnit(sourceUnit);
+            walker.walk(walker.getSourceFile());
             return walker.getFailures();
         }
 

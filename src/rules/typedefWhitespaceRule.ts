@@ -14,129 +14,99 @@
  * limitations under the License.
  */
 
-/// <reference path="../../lib/tslint.d.ts" />
+///<reference path="../../lib/tslint.d.ts" />
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "missing type declaration";
 
-    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(<Lint.RuleWalker>(new TypedefWhitespaceWalker(syntaxTree, this.getOptions())));
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        return this.applyWithWalker(new TypedefWhitespaceWalker(sourceFile, this.getOptions()));
     }
 }
 
 class TypedefWhitespaceWalker extends Lint.RuleWalker {
-
-    public visitCallSignature(node: TypeScript.CallSignatureSyntax): void {
-        this.checkSpace("call-signature", node, node.typeAnnotation);
-
-        super.visitCallSignature(node);
+    public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
+        this.checkSpace("call-signature", node, node.type, node.parameters.end + 1);
+        super.visitFunctionDeclaration(node);
     }
 
-    public visitCatchClause(node: TypeScript.CatchClauseSyntax): void {
-        this.checkSpace("catch-clause", node, node.typeAnnotation);
-
-        super.visitCatchClause(node);
+    public visitFunctionExpression(node: ts.FunctionExpression) {
+        this.checkSpace("call-signature", node, node.type, node.parameters.end + 1);
+        super.visitFunctionExpression(node);
     }
 
-    public visitIndexSignature(node: TypeScript.IndexSignatureSyntax): void {
-        this.checkSpace("index-signature", node, node.typeAnnotation);
-
-        super.visitIndexSignature(node);
+    public visitGetAccessor(node: ts.AccessorDeclaration) {
+        this.checkSpace("call-signature", node, node.type, node.parameters.end + 1);
+        super.visitGetAccessor(node);
     }
 
-    public visitParameter(node: TypeScript.ParameterSyntax): void {
-        this.checkSpace("parameter", node, node.typeAnnotation);
+    public visitIndexSignatureDeclaration(node: ts.IndexSignatureDeclaration) {
+        var indexParameter = node.parameters[0];
 
-        super.visitParameter(node);
+        if (indexParameter != null) {
+            this.checkSpace("index-signature", indexParameter, indexParameter.type, indexParameter.name.getEnd());
+        }
+        super.visitIndexSignatureDeclaration(node);
     }
 
-    public visitPropertySignature(node: TypeScript.PropertySignatureSyntax): void {
-        this.checkSpace("property-signature", node, node.typeAnnotation);
-
-        super.visitPropertySignature(node);
+    public visitMethodDeclaration(node: ts.MethodDeclaration) {
+        this.checkSpace("call-signature", node, node.type, node.parameters.end + 1);
+        super.visitMethodDeclaration(node);
     }
 
-    public visitVariableDeclarator(node: TypeScript.VariableDeclaratorSyntax): void {
-        this.checkSpace("variable-declarator", node, node.typeAnnotation);
-
-        super.visitVariableDeclarator(node);
+    public visitParameterDeclaration(node: ts.ParameterDeclaration) {
+        this.checkSpace("parameter", node, node.type, node.name.getEnd());
+        super.visitParameterDeclaration(node);
     }
 
-    public checkSpace(option: string, node: TypeScript.ISyntaxElement, typeAnnotation: TypeScript.TypeAnnotationSyntax) : void {
-        if (this.hasOption(option) && typeAnnotation) {
-            var typeAnnotationChildIndex = this.getTypeAnnotationIndex(node);
-            var precedingChild = this.findPrecedingChild(node, typeAnnotationChildIndex);
-            var trailingTrivia = TypeScript.trailingTrivia(precedingChild);
-            var hasLeadingWhitespace = this.hasLeadingWhitespace(trailingTrivia);
+    public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
+        this.checkSpace("property-declaration", node, node.type, node.name.getEnd());
+        super.visitPropertyDeclaration(node);
+    }
+
+    public visitSetAccessor(node: ts.AccessorDeclaration) {
+        this.checkSpace("call-signature", node, node.type, node.parameters.end + 1);
+        super.visitSetAccessor(node);
+    }
+
+    public visitVariableDeclaration(node: ts.VariableDeclaration) {
+        this.checkSpace("variable-declaration", node, node.type, node.name.getEnd());
+        super.visitVariableDeclaration(node);
+    }
+
+    // TODO: `typeNode: ts.TypeNode | ts.StringLiteral`
+    public checkSpace(option: string, node: ts.Node, typeNode: ts.Node, positionBeforeColon: number) {
+        if (this.hasOption(option) && typeNode != null && positionBeforeColon != null) {
+            var hasLeadingWhitespace: boolean;
+            var scanner = ts.createScanner(ts.ScriptTarget.ES5, false, node.getText());
+
+            scanner.setTextPos(positionBeforeColon - node.getStart());
+            hasLeadingWhitespace = scanner.scan() === ts.SyntaxKind.WhitespaceTrivia;
 
             if (hasLeadingWhitespace !== (this.getOption(option) === "space")) {
-                var position = this.positionAfter(precedingChild);
                 var message = "expected " + this.getOption(option) + " in " + option;
-                var failure = this.createFailure(position, 1, message);
-
-                this.addFailure(failure);
+                this.addFailure(this.createFailure(positionBeforeColon, 1, message));
             }
         }
     }
 
-    public hasOption(option: string): boolean {
+    public hasOption(option: string) {
         var allOptions = this.getOptions();
-        if (!allOptions || allOptions.length === 0) {
+        if (allOptions == null || allOptions.length === 0) {
             return false;
         }
 
         var options = allOptions[0];
-
-        if (!options) {
-            return false;
-        }
-
-        return !!options[option];
+        return options == null || options[option] != null;
     }
 
-    private getOption(option: string): string {
+    private getOption(option: string) {
         var allOptions = this.getOptions();
-        if (!allOptions || allOptions.length === 0) {
-            return undefined;
+        if (allOptions == null || allOptions.length === 0) {
+            return null;
         }
 
         var options = allOptions[0];
-
         return options[option];
-    }
-
-    private getTypeAnnotationIndex(node: TypeScript.ISyntaxElement): number {
-        var index = 0;
-        var current = TypeScript.childAt(node, index);
-
-        while (!(current instanceof TypeScript.Syntax.Concrete.TypeAnnotationSyntax)) {
-            index++;
-            current = TypeScript.childAt(node, index);
-        }
-        return index;
-    }
-
-    private findPrecedingChild(node: TypeScript.ISyntaxElement, startIndex: number): TypeScript.ISyntaxElement {
-        var offset = 0;
-        var precedingChild: TypeScript.ISyntaxElement;
-
-        while (!precedingChild) {
-            offset++;
-            precedingChild = TypeScript.childAt(node, startIndex - offset);
-        }
-
-        return precedingChild;
-    }
-
-    private hasLeadingWhitespace(trivia: TypeScript.ISyntaxTriviaList): boolean {
-        if (trivia.count() < 1) {
-            return false;
-        } else {
-            var kind = trivia.syntaxTriviaAt(0).kind();
-            if (kind !== TypeScript.SyntaxKind.WhitespaceTrivia && kind !== TypeScript.SyntaxKind.NewLineTrivia) {
-                return false;
-            }
-        }
-        return true;
     }
 }

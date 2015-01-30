@@ -14,8 +14,6 @@
  * limitations under the License.
 */
 
-/// <reference path='../../lib/tslint.d.ts' />
-
 var OPTION_SPACE = "check-space";
 var OPTION_LOWERCASE = "check-lowercase";
 
@@ -23,42 +21,34 @@ export class Rule extends Lint.Rules.AbstractRule {
     static LOWERCASE_FAILURE = "comment must start with lowercase letter";
     static LEADING_SPACE_FAILURE = "comment must start with a space";
 
-    public apply(syntaxTree: TypeScript.SyntaxTree): Lint.RuleFailure[] {
-        return this.applyWithWalker(new CommentWalker(syntaxTree, this.getOptions()));
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        return this.applyWithWalker(new CommentWalker(sourceFile, this.getOptions()));
     }
 }
 
 class CommentWalker extends Lint.RuleWalker {
-    public visitToken(token: TypeScript.ISyntaxToken): void {
-        var tokenWidth = TypeScript.width(token);
-        this.findFailuresForTrivia(token.leadingTrivia().toArray(), this.getPosition());
-        this.findFailuresForTrivia(token.trailingTrivia().toArray(), this.getPosition() + token.leadingTriviaWidth() + tokenWidth);
-
-        super.visitToken(token);
-    }
-
-    private findFailuresForTrivia(triviaList: TypeScript.ISyntaxTrivia[], startingPosition: number) {
-        var currentPosition = startingPosition;
-        triviaList.forEach((triviaItem) => {
-            if (triviaItem.kind() === TypeScript.SyntaxKind.SingleLineCommentTrivia) {
-                var commentText = triviaItem.fullText();
-                var startPosition = currentPosition + 2;
-                var endPosition = triviaItem.fullWidth() - 2;
+    public visitSourceFile(node: ts.SourceFile): void {
+        var scanner = ts.createScanner(ts.ScriptTarget.ES5, false, node.text);
+        while (scanner.scan() !== ts.SyntaxKind.EndOfFileToken) {
+            if (scanner.getToken() === ts.SyntaxKind.SingleLineCommentTrivia) {
+                var commentText = scanner.getTokenText();
+                var startPosition = scanner.getTokenPos() + 2;
+                var width = commentText.length - 2;
                 if (this.hasOption(OPTION_SPACE)) {
                     if (!this.startsWithSpace(commentText)) {
-                        var leadingSpaceFailure = this.createFailure(startPosition, endPosition, Rule.LEADING_SPACE_FAILURE);
+                        var leadingSpaceFailure = this.createFailure(startPosition, width, Rule.LEADING_SPACE_FAILURE);
                         this.addFailure(leadingSpaceFailure);
                     }
                 }
                 if (this.hasOption(OPTION_LOWERCASE)) {
                     if (!this.startsWithLowercase(commentText)) {
-                        var lowercaseFailure = this.createFailure(startPosition, endPosition, Rule.LOWERCASE_FAILURE);
+                        var lowercaseFailure = this.createFailure(startPosition, width, Rule.LOWERCASE_FAILURE);
                         this.addFailure(lowercaseFailure);
                     }
                 }
             }
-            currentPosition += triviaItem.fullWidth();
-        });
+        }
+        // no need to call super to visit the rest of the nodes, so don't call super here
     }
 
     private startsWithSpace(commentText: string): boolean {

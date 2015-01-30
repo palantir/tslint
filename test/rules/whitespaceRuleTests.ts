@@ -33,7 +33,7 @@ describe("<whitespace>", () => {
             "check-typecast"
         ];
         actualFailures = Lint.Test.applyRuleOnFile(fileName, WhitespaceRule, options);
-        assert.lengthOf(actualFailures, 31);
+        assert.lengthOf(actualFailures, 33);
     });
 
     it("enforces rules only when enabled", () => {
@@ -50,11 +50,15 @@ describe("<whitespace>", () => {
     });
 
     it("enforces whitespace in export statements", () => {
-        var expectedFailure1 = createFailure([3, 15], [3, 16]);
-        var expectedFailure2 = createFailure([3, 16], [3, 17]);
+        var expectedFailure1 = createFailure([3, 19], [3, 20]);
+        var expectedFailure2 = createFailure([3, 20], [3, 21]);
+        var expectedFailure3 = createFailure([42, 7], [42, 8]);
+        var expectedFailure4 = createFailure([42, 8], [42, 9]);
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);
+        Lint.Test.assertContainsFailure(actualFailures, expectedFailure3);
+        Lint.Test.assertContainsFailure(actualFailures, expectedFailure4);
     });
 
     it("enforces whitespace in type declarations", () => {

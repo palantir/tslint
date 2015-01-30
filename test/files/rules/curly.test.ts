@@ -50,3 +50,12 @@ while (j == 1);
 do
     console.log("o");
 while (k == 1);
+
+if (true) {
+    console.log("x");
+} else console.log("y");
+
+
+if (true) {
+    console.log("x");
+} else if (true) {console.log("y")};

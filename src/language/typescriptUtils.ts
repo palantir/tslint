@@ -15,6 +15,8 @@
 */
 
 module TypeScript {
+    // TODO: figure out if we need these functions
+    /*
     export function leadingTrivia(element: ISyntaxElement, text?: ISimpleText): ISyntaxTriviaList {
         var token = firstToken(element);
         return token ? token.leadingTrivia(text) : TypeScript.Syntax.emptyTriviaList;
@@ -24,4 +26,5 @@ module TypeScript {
         var token = lastToken(element);
         return token ? token.trailingTrivia(text) : TypeScript.Syntax.emptyTriviaList;
     }
+    */
 }

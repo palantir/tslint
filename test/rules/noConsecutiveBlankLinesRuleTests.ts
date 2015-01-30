@@ -19,7 +19,7 @@
 describe("<no-consecutive-blank-lines>", () => {
     var NoConsecutiveBlankLinesRule = Lint.Test.getRule("no-consecutive-blank-lines");
 
-    it("ensures comments start with a space and a lowercase letter", () => {
+    it("ensures there is at most one consecutive blank line", () => {
         var fileName = "rules/blanklines.test.ts";
         var createFailure = Lint.Test.createFailuresOnFile(fileName, NoConsecutiveBlankLinesRule.FAILURE_STRING);
         var expectedFailure1 = createFailure([2, 1], [3, 1]);
