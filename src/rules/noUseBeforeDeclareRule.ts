@@ -27,12 +27,16 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-class NoUseBeforeDeclareWalker extends Lint.RuleWalker {
+class NoUseBeforeDeclareWalker extends Lint.ScopeAwareRuleWalker<{}> {
     private languageService: ts.LanguageService;
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions, languageService: ts.LanguageService) {
         super(sourceFile, options);
         this.languageService = languageService;
+    }
+
+    public createScope(): {} {
+        return {};
     }
 
     public visitImportDeclaration(node: ts.ImportDeclaration): void {
@@ -42,8 +46,14 @@ class NoUseBeforeDeclareWalker extends Lint.RuleWalker {
     }
 
     public visitVariableDeclaration(node: ts.VariableDeclaration): void {
-        this.validateUsageForVariable(node.name.text, node.getStart());
+        var variableName = node.name.text;
+        var currentScope = this.getCurrentScope();
 
+        if (currentScope[variableName] == null) {
+            this.validateUsageForVariable(variableName, node.getStart());
+        }
+
+        currentScope[variableName] = true;
         super.visitVariableDeclaration(node);
     }
 
