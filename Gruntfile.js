@@ -1,6 +1,7 @@
 module.exports = function(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
+    typescriptBin: 'node_modules/typescript/bin/typescriptServices.js',
 
     clean: {
       bin: ['bin/tslint-cli.js'],
@@ -10,15 +11,15 @@ module.exports = function(grunt) {
 
     concat: {
       bin: {
-        src: ['lib/typescriptServices.js', 'bin/tslint-cli.js'],
+        src: ['<%= typescriptBin %>', 'bin/tslint-cli.js'],
         dest: 'bin/tslint-cli.js'
       },
       core: {
-        src: ['lib/typescriptServices.js', 'lib/tslint.js'],
+        src: ['<%= typescriptBin %>', 'lib/tslint.js'],
         dest: 'lib/tslint.js'
       },
       test: {
-        src: ['lib/typescriptServices.js', 'build/tslint-tests.js'],
+        src: ['<%= typescriptBin %>', 'build/tslint-tests.js'],
         dest: 'build/tslint-tests.js'
       }
     },
@@ -62,6 +63,7 @@ module.exports = function(grunt) {
 
       core: {
         options: {
+          noImplicitAny: true,
           declaration: true,
           module: 'commonjs'
         },
@@ -72,20 +74,15 @@ module.exports = function(grunt) {
       core_rules: {
         options: {
           base_path: 'src/rules',
-          noImplicitAny: true,
           module: 'commonjs'
         },
-        src: [
-          'lib/tslint.d.ts',
-          'src/rules/*.ts'
-        ],
+        src: ['lib/tslint.d.ts', 'src/rules/*.ts'],
         outDir: 'build/rules/'
       },
 
       core_formatters: {
         options: {
           base_path: 'src/formatters',
-          noImplicitAny: true,
           module: 'commonjs'
         },
         src: ['lib/tslint.d.ts', 'src/formatters/*.ts'],
