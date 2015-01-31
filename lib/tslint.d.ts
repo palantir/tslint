@@ -202,12 +202,6 @@ declare module Lint {
     }
 }
 declare module Lint {
-    interface RuleWalkerState {
-        position: number;
-        token: ts.Node;
-    }
-}
-declare module Lint {
     interface LintResult {
         failureCount: number;
         format: string;
