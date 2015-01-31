@@ -17,7 +17,6 @@
 ///<reference path="../../../typings/typescriptServices.d.ts" />
 
 module Lint {
-    // TODO: rename this class
     export class SyntaxWalker {
         public visitAnyKeyword(node: ts.Node) {
             this.walkChildren(node);

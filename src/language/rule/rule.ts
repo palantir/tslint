@@ -79,7 +79,6 @@ module Lint {
         private failure: string;
         private ruleName: string;
 
-        // TODO: reorder arguments so that ruleName is right after fileName
         constructor(sourceFile: ts.SourceFile,
                     start: number,
                     end: number,
