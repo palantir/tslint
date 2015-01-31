@@ -86,14 +86,6 @@ module Lint {
             this.position += node.getFullWidth();
         }
 
-        // TODO: no idea yet about what to do here
-        /*
-        public visitToken(token: ts.Node): void {
-            super.visitToken(token);
-            this.position += token.getFullWidth();
-        }
-        */
-
         // create a failure at the given position
         public createFailure(start: number, width: number, failure: string): Lint.RuleFailure {
             var from = (start > this.limit) ? this.limit : start;
