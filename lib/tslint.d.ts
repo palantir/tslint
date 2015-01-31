@@ -170,8 +170,6 @@ declare module Lint {
 declare module Lint {
     function createLanguageServiceHost(fileName: string, source: string): ts.LanguageServiceHost;
 }
-declare module TypeScript {
-}
 declare module Lint.Formatters {
     class AbstractFormatter implements Lint.IFormatter {
         format(failures: Lint.RuleFailure[]): string;

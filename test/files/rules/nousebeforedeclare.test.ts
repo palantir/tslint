@@ -24,3 +24,9 @@ class ClassB {
 }
 
 var j: number;
+
+if (something) {
+    var defined = 1;
+} else {
+    var defined;
+}

@@ -22,8 +22,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-class LabelUndefinedWalker extends Lint.ScopeAwareRuleWalker<any> {
-    public createScope(): any {
+class LabelUndefinedWalker extends Lint.ScopeAwareRuleWalker<{}> {
+    public createScope(): {} {
         return {};
     }
 

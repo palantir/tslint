@@ -49,6 +49,7 @@ class NoUseBeforeDeclareWalker extends Lint.ScopeAwareRuleWalker<{}> {
         var variableName = node.name.text;
         var currentScope = this.getCurrentScope();
 
+        // only validate on the first variable declaration within the current scope
         if (currentScope[variableName] == null) {
             this.validateUsageForVariable(variableName, node.getStart());
         }
