@@ -24,6 +24,7 @@ Please first ensure that the TypeScript source files compile correctly.
   usage: tslint
 
   Options:
+
     -c, --config              configuration file
     -f, --file                file to lint                  [required]
     -o, --out                 output file
