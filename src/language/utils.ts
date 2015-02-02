@@ -39,7 +39,9 @@ module Lint {
             getNewLine: () => "\n"
         };
 
-        return ts.createProgram([normalizedName], compilerOptions, compilerHost).getSourceFile(normalizedName);
+        var program = ts.createProgram([normalizedName], compilerOptions, compilerHost);
+        program.getTypeChecker(true);
+        return program.getSourceFile(normalizedName);
     }
 
     export function createCompilerOptions(): ts.CompilerOptions {

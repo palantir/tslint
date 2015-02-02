@@ -22,7 +22,14 @@ module Lint {
 
         public visitSourceFile(node: ts.SourceFile): void {
             var scanner = ts.createScanner(ts.ScriptTarget.ES5, false, node.text);
+            var lastStartPos = -1;
             while (scanner.scan() !== ts.SyntaxKind.EndOfFileToken) {
+                var startPos = scanner.getStartPos();
+                if (startPos === lastStartPos) {
+                    break;
+                }
+                lastStartPos = startPos;
+
                 if (scanner.getToken() === ts.SyntaxKind.MultiLineCommentTrivia) {
                     var commentText = scanner.getTokenText();
                     var startPosition = scanner.getTokenPos();

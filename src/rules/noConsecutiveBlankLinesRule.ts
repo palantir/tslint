@@ -27,7 +27,13 @@ class BlankLinesWalker extends Lint.RuleWalker {
         var scanner = ts.createScanner(ts.ScriptTarget.ES5, false, node.text);
         // starting with 1 to cover the case where the file starts with two blank lines
         var newLinesInARowSeenSoFar = 1;
+        var lastStartPos = -1;
         while (scanner.scan() !== ts.SyntaxKind.EndOfFileToken) {
+            var startPos = scanner.getStartPos();
+            if (startPos === lastStartPos) {
+                break;
+            }
+            lastStartPos = startPos;
             if (scanner.getToken() === ts.SyntaxKind.NewLineTrivia) {
                 newLinesInARowSeenSoFar += 1;
                 if (newLinesInARowSeenSoFar >= 3) {

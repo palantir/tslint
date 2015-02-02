@@ -44,8 +44,14 @@ class WhitespaceWalker extends Lint.RuleWalker {
 
         var lastShouldBeFollowedByWhitespace = false;
         this.scanner.setTextPos(0);
+        var lastStartPos = -1;
         while (this.scanner.scan() !== ts.SyntaxKind.EndOfFileToken) {
             var startPos = this.scanner.getStartPos();
+            if (startPos === lastStartPos) {
+                break;
+            }
+            lastStartPos = startPos;
+
             var tokenKind = this.scanner.getToken();
             if (tokenKind === ts.SyntaxKind.WhitespaceTrivia || tokenKind === ts.SyntaxKind.NewLineTrivia) {
                 lastShouldBeFollowedByWhitespace = false;

@@ -27,10 +27,17 @@ class NoTrailingWhitespaceWalker extends Lint.RuleWalker {
         var scanner = ts.createScanner(ts.ScriptTarget.ES5, false, node.text);
         var lastSeenWasWhitespace = false;
         var lastSeenWhitespacePosition = 0;
+        var lastStartPos = -1;
         while (scanner.scan() !== ts.SyntaxKind.EndOfFileToken) {
+            var startPos = scanner.getStartPos();
+            if (startPos === lastStartPos) {
+                break;
+            }
+            lastStartPos = startPos;
+
             if (scanner.getToken() === ts.SyntaxKind.NewLineTrivia) {
                 if (lastSeenWasWhitespace) {
-                    var width = scanner.getStartPos() - lastSeenWhitespacePosition;
+                    var width = startPos - lastSeenWhitespacePosition;
                     var failure = this.createFailure(lastSeenWhitespacePosition, width, Rule.FAILURE_STRING);
                     this.addFailure(failure);
                 }
