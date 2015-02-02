@@ -96,12 +96,18 @@ class WhitespaceWalker extends Lint.RuleWalker {
     }
 
     public visitRegularExpressionLiteral(node: ts.Node) {
-        this.tokensToSkipStartEndMap[node.getStart()] = node.getEnd();
+        if (node.getStart() < node.getEnd()) {
+            // only add to the map nodes whose end comes after their start, to prevent infinite loops
+            this.tokensToSkipStartEndMap[node.getStart()] = node.getEnd();
+        }
         super.visitRegularExpressionLiteral(node);
     }
 
     public visitIdentifier(node: ts.Identifier) {
-        this.tokensToSkipStartEndMap[node.getStart()] = node.getEnd();
+        if (node.getStart() < node.getEnd()) {
+            // only add to the map nodes whose end comes after their start, to prevent infinite loops
+            this.tokensToSkipStartEndMap[node.getStart()] = node.getEnd();
+        }
         super.visitIdentifier(node);
     }
 
