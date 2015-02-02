@@ -24,16 +24,9 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class BlankLinesWalker extends Lint.RuleWalker {
     public visitSourceFile(node: ts.SourceFile): void {
-        var scanner = ts.createScanner(ts.ScriptTarget.ES5, false, node.text);
         // starting with 1 to cover the case where the file starts with two blank lines
         var newLinesInARowSeenSoFar = 1;
-        var lastStartPos = -1;
-        while (scanner.scan() !== ts.SyntaxKind.EndOfFileToken) {
-            var startPos = scanner.getStartPos();
-            if (startPos === lastStartPos) {
-                break;
-            }
-            lastStartPos = startPos;
+        Lint.scanAllTokens(ts.createScanner(ts.ScriptTarget.ES5, false, node.text), (scanner: ts.Scanner) => {
             if (scanner.getToken() === ts.SyntaxKind.NewLineTrivia) {
                 newLinesInARowSeenSoFar += 1;
                 if (newLinesInARowSeenSoFar >= 3) {
@@ -43,7 +36,7 @@ class BlankLinesWalker extends Lint.RuleWalker {
             } else {
                 newLinesInARowSeenSoFar = 0;
             }
-        }
+        });
         // no need to call super to visit the rest of the nodes, so don't call super here
     }
 }

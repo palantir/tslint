@@ -24,20 +24,12 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class NoTrailingWhitespaceWalker extends Lint.RuleWalker {
     public visitSourceFile(node: ts.SourceFile): void {
-        var scanner = ts.createScanner(ts.ScriptTarget.ES5, false, node.text);
         var lastSeenWasWhitespace = false;
         var lastSeenWhitespacePosition = 0;
-        var lastStartPos = -1;
-        while (scanner.scan() !== ts.SyntaxKind.EndOfFileToken) {
-            var startPos = scanner.getStartPos();
-            if (startPos === lastStartPos) {
-                break;
-            }
-            lastStartPos = startPos;
-
+        Lint.scanAllTokens(ts.createScanner(ts.ScriptTarget.ES5, false, node.text), (scanner: ts.Scanner) => {
             if (scanner.getToken() === ts.SyntaxKind.NewLineTrivia) {
                 if (lastSeenWasWhitespace) {
-                    var width = startPos - lastSeenWhitespacePosition;
+                    var width = scanner.getStartPos() - lastSeenWhitespacePosition;
                     var failure = this.createFailure(lastSeenWhitespacePosition, width, Rule.FAILURE_STRING);
                     this.addFailure(failure);
                 }
@@ -48,7 +40,7 @@ class NoTrailingWhitespaceWalker extends Lint.RuleWalker {
             } else {
                 lastSeenWasWhitespace = false;
             }
-        }
+        });
         // no need to call super to visit the rest of the nodes, so don't call super here
     }
 }

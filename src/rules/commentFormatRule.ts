@@ -28,15 +28,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class CommentWalker extends Lint.RuleWalker {
     public visitSourceFile(node: ts.SourceFile): void {
-        var scanner = ts.createScanner(ts.ScriptTarget.ES5, false, node.text);
-        var lastStartPos = -1;
-        while (scanner.scan() !== ts.SyntaxKind.EndOfFileToken) {
-            var startPos = scanner.getStartPos();
-            if (startPos === lastStartPos) {
-                break;
-            }
-            lastStartPos = startPos;
-
+        Lint.scanAllTokens(ts.createScanner(ts.ScriptTarget.ES5, false, node.text), (scanner: ts.Scanner) => {
             if (scanner.getToken() === ts.SyntaxKind.SingleLineCommentTrivia) {
                 var commentText = scanner.getTokenText();
                 var startPosition = scanner.getTokenPos() + 2;
@@ -54,7 +46,7 @@ class CommentWalker extends Lint.RuleWalker {
                     }
                 }
             }
-        }
+        });
         // no need to call super to visit the rest of the nodes, so don't call super here
     }
 

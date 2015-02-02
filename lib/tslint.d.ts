@@ -113,6 +113,7 @@ declare module Lint {
     function createCompilerOptions(): ts.CompilerOptions;
     function doesIntersect(failure: RuleFailure, disabledIntervals: Lint.IDisabledInterval[]): boolean;
     function abstract(): string;
+    function scanAllTokens(scanner: ts.Scanner, callback: (scanner: ts.Scanner) => void): void;
 }
 declare module Lint {
     class RuleWalker extends Lint.SyntaxWalker {

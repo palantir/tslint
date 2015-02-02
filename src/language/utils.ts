@@ -40,6 +40,8 @@ module Lint {
         };
 
         var program = ts.createProgram([normalizedName], compilerOptions, compilerHost);
+        // this will force the binder to properly set up parent pointers, which will allow getSourceFile to work on all nodes,
+        // and will therefore allow our code to work even if the source doesn't compile
         program.getTypeChecker(true);
         return program.getSourceFile(normalizedName);
     }
@@ -66,5 +68,17 @@ module Lint {
 
     export function abstract() {
         return "abstract method not implemented";
+    }
+
+    export function scanAllTokens(scanner: ts.Scanner, callback: (scanner: ts.Scanner) => void) {
+        var lastStartPos = -1;
+        while (scanner.scan() !== ts.SyntaxKind.EndOfFileToken) {
+            var startPos = scanner.getStartPos();
+            if (startPos === lastStartPos) {
+                break;
+            }
+            lastStartPos = startPos;
+            callback(scanner);
+        }
     }
 }

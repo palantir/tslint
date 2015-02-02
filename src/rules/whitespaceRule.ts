@@ -44,15 +44,9 @@ class WhitespaceWalker extends Lint.RuleWalker {
 
         var lastShouldBeFollowedByWhitespace = false;
         this.scanner.setTextPos(0);
-        var lastStartPos = -1;
-        while (this.scanner.scan() !== ts.SyntaxKind.EndOfFileToken) {
-            var startPos = this.scanner.getStartPos();
-            if (startPos === lastStartPos) {
-                break;
-            }
-            lastStartPos = startPos;
-
-            var tokenKind = this.scanner.getToken();
+        Lint.scanAllTokens(this.scanner, (scanner: ts.Scanner) => {
+            var startPos = scanner.getStartPos();
+            var tokenKind = scanner.getToken();
             if (tokenKind === ts.SyntaxKind.WhitespaceTrivia || tokenKind === ts.SyntaxKind.NewLineTrivia) {
                 lastShouldBeFollowedByWhitespace = false;
             } else if (lastShouldBeFollowedByWhitespace) {
@@ -64,8 +58,8 @@ class WhitespaceWalker extends Lint.RuleWalker {
             if (this.tokensToSkipStartEndMap[startPos] != null) {
                 // tokens to skip are places where the scanner gets confused about what the token is, without the proper context
                 // (specifically, regex and identifiers). So skip those tokens.
-                this.scanner.setTextPos(this.tokensToSkipStartEndMap[startPos]);
-                continue;
+                scanner.setTextPos(this.tokensToSkipStartEndMap[startPos]);
+                return;
             }
 
             // check for trailing space after the given tokens
@@ -98,7 +92,7 @@ class WhitespaceWalker extends Lint.RuleWalker {
                     break;
 
             }
-        }
+        });
     }
 
     public visitRegularExpressionLiteral(node: ts.Node) {
