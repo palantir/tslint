@@ -1,6 +1,6 @@
 Change Log
 ===
-v2.0.0
+v2.0.1
 ---
 * Upgraded Typescript compiler to 1.4
 * **BREAKING CHANGES**
