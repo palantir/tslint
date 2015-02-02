@@ -1,5 +1,19 @@
 Change Log
 ===
+v2.0.0
+---
+* Upgraded Typescript compiler to 1.4
+* **BREAKING CHANGES**
+	* typedef rule options were modified:
+		* index-signature removed as no longer necessary
+		* property-signature renamed to property-declaration
+		* variable-declarator renamed to variable-declaration
+		* member-variable-declarator renamed to member-variable-declaration
+	* typedef-whitespace rule options were modified:
+		* catch-clause was removed as invalid
+		* further options were added, see readme for more details
+	* due to changes to the typescript compiler API, old custom rules may no longer work and may need to be rewritten
+	* the JSON formatter's line and character positions are now 1-indexed instead of 0-indexed
 
 v1.2.0
 ---
