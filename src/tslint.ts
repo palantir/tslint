@@ -63,28 +63,24 @@ module Lint {
             var failures: RuleFailure[] = [];
             var sourceFile = Lint.getSourceFile(this.fileName, this.source);
 
-            try {
-                // walk the code first to find all the intervals where rules are disabled
-                var rulesWalker = new EnableDisableRulesWalker(sourceFile, {ruleName: "", disabledIntervals: []});
-                rulesWalker.walk(sourceFile);
-                var enableDisableRuleMap = rulesWalker.enableDisableRuleMap;
+            // walk the code first to find all the intervals where rules are disabled
+            var rulesWalker = new EnableDisableRulesWalker(sourceFile, {ruleName: "", disabledIntervals: []});
+            rulesWalker.walk(sourceFile);
+            var enableDisableRuleMap = rulesWalker.enableDisableRuleMap;
 
-                var rulesDirectory = this.getRelativePath(this.options.rulesDirectory);
-                var configuration = this.options.configuration.rules;
-                var configuredRules = Lint.loadRules(configuration, enableDisableRuleMap, rulesDirectory);
-                for (var i = 0; i < configuredRules.length; ++i) {
-                    var rule = configuredRules[i];
-                    if (rule.isEnabled()) {
-                        var ruleFailures = rule.apply(sourceFile);
-                        ruleFailures.forEach((ruleFailure) => {
-                            if (!this.containsRule(failures, ruleFailure)) {
-                                failures.push(ruleFailure);
-                            }
-                        });
-                    }
+            var rulesDirectory = this.getRelativePath(this.options.rulesDirectory);
+            var configuration = this.options.configuration.rules;
+            var configuredRules = Lint.loadRules(configuration, enableDisableRuleMap, rulesDirectory);
+            for (var i = 0; i < configuredRules.length; ++i) {
+                var rule = configuredRules[i];
+                if (rule.isEnabled()) {
+                    var ruleFailures = rule.apply(sourceFile);
+                    ruleFailures.forEach((ruleFailure) => {
+                        if (!this.containsRule(failures, ruleFailure)) {
+                            failures.push(ruleFailure);
+                        }
+                    });
                 }
-            } catch (e) {
-                failures = [new RuleFailure(sourceFile, 0, 0, "unable to compile", "compilation")];
             }
 
             var formatter: Lint.IFormatter;

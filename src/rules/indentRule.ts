@@ -54,7 +54,14 @@ class IndentWalker extends Lint.RuleWalker {
             scanner.setTextPos(lineStart);
             var currentScannedType = scanner.scan();
             var fullLeadingWhitespace = "";
+            var lastStartPos = -1;
             while (currentScannedType === ts.SyntaxKind.WhitespaceTrivia) {
+                var startPos = scanner.getStartPos();
+                if (startPos === lastStartPos) {
+                    break;
+                }
+                lastStartPos = startPos;
+
                 fullLeadingWhitespace += scanner.getTokenText();
                 currentScannedType = scanner.scan();
             }
