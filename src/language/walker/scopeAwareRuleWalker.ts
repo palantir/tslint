@@ -27,22 +27,6 @@ module Lint {
             this.scopeStack = [this.createScope()];
         }
 
-        public visitNode(node: ts.Node): void {
-            var isNewScope = this.isScopeBoundary(node);
-
-            if (isNewScope) {
-                this.scopeStack.push(this.createScope());
-            }
-
-            this.onScopeStart();
-            super.visitNode(node);
-            this.onScopeEnd();
-
-            if (isNewScope) {
-                this.scopeStack.pop();
-            }
-        }
-
         // create a new scope
         public createScope(): T {
             throw Lint.abstract();
@@ -66,6 +50,22 @@ module Lint {
         // callback notifier when a scope ends
         public onScopeEnd(): void {
             return;
+        }
+
+        protected visitNode(node: ts.Node): void {
+            var isNewScope = this.isScopeBoundary(node);
+
+            if (isNewScope) {
+                this.scopeStack.push(this.createScope());
+            }
+
+            this.onScopeStart();
+            super.visitNode(node);
+            this.onScopeEnd();
+
+            if (isNewScope) {
+                this.scopeStack.pop();
+            }
         }
 
         private isScopeBoundary(node: ts.Node): boolean {

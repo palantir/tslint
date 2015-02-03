@@ -18,231 +18,227 @@
 
 module Lint {
     export class SyntaxWalker {
-        public visitAnyKeyword(node: ts.Node) {
-            this.walkChildren(node);
-        }
-
-        public visitArrowFunction(node: ts.FunctionLikeDeclaration) {
-            this.walkChildren(node);
-        }
-
-        public visitBinaryExpression(node: ts.BinaryExpression) {
-            this.walkChildren(node);
-        }
-
-        public visitBlock(node: ts.Block) {
-            this.walkChildren(node);
-        }
-
-        public visitBreakStatement(node: ts.BreakOrContinueStatement) {
-            this.walkChildren(node);
-        }
-
-        public visitCallExpression(node: ts.CallExpression) {
-            this.walkChildren(node);
-        }
-
-        public visitCaseClause(node: ts.CaseClause) {
-            this.walkChildren(node);
-        }
-
-        public visitClassDeclaration(node: ts.ClassDeclaration) {
-            this.walkChildren(node);
-        }
-
-        public visitCatchClause(node: ts.CatchClause) {
-            this.walkChildren(node);
-        }
-
-        public visitConditionalExpression(node: ts.ConditionalExpression) {
-            this.walkChildren(node);
-        }
-
-        public visitConstructorDeclaration(node: ts.ConstructorDeclaration) {
-            this.walkChildren(node);
-        }
-
-        public visitConstructorType(node: ts.Node) {
-            this.walkChildren(node);
-        }
-
-        public visitContinueStatement(node: ts.BreakOrContinueStatement) {
-            this.walkChildren(node);
-        }
-
-        public visitDebuggerStatement(node: ts.Statement) {
-            this.walkChildren(node);
-        }
-
-        public visitDefaultClause(node: ts.DefaultClause) {
-            this.walkChildren(node);
-        }
-
-        public visitDoStatement(node: ts.DoStatement) {
-            this.walkChildren(node);
-        }
-
-        public visitElementAccessExpression(node: ts.ElementAccessExpression) {
-            this.walkChildren(node);
-        }
-
-        public visitEnumDeclaration(node: ts.EnumDeclaration) {
-            this.walkChildren(node);
-        }
-
-        public visitExportAssignment(node: ts.ExportAssignment) {
-            this.walkChildren(node);
-        }
-
-        public visitExpressionStatement(node: ts.ExpressionStatement) {
-            this.walkChildren(node);
-        }
-
-        public visitForStatement(node: ts.ForStatement) {
-            this.walkChildren(node);
-        }
-
-        public visitForInStatement(node: ts.ForInStatement) {
-            this.walkChildren(node);
-        }
-
-        public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
-            this.walkChildren(node);
-        }
-
-        public visitFunctionExpression(node: ts.FunctionExpression) {
-            this.walkChildren(node);
-        }
-
-        public visitFunctionType(node: ts.Node) {
-            this.walkChildren(node);
-        }
-
-        public visitGetAccessor(node: ts.AccessorDeclaration) {
-            this.walkChildren(node);
-        }
-
-        public visitIdentifier(node: ts.Identifier) {
-            this.walkChildren(node);
-        }
-
-        public visitIfStatement(node: ts.IfStatement) {
-            this.walkChildren(node);
-        }
-
-        public visitImportDeclaration(node: ts.ImportDeclaration) {
-            this.walkChildren(node);
-        }
-
-        public visitIndexSignatureDeclaration(node: ts.IndexSignatureDeclaration) {
-            this.walkChildren(node);
-        }
-
-        public visitInterfaceDeclaration(node: ts.InterfaceDeclaration) {
-            this.walkChildren(node);
-        }
-
-        public visitLabeledStatement(node: ts.LabeledStatement) {
-            this.walkChildren(node);
-        }
-
-        public visitMethodDeclaration(node: ts.MethodDeclaration) {
-            this.walkChildren(node);
-        }
-
-        public visitModuleDeclaration(node: ts.ModuleDeclaration) {
-            this.walkChildren(node);
-        }
-
-        public visitNewExpression(node: ts.NewExpression) {
-            this.walkChildren(node);
-        }
-
-        public visitObjectLiteralExpression(node: ts.ObjectLiteralExpression) {
-            this.walkChildren(node);
-        }
-
-        public visitParameterDeclaration(node: ts.ParameterDeclaration) {
-            this.walkChildren(node);
-        }
-
-        public visitPostfixUnaryExpression(node: ts.PostfixUnaryExpression) {
-            this.walkChildren(node);
-        }
-
-        public visitPrefixUnaryExpression(node: ts.PrefixUnaryExpression) {
-            this.walkChildren(node);
-        }
-
-        public visitPropertyAccessExpression(node: ts.PropertyAccessExpression) {
-            this.walkChildren(node);
-        }
-
-        public visitPropertyAssignment(node: ts.PropertyAssignment) {
-            this.walkChildren(node);
-        }
-
-        public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
-            this.walkChildren(node);
-        }
-
-        public visitRegularExpressionLiteral(node: ts.Node) {
-            this.walkChildren(node);
-        }
-
-        public visitReturnStatement(node: ts.ReturnStatement) {
-            this.walkChildren(node);
-        }
-
-        public visitSetAccessor(node: ts.AccessorDeclaration) {
-            this.walkChildren(node);
-        }
-
-        public visitSourceFile(node: ts.SourceFile) {
-            this.walkChildren(node);
-        }
-
-        public visitSwitchStatement(node: ts.SwitchStatement) {
-            this.walkChildren(node);
-        }
-
-        public visitThrowStatement(node: ts.ThrowStatement) {
-            this.walkChildren(node);
-        }
-
-        public visitTryBlock(node: ts.Block) {
-            this.walkChildren(node);
-        }
-
-        public visitTryStatement(node: ts.TryStatement) {
-            this.walkChildren(node);
-        }
-
-        public visitTypeAssertionExpression(node: ts.TypeAssertion) {
-            this.walkChildren(node);
-        }
-
-        public visitVariableDeclaration(node: ts.VariableDeclaration) {
-            this.walkChildren(node);
-        }
-
-        public visitVariableStatement(node: ts.VariableStatement) {
-            this.walkChildren(node);
-        }
-
-        public visitWhileStatement(node: ts.WhileStatement) {
-            this.walkChildren(node);
-        }
-
         public walk(node: ts.Node) {
             this.visitNode(node);
         }
 
-        public walkChildren(node: ts.Node) {
-            ts.forEachChild(node, (child) => this.visitNode(child));
+        protected visitAnyKeyword(node: ts.Node) {
+            this.walkChildren(node);
         }
 
-        public visitNode(node: ts.Node) {
+        protected visitArrowFunction(node: ts.FunctionLikeDeclaration) {
+            this.walkChildren(node);
+        }
+
+        protected visitBinaryExpression(node: ts.BinaryExpression) {
+            this.walkChildren(node);
+        }
+
+        protected visitBlock(node: ts.Block) {
+            this.walkChildren(node);
+        }
+
+        protected visitBreakStatement(node: ts.BreakOrContinueStatement) {
+            this.walkChildren(node);
+        }
+
+        protected visitCallExpression(node: ts.CallExpression) {
+            this.walkChildren(node);
+        }
+
+        protected visitCaseClause(node: ts.CaseClause) {
+            this.walkChildren(node);
+        }
+
+        protected visitClassDeclaration(node: ts.ClassDeclaration) {
+            this.walkChildren(node);
+        }
+
+        protected visitCatchClause(node: ts.CatchClause) {
+            this.walkChildren(node);
+        }
+
+        protected visitConditionalExpression(node: ts.ConditionalExpression) {
+            this.walkChildren(node);
+        }
+
+        protected visitConstructorDeclaration(node: ts.ConstructorDeclaration) {
+            this.walkChildren(node);
+        }
+
+        protected visitConstructorType(node: ts.Node) {
+            this.walkChildren(node);
+        }
+
+        protected visitContinueStatement(node: ts.BreakOrContinueStatement) {
+            this.walkChildren(node);
+        }
+
+        protected visitDebuggerStatement(node: ts.Statement) {
+            this.walkChildren(node);
+        }
+
+        protected visitDefaultClause(node: ts.DefaultClause) {
+            this.walkChildren(node);
+        }
+
+        protected visitDoStatement(node: ts.DoStatement) {
+            this.walkChildren(node);
+        }
+
+        protected visitElementAccessExpression(node: ts.ElementAccessExpression) {
+            this.walkChildren(node);
+        }
+
+        protected visitEnumDeclaration(node: ts.EnumDeclaration) {
+            this.walkChildren(node);
+        }
+
+        protected visitExportAssignment(node: ts.ExportAssignment) {
+            this.walkChildren(node);
+        }
+
+        protected visitExpressionStatement(node: ts.ExpressionStatement) {
+            this.walkChildren(node);
+        }
+
+        protected visitForStatement(node: ts.ForStatement) {
+            this.walkChildren(node);
+        }
+
+        protected visitForInStatement(node: ts.ForInStatement) {
+            this.walkChildren(node);
+        }
+
+        protected visitFunctionDeclaration(node: ts.FunctionDeclaration) {
+            this.walkChildren(node);
+        }
+
+        protected visitFunctionExpression(node: ts.FunctionExpression) {
+            this.walkChildren(node);
+        }
+
+        protected visitFunctionType(node: ts.Node) {
+            this.walkChildren(node);
+        }
+
+        protected visitGetAccessor(node: ts.AccessorDeclaration) {
+            this.walkChildren(node);
+        }
+
+        protected visitIdentifier(node: ts.Identifier) {
+            this.walkChildren(node);
+        }
+
+        protected visitIfStatement(node: ts.IfStatement) {
+            this.walkChildren(node);
+        }
+
+        protected visitImportDeclaration(node: ts.ImportDeclaration) {
+            this.walkChildren(node);
+        }
+
+        protected visitIndexSignatureDeclaration(node: ts.IndexSignatureDeclaration) {
+            this.walkChildren(node);
+        }
+
+        protected visitInterfaceDeclaration(node: ts.InterfaceDeclaration) {
+            this.walkChildren(node);
+        }
+
+        protected visitLabeledStatement(node: ts.LabeledStatement) {
+            this.walkChildren(node);
+        }
+
+        protected visitMethodDeclaration(node: ts.MethodDeclaration) {
+            this.walkChildren(node);
+        }
+
+        protected visitModuleDeclaration(node: ts.ModuleDeclaration) {
+            this.walkChildren(node);
+        }
+
+        protected visitNewExpression(node: ts.NewExpression) {
+            this.walkChildren(node);
+        }
+
+        protected visitObjectLiteralExpression(node: ts.ObjectLiteralExpression) {
+            this.walkChildren(node);
+        }
+
+        protected visitParameterDeclaration(node: ts.ParameterDeclaration) {
+            this.walkChildren(node);
+        }
+
+        protected visitPostfixUnaryExpression(node: ts.PostfixUnaryExpression) {
+            this.walkChildren(node);
+        }
+
+        protected visitPrefixUnaryExpression(node: ts.PrefixUnaryExpression) {
+            this.walkChildren(node);
+        }
+
+        protected visitPropertyAccessExpression(node: ts.PropertyAccessExpression) {
+            this.walkChildren(node);
+        }
+
+        protected visitPropertyAssignment(node: ts.PropertyAssignment) {
+            this.walkChildren(node);
+        }
+
+        protected visitPropertyDeclaration(node: ts.PropertyDeclaration) {
+            this.walkChildren(node);
+        }
+
+        protected visitRegularExpressionLiteral(node: ts.Node) {
+            this.walkChildren(node);
+        }
+
+        protected visitReturnStatement(node: ts.ReturnStatement) {
+            this.walkChildren(node);
+        }
+
+        protected visitSetAccessor(node: ts.AccessorDeclaration) {
+            this.walkChildren(node);
+        }
+
+        protected visitSourceFile(node: ts.SourceFile) {
+            this.walkChildren(node);
+        }
+
+        protected visitSwitchStatement(node: ts.SwitchStatement) {
+            this.walkChildren(node);
+        }
+
+        protected visitThrowStatement(node: ts.ThrowStatement) {
+            this.walkChildren(node);
+        }
+
+        protected visitTryBlock(node: ts.Block) {
+            this.walkChildren(node);
+        }
+
+        protected visitTryStatement(node: ts.TryStatement) {
+            this.walkChildren(node);
+        }
+
+        protected visitTypeAssertionExpression(node: ts.TypeAssertion) {
+            this.walkChildren(node);
+        }
+
+        protected visitVariableDeclaration(node: ts.VariableDeclaration) {
+            this.walkChildren(node);
+        }
+
+        protected visitVariableStatement(node: ts.VariableStatement) {
+            this.walkChildren(node);
+        }
+
+        protected visitWhileStatement(node: ts.WhileStatement) {
+            this.walkChildren(node);
+        }
+
+        protected visitNode(node: ts.Node) {
             switch (node.kind) {
                 case ts.SyntaxKind.AnyKeyword:
                     this.visitAnyKeyword(node);
@@ -464,6 +460,10 @@ module Lint {
                     this.walkChildren(node);
                     break;
             }
+        }
+
+        private walkChildren(node: ts.Node) {
+            ts.forEachChild(node, (child) => this.visitNode(child));
         }
     }
 }
