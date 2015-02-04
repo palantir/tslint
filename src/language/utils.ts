@@ -22,7 +22,7 @@ module Lint {
     var path = require("path");
 
     export function getSourceFile(fileName: string, source: string): ts.SourceFile {
-        var normalizedName = path.normalize(fileName);
+        var normalizedName = path.normalize(fileName.replace(/\\/g, "/"));
         var compilerOptions = createCompilerOptions();
 
         var compilerHost = {
