@@ -22,12 +22,12 @@ module Lint {
     var path = require("path");
 
     export function getSourceFile(fileName: string, source: string): ts.SourceFile {
-        var normalizedName = path.normalize(fileName.replace(/\\/g, "/"));
+        var normalizedName = path.normalize(fileName).replace(/\\/g, "/");
         var compilerOptions = createCompilerOptions();
 
         var compilerHost = {
-            getSourceFile: function(filenameToGet: string) {
-                if (filenameToGet === fileName) {
+            getSourceFile: function (filenameToGet: string) {
+                if (filenameToGet === normalizedName) {
                     return ts.createSourceFile(filenameToGet, source, compilerOptions.target, "1", true);
                 }
             },
