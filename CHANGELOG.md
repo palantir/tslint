@@ -1,5 +1,9 @@
 Change Log
 ===
+v2.1.0
+---
+* Fix crash on Windows
+---
 v2.0.1
 ---
 * Upgraded Typescript compiler to 1.4
