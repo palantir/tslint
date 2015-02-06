@@ -80,6 +80,10 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
         super.visitPropertyDeclaration(node);
     }
 
+    public visitTypeLiteral(node: ts.TypeLiteralNode) {
+        // don't call super from here -- we want to skip the property declarations in type literals
+    }
+
     private checkAndSetModifiers(node: ts.Declaration, current: IModifiers): void {
         if (!this.canAppearAfter(this.previous, current)) {
             var message = "Declaration of " + toString(current) +

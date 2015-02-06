@@ -101,6 +101,7 @@ declare module Lint {
         protected visitTryBlock(node: ts.Block): void;
         protected visitTryStatement(node: ts.TryStatement): void;
         protected visitTypeAssertionExpression(node: ts.TypeAssertion): void;
+        protected visitTypeLiteral(node: ts.TypeLiteralNode): void;
         protected visitVariableDeclaration(node: ts.VariableDeclaration): void;
         protected visitVariableStatement(node: ts.VariableStatement): void;
         protected visitWhileStatement(node: ts.WhileStatement): void;

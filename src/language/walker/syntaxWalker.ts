@@ -226,6 +226,10 @@ module Lint {
             this.walkChildren(node);
         }
 
+        protected visitTypeLiteral(node: ts.TypeLiteralNode) {
+            this.walkChildren(node);
+        }
+
         protected visitVariableDeclaration(node: ts.VariableDeclaration) {
             this.walkChildren(node);
         }
@@ -442,6 +446,10 @@ module Lint {
 
                 case ts.SyntaxKind.TypeAssertionExpression:
                     this.visitTypeAssertionExpression(<ts.TypeAssertion> node);
+                    break;
+
+                case ts.SyntaxKind.TypeLiteral:
+                    this.visitTypeLiteral(<ts.TypeLiteralNode> node);
                     break;
 
                 case ts.SyntaxKind.VariableDeclaration:
