@@ -52,6 +52,13 @@ class JsdocWalker extends Lint.RuleWalker {
                 }
                 return;
             }
+
+            // Correct position for comments on the start of the file
+            if (currentPosition == 1) {
+                currentPosition = 0;
+            }
+
+
             // the -1 is necessary because character is 1-indexed, but indexOf is 0-indexed
             var indexToMatch = firstLine.indexOf("**") + sourceFile.getLineAndCharacterFromPosition(currentPosition).character - 1;
             // all lines but the first and last
