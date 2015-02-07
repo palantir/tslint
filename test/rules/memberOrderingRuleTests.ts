@@ -41,9 +41,12 @@ describe("<member-ordering>", () => {
         ]);
 
         Lint.Test.assertFailuresEqual(actualFailures, [
-            Lint.Test.createFailure(fileName, [3, 5], [3, 15],
+            Lint.Test.createFailure(fileName, [12, 5], [12, 15],
                     "Declaration of public instance member variable not allowed " +
-                    "to appear after declaration of public instance member function")
+                    "to appear after declaration of public instance member function"),
+            Lint.Test.createFailure(fileName, [17, 5], [17, 15],
+                    "Declaration of public instance member variable not allowed " +
+                    "to appear after declaration of public instance member function"),
         ]);
     });
 
