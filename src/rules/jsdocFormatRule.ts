@@ -53,8 +53,8 @@ class JsdocWalker extends Lint.RuleWalker {
                 return;
             }
 
-            // Correct position for comments on the start of the file
-            if (currentPosition == 1) {
+            // Fix position for comments on the start of the file
+            if (currentPosition === 1) {
                 currentPosition = 0;
             }
 
@@ -82,7 +82,7 @@ class JsdocWalker extends Lint.RuleWalker {
             // followed by the end of the string
             var endBlockCommentMatch = lastLine.match(/^\s*\*\/$/);
             if (endBlockCommentMatch == null) {
-                this.addFailureAt(jsdocPosition, lastLine.length,  Rule.FORMAT_FAILURE_STRING);
+                this.addFailureAt(jsdocPosition, lastLine.length, Rule.FORMAT_FAILURE_STRING);
             }
             var lastAsteriskIndex = lastLine.indexOf("*");
             if (lastAsteriskIndex !== indexToMatch) {
