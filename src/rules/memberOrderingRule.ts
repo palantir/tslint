@@ -70,6 +70,15 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
         super.visitClassDeclaration(node);
     }
 
+    public visitInterfaceDeclaration(node: ts.InterfaceDeclaration): void {
+        this.previous = {
+            isMethod: false,
+            isPrivate: false,
+            isInstance: false
+        };
+        super.visitInterfaceDeclaration(node);
+    }
+
     public visitMethodDeclaration(node: ts.MethodDeclaration): void {
         this.checkAndSetModifiers(node, getModifiers(true, node.modifiers));
         super.visitMethodDeclaration(node);
