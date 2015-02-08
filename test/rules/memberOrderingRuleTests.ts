@@ -39,6 +39,7 @@ describe("<member-ordering>", () => {
             true,
             "variables-before-functions"
         ]);
+
         Lint.Test.assertFailuresEqual(actualFailures, [
             Lint.Test.createFailure(fileName, [3, 5], [3, 15],
                     "Declaration of public instance member variable not allowed " +
