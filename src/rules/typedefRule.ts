@@ -96,7 +96,9 @@ class TypedefWalker extends Lint.RuleWalker {
     }
 
     public visitVariableDeclaration(node: ts.VariableDeclaration) {
-        this.checkTypeAnnotation("variable-declaration", node.name.getEnd(), node.type, node.name);
+        if (node.parent.kind !== ts.SyntaxKind.ForInStatement) {
+            this.checkTypeAnnotation("variable-declaration", node.name.getEnd(), node.type, node.name);
+        }
         super.visitVariableDeclaration(node);
     }
 
