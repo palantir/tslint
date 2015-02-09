@@ -52,6 +52,13 @@ class JsdocWalker extends Lint.RuleWalker {
                 }
                 return;
             }
+
+            // Fix position for comments on the start of the file
+            if (currentPosition === 1) {
+                currentPosition = 0;
+            }
+
+
             // the -1 is necessary because character is 1-indexed, but indexOf is 0-indexed
             var indexToMatch = firstLine.indexOf("**") + sourceFile.getLineAndCharacterFromPosition(currentPosition).character - 1;
             // all lines but the first and last
@@ -75,7 +82,7 @@ class JsdocWalker extends Lint.RuleWalker {
             // followed by the end of the string
             var endBlockCommentMatch = lastLine.match(/^\s*\*\/$/);
             if (endBlockCommentMatch == null) {
-                this.addFailureAt(jsdocPosition, lastLine.length,  Rule.FORMAT_FAILURE_STRING);
+                this.addFailureAt(jsdocPosition, lastLine.length, Rule.FORMAT_FAILURE_STRING);
             }
             var lastAsteriskIndex = lastLine.indexOf("*");
             if (lastAsteriskIndex !== indexToMatch) {
