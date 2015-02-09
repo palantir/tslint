@@ -35,16 +35,18 @@ class NoDuplicateVariableWalker extends Lint.ScopeAwareRuleWalker<ScopeInfo> {
         var declarationIsLet = (Math.floor(node.flags / ts.NodeFlags.Let) % 2) === 1;
 
         var failureString = Rule.FAILURE_STRING + variableName + "'";
-        if (currentScope.varVariableNames.indexOf(variableName) >= 0) {
+        if (currentScope.varNames.indexOf(variableName) >= 0) {
+            // if there was a previous var declaration with the same name, this declaration is invalid
             this.addFailure(this.createFailure(propertyName.getStart(), propertyName.getWidth(), failureString));
         } else if (!declarationIsLet) {
-            if (currentScope.letVariableNames.indexOf(variableName) >= 0) {
+            if (currentScope.letNames.indexOf(variableName) >= 0) {
+                // if we're a var, and someone previously declared a let with the same name, this declaration is invalid
                 this.addFailure(this.createFailure(propertyName.getStart(), propertyName.getWidth(), failureString));
             } else {
-                currentScope.varVariableNames.push(variableName);
+                currentScope.varNames.push(variableName);
             }
         } else {
-            currentScope.letVariableNames.push(variableName);
+            currentScope.letNames.push(variableName);
         }
 
         super.visitVariableDeclaration(node);
@@ -52,6 +54,6 @@ class NoDuplicateVariableWalker extends Lint.ScopeAwareRuleWalker<ScopeInfo> {
 }
 
 class ScopeInfo {
-    public varVariableNames: string[] = [];
-    public letVariableNames: string[] = [];
+    public varNames: string[] = [];
+    public letNames: string[] = [];
 }
