@@ -53,3 +53,7 @@ class ConstructorUnTyped {
 function anotherNoTypesFn(a, b) {
     return b;
 }
+
+function forInFn(): void {
+    for (var p in []) {}
+}
