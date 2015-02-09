@@ -62,12 +62,13 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
     }
 
     public visitClassDeclaration(node: ts.ClassDeclaration): void {
-        this.previous = {
-            isMethod: false,
-            isPrivate: false,
-            isInstance: false
-        };
+        this.resetPreviousModifiers();
         super.visitClassDeclaration(node);
+    }
+
+    public visitInterfaceDeclaration(node: ts.InterfaceDeclaration): void {
+        this.resetPreviousModifiers();
+        super.visitInterfaceDeclaration(node);
     }
 
     public visitMethodDeclaration(node: ts.MethodDeclaration): void {
@@ -82,6 +83,14 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
 
     public visitTypeLiteral(node: ts.TypeLiteralNode) {
         // don't call super from here -- we want to skip the property declarations in type literals
+    }
+
+    private resetPreviousModifiers(): void {
+        this.previous = {
+            isMethod: false,
+            isPrivate: false,
+            isInstance: false
+        };
     }
 
     private checkAndSetModifiers(node: ts.Declaration, current: IModifiers): void {
