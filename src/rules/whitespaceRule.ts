@@ -57,7 +57,7 @@ class WhitespaceWalker extends Lint.RuleWalker {
 
             if (this.tokensToSkipStartEndMap[startPos] != null) {
                 // tokens to skip are places where the scanner gets confused about what the token is, without the proper context
-                // (specifically, regex and identifiers). So skip those tokens.
+                // (specifically, regex, identifiers, and templates). So skip those tokens.
                 scanner.setTextPos(this.tokensToSkipStartEndMap[startPos]);
                 return;
             }
@@ -109,6 +109,14 @@ class WhitespaceWalker extends Lint.RuleWalker {
             this.tokensToSkipStartEndMap[node.getStart()] = node.getEnd();
         }
         super.visitIdentifier(node);
+    }
+
+    public visitTemplateExpression(node: ts.TemplateExpression) {
+        if (node.getStart() < node.getEnd()) {
+            // only add to the map nodes whose end comes after their start, to prevent infinite loops
+            this.tokensToSkipStartEndMap[node.getStart()] = node.getEnd();
+        }
+        super.visitTemplateExpression(node);
     }
 
     // check for spaces between the operator symbol (except in the case of comma statements)

@@ -97,6 +97,7 @@ declare module Lint {
         protected visitSetAccessor(node: ts.AccessorDeclaration): void;
         protected visitSourceFile(node: ts.SourceFile): void;
         protected visitSwitchStatement(node: ts.SwitchStatement): void;
+        protected visitTemplateExpression(node: ts.TemplateExpression): void;
         protected visitThrowStatement(node: ts.ThrowStatement): void;
         protected visitTryBlock(node: ts.Block): void;
         protected visitTryStatement(node: ts.TryStatement): void;

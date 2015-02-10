@@ -27,8 +27,23 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class CommentWalker extends Lint.RuleWalker {
+    private tokensToSkipStartEndMap: {[start: number]: number};
+
+    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
+        super(sourceFile, options);
+        this.tokensToSkipStartEndMap = {};
+    }
+
     public visitSourceFile(node: ts.SourceFile): void {
+        super.visitSourceFile(node);
         Lint.scanAllTokens(ts.createScanner(ts.ScriptTarget.ES5, false, node.text), (scanner: ts.Scanner) => {
+            var startPos = scanner.getStartPos();
+            if (this.tokensToSkipStartEndMap[startPos] != null) {
+                // tokens to skip are places where the scanner gets confused about what the token is, without the proper context
+                // (specifically, regex, identifiers, and templates). So skip those tokens.
+                scanner.setTextPos(this.tokensToSkipStartEndMap[startPos]);
+                return;
+            }
             if (scanner.getToken() === ts.SyntaxKind.SingleLineCommentTrivia) {
                 var commentText = scanner.getTokenText();
                 var startPosition = scanner.getTokenPos() + 2;
@@ -47,7 +62,30 @@ class CommentWalker extends Lint.RuleWalker {
                 }
             }
         });
-        // no need to call super to visit the rest of the nodes, so don't call super here
+    }
+
+    public visitRegularExpressionLiteral(node: ts.Node) {
+        if (node.getStart() < node.getEnd()) {
+            // only add to the map nodes whose end comes after their start, to prevent infinite loops
+            this.tokensToSkipStartEndMap[node.getStart()] = node.getEnd();
+        }
+        super.visitRegularExpressionLiteral(node);
+    }
+
+    public visitIdentifier(node: ts.Identifier) {
+        if (node.getStart() < node.getEnd()) {
+            // only add to the map nodes whose end comes after their start, to prevent infinite loops
+            this.tokensToSkipStartEndMap[node.getStart()] = node.getEnd();
+        }
+        super.visitIdentifier(node);
+    }
+
+    public visitTemplateExpression(node: ts.TemplateExpression) {
+        if (node.getStart() < node.getEnd()) {
+            // only add to the map nodes whose end comes after their start, to prevent infinite loops
+            this.tokensToSkipStartEndMap[node.getStart()] = node.getEnd();
+        }
+        super.visitTemplateExpression(node);
     }
 
     private startsWithSpace(commentText: string): boolean {
