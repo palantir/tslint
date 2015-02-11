@@ -99,6 +99,19 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     public visitParameterDeclaration(node: ts.ParameterDeclaration): void {
         var variableName = node.name.text;
 
+        // Skip parameters in type literals. We don't want to generate
+        // warnings about unused variables in those.
+        if (node.parent && node.parent.symbol) {
+
+            // Similar code which checks presence of a bit is also present in
+            // noDuplicateVariableRule.ts. Does TypeScript or tslint provide
+            // any helpers to test presence of bits?
+            var symbolFlags = node.parent.symbol.flags;
+            if ((Math.floor(symbolFlags / ts.SymbolFlags.TypeLiteral) % 2) === 1) {
+                return;
+            }
+        }
+
         if (!this.hasModifier(node.modifiers, ts.SyntaxKind.PublicKeyword)
             && !this.skipParameterDeclaration && this.hasOption(OPTION_CHECK_PARAMETERS)) {
             this.validateReferencesForVariable(variableName, node.name.getStart());

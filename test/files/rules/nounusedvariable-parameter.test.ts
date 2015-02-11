@@ -30,3 +30,7 @@ export interface ITestMapInterface {
 export function func6(...args: number[]) {
     return args;
 }
+
+export function func7(f: (x: number) => number) {
+    return f;
+}
