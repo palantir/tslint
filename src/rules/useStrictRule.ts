@@ -63,7 +63,7 @@ class UseStrictWalker extends Lint.ScopeAwareRuleWalker<{}> {
         super.visitFunctionDeclaration(node);
     }
 
-    private handleBlock(node: ts.Declaration, block: ts.Block) {
+    private handleBlock(node: ts.Declaration, block: ts.Block | ts.ModuleBlock) {
         var isFailure = true;
 
         if (block.statements != null && block.statements.length > 0) {
