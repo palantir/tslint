@@ -27,12 +27,6 @@ class NoDuplicateVariableWalker extends Lint.ScopeAwareRuleWalker<ScopeInfo> {
         return new ScopeInfo();
     }
 
-    fail(ident: ts.Identifier): void {
-        var failureString = Rule.FAILURE_STRING + ident.text + "'";
-        this.addFailure(this.createFailure(ident.getStart(),
-            ident.getWidth(), failureString));
-    }
-
     public visitParameterDeclaration(node: ts.ParameterDeclaration): void {
         // Treat parameters as var.
         var propertyName = node.name;
@@ -40,7 +34,7 @@ class NoDuplicateVariableWalker extends Lint.ScopeAwareRuleWalker<ScopeInfo> {
         var currentScope = this.getCurrentScope();
 
         if (currentScope.varNames.indexOf(variableName) >= 0) {
-            this.fail(node.name);
+            this.addFailureOnIdentifier(node.name);
         } else {
             currentScope.varNames.push(variableName);
         }
@@ -57,11 +51,11 @@ class NoDuplicateVariableWalker extends Lint.ScopeAwareRuleWalker<ScopeInfo> {
 
         if (currentScope.varNames.indexOf(variableName) >= 0) {
             // if there was a previous var declaration with the same name, this declaration is invalid
-            this.fail(propertyName);
+            this.addFailureOnIdentifier(propertyName);
         } else if (!declarationIsLet) {
             if (currentScope.letNames.indexOf(variableName) >= 0) {
                 // if we're a var, and someone previously declared a let with the same name, this declaration is invalid
-                this.fail(propertyName);
+                this.addFailureOnIdentifier(propertyName);
             } else {
                 currentScope.varNames.push(variableName);
             }
@@ -71,6 +65,13 @@ class NoDuplicateVariableWalker extends Lint.ScopeAwareRuleWalker<ScopeInfo> {
 
         super.visitVariableDeclaration(node);
     }
+
+    private addFailureOnIdentifier(ident: ts.Identifier): void {
+        var failureString = Rule.FAILURE_STRING + ident.text + "'";
+        this.addFailure(this.createFailure(ident.getStart(),
+            ident.getWidth(), failureString));
+    }
+
 }
 
 class ScopeInfo {
