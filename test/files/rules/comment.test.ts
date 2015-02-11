@@ -11,3 +11,5 @@ class Clazz { // this comment is correct
 
 //#region test
 //#endregion
+
+`${location.protocol}//${location.hostname}`

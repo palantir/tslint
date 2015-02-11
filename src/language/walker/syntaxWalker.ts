@@ -210,6 +210,10 @@ module Lint {
             this.walkChildren(node);
         }
 
+        protected visitTemplateExpression(node: ts.TemplateExpression) {
+            this.walkChildren(node);
+        }
+
         protected visitThrowStatement(node: ts.ThrowStatement) {
             this.walkChildren(node);
         }
@@ -430,6 +434,10 @@ module Lint {
 
                 case ts.SyntaxKind.SwitchStatement:
                     this.visitSwitchStatement(<ts.SwitchStatement> node);
+                    break;
+
+                case ts.SyntaxKind.TemplateExpression:
+                    this.visitTemplateExpression(<ts.TemplateExpression> node);
                     break;
 
                 case ts.SyntaxKind.ThrowStatement:
