@@ -96,27 +96,25 @@ class WhitespaceWalker extends Lint.RuleWalker {
     }
 
     public visitRegularExpressionLiteral(node: ts.Node) {
-        if (node.getStart() < node.getEnd()) {
-            // only add to the map nodes whose end comes after their start, to prevent infinite loops
-            this.tokensToSkipStartEndMap[node.getStart()] = node.getEnd();
-        }
+        this.addTokenToSkipFromNode(node);
         super.visitRegularExpressionLiteral(node);
     }
 
     public visitIdentifier(node: ts.Identifier) {
-        if (node.getStart() < node.getEnd()) {
-            // only add to the map nodes whose end comes after their start, to prevent infinite loops
-            this.tokensToSkipStartEndMap[node.getStart()] = node.getEnd();
-        }
+        this.addTokenToSkipFromNode(node);
         super.visitIdentifier(node);
     }
 
     public visitTemplateExpression(node: ts.TemplateExpression) {
+        this.addTokenToSkipFromNode(node);
+        super.visitTemplateExpression(node);
+    }
+
+    public addTokenToSkipFromNode(node: ts.Node) {
         if (node.getStart() < node.getEnd()) {
             // only add to the map nodes whose end comes after their start, to prevent infinite loops
             this.tokensToSkipStartEndMap[node.getStart()] = node.getEnd();
         }
-        super.visitTemplateExpression(node);
     }
 
     // check for spaces between the operator symbol (except in the case of comma statements)

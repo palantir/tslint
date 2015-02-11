@@ -44,6 +44,7 @@ class CommentWalker extends Lint.RuleWalker {
                 scanner.setTextPos(this.tokensToSkipStartEndMap[startPos]);
                 return;
             }
+
             if (scanner.getToken() === ts.SyntaxKind.SingleLineCommentTrivia) {
                 var commentText = scanner.getTokenText();
                 var startPosition = scanner.getTokenPos() + 2;
@@ -65,27 +66,25 @@ class CommentWalker extends Lint.RuleWalker {
     }
 
     public visitRegularExpressionLiteral(node: ts.Node) {
-        if (node.getStart() < node.getEnd()) {
-            // only add to the map nodes whose end comes after their start, to prevent infinite loops
-            this.tokensToSkipStartEndMap[node.getStart()] = node.getEnd();
-        }
+        this.addTokenToSkipFromNode(node);
         super.visitRegularExpressionLiteral(node);
     }
 
     public visitIdentifier(node: ts.Identifier) {
-        if (node.getStart() < node.getEnd()) {
-            // only add to the map nodes whose end comes after their start, to prevent infinite loops
-            this.tokensToSkipStartEndMap[node.getStart()] = node.getEnd();
-        }
+        this.addTokenToSkipFromNode(node);
         super.visitIdentifier(node);
     }
 
     public visitTemplateExpression(node: ts.TemplateExpression) {
+        this.addTokenToSkipFromNode(node);
+        super.visitTemplateExpression(node);
+    }
+
+     public addTokenToSkipFromNode(node: ts.Node) {
         if (node.getStart() < node.getEnd()) {
             // only add to the map nodes whose end comes after their start, to prevent infinite loops
             this.tokensToSkipStartEndMap[node.getStart()] = node.getEnd();
         }
-        super.visitTemplateExpression(node);
     }
 
     private startsWithSpace(commentText: string): boolean {
