@@ -1,5 +1,11 @@
 Change Log
 ===
+v2.1.1
+---
+* [bugs] #292 #293 #295 #301 #302
+* Some internal refactoring
+* Added Windows CI testing (appveyor)
+
 v2.1.0
 ---
 * Fix crash on Windows
