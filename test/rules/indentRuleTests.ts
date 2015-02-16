@@ -32,6 +32,10 @@ describe("<indent>", () => {
             actualFailures = Lint.Test.applyRuleOnFile(fileName, IndentRule, [true, "tabs"]);
         });
 
+        it("doesn't fail good code", () => {
+            assert.lengthOf(actualFailures, 21);
+        });
+
         it("enforces variable indentation", () => {
             expectFailure(Lint.Test.createFailure(fileName, [58, 1], [58, 5], failureStringTabs));
             expectFailure(Lint.Test.createFailure(fileName, [62, 1], [62, 9], failureStringTabs));
@@ -81,6 +85,10 @@ describe("<indent>", () => {
 
         before(() => {
             actualFailures = Lint.Test.applyRuleOnFile(fileName, IndentRule, [true, "spaces"]);
+        });
+
+        it("doesn't fail good code", () => {
+            assert.lengthOf(actualFailures, 21);
         });
 
         it("enforces variable indentation", () => {
