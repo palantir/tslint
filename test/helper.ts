@@ -80,4 +80,21 @@ module Lint.Test {
             assert(false, "expected " + stringifiedNeedle + " within " + stringifiedHaystack);
         }
     }
+
+    // assert that a failure array does not contain any error on a set of lines
+    export function assertNoFailuresWithin(fileName: string, failures: Lint.RuleFailure[], startLine: number, endLine: number) {
+        var sourceFile = getSourceFile(fileName);
+        var startPosition = sourceFile.getPositionFromLineAndCharacter(startLine, 1);
+        var endPosition = sourceFile.getPositionFromLineAndCharacter(endLine, 1) - 1;
+
+        var failuresWithin = failures.filter(item =>
+                item.getStartPosition().getPosition() <= endPosition
+                && item.getEndPosition().getPosition() >= startPosition);
+
+        if (failuresWithin.length > 0) {
+            var stringifiedFailuresWithin = JSON.stringify(failuresWithin.map(failure => failure.toJson()), null, 2);
+
+            assert(false, "expected no failures within lines " + startLine + ":" + endLine + ", found: " + stringifiedFailuresWithin);
+        }
+    }
 }
