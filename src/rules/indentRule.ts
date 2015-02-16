@@ -49,8 +49,14 @@ class IndentWalker extends Lint.RuleWalker {
             return;
         }
 
+        let endOfComment = -1;
         const scanner = ts.createScanner(ts.ScriptTarget.ES5, false, node.text);
         for (let lineStart of node.getLineStarts()) {
+            if (lineStart < endOfComment) {
+                // skip checking lines inside multi-line comments
+                continue;
+            }
+
             scanner.setTextPos(lineStart);
 
             let currentScannedType = scanner.scan();
@@ -66,6 +72,11 @@ class IndentWalker extends Lint.RuleWalker {
 
                 fullLeadingWhitespace += scanner.getTokenText();
                 currentScannedType = scanner.scan();
+            }
+
+            const commentRanges = ts.getTrailingCommentRanges(node.text, lineStart);
+            if (commentRanges) {
+                endOfComment = commentRanges[commentRanges.length - 1].end;
             }
 
             if (currentScannedType === ts.SyntaxKind.SingleLineCommentTrivia
