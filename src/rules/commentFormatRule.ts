@@ -16,9 +16,11 @@
 
 var OPTION_SPACE = "check-space";
 var OPTION_LOWERCASE = "check-lowercase";
+var OPTION_UPPERCASE = "check-uppercase";
 
 export class Rule extends Lint.Rules.AbstractRule {
     static LOWERCASE_FAILURE = "comment must start with lowercase letter";
+    static UPPERCASE_FAILURE = "comment must start with uppercase letter";
     static LEADING_SPACE_FAILURE = "comment must start with a space";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -61,6 +63,12 @@ class CommentWalker extends Lint.RuleWalker {
                         this.addFailure(lowercaseFailure);
                     }
                 }
+                if (this.hasOption(OPTION_UPPERCASE)) {
+                    if (!this.startsWithUppercase(commentText)) {
+                        var uppercaseFailure = this.createFailure(startPosition, width, Rule.UPPERCASE_FAILURE);
+                        this.addFailure(uppercaseFailure);
+                    }
+                }
             }
         });
     }
@@ -80,7 +88,7 @@ class CommentWalker extends Lint.RuleWalker {
         super.visitTemplateExpression(node);
     }
 
-     public addTokenToSkipFromNode(node: ts.Node) {
+    public addTokenToSkipFromNode(node: ts.Node) {
         if (node.getStart() < node.getEnd()) {
             // only add to the map nodes whose end comes after their start, to prevent infinite loops
             this.tokensToSkipStartEndMap[node.getStart()] = node.getEnd();
@@ -103,6 +111,14 @@ class CommentWalker extends Lint.RuleWalker {
     }
 
     private startsWithLowercase(commentText: string): boolean {
+        return this.startsWith(commentText, c => c.toLowerCase());
+    }
+
+    private startsWithUppercase(commentText: string): boolean {
+        return this.startsWith(commentText, c => c.toUpperCase());
+    }
+
+    private startsWith(commentText: string, changeCase: (str: string) => string): boolean {
         if (commentText.length <= 2) {
             return true; // comment is "//"? Technically not a violation.
         }
@@ -112,11 +128,10 @@ class CommentWalker extends Lint.RuleWalker {
         if (firstCharacterMatch != null) {
             // the first group matched, i.e. the thing in the parens, is the first non-space character, if it's alphanumeric
             var firstCharacter = firstCharacterMatch[1];
-            return firstCharacter === firstCharacter.toLowerCase();
+            return firstCharacter === changeCase(firstCharacter);
         } else {
             // first character isn't alphanumeric/doesn't exist? Technically not a violation
             return true;
         }
     }
-
 }
