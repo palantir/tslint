@@ -57,3 +57,8 @@ function anotherNoTypesFn(a, b) {
 function forInFn(): void {
     for (var p in []) {}
 }
+
+class NoReturnTypeForSetAccessor {
+    set name(value: string) {
+    }
+}
