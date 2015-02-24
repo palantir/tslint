@@ -28,7 +28,7 @@ describe("<one-line>", () => {
     before(() => {
         var options = [true, "check-open-brace", "check-catch", "check-else", "check-whitespace"];
         actualFailures = Lint.Test.applyRuleOnFile(fileName, OneLineRule, options);
-        assert.lengthOf(actualFailures, 13);
+        assert.lengthOf(actualFailures, 15);
     });
 
     it("enforces rules only when enabled", () => {
@@ -100,4 +100,15 @@ describe("<one-line>", () => {
         var expectedFailure = Lint.Test.createFailure(fileName, [59, 14], [59, 15], whitespaceFailure);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
+
+    it("enforces vertical alignment of if and brace", () => {
+        var expectedFailure = Lint.Test.createFailure(fileName, [71, 2], [71, 3], braceFailure);
+        Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
+    });
+
+    it("enforces vertical alignment of if and brace", () => {
+        var expectedFailure = Lint.Test.createFailure(fileName, [77, 1], [77, 2], braceFailure);
+        Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
+    });
+
 });

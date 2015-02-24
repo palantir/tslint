@@ -38,7 +38,11 @@ class OneLineWalker extends Lint.RuleWalker {
         if (thenStatement.kind === ts.SyntaxKind.Block) {
             var expressionCloseParen = node.getChildAt(3);
             var thenOpeningBrace = thenStatement.getChildAt(0);
-            this.handleOpeningBrace(expressionCloseParen, thenOpeningBrace);
+            if (!this.multilineAndAlignedBrace(node,
+                                               expressionCloseParen,
+                                               thenOpeningBrace)) {
+                this.handleOpeningBrace(expressionCloseParen, thenOpeningBrace);
+            }
         }
 
         var elseStatement = node.elseStatement;
@@ -218,7 +222,11 @@ class OneLineWalker extends Lint.RuleWalker {
         var statement = node.statement;
         if (statement.kind === ts.SyntaxKind.Block) {
             var openBraceToken = statement.getChildAt(0);
-            this.handleOpeningBrace(closeParenToken, openBraceToken);
+            if (!this.multilineAndAlignedBrace(node,
+                                               closeParenToken,
+                                               openBraceToken)) {
+                this.handleOpeningBrace(closeParenToken, openBraceToken);
+            }
         }
     }
 
@@ -226,12 +234,9 @@ class OneLineWalker extends Lint.RuleWalker {
         if (previousNode == null || openBraceToken == null) {
             return;
         }
-        var sourceFile = previousNode.getSourceFile();
-        var previousNodeLine = sourceFile.getLineAndCharacterFromPosition(previousNode.getEnd()).line;
-        var openBraceLine = sourceFile.getLineAndCharacterFromPosition(openBraceToken.getStart()).line;
         var failure: Lint.RuleFailure;
 
-        if (this.hasOption(OPTION_BRACE) && previousNodeLine !== openBraceLine) {
+        if (this.hasOption(OPTION_BRACE) && !this.sameLine(previousNode, openBraceToken)) {
             failure = this.createFailure(openBraceToken.getStart(), openBraceToken.getWidth(), Rule.BRACE_FAILURE_STRING);
         } else if (this.hasOption(OPTION_WHITESPACE) && previousNode.getEnd() === openBraceToken.getStart()) {
             failure = this.createFailure(openBraceToken.getStart(), openBraceToken.getWidth(), Rule.WHITESPACE_FAILURE_STRING);
@@ -243,5 +248,34 @@ class OneLineWalker extends Lint.RuleWalker {
 
     private static getFirstChildOfKind(node: ts.Node, kind: ts.SyntaxKind) {
         return node.getChildren().filter((child) => child.kind === kind)[0];
+    }
+
+    private sameLine(node1: ts.Node, node2: ts.Node): boolean {
+        var sourceFile = node1.getSourceFile();
+        var line1 = sourceFile.getLineAndCharacterFromPosition(node1.getEnd()).line;
+        var line2 = sourceFile.getLineAndCharacterFromPosition(node2.getStart()).line;
+        return line1 === line2;
+    }
+
+    private sameColumn(node1: ts.Node, node2: ts.Node): boolean {
+        var sourceFile = node1.getSourceFile();
+        var col1 = sourceFile.getLineAndCharacterFromPosition(node1.getStart()).character;
+        var col2 = sourceFile.getLineAndCharacterFromPosition(node2.getStart()).character;
+        return col1 === col2;
+    }
+
+    // Return true if the expression seems to span over more than 1 line and
+    // the opening curly brace is vertically aligned with the statement start.
+    // e.g:
+    // if (aa &&
+    //     bb)
+    // {
+    //     ...
+    // }
+    private multilineAndAlignedBrace(parentStmt: ts.Node,
+                                     closeParen: ts.Node,
+                                     openBrace: ts.Node): boolean {
+        return !this.sameLine(parentStmt.getChildAt(0), closeParen) &&
+               this.sameColumn(parentStmt, openBrace);
     }
 }
