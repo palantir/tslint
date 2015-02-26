@@ -106,6 +106,10 @@ Supported Rules
 
 A sample configuration file with all options is available [here](https://github.com/palantir/tslint/blob/master/docs/sample.tslint.json).
 
+* `align` enforces vertical alignment. Rule options:
+  * `"parameters"` checks alignment of function parameters.
+  * `"arguments"` checks alignment of function call arguments.
+  * `"statements"` checks alignment of statements.
 * `ban` bans the use of specific functions. Options are ["object", "function"] pairs that ban the use of object.function()
 * `class-name` enforces PascalCased class and interface names.
 * `comment-format` enforces rules for single-line comments. Rule options:
