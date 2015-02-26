@@ -21,8 +21,8 @@ describe("<align, enabled>", () => {
     it("ensures that parameters in function signatures are aligned", () => {
         var fileName = "rules/align.test.ts";
         var AlignRule = Lint.Test.getRule("align");
-        var options = [true, "parameters"];
-        var failureString = "parameters" + AlignRule.FAILURE_STRING_SUFFIX;
+        var options = [true, AlignRule.PARAMETERS_OPTION];
+        var failureString = AlignRule.PARAMETERS_OPTION + AlignRule.FAILURE_STRING_SUFFIX;
         var failure = Lint.Test.createFailuresOnFile(fileName, failureString);
         var expectedFailures = [
             failure([2, 1], [2, 10]),
@@ -39,8 +39,8 @@ describe("<align, enabled>", () => {
     it("ensures that arguments in function calls are aligned", () => {
         var fileName = "rules/align.test.ts";
         var AlignRule = Lint.Test.getRule("align");
-        var options = [true, "arguments"];
-        var failureString = "arguments" + AlignRule.FAILURE_STRING_SUFFIX;
+        var options = [true, AlignRule.ARGUMENTS_OPTION];
+        var failureString = AlignRule.ARGUMENTS_OPTION + AlignRule.FAILURE_STRING_SUFFIX;
         var failure = Lint.Test.createFailuresOnFile(fileName, failureString);
         var expectedFailures = [
             failure([65, 5], [65, 11]),
@@ -53,8 +53,8 @@ describe("<align, enabled>", () => {
     it("ensures that statements at the same nesting level are aligned", () => {
         var fileName = "rules/align.test.ts";
         var AlignRule = Lint.Test.getRule("align");
-        var options = [true, "statements"];
-        var failureString = "statements" + AlignRule.FAILURE_STRING_SUFFIX;
+        var options = [true, AlignRule.STATEMENTS_OPTION];
+        var failureString = AlignRule.STATEMENTS_OPTION + AlignRule.FAILURE_STRING_SUFFIX;
         var failure = Lint.Test.createFailuresOnFile(fileName, failureString);
         var expectedFailures = [
             failure([109, 6], [109, 16]),

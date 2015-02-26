@@ -15,6 +15,10 @@
 */
 
 export class Rule extends Lint.Rules.AbstractRule {
+    public static PARAMETERS_OPTION = "parameters";
+    public static ARGUMENTS_OPTION = "arguments";
+    public static STATEMENTS_OPTION = "statements";
+
     public static FAILURE_STRING_SUFFIX = " are not aligned";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -30,35 +34,23 @@ type SourcePosition = {
 
 class AlignWalker extends Lint.RuleWalker {
     public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
-        this.checkParameters(node.parameters);
+        this.checkAlignment(Rule.PARAMETERS_OPTION, node.parameters);
         super.visitFunctionDeclaration(node);
     }
 
     public visitFunctionExpression(node: ts.FunctionExpression) {
-        this.checkParameters(node.parameters);
+        this.checkAlignment(Rule.PARAMETERS_OPTION, node.parameters);
         super.visitFunctionExpression(node);
     }
 
     public visitCallExpression(node: ts.CallExpression) {
-        this.checkArguments(node.arguments);
+        this.checkAlignment(Rule.ARGUMENTS_OPTION, node.arguments);
         super.visitCallExpression(node);
     }
 
     public visitBlock(node: ts.Block) {
-        this.checkStatements(node.statements);
+        this.checkAlignment(Rule.STATEMENTS_OPTION, node.statements);
         super.visitBlock(node);
-    }
-
-    private checkParameters(parameters: ts.Node[]) {
-        this.checkAlignment("parameters", parameters);
-    }
-
-    private checkArguments(arguments: ts.Node[]) {
-        this.checkAlignment("arguments", arguments);
-    }
-
-    private checkStatements(statements: ts.Node[]) {
-        this.checkAlignment("statements", statements);
     }
 
     private checkAlignment(kind: string, nodes: ts.Node[]) {
