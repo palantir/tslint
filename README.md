@@ -1,4 +1,9 @@
-TSLint [![NPM version](https://badge.fury.io/js/tslint.svg)](http://badge.fury.io/js/tslint) [![Linux Build Status](https://travis-ci.org/palantir/tslint.svg?branch=master)](https://travis-ci.org/palantir/tslint) [![Windows Build Status](https://ci.appveyor.com/api/projects/status/github/palantir/tslint?svg=true&branch=master)](https://ci.appveyor.com/project/ashwinr/tslint)
+[![NPM version](https://badge.fury.io/js/tslint.svg)](http://badge.fury.io/js/tslint)
+[![Downloads](http://img.shields.io/npm/dm/tslint.svg)](https://npmjs.org/package/tslint)
+[![Linux Build Status](https://travis-ci.org/palantir/tslint.svg?branch=master)](https://travis-ci.org/palantir/tslint)
+[![Windows Build Status](https://ci.appveyor.com/api/projects/status/github/palantir/tslint?svg=true&branch=master)](https://ci.appveyor.com/project/ashwinr/tslint)
+
+TSLint
 ======
 
 A linter for the TypeScript language.
@@ -21,7 +26,7 @@ Please first ensure that the TypeScript source files compile correctly.
 
 ##### CLI
 
-  usage: tslint
+  usage: `tslint`
 
   Options:
 
