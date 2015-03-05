@@ -72,6 +72,16 @@ void invalidArgumentsAlignment2()
         0);
 }
 
+class foo {
+    function constructor(a: number,
+                         str: string)
+    {
+    }
+}
+
+var invalidConstructorArgsAlignment = new foo(10,
+             "abcd");
+
 void validArgumentsAlignment1()
 {
     f(101, 'xyz', 'abc');
