@@ -30,7 +30,10 @@ describe("<no-duplicate-variable>", () => {
             Lint.Test.createFailure(fileName, [82, 13], [82, 14], NoDuplicateVariableRule.FAILURE_STRING + "a'"),
             Lint.Test.createFailure(fileName, [85, 13], [85, 14], NoDuplicateVariableRule.FAILURE_STRING + "d'"),
             Lint.Test.createFailure(fileName, [91, 13], [91, 14], NoDuplicateVariableRule.FAILURE_STRING + "e'"),
-            Lint.Test.createFailure(fileName, [94, 9], [94, 10], NoDuplicateVariableRule.FAILURE_STRING + "f'")
+            Lint.Test.createFailure(fileName, [94, 9], [94, 10], NoDuplicateVariableRule.FAILURE_STRING + "f'"),
+            Lint.Test.createFailure(fileName, [98, 38], [98, 41], NoDuplicateVariableRule.FAILURE_STRING + "arg'"),
+            Lint.Test.createFailure(fileName, [103, 9], [103, 10], NoDuplicateVariableRule.FAILURE_STRING + "x'"),
+            Lint.Test.createFailure(fileName, [104, 9], [104, 10], NoDuplicateVariableRule.FAILURE_STRING + "y'")
         ];
 
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, NoDuplicateVariableRule);

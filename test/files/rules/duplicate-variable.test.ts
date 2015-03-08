@@ -93,3 +93,13 @@ function letTesting() {
     }
     var f = 4;
 }
+
+// failure: two arguments have the same name.
+function testArguments1(arg: number, arg: number): void {
+}
+
+// failure: local var/let declarations shadow arguments.
+function testArguments2(x: number, y: number): void {
+    var x = 1;
+    let y = 2;
+}
