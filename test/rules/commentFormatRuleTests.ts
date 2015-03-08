@@ -20,7 +20,7 @@ describe("<comment-format>", () => {
     var CommentFormatRule = Lint.Test.getRule("comment-format");
 
     it("ensures comments start with a space and a lowercase letter", () => {
-        var fileName = "rules/comment.test.ts";
+        var fileName = "rules/comment-lower.test.ts";
         var createLowercaseFailure = Lint.Test.createFailuresOnFile(fileName, CommentFormatRule.LOWERCASE_FAILURE);
         var createLeadingSpaceFailure = Lint.Test.createFailuresOnFile(fileName, CommentFormatRule.LEADING_SPACE_FAILURE);
         var expectedFailure1 = createLowercaseFailure([5, 27], [5, 73]);
@@ -31,6 +31,28 @@ describe("<comment-format>", () => {
         var options = [true,
             "check-space",
             "check-lowercase"
+        ];
+        var actualFailures = Lint.Test.applyRuleOnFile(fileName, CommentFormatRule, options);
+
+        Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
+        Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);
+        Lint.Test.assertContainsFailure(actualFailures, expectedFailure3);
+        Lint.Test.assertContainsFailure(actualFailures, expectedFailure4);
+        assert.lengthOf(actualFailures, 4);
+    });
+
+    it("ensures comments start with a space and a uppercase letter", () => {
+        var fileName = "rules/comment-upper.test.ts";
+        var createUppercaseFailure = Lint.Test.createFailuresOnFile(fileName, CommentFormatRule.UPPERCASE_FAILURE);
+        var createLeadingSpaceFailure = Lint.Test.createFailuresOnFile(fileName, CommentFormatRule.LEADING_SPACE_FAILURE);
+        var expectedFailure1 = createUppercaseFailure([5, 27], [5, 73]);
+        var expectedFailure2 = createUppercaseFailure([6, 11], [6, 84]);
+        var expectedFailure3 = createLeadingSpaceFailure([6, 11], [6, 84]);
+        var expectedFailure4 = createLeadingSpaceFailure([7, 32], [7, 57]);
+
+        var options = [true,
+            "check-space",
+            "check-uppercase"
         ];
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, CommentFormatRule, options);
 

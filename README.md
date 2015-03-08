@@ -121,6 +121,7 @@ A sample configuration file with all options is available [here](https://github.
     * `"check-space"` enforces the rule that all single-line comments must begin with a space, as in `// comment`
         * note that comments starting with `///` are also allowed, for things such as `///<reference>`
     * `"check-lowercase"` enforces the rule that the first non-whitespace character of a comment must be lowercase, if applicable
+    * `"check-uppercase"` enforces the rule that the first non-whitespace character of a comment must be uppercase, if applicable
 * `curly` enforces braces for `if`/`for`/`do`/`while` statements.
 * `eofline` enforces the file to end with a newline.
 * `forin` enforces a `for ... in` statement to be filtered with an `if` statement.*
