@@ -48,6 +48,11 @@ class AlignWalker extends Lint.RuleWalker {
         super.visitCallExpression(node);
     }
 
+    public visitNewExpression(node: ts.NewExpression) {
+        this.checkAlignment(Rule.ARGUMENTS_OPTION, node.arguments);
+        super.visitNewExpression(node);
+    }
+
     public visitBlock(node: ts.Block) {
         this.checkAlignment(Rule.STATEMENTS_OPTION, node.statements);
         super.visitBlock(node);

@@ -44,7 +44,8 @@ describe("<align, enabled>", () => {
         var failure = Lint.Test.createFailuresOnFile(fileName, failureString);
         var expectedFailures = [
             failure([65, 5], [65, 11]),
-            failure([72, 9], [72, 10])
+            failure([72, 9], [72, 10]),
+            failure([83, 14], [83, 20])
         ];
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, AlignRule, options);
         Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
@@ -57,8 +58,8 @@ describe("<align, enabled>", () => {
         var failureString = AlignRule.STATEMENTS_OPTION + AlignRule.FAILURE_STRING_SUFFIX;
         var failure = Lint.Test.createFailuresOnFile(fileName, failureString);
         var expectedFailures = [
-            failure([109, 6], [109, 16]),
-            failure([117, 8], [117, 18])
+            failure([119, 6], [119, 16]),
+            failure([127, 8], [127, 18])
         ];
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, AlignRule, options);
         Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
