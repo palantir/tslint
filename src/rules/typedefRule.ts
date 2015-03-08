@@ -104,7 +104,10 @@ class TypedefWalker extends Lint.RuleWalker {
 
     private handleCallSignature(node: ts.FunctionLikeDeclaration) {
         var location = (node.parameters != null) ? node.parameters.end : null;
-        this.checkTypeAnnotation("call-signature", location, node.type, node.name);
+        // Set accessors don't have a return type.
+        if (node.kind !== ts.SyntaxKind.SetAccessor) {
+            this.checkTypeAnnotation("call-signature", location, node.type, node.name);
+        }
     }
 
     private checkTypeAnnotation(option: string,
