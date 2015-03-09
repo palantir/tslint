@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Palantir Technologies, Inc.
+ * Copyright 2015 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 */
 
 export class Rule extends Lint.Rules.AbstractRule {
-    public static FAILURE_STRING = "Switch statement doesn't include a 'default' case";
+    public static FAILURE_STRING = "switch statement doesn't include a 'default' case";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new SwitchDefaultWalker(sourceFile, this.getOptions()));

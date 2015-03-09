@@ -164,6 +164,7 @@ A sample configuration file with all options is available [here](https://github.
 * `quotemark` enforces consistent single or double quoted string literals.
 * `radix` enforces the radix parameter of `parseInt`
 * `semicolon` enforces semicolons at the end of every statement.
+* `switch-default` enforces a `default` case in `switch` statements.
 * `triple-equals` enforces === and !== in favor of == and !=.
 * `typedef` enforces type definitions to exist. Rule options:
     * `"call-signature"` checks return type of functions
