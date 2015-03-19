@@ -65,3 +65,40 @@ function f():
 
     return 5;
 }
+
+if (cond1 &&
+    cond2)
+ {
+    i++;
+ }
+
+ if (cond1 &&
+     cond2)
+{
+    i++;
+}
+
+// valid
+if (cond1 &&
+    cond2 &&
+    cond3)
+{
+    i++;
+}
+
+// valid
+while (cond1 &&
+       cond2)
+{
+    count++;
+}
+
+// valid
+for (var i = 0;
+     i < length;
+     i++)
+{
+    count++;
+}
+     
+
