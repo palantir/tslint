@@ -85,6 +85,12 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         this.skipVariableDeclaration = false;
     }
 
+    public visitFunctionType(node: ts.Node): void {
+        this.skipParameterDeclaration = true;
+        super.visitFunctionType(node);
+        this.skipParameterDeclaration = false;
+    }
+
     // check function declarations (skipping exports)
     public visitFunctionDeclaration(node: ts.FunctionDeclaration): void {
         var variableName = node.name.text;
