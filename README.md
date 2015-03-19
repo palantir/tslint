@@ -93,6 +93,15 @@ tslint accepts the following commandline options:
 ##### Library
 
 ```javascript
+var fileName = "Specify file name";
+
+var configuration = {
+  rules: {
+      "variable-name": true,
+      "quotemark": [true, "double"]
+  }
+};
+
 var options = {
   formatter: "json",
   configuration: configuration,
@@ -101,6 +110,8 @@ var options = {
 };
 
 var Linter = require("tslint");
+var fs = require("fs");
+var contents = fs.readFileSync(fileName, "utf8");
 
 var ll = new Linter(fileName, contents, options);
 var result = ll.lint();
