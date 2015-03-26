@@ -15,6 +15,7 @@
 */
 
 var OPTION_CHECK_PARAMETERS = "check-parameters";
+var OPTION_IGNORE_UNDERSCORE = "ignore-underscore";
 
 /// <reference path='../../lib/tslint.d.ts' />
 
@@ -157,6 +158,12 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     }
 
     private validateReferencesForVariable(name: string, position: number) {
+        if (this.hasOption(OPTION_IGNORE_UNDERSCORE)) {
+            if (name.charAt(0) === "_") {
+                return;
+            }
+        }
+
         var references = this.languageService.getReferencesAtPosition("file.ts", position);
         if (references.length <= 1) {
             var failureString = Rule.FAILURE_STRING + "'" + name + "'";

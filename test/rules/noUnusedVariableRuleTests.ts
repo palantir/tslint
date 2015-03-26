@@ -35,7 +35,7 @@ describe("<no-unused-variable>", () => {
         var failureString = Rule.FAILURE_STRING + "'y'";
         var failure = Lint.Test.createFailuresOnFile(fileName, failureString)([3, 5], [3, 6]);
 
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule);
+        var actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule, [true, "ignore-underscore"]);
 
         assert.lengthOf(actualFailures, 1);
         Lint.Test.assertContainsFailure(actualFailures, failure);
@@ -77,7 +77,7 @@ describe("<no-unused-variable>", () => {
         var failure3 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING + "'y'")([9, 35], [9, 36]);
         var failure4 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING + "'x'")([18, 25], [18, 26]);
 
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule, [true, "check-parameters"]);
+        var actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule, [true, "check-parameters", "ignore-underscore"]);
 
         assert.lengthOf(actualFailures, 4);
 
