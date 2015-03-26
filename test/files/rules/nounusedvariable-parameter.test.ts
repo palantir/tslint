@@ -34,3 +34,6 @@ export function func6(...args: number[]) {
 export function func7(f: (x: number) => number) {
     return f;
 }
+
+export function func8(_x: number) {
+}
