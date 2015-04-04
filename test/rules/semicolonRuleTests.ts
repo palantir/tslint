@@ -30,7 +30,7 @@ describe("<semicolon>", () => {
     });
 
     it("warns on all statements", () => {
-        assert.equal(actualFailures.length, 14);
+        assert.equal(actualFailures.length, 15);
     });
 
     it("warns on variable statements", () => {
@@ -72,5 +72,9 @@ describe("<semicolon>", () => {
     it("warns on import and export statements", () => {
         Lint.Test.assertContainsFailure(actualFailures, createFailure([30, 24], [30, 24]));
         Lint.Test.assertContainsFailure(actualFailures, createFailure([32, 17], [32, 17]));
+    });
+
+    it("warns on use strict statements", () => {
+        Lint.Test.assertContainsFailure(actualFailures, createFailure([36, 17], [36, 17]));
     });
 });

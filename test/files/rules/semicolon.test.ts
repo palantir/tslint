@@ -31,3 +31,8 @@ import v = require("i")
 module M {
     export var x
 }
+
+function useStrictMissingSemicolon() {
+    "use strict"
+    return null;
+}
