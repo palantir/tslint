@@ -25,14 +25,15 @@ module Lint {
         var normalizedName = path.normalize(fileName).replace(/\\/g, "/");
         var compilerOptions = createCompilerOptions();
 
+        // TODO: use ts.createCompilerHost instead
         var compilerHost = {
             getSourceFile: function (filenameToGet: string) {
                 if (filenameToGet === normalizedName) {
-                    return ts.createSourceFile(filenameToGet, source, compilerOptions.target, "1", true);
+                    return ts.createSourceFile(filenameToGet, source, compilerOptions.target, true);
                 }
             },
             writeFile: () => null,
-            getDefaultLibFilename: () => "lib.d.ts",
+            getDefaultLibFileName: () => "lib.d.ts",
             useCaseSensitiveFileNames: () => true,
             getCanonicalFileName: (filename: string) => filename,
             getCurrentDirectory: () => "",
@@ -40,9 +41,14 @@ module Lint {
         };
 
         var program = ts.createProgram([normalizedName], compilerOptions, compilerHost);
-        // this will force the binder to properly set up parent pointers, which will allow getSourceFile to work on all nodes,
-        // and will therefore allow our code to work even if the source doesn't compile
-        program.getTypeChecker(true);
+
+        // TODO: check if this is now necessary, because of setParentNodes in ts.createSourceFile
+
+        // this will force the binder to properly set up parent pointers, which will allow
+        // getSourceFile to work on all nodes, and will therefore allow our code to work
+        // even if the source doesn't compile
+        program.getTypeChecker();
+
         return program.getSourceFile(normalizedName);
     }
 
