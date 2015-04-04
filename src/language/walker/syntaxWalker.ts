@@ -218,10 +218,6 @@ module Lint {
             this.walkChildren(node);
         }
 
-        protected visitTryBlock(node: ts.Block) {
-            this.walkChildren(node);
-        }
-
         protected visitTryStatement(node: ts.TryStatement) {
             this.walkChildren(node);
         }
@@ -376,7 +372,7 @@ module Lint {
                     this.visitLabeledStatement(<ts.LabeledStatement> node);
                     break;
 
-                case ts.SyntaxKind.Method:
+                case ts.SyntaxKind.MethodDeclaration:
                     this.visitMethodDeclaration(<ts.MethodDeclaration> node);
                     break;
 
@@ -412,7 +408,7 @@ module Lint {
                     this.visitPropertyAssignment(<ts.PropertyAssignment> node);
                     break;
 
-                case ts.SyntaxKind.Property:
+                case ts.SyntaxKind.PropertyDeclaration:
                     this.visitPropertyDeclaration(<ts.PropertyDeclaration> node);
                     break;
 
@@ -442,10 +438,6 @@ module Lint {
 
                 case ts.SyntaxKind.ThrowStatement:
                     this.visitThrowStatement(<ts.ThrowStatement> node);
-                    break;
-
-                case ts.SyntaxKind.TryBlock:
-                    this.visitTryBlock(<ts.Block> node);
                     break;
 
                 case ts.SyntaxKind.TryStatement:

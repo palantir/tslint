@@ -99,7 +99,6 @@ declare module Lint {
         protected visitSwitchStatement(node: ts.SwitchStatement): void;
         protected visitTemplateExpression(node: ts.TemplateExpression): void;
         protected visitThrowStatement(node: ts.ThrowStatement): void;
-        protected visitTryBlock(node: ts.Block): void;
         protected visitTryStatement(node: ts.TryStatement): void;
         protected visitTypeAssertionExpression(node: ts.TypeAssertion): void;
         protected visitTypeLiteral(node: ts.TypeLiteralNode): void;

@@ -86,7 +86,7 @@ module Lint {
                     ruleName: string) {
 
             this.sourceFile = sourceFile;
-            this.fileName = sourceFile.filename;
+            this.fileName = sourceFile.fileName;
             this.startPosition = this.createFailurePosition(start);
             this.endPosition = this.createFailurePosition(end);
             this.failure = failure;
@@ -131,7 +131,7 @@ module Lint {
         }
 
         private createFailurePosition(position: number): RuleFailurePosition {
-            var lineAndCharacter = this.sourceFile.getLineAndCharacterFromPosition(position);
+            var lineAndCharacter = this.sourceFile.getLineAndCharacterOfPosition(position);
             var failurePosition = new RuleFailurePosition(position, lineAndCharacter);
             return failurePosition;
         }
