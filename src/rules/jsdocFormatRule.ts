@@ -53,7 +53,7 @@ class JsdocWalker extends Lint.RuleWalker {
                 return;
             }
             // the -1 is necessary because character is 1-indexed, but indexOf is 0-indexed
-            var indexToMatch = firstLine.indexOf("**") + sourceFile.getLineAndCharacterFromPosition(currentPosition).character - 1;
+            var indexToMatch = firstLine.indexOf("**") + sourceFile.getLineAndCharacterOfPosition(currentPosition).character - 1;
             // all lines but the first and last
             var otherLines = lines.splice(1, lines.length - 2);
             jsdocPosition += firstLine.length + 1; // + 1 for the splitted-out newline

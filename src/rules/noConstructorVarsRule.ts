@@ -28,9 +28,13 @@ export class NoConstructorVariableDeclarationsWalker extends Lint.RuleWalker {
         var parameters = node.parameters;
         parameters.forEach((parameter) => {
             if (parameter.modifiers != null && parameter.modifiers.length > 0) {
+                var name = <ts.Identifier> parameter.name;
+                var errorMessage = "'" + name.text + "'" + Rule.FAILURE_STRING_PART;
+
                 var lastModifier = parameter.modifiers[parameter.modifiers.length - 1];
-                this.addFailure(this.createFailure(parameter.getStart(), lastModifier.getEnd() - parameter.getStart(),
-                    "'" + parameter.name.text + "'" + Rule.FAILURE_STRING_PART));
+                var position = lastModifier.getEnd() - parameter.getStart();
+
+                this.addFailure(this.createFailure(parameter.getStart(), position, errorMessage));
             }
         });
         super.visitConstructorDeclaration(node);
