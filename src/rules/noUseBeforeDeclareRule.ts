@@ -40,13 +40,17 @@ class NoUseBeforeDeclareWalker extends Lint.ScopeAwareRuleWalker<{}> {
     }
 
     public visitImportDeclaration(node: ts.ImportDeclaration): void {
-        this.validateUsageForVariable(node.name.text, node.name.getStart());
+        if (node.importClause != null) {
+            var name = <ts.Identifier> node.importClause.name;
+            this.validateUsageForVariable(name.text, name.getStart());
+        }
 
         super.visitImportDeclaration(node);
     }
 
     public visitVariableDeclaration(node: ts.VariableDeclaration): void {
-        var variableName = node.name.text;
+        var nameNode = <ts.Identifier> node.name;
+        var variableName = nameNode.text;
         var currentScope = this.getCurrentScope();
 
         // only validate on the first variable declaration within the current scope
@@ -62,7 +66,7 @@ class NoUseBeforeDeclareWalker extends Lint.ScopeAwareRuleWalker<{}> {
         var references = this.languageService.getReferencesAtPosition("file.ts", position);
         if (references) {
             references.forEach((reference) => {
-                var referencePosition = reference.textSpan.start();
+                var referencePosition = reference.textSpan.start;
                 if (referencePosition < position) {
                     var failureString = Rule.FAILURE_STRING_PREFIX + name + Rule.FAILURE_STRING_POSTFIX;
                     var failure = this.createFailure(referencePosition, name.length, failureString);

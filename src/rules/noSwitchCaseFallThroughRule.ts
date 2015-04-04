@@ -28,7 +28,7 @@ export class NoSwitchCaseFallThroughWalker extends Lint.RuleWalker {
         var isFallingThrough = false;
         // get the position for the first case statement
 
-        var switchClauses = node.clauses;
+        var switchClauses = node.caseBlock.clauses;
         switchClauses.forEach((child, i) => {
             var kind = child.kind;
             if (kind === ts.SyntaxKind.CaseClause) {

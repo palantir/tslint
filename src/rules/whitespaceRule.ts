@@ -119,7 +119,7 @@ class WhitespaceWalker extends Lint.RuleWalker {
 
     // check for spaces between the operator symbol (except in the case of comma statements)
     public visitBinaryExpression(node: ts.BinaryExpression): void {
-        var operatorKind = node.operator;
+        var operatorKind = node.operatorToken.kind;
         if (this.hasOption(OPTION_OPERATOR) && operatorKind !== ts.SyntaxKind.CommaToken) {
             var position = node.left.getEnd();
             this.checkForTrailingWhitespace(position);
@@ -178,8 +178,9 @@ class WhitespaceWalker extends Lint.RuleWalker {
 
     // check for spaces within imports
     public visitImportDeclaration(node: ts.ImportDeclaration): void {
-        if (this.hasOption(OPTION_DECL)) {
-            var position = node.name.getEnd();
+        var importClause = node.importClause;
+        if (this.hasOption(OPTION_DECL) && importClause != null) {
+            var position = importClause.name.getEnd();
             this.checkForTrailingWhitespace(position);
         }
 

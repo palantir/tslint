@@ -44,15 +44,19 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
 
     public visitImportDeclaration(node: ts.ImportDeclaration): void {
         if (!this.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword)) {
-            this.validateReferencesForVariable(node.name.text, node.name.getStart());
+            var importClause = node.importClause;
+            if (importClause != null) {
+                var name = <ts.Identifier> importClause.name;
+                this.validateReferencesForVariable(name.text, name.getStart());
+            }
         }
         super.visitImportDeclaration(node);
     }
 
     // check variable declarations
     public visitVariableDeclaration(node: ts.VariableDeclaration): void {
-        var propertyName = node.name,
-            variableName = propertyName.text;
+        var propertyName = <ts.Identifier> node.name;
+        var variableName = propertyName.text;
 
         if (!this.skipVariableDeclaration) {
             this.validateReferencesForVariable(variableName, propertyName.getStart());
@@ -103,7 +107,8 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     }
 
     public visitParameterDeclaration(node: ts.ParameterDeclaration): void {
-        var variableName = node.name.text;
+        var nameNode = <ts.Identifier> node.name;
+        var variableName = nameNode.text;
 
         if (!this.hasModifier(node.modifiers, ts.SyntaxKind.PublicKeyword)
             && !this.skipParameterDeclaration && this.hasOption(OPTION_CHECK_PARAMETERS)) {

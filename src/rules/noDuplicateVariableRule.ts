@@ -43,7 +43,7 @@ class NoDuplicateVariableWalker extends Lint.ScopeAwareRuleWalker<ScopeInfo> {
     }
 
     public visitVariableDeclaration(node: ts.VariableDeclaration): void {
-        var propertyName = node.name;
+        var propertyName = <ts.Identifier> node.name;
         var variableName = propertyName.text;
         var currentScope = this.getCurrentScope();
         // determine if the appropriate bit is set, which indicates this is a "let"

@@ -52,7 +52,7 @@ class TypedefWalker extends Lint.RuleWalker {
                 case ts.SyntaxKind.PropertyAssignment:
                     this.visitPropertyAssignment(<ts.PropertyAssignment> property);
                     break;
-                case ts.SyntaxKind.Method:
+                case ts.SyntaxKind.MethodDeclaration:
                     this.visitMethodDeclaration(<ts.MethodDeclaration> property);
                     break;
                 case ts.SyntaxKind.GetAccessor:
