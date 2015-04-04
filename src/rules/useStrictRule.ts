@@ -69,13 +69,11 @@ class UseStrictWalker extends Lint.ScopeAwareRuleWalker<{}> {
         if (block.statements != null && block.statements.length > 0) {
             var firstStatement = block.statements[0];
 
-            if (firstStatement.kind === ts.SyntaxKind.ExpressionStatement && firstStatement.getChildCount() === 2) {
+            if (firstStatement.kind === ts.SyntaxKind.ExpressionStatement) {
                 var firstChild = firstStatement.getChildAt(0);
-                var secondChild = firstStatement.getChildAt(1);
 
                 if (firstChild.kind === ts.SyntaxKind.StringLiteral &&
-                        (<ts.StringLiteralExpression> firstChild).text === UseStrictWalker.USE_STRICT_STRING &&
-                        secondChild.kind === ts.SyntaxKind.SemicolonToken) {
+                        (<ts.StringLiteralExpression> firstChild).text === UseStrictWalker.USE_STRICT_STRING) {
                     isFailure = false;
                 }
             }

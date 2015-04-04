@@ -47,3 +47,8 @@ declare module foo {
     export class bar {
     }
 }
+
+function shouldPassUseStrictRule(): string {
+    "use strict"
+    return "This is a test"
+}
