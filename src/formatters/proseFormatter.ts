@@ -24,7 +24,7 @@ export class Formatter extends Lint.Formatters.AbstractFormatter {
             var failureString = failure.getFailure();
 
             var lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
-            var positionTuple = "[" + lineAndCharacter.line + ", " + lineAndCharacter.character + "]";
+            var positionTuple = "[" + (lineAndCharacter.line + 1) + ", " + (lineAndCharacter.character + 1) + "]";
 
             return fileName + positionTuple + ": " + failureString;
         });

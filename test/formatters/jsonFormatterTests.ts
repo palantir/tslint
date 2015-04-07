@@ -40,13 +40,13 @@ describe("JSON Formatter", () => {
             failure: "first failure",
             startPosition: {
                 position: 0,
-                line: 1,
-                character: 1
+                line: 0,
+                character: 0
             },
             endPosition: {
                 position: 1,
-                line: 1,
-                character: 2
+                line: 0,
+                character: 1
             },
             ruleName: "first-name"
         },
@@ -55,13 +55,13 @@ describe("JSON Formatter", () => {
             failure: "last failure",
             startPosition: {
                 position: maxPosition - 1,
-                line: 6,
-                character: 3
+                line: 5,
+                character: 2
             },
             endPosition: {
                 position: maxPosition,
-                line: 7,
-                character: 1
+                line: 6,
+                character: 0
             },
             ruleName: "last-name"
         },
@@ -70,13 +70,13 @@ describe("JSON Formatter", () => {
             failure: "full failure",
             startPosition: {
                 position: 0,
-                line: 1,
-                character: 1
+                line: 0,
+                character: 0
             },
             endPosition: {
                 position: maxPosition,
-                line: 7,
-                character: 1
+                line: 6,
+                character: 0
             },
             ruleName: "full-name"
         }];
