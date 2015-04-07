@@ -31,8 +31,8 @@ export class Formatter extends Lint.Formatters.AbstractFormatter {
             var lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
 
             output += "<file name=\"" + failure.getFileName();
-            output += "\"><violation begincolumn=\"" + lineAndCharacter.character;
-            output += "\" beginline=\"" + lineAndCharacter.line;
+            output += "\"><violation begincolumn=\"" + (lineAndCharacter.character + 1);
+            output += "\" beginline=\"" + (lineAndCharacter.line + 1);
             output += "\" priority=\"1\"";
             output += " rule=\"" + failureString + "\"> </violation></file>";
         });
