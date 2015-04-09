@@ -53,6 +53,14 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         super.visitImportDeclaration(node);
     }
 
+    public visitImportEqualsDeclaration(node: ts.ImportEqualsDeclaration): void {
+        if (!this.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword)) {
+            var name = node.name;
+            this.validateReferencesForVariable(name.text, name.getStart());
+        }
+        super.visitImportEqualsDeclaration(node);
+    }
+
     // check variable declarations
     public visitVariableDeclaration(node: ts.VariableDeclaration): void {
         var propertyName = <ts.Identifier> node.name;
