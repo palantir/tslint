@@ -25,8 +25,9 @@ export class Rule extends Lint.Rules.AbstractRule {
 export class SwitchDefaultWalker extends Lint.RuleWalker {
 
     public visitSwitchStatement(node: ts.SwitchStatement) {
-        var hasDefaultCase = node.clauses.some((clause) =>
-                                               clause.kind === ts.SyntaxKind.DefaultClause);
+        var hasDefaultCase = node.caseBlock.clauses.some((clause) => {
+            return clause.kind === ts.SyntaxKind.DefaultClause;
+        });
         if (!hasDefaultCase) {
             this.addFailure(this.createFailure(node.getStart(),
                                                node.getWidth(),
