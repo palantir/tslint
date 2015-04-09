@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/// <reference path="../../lib/tslint.d.ts" />
-
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "missing type declaration";
 
@@ -46,13 +44,18 @@ class TypedefWalker extends Lint.RuleWalker {
         super.visitMethodDeclaration(node);
     }
 
+    public visitMethodSignature(node: ts.SignatureDeclaration) {
+        this.handleCallSignature(node);
+        super.visitMethodSignature(node);
+    }
+
     public visitObjectLiteralExpression(node: ts.ObjectLiteralExpression) {
         node.properties.forEach((property: ts.ObjectLiteralElement) => {
             switch (property.kind) {
                 case ts.SyntaxKind.PropertyAssignment:
                     this.visitPropertyAssignment(<ts.PropertyAssignment> property);
                     break;
-                case ts.SyntaxKind.Method:
+                case ts.SyntaxKind.MethodDeclaration:
                     this.visitMethodDeclaration(<ts.MethodDeclaration> property);
                     break;
                 case ts.SyntaxKind.GetAccessor:
@@ -84,10 +87,15 @@ class TypedefWalker extends Lint.RuleWalker {
     }
 
     public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
-        var optionName = (node.parent.kind === ts.SyntaxKind.ClassDeclaration) ? "member-variable-declaration"
-                                                                               : "property-declaration";
+        var optionName = "member-variable-declaration";
         this.checkTypeAnnotation(optionName, node.name.getEnd(), node.type, node.name);
         super.visitPropertyDeclaration(node);
+    }
+
+    public visitPropertySignature(node: ts.PropertyDeclaration) {
+        var optionName = "property-declaration";
+        this.checkTypeAnnotation(optionName, node.name.getEnd(), node.type, node.name);
+        super.visitPropertySignature(node);
     }
 
     public visitSetAccessor(node: ts.AccessorDeclaration) {
@@ -96,13 +104,14 @@ class TypedefWalker extends Lint.RuleWalker {
     }
 
     public visitVariableDeclaration(node: ts.VariableDeclaration) {
-        if (node.parent.kind !== ts.SyntaxKind.ForInStatement) {
+        // first parent is the VariableDeclarationList, grandparent would be the for-in statement
+        if (node.parent.parent.kind !== ts.SyntaxKind.ForInStatement) {
             this.checkTypeAnnotation("variable-declaration", node.name.getEnd(), node.type, node.name);
         }
         super.visitVariableDeclaration(node);
     }
 
-    private handleCallSignature(node: ts.FunctionLikeDeclaration) {
+    private handleCallSignature(node: ts.SignatureDeclaration) {
         var location = (node.parameters != null) ? node.parameters.end : null;
         // Set accessors don't have a return type.
         if (node.kind !== ts.SyntaxKind.SetAccessor) {

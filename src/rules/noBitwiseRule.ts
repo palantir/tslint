@@ -24,7 +24,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class NoBitwiseWalker extends Lint.RuleWalker {
     public visitBinaryExpression(node: ts.BinaryExpression): void {
-        switch (node.operator) {
+        switch (node.operatorToken.kind) {
             case ts.SyntaxKind.AmpersandToken:
             case ts.SyntaxKind.AmpersandEqualsToken:
             case ts.SyntaxKind.BarToken:

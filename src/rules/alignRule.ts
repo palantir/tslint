@@ -78,6 +78,6 @@ class AlignWalker extends Lint.RuleWalker {
     }
 
     private getPosition(node: ts.Node): SourcePosition {
-        return node.getSourceFile().getLineAndCharacterFromPosition(node.getStart());
+        return node.getSourceFile().getLineAndCharacterOfPosition(node.getStart());
     }
 }
