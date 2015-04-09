@@ -54,6 +54,11 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
         super.visitMethodDeclaration(node);
     }
 
+    public visitMethodSignature(node: ts.SignatureDeclaration) {
+        this.checkSpace("call-signature", node, node.type, node.parameters.end + 1);
+        super.visitMethodSignature(node);
+    }
+
     public visitParameterDeclaration(node: ts.ParameterDeclaration) {
         this.checkSpace("parameter", node, node.type, node.name.getEnd());
         super.visitParameterDeclaration(node);
@@ -62,6 +67,11 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
     public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
         this.checkSpace("property-declaration", node, node.type, node.name.getEnd());
         super.visitPropertyDeclaration(node);
+    }
+
+    public visitPropertySignature(node: ts.PropertyDeclaration) {
+        this.checkSpace("property-declaration", node, node.type, node.name.getEnd());
+        super.visitPropertySignature(node);
     }
 
     public visitSetAccessor(node: ts.AccessorDeclaration) {

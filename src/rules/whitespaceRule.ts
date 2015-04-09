@@ -187,6 +187,15 @@ class WhitespaceWalker extends Lint.RuleWalker {
         super.visitImportDeclaration(node);
     }
 
+    public visitImportEqualsDeclaration(node: ts.ImportEqualsDeclaration): void {
+        if (this.hasOption(OPTION_DECL)) {
+            var position = node.name.getEnd();
+            this.checkForTrailingWhitespace(position);
+        }
+
+        super.visitImportEqualsDeclaration(node);
+    }
+
     // check for spaces within exports
     public visitExportAssignment(node: ts.ExportAssignment): void {
         if (this.hasOption(OPTION_DECL)) {

@@ -79,10 +79,12 @@ declare module Lint {
         protected visitIdentifier(node: ts.Identifier): void;
         protected visitIfStatement(node: ts.IfStatement): void;
         protected visitImportDeclaration(node: ts.ImportDeclaration): void;
+        protected visitImportEqualsDeclaration(node: ts.ImportEqualsDeclaration): void;
         protected visitIndexSignatureDeclaration(node: ts.IndexSignatureDeclaration): void;
         protected visitInterfaceDeclaration(node: ts.InterfaceDeclaration): void;
         protected visitLabeledStatement(node: ts.LabeledStatement): void;
         protected visitMethodDeclaration(node: ts.MethodDeclaration): void;
+        protected visitMethodSignature(node: ts.SignatureDeclaration): void;
         protected visitModuleDeclaration(node: ts.ModuleDeclaration): void;
         protected visitNewExpression(node: ts.NewExpression): void;
         protected visitObjectLiteralExpression(node: ts.ObjectLiteralExpression): void;
@@ -92,6 +94,7 @@ declare module Lint {
         protected visitPropertyAccessExpression(node: ts.PropertyAccessExpression): void;
         protected visitPropertyAssignment(node: ts.PropertyAssignment): void;
         protected visitPropertyDeclaration(node: ts.PropertyDeclaration): void;
+        protected visitPropertySignature(node: ts.Node): void;
         protected visitRegularExpressionLiteral(node: ts.Node): void;
         protected visitReturnStatement(node: ts.ReturnStatement): void;
         protected visitSetAccessor(node: ts.AccessorDeclaration): void;

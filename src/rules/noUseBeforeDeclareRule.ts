@@ -48,6 +48,13 @@ class NoUseBeforeDeclareWalker extends Lint.ScopeAwareRuleWalker<{}> {
         super.visitImportDeclaration(node);
     }
 
+    public visitImportEqualsDeclaration(node: ts.ImportEqualsDeclaration): void {
+        var name = <ts.Identifier> node.name;
+        this.validateUsageForVariable(name.text, name.getStart());
+
+        super.visitImportEqualsDeclaration(node);
+    }
+
     public visitVariableDeclaration(node: ts.VariableDeclaration): void {
         var nameNode = <ts.Identifier> node.name;
         var variableName = nameNode.text;

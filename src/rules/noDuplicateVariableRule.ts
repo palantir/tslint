@@ -31,8 +31,8 @@ class NoDuplicateVariableWalker extends Lint.ScopeAwareRuleWalker<ScopeInfo> {
         var propertyName = <ts.Identifier> node.name;
         var variableName = propertyName.text;
         var currentScope = this.getCurrentScope();
-        // determine if the appropriate bit is set, which indicates this is a "let"
-        var declarationIsLet = (Math.floor(node.flags / ts.NodeFlags.Let) % 2) === 1;
+        // determine if the appropriate bit in the parent (VariableDeclarationList) is set, which indicates this is a "let"
+        var declarationIsLet = (Math.floor(node.parent.flags / ts.NodeFlags.Let) % 2) === 1;
 
         var failureString = Rule.FAILURE_STRING + variableName + "'";
         if (currentScope.varNames.indexOf(variableName) >= 0) {
