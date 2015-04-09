@@ -138,6 +138,10 @@ module Lint {
             this.walkChildren(node);
         }
 
+        protected visitImportEqualsDeclaration(node: ts.ImportEqualsDeclaration) {
+            this.walkChildren(node);
+        }
+
         protected visitIndexSignatureDeclaration(node: ts.IndexSignatureDeclaration) {
             this.walkChildren(node);
         }
@@ -151,6 +155,10 @@ module Lint {
         }
 
         protected visitMethodDeclaration(node: ts.MethodDeclaration) {
+            this.walkChildren(node);
+        }
+
+        protected visitMethodSignature(node: ts.SignatureDeclaration) {
             this.walkChildren(node);
         }
 
@@ -190,6 +198,10 @@ module Lint {
             this.walkChildren(node);
         }
 
+        protected visitPropertySignature(node: ts.Node) {
+            this.walkChildren(node);
+        }
+
         protected visitRegularExpressionLiteral(node: ts.Node) {
             this.walkChildren(node);
         }
@@ -215,10 +227,6 @@ module Lint {
         }
 
         protected visitThrowStatement(node: ts.ThrowStatement) {
-            this.walkChildren(node);
-        }
-
-        protected visitTryBlock(node: ts.Block) {
             this.walkChildren(node);
         }
 
@@ -364,6 +372,10 @@ module Lint {
                     this.visitImportDeclaration(<ts.ImportDeclaration> node);
                     break;
 
+                case ts.SyntaxKind.ImportEqualsDeclaration:
+                    this.visitImportEqualsDeclaration(<ts.ImportEqualsDeclaration> node);
+                    break;
+
                 case ts.SyntaxKind.IndexSignature:
                     this.visitIndexSignatureDeclaration(<ts.IndexSignatureDeclaration> node);
                     break;
@@ -376,8 +388,12 @@ module Lint {
                     this.visitLabeledStatement(<ts.LabeledStatement> node);
                     break;
 
-                case ts.SyntaxKind.Method:
+                case ts.SyntaxKind.MethodDeclaration:
                     this.visitMethodDeclaration(<ts.MethodDeclaration> node);
+                    break;
+
+                case ts.SyntaxKind.MethodSignature:
+                    this.visitMethodSignature(<ts.SignatureDeclaration> node);
                     break;
 
                 case ts.SyntaxKind.ModuleDeclaration:
@@ -412,8 +428,12 @@ module Lint {
                     this.visitPropertyAssignment(<ts.PropertyAssignment> node);
                     break;
 
-                case ts.SyntaxKind.Property:
+                case ts.SyntaxKind.PropertyDeclaration:
                     this.visitPropertyDeclaration(<ts.PropertyDeclaration> node);
+                    break;
+
+                case ts.SyntaxKind.PropertySignature:
+                    this.visitPropertySignature(node);
                     break;
 
                 case ts.SyntaxKind.RegularExpressionLiteral:
@@ -442,10 +462,6 @@ module Lint {
 
                 case ts.SyntaxKind.ThrowStatement:
                     this.visitThrowStatement(<ts.ThrowStatement> node);
-                    break;
-
-                case ts.SyntaxKind.TryBlock:
-                    this.visitTryBlock(<ts.Block> node);
                     break;
 
                 case ts.SyntaxKind.TryStatement:

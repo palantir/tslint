@@ -73,7 +73,7 @@ module Lint {
                 || node.kind === ts.SyntaxKind.FunctionExpression
                 || node.kind === ts.SyntaxKind.PropertyAssignment
                 || node.kind === ts.SyntaxKind.ShorthandPropertyAssignment
-                || node.kind === ts.SyntaxKind.Method
+                || node.kind === ts.SyntaxKind.MethodDeclaration
                 || node.kind === ts.SyntaxKind.Constructor
                 || node.kind === ts.SyntaxKind.ModuleDeclaration
                 || node.kind === ts.SyntaxKind.ArrowFunction

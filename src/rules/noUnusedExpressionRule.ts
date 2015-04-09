@@ -50,7 +50,7 @@ class UnusedExpressionWalker extends Lint.RuleWalker {
 
     public visitBinaryExpression(node: ts.BinaryExpression) {
         super.visitBinaryExpression(node);
-        switch (node.operator) {
+        switch (node.operatorToken.kind) {
             case ts.SyntaxKind.EqualsToken:
             case ts.SyntaxKind.PlusEqualsToken:
             case ts.SyntaxKind.MinusEqualsToken:

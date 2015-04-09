@@ -36,7 +36,7 @@ class VariableNameWalker extends Lint.RuleWalker {
     }
 
     public visitVariableDeclaration(node: ts.VariableDeclaration) {
-        this.handleVariableName(node.name);
+        this.handleVariableName(<ts.Identifier> node.name);
         super.visitVariableDeclaration(node);
     }
 

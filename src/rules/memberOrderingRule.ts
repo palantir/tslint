@@ -76,10 +76,21 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
         super.visitMethodDeclaration(node);
     }
 
+    public visitMethodSignature(node: ts.SignatureDeclaration): void {
+        this.checkAndSetModifiers(node, getModifiers(true, node.modifiers));
+        super.visitMethodSignature(node);
+    }
+
     public visitPropertyDeclaration(node: ts.PropertyDeclaration): void {
         this.checkAndSetModifiers(node, getModifiers(false, node.modifiers));
         super.visitPropertyDeclaration(node);
     }
+
+    public visitPropertySignature(node: ts.Node): void {
+        this.checkAndSetModifiers(node, getModifiers(false, node.modifiers));
+        super.visitPropertySignature(node);
+    }
+
 
     public visitTypeLiteral(node: ts.TypeLiteralNode) {
         // don't call super from here -- we want to skip the property declarations in type literals
@@ -93,7 +104,7 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
         };
     }
 
-    private checkAndSetModifiers(node: ts.Declaration, current: IModifiers): void {
+    private checkAndSetModifiers(node: ts.Node, current: IModifiers): void {
         if (!this.canAppearAfter(this.previous, current)) {
             var message = "Declaration of " + toString(current) +
                 " not allowed to appear after declaration of " + toString(this.previous);

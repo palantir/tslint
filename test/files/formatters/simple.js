@@ -16,7 +16,7 @@ SimpleFormatter.prototype = Object.create({
             var line = lineAndCharacter.line;
             var character = lineAndCharacter.character;
 
-            output += "[" + line + ", " + character + "]" + fileName + "\n";
+            output += "[" + (line + 1) + ", " + (character + 1) + "]" + fileName + "\n";
         }
         return output;
     }

@@ -50,8 +50,8 @@ class OneLineWalker extends Lint.RuleWalker {
                 this.handleOpeningBrace(elseKeyword, elseOpeningBrace);
             }
             if (this.hasOption(OPTION_ELSE)) {
-                var thenStatementEndLine = sourceFile.getLineAndCharacterFromPosition(thenStatement.getEnd()).line;
-                var elseKeywordLine = sourceFile.getLineAndCharacterFromPosition(elseKeyword.getStart()).line;
+                var thenStatementEndLine = sourceFile.getLineAndCharacterOfPosition(thenStatement.getEnd()).line;
+                var elseKeywordLine = sourceFile.getLineAndCharacterOfPosition(elseKeyword.getStart()).line;
                 if (thenStatementEndLine !== elseKeywordLine) {
                     var failure = this.createFailure(elseKeyword.getStart(), elseKeyword.getWidth(), Rule.ELSE_FAILURE_STRING);
                     this.addFailure(failure);
@@ -60,13 +60,6 @@ class OneLineWalker extends Lint.RuleWalker {
         }
 
         super.visitIfStatement(node);
-    }
-
-    public visitTryBlock(node: ts.Block) {
-        var tryKeyword = node.getChildAt(0);
-        var tryOpeningBrace = node.getChildAt(1);
-        this.handleOpeningBrace(tryKeyword, tryOpeningBrace);
-        super.visitTryBlock(node);
     }
 
     public visitCatchClause(node: ts.CatchClause) {
@@ -79,11 +72,18 @@ class OneLineWalker extends Lint.RuleWalker {
     public visitTryStatement(node: ts.TryStatement) {
         var sourceFile = node.getSourceFile();
         var catchClause = node.catchClause;
+
+        // "visit" try block
+        var tryKeyword = node.getChildAt(0);
+        var tryBlock = node.tryBlock;
+        var tryOpeningBrace = tryBlock.getChildAt(0);
+        this.handleOpeningBrace(tryKeyword, tryOpeningBrace);
+
         if (this.hasOption(OPTION_CATCH) && catchClause != null) {
             var tryClosingBrace = node.tryBlock.getChildAt(node.tryBlock.getChildCount() - 1);
             var catchKeyword = catchClause.getChildAt(0);
-            var tryClosingBraceLine = sourceFile.getLineAndCharacterFromPosition(tryClosingBrace.getEnd()).line;
-            var catchKeywordLine = sourceFile.getLineAndCharacterFromPosition(catchKeyword.getStart()).line;
+            var tryClosingBraceLine = sourceFile.getLineAndCharacterOfPosition(tryClosingBrace.getEnd()).line;
+            var catchKeywordLine = sourceFile.getLineAndCharacterOfPosition(catchKeyword.getStart()).line;
             if (tryClosingBraceLine !== catchKeywordLine) {
                 var failure = this.createFailure(catchKeyword.getStart(), catchKeyword.getWidth(), Rule.CATCH_FAILURE_STRING);
                 this.addFailure(failure);
@@ -108,11 +108,15 @@ class OneLineWalker extends Lint.RuleWalker {
     }
 
     public visitBinaryExpression(node: ts.BinaryExpression) {
-        if (node.operator === ts.SyntaxKind.EqualsToken && node.right.kind === ts.SyntaxKind.ObjectLiteralExpression) {
+        var rightkind = node.right.kind;
+        var opkind = node.operatorToken.kind;
+
+        if (opkind === ts.SyntaxKind.EqualsToken && rightkind === ts.SyntaxKind.ObjectLiteralExpression) {
             var equalsToken = node.getChildAt(1);
             var openBraceToken = node.right.getChildAt(0);
             this.handleOpeningBrace(equalsToken, openBraceToken);
         }
+
         super.visitBinaryExpression(node);
     }
 
@@ -155,7 +159,7 @@ class OneLineWalker extends Lint.RuleWalker {
 
     public visitSwitchStatement(node: ts.SwitchStatement) {
         var closeParenToken = node.getChildAt(3);
-        var openBraceToken = node.getChildAt(4);
+        var openBraceToken = node.caseBlock.getChildAt(0);
         this.handleOpeningBrace(closeParenToken, openBraceToken);
         super.visitSwitchStatement(node);
     }
@@ -171,7 +175,7 @@ class OneLineWalker extends Lint.RuleWalker {
         var nameNode = node.name;
         var openBraceToken = OneLineWalker.getFirstChildOfKind(node, ts.SyntaxKind.OpenBraceToken);
         this.handleOpeningBrace(nameNode, openBraceToken);
-        super.visitInterfaceDeclaration(node);
+        super.visitClassDeclaration(node);
     }
 
     public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
@@ -227,8 +231,8 @@ class OneLineWalker extends Lint.RuleWalker {
             return;
         }
         var sourceFile = previousNode.getSourceFile();
-        var previousNodeLine = sourceFile.getLineAndCharacterFromPosition(previousNode.getEnd()).line;
-        var openBraceLine = sourceFile.getLineAndCharacterFromPosition(openBraceToken.getStart()).line;
+        var previousNodeLine = sourceFile.getLineAndCharacterOfPosition(previousNode.getEnd()).line;
+        var openBraceLine = sourceFile.getLineAndCharacterOfPosition(openBraceToken.getStart()).line;
         var failure: Lint.RuleFailure;
 
         if (this.hasOption(OPTION_BRACE) && previousNodeLine !== openBraceLine) {
