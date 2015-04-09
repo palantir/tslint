@@ -25,7 +25,6 @@ module Lint {
         var normalizedName = path.normalize(fileName).replace(/\\/g, "/");
         var compilerOptions = createCompilerOptions();
 
-        // TODO: use ts.createCompilerHost instead
         var compilerHost = {
             getSourceFile: function (filenameToGet: string) {
                 if (filenameToGet === normalizedName) {
@@ -41,13 +40,6 @@ module Lint {
         };
 
         var program = ts.createProgram([normalizedName], compilerOptions, compilerHost);
-
-        // TODO: check if this is now necessary, because of setParentNodes in ts.createSourceFile
-
-        // this will force the binder to properly set up parent pointers, which will allow
-        // getSourceFile to work on all nodes, and will therefore allow our code to work
-        // even if the source doesn't compile
-        program.getTypeChecker();
 
         return program.getSourceFile(normalizedName);
     }

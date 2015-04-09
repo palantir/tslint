@@ -87,15 +87,13 @@ class TypedefWalker extends Lint.RuleWalker {
     }
 
     public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
-        var optionName = (node.parent.kind === ts.SyntaxKind.ClassDeclaration) ? "member-variable-declaration"
-                                                                               : "property-declaration";
+        var optionName = "member-variable-declaration";
         this.checkTypeAnnotation(optionName, node.name.getEnd(), node.type, node.name);
         super.visitPropertyDeclaration(node);
     }
 
     public visitPropertySignature(node: ts.PropertyDeclaration) {
-        var optionName = (node.parent.kind === ts.SyntaxKind.ClassDeclaration) ? "member-variable-declaration"
-                                                                               : "property-declaration";
+        var optionName = "property-declaration";
         this.checkTypeAnnotation(optionName, node.name.getEnd(), node.type, node.name);
         super.visitPropertySignature(node);
     }

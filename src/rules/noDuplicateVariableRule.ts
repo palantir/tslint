@@ -29,12 +29,12 @@ class NoDuplicateVariableWalker extends Lint.ScopeAwareRuleWalker<ScopeInfo> {
 
     public visitParameterDeclaration(node: ts.ParameterDeclaration): void {
         // Treat parameters as var.
-        var propertyName = node.name;
+        var propertyName = <ts.Identifier> node.name;
         var variableName = propertyName.text;
         var currentScope = this.getCurrentScope();
 
         if (currentScope.varNames.indexOf(variableName) >= 0) {
-            this.addFailureOnIdentifier(node.name);
+            this.addFailureOnIdentifier(<ts.Identifier> node.name);
         } else {
             currentScope.varNames.push(variableName);
         }
