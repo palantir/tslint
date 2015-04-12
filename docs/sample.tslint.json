@@ -24,6 +24,7 @@
         "static-before-instance",
         "variables-before-functions"
     ],
+    "no-any": false,
     "no-arg": true,
     "no-bitwise": true,
     "no-console": [true,
@@ -44,9 +45,9 @@
     "no-switch-case-fall-through": true,
     "no-trailing-comma": true,
     "no-trailing-whitespace": true,
+    "no-unreachable": true,
     "no-unused-expression": true,
     "no-unused-variable": true,
-    "no-unreachable": true,
     "no-use-before-declare": true,
     "no-var-requires": true,
     "one-line": [true,
