@@ -14,21 +14,29 @@
  * limitations under the License.
 */
 
-/// <reference path='language/walker/ruleWalker.ts'/>
+/// <reference path='language/walker/skipableTokenAwareRuleWalker.ts'/>
 
 module Lint {
-    export class EnableDisableRulesWalker extends Lint.RuleWalker {
+    export class EnableDisableRulesWalker extends Lint.SkipableTokenAwareRuleWalker {
         public enableDisableRuleMap: {[rulename: string]: Lint.IEnableDisablePosition[]} = {};
 
         public visitSourceFile(node: ts.SourceFile): void {
+            super.visitSourceFile(node);
             Lint.scanAllTokens(ts.createScanner(ts.ScriptTarget.ES5, false, node.text), (scanner: ts.Scanner) => {
+                var startPos = scanner.getStartPos();
+                if (this.tokensToSkipStartEndMap[startPos] != null) {
+                    // tokens to skip are places where the scanner gets confused about what the token is, without the proper context
+                    // (specifically, regex, identifiers, and templates). So skip those tokens.
+                    scanner.setTextPos(this.tokensToSkipStartEndMap[startPos]);
+                    return;
+                }
+
                 if (scanner.getToken() === ts.SyntaxKind.MultiLineCommentTrivia) {
                     var commentText = scanner.getTokenText();
                     var startPosition = scanner.getTokenPos();
                     this.handlePossibleTslintSwitch(commentText, startPosition);
                 }
             });
-            // no need to call super to visit the rest of the nodes, so don't call super here
         }
 
         private handlePossibleTslintSwitch(commentText: string, startingPosition: number) {

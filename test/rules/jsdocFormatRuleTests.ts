@@ -23,13 +23,13 @@ describe("<jsdoc-format>", () => {
         var fileName = "rules/jsdoc.test.ts";
         var createFormatFailure = Lint.Test.createFailuresOnFile(fileName, JsdocFormatRule.FORMAT_FAILURE_STRING);
         var createAlignmentFailure = Lint.Test.createFailuresOnFile(fileName, JsdocFormatRule.ALIGNMENT_FAILURE_STRING);
-        var expectedFailure1 = createFormatFailure([20, 1], [20, 40]);
-        var expectedFailure2 = createAlignmentFailure([26, 1], [26, 6]);
-        var expectedFailure3 = createFormatFailure([30, 1], [30, 8]);
-        var expectedFailure4 = createFormatFailure([34, 1], [34, 7]);
-        var expectedFailure5 = createAlignmentFailure([39, 1], [39, 19]);
-        var expectedFailure6 = createFormatFailure([42, 5], [42, 26]);
-        var expectedFailure7 = createFormatFailure([44, 5], [44, 32]);
+        var expectedFailure1 = createFormatFailure([28, 1], [28, 40]);
+        var expectedFailure2 = createAlignmentFailure([34, 1], [34, 6]);
+        var expectedFailure3 = createFormatFailure([38, 1], [38, 8]);
+        var expectedFailure4 = createFormatFailure([42, 1], [42, 7]);
+        var expectedFailure5 = createAlignmentFailure([47, 1], [47, 19]);
+        var expectedFailure6 = createFormatFailure([50, 5], [50, 26]);
+        var expectedFailure7 = createFormatFailure([52, 5], [52, 32]);
 
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, JsdocFormatRule);
 

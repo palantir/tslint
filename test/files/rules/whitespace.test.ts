@@ -46,3 +46,9 @@ a.then(() => {
 }).if(() => {
     return 1;
 });
+
+var name = "something";
+var test = `
+<sl-property-group label=${name} Axes">
+  <div class="repeat"
+`;

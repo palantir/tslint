@@ -35,5 +35,6 @@ describe("<no-trailing-whitespace>", () => {
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure3);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure4);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure5);
+        assert.lengthOf(actualFailures, 5);
     });
 });

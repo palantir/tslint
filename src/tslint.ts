@@ -28,6 +28,7 @@
 /// <reference path='language/rule/abstractRule.ts'/>
 /// <reference path='language/walker/ruleWalker.ts'/>
 /// <reference path='language/walker/scopeAwareRuleWalker.ts'/>
+/// <reference path='language/walker/skipableTokenAwareRuleWalker.ts'/>
 
 module Lint {
     var path = require("path");
