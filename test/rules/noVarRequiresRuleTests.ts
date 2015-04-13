@@ -17,7 +17,7 @@
 /// <reference path='../references.ts' />
 
 describe("<no-var-requires>", () => {
-    it("disallows use of require outside import statments", () => {
+    it("disallows use of require outside import statements", () => {
         var fileName = "rules/novarrequires.test.ts";
         var NoVarRequiresRule = Lint.Test.getRule("no-var-requires");
         var expectedFailure = Lint.Test.createFailure(fileName, [2, 9], [2, 21], NoVarRequiresRule.FAILURE_STRING);

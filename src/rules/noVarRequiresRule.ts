@@ -17,7 +17,7 @@
 /// <reference path='../../lib/tslint.d.ts' />
 
 export class Rule extends Lint.Rules.AbstractRule {
-    public static FAILURE_STRING = "require statement not part of an import statment";
+    public static FAILURE_STRING = "require statement not part of an import statement";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         var requiresWalker = new RequiresWalker(sourceFile, this.getOptions());
