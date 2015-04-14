@@ -22,11 +22,21 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-class NoTrailingWhitespaceWalker extends Lint.RuleWalker {
+class NoTrailingWhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
     public visitSourceFile(node: ts.SourceFile): void {
+        super.visitSourceFile(node);
         var lastSeenWasWhitespace = false;
         var lastSeenWhitespacePosition = 0;
         Lint.scanAllTokens(ts.createScanner(ts.ScriptTarget.ES5, false, node.text), (scanner: ts.Scanner) => {
+            var startPos = scanner.getStartPos();
+            if (this.tokensToSkipStartEndMap[startPos] != null) {
+                // tokens to skip are places where the scanner gets confused about what the token is, without the proper context
+                // (specifically, regex, identifiers, and templates). So skip those tokens.
+                scanner.setTextPos(this.tokensToSkipStartEndMap[startPos]);
+                lastSeenWasWhitespace = false;
+                return;
+            }
+
             if (scanner.getToken() === ts.SyntaxKind.NewLineTrivia) {
                 if (lastSeenWasWhitespace) {
                     var width = scanner.getStartPos() - lastSeenWhitespacePosition;
@@ -41,6 +51,5 @@ class NoTrailingWhitespaceWalker extends Lint.RuleWalker {
                 lastSeenWasWhitespace = false;
             }
         });
-        // no need to call super to visit the rest of the nodes, so don't call super here
     }
 }

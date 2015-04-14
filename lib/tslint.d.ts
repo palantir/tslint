@@ -164,7 +164,19 @@ declare module Lint {
     function findFormatter(name: string, formattersDirectory?: string): any;
 }
 declare module Lint {
-    class EnableDisableRulesWalker extends Lint.RuleWalker {
+    class SkippableTokenAwareRuleWalker extends RuleWalker {
+        protected tokensToSkipStartEndMap: {
+            [start: number]: number;
+        };
+        constructor(sourceFile: ts.SourceFile, options: Lint.IOptions);
+        protected visitRegularExpressionLiteral(node: ts.Node): void;
+        protected visitIdentifier(node: ts.Identifier): void;
+        protected visitTemplateExpression(node: ts.TemplateExpression): void;
+        private addTokenToSkipFromNode(node);
+    }
+}
+declare module Lint {
+    class EnableDisableRulesWalker extends Lint.SkippableTokenAwareRuleWalker {
         enableDisableRuleMap: {
             [rulename: string]: Lint.IEnableDisablePosition[];
         };

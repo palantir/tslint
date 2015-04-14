@@ -18,3 +18,10 @@ var AAAaA = 'test'
 var AAAaA = 'test'
 /* tslint:enable:zasdadsa */
 var AAAaA = 'test'
+
+/* tslint:enable */
+var  re;
+re = /`/;
+
+/* tslint:disable:quotemark */
+var s = 'xxx';

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 var OPTION_SPACE = "check-space";
 var OPTION_LOWERCASE = "check-lowercase";
@@ -28,14 +28,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-class CommentWalker extends Lint.RuleWalker {
-    private tokensToSkipStartEndMap: {[start: number]: number};
-
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
-        super(sourceFile, options);
-        this.tokensToSkipStartEndMap = {};
-    }
-
+class CommentWalker extends Lint.SkippableTokenAwareRuleWalker {
     public visitSourceFile(node: ts.SourceFile): void {
         super.visitSourceFile(node);
         Lint.scanAllTokens(ts.createScanner(ts.ScriptTarget.ES5, false, node.text), (scanner: ts.Scanner) => {
@@ -71,28 +64,6 @@ class CommentWalker extends Lint.RuleWalker {
                 }
             }
         });
-    }
-
-    public visitRegularExpressionLiteral(node: ts.Node) {
-        this.addTokenToSkipFromNode(node);
-        super.visitRegularExpressionLiteral(node);
-    }
-
-    public visitIdentifier(node: ts.Identifier) {
-        this.addTokenToSkipFromNode(node);
-        super.visitIdentifier(node);
-    }
-
-    public visitTemplateExpression(node: ts.TemplateExpression) {
-        this.addTokenToSkipFromNode(node);
-        super.visitTemplateExpression(node);
-    }
-
-    public addTokenToSkipFromNode(node: ts.Node) {
-        if (node.getStart() < node.getEnd()) {
-            // only add to the map nodes whose end comes after their start, to prevent infinite loops
-            this.tokensToSkipStartEndMap[node.getStart()] = node.getEnd();
-        }
     }
 
     private startsWithSpace(commentText: string): boolean {

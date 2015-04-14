@@ -29,14 +29,12 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-class WhitespaceWalker extends Lint.RuleWalker {
+class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
     private scanner: ts.Scanner;
-    private tokensToSkipStartEndMap: {[start: number]: number};
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
         this.scanner = ts.createScanner(ts.ScriptTarget.ES5, false, sourceFile.text);
-        this.tokensToSkipStartEndMap = {};
     }
 
     public visitSourceFile(node: ts.SourceFile): void {
@@ -93,28 +91,6 @@ class WhitespaceWalker extends Lint.RuleWalker {
 
             }
         });
-    }
-
-    public visitRegularExpressionLiteral(node: ts.Node) {
-        this.addTokenToSkipFromNode(node);
-        super.visitRegularExpressionLiteral(node);
-    }
-
-    public visitIdentifier(node: ts.Identifier) {
-        this.addTokenToSkipFromNode(node);
-        super.visitIdentifier(node);
-    }
-
-    public visitTemplateExpression(node: ts.TemplateExpression) {
-        this.addTokenToSkipFromNode(node);
-        super.visitTemplateExpression(node);
-    }
-
-    public addTokenToSkipFromNode(node: ts.Node) {
-        if (node.getStart() < node.getEnd()) {
-            // only add to the map nodes whose end comes after their start, to prevent infinite loops
-            this.tokensToSkipStartEndMap[node.getStart()] = node.getEnd();
-        }
     }
 
     // check for spaces between the operator symbol (except in the case of comma statements)

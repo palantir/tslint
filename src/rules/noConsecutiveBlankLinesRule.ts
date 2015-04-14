@@ -22,11 +22,21 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-class BlankLinesWalker extends Lint.RuleWalker {
+class BlankLinesWalker extends Lint.SkippableTokenAwareRuleWalker {
     public visitSourceFile(node: ts.SourceFile): void {
+        super.visitSourceFile(node);
         // starting with 1 to cover the case where the file starts with two blank lines
         var newLinesInARowSeenSoFar = 1;
         Lint.scanAllTokens(ts.createScanner(ts.ScriptTarget.ES5, false, node.text), (scanner: ts.Scanner) => {
+            var startPos = scanner.getStartPos();
+            if (this.tokensToSkipStartEndMap[startPos] != null) {
+                // tokens to skip are places where the scanner gets confused about what the token is, without the proper context
+                // (specifically, regex, identifiers, and templates). So skip those tokens.
+                scanner.setTextPos(this.tokensToSkipStartEndMap[startPos]);
+                newLinesInARowSeenSoFar = 0;
+                return;
+            }
+
             if (scanner.getToken() === ts.SyntaxKind.NewLineTrivia) {
                 newLinesInARowSeenSoFar += 1;
                 if (newLinesInARowSeenSoFar >= 3) {
@@ -37,6 +47,5 @@ class BlankLinesWalker extends Lint.RuleWalker {
                 newLinesInARowSeenSoFar = 0;
             }
         });
-        // no need to call super to visit the rest of the nodes, so don't call super here
     }
 }

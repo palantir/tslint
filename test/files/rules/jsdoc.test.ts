@@ -1,3 +1,11 @@
+function makeHeader(pkg: Package) {
+    return [
+        `\t/**`,
+        `\t * ${pkg.name} v${pkg.version}`,
+        `\t */`
+    ].join("\r\n");
+}
+
 class Clazz { //this is not a block comment
     /* block comment
      *Not a jsdoc and not subject to the rules lalala
@@ -50,3 +58,5 @@ one  *
     /** a good one */
 
 }
+
+
