@@ -164,7 +164,7 @@ declare module Lint {
     function findFormatter(name: string, formattersDirectory?: string): any;
 }
 declare module Lint {
-    class SkipableTokenAwareRuleWalker extends RuleWalker {
+    class SkippableTokenAwareRuleWalker extends RuleWalker {
         protected tokensToSkipStartEndMap: {
             [start: number]: number;
         };
@@ -176,7 +176,7 @@ declare module Lint {
     }
 }
 declare module Lint {
-    class EnableDisableRulesWalker extends Lint.SkipableTokenAwareRuleWalker {
+    class EnableDisableRulesWalker extends Lint.SkippableTokenAwareRuleWalker {
         enableDisableRuleMap: {
             [rulename: string]: Lint.IEnableDisablePosition[];
         };

@@ -22,7 +22,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-class BlankLinesWalker extends Lint.SkipableTokenAwareRuleWalker {
+class BlankLinesWalker extends Lint.SkippableTokenAwareRuleWalker {
     public visitSourceFile(node: ts.SourceFile): void {
         super.visitSourceFile(node);
         // starting with 1 to cover the case where the file starts with two blank lines

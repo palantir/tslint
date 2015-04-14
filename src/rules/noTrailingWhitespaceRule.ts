@@ -22,7 +22,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-class NoTrailingWhitespaceWalker extends Lint.SkipableTokenAwareRuleWalker {
+class NoTrailingWhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
     public visitSourceFile(node: ts.SourceFile): void {
         super.visitSourceFile(node);
         var lastSeenWasWhitespace = false;

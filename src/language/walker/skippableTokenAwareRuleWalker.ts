@@ -17,7 +17,7 @@
 /// <reference path='ruleWalker.ts'/>
 
 module Lint {
-    export class SkipableTokenAwareRuleWalker extends RuleWalker {
+    export class SkippableTokenAwareRuleWalker extends RuleWalker {
         protected tokensToSkipStartEndMap: {[start: number]: number};
 
         constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {

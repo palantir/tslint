@@ -23,7 +23,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-class JsdocWalker extends Lint.SkipableTokenAwareRuleWalker {
+class JsdocWalker extends Lint.SkippableTokenAwareRuleWalker {
     public visitSourceFile(node: ts.SourceFile): void {
         super.visitSourceFile(node);
         Lint.scanAllTokens(ts.createScanner(ts.ScriptTarget.ES5, false, node.text), (scanner: ts.Scanner) => {

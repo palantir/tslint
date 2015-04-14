@@ -29,7 +29,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-class WhitespaceWalker extends Lint.SkipableTokenAwareRuleWalker {
+class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
     private scanner: ts.Scanner;
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {

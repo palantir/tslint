@@ -14,10 +14,10 @@
  * limitations under the License.
 */
 
-/// <reference path='language/walker/skipableTokenAwareRuleWalker.ts'/>
+/// <reference path='language/walker/skippableTokenAwareRuleWalker.ts'/>
 
 module Lint {
-    export class EnableDisableRulesWalker extends Lint.SkipableTokenAwareRuleWalker {
+    export class EnableDisableRulesWalker extends Lint.SkippableTokenAwareRuleWalker {
         public enableDisableRuleMap: {[rulename: string]: Lint.IEnableDisablePosition[]} = {};
 
         public visitSourceFile(node: ts.SourceFile): void {
