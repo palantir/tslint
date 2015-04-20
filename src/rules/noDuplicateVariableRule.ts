@@ -42,6 +42,10 @@ class NoDuplicateVariableWalker extends Lint.ScopeAwareRuleWalker<ScopeInfo> {
         super.visitParameterDeclaration(node);
     }
 
+    public visitTypeLiteral(node: ts.TypeLiteralNode): void {
+        // don't call super, we don't want to walk the inside of type nodes
+    }
+
     public visitVariableDeclaration(node: ts.VariableDeclaration): void {
         var propertyName = <ts.Identifier> node.name;
         var variableName = propertyName.text;

@@ -103,3 +103,6 @@ function testArguments2(x: number, y: number): void {
     var x = 1;
     let y = 2;
 }
+
+var references: {[vertex: string]: any};
+var dependents: {[vertex: string]: any};
