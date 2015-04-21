@@ -46,6 +46,16 @@ class NoDuplicateVariableWalker extends Lint.ScopeAwareRuleWalker<ScopeInfo> {
         // don't call super, we don't want to walk the inside of type nodes
     }
 
+    public visitMethodSignature(node: ts.SignatureDeclaration): void {
+        // don't call super, we don't want to walk method signatures either
+    }
+
+    public visitCatchClause(node: ts.CatchClause): void {
+        // don't visit the catch clause variable declaration, just visit the block
+        // the catch clause variable declaration has its own special scoping rules
+        this.visitBlock(node.block);
+    }
+
     public visitVariableDeclaration(node: ts.VariableDeclaration): void {
         var propertyName = <ts.Identifier> node.name;
         var variableName = propertyName.text;
