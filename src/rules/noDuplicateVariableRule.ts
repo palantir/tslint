@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "duplicate variable: '";
@@ -64,7 +64,7 @@ class NoDuplicateVariableWalker extends Lint.ScopeAwareRuleWalker<ScopeInfo> {
         var declarationIsLet = (Math.floor(node.parent.flags / ts.NodeFlags.Let) % 2) === 1;
 
         if (currentScope.varNames.indexOf(variableName) >= 0) {
-            // if there was a previous var declaration with the same name, this declaration is invalid
+            // if there was a previous var declaration with the same name, this declaration is invalid (regardless of let)
             this.addFailureOnIdentifier(propertyName);
         } else if (!declarationIsLet) {
             if (currentScope.letNames.indexOf(variableName) >= 0) {
@@ -82,8 +82,7 @@ class NoDuplicateVariableWalker extends Lint.ScopeAwareRuleWalker<ScopeInfo> {
 
     private addFailureOnIdentifier(ident: ts.Identifier): void {
         var failureString = Rule.FAILURE_STRING + ident.text + "'";
-        this.addFailure(this.createFailure(ident.getStart(),
-            ident.getWidth(), failureString));
+        this.addFailure(this.createFailure(ident.getStart(), ident.getWidth(), failureString));
     }
 
 }

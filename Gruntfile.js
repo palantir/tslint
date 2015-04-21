@@ -1,4 +1,5 @@
 module.exports = function(grunt) {
+  'use strict';
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     typescriptBin: 'node_modules/typescript/bin/typescriptServices.js',
@@ -35,18 +36,18 @@ module.exports = function(grunt) {
 
     tslint: {
       options: {
-        configuration: grunt.file.readJSON("tslint.json")
+        configuration: grunt.file.readJSON('tslint.json')
       },
       src: [
-        "src/*.ts",
-        "src/formatters/**/*.ts",
-        "src/language/**/*.ts",
-        "src/rules/**/*.ts"
+        'src/*.ts',
+        'src/formatters/**/*.ts',
+        'src/language/**/*.ts',
+        'src/rules/**/*.ts'
       ],
       test: [
-        "test/**/*.ts",
-        "!test/**/*.test.ts",
-        "!test/typings/*.ts"
+        'test/**/*.ts',
+        '!test/**/*.test.ts',
+        '!test/typings/*.ts'
       ]
     },
 

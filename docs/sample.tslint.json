@@ -39,6 +39,7 @@
     "no-debugger": true,
     "no-duplicate-key": true,
     "no-duplicate-variable": true,
+    "no-duplicate-let": true,
     "no-empty": true,
     "no-eval": true,
     "no-string-literal": true,
