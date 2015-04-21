@@ -12,13 +12,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /// <reference path='../references.ts' />
 
 describe("<no-duplicate-variable>", () => {
     it("ensures that variable declarations are unique within a scope", () => {
-        var fileName = "rules/duplicate-variable.test.ts";
+        var fileName = "rules/no-duplicate-variable.test.ts";
         var NoDuplicateVariableRule = Lint.Test.getRule("no-duplicate-variable");
         var failureString = NoDuplicateVariableRule.FAILURE_STRING + "duplicated'";
 

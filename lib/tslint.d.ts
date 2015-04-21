@@ -213,7 +213,13 @@ declare module Lint {
         onScopeStart(): void;
         onScopeEnd(): void;
         protected visitNode(node: ts.Node): void;
-        private isScopeBoundary(node);
+        protected isScopeBoundary(node: ts.Node): boolean;
+    }
+}
+declare module Lint {
+    class BlockScopeAwareRuleWalker<T> extends ScopeAwareRuleWalker<T> {
+        constructor(sourceFile: ts.SourceFile, options?: any);
+        protected isScopeBoundary(node: ts.Node): boolean;
     }
 }
 declare module Lint {
