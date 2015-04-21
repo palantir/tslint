@@ -107,7 +107,7 @@ function testArguments2(x: number, y: number): void {
 var references: {[vertex: string]: any};
 var dependents: {[vertex: string]: any};
 
-function blah(arg1: {[key: string]: any, arg2: {[key:string]: any}) {
+function blah(arg1: {[key: string]: any}, arg2: {[key:string]: any}) {
 }
 
 export interface IClipboard {

@@ -68,7 +68,7 @@ module Lint {
             }
         }
 
-        private isScopeBoundary(node: ts.Node): boolean {
+        protected isScopeBoundary(node: ts.Node): boolean {
             return node.kind === ts.SyntaxKind.FunctionDeclaration
                 || node.kind === ts.SyntaxKind.FunctionExpression
                 || node.kind === ts.SyntaxKind.PropertyAssignment

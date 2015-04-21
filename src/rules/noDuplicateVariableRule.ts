@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "duplicate variable: '";
@@ -22,9 +22,13 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-class NoDuplicateVariableWalker extends Lint.ScopeAwareRuleWalker<ScopeInfo> {
+class NoDuplicateVariableWalker extends Lint.BlockScopeAwareRuleWalker<ScopeInfo, BlockScopeInfo> {
     public createScope(): ScopeInfo {
         return new ScopeInfo();
+    }
+
+    public createBlockScope(): BlockScopeInfo {
+        return new BlockScopeInfo();
     }
 
     public visitParameterDeclaration(node: ts.ParameterDeclaration): void {
@@ -60,11 +64,12 @@ class NoDuplicateVariableWalker extends Lint.ScopeAwareRuleWalker<ScopeInfo> {
         var propertyName = <ts.Identifier> node.name;
         var variableName = propertyName.text;
         var currentScope = this.getCurrentScope();
+        var currentBlockScope = this.getCurrentBlockScope();
         // determine if the appropriate bit in the parent (VariableDeclarationList) is set, which indicates this is a "let"
         var declarationIsLet = (Math.floor(node.parent.flags / ts.NodeFlags.Let) % 2) === 1;
 
         if (currentScope.varNames.indexOf(variableName) >= 0) {
-            // if there was a previous var declaration with the same name, this declaration is invalid
+            // if there was a previous var declaration with the same name, this declaration is invalid (regardless of let)
             this.addFailureOnIdentifier(propertyName);
         } else if (!declarationIsLet) {
             if (currentScope.letNames.indexOf(variableName) >= 0) {
@@ -75,6 +80,12 @@ class NoDuplicateVariableWalker extends Lint.ScopeAwareRuleWalker<ScopeInfo> {
             }
         } else {
             currentScope.letNames.push(variableName);
+
+            if (currentBlockScope.letNames.indexOf(variableName) >= 0) {
+                this.addFailureOnIdentifier(propertyName);
+            } else {
+                currentBlockScope.letNames.push(variableName);
+            }
         }
 
         super.visitVariableDeclaration(node);
@@ -82,13 +93,15 @@ class NoDuplicateVariableWalker extends Lint.ScopeAwareRuleWalker<ScopeInfo> {
 
     private addFailureOnIdentifier(ident: ts.Identifier): void {
         var failureString = Rule.FAILURE_STRING + ident.text + "'";
-        this.addFailure(this.createFailure(ident.getStart(),
-            ident.getWidth(), failureString));
+        this.addFailure(this.createFailure(ident.getStart(), ident.getWidth(), failureString));
     }
-
 }
 
-class ScopeInfo {
-    public varNames: string[] = [];
+class BlockScopeInfo {
     public letNames: string[] = [];
 }
+
+class ScopeInfo extends BlockScopeInfo {
+    public varNames: string[] = [];
+}
+

@@ -12,13 +12,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /// <reference path='../references.ts' />
 
 describe("<no-duplicate-variable>", () => {
     it("ensures that variable declarations are unique within a scope", () => {
-        var fileName = "rules/duplicate-variable.test.ts";
+        var fileName = "rules/no-duplicate-variable.test.ts";
         var NoDuplicateVariableRule = Lint.Test.getRule("no-duplicate-variable");
         var failureString = NoDuplicateVariableRule.FAILURE_STRING + "duplicated'";
 
@@ -34,6 +34,22 @@ describe("<no-duplicate-variable>", () => {
             Lint.Test.createFailure(fileName, [98, 38], [98, 41], NoDuplicateVariableRule.FAILURE_STRING + "arg'"),
             Lint.Test.createFailure(fileName, [103, 9], [103, 10], NoDuplicateVariableRule.FAILURE_STRING + "x'"),
             Lint.Test.createFailure(fileName, [104, 9], [104, 10], NoDuplicateVariableRule.FAILURE_STRING + "y'")
+        ];
+
+        var actualFailures = Lint.Test.applyRuleOnFile(fileName, NoDuplicateVariableRule);
+        Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
+    });
+
+    it("ensures that let declarations are unique within a block scope", () => {
+        var fileName = "rules/no-duplicate-let-variable.test.ts";
+        var NoDuplicateVariableRule = Lint.Test.getRule("no-duplicate-variable");
+        var failureString = NoDuplicateVariableRule.FAILURE_STRING + "duplicated'";
+
+        var createFailure = Lint.Test.createFailuresOnFile(fileName, failureString);
+        var expectedFailures = [
+            Lint.Test.createFailure(fileName, [8, 5], [8, 6], NoDuplicateVariableRule.FAILURE_STRING + "b'"),
+            Lint.Test.createFailure(fileName, [16, 13], [16, 14], NoDuplicateVariableRule.FAILURE_STRING + "c'"),
+            Lint.Test.createFailure(fileName, [22, 9], [22, 10], NoDuplicateVariableRule.FAILURE_STRING + "d'")
         ];
 
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, NoDuplicateVariableRule);
