@@ -73,35 +73,8 @@ class NoDupConstructor {
     }
 }
 
-// valid/invalid code
-function letTesting() {
-    var a = 1;
-    let b = 1;
-    let d = 1;
-    if (true) {
-        let a = 2;
-        let b = 2;
-        let c = 2;
-        var d = 2;
-        var e = 2;
-    }
-    else {
-        let b = 3;
-        let c = 3;
-        let e = 3;
-        let f = 3;
-    }
-    var f = 4;
-}
-
-// failure: two arguments have the same name.
+// tsc error
 function testArguments1(arg: number, arg: number): void {
-}
-
-// failure: local var/let declarations shadow arguments.
-function testArguments2(x: number, y: number): void {
-    var x = 1;
-    let y = 2;
 }
 
 var references: {[vertex: string]: any};

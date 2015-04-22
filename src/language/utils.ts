@@ -79,4 +79,10 @@ module Lint {
             callback(scanner);
         }
     }
+
+    export function isBlockScopedVariable(node: ts.VariableDeclaration): boolean {
+        // determine if the appropriate bit in the parent (VariableDeclarationList) is set, which indicates this is a "let" or "const"
+        return (Math.floor(node.parent.flags / ts.NodeFlags.Let) % 2) === 1
+            || (Math.floor(node.parent.flags / ts.NodeFlags.Const) % 2) === 1;
+    }
 }

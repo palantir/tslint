@@ -17,6 +17,10 @@
 /// <reference path='scopeAwareRuleWalker.ts'/>
 
 module Lint {
+    /**
+     * An AST walker that is aware of block scopes in addition to regular scopes. Block scopes
+     * are a superset of regular scopes (new block scopes are created more frequently in a program).
+     */
     export class BlockScopeAwareRuleWalker<T, U> extends ScopeAwareRuleWalker<T> {
         private blockScopeStack: U[];
 
@@ -33,6 +37,10 @@ module Lint {
 
         public getCurrentBlockScope(): U {
             return this.blockScopeStack[this.blockScopeStack.length - 1];
+        }
+
+        public getCurrentBlockDepth(): number {
+            return this.blockScopeStack.length;
         }
 
         // callback notifier when a block scope begins
@@ -61,13 +69,19 @@ module Lint {
             }
         }
 
-        // block scopes are a superset of regular scopes
         private isBlockScopeBoundary(node: ts.Node): boolean {
             return super.isScopeBoundary(node)
-                || node.kind === ts.SyntaxKind.ConditionalExpression
-                || node.kind === ts.SyntaxKind.CaseBlock
-                || node.kind === ts.SyntaxKind.ModuleBlock
-                || node.kind === ts.SyntaxKind.Block;
+                || node.kind === ts.SyntaxKind.DoStatement
+                || node.kind === ts.SyntaxKind.WhileStatement
+                || node.kind === ts.SyntaxKind.ForStatement
+                || node.kind === ts.SyntaxKind.ForInStatement
+                || node.kind === ts.SyntaxKind.ForOfStatement
+                || node.kind === ts.SyntaxKind.WithStatement
+                || node.kind === ts.SyntaxKind.SwitchStatement
+                || (node.parent != null
+                    && (node.parent.kind === ts.SyntaxKind.TryStatement
+                        || node.parent.kind === ts.SyntaxKind.IfStatement)
+                   );
         }
     }
 }

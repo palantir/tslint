@@ -118,6 +118,7 @@ declare module Lint {
     function doesIntersect(failure: RuleFailure, disabledIntervals: Lint.IDisabledInterval[]): boolean;
     function abstract(): string;
     function scanAllTokens(scanner: ts.Scanner, callback: (scanner: ts.Scanner) => void): void;
+    function isBlockScopedVariable(node: ts.VariableDeclaration): boolean;
 }
 declare module Lint {
     class RuleWalker extends Lint.SyntaxWalker {
@@ -209,6 +210,7 @@ declare module Lint {
         constructor(sourceFile: ts.SourceFile, options?: any);
         createScope(): T;
         getCurrentScope(): T;
+        getAllScopes(): T[];
         getCurrentDepth(): number;
         onScopeStart(): void;
         onScopeEnd(): void;
@@ -222,6 +224,7 @@ declare module Lint {
         constructor(sourceFile: ts.SourceFile, options?: any);
         createBlockScope(): U;
         getCurrentBlockScope(): U;
+        getCurrentBlockDepth(): number;
         onBlockScopeStart(): void;
         onBlockScopeEnd(): void;
         protected visitNode(node: ts.Node): void;
