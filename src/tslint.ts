@@ -28,6 +28,7 @@
 /// <reference path='language/rule/abstractRule.ts'/>
 /// <reference path='language/walker/ruleWalker.ts'/>
 /// <reference path='language/walker/scopeAwareRuleWalker.ts'/>
+/// <reference path='language/walker/blockScopeAwareRuleWalker.ts'/>
 /// <reference path='language/walker/skippableTokenAwareRuleWalker.ts'/>
 
 module Lint {

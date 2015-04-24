@@ -15,20 +15,35 @@
  */
 
 export class Rule extends Lint.Rules.AbstractRule {
-    public static FAILURE_STRING = "duplicate variable: '";
+    public static FAILURE_STRING = "shadowed variable: '";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoDuplicateVariableWalker(sourceFile, this.getOptions()));
+        return this.applyWithWalker(new NoShadowedVariableWalker(sourceFile, this.getOptions()));
     }
 }
 
-class NoDuplicateVariableWalker extends Lint.BlockScopeAwareRuleWalker<{}, ScopeInfo> {
+class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<ScopeInfo, ScopeInfo> {
     public createScope(): ScopeInfo {
-        return null;
+        return new ScopeInfo();
     }
 
     public createBlockScope(): ScopeInfo {
         return new ScopeInfo();
+    }
+
+    public visitParameterDeclaration(node: ts.ParameterDeclaration): void {
+        // Treat parameters as block-scoped variables
+        var propertyName = <ts.Identifier> node.name;
+        var variableName = propertyName.text;
+        var currentScope = this.getCurrentScope();
+        var currentBlockScope = this.getCurrentBlockScope();
+
+        if (this.isVarInAnyScope(variableName)) {
+            this.addFailureOnIdentifier(propertyName);
+        }
+        currentScope.varNames.push(variableName);
+
+        super.visitParameterDeclaration(node);
     }
 
     public visitTypeLiteral(node: ts.TypeLiteralNode): void {
@@ -48,17 +63,29 @@ class NoDuplicateVariableWalker extends Lint.BlockScopeAwareRuleWalker<{}, Scope
     public visitVariableDeclaration(node: ts.VariableDeclaration): void {
         var propertyName = <ts.Identifier> node.name;
         var variableName = propertyName.text;
+        var currentScope = this.getCurrentScope();
         var currentBlockScope = this.getCurrentBlockScope();
 
-        if (!Lint.isBlockScopedVariable(node)) {
-            if (currentBlockScope.varNames.indexOf(variableName) >= 0) {
-                this.addFailureOnIdentifier(propertyName);
-            } else {
-                currentBlockScope.varNames.push(variableName);
-            }
+        // this var is shadowing if there's already a var of the same name in any available scope AND
+        // it is not in the current block (those are handled by the 'no-duplicate-variable' rule)
+        if (this.isVarInAnyScope(variableName) && currentBlockScope.varNames.indexOf(variableName) < 0) {
+            this.addFailureOnIdentifier(propertyName);
         }
 
+        // regular vars should always be added to the scope; block-scoped vars should be added iff
+        // the current scope is same as current block scope
+        if (!Lint.isBlockScopedVariable(node)
+                || this.getCurrentBlockDepth() === 1
+                || this.getCurrentBlockDepth() === this.getCurrentDepth()) {
+            currentScope.varNames.push(variableName);
+        }
+        currentBlockScope.varNames.push(variableName);
+
         super.visitVariableDeclaration(node);
+    }
+
+    private isVarInAnyScope(varName: string): boolean {
+        return this.getAllScopes().some((scopeInfo) => scopeInfo.varNames.indexOf(varName) >= 0);
     }
 
     private addFailureOnIdentifier(ident: ts.Identifier): void {
