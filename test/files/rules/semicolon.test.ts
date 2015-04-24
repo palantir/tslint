@@ -36,3 +36,15 @@ function useStrictMissingSemicolon() {
     "use strict"
     return null;
 }
+
+class MyClass {
+    public name : string
+    private index : number
+    private email : string; // no error
+}
+
+interface ITest {
+    foo?: string
+    bar: number
+    baz: boolean; // no error
+}
