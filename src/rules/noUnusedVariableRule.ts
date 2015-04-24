@@ -29,8 +29,9 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class NoUnusedVariablesWalker extends Lint.RuleWalker {
-    private skipVariableDeclaration: boolean;
+    private skipBindingElement: boolean;
     private skipParameterDeclaration: boolean;
+    private skipVariableDeclaration: boolean;
     private languageService: ts.LanguageService;
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions, languageService: ts.LanguageService) {
@@ -38,6 +39,17 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         this.skipVariableDeclaration = false;
         this.skipParameterDeclaration = false;
         this.languageService = languageService;
+    }
+
+    public visitBindingElement(node: ts.BindingElement) {
+        var isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
+
+        if (isSingleVariable && !this.skipBindingElement) {
+            var variableIdentifier = <ts.Identifier> node.name;
+            this.validateReferencesForVariable(variableIdentifier.text, variableIdentifier.getStart());
+        }
+
+        super.visitBindingElement(node);
     }
 
     public visitImportDeclaration(node: ts.ImportDeclaration): void {
@@ -67,11 +79,11 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
 
     // check variable declarations
     public visitVariableDeclaration(node: ts.VariableDeclaration): void {
-        var propertyName = <ts.Identifier> node.name;
-        var variableName = propertyName.text;
+        var isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
 
-        if (!this.skipVariableDeclaration) {
-            this.validateReferencesForVariable(variableName, propertyName.getStart());
+        if (isSingleVariable && !this.skipVariableDeclaration) {
+            var variableIdentifier = <ts.Identifier> node.name;
+            this.validateReferencesForVariable(variableIdentifier.text, variableIdentifier.getStart());
         }
 
         super.visitVariableDeclaration(node);
@@ -95,10 +107,12 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     public visitVariableStatement(node: ts.VariableStatement): void {
         if (this.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword)
             || this.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)) {
+            this.skipBindingElement = true;
             this.skipVariableDeclaration = true;
         }
 
         super.visitVariableStatement(node);
+        this.skipBindingElement = false;
         this.skipVariableDeclaration = false;
     }
 
