@@ -43,9 +43,11 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     public visitImportDeclaration(node: ts.ImportDeclaration): void {
         if (!this.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword)) {
             var importClause = node.importClause;
-            if (importClause != null) {
-                var name = <ts.Identifier> importClause.name;
-                this.validateReferencesForVariable(name.text, name.getStart());
+
+            // named imports & namespace imports handled by other walker methods
+            if (importClause.name != null) {
+                var variableIdentifier = importClause.name;
+                this.validateReferencesForVariable(variableIdentifier.text, variableIdentifier.getStart());
             }
         }
         super.visitImportDeclaration(node);
@@ -65,7 +67,18 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         this.visitBlock(node.block);
     }
 
-    // check variable declarations
+    public visitNamedImports(node: ts.NamedImports): void {
+        node.elements.forEach((namedImport: ts.ImportSpecifier) => {
+            this.validateReferencesForVariable(namedImport.name.text, namedImport.name.getStart());
+        });
+        super.visitNamedImports(node);
+    }
+
+    public visitNamespaceImport(node: ts.NamespaceImport): void {
+        this.validateReferencesForVariable(node.name.text, node.getStart());
+        super.visitNamespaceImport(node);
+    }
+
     public visitVariableDeclaration(node: ts.VariableDeclaration): void {
         var propertyName = <ts.Identifier> node.name;
         var variableName = propertyName.text;
@@ -177,9 +190,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     private validateReferencesForVariable(name: string, position: number) {
         var highlights = this.languageService.getDocumentHighlights("file.ts", position, ["file.ts"]);
         if (highlights[0].highlightSpans.length <= 1) {
-            var failureString = Rule.FAILURE_STRING + "'" + name + "'";
-            var failure = this.createFailure(position, name.length, failureString);
-            this.addFailure(failure);
+            this.addFailure(this.createFailure(position, name.length, `${Rule.FAILURE_STRING}'${name}'`));
         }
     }
 }

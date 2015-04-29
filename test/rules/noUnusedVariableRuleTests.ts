@@ -19,13 +19,14 @@ describe("<no-unused-variable>", () => {
         var fileName = "rules/nounusedvariable-imports.test.ts";
         var Rule = Lint.Test.getRule("no-unused-variable");
         var failure1 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING + "'xyz'")([3, 9], [3, 12]);
-        var failure2 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING + "'template'")([11, 7], [11, 15]);
-
+        var failure2 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING + "'createReadStream'")([4, 9], [4, 25]);
+        var failure3 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING + "'template'")([14, 7], [14, 15]);
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule);
 
-        assert.lengthOf(actualFailures, 2);
+        assert.lengthOf(actualFailures, 3);
         Lint.Test.assertContainsFailure(actualFailures, failure1);
         Lint.Test.assertContainsFailure(actualFailures, failure2);
+        Lint.Test.assertContainsFailure(actualFailures, failure3);
     });
 
     it("restricts unused variables", () => {

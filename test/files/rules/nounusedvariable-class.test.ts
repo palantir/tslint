@@ -1,5 +1,5 @@
 class ABCD {
-    private z2: number;
+    private z2: number; // failure
     constructor() {
     }
 
@@ -15,7 +15,7 @@ class ABCD {
         //
     }
 
-    private mfunc4() {
+    private mfunc4() { // failure
         //
     }
     static stillPublic: number;

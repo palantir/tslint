@@ -4,6 +4,7 @@ declare module Lint {
         protected visitAnyKeyword(node: ts.Node): void;
         protected visitArrowFunction(node: ts.FunctionLikeDeclaration): void;
         protected visitBinaryExpression(node: ts.BinaryExpression): void;
+        protected visitBindingElement(node: ts.BindingElement): void;
         protected visitBlock(node: ts.Block): void;
         protected visitBreakStatement(node: ts.BreakOrContinueStatement): void;
         protected visitCallExpression(node: ts.CallExpression): void;
@@ -37,6 +38,8 @@ declare module Lint {
         protected visitMethodDeclaration(node: ts.MethodDeclaration): void;
         protected visitMethodSignature(node: ts.SignatureDeclaration): void;
         protected visitModuleDeclaration(node: ts.ModuleDeclaration): void;
+        protected visitNamedImports(node: ts.NamedImports): void;
+        protected visitNamespaceImport(node: ts.NamespaceImport): void;
         protected visitNewExpression(node: ts.NewExpression): void;
         protected visitObjectLiteralExpression(node: ts.ObjectLiteralExpression): void;
         protected visitParameterDeclaration(node: ts.ParameterDeclaration): void;
