@@ -12,12 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
-
-/// <reference path='../references.ts' />
+ */
 
 describe("<no-empty>", () => {
-    var actualFailures;
+    var actualFailures: Lint.RuleFailure[];
     var fileName = "rules/noempty.test.ts";
     var NoEmptyRule = Lint.Test.getRule("no-empty");
     var createFailure = Lint.Test.createFailuresOnFile(fileName, NoEmptyRule.FAILURE_STRING);

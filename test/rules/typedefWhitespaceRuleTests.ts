@@ -14,7 +14,7 @@
  * limitations under the License.
 */
 
-///<reference path='../references.ts' />
+
 
 describe("<typedefWhitespace, not enabled>", () => {
     var fileName = "rules/typedefWhitespace.test.ts";

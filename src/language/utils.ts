@@ -14,10 +14,6 @@
  * limitations under the License.
 */
 
-///<reference path="../../typings/node.d.ts" />
-///<reference path="../../typings/typescriptServices.d.ts" />
-///<reference path='./rule/rule.ts'/>
-
 module Lint {
     var path = require("path");
 

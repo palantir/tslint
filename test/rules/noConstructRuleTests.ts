@@ -12,12 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
-
-/// <reference path='../references.ts' />
+ */
 
 describe("<no-construct>", () => {
-    var actualFailures;
+    var actualFailures: Lint.RuleFailure[];
     var fileName = "rules/noconstruct.test.ts";
     var NoConstructRule = Lint.Test.getRule("no-construct");
     var createFailure = Lint.Test.createFailuresOnFile(fileName, NoConstructRule.FAILURE_STRING);

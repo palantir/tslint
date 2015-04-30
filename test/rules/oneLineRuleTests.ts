@@ -12,12 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
-
-/// <reference path='../references.ts' />
+ */
 
 describe("<one-line>", () => {
-    var actualFailures;
+    var actualFailures: Lint.RuleFailure[];
     var fileName = "rules/oneline.test.ts";
     var OneLineRule = Lint.Test.getRule("one-line");
     var braceFailure = OneLineRule.BRACE_FAILURE_STRING;
