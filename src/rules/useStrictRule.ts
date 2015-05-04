@@ -73,7 +73,7 @@ class UseStrictWalker extends Lint.ScopeAwareRuleWalker<{}> {
                 var firstChild = firstStatement.getChildAt(0);
 
                 if (firstChild.kind === ts.SyntaxKind.StringLiteral &&
-                        (<ts.StringLiteralExpression> firstChild).text === UseStrictWalker.USE_STRICT_STRING) {
+                        (<ts.StringLiteral> firstChild).text === UseStrictWalker.USE_STRICT_STRING) {
                     isFailure = false;
                 }
             }

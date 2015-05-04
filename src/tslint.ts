@@ -16,6 +16,7 @@
 
 /// <reference path='../typings/node.d.ts'/>
 /// <reference path='../typings/typescriptServices.d.ts'/>
+/// <reference path='../typings/typescriptServicesScanner.d.ts'/>
 
 /// <reference path='ruleLoader.ts'/>
 /// <reference path='configuration.ts'/>
