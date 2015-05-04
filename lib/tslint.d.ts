@@ -1,4 +1,5 @@
 /// <reference path="../typings/typescriptServices.d.ts" />
+/// <reference path="../typings/typescriptServicesScanner.d.ts" />
 /// <reference path="../typings/node.d.ts" />
 declare module Lint {
     interface IOptions {
