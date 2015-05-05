@@ -70,15 +70,17 @@ class NoUseBeforeDeclareWalker extends Lint.ScopeAwareRuleWalker<{}> {
     }
 
     private validateUsageForVariable(name: string, position: number) {
-        var references = this.languageService.getReferencesAtPosition("file.ts", position);
-        if (references) {
-            references.forEach((reference) => {
-                var referencePosition = reference.textSpan.start;
-                if (referencePosition < position) {
-                    var failureString = Rule.FAILURE_STRING_PREFIX + name + Rule.FAILURE_STRING_POSTFIX;
-                    var failure = this.createFailure(referencePosition, name.length, failureString);
-                    this.addFailure(failure);
-                }
+        var highlights = this.languageService.getDocumentHighlights("file.ts", position, ["file.ts"]);
+        if (highlights) {
+            highlights.forEach((highlight) => {
+                highlight.highlightSpans.forEach((highlightSpan) => {
+                    var referencePosition = highlightSpan.textSpan.start;
+                    if (referencePosition < position) {
+                        var failureString = Rule.FAILURE_STRING_PREFIX + name + Rule.FAILURE_STRING_POSTFIX;
+                        var failure = this.createFailure(referencePosition, name.length, failureString);
+                        this.addFailure(failure);
+                    }
+                });
             });
         }
     }
