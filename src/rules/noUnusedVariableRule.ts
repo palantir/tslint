@@ -170,8 +170,8 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     }
 
     private validateReferencesForVariable(name: string, position: number) {
-        var references = this.languageService.getReferencesAtPosition("file.ts", position);
-        if (references.length <= 1) {
+        var highlights = this.languageService.getDocumentHighlights("file.ts", position, ["file.ts"]);
+        if (highlights[0].highlightSpans.length <= 1) {
             var failureString = Rule.FAILURE_STRING + "'" + name + "'";
             var failure = this.createFailure(position, name.length, failureString);
             this.addFailure(failure);
