@@ -1,5 +1,19 @@
 Change Log
 ===
+v2.2.0-beta
+---
+* Upgraded Typescript compiler to 1.5
+* **BREAKING CHANGES**
+	* due to changes to the typescript compiler API, old custom rules may no longer work and may need to be rewritten
+	* the JSON formatter's line and character positions are now back to being 0-indexed instead of 1-indexed
+* [bugs] #328 #334 #319 #351 #365 #254
+* [bug] fixes for tslint behavior around template strings (fixes #357, #349, #332, and more)
+* [new-rule] `align` rule now enforces vertical alignment on parameters, arguments, and statements
+* [new-rule] `switch-default` enforces a `default` case in `switch` statements
+* [feature] `no-duplicate-variable` rule now additionally checks if function parameters have been shadowed
+* Additional fixes to existing rules to work as before with the typescript 1.5 compiler
+
+===
 v2.1.1
 ---
 * [bugs] #292 #293 #295 #301 #302
