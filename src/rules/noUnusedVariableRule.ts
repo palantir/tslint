@@ -61,6 +61,12 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         super.visitImportEqualsDeclaration(node);
     }
 
+    public visitCatchClause(node: ts.CatchClause): void {
+        // don't visit the catch clause variable declaration, just visit the block
+        // the catch clause variable declaration needs to be there but doesn't need to be used
+        this.visitBlock(node.block);
+    }
+
     // check variable declarations
     public visitVariableDeclaration(node: ts.VariableDeclaration): void {
         var propertyName = <ts.Identifier> node.name;
