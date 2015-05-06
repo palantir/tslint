@@ -113,7 +113,9 @@ function blah(arg1: {[key: string]: any, arg2: {[key:string]: any}) {
 export interface IClipboard {
     copy(key: string, state: any): void;
     paste(key: string): any;
-    findMaxOrMin(values: any[], defaultValue: number, operation: (...values: any[]) => number)
+    findMaxOrMin(values: any[], defaultValue: number, operation: (...values: any[]) => number);
+    functionA: (value: string) => void;
+    functionB: (value: string) => void;
 }
 
 try {

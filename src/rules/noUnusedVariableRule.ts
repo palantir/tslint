@@ -59,6 +59,12 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         super.visitImportEqualsDeclaration(node);
     }
 
+    public visitCatchClause(node: ts.CatchClause): void {
+        // don't visit the catch clause variable declaration, just visit the block
+        // the catch clause variable declaration needs to be there but doesn't need to be used
+        this.visitBlock(node.block);
+    }
+
     // check variable declarations
     public visitVariableDeclaration(node: ts.VariableDeclaration): void {
         var propertyName = <ts.Identifier> node.name;
@@ -168,8 +174,8 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     }
 
     private validateReferencesForVariable(name: string, position: number) {
-        var references = this.languageService.getReferencesAtPosition("file.ts", position);
-        if (references.length <= 1) {
+        var highlights = this.languageService.getDocumentHighlights("file.ts", position, ["file.ts"]);
+        if (highlights[0].highlightSpans.length <= 1) {
             var failureString = Rule.FAILURE_STRING + "'" + name + "'";
             var failure = this.createFailure(position, name.length, failureString);
             this.addFailure(failure);

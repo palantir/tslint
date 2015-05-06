@@ -16,6 +16,7 @@
     "files": [
         "../typings/node.d.ts",
         "../typings/typescriptServices.d.ts",
+        "../typings/typescriptServicesScanner.d.ts",
         "../lib/tslint.d.ts",
         "./typings/chai-assert.d.ts",
         "./typings/chai.d.ts",

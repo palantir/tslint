@@ -10,3 +10,9 @@ class ABCD {
         z = 3;
     }
 }
+
+try {
+  // code here
+} catch (e) {
+  // e is unused but that's still ok
+}
