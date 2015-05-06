@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/// <reference path='../references.ts' />
-
 describe("<member-ordering>", () => {
     it("requires public variables to go before private ones", () => {
         var fileName = "rules/memberordering-private.test.ts";

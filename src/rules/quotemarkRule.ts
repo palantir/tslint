@@ -14,8 +14,6 @@
  * limitations under the License.
 */
 
-/// <reference path='../../lib/tslint.d.ts' />
-
 enum QuoteMark {
     SINGLE_QUOTES,
     DOUBLE_QUOTES

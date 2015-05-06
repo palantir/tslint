@@ -14,11 +14,10 @@
  * limitations under the License.
 */
 
-/// <reference path='../references.ts' />
-
 describe("Prose Formatter", () => {
     var TEST_FILE = "formatters/proseFormatter.test.ts";
-    var sourceFile, formatter;
+    var sourceFile: ts.SourceFile;
+    var formatter: Lint.IFormatter;
 
     before(function() {
         var Formatter = Lint.Test.getFormatter("prose");
@@ -49,7 +48,7 @@ describe("Prose Formatter", () => {
         assert.equal(result, "\n");
     });
 
-    function getPositionString(line, character) {
+    function getPositionString(line: number, character: number) {
         return "[" + line + ", " + character + "]: ";
     }
 });

@@ -14,7 +14,7 @@
  * limitations under the License.
 */
 
-///<reference path='../references.ts' />
+
 
 describe("<typedef, not enabled>", () => {
     var fileName = "rules/typedef.test.ts";

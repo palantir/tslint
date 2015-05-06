@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/// <reference path='ruleWalker.ts'/>
-
 module Lint {
     export class SkippableTokenAwareRuleWalker extends RuleWalker {
         protected tokensToSkipStartEndMap: {[start: number]: number};
