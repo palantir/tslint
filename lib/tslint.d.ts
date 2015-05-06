@@ -1,53 +1,3 @@
-/// <reference path="../typings/typescriptServices.d.ts" />
-/// <reference path="../typings/typescriptServicesScanner.d.ts" />
-/// <reference path="../typings/node.d.ts" />
-declare module Lint {
-    interface IOptions {
-        ruleArguments?: any[];
-        ruleName: string;
-        disabledIntervals: Lint.IDisabledInterval[];
-    }
-    interface IDisabledInterval {
-        startPosition: number;
-        endPosition: number;
-    }
-    interface IRule {
-        getOptions(): IOptions;
-        isEnabled(): boolean;
-        apply(sourceFile: ts.SourceFile): RuleFailure[];
-        applyWithWalker(walker: Lint.RuleWalker): RuleFailure[];
-    }
-    class RuleFailurePosition {
-        private position;
-        private lineAndCharacter;
-        constructor(position: number, lineAndCharacter: ts.LineAndCharacter);
-        getPosition(): number;
-        getLineAndCharacter(): ts.LineAndCharacter;
-        toJson(): {
-            position: number;
-            line: number;
-            character: number;
-        };
-        equals(ruleFailurePosition: RuleFailurePosition): boolean;
-    }
-    class RuleFailure {
-        private sourceFile;
-        private fileName;
-        private startPosition;
-        private endPosition;
-        private failure;
-        private ruleName;
-        constructor(sourceFile: ts.SourceFile, start: number, end: number, failure: string, ruleName: string);
-        getFileName(): string;
-        getRuleName(): string;
-        getStartPosition(): Lint.RuleFailurePosition;
-        getEndPosition(): Lint.RuleFailurePosition;
-        getFailure(): string;
-        toJson(): any;
-        equals(ruleFailure: RuleFailure): boolean;
-        private createFailurePosition(position);
-    }
-}
 declare module Lint {
     class SyntaxWalker {
         walk(node: ts.Node): void;
@@ -113,6 +63,77 @@ declare module Lint {
         private walkChildren(node);
     }
 }
+declare module Lint.Formatters {
+    class AbstractFormatter implements Lint.IFormatter {
+        format(failures: Lint.RuleFailure[]): string;
+    }
+}
+declare module Lint {
+    interface IFormatter {
+        format(failures: Lint.RuleFailure[]): string;
+    }
+}
+declare module Lint {
+    function createLanguageServiceHost(fileName: string, source: string): ts.LanguageServiceHost;
+}
+declare module Lint.Rules {
+    class AbstractRule implements Lint.IRule {
+        private value;
+        private options;
+        constructor(ruleName: string, value: any, disabledIntervals: Lint.IDisabledInterval[]);
+        getOptions(): Lint.IOptions;
+        apply(sourceFile: ts.SourceFile): RuleFailure[];
+        applyWithWalker(walker: Lint.RuleWalker): RuleFailure[];
+        isEnabled(): boolean;
+    }
+}
+declare module Lint {
+    interface IOptions {
+        ruleArguments?: any[];
+        ruleName: string;
+        disabledIntervals: Lint.IDisabledInterval[];
+    }
+    interface IDisabledInterval {
+        startPosition: number;
+        endPosition: number;
+    }
+    interface IRule {
+        getOptions(): IOptions;
+        isEnabled(): boolean;
+        apply(sourceFile: ts.SourceFile): RuleFailure[];
+        applyWithWalker(walker: Lint.RuleWalker): RuleFailure[];
+    }
+    class RuleFailurePosition {
+        private position;
+        private lineAndCharacter;
+        constructor(position: number, lineAndCharacter: ts.LineAndCharacter);
+        getPosition(): number;
+        getLineAndCharacter(): ts.LineAndCharacter;
+        toJson(): {
+            position: number;
+            line: number;
+            character: number;
+        };
+        equals(ruleFailurePosition: RuleFailurePosition): boolean;
+    }
+    class RuleFailure {
+        private sourceFile;
+        private fileName;
+        private startPosition;
+        private endPosition;
+        private failure;
+        private ruleName;
+        constructor(sourceFile: ts.SourceFile, start: number, end: number, failure: string, ruleName: string);
+        getFileName(): string;
+        getRuleName(): string;
+        getStartPosition(): Lint.RuleFailurePosition;
+        getEndPosition(): Lint.RuleFailurePosition;
+        getFailure(): string;
+        toJson(): any;
+        equals(ruleFailure: RuleFailure): boolean;
+        private createFailurePosition(position);
+    }
+}
 declare module Lint {
     function getSourceFile(fileName: string, source: string): ts.SourceFile;
     function createCompilerOptions(): ts.CompilerOptions;
@@ -142,27 +163,17 @@ declare module Lint {
     }
 }
 declare module Lint {
-    interface IEnableDisablePosition {
-        isEnabled: boolean;
-        position: number;
+    class ScopeAwareRuleWalker<T> extends RuleWalker {
+        private scopeStack;
+        constructor(sourceFile: ts.SourceFile, options?: any);
+        createScope(): T;
+        getCurrentScope(): T;
+        getCurrentDepth(): number;
+        onScopeStart(): void;
+        onScopeEnd(): void;
+        protected visitNode(node: ts.Node): void;
+        private isScopeBoundary(node);
     }
-    function loadRules(ruleConfiguration: {
-        [name: string]: any;
-    }, enableDisableRuleMap: {
-        [rulename: string]: Lint.IEnableDisablePosition[];
-    }, rulesDirectory?: string): IRule[];
-    function findRule(name: string, rulesDirectory?: string): any;
-}
-declare module Lint.Configuration {
-    function findConfiguration(configFile: string, inputFileLocation: string): any;
-}
-declare module Lint {
-    interface IFormatter {
-        format(failures: Lint.RuleFailure[]): string;
-    }
-}
-declare module Lint {
-    function findFormatter(name: string, formattersDirectory?: string): any;
 }
 declare module Lint {
     class SkippableTokenAwareRuleWalker extends RuleWalker {
@@ -176,6 +187,9 @@ declare module Lint {
         private addTokenToSkipFromNode(node);
     }
 }
+declare module Lint.Configuration {
+    function findConfiguration(configFile: string, inputFileLocation: string): any;
+}
 declare module Lint {
     class EnableDisableRulesWalker extends Lint.SkippableTokenAwareRuleWalker {
         enableDisableRuleMap: {
@@ -186,36 +200,19 @@ declare module Lint {
     }
 }
 declare module Lint {
-    function createLanguageServiceHost(fileName: string, source: string): ts.LanguageServiceHost;
-}
-declare module Lint.Formatters {
-    class AbstractFormatter implements Lint.IFormatter {
-        format(failures: Lint.RuleFailure[]): string;
-    }
-}
-declare module Lint.Rules {
-    class AbstractRule implements Lint.IRule {
-        private value;
-        private options;
-        constructor(ruleName: string, value: any, disabledIntervals: Lint.IDisabledInterval[]);
-        getOptions(): Lint.IOptions;
-        apply(sourceFile: ts.SourceFile): RuleFailure[];
-        applyWithWalker(walker: Lint.RuleWalker): RuleFailure[];
-        isEnabled(): boolean;
-    }
+    function findFormatter(name: string, formattersDirectory?: string): any;
 }
 declare module Lint {
-    class ScopeAwareRuleWalker<T> extends RuleWalker {
-        private scopeStack;
-        constructor(sourceFile: ts.SourceFile, options?: any);
-        createScope(): T;
-        getCurrentScope(): T;
-        getCurrentDepth(): number;
-        onScopeStart(): void;
-        onScopeEnd(): void;
-        protected visitNode(node: ts.Node): void;
-        private isScopeBoundary(node);
+    interface IEnableDisablePosition {
+        isEnabled: boolean;
+        position: number;
     }
+    function loadRules(ruleConfiguration: {
+        [name: string]: any;
+    }, enableDisableRuleMap: {
+        [rulename: string]: Lint.IEnableDisablePosition[];
+    }, rulesDirectory?: string): IRule[];
+    function findRule(name: string, rulesDirectory?: string): any;
 }
 declare module Lint {
     interface LintResult {

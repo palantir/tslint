@@ -14,8 +14,6 @@
  * limitations under the License.
 */
 
-///<reference path='../references.ts' />
-
 describe("<align, enabled>", () => {
 
     it("ensures that parameters in function signatures are aligned", () => {
@@ -65,4 +63,3 @@ describe("<align, enabled>", () => {
         Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
     });
 });
-

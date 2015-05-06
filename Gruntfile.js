@@ -19,7 +19,7 @@ module.exports = function(grunt) {
         dest: 'lib/tslint.js'
       },
       test: {
-        src: ['<%= typescriptBin %>', 'build/tslint-tests.js'],
+        src: ['lib/tslint.js', 'build/tslint-tests.js'],
         dest: 'build/tslint-tests.js'
       }
     },
@@ -51,13 +51,17 @@ module.exports = function(grunt) {
     },
 
     ts: {
-      options:{
+      options: {
         sourceMap: false,
         target: 'es5'
       },
 
       bin: {
-        src: ['src/tslint-cli.ts'],
+        src: [
+          'typings/*.d.ts',
+          'src/language/**/*.ts',
+          'src/*.ts',
+        ],
         out: 'bin/tslint-cli.js'
       },
 
@@ -67,7 +71,13 @@ module.exports = function(grunt) {
           declaration: true,
           module: 'commonjs'
         },
-        src: ['src/tslint.ts'],
+        src: [
+          'typings/*.d.ts',
+          'src/language/walker/syntaxWalker.ts',
+          'src/language/**/*.ts',
+          'src/*.ts',
+          '!src/tslint-cli.ts'
+        ],
         out: 'lib/tslint.js'
       },
 
@@ -76,7 +86,11 @@ module.exports = function(grunt) {
           base_path: 'src/rules',
           module: 'commonjs'
         },
-        src: ['lib/tslint.d.ts', 'src/rules/*.ts'],
+        src: [
+          'typings/*.d.ts',
+          'lib/tslint.d.ts',
+          'src/rules/*.ts'
+        ],
         outDir: 'build/rules/'
       },
 
@@ -85,12 +99,19 @@ module.exports = function(grunt) {
           base_path: 'src/formatters',
           module: 'commonjs'
         },
-        src: ['lib/tslint.d.ts', 'src/formatters/*.ts'],
+        src: [
+          'typings/*.d.ts',
+          'lib/tslint.d.ts',
+          'src/formatters/*.ts'
+        ],
         outDir: 'build/formatters/'
       },
 
       test: {
         src: [
+          'typings/*.d.ts',
+          'lib/tslint.d.ts',
+          'test/typings/*.d.ts',
           'test/**/*.ts',
           '!test/files/**/*.ts'
         ],

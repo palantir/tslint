@@ -14,8 +14,6 @@
  * limitations under the License.
 */
 
-/// <reference path='ruleWalker.ts'/>
-
 module Lint {
     export class ScopeAwareRuleWalker<T> extends RuleWalker {
         private scopeStack: T[];

@@ -14,8 +14,6 @@
  * limitations under the License.
 */
 
-/// <reference path='references.ts' />
-
 var fs = require("fs");
 
 describe("Enable and Disable Rules", () => {

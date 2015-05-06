@@ -14,8 +14,6 @@
  * limitations under the License.
 */
 
-/// <reference path='../references.ts' />
-
 describe("<no-duplicate-variable>", () => {
     it("ensures that variable declarations are unique within a scope", () => {
         var fileName = "rules/duplicate-variable.test.ts";

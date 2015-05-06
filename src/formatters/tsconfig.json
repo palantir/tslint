@@ -1,0 +1,21 @@
+{
+    "version": "1.5.0-alpha",
+    "compilerOptions": {
+        "module": "commonjs",
+        "noImplicitAny": true,
+        "sourceMap": false,
+        "target": "es5",
+        "outDir": "../../build/formatters/"
+    },
+    "filesGlob": [
+        "../../lib/tslint.d.ts",
+        "./*.ts"
+    ],
+    "files": [
+        "../../lib/tslint.d.ts",
+        "./jsonFormatter.ts",
+        "./pmdFormatter.ts",
+        "./proseFormatter.ts",
+        "./verboseFormatter.ts"
+    ]
+}

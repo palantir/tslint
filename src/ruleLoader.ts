@@ -14,9 +14,6 @@
  * limitations under the License.
 */
 
-/// <reference path='language/rule/rule.ts'/>
-/// <reference path='language/walker/ruleWalker.ts'/>
-
 module Lint {
     var fs = require("fs");
     var path = require("path");

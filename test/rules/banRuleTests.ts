@@ -14,8 +14,6 @@
  * limitations under the License.
 */
 
-/// <reference path='../references.ts' />
-
 describe("<ban>", () => {
     it("bans access to specified functions", () => {
         var fileName = "rules/ban.test.ts";
