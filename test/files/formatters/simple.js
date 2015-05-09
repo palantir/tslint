@@ -1,8 +1,8 @@
-function SimpleFormatter() {
+function SimpleFormatter () {
 
 }
 SimpleFormatter.prototype = Object.create({
-    name: 'simple',
+    name: "simple",
     getName: function () {
         return this.name;
     },
