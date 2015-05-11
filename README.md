@@ -248,7 +248,7 @@ The walker takes care of all the work.
 class NoImportsWalker extends Lint.RuleWalker {
     public visitImportDeclaration(node: ts.ImportDeclaration) {
         // create a failure at the current position
-        this.addFailure(this.createFailure(node.getStart(), node.width(), Rule.FAILURE_STRING));
+        this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
 
         // call the base version of this visitor to actually parse this node
         super.visitImportDeclaration(node);
@@ -280,7 +280,7 @@ function NoImportsWalker() {
 NoImportsWalker.prototype = Object.create(Lint.RuleWalker.prototype);
 NoImportsWalker.prototype.visitImportDeclaration = function (node) {
     // create a failure at the current position
-    this.addFailure(this.createFailure(node.getStart(), node.width(), "import statement forbidden"));
+    this.addFailure(this.createFailure(node.getStart(), node.getWidth(), "import statement forbidden"));
 
     // call the base version of this visitor to actually parse this node
     Lint.RuleWalker.prototype.visitImportDeclaration.call(this, node);
