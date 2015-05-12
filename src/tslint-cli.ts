@@ -80,58 +80,59 @@ if (argv.v !== undefined) {
 
 if ("help" in argv) {
     outputStream.write(optimist.help());
-    var outputString = "\ntslint accepts the following commandline options:\n" +
-        "\n" +
-        "    -f, --file:\n" +
-        "        The location of the TypeScript file that you wish to lint. This\n" +
-        "        option is required. Muliptle files are processed consecutively.\n" +
-        "\n" +
-        "    -c, --config:\n" +
-        "        The location of the configuration file that tslint will use to\n" +
-        "        determine which rules are activated and what options to provide\n" +
-        "        to the rules. If no option is specified, the config file named\n" +
-        "        tslint.json is used, so long as it exists in the path.\n" +
-        "        The format of the file is { rules: { /* rules list */ } },\n" +
-        "        where /* rules list */ is a key: value comma-seperated list of\n" +
-        "        rulename: rule-options pairs. Rule-options can be either a\n" +
-        "        boolean true/false value denoting whether the rule is used or not,\n" +
-        "        or a list [boolean, ...] where the boolean provides the same role\n" +
-        "        as in the non-list case, and the rest of the list are options passed\n" +
-        "        to the rule that will determine what it checks for (such as number\n" +
-        "        of characters for the max-line-length rule, or what functions to ban\n" +
-        "        for the ban rule).\n" +
-        "\n" +
-        "    -o, --out:\n" +
-        "        A filename to output the results to. By default, tslint outputs to\n" +
-        "        stdout, which is usually the console where you're running it from.\n" +
-        "\n" +
-        "    -r, --rules-dir:\n" +
-        "        An additional rules directory, for additional user-created rules.\n" +
-        "        tslint will always check its default rules directory, in\n" +
-        "        node_modules/tslint/build/rules, before checking the user-provided\n" +
-        "        rules directory, so rules in the user-provided rules directory\n" +
-        "        with the same name as the base rules will not be loaded.\n" +
-        "\n" +
-        "    -s, --formatters-dir:\n" +
-        "        An additional formatters directory, for user-created formatters.\n" +
-        "        Formatters are files that will format the tslint output, before\n" +
-        "        writing it to stdout or the file passed in --out. The default\n" +
-        "        directory, node_modules/tslint/build/formatters, will always be\n" +
-        "        checked first, so user-created formatters with the same names\n" +
-        "        as the base formatters will not be loaded.\n" +
-        "\n" +
-        "    -t, --format:\n" +
-        "        The formatter to use to format the results of the linter before\n" +
-        "        outputting it to stdout or the file passed in --out. The core\n" +
-        "        formatters are prose (human readable), json (machine readable)\n" +
-        "        and verbose. prose is the default if this option is not used. Additonal\n" +
-        "        formatters can be added and used if the --formatters-dir option is set.\n" +
-        "\n" +
-        "    -v, --version:\n" +
-        "        The current version of tslint.\n" +
-        "\n" +
-        "    -h, --help:\n" +
-        "       Prints this help message.\n";
+    var outputString = `
+tslint accepts the following commandline options:
+
+    -f, --file:
+        The location of the TypeScript file that you wish to lint. This
+        option is required. Muliptle files are processed consecutively.
+
+    -c, --config:
+        The location of the configuration file that tslint will use to
+        determine which rules are activated and what options to provide
+        to the rules. If no option is specified, the config file named
+        tslint.json is used, so long as it exists in the path.
+        The format of the file is { rules: { /* rules list */ } },
+        where /* rules list */ is a key: value comma-seperated list of
+        rulename: rule-options pairs. Rule-options can be either a
+        boolean true/false value denoting whether the rule is used or not,
+        or a list [boolean, ...] where the boolean provides the same role
+        as in the non-list case, and the rest of the list are options passed
+        to the rule that will determine what it checks for (such as number
+        of characters for the max-line-length rule, or what functions to ban
+        for the ban rule).
+
+    -o, --out:
+        A filename to output the results to. By default, tslint outputs to
+        stdout, which is usually the console where you're running it from.
+
+    -r, --rules-dir:
+        An additional rules directory, for additional user-created rules.
+        tslint will always check its default rules directory, in
+        node_modules/tslint/build/rules, before checking the user-provided
+        rules directory, so rules in the user-provided rules directory
+        with the same name as the base rules will not be loaded.
+
+    -s, --formatters-dir:
+        An additional formatters directory, for user-created formatters.
+        Formatters are files that will format the tslint output, before
+        writing it to stdout or the file passed in --out. The default
+        directory, node_modules/tslint/build/formatters, will always be
+        checked first, so user-created formatters with the same names
+        as the base formatters will not be loaded.
+
+    -t, --format:
+        The formatter to use to format the results of the linter before
+        outputting it to stdout or the file passed in --out. The core
+        formatters are prose (human readable), json (machine readable)
+        and verbose. prose is the default if this option is not used. Additonal
+        formatters can be added and used if the --formatters-dir option is set.
+
+    -v, --version:
+        The current version of tslint.
+
+    -h, --help:
+       Prints this help message.`;
     outputStream.write(outputString);
     process.exit(0);
 }
