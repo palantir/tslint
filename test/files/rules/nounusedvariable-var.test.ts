@@ -16,3 +16,5 @@ try {
 } catch (e) {
   // e is unused but that's still ok
 }
+
+declare var tmp: any;
