@@ -45,7 +45,7 @@ describe("<no-empty>", () => {
     });
 
     it("forbids empty constructors", () => {
-        var expectedFailure = createFailure([24, 34], [25, 6]);
+        var expectedFailure = createFailure([29, 34], [30, 6]);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 

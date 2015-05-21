@@ -21,6 +21,11 @@ class testClass {
 }
 
 class testClass2 {
+    constructor(protected allowed: any) {
+    }
+}
+
+class testClass3 {
     constructor(notAllowed: any) {
     }
 }
