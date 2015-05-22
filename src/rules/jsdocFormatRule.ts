@@ -45,7 +45,10 @@ class JsdocWalker extends Lint.SkippableTokenAwareRuleWalker {
 
     private findFailuresForJsdocComment(commentText: string, startingPosition: number, sourceFile: ts.SourceFile) {
         var currentPosition = startingPosition;
-        var lines = commentText.split("\n");
+        // the file may be different depending on the OS it was originally authored on
+        // can't rely on require('os').EOL or process.platform as that is the execution env
+        // regex is: split optionally on \r\n, but alwasy split on \n if no \r exists
+        var lines = commentText.split(/\r?\n/);
         var jsdocPosition = currentPosition;
         var firstLine = lines[0];
 

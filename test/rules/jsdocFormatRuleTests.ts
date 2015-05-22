@@ -42,4 +42,10 @@ describe("<jsdoc-format>", () => {
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure7);
         assert.lengthOf(actualFailures, 7);
     });
+
+    it("ensures jsdoc commments can have have windows line endings", () => {
+        var fileName = "rules/jsdoc-windows.test.ts";
+        var actualFailures = Lint.Test.applyRuleOnFile(fileName, JsdocFormatRule);
+        assert.lengthOf(actualFailures, 0);
+    });
 });
