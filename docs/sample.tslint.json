@@ -5,6 +5,7 @@
         "arguments",
         "statements"],
     "ban": false,
+    "member-no-default-access": true,
     "class-name": true,
     "comment-format": [true,
         "check-space",

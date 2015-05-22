@@ -47,6 +47,7 @@
         "./rules/labelPositionRuleTests.ts",
         "./rules/labelUndefinedRuleTests.ts",
         "./rules/maxLineLengthRuleTests.ts",
+        "./rules/memberNoDefaultAccessTests.ts",
         "./rules/memberOrderingRuleTests.ts",
         "./rules/noAnyRuleTests.ts",
         "./rules/noArgRuleTests.ts",
