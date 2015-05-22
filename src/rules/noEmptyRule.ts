@@ -69,8 +69,8 @@ class BlockWalker extends Lint.RuleWalker {
     }
 
     private isPropertyAccessModifier(modifier: string): boolean {
-        return modifier === ts.SyntaxKind.PrivateKeyword ||
-            modifier === ts.SyntaxKind.ProtectedKeyword ||
-            modifier === ts.SyntaxKind.PublicKeyword;
+        return modifier === ts.SyntaxKind.PrivateKeyword
+            || modifier === ts.SyntaxKind.ProtectedKeyword
+            || modifier === ts.SyntaxKind.PublicKeyword;
     }
 }
