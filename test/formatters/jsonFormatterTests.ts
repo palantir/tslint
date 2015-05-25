@@ -14,11 +14,10 @@
  * limitations under the License.
 */
 
-/// <reference path='../references.ts' />
-
 describe("JSON Formatter", () => {
     var TEST_FILE = "formatters/jsonFormatter.test.ts";
-    var sourceFile, formatter;
+    var sourceFile: ts.SourceFile;
+    var formatter: Lint.IFormatter;
 
     before(function() {
         var Formatter = Lint.Test.getFormatter("json");

@@ -14,8 +14,6 @@
  * limitations under the License.
 */
 
-/// <reference path='../references.ts' />
-
 describe("<eofline>", () => {
     it("ensures a trailing newline at EOF", () => {
         var fileName = "rules/eofline.test.ts";

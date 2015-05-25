@@ -14,8 +14,6 @@
  * limitations under the License.
 */
 
-/// <reference path='language/formatter/formatter.ts'/>
-
 module Lint {
     var fs = require("fs");
     var path = require("path");

@@ -14,8 +14,6 @@
  * limitations under the License.
 */
 
-/// <reference path='../references.ts' />
-
 describe("<comment-format>", () => {
     var CommentFormatRule = Lint.Test.getRule("comment-format");
 

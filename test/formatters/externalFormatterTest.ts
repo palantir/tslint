@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/// <reference path='../references.ts' />
-
 describe("External Formatter", () => {
     var TEST_FILE = "formatters/externalFormatter.test.ts";
     var TEST_MODULE = "../test/files/formatters/simple";

@@ -12,24 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
-
-/// <reference path='../typings/node.d.ts'/>
-/// <reference path='../typings/typescriptServices.d.ts'/>
-/// <reference path='../typings/typescriptServicesScanner.d.ts'/>
-
-/// <reference path='ruleLoader.ts'/>
-/// <reference path='configuration.ts'/>
-/// <reference path='formatterLoader.ts'/>
-/// <reference path='enableDisableRules.ts'/>
-
-/// <reference path='language/languageServiceHost.ts'/>
-/// <reference path='language/utils.ts'/>
-/// <reference path='language/formatter/abstractFormatter.ts'/>
-/// <reference path='language/rule/abstractRule.ts'/>
-/// <reference path='language/walker/ruleWalker.ts'/>
-/// <reference path='language/walker/scopeAwareRuleWalker.ts'/>
-/// <reference path='language/walker/skippableTokenAwareRuleWalker.ts'/>
+ */
 
 module Lint {
     var path = require("path");

@@ -14,10 +14,8 @@
  * limitations under the License.
 */
 
-/// <reference path='../references.ts' />
-
 describe("<curly>", () => {
-    var actualFailures;
+    var actualFailures: Lint.RuleFailure[];
     var fileName = "rules/curly.test.ts";
     var CurlyRule = Lint.Test.getRule("curly");
 

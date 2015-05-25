@@ -14,8 +14,6 @@
  * limitations under the License.
 */
 
-/// <reference path='../references.ts' />
-
 describe("<class-name>", () => {
     var ClassNameRule = Lint.Test.getRule("class-name");
 
