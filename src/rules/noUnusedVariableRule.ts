@@ -93,9 +93,10 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         this.skipParameterDeclaration = false;
     }
 
-    // skip exported variables
+    // skip exported and declared variables
     public visitVariableStatement(node: ts.VariableStatement): void {
-        if (this.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword)) {
+        if (this.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword)
+            || this.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)) {
             this.skipVariableDeclaration = true;
         }
 
