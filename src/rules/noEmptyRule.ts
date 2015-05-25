@@ -50,8 +50,6 @@ class BlockWalker extends Lint.RuleWalker {
             var param = parameters[i];
 
             for (var j = 0; param.modifiers != null && j < param.modifiers.length; j++) {
-                var modifier = param.modifiers[j].kind;
-
                 if (this.isPropertyAccessModifier(param.modifiers[j].kind)) {
                     isSkipped = true;
                     this.ignoredBlocks.push(node.body);
@@ -68,7 +66,7 @@ class BlockWalker extends Lint.RuleWalker {
         super.visitConstructorDeclaration(node);
     }
 
-    private isPropertyAccessModifier(modifier: string): boolean {
+    private isPropertyAccessModifier(modifier: ts.SyntaxKind): boolean {
         return modifier === ts.SyntaxKind.PrivateKeyword
             || modifier === ts.SyntaxKind.ProtectedKeyword
             || modifier === ts.SyntaxKind.PublicKeyword;
