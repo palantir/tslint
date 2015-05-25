@@ -160,6 +160,7 @@ A sample configuration file with all options is available [here](https://github.
 * `no-debugger` disallows `debugger` statements.
 * `no-duplicate-key` disallows duplicate keys in object literals.
 * `no-duplicate-variable` disallows duplicate variable declarations.
+* `no-shadowed-variable` disallows shadowed variable declarations.
 * `no-empty` disallows empty blocks.
 * `no-eval` disallows `eval` function invocations.
 * `no-string-literal` disallows object access via string literals.

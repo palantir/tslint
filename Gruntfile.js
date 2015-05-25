@@ -86,6 +86,8 @@ module.exports = function (grunt) {
                 src: [
                     "typings/*.d.ts",
                     "src/language/walker/syntaxWalker.ts",
+                    "src/language/walker/ruleWalker.ts",
+                    "src/language/walker/scopeAwareRuleWalker.ts",
                     "src/language/**/*.ts",
                     "src/!(tslint-cli).ts",
                     "src/tslint-cli.ts"
@@ -102,6 +104,8 @@ module.exports = function (grunt) {
                 src: [
                     "typings/*.d.ts",
                     "src/language/walker/syntaxWalker.ts",
+                    "src/language/walker/ruleWalker.ts",
+                    "src/language/walker/scopeAwareRuleWalker.ts",
                     "src/language/**/*.ts",
                     "src/*.ts",
                     "!src/tslint-cli.ts"

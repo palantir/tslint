@@ -56,6 +56,7 @@
         "./rules/noDuplicateVariableRuleTests.ts",
         "./rules/noEmptyRuleTests.ts",
         "./rules/noEvalRuleTests.ts",
+        "./rules/noShadowedVariableRuleTests.ts",
         "./rules/noStringLiteralRuleTests.ts",
         "./rules/noSwitchCaseFallThroughRuleTests.ts",
         "./rules/noTrailingCommaRuleTests.ts",
