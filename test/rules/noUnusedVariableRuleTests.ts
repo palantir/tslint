@@ -86,14 +86,21 @@ describe("<no-unused-variable>", () => {
         var failure2 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING + "'y'")([5, 34], [5, 35]);
         var failure3 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING + "'y'")([9, 35], [9, 36]);
         var failure4 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING + "'x'")([18, 25], [18, 26]);
+        var failure5 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING + "'y'")([38, 27], [38, 28]);
+        var failure6 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING + "'b'")([46, 22], [46, 23]);
+        var failure7 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING + "'b'")([50, 23], [50, 24]);
+        var failure8 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING + "'x'")([55, 20], [55, 21]);
 
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule, [true, "check-parameters"]);
 
-        assert.lengthOf(actualFailures, 4);
-
+        assert.lengthOf(actualFailures, 8);
         Lint.Test.assertContainsFailure(actualFailures, failure1);
         Lint.Test.assertContainsFailure(actualFailures, failure2);
         Lint.Test.assertContainsFailure(actualFailures, failure3);
         Lint.Test.assertContainsFailure(actualFailures, failure4);
+        Lint.Test.assertContainsFailure(actualFailures, failure5);
+        Lint.Test.assertContainsFailure(actualFailures, failure6);
+        Lint.Test.assertContainsFailure(actualFailures, failure7);
+        Lint.Test.assertContainsFailure(actualFailures, failure8);
     });
 });
