@@ -14,18 +14,32 @@
  * limitations under the License.
  */
 
-var OPTION_LEADING_UNDERSCORE = "allow-leading-underscore";
+const OPTION_LEADING_UNDERSCORE = "allow-leading-underscore";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "variable name must be in camelcase or uppercase";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        var variableNameWalker = new VariableNameWalker(sourceFile, this.getOptions());
+        const variableNameWalker = new VariableNameWalker(sourceFile, this.getOptions());
         return this.applyWithWalker(variableNameWalker);
     }
 }
 
 class VariableNameWalker extends Lint.RuleWalker {
+    public visitBindingElement(node: ts.BindingElement) {
+        if (node.name.kind === ts.SyntaxKind.Identifier) {
+            this.handleVariableName(<ts.Identifier> node.name);
+        }
+        super.visitBindingElement(node);
+    }
+
+    public visitParameterDeclaration(node: ts.ParameterDeclaration) {
+        if (node.name.kind === ts.SyntaxKind.Identifier) {
+            this.handleVariableName(<ts.Identifier> node.name);
+        }
+        super.visitParameterDeclaration(node);
+    }
+
     public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
         if (node.name != null && node.name.kind === ts.SyntaxKind.Identifier) {
             this.handleVariableName(<ts.Identifier> node.name);
@@ -34,23 +48,21 @@ class VariableNameWalker extends Lint.RuleWalker {
     }
 
     public visitVariableDeclaration(node: ts.VariableDeclaration) {
-        this.handleVariableName(<ts.Identifier> node.name);
+        if (node.name.kind === ts.SyntaxKind.Identifier) {
+            this.handleVariableName(<ts.Identifier> node.name);
+        }
         super.visitVariableDeclaration(node);
     }
 
     public visitVariableStatement(node: ts.VariableStatement) {
         // skip 'declare' keywords
-        var hasDeclareModifier = (node.modifiers != null) &&
-                (node.modifiers.length > 0) &&
-                (node.modifiers[0].kind === ts.SyntaxKind.DeclareKeyword);
-
-        if (!hasDeclareModifier) {
+        if (!Lint.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)) {
             super.visitVariableStatement(node);
         }
     }
 
     private handleVariableName(name: ts.Identifier) {
-        var variableName = name.text;
+        const variableName = name.text;
 
         if (!this.isCamelCase(variableName) && !this.isUpperCase(variableName)) {
             this.addFailure(this.createFailure(name.getStart(), name.getWidth(), Rule.FAILURE_STRING));
@@ -58,8 +70,8 @@ class VariableNameWalker extends Lint.RuleWalker {
     }
 
     private isCamelCase(name: string) {
-        var firstCharacter = name.charAt(0);
-        var rest = name.substring(1);
+        const firstCharacter = name.charAt(0);
+        const rest = name.substring(1);
 
         if (name.length <= 0) {
             return true;
