@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_PREFIX = "variable '";
@@ -27,7 +27,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-class NoUseBeforeDeclareWalker extends Lint.ScopeAwareRuleWalker<{}> {
+type VisitedVariables = {[varName: string]: boolean};
+
+class NoUseBeforeDeclareWalker extends Lint.ScopeAwareRuleWalker<VisitedVariables> {
     private languageService: ts.LanguageService;
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions, languageService: ts.LanguageService) {
@@ -35,14 +37,19 @@ class NoUseBeforeDeclareWalker extends Lint.ScopeAwareRuleWalker<{}> {
         this.languageService = languageService;
     }
 
-    public createScope(): {} {
+    public createScope(): VisitedVariables {
         return {};
     }
 
     public visitImportDeclaration(node: ts.ImportDeclaration): void {
         if (node.importClause != null) {
-            var name = <ts.Identifier> node.importClause.name;
-            this.validateUsageForVariable(name.text, name.getStart());
+            var importClause = node.importClause;
+
+            // named imports & namespace imports handled by other walker methods
+            if (importClause.name != null) {
+                var variableIdentifier = importClause.name;
+                this.validateUsageForVariable(variableIdentifier.text, variableIdentifier.getStart());
+            }
         }
 
         super.visitImportDeclaration(node);
@@ -55,7 +62,20 @@ class NoUseBeforeDeclareWalker extends Lint.ScopeAwareRuleWalker<{}> {
         super.visitImportEqualsDeclaration(node);
     }
 
+    public visitNamedImports(node: ts.NamedImports): void {
+        node.elements.forEach((namedImport: ts.ImportSpecifier) => {
+            this.validateUsageForVariable(namedImport.name.text, namedImport.name.getStart());
+        });
+        super.visitNamedImports(node);
+    }
+
+    public visitNamespaceImport(node: ts.NamespaceImport): void {
+        this.validateUsageForVariable(node.name.text, node.name.getStart());
+        super.visitNamespaceImport(node);
+    }
+
     public visitVariableDeclaration(node: ts.VariableDeclaration): void {
+        var isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
         var nameNode = <ts.Identifier> node.name;
         var variableName = nameNode.text;
         var currentScope = this.getCurrentScope();
@@ -77,8 +97,7 @@ class NoUseBeforeDeclareWalker extends Lint.ScopeAwareRuleWalker<{}> {
                     var referencePosition = highlightSpan.textSpan.start;
                     if (referencePosition < position) {
                         var failureString = Rule.FAILURE_STRING_PREFIX + name + Rule.FAILURE_STRING_POSTFIX;
-                        var failure = this.createFailure(referencePosition, name.length, failureString);
-                        this.addFailure(failure);
+                        this.addFailure(this.createFailure(referencePosition, name.length, failureString));
                     }
                 });
             });
