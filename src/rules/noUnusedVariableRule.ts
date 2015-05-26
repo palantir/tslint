@@ -50,6 +50,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
                 this.validateReferencesForVariable(variableIdentifier.text, variableIdentifier.getStart());
             }
         }
+
         super.visitImportDeclaration(node);
     }
 
@@ -75,7 +76,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     }
 
     public visitNamespaceImport(node: ts.NamespaceImport): void {
-        this.validateReferencesForVariable(node.name.text, node.getStart());
+        this.validateReferencesForVariable(node.name.text, node.name.getStart());
         super.visitNamespaceImport(node);
     }
 

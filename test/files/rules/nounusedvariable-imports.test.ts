@@ -13,3 +13,5 @@ $(_.xyz());
 module S {
   var template = '';
 }
+
+import * as foo from "lib";
