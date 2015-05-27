@@ -23,6 +23,7 @@ declare module Lint {
         protected visitExpressionStatement(node: ts.ExpressionStatement): void;
         protected visitForStatement(node: ts.ForStatement): void;
         protected visitForInStatement(node: ts.ForInStatement): void;
+        protected visitForOfStatement(node: ts.ForOfStatement): void;
         protected visitFunctionDeclaration(node: ts.FunctionDeclaration): void;
         protected visitFunctionExpression(node: ts.FunctionExpression): void;
         protected visitFunctionType(node: ts.Node): void;
