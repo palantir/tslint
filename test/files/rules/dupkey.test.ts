@@ -7,11 +7,11 @@ var x = {
     axa: 1,
     bd: 2,
     c: 3,
-    axa: 4,
+    axa: 4, // failure
     d: 5,
     ba: 3,
-    bd: 6,
-    axa: 6
+    bd: 6, // failure
+    axa: 6 // failure
 };
 
 var z = {
@@ -26,12 +26,17 @@ var z = {
 };
 
 var interspersed = {
-    duplicated: 1,
+    duplicated: 1, // failure
     newContext: {},
-    duplicated: 2
+    duplicated: 2 // failure
 };
 
 var n = {
     constructor: function () {},
     hasOwnProperty: function () {}
 };
+
+var foo = {
+    ["ab" + "cd"]: "efgh",
+    [x.axa]: "bar"
+}

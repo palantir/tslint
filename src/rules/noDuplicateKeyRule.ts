@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "duplicate key '";
@@ -32,12 +32,13 @@ class NoDuplicateKeyWalker extends Lint.RuleWalker {
     }
 
     public visitPropertyAssignment(node: ts.PropertyAssignment): void {
-        var objectKeys = this.objectKeysStack[this.objectKeysStack.length - 1];
-        var keyNode = node.name;
+        const objectKeys = this.objectKeysStack[this.objectKeysStack.length - 1];
+        const keyNode = node.name;
+
         if (keyNode.kind === ts.SyntaxKind.Identifier) {
-            var key = (<ts.Identifier> keyNode).text;
+            const key = (<ts.Identifier> keyNode).text;
             if (objectKeys[key]) {
-                var failureString = Rule.FAILURE_STRING + key + "'";
+                const failureString = Rule.FAILURE_STRING + key + "'";
                 this.addFailure(this.createFailure(keyNode.getStart(), keyNode.getWidth(), failureString));
             } else {
                 objectKeys[key] = true;
