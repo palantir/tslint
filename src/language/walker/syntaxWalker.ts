@@ -32,6 +32,10 @@ module Lint {
             this.walkChildren(node);
         }
 
+        protected visitBindingElement(node: ts.BindingElement) {
+            this.walkChildren(node);
+        }
+
         protected visitBlock(node: ts.Block) {
             this.walkChildren(node);
         }
@@ -264,6 +268,10 @@ module Lint {
 
                 case ts.SyntaxKind.BinaryExpression:
                     this.visitBinaryExpression(<ts.BinaryExpression> node);
+                    break;
+
+                case ts.SyntaxKind.BindingElement:
+                    this.visitBindingElement(<ts.BindingElement> node);
                     break;
 
                 case ts.SyntaxKind.Block:

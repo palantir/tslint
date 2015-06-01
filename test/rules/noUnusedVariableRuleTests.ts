@@ -31,13 +31,21 @@ describe("<no-unused-variable>", () => {
     it("restricts unused variables", () => {
         var fileName = "rules/nounusedvariable-var.test.ts";
         var Rule = Lint.Test.getRule("no-unused-variable");
-        var failureString = Rule.FAILURE_STRING + "'y'";
-        var failure = Lint.Test.createFailuresOnFile(fileName, failureString)([3, 5], [3, 6]);
+
+        var failure1 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING + "'y'")([3, 5], [3, 6]);
+        var failure2 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING + "'a'")([23, 10], [23, 11]);
+        var failure3 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING + "'b'")([23, 13], [23, 14]);
+        var failure4 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING + "'d'")([26, 10], [26, 11]);
+        var failure5 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING + "'e'")([26, 13], [26, 14]);
 
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule);
 
-        assert.lengthOf(actualFailures, 1);
-        Lint.Test.assertContainsFailure(actualFailures, failure);
+        assert.lengthOf(actualFailures, 5);
+        Lint.Test.assertContainsFailure(actualFailures, failure1);
+        Lint.Test.assertContainsFailure(actualFailures, failure2);
+        Lint.Test.assertContainsFailure(actualFailures, failure3);
+        Lint.Test.assertContainsFailure(actualFailures, failure4);
+        Lint.Test.assertContainsFailure(actualFailures, failure5);
     });
 
     it("restricts unused functions", () => {
