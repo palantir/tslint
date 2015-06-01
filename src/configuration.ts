@@ -45,7 +45,7 @@ module Lint.Configuration {
         }
 
         var defaultPath = path.join(homeDir, CONFIG_FILENAME);
-        if (!fs.existsSync(defaultPath)) defaultPath = undefined;
+        if (!fs.existsSync(defaultPath)) { defaultPath = undefined; }
 
         configFile = findup(CONFIG_FILENAME, { cwd: inputFileLocation, nocase: true }) || defaultPath;
 
