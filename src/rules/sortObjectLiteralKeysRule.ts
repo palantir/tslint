@@ -23,6 +23,8 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class SortedKeyWalker extends Lint.RuleWalker {
+    // Stacks are used to maintain state while
+    // recursing through nested object literals.
     private lastSortedKeyStack: string[] = [];
     private sortedStateStack: boolean[] = [];
 
@@ -35,14 +37,17 @@ class SortedKeyWalker extends Lint.RuleWalker {
     }
 
     public visitPropertyAssignment(node: ts.PropertyAssignment): void {
-        var sortedState = this.sortedStateStack[this.sortedStateStack.length - 1];
+        const sortedState = this.sortedStateStack[this.sortedStateStack.length - 1];
+        // Skip remainder of object literal scan if a previous key was found
+        // in an unsorted position. This ensures only one error is thrown at
+        // a time and keeps error output clean.
         if (sortedState) {
-            var lastSortedKey = this.lastSortedKeyStack[this.lastSortedKeyStack.length - 1];
-            var keyNode = node.name;
+            const lastSortedKey = this.lastSortedKeyStack[this.lastSortedKeyStack.length - 1];
+            const keyNode = node.name;
             if (keyNode.kind === ts.SyntaxKind.Identifier) {
-                var key = (<ts.Identifier> keyNode).text;
+                const key = (<ts.Identifier> keyNode).text;
                 if (key < lastSortedKey) {
-                    var failureString = Rule.FAILURE_STRING + key + "'";
+                    const failureString = Rule.FAILURE_STRING + key + "'";
                     this.addFailure(this.createFailure(keyNode.getStart(), keyNode.getWidth(), failureString));
                     this.sortedStateStack[this.sortedStateStack.length - 1] = false;
                 } else {

@@ -38,24 +38,42 @@ var failC = {
     }
 };
 
-var passD = {};
+var passD = {
+    a: 1,
+    b: {
+        aa: 1,
+        bb: 2
+    },
+    c: 3
+};
 
-var passE = {
+var failD = {
+    a: 1,
+    c: {
+        aa: 1,
+        bb: 2
+    },
+    b: 3
+};
+
+var passE = {};
+
+var passF = {
     asdf: [1, 2, 3],
     sdfa: {}
 };
 
-var failE = {
+var failF = {
     sdfa: {},
     asdf: [1, 2, 3]
 };
 
-var passF = {
+var passG = {
     asdfn: function () {},
     sdafn: function () {}
 };
 
-var failF = {
+var failG = {
     sdafn: function () {},
     asdfn: function () {}
 };
