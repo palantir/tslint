@@ -15,35 +15,48 @@
  */
 
 describe("<no-use-before-declare>", () => {
+    var Rule: any;
+
+    before(() => {
+        Rule = Lint.Test.getRule("no-use-before-declare");
+    });
+
     it("restricts usage before declaration", () => {
         var fileName = "rules/nousebeforedeclare.test.ts";
-        var Rule = Lint.Test.getRule("no-use-before-declare");
-
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule);
-        assert.equal(actualFailures.length, 3);
+
+        assert.equal(actualFailures.length, 7);
     });
 
     it("restricts usage of imports before declaration", () => {
         var fileName = "rules/nousebeforedeclare.test.ts";
-        var Rule = Lint.Test.getRule("no-use-before-declare");
-        var failureString = Rule.FAILURE_STRING_PREFIX + "$" + Rule.FAILURE_STRING_POSTFIX;
-        var failure = Lint.Test.createFailuresOnFile(fileName, failureString)([1, 1], [1, 2]);
-
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule);
 
-        Lint.Test.assertContainsFailure(actualFailures, failure);
+        var failure1 = Lint.Test.createFailuresOnFile(fileName, makeFailureString("$"))([1, 1], [1, 2]);
+        var failure2 = Lint.Test.createFailuresOnFile(fileName, makeFailureString("foo1"))([35, 17], [35, 21]);
+        var failure3 = Lint.Test.createFailuresOnFile(fileName, makeFailureString("foo2"))([36, 17], [36, 21]);
+        var failure4 = Lint.Test.createFailuresOnFile(fileName, makeFailureString("foo3"))([37, 17], [37, 21]);
+        var failure5 = Lint.Test.createFailuresOnFile(fileName, makeFailureString("map"))([38, 5], [38, 8]);
+
+        Lint.Test.assertContainsFailure(actualFailures, failure1);
+        Lint.Test.assertContainsFailure(actualFailures, failure2);
+        Lint.Test.assertContainsFailure(actualFailures, failure3);
+        Lint.Test.assertContainsFailure(actualFailures, failure4);
+        Lint.Test.assertContainsFailure(actualFailures, failure5);
     });
 
     it("restricts usage of variables before declaration", () => {
         var fileName = "rules/nousebeforedeclare.test.ts";
-        var Rule = Lint.Test.getRule("no-use-before-declare");
-        var failureString1 = Rule.FAILURE_STRING_PREFIX + "varb" + Rule.FAILURE_STRING_POSTFIX;
-        var failureString2 = Rule.FAILURE_STRING_PREFIX + "j" + Rule.FAILURE_STRING_POSTFIX;
-        var failure1 = Lint.Test.createFailuresOnFile(fileName, failureString1)([3, 12], [3, 16]);
-        var failure2 = Lint.Test.createFailuresOnFile(fileName, failureString2)([13, 9], [13, 10]);
-
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule);
+
+        var failure1 = Lint.Test.createFailuresOnFile(fileName, makeFailureString("varb"))([3, 12], [3, 16]);
+        var failure2 = Lint.Test.createFailuresOnFile(fileName, makeFailureString("j"))([13, 9], [13, 10]);
+
         Lint.Test.assertContainsFailure(actualFailures, failure1);
         Lint.Test.assertContainsFailure(actualFailures, failure2);
     });
+
+    function makeFailureString(varName: string) {
+        return `${Rule.FAILURE_STRING_PREFIX}${varName}${Rule.FAILURE_STRING_POSTFIX}`;
+    }
 });
