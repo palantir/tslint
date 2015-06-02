@@ -38,6 +38,8 @@ declare module Lint {
         protected visitMethodDeclaration(node: ts.MethodDeclaration): void;
         protected visitMethodSignature(node: ts.SignatureDeclaration): void;
         protected visitModuleDeclaration(node: ts.ModuleDeclaration): void;
+        protected visitNamedImports(node: ts.NamedImports): void;
+        protected visitNamespaceImport(node: ts.NamespaceImport): void;
         protected visitNewExpression(node: ts.NewExpression): void;
         protected visitObjectLiteralExpression(node: ts.ObjectLiteralExpression): void;
         protected visitParameterDeclaration(node: ts.ParameterDeclaration): void;

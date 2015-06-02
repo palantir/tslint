@@ -1,7 +1,10 @@
 import  $ = require("jquery");
 import  _ = require("underscore");
-import  xyz = require("xyz");
+import  xyz = require("xyz"); // failure
+import {createReadStream, createWriteStream} from "fs"; // failure
 export import a = require("a");
+
+createWriteStream();
 
 $(_.xyz());
 
@@ -10,3 +13,5 @@ $(_.xyz());
 module S {
   var template = '';
 }
+
+import * as foo from "lib";

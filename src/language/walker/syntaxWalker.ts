@@ -168,6 +168,14 @@ module Lint {
             this.walkChildren(node);
         }
 
+        protected visitNamedImports(node: ts.NamedImports) {
+            this.walkChildren(node);
+        }
+
+        protected visitNamespaceImport(node: ts.NamespaceImport) {
+            this.walkChildren(node);
+        }
+
         protected visitNewExpression(node: ts.NewExpression) {
             this.walkChildren(node);
         }
@@ -260,6 +268,10 @@ module Lint {
             switch (node.kind) {
                 case ts.SyntaxKind.AnyKeyword:
                     this.visitAnyKeyword(node);
+                    break;
+
+                case ts.SyntaxKind.BindingElement:
+                    this.visitBindingElement(<ts.BindingElement> node);
                     break;
 
                 case ts.SyntaxKind.ArrowFunction:
@@ -404,6 +416,14 @@ module Lint {
 
                 case ts.SyntaxKind.ModuleDeclaration:
                     this.visitModuleDeclaration(<ts.ModuleDeclaration> node);
+                    break;
+
+                case ts.SyntaxKind.NamedImports:
+                    this.visitNamedImports(<ts.NamedImports> node);
+                    break;
+
+                case ts.SyntaxKind.NamespaceImport:
+                    this.visitNamespaceImport(<ts.NamespaceImport> node);
                     break;
 
                 case ts.SyntaxKind.NewExpression:
