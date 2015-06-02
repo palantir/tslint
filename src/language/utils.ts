@@ -76,4 +76,17 @@ module Lint {
             callback(scanner);
         }
     }
+
+    /**
+     * @returns true if any modifier kinds passed along exist in the given modifiers array
+     */
+    export function hasModifier(modifiers: ts.ModifiersArray, ...modifierKinds: ts.SyntaxKind[]) {
+        if (modifiers == null || modifierKinds == null) {
+            return false;
+        }
+
+        return modifiers.some((m) => {
+            return modifierKinds.some((k) => m.kind === k);
+        });
+    }
 }

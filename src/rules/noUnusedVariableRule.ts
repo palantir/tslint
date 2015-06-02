@@ -53,7 +53,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     }
 
     public visitImportDeclaration(node: ts.ImportDeclaration): void {
-        if (!this.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword)) {
+        if (!Lint.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword)) {
             var importClause = node.importClause;
 
             // named imports & namespace imports handled by other walker methods
@@ -67,7 +67,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     }
 
     public visitImportEqualsDeclaration(node: ts.ImportEqualsDeclaration): void {
-        if (!this.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword)) {
+        if (!Lint.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword)) {
             var name = node.name;
             this.validateReferencesForVariable(name.text, name.getStart());
         }
@@ -119,8 +119,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
 
     // skip exported and declared variables
     public visitVariableStatement(node: ts.VariableStatement): void {
-        if (this.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword)
-            || this.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)) {
+        if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword, ts.SyntaxKind.DeclareKeyword)) {
             this.skipBindingElement = true;
             this.skipVariableDeclaration = true;
         }
@@ -140,7 +139,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     public visitFunctionDeclaration(node: ts.FunctionDeclaration): void {
         var variableName = node.name.text;
 
-        if (!this.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword)) {
+        if (!Lint.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword)) {
             this.validateReferencesForVariable(variableName, node.name.getStart());
         }
 
@@ -148,15 +147,27 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     }
 
     public visitParameterDeclaration(node: ts.ParameterDeclaration): void {
-        var nameNode = <ts.Identifier> node.name;
-        var variableName = nameNode.text;
+        var isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
+        var isPropertyParameter = Lint.hasModifier(node.modifiers,
+                                                   ts.SyntaxKind.PublicKeyword,
+                                                   ts.SyntaxKind.PrivateKeyword,
+                                                   ts.SyntaxKind.ProtectedKeyword);
 
-        if (!this.hasModifier(node.modifiers, ts.SyntaxKind.PublicKeyword)
-            && !this.skipParameterDeclaration && this.hasOption(OPTION_CHECK_PARAMETERS)) {
-            this.validateReferencesForVariable(variableName, node.name.getStart());
+        if (!isSingleVariable && isPropertyParameter) {
+            // tsc error: a parameter property may not be a binding pattern
+            this.skipBindingElement = true;
+        }
+
+        if (this.hasOption(OPTION_CHECK_PARAMETERS)
+            && isSingleVariable
+            && !this.skipParameterDeclaration
+            && !Lint.hasModifier(node.modifiers, ts.SyntaxKind.PublicKeyword)) {
+            var nameNode = <ts.Identifier> node.name;
+            this.validateReferencesForVariable(nameNode.text, node.name.getStart());
         }
 
         super.visitParameterDeclaration(node);
+        this.skipBindingElement = false;
     }
 
     // check private member variables
@@ -166,7 +177,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
             var variableName = (<ts.Identifier> node.name).text;
 
             // check only if an explicit 'private' modifier is specified
-            if (this.hasModifier(modifiers, ts.SyntaxKind.PrivateKeyword)) {
+            if (Lint.hasModifier(modifiers, ts.SyntaxKind.PrivateKeyword)) {
                 this.validateReferencesForVariable(variableName, node.name.getStart());
             }
         }
@@ -180,26 +191,12 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
             var modifiers = node.modifiers;
             var variableName = (<ts.Identifier> node.name).text;
 
-            if (this.hasModifier(modifiers, ts.SyntaxKind.PrivateKeyword)) {
+            if (Lint.hasModifier(modifiers, ts.SyntaxKind.PrivateKeyword)) {
                 this.validateReferencesForVariable(variableName, node.name.getStart());
             }
         }
 
         super.visitMethodDeclaration(node);
-    }
-
-    private hasModifier(modifiers: ts.ModifiersArray, modifierKind: ts.SyntaxKind) {
-        if (modifiers == null) {
-            return false;
-        }
-        for (var i = 0, n = modifiers.length; i < n; i++) {
-            var modifier = modifiers[i];
-            if (modifier.kind === modifierKind) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private validateReferencesForVariable(name: string, position: number) {
