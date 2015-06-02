@@ -11,7 +11,14 @@ $(_.xyz());
 /// <reference path="../externalFormatter.test.ts" />
 
 module S {
-  var template = '';
+  var template = ""; // failure
 }
 
-import * as foo from "lib";
+import * as foo from "libA"; // failure on 'foo'
+import * as bar from "libB";
+import baz from "libC";
+import defaultExport, { namedExport } from "libD"; // failure on 'defaultExport'
+
+bar.someFunc();
+baz();
+namedExport();
