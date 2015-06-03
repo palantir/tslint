@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 const OPTION_BRANCH = "check-branch";
 const OPTION_DECL = "check-decl";
@@ -104,15 +104,10 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
 
     // check for spaces between the operator symbol (except in the case of comma statements)
     public visitBinaryExpression(node: ts.BinaryExpression) {
-        var operatorKind = node.operatorToken.kind;
-        if (this.hasOption(OPTION_OPERATOR) && operatorKind !== ts.SyntaxKind.CommaToken) {
-            var position = node.left.getEnd();
-            this.checkForTrailingWhitespace(position);
-
-            position = node.right.getFullStart();
-            this.checkForTrailingWhitespace(position);
+        if (this.hasOption(OPTION_OPERATOR) && node.operatorToken.kind !== ts.SyntaxKind.CommaToken) {
+            this.checkForTrailingWhitespace(node.left.getEnd());
+            this.checkForTrailingWhitespace(node.right.getFullStart());
         }
-
         super.visitBinaryExpression(node);
     }
 
@@ -134,16 +129,10 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
     // check for spaces between ternary operator symbols
     public visitConditionalExpression(node: ts.ConditionalExpression) {
         if (this.hasOption(OPTION_OPERATOR)) {
-            var position = node.condition.getEnd();
-            this.checkForTrailingWhitespace(position);
-
-            position = node.whenTrue.getFullStart();
-            this.checkForTrailingWhitespace(position);
-
-            position = node.whenTrue.getEnd();
-            this.checkForTrailingWhitespace(position);
+            this.checkForTrailingWhitespace(node.condition.getEnd());
+            this.checkForTrailingWhitespace(node.whenTrue.getFullStart());
+            this.checkForTrailingWhitespace(node.whenTrue.getEnd());
         }
-
         super.visitConditionalExpression(node);
     }
 
@@ -155,59 +144,48 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
                 this.checkForTrailingWhitespace(node.name.getEnd());
             }
         }
-
         super.visitVariableDeclaration(node);
     }
 
     public visitImportDeclaration(node: ts.ImportDeclaration) {
         const importClause = node.importClause;
-
         if (this.hasOption(OPTION_MODULE) && importClause != null) {
-            let position: number;
-
-            if (importClause.namedBindings != null) {
-                // import foo, { bar } from "baz"; OR import { namedA, named B} from "lib";
-                position = importClause.namedBindings.getEnd();
-            } else {
-                // import moduleReference from "lib";
-                position = importClause.name.getEnd();
-            }
-
+            // an import clause can have _both_ named bindings and a name (the latter for the default import)
+            // but the named bindings always come last, so we only need to check that for whitespace
+            const position = (importClause.namedBindings == null) ? importClause.name.getEnd()
+                                                                  : importClause.namedBindings.getEnd();
             this.checkForTrailingWhitespace(position);
         }
-
         super.visitImportDeclaration(node);
     }
 
     public visitImportEqualsDeclaration(node: ts.ImportEqualsDeclaration) {
         if (this.hasOption(OPTION_MODULE)) {
-            var position = node.name.getEnd();
+            const position = node.name.getEnd();
             this.checkForTrailingWhitespace(position);
         }
-
         super.visitImportEqualsDeclaration(node);
     }
 
     public visitExportAssignment(node: ts.ExportAssignment) {
         if (this.hasOption(OPTION_MODULE)) {
-            var exportKeyword = node.getChildAt(0);
-            var position = exportKeyword.getEnd();
+            const exportKeyword = node.getChildAt(0);
+            const position = exportKeyword.getEnd();
             this.checkForTrailingWhitespace(position);
         }
-
         super.visitExportAssignment(node);
     }
 
     public visitTypeAssertionExpression(node: ts.TypeAssertion) {
         if (this.hasOption(OPTION_TYPECAST)) {
-            var position = node.expression.getFullStart();
+            const position = node.expression.getFullStart();
             this.checkForTrailingWhitespace(position);
         }
         super.visitTypeAssertionExpression(node);
     }
 
     private checkEqualsGreaterThanTokenInNode(node: ts.Node) {
-        var arrowChildNumber = -1;
+        let arrowChildNumber = -1;
         node.getChildren().forEach((child, i) => {
             if (child.kind === ts.SyntaxKind.EqualsGreaterThanToken) {
                 arrowChildNumber = i;
@@ -215,9 +193,9 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
         });
         // condition so we don't crash if the arrow is somehow missing
         if (arrowChildNumber !== -1) {
-            var equalsGreaterThanToken = node.getChildAt(arrowChildNumber);
+            const equalsGreaterThanToken = node.getChildAt(arrowChildNumber);
             if (this.hasOption(OPTION_OPERATOR)) {
-                var position = equalsGreaterThanToken.getFullStart();
+                let position = equalsGreaterThanToken.getFullStart();
                 this.checkForTrailingWhitespace(position);
 
                 position = equalsGreaterThanToken.getEnd();
@@ -228,13 +206,13 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
 
     private checkForTrailingWhitespace(position: number) {
         this.scanner.setTextPos(position);
-        var nextTokenType = this.scanner.scan();
+        const nextTokenType = this.scanner.scan();
+
         if (nextTokenType !== ts.SyntaxKind.WhitespaceTrivia &&
             nextTokenType !== ts.SyntaxKind.NewLineTrivia &&
             nextTokenType !== ts.SyntaxKind.EndOfFileToken) {
 
-            var failure = this.createFailure(position, 1, Rule.FAILURE_STRING);
-            this.addFailure(failure);
+            this.addFailure(this.createFailure(position, 1, Rule.FAILURE_STRING));
         }
     }
 }
