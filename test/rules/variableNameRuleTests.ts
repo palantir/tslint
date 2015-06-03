@@ -15,41 +15,43 @@
  */
 
 describe("<variable-name>", () => {
-    var VariableNameRule = Lint.Test.getRule("variable-name");
+    const VariableNameRule = Lint.Test.getRule("variable-name");
+    const failureString = VariableNameRule.FAILURE_STRING;
+    const fileName = "rules/varname.test.ts";
+    const createFailure = Lint.Test.createFailuresOnFile(fileName, failureString);
 
-    it("ensures only (camel/upper)case naming convention for variables", () => {
-        var fileName = "rules/varname.test.ts";
-        var failureString = VariableNameRule.FAILURE_STRING;
-
-        var createFailure = Lint.Test.createFailuresOnFile(fileName, failureString);
-        var expectedFailures = [
+    it("ensures only (camel/upper)case naming convention for variables & parameters", () => {
+        const expectedFailures = [
             createFailure([3, 5], [3, 17]),
             createFailure([4, 5], [4, 18]),
             createFailure([7, 13], [7, 26]),
             createFailure([8, 13], [8, 29]),
-            createFailure([13, 13], [13, 25])
+            createFailure([13, 13], [13, 25]),
+            createFailure([19, 48], [19, 56]),
+            createFailure([19, 58], [19, 68]),
+            createFailure([24, 7], [24, 17]),
+            createFailure([24, 19], [24, 30]),
+            createFailure([26, 56], [26, 69]),
+            createFailure([26, 71], [26, 84]),
         ];
 
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, VariableNameRule);
+        const actualFailures = Lint.Test.applyRuleOnFile(fileName, VariableNameRule);
         Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
     });
 
     it("ensures leading underscores can optionally be legal", () => {
-        var fileName = "rules/varname.test.ts";
-        var failureString = VariableNameRule.FAILURE_STRING;
-
-        var createFailure = Lint.Test.createFailuresOnFile(fileName, failureString);
-        var expectedFailures = [
-            createFailure([3, 5], [3, 17]),
-            createFailure([4, 5], [4, 18]),
-            createFailure([7, 13], [7, 26]),
-            createFailure([13, 13], [13, 25])
-        ];
-        var options = [true,
+        const options = [true,
             "allow-leading-underscore"
         ];
 
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, VariableNameRule, options);
-        Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
+        const actualFailures = Lint.Test.applyRuleOnFile(fileName, VariableNameRule, options);
+        const optionallyValidFailures = [
+            createFailure([8, 13], [8, 29])
+        ];
+
+        // none of the optionally valid names should appear in the failures list
+        assert.isFalse(actualFailures.some((failure) => {
+            return optionallyValidFailures.some((f) => f.equals(failure));
+        }));
     });
 });

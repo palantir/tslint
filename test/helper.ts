@@ -62,7 +62,10 @@ module Lint.Test {
     export function assertFailuresEqual(actualFailures: Lint.RuleFailure[], expectedFailures: Lint.RuleFailure[]) {
         assert.equal(actualFailures.length, expectedFailures.length);
         actualFailures.forEach((actualFailure, i) => {
-            assert.isTrue(actualFailure.equals(expectedFailures[i]));
+            const startPosition = JSON.stringify(actualFailure.getStartPosition().toJson());
+            const endPosition = JSON.stringify(actualFailure.getEndPosition().toJson());
+            assert.isTrue(actualFailure.equals(expectedFailures[i]),
+                          `actual failure at ${startPosition}, ${endPosition} did not match expected failure`);
         });
     }
 
