@@ -112,6 +112,10 @@ module Lint {
             this.walkChildren(node);
         }
 
+        protected visitForOfStatement(node: ts.ForOfStatement) {
+            this.walkChildren(node);
+        }
+
         protected visitFunctionDeclaration(node: ts.FunctionDeclaration) {
             this.walkChildren(node);
         }
@@ -360,6 +364,10 @@ module Lint {
 
                 case ts.SyntaxKind.ForInStatement:
                     this.visitForInStatement(<ts.ForInStatement> node);
+                    break;
+
+                case ts.SyntaxKind.ForOfStatement:
+                    this.visitForOfStatement(<ts.ForOfStatement> node);
                     break;
 
                 case ts.SyntaxKind.FunctionDeclaration:
