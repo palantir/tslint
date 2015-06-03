@@ -14,12 +14,13 @@
  * limitations under the License.
 */
 
-var OPTION_BRANCH = "check-branch";
-var OPTION_DECL = "check-decl";
-var OPTION_OPERATOR = "check-operator";
-var OPTION_SEPARATOR = "check-separator";
-var OPTION_TYPE = "check-type";
-var OPTION_TYPECAST = "check-typecast";
+const OPTION_BRANCH = "check-branch";
+const OPTION_DECL = "check-decl";
+const OPTION_OPERATOR = "check-operator";
+const OPTION_MODULE = "check-module";
+const OPTION_SEPARATOR = "check-separator";
+const OPTION_TYPE = "check-type";
+const OPTION_TYPECAST = "check-typecast";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "missing whitespace";
@@ -37,14 +38,16 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
         this.scanner = ts.createScanner(ts.ScriptTarget.ES5, false, sourceFile.text);
     }
 
-    public visitSourceFile(node: ts.SourceFile): void {
+    public visitSourceFile(node: ts.SourceFile) {
         super.visitSourceFile(node);
 
-        var lastShouldBeFollowedByWhitespace = false;
+        let lastShouldBeFollowedByWhitespace = false;
         this.scanner.setTextPos(0);
+
         Lint.scanAllTokens(this.scanner, (scanner: ts.Scanner) => {
-            var startPos = scanner.getStartPos();
-            var tokenKind = scanner.getToken();
+            const startPos = scanner.getStartPos();
+            const tokenKind = scanner.getToken();
+
             if (tokenKind === ts.SyntaxKind.WhitespaceTrivia || tokenKind === ts.SyntaxKind.NewLineTrivia) {
                 lastShouldBeFollowedByWhitespace = false;
             } else if (lastShouldBeFollowedByWhitespace) {
@@ -88,13 +91,19 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
                         lastShouldBeFollowedByWhitespace = true;
                     }
                     break;
-
+                case ts.SyntaxKind.ImportKeyword:
+                case ts.SyntaxKind.ExportKeyword:
+                case ts.SyntaxKind.FromKeyword:
+                    if (this.hasOption(OPTION_MODULE)) {
+                        lastShouldBeFollowedByWhitespace = true;
+                    }
+                    break;
             }
         });
     }
 
     // check for spaces between the operator symbol (except in the case of comma statements)
-    public visitBinaryExpression(node: ts.BinaryExpression): void {
+    public visitBinaryExpression(node: ts.BinaryExpression) {
         var operatorKind = node.operatorToken.kind;
         if (this.hasOption(OPTION_OPERATOR) && operatorKind !== ts.SyntaxKind.CommaToken) {
             var position = node.left.getEnd();
@@ -107,24 +116,23 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
         super.visitBinaryExpression(node);
     }
 
-    // check for spaces between the => symbol
-    public visitArrowFunction(node: ts.FunctionLikeDeclaration): void {
+    public visitArrowFunction(node: ts.FunctionLikeDeclaration) {
         this.checkEqualsGreaterThanTokenInNode(node);
         super.visitArrowFunction(node);
     }
 
-    public visitConstructorType(node: ts.Node): void {
+    public visitConstructorType(node: ts.Node) {
         this.checkEqualsGreaterThanTokenInNode(node);
         super.visitConstructorType(node);
     }
 
-    public visitFunctionType(node: ts.Node): void {
+    public visitFunctionType(node: ts.Node) {
         this.checkEqualsGreaterThanTokenInNode(node);
         super.visitFunctionType(node);
     }
 
     // check for spaces between ternary operator symbols
-    public visitConditionalExpression(node: ts.ConditionalExpression): void {
+    public visitConditionalExpression(node: ts.ConditionalExpression) {
         if (this.hasOption(OPTION_OPERATOR)) {
             var position = node.condition.getEnd();
             this.checkForTrailingWhitespace(position);
@@ -139,8 +147,7 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
         super.visitConditionalExpression(node);
     }
 
-    // check for spaces in variable declarations
-    public visitVariableDeclaration(node: ts.VariableDeclaration): void {
+    public visitVariableDeclaration(node: ts.VariableDeclaration) {
         if (this.hasOption(OPTION_DECL) && node.initializer != null) {
             if (node.type != null) {
                 this.checkForTrailingWhitespace(node.type.getEnd());
@@ -152,19 +159,28 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
         super.visitVariableDeclaration(node);
     }
 
-    // check for spaces within imports
-    public visitImportDeclaration(node: ts.ImportDeclaration): void {
-        var importClause = node.importClause;
-        if (this.hasOption(OPTION_DECL) && importClause != null) {
-            var position = importClause.name.getEnd();
+    public visitImportDeclaration(node: ts.ImportDeclaration) {
+        const importClause = node.importClause;
+
+        if (this.hasOption(OPTION_MODULE) && importClause != null) {
+            let position: number;
+
+            if (importClause.namedBindings != null) {
+                // import foo, { bar } from "baz"; OR import { namedA, named B} from "lib";
+                position = importClause.namedBindings.getEnd();
+            } else {
+                // import moduleReference from "lib";
+                position = importClause.name.getEnd();
+            }
+
             this.checkForTrailingWhitespace(position);
         }
 
         super.visitImportDeclaration(node);
     }
 
-    public visitImportEqualsDeclaration(node: ts.ImportEqualsDeclaration): void {
-        if (this.hasOption(OPTION_DECL)) {
+    public visitImportEqualsDeclaration(node: ts.ImportEqualsDeclaration) {
+        if (this.hasOption(OPTION_MODULE)) {
             var position = node.name.getEnd();
             this.checkForTrailingWhitespace(position);
         }
@@ -172,9 +188,8 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
         super.visitImportEqualsDeclaration(node);
     }
 
-    // check for spaces within exports
-    public visitExportAssignment(node: ts.ExportAssignment): void {
-        if (this.hasOption(OPTION_DECL)) {
+    public visitExportAssignment(node: ts.ExportAssignment) {
+        if (this.hasOption(OPTION_MODULE)) {
             var exportKeyword = node.getChildAt(0);
             var position = exportKeyword.getEnd();
             this.checkForTrailingWhitespace(position);
@@ -183,7 +198,7 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
         super.visitExportAssignment(node);
     }
 
-    public visitTypeAssertionExpression(node: ts.TypeAssertion): void {
+    public visitTypeAssertionExpression(node: ts.TypeAssertion) {
         if (this.hasOption(OPTION_TYPECAST)) {
             var position = node.expression.getFullStart();
             this.checkForTrailingWhitespace(position);

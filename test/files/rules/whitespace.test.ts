@@ -52,3 +52,19 @@ var test = `
 <sl-property-group label=${name} Axes">
   <div class="repeat"
 `;
+
+import { importA } from "libA";
+import { importB }from "libB";
+import{importC}from"libC";
+import moduleD, {importD}from "libD";
+
+export default 123;
+
+const D = 123;
+export{ D as default }; // failure
+
+export function each(obj, iterator, context) {
+    //
+}
+
+export {each as forEach};
