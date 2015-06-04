@@ -62,3 +62,9 @@ class NoReturnTypeForSetAccessor {
     set name(value: string) {
     }
 }
+
+try {
+    return 123;
+} catch (e) { // should not be a failure; catch clause can't have typedef
+    console.log(e);
+}

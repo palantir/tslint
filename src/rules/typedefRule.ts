@@ -87,13 +87,13 @@ class TypedefWalker extends Lint.RuleWalker {
     }
 
     public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
-        var optionName = "member-variable-declaration";
+        const optionName = "member-variable-declaration";
         this.checkTypeAnnotation(optionName, node.name.getEnd(), node.type, node.name);
         super.visitPropertyDeclaration(node);
     }
 
     public visitPropertySignature(node: ts.PropertyDeclaration) {
-        var optionName = "property-declaration";
+        const optionName = "property-declaration";
         this.checkTypeAnnotation(optionName, node.name.getEnd(), node.type, node.name);
         super.visitPropertySignature(node);
     }
@@ -105,15 +105,16 @@ class TypedefWalker extends Lint.RuleWalker {
 
     public visitVariableDeclaration(node: ts.VariableDeclaration) {
         // first parent is the VariableDeclarationList, grandparent would be the for-in statement
-        if (node.parent.parent.kind !== ts.SyntaxKind.ForInStatement) {
+        if (node.parent.parent.kind !== ts.SyntaxKind.ForInStatement &&
+                node.parent.kind !== ts.SyntaxKind.CatchClause) {
             this.checkTypeAnnotation("variable-declaration", node.name.getEnd(), node.type, node.name);
         }
         super.visitVariableDeclaration(node);
     }
 
     private handleCallSignature(node: ts.SignatureDeclaration) {
-        var location = (node.parameters != null) ? node.parameters.end : null;
-        // Set accessors don't have a return type.
+        const location = (node.parameters != null) ? node.parameters.end : null;
+        // set accessors can't have a return type.
         if (node.kind !== ts.SyntaxKind.SetAccessor) {
             this.checkTypeAnnotation("call-signature", location, node.type, node.name);
         }
@@ -123,14 +124,12 @@ class TypedefWalker extends Lint.RuleWalker {
                                 location: number,
                                 typeAnnotation: ts.TypeNode,
                                 name?: ts.Node) {
-
         if (this.hasOption(option) && typeAnnotation == null) {
-            var ns = "";
-
+            let ns = "";
             if (name != null && name.kind === ts.SyntaxKind.Identifier) {
-                ns = ": '" + (<ts.Identifier> name).text + "'";
+                ns = `: '${(<ts.Identifier> name).text}'`;
             }
-            var failure = this.createFailure(location, 1, "expected " + option + ns + " to have a typedef");
+            let failure = this.createFailure(location, 1, "expected " + option + ns + " to have a typedef");
             this.addFailure(failure);
         }
     }
