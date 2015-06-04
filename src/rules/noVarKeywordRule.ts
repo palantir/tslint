@@ -28,44 +28,17 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class NoVarKeywordWalker extends Lint.RuleWalker {
-    private skipVariableDeclaration = false;
-
     public visitVariableStatement(node: ts.VariableStatement): void {
-        if (this.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword) ||
-            this.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)) {
-            this.skipVariableDeclaration = true;
-        }
-
-        super.visitVariableStatement(node);
-        this.skipVariableDeclaration = false;
-    }
-
-    public visitVariableDeclaration(node: ts.VariableDeclaration) {
-
-        if (!this.skipVariableDeclaration) {
-            var flags = node.parent.flags;
-            var name = (<ts.Identifier> node.name);
+        if (!Lint.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword)
+            && !Lint.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)) {
+            var flags = node.declarationList.flags;
             var declarationIsLet = (Math.floor(flags / ts.NodeFlags.Let) % 2) === 1;
             var declarationIsConst = (Math.floor(flags / ts.NodeFlags.Const) % 2) === 1;
             if (!declarationIsConst && !declarationIsLet) {
-                this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+                this.addFailure(this.createFailure(node.getStart(), "var".length, Rule.FAILURE_STRING));
             }
         }
 
-        super.visitVariableDeclaration(node);
+        super.visitVariableStatement(node);
     }
-
-    private hasModifier(modifiers: ts.ModifiersArray, modifierKind: ts.SyntaxKind) {
-        if (modifiers == null) {
-            return false;
-        }
-        for (var i = 0; i < modifiers.length; i++) {
-            var modifier = modifiers[i];
-            if (modifier.kind === modifierKind) {
-                return true;
-            }
-        }
-        return false;
-    }
-
 }

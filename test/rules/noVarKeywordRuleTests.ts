@@ -22,10 +22,9 @@ describe("<no-var-keyword>", () => {
         var NoVarKeywordRule = Lint.Test.getRule("no-var-keyword");
         var failure = Lint.Test.createFailuresOnFile(fileName, NoVarKeywordRule.FAILURE_STRING);
         var expectedFailure = [
-            failure([3, 5], [3, 8]),
-            failure([6, 9], [6, 14]),
-            failure([9, 5], [9, 6]),
-            failure([10, 5], [10, 6])
+            failure([3, 1], [3, 4]),
+            failure([6, 5], [6, 8]),
+            failure([9, 1], [9, 4]),
         ];
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, NoVarKeywordRule);
         Lint.Test.assertFailuresEqual(actualFailures, expectedFailure);
