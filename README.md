@@ -172,6 +172,7 @@ A sample configuration file with all options is available [here](https://github.
     * `"check-parameters"` disallows unused function and constructor parameters.
         * NOTE: this option is experimental and does not work with classes that use abstract method declarations, among other things. Use at your own risk.
 * `no-use-before-declare` disallows usage of variables before their declaration.
+* `no-var-keyword` disallows usage of the `var` keyword, use `let` or `const` instead.
 * `no-var-requires` disallows the use of require statements except in import statements, banning the use of forms such as `var module = require("module")`
 * `one-line` enforces the specified tokens to be on the same line as the expression preceding it. Rule options:
   * `"check-catch"` checks that `catch` is on the same line as the closing brace for `try`
