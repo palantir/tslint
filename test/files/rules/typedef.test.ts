@@ -58,6 +58,10 @@ function forInFn(): void {
     for (var p in []) {}
 }
 
+function spreadFunction(...n) : number {
+  return ns[0];
+}
+
 class NoReturnTypeForSetAccessor {
     set name(value: string) {
     }
