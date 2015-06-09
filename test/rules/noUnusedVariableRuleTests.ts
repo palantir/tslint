@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-describe.only("<no-unused-variable>", () => {
+describe("<no-unused-variable>", () => {
     it("restricts unused imports", () => {
         var fileName = "rules/nounusedvariable-imports.test.ts";
         var Rule = Lint.Test.getRule("no-unused-variable");
