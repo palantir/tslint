@@ -30,7 +30,7 @@ describe("<typedef, not enabled>", () => {
     });
 });
 
-describe.only("<typedef, enabled>", () => {
+describe("<typedef, enabled>", () => {
     const fileName = "rules/typedef.test.ts";
     const TypedefRule = Lint.Test.getRule("typedef");
     let actualFailures: Lint.RuleFailure[];
