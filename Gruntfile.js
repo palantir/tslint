@@ -1,5 +1,12 @@
 "use strict";
 
+var checkBinTest;
+if (process.platform  === "win32") {
+    checkBinTest = [];
+} else {
+    checkBinTest = ["run:test"];
+}
+
 module.exports = function (grunt) {
     // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
     grunt.initConfig({
@@ -33,6 +40,12 @@ module.exports = function (grunt) {
                     reporter: "spec"
                 },
                 src: ["build/tslint-tests.js"]
+            }
+        },
+
+        run: {
+            test: {
+                cmd: "./test/check-bin.sh"
             }
         },
 
@@ -72,8 +85,10 @@ module.exports = function (grunt) {
             bin: {
                 src: [
                     "typings/*.d.ts",
+                    "src/language/walker/syntaxWalker.ts",
                     "src/language/**/*.ts",
-                    "src/*.ts",
+                    "src/!(tslint-cli).ts",
+                    "src/tslint-cli.ts"
                 ],
                 out: "bin/tslint-cli.js"
             },
@@ -138,13 +153,15 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-contrib-concat");
     grunt.loadNpmTasks("grunt-jscs");
     grunt.loadNpmTasks("grunt-mocha-test");
+    grunt.loadNpmTasks("grunt-run");
     grunt.loadNpmTasks("grunt-tslint");
     grunt.loadNpmTasks("grunt-ts");
 
     // register custom tasks
     grunt.registerTask("core", ["clean:core", "ts:core", "concat:core", "ts:core_rules", "ts:core_formatters"]);
     grunt.registerTask("bin", ["clean:bin", "ts:bin", "tslint:src", "concat:bin"]);
-    grunt.registerTask("test", ["clean:test", "ts:test", "tslint:test", "concat:test", "mochaTest"]);
+    grunt.registerTask("test", ["clean:test", "ts:test", "tslint:test", "concat:test", "mochaTest"]
+                                  .concat(checkBinTest));
 
     // create default task
     grunt.registerTask("default", ["jscs", "core", "bin", "test"]);
