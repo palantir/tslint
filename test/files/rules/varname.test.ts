@@ -21,8 +21,12 @@ export function functionWithInvalidParamNames (bad_name, AnotherOne) { // 2 fail
 }
 
 let { foo, bar } = { foo: 1, bar: 2 };
-let [ InvalidFoo, invalid_bar ] =  [1, 2]; // 2 failures
+let [ InvalidFoo, invalid_bar, ...invalid_baz ] =  [1, 2, 3, 4]; // 3 failures
 
 export function anotherFunctionWithInvalidParamNames ([first_element, SecondElement]) { // 2 failures
     //
+}
+
+export function functionWithInvalidSpread(invalid_arg: ...number) { // 1 failure
+  //
 }

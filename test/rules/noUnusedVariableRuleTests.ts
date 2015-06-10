@@ -42,15 +42,17 @@ describe("<no-unused-variable>", () => {
         var failure3 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING + "'b'")([23, 13], [23, 14]);
         var failure4 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING + "'d'")([26, 10], [26, 11]);
         var failure5 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING + "'e'")([26, 13], [26, 14]);
+        var failure6 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING + "'a'")([35, 7] , [35, 8 ]);
 
         var actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule);
 
-        assert.lengthOf(actualFailures, 5);
+        assert.lengthOf(actualFailures, 6);
         Lint.Test.assertContainsFailure(actualFailures, failure1);
         Lint.Test.assertContainsFailure(actualFailures, failure2);
         Lint.Test.assertContainsFailure(actualFailures, failure3);
         Lint.Test.assertContainsFailure(actualFailures, failure4);
         Lint.Test.assertContainsFailure(actualFailures, failure5);
+        Lint.Test.assertContainsFailure(actualFailures, failure6);
     });
 
     it("restricts unused functions", () => {

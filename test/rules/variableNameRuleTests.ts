@@ -31,8 +31,10 @@ describe("<variable-name>", () => {
             createFailure([19, 58], [19, 68]),
             createFailure([24, 7], [24, 17]),
             createFailure([24, 19], [24, 30]),
+            createFailure([24, 35], [24, 46]),
             createFailure([26, 56], [26, 69]),
             createFailure([26, 71], [26, 84]),
+            createFailure([30, 43], [30, 54]),
         ];
 
         const actualFailures = Lint.Test.applyRuleOnFile(fileName, VariableNameRule);

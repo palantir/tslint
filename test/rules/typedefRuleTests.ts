@@ -112,8 +112,12 @@ describe("<typedef, enabled>", () => {
             [53, 31],
             [53, 32],
             "expected parameter: 'b' to have a typedef");
+        const expectedFailure6 = Lint.Test.createFailure(fileName,
+              [61, 29],
+              [61, 30],
+              "expected parameter: 'n' to have a typedef");
 
-        assertFailures(expectedFailure1, expectedFailure2, expectedFailure3, expectedFailure4, expectedFailure5);
+        assertFailures(expectedFailure1, expectedFailure2, expectedFailure3, expectedFailure4, expectedFailure5, expectedFailure6);
     });
 
     it("enforces typedef in property declaration", () => {
