@@ -1,5 +1,15 @@
 Change Log
 ===
+v2.3.0
+---
+* [bugs] #401 #367 #324 #352
+* [new-rule] `no-var-keyword` disallows `var` in favor of `let` and `const`
+* [new-rule] `sort-object-literal-keys` forces object-literal keys to be sorted alphabetically
+* Add support for ES6 destructuring and module syntax (affects `variable-name`, `no-use-before-declare`, `whitespace` and `no-unused-variable`)
+* Add support for ES6 for-of and spread operator syntax
+* Use tsconfig.json & JSCS in the build system
+
+===
 v2.2.0-beta
 ---
 * Upgraded Typescript compiler to 1.5
