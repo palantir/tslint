@@ -39,3 +39,7 @@ export function testUnusedSpread() {
   return c;
 
 }
+
+for(let e of [1,2,3]) {
+
+}
