@@ -127,6 +127,7 @@ A sample configuration file with all options is available [here](https://github.
   * `"arguments"` checks alignment of function call arguments.
   * `"statements"` checks alignment of statements.
 * `ban` bans the use of specific functions. Options are ["object", "function"] pairs that ban the use of object.function()
+* `class-member-no-default-access` enforces using explicit visibility on class members
 * `class-name` enforces PascalCased class and interface names.
 * `comment-format` enforces rules for single-line comments. Rule options:
     * `"check-space"` enforces the rule that all single-line comments must begin with a space, as in `// comment`
