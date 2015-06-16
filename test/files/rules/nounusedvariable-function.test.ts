@@ -13,3 +13,5 @@ function func3() {
 export function func4() {
     return func1(2, 3);
 }
+
+declare function func5(): any;
