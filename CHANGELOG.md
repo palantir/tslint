@@ -1,6 +1,6 @@
 Change Log
 ===
-v2.3.0
+v2.3.0-beta
 ---
 * [bugs] #401 #367 #324 #352
 * [new-rule] `no-var-keyword` disallows `var` in favor of `let` and `const`
