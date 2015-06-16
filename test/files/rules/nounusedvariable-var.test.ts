@@ -43,3 +43,10 @@ export function testUnusedSpread() {
 for(let e of [1,2,3]) {
 
 }
+
+export function testRenamingDestructure() {
+  var a = 2;
+  let {a: b} = {a: 4}; // 1 error (b is unused)
+  let {x: y} = {x: 7}; // false positive
+  return a + y;
+}
