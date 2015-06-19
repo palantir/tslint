@@ -19,7 +19,22 @@ module Lint.Configuration {
     var path = require("path");
     var findup = require("findup-sync");
 
-    var CONFIG_FILENAME = "tslint.json";
+    const CONFIG_FILENAME = "tslint.json";
+    const DEFAULT_CONFIG = {
+        "rules": {
+            "curly": true,
+            "indent": [true, 4],
+            "no-duplicate-key": true,
+            "no-duplicate-variable": true,
+            "no-empty": true,
+            "no-eval": true,
+            "no-trailing-whitespace": true,
+            "no-unreachable": true,
+            "no-use-before-declare": true,
+            "quotemark": [true, "double"],
+            "semicolon": true
+        }
+    };
 
     export function findConfiguration(configFile: string, inputFileLocation: string): any {
         if (configFile) {
@@ -48,7 +63,11 @@ module Lint.Configuration {
 
         configFile = findup(CONFIG_FILENAME, { cwd: inputFileLocation, nocase: true }) || defaultPath;
 
-        return configFile ? JSON.parse(fs.readFileSync(configFile, "utf8")) : undefined;
+        if (fs.existsSync(configFile)) {
+            return JSON.parse(fs.readFileSync(configFile, "utf8"));
+        } else {
+            return DEFAULT_CONFIG;
+        }
     }
 
     function getHomeDir() {
