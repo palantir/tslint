@@ -67,6 +67,41 @@ declare module Lint {
         private walkChildren(node);
     }
 }
+declare module Lint {
+    class RuleWalker extends Lint.SyntaxWalker {
+        private limit;
+        private position;
+        private options;
+        private failures;
+        private sourceFile;
+        private disabledIntervals;
+        private ruleName;
+        constructor(sourceFile: ts.SourceFile, options: Lint.IOptions);
+        getSourceFile(): ts.SourceFile;
+        getFailures(): RuleFailure[];
+        getLimit(): number;
+        getOptions(): any;
+        hasOption(option: string): boolean;
+        skip(node: ts.Node): void;
+        createFailure(start: number, width: number, failure: string): Lint.RuleFailure;
+        addFailure(failure: RuleFailure): void;
+        private existsFailure(failure);
+    }
+}
+declare module Lint {
+    class ScopeAwareRuleWalker<T> extends RuleWalker {
+        private scopeStack;
+        constructor(sourceFile: ts.SourceFile, options?: any);
+        createScope(): T;
+        getCurrentScope(): T;
+        getAllScopes(): T[];
+        getCurrentDepth(): number;
+        onScopeStart(): void;
+        onScopeEnd(): void;
+        protected visitNode(node: ts.Node): void;
+        protected isScopeBoundary(node: ts.Node): boolean;
+    }
+}
 declare module Lint.Formatters {
     class AbstractFormatter implements Lint.IFormatter {
         format(failures: Lint.RuleFailure[]): string;
@@ -145,39 +180,19 @@ declare module Lint {
     function abstract(): string;
     function scanAllTokens(scanner: ts.Scanner, callback: (scanner: ts.Scanner) => void): void;
     function hasModifier(modifiers: ts.ModifiersArray, ...modifierKinds: ts.SyntaxKind[]): boolean;
+    function isBlockScopedVariable(node: ts.VariableDeclaration): boolean;
 }
 declare module Lint {
-    class RuleWalker extends Lint.SyntaxWalker {
-        private limit;
-        private position;
-        private options;
-        private failures;
-        private sourceFile;
-        private disabledIntervals;
-        private ruleName;
-        constructor(sourceFile: ts.SourceFile, options: Lint.IOptions);
-        getSourceFile(): ts.SourceFile;
-        getFailures(): RuleFailure[];
-        getLimit(): number;
-        getOptions(): any;
-        hasOption(option: string): boolean;
-        skip(node: ts.Node): void;
-        createFailure(start: number, width: number, failure: string): Lint.RuleFailure;
-        addFailure(failure: RuleFailure): void;
-        private existsFailure(failure);
-    }
-}
-declare module Lint {
-    class ScopeAwareRuleWalker<T> extends RuleWalker {
-        private scopeStack;
+    class BlockScopeAwareRuleWalker<T, U> extends ScopeAwareRuleWalker<T> {
+        private blockScopeStack;
         constructor(sourceFile: ts.SourceFile, options?: any);
-        createScope(): T;
-        getCurrentScope(): T;
-        getCurrentDepth(): number;
-        onScopeStart(): void;
-        onScopeEnd(): void;
+        createBlockScope(): U;
+        getCurrentBlockScope(): U;
+        onBlockScopeStart(): void;
+        getCurrentBlockDepth(): number;
+        onBlockScopeEnd(): void;
         protected visitNode(node: ts.Node): void;
-        private isScopeBoundary(node);
+        private isBlockScopeBoundary(node);
     }
 }
 declare module Lint {

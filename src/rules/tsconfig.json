@@ -43,6 +43,7 @@
         "./noDuplicateVariableRule.ts",
         "./noEmptyRule.ts",
         "./noEvalRule.ts",
+        "./noShadowedVariableRule.ts",
         "./noStringLiteralRule.ts",
         "./noSwitchCaseFallThroughRule.ts",
         "./noTrailingCommaRule.ts",

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 module Lint {
     export class ScopeAwareRuleWalker<T> extends RuleWalker {
@@ -25,17 +25,19 @@ module Lint {
             this.scopeStack = [this.createScope()];
         }
 
-        // create a new scope
         public createScope(): T {
             throw Lint.abstract();
         }
 
-        // get the current scope
         public getCurrentScope(): T {
             return this.scopeStack[this.scopeStack.length - 1];
         }
 
-        // get the depth of the scope stack
+        // get all scopes available at this depth
+        public getAllScopes(): T[] {
+            return this.scopeStack.slice();
+        }
+
         public getCurrentDepth(): number {
             return this.scopeStack.length;
         }
@@ -66,7 +68,7 @@ module Lint {
             }
         }
 
-        private isScopeBoundary(node: ts.Node): boolean {
+        protected isScopeBoundary(node: ts.Node): boolean {
             return node.kind === ts.SyntaxKind.FunctionDeclaration
                 || node.kind === ts.SyntaxKind.FunctionExpression
                 || node.kind === ts.SyntaxKind.PropertyAssignment

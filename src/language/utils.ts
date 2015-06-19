@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 module Lint {
     var path = require("path");
@@ -88,5 +88,12 @@ module Lint {
         return modifiers.some((m) => {
             return modifierKinds.some((k) => m.kind === k);
         });
+    }
+
+    export function isBlockScopedVariable(node: ts.VariableDeclaration): boolean {
+        // determine if the appropriate bit in the parent (VariableDeclarationList) is set,
+        // which indicates this is a "let" or "const"
+        return (Math.floor(node.parent.flags / ts.NodeFlags.Let) % 2) === 1
+            || (Math.floor(node.parent.flags / ts.NodeFlags.Const) % 2) === 1;
     }
 }
