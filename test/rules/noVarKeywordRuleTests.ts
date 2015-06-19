@@ -19,12 +19,12 @@ describe("<no-var-keyword>", () => {
     const fileName = "rules/novarkeyword.test.ts";
 
     it("disallows use of creating variables with 'var'", () => {
-        const failure = Lint.Test.createFailuresOnFile(fileName, NoVarKeywordRule.FAILURE_STRING);
+        const createFailure = Lint.Test.createFailuresOnFile(fileName, NoVarKeywordRule.FAILURE_STRING);
         const expectedFailures = [
-            failure([1, 1], [1, 4]),
-            failure([4, 5], [4, 8]),
-            failure([7, 1], [7, 4]),
-            failure([10, 1], [10, 4]),
+            createFailure([1, 1], [1, 4]),
+            createFailure([4, 5], [4, 8]),
+            createFailure([7, 1], [7, 4]),
+            createFailure([10, 1], [10, 4]),
         ];
         const actualFailures = Lint.Test.applyRuleOnFile(fileName, NoVarKeywordRule);
 

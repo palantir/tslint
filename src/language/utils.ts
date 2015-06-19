@@ -84,10 +84,25 @@ module Lint {
         });
     }
 
-    export function isBlockScopedVariable(node: ts.VariableDeclaration): boolean {
-        // determine if the appropriate bit in the parent (VariableDeclarationList) is set,
-        // which indicates this is a "let" or "const"
-        return (Math.floor(node.parent.flags / ts.NodeFlags.Let) % 2) === 1
-            || (Math.floor(node.parent.flags / ts.NodeFlags.Const) % 2) === 1;
+    /**
+     * Determines if the appropriate bit in the parent (VariableDeclarationList) is set,
+     * which indicates this is a "let" or "const".
+     */
+    export function isBlockScopedVariable(node: ts.VariableDeclaration | ts.VariableStatement): boolean {
+        const parentNode = (node.kind === ts.SyntaxKind.VariableDeclaration)
+            ? (<ts.VariableDeclaration> node).parent
+            : (<ts.VariableStatement> node).declarationList;
+
+        return isNodeFlagSet(parentNode, ts.NodeFlags.Let)
+            || isNodeFlagSet(parentNode, ts.NodeFlags.Const);
+    }
+
+    /**
+     * Bitwise check for node flags.
+     */
+    function isNodeFlagSet(node: ts.Node, flagToCheck: ts.NodeFlags): boolean {
+        /* tslint:disable:no-bitwise */
+        return (node.flags & flagToCheck) !== 0;
+        /* tslint:enable:no-bitwise */
     }
 }

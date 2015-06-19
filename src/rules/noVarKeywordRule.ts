@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-///<reference path='../../lib/tslint.d.ts' />
-
 const OPTION_LEADING_UNDERSCORE = "no-var-keyword";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -29,14 +27,9 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class NoVarKeywordWalker extends Lint.RuleWalker {
     public visitVariableStatement(node: ts.VariableStatement) {
-        if (!Lint.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword)
-            && !Lint.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)) {
-            const flags = node.declarationList.flags;
-            const declarationIsLet = (Math.floor(flags / ts.NodeFlags.Let) % 2) === 1;
-            const declarationIsConst = (Math.floor(flags / ts.NodeFlags.Const) % 2) === 1;
-            if (!declarationIsConst && !declarationIsLet) {
-                this.addFailure(this.createFailure(node.getStart(), "var".length, Rule.FAILURE_STRING));
-            }
+        if (!Lint.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword, ts.SyntaxKind.DeclareKeyword)
+                && !Lint.isBlockScopedVariable(node)) {
+            this.addFailure(this.createFailure(node.getStart(), "var".length, Rule.FAILURE_STRING));
         }
 
         super.visitVariableStatement(node);
