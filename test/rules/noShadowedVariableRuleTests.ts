@@ -16,11 +16,10 @@
 
 describe("<no-shadowed-variable>", () => {
     it("ensures that variable declarations are not shadowed", () => {
-        var fileName = "rules/no-shadowed-variable.test.ts";
-        var NoShadowedVariableRule = Lint.Test.getRule("no-shadowed-variable");
-        var failureString = NoShadowedVariableRule.FAILURE_STRING + "shadowed'";
+        const fileName = "rules/no-shadowed-variable.test.ts";
+        const NoShadowedVariableRule = Lint.Test.getRule("no-shadowed-variable");
 
-        var expectedFailures = [
+        const expectedFailures = [
             Lint.Test.createFailure(fileName, [6, 13], [6, 14], NoShadowedVariableRule.FAILURE_STRING + "a'"),
             Lint.Test.createFailure(fileName, [7, 13], [7, 14], NoShadowedVariableRule.FAILURE_STRING + "b'"),
             Lint.Test.createFailure(fileName, [11, 13], [11, 14], NoShadowedVariableRule.FAILURE_STRING + "b'"),
@@ -38,7 +37,7 @@ describe("<no-shadowed-variable>", () => {
             Lint.Test.createFailure(fileName, [75, 13], [75, 16], NoShadowedVariableRule.FAILURE_STRING + "foo'")
         ];
 
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, NoShadowedVariableRule);
+        const actualFailures = Lint.Test.applyRuleOnFile(fileName, NoShadowedVariableRule);
         Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
     });
 });
