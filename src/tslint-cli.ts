@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+/// <reference path="../typings/node.d.ts"/>
+/// <reference path="tslint.ts"/>
+/// <reference path="configuration.ts"/>
+
 var fs = require("fs");
 var optimist = require("optimist")
     .usage("usage: $0")

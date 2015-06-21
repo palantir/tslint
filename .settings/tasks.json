@@ -1,0 +1,28 @@
+// Available variables which can be used inside of strings.
+// ${workspaceRoot}: the root folder of the team
+// ${file}: the current opened file
+// ${fileBasename}: the current opened file's basename
+// ${fileDirname}: the current opened file's dirname
+// ${fileExtname}: the current opened file's extension
+// ${cwd}: the current working directory of the spawned process
+
+// A task runner that calls the Typescipt compiler (tsc) and compiles based on a tsconfig.json file
+{
+	"version": "0.1.0",
+	
+	// The command is tsc. Assumes that tsc has been installed using npm install -g typescript
+	"command": "${workspaceRoot}/node_modules/typescript/bin/tsc",
+	
+	// The command is a shell script
+	"isShellCommand": true,
+
+	// Show the output window only if unrecognized errors occur. 
+	"showOutput": "silent",
+	
+	// Tell the tsc compiler to use the tsconfig.json from the open folder.
+	"args": ["-p", "${fileDirname}"],
+	
+	// use the standard tsc problem matcher to find compile problems
+	// in the output.
+	"problemMatcher": "$tsc"
+}
