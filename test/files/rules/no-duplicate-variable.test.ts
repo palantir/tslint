@@ -107,10 +107,10 @@ function testArguments2(x: number, y: number): void {
 var references: {[vertex: string]: any};
 var dependents: {[vertex: string]: any};
 
-function blah(arg1: {[key: string]: any, arg2: {[key:string]: any}) {
+function blah(arg1: {[key: string]: any}, arg2: {[key:string]: any}) {
 }
 
-export interface IClipboard {
+interface IClipboard {
     copy(key: string, state: any): void;
     paste(key: string): any;
     findMaxOrMin(values: any[], defaultValue: number, operation: (...values: any[]) => number);
@@ -130,4 +130,25 @@ try {
 } catch (e) {
     e.blah();
     //
+}
+
+function testDestructuring() {
+    function myFunc() {
+        return [1, 2];
+    }
+
+    var [x, y] = myFunc();
+    var [z, z] = myFunc(); // failure
+
+    let [x1, y1] = myFunc();
+    let [z1, z1] = myFunc(); // tsc error
+
+    const [x2, y2] = myFunc();
+    const [z2, z2] = myFunc(); // tsc error
+
+    let [a1, [b1, c1]] = [1, [2, 3]];
+    let [{a1, d1}] = [{a1: 1, d1: 4}]; // tsc error
+
+    var [a2, [b2, c2]] = [1, [2, 3]];
+    var [{a2, d2}] = [{a2: 1, d2: 4}]; // failure
 }
