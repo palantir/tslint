@@ -19,7 +19,7 @@
 var OPTION_LEADING_UNDERSCORE = "no-var-keyword";
 
 export class Rule extends Lint.Rules.AbstractRule {
-    public static FAILURE_STRING = "use of the var-keyword is disallowed, use 'let' or 'const' instead";
+    public static FAILURE_STRING = "forbidden var keyword";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         var noVarKeywordWalker = new NoVarKeywordWalker(sourceFile, this.getOptions());
