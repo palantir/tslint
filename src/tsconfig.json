@@ -1,12 +1,12 @@
 {
-    "version": "1.5.0-alpha",
+    "version": "1.5.0-beta",
     "compilerOptions": {
         "module": "commonjs",
         "noImplicitAny": true,
         "declaration": true,
         "sourceMap": false,
         "target": "es5",
-        "out": "../build/tslint.js"
+        "out": "build/tslint.js"
     },
     "filesGlob": [
         "../typings/*.d.ts",
