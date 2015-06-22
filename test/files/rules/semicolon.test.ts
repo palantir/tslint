@@ -48,3 +48,7 @@ interface ITest {
     bar: number
     baz: boolean; // no error
 }
+
+import {Router} from 'aurelia-router'; // no error
+
+import {Controller} from 'my-lib' // error
