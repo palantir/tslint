@@ -28,7 +28,7 @@ describe("Enable and Disable Rules", () => {
         var relativePath = path.join("test", "files", "rules/enabledisable.test.ts");
         var source = fs.readFileSync(relativePath, "utf8");
 
-        var options = {
+        var options: Lint.ILinterOptions = {
             formatter: "json",
             configuration: validConfiguration,
             rulesDirectory: null,
@@ -49,12 +49,11 @@ describe("Enable and Disable Rules", () => {
         var expectedFailure5 = quotemarkFailure([10, 13], [10, 19]);
         var expectedFailure6 = quotemarkFailure([16, 13], [16, 19]);
 
-
         var ll = new Lint.Linter(relativePath, source, options);
         var result = ll.lint();
         var parsedResult = JSON.parse(result.output);
         var actualFailures: Lint.RuleFailure[] = [];
-        parsedResult.forEach((failure) => {
+        parsedResult.forEach((failure: any) => {
             var startArray = [failure.startPosition.line + 1, failure.startPosition.character + 1];
             var endArray = [failure.endPosition.line + 1, failure.endPosition.character + 1];
             actualFailures.push(Lint.Test.createFailure("rules/enabledisable.test.ts", startArray, endArray, failure.failure));

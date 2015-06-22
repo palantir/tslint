@@ -17,13 +17,14 @@
 describe("External Formatter", () => {
     var TEST_FILE = "formatters/externalFormatter.test.ts";
     var TEST_MODULE = "../test/files/formatters/simple";
-    var sourceFile, formatter;
+    var sourceFile: ts.SourceFile, formatter: Lint.IFormatter;
 
     before(function() {
         var Formatter = Lint.Test.getFormatter(TEST_MODULE);
         sourceFile = Lint.Test.getSourceFile(TEST_FILE);
         formatter = new Formatter();
     });
+
     it("formats failures", () => {
         var maxPosition = sourceFile.getFullWidth();
 
@@ -52,7 +53,7 @@ describe("External Formatter", () => {
         assert.equal(result, "");
     });
 
-    function getPositionString(line, character) {
+    function getPositionString(line: number, character: number) {
         return "[" + line + ", " + character + "]";
     }
 });

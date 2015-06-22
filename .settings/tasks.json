@@ -6,23 +6,14 @@
 // ${fileExtname}: the current opened file's extension
 // ${cwd}: the current working directory of the spawned process
 
-// A task runner that calls the Typescipt compiler (tsc) and compiles based on a tsconfig.json file
+// A task runner that calls scripts/tsc-wrapper.js. The wrapper script traverses
+// up the file system until a valid `tsconfig.json` is found, and runs `tsc` from
+// node_modules with that path as the root
 {
 	"version": "0.1.0",
-	
-	// The command is tsc. Assumes that tsc has been installed using npm install -g typescript
-	"command": "${workspaceRoot}/node_modules/typescript/bin/tsc",
-	
-	// The command is a shell script
+	"command": "${workspaceRoot}/scripts/tsc-wrapper.js",
 	"isShellCommand": true,
-
-	// Show the output window only if unrecognized errors occur. 
 	"showOutput": "silent",
-	
-	// Tell the tsc compiler to use the tsconfig.json from the open folder.
-	"args": ["-p", "${fileDirname}"],
-	
-	// use the standard tsc problem matcher to find compile problems
-	// in the output.
+	"args": ["${workspaceRoot}", "${fileDirname}"],
 	"problemMatcher": "$tsc"
 }

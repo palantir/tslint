@@ -13,8 +13,9 @@
 		".git",
 		".tscache",
 		"bower_components",
+                "bin",
 		"build",
-        "lib",
+                "lib",
 		"node_modules"
 	]
 }

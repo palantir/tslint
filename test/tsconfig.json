@@ -5,14 +5,18 @@
         "noImplicitAny": true,
         "sourceMap": false,
         "target": "es5",
-        "out": "../build/tslint-tests.js"
+        "out": "build/tslint-tests.js"
     },
     "filesGlob": [
         "../typings/*.d.ts",
         "../lib/tslint.d.ts",
         "./typings/*.ts",
-        "./**/*.ts",
-        "!./files/**/*"
+        "./references.ts",
+        "./helper.ts",
+        "./ruleDisableEnableTests.ts",
+        "./ruleLoaderTests.ts",
+        "./formatters/*.ts",
+        "./rules/*.ts"
     ],
     "files": [
         "../typings/node.d.ts",
@@ -21,16 +25,15 @@
         "../lib/tslint.d.ts",
         "./typings/chai.d.ts",
         "./typings/mocha.d.ts",
-        "./chaiAssert.ts",
+        "./references.ts",
+        "./helper.ts",
+        "./ruleDisableEnableTests.ts",
+        "./ruleLoaderTests.ts",
         "./formatters/externalFormatterTest.ts",
         "./formatters/jsonFormatterTests.ts",
         "./formatters/pmdFormatterTests.ts",
         "./formatters/proseFormatterTests.ts",
         "./formatters/verboseFormatterTests.ts",
-        "./helper.ts",
-        "./references.ts",
-        "./ruleDisableEnableTests.ts",
-        "./ruleLoaderTests.ts",
         "./rules/alignRuleTests.ts",
         "./rules/banRuleTests.ts",
         "./rules/classNameRuleTests.ts",
