@@ -75,3 +75,23 @@ function testDoStatement() {
         let foo = 2; // failure
     } while (true);
 }
+
+function testDestructuring(x: number) {
+    var {y, z} = {y: 2, z: 3};
+
+    function myFunc() {
+        return [1];
+    }
+
+    function innerFunc() {
+        var [foo] = myFunc();
+        var [x] = myFunc();   // failure
+        let [y] = myFunc();   // failure
+        const [z] = myFunc(); // failure
+    }
+
+    function anotherInnerFunc() {
+        var [{x}] = [{x: 1}];   // failure
+        let [[y]] = [[2]];      // failure
+    }
+}

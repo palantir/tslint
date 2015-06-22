@@ -31,15 +31,37 @@ class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<ScopeInfo,
         return new ScopeInfo();
     }
 
+    public visitBindingElement(node: ts.BindingElement) {
+        // TODO: handle node.dotDotDotToken?
+        const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
+        const isBlockScoped = Lint.isBlockScopedBindingElement(node);
+
+        if (isSingleVariable) {
+            this.handleSingleVariableIdentifier(<ts.Identifier> node.name, isBlockScoped);
+        }
+
+        super.visitBindingElement(node);
+    }
+
+    public visitCatchClause(node: ts.CatchClause) {
+        // don't visit the catch clause variable declaration, just visit the block
+        // the catch clause variable declaration has its own special scoping rules
+        this.visitBlock(node.block);
+    }
+
+    public visitMethodSignature(node: ts.SignatureDeclaration) {
+        // don't call super, we don't want to walk method signatures either
+    }
+
     public visitParameterDeclaration(node: ts.ParameterDeclaration) {
         // Treat parameters as block-scoped variables
-        const propertyName = <ts.Identifier> node.name;
-        const variableName = propertyName.text;
+        const variableIdentifier = <ts.Identifier> node.name;
+        const variableName = variableIdentifier.text;
         const currentScope = this.getCurrentScope();
         const currentBlockScope = this.getCurrentBlockScope();
 
         if (this.isVarInAnyScope(variableName)) {
-            this.addFailureOnIdentifier(propertyName);
+            this.addFailureOnIdentifier(variableIdentifier);
         }
         currentScope.varNames.push(variableName);
 
@@ -50,38 +72,35 @@ class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<ScopeInfo,
         // don't call super, we don't want to walk the inside of type nodes
     }
 
-    public visitMethodSignature(node: ts.SignatureDeclaration) {
-        // don't call super, we don't want to walk method signatures either
-    }
-
-    public visitCatchClause(node: ts.CatchClause) {
-        // don't visit the catch clause variable declaration, just visit the block
-        // the catch clause variable declaration has its own special scoping rules
-        this.visitBlock(node.block);
-    }
-
     public visitVariableDeclaration(node: ts.VariableDeclaration) {
-        const propertyName = <ts.Identifier> node.name;
-        const variableName = propertyName.text;
+        const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
+
+        if (isSingleVariable) {
+            this.handleSingleVariableIdentifier(<ts.Identifier> node.name, Lint.isBlockScopedVariable(node));
+        }
+
+        super.visitVariableDeclaration(node);
+    }
+
+    private handleSingleVariableIdentifier(variableIdentifier: ts.Identifier, isBlockScoped: boolean) {
+        const variableName = variableIdentifier.text;
         const currentScope = this.getCurrentScope();
         const currentBlockScope = this.getCurrentBlockScope();
 
         // this var is shadowing if there's already a var of the same name in any available scope AND
         // it is not in the current block (those are handled by the 'no-duplicate-variable' rule)
         if (this.isVarInAnyScope(variableName) && currentBlockScope.varNames.indexOf(variableName) < 0) {
-            this.addFailureOnIdentifier(propertyName);
+            this.addFailureOnIdentifier(variableIdentifier);
         }
 
         // regular vars should always be added to the scope; block-scoped vars should be added iff
         // the current scope is same as current block scope
-        if (!Lint.isBlockScopedVariable(node)
+        if (!isBlockScoped
                 || this.getCurrentBlockDepth() === 1
                 || this.getCurrentBlockDepth() === this.getCurrentDepth()) {
             currentScope.varNames.push(variableName);
         }
         currentBlockScope.varNames.push(variableName);
-
-        super.visitVariableDeclaration(node);
     }
 
     private isVarInAnyScope(varName: string) {
