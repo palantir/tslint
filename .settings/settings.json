@@ -13,6 +13,7 @@
 		".git",
 		".tscache",
 		"bower_components",
+        "bin",
 		"build",
         "lib",
 		"node_modules"
