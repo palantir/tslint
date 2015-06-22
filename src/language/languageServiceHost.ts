@@ -14,8 +14,6 @@
  * limitations under the License.
 */
 
-/* tslint:disable:no-unused-variable */
-
 module Lint {
     export function createLanguageServiceHost(fileName: string, source: string) {
         var host: ts.LanguageServiceHost = {
