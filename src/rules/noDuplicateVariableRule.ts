@@ -22,7 +22,6 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-// class NoDuplicateVariableWalker extends Lint.ScopeAwareRuleWalker<ScopeInfo> {
 class NoDuplicateVariableWalker extends Lint.BlockScopeAwareRuleWalker<{}, ScopeInfo> {
     public createScope(): any {
         return null;
@@ -32,12 +31,16 @@ class NoDuplicateVariableWalker extends Lint.BlockScopeAwareRuleWalker<{}, Scope
         return new ScopeInfo();
     }
 
-    public visitTypeLiteral(node: ts.TypeLiteralNode) {
-        // don't call super, we don't want to walk the inside of type nodes
-    }
+    public visitBindingElement(node: ts.BindingElement) {
+        // TODO: handle node.dotdotToken?
+        const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
+        const isBlockScoped = Lint.isBlockScopedVariable(<ts.VariableDeclaration> node.parent.parent);
 
-    public visitMethodSignature(node: ts.SignatureDeclaration) {
-        // don't call super, we don't want to walk method signatures either
+        if (isSingleVariable && !isBlockScoped) {
+            this.handleSingleVariableIdentifier(<ts.Identifier> node.name);
+        }
+
+        super.visitBindingElement(node);
     }
 
     public visitCatchClause(node: ts.CatchClause) {
@@ -46,20 +49,34 @@ class NoDuplicateVariableWalker extends Lint.BlockScopeAwareRuleWalker<{}, Scope
         this.visitBlock(node.block);
     }
 
-    public visitVariableDeclaration(node: ts.VariableDeclaration) {
-        const propertyName = <ts.Identifier> node.name;
-        const variableName = propertyName.text;
-        const currentBlockScope = this.getCurrentBlockScope();
+    public visitMethodSignature(node: ts.SignatureDeclaration) {
+        // don't call super, we don't want to walk method signatures either
+    }
 
-        if (!Lint.isBlockScopedVariable(node)) {
-            if (currentBlockScope.varNames.indexOf(variableName) >= 0) {
-                this.addFailureOnIdentifier(propertyName);
-            } else {
-                currentBlockScope.varNames.push(variableName);
-            }
+    public visitTypeLiteral(node: ts.TypeLiteralNode) {
+        // don't call super, we don't want to walk the inside of type nodes
+    }
+
+    public visitVariableDeclaration(node: ts.VariableDeclaration) {
+        const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
+
+        // destructuring is handled by this.visitBindingElement()
+        if (isSingleVariable && !Lint.isBlockScopedVariable(node)) {
+            this.handleSingleVariableIdentifier(<ts.Identifier> node.name);
         }
 
         super.visitVariableDeclaration(node);
+    }
+
+    private handleSingleVariableIdentifier(variableIdentifier: ts.Identifier) {
+        const variableName = variableIdentifier.text;
+        const currentBlockScope = this.getCurrentBlockScope();
+
+        if (currentBlockScope.varNames.indexOf(variableName) >= 0) {
+            this.addFailureOnIdentifier(variableIdentifier);
+        } else {
+            currentBlockScope.varNames.push(variableName);
+        }
     }
 
     private addFailureOnIdentifier(ident: ts.Identifier) {

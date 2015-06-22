@@ -23,7 +23,9 @@ describe("<no-duplicate-variable>", () => {
         const expectedFailures = [
             createFailure([11, 13], [11, 23]),
             createFailure([22, 9], [22, 19]),
-            createFailure([26, 5], [26, 15])
+            createFailure([26, 5], [26, 15]),
+            Lint.Test.createFailure(fileName, [141, 13], [141, 14], NoDuplicateVariableRule.FAILURE_STRING + "z'"),
+            Lint.Test.createFailure(fileName, [153, 11], [153, 13], NoDuplicateVariableRule.FAILURE_STRING + "a2'")
         ];
 
         const actualFailures = Lint.Test.applyRuleOnFile(fileName, NoDuplicateVariableRule);
