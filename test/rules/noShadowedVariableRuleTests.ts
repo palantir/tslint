@@ -15,10 +15,10 @@
  */
 
 describe("<no-shadowed-variable>", () => {
-    it("ensures that variable declarations are not shadowed", () => {
-        const fileName = "rules/no-shadowed-variable.test.ts";
-        const NoShadowedVariableRule = Lint.Test.getRule("no-shadowed-variable");
+    const NoShadowedVariableRule = Lint.Test.getRule("no-shadowed-variable");
+    const fileName = "rules/no-shadowed-variable.test.ts";
 
+    it("ensures that variable declarations are not shadowed", () => {
         const expectedFailures = [
             Lint.Test.createFailure(fileName, [6, 13], [6, 14], NoShadowedVariableRule.FAILURE_STRING + "a'"),
             Lint.Test.createFailure(fileName, [7, 13], [7, 14], NoShadowedVariableRule.FAILURE_STRING + "b'"),

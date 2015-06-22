@@ -15,10 +15,11 @@
  */
 
 describe("<no-duplicate-variable>", () => {
+    const NoDuplicateVariableRule = Lint.Test.getRule("no-duplicate-variable");
+    const fileName = "rules/no-duplicate-variable.test.ts";
+    const failureString = NoDuplicateVariableRule.FAILURE_STRING + "duplicated'";
+
     it("ensures that variable declarations are unique within a scope", () => {
-        const fileName = "rules/no-duplicate-variable.test.ts";
-        const NoDuplicateVariableRule = Lint.Test.getRule("no-duplicate-variable");
-        const failureString = NoDuplicateVariableRule.FAILURE_STRING + "duplicated'";
         const createFailure = Lint.Test.createFailuresOnFile(fileName, failureString);
         const expectedFailures = [
             createFailure([11, 13], [11, 23]),

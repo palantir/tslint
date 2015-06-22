@@ -12,25 +12,24 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "missing radix parameter";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        var radixWalker = new RadixWalker(sourceFile, this.getOptions());
+        const radixWalker = new RadixWalker(sourceFile, this.getOptions());
         return this.applyWithWalker(radixWalker);
     }
 }
 
 class RadixWalker extends Lint.RuleWalker {
-    public visitCallExpression(node: ts.CallExpression): void {
-        var expression = node.expression;
+    public visitCallExpression(node: ts.CallExpression) {
+        const expression = node.expression;
 
-        if (expression.kind === ts.SyntaxKind.Identifier &&
-            node.getFirstToken().getText() === "parseInt" &&
-            node.arguments.length < 2) {
-
+        if (expression.kind === ts.SyntaxKind.Identifier
+                && node.getFirstToken().getText() === "parseInt"
+                && node.arguments.length < 2) {
             this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
         }
 

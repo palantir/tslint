@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "block is empty";
@@ -25,15 +25,13 @@ export class Rule extends Lint.Rules.AbstractRule {
 class BlockWalker extends Lint.RuleWalker {
     private ignoredBlocks: ts.Block[] = [];
 
-    public visitBlock(node: ts.Block): void {
-        var openBrace = node.getChildAt(0);
-        var closeBrace = node.getChildAt(node.getChildCount() - 1);
-
-        var sourceFileText = node.getSourceFile().text;
-
-        var hasCommentAfter = ts.getTrailingCommentRanges(sourceFileText, openBrace.getEnd()) != null;
-        var hasCommentBefore = ts.getLeadingCommentRanges(sourceFileText, closeBrace.getFullStart()) != null;
-        var isSkipped = this.ignoredBlocks.indexOf(node) !== -1;
+    public visitBlock(node: ts.Block) {
+        const openBrace = node.getChildAt(0);
+        const closeBrace = node.getChildAt(node.getChildCount() - 1);
+        const sourceFileText = node.getSourceFile().text;
+        const hasCommentAfter = ts.getTrailingCommentRanges(sourceFileText, openBrace.getEnd()) != null;
+        const hasCommentBefore = ts.getLeadingCommentRanges(sourceFileText, closeBrace.getFullStart()) != null;
+        const isSkipped = this.ignoredBlocks.indexOf(node) !== -1;
 
         if (node.statements.length <= 0 && !hasCommentAfter && !hasCommentBefore && !isSkipped) {
             this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
@@ -42,20 +40,22 @@ class BlockWalker extends Lint.RuleWalker {
         super.visitBlock(node);
     }
 
-    public visitConstructorDeclaration(node: ts.ConstructorDeclaration): void {
-        var isSkipped = false;
-        var parameters = node.parameters;
+    public visitConstructorDeclaration(node: ts.ConstructorDeclaration) {
+        const parameters = node.parameters;
+        let isSkipped = false;
 
-        for (var i = 0; i < parameters.length; i++) {
-            var param = parameters[i];
+        for (let param of parameters) {
+            const hasPropertyAccessModifier = Lint.hasModifier(
+                param.modifiers,
+                ts.SyntaxKind.PrivateKeyword,
+                ts.SyntaxKind.ProtectedKeyword,
+                ts.SyntaxKind.PublicKeyword
+            );
 
-            for (var j = 0; param.modifiers != null && j < param.modifiers.length; j++) {
-                if (this.isPropertyAccessModifier(param.modifiers[j].kind)) {
-                    isSkipped = true;
-                    this.ignoredBlocks.push(node.body);
-
-                    break;
-                }
+            if (hasPropertyAccessModifier) {
+                isSkipped = true;
+                this.ignoredBlocks.push(node.body);
+                break;
             }
 
             if (isSkipped) {
@@ -64,11 +64,5 @@ class BlockWalker extends Lint.RuleWalker {
         }
 
         super.visitConstructorDeclaration(node);
-    }
-
-    private isPropertyAccessModifier(modifier: ts.SyntaxKind): boolean {
-        return modifier === ts.SyntaxKind.PrivateKeyword
-            || modifier === ts.SyntaxKind.ProtectedKeyword
-            || modifier === ts.SyntaxKind.PublicKeyword;
     }
 }

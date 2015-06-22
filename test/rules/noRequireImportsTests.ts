@@ -15,10 +15,10 @@
  */
 
 describe("<no-require-imports>", () => {
-    it("forbids CommmonJS style imports", () => {
-        const fileName = "rules/norequireimports.test.ts";
-        const Rule = Lint.Test.getRule("no-require-imports");
+    const Rule = Lint.Test.getRule("no-require-imports");
+    const fileName = "rules/norequireimports.test.ts";
 
+    it("forbids CommmonJS style imports", () => {
         const actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule);
 
         assert(actualFailures.length === 6, "Expected 6 failures, got " + actualFailures.length);

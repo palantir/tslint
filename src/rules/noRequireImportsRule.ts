@@ -36,7 +36,7 @@ class NoRequireImportsWalker extends Lint.RuleWalker {
         super.visitImportEqualsDeclaration(node);
     }
 
-    private handleDeclaration(decl: ts.VariableDeclaration) : void {
+    private handleDeclaration(decl: ts.VariableDeclaration)  {
         // make sure the RHS is a call expression.
         const call = <ts.CallExpression> (decl.initializer);
         if (call && call.arguments && call.expression) {

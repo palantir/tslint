@@ -12,12 +12,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 module Lint.Configuration {
-    var fs = require("fs");
-    var path = require("path");
-    var findup = require("findup-sync");
+    const fs = require("fs");
+    const path = require("path");
+    const findup = require("findup-sync");
 
     const CONFIG_FILENAME = "tslint.json";
     const DEFAULT_CONFIG = {
@@ -45,7 +45,7 @@ module Lint.Configuration {
         configFile = findup("package.json", { cwd: inputFileLocation, nocase: true });
 
         if (configFile) {
-            var content = require(configFile);
+            const content = require(configFile);
 
             if (content.tslintConfig) {
                 return content.tslintConfig;
@@ -53,13 +53,13 @@ module Lint.Configuration {
         }
 
         // Next look for tslint.json
-        var homeDir = getHomeDir();
+        const homeDir = getHomeDir();
 
         if (!homeDir) {
             return undefined;
         }
 
-        var defaultPath = path.join(homeDir, CONFIG_FILENAME);
+        const defaultPath = path.join(homeDir, CONFIG_FILENAME);
 
         configFile = findup(CONFIG_FILENAME, { cwd: inputFileLocation, nocase: true }) || defaultPath;
 
@@ -71,13 +71,12 @@ module Lint.Configuration {
     }
 
     function getHomeDir() {
-        var environment = global.process.env;
-        var paths = [environment.USERPROFILE, environment.HOME, environment.HOMEPATH, environment.HOMEDRIVE + environment.HOMEPATH];
+        const environment = global.process.env;
+        const paths = [environment.USERPROFILE, environment.HOME, environment.HOMEPATH, environment.HOMEDRIVE + environment.HOMEPATH];
 
-        for (var homeIndex in paths) {
+        for (const homeIndex in paths) {
             if (paths.hasOwnProperty(homeIndex)) {
-                var homePath = paths[homeIndex];
-
+                const homePath = paths[homeIndex];
                 if (homePath && fs.existsSync(homePath)) {
                     return homePath;
                 }

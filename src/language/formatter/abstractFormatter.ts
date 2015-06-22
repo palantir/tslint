@@ -16,10 +16,8 @@
 
 module Lint.Formatters {
     export class AbstractFormatter implements Lint.IFormatter {
-        /* tslint:disable:no-unused-variable */
         public format(failures: Lint.RuleFailure[]): string {
             throw Lint.abstract();
         }
-        /* tslint:enable:no-unused-variable */
     }
 }

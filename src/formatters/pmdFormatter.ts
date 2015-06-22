@@ -12,28 +12,28 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 export class Formatter extends Lint.Formatters.AbstractFormatter {
     public format(failures: Lint.RuleFailure[]): string {
-        var output = "<pmd version=\"tslint\">";
+        let output = "<pmd version=\"tslint\">";
 
-        failures.forEach((failure: Lint.RuleFailure) => {
-            var failureString = failure.getFailure()
+        for (let failure of failures) {
+            const failureString = failure.getFailure()
                 .replace(/&/g, "&amp;")
                 .replace(/</g, "&lt;")
                 .replace(/>/g, "&gt;")
                 .replace(/\'/g, "&#39;")
                 .replace(/\"/g, "&quot;");
 
-            var lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
+            const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
 
             output += "<file name=\"" + failure.getFileName();
             output += "\"><violation begincolumn=\"" + (lineAndCharacter.character + 1);
             output += "\" beginline=\"" + (lineAndCharacter.line + 1);
             output += "\" priority=\"1\"";
             output += " rule=\"" + failureString + "\"> </violation></file>";
-        });
+        }
 
         output += "</pmd>";
         return output;

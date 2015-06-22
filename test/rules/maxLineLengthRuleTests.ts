@@ -15,11 +15,12 @@
  */
 
 describe("<max-line-length>", () => {
+    const MaxLineLengthRule = Lint.Test.getRule("max-line-length");
+    const fileName = "rules/maxlen.test.ts";
+
     it("enforces a maximum line length", () => {
-        var fileName = "rules/maxlen.test.ts";
-        var MaxLineLengthRule = Lint.Test.getRule("max-line-length");
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, MaxLineLengthRule, [true, 140]);
-        var expectedFailures = [
+        const actualFailures = Lint.Test.applyRuleOnFile(fileName, MaxLineLengthRule, [true, 140]);
+        const expectedFailures = [
             Lint.Test.createFailure(fileName, [2, 1], [2, 165], MaxLineLengthRule.FAILURE_STRING + "140")
         ];
 

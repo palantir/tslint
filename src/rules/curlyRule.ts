@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static DO_FAILURE_STRING = "do statements must be braced";
@@ -27,7 +27,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class CurlyWalker extends Lint.RuleWalker {
-    public visitForInStatement(node: ts.ForInStatement): void {
+    public visitForInStatement(node: ts.ForInStatement) {
         if (!this.isStatementBraced(node.statement)) {
             this.addFailureForNode(node, Rule.FOR_FAILURE_STRING);
         }
@@ -35,7 +35,7 @@ class CurlyWalker extends Lint.RuleWalker {
         super.visitForInStatement(node);
     }
 
-    public visitForOfStatement(node: ts.ForInStatement): void {
+    public visitForOfStatement(node: ts.ForInStatement) {
         if (!this.isStatementBraced(node.statement)) {
             this.addFailureForNode(node, Rule.FOR_FAILURE_STRING);
         }
@@ -43,7 +43,7 @@ class CurlyWalker extends Lint.RuleWalker {
         super.visitForInStatement(node);
     }
 
-    public visitForStatement(node: ts.ForStatement): void {
+    public visitForStatement(node: ts.ForStatement) {
         if (!this.isStatementBraced(node.statement)) {
             this.addFailureForNode(node, Rule.FOR_FAILURE_STRING);
         }
@@ -51,26 +51,29 @@ class CurlyWalker extends Lint.RuleWalker {
         super.visitForStatement(node);
     }
 
-    public visitIfStatement(node: ts.IfStatement): void {
+    public visitIfStatement(node: ts.IfStatement) {
         if (!this.isStatementBraced(node.thenStatement)) {
             this.addFailure(this.createFailure(node.getStart(), node.thenStatement.getEnd() - node.getStart(), Rule.IF_FAILURE_STRING));
         }
+
         if (node.elseStatement != null
-            && node.elseStatement.kind !== ts.SyntaxKind.IfStatement
-            && !this.isStatementBraced(node.elseStatement)) {
+                && node.elseStatement.kind !== ts.SyntaxKind.IfStatement
+                && !this.isStatementBraced(node.elseStatement)) {
 
             // find the else keyword to place the error appropriately
-            var elseKeywordNode = node.getChildren().filter((child) => child.kind === ts.SyntaxKind.ElseKeyword)[0];
+            const elseKeywordNode = node.getChildren().filter((child) => child.kind === ts.SyntaxKind.ElseKeyword)[0];
 
-            this.addFailure(this.createFailure(elseKeywordNode.getStart(),
+            this.addFailure(
+                this.createFailure(elseKeywordNode.getStart(),
                 node.elseStatement.getEnd() - elseKeywordNode.getStart(),
-                Rule.ELSE_FAILURE_STRING));
+                Rule.ELSE_FAILURE_STRING)
+            );
         }
 
         super.visitIfStatement(node);
     }
 
-    public visitDoStatement(node: ts.DoStatement): void {
+    public visitDoStatement(node: ts.DoStatement) {
         if (!this.isStatementBraced(node.statement)) {
             this.addFailureForNode(node, Rule.DO_FAILURE_STRING);
         }
@@ -78,7 +81,7 @@ class CurlyWalker extends Lint.RuleWalker {
         super.visitDoStatement(node);
     }
 
-    public visitWhileStatement(node: ts.WhileStatement): void {
+    public visitWhileStatement(node: ts.WhileStatement) {
         if (!this.isStatementBraced(node.statement)) {
             this.addFailureForNode(node, Rule.WHILE_FAILURE_STRING);
         }
@@ -86,11 +89,8 @@ class CurlyWalker extends Lint.RuleWalker {
         super.visitWhileStatement(node);
     }
 
-    private isStatementBraced(node: ts.Statement): boolean {
-        if (node.kind === ts.SyntaxKind.Block) {
-            return true;
-        }
-        return false;
+    private isStatementBraced(node: ts.Statement) {
+        return node.kind === ts.SyntaxKind.Block;
     }
 
     private addFailureForNode(node: ts.Node, failure: string) {

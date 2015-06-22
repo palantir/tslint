@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 export class Rule extends Lint.Rules.AbstractRule {
     static FAILURE_STRING = "interface name must be a capitalized I";
@@ -23,8 +23,8 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class NameWalker extends Lint.RuleWalker {
-    public visitInterfaceDeclaration(node: ts.InterfaceDeclaration): void {
-        var interfaceName = node.name.text;
+    public visitInterfaceDeclaration(node: ts.InterfaceDeclaration) {
+        const interfaceName = node.name.text;
         if (!this.startsWithI(interfaceName)) {
             this.addFailureAt(node.name.getStart(), node.name.getWidth());
         }
@@ -37,12 +37,12 @@ class NameWalker extends Lint.RuleWalker {
             return true;
         }
 
-        var firstCharacter = name.charAt(0);
+        const firstCharacter = name.charAt(0);
         return (firstCharacter === "I");
     }
 
     private addFailureAt(position: number, width: number) {
-        var failure = this.createFailure(position, width, Rule.FAILURE_STRING);
+        const failure = this.createFailure(position, width, Rule.FAILURE_STRING);
         this.addFailure(failure);
     }
 

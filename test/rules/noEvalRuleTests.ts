@@ -15,12 +15,13 @@
  */
 
 describe("<no-eval>", () => {
+    const NoEvalRule = Lint.Test.getRule("no-eval");
+    const fileName = "rules/evil.test.ts";
+    const failureString = NoEvalRule.FAILURE_STRING;
+
     it("forbids eval", () => {
-        var fileName = "rules/evil.test.ts";
-        var NoEvalRule = Lint.Test.getRule("no-eval");
-        var failureString = NoEvalRule.FAILURE_STRING;
-        var expectedFailure = Lint.Test.createFailure(fileName, [6, 13], [6, 17], failureString);
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, NoEvalRule);
+        const expectedFailure = Lint.Test.createFailure(fileName, [6, 13], [6, 17], failureString);
+        const actualFailures = Lint.Test.applyRuleOnFile(fileName, NoEvalRule);
 
         assert.equal(actualFailures.length, 1);
         assert.isTrue(actualFailures[0].equals(expectedFailure));

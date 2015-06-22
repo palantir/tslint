@@ -12,12 +12,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 export class Formatter extends Lint.Formatters.AbstractFormatter {
     public format(failures: Lint.RuleFailure[]): string {
-        var failuresJSON = failures.map((failure) => failure.toJson());
-
+        const failuresJSON = failures.map((failure) => failure.toJson());
         return JSON.stringify(failuresJSON);
     }
 }

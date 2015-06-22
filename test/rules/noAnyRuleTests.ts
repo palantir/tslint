@@ -15,12 +15,12 @@
  */
 
 describe("<no-any>", () => {
-    var fileName = "rules/noAny.test.ts";
-    var NoAnyRule = Lint.Test.getRule("no-any");
+    const NoAnyRule = Lint.Test.getRule("no-any");
+    const fileName = "rules/noAny.test.ts";
 
-    it("var declaration with type of 'any' should not be allowed", () => {
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, NoAnyRule);
-        var expectedFailure = Lint.Test.createFailure(fileName, [1, 8], [1, 11], "type decoration of 'any' is forbidden");
+    it("const declaration with type of 'any' should not be allowed", () => {
+        const actualFailures = Lint.Test.applyRuleOnFile(fileName, NoAnyRule);
+        const expectedFailure = Lint.Test.createFailure(fileName, [1, 8], [1, 11], "type decoration of 'any' is forbidden");
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });

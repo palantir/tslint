@@ -15,12 +15,13 @@
  */
 
 describe("<no-trailing-comma>", () => {
+    const NoTrailingCommaRule = Lint.Test.getRule("no-trailing-comma");
+    const fileName = "rules/notrailingcomma.test.ts";
+
     it("restricts the use of trailing commas in object literals", () => {
-        var fileName = "rules/notrailingcomma.test.ts";
-        var NoTrailingCommaRule = Lint.Test.getRule("no-trailing-comma");
-        var expectedFailure1 = Lint.Test.createFailure(fileName, [5, 15], [5, 16], NoTrailingCommaRule.FAILURE_STRING);
-        var expectedFailure2 = Lint.Test.createFailure(fileName, [15, 9], [15, 10], NoTrailingCommaRule.FAILURE_STRING);
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, NoTrailingCommaRule);
+        const expectedFailure1 = Lint.Test.createFailure(fileName, [5, 15], [5, 16], NoTrailingCommaRule.FAILURE_STRING);
+        const expectedFailure2 = Lint.Test.createFailure(fileName, [15, 9], [15, 10], NoTrailingCommaRule.FAILURE_STRING);
+        const actualFailures = Lint.Test.applyRuleOnFile(fileName, NoTrailingCommaRule);
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);

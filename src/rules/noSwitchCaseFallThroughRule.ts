@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_PART = "expected a 'break' before ";
@@ -23,16 +23,15 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 export class NoSwitchCaseFallThroughWalker extends Lint.RuleWalker {
-
     public visitSwitchStatement(node: ts.SwitchStatement) {
-        var isFallingThrough = false;
-        // get the position for the first case statement
+        let isFallingThrough = false;
 
-        var switchClauses = node.caseBlock.clauses;
+        // get the position for the first case statement
+        const switchClauses = node.caseBlock.clauses;
         switchClauses.forEach((child, i) => {
-            var kind = child.kind;
+            const kind = child.kind;
             if (kind === ts.SyntaxKind.CaseClause) {
-                var switchClause = <ts.CaseClause> child;
+                const switchClause = <ts.CaseClause> child;
                 isFallingThrough = this.fallsThrough(switchClause.statements);
                 // no break statements and no statements means the fallthrough is expected.
                 // last item doesn't need a break
@@ -45,7 +44,7 @@ export class NoSwitchCaseFallThroughWalker extends Lint.RuleWalker {
             } else {
                 // case statement falling through a default
                 if (isFallingThrough && !this.fallThroughAllowed(child)) {
-                    var failureString = Rule.FAILURE_STRING_PART + "'default'";
+                    const failureString = Rule.FAILURE_STRING_PART + "'default'";
                     this.addFailure(this.createFailure(switchClauses[i - 1].getEnd(), 1, failureString));
                 }
             }
@@ -53,15 +52,14 @@ export class NoSwitchCaseFallThroughWalker extends Lint.RuleWalker {
         super.visitSwitchStatement(node);
     }
 
-    private fallThroughAllowed(nextCaseOrDefaultStatement: ts.Node): boolean {
-        var sourceFileText = nextCaseOrDefaultStatement.getSourceFile().text;
-        var childCount = nextCaseOrDefaultStatement.getChildCount();
-        var firstChild = nextCaseOrDefaultStatement.getChildAt(0);
-        var commentRanges = ts.getLeadingCommentRanges(sourceFileText, firstChild.getFullStart());
+    private fallThroughAllowed(nextCaseOrDefaultStatement: ts.Node) {
+        const sourceFileText = nextCaseOrDefaultStatement.getSourceFile().text;
+        const childCount = nextCaseOrDefaultStatement.getChildCount();
+        const firstChild = nextCaseOrDefaultStatement.getChildAt(0);
+        const commentRanges = ts.getLeadingCommentRanges(sourceFileText, firstChild.getFullStart());
         if (commentRanges != null) {
-            for (var i = 0; i < commentRanges.length; i++) {
-                var commentRange = commentRanges[i];
-                var commentText = sourceFileText.substring(commentRange.pos, commentRange.end);
+            for (let commentRange of commentRanges) {
+                const commentText = sourceFileText.substring(commentRange.pos, commentRange.end);
                 if (commentText === "/* falls through */") {
                     return true;
                 }
@@ -70,15 +68,11 @@ export class NoSwitchCaseFallThroughWalker extends Lint.RuleWalker {
         return false;
     }
 
-    private fallsThrough(list: ts.NodeArray<ts.Statement>) {
-        for (var i = 0; i < list.length; i++) {
-            var nodeKind = list[i].kind;
-            if (nodeKind === ts.SyntaxKind.BreakStatement ||
-                nodeKind === ts.SyntaxKind.ThrowStatement ||
-                nodeKind === ts.SyntaxKind.ReturnStatement) {
-                return false;
-            }
-        }
-        return true;
+    private fallsThrough(statements: ts.NodeArray<ts.Statement>) {
+        return !statements.some((statement) => {
+            return statement.kind === ts.SyntaxKind.BreakStatement
+                || statement.kind === ts.SyntaxKind.ThrowStatement
+                || statement.kind === ts.SyntaxKind.ReturnStatement;
+        });
     }
 }

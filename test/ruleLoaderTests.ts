@@ -15,11 +15,11 @@
  */
 
 describe("Rule Loader", () => {
-    var path = require("path");
-    var rulesDirectory = path.join(global.process.cwd(), "build/rules");
+    const path = require("path");
+    const rulesDirectory = path.join(global.process.cwd(), "build/rules");
 
     it("loads core rules", () => {
-        var validConfiguration: {[name: string]: any} = {
+        const validConfiguration: {[name: string]: any} = {
             "forin": false,
             "quotemark": "single",
             "eofline": true,
@@ -27,29 +27,29 @@ describe("Rule Loader", () => {
             "no-debugger": true
         };
 
-        var rules = Lint.loadRules(validConfiguration, {}, rulesDirectory);
+        const rules = Lint.loadRules(validConfiguration, {}, rulesDirectory);
         assert.equal(rules.length, 5);
     });
 
     it("skips invalid rules", () => {
-        var invalidConfiguration: {[name: string]: any} = {
+        const invalidConfiguration: {[name: string]: any} = {
             "invalidConfig1": true,
             "invalidConfig2": false
         };
 
-        var rules = Lint.loadRules(invalidConfiguration, {}, rulesDirectory);
+        const rules = Lint.loadRules(invalidConfiguration, {}, rulesDirectory);
         assert.deepEqual(rules, []);
     });
 
     it("doesn't ignore leading or trailing underscores or dashes", () => {
-        var invalidConfiguration: {[name: string]: any} = {
+        const invalidConfiguration: {[name: string]: any} = {
             "_indent": 6,
             "forin_": true,
             "-quotemark": "single",
             "eofline-": true
         };
 
-        var rules = Lint.loadRules(invalidConfiguration, {}, rulesDirectory);
+        const rules = Lint.loadRules(invalidConfiguration, {}, rulesDirectory);
         assert.deepEqual(rules, []);
     });
 });

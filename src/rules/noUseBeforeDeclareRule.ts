@@ -19,9 +19,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_POSTFIX = "' used before declaration";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        var documentRegistry = ts.createDocumentRegistry();
-        var languageServiceHost = Lint.createLanguageServiceHost("file.ts", sourceFile.getFullText());
-        var languageService = ts.createLanguageService(languageServiceHost, documentRegistry);
+        const documentRegistry = ts.createDocumentRegistry();
+        const languageServiceHost = Lint.createLanguageServiceHost("file.ts", sourceFile.getFullText());
+        const languageService = ts.createLanguageService(languageServiceHost, documentRegistry);
 
         return this.applyWithWalker(new NoUseBeforeDeclareWalker(sourceFile, this.getOptions(), languageService));
     }
@@ -41,13 +41,13 @@ class NoUseBeforeDeclareWalker extends Lint.ScopeAwareRuleWalker<VisitedVariable
         return {};
     }
 
-    public visitImportDeclaration(node: ts.ImportDeclaration): void {
+    public visitImportDeclaration(node: ts.ImportDeclaration) {
         if (node.importClause != null) {
-            var importClause = node.importClause;
+            const importClause = node.importClause;
 
             // named imports & namespace imports handled by other walker methods
             if (importClause.name != null) {
-                var variableIdentifier = importClause.name;
+                const variableIdentifier = importClause.name;
                 this.validateUsageForVariable(variableIdentifier.text, variableIdentifier.getStart());
             }
         }
@@ -55,30 +55,30 @@ class NoUseBeforeDeclareWalker extends Lint.ScopeAwareRuleWalker<VisitedVariable
         super.visitImportDeclaration(node);
     }
 
-    public visitImportEqualsDeclaration(node: ts.ImportEqualsDeclaration): void {
-        var name = <ts.Identifier> node.name;
+    public visitImportEqualsDeclaration(node: ts.ImportEqualsDeclaration) {
+        const name = <ts.Identifier> node.name;
         this.validateUsageForVariable(name.text, name.getStart());
 
         super.visitImportEqualsDeclaration(node);
     }
 
-    public visitNamedImports(node: ts.NamedImports): void {
-        node.elements.forEach((namedImport: ts.ImportSpecifier) => {
+    public visitNamedImports(node: ts.NamedImports) {
+        for (let namedImport of node.elements) {
             this.validateUsageForVariable(namedImport.name.text, namedImport.name.getStart());
-        });
+        }
         super.visitNamedImports(node);
     }
 
-    public visitNamespaceImport(node: ts.NamespaceImport): void {
+    public visitNamespaceImport(node: ts.NamespaceImport) {
         this.validateUsageForVariable(node.name.text, node.name.getStart());
         super.visitNamespaceImport(node);
     }
 
-    public visitVariableDeclaration(node: ts.VariableDeclaration): void {
-        var isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
-        var nameNode = <ts.Identifier> node.name;
-        var variableName = nameNode.text;
-        var currentScope = this.getCurrentScope();
+    public visitVariableDeclaration(node: ts.VariableDeclaration) {
+        const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
+        const nameNode = <ts.Identifier> node.name;
+        const variableName = nameNode.text;
+        const currentScope = this.getCurrentScope();
 
         // only validate on the first variable declaration within the current scope
         if (currentScope[variableName] == null) {
@@ -90,17 +90,15 @@ class NoUseBeforeDeclareWalker extends Lint.ScopeAwareRuleWalker<VisitedVariable
     }
 
     private validateUsageForVariable(name: string, position: number) {
-        var highlights = this.languageService.getDocumentHighlights("file.ts", position, ["file.ts"]);
-        if (highlights) {
-            highlights.forEach((highlight) => {
-                highlight.highlightSpans.forEach((highlightSpan) => {
-                    var referencePosition = highlightSpan.textSpan.start;
-                    if (referencePosition < position) {
-                        var failureString = Rule.FAILURE_STRING_PREFIX + name + Rule.FAILURE_STRING_POSTFIX;
-                        this.addFailure(this.createFailure(referencePosition, name.length, failureString));
-                    }
-                });
-            });
+        const highlights = this.languageService.getDocumentHighlights("file.ts", position, ["file.ts"]);
+        for (let highlight of highlights) {
+            for (let highlightSpan of highlight.highlightSpans) {
+                const referencePosition = highlightSpan.textSpan.start;
+                if (referencePosition < position) {
+                    const failureString = Rule.FAILURE_STRING_PREFIX + name + Rule.FAILURE_STRING_POSTFIX;
+                    this.addFailure(this.createFailure(referencePosition, name.length, failureString));
+                }
+            }
         }
     }
 }

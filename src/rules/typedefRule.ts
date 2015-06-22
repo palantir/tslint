@@ -18,7 +18,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "missing type declaration";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        var typedefWalker = new TypedefWalker(sourceFile, this.getOptions());
+        const typedefWalker = new TypedefWalker(sourceFile, this.getOptions());
         return this.applyWithWalker(typedefWalker);
     }
 }
@@ -50,7 +50,7 @@ class TypedefWalker extends Lint.RuleWalker {
     }
 
     public visitObjectLiteralExpression(node: ts.ObjectLiteralExpression) {
-        node.properties.forEach((property: ts.ObjectLiteralElement) => {
+        for (let property of node.properties) {
             switch (property.kind) {
                 case ts.SyntaxKind.PropertyAssignment:
                     this.visitPropertyAssignment(<ts.PropertyAssignment> property);
@@ -65,7 +65,7 @@ class TypedefWalker extends Lint.RuleWalker {
                     this.visitSetAccessor(<ts.AccessorDeclaration> property);
                     break;
             }
-        });
+        }
     }
 
     public visitParameterDeclaration(node: ts.ParameterDeclaration) {
@@ -104,9 +104,9 @@ class TypedefWalker extends Lint.RuleWalker {
     }
 
     public visitVariableDeclaration(node: ts.VariableDeclaration) {
-        // first parent is the VariableDeclarationList, grandparent would be the for-in statement
-        if (node.parent.parent.kind !== ts.SyntaxKind.ForInStatement &&
-                node.parent.kind !== ts.SyntaxKind.CatchClause) {
+        // first parent is the variableDeclarationList, grandparent would be the for-in statement
+        if (node.parent.parent.kind !== ts.SyntaxKind.ForInStatement
+                && node.parent.kind !== ts.SyntaxKind.CatchClause) {
             this.checkTypeAnnotation("variable-declaration", node.name.getEnd(), node.type, node.name);
         }
         super.visitVariableDeclaration(node);

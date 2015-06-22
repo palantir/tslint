@@ -15,14 +15,13 @@
  */
 
 describe("<no-debugger>", () => {
-    var NoDebuggerRule = Lint.Test.getRule("no-debugger");
+    const NoDebuggerRule = Lint.Test.getRule("no-debugger");
+    const fileName = "rules/debug.test.ts";
+    const failureString = NoDebuggerRule.FAILURE_STRING;
 
     it("forbids debugger statements", () => {
-        var fileName = "rules/debug.test.ts";
-        var failureString = NoDebuggerRule.FAILURE_STRING;
-
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, NoDebuggerRule);
-        var expectedFailure = Lint.Test.createFailure(fileName, [5, 9], [5, 17], failureString);
+        const actualFailures = Lint.Test.applyRuleOnFile(fileName, NoDebuggerRule);
+        const expectedFailure = Lint.Test.createFailure(fileName, [5, 9], [5, 17], failureString);
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });

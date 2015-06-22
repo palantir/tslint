@@ -12,17 +12,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 import BanRule = require("./banRule");
 
 export class Rule extends BanRule.Rule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        var options = this.getOptions();
-        var consoleBanWalker = new BanRule.BanFunctionWalker(sourceFile, this.getOptions());
-        options.ruleArguments.forEach((option) => {
+        const options = this.getOptions();
+        const consoleBanWalker = new BanRule.BanFunctionWalker(sourceFile, this.getOptions());
+        for (let option of options.ruleArguments) {
             consoleBanWalker.addBannedFunction(["console", option]);
-        });
+        }
         return this.applyWithWalker(consoleBanWalker);
     }
   }

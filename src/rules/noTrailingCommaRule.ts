@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "trailing comma";
@@ -23,12 +23,12 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class NoTrailingCommaWalker extends Lint.RuleWalker {
-    public visitObjectLiteralExpression(node: ts.ObjectLiteralExpression): void {
-        var child = node.getChildAt(1);
+    public visitObjectLiteralExpression(node: ts.ObjectLiteralExpression) {
+        const child = node.getChildAt(1);
         if (child != null && child.kind === ts.SyntaxKind.SyntaxList) {
-            var grandChildren = child.getChildren();
+            const grandChildren = child.getChildren();
             if (grandChildren.length > 0) {
-                var lastGrandChild = grandChildren[grandChildren.length - 1];
+                const lastGrandChild = grandChildren[grandChildren.length - 1];
 
                 if (lastGrandChild.kind === ts.SyntaxKind.CommaToken) {
                     this.addFailure(this.createFailure(lastGrandChild.getStart(), 1, Rule.FAILURE_STRING));

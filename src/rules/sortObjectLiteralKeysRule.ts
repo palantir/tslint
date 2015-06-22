@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "unsorted key '";
@@ -23,12 +23,11 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class SortedKeyWalker extends Lint.RuleWalker {
-    // Stacks are used to maintain state while
-    // recursing through nested object literals.
+    // Stacks are used to maintain state while recursing through nested object literals.
     private lastSortedKeyStack: string[] = [];
     private sortedStateStack: boolean[] = [];
 
-    public visitObjectLiteralExpression(node: ts.ObjectLiteralExpression): void {
+    public visitObjectLiteralExpression(node: ts.ObjectLiteralExpression) {
         this.lastSortedKeyStack.push(""); // Char code 0; every string should be >= to this
         this.sortedStateStack.push(true); // Sorted state is always initially true
         super.visitObjectLiteralExpression(node);
@@ -36,7 +35,7 @@ class SortedKeyWalker extends Lint.RuleWalker {
         this.sortedStateStack.pop();
     }
 
-    public visitPropertyAssignment(node: ts.PropertyAssignment): void {
+    public visitPropertyAssignment(node: ts.PropertyAssignment) {
         const sortedState = this.sortedStateStack[this.sortedStateStack.length - 1];
         // Skip remainder of object literal scan if a previous key was found
         // in an unsorted position. This ensures only one error is thrown at

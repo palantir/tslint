@@ -38,7 +38,7 @@ module Lint {
         }
 
         // callback notifier when a block scope begins
-        public onBlockScopeStart(): void {
+        public onBlockScopeStart() {
             return;
         }
 
@@ -47,12 +47,12 @@ module Lint {
         }
 
         // callback notifier when a block scope ends
-        public onBlockScopeEnd(): void {
+        public onBlockScopeEnd() {
             return;
         }
 
-        protected visitNode(node: ts.Node): void {
-            var isNewBlockScope = this.isBlockScopeBoundary(node);
+        protected visitNode(node: ts.Node) {
+            const isNewBlockScope = this.isBlockScopeBoundary(node);
 
             if (isNewBlockScope) {
                 this.blockScopeStack.push(this.createBlockScope());

@@ -43,17 +43,17 @@ module Lint {
         }
 
         // callback notifier when a scope begins
-        public onScopeStart(): void {
+        public onScopeStart() {
             return;
         }
 
         // callback notifier when a scope ends
-        public onScopeEnd(): void {
+        public onScopeEnd() {
             return;
         }
 
-        protected visitNode(node: ts.Node): void {
-            var isNewScope = this.isScopeBoundary(node);
+        protected visitNode(node: ts.Node) {
+            const isNewScope = this.isScopeBoundary(node);
 
             if (isNewScope) {
                 this.scopeStack.push(this.createScope());

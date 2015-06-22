@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 enum QuoteMark {
     SINGLE_QUOTES,
@@ -25,7 +25,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public isEnabled(): boolean {
         if (super.isEnabled()) {
-            var quoteMarkString = this.getOptions().ruleArguments[0];
+            const quoteMarkString = this.getOptions().ruleArguments[0];
             return (quoteMarkString === "single" || quoteMarkString === "double");
         }
 
@@ -43,7 +43,7 @@ class QuoteWalker extends Lint.RuleWalker {
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
 
-        var quoteMarkString = this.getOptions()[0];
+        const quoteMarkString = this.getOptions()[0];
         if (quoteMarkString === "single") {
             this.quoteMark = QuoteMark.SINGLE_QUOTES;
         } else {
@@ -57,15 +57,15 @@ class QuoteWalker extends Lint.RuleWalker {
     }
 
     private handleNode(node: ts.Node) {
-        var failure: Lint.RuleFailure = null;
+        let failure: Lint.RuleFailure;
 
         if (node.kind === ts.SyntaxKind.StringLiteral) {
-            var text = node.getText();
-            var width = node.getWidth();
-            var position = node.getStart();
+            const text = node.getText();
+            const width = node.getWidth();
+            const position = node.getStart();
 
-            var firstCharacter = text.charAt(0);
-            var lastCharacter = text.charAt(text.length - 1);
+            const firstCharacter = text.charAt(0);
+            const lastCharacter = text.charAt(text.length - 1);
 
             if (this.quoteMark === QuoteMark.SINGLE_QUOTES) {
                 if (firstCharacter !== "'" || lastCharacter !== "'") {
@@ -78,7 +78,7 @@ class QuoteWalker extends Lint.RuleWalker {
             }
         }
 
-        if (failure) {
+        if (failure != null) {
             this.addFailure(failure);
         }
     }

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "forbidden eval";
@@ -23,10 +23,10 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class NoEvalWalker extends Lint.RuleWalker {
-    public visitCallExpression(node: ts.CallExpression): void {
-        var expression = node.expression;
+    public visitCallExpression(node: ts.CallExpression) {
+        const expression = node.expression;
         if (expression.kind === ts.SyntaxKind.Identifier) {
-            var expressionName = (<ts.Identifier> expression).text;
+            const expressionName = (<ts.Identifier> expression).text;
             if (expressionName === "eval") {
                 this.addFailure(this.createFailure(expression.getStart(), expression.getWidth(), Rule.FAILURE_STRING));
             }

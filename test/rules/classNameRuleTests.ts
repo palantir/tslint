@@ -12,17 +12,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 describe("<class-name>", () => {
-    var ClassNameRule = Lint.Test.getRule("class-name");
+    const ClassNameRule = Lint.Test.getRule("class-name");
+    const fileName = "rules/classname.test.ts";
 
     it("ensures class names are always pascal-cased", () => {
-        var fileName = "rules/classname.test.ts";
-        var createFailure = Lint.Test.createFailuresOnFile(fileName, ClassNameRule.FAILURE_STRING);
-        var expectedFailure1 = createFailure([5, 7], [5, 23]);
-        var expectedFailure2 = createFailure([9, 7], [9, 33]);
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, ClassNameRule);
+        const createFailure = Lint.Test.createFailuresOnFile(fileName, ClassNameRule.FAILURE_STRING);
+        const expectedFailure1 = createFailure([5, 7], [5, 23]);
+        const expectedFailure2 = createFailure([9, 7], [9, 33]);
+        const actualFailures = Lint.Test.applyRuleOnFile(fileName, ClassNameRule);
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);

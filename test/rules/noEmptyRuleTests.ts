@@ -15,35 +15,35 @@
  */
 
 describe("<no-empty>", () => {
-    var actualFailures: Lint.RuleFailure[];
-    var fileName = "rules/noempty.test.ts";
-    var NoEmptyRule = Lint.Test.getRule("no-empty");
-    var createFailure = Lint.Test.createFailuresOnFile(fileName, NoEmptyRule.FAILURE_STRING);
+    const fileName = "rules/noempty.test.ts";
+    const NoEmptyRule = Lint.Test.getRule("no-empty");
+    const createFailure = Lint.Test.createFailuresOnFile(fileName, NoEmptyRule.FAILURE_STRING);
+    let actualFailures: Lint.RuleFailure[];
 
     before(() => {
         actualFailures = Lint.Test.applyRuleOnFile(fileName, NoEmptyRule);
     });
 
     it("forbids empty conditional blocks", () => {
-        var expectedFailure1 = createFailure([1, 14], [1, 16]);
-        var expectedFailure2 = createFailure([2, 14], [5, 2]);
+        const expectedFailure1 = createFailure([1, 14], [1, 16]);
+        const expectedFailure2 = createFailure([2, 14], [5, 2]);
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);
     });
 
     it("forbids empty function blocks", () => {
-        var expectedFailure = createFailure([7, 25], [9, 2]);
+        const expectedFailure = createFailure([7, 25], [9, 2]);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 
     it("forbids empty loop blocks", () => {
-        var expectedFailure = createFailure([11, 29], [11, 32]);
+        const expectedFailure = createFailure([11, 29], [11, 32]);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 
     it("forbids empty constructors", () => {
-        var expectedFailure = createFailure([29, 34], [30, 6]);
+        const expectedFailure = createFailure([29, 34], [30, 6]);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 

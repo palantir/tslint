@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "file should end with a newline";
@@ -22,12 +22,14 @@ export class Rule extends Lint.Rules.AbstractRule {
             // if the file is empty, it "ends with a newline", so don't return a failure
             return [];
         }
-        var eofToken = sourceFile.endOfFileToken;
-        var eofTokenFullText = eofToken.getFullText();
+
+        const eofToken = sourceFile.endOfFileToken;
+        const eofTokenFullText = eofToken.getFullText();
         if (eofTokenFullText.length === 0 || eofTokenFullText.charAt(eofTokenFullText.length - 1) !== "\n") {
-            var start = eofToken.getStart();
-            var failure = new Lint.RuleFailure(sourceFile, start, start, Rule.FAILURE_STRING, this.getOptions().ruleName);
-            return [failure];
+            const start = eofToken.getStart();
+            return [
+                new Lint.RuleFailure(sourceFile, start, start, Rule.FAILURE_STRING, this.getOptions().ruleName)
+            ];
         }
 
         return [];

@@ -83,7 +83,7 @@ declare module Lint {
         getOptions(): any;
         hasOption(option: string): boolean;
         skip(node: ts.Node): void;
-        createFailure(start: number, width: number, failure: string): Lint.RuleFailure;
+        createFailure(start: number, width: number, failure: string): RuleFailure;
         addFailure(failure: RuleFailure): void;
         private existsFailure(failure);
     }
@@ -149,9 +149,9 @@ declare module Lint {
         getPosition(): number;
         getLineAndCharacter(): ts.LineAndCharacter;
         toJson(): {
-            position: number;
-            line: number;
             character: number;
+            line: number;
+            position: number;
         };
         equals(ruleFailurePosition: RuleFailurePosition): boolean;
     }
@@ -165,8 +165,8 @@ declare module Lint {
         constructor(sourceFile: ts.SourceFile, start: number, end: number, failure: string, ruleName: string);
         getFileName(): string;
         getRuleName(): string;
-        getStartPosition(): Lint.RuleFailurePosition;
-        getEndPosition(): Lint.RuleFailurePosition;
+        getStartPosition(): RuleFailurePosition;
+        getEndPosition(): RuleFailurePosition;
         getFailure(): string;
         toJson(): any;
         equals(ruleFailure: RuleFailure): boolean;

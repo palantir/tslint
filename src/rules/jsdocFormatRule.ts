@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static ALIGNMENT_FAILURE_STRING = "asterisks in jsdoc must be aligned";
@@ -24,10 +24,10 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class JsdocWalker extends Lint.SkippableTokenAwareRuleWalker {
-    public visitSourceFile(node: ts.SourceFile): void {
+    public visitSourceFile(node: ts.SourceFile) {
         super.visitSourceFile(node);
         Lint.scanAllTokens(ts.createScanner(ts.ScriptTarget.ES5, false, node.text), (scanner: ts.Scanner) => {
-            var startPos = scanner.getStartPos();
+            const startPos = scanner.getStartPos();
             if (this.tokensToSkipStartEndMap[startPos] != null) {
                 // tokens to skip are places where the scanner gets confused about what the token is, without the proper context
                 // (specifically, regex, identifiers, and templates). So skip those tokens.
@@ -36,58 +36,59 @@ class JsdocWalker extends Lint.SkippableTokenAwareRuleWalker {
             }
 
             if (scanner.getToken() === ts.SyntaxKind.MultiLineCommentTrivia) {
-                var commentText = scanner.getTokenText();
-                var startPosition = scanner.getTokenPos();
+                const commentText = scanner.getTokenText();
+                const startPosition = scanner.getTokenPos();
                 this.findFailuresForJsdocComment(commentText, startPosition, node);
             }
         });
     }
 
     private findFailuresForJsdocComment(commentText: string, startingPosition: number, sourceFile: ts.SourceFile) {
-        var currentPosition = startingPosition;
+        const currentPosition = startingPosition;
         // the file may be different depending on the OS it was originally authored on
         // can't rely on require('os').EOL or process.platform as that is the execution env
         // regex is: split optionally on \r\n, but alwasy split on \n if no \r exists
-        var lines = commentText.split(/\r?\n/);
-        var jsdocPosition = currentPosition;
-        var firstLine = lines[0];
+        const lines = commentText.split(/\r?\n/);
+        const firstLine = lines[0];
+        let jsdocPosition = currentPosition;
 
         // regex is: start of string, followed by any amount of whitespace, followed by /**
-        var isJsdocMatch = firstLine.match(/^\s*\/\*\*/);
+        const isJsdocMatch = firstLine.match(/^\s*\/\*\*/);
         if (isJsdocMatch != null) {
-
             if (lines.length === 1) {
-                var firstLineMatch = firstLine.match(/^\s*\/\*\* (.* )?\*\/$/);
+                const firstLineMatch = firstLine.match(/^\s*\/\*\* (.* )?\*\/$/);
                 if (firstLineMatch == null) {
                     this.addFailureAt(jsdocPosition, firstLine.length, Rule.FORMAT_FAILURE_STRING);
                 }
                 return;
             }
-            var indexToMatch = firstLine.indexOf("**") + sourceFile.getLineAndCharacterOfPosition(currentPosition).character;
+
+            const indexToMatch = firstLine.indexOf("**") + sourceFile.getLineAndCharacterOfPosition(currentPosition).character;
             // all lines but the first and last
-            var otherLines = lines.splice(1, lines.length - 2);
+            const otherLines = lines.splice(1, lines.length - 2);
             jsdocPosition += firstLine.length + 1; // + 1 for the splitted-out newline
-            otherLines.forEach((line) => {
+            for (let line of otherLines) {
                 // regex is: start of string, followed by any amount of whitespace, followed by *,
                 // followed by either a space or the end of the string
-                var asteriskMatch = line.match(/^\s*\*( |$)/);
+                const asteriskMatch = line.match(/^\s*\*( |$)/);
                 if (asteriskMatch == null) {
                     this.addFailureAt(jsdocPosition, line.length, Rule.FORMAT_FAILURE_STRING);
                 }
-                var asteriskIndex = line.indexOf("*");
+                const asteriskIndex = line.indexOf("*");
                 if (asteriskIndex !== indexToMatch) {
                     this.addFailureAt(jsdocPosition, line.length, Rule.ALIGNMENT_FAILURE_STRING);
                 }
                 jsdocPosition += line.length + 1; // + 1 for the splitted-out newline
-            });
-            var lastLine = lines[lines.length - 1];
+            }
+
+            const lastLine = lines[lines.length - 1];
             // regex is: start of string, followed by any amount of whitespace, followed by */,
             // followed by the end of the string
-            var endBlockCommentMatch = lastLine.match(/^\s*\*\/$/);
+            const endBlockCommentMatch = lastLine.match(/^\s*\*\/$/);
             if (endBlockCommentMatch == null) {
                 this.addFailureAt(jsdocPosition, lastLine.length,  Rule.FORMAT_FAILURE_STRING);
             }
-            var lastAsteriskIndex = lastLine.indexOf("*");
+            const lastAsteriskIndex = lastLine.indexOf("*");
             if (lastAsteriskIndex !== indexToMatch) {
                 this.addFailureAt(jsdocPosition, lastLine.length, Rule.ALIGNMENT_FAILURE_STRING);
             }
@@ -95,7 +96,7 @@ class JsdocWalker extends Lint.SkippableTokenAwareRuleWalker {
     }
 
     private addFailureAt(currentPosition: number, width: number, failureString: string) {
-        var failure = this.createFailure(currentPosition, width, failureString);
+        const failure = this.createFailure(currentPosition, width, failureString);
         this.addFailure(failure);
     }
 }

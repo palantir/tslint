@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 export class Rule extends Lint.Rules.AbstractRule {
     static FAILURE_STRING = "consecutive blank lines are disallowed";
@@ -23,12 +23,13 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class BlankLinesWalker extends Lint.SkippableTokenAwareRuleWalker {
-    public visitSourceFile(node: ts.SourceFile): void {
+    public visitSourceFile(node: ts.SourceFile) {
         super.visitSourceFile(node);
+
         // starting with 1 to cover the case where the file starts with two blank lines
-        var newLinesInARowSeenSoFar = 1;
+        let newLinesInARowSeenSoFar = 1;
         Lint.scanAllTokens(ts.createScanner(ts.ScriptTarget.ES5, false, node.text), (scanner: ts.Scanner) => {
-            var startPos = scanner.getStartPos();
+            const startPos = scanner.getStartPos();
             if (this.tokensToSkipStartEndMap[startPos] != null) {
                 // tokens to skip are places where the scanner gets confused about what the token is, without the proper context
                 // (specifically, regex, identifiers, and templates). So skip those tokens.
@@ -40,7 +41,7 @@ class BlankLinesWalker extends Lint.SkippableTokenAwareRuleWalker {
             if (scanner.getToken() === ts.SyntaxKind.NewLineTrivia) {
                 newLinesInARowSeenSoFar += 1;
                 if (newLinesInARowSeenSoFar >= 3) {
-                    var failure = this.createFailure(scanner.getStartPos(), 1, Rule.FAILURE_STRING);
+                    const failure = this.createFailure(scanner.getStartPos(), 1, Rule.FAILURE_STRING);
                     this.addFailure(failure);
                 }
             } else {

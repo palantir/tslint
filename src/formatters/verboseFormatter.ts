@@ -17,13 +17,13 @@
 export class Formatter extends Lint.Formatters.AbstractFormatter {
     public format(failures: Lint.RuleFailure[]): string {
 
-        var outputLines = failures.map((failure: Lint.RuleFailure) => {
-            var fileName = failure.getFileName();
-            var failureString = failure.getFailure();
-            var ruleName = failure.getRuleName();
+        const outputLines = failures.map((failure: Lint.RuleFailure) => {
+            const fileName = failure.getFileName();
+            const failureString = failure.getFailure();
+            const ruleName = failure.getRuleName();
 
-            var lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
-            var positionTuple = "[" + (lineAndCharacter.line + 1) + ", " + (lineAndCharacter.character + 1) + "]";
+            const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
+            const positionTuple = "[" + (lineAndCharacter.line + 1) + ", " + (lineAndCharacter.character + 1) + "]";
 
             return "(" + ruleName + ") " + fileName + positionTuple + ": " + failureString;
         });

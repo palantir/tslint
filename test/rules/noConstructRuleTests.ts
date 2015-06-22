@@ -15,27 +15,27 @@
  */
 
 describe("<no-construct>", () => {
-    var actualFailures: Lint.RuleFailure[];
-    var fileName = "rules/noconstruct.test.ts";
-    var NoConstructRule = Lint.Test.getRule("no-construct");
-    var createFailure = Lint.Test.createFailuresOnFile(fileName, NoConstructRule.FAILURE_STRING);
+    const fileName = "rules/noconstruct.test.ts";
+    const NoConstructRule = Lint.Test.getRule("no-construct");
+    const createFailure = Lint.Test.createFailuresOnFile(fileName, NoConstructRule.FAILURE_STRING);
+    let actualFailures: Lint.RuleFailure[];
 
     before(() => {
         actualFailures = Lint.Test.applyRuleOnFile(fileName, NoConstructRule);
     });
 
     it("forbids access to String constructor", () => {
-        var expectedFailure = createFailure([2, 13], [2, 23]);
+        const expectedFailure = createFailure([2, 13], [2, 23]);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 
     it("forbids access to Number constructor", () => {
-        var expectedFailure = createFailure([5, 10], [5, 23]);
+        const expectedFailure = createFailure([5, 10], [5, 23]);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 
     it("forbids access to Boolean constructor", () => {
-        var expectedFailure = createFailure([8, 10], [8, 21]);
+        const expectedFailure = createFailure([8, 10], [8, 21]);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 });

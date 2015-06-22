@@ -66,13 +66,13 @@ class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<ScopeInfo,
         const currentScope = this.getCurrentScope();
         const currentBlockScope = this.getCurrentBlockScope();
 
-        // this var is shadowing if there's already a var of the same name in any available scope AND
+        // this const is shadowing if there's already a const of the same name in any available scope AND
         // it is not in the current block (those are handled by the 'no-duplicate-variable' rule)
         if (this.isVarInAnyScope(variableName) && currentBlockScope.varNames.indexOf(variableName) < 0) {
             this.addFailureOnIdentifier(propertyName);
         }
 
-        // regular vars should always be added to the scope; block-scoped vars should be added iff
+        // regular consts should always be added to the scope; block-scoped consts should be added iff
         // the current scope is same as current block scope
         if (!Lint.isBlockScopedVariable(node)
                 || this.getCurrentBlockDepth() === 1
@@ -89,7 +89,7 @@ class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<ScopeInfo,
     }
 
     private addFailureOnIdentifier(ident: ts.Identifier) {
-        var failureString = Rule.FAILURE_STRING + ident.text + "'";
+        const failureString = Rule.FAILURE_STRING + ident.text + "'";
         this.addFailure(this.createFailure(ident.getStart(), ident.getWidth(), failureString));
     }
 }

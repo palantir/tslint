@@ -15,16 +15,16 @@
  */
 
 describe("<no-consecutive-blank-lines>", () => {
-    var NoConsecutiveBlankLinesRule = Lint.Test.getRule("no-consecutive-blank-lines");
+    const NoConsecutiveBlankLinesRule = Lint.Test.getRule("no-consecutive-blank-lines");
+    const fileName = "rules/blanklines.test.ts";
 
     it("ensures there is at most one consecutive blank line", () => {
-        var fileName = "rules/blanklines.test.ts";
-        var createFailure = Lint.Test.createFailuresOnFile(fileName, NoConsecutiveBlankLinesRule.FAILURE_STRING);
-        var expectedFailure1 = createFailure([2, 1], [3, 1]);
-        var expectedFailure2 = createFailure([9, 1], [10, 1]);
-        var expectedFailure3 = createFailure([14, 1], [15, 1]);
+        const createFailure = Lint.Test.createFailuresOnFile(fileName, NoConsecutiveBlankLinesRule.FAILURE_STRING);
+        const expectedFailure1 = createFailure([2, 1], [3, 1]);
+        const expectedFailure2 = createFailure([9, 1], [10, 1]);
+        const expectedFailure3 = createFailure([14, 1], [15, 1]);
 
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, NoConsecutiveBlankLinesRule);
+        const actualFailures = Lint.Test.applyRuleOnFile(fileName, NoConsecutiveBlankLinesRule);
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);

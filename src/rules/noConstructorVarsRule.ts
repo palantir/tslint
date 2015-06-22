@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_PART = " cannot be declared in the constructor";
@@ -24,19 +24,17 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 export class NoConstructorVariableDeclarationsWalker extends Lint.RuleWalker {
 
-    public visitConstructorDeclaration(node: ts.ConstructorDeclaration): void {
-        var parameters = node.parameters;
-        parameters.forEach((parameter) => {
+    public visitConstructorDeclaration(node: ts.ConstructorDeclaration) {
+        const parameters = node.parameters;
+        for (let parameter of parameters) {
             if (parameter.modifiers != null && parameter.modifiers.length > 0) {
-                var name = <ts.Identifier> parameter.name;
-                var errorMessage = "'" + name.text + "'" + Rule.FAILURE_STRING_PART;
-
-                var lastModifier = parameter.modifiers[parameter.modifiers.length - 1];
-                var position = lastModifier.getEnd() - parameter.getStart();
-
+                const name = <ts.Identifier> parameter.name;
+                const errorMessage = "'" + name.text + "'" + Rule.FAILURE_STRING_PART;
+                const lastModifier = parameter.modifiers[parameter.modifiers.length - 1];
+                const position = lastModifier.getEnd() - parameter.getStart();
                 this.addFailure(this.createFailure(parameter.getStart(), position, errorMessage));
             }
-        });
+        }
         super.visitConstructorDeclaration(node);
     }
 }

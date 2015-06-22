@@ -18,8 +18,8 @@
 /// <reference path="tslint.ts"/>
 /// <reference path="configuration.ts"/>
 
-var fs = require("fs");
-var optimist = require("optimist")
+const fs = require("fs");
+const optimist = require("optimist")
     .usage("usage: $0")
     .check((argv: any) => {
         // at least one of file or help or version must be present
@@ -54,17 +54,17 @@ var optimist = require("optimist")
         },
         "t": {
             alias: "format",
-            describe: "output format (prose, json, verbose)",
-            default: "prose"
+            default: "prose",
+            describe: "output format (prose, json, verbose)"
         },
         "v": {
             alias: "version",
             describe: "current version"
         }
     });
-var argv = optimist.argv;
+const argv = optimist.argv;
 
-var outputStream: any;
+let outputStream: any;
 if (argv.o !== undefined) {
     outputStream = fs.createWriteStream(argv.o, {
         end: false,
@@ -82,7 +82,7 @@ if (argv.v !== undefined) {
 
 if ("help" in argv) {
     outputStream.write(optimist.help());
-    var outputString = `
+    const outputString = `
 tslint accepts the following commandline options:
 
     -f, --file:
@@ -145,28 +145,28 @@ if (argv.c && !fs.existsSync(argv.c)) {
     process.exit(1);
 }
 
-var processFile = (file: string) => {
+const processFile = (file: string) => {
     if (!fs.existsSync(file)) {
         console.error("Unable to open file: " + file);
         process.exit(1);
     }
 
-    var contents = fs.readFileSync(file, "utf8");
-    var configuration = Lint.Configuration.findConfiguration(argv.c, file);
+    const contents = fs.readFileSync(file, "utf8");
+    const configuration = Lint.Configuration.findConfiguration(argv.c, file);
 
     if (configuration === undefined) {
         console.error("unable to find tslint configuration");
         process.exit(1);
     }
 
-    var linter = new Lint.Linter(file, contents, {
+    const linter = new Lint.Linter(file, contents, {
         configuration: configuration,
         formatter: argv.t,
-        rulesDirectory: argv.r,
-        formattersDirectory: argv.s
+        formattersDirectory: argv.s,
+        rulesDirectory: argv.r
     });
 
-    var lintResult = linter.lint();
+    const lintResult = linter.lint();
 
     if (lintResult.failureCount > 0) {
         outputStream.write(lintResult.output, () => {
@@ -175,12 +175,12 @@ var processFile = (file: string) => {
     }
 };
 
-var fileOrFiles = argv.f;
+const fileOrFiles = argv.f;
 
 if (typeof fileOrFiles === "string") {
     processFile(fileOrFiles);
 } else {
-    for (var ix in fileOrFiles) {
+    for (const ix in fileOrFiles) {
         if (fileOrFiles.hasOwnProperty(ix)) {
             processFile(fileOrFiles[ix]);
         }

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "forbidden bitwise operation";
@@ -23,7 +23,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class NoBitwiseWalker extends Lint.RuleWalker {
-    public visitBinaryExpression(node: ts.BinaryExpression): void {
+    public visitBinaryExpression(node: ts.BinaryExpression) {
         switch (node.operatorToken.kind) {
             case ts.SyntaxKind.AmpersandToken:
             case ts.SyntaxKind.AmpersandEqualsToken:
@@ -43,7 +43,7 @@ class NoBitwiseWalker extends Lint.RuleWalker {
         super.visitBinaryExpression(node);
     }
 
-    public visitPrefixUnaryExpression(node: ts.PrefixUnaryExpression): void {
+    public visitPrefixUnaryExpression(node: ts.PrefixUnaryExpression) {
         if (node.operator === ts.SyntaxKind.TildeToken) {
             this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
         }

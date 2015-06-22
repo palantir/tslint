@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "trailing whitespace";
@@ -23,12 +23,12 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class NoTrailingWhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
-    public visitSourceFile(node: ts.SourceFile): void {
+    public visitSourceFile(node: ts.SourceFile) {
         super.visitSourceFile(node);
-        var lastSeenWasWhitespace = false;
-        var lastSeenWhitespacePosition = 0;
+        let lastSeenWasWhitespace = false;
+        let lastSeenWhitespacePosition = 0;
         Lint.scanAllTokens(ts.createScanner(ts.ScriptTarget.ES5, false, node.text), (scanner: ts.Scanner) => {
-            var startPos = scanner.getStartPos();
+            const startPos = scanner.getStartPos();
             if (this.tokensToSkipStartEndMap[startPos] != null) {
                 // tokens to skip are places where the scanner gets confused about what the token is, without the proper context
                 // (specifically, regex, identifiers, and templates). So skip those tokens.
@@ -39,8 +39,8 @@ class NoTrailingWhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
 
             if (scanner.getToken() === ts.SyntaxKind.NewLineTrivia) {
                 if (lastSeenWasWhitespace) {
-                    var width = scanner.getStartPos() - lastSeenWhitespacePosition;
-                    var failure = this.createFailure(lastSeenWhitespacePosition, width, Rule.FAILURE_STRING);
+                    const width = scanner.getStartPos() - lastSeenWhitespacePosition;
+                    const failure = this.createFailure(lastSeenWhitespacePosition, width, Rule.FAILURE_STRING);
                     this.addFailure(failure);
                 }
                lastSeenWasWhitespace = false;

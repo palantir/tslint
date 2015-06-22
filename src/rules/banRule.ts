@@ -12,15 +12,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_PART = "function invocation disallowed: ";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        var options = this.getOptions();
-        var banFunctionWalker = new BanFunctionWalker(sourceFile, options);
-        var functionsToBan = options.ruleArguments;
+        const options = this.getOptions();
+        const banFunctionWalker = new BanFunctionWalker(sourceFile, options);
+        const functionsToBan = options.ruleArguments;
         functionsToBan.forEach((functionToBan) => {
             banFunctionWalker.addBannedFunction(functionToBan);
         });
@@ -35,23 +35,23 @@ export class BanFunctionWalker extends Lint.RuleWalker {
         this.bannedFunctions.push(bannedFunction);
     }
 
-    public visitCallExpression(node: ts.CallExpression): void {
-        var expression = node.expression;
+    public visitCallExpression(node: ts.CallExpression) {
+        const expression = node.expression;
 
         if (expression.kind === ts.SyntaxKind.PropertyAccessExpression &&
             expression.getChildCount() >= 3) {
 
-            var firstToken = expression.getFirstToken();
-            var secondToken = expression.getChildAt(1);
-            var thirdToken = expression.getChildAt(2);
+            const firstToken = expression.getFirstToken();
+            const secondToken = expression.getChildAt(1);
+            const thirdToken = expression.getChildAt(2);
 
-            var firstText = firstToken.getText();
-            var thirdText = thirdToken.getFullText();
+            const firstText = firstToken.getText();
+            const thirdText = thirdToken.getFullText();
 
             if (secondToken.kind === ts.SyntaxKind.DotToken) {
                 this.bannedFunctions.forEach((bannedFunction) => {
                     if (firstText === bannedFunction[0] && thirdText === bannedFunction[1]) {
-                        var failure = this.createFailure(expression.getStart(),
+                        const failure = this.createFailure(expression.getStart(),
                                                          expression.getWidth(),
                                                          Rule.FAILURE_STRING_PART + firstText + "." + thirdText);
                         this.addFailure(failure);

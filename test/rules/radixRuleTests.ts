@@ -15,12 +15,13 @@
  */
 
 describe("<radix>", () => {
+    const RadixRule = Lint.Test.getRule("radix");
+    const fileName = "rules/radix.test.ts";
+    const failureString = RadixRule.FAILURE_STRING;
+
     it("enforces radix parameter of parseInt", () => {
-        var fileName = "rules/radix.test.ts";
-        var RadixRule = Lint.Test.getRule("radix");
-        var failureString = RadixRule.FAILURE_STRING;
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, RadixRule);
-        var expectedFailure = Lint.Test.createFailure(fileName, [2, 9], [2, 20], failureString);
+        const actualFailures = Lint.Test.applyRuleOnFile(fileName, RadixRule);
+        const expectedFailure = Lint.Test.createFailure(fileName, [2, 9], [2, 20], failureString);
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
