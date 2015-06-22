@@ -14,8 +14,6 @@
  * limitations under the License.
 */
 
-/// <reference path='../references.ts' />
-
 describe("<no-var-keyword>", () => {
     it("disallows use of creating variables with 'var'", () => {
         var fileName = "rules/novarkeyword.test.ts";
