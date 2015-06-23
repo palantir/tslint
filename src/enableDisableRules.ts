@@ -12,16 +12,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 module Lint {
     export class EnableDisableRulesWalker extends Lint.SkippableTokenAwareRuleWalker {
         public enableDisableRuleMap: {[rulename: string]: Lint.IEnableDisablePosition[]} = {};
 
-        public visitSourceFile(node: ts.SourceFile): void {
+        public visitSourceFile(node: ts.SourceFile) {
             super.visitSourceFile(node);
             Lint.scanAllTokens(ts.createScanner(ts.ScriptTarget.ES5, false, node.text), (scanner: ts.Scanner) => {
-                var startPos = scanner.getStartPos();
+                const startPos = scanner.getStartPos();
                 if (this.tokensToSkipStartEndMap[startPos] != null) {
                     // tokens to skip are places where the scanner gets confused about what the token is, without the proper context
                     // (specifically, regex, identifiers, and templates). So skip those tokens.
@@ -30,25 +30,25 @@ module Lint {
                 }
 
                 if (scanner.getToken() === ts.SyntaxKind.MultiLineCommentTrivia) {
-                    var commentText = scanner.getTokenText();
-                    var startPosition = scanner.getTokenPos();
+                    const commentText = scanner.getTokenText();
+                    const startPosition = scanner.getTokenPos();
                     this.handlePossibleTslintSwitch(commentText, startPosition);
                 }
             });
         }
 
         private handlePossibleTslintSwitch(commentText: string, startingPosition: number) {
-            var currentPosition = startingPosition;
+            const currentPosition = startingPosition;
             // regex is: start of string followed by "/*" followed by any amount of whitespace followed by "tslint:"
             if (commentText.match(/^\/\*\s*tslint:/)) {
-                var commentTextParts = commentText.split(":");
+                const commentTextParts = commentText.split(":");
                 // regex is: start of string followed by either "enable" or "disable"
                 // followed by either whitespace or end of string
-                var enableOrDisableMatch = commentTextParts[1].match(/^(enable|disable)(\s|$)/);
+                const enableOrDisableMatch = commentTextParts[1].match(/^(enable|disable)(\s|$)/);
                 if (enableOrDisableMatch != null) {
-                    var isEnabled = enableOrDisableMatch[1] === "enable";
-                    var position = currentPosition;
-                    var rulesList = ["all"];
+                    const isEnabled = enableOrDisableMatch[1] === "enable";
+                    const position = currentPosition;
+                    let rulesList = ["all"];
                     if (commentTextParts.length > 2) {
                         rulesList = commentTextParts[2].split(/\s+/);
                     }
@@ -56,7 +56,10 @@ module Lint {
                         if (!(ruleToAdd in this.enableDisableRuleMap)) {
                             this.enableDisableRuleMap[ruleToAdd] = [];
                         }
-                        this.enableDisableRuleMap[ruleToAdd].push({position: position, isEnabled: isEnabled});
+                        this.enableDisableRuleMap[ruleToAdd].push({
+                            isEnabled: isEnabled,
+                            position: position
+                        });
                     });
                 }
             }

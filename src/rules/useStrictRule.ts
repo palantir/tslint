@@ -18,7 +18,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "missing 'use strict'";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        var useStrictWalker = new UseStrictWalker(sourceFile, this.getOptions());
+        const useStrictWalker = new UseStrictWalker(sourceFile, this.getOptions());
         return this.applyWithWalker(useStrictWalker);
     }
 }
@@ -34,17 +34,13 @@ class UseStrictWalker extends Lint.ScopeAwareRuleWalker<{}> {
     }
 
     public visitModuleDeclaration(node: ts.ModuleDeclaration) {
-        var modifiers = node.modifiers;
-        var hasDeclareModifier = (modifiers != null) && (modifiers.length > 0) && (modifiers[0].kind === ts.SyntaxKind.DeclareKeyword);
-
         // current depth is 2: global scope and the scope created by this module
-        if (this.getCurrentDepth() === 2 && !hasDeclareModifier) {
-            if (this.hasOption(UseStrictWalker.OPTION_CHECK_MODULE) &&
-                    node.body != null &&
-                    node.body.kind === ts.SyntaxKind.ModuleBlock &&
-                    this.hasOption(UseStrictWalker.OPTION_CHECK_MODULE)) {
-                this.handleBlock(node, <ts.Block> node.body);
-            }
+        if (this.getCurrentDepth() === 2
+                && !Lint.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)
+                && this.hasOption(UseStrictWalker.OPTION_CHECK_MODULE)
+                && node.body != null
+                && node.body.kind === ts.SyntaxKind.ModuleBlock) {
+            this.handleBlock(node, <ts.Block> node.body);
         }
 
         super.visitModuleDeclaration(node);
@@ -62,16 +58,16 @@ class UseStrictWalker extends Lint.ScopeAwareRuleWalker<{}> {
     }
 
     private handleBlock(node: ts.Declaration, block: ts.Block | ts.ModuleBlock) {
-        var isFailure = true;
+        let isFailure = true;
 
         if (block.statements != null && block.statements.length > 0) {
-            var firstStatement = block.statements[0];
+            const firstStatement = block.statements[0];
 
             if (firstStatement.kind === ts.SyntaxKind.ExpressionStatement) {
-                var firstChild = firstStatement.getChildAt(0);
+                const firstChild = firstStatement.getChildAt(0);
 
-                if (firstChild.kind === ts.SyntaxKind.StringLiteral &&
-                        (<ts.StringLiteral> firstChild).text === UseStrictWalker.USE_STRICT_STRING) {
+                if (firstChild.kind === ts.SyntaxKind.StringLiteral
+                        && (<ts.StringLiteral> firstChild).text === UseStrictWalker.USE_STRICT_STRING) {
                     isFailure = false;
                 }
             }

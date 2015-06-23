@@ -15,27 +15,27 @@
  */
 
 module Lint {
-    var path = require("path");
+    const path = require("path");
 
     export function getSourceFile(fileName: string, source: string): ts.SourceFile {
-        var normalizedName = path.normalize(fileName).replace(/\\/g, "/");
-        var compilerOptions = createCompilerOptions();
+        const normalizedName = path.normalize(fileName).replace(/\\/g, "/");
+        const compilerOptions = createCompilerOptions();
 
-        var compilerHost = {
+        const compilerHost = {
+            getCanonicalFileName: (filename: string) => filename,
+            getCurrentDirectory: () => "",
+            getDefaultLibFileName: () => "lib.d.ts",
+            getNewLine: () => "\n",
             getSourceFile: function (filenameToGet: string) {
                 if (filenameToGet === normalizedName) {
                     return ts.createSourceFile(filenameToGet, source, compilerOptions.target, true);
                 }
             },
-            writeFile: () => null,
-            getDefaultLibFileName: () => "lib.d.ts",
             useCaseSensitiveFileNames: () => true,
-            getCanonicalFileName: (filename: string) => filename,
-            getCurrentDirectory: () => "",
-            getNewLine: () => "\n"
+            writeFile: () => null
         };
 
-        var program = ts.createProgram([normalizedName], compilerOptions, compilerHost);
+        const program = ts.createProgram([normalizedName], compilerOptions, compilerHost);
 
         return program.getSourceFile(normalizedName);
     }
@@ -48,17 +48,11 @@ module Lint {
     }
 
     export function doesIntersect(failure: RuleFailure, disabledIntervals: Lint.IDisabledInterval[]) {
-        var intersectionExists = false;
-
-        disabledIntervals.forEach((disabledInterval) => {
-            var maxStart = Math.max(disabledInterval.startPosition, failure.getStartPosition().getPosition());
-            var minEnd = Math.min(disabledInterval.endPosition, failure.getEndPosition().getPosition());
-            if (maxStart <= minEnd) {
-                // intervals intersect
-                intersectionExists = true;
-            }
+        return disabledIntervals.some((interval) => {
+            const maxStart = Math.max(interval.startPosition, failure.getStartPosition().getPosition());
+            const minEnd = Math.min(interval.endPosition, failure.getEndPosition().getPosition());
+            return maxStart <= minEnd;
         });
-        return intersectionExists;
     }
 
     export function abstract() {
@@ -66,9 +60,9 @@ module Lint {
     }
 
     export function scanAllTokens(scanner: ts.Scanner, callback: (scanner: ts.Scanner) => void) {
-        var lastStartPos = -1;
+        let lastStartPos = -1;
         while (scanner.scan() !== ts.SyntaxKind.EndOfFileToken) {
-            var startPos = scanner.getStartPos();
+            const startPos = scanner.getStartPos();
             if (startPos === lastStartPos) {
                 break;
             }

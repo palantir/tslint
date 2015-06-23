@@ -12,25 +12,25 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 describe("<comment-format>", () => {
-    var CommentFormatRule = Lint.Test.getRule("comment-format");
+    const CommentFormatRule = Lint.Test.getRule("comment-format");
 
     it("ensures comments start with a space and a lowercase letter", () => {
-        var fileName = "rules/comment-lower.test.ts";
-        var createLowercaseFailure = Lint.Test.createFailuresOnFile(fileName, CommentFormatRule.LOWERCASE_FAILURE);
-        var createLeadingSpaceFailure = Lint.Test.createFailuresOnFile(fileName, CommentFormatRule.LEADING_SPACE_FAILURE);
-        var expectedFailure1 = createLowercaseFailure([5, 27], [5, 73]);
-        var expectedFailure2 = createLowercaseFailure([6, 11], [6, 84]);
-        var expectedFailure3 = createLeadingSpaceFailure([6, 11], [6, 84]);
-        var expectedFailure4 = createLeadingSpaceFailure([7, 32], [7, 57]);
+        const fileName = "rules/comment-lower.test.ts";
+        const createLowercaseFailure = Lint.Test.createFailuresOnFile(fileName, CommentFormatRule.LOWERCASE_FAILURE);
+        const createLeadingSpaceFailure = Lint.Test.createFailuresOnFile(fileName, CommentFormatRule.LEADING_SPACE_FAILURE);
+        const expectedFailure1 = createLowercaseFailure([5, 27], [5, 73]);
+        const expectedFailure2 = createLowercaseFailure([6, 11], [6, 84]);
+        const expectedFailure3 = createLeadingSpaceFailure([6, 11], [6, 84]);
+        const expectedFailure4 = createLeadingSpaceFailure([7, 32], [7, 57]);
 
-        var options = [true,
+        const options = [true,
             "check-space",
             "check-lowercase"
         ];
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, CommentFormatRule, options);
+        const actualFailures = Lint.Test.applyRuleOnFile(fileName, CommentFormatRule, options);
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);
@@ -40,19 +40,19 @@ describe("<comment-format>", () => {
     });
 
     it("ensures comments start with a space and a uppercase letter", () => {
-        var fileName = "rules/comment-upper.test.ts";
-        var createUppercaseFailure = Lint.Test.createFailuresOnFile(fileName, CommentFormatRule.UPPERCASE_FAILURE);
-        var createLeadingSpaceFailure = Lint.Test.createFailuresOnFile(fileName, CommentFormatRule.LEADING_SPACE_FAILURE);
-        var expectedFailure1 = createUppercaseFailure([5, 27], [5, 73]);
-        var expectedFailure2 = createUppercaseFailure([6, 11], [6, 84]);
-        var expectedFailure3 = createLeadingSpaceFailure([6, 11], [6, 84]);
-        var expectedFailure4 = createLeadingSpaceFailure([7, 32], [7, 57]);
+        const fileName = "rules/comment-upper.test.ts";
+        const createUppercaseFailure = Lint.Test.createFailuresOnFile(fileName, CommentFormatRule.UPPERCASE_FAILURE);
+        const createLeadingSpaceFailure = Lint.Test.createFailuresOnFile(fileName, CommentFormatRule.LEADING_SPACE_FAILURE);
+        const expectedFailure1 = createUppercaseFailure([5, 27], [5, 73]);
+        const expectedFailure2 = createUppercaseFailure([6, 11], [6, 84]);
+        const expectedFailure3 = createLeadingSpaceFailure([6, 11], [6, 84]);
+        const expectedFailure4 = createLeadingSpaceFailure([7, 32], [7, 57]);
 
-        var options = [true,
+        const options = [true,
             "check-space",
             "check-uppercase"
         ];
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, CommentFormatRule, options);
+        const actualFailures = Lint.Test.applyRuleOnFile(fileName, CommentFormatRule, options);
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);

@@ -12,28 +12,28 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 ///<reference path='../../lib/tslint.d.ts' />
 
-var OPTION_LEADING_UNDERSCORE = "no-var-keyword";
+const OPTION_LEADING_UNDERSCORE = "no-var-keyword";
 
 export class Rule extends Lint.Rules.AbstractRule {
-    public static FAILURE_STRING = "forbidden var keyword";
+    public static FAILURE_STRING = "forbidden const keyword";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        var noVarKeywordWalker = new NoVarKeywordWalker(sourceFile, this.getOptions());
+        const noVarKeywordWalker = new NoVarKeywordWalker(sourceFile, this.getOptions());
         return this.applyWithWalker(noVarKeywordWalker);
     }
 }
 
 class NoVarKeywordWalker extends Lint.RuleWalker {
-    public visitVariableStatement(node: ts.VariableStatement): void {
+    public visitVariableStatement(node: ts.VariableStatement) {
         if (!Lint.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword)
             && !Lint.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)) {
-            var flags = node.declarationList.flags;
-            var declarationIsLet = (Math.floor(flags / ts.NodeFlags.Let) % 2) === 1;
-            var declarationIsConst = (Math.floor(flags / ts.NodeFlags.Const) % 2) === 1;
+            const flags = node.declarationList.flags;
+            const declarationIsLet = (Math.floor(flags / ts.NodeFlags.Let) % 2) === 1;
+            const declarationIsConst = (Math.floor(flags / ts.NodeFlags.Const) % 2) === 1;
             if (!declarationIsConst && !declarationIsLet) {
                 this.addFailure(this.createFailure(node.getStart(), "var".length, Rule.FAILURE_STRING));
             }

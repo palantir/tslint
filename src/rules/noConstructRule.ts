@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "undesirable constructor use";
@@ -29,12 +29,12 @@ class NoConstructWalker extends Lint.RuleWalker {
         "String"
     ];
 
-    public visitNewExpression(node: ts.NewExpression): void {
+    public visitNewExpression(node: ts.NewExpression) {
         if (node.expression.kind === ts.SyntaxKind.Identifier) {
-            var identifier = <ts.Identifier> node.expression;
-            var constructorName = identifier.text;
+            const identifier = <ts.Identifier> node.expression;
+            const constructorName = identifier.text;
             if (NoConstructWalker.FORBIDDEN_CONSTRUCTORS.indexOf(constructorName) !== -1) {
-                var failure = this.createFailure(node.getStart(), identifier.getEnd() - node.getStart(), Rule.FAILURE_STRING);
+                const failure = this.createFailure(node.getStart(), identifier.getEnd() - node.getStart(), Rule.FAILURE_STRING);
                 this.addFailure(failure);
             }
         }

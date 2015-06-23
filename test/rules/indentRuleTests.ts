@@ -15,10 +15,10 @@
  */
 
 describe("<indent>", () => {
-    var IndentRule = Lint.Test.getRule("indent");
-    var failureStringTabs = IndentRule.FAILURE_STRING_TABS;
-    var failureStringSpaces = IndentRule.FAILURE_STRING_SPACES;
-    var actualFailures: Lint.RuleFailure[];
+    const IndentRule = Lint.Test.getRule("indent");
+    const failureStringTabs = IndentRule.FAILURE_STRING_TABS;
+    const failureStringSpaces = IndentRule.FAILURE_STRING_SPACES;
+    let actualFailures: Lint.RuleFailure[];
 
     function expectFailure(failure: Lint.RuleFailure) {
         Lint.Test.assertContainsFailure(actualFailures, failure);
@@ -26,7 +26,7 @@ describe("<indent>", () => {
 
     // Checks only that the indent character is the specified one, *NOT* the size of the indent
     describe("on a tab-indented file", () => {
-        var fileName = "rules/indentwith_tabs.test.ts";
+        const fileName = "rules/indentwith_tabs.test.ts";
 
         before(() => {
             actualFailures = Lint.Test.applyRuleOnFile(fileName, IndentRule, [true, "tabs"]);
@@ -73,13 +73,11 @@ describe("<indent>", () => {
             expectFailure(Lint.Test.createFailure(fileName, [119, 1], [119, 9], failureStringTabs));
             expectFailure(Lint.Test.createFailure(fileName, [121, 1], [121, 5], failureStringTabs));
         });
-
     });
-
 
     // Checks only that the indent character is the specified one, *NOT* the size of the indent
     describe("on a space-indented file", () => {
-        var fileName = "rules/indentwith_spaces.test.ts";
+        const fileName = "rules/indentwith_spaces.test.ts";
 
         before(() => {
             actualFailures = Lint.Test.applyRuleOnFile(fileName, IndentRule, [true, "spaces"]);
@@ -126,7 +124,5 @@ describe("<indent>", () => {
             expectFailure(Lint.Test.createFailure(fileName, [119, 1], [119, 3], failureStringSpaces));
             expectFailure(Lint.Test.createFailure(fileName, [121, 1], [121, 2], failureStringSpaces));
         });
-
     });
-
 });

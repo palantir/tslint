@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "expected an assignment or function call";
@@ -36,7 +36,7 @@ class UnusedExpressionWalker extends Lint.RuleWalker {
         if (this.expressionIsUnused) {
             // ignore valid unused expressions
             if (node.expression.kind === ts.SyntaxKind.StringLiteral) {
-                var expressionText = node.expression.getText();
+                const expressionText = node.expression.getText();
                 if (expressionText === "\"use strict\"" || expressionText === "'use strict'") {
                     return;
                 }
@@ -106,13 +106,12 @@ class UnusedExpressionWalker extends Lint.RuleWalker {
         this.visitNode(node.condition);
         this.expressionIsUnused = true;
         this.visitNode(node.whenTrue);
-        var firstExpressionIsUnused = this.expressionIsUnused;
+        const firstExpressionIsUnused = this.expressionIsUnused;
         this.expressionIsUnused = true;
         this.visitNode(node.whenFalse);
-        var secondExpressionIsUnused = this.expressionIsUnused;
+        const secondExpressionIsUnused = this.expressionIsUnused;
         // if either expression is unused, then that expression's branch is a no-op unless it's
         // being assigned to something or passed to a function, so consider the entire expression unused
         this.expressionIsUnused = firstExpressionIsUnused || secondExpressionIsUnused;
     }
-
 }

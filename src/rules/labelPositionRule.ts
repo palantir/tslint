@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "unexpected label on statement";
@@ -25,15 +25,14 @@ export class Rule extends Lint.Rules.AbstractRule {
 class LabelPosWalker extends Lint.RuleWalker {
     private isValidLabel: boolean;
 
-    public visitLabeledStatement(node: ts.LabeledStatement): void {
-        var statement = node.statement;
-        if (statement.kind !== ts.SyntaxKind.DoStatement &&
-            statement.kind !== ts.SyntaxKind.ForStatement &&
-            statement.kind !== ts.SyntaxKind.ForInStatement &&
-            statement.kind !== ts.SyntaxKind.WhileStatement &&
-            statement.kind !== ts.SyntaxKind.SwitchStatement) {
-
-            var failure = this.createFailure(node.label.getStart(), node.label.getWidth(), Rule.FAILURE_STRING);
+    public visitLabeledStatement(node: ts.LabeledStatement) {
+        const statement = node.statement;
+        if (statement.kind !== ts.SyntaxKind.DoStatement
+                && statement.kind !== ts.SyntaxKind.ForStatement
+                && statement.kind !== ts.SyntaxKind.ForInStatement
+                && statement.kind !== ts.SyntaxKind.WhileStatement
+                && statement.kind !== ts.SyntaxKind.SwitchStatement) {
+            const failure = this.createFailure(node.label.getStart(), node.label.getWidth(), Rule.FAILURE_STRING);
             this.addFailure(failure);
         }
         super.visitLabeledStatement(node);

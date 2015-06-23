@@ -12,19 +12,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 export class Formatter extends Lint.Formatters.AbstractFormatter {
     public format(failures: Lint.RuleFailure[]): string {
+        const outputLines = failures.map((failure: Lint.RuleFailure) => {
+            const fileName = failure.getFileName();
+            const failureString = failure.getFailure();
 
-        var outputLines = failures.map((failure: Lint.RuleFailure) => {
-            var fileName = failure.getFileName();
-            var failureString = failure.getFailure();
+            const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
+            const positionTuple = `[${lineAndCharacter.line + 1}, ${lineAndCharacter.character + 1}]`;
 
-            var lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
-            var positionTuple = "[" + (lineAndCharacter.line + 1) + ", " + (lineAndCharacter.character + 1) + "]";
-
-            return fileName + positionTuple + ": " + failureString;
+            return `${fileName}${positionTuple}: ${failureString}`;
         });
 
         return outputLines.join("\n") + "\n";

@@ -28,11 +28,8 @@ module Lint {
 
     export interface IRule {
         getOptions(): IOptions;
-
         isEnabled(): boolean;
-
         apply(sourceFile: ts.SourceFile): RuleFailure[];
-
         applyWithWalker(walker: Lint.RuleWalker): RuleFailure[];
     }
 
@@ -55,19 +52,19 @@ module Lint {
 
         public toJson() {
             return {
-                position: this.position,
+                character: this.lineAndCharacter.character,
                 line: this.lineAndCharacter.line,
-                character: this.lineAndCharacter.character
+                position: this.position
             };
         }
 
         public equals(ruleFailurePosition: RuleFailurePosition) {
-            var ll = this.lineAndCharacter;
-            var rr = ruleFailurePosition.lineAndCharacter;
+            const ll = this.lineAndCharacter;
+            const rr = ruleFailurePosition.lineAndCharacter;
 
-            return (this.position === ruleFailurePosition.position &&
-                    ll.line === rr.line &&
-                    ll.character === rr.character);
+            return this.position === ruleFailurePosition.position
+                && ll.line === rr.line
+                && ll.character === rr.character;
         }
     }
 
@@ -101,11 +98,11 @@ module Lint {
             return this.ruleName;
         }
 
-        public getStartPosition(): Lint.RuleFailurePosition {
+        public getStartPosition(): RuleFailurePosition {
             return this.startPosition;
         }
 
-        public getEndPosition(): Lint.RuleFailurePosition {
+        public getEndPosition(): RuleFailurePosition {
             return this.endPosition;
         }
 
@@ -115,26 +112,24 @@ module Lint {
 
         public toJson(): any {
             return {
-                name: this.fileName,
-                failure: this.failure,
-                startPosition: this.startPosition.toJson(),
                 endPosition: this.endPosition.toJson(),
-                ruleName: this.ruleName
+                failure: this.failure,
+                name: this.fileName,
+                ruleName: this.ruleName,
+                startPosition: this.startPosition.toJson()
             };
         }
 
-        public equals(ruleFailure: RuleFailure): boolean {
-            return (this.failure  === ruleFailure.getFailure() &&
-                    this.fileName === ruleFailure.getFileName() &&
-                    this.startPosition.equals(ruleFailure.getStartPosition()) &&
-                    this.endPosition.equals(ruleFailure.getEndPosition()));
+        public equals(ruleFailure: RuleFailure) {
+            return this.failure  === ruleFailure.getFailure()
+                && this.fileName === ruleFailure.getFileName()
+                && this.startPosition.equals(ruleFailure.getStartPosition())
+                && this.endPosition.equals(ruleFailure.getEndPosition());
         }
 
-        private createFailurePosition(position: number): RuleFailurePosition {
-            var lineAndCharacter = this.sourceFile.getLineAndCharacterOfPosition(position);
-            var failurePosition = new RuleFailurePosition(position, lineAndCharacter);
-            return failurePosition;
+        private createFailurePosition(position: number) {
+            const lineAndCharacter = this.sourceFile.getLineAndCharacterOfPosition(position);
+            return new RuleFailurePosition(position, lineAndCharacter);
         }
     }
-
 }

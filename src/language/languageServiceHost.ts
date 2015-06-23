@@ -14,25 +14,23 @@
  * limitations under the License.
 */
 
-/* tslint:disable:no-unused-variable */
-
 module Lint {
     export function createLanguageServiceHost(fileName: string, source: string) {
-        var host: ts.LanguageServiceHost = {
+        const host: ts.LanguageServiceHost = {
+            getCompilationSettings: () => Lint.createCompilerOptions(),
+            getCurrentDirectory: () => "",
+            getDefaultLibFileName: () => "lib.d.ts",
             getScriptFileNames: () => [fileName],
-            getScriptVersion: () => "1",
+            getScriptIsOpen: () => true,
             getScriptSnapshot: () => {
                 return {
-                    getText: (start, end) => source.substring(start, end),
+                    getChangeRange: (oldSnapshot) => undefined,
                     getLength: () => source.length,
                     getLineStartPositions: () => ts.computeLineStarts(source),
-                    getChangeRange: (oldSnapshot) => undefined
+                    getText: (start, end) => source.substring(start, end)
                 };
             },
-            getCurrentDirectory: () => "",
-            getScriptIsOpen: () => true,
-            getCompilationSettings: () => Lint.createCompilerOptions(),
-            getDefaultLibFileName: () => "lib.d.ts",
+            getScriptVersion: () => "1",
             log: (message) => { /* */ }
         };
 

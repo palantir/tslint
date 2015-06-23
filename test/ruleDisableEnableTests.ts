@@ -12,52 +12,51 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
-var fs = require("fs");
+const fs = require("fs");
+const path = require("path");
 
 describe("Enable and Disable Rules", () => {
-    var path = require("path");
-
     it("is enabled and disabled in all the right places", () => {
-        var validConfiguration = {rules: {
+        const validConfiguration = {rules: {
             "variable-name": true,
             "quotemark": [true, "double"]
         }};
 
-        var relativePath = path.join("test", "files", "rules/enabledisable.test.ts");
-        var source = fs.readFileSync(relativePath, "utf8");
+        const relativePath = path.join("test", "files", "rules/enabledisable.test.ts");
+        const source = fs.readFileSync(relativePath, "utf8");
 
-        var options: Lint.ILinterOptions = {
-            formatter: "json",
+        const options: Lint.ILinterOptions = {
             configuration: validConfiguration,
-            rulesDirectory: null,
-            formattersDirectory: null
+            formatter: "json",
+            formattersDirectory: null,
+            rulesDirectory: null
         };
 
-        var QuotemarkRule = Lint.Test.getRule("quotemark");
-        var VariableNameRule = Lint.Test.getRule("variable-name");
+        const QuotemarkRule = Lint.Test.getRule("quotemark");
+        const variableNameRule = Lint.Test.getRule("variable-name");
 
-        var quotemarkFailure = Lint.Test.createFailuresOnFile("rules/enabledisable.test.ts", QuotemarkRule.DOUBLE_QUOTE_FAILURE);
-        var variableNameFailure = Lint.Test.createFailuresOnFile("rules/enabledisable.test.ts", VariableNameRule.FAILURE_STRING);
+        const quotemarkFailure = Lint.Test.createFailuresOnFile("rules/enabledisable.test.ts", QuotemarkRule.DOUBLE_QUOTE_FAILURE);
+        const variableNameFailure = Lint.Test.createFailuresOnFile("rules/enabledisable.test.ts", variableNameRule.FAILURE_STRING);
 
-        var expectedFailure1 = variableNameFailure([2, 5], [2, 10]);
-        var expectedFailure2 = variableNameFailure([10, 5], [10, 10]);
+        const expectedFailure1 = variableNameFailure([2, 5], [2, 10]);
+        const expectedFailure2 = variableNameFailure([10, 5], [10, 10]);
 
-        var expectedFailure3 = quotemarkFailure([2, 13], [2, 19]);
-        var expectedFailure4 = quotemarkFailure([8, 13], [8, 19]);
-        var expectedFailure5 = quotemarkFailure([10, 13], [10, 19]);
-        var expectedFailure6 = quotemarkFailure([16, 13], [16, 19]);
+        const expectedFailure3 = quotemarkFailure([2, 13], [2, 19]);
+        const expectedFailure4 = quotemarkFailure([8, 13], [8, 19]);
+        const expectedFailure5 = quotemarkFailure([10, 13], [10, 19]);
+        const expectedFailure6 = quotemarkFailure([16, 13], [16, 19]);
 
-        var ll = new Lint.Linter(relativePath, source, options);
-        var result = ll.lint();
-        var parsedResult = JSON.parse(result.output);
-        var actualFailures: Lint.RuleFailure[] = [];
-        parsedResult.forEach((failure: any) => {
-            var startArray = [failure.startPosition.line + 1, failure.startPosition.character + 1];
-            var endArray = [failure.endPosition.line + 1, failure.endPosition.character + 1];
+        const ll = new Lint.Linter(relativePath, source, options);
+        const result = ll.lint();
+        const parsedResult = JSON.parse(result.output);
+        const actualFailures: Lint.RuleFailure[] = [];
+        for (let failure of parsedResult) {
+            const startArray = [failure.startPosition.line + 1, failure.startPosition.character + 1];
+            const endArray = [failure.endPosition.line + 1, failure.endPosition.character + 1];
             actualFailures.push(Lint.Test.createFailure("rules/enabledisable.test.ts", startArray, endArray, failure.failure));
-        });
+        }
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);

@@ -51,7 +51,7 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
             if (tokenKind === ts.SyntaxKind.WhitespaceTrivia || tokenKind === ts.SyntaxKind.NewLineTrivia) {
                 lastShouldBeFollowedByWhitespace = false;
             } else if (lastShouldBeFollowedByWhitespace) {
-                var failure = this.createFailure(startPos, 1, Rule.FAILURE_STRING);
+                const failure = this.createFailure(startPos, 1, Rule.FAILURE_STRING);
                 this.addFailure(failure);
                 lastShouldBeFollowedByWhitespace = false;
             }
@@ -191,6 +191,7 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
                 arrowChildNumber = i;
             }
         });
+
         // condition so we don't crash if the arrow is somehow missing
         if (arrowChildNumber !== -1) {
             const equalsGreaterThanToken = node.getChildAt(arrowChildNumber);
@@ -208,10 +209,9 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
         this.scanner.setTextPos(position);
         const nextTokenType = this.scanner.scan();
 
-        if (nextTokenType !== ts.SyntaxKind.WhitespaceTrivia &&
-            nextTokenType !== ts.SyntaxKind.NewLineTrivia &&
-            nextTokenType !== ts.SyntaxKind.EndOfFileToken) {
-
+        if (nextTokenType !== ts.SyntaxKind.WhitespaceTrivia
+                && nextTokenType !== ts.SyntaxKind.NewLineTrivia
+                && nextTokenType !== ts.SyntaxKind.EndOfFileToken) {
             this.addFailure(this.createFailure(position, 1, Rule.FAILURE_STRING));
         }
     }

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static PARAMETERS_OPTION = "parameters";
@@ -22,7 +22,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_SUFFIX = " are not aligned";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        var alignWalker = new AlignWalker(sourceFile, this.getOptions());
+        const alignWalker = new AlignWalker(sourceFile, this.getOptions());
         return this.applyWithWalker(alignWalker);
     }
 }
@@ -62,16 +62,16 @@ class AlignWalker extends Lint.RuleWalker {
         if (nodes.length === 0 || !this.hasOption(kind)) {
             return;
         }
-        var prevPos = this.getPosition(nodes[0]);
-        var alignToColumn = prevPos.character;
-        for (var index = 1; index < nodes.length; index++) {
-            var node = nodes[index];
-            var curPos = this.getPosition(node);
+
+        let prevPos = this.getPosition(nodes[0]);
+        const alignToColumn = prevPos.character;
+
+        // skip first node in list
+        for (let node of nodes.slice(1)) {
+            const curPos = this.getPosition(node);
             if (curPos.line !== prevPos.line && curPos.character !== alignToColumn) {
-                this.addFailure(this.createFailure(node.getStart(),
-                                                   node.getWidth(),
-                                                   kind + Rule.FAILURE_STRING_SUFFIX));
-                break; // exit loop.
+                this.addFailure(this.createFailure(node.getStart(), node.getWidth(), kind + Rule.FAILURE_STRING_SUFFIX));
+                break;
             }
             prevPos = curPos;
         }

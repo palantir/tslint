@@ -12,29 +12,29 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 describe("PMD Formatter", () => {
-    var TEST_FILE = "formatters/pmdFormatter.test.ts";
-    var sourceFile: ts.SourceFile;
-    var formatter: Lint.IFormatter;
+    const TEST_FILE = "formatters/pmdFormatter.test.ts";
+    let sourceFile: ts.SourceFile;
+    let formatter: Lint.IFormatter;
 
-    before(function() {
-        var Formatter = Lint.Test.getFormatter("pmd");
+    before(() => {
+        const Formatter = Lint.Test.getFormatter("pmd");
         sourceFile = Lint.Test.getSourceFile(TEST_FILE);
         formatter = new Formatter();
     });
 
     it("formats failures", () => {
-        var maxPosition = sourceFile.getFullWidth();
+        const maxPosition = sourceFile.getFullWidth();
 
-        var failures = [
+        const failures = [
             new Lint.RuleFailure(sourceFile, 0, 1, "first failure", "first-name"),
             new Lint.RuleFailure(sourceFile, 2, 3, "&<>'\" should be escaped", "escape"),
             new Lint.RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name"),
             new Lint.RuleFailure(sourceFile, 0, maxPosition, "full failure", "full-name")
         ];
-        var expectedResult =
+        const expectedResult =
             "<pmd version=\"tslint\">" +
                 "<file name=\"formatters/pmdFormatter.test.ts\">" +
                     "<violation begincolumn=\"1\" beginline=\"1\" priority=\"1\" rule=\"first failure\"> " +
@@ -58,7 +58,7 @@ describe("PMD Formatter", () => {
     });
 
     it("handles no failures", () => {
-        var result = formatter.format([]);
+        const result = formatter.format([]);
         assert.deepEqual(result, "<pmd version=\"tslint\"></pmd>");
     });
 });

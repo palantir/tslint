@@ -15,13 +15,14 @@
  */
 
 describe("<no-switch-case-fall-through>", () => {
+    const Rule = Lint.Test.getRule("no-switch-case-fall-through");
+    const fileName = "rules/noswitchcasefallthrough.test.ts";
+
     it("Switch fall through", () => {
-        var fileName = "rules/noswitchcasefallthrough.test.ts";
-        var Rule = Lint.Test.getRule("no-switch-case-fall-through");
-        var failureString = Rule.FAILURE_STRING_PART;
-        var failureDefault = Lint.Test.createFailuresOnFile(fileName, failureString + "'default'");
-        var failureCase = Lint.Test.createFailuresOnFile(fileName, failureString + "'case'");
-        var expectedFailures = [
+        const failureString = Rule.FAILURE_STRING_PART;
+        const failureDefault = Lint.Test.createFailuresOnFile(fileName, failureString + "'default'");
+        const failureCase = Lint.Test.createFailuresOnFile(fileName, failureString + "'case'");
+        const expectedFailures = [
             failureCase([3, 15], [3, 16]),
             failureCase([6, 15], [6, 16]),
             failureDefault([8, 12], [8, 13]),
@@ -30,10 +31,9 @@ describe("<no-switch-case-fall-through>", () => {
             failureCase([35, 10], [35, 11]),
             failureDefault([32, 21], [32, 22])
         ];
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule);
+        const actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule);
 
         assert.lengthOf(actualFailures, 7);
-
         Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
     });
 });

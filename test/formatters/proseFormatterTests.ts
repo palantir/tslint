@@ -12,43 +12,43 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 describe("Prose Formatter", () => {
-    var TEST_FILE = "formatters/proseFormatter.test.ts";
-    var sourceFile: ts.SourceFile;
-    var formatter: Lint.IFormatter;
+    const TEST_FILE = "formatters/proseFormatter.test.ts";
+    let sourceFile: ts.SourceFile;
+    let formatter: Lint.IFormatter;
 
-    before(function() {
-        var Formatter = Lint.Test.getFormatter("prose");
+    before(() => {
+        const Formatter = Lint.Test.getFormatter("prose");
         sourceFile = Lint.Test.getSourceFile(TEST_FILE);
         formatter = new Formatter();
     });
 
     it("formats failures", () => {
-        var maxPosition = sourceFile.getFullWidth();
+        const maxPosition = sourceFile.getFullWidth();
 
-        var failures = [
+        const failures = [
             new Lint.RuleFailure(sourceFile, 0, 1, "first failure", "first-name"),
             new Lint.RuleFailure(sourceFile, 32, 36, "mid failure", "mid-name"),
             new Lint.RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name")
         ];
 
-        var expectedResult =
+        const expectedResult =
             TEST_FILE + getPositionString(1, 1) + "first failure\n" +
             TEST_FILE + getPositionString(2, 12) + "mid failure\n" +
             TEST_FILE + getPositionString(9, 2) + "last failure\n";
 
-        var actualResult = formatter.format(failures);
+        const actualResult = formatter.format(failures);
         assert.equal(actualResult, expectedResult);
     });
 
     it("handles no failures", () => {
-        var result = formatter.format([]);
+        const result = formatter.format([]);
         assert.equal(result, "\n");
     });
 
     function getPositionString(line: number, character: number) {
-        return "[" + line + ", " + character + "]: ";
+        return `[${line}, ${character}]: `;
     }
 });

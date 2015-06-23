@@ -12,29 +12,30 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 describe("JSON Formatter", () => {
-    var TEST_FILE = "formatters/jsonFormatter.test.ts";
-    var sourceFile: ts.SourceFile;
-    var formatter: Lint.IFormatter;
+    const TEST_FILE = "formatters/jsonFormatter.test.ts";
+    let sourceFile: ts.SourceFile;
+    let formatter: Lint.IFormatter;
 
-    before(function() {
-        var Formatter = Lint.Test.getFormatter("json");
+    before(() => {
+        const Formatter = Lint.Test.getFormatter("json");
         sourceFile = Lint.Test.getSourceFile(TEST_FILE);
         formatter = new Formatter();
     });
 
     it("formats failures", () => {
-        var maxPosition = sourceFile.getFullWidth();
+        const maxPosition = sourceFile.getFullWidth();
 
-        var failures = [
+        const failures = [
             new Lint.RuleFailure(sourceFile, 0, 1, "first failure", "first-name"),
             new Lint.RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name"),
             new Lint.RuleFailure(sourceFile, 0, maxPosition, "full failure", "full-name")
         ];
 
-        var expectedResult = [{
+        /* tslint:disable:sort-object-literal-keys */
+        const expectedResult = [{
             name: TEST_FILE,
             failure: "first failure",
             startPosition: {
@@ -79,13 +80,14 @@ describe("JSON Formatter", () => {
             },
             ruleName: "full-name"
         }];
+        /* tslint:enable:sort-object-literal-keys */
 
-        var actualResult = JSON.parse(formatter.format(failures));
+        const actualResult = JSON.parse(formatter.format(failures));
         assert.deepEqual(actualResult, expectedResult);
     });
 
     it("handles no failures", () => {
-        var result = JSON.parse(formatter.format([]));
+        const result = JSON.parse(formatter.format([]));
         assert.deepEqual(result, []);
     });
 });

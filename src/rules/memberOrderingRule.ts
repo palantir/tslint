@@ -12,11 +12,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
-var OPTION_VARIABLES_BEFORE_FUNCTIONS = "variables-before-functions";
-var OPTION_STATIC_BEFORE_INSTANCE = "static-before-instance";
-var OPTION_PUBLIC_BEFORE_PRIVATE = "public-before-private";
+const OPTION_VARIABLES_BEFORE_FUNCTIONS = "variables-before-functions";
+const OPTION_STATIC_BEFORE_INSTANCE = "static-before-instance";
+const OPTION_PUBLIC_BEFORE_PRIVATE = "public-before-private";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -31,7 +31,7 @@ interface IModifiers {
 }
 
 function getModifiers(isMethod: boolean, modifiers?: ts.ModifiersArray): IModifiers {
-    var modifierStrings: string[] = [];
+    let modifierStrings: string[] = [];
     if (modifiers != null) {
         modifierStrings = modifiers.map((x) => {
             return x.getText();
@@ -39,9 +39,9 @@ function getModifiers(isMethod: boolean, modifiers?: ts.ModifiersArray): IModifi
     }
 
     return {
+        isInstance: modifierStrings.indexOf("static") === -1,
         isMethod: isMethod,
-        isPrivate: modifierStrings.indexOf("private") !== -1,
-        isInstance: modifierStrings.indexOf("static") === -1
+        isPrivate: modifierStrings.indexOf("private") !== -1
     };
 }
 
@@ -61,62 +61,62 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
         super(sourceFile, options);
     }
 
-    public visitClassDeclaration(node: ts.ClassDeclaration): void {
+    public visitClassDeclaration(node: ts.ClassDeclaration) {
         this.resetPreviousModifiers();
         super.visitClassDeclaration(node);
     }
 
-    public visitInterfaceDeclaration(node: ts.InterfaceDeclaration): void {
+    public visitInterfaceDeclaration(node: ts.InterfaceDeclaration) {
         this.resetPreviousModifiers();
         super.visitInterfaceDeclaration(node);
     }
 
-    public visitMethodDeclaration(node: ts.MethodDeclaration): void {
+    public visitMethodDeclaration(node: ts.MethodDeclaration) {
         this.checkAndSetModifiers(node, getModifiers(true, node.modifiers));
         super.visitMethodDeclaration(node);
     }
 
-    public visitMethodSignature(node: ts.SignatureDeclaration): void {
+    public visitMethodSignature(node: ts.SignatureDeclaration) {
         this.checkAndSetModifiers(node, getModifiers(true, node.modifiers));
         super.visitMethodSignature(node);
     }
 
-    public visitPropertyDeclaration(node: ts.PropertyDeclaration): void {
+    public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
         this.checkAndSetModifiers(node, getModifiers(false, node.modifiers));
         super.visitPropertyDeclaration(node);
     }
 
-    public visitPropertySignature(node: ts.Node): void {
+    public visitPropertySignature(node: ts.Node) {
         this.checkAndSetModifiers(node, getModifiers(false, node.modifiers));
         super.visitPropertySignature(node);
     }
-
 
     public visitTypeLiteral(node: ts.TypeLiteralNode) {
         // don't call super from here -- we want to skip the property declarations in type literals
     }
 
-    private resetPreviousModifiers(): void {
+    private resetPreviousModifiers() {
         this.previous = {
+            isInstance: false,
             isMethod: false,
-            isPrivate: false,
-            isInstance: false
+            isPrivate: false
         };
     }
 
-    private checkAndSetModifiers(node: ts.Node, current: IModifiers): void {
+    private checkAndSetModifiers(node: ts.Node, current: IModifiers) {
         if (!this.canAppearAfter(this.previous, current)) {
-            var message = "Declaration of " + toString(current) +
+            const message = "Declaration of " + toString(current) +
                 " not allowed to appear after declaration of " + toString(this.previous);
             this.addFailure(this.createFailure(node.getStart(), node.getWidth(), message));
         }
         this.previous = current;
     }
 
-    private canAppearAfter(previous: IModifiers, current: IModifiers): boolean {
+    private canAppearAfter(previous: IModifiers, current: IModifiers) {
         if (previous == null || current == null) {
             return true;
         }
+
         if (this.hasOption(OPTION_VARIABLES_BEFORE_FUNCTIONS) && previous.isMethod !== current.isMethod) {
             return Number(previous.isMethod) < Number(current.isMethod);
         }

@@ -12,19 +12,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "require statement not part of an import statement";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        var requiresWalker = new RequiresWalker(sourceFile, this.getOptions());
+        const requiresWalker = new RequiresWalker(sourceFile, this.getOptions());
         return this.applyWithWalker(requiresWalker);
     }
 }
 
 class RequiresWalker extends Lint.ScopeAwareRuleWalker<{}> {
-
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
     }
@@ -34,10 +33,10 @@ class RequiresWalker extends Lint.ScopeAwareRuleWalker<{}> {
     }
 
     public visitCallExpression(node: ts.CallExpression) {
-        var expression = node.expression;
+        const expression = node.expression;
 
         if (this.getCurrentDepth() <= 1 && expression.kind === ts.SyntaxKind.Identifier) {
-            var identifierName = (<ts.Identifier> expression).text;
+            const identifierName = (<ts.Identifier> expression).text;
             if (identifierName === "require") {
                 // if we're calling (invoking) require, then it's not part of an import statement
                 this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
@@ -46,5 +45,4 @@ class RequiresWalker extends Lint.ScopeAwareRuleWalker<{}> {
 
         super.visitCallExpression(node);
     }
-
 }

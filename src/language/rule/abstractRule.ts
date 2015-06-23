@@ -20,7 +20,7 @@ module Lint.Rules {
         private options: Lint.IOptions;
 
         constructor(ruleName: string, value: any, disabledIntervals: Lint.IDisabledInterval[]) {
-            var ruleArguments: any[] = [];
+            let ruleArguments: any[] = [];
 
             if (Array.isArray(value) && value.length > 1) {
                 ruleArguments = value.slice(1);
@@ -28,9 +28,9 @@ module Lint.Rules {
 
             this.value = value;
             this.options = {
+                disabledIntervals: disabledIntervals,
                 ruleArguments: ruleArguments,
-                ruleName: ruleName,
-                disabledIntervals: disabledIntervals
+                ruleName: ruleName
             };
         }
 
@@ -50,7 +50,7 @@ module Lint.Rules {
         }
 
         public isEnabled(): boolean {
-            var value = this.value;
+            const value = this.value;
 
             if (typeof value === "boolean") {
                 return value;
@@ -63,5 +63,4 @@ module Lint.Rules {
             return false;
         }
     }
-
 }

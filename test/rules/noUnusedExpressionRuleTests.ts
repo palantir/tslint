@@ -15,12 +15,12 @@
  */
 
 describe("<no-unused-expression>", () => {
-    var NoUnusedExpressionRule = Lint.Test.getRule("no-unused-expression");
+    const NoUnusedExpressionRule = Lint.Test.getRule("no-unused-expression");
+    const fileName = "rules/unused.expression.test.ts";
 
     it("disallows unused expression statements", () => {
-        var fileName = "rules/unused.expression.test.ts";
-        var createFailure = Lint.Test.createFailuresOnFile(fileName, NoUnusedExpressionRule.FAILURE_STRING);
-        var expectedFailures: Lint.RuleFailure[] = [
+        const createFailure = Lint.Test.createFailuresOnFile(fileName, NoUnusedExpressionRule.FAILURE_STRING);
+        const expectedFailures: Lint.RuleFailure[] = [
             createFailure([34, 1], [34, 3]),
             createFailure([35, 1], [35, 3]),
             createFailure([36, 1], [36, 7]),
@@ -34,7 +34,7 @@ describe("<no-unused-expression>", () => {
             createFailure([44, 1], [44, 24]),
             createFailure([45, 1], [45, 13]),
         ];
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, NoUnusedExpressionRule);
+        const actualFailures = Lint.Test.applyRuleOnFile(fileName, NoUnusedExpressionRule);
 
         Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
     });

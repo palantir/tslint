@@ -12,10 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
-var OPTION_USE_TABS = "tabs";
-var OPTION_USE_SPACES = "spaces";
+const OPTION_USE_TABS = "tabs";
+const OPTION_USE_SPACES = "spaces";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_TABS = "tab indentation expected";
@@ -43,20 +43,22 @@ class IndentWalker extends Lint.RuleWalker {
         }
     }
 
-    public visitSourceFile(node: ts.SourceFile): void {
+    public visitSourceFile(node: ts.SourceFile) {
         if (!this.hasOption(OPTION_USE_TABS) && !this.hasOption(OPTION_USE_SPACES)) {
             // if we don't have either option, no need to check anything, and no need to call super, so just return
             return;
         }
-        var scanner = ts.createScanner(ts.ScriptTarget.ES5, false, node.text);
-        var lineStarts = node.getLineStarts();
-        lineStarts.forEach((lineStart) => {
+
+        const scanner = ts.createScanner(ts.ScriptTarget.ES5, false, node.text);
+        for (let lineStart of node.getLineStarts()) {
             scanner.setTextPos(lineStart);
-            var currentScannedType = scanner.scan();
-            var fullLeadingWhitespace = "";
-            var lastStartPos = -1;
+
+            let currentScannedType = scanner.scan();
+            let fullLeadingWhitespace = "";
+            let lastStartPos = -1;
+
             while (currentScannedType === ts.SyntaxKind.WhitespaceTrivia) {
-                var startPos = scanner.getStartPos();
+                const startPos = scanner.getStartPos();
                 if (startPos === lastStartPos) {
                     break;
                 }
@@ -66,19 +68,17 @@ class IndentWalker extends Lint.RuleWalker {
                 currentScannedType = scanner.scan();
             }
 
-            if (currentScannedType === ts.SyntaxKind.SingleLineCommentTrivia ||
-                currentScannedType === ts.SyntaxKind.MultiLineCommentTrivia ||
-                currentScannedType === ts.SyntaxKind.NewLineTrivia) {
-
+            if (currentScannedType === ts.SyntaxKind.SingleLineCommentTrivia
+                    || currentScannedType === ts.SyntaxKind.MultiLineCommentTrivia
+                    || currentScannedType === ts.SyntaxKind.NewLineTrivia) {
                 // ignore lines that have comments before the first token
-
-                return;
+                continue;
             }
 
             if (fullLeadingWhitespace.match(this.regExp)) {
                 this.addFailure(this.createFailure(lineStart, fullLeadingWhitespace.length, this.failureString));
             }
-        });
+        }
         // no need to call super to visit the rest of the nodes, so don't call super here
     }
 }

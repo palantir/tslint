@@ -15,11 +15,11 @@
  */
 
 describe("<no-duplicate-key>", () => {
-    it("forbids duplicate keys in object literals", () => {
-        const fileName = "rules/dupkey.test.ts";
-        const NoDuplicateKeyRule = Lint.Test.getRule("no-duplicate-key");
-        const failureString = NoDuplicateKeyRule.FAILURE_STRING;
+    const NoDuplicateKeyRule = Lint.Test.getRule("no-duplicate-key");
+    const fileName = "rules/dupkey.test.ts";
+    const failureString = NoDuplicateKeyRule.FAILURE_STRING;
 
+    it("forbids duplicate keys in object literals", () => {
         const actualFailures = Lint.Test.applyRuleOnFile(fileName, NoDuplicateKeyRule);
         const createFailure1 = Lint.Test.createFailuresOnFile(fileName, failureString + "axa'");
         const createFailure2 = Lint.Test.createFailuresOnFile(fileName, failureString + "bd'");

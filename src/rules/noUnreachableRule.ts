@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "unreachable code";
@@ -30,8 +30,8 @@ class UnreachableWalker extends Lint.RuleWalker {
         this.hasReturned = false;
     }
 
-    public visitNode(node: ts.Node): void {
-        var previousReturned = this.hasReturned;
+    public visitNode(node: ts.Node) {
+        const previousReturned = this.hasReturned;
         // function declarations can be hoisted -- so set hasReturned to false until we're done with the function
         if (node.kind === ts.SyntaxKind.FunctionDeclaration) {
             this.hasReturned = false;
@@ -51,22 +51,22 @@ class UnreachableWalker extends Lint.RuleWalker {
         }
     }
 
-    public visitBlock(node: ts.Block): void {
+    public visitBlock(node: ts.Block) {
         super.visitBlock(node);
         this.hasReturned = false;
     }
 
-    public visitCaseClause(node: ts.CaseClause): void {
+    public visitCaseClause(node: ts.CaseClause) {
         super.visitCaseClause(node);
         this.hasReturned = false;
     }
 
-    public visitDefaultClause(node: ts.DefaultClause): void {
+    public visitDefaultClause(node: ts.DefaultClause) {
         super.visitDefaultClause(node);
         this.hasReturned = false;
     }
 
-    public visitIfStatement(node: ts.IfStatement): void {
+    public visitIfStatement(node: ts.IfStatement) {
         this.visitNode(node.expression);
         this.visitNode(node.thenStatement);
         this.hasReturned = false;
@@ -76,22 +76,22 @@ class UnreachableWalker extends Lint.RuleWalker {
         }
     }
 
-    public visitBreakStatement(node: ts.BreakOrContinueStatement): void {
+    public visitBreakStatement(node: ts.BreakOrContinueStatement) {
         super.visitBreakStatement(node);
         this.hasReturned = true;
     }
 
-    public visitContinueStatement(node: ts.BreakOrContinueStatement): void {
+    public visitContinueStatement(node: ts.BreakOrContinueStatement) {
         super.visitContinueStatement(node);
         this.hasReturned = true;
     }
 
-    public visitReturnStatement(node: ts.ReturnStatement): void {
+    public visitReturnStatement(node: ts.ReturnStatement) {
         super.visitReturnStatement(node);
         this.hasReturned = true;
     }
 
-    public visitThrowStatement(node: ts.ThrowStatement): void {
+    public visitThrowStatement(node: ts.ThrowStatement) {
         super.visitThrowStatement(node);
         this.hasReturned = true;
     }

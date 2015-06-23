@@ -15,13 +15,13 @@
  */
 
 describe("<semicolon>", () => {
-    var SemicolonRule = Lint.Test.getRule("semicolon");
-    var fileName = "rules/semicolon.test.ts";
-    var failureString = SemicolonRule.FAILURE_STRING;
-    var actualFailures: Lint.RuleFailure[];
-    var createFailure = (start: number[], end: number[]) => {
+    const SemicolonRule = Lint.Test.getRule("semicolon");
+    const fileName = "rules/semicolon.test.ts";
+    const failureString = SemicolonRule.FAILURE_STRING;
+    const createFailure = (start: number[], end: number[]) => {
         return Lint.Test.createFailure(fileName, start, end, failureString);
     };
+    let actualFailures: Lint.RuleFailure[];
 
     before(() => {
         actualFailures = Lint.Test.applyRuleOnFile(fileName, SemicolonRule);

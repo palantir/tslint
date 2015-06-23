@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "use of debugger statements is disallowed";
@@ -23,8 +23,8 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class NoDebuggerWalker extends Lint.RuleWalker {
-    public visitDebuggerStatement(node: ts.Statement): void {
-        var debuggerKeywordNode = node.getChildAt(0);
+    public visitDebuggerStatement(node: ts.Statement) {
+        const debuggerKeywordNode = node.getChildAt(0);
         this.addFailure(this.createFailure(debuggerKeywordNode.getStart(), debuggerKeywordNode.getWidth(), Rule.FAILURE_STRING));
         super.visitDebuggerStatement(node);
    }

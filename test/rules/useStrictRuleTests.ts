@@ -15,24 +15,23 @@
  */
 
 describe("<use-strict>", () => {
-    var UseStrictRule = Lint.Test.getRule("use-strict");
-
-    var actualFailures: any;
-    var fileName = "rules/usestrict.test.ts";
+    const UseStrictRule = Lint.Test.getRule("use-strict");
+    const fileName = "rules/usestrict.test.ts";
+    let actualFailures: Lint.RuleFailure[];
 
     before(() => {
-        var options = [true, "check-function", "check-module"];
+        const options = [true, "check-function", "check-module"];
         actualFailures = Lint.Test.applyRuleOnFile(fileName, UseStrictRule, options);
         assert.lengthOf(actualFailures, 2);
     });
 
     it("enforces checks for 'use strict' in functions", () => {
-        var expectedFailures = Lint.Test.createFailure(fileName, [14, 1], [14, 9], UseStrictRule.FAILURE_STRING);
+        const expectedFailures = Lint.Test.createFailure(fileName, [14, 1], [14, 9], UseStrictRule.FAILURE_STRING);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailures);
     });
 
     it("enforces checks for 'use strict' in modules", () => {
-        var expectedFailures = Lint.Test.createFailure(fileName, [24, 1], [24, 7], UseStrictRule.FAILURE_STRING);
+        const expectedFailures = Lint.Test.createFailure(fileName, [24, 1], [24, 7], UseStrictRule.FAILURE_STRING);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailures);
     });
 });

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-var OPTION_SPACE = "check-space";
-var OPTION_LOWERCASE = "check-lowercase";
-var OPTION_UPPERCASE = "check-uppercase";
+const OPTION_SPACE = "check-space";
+const OPTION_LOWERCASE = "check-lowercase";
+const OPTION_UPPERCASE = "check-uppercase";
 
 export class Rule extends Lint.Rules.AbstractRule {
     static LOWERCASE_FAILURE = "comment must start with lowercase letter";
@@ -29,10 +29,10 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class CommentWalker extends Lint.SkippableTokenAwareRuleWalker {
-    public visitSourceFile(node: ts.SourceFile): void {
+    public visitSourceFile(node: ts.SourceFile) {
         super.visitSourceFile(node);
         Lint.scanAllTokens(ts.createScanner(ts.ScriptTarget.ES5, false, node.text), (scanner: ts.Scanner) => {
-            var startPos = scanner.getStartPos();
+            const startPos = scanner.getStartPos();
             if (this.tokensToSkipStartEndMap[startPos] != null) {
                 // tokens to skip are places where the scanner gets confused about what the token is, without the proper context
                 // (specifically, regex, identifiers, and templates). So skip those tokens.
@@ -41,24 +41,24 @@ class CommentWalker extends Lint.SkippableTokenAwareRuleWalker {
             }
 
             if (scanner.getToken() === ts.SyntaxKind.SingleLineCommentTrivia) {
-                var commentText = scanner.getTokenText();
-                var startPosition = scanner.getTokenPos() + 2;
-                var width = commentText.length - 2;
+                const commentText = scanner.getTokenText();
+                const startPosition = scanner.getTokenPos() + 2;
+                const width = commentText.length - 2;
                 if (this.hasOption(OPTION_SPACE)) {
                     if (!this.startsWithSpace(commentText)) {
-                        var leadingSpaceFailure = this.createFailure(startPosition, width, Rule.LEADING_SPACE_FAILURE);
+                        const leadingSpaceFailure = this.createFailure(startPosition, width, Rule.LEADING_SPACE_FAILURE);
                         this.addFailure(leadingSpaceFailure);
                     }
                 }
                 if (this.hasOption(OPTION_LOWERCASE)) {
                     if (!this.startsWithLowercase(commentText)) {
-                        var lowercaseFailure = this.createFailure(startPosition, width, Rule.LOWERCASE_FAILURE);
+                        const lowercaseFailure = this.createFailure(startPosition, width, Rule.LOWERCASE_FAILURE);
                         this.addFailure(lowercaseFailure);
                     }
                 }
                 if (this.hasOption(OPTION_UPPERCASE)) {
                     if (!this.startsWithUppercase(commentText)) {
-                        var uppercaseFailure = this.createFailure(startPosition, width, Rule.UPPERCASE_FAILURE);
+                        const uppercaseFailure = this.createFailure(startPosition, width, Rule.UPPERCASE_FAILURE);
                         this.addFailure(uppercaseFailure);
                     }
                 }
@@ -76,7 +76,7 @@ class CommentWalker extends Lint.SkippableTokenAwareRuleWalker {
             return true;
         }
 
-        var firstCharacter = commentText.charAt(2); // first character after the space
+        const firstCharacter = commentText.charAt(2); // first character after the space
         // three slashes (///) also works, to allow for ///<reference>
         return firstCharacter === " " || firstCharacter === "/";
     }
@@ -95,10 +95,10 @@ class CommentWalker extends Lint.SkippableTokenAwareRuleWalker {
         }
 
         // regex is "start of string"//"any amount of whitespace"("word character")
-        var firstCharacterMatch = commentText.match(/^\/\/\s*(\w)/);
+        const firstCharacterMatch = commentText.match(/^\/\/\s*(\w)/);
         if (firstCharacterMatch != null) {
             // the first group matched, i.e. the thing in the parens, is the first non-space character, if it's alphanumeric
-            var firstCharacter = firstCharacterMatch[1];
+            const firstCharacter = firstCharacterMatch[1];
             return firstCharacter === changeCase(firstCharacter);
         } else {
             // first character isn't alphanumeric/doesn't exist? Technically not a violation

@@ -15,31 +15,32 @@
  */
 
 describe("External Formatter", () => {
-    var TEST_FILE = "formatters/externalFormatter.test.ts";
-    var TEST_MODULE = "../test/files/formatters/simple";
-    var sourceFile: ts.SourceFile, formatter: Lint.IFormatter;
+    const TEST_FILE = "formatters/externalFormatter.test.ts";
+    const TEST_MODULE = "../test/files/formatters/simple";
+    let sourceFile: ts.SourceFile;
+    let formatter: Lint.IFormatter;
 
-    before(function() {
-        var Formatter = Lint.Test.getFormatter(TEST_MODULE);
+    before(() => {
+        const Formatter = Lint.Test.getFormatter(TEST_MODULE);
         sourceFile = Lint.Test.getSourceFile(TEST_FILE);
         formatter = new Formatter();
     });
 
     it("formats failures", () => {
-        var maxPosition = sourceFile.getFullWidth();
+        const maxPosition = sourceFile.getFullWidth();
 
-        var failures = [
+        const failures = [
             new Lint.RuleFailure(sourceFile, 0, 1, "first failure", "first-name"),
             new Lint.RuleFailure(sourceFile, 32, 36, "mid failure", "mid-name"),
             new Lint.RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name")
         ];
 
-        var expectedResult =
+        const expectedResult =
             getPositionString(1, 1) + TEST_FILE + "\n" +
             getPositionString(2, 11) + TEST_FILE + "\n" +
             getPositionString(9, 2) + TEST_FILE + "\n";
 
-        var actualResult = formatter.format(failures);
+        const actualResult = formatter.format(failures);
 
         assert.equal(actualResult, expectedResult);
     });
@@ -49,7 +50,7 @@ describe("External Formatter", () => {
     });
 
     it("handles no failures", () => {
-        var result = formatter.format([]);
+        const result = formatter.format([]);
         assert.equal(result, "");
     });
 

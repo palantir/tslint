@@ -12,15 +12,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 describe("<ban>", () => {
-    it("bans access to specified functions", () => {
-        var fileName = "rules/ban.test.ts";
-        var BanRule = Lint.Test.getRule("ban");
-        var dirFailure = Lint.Test.createFailuresOnFile(fileName, BanRule.FAILURE_STRING_PART + "window.toString")([2, 1], [2, 16]);
+    const fileName = "rules/ban.test.ts";
+    const BanRule = Lint.Test.getRule("ban");
 
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, BanRule, [true, ["window", "toString"]]);
+    it("bans access to specified functions", () => {
+        const dirFailure = Lint.Test.createFailuresOnFile(fileName, BanRule.FAILURE_STRING_PART + "window.toString")([2, 1], [2, 16]);
+        const actualFailures = Lint.Test.applyRuleOnFile(fileName, BanRule, [true, ["window", "toString"]]);
         Lint.Test.assertContainsFailure(actualFailures, dirFailure);
     });
 });

@@ -12,16 +12,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 describe("<eofline>", () => {
-    it("ensures a trailing newline at EOF", () => {
-        var fileName = "rules/eofline.test.ts";
-        var EofLineRule = Lint.Test.getRule("eofline");
-        var failureString = EofLineRule.FAILURE_STRING;
+    const EofLineRule = Lint.Test.getRule("eofline");
+    const fileName = "rules/eofline.test.ts";
+    const failureString = EofLineRule.FAILURE_STRING;
 
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, EofLineRule);
-        var expectedFailure = Lint.Test.createFailure(fileName, [4, 38], [4, 38], failureString);
+    it("ensures a trailing newline at EOF", () => {
+        const actualFailures = Lint.Test.applyRuleOnFile(fileName, EofLineRule);
+        const expectedFailure = Lint.Test.createFailure(fileName, [4, 38], [4, 38], failureString);
 
         assert.equal(actualFailures.length, 1);
         assert.isTrue(actualFailures[0].equals(expectedFailure));

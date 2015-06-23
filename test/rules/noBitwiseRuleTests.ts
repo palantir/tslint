@@ -15,17 +15,17 @@
  */
 
 describe("<no-bitwise>", () => {
-    var NoBitwiseRule = Lint.Test.getRule("no-bitwise");
+    const NoBitwiseRule = Lint.Test.getRule("no-bitwise");
+    const fileName = "rules/bitwise.test.ts";
 
     it("forbids access to bitwise operators", () => {
-        var fileName = "rules/bitwise.test.ts";
-        var createFailure = Lint.Test.createFailuresOnFile(fileName, NoBitwiseRule.FAILURE_STRING);
-        var expectedFailures: Lint.RuleFailure[] = [
+        const createFailure = Lint.Test.createFailuresOnFile(fileName, NoBitwiseRule.FAILURE_STRING);
+        const expectedFailures: Lint.RuleFailure[] = [
             createFailure([2, 10], [2, 15]),
             createFailure([3, 10], [3, 28]),
             createFailure([3, 22], [3, 27]),
         ];
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, NoBitwiseRule);
+        const actualFailures = Lint.Test.applyRuleOnFile(fileName, NoBitwiseRule);
 
         Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
     });

@@ -15,12 +15,12 @@
  */
 
 describe("<no-string-literal>", () => {
-    it("forbids object access via string literals", () => {
-        var fileName = "rules/sub.test.ts";
-        var NoStringLiteralRule = Lint.Test.getRule("no-string-literal");
+    const NoStringLiteralRule = Lint.Test.getRule("no-string-literal");
+    const fileName = "rules/sub.test.ts";
 
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, NoStringLiteralRule);
-        var expectedFailures = [
+    it("forbids object access via string literals", () => {
+        const actualFailures = Lint.Test.applyRuleOnFile(fileName, NoStringLiteralRule);
+        const expectedFailures = [
             Lint.Test.createFailure(fileName, [10, 20], [10, 25], NoStringLiteralRule.FAILURE_STRING),
             Lint.Test.createFailure(fileName, [11, 21], [11, 24], NoStringLiteralRule.FAILURE_STRING),
             Lint.Test.createFailure(fileName, [15, 5], [15, 23], NoStringLiteralRule.FAILURE_STRING),

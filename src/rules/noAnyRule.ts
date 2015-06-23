@@ -23,7 +23,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class NoAnyWalker extends Lint.RuleWalker {
-    public visitAnyKeyword(node: ts.Node): void {
+    public visitAnyKeyword(node: ts.Node) {
         this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
         super.visitAnyKeyword(node);
     }

@@ -15,15 +15,16 @@
  */
 
 describe("<label-position>", () => {
+    const LabelPositionRule = Lint.Test.getRule("label-position");
+    const fileName = "rules/labelpos.test.ts";
+
     it("enforces that labels are correctly positioned", () => {
-        var fileName = "rules/labelpos.test.ts";
-        var LabelPositionRule = Lint.Test.getRule("label-position");
-        var createFailure = Lint.Test.createFailuresOnFile(fileName, LabelPositionRule.FAILURE_STRING);
-        var expectedFailures: Lint.RuleFailure[] = [
+        const createFailure = Lint.Test.createFailuresOnFile(fileName, LabelPositionRule.FAILURE_STRING);
+        const expectedFailures: Lint.RuleFailure[] = [
             createFailure([2, 5], [2, 9]),
             createFailure([5, 5], [5, 9])
         ];
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, LabelPositionRule);
+        const actualFailures = Lint.Test.applyRuleOnFile(fileName, LabelPositionRule);
 
         Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
     });

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "switch statement doesn't include a 'default' case";
@@ -23,16 +23,13 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 export class SwitchDefaultWalker extends Lint.RuleWalker {
-
     public visitSwitchStatement(node: ts.SwitchStatement) {
-        var hasDefaultCase = node.caseBlock.clauses.some((clause) => {
-            return clause.kind === ts.SyntaxKind.DefaultClause;
-        });
+        const hasDefaultCase = node.caseBlock.clauses.some((clause) => clause.kind === ts.SyntaxKind.DefaultClause);
+
         if (!hasDefaultCase) {
-            this.addFailure(this.createFailure(node.getStart(),
-                                               node.getWidth(),
-                                               Rule.FAILURE_STRING));
+            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
         }
+
         super.visitSwitchStatement(node);
     }
 }

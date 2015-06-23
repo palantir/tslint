@@ -12,25 +12,25 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 module Lint {
-    var fs = require("fs");
-    var path = require("path");
-    var _s = require("underscore.string");
+    const fs = require("fs");
+    const path = require("path");
+    const _s = require("underscore.string");
 
-    var moduleDirectory = path.dirname(module.filename);
-    var CORE_FORMATTERS_DIRECTORY = path.resolve(moduleDirectory, "..", "build", "formatters");
+    const moduleDirectory = path.dirname(module.filename);
+    const CORE_FORMATTERS_DIRECTORY = path.resolve(moduleDirectory, "..", "build", "formatters");
 
     export function findFormatter(name: string, formattersDirectory?: string) {
         if (typeof(name) === "function") {
             return name;
         }
 
-        var camelizedName = _s.camelize(name + "Formatter");
+        const camelizedName = _s.camelize(name + "Formatter");
 
         // first check for core formatters
-        var Formatter = loadFormatter(CORE_FORMATTERS_DIRECTORY, camelizedName);
+        let Formatter = loadFormatter(CORE_FORMATTERS_DIRECTORY, camelizedName);
         if (Formatter) {
             return Formatter;
         }
@@ -48,11 +48,11 @@ module Lint {
     }
 
     function loadFormatter(...paths: string[]) {
-        var formatterPath = paths.reduce((p, c) => path.join(p, c), "");
-        var fullPath = path.resolve(moduleDirectory, formatterPath);
+        const formatterPath = paths.reduce((p, c) => path.join(p, c), "");
+        const fullPath = path.resolve(moduleDirectory, formatterPath);
 
         if (fs.existsSync(fullPath + ".js")) {
-            var formatterModule = require(fullPath);
+            const formatterModule = require(fullPath);
             return formatterModule.Formatter;
         }
 
@@ -60,7 +60,7 @@ module Lint {
     }
 
     function loadFormatterModule(name: string) {
-        var src: string;
+        let src: string;
         try {
             src = require.resolve(name);
         } catch (e) {

@@ -15,18 +15,17 @@
  */
 
 describe("<no-trailing-whitespace>", () => {
-    it("forbids trailing whitespace", () => {
-        var fileName = "rules/trailing.test.ts";
-        var NoTrailingWhitespaceRule = Lint.Test.getRule("no-trailing-whitespace");
-        var failureString = NoTrailingWhitespaceRule.FAILURE_STRING;
-        var createFailure = Lint.Test.createFailuresOnFile(fileName, failureString);
+    const NoTrailingWhitespaceRule = Lint.Test.getRule("no-trailing-whitespace");
+    const fileName = "rules/trailing.test.ts";
+    const createFailure = Lint.Test.createFailuresOnFile(fileName, NoTrailingWhitespaceRule.FAILURE_STRING);
 
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, NoTrailingWhitespaceRule);
-        var expectedFailure1 = createFailure([2, 24], [2, 28]);
-        var expectedFailure2 = createFailure([3, 32], [3, 36]);
-        var expectedFailure3 = createFailure([5, 1], [5, 5]);
-        var expectedFailure4 = createFailure([6, 1], [6, 5]);
-        var expectedFailure5 = createFailure([9, 2], [9, 6]);
+    it("forbids trailing whitespace", () => {
+        const actualFailures = Lint.Test.applyRuleOnFile(fileName, NoTrailingWhitespaceRule);
+        const expectedFailure1 = createFailure([2, 24], [2, 28]);
+        const expectedFailure2 = createFailure([3, 32], [3, 36]);
+        const expectedFailure3 = createFailure([5, 1], [5, 5]);
+        const expectedFailure4 = createFailure([6, 1], [6, 5]);
+        const expectedFailure5 = createFailure([9, 2], [9, 6]);
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);

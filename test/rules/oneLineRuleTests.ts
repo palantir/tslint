@@ -15,87 +15,87 @@
  */
 
 describe("<one-line>", () => {
-    var actualFailures: Lint.RuleFailure[];
-    var fileName = "rules/oneline.test.ts";
-    var OneLineRule = Lint.Test.getRule("one-line");
-    var braceFailure = OneLineRule.BRACE_FAILURE_STRING;
-    var elseFailure = OneLineRule.ELSE_FAILURE_STRING;
-    var whitespaceFailure = OneLineRule.WHITESPACE_FAILURE_STRING;
-    var catchFailure = OneLineRule.CATCH_FAILURE_STRING;
+    const fileName = "rules/oneline.test.ts";
+    const OneLineRule = Lint.Test.getRule("one-line");
+    const braceFailure = OneLineRule.BRACE_FAILURE_STRING;
+    const elseFailure = OneLineRule.ELSE_FAILURE_STRING;
+    const whitespaceFailure = OneLineRule.WHITESPACE_FAILURE_STRING;
+    const catchFailure = OneLineRule.CATCH_FAILURE_STRING;
+    let actualFailures: Lint.RuleFailure[];
 
     before(() => {
-        var options = [true, "check-open-brace", "check-catch", "check-else", "check-whitespace"];
+        const options = [true, "check-open-brace", "check-catch", "check-else", "check-whitespace"];
         actualFailures = Lint.Test.applyRuleOnFile(fileName, OneLineRule, options);
         assert.lengthOf(actualFailures, 13);
     });
 
     it("enforces rules only when enabled", () => {
-        var failures = Lint.Test.applyRuleOnFile(fileName, OneLineRule);
+        const failures = Lint.Test.applyRuleOnFile(fileName, OneLineRule);
         assert.equal(failures.length, 0);
     });
 
     it("enforces module brace", () => {
-        var expectedFailure = Lint.Test.createFailure(fileName, [2, 1], [2, 2], braceFailure);
+        const expectedFailure = Lint.Test.createFailure(fileName, [2, 1], [2, 2], braceFailure);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 
     it("enforces enumeration brace", () => {
-        var expectedFailure = Lint.Test.createFailure(fileName, [4, 5], [4, 6], braceFailure);
+        const expectedFailure = Lint.Test.createFailure(fileName, [4, 5], [4, 6], braceFailure);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 
     it("enforces function brace", () => {
-        var expectedFailure = Lint.Test.createFailure(fileName, [12, 5], [12, 6], braceFailure);
+        const expectedFailure = Lint.Test.createFailure(fileName, [12, 5], [12, 6], braceFailure);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 
     it("enforces if brace", () => {
-        var expectedFailure = Lint.Test.createFailure(fileName, [14, 9], [14, 10], braceFailure);
+        const expectedFailure = Lint.Test.createFailure(fileName, [14, 9], [14, 10], braceFailure);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 
     it("enforces else position", () => {
-        var expectedFailure = Lint.Test.createFailure(fileName, [17, 9], [17, 13], elseFailure);
+        const expectedFailure = Lint.Test.createFailure(fileName, [17, 9], [17, 13], elseFailure);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 
     it("enforces class brace", () => {
-        var expectedFailure = Lint.Test.createFailure(fileName, [25, 1], [25, 2], braceFailure);
+        const expectedFailure = Lint.Test.createFailure(fileName, [25, 1], [25, 2], braceFailure);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 
     it("enforces object literal brace", () => {
-        var expectedFailure = Lint.Test.createFailure(fileName, [30, 1], [30, 2], braceFailure);
+        const expectedFailure = Lint.Test.createFailure(fileName, [30, 1], [30, 2], braceFailure);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 
     it("enforces block brace", () => {
-        var expectedFailure = Lint.Test.createFailure(fileName, [36, 1], [36, 2], braceFailure);
+        const expectedFailure = Lint.Test.createFailure(fileName, [36, 1], [36, 2], braceFailure);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 
     it("enforces switch brace", () => {
-        var expectedFailure = Lint.Test.createFailure(fileName, [41, 1], [41, 2], braceFailure);
+        const expectedFailure = Lint.Test.createFailure(fileName, [41, 1], [41, 2], braceFailure);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 
     it("enforces try brace", () => {
-        var expectedFailure = Lint.Test.createFailure(fileName, [51, 1], [51, 2], braceFailure);
+        const expectedFailure = Lint.Test.createFailure(fileName, [51, 1], [51, 2], braceFailure);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 
     it("enforces catch position", () => {
-        var expectedFailure = Lint.Test.createFailure(fileName, [54, 1], [54, 6], catchFailure);
+        const expectedFailure = Lint.Test.createFailure(fileName, [54, 1], [54, 6], catchFailure);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 
     it("enforces catch brace", () => {
-        var expectedFailure = Lint.Test.createFailure(fileName, [55, 1], [55, 2], braceFailure);
+        const expectedFailure = Lint.Test.createFailure(fileName, [55, 1], [55, 2], braceFailure);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 
     it("enforces whitespace before a brace", () => {
-        var expectedFailure = Lint.Test.createFailure(fileName, [59, 14], [59, 15], whitespaceFailure);
+        const expectedFailure = Lint.Test.createFailure(fileName, [59, 14], [59, 15], whitespaceFailure);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 });

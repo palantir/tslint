@@ -15,11 +15,11 @@
  */
 
 describe("<sort-object-literal-keys>", () => {
-    it("forbids unsorted keys in object literals", () => {
-        const fileName = "rules/sortedkey.test.ts";
-        const SortedKeyRule = Lint.Test.getRule("sort-object-literal-keys");
-        const failureString = SortedKeyRule.FAILURE_STRING;
+    const SortedKeyRule = Lint.Test.getRule("sort-object-literal-keys");
+    const fileName = "rules/sortedkey.test.ts";
+    const failureString = SortedKeyRule.FAILURE_STRING;
 
+    it("forbids unsorted keys in object literals", () => {
         const actualFailures = Lint.Test.applyRuleOnFile(fileName, SortedKeyRule);
         const createFailure1 = Lint.Test.createFailuresOnFile(fileName, failureString + "a'");
         const createFailure2 = Lint.Test.createFailuresOnFile(fileName, failureString + "a'");

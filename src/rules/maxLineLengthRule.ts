@@ -12,14 +12,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "exceeds maximum line length of ";
 
     public isEnabled(): boolean {
         if (super.isEnabled()) {
-            var option = this.getOptions().ruleArguments[0];
+            const option = this.getOptions().ruleArguments[0];
             if (typeof option === "number" && option > 0) {
                 return true;
             }
@@ -29,23 +29,22 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        var ruleFailures: Lint.RuleFailure[] = [];
-        var lineLimit = this.getOptions().ruleArguments[0];
-        var lineStarts = sourceFile.getLineStarts();
-        var errorString = Rule.FAILURE_STRING + lineLimit;
-        var disabledIntervals = this.getOptions().disabledIntervals;
+        const ruleFailures: Lint.RuleFailure[] = [];
+        const lineLimit = this.getOptions().ruleArguments[0];
+        const lineStarts = sourceFile.getLineStarts();
+        const errorString = Rule.FAILURE_STRING + lineLimit;
+        const disabledIntervals = this.getOptions().disabledIntervals;
+        const source = sourceFile.getFullText();
 
-        var source = sourceFile.getFullText();
-
-        for (var i = 0; i < lineStarts.length - 1; ++i) {
-            var from = lineStarts[i], to = lineStarts[i + 1];
+        for (let i = 0; i < lineStarts.length - 1; ++i) {
+            const from = lineStarts[i], to = lineStarts[i + 1];
             if ((to - from - 1) > lineLimit && !((to - from - 2) === lineLimit && source[to - 2] === "\r")) {
                 // first condition above is whether the line (minus the newline) is larger than the line limit
                 // second two check for windows line endings, that is, check to make sure it is not the case
                 // that we are only over by the limit by exactly one and that the character we are over the
                 // limit by is a '\r' character which does not count against the limit
                 // (and thus we are not actually over the limit).
-                var ruleFailure = new Lint.RuleFailure(sourceFile, from, to - 1, errorString, this.getOptions().ruleName);
+                const ruleFailure = new Lint.RuleFailure(sourceFile, from, to - 1, errorString, this.getOptions().ruleName);
                 if (!Lint.doesIntersect(ruleFailure, disabledIntervals)) {
                     ruleFailures.push(ruleFailure);
                 }

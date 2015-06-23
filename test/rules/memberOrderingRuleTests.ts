@@ -16,9 +16,9 @@
 
 describe("<member-ordering>", () => {
     it("requires public variables to go before private ones", () => {
-        var fileName = "rules/memberordering-private.test.ts";
-        var MemberOrderingRule = Lint.Test.getRule("member-ordering");
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, MemberOrderingRule, [
+        const fileName = "rules/memberordering-private.test.ts";
+        const MemberOrderingRule = Lint.Test.getRule("member-ordering");
+        const actualFailures = Lint.Test.applyRuleOnFile(fileName, MemberOrderingRule, [
             true,
             "public-before-private"
         ]);
@@ -31,9 +31,9 @@ describe("<member-ordering>", () => {
     });
 
     it("requires variables to go before methods", () => {
-        var fileName = "rules/memberordering-method.test.ts";
-        var MemberOrderingRule = Lint.Test.getRule("member-ordering");
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, MemberOrderingRule, [
+        const fileName = "rules/memberordering-method.test.ts";
+        const MemberOrderingRule = Lint.Test.getRule("member-ordering");
+        const actualFailures = Lint.Test.applyRuleOnFile(fileName, MemberOrderingRule, [
             true,
             "variables-before-functions"
         ]);
@@ -49,9 +49,9 @@ describe("<member-ordering>", () => {
     });
 
     it("requires static variables to go before instance variables", () => {
-        var fileName = "rules/memberordering-static.test.ts";
-        var MemberOrderingRule = Lint.Test.getRule("member-ordering");
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, MemberOrderingRule, [
+        const fileName = "rules/memberordering-static.test.ts";
+        const MemberOrderingRule = Lint.Test.getRule("member-ordering");
+        const actualFailures = Lint.Test.applyRuleOnFile(fileName, MemberOrderingRule, [
             true,
             "static-before-instance"
         ]);

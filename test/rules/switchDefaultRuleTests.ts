@@ -15,16 +15,17 @@
  */
 
 describe("<switch-default>", () => {
+    const SwitchDefaultRule = Lint.Test.getRule("switch-default");
+    const fileName = "rules/switchdefault.test.ts";
+    const failureString = SwitchDefaultRule.FAILURE_STRING;
+
     it("Switch default", () => {
-        var fileName = "rules/switchdefault.test.ts";
-        var Rule = Lint.Test.getRule("switch-default");
-        var failureString = Rule.FAILURE_STRING;
-        var failure = Lint.Test.createFailuresOnFile(fileName, failureString);
-        var expectedFailures = [
+        const failure = Lint.Test.createFailuresOnFile(fileName, failureString);
+        const expectedFailures = [
             failure([2, 1], [6, 2]),
             failure([8, 1], [18, 2])
         ];
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule);
+        const actualFailures = Lint.Test.applyRuleOnFile(fileName, SwitchDefaultRule);
         Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
     });
 });

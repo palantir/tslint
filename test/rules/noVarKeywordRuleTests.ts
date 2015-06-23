@@ -12,20 +12,22 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 describe("<no-var-keyword>", () => {
+    const NoVarKeywordRule = Lint.Test.getRule("no-var-keyword");
+    const fileName = "rules/novarkeyword.test.ts";
+
     it("disallows use of creating variables with 'var'", () => {
-        var fileName = "rules/novarkeyword.test.ts";
-        var NoVarKeywordRule = Lint.Test.getRule("no-var-keyword");
-        var failure = Lint.Test.createFailuresOnFile(fileName, NoVarKeywordRule.FAILURE_STRING);
-        var expectedFailure = [
-            failure([3, 1], [3, 4]),
-            failure([6, 5], [6, 8]),
-            failure([9, 1], [9, 4]),
-            failure([12, 1], [12, 4]),
+        const failure = Lint.Test.createFailuresOnFile(fileName, NoVarKeywordRule.FAILURE_STRING);
+        const expectedFailures = [
+            failure([1, 1], [1, 4]),
+            failure([4, 5], [4, 8]),
+            failure([7, 1], [7, 4]),
+            failure([10, 1], [10, 4]),
         ];
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, NoVarKeywordRule);
-        Lint.Test.assertFailuresEqual(actualFailures, expectedFailure);
+        const actualFailures = Lint.Test.applyRuleOnFile(fileName, NoVarKeywordRule);
+
+        Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
     });
 });

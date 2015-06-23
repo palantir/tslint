@@ -25,13 +25,13 @@ export class Rule extends Lint.Rules.AbstractRule {
 class NoDuplicateKeyWalker extends Lint.RuleWalker {
     private objectKeysStack: {[key: string]: boolean}[] = [];
 
-    public visitObjectLiteralExpression(node: ts.ObjectLiteralExpression): void {
+    public visitObjectLiteralExpression(node: ts.ObjectLiteralExpression) {
         this.objectKeysStack.push(Object.create(null));
         super.visitObjectLiteralExpression(node);
         this.objectKeysStack.pop();
     }
 
-    public visitPropertyAssignment(node: ts.PropertyAssignment): void {
+    public visitPropertyAssignment(node: ts.PropertyAssignment) {
         const objectKeys = this.objectKeysStack[this.objectKeysStack.length - 1];
         const keyNode = node.name;
 

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "for (... in ...) statements must be filtered with an if statement";
@@ -23,14 +23,14 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class ForInWalker extends Lint.RuleWalker {
-    public visitForInStatement(node: ts.ForInStatement): void {
+    public visitForInStatement(node: ts.ForInStatement) {
         this.handleForInStatement(node);
         super.visitForInStatement(node);
     }
 
     private handleForInStatement(node: ts.ForInStatement) {
-        var statement = node.statement;
-        var statementKind = node.statement.kind;
+        const statement = node.statement;
+        const statementKind = node.statement.kind;
 
         // a direct if statement under a for...in is valid
         if (statementKind === ts.SyntaxKind.IfStatement) {
@@ -39,10 +39,10 @@ class ForInWalker extends Lint.RuleWalker {
 
         // if there is a block, verify that it has a single if statement or starts with if (..) continue;
         if (statementKind === ts.SyntaxKind.Block) {
-            var blockNode = <ts.Block> statement;
-            var blockStatements = blockNode.statements;
+            const blockNode = <ts.Block> statement;
+            const blockStatements = blockNode.statements;
             if (blockStatements.length >= 1) {
-                var firstBlockStatement = blockStatements[0];
+                const firstBlockStatement = blockStatements[0];
                 if (firstBlockStatement.kind === ts.SyntaxKind.IfStatement) {
                     // if this "if" statement is the only statement within the block
                     if (blockStatements.length === 1) {
@@ -50,29 +50,28 @@ class ForInWalker extends Lint.RuleWalker {
                     }
 
                     // if this "if" statement has a single continue block
-                    var ifStatement = (<ts.IfStatement> firstBlockStatement).thenStatement;
-                    if (this.nodeIsContinue(ifStatement)) {
+                    const ifStatement = (<ts.IfStatement> firstBlockStatement).thenStatement;
+                    if (ForInWalker.nodeIsContinue(ifStatement)) {
                         return;
                     }
                 }
             }
         }
 
-        var failure = this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING);
+        const failure = this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING);
         this.addFailure(failure);
     }
 
-    private nodeIsContinue(node: ts.Node): boolean {
-        var kind = node.kind;
+    private static nodeIsContinue(node: ts.Node) {
+        const kind = node.kind;
 
         if (kind === ts.SyntaxKind.ContinueStatement) {
             return true;
         }
 
         if (kind === ts.SyntaxKind.Block) {
-            var blockStatements = (<ts.Block>node).statements;
-            if (blockStatements.length === 1 &&
-                blockStatements[0].kind === ts.SyntaxKind.ContinueStatement) {
+            const blockStatements = (<ts.Block> node).statements;
+            if (blockStatements.length === 1 && blockStatements[0].kind === ts.SyntaxKind.ContinueStatement) {
                 return true;
             }
         }

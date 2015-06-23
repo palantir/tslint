@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 export class Rule extends Lint.Rules.AbstractRule {
     static FAILURE_STRING = "name must be in pascal case";
@@ -23,8 +23,8 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class NameWalker extends Lint.RuleWalker {
-    public visitClassDeclaration(node: ts.ClassDeclaration): void {
-        var className = node.name.getText();
+    public visitClassDeclaration(node: ts.ClassDeclaration) {
+        const className = node.name.getText();
         if (!this.isPascalCased(className)) {
             this.addFailureAt(node.name.getStart(), node.name.getWidth());
         }
@@ -32,8 +32,8 @@ class NameWalker extends Lint.RuleWalker {
         super.visitClassDeclaration(node);
     }
 
-    public visitInterfaceDeclaration(node: ts.InterfaceDeclaration): void {
-        var interfaceName = node.name.getText();
+    public visitInterfaceDeclaration(node: ts.InterfaceDeclaration) {
+        const interfaceName = node.name.getText();
         if (!this.isPascalCased(interfaceName)) {
             this.addFailureAt(node.name.getStart(), node.name.getWidth());
         }
@@ -46,13 +46,12 @@ class NameWalker extends Lint.RuleWalker {
             return true;
         }
 
-        var firstCharacter = name.charAt(0);
+        const firstCharacter = name.charAt(0);
         return ((firstCharacter === firstCharacter.toUpperCase()) && name.indexOf("_") === -1);
     }
 
     private addFailureAt(position: number, width: number) {
-        var failure = this.createFailure(position, width, Rule.FAILURE_STRING);
+        const failure = this.createFailure(position, width, Rule.FAILURE_STRING);
         this.addFailure(failure);
     }
-
 }

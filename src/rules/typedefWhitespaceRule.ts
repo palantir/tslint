@@ -39,11 +39,12 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
     }
 
     public visitIndexSignatureDeclaration(node: ts.IndexSignatureDeclaration) {
-        var indexParameter = node.parameters[0];
+        const indexParameter = node.parameters[0];
 
         if (indexParameter != null) {
             this.checkSpace("index-signature", indexParameter, indexParameter.type, indexParameter.name.getEnd());
         }
+
         super.visitIndexSignatureDeclaration(node);
     }
 
@@ -84,36 +85,36 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
 
     public checkSpace(option: string, node: ts.Node, typeNode: ts.TypeNode | ts.StringLiteral, positionBeforeColon: number) {
         if (this.hasOption(option) && typeNode != null && positionBeforeColon != null) {
-            var hasLeadingWhitespace: boolean;
-            var scanner = ts.createScanner(ts.ScriptTarget.ES5, false, node.getText());
+            const scanner = ts.createScanner(ts.ScriptTarget.ES5, false, node.getText());
+            let hasLeadingWhitespace: boolean;
 
             scanner.setTextPos(positionBeforeColon - node.getStart());
             hasLeadingWhitespace = scanner.scan() === ts.SyntaxKind.WhitespaceTrivia;
 
             if (hasLeadingWhitespace !== (this.getOption(option) === "space")) {
-                var message = "expected " + this.getOption(option) + " in " + option;
+                const message = "expected " + this.getOption(option) + " in " + option;
                 this.addFailure(this.createFailure(positionBeforeColon, 1, message));
             }
         }
     }
 
     public hasOption(option: string) {
-        var allOptions = this.getOptions();
+        const allOptions = this.getOptions();
         if (allOptions == null || allOptions.length === 0) {
             return false;
         }
 
-        var options = allOptions[0];
+        const options = allOptions[0];
         return options == null || options[option] != null;
     }
 
     private getOption(option: string) {
-        var allOptions = this.getOptions();
+        const allOptions = this.getOptions();
         if (allOptions == null || allOptions.length === 0) {
             return null;
         }
 
-        var options = allOptions[0];
+        const options = allOptions[0];
         return options[option];
     }
 }

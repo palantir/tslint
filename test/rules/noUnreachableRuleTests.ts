@@ -15,18 +15,19 @@
  */
 
 describe("<no-unreachable>", () => {
+    const NoUnreachableRule = Lint.Test.getRule("no-unreachable");
+    const fileName = "rules/nounreachable.test.ts";
+
     it("restricts the use of unreachable code statements", () => {
-        var fileName = "rules/nounreachable.test.ts";
-        var NoUnreachableRule = Lint.Test.getRule("no-unreachable");
-        var createFailure = Lint.Test.createFailuresOnFile(fileName, NoUnreachableRule.FAILURE_STRING);
-        var expectedFailures: Lint.RuleFailure[] = [
+        const createFailure = Lint.Test.createFailuresOnFile(fileName, NoUnreachableRule.FAILURE_STRING);
+        const expectedFailures: Lint.RuleFailure[] = [
             createFailure([6, 5], [6, 11]),
             createFailure([13, 9], [13, 15]),
             createFailure([25, 9], [25, 27]),
             createFailure([28, 9], [28, 15]),
             createFailure([88, 5], [88, 15])
         ];
-        var actualFailures = Lint.Test.applyRuleOnFile(fileName, NoUnreachableRule);
+        const actualFailures = Lint.Test.applyRuleOnFile(fileName, NoUnreachableRule);
 
         Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
     });

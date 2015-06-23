@@ -15,8 +15,8 @@
  */
 
 module Lint {
-    var path = require("path");
-    var moduleDirectory = path.dirname(module.filename);
+    const path = require("path");
+    const moduleDirectory = path.dirname(module.filename);
 
     export interface LintResult {
         failureCount: number;
@@ -45,40 +45,42 @@ module Lint {
         }
 
         public lint(): LintResult {
-            var failures: RuleFailure[] = [];
-            var sourceFile = Lint.getSourceFile(this.fileName, this.source);
+            const failures: RuleFailure[] = [];
+            const sourceFile = Lint.getSourceFile(this.fileName, this.source);
 
             // walk the code first to find all the intervals where rules are disabled
-            var rulesWalker = new EnableDisableRulesWalker(sourceFile, {ruleName: "", disabledIntervals: []});
+            const rulesWalker = new EnableDisableRulesWalker(sourceFile, {
+                disabledIntervals: [],
+                ruleName: ""
+            });
             rulesWalker.walk(sourceFile);
-            var enableDisableRuleMap = rulesWalker.enableDisableRuleMap;
+            const enableDisableRuleMap = rulesWalker.enableDisableRuleMap;
 
-            var rulesDirectory = this.getRelativePath(this.options.rulesDirectory);
-            var configuration = this.options.configuration.rules;
-            var configuredRules = Lint.loadRules(configuration, enableDisableRuleMap, rulesDirectory);
-            for (var i = 0; i < configuredRules.length; ++i) {
-                var rule = configuredRules[i];
+            const rulesDirectory = this.getRelativePath(this.options.rulesDirectory);
+            const configuration = this.options.configuration.rules;
+            const configuredRules = Lint.loadRules(configuration, enableDisableRuleMap, rulesDirectory);
+            for (let rule of configuredRules) {
                 if (rule.isEnabled()) {
-                    var ruleFailures = rule.apply(sourceFile);
-                    ruleFailures.forEach((ruleFailure) => {
+                    const ruleFailures = rule.apply(sourceFile);
+                    for (let ruleFailure of ruleFailures) {
                         if (!this.containsRule(failures, ruleFailure)) {
                             failures.push(ruleFailure);
                         }
-                    });
+                    }
                 }
             }
 
-            var formatter: Lint.IFormatter;
-            var formattersDirectory = this.getRelativePath(this.options.formattersDirectory);
+            let formatter: Lint.IFormatter;
+            const formattersDirectory = this.getRelativePath(this.options.formattersDirectory);
 
-            var Formatter = Lint.findFormatter(this.options.formatter, formattersDirectory);
+            const Formatter = Lint.findFormatter(this.options.formatter, formattersDirectory);
             if (Formatter) {
                 formatter = new Formatter();
             } else {
                 throw new Error("formatter '" + this.options.formatter + "' not found");
             }
 
-            var output = formatter.format(failures);
+            const output = formatter.format(failures);
             return {
                 failureCount: failures.length,
                 format: this.options.formatter,
@@ -95,13 +97,7 @@ module Lint {
         }
 
         private containsRule(rules: RuleFailure[], rule: RuleFailure) {
-            for (var i = 0; i < rules.length; ++i) {
-                if (rules[i].equals(rule)) {
-                    return true;
-                }
-            }
-
-            return false;
+            return rules.some((r) => r.equals(rule));
         }
     }
 }

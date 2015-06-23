@@ -44,27 +44,9 @@ module Lint {
             return this.failures;
         }
 
-        /*
-        public getPosition() {
-            return this.position;
-        }
-        */
-
         public getLimit() {
             return this.limit;
         }
-
-        /*
-        public positionAfter(...nodes: ts.Node[]): number {
-            var position = this.getPosition();
-            nodes.forEach((node) => {
-                if (node !== null) {
-                    position += node.getFullWidth();
-                }
-            });
-            return position;
-        }
-        */
 
         public getOptions(): any {
             return this.options;
@@ -82,29 +64,21 @@ module Lint {
             this.position += node.getFullWidth();
         }
 
-        // create a failure at the given position
-        public createFailure(start: number, width: number, failure: string): Lint.RuleFailure {
-            var from = (start > this.limit) ? this.limit : start;
-            var to = ((start + width) > this.limit) ? this.limit : (start + width);
-
+        public createFailure(start: number, width: number, failure: string): RuleFailure {
+            const from = (start > this.limit) ? this.limit : start;
+            const to = ((start + width) > this.limit) ? this.limit : (start + width);
             return new Lint.RuleFailure(this.sourceFile, from, to, failure, this.ruleName);
         }
 
         public addFailure(failure: RuleFailure) {
-            if (!this.existsFailure(failure)) {
-                // don't add failures for a rule if the failure intersects an interval where that rule is disabled
-                if (!Lint.doesIntersect(failure, this.disabledIntervals)) {
-                    this.failures.push(failure);
-                }
+            // don't add failures for a rule if the failure intersects an interval where that rule is disabled
+            if (!this.existsFailure(failure) && !Lint.doesIntersect(failure, this.disabledIntervals)) {
+                this.failures.push(failure);
             }
         }
 
         private existsFailure(failure: RuleFailure) {
-            var filteredFailures = this.failures.filter(function(f) {
-                return f.equals(failure);
-            });
-
-            return (filteredFailures.length > 0);
+            return this.failures.some((f) => f.equals(failure));
         }
     }
 

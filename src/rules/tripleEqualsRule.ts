@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-var OPTION_ALLOW_NULL_CHECK = "allow-null-check";
+const OPTION_ALLOW_NULL_CHECK = "allow-null-check";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static EQ_FAILURE_STRING = "== should be ===";
     public static NEQ_FAILURE_STRING = "!= should be !==";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        var comparisonWalker = new ComparisonWalker(sourceFile, this.getOptions());
+        const comparisonWalker = new ComparisonWalker(sourceFile, this.getOptions());
         return this.applyWithWalker(comparisonWalker);
     }
 }
@@ -31,7 +31,7 @@ class ComparisonWalker extends Lint.RuleWalker {
 
     public visitBinaryExpression(node: ts.BinaryExpression) {
         if (!this.isExpressionAllowed(node)) {
-            var position = node.getChildAt(1).getStart();
+            const position = node.getChildAt(1).getStart();
             this.handleOperatorToken(position, node.operatorToken.kind);
         }
         super.visitBinaryExpression(node);
@@ -49,9 +49,9 @@ class ComparisonWalker extends Lint.RuleWalker {
     }
 
     private isExpressionAllowed(node: ts.BinaryExpression): boolean {
-        var nullKeyword = ts.SyntaxKind.NullKeyword;
+        const nullKeyword = ts.SyntaxKind.NullKeyword;
 
-        return this.hasOption(OPTION_ALLOW_NULL_CHECK) &&
-                (node.left.kind ===  nullKeyword || node.right.kind === nullKeyword);
+        return this.hasOption(OPTION_ALLOW_NULL_CHECK)
+            && (node.left.kind ===  nullKeyword || node.right.kind === nullKeyword);
     }
 }

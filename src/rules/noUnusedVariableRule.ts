@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-var OPTION_CHECK_PARAMETERS = "check-parameters";
+const OPTION_CHECK_PARAMETERS = "check-parameters";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "unused variable: ";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        var documentRegistry = ts.createDocumentRegistry();
-        var languageServiceHost = Lint.createLanguageServiceHost("file.ts", sourceFile.getFullText());
-        var languageService = ts.createLanguageService(languageServiceHost, documentRegistry);
+        const documentRegistry = ts.createDocumentRegistry();
+        const languageServiceHost = Lint.createLanguageServiceHost("file.ts", sourceFile.getFullText());
+        const languageService = ts.createLanguageService(languageServiceHost, documentRegistry);
 
         return this.applyWithWalker(new NoUnusedVariablesWalker(sourceFile, this.getOptions(), languageService));
     }
@@ -42,23 +42,23 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     }
 
     public visitBindingElement(node: ts.BindingElement) {
-        var isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
+        const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
 
         if (isSingleVariable && !this.skipBindingElement) {
-            var variableIdentifier = <ts.Identifier> node.name;
+            const variableIdentifier = <ts.Identifier> node.name;
             this.validateReferencesForVariable(variableIdentifier.text, variableIdentifier.getStart());
         }
 
         super.visitBindingElement(node);
     }
 
-    public visitImportDeclaration(node: ts.ImportDeclaration): void {
+    public visitImportDeclaration(node: ts.ImportDeclaration) {
         if (!Lint.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword)) {
-            var importClause = node.importClause;
+            const importClause = node.importClause;
 
             // named imports & namespace imports handled by other walker methods
             if (importClause.name != null) {
-                var variableIdentifier = importClause.name;
+                const variableIdentifier = importClause.name;
                 this.validateReferencesForVariable(variableIdentifier.text, variableIdentifier.getStart());
             }
         }
@@ -66,37 +66,37 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         super.visitImportDeclaration(node);
     }
 
-    public visitImportEqualsDeclaration(node: ts.ImportEqualsDeclaration): void {
+    public visitImportEqualsDeclaration(node: ts.ImportEqualsDeclaration) {
         if (!Lint.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword)) {
-            var name = node.name;
+            const name = node.name;
             this.validateReferencesForVariable(name.text, name.getStart());
         }
         super.visitImportEqualsDeclaration(node);
     }
 
-    public visitCatchClause(node: ts.CatchClause): void {
+    public visitCatchClause(node: ts.CatchClause) {
         // don't visit the catch clause variable declaration, just visit the block
         // the catch clause variable declaration needs to be there but doesn't need to be used
         this.visitBlock(node.block);
     }
 
-    public visitNamedImports(node: ts.NamedImports): void {
+    public visitNamedImports(node: ts.NamedImports) {
         node.elements.forEach((namedImport: ts.ImportSpecifier) => {
             this.validateReferencesForVariable(namedImport.name.text, namedImport.name.getStart());
         });
         super.visitNamedImports(node);
     }
 
-    public visitNamespaceImport(node: ts.NamespaceImport): void {
+    public visitNamespaceImport(node: ts.NamespaceImport) {
         this.validateReferencesForVariable(node.name.text, node.name.getStart());
         super.visitNamespaceImport(node);
     }
 
-    public visitVariableDeclaration(node: ts.VariableDeclaration): void {
-        var isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
+    public visitVariableDeclaration(node: ts.VariableDeclaration) {
+        const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
 
         if (isSingleVariable && !this.skipVariableDeclaration) {
-            var variableIdentifier = <ts.Identifier> node.name;
+            const variableIdentifier = <ts.Identifier> node.name;
             this.validateReferencesForVariable(variableIdentifier.text, variableIdentifier.getStart());
         }
 
@@ -104,21 +104,21 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     }
 
     // skip parameters in interfaces
-    public visitInterfaceDeclaration(node: ts.InterfaceDeclaration): void {
+    public visitInterfaceDeclaration(node: ts.InterfaceDeclaration) {
         this.skipParameterDeclaration = true;
         super.visitInterfaceDeclaration(node);
         this.skipParameterDeclaration = false;
     }
 
     // skip parameters in index signatures (stuff like [key: string]: string)
-    public visitIndexSignatureDeclaration(node: ts.IndexSignatureDeclaration): void {
+    public visitIndexSignatureDeclaration(node: ts.IndexSignatureDeclaration) {
         this.skipParameterDeclaration = true;
         super.visitIndexSignatureDeclaration(node);
         this.skipParameterDeclaration = false;
     }
 
     // skip exported and declared variables
-    public visitVariableStatement(node: ts.VariableStatement): void {
+    public visitVariableStatement(node: ts.VariableStatement) {
         if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword, ts.SyntaxKind.DeclareKeyword)) {
             this.skipBindingElement = true;
             this.skipVariableDeclaration = true;
@@ -129,15 +129,15 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         this.skipVariableDeclaration = false;
     }
 
-    public visitFunctionType(node: ts.Node): void {
+    public visitFunctionType(node: ts.Node) {
         this.skipParameterDeclaration = true;
         super.visitFunctionType(node);
         this.skipParameterDeclaration = false;
     }
 
     // skip exported and declared functions
-    public visitFunctionDeclaration(node: ts.FunctionDeclaration): void {
-        var variableName = node.name.text;
+    public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
+        const variableName = node.name.text;
 
         if (!Lint.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword, ts.SyntaxKind.DeclareKeyword)) {
             this.validateReferencesForVariable(variableName, node.name.getStart());
@@ -146,12 +146,12 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         super.visitFunctionDeclaration(node);
     }
 
-    public visitParameterDeclaration(node: ts.ParameterDeclaration): void {
-        var isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
-        var isPropertyParameter = Lint.hasModifier(node.modifiers,
-                                                   ts.SyntaxKind.PublicKeyword,
-                                                   ts.SyntaxKind.PrivateKeyword,
-                                                   ts.SyntaxKind.ProtectedKeyword);
+    public visitParameterDeclaration(node: ts.ParameterDeclaration) {
+        const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
+        const isPropertyParameter = Lint.hasModifier(node.modifiers,
+                                                     ts.SyntaxKind.PublicKeyword,
+                                                     ts.SyntaxKind.PrivateKeyword,
+                                                     ts.SyntaxKind.ProtectedKeyword);
 
         if (!isSingleVariable && isPropertyParameter) {
             // tsc error: a parameter property may not be a binding pattern
@@ -162,7 +162,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
             && isSingleVariable
             && !this.skipParameterDeclaration
             && !Lint.hasModifier(node.modifiers, ts.SyntaxKind.PublicKeyword)) {
-            var nameNode = <ts.Identifier> node.name;
+            const nameNode = <ts.Identifier> node.name;
             this.validateReferencesForVariable(nameNode.text, node.name.getStart());
         }
 
@@ -171,10 +171,10 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     }
 
     // check private member variables
-    public visitPropertyDeclaration(node: ts.PropertyDeclaration): void {
+    public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
         if (node.name != null && node.name.kind === ts.SyntaxKind.Identifier) {
-            var modifiers = node.modifiers;
-            var variableName = (<ts.Identifier> node.name).text;
+            const modifiers = node.modifiers;
+            const variableName = (<ts.Identifier> node.name).text;
 
             // check only if an explicit 'private' modifier is specified
             if (Lint.hasModifier(modifiers, ts.SyntaxKind.PrivateKeyword)) {
@@ -186,10 +186,10 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     }
 
     // check private member functions
-    public visitMethodDeclaration(node: ts.MethodDeclaration): void {
+    public visitMethodDeclaration(node: ts.MethodDeclaration) {
         if (node.name != null && node.name.kind === ts.SyntaxKind.Identifier) {
-            var modifiers = node.modifiers;
-            var variableName = (<ts.Identifier> node.name).text;
+            const modifiers = node.modifiers;
+            const variableName = (<ts.Identifier> node.name).text;
 
             if (Lint.hasModifier(modifiers, ts.SyntaxKind.PrivateKeyword)) {
                 this.validateReferencesForVariable(variableName, node.name.getStart());
@@ -200,7 +200,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     }
 
     private validateReferencesForVariable(name: string, position: number) {
-        var highlights = this.languageService.getDocumentHighlights("file.ts", position, ["file.ts"]);
+        const highlights = this.languageService.getDocumentHighlights("file.ts", position, ["file.ts"]);
         if (highlights[0].highlightSpans.length <= 1) {
             this.addFailure(this.createFailure(position, name.length, `${Rule.FAILURE_STRING}'${name}'`));
         }

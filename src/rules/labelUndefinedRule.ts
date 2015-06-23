@@ -27,30 +27,30 @@ class LabelUndefinedWalker extends Lint.ScopeAwareRuleWalker<{[key: string]: any
         return {};
     }
 
-    public visitLabeledStatement(node: ts.LabeledStatement): void {
-        var label = node.label.text;
-        var currentScope = this.getCurrentScope();
+    public visitLabeledStatement(node: ts.LabeledStatement) {
+        const label = node.label.text;
+        const currentScope = this.getCurrentScope();
 
         currentScope[label] = true;
         super.visitLabeledStatement(node);
     }
 
-    public visitBreakStatement(node: ts.BreakOrContinueStatement): void {
+    public visitBreakStatement(node: ts.BreakOrContinueStatement) {
         this.validateLabelAt(node.label, node.getStart(), node.getChildAt(0).getWidth());
         super.visitBreakStatement(node);
     }
 
-    public visitContinueStatement(node: ts.BreakOrContinueStatement): void {
+    public visitContinueStatement(node: ts.BreakOrContinueStatement) {
         this.validateLabelAt(node.label, node.getStart(), node.getChildAt(0).getWidth());
         super.visitContinueStatement(node);
     }
 
-    private validateLabelAt(label: ts.Identifier, position: number, width: number): void {
-        var currentScope = this.getCurrentScope();
+    private validateLabelAt(label: ts.Identifier, position: number, width: number) {
+        const currentScope = this.getCurrentScope();
 
         if (label != null && !currentScope[label.text]) {
-            var failureString = Rule.FAILURE_STRING + label.text + "'";
-            var failure = this.createFailure(position, width, failureString);
+            const failureString = Rule.FAILURE_STRING + label.text + "'";
+            const failure = this.createFailure(position, width, failureString);
             this.addFailure(failure);
         }
     }
