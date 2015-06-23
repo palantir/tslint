@@ -22,9 +22,11 @@ describe("<no-any>", () => {
     const createFailure = Lint.Test.createFailuresOnFile(fileName, NoAnyRule.FAILURE_STRING);
 
     it("disallows variables with type 'any'", () => {
-        let expectedFailures = [createFailure([1, 8], [1, 11]),
-                                createFailure([7, 8], [7, 11]),
-                                createFailure([8, 8], [8, 11])];
+        const expectedFailures = [
+            createFailure([1, 8], [1, 11]),
+            createFailure([7, 8], [7, 11]),
+            createFailure([8, 8], [8, 11])
+        ];
 
         for (let failure of expectedFailures) {
             Lint.Test.assertContainsFailure(actualFailures, failure);
@@ -32,17 +34,17 @@ describe("<no-any>", () => {
     });
 
     it("disallows functions with parameter type 'any'", () => {
-        let expectedFailure = createFailure([3, 17], [3, 20]);
+        const expectedFailure = createFailure([3, 17], [3, 20]);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 
     it("disallows functions with return type 'any'", () => {
-        let expectedFailure = createFailure([3, 24], [3, 27]);
+        const expectedFailure = createFailure([3, 24], [3, 27]);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 
     it("catches destructuring bindings with member types of 'any'", () => {
-        let expectedFailure = createFailure([10, 23], [10, 26]);
+        const expectedFailure = createFailure([10, 23], [10, 26]);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 
