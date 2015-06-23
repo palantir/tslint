@@ -21,7 +21,7 @@ module Lint {
         const normalizedName = path.normalize(fileName).replace(/\\/g, "/");
         const compilerOptions = createCompilerOptions();
 
-        const compilerHost = {
+        const compilerHost: ts.CompilerHost = {
             getCanonicalFileName: (filename: string) => filename,
             getCurrentDirectory: () => "",
             getDefaultLibFileName: () => "lib.d.ts",
@@ -95,6 +95,19 @@ module Lint {
 
         return isNodeFlagSet(parentNode, ts.NodeFlags.Let)
             || isNodeFlagSet(parentNode, ts.NodeFlags.Const);
+    }
+
+    export function isBlockScopedBindingElement(node: ts.BindingElement): boolean {
+        let currentParent = node.parent;
+        while (currentParent.kind !== ts.SyntaxKind.VariableDeclaration) {
+            if (currentParent.parent == null) {
+                // if we didn't encounter a VariableDeclaration, this must be a function parameter, which is block scoped
+                return true;
+            } else {
+                currentParent = currentParent.parent;
+            }
+        }
+        return isBlockScopedVariable(<ts.VariableDeclaration> currentParent);
     }
 
     /**

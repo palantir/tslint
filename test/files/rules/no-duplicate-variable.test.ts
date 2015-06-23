@@ -151,4 +151,9 @@ function testDestructuring() {
 
     var [a2, [b2, c2]] = [1, [2, 3]];
     var [{a2, d2}] = [{a2: 1, d2: 4}]; // failure
+
+    function myFunc2([a, b]) {
+        var a; // not a failure; caught by no-shadowed-variable
+        return b;
+    }
 }
