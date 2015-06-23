@@ -20,7 +20,7 @@ describe("External Formatter", () => {
     let sourceFile: ts.SourceFile;
     let formatter: Lint.IFormatter;
 
-    before(function() {
+    before(() => {
         const Formatter = Lint.Test.getFormatter(TEST_MODULE);
         sourceFile = Lint.Test.getSourceFile(TEST_FILE);
         formatter = new Formatter();

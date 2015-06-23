@@ -19,7 +19,7 @@ describe("JSON Formatter", () => {
     let sourceFile: ts.SourceFile;
     let formatter: Lint.IFormatter;
 
-    before(function() {
+    before(() => {
         const Formatter = Lint.Test.getFormatter("json");
         sourceFile = Lint.Test.getSourceFile(TEST_FILE);
         formatter = new Formatter();

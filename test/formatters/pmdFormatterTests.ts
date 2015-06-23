@@ -12,14 +12,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 describe("PMD Formatter", () => {
     const TEST_FILE = "formatters/pmdFormatter.test.ts";
     let sourceFile: ts.SourceFile;
     let formatter: Lint.IFormatter;
 
-    before(function() {
+    before(() => {
         const Formatter = Lint.Test.getFormatter("pmd");
         sourceFile = Lint.Test.getSourceFile(TEST_FILE);
         formatter = new Formatter();

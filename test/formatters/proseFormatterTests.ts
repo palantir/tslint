@@ -12,14 +12,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 describe("Prose Formatter", () => {
     const TEST_FILE = "formatters/proseFormatter.test.ts";
     let sourceFile: ts.SourceFile;
     let formatter: Lint.IFormatter;
 
-    before(function() {
+    before(() => {
         const Formatter = Lint.Test.getFormatter("prose");
         sourceFile = Lint.Test.getSourceFile(TEST_FILE);
         formatter = new Formatter();
