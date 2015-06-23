@@ -180,7 +180,8 @@ declare module Lint {
     function abstract(): string;
     function scanAllTokens(scanner: ts.Scanner, callback: (scanner: ts.Scanner) => void): void;
     function hasModifier(modifiers: ts.ModifiersArray, ...modifierKinds: ts.SyntaxKind[]): boolean;
-    function isBlockScopedVariable(node: ts.VariableDeclaration): boolean;
+    function isBlockScopedVariable(node: ts.VariableDeclaration | ts.VariableStatement): boolean;
+    function isBlockScopedBindingElement(node: ts.BindingElement): boolean;
 }
 declare module Lint {
     class BlockScopeAwareRuleWalker<T, U> extends ScopeAwareRuleWalker<T> {

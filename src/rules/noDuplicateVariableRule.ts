@@ -34,7 +34,7 @@ class NoDuplicateVariableWalker extends Lint.BlockScopeAwareRuleWalker<{}, Scope
     public visitBindingElement(node: ts.BindingElement) {
         // TODO: handle node.dotdotToken?
         const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
-        const isBlockScoped = Lint.isBlockScopedVariable(<ts.VariableDeclaration> node.parent.parent);
+        const isBlockScoped = Lint.isBlockScopedBindingElement(node);
 
         if (isSingleVariable && !isBlockScoped) {
             this.handleSingleVariableIdentifier(<ts.Identifier> node.name);
@@ -83,7 +83,6 @@ class NoDuplicateVariableWalker extends Lint.BlockScopeAwareRuleWalker<{}, Scope
         const failureString = `${Rule.FAILURE_STRING}${ident.text}'`;
         this.addFailure(this.createFailure(ident.getStart(), ident.getWidth(), failureString));
     }
-
 }
 
 class ScopeInfo {

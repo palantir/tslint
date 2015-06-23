@@ -21,7 +21,7 @@ module Lint {
         const normalizedName = path.normalize(fileName).replace(/\\/g, "/");
         const compilerOptions = createCompilerOptions();
 
-        const compilerHost = {
+        const compilerHost: ts.CompilerHost = {
             getCanonicalFileName: (filename: string) => filename,
             getCurrentDirectory: () => "",
             getDefaultLibFileName: () => "lib.d.ts",
@@ -84,10 +84,38 @@ module Lint {
         });
     }
 
-    export function isBlockScopedVariable(node: ts.VariableDeclaration): boolean {
-        // determine if the appropriate bit in the parent (VariableDeclarationList) is set,
-        // which indicates this is a "let" or "const"
-        return (Math.floor(node.parent.flags / ts.NodeFlags.Let) % 2) === 1
-            || (Math.floor(node.parent.flags / ts.NodeFlags.Const) % 2) === 1;
+    /**
+     * Determines if the appropriate bit in the parent (VariableDeclarationList) is set,
+     * which indicates this is a "let" or "const".
+     */
+    export function isBlockScopedVariable(node: ts.VariableDeclaration | ts.VariableStatement): boolean {
+        const parentNode = (node.kind === ts.SyntaxKind.VariableDeclaration)
+            ? (<ts.VariableDeclaration> node).parent
+            : (<ts.VariableStatement> node).declarationList;
+
+        return isNodeFlagSet(parentNode, ts.NodeFlags.Let)
+            || isNodeFlagSet(parentNode, ts.NodeFlags.Const);
+    }
+
+    export function isBlockScopedBindingElement(node: ts.BindingElement): boolean {
+        let currentParent = node.parent;
+        while (currentParent.kind !== ts.SyntaxKind.VariableDeclaration) {
+            if (currentParent.parent == null) {
+                // if we didn't encounter a VariableDeclaration, this must be a function parameter, which is block scoped
+                return true;
+            } else {
+                currentParent = currentParent.parent;
+            }
+        }
+        return isBlockScopedVariable(<ts.VariableDeclaration> currentParent);
+    }
+
+    /**
+     * Bitwise check for node flags.
+     */
+    function isNodeFlagSet(node: ts.Node, flagToCheck: ts.NodeFlags): boolean {
+        /* tslint:disable:no-bitwise */
+        return (node.flags & flagToCheck) !== 0;
+        /* tslint:enable:no-bitwise */
     }
 }
