@@ -15,14 +15,39 @@
  */
 
 describe("<no-any>", () => {
+    const fileName = "rules/noany.test.ts";
     const NoAnyRule = Lint.Test.getRule("no-any");
-    const fileName = "rules/noAny.test.ts";
+    const actualFailures = Lint.Test.applyRuleOnFile(fileName, NoAnyRule);
 
-    it("const declaration with type of 'any' should not be allowed", () => {
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, NoAnyRule);
-        const expectedFailure = Lint.Test.createFailure(fileName, [1, 8], [1, 11], "type decoration of 'any' is forbidden");
+    const createFailure = Lint.Test.createFailuresOnFile(fileName, NoAnyRule.FAILURE_STRING);
 
+    it("disallows variables with type 'any'", () => {
+        let expectedFailures = [createFailure([1, 8], [1, 11]),
+                                createFailure([7, 8], [7, 11]),
+                                createFailure([8, 8], [8, 11])];
+
+        for (let failure of expectedFailures) {
+            Lint.Test.assertContainsFailure(actualFailures, failure);
+        }
+    });
+
+    it("disallows functions with parameter type 'any'", () => {
+        let expectedFailure = createFailure([3, 17], [3, 20]);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
+    });
+
+    it("disallows functions with return type 'any'", () => {
+        let expectedFailure = createFailure([3, 24], [3, 27]);
+        Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
+    });
+
+    it("catches destructuring bindings with member types of 'any'", () => {
+        let expectedFailure = createFailure([10, 23], [10, 26]);
+        Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
+    });
+
+    it("finds the expected number of errors", () => {
+       assert.equal(actualFailures.length, 6);
     });
 
 });
