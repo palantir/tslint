@@ -26,12 +26,12 @@ Please first ensure that the TypeScript source files compile correctly.
 
 ##### CLI
 
-  usage: `tslint`
+  usage: `tslint -cforst [file ...]`
 
   Options:
 
     -c, --config              configuration file
-    -f, --file                file to lint                  [required]
+    -f, --file                file to lint
     -o, --out                 output file
     -r, --rules-dir           rules directory
     -s, --formatters-dir      formatters directory
@@ -42,8 +42,9 @@ By default, configuration is loaded from `tslint.json`, if it exists in the curr
 tslint accepts the following commandline options:
 
     -f, --file:
-        The location of the TypeScript file that you wish to lint. This
-        option is required. Muliptle files are processed consecutively.
+        The location of the TypeScript file that you wish to lint. Multiple
+        files are processed consecutively. Files can also be tacked on to the
+        end of the command.
 
     -c, --config:
         The location of the configuration file that tslint will use to

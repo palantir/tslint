@@ -12,35 +12,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+num_failures=0
+
+expectOut () {
+  actual=$1
+  expect=$2
+  msg=$3
+
+  if [ $expect != $actual ]
+  then
+    echo "$msg: expected $expect got $actual"
+    num_failures=$(expr $num_failures + 1)
+  fi
+}
+
 echo "Checking tslint binary"
 # make sure calling tslint with no args exits correctly.
 ./bin/tslint
-out=$?
-if [ $out != 1 ]
-then
-  echo "tslint with no args did not exit with a 1, got $out"
-  exit 1
-fi
-
-
+expectOut $? 1  "tslint with no args did not exit correctly"
 
 # make sure calling tslint with a good file exits correctly.
 ./bin/tslint -f src/configuration.ts
-out=$?
-if [ $out != 0 ]
-then
-  echo "tslint with a good file did not exit with a 0, got $out"
-  exit 1
-fi
-
+expectOut $? 0 "tslint with a good file did not exit correctly"
 
 # make sure calling tslint with a bad file exits correctly
 ./bin/tslint -f test/files/rules/ban.test.ts -c tslint.json
-out=$?
-if [ $out != 2 ]
-then
-  echo "tslint with a bad file did not exit with a 2, got $out"
-  exit 1
-fi
+expectOut "tslint with a bad file did not exit correctly"
 
-echo "Done!"
+# make sure calling tslint without the -f flag exits correctly
+./bin/tslint src/configuration.ts src/formatterLoader.ts
+expectOut $? 0 "tslint with no -f flag did not exit correctly"
+
+if [ $num_failures != 0 ]
+then
+  echo "Failed $num_failures tests"
+  exit 1
+else
+  echo "Done!"
+  exit 0
+fi

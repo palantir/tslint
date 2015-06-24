@@ -22,8 +22,8 @@ const fs = require("fs");
 const optimist = require("optimist")
     .usage("usage: $0")
     .check((argv: any) => {
-        // at least one of file or help or version must be present
-        if (!(argv.f || argv.h || argv.v)) {
+        // at least one of file, help, version or unqualified argument must be present
+        if (!(argv.f || argv.h || argv.v || argv._.length > 0)) {
             throw "Missing required arguments: f";
         }
     })
@@ -175,14 +175,14 @@ const processFile = (file: string) => {
     }
 };
 
-const fileOrFiles = argv.f;
+let files = [];
+if (argv.f instanceof Array) {
+    files = files.concat(argv.f);
+} else if (typeof argv.f === "string") {
+    files.push(argv.f);
+}
+files = files.concat(argv._);
 
-if (typeof fileOrFiles === "string") {
-    processFile(fileOrFiles);
-} else {
-    for (const ix in fileOrFiles) {
-        if (fileOrFiles.hasOwnProperty(ix)) {
-            processFile(fileOrFiles[ix]);
-        }
-    }
+for (const file of files) {
+        processFile(file);
 }
