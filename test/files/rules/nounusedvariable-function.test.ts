@@ -15,3 +15,7 @@ export function func4() {
 }
 
 declare function func5(): any;
+
+export default function () {
+    return 0;
+}
