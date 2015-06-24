@@ -258,3 +258,6 @@ declare module Lint {
         private containsRule(rules, rule);
     }
 }
+declare module "tslint" {
+    export = Lint;
+}
