@@ -183,6 +183,6 @@ if (argv.f instanceof Array) {
 }
 files = files.concat(argv._);
 
-for (const file of files) {
+for (let file of files) {
         processFile(file);
 }
