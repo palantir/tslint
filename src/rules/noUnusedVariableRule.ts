@@ -137,9 +137,8 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
 
     // skip exported and declared functions
     public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
-        const variableName = node.name.text;
-
         if (!Lint.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword, ts.SyntaxKind.DeclareKeyword)) {
+            const variableName = node.name.text;
             this.validateReferencesForVariable(variableName, node.name.getStart());
         }
 
