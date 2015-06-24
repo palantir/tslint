@@ -110,3 +110,7 @@ global.ts = ts;
 module.exports = Lint.Linter;
 // also export Lint.Configuration.findConfiguration so implementers can consume
 module.exports.findConfiguration = Lint.Configuration.findConfiguration;
+
+declare module "tslint" {
+    export = Lint;
+}
