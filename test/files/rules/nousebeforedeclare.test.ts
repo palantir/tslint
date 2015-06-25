@@ -42,3 +42,4 @@ import { default as foo1 } from "lib";
 import foo2 from "lib";
 import _, { map, foldl } from "underscore";
 import * as foo3 from "lib";
+import "lib";

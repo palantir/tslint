@@ -56,8 +56,9 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         if (!Lint.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword)) {
             const importClause = node.importClause;
 
-            // named imports & namespace imports handled by other walker methods
-            if (importClause.name != null) {
+            // Named imports & namespace imports handled by other walker methods.
+            // importClause will be null for bare imports.
+            if (importClause != null && importClause.name != null) {
                 const variableIdentifier = importClause.name;
                 this.validateReferencesForVariable(variableIdentifier.text, variableIdentifier.getStart());
             }
