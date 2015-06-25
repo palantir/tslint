@@ -43,7 +43,7 @@ tslint accepts the following commandline options:
 
     -f, --file:
         The location of the TypeScript file that you wish to lint. This
-        option is required. Muliptle files are processed consecutively.
+        option is required. Multiple files are processed consecutively.
 
     -c, --config:
         The location of the configuration file that tslint will use to
