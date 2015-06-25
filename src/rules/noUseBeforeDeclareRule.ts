@@ -42,14 +42,13 @@ class NoUseBeforeDeclareWalker extends Lint.ScopeAwareRuleWalker<VisitedVariable
     }
 
     public visitImportDeclaration(node: ts.ImportDeclaration) {
-        if (node.importClause != null) {
-            const importClause = node.importClause;
+        const importClause = node.importClause;
 
-            // named imports & namespace imports handled by other walker methods
-            if (importClause.name != null) {
-                const variableIdentifier = importClause.name;
-                this.validateUsageForVariable(variableIdentifier.text, variableIdentifier.getStart());
-            }
+        // named imports & namespace imports handled by other walker methods
+        // importClause will be null for bare imports
+        if (importClause != null && importClause.name != null) {
+            const variableIdentifier = importClause.name;
+            this.validateUsageForVariable(variableIdentifier.text, variableIdentifier.getStart());
         }
 
         super.visitImportDeclaration(node);

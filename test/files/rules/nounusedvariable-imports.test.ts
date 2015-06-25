@@ -22,3 +22,5 @@ import defaultExport, { namedExport } from "libD"; // failure on 'defaultExport'
 bar.someFunc();
 baz();
 namedExport();
+
+import "jquery";
