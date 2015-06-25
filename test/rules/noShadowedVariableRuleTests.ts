@@ -34,10 +34,15 @@ describe("<no-shadowed-variable>", () => {
             Lint.Test.createFailure(fileName, [47, 9], [47, 10], NoShadowedVariableRule.FAILURE_STRING + "j'"),
             Lint.Test.createFailure(fileName, [59, 13], [59, 16], NoShadowedVariableRule.FAILURE_STRING + "bar'"),
             Lint.Test.createFailure(fileName, [67, 13], [67, 16], NoShadowedVariableRule.FAILURE_STRING + "foo'"),
-            Lint.Test.createFailure(fileName, [75, 13], [75, 16], NoShadowedVariableRule.FAILURE_STRING + "foo'")
+            Lint.Test.createFailure(fileName, [75, 13], [75, 16], NoShadowedVariableRule.FAILURE_STRING + "foo'"),
+            Lint.Test.createFailure(fileName, [88, 14], [88, 15], NoShadowedVariableRule.FAILURE_STRING + "x'"),
+            Lint.Test.createFailure(fileName, [89, 14], [89, 15], NoShadowedVariableRule.FAILURE_STRING + "y'"),
+            Lint.Test.createFailure(fileName, [90, 16], [90, 17], NoShadowedVariableRule.FAILURE_STRING + "z'"),
+            Lint.Test.createFailure(fileName, [94, 15], [94, 16], NoShadowedVariableRule.FAILURE_STRING + "x'"),
+            Lint.Test.createFailure(fileName, [95, 15], [95, 16], NoShadowedVariableRule.FAILURE_STRING + "y'")
         ];
-
         const actualFailures = Lint.Test.applyRuleOnFile(fileName, NoShadowedVariableRule);
+
         Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
     });
 });
