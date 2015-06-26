@@ -1,5 +1,16 @@
 Change Log
 ===
+
+v2.3.1-beta
+---
+* [bugs] #137 #434 #451 #456
+* [new-rule] `no-require-imports` disallows `require()` style imports
+* [new-rule] `no-shadowed-variable` moves over shadowed variable checking from `no-duplicate-variable` into its own rule
+* **BREAKING**
+	* `no-duplicate-variable` now only checks for duplicates within the same block scope; enable `no-shadowed-variable` to get duplicate-variable checking across block scopes
+* [enhancement] `no-duplicate-variable`, `no-shadowed-variable`, and `no-use-before-declare` now support ES6 destructuring
+* [enhancement] tslint CLI now uses a default configuration if no config file is found
+
 v2.3.0-beta
 ---
 * [bugs] #401 #367 #324 #352
@@ -9,7 +20,6 @@ v2.3.0-beta
 * Add support for ES6 for-of and spread operator syntax
 * Use tsconfig.json & JSCS in the build system
 
-===
 v2.2.0-beta
 ---
 * Upgraded Typescript compiler to 1.5
@@ -23,7 +33,6 @@ v2.2.0-beta
 * [feature] `no-duplicate-variable` rule now additionally checks if function parameters have been shadowed
 * Additional fixes to existing rules to work as before with the typescript 1.5 compiler
 
-===
 v2.1.1
 ---
 * [bugs] #292 #293 #295 #301 #302
@@ -33,7 +42,7 @@ v2.1.1
 v2.1.0
 ---
 * Fix crash on Windows
----
+
 v2.0.1
 ---
 * Upgraded Typescript compiler to 1.4
@@ -59,7 +68,6 @@ v1.0.1
 
 v1.0.0
 ---
-
 * upgrade TypeScript compiler to 1.3
 * **BREAKING CHANGES**
 	* all error messages now start with a lower-case character and do not end with a period
@@ -69,31 +77,26 @@ v1.0.0
 
 v0.4.12
 ---
-
 * multiple files with -f on cli
 * config file search starts with input file
 
 v0.4.11
 ---
-
 * [bugs] #136, #163
 * internal refactors
 
 v0.4.10
 ---
-
 * [bugs] #138, #145, #146, #148
 
 v0.4.9
 ---
-
 * [new-rule] `no-any` disallows all uses of `any`
-* [bug] /* tslint:disable */ now disables semicolon rule as well
+* [bug] `/* tslint:disable */` now disables semicolon rule as well
 * [bug] delete operator no longer results in a false positive for `no-unused-expression`
 
 v0.4.8
 ---
-
 * [new-rule] `no-var-requires` disallows require statements not part of an import statement
 * [new-rule] `typedef` rule also checks for member variables
 * [bug] `no-unused-variable` no longer triggers false positives for class members labeled only `static`
@@ -103,7 +106,6 @@ v0.4.8
 
 v0.4.7
 ---
-
 * [new-rule] added `no-unused-expression` rule which disallows unused expression statements
 * [feature] the `check-operator` option for the `whitespace` rule now checks whitespace around the => token
 * [bug] `no-use-before-declare-rule` no longer triggers false positives for member variables of classes used before the class is declared
@@ -133,7 +135,6 @@ v0.4.4
 
 v0.4.3
 ---
-
 * [new-rule] `no-unused-variable`
 * [new-rule] `no-trailing-comma`
 * [new-rule] `no-use-before-declare`
