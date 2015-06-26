@@ -36,6 +36,7 @@ class NoDuplicateVariableWalker extends Lint.BlockScopeAwareRuleWalker<{}, Scope
         const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
         const isBlockScoped = Lint.isBlockScopedBindingElement(node);
 
+        // duplicate-variable errors for block-scoped vars are caught by tsc
         if (isSingleVariable && !isBlockScoped) {
             this.handleSingleVariableIdentifier(<ts.Identifier> node.name);
         }

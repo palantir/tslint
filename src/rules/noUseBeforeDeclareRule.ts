@@ -41,6 +41,19 @@ class NoUseBeforeDeclareWalker extends Lint.ScopeAwareRuleWalker<VisitedVariable
         return {};
     }
 
+    public visitBindingElement(node: ts.BindingElement) {
+        const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
+        const isBlockScoped = Lint.isBlockScopedBindingElement(node);
+
+        // use-before-declare errors for block-scoped vars are caught by tsc
+        if (isSingleVariable && !isBlockScoped) {
+            const variableName = (<ts.Identifier> node.name).text;
+            this.validateUsageForVariable(variableName, node.getStart());
+        }
+
+        super.visitBindingElement(node);
+    }
+
     public visitImportDeclaration(node: ts.ImportDeclaration) {
         const importClause = node.importClause;
 
@@ -75,12 +88,11 @@ class NoUseBeforeDeclareWalker extends Lint.ScopeAwareRuleWalker<VisitedVariable
 
     public visitVariableDeclaration(node: ts.VariableDeclaration) {
         const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
-        const nameNode = <ts.Identifier> node.name;
-        const variableName = nameNode.text;
+        const variableName = (<ts.Identifier> node.name).text;
         const currentScope = this.getCurrentScope();
 
         // only validate on the first variable declaration within the current scope
-        if (currentScope[variableName] == null) {
+        if (isSingleVariable && currentScope[variableName] == null) {
             this.validateUsageForVariable(variableName, node.getStart());
         }
 
