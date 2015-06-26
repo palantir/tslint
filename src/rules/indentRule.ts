@@ -26,7 +26,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-// Visit every token and enforce that only the right character is used for indentation
+// visit every token and enforce that only the right character is used for indentation
 class IndentWalker extends Lint.RuleWalker {
     private failureString: string;
     private regExp: RegExp;

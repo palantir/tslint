@@ -32,7 +32,7 @@ class NoDuplicateVariableWalker extends Lint.BlockScopeAwareRuleWalker<{}, Scope
     }
 
     public visitBindingElement(node: ts.BindingElement) {
-        // TODO: handle node.dotdotToken?
+        // #471: handle node.dotdotToken?
         const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
         const isBlockScoped = Lint.isBlockScopedBindingElement(node);
 

@@ -32,7 +32,7 @@ class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<ScopeInfo,
     }
 
     public visitBindingElement(node: ts.BindingElement) {
-        // TODO: handle node.dotDotDotToken?
+        // #471: handle node.dotDotDotToken?
         const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
         const isBlockScoped = Lint.isBlockScopedBindingElement(node);
 
@@ -54,7 +54,7 @@ class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<ScopeInfo,
     }
 
     public visitParameterDeclaration(node: ts.ParameterDeclaration) {
-        // Treat parameters as block-scoped variables
+        // treat parameters as block-scoped variables
         const variableIdentifier = <ts.Identifier> node.name;
         const variableName = variableIdentifier.text;
         const currentScope = this.getCurrentScope();
