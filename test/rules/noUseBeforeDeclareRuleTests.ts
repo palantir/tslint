@@ -20,7 +20,7 @@ describe("<no-use-before-declare>", () => {
 
     it("restricts usage before declaration", () => {
         const actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule);
-        assert.equal(actualFailures.length, 7);
+        assert.equal(actualFailures.length, 8);
     });
 
     it("restricts usage of imports before declaration", () => {
@@ -47,6 +47,13 @@ describe("<no-use-before-declare>", () => {
 
         Lint.Test.assertContainsFailure(actualFailures, failure1);
         Lint.Test.assertContainsFailure(actualFailures, failure2);
+    });
+
+    it("restricts exporting variables before declaration", () => {
+        const actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule);
+        const failure1 = Lint.Test.createFailuresOnFile(fileName, makeFailureString("undeclaredA"))([52, 5], [52, 16]);
+
+        Lint.Test.assertContainsFailure(actualFailures, failure1);
     });
 
     function makeFailureString(varName: string) {

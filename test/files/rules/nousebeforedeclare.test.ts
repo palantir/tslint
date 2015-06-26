@@ -43,3 +43,18 @@ import foo2 from "lib";
 import _, { map, foldl } from "underscore";
 import * as foo3 from "lib";
 import "lib";
+
+export default function () {
+    //
+};
+
+export {
+    undeclaredA, // failure
+    undeclaredB, // tsc error
+    undeclaredC, // tsc error
+    testUndeclaredImports
+};
+
+var undeclaredA = 42;
+let { undeclaredB } = { undeclaredB: 43 };
+const [ undeclaredC, [undeclaredD] ] = [ 1, [2] ];
