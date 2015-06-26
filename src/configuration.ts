@@ -41,7 +41,7 @@ module Lint.Configuration {
             return JSON.parse(fs.readFileSync(configFile, "utf8"));
         }
 
-        // First look for package.json from input file location
+        // first look for package.json from input file location
         configFile = findup("package.json", { cwd: inputFileLocation, nocase: true });
 
         if (configFile) {
@@ -52,9 +52,8 @@ module Lint.Configuration {
             }
         }
 
-        // Next look for tslint.json
+        // next look for tslint.json
         const homeDir = getHomeDir();
-
         if (!homeDir) {
             return undefined;
         }

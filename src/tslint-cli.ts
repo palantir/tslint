@@ -139,7 +139,7 @@ tslint accepts the following commandline options:
     process.exit(0);
 }
 
-// When provided it should point to an existing location
+// when provided, it should point to an existing location
 if (argv.c && !fs.existsSync(argv.c)) {
     console.error("Invalid option for configuration: " + argv.c);
     process.exit(1);

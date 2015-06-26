@@ -23,13 +23,15 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class SortedKeyWalker extends Lint.RuleWalker {
-    // Stacks are used to maintain state while recursing through nested object literals.
+    // stacks are used to maintain state while recursing through nested object literals
     private lastSortedKeyStack: string[] = [];
     private sortedStateStack: boolean[] = [];
 
     public visitObjectLiteralExpression(node: ts.ObjectLiteralExpression) {
-        this.lastSortedKeyStack.push(""); // Char code 0; every string should be >= to this
-        this.sortedStateStack.push(true); // Sorted state is always initially true
+        // char code 0; every string should be >= to this
+        this.lastSortedKeyStack.push("");
+        // sorted state is always initially true
+        this.sortedStateStack.push(true);
         super.visitObjectLiteralExpression(node);
         this.lastSortedKeyStack.pop();
         this.sortedStateStack.pop();
@@ -37,7 +39,7 @@ class SortedKeyWalker extends Lint.RuleWalker {
 
     public visitPropertyAssignment(node: ts.PropertyAssignment) {
         const sortedState = this.sortedStateStack[this.sortedStateStack.length - 1];
-        // Skip remainder of object literal scan if a previous key was found
+        // skip remainder of object literal scan if a previous key was found
         // in an unsorted position. This ensures only one error is thrown at
         // a time and keeps error output clean.
         if (sortedState) {

@@ -24,7 +24,7 @@ describe("<indent>", () => {
         Lint.Test.assertContainsFailure(actualFailures, failure);
     }
 
-    // Checks only that the indent character is the specified one, *NOT* the size of the indent
+    // checks only that the indent character is the specified one, *NOT* the size of the indent
     describe("on a tab-indented file", () => {
         const fileName = "rules/indentwith_tabs.test.ts";
 
@@ -75,7 +75,7 @@ describe("<indent>", () => {
         });
     });
 
-    // Checks only that the indent character is the specified one, *NOT* the size of the indent
+    // checks only that the indent character is the specified one, *NOT* the size of the indent
     describe("on a space-indented file", () => {
         const fileName = "rules/indentwith_spaces.test.ts";
 
