@@ -38,11 +38,9 @@ module Lint.Rules {
             return this.options;
         }
 
-        /* tslint:disable:no-unused-variable */
         public apply(sourceFile: ts.SourceFile): RuleFailure[] {
             throw Lint.abstract();
         }
-        /* tslint:enable:no-unused-variable */
 
         public applyWithWalker(walker: Lint.RuleWalker): RuleFailure[] {
             walker.walk(walker.getSourceFile());
