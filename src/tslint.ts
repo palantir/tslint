@@ -22,6 +22,7 @@ module Lint {
         failureCount: number;
         format: string;
         output: string;
+        raw: RuleFailure[];
     }
 
     export interface ILinterOptions {
@@ -84,7 +85,8 @@ module Lint {
             return {
                 failureCount: failures.length,
                 format: this.options.formatter,
-                output: output
+                output: output,
+                raw: failures
             };
         }
 
