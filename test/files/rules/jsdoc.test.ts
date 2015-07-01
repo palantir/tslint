@@ -59,4 +59,10 @@ one  *
 
 }
 
-
+function makeHeader(pkg: Package) {
+    return [
+        `\t/**`,
+        `\t * ${pkg.name} v${pkg.version}`,
+        `\t */`
+    ].join("\r\n");
+}
