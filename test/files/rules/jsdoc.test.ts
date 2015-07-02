@@ -59,4 +59,11 @@ one  *
 
 }
 
-
+// Regression test: jsdoc rule shouldn't look inside template strings (https://github.com/palantir/tslint/issues/332)
+function makeHeader(pkg: Package) {
+    return [
+        `\t/**`,
+        `\t * ${pkg.name} v${pkg.version}`,
+        `\t */`
+    ].join("\r\n");
+}
