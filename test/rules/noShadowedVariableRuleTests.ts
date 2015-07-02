@@ -39,7 +39,8 @@ describe("<no-shadowed-variable>", () => {
             Lint.Test.createFailure(fileName, [89, 14], [89, 15], NoShadowedVariableRule.FAILURE_STRING + "y'"),
             Lint.Test.createFailure(fileName, [90, 16], [90, 17], NoShadowedVariableRule.FAILURE_STRING + "z'"),
             Lint.Test.createFailure(fileName, [94, 15], [94, 16], NoShadowedVariableRule.FAILURE_STRING + "x'"),
-            Lint.Test.createFailure(fileName, [95, 15], [95, 16], NoShadowedVariableRule.FAILURE_STRING + "y'")
+            Lint.Test.createFailure(fileName, [95, 15], [95, 16], NoShadowedVariableRule.FAILURE_STRING + "y'"),
+            Lint.Test.createFailure(fileName, [97, 17], [97, 18], NoShadowedVariableRule.FAILURE_STRING + "z'")
         ];
         const actualFailures = Lint.Test.applyRuleOnFile(fileName, NoShadowedVariableRule);
 
