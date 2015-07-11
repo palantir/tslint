@@ -156,4 +156,7 @@ function testDestructuring() {
         var a; // not a failure; caught by no-shadowed-variable
         return b;
     }
+
+    var [x, y3] = myFunc(); // failure
+    var [x3, ...y] = [1, 2, 3, 4]; // failure
 }

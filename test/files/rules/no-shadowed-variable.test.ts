@@ -93,5 +93,7 @@ function testDestructuring(x: number) {
     function anotherInnerFunc() {
         var [{x}] = [{x: 1}];   // failure
         let [[y]] = [[2]];      // failure
+        var [foo, ...bar] = [1, 2, 3, 4];
+        var [...z] = [1, 2, 3, 4]; // failure
     }
 }
