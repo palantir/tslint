@@ -14,5 +14,7 @@
  * limitations under the License.
  */
 
-// attach chai.assert to the global object
-global.assert = require("chai").assert;
+/* tslint:disable:no-var-keyword */
+var assert: Chai.Assert = require("chai").assert;
+global.assert = assert;
+/* tslint:enable:no-var-keyword */

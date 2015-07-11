@@ -174,5 +174,5 @@ const processFile = (file: string) => {
 const files = argv._;
 
 for (const file of files) {
-        processFile(file);
+    processFile(file);
 }
