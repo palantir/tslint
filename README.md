@@ -312,7 +312,7 @@ Such custom formatters can also be written in Javascript. Additionally, formatte
 Development
 -----------
 
-To develop tslint simply clone the repository, install dependencies and run grunt:
+To develop TSLint simply clone the repository, install dependencies and run grunt:
 
 ```bash
 git clone git@github.com:palantir/tslint.git
