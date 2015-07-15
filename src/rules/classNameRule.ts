@@ -24,9 +24,12 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class NameWalker extends Lint.RuleWalker {
     public visitClassDeclaration(node: ts.ClassDeclaration) {
-        const className = node.name.getText();
-        if (!this.isPascalCased(className)) {
-            this.addFailureAt(node.name.getStart(), node.name.getWidth());
+        // classes declared as default exports will be unnamed
+        if (node.name != null) {
+            const className = node.name.getText();
+            if (!this.isPascalCased(className)) {
+                this.addFailureAt(node.name.getStart(), node.name.getWidth());
+            }
         }
 
         super.visitClassDeclaration(node);
@@ -41,7 +44,7 @@ class NameWalker extends Lint.RuleWalker {
         super.visitInterfaceDeclaration(node);
     }
 
-    private isPascalCased(name: string): boolean {
+    private isPascalCased(name: string) {
         if (name.length <= 0) {
             return true;
         }
