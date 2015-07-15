@@ -178,7 +178,7 @@ declare module Lint {
     function createCompilerOptions(): ts.CompilerOptions;
     function doesIntersect(failure: RuleFailure, disabledIntervals: Lint.IDisabledInterval[]): boolean;
     function abstract(): string;
-    function scanAllTokens(scanner: ts.Scanner, callback: (scanner: ts.Scanner) => void): void;
+    function scanAllTokens(scanner: ts.Scanner, callback: (s: ts.Scanner) => void): void;
     function hasModifier(modifiers: ts.ModifiersArray, ...modifierKinds: ts.SyntaxKind[]): boolean;
     function isBlockScopedVariable(node: ts.VariableDeclaration | ts.VariableStatement): boolean;
     function isBlockScopedBindingElement(node: ts.BindingElement): boolean;
