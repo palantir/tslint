@@ -59,7 +59,7 @@ module Lint {
         return "abstract method not implemented";
     }
 
-    export function scanAllTokens(scanner: ts.Scanner, callback: (scanner: ts.Scanner) => void) {
+    export function scanAllTokens(scanner: ts.Scanner, callback: (s: ts.Scanner) => void) {
         let lastStartPos = -1;
         while (scanner.scan() !== ts.SyntaxKind.EndOfFileToken) {
             const startPos = scanner.getStartPos();
