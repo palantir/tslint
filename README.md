@@ -92,17 +92,17 @@ tslint accepts the following commandline options:
 var fileName = "Specify file name";
 
 var configuration = {
-  rules: {
-      "variable-name": true,
-      "quotemark": [true, "double"]
-  }
+    rules: {
+        "variable-name": true,
+        "quotemark": [true, "double"]
+    }
 };
 
 var options = {
-  formatter: "json",
-  configuration: configuration,
-  rulesDirectory: "customRules/",
-  formattersDirectory: "customFormatters/"
+    formatter: "json",
+    configuration: configuration,
+    rulesDirectory: "customRules/",
+    formattersDirectory: "customFormatters/"
 };
 
 var Linter = require("tslint");
