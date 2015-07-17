@@ -47,3 +47,13 @@ case 2:
     break;
 }
 
+// valid
+baz:
+switch(foo) {
+case 1:
+    bar();
+    continue baz;
+default:
+    break;
+}
+

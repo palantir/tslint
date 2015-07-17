@@ -72,7 +72,8 @@ export class NoSwitchCaseFallThroughWalker extends Lint.RuleWalker {
         return !statements.some((statement) => {
             return statement.kind === ts.SyntaxKind.BreakStatement
                 || statement.kind === ts.SyntaxKind.ThrowStatement
-                || statement.kind === ts.SyntaxKind.ReturnStatement;
+                || statement.kind === ts.SyntaxKind.ReturnStatement
+                || statement.kind === ts.SyntaxKind.ContinueStatement;
         });
     }
 }
