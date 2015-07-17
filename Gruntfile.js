@@ -167,6 +167,8 @@ module.exports = function (grunt) {
     grunt.registerTask("test", ["clean:test", "ts:test", "tslint:test", "concat:test", "mochaTest"]
                                   .concat(checkBinTest));
 
+    grunt.registerTask("concat-and-test", ["concat:test", "mochaTest"]);
+
     // create default task
     grunt.registerTask("default", ["jscs", "core", "bin", "test"]);
 };

@@ -6,7 +6,7 @@
         "declaration": true,
         "sourceMap": false,
         "target": "es5",
-        "out": "build/tslint.js"
+        "out": "../build/tslint.js"
     },
     "filesGlob": [
         "../typings/*.d.ts",
