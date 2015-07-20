@@ -5,7 +5,7 @@
         "noImplicitAny": true,
         "sourceMap": false,
         "target": "es5",
-        "out": "build/tslint-tests.js"
+        "out": "../build/tslint-tests.js"
     },
     "filesGlob": [
         "../typings/*.d.ts",
