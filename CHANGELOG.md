@@ -1,6 +1,13 @@
 Change Log
 ===
 
+v2.4.0
+---
+* Upgraded Typescript compiler to 1.5.3
+* [bugs] #332, #493, #509, #483
+* [bug] fix error message in `no-var-keyword` rule
+* [enhancement] CI tests are now run on node v0.12 in addition to v0.10
+
 v2.3.1-beta
 ---
 * [bugs] #137 #434 #451 #456
@@ -22,7 +29,7 @@ v2.3.0-beta
 
 v2.2.0-beta
 ---
-* Upgraded Typescript compiler to 1.5
+* Upgraded Typescript compiler to 1.5.0-beta
 * **BREAKING CHANGES**
 	* due to changes to the typescript compiler API, old custom rules may no longer work and may need to be rewritten
 	* the JSON formatter's line and character positions are now back to being 0-indexed instead of 1-indexed
