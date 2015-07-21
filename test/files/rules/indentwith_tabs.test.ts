@@ -1,5 +1,8 @@
 // valid code
 module TestModule {
+	/**
+	 * Some documentation
+	 */
 	var func = () => {
 		console.warn("hi");
 	};
