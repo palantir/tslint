@@ -1,3 +1,4 @@
+.DS_Store
 .gitmodules
 .project
 .travis.yml
@@ -7,3 +8,4 @@ tslint.json
 build/tslint-tests.js
 src/
 test/
+tscommand*.txt
