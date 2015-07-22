@@ -1,6 +1,10 @@
 Change Log
 ===
 
+v2.4.1
+---
+* [bug] remove npm-shrinkwrap.json from the published package
+
 v2.4.0
 ---
 * Upgraded Typescript compiler to 1.5.3
