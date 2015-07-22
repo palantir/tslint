@@ -1,7 +1,7 @@
 Change Log
 ===
 
-v2.4.1
+v2.4.2
 ---
 * [bug] remove npm-shrinkwrap.json from the published package
 
