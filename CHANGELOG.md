@@ -11,6 +11,8 @@ v2.4.0
 * [bugs] #332, #493, #509, #483
 * [bug] fix error message in `no-var-keyword` rule
 * [enhancement] CI tests are now run on node v0.12 in addition to v0.10
+* **BREAKING**
+	* `-f` option removed from CLI
 
 v2.3.1-beta
 ---
