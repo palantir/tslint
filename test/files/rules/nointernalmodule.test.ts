@@ -7,5 +7,7 @@ module bar {
 declare module buzz {
 }
 
-declare module "bizz" {
+declare module "hoge" {
+}
+declare module 'fuga' {
 }

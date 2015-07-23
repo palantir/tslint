@@ -27,7 +27,7 @@ class NoInternalModuleWalker extends Lint.RuleWalker {
         let name = node.name.getText();
         if (Lint.isNodeFlagSet(node, ts.NodeFlags.Namespace)) {
             // ok namespace
-        } else if (name.indexOf(`"`) === 0 && name.lastIndexOf(`"`) === name.length - 1) {
+        } else if ((name[0] === `"` && name[name.length - 1] === `"`) || (name[0] === `'` && name[name.length - 1] === `'`)) {
             // ok external module
         } else {
             this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
