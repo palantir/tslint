@@ -132,7 +132,9 @@ A sample configuration file with all options is available [here](https://github.
 * `curly` enforces braces for `if`/`for`/`do`/`while` statements.
 * `eofline` enforces the file to end with a newline.
 * `forin` enforces a `for ... in` statement to be filtered with an `if` statement.*
-* `indent` enforces consistent indentation with tabs or spaces.
+* `indent` enforces indentation with tabs or spaces. Rule options (one is required):
+    * `"tabs"` enforces consistent tabs
+    * `"spaces"` enforces consistent spaces
 * `interface-name` enforces the rule that interface names must begin with a capital 'I'
 * `jsdoc-format` enforces basic format rules for jsdoc comments -- comments starting with `/**`
     * each line contains an asterisk and asterisks must be aligned
@@ -177,7 +179,9 @@ A sample configuration file with all options is available [here](https://github.
   * `"check-else"` checks that `else` is on the same line as the closing brace for `if`
   * `"check-open-brace"` checks that an open brace falls on the same line as its preceding expression.
   * `"check-whitespace"` checks preceding whitespace for the specified tokens.
-* `quotemark` enforces consistent single or double quoted string literals.
+* `quotemark` enforces consistent single or double quoted string literals. Rule options (one is required):
+    * `"single"` enforces single quotes
+    * `"double"` enforces double quotes
 * `radix` enforces the radix parameter of `parseInt`
 * `semicolon` enforces semicolons at the end of every statement.
 * `switch-default` enforces a `default` case in `switch` statements.
