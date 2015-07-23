@@ -133,8 +133,8 @@ A sample configuration file with all options is available [here](https://github.
 * `eofline` enforces the file to end with a newline.
 * `forin` enforces a `for ... in` statement to be filtered with an `if` statement.*
 * `indent` enforces indentation with tabs or spaces. Rule options (one is required):
-    * `"tabs"` enforces consistient tabs
-    * `"spaces"` enforces consistient spaces
+    * `"tabs"` enforces consistent tabs
+    * `"spaces"` enforces consistent spaces
 * `interface-name` enforces the rule that interface names must begin with a capital 'I'
 * `jsdoc-format` enforces basic format rules for jsdoc comments -- comments starting with `/**`
     * each line contains an asterisk and asterisks must be aligned
