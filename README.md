@@ -161,6 +161,7 @@ A sample configuration file with all options is available [here](https://github.
 * `no-shadowed-variable` disallows shadowed variable declarations.
 * `no-empty` disallows empty blocks.
 * `no-eval` disallows `eval` function invocations.
+* `no-internal-module` disallows internal `module`, use `namespace` instead.
 * `no-require-imports` disallows require() style imports
 * `no-string-literal` disallows object access via string literals.
 * `no-switch-case-fall-through` disallows falling through case statements.

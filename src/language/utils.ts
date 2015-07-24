@@ -113,7 +113,7 @@ module Lint {
     /**
      * Bitwise check for node flags.
      */
-    function isNodeFlagSet(node: ts.Node, flagToCheck: ts.NodeFlags): boolean {
+    export function isNodeFlagSet(node: ts.Node, flagToCheck: ts.NodeFlags): boolean {
         /* tslint:disable:no-bitwise */
         return (node.flags & flagToCheck) !== 0;
         /* tslint:enable:no-bitwise */
