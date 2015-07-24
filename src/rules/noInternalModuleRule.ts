@@ -24,7 +24,6 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class NoInternalModuleWalker extends Lint.RuleWalker {
     public visitModuleDeclaration(node: ts.ModuleDeclaration) {
-        let name = node.name.getText();
         if (Lint.isNodeFlagSet(node, ts.NodeFlags.Namespace)) {
             // ok namespace
         } else if (node.name.kind === ts.SyntaxKind.Identifier) {
