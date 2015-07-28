@@ -85,7 +85,7 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
 
     public checkSpace(option: string, node: ts.Node, typeNode: ts.TypeNode | ts.StringLiteral, positionBeforeColon: number) {
         if (this.hasOption(option) && typeNode != null && positionBeforeColon != null) {
-            const scanner = ts.createScanner(ts.ScriptTarget.ES5, false, node.getText());
+            const scanner = ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, node.getText());
             let hasLeadingWhitespace: boolean;
 
             scanner.setTextPos(positionBeforeColon - node.getStart());

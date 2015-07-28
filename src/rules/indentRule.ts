@@ -50,7 +50,7 @@ class IndentWalker extends Lint.RuleWalker {
         }
 
         let endOfComment = -1;
-        const scanner = ts.createScanner(ts.ScriptTarget.ES5, false, node.text);
+        const scanner = ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, node.text);
         for (let lineStart of node.getLineStarts()) {
             if (lineStart < endOfComment) {
                 // skip checking lines inside multi-line comments
