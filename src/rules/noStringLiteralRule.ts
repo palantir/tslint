@@ -41,7 +41,7 @@ class NoStringLiteralWalker extends Lint.RuleWalker {
     }
 
     private isValidIdentifier(token: string) {
-        const scanner = ts.createScanner(ts.ScriptTarget.ES5, true, token);
+        const scanner = ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, token);
         scanner.scan();
         // if we scanned to the end of the token, we can check if the scanned item was an identifier
         return scanner.getTokenText() === token && scanner.isIdentifier();

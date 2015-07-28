@@ -35,7 +35,7 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
-        this.scanner = ts.createScanner(ts.ScriptTarget.ES5, false, sourceFile.text);
+        this.scanner = ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, sourceFile.text);
     }
 
     public visitSourceFile(node: ts.SourceFile) {
