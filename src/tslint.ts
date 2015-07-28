@@ -86,7 +86,7 @@ module Lint {
                 failureCount: failures.length,
                 format: this.options.formatter,
                 output: output,
-                raw: failures
+                failures: failures
             };
         }
 
