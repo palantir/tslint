@@ -21,7 +21,6 @@ module Lint {
             getCurrentDirectory: () => "",
             getDefaultLibFileName: () => "lib.d.ts",
             getScriptFileNames: () => [fileName],
-            getScriptIsOpen: () => true,
             getScriptSnapshot: () => {
                 return {
                     getChangeRange: (oldSnapshot) => undefined,

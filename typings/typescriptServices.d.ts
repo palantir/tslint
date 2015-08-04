@@ -1031,6 +1031,7 @@ declare namespace ts {
         getPropertyOfType(type: Type, propertyName: string): Symbol;
         getSignaturesOfType(type: Type, kind: SignatureKind): Signature[];
         getIndexTypeOfType(type: Type, kind: IndexKind): Type;
+        getBaseTypes(type: InterfaceType): ObjectType[];
         getReturnTypeOfSignature(signature: Signature): Type;
         getSymbolsInScope(location: Node, meaning: SymbolFlags): Symbol[];
         getSymbolAtLocation(node: Node): Symbol;
@@ -1054,6 +1055,7 @@ declare namespace ts {
         getExportsOfModule(moduleSymbol: Symbol): Symbol[];
         getJsxElementAttributesType(elementNode: JsxOpeningLikeElement): Type;
         getJsxIntrinsicTagNames(): Symbol[];
+        isOptionalParameter(node: ParameterDeclaration): boolean;
     }
     interface SymbolDisplayBuilder {
         buildTypeDisplay(type: Type, writer: SymbolWriter, enclosingDeclaration?: Node, flags?: TypeFormatFlags): void;
@@ -1198,7 +1200,7 @@ declare namespace ts {
         Anonymous = 65536,
         Instantiated = 131072,
         ObjectLiteral = 524288,
-        ESSymbol = 4194304,
+        ESSymbol = 16777216,
         StringLike = 258,
         NumberLike = 132,
         ObjectType = 80896,
@@ -1218,8 +1220,6 @@ declare namespace ts {
         typeParameters: TypeParameter[];
         outerTypeParameters: TypeParameter[];
         localTypeParameters: TypeParameter[];
-        resolvedBaseConstructorType?: Type;
-        resolvedBaseTypes: ObjectType[];
     }
     interface InterfaceTypeWithDeclaredMembers extends InterfaceType {
         declaredProperties: Symbol[];
@@ -1369,6 +1369,7 @@ declare namespace ts {
     }
     interface CompilerHost {
         getSourceFile(fileName: string, languageVersion: ScriptTarget, onError?: (message: string) => void): SourceFile;
+        getCancellationToken?(): CancellationToken;
         getDefaultLibFileName(options: CompilerOptions): string;
         writeFile: WriteFileCallback;
         getCurrentDirectory(): string;
@@ -1559,6 +1560,7 @@ declare namespace ts {
         getConstructSignatures(): Signature[];
         getStringIndexType(): Type;
         getNumberIndexType(): Type;
+        getBaseTypes(): ObjectType[];
     }
     interface Signature {
         getDeclaration(): SignatureDeclaration;
@@ -1716,6 +1718,7 @@ declare namespace ts {
         const writtenReference: string;
     }
     interface HighlightSpan {
+        fileName?: string;
         textSpan: TextSpan;
         kind: string;
     }
@@ -1985,6 +1988,7 @@ declare namespace ts {
           * @param compilationSettings The compilation settings used to acquire the file
           */
         releaseDocument(fileName: string, compilationSettings: CompilerOptions): void;
+        reportStats(): string;
     }
     module ScriptElementKind {
         const unknown: string;
@@ -2071,6 +2075,18 @@ declare namespace ts {
     }
     function displayPartsToString(displayParts: SymbolDisplayPart[]): string;
     function getDefaultCompilerOptions(): CompilerOptions;
+    interface TranspileOptions {
+        compilerOptions?: CompilerOptions;
+        fileName?: string;
+        reportDiagnostics?: boolean;
+        moduleName?: string;
+    }
+    interface TranspileOutput {
+        outputText: string;
+        diagnostics?: Diagnostic[];
+        sourceMapText?: string;
+    }
+    function transpileModule(input: string, transpileOptions?: TranspileOptions): TranspileOutput;
     function transpile(input: string, compilerOptions?: CompilerOptions, fileName?: string, diagnostics?: Diagnostic[], moduleName?: string): string;
     function createLanguageServiceSourceFile(fileName: string, scriptSnapshot: IScriptSnapshot, scriptTarget: ScriptTarget, version: string, setNodeParents: boolean): SourceFile;
     let disableIncrementalParsing: boolean;
