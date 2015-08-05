@@ -1,5 +1,13 @@
 import * as React from 'react'; // quotemark failure
 
+class BazComponent extends React.Component<React.Props<BazComponent>, {}> {
+    public render() {
+        return (
+            <div></div>
+        );
+    }
+}
+
 interface IFooProps extends React.Props<FooComponent> {
     //
 }
@@ -17,6 +25,7 @@ export class FooComponent extends React.Component<IFooProps, IFooState> {
         return (
             <div>
                 {this.state.bar.map((s) => <span>{s}</span>)}
+                <BazComponent someProp={123} anotherProp={456} />
             </div>
         );
 	} // indent failure
