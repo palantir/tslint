@@ -14,27 +14,51 @@
  * limitations under the License.
  */
 
-describe("Linter applied to TSX syntax", () => {
+describe("TSX syntax", () => {
     const fs = require("fs");
     const path = require("path");
     const fileName = "react.test.tsx";
 
     it("doesn't blow up", () => {
         const validConfiguration = {};
-        const relativePath = path.join("test", "files", "tsx", fileName);
-        const source = fs.readFileSync(relativePath, "utf8");
-
-        const options: Lint.ILinterOptions = {
-            configuration: validConfiguration,
-            formatter: "json",
-            formattersDirectory: null,
-            rulesDirectory: null
-        };
-
-        const ll = new Lint.Linter(relativePath, source, options);
-        const result = ll.lint();
+        const result = runLinterWithConfiguration(validConfiguration);
         const parsedResult = JSON.parse(result.output);
 
         assert.lengthOf(parsedResult, 0);
     });
+
+    it("catches common lint failures", () => {
+        const QuotemarkRule = Lint.Test.getRule("quotemark");
+        const quotemarkFailure = Lint.Test.createFailuresOnFile(`tsx/${fileName}`, QuotemarkRule.DOUBLE_QUOTE_FAILURE);
+
+        const result = runLinterWithConfiguration({
+            rules: {
+                "quotemark": [true, "double"]
+            }
+        });
+        const parsedResult = JSON.parse(result.output);
+        const actualFailures: Lint.RuleFailure[] = [];
+        for (let failure of parsedResult) {
+            const startArray = [failure.startPosition.line + 1, failure.startPosition.character + 1];
+            const endArray = [failure.endPosition.line + 1, failure.endPosition.character + 1];
+            actualFailures.push(Lint.Test.createFailure(`tsx/${fileName}`, startArray, endArray, failure.failure));
+        }
+        const expectedFailure1 = quotemarkFailure([1, 24], [1, 31]);
+
+        Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
+        assert.lengthOf(actualFailures, 1);
+    });
+
+    function runLinterWithConfiguration(config: any): Lint.LintResult {
+        const relativePath = path.join("test", "files", "tsx", fileName);
+        const source = fs.readFileSync(relativePath, "utf8");
+        const options: Lint.ILinterOptions = {
+            configuration: config,
+            formatter: "json",
+            formattersDirectory: null,
+            rulesDirectory: null
+        };
+        const ll = new Lint.Linter(relativePath, source, options);
+        return ll.lint();
+    }
 });
