@@ -78,6 +78,7 @@ module.exports = function (grunt) {
 
         ts: {
             options: {
+                noImplicitAny: true,
                 sourceMap: false,
                 target: "es5"
             },
@@ -97,7 +98,6 @@ module.exports = function (grunt) {
 
             core: {
                 options: {
-                    noImplicitAny: true,
                     declaration: true,
                     module: "commonjs"
                 },
