@@ -15,6 +15,7 @@
         "./helper.ts",
         "./ruleDisableEnableTests.ts",
         "./ruleLoaderTests.ts",
+        "./tsxTests.ts",
         "./formatters/*.ts",
         "./rules/*.ts"
     ],
@@ -29,6 +30,7 @@
         "./helper.ts",
         "./ruleDisableEnableTests.ts",
         "./ruleLoaderTests.ts",
+        "./tsxTests.ts",
         "./formatters/externalFormatterTest.ts",
         "./formatters/jsonFormatterTests.ts",
         "./formatters/pmdFormatterTests.ts",
