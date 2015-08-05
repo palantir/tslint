@@ -19,7 +19,7 @@ describe("TSX syntax", () => {
     const path = require("path");
     const fileName = "react.test.tsx";
 
-    it("doesn't blow up", () => {
+    it("doesn't blow up linter", () => {
         const validConfiguration = {};
         const result = runLinterWithConfiguration(validConfiguration);
         const parsedResult = JSON.parse(result.output);
@@ -28,12 +28,26 @@ describe("TSX syntax", () => {
     });
 
     it("catches common lint failures", () => {
+        const IndentRule = Lint.Test.getRule("indent");
         const QuotemarkRule = Lint.Test.getRule("quotemark");
+        const WhitespaceRule = Lint.Test.getRule("whitespace");
+        const indentFailure = Lint.Test.createFailuresOnFile(`tsx/${fileName}`, IndentRule.FAILURE_STRING_SPACES);
         const quotemarkFailure = Lint.Test.createFailuresOnFile(`tsx/${fileName}`, QuotemarkRule.DOUBLE_QUOTE_FAILURE);
+        const whitespaceFailure = Lint.Test.createFailuresOnFile(`tsx/${fileName}`, WhitespaceRule.FAILURE_STRING);
 
         const result = runLinterWithConfiguration({
             rules: {
-                "quotemark": [true, "double"]
+                "indent": [true, "spaces"],
+                "quotemark": [true, "double"],
+                "whitespace": [true,
+                    "check-branch",
+                    "check-decl",
+                    "check-operator",
+                    "check-module",
+                    "check-separator",
+                    "check-type",
+                    "check-typecast"
+                ]
             }
         });
         const parsedResult = JSON.parse(result.output);
@@ -44,9 +58,13 @@ describe("TSX syntax", () => {
             actualFailures.push(Lint.Test.createFailure(`tsx/${fileName}`, startArray, endArray, failure.failure));
         }
         const expectedFailure1 = quotemarkFailure([1, 24], [1, 31]);
+        const expectedFailure2 = whitespaceFailure([8, 9], [8, 10]);
+        const expectedFailure3 = indentFailure([22, 1], [22, 2]);
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
-        assert.lengthOf(actualFailures, 1);
+        Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);
+        Lint.Test.assertContainsFailure(actualFailures, expectedFailure3);
+        assert.lengthOf(actualFailures, 3);
     });
 
     function runLinterWithConfiguration(config: any): Lint.LintResult {
