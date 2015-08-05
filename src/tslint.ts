@@ -20,6 +20,7 @@ module Lint {
 
     export interface LintResult {
         failureCount: number;
+        failures: RuleFailure[];
         format: string;
         output: string;
     }
@@ -83,6 +84,7 @@ module Lint {
             const output = formatter.format(failures);
             return {
                 failureCount: failures.length,
+                failures: failures,
                 format: this.options.formatter,
                 output: output
             };

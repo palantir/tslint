@@ -241,6 +241,7 @@ declare module Lint {
         failureCount: number;
         format: string;
         output: string;
+        failures: RuleFailure[];
     }
     interface ILinterOptions {
         configuration: any;
