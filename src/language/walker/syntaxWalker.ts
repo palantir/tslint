@@ -156,6 +156,10 @@ module Lint {
             this.walkChildren(node);
         }
 
+        protected visitJsxElement(node: ts.JsxElement) {
+            this.walkChildren(node);
+        }
+
         protected visitLabeledStatement(node: ts.LabeledStatement) {
             this.walkChildren(node);
         }
@@ -408,6 +412,10 @@ module Lint {
 
                 case ts.SyntaxKind.InterfaceDeclaration:
                     this.visitInterfaceDeclaration(<ts.InterfaceDeclaration> node);
+                    break;
+
+                case ts.SyntaxKind.JsxElement:
+                    this.visitJsxElement(<ts.JsxElement> node);
                     break;
 
                 case ts.SyntaxKind.LabeledStatement:

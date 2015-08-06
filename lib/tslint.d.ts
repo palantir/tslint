@@ -35,6 +35,7 @@ declare module Lint {
         protected visitImportEqualsDeclaration(node: ts.ImportEqualsDeclaration): void;
         protected visitIndexSignatureDeclaration(node: ts.IndexSignatureDeclaration): void;
         protected visitInterfaceDeclaration(node: ts.InterfaceDeclaration): void;
+        protected visitJsxElement(node: ts.JsxElement): void;
         protected visitLabeledStatement(node: ts.LabeledStatement): void;
         protected visitMethodDeclaration(node: ts.MethodDeclaration): void;
         protected visitMethodSignature(node: ts.SignatureDeclaration): void;
