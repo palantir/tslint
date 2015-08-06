@@ -9,14 +9,6 @@ TSLint
 
 A linter for the TypeScript language.
 
-"next" distribution
--------------------
-
-The `next` [branch of the TSLint repo](https://github.com/palantir/tslint/tree/next) tracks the latest TypeScript
-compiler and allows you to lint TS code that uses the latest features of the language. Releases from this branch
-are published to npm with the `next` dist-tag, so you can get the latest dev version of TSLint via
-`npm install tslint@next`.
-
 Installation
 ------------
 
@@ -27,6 +19,13 @@ Installation
 ##### Library
 
 ```npm install tslint```
+
+##### `next` distribution
+
+The [`next` branch of the TSLint repo](https://github.com/palantir/tslint/tree/next) tracks the latest TypeScript
+compiler and allows you to lint TS code that uses the latest features of the language. Releases from this branch
+are published to npm with the `next` dist-tag, so you can get the latest dev version of TSLint via
+`npm install tslint@next`.
 
 Usage
 -----
