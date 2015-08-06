@@ -27,7 +27,7 @@ describe("TSX syntax", () => {
         assert.lengthOf(parsedResult, 0);
     });
 
-    describe.only("catches common lint failures", () => {
+    describe("catches common lint failures", () => {
         const lintResult = runLinterWithConfiguration({
             rules: {
                 "indent": [true, "spaces"],
