@@ -27,7 +27,7 @@ describe("TSX syntax", () => {
         assert.lengthOf(parsedResult, 0);
     });
 
-    describe("catches common lint failures", () => {
+    describe.only("catches common lint failures", () => {
         const lintResult = runLinterWithConfiguration({
             rules: {
                 "indent": [true, "spaces"],
@@ -73,8 +73,7 @@ describe("TSX syntax", () => {
         });
 
         it("with no false positives", () => {
-            // todo: fix failing test
-            // assert.lengthOf(actualFailures, 3);
+            assert.lengthOf(actualFailures, 3);
         });
     });
 

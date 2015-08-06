@@ -207,7 +207,7 @@ declare module Lint {
         protected visitRegularExpressionLiteral(node: ts.Node): void;
         protected visitIdentifier(node: ts.Identifier): void;
         protected visitTemplateExpression(node: ts.TemplateExpression): void;
-        private addTokenToSkipFromNode(node);
+        protected addTokenToSkipFromNode(node: ts.Node): void;
     }
 }
 declare module Lint.Configuration {

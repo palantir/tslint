@@ -38,7 +38,7 @@ module Lint {
             super.visitTemplateExpression(node);
         }
 
-        private addTokenToSkipFromNode(node: ts.Node) {
+        protected addTokenToSkipFromNode(node: ts.Node) {
             if (node.getStart() < node.getEnd()) {
                 // only add to the map nodes whose end comes after their start, to prevent infinite loops
                 this.tokensToSkipStartEndMap[node.getStart()] = node.getEnd();

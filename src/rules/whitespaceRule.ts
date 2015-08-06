@@ -165,6 +165,11 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
         super.visitImportEqualsDeclaration(node);
     }
 
+    public visitJsxElement(node: ts.JsxElement) {
+        this.addTokenToSkipFromNode(node);
+        super.visitJsxElement(node);
+    }
+
     public visitTypeAssertionExpression(node: ts.TypeAssertion) {
         if (this.hasOption(OPTION_TYPECAST)) {
             const position = node.expression.getFullStart();
