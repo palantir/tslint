@@ -13,13 +13,13 @@ interface IFooProps extends React.Props<FooComponent> {
 }
 
 interface IFooState {
-    bar:string[] // whitespace failure
+    bar:string[]; // whitespace failure
 }
 
 export class FooComponent extends React.Component<IFooProps, IFooState> {
     public state = {
         bar: [] as string[]
-    }
+    };
 
     public render() {
         return (

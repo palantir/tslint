@@ -30,8 +30,17 @@ describe("TSX syntax", () => {
     describe("catches common lint failures", () => {
         const lintResult = runLinterWithConfiguration({
             rules: {
+                "curly": true,
+                "eofline": true,
                 "indent": [true, "spaces"],
+                "max-line-length": true,
+                "no-bitwise": true,
+                "no-unreachable": true,
+                "no-unused-expression": true,
+                "no-unused-variable": true,
+                "no-use-before-declare": true,
                 "quotemark": [true, "double"],
+                "semicolon": true,
                 "whitespace": [true,
                     "check-branch",
                     "check-decl",
