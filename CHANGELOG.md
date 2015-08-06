@@ -1,6 +1,11 @@
 Change Log
 ===
 
+v2.5.0-dev.1
+---
+* Upgrade TypeScript compiler to v1.6.0-dev.20150805
+* [enhancement] Support `.tsx` syntax (#490)
+
 v2.4.2
 ---
 * [bug] remove npm-shrinkwrap.json from the published package
