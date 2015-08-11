@@ -23,12 +23,16 @@ export class FooComponent extends React.Component<IFooProps, IFooState> {
 
     public render() {
         return (
-            <div>
+            <div onClick={() => this.onClick()}>
                 {this.state.bar.map((s) => <span>{s}</span>)}
                 <BazComponent someProp={123} anotherProp={456} />
             </div>
         );
 	} // indent failure
+
+    private onClick() {
+        console.info("foo component clicked");
+    }
 }
 
 export function buildFooComponent(): JSX.Element {
