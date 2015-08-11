@@ -1,6 +1,11 @@
 Change Log
 ===
 
+v2.5.0-dev.2
+---
+* Upgrade TypeScript compiler to v1.6.0-dev.20150811
+* [bug] fix `whitespace` false positive in JSX elements (#559)
+
 v2.5.0-dev.1
 ---
 * Upgrade TypeScript compiler to v1.6.0-dev.20150805
