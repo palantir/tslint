@@ -160,6 +160,10 @@ module Lint {
             this.walkChildren(node);
         }
 
+        protected visitJsxSelfClosingElement(node: ts.JsxSelfClosingElement) {
+            this.walkChildren(node);
+        }
+
         protected visitLabeledStatement(node: ts.LabeledStatement) {
             this.walkChildren(node);
         }
@@ -416,6 +420,10 @@ module Lint {
 
                 case ts.SyntaxKind.JsxElement:
                     this.visitJsxElement(<ts.JsxElement> node);
+                    break;
+
+                case ts.SyntaxKind.JsxSelfClosingElement:
+                    this.visitJsxSelfClosingElement(<ts.JsxSelfClosingElement> node);
                     break;
 
                 case ts.SyntaxKind.LabeledStatement:

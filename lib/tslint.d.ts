@@ -36,6 +36,7 @@ declare module Lint {
         protected visitIndexSignatureDeclaration(node: ts.IndexSignatureDeclaration): void;
         protected visitInterfaceDeclaration(node: ts.InterfaceDeclaration): void;
         protected visitJsxElement(node: ts.JsxElement): void;
+        protected visitJsxSelfClosingElement(node: ts.JsxSelfClosingElement): void;
         protected visitLabeledStatement(node: ts.LabeledStatement): void;
         protected visitMethodDeclaration(node: ts.MethodDeclaration): void;
         protected visitMethodSignature(node: ts.SignatureDeclaration): void;
@@ -240,9 +241,9 @@ declare module Lint {
 declare module Lint {
     interface LintResult {
         failureCount: number;
+        failures: RuleFailure[];
         format: string;
         output: string;
-        failures: RuleFailure[];
     }
     interface ILinterOptions {
         configuration: any;

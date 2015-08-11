@@ -9,7 +9,7 @@ class BazComponent extends React.Component<React.Props<BazComponent>, {}> {
 }
 
 interface IFooProps extends React.Props<FooComponent> {
-    //
+    fooProp: string;
 }
 
 interface IFooState {
@@ -29,4 +29,9 @@ export class FooComponent extends React.Component<IFooProps, IFooState> {
             </div>
         );
 	} // indent failure
+}
+
+export function buildFooComponent(): JSX.Element {
+    let x: string = "test";
+    return <FooComponent fooProp={ x } />;
 }
