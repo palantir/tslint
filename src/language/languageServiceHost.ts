@@ -21,14 +21,7 @@ module Lint {
             getCurrentDirectory: () => "",
             getDefaultLibFileName: () => "lib.d.ts",
             getScriptFileNames: () => [fileName],
-            getScriptSnapshot: () => {
-                return {
-                    getChangeRange: (oldSnapshot) => undefined,
-                    getLength: () => source.length,
-                    getLineStartPositions: () => ts.computeLineStarts(source),
-                    getText: (start, end) => source.substring(start, end)
-                };
-            },
+            getScriptSnapshot: () => ts.ScriptSnapshot.fromString(source),
             getScriptVersion: () => "1",
             log: (message) => { /* */ }
         };
