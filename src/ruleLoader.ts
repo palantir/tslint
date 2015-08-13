@@ -17,7 +17,7 @@
 module Lint {
     const fs = require("fs");
     const path = require("path");
-    const _s = require("underscore.string");
+    const {camelize, strLeft, strRight} = require("underscore.string");
 
     const moduleDirectory = path.dirname(module.filename);
     const CORE_RULES_DIRECTORY = path.resolve(moduleDirectory, "..", "build", "rules");
@@ -68,8 +68,8 @@ module Lint {
         // finally check for rules within the first level of directories,
         // using dash prefixes as the sub-directory names
         if (rulesDirectory) {
-            const subDirectory = _s.strLeft(rulesDirectory, "-");
-            const ruleName = _s.strRight(rulesDirectory, "-");
+            const subDirectory = strLeft(rulesDirectory, "-");
+            const ruleName = strRight(rulesDirectory, "-");
             if (subDirectory !== rulesDirectory && ruleName !== rulesDirectory) {
                 camelizedName = transformName(ruleName);
                 Rule = loadRule(rulesDirectory, subDirectory, camelizedName);
@@ -89,7 +89,7 @@ module Lint {
         if (nameMatch == null) {
             return name + "Rule";
         }
-        return nameMatch[1] + _s.camelize(nameMatch[2]) + nameMatch[3] + "Rule";
+        return nameMatch[1] + camelize(nameMatch[2]) + nameMatch[3] + "Rule";
     }
 
     function loadRule(...paths: string[]) {

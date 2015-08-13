@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-const fs = require("fs");
-const path = require("path");
-
 describe("Enable and Disable Rules", () => {
+    const fs = require("fs");
+    const path = require("path");
+
     it("is enabled and disabled in all the right places", () => {
         const validConfiguration = {rules: {
             "variable-name": true,

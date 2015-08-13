@@ -54,7 +54,6 @@ export class NoSwitchCaseFallThroughWalker extends Lint.RuleWalker {
 
     private fallThroughAllowed(nextCaseOrDefaultStatement: ts.Node) {
         const sourceFileText = nextCaseOrDefaultStatement.getSourceFile().text;
-        const childCount = nextCaseOrDefaultStatement.getChildCount();
         const firstChild = nextCaseOrDefaultStatement.getChildAt(0);
         const commentRanges = ts.getLeadingCommentRanges(sourceFileText, firstChild.getFullStart());
         if (commentRanges != null) {
