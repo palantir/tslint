@@ -239,9 +239,9 @@ declare module Lint {
 declare module Lint {
     interface LintResult {
         failureCount: number;
+        failures: RuleFailure[];
         format: string;
         output: string;
-        failures: RuleFailure[];
     }
     interface ILinterOptions {
         configuration: any;

@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-const fs = require("fs");
-const path = require("path");
-
 describe("Enable and Disable Rules", () => {
+    const {readFileSync} = require("fs");
+    const {join} = require("path");
+
     it("is enabled and disabled in all the right places", () => {
         const validConfiguration = {rules: {
             "variable-name": true,
             "quotemark": [true, "double"]
         }};
 
-        const relativePath = path.join("test", "files", "rules/enabledisable.test.ts");
-        const source = fs.readFileSync(relativePath, "utf8");
+        const relativePath = join("test", "files", "rules/enabledisable.test.ts");
+        const source = readFileSync(relativePath, "utf8");
 
         const options: Lint.ILinterOptions = {
             configuration: validConfiguration,

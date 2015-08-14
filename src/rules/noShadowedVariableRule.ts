@@ -57,7 +57,6 @@ class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<ScopeInfo,
         const variableIdentifier = <ts.Identifier> node.name;
         const variableName = variableIdentifier.text;
         const currentScope = this.getCurrentScope();
-        const currentBlockScope = this.getCurrentBlockScope();
 
         if (this.isVarInAnyScope(variableName)) {
             this.addFailureOnIdentifier(variableIdentifier);

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-const OPTION_LEADING_UNDERSCORE = "no-var-keyword";
-
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "forbidden var keyword";
 

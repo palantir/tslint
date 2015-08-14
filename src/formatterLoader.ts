@@ -17,7 +17,7 @@
 module Lint {
     const fs = require("fs");
     const path = require("path");
-    const _s = require("underscore.string");
+    const {camelize} = require("underscore.string");
 
     const moduleDirectory = path.dirname(module.filename);
     const CORE_FORMATTERS_DIRECTORY = path.resolve(moduleDirectory, "..", "build", "formatters");
@@ -27,7 +27,7 @@ module Lint {
             return name;
         }
 
-        const camelizedName = _s.camelize(name + "Formatter");
+        const camelizedName = camelize(name + "Formatter");
 
         // first check for core formatters
         let Formatter = loadFormatter(CORE_FORMATTERS_DIRECTORY, camelizedName);
