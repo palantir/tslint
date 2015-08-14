@@ -31,17 +31,10 @@ interface IModifiers {
 }
 
 function getModifiers(isMethod: boolean, modifiers?: ts.ModifiersArray): IModifiers {
-    let modifierStrings: string[] = [];
-    if (modifiers != null) {
-        modifierStrings = modifiers.map((x) => {
-            return x.getText();
-        });
-    }
-
     return {
-        isInstance: modifierStrings.indexOf("static") === -1,
+        isInstance: !Lint.hasModifier(modifiers, ts.SyntaxKind.StaticKeyword),
         isMethod: isMethod,
-        isPrivate: modifierStrings.indexOf("private") !== -1
+        isPrivate: Lint.hasModifier(modifiers, ts.SyntaxKind.PrivateKeyword)
     };
 }
 
@@ -55,7 +48,7 @@ function toString(modifiers: IModifiers): string {
 }
 
 export class MemberOrderingWalker extends Lint.RuleWalker {
-    private previous: IModifiers;
+    private previousMember: IModifiers;
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
@@ -72,22 +65,22 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
     }
 
     public visitMethodDeclaration(node: ts.MethodDeclaration) {
-        this.checkAndSetModifiers(node, getModifiers(true, node.modifiers));
+        this.checkModifiersAndSetPrevious(node, getModifiers(true, node.modifiers));
         super.visitMethodDeclaration(node);
     }
 
     public visitMethodSignature(node: ts.SignatureDeclaration) {
-        this.checkAndSetModifiers(node, getModifiers(true, node.modifiers));
+        this.checkModifiersAndSetPrevious(node, getModifiers(true, node.modifiers));
         super.visitMethodSignature(node);
     }
 
     public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
-        this.checkAndSetModifiers(node, getModifiers(false, node.modifiers));
+        this.checkModifiersAndSetPrevious(node, getModifiers(false, node.modifiers));
         super.visitPropertyDeclaration(node);
     }
 
     public visitPropertySignature(node: ts.Node) {
-        this.checkAndSetModifiers(node, getModifiers(false, node.modifiers));
+        this.checkModifiersAndSetPrevious(node, getModifiers(false, node.modifiers));
         super.visitPropertySignature(node);
     }
 
@@ -96,37 +89,40 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
     }
 
     private resetPreviousModifiers() {
-        this.previous = {
+        this.previousMember = {
             isInstance: false,
             isMethod: false,
             isPrivate: false
         };
     }
 
-    private checkAndSetModifiers(node: ts.Node, current: IModifiers) {
-        if (!this.canAppearAfter(this.previous, current)) {
-            const message = "Declaration of " + toString(current) +
-                " not allowed to appear after declaration of " + toString(this.previous);
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), message));
+    private checkModifiersAndSetPrevious(node: ts.Node, currentMember: IModifiers) {
+        if (!this.canAppearAfter(this.previousMember, currentMember)) {
+            const failure = this.createFailure(
+                node.getStart(),
+                node.getWidth(),
+                `Declaration of ${toString(currentMember)} not allowed to appear after declaration of ${toString(this.previousMember)}`
+            );
+            this.addFailure(failure);
         }
-        this.previous = current;
+        this.previousMember = currentMember;
     }
 
-    private canAppearAfter(previous: IModifiers, current: IModifiers) {
-        if (previous == null || current == null) {
+    private canAppearAfter(previousMember: IModifiers, currentMember: IModifiers) {
+        if (previousMember == null || currentMember == null) {
             return true;
         }
 
-        if (this.hasOption(OPTION_VARIABLES_BEFORE_FUNCTIONS) && previous.isMethod !== current.isMethod) {
-            return Number(previous.isMethod) < Number(current.isMethod);
+        if (this.hasOption(OPTION_VARIABLES_BEFORE_FUNCTIONS) && previousMember.isMethod !== currentMember.isMethod) {
+            return Number(previousMember.isMethod) < Number(currentMember.isMethod);
         }
 
-        if (this.hasOption(OPTION_STATIC_BEFORE_INSTANCE) && previous.isInstance !== current.isInstance) {
-            return Number(previous.isInstance) < Number(current.isInstance);
+        if (this.hasOption(OPTION_STATIC_BEFORE_INSTANCE) && previousMember.isInstance !== currentMember.isInstance) {
+            return Number(previousMember.isInstance) < Number(currentMember.isInstance);
         }
 
-        if (this.hasOption(OPTION_PUBLIC_BEFORE_PRIVATE) && previous.isPrivate !== current.isPrivate) {
-            return Number(previous.isPrivate) < Number(current.isPrivate);
+        if (this.hasOption(OPTION_PUBLIC_BEFORE_PRIVATE) && previousMember.isPrivate !== currentMember.isPrivate) {
+            return Number(previousMember.isPrivate) < Number(currentMember.isPrivate);
         }
 
         return true;
