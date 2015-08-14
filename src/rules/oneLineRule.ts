@@ -44,7 +44,7 @@ class OneLineWalker extends Lint.RuleWalker {
         const elseStatement = node.elseStatement;
         if (elseStatement != null) {
             // find the else keyword
-            const elseKeyword = OneLineWalker.getFirstChildOfKind(node, ts.SyntaxKind.ElseKeyword);
+            const elseKeyword = getFirstChildOfKind(node, ts.SyntaxKind.ElseKeyword);
             if (elseStatement.kind === ts.SyntaxKind.Block) {
                 const elseOpeningBrace = elseStatement.getChildAt(0);
                 this.handleOpeningBrace(elseKeyword, elseOpeningBrace);
@@ -152,7 +152,7 @@ class OneLineWalker extends Lint.RuleWalker {
 
     public visitEnumDeclaration(node: ts.EnumDeclaration) {
         const nameNode = node.name;
-        const openBraceToken = OneLineWalker.getFirstChildOfKind(node, ts.SyntaxKind.OpenBraceToken);
+        const openBraceToken = getFirstChildOfKind(node, ts.SyntaxKind.OpenBraceToken);
         this.handleOpeningBrace(nameNode, openBraceToken);
         super.visitEnumDeclaration(node);
     }
@@ -166,14 +166,14 @@ class OneLineWalker extends Lint.RuleWalker {
 
     public visitInterfaceDeclaration(node: ts.InterfaceDeclaration) {
         const nameNode = node.name;
-        const openBraceToken = OneLineWalker.getFirstChildOfKind(node, ts.SyntaxKind.OpenBraceToken);
+        const openBraceToken = getFirstChildOfKind(node, ts.SyntaxKind.OpenBraceToken);
         this.handleOpeningBrace(nameNode, openBraceToken);
         super.visitInterfaceDeclaration(node);
     }
 
     public visitClassDeclaration(node: ts.ClassDeclaration) {
         const nameNode = node.name;
-        const openBraceToken = OneLineWalker.getFirstChildOfKind(node, ts.SyntaxKind.OpenBraceToken);
+        const openBraceToken = getFirstChildOfKind(node, ts.SyntaxKind.OpenBraceToken);
         this.handleOpeningBrace(nameNode, openBraceToken);
         super.visitClassDeclaration(node);
     }
@@ -196,7 +196,7 @@ class OneLineWalker extends Lint.RuleWalker {
     public visitArrowFunction(node: ts.FunctionLikeDeclaration) {
         const body = node.body;
         if (body != null && body.kind === ts.SyntaxKind.Block) {
-            const arrowToken = OneLineWalker.getFirstChildOfKind(node, ts.SyntaxKind.EqualsGreaterThanToken);
+            const arrowToken = getFirstChildOfKind(node, ts.SyntaxKind.EqualsGreaterThanToken);
             const openBraceToken = node.body.getChildAt(0);
             this.handleOpeningBrace(arrowToken, openBraceToken);
         }
@@ -210,7 +210,7 @@ class OneLineWalker extends Lint.RuleWalker {
             if (node.type != null) {
                 this.handleOpeningBrace(node.type, openBraceToken);
             } else {
-                const closeParenToken = OneLineWalker.getFirstChildOfKind(node, ts.SyntaxKind.CloseParenToken);
+                const closeParenToken = getFirstChildOfKind(node, ts.SyntaxKind.CloseParenToken);
                 this.handleOpeningBrace(closeParenToken, openBraceToken);
             }
         }
@@ -246,8 +246,8 @@ class OneLineWalker extends Lint.RuleWalker {
             this.addFailure(failure);
         }
     }
+}
 
-    private static getFirstChildOfKind(node: ts.Node, kind: ts.SyntaxKind) {
-        return node.getChildren().filter((child) => child.kind === kind)[0];
-    }
+function getFirstChildOfKind(node: ts.Node, kind: ts.SyntaxKind) {
+    return node.getChildren().filter((child) => child.kind === kind)[0];
 }
