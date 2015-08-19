@@ -21,8 +21,8 @@ describe("<class-name>", () => {
     it("ensures class names are always pascal-cased", () => {
         const createFailure = Lint.Test.createFailuresOnFile(fileName, ClassNameRule.FAILURE_STRING);
         const expectedFailures = [
-          createFailure([5, 7], [5, 23]),
-          createFailure([9, 7], [9, 33])
+            createFailure([5, 7], [5, 23]),
+            createFailure([9, 7], [9, 33])
         ];
         const actualFailures = Lint.Test.applyRuleOnFile(fileName, ClassNameRule);
 
