@@ -21,10 +21,8 @@ describe("<member-no-default-access>", () => {
         let actualFailures = Lint.Test.applyRuleOnFile(fileName, MemberNoDefaultAccessRule);
 
         Lint.Test.assertFailuresEqual(actualFailures, [
-            Lint.Test.createFailure(fileName, [8, 5], [8, 15],
-                MemberNoDefaultAccessRule.FAILURE_STRING),
-            Lint.Test.createFailure(fileName, [16, 5], [17, 6],
-                MemberNoDefaultAccessRule.FAILURE_STRING)
+            Lint.Test.createFailure(fileName, [8, 5], [8, 15], MemberNoDefaultAccessRule.FAILURE_STRING),
+            Lint.Test.createFailure(fileName, [16, 5], [17, 6], MemberNoDefaultAccessRule.FAILURE_STRING)
         ]);
     });
 });

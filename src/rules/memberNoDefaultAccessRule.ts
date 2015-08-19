@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 export class Rule extends Lint.Rules.AbstractRule {
     static FAILURE_STRING = "default access modifier on member/method not allowed";
@@ -26,45 +26,29 @@ interface IModifiers {
     hasAccessModifier: boolean;
 }
 
-function getModifiers(modifiers?: ts.ModifiersArray): IModifiers {
-    let modifierStrings: string[] = [];
-    if (modifiers != null) {
-        modifierStrings = modifiers.map((x) => {
-            return x.getText();
-        });
-    }
-
-    let hasAccessModifier = modifierStrings.indexOf("public") !== -1;
-    hasAccessModifier = hasAccessModifier || modifierStrings.indexOf("private") !== -1;
-    hasAccessModifier = hasAccessModifier || modifierStrings.indexOf("protected") !== -1;
-
-    return {
-        hasAccessModifier: hasAccessModifier
-    };
-}
-
 export class MemberAccessWalker extends Lint.RuleWalker {
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
     }
 
-    public visitMethodDeclaration(node: ts.MethodDeclaration): void {
-        this.checkModifiers(node, getModifiers(node.modifiers));
-        super.visitMethodDeclaration(node);
+    public visitMethodDeclaration(node: ts.MethodDeclaration) {
+        this.validateVisibilityModifiers(node);
     }
 
-    public visitPropertyDeclaration(node: ts.PropertyDeclaration): void {
-        this.checkModifiers(node, getModifiers(node.modifiers));
-        super.visitPropertyDeclaration(node);
+    public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
+        this.validateVisibilityModifiers(node);
     }
 
-    private checkModifiers(node: ts.Node, current: IModifiers): void {
-        if (!this.followsRules(current)) {
+    private validateVisibilityModifiers(node: ts.Node) {
+        const hasAnyVisibilityModifiers = Lint.hasModifier(
+            node.modifiers,
+            ts.SyntaxKind.PublicKeyword,
+            ts.SyntaxKind.PrivateKeyword,
+            ts.SyntaxKind.ProtectedKeyword
+            );
+
+        if (!hasAnyVisibilityModifiers) {
             this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
         }
-    }
-
-    private followsRules(current: IModifiers): boolean {
-        return current.hasAccessModifier;
     }
 }
