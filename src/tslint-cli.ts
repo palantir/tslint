@@ -37,6 +37,10 @@ module Lint {
                 alias: "config",
                 describe: "configuration file"
             },
+            "e": {
+                alias: "non-ts-extensions",
+                describe: "allow files with non-typescript extensions"
+            },
             "h": {
                 alias: "help",
                 describe: "display detailed help"
@@ -101,6 +105,10 @@ module Lint {
             of characters for the max-line-length rule, or what functions to ban
             for the ban rule).
 
+        -e, --non-ts-extensions:
+            By default, TSLint only runs on files with a TS extension (.ts, .d.ts).
+            If this flag is present, TSLint will try to run on files with any extension.
+
         -o, --out:
             A filename to output the results to. By default, tslint outputs to
             stdout, which is usually the console where you're running it from.
@@ -157,6 +165,7 @@ module Lint {
         }
 
         const linter = new Linter(file, contents, {
+            allowNonTsExtensions: argv.e,
             configuration: configuration,
             formatter: argv.t,
             formattersDirectory: argv.s,

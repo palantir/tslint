@@ -26,6 +26,7 @@ module Lint {
     }
 
     export interface ILinterOptions {
+        allowNonTsExtensions?: boolean;
         configuration: any;
         formatter: string;
         formattersDirectory: string;
