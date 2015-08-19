@@ -37,7 +37,7 @@ expectOut $? 0 "tslint with a good file did not exit correctly"
 
 # make sure calling tslint without the -f flag exits correctly
 ./bin/tslint src/configuration.ts src/formatterLoader.ts
-expectOut $? 0 "tslint without -f flag did not exit correctly"
+expectOut $? 0 "tslint with valid arguments did not exit correctly"
 
 # make sure calling tslint with the -f flag exits correctly
 ./bin/tslint src/configuration.ts -f src/formatterLoader.ts
