@@ -18,68 +18,54 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "assignment in conditional: ";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const walker = new NoCondAssignWalker(sourceFile, this.getOptions());
+        const walker = new NoConditionalAssignmentWalker(sourceFile, this.getOptions());
         return this.applyWithWalker(walker);
     }
 }
 
-class NoCondAssignWalker extends Lint.RuleWalker {
+class NoConditionalAssignmentWalker extends Lint.RuleWalker {
     private inConditionalExpression = false;
 
     protected visitIfStatement(node: ts.IfStatement) {
-        this.inConditionalExpression = true;
-        if (node.expression.kind === ts.SyntaxKind.BinaryExpression) {
-            this.checkBinaryExpForAssignment(<ts.BinaryExpression> node.expression);
-        }
-        this.walkChildren(node.expression);
-        this.inConditionalExpression = false;
-
+        this.checkExpressionForBinaryExpressions(node.expression);
         super.visitIfStatement(node);
     }
 
     protected visitWhileStatement(node: ts.WhileStatement) {
-        this.inConditionalExpression = true;
-        if (node.expression.kind === ts.SyntaxKind.BinaryExpression) {
-            this.checkBinaryExpForAssignment(<ts.BinaryExpression> node.expression);
-        }
-        this.walkChildren(node.expression);
-        this.inConditionalExpression = false;
-
+        this.checkExpressionForBinaryExpressions(node.expression);
         super.visitWhileStatement(node);
     }
 
     protected visitDoStatement(node: ts.DoStatement) {
-        this.inConditionalExpression = true;
-        if (node.expression.kind === ts.SyntaxKind.BinaryExpression) {
-            this.checkBinaryExpForAssignment(<ts.BinaryExpression> node.expression);
-        }
-        this.walkChildren(node.expression);
-        this.inConditionalExpression = false;
-
+        this.checkExpressionForBinaryExpressions(node.expression);
         super.visitWhileStatement(node);
     }
 
     protected visitForStatement(node: ts.ForStatement) {
-        this.inConditionalExpression = true;
         if (node.condition) {
-            if (node.condition.kind === ts.SyntaxKind.BinaryExpression) {
-                this.checkBinaryExpForAssignment(<ts.BinaryExpression> node.condition);
-            }
-            this.walkChildren(node.condition);
+            this.checkExpressionForBinaryExpressions(node.condition);
         }
-        this.inConditionalExpression = false;
 
         super.visitForStatement(node);
     }
 
-    protected visitBinaryExpression(node: ts.BinaryExpression) {
+    protected visitBinaryExpression(expression: ts.BinaryExpression) {
         if (this.inConditionalExpression) {
-            this.checkBinaryExpForAssignment(node);
+            this.checkBinaryExpressionForAssignment(expression);
         }
-        super.visitBinaryExpression(node);
+        super.visitBinaryExpression(expression);
     }
 
-    private checkBinaryExpForAssignment(expression: ts.BinaryExpression) {
+    private checkExpressionForBinaryExpressions(expression: ts.Expression) {
+        this.inConditionalExpression = true;
+        if (expression.kind === ts.SyntaxKind.BinaryExpression) {
+            this.checkBinaryExpressionForAssignment(<ts.BinaryExpression> expression);
+        }
+        this.walkChildren(expression);
+        this.inConditionalExpression = false;
+    }
+
+    private checkBinaryExpressionForAssignment(expression: ts.BinaryExpression) {
         if (this.isAssignmentToken(expression.operatorToken.kind)) {
             this.addFailure(this.createFailure(expression.getStart(), expression.getWidth(), Rule.FAILURE_STRING));
         }
