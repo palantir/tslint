@@ -51,6 +51,7 @@
         "./rules/noAnyRuleTests.ts",
         "./rules/noArgRuleTests.ts",
         "./rules/noBitwiseRuleTests.ts",
+        "./rules/noCondAssignRuleTests.ts",
         "./rules/noConsecutiveBlankLinesRuleTests.ts",
         "./rules/noConsoleRuleTests.ts",
         "./rules/noConstructRuleTests.ts",
