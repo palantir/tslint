@@ -29,7 +29,7 @@ expectOut () {
 echo "Checking tslint binary"
 # make sure calling tslint with no args exits correctly.
 ./bin/tslint
-expectOut $? 1  "tslint with not args did not exit correctly"
+expectOut $? 1  "tslint with no args did not exit correctly"
 
 # make sure calling tslint with a good file exits correctly.
 ./bin/tslint src/configuration.ts
@@ -37,11 +37,11 @@ expectOut $? 0 "tslint with a good file did not exit correctly"
 
 # make sure calling tslint without the -f flag exits correctly
 ./bin/tslint src/configuration.ts src/formatterLoader.ts
-expectOut $? 0 "tslint with no did not exit correctly"
+expectOut $? 0 "tslint without -f flag did not exit correctly"
 
-# make sure calling tslint the -f flag exits correctly
+# make sure calling tslint with the -f flag exits correctly
 ./bin/tslint src/configuration.ts -f src/formatterLoader.ts
-expectOut $? 1 "tslint with no did not exit correctly"
+expectOut $? 1 "tslint with -f flag did not exit correctly"
 
 if [ $num_failures != 0 ]
 then
