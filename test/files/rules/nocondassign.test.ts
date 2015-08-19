@@ -18,7 +18,7 @@ for (;;) { }
 // invalid cases
 if (x = 5) { }
 if (a && (b = 5)) { }
-else if (x == 2) { }
+else if (x = 2) { }
 
 do { } while (x = 4);
 
@@ -27,3 +27,8 @@ while ((x = y - 12));
 
 for (var x = 4; x = 8; x++) { }
 for (; (y == 2) && (x = 3); ) { }
+
+if (x += 2) { }
+else if (h || (x <<= 4)) { }
+
+do { } while (x ^= 4) { }

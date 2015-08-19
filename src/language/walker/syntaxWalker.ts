@@ -528,7 +528,7 @@ module Lint {
             }
         }
 
-        private walkChildren(node: ts.Node) {
+        protected walkChildren(node: ts.Node) {
             ts.forEachChild(node, (child) => this.visitNode(child));
         }
     }

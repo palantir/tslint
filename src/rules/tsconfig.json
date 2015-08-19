@@ -34,7 +34,7 @@
         "./noAnyRule.ts",
         "./noArgRule.ts",
         "./noBitwiseRule.ts",
-        "./noCondAssignRule.ts",
+        "./noConditionalAssignmentRule.ts",
         "./noConsecutiveBlankLinesRule.ts",
         "./noConsoleRule.ts",
         "./noConstructRule.ts",
