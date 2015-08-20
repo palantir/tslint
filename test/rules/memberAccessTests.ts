@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-describe("<member-no-default-access>", () => {
-    it("disallow default access on member", () => {
-        let fileName = "rules/membernodefaultaccess.test.ts";
-        let MemberNoDefaultAccessRule = Lint.Test.getRule("member-no-default-access");
-        let actualFailures = Lint.Test.applyRuleOnFile(fileName, MemberNoDefaultAccessRule);
+describe("<member-access>", () => {
+    it("enforces using explicit visibility on class members", () => {
+        let fileName = "rules/memberaccess.test.ts";
+        let MemberAccessRule = Lint.Test.getRule("member-access");
+        let actualFailures = Lint.Test.applyRuleOnFile(fileName, MemberAccessRule);
 
         Lint.Test.assertFailuresEqual(actualFailures, [
-            Lint.Test.createFailure(fileName, [8, 5], [8, 15], MemberNoDefaultAccessRule.FAILURE_STRING),
-            Lint.Test.createFailure(fileName, [16, 5], [17, 6], MemberNoDefaultAccessRule.FAILURE_STRING)
+            Lint.Test.createFailure(fileName, [8, 5], [8, 15], MemberAccessRule.FAILURE_STRING),
+            Lint.Test.createFailure(fileName, [16, 5], [17, 6], MemberAccessRule.FAILURE_STRING)
         ]);
     });
 });

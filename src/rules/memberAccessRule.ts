@@ -22,10 +22,6 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-interface IModifiers {
-    hasAccessModifier: boolean;
-}
-
 export class MemberAccessWalker extends Lint.RuleWalker {
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
@@ -45,7 +41,7 @@ export class MemberAccessWalker extends Lint.RuleWalker {
             ts.SyntaxKind.PublicKeyword,
             ts.SyntaxKind.PrivateKeyword,
             ts.SyntaxKind.ProtectedKeyword
-            );
+        );
 
         if (!hasAnyVisibilityModifiers) {
             this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));

@@ -30,7 +30,7 @@
         "./labelPositionRule.ts",
         "./labelUndefinedRule.ts",
         "./maxLineLengthRule.ts",
-        "./memberNoDefaultAccessRule.ts",        
+        "./memberAccessRule.ts",
         "./memberOrderingRule.ts",
         "./noAnyRule.ts",
         "./noArgRule.ts",
