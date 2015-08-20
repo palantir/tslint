@@ -47,8 +47,12 @@ describe("<no-conditional-assignment>", () => {
     it("should detect assignments in while conditionals", () => {
         const expectedFailure1 = createFailure([25, 8], [25, 13]);
         const expectedFailure2 = createFailure([26, 9], [26, 19]);
+        const expectedFailure3 = createFailure([35, 9], [35, 14]);
+        const expectedFailure4 = createFailure([35, 33], [35, 38]);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);
+        Lint.Test.assertContainsFailure(actualFailures, expectedFailure3);
+        Lint.Test.assertContainsFailure(actualFailures, expectedFailure4);
     });
 
     it("should detect assignments in for conditionals", () => {
@@ -59,6 +63,6 @@ describe("<no-conditional-assignment>", () => {
     });
 
     it("no false positives for rule", () => {
-        assert.lengthOf(actualFailures, 11);
+        assert.lengthOf(actualFailures, 13);
     });
 });

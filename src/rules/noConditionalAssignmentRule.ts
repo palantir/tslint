@@ -24,55 +24,55 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class NoConditionalAssignmentWalker extends Lint.RuleWalker {
-    private inConditionalExpression = false;
+    private isInConditional = false;
 
     protected visitIfStatement(node: ts.IfStatement) {
-        this.checkExpressionForBinaryExpressions(node.expression);
+        this.validateConditionalExpression(node.expression);
         super.visitIfStatement(node);
     }
 
     protected visitWhileStatement(node: ts.WhileStatement) {
-        this.checkExpressionForBinaryExpressions(node.expression);
+        this.validateConditionalExpression(node.expression);
         super.visitWhileStatement(node);
     }
 
     protected visitDoStatement(node: ts.DoStatement) {
-        this.checkExpressionForBinaryExpressions(node.expression);
+        this.validateConditionalExpression(node.expression);
         super.visitWhileStatement(node);
     }
 
     protected visitForStatement(node: ts.ForStatement) {
-        if (node.condition) {
-            this.checkExpressionForBinaryExpressions(node.condition);
+        if (node.condition != null) {
+            this.validateConditionalExpression(node.condition);
         }
-
         super.visitForStatement(node);
     }
 
     protected visitBinaryExpression(expression: ts.BinaryExpression) {
-        if (this.inConditionalExpression) {
-            this.checkBinaryExpressionForAssignment(expression);
+        if (this.isInConditional) {
+            this.checkForAssignment(expression);
         }
         super.visitBinaryExpression(expression);
     }
 
-    private checkExpressionForBinaryExpressions(expression: ts.Expression) {
-        this.inConditionalExpression = true;
+    private validateConditionalExpression(expression: ts.Expression) {
+        this.isInConditional = true;
         if (expression.kind === ts.SyntaxKind.BinaryExpression) {
-            this.checkBinaryExpressionForAssignment(<ts.BinaryExpression> expression);
+            // check for simple assignment in a conditional, like `if (a = 1) {`
+            this.checkForAssignment(<ts.BinaryExpression> expression);
         }
+        // walk the children of the conditional expression for nested assignments, like `if ((a = 1) && (b == 1)) {`
         this.walkChildren(expression);
-        this.inConditionalExpression = false;
+        this.isInConditional = false;
     }
 
-    private checkBinaryExpressionForAssignment(expression: ts.BinaryExpression) {
-        if (this.isAssignmentToken(expression.operatorToken.kind)) {
+    private checkForAssignment(expression: ts.BinaryExpression) {
+        if (this.isAssignmentToken(expression.operatorToken)) {
             this.addFailure(this.createFailure(expression.getStart(), expression.getWidth(), Rule.FAILURE_STRING));
         }
     }
 
-    private isAssignmentToken(token: ts.SyntaxKind): boolean {
-        return token >= ts.SyntaxKind.FirstAssignment && token <= ts.SyntaxKind.LastAssignment;
+    private isAssignmentToken(token: ts.Node) {
+        return token.kind >= ts.SyntaxKind.FirstAssignment && token.kind <= ts.SyntaxKind.LastAssignment;
     }
-
 }
