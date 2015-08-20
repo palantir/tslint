@@ -64,7 +64,7 @@ declare module Lint {
         protected visitVariableStatement(node: ts.VariableStatement): void;
         protected visitWhileStatement(node: ts.WhileStatement): void;
         protected visitNode(node: ts.Node): void;
-        private walkChildren(node);
+        protected walkChildren(node: ts.Node): void;
     }
 }
 declare module Lint {

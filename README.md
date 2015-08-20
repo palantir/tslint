@@ -159,6 +159,7 @@ A sample configuration file with all options is available [here](https://github.
 * `no-any` diallows usages of `any` as a type decoration.
 * `no-arg` disallows access to `arguments.callee`.
 * `no-bitwise` disallows bitwise operators.
+* `no-conditional-assignment` disallows any type of assignment in any conditionals. This applies to `do-while`, `for`, `if`, and `while` statements.
 * `no-console` disallows access to the specified functions on `console`. Rule options are functions to ban on the console variable.
 * `no-consecutive-blank-lines` disallows having more than one blank line in a row in a file
 * `no-construct` disallows access to the constructors of `String`, `Number`, and `Boolean`.
