@@ -24,7 +24,7 @@ describe("Enable and Disable Rules", () => {
             "quotemark": [true, "double"]
         }};
 
-        const relativePath = join("test", "files", "rules/enabledisable.test.ts");
+        const relativePath = join("test", "files", "enabledisable.test.ts");
         const source = readFileSync(relativePath, "utf8");
 
         const options: Lint.ILinterOptions = {
