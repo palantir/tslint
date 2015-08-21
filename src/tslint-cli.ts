@@ -21,7 +21,7 @@
 module Lint {
     const fs = require("fs");
     const optimist = require("optimist")
-        .usage("usage: $0")
+        .usage("Usage: $0 [options] [file ...]")
         .check((argv: any) => {
             // at least one of file, help, version or unqualified argument must be present
             if (!(argv.h || argv.v || argv._.length > 0)) {
@@ -131,7 +131,7 @@ module Lint {
             The current version of tslint.
 
         -h, --help:
-           Prints this help message.`;
+           Prints this help message.\n`;
         outputStream.write(outputString);
         process.exit(0);
     }

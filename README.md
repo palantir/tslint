@@ -34,7 +34,7 @@ Please first ensure that the TypeScript source files compile correctly.
 
 ##### CLI
 
-  usage: `tslint [options...] [file ...]`
+  usage: `tslint [options] [file ...]`
 
   Options:
 
@@ -46,7 +46,7 @@ Please first ensure that the TypeScript source files compile correctly.
 
 By default, configuration is loaded from `tslint.json`, if it exists in the current path, or the user's home directory, in that order.
 
-tslint accepts the following commandline options:
+tslint accepts the following command-line options:
 
     -c, --config:
         The location of the configuration file that tslint will use to
