@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-describe("<class-name>", () => {
-    const ClassNameRule = Lint.Test.getRule("class-name");
-    const fileName = "rules/classname.test.ts";
+describe("<member-access>", () => {
+    it("enforces using explicit visibility on class members", () => {
+        let fileName = "rules/memberaccess.test.ts";
+        let MemberAccessRule = Lint.Test.getRule("member-access");
+        let actualFailures = Lint.Test.applyRuleOnFile(fileName, MemberAccessRule);
 
-    it("ensures class names are always pascal-cased", () => {
-        const createFailure = Lint.Test.createFailuresOnFile(fileName, ClassNameRule.FAILURE_STRING);
-        const expectedFailures = [
-            createFailure([5, 7], [5, 23]),
-            createFailure([9, 7], [9, 33])
-        ];
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, ClassNameRule);
-
-        Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
+        Lint.Test.assertFailuresEqual(actualFailures, [
+            Lint.Test.createFailure(fileName, [8, 5], [8, 15], MemberAccessRule.FAILURE_STRING),
+            Lint.Test.createFailure(fileName, [16, 5], [17, 6], MemberAccessRule.FAILURE_STRING)
+        ]);
     });
 });

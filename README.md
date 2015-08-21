@@ -28,6 +28,13 @@ Installation
 
 ```npm install tslint```
 
+##### `next` distribution
+
+The [`next` branch of the TSLint repo](https://github.com/palantir/tslint/tree/next) tracks the latest TypeScript
+compiler and allows you to lint TS code that uses the latest features of the language. Releases from this branch
+are published to npm with the `next` dist-tag, so you can get the latest dev version of TSLint via
+`npm install tslint@next`.
+
 Usage
 -----
 
@@ -35,7 +42,7 @@ Please first ensure that the TypeScript source files compile correctly.
 
 ##### CLI
 
-  usage: `tslint [options...] [file ...]`
+  usage: `tslint [options] [file ...]`
 
   Options:
 
@@ -47,7 +54,7 @@ Please first ensure that the TypeScript source files compile correctly.
 
 By default, configuration is loaded from `tslint.json`, if it exists in the current path, or the user's home directory, in that order.
 
-tslint accepts the following commandline options:
+tslint accepts the following command-line options:
 
     -c, --config:
         The location of the configuration file that tslint will use to
@@ -152,6 +159,7 @@ A sample configuration file with all options is available [here](https://github.
 * `label-position` enforces labels only on sensible statements.
 * `label-undefined` checks that labels are defined before usage.
 * `max-line-length` sets the maximum length of a line.
+* `member-access` enforces using explicit visibility on class members
 * `member-ordering` enforces member ordering. Rule options:
     * `public-before-private` All public members must be declared before private members
     * `static-before-instance` All static members must be declared before instance members
@@ -159,6 +167,7 @@ A sample configuration file with all options is available [here](https://github.
 * `no-any` diallows usages of `any` as a type decoration.
 * `no-arg` disallows access to `arguments.callee`.
 * `no-bitwise` disallows bitwise operators.
+* `no-conditional-assignment` disallows any type of assignment in any conditionals. This applies to `do-while`, `for`, `if`, and `while` statements.
 * `no-console` disallows access to the specified functions on `console`. Rule options are functions to ban on the console variable.
 * `no-consecutive-blank-lines` disallows having more than one blank line in a row in a file
 * `no-construct` disallows access to the constructors of `String`, `Number`, and `Boolean`.

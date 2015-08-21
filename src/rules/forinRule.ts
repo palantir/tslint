@@ -51,7 +51,7 @@ class ForInWalker extends Lint.RuleWalker {
 
                     // if this "if" statement has a single continue block
                     const ifStatement = (<ts.IfStatement> firstBlockStatement).thenStatement;
-                    if (ForInWalker.nodeIsContinue(ifStatement)) {
+                    if (nodeIsContinue(ifStatement)) {
                         return;
                     }
                 }
@@ -61,21 +61,21 @@ class ForInWalker extends Lint.RuleWalker {
         const failure = this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING);
         this.addFailure(failure);
     }
+}
 
-    private static nodeIsContinue(node: ts.Node) {
-        const kind = node.kind;
+function nodeIsContinue(node: ts.Node) {
+    const kind = node.kind;
 
-        if (kind === ts.SyntaxKind.ContinueStatement) {
+    if (kind === ts.SyntaxKind.ContinueStatement) {
+        return true;
+    }
+
+    if (kind === ts.SyntaxKind.Block) {
+        const blockStatements = (<ts.Block> node).statements;
+        if (blockStatements.length === 1 && blockStatements[0].kind === ts.SyntaxKind.ContinueStatement) {
             return true;
         }
-
-        if (kind === ts.SyntaxKind.Block) {
-            const blockStatements = (<ts.Block> node).statements;
-            if (blockStatements.length === 1 && blockStatements[0].kind === ts.SyntaxKind.ContinueStatement) {
-                return true;
-            }
-        }
-
-        return false;
     }
+
+    return false;
 }

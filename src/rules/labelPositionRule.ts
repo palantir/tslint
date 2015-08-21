@@ -18,13 +18,11 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "unexpected label on statement";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new LabelPosWalker(sourceFile, this.getOptions()));
+        return this.applyWithWalker(new LabelPositionWalker(sourceFile, this.getOptions()));
     }
 }
 
-class LabelPosWalker extends Lint.RuleWalker {
-    private isValidLabel: boolean;
-
+class LabelPositionWalker extends Lint.RuleWalker {
     public visitLabeledStatement(node: ts.LabeledStatement) {
         const statement = node.statement;
         if (statement.kind !== ts.SyntaxKind.DoStatement
