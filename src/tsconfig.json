@@ -20,7 +20,6 @@
     "files": [
         "../typings/node.d.ts",
         "../typings/typescriptServices.d.ts",
-        "../typings/typescriptServicesScanner.d.ts",
         "./language/walker/syntaxWalker.ts",
         "./language/walker/ruleWalker.ts",
         "./language/walker/scopeAwareRuleWalker.ts",
