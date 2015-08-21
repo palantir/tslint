@@ -33,11 +33,11 @@ module Lint {
     }
 
     export class Linter {
+        public static VERSION = "2.4.2";
+
         private fileName: string;
         private source: string;
         private options: ILinterOptions;
-
-        public static VERSION = "2.4.2";
 
         constructor(fileName: string, source: string, options: ILinterOptions) {
             this.fileName = fileName;
