@@ -22,6 +22,7 @@ module Lint {
         const compilerOptions = createCompilerOptions();
 
         const compilerHost: ts.CompilerHost = {
+            fileExists: () => true,
             getCanonicalFileName: (filename: string) => filename,
             getCurrentDirectory: () => "",
             getDefaultLibFileName: () => "lib.d.ts",
@@ -31,6 +32,7 @@ module Lint {
                     return ts.createSourceFile(filenameToGet, source, compilerOptions.target, true);
                 }
             },
+            readFile: () => null,
             useCaseSensitiveFileNames: () => true,
             writeFile: () => null
         };
