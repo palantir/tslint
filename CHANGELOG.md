@@ -1,6 +1,18 @@
 Change Log
 ===
 
+v2.4.3
+---
+* [new-rule] `no-conditional-assignment` (#507)
+* [new-rule] `member-access` (#552)
+* [new-rule] `no-internal-module` (#513)
+* [bugfix] small fixes to `sample.tslint.json` (#545)
+* [bugfix] fix README docs for quotemark and indent (#523)
+* [enhancement] update `findup-sync` and `underscore.string` dependencies
+* [enhancement] add `"typescript"` field to `package.json` (#560)
+* [enhancement] small improvements to CLI help text
+* [enhancement] expose raw failures array in the JS API (#477)
+
 v2.4.2
 ---
 * [bug] remove npm-shrinkwrap.json from the published package
