@@ -15,6 +15,7 @@
  */
 
 const OPTION_LEADING_UNDERSCORE = "allow-leading-underscore";
+const OPTION_TRAILING_UNDERSCORE = "allow-trailing-underscore";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "variable name must be in camelcase or uppercase";
@@ -71,15 +72,19 @@ class VariableNameWalker extends Lint.RuleWalker {
 
     private isCamelCase(name: string) {
         const firstCharacter = name.charAt(0);
-        const rest = name.substring(1);
+        const lastCharacter = name.charAt(name.length - 1);
+        const middle = name.substr(1, name.length - 2);
 
         if (name.length <= 0) {
             return true;
-        } else if (!this.hasOption(OPTION_LEADING_UNDERSCORE) && firstCharacter === "_") {
+        }
+        if (!this.hasOption(OPTION_LEADING_UNDERSCORE) && firstCharacter === "_") {
             return false;
         }
-
-        return firstCharacter === firstCharacter.toLowerCase() && rest.indexOf("_") === -1;
+        if (!this.hasOption(OPTION_TRAILING_UNDERSCORE) && lastCharacter === "_") {
+            return false;
+        }
+        return firstCharacter === firstCharacter.toLowerCase() && middle.indexOf("_") === -1;
     }
 
     private isUpperCase(name: string) {
