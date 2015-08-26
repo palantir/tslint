@@ -1025,11 +1025,6 @@ declare namespace ts {
         emitSkipped: boolean;
         diagnostics: Diagnostic[];
     }
-    interface TypeCheckerHost {
-        getCompilerOptions(): CompilerOptions;
-        getSourceFiles(): SourceFile[];
-        getSourceFile(fileName: string): SourceFile;
-    }
     interface TypeChecker {
         getTypeOfSymbolAtLocation(symbol: Symbol, node: Node): Type;
         getDeclaredTypeOfSymbol(symbol: Symbol): Type;
@@ -1298,6 +1293,10 @@ declare namespace ts {
         Error = 1,
         Message = 2,
     }
+    const enum ModuleResolutionKind {
+        Classic = 1,
+        NodeJs = 2,
+    }
     interface CompilerOptions {
         allowNonTsExtensions?: boolean;
         charset?: string;
@@ -1321,6 +1320,7 @@ declare namespace ts {
         noLib?: boolean;
         noResolve?: boolean;
         out?: string;
+        outFile?: string;
         outDir?: string;
         preserveConstEnums?: boolean;
         project?: string;
@@ -1336,6 +1336,7 @@ declare namespace ts {
         experimentalDecorators?: boolean;
         experimentalAsyncFunctions?: boolean;
         emitDecoratorMetadata?: boolean;
+        moduleResolution?: ModuleResolutionKind;
         [option: string]: string | number | boolean;
     }
     const enum ModuleKind {
@@ -1513,6 +1514,9 @@ declare namespace ts {
     function findConfigFile(searchPath: string): string;
     function resolveTripleslashReference(moduleName: string, containingFile: string): string;
     function resolveModuleName(moduleName: string, containingFile: string, compilerOptions: CompilerOptions, host: ModuleResolutionHost): ResolvedModule;
+    function nodeModuleNameResolver(moduleName: string, containingFile: string, host: ModuleResolutionHost): ResolvedModule;
+    function baseUrlModuleNameResolver(moduleName: string, containingFile: string, baseUrl: string, host: ModuleResolutionHost): ResolvedModule;
+    function classicNameResolver(moduleName: string, containingFile: string, compilerOptions: CompilerOptions, host: ModuleResolutionHost): ResolvedModule;
     function createCompilerHost(options: CompilerOptions, setParentNodes?: boolean): CompilerHost;
     function getPreEmitDiagnostics(program: Program, sourceFile?: SourceFile, cancellationToken?: CancellationToken): Diagnostic[];
     function flattenDiagnosticMessageText(messageText: string | DiagnosticMessageChain, newLine: string): string;
