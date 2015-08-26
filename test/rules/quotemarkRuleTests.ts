@@ -22,14 +22,38 @@ describe("<quotemark>", () => {
 
     it("enforces single quotes", () => {
         const actualFailures = Lint.Test.applyRuleOnFile(fileName, QuoteMarkRule, [true, "single"]);
+        const expectedFailures = [
+            Lint.Test.createFailure(fileName, [2, 19], [2, 28], singleFailureString),
+            Lint.Test.createFailure(fileName, [3, 26], [3, 48], singleFailureString)
+        ];
+
+        assert.equal(actualFailures.length, 2);
+        assert.isTrue(actualFailures[0].equals(expectedFailures[0]));
+        assert.isTrue(actualFailures[1].equals(expectedFailures[1]));
+    });
+
+    it("enforces double quotes", () => {
+        const actualFailures = Lint.Test.applyRuleOnFile(fileName, QuoteMarkRule, [true, "double"]);
+        const expectedFailures = [
+          Lint.Test.createFailure(fileName, [1, 14], [1, 22], doubleFailureString),
+          Lint.Test.createFailure(fileName, [4, 26], [4, 48], doubleFailureString)
+        ];
+
+        assert.equal(actualFailures.length, 2);
+        assert.isTrue(actualFailures[0].equals(expectedFailures[0]));
+        assert.isTrue(actualFailures[1].equals(expectedFailures[1]));
+    });
+
+    it("enforces single quotes but allow other quote marks to avoid having to escape", () => {
+        const actualFailures = Lint.Test.applyRuleOnFile(fileName, QuoteMarkRule, [true, "single", "avoid-escape"]);
         const expectedFailure = Lint.Test.createFailure(fileName, [2, 19], [2, 28], singleFailureString);
 
         assert.equal(actualFailures.length, 1);
         assert.isTrue(actualFailures[0].equals(expectedFailure));
     });
 
-    it("enforces double quotes", () => {
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, QuoteMarkRule, [true, "double"]);
+    it("enforces double quotes but allow other quote marks to avoid having to escape", () => {
+        const actualFailures = Lint.Test.applyRuleOnFile(fileName, QuoteMarkRule, [true, "double", "avoid-escape"]);
         const expectedFailure = Lint.Test.createFailure(fileName, [1, 14], [1, 22], doubleFailureString);
 
         assert.equal(actualFailures.length, 1);
