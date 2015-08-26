@@ -1,6 +1,10 @@
 Change Log
 ===
 
+v2.5.0-dev.4
+---
+* Upgrade TypeScript compiler to v1.6.0-dev.20150825
+
 v2.5.0-dev.3
 ---
 * Upgrade TypeScript compiler to v1.6.0-dev.20150821
