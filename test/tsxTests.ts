@@ -82,9 +82,7 @@ describe("TSX syntax", () => {
         });
 
         it("with no false positives", () => {
-            // todo (#558): there should only be 3, but there is a false positive no-unused-variable failure due
-            // to a compiler bug
-            assert.lengthOf(actualFailures, 4);
+            assert.lengthOf(actualFailures, 3);
         });
     });
 

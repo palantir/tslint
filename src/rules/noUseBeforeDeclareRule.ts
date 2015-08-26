@@ -19,10 +19,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_POSTFIX = "' used before declaration";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const documentRegistry = ts.createDocumentRegistry();
-        const languageServiceHost = Lint.createLanguageServiceHost("file.ts", sourceFile.getFullText());
-        const languageService = ts.createLanguageService(languageServiceHost, documentRegistry);
-
+        const languageService = Lint.createLanguageService(sourceFile.fileName, sourceFile.getFullText());
         return this.applyWithWalker(new NoUseBeforeDeclareWalker(sourceFile, this.getOptions(), languageService));
     }
 }
@@ -101,7 +98,8 @@ class NoUseBeforeDeclareWalker extends Lint.ScopeAwareRuleWalker<VisitedVariable
     }
 
     private validateUsageForVariable(name: string, position: number) {
-        const highlights = this.languageService.getDocumentHighlights("file.ts", position, ["file.ts"]);
+        const fileName = this.getSourceFile().fileName;
+        const highlights = this.languageService.getDocumentHighlights(fileName, position, [fileName]);
         for (let highlight of highlights) {
             for (let highlightSpan of highlight.highlightSpans) {
                 const referencePosition = highlightSpan.textSpan.start;
