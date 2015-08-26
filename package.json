@@ -6,9 +6,6 @@
     "tslint": "./bin/tslint"
   },
   "main": "./lib/tslint",
-  "typescript": {
-    "definition": "lib/tslint.d.ts"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/palantir/tslint.git"
