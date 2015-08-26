@@ -33,7 +33,7 @@ module Lint {
     }
 
     export class Linter {
-        public static VERSION = "2.4.3";
+        public static VERSION = "2.4.4";
 
         private fileName: string;
         private source: string;

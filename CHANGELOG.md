@@ -1,6 +1,10 @@
 Change Log
 ===
 
+v2.4.4
+---
+* [bugfix] remove "typescript" block from package.json (#606)
+
 v2.4.3
 ---
 * [new-rule] `no-conditional-assignment` (#507)

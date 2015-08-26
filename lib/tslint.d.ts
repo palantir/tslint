@@ -250,10 +250,10 @@ declare module Lint {
         rulesDirectory: string;
     }
     class Linter {
+        static VERSION: string;
         private fileName;
         private source;
         private options;
-        static VERSION: string;
         constructor(fileName: string, source: string, options: ILinterOptions);
         lint(): LintResult;
         private getRelativePath(directory);
