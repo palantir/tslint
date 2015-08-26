@@ -32,3 +32,4 @@ export function functionWithInvalidSpread(invalid_arg: ...number) { // 1 failure
 }
 
 let optionallyValid_ = "bar";
+let _$httpBackend_ = "leading and trailing";

@@ -35,7 +35,8 @@ describe("<variable-name>", () => {
             createFailure([26, 56], [26, 69]),
             createFailure([26, 71], [26, 84]),
             createFailure([30, 43], [30, 54]),
-            createFailure([34, 5], [34, 21])
+            createFailure([34, 5], [34, 21]),
+            createFailure([35, 5], [35, 19])
         ];
 
         const actualFailures = Lint.Test.applyRuleOnFile(fileName, VariableNameRule);
@@ -66,6 +67,23 @@ describe("<variable-name>", () => {
         const actualFailures = Lint.Test.applyRuleOnFile(fileName, VariableNameRule, options);
         const optionallyValidFailures = [
             createFailure([34, 5], [34, 21])
+        ];
+
+        // none of the optionally valid names should appear in the failures list
+        assert.isFalse(actualFailures.some((failure) => {
+            return optionallyValidFailures.some((f) => f.equals(failure));
+        }));
+    });
+
+    it("ensures leading & trailing underscores can optionally be legal", () => {
+        const options = [true,
+            "allow-leading-underscore",
+            "allow-trailing-underscore"
+        ];
+
+        const actualFailures = Lint.Test.applyRuleOnFile(fileName, VariableNameRule, options);
+        const optionallyValidFailures = [
+            createFailure([35, 5], [35, 19])
         ];
 
         // none of the optionally valid names should appear in the failures list
