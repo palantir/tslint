@@ -15,6 +15,10 @@ v2.5.0-dev.1
 * Upgrade TypeScript compiler to v1.6.0-dev.20150805
 * [enhancement] Support `.tsx` syntax (#490)
 
+v2.4.4
+---
+* [bugfix] remove "typescript" block from package.json (#606)
+
 v2.4.3
 ---
 * [new-rule] `no-conditional-assignment` (#507)
