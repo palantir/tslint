@@ -68,7 +68,7 @@ module Lint {
             this.walkChildren(node);
         }
 
-        protected visitConstructorType(node: ts.Node) {
+        protected visitConstructorType(node: ts.FunctionOrConstructorTypeNode) {
             this.walkChildren(node);
         }
 
@@ -124,7 +124,7 @@ module Lint {
             this.walkChildren(node);
         }
 
-        protected visitFunctionType(node: ts.Node) {
+        protected visitFunctionType(node: ts.FunctionOrConstructorTypeNode) {
             this.walkChildren(node);
         }
 
@@ -323,7 +323,7 @@ module Lint {
                     break;
 
                 case ts.SyntaxKind.ConstructorType:
-                    this.visitConstructorType(node);
+                    this.visitConstructorType(<ts.FunctionOrConstructorTypeNode> node);
                     break;
 
                 case ts.SyntaxKind.ContinueStatement:
@@ -379,7 +379,7 @@ module Lint {
                     break;
 
                 case ts.SyntaxKind.FunctionType:
-                    this.visitFunctionType(node);
+                    this.visitFunctionType(<ts.FunctionOrConstructorTypeNode> node);
                     break;
 
                 case ts.SyntaxKind.GetAccessor:
