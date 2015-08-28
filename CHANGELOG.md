@@ -3,7 +3,7 @@ Change Log
 
 v2.4.5
 ---
-* [bugfix] #500
+* [bugfix] fix false positives on `no-shadowed-variable` rule (#500)
 * [enhancement] add `allow-trailing-underscore` option to `variable-name` rule
 
 v2.4.4
