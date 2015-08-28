@@ -116,6 +116,7 @@ declare module Lint {
 }
 declare module Lint {
     function createLanguageServiceHost(fileName: string, source: string): ts.LanguageServiceHost;
+    function createLanguageService(fileName: string, source: string): ts.LanguageService;
 }
 declare module Lint.Rules {
     class AbstractRule implements Lint.IRule {

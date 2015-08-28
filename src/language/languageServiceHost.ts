@@ -28,4 +28,10 @@ module Lint {
 
         return host;
     }
+
+    export function createLanguageService(fileName: string, source: string) {
+        const documentRegistry = ts.createDocumentRegistry();
+        const languageServiceHost = Lint.createLanguageServiceHost(fileName, source);
+        return ts.createLanguageService(languageServiceHost, documentRegistry);
+    }
 }
