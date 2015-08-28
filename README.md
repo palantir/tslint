@@ -214,6 +214,7 @@ A sample configuration file with all options is available [here](https://github.
     * `check-function` checks that all top-level functions are using strict mode
 * `variable-name` allows only camelCased or UPPER_CASED variable names. Rule options:
   * `"allow-leading-underscore"` allows underscores at the beginnning.
+  * `"allow-trailing-underscore"` allows underscores at the end.
 * `whitespace` enforces spacing whitespace. Rule options:
   * `"check-branch"` checks branching statements (`if`/`else`/`for`/`while`) are followed by whitespace
   * `"check-decl"`checks that variable declarations have whitespace around the equals token
