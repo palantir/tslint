@@ -1,6 +1,6 @@
 {
   "name": "tslint",
-  "version": "2.4.4",
+  "version": "2.4.5",
   "description": "a static analysis linter for TypeScript",
   "bin": {
     "tslint": "./bin/tslint"
