@@ -13,7 +13,7 @@ declare module Lint {
         protected visitCatchClause(node: ts.CatchClause): void;
         protected visitConditionalExpression(node: ts.ConditionalExpression): void;
         protected visitConstructorDeclaration(node: ts.ConstructorDeclaration): void;
-        protected visitConstructorType(node: ts.Node): void;
+        protected visitConstructorType(node: ts.FunctionOrConstructorTypeNode): void;
         protected visitContinueStatement(node: ts.BreakOrContinueStatement): void;
         protected visitDebuggerStatement(node: ts.Statement): void;
         protected visitDefaultClause(node: ts.DefaultClause): void;
@@ -27,7 +27,7 @@ declare module Lint {
         protected visitForOfStatement(node: ts.ForOfStatement): void;
         protected visitFunctionDeclaration(node: ts.FunctionDeclaration): void;
         protected visitFunctionExpression(node: ts.FunctionExpression): void;
-        protected visitFunctionType(node: ts.Node): void;
+        protected visitFunctionType(node: ts.FunctionOrConstructorTypeNode): void;
         protected visitGetAccessor(node: ts.AccessorDeclaration): void;
         protected visitIdentifier(node: ts.Identifier): void;
         protected visitIfStatement(node: ts.IfStatement): void;
