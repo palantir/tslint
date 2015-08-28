@@ -19,6 +19,11 @@ v2.5.0-dev.1
 * Upgrade TypeScript compiler to v1.6.0-dev.20150805
 * [enhancement] Support `.tsx` syntax (#490)
 
+v2.4.5
+---
+* [bugfix] fix false positives on `no-shadowed-variable` rule (#500)
+* [enhancement] add `allow-trailing-underscore` option to `variable-name` rule
+
 v2.4.4
 ---
 * [bugfix] remove "typescript" block from package.json (#606)
