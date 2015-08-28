@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
- var HelloWorld = (function () {
+ let HelloWorld = (function () {
     function HelloWorld(name) {
         this.name = name;
     }
@@ -23,3 +23,6 @@
     };
     return HelloWorld;
 })();
+
+let hello = new HelloWorld("hello");
+hello.sayHello();

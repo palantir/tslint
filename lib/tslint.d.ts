@@ -244,6 +244,7 @@ declare module Lint {
         output: string;
     }
     interface ILinterOptions {
+        allowNonTsExtensions?: boolean;
         configuration: any;
         formatter: string;
         formattersDirectory: string;
