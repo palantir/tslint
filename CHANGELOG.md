@@ -1,6 +1,11 @@
 Change Log
 ===
 
+v2.5.0-dev.5
+---
+* Upgrade TypeScript compiler to v1.7.0-dev.20150828
+* [bugfix] Handle .tsx files appropriately (#597, #558)
+
 v2.5.0-dev.4
 ---
 * Upgrade TypeScript compiler to v1.6.0-dev.20150825
