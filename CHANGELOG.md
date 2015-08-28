@@ -1,6 +1,11 @@
 Change Log
 ===
 
+v2.5.0-dev.5
+---
+* Upgrade TypeScript compiler to v1.7.0-dev.20150828
+* [bugfix] Handle .tsx files appropriately (#597, #558)
+
 v2.5.0-dev.4
 ---
 * Upgrade TypeScript compiler to v1.6.0-dev.20150825
@@ -18,6 +23,11 @@ v2.5.0-dev.1
 ---
 * Upgrade TypeScript compiler to v1.6.0-dev.20150805
 * [enhancement] Support `.tsx` syntax (#490)
+
+v2.4.5
+---
+* [bugfix] fix false positives on `no-shadowed-variable` rule (#500)
+* [enhancement] add `allow-trailing-underscore` option to `variable-name` rule
 
 v2.4.4
 ---

@@ -97,3 +97,15 @@ function testDestructuring(x: number) {
         var [...z] = [1, 2, 3, 4]; // failure
     }
 }
+
+function falsePositive1(bar: (okay1: any) => void) {
+    let okay1 = 1;
+}
+
+function falsePositive2(okay2: any, done: (okay2: any) => void) { }
+
+interface FalsePositive3 {
+    diffuse: (pos: number) => number;
+    specular: (pos: number) => number;
+    pos: number;
+}

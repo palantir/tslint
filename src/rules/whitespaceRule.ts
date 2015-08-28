@@ -126,7 +126,7 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
         super.visitConditionalExpression(node);
     }
 
-    public visitConstructorType(node: ts.Node) {
+    public visitConstructorType(node: ts.FunctionOrConstructorTypeNode) {
         this.checkEqualsGreaterThanTokenInNode(node);
         super.visitConstructorType(node);
     }
@@ -140,7 +140,7 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
         super.visitExportAssignment(node);
     }
 
-    public visitFunctionType(node: ts.Node) {
+    public visitFunctionType(node: ts.FunctionOrConstructorTypeNode) {
         this.checkEqualsGreaterThanTokenInNode(node);
         super.visitFunctionType(node);
     }
