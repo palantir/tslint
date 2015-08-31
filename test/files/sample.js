@@ -14,15 +14,8 @@
  * limitations under the License.
  */
 
- let HelloWorld = (function () {
-    function HelloWorld(name) {
-        this.name = name;
-    }
-    HelloWorld.prototype.sayHello = function () {
-        return "Hello, " + this.name + "!";
-    };
-    return HelloWorld;
-})();
-
-let hello = new HelloWorld("hello");
-hello.sayHello();
+// we have to keep this file simple, or TSLint will be very unhappy,
+// as it doesn't like the 'var' keyword for example
+(function(name){
+    return "Hello, " + name;
+})("TSLint");
