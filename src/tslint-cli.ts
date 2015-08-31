@@ -40,7 +40,7 @@ module Lint {
             "e": {
                 alias: "non-ts-extensions",
                 default: false,
-                describe: "allow files with non-typescript extensions",
+                describe: "allow files without a TypeScript extension",
                 type: "boolean"
             },
             "h": {
