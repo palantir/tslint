@@ -39,7 +39,9 @@ module Lint {
             },
             "e": {
                 alias: "non-ts-extensions",
-                describe: "allow files with non-typescript extensions"
+                default: false,
+                describe: "allow files with non-typescript extensions",
+                type: "boolean"
             },
             "h": {
                 alias: "help",
@@ -172,7 +174,13 @@ module Lint {
             rulesDirectory: argv.r
         });
 
-        const lintResult = linter.lint();
+        let lintResult;
+        try {
+            lintResult = linter.lint();
+        } catch (e) {
+            console.error(e.message);
+            process.exit(1);
+        }
 
         if (lintResult.failureCount > 0) {
             outputStream.write(lintResult.output, () => {
