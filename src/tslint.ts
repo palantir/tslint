@@ -52,9 +52,8 @@ module Lint {
 
         public lint(): LintResult {
             const tsExtensions = [".ts"];
-            const fileExtension = path.extname(this.fileName);
-            const isTsFile = (tsExtensions.indexOf(fileExtension) >= 0);
-            if (!(isTsFile || this.options.allowNonTsExtensions)) {
+            const isTsFile = tsExtensions.indexOf(path.extname(this.fileName)) >= 0;
+            if (!isTsFile && !this.options.allowNonTsExtensions) {
                 throw new Error("Cannot lint non-TypeScript files. Use the -e option to enable linting.");
             }
 

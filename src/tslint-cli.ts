@@ -174,7 +174,7 @@ module Lint {
             rulesDirectory: argv.r
         });
 
-        let lintResult;
+        let lintResult: LintResult;
         try {
             lintResult = linter.lint();
         } catch (e) {
