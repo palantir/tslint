@@ -24,12 +24,23 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class NoInternalModuleWalker extends Lint.RuleWalker {
     public visitModuleDeclaration(node: ts.ModuleDeclaration) {
-        if (Lint.isNodeFlagSet(node, ts.NodeFlags.Namespace)) {
-            // ok namespace
-        } else if (node.name.kind === ts.SyntaxKind.Identifier) {
-            // for external modules, node.name will be a LiteralExpression instead of Identifier
+        if (this.isInternalModuleDeclaration(node)) {
             this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
         }
         super.visitModuleDeclaration(node);
+    }
+
+    private isInternalModuleDeclaration(node: ts.ModuleDeclaration) {
+        // an internal module declaration is not a namespace or a nested declaration
+        // for external modules, node.name.kind will be a LiteralExpression instead of Identifier
+        return !Lint.isNodeFlagSet(node, ts.NodeFlags.Namespace)
+            && !this.isNestedDeclaration(node)
+            && node.name.kind === ts.SyntaxKind.Identifier;
+    }
+
+    private isNestedDeclaration(node: ts.ModuleDeclaration) {
+        // in a declaration expression like 'module a.b.c' - 'a' is the top level module declaration node and 'b' and 'c' are nested
+        // therefore we can depend that a node's position will only match with its name's position for nested nodes
+        return node.name.pos === node.pos;
     }
 }
