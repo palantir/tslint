@@ -43,6 +43,15 @@ expectOut $? 0 "tslint with valid arguments did not exit correctly"
 ./bin/tslint src/configuration.ts -f src/formatterLoader.ts
 expectOut $? 1 "tslint with -f flag did not exit correctly"
 
+# make sure tslint only accepts typescript extensions without -e option
+./bin/tslint test/files/sample.js
+expectOut $? 1 "tslint without -e flag did not exit correctly when handling non-TS extensions"
+
+# make sure tslint accepts other file extensions with -e flag
+./bin/tslint -e test/files/sample.js
+expectOut $? 0 "tslint with -e flag did not exit correctly when handling non-TS extensions"
+
+
 if [ $num_failures != 0 ]
 then
   echo "Failed $num_failures tests"

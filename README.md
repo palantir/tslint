@@ -39,6 +39,7 @@ Please first ensure that the TypeScript source files compile correctly.
   Options:
 
     -c, --config              configuration file
+    -e, --non-ts-extensions   allow files without a TypeScript extension
     -o, --out                 output file
     -r, --rules-dir           rules directory
     -s, --formatters-dir      formatters directory
@@ -62,6 +63,10 @@ tslint accepts the following command-line options:
         to the rule that will determine what it checks for (such as number
         of characters for the max-line-length rule, or what functions to ban
         for the ban rule).
+
+    -e, --non-ts-extensions:
+        By default, TSLint only runs on files with a TS extension (.ts, .d.ts).
+        If this flag is present, TSLint will try to run on files with any extension.
 
     -o, --out:
         A filename to output the results to. By default, tslint outputs to
@@ -106,6 +111,7 @@ var configuration = {
 };
 
 var options = {
+    allowNonTsExtensions: false,
     formatter: "json",
     configuration: configuration,
     rulesDirectory: "customRules/",

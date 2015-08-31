@@ -26,6 +26,7 @@ module Lint {
     }
 
     export interface ILinterOptions {
+        allowNonTsExtensions?: boolean;
         configuration: any;
         formatter: string;
         formattersDirectory: string;
@@ -43,9 +44,19 @@ module Lint {
             this.fileName = fileName;
             this.source = source;
             this.options = options;
+
+            if (this.options.allowNonTsExtensions == null) {
+                this.options.allowNonTsExtensions = false;
+            }
         }
 
         public lint(): LintResult {
+            const tsExtensions = [".ts"];
+            const isTsFile = tsExtensions.indexOf(path.extname(this.fileName)) >= 0;
+            if (!isTsFile && !this.options.allowNonTsExtensions) {
+                throw new Error("Cannot lint non-TypeScript files. Use the -e option to enable linting.");
+            }
+
             const failures: RuleFailure[] = [];
             const sourceFile = Lint.getSourceFile(this.fileName, this.source);
 
