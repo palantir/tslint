@@ -36,7 +36,7 @@
     "grunt-tslint": "latest",
     "mocha": "^2.2.5",
     "tslint": "latest",
-    "typescript": "next"
+    "typescript": "1.6.0-beta"
   },
   "license": "Apache-2.0"
 }
