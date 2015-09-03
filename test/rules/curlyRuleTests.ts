@@ -58,7 +58,7 @@ describe("<curly>", () => {
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 
-    it("does have false positives for curly rule", () => {
+    it("does not have false positives", () => {
         assert.lengthOf(actualFailures, 7);
     });
 });

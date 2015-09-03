@@ -35,6 +35,8 @@ declare module Lint {
         protected visitImportEqualsDeclaration(node: ts.ImportEqualsDeclaration): void;
         protected visitIndexSignatureDeclaration(node: ts.IndexSignatureDeclaration): void;
         protected visitInterfaceDeclaration(node: ts.InterfaceDeclaration): void;
+        protected visitJsxElement(node: ts.JsxElement): void;
+        protected visitJsxSelfClosingElement(node: ts.JsxSelfClosingElement): void;
         protected visitLabeledStatement(node: ts.LabeledStatement): void;
         protected visitMethodDeclaration(node: ts.MethodDeclaration): void;
         protected visitMethodSignature(node: ts.SignatureDeclaration): void;
@@ -114,6 +116,7 @@ declare module Lint {
 }
 declare module Lint {
     function createLanguageServiceHost(fileName: string, source: string): ts.LanguageServiceHost;
+    function createLanguageService(fileName: string, source: string): ts.LanguageService;
 }
 declare module Lint.Rules {
     class AbstractRule implements Lint.IRule {
@@ -206,7 +209,7 @@ declare module Lint {
         protected visitRegularExpressionLiteral(node: ts.Node): void;
         protected visitIdentifier(node: ts.Identifier): void;
         protected visitTemplateExpression(node: ts.TemplateExpression): void;
-        private addTokenToSkipFromNode(node);
+        protected addTokenToSkipFromNode(node: ts.Node): void;
     }
 }
 declare module Lint.Configuration {

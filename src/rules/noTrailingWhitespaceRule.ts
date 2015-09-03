@@ -27,7 +27,7 @@ class NoTrailingWhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
         super.visitSourceFile(node);
         let lastSeenWasWhitespace = false;
         let lastSeenWhitespacePosition = 0;
-        Lint.scanAllTokens(ts.createScanner(ts.ScriptTarget.ES5, false, node.text), (scanner: ts.Scanner) => {
+        Lint.scanAllTokens(ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, node.text), (scanner: ts.Scanner) => {
             const startPos = scanner.getStartPos();
             if (this.tokensToSkipStartEndMap[startPos] != null) {
                 // tokens to skip are places where the scanner gets confused about what the token is, without the proper context

@@ -15,13 +15,13 @@
         "./helper.ts",
         "./ruleDisableEnableTests.ts",
         "./ruleLoaderTests.ts",
+        "./tsxTests.ts",
         "./formatters/*.ts",
         "./rules/*.ts"
     ],
     "files": [
         "../typings/node.d.ts",
         "../typings/typescriptServices.d.ts",
-        "../typings/typescriptServicesScanner.d.ts",
         "../lib/tslint.d.ts",
         "./typings/chai/chai.d.ts",
         "./typings/mocha/mocha.d.ts",
@@ -29,6 +29,7 @@
         "./helper.ts",
         "./ruleDisableEnableTests.ts",
         "./ruleLoaderTests.ts",
+        "./tsxTests.ts",
         "./formatters/externalFormatterTest.ts",
         "./formatters/jsonFormatterTests.ts",
         "./formatters/pmdFormatterTests.ts",

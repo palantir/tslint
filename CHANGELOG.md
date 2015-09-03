@@ -1,6 +1,35 @@
 Change Log
 ===
 
+v2.5.0-beta
+---
+* Use TypeScript compiler `v1.6.0-beta`
+* [bugfix] Fix `no-internal-module` false positives on nested namespaces (#600)
+* [docs] Add documentation for `sort-object-literal-keys` rule
+
+v2.5.0-dev.5
+---
+* Upgrade TypeScript compiler to `v1.7.0-dev.20150828`
+* [bugfix] Handle .tsx files appropriately (#597, #558)
+
+v2.5.0-dev.4
+---
+* Upgrade TypeScript compiler to `v1.6.0-dev.20150825`
+
+v2.5.0-dev.3
+---
+* Upgrade TypeScript compiler to `v1.6.0-dev.20150821`
+
+v2.5.0-dev.2
+---
+* Upgrade TypeScript compiler to `v1.6.0-dev.20150811`
+* [bug] fix `whitespace` false positive in JSX elements (#559)
+
+v2.5.0-dev.1
+---
+* Upgrade TypeScript compiler to `v1.6.0-dev.20150805`
+* [enhancement] Support `.tsx` syntax (#490)
+
 v2.4.5
 ---
 * [bugfix] fix false positives on `no-shadowed-variable` rule (#500)

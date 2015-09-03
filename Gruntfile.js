@@ -11,7 +11,7 @@ module.exports = function (grunt) {
     // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
     grunt.initConfig({
         pkg: grunt.file.readJSON("package.json"),
-        typescriptBin: "node_modules/typescript/bin/typescriptServices.js",
+        typescriptBin: "node_modules/typescript/lib/typescriptServices.js",
 
         clean: {
             bin: ["bin/tslint-cli.js"],
@@ -78,6 +78,7 @@ module.exports = function (grunt) {
 
         ts: {
             options: {
+                noImplicitAny: true,
                 sourceMap: false,
                 target: "es5"
             },
@@ -97,7 +98,6 @@ module.exports = function (grunt) {
 
             core: {
                 options: {
-                    noImplicitAny: true,
                     declaration: true,
                     module: "commonjs"
                 },

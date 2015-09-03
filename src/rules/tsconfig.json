@@ -16,7 +16,6 @@
         "../../lib/tslint.d.ts",
         "../../typings/node.d.ts",
         "../../typings/typescriptServices.d.ts",
-        "../../typings/typescriptServicesScanner.d.ts",
         "./alignRule.ts",
         "./banRule.ts",
         "./classNameRule.ts",

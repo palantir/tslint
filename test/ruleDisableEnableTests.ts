@@ -24,7 +24,7 @@ describe("Enable and Disable Rules", () => {
             "quotemark": [true, "double"]
         }};
 
-        const relativePath = join("test", "files", "rules/enabledisable.test.ts");
+        const relativePath = join("test", "files", "enabledisable.test.ts");
         const source = readFileSync(relativePath, "utf8");
 
         const options: Lint.ILinterOptions = {
@@ -35,10 +35,10 @@ describe("Enable and Disable Rules", () => {
         };
 
         const QuotemarkRule = Lint.Test.getRule("quotemark");
-        const variableNameRule = Lint.Test.getRule("variable-name");
+        const VariableNameRule = Lint.Test.getRule("variable-name");
 
-        const quotemarkFailure = Lint.Test.createFailuresOnFile("rules/enabledisable.test.ts", QuotemarkRule.DOUBLE_QUOTE_FAILURE);
-        const variableNameFailure = Lint.Test.createFailuresOnFile("rules/enabledisable.test.ts", variableNameRule.FAILURE_STRING);
+        const quotemarkFailure = Lint.Test.createFailuresOnFile("enabledisable.test.ts", QuotemarkRule.DOUBLE_QUOTE_FAILURE);
+        const variableNameFailure = Lint.Test.createFailuresOnFile("enabledisable.test.ts", VariableNameRule.FAILURE_STRING);
 
         const expectedFailure1 = variableNameFailure([2, 5], [2, 10]);
         const expectedFailure2 = variableNameFailure([10, 5], [10, 10]);
@@ -55,7 +55,7 @@ describe("Enable and Disable Rules", () => {
         for (let failure of parsedResult) {
             const startArray = [failure.startPosition.line + 1, failure.startPosition.character + 1];
             const endArray = [failure.endPosition.line + 1, failure.endPosition.character + 1];
-            actualFailures.push(Lint.Test.createFailure("rules/enabledisable.test.ts", startArray, endArray, failure.failure));
+            actualFailures.push(Lint.Test.createFailure("enabledisable.test.ts", startArray, endArray, failure.failure));
         }
 
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);

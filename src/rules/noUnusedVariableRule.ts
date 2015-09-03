@@ -20,25 +20,22 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "unused variable: ";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const documentRegistry = ts.createDocumentRegistry();
-        const languageServiceHost = Lint.createLanguageServiceHost("file.ts", sourceFile.getFullText());
-        const languageService = ts.createLanguageService(languageServiceHost, documentRegistry);
-
+        const languageService = Lint.createLanguageService(sourceFile.fileName, sourceFile.getFullText());
         return this.applyWithWalker(new NoUnusedVariablesWalker(sourceFile, this.getOptions(), languageService));
     }
 }
 
 class NoUnusedVariablesWalker extends Lint.RuleWalker {
+    private languageService: ts.LanguageService;
     private skipBindingElement: boolean;
     private skipParameterDeclaration: boolean;
     private skipVariableDeclaration: boolean;
-    private languageService: ts.LanguageService;
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions, languageService: ts.LanguageService) {
         super(sourceFile, options);
+        this.languageService = languageService;
         this.skipVariableDeclaration = false;
         this.skipParameterDeclaration = false;
-        this.languageService = languageService;
     }
 
     public visitBindingElement(node: ts.BindingElement) {
@@ -200,8 +197,9 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     }
 
     private validateReferencesForVariable(name: string, position: number) {
-        const highlights = this.languageService.getDocumentHighlights("file.ts", position, ["file.ts"]);
-        if (highlights[0].highlightSpans.length <= 1) {
+        const fileName = this.getSourceFile().fileName;
+        const highlights = this.languageService.getDocumentHighlights(fileName, position, [fileName]);
+        if (highlights == null || highlights[0].highlightSpans.length <= 1) {
             this.addFailure(this.createFailure(position, name.length, `${Rule.FAILURE_STRING}'${name}'`));
         }
     }

@@ -21,19 +21,17 @@ module Lint {
             getCurrentDirectory: () => "",
             getDefaultLibFileName: () => "lib.d.ts",
             getScriptFileNames: () => [fileName],
-            getScriptIsOpen: () => true,
-            getScriptSnapshot: () => {
-                return {
-                    getChangeRange: (oldSnapshot) => undefined,
-                    getLength: () => source.length,
-                    getLineStartPositions: () => ts.computeLineStarts(source),
-                    getText: (start, end) => source.substring(start, end)
-                };
-            },
+            getScriptSnapshot: () => ts.ScriptSnapshot.fromString(source),
             getScriptVersion: () => "1",
             log: (message) => { /* */ }
         };
 
         return host;
+    }
+
+    export function createLanguageService(fileName: string, source: string) {
+        const documentRegistry = ts.createDocumentRegistry();
+        const languageServiceHost = Lint.createLanguageServiceHost(fileName, source);
+        return ts.createLanguageService(languageServiceHost, documentRegistry);
     }
 }

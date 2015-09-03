@@ -28,7 +28,7 @@ class BlankLinesWalker extends Lint.SkippableTokenAwareRuleWalker {
 
         // starting with 1 to cover the case where the file starts with two blank lines
         let newLinesInARowSeenSoFar = 1;
-        Lint.scanAllTokens(ts.createScanner(ts.ScriptTarget.ES5, false, node.text), (scanner: ts.Scanner) => {
+        Lint.scanAllTokens(ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, node.text), (scanner: ts.Scanner) => {
             const startPos = scanner.getStartPos();
             if (this.tokensToSkipStartEndMap[startPos] != null) {
                 // tokens to skip are places where the scanner gets confused about what the token is, without the proper context
