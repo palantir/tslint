@@ -165,16 +165,12 @@ class OneLineWalker extends Lint.RuleWalker {
     }
 
     public visitInterfaceDeclaration(node: ts.InterfaceDeclaration) {
-        const nameNode = node.name;
-        const openBraceToken = getFirstChildOfKind(node, ts.SyntaxKind.OpenBraceToken);
-        this.handleOpeningBrace(nameNode, openBraceToken);
+        this.handleClassLikeDeclaration(node);
         super.visitInterfaceDeclaration(node);
     }
 
     public visitClassDeclaration(node: ts.ClassDeclaration) {
-        const nameNode = node.name;
-        const openBraceToken = getFirstChildOfKind(node, ts.SyntaxKind.OpenBraceToken);
-        this.handleOpeningBrace(nameNode, openBraceToken);
+        this.handleClassLikeDeclaration(node);
         super.visitClassDeclaration(node);
     }
 
@@ -214,6 +210,19 @@ class OneLineWalker extends Lint.RuleWalker {
                 this.handleOpeningBrace(closeParenToken, openBraceToken);
             }
         }
+    }
+
+    private handleClassLikeDeclaration(node: ts.ClassDeclaration | ts.InterfaceDeclaration) {
+        let lastNodeOfDeclaration: ts.Node = node.name;
+        const openBraceToken = getFirstChildOfKind(node, ts.SyntaxKind.OpenBraceToken);
+
+        if (node.heritageClauses != null) {
+            lastNodeOfDeclaration = node.heritageClauses[node.heritageClauses.length - 1];
+        } else if (node.typeParameters != null) {
+            lastNodeOfDeclaration = node.typeParameters[node.typeParameters.length - 1];
+        }
+
+        this.handleOpeningBrace(lastNodeOfDeclaration, openBraceToken);
     }
 
     private handleIterationStatement(node: ts.IterationStatement) {
