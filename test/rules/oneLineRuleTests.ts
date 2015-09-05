@@ -26,7 +26,7 @@ describe("<one-line>", () => {
     before(() => {
         const options = [true, "check-open-brace", "check-catch", "check-else", "check-whitespace"];
         actualFailures = Lint.Test.applyRuleOnFile(fileName, OneLineRule, options);
-        assert.lengthOf(actualFailures, 13);
+        assert.lengthOf(actualFailures, 14);
     });
 
     it("enforces rules only when enabled", () => {
@@ -59,7 +59,7 @@ describe("<one-line>", () => {
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 
-    it("enforces class brace", () => {
+    it("enforces interface brace", () => {
         const expectedFailure = Lint.Test.createFailure(fileName, [25, 1], [25, 2], braceFailure);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
@@ -91,6 +91,11 @@ describe("<one-line>", () => {
 
     it("enforces catch brace", () => {
         const expectedFailure = Lint.Test.createFailure(fileName, [55, 1], [55, 2], braceFailure);
+        Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
+    });
+
+    it("enforces class brace", () => {
+        const expectedFailure = Lint.Test.createFailure(fileName, [70, 1], [70, 2], braceFailure);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
     });
 

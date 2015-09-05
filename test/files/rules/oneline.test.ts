@@ -65,3 +65,27 @@ function f():
 
     return 5;
 }
+
+class BarBooBaz 
+{
+
+}
+
+class FooBarBaz {
+}
+
+// Valid multiline declarations
+export class LongDescriptiveClassName<T extends ISomeInterface<number>, S>
+    extends SomeAbstractBaseClass<T, S> implements IImportantInterface<T, S> {
+}
+
+export interface LongDescriptiveInterfaceName<T extends ISomeOtherInterface>
+    extends AThirdInterface {
+}
+
+function longFunctionNameWithLotsOfParams<T>(
+    x: number,
+    y: number,
+    z: number,
+    a: T) {
+}
