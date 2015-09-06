@@ -17,6 +17,6 @@
 export class Formatter extends Lint.Formatters.AbstractFormatter {
     public format(failures: Lint.RuleFailure[]): string {
         const failuresJSON = failures.map((failure) => failure.toJson());
-        return JSON.stringify(failuresJSON);
+        return JSON.stringify(failuresJSON) + "\n";
     }
 }

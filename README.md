@@ -318,8 +318,8 @@ Just like rules, additional formatters can also be supplied to TSLint via `--for
 
 export class Formatter extends Lint.Formatters.AbstractFormatter {
     public format(failures: Lint.RuleFailure[]): string {
-        var failuresJSON = failures.map((failure: Lint.RuleFailure) => failure.toJson());
-        return JSON.stringify(failuresJSON);
+        const failuresJSON = failures.map((failure) => failure.toJson());
+        return JSON.stringify(failuresJSON) + "\n";
     }
 }
 ```
