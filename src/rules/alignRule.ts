@@ -33,6 +33,11 @@ type SourcePosition = {
 }
 
 class AlignWalker extends Lint.RuleWalker {
+    public visitConstructorDeclaration(node: ts.ConstructorDeclaration) {
+        this.checkAlignment(Rule.PARAMETERS_OPTION, node.parameters);
+        super.visitConstructorDeclaration(node);
+    }
+
     public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
         this.checkAlignment(Rule.PARAMETERS_OPTION, node.parameters);
         super.visitFunctionDeclaration(node);
@@ -41,6 +46,11 @@ class AlignWalker extends Lint.RuleWalker {
     public visitFunctionExpression(node: ts.FunctionExpression) {
         this.checkAlignment(Rule.PARAMETERS_OPTION, node.parameters);
         super.visitFunctionExpression(node);
+    }
+
+    public visitMethodDeclaration(node: ts.MethodDeclaration) {
+        this.checkAlignment(Rule.PARAMETERS_OPTION, node.parameters);
+        super.visitMethodDeclaration(node);
     }
 
     public visitCallExpression(node: ts.CallExpression) {
@@ -59,7 +69,7 @@ class AlignWalker extends Lint.RuleWalker {
     }
 
     private checkAlignment(kind: string, nodes: ts.Node[]) {
-        if (nodes.length === 0 || !this.hasOption(kind)) {
+        if (nodes == null || nodes.length === 0 || !this.hasOption(kind)) {
             return;
         }
 
