@@ -109,3 +109,8 @@ interface FalsePositive3 {
     specular: (pos: number) => number;
     pos: number;
 }
+
+interface FalsePositive4<T, TResult> {
+    (parameters: T, runSynchonous: boolean): TResult;
+    (parameters: T, callback: (error: Error, result: TResult) => void): void;
+}
