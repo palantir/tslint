@@ -41,9 +41,9 @@ describe("<no-unused-variable>", () => {
         const failure3 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING + "'b'")([23, 13], [23, 14]);
         const failure4 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING + "'d'")([26, 10], [26, 11]);
         const failure5 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING + "'e'")([26, 13], [26, 14]);
-        const failure6 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING + "'a'")([35, 7] , [35, 8 ]);
+        const failure6 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING + "'a'")([35, 7], [35, 8]);
         const failure7 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING + "'e'")([43, 9], [43, 10]);
-        const failure8 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING + "'b'")([49, 11] , [49, 12]);
+        const failure8 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING + "'b'")([49, 11], [49, 12]);
 
         const actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule);
 
@@ -104,5 +104,12 @@ describe("<no-unused-variable>", () => {
         Lint.Test.assertContainsFailure(actualFailures, failure6);
         Lint.Test.assertContainsFailure(actualFailures, failure7);
         Lint.Test.assertContainsFailure(actualFailures, failure8);
+    });
+
+    it("shouldn't find false positives", () => {
+        const fileName = "rules/nounusedvariable-falsepositives.test.ts";
+        const actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule);
+
+        assert.lengthOf(actualFailures, 0);
     });
 });

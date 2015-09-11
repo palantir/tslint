@@ -21,7 +21,7 @@ module Lint {
             getCurrentDirectory: () => "",
             getDefaultLibFileName: () => "lib.d.ts",
             getScriptFileNames: () => [fileName],
-            getScriptSnapshot: () => ts.ScriptSnapshot.fromString(source),
+            getScriptSnapshot: (name) => ts.ScriptSnapshot.fromString(name === fileName ? source : ""),
             getScriptVersion: () => "1",
             log: (message) => { /* */ }
         };
@@ -30,8 +30,7 @@ module Lint {
     }
 
     export function createLanguageService(fileName: string, source: string) {
-        const documentRegistry = ts.createDocumentRegistry();
         const languageServiceHost = Lint.createLanguageServiceHost(fileName, source);
-        return ts.createLanguageService(languageServiceHost, documentRegistry);
+        return ts.createLanguageService(languageServiceHost);
     }
 }
