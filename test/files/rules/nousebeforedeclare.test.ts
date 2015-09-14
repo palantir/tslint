@@ -58,3 +58,9 @@ export {
 var undeclaredA = 42;
 let { undeclaredB } = { undeclaredB: 43 };
 const [ undeclaredC, [undeclaredD] ] = [ 1, [2] ];
+
+// shouldn't crash tslint
+function a() {
+    var b = ({c: dog}) => { dog++; };
+    b({ c: 5 });
+}
