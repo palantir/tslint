@@ -4,6 +4,7 @@
         "parameters",
         "arguments",
         "statements"],
+    "all-caps": true,
     "ban": false,
     "class-name": true,
     "comment-format": [true,
