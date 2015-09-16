@@ -193,7 +193,13 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
             }
         }
 
+        // skip checking parameter declarations for abstract methods
+        // They can't have a body so parameters are always unused
+        if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.AbstractKeyword)) {
+            this.skipParameterDeclaration = true;
+        }
         super.visitMethodDeclaration(node);
+        this.skipParameterDeclaration = false;
     }
 
     private validateReferencesForVariable(name: string, position: number) {

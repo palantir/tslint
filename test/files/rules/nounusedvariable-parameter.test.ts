@@ -56,3 +56,7 @@ export class DestructuringTests {
         return;
     }
 }
+
+abstract class AbstractTest {
+    abstract foo(x);
+}
