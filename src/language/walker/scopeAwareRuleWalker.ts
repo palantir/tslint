@@ -15,7 +15,7 @@
  */
 
 module Lint {
-    export class ScopeAwareRuleWalker<T> extends RuleWalker {
+    export abstract class ScopeAwareRuleWalker<T> extends RuleWalker {
         private scopeStack: T[];
 
         constructor(sourceFile: ts.SourceFile, options?: any) {
@@ -25,9 +25,7 @@ module Lint {
             this.scopeStack = [this.createScope()];
         }
 
-        public createScope(): T {
-            throw Lint.abstract();
-        }
+        public abstract createScope(): T;
 
         public getCurrentScope(): T {
             return this.scopeStack[this.scopeStack.length - 1];

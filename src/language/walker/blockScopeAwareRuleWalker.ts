@@ -19,7 +19,7 @@ module Lint {
      * An AST walker that is aware of block scopes in addition to regular scopes. Block scopes
      * are a superset of regular scopes (new block scopes are created more frequently in a program).
      */
-    export class BlockScopeAwareRuleWalker<T, U> extends ScopeAwareRuleWalker<T> {
+    export abstract class BlockScopeAwareRuleWalker<T, U> extends ScopeAwareRuleWalker<T> {
         private blockScopeStack: U[];
 
         constructor(sourceFile: ts.SourceFile, options?: any) {
@@ -29,9 +29,7 @@ module Lint {
             this.blockScopeStack = [this.createBlockScope()];
         }
 
-        public createBlockScope(): U {
-            throw Lint.abstract();
-        }
+        public abstract createBlockScope(): U;
 
         public getCurrentBlockScope(): U {
             return this.blockScopeStack[this.blockScopeStack.length - 1];
