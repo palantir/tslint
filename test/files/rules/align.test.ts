@@ -15,14 +15,14 @@ function invalidParametersAlignment3(a: number,
 }
 
 class C1 {
-    function invalidParametersAlignment(a: number,
+    invalidParametersAlignment(a: number,
                            b: number)
     {
     }
 }
 
 class InvalidAlignmentInConstructor {
-    function constructor(a: number,
+    constructor(a: number,
                                  str: string)
     {
     }
@@ -59,22 +59,22 @@ var validParametersAlignment6 = function(xxx: foo,
 
 ///////
 
-void invalidArgumentsAlignment1()
+function invalidArgumentsAlignment1()
 {
     f(10,
     'abcd', 0);
 }
 
-void invalidArgumentsAlignment2()
+function invalidArgumentsAlignment2()
 {
     f(10,
       'abcd',
         0);
 }
 
-class foo {
-    function constructor(a: number,
-                         str: string)
+class Foo {
+    constructor(a: number,
+                str: string)
     {
     }
 }
@@ -82,12 +82,12 @@ class foo {
 var invalidConstructorArgsAlignment = new foo(10,
              "abcd");
 
-void validArgumentsAlignment1()
+function validArgumentsAlignment1()
 {
     f(101, 'xyz', 'abc');
 }
 
-void validArgumentsAlignment2()
+function validArgumentsAlignment2()
 {
     f(1,
       2,
@@ -95,7 +95,7 @@ void validArgumentsAlignment2()
       4);
 }
 
-void validArgumentsAlignment3()
+function validArgumentsAlignment3()
 {
     f(
         1,
@@ -104,7 +104,7 @@ void validArgumentsAlignment3()
         4);
 }
 
-void validArgumentsAlignment3()
+function validArgumentsAlignment3()
 {
     f(1, 2,
       3, 4);
@@ -112,14 +112,14 @@ void validArgumentsAlignment3()
 
 ////////
 
-void invalidStatementsAlignment1()
+function invalidStatementsAlignment1()
 {
     var i = 0;
     var j = 0;
      var k = 1;
 }
 
-void invalidStatementsAlignment1()
+function invalidStatementsAlignment1()
 {
     var i = 0;
     {
@@ -128,18 +128,22 @@ void invalidStatementsAlignment1()
     }
 }
 
-void validStatementsAlignment1()
+function validStatementsAlignment1()
 {
     var i = 0;
     var j = 0;
     var k = 1;
 }
 
-void validStatementsAlignment2()
+function validStatementsAlignment2()
 {
     var i = 0;
     {
         var j = 0;
         var k = 1;
     }
+}
+
+function shouldntCrash() {
+  let f = new Foo;
 }
