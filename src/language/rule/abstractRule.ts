@@ -15,7 +15,7 @@
  */
 
 module Lint.Rules {
-    export class AbstractRule implements Lint.IRule {
+    export abstract class AbstractRule implements Lint.IRule {
         private value: any;
         private options: Lint.IOptions;
 
@@ -38,11 +38,7 @@ module Lint.Rules {
             return this.options;
         }
 
-        /* tslint:disable:no-unused-variable */
-        public apply(sourceFile: ts.SourceFile): RuleFailure[] {
-            throw Lint.abstract();
-        }
-        /* tslint:enable:no-unused-variable */
+        public abstract apply(sourceFile: ts.SourceFile): RuleFailure[];
 
         public applyWithWalker(walker: Lint.RuleWalker): RuleFailure[] {
             walker.walk(walker.getSourceFile());
