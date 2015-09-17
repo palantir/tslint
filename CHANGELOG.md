@@ -1,6 +1,13 @@
 Change Log
 ===
 
+v2.5.0
+---
+* Use TypeScript compiler `v1.6.2`
+* [bugfixes] #637, #642, #650, #652
+* [bugfixes] fix various false positives in `no-unused-variable` rule (#570, #613, #663)
+* Update project setup for latest VSCode (#662)
+
 v2.5.0-beta
 ---
 * Use TypeScript compiler `v1.6.0-beta`
