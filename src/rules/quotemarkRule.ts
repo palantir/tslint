@@ -38,17 +38,21 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class QuoteWalker extends Lint.RuleWalker {
-    private quoteMark: QuoteMark;
+    private quoteMark = QuoteMark.DOUBLE_QUOTES;
+    private avoidEscape: boolean;
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
 
-        const quoteMarkString = this.getOptions()[0];
+        const ruleArguments = this.getOptions();
+        const quoteMarkString = ruleArguments[0];
         if (quoteMarkString === "single") {
             this.quoteMark = QuoteMark.SINGLE_QUOTES;
         } else {
             this.quoteMark = QuoteMark.DOUBLE_QUOTES;
         }
+
+        this.avoidEscape = ruleArguments.indexOf("avoid-escape") > 0;
     }
 
     public visitNode(node : ts.Node) {
@@ -57,8 +61,6 @@ class QuoteWalker extends Lint.RuleWalker {
     }
 
     private handleNode(node: ts.Node) {
-        let failure: Lint.RuleFailure;
-
         if (node.kind === ts.SyntaxKind.StringLiteral) {
             const text = node.getText();
             const width = node.getWidth();
@@ -67,19 +69,20 @@ class QuoteWalker extends Lint.RuleWalker {
             const firstCharacter = text.charAt(0);
             const lastCharacter = text.charAt(text.length - 1);
 
-            if (this.quoteMark === QuoteMark.SINGLE_QUOTES) {
-                if (firstCharacter !== "'" || lastCharacter !== "'") {
-                    failure = this.createFailure(position, width, Rule.SINGLE_QUOTE_FAILURE);
-                }
-            } else if (this.quoteMark === QuoteMark.DOUBLE_QUOTES) {
-                if (firstCharacter !== "\"" || lastCharacter !== "\"") {
-                    failure = this.createFailure(position, width, Rule.DOUBLE_QUOTE_FAILURE);
+            const expectedQuoteMark = (this.quoteMark === QuoteMark.SINGLE_QUOTES) ? "'" : "\"";
+
+            if (firstCharacter !== expectedQuoteMark || lastCharacter !== expectedQuoteMark) {
+                // allow the "other" quote mark to be used, but only to avoid having to escape
+                const includesOtherQuoteMark = text.slice(1, -1).indexOf(expectedQuoteMark) !== -1;
+
+                if (!(this.avoidEscape && includesOtherQuoteMark)) {
+                    const failureMessage = (this.quoteMark === QuoteMark.SINGLE_QUOTES)
+                        ? Rule.SINGLE_QUOTE_FAILURE
+                        : Rule.DOUBLE_QUOTE_FAILURE;
+
+                    this.addFailure(this.createFailure(position, width, failureMessage));
                 }
             }
-        }
-
-        if (failure != null) {
-            this.addFailure(failure);
         }
     }
 }
