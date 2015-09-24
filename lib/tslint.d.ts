@@ -8,6 +8,7 @@ declare module Lint {
         protected visitBlock(node: ts.Block): void;
         protected visitBreakStatement(node: ts.BreakOrContinueStatement): void;
         protected visitCallExpression(node: ts.CallExpression): void;
+        protected visitCallSignature(node: ts.SignatureDeclaration): void;
         protected visitCaseClause(node: ts.CaseClause): void;
         protected visitClassDeclaration(node: ts.ClassDeclaration): void;
         protected visitCatchClause(node: ts.CatchClause): void;

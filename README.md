@@ -189,9 +189,10 @@ A sample configuration file with all options is available [here](https://github.
   * `"check-else"` checks that `else` is on the same line as the closing brace for `if`
   * `"check-open-brace"` checks that an open brace falls on the same line as its preceding expression.
   * `"check-whitespace"` checks preceding whitespace for the specified tokens.
-* `quotemark` enforces consistent single or double quoted string literals. Rule options (one is required):
+* `quotemark` enforces consistent single or double quoted string literals. Rule options (at least one of `"double"` or `"single"` is required):
     * `"single"` enforces single quotes
     * `"double"` enforces double quotes
+    * `"avoid-escape"` allows you to use the "other" quotemark in cases where escaping would normally be required. For example, `[true, "double", "avoid-escape"]` would not report a failure on the string literal `'Hello "World"'`.
 * `radix` enforces the radix parameter of `parseInt`
 * `semicolon` enforces semicolons at the end of every statement.
 * `sort-object-literal-keys` checks that keys in object literals are declared in alphabetical order

@@ -48,6 +48,10 @@ module Lint {
             this.walkChildren(node);
         }
 
+        protected visitCallSignature(node: ts.SignatureDeclaration) {
+            this.walkChildren(node);
+        }
+
         protected visitCaseClause(node: ts.CaseClause) {
             this.walkChildren(node);
         }
@@ -308,6 +312,10 @@ module Lint {
 
                 case ts.SyntaxKind.CallExpression:
                     this.visitCallExpression(<ts.CallExpression> node);
+                    break;
+
+                case ts.SyntaxKind.CallSignature:
+                    this.visitCallSignature(<ts.SignatureDeclaration> node);
                     break;
 
                 case ts.SyntaxKind.CaseClause:

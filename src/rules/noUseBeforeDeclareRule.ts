@@ -45,7 +45,7 @@ class NoUseBeforeDeclareWalker extends Lint.ScopeAwareRuleWalker<VisitedVariable
         // use-before-declare errors for block-scoped vars are caught by tsc
         if (isSingleVariable && !isBlockScoped) {
             const variableName = (<ts.Identifier> node.name).text;
-            this.validateUsageForVariable(variableName, node.getStart());
+            this.validateUsageForVariable(variableName, node.name.getStart());
         }
 
         super.visitBindingElement(node);

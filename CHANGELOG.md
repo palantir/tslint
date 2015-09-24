@@ -1,27 +1,44 @@
 Change Log
 ===
 
+v2.6.0-dev.1
+---
+* Upgrade TypeScript compiler to `v1.7.0-dev.20150924`
+
+v2.5.0
+---
+* Use TypeScript compiler `v1.6.2`
+* [bugfixes] #637, #642, #650, #652
+* [bugfixes] fix various false positives in `no-unused-variable` rule (#570, #613, #663)
+* Update project setup for latest VSCode (#662)
+
+v2.5.0-beta
+---
+* Use TypeScript compiler `v1.6.0-beta`
+* [bugfix] Fix `no-internal-module` false positives on nested namespaces (#600)
+* [docs] Add documentation for `sort-object-literal-keys` rule
+
 v2.5.0-dev.5
 ---
-* Upgrade TypeScript compiler to v1.7.0-dev.20150828
+* Upgrade TypeScript compiler to `v1.7.0-dev.20150828`
 * [bugfix] Handle .tsx files appropriately (#597, #558)
 
 v2.5.0-dev.4
 ---
-* Upgrade TypeScript compiler to v1.6.0-dev.20150825
+* Upgrade TypeScript compiler to `v1.6.0-dev.20150825`
 
 v2.5.0-dev.3
 ---
-* Upgrade TypeScript compiler to v1.6.0-dev.20150821
+* Upgrade TypeScript compiler to `v1.6.0-dev.20150821`
 
 v2.5.0-dev.2
 ---
-* Upgrade TypeScript compiler to v1.6.0-dev.20150811
+* Upgrade TypeScript compiler to `v1.6.0-dev.20150811`
 * [bug] fix `whitespace` false positive in JSX elements (#559)
 
 v2.5.0-dev.1
 ---
-* Upgrade TypeScript compiler to v1.6.0-dev.20150805
+* Upgrade TypeScript compiler to `v1.6.0-dev.20150805`
 * [enhancement] Support `.tsx` syntax (#490)
 
 v2.4.5
