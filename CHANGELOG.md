@@ -1,6 +1,10 @@
 Change Log
 ===
 
+v2.6.0-dev.1
+---
+* Upgrade TypeScript compiler to `v1.7.0-dev.20150924`
+
 v2.5.0
 ---
 * Use TypeScript compiler `v1.6.2`
