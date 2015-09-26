@@ -24,6 +24,10 @@ export class SyntaxWalker {
         this.walkChildren(node);
     }
 
+    protected visitArrayLiteralExpression(node: ts.ArrayLiteralExpression) {
+        this.walkChildren(node);
+    }
+
     protected visitArrowFunction(node: ts.FunctionLikeDeclaration) {
         this.walkChildren(node);
     }
@@ -33,6 +37,10 @@ export class SyntaxWalker {
     }
 
     protected visitBindingElement(node: ts.BindingElement) {
+        this.walkChildren(node);
+    }
+
+    protected visitBindingPattern(node: ts.BindingPattern) {
         this.walkChildren(node);
     }
 
@@ -286,6 +294,14 @@ export class SyntaxWalker {
                 this.visitAnyKeyword(node);
                 break;
 
+            case ts.SyntaxKind.ArrayBindingPattern:
+                this.visitBindingPattern(<ts.BindingPattern> node);
+                break;
+
+            case ts.SyntaxKind.ArrayLiteralExpression:
+                this.visitArrayLiteralExpression(<ts.ArrayLiteralExpression> node);
+                break;
+
             case ts.SyntaxKind.BindingElement:
                 this.visitBindingElement(<ts.BindingElement> node);
                 break;
@@ -460,6 +476,10 @@ export class SyntaxWalker {
 
             case ts.SyntaxKind.NewExpression:
                 this.visitNewExpression(<ts.NewExpression> node);
+                break;
+
+            case ts.SyntaxKind.ObjectBindingPattern:
+                this.visitBindingPattern(<ts.BindingPattern> node);
                 break;
 
             case ts.SyntaxKind.ObjectLiteralExpression:
