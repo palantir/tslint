@@ -63,6 +63,7 @@
         "./rules/noDuplicateVariableRuleTests.ts",
         "./rules/noEmptyRuleTests.ts",
         "./rules/noEvalRuleTests.ts",
+        "./rules/noInferrableTypesRuleTests.ts",
         "./rules/noInternalModuleRuleTests.ts",
         "./rules/noRequireImportsRuleTests.ts",
         "./rules/noShadowedVariableRuleTests.ts",
