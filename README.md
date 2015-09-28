@@ -170,6 +170,7 @@ A sample configuration file with all options is available [here](https://github.
 * `no-shadowed-variable` disallows shadowed variable declarations.
 * `no-empty` disallows empty blocks.
 * `no-eval` disallows `eval` function invocations.
+* `no-inferrable-types` disallows explicit type declarations for variables or parameters initialized to a number, string, or boolean
 * `no-internal-module` disallows internal `module`, use `namespace` instead.
 * `no-require-imports` disallows require() style imports
 * `no-string-literal` disallows object access via string literals.
