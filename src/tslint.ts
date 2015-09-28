@@ -114,5 +114,6 @@ module.exports = Lint.Linter;
 module.exports.findConfiguration = Lint.Configuration.findConfiguration;
 
 declare module "tslint" {
-    export = Lint;
+    import Linter = Lint.Linter;
+    export = Linter;
 }
