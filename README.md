@@ -146,7 +146,7 @@ A sample configuration file with all options is available [here](https://github.
 * `jsdoc-format` enforces basic format rules for jsdoc comments -- comments starting with `/**`
     * each line contains an asterisk and asterisks must be aligned
     * each asterisk must be followed by either a space or a newline (except for the first and the last)
-    * the only characters before the asterisk on each line must be whitepace characters
+    * the only characters before the asterisk on each line must be whitespace characters
     * one line comments must start with `/** ` and end with ` */`
 * `label-position` enforces labels only on sensible statements.
 * `label-undefined` checks that labels are defined before usage.
