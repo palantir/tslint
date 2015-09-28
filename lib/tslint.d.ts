@@ -265,5 +265,6 @@ declare module Lint {
     }
 }
 declare module "tslint" {
-    export = Lint;
+    import Linter = Lint.Linter;
+    export = Linter;
 }
