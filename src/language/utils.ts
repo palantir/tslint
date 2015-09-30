@@ -58,6 +58,7 @@ module Lint {
     }
 
     export function abstract() {
+        console.warn("Lint.abstract() is deprecated and will be removed in a future release. TSLint now uses abstract classes.");
         return "abstract method not implemented";
     }
 
