@@ -15,9 +15,7 @@
  */
 
 module Lint.Formatters {
-    export class AbstractFormatter implements Lint.IFormatter {
-        public format(failures: Lint.RuleFailure[]): string {
-            throw Lint.abstract();
-        }
+    export abstract class AbstractFormatter implements Lint.IFormatter {
+        public abstract format(failures: Lint.RuleFailure[]): string;
     }
 }
