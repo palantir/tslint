@@ -249,8 +249,8 @@ Rule names are always camel-cased and *must* contain the suffix `Rule`. Let us t
 Now, let us first write the rule in TypeScript. At the top, we reference TSLint's [definition file](https://github.com/palantir/tslint/blob/master/lib/tslint.d.ts) and the [definition file](https://github.com/palantir/tslint/blob/master/typings/typescriptServices.d.ts) for TypeScript's language services. The exported class must always be named `Rule` and extend from `Lint.Rules.AbstractRule`.
 
 ```typescript
-/// <reference path='typings/typescriptServices.d.ts' />
-/// <reference path='lib/tslint.d.ts' />
+/// <reference path='../node_modules/tslint/typings/typescriptServices.d.ts' />
+/// <reference path='../node_modules/tslint/lib/tslint.d.ts' />
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "import statement forbidden";
@@ -282,7 +282,6 @@ We still need to hook up this new rule to TSLint. First make sure to compile `no
 Now, let us rewrite the same rule in Javascript.
 
 ```javascript
-
 function Rule() {
     Lint.Rules.AbstractRule.apply(this, arguments);
 }
@@ -316,8 +315,9 @@ Custom Formatters
 -----------------
 Just like rules, additional formatters can also be supplied to TSLint via `--formatters-dir` on the CLI or `formattersDirectory` option on the library or `grunt-tslint`. Writing a new formatter is simpler than writing a new rule, as shown in the JSON formatter's code.
 
-```javascript
-/// <reference path='lib/tslint.d.ts' />
+```typescript
+/// <reference path='../node_modules/tslint/typings/typescriptServices.d.ts' />
+/// <reference path='../node_modules/tslint/lib/tslint.d.ts' />
 
 export class Formatter extends Lint.Formatters.AbstractFormatter {
     public format(failures: Lint.RuleFailure[]): string {
