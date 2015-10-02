@@ -13,36 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as Lint from "../../lint";
+import {RuleWalker} from "./ruleWalker";
+import * as ts from "typescript";
 
-module Lint {
-    export class SkippableTokenAwareRuleWalker extends RuleWalker {
-        protected tokensToSkipStartEndMap: {[start: number]: number};
+export class SkippableTokenAwareRuleWalker extends RuleWalker {
+    protected tokensToSkipStartEndMap: {[start: number]: number};
 
-        constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
-            super(sourceFile, options);
-            this.tokensToSkipStartEndMap = {};
-        }
+    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
+        super(sourceFile, options);
+        this.tokensToSkipStartEndMap = {};
+    }
 
-        protected visitRegularExpressionLiteral(node: ts.Node) {
-            this.addTokenToSkipFromNode(node);
-            super.visitRegularExpressionLiteral(node);
-        }
+    protected visitRegularExpressionLiteral(node: ts.Node) {
+        this.addTokenToSkipFromNode(node);
+        super.visitRegularExpressionLiteral(node);
+    }
 
-        protected visitIdentifier(node: ts.Identifier) {
-            this.addTokenToSkipFromNode(node);
-            super.visitIdentifier(node);
-        }
+    protected visitIdentifier(node: ts.Identifier) {
+        this.addTokenToSkipFromNode(node);
+        super.visitIdentifier(node);
+    }
 
-        protected visitTemplateExpression(node: ts.TemplateExpression) {
-            this.addTokenToSkipFromNode(node);
-            super.visitTemplateExpression(node);
-        }
+    protected visitTemplateExpression(node: ts.TemplateExpression) {
+        this.addTokenToSkipFromNode(node);
+        super.visitTemplateExpression(node);
+    }
 
-        protected addTokenToSkipFromNode(node: ts.Node) {
-            if (node.getStart() < node.getEnd()) {
-                // only add to the map nodes whose end comes after their start, to prevent infinite loops
-                this.tokensToSkipStartEndMap[node.getStart()] = node.getEnd();
-            }
+    protected addTokenToSkipFromNode(node: ts.Node) {
+        if (node.getStart() < node.getEnd()) {
+            // only add to the map nodes whose end comes after their start, to prevent infinite loops
+            this.tokensToSkipStartEndMap[node.getStart()] = node.getEnd();
         }
     }
 }

@@ -14,71 +14,69 @@
  * limitations under the License.
  */
 
-module Lint.Configuration {
-    const fs = require("fs");
-    const path = require("path");
-    const findup = require("findup-sync");
+import * as fs from "fs";
+import * as path from "path";
+import * as findup from "findup-sync";
 
-    const CONFIG_FILENAME = "tslint.json";
-    const DEFAULT_CONFIG = {
-        "rules": {
-            "curly": true,
-            "indent": [true, 4],
-            "no-duplicate-key": true,
-            "no-duplicate-variable": true,
-            "no-empty": true,
-            "no-eval": true,
-            "no-trailing-whitespace": true,
-            "no-unreachable": true,
-            "no-use-before-declare": true,
-            "quotemark": [true, "double"],
-            "semicolon": true
-        }
-    };
+const CONFIG_FILENAME = "tslint.json";
+const DEFAULT_CONFIG = {
+    "rules": {
+        "curly": true,
+        "indent": [true, 4],
+        "no-duplicate-key": true,
+        "no-duplicate-variable": true,
+        "no-empty": true,
+        "no-eval": true,
+        "no-trailing-whitespace": true,
+        "no-unreachable": true,
+        "no-use-before-declare": true,
+        "quotemark": [true, "double"],
+        "semicolon": true
+    }
+};
 
-    export function findConfiguration(configFile: string, inputFileLocation: string): any {
-        if (configFile) {
-            return JSON.parse(fs.readFileSync(configFile, "utf8"));
-        }
+export function findConfiguration(configFile: string, inputFileLocation: string): any {
+    if (configFile) {
+        return JSON.parse(fs.readFileSync(configFile, "utf8"));
+    }
 
-        // first look for package.json from input file location
-        configFile = findup("package.json", { cwd: inputFileLocation, nocase: true });
+    // first look for package.json from input file location
+    configFile = findup("package.json", { cwd: inputFileLocation, nocase: true });
 
-        if (configFile) {
-            const content = require(configFile);
+    if (configFile) {
+        const content = require(configFile);
 
-            if (content.tslintConfig) {
-                return content.tslintConfig;
-            }
-        }
-
-        // next look for tslint.json
-        const homeDir = getHomeDir();
-        if (!homeDir) {
-            return undefined;
-        }
-
-        const defaultPath = path.join(homeDir, CONFIG_FILENAME);
-
-        configFile = findup(CONFIG_FILENAME, { cwd: inputFileLocation, nocase: true }) || defaultPath;
-
-        if (fs.existsSync(configFile)) {
-            return JSON.parse(fs.readFileSync(configFile, "utf8"));
-        } else {
-            return DEFAULT_CONFIG;
+        if (content.tslintConfig) {
+            return content.tslintConfig;
         }
     }
 
-    function getHomeDir() {
-        const environment = global.process.env;
-        const paths = [environment.USERPROFILE, environment.HOME, environment.HOMEPATH, environment.HOMEDRIVE + environment.HOMEPATH];
+    // next look for tslint.json
+    const homeDir = getHomeDir();
+    if (!homeDir) {
+        return undefined;
+    }
 
-        for (const homeIndex in paths) {
-            if (paths.hasOwnProperty(homeIndex)) {
-                const homePath = paths[homeIndex];
-                if (homePath && fs.existsSync(homePath)) {
-                    return homePath;
-                }
+    const defaultPath = path.join(homeDir, CONFIG_FILENAME);
+
+    configFile = findup(CONFIG_FILENAME, { cwd: inputFileLocation, nocase: true }) || defaultPath;
+
+    if (fs.existsSync(configFile)) {
+        return JSON.parse(fs.readFileSync(configFile, "utf8"));
+    } else {
+        return DEFAULT_CONFIG;
+    }
+}
+
+function getHomeDir() {
+    const environment = global.process.env;
+    const paths = [environment.USERPROFILE, environment.HOME, environment.HOMEPATH, environment.HOMEDRIVE + environment.HOMEPATH];
+
+    for (const homeIndex in paths) {
+        if (paths.hasOwnProperty(homeIndex)) {
+            const homePath = paths[homeIndex];
+            if (homePath && fs.existsSync(homePath)) {
+                return homePath;
             }
         }
     }

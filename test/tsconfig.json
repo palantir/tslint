@@ -5,10 +5,10 @@
         "noImplicitAny": true,
         "sourceMap": false,
         "target": "es5",
-        "out": "../build/tslint-tests.js"
+        "outDir": "../build/tests"
     },
     "filesGlob": [
-        "../typings/*.d.ts",
+        "../typings/tsd.d.ts",
         "../lib/tslint.d.ts",
         "./typings/**/*.d.ts",
         "./references.ts",
@@ -20,8 +20,7 @@
         "./rules/*.ts"
     ],
     "files": [
-        "../typings/node.d.ts",
-        "../typings/typescriptServices.d.ts",
+        "../typings/tsd.d.ts",
         "../lib/tslint.d.ts",
         "./typings/chai/chai.d.ts",
         "./typings/mocha/mocha.d.ts",

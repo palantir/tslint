@@ -14,8 +14,7 @@ module.exports = function (grunt) {
         typescriptBin: "node_modules/typescript/lib/typescriptServices.js",
 
         clean: {
-            bin: ["bin/tslint-cli.js"],
-            core: ["build/rules/", "build/formatters", "lib/tslint.*"],
+            lib: ["lib/**/*.js", "lib/**/*.d.ts"],
             test: ["build/test/"],
         },
 

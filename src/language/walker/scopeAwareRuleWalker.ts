@@ -13,73 +13,74 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as Lint from "../../lint";
+import {RuleWalker} from "./ruleWalker";
+import * as ts from "typescript";
 
-module Lint {
-    export abstract class ScopeAwareRuleWalker<T> extends RuleWalker {
-        private scopeStack: T[];
+export abstract class ScopeAwareRuleWalker<T> extends RuleWalker {
+    private scopeStack: T[];
 
-        constructor(sourceFile: ts.SourceFile, options?: any) {
-            super(sourceFile, options);
+    constructor(sourceFile: ts.SourceFile, options?: any) {
+        super(sourceFile, options);
 
-            // initialize stack with global scope
-            this.scopeStack = [this.createScope()];
+        // initialize stack with global scope
+        this.scopeStack = [this.createScope()];
+    }
+
+    public abstract createScope(): T;
+
+    public getCurrentScope(): T {
+        return this.scopeStack[this.scopeStack.length - 1];
+    }
+
+    // get all scopes available at this depth
+    public getAllScopes(): T[] {
+        return this.scopeStack.slice();
+    }
+
+    public getCurrentDepth(): number {
+        return this.scopeStack.length;
+    }
+
+    // callback notifier when a scope begins
+    public onScopeStart() {
+        return;
+    }
+
+    // callback notifier when a scope ends
+    public onScopeEnd() {
+        return;
+    }
+
+    protected visitNode(node: ts.Node) {
+        const isNewScope = this.isScopeBoundary(node);
+
+        if (isNewScope) {
+            this.scopeStack.push(this.createScope());
         }
 
-        public abstract createScope(): T;
+        this.onScopeStart();
+        super.visitNode(node);
+        this.onScopeEnd();
 
-        public getCurrentScope(): T {
-            return this.scopeStack[this.scopeStack.length - 1];
+        if (isNewScope) {
+            this.scopeStack.pop();
         }
+    }
 
-        // get all scopes available at this depth
-        public getAllScopes(): T[] {
-            return this.scopeStack.slice();
-        }
-
-        public getCurrentDepth(): number {
-            return this.scopeStack.length;
-        }
-
-        // callback notifier when a scope begins
-        public onScopeStart() {
-            return;
-        }
-
-        // callback notifier when a scope ends
-        public onScopeEnd() {
-            return;
-        }
-
-        protected visitNode(node: ts.Node) {
-            const isNewScope = this.isScopeBoundary(node);
-
-            if (isNewScope) {
-                this.scopeStack.push(this.createScope());
-            }
-
-            this.onScopeStart();
-            super.visitNode(node);
-            this.onScopeEnd();
-
-            if (isNewScope) {
-                this.scopeStack.pop();
-            }
-        }
-
-        protected isScopeBoundary(node: ts.Node): boolean {
-            return node.kind === ts.SyntaxKind.FunctionDeclaration
-                || node.kind === ts.SyntaxKind.FunctionExpression
-                || node.kind === ts.SyntaxKind.PropertyAssignment
-                || node.kind === ts.SyntaxKind.ShorthandPropertyAssignment
-                || node.kind === ts.SyntaxKind.MethodDeclaration
-                || node.kind === ts.SyntaxKind.Constructor
-                || node.kind === ts.SyntaxKind.ModuleDeclaration
-                || node.kind === ts.SyntaxKind.ArrowFunction
-                || node.kind === ts.SyntaxKind.ParenthesizedExpression
-                || node.kind === ts.SyntaxKind.ClassDeclaration
-                || node.kind === ts.SyntaxKind.InterfaceDeclaration
-                || node.kind === ts.SyntaxKind.GetAccessor
-                || node.kind === ts.SyntaxKind.SetAccessor;
-        }
+    protected isScopeBoundary(node: ts.Node): boolean {
+        return node.kind === ts.SyntaxKind.FunctionDeclaration
+            || node.kind === ts.SyntaxKind.FunctionExpression
+            || node.kind === ts.SyntaxKind.PropertyAssignment
+            || node.kind === ts.SyntaxKind.ShorthandPropertyAssignment
+            || node.kind === ts.SyntaxKind.MethodDeclaration
+            || node.kind === ts.SyntaxKind.Constructor
+            || node.kind === ts.SyntaxKind.ModuleDeclaration
+            || node.kind === ts.SyntaxKind.ArrowFunction
+            || node.kind === ts.SyntaxKind.ParenthesizedExpression
+            || node.kind === ts.SyntaxKind.ClassDeclaration
+            || node.kind === ts.SyntaxKind.InterfaceDeclaration
+            || node.kind === ts.SyntaxKind.GetAccessor
+            || node.kind === ts.SyntaxKind.SetAccessor;
     }
 }
