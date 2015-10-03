@@ -1,6 +1,11 @@
 Change Log
 ===
 
+v2.6.0-dev.2
+---
+* Upgrade TypeScript compiler to `v1.7.0-dev.20151003`
+* [bugfix] `no-unused-expression` rule now handles yield expressions properly (#706)
+
 v2.6.0-dev.1
 ---
 * Upgrade TypeScript compiler to `v1.7.0-dev.20150924`
