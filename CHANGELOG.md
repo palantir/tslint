@@ -5,6 +5,14 @@ v2.6.0-dev.1
 ---
 * Upgrade TypeScript compiler to `v1.7.0-dev.20150924`
 
+v2.5.1
+---
+* [new-rule] no-inferrable-types rule (#676)
+* [new-rule-option] "avoid-escape" option for quotemark rule (#543)
+* [bugfix] type declaration for tslint external module #686
+* [enhancement] `AbstractRule` and `AbstractFormatter` are now abstract classes (#631)
+	* Note: `Lint.abstract()` is now deprecated
+
 v2.5.0
 ---
 * Use TypeScript compiler `v1.6.2`

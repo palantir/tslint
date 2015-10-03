@@ -92,10 +92,10 @@ declare module Lint {
     }
 }
 declare module Lint {
-    class ScopeAwareRuleWalker<T> extends RuleWalker {
+    abstract class ScopeAwareRuleWalker<T> extends RuleWalker {
         private scopeStack;
         constructor(sourceFile: ts.SourceFile, options?: any);
-        createScope(): T;
+        abstract createScope(): T;
         getCurrentScope(): T;
         getAllScopes(): T[];
         getCurrentDepth(): number;
@@ -106,8 +106,8 @@ declare module Lint {
     }
 }
 declare module Lint.Formatters {
-    class AbstractFormatter implements Lint.IFormatter {
-        format(failures: Lint.RuleFailure[]): string;
+    abstract class AbstractFormatter implements Lint.IFormatter {
+        abstract format(failures: Lint.RuleFailure[]): string;
     }
 }
 declare module Lint {
@@ -120,12 +120,12 @@ declare module Lint {
     function createLanguageService(fileName: string, source: string): ts.LanguageService;
 }
 declare module Lint.Rules {
-    class AbstractRule implements Lint.IRule {
+    abstract class AbstractRule implements Lint.IRule {
         private value;
         private options;
         constructor(ruleName: string, value: any, disabledIntervals: Lint.IDisabledInterval[]);
         getOptions(): Lint.IOptions;
-        apply(sourceFile: ts.SourceFile): RuleFailure[];
+        abstract apply(sourceFile: ts.SourceFile): RuleFailure[];
         applyWithWalker(walker: Lint.RuleWalker): RuleFailure[];
         isEnabled(): boolean;
     }
@@ -189,10 +189,10 @@ declare module Lint {
     function isNodeFlagSet(node: ts.Node, flagToCheck: ts.NodeFlags): boolean;
 }
 declare module Lint {
-    class BlockScopeAwareRuleWalker<T, U> extends ScopeAwareRuleWalker<T> {
+    abstract class BlockScopeAwareRuleWalker<T, U> extends ScopeAwareRuleWalker<T> {
         private blockScopeStack;
         constructor(sourceFile: ts.SourceFile, options?: any);
-        createBlockScope(): U;
+        abstract createBlockScope(): U;
         getCurrentBlockScope(): U;
         onBlockScopeStart(): void;
         getCurrentBlockDepth(): number;
@@ -265,5 +265,6 @@ declare module Lint {
     }
 }
 declare module "tslint" {
-    export = Lint;
+    import Linter = Lint.Linter;
+    export = Linter;
 }
