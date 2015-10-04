@@ -65,7 +65,10 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
     }
 
     public visitMethodDeclaration(node: ts.MethodDeclaration) {
-        this.checkModifiersAndSetPrevious(node, getModifiers(true, node.modifiers));
+        if (node.parent.kind !== ts.SyntaxKind.ObjectLiteralExpression) {
+            this.checkModifiersAndSetPrevious(node, getModifiers(true, node.modifiers));
+        }
+
         super.visitMethodDeclaration(node);
     }
 
