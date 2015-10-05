@@ -1,7 +1,7 @@
 class Foo {
     private x: number;
     private bar(): any {
-        var bla: { a: string } = {a: '1'};
+        var bla: { a: string, b: () => void } = { a: '1', b() {} };
     }
     y: number;
 }
