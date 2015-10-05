@@ -146,7 +146,7 @@ A sample configuration file with all options is available [here](https://github.
 * `jsdoc-format` enforces basic format rules for jsdoc comments -- comments starting with `/**`
     * each line contains an asterisk and asterisks must be aligned
     * each asterisk must be followed by either a space or a newline (except for the first and the last)
-    * the only characters before the asterisk on each line must be whitepace characters
+    * the only characters before the asterisk on each line must be whitespace characters
     * one line comments must start with `/** ` and end with ` */`
 * `label-position` enforces labels only on sensible statements.
 * `label-undefined` checks that labels are defined before usage.
@@ -170,6 +170,7 @@ A sample configuration file with all options is available [here](https://github.
 * `no-shadowed-variable` disallows shadowed variable declarations.
 * `no-empty` disallows empty blocks.
 * `no-eval` disallows `eval` function invocations.
+* `no-inferrable-types` disallows explicit type declarations for variables or parameters initialized to a number, string, or boolean
 * `no-internal-module` disallows internal `module`, use `namespace` instead.
 * `no-require-imports` disallows require() style imports
 * `no-string-literal` disallows object access via string literals.
@@ -245,10 +246,11 @@ TSLint ships with a set of core rules that can be configured. However, users are
 
 Rule names are always camel-cased and *must* contain the suffix `Rule`. Let us take the example of how to write a new rule to forbid all import statements (you know, *for science*). Let us name the rule file `noImportsRule.ts`. Rules can be referenced in `tslint.json` in their dasherized forms, so `"no-imports": true` would turn on the rule.
 
-Now, let us first write the rule in TypeScript. At the top, we reference TSLint's [definition](https://github.com/palantir/tslint/blob/master/lib/tslint.d.ts) file. The exported class name must always be named `Rule` and extend from `Lint.Rules.AbstractRule`.
+Now, let us first write the rule in TypeScript. At the top, we reference TSLint's [definition file](https://github.com/palantir/tslint/blob/master/lib/tslint.d.ts) and the [definition file](https://github.com/palantir/tslint/blob/master/typings/typescriptServices.d.ts) for TypeScript's language services. The exported class must always be named `Rule` and extend from `Lint.Rules.AbstractRule`.
 
 ```typescript
-/// <reference path='tslint.d.ts' />
+/// <reference path='../node_modules/tslint/typings/typescriptServices.d.ts' />
+/// <reference path='../node_modules/tslint/lib/tslint.d.ts' />
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "import statement forbidden";
@@ -280,7 +282,6 @@ We still need to hook up this new rule to TSLint. First make sure to compile `no
 Now, let us rewrite the same rule in Javascript.
 
 ```javascript
-
 function Rule() {
     Lint.Rules.AbstractRule.apply(this, arguments);
 }
@@ -314,8 +315,9 @@ Custom Formatters
 -----------------
 Just like rules, additional formatters can also be supplied to TSLint via `--formatters-dir` on the CLI or `formattersDirectory` option on the library or `grunt-tslint`. Writing a new formatter is simpler than writing a new rule, as shown in the JSON formatter's code.
 
-```javascript
-/// <reference path='tslint.d.ts' />
+```typescript
+/// <reference path='../node_modules/tslint/typings/typescriptServices.d.ts' />
+/// <reference path='../node_modules/tslint/lib/tslint.d.ts' />
 
 export class Formatter extends Lint.Formatters.AbstractFormatter {
     public format(failures: Lint.RuleFailure[]): string {

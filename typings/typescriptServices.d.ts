@@ -343,6 +343,7 @@ declare namespace ts {
         OctalLiteral = 65536,
         Namespace = 131072,
         ExportContext = 262144,
+        ContainsThis = 524288,
         Modifier = 2035,
         AccessibilityModifier = 112,
         BlockScoped = 49152,
@@ -1082,6 +1083,7 @@ declare namespace ts {
         decreaseIndent(): void;
         clear(): void;
         trackSymbol(symbol: Symbol, enclosingDeclaration?: Node, meaning?: SymbolFlags): void;
+        reportInaccessibleThisError(): void;
     }
     const enum TypeFormatFlags {
         None = 0,
@@ -1202,6 +1204,7 @@ declare namespace ts {
         Instantiated = 131072,
         ObjectLiteral = 524288,
         ESSymbol = 16777216,
+        ThisType = 33554432,
         StringLike = 258,
         NumberLike = 132,
         ObjectType = 80896,
@@ -1223,6 +1226,7 @@ declare namespace ts {
         typeParameters: TypeParameter[];
         outerTypeParameters: TypeParameter[];
         localTypeParameters: TypeParameter[];
+        thisType: TypeParameter;
     }
     interface InterfaceTypeWithDeclaredMembers extends InterfaceType {
         declaredProperties: Symbol[];
@@ -1348,6 +1352,7 @@ declare namespace ts {
         AMD = 2,
         UMD = 3,
         System = 4,
+        ES6 = 5,
     }
     const enum JsxEmit {
         None = 0,
@@ -1417,7 +1422,7 @@ declare namespace ts {
         write(s: string): void;
         readFile(path: string, encoding?: string): string;
         writeFile(path: string, data: string, writeByteOrderMark?: boolean): void;
-        watchFile?(path: string, callback: (path: string) => void): FileWatcher;
+        watchFile?(path: string, callback: (path: string, removed: boolean) => void): FileWatcher;
         resolvePath(path: string): string;
         fileExists(path: string): boolean;
         directoryExists(path: string): boolean;
