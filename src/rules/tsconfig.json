@@ -17,6 +17,7 @@
         "../../typings/node.d.ts",
         "../../typings/typescriptServices.d.ts",
         "./alignRule.ts",
+        "./allCapsRule.ts",
         "./banRule.ts",
         "./classNameRule.ts",
         "./commentFormatRule.ts",

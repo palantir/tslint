@@ -129,6 +129,7 @@ A sample configuration file with all options is available [here](https://github.
   * `"parameters"` checks alignment of function parameters.
   * `"arguments"` checks alignment of function call arguments.
   * `"statements"` checks alignment of statements.
+* `all-caps` ensures that all-caps variable names are const.
 * `ban` bans the use of specific functions. Options are ["object", "function"] pairs that ban the use of object.function()
 * `class-name` enforces PascalCased class and interface names.
 * `comment-format` enforces rules for single-line comments. Rule options:

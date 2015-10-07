@@ -36,6 +36,7 @@
         "./formatters/proseFormatterTests.ts",
         "./formatters/verboseFormatterTests.ts",
         "./rules/alignRuleTests.ts",
+        "./rules/allCapsRuleTests.ts",
         "./rules/banRuleTests.ts",
         "./rules/classNameRuleTests.ts",
         "./rules/commentFormatRuleTests.ts",
