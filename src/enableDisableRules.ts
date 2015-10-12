@@ -14,9 +14,10 @@
 * limitations under the License.
 */
 import * as Lint from "./lint";
+import {SkippableTokenAwareRuleWalker} from "./language/walker/skippableTokenAwareRuleWalker";
 import * as ts from "typescript";
 
-export class EnableDisableRulesWalker extends Lint.SkippableTokenAwareRuleWalker {
+export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
     public enableDisableRuleMap: {[rulename: string]: Lint.IEnableDisablePosition[]} = {};
 
     public visitSourceFile(node: ts.SourceFile) {

@@ -14,8 +14,9 @@
  * limitations under the License.
 */
 import * as Lint from "../lint";
+import {AbstractFormatter} from "../language/formatter/abstractFormatter";
 
-export class Formatter extends Lint.Formatters.AbstractFormatter {
+export class Formatter extends AbstractFormatter {
     public format(failures: Lint.RuleFailure[]): string {
 
         const outputLines = failures.map((failure: Lint.RuleFailure) => {

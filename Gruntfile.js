@@ -14,7 +14,7 @@ module.exports = function (grunt) {
 
         clean: {
             core: ["lib/**/*.js", "lib/**/*.d.ts"],
-            test: ["build/test/"]
+            test: ["build/"]
         },
 
         mochaTest: {
@@ -81,7 +81,7 @@ module.exports = function (grunt) {
             test: {
                 src: [
                     "typings/*.d.ts",
-                    "lib/tslint.d.ts",
+                    "src/**/*.ts",
                     "test/typings/*.d.ts",
                     "test/chaiAssert.d.ts",
                     "test/**/*.ts",

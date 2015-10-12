@@ -20,7 +20,7 @@ import {camelize, strLeft, strRight} from "underscore.string";
 import * as Lint from "./lint";
 
 const moduleDirectory = path.dirname(module.filename);
-const CORE_RULES_DIRECTORY = path.resolve(moduleDirectory, "..", "build", "rules");
+const CORE_RULES_DIRECTORY = path.resolve(moduleDirectory, ".", "rules");
 
 export interface IEnableDisablePosition {
     isEnabled: boolean;

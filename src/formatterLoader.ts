@@ -19,7 +19,7 @@ import * as path from "path";
 import {camelize} from "underscore.string";
 
 const moduleDirectory = path.dirname(module.filename);
-const CORE_FORMATTERS_DIRECTORY = path.resolve(moduleDirectory, "..", "build", "formatters");
+const CORE_FORMATTERS_DIRECTORY = path.resolve(moduleDirectory, ".", "formatters");
 
 export function findFormatter(name: string, formattersDirectory?: string) {
     if (typeof(name) === "function") {

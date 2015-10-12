@@ -27,12 +27,12 @@ export function getSourceFile(fileName: string): ts.SourceFile {
 }
 
 export function getRule(ruleName: string) {
-    const rulesDirectory = path.join(global.process.cwd(), "build/rules");
+    const rulesDirectory = path.join(path.dirname(module.filename), "../src/rules");
     return Lint.findRule(ruleName, rulesDirectory);
 }
 
 export function getFormatter(formatterName: string) {
-    const formattersDirectory = path.join(global.process.cwd(), "build/formatters");
+    const formattersDirectory = path.join(path.dirname(module.filename), "../src/formatters");
     return Lint.findFormatter(formatterName, formattersDirectory);
 }
 
