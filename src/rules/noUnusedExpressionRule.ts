@@ -42,7 +42,7 @@ class UnusedExpressionWalker extends Lint.RuleWalker {
                 if (expressionText === "\"use strict\"" || expressionText === "'use strict'") {
                     return;
                 }
-            } else if (node.expression.kind === ts.SyntaxKind.DeleteExpression) {
+            } else if (node.expression.kind === ts.SyntaxKind.DeleteExpression || node.expression.kind === ts.SyntaxKind.YieldExpression) {
                 return;
             }
 

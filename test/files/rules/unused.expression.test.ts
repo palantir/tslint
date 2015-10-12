@@ -48,3 +48,8 @@ a => fun2(a);
 
 var obj = {};
 delete obj.key;
+function* g(): Iterable<number> {
+    for (let i = 0; i < 100; i++) {
+        yield i;
+    }
+}

@@ -36,33 +36,34 @@ const DEFAULT_CONFIG = {
 };
 
 export function findConfiguration(configFile: string, inputFileLocation: string): any {
-    if (configFile) {
-        return JSON.parse(fs.readFileSync(configFile, "utf8"));
-    }
+    if (configFile == null) {
+        // first look for package.json from input file location
+        configFile = findup("package.json", { cwd: inputFileLocation, nocase: true });
 
-    // first look for package.json from input file location
-    configFile = findup("package.json", { cwd: inputFileLocation, nocase: true });
+        if (configFile) {
+            const content = require(configFile);
 
-    if (configFile) {
-        const content = require(configFile);
-
-        if (content.tslintConfig) {
-            return content.tslintConfig;
+            if (content.tslintConfig) {
+                return content.tslintConfig;
+            }
         }
+
+        // next look for tslint.json
+        const homeDir = getHomeDir();
+        if (!homeDir) {
+            return undefined;
+        }
+
+        const defaultPath = path.join(homeDir, CONFIG_FILENAME);
+
+        configFile = findup(CONFIG_FILENAME, { cwd: inputFileLocation, nocase: true }) || defaultPath;
     }
-
-    // next look for tslint.json
-    const homeDir = getHomeDir();
-    if (!homeDir) {
-        return undefined;
-    }
-
-    const defaultPath = path.join(homeDir, CONFIG_FILENAME);
-
-    configFile = findup(CONFIG_FILENAME, { cwd: inputFileLocation, nocase: true }) || defaultPath;
 
     if (fs.existsSync(configFile)) {
-        return JSON.parse(fs.readFileSync(configFile, "utf8"));
+        let fileData = fs.readFileSync(configFile, "utf8");
+        // remove BOM if present
+        fileData = fileData.replace(/^\uFEFF/, "");
+        return JSON.parse(fileData);
     } else {
         return DEFAULT_CONFIG;
     }
