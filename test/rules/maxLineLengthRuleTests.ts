@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as Lint from "../lint";
 
 describe("<max-line-length>", () => {
     const MaxLineLengthRule = Lint.Test.getRule("max-line-length");

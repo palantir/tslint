@@ -1,6 +1,7 @@
 import * as formatters from "./formatters";
 import * as configuration from "./configuration";
 import * as rules from "./rules";
+import * as Linter from "./tslint";
 export * from "./language/rule/rule";
 export * from "./enableDisableRules";
 export * from "./formatterLoader";
@@ -12,3 +13,6 @@ export * from "./language/formatter/formatter";
 export declare var Formatters: typeof formatters;
 export declare var Configuration: typeof configuration;
 export declare var Rules: typeof rules;
+declare type LintResult = Linter.LintResult;
+declare type ILinterOptions = Linter.ILinterOptions;
+export { Linter, LintResult, ILinterOptions };

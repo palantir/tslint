@@ -11,26 +11,10 @@ module.exports = function (grunt) {
     // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
     grunt.initConfig({
         pkg: grunt.file.readJSON("package.json"),
-        typescriptBin: "node_modules/typescript/lib/typescriptServices.js",
 
         clean: {
-            lib: ["lib/**/*.js", "lib/**/*.d.ts"],
-            test: ["build/test/"],
-        },
-
-        concat: {
-            bin: {
-                src: ["<%= typescriptBin %>", "bin/tslint-cli.js"],
-                dest: "bin/tslint-cli.js"
-            },
-            core: {
-                src: ["<%= typescriptBin %>", "lib/tslint.js"],
-                dest: "lib/tslint.js"
-            },
-            test: {
-                src: ["lib/tslint.js", "build/tslint-tests.js"],
-                dest: "build/tslint-tests.js"
-            }
+            core: ["lib/**/*.js", "lib/**/*.d.ts"],
+            test: ["build/test/"]
         },
 
         mochaTest: {
@@ -38,7 +22,7 @@ module.exports = function (grunt) {
                 options: {
                     reporter: "spec"
                 },
-                src: ["build/tslint-tests.js"]
+                src: ["build/test/**/*.js"]
             }
         },
 
@@ -79,63 +63,19 @@ module.exports = function (grunt) {
             options: {
                 noImplicitAny: true,
                 sourceMap: false,
-                target: "es5"
-            },
-
-            bin: {
-                src: [
-                    "typings/*.d.ts",
-                    "src/language/walker/syntaxWalker.ts",
-                    "src/language/walker/ruleWalker.ts",
-                    "src/language/walker/scopeAwareRuleWalker.ts",
-                    "src/language/**/*.ts",
-                    "src/!(tslint-cli).ts",
-                    "src/tslint-cli.ts"
-                ],
-                out: "bin/tslint-cli.js"
+                target: "es5",
+                module: "commonjs"
             },
 
             core: {
                 options: {
-                    declaration: true,
-                    module: "commonjs"
+                    declaration: true
                 },
                 src: [
                     "typings/*.d.ts",
-                    "src/language/walker/syntaxWalker.ts",
-                    "src/language/walker/ruleWalker.ts",
-                    "src/language/walker/scopeAwareRuleWalker.ts",
-                    "src/language/**/*.ts",
-                    "src/*.ts",
-                    "!src/tslint-cli.ts"
+                    "src/**/*.ts",
                 ],
-                out: "lib/tslint.js"
-            },
-
-            core_rules: {
-                options: {
-                    base_path: "src/rules",
-                    module: "commonjs"
-                },
-                src: [
-                    "typings/*.d.ts",
-                    "lib/tslint.d.ts",
-                    "src/rules/*.ts"
-                ],
-                outDir: "build/rules/"
-            },
-
-            core_formatters: {
-                options: {
-                    base_path: "src/formatters",
-                    module: "commonjs"
-                },
-                src: [
-                    "typings/*.d.ts",
-                    "lib/tslint.d.ts",
-                    "src/formatters/*.ts"
-                ],
-                outDir: "build/formatters/"
+                outDir: "lib/"
             },
 
             test: {
@@ -143,17 +83,17 @@ module.exports = function (grunt) {
                     "typings/*.d.ts",
                     "lib/tslint.d.ts",
                     "test/typings/*.d.ts",
+                    "test/chaiAssert.d.ts",
                     "test/**/*.ts",
                     "!test/files/**/*.ts"
                 ],
-                out: "build/tslint-tests.js"
+                outDir: "build/"
             }
         }
     });
 
     // load NPM tasks
     grunt.loadNpmTasks("grunt-contrib-clean");
-    grunt.loadNpmTasks("grunt-contrib-concat");
     grunt.loadNpmTasks("grunt-jscs");
     grunt.loadNpmTasks("grunt-mocha-test");
     grunt.loadNpmTasks("grunt-run");
@@ -161,13 +101,10 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-ts");
 
     // register custom tasks
-    grunt.registerTask("core", ["clean:core", "ts:core", "concat:core", "ts:core_rules", "ts:core_formatters"]);
-    grunt.registerTask("bin", ["clean:bin", "ts:bin", "tslint:src", "concat:bin"]);
-    grunt.registerTask("test", ["clean:test", "ts:test", "tslint:test", "concat:test", "mochaTest"]
+    grunt.registerTask("core", ["clean:core", "ts:core"]);
+    grunt.registerTask("test", ["clean:test", "ts:test", "tslint:test", "mochaTest"]
                                   .concat(checkBinTest));
 
-    grunt.registerTask("concat-and-test", ["concat:test", "mochaTest"]);
-
     // create default task
-    grunt.registerTask("default", ["jscs", "core", "bin", "test"]);
+    grunt.registerTask("default", ["jscs", "core", "test"]);
 };
