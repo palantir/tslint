@@ -17,7 +17,7 @@
 import * as Linter from "./tslint";
 import * as fs from "fs";
 import * as optimist from "optimist";
-optimist
+let processed = optimist
     .usage("Usage: $0 [options] [file ...]")
     .check((argv: any) => {
         // at least one of file, help, version or unqualified argument must be present
@@ -60,7 +60,7 @@ optimist
             describe: "current version"
         }
     });
-const argv = optimist.argv;
+const argv = processed.argv;
 
 let outputStream: any;
 if (argv.o !== undefined) {
@@ -78,7 +78,7 @@ if (argv.v !== undefined) {
 }
 
 if ("help" in argv) {
-    outputStream.write(optimist.help());
+    outputStream.write(processed.help());
     const outputString = `
 tslint accepts the following commandline options:
 
