@@ -9,6 +9,35 @@ if (process.platform  === "win32") {
 
 module.exports = function (grunt) {
     // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
+    grunt.registerMultiTask("tsfmt", "Check typescript format", function() {
+        var done = this.async();
+        var fmt = require("typescript-formatter");
+        var options = { verify: true };
+        var completionPromises = [];
+        this.files.forEach(function(file) {
+            var srcs = file.src;
+            srcs.forEach(function(src) {
+                if (!grunt.file.exists(src)) {
+                    grunt.log.warn('Source file "' + src + '" not found.');
+                    return false;
+                }
+
+                var content = grunt.file.read(src);
+                completionPromises.push(fmt.processString(src, content, options));
+            });
+        });
+        Promise.all(completionPromises).then(function(results) {
+            var success = true;
+            results.forEach(function(result) {
+                if (result.error && result.message) {
+                    grunt.log.warn(result.message);
+                    success = false;
+                }
+            });
+            done(success);
+        });
+    });
+
     grunt.initConfig({
         pkg: grunt.file.readJSON("package.json"),
         typescriptBin: "node_modules/typescript/lib/typescriptServices.js",
@@ -32,6 +61,11 @@ module.exports = function (grunt) {
                 src: ["lib/tslint.js", "build/tslint-tests.js"],
                 dest: "build/tslint-tests.js"
             }
+        },
+
+        tsfmt: {
+            src: ["src/**/*.ts", "src/**/*.tsx"],
+            test: ["test/**/*.ts", "test/**/*.tsx"]
         },
 
         mochaTest: {
