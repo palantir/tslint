@@ -9,7 +9,7 @@
         "outDir": "../lib"
     },
     "files": [
-        "./typings/tsd.d.ts",
+        "../typings/tsd.d.ts",
         "./tslint.ts",
         "./rules/alignRule.ts",
         "./rules/banRule.ts",

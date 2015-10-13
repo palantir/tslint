@@ -17,9 +17,9 @@ import {ScopeAwareRuleWalker} from "./scopeAwareRuleWalker";
 import * as ts from "typescript";
 
 /**
-    * An AST walker that is aware of block scopes in addition to regular scopes. Block scopes
-    * are a superset of regular scopes (new block scopes are created more frequently in a program).
-    */
+* An AST walker that is aware of block scopes in addition to regular scopes. Block scopes
+* are a superset of regular scopes (new block scopes are created more frequently in a program).
+*/
 export abstract class BlockScopeAwareRuleWalker<T, U> extends ScopeAwareRuleWalker<T> {
     private blockScopeStack: U[];
 

@@ -76,8 +76,8 @@ export function scanAllTokens(scanner: ts.Scanner, callback: (s: ts.Scanner) => 
 }
 
 /**
-    * @returns true if any modifier kinds passed along exist in the given modifiers array
-    */
+* @returns true if any modifier kinds passed along exist in the given modifiers array
+*/
 export function hasModifier(modifiers: ts.ModifiersArray, ...modifierKinds: ts.SyntaxKind[]) {
     if (modifiers == null || modifierKinds == null) {
         return false;
@@ -89,9 +89,9 @@ export function hasModifier(modifiers: ts.ModifiersArray, ...modifierKinds: ts.S
 }
 
 /**
-    * Determines if the appropriate bit in the parent (VariableDeclarationList) is set,
-    * which indicates this is a "let" or "const".
-    */
+* Determines if the appropriate bit in the parent (VariableDeclarationList) is set,
+* which indicates this is a "let" or "const".
+*/
 export function isBlockScopedVariable(node: ts.VariableDeclaration | ts.VariableStatement): boolean {
     const parentNode = (node.kind === ts.SyntaxKind.VariableDeclaration)
         ? (<ts.VariableDeclaration> node).parent
@@ -115,8 +115,8 @@ export function isBlockScopedBindingElement(node: ts.BindingElement): boolean {
 }
 
 /**
-    * Bitwise check for node flags.
-    */
+* Bitwise check for node flags.
+*/
 export function isNodeFlagSet(node: ts.Node, flagToCheck: ts.NodeFlags): boolean {
     /* tslint:disable:no-bitwise */
     return (node.flags & flagToCheck) !== 0;

@@ -1,7 +1,6 @@
 import * as formatters from "./formatters";
 import * as configuration from "./configuration";
 import * as rules from "./rules";
-import * as Linter from "./tslint";
 
 export * from "./language/rule/rule";
 export * from "./enableDisableRules";
@@ -16,7 +15,20 @@ export var Formatters = formatters;
 export var Configuration = configuration;
 export var Rules = rules;
 
-type LintResult = Linter.LintResult;
-type ILinterOptions = Linter.ILinterOptions;
+import {RuleFailure} from "./language/rule/rule";
 
-export {Linter, LintResult, ILinterOptions};
+export interface LintResult {
+    failureCount: number;
+    failures: RuleFailure[];
+    format: string;
+    output: string;
+}
+
+export interface ILinterOptions {
+    configuration: any;
+    formatter: string;
+    formattersDirectory: string;
+    rulesDirectory: string;
+}
+
+export {Linter} from "./tslint";

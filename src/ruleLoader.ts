@@ -28,8 +28,8 @@ export interface IEnableDisablePosition {
 }
 
 export function loadRules(ruleConfiguration: {[name: string]: any},
-                            enableDisableRuleMap: {[rulename: string]: Lint.IEnableDisablePosition[]},
-                            rulesDirectory?: string): Lint.IRule[] {
+                          enableDisableRuleMap: {[rulename: string]: Lint.IEnableDisablePosition[]},
+                          rulesDirectory?: string): Lint.IRule[] {
     const rules: Lint.IRule[] = [];
     for (const ruleName in ruleConfiguration) {
         if (ruleConfiguration.hasOwnProperty(ruleName)) {

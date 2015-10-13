@@ -16,22 +16,24 @@
 
 import * as Lint from "./lint";
 import * as path from "path";
+import {findConfiguration as config} from "./configuration";
 const moduleDirectory = path.dirname(module.filename);
 
-class Linter {
+export class Linter {
     public static VERSION = "2.5.1";
+    public static findConfiguration = config;
 
     private fileName: string;
     private source: string;
-    private options: Linter.ILinterOptions;
+    private options: Lint.ILinterOptions;
 
-    constructor(fileName: string, source: string, options: Linter.ILinterOptions) {
+    constructor(fileName: string, source: string, options: Lint.ILinterOptions) {
         this.fileName = fileName;
         this.source = source;
         this.options = options;
     }
 
-    public lint(): Linter.LintResult {
+    public lint(): Lint.LintResult {
         const failures: Lint.RuleFailure[] = [];
         const sourceFile = Lint.getSourceFile(this.fileName, this.source);
 
@@ -88,26 +90,3 @@ class Linter {
         return rules.some((r) => r.equals(rule));
     }
 }
-
-import {findConfiguration as config} from "./configuration";
-
-namespace Linter {
-    export var findConfiguration = config;
-    export interface LintResult {
-        failureCount: number;
-        failures: Lint.RuleFailure[];
-        format: string;
-        output: string;
-    }
-
-    export interface ILinterOptions {
-        configuration: any;
-        formatter: string;
-        formattersDirectory: string;
-        rulesDirectory: string;
-    }
-}
-
-// export Lint.Linter as the API interface for this module
-export = Linter;
-
