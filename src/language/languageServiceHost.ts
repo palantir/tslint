@@ -14,23 +14,24 @@
  * limitations under the License.
  */
 
-module Lint {
-    export function createLanguageServiceHost(fileName: string, source: string) {
-        const host: ts.LanguageServiceHost = {
-            getCompilationSettings: () => Lint.createCompilerOptions(),
-            getCurrentDirectory: () => "",
-            getDefaultLibFileName: () => "lib.d.ts",
-            getScriptFileNames: () => [fileName],
-            getScriptSnapshot: (name) => ts.ScriptSnapshot.fromString(name === fileName ? source : ""),
-            getScriptVersion: () => "1",
-            log: (message) => { /* */ }
-        };
+import * as Lint from "../lint";
+import * as ts from "typescript";
 
-        return host;
-    }
+export function createLanguageServiceHost(fileName: string, source: string) {
+    const host: ts.LanguageServiceHost = {
+        getCompilationSettings: () => Lint.createCompilerOptions(),
+        getCurrentDirectory: () => "",
+        getDefaultLibFileName: () => "lib.d.ts",
+        getScriptFileNames: () => [fileName],
+        getScriptSnapshot: (name) => ts.ScriptSnapshot.fromString(name === fileName ? source : ""),
+        getScriptVersion: () => "1",
+        log: (message) => { /* */ }
+    };
 
-    export function createLanguageService(fileName: string, source: string) {
-        const languageServiceHost = Lint.createLanguageServiceHost(fileName, source);
-        return ts.createLanguageService(languageServiceHost);
-    }
+    return host;
+}
+
+export function createLanguageService(fileName: string, source: string) {
+    const languageServiceHost = Lint.createLanguageServiceHost(fileName, source);
+    return ts.createLanguageService(languageServiceHost);
 }

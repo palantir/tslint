@@ -5,12 +5,12 @@
         "noImplicitAny": true,
         "sourceMap": false,
         "target": "es5",
-        "out": "../build/tslint-tests.js"
+        "outDir": "../build/tests"
     },
     "filesGlob": [
-        "../typings/*.d.ts",
-        "../lib/tslint.d.ts",
+        "../typings/tsd.d.ts",
         "./typings/**/*.d.ts",
+        "./chaiAssert.d.ts",
         "./references.ts",
         "./helper.ts",
         "./ruleDisableEnableTests.ts",
@@ -20,11 +20,10 @@
         "./rules/*.ts"
     ],
     "files": [
-        "../typings/node.d.ts",
-        "../typings/typescriptServices.d.ts",
-        "../lib/tslint.d.ts",
+        "../typings/tsd.d.ts",
         "./typings/chai/chai.d.ts",
         "./typings/mocha/mocha.d.ts",
+        "./chaiAssert.d.ts",
         "./references.ts",
         "./helper.ts",
         "./ruleDisableEnableTests.ts",

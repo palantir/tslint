@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as Lint from "../lint";
 
 describe("<sort-object-literal-keys>", () => {
     const SortedKeyRule = Lint.Test.getRule("sort-object-literal-keys");

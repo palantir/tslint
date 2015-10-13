@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as Lint from "../lint";
+import * as ts from "typescript";
 
 describe("External Formatter", () => {
     const TEST_FILE = "formatters/externalFormatter.test.ts";
-    const TEST_MODULE = "../test/files/formatters/simple";
+    const TEST_MODULE = "../../test/files/formatters/simple";
     let sourceFile: ts.SourceFile;
     let formatter: Lint.IFormatter;
 

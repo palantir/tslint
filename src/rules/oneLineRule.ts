@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as Lint from "../lint";
+import * as ts from "typescript";
 
 const OPTION_BRACE = "check-open-brace";
 const OPTION_CATCH = "check-catch";
