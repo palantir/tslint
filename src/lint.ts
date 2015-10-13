@@ -31,4 +31,4 @@ export interface ILinterOptions {
     rulesDirectory: string;
 }
 
-export {Linter} from "./tslint";
+export {default as Linter} from "./tslint";
