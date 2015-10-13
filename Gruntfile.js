@@ -9,16 +9,16 @@ if (process.platform  === "win32") {
 
 module.exports = function (grunt) {
     // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
-    grunt.registerMultiTask("tsfmt", "Check typescript format", function() {
+    grunt.registerMultiTask("tsfmt", "Check typescript format", function () {
         var done = this.async();
         var fmt = require("typescript-formatter");
-        var options = { verify: true };
+        var options = {verify: true};
         var completionPromises = [];
-        this.files.forEach(function(file) {
+        this.files.forEach(function (file) {
             var srcs = file.src;
-            srcs.forEach(function(src) {
+            srcs.forEach(function (src) {
                 if (!grunt.file.exists(src)) {
-                    grunt.log.warn('Source file "' + src + '" not found.');
+                    grunt.log.warn("Source file \"" + src + "\" not found.");
                     return false;
                 }
 
@@ -26,9 +26,9 @@ module.exports = function (grunt) {
                 completionPromises.push(fmt.processString(src, content, options));
             });
         });
-        Promise.all(completionPromises).then(function(results) {
+        Promise.all(completionPromises).then(function (results) {
             var success = true;
-            results.forEach(function(result) {
+            results.forEach(function (result) {
                 if (result.error && result.message) {
                     grunt.log.warn(result.message);
                     success = false;
