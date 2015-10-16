@@ -49,7 +49,6 @@
     "no-require-imports": true,
     "no-string-literal": true,
     "no-switch-case-fall-through": true,
-    "no-trailing-comma": true,
     "no-trailing-whitespace": true,
     "no-unreachable": true,
     "no-unused-expression": true,
@@ -68,6 +67,10 @@
     "semicolon": true,
     "sort-object-literal-keys": true,
     "switch-default": true,
+    "trailing-comma": [true, {
+        "multiline": "always",
+        "singleline": "never"
+    }],
     "triple-equals": [true, "allow-null-check"],
     "typedef": [true,
         "call-signature",

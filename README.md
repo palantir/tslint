@@ -175,7 +175,6 @@ A sample configuration file with all options is available [here](https://github.
 * `no-require-imports` disallows require() style imports
 * `no-string-literal` disallows object access via string literals.
 * `no-switch-case-fall-through` disallows falling through case statements.
-* `no-trailing-comma` disallows trailing comma within object literals.
 * `no-trailing-whitespace` disallows trailing whitespace at the end of a line.
 * `no-unreachable` disallows unreachable code after `break`, `catch`, `throw`, and `return` statements.
 * `no-unused-expression` disallows unused expression statements, that is, expression statements that are not assignments or function invocations (and thus no-ops).
@@ -198,6 +197,10 @@ A sample configuration file with all options is available [here](https://github.
 * `semicolon` enforces semicolons at the end of every statement.
 * `sort-object-literal-keys` checks that keys in object literals are declared in alphabetical order
 * `switch-default` enforces a `default` case in `switch` statements.
+* `trailing-comma` enforces or disallows trailing comma within array and object literals, destructuring assignment and named imports.
+  Each rule option requires a value of `"always"` or `"never"`. Rule options:
+    * `"multiline"` checks multi-line object literals
+    * `"singleline"` checks single-line object literals
 * `triple-equals` enforces === and !== in favor of == and !=.
 * `typedef` enforces type definitions to exist. Rule options:
     * `"call-signature"` checks return type of functions
