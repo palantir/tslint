@@ -58,11 +58,6 @@ export function doesIntersect(failure: Lint.RuleFailure, disabledIntervals: Lint
     });
 }
 
-export function abstract() {
-    console.warn("Lint.abstract() is deprecated and will be removed in a future release. TSLint now uses abstract classes.");
-    return "abstract method not implemented";
-}
-
 export function scanAllTokens(scanner: ts.Scanner, callback: (s: ts.Scanner) => void) {
     let lastStartPos = -1;
     while (scanner.scan() !== ts.SyntaxKind.EndOfFileToken) {
