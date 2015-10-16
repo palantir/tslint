@@ -252,6 +252,10 @@ export class SyntaxWalker {
         this.walkChildren(node);
     }
 
+    protected visitStringLiteral(node: ts.StringLiteral) {
+        this.walkChildren(node);
+    }
+
     protected visitSwitchStatement(node: ts.SwitchStatement) {
         this.walkChildren(node);
     }
@@ -528,6 +532,10 @@ export class SyntaxWalker {
 
             case ts.SyntaxKind.SourceFile:
                 this.visitSourceFile(<ts.SourceFile> node);
+                break;
+
+            case ts.SyntaxKind.StringLiteral:
+                this.visitStringLiteral(<ts.StringLiteral> node);
                 break;
 
             case ts.SyntaxKind.SwitchStatement:
