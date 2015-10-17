@@ -20,11 +20,11 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "unsorted key '";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new SortedKeyWalker(sourceFile, this.getOptions()));
+        return this.applyWithWalker(new ObjectLiteralSortKeysWalker(sourceFile, this.getOptions()));
     }
 }
 
-class SortedKeyWalker extends Lint.RuleWalker {
+class ObjectLiteralSortKeysWalker extends Lint.RuleWalker {
     // stacks are used to maintain state while recursing through nested object literals
     private lastSortedKeyStack: string[] = [];
     private sortedStateStack: boolean[] = [];

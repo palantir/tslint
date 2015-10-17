@@ -184,6 +184,7 @@ A sample configuration file with all options is available [here](https://github.
 * `no-use-before-declare` disallows usage of variables before their declaration.
 * `no-var-keyword` disallows usage of the `var` keyword, use `let` or `const` instead.
 * `no-var-requires` disallows the use of require statements except in import statements, banning the use of forms such as `var module = require("module")`
+* `object-literal-sort-keys` checks that keys in object literals are declared in alphabetical order
 * `one-line` enforces the specified tokens to be on the same line as the expression preceding it. Rule options:
   * `"check-catch"` checks that `catch` is on the same line as the closing brace for `try`
   * `"check-else"` checks that `else` is on the same line as the closing brace for `if`
@@ -195,7 +196,6 @@ A sample configuration file with all options is available [here](https://github.
     * `"avoid-escape"` allows you to use the "other" quotemark in cases where escaping would normally be required. For example, `[true, "double", "avoid-escape"]` would not report a failure on the string literal `'Hello "World"'`.
 * `radix` enforces the radix parameter of `parseInt`
 * `semicolon` enforces semicolons at the end of every statement.
-* `sort-object-literal-keys` checks that keys in object literals are declared in alphabetical order
 * `switch-default` enforces a `default` case in `switch` statements.
 * `trailing-comma` enforces or disallows trailing comma within array and object literals, destructuring assignment and named imports.
   Each rule option requires a value of `"always"` or `"never"`. Rule options:

@@ -15,9 +15,9 @@
  */
 import * as Lint from "../lint";
 
-describe("<sort-object-literal-keys>", () => {
-    const SortedKeyRule = Lint.Test.getRule("sort-object-literal-keys");
-    const fileName = "rules/sortedkey.test.ts";
+describe("<object-literal-sort-keys>", () => {
+    const SortedKeyRule = Lint.Test.getRule("object-literal-sort-keys");
+    const fileName = "rules/objectliteralsortkeys.test.ts";
     const failureString = SortedKeyRule.FAILURE_STRING;
 
     it("forbids unsorted keys in object literals", () => {
