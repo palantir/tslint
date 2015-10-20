@@ -280,6 +280,10 @@ export class SyntaxWalker {
         this.walkChildren(node);
     }
 
+    protected visitTypeReference(node: ts.TypeReferenceNode) {
+        this.walkChildren(node);
+    }
+
     protected visitVariableDeclaration(node: ts.VariableDeclaration) {
         this.walkChildren(node);
     }
@@ -289,6 +293,10 @@ export class SyntaxWalker {
     }
 
     protected visitWhileStatement(node: ts.WhileStatement) {
+        this.walkChildren(node);
+    }
+
+    protected visitWithStatement(node: ts.WithStatement) {
         this.walkChildren(node);
     }
 
@@ -562,6 +570,10 @@ export class SyntaxWalker {
                 this.visitTypeLiteral(<ts.TypeLiteralNode> node);
                 break;
 
+            case ts.SyntaxKind.TypeReference:
+                this.visitTypeReference(<ts.TypeReferenceNode> node);
+                break;
+
             case ts.SyntaxKind.VariableDeclaration:
                 this.visitVariableDeclaration(<ts.VariableDeclaration> node);
                 break;
@@ -572,6 +584,10 @@ export class SyntaxWalker {
 
             case ts.SyntaxKind.WhileStatement:
                 this.visitWhileStatement(<ts.WhileStatement> node);
+                break;
+
+            case ts.SyntaxKind.WithStatement:
+                this.visitWithStatement(<ts.WithStatement> node);
                 break;
 
             default:
