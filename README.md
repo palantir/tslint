@@ -172,6 +172,7 @@ A sample configuration file with all options is available [here](https://github.
 * `no-eval` disallows `eval` function invocations.
 * `no-inferrable-types` disallows explicit type declarations for variables or parameters initialized to a number, string, or boolean
 * `no-internal-module` disallows internal `module`, use `namespace` instead.
+* `no-keyword-named-variables` disallows the use of certain TypeScript keywords (`any`, `Number`, `number`, `String`, `string`, `Boolean`, `boolean`, `undefined`) as variable or parameter names
 * `no-require-imports` disallows require() style imports
 * `no-string-literal` disallows object access via string literals.
 * `no-switch-case-fall-through` disallows falling through case statements.
