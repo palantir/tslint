@@ -17,7 +17,7 @@ import * as Lint from "../lint";
 
 describe("<variable-name>", () => {
     const VariableNameRule = Lint.Test.getRule("variable-name");
-    const failureString = VariableNameRule.FAILURE_STRING;
+    const failureString = VariableNameRule.FORMAT_FAILURE;
     const fileName = "rules/varname.test.ts";
     const createFailure = Lint.Test.createFailuresOnFile(fileName, failureString);
 
@@ -91,5 +91,24 @@ describe("<variable-name>", () => {
         assert.isFalse(actualFailures.some((failure) => {
             return optionallyValidFailures.some((f) => f.equals(failure));
         }));
+    });
+
+    it("ensures keywords are banned optionally", () => {
+        const file = "rules/varname-keywords.test.ts";
+        const failure = Lint.Test.createFailuresOnFile(file, VariableNameRule.KEYWORD_FAILURE);
+        const options = [true, "ban-keywords"];
+
+        const expectedFailures = [
+            failure([1, 5], [1, 14]),
+            failure([2, 5], [2, 12]),
+            failure([3, 14], [3, 17]),
+            failure([4, 6], [4, 12]),
+            failure([5, 6], [5, 12])
+        ];
+
+        const actualFailures = Lint.Test.applyRuleOnFile(file, VariableNameRule, options);
+        console.log(actualFailures[0]);
+        console.log(expectedFailures[0]);
+        Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
     });
 });

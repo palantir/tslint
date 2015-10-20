@@ -172,7 +172,6 @@ A sample configuration file with all options is available [here](https://github.
 * `no-eval` disallows `eval` function invocations.
 * `no-inferrable-types` disallows explicit type declarations for variables or parameters initialized to a number, string, or boolean
 * `no-internal-module` disallows internal `module`, use `namespace` instead.
-* `no-keyword-named-variables` disallows the use of certain TypeScript keywords (`any`, `Number`, `number`, `String`, `string`, `Boolean`, `boolean`, `undefined`) as variable or parameter names
 * `no-require-imports` disallows require() style imports
 * `no-string-literal` disallows object access via string literals.
 * `no-switch-case-fall-through` disallows falling through case statements.
@@ -219,9 +218,11 @@ A sample configuration file with all options is available [here](https://github.
 * `use-strict` enforces ECMAScript 5's strict mode
     * `check-module` checks that all top-level modules are using strict mode
     * `check-function` checks that all top-level functions are using strict mode
-* `variable-name` allows only camelCased or UPPER_CASED variable names. Rule options:
-  * `"allow-leading-underscore"` allows underscores at the beginnning.
-  * `"allow-trailing-underscore"` allows underscores at the end.
+* `variable-name` checks variables names for various errors.  Rule options:
+  * `"check-format"`: allows only camelCased or UPPER_CASED variable names
+    * `"allow-leading-underscore"` allows underscores at the beginnning
+    * `"allow-trailing-underscore"` allows underscores at the end
+  * `"ban-keywords"`: disallows the use of certain TypeScript keywords (`any`, `Number`, `number`, `String`, `string`, `Boolean`, `boolean`, `undefined`) as variable or parameter names
 * `whitespace` enforces spacing whitespace. Rule options:
   * `"check-branch"` checks branching statements (`if`/`else`/`for`/`while`) are followed by whitespace
   * `"check-decl"`checks that variable declarations have whitespace around the equals token

@@ -16,11 +16,16 @@
 import * as Lint from "../lint";
 import * as ts from "typescript";
 
+const BAD_NAMES = ["any", "Number", "number", "String", "string", "Boolean", "boolean", "undefined"];
+
 const OPTION_LEADING_UNDERSCORE = "allow-leading-underscore";
 const OPTION_TRAILING_UNDERSCORE = "allow-trailing-underscore";
+const OPTION_BAN_KEYWORDS = "ban-keywords";
+const OPTION_CHECK_FORMAT = "check-format";
 
 export class Rule extends Lint.Rules.AbstractRule {
-    public static FAILURE_STRING = "variable name must be in camelcase or uppercase";
+    public static FORMAT_FAILURE = "variable name must be in camelcase or uppercase";
+    public static KEYWORD_FAILURE = "variable nameclashes with keyword/type";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const variableNameWalker = new VariableNameWalker(sourceFile, this.getOptions());
@@ -29,30 +34,48 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class VariableNameWalker extends Lint.RuleWalker {
+    private checkFormat: boolean;
+    private banKeywords: boolean;
+
+    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
+        super(sourceFile, options);
+
+        this.banKeywords = this.hasOption(OPTION_BAN_KEYWORDS);
+        // check variable name formatting by default if no options are specified
+        this.checkFormat = !this.banKeywords || this.hasOption(OPTION_CHECK_FORMAT);
+    }
+
     public visitBindingElement(node: ts.BindingElement) {
         if (node.name.kind === ts.SyntaxKind.Identifier) {
-            this.handleVariableName(<ts.Identifier> node.name);
+            const identifier = node.name as ts.Identifier;
+            this.handleVariableNameFormat(identifier);
+            this.handleVariableNameKeyword(identifier);
         }
         super.visitBindingElement(node);
     }
 
     public visitParameterDeclaration(node: ts.ParameterDeclaration) {
         if (node.name.kind === ts.SyntaxKind.Identifier) {
-            this.handleVariableName(<ts.Identifier> node.name);
+            const identifier = node.name as ts.Identifier;
+            this.handleVariableNameFormat(identifier);
+            this.handleVariableNameKeyword(identifier);
         }
         super.visitParameterDeclaration(node);
     }
 
     public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
         if (node.name != null && node.name.kind === ts.SyntaxKind.Identifier) {
-            this.handleVariableName(<ts.Identifier> node.name);
+            const identifier = node.name as ts.Identifier;
+            this.handleVariableNameFormat(identifier);
         }
         super.visitPropertyDeclaration(node);
     }
 
     public visitVariableDeclaration(node: ts.VariableDeclaration) {
         if (node.name.kind === ts.SyntaxKind.Identifier) {
-            this.handleVariableName(<ts.Identifier> node.name);
+            const identifier = node.name as ts.Identifier;
+            this.handleVariableNameFormat(identifier);
+            this.handleVariableNameKeyword(identifier);
         }
         super.visitVariableDeclaration(node);
     }
@@ -64,11 +87,19 @@ class VariableNameWalker extends Lint.RuleWalker {
         }
     }
 
-    private handleVariableName(name: ts.Identifier) {
+    private handleVariableNameFormat(name: ts.Identifier) {
         const variableName = name.text;
 
-        if (!this.isCamelCase(variableName) && !this.isUpperCase(variableName)) {
-            this.addFailure(this.createFailure(name.getStart(), name.getWidth(), Rule.FAILURE_STRING));
+        if (this.checkFormat && !this.isCamelCase(variableName) && !this.isUpperCase(variableName)) {
+            this.addFailure(this.createFailure(name.getStart(), name.getWidth(), Rule.FORMAT_FAILURE));
+        }
+    }
+
+    private handleVariableNameKeyword(name: ts.Identifier) {
+        const variableName = name.text;
+        
+        if (this.banKeywords && BAD_NAMES.indexOf(variableName) !== -1) {
+            this.addFailure(this.createFailure(name.getStart(), name.getWidth(), Rule.KEYWORD_FAILURE));
         }
     }
 

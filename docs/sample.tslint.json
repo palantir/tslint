@@ -56,7 +56,6 @@
     "no-eval": true,
     "no-inferrable-types": false,
     "no-internal-module": true,
-    "no-keyword-named-variables": true,
     "no-require-imports": true,
     "no-shadowed-variable": true,
     "no-string-literal": true,
@@ -118,7 +117,12 @@
       "check-module",
       "check-function"
     ],
-    "variable-name": false,
+    "variable-name": [
+      true,
+      "check-format",
+      "allow-leading-underscore",
+      "ban-keywords"
+    ],
     "whitespace": [
       true,
       "check-branch",

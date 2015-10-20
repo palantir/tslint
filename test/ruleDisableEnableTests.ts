@@ -39,7 +39,7 @@ describe("Enable and Disable Rules", () => {
         const VariableNameRule = Lint.Test.getRule("variable-name");
 
         const quotemarkFailure = Lint.Test.createFailuresOnFile("enabledisable.test.ts", QuotemarkRule.DOUBLE_QUOTE_FAILURE);
-        const variableNameFailure = Lint.Test.createFailuresOnFile("enabledisable.test.ts", VariableNameRule.FAILURE_STRING);
+        const variableNameFailure = Lint.Test.createFailuresOnFile("enabledisable.test.ts", VariableNameRule.FORMAT_FAILURE);
 
         const expectedFailure1 = variableNameFailure([2, 5], [2, 10]);
         const expectedFailure2 = variableNameFailure([10, 5], [10, 10]);
