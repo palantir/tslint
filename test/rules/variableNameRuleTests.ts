@@ -93,7 +93,7 @@ describe("<variable-name>", () => {
         }));
     });
 
-    it("ensures keywords are banned optionally", () => {
+    it("ensures keywords can optionally be banned", () => {
         const file = "rules/varname-keywords.test.ts";
         const failure = Lint.Test.createFailuresOnFile(file, VariableNameRule.KEYWORD_FAILURE);
         const options = [true, "ban-keywords"];

@@ -12,6 +12,6 @@ let [faz] = [5];
 const {pom} = {pom: 5};
 
 interface Wob {
-	number: string;
+    number: string;
 }
 

@@ -16,7 +16,7 @@
 import * as Lint from "../lint";
 import * as ts from "typescript";
 
-const BAD_NAMES = ["any", "Number", "number", "String", "string", "Boolean", "boolean", "undefined"];
+const BANNED_KEYWORDS = ["any", "Number", "number", "String", "string", "Boolean", "boolean", "undefined"];
 
 const OPTION_LEADING_UNDERSCORE = "allow-leading-underscore";
 const OPTION_TRAILING_UNDERSCORE = "allow-trailing-underscore";
@@ -25,7 +25,7 @@ const OPTION_CHECK_FORMAT = "check-format";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FORMAT_FAILURE = "variable name must be in camelcase or uppercase";
-    public static KEYWORD_FAILURE = "variable nameclashes with keyword/type";
+    public static KEYWORD_FAILURE = "variable name clashes with keyword/type";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const variableNameWalker = new VariableNameWalker(sourceFile, this.getOptions());
@@ -34,20 +34,20 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class VariableNameWalker extends Lint.RuleWalker {
-    private checkFormat: boolean;
-    private banKeywords: boolean;
+    private shouldBanKeywords: boolean;
+    private shouldCheckFormat: boolean;
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
 
-        this.banKeywords = this.hasOption(OPTION_BAN_KEYWORDS);
+        this.shouldBanKeywords = this.hasOption(OPTION_BAN_KEYWORDS);
         // check variable name formatting by default if no options are specified
-        this.checkFormat = !this.banKeywords || this.hasOption(OPTION_CHECK_FORMAT);
+        this.shouldCheckFormat = !this.shouldBanKeywords || this.hasOption(OPTION_CHECK_FORMAT);
     }
 
     public visitBindingElement(node: ts.BindingElement) {
         if (node.name.kind === ts.SyntaxKind.Identifier) {
-            const identifier = node.name as ts.Identifier;
+            const identifier = <ts.Identifier> node.name;
             this.handleVariableNameFormat(identifier);
             this.handleVariableNameKeyword(identifier);
         }
@@ -56,7 +56,7 @@ class VariableNameWalker extends Lint.RuleWalker {
 
     public visitParameterDeclaration(node: ts.ParameterDeclaration) {
         if (node.name.kind === ts.SyntaxKind.Identifier) {
-            const identifier = node.name as ts.Identifier;
+            const identifier = <ts.Identifier> node.name;
             this.handleVariableNameFormat(identifier);
             this.handleVariableNameKeyword(identifier);
         }
@@ -65,15 +65,16 @@ class VariableNameWalker extends Lint.RuleWalker {
 
     public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
         if (node.name != null && node.name.kind === ts.SyntaxKind.Identifier) {
-            const identifier = node.name as ts.Identifier;
+            const identifier = <ts.Identifier> node.name;
             this.handleVariableNameFormat(identifier);
+            // do not check property declarations for keywords, they are allowed to be keywords
         }
         super.visitPropertyDeclaration(node);
     }
 
     public visitVariableDeclaration(node: ts.VariableDeclaration) {
         if (node.name.kind === ts.SyntaxKind.Identifier) {
-            const identifier = node.name as ts.Identifier;
+            const identifier = <ts.Identifier> node.name;
             this.handleVariableNameFormat(identifier);
             this.handleVariableNameKeyword(identifier);
         }
@@ -90,7 +91,7 @@ class VariableNameWalker extends Lint.RuleWalker {
     private handleVariableNameFormat(name: ts.Identifier) {
         const variableName = name.text;
 
-        if (this.checkFormat && !this.isCamelCase(variableName) && !this.isUpperCase(variableName)) {
+        if (this.shouldCheckFormat && !this.isCamelCase(variableName) && !this.isUpperCase(variableName)) {
             this.addFailure(this.createFailure(name.getStart(), name.getWidth(), Rule.FORMAT_FAILURE));
         }
     }
@@ -98,7 +99,7 @@ class VariableNameWalker extends Lint.RuleWalker {
     private handleVariableNameKeyword(name: ts.Identifier) {
         const variableName = name.text;
         
-        if (this.banKeywords && BAD_NAMES.indexOf(variableName) !== -1) {
+        if (this.shouldBanKeywords && BANNED_KEYWORDS.indexOf(variableName) !== -1) {
             this.addFailure(this.createFailure(name.getStart(), name.getWidth(), Rule.KEYWORD_FAILURE));
         }
     }
