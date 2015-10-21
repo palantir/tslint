@@ -16,11 +16,16 @@
 import * as Lint from "../lint";
 import * as ts from "typescript";
 
+const BANNED_KEYWORDS = ["any", "Number", "number", "String", "string", "Boolean", "boolean", "undefined"];
+
 const OPTION_LEADING_UNDERSCORE = "allow-leading-underscore";
 const OPTION_TRAILING_UNDERSCORE = "allow-trailing-underscore";
+const OPTION_BAN_KEYWORDS = "ban-keywords";
+const OPTION_CHECK_FORMAT = "check-format";
 
 export class Rule extends Lint.Rules.AbstractRule {
-    public static FAILURE_STRING = "variable name must be in camelcase or uppercase";
+    public static FORMAT_FAILURE = "variable name must be in camelcase or uppercase";
+    public static KEYWORD_FAILURE = "variable name clashes with keyword/type";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const variableNameWalker = new VariableNameWalker(sourceFile, this.getOptions());
@@ -29,30 +34,49 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class VariableNameWalker extends Lint.RuleWalker {
+    private shouldBanKeywords: boolean;
+    private shouldCheckFormat: boolean;
+
+    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
+        super(sourceFile, options);
+
+        this.shouldBanKeywords = this.hasOption(OPTION_BAN_KEYWORDS);
+        // check variable name formatting by default if no options are specified
+        this.shouldCheckFormat = !this.shouldBanKeywords || this.hasOption(OPTION_CHECK_FORMAT);
+    }
+
     public visitBindingElement(node: ts.BindingElement) {
         if (node.name.kind === ts.SyntaxKind.Identifier) {
-            this.handleVariableName(<ts.Identifier> node.name);
+            const identifier = <ts.Identifier> node.name;
+            this.handleVariableNameFormat(identifier);
+            this.handleVariableNameKeyword(identifier);
         }
         super.visitBindingElement(node);
     }
 
     public visitParameterDeclaration(node: ts.ParameterDeclaration) {
         if (node.name.kind === ts.SyntaxKind.Identifier) {
-            this.handleVariableName(<ts.Identifier> node.name);
+            const identifier = <ts.Identifier> node.name;
+            this.handleVariableNameFormat(identifier);
+            this.handleVariableNameKeyword(identifier);
         }
         super.visitParameterDeclaration(node);
     }
 
     public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
         if (node.name != null && node.name.kind === ts.SyntaxKind.Identifier) {
-            this.handleVariableName(<ts.Identifier> node.name);
+            const identifier = <ts.Identifier> node.name;
+            this.handleVariableNameFormat(identifier);
+            // do not check property declarations for keywords, they are allowed to be keywords
         }
         super.visitPropertyDeclaration(node);
     }
 
     public visitVariableDeclaration(node: ts.VariableDeclaration) {
         if (node.name.kind === ts.SyntaxKind.Identifier) {
-            this.handleVariableName(<ts.Identifier> node.name);
+            const identifier = <ts.Identifier> node.name;
+            this.handleVariableNameFormat(identifier);
+            this.handleVariableNameKeyword(identifier);
         }
         super.visitVariableDeclaration(node);
     }
@@ -64,11 +88,19 @@ class VariableNameWalker extends Lint.RuleWalker {
         }
     }
 
-    private handleVariableName(name: ts.Identifier) {
+    private handleVariableNameFormat(name: ts.Identifier) {
         const variableName = name.text;
 
-        if (!this.isCamelCase(variableName) && !this.isUpperCase(variableName)) {
-            this.addFailure(this.createFailure(name.getStart(), name.getWidth(), Rule.FAILURE_STRING));
+        if (this.shouldCheckFormat && !this.isCamelCase(variableName) && !this.isUpperCase(variableName)) {
+            this.addFailure(this.createFailure(name.getStart(), name.getWidth(), Rule.FORMAT_FAILURE));
+        }
+    }
+
+    private handleVariableNameKeyword(name: ts.Identifier) {
+        const variableName = name.text;
+        
+        if (this.shouldBanKeywords && BANNED_KEYWORDS.indexOf(variableName) !== -1) {
+            this.addFailure(this.createFailure(name.getStart(), name.getWidth(), Rule.KEYWORD_FAILURE));
         }
     }
 
