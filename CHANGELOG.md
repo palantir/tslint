@@ -1,6 +1,20 @@
 Change Log
 ===
 
+v3.0.0-dev.1
+---
+* **BREAKING CHANGES**
+  * Rearchitect tslint to use external modules instead of merged namespaces (#726)
+    * Dependencies need to be handled differently now by custom rules and formatters
+    * See the [PR](https://github.com/palantir/tslint/pull/726) for full details about this change
+  * `no-trailing-comma` rule removed, it is replaced by the `trailing-comma` rule (#687)
+  * Rename `sort-object-literal-keys` rule to `object-literal-sort-keys` (#304, #537)
+  * `Lint.abstract()` has been removed (#700)
+* [new-rule] `trailing-comma` rule (#557, #687)
+* [new-rule-option] "ban-keywords" option for `variable-name` rule (#735, #748)
+* [bugfix] `typedef` rule now handles `for-of` loops correctly (#743)
+* [bugfix] Handle tslint.json utf-8 files which have a BOM correctly (#90)
+
 v2.6.0-dev.2
 ---
 * Upgrade TypeScript compiler to `v1.7.0-dev.20151003`
