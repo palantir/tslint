@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as Lint from "../lint";
 
 describe("<no-console>", () => {
     const NoConsoleRule = Lint.Test.getRule("no-console");

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import * as Lint from "../lint";
+
 describe("<whitespace>", () => {
     const fileName = "rules/whitespace.test.ts";
     const WhitespaceRule = Lint.Test.getRule("whitespace");

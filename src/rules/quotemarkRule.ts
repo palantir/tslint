@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as Lint from "../lint";
+import * as ts from "typescript";
 
 enum QuoteMark {
     SINGLE_QUOTES,
@@ -55,34 +57,29 @@ class QuoteWalker extends Lint.RuleWalker {
         this.avoidEscape = ruleArguments.indexOf("avoid-escape") > 0;
     }
 
-    public visitNode(node : ts.Node) {
-        this.handleNode(node);
-        super.visitNode(node);
-    }
+    protected visitStringLiteral(node: ts.StringLiteral) {
+        const text = node.getText();
+        const width = node.getWidth();
+        const position = node.getStart();
 
-    private handleNode(node: ts.Node) {
-        if (node.kind === ts.SyntaxKind.StringLiteral) {
-            const text = node.getText();
-            const width = node.getWidth();
-            const position = node.getStart();
+        const firstCharacter = text.charAt(0);
+        const lastCharacter = text.charAt(text.length - 1);
 
-            const firstCharacter = text.charAt(0);
-            const lastCharacter = text.charAt(text.length - 1);
+        const expectedQuoteMark = (this.quoteMark === QuoteMark.SINGLE_QUOTES) ? "'" : "\"";
 
-            const expectedQuoteMark = (this.quoteMark === QuoteMark.SINGLE_QUOTES) ? "'" : "\"";
+        if (firstCharacter !== expectedQuoteMark || lastCharacter !== expectedQuoteMark) {
+            // allow the "other" quote mark to be used, but only to avoid having to escape
+            const includesOtherQuoteMark = text.slice(1, -1).indexOf(expectedQuoteMark) !== -1;
 
-            if (firstCharacter !== expectedQuoteMark || lastCharacter !== expectedQuoteMark) {
-                // allow the "other" quote mark to be used, but only to avoid having to escape
-                const includesOtherQuoteMark = text.slice(1, -1).indexOf(expectedQuoteMark) !== -1;
+            if (!(this.avoidEscape && includesOtherQuoteMark)) {
+                const failureMessage = (this.quoteMark === QuoteMark.SINGLE_QUOTES)
+                    ? Rule.SINGLE_QUOTE_FAILURE
+                    : Rule.DOUBLE_QUOTE_FAILURE;
 
-                if (!(this.avoidEscape && includesOtherQuoteMark)) {
-                    const failureMessage = (this.quoteMark === QuoteMark.SINGLE_QUOTES)
-                        ? Rule.SINGLE_QUOTE_FAILURE
-                        : Rule.DOUBLE_QUOTE_FAILURE;
-
-                    this.addFailure(this.createFailure(position, width, failureMessage));
-                }
+                this.addFailure(this.createFailure(position, width, failureMessage));
             }
         }
+
+        super.visitStringLiteral(node);
     }
 }

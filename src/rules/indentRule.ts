@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as Lint from "../lint";
+import * as ts from "typescript";
 
 const OPTION_USE_TABS = "tabs";
 const OPTION_USE_SPACES = "spaces";

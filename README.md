@@ -175,7 +175,6 @@ A sample configuration file with all options is available [here](https://github.
 * `no-require-imports` disallows require() style imports
 * `no-string-literal` disallows object access via string literals.
 * `no-switch-case-fall-through` disallows falling through case statements.
-* `no-trailing-comma` disallows trailing comma within object literals.
 * `no-trailing-whitespace` disallows trailing whitespace at the end of a line.
 * `no-unreachable` disallows unreachable code after `break`, `catch`, `throw`, and `return` statements.
 * `no-unused-expression` disallows unused expression statements, that is, expression statements that are not assignments or function invocations (and thus no-ops).
@@ -185,6 +184,7 @@ A sample configuration file with all options is available [here](https://github.
 * `no-use-before-declare` disallows usage of variables before their declaration.
 * `no-var-keyword` disallows usage of the `var` keyword, use `let` or `const` instead.
 * `no-var-requires` disallows the use of require statements except in import statements, banning the use of forms such as `var module = require("module")`
+* `object-literal-sort-keys` checks that keys in object literals are declared in alphabetical order
 * `one-line` enforces the specified tokens to be on the same line as the expression preceding it. Rule options:
   * `"check-catch"` checks that `catch` is on the same line as the closing brace for `try`
   * `"check-else"` checks that `else` is on the same line as the closing brace for `if`
@@ -196,8 +196,11 @@ A sample configuration file with all options is available [here](https://github.
     * `"avoid-escape"` allows you to use the "other" quotemark in cases where escaping would normally be required. For example, `[true, "double", "avoid-escape"]` would not report a failure on the string literal `'Hello "World"'`.
 * `radix` enforces the radix parameter of `parseInt`
 * `semicolon` enforces semicolons at the end of every statement.
-* `sort-object-literal-keys` checks that keys in object literals are declared in alphabetical order
 * `switch-default` enforces a `default` case in `switch` statements.
+* `trailing-comma` enforces or disallows trailing comma within array and object literals, destructuring assignment and named imports.
+  Each rule option requires a value of `"always"` or `"never"`. Rule options:
+    * `"multiline"` checks multi-line object literals
+    * `"singleline"` checks single-line object literals
 * `triple-equals` enforces === and !== in favor of == and !=.
 * `typedef` enforces type definitions to exist. Rule options:
     * `"call-signature"` checks return type of functions
@@ -215,9 +218,11 @@ A sample configuration file with all options is available [here](https://github.
 * `use-strict` enforces ECMAScript 5's strict mode
     * `check-module` checks that all top-level modules are using strict mode
     * `check-function` checks that all top-level functions are using strict mode
-* `variable-name` allows only camelCased or UPPER_CASED variable names. Rule options:
-  * `"allow-leading-underscore"` allows underscores at the beginnning.
-  * `"allow-trailing-underscore"` allows underscores at the end.
+* `variable-name` checks variables names for various errors.  Rule options:
+  * `"check-format"`: allows only camelCased or UPPER_CASED variable names
+    * `"allow-leading-underscore"` allows underscores at the beginnning
+    * `"allow-trailing-underscore"` allows underscores at the end
+  * `"ban-keywords"`: disallows the use of certain TypeScript keywords (`any`, `Number`, `number`, `String`, `string`, `Boolean`, `boolean`, `undefined`) as variable or parameter names
 * `whitespace` enforces spacing whitespace. Rule options:
   * `"check-branch"` checks branching statements (`if`/`else`/`for`/`while`) are followed by whitespace
   * `"check-decl"`checks that variable declarations have whitespace around the equals token

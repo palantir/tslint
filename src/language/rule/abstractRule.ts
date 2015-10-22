@@ -13,50 +13,51 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as Lint from "../../lint";
+import {RuleWalker} from "../walker/ruleWalker";
+import * as ts from "typescript";
 
-module Lint.Rules {
-    export abstract class AbstractRule implements Lint.IRule {
-        private value: any;
-        private options: Lint.IOptions;
+export abstract class AbstractRule implements Lint.IRule {
+    private value: any;
+    private options: Lint.IOptions;
 
-        constructor(ruleName: string, value: any, disabledIntervals: Lint.IDisabledInterval[]) {
-            let ruleArguments: any[] = [];
+    constructor(ruleName: string, value: any, disabledIntervals: Lint.IDisabledInterval[]) {
+        let ruleArguments: any[] = [];
 
-            if (Array.isArray(value) && value.length > 1) {
-                ruleArguments = value.slice(1);
-            }
-
-            this.value = value;
-            this.options = {
-                disabledIntervals: disabledIntervals,
-                ruleArguments: ruleArguments,
-                ruleName: ruleName
-            };
+        if (Array.isArray(value) && value.length > 1) {
+            ruleArguments = value.slice(1);
         }
 
-        public getOptions(): Lint.IOptions {
-            return this.options;
+        this.value = value;
+        this.options = {
+            disabledIntervals: disabledIntervals,
+            ruleArguments: ruleArguments,
+            ruleName: ruleName
+        };
+    }
+
+    public getOptions(): Lint.IOptions {
+        return this.options;
+    }
+
+    public abstract apply(sourceFile: ts.SourceFile): Lint.RuleFailure[];
+
+    public applyWithWalker(walker: RuleWalker): Lint.RuleFailure[] {
+        walker.walk(walker.getSourceFile());
+        return walker.getFailures();
+    }
+
+    public isEnabled(): boolean {
+        const value = this.value;
+
+        if (typeof value === "boolean") {
+            return value;
         }
 
-        public abstract apply(sourceFile: ts.SourceFile): RuleFailure[];
-
-        public applyWithWalker(walker: Lint.RuleWalker): RuleFailure[] {
-            walker.walk(walker.getSourceFile());
-            return walker.getFailures();
+        if (Array.isArray(value) && value.length > 0) {
+            return value[0];
         }
 
-        public isEnabled(): boolean {
-            const value = this.value;
-
-            if (typeof value === "boolean") {
-                return value;
-            }
-
-            if (Array.isArray(value) && value.length > 0) {
-                return value[0];
-            }
-
-            return false;
-        }
+        return false;
     }
 }
