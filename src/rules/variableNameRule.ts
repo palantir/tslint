@@ -16,7 +16,7 @@
 import * as Lint from "../lint";
 import * as ts from "typescript";
 
-const BANNED_KEYWORDS = ["any", "Number", "number", "String", "string", "Boolean", "boolean", "undefined"];
+const BANNED_KEYWORDS = ["any", "Number", "number", "String", "string", "Boolean", "boolean", "Undefined", "undefined"];
 
 const OPTION_LEADING_UNDERSCORE = "allow-leading-underscore";
 const OPTION_TRAILING_UNDERSCORE = "allow-trailing-underscore";
