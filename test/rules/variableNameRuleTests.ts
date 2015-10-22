@@ -107,8 +107,6 @@ describe("<variable-name>", () => {
         ];
 
         const actualFailures = Lint.Test.applyRuleOnFile(file, VariableNameRule, options);
-        console.log(actualFailures[0]);
-        console.log(expectedFailures[0]);
         Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
     });
 });
