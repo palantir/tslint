@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as Lint from "../lint";
 
 describe("<no-var-keyword>", () => {
     const NoVarKeywordRule = Lint.Test.getRule("no-var-keyword");

@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as Lint from "../../lint";
 
-module Lint.Formatters {
-    export abstract class AbstractFormatter implements Lint.IFormatter {
-        public abstract format(failures: Lint.RuleFailure[]): string;
-    }
+export abstract class AbstractFormatter implements Lint.IFormatter {
+    public abstract format(failures: Lint.RuleFailure[]): string;
 }

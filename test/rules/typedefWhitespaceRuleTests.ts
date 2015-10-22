@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-
-
+import * as Lint from "../lint";
 
 describe("<typedefWhitespace, not enabled>", () => {
     const fileName = "rules/typedefWhitespace.test.ts";

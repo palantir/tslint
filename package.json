@@ -6,6 +6,7 @@
     "tslint": "./bin/tslint"
   },
   "main": "./lib/tslint",
+  "typings": "./lib/tslint",
   "repository": {
     "type": "git",
     "url": "https://github.com/palantir/tslint.git"
@@ -21,22 +22,21 @@
   "dependencies": {
     "findup-sync": "~0.2.1",
     "optimist": "~0.6.0",
-    "underscore.string": "~3.1.1"
+    "underscore.string": "~3.1.1",
+    "typescript": "next"
   },
   "devDependencies": {
     "chai": "^3.0.0",
     "grunt": "^0.4.5",
     "grunt-cli": "^0.1.9",
     "grunt-contrib-clean": "^0.6.0",
-    "grunt-contrib-concat": "^0.5.1",
     "grunt-jscs": "^1.8.0",
     "grunt-mocha-test": "^0.12.7",
     "grunt-run": "^0.3.0",
     "grunt-ts": "^4.1.0",
     "grunt-tslint": "latest",
     "mocha": "^2.2.5",
-    "tslint": "latest",
-    "typescript": "next"
+    "tslint": "latest"
   },
   "license": "Apache-2.0"
 }

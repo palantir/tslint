@@ -72,3 +72,8 @@ try {
 } catch (e) { // should not be a failure; catch clause can't have typedef
     console.log(e);
 }
+
+// should not fail, typedefs not allowed in for-of loops
+for (let i of [1, 2, 3]) {
+
+}

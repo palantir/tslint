@@ -4,3 +4,8 @@
 
 declare var assert: Chai.Assert;
 
+declare namespace NodeJS {
+    interface Global {
+        assert: Chai.Assert;
+    }
+}
