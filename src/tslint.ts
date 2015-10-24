@@ -20,7 +20,7 @@ import {findConfiguration as config} from "./configuration";
 const moduleDirectory = path.dirname(module.filename);
 
 export default class Linter {
-    public static VERSION = "2.6.0-dev.2";
+    public static VERSION = "3.0.0-dev.1";
     public static findConfiguration = config;
 
     private fileName: string;
