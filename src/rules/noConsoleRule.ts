@@ -16,7 +16,7 @@
 import * as Lint from "../lint";
 import * as ts from "typescript";
 
-import BanRule = require("./banRule");
+import * as BanRule from "./banRule";
 
 export class Rule extends BanRule.Rule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {

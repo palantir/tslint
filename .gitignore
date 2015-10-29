@@ -5,3 +5,4 @@ bin/tslint-cli.js
 lib/
 node_modules/
 tscommand*.txt
+typings/.basedir.ts
