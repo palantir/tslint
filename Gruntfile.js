@@ -14,7 +14,7 @@ module.exports = function (grunt) {
 
         clean: {
             core: ["lib/**/*.js", "lib/**/*.d.ts"],
-            test: ["build/"]
+            test: ["build/tests"]
         },
 
         mochaTest: {
@@ -22,7 +22,7 @@ module.exports = function (grunt) {
                 options: {
                     reporter: "spec"
                 },
-                src: ["build/test/**/*.js"]
+                src: ["build/tests/test/**/*.js"]
             }
         },
 
@@ -60,39 +60,36 @@ module.exports = function (grunt) {
         },
 
         ts: {
-            options: {
-                noImplicitAny: true,
-                sourceMap: false,
-                target: "es5",
-                module: "commonjs"
-            },
-
             core: {
-                options: {
-                    declaration: true
-                },
-                src: [
-                    "typings/*.d.ts",
-                    "src/**/*.ts",
-                ],
-                outDir: "lib/"
+                tsconfig: "src/tsconfig.json",
             },
-
             test: {
-                src: [
-                    "typings/*.d.ts",
-                    "src/**/*.ts",
-                    "test/typings/*.d.ts",
-                    "test/chaiAssert.d.ts",
-                    "test/**/*.ts",
-                    "!test/files/**/*.ts"
-                ],
-                outDir: "build/"
+                tsconfig: "test/tsconfig.json",
+            }
+        },
+
+        babel: {
+            core: {
+                files: [{
+                    expand: true,
+                    cwd: "lib",
+                    src: ["**/*.js"],
+                    dest: "lib",
+                }]
+            },
+            test: {
+                files: [{
+                    expand: true,
+                    cwd: "build/tests",
+                    src: ["**/*.js"],
+                    dest: "build/tests"
+                }]
             }
         }
     });
 
     // load NPM tasks
+    grunt.loadNpmTasks("grunt-babel");
     grunt.loadNpmTasks("grunt-contrib-clean");
     grunt.loadNpmTasks("grunt-jscs");
     grunt.loadNpmTasks("grunt-mocha-test");
@@ -101,8 +98,8 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-ts");
 
     // register custom tasks
-    grunt.registerTask("core", ["clean:core", "ts:core"]);
-    grunt.registerTask("test", ["clean:test", "ts:test", "tslint:test", "mochaTest"]
+    grunt.registerTask("core", ["clean:core", "ts:core", "babel:core"]);
+    grunt.registerTask("test", ["clean:test", "ts:test", "babel:test", "tslint:test", "mochaTest"]
                                   .concat(checkBinTest));
 
     // create default task

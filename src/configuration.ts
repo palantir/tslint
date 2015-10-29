@@ -16,7 +16,10 @@
 
 import * as fs from "fs";
 import * as path from "path";
-import * as findup from "findup-sync";
+
+// hack to correctly import JS module that uses module.exports = function(){...}
+import * as findupSync from "findup-sync";
+const findup = (<any>findupSync).default;
 
 const CONFIG_FILENAME = "tslint.json";
 const DEFAULT_CONFIG = {
