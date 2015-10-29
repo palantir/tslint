@@ -69,6 +69,9 @@ module.exports = function (grunt) {
         },
 
         babel: {
+            options: {
+                optional: ["runtime"]
+            },
             core: {
                 files: [{
                     expand: true,
