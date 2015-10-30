@@ -14,9 +14,6 @@
     "underscore/underscore.d.ts": {
       "commit": "98d3168c2c570352a3a7393788e2ec9fbb08ade6"
     },
-    "findup-sync/findup-sync.d.ts": {
-      "commit": "98d3168c2c570352a3a7393788e2ec9fbb08ade6"
-    },
     "minimatch/minimatch.d.ts": {
       "commit": "98d3168c2c570352a3a7393788e2ec9fbb08ade6"
     },

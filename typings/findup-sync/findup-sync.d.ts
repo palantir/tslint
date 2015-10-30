@@ -11,9 +11,5 @@ declare module 'findup-sync' {
 	interface IOptions extends minimatch.IOptions {
 		cwd?: string;
 	}
-
-	function mod(pattern: string[] | string, opts?: IOptions): string;
-    namespace mod {} // Literally works around a bug in TS
-
-	export = mod;
+	export default function (pattern: string[] | string, opts?: IOptions): string;
 }

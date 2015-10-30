@@ -16,7 +16,7 @@
 
 import * as fs from "fs";
 import * as path from "path";
-import * as findup from "findup-sync";
+import findup from "findup-sync";
 
 const CONFIG_FILENAME = "tslint.json";
 const DEFAULT_CONFIG = {
