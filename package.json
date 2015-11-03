@@ -33,7 +33,7 @@
     "grunt-jscs": "^1.8.0",
     "grunt-mocha-test": "^0.12.7",
     "grunt-run": "^0.3.0",
-    "grunt-ts": "^4.1.0",
+    "grunt-ts": "^5.1.0",
     "grunt-tslint": "latest",
     "mocha": "^2.2.5",
     "tslint": "latest"
