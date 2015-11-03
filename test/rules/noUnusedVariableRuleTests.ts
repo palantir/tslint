@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import * as Lint from "../lint";
 
 describe("<no-unused-variable>", () => {
@@ -112,5 +113,67 @@ describe("<no-unused-variable>", () => {
         const actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule);
 
         assert.lengthOf(actualFailures, 0);
+    });
+
+    describe("with react option", () => {
+        describe("set", () => {
+            function describeSuite(importModuleName: string) {
+                const suffix = moduleNameToFilenameSuffix(importModuleName);
+                describe(`importing \"${importModuleName}\"`, () => {
+                    it("should not fail if only JSX present", () => {
+                        assertNoFailures(`rules/nounusedvariable-react1-${suffix}.test.tsx`, true);
+                    });
+
+                    it("should not fail if React namespace is used", () => {
+                        assertNoFailures(`rules/nounusedvariable-react2-${suffix}.test.tsx`, true);
+                    });
+
+                    it("should fail if neither JSX nor React namespace is seen", () => {
+                        assertSingleFailure(`rules/nounusedvariable-react3-${suffix}.test.tsx`, true);
+                    });
+                });
+            }
+
+            describeSuite("react");
+            describeSuite("react/addons");
+        });
+
+        describe("not set", () => {
+            function describeSuite(importModuleName: string) {
+                const suffix = moduleNameToFilenameSuffix(importModuleName);
+                describe(`importing \"${importModuleName}\"`, () => {
+                    it("should fail if only JSX present", () => {
+                        assertSingleFailure(`rules/nounusedvariable-react1-${suffix}.test.tsx`, false);
+                    });
+
+                    it("should not fail if React namespace is used", () => {
+                        assertNoFailures(`rules/nounusedvariable-react2-${suffix}.test.tsx`, false);
+                    });
+
+                    it("should fail if neither JSX nor React namespace is seen", () => {
+                        assertSingleFailure(`rules/nounusedvariable-react3-${suffix}.test.tsx`, false);
+                    });
+                });
+            }
+
+            describeSuite("react");
+            describeSuite("react/addons");
+        });
+
+        function assertNoFailures(fileName: string, isReactOptionSet: boolean) {
+            const actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule, isReactOptionSet ? [true, "react"] : [true]);
+            assert.lengthOf(actualFailures, 0);
+        }
+
+        function assertSingleFailure(fileName: string, isReactOptionSet: boolean) {
+            const expectedFailure = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING + "'React'")([1, 13], [1, 18]);
+            const actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule, isReactOptionSet ? [true, "react"] : [true]);
+            assert.lengthOf(actualFailures, 1);
+            Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
+        }
+
+        function moduleNameToFilenameSuffix(moduleName: string): string {
+            return moduleName.replace(/\//g, "_");
+        }
     });
 });

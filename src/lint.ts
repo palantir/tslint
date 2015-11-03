@@ -1,6 +1,8 @@
-import * as formatters from "./formatters";
 import * as configuration from "./configuration";
+import * as formatters from "./formatters";
+import * as linter from "./tslint";
 import * as rules from "./rules";
+
 
 export * from "./language/rule/rule";
 export * from "./enableDisableRules";
@@ -11,8 +13,9 @@ export * from "./language/languageServiceHost";
 export * from "./language/walker";
 export * from "./language/formatter/formatter";
 
-export var Formatters = formatters;
 export var Configuration = configuration;
+export var Formatters = formatters;
+export var Linter = linter;
 export var Rules = rules;
 
 import {RuleFailure} from "./language/rule/rule";
@@ -30,5 +33,3 @@ export interface ILinterOptions {
     formattersDirectory: string;
     rulesDirectory: string;
 }
-
-export {default as Linter} from "./tslint";

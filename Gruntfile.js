@@ -60,34 +60,11 @@ module.exports = function (grunt) {
         },
 
         ts: {
-            options: {
-                noImplicitAny: true,
-                sourceMap: false,
-                target: "es5",
-                module: "commonjs"
-            },
-
             core: {
-                options: {
-                    declaration: true
-                },
-                src: [
-                    "typings/*.d.ts",
-                    "src/**/*.ts",
-                ],
-                outDir: "lib/"
+                tsconfig: "src/tsconfig.json"
             },
-
             test: {
-                src: [
-                    "typings/*.d.ts",
-                    "src/**/*.ts",
-                    "test/typings/*.d.ts",
-                    "test/chaiAssert.d.ts",
-                    "test/**/*.ts",
-                    "!test/files/**/*.ts"
-                ],
-                outDir: "build/"
+                tsconfig: "test/tsconfig.json"
             }
         }
     });
