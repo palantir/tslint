@@ -113,4 +113,66 @@ describe("<no-unused-variable>", () => {
 
         assert.lengthOf(actualFailures, 0);
     });
+
+    describe("with react option", () => {
+        describe("set", () => {
+            function shared(importModuleName: string) {
+                const suffix = moduleNameToFilenameSuffix(importModuleName);
+                describe("importing \"${importModuleName}\"", () => {
+                    it("should not fail if only JSX present", () => {
+                        pass(`rules/nounusedvariable-react1-${suffix}.test.tsx`, true);
+                    });
+
+                    it("should not fail if React namespace is used", () => {
+                        pass(`rules/nounusedvariable-react2-${suffix}.test.tsx`, true);
+                    });
+
+                    it("should fail if neither JSX nor React namespace is seen", () => {
+                        fail(`rules/nounusedvariable-react3-${suffix}.test.tsx`, true);
+                    });
+                });
+            }
+
+            shared("react");
+            shared("react/addons");
+        });
+
+        describe("not set", () => {
+            function shared(importModuleName: string) {
+                const suffix = moduleNameToFilenameSuffix(importModuleName);
+                describe("importing \"${importModuleName}\"", () => {
+                    it("should fail if only JSX present", () => {
+                        fail(`rules/nounusedvariable-react1-${suffix}.test.tsx`, false);
+                    });
+
+                    it("should not fail if React namespace is used", () => {
+                        pass(`rules/nounusedvariable-react2-${suffix}.test.tsx`, false);
+                    });
+
+                    it("should fail if neither JSX nor React namespace is seen", () => {
+                        fail(`rules/nounusedvariable-react3-${suffix}.test.tsx`, false);
+                    });
+                });
+            }
+
+            shared("react");
+            shared("react/addons");
+        });
+
+        function pass(fileName: string, isReactOptionSet: boolean) {
+            const actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule, isReactOptionSet ? [true, "react"] : [true]);
+            assert.lengthOf(actualFailures, 0);
+        }
+
+        function fail(fileName: string, isReactOptionSet: boolean) {
+            const failure1 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING + "'React'")([1, 13], [1, 18]);
+            const actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule, isReactOptionSet ? [true, "react"] : [true]);
+            assert.lengthOf(actualFailures, 1);
+            Lint.Test.assertContainsFailure(actualFailures, failure1);
+        }
+
+        function moduleNameToFilenameSuffix(moduleName: string): string {
+            return moduleName.replace(/\//g, "_");
+        }
+    });
 });

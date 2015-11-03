@@ -16,7 +16,13 @@
 import * as Lint from "../lint";
 import * as ts from "typescript";
 
+const OPTION_REACT = "react";
 const OPTION_CHECK_PARAMETERS = "check-parameters";
+
+const REACT_MODULES = ["react", "react/addons"];
+const REACT_NAMESPACE_IMPORT_NAME = "React";
+
+const MODULE_SPECIFIER_MATCH = /^["'](.+)['"]$/;
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "unused variable: ";
@@ -33,11 +39,50 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     private skipParameterDeclaration: boolean;
     private skipVariableDeclaration: boolean;
 
+    private reactImport: ts.NamespaceImport;
+    private reactUsed: boolean;
+    private hasSeenJsxElement: boolean;
+
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions, languageService: ts.LanguageService) {
         super(sourceFile, options);
         this.languageService = languageService;
         this.skipVariableDeclaration = false;
         this.skipParameterDeclaration = false;
+        this.reactUsed = false;
+        this.hasSeenJsxElement = false;
+    }
+
+    public visitSourceFile(node: ts.SourceFile) {
+        super.visitSourceFile(node);
+
+        // after a this.visitSourceFile is completed, this.reactImport will be set to a NamespaceImport
+        // iff:
+        //
+        // + a react option has been provided to the rule and
+        // + an import of a module that matches one of OPTION_REACT_MODULES is found, to a
+        //   NamespaceImport named OPTION_REACT_NAMESPACE_IMPORT_NAME
+        //
+        // e.g.
+        //
+        // import * as React from "react/addons";
+        //
+        // If reactImport is defined when a walk is completed, we need to have:
+        //
+        // a) seen another usage of React and/or
+        // b) seen a JSX identifier
+        //
+        // otherwise a a variable usage failure will will be reported
+        if (this.hasOption(OPTION_REACT) && this.reactImport !== undefined) {
+            if (!this.reactUsed && !this.hasSeenJsxElement) {
+                let name = this.reactImport.name.getText();
+                this.addFailure(this.createFailure(this.reactImport.name.getStart(), name.length, `${Rule.FAILURE_STRING}'${name}'`));
+            }
+        }
+    }
+
+    public visitJsxElement(node: ts.JsxElement) {
+        this.hasSeenJsxElement = true;
+        super.visitJsxElement(node);
     }
 
     public visitBindingElement(node: ts.BindingElement) {
@@ -88,7 +133,26 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     }
 
     public visitNamespaceImport(node: ts.NamespaceImport) {
-        this.validateReferencesForVariable(node.name.text, node.name.getStart());
+        let importDeclaration = <ts.ImportDeclaration>node.parent.parent;
+        let moduleSpecifier = importDeclaration.moduleSpecifier.getText();
+
+        // extract the unquoted module being imported
+        let match = moduleSpecifier.match(MODULE_SPECIFIER_MATCH);
+
+        let isReactImport = match && REACT_MODULES.indexOf(match[1]) !== -1;
+        if (this.hasOption(OPTION_REACT)
+                && isReactImport
+                && node.name.text === REACT_NAMESPACE_IMPORT_NAME) {
+            this.reactImport = node;
+            let fileName = this.getSourceFile().fileName;
+            let position = node.name.getStart();
+            let highlights = this.languageService.getDocumentHighlights(fileName, position, [fileName]);
+            if (highlights != null && highlights[0].highlightSpans.length > 1) {
+                this.reactUsed = true;
+            }
+        } else {
+            this.validateReferencesForVariable(node.name.text, node.name.getStart());
+        }
         super.visitNamespaceImport(node);
     }
 
