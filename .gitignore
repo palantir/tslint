@@ -5,3 +5,5 @@ bin/tslint-cli.js
 lib/
 node_modules/
 tscommand*.txt
+# created by grunt-ts for faster compiling
+typings/.basedir.ts
