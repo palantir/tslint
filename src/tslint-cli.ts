@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import Linter from "./tslint";
+import * as Linter from "./tslint";
 import * as fs from "fs";
 import * as optimist from "optimist";
 let processed = optimist

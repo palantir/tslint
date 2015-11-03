@@ -19,7 +19,7 @@ import * as path from "path";
 import {findConfiguration as config} from "./configuration";
 const moduleDirectory = path.dirname(module.filename);
 
-export default class Linter {
+class Linter {
     public static VERSION = "2.5.1";
     public static findConfiguration = config;
 
@@ -90,3 +90,6 @@ export default class Linter {
         return rules.some((r) => r.equals(rule));
     }
 }
+
+namespace Linter {}
+export = Linter;
