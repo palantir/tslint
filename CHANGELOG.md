@@ -1,6 +1,12 @@
 Change Log
 ===
 
+v3.0.0-dev.2
+---
+* [new-rule-option] "react" option for `no-unused-variable` rule (#698, #725)
+* [bugfix] Fix how `Linter` is exported from "tslint" module (#760)
+* [bugfix] `no-use-before-declare` rule doesn't crash on uncompilable code (#763)
+
 v3.0.0-dev.1
 ---
 * **BREAKING CHANGES**
