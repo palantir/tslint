@@ -98,7 +98,7 @@ class VariableNameWalker extends Lint.RuleWalker {
 
     private handleVariableNameKeyword(name: ts.Identifier) {
         const variableName = name.text;
-        
+
         if (this.shouldBanKeywords && BANNED_KEYWORDS.indexOf(variableName) !== -1) {
             this.addFailure(this.createFailure(name.getStart(), name.getWidth(), Rule.KEYWORD_FAILURE));
         }

@@ -106,8 +106,7 @@ class TypedefWalker extends Lint.RuleWalker {
     }
 
     public visitVariableDeclaration(node: ts.VariableDeclaration) {
-        // AFAIK, variable declarations will always have a grandparent, 
-        // but check that to be on the safe side.
+        // variable declarations should always have a grandparent, but check that to be on the safe side.
         // catch statements will be the parent of the variable declaration
         // for-in/for-of loops will be the gradparent of the variable declaration
         if (node.parent != null && node.parent.parent != null
