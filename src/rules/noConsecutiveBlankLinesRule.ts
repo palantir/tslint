@@ -17,7 +17,7 @@ import * as Lint from "../lint";
 import * as ts from "typescript";
 
 export class Rule extends Lint.Rules.AbstractRule {
-    static FAILURE_STRING = "consecutive blank lines are disallowed";
+    public static FAILURE_STRING = "consecutive blank lines are disallowed";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new BlankLinesWalker(sourceFile, this.getOptions()));

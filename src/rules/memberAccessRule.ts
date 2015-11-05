@@ -17,7 +17,7 @@ import * as Lint from "../lint";
 import * as ts from "typescript";
 
 export class Rule extends Lint.Rules.AbstractRule {
-    static FAILURE_STRING = "default access modifier on member/method not allowed";
+    public static FAILURE_STRING = "default access modifier on member/method not allowed";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new MemberAccessWalker(sourceFile, this.getOptions()));
