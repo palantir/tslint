@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
 import * as ts from "typescript";
+import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_PART = "function invocation disallowed: ";
@@ -23,9 +24,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         const options = this.getOptions();
         const banFunctionWalker = new BanFunctionWalker(sourceFile, options);
         const functionsToBan = options.ruleArguments;
-        functionsToBan.forEach((functionToBan) => {
-            banFunctionWalker.addBannedFunction(functionToBan);
-        });
+        functionsToBan.forEach((f) => banFunctionWalker.addBannedFunction(f));
         return this.applyWithWalker(banFunctionWalker);
     }
 }
@@ -40,8 +39,8 @@ export class BanFunctionWalker extends Lint.RuleWalker {
     public visitCallExpression(node: ts.CallExpression) {
         const expression = node.expression;
 
-        if (expression.kind === ts.SyntaxKind.PropertyAccessExpression &&
-            expression.getChildCount() >= 3) {
+        if (expression.kind === ts.SyntaxKind.PropertyAccessExpression
+                && expression.getChildCount() >= 3) {
 
             const firstToken = expression.getFirstToken();
             const secondToken = expression.getChildAt(1);
@@ -51,14 +50,16 @@ export class BanFunctionWalker extends Lint.RuleWalker {
             const thirdText = thirdToken.getFullText();
 
             if (secondToken.kind === ts.SyntaxKind.DotToken) {
-                this.bannedFunctions.forEach((bannedFunction) => {
+                for (const bannedFunction of this.bannedFunctions) {
                     if (firstText === bannedFunction[0] && thirdText === bannedFunction[1]) {
-                        const failure = this.createFailure(expression.getStart(),
-                                                         expression.getWidth(),
-                                                         Rule.FAILURE_STRING_PART + firstText + "." + thirdText);
+                        const failure = this.createFailure(
+                            expression.getStart(),
+                            expression.getWidth(),
+                            `${Rule.FAILURE_STRING_PART}${firstText}.${thirdText}`
+                        );
                         this.addFailure(failure);
                     }
-                });
+                }
             }
         }
 

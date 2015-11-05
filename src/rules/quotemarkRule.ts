@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
 import * as ts from "typescript";
+import * as Lint from "../lint";
 
 enum QuoteMark {
     SINGLE_QUOTES,
@@ -35,11 +36,11 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new QuoteWalker(sourceFile, this.getOptions()));
+        return this.applyWithWalker(new QuotemarkWalker(sourceFile, this.getOptions()));
     }
 }
 
-class QuoteWalker extends Lint.RuleWalker {
+class QuotemarkWalker extends Lint.RuleWalker {
     private quoteMark = QuoteMark.DOUBLE_QUOTES;
     private avoidEscape: boolean;
 

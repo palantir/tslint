@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
 import * as ts from "typescript";
+import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static DO_FAILURE_STRING = "do statements must be braced";
@@ -55,7 +56,11 @@ class CurlyWalker extends Lint.RuleWalker {
 
     public visitIfStatement(node: ts.IfStatement) {
         if (!this.isStatementBraced(node.thenStatement)) {
-            this.addFailure(this.createFailure(node.getStart(), node.thenStatement.getEnd() - node.getStart(), Rule.IF_FAILURE_STRING));
+            this.addFailure(this.createFailure(
+                node.getStart(),
+                node.thenStatement.getEnd() - node.getStart(),
+                Rule.IF_FAILURE_STRING
+            ));
         }
 
         if (node.elseStatement != null
@@ -65,11 +70,11 @@ class CurlyWalker extends Lint.RuleWalker {
             // find the else keyword to place the error appropriately
             const elseKeywordNode = node.getChildren().filter((child) => child.kind === ts.SyntaxKind.ElseKeyword)[0];
 
-            this.addFailure(
-                this.createFailure(elseKeywordNode.getStart(),
+            this.addFailure(this.createFailure(
+                elseKeywordNode.getStart(),
                 node.elseStatement.getEnd() - elseKeywordNode.getStart(),
-                Rule.ELSE_FAILURE_STRING)
-            );
+                Rule.ELSE_FAILURE_STRING
+            ));
         }
 
         super.visitIfStatement(node);

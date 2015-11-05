@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import * as ts from "typescript";
 import * as Lint from "../../lint";
 import {SyntaxWalker} from "./syntaxWalker";
-import * as ts from "typescript";
 
 export class RuleWalker extends SyntaxWalker {
     private limit: number;
