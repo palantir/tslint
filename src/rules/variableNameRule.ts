@@ -92,7 +92,7 @@ class VariableNameWalker extends Lint.RuleWalker {
     private handleVariableNameFormat(name: ts.Identifier) {
         const variableName = name.text;
 
-        if (this.shouldCheckFormat && !this.isCamelCase(variableName) && !this.isUpperCase(variableName)) {
+        if (this.shouldCheckFormat && !this.isCamelCase(variableName) && !isUpperCase(variableName)) {
             this.addFailure(this.createFailure(name.getStart(), name.getWidth(), Rule.FORMAT_FAILURE));
         }
     }
@@ -121,8 +121,8 @@ class VariableNameWalker extends Lint.RuleWalker {
         }
         return firstCharacter === firstCharacter.toLowerCase() && middle.indexOf("_") === -1;
     }
+}
 
-    private isUpperCase(name: string) {
-        return name === name.toUpperCase();
-    }
+function isUpperCase(name: string) {
+    return name === name.toUpperCase();
 }

@@ -70,12 +70,12 @@ class NoConditionalAssignmentWalker extends Lint.RuleWalker {
     }
 
     private checkForAssignment(expression: ts.BinaryExpression) {
-        if (this.isAssignmentToken(expression.operatorToken)) {
+        if (isAssignmentToken(expression.operatorToken)) {
             this.addFailure(this.createFailure(expression.getStart(), expression.getWidth(), Rule.FAILURE_STRING));
         }
     }
+}
 
-    private isAssignmentToken(token: ts.Node) {
-        return token.kind >= ts.SyntaxKind.FirstAssignment && token.kind <= ts.SyntaxKind.LastAssignment;
-    }
+function isAssignmentToken(token: ts.Node) {
+    return token.kind >= ts.SyntaxKind.FirstAssignment && token.kind <= ts.SyntaxKind.LastAssignment;
 }

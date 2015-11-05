@@ -31,7 +31,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class CurlyWalker extends Lint.RuleWalker {
     public visitForInStatement(node: ts.ForInStatement) {
-        if (!this.isStatementBraced(node.statement)) {
+        if (!isStatementBraced(node.statement)) {
             this.addFailureForNode(node, Rule.FOR_FAILURE_STRING);
         }
 
@@ -39,7 +39,7 @@ class CurlyWalker extends Lint.RuleWalker {
     }
 
     public visitForOfStatement(node: ts.ForInStatement) {
-        if (!this.isStatementBraced(node.statement)) {
+        if (!isStatementBraced(node.statement)) {
             this.addFailureForNode(node, Rule.FOR_FAILURE_STRING);
         }
 
@@ -47,7 +47,7 @@ class CurlyWalker extends Lint.RuleWalker {
     }
 
     public visitForStatement(node: ts.ForStatement) {
-        if (!this.isStatementBraced(node.statement)) {
+        if (!isStatementBraced(node.statement)) {
             this.addFailureForNode(node, Rule.FOR_FAILURE_STRING);
         }
 
@@ -55,7 +55,7 @@ class CurlyWalker extends Lint.RuleWalker {
     }
 
     public visitIfStatement(node: ts.IfStatement) {
-        if (!this.isStatementBraced(node.thenStatement)) {
+        if (!isStatementBraced(node.thenStatement)) {
             this.addFailure(this.createFailure(
                 node.getStart(),
                 node.thenStatement.getEnd() - node.getStart(),
@@ -65,7 +65,7 @@ class CurlyWalker extends Lint.RuleWalker {
 
         if (node.elseStatement != null
                 && node.elseStatement.kind !== ts.SyntaxKind.IfStatement
-                && !this.isStatementBraced(node.elseStatement)) {
+                && !isStatementBraced(node.elseStatement)) {
 
             // find the else keyword to place the error appropriately
             const elseKeywordNode = node.getChildren().filter((child) => child.kind === ts.SyntaxKind.ElseKeyword)[0];
@@ -81,7 +81,7 @@ class CurlyWalker extends Lint.RuleWalker {
     }
 
     public visitDoStatement(node: ts.DoStatement) {
-        if (!this.isStatementBraced(node.statement)) {
+        if (!isStatementBraced(node.statement)) {
             this.addFailureForNode(node, Rule.DO_FAILURE_STRING);
         }
 
@@ -89,18 +89,18 @@ class CurlyWalker extends Lint.RuleWalker {
     }
 
     public visitWhileStatement(node: ts.WhileStatement) {
-        if (!this.isStatementBraced(node.statement)) {
+        if (!isStatementBraced(node.statement)) {
             this.addFailureForNode(node, Rule.WHILE_FAILURE_STRING);
         }
 
         super.visitWhileStatement(node);
     }
 
-    private isStatementBraced(node: ts.Statement) {
-        return node.kind === ts.SyntaxKind.Block;
-    }
-
     private addFailureForNode(node: ts.Node, failure: string) {
         this.addFailure(this.createFailure(node.getStart(), node.getWidth(), failure));
     }
+}
+
+function isStatementBraced(node: ts.Statement) {
+    return node.kind === ts.SyntaxKind.Block;
 }

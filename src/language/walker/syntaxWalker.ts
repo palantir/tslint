@@ -315,10 +315,6 @@ export class SyntaxWalker {
                 this.visitArrayLiteralExpression(<ts.ArrayLiteralExpression> node);
                 break;
 
-            case ts.SyntaxKind.BindingElement:
-                this.visitBindingElement(<ts.BindingElement> node);
-                break;
-
             case ts.SyntaxKind.ArrowFunction:
                 this.visitArrowFunction(<ts.FunctionLikeDeclaration> node);
                 break;

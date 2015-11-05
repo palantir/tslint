@@ -35,18 +35,18 @@ class NoStringLiteralWalker extends Lint.RuleWalker {
             const unquotedAccessorText = accessorText.substring(1, accessorText.length - 1);
 
             // only create a failure if the identifier is valid, in which case there's no need to use string literals
-            if (this.isValidIdentifier(unquotedAccessorText)) {
+            if (isValidIdentifier(unquotedAccessorText)) {
                 this.addFailure(this.createFailure(argument.getStart(), argument.getWidth(), Rule.FAILURE_STRING));
             }
         }
 
         super.visitElementAccessExpression(node);
     }
+}
 
-    private isValidIdentifier(token: string) {
-        const scanner = ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, token);
-        scanner.scan();
-        // if we scanned to the end of the token, we can check if the scanned item was an identifier
-        return scanner.getTokenText() === token && scanner.isIdentifier();
-    }
+function isValidIdentifier(token: string) {
+    const scanner = ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, token);
+    scanner.scan();
+    // if we scanned to the end of the token, we can check if the scanned item was an identifier
+    return scanner.getTokenText() === token && scanner.isIdentifier();
 }

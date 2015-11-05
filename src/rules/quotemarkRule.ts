@@ -58,7 +58,7 @@ class QuotemarkWalker extends Lint.RuleWalker {
         this.avoidEscape = ruleArguments.indexOf("avoid-escape") > 0;
     }
 
-    protected visitStringLiteral(node: ts.StringLiteral) {
+    public visitStringLiteral(node: ts.StringLiteral) {
         const text = node.getText();
         const width = node.getWidth();
         const position = node.getStart();

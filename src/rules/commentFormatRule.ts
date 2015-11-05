@@ -48,19 +48,19 @@ class CommentWalker extends Lint.SkippableTokenAwareRuleWalker {
                 const startPosition = scanner.getTokenPos() + 2;
                 const width = commentText.length - 2;
                 if (this.hasOption(OPTION_SPACE)) {
-                    if (!this.startsWithSpace(commentText)) {
+                    if (!startsWithSpace(commentText)) {
                         const leadingSpaceFailure = this.createFailure(startPosition, width, Rule.LEADING_SPACE_FAILURE);
                         this.addFailure(leadingSpaceFailure);
                     }
                 }
                 if (this.hasOption(OPTION_LOWERCASE)) {
-                    if (!this.startsWithLowercase(commentText)) {
+                    if (!startsWithLowercase(commentText)) {
                         const lowercaseFailure = this.createFailure(startPosition, width, Rule.LOWERCASE_FAILURE);
                         this.addFailure(lowercaseFailure);
                     }
                 }
                 if (this.hasOption(OPTION_UPPERCASE)) {
-                    if (!this.startsWithUppercase(commentText)) {
+                    if (!startsWithUppercase(commentText)) {
                         const uppercaseFailure = this.createFailure(startPosition, width, Rule.UPPERCASE_FAILURE);
                         this.addFailure(uppercaseFailure);
                     }
@@ -69,43 +69,44 @@ class CommentWalker extends Lint.SkippableTokenAwareRuleWalker {
         });
     }
 
-    private startsWithSpace(commentText: string): boolean {
-        if (commentText.length <= 2) {
-            return true; // comment is "//"? Technically not a violation.
-        }
+}
 
-        // whitelist //#region and //#endregion
-        if ((/^#(end)?region/).test(commentText.substring(2))) {
-            return true;
-        }
-
-        const firstCharacter = commentText.charAt(2); // first character after the space
-        // three slashes (///) also works, to allow for ///<reference>
-        return firstCharacter === " " || firstCharacter === "/";
+function startsWith(commentText: string, changeCase: (str: string) => string) {
+    if (commentText.length <= 2) {
+        return true; // comment is "//"? Technically not a violation.
     }
 
-    private startsWithLowercase(commentText: string): boolean {
-        return this.startsWith(commentText, c => c.toLowerCase());
+    // regex is "start of string"//"any amount of whitespace"("word character")
+    const firstCharacterMatch = commentText.match(/^\/\/\s*(\w)/);
+    if (firstCharacterMatch != null) {
+        // the first group matched, i.e. the thing in the parens, is the first non-space character, if it's alphanumeric
+        const firstCharacter = firstCharacterMatch[1];
+        return firstCharacter === changeCase(firstCharacter);
+    } else {
+        // first character isn't alphanumeric/doesn't exist? Technically not a violation
+        return true;
+    }
+}
+
+function startsWithLowercase(commentText: string) {
+    return startsWith(commentText, c => c.toLowerCase());
+}
+
+function startsWithUppercase(commentText: string) {
+    return startsWith(commentText, c => c.toUpperCase());
+}
+
+function startsWithSpace(commentText: string) {
+    if (commentText.length <= 2) {
+        return true; // comment is "//"? Technically not a violation.
     }
 
-    private startsWithUppercase(commentText: string): boolean {
-        return this.startsWith(commentText, c => c.toUpperCase());
+    // whitelist //#region and //#endregion
+    if ((/^#(end)?region/).test(commentText.substring(2))) {
+        return true;
     }
 
-    private startsWith(commentText: string, changeCase: (str: string) => string): boolean {
-        if (commentText.length <= 2) {
-            return true; // comment is "//"? Technically not a violation.
-        }
-
-        // regex is "start of string"//"any amount of whitespace"("word character")
-        const firstCharacterMatch = commentText.match(/^\/\/\s*(\w)/);
-        if (firstCharacterMatch != null) {
-            // the first group matched, i.e. the thing in the parens, is the first non-space character, if it's alphanumeric
-            const firstCharacter = firstCharacterMatch[1];
-            return firstCharacter === changeCase(firstCharacter);
-        } else {
-            // first character isn't alphanumeric/doesn't exist? Technically not a violation
-            return true;
-        }
-    }
+    const firstCharacter = commentText.charAt(2); // first character after the space
+    // three slashes (///) also works, to allow for ///<reference>
+    return firstCharacter === " " || firstCharacter === "/";
 }

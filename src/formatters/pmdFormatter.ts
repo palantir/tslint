@@ -26,8 +26,8 @@ export class Formatter extends AbstractFormatter {
                 .replace(/&/g, "&amp;")
                 .replace(/</g, "&lt;")
                 .replace(/>/g, "&gt;")
-                .replace(/\'/g, "&#39;")
-                .replace(/\"/g, "&quot;");
+                .replace(/'/g, "&#39;")
+                .replace(/"/g, "&quot;");
 
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
 
