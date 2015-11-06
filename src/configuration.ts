@@ -71,14 +71,16 @@ export function findConfiguration(configFile: string, inputFileLocation: string)
 
 function getHomeDir() {
     const environment = global.process.env;
-    const paths = [environment.USERPROFILE, environment.HOME, environment.HOMEPATH, environment.HOMEDRIVE + environment.HOMEPATH];
+    const paths = [
+        environment.USERPROFILE,
+        environment.HOME,
+        environment.HOMEPATH,
+        environment.HOMEDRIVE + environment.HOMEPATH
+    ];
 
-    for (const homeIndex in paths) {
-        if (paths.hasOwnProperty(homeIndex)) {
-            const homePath = paths[homeIndex];
-            if (homePath && fs.existsSync(homePath)) {
-                return homePath;
-            }
+    for (const homePath of paths) {
+        if (homePath != null && fs.existsSync(homePath)) {
+            return homePath;
         }
     }
 }

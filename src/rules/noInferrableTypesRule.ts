@@ -13,18 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
 import * as ts from "typescript";
+import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_FACTORY = (type: string) => `LHS type (${type}) inferred by RHS expression, remove type annotation`;
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new InferrableTypeWalker(sourceFile, this.getOptions()));
+        return this.applyWithWalker(new NoInferrableTypesWalker(sourceFile, this.getOptions()));
     }
 }
 
-class InferrableTypeWalker extends Lint.RuleWalker {
+class NoInferrableTypesWalker extends Lint.RuleWalker {
     public visitVariableDeclaration(node: ts.VariableDeclaration) {
         this.checkDeclaration(node);
         super.visitVariableDeclaration(node);
@@ -38,17 +39,18 @@ class InferrableTypeWalker extends Lint.RuleWalker {
     private checkDeclaration(node: ts.ParameterDeclaration | ts.VariableDeclaration) {
         if (node.type != null && node.initializer != null) {
             let failure: string;
+
             switch (node.type.kind) {
                 case ts.SyntaxKind.BooleanKeyword:
                     if (node.initializer.kind === ts.SyntaxKind.TrueKeyword || node.initializer.kind === ts.SyntaxKind.FalseKeyword) {
                         failure = "boolean";
                     }
-                break;
+                    break;
                 case ts.SyntaxKind.NumberKeyword:
                     if (node.initializer.kind === ts.SyntaxKind.NumericLiteral) {
                         failure = "number";
                     }
-                break;
+                    break;
                 case ts.SyntaxKind.StringKeyword:
                     switch (node.initializer.kind) {
                         case ts.SyntaxKind.StringLiteral:
@@ -59,9 +61,10 @@ class InferrableTypeWalker extends Lint.RuleWalker {
                         default:
                             break;
                     }
-                break;
+                    break;
             }
-            if (failure) {
+
+            if (failure != null) {
                 this.addFailure(this.createFailure(node.type.getStart(), node.type.getWidth(), Rule.FAILURE_STRING_FACTORY(failure)));
             }
         }

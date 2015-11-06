@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
 import * as ts from "typescript";
+import * as Lint from "../lint";
 
 const OPTION_ALLOW_NULL_CHECK = "allow-null-check";
 
@@ -50,7 +51,7 @@ class ComparisonWalker extends Lint.RuleWalker {
         }
     }
 
-    private isExpressionAllowed(node: ts.BinaryExpression): boolean {
+    private isExpressionAllowed(node: ts.BinaryExpression) {
         const nullKeyword = ts.SyntaxKind.NullKeyword;
 
         return this.hasOption(OPTION_ALLOW_NULL_CHECK)

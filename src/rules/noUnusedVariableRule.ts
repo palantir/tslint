@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
 import * as ts from "typescript";
+import * as Lint from "../lint";
 
 const OPTION_REACT = "react";
 const OPTION_CHECK_PARAMETERS = "check-parameters";
@@ -128,9 +129,9 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     }
 
     public visitNamedImports(node: ts.NamedImports) {
-        node.elements.forEach((namedImport: ts.ImportSpecifier) => {
+        for (const namedImport of node.elements) {
             this.validateReferencesForVariable(namedImport.name.text, namedImport.name.getStart());
-        });
+        }
         super.visitNamedImports(node);
     }
 

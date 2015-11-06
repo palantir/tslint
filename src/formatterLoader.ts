@@ -1,18 +1,18 @@
 /*
-* Copyright 2013 Palantir Technologies, Inc.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright 2013 Palantir Technologies, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 import * as fs from "fs";
 import * as path from "path";
@@ -22,15 +22,15 @@ const moduleDirectory = path.dirname(module.filename);
 const CORE_FORMATTERS_DIRECTORY = path.resolve(moduleDirectory, ".", "formatters");
 
 export function findFormatter(name: string, formattersDirectory?: string) {
-    if (typeof(name) === "function") {
+    if (typeof name === "function") {
         return name;
     }
 
-    const camelizedName = camelize(name + "Formatter");
+    const camelizedName = camelize(`${name}Formatter`);
 
     // first check for core formatters
     let Formatter = loadFormatter(CORE_FORMATTERS_DIRECTORY, camelizedName);
-    if (Formatter) {
+    if (Formatter != null) {
         return Formatter;
     }
 
@@ -50,7 +50,7 @@ function loadFormatter(...paths: string[]) {
     const formatterPath = paths.reduce((p, c) => path.join(p, c), "");
     const fullPath = path.resolve(moduleDirectory, formatterPath);
 
-    if (fs.existsSync(fullPath + ".js")) {
+    if (fs.existsSync(`${fullPath}.js`)) {
         const formatterModule = require(fullPath);
         return formatterModule.Formatter;
     }

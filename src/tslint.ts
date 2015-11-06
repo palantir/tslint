@@ -48,13 +48,12 @@ class Linter {
         const rulesDirectory = this.getRelativePath(this.options.rulesDirectory);
         const configuration = this.options.configuration.rules;
         const configuredRules = Lint.loadRules(configuration, enableDisableRuleMap, rulesDirectory);
-        for (let rule of configuredRules) {
-            if (rule.isEnabled()) {
-                const ruleFailures = rule.apply(sourceFile);
-                for (let ruleFailure of ruleFailures) {
-                    if (!this.containsRule(failures, ruleFailure)) {
-                        failures.push(ruleFailure);
-                    }
+        const enabledRules = configuredRules.filter((r) => r.isEnabled());
+        for (let rule of enabledRules) {
+            const ruleFailures = rule.apply(sourceFile);
+            for (let ruleFailure of ruleFailures) {
+                if (!this.containsRule(failures, ruleFailure)) {
+                    failures.push(ruleFailure);
                 }
             }
         }
@@ -66,7 +65,7 @@ class Linter {
         if (Formatter) {
             formatter = new Formatter();
         } else {
-            throw new Error("formatter '" + this.options.formatter + "' not found");
+            throw new Error(`formatter '${this.options.formatter}' not found`);
         }
 
         const output = formatter.format(failures);
@@ -79,11 +78,9 @@ class Linter {
     }
 
     private getRelativePath(directory: string): string {
-        if (directory) {
+        if (directory != null) {
             return path.relative(moduleDirectory, directory);
         }
-
-        return undefined;
     }
 
     private containsRule(rules: Lint.RuleFailure[], rule: Lint.RuleFailure) {
