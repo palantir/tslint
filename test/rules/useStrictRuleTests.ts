@@ -22,7 +22,7 @@ describe("<use-strict>", () => {
     before(() => {
         const options = [true, "check-function", "check-module"];
         actualFailures = Lint.Test.applyRuleOnFile(fileName, UseStrictRule, options);
-        assert.lengthOf(actualFailures, 2);
+        assert.lengthOf(actualFailures, 3);
     });
 
     it("enforces checks for 'use strict' in functions", () => {
@@ -32,6 +32,11 @@ describe("<use-strict>", () => {
 
     it("enforces checks for 'use strict' in modules", () => {
         const expectedFailures = Lint.Test.createFailure(fileName, [24, 1], [24, 7], UseStrictRule.FAILURE_STRING);
+        Lint.Test.assertContainsFailure(actualFailures, expectedFailures);
+    });
+
+    it("enforces checks for 'use strict' in module declaration with more than one identifier", () => {
+        const expectedFailures = Lint.Test.createFailure(fileName, [29, 1], [29, 7], UseStrictRule.FAILURE_STRING);
         Lint.Test.assertContainsFailure(actualFailures, expectedFailures);
     });
 });
