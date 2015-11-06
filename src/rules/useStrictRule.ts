@@ -36,13 +36,16 @@ class UseStrictWalker extends Lint.ScopeAwareRuleWalker<{}> {
     }
 
     public visitModuleDeclaration(node: ts.ModuleDeclaration) {
-        // current depth is 2: global scope and the scope created by this module
-        if (this.getCurrentDepth() === 2
-                && !Lint.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)
+        if (!Lint.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)
                 && this.hasOption(UseStrictWalker.OPTION_CHECK_MODULE)
                 && node.body != null
                 && node.body.kind === ts.SyntaxKind.ModuleBlock) {
-            this.handleBlock(node, <ts.Block> node.body);
+            let firstModuleDeclaration = getFirstInModuleDeclarationsChain(node);
+            let hasOnlyModuleDeclarationParents = firstModuleDeclaration.parent.kind === ts.SyntaxKind.SourceFile;
+
+            if (hasOnlyModuleDeclarationParents) {
+                this.handleBlock(firstModuleDeclaration, <ts.Block> node.body);
+            }
         }
 
         super.visitModuleDeclaration(node);
@@ -79,4 +82,14 @@ class UseStrictWalker extends Lint.ScopeAwareRuleWalker<{}> {
             this.addFailure(this.createFailure(node.getStart(), node.getFirstToken().getWidth(), Rule.FAILURE_STRING));
         }
     }
+}
+
+function getFirstInModuleDeclarationsChain(node: ts.ModuleDeclaration): ts.ModuleDeclaration {
+    let current = node;
+
+    while (current.parent.kind === ts.SyntaxKind.ModuleDeclaration) {
+        current = <ts.ModuleDeclaration> current.parent;
+    }
+
+    return current;
 }
