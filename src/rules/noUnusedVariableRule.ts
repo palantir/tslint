@@ -83,11 +83,6 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         }
     }
 
-    public visitJsxElement(node: ts.JsxElement) {
-        this.hasSeenJsxElement = true;
-        super.visitJsxElement(node);
-    }
-
     public visitBindingElement(node: ts.BindingElement) {
         const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
 
@@ -97,6 +92,28 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         }
 
         super.visitBindingElement(node);
+    }
+
+    public visitCatchClause(node: ts.CatchClause) {
+        // don't visit the catch clause variable declaration, just visit the block
+        // the catch clause variable declaration needs to be there but doesn't need to be used
+        this.visitBlock(node.block);
+    }
+
+    // skip exported and declared functions
+    public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
+        if (!Lint.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword, ts.SyntaxKind.DeclareKeyword)) {
+            const variableName = node.name.text;
+            this.validateReferencesForVariable(variableName, node.name.getStart());
+        }
+
+        super.visitFunctionDeclaration(node);
+    }
+
+    public visitFunctionType(node: ts.FunctionOrConstructorTypeNode) {
+        this.skipParameterDeclaration = true;
+        super.visitFunctionType(node);
+        this.skipParameterDeclaration = false;
     }
 
     public visitImportDeclaration(node: ts.ImportDeclaration) {
@@ -122,10 +139,47 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         super.visitImportEqualsDeclaration(node);
     }
 
-    public visitCatchClause(node: ts.CatchClause) {
-        // don't visit the catch clause variable declaration, just visit the block
-        // the catch clause variable declaration needs to be there but doesn't need to be used
-        this.visitBlock(node.block);
+    // skip parameters in index signatures (stuff like [key: string]: string)
+    public visitIndexSignatureDeclaration(node: ts.IndexSignatureDeclaration) {
+        this.skipParameterDeclaration = true;
+        super.visitIndexSignatureDeclaration(node);
+        this.skipParameterDeclaration = false;
+    }
+
+    // skip parameters in interfaces
+    public visitInterfaceDeclaration(node: ts.InterfaceDeclaration) {
+        this.skipParameterDeclaration = true;
+        super.visitInterfaceDeclaration(node);
+        this.skipParameterDeclaration = false;
+    }
+
+    public visitJsxElement(node: ts.JsxElement) {
+        this.hasSeenJsxElement = true;
+        super.visitJsxElement(node);
+    }
+
+    public visitJsxSelfClosingElement(node: ts.JsxSelfClosingElement) {
+        this.hasSeenJsxElement = true;
+        super.visitJsxSelfClosingElement(node);
+    }
+
+    // check private member functions
+    public visitMethodDeclaration(node: ts.MethodDeclaration) {
+        if (node.name != null && node.name.kind === ts.SyntaxKind.Identifier) {
+            const modifiers = node.modifiers;
+            const variableName = (<ts.Identifier> node.name).text;
+
+            if (Lint.hasModifier(modifiers, ts.SyntaxKind.PrivateKeyword)) {
+                this.validateReferencesForVariable(variableName, node.name.getStart());
+            }
+        }
+
+        // abstract methods can't have a body so their parameters are always unused
+        if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.AbstractKeyword)) {
+            this.skipParameterDeclaration = true;
+        }
+        super.visitMethodDeclaration(node);
+        this.skipParameterDeclaration = false;
     }
 
     public visitNamedImports(node: ts.NamedImports) {
@@ -155,59 +209,6 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
             this.validateReferencesForVariable(node.name.text, node.name.getStart());
         }
         super.visitNamespaceImport(node);
-    }
-
-    public visitVariableDeclaration(node: ts.VariableDeclaration) {
-        const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
-
-        if (isSingleVariable && !this.skipVariableDeclaration) {
-            const variableIdentifier = <ts.Identifier> node.name;
-            this.validateReferencesForVariable(variableIdentifier.text, variableIdentifier.getStart());
-        }
-
-        super.visitVariableDeclaration(node);
-    }
-
-    // skip parameters in interfaces
-    public visitInterfaceDeclaration(node: ts.InterfaceDeclaration) {
-        this.skipParameterDeclaration = true;
-        super.visitInterfaceDeclaration(node);
-        this.skipParameterDeclaration = false;
-    }
-
-    // skip parameters in index signatures (stuff like [key: string]: string)
-    public visitIndexSignatureDeclaration(node: ts.IndexSignatureDeclaration) {
-        this.skipParameterDeclaration = true;
-        super.visitIndexSignatureDeclaration(node);
-        this.skipParameterDeclaration = false;
-    }
-
-    // skip exported and declared variables
-    public visitVariableStatement(node: ts.VariableStatement) {
-        if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword, ts.SyntaxKind.DeclareKeyword)) {
-            this.skipBindingElement = true;
-            this.skipVariableDeclaration = true;
-        }
-
-        super.visitVariableStatement(node);
-        this.skipBindingElement = false;
-        this.skipVariableDeclaration = false;
-    }
-
-    public visitFunctionType(node: ts.FunctionOrConstructorTypeNode) {
-        this.skipParameterDeclaration = true;
-        super.visitFunctionType(node);
-        this.skipParameterDeclaration = false;
-    }
-
-    // skip exported and declared functions
-    public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
-        if (!Lint.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword, ts.SyntaxKind.DeclareKeyword)) {
-            const variableName = node.name.text;
-            this.validateReferencesForVariable(variableName, node.name.getStart());
-        }
-
-        super.visitFunctionDeclaration(node);
     }
 
     public visitParameterDeclaration(node: ts.ParameterDeclaration) {
@@ -251,23 +252,27 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         super.visitPropertyDeclaration(node);
     }
 
-    // check private member functions
-    public visitMethodDeclaration(node: ts.MethodDeclaration) {
-        if (node.name != null && node.name.kind === ts.SyntaxKind.Identifier) {
-            const modifiers = node.modifiers;
-            const variableName = (<ts.Identifier> node.name).text;
+    public visitVariableDeclaration(node: ts.VariableDeclaration) {
+        const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
 
-            if (Lint.hasModifier(modifiers, ts.SyntaxKind.PrivateKeyword)) {
-                this.validateReferencesForVariable(variableName, node.name.getStart());
-            }
+        if (isSingleVariable && !this.skipVariableDeclaration) {
+            const variableIdentifier = <ts.Identifier> node.name;
+            this.validateReferencesForVariable(variableIdentifier.text, variableIdentifier.getStart());
         }
 
-        // abstract methods can't have a body so their parameters are always unused
-        if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.AbstractKeyword)) {
-            this.skipParameterDeclaration = true;
+        super.visitVariableDeclaration(node);
+    }
+
+    // skip exported and declared variables
+    public visitVariableStatement(node: ts.VariableStatement) {
+        if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword, ts.SyntaxKind.DeclareKeyword)) {
+            this.skipBindingElement = true;
+            this.skipVariableDeclaration = true;
         }
-        super.visitMethodDeclaration(node);
-        this.skipParameterDeclaration = false;
+
+        super.visitVariableStatement(node);
+        this.skipBindingElement = false;
+        this.skipVariableDeclaration = false;
     }
 
     private validateReferencesForVariable(name: string, position: number) {
