@@ -22,8 +22,7 @@
   "dependencies": {
     "findup-sync": "~0.2.1",
     "optimist": "~0.6.0",
-    "underscore.string": "~3.1.1",
-    "typescript": "next"
+    "underscore.string": "~3.1.1"
   },
   "devDependencies": {
     "chai": "^3.0.0",
@@ -37,6 +36,9 @@
     "grunt-tslint": "latest",
     "mocha": "^2.2.5",
     "tslint": "latest"
+  },
+  "peerDependencies": {
+    "typescript": ">=1.7.0 || >=1.7.0-dev.20151003 || >=1.8.0-dev"
   },
   "license": "Apache-2.0"
 }
