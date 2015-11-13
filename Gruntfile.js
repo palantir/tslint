@@ -78,9 +78,8 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-ts");
 
     // register custom tasks
-    grunt.registerTask("core", ["clean:core", "ts:core"]);
-    grunt.registerTask("test", ["clean:test", "ts:test", "tslint:test", "mochaTest"]
-                                  .concat(checkBinTest));
+    grunt.registerTask("core", ["clean:core", "ts:core", "tslint:src"]);
+    grunt.registerTask("test", ["clean:test", "ts:test", "tslint:test", "mochaTest"].concat(checkBinTest));
 
     // create default task
     grunt.registerTask("default", ["jscs", "core", "test"]);

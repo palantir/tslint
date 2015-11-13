@@ -13,19 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
 import * as ts from "typescript";
+import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "require statement not part of an import statement";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const requiresWalker = new RequiresWalker(sourceFile, this.getOptions());
+        const requiresWalker = new NoVarRequiresWalker(sourceFile, this.getOptions());
         return this.applyWithWalker(requiresWalker);
     }
 }
 
-class RequiresWalker extends Lint.ScopeAwareRuleWalker<{}> {
+class NoVarRequiresWalker extends Lint.ScopeAwareRuleWalker<{}> {
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
     }

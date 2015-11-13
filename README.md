@@ -160,19 +160,19 @@ A sample configuration file with all options is available [here](https://github.
 * `no-arg` disallows access to `arguments.callee`.
 * `no-bitwise` disallows bitwise operators.
 * `no-conditional-assignment` disallows any type of assignment in any conditionals. This applies to `do-while`, `for`, `if`, and `while` statements.
+* `no-consecutive-blank-lines` disallows having more than one blank line in a row in a file.
 * `no-console` disallows access to the specified functions on `console`. Rule options are functions to ban on the console variable.
-* `no-consecutive-blank-lines` disallows having more than one blank line in a row in a file
 * `no-construct` disallows access to the constructors of `String`, `Number`, and `Boolean`.
 * `no-constructor-vars` disallows the `public` and `private` modifiers for constructor parameters.
 * `no-debugger` disallows `debugger` statements.
 * `no-duplicate-key` disallows duplicate keys in object literals.
 * `no-duplicate-variable` disallows duplicate variable declarations in the same block scope.
-* `no-shadowed-variable` disallows shadowed variable declarations.
 * `no-empty` disallows empty blocks.
 * `no-eval` disallows `eval` function invocations.
 * `no-inferrable-types` disallows explicit type declarations for variables or parameters initialized to a number, string, or boolean
 * `no-internal-module` disallows internal `module`, use `namespace` instead.
-* `no-require-imports` disallows require() style imports
+* `no-require-imports` disallows require() style imports.
+* `no-shadowed-variable` disallows shadowed variable declarations.
 * `no-string-literal` disallows object access via string literals.
 * `no-switch-case-fall-through` disallows falling through case statements.
 * `no-trailing-whitespace` disallows trailing whitespace at the end of a line.

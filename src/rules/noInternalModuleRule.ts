@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
 import * as ts from "typescript";
+import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "forbidden internal module";
@@ -36,13 +37,14 @@ class NoInternalModuleWalker extends Lint.RuleWalker {
         // an internal module declaration is not a namespace or a nested declaration
         // for external modules, node.name.kind will be a LiteralExpression instead of Identifier
         return !Lint.isNodeFlagSet(node, ts.NodeFlags.Namespace)
-            && !this.isNestedDeclaration(node)
+            && !isNestedDeclaration(node)
             && node.name.kind === ts.SyntaxKind.Identifier;
     }
+}
 
-    private isNestedDeclaration(node: ts.ModuleDeclaration) {
-        // in a declaration expression like 'module a.b.c' - 'a' is the top level module declaration node and 'b' and 'c' are nested
-        // therefore we can depend that a node's position will only match with its name's position for nested nodes
-        return node.name.pos === node.pos;
-    }
+function isNestedDeclaration(node: ts.ModuleDeclaration) {
+    // in a declaration expression like 'module a.b.c' - 'a' is the top level module declaration node and 'b' and 'c'
+    // are nested therefore we can depend that a node's position will only match with its name's position for nested
+    // nodes
+    return node.name.pos === node.pos;
 }

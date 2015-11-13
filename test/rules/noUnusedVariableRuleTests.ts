@@ -136,6 +136,10 @@ describe("<no-unused-variable>", () => {
 
             describeSuite("react");
             describeSuite("react/addons");
+
+            it("should not fail if JSX self-closing element is used", () => {
+                assertNoFailures("rules/nounusedvariable-react4-react.test.tsx", true);
+            });
         });
 
         describe("not set", () => {

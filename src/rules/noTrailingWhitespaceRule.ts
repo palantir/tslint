@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
 import * as ts from "typescript";
+import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "trailing whitespace";
@@ -45,7 +46,7 @@ class NoTrailingWhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
                     const failure = this.createFailure(lastSeenWhitespacePosition, width, Rule.FAILURE_STRING);
                     this.addFailure(failure);
                 }
-               lastSeenWasWhitespace = false;
+                lastSeenWasWhitespace = false;
             } else if (scanner.getToken() === ts.SyntaxKind.WhitespaceTrivia) {
                 lastSeenWasWhitespace = true;
                 lastSeenWhitespacePosition = scanner.getStartPos();

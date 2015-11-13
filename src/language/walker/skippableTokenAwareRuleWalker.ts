@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import * as ts from "typescript";
 import * as Lint from "../../lint";
 import {RuleWalker} from "./ruleWalker";
-import * as ts from "typescript";
 
 export class SkippableTokenAwareRuleWalker extends RuleWalker {
     protected tokensToSkipStartEndMap: {[start: number]: number};

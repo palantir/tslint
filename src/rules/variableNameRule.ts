@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
 import * as ts from "typescript";
+import * as Lint from "../lint";
 
 const BANNED_KEYWORDS = ["any", "Number", "number", "String", "string", "Boolean", "boolean", "Undefined", "undefined"];
 
@@ -91,14 +92,14 @@ class VariableNameWalker extends Lint.RuleWalker {
     private handleVariableNameFormat(name: ts.Identifier) {
         const variableName = name.text;
 
-        if (this.shouldCheckFormat && !this.isCamelCase(variableName) && !this.isUpperCase(variableName)) {
+        if (this.shouldCheckFormat && !this.isCamelCase(variableName) && !isUpperCase(variableName)) {
             this.addFailure(this.createFailure(name.getStart(), name.getWidth(), Rule.FORMAT_FAILURE));
         }
     }
 
     private handleVariableNameKeyword(name: ts.Identifier) {
         const variableName = name.text;
-        
+
         if (this.shouldBanKeywords && BANNED_KEYWORDS.indexOf(variableName) !== -1) {
             this.addFailure(this.createFailure(name.getStart(), name.getWidth(), Rule.KEYWORD_FAILURE));
         }
@@ -120,8 +121,8 @@ class VariableNameWalker extends Lint.RuleWalker {
         }
         return firstCharacter === firstCharacter.toLowerCase() && middle.indexOf("_") === -1;
     }
+}
 
-    private isUpperCase(name: string) {
-        return name === name.toUpperCase();
-    }
+function isUpperCase(name: string) {
+    return name === name.toUpperCase();
 }

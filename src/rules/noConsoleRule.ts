@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
-import * as ts from "typescript";
 
-import BanRule = require("./banRule");
+import * as ts from "typescript";
+import * as Lint from "../lint";
+import * as BanRule from "./banRule";
 
 export class Rule extends BanRule.Rule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const options = this.getOptions();
         const consoleBanWalker = new BanRule.BanFunctionWalker(sourceFile, this.getOptions());
-        for (let option of options.ruleArguments) {
+        for (const option of options.ruleArguments) {
             consoleBanWalker.addBannedFunction(["console", option]);
         }
         return this.applyWithWalker(consoleBanWalker);
     }
-  }
+}

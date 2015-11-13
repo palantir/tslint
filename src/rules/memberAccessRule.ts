@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
 import * as ts from "typescript";
+import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
-    static FAILURE_STRING = "default access modifier on member/method not allowed";
+    public static FAILURE_STRING = "default access modifier on member/method not allowed";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new MemberAccessWalker(sourceFile, this.getOptions()));

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import * as Lint from "../lint";
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
 
@@ -25,8 +26,8 @@ export class Formatter extends AbstractFormatter {
                 .replace(/&/g, "&amp;")
                 .replace(/</g, "&lt;")
                 .replace(/>/g, "&gt;")
-                .replace(/\'/g, "&#39;")
-                .replace(/\"/g, "&quot;");
+                .replace(/'/g, "&#39;")
+                .replace(/"/g, "&quot;");
 
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
 

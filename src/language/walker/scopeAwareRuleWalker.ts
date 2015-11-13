@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {RuleWalker} from "./ruleWalker";
+
 import * as ts from "typescript";
+import {RuleWalker} from "./ruleWalker";
 
 export abstract class ScopeAwareRuleWalker<T> extends RuleWalker {
     private scopeStack: T[];

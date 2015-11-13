@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import * as ts from "typescript";
 import * as Lint from "../../lint";
 import {RuleWalker} from "../walker/ruleWalker";
-import * as ts from "typescript";
 
 export abstract class AbstractRule implements Lint.IRule {
     private value: any;

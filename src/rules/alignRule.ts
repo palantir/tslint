@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import * as Lint from "../lint";
 import * as ts from "typescript";
 
@@ -75,12 +76,12 @@ class AlignWalker extends Lint.RuleWalker {
             return;
         }
 
-        let prevPos = this.getPosition(nodes[0]);
+        let prevPos = getPosition(nodes[0]);
         const alignToColumn = prevPos.character;
 
         // skip first node in list
         for (let node of nodes.slice(1)) {
-            const curPos = this.getPosition(node);
+            const curPos = getPosition(node);
             if (curPos.line !== prevPos.line && curPos.character !== alignToColumn) {
                 this.addFailure(this.createFailure(node.getStart(), node.getWidth(), kind + Rule.FAILURE_STRING_SUFFIX));
                 break;
@@ -89,7 +90,8 @@ class AlignWalker extends Lint.RuleWalker {
         }
     }
 
-    private getPosition(node: ts.Node): SourcePosition {
-        return node.getSourceFile().getLineAndCharacterOfPosition(node.getStart());
-    }
+}
+
+function getPosition(node: ts.Node): SourcePosition {
+    return node.getSourceFile().getLineAndCharacterOfPosition(node.getStart());
 }
