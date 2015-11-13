@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
 import * as ts from "typescript";
+import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "missing semicolon";
@@ -89,15 +90,12 @@ class SemicolonWalker extends Lint.RuleWalker {
 
     private checkSemicolonAt(node: ts.Node) {
         const children = node.getChildren(this.getSourceFile());
-        for (let child of children) {
-            if (child.kind === ts.SyntaxKind.SemicolonToken) {
-                return;
-            }
-        }
+        const hasSemicolon = children.some((child) => child.kind === ts.SyntaxKind.SemicolonToken);
 
-        // no semicolon token was found, so add a failure at the given position
-        const sourceFile = this.getSourceFile();
-        const position = node.getStart(sourceFile) + node.getWidth(sourceFile);
-        this.addFailure(this.createFailure(Math.min(position, this.getLimit()), 0, Rule.FAILURE_STRING));
+        if (!hasSemicolon) {
+            const sourceFile = this.getSourceFile();
+            const position = node.getStart(sourceFile) + node.getWidth(sourceFile);
+            this.addFailure(this.createFailure(Math.min(position, this.getLimit()), 0, Rule.FAILURE_STRING));
+        }
     }
 }

@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
 import * as ts from "typescript";
+import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "undesirable constructor use";
@@ -40,7 +41,6 @@ class NoConstructWalker extends Lint.RuleWalker {
                 this.addFailure(failure);
             }
         }
-
         super.visitNewExpression(node);
     }
 }

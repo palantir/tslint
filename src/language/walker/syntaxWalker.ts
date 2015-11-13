@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import * as ts from "typescript";
 
 export class SyntaxWalker {
@@ -312,10 +313,6 @@ export class SyntaxWalker {
 
             case ts.SyntaxKind.ArrayLiteralExpression:
                 this.visitArrayLiteralExpression(<ts.ArrayLiteralExpression> node);
-                break;
-
-            case ts.SyntaxKind.BindingElement:
-                this.visitBindingElement(<ts.BindingElement> node);
                 break;
 
             case ts.SyntaxKind.ArrowFunction:

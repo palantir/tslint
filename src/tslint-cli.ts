@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import * as Linter from "./tslint";
 import * as fs from "fs";
 import * as optimist from "optimist";
+import * as Linter from "./tslint";
+
 let processed = optimist
     .usage("Usage: $0 [options] [file ...]")
     .check((argv: any) => {
@@ -63,7 +64,7 @@ let processed = optimist
 const argv = processed.argv;
 
 let outputStream: any;
-if (argv.o !== undefined) {
+if (argv.o != null) {
     outputStream = fs.createWriteStream(argv.o, {
         flags: "w+",
         mode: 420
@@ -72,7 +73,7 @@ if (argv.o !== undefined) {
     outputStream = process.stdout;
 }
 
-if (argv.v !== undefined) {
+if (argv.v != null) {
     outputStream.write(Linter.VERSION + "\n");
     process.exit(0);
 }
@@ -140,15 +141,15 @@ if (argv.c && !fs.existsSync(argv.c)) {
 
 const processFile = (file: string) => {
     if (!fs.existsSync(file)) {
-        console.error("Unable to open file: " + file);
+        console.error(`Unable to open file: ${file}`);
         process.exit(1);
     }
 
     const contents = fs.readFileSync(file, "utf8");
     const configuration = Linter.findConfiguration(argv.c, file);
 
-    if (configuration === undefined) {
-        console.error("unable to find tslint configuration");
+    if (configuration == null) {
+        console.error("Unable to find tslint configuration");
         process.exit(1);
     }
 

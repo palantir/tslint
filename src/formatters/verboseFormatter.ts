@@ -12,7 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
+
 import * as Lint from "../lint";
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
 
@@ -27,7 +28,7 @@ export class Formatter extends AbstractFormatter {
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
             const positionTuple = "[" + (lineAndCharacter.line + 1) + ", " + (lineAndCharacter.character + 1) + "]";
 
-            return "(" + ruleName + ") " + fileName + positionTuple + ": " + failureString;
+            return `(${ruleName}) ${fileName}${positionTuple}: ${failureString}`;
         });
 
         return outputLines.join("\n") + "\n";

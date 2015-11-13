@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
 import * as ts from "typescript";
+import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "missing type declaration";
@@ -106,8 +107,7 @@ class TypedefWalker extends Lint.RuleWalker {
     }
 
     public visitVariableDeclaration(node: ts.VariableDeclaration) {
-        // AFAIK, variable declarations will always have a grandparent, 
-        // but check that to be on the safe side.
+        // variable declarations should always have a grandparent, but check that to be on the safe side.
         // catch statements will be the parent of the variable declaration
         // for-in/for-of loops will be the gradparent of the variable declaration
         if (node.parent != null && node.parent.parent != null

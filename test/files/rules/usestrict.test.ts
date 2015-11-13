@@ -26,6 +26,11 @@ module TestNoUseStrictModule {
     var i = 3;
 }
 
+module TestNoUseStrictModule.Namespaced.AndAgain {
+    // hello
+    var i = 3;
+}
+
 function checkDepth() {
     "use strict";
 

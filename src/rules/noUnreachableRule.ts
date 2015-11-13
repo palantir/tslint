@@ -13,18 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
 import * as ts from "typescript";
+import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "unreachable code";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new UnreachableWalker(sourceFile, this.getOptions()));
+        return this.applyWithWalker(new NoUnreachableWalker(sourceFile, this.getOptions()));
     }
 }
 
-class UnreachableWalker extends Lint.RuleWalker {
+class NoUnreachableWalker extends Lint.RuleWalker {
     private hasReturned: boolean;
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {

@@ -17,18 +17,16 @@
 import * as Lint from "../lint";
 import * as ts from "typescript";
 
-export function createLanguageServiceHost(fileName: string, source: string) {
-    const host: ts.LanguageServiceHost = {
+export function createLanguageServiceHost(fileName: string, source: string): ts.LanguageServiceHost {
+    return {
         getCompilationSettings: () => Lint.createCompilerOptions(),
         getCurrentDirectory: () => "",
         getDefaultLibFileName: () => "lib.d.ts",
         getScriptFileNames: () => [fileName],
-        getScriptSnapshot: (name) => ts.ScriptSnapshot.fromString(name === fileName ? source : ""),
+        getScriptSnapshot: (name: string) => ts.ScriptSnapshot.fromString(name === fileName ? source : ""),
         getScriptVersion: () => "1",
-        log: (message) => { /* */ }
+        log: () => { /* */ }
     };
-
-    return host;
 }
 
 export function createLanguageService(fileName: string, source: string) {

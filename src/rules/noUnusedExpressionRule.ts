@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import * as Lint from "../lint";
 import * as ts from "typescript";
 
@@ -20,11 +21,11 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "expected an assignment or function call";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new UnusedExpressionWalker(sourceFile, this.getOptions()));
+        return this.applyWithWalker(new NoUnusedExpressionWalker(sourceFile, this.getOptions()));
     }
 }
 
-class UnusedExpressionWalker extends Lint.RuleWalker {
+class NoUnusedExpressionWalker extends Lint.RuleWalker {
     private expressionIsUnused: boolean;
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {

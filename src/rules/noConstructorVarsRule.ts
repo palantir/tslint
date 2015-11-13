@@ -13,19 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
 import * as ts from "typescript";
+import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_PART = " cannot be declared in the constructor";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoConstructorVariableDeclarationsWalker(sourceFile, this.getOptions()));
+        return this.applyWithWalker(new NoConstructorVarsWalker(sourceFile, this.getOptions()));
     }
 }
 
-export class NoConstructorVariableDeclarationsWalker extends Lint.RuleWalker {
-
+export class NoConstructorVarsWalker extends Lint.RuleWalker {
     public visitConstructorDeclaration(node: ts.ConstructorDeclaration) {
         const parameters = node.parameters;
         for (let parameter of parameters) {
