@@ -1,6 +1,12 @@
 Change Log
 ===
 
+v3.0.0-dev.3
+---
+* Typescript is now a peerDependency (#791)
+* [bugfix] `no-unused-variable` rule with `react` option works with self-closing JSX tags (#776)
+* [bugfix] `use-strict` bugfix (#544)
+
 v3.0.0-dev.2
 ---
 * [new-rule-option] "react" option for `no-unused-variable` rule (#698, #725)
