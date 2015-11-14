@@ -247,6 +247,14 @@ Rules flags enable or disable rules as they are parsed. A rule is enabled or dis
 
 For example, imagine the directive `/* tslint:disable */` on the first line of a file, `/* tslint:enable:ban class-name */` on the 10th line and `/* tslint:enable */` on the 20th. No rules will be checked between the 1st and 10th lines, only the `ban` and `class-name` rules will be checked between the 10th and 20th, and all rules will be checked for the remainder of the file.
 
+Community Rules
+---------------
+
+In case we don't have the rules you're looking for, you can take advantage of some rules created by the community:
+
+- [ESLint rules for TSLint - Improve your TSLint with the missing ESLint Rules](https://github.com/buzinas/tslint-eslint-rules)
+- [tslint-microsoft-contrib - A set of TSLint rules used on some Microsoft projects](https://github.com/Microsoft/tslint-microsoft-contrib)
+
 Custom Rules
 ------------
 TSLint ships with a set of core rules that can be configured. However, users are also allowed to write their own rules, which allows them to enforce specific behavior not covered by the core of TSLint. TSLint's internal rules are itself written to be pluggable, so adding a new rule is as simple as creating a new rule file named by convention. New rules can be written in either TypeScript or Javascript; if written in TypeScript, the code must be compiled to Javascript before invoking TSLint.
