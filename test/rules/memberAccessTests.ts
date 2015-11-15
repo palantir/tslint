@@ -16,14 +16,48 @@
 import * as Lint from "../lint";
 
 describe("<member-access>", () => {
-    it("enforces using explicit visibility on class members", () => {
-        let fileName = "rules/memberaccess.test.ts";
-        let MemberAccessRule = Lint.Test.getRule("member-access");
-        let actualFailures = Lint.Test.applyRuleOnFile(fileName, MemberAccessRule);
 
-        Lint.Test.assertFailuresEqual(actualFailures, [
-            Lint.Test.createFailure(fileName, [8, 5], [8, 15], MemberAccessRule.FAILURE_STRING),
-            Lint.Test.createFailure(fileName, [16, 5], [17, 6], MemberAccessRule.FAILURE_STRING)
-        ]);
+    it("ensures that class properties have access modifiers", () => {
+        const fileName = "rules/memberaccess.test.ts";
+        const expectedFailures = [
+            [[2, 5], [2, 17]],
+            [[10, 5], [10, 15]],
+            [[16, 5], [16, 33]],
+            [[17, 5], [17, 29]],
+            [[29, 9], [29, 19]]
+        ];
+
+        checkFile(fileName, expectedFailures);
     });
+
+    it("ensures that constructors have access modifiers", () => {
+        const fileName = "rules/memberaccess-constructor.test.ts";
+        const expectedFailures = [
+            [[2, 5], [2, 28]],
+            [[3, 5], [3, 27]]
+        ];
+        const options = [true, "check-constructor"];
+
+        checkFile(fileName, expectedFailures, options);
+    });
+
+    it("ensures that accessors have access modifiers", () => {
+        const fileName = "rules/memberaccess-accessor.test.ts";
+        const expectedFailures = [
+            [[2, 5], [4, 6]],
+            [[5, 5], [5, 21]]
+        ];
+        const options = [true, "check-accessor"];
+
+        checkFile(fileName, expectedFailures, options);
+    });
+
+    function checkFile(fileName: string, expectedFailures: number[][][], options: any[] = [true]) {
+        const MemberAccessRule = Lint.Test.getRule("member-access");
+        const createFailure = Lint.Test.createFailuresOnFile(fileName, MemberAccessRule.FAILURE_STRING);
+        const expectedFileFailures = expectedFailures.map(failure => createFailure(failure[0], failure[1]));
+
+        const actualFailures = Lint.Test.applyRuleOnFile(fileName, MemberAccessRule, options);
+        Lint.Test.assertFailuresEqual(actualFailures, expectedFileFailures);
+    }
 });

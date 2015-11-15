@@ -26,19 +26,52 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 export class MemberAccessWalker extends Lint.RuleWalker {
+    private validateConstructors: boolean;
+    private validateAccessors: boolean;
+
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
+        this.validateConstructors = this.hasOption("check-constructor");
+        this.validateAccessors = this.hasOption("check-accessor");
+    }
+
+    public visitConstructorDeclaration(node: ts.ConstructorDeclaration) {
+        if (this.validateConstructors) {
+            // constructor is only allowed to have public or nothing, but the compiler will catch this
+            this.validateVisibilityModifiers(node);
+        }
+
+        super.visitConstructorDeclaration(node);
     }
 
     public visitMethodDeclaration(node: ts.MethodDeclaration) {
         this.validateVisibilityModifiers(node);
+        super.visitMethodDeclaration(node);
     }
 
     public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
         this.validateVisibilityModifiers(node);
     }
 
+    public visitGetAccessor(node: ts.AccessorDeclaration) {
+        if (this.validateAccessors) {
+            this.validateVisibilityModifiers(node);
+        }
+        super.visitGetAccessor(node);
+    }
+
+    public visitSetAccessor(node: ts.AccessorDeclaration) {
+        if (this.validateAccessors) {
+            this.validateVisibilityModifiers(node);
+        }
+        super.visitSetAccessor(node);
+    }
+
     private validateVisibilityModifiers(node: ts.Node) {
+        if (node.parent.kind === ts.SyntaxKind.ObjectLiteralExpression) {
+            return;
+        }
+
         const hasAnyVisibilityModifiers = Lint.hasModifier(
             node.modifiers,
             ts.SyntaxKind.PublicKeyword,
