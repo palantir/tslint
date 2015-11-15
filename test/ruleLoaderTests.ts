@@ -53,4 +53,17 @@ describe("Rule Loader", () => {
         const rules = Lint.loadRules(invalidConfiguration, {}, rulesDirectory);
         assert.deepEqual(rules, []);
     });
+
+    it("works with rulesDirectory argument as an Array", () => {
+        const validConfiguration: {[name: string]: any} = {
+            "forin": false,
+            "quotemark": "single",
+            "eofline": true,
+            "class-name": true,
+            "no-debugger": true
+        };
+
+        const rules = Lint.loadRules(validConfiguration, {}, [rulesDirectory]);
+        assert.equal(rules.length, 5);
+    });
 });

@@ -18,6 +18,7 @@ import * as fs from "fs";
 import * as path from "path";
 import {camelize, strLeft, strRight} from "underscore.string";
 import * as Lint from "./lint";
+import {getRulesDirectories} from "./configuration";
 
 const moduleDirectory = path.dirname(module.filename);
 const CORE_RULES_DIRECTORY = path.resolve(moduleDirectory, ".", "rules");
@@ -29,12 +30,12 @@ export interface IEnableDisablePosition {
 
 export function loadRules(ruleConfiguration: {[name: string]: any},
                           enableDisableRuleMap: {[rulename: string]: Lint.IEnableDisablePosition[]},
-                          rulesDirectory?: string): Lint.IRule[] {
+                          rulesDirectories?: string | string[]): Lint.IRule[] {
     const rules: Lint.IRule[] = [];
     for (const ruleName in ruleConfiguration) {
         if (ruleConfiguration.hasOwnProperty(ruleName)) {
             const ruleValue = ruleConfiguration[ruleName];
-            const Rule = findRule(ruleName, rulesDirectory);
+            const Rule = findRule(ruleName, rulesDirectories);
             if (Rule !== undefined) {
                 const all = "all"; // make the linter happy until we can turn it on and off
                 const allList = (all in enableDisableRuleMap ? enableDisableRuleMap[all] : []);
@@ -48,33 +49,35 @@ export function loadRules(ruleConfiguration: {[name: string]: any},
     return rules;
 }
 
-export function findRule(name: string, rulesDirectory?: string) {
+export function findRule(name: string, rulesDirectories?: string | string[]) {
     let camelizedName = transformName(name);
 
     // first check for core rules
     let Rule = loadRule(CORE_RULES_DIRECTORY, camelizedName);
-    if (Rule) {
+    if (Rule != null) {
         return Rule;
     }
 
-    // then check for rules within the first level of rulesDirectory
-    if (rulesDirectory) {
-        Rule = loadRule(rulesDirectory, camelizedName);
-        if (Rule) {
-            return Rule;
-        }
-    }
+    let directories = getRulesDirectories(rulesDirectories);
 
-    // finally check for rules within the first level of directories,
-    // using dash prefixes as the sub-directory names
-    if (rulesDirectory) {
-        const subDirectory = strLeft(rulesDirectory, "-");
-        const ruleName = strRight(rulesDirectory, "-");
-        if (subDirectory !== rulesDirectory && ruleName !== rulesDirectory) {
-            camelizedName = transformName(ruleName);
-            Rule = loadRule(rulesDirectory, subDirectory, camelizedName);
-            if (Rule) {
+    for (let rulesDirectory of directories) {
+        // then check for rules within the first level of rulesDirectory
+        if (rulesDirectory != null) {
+            Rule = loadRule(rulesDirectory, camelizedName);
+            if (Rule != null) {
                 return Rule;
+            }
+
+            // finally check for rules within the first level of directories,
+            // using dash prefixes as the sub-directory names
+            const subDirectory = strLeft(rulesDirectory, "-");
+            const ruleName = strRight(rulesDirectory, "-");
+            if (subDirectory !== rulesDirectory && ruleName !== rulesDirectory) {
+                camelizedName = transformName(ruleName);
+                Rule = loadRule(rulesDirectory, subDirectory, camelizedName);
+                if (Rule != null) {
+                    return Rule;
+                }
             }
         }
     }

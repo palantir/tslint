@@ -15,9 +15,7 @@
  */
 
 import * as Lint from "./lint";
-import * as path from "path";
-import {findConfiguration as config} from "./configuration";
-const moduleDirectory = path.dirname(module.filename);
+import {findConfiguration as config, getRulesDirectories, getRelativePath} from "./configuration";
 
 class Linter {
     public static VERSION = "2.5.1";
@@ -45,9 +43,9 @@ class Linter {
         rulesWalker.walk(sourceFile);
         const enableDisableRuleMap = rulesWalker.enableDisableRuleMap;
 
-        const rulesDirectory = this.getRelativePath(this.options.rulesDirectory);
+        const rulesDirectories = getRulesDirectories(this.options.rulesDirectory);
         const configuration = this.options.configuration.rules;
-        const configuredRules = Lint.loadRules(configuration, enableDisableRuleMap, rulesDirectory);
+        const configuredRules = Lint.loadRules(configuration, enableDisableRuleMap, rulesDirectories);
         const enabledRules = configuredRules.filter((r) => r.isEnabled());
         for (let rule of enabledRules) {
             const ruleFailures = rule.apply(sourceFile);
@@ -59,7 +57,7 @@ class Linter {
         }
 
         let formatter: Lint.IFormatter;
-        const formattersDirectory = this.getRelativePath(this.options.formattersDirectory);
+        const formattersDirectory = getRelativePath(this.options.formattersDirectory);
 
         const Formatter = Lint.findFormatter(this.options.formatter, formattersDirectory);
         if (Formatter) {
@@ -75,12 +73,6 @@ class Linter {
             format: this.options.formatter,
             output: output
         };
-    }
-
-    private getRelativePath(directory: string): string {
-        if (directory != null) {
-            return path.relative(moduleDirectory, directory);
-        }
     }
 
     private containsRule(rules: Lint.RuleFailure[], rule: Lint.RuleFailure) {
