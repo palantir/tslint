@@ -7,6 +7,9 @@
         "target": "es5",
         "outDir": "../build"
     },
+    "atom": {
+        "rewriteTsconfig": false
+    },
     "filesGlob": [
         "../typings/tsd.d.ts",
         "./typings/**/*.d.ts",
