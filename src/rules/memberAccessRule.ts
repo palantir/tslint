@@ -26,17 +26,12 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 export class MemberAccessWalker extends Lint.RuleWalker {
-    private validateConstructors: boolean;
-    private validateAccessors: boolean;
-
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
-        this.validateConstructors = this.hasOption("check-constructor");
-        this.validateAccessors = this.hasOption("check-accessor");
     }
 
     public visitConstructorDeclaration(node: ts.ConstructorDeclaration) {
-        if (this.validateConstructors) {
+        if (this.hasOption("check-constructor")) {
             // constructor is only allowed to have public or nothing, but the compiler will catch this
             this.validateVisibilityModifiers(node);
         }
@@ -51,10 +46,11 @@ export class MemberAccessWalker extends Lint.RuleWalker {
 
     public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
         this.validateVisibilityModifiers(node);
+        super.visitMethodDeclaration(node);
     }
 
     public visitGetAccessor(node: ts.AccessorDeclaration) {
-        if (this.validateAccessors) {
+        if (this.hasOption("check-accessor")) {
             this.validateVisibilityModifiers(node);
         }
         super.visitGetAccessor(node);

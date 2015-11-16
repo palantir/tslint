@@ -16,7 +16,6 @@
 import * as Lint from "../lint";
 
 describe("<member-access>", () => {
-
     it("ensures that class properties have access modifiers", () => {
         const fileName = "rules/memberaccess.test.ts";
         const expectedFailures = [
@@ -27,7 +26,7 @@ describe("<member-access>", () => {
             [[29, 9], [29, 19]]
         ];
 
-        checkFile(fileName, expectedFailures);
+        assertFailuresInFile(fileName, expectedFailures);
     });
 
     it("ensures that constructors have access modifiers", () => {
@@ -38,7 +37,7 @@ describe("<member-access>", () => {
         ];
         const options = [true, "check-constructor"];
 
-        checkFile(fileName, expectedFailures, options);
+        assertFailuresInFile(fileName, expectedFailures, options);
     });
 
     it("ensures that accessors have access modifiers", () => {
@@ -49,10 +48,10 @@ describe("<member-access>", () => {
         ];
         const options = [true, "check-accessor"];
 
-        checkFile(fileName, expectedFailures, options);
+        assertFailuresInFile(fileName, expectedFailures, options);
     });
 
-    function checkFile(fileName: string, expectedFailures: number[][][], options: any[] = [true]) {
+    function assertFailuresInFile(fileName: string, expectedFailures: number[][][], options: any[] = [true]) {
         const MemberAccessRule = Lint.Test.getRule("member-access");
         const createFailure = Lint.Test.createFailuresOnFile(fileName, MemberAccessRule.FAILURE_STRING);
         const expectedFileFailures = expectedFailures.map(failure => createFailure(failure[0], failure[1]));
