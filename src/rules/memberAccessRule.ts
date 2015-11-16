@@ -46,7 +46,7 @@ export class MemberAccessWalker extends Lint.RuleWalker {
 
     public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
         this.validateVisibilityModifiers(node);
-        super.visitMethodDeclaration(node);
+        super.visitPropertyDeclaration(node);
     }
 
     public visitGetAccessor(node: ts.AccessorDeclaration) {
@@ -57,7 +57,7 @@ export class MemberAccessWalker extends Lint.RuleWalker {
     }
 
     public visitSetAccessor(node: ts.AccessorDeclaration) {
-        if (this.validateAccessors) {
+        if (this.hasOption("check-accessor")) {
             this.validateVisibilityModifiers(node);
         }
         super.visitSetAccessor(node);
