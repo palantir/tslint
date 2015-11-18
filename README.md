@@ -14,84 +14,100 @@ Installation
 
 ##### CLI
 
-```npm install tslint -g```
+```
+npm install tslint -g
+npm install typescript -g
+```
 
 ##### Library
 
-```npm install tslint```
+```
+npm install tslint
+npm install typescript
+```
 
-##### `next` distribution
+##### Peer dependencies
 
-The [`next` branch of the TSLint repo](https://github.com/palantir/tslint/tree/next) tracks the latest TypeScript
-compiler and allows you to lint TS code that uses the latest features of the language. Releases from this branch
-are published to npm with the `next` dist-tag, so you can get the latest dev version of TSLint via
-`npm install tslint@next`.
+The `typescript` module is a peer dependency of TSLint, which allows you to update the compiler independently from the
+linter.
+
+Keep in mind that NPM v3 tries to flatten dependency trees so `tslint` will likely have to use the same version of `tsc`
+used to actaully compile your sources. This means that breaking changes in the latest dev release of `typescript@next`
+might break something in the linter if we haven't built against that release yet. If this happens to you, you can try:
+1. picking up `tslint@next`, which may have some bugfixes not released in `tslint@latest`
+   (see [release notes here](https://github.com/palantir/tslint/releases)).
+2. rolling back `typescript` to a known working version (NPM v3 tries to flatten dependency trees so `tslint` will
+   likely have to use the same version of `tsc` used to actaully compile your sources).
 
 Usage
 -----
 
-Please first ensure that the TypeScript source files compile correctly.
+Please ensure that the TypeScript source files compile correctly _before_ running the linter.
 
 ##### CLI
 
-  usage: `tslint [options] [file ...]`
+usage: `tslint [options] [file ...]`
 
-  Options:
+Options:
 
-    -c, --config              configuration file
-    -o, --out                 output file
-    -r, --rules-dir           rules directory
-    -s, --formatters-dir      formatters directory
-    -t, --format              output format (prose, json)   [default: "prose"]
+```
+-c, --config              configuration file
+-o, --out                 output file
+-r, --rules-dir           rules directory
+-s, --formatters-dir      formatters directory
+-t, --format              output format (prose, json)   [default: "prose"]
+```
 
 By default, configuration is loaded from `tslint.json`, if it exists in the current path, or the user's home directory, in that order.
 
 tslint accepts the following command-line options:
 
-    -c, --config:
-        The location of the configuration file that tslint will use to
-        determine which rules are activated and what options to provide
-        to the rules. If no option is specified, the config file named
-        tslint.json is used, so long as it exists in the path.
-        The format of the file is { rules: { /* rules list */ } },
-        where /* rules list */ is a key: value comma-seperated list of
-        rulename: rule-options pairs. Rule-options can be either a
-        boolean true/false value denoting whether the rule is used or not,
-        or a list [boolean, ...] where the boolean provides the same role
-        as in the non-list case, and the rest of the list are options passed
-        to the rule that will determine what it checks for (such as number
-        of characters for the max-line-length rule, or what functions to ban
-        for the ban rule).
+```
+-c, --config:
+    The location of the configuration file that tslint will use to
+    determine which rules are activated and what options to provide
+    to the rules. If no option is specified, the config file named
+    tslint.json is used, so long as it exists in the path.
+    The format of the file is { rules: { /* rules list */ } },
+    where /* rules list */ is a key: value comma-seperated list of
+    rulename: rule-options pairs. Rule-options can be either a
+    boolean true/false value denoting whether the rule is used or not,
+    or a list [boolean, ...] where the boolean provides the same role
+    as in the non-list case, and the rest of the list are options passed
+    to the rule that will determine what it checks for (such as number
+    of characters for the max-line-length rule, or what functions to ban
+    for the ban rule).
 
-    -o, --out:
-        A filename to output the results to. By default, tslint outputs to
-        stdout, which is usually the console where you're running it from.
+-o, --out:
+    A filename to output the results to. By default, tslint outputs to
+    stdout, which is usually the console where you're running it from.
 
-    -r, --rules-dir:
-        An additional rules directory, for user-created rules.
-        tslint will always check its default rules directory, in
-        node_modules/tslint/build/rules, before checking the user-provided
-        rules directory, so rules in the user-provided rules directory
-        with the same name as the base rules will not be loaded.
+-r, --rules-dir:
+    An additional rules directory, for user-created rules.
+    tslint will always check its default rules directory, in
+    node_modules/tslint/build/rules, before checking the user-provided
+    rules directory, so rules in the user-provided rules directory
+    with the same name as the base rules will not be loaded.
 
-    -s, --formatters-dir:
-        An additional formatters directory, for user-created formatters.
-        Formatters are files that will format the tslint output, before
-        writing it to stdout or the file passed in --out. The default
-        directory, node_modules/tslint/build/formatters, will always be
-        checked first, so user-created formatters with the same names
-        as the base formatters will not be loaded.
+-s, --formatters-dir:
+    An additional formatters directory, for user-created formatters.
+    Formatters are files that will format the tslint output, before
+    writing it to stdout or the file passed in --out. The default
+    directory, node_modules/tslint/build/formatters, will always be
+    checked first, so user-created formatters with the same names
+    as the base formatters will not be loaded.
 
-    -t, --format:
-        The formatter to use to format the results of the linter before
-        outputting it to stdout or the file passed in --out. The core
-        formatters are prose (human readable) and json (machine readable),
-        and prose is the default if this option is not used. Additional
-        formatters can be added and used if the --formatters-dir option
-        is set.
+-t, --format:
+    The formatter to use to format the results of the linter before
+    outputting it to stdout or the file passed in --out. The core
+    formatters are prose (human readable) and json (machine readable),
+    and prose is the default if this option is not used. Additional
+    formatters can be added and used if the --formatters-dir option
+    is set.
 
-    --help:
-        Prints this help message.
+--help:
+    Prints this help message.
+```
 
 ##### Library
 
@@ -251,13 +267,15 @@ Custom Rules
 ------------
 TSLint ships with a set of core rules that can be configured. However, users are also allowed to write their own rules, which allows them to enforce specific behavior not covered by the core of TSLint. TSLint's internal rules are itself written to be pluggable, so adding a new rule is as simple as creating a new rule file named by convention. New rules can be written in either TypeScript or Javascript; if written in TypeScript, the code must be compiled to Javascript before invoking TSLint.
 
-Rule names are always camel-cased and *must* contain the suffix `Rule`. Let us take the example of how to write a new rule to forbid all import statements (you know, *for science*). Let us name the rule file `noImportsRule.ts`. Rules can be referenced in `tslint.json` in their dasherized forms, so `"no-imports": true` would turn on the rule.
+Rule names are always camel-cased and *must* contain the suffix `Rule`. Let us take the example of how to write a new rule to forbid all import statements (you know, *for science*). Let us name the rule file `noImportsRule.ts`. Rules can be referenced in `tslint.json` in their kebab-case forms, so `"no-imports": true` would turn on the rule.
 
-Now, let us first write the rule in TypeScript. At the top, we reference TSLint's [definition file](https://github.com/palantir/tslint/blob/master/lib/tslint.d.ts) and the [definition file](https://github.com/palantir/tslint/blob/master/typings/typescriptServices.d.ts) for TypeScript's language services. The exported class must always be named `Rule` and extend from `Lint.Rules.AbstractRule`.
+Now, let us first write the rule in TypeScript. A few things to note:
+- We import `tslint/lib/lint` to get the whole `Lint` namespace instead of just the `Linter` class.
+- The exported class must always be named `Rule` and extend from `Lint.Rules.AbstractRule`.
 
 ```typescript
-/// <reference path='../node_modules/tslint/typings/typescriptServices.d.ts' />
-/// <reference path='../node_modules/tslint/lib/tslint.d.ts' />
+import * as ts from "typescript";
+import * as Lint from "tslint/lib/lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "import statement forbidden";
@@ -266,11 +284,8 @@ export class Rule extends Lint.Rules.AbstractRule {
         return this.applyWithWalker(new NoImportsWalker(sourceFile, this.getOptions()));
     }
 }
-```
 
-The walker takes care of all the work.
-
-```typescript
+// The walker takes care of all the work.
 class NoImportsWalker extends Lint.RuleWalker {
     public visitImportDeclaration(node: ts.ImportDeclaration) {
         // create a failure at the current position
@@ -286,9 +301,12 @@ Given a walker, TypeScript's parser visits the AST using the visitor pattern. So
 
 We still need to hook up this new rule to TSLint. First make sure to compile `noImportsRule.ts`: `tsc -m commonjs --noImplicitAny noImportsRule.ts tslint.d.ts`. Then, if using the CLI, provide the directory that contains this rule as an option to `--rules-dir`. If using TSLint as a library or via `grunt-tslint`, the `options` hash must contain `"rulesDirectory": "..."`. If you run the linter, you'll see that we have now successfully banned all import statements via TSLint!
 
-Now, let us rewrite the same rule in Javascript.
+Now, let us rewrite the same rule in JavaScript.
 
 ```javascript
+import "typescript";
+import * as Lint from "tslint/lib/lint";
+
 function Rule() {
     Lint.Rules.AbstractRule.apply(this, arguments);
 }
@@ -323,8 +341,8 @@ Custom Formatters
 Just like rules, additional formatters can also be supplied to TSLint via `--formatters-dir` on the CLI or `formattersDirectory` option on the library or `grunt-tslint`. Writing a new formatter is simpler than writing a new rule, as shown in the JSON formatter's code.
 
 ```typescript
-/// <reference path='../node_modules/tslint/typings/typescriptServices.d.ts' />
-/// <reference path='../node_modules/tslint/lib/tslint.d.ts' />
+import * as ts from "typescript";
+import * as Lint from "tslint/lib/lint";
 
 export class Formatter extends Lint.Formatters.AbstractFormatter {
     public format(failures: Lint.RuleFailure[]): string {
@@ -347,11 +365,18 @@ npm install
 grunt
 ```
 
+#### `next` branch
+
+The [`next` branch of the TSLint repo](https://github.com/palantir/tslint/tree/next) tracks the latest TypeScript
+compiler as a `devDependency`. This allows you to develop the linter and its rules against the latest features of the
+language. Releases from this branch are published to npm with the `next` dist-tag, so you can get the latest dev
+version of TSLint via `npm install tslint@next`.
+
 Creating a new Release
 ----------------------
 
-1. Bump up the version number in package.json and tslint.ts
-2. Add a section for the new release in CHANGELOG.md
+1. Bump up the version number in `package.json` and `tslint.ts`
+2. Add a section for the new release in `CHANGELOG.md`
 3. Run `grunt` to build the latest sources
 4. Commit
 5. Run `npm publish`
