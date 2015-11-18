@@ -152,6 +152,8 @@ A sample configuration file with all options is available [here](https://github.
 * `label-undefined` checks that labels are defined before usage.
 * `max-line-length` sets the maximum length of a line.
 * `member-access` enforces using explicit visibility on class members
+    * `"check-accessor"` enforces explicit visibility on get/set accessors (can only be public)
+    * `"check-constructor"` enforces explicit visibility on constructors (can only be public)
 * `member-ordering` enforces member ordering. Rule options:
     * `public-before-private` All public members must be declared before private members
     * `static-before-instance` All static members must be declared before instance members
