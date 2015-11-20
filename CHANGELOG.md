@@ -1,13 +1,59 @@
 Change Log
 ===
 
+v3.0.0
+---
+* [bugfix] `member-access` rule now handles object literals and get/set accessors properly (#801)
+    * New rule options: `check-accessor` and `check-constructor`
+* All the changes from the following releases, including some **breaking changes**:
+    * `3.0.0-dev.3`
+    * `3.0.0-dev.2`
+    * `3.0.0-dev.1`
+    * `2.6.0-dev.2`
+    * `2.6.0-dev.1`
+
+v3.0.0-dev.3
+---
+* Typescript is now a peerDependency (#791)
+* [bugfix] `no-unused-variable` rule with `react` option works with self-closing JSX tags (#776)
+* [bugfix] `use-strict` bugfix (#544)
+
+v3.0.0-dev.2
+---
+* [new-rule-option] "react" option for `no-unused-variable` rule (#698, #725)
+* [bugfix] Fix how `Linter` is exported from "tslint" module (#760)
+* [bugfix] `no-use-before-declare` rule doesn't crash on uncompilable code (#763)
+
+v3.0.0-dev.1
+---
+* **BREAKING CHANGES**
+    * Rearchitect TSLint to use external modules instead of merged namespaces (#726)
+        * Dependencies need to be handled differently now by custom rules and formatters
+        * See the [PR](https://github.com/palantir/tslint/pull/726) for full details about this change
+    * `no-trailing-comma` rule removed, it is replaced by the `trailing-comma` rule (#687)
+    * Rename `sort-object-literal-keys` rule to `object-literal-sort-keys` (#304, #537)
+    * `Lint.abstract()` has been removed (#700)
+* [new-rule] `trailing-comma` rule (#557, #687)
+* [new-rule-option] "ban-keywords" option for `variable-name` rule (#735, #748)
+* [bugfix] `typedef` rule now handles `for-of` loops correctly (#743)
+* [bugfix] Handle tslint.json utf-8 files which have a BOM correctly (#90)
+
+v2.6.0-dev.2
+---
+* Upgrade TypeScript compiler to `v1.7.0-dev.20151003`
+* [bugfix] `no-unused-expression` rule now handles yield expressions properly (#706)
+
+v2.6.0-dev.1
+---
+* Upgrade TypeScript compiler to `v1.7.0-dev.20150924`
+
 v2.5.1
 ---
 * [new-rule] no-inferrable-types rule (#676)
 * [new-rule-option] "avoid-escape" option for quotemark rule (#543)
 * [bugfix] type declaration for tslint external module #686
 * [enhancement] `AbstractRule` and `AbstractFormatter` are now abstract classes (#631)
-	* Note: `Lint.abstract()` is now deprecated
+    * Note: `Lint.abstract()` is now deprecated
 
 v2.5.0
 ---
@@ -77,7 +123,7 @@ v2.4.0
 * [bug] fix error message in `no-var-keyword` rule
 * [enhancement] CI tests are now run on node v0.12 in addition to v0.10
 * **BREAKING**
-	* `-f` option removed from CLI
+    * `-f` option removed from CLI
 
 v2.3.1-beta
 ---
@@ -85,7 +131,7 @@ v2.3.1-beta
 * [new-rule] `no-require-imports` disallows `require()` style imports
 * [new-rule] `no-shadowed-variable` moves over shadowed variable checking from `no-duplicate-variable` into its own rule
 * **BREAKING**
-	* `no-duplicate-variable` now only checks for duplicates within the same block scope; enable `no-shadowed-variable` to get duplicate-variable checking across block scopes
+    * `no-duplicate-variable` now only checks for duplicates within the same block scope; enable `no-shadowed-variable` to get duplicate-variable checking across block scopes
 * [enhancement] `no-duplicate-variable`, `no-shadowed-variable`, and `no-use-before-declare` now support ES6 destructuring
 * [enhancement] tslint CLI now uses a default configuration if no config file is found
 
@@ -102,8 +148,8 @@ v2.2.0-beta
 ---
 * Upgraded Typescript compiler to 1.5.0-beta
 * **BREAKING CHANGES**
-	* due to changes to the typescript compiler API, old custom rules may no longer work and may need to be rewritten
-	* the JSON formatter's line and character positions are now back to being 0-indexed instead of 1-indexed
+    * due to changes to the typescript compiler API, old custom rules may no longer work and may need to be rewritten
+    * the JSON formatter's line and character positions are now back to being 0-indexed instead of 1-indexed
 * [bugs] #328 #334 #319 #351 #365 #254
 * [bug] fixes for tslint behavior around template strings (fixes #357, #349, #332, and more)
 * [new-rule] `align` rule now enforces vertical alignment on parameters, arguments, and statements
@@ -125,16 +171,16 @@ v2.0.1
 ---
 * Upgraded Typescript compiler to 1.4
 * **BREAKING CHANGES**
-	* typedef rule options were modified:
-		* index-signature removed as no longer necessary
-		* property-signature renamed to property-declaration
-		* variable-declarator renamed to variable-declaration
-		* member-variable-declarator renamed to member-variable-declaration
-	* typedef-whitespace rule options were modified:
-		* catch-clause was removed as invalid
-		* further options were added, see readme for more details
-	* due to changes to the typescript compiler API, old custom rules may no longer work and may need to be rewritten
-	* the JSON formatter's line and character positions are now 1-indexed instead of 0-indexed
+    * typedef rule options were modified:
+        * index-signature removed as no longer necessary
+        * property-signature renamed to property-declaration
+        * variable-declarator renamed to variable-declaration
+        * member-variable-declarator renamed to member-variable-declaration
+    * typedef-whitespace rule options were modified:
+        * catch-clause was removed as invalid
+        * further options were added, see readme for more details
+    * due to changes to the typescript compiler API, old custom rules may no longer work and may need to be rewritten
+    * the JSON formatter's line and character positions are now 1-indexed instead of 0-indexed
 
 v1.2.0
 ---
@@ -148,10 +194,10 @@ v1.0.0
 ---
 * upgrade TypeScript compiler to 1.3
 * **BREAKING CHANGES**
-	* all error messages now start with a lower-case character and do not end with a period
-	* all rule options are consistent in nomenclature. The `typedef` and `typedef-whitespace` rules now take in hyphenated options
-	* `unused-variables` rule cannot find unused private variables defined in the constructor due to a bug in 1.3 compiler
-	* `indent` rule has changed to only check for tabs or spaces and not enforce indentation levels
+    * all error messages now start with a lower-case character and do not end with a period
+    * all rule options are consistent in nomenclature. The `typedef` and `typedef-whitespace` rules now take in hyphenated options
+    * `unused-variables` rule cannot find unused private variables defined in the constructor due to a bug in 1.3 compiler
+    * `indent` rule has changed to only check for tabs or spaces and not enforce indentation levels
 
 v0.4.12
 ---

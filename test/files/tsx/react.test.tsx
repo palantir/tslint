@@ -39,3 +39,11 @@ export function buildFooComponent(): JSX.Element {
     let x: string = "test";
     return <FooComponent fooProp={ x } />;
 }
+
+// test false positive for JSX spread (https://github.com/palantir/tslint/issues/658)
+class MyComponent extends React.Component<{}, {}> {
+    public render() {
+        let props = { foo: "bar" };
+        return <div {...props}></div>;
+    }
+}
