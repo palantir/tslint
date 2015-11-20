@@ -3,7 +3,9 @@ Change Log
 
 v3.0.0
 ---
-* All the changes from the following releases, including some **breaking change**:
+* [bugfix] `member-access` rule now handles object literals and get/set accessors properly (#801)
+    * New rule options: `check-accessor` and `check-constructor`
+* All the changes from the following releases, including some **breaking changes**:
     * `3.0.0-dev.3`
     * `3.0.0-dev.2`
     * `3.0.0-dev.1`
