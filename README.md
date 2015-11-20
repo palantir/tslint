@@ -29,15 +29,12 @@ npm install typescript
 ##### Peer dependencies
 
 The `typescript` module is a peer dependency of TSLint, which allows you to update the compiler independently from the
-linter.
+linter. This also means that `tslint` will have to use the same version of `tsc` used to actually compile your sources.
 
-Keep in mind that NPM v3 tries to flatten dependency trees so `tslint` will likely have to use the same version of `tsc`
-used to actaully compile your sources. This means that breaking changes in the latest dev release of `typescript@next`
-might break something in the linter if we haven't built against that release yet. If this happens to you, you can try:
+Breaking changes in the latest dev release of `typescript@next` might break something in the linter if we haven't built against that release yet. If this happens to you, you can try:
 1. picking up `tslint@next`, which may have some bugfixes not released in `tslint@latest`
    (see [release notes here](https://github.com/palantir/tslint/releases)).
-2. rolling back `typescript` to a known working version (NPM v3 tries to flatten dependency trees so `tslint` will
-   likely have to use the same version of `tsc` used to actaully compile your sources).
+2. rolling back `typescript` to a known working version.
 
 Usage
 -----
@@ -194,10 +191,10 @@ A sample configuration file with all options is available [here](https://github.
 * `no-trailing-whitespace` disallows trailing whitespace at the end of a line.
 * `no-unreachable` disallows unreachable code after `break`, `catch`, `throw`, and `return` statements.
 * `no-unused-expression` disallows unused expression statements, that is, expression statements that are not assignments or function invocations (and thus no-ops).
-* `no-unused-variable` disallows unused imports, variables, functions and private class members.
+* `no-unused-variable` disallows unused imports, variables, functions and private class members. Rule options:
     * `"check-parameters"` disallows unused function and constructor parameters.
         * NOTE: this option is experimental and does not work with classes that use abstract method declarations, among other things. Use at your own risk.
-    * `"react"` relaxes the rule for a namespace import named `React` (from either the module `"react"` or `"react/addons"`) to also consider JSX expressions uses of the import.
+    * `"react"` relaxes the rule for a namespace import named `React` (from either the module `"react"` or `"react/addons"`). Any JSX expression in the file will be treated as a usage of `React` (because it expands to `React.createElement`).
 * `no-use-before-declare` disallows usage of variables before their declaration.
 * `no-var-keyword` disallows usage of the `var` keyword, use `let` or `const` instead.
 * `no-var-requires` disallows the use of require statements except in import statements, banning the use of forms such as `var module = require("module")`.
@@ -300,40 +297,10 @@ Given a walker, TypeScript's parser visits the AST using the visitor pattern. So
 
 We still need to hook up this new rule to TSLint. First make sure to compile `noImportsRule.ts`: `tsc -m commonjs --noImplicitAny noImportsRule.ts tslint.d.ts`. Then, if using the CLI, provide the directory that contains this rule as an option to `--rules-dir`. If using TSLint as a library or via `grunt-tslint`, the `options` hash must contain `"rulesDirectory": "..."`. If you run the linter, you'll see that we have now successfully banned all import statements via TSLint!
 
-Now, let us rewrite the same rule in JavaScript.
+Final notes:
 
-```javascript
-import "typescript";
-import * as Lint from "tslint/lib/lint";
-
-function Rule() {
-    Lint.Rules.AbstractRule.apply(this, arguments);
-}
-
-Rule.prototype = Object.create(Lint.Rules.AbstractRule.prototype);
-Rule.prototype.apply = function(sourceFile) {
-    return this.applyWithWalker(new NoImportsWalker(sourceFile, this.getOptions()));
-};
-
-function NoImportsWalker() {
-    Lint.RuleWalker.apply(this, arguments);
-}
-
-NoImportsWalker.prototype = Object.create(Lint.RuleWalker.prototype);
-NoImportsWalker.prototype.visitImportDeclaration = function (node) {
-    // create a failure at the current position
-    this.addFailure(this.createFailure(node.getStart(), node.getWidth(), "import statement forbidden"));
-
-    // call the base version of this visitor to actually parse this node
-    Lint.RuleWalker.prototype.visitImportDeclaration.call(this, node);
-};
-
-exports.Rule = Rule;
-```
-
-As you can see, it's a pretty straightforward translation from the equivalent TypeScript code.
-
-Finally, core rules cannot be overwritten with a custom implementation, and rules can also take in options (retrieved via `this.getOptions()`).
+- Core rules cannot be overwritten with a custom implementation.
+- Custom rules can also take in options just like core rules (retrieved via `this.getOptions()`).
 
 Custom Formatters
 -----------------
