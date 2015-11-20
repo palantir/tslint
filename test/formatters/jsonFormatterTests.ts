@@ -36,7 +36,7 @@ describe("JSON Formatter", () => {
             new Lint.RuleFailure(sourceFile, 0, maxPosition, "full failure", "full-name")
         ];
 
-        /* tslint:disable:sort-object-literal-keys */
+        /* tslint:disable:object-literal-sort-keys */
         const expectedResult = [{
             name: TEST_FILE,
             failure: "first failure",
@@ -82,7 +82,7 @@ describe("JSON Formatter", () => {
             },
             ruleName: "full-name"
         }];
-        /* tslint:enable:sort-object-literal-keys */
+        /* tslint:enable:object-literal-sort-keys */
 
         const actualResult = JSON.parse(formatter.format(failures));
         assert.deepEqual(actualResult, expectedResult);
