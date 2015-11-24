@@ -36,10 +36,15 @@ class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<ScopeInfo,
 
     public visitBindingElement(node: ts.BindingElement) {
         const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
-        const isBlockScoped = Lint.isBlockScopedBindingElement(node);
+        const variableDeclaration = Lint.getBindingElementVariableDeclaration(node);
 
         if (isSingleVariable) {
-            this.handleSingleVariableIdentifier(<ts.Identifier> node.name, isBlockScoped);
+            if (variableDeclaration) {
+                const isBlockScopedVariable = Lint.isBlockScopedVariable(variableDeclaration);
+                this.handleSingleVariableIdentifier(<ts.Identifier> node.name, isBlockScopedVariable);
+            } else {
+                this.handleSingleParameterIdentifier(<ts.Identifier> node.name);
+            }
         }
 
         super.visitBindingElement(node);
@@ -64,15 +69,11 @@ class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<ScopeInfo,
     }
 
     public visitParameterDeclaration(node: ts.ParameterDeclaration) {
-        // treat parameters as block-scoped variables
-        const variableIdentifier = <ts.Identifier> node.name;
-        const variableName = variableIdentifier.text;
-        const currentScope = this.getCurrentScope();
+        const isSingleParameter = node.name.kind === ts.SyntaxKind.Identifier;
 
-        if (this.isVarInAnyScope(variableName)) {
-            this.addFailureOnIdentifier(variableIdentifier);
+        if (isSingleParameter) {
+            this.handleSingleParameterIdentifier(<ts.Identifier> node.name);
         }
-        currentScope.varNames.push(variableName);
 
         super.visitParameterDeclaration(node);
     }
@@ -110,6 +111,17 @@ class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<ScopeInfo,
             currentScope.varNames.push(variableName);
         }
         currentBlockScope.varNames.push(variableName);
+    }
+
+    private handleSingleParameterIdentifier(variableIdentifier: ts.Identifier) {
+        // treat parameters as block-scoped variables
+        const variableName = variableIdentifier.text;
+        const currentScope = this.getCurrentScope();
+
+        if (this.isVarInAnyScope(variableName)) {
+            this.addFailureOnIdentifier(variableIdentifier);
+        }
+        currentScope.varNames.push(variableName);
     }
 
     private isVarInAnyScope(varName: string) {
