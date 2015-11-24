@@ -14,8 +14,14 @@
  * limitations under the License.
  */
 
-import * as Lint from "./lint";
+import {IFormatter} from "./language/formatter/formatter";
+import {RuleFailure} from "./language/rule/rule";
+import {getSourceFile} from "./language/utils";
 import {findConfiguration as config, getRulesDirectories, getRelativePath} from "./configuration";
+import {EnableDisableRulesWalker} from "./enableDisableRules";
+import {findFormatter} from "./formatterLoader";
+import {ILinterOptions, LintResult} from "./lint";
+import {loadRules} from "./ruleLoader";
 
 class Linter {
     public static VERSION = "3.0.0";
@@ -23,20 +29,20 @@ class Linter {
 
     private fileName: string;
     private source: string;
-    private options: Lint.ILinterOptions;
+    private options: ILinterOptions;
 
-    constructor(fileName: string, source: string, options: Lint.ILinterOptions) {
+    constructor(fileName: string, source: string, options: ILinterOptions) {
         this.fileName = fileName;
         this.source = source;
         this.options = options;
     }
 
-    public lint(): Lint.LintResult {
-        const failures: Lint.RuleFailure[] = [];
-        const sourceFile = Lint.getSourceFile(this.fileName, this.source);
+    public lint(): LintResult {
+        const failures: RuleFailure[] = [];
+        const sourceFile = getSourceFile(this.fileName, this.source);
 
         // walk the code first to find all the intervals where rules are disabled
-        const rulesWalker = new Lint.EnableDisableRulesWalker(sourceFile, {
+        const rulesWalker = new EnableDisableRulesWalker(sourceFile, {
             disabledIntervals: [],
             ruleName: ""
         });
@@ -45,7 +51,7 @@ class Linter {
 
         const rulesDirectories = getRulesDirectories(this.options.rulesDirectory);
         const configuration = this.options.configuration.rules;
-        const configuredRules = Lint.loadRules(configuration, enableDisableRuleMap, rulesDirectories);
+        const configuredRules = loadRules(configuration, enableDisableRuleMap, rulesDirectories);
         const enabledRules = configuredRules.filter((r) => r.isEnabled());
         for (let rule of enabledRules) {
             const ruleFailures = rule.apply(sourceFile);
@@ -56,10 +62,10 @@ class Linter {
             }
         }
 
-        let formatter: Lint.IFormatter;
+        let formatter: IFormatter;
         const formattersDirectory = getRelativePath(this.options.formattersDirectory);
 
-        const Formatter = Lint.findFormatter(this.options.formatter, formattersDirectory);
+        const Formatter = findFormatter(this.options.formatter, formattersDirectory);
         if (Formatter) {
             formatter = new Formatter();
         } else {
@@ -75,7 +81,7 @@ class Linter {
         };
     }
 
-    private containsRule(rules: Lint.RuleFailure[], rule: Lint.RuleFailure) {
+    private containsRule(rules: RuleFailure[], rule: RuleFailure) {
         return rules.some((r) => r.equals(rule));
     }
 }

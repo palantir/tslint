@@ -16,7 +16,7 @@
 
 import * as path from "path";
 import * as ts from "typescript";
-import * as Lint from "../lint";
+import {IDisabledInterval, RuleFailure} from "./rule/rule";
 
 export function getSourceFile(fileName: string, source: string): ts.SourceFile {
     const normalizedName = path.normalize(fileName).replace(/\\/g, "/");
@@ -50,7 +50,7 @@ export function createCompilerOptions(): ts.CompilerOptions {
     };
 }
 
-export function doesIntersect(failure: Lint.RuleFailure, disabledIntervals: Lint.IDisabledInterval[]) {
+export function doesIntersect(failure: RuleFailure, disabledIntervals: IDisabledInterval[]) {
     return disabledIntervals.some((interval) => {
         const maxStart = Math.max(interval.startPosition, failure.getStartPosition().getPosition());
         const minEnd = Math.min(interval.endPosition, failure.getEndPosition().getPosition());

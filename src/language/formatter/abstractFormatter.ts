@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import * as Lint from "../../lint";
+import {RuleFailure} from "../rule/rule";
+import {IFormatter} from "./formatter";
 
-export abstract class AbstractFormatter implements Lint.IFormatter {
-    public abstract format(failures: Lint.RuleFailure[]): string;
+export abstract class AbstractFormatter implements IFormatter {
+    public abstract format(failures: RuleFailure[]): string;
 }

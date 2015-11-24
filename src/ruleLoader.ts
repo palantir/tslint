@@ -17,8 +17,8 @@
 import * as fs from "fs";
 import * as path from "path";
 import {camelize, strLeft, strRight} from "underscore.string";
-import * as Lint from "./lint";
 import {getRulesDirectories} from "./configuration";
+import {IRule, IDisabledInterval} from "./language/rule/rule";
 
 const moduleDirectory = path.dirname(module.filename);
 const CORE_RULES_DIRECTORY = path.resolve(moduleDirectory, ".", "rules");
@@ -29,9 +29,9 @@ export interface IEnableDisablePosition {
 }
 
 export function loadRules(ruleConfiguration: {[name: string]: any},
-                          enableDisableRuleMap: {[rulename: string]: Lint.IEnableDisablePosition[]},
-                          rulesDirectories?: string | string[]): Lint.IRule[] {
-    const rules: Lint.IRule[] = [];
+                          enableDisableRuleMap: {[rulename: string]: IEnableDisablePosition[]},
+                          rulesDirectories?: string | string[]): IRule[] {
+    const rules: IRule[] = [];
     for (const ruleName in ruleConfiguration) {
         if (ruleConfiguration.hasOwnProperty(ruleName)) {
             const ruleValue = ruleConfiguration[ruleName];
@@ -110,13 +110,13 @@ function loadRule(...paths: string[]) {
 }
 
 /*
-    * We're assuming both lists are already sorted top-down so compare the tops, use the smallest of the two,
-    * and build the intervals that way.
-    */
+ * We're assuming both lists are already sorted top-down so compare the tops, use the smallest of the two,
+ * and build the intervals that way.
+ */
 function buildDisabledIntervalsFromSwitches(ruleSpecificList: IEnableDisablePosition[], allList: IEnableDisablePosition[]) {
     let isCurrentlyDisabled = false;
     let disabledStartPosition: number;
-    const disabledIntervalList: Lint.IDisabledInterval[] = [];
+    const disabledIntervalList: IDisabledInterval[] = [];
     let i = 0;
     let j = 0;
 
