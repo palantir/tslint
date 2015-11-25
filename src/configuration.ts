@@ -35,6 +35,28 @@ const DEFAULT_CONFIG = {
     }
 };
 
+const moduleDirectory = path.dirname(module.filename);
+
+export function getRulesDirectories(directories: string | string[]): string[] {
+    let rulesDirectories: string[] = [];
+
+    if (directories != null) {
+        if (typeof directories === "string") {
+            rulesDirectories = [getRelativePath(<string>directories)];
+        } else {
+            rulesDirectories = (<string[]>directories).map((dir) => getRelativePath(dir));
+        }
+    }
+
+    return rulesDirectories;
+}
+
+export function getRelativePath(directory: string): string {
+    if (directory != null) {
+        return path.relative(moduleDirectory, directory);
+    }
+}
+
 export function findConfiguration(configFile: string, inputFileLocation: string): any {
     if (configFile == null) {
         // first look for package.json from input file location

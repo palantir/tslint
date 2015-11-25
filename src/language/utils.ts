@@ -97,16 +97,21 @@ export function isBlockScopedVariable(node: ts.VariableDeclaration | ts.Variable
 }
 
 export function isBlockScopedBindingElement(node: ts.BindingElement): boolean {
+    const variableDeclaration = getBindingElementVariableDeclaration(node);
+    // if no variable declaration, it must be a function param, which is block scoped
+    return (variableDeclaration == null) || isBlockScopedVariable(variableDeclaration);
+}
+
+export function getBindingElementVariableDeclaration(node: ts.BindingElement): ts.VariableDeclaration {
     let currentParent = node.parent;
     while (currentParent.kind !== ts.SyntaxKind.VariableDeclaration) {
         if (currentParent.parent == null) {
-            // if we didn't encounter a VariableDeclaration, this must be a function parameter, which is block scoped
-            return true;
+            return null; // function parameter, no variable declaration
         } else {
             currentParent = currentParent.parent;
         }
     }
-    return isBlockScopedVariable(<ts.VariableDeclaration> currentParent);
+    return <ts.VariableDeclaration> currentParent;
 }
 
 /**

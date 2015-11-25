@@ -45,5 +45,5 @@ export interface ILinterOptions {
     configuration: any;
     formatter: string;
     formattersDirectory: string;
-    rulesDirectory: string;
+    rulesDirectory: string | string[];
 }
