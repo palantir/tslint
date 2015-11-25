@@ -1,6 +1,11 @@
 Change Log
 ===
 
+v3.1.0-dev.1
+---
+* [bugfix] fixed `no-shadowed-variable` false positives when handling destructuring in function params (#727)
+- [enhancement] `rulesDirectory` in `tslint.json` now supports multiple file paths (#795)
+
 v3.0.0
 ---
 * [bugfix] `member-access` rule now handles object literals and get/set accessors properly (#801)

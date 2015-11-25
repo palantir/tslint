@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import * as Lint from "./lint";
 
 describe("TSX syntax", () => {
@@ -83,8 +84,7 @@ describe("TSX syntax", () => {
         });
 
         it("with no false positives", () => {
-            // TODO: one false positive exists because of a compiler bug (see #806)
-            assert.lengthOf(actualFailures, 4);
+            assert.lengthOf(actualFailures, 3);
         });
     });
 
