@@ -126,11 +126,12 @@ export function someAncestor(node: ts.Node, predicate: (n: ts.Node) => boolean):
 }
 
 /**
- * Bitwise check for node flags.
+ * Bitwise check for node flags. This method will walk up binding patterns and variable declaration lists to get a
+ * combined list of node flags before comparing against flagsToCheck.
  */
 export function isNodeFlagSet(node: ts.Node, flagToCheck: ts.NodeFlags): boolean {
     /* tslint:disable:no-bitwise */
-    return (node.flags & flagToCheck) !== 0;
+    return (getCombinedNodeFlags(node) & flagToCheck) !== 0;
     /* tslint:enable:no-bitwise */
 }
 
@@ -142,4 +143,37 @@ export function isNestedModuleDeclaration(decl: ts.ModuleDeclaration) {
     // are nested therefore we can depend that a node's position will only match with its name's position for nested
     // nodes
     return decl.name.pos === decl.pos;
+}
+
+function getCombinedNodeFlags(node: ts.Node): ts.NodeFlags {
+    node = walkUpBindingElementsAndPatterns(node);
+
+    let flags = node.flags;
+    if (node.kind === ts.SyntaxKind.VariableDeclaration) {
+        node = node.parent;
+    }
+
+    /* tslint:disable no-bitwise */
+    if (node != null && node.kind === ts.SyntaxKind.VariableDeclarationList) {
+        flags |= node.flags;
+        node = node.parent;
+    }
+
+    if (node != null && node.kind === ts.SyntaxKind.VariableStatement) {
+        flags |= node.flags;
+    }
+    /* tslint:enable no-bitwise */
+
+    return flags;
+}
+
+function isBindingPattern(node: ts.Node): node is ts.BindingPattern {
+    return !!node && (node.kind === ts.SyntaxKind.ArrayBindingPattern || node.kind === ts.SyntaxKind.ObjectBindingPattern);
+}
+
+function walkUpBindingElementsAndPatterns(node: ts.Node): ts.Node {
+    while (node != null && (node.kind === ts.SyntaxKind.BindingElement || isBindingPattern(node))) {
+        node = node.parent;
+    }
+    return node;
 }

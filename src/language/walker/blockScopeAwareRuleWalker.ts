@@ -35,17 +35,22 @@ export abstract class BlockScopeAwareRuleWalker<T, U> extends ScopeAwareRuleWalk
 
     public abstract createBlockScope(): U;
 
+    // get all block scopes available at this depth
+    public getAllBlockScopes(): U[] {
+        return this.blockScopeStack.slice();
+    }
+
     public getCurrentBlockScope(): U {
         return this.blockScopeStack[this.blockScopeStack.length - 1];
+    }
+
+    public getCurrentBlockDepth(): number {
+        return this.blockScopeStack.length;
     }
 
     // callback notifier when a block scope begins
     public onBlockScopeStart() {
         return;
-    }
-
-    public getCurrentBlockDepth(): number {
-        return this.blockScopeStack.length;
     }
 
     // callback notifier when a block scope ends
