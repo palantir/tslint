@@ -15,6 +15,7 @@
  */
 
 import * as fs from "fs";
+import * as glob from "glob";
 import * as optimist from "optimist";
 import * as Linter from "./tslint";
 import {getRulesDirectories} from "./configuration";
@@ -179,5 +180,5 @@ const processFile = (file: string) => {
 const files = argv._;
 
 for (const file of files) {
-    processFile(file);
+    glob.sync(file).forEach(processFile);
 }

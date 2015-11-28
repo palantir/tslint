@@ -4,3 +4,4 @@
 /// <reference path="findup-sync/findup-sync.d.ts" />
 /// <reference path="minimatch/minimatch.d.ts" />
 /// <reference path="optimist/optimist.d.ts" />
+/// <reference path="glob/glob.d.ts" />
