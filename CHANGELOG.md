@@ -3,7 +3,7 @@ Change Log
 
 v3.1.1
 ---
-* Bump TypeScript peer dependency to `>= 1.7.3`
+* Bump TypeScript peer dependency to `>= 1.7.3` due to `const enum` incompatibility (#832)
 
 v3.1.0
 ---
