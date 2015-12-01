@@ -83,8 +83,7 @@ describe("TSX syntax", () => {
         });
 
         it("with no false positives", () => {
-            // TODO: one false positive exists because of a compiler bug (see #806)
-            assert.lengthOf(actualFailures, 4);
+            assert.lengthOf(actualFailures, 3);
         });
     });
 
