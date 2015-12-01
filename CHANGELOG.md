@@ -1,6 +1,10 @@
 Change Log
 ===
 
+v3.1.1
+---
+* Bump TypeScript peer dependency to `>= 1.7.3`
+
 v3.1.0
 ---
 * [bugfix] build with TS v1.7.3 to fix null pointer exception (#832)
@@ -21,7 +25,7 @@ v3.0.0
 
 v3.0.0-dev.3
 ---
-* Typescript is now a peerDependency (#791)
+* TypeScript is now a peerDependency (#791)
 * [bugfix] `no-unused-variable` rule with `react` option works with self-closing JSX tags (#776)
 * [bugfix] `use-strict` bugfix (#544)
 

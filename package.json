@@ -1,6 +1,6 @@
 {
   "name": "tslint",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "a static analysis linter for TypeScript",
   "bin": {
     "tslint": "./bin/tslint"
@@ -39,7 +39,7 @@
     "typescript": "latest"
   },
   "peerDependencies": {
-    "typescript": ">=1.6.2"
+    "typescript": ">=1.7.3"
   },
   "license": "Apache-2.0"
 }
