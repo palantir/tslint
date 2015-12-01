@@ -18,7 +18,7 @@ import * as Lint from "./lint";
 import {findConfiguration as config, getRulesDirectories, getRelativePath} from "./configuration";
 
 class Linter {
-    public static VERSION = "3.1.0";
+    public static VERSION = "3.1.1";
     public static findConfiguration = config;
 
     private fileName: string;
