@@ -1,6 +1,13 @@
 Change Log
 ===
 
+v3.1.0
+---
+* [bugfix] build with TS v1.7.3 to fix null pointer exception (#832)
+* [bugfix] fixed false positive in `no-require-imports` rule (#816)
+* [bugfix] fixed `no-shadowed-variable` false positives when handling destructuring in function params (#727)
+* [enhancement] `rulesDirectory` in `tslint.json` now supports multiple file paths (#795)
+
 v3.0.0
 ---
 * [bugfix] `member-access` rule now handles object literals and get/set accessors properly (#801)
