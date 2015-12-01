@@ -17,7 +17,7 @@
 import {IFormatter} from "./language/formatter/formatter";
 import {RuleFailure} from "./language/rule/rule";
 import {getSourceFile} from "./language/utils";
-import {findConfiguration as config, getRulesDirectories, getRelativePath} from "./configuration";
+import {findConfiguration as config, getRelativePath} from "./configuration";
 import {EnableDisableRulesWalker} from "./enableDisableRules";
 import {findFormatter} from "./formatterLoader";
 import {ILinterOptions, LintResult} from "./lint";
@@ -49,7 +49,7 @@ class Linter {
         rulesWalker.walk(sourceFile);
         const enableDisableRuleMap = rulesWalker.enableDisableRuleMap;
 
-        const rulesDirectories = getRulesDirectories(this.options.rulesDirectory);
+        const rulesDirectories = this.options.rulesDirectory;
         const configuration = this.options.configuration.rules;
         const configuredRules = loadRules(configuration, enableDisableRuleMap, rulesDirectories);
         const enabledRules = configuredRules.filter((r) => r.isEnabled());
