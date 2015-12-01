@@ -15,13 +15,13 @@
  */
 
 import * as ts from "typescript";
-import * as Lint from "../../lint";
+import {IOptions} from "../../lint";
 import {RuleWalker} from "./ruleWalker";
 
 export class SkippableTokenAwareRuleWalker extends RuleWalker {
     protected tokensToSkipStartEndMap: {[start: number]: number};
 
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
+    constructor(sourceFile: ts.SourceFile, options: IOptions) {
         super(sourceFile, options);
         this.tokensToSkipStartEndMap = {};
     }

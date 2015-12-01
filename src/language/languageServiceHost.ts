@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import * as Lint from "../lint";
 import * as ts from "typescript";
+import {createCompilerOptions} from "./utils";
 
 export function createLanguageServiceHost(fileName: string, source: string): ts.LanguageServiceHost {
     return {
-        getCompilationSettings: () => Lint.createCompilerOptions(),
+        getCompilationSettings: () => createCompilerOptions(),
         getCurrentDirectory: () => "",
         getDefaultLibFileName: () => "lib.d.ts",
         getScriptFileNames: () => [fileName],
@@ -30,6 +30,6 @@ export function createLanguageServiceHost(fileName: string, source: string): ts.
 }
 
 export function createLanguageService(fileName: string, source: string) {
-    const languageServiceHost = Lint.createLanguageServiceHost(fileName, source);
+    const languageServiceHost = createLanguageServiceHost(fileName, source);
     return ts.createLanguageService(languageServiceHost);
 }

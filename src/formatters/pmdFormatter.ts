@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import * as Lint from "../lint";
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
+import {RuleFailure} from "../language/rule/rule";
 
 export class Formatter extends AbstractFormatter {
-    public format(failures: Lint.RuleFailure[]): string {
+    public format(failures: RuleFailure[]): string {
         let output = "<pmd version=\"tslint\">";
 
         for (let failure of failures) {
