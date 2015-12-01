@@ -81,12 +81,12 @@ module.exports = function (grunt) {
     grunt.registerTask("core", [
         "clean:core",
         "ts:core",
-        // "tslint:src"
+        "tslint:src"
     ]);
     grunt.registerTask("test", [
         "clean:test",
         "ts:test",
-        // "tslint:test",
+        "tslint:test",
         "mochaTest"
     ].concat(checkBinTest));
 
