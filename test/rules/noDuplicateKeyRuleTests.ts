@@ -13,18 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
+import {TestUtils} from "../lint";
 
 describe("<no-duplicate-key>", () => {
-    const NoDuplicateKeyRule = Lint.Test.getRule("no-duplicate-key");
+    const NoDuplicateKeyRule = TestUtils.getRule("no-duplicate-key");
     const fileName = "rules/dupkey.test.ts";
     const failureString = NoDuplicateKeyRule.FAILURE_STRING;
 
     it("forbids duplicate keys in object literals", () => {
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, NoDuplicateKeyRule);
-        const createFailure1 = Lint.Test.createFailuresOnFile(fileName, failureString + "axa'");
-        const createFailure2 = Lint.Test.createFailuresOnFile(fileName, failureString + "bd'");
-        const createFailure3 = Lint.Test.createFailuresOnFile(fileName, failureString + "duplicated'");
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, NoDuplicateKeyRule);
+        const createFailure1 = TestUtils.createFailuresOnFile(fileName, failureString + "axa'");
+        const createFailure2 = TestUtils.createFailuresOnFile(fileName, failureString + "bd'");
+        const createFailure3 = TestUtils.createFailuresOnFile(fileName, failureString + "duplicated'");
         const expectedFailures = [
             createFailure1([10, 5], [10, 8]),
             createFailure2([13, 5], [13, 7]),
@@ -32,6 +33,6 @@ describe("<no-duplicate-key>", () => {
             createFailure3([31, 5], [31, 15])
         ];
 
-        Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
+        TestUtils.assertFailuresEqual(actualFailures, expectedFailures);
     });
 });

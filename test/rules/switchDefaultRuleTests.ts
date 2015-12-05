@@ -13,20 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
+import {TestUtils} from "../lint";
 
 describe("<switch-default>", () => {
-    const SwitchDefaultRule = Lint.Test.getRule("switch-default");
+    const SwitchDefaultRule = TestUtils.getRule("switch-default");
     const fileName = "rules/switchdefault.test.ts";
     const failureString = SwitchDefaultRule.FAILURE_STRING;
 
     it("Switch default", () => {
-        const failure = Lint.Test.createFailuresOnFile(fileName, failureString);
+        const failure = TestUtils.createFailuresOnFile(fileName, failureString);
         const expectedFailures = [
             failure([2, 1], [6, 2]),
             failure([8, 1], [18, 2])
         ];
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, SwitchDefaultRule);
-        Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, SwitchDefaultRule);
+        TestUtils.assertFailuresEqual(actualFailures, expectedFailures);
     });
 });

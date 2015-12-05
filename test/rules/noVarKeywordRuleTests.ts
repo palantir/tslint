@@ -13,22 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
+import {TestUtils} from "../lint";
 
 describe("<no-var-keyword>", () => {
-    const NoVarKeywordRule = Lint.Test.getRule("no-var-keyword");
+    const NoVarKeywordRule = TestUtils.getRule("no-var-keyword");
     const fileName = "rules/novarkeyword.test.ts";
 
     it("disallows use of creating variables with 'var'", () => {
-        const createFailure = Lint.Test.createFailuresOnFile(fileName, NoVarKeywordRule.FAILURE_STRING);
+        const createFailure = TestUtils.createFailuresOnFile(fileName, NoVarKeywordRule.FAILURE_STRING);
         const expectedFailures = [
             createFailure([1, 1], [1, 4]),
             createFailure([4, 5], [4, 8]),
             createFailure([7, 1], [7, 4]),
             createFailure([10, 1], [10, 4]),
         ];
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, NoVarKeywordRule);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, NoVarKeywordRule);
 
-        Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
+        TestUtils.assertFailuresEqual(actualFailures, expectedFailures);
     });
 });

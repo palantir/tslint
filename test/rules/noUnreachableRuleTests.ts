@@ -13,23 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
+import {RuleFailure, TestUtils} from "../lint";
 
 describe("<no-unreachable>", () => {
-    const NoUnreachableRule = Lint.Test.getRule("no-unreachable");
+    const NoUnreachableRule = TestUtils.getRule("no-unreachable");
     const fileName = "rules/nounreachable.test.ts";
 
     it("restricts the use of unreachable code statements", () => {
-        const createFailure = Lint.Test.createFailuresOnFile(fileName, NoUnreachableRule.FAILURE_STRING);
-        const expectedFailures: Lint.RuleFailure[] = [
+        const createFailure = TestUtils.createFailuresOnFile(fileName, NoUnreachableRule.FAILURE_STRING);
+        const expectedFailures: RuleFailure[] = [
             createFailure([6, 5], [6, 11]),
             createFailure([13, 9], [13, 15]),
             createFailure([25, 9], [25, 27]),
             createFailure([28, 9], [28, 15]),
             createFailure([88, 5], [88, 15])
         ];
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, NoUnreachableRule);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, NoUnreachableRule);
 
-        Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
+        TestUtils.assertFailuresEqual(actualFailures, expectedFailures);
     });
 });

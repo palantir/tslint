@@ -13,16 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
+import {TestUtils} from "../lint";
 
 describe("<no-eval>", () => {
-    const NoEvalRule = Lint.Test.getRule("no-eval");
+    const NoEvalRule = TestUtils.getRule("no-eval");
     const fileName = "rules/evil.test.ts";
     const failureString = NoEvalRule.FAILURE_STRING;
 
     it("forbids eval", () => {
-        const expectedFailure = Lint.Test.createFailure(fileName, [6, 13], [6, 17], failureString);
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, NoEvalRule);
+        const expectedFailure = TestUtils.createFailure(fileName, [6, 13], [6, 17], failureString);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, NoEvalRule);
 
         assert.equal(actualFailures.length, 1);
         assert.isTrue(actualFailures[0].equals(expectedFailure));

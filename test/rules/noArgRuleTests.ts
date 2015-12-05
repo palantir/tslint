@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
+import {TestUtils} from "../lint";
 
 describe("<no-arg>", () => {
     it("forbids access to arguments properties", () => {
         const fileName = "rules/noarg.test.ts";
-        const NoArgRule = Lint.Test.getRule("no-arg");
-        const expectedFailure = Lint.Test.createFailure(fileName, [4, 8], [4, 17], NoArgRule.FAILURE_STRING);
+        const NoArgRule = TestUtils.getRule("no-arg");
+        const expectedFailure = TestUtils.createFailure(fileName, [4, 8], [4, 17], NoArgRule.FAILURE_STRING);
 
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, NoArgRule);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, NoArgRule);
 
         assert.equal(actualFailures.length, 1);
         assert.isTrue(actualFailures[0].equals(expectedFailure));

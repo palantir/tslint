@@ -13,20 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
+import {RuleFailure, TestUtils} from "../lint";
 
 describe("<label-position>", () => {
-    const LabelPositionRule = Lint.Test.getRule("label-position");
+    const LabelPositionRule = TestUtils.getRule("label-position");
     const fileName = "rules/labelpos.test.ts";
 
     it("enforces that labels are correctly positioned", () => {
-        const createFailure = Lint.Test.createFailuresOnFile(fileName, LabelPositionRule.FAILURE_STRING);
-        const expectedFailures: Lint.RuleFailure[] = [
+        const createFailure = TestUtils.createFailuresOnFile(fileName, LabelPositionRule.FAILURE_STRING);
+        const expectedFailures: RuleFailure[] = [
             createFailure([2, 5], [2, 9]),
             createFailure([5, 5], [5, 9])
         ];
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, LabelPositionRule);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, LabelPositionRule);
 
-        Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
+        TestUtils.assertFailuresEqual(actualFailures, expectedFailures);
     });
 });

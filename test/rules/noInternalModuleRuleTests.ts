@@ -13,27 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
+import {TestUtils} from "../lint";
 
 describe("<no-internal-module>", () => {
-    const NoInternalModule = Lint.Test.getRule("no-internal-module");
+    const NoInternalModule = TestUtils.getRule("no-internal-module");
     const fileName = "rules/nointernalmodule.test.ts";
     const failureString = NoInternalModule.FAILURE_STRING;
 
     it("forbids internal module", () => {
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, NoInternalModule);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, NoInternalModule);
         const expectedFailures = [
-            Lint.Test.createFailure(fileName, [4, 1], [4, 15], failureString),
-            Lint.Test.createFailure(fileName, [7, 1], [7, 24], failureString),
-            Lint.Test.createFailure(fileName, [25, 5], [28, 6], failureString),
-            Lint.Test.createFailure(fileName, [31, 1], [36, 2], failureString),
-            Lint.Test.createFailure(fileName, [33, 9], [33, 32], failureString),
-            Lint.Test.createFailure(fileName, [44, 1], [44, 30], failureString),
-            Lint.Test.createFailure(fileName, [46, 1], [46, 35], failureString),
-            Lint.Test.createFailure(fileName, [49, 1], [49, 21], failureString),
-            Lint.Test.createFailure(fileName, [50, 1], [50, 22], failureString)
+            TestUtils.createFailure(fileName, [4, 1], [4, 15], failureString),
+            TestUtils.createFailure(fileName, [7, 1], [7, 24], failureString),
+            TestUtils.createFailure(fileName, [25, 5], [28, 6], failureString),
+            TestUtils.createFailure(fileName, [31, 1], [36, 2], failureString),
+            TestUtils.createFailure(fileName, [33, 9], [33, 32], failureString),
+            TestUtils.createFailure(fileName, [44, 1], [44, 30], failureString),
+            TestUtils.createFailure(fileName, [46, 1], [46, 35], failureString),
+            TestUtils.createFailure(fileName, [49, 1], [49, 21], failureString),
+            TestUtils.createFailure(fileName, [50, 1], [50, 22], failureString)
         ];
 
-        Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
+        TestUtils.assertFailuresEqual(actualFailures, expectedFailures);
     });
 });

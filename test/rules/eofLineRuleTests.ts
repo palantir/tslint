@@ -13,16 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
+import {TestUtils} from "../lint";
 
 describe("<eofline>", () => {
-    const EofLineRule = Lint.Test.getRule("eofline");
+    const EofLineRule = TestUtils.getRule("eofline");
     const fileName = "rules/eofline.test.ts";
     const failureString = EofLineRule.FAILURE_STRING;
 
     it("ensures a trailing newline at EOF", () => {
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, EofLineRule);
-        const expectedFailure = Lint.Test.createFailure(fileName, [4, 38], [4, 38], failureString);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, EofLineRule);
+        const expectedFailure = TestUtils.createFailure(fileName, [4, 38], [4, 38], failureString);
 
         assert.equal(actualFailures.length, 1);
         assert.isTrue(actualFailures[0].equals(expectedFailure));

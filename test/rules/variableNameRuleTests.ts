@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
+import {TestUtils} from "../lint";
 
 describe("<variable-name>", () => {
-    const VariableNameRule = Lint.Test.getRule("variable-name");
+    const VariableNameRule = TestUtils.getRule("variable-name");
     const failureString = VariableNameRule.FORMAT_FAILURE;
     const fileName = "rules/varname.test.ts";
-    const createFailure = Lint.Test.createFailuresOnFile(fileName, failureString);
+    const createFailure = TestUtils.createFailuresOnFile(fileName, failureString);
 
     it("ensures only (camel/upper)case naming convention for variables & parameters", () => {
         const expectedFailures = [
@@ -40,8 +41,8 @@ describe("<variable-name>", () => {
             createFailure([35, 5], [35, 19])
         ];
 
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, VariableNameRule);
-        Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, VariableNameRule);
+        TestUtils.assertFailuresEqual(actualFailures, expectedFailures);
     });
 
     it("ensures leading underscores can optionally be legal", () => {
@@ -49,7 +50,7 @@ describe("<variable-name>", () => {
             "allow-leading-underscore"
         ];
 
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, VariableNameRule, options);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, VariableNameRule, options);
         const optionallyValidFailures = [
             createFailure([8, 13], [8, 29])
         ];
@@ -65,7 +66,7 @@ describe("<variable-name>", () => {
             "allow-trailing-underscore"
         ];
 
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, VariableNameRule, options);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, VariableNameRule, options);
         const optionallyValidFailures = [
             createFailure([34, 5], [34, 21])
         ];
@@ -82,7 +83,7 @@ describe("<variable-name>", () => {
             "allow-trailing-underscore"
         ];
 
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, VariableNameRule, options);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, VariableNameRule, options);
         const optionallyValidFailures = [
             createFailure([35, 5], [35, 19])
         ];
@@ -95,7 +96,7 @@ describe("<variable-name>", () => {
 
     it("ensures keywords can optionally be banned", () => {
         const file = "rules/varname-keywords.test.ts";
-        const failure = Lint.Test.createFailuresOnFile(file, VariableNameRule.KEYWORD_FAILURE);
+        const failure = TestUtils.createFailuresOnFile(file, VariableNameRule.KEYWORD_FAILURE);
         const options = [true, "ban-keywords"];
 
         const expectedFailures = [
@@ -106,7 +107,7 @@ describe("<variable-name>", () => {
             failure([5, 6], [5, 12])
         ];
 
-        const actualFailures = Lint.Test.applyRuleOnFile(file, VariableNameRule, options);
-        Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
+        const actualFailures = TestUtils.applyRuleOnFile(file, VariableNameRule, options);
+        TestUtils.assertFailuresEqual(actualFailures, expectedFailures);
     });
 });

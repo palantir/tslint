@@ -13,50 +13,51 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
+import {RuleFailure, TestUtils} from "../lint";
 
 describe("<curly>", () => {
     const fileName = "rules/curly.test.ts";
-    const CurlyRule = Lint.Test.getRule("curly");
-    let actualFailures: Lint.RuleFailure[];
+    const CurlyRule = TestUtils.getRule("curly");
+    let actualFailures: RuleFailure[];
 
     before(() => {
-        actualFailures = Lint.Test.applyRuleOnFile(fileName, CurlyRule);
+        actualFailures = TestUtils.applyRuleOnFile(fileName, CurlyRule);
     });
 
     it("ensures if statements are always braced", () => {
         const failureString = CurlyRule.IF_FAILURE_STRING;
-        const expectedFailure = Lint.Test.createFailure(fileName, [10, 5], [11, 26], failureString);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
+        const expectedFailure = TestUtils.createFailure(fileName, [10, 5], [11, 26], failureString);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure);
     });
 
     it("ensures for statements are always braced", () => {
         const failureString = CurlyRule.FOR_FAILURE_STRING;
-        const expectedFailure1 = Lint.Test.createFailure(fileName, [22, 3], [23, 24], failureString);
-        const expectedFailure2 = Lint.Test.createFailure(fileName, [25, 1], [26, 22], failureString);
-        const expectedFailure3 = Lint.Test.createFailure(fileName, [67, 1], [68, 20], failureString);
+        const expectedFailure1 = TestUtils.createFailure(fileName, [22, 3], [23, 24], failureString);
+        const expectedFailure2 = TestUtils.createFailure(fileName, [25, 1], [26, 22], failureString);
+        const expectedFailure3 = TestUtils.createFailure(fileName, [67, 1], [68, 20], failureString);
 
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure3);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure1);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure2);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure3);
     });
 
     it("ensures while statements are always braced", () => {
         const failureString = CurlyRule.WHILE_FAILURE_STRING;
-        const expectedFailure1 = Lint.Test.createFailure(fileName, [37, 1], [38, 22], failureString);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
+        const expectedFailure1 = TestUtils.createFailure(fileName, [37, 1], [38, 22], failureString);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure1);
     });
 
     it("ensures do statements are always braced", () => {
         const failureString = CurlyRule.DO_FAILURE_STRING;
-        const expectedFailure1 = Lint.Test.createFailure(fileName, [50, 1], [52, 16], failureString);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
+        const expectedFailure1 = TestUtils.createFailure(fileName, [50, 1], [52, 16], failureString);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure1);
     });
 
     it("ensures else statements are always braced", () => {
         const failureString = CurlyRule.ELSE_FAILURE_STRING;
-        const expectedFailure = Lint.Test.createFailure(fileName, [56, 3], [56, 25], failureString);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
+        const expectedFailure = TestUtils.createFailure(fileName, [56, 3], [56, 25], failureString);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure);
     });
 
     it("does not have false positives", () => {

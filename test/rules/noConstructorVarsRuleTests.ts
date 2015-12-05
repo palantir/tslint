@@ -13,25 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
+import {TestUtils} from "../lint";
 
 describe("<no-constructor-variable-declarations>", () => {
-    const Rule = Lint.Test.getRule("no-constructor-vars");
+    const Rule = TestUtils.getRule("no-constructor-vars");
     const fileName = "rules/noconstructorvars.test.ts";
     const failureString = Rule.FAILURE_STRING_PART;
 
     it("no constructor variable declarations", () => {
-        const failureFoo = Lint.Test.createFailuresOnFile(fileName, "'foo'" + failureString);
-        const failureBar = Lint.Test.createFailuresOnFile(fileName, "'bar'" + failureString);
+        const failureFoo = TestUtils.createFailuresOnFile(fileName, "'foo'" + failureString);
+        const failureBar = TestUtils.createFailuresOnFile(fileName, "'bar'" + failureString);
 
         const expectedFailures = [
             failureFoo([3, 17], [3, 24]),
             failureFoo([9, 17], [9, 24]),
             failureBar([9, 38], [9, 44])
         ];
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, Rule);
         assert.lengthOf(actualFailures, 3);
 
-        Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
+        TestUtils.assertFailuresEqual(actualFailures, expectedFailures);
     });
 });

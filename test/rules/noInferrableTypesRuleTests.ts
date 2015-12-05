@@ -13,16 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
+import {TestUtils} from "../lint";
 
 describe("<no-inferrable-types>", () => {
-    const Rule = Lint.Test.getRule("no-inferrable-types");
+    const Rule = TestUtils.getRule("no-inferrable-types");
     const fileName = "rules/noinferrabletypes.test.ts";
 
     it("forbids explicit type declarations where easily inferrable", () => {
         const createFailure = (start: number[], end: number[], type: string) => {
             const failureString = Rule.FAILURE_STRING_FACTORY(type);
-            return Lint.Test.createFailure(fileName, start, end, failureString);
+            return TestUtils.createFailure(fileName, start, end, failureString);
         };
 
         const expectedFailures = [
@@ -33,7 +34,7 @@ describe("<no-inferrable-types>", () => {
             createFailure([7, 33], [7, 40], "boolean"),
             createFailure([7, 52], [7, 58], "string")
         ];
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule);
-        Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, Rule);
+        TestUtils.assertFailuresEqual(actualFailures, expectedFailures);
     });
 });

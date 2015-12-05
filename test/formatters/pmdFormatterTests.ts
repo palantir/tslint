@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
 import * as ts from "typescript";
+import {IFormatter, RuleFailure, TestUtils} from "../lint";
 
 describe("PMD Formatter", () => {
     const TEST_FILE = "formatters/pmdFormatter.test.ts";
     let sourceFile: ts.SourceFile;
-    let formatter: Lint.IFormatter;
+    let formatter: IFormatter;
 
     before(() => {
-        const Formatter = Lint.Test.getFormatter("pmd");
-        sourceFile = Lint.Test.getSourceFile(TEST_FILE);
+        const Formatter = TestUtils.getFormatter("pmd");
+        sourceFile = TestUtils.getSourceFile(TEST_FILE);
         formatter = new Formatter();
     });
 
@@ -31,10 +32,10 @@ describe("PMD Formatter", () => {
         const maxPosition = sourceFile.getFullWidth();
 
         const failures = [
-            new Lint.RuleFailure(sourceFile, 0, 1, "first failure", "first-name"),
-            new Lint.RuleFailure(sourceFile, 2, 3, "&<>'\" should be escaped", "escape"),
-            new Lint.RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name"),
-            new Lint.RuleFailure(sourceFile, 0, maxPosition, "full failure", "full-name")
+            new RuleFailure(sourceFile, 0, 1, "first failure", "first-name"),
+            new RuleFailure(sourceFile, 2, 3, "&<>'\" should be escaped", "escape"),
+            new RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name"),
+            new RuleFailure(sourceFile, 0, maxPosition, "full failure", "full-name")
         ];
         const expectedResult =
             "<pmd version=\"tslint\">" +

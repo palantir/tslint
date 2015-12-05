@@ -13,32 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
+import {RuleFailure, TestUtils} from "../lint";
 
 describe("<typedef, not enabled>", () => {
     const fileName = "rules/typedef.test.ts";
-    const TypedefRule = Lint.Test.getRule("typedef");
+    const TypedefRule = TestUtils.getRule("typedef");
 
     it("enforces rules only when enabled (unspecified)", () => {
-        const failures = Lint.Test.applyRuleOnFile(fileName, TypedefRule);
+        const failures = TestUtils.applyRuleOnFile(fileName, TypedefRule);
         assert.equal(failures.length, 0);
     });
 
     it("enforces rules only when enabled (disabled)", () => {
         const options = [false];
-        const failures = Lint.Test.applyRuleOnFile(fileName, TypedefRule, options);
+        const failures = TestUtils.applyRuleOnFile(fileName, TypedefRule, options);
         assert.equal(failures.length, 0);
     });
 });
 
 describe("<typedef, enabled>", () => {
     const fileName = "rules/typedef.test.ts";
-    const TypedefRule = Lint.Test.getRule("typedef");
-    let actualFailures: Lint.RuleFailure[];
+    const TypedefRule = TestUtils.getRule("typedef");
+    let actualFailures: RuleFailure[];
 
-    function assertFailures(...failures: Lint.RuleFailure[]) {
+    function assertFailures(...failures: RuleFailure[]) {
         failures.forEach((failure) => {
-            Lint.Test.assertContainsFailure(actualFailures, failure);
+            TestUtils.assertContainsFailure(actualFailures, failure);
             actualFailures = actualFailures.filter((actualFailure) => !actualFailure.equals(failure));
         });
     }
@@ -51,39 +52,39 @@ describe("<typedef, enabled>", () => {
             "property-declaration",
             "member-variable-declaration"
         ];
-        actualFailures = Lint.Test.applyRuleOnFile(fileName, TypedefRule, options);
+        actualFailures = TestUtils.applyRuleOnFile(fileName, TypedefRule, options);
     });
 
     it("enforces typedef in call signatures", () => {
-        const expectedFailure1 = Lint.Test.createFailure(fileName,
+        const expectedFailure1 = TestUtils.createFailure(fileName,
             [28, 6],
             [28, 7],
             "expected call-signature to have a typedef");
-        const expectedFailure2 = Lint.Test.createFailure(fileName,
+        const expectedFailure2 = TestUtils.createFailure(fileName,
             [4, 17],
             [4, 18],
             "expected call-signature: 'PropDef' to have a typedef");
-        const expectedFailure3 = Lint.Test.createFailure(fileName,
+        const expectedFailure3 = TestUtils.createFailure(fileName,
             [38, 21],
             [38, 22],
             "expected call-signature: 'name' to have a typedef");
-        const expectedFailure4 = Lint.Test.createFailure(fileName,
+        const expectedFailure4 = TestUtils.createFailure(fileName,
             [53, 31],
             [53, 32],
             "expected call-signature: 'anotherNoTypesFn' to have a typedef");
-        const expectedFailure5 = Lint.Test.createFailure(fileName,
+        const expectedFailure5 = TestUtils.createFailure(fileName,
             [8, 15],
             [8, 16],
             "expected call-signature: 'methodDef' to have a typedef");
-        const expectedFailure6 = Lint.Test.createFailure(fileName,
+        const expectedFailure6 = TestUtils.createFailure(fileName,
             [12, 32],
             [12, 33],
             "expected call-signature to have a typedef");
-        const expectedFailure7 = Lint.Test.createFailure(fileName,
+        const expectedFailure7 = TestUtils.createFailure(fileName,
             [16, 22],
             [16, 23],
             "expected call-signature to have a typedef");
-        const expectedFailure8 = Lint.Test.createFailure(fileName,
+        const expectedFailure8 = TestUtils.createFailure(fileName,
             [42, 21],
             [42, 22],
             "expected call-signature: 'unTyped' to have a typedef");
@@ -93,27 +94,27 @@ describe("<typedef, enabled>", () => {
     });
 
     it("enforces typedef in parameter", () => {
-        const expectedFailure1 = Lint.Test.createFailure(fileName,
+        const expectedFailure1 = TestUtils.createFailure(fileName,
             [27, 6],
             [27, 7],
             "expected parameter: 'a' to have a typedef");
-        const expectedFailure2 = Lint.Test.createFailure(fileName,
+        const expectedFailure2 = TestUtils.createFailure(fileName,
             [28, 6],
             [28, 7],
             "expected parameter: 'b' to have a typedef");
-        const expectedFailure3 = Lint.Test.createFailure(fileName,
+        const expectedFailure3 = TestUtils.createFailure(fileName,
             [48, 21],
             [48, 22],
             "expected parameter: 'type' to have a typedef");
-        const expectedFailure4 = Lint.Test.createFailure(fileName,
+        const expectedFailure4 = TestUtils.createFailure(fileName,
             [53, 28],
             [53, 29],
             "expected parameter: 'a' to have a typedef");
-        const expectedFailure5 = Lint.Test.createFailure(fileName,
+        const expectedFailure5 = TestUtils.createFailure(fileName,
             [53, 31],
             [53, 32],
             "expected parameter: 'b' to have a typedef");
-        const expectedFailure6 = Lint.Test.createFailure(fileName,
+        const expectedFailure6 = TestUtils.createFailure(fileName,
               [61, 29],
               [61, 30],
               "expected parameter: 'n' to have a typedef");
@@ -122,7 +123,7 @@ describe("<typedef, enabled>", () => {
     });
 
     it("enforces typedef in property declaration", () => {
-        const expectedFailure = Lint.Test.createFailure(fileName,
+        const expectedFailure = TestUtils.createFailure(fileName,
             [22, 9],
             [22, 10],
             "expected property-declaration: 'Prop' to have a typedef");
@@ -131,19 +132,19 @@ describe("<typedef, enabled>", () => {
     });
 
     it("enforces typedef in variable declaration", () => {
-        const expectedFailure1 = Lint.Test.createFailure(fileName,
+        const expectedFailure1 = TestUtils.createFailure(fileName,
             [1, 42],
             [1, 43],
             "expected variable-declaration: 'NoTypeObjectLiteralWithPropertyGetter' to have a typedef");
-        const expectedFailure2 = Lint.Test.createFailure(fileName,
+        const expectedFailure2 = TestUtils.createFailure(fileName,
             [26, 14],
             [26, 15],
             "expected variable-declaration: 'NoTypesFn' to have a typedef");
-        const expectedFailure3 = Lint.Test.createFailure(fileName,
+        const expectedFailure3 = TestUtils.createFailure(fileName,
             [29, 10],
             [29, 11],
             "expected variable-declaration: 'c' to have a typedef");
-        const expectedFailure4 = Lint.Test.createFailure(fileName,
+        const expectedFailure4 = TestUtils.createFailure(fileName,
             [30, 10],
             [30, 11],
             "expected variable-declaration: 'd' to have a typedef");
@@ -152,7 +153,7 @@ describe("<typedef, enabled>", () => {
     });
 
     it("enforces typedef in member variable declaration", () => {
-        const expectedFailure = Lint.Test.createFailure(fileName,
+        const expectedFailure = TestUtils.createFailure(fileName,
             [36, 11],
             [36, 12],
             "expected member-variable-declaration: 'Member' to have a typedef");

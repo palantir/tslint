@@ -13,19 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
+import {TestUtils} from "../lint";
 
 describe("<member-ordering>", () => {
     it("requires public variables to go before private ones", () => {
         const fileName = "rules/memberordering-private.test.ts";
-        const MemberOrderingRule = Lint.Test.getRule("member-ordering");
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, MemberOrderingRule, [
+        const MemberOrderingRule = TestUtils.getRule("member-ordering");
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, MemberOrderingRule, [
             true,
             "public-before-private"
         ]);
 
-        Lint.Test.assertFailuresEqual(actualFailures, [
-            Lint.Test.createFailure(fileName, [6, 5], [6, 15],
+        TestUtils.assertFailuresEqual(actualFailures, [
+            TestUtils.createFailure(fileName, [6, 5], [6, 15],
                 "Declaration of public instance member variable not allowed " +
                 "to appear after declaration of private instance member function")
         ]);
@@ -33,17 +34,17 @@ describe("<member-ordering>", () => {
 
     it("requires variables to go before methods", () => {
         const fileName = "rules/memberordering-method.test.ts";
-        const MemberOrderingRule = Lint.Test.getRule("member-ordering");
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, MemberOrderingRule, [
+        const MemberOrderingRule = TestUtils.getRule("member-ordering");
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, MemberOrderingRule, [
             true,
             "variables-before-functions"
         ]);
 
-        Lint.Test.assertFailuresEqual(actualFailures, [
-            Lint.Test.createFailure(fileName, [12, 5], [12, 15],
+        TestUtils.assertFailuresEqual(actualFailures, [
+            TestUtils.createFailure(fileName, [12, 5], [12, 15],
                     "Declaration of public instance member variable not allowed " +
                     "to appear after declaration of public instance member function"),
-            Lint.Test.createFailure(fileName, [17, 5], [17, 15],
+            TestUtils.createFailure(fileName, [17, 5], [17, 15],
                     "Declaration of public instance member variable not allowed " +
                     "to appear after declaration of public instance member function"),
         ]);
@@ -51,14 +52,14 @@ describe("<member-ordering>", () => {
 
     it("requires static variables to go before instance variables", () => {
         const fileName = "rules/memberordering-static.test.ts";
-        const MemberOrderingRule = Lint.Test.getRule("member-ordering");
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, MemberOrderingRule, [
+        const MemberOrderingRule = TestUtils.getRule("member-ordering");
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, MemberOrderingRule, [
             true,
             "static-before-instance"
         ]);
 
-        Lint.Test.assertFailuresEqual(actualFailures, [
-            Lint.Test.createFailure(fileName, [3, 5], [3, 22],
+        TestUtils.assertFailuresEqual(actualFailures, [
+            TestUtils.createFailure(fileName, [3, 5], [3, 22],
                     "Declaration of public static member variable not allowed " +
                     "to appear after declaration of public instance member variable")
         ]);

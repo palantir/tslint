@@ -13,22 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
+import {RuleFailure, TestUtils} from "../lint";
 
 describe("<label-undefined>", () => {
-    const LabelUndefinedRule = Lint.Test.getRule("label-undefined");
+    const LabelUndefinedRule = TestUtils.getRule("label-undefined");
     const fileName = "rules/label-undefined.test.ts";
     const failureString = LabelUndefinedRule.FAILURE_STRING;
 
     it("forbids the use of undefined labels", () => {
-        const expectedFailures: Lint.RuleFailure[] = [
-            Lint.Test.createFailure(fileName, [6, 9], [6, 14], failureString + "lab1'"),
-            Lint.Test.createFailure(fileName, [13, 9], [13, 17], failureString + "lab2'"),
-            Lint.Test.createFailure(fileName, [27, 17], [27, 22], failureString + "lab3'"),
-            Lint.Test.createFailure(fileName, [36, 9], [36, 17], failureString + "lab4'")
+        const expectedFailures: RuleFailure[] = [
+            TestUtils.createFailure(fileName, [6, 9], [6, 14], failureString + "lab1'"),
+            TestUtils.createFailure(fileName, [13, 9], [13, 17], failureString + "lab2'"),
+            TestUtils.createFailure(fileName, [27, 17], [27, 22], failureString + "lab3'"),
+            TestUtils.createFailure(fileName, [36, 9], [36, 17], failureString + "lab4'")
         ];
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, LabelUndefinedRule);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, LabelUndefinedRule);
 
-        Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
+        TestUtils.assertFailuresEqual(actualFailures, expectedFailures);
     });
 });

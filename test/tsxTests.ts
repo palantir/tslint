@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "./lint";
+
+import {ILinterOptions, Linter, LintResult, RuleFailure, TestUtils} from "./lint";
 
 describe("TSX syntax", () => {
     const fs = require("fs");
@@ -54,32 +55,32 @@ describe("TSX syntax", () => {
             }
         });
         const parsedResult = JSON.parse(lintResult.output);
-        const actualFailures: Lint.RuleFailure[] = [];
+        const actualFailures: RuleFailure[] = [];
         for (let failure of parsedResult) {
             const startArray = [failure.startPosition.line + 1, failure.startPosition.character + 1];
             const endArray = [failure.endPosition.line + 1, failure.endPosition.character + 1];
-            actualFailures.push(Lint.Test.createFailure(`tsx/${fileName}`, startArray, endArray, failure.failure));
+            actualFailures.push(TestUtils.createFailure(`tsx/${fileName}`, startArray, endArray, failure.failure));
         }
 
         it("<indent>", () => {
-            const IndentRule = Lint.Test.getRule("indent");
-            const indentFailure = Lint.Test.createFailuresOnFile(`tsx/${fileName}`, IndentRule.FAILURE_STRING_SPACES);
+            const IndentRule = TestUtils.getRule("indent");
+            const indentFailure = TestUtils.createFailuresOnFile(`tsx/${fileName}`, IndentRule.FAILURE_STRING_SPACES);
 
-            Lint.Test.assertContainsFailure(actualFailures, indentFailure([31, 1], [31, 2]));
+            TestUtils.assertContainsFailure(actualFailures, indentFailure([31, 1], [31, 2]));
         });
 
         it("<quotemark>", () => {
-            const QuotemarkRule = Lint.Test.getRule("quotemark");
-            const quotemarkFailure = Lint.Test.createFailuresOnFile(`tsx/${fileName}`, QuotemarkRule.DOUBLE_QUOTE_FAILURE);
+            const QuotemarkRule = TestUtils.getRule("quotemark");
+            const quotemarkFailure = TestUtils.createFailuresOnFile(`tsx/${fileName}`, QuotemarkRule.DOUBLE_QUOTE_FAILURE);
 
-            Lint.Test.assertContainsFailure(actualFailures, quotemarkFailure([1, 24], [1, 31]));
+            TestUtils.assertContainsFailure(actualFailures, quotemarkFailure([1, 24], [1, 31]));
         });
 
         it("<whitespace>", () => {
-            const WhitespaceRule = Lint.Test.getRule("whitespace");
-            const whitespaceFailure = Lint.Test.createFailuresOnFile(`tsx/${fileName}`, WhitespaceRule.FAILURE_STRING);
+            const WhitespaceRule = TestUtils.getRule("whitespace");
+            const whitespaceFailure = TestUtils.createFailuresOnFile(`tsx/${fileName}`, WhitespaceRule.FAILURE_STRING);
 
-            Lint.Test.assertContainsFailure(actualFailures, whitespaceFailure([16, 9], [16, 10]));
+            TestUtils.assertContainsFailure(actualFailures, whitespaceFailure([16, 9], [16, 10]));
         });
 
         it("with no false positives", () => {
@@ -87,16 +88,16 @@ describe("TSX syntax", () => {
         });
     });
 
-    function runLinterWithConfiguration(config: any): Lint.LintResult {
+    function runLinterWithConfiguration(config: any): LintResult {
         const relativePath = path.join("test", "files", "tsx", fileName);
         const source = fs.readFileSync(relativePath, "utf8");
-        const options: Lint.ILinterOptions = {
+        const options: ILinterOptions = {
             configuration: config,
             formatter: "json",
             formattersDirectory: null,
             rulesDirectory: null
         };
-        const ll = new Lint.Linter(relativePath, source, options);
+        const ll = new Linter(relativePath, source, options);
         return ll.lint();
     }
 });

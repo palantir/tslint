@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+import {TestUtils} from "../lint";
 
 describe("<ban>", () => {
     const fileName = "rules/ban.test.ts";
-    const BanRule = Lint.Test.getRule("ban");
+    const BanRule = TestUtils.getRule("ban");
 
     it("bans access to specified functions", () => {
-        const dirFailure = Lint.Test.createFailuresOnFile(fileName, BanRule.FAILURE_STRING_PART + "window.toString")([2, 1], [2, 16]);
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, BanRule, [true, ["window", "toString"]]);
-        Lint.Test.assertContainsFailure(actualFailures, dirFailure);
+        const dirFailure = TestUtils.createFailuresOnFile(fileName, BanRule.FAILURE_STRING_PART + "window.toString")([2, 1], [2, 16]);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, BanRule, [true, ["window", "toString"]]);
+        TestUtils.assertContainsFailure(actualFailures, dirFailure);
     });
 });

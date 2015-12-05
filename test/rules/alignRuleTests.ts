@@ -13,16 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
+import {TestUtils} from "../lint";
 
 describe("<align, enabled>", () => {
     const fileName = "rules/align.test.ts";
-    const AlignRule = Lint.Test.getRule("align");
+    const AlignRule = TestUtils.getRule("align");
 
     it("ensures that parameters in function signatures are aligned", () => {
         const options = [true, AlignRule.PARAMETERS_OPTION];
         const failureString = AlignRule.PARAMETERS_OPTION + AlignRule.FAILURE_STRING_SUFFIX;
-        const createFailure = Lint.Test.createFailuresOnFile(fileName, failureString);
+        const createFailure = TestUtils.createFailuresOnFile(fileName, failureString);
         const expectedFailures = [
             createFailure([2, 1], [2, 10]),
             createFailure([7, 1], [7, 10]),
@@ -31,32 +32,32 @@ describe("<align, enabled>", () => {
             createFailure([26, 34], [26, 45]),
             createFailure([32, 31], [32, 39])
         ];
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, AlignRule, options);
-        Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, AlignRule, options);
+        TestUtils.assertFailuresEqual(actualFailures, expectedFailures);
     });
 
     it("ensures that arguments in function calls are aligned", () => {
         const options = [true, AlignRule.ARGUMENTS_OPTION];
         const failureString = AlignRule.ARGUMENTS_OPTION + AlignRule.FAILURE_STRING_SUFFIX;
-        const createFailure = Lint.Test.createFailuresOnFile(fileName, failureString);
+        const createFailure = TestUtils.createFailuresOnFile(fileName, failureString);
         const expectedFailures = [
             createFailure([65, 5], [65, 11]),
             createFailure([72, 9], [72, 10]),
             createFailure([83, 14], [83, 20])
         ];
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, AlignRule, options);
-        Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, AlignRule, options);
+        TestUtils.assertFailuresEqual(actualFailures, expectedFailures);
     });
 
     it("ensures that statements at the same nesting level are aligned", () => {
         const options = [true, AlignRule.STATEMENTS_OPTION];
         const failureString = AlignRule.STATEMENTS_OPTION + AlignRule.FAILURE_STRING_SUFFIX;
-        const createFailure = Lint.Test.createFailuresOnFile(fileName, failureString);
+        const createFailure = TestUtils.createFailuresOnFile(fileName, failureString);
         const expectedFailures = [
             createFailure([119, 6], [119, 16]),
             createFailure([127, 8], [127, 18])
         ];
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, AlignRule, options);
-        Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, AlignRule, options);
+        TestUtils.assertFailuresEqual(actualFailures, expectedFailures);
     });
 });

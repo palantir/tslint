@@ -13,39 +13,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
+import {RuleFailure, TestUtils} from "../lint";
 
 describe("<no-empty>", () => {
     const fileName = "rules/noempty.test.ts";
-    const NoEmptyRule = Lint.Test.getRule("no-empty");
-    const createFailure = Lint.Test.createFailuresOnFile(fileName, NoEmptyRule.FAILURE_STRING);
-    let actualFailures: Lint.RuleFailure[];
+    const NoEmptyRule = TestUtils.getRule("no-empty");
+    const createFailure = TestUtils.createFailuresOnFile(fileName, NoEmptyRule.FAILURE_STRING);
+    let actualFailures: RuleFailure[];
 
     before(() => {
-        actualFailures = Lint.Test.applyRuleOnFile(fileName, NoEmptyRule);
+        actualFailures = TestUtils.applyRuleOnFile(fileName, NoEmptyRule);
     });
 
     it("forbids empty conditional blocks", () => {
         const expectedFailure1 = createFailure([1, 14], [1, 16]);
         const expectedFailure2 = createFailure([2, 14], [5, 2]);
 
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure1);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure2);
     });
 
     it("forbids empty function blocks", () => {
         const expectedFailure = createFailure([7, 25], [9, 2]);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure);
     });
 
     it("forbids empty loop blocks", () => {
         const expectedFailure = createFailure([11, 29], [11, 32]);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure);
     });
 
     it("forbids empty constructors", () => {
         const expectedFailure = createFailure([29, 34], [30, 6]);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure);
     });
 
     it("non empty blocks are allowed", () => {

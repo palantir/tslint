@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
+import {TestUtils} from "../lint";
 
 describe("<no-var-requires>", () => {
-    const NoVarRequiresRule = Lint.Test.getRule("no-var-requires");
+    const NoVarRequiresRule = TestUtils.getRule("no-var-requires");
     const fileName = "rules/novarrequires.test.ts";
 
     it("disallows use of require outside import statements", () => {
-        const expectedFailure = Lint.Test.createFailure(fileName, [2, 9], [2, 21], NoVarRequiresRule.FAILURE_STRING);
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, NoVarRequiresRule);
+        const expectedFailure = TestUtils.createFailure(fileName, [2, 9], [2, 21], NoVarRequiresRule.FAILURE_STRING);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, NoVarRequiresRule);
 
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure);
         assert.lengthOf(actualFailures, 1);
     });
 });

@@ -13,31 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
+import {RuleFailure, TestUtils} from "../lint";
 
 describe("<use-strict>", () => {
-    const UseStrictRule = Lint.Test.getRule("use-strict");
+    const UseStrictRule = TestUtils.getRule("use-strict");
     const fileName = "rules/usestrict.test.ts";
-    let actualFailures: Lint.RuleFailure[];
+    let actualFailures: RuleFailure[];
 
     before(() => {
         const options = [true, "check-function", "check-module"];
-        actualFailures = Lint.Test.applyRuleOnFile(fileName, UseStrictRule, options);
+        actualFailures = TestUtils.applyRuleOnFile(fileName, UseStrictRule, options);
         assert.lengthOf(actualFailures, 3);
     });
 
     it("enforces checks for 'use strict' in functions", () => {
-        const expectedFailures = Lint.Test.createFailure(fileName, [14, 1], [14, 9], UseStrictRule.FAILURE_STRING);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailures);
+        const expectedFailures = TestUtils.createFailure(fileName, [14, 1], [14, 9], UseStrictRule.FAILURE_STRING);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailures);
     });
 
     it("enforces checks for 'use strict' in modules", () => {
-        const expectedFailures = Lint.Test.createFailure(fileName, [24, 1], [24, 7], UseStrictRule.FAILURE_STRING);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailures);
+        const expectedFailures = TestUtils.createFailure(fileName, [24, 1], [24, 7], UseStrictRule.FAILURE_STRING);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailures);
     });
 
     it("enforces checks for 'use strict' in module declaration with more than one identifier", () => {
-        const expectedFailures = Lint.Test.createFailure(fileName, [29, 1], [29, 7], UseStrictRule.FAILURE_STRING);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailures);
+        const expectedFailures = TestUtils.createFailure(fileName, [29, 1], [29, 7], UseStrictRule.FAILURE_STRING);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailures);
     });
 });

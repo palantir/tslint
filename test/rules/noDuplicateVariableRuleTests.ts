@@ -13,26 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
+import {TestUtils} from "../lint";
 
 describe("<no-duplicate-variable>", () => {
-    const NoDuplicateVariableRule = Lint.Test.getRule("no-duplicate-variable");
+    const NoDuplicateVariableRule = TestUtils.getRule("no-duplicate-variable");
     const fileName = "rules/no-duplicate-variable.test.ts";
     const failureString = NoDuplicateVariableRule.FAILURE_STRING + "duplicated'";
 
     it("ensures that variable declarations are unique within a scope", () => {
-        const createFailure = Lint.Test.createFailuresOnFile(fileName, failureString);
+        const createFailure = TestUtils.createFailuresOnFile(fileName, failureString);
         const expectedFailures = [
             createFailure([11, 13], [11, 23]),
             createFailure([22, 9], [22, 19]),
             createFailure([26, 5], [26, 15]),
-            Lint.Test.createFailure(fileName, [141, 13], [141, 14], NoDuplicateVariableRule.FAILURE_STRING + "z'"),
-            Lint.Test.createFailure(fileName, [153, 11], [153, 13], NoDuplicateVariableRule.FAILURE_STRING + "a2'"),
-            Lint.Test.createFailure(fileName, [160, 10], [160, 11], NoDuplicateVariableRule.FAILURE_STRING + "x'"),
-            Lint.Test.createFailure(fileName, [161, 17], [161, 18], NoDuplicateVariableRule.FAILURE_STRING + "y'")
+            TestUtils.createFailure(fileName, [141, 13], [141, 14], NoDuplicateVariableRule.FAILURE_STRING + "z'"),
+            TestUtils.createFailure(fileName, [153, 11], [153, 13], NoDuplicateVariableRule.FAILURE_STRING + "a2'"),
+            TestUtils.createFailure(fileName, [160, 10], [160, 11], NoDuplicateVariableRule.FAILURE_STRING + "x'"),
+            TestUtils.createFailure(fileName, [161, 17], [161, 18], NoDuplicateVariableRule.FAILURE_STRING + "y'")
         ];
 
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, NoDuplicateVariableRule);
-        Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, NoDuplicateVariableRule);
+        TestUtils.assertFailuresEqual(actualFailures, expectedFailures);
     });
 });

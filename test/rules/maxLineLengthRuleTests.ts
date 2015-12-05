@@ -13,18 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
+import {TestUtils} from "../lint";
 
 describe("<max-line-length>", () => {
-    const MaxLineLengthRule = Lint.Test.getRule("max-line-length");
+    const MaxLineLengthRule = TestUtils.getRule("max-line-length");
     const fileName = "rules/maxlen.test.ts";
 
     it("enforces a maximum line length", () => {
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, MaxLineLengthRule, [true, 140]);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, MaxLineLengthRule, [true, 140]);
         const expectedFailures = [
-            Lint.Test.createFailure(fileName, [2, 1], [2, 165], MaxLineLengthRule.FAILURE_STRING + "140")
+            TestUtils.createFailure(fileName, [2, 1], [2, 165], MaxLineLengthRule.FAILURE_STRING + "140")
         ];
 
-        Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
+        TestUtils.assertFailuresEqual(actualFailures, expectedFailures);
     });
 });
