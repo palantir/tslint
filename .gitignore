@@ -1,8 +1,7 @@
 .DS_Store
 .tscache/
-build/
-bin/tslint-cli.js
-lib/
+/build/
+/lib/
 node_modules/
 tscommand*.txt
 # created by grunt-ts for faster compiling
