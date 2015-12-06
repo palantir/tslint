@@ -26,6 +26,9 @@ describe("<no-var-keyword>", () => {
             createFailure([4, 5], [4, 8]),
             createFailure([7, 1], [7, 4]),
             createFailure([10, 1], [10, 4]),
+            createFailure([12, 6], [12, 9]),
+            createFailure([13, 6], [13, 9]),
+            createFailure([14, 6], [14, 9]),
         ];
         const actualFailures = Lint.Test.applyRuleOnFile(fileName, NoVarKeywordRule);
 
