@@ -1,6 +1,12 @@
 Change Log
 ===
 
+v3.2.0-dev.1
+---
+* [bugfix] fixed bug in how custom rules directories are registered (#844)
+* [enhancement] better support for globs in CLI (#827)
+* [new-rule] `no-null-keyword` rule (#722)
+
 v3.1.1
 ---
 * Bump TypeScript peer dependency to `>= 1.7.3` due to `const enum` incompatibility (#832)
