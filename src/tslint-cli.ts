@@ -178,8 +178,20 @@ const processFile = (file: string) => {
     }
 };
 
-const files = argv._;
+const GLOB_IGNORE = 'node_modules';
 
-for (const file of files) {
-    glob.sync(file).forEach(processFile);
-}
+const fileArgs: string[] = argv._;
+const files: string[] = fileArgs.reduce((files: string[], arg: string) => {
+    return files.concat(glob.sync(arg, {ignore: GLOB_IGNORE}));
+}, []);
+
+files.forEach(file => {
+    // Check whether argument is actually a directory
+    const stat = fs.lstatSync(file);
+    if (stat.isDirectory()) {
+        // Just read all ts files in the directory
+        glob.sync(file + "/**/*.ts", {ignore: GLOB_IGNORE}).forEach(processFile);
+    } else {
+        processFile(file);
+    }
+});
