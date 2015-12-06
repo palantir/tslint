@@ -1,4 +1,5 @@
-/*
+/**
+ * @license
  * Copyright 2013 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,13 +15,12 @@
  * limitations under the License.
  */
 
-import * as Lint from "../lint";
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
+import {RuleFailure} from "../language/rule/rule";
 
 export class Formatter extends AbstractFormatter {
-    public format(failures: Lint.RuleFailure[]): string {
-
-        const outputLines = failures.map((failure: Lint.RuleFailure) => {
+    public format(failures: RuleFailure[]): string {
+        const outputLines = failures.map((failure: RuleFailure) => {
             const fileName = failure.getFileName();
             const failureString = failure.getFailure();
             const ruleName = failure.getRuleName();

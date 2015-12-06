@@ -1,5 +1,4 @@
-/**
- * @license
+/*
  * Copyright 2013 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,17 +14,24 @@
  * limitations under the License.
  */
 
-import * as ts from "typescript";
-import * as Lint from "../lint";
-import * as BanRule from "./banRule";
+// with due reference to https://github.com/Microsoft/TypeScript/blob/7813121c4d77e50aad0eed3152ef1f1156c7b574/scripts/tslint/noNullRule.ts
 
-export class Rule extends BanRule.Rule {
+import * as Lint from "../lint";
+import * as ts from "typescript";
+
+export class Rule extends Lint.Rules.AbstractRule {
+    public static FAILURE_STRING = "Use 'undefined' instead of 'null'";
+
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const options = this.getOptions();
-        const consoleBanWalker = new BanRule.BanFunctionWalker(sourceFile, this.getOptions());
-        for (const option of options.ruleArguments) {
-            consoleBanWalker.addBannedFunction(["console", option]);
+        return this.applyWithWalker(new NullWalker(sourceFile, this.getOptions()));
+    }
+}
+
+class NullWalker extends Lint.RuleWalker {
+    public visitNode(node: ts.Node) {
+        super.visitNode(node);
+        if (node.kind === ts.SyntaxKind.NullKeyword) {
+            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
         }
-        return this.applyWithWalker(consoleBanWalker);
     }
 }

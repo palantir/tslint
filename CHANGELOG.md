@@ -1,10 +1,16 @@
 Change Log
 ===
 
-v3.1.0-dev.1
+v3.1.1
 ---
+* Bump TypeScript peer dependency to `>= 1.7.3` due to `const enum` incompatibility (#832)
+
+v3.1.0
+---
+* [bugfix] build with TS v1.7.3 to fix null pointer exception (#832)
+* [bugfix] fixed false positive in `no-require-imports` rule (#816)
 * [bugfix] fixed `no-shadowed-variable` false positives when handling destructuring in function params (#727)
-- [enhancement] `rulesDirectory` in `tslint.json` now supports multiple file paths (#795)
+* [enhancement] `rulesDirectory` in `tslint.json` now supports multiple file paths (#795)
 
 v3.0.0
 ---
@@ -19,7 +25,7 @@ v3.0.0
 
 v3.0.0-dev.3
 ---
-* Typescript is now a peerDependency (#791)
+* TypeScript is now a peerDependency (#791)
 * [bugfix] `no-unused-variable` rule with `react` option works with self-closing JSX tags (#776)
 * [bugfix] `use-strict` bugfix (#544)
 

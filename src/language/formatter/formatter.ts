@@ -1,4 +1,5 @@
-/*
+/**
+ * @license
  * Copyright 2013 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,8 +15,8 @@
  * limitations under the License.
  */
 
-import * as Lint from "../../lint";
+import {RuleFailure} from "../rule/rule";
 
 export interface IFormatter {
-    format(failures: Lint.RuleFailure[]): string;
+    format(failures: RuleFailure[]): string;
 }

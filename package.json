@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "findup-sync": "~0.2.1",
+    "glob": "^6.0.1",
     "optimist": "~0.6.0",
     "underscore.string": "~3.1.1"
   },
@@ -39,7 +40,11 @@
     "typescript": "next"
   },
   "peerDependencies": {
+<<<<<<< HEAD
     "typescript": ">=1.7.0 || >=1.7.0-dev.20151003 || >=1.8.0-dev"
+=======
+    "typescript": ">=1.7.3"
+>>>>>>> master
   },
   "license": "Apache-2.0"
 }
