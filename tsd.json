@@ -5,7 +5,19 @@
   "path": "typings",
   "bundle": "typings/tsd.d.ts",
   "installed": {
+    "findup-sync/findup-sync.d.ts": {
+      "commit": "98d3168c2c570352a3a7393788e2ec9fbb08ade6"
+    },
+    "glob/glob.d.ts": {
+      "commit": "fb2b3b1e068c9ff7d8f9b0851c08d37d96c95c38"
+    },
+    "minimatch/minimatch.d.ts": {
+      "commit": "98d3168c2c570352a3a7393788e2ec9fbb08ade6"
+    },
     "node/node.d.ts": {
+      "commit": "98d3168c2c570352a3a7393788e2ec9fbb08ade6"
+    },
+    "optimist/optimist.d.ts": {
       "commit": "98d3168c2c570352a3a7393788e2ec9fbb08ade6"
     },
     "underscore.string/underscore.string.d.ts": {
@@ -13,18 +25,6 @@
     },
     "underscore/underscore.d.ts": {
       "commit": "98d3168c2c570352a3a7393788e2ec9fbb08ade6"
-    },
-    "findup-sync/findup-sync.d.ts": {
-      "commit": "98d3168c2c570352a3a7393788e2ec9fbb08ade6"
-    },
-    "minimatch/minimatch.d.ts": {
-      "commit": "98d3168c2c570352a3a7393788e2ec9fbb08ade6"
-    },
-    "optimist/optimist.d.ts": {
-      "commit": "98d3168c2c570352a3a7393788e2ec9fbb08ade6"
-    },
-    "glob/glob.d.ts": {
-      "commit": "fb2b3b1e068c9ff7d8f9b0851c08d37d96c95c38"
     }
   }
 }
