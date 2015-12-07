@@ -20,6 +20,7 @@
     ],
     "files": [
         "../typings/findup-sync/findup-sync.d.ts",
+        "../typings/glob/glob.d.ts",
         "../typings/minimatch/minimatch.d.ts",
         "../typings/node/node.d.ts",
         "../typings/optimist/optimist.d.ts",
