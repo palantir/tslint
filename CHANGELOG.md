@@ -15,6 +15,9 @@ v3.1.0
 ---
 * [bugfix] build with TS v1.7.3 to fix null pointer exception (#832)
 * [bugfix] fixed false positive in `no-require-imports` rule (#816)
+
+v3.1.0-dev.1
+---
 * [bugfix] fixed `no-shadowed-variable` false positives when handling destructuring in function params (#727)
 * [enhancement] `rulesDirectory` in `tslint.json` now supports multiple file paths (#795)
 
