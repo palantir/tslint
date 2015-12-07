@@ -187,7 +187,8 @@ A sample configuration file with all options is available [here](https://github.
 * `no-eval` disallows `eval` function invocations.
 * `no-inferrable-types` disallows explicit type declarations for variables or parameters initialized to a number, string, or boolean.
 * `no-internal-module` disallows internal `module` (use `namespace` instead).
-* `no-require-imports` disallows `require()` style imports (use ES6-style imports instead).
+* `no-null-keyword` disallows use of the `null` keyword literal
+* `no-require-imports` disallows invocation of `require()` (use ES6-style imports instead).
 * `no-shadowed-variable` disallows shadowed variable declarations.
 * `no-string-literal` disallows object access via string literals.
 * `no-switch-case-fall-through` disallows falling through case statements.

@@ -1,4 +1,5 @@
-/*
+/**
+ * @license
  * Copyright 2013 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,14 +16,15 @@
  */
 
 import * as ts from "typescript";
-import * as Lint from "../../lint";
+import {IOptions} from "../../lint";
 import {RuleWalker} from "../walker/ruleWalker";
+import {IRule, IDisabledInterval, RuleFailure} from "./rule";
 
-export abstract class AbstractRule implements Lint.IRule {
+export abstract class AbstractRule implements IRule {
     private value: any;
-    private options: Lint.IOptions;
+    private options: IOptions;
 
-    constructor(ruleName: string, value: any, disabledIntervals: Lint.IDisabledInterval[]) {
+    constructor(ruleName: string, value: any, disabledIntervals: IDisabledInterval[]) {
         let ruleArguments: any[] = [];
 
         if (Array.isArray(value) && value.length > 1) {
@@ -37,13 +39,13 @@ export abstract class AbstractRule implements Lint.IRule {
         };
     }
 
-    public getOptions(): Lint.IOptions {
+    public getOptions(): IOptions {
         return this.options;
     }
 
-    public abstract apply(sourceFile: ts.SourceFile): Lint.RuleFailure[];
+    public abstract apply(sourceFile: ts.SourceFile): RuleFailure[];
 
-    public applyWithWalker(walker: RuleWalker): Lint.RuleFailure[] {
+    public applyWithWalker(walker: RuleWalker): RuleFailure[] {
         walker.walk(walker.getSourceFile());
         return walker.getFailures();
     }

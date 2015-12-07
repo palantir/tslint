@@ -13,28 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import * as Lint from "../lint";
 
 describe("<no-require-imports>", () => {
     const Rule = Lint.Test.getRule("no-require-imports");
     const fileName = "rules/norequireimports.test.ts";
 
-    it("forbids CommmonJS style imports", () => {
+    it("forbids require() imports", () => {
         const actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule);
 
-        assert(actualFailures.length === 6, "Expected 6 failures, got " + actualFailures.length);
-        const failure1 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING)([1, 5], [1, 25]);
-        const failure2 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING)([3, 5], [3, 27]);
-        const failure3 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING)([11, 5], [11, 27]);
-        const failure4 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING)([12, 5], [12, 27]);
-        const failure5 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING)([15, 1], [15, 31]);
-        const failure6 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING)([17, 1], [17, 18]);
+        assert(actualFailures.length === 5, "Expected 5 failures, got " + actualFailures.length);
+        const failure1 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING)([1, 11], [1, 25]);
+        const failure2 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING)([3, 12], [3, 27]);
+        const failure3 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING)([11, 12], [11, 27]);
+        const failure4 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING)([12, 12], [12, 27]);
+        const failure5 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING)([15, 15], [15, 30]);
 
         Lint.Test.assertContainsFailure(actualFailures, failure1);
         Lint.Test.assertContainsFailure(actualFailures, failure2);
         Lint.Test.assertContainsFailure(actualFailures, failure3);
         Lint.Test.assertContainsFailure(actualFailures, failure4);
         Lint.Test.assertContainsFailure(actualFailures, failure5);
-        Lint.Test.assertContainsFailure(actualFailures, failure6);
     });
 });
