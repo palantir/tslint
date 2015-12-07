@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import * as Lint from "../lint";
+import {RuleFailure, TestUtils} from "../lint";
 
 describe("<whitespace>", () => {
     const fileName = "rules/whitespace.test.ts";
-    const WhitespaceRule = Lint.Test.getRule("whitespace");
-    const createFailure = Lint.Test.createFailuresOnFile(fileName, WhitespaceRule.FAILURE_STRING);
-    let actualFailures: Lint.RuleFailure[];
+    const WhitespaceRule = TestUtils.getRule("whitespace");
+    const createFailure = TestUtils.createFailuresOnFile(fileName, WhitespaceRule.FAILURE_STRING);
+    let actualFailures: RuleFailure[];
 
     before(() => {
         const options = [true,
@@ -32,12 +32,12 @@ describe("<whitespace>", () => {
             "check-type",
             "check-typecast"
         ];
-        actualFailures = Lint.Test.applyRuleOnFile(fileName, WhitespaceRule, options);
+        actualFailures = TestUtils.applyRuleOnFile(fileName, WhitespaceRule, options);
         assert.lengthOf(actualFailures, 39);
     });
 
     it("enforces rules only when enabled", () => {
-        const failures = Lint.Test.applyRuleOnFile(fileName, WhitespaceRule);
+        const failures = TestUtils.applyRuleOnFile(fileName, WhitespaceRule);
         assert.equal(failures.length, 0);
     });
 
@@ -53,7 +53,7 @@ describe("<whitespace>", () => {
         ];
 
         expectedFailures.forEach((failure) => {
-            Lint.Test.assertContainsFailure(actualFailures, failure);
+            TestUtils.assertContainsFailure(actualFailures, failure);
         });
     });
 
@@ -67,13 +67,13 @@ describe("<whitespace>", () => {
         ];
 
         expectedFailures.forEach((failure) => {
-            Lint.Test.assertContainsFailure(actualFailures, failure);
+            TestUtils.assertContainsFailure(actualFailures, failure);
         });
     });
 
     it("enforces whitespace in type declarations", () => {
         const expectedFailure = createFailure([5, 11], [5, 12]);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure);
     });
 
     it("enforces whitespace in conditional statements", () => {
@@ -85,7 +85,7 @@ describe("<whitespace>", () => {
         ];
 
         expectedFailures.forEach((failure) => {
-            Lint.Test.assertContainsFailure(actualFailures, failure);
+            TestUtils.assertContainsFailure(actualFailures, failure);
         });
     });
 
@@ -96,7 +96,7 @@ describe("<whitespace>", () => {
         ];
 
         expectedFailures.forEach((failure) => {
-            Lint.Test.assertContainsFailure(actualFailures, failure);
+            TestUtils.assertContainsFailure(actualFailures, failure);
         });
     });
 
@@ -108,7 +108,7 @@ describe("<whitespace>", () => {
         ];
 
         expectedFailures.forEach((failure) => {
-            Lint.Test.assertContainsFailure(actualFailures, failure);
+            TestUtils.assertContainsFailure(actualFailures, failure);
         });
     });
 
@@ -120,7 +120,7 @@ describe("<whitespace>", () => {
         ];
 
         expectedFailures.forEach((failure) => {
-            Lint.Test.assertContainsFailure(actualFailures, failure);
+            TestUtils.assertContainsFailure(actualFailures, failure);
         });
     });
 
@@ -132,18 +132,18 @@ describe("<whitespace>", () => {
         ];
 
         expectedFailures.forEach((failure) => {
-            Lint.Test.assertContainsFailure(actualFailures, failure);
+            TestUtils.assertContainsFailure(actualFailures, failure);
         });
     });
 
     it("enforces whitespace in while statements", () => {
         const expectedFailure = createFailure([24, 10], [24, 11]);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure);
     });
 
     it("enforces whitespace in label definitions", () => {
         const expectedFailure = createFailure([21, 14], [21, 15]);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure);
     });
 
     it("enforces whitespace around the => token", () => {
@@ -159,11 +159,11 @@ describe("<whitespace>", () => {
         ];
 
         expectedFailures.forEach((failure) => {
-            Lint.Test.assertContainsFailure(actualFailures, failure);
+            TestUtils.assertContainsFailure(actualFailures, failure);
         });
     });
 
     it("enforces whitespace around typecasts", () => {
-        Lint.Test.assertContainsFailure(actualFailures, createFailure([36, 21], [36, 22]));
+        TestUtils.assertContainsFailure(actualFailures, createFailure([36, 21], [36, 22]));
     });
 });

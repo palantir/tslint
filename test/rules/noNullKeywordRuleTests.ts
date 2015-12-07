@@ -1,4 +1,5 @@
-/*
+/**
+ * @license
  * Copyright 2013 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,14 +15,14 @@
  * limitations under the License.
  */
 
-import * as Lint from "../lint";
+import {TestUtils} from "../lint";
 
 describe("<no-null-keyword>", () => {
     const fileName = "rules/nonullkeyword.test.ts";
-    const NoNullKeywordRule = Lint.Test.getRule("no-null-keyword");
-    const actualFailures = Lint.Test.applyRuleOnFile(fileName, NoNullKeywordRule);
+    const NoNullKeywordRule = TestUtils.getRule("no-null-keyword");
+    const actualFailures = TestUtils.applyRuleOnFile(fileName, NoNullKeywordRule);
 
-    const createFailure = Lint.Test.createFailuresOnFile(fileName, NoNullKeywordRule.FAILURE_STRING);
+    const createFailure = TestUtils.createFailuresOnFile(fileName, NoNullKeywordRule.FAILURE_STRING);
 
     it("disallows assignment 'null'", () => {
         assert.equal(actualFailures.length, 2);
@@ -32,7 +33,7 @@ describe("<no-null-keyword>", () => {
         ];
 
         for (let failure of expectedFailures) {
-            Lint.Test.assertContainsFailure(actualFailures, failure);
+            TestUtils.assertContainsFailure(actualFailures, failure);
         }
     });
 });

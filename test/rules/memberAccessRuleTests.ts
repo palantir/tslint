@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
+import {TestUtils} from "../lint";
 
 describe("<member-access>", () => {
     it("ensures that class properties have access modifiers", () => {
@@ -52,11 +53,11 @@ describe("<member-access>", () => {
     });
 
     function assertFailuresInFile(fileName: string, expectedFailures: number[][][], options: any[] = [true]) {
-        const MemberAccessRule = Lint.Test.getRule("member-access");
-        const createFailure = Lint.Test.createFailuresOnFile(fileName, MemberAccessRule.FAILURE_STRING);
+        const MemberAccessRule = TestUtils.getRule("member-access");
+        const createFailure = TestUtils.createFailuresOnFile(fileName, MemberAccessRule.FAILURE_STRING);
         const expectedFileFailures = expectedFailures.map(failure => createFailure(failure[0], failure[1]));
 
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, MemberAccessRule, options);
-        Lint.Test.assertFailuresEqual(actualFailures, expectedFileFailures);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, MemberAccessRule, options);
+        TestUtils.assertFailuresEqual(actualFailures, expectedFileFailures);
     }
 });

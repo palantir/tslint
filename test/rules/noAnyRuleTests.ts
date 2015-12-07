@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
+import {TestUtils} from "../lint";
 
 describe("<no-any>", () => {
     const fileName = "rules/noany.test.ts";
-    const NoAnyRule = Lint.Test.getRule("no-any");
-    const actualFailures = Lint.Test.applyRuleOnFile(fileName, NoAnyRule);
+    const NoAnyRule = TestUtils.getRule("no-any");
+    const actualFailures = TestUtils.applyRuleOnFile(fileName, NoAnyRule);
 
-    const createFailure = Lint.Test.createFailuresOnFile(fileName, NoAnyRule.FAILURE_STRING);
+    const createFailure = TestUtils.createFailuresOnFile(fileName, NoAnyRule.FAILURE_STRING);
 
     it("disallows variables with type 'any'", () => {
         const expectedFailures = [
@@ -30,23 +31,23 @@ describe("<no-any>", () => {
         ];
 
         for (let failure of expectedFailures) {
-            Lint.Test.assertContainsFailure(actualFailures, failure);
+            TestUtils.assertContainsFailure(actualFailures, failure);
         }
     });
 
     it("disallows functions with parameter type 'any'", () => {
         const expectedFailure = createFailure([3, 17], [3, 20]);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure);
     });
 
     it("disallows functions with return type 'any'", () => {
         const expectedFailure = createFailure([3, 24], [3, 27]);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure);
     });
 
     it("catches destructuring bindings with member types of 'any'", () => {
         const expectedFailure = createFailure([10, 23], [10, 26]);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure);
     });
 
     it("finds the expected number of errors", () => {

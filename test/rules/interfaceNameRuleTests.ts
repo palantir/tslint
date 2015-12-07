@@ -13,18 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
+import {TestUtils} from "../lint";
 
 describe("<interface-name>", () => {
-    const InterfaceNameRule = Lint.Test.getRule("interface-name");
+    const InterfaceNameRule = TestUtils.getRule("interface-name");
     const fileName = "rules/interfacename.test.ts";
 
     it("ensures interface names always start with a capital I", () => {
-        const createFailure = Lint.Test.createFailuresOnFile(fileName, InterfaceNameRule.FAILURE_STRING);
+        const createFailure = TestUtils.createFailuresOnFile(fileName, InterfaceNameRule.FAILURE_STRING);
         const expectedFailure1 = createFailure([5, 11], [5, 32]);
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, InterfaceNameRule);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, InterfaceNameRule);
 
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure1);
         assert.lengthOf(actualFailures, 1);
     });
 });

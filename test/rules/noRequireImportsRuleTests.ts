@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-import * as Lint from "../lint";
+import {TestUtils} from "../lint";
 
 describe("<no-require-imports>", () => {
-    const Rule = Lint.Test.getRule("no-require-imports");
+    const Rule = TestUtils.getRule("no-require-imports");
     const fileName = "rules/norequireimports.test.ts";
 
     it("forbids require() imports", () => {
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, Rule);
 
         assert(actualFailures.length === 5, "Expected 5 failures, got " + actualFailures.length);
-        const failure1 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING)([1, 11], [1, 25]);
-        const failure2 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING)([3, 12], [3, 27]);
-        const failure3 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING)([11, 12], [11, 27]);
-        const failure4 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING)([12, 12], [12, 27]);
-        const failure5 = Lint.Test.createFailuresOnFile(fileName, Rule.FAILURE_STRING)([15, 15], [15, 30]);
+        const failure1 = TestUtils.createFailuresOnFile(fileName, Rule.FAILURE_STRING)([1, 11], [1, 25]);
+        const failure2 = TestUtils.createFailuresOnFile(fileName, Rule.FAILURE_STRING)([3, 12], [3, 27]);
+        const failure3 = TestUtils.createFailuresOnFile(fileName, Rule.FAILURE_STRING)([11, 12], [11, 27]);
+        const failure4 = TestUtils.createFailuresOnFile(fileName, Rule.FAILURE_STRING)([12, 12], [12, 27]);
+        const failure5 = TestUtils.createFailuresOnFile(fileName, Rule.FAILURE_STRING)([15, 15], [15, 30]);
 
-        Lint.Test.assertContainsFailure(actualFailures, failure1);
-        Lint.Test.assertContainsFailure(actualFailures, failure2);
-        Lint.Test.assertContainsFailure(actualFailures, failure3);
-        Lint.Test.assertContainsFailure(actualFailures, failure4);
-        Lint.Test.assertContainsFailure(actualFailures, failure5);
+        TestUtils.assertContainsFailure(actualFailures, failure1);
+        TestUtils.assertContainsFailure(actualFailures, failure2);
+        TestUtils.assertContainsFailure(actualFailures, failure3);
+        TestUtils.assertContainsFailure(actualFailures, failure4);
+        TestUtils.assertContainsFailure(actualFailures, failure5);
     });
 });

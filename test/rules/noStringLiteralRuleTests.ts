@@ -13,23 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
+import {TestUtils} from "../lint";
 
 describe("<no-string-literal>", () => {
-    const NoStringLiteralRule = Lint.Test.getRule("no-string-literal");
+    const NoStringLiteralRule = TestUtils.getRule("no-string-literal");
     const fileName = "rules/sub.test.ts";
 
     it("forbids object access via string literals", () => {
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, NoStringLiteralRule);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, NoStringLiteralRule);
         const expectedFailures = [
-            Lint.Test.createFailure(fileName, [10, 20], [10, 25], NoStringLiteralRule.FAILURE_STRING),
-            Lint.Test.createFailure(fileName, [11, 21], [11, 24], NoStringLiteralRule.FAILURE_STRING),
-            Lint.Test.createFailure(fileName, [15, 5], [15, 23], NoStringLiteralRule.FAILURE_STRING),
-            Lint.Test.createFailure(fileName, [16, 5], [16, 30], NoStringLiteralRule.FAILURE_STRING)
+            TestUtils.createFailure(fileName, [10, 20], [10, 25], NoStringLiteralRule.FAILURE_STRING),
+            TestUtils.createFailure(fileName, [11, 21], [11, 24], NoStringLiteralRule.FAILURE_STRING),
+            TestUtils.createFailure(fileName, [15, 5], [15, 23], NoStringLiteralRule.FAILURE_STRING),
+            TestUtils.createFailure(fileName, [16, 5], [16, 30], NoStringLiteralRule.FAILURE_STRING)
         ];
 
-        expectedFailures.forEach((expectedFailure) => {
-            Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
-        });
+        for (const expectedFailure of expectedFailures) {
+            TestUtils.assertContainsFailure(actualFailures, expectedFailure);
+        }
     });
 });

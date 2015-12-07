@@ -13,21 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
+import {TestUtils} from "../lint";
 
 describe("<object-literal-sort-keys>", () => {
-    const SortedKeyRule = Lint.Test.getRule("object-literal-sort-keys");
+    const SortedKeyRule = TestUtils.getRule("object-literal-sort-keys");
     const fileName = "rules/objectliteralsortkeys.test.ts";
     const failureString = SortedKeyRule.FAILURE_STRING;
 
     it("forbids unsorted keys in object literals", () => {
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, SortedKeyRule);
-        const createFailure1 = Lint.Test.createFailuresOnFile(fileName, failureString + "a'");
-        const createFailure2 = Lint.Test.createFailuresOnFile(fileName, failureString + "a'");
-        const createFailure3 = Lint.Test.createFailuresOnFile(fileName, failureString + "aa'");
-        const createFailure4 = Lint.Test.createFailuresOnFile(fileName, failureString + "b'");
-        const createFailure5 = Lint.Test.createFailuresOnFile(fileName, failureString + "asdf'");
-        const createFailure6 = Lint.Test.createFailuresOnFile(fileName, failureString + "asdfn'");
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, SortedKeyRule);
+        const createFailure1 = TestUtils.createFailuresOnFile(fileName, failureString + "a'");
+        const createFailure2 = TestUtils.createFailuresOnFile(fileName, failureString + "a'");
+        const createFailure3 = TestUtils.createFailuresOnFile(fileName, failureString + "aa'");
+        const createFailure4 = TestUtils.createFailuresOnFile(fileName, failureString + "b'");
+        const createFailure5 = TestUtils.createFailuresOnFile(fileName, failureString + "asdf'");
+        const createFailure6 = TestUtils.createFailuresOnFile(fileName, failureString + "asdfn'");
         const expectedFailures = [
             createFailure1([8, 5], [8, 6]),
             createFailure2([20, 5], [20, 6]),
@@ -37,6 +38,6 @@ describe("<object-literal-sort-keys>", () => {
             createFailure6([78, 5], [78, 10])
         ];
 
-        Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
+        TestUtils.assertFailuresEqual(actualFailures, expectedFailures);
     });
 });

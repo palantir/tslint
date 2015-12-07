@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+declare namespace NodeJS {
+    interface Global {
+        assert: Chai.Assert;
+    }
+}
+
 /* tslint:disable:no-var-keyword */
 var assert: Chai.Assert = require("chai").assert;
 global.assert = assert;

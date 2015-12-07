@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "./lint";
+
+import {ILinterOptions, Linter, RuleFailure, TestUtils} from "./lint";
 
 describe("Enable and Disable Rules", () => {
     const {readFileSync} = require("fs");
@@ -28,18 +29,18 @@ describe("Enable and Disable Rules", () => {
         const relativePath = join("test", "files", "enabledisable.test.ts");
         const source = readFileSync(relativePath, "utf8");
 
-        const options: Lint.ILinterOptions = {
+        const options: ILinterOptions = {
             configuration: validConfiguration,
             formatter: "json",
             formattersDirectory: null,
             rulesDirectory: null
         };
 
-        const QuotemarkRule = Lint.Test.getRule("quotemark");
-        const VariableNameRule = Lint.Test.getRule("variable-name");
+        const QuotemarkRule = TestUtils.getRule("quotemark");
+        const VariableNameRule = TestUtils.getRule("variable-name");
 
-        const quotemarkFailure = Lint.Test.createFailuresOnFile("enabledisable.test.ts", QuotemarkRule.DOUBLE_QUOTE_FAILURE);
-        const variableNameFailure = Lint.Test.createFailuresOnFile("enabledisable.test.ts", VariableNameRule.FORMAT_FAILURE);
+        const quotemarkFailure = TestUtils.createFailuresOnFile("enabledisable.test.ts", QuotemarkRule.DOUBLE_QUOTE_FAILURE);
+        const variableNameFailure = TestUtils.createFailuresOnFile("enabledisable.test.ts", VariableNameRule.FORMAT_FAILURE);
 
         const expectedFailure1 = variableNameFailure([2, 5], [2, 10]);
         const expectedFailure2 = variableNameFailure([10, 5], [10, 10]);
@@ -49,22 +50,22 @@ describe("Enable and Disable Rules", () => {
         const expectedFailure5 = quotemarkFailure([10, 13], [10, 19]);
         const expectedFailure6 = quotemarkFailure([16, 13], [16, 19]);
 
-        const ll = new Lint.Linter(relativePath, source, options);
+        const ll = new Linter(relativePath, source, options);
         const result = ll.lint();
         const parsedResult = JSON.parse(result.output);
-        const actualFailures: Lint.RuleFailure[] = [];
+        const actualFailures: RuleFailure[] = [];
         for (let failure of parsedResult) {
             const startArray = [failure.startPosition.line + 1, failure.startPosition.character + 1];
             const endArray = [failure.endPosition.line + 1, failure.endPosition.character + 1];
-            actualFailures.push(Lint.Test.createFailure("enabledisable.test.ts", startArray, endArray, failure.failure));
+            actualFailures.push(TestUtils.createFailure("enabledisable.test.ts", startArray, endArray, failure.failure));
         }
 
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure3);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure4);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure5);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure6);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure1);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure2);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure3);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure4);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure5);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure6);
         assert.lengthOf(actualFailures, 6);
     });
 });

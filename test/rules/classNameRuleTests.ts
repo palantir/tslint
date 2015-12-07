@@ -13,20 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
+import {TestUtils} from "../lint";
 
 describe("<class-name>", () => {
-    const ClassNameRule = Lint.Test.getRule("class-name");
+    const ClassNameRule = TestUtils.getRule("class-name");
     const fileName = "rules/classname.test.ts";
 
     it("ensures class names are always pascal-cased", () => {
-        const createFailure = Lint.Test.createFailuresOnFile(fileName, ClassNameRule.FAILURE_STRING);
+        const createFailure = TestUtils.createFailuresOnFile(fileName, ClassNameRule.FAILURE_STRING);
         const expectedFailures = [
             createFailure([5, 7], [5, 23]),
             createFailure([9, 7], [9, 33])
         ];
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, ClassNameRule);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, ClassNameRule);
 
-        Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
+        TestUtils.assertFailuresEqual(actualFailures, expectedFailures);
     });
 });

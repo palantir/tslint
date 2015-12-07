@@ -13,21 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
+import {RuleFailure, TestUtils} from "../lint";
 
 describe("<no-bitwise>", () => {
-    const NoBitwiseRule = Lint.Test.getRule("no-bitwise");
+    const NoBitwiseRule = TestUtils.getRule("no-bitwise");
     const fileName = "rules/bitwise.test.ts";
 
     it("forbids access to bitwise operators", () => {
-        const createFailure = Lint.Test.createFailuresOnFile(fileName, NoBitwiseRule.FAILURE_STRING);
-        const expectedFailures: Lint.RuleFailure[] = [
+        const createFailure = TestUtils.createFailuresOnFile(fileName, NoBitwiseRule.FAILURE_STRING);
+        const expectedFailures: RuleFailure[] = [
             createFailure([2, 10], [2, 15]),
             createFailure([3, 10], [3, 28]),
             createFailure([3, 22], [3, 27]),
         ];
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, NoBitwiseRule);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, NoBitwiseRule);
 
-        Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
+        TestUtils.assertFailuresEqual(actualFailures, expectedFailures);
     });
 });
