@@ -83,7 +83,7 @@ tslint accepts the following command-line options:
 -r, --rules-dir:
     An additional rules directory, for user-created rules.
     tslint will always check its default rules directory, in
-    node_modules/tslint/build/rules, before checking the user-provided
+    node_modules/tslint/lib/rules, before checking the user-provided
     rules directory, so rules in the user-provided rules directory
     with the same name as the base rules will not be loaded.
 
@@ -122,7 +122,7 @@ var configuration = {
 var options = {
     formatter: "json",
     configuration: configuration,
-    rulesDirectory: "customRules/",
+    rulesDirectory: "customRules/", // can be an array of directories
     formattersDirectory: "customFormatters/"
 };
 
@@ -305,9 +305,15 @@ class NoImportsWalker extends Lint.RuleWalker {
 }
 ```
 
-Given a walker, TypeScript's parser visits the AST using the visitor pattern. So the rule walkers only need to override the appropriate visitor methods to enforce its checks. For reference, the base walker can be found in [syntaxWalker.ts](https://github.com/palantir/tslint/blob/1.4/src/language/walker/syntaxWalker.ts).
+Given a walker, TypeScript's parser visits the AST using the visitor pattern. So the rule walkers only need to override the appropriate visitor methods to enforce its checks. For reference, the base walker can be found in [syntaxWalker.ts](https://github.com/palantir/tslint/blob/master/src/language/walker/syntaxWalker.ts).
 
-We still need to hook up this new rule to TSLint. First make sure to compile `noImportsRule.ts`: `tsc -m commonjs --noImplicitAny noImportsRule.ts tslint.d.ts`. Then, if using the CLI, provide the directory that contains this rule as an option to `--rules-dir`. If using TSLint as a library or via `grunt-tslint`, the `options` hash must contain `"rulesDirectory": "..."`. If you run the linter, you'll see that we have now successfully banned all import statements via TSLint!
+We still need to hook up this new rule to TSLint. First make sure to compile `noImportsRule.ts`:
+
+```bash
+tsc -m commonjs --noImplicitAny noImportsRule.ts node_modules/tslint/lib/tslint.d.ts
+```
+
+Then, if using the CLI, provide the directory that contains this rule as an option to `--rules-dir`. If using TSLint as a library or via `grunt-tslint`, the `options` hash must contain `"rulesDirectory": "..."`. If you run the linter, you'll see that we have now successfully banned all import statements via TSLint!
 
 Final notes:
 
