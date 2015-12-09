@@ -24,6 +24,31 @@ enum QuoteMark {
 }
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "quotemark",
+        description: "Requires single or double quotes for string literals.",
+        optionsDescription: Lint.Utils.dedent`
+            Five arguments may be optionally provided:
+
+            * \`"single"\` enforces single quotes.
+            * \`"double"\` enforces double quotes.
+            * \`"jsx-single"\` enforces single quotes for JSX attributes.
+            * \`"jsx-double"\` enforces double quotes for JSX attributes.
+            * \`"avoid-escape"\` allows you to use the "other" quotemark in cases where escaping would normally be required.
+            For example, \`[true, "double", "avoid-escape"]\` would not report a failure on the string literal \`'Hello "World"'\`.`,
+        options: {
+            type: "list",
+            listType: {
+                type: "enum",
+                enumValues: ["single", "double", "jsx-single", "jsx-double", "avoid-escape"],
+            },
+        },
+        optionExamples: ['[true, "single", "avoid-escape"]', '[true, "single", "jsx-double"]'],
+        type: "style",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static SINGLE_QUOTE_FAILURE = "\" should be '";
     public static DOUBLE_QUOTE_FAILURE = "' should be \"";
 

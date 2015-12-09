@@ -18,7 +18,67 @@
 import * as ts from "typescript";
 import * as Lint from "../lint";
 
+/* tslint:disable:object-literal-sort-keys */
+const SPACE_OPTIONS: Lint.IRuleOption = {
+    type: "enum",
+    enumValues: ["nospace", "onespace", "space"],
+};
+
+const SPACE_OBJECT: Lint.IRuleOption = {
+    type: "object",
+    properties: {
+        "call-signature": SPACE_OPTIONS,
+        "index-signature": SPACE_OPTIONS,
+        "parameter": SPACE_OPTIONS,
+        "property-declaration": SPACE_OPTIONS,
+        "variable-declaration": SPACE_OPTIONS,
+    },
+};
+
 export class Rule extends Lint.Rules.AbstractRule {
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "typedef-whitespace",
+        description: "Requires or disallows whitespace for type definitions.",
+        descriptionDetails: "Determines if a space is required or not before the colon in a type specifier.",
+        optionsDescription: Lint.Utils.dedent`
+            Two arguments which are both objects.
+            The first argument specifies how much space should be to the _left_ of a typedef colon.
+            The second argument specifies how much space should be to the _right_ of a typedef colon.
+            Each key should have a value of \`"space"\` or \`"nospace"\`.
+            Possible keys are:
+
+            * \`"call-signature"\` checks return type of functions.
+            * \`"index-signature"\` checks index type specifier of indexers.
+            * \`"parameter"\` checks function parameters.
+            * \`"property-declaration"\` checks object property declarations.
+            * \`"variable-declaration"\` checks variable declaration.`,
+        options: {
+            type: "array",
+            arrayMembers: [SPACE_OBJECT, SPACE_OBJECT],
+        },
+        optionExamples: [Lint.Utils.dedent`
+            [
+              true,
+              {
+                "call-signature": "nospace",
+                "index-signature": "nospace",
+                "parameter": "nospace",
+                "property-declaration": "nospace",
+                "variable-declaration": "nospace"
+              },
+              {
+                "call-signature": "onespace",
+                "index-signature": "onespace",
+                "parameter": "onespace",
+                "property-declaration": "onespace",
+                "variable-declaration": "onespace"
+              }
+            ]`,
+        ],
+        type: "typescript",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new TypedefWhitespaceWalker(sourceFile, this.getOptions()));
     }

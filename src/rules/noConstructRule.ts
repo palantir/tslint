@@ -19,6 +19,22 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "no-construct",
+        description: "Disallows access to the constructors of `String`, `Number`, and `Boolean`.",
+        descriptionDetails: "Disallows constructor use such as `new Number(foo)` but does not disallow `Number(foo)`.",
+        rationale: Lint.Utils.dedent`
+            There is little reason to use \`String\`, \`Number\`, or \`Boolean\` as constructors.
+            In almost all cases, the regular function-call version is more appropriate.
+            [More details](http://stackoverflow.com/q/4719320/3124288) are available on StackOverflow.`,
+        optionsDescription: "Not configurable.",
+        options: {},
+        optionExamples: ["true"],
+        type: "functionality",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING = "undesirable constructor use";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {

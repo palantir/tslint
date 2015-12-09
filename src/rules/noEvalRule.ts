@@ -19,6 +19,21 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "no-eval",
+        description: "Disallows `eval` function invocations.",
+        rationale: Lint.Utils.dedent`
+            \`eval()\` is dangerous as it allows arbitrary code execution with full privileges. There are
+            [alternatives](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval)
+            for most of the use cases for \`eval()\`.`,
+        optionsDescription: "Not configurable.",
+        options: {},
+        optionExamples: ["true"],
+        type: "functionality",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING = "forbidden eval";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {

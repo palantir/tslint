@@ -19,6 +19,21 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "no-angle-bracket-type-assertion",
+        description: "Requires the use of `as Type` for type assertions instead of `<Type>`.",
+        rationale: Lint.Utils.dedent`
+            Both formats of type assertions have the same effect, but only \`as\` type assertions
+            work in \`.tsx\` files. This rule ensures that you have a consistent type assertion style
+            across your codebase.`,
+        optionsDescription: "Not configurable.",
+        options: {},
+        optionExamples: ["true"],
+        type: "style",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING = "Type assertion using the '<>' syntax is forbidden. Use the 'as' syntax instead.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {

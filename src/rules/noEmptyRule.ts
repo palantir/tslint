@@ -19,6 +19,19 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "no-empty",
+        description: "Disallows empty blocks.",
+        descriptionDetails: "Blocks with a comment inside are not considered empty.",
+        rationale: "Empty blocks are often indicators of missing code.",
+        optionsDescription: "Not configurable.",
+        options: {},
+        optionExamples: ["true"],
+        type: "functionality",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING = "block is empty";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {

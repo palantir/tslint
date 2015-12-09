@@ -1,6 +1,7 @@
 .DS_Store
 .tscache/
 /build/
+/docs/*.js
 /lib/
 node_modules/
 tscommand*.txt

@@ -19,6 +19,20 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "no-duplicate-key",
+        description: "Disallows duplicate keys in object literals.",
+        rationale: Lint.Utils.dedent`
+            There is no good reason to define an object literal with the same key twice.
+            This rule is now implemented in the TypeScript compiler and does not need to be used.`,
+        optionsDescription: "Not configurable.",
+        options: {},
+        optionExamples: ["true"],
+        type: "functionality",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING = "duplicate key '";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {

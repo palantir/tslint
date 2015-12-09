@@ -18,6 +18,68 @@
 import * as ts from "typescript";
 import {RuleWalker} from "../walker/ruleWalker";
 
+export interface IRuleMetadata {
+   /**
+    * The kebab-case name of the rule.
+    */
+    ruleName: string;
+
+   /**
+    * The type of the rule - its overall purpose
+    */
+    type: RuleType;
+
+    /**
+    * A short, one line description of what the rule does.
+    */
+    description: string;
+
+    /**
+    * More elaborate details about the rule.
+    */
+    descriptionDetails?: string;
+
+   /**
+    * An explanation of the available options for the rule.
+    */
+    optionsDescription?: string;
+
+   /**
+    * Schema of the options the rule accepts.
+    * The first boolean for whether the rule is enabled or not is already implied.
+    * This field describes the options after that boolean.
+    */
+    options: IRuleOption;
+
+   /**
+    * Examples of what a standard config for the rule might look like.
+    */
+    optionExamples?: string[];
+
+   /**
+    * An explanation of why the rule is useful.
+    */
+    rationale?: string;
+}
+
+export type RuleType = "functionality" | "maintainability" | "style" | "typescript";
+
+export type RuleOptionType = "array" | "enum" | "list" | "number" | "object" | "string";
+
+export interface IBaseRuleOption { type?: RuleOptionType; }
+
+export interface IArrayRuleOption extends IBaseRuleOption { arrayMembers: IRuleOption[]; }
+export interface IEmptyRuleOption extends IBaseRuleOption { }
+export interface IEnumRuleOption extends IBaseRuleOption { enumValues: string[]; }
+export interface IListRuleOption extends IBaseRuleOption { listType: IRuleOption; }
+export interface INumberRuleOption extends IBaseRuleOption { }
+export interface IObjectRuleOption extends IBaseRuleOption { properties: { [key: string]: IRuleOption }; }
+export interface IStringRuleOption extends IBaseRuleOption { }
+
+export type IRuleOption = IArrayRuleOption | IEmptyRuleOption | IEnumRuleOption | IListRuleOption
+                        | INumberRuleOption | IObjectRuleOption | IStringRuleOption;
+
+
 export interface IOptions {
     ruleArguments?: any[];
     ruleName: string;

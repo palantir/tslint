@@ -27,6 +27,43 @@ const REACT_NAMESPACE_IMPORT_NAME = "React";
 const MODULE_SPECIFIER_MATCH = /^["'](.+)['"]$/;
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "no-unused-variable",
+        description: "Disallows unused imports, variables, functions and private class members.",
+        optionsDescription: Lint.Utils.dedent`
+            Three optional arguments may be optionally provided:
+
+            * \`"check-parameters"\` disallows unused function and constructor parameters.
+                * NOTE: this option is experimental and does not work with classes
+                that use abstract method declarations, among other things.
+            * \`"react"\` relaxes the rule for a namespace import named \`React\`
+            (from either the module \`"react"\` or \`"react/addons"\`).
+            Any JSX expression in the file will be treated as a usage of \`React\`
+            (because it expands to \`React.createElement \`).
+            * \`{"ignore-pattern": "pattern"}\` where pattern is a case-sensitive regexp.
+            Variable names that match the pattern will be ignored.`,
+        options: {
+            type: "array",
+            arrayMembers: [{
+                type: "list",
+                listType: {
+                    type: "enum",
+                    enumValues: ["check-parameters", "react"],
+                },
+            },
+            {
+                type: "object",
+                properties: {
+                    "ignore-pattern": {type: "string"},
+                },
+            }, ],
+        },
+        optionExamples: ['[true, "react"]', '[true, {"ignore-pattern": "^_"}]'],
+        type: "functionality",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING = "unused variable: ";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {

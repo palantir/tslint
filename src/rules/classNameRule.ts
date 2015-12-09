@@ -19,6 +19,18 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "class-name",
+        description: "Enforces PascalCased class and interface names.",
+        rationale: "Makes it easy to differentitate classes from regular variables at a glance.",
+        optionsDescription: "Not configurable.",
+        options: {},
+        optionExamples: ["true"],
+        type: "style",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING = "name must be in pascal case";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {

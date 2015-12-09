@@ -19,6 +19,20 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "no-use-before-declare",
+        description: "Disallows usage of variables before their declaration.",
+        descriptionDetails: Lint.Utils.dedent`
+            This rule is primarily useful when using the \`var\` keyword -
+            the compiler will detect if a \`let\` and \`const\` variable is used before it is declared.`,
+        optionsDescription: "Not configurable.",
+        options: {},
+        optionExamples: ["true"],
+        type: "functionality",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING_PREFIX = "variable '";
     public static FAILURE_STRING_POSTFIX = "' used before declaration";
 

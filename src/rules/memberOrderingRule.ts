@@ -75,6 +75,28 @@ const PRESET_ORDERS: { [preset: string]: string[] } = {
 /* end new options */
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "member-ordering",
+        description: "Enforces member ordering.",
+        rationale: "A consistent ordering for class members can make classes easier to read, navigate, and edit.",
+        optionsDescription: Lint.Utils.dedent`
+            Three arguments may be optionally provided:
+
+            * \`public-before-private \` All public members must be declared before private members.
+            * \`static-before-instance \` All static members must be declared before instance members.
+            * \`variables-before-functions\` All variables needs to be declared before functions.`,
+        options: {
+            type: "list",
+            listType: {
+                type: "enum",
+                enumValues: ["public-before-private", "static-before-instance", "variables-before-functions"],
+            },
+        },
+        optionExamples: ['[true, "public-before-private", "static-before-instance"]'],
+        type: "typescript",
+    };
+    /* tslint:enable:object-literal-sort-keys */
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new MemberOrderingWalker(sourceFile, this.getOptions()));
     }

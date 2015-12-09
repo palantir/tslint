@@ -19,6 +19,18 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "no-shadowed-variable",
+        description: "Disallows shadowing variable declarations.",
+        rationale: "Shadowing a variable masks access to it and obscures to what value an identifier actually refers.",
+        optionsDescription: "Not configurable.",
+        options: {},
+        optionExamples: ["true"],
+        type: "functionality",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING = "shadowed variable: '";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {

@@ -26,6 +26,27 @@ function isUndefinedExpression(expression: ts.Expression) {
 }
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "triple-equals",
+        description: "Requires `===` and `!==` in place of `==` and `!=`.",
+        optionsDescription: Lint.Utils.dedent `
+            Two arguments may be optionally provided:
+
+            * \`"allow-null-check"\` allows \`==\` and \`!=\` when comparing to \`null\`.
+            * \`"allow-undefined-check"\` allows \`==\` and \`!=\` when comparing to \`undefined\`.`,
+        options: {
+            type: "list",
+            listType: {
+                type: "enum",
+                enumValues: [OPTION_ALLOW_NULL_CHECK, OPTION_ALLOW_UNDEFINED_CHECK],
+            },
+        },
+        optionExamples: ["true", '[true, "allow-null-check"]', '[true, "allow-undefined-check"]'],
+        type: "functionality",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static EQ_FAILURE_STRING = "== should be ===";
     public static NEQ_FAILURE_STRING = "!= should be !==";
 

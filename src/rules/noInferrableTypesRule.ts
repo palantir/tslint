@@ -21,6 +21,18 @@ import * as Lint from "../lint";
 const OPTION_IGNORE_PARMS = "ignore-params";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "no-inferrable-types",
+        description: "Disallows explicit type declarations for variables or parameters initialized to a number, string, or boolean.",
+        rationale: "Explicit types where they can be easily infered by the compiler make code more verbose.",
+        optionsDescription: "Not configurable.",
+        options: {},
+        optionExamples: ["true"],
+        type: "typescript",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING_FACTORY = (type: string) => `LHS type (${type}) inferred by RHS expression, remove type annotation`;
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {

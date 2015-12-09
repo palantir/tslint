@@ -19,6 +19,28 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "forin",
+        description: "Requires a `for ... in` statement to be filtered with an `if` statement.",
+        rationale: Lint.Utils.dedent`
+            \`\`\`ts
+            for (let key in someObject) {
+                if (someObject.hasOwnProperty(key)) {
+                    // code here
+                }
+            }
+            \`\`\`
+            Prevents accidental interation over properties inherited from an object's prototype.
+            See [MDN's \`for...in\`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...in)
+            documentation for more information about \`for...in\` loops.`,
+        optionsDescription: "Not configurable.",
+        options: {},
+        optionExamples: ["true"],
+        type: "functionality",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING = "for (... in ...) statements must be filtered with an if statement";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {

@@ -23,6 +23,24 @@ const OPTION_NEVER = "never";
 const OPTION_IGNORE_INTERFACES = "ignore-interfaces";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "semicolon",
+        description: "Enforces consistent semicolon usage at the end of every statement.",
+        optionsDescription: Lint.Utils.dedent`
+            One of the following arguments must be provided:
+
+            * \`"always"\` enforces semicolons at the end of every statement.
+            * \`"never"\` disallows semicolons at the end of every statement except for when they are necessary.`,
+        options: {
+            type: "enum",
+            enumValues: ["always", "never"],
+        },
+        optionExamples: ['[true, "always"]', '[true, "never"]'],
+        type: "style",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING_MISSING = "missing semicolon";
     public static FAILURE_STRING_UNNECESSARY = "unnecessary semicolon";
 

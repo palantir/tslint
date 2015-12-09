@@ -27,6 +27,34 @@ const OPTION_TYPE = "check-type";
 const OPTION_TYPECAST = "check-typecast";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "whitespace",
+        description: "Enforces whitespace style conventions.",
+        rationale: "Helps maintain a readable, consistent style in your codebase.",
+        optionsDescription: Lint.Utils.dedent`
+            Seven arguments may be optionally provided:
+
+            * \`"check-branch"\` checks branching statements (\`if\`/\`else\`/\`for\`/\`while\`) are followed by whitespace.
+            * \`"check-decl"\`checks that variable declarations have whitespace around the equals token.
+            * \`"check-operator"\` checks for whitespace around operator tokens.
+            * \`"check-module"\` checks for whitespace in import & export statements.
+            * \`"check-separator"\` checks for whitespace after separator tokens (\`,\`/\`;\`).
+            * \`"check-type"\` checks for whitespace before a variable type specification.
+            * \`"check-typecast"\` checks for whitespace between a typecast and its target.`,
+        options: {
+            type: "list",
+            listType: {
+                type: "enum",
+                enumValues: ["check-branch", "check-decl", "check-operator", "check-module",
+                             "check-seperator", "check-type", "check-typecast", ],
+            },
+        },
+        optionExamples: ['[true, "check-branch", "check-operator", "check-typecast"]'],
+        type: "style",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING = "missing whitespace";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
