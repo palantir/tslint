@@ -19,6 +19,18 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "no-any",
+        description: "Diallows usages of `any` as a type declaration.",
+        rationale: "Using `any` as a type declaration nullifies the compile-time benefits of the type system.",
+        optionsDescription: "Not configurable.",
+        options: {},
+        optionExamples: ["true"],
+        type: "typescript",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING = "type decoration of 'any' is forbidden";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {

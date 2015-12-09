@@ -19,6 +19,25 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "jsdoc-format",
+        description: "Enforces basic format rules for JSDoc comments.",
+        descriptionDetails: Lint.Utils.dedent`
+            The following rules are enforced for JSDoc comments (comments starting with \`/**\`):
+             
+            * each line contains an asterisk and asterisks must be aligned
+            * each asterisk must be followed by either a space or a newline (except for the first and the last)
+            * the only characters before the asterisk on each line must be whitespace characters
+            * one line comments must start with \`/** \` and end with \`*/\``,
+        rationale: "Helps maintain a consistent, readable style for JSDoc comments.",
+        optionsDescription: "Not configurable.",
+        options: {},
+        optionExamples: ["true"],
+        type: "style",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static ALIGNMENT_FAILURE_STRING = "asterisks in jsdoc must be aligned";
     public static FORMAT_FAILURE_STRING = "jsdoc is not formatted correctly on this line";
 

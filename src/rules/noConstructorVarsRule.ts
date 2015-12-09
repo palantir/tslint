@@ -19,6 +19,20 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "no-constructor-vars",
+        description: "Disallows parameter properties.",
+        rationale: Lint.Utils.dedent`
+            Parameter properties can be confusing to those new to TS as they are less explicit
+            than other ways of declaring and initializing class members.`,
+        optionsDescription: "Not configurable.",
+        options: {},
+        optionExamples: ["true"],
+        type: "style",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING_PART = " cannot be declared in the constructor";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {

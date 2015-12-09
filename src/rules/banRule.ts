@@ -19,6 +19,27 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "ban",
+        description: "Bans the use of specific functions.",
+        descriptionDetails: "At this time, there is no way to disable global methods with this rule.",
+        optionsDescription: "A list of `['object', 'method']` pairs which ban `object.method()`.",
+        options: {
+            type: "list",
+            listType: {
+                type: "array",
+                arrayMembers: [
+                    { type: "string" },
+                    { type: "string" },
+                ],
+            },
+        },
+        optionExamples: [`[true, ["console", "log"], ["someObject", "someFunction"]]`],
+        type: "functionality",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING_PART = "function invocation disallowed: ";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {

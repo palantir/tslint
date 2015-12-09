@@ -19,6 +19,43 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "no-switch-case-fall-through",
+        description: "Disallows falling through case statements.",
+        descriptionDetails: Lint.Utils.dedent`
+            For example, the following is not allowed:
+
+            \`\`\`ts
+            switch(foo) {
+                case 1:
+                    someFunc(foo);
+                case 2:
+                    someOtherFunc(foo);
+            }
+            \`\`\`
+
+            However, fall through is allowed when case statements are consecutive or
+            a magic \`/* falls through */\` comment is present. The following is valid:
+
+            \`\`\`ts
+            switch(foo) {
+                case 1:
+                    someFunc(foo);
+                    /* falls through */
+                case 2:
+                case 3:
+                    someOtherFunc(foo);
+            }
+            \`\`\``,
+        rationale: "Fall though in switch statements is often unintentional and a bug.",
+        optionsDescription: "Not configurable.",
+        options: {},
+        optionExamples: ["true"],
+        type: "functionality",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING_PART = "expected a 'break' before ";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {

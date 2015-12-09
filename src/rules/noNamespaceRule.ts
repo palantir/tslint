@@ -19,6 +19,30 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "no-namespace",
+        description: "Disallows use of internal \`module\`s and \`namespace\`s.",
+        descriptionDetails: "This rule still allows the use of `declare module ... {}`",
+        rationale: Lint.Utils.dedent`
+            ES6-style external modules are the standard way to modularize code.
+            Using \`module {}\` and \`namespace {}\` are outdated ways to organize TypeScript code.`,
+        optionsDescription: Lint.Utils.dedent`
+            One argument may be optionally provided:
+
+            * \`allow-declarations\` allows \`declare namespace ... {}\` to describe external APIs.`,
+        options: {
+            type: "list",
+            listType: {
+                type: "enum",
+                enumValues: ["allow-declarations"],
+            },
+        },
+        optionExamples: ["true", '[true, "allow-declarations"]'],
+        type: "typescript",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING = "'namespace' and 'module' are disallowed";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {

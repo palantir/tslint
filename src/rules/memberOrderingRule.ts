@@ -75,6 +75,49 @@ const PRESET_ORDERS: { [preset: string]: string[] } = {
 /* end new options */
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "member-ordering",
+        description: "Enforces member ordering.",
+        rationale: "A consistent ordering for class members can make classes easier to read, navigate, and edit.",
+        optionsDescription: Lint.Utils.dedent`
+            One argument, which is an object, must be provided. It should contain an \`order\` property.
+            The \`order\` property should have a value of one of the following strings:
+
+            * \`fields-first\`
+            * \`statics-first\`
+            * \`instance-sandwich\`
+
+            Alternatively, the value for \`order\` maybe be an array consisting of the following strings:
+
+            * \`public-static-field\`
+            * \`protected-static-field\`
+            * \`private-static-field\`
+            * \`public-instance-field\`
+            * \`protected-instance-field\`
+            * \`private-instance-field\`
+            * \`constructor\`
+            * \`public-static-method\`
+            * \`protected-static-method\`
+            * \`private-static-method\`
+            * \`public-instance-method\`
+            * \`protected-instance-method\`
+            * \`private-instance-method\`
+
+            This is useful if one of the preset orders does not meet your needs.`,
+        options: {
+            type: "object",
+            properties: {
+                order: {
+                    type: "enum",
+                    enumValues: ["fields-first", "statics-first", "instance-sandwich"],
+                },
+            },
+        },
+        optionExamples: ['[true, { "order": "fields-first" }]'],
+        type: "typescript",
+    };
+    /* tslint:enable:object-literal-sort-keys */
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new MemberOrderingWalker(sourceFile, this.getOptions()));
     }

@@ -19,6 +19,20 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "no-var-requires",
+        description: "Disallows the use of require statements except in import statements.",
+        descriptionDetails: Lint.Utils.dedent`
+            In other words, the use of forms such as \`var module = require("module")\` are banned.
+            Instead use ES6 style imports or \`import foo = require('foo')\` imports.`,
+        optionsDescription: "Not configurable.",
+        options: {},
+        optionExamples: ["true"],
+        type: "typescript",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING = "require statement not part of an import statement";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {

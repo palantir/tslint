@@ -23,6 +23,30 @@ const OPTION_LOWERCASE = "check-lowercase";
 const OPTION_UPPERCASE = "check-uppercase";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "comment-format",
+        description: "Enforces formatting rules for single-line comments.",
+        rationale: "Helps maintain a consistent, readable style in your codebase.",
+        optionsDescription: Lint.Utils.dedent`
+            Three arguments may be optionally provided:
+
+            * \`"check-space"\` requires that all single-line comments must begin with a space, as in \`// comment\`
+                * note that comments starting with \`///\` are also allowed, for things such as \`///<reference>\`
+            * \`"check-lowercase"\` requires that the first non-whitespace character of a comment must be lowercase, if applicable.
+            * \`"check-uppercase"\` requires that the first non-whitespace character of a comment must be uppercase, if applicable.`,
+        options: {
+            type: "list",
+            listType: {
+                type: "enum",
+                enumValues: ["check-space", "check-lowercase", "check-uppercase"],
+            },
+        },
+        optionExamples: ['[true, "check-space", "check-lowercase"]'],
+        type: "style",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static LOWERCASE_FAILURE = "comment must start with lowercase letter";
     public static UPPERCASE_FAILURE = "comment must start with uppercase letter";
     public static LEADING_SPACE_FAILURE = "comment must start with a space";

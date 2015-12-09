@@ -22,6 +22,25 @@ const OPTION_ALWAYS = "always-prefix";
 const OPTION_NEVER = "never-prefix";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "interface-name",
+        description: "Requires interface names to begin with a capital 'I'",
+        rationale: "Makes it easy to differentitate interfaces from regular classes at a glance.",
+        optionsDescription: Lint.Utils.dedent`
+            One of the following two options must be provided:
+
+            * \`"${OPTION_ALWAYS}"\` requires interface names to start with an "I"
+            * \`"${OPTION_NEVER}"\` requires interface names to not have an "I" prefix`,
+        options: {
+            type: "enum",
+            enumValues: [OPTION_ALWAYS, OPTION_NEVER],
+        },
+        optionExamples: [`[true, "${OPTION_ALWAYS}"]`, `[true, "${OPTION_NEVER}"]`],
+        type: "style",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING = "interface name must start with a capitalized I";
     public static FAILURE_STRING_NO_PREFIX = `interface name must not have an "I" prefix`;
 

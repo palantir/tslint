@@ -19,6 +19,23 @@ import * as Lint from "../lint";
 import * as ts from "typescript";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "no-unused-expression",
+        description: "Disallows unused expression statements.",
+        descriptionDetails: Lint.Utils.dedent`
+            Unused expressions are expression statements which are not assignments or function calls
+            (and thus usually no-ops).`,
+        rationale: Lint.Utils.dedent`
+            Detects potential errors where an assignment or function call was intended. Also detects constructs such as
+            \`new SomeClass()\`, where a constructor is used solely for its side effects, which is considered poor style.`,
+        optionsDescription: "Not configurable.",
+        options: {},
+        optionExamples: ["true"],
+        type: "functionality",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING = "expected an assignment or function call";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {

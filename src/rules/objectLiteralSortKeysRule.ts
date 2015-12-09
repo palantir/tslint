@@ -19,6 +19,18 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "object-literal-sort-keys",
+        description: "Requires keys in object literals to be sorted alphabetically",
+        rationale: "Useful in preventing merge conflicts",
+        optionsDescription: "Not configurable.",
+        options: {},
+        optionExamples: ["true"],
+        type: "maintainability",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING_PREFIX = "The key '";
     public static FAILURE_STRING_POSTFIX = "' is not sorted alphabetically";
 

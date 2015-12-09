@@ -19,6 +19,19 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "label-undefined",
+        description: "Checks that labels are defined before usage.",
+        descriptionDetails: "This rule is now implemented in the TypeScript compiler and does not need to be used.",
+        rationale: "Using `break` or `continue` to go to an out-of-scope label is an error in JS.",
+        optionsDescription: "Not configurable.",
+        options: {},
+        optionExamples: ["true"],
+        type: "functionality",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING = "undefined label: '";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {

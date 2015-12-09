@@ -19,6 +19,18 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "no-require-imports",
+        description: "Disallows invocation of `require()`.",
+        rationale: "Prefer the newer ES6-style imports over `require()`.",
+        optionsDescription: "Not configurable.",
+        options: {},
+        optionExamples: ["true"],
+        type: "maintainability",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING = "require() style import is forbidden";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {

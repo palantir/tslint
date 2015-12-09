@@ -19,6 +19,21 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "radix",
+        description: "Requires the radix parameter to be specified when calling `parseInt`.",
+        rationale: Lint.Utils.dedent`
+            From [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/parseInt): 
+            > Always specify this parameter to eliminate reader confusion and to guarantee predictable behavior.
+            > Different implementations produce different results when a radix is not specified, usually defaulting the value to 10.`,
+        optionsDescription: "Not configurable.",
+        options: {},
+        optionExamples: ["true"],
+        type: "functionality",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING = "missing radix parameter";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {

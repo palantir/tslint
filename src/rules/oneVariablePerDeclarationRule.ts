@@ -21,6 +21,26 @@ import * as Lint from "../lint";
 const OPTION_IGNORE_FOR_LOOP = "ignore-for-loop";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "one-variable-per-declaration",
+        description: "Disallows multiple variable definitions in the same declaration statement.",
+        optionsDescription: Lint.Utils.dedent`
+            One argument may be optionally provided:
+
+            * \`${OPTION_IGNORE_FOR_LOOP}\` allows multiple variable definitions in a for loop declaration.`,
+        options: {
+            type: "list",
+            listType: {
+                type: "enum",
+                enumValues: [OPTION_IGNORE_FOR_LOOP],
+            },
+        },
+        optionExamples: ["true", `[true, "${OPTION_IGNORE_FOR_LOOP}"]`],
+        type: "style",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING = "Multiple variable declarations in the same statement are forbidden";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
