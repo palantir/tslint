@@ -106,7 +106,7 @@ linter. This also means that <code>tslint</code> will have to use the same versi
 -r, --rules-dir:
     An additional rules directory, for user-created rules.
     tslint will always check its default rules directory, in
-    node_modules/tslint/build/rules, before checking the user-provided
+    node_modules/tslint/lib/rules, before checking the user-provided
     rules directory, so rules in the user-provided rules directory
     with the same name as the base rules will not be loaded.
 
@@ -145,7 +145,7 @@ linter. This also means that <code>tslint</code> will have to use the same versi
 <span class="pl-k">var</span> options <span class="pl-k">=</span> {
     formatter<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>json<span class="pl-pds">"</span></span>,
     configuration<span class="pl-k">:</span> configuration,
-    rulesDirectory<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>customRules/<span class="pl-pds">"</span></span>,
+    rulesDirectory<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>customRules/<span class="pl-pds">"</span></span>, <span class="pl-c">// can be an array of directories</span>
     formattersDirectory<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>customFormatters/<span class="pl-pds">"</span></span>
 };
 
@@ -518,9 +518,13 @@ to require a space or no space before the type specifier's colon. Rule options:
     }
 }</pre></div>
 
-<p>Given a walker, TypeScript's parser visits the AST using the visitor pattern. So the rule walkers only need to override the appropriate visitor methods to enforce its checks. For reference, the base walker can be found in <a href="https://github.com/palantir/tslint/blob/1.4/src/language/walker/syntaxWalker.ts">syntaxWalker.ts</a>.</p>
+<p>Given a walker, TypeScript's parser visits the AST using the visitor pattern. So the rule walkers only need to override the appropriate visitor methods to enforce its checks. For reference, the base walker can be found in <a href="https://github.com/palantir/tslint/blob/master/src/language/walker/syntaxWalker.ts">syntaxWalker.ts</a>.</p>
 
-<p>We still need to hook up this new rule to TSLint. First make sure to compile <code>noImportsRule.ts</code>: <code>tsc -m commonjs --noImplicitAny noImportsRule.ts tslint.d.ts</code>. Then, if using the CLI, provide the directory that contains this rule as an option to <code>--rules-dir</code>. If using TSLint as a library or via <code>grunt-tslint</code>, the <code>options</code> hash must contain <code>"rulesDirectory": "..."</code>. If you run the linter, you'll see that we have now successfully banned all import statements via TSLint!</p>
+<p>We still need to hook up this new rule to TSLint. First make sure to compile <code>noImportsRule.ts</code>:</p>
+
+<div class="highlight highlight-source-shell"><pre>tsc -m commonjs --noImplicitAny noImportsRule.ts node_modules/tslint/lib/tslint.d.ts</pre></div>
+
+<p>Then, if using the CLI, provide the directory that contains this rule as an option to <code>--rules-dir</code>. If using TSLint as a library or via <code>grunt-tslint</code>, the <code>options</code> hash must contain <code>"rulesDirectory": "..."</code>. If you run the linter, you'll see that we have now successfully banned all import statements via TSLint!</p>
 
 <p>Final notes:</p>
 
