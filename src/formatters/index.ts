@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-export * from "./jsonFormatter";
-export * from "./pmdFormatter";
-export * from "./proseFormatter";
-export * from "./verboseFormatter";
+export { Formatter as JsonFormatter } from "./jsonFormatter";
+export { Formatter as PmdFormatter } from "./pmdFormatter";
+export { Formatter as ProseFormatter } from "./proseFormatter";
+export { Formatter as VerboseFormatter } from "./verboseFormatter";
