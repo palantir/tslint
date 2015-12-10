@@ -13,23 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
+import {TestUtils} from "../lint";
 
 describe("<no-consecutive-blank-lines>", () => {
-    const NoConsecutiveBlankLinesRule = Lint.Test.getRule("no-consecutive-blank-lines");
+    const NoConsecutiveBlankLinesRule = TestUtils.getRule("no-consecutive-blank-lines");
     const fileName = "rules/blanklines.test.ts";
 
     it("ensures there is at most one consecutive blank line", () => {
-        const createFailure = Lint.Test.createFailuresOnFile(fileName, NoConsecutiveBlankLinesRule.FAILURE_STRING);
+        const createFailure = TestUtils.createFailuresOnFile(fileName, NoConsecutiveBlankLinesRule.FAILURE_STRING);
         const expectedFailure1 = createFailure([2, 1], [3, 1]);
         const expectedFailure2 = createFailure([9, 1], [10, 1]);
         const expectedFailure3 = createFailure([14, 1], [15, 1]);
 
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, NoConsecutiveBlankLinesRule);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, NoConsecutiveBlankLinesRule);
 
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure3);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure1);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure2);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure3);
         assert.lengthOf(actualFailures, 3);
     });
 });

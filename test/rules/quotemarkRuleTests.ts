@@ -13,19 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
+import {TestUtils} from "../lint";
 
 describe("<quotemark>", () => {
-    const QuoteMarkRule = Lint.Test.getRule("quotemark");
+    const QuoteMarkRule = TestUtils.getRule("quotemark");
     const fileName = "rules/quotemark.test.ts";
     const singleFailureString = QuoteMarkRule.SINGLE_QUOTE_FAILURE;
     const doubleFailureString = QuoteMarkRule.DOUBLE_QUOTE_FAILURE;
 
     it("enforces single quotes", () => {
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, QuoteMarkRule, [true, "single"]);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, QuoteMarkRule, [true, "single"]);
         const expectedFailures = [
-            Lint.Test.createFailure(fileName, [2, 19], [2, 28], singleFailureString),
-            Lint.Test.createFailure(fileName, [3, 26], [3, 48], singleFailureString)
+            TestUtils.createFailure(fileName, [2, 19], [2, 28], singleFailureString),
+            TestUtils.createFailure(fileName, [3, 26], [3, 48], singleFailureString)
         ];
 
         assert.equal(actualFailures.length, 2);
@@ -34,10 +35,10 @@ describe("<quotemark>", () => {
     });
 
     it("enforces double quotes", () => {
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, QuoteMarkRule, [true, "double"]);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, QuoteMarkRule, [true, "double"]);
         const expectedFailures = [
-          Lint.Test.createFailure(fileName, [1, 14], [1, 22], doubleFailureString),
-          Lint.Test.createFailure(fileName, [4, 26], [4, 48], doubleFailureString)
+          TestUtils.createFailure(fileName, [1, 14], [1, 22], doubleFailureString),
+          TestUtils.createFailure(fileName, [4, 26], [4, 48], doubleFailureString)
         ];
 
         assert.equal(actualFailures.length, 2);
@@ -46,16 +47,16 @@ describe("<quotemark>", () => {
     });
 
     it("enforces single quotes but allow other quote marks to avoid having to escape", () => {
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, QuoteMarkRule, [true, "single", "avoid-escape"]);
-        const expectedFailure = Lint.Test.createFailure(fileName, [2, 19], [2, 28], singleFailureString);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, QuoteMarkRule, [true, "single", "avoid-escape"]);
+        const expectedFailure = TestUtils.createFailure(fileName, [2, 19], [2, 28], singleFailureString);
 
         assert.equal(actualFailures.length, 1);
         assert.isTrue(actualFailures[0].equals(expectedFailure));
     });
 
     it("enforces double quotes but allow other quote marks to avoid having to escape", () => {
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, QuoteMarkRule, [true, "double", "avoid-escape"]);
-        const expectedFailure = Lint.Test.createFailure(fileName, [1, 14], [1, 22], doubleFailureString);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, QuoteMarkRule, [true, "double", "avoid-escape"]);
+        const expectedFailure = TestUtils.createFailure(fileName, [1, 14], [1, 22], doubleFailureString);
 
         assert.equal(actualFailures.length, 1);
         assert.isTrue(actualFailures[0].equals(expectedFailure));

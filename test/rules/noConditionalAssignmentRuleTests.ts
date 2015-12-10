@@ -13,16 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
+import {RuleFailure, TestUtils} from "../lint";
 
 describe("<no-conditional-assignment>", () => {
     const fileName = "rules/nocondassign.test.ts";
-    const NoConditionalAssignmentRule = Lint.Test.getRule("no-conditional-assignment");
-    const createFailure = Lint.Test.createFailuresOnFile(fileName, NoConditionalAssignmentRule.FAILURE_STRING);
-    let actualFailures: Lint.RuleFailure[];
+    const NoConditionalAssignmentRule = TestUtils.getRule("no-conditional-assignment");
+    const createFailure = TestUtils.createFailuresOnFile(fileName, NoConditionalAssignmentRule.FAILURE_STRING);
+    let actualFailures: RuleFailure[];
 
     before(() => {
-        actualFailures = Lint.Test.applyRuleOnFile(fileName, NoConditionalAssignmentRule);
+        actualFailures = TestUtils.applyRuleOnFile(fileName, NoConditionalAssignmentRule);
     });
 
     it("should detect assignments in if conditionals", () => {
@@ -31,18 +32,18 @@ describe("<no-conditional-assignment>", () => {
         const expectedFailure3 = createFailure([21, 10], [21, 15]);
         const expectedFailure4 = createFailure([31, 5], [31, 11]);
         const expectedFailure5 = createFailure([32, 16], [32, 23]);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure3);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure4);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure5);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure1);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure2);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure3);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure4);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure5);
     });
 
     it("should detect assignments in do-while conditionals", () => {
         const expectedFailure1 = createFailure([23, 15], [23, 20]);
         const expectedFailure2 = createFailure([34, 15], [34, 21]);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure1);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure2);
     });
 
     it("should detect assignments in while conditionals", () => {
@@ -50,17 +51,17 @@ describe("<no-conditional-assignment>", () => {
         const expectedFailure2 = createFailure([26, 9], [26, 19]);
         const expectedFailure3 = createFailure([35, 9], [35, 14]);
         const expectedFailure4 = createFailure([35, 33], [35, 38]);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure3);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure4);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure1);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure2);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure3);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure4);
     });
 
     it("should detect assignments in for conditionals", () => {
         const expectedFailure1 = createFailure([28, 17], [28, 22]);
         const expectedFailure2 = createFailure([29, 21], [29, 26]);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure1);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure2);
     });
 
     it("no false positives for rule", () => {

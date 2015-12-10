@@ -1,4 +1,5 @@
-/*
+/**
+ * @license
  * Copyright 2015 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,13 +16,13 @@
  */
 
 import * as ts from "typescript";
-import * as Lint from "../../lint";
+import {IOptions} from "../../lint";
 import {RuleWalker} from "./ruleWalker";
 
 export class SkippableTokenAwareRuleWalker extends RuleWalker {
     protected tokensToSkipStartEndMap: {[start: number]: number};
 
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
+    constructor(sourceFile: ts.SourceFile, options: IOptions) {
         super(sourceFile, options);
         this.tokensToSkipStartEndMap = {};
     }

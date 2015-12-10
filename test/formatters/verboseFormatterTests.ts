@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
 import * as ts from "typescript";
+import {IFormatter, RuleFailure, TestUtils} from "../lint";
 
 describe("Verbose Formatter", () => {
     const TEST_FILE = "formatters/proseFormatter.test.ts";
     let sourceFile: ts.SourceFile;
-    let formatter: Lint.IFormatter;
+    let formatter: IFormatter;
 
     before(() => {
-        const Formatter = Lint.Test.getFormatter("verbose");
-        sourceFile = Lint.Test.getSourceFile(TEST_FILE);
+        const Formatter = TestUtils.getFormatter("verbose");
+        sourceFile = TestUtils.getSourceFile(TEST_FILE);
         formatter = new Formatter();
     });
 
@@ -31,9 +32,9 @@ describe("Verbose Formatter", () => {
         const maxPosition = sourceFile.getFullWidth();
 
         const failures = [
-            new Lint.RuleFailure(sourceFile, 0, 1, "first failure", "first-name"),
-            new Lint.RuleFailure(sourceFile, 32, 36, "mid failure", "mid-name"),
-            new Lint.RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name")
+            new RuleFailure(sourceFile, 0, 1, "first failure", "first-name"),
+            new RuleFailure(sourceFile, 32, 36, "mid failure", "mid-name"),
+            new RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name")
         ];
 
         const expectedResult =

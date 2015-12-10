@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
+import {TestUtils} from "../lint";
 
 describe("<no-debugger>", () => {
-    const NoDebuggerRule = Lint.Test.getRule("no-debugger");
+    const NoDebuggerRule = TestUtils.getRule("no-debugger");
     const fileName = "rules/debug.test.ts";
     const failureString = NoDebuggerRule.FAILURE_STRING;
 
     it("forbids debugger statements", () => {
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, NoDebuggerRule);
-        const expectedFailure = Lint.Test.createFailure(fileName, [5, 9], [5, 17], failureString);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, NoDebuggerRule);
+        const expectedFailure = TestUtils.createFailure(fileName, [5, 9], [5, 17], failureString);
 
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure);
     });
 });

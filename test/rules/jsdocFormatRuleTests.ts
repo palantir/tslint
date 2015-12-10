@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
+import {TestUtils} from "../lint";
 
 describe("<jsdoc-format>", () => {
-    const JsdocFormatRule = Lint.Test.getRule("jsdoc-format");
+    const JsdocFormatRule = TestUtils.getRule("jsdoc-format");
 
     it("ensures jsdoc comments have properly lined up asterisks and start with spaces", () => {
         const fileName = "rules/jsdoc.test.ts";
-        const createFormatFailure = Lint.Test.createFailuresOnFile(fileName, JsdocFormatRule.FORMAT_FAILURE_STRING);
-        const createAlignmentFailure = Lint.Test.createFailuresOnFile(fileName, JsdocFormatRule.ALIGNMENT_FAILURE_STRING);
+        const createFormatFailure = TestUtils.createFailuresOnFile(fileName, JsdocFormatRule.FORMAT_FAILURE_STRING);
+        const createAlignmentFailure = TestUtils.createFailuresOnFile(fileName, JsdocFormatRule.ALIGNMENT_FAILURE_STRING);
         const expectedFailure1 = createFormatFailure([28, 1], [28, 40]);
         const expectedFailure2 = createAlignmentFailure([34, 1], [34, 6]);
         const expectedFailure3 = createFormatFailure([38, 1], [38, 8]);
@@ -30,21 +31,21 @@ describe("<jsdoc-format>", () => {
         const expectedFailure6 = createFormatFailure([50, 5], [50, 26]);
         const expectedFailure7 = createFormatFailure([52, 5], [52, 32]);
 
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, JsdocFormatRule);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, JsdocFormatRule);
 
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure3);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure4);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure5);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure6);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure7);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure1);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure2);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure3);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure4);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure5);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure6);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure7);
         assert.lengthOf(actualFailures, 7);
     });
 
     it("ensures jsdoc commments can have have windows line endings", () => {
         const fileName = "rules/jsdoc-windows.test.ts";
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, JsdocFormatRule);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, JsdocFormatRule);
         assert.lengthOf(actualFailures, 0);
     });
 });

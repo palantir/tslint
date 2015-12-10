@@ -1,4 +1,5 @@
-/*
+/**
+ * @license
  * Copyright 2013 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,12 +16,12 @@
  */
 
 import * as ts from "typescript";
-import * as Lint from "../../lint";
+import {RuleWalker} from "../walker/ruleWalker";
 
 export interface IOptions {
     ruleArguments?: any[];
     ruleName: string;
-    disabledIntervals: Lint.IDisabledInterval[];
+    disabledIntervals: IDisabledInterval[];
 }
 
 export interface IDisabledInterval {
@@ -32,7 +33,7 @@ export interface IRule {
     getOptions(): IOptions;
     isEnabled(): boolean;
     apply(sourceFile: ts.SourceFile): RuleFailure[];
-    applyWithWalker(walker: Lint.RuleWalker): RuleFailure[];
+    applyWithWalker(walker: RuleWalker): RuleFailure[];
 }
 
 export class RuleFailurePosition {
@@ -73,8 +74,8 @@ export class RuleFailurePosition {
 export class RuleFailure {
     private sourceFile: ts.SourceFile;
     private fileName: string;
-    private startPosition: Lint.RuleFailurePosition;
-    private endPosition: Lint.RuleFailurePosition;
+    private startPosition: RuleFailurePosition;
+    private endPosition: RuleFailurePosition;
     private failure: string;
     private ruleName: string;
 

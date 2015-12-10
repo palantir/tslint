@@ -13,22 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
+import {TestUtils} from "../lint";
 
 describe("<no-console>", () => {
-    const NoConsoleRule = Lint.Test.getRule("no-console");
+    const NoConsoleRule = TestUtils.getRule("no-console");
     const fileName = "rules/noconsole.test.ts";
 
     it("forbids access to specified console properties", () => {
-        const dirFailure = Lint.Test.createFailuresOnFile(fileName, NoConsoleRule.FAILURE_STRING_PART + "console.dir")([3, 1], [3, 12]);
-        const errorFailure = Lint.Test.createFailuresOnFile(fileName, NoConsoleRule.FAILURE_STRING_PART + "console.error")([7, 1], [7, 14]);
-        const logFailure = Lint.Test.createFailuresOnFile(fileName, NoConsoleRule.FAILURE_STRING_PART + "console.log")([2, 1], [2, 12]);
-        const warnFailure = Lint.Test.createFailuresOnFile(fileName, NoConsoleRule.FAILURE_STRING_PART + "console.warn")([6, 1], [6, 13]);
+        const dirFailure = TestUtils.createFailuresOnFile(fileName, NoConsoleRule.FAILURE_STRING_PART + "console.dir")([3, 1], [3, 12]);
+        const errorFailure = TestUtils.createFailuresOnFile(fileName, NoConsoleRule.FAILURE_STRING_PART + "console.error")([7, 1], [7, 14]);
+        const logFailure = TestUtils.createFailuresOnFile(fileName, NoConsoleRule.FAILURE_STRING_PART + "console.log")([2, 1], [2, 12]);
+        const warnFailure = TestUtils.createFailuresOnFile(fileName, NoConsoleRule.FAILURE_STRING_PART + "console.warn")([6, 1], [6, 13]);
 
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, NoConsoleRule, [true, "dir", "error", "log", "warn"]);
-        Lint.Test.assertContainsFailure(actualFailures, dirFailure);
-        Lint.Test.assertContainsFailure(actualFailures, errorFailure);
-        Lint.Test.assertContainsFailure(actualFailures, logFailure);
-        Lint.Test.assertContainsFailure(actualFailures, warnFailure);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, NoConsoleRule, [true, "dir", "error", "log", "warn"]);
+        TestUtils.assertContainsFailure(actualFailures, dirFailure);
+        TestUtils.assertContainsFailure(actualFailures, errorFailure);
+        TestUtils.assertContainsFailure(actualFailures, logFailure);
+        TestUtils.assertContainsFailure(actualFailures, warnFailure);
     });
 });

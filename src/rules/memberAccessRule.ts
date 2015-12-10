@@ -1,4 +1,5 @@
-/*
+/**
+ * @license
  * Copyright 2013 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,15 +31,44 @@ export class MemberAccessWalker extends Lint.RuleWalker {
         super(sourceFile, options);
     }
 
+    public visitConstructorDeclaration(node: ts.ConstructorDeclaration) {
+        if (this.hasOption("check-constructor")) {
+            // constructor is only allowed to have public or nothing, but the compiler will catch this
+            this.validateVisibilityModifiers(node);
+        }
+
+        super.visitConstructorDeclaration(node);
+    }
+
     public visitMethodDeclaration(node: ts.MethodDeclaration) {
         this.validateVisibilityModifiers(node);
+        super.visitMethodDeclaration(node);
     }
 
     public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
         this.validateVisibilityModifiers(node);
+        super.visitPropertyDeclaration(node);
+    }
+
+    public visitGetAccessor(node: ts.AccessorDeclaration) {
+        if (this.hasOption("check-accessor")) {
+            this.validateVisibilityModifiers(node);
+        }
+        super.visitGetAccessor(node);
+    }
+
+    public visitSetAccessor(node: ts.AccessorDeclaration) {
+        if (this.hasOption("check-accessor")) {
+            this.validateVisibilityModifiers(node);
+        }
+        super.visitSetAccessor(node);
     }
 
     private validateVisibilityModifiers(node: ts.Node) {
+        if (node.parent.kind === ts.SyntaxKind.ObjectLiteralExpression) {
+            return;
+        }
+
         const hasAnyVisibilityModifiers = Lint.hasModifier(
             node.modifiers,
             ts.SyntaxKind.PublicKeyword,

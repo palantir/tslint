@@ -13,16 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
+import {TestUtils} from "../lint";
 
 describe("<no-switch-case-fall-through>", () => {
-    const Rule = Lint.Test.getRule("no-switch-case-fall-through");
+    const Rule = TestUtils.getRule("no-switch-case-fall-through");
     const fileName = "rules/noswitchcasefallthrough.test.ts";
 
     it("Switch fall through", () => {
         const failureString = Rule.FAILURE_STRING_PART;
-        const failureDefault = Lint.Test.createFailuresOnFile(fileName, failureString + "'default'");
-        const failureCase = Lint.Test.createFailuresOnFile(fileName, failureString + "'case'");
+        const failureDefault = TestUtils.createFailuresOnFile(fileName, failureString + "'default'");
+        const failureCase = TestUtils.createFailuresOnFile(fileName, failureString + "'case'");
         const expectedFailures = [
             failureCase([3, 15], [3, 16]),
             failureCase([6, 15], [6, 16]),
@@ -32,9 +33,9 @@ describe("<no-switch-case-fall-through>", () => {
             failureCase([35, 10], [35, 11]),
             failureDefault([32, 21], [32, 22])
         ];
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, Rule);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, Rule);
 
         assert.lengthOf(actualFailures, 7);
-        Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
+        TestUtils.assertFailuresEqual(actualFailures, expectedFailures);
     });
 });

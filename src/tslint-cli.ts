@@ -1,4 +1,5 @@
-/*
+/**
+ * @license
  * Copyright 2013 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,8 +16,10 @@
  */
 
 import * as fs from "fs";
+import * as glob from "glob";
 import * as optimist from "optimist";
 import * as Linter from "./tslint";
+import {getRulesDirectories} from "./configuration";
 
 let processed = optimist
     .usage("Usage: $0 [options] [file ...]")
@@ -153,11 +156,17 @@ const processFile = (file: string) => {
         process.exit(1);
     }
 
+    const rulesDirectories = getRulesDirectories(configuration.rulesDirectory);
+
+    if (argv.r != null) {
+        rulesDirectories.push(argv.r);
+    }
+
     const linter = new Linter(file, contents, {
         configuration: configuration,
         formatter: argv.t,
         formattersDirectory: argv.s,
-        rulesDirectory: argv.r
+        rulesDirectory: rulesDirectories
     });
 
     const lintResult = linter.lint();
@@ -172,5 +181,5 @@ const processFile = (file: string) => {
 const files = argv._;
 
 for (const file of files) {
-    processFile(file);
+    glob.sync(file).forEach(processFile);
 }

@@ -114,3 +114,17 @@ interface FalsePositive4<T, TResult> {
     (parameters: T, runSynchonous: boolean): TResult;
     (parameters: T, callback: (error: Error, result: TResult) => void): void;
 }
+
+let p = 1;
+function testParameterDestructuring(
+    { pos: p }: FalsePositive3, // failure
+    { pos: q, specular: r }: FalsePositive3,
+    { pos }: FalsePositive3
+) {
+    p = 2;
+    var q = 1; // failure
+
+    function someInnerFunc() {
+        let pos = 3; // failure
+    }
+}

@@ -1,4 +1,5 @@
-/*
+/**
+ * @license
  * Copyright 2015 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,27 +27,21 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class NoRequireImportsWalker extends Lint.RuleWalker {
-    public visitVariableStatement(node: ts.VariableStatement) {
-        const declarations = node.declarationList.declarations;
-        for (let decl of declarations) {
-            this.handleDeclaration(decl);
+    public visitCallExpression(node: ts.CallExpression) {
+        if (node.arguments != null && node.expression != null) {
+            const callExpressionText = node.expression.getText(this.getSourceFile());
+            if (callExpressionText === "require") {
+                this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+            }
         }
-        super.visitVariableStatement(node);
+        super.visitCallExpression(node);
     }
 
     public visitImportEqualsDeclaration(node: ts.ImportEqualsDeclaration) {
-        this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
-        super.visitImportEqualsDeclaration(node);
-    }
-
-    private handleDeclaration(decl: ts.VariableDeclaration)  {
-        // make sure the RHS is a call expression.
-        const call = <ts.CallExpression> (decl.initializer);
-        if (call && call.arguments && call.expression) {
-            const callExpressionText = call.expression.getText(this.getSourceFile());
-            if (callExpressionText === "require") {
-                this.addFailure(this.createFailure(decl.getStart(), decl.getWidth(), Rule.FAILURE_STRING));
-            }
+        const {moduleReference} = node;
+        if (moduleReference.kind === ts.SyntaxKind.ExternalModuleReference) {
+            this.addFailure(this.createFailure(moduleReference.getStart(), moduleReference.getWidth(), Rule.FAILURE_STRING));
         }
+        super.visitImportEqualsDeclaration(node);
     }
 }

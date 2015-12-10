@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
+import {TestUtils} from "../lint";
 
 describe("<radix>", () => {
-    const RadixRule = Lint.Test.getRule("radix");
+    const RadixRule = TestUtils.getRule("radix");
     const fileName = "rules/radix.test.ts";
     const failureString = RadixRule.FAILURE_STRING;
 
     it("enforces radix parameter of parseInt", () => {
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, RadixRule);
-        const expectedFailure = Lint.Test.createFailure(fileName, [2, 9], [2, 20], failureString);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, RadixRule);
+        const expectedFailure = TestUtils.createFailure(fileName, [2, 9], [2, 20], failureString);
 
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure);
     });
 });

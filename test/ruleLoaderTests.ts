@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "./lint";
+
+import {loadRules} from "./lint";
 
 describe("Rule Loader", () => {
     const path = require("path");
@@ -28,7 +29,7 @@ describe("Rule Loader", () => {
             "no-debugger": true
         };
 
-        const rules = Lint.loadRules(validConfiguration, {}, rulesDirectory);
+        const rules = loadRules(validConfiguration, {}, rulesDirectory);
         assert.equal(rules.length, 5);
     });
 
@@ -38,7 +39,7 @@ describe("Rule Loader", () => {
             "invalidConfig2": false
         };
 
-        const rules = Lint.loadRules(invalidConfiguration, {}, rulesDirectory);
+        const rules = loadRules(invalidConfiguration, {}, rulesDirectory);
         assert.deepEqual(rules, []);
     });
 
@@ -50,7 +51,20 @@ describe("Rule Loader", () => {
             "eofline-": true
         };
 
-        const rules = Lint.loadRules(invalidConfiguration, {}, rulesDirectory);
+        const rules = loadRules(invalidConfiguration, {}, rulesDirectory);
         assert.deepEqual(rules, []);
+    });
+
+    it("works with rulesDirectory argument as an Array", () => {
+        const validConfiguration: {[name: string]: any} = {
+            "forin": false,
+            "quotemark": "single",
+            "eofline": true,
+            "class-name": true,
+            "no-debugger": true
+        };
+
+        const rules = loadRules(validConfiguration, {}, [rulesDirectory]);
+        assert.equal(rules.length, 5);
     });
 });

@@ -13,20 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
+import {TestUtils} from "../lint";
 
 describe("<forin>", () => {
-    const ForInRule = Lint.Test.getRule("forin");
+    const ForInRule = TestUtils.getRule("forin");
     const fileName = "rules/forin.test.ts";
     const failureString = ForInRule.FAILURE_STRING;
 
     it("enforces filtering for the body of a for...in statement", () => {
         const expectedFailures = [
-            Lint.Test.createFailure(fileName, [2, 5], [4, 6], failureString),
-            Lint.Test.createFailure(fileName, [6, 5], [11, 6], failureString)
+            TestUtils.createFailure(fileName, [2, 5], [4, 6], failureString),
+            TestUtils.createFailure(fileName, [6, 5], [11, 6], failureString)
         ];
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, ForInRule);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, ForInRule);
 
-        Lint.Test.assertFailuresEqual(actualFailures, expectedFailures);
+        TestUtils.assertFailuresEqual(actualFailures, expectedFailures);
     });
 });

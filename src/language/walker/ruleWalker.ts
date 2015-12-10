@@ -1,4 +1,5 @@
-/*
+/**
+ * @license
  * Copyright 2013 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,19 +16,21 @@
  */
 
 import * as ts from "typescript";
-import * as Lint from "../../lint";
+import {IOptions} from "../../lint";
+import {IDisabledInterval, RuleFailure} from "../rule/rule";
+import {doesIntersect} from "../utils";
 import {SyntaxWalker} from "./syntaxWalker";
 
 export class RuleWalker extends SyntaxWalker {
     private limit: number;
     private position: number;
     private options: any[];
-    private failures: Lint.RuleFailure[];
+    private failures: RuleFailure[];
     private sourceFile: ts.SourceFile;
-    private disabledIntervals: Lint.IDisabledInterval[];
+    private disabledIntervals: IDisabledInterval[];
     private ruleName: string;
 
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
+    constructor(sourceFile: ts.SourceFile, options: IOptions) {
         super();
 
         this.position = 0;
@@ -43,7 +46,7 @@ export class RuleWalker extends SyntaxWalker {
         return this.sourceFile;
     }
 
-    public getFailures(): Lint.RuleFailure[] {
+    public getFailures(): RuleFailure[] {
         return this.failures;
     }
 
@@ -67,20 +70,20 @@ export class RuleWalker extends SyntaxWalker {
         this.position += node.getFullWidth();
     }
 
-    public createFailure(start: number, width: number, failure: string): Lint.RuleFailure {
+    public createFailure(start: number, width: number, failure: string): RuleFailure {
         const from = (start > this.limit) ? this.limit : start;
         const to = ((start + width) > this.limit) ? this.limit : (start + width);
-        return new Lint.RuleFailure(this.sourceFile, from, to, failure, this.ruleName);
+        return new RuleFailure(this.sourceFile, from, to, failure, this.ruleName);
     }
 
-    public addFailure(failure: Lint.RuleFailure) {
+    public addFailure(failure: RuleFailure) {
         // don't add failures for a rule if the failure intersects an interval where that rule is disabled
-        if (!this.existsFailure(failure) && !Lint.doesIntersect(failure, this.disabledIntervals)) {
+        if (!this.existsFailure(failure) && !doesIntersect(failure, this.disabledIntervals)) {
             this.failures.push(failure);
         }
     }
 
-    private existsFailure(failure: Lint.RuleFailure) {
+    private existsFailure(failure: RuleFailure) {
         return this.failures.some((f) => f.equals(failure));
     }
 }

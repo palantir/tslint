@@ -1,4 +1,5 @@
-/*
+/**
+ * @license
  * Copyright 2013 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -45,5 +46,5 @@ export interface ILinterOptions {
     configuration: any;
     formatter: string;
     formattersDirectory: string;
-    rulesDirectory: string;
+    rulesDirectory: string | string[];
 }

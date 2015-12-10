@@ -8,15 +8,24 @@
         "target": "es5",
         "outDir": "../lib"
     },
+    "atom": {
+        "rewriteTsconfig": false
+    },
     "filesGlob": [
-        "../typings/tsd.d.ts",
+        "../typings/**/*.d.ts",
         "./*.ts",
         "./formatters/**/*.ts",
         "./language/**/*.ts",
         "./rules/**/*.ts"
     ],
     "files": [
-        "../typings/tsd.d.ts",
+        "../typings/findup-sync/findup-sync.d.ts",
+        "../typings/glob/glob.d.ts",
+        "../typings/minimatch/minimatch.d.ts",
+        "../typings/node/node.d.ts",
+        "../typings/optimist/optimist.d.ts",
+        "../typings/underscore.string/underscore.string.d.ts",
+        "../typings/underscore/underscore.d.ts",
         "configuration.ts",
         "enableDisableRules.ts",
         "formatterLoader.ts",
@@ -73,6 +82,7 @@
         "rules/noEvalRule.ts",
         "rules/noInferrableTypesRule.ts",
         "rules/noInternalModuleRule.ts",
+        "rules/noNullKeywordRule.ts",
         "rules/noRequireImportsRule.ts",
         "rules/noShadowedVariableRule.ts",
         "rules/noStringLiteralRule.ts",

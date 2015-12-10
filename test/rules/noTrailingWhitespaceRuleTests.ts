@@ -13,26 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
+import {TestUtils} from "../lint";
 
 describe("<no-trailing-whitespace>", () => {
-    const NoTrailingWhitespaceRule = Lint.Test.getRule("no-trailing-whitespace");
+    const NoTrailingWhitespaceRule = TestUtils.getRule("no-trailing-whitespace");
     const fileName = "rules/trailing.test.ts";
-    const createFailure = Lint.Test.createFailuresOnFile(fileName, NoTrailingWhitespaceRule.FAILURE_STRING);
+    const createFailure = TestUtils.createFailuresOnFile(fileName, NoTrailingWhitespaceRule.FAILURE_STRING);
 
     it("forbids trailing whitespace", () => {
-        const actualFailures = Lint.Test.applyRuleOnFile(fileName, NoTrailingWhitespaceRule);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, NoTrailingWhitespaceRule);
         const expectedFailure1 = createFailure([2, 24], [2, 28]);
         const expectedFailure2 = createFailure([3, 32], [3, 36]);
         const expectedFailure3 = createFailure([5, 1], [5, 5]);
         const expectedFailure4 = createFailure([6, 1], [6, 5]);
         const expectedFailure5 = createFailure([9, 2], [9, 6]);
 
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure1);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure2);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure3);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure4);
-        Lint.Test.assertContainsFailure(actualFailures, expectedFailure5);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure1);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure2);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure3);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure4);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure5);
         assert.lengthOf(actualFailures, 5);
     });
 });
