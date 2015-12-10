@@ -1,6 +1,10 @@
 Change Log
 ===
 
+v3.2.0-dev.2
+---
+* [bugfix] formatters are now exported correctly to work with TS 1.8 (#863)
+
 v3.2.0-dev.1
 ---
 * [bugfix] fixed bug in how custom rules directories are registered (#844)
