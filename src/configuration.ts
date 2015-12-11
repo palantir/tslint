@@ -19,8 +19,8 @@ import * as fs from "fs";
 import * as path from "path";
 import * as findup from "findup-sync";
 
-const CONFIG_FILENAME = "tslint.json";
-const DEFAULT_CONFIG = {
+export const CONFIG_FILENAME = "tslint.json";
+export const DEFAULT_CONFIG = {
     "rules": {
         "curly": true,
         "indent": [true, 4],
