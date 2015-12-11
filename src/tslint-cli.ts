@@ -44,7 +44,7 @@ let processed = optimist
         },
         "i": {
             alias: "init",
-            describe: "generate a tslint.json config file in the cwd"
+            describe: "generate a tslint.json config file in the current working directory"
         },
         "o": {
             alias: "out",
@@ -91,7 +91,7 @@ if (argv.i != null) {
         process.exit(1);
     }
 
-    const tslintJSON = JSON.stringify(DEFAULT_CONFIG, undefined, "   ");
+    const tslintJSON = JSON.stringify(DEFAULT_CONFIG, undefined, "    ");
     fs.writeFileSync(CONFIG_FILENAME, tslintJSON);
     process.exit(0);
 }
