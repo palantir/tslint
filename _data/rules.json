@@ -1,0 +1,760 @@
+[
+  {
+    "ruleName": "align",
+    "description": "Enforces vertical alignment.",
+    "optionsDescription": "Three arguments may be optionally provided:\n\n* `\"parameters\"` checks alignment of function parameters.\n* `\"arguments\"` checks alignment of function call arguments.\n* `\"statements\"` checks alignment of statements.",
+    "options": {
+      "type": "list",
+      "listType": {
+        "type": "enum",
+        "enumValues": [
+          "arguments",
+          "parameters",
+          "statements"
+        ]
+      }
+    },
+    "optionExamples": [
+      "[true, \"parameters\", \"statements\"]"
+    ],
+    "type": "style"
+  },
+  {
+    "ruleName": "ban",
+    "description": "Bans the use of specific functions.",
+    "optionsDescription": "A list of `['object', 'method']` pairs which ban `object.method()`.",
+    "options": {
+      "type": "list",
+      "listType": {
+        "type": "array",
+        "arrayMembers": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "string"
+          }
+        ]
+      }
+    },
+    "optionExamples": [
+      "[true, [\"console\", \"log\"], [\"someObject\", \"someFunction\"]]"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "class-name",
+    "description": "Enforces PascalCased class and interface names.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "style"
+  },
+  {
+    "ruleName": "comment-format",
+    "description": "Enforces formatting rules for single-line comments.",
+    "optionsDescription": "Three arguments may be optionally provided:\n\n* `\"check-space\"` enforces the rule that all single-line comments must begin with a space, as in `// comment`\n    * note that comments starting with `///` are also allowed, for things such as `///<reference>`\n* `\"check-lowercase\"` enforces the rule that the first non-whitespace character of a comment must be lowercase, if applicable.\n* `\"check-uppercase\"` enforces the rule that the first non-whitespace character of a comment must be uppercase, if applicable.",
+    "options": {
+      "type": "list",
+      "listType": {
+        "type": "enum",
+        "enumValues": [
+          "check-space",
+          "check-lowercase",
+          "check-uppercase"
+        ]
+      }
+    },
+    "optionExamples": [
+      "[true, \"check-space\", \"check-lowercase\"]"
+    ],
+    "type": "style"
+  },
+  {
+    "ruleName": "curly",
+    "description": "Enforces braces for `if`/`for`/`do`/`while` statements.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "eofline",
+    "description": "Ensures the file ends with a newline.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "maintainability"
+  },
+  {
+    "ruleName": "forin",
+    "description": "Requires a `for ... in` statement to be filtered with an `if` statement.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "indent",
+    "description": "Enforces indentation with tabs or spaces.",
+    "optionsDescription": "One of the following arguments must be provided:\n\n* `\"spaces\"` enforces consistent spaces.\n* `\"tabs\"` enforces consistent tabs.",
+    "options": {
+      "type": "enum",
+      "enumValues": [
+        "tabs",
+        "spaces"
+      ]
+    },
+    "optionExamples": [
+      "[true, \"spaces\"]"
+    ],
+    "type": "maintainability"
+  },
+  {
+    "ruleName": "interface-name",
+    "description": "Requires interface names to begin with a capital 'I'",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "style"
+  },
+  {
+    "ruleName": "jsdoc-format",
+    "description": "Enforces basic format rules for JSDoc comments.",
+    "descriptionDetails": "The following rules are enforced for JSDoc comments (comments starting with `/**`):\n \n  * each line contains an asterisk and asterisks must be aligned\n  * each asterisk must be followed by either a space or a newline (except for the first and the last)\n  * the only characters before the asterisk on each line must be whitespace characters\n  * one line comments must start with `/** ` and end with `*/`",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "style"
+  },
+  {
+    "ruleName": "label-position",
+    "description": "Only allows labels on sensible statements.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "label-undefined",
+    "description": "Checks that labels are defined before usage.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "max-line-length",
+    "description": "Requires lines to be under a certain max length.",
+    "optionsDescription": "An integer indicating the max length of lines.",
+    "options": {
+      "type": "number"
+    },
+    "optionExamples": [
+      "[true, 120]"
+    ],
+    "type": "maintainability"
+  },
+  {
+    "ruleName": "member-access-rule",
+    "description": "Requires explicit visibility declarations for class members.",
+    "optionsDescription": "Two arguments may be optionally provided:\n\n  * `\"check-accessor\"` enforces explicit visibility on get/set accessors (can only be public)\n  * `\"check-constructor\"`  enforces explicit visibility on constructors (can only be public)",
+    "options": {
+      "type": "list",
+      "listType": {
+        "type": "enum",
+        "enumValues": [
+          "check-accessor",
+          "check-constructor"
+        ]
+      }
+    },
+    "optionExamples": [
+      "true",
+      "[true, \"check-accessor\"]"
+    ],
+    "type": "style"
+  },
+  {
+    "ruleName": "member-ordering-rule",
+    "description": "Enforces member ordering.",
+    "optionsDescription": "Three arguments may be optionally provided:\n\n    * `public-before-private ` All public members must be declared before private members.\n    * `static-before-instance ` All static members must be declared before instance members.\n    * `variables-before-functions` All variables needs to be declared before functions.",
+    "options": {
+      "type": "list",
+      "listType": {
+        "type": "enum",
+        "enumValues": [
+          "public-before-private",
+          "static-before-instance",
+          "variables-before-functions"
+        ]
+      }
+    },
+    "optionExamples": [
+      "[true, \"public-before-private\", \"static-before-instance\"]"
+    ],
+    "type": "maintainability"
+  },
+  {
+    "ruleName": "no-any",
+    "description": "Diallows usages of `any` as a type declaration.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-arg",
+    "description": "Disallows access to `arguments.callee`.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-bitwise",
+    "description": "Disallows bitwise operators.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "maintainability"
+  },
+  {
+    "ruleName": "no-conditional-assignment",
+    "description": "Disallows any type of assignment in conditionals.",
+    "descriptionDetails": "This applies to `do-while`, `for`, `if`, and `while` statements.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-consecutive-blank-lines",
+    "description": "Disallows having more than one blank line in a row.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "style"
+  },
+  {
+    "ruleName": "no-console",
+    "description": "Bans the use of specified `console` methods.",
+    "optionsDescription": "A list of method names to ban.",
+    "options": {
+      "type": "list",
+      "listType": {
+        "type": "string"
+      }
+    },
+    "optionExamples": [
+      "[true, [\"log\", \"error\"]]"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-constructor-vars",
+    "description": "Disallows the `public` and `private` modifiers for constructor parameters.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "style"
+  },
+  {
+    "ruleName": "no-construct",
+    "description": "Disallows access to the constructors of `String`, `Number`, and `Boolean`.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-debugger",
+    "description": "Disallows `debugger` statements.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-duplicate-key",
+    "description": "Disallows duplicate keys in object literals.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-duplicate-variable",
+    "description": "Disallows duplicate variable declarations in the same block scope.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-empty",
+    "description": "Disallows empty blocks.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-eval",
+    "description": "Disallows `eval` function invocations.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-inferrable-types",
+    "description": "Disallows explicit type declarations for variables or parameters initialized to a number, string, or boolean.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "style"
+  },
+  {
+    "ruleName": "no-internal-module",
+    "description": "Disallows internal `module`",
+    "rationale": "Using `module` leads to a confusion of concepts with external modules. Use the newer `namespace` keyword instead.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "style"
+  },
+  {
+    "ruleName": "no-null-keyword",
+    "description": "Disallows use of the `null` keyword literal.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-require-imports",
+    "description": "Disallows invocation of `require()`.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "maintainability"
+  },
+  {
+    "ruleName": "no-shadowed-variable",
+    "description": "Disallows shadowed variable declarations.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-string-literal",
+    "description": "Disallows object access via string literals.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-switch-case-fall-through",
+    "description": "Disallows falling through case statements.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-trailing-whitespace",
+    "description": "Disallows trailing whitespace at the end of a line.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "maintainability"
+  },
+  {
+    "ruleName": "no-unreachable",
+    "description": "Disallows unreachable code after `break`, `catch`, `throw`, and `return` statements.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-unused-expression",
+    "description": "Disallows unused expression statements.",
+    "descriptionDetails": "Unused expressions are expression statements which are not assignments or function calls (and thus no-ops).",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-unused-variable",
+    "description": "Disallows unused imports, variables, functions and private class members.",
+    "optionsDescription": "Two arguments may be optionally provided:\n\n* `\"check-parameters\"` disallows unused function and constructor parameters.\n    * NOTE: this option is experimental and does not work with classes that use abstract method declarations, among other things.\n* `\"react\"` relaxes the rule for a namespace import named `React` (from either the module `\"react\"` or `\"react/addons\"`).\nAny JSX expression in the file will be treated as a usage of `React` (because it expands to `React.createElement `).",
+    "options": {
+      "type": "list",
+      "listType": {
+        "type": "enum",
+        "enumValues": [
+          "check-parameters",
+          "react"
+        ]
+      }
+    },
+    "optionExamples": [
+      "[true, \"react\"]"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-use-before-declare",
+    "description": "Disallows usage of variables before their declaration.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-var-keyword",
+    "description": "Disallows usage of the `var` keyword.",
+    "descriptionDetails": "Use `let` or `const` instead.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-var-requires",
+    "description": "Disallows the use of require statements except in import statements.",
+    "descriptionDetails": "In other words, the use of forms such as `var module = require(\"module\")` is banned.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "object-literal-sort-keys",
+    "description": "Requires keys in object literals to be sorted alphabetically",
+    "rationale": "Useful in preventing merge conflicts",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "maintainability"
+  },
+  {
+    "ruleName": "one-line",
+    "description": "Requires the specified tokens to be on the same line as the expression preceding them.",
+    "optionsDescription": "Four arguments may be optionally provided:\n\n  * `\"check-catch\"` checks that `catch` is on the same line as the closing brace for `try`.\n  * `\"check-else\"` checks that `else` is on the same line as the closing brace for `if`.\n  * `\"check-open-brace\"` checks that an open brace falls on the same line as its preceding expression.\n  * `\"check-whitespace\"` checks preceding whitespace for the specified tokens.",
+    "options": {
+      "type": "list",
+      "listType": {
+        "type": "enum",
+        "enumValues": [
+          "check-catch",
+          "check-else",
+          "check-open-brace",
+          "check-whitespace"
+        ]
+      }
+    },
+    "optionExamples": [
+      "[true, \"check-catch\", \"check-else\"]"
+    ],
+    "type": "style"
+  },
+  {
+    "ruleName": "quotemark",
+    "description": "Requires single or double quotes for string literals.",
+    "optionsDescription": "Three arguments may be optionally provided:\n\n* `\"single\"` enforces single quotes.\n* `\"double\"` enforces double quotes.\n* `\"avoid-escape\"` allows you to use the \"other\" quotemark in cases where escaping would normally be required.\nFor example, `[true, \"double\", \"avoid-escape\"]` would not report a failure on the string literal `'Hello \"World\"'`.",
+    "options": {
+      "type": "list",
+      "listType": {
+        "type": "enum",
+        "enumValues": [
+          "single",
+          "double",
+          "avoid-escape"
+        ]
+      }
+    },
+    "optionExamples": [
+      "[true, \"single\", \"avoid-escape\"]"
+    ],
+    "type": "style"
+  },
+  {
+    "ruleName": "radix",
+    "description": "Requires the radix parameter to be specified when calling `parseInt`.",
+    "rationale": "From MDN: \n> Always specify this parameter to eliminate reader confusion and to guarantee predictable behavior.\n> Different implementations produce different results when a radix is not specified, usually defaulting the value to 10.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "semicolon",
+    "description": "Requires semicolons at the end of every statement.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "style"
+  },
+  {
+    "ruleName": "switch-default",
+    "description": "Require a `default` case in all `switch` statements.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "trailing-comma",
+    "description": "Requires or disallows trailing commas in array and object literals, destructuring assignments and named imports.",
+    "optionsDescription": "One argument which is an object with the keys `multiline` and `singleline`.\nBoth should be set to either `\"always\"` or `\"never\"`.\n\n* `\"multiline\"` checks multi-line object literals.\n* `\"singleline\"` checks single-line object literals.",
+    "options": {
+      "type": "object",
+      "properties": {
+        "multiline": {
+          "type": "enum",
+          "enumValues": [
+            "always",
+            "never"
+          ]
+        },
+        "singleline": {
+          "type": "enum",
+          "enumValues": [
+            "always",
+            "never"
+          ]
+        }
+      }
+    },
+    "optionExamples": [
+      "[true, {\"multiline\": \"always\", \"singleline\": \"never\"}]"
+    ],
+    "type": "maintainability"
+  },
+  {
+    "ruleName": "triple-equals",
+    "description": "Requires `===` and `!==` in place of `==` and `!=`.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "typedef",
+    "description": "Requires type defintions to exist.",
+    "optionsDescription": "Five arguments may be optionally provided:\n\n* `\"call-signature\"` checks return type of functions.\n* `\"parameter\"` checks type specifier of function parameters.\n* `\"property-declaration\"` checks return types of interface properties.\n* `\"variable-declaration\"` checks variable declarations.\n* `\"member-variable-declaration\"` checks member variable declarations.",
+    "options": {
+      "type": "list",
+      "listType": {
+        "type": "enum",
+        "enumValues": [
+          "call-signature",
+          "parameter",
+          "property-declaration",
+          "variable-declaration",
+          "member-variable-declaration"
+        ]
+      }
+    },
+    "optionExamples": [
+      "[true, \"call-signature\", \"member-variable-declaration\"]"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "typedef-whitespace",
+    "description": "Requires or disallows whitespace for type definitions.",
+    "descriptionDetails": "Determines if a space is required or not before the colon in a type specifier.",
+    "optionsDescription": "One argument which is an object.\nEach key should have a value of `\"space\"` or `\"nospace\"`.\nPossible keys are:\n\n* `\"call-signature\"` checks return type of functions.\n* `\"index-signature\"` checks index type specifier of indexers.\n* `\"parameter\"` checks function parameters.\n* `\"property-declaration\"` checks object property declarations.\n* `\"variable-declaration\"` checks variable declaration.",
+    "options": {
+      "type": "object",
+      "properties": {
+        "call-signature": {
+          "type": "enum",
+          "enumValues": [
+            "nospace",
+            "space"
+          ]
+        },
+        "index-signature": {
+          "type": "enum",
+          "enumValues": [
+            "nospace",
+            "space"
+          ]
+        },
+        "parameter": {
+          "type": "enum",
+          "enumValues": [
+            "nospace",
+            "space"
+          ]
+        },
+        "property-declaration": {
+          "type": "enum",
+          "enumValues": [
+            "nospace",
+            "space"
+          ]
+        },
+        "variable-declaration": {
+          "type": "enum",
+          "enumValues": [
+            "nospace",
+            "space"
+          ]
+        }
+      }
+    },
+    "optionExamples": [
+      "[true, {\"parameter\": \"space\", \"property-declaration\" : \"space\"}]"
+    ],
+    "type": "style"
+  },
+  {
+    "ruleName": "use-strict",
+    "description": "Requires using ECMAScript 5's strict mode.",
+    "optionsDescription": "Two arguments may be optionally provided:\n\n* `check-module` checks that all top-level modules are using strict mode.\n* `check-function` checks that all top-level functions are using strict mode.",
+    "options": {
+      "type": "list",
+      "listType": {
+        "type": "enum",
+        "enumValues": [
+          "check-module",
+          "check-function"
+        ]
+      }
+    },
+    "optionExamples": [
+      "[true, \"check-module\"]"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "variable-name",
+    "description": "Checks variable names for various errors.",
+    "optionsDescription": "Four arguments may be optionally provided:\n\n* `\"check-format\"`: allows only camelCased or UPPER_CASED variable names\n  * `\"allow-leading-underscore\"` allows underscores at the beginning (only has an effect if \"check-format\" specified)\n  * `\"allow-trailing-underscore\"` allows underscores at the end. (only has an effect if \"check-format\" specified)\n* `\"ban-keywords\"`: disallows the use of certain TypeScript keywords\n(`any`, `Number`, `number`, `String`, `string`, `Boolean`, `boolean`, `undefined`) as variable or parameter names.",
+    "options": {
+      "type": "list",
+      "listType": {
+        "type": "enum",
+        "enumValues": [
+          "check-format",
+          "allow-leading-underscore",
+          "allow-trailing-underscore",
+          "ban-keywords"
+        ]
+      }
+    },
+    "optionExamples": [
+      "[true, \"ban-keywords\", \"check-format\", \"allow-leading-underscore\"]"
+    ],
+    "type": "style"
+  },
+  {
+    "ruleName": "whitespace",
+    "description": "Requires spacing whitespace.",
+    "optionsDescription": "Seven arguments may be optionally provided:\n\n* `\"check-branch\"` checks branching statements (`if`/`else`/`for`/`while`) are followed by whitespace.\n* `\"check-decl\"`checks that variable declarations have whitespace around the equals token.\n* `\"check-operator\"` checks for whitespace around operator tokens.\n* `\"check-module\"` checks for whitespace in import & export statements.\n* `\"check-separator\"` checks for whitespace after separator tokens (`,`/`;`).\n* `\"check-type\"` checks for whitespace before a variable type specification.\n* `\"check-typecast\"` checks for whitespace between a typecast and its target.",
+    "options": {
+      "type": "list",
+      "listType": {
+        "type": "enum",
+        "enumValues": [
+          "check-branch",
+          "check-decl",
+          "check-operator",
+          "check-module",
+          "check-seperator",
+          "check-type",
+          "check-typecast"
+        ]
+      }
+    },
+    "optionExamples": [
+      "[true, \"check-branch\", \"check-operator\", \"check-typecast\"]"
+    ],
+    "type": "style"
+  }
+]

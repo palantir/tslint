@@ -12,5 +12,11 @@ github_username:  palantir/tslint
 markdown: redcarpet
 markdown_ext: md
 
+page_gen:
+  - data: rules
+    template: rule
+    name: ruleName
+    dir: rules
+
 redcarpet:
   extensions: ["tables", "autolink", "strikethrough", "space_after_headers", "with_toc_data", "fenced_code_blocks"]
