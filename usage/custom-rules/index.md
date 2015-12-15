@@ -27,4 +27,4 @@ Finally, you can specify the path to your custom rules inside of your [`tslint.j
 [0]: {{site.baseurl | append: "/develop/custom-rules/"}}
 [1]: {{site.baseurl | append: "/usage/cli/"}}
 [2]: {{site.baseurl | append: "/usage/library/"}}
-[2]: {{site.baseurl | append: "/usage/tslint-json/"}}
+[3]: {{site.baseurl | append: "/usage/tslint-json/"}}
