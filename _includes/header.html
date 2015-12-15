@@ -4,12 +4,10 @@
   <section class="site-header">
       <a class="site-title" href="{{ site.baseurl }}/">{{ site.title }}</a>
       <nav class="site-nav">
-        {% assign pages = site.pages | sort: 'order' %} 
-        {% for page in pages %}
-          {% if page.menu == 'main' %}
-            <a class="page-link" href="{{ page.url | prepend: site.baseurl }}">{{ page.title }}</a>
-          {% endif %}
-        {% endfor %}
+        <a class="page-link" href="{{site.baseurl}}/usage/cli">Usage</a>
+        <a class="page-link" href="{{site.baseurl}}/rules">Rules</a>
+        <a class="page-link" href="{{site.baseurl}}/develop/custom-rules">Develop</a>
+        <a class="page-link" href="{{site.baseurl}}/news">News</a>
       </nav>
   </section>
   {% if page.title == site.title %}

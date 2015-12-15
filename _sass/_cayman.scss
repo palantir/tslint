@@ -222,7 +222,7 @@ $header-hover-color: rgba(255, 255, 255, 0.8);
   }
 
   @include large {
-    max-width: 64rem;
+    max-width: 68rem;
     padding: 2rem 6rem;
     margin: 0 auto;
     font-size: 1.1rem;
@@ -395,6 +395,40 @@ $header-hover-color: rgba(255, 255, 255, 0.8);
     margin: 1rem 0;
     background-color: #eff0f1;
     border: 0;
+  }
+}
+
+.page {
+  @extend %clearfix;
+  width: 100%;
+}
+
+.page-content {
+  width: 80%;
+  padding: 1rem;
+  float: left;
+}
+
+.page-sidebar {
+  width: 20%;
+  padding: 1rem;
+  float: left;
+
+  .active {
+    font-style: italic;
+  }
+}
+
+.sidebar-title {
+  border-bottom: 1px solid $heading-color;
+}
+
+ul.sidebar-links {
+  list-style: none;
+  margin-left: 0;
+
+  h6 {
+    margin-bottom: 0.33rem;
   }
 }
 
