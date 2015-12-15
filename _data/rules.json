@@ -2,7 +2,8 @@
   {
     "ruleName": "align",
     "description": "Enforces vertical alignment.",
-    "optionsDescription": "Three arguments may be optionally provided:\n\n* `\"parameters\"` checks alignment of function parameters.\n* `\"arguments\"` checks alignment of function call arguments.\n* `\"statements\"` checks alignment of statements.",
+    "rationale": "Helps maintain a readable style in your codebase.",
+    "optionsDescription": "\nThree arguments may be optionally provided:\n\n* `\"parameters\"` checks alignment of function parameters.\n* `\"arguments\"` checks alignment of function call arguments.\n* `\"statements\"` checks alignment of statements.",
     "options": {
       "type": "list",
       "listType": {
@@ -22,6 +23,7 @@
   {
     "ruleName": "ban",
     "description": "Bans the use of specific functions.",
+    "descriptionDetails": "At this time, there is no way to disable global methods with this rule.",
     "optionsDescription": "A list of `['object', 'method']` pairs which ban `object.method()`.",
     "options": {
       "type": "list",
@@ -45,6 +47,7 @@
   {
     "ruleName": "class-name",
     "description": "Enforces PascalCased class and interface names.",
+    "rationale": "Helps maintain a consistent, readable style in your codebase.",
     "optionsDescription": "Not configurable.",
     "options": {},
     "optionExamples": [
@@ -55,7 +58,8 @@
   {
     "ruleName": "comment-format",
     "description": "Enforces formatting rules for single-line comments.",
-    "optionsDescription": "Three arguments may be optionally provided:\n\n* `\"check-space\"` enforces the rule that all single-line comments must begin with a space, as in `// comment`\n    * note that comments starting with `///` are also allowed, for things such as `///<reference>`\n* `\"check-lowercase\"` enforces the rule that the first non-whitespace character of a comment must be lowercase, if applicable.\n* `\"check-uppercase\"` enforces the rule that the first non-whitespace character of a comment must be uppercase, if applicable.",
+    "rationale": "Helps maintain a consistent, readable style in your codebase.",
+    "optionsDescription": "\nThree arguments may be optionally provided:\n\n* `\"check-space\"` requires that all single-line comments must begin with a space, as in `// comment`\n    * note that comments starting with `///` are also allowed, for things such as `///<reference>`\n* `\"check-lowercase\"` requires that the first non-whitespace character of a comment must be lowercase, if applicable.\n* `\"check-uppercase\"` requires that the first non-whitespace character of a comment must be uppercase, if applicable.",
     "options": {
       "type": "list",
       "listType": {
@@ -75,6 +79,7 @@
   {
     "ruleName": "curly",
     "description": "Enforces braces for `if`/`for`/`do`/`while` statements.",
+    "rationale": "\n```ts\nif (foo === bar)\n    foo++;\n    bar++;\n```\n\nIn the code above, the author almost certainly meant for both `foo++` and `bar++`\nto be executed only if `foo === bar`. However, he forgot braces and `bar++` will be executed\nno matter what. This rule could prevent such a mistake.",
     "optionsDescription": "Not configurable.",
     "options": {},
     "optionExamples": [
@@ -85,6 +90,7 @@
   {
     "ruleName": "eofline",
     "description": "Ensures the file ends with a newline.",
+    "rationale": "It is a [standard convention](http://stackoverflow.com/q/729692/3124288) to end files with a newline.",
     "optionsDescription": "Not configurable.",
     "options": {},
     "optionExamples": [
@@ -95,6 +101,7 @@
   {
     "ruleName": "forin",
     "description": "Requires a `for ... in` statement to be filtered with an `if` statement.",
+    "rationale": "\n```ts\nfor (let key in someObject) {\n    if (someObject.hasOwnProperty(key)) {\n        // code here\n    }\n}\n```\nPrevents accidental interation over properties inherited from an object's prototype.\nSee [MDN's `for...in`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...in)\ndocumentation for more information about `for...in` loops.",
     "optionsDescription": "Not configurable.",
     "options": {},
     "optionExamples": [
