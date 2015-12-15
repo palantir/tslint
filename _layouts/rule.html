@@ -1,6 +1,5 @@
 ---
 layout: page
-title: "Rule: {{page.ruleName}}"
 ---
 {{page.description | markdownify}}
 {% if page.descriptionDetails %}
@@ -24,5 +23,5 @@ title: "Rule: {{page.ruleName}}"
 
 <h5>Schema:</h5>
 <pre>
-{{page.options | to_json}}
+{{page.optionsJSON}}
 </pre>

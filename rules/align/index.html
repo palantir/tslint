@@ -1,0 +1,35 @@
+---
+ruleName: align
+description: Enforces vertical alignment.
+optionsDescription: |-
+  Three arguments may be optionally provided:
+
+  * `"parameters"` checks alignment of function parameters.
+  * `"arguments"` checks alignment of function call arguments.
+  * `"statements"` checks alignment of statements.
+options:
+  type: list
+  listType:
+    type: enum
+    enumValues:
+      - arguments
+      - parameters
+      - statements
+optionExamples:
+  - '[true, "parameters", "statements"]'
+type: style
+optionsJSON: |-
+  {
+    "type": "list",
+    "listType": {
+      "type": "enum",
+      "enumValues": [
+        "arguments",
+        "parameters",
+        "statements"
+      ]
+    }
+  }
+layout: rule
+title: 'Rule: align'
+---

@@ -1,0 +1,89 @@
+---
+ruleName: typedef-whitespace
+description: Requires or disallows whitespace for type definitions.
+descriptionDetails: Determines if a space is required or not before the colon in a type specifier.
+optionsDescription: |-
+  One argument which is an object.
+  Each key should have a value of `"space"` or `"nospace"`.
+  Possible keys are:
+
+  * `"call-signature"` checks return type of functions.
+  * `"index-signature"` checks index type specifier of indexers.
+  * `"parameter"` checks function parameters.
+  * `"property-declaration"` checks object property declarations.
+  * `"variable-declaration"` checks variable declaration.
+options:
+  type: object
+  properties:
+    call-signature:
+      type: enum
+      enumValues:
+        - nospace
+        - space
+    index-signature:
+      type: enum
+      enumValues:
+        - nospace
+        - space
+    parameter:
+      type: enum
+      enumValues:
+        - nospace
+        - space
+    property-declaration:
+      type: enum
+      enumValues:
+        - nospace
+        - space
+    variable-declaration:
+      type: enum
+      enumValues:
+        - nospace
+        - space
+optionExamples:
+  - '[true, {"parameter": "space", "property-declaration" : "space"}]'
+type: style
+optionsJSON: |-
+  {
+    "type": "object",
+    "properties": {
+      "call-signature": {
+        "type": "enum",
+        "enumValues": [
+          "nospace",
+          "space"
+        ]
+      },
+      "index-signature": {
+        "type": "enum",
+        "enumValues": [
+          "nospace",
+          "space"
+        ]
+      },
+      "parameter": {
+        "type": "enum",
+        "enumValues": [
+          "nospace",
+          "space"
+        ]
+      },
+      "property-declaration": {
+        "type": "enum",
+        "enumValues": [
+          "nospace",
+          "space"
+        ]
+      },
+      "variable-declaration": {
+        "type": "enum",
+        "enumValues": [
+          "nospace",
+          "space"
+        ]
+      }
+    }
+  }
+layout: rule
+title: 'Rule: typedef-whitespace'
+---

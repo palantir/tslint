@@ -1,0 +1,27 @@
+---
+ruleName: indent
+description: Enforces indentation with tabs or spaces.
+optionsDescription: |-
+  One of the following arguments must be provided:
+
+  * `"spaces"` enforces consistent spaces.
+  * `"tabs"` enforces consistent tabs.
+options:
+  type: enum
+  enumValues:
+    - tabs
+    - spaces
+optionExamples:
+  - '[true, "spaces"]'
+type: maintainability
+optionsJSON: |-
+  {
+    "type": "enum",
+    "enumValues": [
+      "tabs",
+      "spaces"
+    ]
+  }
+layout: rule
+title: 'Rule: indent'
+---

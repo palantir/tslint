@@ -1,6 +1,6 @@
 <ul>
  {% assign rules = site.data.rules | where: "type",include.ruleType | sort: "name" %}
  {% for rule in rules %}
-  <li><a href="{{rule.ruleName}}.html">{{rule.ruleName}}</a> - {{rule.description | markdownify | remove:"<p>" | remove: "</p>"}}</li>
+  <li><a href="{{rule.ruleName}}">{{rule.ruleName}}</a> - {{rule.description | markdownify | remove:"<p>" | remove: "</p>"}}</li>
  {% endfor %}
 </ul>
