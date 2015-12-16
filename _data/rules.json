@@ -47,7 +47,7 @@
   {
     "ruleName": "class-name",
     "description": "Enforces PascalCased class and interface names.",
-    "rationale": "Helps maintain a consistent, readable style in your codebase.",
+    "rationale": "Makes it easy to differentitate classes from regular variables at a glance.",
     "optionsDescription": "Not configurable.",
     "options": {},
     "optionExamples": [
@@ -112,7 +112,8 @@
   {
     "ruleName": "indent",
     "description": "Enforces indentation with tabs or spaces.",
-    "optionsDescription": "One of the following arguments must be provided:\n\n* `\"spaces\"` enforces consistent spaces.\n* `\"tabs\"` enforces consistent tabs.",
+    "rationale": "\nUsing only one of tabs or spaces for indentation leads to more consistent editor behavior,\ncleaner diffs in version control, and easier programatic manipulation.",
+    "optionsDescription": "\nOne of the following arguments must be provided:\n\n* `\"spaces\"` enforces consistent spaces.\n* `\"tabs\"` enforces consistent tabs.",
     "options": {
       "type": "enum",
       "enumValues": [
@@ -128,6 +129,7 @@
   {
     "ruleName": "interface-name",
     "description": "Requires interface names to begin with a capital 'I'",
+    "rationale": "Makes it easy to differentitate interfaces from regular classes at a glance.",
     "optionsDescription": "Not configurable.",
     "options": {},
     "optionExamples": [
@@ -138,7 +140,8 @@
   {
     "ruleName": "jsdoc-format",
     "description": "Enforces basic format rules for JSDoc comments.",
-    "descriptionDetails": "The following rules are enforced for JSDoc comments (comments starting with `/**`):\n \n  * each line contains an asterisk and asterisks must be aligned\n  * each asterisk must be followed by either a space or a newline (except for the first and the last)\n  * the only characters before the asterisk on each line must be whitespace characters\n  * one line comments must start with `/** ` and end with `*/`",
+    "descriptionDetails": "\nThe following rules are enforced for JSDoc comments (comments starting with `/**`):\n \n* each line contains an asterisk and asterisks must be aligned\n* each asterisk must be followed by either a space or a newline (except for the first and the last)\n* the only characters before the asterisk on each line must be whitespace characters\n* one line comments must start with `/** ` and end with `*/`",
+    "rationale": "Helps maintain a consistent, readable style for JSDoc comments.",
     "optionsDescription": "Not configurable.",
     "options": {},
     "optionExamples": [
@@ -148,7 +151,9 @@
   },
   {
     "ruleName": "label-position",
-    "description": "Only allows labels on sensible statements.",
+    "description": "Only allows labels in sensible locations.",
+    "descriptionDetails": "This rule only allows labels to be on `do/for/while/switch` statements.",
+    "rationale": "\nLabels in JavaScript only can be used in conjunction with `break` or `continue`,\nconstructs meant to be used for loop flow control. While you can theoretically use\nlabels on any block statement in JS, it is considered poor code structure to do so.",
     "optionsDescription": "Not configurable.",
     "options": {},
     "optionExamples": [
@@ -159,6 +164,8 @@
   {
     "ruleName": "label-undefined",
     "description": "Checks that labels are defined before usage.",
+    "descriptionDetails": "This rule is now implemented in the TypeScript compiler and does not need to be used.",
+    "rationale": "Using `break` or `continue` to go to an out-of-scope label is an error in JS.",
     "optionsDescription": "Not configurable.",
     "options": {},
     "optionExamples": [
@@ -169,6 +176,7 @@
   {
     "ruleName": "max-line-length",
     "description": "Requires lines to be under a certain max length.",
+    "rationale": "\nLimiting the length of a line of code improces code readability.\nIt also makes comparing code side-by-side easier and works smoother with\nvarious editors, IDEs, and version control diff viewers.",
     "optionsDescription": "An integer indicating the max length of lines.",
     "options": {
       "type": "number"
@@ -181,7 +189,8 @@
   {
     "ruleName": "member-access-rule",
     "description": "Requires explicit visibility declarations for class members.",
-    "optionsDescription": "Two arguments may be optionally provided:\n\n  * `\"check-accessor\"` enforces explicit visibility on get/set accessors (can only be public)\n  * `\"check-constructor\"`  enforces explicit visibility on constructors (can only be public)",
+    "rationale": "Explicit visibility declarations can make code more readable and accessible for those new to TS.",
+    "optionsDescription": "\nTwo arguments may be optionally provided:\n\n* `\"check-accessor\"` enforces explicit visibility on get/set accessors (can only be public)\n* `\"check-constructor\"`  enforces explicit visibility on constructors (can only be public)",
     "options": {
       "type": "list",
       "listType": {
@@ -196,12 +205,13 @@
       "true",
       "[true, \"check-accessor\"]"
     ],
-    "type": "style"
+    "type": "typescript"
   },
   {
     "ruleName": "member-ordering-rule",
     "description": "Enforces member ordering.",
-    "optionsDescription": "Three arguments may be optionally provided:\n\n    * `public-before-private ` All public members must be declared before private members.\n    * `static-before-instance ` All static members must be declared before instance members.\n    * `variables-before-functions` All variables needs to be declared before functions.",
+    "rationale": "A consistent ordering for class members can make classes easier to read, navigate, and edit.",
+    "optionsDescription": "\nThree arguments may be optionally provided:\n\n* `public-before-private ` All public members must be declared before private members.\n* `static-before-instance ` All static members must be declared before instance members.\n* `variables-before-functions` All variables needs to be declared before functions.",
     "options": {
       "type": "list",
       "listType": {
@@ -216,21 +226,23 @@
     "optionExamples": [
       "[true, \"public-before-private\", \"static-before-instance\"]"
     ],
-    "type": "maintainability"
+    "type": "typescript"
   },
   {
     "ruleName": "no-any",
     "description": "Diallows usages of `any` as a type declaration.",
+    "rationale": "Using `any` as a type declaration nullifies the compile-time benefits of the type system.",
     "optionsDescription": "Not configurable.",
     "options": {},
     "optionExamples": [
       "true"
     ],
-    "type": "functionality"
+    "type": "typescript"
   },
   {
     "ruleName": "no-arg",
-    "description": "Disallows access to `arguments.callee`.",
+    "description": "Disallows use of `arguments.callee`.",
+    "rationale": "\nUsing `arguments.callee` makes various performance optimizations impossible.\nSee [=MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/arguments/callee)\nfor more details on why to avoid `arguments.callee`.",
     "optionsDescription": "Not configurable.",
     "options": {},
     "optionExamples": [
@@ -241,17 +253,19 @@
   {
     "ruleName": "no-bitwise",
     "description": "Disallows bitwise operators.",
+    "rationale": "\nBitwise operators are often typos - for example `bool1 & bool2` instead of `bool1 && bool2`.\nThey also can be an indicator of overly clever code which decreases maintainability.",
     "optionsDescription": "Not configurable.",
     "options": {},
     "optionExamples": [
       "true"
     ],
-    "type": "maintainability"
+    "type": "functionality"
   },
   {
     "ruleName": "no-conditional-assignment",
     "description": "Disallows any type of assignment in conditionals.",
     "descriptionDetails": "This applies to `do-while`, `for`, `if`, and `while` statements.",
+    "rationale": "\nAssignments in conditionals are often typos:\nfor example `if (var1 = var2)` instead of `if (var1 == var2)`.\nThey also can be an indicator of overly clever code which decreases maintainability.",
     "optionsDescription": "Not configurable.",
     "options": {},
     "optionExamples": [
@@ -261,7 +275,8 @@
   },
   {
     "ruleName": "no-consecutive-blank-lines",
-    "description": "Disallows having more than one blank line in a row.",
+    "description": "Disallows more than one blank line in a row.",
+    "rationale": "Helps maintain a readable style in your codebase.",
     "optionsDescription": "Not configurable.",
     "options": {},
     "optionExamples": [
@@ -272,6 +287,7 @@
   {
     "ruleName": "no-console",
     "description": "Bans the use of specified `console` methods.",
+    "rationale": "In general, `console` methods aren't appropriate for production code.",
     "optionsDescription": "A list of method names to ban.",
     "options": {
       "type": "list",
@@ -286,7 +302,8 @@
   },
   {
     "ruleName": "no-constructor-vars",
-    "description": "Disallows the `public` and `private` modifiers for constructor parameters.",
+    "description": "Disallows paramater properties.",
+    "rationale": "\nParameter properties can be confusing to those new to TS as they are less explicit\nthan other ways of declaring and initializing class members.",
     "optionsDescription": "Not configurable.",
     "options": {},
     "optionExamples": [
@@ -297,6 +314,8 @@
   {
     "ruleName": "no-construct",
     "description": "Disallows access to the constructors of `String`, `Number`, and `Boolean`.",
+    "descriptionDetails": "Disallows constructor use such as `new Number(foo)` but does not disallow `Number(foo)`.",
+    "rationale": "\nThere is little reason to use `String`, `Number`, or `Boolean` as constructors.\nIn almost all cases, the regular function-call version is more appropriate.\n[More details](http://stackoverflow.com/q/4719320/3124288) are available on StackOverflow.",
     "optionsDescription": "Not configurable.",
     "options": {},
     "optionExamples": [
@@ -307,6 +326,7 @@
   {
     "ruleName": "no-debugger",
     "description": "Disallows `debugger` statements.",
+    "rationale": "In general, `debugger` statements aren't appropriate for production code.",
     "optionsDescription": "Not configurable.",
     "options": {},
     "optionExamples": [
@@ -317,6 +337,7 @@
   {
     "ruleName": "no-duplicate-key",
     "description": "Disallows duplicate keys in object literals.",
+    "rationale": "There is no good reason to define an object literal with the same key twice.",
     "optionsDescription": "Not configurable.",
     "options": {},
     "optionExamples": [
@@ -327,6 +348,7 @@
   {
     "ruleName": "no-duplicate-variable",
     "description": "Disallows duplicate variable declarations in the same block scope.",
+    "rationale": "A variable can be reassigned if necessary - there's no good reason to have a duplicate variable declaration.",
     "optionsDescription": "Not configurable.",
     "options": {},
     "optionExamples": [
@@ -337,6 +359,7 @@
   {
     "ruleName": "no-empty",
     "description": "Disallows empty blocks.",
+    "rationale": "Empty blocks are often indicators of missing code.",
     "optionsDescription": "Not configurable.",
     "options": {},
     "optionExamples": [
@@ -347,6 +370,7 @@
   {
     "ruleName": "no-eval",
     "description": "Disallows `eval` function invocations.",
+    "rationale": "\n`eval()` is dangerous as it allows arbitrary code execution with full privileges. There are\n[alternatives](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval)\nfor most of the use cases for `eval()`.",
     "optionsDescription": "Not configurable.",
     "options": {},
     "optionExamples": [
@@ -357,12 +381,13 @@
   {
     "ruleName": "no-inferrable-types",
     "description": "Disallows explicit type declarations for variables or parameters initialized to a number, string, or boolean.",
+    "rationale": "Explicit types where they can be easily infered by the compiler make code more verbose.",
     "optionsDescription": "Not configurable.",
     "options": {},
     "optionExamples": [
       "true"
     ],
-    "type": "style"
+    "type": "typescript"
   },
   {
     "ruleName": "no-internal-module",
@@ -373,11 +398,12 @@
     "optionExamples": [
       "true"
     ],
-    "type": "style"
+    "type": "typescript"
   },
   {
     "ruleName": "no-null-keyword",
     "description": "Disallows use of the `null` keyword literal.",
+    "rationale": "\nInstead of having the dual concepts of `null` and`undefined` in a codebase,\nthis rule ensures that only `undefined` is used.",
     "optionsDescription": "Not configurable.",
     "options": {},
     "optionExamples": [
@@ -388,6 +414,7 @@
   {
     "ruleName": "no-require-imports",
     "description": "Disallows invocation of `require()`.",
+    "rationale": "Prefer the newer ES6-style imports over `require()`.",
     "optionsDescription": "Not configurable.",
     "options": {},
     "optionExamples": [
@@ -397,7 +424,8 @@
   },
   {
     "ruleName": "no-shadowed-variable",
-    "description": "Disallows shadowed variable declarations.",
+    "description": "Disallows shadowing variable declarations.",
+    "rationale": "Shadowing a variable masks access to it and obscures to what value an identifier actually refers.",
     "optionsDescription": "Not configurable.",
     "options": {},
     "optionExamples": [
@@ -408,6 +436,7 @@
   {
     "ruleName": "no-string-literal",
     "description": "Disallows object access via string literals.",
+    "rationale": "Encourages using typed property access.",
     "optionsDescription": "Not configurable.",
     "options": {},
     "optionExamples": [
@@ -418,6 +447,7 @@
   {
     "ruleName": "no-switch-case-fall-through",
     "description": "Disallows falling through case statements.",
+    "rationale": "Fall though in switch statements is often unintentional.",
     "optionsDescription": "Not configurable.",
     "options": {},
     "optionExamples": [
@@ -428,6 +458,7 @@
   {
     "ruleName": "no-trailing-whitespace",
     "description": "Disallows trailing whitespace at the end of a line.",
+    "rationale": "Keeps version control diffs clean as it prevents accidental whitespace from being committed.",
     "optionsDescription": "Not configurable.",
     "options": {},
     "optionExamples": [
@@ -438,6 +469,7 @@
   {
     "ruleName": "no-unreachable",
     "description": "Disallows unreachable code after `break`, `catch`, `throw`, and `return` statements.",
+    "rationale": "Unreachable code is often indication of a logic error.",
     "optionsDescription": "Not configurable.",
     "options": {},
     "optionExamples": [
@@ -630,7 +662,7 @@
   },
   {
     "ruleName": "typedef",
-    "description": "Requires type defintions to exist.",
+    "description": "Requires type definitions to exist.",
     "optionsDescription": "Five arguments may be optionally provided:\n\n* `\"call-signature\"` checks return type of functions.\n* `\"parameter\"` checks type specifier of function parameters.\n* `\"property-declaration\"` checks return types of interface properties.\n* `\"variable-declaration\"` checks variable declarations.\n* `\"member-variable-declaration\"` checks member variable declarations.",
     "options": {
       "type": "list",
@@ -648,7 +680,7 @@
     "optionExamples": [
       "[true, \"call-signature\", \"member-variable-declaration\"]"
     ],
-    "type": "functionality"
+    "type": "typescript"
   },
   {
     "ruleName": "typedef-whitespace",
@@ -698,7 +730,7 @@
     "optionExamples": [
       "[true, {\"parameter\": \"space\", \"property-declaration\" : \"space\"}]"
     ],
-    "type": "style"
+    "type": "typescript"
   },
   {
     "ruleName": "use-strict",

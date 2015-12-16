@@ -8,10 +8,12 @@ A variety of tools and libraries are available to help you integrate TSLint auto
 
 _Note: Most of these tools are not maintained by TSLint._
 
-* [grunt-tslint][0] - Integrate TSLint into your [Grunt][1] builds.
-* [gulp-tslint][2] - Integrate TSLint into your [Gulp][3] builds.
-* [eclipse-tslint][4] - Integrate TSLint with the [Eclipse][5] IDE
-* [linter-tslint][6] - Integrate TSLint with the [Atom][6] editor.
+* [grunt-tslint][0] ([Grunt][1])
+* [gulp-tslint][2] ([Gulp][3])
+* [eclipse-tslint][4] ([Eclipse][5])
+* [linter-tslint][6] ([Atom][7])
+* [vscode-tslint][8] ([Visual Studio Code][9])
+* [syntastic][10] ([VIM][11])
 
 
 [0]: https://github.com/palantir/grunt-tslint
@@ -22,3 +24,7 @@ _Note: Most of these tools are not maintained by TSLint._
 [5]: http://www.eclipse.org/
 [6]: https://github.com/AtomLinter/linter-tslint
 [7]: https://atom.io/
+[8]: https://github.com/Microsoft/vscode-tslint/tree/master/tslint
+[9]: https://code.visualstudio.com/
+[10]: https://github.com/scrooloose/syntastic
+[11]: http://www.vim.org/
