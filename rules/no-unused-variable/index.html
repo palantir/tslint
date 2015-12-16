@@ -2,12 +2,16 @@
 ruleName: no-unused-variable
 description: 'Disallows unused imports, variables, functions and private class members.'
 optionsDescription: |-
+
   Two arguments may be optionally provided:
 
   * `"check-parameters"` disallows unused function and constructor parameters.
-      * NOTE: this option is experimental and does not work with classes that use abstract method declarations, among other things.
-  * `"react"` relaxes the rule for a namespace import named `React` (from either the module `"react"` or `"react/addons"`).
-  Any JSX expression in the file will be treated as a usage of `React` (because it expands to `React.createElement `).
+      * NOTE: this option is experimental and does not work with classes
+      that use abstract method declarations, among other things.
+  * `"react"` relaxes the rule for a namespace import named `React`
+  (from either the module `"react"` or `"react/addons"`).
+  Any JSX expression in the file will be treated as a usage of `React`
+  (because it expands to `React.createElement `).
 options:
   type: list
   listType:

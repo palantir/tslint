@@ -2,7 +2,7 @@
   {
     "ruleName": "align",
     "description": "Enforces vertical alignment.",
-    "rationale": "Helps maintain a readable style in your codebase.",
+    "rationale": "Helps maintain a readable, consistent style in your codebase.",
     "optionsDescription": "\nThree arguments may be optionally provided:\n\n* `\"parameters\"` checks alignment of function parameters.\n* `\"arguments\"` checks alignment of function call arguments.\n* `\"statements\"` checks alignment of statements.",
     "options": {
       "type": "list",
@@ -447,7 +447,7 @@
   {
     "ruleName": "no-switch-case-fall-through",
     "description": "Disallows falling through case statements.",
-    "rationale": "Fall though in switch statements is often unintentional.",
+    "rationale": "Fall though in switch statements is often unintentional and a bug.",
     "optionsDescription": "Not configurable.",
     "options": {},
     "optionExamples": [
@@ -491,7 +491,7 @@
   {
     "ruleName": "no-unused-variable",
     "description": "Disallows unused imports, variables, functions and private class members.",
-    "optionsDescription": "Two arguments may be optionally provided:\n\n* `\"check-parameters\"` disallows unused function and constructor parameters.\n    * NOTE: this option is experimental and does not work with classes that use abstract method declarations, among other things.\n* `\"react\"` relaxes the rule for a namespace import named `React` (from either the module `\"react\"` or `\"react/addons\"`).\nAny JSX expression in the file will be treated as a usage of `React` (because it expands to `React.createElement `).",
+    "optionsDescription": "\nTwo arguments may be optionally provided:\n\n* `\"check-parameters\"` disallows unused function and constructor parameters.\n    * NOTE: this option is experimental and does not work with classes\n    that use abstract method declarations, among other things.\n* `\"react\"` relaxes the rule for a namespace import named `React`\n(from either the module `\"react\"` or `\"react/addons\"`).\nAny JSX expression in the file will be treated as a usage of `React`\n(because it expands to `React.createElement `).",
     "options": {
       "type": "list",
       "listType": {
@@ -553,7 +553,7 @@
   {
     "ruleName": "one-line",
     "description": "Requires the specified tokens to be on the same line as the expression preceding them.",
-    "optionsDescription": "Four arguments may be optionally provided:\n\n  * `\"check-catch\"` checks that `catch` is on the same line as the closing brace for `try`.\n  * `\"check-else\"` checks that `else` is on the same line as the closing brace for `if`.\n  * `\"check-open-brace\"` checks that an open brace falls on the same line as its preceding expression.\n  * `\"check-whitespace\"` checks preceding whitespace for the specified tokens.",
+    "optionsDescription": "\nFour arguments may be optionally provided:\n\n* `\"check-catch\"` checks that `catch` is on the same line as the closing brace for `try`.\n* `\"check-else\"` checks that `else` is on the same line as the closing brace for `if`.\n* `\"check-open-brace\"` checks that an open brace falls on the same line as its preceding expression.\n* `\"check-whitespace\"` checks preceding whitespace for the specified tokens.",
     "options": {
       "type": "list",
       "listType": {
@@ -574,7 +574,7 @@
   {
     "ruleName": "quotemark",
     "description": "Requires single or double quotes for string literals.",
-    "optionsDescription": "Three arguments may be optionally provided:\n\n* `\"single\"` enforces single quotes.\n* `\"double\"` enforces double quotes.\n* `\"avoid-escape\"` allows you to use the \"other\" quotemark in cases where escaping would normally be required.\nFor example, `[true, \"double\", \"avoid-escape\"]` would not report a failure on the string literal `'Hello \"World\"'`.",
+    "optionsDescription": "\nThree arguments may be optionally provided:\n\n* `\"single\"` enforces single quotes.\n* `\"double\"` enforces double quotes.\n* `\"avoid-escape\"` allows you to use the \"other\" quotemark in cases where escaping would normally be required.\nFor example, `[true, \"double\", \"avoid-escape\"]` would not report a failure on the string literal `'Hello \"World\"'`.",
     "options": {
       "type": "list",
       "listType": {
@@ -594,7 +594,7 @@
   {
     "ruleName": "radix",
     "description": "Requires the radix parameter to be specified when calling `parseInt`.",
-    "rationale": "From MDN: \n> Always specify this parameter to eliminate reader confusion and to guarantee predictable behavior.\n> Different implementations produce different results when a radix is not specified, usually defaulting the value to 10.",
+    "rationale": "\nFrom [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/parseInt): \n> Always specify this parameter to eliminate reader confusion and to guarantee predictable behavior.\n> Different implementations produce different results when a radix is not specified, usually defaulting the value to 10.",
     "optionsDescription": "Not configurable.",
     "options": {},
     "optionExamples": [
@@ -625,7 +625,7 @@
   {
     "ruleName": "trailing-comma",
     "description": "Requires or disallows trailing commas in array and object literals, destructuring assignments and named imports.",
-    "optionsDescription": "One argument which is an object with the keys `multiline` and `singleline`.\nBoth should be set to either `\"always\"` or `\"never\"`.\n\n* `\"multiline\"` checks multi-line object literals.\n* `\"singleline\"` checks single-line object literals.",
+    "optionsDescription": "\nOne argument which is an object with the keys `multiline` and `singleline`.\nBoth should be set to either `\"always\"` or `\"never\"`.\n\n* `\"multiline\"` checks multi-line object literals.\n* `\"singleline\"` checks single-line object literals.",
     "options": {
       "type": "object",
       "properties": {
@@ -663,7 +663,7 @@
   {
     "ruleName": "typedef",
     "description": "Requires type definitions to exist.",
-    "optionsDescription": "Five arguments may be optionally provided:\n\n* `\"call-signature\"` checks return type of functions.\n* `\"parameter\"` checks type specifier of function parameters.\n* `\"property-declaration\"` checks return types of interface properties.\n* `\"variable-declaration\"` checks variable declarations.\n* `\"member-variable-declaration\"` checks member variable declarations.",
+    "optionsDescription": "\nFive arguments may be optionally provided:\n\n* `\"call-signature\"` checks return type of functions.\n* `\"parameter\"` checks type specifier of function parameters.\n* `\"property-declaration\"` checks return types of interface properties.\n* `\"variable-declaration\"` checks variable declarations.\n* `\"member-variable-declaration\"` checks member variable declarations.",
     "options": {
       "type": "list",
       "listType": {
@@ -686,7 +686,7 @@
     "ruleName": "typedef-whitespace",
     "description": "Requires or disallows whitespace for type definitions.",
     "descriptionDetails": "Determines if a space is required or not before the colon in a type specifier.",
-    "optionsDescription": "One argument which is an object.\nEach key should have a value of `\"space\"` or `\"nospace\"`.\nPossible keys are:\n\n* `\"call-signature\"` checks return type of functions.\n* `\"index-signature\"` checks index type specifier of indexers.\n* `\"parameter\"` checks function parameters.\n* `\"property-declaration\"` checks object property declarations.\n* `\"variable-declaration\"` checks variable declaration.",
+    "optionsDescription": "\nOne argument which is an object.\nEach key should have a value of `\"space\"` or `\"nospace\"`.\nPossible keys are:\n\n* `\"call-signature\"` checks return type of functions.\n* `\"index-signature\"` checks index type specifier of indexers.\n* `\"parameter\"` checks function parameters.\n* `\"property-declaration\"` checks object property declarations.\n* `\"variable-declaration\"` checks variable declaration.",
     "options": {
       "type": "object",
       "properties": {
@@ -735,7 +735,7 @@
   {
     "ruleName": "use-strict",
     "description": "Requires using ECMAScript 5's strict mode.",
-    "optionsDescription": "Two arguments may be optionally provided:\n\n* `check-module` checks that all top-level modules are using strict mode.\n* `check-function` checks that all top-level functions are using strict mode.",
+    "optionsDescription": "\nTwo arguments may be optionally provided:\n\n* `check-module` checks that all top-level modules are using strict mode.\n* `check-function` checks that all top-level functions are using strict mode.",
     "options": {
       "type": "list",
       "listType": {
@@ -754,7 +754,7 @@
   {
     "ruleName": "variable-name",
     "description": "Checks variable names for various errors.",
-    "optionsDescription": "Four arguments may be optionally provided:\n\n* `\"check-format\"`: allows only camelCased or UPPER_CASED variable names\n  * `\"allow-leading-underscore\"` allows underscores at the beginning (only has an effect if \"check-format\" specified)\n  * `\"allow-trailing-underscore\"` allows underscores at the end. (only has an effect if \"check-format\" specified)\n* `\"ban-keywords\"`: disallows the use of certain TypeScript keywords\n(`any`, `Number`, `number`, `String`, `string`, `Boolean`, `boolean`, `undefined`) as variable or parameter names.",
+    "optionsDescription": "\nFour arguments may be optionally provided:\n\n* `\"check-format\"`: allows only camelCased or UPPER_CASED variable names\n  * `\"allow-leading-underscore\"` allows underscores at the beginning (only has an effect if \"check-format\" specified)\n  * `\"allow-trailing-underscore\"` allows underscores at the end. (only has an effect if \"check-format\" specified)\n* `\"ban-keywords\"`: disallows the use of certain TypeScript keywords (`any`, `Number`, `number`, `String`,\n`string`, `Boolean`, `boolean`, `undefined`) as variable or parameter names.",
     "options": {
       "type": "list",
       "listType": {
@@ -775,7 +775,8 @@
   {
     "ruleName": "whitespace",
     "description": "Requires spacing whitespace.",
-    "optionsDescription": "Seven arguments may be optionally provided:\n\n* `\"check-branch\"` checks branching statements (`if`/`else`/`for`/`while`) are followed by whitespace.\n* `\"check-decl\"`checks that variable declarations have whitespace around the equals token.\n* `\"check-operator\"` checks for whitespace around operator tokens.\n* `\"check-module\"` checks for whitespace in import & export statements.\n* `\"check-separator\"` checks for whitespace after separator tokens (`,`/`;`).\n* `\"check-type\"` checks for whitespace before a variable type specification.\n* `\"check-typecast\"` checks for whitespace between a typecast and its target.",
+    "rationale": "Helps maintain a readable, consistent style in your codebase.",
+    "optionsDescription": "\nSeven arguments may be optionally provided:\n\n* `\"check-branch\"` checks branching statements (`if`/`else`/`for`/`while`) are followed by whitespace.\n* `\"check-decl\"`checks that variable declarations have whitespace around the equals token.\n* `\"check-operator\"` checks for whitespace around operator tokens.\n* `\"check-module\"` checks for whitespace in import & export statements.\n* `\"check-separator\"` checks for whitespace after separator tokens (`,`/`;`).\n* `\"check-type\"` checks for whitespace before a variable type specification.\n* `\"check-typecast\"` checks for whitespace between a typecast and its target.",
     "options": {
       "type": "list",
       "listType": {
