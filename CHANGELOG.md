@@ -1,6 +1,11 @@
 Change Log
 ===
 
+v3.2.1-dev.1
+---
+* [enhancement] automatically generate a `tslint.json` file with new `--init` CLI command (#717)
+* [bugfix] `no-var-keyword` rule detects the use of `var` in all types of `for` loops (#855)
+
 v3.2.0
 ---
 * Stable release containing changes from last two dev releases
