@@ -36,4 +36,26 @@ class NoVarKeywordWalker extends Lint.RuleWalker {
 
         super.visitVariableStatement(node);
     }
+
+    public visitForStatement(node: ts.ForStatement) {
+        this.handleInitializerNode(node.initializer);
+        super.visitForStatement(node);
+    }
+
+    public visitForInStatement(node: ts.ForInStatement) {
+        this.handleInitializerNode(node.initializer);
+        super.visitForInStatement(node);
+    }
+
+    public visitForOfStatement(node: ts.ForOfStatement) {
+        this.handleInitializerNode(node.initializer);
+        super.visitForOfStatement(node);
+    }
+
+    private handleInitializerNode(node: ts.VariableDeclarationList | ts.Expression) {
+        if (node && node.kind === ts.SyntaxKind.VariableDeclarationList &&
+                !(Lint.isNodeFlagSet(node, ts.NodeFlags.Let) || Lint.isNodeFlagSet(node, ts.NodeFlags.Const))) {
+            this.addFailure(this.createFailure(node.getStart(), "var".length, Rule.FAILURE_STRING));
+        }
+    }
 }

@@ -9,6 +9,10 @@ var i, // failure
 
 var [a, b] = [1, 2]; // failure
 
+for (var n; false;); // failure
+for (var n1 in foo); // failure
+for (var n2 of foo); // failure
+
 declare var tmp2: any;
 
 let bar;
@@ -22,3 +26,10 @@ module quz {
 }
 
 let [x, y] = [1, 2];
+
+for (n; false;);
+for (let n; false;);
+for (let name in foo);
+for (let name of foo);
+for (const name in foo);
+for (const name of foo);
