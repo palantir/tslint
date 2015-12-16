@@ -19,13 +19,13 @@ import * as fs from "fs";
 import * as glob from "glob";
 import * as optimist from "optimist";
 import * as Linter from "./tslint";
-import {getRulesDirectories} from "./configuration";
+import {CONFIG_FILENAME, DEFAULT_CONFIG, getRulesDirectories} from "./configuration";
 
 let processed = optimist
     .usage("Usage: $0 [options] [file ...]")
     .check((argv: any) => {
         // at least one of file, help, version or unqualified argument must be present
-        if (!(argv.h || argv.v || argv._.length > 0)) {
+        if (!(argv.h || argv.i || argv.v || argv._.length > 0)) {
             throw "Missing files";
         }
 
@@ -41,6 +41,10 @@ let processed = optimist
         "h": {
             alias: "help",
             describe: "display detailed help"
+        },
+        "i": {
+            alias: "init",
+            describe: "generate a tslint.json config file in the current working directory"
         },
         "o": {
             alias: "out",
@@ -81,6 +85,17 @@ if (argv.v != null) {
     process.exit(0);
 }
 
+if (argv.i != null) {
+    if (fs.existsSync(CONFIG_FILENAME)) {
+        console.error(`Cannot generate ${CONFIG_FILENAME}: file already exists`);
+        process.exit(1);
+    }
+
+    const tslintJSON = JSON.stringify(DEFAULT_CONFIG, undefined, "    ");
+    fs.writeFileSync(CONFIG_FILENAME, tslintJSON);
+    process.exit(0);
+}
+
 if ("help" in argv) {
     outputStream.write(processed.help());
     const outputString = `
@@ -100,6 +115,9 @@ tslint accepts the following commandline options:
         to the rule that will determine what it checks for (such as number
         of characters for the max-line-length rule, or what functions to ban
         for the ban rule).
+
+    -i, --init:
+        Generates a tslint.json config file in the current working directory.
 
     -o, --out:
         A filename to output the results to. By default, tslint outputs to
