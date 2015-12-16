@@ -1,6 +1,10 @@
 Change Log
 ===
 
+v3.2.0
+---
+* Stable release containing changes from last two dev releases
+
 v3.2.0-dev.2
 ---
 * [bugfix] formatters are now exported correctly to work with TS 1.8 (#863)

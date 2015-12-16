@@ -42,5 +42,8 @@
   "peerDependencies": {
     "typescript": ">=1.7.3 || >=1.7.0-dev.20151003 || >=1.8.0-dev"
   },
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "typescript": {
+    "definition": "lib/tslint.d.ts"
+  }
 }

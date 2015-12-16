@@ -19,20 +19,36 @@ import * as fs from "fs";
 import * as path from "path";
 import * as findup from "findup-sync";
 
-const CONFIG_FILENAME = "tslint.json";
-const DEFAULT_CONFIG = {
+export const CONFIG_FILENAME = "tslint.json";
+export const DEFAULT_CONFIG = {
     "rules": {
-        "curly": true,
-        "indent": [true, 4],
-        "no-duplicate-key": true,
+        "class-name": true,
+        "comment-format": [true, "check-space"],
+        "indent": [true, "spaces"],
         "no-duplicate-variable": true,
-        "no-empty": true,
         "no-eval": true,
+        "no-internal-module": true,
         "no-trailing-whitespace": true,
-        "no-unreachable": true,
-        "no-use-before-declare": true,
+        "no-var-keyword": true,
+        "one-line": [true, "check-open-brace", "check-whitespace"],
         "quotemark": [true, "double"],
-        "semicolon": true
+        "semicolon": true,
+        "triple-equals": [true, "allow-null-check"],
+        "typedef-whitespace": [true, {
+            "call-signature": "nospace",
+            "index-signature": "nospace",
+            "parameter": "nospace",
+            "property-declaration": "nospace",
+            "variable-declaration": "nospace"
+        }],
+        "variable-name": [true, "ban-keywords"],
+        "whitespace": [true,
+            "check-branch",
+            "check-decl",
+            "check-operator",
+            "check-separator",
+            "check-type"
+        ],
     }
 };
 const moduleDirectory = path.dirname(module.filename);

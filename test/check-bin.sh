@@ -19,8 +19,7 @@ expectOut () {
   expect=$2
   msg=$3
 
-  if [ $expect != $actual ]
-  then
+  if [ $expect != $actual ]; then
     echo "$msg: expected $expect got $actual"
     num_failures=$(expr $num_failures + 1)
   fi
@@ -43,8 +42,27 @@ expectOut $? 0 "tslint with valid arguments did not exit correctly"
 ./bin/tslint src/configuration.ts -f src/formatterLoader.ts
 expectOut $? 1 "tslint with -f flag did not exit correctly"
 
-if [ $num_failures != 0 ]
-then
+# make sure tslint --init generates a file
+cd ./bin
+if [ -f tslint.json ]; then
+  rm tslint.json
+fi
+
+./tslint --init
+if [ ! -f tslint.json ]; then
+  echo "--init failed, tslint.json not created"
+  num_failures=$(expr $num_failures + 1)
+fi
+expectOut $? 0 "tslint with --init flag did not exit correctly"
+
+# should fail since tslint.json already exists
+./tslint --init
+expectOut $? 1 "tslint with --init flag did not exit correctly when tslint.json already exists"
+
+rm tslint.json
+cd ..
+
+if [ $num_failures != 0 ]; then
   echo "Failed $num_failures tests"
   exit 1
 else
