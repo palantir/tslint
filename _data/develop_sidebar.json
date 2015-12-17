@@ -17,10 +17,6 @@
       {
          "title": "Docs Development",
          "url": "/docs/"
-      },
-      {
-         "title": "Rule Config Schemas",
-         "url": "/rule-config/"
       }
    ]
 }

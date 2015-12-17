@@ -176,7 +176,7 @@
   {
     "ruleName": "max-line-length",
     "description": "Requires lines to be under a certain max length.",
-    "rationale": "\nLimiting the length of a line of code improces code readability.\nIt also makes comparing code side-by-side easier and works smoother with\nvarious editors, IDEs, and version control diff viewers.",
+    "rationale": "\nLimiting the length of a line of code improves code readability.\nIt also makes comparing code side-by-side easier and improves compatibility with\nvarious editors, IDEs, and diff viewers.",
     "optionsDescription": "An integer indicating the max length of lines.",
     "options": {
       "type": "number"
@@ -242,7 +242,7 @@
   {
     "ruleName": "no-arg",
     "description": "Disallows use of `arguments.callee`.",
-    "rationale": "\nUsing `arguments.callee` makes various performance optimizations impossible.\nSee [=MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/arguments/callee)\nfor more details on why to avoid `arguments.callee`.",
+    "rationale": "\nUsing `arguments.callee` makes various performance optimizations impossible.\nSee [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/arguments/callee)\nfor more details on why to avoid `arguments.callee`.",
     "optionsDescription": "Not configurable.",
     "options": {},
     "optionExamples": [
@@ -253,6 +253,7 @@
   {
     "ruleName": "no-bitwise",
     "description": "Disallows bitwise operators.",
+    "descriptionDetails": "\nSpecifically, the following bitwise operators are banned:\n`&`, `&=`, `|`, `|=`,\n`^`, `^=`, `<<`, `<<=`,\n`>>`, `>>=`, `>>>`, `>>>=`, and `~`.\nThis rule does not ban the use of `&` and `|` for intersection and union types.",
     "rationale": "\nBitwise operators are often typos - for example `bool1 & bool2` instead of `bool1 && bool2`.\nThey also can be an indicator of overly clever code which decreases maintainability.",
     "optionsDescription": "Not configurable.",
     "options": {},
@@ -302,7 +303,7 @@
   },
   {
     "ruleName": "no-constructor-vars",
-    "description": "Disallows paramater properties.",
+    "description": "Disallows parameter properties.",
     "rationale": "\nParameter properties can be confusing to those new to TS as they are less explicit\nthan other ways of declaring and initializing class members.",
     "optionsDescription": "Not configurable.",
     "options": {},
@@ -337,7 +338,7 @@
   {
     "ruleName": "no-duplicate-key",
     "description": "Disallows duplicate keys in object literals.",
-    "rationale": "There is no good reason to define an object literal with the same key twice.",
+    "rationale": "\nThere is no good reason to define an object literal with the same key twice.\nThis rule is now implemented in the TypeScript compiler and does not need to be used.",
     "optionsDescription": "Not configurable.",
     "options": {},
     "optionExamples": [
@@ -348,7 +349,8 @@
   {
     "ruleName": "no-duplicate-variable",
     "description": "Disallows duplicate variable declarations in the same block scope.",
-    "rationale": "A variable can be reassigned if necessary - there's no good reason to have a duplicate variable declaration.",
+    "descriptionDetails": "\nThis rule is only useful when using the `var` keyword -\nthe compiler will detect redeclarations of `let` and `const` variables.",
+    "rationale": "\nA variable can be reassigned if necessary -\nthere's no good reason to have a duplicate variable declaration.",
     "optionsDescription": "Not configurable.",
     "options": {},
     "optionExamples": [
@@ -359,6 +361,7 @@
   {
     "ruleName": "no-empty",
     "description": "Disallows empty blocks.",
+    "descriptionDetails": "Blocks with a comment inside are not considered empty.",
     "rationale": "Empty blocks are often indicators of missing code.",
     "optionsDescription": "Not configurable.",
     "options": {},
@@ -436,7 +439,7 @@
   {
     "ruleName": "no-string-literal",
     "description": "Disallows object access via string literals.",
-    "rationale": "Encourages using typed property access.",
+    "rationale": "Encourages using strongly-typed property access.",
     "optionsDescription": "Not configurable.",
     "options": {},
     "optionExamples": [
@@ -480,7 +483,8 @@
   {
     "ruleName": "no-unused-expression",
     "description": "Disallows unused expression statements.",
-    "descriptionDetails": "Unused expressions are expression statements which are not assignments or function calls (and thus no-ops).",
+    "descriptionDetails": "\nUnused expressions are expression statements which are not assignments or function calls\n(and thus usually no-ops).",
+    "rationale": "\nDetects potential errors where an assignment or function call was intended. Also detects constructs such as\n`new SomeClass()`, where a constructor is used solely for its side effects, which is considered poor style.",
     "optionsDescription": "Not configurable.",
     "options": {},
     "optionExamples": [
@@ -510,6 +514,7 @@
   {
     "ruleName": "no-use-before-declare",
     "description": "Disallows usage of variables before their declaration.",
+    "descriptionDetails": "\nThis rule is primarily useful when using the `var` keyword -\nthe compiler will detect if a `let` and `const` variable is used before it is declared.",
     "optionsDescription": "Not configurable.",
     "options": {},
     "optionExamples": [
@@ -531,13 +536,13 @@
   {
     "ruleName": "no-var-requires",
     "description": "Disallows the use of require statements except in import statements.",
-    "descriptionDetails": "In other words, the use of forms such as `var module = require(\"module\")` is banned.",
+    "descriptionDetails": "\nIn other words, the use of forms such as `var module = require(\"module\")` are banned.\nInstead use ES6 style imports or `import foo = require('foo')` imports.",
     "optionsDescription": "Not configurable.",
     "options": {},
     "optionExamples": [
       "true"
     ],
-    "type": "functionality"
+    "type": "typescript"
   },
   {
     "ruleName": "object-literal-sort-keys",
@@ -774,7 +779,7 @@
   },
   {
     "ruleName": "whitespace",
-    "description": "Requires spacing whitespace.",
+    "description": "Enforces whitespace style conventions.",
     "rationale": "Helps maintain a readable, consistent style in your codebase.",
     "optionsDescription": "\nSeven arguments may be optionally provided:\n\n* `\"check-branch\"` checks branching statements (`if`/`else`/`for`/`while`) are followed by whitespace.\n* `\"check-decl\"`checks that variable declarations have whitespace around the equals token.\n* `\"check-operator\"` checks for whitespace around operator tokens.\n* `\"check-module\"` checks for whitespace in import & export statements.\n* `\"check-separator\"` checks for whitespace after separator tokens (`,`/`;`).\n* `\"check-type\"` checks for whitespace before a variable type specification.\n* `\"check-typecast\"` checks for whitespace between a typecast and its target.",
     "options": {
