@@ -1,0 +1,4 @@
+console.time();
+window.toString();
+  ~~~~~~~~~~~~~    [wrong error message]
+console.log();
