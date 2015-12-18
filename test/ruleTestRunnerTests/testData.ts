@@ -91,4 +91,23 @@ export const resultErrs5: LintError[] = [
   { startPos: { line: 1, col: 10 }, endPos: { line: 1, col: 23}, message: "unsafe access" },
   { startPos: { line: 1, col: 12 }, endPos: { line: 2, col: 7 }, message: "another error" }
 ];
+
+export const lintStr6 = `
+if (code === lint-error-free) {
+             ~~~~~~~~~~~~~~~    [err]
+}
+
+[err]: A longer error message I didn't want to type every time!
+`;
+export const codeStr6 = `
+if (code === lint-error-free) {
+}
+
+`;
+export const resultErrs6: LintError[] = [
+    { startPos: { line: 1, col: 13 }, endPos: { line: 1, col: 28 }, message: "A longer error message I didn't want to type every time!" },
+];
+
+
+
 /* tslint:enable:object-literal-sort-keys */

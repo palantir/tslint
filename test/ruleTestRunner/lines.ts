@@ -26,11 +26,15 @@ export class MultilineErrorLine {
 export class EndErrorLine {
     constructor(public startCol: number, public endCol: number, public message: string) { }
 }
+export class MessageSubstitutionLine {
+    constructor(public key: string, public message: string) { }
+}
 export type ErrorLine = MultilineErrorLine | EndErrorLine;
-export type Line = CodeLine | ErrorLine;
+export type Line = CodeLine | ErrorLine | MessageSubstitutionLine;
 
 const multilineErrorRegex = /^\s*~+$/;
 const endErrorRegex = /^\s*~+\s*\[([\w ]+)\]\s*$/;
+const messageSubstitutionRegex = /^\[(\w+?)]: \s*(.+?)\s*$/;
 
 export function classifyLine(line: string): Line {
     let matches: RegExpMatchArray;
@@ -45,6 +49,9 @@ export function classifyLine(line: string): Line {
         const endErrorCol = line.lastIndexOf("~") + 1;
         const [, message] = matches;
         return new EndErrorLine(startErrorCol, endErrorCol, message);
+    } else if (matches = line.match(messageSubstitutionRegex)) {
+        const [, key, message] = matches;
+        return new MessageSubstitutionLine(key, message);
     } else {
         return new CodeLine(line);
     }

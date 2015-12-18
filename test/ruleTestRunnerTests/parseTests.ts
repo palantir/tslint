@@ -21,15 +21,19 @@ describe("Rule Test Runner", () => {
     describe("parse", () => {
         describe("::removeErrorMarkup", () => {
             it("should return the contents of a regular string unchanged", () => {
-             assert.equal(parse.removeErrorMarkup(testData.lintStr1), testData.codeStr1);
+                assert.strictEqual(parse.removeErrorMarkup(testData.lintStr1), testData.codeStr1);
             });
 
             it("should remove a single-line error markup correctly", () => {
-             assert.equal(parse.removeErrorMarkup(testData.lintStr2), testData.codeStr2);
+                assert.strictEqual(parse.removeErrorMarkup(testData.lintStr2), testData.codeStr2);
             });
 
             it("should remove a mix of error markup correctly", () => {
-             assert.equal(parse.removeErrorMarkup(testData.lintStr3), testData.codeStr3);
+                assert.strictEqual(parse.removeErrorMarkup(testData.lintStr3), testData.codeStr3);
+            });
+
+            it("should handle message substitutions correctly", () => {
+                assert.strictEqual(parse.removeErrorMarkup(testData.lintStr6), testData.codeStr6);
             });
         });
 
@@ -45,11 +49,15 @@ describe("Rule Test Runner", () => {
             it("should find a mix of errors correctly", () => {
                 assert.deepEqual(parse.parseErrorsFromMarkup(testData.lintStr3), testData.resultErrs3);
             });
+
+            it("should handle message substitutions correctly", () => {
+                assert.deepEqual(parse.parseErrorsFromMarkup(testData.lintStr6), testData.resultErrs6);
+            });
         });
 
         describe("::createMarkupFromErrors", () => {
             it("should generate correct markup", () => {
-                assert.equal(parse.createMarkupFromErrors(testData.codeStr5, testData.resultErrs5), testData.lintStr5);
+                assert.strictEqual(parse.createMarkupFromErrors(testData.codeStr5, testData.resultErrs5), testData.lintStr5);
             });
         });
     });

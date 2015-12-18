@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {LintError, errorComparator, lintSyntaxError} from "./types";
-import {ErrorLine, CodeLine, MultilineErrorLine, EndErrorLine, classifyLine, createErrorString} from "./lines";
+import {LintError, FILE_EXTENSION, errorComparator, lintSyntaxError} from "./types";
+import {ErrorLine, CodeLine, MultilineErrorLine, EndErrorLine, MessageSubstitutionLine, classifyLine, createErrorString} from "./lines";
 
 export function removeErrorMarkup(text: string): string {
     const textLines = text.split("\n");
@@ -27,61 +27,67 @@ export function removeErrorMarkup(text: string): string {
 /* tslint:disable:object-literal-sort-keys */
 export function parseErrorsFromMarkup(text: string): LintError[] {
     const textLines = text.split("\n");
-    const lines = textLines.map(classifyLine);
+    const classifiedLines = textLines.map(classifyLine);
 
-    if (lines.length > 0 && !(lines[0] instanceof CodeLine)) {
-        throw lintSyntaxError("Cannot start a lint file with an error mark line.");
+    if (classifiedLines.length > 0 && !(classifiedLines[0] instanceof CodeLine)) {
+        throw lintSyntaxError(`Cannot start a ${FILE_EXTENSION} file with an error mark line.`);
     }
 
-    // map each line of code to the error markings beneath it
-    let lineIndex = -1;
-    const lineErrorMap: ErrorLine[][] = [];
-    for (const line of lines) {
+    const messageSubstitutionLines = <MessageSubstitutionLine[]> classifiedLines.filter((l) => l instanceof MessageSubstitutionLine);
+    const messageSubstitutions = messageSubstitutionLines.reduce((obj, line) => {
+        obj[line.key] = line.message;
+        return obj;
+    }, <any>{});
+
+    // map each actual line of code to the error markings beneath it
+    const errorMarkupForLinesOfCode = classifiedLines.reduce((lineMap, line) => {
         if (line instanceof CodeLine) {
-            lineIndex++;
-            lineErrorMap[lineIndex] = [];
+            lineMap.push([]);
+        } else if (line instanceof MessageSubstitutionLine) {
+            // do nothing, already processed above
         } else {
-            lineErrorMap[lineIndex].push(<ErrorLine>line);
+            lineMap[lineMap.length - 1].push(<ErrorLine>line);
         }
-    }
+        return lineMap;
+    }, (<ErrorLine[][]> []));
+
 
     const lintErrors: LintError[] = [];
 
     // for each line of code...
-    lineErrorMap.forEach((errorLines, lineNo) => {
+    errorMarkupForLinesOfCode.forEach((errorMarkupForLineOfCode, lineNo) => {
 
         // for each error marking on that line...
-        while (errorLines.length > 0) {
-            const errorLine = errorLines.shift();
-            const errorStartPos = { line: lineNo, col: errorLine.startCol };
+        while (errorMarkupForLineOfCode.length > 0) {
+            const errorMarkup = errorMarkupForLineOfCode.shift();
+            const errorStartPos = { line: lineNo, col: errorMarkup.startCol };
 
             // if the error starts and ends on this line, add it now to list of errors
-            if (errorLine instanceof EndErrorLine) {
+            if (errorMarkup instanceof EndErrorLine) {
                 lintErrors.push({
                     startPos: errorStartPos,
-                    endPos: { line: lineNo, col: errorLine.endCol },
-                    message: errorLine.message
+                    endPos: { line: lineNo, col: errorMarkup.endCol },
+                    message: getFullMessage(messageSubstitutions, errorMarkup.message)
                 });
 
-                // if the error is the start of a multiline error
-            } else if (errorLine instanceof MultilineErrorLine) {
+            // if the error is the start of a multiline error
+            } else if (errorMarkup instanceof MultilineErrorLine) {
+
                 // keep going until we get to the end of the multiline error
-                for (let endLineNo = lineNo + 1; ; ++endLineNo) {
-                    if (endLineNo >= lineErrorMap.length
-                        || lineErrorMap[endLineNo].length === 0
-                        || lineErrorMap[endLineNo][0].startCol !== 0) {
+                for (let nextLineNo = lineNo + 1; ; ++nextLineNo) {
+                    if (!validErrorMarkupContinuation(errorMarkupForLinesOfCode, nextLineNo)) {
                         throw lintSyntaxError(
                             `Error mark starting at ${errorStartPos.line}:${errorStartPos.col} does not end correctly.`
                         );
                     } else {
-                        const nextErrorLine = lineErrorMap[endLineNo].shift();
+                        const nextErrorLine = errorMarkupForLinesOfCode[nextLineNo].shift();
 
                         // if end of multiline error, add it it list of errors
                         if (nextErrorLine instanceof EndErrorLine) {
                             lintErrors.push({
                                 startPos: errorStartPos,
-                                endPos: { line: endLineNo, col: nextErrorLine.endCol },
-                                message: nextErrorLine.message
+                                endPos: { line: nextLineNo, col: nextErrorLine.endCol },
+                                message: getFullMessage(messageSubstitutions, nextErrorLine.message)
                             });
                             break;
                         }
@@ -102,31 +108,43 @@ export function createMarkupFromErrors(code: string, lintErrors: LintError[]) {
     lintErrors.sort(errorComparator);
 
     const codeLines = code.split("\n");
-    const lineErrorMap: ErrorLine[][] = codeLines.map(() => []);
+    const errorMarkupForLinesOfCode: ErrorLine[][] = codeLines.map(() => []);
+
     for (const error of lintErrors) {
         const {startPos, endPos, message} = error;
+
         if (startPos.line === endPos.line) {  // single line error
-            lineErrorMap[startPos.line].push(new EndErrorLine(
+            errorMarkupForLinesOfCode[startPos.line].push(new EndErrorLine(
                 startPos.col,
                 endPos.col,
                 message
             ));
         } else {  // multiline error
-            lineErrorMap[startPos.line].push(new MultilineErrorLine(startPos.col));
+            errorMarkupForLinesOfCode[startPos.line].push(new MultilineErrorLine(startPos.col));
             for (let lineNo = startPos.line + 1; lineNo < endPos.line; ++lineNo) {
-                lineErrorMap[lineNo].push(new MultilineErrorLine(0));
+                errorMarkupForLinesOfCode[lineNo].push(new MultilineErrorLine(0));
             }
-            lineErrorMap[endPos.line].push(new EndErrorLine(0, endPos.col, message));
+            errorMarkupForLinesOfCode[endPos.line].push(new EndErrorLine(0, endPos.col, message));
         }
     }
 
-    let resultLines: string[] = [];
-    codeLines.forEach((codeLine, i) => {
-        resultLines.push(codeLine);
-        for (let errorLine of lineErrorMap[i]) {
-            resultLines.push(createErrorString(codeLine, errorLine));
+    const resultLines = codeLines.reduce((finalLines, codeLine, i) => {
+        finalLines.push(codeLine);
+        for (const errorMarkup of errorMarkupForLinesOfCode[i]) {
+            finalLines.push(createErrorString(codeLine, errorMarkup));
         }
-    });
+        return finalLines;
+    }, <string[]>[]);
     return resultLines.join("\n");
+}
+
+function getFullMessage(messageSubstitutions: {[k: string]: string}, message: string) {
+    return messageSubstitutions[message] || message;
+}
+
+function validErrorMarkupContinuation(errorMarkupForLinesOfCode: ErrorLine[][], lineNo: number) {
+    return lineNo < errorMarkupForLinesOfCode.length
+        && errorMarkupForLinesOfCode[lineNo].length !== 0
+        && errorMarkupForLinesOfCode[lineNo][0].startCol === 0;
 }
 /* tslint:enable:object-literal-sort-keys */

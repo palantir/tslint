@@ -20,10 +20,10 @@ describe("Rule Test Runner", () => {
     describe("utils", () => {
         describe("::strMult", () => {
             it("should duplicate strings correctly", () => {
-                assert.equal("xxxxx", utils.strMult("x", 5));
-                assert.equal("", utils.strMult("abc", 0));
-                assert.equal("abcabcabc", utils.strMult("abc", 3));
-                assert.equal("one", utils.strMult("one", 1));
+                assert.strictEqual("xxxxx", utils.strMult("x", 5));
+                assert.strictEqual("", utils.strMult("abc", 0));
+                assert.strictEqual("abcabcabc", utils.strMult("abc", 3));
+                assert.strictEqual("one", utils.strMult("one", 1));
             });
         });
     });

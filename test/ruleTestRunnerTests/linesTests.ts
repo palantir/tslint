@@ -23,12 +23,12 @@ describe("Rule Test Runner", () => {
                 const code1 = "this is a line of code";
                 const errorMarkup1 = "  ~~~~~~~~~~~~~~~~~~~~";
                 const errorLine1 = new lines.MultilineErrorLine(2);
-                assert.equal(lines.createErrorString(code1, errorLine1), errorMarkup1);
+                assert.strictEqual(lines.createErrorString(code1, errorLine1), errorMarkup1);
 
                 const code2 = "another line of code here";
                 const errorMarkup2 = "~~~~~~~~~~~~~~~~~~~~~~~~~ [foo]";
                 const errorLine2 = new lines.EndErrorLine(0, code2.length, "foo");
-                assert.equal(lines.createErrorString(code2, errorLine2), errorMarkup2);
+                assert.strictEqual(lines.createErrorString(code2, errorLine2), errorMarkup2);
             });
         });
     });

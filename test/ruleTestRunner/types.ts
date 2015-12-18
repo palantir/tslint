@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+export const FILE_EXTENSION = ".linttest";
+
 export interface PositionInFile {
    line: number;
    col: number;
