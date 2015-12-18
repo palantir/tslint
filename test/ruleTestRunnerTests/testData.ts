@@ -51,7 +51,7 @@ A file with lots of errors
    And more code here
 ~~~~~~~~~~~~    [multiline error1]
 ~~~~~~~~~~~~~~~~~~~~~
-      ~  [error3]
+      ~  [error3: fun]
    Final code here
 ~~  [multiline error2]
 `;
@@ -67,7 +67,7 @@ export const resultErrs3: LintError[] = [
   { startPos: { line: 1, col: 3 }, endPos: { line: 3, col: 12 }, message: "multiline error1" },
   { startPos: { line: 1, col: 4 }, endPos: { line: 1, col: 17 }, message: "error2" },
   { startPos: { line: 2, col: 0 }, endPos: { line: 4, col: 2 }, message: "multiline error2" },
-  { startPos: { line: 3, col: 6 }, endPos: { line: 3, col: 7 }, message: "error3" }
+  { startPos: { line: 3, col: 6 }, endPos: { line: 3, col: 7 }, message: "error3: fun" }
 ];
 
 export const lintStr4 = "";

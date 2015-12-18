@@ -1,4 +1,4 @@
 console.time();
 window.toString();
-  ~~~~~~~~~~~~~    [wrong error message]
+~~~~~~~~~~~~~~~    [function invocation disallowed: window.toString]
 console.log();

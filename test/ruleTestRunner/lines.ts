@@ -33,7 +33,7 @@ export type ErrorLine = MultilineErrorLine | EndErrorLine;
 export type Line = CodeLine | ErrorLine | MessageSubstitutionLine;
 
 const multilineErrorRegex = /^\s*~+$/;
-const endErrorRegex = /^\s*~+\s*\[([\w ]+)\]\s*$/;
+const endErrorRegex = /^\s*~+\s*\[(.+)\]\s*$/;
 const messageSubstitutionRegex = /^\[(\w+?)]: \s*(.+?)\s*$/;
 
 export function classifyLine(line: string): Line {
