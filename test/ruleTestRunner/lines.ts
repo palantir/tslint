@@ -37,12 +37,12 @@ export function classifyLine(line: string): Line {
     /* tslint:disable:no-conditional-assignment */
     if (line.match(multilineErrorRegex)) {
         // 1-based indexing for line and column numbers
-        const startErrorCol = line.indexOf("~") + 1;
+        const startErrorCol = line.indexOf("~");
         return new MultilineErrorLine(startErrorCol);
     } else if (matches = line.match(endErrorRegex)) {
-        const startErrorCol = line.indexOf("~") + 1;
+        const startErrorCol = line.indexOf("~");
         // exclusive endpoint
-        const endErrorCol = line.lastIndexOf("~") + 2;
+        const endErrorCol = line.lastIndexOf("~") + 1;
         const [, message] = matches;
         return new EndErrorLine(startErrorCol, endErrorCol, message);
     } else {
@@ -52,13 +52,13 @@ export function classifyLine(line: string): Line {
 }
 
 export function createErrorString(code: string, errorLine: ErrorLine) {
-    const startSpaces = strMult(" ", errorLine.startCol - 1);
+    const startSpaces = strMult(" ", errorLine.startCol);
     if (errorLine instanceof MultilineErrorLine) {
         const tildes = strMult("~", code.length - startSpaces.length);
         return `${startSpaces}${tildes}`;
     } else if (errorLine instanceof EndErrorLine) {
         const tildes = strMult("~", errorLine.endCol - errorLine.startCol);
-        const endSpaces = strMult(" ", code.length - errorLine.endCol + 1);
+        const endSpaces = strMult(" ", code.length - errorLine.endCol);
         return `${startSpaces}${tildes}${endSpaces} [${errorLine.message}]`;
     }
 }

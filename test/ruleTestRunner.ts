@@ -24,26 +24,31 @@ import * as Linter from "../src/tslint";
 import * as parse from "./ruleTestRunner/parse";
 import {LintError} from "./ruleTestRunner/types";
 
-console.log();
-console.log(colors.underline("Testing Lint Rules:"));
-
 const EXTENSION = ".linttest";
+
 // needed to get colors to show up when passing through Grunt
 (colors as any).enabled = true;
 
+console.log();
+console.log(colors.underline("Testing Lint Rules:"));
+
+let hadTestFailure = false;
 const testDirectories = glob.sync("test/ruleTests/*");
+
 for (const testDirectory of testDirectories) {
     const filesToLint = glob.sync(path.join(testDirectory, `**/*${EXTENSION}`));
-    const configuration = JSON.parse(fs.readFileSync(path.join(testDirectory, "tslint.json"), "utf8"));
+    const tslintConfig = JSON.parse(fs.readFileSync(path.join(testDirectory, "tslint.json"), "utf8"));
+
     for (const fileToLint of filesToLint) {
         process.stdout.write(`${fileToLint}:`);
+
         const baseFilename = path.basename(fileToLint, ".linttest");
         const fileData = fs.readFileSync(fileToLint, "utf8");
         const fileDataWithoutMarkup = parse.removeErrorMarkup(fileData);
         const errorsFromMarkup = parse.parseErrorsFromMarkup(fileData);
 
         const options = {
-            configuration,
+            configuration: tslintConfig,
             formatter: "prose",
             formattersDirectory: "",
             rulesDirectory: "",
@@ -51,10 +56,10 @@ for (const testDirectory of testDirectories) {
 
         const linter = new Linter(baseFilename, fileDataWithoutMarkup, options);
         const errorsFromLinter: LintError[] = linter.lint().failures.map((failure) => {
-            const startCol = failure.getStartPosition().getLineAndCharacter().character + 1;
-            const startLine = failure.getStartPosition().getLineAndCharacter().line + 1;
-            const endCol = failure.getEndPosition().getLineAndCharacter().character + 1;
-            const endLine = failure.getEndPosition().getLineAndCharacter().line + 1;
+            const startCol = failure.getStartPosition().getLineAndCharacter().character;
+            const startLine = failure.getStartPosition().getLineAndCharacter().line;
+            const endCol = failure.getEndPosition().getLineAndCharacter().character;
+            const endLine = failure.getEndPosition().getLineAndCharacter().line;
 
             return {
                 endPos: { col: endCol, line: endLine },
@@ -76,6 +81,8 @@ for (const testDirectory of testDirectories) {
             console.log(colors.red("Expected (from .linttest file)"));
             console.log(colors.green("Actual (from TSLint)"));
 
+            hadTestFailure = true;
+
             for (const diffResult of diffResults) {
                 let text: string;
                 if (diffResult.added) {
@@ -92,4 +99,6 @@ for (const testDirectory of testDirectories) {
      }
  }
 
-process.exit(0);
+if (hadTestFailure) {
+    process.exit(1);
+}

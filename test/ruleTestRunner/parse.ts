@@ -48,8 +48,7 @@ export function parseErrorsFromMarkup(text: string): LintError[] {
     const lintErrors: LintError[] = [];
 
     // for each line of code...
-    for (let lineNo = 1; lineNo <= lineErrorMap.length; ++lineNo) {
-        const errorLines = lineErrorMap[lineNo - 1];
+    lineErrorMap.forEach((errorLines, lineNo) => {
 
         // for each error marking on that line...
         while (errorLines.length > 0) {
@@ -64,18 +63,18 @@ export function parseErrorsFromMarkup(text: string): LintError[] {
                     message: errorLine.message
                 });
 
-            // if the error is the start of a multiline error
+                // if the error is the start of a multiline error
             } else if (errorLine instanceof MultilineErrorLine) {
                 // keep going until we get to the end of the multiline error
                 for (let endLineNo = lineNo + 1; ; ++endLineNo) {
-                    if (endLineNo > lineErrorMap.length
-                            || lineErrorMap[endLineNo - 1].length === 0
-                            || lineErrorMap[endLineNo - 1][0].startCol !== 1) {
+                    if (endLineNo >= lineErrorMap.length
+                        || lineErrorMap[endLineNo].length === 0
+                        || lineErrorMap[endLineNo][0].startCol !== 0) {
                         throw lintSyntaxError(
                             `Error mark starting at ${errorStartPos.line}:${errorStartPos.col} does not end correctly.`
                         );
                     } else {
-                        const nextErrorLine = lineErrorMap[endLineNo - 1].shift();
+                        const nextErrorLine = lineErrorMap[endLineNo].shift();
 
                         // if end of multiline error, add it it list of errors
                         if (nextErrorLine instanceof EndErrorLine) {
@@ -90,7 +89,7 @@ export function parseErrorsFromMarkup(text: string): LintError[] {
                 }
             }
         }
-    }
+    });
 
     // sort errors by startPos then endPos
     lintErrors.sort(errorComparator);
@@ -107,17 +106,17 @@ export function createMarkupFromErrors(code: string, lintErrors: LintError[]) {
     for (const error of lintErrors) {
         const {startPos, endPos, message} = error;
         if (startPos.line === endPos.line) {  // single line error
-            lineErrorMap[startPos.line - 1].push(new EndErrorLine(
+            lineErrorMap[startPos.line].push(new EndErrorLine(
                 startPos.col,
                 endPos.col,
                 message
             ));
         } else {  // multiline error
-            lineErrorMap[startPos.line - 1].push(new MultilineErrorLine(startPos.col));
-            for (let lineNo = startPos.line; lineNo < endPos.line - 1; ++lineNo) {
-                lineErrorMap[lineNo].push(new MultilineErrorLine(1));
+            lineErrorMap[startPos.line].push(new MultilineErrorLine(startPos.col));
+            for (let lineNo = startPos.line + 1; lineNo < endPos.line; ++lineNo) {
+                lineErrorMap[lineNo].push(new MultilineErrorLine(0));
             }
-            lineErrorMap[endPos.line - 1].push(new EndErrorLine(1, endPos.col, message));
+            lineErrorMap[endPos.line].push(new EndErrorLine(0, endPos.col, message));
         }
     }
 

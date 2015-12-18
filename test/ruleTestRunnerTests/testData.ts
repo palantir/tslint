@@ -36,7 +36,7 @@ export const codeStr2 = `
 A file with an error
 `;
 export const resultErrs2: LintError[] = [
-  { startPos: { line: 2, col: 1 }, endPos: { line: 2, col: 6 }, message: "error" }
+  { startPos: { line: 1, col: 0 }, endPos: { line: 1, col: 5 }, message: "error" }
 ];
 
 
@@ -63,11 +63,11 @@ A file with lots of errors
    Final code here
 `;
 export const resultErrs3: LintError[] = [
-  { startPos: { line: 2, col: 1 }, endPos: { line: 2, col: 6 }, message: "error" },
-  { startPos: { line: 2, col: 4 }, endPos: { line: 4, col: 13 }, message: "multiline error1" },
-  { startPos: { line: 2, col: 5 }, endPos: { line: 2, col: 18 }, message: "error2" },
-  { startPos: { line: 3, col: 1 }, endPos: { line: 5, col: 3 }, message: "multiline error2" },
-  { startPos: { line: 4, col: 7 }, endPos: { line: 4, col: 8 }, message: "error3" }
+  { startPos: { line: 1, col: 0 }, endPos: { line: 1, col: 5 }, message: "error" },
+  { startPos: { line: 1, col: 3 }, endPos: { line: 3, col: 12 }, message: "multiline error1" },
+  { startPos: { line: 1, col: 4 }, endPos: { line: 1, col: 17 }, message: "error2" },
+  { startPos: { line: 2, col: 0 }, endPos: { line: 4, col: 2 }, message: "multiline error2" },
+  { startPos: { line: 3, col: 6 }, endPos: { line: 3, col: 7 }, message: "error3" }
 ];
 
 export const lintStr4 = "";
@@ -88,7 +88,7 @@ someObject.someProperty.doSomething();
 someVar <- someObject.crazyMethod(arg1, arg2, arg3);
 `;
 export const resultErrs5: LintError[] = [
-  { startPos: { line: 2, col: 11 }, endPos: { line: 2, col: 24 }, message: "unsafe access" },
-  { startPos: { line: 2, col: 13 }, endPos: { line: 3, col: 8 }, message: "another error" }
+  { startPos: { line: 1, col: 10 }, endPos: { line: 1, col: 23}, message: "unsafe access" },
+  { startPos: { line: 1, col: 12 }, endPos: { line: 2, col: 7 }, message: "another error" }
 ];
 /* tslint:enable:object-literal-sort-keys */
