@@ -1,0 +1,8 @@
+interface IValidInterfaceName {
+
+}
+
+interface NotValidInterfaceName {
+          ~~~~~~~~~~~~~~~~~~~~~  [interface name must be a capitalized I]
+
+}

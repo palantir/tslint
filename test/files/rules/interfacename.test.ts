@@ -1,7 +1,0 @@
-interface IValidInterfaceName {
-
-}
-
-interface NotValidInterfaceName {
-
-}
