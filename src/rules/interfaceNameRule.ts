@@ -19,7 +19,7 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
-    public static FAILURE_STRING = "interface name must be a capitalized I";
+    public static FAILURE_STRING = "interface name must start with a capitalized I";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new NameWalker(sourceFile, this.getOptions()));
