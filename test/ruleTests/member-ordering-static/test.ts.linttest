@@ -1,0 +1,10 @@
+class Foo {
+    x: number;
+    static y: number;
+    ~~~~~~~~~~~~~~~~~ [0]
+    constructor() {
+        // nothing to do
+    }
+}
+
+[0]: Declaration of public static member variable not allowed to appear after declaration of public instance member variable
