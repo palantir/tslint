@@ -1,8 +1,12 @@
 class Members {
     get g() {
+    ~~~~~~~~~
         return 1;
+~~~~~~~~~~~~~~~~~
     }
+~~~~~ [default access modifier on member/method not allowed]
     set s(o: any) {}
+    ~~~~~~~~~~~~~~~~ [default access modifier on member/method not allowed]
 
     public get publicG() {
         return 1;
