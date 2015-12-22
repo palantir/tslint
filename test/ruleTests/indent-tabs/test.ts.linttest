@@ -59,28 +59,36 @@ module TestModule {
 // invalid code
 module TestModule {
     var testVariable = 123;
+~~~~ [0]
 }
 
 function() {
         var test = 123;
+~~~~~~~~ [0]
 }
 
 class TestClass {
     private variable;
+~~~~ [0]
 
     testFunction() {
+~~~~ [0]
        this.variable = 3;
+~~~~~~~ [0]
     }
+~~~~ [0]
 }
 
 var obj = {
     a: 1,
+~~~~ [0]
 	b: 2,
 	c: 3
 };
 
 enum TestEnum {
     VALUE1,
+~~~~ [0]
 	VALUE2
 }
 
@@ -89,41 +97,56 @@ switch (integerValue) {
 		console.warn("1");
 		break;
     case 1:
+~~~~ [0]
         console.warn("1");
+~~~~~~~~ [0]
         break;
+~~~~~~~~ [0]
     default:
+~~~~ [0]
         console.warn("default");
+~~~~~~~~ [0]
         break;
+~~~~~~~~ [0]
 }
 
 for (var i = 0; i < 1; ++i) {
     console.warn("123");
+~~~~ [0]
 }
 
 while (i < 1) {
     console.warn("123");
+~~~~ [0]
 }
 
 do {
     console.warn("123");
+~~~~ [0]
 } while (i < 1);
 
 if (i < 1) {
     console.warn("123");
+~~~~ [0]
 }
 
 var arr = [
     1,
+~~~~ [0]
 	2
 ];
 
 var arr2 = [
 	{
         a: 1,
+~~~~~~~~ [0]
 		b: 2
     },
+~~~~ [0]
 	{
 		a: 3,
 		b: 4
 	}
 ];
+
+[0]: tab indentation expected
