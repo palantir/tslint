@@ -26,30 +26,37 @@ I've even got characters where I shouldn't. How fun!    *
     /**
      * this is also jsdoc
      *and it has a problem on this line
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [format]
      */
 
     /**
      * this jsoc is fine
      * up until the last line when it isn't
    */
+~~~~~ [asterisks]
 
     /**
      * this jsdoc has characters where it really should
 not  */
+~~~~~~~ [format]
 
     /**
      * same thing with this
 one  *
+~~~~~~ [format]
      */
 
     /**
      * what else can go wrong?
    * oh right this
+~~~~~~~~~~~~~~~~~~ [asterisks]
      */
 
     /**a bad one liner */
+    ~~~~~~~~~~~~~~~~~~~~~ [format]
 
     /** another bad one liner*/
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [format]
 
     /** */
 
@@ -67,3 +74,6 @@ function makeHeader(pkg: Package) {
         `\t */`
     ].join("\r\n");
 }
+
+[format]: jsdoc is not formatted correctly on this line
+[asterisks]: asterisks in jsdoc must be aligned
