@@ -4,6 +4,7 @@ function f1() {
     var x = 3;
     return;
     var y;
+    ~~~~~~ [unreachable code]
     var z;
 }
 
@@ -11,6 +12,7 @@ var f2 = () => {
     if (x === 3) {
         throw new Error("error");
         "123";
+        ~~~~~~ [unreachable code]
     } else {
         return y;
     }
@@ -23,9 +25,11 @@ for (var i = 0; i < 10; ++i) {
     if (i === 3) {
         break;
         console.log("hi");
+        ~~~~~~~~~~~~~~~~~~ [unreachable code]
     } else {
         continue lab;
         i = 4;
+        ~~~~~~ [unreachable code]
     }
 }
 
@@ -86,6 +90,7 @@ function f7() {
     }
 
     var y = 7;
+    ~~~~~~~~~~ [unreachable code]
 }
 
 // more valid code
