@@ -34,7 +34,7 @@ export type Line = CodeLine | ErrorLine | MessageSubstitutionLine;
 
 const multilineErrorRegex = /^\s*(~+|~nil)$/;
 const endErrorRegex = /^\s*(~+|~nil)\s*\[(.+)\]\s*$/;
-const messageSubstitutionRegex = /^\[(\w+?)]: \s*(.+?)\s*$/;
+const messageSubstitutionRegex = /^\[([\w\-\_]+?)]: \s*(.+?)\s*$/;
 
 export function classifyLine(line: string): Line {
     let matches: RegExpMatchArray;

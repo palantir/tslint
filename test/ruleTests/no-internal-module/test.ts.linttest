@@ -2,10 +2,14 @@ namespace foo {
 }
 
 module bar {
+~~~~~~~~~~~~
 }
+~ [0]
 
 declare module buzz {
+~~~~~~~~~~~~~~~~~~~~~
 }
+~ [0]
 
 declare module "hoge" {
 }
@@ -23,17 +27,29 @@ namespace foo {
 
 namespace foo.bar {
     module baz {
+    ~~~~~~~~~~~~
         namespace buzz {
+~~~~~~~~~~~~~~~~~~~~~~~~
         }
+~~~~~~~~~
     }
+~~~~~ [0]
 }
 
 module foo.bar {
+~~~~~~~~~~~~~~~~
     namespace baz {
+~~~~~~~~~~~~~~~~~~~
         module buzz {
+~~~~~~~~~~~~~~~~~~~~~
+        ~~~~~~~~~~~~~
         }
+~~~~~~~~~
+~~~~~~~~~ [0]
     }
+~~~~~
 }
+~ [0]
 
 namespace name.namespace {
 }
@@ -42,11 +58,21 @@ namespace namespace.name {
 
 // intentionally malformed for test cases, do not format
 declare module declare
+~~~~~~~~~~~~~~~~~~~~~~
 .dec{}
+~~~~~~ [0]
 declare  module dec . declare  {
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 }
+~ [0]
 
 module  mod.module{}
+~~~~~~~~~~~~~~~~~~~~ [0]
 module module.mod
+~~~~~~~~~~~~~~~~~
 {
+~
 }
+~ [0]
+
+[0]: forbidden internal module
