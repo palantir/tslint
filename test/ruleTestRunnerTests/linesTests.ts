@@ -21,13 +21,25 @@ describe("Rule Test Runner", () => {
         describe("::createErrorString", () => {
             it("should correctly create strings", () => {
                 const code1 = "this is a line of code";
-                const errorMarkup1 = "  ~~~~~~~~~~~~~~~~~~~~";
                 const errorLine1 = new lines.MultilineErrorLine(2);
+                const errorMarkup1 = "  ~~~~~~~~~~~~~~~~~~~~";
                 assert.strictEqual(lines.createErrorString(code1, errorLine1), errorMarkup1);
 
                 const code2 = "another line of code here";
-                const errorMarkup2 = "~~~~~~~~~~~~~~~~~~~~~~~~~ [foo]";
                 const errorLine2 = new lines.EndErrorLine(0, code2.length, "foo");
+                const errorMarkup2 = "~~~~~~~~~~~~~~~~~~~~~~~~~ [foo]";
+                assert.strictEqual(lines.createErrorString(code2, errorLine2), errorMarkup2);
+            });
+
+            it("should correctly create strings with empty lines of code", () => {
+                const code1 = "";
+                const errorLine1 = new lines.MultilineErrorLine(0);
+                const errorMarkup1 = "~nil";
+                assert.strictEqual(lines.createErrorString(code1, errorLine1), errorMarkup1);
+
+                const code2 = "";
+                const errorLine2 = new lines.EndErrorLine(0, 0, "foo");
+                const errorMarkup2 = "~nil [foo]";
                 assert.strictEqual(lines.createErrorString(code2, errorLine2), errorMarkup2);
             });
         });

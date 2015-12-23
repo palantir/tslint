@@ -108,6 +108,28 @@ export const resultErrs6: LintError[] = [
     { startPos: { line: 1, col: 13 }, endPos: { line: 1, col: 28 }, message: "A longer error message I didn't want to type every time!" },
 ];
 
+export const lintStr7 = `
+someCode.something();
+ ~nil                 [some error]
+more code {
+
+~nil
+
+~nil [another error]
+}
+`;
+export const codeStr7 = `
+someCode.something();
+more code {
+
+
+}
+`;
+export const resultErrs7: LintError[] = [
+  { startPos: { line: 1, col: 1 }, endPos: { line: 1, col: 1 }, message: "some error" },
+  { startPos: { line: 3, col: 0 }, endPos: { line: 4, col: 0 }, message: "another error" }
+];
+
 
 
 /* tslint:enable:object-literal-sort-keys */

@@ -9,6 +9,7 @@ class Test {
             };
 
         var duplicated = null;
+            ~~~~~~~~~~         [duplicate variable: 'duplicated']
     }
 }
 
@@ -20,10 +21,12 @@ function test() {
         };
 
     var duplicated = null;
+        ~~~~~~~~~~         [duplicate variable: 'duplicated']
 }
 
 duplicated = 2;
 var duplicated = 3;
+    ~~~~~~~~~~      [duplicate variable: 'duplicated']
 
 // valid code
 module tmp {
@@ -139,6 +142,7 @@ function testDestructuring() {
 
     var [x, y] = myFunc();
     var [z, z] = myFunc(); // failure
+            ~                         [duplicate variable: 'z']
 
     let [x1, y1] = myFunc();
     let [z1, z1] = myFunc(); // tsc error
@@ -151,6 +155,7 @@ function testDestructuring() {
 
     var [a2, [b2, c2]] = [1, [2, 3]];
     var [{a2, d2}] = [{a2: 1, d2: 4}]; // failure
+          ~~                                      [duplicate variable: 'a2']
 
     function myFunc2([a, b]) {
         var a; // not a failure; caught by no-shadowed-variable
@@ -158,5 +163,7 @@ function testDestructuring() {
     }
 
     var [x, y3] = myFunc(); // failure
+         ~                             [duplicate variable: 'x']
     var [x3, ...y] = [1, 2, 3, 4]; // failure
+                ~                             [duplicate variable: 'y']
 }

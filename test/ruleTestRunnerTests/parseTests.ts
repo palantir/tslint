@@ -35,6 +35,10 @@ describe("Rule Test Runner", () => {
             it("should handle message substitutions correctly", () => {
                 assert.strictEqual(parse.removeErrorMarkup(testData.lintStr6), testData.codeStr6);
             });
+
+            it("should handle nil-length errors correctly", () => {
+                assert.strictEqual(parse.removeErrorMarkup(testData.lintStr7), testData.codeStr7);
+            });
         });
 
         describe("::parseErrors", () => {
@@ -53,11 +57,19 @@ describe("Rule Test Runner", () => {
             it("should handle message substitutions correctly", () => {
                 assert.deepEqual(parse.parseErrorsFromMarkup(testData.lintStr6), testData.resultErrs6);
             });
+
+            it("should handle nil-length errors correctly", () => {
+                assert.deepEqual(parse.parseErrorsFromMarkup(testData.lintStr7), testData.resultErrs7);
+            });
         });
 
         describe("::createMarkupFromErrors", () => {
             it("should generate correct markup", () => {
                 assert.strictEqual(parse.createMarkupFromErrors(testData.codeStr5, testData.resultErrs5), testData.lintStr5);
+            });
+
+            it("should generate correct markup with nil-length errors", () => {
+                assert.strictEqual(parse.createMarkupFromErrors(testData.codeStr7, testData.resultErrs7), testData.lintStr7);
             });
         });
     });

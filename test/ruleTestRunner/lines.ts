@@ -32,8 +32,8 @@ export class MessageSubstitutionLine {
 export type ErrorLine = MultilineErrorLine | EndErrorLine;
 export type Line = CodeLine | ErrorLine | MessageSubstitutionLine;
 
-const multilineErrorRegex = /^\s*~+$/;
-const endErrorRegex = /^\s*~+\s*\[(.+)\]\s*$/;
+const multilineErrorRegex = /^\s*(~+|~nil)$/;
+const endErrorRegex = /^\s*(~+|~nil)\s*\[(.+)\]\s*$/;
 const messageSubstitutionRegex = /^\[(\w+?)]: \s*(.+?)\s*$/;
 
 export function classifyLine(line: string): Line {
@@ -44,10 +44,10 @@ export function classifyLine(line: string): Line {
         const startErrorCol = line.indexOf("~");
         return new MultilineErrorLine(startErrorCol);
     } else if (matches = line.match(endErrorRegex)) {
+        const [, squiggles, message] = matches;
         const startErrorCol = line.indexOf("~");
-        // exclusive endpoint
-        const endErrorCol = line.lastIndexOf("~") + 1;
-        const [, message] = matches;
+        const zeroLengthError = (squiggles === "~nil");
+        const endErrorCol = zeroLengthError ? startErrorCol : line.lastIndexOf("~") + 1;
         return new EndErrorLine(startErrorCol, endErrorCol, message);
     } else if (matches = line.match(messageSubstitutionRegex)) {
         const [, key, message] = matches;
@@ -61,11 +61,23 @@ export function classifyLine(line: string): Line {
 export function createErrorString(code: string, errorLine: ErrorLine) {
     const startSpaces = strMult(" ", errorLine.startCol);
     if (errorLine instanceof MultilineErrorLine) {
-        const tildes = strMult("~", code.length - startSpaces.length);
+        // special case for when the line of code is simply a newline.
+        // use "~nil" to indicate the error continues on that line
+        if (code.length === 0 && errorLine.startCol === 0) {
+            return "~nil";
+        }
+
+        let tildes = strMult("~", code.length - startSpaces.length);
         return `${startSpaces}${tildes}`;
     } else if (errorLine instanceof EndErrorLine) {
-        const tildes = strMult("~", errorLine.endCol - errorLine.startCol);
-        const endSpaces = strMult(" ", code.length - errorLine.endCol);
+        let tildes = strMult("~", errorLine.endCol - errorLine.startCol);
+        let endSpaces = strMult(" ", code.length - errorLine.endCol);
+        if (tildes.length === 0) {
+            tildes = "~nil";
+            // because we add "~nil" we need three less spaces than normal.
+            // always make sure we have at least one space though
+            endSpaces = endSpaces.substring(0, Math.max(endSpaces.length - 4, 1));
+        }
         return `${startSpaces}${tildes}${endSpaces} [${errorLine.message}]`;
     }
 }
