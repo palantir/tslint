@@ -8,14 +8,20 @@ var obj = {
 function test() {
     var a = obj.a;
       var b = obj[ 'bcd' ];
+                   ~~~~~    [0]
         var c = obj["c"];
+                    ~~~   [0]
     var d = obj[b];
 }
 
 obj["invalid_accessor"];
+    ~~~~~~~~~~~~~~~~~~   [0]
 obj["_AnotherInvalidAccessor"];
+    ~~~~~~~~~~~~~~~~~~~~~~~~~   [0]
 
 // valid accessors
 obj["a-2"];
 obj["2a"];
 obj["?a#$!$^&%&"];
+
+[0]: object access via string literals is disallowed

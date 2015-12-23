@@ -42,8 +42,8 @@ export class NoSwitchCaseFallThroughWalker extends Lint.RuleWalker {
                 if (isFallingThrough && switchClause.statements.length > 0 && ((switchClauses.length - 1) > i)) {
                     if (!isFallThroughAllowed(switchClauses[i + 1])) {
                         this.addFailure(this.createFailure(
-                            child.getEnd(),
-                            1,
+                            switchClauses[i + 1].getStart(),
+                            "case".length,
                             `${Rule.FAILURE_STRING_PART}'case'`
                         ));
                     }
@@ -52,7 +52,7 @@ export class NoSwitchCaseFallThroughWalker extends Lint.RuleWalker {
                 // case statement falling through a default
                 if (isFallingThrough && !isFallThroughAllowed(child)) {
                     const failureString = Rule.FAILURE_STRING_PART + "'default'";
-                    this.addFailure(this.createFailure(switchClauses[i - 1].getEnd(), 1, failureString));
+                    this.addFailure(this.createFailure(switchClauses[i].getStart(), "default".length, failureString));
                 }
             }
         });

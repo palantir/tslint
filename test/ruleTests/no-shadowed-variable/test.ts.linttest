@@ -4,13 +4,17 @@ function letTesting() {
 
     if (true) {
         let a = 2; // failure
+            ~                 [shadowed variable: 'a']
         let b = 2; // failure
+            ~                 [shadowed variable: 'b']
         let c = 2;
         var e = 2;
     } else {
         let b = 3; // failure
+            ~                 [shadowed variable: 'b']
         let c = 3;
         let e = 3; // failure
+            ~                 [shadowed variable: 'e']
         let f = 3;
     }
 
@@ -20,11 +24,13 @@ function letTesting() {
 let a = 1;
 if (true) {
     let a = 2; // failure
+        ~                 [shadowed variable: 'a']
 }
 
 var g = 1;
 for (var index in [0, 1, 2]) {
     var g = 2; // failure
+        ~                 [shadowed variable: 'g']
 }
 
 function constTesting() {
@@ -33,18 +39,24 @@ function constTesting() {
 
     if (true) {
         const h = 2; // failure
+              ~                 [shadowed variable: 'h']
         const i = 2; // failure
+              ~                 [shadowed variable: 'i']
     }
 }
 
 function testArguments(x: number, y: number): void {
     var x = 1; // failure
+        ~                 [shadowed variable: 'x']
     let y = 2; // tsc error
+        ~                   [shadowed variable: 'y']
 }
 
 let j = 1;
 for (var index in [0, 1, 2]) { // failure
+         ~~~~~                            [shadowed variable: 'index']
     let j = 2; // failure
+        ~                 [shadowed variable: 'j']
 }
 
 function testTryStatement() {
@@ -57,6 +69,7 @@ function testTryStatement() {
     } finally {
         let foo = 3;
         let bar = 3; // failure
+            ~~~                 [shadowed variable: 'bar']
     }
 }
 
@@ -65,6 +78,7 @@ function testWhileStatement() {
 
     while (true) {
         let foo = 2; // failure
+            ~~~                 [shadowed variable: 'foo']
     }
 }
 
@@ -73,6 +87,7 @@ function testDoStatement() {
 
     do {
         let foo = 2; // failure
+            ~~~                 [shadowed variable: 'foo']
     } while (true);
 }
 
@@ -86,15 +101,21 @@ function testDestructuring(x: number) {
     function innerFunc() {
         var [foo] = myFunc();
         var [x] = myFunc();   // failure
+             ~                           [shadowed variable: 'x']
         let [y] = myFunc();   // failure
+             ~                           [shadowed variable: 'y']
         const [z] = myFunc(); // failure
+               ~                         [shadowed variable: 'z']
     }
 
     function anotherInnerFunc() {
         var [{x}] = [{x: 1}];   // failure
+              ~                            [shadowed variable: 'x']
         let [[y]] = [[2]];      // failure
+              ~                            [shadowed variable: 'y']
         var [foo, ...bar] = [1, 2, 3, 4];
         var [...z] = [1, 2, 3, 4]; // failure
+                ~                             [shadowed variable: 'z']
     }
 }
 
@@ -118,13 +139,16 @@ interface FalsePositive4<T, TResult> {
 let p = 1;
 function testParameterDestructuring(
     { pos: p }: FalsePositive3, // failure
+           ~                               [shadowed variable: 'p']
     { pos: q, specular: r }: FalsePositive3,
     { pos }: FalsePositive3
 ) {
     p = 2;
     var q = 1; // failure
+        ~                 [shadowed variable: 'q']
 
     function someInnerFunc() {
         let pos = 3; // failure
+            ~~~                 [shadowed variable: 'pos']
     }
 }
