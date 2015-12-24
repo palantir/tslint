@@ -12,6 +12,7 @@ function testSingleQuotes() {
 }
 
 function testNoUseStrict() {
+~~~~~~~~                     [missing 'use strict']
 }
 
 module TestModule {
@@ -22,11 +23,13 @@ module TestModule {
 }
 
 module TestNoUseStrictModule {
+~~~~~~                         [missing 'use strict']
     // hello
     var i = 3;
 }
 
 module TestNoUseStrictModule.Namespaced.AndAgain {
+~~~~~~                                             [missing 'use strict']
     // hello
     var i = 3;
 }

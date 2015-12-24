@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "use-strict": [true, "check-function", "check-module"]
+  }
+}
