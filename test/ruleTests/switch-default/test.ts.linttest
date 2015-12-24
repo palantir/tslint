@@ -1,21 +1,36 @@
-
 switch (foo) {
+~~~~~~~~~~~~~~
 case 1:
+~~~~~~~
     bar();
+~~~~~~~~~~
     break;
+~~~~~~~~~~
 }
+~ [switch statement doesn't include a 'default' case]
 
 switch (foo) {
+~~~~~~~~~~~~~~
 case 1:
+~~~~~~~
     bar();
+~~~~~~~~~~
     break;
+~~~~~~~~~~
 case 2:
+~~~~~~~
     bar();
+~~~~~~~~~~
     break;
+~~~~~~~~~~
 case 3:
+~~~~~~~
     bar();
+~~~~~~~~~~
     break;
+~~~~~~~~~~
 }
+~ [switch statement doesn't include a 'default' case]
 
 // valid
 switch (foo) {
