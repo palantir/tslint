@@ -1,6 +1,8 @@
-$.x = 3; // failure on '$'
+$.x = 3;
+~        [variable '$' used before declaration]
 import $ = require("$");
-var vara = varb, varb; // failure on 'varb'
+var vara = varb, varb;
+           ~~~~        [variable 'varb' used before declaration]
 
 class Test {
     constructor() {
@@ -10,7 +12,8 @@ class Test {
     private a: number;
 }
 
-var i = j; // failure on 'j'
+var i = j;
+        ~  [variable 'j' used before declaration]
 
 class ClassA {
     prop: number;
@@ -32,10 +35,14 @@ if (something) {
 }
 
 function testUndeclaredImports() {
-    console.log(foo1); // failure on 'foo1'
-    console.log(foo2); // failure on 'foo2'
-    console.log(foo3); // failure on 'foo3'
-    map([], (x) => x); // failure on 'map'
+    console.log(foo1);
+                ~~~~   [variable 'foo1' used before declaration]
+    console.log(foo2);
+                ~~~~   [variable 'foo2' used before declaration]
+    console.log(foo3);
+                ~~~~   [variable 'foo3' used before declaration]
+    map([], (x) => x);
+    ~~~                [variable 'map' used before declaration]
 }
 
 import { default as foo1 } from "lib";
@@ -49,7 +56,8 @@ export default function () {
 };
 
 export {
-    undeclaredA, // failure
+    undeclaredA,
+    ~~~~~~~~~~~ [variable 'undeclaredA' used before declaration]
     undeclaredB, // tsc error
     undeclaredC, // tsc error
     testUndeclaredImports
