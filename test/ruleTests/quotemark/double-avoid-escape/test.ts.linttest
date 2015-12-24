@@ -1,4 +1,5 @@
 var single = 'single';
+             ~~~~~~~~  [' should be "]
     var doublee = "married";
 var singleWithinDouble = "'singleWithinDouble'";
 var doubleWithinSingle = '"doubleWithinSingle"';

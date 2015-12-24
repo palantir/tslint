@@ -31,7 +31,7 @@ console.log();
 console.log(colors.underline("Testing Lint Rules:"));
 
 let hadTestFailure = false;
-const testDirectories = glob.sync("test/ruleTests/*");
+const testDirectories = glob.sync("test/ruleTests/**/tslint.json").map(path.dirname);
 
 for (const testDirectory of testDirectories) {
     const filesToLint = glob.sync(path.join(testDirectory, `**/*${FILE_EXTENSION}`));
