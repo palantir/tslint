@@ -6,7 +6,7 @@ import * as path from "path";
 
 import * as Linter from "./tslint";
 import * as parse from "./test/parse";
-import {LintError, FILE_EXTENSION} from "./test/types";
+import {FILE_EXTENSION, LintError} from "./test/types";
 
 export interface TestResult {
     directory: string;
@@ -80,15 +80,13 @@ export function consoleTestResultHandler(testResult: TestResult): boolean {
             didAllTestsPass = false;
 
             for (const diffResult of diffResults) {
-                let text: string;
+                let color = colors.gray;
                 if (diffResult.added) {
-                    text = colors.green(diffResult.value);
+                    color = colors.green;
                 } else if (diffResult.removed) {
-                    text = colors.red(diffResult.value);
-                } else {
-                    text = colors.gray(diffResult.value);
+                    color = colors.red;
                 }
-                process.stdout.write(text);
+                process.stdout.write(color(diffResult.value));
             }
         }
     }

@@ -14,80 +14,78 @@
  * limitations under the License.
  */
 
-import {LintError, FILE_EXTENSION, errorComparator, lintSyntaxError} from "./types";
-import {ErrorLine, CodeLine, MultilineErrorLine, EndErrorLine, MessageSubstitutionLine, classifyLine, createErrorString} from "./lines";
+import {FILE_EXTENSION, LintError, errorComparator, lintSyntaxError} from "./types";
+import {Line, ErrorLine, CodeLine, MultilineErrorLine, EndErrorLine, MessageSubstitutionLine,
+        textToLineObj, lineObjToText} from "./lines";
 
+/**
+ * Takes the full text of a .linttest file and returns the contents of the file
+ * with all error markup removed
+ */
 export function removeErrorMarkup(text: string): string {
-    const textLines = text.split("\n");
-    const lines = textLines.map(classifyLine);
-    const codeLines = lines.filter((line) => (line instanceof CodeLine)).map((line) => (<CodeLine>line).contents);
-    return codeLines.join("\n");
+    const textWithMarkup = text.split("\n");
+    const lines = textWithMarkup.map(textToLineObj);
+    const codeText = lines.filter((line) => (line instanceof CodeLine)).map((line) => (<CodeLine>line).contents);
+    return codeText.join("\n");
 }
 
 /* tslint:disable:object-literal-sort-keys */
+/**
+ * Takes the full text of a .linttest file and returns an array of LintErrors
+ * corresponding to the error markup in the file.
+ */
 export function parseErrorsFromMarkup(text: string): LintError[] {
-    const textLines = text.split("\n");
-    const classifiedLines = textLines.map(classifyLine);
+    const textWithMarkup = text.split("\n");
+    const lines = textWithMarkup.map(textToLineObj);
 
-    if (classifiedLines.length > 0 && !(classifiedLines[0] instanceof CodeLine)) {
+    if (lines.length > 0 && !(lines[0] instanceof CodeLine)) {
         throw lintSyntaxError(`Cannot start a ${FILE_EXTENSION} file with an error mark line.`);
     }
 
-    const messageSubstitutionLines = <MessageSubstitutionLine[]> classifiedLines.filter((l) => l instanceof MessageSubstitutionLine);
-    const messageSubstitutions = messageSubstitutionLines.reduce((obj, line) => {
-        obj[line.key] = line.message;
-        return obj;
-    }, <any>{});
+    const messageSubstitutionLines = <MessageSubstitutionLine[]>lines.filter((l) => l instanceof MessageSubstitutionLine);
+    const messageSubstitutions: { [key: string]: string } = {};
+    for (const line of messageSubstitutionLines) {
+        messageSubstitutions[line.key] = line.message;
+    }
 
-    // map each actual line of code to the error markings beneath it
-    const errorMarkupForLinesOfCode = classifiedLines.reduce((lineMap, line) => {
-        if (line instanceof CodeLine) {
-            lineMap.push([]);
-        } else if (line instanceof MessageSubstitutionLine) {
-            // do nothing, already processed above
-        } else {
-            lineMap[lineMap.length - 1].push(<ErrorLine>line);
-        }
-        return lineMap;
-    }, (<ErrorLine[][]> []));
-
+    // errorLineForCodeLine[5] contains all the ErrorLine objects associated with the 5th line of code, for example
+    const errorLinesForCodeLines = separateErrorLinesFromCodeLines(lines);
 
     const lintErrors: LintError[] = [];
-
     // for each line of code...
-    errorMarkupForLinesOfCode.forEach((errorMarkupForLineOfCode, lineNo) => {
+    errorLinesForCodeLines.forEach((errorLinesForLineOfCode, lineNo) => {
 
         // for each error marking on that line...
-        while (errorMarkupForLineOfCode.length > 0) {
-            const errorMarkup = errorMarkupForLineOfCode.shift();
-            const errorStartPos = { line: lineNo, col: errorMarkup.startCol };
+        while (errorLinesForLineOfCode.length > 0) {
+            const errorLine = errorLinesForLineOfCode.shift();
+            const errorStartPos = { line: lineNo, col: errorLine.startCol };
 
             // if the error starts and ends on this line, add it now to list of errors
-            if (errorMarkup instanceof EndErrorLine) {
+            if (errorLine instanceof EndErrorLine) {
                 lintErrors.push({
                     startPos: errorStartPos,
-                    endPos: { line: lineNo, col: errorMarkup.endCol },
-                    message: getFullMessage(messageSubstitutions, errorMarkup.message)
+                    endPos: { line: lineNo, col: errorLine.endCol },
+                    message: messageSubstitutions[errorLine.message] || errorLine.message
                 });
 
             // if the error is the start of a multiline error
-            } else if (errorMarkup instanceof MultilineErrorLine) {
+            } else if (errorLine instanceof MultilineErrorLine) {
 
-                // keep going until we get to the end of the multiline error
+                // iterate through the MultilineErrorLines until we get to an EndErrorLine
                 for (let nextLineNo = lineNo + 1; ; ++nextLineNo) {
-                    if (!validErrorMarkupContinuation(errorMarkupForLinesOfCode, nextLineNo)) {
+                    if (!validErrorMarkupContinuation(errorLinesForCodeLines, nextLineNo)) {
                         throw lintSyntaxError(
                             `Error mark starting at ${errorStartPos.line}:${errorStartPos.col} does not end correctly.`
                         );
                     } else {
-                        const nextErrorLine = errorMarkupForLinesOfCode[nextLineNo].shift();
+                        const nextErrorLine = errorLinesForCodeLines[nextLineNo].shift();
 
                         // if end of multiline error, add it it list of errors
                         if (nextErrorLine instanceof EndErrorLine) {
                             lintErrors.push({
                                 startPos: errorStartPos,
                                 endPos: { line: nextLineNo, col: nextErrorLine.endCol },
-                                message: getFullMessage(messageSubstitutions, nextErrorLine.message)
+                                message: messageSubstitutions[nextErrorLine.message] || nextErrorLine.message
                             });
                             break;
                         }
@@ -97,54 +95,62 @@ export function parseErrorsFromMarkup(text: string): LintError[] {
         }
     });
 
-    // sort errors by startPos then endPos
     lintErrors.sort(errorComparator);
 
     return lintErrors;
 }
 
 export function createMarkupFromErrors(code: string, lintErrors: LintError[]) {
-    // theoretically, lint errors should be already sorted, but just to play it safe...
     lintErrors.sort(errorComparator);
 
-    const codeLines = code.split("\n");
-    const errorMarkupForLinesOfCode: ErrorLine[][] = codeLines.map(() => []);
+    const codeText = code.split("\n");
+    const errorLinesForCodeText: ErrorLine[][] = codeText.map(() => []);
 
     for (const error of lintErrors) {
         const {startPos, endPos, message} = error;
 
         if (startPos.line === endPos.line) {  // single line error
-            errorMarkupForLinesOfCode[startPos.line].push(new EndErrorLine(
+            errorLinesForCodeText[startPos.line].push(new EndErrorLine(
                 startPos.col,
                 endPos.col,
                 message
             ));
         } else {  // multiline error
-            errorMarkupForLinesOfCode[startPos.line].push(new MultilineErrorLine(startPos.col));
+            errorLinesForCodeText[startPos.line].push(new MultilineErrorLine(startPos.col));
             for (let lineNo = startPos.line + 1; lineNo < endPos.line; ++lineNo) {
-                errorMarkupForLinesOfCode[lineNo].push(new MultilineErrorLine(0));
+                errorLinesForCodeText[lineNo].push(new MultilineErrorLine(0));
             }
-            errorMarkupForLinesOfCode[endPos.line].push(new EndErrorLine(0, endPos.col, message));
+            errorLinesForCodeText[endPos.line].push(new EndErrorLine(0, endPos.col, message));
         }
     }
 
-    const resultLines = codeLines.reduce((finalLines, codeLine, i) => {
-        finalLines.push(codeLine);
-        for (const errorMarkup of errorMarkupForLinesOfCode[i]) {
-            finalLines.push(createErrorString(codeLine, errorMarkup));
-        }
-        return finalLines;
-    }, <string[]>[]);
-    return resultLines.join("\n");
-}
-
-function getFullMessage(messageSubstitutions: {[k: string]: string}, message: string) {
-    return messageSubstitutions[message] || message;
-}
-
-function validErrorMarkupContinuation(errorMarkupForLinesOfCode: ErrorLine[][], lineNo: number) {
-    return lineNo < errorMarkupForLinesOfCode.length
-        && errorMarkupForLinesOfCode[lineNo].length !== 0
-        && errorMarkupForLinesOfCode[lineNo][0].startCol === 0;
+    const finalText = combineCodeTextAndErrorLines(codeText, errorLinesForCodeText);
+    return finalText.join("\n");
 }
 /* tslint:enable:object-literal-sort-keys */
+
+function combineCodeTextAndErrorLines(codeText: string[], errorLinesForCodeText: ErrorLine[][]) {
+    return codeText.reduce((finalText, code, i) => {
+        finalText.push(code);
+        finalText.push(...errorLinesForCodeText[i].map((line) => lineObjToText(line, code)));
+        return finalText;
+    }, <string[]>[]);
+}
+
+function separateErrorLinesFromCodeLines(lines: Line[]) {
+    const errorLinesForCodeLine: ErrorLine[][] = [];
+    for (const line of lines) {
+        if (line instanceof CodeLine) {
+            errorLinesForCodeLine.push([]);
+        } else if (line instanceof ErrorLine) {
+            errorLinesForCodeLine[errorLinesForCodeLine.length - 1].push(line);
+        }
+    }
+    return errorLinesForCodeLine;
+}
+
+function validErrorMarkupContinuation(errorLinesForCodeLines: ErrorLine[][], lineNo: number) {
+    return lineNo < errorLinesForCodeLines.length
+        && errorLinesForCodeLines[lineNo].length !== 0
+        && errorLinesForCodeLines[lineNo][0].startCol === 0;
+}

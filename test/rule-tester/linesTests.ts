@@ -23,24 +23,24 @@ describe("Rule Test Runner", () => {
                 const code1 = "this is a line of code";
                 const errorLine1 = new lines.MultilineErrorLine(2);
                 const errorMarkup1 = "  ~~~~~~~~~~~~~~~~~~~~";
-                assert.strictEqual(lines.createErrorString(code1, errorLine1), errorMarkup1);
+                assert.strictEqual(lines.lineObjToText(errorLine1, code1), errorMarkup1);
 
                 const code2 = "another line of code here";
                 const errorLine2 = new lines.EndErrorLine(0, code2.length, "foo");
                 const errorMarkup2 = "~~~~~~~~~~~~~~~~~~~~~~~~~ [foo]";
-                assert.strictEqual(lines.createErrorString(code2, errorLine2), errorMarkup2);
+                assert.strictEqual(lines.lineObjToText(errorLine2, code2), errorMarkup2);
             });
 
             it("should correctly create strings with empty lines of code", () => {
                 const code1 = "";
                 const errorLine1 = new lines.MultilineErrorLine(0);
-                const errorMarkup1 = "~nil";
-                assert.strictEqual(lines.createErrorString(code1, errorLine1), errorMarkup1);
+                const errorMarkup1 = lines.ZERO_LENGTH_ERROR;
+                assert.strictEqual(lines.lineObjToText(errorLine1, code1), errorMarkup1);
 
                 const code2 = "";
                 const errorLine2 = new lines.EndErrorLine(0, 0, "foo");
-                const errorMarkup2 = "~nil [foo]";
-                assert.strictEqual(lines.createErrorString(code2, errorLine2), errorMarkup2);
+                const errorMarkup2 = `${lines.ZERO_LENGTH_ERROR} [foo]`;
+                assert.strictEqual(lines.lineObjToText(errorLine2, code2), errorMarkup2);
             });
         });
     });

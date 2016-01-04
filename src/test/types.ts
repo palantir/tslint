@@ -23,13 +23,8 @@ export interface PositionInFile {
 
 export interface LintError {
    startPos: PositionInFile;
-   endPos?: PositionInFile;
+   endPos: PositionInFile;
    message: string;
-}
-
-export interface LintFile {
-   contents: string;
-   lintErrors: LintError[];
 }
 
 export function errorComparator(err1: LintError, err2: LintError) {

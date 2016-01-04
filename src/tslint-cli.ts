@@ -65,7 +65,7 @@ let processed = optimist
             describe: "output format (prose, json, verbose)"
         },
         "test": {
-            describe: "test that the desired output is produced by tslint"
+            describe: "test that tslint produces the correct output for the specified directory"
         },
         "v": {
             alias: "version",
@@ -154,6 +154,12 @@ tslint accepts the following commandline options:
         formatters are prose (human readable), json (machine readable)
         and verbose. prose is the default if this option is not used. Additonal
         formatters can be added and used if the --formatters-dir option is set.
+
+    --test:
+        Runs tslint on the specified directory and checks if tslint's output matches
+        the expected output. Automatically loads the tslint.json file in the
+        specified directory as the configuration file for the tests. See the
+        full tslint documentation for more details on how this can be used to test custom rules.
 
     -v, --version:
         The current version of tslint.

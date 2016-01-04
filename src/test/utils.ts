@@ -14,16 +14,6 @@
  * limitations under the License.
  */
 
-export function tempCwd(newCwd: string, callback: () => void) {
-    const oldCwd = process.cwd();
-    process.chdir(newCwd);
-    try {
-        callback();
-    } finally {
-        process.chdir(oldCwd);
-    }
-}
-
 export function strMult(str: string, numTimes: number) {
     return Array(numTimes + 1).join(str);
 }
