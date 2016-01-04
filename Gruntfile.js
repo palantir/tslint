@@ -31,7 +31,7 @@ module.exports = function (grunt) {
                 exec: "./test/check-bin.sh"
             },
             testRules: {
-                exec: "node ./build/test/ruleTestRunner/ruleTestRunner.js"
+                exec: "node ./build/test/ruleTestRunner.js"
             }
         },
 

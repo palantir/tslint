@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as lines from "../ruleTestRunner/modules/lines";
+import * as lines from "../../src/test/lines";
 
 describe("Rule Test Runner", () => {
     describe("lines", () => {

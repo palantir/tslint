@@ -20,12 +20,13 @@ import * as glob from "glob";
 import * as optimist from "optimist";
 import * as Linter from "./tslint";
 import {CONFIG_FILENAME, DEFAULT_CONFIG, getRulesDirectories} from "./configuration";
+import {consoleTestResultHandler, runTest} from "./test";
 
 let processed = optimist
     .usage("Usage: $0 [options] [file ...]")
     .check((argv: any) => {
         // at least one of file, help, version or unqualified argument must be present
-        if (!(argv.h || argv.i || argv.v || argv._.length > 0)) {
+        if (!(argv.h || argv.i || argv.test || argv.v || argv._.length > 0)) {
             throw "Missing files";
         }
 
@@ -63,6 +64,9 @@ let processed = optimist
             default: "prose",
             describe: "output format (prose, json, verbose)"
         },
+        "test": {
+            describe: "test that the desired output is produced by tslint"
+        },
         "v": {
             alias: "version",
             describe: "current version"
@@ -94,6 +98,12 @@ if (argv.i != null) {
     const tslintJSON = JSON.stringify(DEFAULT_CONFIG, undefined, "    ");
     fs.writeFileSync(CONFIG_FILENAME, tslintJSON);
     process.exit(0);
+}
+
+if (argv.test != null) {
+    const results = runTest(argv.test);
+    const didAllTestsPass = consoleTestResultHandler(results);
+    process.exit(didAllTestsPass ? 0 : 1);
 }
 
 if ("help" in argv) {

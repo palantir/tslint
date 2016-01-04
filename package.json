@@ -20,6 +20,8 @@
     "test": "grunt"
   },
   "dependencies": {
+    "colors": "^1.1.2",
+    "diff": "^2.2.1",
     "findup-sync": "~0.2.1",
     "glob": "^6.0.1",
     "optimist": "~0.6.0",
@@ -27,8 +29,6 @@
   },
   "devDependencies": {
     "chai": "^3.0.0",
-    "colors": "^1.1.2",
-    "diff": "^2.2.1",
     "grunt": "^0.4.5",
     "grunt-cli": "^0.1.9",
     "grunt-contrib-clean": "^0.6.0",

@@ -33,7 +33,7 @@ declare module "optimist" {
 
         describe(key: string, desc: string): Optimist;
 
-        options(obj: {[key: string]: {alias: string, describe: string, default?: any}}): Optimist;
+        options(obj: {[key: string]: {alias?: string, describe: string, default?: any}}): Optimist;
         options(key: string, opt: Object): Optimist;
 
         check(fn: Function): Optimist;

@@ -9,12 +9,6 @@
     },
     "mocha/mocha.d.ts": {
       "commit": "aadd63ecae3feb76ea2d4be80511e266b5c2c4a7"
-    },
-    "colors/colors.d.ts": {
-      "commit": "78ba6e41543e5ababbd1dda19797601be3c1f304"
-    },
-    "diff/diff.d.ts": {
-      "commit": "78ba6e41543e5ababbd1dda19797601be3c1f304"
     }
   }
 }
