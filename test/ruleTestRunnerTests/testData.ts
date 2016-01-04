@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {LintError} from "../ruleTestRunner/types";
+import {LintError} from "../ruleTestRunner/modules/types";
 
 /* tslint:disable:object-literal-sort-keys */
 

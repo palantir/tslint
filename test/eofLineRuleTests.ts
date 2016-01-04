@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {TestUtils} from "../lint";
+import {TestUtils} from "./lint";
 
 describe("<eofline>", () => {
     const EofLineRule = TestUtils.getRule("eofline");
-    const fileName = "rules/eofline.test.ts";
+    const fileName = "eofline.test.ts";
     const failureString = EofLineRule.FAILURE_STRING;
 
     it("ensures a trailing newline at EOF", () => {

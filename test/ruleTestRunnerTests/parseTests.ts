@@ -15,7 +15,7 @@
  */
 
 import * as testData from "./testData";
-import * as parse from "../ruleTestRunner/parse";
+import * as parse from "../ruleTestRunner/modules/parse";
 
 describe("Rule Test Runner", () => {
     describe("parse", () => {

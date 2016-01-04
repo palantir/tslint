@@ -1,4 +1,5 @@
 import * as React from 'react'; // quotemark failure
+                       ~~~~~~~                       [' should be "]
 
 class BazComponent extends React.Component<React.Props<BazComponent>, {}> {
     public render() {
@@ -14,6 +15,7 @@ interface IFooProps extends React.Props<FooComponent> {
 
 interface IFooState {
     bar:string[]; // whitespace failure
+        ~                               [missing whitespace]
 }
 
 export class FooComponent extends React.Component<IFooProps, IFooState> {
@@ -29,6 +31,7 @@ export class FooComponent extends React.Component<IFooProps, IFooState> {
             </div>
         );
 	} // indent failure
+~                    [space indentation expected]
 
     private onClick() {
         console.info("foo component clicked");

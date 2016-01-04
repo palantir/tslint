@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as utils from "../ruleTestRunner/utils";
+import * as utils from "../ruleTestRunner/modules/utils";
 
 describe("Rule Test Runner", () => {
     describe("utils", () => {

@@ -20,9 +20,9 @@ import * as fs from "fs";
 import * as glob from "glob";
 import * as path from "path";
 
-import * as Linter from "../src/tslint";
-import * as parse from "./ruleTestRunner/parse";
-import {LintError, FILE_EXTENSION} from "./ruleTestRunner/types";
+import * as Linter from "../../src/tslint";
+import * as parse from "./modules/parse";
+import {LintError, FILE_EXTENSION} from "./modules/types";
 
 // needed to get colors to show up when passing through Grunt
 (colors as any).enabled = true;
@@ -31,7 +31,7 @@ console.log();
 console.log(colors.underline("Testing Lint Rules:"));
 
 let hadTestFailure = false;
-const testDirectories = glob.sync("test/ruleTests/**/tslint.json").map(path.dirname);
+const testDirectories = glob.sync("test/rules/**/tslint.json").map(path.dirname);
 
 for (const testDirectory of testDirectories) {
     const filesToLint = glob.sync(path.join(testDirectory, `**/*${FILE_EXTENSION}`));

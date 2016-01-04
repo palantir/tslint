@@ -4,7 +4,7 @@ var checkBinTest;
 if (process.platform  === "win32") {
     checkBinTest = [];
 } else {
-    checkBinTest = ["run:test"];
+    checkBinTest = ["run:testBin"];
 }
 
 module.exports = function (grunt) {
@@ -27,8 +27,11 @@ module.exports = function (grunt) {
         },
 
         run: {
-            test: {
-                exec: "./test/check-bin.sh && node ./build/test/ruleTestRunner.js"
+            testBin: {
+                exec: "./test/check-bin.sh"
+            },
+            testRules: {
+                exec: "node ./build/test/ruleTestRunner/ruleTestRunner.js"
             }
         },
 
@@ -87,7 +90,8 @@ module.exports = function (grunt) {
         "clean:test",
         "ts:test",
         "tslint:test",
-        "mochaTest"
+        "mochaTest",
+        "run:testRules",
     ].concat(checkBinTest));
 
     // create default task
