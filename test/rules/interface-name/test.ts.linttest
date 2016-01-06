@@ -3,6 +3,5 @@ interface IValidInterfaceName {
 }
 
 interface NotValidInterfaceName {
-          ~~~~~~~~~~~~~~~~~~~~~  [interface name must be a capitalized I]
-
+          ~~~~~~~~~~~~~~~~~~~~~  [interface name must start with a capitalized I]
 }
