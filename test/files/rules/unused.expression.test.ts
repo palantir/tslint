@@ -53,3 +53,8 @@ function* g(): Iterable<number> {
         yield i;
     }
 }
+
+async function f(foo: Promise<void>): Promise<number> {
+    await foo;
+    return 0;
+}

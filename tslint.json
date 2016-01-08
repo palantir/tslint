@@ -48,7 +48,7 @@
       "check-else",
       "check-whitespace"
     ],
-    "quotemark": [true, "double"],
+    "quotemark": [true, "double", "avoid-escape"],
     "radix": true,
     "semicolon": true,
     "triple-equals": [true, "allow-null-check"],
