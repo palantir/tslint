@@ -83,10 +83,12 @@ class SemicolonWalker extends Lint.RuleWalker {
     }
 
     public visitInterfaceDeclaration(node: ts.InterfaceDeclaration) {
-        for (let member of node.members) {
-            this.checkSemicolonAt(member);
+        if (node.members) {
+            for (let member of node.members) {
+                this.checkSemicolonAt(member);
+            }
+            super.visitInterfaceDeclaration(node);
         }
-        super.visitInterfaceDeclaration(node);
     }
 
     private checkSemicolonAt(node: ts.Node) {
