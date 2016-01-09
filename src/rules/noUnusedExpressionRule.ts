@@ -38,17 +38,17 @@ class NoUnusedExpressionWalker extends Lint.RuleWalker {
         this.expressionIsUnused = true;
         super.visitExpressionStatement(node);
         if (this.expressionIsUnused) {
-            // ignore valid unused expressions
-            if (node.expression.kind === ts.SyntaxKind.StringLiteral) {
-                const expressionText = node.expression.getText();
-                if (expressionText === "\"use strict\"" || expressionText === "'use strict'") {
-                    return;
-                }
-            } else if (node.expression.kind === ts.SyntaxKind.DeleteExpression || node.expression.kind === ts.SyntaxKind.YieldExpression) {
-                return;
-            }
+            const { expression } = node;
+            const { kind } = expression;
+            const isValidStandaloneExpression = kind === ts.SyntaxKind.DeleteExpression
+                || kind === ts.SyntaxKind.YieldExpression
+                || kind === ts.SyntaxKind.AwaitExpression;
+            const isValidStringExpression = kind === ts.SyntaxKind.StringLiteral
+                && (expression.getText() === '"use strict"' || expression.getText() === "'use strict'");
 
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+            if (!isValidStandaloneExpression && !isValidStringExpression) {
+                this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+            }
         }
     }
 
