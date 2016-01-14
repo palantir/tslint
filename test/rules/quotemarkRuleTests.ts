@@ -19,6 +19,7 @@ import {TestUtils} from "../lint";
 describe("<quotemark>", () => {
     const QuoteMarkRule = TestUtils.getRule("quotemark");
     const fileName = "rules/quotemark.test.ts";
+    const tsxFileName = "rules/quotemark.test.tsx";
     const singleFailureString = QuoteMarkRule.SINGLE_QUOTE_FAILURE;
     const doubleFailureString = QuoteMarkRule.DOUBLE_QUOTE_FAILURE;
 
@@ -61,4 +62,31 @@ describe("<quotemark>", () => {
         assert.equal(actualFailures.length, 1);
         assert.isTrue(actualFailures[0].equals(expectedFailure));
     });
+
+    it("enforces double quotes and jsx single quotes", () => {
+        const actualFailures = TestUtils.applyRuleOnFile(tsxFileName, QuoteMarkRule, [true, "double", "jsx-single"]);
+
+        const expectedFailures = [
+            TestUtils.createFailure(tsxFileName, [4, 20], [4, 27], singleFailureString),
+            TestUtils.createFailure(tsxFileName, [4, 44], [4, 47], doubleFailureString)
+        ];
+        assert.equal(actualFailures.length, 2);
+        assert.isTrue(actualFailures[0].equals(expectedFailures[0]));
+        assert.isTrue(actualFailures[1].equals(expectedFailures[1]));
+    });
+
+    it("enforces single quotes and jsx double quotes", () => {
+        const actualFailures = TestUtils.applyRuleOnFile(tsxFileName, QuoteMarkRule, [true, "single", "jsx-double"]);
+
+        const expectedFailures = [
+            TestUtils.createFailure(tsxFileName, [1, 24], [1, 31], singleFailureString),
+            TestUtils.createFailure(tsxFileName, [4, 31], [4, 35], doubleFailureString),
+            TestUtils.createFailure(tsxFileName, [4, 50], [4, 53], singleFailureString)
+        ];
+        assert.equal(actualFailures.length, 3);
+        assert.isTrue(actualFailures[0].equals(expectedFailures[0]));
+        assert.isTrue(actualFailures[1].equals(expectedFailures[1]));
+        assert.isTrue(actualFailures[2].equals(expectedFailures[2]));
+    });
+
 });
