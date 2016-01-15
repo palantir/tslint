@@ -18,8 +18,15 @@
 import * as fs from "fs";
 import * as glob from "glob";
 import * as optimist from "optimist";
+import * as path from "path";
 import * as Linter from "./tslint";
-import {CONFIG_FILENAME, DEFAULT_CONFIG, getRulesDirectories} from "./configuration";
+import {
+    CONFIG_FILENAME,
+    DEFAULT_CONFIG,
+    findConfigurationPath,
+    getRulesDirectories,
+    loadConfigurationFromPath
+} from "./configuration";
 
 let processed = optimist
     .usage("Usage: $0 [options] [file ...]")
@@ -167,14 +174,13 @@ const processFile = (file: string) => {
     }
 
     const contents = fs.readFileSync(file, "utf8");
-    const configuration = Linter.findConfiguration(argv.c, file);
+    const configurationPath = findConfigurationPath(argv.c, file);
+    const configuration = loadConfigurationFromPath(configurationPath);
 
-    if (configuration == null) {
-        console.error("Unable to find tslint configuration");
-        process.exit(1);
-    }
+    // if configurationPath is null, this will be set to ".", which is the current directory and is fine
+    const configurationDir = path.dirname(configurationPath);
 
-    const rulesDirectories = getRulesDirectories(configuration.rulesDirectory);
+    const rulesDirectories = getRulesDirectories(configuration.rulesDirectory, configurationDir);
 
     if (argv.r != null) {
         rulesDirectories.push(argv.r);

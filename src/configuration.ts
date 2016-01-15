@@ -51,39 +51,56 @@ export const DEFAULT_CONFIG = {
         ],
     }
 };
-const moduleDirectory = path.dirname(module.filename);
 
 export function findConfiguration(configFile: string, inputFileLocation: string): any {
-    if (configFile == null) {
-        // first look for package.json from input file location
-        configFile = findup("package.json", { cwd: inputFileLocation, nocase: true });
+    const configPath = findConfigurationPath(configFile, inputFileLocation);
+    return loadConfigurationFromPath(configPath);
+}
 
-        if (configFile) {
-            const content = require(configFile);
+export function findConfigurationPath(suppliedConfigFilePath: string, inputFilePath: string) {
+    if (suppliedConfigFilePath != null) {
+        if (!fs.existsSync(suppliedConfigFilePath)) {
+            throw new Error(`Could not find config file at: ${path.resolve(suppliedConfigFilePath)}`);
+        } else {
+            return suppliedConfigFilePath;
+        }
+    } else {
+        // search for package.json with tslintConfig property
+        let configFilePath = findup("package.json", { cwd: inputFilePath, nocase: true });
+        if (configFilePath != null && require(configFilePath).tslintConfig != null) {
+            return configFilePath;
+        }
 
-            if (content.tslintConfig) {
-                return content.tslintConfig;
+        // search for tslint.json from input file location
+        configFilePath = findup(CONFIG_FILENAME, { cwd: inputFilePath, nocase: true });
+        if (configFilePath != null && fs.existsSync(configFilePath)) {
+            return configFilePath;
+        }
+
+        // search for tslint.json in home directory
+        const homeDir = getHomeDir();
+        if (homeDir != null) {
+            configFilePath = path.join(homeDir, CONFIG_FILENAME);
+            if (fs.existsSync(configFilePath)) {
+                return configFilePath;
             }
         }
 
-        // next look for tslint.json
-        const homeDir = getHomeDir();
-        if (!homeDir) {
-            return undefined;
-        }
-
-        const defaultPath = path.join(homeDir, CONFIG_FILENAME);
-
-        configFile = findup(CONFIG_FILENAME, { cwd: inputFileLocation, nocase: true }) || defaultPath;
+        // no path could be found
+        return undefined;
     }
+}
 
-    if (fs.existsSync(configFile)) {
-        let fileData = fs.readFileSync(configFile, "utf8");
+export function loadConfigurationFromPath(configFilePath: string) {
+    if (configFilePath == null) {
+        return DEFAULT_CONFIG;
+    } else if (path.basename(configFilePath) === "package.json") {
+        return require(configFilePath).tslintConfig;
+    } else {
+        let fileData = fs.readFileSync(configFilePath, "utf8");
         // remove BOM if present
         fileData = fileData.replace(/^\uFEFF/, "");
         return JSON.parse(fileData);
-    } else {
-        return DEFAULT_CONFIG;
     }
 }
 
@@ -103,20 +120,27 @@ function getHomeDir() {
     }
 }
 
-export function getRelativePath(directory: string): string {
+export function getRelativePath(directory: string, relativeTo?: string): string {
     if (directory != null) {
-        return path.relative(moduleDirectory, directory);
+        const basePath = relativeTo || process.cwd();
+        return path.resolve(basePath, directory);
     }
 }
 
-export function getRulesDirectories(directories: string | string[]): string[] {
+export function getRulesDirectories(directories: string | string[], relativeTo?: string): string[] {
     let rulesDirectories: string[] = [];
 
     if (directories != null) {
         if (typeof directories === "string") {
-            rulesDirectories = [getRelativePath(<string>directories)];
+            rulesDirectories = [getRelativePath(directories, relativeTo)];
         } else {
-            rulesDirectories = (<string[]>directories).map((dir) => getRelativePath(dir));
+            rulesDirectories = directories.map((dir) => getRelativePath(dir, relativeTo));
+        }
+    }
+
+    for (const directory of rulesDirectories) {
+        if (!fs.existsSync(directory)) {
+            throw new Error(`Could not find custom rule directory: ${directory}`);
         }
     }
 
