@@ -1,6 +1,10 @@
 Change Log
 ===
 
+v3.2.1
+---
+* Stable release containing changes from the last dev release
+
 v3.2.1-dev.1
 ---
 * [enhancement] automatically generate a `tslint.json` file with new `--init` CLI command (#717)
