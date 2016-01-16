@@ -1,6 +1,13 @@
 Change Log
 ===
 
+v3.2.2-dev.1
+---
+* [enhancement] Throw an error if a path to a directory of custom rules is invalid (#910)
+* [new-rule-option] "jsx-single" and "jsx-double" options for `quotemark` rule (#673)
+* [bugfix] Handle paths to directories of custom rules more accurately
+* [bugfix] `no-unused-expression` rule handles `await` statements correctly (#887)
+
 v3.2.1
 ---
 * Stable release containing changes from the last dev release
