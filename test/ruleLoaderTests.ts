@@ -17,8 +17,7 @@
 import {loadRules} from "./lint";
 
 describe("Rule Loader", () => {
-    const path = require("path");
-    const rulesDirectory = path.join(global.process.cwd(), "build/rules");
+    const RULES_DIRECTORY = "build/src/rules";
 
     it("loads core rules", () => {
         const validConfiguration: {[name: string]: any} = {
@@ -29,7 +28,7 @@ describe("Rule Loader", () => {
             "no-debugger": true
         };
 
-        const rules = loadRules(validConfiguration, {}, rulesDirectory);
+        const rules = loadRules(validConfiguration, {}, RULES_DIRECTORY);
         assert.equal(rules.length, 5);
     });
 
@@ -39,7 +38,7 @@ describe("Rule Loader", () => {
             "invalidConfig2": false
         };
 
-        const rules = loadRules(invalidConfiguration, {}, rulesDirectory);
+        const rules = loadRules(invalidConfiguration, {}, RULES_DIRECTORY);
         assert.deepEqual(rules, []);
     });
 
@@ -51,7 +50,7 @@ describe("Rule Loader", () => {
             "eofline-": true
         };
 
-        const rules = loadRules(invalidConfiguration, {}, rulesDirectory);
+        const rules = loadRules(invalidConfiguration, {}, RULES_DIRECTORY);
         assert.deepEqual(rules, []);
     });
 
@@ -64,7 +63,7 @@ describe("Rule Loader", () => {
             "no-debugger": true
         };
 
-        const rules = loadRules(validConfiguration, {}, [rulesDirectory]);
+        const rules = loadRules(validConfiguration, {}, [RULES_DIRECTORY]);
         assert.equal(rules.length, 5);
     });
 });

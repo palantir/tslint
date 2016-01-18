@@ -211,6 +211,8 @@ A sample configuration file with all options is available [here](https://github.
 * `quotemark` enforces consistent single or double quoted string literals. Rule options (at least one of `"double"` or `"single"` is required):
     * `"single"` enforces single quotes.
     * `"double"` enforces double quotes.
+    * `"jsx-single"` enforces single quotes for JSX attributes.
+    * `"jsx-double"` enforces double quotes for JSX attributes.
     * `"avoid-escape"` allows you to use the "other" quotemark in cases where escaping would normally be required. For example, `[true, "double", "avoid-escape"]` would not report a failure on the string literal `'Hello "World"'`.
 * `radix` enforces the radix parameter of `parseInt`.
 * `semicolon` enforces semicolons at the end of every statement.
@@ -219,7 +221,8 @@ A sample configuration file with all options is available [here](https://github.
   Each rule option requires a value of `"always"` or `"never"`. Rule options:
     * `"multiline"` checks multi-line object literals.
     * `"singleline"` checks single-line object literals.
-* `triple-equals` enforces === and !== in favor of == and !=.
+* `triple-equals` enforces `===` and `!==` in favor of `==` and `!=`.
+    * `"allow-null-check"` allows `==` and `!=` when comparing to `null`.
 * `typedef` enforces type definitions to exist. Rule options:
     * `"call-signature"` checks return type of functions.
     * `"parameter"` checks type specifier of function parameters.

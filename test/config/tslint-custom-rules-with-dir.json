@@ -1,0 +1,6 @@
+{
+  "rulesDirectory": "../files/custom-rules/",
+  "rules": {
+    "always-fail": true
+  }
+}

@@ -43,23 +43,31 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class QuotemarkWalker extends Lint.RuleWalker {
     private quoteMark = QuoteMark.DOUBLE_QUOTES;
+    private jsxQuoteMark: QuoteMark;
     private avoidEscape: boolean;
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
 
         const ruleArguments = this.getOptions();
-        const quoteMarkString = ruleArguments[0];
-        if (quoteMarkString === "single") {
+
+        if (ruleArguments.indexOf("single") > -1) {
             this.quoteMark = QuoteMark.SINGLE_QUOTES;
+        }
+
+        if (ruleArguments.indexOf("jsx-single") > -1) {
+            this.jsxQuoteMark = QuoteMark.SINGLE_QUOTES;
+        } else if (ruleArguments.indexOf("jsx-double") > -1) {
+            this.jsxQuoteMark = QuoteMark.DOUBLE_QUOTES;
         } else {
-            this.quoteMark = QuoteMark.DOUBLE_QUOTES;
+            this.jsxQuoteMark = this.quoteMark;
         }
 
         this.avoidEscape = ruleArguments.indexOf("avoid-escape") > 0;
     }
 
     public visitStringLiteral(node: ts.StringLiteral) {
+        const inJsx = (node.parent.kind === ts.SyntaxKind.JsxAttribute);
         const text = node.getText();
         const width = node.getWidth();
         const position = node.getStart();
@@ -67,14 +75,15 @@ class QuotemarkWalker extends Lint.RuleWalker {
         const firstCharacter = text.charAt(0);
         const lastCharacter = text.charAt(text.length - 1);
 
-        const expectedQuoteMark = (this.quoteMark === QuoteMark.SINGLE_QUOTES) ? "'" : "\"";
+        const quoteMark = inJsx ? this.jsxQuoteMark : this.quoteMark;
+        const expectedQuoteMark = (quoteMark === QuoteMark.SINGLE_QUOTES) ? "'" : "\"";
 
         if (firstCharacter !== expectedQuoteMark || lastCharacter !== expectedQuoteMark) {
             // allow the "other" quote mark to be used, but only to avoid having to escape
             const includesOtherQuoteMark = text.slice(1, -1).indexOf(expectedQuoteMark) !== -1;
 
             if (!(this.avoidEscape && includesOtherQuoteMark)) {
-                const failureMessage = (this.quoteMark === QuoteMark.SINGLE_QUOTES)
+                const failureMessage = (quoteMark === QuoteMark.SINGLE_QUOTES)
                     ? Rule.SINGLE_QUOTE_FAILURE
                     : Rule.DOUBLE_QUOTE_FAILURE;
 

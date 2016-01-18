@@ -19,7 +19,10 @@ expectOut () {
   expect=$2
   msg=$3
 
-  if [ $expect != $actual ]; then
+  nodeV=`node -v`
+  
+  # if Node 0.10.*, node will sometimes exit with status 8 when an error is thrown
+  if [[ $expect != $actual || $nodeV == v0.10.* && $expect == 1 && $actual == 8 ]] ; then
     echo "$msg: expected $expect got $actual"
     num_failures=$(expr $num_failures + 1)
   fi
@@ -41,6 +44,21 @@ expectOut $? 0 "tslint with valid arguments did not exit correctly"
 # make sure calling tslint with the -f flag exits correctly
 ./bin/tslint src/configuration.ts -f src/formatterLoader.ts
 expectOut $? 1 "tslint with -f flag did not exit correctly"
+
+# make sure calling tslint with a CLI custom rules directory that doesn't exist fails
+# (redirect stderr because it's confusing to see a stack trace during the build)
+./bin/tslint -c ./test/config/tslint-custom-rules.json -r ./someRandomDir src/tslint.ts
+expectOut $? 1 "tslint with -r pointing to a nonexistent directory did not fail"
+
+# make sure calling tslint with a CLI custom rules directory that does exist finds the errors it should
+./bin/tslint -c ./test/config/tslint-custom-rules.json -r ./test/files/custom-rules src/tslint.ts
+expectOut $? 2 "tslint with with -r pointing to custom rules did not find lint failures"
+
+# make sure calling tslint with a rulesDirectory in a config file works
+./bin/tslint -c ./test/config/tslint-custom-rules-with-dir.json src/tslint.ts
+expectOut $? 2 "tslint with with JSON pointing to custom rules did not find lint failures"
+
+
 
 # make sure tslint --init generates a file
 cd ./bin

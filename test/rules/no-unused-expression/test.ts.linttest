@@ -29,6 +29,19 @@ j = (j === 0 ? 5 : 6);
 (a => 5)(4);
 "use strict";
 
+var obj = {};
+delete obj.key;
+function* g(): Iterable<number> {
+    for (let i = 0; i < 100; i++) {
+        yield i;
+    }
+}
+
+async function f(foo: Promise<void>): Promise<number> {
+    await foo;
+    return 0;
+}
+
 // invalid code:
 
 5;
@@ -55,15 +68,5 @@ a => fun2(a);
 ~~~~~~~~~~~~~~~~~~~~~~~ [0]
 "use strct";
 ~~~~~~~~~~~~ [0]
-
-// sigh, valid code again:
-
-var obj = {};
-delete obj.key;
-function* g(): Iterable<number> {
-    for (let i = 0; i < 100; i++) {
-        yield i;
-    }
-}
 
 [0]: expected an assignment or function call
