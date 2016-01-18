@@ -221,7 +221,8 @@ A sample configuration file with all options is available [here](https://github.
   Each rule option requires a value of `"always"` or `"never"`. Rule options:
     * `"multiline"` checks multi-line object literals.
     * `"singleline"` checks single-line object literals.
-* `triple-equals` enforces === and !== in favor of == and !=.
+* `triple-equals` enforces `===` and `!==` in favor of `==` and `!=`.
+    * `"allow-null-check"` allows `==` and `!=` when comparing to `null`.
 * `typedef` enforces type definitions to exist. Rule options:
     * `"call-signature"` checks return type of functions.
     * `"parameter"` checks type specifier of function parameters.
