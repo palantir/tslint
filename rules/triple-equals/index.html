@@ -1,12 +1,31 @@
 ---
 ruleName: triple-equals
 description: 'Requires `===` and `!==` in place of `==` and `!=`.'
-optionsDescription: Not configurable.
-options: {}
+optionsDescription: |-
+
+  One argument may be optionally provided:
+
+  * `"allow-null-check"` allows `==` and `!=` when comparing to `null`.
+options:
+  type: list
+  listType:
+    type: enum
+    enumValues:
+      - allow-null-check
 optionExamples:
   - 'true'
+  - '[true, "allow-null-check"]'
 type: functionality
-optionsJSON: '{}'
+optionsJSON: |-
+  {
+    "type": "list",
+    "listType": {
+      "type": "enum",
+      "enumValues": [
+        "allow-null-check"
+      ]
+    }
+  }
 layout: rule
 title: 'Rule: triple-equals'
 ---

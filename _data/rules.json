@@ -579,7 +579,7 @@
   {
     "ruleName": "quotemark",
     "description": "Requires single or double quotes for string literals.",
-    "optionsDescription": "\nThree arguments may be optionally provided:\n\n* `\"single\"` enforces single quotes.\n* `\"double\"` enforces double quotes.\n* `\"avoid-escape\"` allows you to use the \"other\" quotemark in cases where escaping would normally be required.\nFor example, `[true, \"double\", \"avoid-escape\"]` would not report a failure on the string literal `'Hello \"World\"'`.",
+    "optionsDescription": "\nFive arguments may be optionally provided:\n\n* `\"single\"` enforces single quotes.\n* `\"double\"` enforces double quotes.\n* `\"jsx-single\"` enforces single quotes for JSX attributes.\n* `\"jsx-double\"` enforces double quotes for JSX attributes.\n* `\"avoid-escape\"` allows you to use the \"other\" quotemark in cases where escaping would normally be required.\nFor example, `[true, \"double\", \"avoid-escape\"]` would not report a failure on the string literal `'Hello \"World\"'`.",
     "options": {
       "type": "list",
       "listType": {
@@ -587,12 +587,15 @@
         "enumValues": [
           "single",
           "double",
+          "jsx-single",
+          "jsx-double",
           "avoid-escape"
         ]
       }
     },
     "optionExamples": [
-      "[true, \"single\", \"avoid-escape\"]"
+      "[true, \"single\", \"avoid-escape\"]",
+      "[true, \"single\", \"jsx-double\"]"
     ],
     "type": "style"
   },
@@ -658,10 +661,19 @@
   {
     "ruleName": "triple-equals",
     "description": "Requires `===` and `!==` in place of `==` and `!=`.",
-    "optionsDescription": "Not configurable.",
-    "options": {},
+    "optionsDescription": "\nOne argument may be optionally provided:\n\n* `\"allow-null-check\"` allows `==` and `!=` when comparing to `null`.",
+    "options": {
+      "type": "list",
+      "listType": {
+        "type": "enum",
+        "enumValues": [
+          "allow-null-check"
+        ]
+      }
+    },
     "optionExamples": [
-      "true"
+      "true",
+      "[true, \"allow-null-check\"]"
     ],
     "type": "functionality"
   },
