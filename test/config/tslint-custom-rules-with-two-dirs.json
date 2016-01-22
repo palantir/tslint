@@ -1,0 +1,7 @@
+{
+  "rulesDirectory": ["../files/custom-rules-2", "../files/custom-rules/"],
+  "rules": {
+    "always-fail": true,
+    "no-fail": true
+  }
+}
