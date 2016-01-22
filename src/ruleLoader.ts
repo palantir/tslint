@@ -17,7 +17,7 @@
 
 import * as fs from "fs";
 import * as path from "path";
-import {camelize, strLeft, strRight} from "underscore.string";
+import {camelize} from "underscore.string";
 import {getRulesDirectories} from "./configuration";
 import {IRule, IDisabledInterval} from "./language/rule/rule";
 
@@ -68,18 +68,6 @@ export function findRule(name: string, rulesDirectories?: string | string[]) {
             if (Rule != null) {
                 return Rule;
             }
-
-            // finally check for rules within the first level of directories,
-            // using dash prefixes as the sub-directory names
-            const subDirectory = strLeft(rulesDirectory, "-");
-            const ruleName = strRight(rulesDirectory, "-");
-            if (subDirectory !== rulesDirectory && ruleName !== rulesDirectory) {
-                camelizedName = transformName(ruleName);
-                Rule = loadRule(rulesDirectory, subDirectory, camelizedName);
-                if (Rule != null) {
-                    return Rule;
-                }
-            }
         }
     }
 
@@ -96,9 +84,12 @@ function transformName(name: string) {
     return nameMatch[1] + camelize(nameMatch[2]) + nameMatch[3] + "Rule";
 }
 
-function loadRule(...paths: string[]) {
-    const rulePath = paths.reduce((p, c) => path.join(p, c), "");
-    const fullPath = path.resolve(moduleDirectory, rulePath);
+/**
+ * @param directory - An absolute path to a directory of rules
+ * @param ruleName - A name of a rule in filename format. ex) "someLintRule"
+ */
+function loadRule(directory: string, ruleName: string) {
+    const fullPath = path.join(directory, ruleName);
 
     if (fs.existsSync(fullPath + ".js")) {
         const ruleModule = require(fullPath);
