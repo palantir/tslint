@@ -1,6 +1,10 @@
 Change Log
 ===
 
+v3.3.0-dev.1
+---
+* [bugfix] Correctly handle more than one custom rules directory (#928)
+
 v3.2.2
 ---
 * Stable release containing changes from the last dev release
