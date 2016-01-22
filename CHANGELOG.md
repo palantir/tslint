@@ -1,6 +1,10 @@
 Change Log
 ===
 
+v3.2.2
+---
+* Stable release containing changes from the last dev release
+
 v3.2.2-dev.1
 ---
 * [enhancement] Throw an error if a path to a directory of custom rules is invalid (#910)

@@ -127,6 +127,9 @@ export function getRelativePath(directory: string, relativeTo?: string): string 
     }
 }
 
+/**
+ * @return An array of absolute paths to directories potentially containing rules
+ */
 export function getRulesDirectories(directories: string | string[], relativeTo?: string): string[] {
     let rulesDirectories: string[] = [];
 
