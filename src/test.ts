@@ -25,7 +25,7 @@ import * as Linter from "./tslint";
 import * as parse from "./test/parse";
 import {LintError} from "./test/lintError";
 
-const FILE_EXTENSION = ".linttest";
+const FILE_EXTENSION = ".lint";
 
 export interface TestResult {
     directory: string;
