@@ -1,3 +1,20 @@
+/**
+ * @license
+ * Copyright 2016 Palantir Technologies, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import * as colors from "colors";
 import * as diff from "diff";
 import * as fs from "fs";
@@ -6,7 +23,9 @@ import * as path from "path";
 
 import * as Linter from "./tslint";
 import * as parse from "./test/parse";
-import {FILE_EXTENSION, LintError} from "./test/types";
+import {LintError} from "./test/lintError";
+
+const FILE_EXTENSION = ".linttest";
 
 export interface TestResult {
     directory: string;
@@ -26,7 +45,7 @@ export function runTest(testDirectory: string): TestResult {
     const results: TestResult = { directory: testDirectory, results: {} };
 
     for (const fileToLint of filesToLint) {
-        const fileBasename = path.basename(fileToLint, ".linttest");
+        const fileBasename = path.basename(fileToLint, FILE_EXTENSION);
         const fileText = fs.readFileSync(fileToLint, "utf8");
         const fileTextWithoutMarkup = parse.removeErrorMarkup(fileText);
         const errorsFromMarkup = parse.parseErrorsFromMarkup(fileText);
@@ -43,9 +62,15 @@ export function runTest(testDirectory: string): TestResult {
             const endLineAndCharacter = failure.getEndPosition().getLineAndCharacter();
 
             return {
-                endPos: { col: endLineAndCharacter.character, line: endLineAndCharacter.line },
+                endPos: {
+                    col: endLineAndCharacter.character,
+                    line: endLineAndCharacter.line
+                },
                 message: failure.getFailure(),
-                startPos: { col: startLineAndCharacter.character, line: startLineAndCharacter.line },
+                startPos: {
+                    col: startLineAndCharacter.character,
+                    line: startLineAndCharacter.line
+                },
             };
         });
 
@@ -74,8 +99,8 @@ export function consoleTestResultHandler(testResult: TestResult): boolean {
             console.log(colors.green(" Passed"));
         } else {
             console.log(colors.red(" Failed!"));
-            console.log(colors.red("Expected (from .linttest file)"));
-            console.log(colors.green("Actual (from TSLint)"));
+            console.log(colors.green(`Expected (from ${FILE_EXTENSION} file)`));
+            console.log(colors.red("Actual (from TSLint)"));
 
             didAllTestsPass = false;
 

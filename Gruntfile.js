@@ -53,7 +53,8 @@ module.exports = function (grunt) {
                 "src/*.ts",
                 "src/formatters/**/*.ts",
                 "src/language/**/*.ts",
-                "src/rules/**/*.ts"
+                "src/rules/**/*.ts",
+                "src/test/**/*.ts"
             ],
             test: [
                 "test/**/*.ts",

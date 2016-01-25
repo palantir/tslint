@@ -79,8 +79,8 @@ expectOut $? 1 "tslint with --init flag did not exit correctly when tslint.json 
 
 rm tslint.json
 cd ..
-# end tslint --init tests
 
+# ensure --test command works correctly
 ./bin/tslint --test test/rules/no-eval
 expectOut $? 0 "tslint --test did not exit correctly for a passing test"
 

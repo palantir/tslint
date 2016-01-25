@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-export function strMult(str: string, numTimes: number) {
+export function replicateStr(str: string, numTimes: number) {
     return Array(numTimes + 1).join(str);
 }

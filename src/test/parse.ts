@@ -14,32 +14,32 @@
  * limitations under the License.
  */
 
-import {FILE_EXTENSION, LintError, errorComparator, lintSyntaxError} from "./types";
+import {LintError, errorComparator, lintSyntaxError} from "./lintError";
 import {Line, ErrorLine, CodeLine, MultilineErrorLine, EndErrorLine, MessageSubstitutionLine,
-        textToLineObj, lineObjToText} from "./lines";
+        parseLine, printLine} from "./lines";
 
 /**
- * Takes the full text of a .linttest file and returns the contents of the file
+ * Takes the full text of a .lint file and returns the contents of the file
  * with all error markup removed
  */
 export function removeErrorMarkup(text: string): string {
     const textWithMarkup = text.split("\n");
-    const lines = textWithMarkup.map(textToLineObj);
+    const lines = textWithMarkup.map(parseLine);
     const codeText = lines.filter((line) => (line instanceof CodeLine)).map((line) => (<CodeLine>line).contents);
     return codeText.join("\n");
 }
 
 /* tslint:disable:object-literal-sort-keys */
 /**
- * Takes the full text of a .linttest file and returns an array of LintErrors
+ * Takes the full text of a .lint file and returns an array of LintErrors
  * corresponding to the error markup in the file.
  */
 export function parseErrorsFromMarkup(text: string): LintError[] {
     const textWithMarkup = text.split("\n");
-    const lines = textWithMarkup.map(textToLineObj);
+    const lines = textWithMarkup.map(parseLine);
 
     if (lines.length > 0 && !(lines[0] instanceof CodeLine)) {
-        throw lintSyntaxError(`Cannot start a ${FILE_EXTENSION} file with an error mark line.`);
+        throw lintSyntaxError(`text cannot start with an error mark line.`);
     }
 
     const messageSubstitutionLines = <MessageSubstitutionLine[]>lines.filter((l) => l instanceof MessageSubstitutionLine);
@@ -49,7 +49,7 @@ export function parseErrorsFromMarkup(text: string): LintError[] {
     }
 
     // errorLineForCodeLine[5] contains all the ErrorLine objects associated with the 5th line of code, for example
-    const errorLinesForCodeLines = separateErrorLinesFromCodeLines(lines);
+    const errorLinesForCodeLines = createCodeLineNoToErrorsMap(lines);
 
     const lintErrors: LintError[] = [];
     // for each line of code...
@@ -73,7 +73,7 @@ export function parseErrorsFromMarkup(text: string): LintError[] {
 
                 // iterate through the MultilineErrorLines until we get to an EndErrorLine
                 for (let nextLineNo = lineNo + 1; ; ++nextLineNo) {
-                    if (!validErrorMarkupContinuation(errorLinesForCodeLines, nextLineNo)) {
+                    if (!isValidErrorMarkupContinuation(errorLinesForCodeLines, nextLineNo)) {
                         throw lintSyntaxError(
                             `Error mark starting at ${errorStartPos.line}:${errorStartPos.col} does not end correctly.`
                         );
@@ -109,13 +109,15 @@ export function createMarkupFromErrors(code: string, lintErrors: LintError[]) {
     for (const error of lintErrors) {
         const {startPos, endPos, message} = error;
 
-        if (startPos.line === endPos.line) {  // single line error
+        if (startPos.line === endPos.line) {
+            // single line error
             errorLinesForCodeText[startPos.line].push(new EndErrorLine(
                 startPos.col,
                 endPos.col,
                 message
             ));
-        } else {  // multiline error
+        } else {
+            // multiline error
             errorLinesForCodeText[startPos.line].push(new MultilineErrorLine(startPos.col));
             for (let lineNo = startPos.line + 1; lineNo < endPos.line; ++lineNo) {
                 errorLinesForCodeText[lineNo].push(new MultilineErrorLine(0));
@@ -130,14 +132,14 @@ export function createMarkupFromErrors(code: string, lintErrors: LintError[]) {
 /* tslint:enable:object-literal-sort-keys */
 
 function combineCodeTextAndErrorLines(codeText: string[], errorLinesForCodeText: ErrorLine[][]) {
-    return codeText.reduce((finalText, code, i) => {
-        finalText.push(code);
-        finalText.push(...errorLinesForCodeText[i].map((line) => lineObjToText(line, code)));
-        return finalText;
+    return codeText.reduce((resultText, code, i) => {
+        resultText.push(code);
+        resultText.push(...(errorLinesForCodeText[i].map((line) => printLine(line, code))));
+        return resultText;
     }, <string[]>[]);
 }
 
-function separateErrorLinesFromCodeLines(lines: Line[]) {
+function createCodeLineNoToErrorsMap(lines: Line[]) {
     const errorLinesForCodeLine: ErrorLine[][] = [];
     for (const line of lines) {
         if (line instanceof CodeLine) {
@@ -149,7 +151,7 @@ function separateErrorLinesFromCodeLines(lines: Line[]) {
     return errorLinesForCodeLine;
 }
 
-function validErrorMarkupContinuation(errorLinesForCodeLines: ErrorLine[][], lineNo: number) {
+function isValidErrorMarkupContinuation(errorLinesForCodeLines: ErrorLine[][], lineNo: number) {
     return lineNo < errorLinesForCodeLines.length
         && errorLinesForCodeLines[lineNo].length !== 0
         && errorLinesForCodeLines[lineNo][0].startCol === 0;

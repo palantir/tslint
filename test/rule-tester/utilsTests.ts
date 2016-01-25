@@ -16,15 +16,13 @@
 
 import * as utils from "../../src/test/utils";
 
-describe("Rule Test Runner", () => {
-    describe("utils", () => {
-        describe("::strMult", () => {
-            it("should duplicate strings correctly", () => {
-                assert.strictEqual("xxxxx", utils.strMult("x", 5));
-                assert.strictEqual("", utils.strMult("abc", 0));
-                assert.strictEqual("abcabcabc", utils.strMult("abc", 3));
-                assert.strictEqual("one", utils.strMult("one", 1));
-            });
+describe("Rule Test Utils", () => {
+    describe("replicateStr", () => {
+        it("should duplicate strings correctly", () => {
+            assert.strictEqual("xxxxx", utils.replicateStr("x", 5));
+            assert.strictEqual("", utils.replicateStr("abc", 0));
+            assert.strictEqual("abcabcabc", utils.replicateStr("abc", 3));
+            assert.strictEqual("one", utils.replicateStr("one", 1));
         });
     });
 });

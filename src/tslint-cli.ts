@@ -164,7 +164,7 @@ tslint accepts the following commandline options:
 
     --test:
         Runs tslint on the specified directory and checks if tslint's output matches
-        the expected output. Automatically loads the tslint.json file in the
+        the expected output in .lint files. Automatically loads the tslint.json file in the
         specified directory as the configuration file for the tests. See the
         full tslint documentation for more details on how this can be used to test custom rules.
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {strMult} from "./utils";
+import {replicateStr} from "./utils";
 
 // Use classes here instead of interfaces because we want runtime type data
 export class Line { }
@@ -38,9 +38,9 @@ const messageSubstitutionRegex = /^\[([\w\-\_]+?)]: \s*(.+?)\s*$/;
 export const ZERO_LENGTH_ERROR = "~nil";
 
 /**
- * Maps a line of text from a .linttest file to an appropriate Line object
+ * Maps a line of text from a .lint file to an appropriate Line object
  */
-export function textToLineObj(text: string): Line {
+export function parseLine(text: string): Line {
     const multilineErrorMatch = text.match(multilineErrorRegex);
     if (multilineErrorMatch != null) {
         const startErrorCol = text.indexOf("~");
@@ -67,13 +67,20 @@ export function textToLineObj(text: string): Line {
 }
 
 /**
- * Maps an ErrorLine object to a matching line of text that could be in a .linttest file.
- * This is almost the inverse of classifyLine.
- * If you ran `createErrorString(classifyLine(someText))`, the whitespace in the result may be different than in someText
+ * Maps a Line object to a matching line of text that could be in a .lint file.
+ * This is almost the inverse of parseLine.
+ * If you ran `printLine(parseLine(someText), code)`, the whitespace in the result may be different than in someText
+ * @param line - A Line object to convert to text
+ * @param code - If line represents error markup, this is the line of code preceding the markup.
+ *               Otherwise, this parameter is not required.
  */
-export function lineObjToText(line: Line, code: string) {
+export function printLine(line: Line, code?: string): string {
     if (line instanceof ErrorLine) {
-        const startSpaces = strMult(" ", line.startCol);
+        if (code == null) {
+           throw new Error("Must supply argument for code parameter when line is an ErrorLine");
+        }
+
+        const leadingSpaces = replicateStr(" ", line.startCol);
         if (line instanceof MultilineErrorLine) {
             // special case for when the line of code is simply a newline.
             // use "~nil" to indicate the error continues on that line
@@ -81,24 +88,22 @@ export function lineObjToText(line: Line, code: string) {
                 return ZERO_LENGTH_ERROR;
             }
 
-            const tildes = strMult("~", code.length - startSpaces.length);
-            return `${startSpaces}${tildes}`;
+            const tildes = replicateStr("~", code.length - leadingSpaces.length);
+            return `${leadingSpaces}${tildes}`;
         } else if (line instanceof EndErrorLine) {
-            let tildes = strMult("~", line.endCol - line.startCol);
-            let endSpaces = strMult(" ", code.length - line.endCol);
+            let tildes = replicateStr("~", line.endCol - line.startCol);
+            let endSpaces = replicateStr(" ", code.length - line.endCol);
             if (tildes.length === 0) {
                 tildes = ZERO_LENGTH_ERROR;
                 // because we add "~nil" we need four less spaces than normal at the end
                 // always make sure we have at least one space though
                 endSpaces = endSpaces.substring(0, Math.max(endSpaces.length - 4, 1));
             }
-            return `${startSpaces}${tildes}${endSpaces} [${line.message}]`;
-        } 
-    }
-    else if (line instanceof MessageSubstitutionLine) {
+            return `${leadingSpaces}${tildes}${endSpaces} [${line.message}]`;
+        }
+    } else if (line instanceof MessageSubstitutionLine) {
         return `[${line.key}]: ${line.message}`;
-    }
-    else if (line instanceof CodeLine) {
+    } else if (line instanceof CodeLine) {
         return line.contents;
     }
 }

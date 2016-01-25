@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {LintError} from "../../src/test/types";
+import {LintError} from "../../src/test/lintError";
 
 /* tslint:disable:object-literal-sort-keys */
 

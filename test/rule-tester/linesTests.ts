@@ -16,32 +16,30 @@
 
 import * as lines from "../../src/test/lines";
 
-describe("Rule Test Runner", () => {
-    describe("lines", () => {
-        describe("::createErrorString", () => {
-            it("should correctly create strings", () => {
-                const code1 = "this is a line of code";
-                const errorLine1 = new lines.MultilineErrorLine(2);
-                const errorMarkup1 = "  ~~~~~~~~~~~~~~~~~~~~";
-                assert.strictEqual(lines.lineObjToText(errorLine1, code1), errorMarkup1);
+describe("Rule Test Lines", () => {
+    describe("createErrorString", () => {
+        it("should correctly create strings", () => {
+            const code1 = "this is a line of code";
+            const errorLine1 = new lines.MultilineErrorLine(2);
+            const errorMarkup1 = "  ~~~~~~~~~~~~~~~~~~~~";
+            assert.strictEqual(lines.printLine(errorLine1, code1), errorMarkup1);
 
-                const code2 = "another line of code here";
-                const errorLine2 = new lines.EndErrorLine(0, code2.length, "foo");
-                const errorMarkup2 = "~~~~~~~~~~~~~~~~~~~~~~~~~ [foo]";
-                assert.strictEqual(lines.lineObjToText(errorLine2, code2), errorMarkup2);
-            });
+            const code2 = "another line of code here";
+            const errorLine2 = new lines.EndErrorLine(0, code2.length, "foo");
+            const errorMarkup2 = "~~~~~~~~~~~~~~~~~~~~~~~~~ [foo]";
+            assert.strictEqual(lines.printLine(errorLine2, code2), errorMarkup2);
+        });
 
-            it("should correctly create strings with empty lines of code", () => {
-                const code1 = "";
-                const errorLine1 = new lines.MultilineErrorLine(0);
-                const errorMarkup1 = lines.ZERO_LENGTH_ERROR;
-                assert.strictEqual(lines.lineObjToText(errorLine1, code1), errorMarkup1);
+        it("should correctly create strings with empty lines of code", () => {
+            const code1 = "";
+            const errorLine1 = new lines.MultilineErrorLine(0);
+            const errorMarkup1 = lines.ZERO_LENGTH_ERROR;
+            assert.strictEqual(lines.printLine(errorLine1, code1), errorMarkup1);
 
-                const code2 = "";
-                const errorLine2 = new lines.EndErrorLine(0, 0, "foo");
-                const errorMarkup2 = `${lines.ZERO_LENGTH_ERROR} [foo]`;
-                assert.strictEqual(lines.lineObjToText(errorLine2, code2), errorMarkup2);
-            });
+            const code2 = "";
+            const errorLine2 = new lines.EndErrorLine(0, 0, "foo");
+            const errorMarkup2 = `${lines.ZERO_LENGTH_ERROR} [foo]`;
+            assert.strictEqual(lines.printLine(errorLine2, code2), errorMarkup2);
         });
     });
 });
