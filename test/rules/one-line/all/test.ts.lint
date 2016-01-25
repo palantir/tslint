@@ -103,3 +103,13 @@ function longFunctionNameWithLotsOfParams<T>(
     z: number,
     a: T) {
 }
+
+let geoConfig: {
+    maximumAge?: number;
+    timeout?: number;
+    enableHighAccuracy?: boolean;
+} = {
+    maximumAge: 3000,
+    timeout: 5000,
+    enableHighAccuracy: false
+};

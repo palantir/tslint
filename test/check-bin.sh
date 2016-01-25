@@ -58,7 +58,9 @@ expectOut $? 2 "tslint with with -r pointing to custom rules did not find lint f
 ./bin/tslint -c ./test/config/tslint-custom-rules-with-dir.json src/tslint.ts
 expectOut $? 2 "tslint with with JSON pointing to custom rules did not find lint failures"
 
-
+# make sure calling tslint with an array as rulesDirectory in a config file works
+./bin/tslint -c ./test/config/tslint-custom-rules-with-two-dirs.json src/tslint.ts
+expectOut $? 2 "tslint with with JSON pointing to two custom rules did not find lint failures from second directory"
 
 # make sure tslint --init generates a file
 cd ./bin

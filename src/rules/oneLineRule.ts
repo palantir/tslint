@@ -127,7 +127,7 @@ class OneLineWalker extends Lint.RuleWalker {
     public visitVariableDeclaration(node: ts.VariableDeclaration) {
         const initializer = node.initializer;
         if (initializer != null && initializer.kind === ts.SyntaxKind.ObjectLiteralExpression) {
-            const equalsToken = node.getChildAt(1);
+            const equalsToken = node.getChildren().filter((n) => n.kind === ts.SyntaxKind.EqualsToken)[0];
             const openBraceToken = initializer.getChildAt(0);
             this.handleOpeningBrace(equalsToken, openBraceToken);
         }
