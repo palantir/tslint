@@ -22,7 +22,6 @@ export class Formatter extends AbstractFormatter {
         const outputLines = failures.map((failure: RuleFailure) => {
             const fileName = failure.getFileName();
             const failureString = failure.getFailure();
-            const ruleName = failure.getRuleName();
 
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
             const positionTuple = `(${lineAndCharacter.line + 1},${lineAndCharacter.character + 1})`;
