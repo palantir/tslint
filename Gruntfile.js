@@ -22,16 +22,17 @@ module.exports = function (grunt) {
                 options: {
                     reporter: "spec"
                 },
-                src: ["build/test/**/*Tests.js", "build/test/assert.js", "build/test/lint.js"]
+                src: ["build/test/**/*Tests.js", "build/test/assert.js"]
             }
         },
 
         run: {
             testBin: {
-                exec: "./test/check-bin.sh"
+                cmd: "./test/check-bin.sh",
+                options: {quiet: Infinity}
             },
             testRules: {
-                exec: "node ./build/test/ruleTestRunner.js"
+                args: ["./build/test/ruleTestRunner.js"]
             }
         },
 
