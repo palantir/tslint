@@ -1,0 +1,22 @@
+// ensure that Bar and Baz do not get conflated
+interface Bar {
+    x(): void;
+}
+
+interface Baz {
+    y: number;
+}
+
+interface BarBaz {
+    x(): void;
+    y: number;
+    ~~~~~~~~~~ [0]
+}
+
+class Foo {
+    x(): void {}
+    y: number;
+    ~~~~~~~~~~ [0]
+}
+
+[0]: Declaration of public instance member variable not allowed to appear after declaration of public instance member function

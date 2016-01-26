@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "no-constructor-vars": true
+  }
+}

@@ -1,0 +1,11 @@
+var s1 = "s";
+var s2 =    new String("s");
+            ~~~~~~~~~~       [undesirable constructor use]
+
+var n1 = 1;
+var n2 = new    Number(1);
+         ~~~~~~~~~~~~~     [undesirable constructor use]
+
+var b1 = true;
+var b2 = new Boolean    (true);
+         ~~~~~~~~~~~            [undesirable constructor use]

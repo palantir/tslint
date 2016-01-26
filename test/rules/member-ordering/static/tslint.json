@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "member-ordering": [true, "static-before-instance"]
+  }
+}

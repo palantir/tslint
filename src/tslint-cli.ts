@@ -27,12 +27,13 @@ import {
     getRulesDirectories,
     loadConfigurationFromPath
 } from "./configuration";
+import {consoleTestResultHandler, runTest} from "./test";
 
 let processed = optimist
     .usage("Usage: $0 [options] [file ...]")
     .check((argv: any) => {
         // at least one of file, help, version or unqualified argument must be present
-        if (!(argv.h || argv.i || argv.v || argv._.length > 0)) {
+        if (!(argv.h || argv.i || argv.test || argv.v || argv._.length > 0)) {
             throw "Missing files";
         }
 
@@ -70,6 +71,9 @@ let processed = optimist
             default: "prose",
             describe: "output format (prose, json, verbose)"
         },
+        "test": {
+            describe: "test that tslint produces the correct output for the specified directory"
+        },
         "v": {
             alias: "version",
             describe: "current version"
@@ -101,6 +105,12 @@ if (argv.i != null) {
     const tslintJSON = JSON.stringify(DEFAULT_CONFIG, undefined, "    ");
     fs.writeFileSync(CONFIG_FILENAME, tslintJSON);
     process.exit(0);
+}
+
+if (argv.test != null) {
+    const results = runTest(argv.test);
+    const didAllTestsPass = consoleTestResultHandler(results);
+    process.exit(didAllTestsPass ? 0 : 1);
 }
 
 if ("help" in argv) {
@@ -151,6 +161,12 @@ tslint accepts the following commandline options:
         formatters are prose (human readable), json (machine readable)
         and verbose. prose is the default if this option is not used. Additonal
         formatters can be added and used if the --formatters-dir option is set.
+
+    --test:
+        Runs tslint on the specified directory and checks if tslint's output matches
+        the expected output in .lint files. Automatically loads the tslint.json file in the
+        specified directory as the configuration file for the tests. See the
+        full tslint documentation for more details on how this can be used to test custom rules.
 
     -v, --version:
         The current version of tslint.

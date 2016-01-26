@@ -1,0 +1,39 @@
+declare class AmbientNoAccess {
+    a(): number;
+    ~~~~~~~~~~~~ [0]
+}
+
+declare class AmbientAccess {
+    public a(): number;
+}
+
+class Members {
+    i: number;
+    ~~~~~~~~~~ [0]
+
+    public nPublic: number;
+    protected nProtected: number;
+    private nPrivate: number;
+
+    noAccess(x: number): number;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+    noAccess(o: any): any {}
+    ~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+
+    public access(x: number): number;
+    public access(o: any): any {}
+}
+
+const obj = {
+    func() {}
+};
+
+function main() {
+    class A {
+        i: number;
+        ~~~~~~~~~~ [0]
+        public n: number;
+    }
+}
+
+[0]: default access modifier on member/method not allowed

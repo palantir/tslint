@@ -1,0 +1,24 @@
+class ABCD {
+    private z2: number;
+            ~~          [unused variable: 'z2']
+    constructor() {
+    }
+
+    mfunc1() {
+        //
+    }
+
+    public mfunc2() {
+        this.mfunc3();
+    }
+
+    private mfunc3() {
+        //
+    }
+
+    private mfunc4() {
+            ~~~~~~     [unused variable: 'mfunc4']
+        //
+    }
+    static stillPublic: number;
+}

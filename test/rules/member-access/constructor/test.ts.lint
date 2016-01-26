@@ -1,0 +1,11 @@
+class ContructorsNoAccess {
+    constructor(i: number);
+    ~~~~~~~~~~~~~~~~~~~~~~~ [default access modifier on member/method not allowed]
+    constructor(o: any) {}
+    ~~~~~~~~~~~~~~~~~~~~~~ [default access modifier on member/method not allowed]
+}
+
+class ContructorsAccess {
+    public constructor(i: number);
+    public constructor(o: any) {}
+}

@@ -64,7 +64,7 @@ class TrailingCommaWalker extends Lint.RuleWalker {
                 if (hasTrailingComma && option === "never") {
                     this.addFailure(this.createFailure(lastGrandChild.getStart(), 1, Rule.FAILURE_STRING_NEVER));
                 } else if (!hasTrailingComma && option === "always") {
-                    this.addFailure(this.createFailure(lastGrandChild.getEnd(), 1, Rule.FAILURE_STRING_ALWAYS));
+                    this.addFailure(this.createFailure(lastGrandChild.getEnd() - 1, 1, Rule.FAILURE_STRING_ALWAYS));
                 }
             }
         }

@@ -20,6 +20,8 @@
     "test": "grunt"
   },
   "dependencies": {
+    "colors": "^1.1.2",
+    "diff": "^2.2.1",
     "findup-sync": "~0.2.1",
     "glob": "^6.0.1",
     "optimist": "~0.6.0",

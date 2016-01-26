@@ -82,6 +82,13 @@ expectOut $? 1 "tslint with --init flag did not exit correctly when tslint.json 
 rm tslint.json
 cd ..
 
+# ensure --test command works correctly
+./bin/tslint --test test/rules/no-eval
+expectOut $? 0 "tslint --test did not exit correctly for a passing test"
+
+./bin/tslint --test test/files/incorrect-rule-test
+expectOut $? 1 "tslint --test did not exit correctly for a failing test"
+
 if [ $num_failures != 0 ]; then
   echo "Failed $num_failures tests"
   exit 1
