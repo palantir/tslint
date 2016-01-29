@@ -1,0 +1,72 @@
+function fun1() {
+    return 0;
+}
+
+function fun2(a: number) {
+    return 0;
+}
+
+function fun3(a: number, b: number) {
+    return 0;
+}
+
+// valid code:
+
+var i: number;
+var j = 3;
+i = 1 + 2;
+j = fun1();
+fun1();
+fun2(2);
+fun3(2, fun1());
+i++;
+i += 2;
+--i;
+i <<= 2;
+i = fun1() + fun1();
+j = (j === 0 ? 5 : 6);
+(j === 0 ? fun1() : fun2(j));
+(a => 5)(4);
+"use strict";
+
+var obj = {};
+delete obj.key;
+function* g(): Iterable<number> {
+    for (let i = 0; i < 100; i++) {
+        yield i;
+    }
+}
+
+async function f(foo: Promise<void>): Promise<number> {
+    await foo;
+    return 0;
+}
+
+// invalid code:
+
+5;
+~~ [0]
+i;
+~~ [0]
+3 + 5;
+~~~~~~ [0]
+fun1() + fun1();
+~~~~~~~~~~~~~~~~ [0]
+fun2(i) + fun3(4,7);
+~~~~~~~~~~~~~~~~~~~~ [0]
+fun1() + 4;
+~~~~~~~~~~~ [0]
+4 + fun2(j);
+~~~~~~~~~~~~ [0]
+(j === 0 ? fun1() : 5);
+~~~~~~~~~~~~~~~~~~~~~~~ [0]
+(j === 0 ? i : fun2(j));
+~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+a => fun2(a);
+~~~~~~~~~~~~~ [0]
+() => {return fun1();};
+~~~~~~~~~~~~~~~~~~~~~~~ [0]
+"use strct";
+~~~~~~~~~~~~ [0]
+
+[0]: expected an assignment or function call

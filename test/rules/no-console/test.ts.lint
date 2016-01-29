@@ -1,0 +1,13 @@
+console.time();
+console.log("log");
+~~~~~~~~~~~             [function invocation disallowed: console.log]
+console.dir(object);
+~~~~~~~~~~~             [function invocation disallowed: console.dir]
+console.info("info");
+console.trace("trace");
+console.warn("warn");
+~~~~~~~~~~~~            [function invocation disallowed: console.warn]
+console.error("error");
+~~~~~~~~~~~~~           [function invocation disallowed: console.error]
+console.something();
+console.timeEnd();

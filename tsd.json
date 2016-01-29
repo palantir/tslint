@@ -5,6 +5,12 @@
   "path": "typings",
   "bundle": "typings/tsd.d.ts",
   "installed": {
+    "colors/colors.d.ts": {
+      "commit": "78ba6e41543e5ababbd1dda19797601be3c1f304"
+    },
+    "diff/diff.d.ts": {
+      "commit": "78ba6e41543e5ababbd1dda19797601be3c1f304"
+    },
     "findup-sync/findup-sync.d.ts": {
       "commit": "98d3168c2c570352a3a7393788e2ec9fbb08ade6"
     },

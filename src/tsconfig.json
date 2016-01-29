@@ -16,9 +16,12 @@
         "./*.ts",
         "./formatters/**/*.ts",
         "./language/**/*.ts",
-        "./rules/**/*.ts"
+        "./rules/**/*.ts",
+        "./test/**/*.ts"
     ],
     "files": [
+        "../typings/colors/colors.d.ts",
+        "../typings/diff/diff.d.ts",
         "../typings/findup-sync/findup-sync.d.ts",
         "../typings/glob/glob.d.ts",
         "../typings/minimatch/minimatch.d.ts",
@@ -33,6 +36,7 @@
         "lint.ts",
         "ruleLoader.ts",
         "rules.ts",
+        "test.ts",
         "tslint-cli.ts",
         "tslint.ts",
         "formatters/index.ts",
@@ -106,6 +110,10 @@
         "rules/typedefWhitespaceRule.ts",
         "rules/useStrictRule.ts",
         "rules/variableNameRule.ts",
-        "rules/whitespaceRule.ts"
+        "rules/whitespaceRule.ts",
+        "test/lines.ts",
+        "test/lintError.ts",
+        "test/parse.ts",
+        "test/utils.ts"
     ]
 }

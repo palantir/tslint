@@ -1,0 +1,6 @@
+var single = 'single';
+    var doublee = "married";
+                  ~~~~~~~~~  [" should be ']
+var singleWithinDouble = "'singleWithinDouble'";
+                         ~~~~~~~~~~~~~~~~~~~~~~  [" should be ']
+var doubleWithinSingle = '"doubleWithinSingle"';

@@ -1,0 +1,31 @@
+import  $ = require("jquery");
+import  _ = require("underscore");
+import  xyz = require("xyz");
+        ~~~                   [unused variable: 'xyz']
+import {createReadStream, createWriteStream} from "fs";
+        ~~~~~~~~~~~~~~~~                                [unused variable: 'createReadStream']
+export import a = require("a");
+
+createWriteStream();
+
+$(_.xyz());
+
+/// <reference path="../externalFormatter.test.ts" />
+
+module S {
+  var template = "";
+      ~~~~~~~~       [unused variable: 'template']
+}
+
+import * as foo from "libA";
+            ~~~              [unused variable: 'foo']
+import * as bar from "libB";
+import baz from "libC";
+import defaultExport, { namedExport } from "libD";
+       ~~~~~~~~~~~~~                               [unused variable: 'defaultExport']
+
+bar.someFunc();
+baz();
+namedExport();
+
+import "jquery";

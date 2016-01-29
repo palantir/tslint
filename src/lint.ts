@@ -19,6 +19,7 @@ import * as configuration from "./configuration";
 import * as formatters from "./formatters";
 import * as linter from "./tslint";
 import * as rules from "./rules";
+import * as test from "./test";
 import {RuleFailure} from "./language/rule/rule";
 
 export * from "./language/rule/rule";
@@ -34,6 +35,7 @@ export var Configuration = configuration;
 export var Formatters = formatters;
 export var Linter = linter;
 export var Rules = rules;
+export var Test = test;
 
 export interface LintResult {
     failureCount: number;

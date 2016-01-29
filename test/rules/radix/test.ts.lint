@@ -1,0 +1,4 @@
+var x = parseInt(3, 10) +
+        parseInt(4);
+        ~~~~~~~~~~~  [missing radix parameter]
+var y = parseFloat("2.5");

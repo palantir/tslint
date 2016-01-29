@@ -5,6 +5,10 @@ v3.3.0-dev.2
 ---
 * Add TypeScript peer dependency `>=1.9.0-dev` to support latest nightlies
 
+v3.3.0
+---
+* [bugfix] Tweak TSLint build so TSLint works with typescript@next (#926)
+
 v3.3.0-dev.1
 ---
 * [bugfix] Correctly handle more than one custom rules directory (#928)

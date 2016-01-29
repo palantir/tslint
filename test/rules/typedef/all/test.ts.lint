@@ -1,0 +1,42 @@
+var NoTypeObjectLiteralWithPropertyGetter = {
+                                         ~    [expected variable-declaration: 'NoTypeObjectLiteralWithPropertyGetter' to have a typedef]
+    Prop: "some property",
+
+    get PropDef() {
+                ~   [expected call-signature: 'PropDef' to have a typedef]
+        return this.Prop;
+    },
+
+    methodDef() {
+              ~   [expected call-signature: 'methodDef' to have a typedef]
+        return 'untyped';
+    },
+
+    anotherMethodDef: function() {
+                               ~   [expected call-signature to have a typedef]
+        return 'also untyped';
+    },
+
+    arrowMethodDef: () => {
+                     ~      [expected call-signature to have a typedef]
+        return 'also untyped';
+    }
+};
+
+interface NoTypeInterface {
+    Prop;
+        ~ [expected property-declaration: 'Prop' to have a typedef]
+    PropWithType: string;
+}
+
+var NoTypesFn = function (
+             ~             [expected variable-declaration: 'NoTypesFn' to have a typedef]
+    a,
+     ~ [expected parameter: 'a' to have a typedef]
+    b) {
+     ~   [expected call-signature to have a typedef]
+     ~   [expected parameter: 'b' to have a typedef]
+    var c = a + b,
+         ~         [expected variable-declaration: 'c' to have a typedef]
+        d = a - b;
+         ~         [expected variable-declaration: 'd' to have a typedef]
