@@ -33,6 +33,8 @@ export function loadRules(ruleConfiguration: {[name: string]: any},
                           enableDisableRuleMap: {[rulename: string]: IEnableDisablePosition[]},
                           rulesDirectories?: string | string[]): IRule[] {
     const rules: IRule[] = [];
+    const notFoundRules: string[] = [];
+
     for (const ruleName in ruleConfiguration) {
         if (ruleConfiguration.hasOwnProperty(ruleName)) {
             const ruleValue = ruleConfiguration[ruleName];
@@ -43,11 +45,18 @@ export function loadRules(ruleConfiguration: {[name: string]: any},
                 const ruleSpecificList = (ruleName in enableDisableRuleMap ? enableDisableRuleMap[ruleName] : []);
                 const disabledIntervals = buildDisabledIntervalsFromSwitches(ruleSpecificList, allList);
                 rules.push(new Rule(ruleName, ruleValue, disabledIntervals));
+            } else {
+                notFoundRules.push(ruleName);
             }
         }
     }
 
-    return rules;
+    if (notFoundRules.length > 0) {
+        const errorMessage = `Could not find the following rules specified in the configuration:\n${notFoundRules.join("\n")}`;
+        throw new Error(errorMessage);
+    } else {
+        return rules;
+    }
 }
 
 export function findRule(name: string, rulesDirectories?: string | string[]) {

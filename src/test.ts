@@ -105,7 +105,7 @@ export function consoleTestResultHandler(testResult: TestResult): boolean {
             didAllTestsPass = false;
 
             for (const diffResult of diffResults) {
-                let color = colors.gray;
+                let color = colors.grey;
                 if (diffResult.added) {
                     color = colors.green;
                 } else if (diffResult.removed) {

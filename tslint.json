@@ -34,7 +34,6 @@
     "no-shadowed-variable": true,
     "no-string-literal": true,
     "no-switch-case-fall-through": true,
-    "no-trailing-comma": true,
     "no-trailing-whitespace": true,
     "no-unused-expression": true,
     "no-unused-variable": true,
@@ -51,6 +50,10 @@
     "quotemark": [true, "double", "avoid-escape"],
     "radix": true,
     "semicolon": true,
+    "trailing-comma": {
+      "singleline": "never",
+      "multiline": "always"
+    },
     "triple-equals": [true, "allow-null-check"],
     "typedef-whitespace": [true, {
       "call-signature": "nospace",
