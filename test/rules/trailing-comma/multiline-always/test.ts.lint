@@ -14,6 +14,15 @@ var x = [{
 }];
 ~   [missing trailing comma]
 
+var s = {
+    sA: 6,
+};
+
+var t = {
+    tA: 7
+        ~ [missing trailing comma]
+}
+
 var y = {
     yA: 42,
     yB: 24,
@@ -24,6 +33,15 @@ var z = {
     zTwo: 1
           ~ [missing trailing comma]
 };
+
+var ss = [
+    6,
+];
+
+var tt = [
+    7
+    ~ [missing trailing comma]
+];
 
 var yy = [
     42,
@@ -49,6 +67,15 @@ var cc = [42, 24,];
 var dd = [2, 1];
 
 var {
+    sA,
+} = s;
+
+var {
+    tA
+     ~ [missing trailing comma]
+} = t;
+
+var {
     yA,
     yB,
 } = y;
@@ -58,6 +85,15 @@ var {
     zTwo
        ~ [missing trailing comma]
 } = z;
+
+var [
+    ssA,
+] = ss;
+
+var [
+    ttA
+      ~ [missing trailing comma]
+] = tt;
 
 var [
     yyA,
@@ -77,6 +113,15 @@ var {dOne, dTwo} = d;
 var [ccA, ccB,] = cc;
 
 var [ddOne, ddTwo] = dd;
+
+import {
+    ClassS,
+} from "module";
+
+import {
+    ClassT
+         ~ [missing trailing comma]
+} from "module";
 
 import {
     ClassV,

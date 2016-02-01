@@ -14,6 +14,15 @@ var x = [{
     c: (a + b)
 }];
 
+var s = {
+    sA: 6,
+         ~ [trailing comma]
+};
+
+var t = {
+    tA: 7
+}
+
 var y = {
     yA: 42,
     yB: 24,
@@ -24,6 +33,15 @@ var z = {
     zOne: 2,
     zTwo: 1
 };
+
+var ss = [
+    6,
+     ~ [trailing comma]
+];
+
+var tt = [
+    7
+];
 
 var yy = [
     42,
@@ -49,6 +67,15 @@ var cc = [42, 24,];
 var dd = [2, 1];
 
 var {
+    sA,
+      ~ [trailing comma]
+} = s;
+
+var {
+    tA
+} = t;
+
+var {
     yA,
     yB,
       ~ [trailing comma]
@@ -58,6 +85,15 @@ var {
     zOne,
     zTwo
 } = z;
+
+var [
+    ssA,
+       ~ [trailing comma]
+] = ss;
+
+var [
+    ttA
+] = tt;
 
 var [
     yyA,
@@ -77,6 +113,15 @@ var {dOne, dTwo} = d;
 var [ccA, ccB,] = cc;
 
 var [ddOne, ddTwo] = dd;
+
+import {
+    ClassS,
+          ~ [trailing comma]
+} from "module";
+
+import {
+    ClassT
+} from "module";
 
 import {
     ClassV,
