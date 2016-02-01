@@ -35,7 +35,7 @@ export abstract class AbstractRule implements IRule {
         this.options = {
             disabledIntervals: disabledIntervals,
             ruleArguments: ruleArguments,
-            ruleName: ruleName
+            ruleName: ruleName,
         };
     }
 

@@ -50,10 +50,10 @@
     "quotemark": [true, "double", "avoid-escape"],
     "radix": true,
     "semicolon": true,
-    "trailing-comma": {
+    "trailing-comma": [true, {
       "singleline": "never",
       "multiline": "always"
-    },
+    }],
     "triple-equals": [true, "allow-null-check"],
     "typedef-whitespace": [true, {
       "call-signature": "nospace",

@@ -34,7 +34,7 @@ describe("MSBuild Formatter", () => {
         const failures = [
             new RuleFailure(sourceFile, 0, 1, "first failure", "first-name"),
             new RuleFailure(sourceFile, 32, 36, "mid failure", "mid-name"),
-            new RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name")
+            new RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name"),
         ];
 
         const expectedResult =

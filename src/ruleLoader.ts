@@ -143,7 +143,7 @@ function buildDisabledIntervalsFromSwitches(ruleSpecificList: IEnableDisablePosi
                 // we're currently disabled and about to enable -- end the interval
                 disabledIntervalList.push({
                     endPosition: newPositionToCheck.position,
-                    startPosition: disabledStartPosition
+                    startPosition: disabledStartPosition,
                 });
                 isCurrentlyDisabled = false;
             }
@@ -154,7 +154,7 @@ function buildDisabledIntervalsFromSwitches(ruleSpecificList: IEnableDisablePosi
         // we started an interval but didn't finish one -- so finish it with an Infinity
         disabledIntervalList.push({
             endPosition: Infinity,
-            startPosition: disabledStartPosition
+            startPosition: disabledStartPosition,
         });
     }
 

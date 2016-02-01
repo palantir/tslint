@@ -30,7 +30,7 @@ class NoConstructWalker extends Lint.RuleWalker {
     private static FORBIDDEN_CONSTRUCTORS = [
         "Boolean",
         "Number",
-        "String"
+        "String",
     ];
 
     public visitNewExpression(node: ts.NewExpression) {

@@ -37,7 +37,7 @@ function getModifiers(isMethod: boolean, modifiers?: ts.ModifiersArray): IModifi
     return {
         isInstance: !Lint.hasModifier(modifiers, ts.SyntaxKind.StaticKeyword),
         isMethod: isMethod,
-        isPrivate: Lint.hasModifier(modifiers, ts.SyntaxKind.PrivateKeyword)
+        isPrivate: Lint.hasModifier(modifiers, ts.SyntaxKind.PrivateKeyword),
     };
 }
 
@@ -46,7 +46,7 @@ function toString(modifiers: IModifiers): string {
         modifiers.isPrivate ? "private" : "public",
         modifiers.isInstance ? "instance" : "static",
         "member",
-        modifiers.isMethod ? "function" : "variable"
+        modifiers.isMethod ? "function" : "variable",
     ].join(" ");
 }
 
@@ -95,7 +95,7 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
         this.previousMember = {
             isInstance: false,
             isMethod: false,
-            isPrivate: false
+            isPrivate: false,
         };
     }
 

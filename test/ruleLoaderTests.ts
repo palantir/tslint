@@ -25,7 +25,7 @@ describe("Rule Loader", () => {
             "quotemark": "single",
             "eofline": true,
             "class-name": true,
-            "no-debugger": true
+            "no-debugger": true,
         };
 
         const rules = loadRules(validConfiguration, {}, RULES_DIRECTORY);
@@ -35,7 +35,7 @@ describe("Rule Loader", () => {
     it("throws if an invalid rule is found", () => {
         const invalidConfiguration: {[name: string]: any} = {
             "invalidConfig1": true,
-            "invalidConfig2": false
+            "invalidConfig2": false,
         };
 
         assert.throws(
@@ -49,7 +49,7 @@ describe("Rule Loader", () => {
             "_indent": 6,
             "forin_": true,
             "-quotemark": "single",
-            "eofline-": true
+            "eofline-": true,
         };
 
         assert.throws(
@@ -64,7 +64,7 @@ describe("Rule Loader", () => {
             "quotemark": "single",
             "eofline": true,
             "class-name": true,
-            "no-debugger": true
+            "no-debugger": true,
         };
 
         const rules = loadRules(validConfiguration, {}, [RULES_DIRECTORY]);

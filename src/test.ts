@@ -64,12 +64,12 @@ export function runTest(testDirectory: string): TestResult {
             return {
                 endPos: {
                     col: endLineAndCharacter.character,
-                    line: endLineAndCharacter.line
+                    line: endLineAndCharacter.line,
                 },
                 message: failure.getFailure(),
                 startPos: {
                     col: startLineAndCharacter.character,
-                    line: startLineAndCharacter.line
+                    line: startLineAndCharacter.line,
                 },
             };
         });
