@@ -39,14 +39,14 @@ export function loadRules(ruleConfiguration: {[name: string]: any},
         if (ruleConfiguration.hasOwnProperty(ruleName)) {
             const ruleValue = ruleConfiguration[ruleName];
             const Rule = findRule(ruleName, rulesDirectories);
-            if (Rule !== undefined) {
+            if (Rule == null) {
+                notFoundRules.push(ruleName);
+            } else {
                 const all = "all"; // make the linter happy until we can turn it on and off
                 const allList = (all in enableDisableRuleMap ? enableDisableRuleMap[all] : []);
                 const ruleSpecificList = (ruleName in enableDisableRuleMap ? enableDisableRuleMap[ruleName] : []);
                 const disabledIntervals = buildDisabledIntervalsFromSwitches(ruleSpecificList, allList);
                 rules.push(new Rule(ruleName, ruleValue, disabledIntervals));
-            } else {
-                notFoundRules.push(ruleName);
             }
         }
     }
