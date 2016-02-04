@@ -206,6 +206,7 @@ A sample configuration file with all options is available [here](https://github.
 * `one-line` enforces the specified tokens to be on the same line as the expression preceding it. Rule options:
   * `"check-catch"` checks that `catch` is on the same line as the closing brace for `try`.
   * `"check-else"` checks that `else` is on the same line as the closing brace for `if`.
+  * `"check-finally"` checks that `finally` is on the same line as the closing brace for the preceding `try` or `catch`.
   * `"check-open-brace"` checks that an open brace falls on the same line as its preceding expression.
   * `"check-whitespace"` checks preceding whitespace for the specified tokens.
 * `quotemark` enforces consistent single or double quoted string literals. Rule options (at least one of `"double"` or `"single"` is required):

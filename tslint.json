@@ -46,6 +46,7 @@
       "check-open-brace",
       "check-catch",
       "check-else",
+      "check-finally",
       "check-whitespace"
     ],
     "quotemark": [true, "double", "avoid-escape"],

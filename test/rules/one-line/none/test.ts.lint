@@ -55,6 +55,26 @@ catch (e)
 {
     throw(e);
 }
+finally
+{
+    // do something
+}
+
+try {
+    foo();
+}
+finally
+{
+    bar();
+}
+
+try{
+    foo();
+} catch(e){
+    bar();
+} finally{
+    baz();
+}
 
 while(x < 10){
     x++;
