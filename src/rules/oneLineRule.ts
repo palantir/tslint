@@ -21,12 +21,14 @@ import * as Lint from "../lint";
 const OPTION_BRACE = "check-open-brace";
 const OPTION_CATCH = "check-catch";
 const OPTION_ELSE = "check-else";
+const OPTION_FINALLY = "check-finally";
 const OPTION_WHITESPACE = "check-whitespace";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static BRACE_FAILURE_STRING = "misplaced opening brace";
     public static CATCH_FAILURE_STRING = "misplaced 'catch'";
     public static ELSE_FAILURE_STRING = "misplaced 'else'";
+    public static FINALLY_FAILURE_STRING = "misplaced 'finally'";
     public static WHITESPACE_FAILURE_STRING = "missing whitespace";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -67,15 +69,17 @@ class OneLineWalker extends Lint.RuleWalker {
     }
 
     public visitCatchClause(node: ts.CatchClause) {
-        const catchKeyword = node.getChildAt(0);
+        const catchClosingParen = node.getChildren().filter((n) => n.kind === ts.SyntaxKind.CloseParenToken)[0];
         const catchOpeningBrace = node.block.getChildAt(0);
-        this.handleOpeningBrace(catchKeyword, catchOpeningBrace);
+        this.handleOpeningBrace(catchClosingParen, catchOpeningBrace);
         super.visitCatchClause(node);
     }
 
     public visitTryStatement(node: ts.TryStatement) {
         const sourceFile = node.getSourceFile();
         const catchClause = node.catchClause;
+        const finallyBlock = node.finallyBlock;
+        const finallyKeyword = node.getChildren().filter((n) => n.kind === ts.SyntaxKind.FinallyKeyword)[0];
 
         // "visit" try block
         const tryKeyword = node.getChildAt(0);
@@ -93,6 +97,23 @@ class OneLineWalker extends Lint.RuleWalker {
                 this.addFailure(failure);
             }
         }
+
+        if (finallyBlock != null && finallyKeyword != null) {
+            const finallyOpeningBrace = finallyBlock.getChildAt(0);
+            this.handleOpeningBrace(finallyKeyword, finallyOpeningBrace);
+
+            if (this.hasOption(OPTION_FINALLY)) {
+                const previousBlock = catchClause != null ? catchClause.block : node.tryBlock;
+                const closingBrace = previousBlock.getChildAt(previousBlock.getChildCount() - 1);
+                const closingBraceLine = sourceFile.getLineAndCharacterOfPosition(closingBrace.getEnd()).line;
+                const finallyKeywordLine = sourceFile.getLineAndCharacterOfPosition(finallyKeyword.getStart()).line;
+                if (closingBraceLine !== finallyKeywordLine) {
+                    const failure = this.createFailure(finallyKeyword.getStart(), finallyKeyword.getWidth(), Rule.FINALLY_FAILURE_STRING);
+                    this.addFailure(failure);
+                }
+            }
+        }
+
         super.visitTryStatement(node);
     }
 
