@@ -26,17 +26,20 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class TypedefWhitespaceWalker extends Lint.RuleWalker {
     public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
-        this.checkSpace("call-signature", node, node.type, node.parameters.end + 1);
+        const positionBeforeColon = this.positionBeforeColon(node);
+        this.checkSpace("call-signature", node, node.type, positionBeforeColon);
         super.visitFunctionDeclaration(node);
     }
 
     public visitFunctionExpression(node: ts.FunctionExpression) {
-        this.checkSpace("call-signature", node, node.type, node.parameters.end + 1);
+        const positionBeforeColon = this.positionBeforeColon(node);
+        this.checkSpace("call-signature", node, node.type, positionBeforeColon);
         super.visitFunctionExpression(node);
     }
 
     public visitGetAccessor(node: ts.AccessorDeclaration) {
-        this.checkSpace("call-signature", node, node.type, node.parameters.end + 1);
+        const positionBeforeColon = this.positionBeforeColon(node);
+        this.checkSpace("call-signature", node, node.type, positionBeforeColon);
         super.visitGetAccessor(node);
     }
 
@@ -51,12 +54,14 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
     }
 
     public visitMethodDeclaration(node: ts.MethodDeclaration) {
-        this.checkSpace("call-signature", node, node.type, node.parameters.end + 1);
+        const positionBeforeColon = this.positionBeforeColon(node);
+        this.checkSpace("call-signature", node, node.type, positionBeforeColon);
         super.visitMethodDeclaration(node);
     }
 
     public visitMethodSignature(node: ts.SignatureDeclaration) {
-        this.checkSpace("call-signature", node, node.type, node.parameters.end + 1);
+        const positionBeforeColon = this.positionBeforeColon(node);
+        this.checkSpace("call-signature", node, node.type, positionBeforeColon);
         super.visitMethodSignature(node);
     }
 
@@ -76,7 +81,8 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
     }
 
     public visitSetAccessor(node: ts.AccessorDeclaration) {
-        this.checkSpace("call-signature", node, node.type, node.parameters.end + 1);
+        const positionBeforeColon = this.positionBeforeColon(node);
+        this.checkSpace("call-signature", node, node.type, positionBeforeColon);
         super.visitSetAccessor(node);
     }
 
@@ -118,5 +124,16 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
 
         const options = allOptions[0];
         return options[option];
+    }
+
+    private positionBeforeColon(node: ts.FunctionDeclaration | ts.FunctionExpression | ts.AccessorDeclaration |
+                                        ts.MethodDeclaration | ts.SignatureDeclaration | ts.AccessorDeclaration) {
+        const children = node.getChildren();
+        for (let i = 0; i < children.length; ++i) {
+            if (children[i].getText() === ":") {
+                return children[i].pos;
+            }
+        }
+        return 0;
     }
 }
