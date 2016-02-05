@@ -64,7 +64,7 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
                     }
                     this.enableDisableRuleMap[ruleToAdd].push({
                         isEnabled: isEnabled,
-                        position: startingPosition
+                        position: startingPosition,
                     });
                 }
             }

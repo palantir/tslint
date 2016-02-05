@@ -64,12 +64,12 @@ export function runTest(testDirectory: string): TestResult {
             return {
                 endPos: {
                     col: endLineAndCharacter.character,
-                    line: endLineAndCharacter.line
+                    line: endLineAndCharacter.line,
                 },
                 message: failure.getFailure(),
                 startPos: {
                     col: startLineAndCharacter.character,
-                    line: startLineAndCharacter.line
+                    line: startLineAndCharacter.line,
                 },
             };
         });
@@ -105,7 +105,7 @@ export function consoleTestResultHandler(testResult: TestResult): boolean {
             didAllTestsPass = false;
 
             for (const diffResult of diffResults) {
-                let color = colors.gray;
+                let color = colors.grey;
                 if (diffResult.added) {
                     color = colors.green;
                 } else if (diffResult.removed) {

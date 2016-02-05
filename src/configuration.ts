@@ -39,17 +39,17 @@ export const DEFAULT_CONFIG = {
             "index-signature": "nospace",
             "parameter": "nospace",
             "property-declaration": "nospace",
-            "variable-declaration": "nospace"
-        }],
+            "variable-declaration": "nospace",
+        }, ],
         "variable-name": [true, "ban-keywords"],
         "whitespace": [true,
             "check-branch",
             "check-decl",
             "check-operator",
             "check-separator",
-            "check-type"
+            "check-type",
         ],
-    }
+    },
 };
 
 export function findConfiguration(configFile: string, inputFileLocation: string): any {
@@ -110,7 +110,7 @@ function getHomeDir() {
         environment.USERPROFILE,
         environment.HOME,
         environment.HOMEPATH,
-        environment.HOMEDRIVE + environment.HOMEPATH
+        environment.HOMEDRIVE + environment.HOMEPATH,
     ];
 
     for (const homePath of paths) {

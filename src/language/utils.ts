@@ -36,7 +36,7 @@ export function getSourceFile(fileName: string, source: string): ts.SourceFile {
         },
         readFile: () => null,
         useCaseSensitiveFileNames: () => true,
-        writeFile: () => null
+        writeFile: () => null,
     };
 
     const program = ts.createProgram([normalizedName], compilerOptions, compilerHost);
@@ -47,7 +47,7 @@ export function getSourceFile(fileName: string, source: string): ts.SourceFile {
 export function createCompilerOptions(): ts.CompilerOptions {
     return {
         noResolve: true,
-        target: ts.ScriptTarget.ES5
+        target: ts.ScriptTarget.ES5,
     };
 }
 

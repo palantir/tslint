@@ -26,7 +26,7 @@ export function createLanguageServiceHost(fileName: string, source: string): ts.
         getScriptFileNames: () => [fileName],
         getScriptSnapshot: (name: string) => ts.ScriptSnapshot.fromString(name === fileName ? source : ""),
         getScriptVersion: () => "1",
-        log: () => { /* */ }
+        log: () => { /* */ },
     };
 }
 

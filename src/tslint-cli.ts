@@ -25,7 +25,7 @@ import {
     DEFAULT_CONFIG,
     findConfigurationPath,
     getRulesDirectories,
-    loadConfigurationFromPath
+    loadConfigurationFromPath,
 } from "./configuration";
 import {consoleTestResultHandler, runTest} from "./test";
 
@@ -44,40 +44,40 @@ let processed = optimist
     .options({
         "c": {
             alias: "config",
-            describe: "configuration file"
+            describe: "configuration file",
         },
         "h": {
             alias: "help",
-            describe: "display detailed help"
+            describe: "display detailed help",
         },
         "i": {
             alias: "init",
-            describe: "generate a tslint.json config file in the current working directory"
+            describe: "generate a tslint.json config file in the current working directory",
         },
         "o": {
             alias: "out",
-            describe: "output file"
+            describe: "output file",
         },
         "r": {
             alias: "rules-dir",
-            describe: "rules directory"
+            describe: "rules directory",
         },
         "s": {
             alias: "formatters-dir",
-            describe: "formatters directory"
+            describe: "formatters directory",
         },
         "t": {
             alias: "format",
             default: "prose",
-            describe: "output format (prose, json, verbose)"
+            describe: "output format (prose, json, verbose)",
         },
         "test": {
             describe: "test that tslint produces the correct output for the specified directory"
         },
         "v": {
             alias: "version",
-            describe: "current version"
-        }
+            describe: "current version",
+        },
     });
 const argv = processed.argv;
 
@@ -85,7 +85,7 @@ let outputStream: any;
 if (argv.o != null) {
     outputStream = fs.createWriteStream(argv.o, {
         flags: "w+",
-        mode: 420
+        mode: 420,
     });
 } else {
     outputStream = process.stdout;
@@ -206,7 +206,7 @@ const processFile = (file: string) => {
         configuration: configuration,
         formatter: argv.t,
         formattersDirectory: argv.s,
-        rulesDirectory: rulesDirectories
+        rulesDirectory: rulesDirectories,
     });
 
     const lintResult = linter.lint();

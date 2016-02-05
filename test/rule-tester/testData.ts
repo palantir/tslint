@@ -67,7 +67,7 @@ export const resultErrs3: LintError[] = [
   { startPos: { line: 1, col: 3 }, endPos: { line: 3, col: 12 }, message: "multiline error1" },
   { startPos: { line: 1, col: 4 }, endPos: { line: 1, col: 17 }, message: "error2" },
   { startPos: { line: 2, col: 0 }, endPos: { line: 4, col: 2 }, message: "multiline error2" },
-  { startPos: { line: 3, col: 6 }, endPos: { line: 3, col: 7 }, message: "error3: fun" }
+  { startPos: { line: 3, col: 6 }, endPos: { line: 3, col: 7 }, message: "error3: fun" },
 ];
 
 export const lintStr4 = "";
@@ -89,7 +89,7 @@ someVar <- someObject.crazyMethod(arg1, arg2, arg3);
 `;
 export const resultErrs5: LintError[] = [
   { startPos: { line: 1, col: 10 }, endPos: { line: 1, col: 23}, message: "unsafe access" },
-  { startPos: { line: 1, col: 12 }, endPos: { line: 2, col: 7 }, message: "another error" }
+  { startPos: { line: 1, col: 12 }, endPos: { line: 2, col: 7 }, message: "another error" },
 ];
 
 export const lintStr6 = `
@@ -105,7 +105,7 @@ if (code === lint-error-free) {
 
 `;
 export const resultErrs6: LintError[] = [
-    { startPos: { line: 1, col: 13 }, endPos: { line: 1, col: 28 }, message: "A longer error message I didn't want to type every time!" },
+    { startPos: { line: 1, col: 13 }, endPos: { line: 1, col: 28 }, message: "A longer error message I didn't want to type every time!" }
 ];
 
 export const lintStr7 = `
@@ -127,7 +127,7 @@ more code {
 `;
 export const resultErrs7: LintError[] = [
   { startPos: { line: 1, col: 1 }, endPos: { line: 1, col: 1 }, message: "some error" },
-  { startPos: { line: 3, col: 0 }, endPos: { line: 4, col: 0 }, message: "another error" }
+  { startPos: { line: 3, col: 0 }, endPos: { line: 4, col: 0 }, message: "another error" },
 ];
 
 
