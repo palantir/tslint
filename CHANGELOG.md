@@ -1,6 +1,23 @@
 Change Log
 ===
 
+v3.4.0-dev.1
+---
+* [enhancement] Revamped testing system (#620)
+  * Writing tests for rules is now much simpler with a linter DSL.
+    See exisitng tests in `test/rules/**/*.ts.lint` for examples.
+* [enhancement] New msbuild formatter (#947)
+* [bugfix] Fix handling of multiline literals in `trailing-comma` rule (#856)
+* [bugfix] `one-line` rule correctly checks space between `catch` and opening brace (#925)
+* [bugfix] `one-line` rule correctly checks multiline variable declarations (#935)
+* [enhancement] New option `check-finally` for `one-line` rule (#925)
+* __BREAKING CHANGES__
+  * [bugfix] Report error when a rule in the config file is not found (#598)
+
+Thanks to our contributors!
+* @mmv
+* @pe8ter
+
 v3.3.0-dev.2
 ---
 * Add TypeScript peer dependency `>=1.9.0-dev` to support latest nightlies
