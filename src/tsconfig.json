@@ -41,6 +41,7 @@
         "tslint.ts",
         "formatters/index.ts",
         "formatters/jsonFormatter.ts",
+        "formatters/msbuildFormatter.ts",
         "formatters/pmdFormatter.ts",
         "formatters/proseFormatter.ts",
         "formatters/verboseFormatter.ts",

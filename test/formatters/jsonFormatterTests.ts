@@ -34,7 +34,7 @@ describe("JSON Formatter", () => {
         const failures = [
             new RuleFailure(sourceFile, 0, 1, "first failure", "first-name"),
             new RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name"),
-            new RuleFailure(sourceFile, 0, maxPosition, "full failure", "full-name")
+            new RuleFailure(sourceFile, 0, maxPosition, "full failure", "full-name"),
         ];
 
         /* tslint:disable:object-literal-sort-keys */
@@ -44,14 +44,14 @@ describe("JSON Formatter", () => {
             startPosition: {
                 position: 0,
                 line: 0,
-                character: 0
+                character: 0,
             },
             endPosition: {
                 position: 1,
                 line: 0,
-                character: 1
+                character: 1,
             },
-            ruleName: "first-name"
+            ruleName: "first-name",
         },
         {
             name: TEST_FILE,
@@ -59,14 +59,14 @@ describe("JSON Formatter", () => {
             startPosition: {
                 position: maxPosition - 1,
                 line: 5,
-                character: 2
+                character: 2,
             },
             endPosition: {
                 position: maxPosition,
                 line: 6,
-                character: 0
+                character: 0,
             },
-            ruleName: "last-name"
+            ruleName: "last-name",
         },
         {
             name: TEST_FILE,
@@ -74,15 +74,15 @@ describe("JSON Formatter", () => {
             startPosition: {
                 position: 0,
                 line: 0,
-                character: 0
+                character: 0,
             },
             endPosition: {
                 position: maxPosition,
                 line: 6,
-                character: 0
+                character: 0,
             },
-            ruleName: "full-name"
-        }];
+            ruleName: "full-name",
+        }, ];
         /* tslint:enable:object-literal-sort-keys */
 
         const actualResult = JSON.parse(formatter.format(failures));

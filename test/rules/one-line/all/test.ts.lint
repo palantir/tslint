@@ -67,6 +67,33 @@ catch (e)
 ~ [misplaced opening brace]
     throw(e);
 }
+finally
+~~~~~~~ [misplaced 'finally']
+{
+~ [misplaced opening brace]
+    // do something
+}
+
+try {
+    foo();
+}
+finally
+~~~~~~~ [misplaced 'finally']
+{
+~ [misplaced opening brace]
+    bar();
+}
+
+try{
+   ~ [missing whitespace]
+    foo();
+} catch(e){
+          ~ [missing whitespace]
+    bar();
+} finally{
+         ~ [missing whitespace]
+    baz();
+}
 
 while(x < 10){
              ~ [missing whitespace]

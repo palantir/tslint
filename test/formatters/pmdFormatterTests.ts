@@ -35,7 +35,7 @@ describe("PMD Formatter", () => {
             new RuleFailure(sourceFile, 0, 1, "first failure", "first-name"),
             new RuleFailure(sourceFile, 2, 3, "&<>'\" should be escaped", "escape"),
             new RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name"),
-            new RuleFailure(sourceFile, 0, maxPosition, "full failure", "full-name")
+            new RuleFailure(sourceFile, 0, maxPosition, "full failure", "full-name"),
         ];
         const expectedResult =
             "<pmd version=\"tslint\">" +

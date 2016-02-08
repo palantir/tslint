@@ -25,21 +25,23 @@ describe("Rule Loader", () => {
             "quotemark": "single",
             "eofline": true,
             "class-name": true,
-            "no-debugger": true
+            "no-debugger": true,
         };
 
         const rules = loadRules(validConfiguration, {}, RULES_DIRECTORY);
         assert.equal(rules.length, 5);
     });
 
-    it("skips invalid rules", () => {
+    it("throws if an invalid rule is found", () => {
         const invalidConfiguration: {[name: string]: any} = {
             "invalidConfig1": true,
-            "invalidConfig2": false
+            "invalidConfig2": false,
         };
 
-        const rules = loadRules(invalidConfiguration, {}, RULES_DIRECTORY);
-        assert.deepEqual(rules, []);
+        assert.throws(
+            () => loadRules(invalidConfiguration, {}, RULES_DIRECTORY),
+            /invalidConfig1\ninvalidConfig2/
+        );
     });
 
     it("doesn't ignore leading or trailing underscores or dashes", () => {
@@ -47,11 +49,13 @@ describe("Rule Loader", () => {
             "_indent": 6,
             "forin_": true,
             "-quotemark": "single",
-            "eofline-": true
+            "eofline-": true,
         };
 
-        const rules = loadRules(invalidConfiguration, {}, RULES_DIRECTORY);
-        assert.deepEqual(rules, []);
+        assert.throws(
+            () => loadRules(invalidConfiguration, {}, RULES_DIRECTORY),
+            /_indent\nforin_\n-quotemark\neofline-/
+        );
     });
 
     it("works with rulesDirectory argument as an Array", () => {
@@ -60,7 +64,7 @@ describe("Rule Loader", () => {
             "quotemark": "single",
             "eofline": true,
             "class-name": true,
-            "no-debugger": true
+            "no-debugger": true,
         };
 
         const rules = loadRules(validConfiguration, {}, [RULES_DIRECTORY]);

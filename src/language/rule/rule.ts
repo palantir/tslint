@@ -57,7 +57,7 @@ export class RuleFailurePosition {
         return {
             character: this.lineAndCharacter.character,
             line: this.lineAndCharacter.line,
-            position: this.position
+            position: this.position,
         };
     }
 
@@ -119,7 +119,7 @@ export class RuleFailure {
             failure: this.failure,
             name: this.fileName,
             ruleName: this.ruleName,
-            startPosition: this.startPosition.toJson()
+            startPosition: this.startPosition.toJson(),
         };
     }
 

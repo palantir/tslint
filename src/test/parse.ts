@@ -15,8 +15,16 @@
  */
 
 import {LintError, errorComparator, lintSyntaxError} from "./lintError";
-import {Line, ErrorLine, CodeLine, MultilineErrorLine, EndErrorLine, MessageSubstitutionLine,
-        parseLine, printLine} from "./lines";
+import {
+    Line,
+    ErrorLine,
+    CodeLine,
+    MultilineErrorLine,
+    EndErrorLine,
+    MessageSubstitutionLine,
+    parseLine,
+    printLine,
+} from "./lines";
 
 /**
  * Takes the full text of a .lint file and returns the contents of the file
@@ -65,7 +73,7 @@ export function parseErrorsFromMarkup(text: string): LintError[] {
                 lintErrors.push({
                     startPos: errorStartPos,
                     endPos: { line: lineNo, col: errorLine.endCol },
-                    message: messageSubstitutions[errorLine.message] || errorLine.message
+                    message: messageSubstitutions[errorLine.message] || errorLine.message,
                 });
 
             // if the error is the start of a multiline error
@@ -85,7 +93,7 @@ export function parseErrorsFromMarkup(text: string): LintError[] {
                             lintErrors.push({
                                 startPos: errorStartPos,
                                 endPos: { line: nextLineNo, col: nextErrorLine.endCol },
-                                message: messageSubstitutions[nextErrorLine.message] || nextErrorLine.message
+                                message: messageSubstitutions[nextErrorLine.message] || nextErrorLine.message,
                             });
                             break;
                         }

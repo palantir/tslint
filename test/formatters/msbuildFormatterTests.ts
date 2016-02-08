@@ -17,13 +17,13 @@
 import * as ts from "typescript";
 import {IFormatter, RuleFailure, TestUtils} from "../lint";
 
-describe("Verbose Formatter", () => {
-    const TEST_FILE = "formatters/proseFormatter.test.ts";
+describe("MSBuild Formatter", () => {
+    const TEST_FILE = "formatters/msbuildFormatter.test.ts";
     let sourceFile: ts.SourceFile;
     let formatter: IFormatter;
 
     before(() => {
-        const Formatter = TestUtils.getFormatter("verbose");
+        const Formatter = TestUtils.getFormatter("msbuild");
         sourceFile = TestUtils.getSourceFile(TEST_FILE);
         formatter = new Formatter();
     });
@@ -38,9 +38,9 @@ describe("Verbose Formatter", () => {
         ];
 
         const expectedResult =
-            "(first-name) " + TEST_FILE + getPositionString(1, 1) + "first failure\n" +
-            "(mid-name) " + TEST_FILE + getPositionString(2, 12) + "mid failure\n" +
-            "(last-name) " + TEST_FILE + getPositionString(9, 2) + "last failure\n";
+            getFailureString(TEST_FILE, 1,  1, "first failure") +
+            getFailureString(TEST_FILE, 2, 12, "mid failure") +
+            getFailureString(TEST_FILE, 9,  2,  "last failure");
 
         const actualResult = formatter.format(failures);
         assert.equal(actualResult, expectedResult);
@@ -51,7 +51,7 @@ describe("Verbose Formatter", () => {
         assert.equal(result, "\n");
     });
 
-    function getPositionString(line: number, character: number) {
-        return `[${line}, ${character}]: `;
+    function getFailureString(file: string, line: number, character: number, reason: string) {
+        return `${file}(${line},${character}): warning: ${reason}\n`;
     }
 });

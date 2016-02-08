@@ -45,7 +45,7 @@ class Linter {
         // walk the code first to find all the intervals where rules are disabled
         const rulesWalker = new EnableDisableRulesWalker(sourceFile, {
             disabledIntervals: [],
-            ruleName: ""
+            ruleName: "",
         });
         rulesWalker.walk(sourceFile);
         const enableDisableRuleMap = rulesWalker.enableDisableRuleMap;
@@ -78,7 +78,7 @@ class Linter {
             failureCount: failures.length,
             failures: failures,
             format: this.options.formatter,
-            output: output
+            output: output,
         };
     }
 

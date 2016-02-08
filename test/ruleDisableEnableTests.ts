@@ -23,8 +23,8 @@ describe("Enable and Disable Rules", () => {
     it("is enabled and disabled in all the right places", () => {
         const validConfiguration = {rules: {
             "variable-name": true,
-            "quotemark": [true, "double"]
-        }};
+            "quotemark": [true, "double"],
+        }, };
 
         const relativePath = join("test", "files", "enabledisable.test.ts");
         const source = readFileSync(relativePath, "utf8");
@@ -33,7 +33,7 @@ describe("Enable and Disable Rules", () => {
             configuration: validConfiguration,
             formatter: "json",
             formattersDirectory: null,
-            rulesDirectory: null
+            rulesDirectory: null,
         };
 
         const QuotemarkRule = TestUtils.getRule("quotemark");

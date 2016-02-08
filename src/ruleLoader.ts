@@ -33,11 +33,15 @@ export function loadRules(ruleConfiguration: {[name: string]: any},
                           enableDisableRuleMap: {[rulename: string]: IEnableDisablePosition[]},
                           rulesDirectories?: string | string[]): IRule[] {
     const rules: IRule[] = [];
+    const notFoundRules: string[] = [];
+
     for (const ruleName in ruleConfiguration) {
         if (ruleConfiguration.hasOwnProperty(ruleName)) {
             const ruleValue = ruleConfiguration[ruleName];
             const Rule = findRule(ruleName, rulesDirectories);
-            if (Rule !== undefined) {
+            if (Rule == null) {
+                notFoundRules.push(ruleName);
+            } else {
                 const all = "all"; // make the linter happy until we can turn it on and off
                 const allList = (all in enableDisableRuleMap ? enableDisableRuleMap[all] : []);
                 const ruleSpecificList = (ruleName in enableDisableRuleMap ? enableDisableRuleMap[ruleName] : []);
@@ -47,7 +51,12 @@ export function loadRules(ruleConfiguration: {[name: string]: any},
         }
     }
 
-    return rules;
+    if (notFoundRules.length > 0) {
+        const errorMessage = `Could not find the following rules specified in the configuration:\n${notFoundRules.join("\n")}`;
+        throw new Error(errorMessage);
+    } else {
+        return rules;
+    }
 }
 
 export function findRule(name: string, rulesDirectories?: string | string[]) {
@@ -134,7 +143,7 @@ function buildDisabledIntervalsFromSwitches(ruleSpecificList: IEnableDisablePosi
                 // we're currently disabled and about to enable -- end the interval
                 disabledIntervalList.push({
                     endPosition: newPositionToCheck.position,
-                    startPosition: disabledStartPosition
+                    startPosition: disabledStartPosition,
                 });
                 isCurrentlyDisabled = false;
             }
@@ -145,7 +154,7 @@ function buildDisabledIntervalsFromSwitches(ruleSpecificList: IEnableDisablePosi
         // we started an interval but didn't finish one -- so finish it with an Infinity
         disabledIntervalList.push({
             endPosition: Infinity,
-            startPosition: disabledStartPosition
+            startPosition: disabledStartPosition,
         });
     }
 
