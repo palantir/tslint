@@ -226,7 +226,8 @@ A sample configuration file with all options is available [here](https://github.
     * `"allow-null-check"` allows `==` and `!=` when comparing to `null`.
 * `typedef` enforces type definitions to exist. Rule options:
     * `"call-signature"` checks return type of functions.
-    * `"parameter"` checks type specifier of function parameters.
+    * `"parameter"` checks type specifier of function parameters for non-arrow functions.
+    * `"arrow-parameter"` checks type specifier of function parameters for arrow functions.
     * `"property-declaration"` checks return types of interface properties.
     * `"variable-declaration"` checks variable declarations.
     * `"member-variable-declaration"` checks member variable declarations.
