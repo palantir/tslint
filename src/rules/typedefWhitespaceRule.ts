@@ -26,17 +26,17 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class TypedefWhitespaceWalker extends Lint.RuleWalker {
     public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
-        this.checkSpace("call-signature", node, node.type, node.parameters.end + 1);
+        this.checkSpace("call-signature", node, node.type, positionBeforeColon(node));
         super.visitFunctionDeclaration(node);
     }
 
     public visitFunctionExpression(node: ts.FunctionExpression) {
-        this.checkSpace("call-signature", node, node.type, node.parameters.end + 1);
+        this.checkSpace("call-signature", node, node.type, positionBeforeColon(node));
         super.visitFunctionExpression(node);
     }
 
     public visitGetAccessor(node: ts.AccessorDeclaration) {
-        this.checkSpace("call-signature", node, node.type, node.parameters.end + 1);
+        this.checkSpace("call-signature", node, node.type, positionBeforeColon(node));
         super.visitGetAccessor(node);
     }
 
@@ -51,12 +51,12 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
     }
 
     public visitMethodDeclaration(node: ts.MethodDeclaration) {
-        this.checkSpace("call-signature", node, node.type, node.parameters.end + 1);
+        this.checkSpace("call-signature", node, node.type, positionBeforeColon(node));
         super.visitMethodDeclaration(node);
     }
 
     public visitMethodSignature(node: ts.SignatureDeclaration) {
-        this.checkSpace("call-signature", node, node.type, node.parameters.end + 1);
+        this.checkSpace("call-signature", node, node.type, positionBeforeColon(node));
         super.visitMethodSignature(node);
     }
 
@@ -76,7 +76,7 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
     }
 
     public visitSetAccessor(node: ts.AccessorDeclaration) {
-        this.checkSpace("call-signature", node, node.type, node.parameters.end + 1);
+        this.checkSpace("call-signature", node, node.type, positionBeforeColon(node));
         super.visitSetAccessor(node);
     }
 
@@ -119,4 +119,9 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
         const options = allOptions[0];
         return options[option];
     }
+}
+
+function positionBeforeColon(node: ts.Node): number {
+    const colon = node.getChildren().filter((c) => c.kind === ts.SyntaxKind.ColonToken)[0];
+    return colon == null ? -1 : colon.pos;
 }

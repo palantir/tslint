@@ -52,6 +52,8 @@ var withPreceedingSpacesFn = function (a : number, b : number) : number {
     }
 };
 
+var withPreceedingSpacesCallSignaturePaddedParams = function ( ) : {}
+
 class NoPreceedingSpacesClass {
     [index: number]: string
           ~                 [expected space in index-signature]
@@ -64,6 +66,15 @@ class NoPreceedingSpacesClass {
                      ~          [expected space in call-signature]
         return "some name";
     }
+
+    public set name(a : string): void {}
+                               ~            [expected space in call-signature]
+
+    public shemp(
+        a : number,
+        b : number
+    ): void {}
+     ~             [expected space in call-signature]
 }
 
 class WithPreceedingSpacesClass {
@@ -74,4 +85,11 @@ class WithPreceedingSpacesClass {
     public get name() : string {
         return "some name";
     }
+
+    public set name(a : string) : void {}
+
+    public shemp(
+        a : number,
+        b : number
+    ) : void {}
 }
