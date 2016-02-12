@@ -171,7 +171,8 @@ A sample configuration file with all options is available [here](https://github.
 * `member-ordering` enforces member ordering. Rule options:
     * `public-before-private` All public members must be declared before private members.
     * `static-before-instance` All static members must be declared before instance members.
-    * `variables-before-functions` All variables needs to be declared before functions.
+    * `variables-before-functions` All member variables need to be declared before member functions.
+       Member variables initialized to a function literal are treated as member functions.
 * `no-any` diallows usages of `any` as a type decoration.
 * `no-arg` disallows access to `arguments.callee`.
 * `no-bitwise` disallows bitwise operators.

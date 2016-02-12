@@ -78,12 +78,16 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
     }
 
     public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
-        this.checkModifiersAndSetPrevious(node, getModifiers(false, node.modifiers));
+        const { initializer } = node;
+        const isFunction = initializer != null
+            && (initializer.kind === ts.SyntaxKind.ArrowFunction || initializer.kind === ts.SyntaxKind.FunctionExpression);
+        this.checkModifiersAndSetPrevious(node, getModifiers(isFunction, node.modifiers));
         super.visitPropertyDeclaration(node);
     }
 
-    public visitPropertySignature(node: ts.Node) {
-        this.checkModifiersAndSetPrevious(node, getModifiers(false, node.modifiers));
+    public visitPropertySignature(node: ts.PropertyDeclaration) {
+        const isFunction = node.type != null && node.type.kind === ts.SyntaxKind.FunctionType;
+        this.checkModifiersAndSetPrevious(node, getModifiers(isFunction, node.modifiers));
         super.visitPropertySignature(node);
     }
 
