@@ -30,4 +30,9 @@ var t = function() {
         case 0:
             break lab7;
     }
+
+    lab8:
+    for (let value of [1]) {
+        break lab8;
+    }
 };
