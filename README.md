@@ -231,8 +231,11 @@ A sample configuration file with all options is available [here](https://github.
     * `"property-declaration"` checks return types of interface properties.
     * `"variable-declaration"` checks variable declarations.
     * `"member-variable-declaration"` checks member variable declarations.
-* `typedef-whitespace` enforces spacing whitespace for type definitions. Each rule option requires a value of `"space"` or `"nospace"`
-   to require a space or no space before the type specifier's colon. Rule options:
+* `typedef-whitespace` enforces spacing whitespace for type definitions. Each rule option requires a value of `"nospace"`,
+  `"onespace"` or `"space"` to require no space, exactly one or at least one space before or after the type specifier's
+  colon. You can specify two objects containing the five options. The first one describes the left, the second one the
+  right hand side of the typedef colon. To omit checks for either side, omit the second object or pass an empty object
+  for the first. Rule options:
     * `"call-signature"` checks return type of functions.
     * `"index-signature"` checks index type specifier of indexers.
     * `"parameter"` checks function parameters.
