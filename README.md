@@ -216,7 +216,9 @@ A sample configuration file with all options is available [here](https://github.
     * `"jsx-double"` enforces double quotes for JSX attributes.
     * `"avoid-escape"` allows you to use the "other" quotemark in cases where escaping would normally be required. For example, `[true, "double", "avoid-escape"]` would not report a failure on the string literal `'Hello "World"'`.
 * `radix` enforces the radix parameter of `parseInt`.
-* `semicolon` enforces semicolons at the end of every statement.
+* `semicolon` enforces consistent semicolon usage at the end of every statement. Rule options:
+    * `"always"` enforces semicolons at the end of every statement.
+    * `"never"` disallows semicolons at the end of every statement except for when they are necessary.
 * `switch-default` enforces a `default` case in `switch` statements.
 * `trailing-comma` enforces or disallows trailing comma within array and object literals, destructuring assignment and named imports.
   Each rule option requires a value of `"always"` or `"never"`. Rule options:
