@@ -18,8 +18,12 @@
 import * as ts from "typescript";
 import * as Lint from "../lint";
 
+const OPTION_ALWAYS = "always";
+const OPTION_NEVER = "never";
+
 export class Rule extends Lint.Rules.AbstractRule {
-    public static FAILURE_STRING = "missing semicolon";
+    public static FAILURE_STRING_MISSING = "missing semicolon";
+    public static FAILURE_STRING_UNNECESSARY = "unnecessary semicolon";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new SemicolonWalker(sourceFile, this.getOptions()));
@@ -90,13 +94,28 @@ class SemicolonWalker extends Lint.RuleWalker {
     }
 
     private checkSemicolonAt(node: ts.Node) {
-        const children = node.getChildren(this.getSourceFile());
+        const sourceFile = this.getSourceFile();
+        const children = node.getChildren(sourceFile);
         const hasSemicolon = children.some((child) => child.kind === ts.SyntaxKind.SemicolonToken);
+        const position = node.getStart(sourceFile) + node.getWidth(sourceFile);
+        // Backwards compatible with plain {"semicolon": true}
+        const always = this.hasOption(OPTION_ALWAYS) || (this.getOptions() && this.getOptions().length === 0);
 
-        if (!hasSemicolon) {
-            const sourceFile = this.getSourceFile();
-            const position = node.getStart(sourceFile) + node.getWidth(sourceFile);
-            this.addFailure(this.createFailure(Math.min(position, this.getLimit()), 0, Rule.FAILURE_STRING));
+        if (always && !hasSemicolon) {
+            this.addFailure(this.createFailure(Math.min(position, this.getLimit()), 0, Rule.FAILURE_STRING_MISSING));
+        } else if (this.hasOption(OPTION_NEVER) && hasSemicolon) {
+            const scanner = ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, sourceFile.text);
+            scanner.setTextPos(position);
+
+            let tokenKind = scanner.scan();
+            while (tokenKind === ts.SyntaxKind.WhitespaceTrivia || tokenKind === ts.SyntaxKind.NewLineTrivia) {
+                tokenKind = scanner.scan();
+            }
+
+            if (tokenKind !== ts.SyntaxKind.OpenParenToken && tokenKind !== ts.SyntaxKind.OpenBracketToken
+                    && tokenKind !== ts.SyntaxKind.PlusToken && tokenKind !== ts.SyntaxKind.MinusToken) {
+                this.addFailure(this.createFailure(Math.min(position - 1, this.getLimit()), 1, Rule.FAILURE_STRING_UNNECESSARY));
+            }
         }
     }
 }
