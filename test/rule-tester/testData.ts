@@ -36,7 +36,7 @@ export const codeStr2 = `
 A file with an error
 `;
 export const resultErrs2: LintError[] = [
-  { startPos: { line: 1, col: 0 }, endPos: { line: 1, col: 5 }, message: "error" }
+  { startPos: { line: 1, col: 0 }, endPos: { line: 1, col: 5 }, message: "error" },
 ];
 
 
@@ -105,7 +105,7 @@ if (code === lint-error-free) {
 
 `;
 export const resultErrs6: LintError[] = [
-    { startPos: { line: 1, col: 13 }, endPos: { line: 1, col: 28 }, message: "A longer error message I didn't want to type every time!" }
+    { startPos: { line: 1, col: 13 }, endPos: { line: 1, col: 28 }, message: "A longer error message I didn't want to type every time!" },
 ];
 
 export const lintStr7 = `
