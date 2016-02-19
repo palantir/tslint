@@ -171,7 +171,8 @@ A sample configuration file with all options is available [here](https://github.
 * `member-ordering` enforces member ordering. Rule options:
     * `public-before-private` All public members must be declared before private members.
     * `static-before-instance` All static members must be declared before instance members.
-    * `variables-before-functions` All variables needs to be declared before functions.
+    * `variables-before-functions` All member variables need to be declared before member functions.
+       Member variables initialized to a function literal are treated as member functions.
 * `no-any` diallows usages of `any` as a type decoration.
 * `no-arg` disallows access to `arguments.callee`.
 * `no-bitwise` disallows bitwise operators.
@@ -216,7 +217,9 @@ A sample configuration file with all options is available [here](https://github.
     * `"jsx-double"` enforces double quotes for JSX attributes.
     * `"avoid-escape"` allows you to use the "other" quotemark in cases where escaping would normally be required. For example, `[true, "double", "avoid-escape"]` would not report a failure on the string literal `'Hello "World"'`.
 * `radix` enforces the radix parameter of `parseInt`.
-* `semicolon` enforces semicolons at the end of every statement.
+* `semicolon` enforces consistent semicolon usage at the end of every statement. Rule options:
+    * `"always"` enforces semicolons at the end of every statement.
+    * `"never"` disallows semicolons at the end of every statement except for when they are necessary.
 * `switch-default` enforces a `default` case in `switch` statements.
 * `trailing-comma` enforces or disallows trailing comma within array and object literals, destructuring assignment and named imports.
   Each rule option requires a value of `"always"` or `"never"`. Rule options:
@@ -226,12 +229,16 @@ A sample configuration file with all options is available [here](https://github.
     * `"allow-null-check"` allows `==` and `!=` when comparing to `null`.
 * `typedef` enforces type definitions to exist. Rule options:
     * `"call-signature"` checks return type of functions.
-    * `"parameter"` checks type specifier of function parameters.
+    * `"parameter"` checks type specifier of function parameters for non-arrow functions.
+    * `"arrow-parameter"` checks type specifier of function parameters for arrow functions.
     * `"property-declaration"` checks return types of interface properties.
     * `"variable-declaration"` checks variable declarations.
     * `"member-variable-declaration"` checks member variable declarations.
-* `typedef-whitespace` enforces spacing whitespace for type definitions. Each rule option requires a value of `"space"` or `"nospace"`
-   to require a space or no space before the type specifier's colon. Rule options:
+* `typedef-whitespace` enforces spacing whitespace for type definitions. Each rule option requires a value of `"nospace"`,
+  `"onespace"` or `"space"` to require no space, exactly one or at least one space before or after the type specifier's
+  colon. You can specify two objects containing the five options. The first one describes the left, the second one the
+  right hand side of the typedef colon. To omit checks for either side, omit the second object or pass an empty object
+  for the first. Rule options:
     * `"call-signature"` checks return type of functions.
     * `"index-signature"` checks index type specifier of indexers.
     * `"parameter"` checks function parameters.

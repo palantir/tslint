@@ -75,7 +75,8 @@ class TypedefWalker extends Lint.RuleWalker {
     public visitParameterDeclaration(node: ts.ParameterDeclaration) {
         // a parameter's "type" could be a specific string value, for example `fn(option: "someOption", anotherOption: number)`
         if (node.type == null || node.type.kind !== ts.SyntaxKind.StringLiteral) {
-            this.checkTypeAnnotation("parameter", node.getEnd(), <ts.TypeNode> node.type, node.name);
+            const optionName = node.parent.kind === ts.SyntaxKind.ArrowFunction ? "arrow-parameter" : "parameter";
+            this.checkTypeAnnotation(optionName, node.getEnd(), <ts.TypeNode> node.type, node.name);
         }
         super.visitParameterDeclaration(node);
     }

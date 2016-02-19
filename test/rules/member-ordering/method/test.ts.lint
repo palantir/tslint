@@ -19,4 +19,25 @@ class Foo {
     ~~~~~~~~~~ [0]
 }
 
+interface IArrowMethods {
+    a: number;
+    b(): void;
+    c: () => void;
+}
+
+class ArrowMethods {
+    public a = 5;
+    public b = "foo";
+    public c() {}
+    public d = () => {};
+    public e = function() {};
+}
+
+class OutOfOrder {
+    a = () => {};
+    b = 5;
+    ~~~~~~ [0]
+}
+
 [0]: Declaration of public instance member variable not allowed to appear after declaration of public instance member function
+

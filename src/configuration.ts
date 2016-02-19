@@ -32,7 +32,7 @@ export const DEFAULT_CONFIG = {
         "no-var-keyword": true,
         "one-line": [true, "check-open-brace", "check-whitespace"],
         "quotemark": [true, "double"],
-        "semicolon": true,
+        "semicolon": [true, "always"],
         "triple-equals": [true, "allow-null-check"],
         "typedef-whitespace": [true, {
             "call-signature": "nospace",

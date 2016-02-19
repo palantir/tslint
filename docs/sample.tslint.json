@@ -84,7 +84,7 @@
       "avoid-escape"
     ],
     "radix": true,
-    "semicolon": true,
+    "semicolon": [true, "always"],
     "switch-default": true,
     "trailing-comma": [
       true,
@@ -101,6 +101,7 @@
       true,
       "call-signature",
       "parameter",
+      "arrow-parameter",
       "property-declaration",
       "variable-declaration",
       "member-variable-declaration"
@@ -113,6 +114,13 @@
         "parameter": "nospace",
         "property-declaration": "nospace",
         "variable-declaration": "nospace"
+      },
+      {
+        "call-signature": "space",
+        "index-signature": "space",
+        "parameter": "space",
+        "property-declaration": "space",
+        "variable-declaration": "space"
       }
     ],
     "use-strict": [

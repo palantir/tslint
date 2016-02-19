@@ -25,98 +25,210 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class TypedefWhitespaceWalker extends Lint.RuleWalker {
+    private static getColonPosition(node: ts.Node) {
+        const colon = node.getChildren().filter((child) =>
+            child.kind === ts.SyntaxKind.ColonToken
+        )[0];
+
+        return colon == null ? -1 : colon.getStart();
+    }
+
     public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
-        this.checkSpace("call-signature", node, node.type, node.parameters.end + 1);
+        this.checkSpace("call-signature", node, node.type);
         super.visitFunctionDeclaration(node);
     }
 
     public visitFunctionExpression(node: ts.FunctionExpression) {
-        this.checkSpace("call-signature", node, node.type, node.parameters.end + 1);
+        this.checkSpace("call-signature", node, node.type);
         super.visitFunctionExpression(node);
     }
 
     public visitGetAccessor(node: ts.AccessorDeclaration) {
-        this.checkSpace("call-signature", node, node.type, node.parameters.end + 1);
+        this.checkSpace("call-signature", node, node.type);
         super.visitGetAccessor(node);
     }
 
     public visitIndexSignatureDeclaration(node: ts.IndexSignatureDeclaration) {
-        const indexParameter = node.parameters[0];
-
-        if (indexParameter != null) {
-            this.checkSpace("index-signature", indexParameter, indexParameter.type, indexParameter.name.getEnd());
-        }
-
+        this.checkSpace("index-signature", node, node.type);
         super.visitIndexSignatureDeclaration(node);
     }
 
     public visitMethodDeclaration(node: ts.MethodDeclaration) {
-        this.checkSpace("call-signature", node, node.type, node.parameters.end + 1);
+        this.checkSpace("call-signature", node, node.type);
         super.visitMethodDeclaration(node);
     }
 
     public visitMethodSignature(node: ts.SignatureDeclaration) {
-        this.checkSpace("call-signature", node, node.type, node.parameters.end + 1);
+        this.checkSpace("call-signature", node, node.type);
         super.visitMethodSignature(node);
     }
 
     public visitParameterDeclaration(node: ts.ParameterDeclaration) {
-        this.checkSpace("parameter", node, node.type, node.name.getEnd());
+        this.checkSpace("parameter", node, node.type);
         super.visitParameterDeclaration(node);
     }
 
     public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
-        this.checkSpace("property-declaration", node, node.type, node.name.getEnd());
+        this.checkSpace("property-declaration", node, node.type);
         super.visitPropertyDeclaration(node);
     }
 
     public visitPropertySignature(node: ts.PropertyDeclaration) {
-        this.checkSpace("property-declaration", node, node.type, node.name.getEnd());
+        this.checkSpace("property-declaration", node, node.type);
         super.visitPropertySignature(node);
     }
 
     public visitSetAccessor(node: ts.AccessorDeclaration) {
-        this.checkSpace("call-signature", node, node.type, node.parameters.end + 1);
+        this.checkSpace("call-signature", node, node.type);
         super.visitSetAccessor(node);
     }
 
     public visitVariableDeclaration(node: ts.VariableDeclaration) {
-        this.checkSpace("variable-declaration", node, node.type, node.name.getEnd());
+        this.checkSpace("variable-declaration", node, node.type);
         super.visitVariableDeclaration(node);
     }
 
-    public checkSpace(option: string, node: ts.Node, typeNode: ts.TypeNode | ts.StringLiteral, positionBeforeColon: number) {
-        if (this.hasOption(option) && typeNode != null && positionBeforeColon != null) {
-            const scanner = ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, node.getText());
-            let hasLeadingWhitespace: boolean;
+    public checkSpace(option: string, node: ts.Node, typeNode: ts.TypeNode | ts.StringLiteral) {
+        if (this.hasOption(option) && typeNode != null) {
+            const colonPosition = TypedefWhitespaceWalker.getColonPosition(node);
 
-            scanner.setTextPos(positionBeforeColon - node.getStart());
-            hasLeadingWhitespace = scanner.scan() === ts.SyntaxKind.WhitespaceTrivia;
+            if (colonPosition != null) {
+                const scanner = ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, node.getText());
 
-            if (hasLeadingWhitespace !== (this.getOption(option) === "space")) {
-                const message = "expected " + this.getOption(option) + " in " + option;
-                this.addFailure(this.createFailure(positionBeforeColon, 1, message));
+                this.checkLeft(option, node, scanner, colonPosition);
+                this.checkRight(option, node, scanner, colonPosition);
             }
         }
     }
 
     public hasOption(option: string) {
+        return this.hasLeftOption(option) || this.hasRightOption(option);
+    }
+
+    private hasLeftOption(option: string) {
         const allOptions = this.getOptions();
+
         if (allOptions == null || allOptions.length === 0) {
             return false;
         }
 
         const options = allOptions[0];
-        return options == null || options[option] != null;
+        return options != null && options[option] != null;
     }
 
-    private getOption(option: string) {
+    private hasRightOption(option: string) {
         const allOptions = this.getOptions();
-        if (allOptions == null || allOptions.length === 0) {
+
+        if (allOptions == null || allOptions.length < 2) {
+            return false;
+        }
+
+        const options = allOptions[1];
+        return options != null && options[option] != null;
+    }
+
+    private getLeftOption(option: string) {
+        if (!this.hasLeftOption(option)) {
             return null;
         }
 
+        const allOptions = this.getOptions();
         const options = allOptions[0];
         return options[option];
+    }
+
+    private getRightOption(option: string) {
+        if (!this.hasRightOption(option)) {
+            return null;
+        }
+
+        const allOptions = this.getOptions();
+        const options = allOptions[1];
+        return options[option];
+    }
+
+    private checkLeft(option: string, node: ts.Node, scanner: ts.Scanner, colonPosition: number) {
+        if (this.hasLeftOption(option)) {
+            let positionToCheck = colonPosition - 1 - node.getStart();
+
+            let hasLeadingWhitespace: boolean;
+            if (positionToCheck < 0) {
+                hasLeadingWhitespace = false;
+            } else {
+                scanner.setTextPos(positionToCheck);
+                hasLeadingWhitespace = scanner.scan() === ts.SyntaxKind.WhitespaceTrivia;
+            }
+
+            positionToCheck = colonPosition - 2 - node.getStart();
+
+            let hasSeveralLeadingWhitespaces: boolean;
+            if (positionToCheck < 0) {
+                hasSeveralLeadingWhitespaces = false;
+            } else {
+                scanner.setTextPos(positionToCheck);
+                hasSeveralLeadingWhitespaces = hasLeadingWhitespace &&
+                    scanner.scan() === ts.SyntaxKind.WhitespaceTrivia;
+            }
+
+            const optionValue = this.getLeftOption(option);
+            const message = "expected " + optionValue + " before colon in " + option;
+            this.performFailureCheck(
+                optionValue,
+                hasLeadingWhitespace,
+                hasSeveralLeadingWhitespaces,
+                colonPosition - 1,
+                message
+            );
+        }
+    }
+
+    private checkRight(option: string, node: ts.Node, scanner: ts.Scanner, colonPosition: number) {
+        if (this.hasRightOption(option)) {
+            let positionToCheck = colonPosition + 1 - node.getStart();
+
+            let hasTrailingWhitespace: boolean;
+            if (positionToCheck >= node.getWidth()) {
+                hasTrailingWhitespace = false;
+            } else {
+                scanner.setTextPos(positionToCheck);
+                hasTrailingWhitespace = scanner.scan() === ts.SyntaxKind.WhitespaceTrivia;
+            }
+
+            positionToCheck = colonPosition + 2 - node.getStart();
+
+            let hasSeveralTrailingWhitespaces: boolean;
+            if (positionToCheck >= node.getWidth()) {
+                hasSeveralTrailingWhitespaces = false;
+            } else {
+                scanner.setTextPos(positionToCheck);
+                hasSeveralTrailingWhitespaces = hasTrailingWhitespace &&
+                    scanner.scan() === ts.SyntaxKind.WhitespaceTrivia;
+            }
+
+            const optionValue = this.getRightOption(option);
+            const message = "expected " + optionValue + " after colon in " + option;
+            this.performFailureCheck(
+                optionValue,
+                hasTrailingWhitespace,
+                hasSeveralTrailingWhitespaces,
+                colonPosition + 1,
+                message
+            );
+        }
+    }
+
+    private performFailureCheck(optionValue: string, hasWS: boolean, hasSeveralWS: boolean, failurePos: number, message: string) {
+        // has several spaces but should have one or none
+        let isFailure = hasSeveralWS &&
+            (optionValue === "onespace" || optionValue === "nospace");
+        // has at least one space but should have none
+        isFailure = isFailure || hasWS && optionValue === "nospace";
+        // has no space but should have at least one
+        isFailure = isFailure || !hasWS &&
+            (optionValue === "onespace" || optionValue === "space");
+
+        if (isFailure) {
+            this.addFailure(this.createFailure(failurePos, 1, message));
+        }
     }
 }
