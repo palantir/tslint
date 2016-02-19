@@ -612,11 +612,18 @@
   },
   {
     "ruleName": "semicolon",
-    "description": "Requires semicolons at the end of every statement.",
-    "optionsDescription": "Not configurable.",
-    "options": {},
+    "description": "Enforces consistent semicolon usage at the end of every statement.",
+    "optionsDescription": "\nOne of the following arguments must be provided:\n\n* `\"always\"` enforces semicolons at the end of every statement.\n* `\"never\"` disallows semicolons at the end of every statement except for when they are necessary.",
+    "options": {
+      "type": "enum",
+      "enumValues": [
+        "always",
+        "never"
+      ]
+    },
     "optionExamples": [
-      "true"
+      "[true, \"always\"]",
+      "[true, \"never\"]"
     ],
     "type": "style"
   },
@@ -680,7 +687,7 @@
   {
     "ruleName": "typedef",
     "description": "Requires type definitions to exist.",
-    "optionsDescription": "\nFive arguments may be optionally provided:\n\n* `\"call-signature\"` checks return type of functions.\n* `\"parameter\"` checks type specifier of function parameters.\n* `\"property-declaration\"` checks return types of interface properties.\n* `\"variable-declaration\"` checks variable declarations.\n* `\"member-variable-declaration\"` checks member variable declarations.",
+    "optionsDescription": "\nSix arguments may be optionally provided:\n\n* `\"call-signature\"` checks return type of functions.\n* `\"parameter\"` checks type specifier of function parameters for non-arrow functions.\n* `\"arrow-parameter\"` checks type specifier of function parameters for arrow functions.\n* `\"property-declaration\"` checks return types of interface properties.\n* `\"variable-declaration\"` checks variable declarations.\n* `\"member-variable-declaration\"` checks member variable declarations.",
     "options": {
       "type": "list",
       "listType": {
@@ -688,6 +695,7 @@
         "enumValues": [
           "call-signature",
           "parameter",
+          "arrow-parameter",
           "property-declaration",
           "variable-declaration",
           "member-variable-declaration"
@@ -695,7 +703,7 @@
       }
     },
     "optionExamples": [
-      "[true, \"call-signature\", \"member-variable-declaration\"]"
+      "[true, \"call-signature\", \"parameter\", \"member-variable-declaration\"]"
     ],
     "type": "typescript"
   },
@@ -703,49 +711,104 @@
     "ruleName": "typedef-whitespace",
     "description": "Requires or disallows whitespace for type definitions.",
     "descriptionDetails": "Determines if a space is required or not before the colon in a type specifier.",
-    "optionsDescription": "\nOne argument which is an object.\nEach key should have a value of `\"space\"` or `\"nospace\"`.\nPossible keys are:\n\n* `\"call-signature\"` checks return type of functions.\n* `\"index-signature\"` checks index type specifier of indexers.\n* `\"parameter\"` checks function parameters.\n* `\"property-declaration\"` checks object property declarations.\n* `\"variable-declaration\"` checks variable declaration.",
+    "optionsDescription": "\nTwo arguments which are both objects.\nThe first argument specifies how much space should be to the _left_ of a typedef colon.\nThe second argument specifies how much space should be to the _right_ of a typedef colon.\nEach key should have a value of `\"space\"` or `\"nospace\"`.\nPossible keys are:\n\n* `\"call-signature\"` checks return type of functions.\n* `\"index-signature\"` checks index type specifier of indexers.\n* `\"parameter\"` checks function parameters.\n* `\"property-declaration\"` checks object property declarations.\n* `\"variable-declaration\"` checks variable declaration.",
     "options": {
-      "type": "object",
-      "properties": {
-        "call-signature": {
-          "type": "enum",
-          "enumValues": [
-            "nospace",
-            "space"
-          ]
+      "type": "array",
+      "arrayMembers": [
+        {
+          "type": "object",
+          "properties": {
+            "call-signature": {
+              "type": "enum",
+              "enumValues": [
+                "nospace",
+                "onespace",
+                "space"
+              ]
+            },
+            "index-signature": {
+              "type": "enum",
+              "enumValues": [
+                "nospace",
+                "onespace",
+                "space"
+              ]
+            },
+            "parameter": {
+              "type": "enum",
+              "enumValues": [
+                "nospace",
+                "onespace",
+                "space"
+              ]
+            },
+            "property-declaration": {
+              "type": "enum",
+              "enumValues": [
+                "nospace",
+                "onespace",
+                "space"
+              ]
+            },
+            "variable-declaration": {
+              "type": "enum",
+              "enumValues": [
+                "nospace",
+                "onespace",
+                "space"
+              ]
+            }
+          }
         },
-        "index-signature": {
-          "type": "enum",
-          "enumValues": [
-            "nospace",
-            "space"
-          ]
-        },
-        "parameter": {
-          "type": "enum",
-          "enumValues": [
-            "nospace",
-            "space"
-          ]
-        },
-        "property-declaration": {
-          "type": "enum",
-          "enumValues": [
-            "nospace",
-            "space"
-          ]
-        },
-        "variable-declaration": {
-          "type": "enum",
-          "enumValues": [
-            "nospace",
-            "space"
-          ]
+        {
+          "type": "object",
+          "properties": {
+            "call-signature": {
+              "type": "enum",
+              "enumValues": [
+                "nospace",
+                "onespace",
+                "space"
+              ]
+            },
+            "index-signature": {
+              "type": "enum",
+              "enumValues": [
+                "nospace",
+                "onespace",
+                "space"
+              ]
+            },
+            "parameter": {
+              "type": "enum",
+              "enumValues": [
+                "nospace",
+                "onespace",
+                "space"
+              ]
+            },
+            "property-declaration": {
+              "type": "enum",
+              "enumValues": [
+                "nospace",
+                "onespace",
+                "space"
+              ]
+            },
+            "variable-declaration": {
+              "type": "enum",
+              "enumValues": [
+                "nospace",
+                "onespace",
+                "space"
+              ]
+            }
+          }
         }
-      }
+      ]
     },
     "optionExamples": [
-      "[true, {\"parameter\": \"space\", \"property-declaration\" : \"space\"}]"
+      "\n[\n  true,\n  {\n    \"call-signature\": \"nospace\",\n    \"index-signature\": \"nospace\",\n    \"parameter\": \"nospace\",\n    \"property-declaration\": \"nospace\",\n    \"variable-declaration\": \"nospace\"\n  },\n  {\n    \"call-signature\": \"onespace\",\n    \"index-signature\": \"onespace\",\n    \"parameter\": \"onespace\",\n    \"property-declaration\": \"onespace\",\n    \"variable-declaration\": \"onespace\"\n  }\n]"
     ],
     "type": "typescript"
   },
