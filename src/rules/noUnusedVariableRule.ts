@@ -80,7 +80,10 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
                 && !this.isReactUsed
                 && !this.hasSeenJsxElement) {
             const nameText = this.reactImport.name.getText();
-            this.addFailure(this.createFailure(this.reactImport.name.getStart(), nameText.length, `${Rule.FAILURE_STRING}'${nameText}'`));
+            if (!this.isIgnored(nameText)) {
+                const start = this.reactImport.name.getStart();
+                this.addFailure(this.createFailure(start, nameText.length, `${Rule.FAILURE_STRING}'${nameText}'`));
+            }
         }
     }
 
@@ -279,8 +282,20 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     private validateReferencesForVariable(name: string, position: number) {
         const fileName = this.getSourceFile().fileName;
         const highlights = this.languageService.getDocumentHighlights(fileName, position, [fileName]);
-        if (highlights == null || highlights[0].highlightSpans.length <= 1) {
+        if ((highlights == null || highlights[0].highlightSpans.length <= 1) && !this.isIgnored(name)) {
             this.addFailure(this.createFailure(position, name.length, `${Rule.FAILURE_STRING}'${name}'`));
+        }
+    }
+
+    private isIgnored(name: string) {
+        const options = this.getOptions();
+        for (const option of options) {
+            if (typeof option === "object") {
+                const {"ignore-pattern": ignorePattern} = option;
+                if (ignorePattern != null) {
+                    return new RegExp(ignorePattern).test(name);
+                }
+            }
         }
     }
 }
