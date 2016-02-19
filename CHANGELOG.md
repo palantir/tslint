@@ -1,6 +1,44 @@
 Change Log
 ===
 
+v3.4.0
+---
+* Stable release containing changes from the last two dev releases
+
+v3.4.0-dev.2
+---
+* [new-rule-option] "arrow-parameter" option for `typedef` rule (#333)
+* [new-rule-option] "never" option for `semicolon` rule (#363)
+* [new-rule-option] "onespace" setting for `typedef-whitespace` rule (#888)
+* [new-rule-option] `typedef-whitespace` rule can now check spacing on right side of typdef colon (#888)
+* [enhancement] `member-ordering` rule treats arrow functions as methods (#226)
+* [bugfix] Handle spaces before typedefs correctly in `typedef-whitespace` rule (#955)
+* [bugfix] `label-position` rule now allows labels on `for-of` loops (#959)
+
+Thanks to our contributors!
+* @b0r3as
+* @ChaseMoskal
+* @Pajn
+* @pe8ter
+* @tomduncalf
+
+v3.4.0-dev.1
+---
+* [enhancement] Revamped testing system (#620)
+  * Writing tests for rules is now much simpler with a linter DSL.
+    See exisitng tests in `test/rules/**/*.ts.lint` for examples.
+* [enhancement] New msbuild formatter (#947)
+* [bugfix] Fix handling of multiline literals in `trailing-comma` rule (#856)
+* [bugfix] `one-line` rule correctly checks space between `catch` and opening brace (#925)
+* [bugfix] `one-line` rule correctly checks multiline variable declarations (#935)
+* [new-rule-option] New option `check-finally` for `one-line` rule (#925)
+* __BREAKING CHANGES__
+  * [bugfix] Report error when a rule in the config file is not found (#598)
+
+Thanks to our contributors!
+* @mmv
+* @pe8ter
+
 v3.3.0
 ---
 * [bugfix] Tweak TSLint build so TSLint works with typescript@next (#926)
