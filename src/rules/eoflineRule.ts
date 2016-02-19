@@ -32,7 +32,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         if (eofTokenFullText.length === 0 || eofTokenFullText.charAt(eofTokenFullText.length - 1) !== "\n") {
             const start = eofToken.getStart();
             return [
-                new Lint.RuleFailure(sourceFile, start, start, Rule.FAILURE_STRING, this.getOptions().ruleName)
+                new Lint.RuleFailure(sourceFile, start, start, Rule.FAILURE_STRING, this.getOptions().ruleName),
             ];
         }
 

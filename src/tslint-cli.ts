@@ -72,7 +72,7 @@ let processed = optimist
             describe: "output format (prose, json, verbose)",
         },
         "test": {
-            describe: "test that tslint produces the correct output for the specified directory"
+            describe: "test that tslint produces the correct output for the specified directory",
         },
         "v": {
             alias: "version",
