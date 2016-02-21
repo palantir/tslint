@@ -38,9 +38,9 @@ describe("MSBuild Formatter", () => {
         ];
 
         const expectedResult =
-            getFailureString(TEST_FILE, 1,  1, "first failure") +
+            getFailureString(TEST_FILE, 1, 1, "first failure") +
             getFailureString(TEST_FILE, 2, 12, "mid failure") +
-            getFailureString(TEST_FILE, 9,  2,  "last failure");
+            getFailureString(TEST_FILE, 9, 2, "last failure");
 
         const actualResult = formatter.format(failures);
         assert.equal(actualResult, expectedResult);

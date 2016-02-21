@@ -53,7 +53,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                     ruleFailures.push(ruleFailure);
                 }
             }
-          }
+        }
 
         return ruleFailures;
     }

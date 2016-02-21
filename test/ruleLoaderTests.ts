@@ -20,7 +20,7 @@ describe("Rule Loader", () => {
     const RULES_DIRECTORY = "build/src/rules";
 
     it("loads core rules", () => {
-        const validConfiguration: {[name: string]: any} = {
+        const validConfiguration: { [name: string]: any } = {
             "forin": false,
             "quotemark": "single",
             "eofline": true,
@@ -33,7 +33,7 @@ describe("Rule Loader", () => {
     });
 
     it("throws if an invalid rule is found", () => {
-        const invalidConfiguration: {[name: string]: any} = {
+        const invalidConfiguration: { [name: string]: any } = {
             "invalidConfig1": true,
             "invalidConfig2": false,
         };
@@ -45,7 +45,7 @@ describe("Rule Loader", () => {
     });
 
     it("doesn't ignore leading or trailing underscores or dashes", () => {
-        const invalidConfiguration: {[name: string]: any} = {
+        const invalidConfiguration: { [name: string]: any } = {
             "_indent": 6,
             "forin_": true,
             "-quotemark": "single",
@@ -59,7 +59,7 @@ describe("Rule Loader", () => {
     });
 
     it("works with rulesDirectory argument as an Array", () => {
-        const validConfiguration: {[name: string]: any} = {
+        const validConfiguration: { [name: string]: any } = {
             "forin": false,
             "quotemark": "single",
             "eofline": true,

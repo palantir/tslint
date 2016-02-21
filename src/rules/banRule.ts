@@ -41,7 +41,7 @@ export class BanFunctionWalker extends Lint.RuleWalker {
         const expression = node.expression;
 
         if (expression.kind === ts.SyntaxKind.PropertyAccessExpression
-                && expression.getChildCount() >= 3) {
+            && expression.getChildCount() >= 3) {
 
             const firstToken = expression.getFirstToken();
             const secondToken = expression.getChildAt(1);

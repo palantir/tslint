@@ -49,7 +49,7 @@ class VariableNameWalker extends Lint.RuleWalker {
 
     public visitBindingElement(node: ts.BindingElement) {
         if (node.name.kind === ts.SyntaxKind.Identifier) {
-            const identifier = <ts.Identifier> node.name;
+            const identifier = <ts.Identifier>node.name;
             this.handleVariableNameFormat(identifier);
             this.handleVariableNameKeyword(identifier);
         }
@@ -58,7 +58,7 @@ class VariableNameWalker extends Lint.RuleWalker {
 
     public visitParameterDeclaration(node: ts.ParameterDeclaration) {
         if (node.name.kind === ts.SyntaxKind.Identifier) {
-            const identifier = <ts.Identifier> node.name;
+            const identifier = <ts.Identifier>node.name;
             this.handleVariableNameFormat(identifier);
             this.handleVariableNameKeyword(identifier);
         }
@@ -67,7 +67,7 @@ class VariableNameWalker extends Lint.RuleWalker {
 
     public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
         if (node.name != null && node.name.kind === ts.SyntaxKind.Identifier) {
-            const identifier = <ts.Identifier> node.name;
+            const identifier = <ts.Identifier>node.name;
             this.handleVariableNameFormat(identifier);
             // do not check property declarations for keywords, they are allowed to be keywords
         }
@@ -76,7 +76,7 @@ class VariableNameWalker extends Lint.RuleWalker {
 
     public visitVariableDeclaration(node: ts.VariableDeclaration) {
         if (node.name.kind === ts.SyntaxKind.Identifier) {
-            const identifier = <ts.Identifier> node.name;
+            const identifier = <ts.Identifier>node.name;
             this.handleVariableNameFormat(identifier);
             this.handleVariableNameKeyword(identifier);
         }

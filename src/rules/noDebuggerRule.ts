@@ -31,5 +31,5 @@ class NoDebuggerWalker extends Lint.RuleWalker {
         const debuggerKeywordNode = node.getChildAt(0);
         this.addFailure(this.createFailure(debuggerKeywordNode.getStart(), debuggerKeywordNode.getWidth(), Rule.FAILURE_STRING));
         super.visitDebuggerStatement(node);
-   }
+    }
 }

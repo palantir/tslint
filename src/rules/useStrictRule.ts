@@ -39,14 +39,14 @@ class UseStrictWalker extends Lint.ScopeAwareRuleWalker<{}> {
 
     public visitModuleDeclaration(node: ts.ModuleDeclaration) {
         if (!Lint.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)
-                && this.hasOption(UseStrictWalker.OPTION_CHECK_MODULE)
-                && node.body != null
-                && node.body.kind === ts.SyntaxKind.ModuleBlock) {
+            && this.hasOption(UseStrictWalker.OPTION_CHECK_MODULE)
+            && node.body != null
+            && node.body.kind === ts.SyntaxKind.ModuleBlock) {
             let firstModuleDeclaration = getFirstInModuleDeclarationsChain(node);
             let hasOnlyModuleDeclarationParents = firstModuleDeclaration.parent.kind === ts.SyntaxKind.SourceFile;
 
             if (hasOnlyModuleDeclarationParents) {
-                this.handleBlock(firstModuleDeclaration, <ts.Block> node.body);
+                this.handleBlock(firstModuleDeclaration, <ts.Block>node.body);
             }
         }
 
@@ -56,8 +56,8 @@ class UseStrictWalker extends Lint.ScopeAwareRuleWalker<{}> {
     public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
         // current depth is 2: global scope and the scope created by this function
         if (this.getCurrentDepth() === 2 &&
-                this.hasOption(UseStrictWalker.OPTION_CHECK_FUNCTION) &&
-                node.body != null) {
+            this.hasOption(UseStrictWalker.OPTION_CHECK_FUNCTION) &&
+            node.body != null) {
             this.handleBlock(node, node.body);
         }
 
@@ -74,7 +74,7 @@ class UseStrictWalker extends Lint.ScopeAwareRuleWalker<{}> {
                 const firstChild = firstStatement.getChildAt(0);
 
                 if (firstChild.kind === ts.SyntaxKind.StringLiteral
-                        && (<ts.StringLiteral> firstChild).text === UseStrictWalker.USE_STRICT_STRING) {
+                    && (<ts.StringLiteral>firstChild).text === UseStrictWalker.USE_STRICT_STRING) {
                     isFailure = false;
                 }
             }
@@ -90,7 +90,7 @@ function getFirstInModuleDeclarationsChain(node: ts.ModuleDeclaration): ts.Modul
     let current = node;
 
     while (current.parent.kind === ts.SyntaxKind.ModuleDeclaration) {
-        current = <ts.ModuleDeclaration> current.parent;
+        current = <ts.ModuleDeclaration>current.parent;
     }
 
     return current;

@@ -80,10 +80,10 @@ export class RuleFailure {
     private ruleName: string;
 
     constructor(sourceFile: ts.SourceFile,
-                start: number,
-                end: number,
-                failure: string,
-                ruleName: string) {
+        start: number,
+        end: number,
+        failure: string,
+        ruleName: string) {
 
         this.sourceFile = sourceFile;
         this.fileName = sourceFile.fileName;
@@ -124,7 +124,7 @@ export class RuleFailure {
     }
 
     public equals(ruleFailure: RuleFailure) {
-        return this.failure  === ruleFailure.getFailure()
+        return this.failure === ruleFailure.getFailure()
             && this.fileName === ruleFailure.getFileName()
             && this.startPosition.equals(ruleFailure.getStartPosition())
             && this.endPosition.equals(ruleFailure.getEndPosition());

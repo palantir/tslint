@@ -39,7 +39,8 @@
     "grunt-tslint": "latest",
     "mocha": "^2.2.5",
     "tslint": "latest",
-    "typescript": "latest"
+    "typescript": "latest",
+    "typescript-formatter": "^2.0.0"
   },
   "peerDependencies": {
     "typescript": ">=1.7.3"

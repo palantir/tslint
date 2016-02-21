@@ -42,9 +42,9 @@ class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<ScopeInfo,
         if (isSingleVariable) {
             if (variableDeclaration) {
                 const isBlockScopedVariable = Lint.isBlockScopedVariable(variableDeclaration);
-                this.handleSingleVariableIdentifier(<ts.Identifier> node.name, isBlockScopedVariable);
+                this.handleSingleVariableIdentifier(<ts.Identifier>node.name, isBlockScopedVariable);
             } else {
-                this.handleSingleParameterIdentifier(<ts.Identifier> node.name);
+                this.handleSingleParameterIdentifier(<ts.Identifier>node.name);
             }
         }
 
@@ -73,7 +73,7 @@ class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<ScopeInfo,
         const isSingleParameter = node.name.kind === ts.SyntaxKind.Identifier;
 
         if (isSingleParameter) {
-            this.handleSingleParameterIdentifier(<ts.Identifier> node.name);
+            this.handleSingleParameterIdentifier(<ts.Identifier>node.name);
         }
 
         super.visitParameterDeclaration(node);
@@ -87,7 +87,7 @@ class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<ScopeInfo,
         const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
 
         if (isSingleVariable) {
-            this.handleSingleVariableIdentifier(<ts.Identifier> node.name, Lint.isBlockScopedVariable(node));
+            this.handleSingleVariableIdentifier(<ts.Identifier>node.name, Lint.isBlockScopedVariable(node));
         }
 
         super.visitVariableDeclaration(node);
@@ -107,8 +107,8 @@ class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<ScopeInfo,
         // regular vars should always be added to the scope; block-scoped vars should be added iff
         // the current scope is same as current block scope
         if (!isBlockScoped
-                || this.getCurrentBlockDepth() === 1
-                || this.getCurrentBlockDepth() === this.getCurrentDepth()) {
+            || this.getCurrentBlockDepth() === 1
+            || this.getCurrentBlockDepth() === this.getCurrentDepth()) {
             currentScope.varNames.push(variableName);
         }
         currentBlockScope.varNames.push(variableName);

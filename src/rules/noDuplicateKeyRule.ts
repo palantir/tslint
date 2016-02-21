@@ -27,7 +27,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class NoDuplicateKeyWalker extends Lint.RuleWalker {
-    private objectKeysStack: {[key: string]: boolean}[] = [];
+    private objectKeysStack: { [key: string]: boolean }[] = [];
 
     public visitObjectLiteralExpression(node: ts.ObjectLiteralExpression) {
         this.objectKeysStack.push(Object.create(null));
@@ -40,7 +40,7 @@ class NoDuplicateKeyWalker extends Lint.RuleWalker {
         const keyNode = node.name;
 
         if (keyNode.kind === ts.SyntaxKind.Identifier) {
-            const key = (<ts.Identifier> keyNode).text;
+            const key = (<ts.Identifier>keyNode).text;
             if (objectKeys[key]) {
                 const failureString = Rule.FAILURE_STRING + key + "'";
                 this.addFailure(this.createFailure(keyNode.getStart(), keyNode.getWidth(), failureString));

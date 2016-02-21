@@ -29,9 +29,9 @@ export interface IEnableDisablePosition {
     position: number;
 }
 
-export function loadRules(ruleConfiguration: {[name: string]: any},
-                          enableDisableRuleMap: {[rulename: string]: IEnableDisablePosition[]},
-                          rulesDirectories?: string | string[]): IRule[] {
+export function loadRules(ruleConfiguration: { [name: string]: any },
+    enableDisableRuleMap: { [rulename: string]: IEnableDisablePosition[] },
+    rulesDirectories?: string | string[]): IRule[] {
     const rules: IRule[] = [];
     const notFoundRules: string[] = [];
 

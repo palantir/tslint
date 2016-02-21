@@ -87,5 +87,5 @@ class Linter {
     }
 }
 
-namespace Linter {}
+namespace Linter { }
 export = Linter;

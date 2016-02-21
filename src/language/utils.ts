@@ -29,7 +29,7 @@ export function getSourceFile(fileName: string, source: string): ts.SourceFile {
         getCurrentDirectory: () => "",
         getDefaultLibFileName: () => "lib.d.ts",
         getNewLine: () => "\n",
-        getSourceFile: function (filenameToGet: string) {
+        getSourceFile: function(filenameToGet: string) {
             if (filenameToGet === normalizedName) {
                 return ts.createSourceFile(filenameToGet, source, compilerOptions.target, true);
             }
@@ -90,8 +90,8 @@ export function hasModifier(modifiers: ts.ModifiersArray, ...modifierKinds: ts.S
  */
 export function isBlockScopedVariable(node: ts.VariableDeclaration | ts.VariableStatement): boolean {
     const parentNode = (node.kind === ts.SyntaxKind.VariableDeclaration)
-        ? (<ts.VariableDeclaration> node).parent
-        : (<ts.VariableStatement> node).declarationList;
+        ? (<ts.VariableDeclaration>node).parent
+        : (<ts.VariableStatement>node).declarationList;
 
     return isNodeFlagSet(parentNode, ts.NodeFlags.Let)
         || isNodeFlagSet(parentNode, ts.NodeFlags.Const);
@@ -112,7 +112,7 @@ export function getBindingElementVariableDeclaration(node: ts.BindingElement): t
             currentParent = currentParent.parent;
         }
     }
-    return <ts.VariableDeclaration> currentParent;
+    return <ts.VariableDeclaration>currentParent;
 }
 
 /**

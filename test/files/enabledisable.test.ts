@@ -20,7 +20,7 @@ var AAAaA = 'test'
 var AAAaA = 'test'
 
 /* tslint:enable */
-var  re;
+var re;
 re = /`/;
 
 /* tslint:disable:quotemark */

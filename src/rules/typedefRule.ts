@@ -57,16 +57,16 @@ class TypedefWalker extends Lint.RuleWalker {
         for (let property of node.properties) {
             switch (property.kind) {
                 case ts.SyntaxKind.PropertyAssignment:
-                    this.visitPropertyAssignment(<ts.PropertyAssignment> property);
+                    this.visitPropertyAssignment(<ts.PropertyAssignment>property);
                     break;
                 case ts.SyntaxKind.MethodDeclaration:
-                    this.visitMethodDeclaration(<ts.MethodDeclaration> property);
+                    this.visitMethodDeclaration(<ts.MethodDeclaration>property);
                     break;
                 case ts.SyntaxKind.GetAccessor:
-                    this.visitGetAccessor(<ts.AccessorDeclaration> property);
+                    this.visitGetAccessor(<ts.AccessorDeclaration>property);
                     break;
                 case ts.SyntaxKind.SetAccessor:
-                    this.visitSetAccessor(<ts.AccessorDeclaration> property);
+                    this.visitSetAccessor(<ts.AccessorDeclaration>property);
                     break;
             }
         }
@@ -76,7 +76,7 @@ class TypedefWalker extends Lint.RuleWalker {
         // a parameter's "type" could be a specific string value, for example `fn(option: "someOption", anotherOption: number)`
         if (node.type == null || node.type.kind !== ts.SyntaxKind.StringLiteral) {
             const optionName = node.parent.kind === ts.SyntaxKind.ArrowFunction ? "arrow-parameter" : "parameter";
-            this.checkTypeAnnotation(optionName, node.getEnd(), <ts.TypeNode> node.type, node.name);
+            this.checkTypeAnnotation(optionName, node.getEnd(), <ts.TypeNode>node.type, node.name);
         }
         super.visitParameterDeclaration(node);
     }
@@ -85,7 +85,7 @@ class TypedefWalker extends Lint.RuleWalker {
         switch (node.initializer.kind) {
             case ts.SyntaxKind.ArrowFunction:
             case ts.SyntaxKind.FunctionExpression:
-                this.handleCallSignature(<ts.FunctionExpression> node.initializer);
+                this.handleCallSignature(<ts.FunctionExpression>node.initializer);
                 break;
         }
         super.visitPropertyAssignment(node);
@@ -113,9 +113,9 @@ class TypedefWalker extends Lint.RuleWalker {
         // catch statements will be the parent of the variable declaration
         // for-in/for-of loops will be the gradparent of the variable declaration
         if (node.parent != null && node.parent.parent != null
-                && node.parent.kind !== ts.SyntaxKind.CatchClause
-                && node.parent.parent.kind !== ts.SyntaxKind.ForInStatement
-                && node.parent.parent.kind !== ts.SyntaxKind.ForOfStatement) {
+            && node.parent.kind !== ts.SyntaxKind.CatchClause
+            && node.parent.parent.kind !== ts.SyntaxKind.ForInStatement
+            && node.parent.parent.kind !== ts.SyntaxKind.ForOfStatement) {
             this.checkTypeAnnotation("variable-declaration", node.name.getEnd(), node.type, node.name);
         }
         super.visitVariableDeclaration(node);
@@ -130,13 +130,13 @@ class TypedefWalker extends Lint.RuleWalker {
     }
 
     private checkTypeAnnotation(option: string,
-                                location: number,
-                                typeAnnotation: ts.TypeNode,
-                                name?: ts.Node) {
+        location: number,
+        typeAnnotation: ts.TypeNode,
+        name?: ts.Node) {
         if (this.hasOption(option) && typeAnnotation == null) {
             let ns = "";
             if (name != null && name.kind === ts.SyntaxKind.Identifier) {
-                ns = `: '${(<ts.Identifier> name).text}'`;
+                ns = `: '${(<ts.Identifier>name).text}'`;
             }
             let failure = this.createFailure(location, 1, "expected " + option + ns + " to have a typedef");
             this.addFailure(failure);

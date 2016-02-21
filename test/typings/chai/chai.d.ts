@@ -51,7 +51,7 @@ declare module Chai {
         haveOwnProperty: OwnProperty;
         length: Length;
         lengthOf: Length;
-        match(regexp: RegExp|string, message?: string): Assertion;
+        match(regexp: RegExp | string, message?: string): Assertion;
         string(string: string, message?: string): Assertion;
         keys: Keys;
         key(string: string): Assertion;
