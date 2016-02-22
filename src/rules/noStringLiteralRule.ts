@@ -29,18 +29,17 @@ export class Rule extends Lint.Rules.AbstractRule {
 class NoStringLiteralWalker extends Lint.RuleWalker {
     public visitElementAccessExpression(node: ts.ElementAccessExpression) {
         const argument = node.argumentExpression;
-        if (!argument) {
-          return;
-        }
-        const accessorText = argument.getText();
+        if (argument != null) {
+            const accessorText = argument.getText();
 
-        // the argument expression should be a string of length at least 2 (due to quote characters)
-        if (argument.kind === ts.SyntaxKind.StringLiteral && accessorText.length > 2) {
-            const unquotedAccessorText = accessorText.substring(1, accessorText.length - 1);
+            // the argument expression should be a string of length at least 2 (due to quote characters)
+            if (argument.kind === ts.SyntaxKind.StringLiteral && accessorText.length > 2) {
+                const unquotedAccessorText = accessorText.substring(1, accessorText.length - 1);
 
-            // only create a failure if the identifier is valid, in which case there's no need to use string literals
-            if (isValidIdentifier(unquotedAccessorText)) {
-                this.addFailure(this.createFailure(argument.getStart(), argument.getWidth(), Rule.FAILURE_STRING));
+                // only create a failure if the identifier is valid, in which case there's no need to use string literals
+                if (isValidIdentifier(unquotedAccessorText)) {
+                    this.addFailure(this.createFailure(argument.getStart(), argument.getWidth(), Rule.FAILURE_STRING));
+                }
             }
         }
 
