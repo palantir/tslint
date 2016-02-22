@@ -24,4 +24,7 @@ obj["a-2"];
 obj["2a"];
 obj["?a#$!$^&%&"];
 
+// invalid accessor - no crash
+obj[]
+
 [0]: object access via string literals is disallowed

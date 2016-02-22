@@ -29,6 +29,9 @@ export class Rule extends Lint.Rules.AbstractRule {
 class NoStringLiteralWalker extends Lint.RuleWalker {
     public visitElementAccessExpression(node: ts.ElementAccessExpression) {
         const argument = node.argumentExpression;
+        if (!argument) {
+          return;
+        }
         const accessorText = argument.getText();
 
         // the argument expression should be a string of length at least 2 (due to quote characters)
