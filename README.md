@@ -7,7 +7,14 @@
 TSLint
 ======
 
-A linter for the TypeScript language.
+An extensible linter for the TypeScript language.
+
+Supports:
+
+- custom rules
+- custom formatters
+- inline disabling / enabling of rules
+- integration with [grunt](https://github.com/palantir/grunt-tslint), [gulp](https://github.com/panuhorsmalahti/gulp-tslint), [atom](https://github.com/AtomLinter/linter-tslint), [sublime](https://packagecontrol.io/packages/SublimeLinter-contrib-tslint), [vim](https://github.com/scrooloose/syntastic), [eclipse](https://github.com/palantir/eclipse-tslint), [webstorm](https://www.jetbrains.com/webstorm/help/tslint.html), and more
 
 Installation
 ------------
@@ -15,20 +22,18 @@ Installation
 ##### CLI
 
 ```
-npm install tslint -g
-npm install typescript -g
+npm install -g tslint typescript
 ```
 
 ##### Library
 
 ```
-npm install tslint
-npm install typescript
+npm install tslint typescript
 ```
 
 ##### Peer dependencies
 
-The `typescript` module is a peer dependency of TSLint, which allows you to update the compiler independently from the
+`typescript` is a peer dependency of `tslint`. This allows you to update the compiler independently from the
 linter. This also means that `tslint` will have to use the same version of `tsc` used to actually compile your sources.
 
 Breaking changes in the latest dev release of `typescript@next` might break something in the linter if we haven't built against that release yet. If this happens to you, you can try:
@@ -370,9 +375,9 @@ version of TSLint via `npm install tslint@next`.
 Creating a new Release
 ----------------------
 
-1. Bump up the version number in `package.json` and `tslint.ts`
+1. Bump the version number in `package.json` and `src/tslint.ts`
 2. Add a section for the new release in `CHANGELOG.md`
 3. Run `grunt` to build the latest sources
-4. Commit
+4. Commit with message "Prepare release <version>"
 5. Run `npm publish`
 6. Create a git tag for the new release and push it
