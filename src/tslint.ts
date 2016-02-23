@@ -25,7 +25,7 @@ import {ILinterOptions, LintResult} from "./lint";
 import {loadRules} from "./ruleLoader";
 
 class Linter {
-    public static VERSION = "3.4.0-dev.2";
+    public static VERSION = "3.5.0-dev.1";
     public static findConfiguration = config;
 
     private fileName: string;
