@@ -1,6 +1,16 @@
 Change Log
 ===
 
+v3.5.0-dev.1
+---
+* [new-rule-option] "ignore-pattern" option for `no-unused-variable` rule (#314)
+* [bugfix] Fix occassional crash in `no-string-literal` rule (#906)
+* [enhancement] Tweak behavior of `member-ordering` rule with regards to arrow function types in interfaces (#226)
+
+Thanks to our contributors!
+@arusakov
+@Pajn
+
 v3.4.0
 ---
 * Stable release containing changes from the last two dev releases
