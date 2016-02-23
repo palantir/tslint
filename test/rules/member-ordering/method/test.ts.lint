@@ -22,11 +22,13 @@ class Foo {
 interface IArrowMethods {
     a: number;
     b(): void;
-    c: () => void;
+    d: () => void;
+    ~~~~~~~~~~~~~~ [0]
 }
 
 class ArrowMethods {
     public a = 5;
+    private callback: () => void
     public b = "foo";
     public c() {}
     public d = () => {};
