@@ -41,9 +41,10 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     private skipParameterDeclaration: boolean;
     private skipVariableDeclaration: boolean;
 
-    private reactImport: ts.NamespaceImport;
     private hasSeenJsxElement: boolean;
+    private ignorePattern: RegExp;
     private isReactUsed: boolean;
+    private reactImport: ts.NamespaceImport;
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions, languageService: ts.LanguageService) {
         super(sourceFile, options);
@@ -52,6 +53,13 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         this.skipParameterDeclaration = false;
         this.hasSeenJsxElement = false;
         this.isReactUsed = false;
+
+        const ignorePatternOption = this.getOptions().filter((option: any) => {
+            return typeof option === "object" && option["ignore-pattern"] != null;
+        })[0];
+        if (ignorePatternOption != null) {
+            this.ignorePattern = new RegExp(ignorePatternOption["ignore-pattern"]);
+        }
     }
 
     public visitSourceFile(node: ts.SourceFile) {
@@ -288,14 +296,6 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     }
 
     private isIgnored(name: string) {
-        const options = this.getOptions();
-        for (const option of options) {
-            if (typeof option === "object") {
-                const {"ignore-pattern": ignorePattern} = option;
-                if (ignorePattern != null) {
-                    return new RegExp(ignorePattern).test(name);
-                }
-            }
-        }
+        return this.ignorePattern != null && this.ignorePattern.test(name);
     }
 }
