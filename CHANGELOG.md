@@ -39,13 +39,10 @@ Thanks to our contributors!
 * @mmv
 * @pe8ter
 
-<<<<<<< HEAD
 v3.3.0-dev.2
 ---
 * Add TypeScript peer dependency `>=1.9.0-dev` to support latest nightlies
 
-=======
->>>>>>> master
 v3.3.0
 ---
 * [bugfix] Tweak TSLint build so TSLint works with typescript@next (#926)
