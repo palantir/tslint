@@ -572,13 +572,14 @@
   {
     "ruleName": "one-line",
     "description": "Requires the specified tokens to be on the same line as the expression preceding them.",
-    "optionsDescription": "\nFour arguments may be optionally provided:\n\n* `\"check-catch\"` checks that `catch` is on the same line as the closing brace for `try`.\n* `\"check-else\"` checks that `else` is on the same line as the closing brace for `if`.\n* `\"check-open-brace\"` checks that an open brace falls on the same line as its preceding expression.\n* `\"check-whitespace\"` checks preceding whitespace for the specified tokens.",
+    "optionsDescription": "\nFive arguments may be optionally provided:\n\n* `\"check-catch\"` checks that `catch` is on the same line as the closing brace for `try`.\n* `\"check-finally\"` checks that `finally` is on the same line as the closing brace for `catch`.\n* `\"check-else\"` checks that `else` is on the same line as the closing brace for `if`.\n* `\"check-open-brace\"` checks that an open brace falls on the same line as its preceding expression.\n* `\"check-whitespace\"` checks preceding whitespace for the specified tokens.",
     "options": {
       "type": "list",
       "listType": {
         "type": "enum",
         "enumValues": [
           "check-catch",
+          "check-finally",
           "check-else",
           "check-open-brace",
           "check-whitespace"
@@ -586,7 +587,7 @@
       }
     },
     "optionExamples": [
-      "[true, \"check-catch\", \"check-else\"]"
+      "[true, \"check-catch\", \"check-finally\", \"check-else\"]"
     ],
     "type": "style"
   },
