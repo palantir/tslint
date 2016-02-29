@@ -16,14 +16,14 @@
 
 import {LintError, errorComparator, lintSyntaxError} from "./lintError";
 import {
-    Line,
-    ErrorLine,
-    CodeLine,
-    MultilineErrorLine,
-    EndErrorLine,
-    MessageSubstitutionLine,
-    parseLine,
-    printLine,
+Line,
+ErrorLine,
+CodeLine,
+MultilineErrorLine,
+EndErrorLine,
+MessageSubstitutionLine,
+parseLine,
+printLine,
 } from "./lines";
 
 /**
@@ -76,7 +76,7 @@ export function parseErrorsFromMarkup(text: string): LintError[] {
                     message: messageSubstitutions[errorLine.message] || errorLine.message,
                 });
 
-            // if the error is the start of a multiline error
+                // if the error is the start of a multiline error
             } else if (errorLine instanceof MultilineErrorLine) {
 
                 // iterate through the MultilineErrorLines until we get to an EndErrorLine

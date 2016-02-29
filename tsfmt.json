@@ -1,0 +1,15 @@
+{
+  "convertTabsToSpaces": true,
+  "indentSize": 4,
+  "tabSize": 4,
+  "insertSpaceAfterCommaDelimiter": true,
+  "insertSpaceAfterFunctionKeywordForAnonymousFunctions": false,
+  "insertSpaceAfterOpeningAndBeforeClosingNonemptyBrackets": false,
+  "insertSpaceAfterKeywordsInControlFlowStatements": true,
+  "insertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis": false,
+  "insertSpaceAfterSemicolonInForStatements": true,
+  "insertSpaceBeforeAndAfterBinaryOperators": true,
+  "newLineCharacter": "\n",
+  "placeOpenBraceOnNewLineForControlBlocks": false,
+  "placeOpenBraceOnNewLineForFunctions": false
+}

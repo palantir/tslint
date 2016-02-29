@@ -30,7 +30,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 class NoVarKeywordWalker extends Lint.RuleWalker {
     public visitVariableStatement(node: ts.VariableStatement) {
         if (!Lint.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword, ts.SyntaxKind.DeclareKeyword)
-                && !Lint.isBlockScopedVariable(node)) {
+            && !Lint.isBlockScopedVariable(node)) {
             this.addFailure(this.createFailure(node.getStart(), "var".length, Rule.FAILURE_STRING));
         }
 
@@ -54,7 +54,7 @@ class NoVarKeywordWalker extends Lint.RuleWalker {
 
     private handleInitializerNode(node: ts.VariableDeclarationList | ts.Expression) {
         if (node && node.kind === ts.SyntaxKind.VariableDeclarationList &&
-                !(Lint.isNodeFlagSet(node, ts.NodeFlags.Let) || Lint.isNodeFlagSet(node, ts.NodeFlags.Const))) {
+            !(Lint.isNodeFlagSet(node, ts.NodeFlags.Let) || Lint.isNodeFlagSet(node, ts.NodeFlags.Const))) {
             this.addFailure(this.createFailure(node.getStart(), "var".length, Rule.FAILURE_STRING));
         }
     }

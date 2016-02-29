@@ -20,7 +20,7 @@ import {IOptions} from "../../lint";
 import {RuleWalker} from "./ruleWalker";
 
 export class SkippableTokenAwareRuleWalker extends RuleWalker {
-    protected tokensToSkipStartEndMap: {[start: number]: number};
+    protected tokensToSkipStartEndMap: { [start: number]: number };
 
     constructor(sourceFile: ts.SourceFile, options: IOptions) {
         super(sourceFile, options);

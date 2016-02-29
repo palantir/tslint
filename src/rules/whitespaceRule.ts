@@ -155,7 +155,7 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
             // an import clause can have _both_ named bindings and a name (the latter for the default import)
             // but the named bindings always come last, so we only need to check that for whitespace
             const position = (importClause.namedBindings == null) ? importClause.name.getEnd()
-                                                                  : importClause.namedBindings.getEnd();
+                : importClause.namedBindings.getEnd();
             this.checkForTrailingWhitespace(position);
         }
         super.visitImportDeclaration(node);
@@ -224,8 +224,8 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
         const nextTokenType = this.scanner.scan();
 
         if (nextTokenType !== ts.SyntaxKind.WhitespaceTrivia
-                && nextTokenType !== ts.SyntaxKind.NewLineTrivia
-                && nextTokenType !== ts.SyntaxKind.EndOfFileToken) {
+            && nextTokenType !== ts.SyntaxKind.NewLineTrivia
+            && nextTokenType !== ts.SyntaxKind.EndOfFileToken) {
             this.addFailure(this.createFailure(position, 1, Rule.FAILURE_STRING));
         }
     }

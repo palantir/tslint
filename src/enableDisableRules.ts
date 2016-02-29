@@ -21,7 +21,7 @@ import {SkippableTokenAwareRuleWalker} from "./language/walker/skippableTokenAwa
 import {IEnableDisablePosition} from "./ruleLoader";
 
 export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
-    public enableDisableRuleMap: {[rulename: string]: IEnableDisablePosition[]} = {};
+    public enableDisableRuleMap: { [rulename: string]: IEnableDisablePosition[] } = {};
 
     public visitSourceFile(node: ts.SourceFile) {
         super.visitSourceFile(node);

@@ -56,6 +56,6 @@ class ComparisonWalker extends Lint.RuleWalker {
         const nullKeyword = ts.SyntaxKind.NullKeyword;
 
         return this.hasOption(OPTION_ALLOW_NULL_CHECK)
-            && (node.left.kind ===  nullKeyword || node.right.kind === nullKeyword);
+            && (node.left.kind === nullKeyword || node.right.kind === nullKeyword);
     }
 }

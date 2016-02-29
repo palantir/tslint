@@ -43,7 +43,7 @@ class ForInWalker extends Lint.RuleWalker {
 
         // if there is a block, verify that it has a single if statement or starts with if (..) continue;
         if (statementKind === ts.SyntaxKind.Block) {
-            const blockNode = <ts.Block> statement;
+            const blockNode = <ts.Block>statement;
             const blockStatements = blockNode.statements;
             if (blockStatements.length >= 1) {
                 const firstBlockStatement = blockStatements[0];
@@ -54,7 +54,7 @@ class ForInWalker extends Lint.RuleWalker {
                     }
 
                     // if this "if" statement has a single continue block
-                    const ifStatement = (<ts.IfStatement> firstBlockStatement).thenStatement;
+                    const ifStatement = (<ts.IfStatement>firstBlockStatement).thenStatement;
                     if (nodeIsContinue(ifStatement)) {
                         return;
                     }
@@ -75,7 +75,7 @@ function nodeIsContinue(node: ts.Node) {
     }
 
     if (kind === ts.SyntaxKind.Block) {
-        const blockStatements = (<ts.Block> node).statements;
+        const blockStatements = (<ts.Block>node).statements;
         if (blockStatements.length === 1 && blockStatements[0].kind === ts.SyntaxKind.ContinueStatement) {
             return true;
         }

@@ -77,7 +77,7 @@ export function parseLine(text: string): Line {
 export function printLine(line: Line, code?: string): string {
     if (line instanceof ErrorLine) {
         if (code == null) {
-           throw new Error("Must supply argument for code parameter when line is an ErrorLine");
+            throw new Error("Must supply argument for code parameter when line is an ErrorLine");
         }
 
         const leadingSpaces = replicateStr(" ", line.startCol);

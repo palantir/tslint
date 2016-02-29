@@ -31,7 +31,7 @@ export class NoConstructorVarsWalker extends Lint.RuleWalker {
         const parameters = node.parameters;
         for (let parameter of parameters) {
             if (parameter.modifiers != null && parameter.modifiers.length > 0) {
-                const name = <ts.Identifier> parameter.name;
+                const name = <ts.Identifier>parameter.name;
                 const errorMessage = "'" + name.text + "'" + Rule.FAILURE_STRING_PART;
                 const lastModifier = parameter.modifiers[parameter.modifiers.length - 1];
                 const position = lastModifier.getEnd() - parameter.getStart();

@@ -84,8 +84,8 @@ class IndentWalker extends Lint.RuleWalker {
             }
 
             if (currentScannedType === ts.SyntaxKind.SingleLineCommentTrivia
-                    || currentScannedType === ts.SyntaxKind.MultiLineCommentTrivia
-                    || currentScannedType === ts.SyntaxKind.NewLineTrivia) {
+                || currentScannedType === ts.SyntaxKind.MultiLineCommentTrivia
+                || currentScannedType === ts.SyntaxKind.NewLineTrivia) {
                 // ignore lines that have comments before the first token
                 continue;
             }

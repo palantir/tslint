@@ -35,7 +35,7 @@ export class NoSwitchCaseFallThroughWalker extends Lint.RuleWalker {
         switchClauses.forEach((child, i) => {
             const kind = child.kind;
             if (kind === ts.SyntaxKind.CaseClause) {
-                const switchClause = <ts.CaseClause> child;
+                const switchClause = <ts.CaseClause>child;
                 isFallingThrough = fallsThrough(switchClause.statements);
                 // no break statements and no statements means the fallthrough is expected.
                 // last item doesn't need a break

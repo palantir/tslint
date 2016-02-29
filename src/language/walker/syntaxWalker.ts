@@ -309,215 +309,215 @@ export class SyntaxWalker {
                 break;
 
             case ts.SyntaxKind.ArrayBindingPattern:
-                this.visitBindingPattern(<ts.BindingPattern> node);
+                this.visitBindingPattern(<ts.BindingPattern>node);
                 break;
 
             case ts.SyntaxKind.ArrayLiteralExpression:
-                this.visitArrayLiteralExpression(<ts.ArrayLiteralExpression> node);
+                this.visitArrayLiteralExpression(<ts.ArrayLiteralExpression>node);
                 break;
 
             case ts.SyntaxKind.ArrowFunction:
-                this.visitArrowFunction(<ts.FunctionLikeDeclaration> node);
+                this.visitArrowFunction(<ts.FunctionLikeDeclaration>node);
                 break;
 
             case ts.SyntaxKind.BinaryExpression:
-                this.visitBinaryExpression(<ts.BinaryExpression> node);
+                this.visitBinaryExpression(<ts.BinaryExpression>node);
                 break;
 
             case ts.SyntaxKind.BindingElement:
-                this.visitBindingElement(<ts.BindingElement> node);
+                this.visitBindingElement(<ts.BindingElement>node);
                 break;
 
             case ts.SyntaxKind.Block:
-                this.visitBlock(<ts.Block> node);
+                this.visitBlock(<ts.Block>node);
                 break;
 
             case ts.SyntaxKind.BreakStatement:
-                this.visitBreakStatement(<ts.BreakOrContinueStatement> node);
+                this.visitBreakStatement(<ts.BreakOrContinueStatement>node);
                 break;
 
             case ts.SyntaxKind.CallExpression:
-                this.visitCallExpression(<ts.CallExpression> node);
+                this.visitCallExpression(<ts.CallExpression>node);
                 break;
 
             case ts.SyntaxKind.CallSignature:
-                this.visitCallSignature(<ts.SignatureDeclaration> node);
+                this.visitCallSignature(<ts.SignatureDeclaration>node);
                 break;
 
             case ts.SyntaxKind.CaseClause:
-                this.visitCaseClause(<ts.CaseClause> node);
+                this.visitCaseClause(<ts.CaseClause>node);
                 break;
 
             case ts.SyntaxKind.ClassDeclaration:
-                this.visitClassDeclaration(<ts.ClassDeclaration> node);
+                this.visitClassDeclaration(<ts.ClassDeclaration>node);
                 break;
 
             case ts.SyntaxKind.CatchClause:
-                this.visitCatchClause(<ts.CatchClause> node);
+                this.visitCatchClause(<ts.CatchClause>node);
                 break;
 
             case ts.SyntaxKind.ConditionalExpression:
-                this.visitConditionalExpression(<ts.ConditionalExpression> node);
+                this.visitConditionalExpression(<ts.ConditionalExpression>node);
                 break;
 
             case ts.SyntaxKind.Constructor:
-                this.visitConstructorDeclaration(<ts.ConstructorDeclaration> node);
+                this.visitConstructorDeclaration(<ts.ConstructorDeclaration>node);
                 break;
 
             case ts.SyntaxKind.ConstructorType:
-                this.visitConstructorType(<ts.FunctionOrConstructorTypeNode> node);
+                this.visitConstructorType(<ts.FunctionOrConstructorTypeNode>node);
                 break;
 
             case ts.SyntaxKind.ContinueStatement:
-                this.visitContinueStatement(<ts.BreakOrContinueStatement> node);
+                this.visitContinueStatement(<ts.BreakOrContinueStatement>node);
                 break;
 
             case ts.SyntaxKind.DebuggerStatement:
-                this.visitDebuggerStatement(<ts.Statement> node);
+                this.visitDebuggerStatement(<ts.Statement>node);
                 break;
 
             case ts.SyntaxKind.DefaultClause:
-                this.visitDefaultClause(<ts.DefaultClause> node);
+                this.visitDefaultClause(<ts.DefaultClause>node);
                 break;
 
             case ts.SyntaxKind.DoStatement:
-                this.visitDoStatement(<ts.DoStatement> node);
+                this.visitDoStatement(<ts.DoStatement>node);
                 break;
 
             case ts.SyntaxKind.ElementAccessExpression:
-                this.visitElementAccessExpression(<ts.ElementAccessExpression> node);
+                this.visitElementAccessExpression(<ts.ElementAccessExpression>node);
                 break;
 
             case ts.SyntaxKind.EnumDeclaration:
-                this.visitEnumDeclaration(<ts.EnumDeclaration> node);
+                this.visitEnumDeclaration(<ts.EnumDeclaration>node);
                 break;
 
             case ts.SyntaxKind.ExportAssignment:
-                this.visitExportAssignment(<ts.ExportAssignment> node);
+                this.visitExportAssignment(<ts.ExportAssignment>node);
                 break;
 
             case ts.SyntaxKind.ExpressionStatement:
-                this.visitExpressionStatement(<ts.ExpressionStatement> node);
+                this.visitExpressionStatement(<ts.ExpressionStatement>node);
                 break;
 
             case ts.SyntaxKind.ForStatement:
-                this.visitForStatement(<ts.ForStatement> node);
+                this.visitForStatement(<ts.ForStatement>node);
                 break;
 
             case ts.SyntaxKind.ForInStatement:
-                this.visitForInStatement(<ts.ForInStatement> node);
+                this.visitForInStatement(<ts.ForInStatement>node);
                 break;
 
             case ts.SyntaxKind.ForOfStatement:
-                this.visitForOfStatement(<ts.ForOfStatement> node);
+                this.visitForOfStatement(<ts.ForOfStatement>node);
                 break;
 
             case ts.SyntaxKind.FunctionDeclaration:
-                this.visitFunctionDeclaration(<ts.FunctionDeclaration> node);
+                this.visitFunctionDeclaration(<ts.FunctionDeclaration>node);
                 break;
 
             case ts.SyntaxKind.FunctionExpression:
-                this.visitFunctionExpression(<ts.FunctionExpression> node);
+                this.visitFunctionExpression(<ts.FunctionExpression>node);
                 break;
 
             case ts.SyntaxKind.FunctionType:
-                this.visitFunctionType(<ts.FunctionOrConstructorTypeNode> node);
+                this.visitFunctionType(<ts.FunctionOrConstructorTypeNode>node);
                 break;
 
             case ts.SyntaxKind.GetAccessor:
-                this.visitGetAccessor(<ts.AccessorDeclaration> node);
+                this.visitGetAccessor(<ts.AccessorDeclaration>node);
                 break;
 
             case ts.SyntaxKind.Identifier:
-                this.visitIdentifier(<ts.Identifier> node);
+                this.visitIdentifier(<ts.Identifier>node);
                 break;
 
             case ts.SyntaxKind.IfStatement:
-                this.visitIfStatement(<ts.IfStatement> node);
+                this.visitIfStatement(<ts.IfStatement>node);
                 break;
 
             case ts.SyntaxKind.ImportDeclaration:
-                this.visitImportDeclaration(<ts.ImportDeclaration> node);
+                this.visitImportDeclaration(<ts.ImportDeclaration>node);
                 break;
 
             case ts.SyntaxKind.ImportEqualsDeclaration:
-                this.visitImportEqualsDeclaration(<ts.ImportEqualsDeclaration> node);
+                this.visitImportEqualsDeclaration(<ts.ImportEqualsDeclaration>node);
                 break;
 
             case ts.SyntaxKind.IndexSignature:
-                this.visitIndexSignatureDeclaration(<ts.IndexSignatureDeclaration> node);
+                this.visitIndexSignatureDeclaration(<ts.IndexSignatureDeclaration>node);
                 break;
 
             case ts.SyntaxKind.InterfaceDeclaration:
-                this.visitInterfaceDeclaration(<ts.InterfaceDeclaration> node);
+                this.visitInterfaceDeclaration(<ts.InterfaceDeclaration>node);
                 break;
 
             case ts.SyntaxKind.JsxElement:
-                this.visitJsxElement(<ts.JsxElement> node);
+                this.visitJsxElement(<ts.JsxElement>node);
                 break;
 
             case ts.SyntaxKind.JsxSelfClosingElement:
-                this.visitJsxSelfClosingElement(<ts.JsxSelfClosingElement> node);
+                this.visitJsxSelfClosingElement(<ts.JsxSelfClosingElement>node);
                 break;
 
             case ts.SyntaxKind.LabeledStatement:
-                this.visitLabeledStatement(<ts.LabeledStatement> node);
+                this.visitLabeledStatement(<ts.LabeledStatement>node);
                 break;
 
             case ts.SyntaxKind.MethodDeclaration:
-                this.visitMethodDeclaration(<ts.MethodDeclaration> node);
+                this.visitMethodDeclaration(<ts.MethodDeclaration>node);
                 break;
 
             case ts.SyntaxKind.MethodSignature:
-                this.visitMethodSignature(<ts.SignatureDeclaration> node);
+                this.visitMethodSignature(<ts.SignatureDeclaration>node);
                 break;
 
             case ts.SyntaxKind.ModuleDeclaration:
-                this.visitModuleDeclaration(<ts.ModuleDeclaration> node);
+                this.visitModuleDeclaration(<ts.ModuleDeclaration>node);
                 break;
 
             case ts.SyntaxKind.NamedImports:
-                this.visitNamedImports(<ts.NamedImports> node);
+                this.visitNamedImports(<ts.NamedImports>node);
                 break;
 
             case ts.SyntaxKind.NamespaceImport:
-                this.visitNamespaceImport(<ts.NamespaceImport> node);
+                this.visitNamespaceImport(<ts.NamespaceImport>node);
                 break;
 
             case ts.SyntaxKind.NewExpression:
-                this.visitNewExpression(<ts.NewExpression> node);
+                this.visitNewExpression(<ts.NewExpression>node);
                 break;
 
             case ts.SyntaxKind.ObjectBindingPattern:
-                this.visitBindingPattern(<ts.BindingPattern> node);
+                this.visitBindingPattern(<ts.BindingPattern>node);
                 break;
 
             case ts.SyntaxKind.ObjectLiteralExpression:
-                this.visitObjectLiteralExpression(<ts.ObjectLiteralExpression> node);
+                this.visitObjectLiteralExpression(<ts.ObjectLiteralExpression>node);
                 break;
 
             case ts.SyntaxKind.Parameter:
-                this.visitParameterDeclaration(<ts.ParameterDeclaration> node);
+                this.visitParameterDeclaration(<ts.ParameterDeclaration>node);
                 break;
 
             case ts.SyntaxKind.PostfixUnaryExpression:
-                this.visitPostfixUnaryExpression(<ts.PostfixUnaryExpression> node);
+                this.visitPostfixUnaryExpression(<ts.PostfixUnaryExpression>node);
                 break;
 
             case ts.SyntaxKind.PrefixUnaryExpression:
-                this.visitPrefixUnaryExpression(<ts.PrefixUnaryExpression> node);
+                this.visitPrefixUnaryExpression(<ts.PrefixUnaryExpression>node);
                 break;
 
             case ts.SyntaxKind.PropertyAccessExpression:
-                this.visitPropertyAccessExpression(<ts.PropertyAccessExpression> node);
+                this.visitPropertyAccessExpression(<ts.PropertyAccessExpression>node);
                 break;
 
             case ts.SyntaxKind.PropertyAssignment:
-                this.visitPropertyAssignment(<ts.PropertyAssignment> node);
+                this.visitPropertyAssignment(<ts.PropertyAssignment>node);
                 break;
 
             case ts.SyntaxKind.PropertyDeclaration:
-                this.visitPropertyDeclaration(<ts.PropertyDeclaration> node);
+                this.visitPropertyDeclaration(<ts.PropertyDeclaration>node);
                 break;
 
             case ts.SyntaxKind.PropertySignature:
@@ -529,63 +529,63 @@ export class SyntaxWalker {
                 break;
 
             case ts.SyntaxKind.ReturnStatement:
-                this.visitReturnStatement(<ts.ReturnStatement> node);
+                this.visitReturnStatement(<ts.ReturnStatement>node);
                 break;
 
             case ts.SyntaxKind.SetAccessor:
-                this.visitSetAccessor(<ts.AccessorDeclaration> node);
+                this.visitSetAccessor(<ts.AccessorDeclaration>node);
                 break;
 
             case ts.SyntaxKind.SourceFile:
-                this.visitSourceFile(<ts.SourceFile> node);
+                this.visitSourceFile(<ts.SourceFile>node);
                 break;
 
             case ts.SyntaxKind.StringLiteral:
-                this.visitStringLiteral(<ts.StringLiteral> node);
+                this.visitStringLiteral(<ts.StringLiteral>node);
                 break;
 
             case ts.SyntaxKind.SwitchStatement:
-                this.visitSwitchStatement(<ts.SwitchStatement> node);
+                this.visitSwitchStatement(<ts.SwitchStatement>node);
                 break;
 
             case ts.SyntaxKind.TemplateExpression:
-                this.visitTemplateExpression(<ts.TemplateExpression> node);
+                this.visitTemplateExpression(<ts.TemplateExpression>node);
                 break;
 
             case ts.SyntaxKind.ThrowStatement:
-                this.visitThrowStatement(<ts.ThrowStatement> node);
+                this.visitThrowStatement(<ts.ThrowStatement>node);
                 break;
 
             case ts.SyntaxKind.TryStatement:
-                this.visitTryStatement(<ts.TryStatement> node);
+                this.visitTryStatement(<ts.TryStatement>node);
                 break;
 
             case ts.SyntaxKind.TypeAssertionExpression:
-                this.visitTypeAssertionExpression(<ts.TypeAssertion> node);
+                this.visitTypeAssertionExpression(<ts.TypeAssertion>node);
                 break;
 
             case ts.SyntaxKind.TypeLiteral:
-                this.visitTypeLiteral(<ts.TypeLiteralNode> node);
+                this.visitTypeLiteral(<ts.TypeLiteralNode>node);
                 break;
 
             case ts.SyntaxKind.TypeReference:
-                this.visitTypeReference(<ts.TypeReferenceNode> node);
+                this.visitTypeReference(<ts.TypeReferenceNode>node);
                 break;
 
             case ts.SyntaxKind.VariableDeclaration:
-                this.visitVariableDeclaration(<ts.VariableDeclaration> node);
+                this.visitVariableDeclaration(<ts.VariableDeclaration>node);
                 break;
 
             case ts.SyntaxKind.VariableStatement:
-                this.visitVariableStatement(<ts.VariableStatement> node);
+                this.visitVariableStatement(<ts.VariableStatement>node);
                 break;
 
             case ts.SyntaxKind.WhileStatement:
-                this.visitWhileStatement(<ts.WhileStatement> node);
+                this.visitWhileStatement(<ts.WhileStatement>node);
                 break;
 
             case ts.SyntaxKind.WithStatement:
-                this.visitWithStatement(<ts.WithStatement> node);
+                this.visitWithStatement(<ts.WithStatement>node);
                 break;
 
             default:

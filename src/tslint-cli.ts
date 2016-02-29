@@ -21,11 +21,11 @@ import * as optimist from "optimist";
 import * as path from "path";
 import * as Linter from "./tslint";
 import {
-    CONFIG_FILENAME,
-    DEFAULT_CONFIG,
-    findConfigurationPath,
-    getRulesDirectories,
-    loadConfigurationFromPath,
+CONFIG_FILENAME,
+DEFAULT_CONFIG,
+findConfigurationPath,
+getRulesDirectories,
+loadConfigurationFromPath,
 } from "./configuration";
 import {consoleTestResultHandler, runTest} from "./test";
 

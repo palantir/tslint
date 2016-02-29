@@ -53,36 +53,36 @@ describe("JSON Formatter", () => {
             },
             ruleName: "first-name",
         },
-        {
-            name: TEST_FILE,
-            failure: "last failure",
-            startPosition: {
-                position: maxPosition - 1,
-                line: 5,
-                character: 2,
+            {
+                name: TEST_FILE,
+                failure: "last failure",
+                startPosition: {
+                    position: maxPosition - 1,
+                    line: 5,
+                    character: 2,
+                },
+                endPosition: {
+                    position: maxPosition,
+                    line: 6,
+                    character: 0,
+                },
+                ruleName: "last-name",
             },
-            endPosition: {
-                position: maxPosition,
-                line: 6,
-                character: 0,
-            },
-            ruleName: "last-name",
-        },
-        {
-            name: TEST_FILE,
-            failure: "full failure",
-            startPosition: {
-                position: 0,
-                line: 0,
-                character: 0,
-            },
-            endPosition: {
-                position: maxPosition,
-                line: 6,
-                character: 0,
-            },
-            ruleName: "full-name",
-        }, ];
+            {
+                name: TEST_FILE,
+                failure: "full failure",
+                startPosition: {
+                    position: 0,
+                    line: 0,
+                    character: 0,
+                },
+                endPosition: {
+                    position: maxPosition,
+                    line: 6,
+                    character: 0,
+                },
+                ruleName: "full-name",
+            }, ];
         /* tslint:enable:object-literal-sort-keys */
 
         const actualResult = JSON.parse(formatter.format(failures));

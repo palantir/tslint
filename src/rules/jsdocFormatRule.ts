@@ -90,7 +90,7 @@ class JsdocWalker extends Lint.SkippableTokenAwareRuleWalker {
             // followed by the end of the string
             const endBlockCommentMatch = lastLine.match(/^\s*\*\/$/);
             if (endBlockCommentMatch == null) {
-                this.addFailureAt(jsdocPosition, lastLine.length,  Rule.FORMAT_FAILURE_STRING);
+                this.addFailureAt(jsdocPosition, lastLine.length, Rule.FORMAT_FAILURE_STRING);
             }
             const lastAsteriskIndex = lastLine.indexOf("*");
             if (lastAsteriskIndex !== indexToMatch) {

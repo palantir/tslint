@@ -113,7 +113,7 @@ class SemicolonWalker extends Lint.RuleWalker {
             }
 
             if (tokenKind !== ts.SyntaxKind.OpenParenToken && tokenKind !== ts.SyntaxKind.OpenBracketToken
-                    && tokenKind !== ts.SyntaxKind.PlusToken && tokenKind !== ts.SyntaxKind.MinusToken) {
+                && tokenKind !== ts.SyntaxKind.PlusToken && tokenKind !== ts.SyntaxKind.MinusToken) {
                 this.addFailure(this.createFailure(Math.min(position - 1, this.getLimit()), 1, Rule.FAILURE_STRING_UNNECESSARY));
             }
         }

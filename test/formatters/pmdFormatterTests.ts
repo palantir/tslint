@@ -39,22 +39,22 @@ describe("PMD Formatter", () => {
         ];
         const expectedResult =
             "<pmd version=\"tslint\">" +
-                "<file name=\"formatters/pmdFormatter.test.ts\">" +
-                    "<violation begincolumn=\"1\" beginline=\"1\" priority=\"1\" rule=\"first failure\"> " +
-                    "</violation>" +
-                "</file>" +
-                "<file name=\"formatters/pmdFormatter.test.ts\">" +
-                    "<violation begincolumn=\"3\" beginline=\"1\" priority=\"1\" rule=\"&amp;&lt;&gt;&#39;&quot; should be escaped\"> " +
-                    "</violation>" +
-                "</file>" +
-                "<file name=\"formatters/pmdFormatter.test.ts\">" +
-                    "<violation begincolumn=\"3\" beginline=\"6\" priority=\"1\" rule=\"last failure\"> " +
-                    "</violation>" +
-                "</file>" +
-                "<file name=\"formatters/pmdFormatter.test.ts\">" +
-                    "<violation begincolumn=\"1\" beginline=\"1\" priority=\"1\" rule=\"full failure\"> " +
-                    "</violation>" +
-                "</file>" +
+            "<file name=\"formatters/pmdFormatter.test.ts\">" +
+            "<violation begincolumn=\"1\" beginline=\"1\" priority=\"1\" rule=\"first failure\"> " +
+            "</violation>" +
+            "</file>" +
+            "<file name=\"formatters/pmdFormatter.test.ts\">" +
+            "<violation begincolumn=\"3\" beginline=\"1\" priority=\"1\" rule=\"&amp;&lt;&gt;&#39;&quot; should be escaped\"> " +
+            "</violation>" +
+            "</file>" +
+            "<file name=\"formatters/pmdFormatter.test.ts\">" +
+            "<violation begincolumn=\"3\" beginline=\"6\" priority=\"1\" rule=\"last failure\"> " +
+            "</violation>" +
+            "</file>" +
+            "<file name=\"formatters/pmdFormatter.test.ts\">" +
+            "<violation begincolumn=\"1\" beginline=\"1\" priority=\"1\" rule=\"full failure\"> " +
+            "</violation>" +
+            "</file>" +
             "</pmd>";
 
         assert.equal(formatter.format(failures), expectedResult);

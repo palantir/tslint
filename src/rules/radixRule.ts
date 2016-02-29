@@ -32,8 +32,8 @@ class RadixWalker extends Lint.RuleWalker {
         const expression = node.expression;
 
         if (expression.kind === ts.SyntaxKind.Identifier
-                && node.getFirstToken().getText() === "parseInt"
-                && node.arguments.length < 2) {
+            && node.getFirstToken().getText() === "parseInt"
+            && node.arguments.length < 2) {
             this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
         }
 

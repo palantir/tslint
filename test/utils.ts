@@ -66,7 +66,7 @@ export function assertFailuresEqual(actualFailures: Lint.RuleFailure[], expected
         const startPosition = JSON.stringify(actualFailure.getStartPosition().toJson());
         const endPosition = JSON.stringify(actualFailure.getEndPosition().toJson());
         assert.isTrue(actualFailure.equals(expectedFailures[i]),
-                      `actual failure at ${startPosition}, ${endPosition} did not match expected failure`);
+            `actual failure at ${startPosition}, ${endPosition} did not match expected failure`);
     });
 }
 
