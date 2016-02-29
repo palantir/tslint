@@ -23,6 +23,7 @@ Finally, you can specify the path to your custom rules inside of your [`tslint.j
 
 - [ESLint rules for TSLint](https://github.com/buzinas/tslint-eslint-rules) - Improve your TSLint with the missing ESLint Rules
 - [tslint-microsoft-contrib](https://github.com/Microsoft/tslint-microsoft-contrib) - A set of TSLint rules used on some Microsoft projects
+- [ng2lint](https://github.com/mgechev/ng2lint) - A set of TSLint rules for static code analysis of Angular 2 TypeScript projects
 
 [0]: {{site.baseurl | append: "/develop/custom-rules/"}}
 [1]: {{site.baseurl | append: "/usage/cli/"}}
