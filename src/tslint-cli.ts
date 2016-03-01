@@ -66,6 +66,10 @@ let processed = optimist
             alias: "formatters-dir",
             describe: "formatters directory",
         },
+        "e": {
+            alias: "exclude",
+            describe: "exclude globs from path expansion",
+        },
         "t": {
             alias: "format",
             default: "prose",
@@ -221,5 +225,5 @@ const processFile = (file: string) => {
 const files = argv._;
 
 for (const file of files) {
-    glob.sync(file).forEach(processFile);
+    glob.sync(file, { ignore: argv.e }).forEach(processFile);
 }
