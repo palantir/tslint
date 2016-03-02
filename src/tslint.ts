@@ -18,7 +18,7 @@
 import {IFormatter} from "./language/formatter/formatter";
 import {RuleFailure} from "./language/rule/rule";
 import {getSourceFile} from "./language/utils";
-import {findConfiguration as config, getRelativePath} from "./configuration";
+import {findConfiguration, findConfigurationPath, getRelativePath, getRulesDirectories, loadConfigurationFromPath} from "./configuration";
 import {EnableDisableRulesWalker} from "./enableDisableRules";
 import {findFormatter} from "./formatterLoader";
 import {ILinterOptions, LintResult} from "./lint";
@@ -26,7 +26,10 @@ import {loadRules} from "./ruleLoader";
 
 class Linter {
     public static VERSION = "3.5.0";
-    public static findConfiguration = config;
+    public static findConfiguration = findConfiguration;
+    public static findConfigurationPath = findConfigurationPath;
+    public static getRulesDirectories = getRulesDirectories;
+    public static loadConfigurationFromPath = loadConfigurationFromPath;
 
     private fileName: string;
     private source: string;
