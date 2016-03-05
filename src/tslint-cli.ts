@@ -16,6 +16,7 @@
  */
 
 import * as fs from "fs";
+import * as path from "path";
 import * as glob from "glob";
 import * as optimist from "optimist";
 import * as path from "path";
@@ -218,8 +219,48 @@ const processFile = (file: string) => {
     }
 };
 
-const files = argv._;
+const GLOB_IGNORE: string[] = ["**/node_modules/**", "**/typings/**"];
 
-for (const file of files) {
-    glob.sync(file).forEach(processFile);
-}
+const fileArgs: string[] = argv._;
+const files: string[] = fileArgs.reduce((list: string[], arg: string) => {
+    return list.concat(glob.sync(arg, {ignore: GLOB_IGNORE}));
+}, []);
+
+files.forEach(arg => {
+    const stat = fs.lstatSync(arg);
+
+    // Check whether argument is actually a directory
+    if (stat.isDirectory()) {
+        let globIgnore = GLOB_IGNORE;
+
+        // Try finding a tsconfig file
+        const configFile = path.join(arg, "/tsconfig.json");
+        let configStat: fs.Stats;
+        try {
+            configStat = fs.lstatSync(configFile);
+        } catch (e) {
+            // File doesn't exist.
+        }
+
+        if (configStat && configStat.isFile()) {
+            let config: any;
+            try {
+                config = JSON.parse(fs.readFileSync(configFile, "utf8"));
+            } catch (e) {
+                // Invalid file contents?
+                console.warn("tsconfig.json file (" + configFile + ") appears not to be valid");
+                console.error(e);
+            }
+            if (config) {
+                if (config.exclude) {
+                    globIgnore = globIgnore.concat(config.exclude);
+                }
+            }
+        }
+
+        // Just read all ts files in the directory
+        glob.sync(path.join(arg, "/**/*.ts"), {ignore: globIgnore}).forEach(processFile);
+    } else {
+        processFile(arg);
+    }
+});
