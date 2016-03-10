@@ -19,6 +19,8 @@ import * as fs from "fs";
 import * as path from "path";
 import * as findup from "findup-sync";
 
+const PACKAGE_DEPRECATION_MSG = "Configuration of TSLint via package.json has been deprecated,\
+please start using the standard tslint.json (http://palantir.github.io/tslint/usage/tslint-json/)";
 export const CONFIG_FILENAME = "tslint.json";
 export const DEFAULT_CONFIG = {
     "rules": {
@@ -115,6 +117,7 @@ export function loadConfigurationFromPath(configFilePath: string) {
     if (configFilePath == null) {
         return DEFAULT_CONFIG;
     } else if (path.basename(configFilePath) === "package.json") {
+        console.warn(PACKAGE_DEPRECATION_MSG);
         return require(configFilePath).tslintConfig;
     } else {
         let fileData = fs.readFileSync(configFilePath, "utf8");
