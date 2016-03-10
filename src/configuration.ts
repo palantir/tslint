@@ -71,7 +71,7 @@ export function findConfiguration(configFile: string, inputFilePath: string): an
  * the location of the config file is not known and you want to search for one.
  * @param inputFilePath A path to the current file being linted. This is the starting location
  * of the search for a configuration.
- * @returns A path to a tslint.json file, a path to a package.json file with a tslintConfig field
+ * @returns A path to a tslint.json file
  * or undefined if neither can be found.
  */
 export function findConfigurationPath(suppliedConfigFilePath: string, inputFilePath: string) {
@@ -85,12 +85,6 @@ export function findConfigurationPath(suppliedConfigFilePath: string, inputFileP
         // search for tslint.json from input file location
         let configFilePath = findup(CONFIG_FILENAME, { cwd: inputFilePath, nocase: true });
         if (configFilePath != null && fs.existsSync(configFilePath)) {
-            return configFilePath;
-        }
-
-        // search for package.json with tslintConfig property
-        configFilePath = findup("package.json", { cwd: inputFilePath, nocase: true });
-        if (configFilePath != null && require(configFilePath).tslintConfig != null) {
             return configFilePath;
         }
 
@@ -114,8 +108,6 @@ export function findConfigurationPath(suppliedConfigFilePath: string, inputFileP
 export function loadConfigurationFromPath(configFilePath: string) {
     if (configFilePath == null) {
         return DEFAULT_CONFIG;
-    } else if (path.basename(configFilePath) === "package.json") {
-        return require(configFilePath).tslintConfig;
     } else {
         let fileData = fs.readFileSync(configFilePath, "utf8");
         // remove BOM if present
