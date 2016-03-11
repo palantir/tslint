@@ -152,3 +152,12 @@ function testParameterDestructuring(
             ~~~                 [shadowed variable: 'pos']
     }
 }
+
+
+{
+    const simpleBlockVar = 3
+}
+
+function testSimpleBlockVar() {
+    const simpleBlockVar = 4
+}
