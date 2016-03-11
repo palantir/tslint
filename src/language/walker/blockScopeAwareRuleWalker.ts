@@ -80,6 +80,10 @@ export abstract class BlockScopeAwareRuleWalker<T, U> extends ScopeAwareRuleWalk
             || (node.parent != null
                 && (node.parent.kind === ts.SyntaxKind.TryStatement
                     || node.parent.kind === ts.SyntaxKind.IfStatement)
+                )
+            || (node.kind === ts.SyntaxKind.Block && node.parent != null
+                && (node.parent.kind === ts.SyntaxKind.Block
+                    || node.parent.kind === ts.SyntaxKind.SourceFile)
                 );
     }
 }

@@ -16,6 +16,18 @@ Supports:
 - inline disabling / enabling of rules
 - integration with [grunt](https://github.com/palantir/grunt-tslint), [gulp](https://github.com/panuhorsmalahti/gulp-tslint), [atom](https://github.com/AtomLinter/linter-tslint), [sublime](https://packagecontrol.io/packages/SublimeLinter-contrib-tslint), [vim](https://github.com/scrooloose/syntastic), [eclipse](https://github.com/palantir/eclipse-tslint), [webstorm](https://www.jetbrains.com/webstorm/help/tslint.html), and more
 
+Table of Contents
+------------
+
+- [Installation](#installation)
+- [Usage](#usage)
+- [Core Rules](#core-rules)
+- [Rule Flags](#rule-flags)
+- [Custom Rules](#custom-rules)
+- [Development](#development)
+- [Creating a new release](#creating-a-new-release)
+
+
 Installation
 ------------
 
@@ -81,6 +93,14 @@ tslint accepts the following command-line options:
     of characters for the max-line-length rule, or what functions to ban
     for the ban rule).
 
+-e, --exclude:
+    A filename or glob which indicates files to exclude from linting.
+    This option can be supplied multiple times if you need multiple
+    globs to indicate which files to exclude.
+
+-i, --init:
+    Generates a tslint.json config file in the current working directory.
+
 -o, --out:
     A filename to output the results to. By default, tslint outputs to
     stdout, which is usually the console where you're running it from.
@@ -103,12 +123,20 @@ tslint accepts the following command-line options:
 -t, --format:
     The formatter to use to format the results of the linter before
     outputting it to stdout or the file passed in --out. The core
-    formatters are prose (human readable) and json (machine readable),
-    and prose is the default if this option is not used. Additional
-    formatters can be added and used if the --formatters-dir option
-    is set.
+    formatters are prose (human readable), json (machine readable)
+    and verbose. prose is the default if this option is not used. Additonal
+    formatters can be added and used if the --formatters-dir option is set.
 
---help:
+--test:
+    Runs tslint on the specified directory and checks if tslint's output matches
+    the expected output in .lint files. Automatically loads the tslint.json file in the
+    specified directory as the configuration file for the tests. See the
+    full tslint documentation for more details on how this can be used to test custom rules.
+
+-v, --version:
+    The current version of tslint.
+
+-h, --help:
     Prints this help message.
 ```
 
@@ -139,8 +167,10 @@ var ll = new Linter(fileName, contents, options);
 var result = ll.lint();
 ```
 
-Supported Rules
+Core Rules
 -----
+
+Core rules are included in the `tslint` package.
 
 A sample configuration file with all options is available [here](https://github.com/palantir/tslint/blob/master/docs/sample.tslint.json).
 
@@ -267,9 +297,9 @@ A sample configuration file with all options is available [here](https://github.
   * `"check-type"` checks for whitespace before a variable type specification.
   * `"check-typecast"` checks for whitespace between a typecast and its target.
 
-TSLint Rule Flags
+Rule Flags
 -----
-You can enable/disable TSLint or a subset of rules within a file with the following comment rule flags:
+You may enable/disable TSLint or a subset of rules within certain lines of a file with the following comment rule flags:
 
 * `/* tslint:disable */` - Disable all rules for the rest of the file
 * `/* tslint:enable */` - Enable all rules for the rest of the file
@@ -280,16 +310,19 @@ Rules flags enable or disable rules as they are parsed. A rule is enabled or dis
 
 For example, imagine the directive `/* tslint:disable */` on the first line of a file, `/* tslint:enable:ban class-name */` on the 10th line and `/* tslint:enable */` on the 20th. No rules will be checked between the 1st and 10th lines, only the `ban` and `class-name` rules will be checked between the 10th and 20th, and all rules will be checked for the remainder of the file.
 
-Custom Rules (from the TypeScript community)
----------------
+Custom Rules
+------------
+
+#### Custom rule sets from the community
 
 If we don't have all the rules you're looking for, you can either write your own custom rules or use custom rules that others have developed. The repos below are a good source of custom rules:
 
 - [ESLint rules for TSLint](https://github.com/buzinas/tslint-eslint-rules) - Improve your TSLint with the missing ESLint Rules
 - [tslint-microsoft-contrib](https://github.com/Microsoft/tslint-microsoft-contrib) - A set of TSLint rules used on some Microsoft projects
+- [ng2lint](https://github.com/mgechev/ng2lint) - A set of TSLint rules for static code analysis of Angular 2 TypeScript projects
 
-Writing Custom Rules
-------------
+#### Writing custom rules
+
 TSLint ships with a set of core rules that can be configured. However, users are also allowed to write their own rules, which allows them to enforce specific behavior not covered by the core of TSLint. TSLint's internal rules are itself written to be pluggable, so adding a new rule is as simple as creating a new rule file named by convention. New rules can be written in either TypeScript or Javascript; if written in TypeScript, the code must be compiled to Javascript before invoking TSLint.
 
 Rule names are always camel-cased and *must* contain the suffix `Rule`. Let us take the example of how to write a new rule to forbid all import statements (you know, *for science*). Let us name the rule file `noImportsRule.ts`. Rules can be referenced in `tslint.json` in their kebab-case forms, so `"no-imports": true` would turn on the rule.
@@ -337,7 +370,7 @@ Final notes:
 - Core rules cannot be overwritten with a custom implementation.
 - Custom rules can also take in options just like core rules (retrieved via `this.getOptions()`).
 
-Writing Custom Formatters
+Custom Formatters
 -----------------
 Just like rules, additional formatters can also be supplied to TSLint via `--formatters-dir` on the CLI or `formattersDirectory` option on the library or `grunt-tslint`. Writing a new formatter is simpler than writing a new rule, as shown in the JSON formatter's code.
 
@@ -353,12 +386,12 @@ export class Formatter extends Lint.Formatters.AbstractFormatter {
 }
 ```
 
-Such custom formatters can also be written in Javascript. Additionally, formatter files are always named with the suffix `Formatter`, and referenced from TSLint without its suffix.
+Such custom formatters can also be written in JavaScript. Formatter files are always named with the suffix `Formatter` and referenced from TSLint without their suffix.
 
 Development
 -----------
 
-To develop TSLint simply clone the repository, install dependencies and run grunt:
+#### Quick Start
 
 ```bash
 git clone git@github.com:palantir/tslint.git
@@ -368,17 +401,17 @@ grunt
 
 #### `next` branch
 
-The [`next` branch of the TSLint repo](https://github.com/palantir/tslint/tree/next) tracks the latest TypeScript
-compiler as a `devDependency`. This allows you to develop the linter and its rules against the latest features of the
-language. Releases from this branch are published to npm with the `next` dist-tag, so you can get the latest dev
+The [`next` branch of this repo](https://github.com/palantir/tslint/tree/next) tracks the latest TypeScript compiler
+nightly release as a `devDependency`. This allows you to develop the linter and its rules against the latest features of the
+language. Releases from this branch are published to npm with the `next` dist-tag, so you may install the latest dev
 version of TSLint via `npm install tslint@next`.
 
-Creating a new Release
+Creating a new release
 ----------------------
 
 1. Bump the version number in `package.json` and `src/tslint.ts`
-2. Add a section for the new release in `CHANGELOG.md`
+2. Add release notes in `CHANGELOG.md`
 3. Run `grunt` to build the latest sources
-4. Commit with message "Prepare release <version>"
+4. Commit with message `Prepare release <version>`
 5. Run `npm publish`
-6. Create a git tag for the new release and push it
+6. Create a git tag for the new release and push it ([see existing tags here](https://github.com/palantir/tslint/tags))

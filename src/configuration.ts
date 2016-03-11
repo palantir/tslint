@@ -52,11 +52,31 @@ export const DEFAULT_CONFIG = {
     },
 };
 
-export function findConfiguration(configFile: string, inputFileLocation: string): any {
-    const configPath = findConfigurationPath(configFile, inputFileLocation);
+const PACKAGE_DEPRECATION_MSG = "Configuration of TSLint via package.json has been deprecated, "
+   + "please start using a tslint.json file instead (http://palantir.github.io/tslint/usage/tslint-json/).";
+
+/**
+ * Searches for a TSLint configuration and returns the data from the config.
+ * @param configFile A path to a config file, this can be null if the location of a config is not known
+ * @param inputFileLocation A path to the current file being linted. This is the starting location
+ * of the search for a configuration.
+ * @returns A TSLint configuration object
+ */
+export function findConfiguration(configFile: string, inputFilePath: string): any {
+    const configPath = findConfigurationPath(configFile, inputFilePath);
     return loadConfigurationFromPath(configPath);
 }
 
+/**
+ * Searches for a TSLint configuration and returns the path to it.
+ * Could return undefined if not configuration is found.
+ * @param suppliedConfigFilePath A path to an known config file supplied by a user. Pass null here if
+ * the location of the config file is not known and you want to search for one.
+ * @param inputFilePath A path to the current file being linted. This is the starting location
+ * of the search for a configuration.
+ * @returns A path to a tslint.json file, a path to a package.json file with a tslintConfig field
+ * or undefined if neither can be found.
+ */
 export function findConfigurationPath(suppliedConfigFilePath: string, inputFilePath: string) {
     if (suppliedConfigFilePath != null) {
         if (!fs.existsSync(suppliedConfigFilePath)) {
@@ -65,15 +85,15 @@ export function findConfigurationPath(suppliedConfigFilePath: string, inputFileP
             return suppliedConfigFilePath;
         }
     } else {
-        // search for package.json with tslintConfig property
-        let configFilePath = findup("package.json", { cwd: inputFilePath, nocase: true });
-        if (configFilePath != null && require(configFilePath).tslintConfig != null) {
+        // search for tslint.json from input file location
+        let configFilePath = findup(CONFIG_FILENAME, { cwd: inputFilePath, nocase: true });
+        if (configFilePath != null && fs.existsSync(configFilePath)) {
             return configFilePath;
         }
 
-        // search for tslint.json from input file location
-        configFilePath = findup(CONFIG_FILENAME, { cwd: inputFilePath, nocase: true });
-        if (configFilePath != null && fs.existsSync(configFilePath)) {
+        // search for package.json with tslintConfig property
+        configFilePath = findup("package.json", { cwd: inputFilePath, nocase: true });
+        if (configFilePath != null && require(configFilePath).tslintConfig != null) {
             return configFilePath;
         }
 
@@ -91,10 +111,14 @@ export function findConfigurationPath(suppliedConfigFilePath: string, inputFileP
     }
 }
 
+/**
+ * @returns a configuration object for TSLint loaded form the file at configFilePath
+ */
 export function loadConfigurationFromPath(configFilePath: string) {
     if (configFilePath == null) {
         return DEFAULT_CONFIG;
     } else if (path.basename(configFilePath) === "package.json") {
+        console.warn(PACKAGE_DEPRECATION_MSG);
         return require(configFilePath).tslintConfig;
     } else {
         let fileData = fs.readFileSync(configFilePath, "utf8");
@@ -128,6 +152,10 @@ export function getRelativePath(directory: string, relativeTo?: string): string 
 }
 
 /**
+ * @param directories A path(s) to a directory of custom rules
+ * @param relativeTo A path that directories provided are relative to.
+ * For example, if the directories come from a tslint.json file, this path
+ * should be the path to the tslint.json file.
  * @return An array of absolute paths to directories potentially containing rules
  */
 export function getRulesDirectories(directories: string | string[], relativeTo?: string): string[] {

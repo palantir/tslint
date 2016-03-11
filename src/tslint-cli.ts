@@ -66,6 +66,10 @@ let processed = optimist
             alias: "formatters-dir",
             describe: "formatters directory",
         },
+        "e": {
+            alias: "exclude",
+            describe: "exclude globs from path expansion",
+        },
         "t": {
             alias: "format",
             default: "prose",
@@ -133,6 +137,11 @@ tslint accepts the following commandline options:
         of characters for the max-line-length rule, or what functions to ban
         for the ban rule).
 
+    -e, --exclude:
+        A filename or glob which indicates files to exclude from linting.
+        This option can be supplied multiple times if you need multiple
+        globs to indicate which files to exclude.
+
     -i, --init:
         Generates a tslint.json config file in the current working directory.
 
@@ -141,9 +150,9 @@ tslint accepts the following commandline options:
         stdout, which is usually the console where you're running it from.
 
     -r, --rules-dir:
-        An additional rules directory, for additional user-created rules.
+        An additional rules directory, for user-created rules.
         tslint will always check its default rules directory, in
-        node_modules/tslint/build/rules, before checking the user-provided
+        node_modules/tslint/lib/rules, before checking the user-provided
         rules directory, so rules in the user-provided rules directory
         with the same name as the base rules will not be loaded.
 
@@ -221,5 +230,5 @@ const processFile = (file: string) => {
 const files = argv._;
 
 for (const file of files) {
-    glob.sync(file).forEach(processFile);
+    glob.sync(file, { ignore: argv.e }).forEach(processFile);
 }
