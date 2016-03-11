@@ -93,6 +93,14 @@ tslint accepts the following command-line options:
     of characters for the max-line-length rule, or what functions to ban
     for the ban rule).
 
+-e, --exclude:
+    A filename or glob which indicates files to exclude from linting.
+    This option can be supplied multiple times if you need multiple
+    globs to indicate which files to exclude.
+
+-i, --init:
+    Generates a tslint.json config file in the current working directory.
+
 -o, --out:
     A filename to output the results to. By default, tslint outputs to
     stdout, which is usually the console where you're running it from.
@@ -115,12 +123,20 @@ tslint accepts the following command-line options:
 -t, --format:
     The formatter to use to format the results of the linter before
     outputting it to stdout or the file passed in --out. The core
-    formatters are prose (human readable) and json (machine readable),
-    and prose is the default if this option is not used. Additional
-    formatters can be added and used if the --formatters-dir option
-    is set.
+    formatters are prose (human readable), json (machine readable)
+    and verbose. prose is the default if this option is not used. Additonal
+    formatters can be added and used if the --formatters-dir option is set.
 
---help:
+--test:
+    Runs tslint on the specified directory and checks if tslint's output matches
+    the expected output in .lint files. Automatically loads the tslint.json file in the
+    specified directory as the configuration file for the tests. See the
+    full tslint documentation for more details on how this can be used to test custom rules.
+
+-v, --version:
+    The current version of tslint.
+
+-h, --help:
     Prints this help message.
 ```
 

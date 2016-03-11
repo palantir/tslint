@@ -19,8 +19,6 @@ import * as fs from "fs";
 import * as path from "path";
 import * as findup from "findup-sync";
 
-const PACKAGE_DEPRECATION_MSG = "Configuration of TSLint via package.json has been deprecated,\
-please start using the standard tslint.json (http://palantir.github.io/tslint/usage/tslint-json/)";
 export const CONFIG_FILENAME = "tslint.json";
 export const DEFAULT_CONFIG = {
     "rules": {
@@ -53,6 +51,9 @@ export const DEFAULT_CONFIG = {
         ],
     },
 };
+
+const PACKAGE_DEPRECATION_MSG = "Configuration of TSLint via package.json has been deprecated, "
+   + "please start using a tslint.json file instead (http://palantir.github.io/tslint/usage/tslint-json/).";
 
 /**
  * Searches for a TSLint configuration and returns the data from the config.
