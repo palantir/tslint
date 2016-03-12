@@ -1,6 +1,22 @@
 Change Log
 ===
 
+v3.6.0
+---
+* Stable release containing changes from the last dev release
+
+v3.6.0-dev.1
+---
+* [enhancement] Add `--exclude` CLI option (#915)
+* [bugfix] Fix `no-shadowed-variable` rule handling of standalone blocks (#1021)
+* [deprecation] Configuration through `package.json` files (#1020)
+* [API] Export additional configuration methods from top-level "tslint" module (#1009)
+
+Thanks to our contributors!
+* @blakeembrey
+* @hamhut1066
+* @meowtec
+
 v3.5.0
 ---
 * Stable release containing changes from the last dev release
