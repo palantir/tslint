@@ -1,37 +1,20 @@
 ---
-ruleName: member-ordering
+ruleName: "member-ordering"
 description: Enforces member ordering.
-rationale: 'A consistent ordering for class members can make classes easier to read, navigate, and edit.'
-optionsDescription: |-
-
-  Three arguments may be optionally provided:
-
-  * `public-before-private ` All public members must be declared before private members.
-  * `static-before-instance ` All static members must be declared before instance members.
-  * `variables-before-functions` All variables needs to be declared before functions.
-options:
+rationale: "A consistent ordering for class members can make classes easier to read, navigate, and edit."
+optionsDescription: "\nThree arguments may be optionally provided:\n\n* `public-before-private ` All public members must be declared before private members.\n* `static-before-instance ` All static members must be declared before instance members.\n* `variables-before-functions` All variables needs to be declared before functions."
+options: 
   type: list
-  listType:
+  listType: 
     type: enum
-    enumValues:
-      - public-before-private
-      - static-before-instance
-      - variables-before-functions
-optionExamples:
-  - '[true, "public-before-private", "static-before-instance"]'
+    enumValues: 
+      - "public-before-private"
+      - "static-before-instance"
+      - "variables-before-functions"
+optionExamples: 
+  - "[true, \"public-before-private\", \"static-before-instance\"]"
 type: typescript
-optionsJSON: |-
-  {
-    "type": "list",
-    "listType": {
-      "type": "enum",
-      "enumValues": [
-        "public-before-private",
-        "static-before-instance",
-        "variables-before-functions"
-      ]
-    }
-  }
+optionsJSON: "{\n  \"type\": \"list\",\n  \"listType\": {\n    \"type\": \"enum\",\n    \"enumValues\": [\n      \"public-before-private\",\n      \"static-before-instance\",\n      \"variables-before-functions\"\n    ]\n  }\n}"
 layout: rule
-title: 'Rule: member-ordering'
+title: "Rule: member-ordering"
 ---

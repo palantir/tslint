@@ -1,29 +1,17 @@
 ---
 ruleName: semicolon
 description: Enforces consistent semicolon usage at the end of every statement.
-optionsDescription: |-
-
-  One of the following arguments must be provided:
-
-  * `"always"` enforces semicolons at the end of every statement.
-  * `"never"` disallows semicolons at the end of every statement except for when they are necessary.
-options:
+optionsDescription: "\nOne of the following arguments must be provided:\n\n* `\"always\"` enforces semicolons at the end of every statement.\n* `\"never\"` disallows semicolons at the end of every statement except for when they are necessary."
+options: 
   type: enum
-  enumValues:
+  enumValues: 
     - always
     - never
-optionExamples:
-  - '[true, "always"]'
-  - '[true, "never"]'
+optionExamples: 
+  - "[true, \"always\"]"
+  - "[true, \"never\"]"
 type: style
-optionsJSON: |-
-  {
-    "type": "enum",
-    "enumValues": [
-      "always",
-      "never"
-    ]
-  }
+optionsJSON: "{\n  \"type\": \"enum\",\n  \"enumValues\": [\n    \"always\",\n    \"never\"\n  ]\n}"
 layout: rule
-title: 'Rule: semicolon'
+title: "Rule: semicolon"
 ---

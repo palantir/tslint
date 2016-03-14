@@ -449,7 +449,7 @@
   },
   {
     "ruleName": "no-switch-case-fall-through",
-    "description": "Disallows falling through case statements.",
+    "description": "\nDisallows falling through case statements.\n\nFor example, the following is not allowed:\n\n```ts\nswitch(foo) {\n    case 1:\n        someFunc(foo);\n    case 2:\n        someOtherFunc(foo);\n}\n```\n\nHowever, fall through is allowed when case statements are consecutive or\na magic `/* falls through */` comment is present. The following is valid:\n\n```ts\nswitch(foo) {\n    case 1:\n        someFunc(foo);\n        /* falls through */\n    case 2:\n    case 3:\n        someOtherFunc(foo);\n}\n```",
     "rationale": "Fall though in switch statements is often unintentional and a bug.",
     "optionsDescription": "Not configurable.",
     "options": {},

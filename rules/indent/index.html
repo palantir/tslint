@@ -1,32 +1,17 @@
 ---
 ruleName: indent
 description: Enforces indentation with tabs or spaces.
-rationale: |-
-
-  Using only one of tabs or spaces for indentation leads to more consistent editor behavior,
-  cleaner diffs in version control, and easier programatic manipulation.
-optionsDescription: |-
-
-  One of the following arguments must be provided:
-
-  * `"spaces"` enforces consistent spaces.
-  * `"tabs"` enforces consistent tabs.
-options:
+rationale: "\nUsing only one of tabs or spaces for indentation leads to more consistent editor behavior,\ncleaner diffs in version control, and easier programatic manipulation."
+optionsDescription: "\nOne of the following arguments must be provided:\n\n* `\"spaces\"` enforces consistent spaces.\n* `\"tabs\"` enforces consistent tabs."
+options: 
   type: enum
-  enumValues:
+  enumValues: 
     - tabs
     - spaces
-optionExamples:
-  - '[true, "spaces"]'
+optionExamples: 
+  - "[true, \"spaces\"]"
 type: maintainability
-optionsJSON: |-
-  {
-    "type": "enum",
-    "enumValues": [
-      "tabs",
-      "spaces"
-    ]
-  }
+optionsJSON: "{\n  \"type\": \"enum\",\n  \"enumValues\": [\n    \"tabs\",\n    \"spaces\"\n  ]\n}"
 layout: rule
-title: 'Rule: indent'
+title: "Rule: indent"
 ---

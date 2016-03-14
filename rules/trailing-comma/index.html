@@ -1,49 +1,24 @@
 ---
-ruleName: trailing-comma
-description: 'Requires or disallows trailing commas in array and object literals, destructuring assignments and named imports.'
-optionsDescription: |-
-
-  One argument which is an object with the keys `multiline` and `singleline`.
-  Both should be set to either `"always"` or `"never"`.
-
-  * `"multiline"` checks multi-line object literals.
-  * `"singleline"` checks single-line object literals.
-options:
+ruleName: "trailing-comma"
+description: "Requires or disallows trailing commas in array and object literals, destructuring assignments and named imports."
+optionsDescription: "\nOne argument which is an object with the keys `multiline` and `singleline`.\nBoth should be set to either `\"always\"` or `\"never\"`.\n\n* `\"multiline\"` checks multi-line object literals.\n* `\"singleline\"` checks single-line object literals."
+options: 
   type: object
-  properties:
-    multiline:
+  properties: 
+    multiline: 
       type: enum
-      enumValues:
+      enumValues: 
         - always
         - never
-    singleline:
+    singleline: 
       type: enum
-      enumValues:
+      enumValues: 
         - always
         - never
-optionExamples:
-  - '[true, {"multiline": "always", "singleline": "never"}]'
+optionExamples: 
+  - "[true, {\"multiline\": \"always\", \"singleline\": \"never\"}]"
 type: maintainability
-optionsJSON: |-
-  {
-    "type": "object",
-    "properties": {
-      "multiline": {
-        "type": "enum",
-        "enumValues": [
-          "always",
-          "never"
-        ]
-      },
-      "singleline": {
-        "type": "enum",
-        "enumValues": [
-          "always",
-          "never"
-        ]
-      }
-    }
-  }
+optionsJSON: "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"multiline\": {\n      \"type\": \"enum\",\n      \"enumValues\": [\n        \"always\",\n        \"never\"\n      ]\n    },\n    \"singleline\": {\n      \"type\": \"enum\",\n      \"enumValues\": [\n        \"always\",\n        \"never\"\n      ]\n    }\n  }\n}"
 layout: rule
-title: 'Rule: trailing-comma'
+title: "Rule: trailing-comma"
 ---

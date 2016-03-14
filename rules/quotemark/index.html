@@ -1,44 +1,22 @@
 ---
 ruleName: quotemark
 description: Requires single or double quotes for string literals.
-optionsDescription: |-
-
-  Five arguments may be optionally provided:
-
-  * `"single"` enforces single quotes.
-  * `"double"` enforces double quotes.
-  * `"jsx-single"` enforces single quotes for JSX attributes.
-  * `"jsx-double"` enforces double quotes for JSX attributes.
-  * `"avoid-escape"` allows you to use the "other" quotemark in cases where escaping would normally be required.
-  For example, `[true, "double", "avoid-escape"]` would not report a failure on the string literal `'Hello "World"'`.
-options:
+optionsDescription: "\nFive arguments may be optionally provided:\n\n* `\"single\"` enforces single quotes.\n* `\"double\"` enforces double quotes.\n* `\"jsx-single\"` enforces single quotes for JSX attributes.\n* `\"jsx-double\"` enforces double quotes for JSX attributes.\n* `\"avoid-escape\"` allows you to use the \"other\" quotemark in cases where escaping would normally be required.\nFor example, `[true, \"double\", \"avoid-escape\"]` would not report a failure on the string literal `'Hello \"World\"'`."
+options: 
   type: list
-  listType:
+  listType: 
     type: enum
-    enumValues:
+    enumValues: 
       - single
       - double
-      - jsx-single
-      - jsx-double
-      - avoid-escape
-optionExamples:
-  - '[true, "single", "avoid-escape"]'
-  - '[true, "single", "jsx-double"]'
+      - "jsx-single"
+      - "jsx-double"
+      - "avoid-escape"
+optionExamples: 
+  - "[true, \"single\", \"avoid-escape\"]"
+  - "[true, \"single\", \"jsx-double\"]"
 type: style
-optionsJSON: |-
-  {
-    "type": "list",
-    "listType": {
-      "type": "enum",
-      "enumValues": [
-        "single",
-        "double",
-        "jsx-single",
-        "jsx-double",
-        "avoid-escape"
-      ]
-    }
-  }
+optionsJSON: "{\n  \"type\": \"list\",\n  \"listType\": {\n    \"type\": \"enum\",\n    \"enumValues\": [\n      \"single\",\n      \"double\",\n      \"jsx-single\",\n      \"jsx-double\",\n      \"avoid-escape\"\n    ]\n  }\n}"
 layout: rule
-title: 'Rule: quotemark'
+title: "Rule: quotemark"
 ---

@@ -1,38 +1,20 @@
 ---
-ruleName: comment-format
-description: Enforces formatting rules for single-line comments.
-rationale: 'Helps maintain a consistent, readable style in your codebase.'
-optionsDescription: |-
-
-  Three arguments may be optionally provided:
-
-  * `"check-space"` requires that all single-line comments must begin with a space, as in `// comment`
-      * note that comments starting with `///` are also allowed, for things such as `///<reference>`
-  * `"check-lowercase"` requires that the first non-whitespace character of a comment must be lowercase, if applicable.
-  * `"check-uppercase"` requires that the first non-whitespace character of a comment must be uppercase, if applicable.
-options:
+ruleName: "comment-format"
+description: "Enforces formatting rules for single-line comments."
+rationale: "Helps maintain a consistent, readable style in your codebase."
+optionsDescription: "\nThree arguments may be optionally provided:\n\n* `\"check-space\"` requires that all single-line comments must begin with a space, as in `// comment`\n    * note that comments starting with `///` are also allowed, for things such as `///<reference>`\n* `\"check-lowercase\"` requires that the first non-whitespace character of a comment must be lowercase, if applicable.\n* `\"check-uppercase\"` requires that the first non-whitespace character of a comment must be uppercase, if applicable."
+options: 
   type: list
-  listType:
+  listType: 
     type: enum
-    enumValues:
-      - check-space
-      - check-lowercase
-      - check-uppercase
-optionExamples:
-  - '[true, "check-space", "check-lowercase"]'
+    enumValues: 
+      - "check-space"
+      - "check-lowercase"
+      - "check-uppercase"
+optionExamples: 
+  - "[true, \"check-space\", \"check-lowercase\"]"
 type: style
-optionsJSON: |-
-  {
-    "type": "list",
-    "listType": {
-      "type": "enum",
-      "enumValues": [
-        "check-space",
-        "check-lowercase",
-        "check-uppercase"
-      ]
-    }
-  }
+optionsJSON: "{\n  \"type\": \"list\",\n  \"listType\": {\n    \"type\": \"enum\",\n    \"enumValues\": [\n      \"check-space\",\n      \"check-lowercase\",\n      \"check-uppercase\"\n    ]\n  }\n}"
 layout: rule
-title: 'Rule: comment-format'
+title: "Rule: comment-format"
 ---
