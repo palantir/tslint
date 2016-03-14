@@ -39,6 +39,7 @@
         "test.ts",
         "tslint-cli.ts",
         "tslint.ts",
+        "utils.ts",
         "formatters/index.ts",
         "formatters/jsonFormatter.ts",
         "formatters/msbuildFormatter.ts",

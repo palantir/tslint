@@ -18,14 +18,11 @@
 import * as fs from "fs";
 import * as glob from "glob";
 import * as optimist from "optimist";
-import * as path from "path";
 import * as Linter from "./tslint";
 import {
     CONFIG_FILENAME,
     DEFAULT_CONFIG,
     findConfigurationPath,
-    getRulesDirectories,
-    loadConfigurationFromPath,
 } from "./configuration";
 import {consoleTestResultHandler, runTest} from "./test";
 
@@ -200,22 +197,12 @@ const processFile = (file: string) => {
 
     const contents = fs.readFileSync(file, "utf8");
     const configurationPath = findConfigurationPath(argv.c, file);
-    const configuration = loadConfigurationFromPath(configurationPath);
-
-    // if configurationPath is null, this will be set to ".", which is the current directory and is fine
-    const configurationDir = path.dirname(configurationPath);
-
-    const rulesDirectories = getRulesDirectories(configuration.rulesDirectory, configurationDir);
-
-    if (argv.r != null) {
-        rulesDirectories.push(argv.r);
-    }
 
     const linter = new Linter(file, contents, {
-        configuration: configuration,
+        configurationPath,
         formatter: argv.t,
         formattersDirectory: argv.s,
-        rulesDirectory: rulesDirectories,
+        rulesDirectory: argv.r,
     });
 
     const lintResult = linter.lint();

@@ -18,11 +18,13 @@
 import {IFormatter} from "./language/formatter/formatter";
 import {RuleFailure} from "./language/rule/rule";
 import {getSourceFile} from "./language/utils";
-import {findConfiguration, findConfigurationPath, getRelativePath, getRulesDirectories, loadConfigurationFromPath} from "./configuration";
+import {extendConfigFile, findConfiguration, findConfigurationPath, getRelativePath,
+        getRulesDirectories, loadConfigurationFromPath, } from "./configuration";
 import {EnableDisableRulesWalker} from "./enableDisableRules";
 import {findFormatter} from "./formatterLoader";
 import {ILinterOptions, LintResult} from "./lint";
 import {loadRules} from "./ruleLoader";
+import {arrayify} from "./utils";
 
 class Linter {
     public static VERSION = "3.6.0";
@@ -39,6 +41,7 @@ class Linter {
         this.fileName = fileName;
         this.source = source;
         this.options = options;
+        this.computeFullOptions();
     }
 
     public lint(): LintResult {
@@ -87,6 +90,21 @@ class Linter {
 
     private containsRule(rules: RuleFailure[], rule: RuleFailure) {
         return rules.some((r) => r.equals(rule));
+    }
+
+    private computeFullOptions() {
+        const {configuration, configurationPath, rulesDirectory} = this.options;
+
+        if (configuration == null && configurationPath == null) {
+            throw new Error("An ILinterOptions object must have either `configuration` or `configurationPath` specified");
+        }
+
+        const configFromPath = configurationPath != null ? loadConfigurationFromPath(configurationPath) : {};
+        const configProvided = configuration != null ? configuration : {};
+        const finalConfig = extendConfigFile(configProvided, configFromPath);
+
+        this.options.configuration = finalConfig;
+        this.options.rulesDirectory = arrayify(rulesDirectory).concat(arrayify(finalConfig.rulesDirectory));
     }
 }
 
