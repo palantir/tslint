@@ -195,6 +195,9 @@ A sample configuration file with all options is available [here](https://github.
     * `"tabs"` enforces consistent tabs.
     * `"spaces"` enforces consistent spaces.
 * `interface-name` enforces the rule that interface names must begin with a capital 'I'
+* `interface-name` enforces consistent internace name. Rule options:
+    * `"always-prefix"` enforces interface names must have an 'I' prefix
+    * `"never-prefix"` enforces interface name must not have an 'I' prefix
 * `jsdoc-format` enforces basic format rules for jsdoc comments -- comments starting with `/**`
     * each line contains an asterisk and asterisks must be aligned
     * each asterisk must be followed by either a space or a newline (except for the first and the last)
