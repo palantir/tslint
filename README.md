@@ -30,6 +30,7 @@ Table of Contents
 
 Installation
 ------------
+<sup>[back to ToC &uarr;](#table-of-contents)</sup>
 
 ##### CLI
 
@@ -56,6 +57,7 @@ Breaking changes in the latest dev release of `typescript@next` might break some
 
 Usage
 -----
+<sup>[back to ToC &uarr;](#table-of-contents)</sup>
 
 Please ensure that the TypeScript source files compile correctly _before_ running the linter.
 
@@ -169,6 +171,7 @@ var result = ll.lint();
 
 Core Rules
 -----
+<sup>[back to ToC &uarr;](#table-of-contents)</sup>
 
 Core rules are included in the `tslint` package.
 
@@ -299,6 +302,8 @@ A sample configuration file with all options is available [here](https://github.
 
 Rule Flags
 -----
+<sup>[back to ToC &uarr;](#table-of-contents)</sup>
+
 You may enable/disable TSLint or a subset of rules within certain lines of a file with the following comment rule flags:
 
 * `/* tslint:disable */` - Disable all rules for the rest of the file
@@ -312,6 +317,7 @@ For example, imagine the directive `/* tslint:disable */` on the first line of a
 
 Custom Rules
 ------------
+<sup>[back to ToC &uarr;](#table-of-contents)</sup>
 
 #### Custom rule sets from the community
 
@@ -372,6 +378,8 @@ Final notes:
 
 Custom Formatters
 -----------------
+<sup>[back to ToC &uarr;](#table-of-contents)</sup>
+
 Just like rules, additional formatters can also be supplied to TSLint via `--formatters-dir` on the CLI or `formattersDirectory` option on the library or `grunt-tslint`. Writing a new formatter is simpler than writing a new rule, as shown in the JSON formatter's code.
 
 ```typescript
@@ -390,6 +398,7 @@ Such custom formatters can also be written in JavaScript. Formatter files are al
 
 Development
 -----------
+<sup>[back to ToC &uarr;](#table-of-contents)</sup>
 
 #### Quick Start
 
@@ -408,6 +417,7 @@ version of TSLint via `npm install tslint@next`.
 
 Creating a new release
 ----------------------
+<sup>[back to ToC &uarr;](#table-of-contents)</sup>
 
 1. Bump the version number in `package.json` and `src/tslint.ts`
 2. Add release notes in `CHANGELOG.md`
