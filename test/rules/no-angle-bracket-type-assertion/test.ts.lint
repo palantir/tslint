@@ -1,0 +1,14 @@
+var a = <any>5;
+        ~~~~~~  [Type assertion using the '<>' syntax is forbidden. Use the 'as' syntax instead.]
+
+var b = <number><any>5;
+        ~~~~~~~~~~~~~~  [Type assertion using the '<>' syntax is forbidden. Use the 'as' syntax instead.]
+                ~~~~~~  [Type assertion using the '<>' syntax is forbidden. Use the 'as' syntax instead.]
+
+var c = <number>(5 as any);
+        ~~~~~~~~~~~~~~~~~~  [Type assertion using the '<>' syntax is forbidden. Use the 'as' syntax instead.]
+
+var d = <any>5 as number;
+        ~~~~~~            [Type assertion using the '<>' syntax is forbidden. Use the 'as' syntax instead.]
+
+var e = 5 as any as number;
