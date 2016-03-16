@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "no-angle-bracket-type-assertion": true
+  }
+}

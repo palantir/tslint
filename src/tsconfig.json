@@ -72,6 +72,7 @@
         "rules/maxLineLengthRule.ts",
         "rules/memberAccessRule.ts",
         "rules/memberOrderingRule.ts",
+        "rules/noAngleBracketTypeAssertionRule.ts",
         "rules/noAnyRule.ts",
         "rules/noArgRule.ts",
         "rules/noBitwiseRule.ts",
