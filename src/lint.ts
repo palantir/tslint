@@ -45,8 +45,7 @@ export interface LintResult {
 }
 
 export interface ILinterOptions {
-    configuration?: any;
-    configurationPath?: string;
+    configuration: any;
     formatter: string;
     formattersDirectory: string;
     rulesDirectory: string | string[];

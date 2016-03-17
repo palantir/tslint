@@ -22,7 +22,7 @@ import * as Linter from "./tslint";
 import {
     CONFIG_FILENAME,
     DEFAULT_CONFIG,
-    findConfigurationPath,
+    findConfiguration,
 } from "./configuration";
 import {consoleTestResultHandler, runTest} from "./test";
 
@@ -196,10 +196,10 @@ const processFile = (file: string) => {
     }
 
     const contents = fs.readFileSync(file, "utf8");
-    const configurationPath = findConfigurationPath(argv.c, file);
+    const configuration = findConfiguration(argv.c, file);
 
     const linter = new Linter(file, contents, {
-        configurationPath,
+        configuration,
         formatter: argv.t,
         formattersDirectory: argv.s,
         rulesDirectory: argv.r,

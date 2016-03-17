@@ -119,7 +119,7 @@
         "../src/tslint.ts",
         "../src/utils.ts",
         "assert.ts",
-        "configrationTests.ts",
+        "configurationTests.ts",
         "eofLineRuleTests.ts",
         "lint.ts",
         "ruleDisableEnableTests.ts",

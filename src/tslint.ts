@@ -18,7 +18,7 @@
 import {IFormatter} from "./language/formatter/formatter";
 import {RuleFailure} from "./language/rule/rule";
 import {getSourceFile} from "./language/utils";
-import {extendConfigFile, findConfiguration, findConfigurationPath, getRelativePath,
+import {DEFAULT_CONFIG, findConfiguration, findConfigurationPath, getRelativePath,
         getRulesDirectories, loadConfigurationFromPath, } from "./configuration";
 import {EnableDisableRulesWalker} from "./enableDisableRules";
 import {findFormatter} from "./formatterLoader";
@@ -93,18 +93,12 @@ class Linter {
     }
 
     private computeFullOptions() {
-        const {configuration, configurationPath, rulesDirectory} = this.options;
-
-        if (configuration == null && configurationPath == null) {
-            throw new Error("An ILinterOptions object must have either `configuration` or `configurationPath` specified");
+        let {configuration, rulesDirectory} = this.options;
+        if (configuration == null ) {
+            configuration = DEFAULT_CONFIG;
         }
-
-        const configFromPath = configurationPath != null ? loadConfigurationFromPath(configurationPath) : {};
-        const configProvided = configuration != null ? configuration : {};
-        const finalConfig = extendConfigFile(configProvided, configFromPath);
-
-        this.options.configuration = finalConfig;
-        this.options.rulesDirectory = arrayify(rulesDirectory).concat(arrayify(finalConfig.rulesDirectory));
+        this.options.rulesDirectory = arrayify(rulesDirectory).concat(arrayify(configuration.rulesDirectory));
+        this.options.configuration = configuration;
     }
 }
 
