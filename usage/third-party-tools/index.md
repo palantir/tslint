@@ -14,6 +14,8 @@ _Note: Most of these tools are not maintained by TSLint._
 * [linter-tslint][6] ([Atom][7])
 * [vscode-tslint][8] ([Visual Studio Code][9])
 * [syntastic][10] ([VIM][11])
+* [Web Analyzer][12] ([Visual Studio][13])
+* [Webstorm][14]
 
 
 [0]: https://github.com/palantir/grunt-tslint
@@ -28,3 +30,6 @@ _Note: Most of these tools are not maintained by TSLint._
 [9]: https://code.visualstudio.com/
 [10]: https://github.com/scrooloose/syntastic
 [11]: http://www.vim.org/
+[12]: https://visualstudiogallery.msdn.microsoft.com/6edc26d4-47d8-4987-82ee-7c820d79be1d
+[13]: https://www.visualstudio.com/
+[14]: https://www.jetbrains.com/help/webstorm/2016.1/tslint.html
