@@ -186,7 +186,13 @@ export function getRelativePath(directory: string, relativeTo?: string): string 
  * @return An array of absolute paths to directories potentially containing rules
  */
 export function getRulesDirectories(directories: string | string[], relativeTo?: string): string[] {
-    const rulesDirectories = arrayify(directories).map((dir) => getRelativePath(dir, relativeTo));
+    const rulesDirectories = arrayify(directories).map((dir) => {
+        if (isNodeModulePath(dir)) {
+            return resolveNodeModulePath(dir);
+        } else {
+            return getRelativePath(dir, relativeTo);
+        }
+    });
 
     for (const directory of rulesDirectories) {
         if (!fs.existsSync(directory)) {
@@ -195,4 +201,19 @@ export function getRulesDirectories(directories: string | string[], relativeTo?:
     }
 
     return rulesDirectories;
+}
+
+function isNodeModulePath(nodeModulePath: string) {
+    return nodeModulePath.indexOf("node_module:") === 0;
+}
+
+function resolveNodeModulePath(nodeModulePath: string) {
+    const packagePath = nodeModulePath.split(":")[1];
+    const [packageName, ...insidePackagePathParts] = packagePath.split("/");
+
+    // we don't want the path to the .js module, we just want the path to its directory
+    const pathToPackage = path.dirname(require.resolve(packageName));
+    const insidePackagePath = insidePackagePathParts.join("/");
+
+    return path.join(pathToPackage, insidePackagePath);
 }

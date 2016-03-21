@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {IConfigFile, extendConfigFile} from "../src/configuration";
+import {IConfigFile, extendConfigFile, getRulesDirectories} from "../src/configuration";
+import {loadRules} from "./lint";
 
 describe("Configuration", () => {
     it("extendConfigFile", () => {
@@ -50,5 +51,11 @@ describe("Configuration", () => {
             },
             rulesDirectory: ["foo", "bar", "baz"],
         });
+    });
+
+    it("resolves rules directories with a node_module: prefix correctly", () => {
+        const resolvedDirectories = getRulesDirectories("node_module:tslint-eslint-rules/dist/rules");
+        const rules = loadRules({"valid-typeof": true}, {}, resolvedDirectories);
+        assert.strictEqual(rules.length, 1);
     });
 });
