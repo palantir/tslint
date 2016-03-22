@@ -10,6 +10,12 @@
 (include if relevant)
 ```
 
+with `tslint.json`:
+
+```json
+(include if relevant)
+```
+
 #### Actual behavior
 
 (fill this out)
