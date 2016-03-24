@@ -1,0 +1,50 @@
+var x = true;
+
+/**
+ * Equality tests
+ */
+
+// Valid comparison
+if (x == null) {
+}
+
+// Valid comparison
+if (x == null || x == undefined) {
+}
+
+// Valid comparison
+if (x === true) {
+}
+
+// Invalid comparison
+if (x === null) {
+      ~~~~~~~~          [Did you mean == null instead?]
+}
+
+/**
+ * Inequality tests
+ */
+ 
+// Valid comparison
+if (x != null) {
+}
+
+// Valid comparison
+if (x != null || x == undefined) {
+}
+
+// Valid comparison
+if (x !== true) {
+}
+
+// Invalid comparison
+if (x !== null) {
+      ~~~~~~~~          [Did you mean != null instead?]
+}
+
+/**
+ * More complex tests
+ */
+ 
+ x === null ? true : false;
+   ~~~~~~~~             [Did you mean == null instead?]

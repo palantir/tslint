@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "no-triple-equals-null": [true, "allow-null-check"]
+  }
+}
