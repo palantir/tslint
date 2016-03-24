@@ -19,6 +19,7 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 const OPTION_ALLOW_NULL_CHECK = "allow-null-check";
+const OPTION_ALLOW_UNDEFINED_CHECK = "allow-undefined-check";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static EQ_FAILURE_STRING = "== should be ===";
