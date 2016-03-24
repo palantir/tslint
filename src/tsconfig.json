@@ -94,6 +94,7 @@
         "rules/noStringLiteralRule.ts",
         "rules/noSwitchCaseFallThroughRule.ts",
         "rules/noTrailingWhitespaceRule.ts",
+        "rules/noTripleEqualsNullRule.ts",
         "rules/noUnreachableRule.ts",
         "rules/noUnusedExpressionRule.ts",
         "rules/noUnusedVariableRule.ts",
