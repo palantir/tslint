@@ -18,7 +18,7 @@
 import * as ts from "typescript";
 import * as Lint from "../lint";
 
-const OPTION_ALLOW_NULL_CHECK = "no-triple-equals-null";
+const OPTION_NO_NULL_KEYWORD = "no-null-keyword";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static EQ_FAILURE_STRING = "Did you mean == null instead?";
@@ -32,7 +32,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class NoTripleEqualsNullWalker extends Lint.RuleWalker {
     public visitBinaryExpression(node: ts.BinaryExpression) {
-        if (!this.isExpressionAllowed(node)) {
+        if (this.isExpressionAllowed(node)) {
             const position = node.getChildAt(1).getStart();
             const expressionWidth = node.right.getFullWidth() + 3;
             this.handleBinaryComparison(position, expressionWidth, node.operatorToken.kind, node.right.kind);
@@ -61,7 +61,7 @@ class NoTripleEqualsNullWalker extends Lint.RuleWalker {
     private isExpressionAllowed(node: ts.BinaryExpression) {
         const nullKeyword = ts.SyntaxKind.NullKeyword;
 
-        return this.hasOption(OPTION_ALLOW_NULL_CHECK)
+        return !this.hasOption(OPTION_NO_NULL_KEYWORD)
             && (node.left.kind ===  nullKeyword || node.right.kind === nullKeyword);
     }
 }
