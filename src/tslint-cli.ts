@@ -71,6 +71,10 @@ let processed = optimist
             default: "prose",
             describe: "output format (prose, json, verbose)",
         },
+        "e": {
+            alias: "force",
+            describe: "force exit 0",
+        },
         "test": {
             describe: "test that tslint produces the correct output for the specified directory",
         },
@@ -162,6 +166,10 @@ tslint accepts the following commandline options:
         and verbose. prose is the default if this option is not used. Additonal
         formatters can be added and used if the --formatters-dir option is set.
 
+    -e, --force:
+        Force exit 0, even after finding linting errors.
+        Useful when running tslint from npm scripts.
+
     --test:
         Runs tslint on the specified directory and checks if tslint's output matches
         the expected output in .lint files. Automatically loads the tslint.json file in the
@@ -213,7 +221,7 @@ const processFile = (file: string) => {
 
     if (lintResult.failureCount > 0) {
         outputStream.write(lintResult.output, () => {
-            process.exit(2);
+            process.exit(argv.e ? 0 : 2);
         });
     }
 };

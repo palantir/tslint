@@ -71,6 +71,7 @@ Options:
 -r, --rules-dir           rules directory
 -s, --formatters-dir      formatters directory
 -t, --format              output format (prose, json)   [default: "prose"]
+-e, --force               force exit 0
 ```
 
 By default, configuration is loaded from `tslint.json`, if it exists in the current path, or the user's home directory, in that order.
@@ -119,6 +120,10 @@ tslint accepts the following command-line options:
     and prose is the default if this option is not used. Additional
     formatters can be added and used if the --formatters-dir option
     is set.
+
+-e, --force:
+    Force exit 0, even after finding linting errors.
+    Useful when running tslint from npm scripts.
 
 --help:
     Prints this help message.
