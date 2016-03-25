@@ -233,6 +233,7 @@ A sample configuration file with all options is available [here](https://github.
 * `no-string-literal` disallows object access via string literals.
 * `no-switch-case-fall-through` disallows falling through case statements.
 * `no-trailing-whitespace` disallows trailing whitespace at the end of a line.
+* `no-triple-equals-null` disallows strict comparisons between variables and `null`.
 * `no-unreachable` disallows unreachable code after `break`, `catch`, `throw`, and `return` statements.
 * `no-unused-expression` disallows unused expression statements, that is, expression statements that are not assignments or function invocations (and thus no-ops).
 * `no-unused-variable` disallows unused imports, variables, functions and private class members. Rule options:
