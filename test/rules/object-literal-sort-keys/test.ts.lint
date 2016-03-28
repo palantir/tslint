@@ -6,7 +6,7 @@ var passA = {
 var failA = {
     b: 1,
     a: 2
-    ~    [unsorted key 'a']
+    ~    [The key 'a' is not sorted alphabetically]
 };
 
 var passB = {
@@ -19,7 +19,7 @@ var passB = {
 var failB = {
     c: 3,
     a: 1,
-    ~     [unsorted key 'a']
+    ~     [The key 'a' is not sorted alphabetically]
     b: 2,
     d: 4
 };
@@ -37,7 +37,7 @@ var failC = {
     b: {
         bb: 2,
         aa: 1
-        ~~    [unsorted key 'aa']
+        ~~    [The key 'aa' is not sorted alphabetically]
     }
 };
 
@@ -57,7 +57,7 @@ var failD = {
         bb: 2
     },
     b: 3
-    ~    [unsorted key 'b']
+    ~    [The key 'b' is not sorted alphabetically]
 };
 
 var passE = {};
@@ -70,7 +70,7 @@ var passF = {
 var failF = {
     sdfa: {},
     asdf: [1, 2, 3]
-    ~~~~            [unsorted key 'asdf']
+    ~~~~            [The key 'asdf' is not sorted alphabetically]
 };
 
 var passG = {
@@ -81,5 +81,5 @@ var passG = {
 var failG = {
     sdafn: function () {},
     asdfn: function () {}
-    ~~~~~                 [unsorted key 'asdfn']
+    ~~~~~                 [The key 'asdfn' is not sorted alphabetically]
 };
