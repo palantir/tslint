@@ -21,6 +21,10 @@ import * as Lint from "../lint";
 const OPTION_ALLOW_NULL_CHECK = "allow-null-check";
 const OPTION_ALLOW_UNDEFINED_CHECK = "allow-undefined-check";
 
+function isUndefinedExpression(expression: ts.Expression) {
+    return expression.kind === ts.SyntaxKind.Identifier && expression.getText() === "undefined";
+}
+
 export class Rule extends Lint.Rules.AbstractRule {
     public static EQ_FAILURE_STRING = "== should be ===";
     public static NEQ_FAILURE_STRING = "!= should be !==";
@@ -56,7 +60,10 @@ class ComparisonWalker extends Lint.RuleWalker {
     private isExpressionAllowed(node: ts.BinaryExpression) {
         const nullKeyword = ts.SyntaxKind.NullKeyword;
 
-        return this.hasOption(OPTION_ALLOW_NULL_CHECK)
-            && (node.left.kind ===  nullKeyword || node.right.kind === nullKeyword);
+        return (
+            this.hasOption(OPTION_ALLOW_NULL_CHECK) && (node.left.kind === nullKeyword || node.right.kind === nullKeyword)
+        ) || (
+            this.hasOption(OPTION_ALLOW_UNDEFINED_CHECK) && (isUndefinedExpression(node.left) || isUndefinedExpression(node.right))
+        );
     }
 }
