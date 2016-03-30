@@ -18,8 +18,14 @@
 import {IFormatter} from "./language/formatter/formatter";
 import {RuleFailure} from "./language/rule/rule";
 import {getSourceFile} from "./language/utils";
-import {DEFAULT_CONFIG, findConfiguration, findConfigurationPath, getRelativePath,
-        getRulesDirectories, loadConfigurationFromPath, } from "./configuration";
+import {
+    DEFAULT_CONFIG,
+    findConfiguration,
+    findConfigurationPath,
+    getRelativePath,
+    getRulesDirectories,
+    loadConfigurationFromPath,
+} from "./configuration";
 import {EnableDisableRulesWalker} from "./enableDisableRules";
 import {findFormatter} from "./formatterLoader";
 import {ILinterOptions, LintResult} from "./lint";
@@ -94,7 +100,7 @@ class Linter {
 
     private computeFullOptions() {
         let {configuration, rulesDirectory} = this.options;
-        if (configuration == null ) {
+        if (configuration == null) {
             configuration = DEFAULT_CONFIG;
         }
         this.options.rulesDirectory = arrayify(rulesDirectory).concat(arrayify(configuration.rulesDirectory));

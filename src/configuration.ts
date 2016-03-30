@@ -21,7 +21,7 @@ import * as findup from "findup-sync";
 
 import {arrayify, objectify} from "./utils";
 
-export interface IConfigFile {
+export interface IConfigurationFile {
     rulesDirectory?: string | string[];
     rules?: any;
 }
@@ -69,7 +69,7 @@ const PACKAGE_DEPRECATION_MSG = "Configuration of TSLint via package.json has be
  * of the search for a configuration.
  * @returns A TSLint configuration object
  */
-export function findConfiguration(configFile: string, inputFilePath: string): IConfigFile {
+export function findConfiguration(configFile: string, inputFilePath: string): IConfigurationFile {
     const configPath = findConfigurationPath(configFile, inputFilePath);
     return loadConfigurationFromPath(configPath);
 }
@@ -121,7 +121,7 @@ export function findConfigurationPath(suppliedConfigFilePath: string, inputFileP
 /**
  * @returns a configuration object for TSLint loaded form the file at configFilePath
  */
-export function loadConfigurationFromPath(configFilePath: string): IConfigFile {
+export function loadConfigurationFromPath(configFilePath: string): IConfigurationFile {
     if (configFilePath == null) {
         return DEFAULT_CONFIG;
     } else if (path.basename(configFilePath) === "package.json") {
@@ -131,14 +131,14 @@ export function loadConfigurationFromPath(configFilePath: string): IConfigFile {
         let fileData = fs.readFileSync(configFilePath, "utf8");
         // remove BOM if present
         fileData = fileData.replace(/^\uFEFF/, "");
-        const configFile: IConfigFile = JSON.parse(fileData);
+        const configFile: IConfigurationFile = JSON.parse(fileData);
         configFile.rulesDirectory = getRulesDirectories(configFile.rulesDirectory, path.dirname(configFilePath));
         return configFile;
     }
 }
 
-export function extendConfigFile(config: IConfigFile, baseConfig: IConfigFile): IConfigFile {
-    let combinedConfig: IConfigFile = {};
+export function extendConfigurationFile(config: IConfigurationFile, baseConfig: IConfigurationFile): IConfigurationFile {
+    let combinedConfig: IConfigurationFile = {};
 
     const baseRulesDirectory = arrayify(baseConfig.rulesDirectory);
     const configRulesDirectory = arrayify(config.rulesDirectory);

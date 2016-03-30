@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-import {IConfigFile, extendConfigFile} from "../src/configuration";
+import {IConfigurationFile, extendConfigurationFile} from "../src/configuration";
 
 describe("Configuration", () => {
-    it("extendConfigFile", () => {
-        const EMPTY_CONFIG: IConfigFile = {
+    it("extendConfigurationFile", () => {
+        const EMPTY_CONFIG: IConfigurationFile = {
             rules: {},
             rulesDirectory: [],
         };
 
-        assert.deepEqual(extendConfigFile({}, {}), EMPTY_CONFIG);
-        assert.deepEqual(extendConfigFile({}, EMPTY_CONFIG), EMPTY_CONFIG);
-        assert.deepEqual(extendConfigFile(EMPTY_CONFIG, {}), EMPTY_CONFIG);
-        assert.deepEqual(extendConfigFile({}, {rules: {foo: "bar"}, rulesDirectory: "foo"}), {
+        assert.deepEqual(extendConfigurationFile({}, {}), EMPTY_CONFIG);
+        assert.deepEqual(extendConfigurationFile({}, EMPTY_CONFIG), EMPTY_CONFIG);
+        assert.deepEqual(extendConfigurationFile(EMPTY_CONFIG, {}), EMPTY_CONFIG);
+        assert.deepEqual(extendConfigurationFile({}, {rules: {foo: "bar"}, rulesDirectory: "foo"}), {
             rules: {foo: "bar"},
             rulesDirectory: ["foo"],
         });
-        assert.deepEqual(extendConfigFile({
+        assert.deepEqual(extendConfigurationFile({
             rules: {
                 "a": 1,
                 "b": 2,
