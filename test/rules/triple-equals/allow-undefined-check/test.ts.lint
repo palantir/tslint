@@ -1,0 +1,2 @@
+// allow double-equality undefined checks
+var x = (y == undefined) ? 1 : 2;

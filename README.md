@@ -270,6 +270,7 @@ A sample configuration file with all options is available [here](https://github.
     * `"singleline"` checks single-line object literals.
 * `triple-equals` enforces `===` and `!==` in favor of `==` and `!=`.
     * `"allow-null-check"` allows `==` and `!=` when comparing to `null`.
+    * `"allow-undefined-check"` allows `==` and `!=` when comparing to `undefined`.
 * `typedef` enforces type definitions to exist. Rule options:
     * `"call-signature"` checks return type of functions.
     * `"parameter"` checks type specifier of function parameters for non-arrow functions.
