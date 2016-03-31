@@ -11,5 +11,9 @@ function testFunction() {
     return;
 }
 
+// disallow double-equality undefined checks
+var x = (y == undefined) ? 1 : 2;
+           ~~ [== should be ===]
+
 // allow double-equality null checks
 var x = (y == null) ? 1 : 2;
