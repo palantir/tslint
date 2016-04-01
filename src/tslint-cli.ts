@@ -43,9 +43,9 @@ let processed = optimist
             alias: "config",
             describe: "configuration file",
         },
-        "n": {
-            alias: "force",
+        "force": {
             describe: "return status code 0 even if there are lint errors",
+            "type": "boolean",
         },
         "h": {
             alias: "help",
@@ -143,7 +143,7 @@ tslint accepts the following commandline options:
         This option can be supplied multiple times if you need multiple
         globs to indicate which files to exclude.
 
-    -n, --force:
+    --force:
         Return status code 0 even if there are any lint errors.
         Useful while running as npm script.
 
@@ -217,7 +217,7 @@ const processFile = (file: string) => {
 
     if (lintResult.failureCount > 0) {
         outputStream.write(lintResult.output, () => {
-            process.exit(argv.n ? 0 : 2);
+            process.exit(argv.force ? 0 : 2);
         });
     }
 };
