@@ -1,6 +1,10 @@
 Change Log
 ===
 
+v3.6.0
+---
+* Stable release containing changes from the last dev release
+
 v3.6.0-dev.1
 ---
 * [enhancement] Add `--exclude` CLI option (#915)

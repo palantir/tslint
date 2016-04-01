@@ -50,7 +50,7 @@
     ],
     "quotemark": [true, "double", "avoid-escape"],
     "radix": true,
-    "semicolon": true,
+    "semicolon": [true, "always"],
     "trailing-comma": [true, {
       "singleline": "never",
       "multiline": "always"

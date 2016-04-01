@@ -19,7 +19,8 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
-    public static FAILURE_STRING = "unsorted key '";
+    public static FAILURE_STRING_PREFIX = "The key '";
+    public static FAILURE_STRING_POSTFIX = "' is not sorted alphabetically";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new ObjectLiteralSortKeysWalker(sourceFile, this.getOptions()));
@@ -52,7 +53,7 @@ class ObjectLiteralSortKeysWalker extends Lint.RuleWalker {
             if (keyNode.kind === ts.SyntaxKind.Identifier) {
                 const key = (<ts.Identifier> keyNode).text;
                 if (key < lastSortedKey) {
-                    const failureString = Rule.FAILURE_STRING + key + "'";
+                    const failureString = Rule.FAILURE_STRING_PREFIX + key + Rule.FAILURE_STRING_POSTFIX;
                     this.addFailure(this.createFailure(keyNode.getStart(), keyNode.getWidth(), failureString));
                     this.sortedStateStack[this.sortedStateStack.length - 1] = false;
                 } else {

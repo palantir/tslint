@@ -14,7 +14,7 @@ Supports:
 - custom rules
 - custom formatters
 - inline disabling / enabling of rules
-- integration with [grunt](https://github.com/palantir/grunt-tslint), [gulp](https://github.com/panuhorsmalahti/gulp-tslint), [atom](https://github.com/AtomLinter/linter-tslint), [sublime](https://packagecontrol.io/packages/SublimeLinter-contrib-tslint), [vim](https://github.com/scrooloose/syntastic), [eclipse](https://github.com/palantir/eclipse-tslint), [webstorm](https://www.jetbrains.com/webstorm/help/tslint.html), and more
+- integration with [msbuild](https://github.com/joshuakgoldberg/tslint.msbuild), [grunt](https://github.com/palantir/grunt-tslint), [gulp](https://github.com/panuhorsmalahti/gulp-tslint), [atom](https://github.com/AtomLinter/linter-tslint), [eclipse](https://github.com/palantir/eclipse-tslint), [sublime](https://packagecontrol.io/packages/SublimeLinter-contrib-tslint), [vim](https://github.com/scrooloose/syntastic), [visual studio](https://visualstudiogallery.msdn.microsoft.com/6edc26d4-47d8-4987-82ee-7c820d79be1d), [webstorm](https://www.jetbrains.com/webstorm/help/tslint.html), and more
 
 Table of Contents
 ------------
@@ -30,6 +30,7 @@ Table of Contents
 
 Installation
 ------------
+<sup>[back to ToC &uarr;](#table-of-contents)</sup>
 
 ##### CLI
 
@@ -56,6 +57,7 @@ Breaking changes in the latest dev release of `typescript@next` might break some
 
 Usage
 -----
+<sup>[back to ToC &uarr;](#table-of-contents)</sup>
 
 Please ensure that the TypeScript source files compile correctly _before_ running the linter.
 
@@ -97,6 +99,10 @@ tslint accepts the following command-line options:
     A filename or glob which indicates files to exclude from linting.
     This option can be supplied multiple times if you need multiple
     globs to indicate which files to exclude.
+
+-n, --force:
+    Return status code 0 even if there are any lint errors.
+    Useful while running as npm script.
 
 -i, --init:
     Generates a tslint.json config file in the current working directory.
@@ -169,6 +175,7 @@ var result = ll.lint();
 
 Core Rules
 -----
+<sup>[back to ToC &uarr;](#table-of-contents)</sup>
 
 Core rules are included in the `tslint` package.
 
@@ -192,6 +199,9 @@ A sample configuration file with all options is available [here](https://github.
     * `"tabs"` enforces consistent tabs.
     * `"spaces"` enforces consistent spaces.
 * `interface-name` enforces the rule that interface names must begin with a capital 'I'
+* `interface-name` enforces consistent internace name. Rule options:
+    * `"always-prefix"` enforces interface names must have an 'I' prefix
+    * `"never-prefix"` enforces interface name must not have an 'I' prefix
 * `jsdoc-format` enforces basic format rules for jsdoc comments -- comments starting with `/**`
     * each line contains an asterisk and asterisks must be aligned
     * each asterisk must be followed by either a space or a newline (except for the first and the last)
@@ -208,6 +218,7 @@ A sample configuration file with all options is available [here](https://github.
     * `static-before-instance` All static members must be declared before instance members.
     * `variables-before-functions` All member variables need to be declared before member functions.
        Member variables initialized to a function literal are treated as member functions.
+* `no-angle-bracket-type-assertion` disallows usages of `<>` type assertions in favor of using the `as` keyword.
 * `no-any` diallows usages of `any` as a type decoration.
 * `no-arg` disallows access to `arguments.callee`.
 * `no-bitwise` disallows bitwise operators.
@@ -263,6 +274,7 @@ A sample configuration file with all options is available [here](https://github.
     * `"singleline"` checks single-line object literals.
 * `triple-equals` enforces `===` and `!==` in favor of `==` and `!=`.
     * `"allow-null-check"` allows `==` and `!=` when comparing to `null`.
+    * `"allow-undefined-check"` allows `==` and `!=` when comparing to `undefined`.
 * `typedef` enforces type definitions to exist. Rule options:
     * `"call-signature"` checks return type of functions.
     * `"parameter"` checks type specifier of function parameters for non-arrow functions.
@@ -299,6 +311,8 @@ A sample configuration file with all options is available [here](https://github.
 
 Rule Flags
 -----
+<sup>[back to ToC &uarr;](#table-of-contents)</sup>
+
 You may enable/disable TSLint or a subset of rules within certain lines of a file with the following comment rule flags:
 
 * `/* tslint:disable */` - Disable all rules for the rest of the file
@@ -312,6 +326,7 @@ For example, imagine the directive `/* tslint:disable */` on the first line of a
 
 Custom Rules
 ------------
+<sup>[back to ToC &uarr;](#table-of-contents)</sup>
 
 #### Custom rule sets from the community
 
@@ -372,6 +387,8 @@ Final notes:
 
 Custom Formatters
 -----------------
+<sup>[back to ToC &uarr;](#table-of-contents)</sup>
+
 Just like rules, additional formatters can also be supplied to TSLint via `--formatters-dir` on the CLI or `formattersDirectory` option on the library or `grunt-tslint`. Writing a new formatter is simpler than writing a new rule, as shown in the JSON formatter's code.
 
 ```typescript
@@ -390,6 +407,7 @@ Such custom formatters can also be written in JavaScript. Formatter files are al
 
 Development
 -----------
+<sup>[back to ToC &uarr;](#table-of-contents)</sup>
 
 #### Quick Start
 
@@ -408,6 +426,7 @@ version of TSLint via `npm install tslint@next`.
 
 Creating a new release
 ----------------------
+<sup>[back to ToC &uarr;](#table-of-contents)</sup>
 
 1. Bump the version number in `package.json` and `src/tslint.ts`
 2. Add release notes in `CHANGELOG.md`

@@ -12,6 +12,7 @@
         "rewriteTsconfig": false
     },
     "filesGlob": [
+        "../custom-typings/**/*.d.ts",
         "../typings/**/*.d.ts",
         "./*.ts",
         "./formatters/**/*.ts",
@@ -20,6 +21,7 @@
         "./test/**/*.ts"
     ],
     "files": [
+        "../custom-typings/path-is-absolute.d.ts",
         "../typings/colors/colors.d.ts",
         "../typings/diff/diff.d.ts",
         "../typings/findup-sync/findup-sync.d.ts",
@@ -39,6 +41,7 @@
         "test.ts",
         "tslint-cli.ts",
         "tslint.ts",
+        "utils.ts",
         "formatters/index.ts",
         "formatters/jsonFormatter.ts",
         "formatters/msbuildFormatter.ts",
@@ -72,6 +75,7 @@
         "rules/maxLineLengthRule.ts",
         "rules/memberAccessRule.ts",
         "rules/memberOrderingRule.ts",
+        "rules/noAngleBracketTypeAssertionRule.ts",
         "rules/noAnyRule.ts",
         "rules/noArgRule.ts",
         "rules/noBitwiseRule.ts",

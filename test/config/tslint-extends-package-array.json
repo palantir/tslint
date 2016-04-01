@@ -1,0 +1,9 @@
+{
+  "extends": [
+    "tslint-config-unional",
+    "./tslint-custom-rules-with-two-dirs.json"
+  ],
+  "rules": {
+    "always-fail": false
+  }
+}
