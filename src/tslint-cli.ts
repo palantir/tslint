@@ -43,6 +43,10 @@ let processed = optimist
             alias: "config",
             describe: "configuration file",
         },
+        "n": {
+            alias: "force",
+            describe: "return status code 0 even if there are lint errors",
+        },
         "h": {
             alias: "help",
             describe: "display detailed help",
@@ -139,6 +143,10 @@ tslint accepts the following commandline options:
         This option can be supplied multiple times if you need multiple
         globs to indicate which files to exclude.
 
+    -n, --force:
+        Return status code 0 even if there are any lint errors.
+        Useful while running as npm script.
+
     -i, --init:
         Generates a tslint.json config file in the current working directory.
 
@@ -209,7 +217,7 @@ const processFile = (file: string) => {
 
     if (lintResult.failureCount > 0) {
         outputStream.write(lintResult.output, () => {
-            process.exit(2);
+            process.exit(argv.n ? 0 : 2);
         });
     }
 };
