@@ -130,10 +130,17 @@
     "ruleName": "interface-name",
     "description": "Requires interface names to begin with a capital 'I'",
     "rationale": "Makes it easy to differentitate interfaces from regular classes at a glance.",
-    "optionsDescription": "Not configurable.",
-    "options": {},
+    "optionsDescription": "\nOne of the following two options must be provided:\n\n* `\"#{OPTION_ALWAYS}\"` requires interface names to start with an \"I\"\n* `\"#{OPTION_NEVER}\"` requires interface names to not have an \"I\" prefix",
+    "options": {
+      "type": "enum",
+      "enumValues": [
+        "always-prefix",
+        "never-prefix"
+      ]
+    },
     "optionExamples": [
-      "true"
+      "[true, \"#{OPTION_ALWAYS}\"]",
+      "[true, \"#{OPTION_NEVER}\"]"
     ],
     "type": "style"
   },
@@ -227,6 +234,17 @@
       "[true, \"public-before-private\", \"static-before-instance\"]"
     ],
     "type": "typescript"
+  },
+  {
+    "ruleName": "no-angle-bracket-type-assertion",
+    "description": "Requires the use of `as Type` for type assertions instead of `<Type>`.",
+    "rationale": "\nBoth formats of type assertions have the same effect, but only `as` type assertions\nwork in `.tsx` files. This rule ensures that you have a consistent type assertion style\nacross your codebase.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "style"
   },
   {
     "ruleName": "no-any",
@@ -683,19 +701,21 @@
   {
     "ruleName": "triple-equals",
     "description": "Requires `===` and `!==` in place of `==` and `!=`.",
-    "optionsDescription": "\nOne argument may be optionally provided:\n\n* `\"allow-null-check\"` allows `==` and `!=` when comparing to `null`.",
+    "optionsDescription": "\nTwo arguments may be optionally provided:\n\n* `\"allow-null-check\"` allows `==` and `!=` when comparing to `null`.\n* `\"allow-undefined-check\"` allows `==` and `!=` when comparing to `undefined`.",
     "options": {
       "type": "list",
       "listType": {
         "type": "enum",
         "enumValues": [
-          "allow-null-check"
+          "allow-null-check",
+          "allow-undefined-check"
         ]
       }
     },
     "optionExamples": [
       "true",
-      "[true, \"allow-null-check\"]"
+      "[true, \"allow-null-check\"]",
+      "[true, \"allow-undefined-check\"]"
     ],
     "type": "functionality"
   },
