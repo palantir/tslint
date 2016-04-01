@@ -1,0 +1,7 @@
+{
+  "extends": "tslint-config-typings",
+  "rulesDirectory": "./rules",
+  "rules": {
+    "always-fail": false
+  }
+}

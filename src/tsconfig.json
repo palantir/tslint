@@ -12,6 +12,7 @@
         "rewriteTsconfig": false
     },
     "filesGlob": [
+        "../custom-typings/**/*.d.ts",
         "../typings/**/*.d.ts",
         "./*.ts",
         "./formatters/**/*.ts",
@@ -20,6 +21,7 @@
         "./test/**/*.ts"
     ],
     "files": [
+        "../custom-typings/path-is-absolute.d.ts",
         "../typings/colors/colors.d.ts",
         "../typings/diff/diff.d.ts",
         "../typings/findup-sync/findup-sync.d.ts",

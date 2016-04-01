@@ -25,6 +25,7 @@
     "findup-sync": "~0.2.1",
     "glob": "^6.0.1",
     "optimist": "~0.6.0",
+    "path-is-absolute": "^1.0.0",
     "underscore.string": "~3.1.1"
   },
   "devDependencies": {
@@ -39,6 +40,8 @@
     "grunt-tslint": "latest",
     "mocha": "^2.2.5",
     "tslint": "latest",
+    "tslint-config-typings": "0.1.6",
+    "tslint-config-unional": "0.1.5",
     "typescript": "latest"
   },
   "peerDependencies": {

@@ -1,0 +1,6 @@
+{
+  "extends": "tslint-config-unional",
+  "rules": {
+    "always-fail": false
+  }
+}
