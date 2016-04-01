@@ -1,6 +1,29 @@
 Change Log
 ===
 
+v3.7.0
+---
+* Stable release containing changes from the last dev release
+
+v3.7.0-dev.1
+---
+* [enhancement] `extends` field for `tslint.json` files (#997)
+* [enhancement] `--force` CLI option (#1059)
+* [enhancement] Improve how `Linter` class handles configurations with a `rulesDirectory` field (#1035)
+* [new-rule] `no-angle-bracket-type-assertion` rule (#639)
+* [new-rule-option] "allow-undefined-check" option for `triple-equals` rule (#602)
+* [new-rule-option] "always-prefix" and "never-prefix" option for `interface-name` rule (#512)
+
+Thanks to our contributors!
+* @Arnavion
+* @chrismbarr
+* @ChrisPearce
+* @JoshuaKGoldberg
+* @patsissonso
+* @sasidhar
+* @unional
+* @vvakame
+
 v3.6.0
 ---
 * Stable release containing changes from the last dev release
