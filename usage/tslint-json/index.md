@@ -7,6 +7,21 @@ permalink: /usage/tslint-json/
 When using [the CLI][0] or many [third-party tools][1], a file named `tslint.json` is used to
 configure which rules get run.
 
+`tslint.json` files can have the following fields specified:
+
+* `extends?: string | string[]`: 
+A path(s) to another configuration file which to extend.
+This value is handled using node module resolution semantics.
+For example a value of "tslint-config" would cause TSLint to try and load the main file of a module
+named "tslint-config" as a configuration file.
+A value of "./tslint-config", on the other hand, would be treated as a relative path to file.
+* `rulesDirectory?: string | string[]`:
+A path(s) to a directory of [custom rules][2]. This will always be treated as a relative or absolute path.
+* `rules?: any`: Pairs of keys and values where each key is a rule name and each value is the configuration for that rule.
+If a rule takes no options, you can simply set its value to a boolean, either `true` or `false`, to enable or disable it.
+If a rule takes options, you set its value to an array where the first value is a boolean indicating if the rule is enabled and the next values are options handled by the rule.
+Not all possible rules are listed here, be sure to [check out the full list][3].
+
 An example `tslint.json` file might look like this:
 
 ```ts
@@ -43,11 +58,6 @@ An example `tslint.json` file might look like this:
     }
 }
 ```
-
-If a rule takes no options, you can simply set it to a boolean, either `true` or `false`, to enable or disable it. If a rule takes options, you set it to an array where the first value is a boolean indicating if the rule is enabled and the next values are options handled by the rule.
-
-Note that the `rulesDirectory` field is optional and only needed if you're using [custom rules][2]. Not all possible rules are listed here, be sure to [check out the full list][3].
-
 
 [0]: {{site.baseurl | append: "/usage/cli"}}
 [1]: {{site.baseurl | append: "/usage/third-party-tools"}}
