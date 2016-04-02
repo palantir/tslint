@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Sharable Configurations and Rules"
-date:   2016-04-02 15:19:00
+date:   2016-03-31 15:19:00
 ---
 
 With the release of [TSLint v3.7.0][0] comes a few new features that will make configuration files (aka [`tslint.json` files][1])
