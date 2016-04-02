@@ -101,8 +101,8 @@ Then, in our `tslint.json` file for our project, we can reference the package of
 
 ```
 {
-    extends: "shared-tslint-rules/tslint-config",
-    rules: {
+    "extends": "shared-tslint-rules/tslint-config",
+    "rules": {
         "no-addition": true
     }
 }
