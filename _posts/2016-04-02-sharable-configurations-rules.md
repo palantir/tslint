@@ -2,7 +2,6 @@
 layout: post
 title:  "Sharable Configurations and Rules"
 date:   2016-04-02 15:19:00
-categories: tslint configuration
 ---
 
 With the release of [TSLint v3.7.0][0] comes a few new features that will make configuration files (aka [`tslint.json` files][1])
@@ -117,4 +116,4 @@ tslint -c path/to/tslint.json my/files/**/to/lint.ts
 ```
 
 [0]: https://github.com/palantir/tslint/releases
-[1]: {{ site.url }}/usage/tslint-json
+[1]: {{ site.baseurl }}/usage/tslint-json

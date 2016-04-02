@@ -2,7 +2,6 @@
 layout: post
 title:  "A New TSLint Website"
 date:   2015-12-10 20:15:21
-categories: tslint user-experience
 ---
 
 As TSLint has grown in usage and popularity alongside of TypeScript, it also has
