@@ -1,6 +1,14 @@
 Change Log
 ===
 
+v3.7.1
+---
+* Stable release containing changes from the last dev release
+
+v3.7.0-dev.2
+---
+* [bugfix] Improve handling of paths provided via the -c CLI option (#1083)
+
 v3.7.0
 ---
 * Stable release containing changes from the last dev release
