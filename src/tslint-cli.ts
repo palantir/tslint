@@ -18,6 +18,7 @@
 import * as fs from "fs";
 import * as glob from "glob";
 import * as optimist from "optimist";
+import * as path from "path";
 import * as Linter from "./tslint";
 import {
     CONFIG_FILENAME,
@@ -196,6 +197,7 @@ if (argv.c && !fs.existsSync(argv.c)) {
     console.error("Invalid option for configuration: " + argv.c);
     process.exit(1);
 }
+const possibleConfigAbsolutePath = argv.c != null ? path.resolve(argv.c) : null;
 
 const processFile = (file: string) => {
     if (!fs.existsSync(file)) {
@@ -204,7 +206,7 @@ const processFile = (file: string) => {
     }
 
     const contents = fs.readFileSync(file, "utf8");
-    const configuration = findConfiguration(argv.c, file);
+    const configuration = findConfiguration(possibleConfigAbsolutePath, file);
 
     const linter = new Linter(file, contents, {
         configuration,

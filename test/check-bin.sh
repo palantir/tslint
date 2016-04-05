@@ -66,6 +66,10 @@ expectOut $? 2 "tslint with with JSON pointing to two custom rules did not find 
 ./bin/tslint -c ./test/config/tslint-custom-rules.json -r ./test/files/custom-rules --force src/tslint.ts
 expectOut $? 0 "tslint with with -r pointing to custom rules did not find lint failures"
 
+# make sure path to config without a preceding "./" works on the CLI
+./bin/tslint -c test/config/tslint-almost-empty.json src/tslint.ts
+expectOut $? 0 "-c relative path without ./ did not work"
+
 # make sure tslint --init generates a file
 cd ./bin
 if [ -f tslint.json ]; then

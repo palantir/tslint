@@ -42,7 +42,7 @@
     "tslint": "next",
     "tslint-config-typings": "0.1.6",
     "tslint-config-unional": "0.1.5",
-    "typescript": "latest"
+    "typescript": "next"
   },
   "peerDependencies": {
     "typescript": ">=1.7.3 || >=1.8.0-dev || >=1.9.0-dev"

@@ -1,6 +1,10 @@
 Change Log
 ===
 
+v3.7.0
+---
+* Stable release containing changes from the last dev release
+
 v3.7.0-dev.1
 ---
 * [enhancement] `extends` field for `tslint.json` files (#997)
