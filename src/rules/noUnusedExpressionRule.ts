@@ -43,9 +43,8 @@ class NoUnusedExpressionWalker extends Lint.RuleWalker {
             const isValidStandaloneExpression = kind === ts.SyntaxKind.DeleteExpression
                 || kind === ts.SyntaxKind.YieldExpression
                 || kind === ts.SyntaxKind.AwaitExpression;
-            const isValidDirective = isDirective(node);
 
-            if (!isValidStandaloneExpression && !isValidDirective) {
+            if (!isValidStandaloneExpression && !isDirective(node)) {
                 this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
             }
         }
@@ -133,13 +132,9 @@ function isDirective(node: ts.Node, checkPreviousSiblings = true): boolean {
     }
 
     if (checkPreviousSiblings) {
-        const previousSiblings: ts.Node[] = [];
-        ts.forEachChild(parent, (n) => {
-            if (n.getStart() < node.getStart()) {
-                previousSiblings.push(n);
-            }
-        });
-        return previousSiblings.every((n) => isDirective(n, false));
+        const siblings: ts.Node[] = [];
+        ts.forEachChild(node.parent, child => { siblings.push(child); });
+        return siblings.slice(0, siblings.indexOf(node)).every((n) => isDirective(n, false));
     } else {
         return true;
     }
