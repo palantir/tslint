@@ -25,10 +25,10 @@ export abstract class ScopeAwareRuleWalker<T> extends RuleWalker {
         super(sourceFile, options);
 
         // initialize stack with global scope
-        this.scopeStack = [this.createScope()];
+        this.scopeStack = [this.createScope(sourceFile)];
     }
 
-    public abstract createScope(): T;
+    public abstract createScope(node: ts.Node): T;
 
     public getCurrentScope(): T {
         return this.scopeStack[this.scopeStack.length - 1];
@@ -57,7 +57,7 @@ export abstract class ScopeAwareRuleWalker<T> extends RuleWalker {
         const isNewScope = this.isScopeBoundary(node);
 
         if (isNewScope) {
-            this.scopeStack.push(this.createScope());
+            this.scopeStack.push(this.createScope(node));
         }
 
         this.onScopeStart();
