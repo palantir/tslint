@@ -24,6 +24,7 @@ const OPTION_LEADING_UNDERSCORE = "allow-leading-underscore";
 const OPTION_TRAILING_UNDERSCORE = "allow-trailing-underscore";
 const OPTION_BAN_KEYWORDS = "ban-keywords";
 const OPTION_CHECK_FORMAT = "check-format";
+const OPTION_ALLOW_PASCAL_CASE = "allow-pascal-case";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FORMAT_FAILURE = "variable name must be in camelcase or uppercase";
@@ -120,8 +121,19 @@ class VariableNameWalker extends Lint.RuleWalker {
         if (!this.hasOption(OPTION_TRAILING_UNDERSCORE) && lastCharacter === "_") {
             return false;
         }
-        return firstCharacter === firstCharacter.toLowerCase() && middle.indexOf("_") === -1;
+        if (this.hasOption(OPTION_ALLOW_PASCAL_CASE)) {
+            if (!isLowerCase(firstCharacter) && !isUpperCase(firstCharacter)) {
+                return false;
+            }
+        } else if (!isLowerCase(firstCharacter)) {
+            return false;
+        }
+        return middle.indexOf("_") === -1;
     }
+}
+
+function isLowerCase(name: string) {
+    return name === name.toLowerCase();
 }
 
 function isUpperCase(name: string) {
