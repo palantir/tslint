@@ -1,6 +1,10 @@
 Change Log
 ===
 
+v3.7.2
+---
+* Stable release containing changes from the last dev release (v3.7.0-dev.3)
+
 v3.7.0-dev.3
 ---
 * [bugfix] `findConfigurationPath` always returns an absolute path (#1093)
