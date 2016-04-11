@@ -80,6 +80,7 @@ export abstract class ScopeAwareRuleWalker<T> extends RuleWalker {
             || node.kind === ts.SyntaxKind.ArrowFunction
             || node.kind === ts.SyntaxKind.ParenthesizedExpression
             || node.kind === ts.SyntaxKind.ClassDeclaration
+            || node.kind === ts.SyntaxKind.ClassExpression
             || node.kind === ts.SyntaxKind.InterfaceDeclaration
             || node.kind === ts.SyntaxKind.GetAccessor
             || node.kind === ts.SyntaxKind.SetAccessor;
