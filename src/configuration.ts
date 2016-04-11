@@ -83,7 +83,7 @@ export function findConfiguration(configFile: string, inputFilePath: string): IC
  * the location of the config file is not known and you want to search for one.
  * @param inputFilePath A path to the current file being linted. This is the starting location
  * of the search for a configuration.
- * @returns A path to a tslint.json file, a path to a package.json file with a tslintConfig field
+ * @returns An absolute path to a tslint.json file, a path to a package.json file with a tslintConfig field
  * or undefined if neither can be found.
  */
 export function findConfigurationPath(suppliedConfigFilePath: string, inputFilePath: string) {
@@ -91,19 +91,19 @@ export function findConfigurationPath(suppliedConfigFilePath: string, inputFileP
         if (!fs.existsSync(suppliedConfigFilePath)) {
             throw new Error(`Could not find config file at: ${path.resolve(suppliedConfigFilePath)}`);
         } else {
-            return suppliedConfigFilePath;
+            return path.resolve(suppliedConfigFilePath);
         }
     } else {
         // search for tslint.json from input file location
         let configFilePath = findup(CONFIG_FILENAME, { cwd: inputFilePath, nocase: true });
         if (configFilePath != null && fs.existsSync(configFilePath)) {
-            return configFilePath;
+            return path.resolve(configFilePath);
         }
 
         // search for package.json with tslintConfig property
         configFilePath = findup("package.json", { cwd: inputFilePath, nocase: true });
         if (configFilePath != null && require(configFilePath).tslintConfig != null) {
-            return configFilePath;
+            return path.resolve(configFilePath);
         }
 
         // search for tslint.json in home directory
@@ -111,7 +111,7 @@ export function findConfigurationPath(suppliedConfigFilePath: string, inputFileP
         if (homeDir != null) {
             configFilePath = path.join(homeDir, CONFIG_FILENAME);
             if (fs.existsSync(configFilePath)) {
-                return configFilePath;
+                return path.resolve(configFilePath);
             }
         }
 
@@ -121,7 +121,12 @@ export function findConfigurationPath(suppliedConfigFilePath: string, inputFileP
 }
 
 /**
- * @returns a configuration object for TSLint loaded form the file at configFilePath
+ * Used Node semantics to load a configuration file given configFilePath.
+ * For example:
+ * '/path/to/config' will be treated as an absolute path
+ * './path/to/config' will be treated as a relative path
+ * 'path/to/config' will attempt to load a to/config file inside a node module named path
+ * @returns a configuration object for TSLint loaded from the file at configFilePath
  */
 export function loadConfigurationFromPath(configFilePath: string): IConfigurationFile {
     if (configFilePath == null) {

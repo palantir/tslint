@@ -39,7 +39,8 @@ class NoInternalModuleWalker extends Lint.RuleWalker {
         // for external modules, node.name.kind will be a LiteralExpression instead of Identifier
         return !Lint.isNodeFlagSet(node, ts.NodeFlags.Namespace)
             && !isNestedDeclaration(node)
-            && node.name.kind === ts.SyntaxKind.Identifier;
+            && node.name.kind === ts.SyntaxKind.Identifier
+            && !isGlobalAugmentation(node);
     }
 }
 
@@ -48,4 +49,10 @@ function isNestedDeclaration(node: ts.ModuleDeclaration) {
     // are nested therefore we can depend that a node's position will only match with its name's position for nested
     // nodes
     return node.name.pos === node.pos;
+}
+
+function isGlobalAugmentation(node: ts.ModuleDeclaration) {
+    // augmenting global uses a sepcial syntax that is allowed
+    // see https://github.com/Microsoft/TypeScript/pull/6213
+    return node.name.kind === ts.SyntaxKind.Identifier && node.name.text === "global";
 }
