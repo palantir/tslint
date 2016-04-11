@@ -83,8 +83,8 @@ class SemicolonWalker extends Lint.RuleWalker {
 
     public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
         const initializer = node.initializer;
-        if (this.hasOption(OPTION_ALWAYS) || this.hasOption(OPTION_NEVER) ||
-            !(initializer && initializer.kind === ts.SyntaxKind.ArrowFunction)) {
+        /* ALWAYS === "enabled" for this rule. */
+        if (this.hasOption(OPTION_NEVER) || !(initializer && initializer.kind === ts.SyntaxKind.ArrowFunction)) {
             this.checkSemicolonAt(node);
         }
         super.visitPropertyDeclaration(node);

@@ -62,7 +62,6 @@ class MyClass {
     public initializedProperty = 6
                                   ~nil [missing semicolon]
     public initializedMethodProperty = () => { return "hi"; }
-                                                             ~nil [missing semicolon]
 }
 
 interface ITest {
