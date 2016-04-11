@@ -1,6 +1,13 @@
 Change Log
 ===
 
+v3.7.0-dev.3
+---
+* [bugfix] `findConfigurationPath` always returns an absolute path (#1093)
+* [bugfix] Update `findup-sync` dependency (#1080)
+* [bugfix] `declare global` no longer triggers `no-internal-module` rule (#1069)
+* [bugfix] Valid JS directives no longer trigger `no-unused-expression` rule (#1050)
+
 v3.7.1
 ---
 * Stable release containing changes from the last dev release
