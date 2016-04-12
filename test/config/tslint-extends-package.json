@@ -1,6 +1,7 @@
 {
-  "extends": "tslint-config-unional",
+  "extends": "tslint-test-custom-rules",
   "rules": {
-    "always-fail": false
+    "rule-two": true,
+    "rule-three": false
   }
 }

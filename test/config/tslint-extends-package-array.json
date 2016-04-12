@@ -1,6 +1,6 @@
 {
   "extends": [
-    "tslint-config-unional",
+    "tslint-test-custom-rules",
     "./tslint-custom-rules-with-two-dirs.json"
   ],
   "rules": {
