@@ -17,8 +17,6 @@
 
 export * from "../src/lint";
 
-// hackhack #851
-/* tslint:disable:no-unused-variable */
 import * as TestUtils from "./utils";
-/* tslint:disable:no-unused-variable */
+
 export {TestUtils};
