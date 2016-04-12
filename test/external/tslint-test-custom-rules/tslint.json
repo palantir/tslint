@@ -1,0 +1,7 @@
+{
+    "rulesDirectory": ["./rules"],
+    "rules": {
+        "rule-one": true,
+        "rule-two": false
+    }
+}
