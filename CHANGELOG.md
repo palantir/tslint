@@ -1,6 +1,14 @@
 Change Log
 ===
 
+v3.7.4
+---
+* Stable release containing changes from the last dev release (v3.7.0-dev.5)
+
+v3.7.0-dev.5
+---
+* [bugfix] Allow JS directives in namespaces (#1115)
+
 v3.7.3
 ---
 * Stable release containing changes from the last dev release (v3.7.0-dev.4)
