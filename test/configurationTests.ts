@@ -66,15 +66,21 @@ describe("Configuration", () => {
             let config = loadConfigurationFromPath("./test/config/tslint-extends-package.json");
 
             assert.isArray(config.rulesDirectory);
-            assert.isFalse(config.rules["always-fail"]);
-            assert.isTrue(Object.keys(config.rules).length > 1);
+            assert.deepEqual(config.rules, {
+                "rule-one": true,
+                "rule-two": true,
+                "rule-three": false,
+            });
         });
 
         it("extends with package without customization", () => {
             let config = loadConfigurationFromPath("./test/config/tslint-extends-package-no-mod.json");
 
             assert.isArray(config.rulesDirectory);
-            assert.isTrue(Object.keys(config.rules).length > 1);
+            assert.deepEqual(config.rules, {
+                "rule-one": true,
+                "rule-two": false,
+            });
         });
 
         it("extends with package two levels (and relative path in rulesDirectory)", () => {
@@ -84,17 +90,24 @@ describe("Configuration", () => {
             assert.lengthOf(config.rulesDirectory, 2);
             assert.isTrue(fs.existsSync(config.rulesDirectory[0]));
             assert.isTrue(fs.existsSync(config.rulesDirectory[1]));
-            assert.isFalse(config.rules["always-fail"]);
-            assert.isTrue(Object.keys(config.rules).length > 1);
+            assert.deepEqual(config.rules, {
+                "always-fail": false,
+                "rule-one": true,
+                "rule-two": true,
+                "rule-four": true,
+            });
         });
 
         it("extends with array", () => {
             let config = loadConfigurationFromPath("./test/config/tslint-extends-package-array.json");
 
             assert.isArray(config.rulesDirectory);
-            assert.isTrue(config.rules["no-fail"]);
-            assert.isFalse(config.rules["always-fail"]);
-            assert.isTrue(Object.keys(config.rules).length > 1);
+            assert.deepEqual(config.rules, {
+                "always-fail": false,
+                "no-fail": true,
+                "rule-one": true,
+                "rule-two": false,
+            });
         });
     });
 });

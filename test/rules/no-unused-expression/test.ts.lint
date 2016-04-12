@@ -29,6 +29,12 @@ function fun3(a: number, b: number) {
     return 0;
 }
 
+namespace Fam { 'use strict'; 'use cool'; }
+module Bam { 'use strict'; 'use cool'; }
+namespace Az.Bz.Cz.Dz { 
+    'ngInject';
+}
+
 // valid code:
 
 var i: number;

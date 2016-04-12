@@ -1,6 +1,6 @@
 {
-  "extends": "tslint-config-typings",
-  "rulesDirectory": "./rules",
+  "extends": "tslint-test-config/tslint.json",
+  "rulesDirectory": "../files/custom-rules",
   "rules": {
     "always-fail": false
   }

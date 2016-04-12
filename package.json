@@ -40,8 +40,8 @@
     "grunt-tslint": "latest",
     "mocha": "^2.2.5",
     "tslint": "next",
-    "tslint-config-typings": "0.1.6",
-    "tslint-config-unional": "0.1.5",
+    "tslint-test-config": "./test/external/tslint-test-config",
+    "tslint-test-custom-rules": "./test/external/tslint-test-custom-rules",
     "typescript": "next"
   },
   "peerDependencies": {

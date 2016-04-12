@@ -124,10 +124,11 @@ function isDirective(node: ts.Node, checkPreviousSiblings = true): boolean {
     const isStringExpression = node.kind === ts.SyntaxKind.ExpressionStatement
         && (node as ts.ExpressionStatement).expression.kind === ts.SyntaxKind.StringLiteral;
     const parentIsSourceFile = parent.kind === ts.SyntaxKind.SourceFile;
+    const parentIsNSBody = parent.kind === ts.SyntaxKind.ModuleBlock;
     const parentIsFunctionBody = parent.kind === ts.SyntaxKind.Block
         && [ts.SyntaxKind.ArrowFunction, ts.SyntaxKind.FunctionExpression, ts.SyntaxKind.FunctionDeclaration].indexOf(grandParentKind) > -1;
 
-    if (!(parentIsSourceFile || parentIsFunctionBody) || !isStringExpression) {
+    if (!(parentIsSourceFile || parentIsFunctionBody || parentIsNSBody) || !isStringExpression) {
         return false;
     }
 
