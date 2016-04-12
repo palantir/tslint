@@ -1,6 +1,14 @@
 Change Log
 ===
 
+v3.7.3
+---
+* Stable release containing changes from the last dev release (v3.7.0-dev.4)
+
+v3.7.0-dev.4
+---
+* [bugfix] Downgrade `findup-sync` dependency (#1108)
+
 v3.7.2
 ---
 * Stable release containing changes from the last dev release (v3.7.0-dev.3)
