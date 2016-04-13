@@ -20,7 +20,10 @@
       true,
       "spaces"
     ],
-    "interface-name": true,
+    "interface-name": [
+      true,
+      "always-prefix"
+    ],
     "jsdoc-format": true,
     "label-position": true,
     "label-undefined": true,
@@ -96,7 +99,8 @@
     ],
     "triple-equals": [
       true,
-      "allow-null-check"
+      "allow-null-check",
+      "allow-undefined-check"
     ],
     "typedef": [
       true,
