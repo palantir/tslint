@@ -58,6 +58,10 @@ class MyClass {
     private index : number
                           ~nil [missing semicolon]
     private email : string;
+
+    public initializedProperty = 6
+                                  ~nil [missing semicolon]
+    public initializedMethodProperty = () => { return "hi"; }
 }
 
 interface ITest {
