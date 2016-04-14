@@ -43,13 +43,15 @@ export const DEFAULT_CONFIG = {
         "quotemark": [true, "double"],
         "semicolon": [true, "always"],
         "triple-equals": [true, "allow-null-check"],
-        "typedef-whitespace": [true, {
-            "call-signature": "nospace",
-            "index-signature": "nospace",
-            "parameter": "nospace",
-            "property-declaration": "nospace",
-            "variable-declaration": "nospace",
-        },],
+        "typedef-whitespace": [
+            true, {
+                "call-signature": "nospace",
+                "index-signature": "nospace",
+                "parameter": "nospace",
+                "property-declaration": "nospace",
+                "variable-declaration": "nospace",
+            },
+        ],
         "variable-name": [true, "ban-keywords"],
         "whitespace": [true,
             "check-branch",
