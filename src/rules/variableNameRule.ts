@@ -121,11 +121,7 @@ class VariableNameWalker extends Lint.RuleWalker {
         if (!this.hasOption(OPTION_TRAILING_UNDERSCORE) && lastCharacter === "_") {
             return false;
         }
-        if (this.hasOption(OPTION_ALLOW_PASCAL_CASE)) {
-            if (!isLowerCase(firstCharacter) && !isUpperCase(firstCharacter)) {
-                return false;
-            }
-        } else if (!isLowerCase(firstCharacter)) {
+        if (!this.hasOption(OPTION_ALLOW_PASCAL_CASE) && !isLowerCase(firstCharacter)) {
             return false;
         }
         return middle.indexOf("_") === -1;
