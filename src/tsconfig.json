@@ -91,6 +91,7 @@
         "rules/noEvalRule.ts",
         "rules/noInferrableTypesRule.ts",
         "rules/noInternalModuleRule.ts",
+        "rules/noInvalidThisRule.ts",
         "rules/noNullKeywordRule.ts",
         "rules/noRequireImportsRule.ts",
         "rules/noShadowedVariableRule.ts",
