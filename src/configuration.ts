@@ -49,7 +49,7 @@ export const DEFAULT_CONFIG = {
             "parameter": "nospace",
             "property-declaration": "nospace",
             "variable-declaration": "nospace",
-        },],
+        }, ],
         "variable-name": [true, "ban-keywords"],
         "whitespace": [true,
             "check-branch",
