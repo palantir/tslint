@@ -49,7 +49,7 @@ export const DEFAULT_CONFIG = {
             "parameter": "nospace",
             "property-declaration": "nospace",
             "variable-declaration": "nospace",
-        }, ],
+        },],
         "variable-name": [true, "ban-keywords"],
         "whitespace": [true,
             "check-branch",
@@ -129,6 +129,35 @@ export function findConfigurationPath(suppliedConfigFilePath: string, inputFileP
  * @returns a configuration object for TSLint loaded from the file at configFilePath
  */
 export function loadConfigurationFromPath(configFilePath: string): IConfigurationFile {
+    function stripComments(content: string): string {
+        /**
+        * First capturing group matches double quoted string
+        * Second matches single quotes string
+        * Third matches block comments
+        * Fourth matches line comments
+        */
+        const regexp: RegExp = /("(?:[^\\\"]*(?:\\.)?)*")|('(?:[^\\\']*(?:\\.)?)*')|(\/\*(?:\r?\n|.)*?\*\/)|(\/{2,}.*?(?:(?:\r?\n)|$))/g;
+        let result = content.replace(regexp, (match, m1, m2, m3, m4) => {
+            // Only one of m1, m2, m3, m4 matches
+            if (m3) {
+                // A block comment. Replace with nothing
+                return "";
+            } else if (m4) {
+                // A line comment. If it ends in \r?\n then keep it.
+                let length = m4.length;
+                if (length > 2 && m4[length - 1] === "\n") {
+                    return m4[length - 2] === "\r" ? "\r\n" : "\n";
+                } else {
+                    return "";
+                }
+            } else {
+                // We match a string
+                return match;
+            }
+        });
+        return result;
+    };
+
     if (configFilePath == null) {
         return DEFAULT_CONFIG;
     } else if (path.basename(configFilePath) === "package.json") {
@@ -136,7 +165,8 @@ export function loadConfigurationFromPath(configFilePath: string): IConfiguratio
         return require(configFilePath).tslintConfig;
     } else {
         const resolvedConfigFilePath = resolveConfigurationPath(configFilePath);
-        let configFile: IConfigurationFile = require(resolvedConfigFilePath);
+        const fileContent = stripComments(fs.readFileSync(resolvedConfigFilePath).toString());
+        let configFile: IConfigurationFile = JSON.parse(fileContent);
         const configFileDir = path.dirname(resolvedConfigFilePath);
 
         configFile.rulesDirectory = getRulesDirectories(configFile.rulesDirectory, configFileDir);
