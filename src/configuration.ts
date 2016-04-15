@@ -138,15 +138,15 @@ export function loadConfigurationFromPath(configFilePath: string): IConfiguratio
         return require(configFilePath).tslintConfig;
     } else {
         const resolvedConfigFilePath = resolveConfigurationPath(configFilePath);
-        let fileContent: string;
+        let configFile: IConfigurationFile;
         if (path.extname(resolvedConfigFilePath) === ".json") {
-            fileContent = stripComments(fs.readFileSync(resolvedConfigFilePath).toString());
+            const fileContent = stripComments(fs.readFileSync(resolvedConfigFilePath).toString());
+            configFile = JSON.parse(fileContent);
         } else {
-            fileContent = require(resolvedConfigFilePath);
+            configFile = require(resolvedConfigFilePath);
             delete require.cache[resolvedConfigFilePath];
         }
 
-        let configFile: IConfigurationFile = JSON.parse(fileContent);
         const configFileDir = path.dirname(resolvedConfigFilePath);
 
         configFile.rulesDirectory = getRulesDirectories(configFile.rulesDirectory, configFileDir);
