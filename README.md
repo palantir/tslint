@@ -299,6 +299,7 @@ A sample configuration file with all options is available [here](https://github.
   * `"check-format"`: allows only camelCased or UPPER_CASED variable names
     * `"allow-leading-underscore"` allows underscores at the beginning.
     * `"allow-trailing-underscore"` allows underscores at the end.
+    * `"allow-pascal-case"` allows PascalCase in addition to camelCase.
   * `"ban-keywords"`: disallows the use of certain TypeScript keywords (`any`, `Number`, `number`, `String`, `string`, `Boolean`, `boolean`, `undefined`) as variable or parameter names.
 * `whitespace` enforces spacing whitespace. Rule options:
   * `"check-branch"` checks branching statements (`if`/`else`/`for`/`while`) are followed by whitespace.
