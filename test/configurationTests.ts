@@ -109,5 +109,15 @@ describe("Configuration", () => {
                 "rule-two": false,
             });
         });
+
+        it("can load .json files with comments", () => {
+            const config = loadConfigurationFromPath("./test/config/tslint-with-comments.json");
+
+            assert.deepEqual(config.rules, {
+                "rule-two": true,
+                "rule-three": "//not a comment",
+                "rule-four": "/*also not a comment*/",
+            });
+        });
     });
 });
