@@ -36,7 +36,8 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
                 return;
             }
 
-            if (scanner.getToken() === ts.SyntaxKind.MultiLineCommentTrivia) {
+            if (scanner.getToken() === ts.SyntaxKind.MultiLineCommentTrivia ||
+                scanner.getToken() === ts.SyntaxKind.SingleLineCommentTrivia) {
                 const commentText = scanner.getTokenText();
                 const startPosition = scanner.getTokenPos();
                 this.handlePossibleTslintSwitch(commentText, startPosition);
@@ -45,8 +46,8 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
     }
 
     private handlePossibleTslintSwitch(commentText: string, startingPosition: number) {
-        // regex is: start of string followed by "/*" followed by any amount of whitespace followed by "tslint:"
-        if (commentText.match(/^\/\*\s*tslint:/)) {
+        // regex is: start of string followed by "/*" or "//" followed by any amount of whitespace followed by "tslint:"
+        if (commentText.match(/^(\/\*|\/\/)\s*tslint:/)) {
             const commentTextParts = commentText.split(":");
             // regex is: start of string followed by either "enable" or "disable"
             // followed by either whitespace or end of string
