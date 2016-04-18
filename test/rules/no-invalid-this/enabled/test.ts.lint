@@ -1,0 +1,23 @@
+function foo(x: number) {
+    console.log(this.x);
+                ~~~~[the "this" keyword is disallowed outside of a class body]
+
+    this.evilMethod();
+    ~~~~[the "this" keyword is disallowed outside of a class body]
+}
+
+class AClass {
+    private x: number;
+
+    public aMethod() {
+        this.x = 5;
+    }
+}
+
+const AClassExpression = class {
+    private x: number;
+
+    public aMethod() {
+        this.x = 5;
+    }
+}
