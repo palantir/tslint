@@ -30,5 +30,6 @@ tslint -c path/to/tslint.json path/to/typescript/file.ts
 ```
 
 Check out [the full usage guide][1] to learn more.
+
 [0]: http://www.typescriptlang.org/
 [1]: usage/cli
