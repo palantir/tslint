@@ -9,7 +9,7 @@ twitter_username: PalantirTech
 github_username:  palantir/tslint
 
 # Build settings
-markdown: redcarpet
+markdown: kramdown
 markdown_ext: md
 
 page_gen:
@@ -17,6 +17,3 @@ page_gen:
     template: rule
     name: ruleName
     dir: rules
-
-redcarpet:
-  extensions: ["tables", "autolink", "strikethrough", "space_after_headers", "with_toc_data", "fenced_code_blocks"]
