@@ -17,6 +17,10 @@
       {
          "title": "Docs Development",
          "url": "/docs/"
+      },
+      {
+          "title": "Testing Rules",
+          "url": "/testing-rules"
       }
    ]
 }
