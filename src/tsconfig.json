@@ -114,6 +114,7 @@
         "rules/tripleEqualsRule.ts",
         "rules/typedefRule.ts",
         "rules/typedefWhitespaceRule.ts",
+        "rules/useIsnanRule.ts",
         "rules/useStrictRule.ts",
         "rules/variableNameRule.ts",
         "rules/whitespaceRule.ts",
