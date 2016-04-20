@@ -42,6 +42,7 @@
         "tslint-cli.ts",
         "tslint.ts",
         "utils.ts",
+        "formatters/checkstyleFormatter.ts",
         "formatters/index.ts",
         "formatters/jsonFormatter.ts",
         "formatters/msbuildFormatter.ts",
