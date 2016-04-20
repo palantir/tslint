@@ -35,6 +35,12 @@ namespace Az.Bz.Cz.Dz {
     'ngInject';
 }
 
+class Foo {
+    bar() {
+        'use strict';
+    }
+}
+
 // valid code:
 
 var i: number;
