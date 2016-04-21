@@ -53,13 +53,16 @@ class TrailingCommaWalker extends Lint.RuleWalker {
     private lintNode(node: ts.Node) {
         const child = node.getChildAt(1);
         if (child != null && child.kind === ts.SyntaxKind.SyntaxList) {
-            const isMultiline = node.getText().match(/\n|\r/);
-            const option = this.getOption(isMultiline ? "multiline" : "singleline");
             const grandChildren = child.getChildren();
 
             if (grandChildren.length > 0) {
                 const lastGrandChild = grandChildren[grandChildren.length - 1];
                 const hasTrailingComma = lastGrandChild.kind === ts.SyntaxKind.CommaToken;
+
+                const endLineOfNode = this.getSourceFile().getLineAndCharacterOfPosition(node.getEnd()).line;
+                const endLineOfLastElement = this.getSourceFile().getLineAndCharacterOfPosition(lastGrandChild.getEnd()).line;
+                const isMultiline = endLineOfNode !== endLineOfLastElement;
+                const option = this.getOption(isMultiline ? "multiline" : "singleline");
 
                 if (hasTrailingComma && option === "never") {
                     this.addFailure(this.createFailure(lastGrandChild.getStart(), 1, Rule.FAILURE_STRING_NEVER));

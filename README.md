@@ -68,11 +68,17 @@ usage: `tslint [options] [file ...]`
 Options:
 
 ```
--c, --config              configuration file
--o, --out                 output file
--r, --rules-dir           rules directory
--s, --formatters-dir      formatters directory
--t, --format              output format (prose, json)   [default: "prose"]
+-c, --config          configuration file
+--force               return status code 0 even if there are lint errors
+-h, --help            display detailed help
+-i, --init            generate a tslint.json config file in the current working directory
+-o, --out             output file
+-r, --rules-dir       rules directory
+-s, --formatters-dir  formatters directory
+-e, --exclude         exclude globs from path expansion
+-t, --format          output format (prose, json, verbose, pmd, msbuild, checkstyle)  [default: "prose"]
+--test                test that tslint produces the correct output for the specified directory
+-v, --version         current version
 ```
 
 By default, configuration is loaded from `tslint.json`, if it exists in the current path, or the user's home directory, in that order.
@@ -100,7 +106,7 @@ tslint accepts the following command-line options:
     This option can be supplied multiple times if you need multiple
     globs to indicate which files to exclude.
 
--n, --force:
+--force:
     Return status code 0 even if there are any lint errors.
     Useful while running as npm script.
 
@@ -130,7 +136,8 @@ tslint accepts the following command-line options:
     The formatter to use to format the results of the linter before
     outputting it to stdout or the file passed in --out. The core
     formatters are prose (human readable), json (machine readable)
-    and verbose. prose is the default if this option is not used. Additonal
+    and verbose. prose is the default if this option is not used.
+    Other built-in options include pmd, msbuild, and checkstyle. Additonal
     formatters can be added and used if the --formatters-dir option is set.
 
 --test:
@@ -194,7 +201,7 @@ A sample configuration file with all options is available [here](https://github.
     * `"check-uppercase"` enforces the rule that the first non-whitespace character of a comment must be uppercase, if applicable.
 * `curly` enforces braces for `if`/`for`/`do`/`while` statements.
 * `eofline` enforces the file to end with a newline.
-* `forin` enforces a `for ... in` statement to be filtered with an `if` statement.*
+* `forin` enforces a `for ... in` statement to be filtered with an `if` statement.
 * `indent` enforces indentation with tabs or spaces. Rule options (one is required):
     * `"tabs"` enforces consistent tabs.
     * `"spaces"` enforces consistent spaces.
@@ -234,7 +241,9 @@ A sample configuration file with all options is available [here](https://github.
 * `no-eval` disallows `eval` function invocations.
 * `no-inferrable-types` disallows explicit type declarations for variables or parameters initialized to a number, string, or boolean.
 * `no-internal-module` disallows internal `module` (use `namespace` instead).
-* `no-null-keyword` disallows use of the `null` keyword literal
+* `no-invalid-this` disallows using the `this` keyword outside of classes.
+* `no-null-keyword` disallows use of the `null` keyword literal.
+* `no-reference` disallows `/// <reference path=>` imports (use ES6-style imports instead).
 * `no-require-imports` disallows invocation of `require()` (use ES6-style imports instead).
 * `no-shadowed-variable` disallows shadowed variable declarations.
 * `no-string-literal` disallows object access via string literals.
@@ -292,6 +301,7 @@ A sample configuration file with all options is available [here](https://github.
     * `"parameter"` checks function parameters.
     * `"property-declaration"` checks object property declarations.
     * `"variable-declaration"` checks variable declaration.
+* `use-isnan` enforces that you use the isNaN() function to check for NaN references instead of a comparison to the NaN constant.
 * `use-strict` enforces ECMAScript 5's strict mode.
     * `check-module` checks that all top-level modules are using strict mode.
     * `check-function` checks that all top-level functions are using strict mode.
@@ -299,6 +309,7 @@ A sample configuration file with all options is available [here](https://github.
   * `"check-format"`: allows only camelCased or UPPER_CASED variable names
     * `"allow-leading-underscore"` allows underscores at the beginning.
     * `"allow-trailing-underscore"` allows underscores at the end.
+    * `"allow-pascal-case"` allows PascalCase in addition to camelCase.
   * `"ban-keywords"`: disallows the use of certain TypeScript keywords (`any`, `Number`, `number`, `String`, `string`, `Boolean`, `boolean`, `undefined`) as variable or parameter names.
 * `whitespace` enforces spacing whitespace. Rule options:
   * `"check-branch"` checks branching statements (`if`/`else`/`for`/`while`) are followed by whitespace.

@@ -23,5 +23,9 @@ var AAAaA = 'test'
 var  re;
 re = /`/;
 
+// tslint:disable
+var AAAaA = 'test'
+// tslint:enable
+
 /* tslint:disable:quotemark */
 var s = 'xxx';

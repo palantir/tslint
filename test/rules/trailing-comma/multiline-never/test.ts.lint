@@ -5,7 +5,6 @@ var v = [{
     c: (a + b),
               ~ [trailing comma]
 },];
- ~   [trailing comma]
 
 var x = [{
     a: 1,

@@ -20,7 +20,7 @@ import * as path from "path";
 import * as findup from "findup-sync";
 import * as pathIsAbsolute from "path-is-absolute";
 
-import {arrayify, objectify} from "./utils";
+import {arrayify, objectify, stripComments} from "./utils";
 
 export interface IConfigurationFile {
     extends?: string | string[];
@@ -43,13 +43,15 @@ export const DEFAULT_CONFIG = {
         "quotemark": [true, "double"],
         "semicolon": [true, "always"],
         "triple-equals": [true, "allow-null-check"],
-        "typedef-whitespace": [true, {
-            "call-signature": "nospace",
-            "index-signature": "nospace",
-            "parameter": "nospace",
-            "property-declaration": "nospace",
-            "variable-declaration": "nospace",
-        }, ],
+        "typedef-whitespace": [
+            true, {
+                "call-signature": "nospace",
+                "index-signature": "nospace",
+                "parameter": "nospace",
+                "property-declaration": "nospace",
+                "variable-declaration": "nospace",
+            },
+        ],
         "variable-name": [true, "ban-keywords"],
         "whitespace": [true,
             "check-branch",
@@ -136,7 +138,15 @@ export function loadConfigurationFromPath(configFilePath: string): IConfiguratio
         return require(configFilePath).tslintConfig;
     } else {
         const resolvedConfigFilePath = resolveConfigurationPath(configFilePath);
-        let configFile: IConfigurationFile = require(resolvedConfigFilePath);
+        let configFile: IConfigurationFile;
+        if (path.extname(resolvedConfigFilePath) === ".json") {
+            const fileContent = stripComments(fs.readFileSync(resolvedConfigFilePath).toString());
+            configFile = JSON.parse(fileContent);
+        } else {
+            configFile = require(resolvedConfigFilePath);
+            delete require.cache[resolvedConfigFilePath];
+        }
+
         const configFileDir = path.dirname(resolvedConfigFilePath);
 
         configFile.rulesDirectory = getRulesDirectories(configFile.rulesDirectory, configFileDir);
