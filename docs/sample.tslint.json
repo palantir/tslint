@@ -67,7 +67,9 @@
     "no-eval": true,
     "no-inferrable-types": false,
     "no-internal-module": true,
+    "no-invalid-this": true,
     "no-null-keyword": true,
+    "no-reference": true,
     "no-require-imports": true,
     "no-shadowed-variable": true,
     "no-string-literal": true,
@@ -134,6 +136,7 @@
         "variable-declaration": "space"
       }
     ],
+    "use-isnan": true,
     "use-strict": [
       true,
       "check-module",
