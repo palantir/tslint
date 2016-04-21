@@ -33,7 +33,8 @@ import {loadRules} from "./ruleLoader";
 import {arrayify} from "./utils";
 
 class Linter {
-    public static VERSION = "3.7.4";
+    public static VERSION = "3.8.0";
+
     public static findConfiguration = findConfiguration;
     public static findConfigurationPath = findConfigurationPath;
     public static getRulesDirectories = getRulesDirectories;
