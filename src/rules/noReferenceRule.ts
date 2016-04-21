@@ -19,6 +19,20 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "no-reference",
+        description: "Disallows `/// <reference path=>` imports (use ES6-style imports instead).",
+        rationale: Lint.Utils.dedent`
+            Using \`/// <reference path=>\` comments to load other files is outdated.
+            Use ES6-style imports to reference other files.`,
+        optionsDescription: "Not configurable.",
+        options: {},
+        optionExamples: ["true"],
+        type: "typescript",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING = "<reference> is not allowed, use imports";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {

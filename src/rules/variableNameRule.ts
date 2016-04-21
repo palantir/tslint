@@ -32,18 +32,25 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "variable-name",
         description: "Checks variable names for various errors.",
         optionsDescription: Lint.Utils.dedent`
-            Four arguments may be optionally provided:
+            Five arguments may be optionally provided:
 
-            * \`"check-format"\`: allows only camelCased or UPPER_CASED variable names
-              * \`"allow-leading-underscore"\` allows underscores at the beginning (only has an effect if "check-format" specified)
-              * \`"allow-trailing-underscore"\` allows underscores at the end. (only has an effect if "check-format" specified)
-            * \`"ban-keywords"\`: disallows the use of certain TypeScript keywords (\`any\`, \`Number\`, \`number\`, \`String\`,
+            * \`"${OPTION_CHECK_FORMAT}"\`: allows only camelCased or UPPER_CASED variable names
+              * \`"${OPTION_LEADING_UNDERSCORE}"\` allows underscores at the beginning (only has an effect if "check-format" specified)
+              * \`"${OPTION_TRAILING_UNDERSCORE}"\` allows underscores at the end. (only has an effect if "check-format" specified)
+              * \`"${OPTION_ALLOW_PASCAL_CASE}\` allows PascalCase in addtion to camelCase.
+            * \`"${OPTION_BAN_KEYWORDS}"\`: disallows the use of certain TypeScript keywords (\`any\`, \`Number\`, \`number\`, \`String\`,
             \`string\`, \`Boolean\`, \`boolean\`, \`undefined\`) as variable or parameter names.`,
         options: {
             type: "list",
             listType: {
                 type: "enum",
-                enumValues: ["check-format", "allow-leading-underscore", "allow-trailing-underscore", "ban-keywords"],
+                enumValues: [
+                    OPTION_CHECK_FORMAT,
+                    OPTION_LEADING_UNDERSCORE,
+                    OPTION_TRAILING_UNDERSCORE,
+                    OPTION_ALLOW_PASCAL_CASE,
+                    OPTION_BAN_KEYWORDS,
+                ],
             },
         },
         optionExamples: ['[true, "ban-keywords", "check-format", "allow-leading-underscore"]'],

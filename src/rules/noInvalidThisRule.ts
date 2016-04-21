@@ -27,6 +27,18 @@ const OPTION_FUNCTION_IN_METHOD = "check-function-in-method";
 const DEPRECATED_OPTION_FUNCTION_IN_METHOD = "no-this-in-function-in-method";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "no-invalid-this",
+        description: "Disallows using the `this` keyword outside of classes.",
+        rationale: "See [the rule's author's rationale here.](https://github.com/palantir/tslint/pull/1105#issue-147549402)",
+        optionsDescription: "Not configurable.",
+        options: {},
+        optionExamples: ["true"],
+        type: "functionality",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING_OUTSIDE = "the \"this\" keyword is disallowed outside of a class body" ;
     public static FAILURE_STRING_INSIDE = "the \"this\" keyword is disallowed in function bodies inside class methods, " +
         "use arrow functions instead";

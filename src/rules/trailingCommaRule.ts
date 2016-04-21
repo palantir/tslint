@@ -28,7 +28,11 @@ export class Rule extends Lint.Rules.AbstractRule {
             Both should be set to either \`"always"\` or \`"never"\`.
 
             * \`"multiline"\` checks multi-line object literals.
-            * \`"singleline"\` checks single-line object literals.`,
+            * \`"singleline"\` checks single-line object literals.
+
+            A array is considered "multiline" if its closing bracket is on a line
+            after the last array element. The same general logic is followed for
+            object literals and named import statements.`,
         options: {
             type: "object",
             properties: {
