@@ -1,6 +1,33 @@
 Change Log
 ===
 
+v3.8.0
+---
+* Stable release containing changes from the last dev release (v3.8.0-dev.0)
+
+v3.8.0-dev.0
+---
+* [new-rule] `no-invalid-this` rule (#1105)
+* [new-rule] `use-isnan` rule (#1054)
+* [new-rule] `no-reference` rule (#1139)
+* [new-rule-option] "allow-pascal-case" option for `variable-name` rule (#1079)
+* [enhancement] Comments now allowed in `tslint.json` files (#1129)
+* [enhancement] Smarter `trailing-comma` behavior (#1122)
+* [enhancement] `semicolon` rule more lenient with arrow-function class members (#1076)
+* [enhancement] Allow enabling/disabling rules with `//` comments (#1134)
+* [enhancement] New checkstyle formatter (#250)
+* [enhancement] Clearer message for `no-var-keyword` rule (#1124)
+* [bugfix] Loaded configurations are not cached (#1128)
+* [bugfix] Allow JS directives at the start of class methods (#1144)
+
+Thanks to our contributors!
+* @AndyMoreland
+* @chrismbarr
+* @HamletDRC
+* @JoshuaKGoldberg
+* @sshev
+* @unional
+
 v3.7.4
 ---
 * Stable release containing changes from the last dev release (v3.7.0-dev.5)
