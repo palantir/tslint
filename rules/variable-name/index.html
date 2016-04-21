@@ -3,11 +3,12 @@ ruleName: variable-name
 description: Checks variable names for various errors.
 optionsDescription: |-
 
-  Four arguments may be optionally provided:
+  Five arguments may be optionally provided:
 
   * `"check-format"`: allows only camelCased or UPPER_CASED variable names
     * `"allow-leading-underscore"` allows underscores at the beginning (only has an effect if "check-format" specified)
     * `"allow-trailing-underscore"` allows underscores at the end. (only has an effect if "check-format" specified)
+    * `"allow-pascal-case` allows PascalCase in addtion to camelCase.
   * `"ban-keywords"`: disallows the use of certain TypeScript keywords (`any`, `Number`, `number`, `String`,
   `string`, `Boolean`, `boolean`, `undefined`) as variable or parameter names.
 options:
@@ -18,6 +19,7 @@ options:
       - check-format
       - allow-leading-underscore
       - allow-trailing-underscore
+      - allow-pascal-case
       - ban-keywords
 optionExamples:
   - '[true, "ban-keywords", "check-format", "allow-leading-underscore"]'
@@ -31,6 +33,7 @@ optionsJSON: |-
         "check-format",
         "allow-leading-underscore",
         "allow-trailing-underscore",
+        "allow-pascal-case",
         "ban-keywords"
       ]
     }

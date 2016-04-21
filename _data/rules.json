@@ -422,6 +422,17 @@
     "type": "typescript"
   },
   {
+    "ruleName": "no-invalid-this",
+    "description": "Disallows using the `this` keyword outside of classes.",
+    "rationale": "See [the rule's author's rationale here.](https://github.com/palantir/tslint/pull/1105#issue-147549402)",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
     "ruleName": "no-null-keyword",
     "description": "Disallows use of the `null` keyword literal.",
     "rationale": "\nInstead of having the dual concepts of `null` and`undefined` in a codebase,\nthis rule ensures that only `undefined` is used.",
@@ -431,6 +442,17 @@
       "true"
     ],
     "type": "functionality"
+  },
+  {
+    "ruleName": "no-reference",
+    "description": "Disallows `/// <reference path=>` imports (use ES6-style imports instead).",
+    "rationale": "\nUsing `/// <reference path=>` comments to load other files is outdated.\nUse ES6-style imports to reference other files.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "typescript"
   },
   {
     "ruleName": "no-require-imports",
@@ -674,7 +696,7 @@
   {
     "ruleName": "trailing-comma",
     "description": "Requires or disallows trailing commas in array and object literals, destructuring assignments and named imports.",
-    "optionsDescription": "\nOne argument which is an object with the keys `multiline` and `singleline`.\nBoth should be set to either `\"always\"` or `\"never\"`.\n\n* `\"multiline\"` checks multi-line object literals.\n* `\"singleline\"` checks single-line object literals.",
+    "optionsDescription": "\nOne argument which is an object with the keys `multiline` and `singleline`.\nBoth should be set to either `\"always\"` or `\"never\"`.\n\n* `\"multiline\"` checks multi-line object literals.\n* `\"singleline\"` checks single-line object literals.\n\nA array is considered \"multiline\" if its closing bracket is on a line\nafter the last array element. The same general logic is followed for\nobject literals and named import statements.",
     "options": {
       "type": "object",
       "properties": {
@@ -849,6 +871,17 @@
     "type": "typescript"
   },
   {
+    "ruleName": "use-isnan",
+    "description": "Enforces use of the `isNaN()` function to check for NaN references instead of a comparison to the `NaN` constant.",
+    "rationale": "\nSince `NaN !== NaN`, comparisons with regular operators will produce unexpected results.\nSo, instead of `if (myVar === NaN)`, do `if (isNaN(myVar))`.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
     "ruleName": "use-strict",
     "description": "Requires using ECMAScript 5's strict mode.",
     "optionsDescription": "\nTwo arguments may be optionally provided:\n\n* `check-module` checks that all top-level modules are using strict mode.\n* `check-function` checks that all top-level functions are using strict mode.",
@@ -870,7 +903,7 @@
   {
     "ruleName": "variable-name",
     "description": "Checks variable names for various errors.",
-    "optionsDescription": "\nFour arguments may be optionally provided:\n\n* `\"check-format\"`: allows only camelCased or UPPER_CASED variable names\n  * `\"allow-leading-underscore\"` allows underscores at the beginning (only has an effect if \"check-format\" specified)\n  * `\"allow-trailing-underscore\"` allows underscores at the end. (only has an effect if \"check-format\" specified)\n* `\"ban-keywords\"`: disallows the use of certain TypeScript keywords (`any`, `Number`, `number`, `String`,\n`string`, `Boolean`, `boolean`, `undefined`) as variable or parameter names.",
+    "optionsDescription": "\nFive arguments may be optionally provided:\n\n* `\"check-format\"`: allows only camelCased or UPPER_CASED variable names\n  * `\"allow-leading-underscore\"` allows underscores at the beginning (only has an effect if \"check-format\" specified)\n  * `\"allow-trailing-underscore\"` allows underscores at the end. (only has an effect if \"check-format\" specified)\n  * `\"allow-pascal-case` allows PascalCase in addtion to camelCase.\n* `\"ban-keywords\"`: disallows the use of certain TypeScript keywords (`any`, `Number`, `number`, `String`,\n`string`, `Boolean`, `boolean`, `undefined`) as variable or parameter names.",
     "options": {
       "type": "list",
       "listType": {
@@ -879,6 +912,7 @@
           "check-format",
           "allow-leading-underscore",
           "allow-trailing-underscore",
+          "allow-pascal-case",
           "ban-keywords"
         ]
       }

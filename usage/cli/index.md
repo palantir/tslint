@@ -30,7 +30,7 @@ Options:
 -r, --rules-dir       rules directory
 -s, --formatters-dir  formatters directory
 -e, --exclude         exclude globs from path expansion
--t, --format          output format (prose, json, verbose)  [default: "prose"]
+-t, --format          output format (prose, json, verbose, pmd, msbuild, checkstyle)    [default: "prose"]
 --test                test that tslint produces the correct output for the specified directory
 -v, --version         current version
 ```
@@ -91,7 +91,8 @@ tslint accepts the following command-line options:
     The formatter to use to format the results of the linter before
     outputting it to stdout or the file passed in --out. The core
     formatters are prose (human readable), json (machine readable)
-    and verbose. prose is the default if this option is not used. Additonal
+    and verbose. prose is the default if this option is not used.
+    Other built-in options include pmd, msbuild, and checkstyle. Additonal
     formatters can be added and used if the --formatters-dir option is set.
 
 --test:
