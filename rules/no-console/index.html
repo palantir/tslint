@@ -1,16 +1,22 @@
 ---
-ruleName: "no-console"
-description: "Bans the use of specified `console` methods."
-rationale: "In general, `console` methods aren't appropriate for production code."
+ruleName: no-console
+description: Bans the use of specified `console` methods.
+rationale: 'In general, `console` methods aren''t appropriate for production code.'
 optionsDescription: A list of method names to ban.
-options: 
+options:
   type: list
-  listType: 
+  listType:
     type: string
-optionExamples: 
-  - "[true, [\"log\", \"error\"]]"
+optionExamples:
+  - '[true, ["log", "error"]]'
 type: functionality
-optionsJSON: "{\n  \"type\": \"list\",\n  \"listType\": {\n    \"type\": \"string\"\n  }\n}"
+optionsJSON: |-
+  {
+    "type": "list",
+    "listType": {
+      "type": "string"
+    }
+  }
 layout: rule
-title: "Rule: no-console"
+title: 'Rule: no-console'
 ---

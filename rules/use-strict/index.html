@@ -1,18 +1,33 @@
 ---
-ruleName: "use-strict"
-description: "Requires using ECMAScript 5's strict mode."
-optionsDescription: "\nTwo arguments may be optionally provided:\n\n* `check-module` checks that all top-level modules are using strict mode.\n* `check-function` checks that all top-level functions are using strict mode."
-options: 
+ruleName: use-strict
+description: Requires using ECMAScript 5's strict mode.
+optionsDescription: |-
+
+  Two arguments may be optionally provided:
+
+  * `check-module` checks that all top-level modules are using strict mode.
+  * `check-function` checks that all top-level functions are using strict mode.
+options:
   type: list
-  listType: 
+  listType:
     type: enum
-    enumValues: 
-      - "check-module"
-      - "check-function"
-optionExamples: 
-  - "[true, \"check-module\"]"
+    enumValues:
+      - check-module
+      - check-function
+optionExamples:
+  - '[true, "check-module"]'
 type: functionality
-optionsJSON: "{\n  \"type\": \"list\",\n  \"listType\": {\n    \"type\": \"enum\",\n    \"enumValues\": [\n      \"check-module\",\n      \"check-function\"\n    ]\n  }\n}"
+optionsJSON: |-
+  {
+    "type": "list",
+    "listType": {
+      "type": "enum",
+      "enumValues": [
+        "check-module",
+        "check-function"
+      ]
+    }
+  }
 layout: rule
-title: "Rule: use-strict"
+title: 'Rule: use-strict'
 ---

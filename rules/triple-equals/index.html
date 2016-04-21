@@ -1,20 +1,35 @@
 ---
-ruleName: "triple-equals"
-description: "Requires `===` and `!==` in place of `==` and `!=`."
-optionsDescription: "\nTwo arguments may be optionally provided:\n\n* `\"allow-null-check\"` allows `==` and `!=` when comparing to `null`.\n* `\"allow-undefined-check\"` allows `==` and `!=` when comparing to `undefined`."
-options: 
+ruleName: triple-equals
+description: Requires `===` and `!==` in place of `==` and `!=`.
+optionsDescription: |-
+
+  Two arguments may be optionally provided:
+
+  * `"allow-null-check"` allows `==` and `!=` when comparing to `null`.
+  * `"allow-undefined-check"` allows `==` and `!=` when comparing to `undefined`.
+options:
   type: list
-  listType: 
+  listType:
     type: enum
-    enumValues: 
-      - "allow-null-check"
-      - "allow-undefined-check"
-optionExamples: 
-  - "true"
-  - "[true, \"allow-null-check\"]"
-  - "[true, \"allow-undefined-check\"]"
+    enumValues:
+      - allow-null-check
+      - allow-undefined-check
+optionExamples:
+  - 'true'
+  - '[true, "allow-null-check"]'
+  - '[true, "allow-undefined-check"]'
 type: functionality
-optionsJSON: "{\n  \"type\": \"list\",\n  \"listType\": {\n    \"type\": \"enum\",\n    \"enumValues\": [\n      \"allow-null-check\",\n      \"allow-undefined-check\"\n    ]\n  }\n}"
+optionsJSON: |-
+  {
+    "type": "list",
+    "listType": {
+      "type": "enum",
+      "enumValues": [
+        "allow-null-check",
+        "allow-undefined-check"
+      ]
+    }
+  }
 layout: rule
-title: "Rule: triple-equals"
+title: 'Rule: triple-equals'
 ---

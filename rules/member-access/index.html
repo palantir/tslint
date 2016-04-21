@@ -1,20 +1,35 @@
 ---
-ruleName: "member-access"
+ruleName: member-access
 description: Requires explicit visibility declarations for class members.
 rationale: Explicit visibility declarations can make code more readable and accessible for those new to TS.
-optionsDescription: "\nTwo arguments may be optionally provided:\n\n* `\"check-accessor\"` enforces explicit visibility on get/set accessors (can only be public)\n* `\"check-constructor\"`  enforces explicit visibility on constructors (can only be public)"
-options: 
+optionsDescription: |-
+
+  Two arguments may be optionally provided:
+
+  * `"check-accessor"` enforces explicit visibility on get/set accessors (can only be public)
+  * `"check-constructor"`  enforces explicit visibility on constructors (can only be public)
+options:
   type: list
-  listType: 
+  listType:
     type: enum
-    enumValues: 
-      - "check-accessor"
-      - "check-constructor"
-optionExamples: 
-  - "true"
-  - "[true, \"check-accessor\"]"
+    enumValues:
+      - check-accessor
+      - check-constructor
+optionExamples:
+  - 'true'
+  - '[true, "check-accessor"]'
 type: typescript
-optionsJSON: "{\n  \"type\": \"list\",\n  \"listType\": {\n    \"type\": \"enum\",\n    \"enumValues\": [\n      \"check-accessor\",\n      \"check-constructor\"\n    ]\n  }\n}"
+optionsJSON: |-
+  {
+    "type": "list",
+    "listType": {
+      "type": "enum",
+      "enumValues": [
+        "check-accessor",
+        "check-constructor"
+      ]
+    }
+  }
 layout: rule
-title: "Rule: member-access"
+title: 'Rule: member-access'
 ---

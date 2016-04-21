@@ -1,13 +1,17 @@
 ---
-ruleName: "no-arg"
-description: "Disallows use of `arguments.callee`."
-rationale: "\nUsing `arguments.callee` makes various performance optimizations impossible.\nSee [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/arguments/callee)\nfor more details on why to avoid `arguments.callee`."
+ruleName: no-arg
+description: Disallows use of `arguments.callee`.
+rationale: |-
+
+  Using `arguments.callee` makes various performance optimizations impossible.
+  See [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/arguments/callee)
+  for more details on why to avoid `arguments.callee`.
 optionsDescription: Not configurable.
 options: {}
-optionExamples: 
-  - "true"
+optionExamples:
+  - 'true'
 type: functionality
-optionsJSON: "{}"
+optionsJSON: '{}'
 layout: rule
-title: "Rule: no-arg"
+title: 'Rule: no-arg'
 ---

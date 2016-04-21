@@ -1,18 +1,30 @@
 ---
-ruleName: "interface-name"
-description: "Requires interface names to begin with a capital 'I'"
+ruleName: interface-name
+description: Requires interface names to begin with a capital 'I'
 rationale: Makes it easy to differentitate interfaces from regular classes at a glance.
-optionsDescription: "\nOne of the following two options must be provided:\n\n* `\"always-prefix\"` requires interface names to start with an \"I\"\n* `\"never-prefix\"` requires interface names to not have an \"I\" prefix"
-options: 
+optionsDescription: |-
+
+  One of the following two options must be provided:
+
+  * `"always-prefix"` requires interface names to start with an "I"
+  * `"never-prefix"` requires interface names to not have an "I" prefix
+options:
   type: enum
-  enumValues: 
-    - "always-prefix"
-    - "never-prefix"
-optionExamples: 
-  - "[true, \"always-prefix\"]"
-  - "[true, \"never-prefix\"]"
+  enumValues:
+    - always-prefix
+    - never-prefix
+optionExamples:
+  - '[true, "always-prefix"]'
+  - '[true, "never-prefix"]'
 type: style
-optionsJSON: "{\n  \"type\": \"enum\",\n  \"enumValues\": [\n    \"always-prefix\",\n    \"never-prefix\"\n  ]\n}"
+optionsJSON: |-
+  {
+    "type": "enum",
+    "enumValues": [
+      "always-prefix",
+      "never-prefix"
+    ]
+  }
 layout: rule
-title: "Rule: interface-name"
+title: 'Rule: interface-name'
 ---

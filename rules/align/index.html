@@ -1,20 +1,37 @@
 ---
 ruleName: align
 description: Enforces vertical alignment.
-rationale: "Helps maintain a readable, consistent style in your codebase."
-optionsDescription: "\nThree arguments may be optionally provided:\n\n* `\"parameters\"` checks alignment of function parameters.\n* `\"arguments\"` checks alignment of function call arguments.\n* `\"statements\"` checks alignment of statements."
-options: 
+rationale: 'Helps maintain a readable, consistent style in your codebase.'
+optionsDescription: |-
+
+  Three arguments may be optionally provided:
+
+  * `"parameters"` checks alignment of function parameters.
+  * `"arguments"` checks alignment of function call arguments.
+  * `"statements"` checks alignment of statements.
+options:
   type: list
-  listType: 
+  listType:
     type: enum
-    enumValues: 
+    enumValues:
       - arguments
       - parameters
       - statements
-optionExamples: 
-  - "[true, \"parameters\", \"statements\"]"
+optionExamples:
+  - '[true, "parameters", "statements"]'
 type: style
-optionsJSON: "{\n  \"type\": \"list\",\n  \"listType\": {\n    \"type\": \"enum\",\n    \"enumValues\": [\n      \"arguments\",\n      \"parameters\",\n      \"statements\"\n    ]\n  }\n}"
+optionsJSON: |-
+  {
+    "type": "list",
+    "listType": {
+      "type": "enum",
+      "enumValues": [
+        "arguments",
+        "parameters",
+        "statements"
+      ]
+    }
+  }
 layout: rule
-title: "Rule: align"
+title: 'Rule: align'
 ---

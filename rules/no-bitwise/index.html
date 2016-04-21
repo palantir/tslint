@@ -1,14 +1,23 @@
 ---
-ruleName: "no-bitwise"
+ruleName: no-bitwise
 description: Disallows bitwise operators.
-descriptionDetails: "\nSpecifically, the following bitwise operators are banned:\n`&`, `&=`, `|`, `|=`,\n`^`, `^=`, `<<`, `<<=`,\n`>>`, `>>=`, `>>>`, `>>>=`, and `~`.\nThis rule does not ban the use of `&` and `|` for intersection and union types."
-rationale: "\nBitwise operators are often typos - for example `bool1 & bool2` instead of `bool1 && bool2`.\nThey also can be an indicator of overly clever code which decreases maintainability."
+descriptionDetails: |-
+
+  Specifically, the following bitwise operators are banned:
+  `&`, `&=`, `|`, `|=`,
+  `^`, `^=`, `<<`, `<<=`,
+  `>>`, `>>=`, `>>>`, `>>>=`, and `~`.
+  This rule does not ban the use of `&` and `|` for intersection and union types.
+rationale: |-
+
+  Bitwise operators are often typos - for example `bool1 & bool2` instead of `bool1 && bool2`.
+  They also can be an indicator of overly clever code which decreases maintainability.
 optionsDescription: Not configurable.
 options: {}
-optionExamples: 
-  - "true"
+optionExamples:
+  - 'true'
 type: functionality
-optionsJSON: "{}"
+optionsJSON: '{}'
 layout: rule
-title: "Rule: no-bitwise"
+title: 'Rule: no-bitwise'
 ---

@@ -1,22 +1,45 @@
 ---
 ruleName: typedef
 description: Requires type definitions to exist.
-optionsDescription: "\nSix arguments may be optionally provided:\n\n* `\"call-signature\"` checks return type of functions.\n* `\"parameter\"` checks type specifier of function parameters for non-arrow functions.\n* `\"arrow-parameter\"` checks type specifier of function parameters for arrow functions.\n* `\"property-declaration\"` checks return types of interface properties.\n* `\"variable-declaration\"` checks variable declarations.\n* `\"member-variable-declaration\"` checks member variable declarations."
-options: 
+optionsDescription: |-
+
+  Six arguments may be optionally provided:
+
+  * `"call-signature"` checks return type of functions.
+  * `"parameter"` checks type specifier of function parameters for non-arrow functions.
+  * `"arrow-parameter"` checks type specifier of function parameters for arrow functions.
+  * `"property-declaration"` checks return types of interface properties.
+  * `"variable-declaration"` checks variable declarations.
+  * `"member-variable-declaration"` checks member variable declarations.
+options:
   type: list
-  listType: 
+  listType:
     type: enum
-    enumValues: 
-      - "call-signature"
+    enumValues:
+      - call-signature
       - parameter
-      - "arrow-parameter"
-      - "property-declaration"
-      - "variable-declaration"
-      - "member-variable-declaration"
-optionExamples: 
-  - "[true, \"call-signature\", \"parameter\", \"member-variable-declaration\"]"
+      - arrow-parameter
+      - property-declaration
+      - variable-declaration
+      - member-variable-declaration
+optionExamples:
+  - '[true, "call-signature", "parameter", "member-variable-declaration"]'
 type: typescript
-optionsJSON: "{\n  \"type\": \"list\",\n  \"listType\": {\n    \"type\": \"enum\",\n    \"enumValues\": [\n      \"call-signature\",\n      \"parameter\",\n      \"arrow-parameter\",\n      \"property-declaration\",\n      \"variable-declaration\",\n      \"member-variable-declaration\"\n    ]\n  }\n}"
+optionsJSON: |-
+  {
+    "type": "list",
+    "listType": {
+      "type": "enum",
+      "enumValues": [
+        "call-signature",
+        "parameter",
+        "arrow-parameter",
+        "property-declaration",
+        "variable-declaration",
+        "member-variable-declaration"
+      ]
+    }
+  }
 layout: rule
-title: "Rule: typedef"
+title: 'Rule: typedef'
 ---
