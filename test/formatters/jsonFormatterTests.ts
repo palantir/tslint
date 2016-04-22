@@ -82,7 +82,7 @@ describe("JSON Formatter", () => {
                 character: 0,
             },
             ruleName: "full-name",
-        }, ];
+        }];
         /* tslint:enable:object-literal-sort-keys */
 
         const actualResult = JSON.parse(formatter.format(failures));

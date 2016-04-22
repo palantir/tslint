@@ -24,7 +24,7 @@ describe("Enable and Disable Rules", () => {
         const validConfiguration = {rules: {
             "variable-name": true,
             "quotemark": [true, "double"],
-        }, };
+        }};
 
         const relativePath = join("test", "files", "enabledisable.test.ts");
         const source = readFileSync(relativePath, "utf8");
