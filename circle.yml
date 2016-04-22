@@ -1,0 +1,3 @@
+dependencies:
+  pre:
+    - case $CIRCLE_NODE_INDEX in 0) nvm use 0.10 ;; 1) nvm use 0.12 ;; 2) nvm use 4.2 ;; 3) nvm use 5.5 ;; esac

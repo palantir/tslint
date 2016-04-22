@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "triple-equals": [true, "allow-undefined-check"]
+  }
+}

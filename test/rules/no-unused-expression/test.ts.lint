@@ -1,6 +1,25 @@
+"use strict";
+'use asm';
+"ngInject";
+'';
+
 function fun1() {
+    "use strict";
+    'someOtherDirective';
     return 0;
 }
+
+(function() { "directive";
+'foo'
+'directive2'
+console.log('foo');
+'notdirective';
+~~~~~~~~~~~~~~~ [0]
+})();
+
+const a = () => {
+'use strict'; "use cool"; "use lint"; var a = 1; "notdirective"; }
+                                                 ~~~~~~~~~~~~~~~ [0]
 
 function fun2(a: number) {
     return 0;
@@ -8,6 +27,12 @@ function fun2(a: number) {
 
 function fun3(a: number, b: number) {
     return 0;
+}
+
+namespace Fam { 'use strict'; 'use cool'; }
+module Bam { 'use strict'; 'use cool'; }
+namespace Az.Bz.Cz.Dz { 
+    'ngInject';
 }
 
 // valid code:
@@ -27,8 +52,6 @@ i = fun1() + fun1();
 j = (j === 0 ? 5 : 6);
 (j === 0 ? fun1() : fun2(j));
 (a => 5)(4);
-"use strict";
-
 var obj = {};
 delete obj.key;
 function* g(): Iterable<number> {

@@ -1,0 +1,7 @@
+{
+  "extends": "tslint-test-custom-rules",
+  "rules": {
+    "rule-two": true,
+    "rule-three": false
+  }
+}

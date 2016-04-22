@@ -19,7 +19,7 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
-    public static FAILURE_STRING = "forbidden var keyword";
+    public static FAILURE_STRING = "forbidden 'var' keyword, use 'let' or 'const' instead";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const noVarKeywordWalker = new NoVarKeywordWalker(sourceFile, this.getOptions());

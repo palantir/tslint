@@ -1,6 +1,6 @@
 [![NPM version](https://badge.fury.io/js/tslint.svg)](http://badge.fury.io/js/tslint)
 [![Downloads](http://img.shields.io/npm/dm/tslint.svg)](https://npmjs.org/package/tslint)
-[![Linux Build Status](https://travis-ci.org/palantir/tslint.svg?branch=master)](https://travis-ci.org/palantir/tslint)
+[![Circle CI](https://circleci.com/gh/palantir/tslint.svg?style=svg)](https://circleci.com/gh/palantir/tslint)
 [![Windows Build Status](https://ci.appveyor.com/api/projects/status/github/palantir/tslint?svg=true&branch=master)](https://ci.appveyor.com/project/ashwinr/tslint)
 [![Join the chat at https://gitter.im/palantir/tslint](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/palantir/tslint?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
@@ -14,7 +14,7 @@ Supports:
 - custom rules
 - custom formatters
 - inline disabling / enabling of rules
-- integration with [grunt](https://github.com/palantir/grunt-tslint), [gulp](https://github.com/panuhorsmalahti/gulp-tslint), [atom](https://github.com/AtomLinter/linter-tslint), [eclipse](https://github.com/palantir/eclipse-tslint), [sublime](https://packagecontrol.io/packages/SublimeLinter-contrib-tslint), [vim](https://github.com/scrooloose/syntastic), [visual studio](https://visualstudiogallery.msdn.microsoft.com/6edc26d4-47d8-4987-82ee-7c820d79be1d), [webstorm](https://www.jetbrains.com/webstorm/help/tslint.html), and more
+- integration with [msbuild](https://github.com/joshuakgoldberg/tslint.msbuild), [grunt](https://github.com/palantir/grunt-tslint), [gulp](https://github.com/panuhorsmalahti/gulp-tslint), [atom](https://github.com/AtomLinter/linter-tslint), [eclipse](https://github.com/palantir/eclipse-tslint), [sublime](https://packagecontrol.io/packages/SublimeLinter-contrib-tslint), [vim](https://github.com/scrooloose/syntastic), [visual studio](https://visualstudiogallery.msdn.microsoft.com/6edc26d4-47d8-4987-82ee-7c820d79be1d), [vscode](https://marketplace.visualstudio.com/items?itemName=eg2.tslint), [webstorm](https://www.jetbrains.com/webstorm/help/tslint.html), and more
 
 Table of Contents
 ------------
@@ -99,6 +99,10 @@ tslint accepts the following command-line options:
     A filename or glob which indicates files to exclude from linting.
     This option can be supplied multiple times if you need multiple
     globs to indicate which files to exclude.
+
+-n, --force:
+    Return status code 0 even if there are any lint errors.
+    Useful while running as npm script.
 
 -i, --init:
     Generates a tslint.json config file in the current working directory.
@@ -195,6 +199,9 @@ A sample configuration file with all options is available [here](https://github.
     * `"tabs"` enforces consistent tabs.
     * `"spaces"` enforces consistent spaces.
 * `interface-name` enforces the rule that interface names must begin with a capital 'I'
+* `interface-name` enforces consistent internace name. Rule options:
+    * `"always-prefix"` enforces interface names must have an 'I' prefix
+    * `"never-prefix"` enforces interface name must not have an 'I' prefix
 * `jsdoc-format` enforces basic format rules for jsdoc comments -- comments starting with `/**`
     * each line contains an asterisk and asterisks must be aligned
     * each asterisk must be followed by either a space or a newline (except for the first and the last)
@@ -267,6 +274,7 @@ A sample configuration file with all options is available [here](https://github.
     * `"singleline"` checks single-line object literals.
 * `triple-equals` enforces `===` and `!==` in favor of `==` and `!=`.
     * `"allow-null-check"` allows `==` and `!=` when comparing to `null`.
+    * `"allow-undefined-check"` allows `==` and `!=` when comparing to `undefined`.
 * `typedef` enforces type definitions to exist. Rule options:
     * `"call-signature"` checks return type of functions.
     * `"parameter"` checks type specifier of function parameters for non-arrow functions.

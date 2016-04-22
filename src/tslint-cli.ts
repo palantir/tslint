@@ -23,9 +23,7 @@ import * as Linter from "./tslint";
 import {
     CONFIG_FILENAME,
     DEFAULT_CONFIG,
-    findConfigurationPath,
-    getRulesDirectories,
-    loadConfigurationFromPath,
+    findConfiguration,
 } from "./configuration";
 import {consoleTestResultHandler, runTest} from "./test";
 
@@ -45,6 +43,10 @@ let processed = optimist
         "c": {
             alias: "config",
             describe: "configuration file",
+        },
+        "force": {
+            describe: "return status code 0 even if there are lint errors",
+            "type": "boolean",
         },
         "h": {
             alias: "help",
@@ -142,6 +144,10 @@ tslint accepts the following commandline options:
         This option can be supplied multiple times if you need multiple
         globs to indicate which files to exclude.
 
+    --force:
+        Return status code 0 even if there are any lint errors.
+        Useful while running as npm script.
+
     -i, --init:
         Generates a tslint.json config file in the current working directory.
 
@@ -191,6 +197,7 @@ if (argv.c && !fs.existsSync(argv.c)) {
     console.error("Invalid option for configuration: " + argv.c);
     process.exit(1);
 }
+const possibleConfigAbsolutePath = argv.c != null ? path.resolve(argv.c) : null;
 
 const processFile = (file: string) => {
     if (!fs.existsSync(file)) {
@@ -199,30 +206,20 @@ const processFile = (file: string) => {
     }
 
     const contents = fs.readFileSync(file, "utf8");
-    const configurationPath = findConfigurationPath(argv.c, file);
-    const configuration = loadConfigurationFromPath(configurationPath);
-
-    // if configurationPath is null, this will be set to ".", which is the current directory and is fine
-    const configurationDir = path.dirname(configurationPath);
-
-    const rulesDirectories = getRulesDirectories(configuration.rulesDirectory, configurationDir);
-
-    if (argv.r != null) {
-        rulesDirectories.push(argv.r);
-    }
+    const configuration = findConfiguration(possibleConfigAbsolutePath, file);
 
     const linter = new Linter(file, contents, {
-        configuration: configuration,
+        configuration,
         formatter: argv.t,
         formattersDirectory: argv.s,
-        rulesDirectory: rulesDirectories,
+        rulesDirectory: argv.r,
     });
 
     const lintResult = linter.lint();
 
     if (lintResult.failureCount > 0) {
         outputStream.write(lintResult.output, () => {
-            process.exit(2);
+            process.exit(argv.force ? 0 : 2);
         });
     }
 };

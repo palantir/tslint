@@ -43,10 +43,8 @@ class NoUnusedExpressionWalker extends Lint.RuleWalker {
             const isValidStandaloneExpression = kind === ts.SyntaxKind.DeleteExpression
                 || kind === ts.SyntaxKind.YieldExpression
                 || kind === ts.SyntaxKind.AwaitExpression;
-            const isValidStringExpression = kind === ts.SyntaxKind.StringLiteral
-                && (expression.getText() === '"use strict"' || expression.getText() === "'use strict'");
 
-            if (!isValidStandaloneExpression && !isValidStringExpression) {
+            if (!isValidStandaloneExpression && !isDirective(node)) {
                 this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
             }
         }
@@ -117,5 +115,28 @@ class NoUnusedExpressionWalker extends Lint.RuleWalker {
         // if either expression is unused, then that expression's branch is a no-op unless it's
         // being assigned to something or passed to a function, so consider the entire expression unused
         this.expressionIsUnused = firstExpressionIsUnused || secondExpressionIsUnused;
+    }
+}
+
+function isDirective(node: ts.Node, checkPreviousSiblings = true): boolean {
+    const { parent } = node;
+    const grandParentKind = parent.parent == null ? null : parent.parent.kind;
+    const isStringExpression = node.kind === ts.SyntaxKind.ExpressionStatement
+        && (node as ts.ExpressionStatement).expression.kind === ts.SyntaxKind.StringLiteral;
+    const parentIsSourceFile = parent.kind === ts.SyntaxKind.SourceFile;
+    const parentIsNSBody = parent.kind === ts.SyntaxKind.ModuleBlock;
+    const parentIsFunctionBody = parent.kind === ts.SyntaxKind.Block
+        && [ts.SyntaxKind.ArrowFunction, ts.SyntaxKind.FunctionExpression, ts.SyntaxKind.FunctionDeclaration].indexOf(grandParentKind) > -1;
+
+    if (!(parentIsSourceFile || parentIsFunctionBody || parentIsNSBody) || !isStringExpression) {
+        return false;
+    }
+
+    if (checkPreviousSiblings) {
+        const siblings: ts.Node[] = [];
+        ts.forEachChild(node.parent, child => { siblings.push(child); });
+        return siblings.slice(0, siblings.indexOf(node)).every((n) => isDirective(n, false));
+    } else {
+        return true;
     }
 }

@@ -11,6 +11,7 @@
         "rewriteTsconfig": false
     },
     "filesGlob": [
+        "../custom-typings/**/*.d.ts",
         "../typings/**/*.d.ts",
         "./typings/**/*.d.ts",
         "../src/**/*.ts",
@@ -19,6 +20,7 @@
         "./rule-tester/*.ts"
     ],
     "files": [
+        "../custom-typings/path-is-absolute.d.ts",
         "../typings/colors/colors.d.ts",
         "../typings/diff/diff.d.ts",
         "../typings/findup-sync/findup-sync.d.ts",
@@ -118,13 +120,16 @@
         "../src/test/utils.ts",
         "../src/tslint-cli.ts",
         "../src/tslint.ts",
+        "../src/utils.ts",
         "assert.ts",
+        "configurationTests.ts",
         "eofLineRuleTests.ts",
         "lint.ts",
         "ruleDisableEnableTests.ts",
         "ruleLoaderTests.ts",
         "ruleTestRunner.ts",
         "utils.ts",
+        "utilsTests.ts",
         "formatters/externalFormatterTest.ts",
         "formatters/jsonFormatterTests.ts",
         "formatters/msbuildFormatterTests.ts",

@@ -1,0 +1,17 @@
+// valid code
+interface Index {
+}
+
+interface I {
+}
+
+interface IDBFactory {
+}
+
+interface ABC {
+}
+
+// invalid code
+interface IOptions {
+          ~~~~~~~~   [interface name must not have an "I" prefix]
+}

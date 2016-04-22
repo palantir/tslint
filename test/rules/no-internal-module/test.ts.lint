@@ -1,6 +1,9 @@
 namespace foo {
 }
 
+// valid, special syntax for augmenting global
+declare global { }
+
 module bar {
 ~~~~~~~~~~~~
 }

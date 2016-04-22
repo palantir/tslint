@@ -1,6 +1,64 @@
 Change Log
 ===
 
+v3.7.4
+---
+* Stable release containing changes from the last dev release (v3.7.0-dev.5)
+
+v3.7.0-dev.5
+---
+* [bugfix] Allow JS directives in namespaces (#1115)
+
+v3.7.3
+---
+* Stable release containing changes from the last dev release (v3.7.0-dev.4)
+
+v3.7.0-dev.4
+---
+* [bugfix] Downgrade `findup-sync` dependency (#1108)
+
+v3.7.2
+---
+* Stable release containing changes from the last dev release (v3.7.0-dev.3)
+
+v3.7.0-dev.3
+---
+* [bugfix] `findConfigurationPath` always returns an absolute path (#1093)
+* [bugfix] Update `findup-sync` dependency (#1080)
+* [bugfix] `declare global` no longer triggers `no-internal-module` rule (#1069)
+* [bugfix] Valid JS directives no longer trigger `no-unused-expression` rule (#1050)
+
+v3.7.1
+---
+* Stable release containing changes from the last dev release
+
+v3.7.0-dev.2
+---
+* [bugfix] Improve handling of paths provided via the -c CLI option (#1083)
+
+v3.7.0
+---
+* Stable release containing changes from the last dev release
+
+v3.7.0-dev.1
+---
+* [enhancement] `extends` field for `tslint.json` files (#997)
+* [enhancement] `--force` CLI option (#1059)
+* [enhancement] Improve how `Linter` class handles configurations with a `rulesDirectory` field (#1035)
+* [new-rule] `no-angle-bracket-type-assertion` rule (#639)
+* [new-rule-option] "allow-undefined-check" option for `triple-equals` rule (#602)
+* [new-rule-option] "always-prefix" and "never-prefix" option for `interface-name` rule (#512)
+
+Thanks to our contributors!
+* @Arnavion
+* @chrismbarr
+* @ChrisPearce
+* @JoshuaKGoldberg
+* @patsissonso
+* @sasidhar
+* @unional
+* @vvakame
+
 v3.6.0
 ---
 * Stable release containing changes from the last dev release

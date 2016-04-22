@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2013 Palantir Technologies, Inc.
+ * Copyright 2016 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,20 @@
  * limitations under the License.
  */
 
-export * from "../src/lint";
+export function arrayify<T>(arg: T | T[]): T[] {
+    if (Array.isArray(arg)) {
+        return arg;
+    } else if (arg != null) {
+        return [arg];
+    } else {
+        return [];
+    }
+}
 
-import * as TestUtils from "./utils";
-
-export {TestUtils};
+export function objectify(arg: any): any {
+    if (typeof arg === "object" && arg != null) {
+        return arg;
+    } else {
+        return {};
+    }
+}
