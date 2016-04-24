@@ -130,6 +130,9 @@ function isDirective(node: ts.Node, checkPreviousSiblings = true): boolean {
         ts.SyntaxKind.FunctionExpression,
         ts.SyntaxKind.FunctionDeclaration,
         ts.SyntaxKind.MethodDeclaration,
+        ts.SyntaxKind.Constructor,
+        ts.SyntaxKind.GetAccessor,
+        ts.SyntaxKind.SetAccessor,
     ].indexOf(grandParentKind) > -1;
 
     if (!(parentIsSourceFile || parentIsFunctionBody || parentIsNSBody) || !isStringExpression) {
