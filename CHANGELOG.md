@@ -1,6 +1,11 @@
 Change Log
 ===
 
+v3.8.0-dev.1
+---
+* [bugfix] Allow JS directives at the start of constructors, getters, and setters (#1159)
+* [bugfix] Remove accidentally included performance profiles from published NPM artifact (#1160)
+
 v3.8.0
 ---
 * Stable release containing changes from the last dev release (v3.8.0-dev.0)
