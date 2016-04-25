@@ -1,6 +1,10 @@
 Change Log
 ===
 
+v3.8.0
+---
+* Stable release containing changes from the last dev release (v3.8.0-dev.0)
+
 v3.8.0-dev.0
 ---
 * [new-rule] `no-invalid-this` rule (#1105)
