@@ -242,7 +242,7 @@ A sample configuration file with all options is available [here](https://github.
 * `no-internal-module` disallows internal `module` (use `namespace` instead).
 * `no-invalid-this` disallows using the `this` keyword outside of classes.
 * `no-namespace` disallows both internal `module`s and `namespace`, but allows ES6-style external modules.
-    * `allow-declarations` Allow `declare module ... {}` to describe external APIs.
+    * `allow-declarations` allows `declare namespace ... {}` to describe external APIs.
 * `no-null-keyword` disallows use of the `null` keyword literal.
 * `no-reference` disallows `/// <reference path=>` imports (use ES6-style imports instead).
 * `no-require-imports` disallows invocation of `require()` (use ES6-style imports instead).
