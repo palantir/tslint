@@ -123,3 +123,14 @@ export function isNodeFlagSet(node: ts.Node, flagToCheck: ts.NodeFlags): boolean
     return (node.flags & flagToCheck) !== 0;
     /* tslint:enable:no-bitwise */
 }
+
+
+/**
+ * Returns true if decl is a nested module declaration, i.e. represents a segment of a dotted module path.
+ */
+export function isNestedModuleDeclaration(decl: ts.ModuleDeclaration) {
+    // in a declaration expression like 'module a.b.c' - 'a' is the top level module declaration node and 'b' and 'c'
+    // are nested therefore we can depend that a node's position will only match with its name's position for nested
+    // nodes
+    return decl.name.pos === decl.pos;
+}
