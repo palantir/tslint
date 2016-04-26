@@ -45,6 +45,10 @@ class Linter {
     private options: ILinterOptions;
 
     constructor(fileName: string, source: string, options: ILinterOptions) {
+        if (typeof options !== "object") {
+            throw new Error("Unknown Linter options type: " + typeof options);
+        }
+
         this.fileName = fileName;
         this.source = source;
         this.options = options;
