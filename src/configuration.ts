@@ -19,6 +19,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as findup from "findup-sync";
 import * as pathIsAbsolute from "path-is-absolute";
+import * as resolve from "resolve";
 
 import {arrayify, objectify, stripComments} from "./utils";
 
@@ -173,7 +174,7 @@ function resolveConfigurationPath(relativeFilePath: string, relativeTo?: string)
         resolvedPath = getRelativePath(relativeFilePath, relativeTo);
     } else {
         try {
-            resolvedPath = require.resolve(relativeFilePath);
+            resolvedPath = resolve.sync(relativeFilePath, { basedir: relativeTo });
         } catch (err) {
             throw new Error(`Invalid "extends" configuration value - could not require "${relativeFilePath}". ` +
                 "Review the Node lookup algorithm (https://nodejs.org/api/modules.html#modules_all_together) " +
