@@ -75,7 +75,7 @@ let processed = optimist
         "t": {
             alias: "format",
             default: "prose",
-            describe: "output format (prose, json, verbose)",
+            describe: "output format (prose, json, verbose, pmd, msbuild, checkstyle)",
         },
         "test": {
             describe: "test that tslint produces the correct output for the specified directory",
@@ -174,7 +174,8 @@ tslint accepts the following commandline options:
         The formatter to use to format the results of the linter before
         outputting it to stdout or the file passed in --out. The core
         formatters are prose (human readable), json (machine readable)
-        and verbose. prose is the default if this option is not used. Additonal
+        and verbose. prose is the default if this option is not used.
+        Other built-in options include pmd, msbuild, and checkstyle. Additonal
         formatters can be added and used if the --formatters-dir option is set.
 
     --test:

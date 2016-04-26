@@ -6,7 +6,13 @@
       "arguments",
       "statements"
     ],
-    "ban": false,
+    "ban": [
+        true,
+        [ "_", "forEach" ],
+        [ "_", "each" ],
+        [ "$", "each" ],
+        [ "angular", "forEach" ]
+    ],
     "class-name": true,
     "comment-format": [
       true,
@@ -20,7 +26,10 @@
       true,
       "spaces"
     ],
-    "interface-name": true,
+    "interface-name": [
+      true,
+      "always-prefix"
+    ],
     "jsdoc-format": true,
     "label-position": true,
     "label-undefined": true,
@@ -58,7 +67,9 @@
     "no-eval": true,
     "no-inferrable-types": false,
     "no-internal-module": true,
+    "no-invalid-this": true,
     "no-null-keyword": true,
+    "no-reference": true,
     "no-require-imports": true,
     "no-shadowed-variable": true,
     "no-string-literal": true,
@@ -96,7 +107,8 @@
     ],
     "triple-equals": [
       true,
-      "allow-null-check"
+      "allow-null-check",
+      "allow-undefined-check"
     ],
     "typedef": [
       true,
@@ -124,6 +136,7 @@
         "variable-declaration": "space"
       }
     ],
+    "use-isnan": true,
     "use-strict": [
       true,
       "check-module",

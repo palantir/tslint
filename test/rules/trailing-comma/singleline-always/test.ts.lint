@@ -11,6 +11,7 @@ var x = [{
     d: 34,
     c: (a + b)
 }];
+~   [missing trailing comma]
 
 var s = {
     sA: 6,
