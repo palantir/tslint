@@ -44,6 +44,13 @@ export interface LintResult {
     output: string;
 }
 
+export interface ILinterOptionsRaw {
+    configuration?: any;
+    formatter?: string;
+    formattersDirectory?: string;
+    rulesDirectory?: string | string[];
+}
+
 export interface ILinterOptions {
     configuration: any;
     formatter: string;
