@@ -170,9 +170,13 @@ function resolveConfigurationPath(relativeFilePath: string, relativeTo?: string)
     try {
         return resolve.sync(relativeFilePath, { basedir });
     } catch (err) {
-        throw new Error(`Invalid "extends" configuration value - could not require "${relativeFilePath}". ` +
-            "Review the Node lookup algorithm (https://nodejs.org/api/modules.html#modules_all_together) " +
-            "for the approximate method TSLint uses to find the referenced configuration file.");
+        try {
+            return require.resolve(relativeFilePath);
+        } catch (err) {
+            throw new Error(`Invalid "extends" configuration value - could not require "${relativeFilePath}". ` +
+                "Review the Node lookup algorithm (https://nodejs.org/api/modules.html#modules_all_together) " +
+                "for the approximate method TSLint uses to find the referenced configuration file.");
+        }
     }
 }
 
