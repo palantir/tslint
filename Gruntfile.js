@@ -31,7 +31,7 @@ module.exports = function (grunt) {
                 cmd: "npm",
                 args: ["install"],
                 options: {
-                  cwd: "./test/config"
+                    cwd: "./test/config"
                 }
             },
             testBin: {
