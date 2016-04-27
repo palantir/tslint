@@ -70,10 +70,10 @@ module.exports = function (grunt) {
             }
         },
 
-        'npm-command': {
+        "npm-command": {
             test: {
                 options: {
-                    cwd: './test/config'
+                    cwd: "./test/config"
                 }
             }
         }
@@ -96,7 +96,7 @@ module.exports = function (grunt) {
     ]);
     grunt.registerTask("test", [
         "clean:test",
-        "run:installTestDeps",
+        "npm-command:test",
         "ts:test",
         "tslint:test",
         "mochaTest",
