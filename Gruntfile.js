@@ -27,6 +27,13 @@ module.exports = function (grunt) {
         },
 
         run: {
+            installTestDeps: {
+                cmd: "npm",
+                args: ["install"],
+                options: {
+                  cwd: "./test/config"
+                }
+            },
             testBin: {
                 cmd: "./test/check-bin.sh",
                 options: {quiet: Infinity}
@@ -87,6 +94,7 @@ module.exports = function (grunt) {
     ]);
     grunt.registerTask("test", [
         "clean:test",
+        "run:installTestDeps",
         "ts:test",
         "tslint:test",
         "mochaTest",
