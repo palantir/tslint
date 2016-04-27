@@ -27,13 +27,6 @@ module.exports = function (grunt) {
         },
 
         run: {
-            installTestDeps: {
-                cmd: "npm",
-                args: ["install"],
-                options: {
-                    cwd: "./test/config"
-                }
-            },
             testBin: {
                 cmd: "./test/check-bin.sh",
                 options: {quiet: Infinity}
@@ -75,6 +68,14 @@ module.exports = function (grunt) {
             test: {
                 tsconfig: "test/tsconfig.json"
             }
+        },
+
+        'npm-command': {
+            test: {
+                options: {
+                    cwd: './test/config'
+                }
+            }
         }
     });
 
@@ -85,6 +86,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-run");
     grunt.loadNpmTasks("grunt-tslint");
     grunt.loadNpmTasks("grunt-ts");
+    grunt.loadNpmTasks("grunt-npm-command");
 
     // register custom tasks
     grunt.registerTask("core", [
