@@ -39,6 +39,7 @@
     "grunt-ts": "^5.1.0",
     "grunt-tslint": "latest",
     "mocha": "^2.2.5",
+    "npm": "^3.8.7",
     "tslint": "latest",
     "typescript": "latest"
   },
