@@ -20,7 +20,6 @@
         "./rule-tester/*.ts"
     ],
     "files": [
-        "../custom-typings/path-is-absolute.d.ts",
         "../custom-typings/resolve.d.ts",
         "../typings/colors/colors.d.ts",
         "../typings/diff/diff.d.ts",

@@ -25,7 +25,6 @@
     "findup-sync": "~0.3.0",
     "glob": "^6.0.1",
     "optimist": "~0.6.0",
-    "path-is-absolute": "^1.0.0",
     "resolve": "^1.1.7",
     "underscore.string": "~3.1.1"
   },
