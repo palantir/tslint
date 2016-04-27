@@ -18,7 +18,6 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as findup from "findup-sync";
-import * as pathIsAbsolute from "path-is-absolute";
 import * as resolve from "resolve";
 
 import {arrayify, objectify, stripComments} from "./utils";
@@ -167,22 +166,14 @@ export function loadConfigurationFromPath(configFilePath: string): IConfiguratio
  * @var relativeFilePath Relative path or package name (tslint-config-X) or package short name (X)
  */
 function resolveConfigurationPath(relativeFilePath: string, relativeTo?: string) {
-    let resolvedPath: string;
-    if (pathIsAbsolute(relativeFilePath)) {
-        resolvedPath = relativeFilePath;
-    } else if (relativeFilePath.indexOf(".") === 0) {
-        resolvedPath = getRelativePath(relativeFilePath, relativeTo);
-    } else {
-        try {
-            resolvedPath = resolve.sync(relativeFilePath, { basedir: relativeTo });
-        } catch (err) {
-            throw new Error(`Invalid "extends" configuration value - could not require "${relativeFilePath}". ` +
-                "Review the Node lookup algorithm (https://nodejs.org/api/modules.html#modules_all_together) " +
-                "for the approximate method TSLint uses to find the referenced configuration file.");
-        }
+    const basedir = relativeTo || process.cwd();
+    try {
+        return resolve.sync(relativeFilePath, { basedir });
+    } catch (err) {
+        throw new Error(`Invalid "extends" configuration value - could not require "${relativeFilePath}". ` +
+            "Review the Node lookup algorithm (https://nodejs.org/api/modules.html#modules_all_together) " +
+            "for the approximate method TSLint uses to find the referenced configuration file.");
     }
-
-    return resolvedPath;
 }
 
 export function extendConfigurationFile(config: IConfigurationFile, baseConfig: IConfigurationFile): IConfigurationFile {
