@@ -31,13 +31,28 @@ function fun3(a: number, b: number) {
 
 namespace Fam { 'use strict'; 'use cool'; }
 module Bam { 'use strict'; 'use cool'; }
-namespace Az.Bz.Cz.Dz { 
+namespace Az.Bz.Cz.Dz {
     'ngInject';
 }
 
 class Foo {
+    constructor() {
+        "ngInject";
+        var a = 1;
+        'notdirective';
+        ~~~~~~~~~~~~~~~ [0]
+    }
+
     bar() {
         'use strict';
+    }
+
+    get baz() {
+        'use asm';
+    }
+
+    set baz(newValue) {
+        "use asm";
     }
 }
 
