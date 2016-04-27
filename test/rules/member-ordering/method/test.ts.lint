@@ -41,5 +41,16 @@ class OutOfOrder {
     ~~~~~~ [0]
 }
 
+class Constructor1 {
+    blah: number = 0;
+    constructor() {}
+}
+
+class Constructor2 {
+    constructor() {}
+    blah: number = 0;
+    ~~~~~~~~~~~~~~~~~ [0]
+}
+
 [0]: Declaration of public instance member variable not allowed to appear after declaration of public instance member function
 
