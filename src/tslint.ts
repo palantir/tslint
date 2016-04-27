@@ -108,8 +108,8 @@ class Linter {
         return {
             configuration: configuration || DEFAULT_CONFIG,
             formatter: formatter || "json",
-            formattersDirectory: "",
-            rulesDirectory: arrayify(rulesDirectory).concat(arrayify(configuration.rulesDirectory))
+            formattersDirectory: formattersDirectory || "",
+            rulesDirectory: arrayify(rulesDirectory).concat(arrayify(configuration.rulesDirectory)),
         };
     }
 }
