@@ -41,6 +41,7 @@
     "grunt-tslint": "latest",
     "mocha": "^2.2.5",
     "tslint": "latest",
+    "tslint-test-config-non-relative": "file:test/external/tslint-test-config-non-relative",
     "typescript": "latest"
   },
   "peerDependencies": {
