@@ -20,7 +20,7 @@ expectOut () {
   msg=$3
 
   nodeV=`node -v`
-  
+
   # if Node 0.10.*, node will sometimes exit with status 8 when an error is thrown
   if [[ $expect != $actual || $nodeV == v0.10.* && $expect == 1 && $actual == 8 ]] ; then
     echo "$msg: expected $expect got $actual"
@@ -69,6 +69,10 @@ expectOut $? 0 "tslint with with -r pointing to custom rules did not find lint f
 # make sure path to config without a preceding "./" works on the CLI
 ./bin/tslint -c test/config/tslint-almost-empty.json src/tslint.ts
 expectOut $? 0 "-c relative path without ./ did not work"
+
+# make sure calling tslint with a config file which extends a package relative to the config file works
+./bin/tslint -c test/config/tslint-extends-package-no-mod.json src/tslint.ts
+expectOut $? 0 "tslint (with config file extending relative package) did not work"
 
 # make sure tslint --init generates a file
 cd ./bin
