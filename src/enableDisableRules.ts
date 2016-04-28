@@ -72,10 +72,46 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
                     if (!(ruleToAdd in this.enableDisableRuleMap)) {
                         this.enableDisableRuleMap[ruleToAdd] = [];
                     }
-                    this.enableDisableRuleMap[ruleToAdd].push({
-                        isEnabled: isEnabled,
-                        position: startingPosition,
-                    });
+                    if (isCurrentLine) {
+                        // start at the line beginning
+                        this.enableDisableRuleMap[ruleToAdd].push({
+                            isEnabled: isEnabled,
+                            position: lineStartingPosition,
+                        });
+                        // end at the end of the comment
+                        this.enableDisableRuleMap[ruleToAdd].push({
+                            isEnabled: !isEnabled,
+                            position: scanner.getTextPos() + 1,
+                        });
+                    } else {
+                        this.enableDisableRuleMap[ruleToAdd].push({
+                            isEnabled: isEnabled,
+                            position: startingPosition,
+                        });
+
+                        if (isNextLine) {
+                            const nextLineEndPos = scanner.lookAhead(() => {
+                                // look ahead for the end of the following line
+                                // we need to skip the next new line and the following one
+                                let newLineCount = 2;
+
+                                while (scanner.scan() !== ts.SyntaxKind.EndOfFileToken) {
+                                    if (scanner.getToken() === ts.SyntaxKind.NewLineTrivia) {
+                                        if (--newLineCount === 0) {
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                return scanner.getStartPos() + 1;
+                            });
+
+                            this.enableDisableRuleMap[ruleToAdd].push({
+                                isEnabled: !isEnabled,
+                                position: nextLineEndPos,
+                            });
+                        }
+                    }
                 }
             }
         }
