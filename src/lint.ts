@@ -51,9 +51,8 @@ export interface ILinterOptionsRaw {
     rulesDirectory?: string | string[];
 }
 
-export interface ILinterOptions {
+export interface ILinterOptions extends ILinterOptionsRaw {
     configuration: any;
     formatter: string;
-    formattersDirectory: string;
     rulesDirectory: string | string[];
 }

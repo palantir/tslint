@@ -98,17 +98,17 @@ class Linter {
         return rules.some((r) => r.equals(rule));
     }
 
-    private computeFullOptions(options: ILinterOptionsRaw): ILinterOptions {
-        if (!options || typeof options !== "object") {
-            options = {};
+    private computeFullOptions(options: ILinterOptionsRaw = {}): ILinterOptions {
+        if (typeof options !== "object") {
+            throw new Error("Unknown Linter options type: " + typeof options);
         }
 
         let { configuration, formatter, formattersDirectory, rulesDirectory } = options;
 
         return {
             configuration: configuration || DEFAULT_CONFIG,
-            formatter: formatter || "json",
-            formattersDirectory: formattersDirectory || "",
+            formatter: formatter || "prose",
+            formattersDirectory: formattersDirectory,
             rulesDirectory: arrayify(rulesDirectory).concat(arrayify(configuration.rulesDirectory)),
         };
     }
