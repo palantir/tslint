@@ -50,11 +50,14 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
         if (commentText.match(/^(\/\*|\/\/)\s*tslint:/)) {
             const commentTextParts = commentText.split(":");
             // regex is: start of string followed by either "enable" or "disable"
+            // followed optionally by -line or -next-line
             // followed by either whitespace or end of string
-            const enableOrDisableMatch = commentTextParts[1].match(/^(enable|disable)(\s|$)/);
+            const enableOrDisableMatch = commentTextParts[1].match(/^(enable|disable)(-(line|next-line))?(\s|$)/);
 
             if (enableOrDisableMatch != null) {
                 const isEnabled = enableOrDisableMatch[1] === "enable";
+                const isCurrentLine = enableOrDisableMatch[3] === "line";
+                const isNextLine = enableOrDisableMatch[3] === "next-line";
                 let rulesList = ["all"];
                 if (commentTextParts.length > 2) {
                     rulesList = commentTextParts[2].split(/\s+/);
