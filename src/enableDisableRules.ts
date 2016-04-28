@@ -26,6 +26,7 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
     public visitSourceFile(node: ts.SourceFile) {
         super.visitSourceFile(node);
         const scan = ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, node.text);
+        let lineStartPos = 0;
 
         scanAllTokens(scan, (scanner: ts.Scanner) => {
             const startPos = scanner.getStartPos();
@@ -36,16 +37,21 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
                 return;
             }
 
+            // keep track of the beginning of the line so that we can use it for same line switches
+            if (scanner.getToken() === ts.SyntaxKind.NewLineTrivia) {
+                lineStartPos = startPos + 1;
+            }
+
             if (scanner.getToken() === ts.SyntaxKind.MultiLineCommentTrivia ||
                 scanner.getToken() === ts.SyntaxKind.SingleLineCommentTrivia) {
                 const commentText = scanner.getTokenText();
                 const startPosition = scanner.getTokenPos();
-                this.handlePossibleTslintSwitch(commentText, startPosition);
+                this.handlePossibleTslintSwitch(commentText, startPosition, lineStartPos, scanner);
             }
         });
     }
 
-    private handlePossibleTslintSwitch(commentText: string, startingPosition: number) {
+    private handlePossibleTslintSwitch(commentText: string, startingPosition: number, lineStartingPosition: number, scanner: ts.Scanner) {
         // regex is: start of string followed by "/*" or "//" followed by any amount of whitespace followed by "tslint:"
         if (commentText.match(/^(\/\*|\/\/)\s*tslint:/)) {
             const commentTextParts = commentText.split(":");
