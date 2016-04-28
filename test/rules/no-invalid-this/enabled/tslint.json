@@ -1,5 +1,9 @@
 {
   "rules": {
-    "no-invalid-this": [true]
+    "no-invalid-this": [
+      true,
+      "outside-of-class",
+      "in-function-in-method"
+    ]
   }
 }
