@@ -328,7 +328,7 @@ Core rules are included in the `tslint` package.
     * `"arrow-parameter"` checks type specifier of function parameters for arrow functions.
     * `"property-declaration"` checks return types of interface properties.
     * `"variable-declaration"` checks variable declarations.
-    * `"member-variable-declaration"` checks member variable declarations.
+    * `"member-variable-declaration"` checks member variable declarations. For arrow functions being assigned as properties, either the property itself or the arrow functions parameters must have a typedef.
 * `typedef-whitespace` enforces spacing whitespace for type definitions. Each rule option requires a value of `"nospace"`,
   `"onespace"` or `"space"` to require no space, exactly one or at least one space before or after the type specifier's
   colon. You can specify two objects containing the five options. The first one describes the left, the second one the

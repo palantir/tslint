@@ -48,8 +48,21 @@ class TsLint {
     };
 
     arrowHelloWorld = () => {
-                   ~          [expected member-variable-declaration: 'arrowHelloWorld' to have a typedef]
                        ~      [expected arrow-call-signature to have a typedef]
+        return this.helloWorld();
+    };
+
+    arrowHelloWorldWithArgsNoTypedef = (arg1) => {
+                                            ~      [expected member-variable-declaration: 'arg1' to have a typedef]
+                                            ~      [expected arrow-call-signature to have a typedef]
+        return this.helloWorld();
+    };
+
+    arrowHelloWorldWithArgsTypedefProperty: (arg1: string) => string = (arg1) => {
+        return this.helloWorld();
+    };
+
+    arrowHelloWorldWithArgsTypedefInline = (arg1: string): string => {
         return this.helloWorld();
     };
 }
