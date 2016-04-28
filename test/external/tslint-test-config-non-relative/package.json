@@ -2,7 +2,7 @@
   "name": "tslint-test-config-non-relative",
   "description": "A test package with a tslint config which is installed in the tslint.",
   "version": "0.0.1",
-  "main": "index.js",
   "private": true,
+  "main": "tslint.json",
   "scripts": {}
 }
