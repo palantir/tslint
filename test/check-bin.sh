@@ -74,14 +74,6 @@ expectOut $? 0 "-c relative path without ./ did not work"
 ./bin/tslint -c test/config/tslint-extends-package-no-mod.json src/tslint.ts
 expectOut $? 0 "tslint (with config file extending relative package) did not work"
 
-# check that a tslint file (outside of the resolution path of the tslint package) can resolve a package that is
-# installed as a dependency of tslint. See palantir/tslint#1172 for details.
-tmpDir=$(mktemp -d)
-echo "{ \"extends\": \"tslint-test-config-non-relative\" }" > $tmpDir/tslint.json
-./bin/tslint -c $tmpDir/tslint.json src/tslint.ts
-expectOut $? 0 "tslint (with config file extending package in tslint scope) did not work"
-rm -r $tmpDir
-
 # make sure tslint --init generates a file
 cd ./bin
 if [ -f tslint.json ]; then
