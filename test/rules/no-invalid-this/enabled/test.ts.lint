@@ -1,9 +1,9 @@
 function foo(x: number) {
     console.log(this.x);
-                ~~~~[the "this" keyword is disallowed outside of a class body]
+                ~~~~                      [the "this" keyword is disallowed outside of a class body]
 
     this.evilMethod();
-    ~~~~[the "this" keyword is disallowed outside of a class body]
+    ~~~~                                  [the "this" keyword is disallowed outside of a class body]
 }
 
 class AClass {
@@ -20,7 +20,7 @@ class AClass {
     public bMethod() {
         [3,4].forEach(function(nr){
             console.log(this.x === nr);
-                        ~~~~[the "this" keyword is disallowed in function bodys inside class methods]
+                        ~~~~              [the "this" keyword is disallowed in function bodies inside class methods, use arrow functions instead]
         });
     }
 
@@ -33,7 +33,7 @@ class AClass {
     public cMethod = () => {
         [3,4].forEach(function(nr){
             console.log(this.x === nr);
-                        ~~~~[the "this" keyword is disallowed in function bodys inside class methods]
+                        ~~~~               [the "this" keyword is disallowed in function bodies inside class methods, use arrow functions instead]
         });
     }
 
@@ -41,7 +41,7 @@ class AClass {
         [3,4].forEach(badFunction);
         function badFunction(nr) {
             console.log(this.x === nr);
-                        ~~~~[the "this" keyword is disallowed in function bodys inside class methods]
+                        ~~~~               [the "this" keyword is disallowed in function bodies inside class methods, use arrow functions instead]
         }
     }
 

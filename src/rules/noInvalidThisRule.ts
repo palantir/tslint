@@ -23,12 +23,12 @@ interface Scope {
     inFunction: boolean;
 }
 
-const OPTION_OUTSIDE = "outside-of-class";
-const OPTION_INSIDE = "in-function-in-method";
+const OPTION_IN_FUNCTION_IN_METHOD = "no-this-in-function-in-method";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_OUTSIDE = "the \"this\" keyword is disallowed outside of a class body" ;
-    public static FAILURE_STRING_INSIDE = "the \"this\" keyword is disallowed in function bodys inside class methods";
+    public static FAILURE_STRING_INSIDE = "the \"this\" keyword is disallowed in function bodies inside class methods, " +
+        "use arrow functions instead";
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new NoInvalidThisWalker(sourceFile, this.getOptions()));
     }
@@ -52,11 +52,11 @@ class NoInvalidThisWalker extends Lint.ScopeAwareRuleWalker<Scope> {
             inFunction = scope.inFunction ? index + 1 : inFunction;
         });
 
-        if (this.hasOption(OPTION_OUTSIDE) && !inClass) {
+        if (inClass === 0) {
             this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING_OUTSIDE));
         }
 
-        if (this.hasOption(OPTION_INSIDE) && inClass && inFunction > inClass) {
+        if (this.hasOption(OPTION_IN_FUNCTION_IN_METHOD) && inClass > 0 && inFunction > inClass) {
             this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING_INSIDE));
         }
     }

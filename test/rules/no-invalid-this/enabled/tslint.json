@@ -2,8 +2,7 @@
   "rules": {
     "no-invalid-this": [
       true,
-      "outside-of-class",
-      "in-function-in-method"
+      "no-this-in-function-in-method"
     ]
   }
 }
