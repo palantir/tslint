@@ -67,7 +67,10 @@
     "no-eval": true,
     "no-inferrable-types": false,
     "no-internal-module": true,
-    "no-invalid-this": true,
+    "no-invalid-this": [
+      true,
+      "no-this-in-function-in-method"
+      ],
     "no-null-keyword": true,
     "no-reference": true,
     "no-require-imports": true,
