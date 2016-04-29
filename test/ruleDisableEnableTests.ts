@@ -50,6 +50,9 @@ describe("Enable and Disable Rules", () => {
         const expectedFailure5 = quotemarkFailure([10, 13], [10, 19]);
         const expectedFailure6 = quotemarkFailure([16, 13], [16, 19]);
 
+        const expectedFailure7 = quotemarkFailure([39, 13], [39, 19]);
+        const expectedFailure8 = variableNameFailure([41, 5], [41, 10]);
+
         const ll = new Linter(relativePath, source, options);
         const result = ll.lint();
         const parsedResult = JSON.parse(result.output);
@@ -66,6 +69,8 @@ describe("Enable and Disable Rules", () => {
         TestUtils.assertContainsFailure(actualFailures, expectedFailure4);
         TestUtils.assertContainsFailure(actualFailures, expectedFailure5);
         TestUtils.assertContainsFailure(actualFailures, expectedFailure6);
-        assert.lengthOf(actualFailures, 6);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure7);
+        TestUtils.assertContainsFailure(actualFailures, expectedFailure8);
+        assert.lengthOf(actualFailures, 8);
     });
 });

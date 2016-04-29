@@ -40,21 +40,30 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
                 scanner.getToken() === ts.SyntaxKind.SingleLineCommentTrivia) {
                 const commentText = scanner.getTokenText();
                 const startPosition = scanner.getTokenPos();
-                this.handlePossibleTslintSwitch(commentText, startPosition);
+                this.handlePossibleTslintSwitch(commentText, startPosition, node, scanner);
             }
         });
     }
 
-    private handlePossibleTslintSwitch(commentText: string, startingPosition: number) {
+    private getStartOfLinePosition(node: ts.SourceFile, position: number, lineOffset = 0) {
+        return node.getPositionOfLineAndCharacter(
+            node.getLineAndCharacterOfPosition(position).line + lineOffset, 0
+        );
+    }
+
+    private handlePossibleTslintSwitch(commentText: string, startingPosition: number, node: ts.SourceFile, scanner: ts.Scanner) {
         // regex is: start of string followed by "/*" or "//" followed by any amount of whitespace followed by "tslint:"
         if (commentText.match(/^(\/\*|\/\/)\s*tslint:/)) {
             const commentTextParts = commentText.split(":");
             // regex is: start of string followed by either "enable" or "disable"
+            // followed optionally by -line or -next-line
             // followed by either whitespace or end of string
-            const enableOrDisableMatch = commentTextParts[1].match(/^(enable|disable)(\s|$)/);
+            const enableOrDisableMatch = commentTextParts[1].match(/^(enable|disable)(-(line|next-line))?(\s|$)/);
 
             if (enableOrDisableMatch != null) {
                 const isEnabled = enableOrDisableMatch[1] === "enable";
+                const isCurrentLine = enableOrDisableMatch[3] === "line";
+                const isNextLine = enableOrDisableMatch[3] === "next-line";
                 let rulesList = ["all"];
                 if (commentTextParts.length > 2) {
                     rulesList = commentTextParts[2].split(/\s+/);
@@ -63,10 +72,31 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
                     if (!(ruleToAdd in this.enableDisableRuleMap)) {
                         this.enableDisableRuleMap[ruleToAdd] = [];
                     }
-                    this.enableDisableRuleMap[ruleToAdd].push({
-                        isEnabled: isEnabled,
-                        position: startingPosition,
-                    });
+                    if (isCurrentLine) {
+                        // start at the beginning of the current line
+                        this.enableDisableRuleMap[ruleToAdd].push({
+                            isEnabled: isEnabled,
+                            position: this.getStartOfLinePosition(node, startingPosition),
+                        });
+                        // end at the beginning of the next line
+                        this.enableDisableRuleMap[ruleToAdd].push({
+                            isEnabled: !isEnabled,
+                            position: scanner.getTextPos() + 1,
+                        });
+                    } else {
+                        // start at the current position
+                        this.enableDisableRuleMap[ruleToAdd].push({
+                            isEnabled: isEnabled,
+                            position: startingPosition,
+                        });
+                        // end at the beginning of the line following the next line
+                        if (isNextLine) {
+                            this.enableDisableRuleMap[ruleToAdd].push({
+                                isEnabled: !isEnabled,
+                                position: this.getStartOfLinePosition(node, startingPosition, 2),
+                            });
+                        }
+                    }
                 }
             }
         }
