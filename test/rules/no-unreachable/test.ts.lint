@@ -102,3 +102,17 @@ function f8() {
         console.log("here");
     }
 }
+
+// valid case
+
+function f9() {
+  return 1;
+  function bar() {}
+  type Bar = string;
+}
+
+function f10() {
+  type Bar = string;
+  return 1;
+  function bar() {}
+}
