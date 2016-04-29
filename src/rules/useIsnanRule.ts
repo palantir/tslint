@@ -32,7 +32,8 @@ export class Rule extends Lint.Rules.AbstractRule {
 class UseIsnanRuleWalker extends Lint.RuleWalker {
 
     protected visitBinaryExpression(node: ts.BinaryExpression): void {
-        if (this.isExpressionNaN(node.left) || this.isExpressionNaN(node.right)) {
+        if (this.isExpressionNaN(node.left) || this.isExpressionNaN(node.right)
+                && node.operatorToken.kind !== ts.SyntaxKind.EqualsToken) {
             this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING + node.getText()));
         }
         super.visitBinaryExpression(node);
