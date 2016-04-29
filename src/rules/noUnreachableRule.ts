@@ -51,7 +51,7 @@ class NoUnreachableWalker extends Lint.RuleWalker {
 
         // if there is further code after the hoisted function and we returned before that code is unreachable
         // so reset hasReturned to its previous state to check for that
-        if (node.kind === ts.SyntaxKind.FunctionDeclaration) {
+        if (node.kind === ts.SyntaxKind.FunctionDeclaration || node.kind === ts.SyntaxKind.TypeAliasDeclaration) {
             this.hasReturned = previousReturned;
         }
     }
@@ -99,9 +99,5 @@ class NoUnreachableWalker extends Lint.RuleWalker {
     public visitThrowStatement(node: ts.ThrowStatement) {
         super.visitThrowStatement(node);
         this.hasReturned = true;
-    }
-
-    public visitTypeAliasDeclaration(node: ts.TypeAliasDeclaration) {
-        this.visitNode(node);
     }
 }
