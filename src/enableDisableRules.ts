@@ -26,7 +26,6 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
     public visitSourceFile(node: ts.SourceFile) {
         super.visitSourceFile(node);
         const scan = ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, node.text);
-        let lineStartPos = 0;
 
         scanAllTokens(scan, (scanner: ts.Scanner) => {
             const startPos = scanner.getStartPos();
@@ -37,21 +36,22 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
                 return;
             }
 
-            // keep track of the beginning of the line so that we can use it for same line switches
-            if (scanner.getToken() === ts.SyntaxKind.NewLineTrivia) {
-                lineStartPos = startPos + 1;
-            }
-
             if (scanner.getToken() === ts.SyntaxKind.MultiLineCommentTrivia ||
                 scanner.getToken() === ts.SyntaxKind.SingleLineCommentTrivia) {
                 const commentText = scanner.getTokenText();
                 const startPosition = scanner.getTokenPos();
-                this.handlePossibleTslintSwitch(commentText, startPosition, lineStartPos, scanner);
+                this.handlePossibleTslintSwitch(commentText, startPosition, node, scanner);
             }
         });
     }
 
-    private handlePossibleTslintSwitch(commentText: string, startingPosition: number, lineStartingPosition: number, scanner: ts.Scanner) {
+    private getStartOfLinePosition(node: ts.SourceFile, position: number, lineOffset = 0) {
+        return node.getPositionOfLineAndCharacter(
+            node.getLineAndCharacterOfPosition(position).line + lineOffset, 0
+        );
+    }
+
+    private handlePossibleTslintSwitch(commentText: string, startingPosition: number, node: ts.SourceFile, scanner: ts.Scanner) {
         // regex is: start of string followed by "/*" or "//" followed by any amount of whitespace followed by "tslint:"
         if (commentText.match(/^(\/\*|\/\/)\s*tslint:/)) {
             const commentTextParts = commentText.split(":");
@@ -73,42 +73,27 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
                         this.enableDisableRuleMap[ruleToAdd] = [];
                     }
                     if (isCurrentLine) {
-                        // start at the line beginning
+                        // start at the beginning of the current line
                         this.enableDisableRuleMap[ruleToAdd].push({
                             isEnabled: isEnabled,
-                            position: lineStartingPosition,
+                            position: this.getStartOfLinePosition(node, startingPosition),
                         });
-                        // end at the end of the comment
+                        // end at the beginning of the next line
                         this.enableDisableRuleMap[ruleToAdd].push({
                             isEnabled: !isEnabled,
                             position: scanner.getTextPos() + 1,
                         });
                     } else {
+                        // start at the current position
                         this.enableDisableRuleMap[ruleToAdd].push({
                             isEnabled: isEnabled,
                             position: startingPosition,
                         });
-
+                        // end at the beginning of the line following the next line
                         if (isNextLine) {
-                            const nextLineEndPos = scanner.lookAhead(() => {
-                                // look ahead for the end of the following line
-                                // we need to skip the next new line and the following one
-                                let newLineCount = 2;
-
-                                while (scanner.scan() !== ts.SyntaxKind.EndOfFileToken) {
-                                    if (scanner.getToken() === ts.SyntaxKind.NewLineTrivia) {
-                                        if (--newLineCount === 0) {
-                                            break;
-                                        }
-                                    }
-                                }
-
-                                return scanner.getStartPos() + 1;
-                            });
-
                             this.enableDisableRuleMap[ruleToAdd].push({
                                 isEnabled: !isEnabled,
-                                position: nextLineEndPos,
+                                position: this.getStartOfLinePosition(node, startingPosition, 2),
                             });
                         }
                     }
