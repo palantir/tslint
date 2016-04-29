@@ -25,7 +25,7 @@
     "findup-sync": "~0.3.0",
     "glob": "^6.0.1",
     "optimist": "~0.6.0",
-    "path-is-absolute": "^1.0.0",
+    "resolve": "^1.1.7",
     "underscore.string": "~3.1.1"
   },
   "devDependencies": {
@@ -35,13 +35,13 @@
     "grunt-contrib-clean": "^0.6.0",
     "grunt-jscs": "^1.8.0",
     "grunt-mocha-test": "^0.12.7",
+    "grunt-npm-command": "^0.1.1",
     "grunt-run": "^0.3.0",
     "grunt-ts": "^5.1.0",
     "grunt-tslint": "latest",
     "mocha": "^2.2.5",
     "tslint": "latest",
-    "tslint-test-config": "./test/external/tslint-test-config",
-    "tslint-test-custom-rules": "./test/external/tslint-test-custom-rules",
+    "tslint-test-config-non-relative": "file:test/external/tslint-test-config-non-relative",
     "typescript": "latest"
   },
   "peerDependencies": {

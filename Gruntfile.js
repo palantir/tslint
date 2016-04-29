@@ -68,6 +68,14 @@ module.exports = function (grunt) {
             test: {
                 tsconfig: "test/tsconfig.json"
             }
+        },
+
+        "npm-command": {
+            test: {
+                options: {
+                    cwd: "./test/config"
+                }
+            }
         }
     });
 
@@ -78,6 +86,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-run");
     grunt.loadNpmTasks("grunt-tslint");
     grunt.loadNpmTasks("grunt-ts");
+    grunt.loadNpmTasks("grunt-npm-command");
 
     // register custom tasks
     grunt.registerTask("core", [
@@ -87,6 +96,7 @@ module.exports = function (grunt) {
     ]);
     grunt.registerTask("test", [
         "clean:test",
+        "npm-command:test",
         "ts:test",
         "tslint:test",
         "mochaTest",
