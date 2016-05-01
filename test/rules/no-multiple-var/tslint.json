@@ -1,0 +1,9 @@
+{
+  "rules": {
+    "no-multiple-var": [true,
+      "var",
+      "let",
+      "const"
+    ]
+  }
+}
