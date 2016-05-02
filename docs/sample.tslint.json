@@ -71,6 +71,7 @@
       true,
       "no-this-in-function-in-method"
       ],
+    "no-multiple-var": true,
     "no-null-keyword": true,
     "no-reference": true,
     "no-require-imports": true,

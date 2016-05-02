@@ -242,6 +242,8 @@ A sample configuration file with all options is available [here](https://github.
 * `no-internal-module` disallows internal `module` (use `namespace` instead).
 * `no-invalid-this` disallows using the `this` keyword outside of classes.
     * `no-this-in-function-in-method` disallows using the `this` keyword in functions within class methods.
+* `no-multiple-var` disallows multiple variable definitions in the same statement.
+* `no-use-before-declare` disallows usage of variables before their declaration.
 * `no-namespace` disallows both internal `module`s and `namespace`, but allows ES6-style external modules.
     * `allow-declarations` allows `declare namespace ... {}` to describe external APIs.
 * `no-null-keyword` disallows use of the `null` keyword literal.
