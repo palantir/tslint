@@ -22,12 +22,12 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Forbidden multiple variable definitions in the same statement";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const noMultipleVarWalker = new NoMultipleVarWalker(sourceFile, this.getOptions());
+        const noMultipleVarWalker = new NoMultipleVariableDeclarationWalker(sourceFile, this.getOptions());
         return this.applyWithWalker(noMultipleVarWalker);
     }
 }
 
-class NoMultipleVarWalker extends Lint.RuleWalker {
+class NoMultipleVariableDeclarationWalker extends Lint.RuleWalker {
     public visitVariableStatement(node: ts.VariableStatement) {
         const { declarationList } = node;
 

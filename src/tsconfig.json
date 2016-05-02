@@ -93,7 +93,7 @@
         "rules/noInferrableTypesRule.ts",
         "rules/noInternalModuleRule.ts",
         "rules/noInvalidThisRule.ts",
-        "rules/noMultipleVarRule.ts",
+        "rules/noMultipleVariableDeclarationRule.ts",
         "rules/noNamespaceRule.ts",
         "rules/noNullKeywordRule.ts",
         "rules/noReferenceRule.ts",
