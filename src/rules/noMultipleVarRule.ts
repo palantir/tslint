@@ -29,7 +29,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class NoMultipleVarWalker extends Lint.RuleWalker {
     public visitVariableStatement(node: ts.VariableStatement) {
-        const declarationList = node.declarationList;
+        const { declarationList } = node;
 
         if (declarationList.declarations.length > 1) {
             this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
@@ -39,12 +39,13 @@ class NoMultipleVarWalker extends Lint.RuleWalker {
     }
 
     public visitForStatement(node: ts.ForStatement) {
-        let initializer = node.initializer;
-        if (initializer && initializer.kind === ts.SyntaxKind.VariableDeclarationList &&
-                (<ts.VariableDeclarationList>initializer).declarations.length > 1) {
-            const declarationList = <ts.VariableDeclarationList>initializer;
-            this.addFailure(this.createFailure(declarationList.getStart(), declarationList.getWidth(), Rule.FAILURE_STRING));
+        const initializer = node.initializer as ts.VariableDeclarationList;
+
+        if (initializer != null && initializer.kind === ts.SyntaxKind.VariableDeclarationList &&
+                initializer.declarations.length > 1) {
+            this.addFailure(this.createFailure(initializer.getStart(), initializer.getWidth(), Rule.FAILURE_STRING));
         }
+
         super.visitForStatement(node);
     }
 }
