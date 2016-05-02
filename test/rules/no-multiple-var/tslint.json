@@ -1,9 +1,5 @@
 {
   "rules": {
-    "no-multiple-var": [true,
-      "var",
-      "let",
-      "const"
-    ]
+    "no-multiple-var": true
   }
 }

@@ -18,10 +18,6 @@
 import * as ts from "typescript";
 import * as Lint from "../lint";
 
-const OPTION_VAR = "var";
-const OPTION_LET = "let";
-const OPTION_CONST = "const";
-
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Forbidden multiple variable definitions in the same statement";
 
@@ -36,7 +32,7 @@ class NoMultipleVarWalker extends Lint.RuleWalker {
         const declarationList = node.declarationList;
 
         if (declarationList.declarations.length > 1) {
-            this.validateMultipleVariableDeclaration(declarationList);
+            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
         }
 
         super.visitVariableStatement(node);
@@ -46,26 +42,9 @@ class NoMultipleVarWalker extends Lint.RuleWalker {
         let initializer = node.initializer;
         if (initializer && initializer.kind === ts.SyntaxKind.VariableDeclarationList &&
                 (<ts.VariableDeclarationList>initializer).declarations.length > 1) {
-            this.validateMultipleVariableDeclaration(<ts.VariableDeclarationList>initializer);
+            const declarationList = <ts.VariableDeclarationList>initializer;
+            this.addFailure(this.createFailure(declarationList.getStart(), declarationList.getWidth(), Rule.FAILURE_STRING));
         }
         super.visitForStatement(node);
-    }
-
-    private validateMultipleVariableDeclaration(node: ts.VariableDeclarationList) {
-            let isAllowed = true;
-            let isLet = Lint.isNodeFlagSet(node, ts.NodeFlags.Let);
-            let isConst = Lint.isNodeFlagSet(node, ts.NodeFlags.Const);
-
-            if (isLet && this.hasOption(OPTION_LET)) {
-                isAllowed = false;
-            } else if (isConst && this.hasOption(OPTION_CONST)) {
-                isAllowed = false;
-            } else if (!isLet && !isConst && this.hasOption(OPTION_VAR)) {
-                isAllowed = false;
-            }
-
-            if (!isAllowed) {
-                this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
-            }
     }
 }
