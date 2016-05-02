@@ -18,6 +18,8 @@
 import * as ts from "typescript";
 import * as Lint from "../lint";
 
+const OPTION_IGNORE_PARMS = "ignore-params";
+
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_FACTORY = (type: string) => `LHS type (${type}) inferred by RHS expression, remove type annotation`;
 
@@ -33,7 +35,9 @@ class NoInferrableTypesWalker extends Lint.RuleWalker {
     }
 
     public visitParameterDeclaration(node: ts.ParameterDeclaration) {
-        this.checkDeclaration(node);
+        if (!this.hasOption(OPTION_IGNORE_PARMS)) {
+            this.checkDeclaration(node);
+        }
         super.visitParameterDeclaration(node);
     }
 
