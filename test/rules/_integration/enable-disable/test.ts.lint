@@ -1,19 +1,25 @@
 /* tslint:enable */
 var AAAaA = 'test'
+    ~~~~~          [variable name must be in camelcase or uppercase]
+            ~~~~~~ [' should be "]
 /* tslint:disable */
 var AAAaA = 'test'
 /* tslint:disable */
 var AAAaA = 'test'
 /* tslint:enable:quotemark */
 var AAAaA = 'test'
+            ~~~~~~ [' should be "]
 /* tslint:enable */
 var AAAaA = 'test'
+    ~~~~~          [variable name must be in camelcase or uppercase]
+            ~~~~~~ [' should be "]
 /* tslint:disable:quotemark variable-name */
 var AAAaA = 'test'
 /* tslint:disable:quotemark */
 var AAAaA = 'test'
 /* tslint:enable:quotemark */
 var AAAaA = 'test'
+            ~~~~~~ [' should be "]
 /* tslint:disable */
 var AAAaA = 'test'
 /* tslint:enable:zasdadsa */
@@ -37,8 +43,10 @@ var AAAaA = 'test'
 
 // tslint:disable
 var AAAaA = 'test' // tslint:enable-line:quotemark
+            ~~~~~~                                 [' should be "]
 // tslint:enable-next-line:variable-name
 var AAAaA = 'test'
+    ~~~~~          [variable name must be in camelcase or uppercase]
 // tslint:enable
 
 /* tslint:disable:quotemark */

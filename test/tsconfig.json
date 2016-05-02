@@ -130,7 +130,6 @@
         "configurationTests.ts",
         "eofLineRuleTests.ts",
         "lint.ts",
-        "ruleDisableEnableTests.ts",
         "ruleLoaderTests.ts",
         "ruleTestRunner.ts",
         "utils.ts",
