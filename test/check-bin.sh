@@ -101,6 +101,13 @@ expectOut $? 0 "tslint --test did not exit correctly for a passing test"
 ./bin/tslint --test test/files/incorrect-rule-test
 expectOut $? 1 "tslint --test did not exit correctly for a failing test"
 
+# ensure --test command works correctly with custom rules
+./bin/tslint --test test/files/custom-rule-rule-test
+expectOut $? 0 "tslint --test did not exit correctly for a passing test with custom rules"
+
+./bin/tslint -r test/files/custom-rules-2 --test test/files/custom-rule-cli-rule-test
+expectOut $? 0 "tslint --test did not exit correctly for a passing test with custom rules from the CLI"
+
 if [ $num_failures != 0 ]; then
   echo "Failed $num_failures tests"
   exit 1
