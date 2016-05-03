@@ -1,6 +1,34 @@
 Change Log
 ===
 
+v3.9.0
+---
+* Stable release containing changes from the last dev release (v3.9.0-dev.0)
+
+v3.9.0-dev.0
+---
+* [new-rule] `no-namespace` rule (#1133)
+* [new-rule] `one-variable-per-declaration` rule (#525)
+* [new-rule-option] "ignore-params" option for `no-inferrable-types` rule (#1190)
+* [new-rule-option] "no-this-in-function-in-method" option for `no-invalid-this` rule (#1179)
+* [enhancement] Single line enable/disable comments (#144)
+* [enhancement] Resolve `extends` packages relative to location of configuration file (#1171)
+* [enhancement] `Linter` class will throw an error if configuration is of an invalid type (#1167)
+* [bugfix] `use-isnan` allows assaignments to `NaN` (#1054)
+* [bugfix] `no-unreachable` handles allows hoisted type aliases (#564)
+* [bugfix] `member-ordering` rule now checks constructors (#1158)
+* [bugfix] `--test` CLI command works correctly with specifiying custom rules (#1195)
+
+Thanks to our contributors!
+* @abierbaum
+* @HamletDRC
+* @inthemill
+* @janslow
+* @JoshuaKGoldberg
+* @mprobst
+* @patsissions
+* @YuichiNukiyama
+
 v3.8.1
 ---
 * Stable release containing changes from the last dev release (v3.8.0-dev.1)
