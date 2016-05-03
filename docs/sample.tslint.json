@@ -7,11 +7,11 @@
       "statements"
     ],
     "ban": [
-        true,
-        [ "_", "forEach" ],
-        [ "_", "each" ],
-        [ "$", "each" ],
-        [ "angular", "forEach" ]
+      true,
+      [ "_", "forEach" ],
+      [ "_", "each" ],
+      [ "$", "each" ],
+      [ "angular", "forEach" ]
     ],
     "class-name": true,
     "comment-format": [
