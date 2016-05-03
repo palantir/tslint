@@ -114,7 +114,7 @@ if (argv.i != null) {
 }
 
 if (argv.test != null) {
-    const results = runTest(argv.test);
+    const results = runTest(argv.test, argv.r);
     const didAllTestsPass = consoleTestResultHandler(results);
     process.exit(didAllTestsPass ? 0 : 1);
 }
