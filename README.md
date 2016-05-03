@@ -242,7 +242,6 @@ A sample configuration file with all options is available [here](https://github.
 * `no-internal-module` disallows internal `module` (use `namespace` instead).
 * `no-invalid-this` disallows using the `this` keyword outside of classes.
     * `no-this-in-function-in-method` disallows using the `this` keyword in functions within class methods.
-* `no-multiple-variable-declaration` disallows multiple variable definitions in the same statement.
 * `no-namespace` disallows both internal `module`s and `namespace`, but allows ES6-style external modules.
     * `allow-declarations` allows `declare namespace ... {}` to describe external APIs.
 * `no-null-keyword` disallows use of the `null` keyword literal.
@@ -269,6 +268,7 @@ A sample configuration file with all options is available [here](https://github.
   * `"check-finally"` checks that `finally` is on the same line as the closing brace for the preceding `try` or `catch`.
   * `"check-open-brace"` checks that an open brace falls on the same line as its preceding expression.
   * `"check-whitespace"` checks preceding whitespace for the specified tokens.
+* `one-variable-per-declaration` disallows multiple variable definitions in the same statement.
 * `quotemark` enforces consistent single or double quoted string literals. Rule options (at least one of `"double"` or `"single"` is required):
     * `"single"` enforces single quotes.
     * `"double"` enforces double quotes.
