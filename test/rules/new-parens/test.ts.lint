@@ -1,0 +1,9 @@
+// correct case
+var foo = new Date();
+
+// incorrect case
+var foge = new Date;
+           ~~~~~~~~ [new calls require parens]
+class Bar {}
+var bar = new Bar;
+          ~~~~~~~ [new calls require parens]

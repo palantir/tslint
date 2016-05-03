@@ -44,6 +44,7 @@
       "static-before-instance",
       "variables-before-functions"
     ],
+    "new-parens": true,
     "no-angle-bracket-type-assertion": true,
     "no-any": false,
     "no-arg": true,
