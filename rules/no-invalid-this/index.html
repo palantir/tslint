@@ -2,12 +2,31 @@
 ruleName: no-invalid-this
 description: Disallows using the `this` keyword outside of classes.
 rationale: 'See [the rule''s author''s rationale here.](https://github.com/palantir/tslint/pull/1105#issue-147549402)'
-optionsDescription: Not configurable.
-options: {}
+optionsDescription: |-
+
+  One argument may be optionally provided:
+
+  * `no-this-in-function-in-method` disallows using the `this` keyword in functions within class methods.
+options:
+  type: list
+  listType:
+    type: enum
+    enumValues:
+      - no-this-in-function-in-method
 optionExamples:
   - 'true'
+  - '[true, "no-this-in-function-in-method"]'
 type: functionality
-optionsJSON: '{}'
+optionsJSON: |-
+  {
+    "type": "list",
+    "listType": {
+      "type": "enum",
+      "enumValues": [
+        "no-this-in-function-in-method"
+      ]
+    }
+  }
 layout: rule
 title: 'Rule: no-invalid-this'
 ---

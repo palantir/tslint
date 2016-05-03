@@ -403,10 +403,19 @@
     "ruleName": "no-inferrable-types",
     "description": "Disallows explicit type declarations for variables or parameters initialized to a number, string, or boolean.",
     "rationale": "Explicit types where they can be easily infered by the compiler make code more verbose.",
-    "optionsDescription": "Not configurable.",
-    "options": {},
+    "optionsDescription": "\nOne argument may be optionally provided:\n\n* `ignore-params` allows specifying an inferrable type annotation for function params.\nThis can be useful when combining with the `typedef` rule.",
+    "options": {
+      "type": "list",
+      "listType": {
+        "type": "enum",
+        "enumValues": [
+          "ignore-params"
+        ]
+      }
+    },
     "optionExamples": [
-      "true"
+      "true",
+      "[true, \"ignore-params\"]"
     ],
     "type": "typescript"
   },
@@ -425,12 +434,42 @@
     "ruleName": "no-invalid-this",
     "description": "Disallows using the `this` keyword outside of classes.",
     "rationale": "See [the rule's author's rationale here.](https://github.com/palantir/tslint/pull/1105#issue-147549402)",
-    "optionsDescription": "Not configurable.",
-    "options": {},
+    "optionsDescription": "\nOne argument may be optionally provided:\n\n* `no-this-in-function-in-method` disallows using the `this` keyword in functions within class methods.",
+    "options": {
+      "type": "list",
+      "listType": {
+        "type": "enum",
+        "enumValues": [
+          "no-this-in-function-in-method"
+        ]
+      }
+    },
     "optionExamples": [
-      "true"
+      "true",
+      "[true, \"no-this-in-function-in-method\"]"
     ],
     "type": "functionality"
+  },
+  {
+    "ruleName": "no-namespace",
+    "description": "Disallows use of internal `module`s and `namespace`s.",
+    "descriptionDetails": "This rule still allows the use of `declare module ... {}`",
+    "rationale": "\nES6-style external modules are the standard way to modularize code.\nUsing `module {}` and `namespace {}` are outdated ways to organize TypeScript code.",
+    "optionsDescription": "\nOne argument may be optionally provided:\n\n* `allow-declarations` allows `declare namespace ... {}` to describe external APIs.",
+    "options": {
+      "type": "list",
+      "listType": {
+        "type": "enum",
+        "enumValues": [
+          "allow-declarations"
+        ]
+      }
+    },
+    "optionExamples": [
+      "true",
+      "[true, \"allow-declarations\"]"
+    ],
+    "type": "typescript"
   },
   {
     "ruleName": "no-null-keyword",
@@ -629,6 +668,16 @@
     },
     "optionExamples": [
       "[true, \"check-catch\", \"check-finally\", \"check-else\"]"
+    ],
+    "type": "style"
+  },
+  {
+    "ruleName": "one-variable-per-declaration",
+    "description": "Disallows multiple variable definitions in the same declaration statement.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
     ],
     "type": "style"
   },
