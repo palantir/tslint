@@ -77,6 +77,11 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
         super.visitMethodSignature(node);
     }
 
+    public visitConstructorDeclaration(node: ts.ConstructorDeclaration) {
+        this.checkModifiersAndSetPrevious(node, getModifiers(true, node.modifiers));
+        super.visitConstructorDeclaration(node);
+    }
+
     public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
         const { initializer } = node;
         const isFunction = initializer != null

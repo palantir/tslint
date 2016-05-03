@@ -241,6 +241,10 @@ A sample configuration file with all options is available [here](https://github.
 * `no-inferrable-types` disallows explicit type declarations for variables or parameters initialized to a number, string, or boolean.
 * `no-internal-module` disallows internal `module` (use `namespace` instead).
 * `no-invalid-this` disallows using the `this` keyword outside of classes.
+    * `no-this-in-function-in-method` disallows using the `this` keyword in functions within class methods.
+* `no-multiple-variable-declaration` disallows multiple variable definitions in the same statement.
+* `no-namespace` disallows both internal `module`s and `namespace`, but allows ES6-style external modules.
+    * `allow-declarations` allows `declare namespace ... {}` to describe external APIs.
 * `no-null-keyword` disallows use of the `null` keyword literal.
 * `no-reference` disallows `/// <reference path=>` imports (use ES6-style imports instead).
 * `no-require-imports` disallows invocation of `require()` (use ES6-style imports instead).

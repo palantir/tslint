@@ -28,7 +28,7 @@ import {
 } from "./configuration";
 import {EnableDisableRulesWalker} from "./enableDisableRules";
 import {findFormatter} from "./formatterLoader";
-import {ILinterOptions, LintResult} from "./lint";
+import {ILinterOptionsRaw, ILinterOptions, LintResult} from "./lint";
 import {loadRules} from "./ruleLoader";
 import {arrayify} from "./utils";
 
@@ -44,11 +44,10 @@ class Linter {
     private source: string;
     private options: ILinterOptions;
 
-    constructor(fileName: string, source: string, options: ILinterOptions) {
+    constructor(fileName: string, source: string, options: ILinterOptionsRaw) {
         this.fileName = fileName;
         this.source = source;
-        this.options = options;
-        this.computeFullOptions();
+        this.options = this.computeFullOptions(options);
     }
 
     public lint(): LintResult {
@@ -99,13 +98,19 @@ class Linter {
         return rules.some((r) => r.equals(rule));
     }
 
-    private computeFullOptions() {
-        let {configuration, rulesDirectory} = this.options;
-        if (configuration == null) {
-            configuration = DEFAULT_CONFIG;
+    private computeFullOptions(options: ILinterOptionsRaw = {}): ILinterOptions {
+        if (typeof options !== "object") {
+            throw new Error("Unknown Linter options type: " + typeof options);
         }
-        this.options.rulesDirectory = arrayify(rulesDirectory).concat(arrayify(configuration.rulesDirectory));
-        this.options.configuration = configuration;
+
+        let { configuration, formatter, formattersDirectory, rulesDirectory } = options;
+
+        return {
+            configuration: configuration || DEFAULT_CONFIG,
+            formatter: formatter || "prose",
+            formattersDirectory: formattersDirectory,
+            rulesDirectory: arrayify(rulesDirectory).concat(arrayify(configuration.rulesDirectory)),
+        };
     }
 }
 

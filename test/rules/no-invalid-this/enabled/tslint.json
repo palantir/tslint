@@ -1,5 +1,8 @@
 {
   "rules": {
-    "no-invalid-this": [true]
+    "no-invalid-this": [
+      true,
+      "no-this-in-function-in-method"
+    ]
   }
 }

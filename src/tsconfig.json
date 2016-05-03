@@ -21,7 +21,7 @@
         "./test/**/*.ts"
     ],
     "files": [
-        "../custom-typings/path-is-absolute.d.ts",
+        "../custom-typings/resolve.d.ts",
         "../typings/colors/colors.d.ts",
         "../typings/diff/diff.d.ts",
         "../typings/findup-sync/findup-sync.d.ts",
@@ -93,6 +93,8 @@
         "rules/noInferrableTypesRule.ts",
         "rules/noInternalModuleRule.ts",
         "rules/noInvalidThisRule.ts",
+        "rules/noMultipleVariableDeclarationRule.ts",
+        "rules/noNamespaceRule.ts",
         "rules/noNullKeywordRule.ts",
         "rules/noReferenceRule.ts",
         "rules/noRequireImportsRule.ts",

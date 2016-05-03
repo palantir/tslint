@@ -18,26 +18,46 @@
 import * as ts from "typescript";
 import * as Lint from "../lint";
 
-export class Rule extends Lint.Rules.AbstractRule {
-    public static FAILURE_STRING = "the \"this\" keyword is disallowed outside of a class body" ;
+interface Scope {
+    inClass: boolean;
+    inFunction: boolean;
+}
 
+const OPTION_IN_FUNCTION_IN_METHOD = "no-this-in-function-in-method";
+
+export class Rule extends Lint.Rules.AbstractRule {
+    public static FAILURE_STRING_OUTSIDE = "the \"this\" keyword is disallowed outside of a class body" ;
+    public static FAILURE_STRING_INSIDE = "the \"this\" keyword is disallowed in function bodies inside class methods, " +
+        "use arrow functions instead";
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new NoInvalidThisWalker(sourceFile, this.getOptions()));
     }
 }
 
-class NoInvalidThisWalker extends Lint.ScopeAwareRuleWalker<{inClass: boolean}> {
-    public createScope(node: ts.Node): { inClass: boolean } {
+class NoInvalidThisWalker extends Lint.ScopeAwareRuleWalker<Scope> {
+    public createScope(node: ts.Node): Scope {
         const isClassScope = node.kind === ts.SyntaxKind.ClassDeclaration || node.kind === ts.SyntaxKind.ClassExpression;
-
+        let inFunction = node.kind === ts.SyntaxKind.FunctionDeclaration || node.kind === ts.SyntaxKind.FunctionExpression;
         return {
             inClass: isClassScope,
+            inFunction: inFunction,
         };
     }
 
     protected validateThisKeyword(node: ts.Node) {
-        if (!this.getAllScopes().some((scope) => scope.inClass)) {
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+        let inClass = 0;
+        let inFunction = 0;
+        this.getAllScopes().forEach((scope, index) => {
+            inClass = scope.inClass ? index + 1 : inClass;
+            inFunction = scope.inFunction ? index + 1 : inFunction;
+        });
+
+        if (inClass === 0) {
+            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING_OUTSIDE));
+        }
+
+        if (this.hasOption(OPTION_IN_FUNCTION_IN_METHOD) && inClass > 0 && inFunction > inClass) {
+            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING_INSIDE));
         }
     }
 

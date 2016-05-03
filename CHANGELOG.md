@@ -1,6 +1,10 @@
 Change Log
 ===
 
+v3.8.1
+---
+* Stable release containing changes from the last dev release (v3.8.0-dev.1)
+
 v3.8.0-dev.1
 ---
 * [bugfix] Allow JS directives at the start of constructors, getters, and setters (#1159)
