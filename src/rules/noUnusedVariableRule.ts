@@ -57,7 +57,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 properties: {
                     "ignore-pattern": {type: "string"},
                 },
-            }, ],
+            }],
         },
         optionExamples: ['[true, "react"]', '[true, {"ignore-pattern": "^_"}]'],
         type: "functionality",

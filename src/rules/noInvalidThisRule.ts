@@ -32,9 +32,18 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "no-invalid-this",
         description: "Disallows using the `this` keyword outside of classes.",
         rationale: "See [the rule's author's rationale here.](https://github.com/palantir/tslint/pull/1105#issue-147549402)",
-        optionsDescription: "Not configurable.",
-        options: {},
-        optionExamples: ["true"],
+        optionsDescription: Lint.Utils.dedent`
+            One argument may be optionally provided:
+
+            * \`${OPTION_IN_FUNCTION_IN_METHOD}\` disallows using the \`this\` keyword in functions within class methods.`,
+        options: {
+            type: "list",
+            listType: {
+                type: "enum",
+                enumValues: [OPTION_IN_FUNCTION_IN_METHOD],
+            },
+        },
+        optionExamples: ["true", `[true, "${OPTION_IN_FUNCTION_IN_METHOD}"]`],
         type: "functionality",
     };
     /* tslint:enable:object-literal-sort-keys */

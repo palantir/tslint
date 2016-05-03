@@ -26,9 +26,19 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "no-inferrable-types",
         description: "Disallows explicit type declarations for variables or parameters initialized to a number, string, or boolean.",
         rationale: "Explicit types where they can be easily infered by the compiler make code more verbose.",
-        optionsDescription: "Not configurable.",
-        options: {},
-        optionExamples: ["true"],
+        optionsDescription: Lint.Utils.dedent`
+            One argument may be optionally provided:
+
+            * \`${OPTION_IGNORE_PARMS}\` allows specifying an inferrable type annotation for function params.
+            This can be useful when combining with the \`typedef\` rule.`,
+        options: {
+            type: "list",
+            listType: {
+                type: "enum",
+                enumValues: [OPTION_IGNORE_PARMS],
+            },
+        },
+        optionExamples: ["true", `[true, "${OPTION_IGNORE_PARMS}"]`],
         type: "typescript",
     };
     /* tslint:enable:object-literal-sort-keys */
