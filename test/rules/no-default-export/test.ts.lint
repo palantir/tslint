@@ -1,3 +1,17 @@
+export { SingleItem };
+
+export { FirstItem, SecondItem };
+
+export { Item as aliasForItem };
+
+export { ItemFromImport } from 'module';
+
+export * from './relativeModule';
+
+export namespace SomeNamespace { }
+
+export import ItemAlias = someNamespace.Item;
+
 export const default = 'VALID';
 
 export default 'INVALID';
