@@ -71,7 +71,6 @@
       true,
       "no-this-in-function-in-method"
       ],
-    "no-multiple-variable-declaration": true,
     "no-null-keyword": true,
     "no-reference": true,
     "no-require-imports": true,
@@ -94,6 +93,7 @@
       "check-finally",
       "check-whitespace"
     ],
+    "one-variable-per-declaration": true,
     "quotemark": [
       true,
       "double",
