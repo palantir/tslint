@@ -19,11 +19,11 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
-    public static FAILURE_STRING = "new calls require parens";
+    public static FAILURE_STRING = "parentheses required when invoking a constructor";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const noVarKeywordWalker = new NewParensWalker(sourceFile, this.getOptions());
-        return this.applyWithWalker(noVarKeywordWalker);
+        const newParensWalker = new NewParensWalker(sourceFile, this.getOptions());
+        return this.applyWithWalker(newParensWalker);
     }
 }
 
@@ -32,6 +32,6 @@ class NewParensWalker extends Lint.RuleWalker {
         if (node.arguments === undefined) {
             this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
         }
-        this.walkChildren(node);
+        super.visitNewExpression(node);
     }
 }

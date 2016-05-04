@@ -3,7 +3,11 @@ var foo = new Date();
 
 // incorrect case
 var foge = new Date;
-           ~~~~~~~~ [new calls require parens]
+           ~~~~~~~~ [0]
 class Bar {}
 var bar = new Bar;
-          ~~~~~~~ [new calls require parens]
+          ~~~~~~~ [0]
+var fogefoge = new Bar(new Foo);
+                       ~~~~~~~ [0]
+
+[0]: parentheses required when invoking a constructor
