@@ -140,7 +140,7 @@ interface WithPreceedingSpacesWithSubsequentSpacesInterface {
 
 // region Function
 
-function noPreceedingSpaceNoSubsequentSpaceFn(a:number, b:number):number {
+function noPreceedingSpaceNoSubsequentSpaceFn(a:number, b?:number):number {
     var c:number = a + b;
     var d:number = a - b;
 
@@ -151,10 +151,10 @@ function noPreceedingSpaceNoSubsequentSpaceFn(a:number, b:number):number {
     }
 }
 
-function noPreceedingSpaceWithSubsequentSpaceFn(a: number, b: number): number {
+function noPreceedingSpaceWithSubsequentSpaceFn(a: number, b?: number): number {
                                                   ~                              [expected nospace after colon in parameter]
-                                                             ~                   [expected nospace after colon in parameter]
-                                                                      ~          [expected nospace after colon in call-signature]
+                                                              ~                  [expected nospace after colon in parameter]
+                                                                       ~         [expected nospace after colon in call-signature]
     var c: number = a + b;
           ~          [expected nospace after colon in variable-declaration]
     var d: number = a - b;
@@ -168,10 +168,10 @@ function noPreceedingSpaceWithSubsequentSpaceFn(a: number, b: number): number {
     }
 }
 
-function noPreceedingSpaceWithSubsequentSpacesFn(a:   number, b:   number):   number {
+function noPreceedingSpaceWithSubsequentSpacesFn(a:   number, b?:   number):   number {
                                                    ~                             [expected nospace after colon in parameter]
-                                                                ~                [expected nospace after colon in parameter]
-                                                                           ~     [expected nospace after colon in call-signature]
+                                                                 ~               [expected nospace after colon in parameter]
+                                                                            ~    [expected nospace after colon in call-signature]
     var c:   number = a + b;
           ~          [expected nospace after colon in variable-declaration]
     var d:   number = a - b;
@@ -185,10 +185,10 @@ function noPreceedingSpaceWithSubsequentSpacesFn(a:   number, b:   number):   nu
     }
 }
 
-function withPreceedingSpaceNoSubsequentSpaceFn(a :number, b :number) :number {
+function withPreceedingSpaceNoSubsequentSpaceFn(a :number, b ?:number) :number {
                                                  ~                              [expected nospace before colon in parameter]
                                                             ~                   [expected nospace before colon in parameter]
-                                                                     ~          [expected nospace before colon in call-signature]
+                                                                      ~         [expected nospace before colon in call-signature]
     var c :number = a + b;
          ~          [expected nospace before colon in variable-declaration]
     var d :number = a - b;
@@ -202,13 +202,13 @@ function withPreceedingSpaceNoSubsequentSpaceFn(a :number, b :number) :number {
     }
 }
 
-function withPreceedingSpaceWithSubsequentSpaceFn(a : number, b : number) : number {
+function withPreceedingSpaceWithSubsequentSpaceFn(a : number, b ?: number) : number {
                                                    ~                             [expected nospace before colon in parameter]
                                                      ~                           [expected nospace after colon in parameter]
                                                                ~                 [expected nospace before colon in parameter]
-                                                                 ~               [expected nospace after colon in parameter]
-                                                                         ~       [expected nospace before colon in call-signature]
-                                                                           ~     [expected nospace after colon in call-signature]
+                                                                  ~              [expected nospace after colon in parameter]
+                                                                          ~      [expected nospace before colon in call-signature]
+                                                                            ~    [expected nospace after colon in call-signature]
     var c : number = a + b;
          ~          [expected nospace before colon in variable-declaration]
            ~        [expected nospace after colon in variable-declaration]
@@ -225,13 +225,13 @@ function withPreceedingSpaceWithSubsequentSpaceFn(a : number, b : number) : numb
     }
 }
 
-function withPreceedingSpaceWithSubsequentSpacesFn(a :   number, b :   number) :   number {
+function withPreceedingSpaceWithSubsequentSpacesFn(a :   number, b ?:   number) :   number {
                                                     ~                                 [expected nospace before colon in parameter]
                                                       ~                               [expected nospace after colon in parameter]
                                                                   ~                   [expected nospace before colon in parameter]
-                                                                    ~                 [expected nospace after colon in parameter]
-                                                                              ~       [expected nospace before colon in call-signature]
-                                                                                ~     [expected nospace after colon in call-signature]
+                                                                     ~                [expected nospace after colon in parameter]
+                                                                               ~      [expected nospace before colon in call-signature]
+                                                                                 ~    [expected nospace after colon in call-signature]
     var c :   number = a + b;
          ~          [expected nospace before colon in variable-declaration]
            ~        [expected nospace after colon in variable-declaration]
@@ -248,10 +248,10 @@ function withPreceedingSpaceWithSubsequentSpacesFn(a :   number, b :   number) :
     }
 }
 
-function withPreceedingSpacesNoSubsequentSpaceFn(a   :number, b   :number)   :number {
+function withPreceedingSpacesNoSubsequentSpaceFn(a   :number, b   ?:number)   :number {
                                                     ~                                [expected nospace before colon in parameter]
                                                                  ~                   [expected nospace before colon in parameter]
-                                                                            ~        [expected nospace before colon in call-signature]
+                                                                             ~       [expected nospace before colon in call-signature]
     var c   :number = a + b;
            ~          [expected nospace before colon in variable-declaration]
     var d   :number = a - b;
@@ -265,13 +265,13 @@ function withPreceedingSpacesNoSubsequentSpaceFn(a   :number, b   :number)   :nu
     }
 }
 
-function withPreceedingSpacesWithSubsequentSpaceFn(a   : number, b   : number)   : number {
+function withPreceedingSpacesWithSubsequentSpaceFn(a   : number, b   ?: number)   : number {
                                                       ~                                 [expected nospace before colon in parameter]
                                                         ~                               [expected nospace after colon in parameter]
-                                                                    ~                   [expected nospace before colon in parameter]
-                                                                      ~                 [expected nospace after colon in parameter]
-                                                                                ~       [expected nospace before colon in call-signature]
-                                                                                  ~     [expected nospace after colon in call-signature]
+                                                                    ~                  [expected nospace before colon in parameter]
+                                                                       ~                [expected nospace after colon in parameter]
+                                                                                 ~      [expected nospace before colon in call-signature]
+                                                                                   ~    [expected nospace after colon in call-signature]
     var c   : number = a + b;
            ~          [expected nospace before colon in variable-declaration]
              ~        [expected nospace after colon in variable-declaration]
@@ -288,13 +288,13 @@ function withPreceedingSpacesWithSubsequentSpaceFn(a   : number, b   : number)  
     }
 }
 
-function withPreceedingSpacesWithSubsequentSpacesFn(a   :   number, b   :   number)   :   number {
+function withPreceedingSpacesWithSubsequentSpacesFn(a   :   number, b   ?:   number)   :   number {
                                                        ~                                     [expected nospace before colon in parameter]
                                                          ~                                   [expected nospace after colon in parameter]
                                                                        ~                     [expected nospace before colon in parameter]
-                                                                         ~                   [expected nospace after colon in parameter]
-                                                                                     ~       [expected nospace before colon in call-signature]
-                                                                                       ~     [expected nospace after colon in call-signature]
+                                                                          ~                  [expected nospace after colon in parameter]
+                                                                                      ~      [expected nospace before colon in call-signature]
+                                                                                        ~    [expected nospace after colon in call-signature]
     var c   :   number = a + b;
            ~          [expected nospace before colon in variable-declaration]
              ~        [expected nospace after colon in variable-declaration]
@@ -317,7 +317,7 @@ function withPreceedingSpacesWithSubsequentSpacesFn(a   :   number, b   :   numb
 
 function noPreceedingSpaceNoSubsequentSpaceMultiLineFn(
     a:number,
-    b:number
+    b?:number
 ):number {
     var c:number = a + b;
     var d:number = a - b;
@@ -332,8 +332,8 @@ function noPreceedingSpaceNoSubsequentSpaceMultiLineFn(
 function noPreceedingSpaceWithSubsequentSpaceMultiLineFn(
     a: number,
       ~          [expected nospace after colon in parameter]
-    b: number
-      ~          [expected nospace after colon in parameter]
+    b?: number
+       ~         [expected nospace after colon in parameter]
 ): number {
   ~          [expected nospace after colon in call-signature]
     var c: number = a + b;

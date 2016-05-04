@@ -160,13 +160,14 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
                 // optional question mark check
                 if (char === ts.SyntaxKind.QuestionToken) {
                     positionToCheck--;
+                    colonPosition--;
                     scanner.setTextPos(positionToCheck);
                     char = scanner.scan();
                 }
                 hasLeadingWhitespace = char === ts.SyntaxKind.WhitespaceTrivia;
             }
 
-            positionToCheck = colonPosition - 2 - node.getStart();
+            positionToCheck--;
 
             let hasSeveralLeadingWhitespaces: boolean;
             if (positionToCheck < 0) {
