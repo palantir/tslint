@@ -90,50 +90,71 @@ var withPreceedingSpacesWithSubsequentSpacesObject = {
 
 interface NoPreceedingSpaceNoSubsequentSpaceInterface {
     Prop:string;
+    Prop2?:string;
 }
 
 interface NoPreceedingSpaceWithSubsequentSpaceInterface {
     Prop: string;
          ~           [expected nospace after colon in property-declaration]
+    Prop2?: string;
+           ~         [expected nospace after colon in property-declaration]
 }
 
 interface NoPreceedingSpaceWithSubsequentSpacesInterface {
     Prop:   string;
          ~           [expected nospace after colon in property-declaration]
+    Prop2?:   string;
+           ~         [expected nospace after colon in property-declaration]
 }
 
 interface WithPreceedingSpaceNoSubsequentSpaceInterface {
     Prop :string;
         ~           [expected nospace before colon in property-declaration]
+    Prop2 ?:string;
+         ~          [expected nospace before colon in property-declaration]
 }
 
 interface WithPreceedingSpaceWithSubsequentSpaceInterface {
     Prop : string;
         ~           [expected nospace before colon in property-declaration]
           ~         [expected nospace after colon in property-declaration]
+    Prop2 ?: string;
+         ~          [expected nospace before colon in property-declaration]
+            ~       [expected nospace after colon in property-declaration]
 }
 
 interface WithPreceedingSpaceWithSubsequentSpacesInterface {
     Prop :   string;
         ~           [expected nospace before colon in property-declaration]
           ~         [expected nospace after colon in property-declaration]
+    Prop2 ?:   string;
+         ~          [expected nospace before colon in property-declaration]
+            ~       [expected nospace after colon in property-declaration]
 }
 
 interface WithPreceedingSpacesNoSubsequentSpaceInterface {
     Prop   :string;
           ~           [expected nospace before colon in property-declaration]
+    Prop2   ?:string;
+           ~          [expected nospace before colon in property-declaration]
 }
 
 interface WithPreceedingSpacesWithSubsequentSpaceInterface {
     Prop   : string;
           ~           [expected nospace before colon in property-declaration]
             ~         [expected nospace after colon in property-declaration]
+    Prop2   ?: string;
+           ~          [expected nospace before colon in property-declaration]
+              ~       [expected nospace after colon in property-declaration]
 }
 
 interface WithPreceedingSpacesWithSubsequentSpacesInterface {
     Prop   :   string;
           ~           [expected nospace before colon in property-declaration]
             ~         [expected nospace after colon in property-declaration]
+    Prop2   ?:   string;
+           ~          [expected nospace before colon in property-declaration]
+              ~       [expected nospace after colon in property-declaration]
 }
 
 // endregion

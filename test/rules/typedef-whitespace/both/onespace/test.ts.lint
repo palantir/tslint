@@ -92,48 +92,69 @@ interface NoPreceedingSpaceNoSubsequentSpaceInterface {
     Prop:string;
        ~             [expected onespace before colon in property-declaration]
          ~           [expected onespace after colon in property-declaration]
+    Prop2?:string;
+        ~            [expected onespace before colon in property-declaration]
+           ~         [expected onespace after colon in property-declaration]
 }
 
 interface NoPreceedingSpaceWithSubsequentSpaceInterface {
     Prop: string;
        ~           [expected onespace before colon in property-declaration]
+    Prop2?: string;
+        ~          [expected onespace before colon in property-declaration]
 }
 
 interface NoPreceedingSpaceWithSubsequentSpacesInterface {
     Prop:   string;
        ~             [expected onespace before colon in property-declaration]
          ~           [expected onespace after colon in property-declaration]
+    Prop2?:   string;
+        ~            [expected onespace before colon in property-declaration]
+           ~         [expected onespace after colon in property-declaration]
 }
 
 interface WithPreceedingSpaceNoSubsequentSpaceInterface {
     Prop :string;
           ~           [expected onespace after colon in property-declaration]
+    Prop2 ?:string;
+            ~         [expected onespace after colon in property-declaration]
 }
 
 interface WithPreceedingSpaceWithSubsequentSpaceInterface {
     Prop : string;
+    Prop2 ?: string;
 }
 
 interface WithPreceedingSpaceWithSubsequentSpacesInterface {
     Prop :   string;
           ~           [expected onespace after colon in property-declaration]
+    Prop2 ?:   string;
+            ~         [expected onespace after colon in property-declaration]
 }
 
 interface WithPreceedingSpacesNoSubsequentSpaceInterface {
     Prop   :string;
           ~             [expected onespace before colon in property-declaration]
             ~           [expected onespace after colon in property-declaration]
+    Prop2   ?:string;
+           ~            [expected onespace before colon in property-declaration]
+              ~         [expected onespace after colon in property-declaration]
 }
 
 interface WithPreceedingSpacesWithSubsequentSpaceInterface {
     Prop   : string;
           ~           [expected onespace before colon in property-declaration]
+    Prop2   ?: string;
+           ~          [expected onespace before colon in property-declaration]
 }
 
 interface WithPreceedingSpacesWithSubsequentSpacesInterface {
     Prop   :   string;
           ~           [expected onespace before colon in property-declaration]
             ~         [expected onespace after colon in property-declaration]
+    Prop2   ?:   string;
+           ~          [expected onespace before colon in property-declaration]
+              ~       [expected onespace after colon in property-declaration]
 }
 
 // endregion
