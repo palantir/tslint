@@ -83,6 +83,7 @@
         "../src/rules/noConstructRule.ts",
         "../src/rules/noConstructorVarsRule.ts",
         "../src/rules/noDebuggerRule.ts",
+        "../src/rules/noDefaultExportRule.ts",
         "../src/rules/noDuplicateKeyRule.ts",
         "../src/rules/noDuplicateVariableRule.ts",
         "../src/rules/noEmptyRule.ts",
