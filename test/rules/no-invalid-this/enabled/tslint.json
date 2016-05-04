@@ -2,7 +2,7 @@
   "rules": {
     "no-invalid-this": [
       true,
-      "no-this-in-function-in-method"
+      "check-function-in-method"
     ]
   }
 }

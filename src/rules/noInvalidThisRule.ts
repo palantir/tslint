@@ -23,7 +23,8 @@ interface Scope {
     inFunction: boolean;
 }
 
-const OPTION_IN_FUNCTION_IN_METHOD = "no-this-in-function-in-method";
+const OPTION_FUNCTION_IN_METHOD = "check-function-in-method";
+const DEPRECATED_OPTION_FUNCTION_IN_METHOD = "no-this-in-function-in-method";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_OUTSIDE = "the \"this\" keyword is disallowed outside of a class body" ;
@@ -56,7 +57,8 @@ class NoInvalidThisWalker extends Lint.ScopeAwareRuleWalker<Scope> {
             this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING_OUTSIDE));
         }
 
-        if (this.hasOption(OPTION_IN_FUNCTION_IN_METHOD) && inClass > 0 && inFunction > inClass) {
+        const checkFuncInMethod = this.hasOption(DEPRECATED_OPTION_FUNCTION_IN_METHOD) || this.hasOption(OPTION_FUNCTION_IN_METHOD);
+        if (checkFuncInMethod && inClass > 0 && inFunction > inClass) {
             this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING_INSIDE));
         }
     }
