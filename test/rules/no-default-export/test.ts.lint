@@ -1,0 +1,4 @@
+export const default = 'VALID';
+
+export default 'INVALID';
+       ~~~~~~~ [use of default exports is disallowed]
