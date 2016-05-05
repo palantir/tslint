@@ -105,7 +105,7 @@ export function findConfigurationPath(suppliedConfigFilePath: string, inputFileP
         // search for package.json with tslintConfig property
         configFilePath = findup("package.json", { cwd: inputFilePath, nocase: true });
         if (configFilePath != null && require(configFilePath).tslintConfig != null) {
-            return path.resolve(configFilePath);
+            return path.resolve(require(configFilePath).tslintConfig);
         }
 
         // search for tslint.json in home directory
