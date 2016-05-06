@@ -224,6 +224,7 @@ A sample configuration file with all options is available [here](https://github.
     * `static-before-instance` All static members must be declared before instance members.
     * `variables-before-functions` All member variables need to be declared before member functions.
        Member variables initialized to a function literal are treated as member functions.
+* `new-parens` enforces parentheses when invoking a constructor via the new keyword.
 * `no-angle-bracket-type-assertion` disallows usages of `<>` type assertions in favor of using the `as` keyword.
 * `no-any` diallows usages of `any` as a type decoration.
 * `no-arg` disallows access to `arguments.callee`.
