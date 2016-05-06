@@ -81,7 +81,7 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
                         // end at the beginning of the next line
                         this.enableDisableRuleMap[ruleToAdd].push({
                             isEnabled: !isEnabled,
-                            position: scanner.getTextPos() + 1,
+                            position: scanner.getTextPos(),
                         });
                     } else {
                         // start at the current position
@@ -93,7 +93,7 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
                         if (isNextLine) {
                             this.enableDisableRuleMap[ruleToAdd].push({
                                 isEnabled: !isEnabled,
-                                position: this.getStartOfLinePosition(node, startingPosition, 2),
+                                position: this.getStartOfLinePosition(node, startingPosition, 2) - 1,
                             });
                         }
                     }
