@@ -271,6 +271,7 @@ A sample configuration file with all options is available [here](https://github.
   * `"check-open-brace"` checks that an open brace falls on the same line as its preceding expression.
   * `"check-whitespace"` checks preceding whitespace for the specified tokens.
 * `one-variable-per-declaration` disallows multiple variable definitions in the same statement.
+  * `"ignore-for-loop"` allows multiple variable definitions in for loop statement.
 * `quotemark` enforces consistent single or double quoted string literals. Rule options (at least one of `"double"` or `"single"` is required):
     * `"single"` enforces single quotes.
     * `"double"` enforces double quotes.
