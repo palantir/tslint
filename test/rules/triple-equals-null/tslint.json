@@ -1,0 +1,6 @@
+{
+  "rules": {
+    "no-triple-equals-null": true,
+    "no-null-keyword": false
+  }
+}

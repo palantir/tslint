@@ -100,6 +100,7 @@
         "../src/rules/noStringLiteralRule.ts",
         "../src/rules/noSwitchCaseFallThroughRule.ts",
         "../src/rules/noTrailingWhitespaceRule.ts",
+        "../src/rules/noTripleEqualsNullRule.ts",
         "../src/rules/noUnreachableRule.ts",
         "../src/rules/noUnusedExpressionRule.ts",
         "../src/rules/noUnusedVariableRule.ts",
