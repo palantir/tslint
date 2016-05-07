@@ -42,9 +42,9 @@ class OneVariablePerDeclarationWalker extends Lint.RuleWalker {
 
     public visitForStatement(node: ts.ForStatement) {
         const initializer = node.initializer as ts.VariableDeclarationList;
-        const isIgnoreForLoop = this.hasOption(OPTION_IGNORE_FOR_LOOP);
+        const shouldIgnoreForLoop = this.hasOption(OPTION_IGNORE_FOR_LOOP);
 
-        if (!isIgnoreForLoop && initializer != null &&
+        if (!shouldIgnoreForLoop && initializer != null &&
             initializer.kind === ts.SyntaxKind.VariableDeclarationList && initializer.declarations.length > 1) {
             this.addFailure(this.createFailure(initializer.getStart(), initializer.getWidth(), Rule.FAILURE_STRING));
         }
