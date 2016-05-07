@@ -26,4 +26,5 @@ const foo13: number = 1, foo14: number = 1;
 const foo15 = 1, foo16 = 1;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
 
-[0]: Forbidden multiple variable definitions in the same statement
+[0]: Multiple variable declarations in the same statement are forbidden
+

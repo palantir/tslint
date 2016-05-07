@@ -21,7 +21,7 @@ import * as Lint from "../lint";
 const OPTION_IGNORE_FOR_LOOP = "ignore-for-loop";
 
 export class Rule extends Lint.Rules.AbstractRule {
-    public static FAILURE_STRING = "Forbidden multiple variable definitions in the same statement";
+    public static FAILURE_STRING = "Multiple variable declarations in the same statement are forbidden";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const oneVarWalker = new OneVariablePerDeclarationWalker(sourceFile, this.getOptions());
@@ -44,8 +44,10 @@ class OneVariablePerDeclarationWalker extends Lint.RuleWalker {
         const initializer = node.initializer as ts.VariableDeclarationList;
         const shouldIgnoreForLoop = this.hasOption(OPTION_IGNORE_FOR_LOOP);
 
-        if (!shouldIgnoreForLoop && initializer != null &&
-            initializer.kind === ts.SyntaxKind.VariableDeclarationList && initializer.declarations.length > 1) {
+        if (!shouldIgnoreForLoop
+                && initializer != null
+                && initializer.kind === ts.SyntaxKind.VariableDeclarationList
+                && initializer.declarations.length > 1) {
             this.addFailure(this.createFailure(initializer.getStart(), initializer.getWidth(), Rule.FAILURE_STRING));
         }
 
