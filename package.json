@@ -33,7 +33,6 @@
     "grunt": "^1.0.1",
     "grunt-cli": "^1.2.0",
     "grunt-contrib-clean": "^1.0.0",
-    "grunt-jscs": "^2.8.0",
     "grunt-mocha-test": "^0.12.7",
     "grunt-npm-command": "^0.1.1",
     "grunt-run": "~0.6.0",

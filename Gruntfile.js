@@ -8,7 +8,6 @@ if (process.platform  === "win32") {
 }
 
 module.exports = function (grunt) {
-    // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
     grunt.initConfig({
         pkg: grunt.file.readJSON("package.json"),
 
@@ -33,16 +32,6 @@ module.exports = function (grunt) {
             },
             testRules: {
                 args: ["./build/test/ruleTestRunner.js"]
-            }
-        },
-
-        jscs: {
-            src: [
-                "Gruntfile.js",
-                "test/files/formatters/*.js"
-            ],
-            options: {
-                config: ".jscsrc"
             }
         },
 
@@ -81,7 +70,6 @@ module.exports = function (grunt) {
 
     // load NPM tasks
     grunt.loadNpmTasks("grunt-contrib-clean");
-    grunt.loadNpmTasks("grunt-jscs");
     grunt.loadNpmTasks("grunt-mocha-test");
     grunt.loadNpmTasks("grunt-run");
     grunt.loadNpmTasks("grunt-tslint");
@@ -104,5 +92,5 @@ module.exports = function (grunt) {
     ].concat(checkBinTest));
 
     // create default task
-    grunt.registerTask("default", ["jscs", "core", "test"]);
+    grunt.registerTask("default", ["core", "test"]);
 };
