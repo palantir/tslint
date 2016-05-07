@@ -94,7 +94,9 @@
       "check-finally",
       "check-whitespace"
     ],
-    "one-variable-per-declaration": true,
+    "one-variable-per-declaration": [true,
+      "ignore-for-loop"
+    ],
     "quotemark": [
       true,
       "double",

@@ -18,6 +18,8 @@
 import * as ts from "typescript";
 import * as Lint from "../lint";
 
+const OPTION_IGNORE_FOR_LOOP = "ignore-for-loop";
+
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Forbidden multiple variable definitions in the same statement";
 
@@ -40,9 +42,10 @@ class OneVariablePerDeclarationWalker extends Lint.RuleWalker {
 
     public visitForStatement(node: ts.ForStatement) {
         const initializer = node.initializer as ts.VariableDeclarationList;
+        const shouldIgnoreForLoop = this.hasOption(OPTION_IGNORE_FOR_LOOP);
 
-        if (initializer != null && initializer.kind === ts.SyntaxKind.VariableDeclarationList &&
-                initializer.declarations.length > 1) {
+        if (!shouldIgnoreForLoop && initializer != null &&
+            initializer.kind === ts.SyntaxKind.VariableDeclarationList && initializer.declarations.length > 1) {
             this.addFailure(this.createFailure(initializer.getStart(), initializer.getWidth(), Rule.FAILURE_STRING));
         }
 
