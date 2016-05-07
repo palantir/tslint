@@ -1,5 +1,6 @@
 .DS_Store
 .gitmodules
+.eslintrc.json
 .project
 .settings
 .travis.yml
