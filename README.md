@@ -251,7 +251,7 @@ A sample configuration file with all options is available [here](https://github.
 * `no-require-imports` disallows invocation of `require()` (use ES6-style imports instead).
 * `no-shadowed-variable` disallows shadowed variable declarations.
 * `no-string-literal` disallows object access via string literals.
-* `no-switch-case-fall-through` disallows falling through case statements.
+* `no-switch-case-fall-through` disallows falling through case statements. As of TypeScript version 1.8, this rule can be enabled within the compiler by passing the --noFallthroughCasesInSwitch flag.
 * `no-trailing-whitespace` disallows trailing whitespace at the end of a line.
 * `no-unreachable` disallows unreachable code after `break`, `catch`, `throw`, and `return` statements. This rule is supported and enforced by default within the TypeScript compiler since version 1.8.
 * `no-unused-expression` disallows unused expression statements, that is, expression statements that are not assignments or function invocations (and thus no-ops).
