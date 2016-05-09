@@ -20,6 +20,7 @@ import * as ts from "typescript";
 const OPTION_VARIABLES_BEFORE_FUNCTIONS = "variables-before-functions";
 const OPTION_STATIC_BEFORE_INSTANCE = "static-before-instance";
 const OPTION_PUBLIC_BEFORE_PRIVATE = "public-before-private";
+const OPTION_IGNORE_CONSTRUCTOR = "ignore-constructor";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -78,8 +79,10 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
     }
 
     public visitConstructorDeclaration(node: ts.ConstructorDeclaration) {
-        this.checkModifiersAndSetPrevious(node, getModifiers(true, node.modifiers));
-        super.visitConstructorDeclaration(node);
+        if (!this.hasOption(OPTION_IGNORE_CONSTRUCTOR)) {
+            this.checkModifiersAndSetPrevious(node, getModifiers(true, node.modifiers));
+            super.visitConstructorDeclaration(node);
+        }
     }
 
     public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
