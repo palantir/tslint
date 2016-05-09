@@ -112,9 +112,9 @@ enum AccessLevel {
     PUBLIC,
 }
 
-enum Bound {
-    STATIC,
+enum Membership {
     INSTANCE,
+    STATIC,
 }
 
 enum Kind {
@@ -124,9 +124,9 @@ enum Kind {
 
 interface INodeAndModifiers {
     accessLevel: AccessLevel;
-    bound: Bound;
     isConstructor: boolean;
     kind: Kind;
+    membership: Membership;
     node: ts.Node;
 }
 
@@ -135,25 +135,25 @@ function getNodeAndModifiers(node: ts.Node, isMethod: boolean, isConstructor = f
     const accessLevel = Lint.hasModifier(modifiers, ts.SyntaxKind.PrivateKeyword) ? AccessLevel.PRIVATE
         : Lint.hasModifier(modifiers, ts.SyntaxKind.ProtectedKeyword) ? AccessLevel.PROTECTED
         : AccessLevel.PUBLIC;
-    const bound = Lint.hasModifier(modifiers, ts.SyntaxKind.StaticKeyword) ? Bound.STATIC : Bound.INSTANCE;
     const kind = isMethod ? Kind.METHOD : Kind.FIELD;
+    const membership = Lint.hasModifier(modifiers, ts.SyntaxKind.StaticKeyword) ? Membership.STATIC : Membership.INSTANCE;
     return {
         accessLevel,
-        bound,
         isConstructor,
         kind,
+        membership,
         node,
     };
 }
 
-function getNodeOption({accessLevel, bound, isConstructor, kind}: INodeAndModifiers) {
+function getNodeOption({accessLevel, isConstructor, kind, membership}: INodeAndModifiers) {
     if (isConstructor) {
         return "constructor";
     }
 
     return [
         AccessLevel[accessLevel].toLowerCase(),
-        Bound[bound].toLowerCase(),
+        Membership[membership].toLowerCase(),
         Kind[kind].toLowerCase(),
     ].join("-");
 }
