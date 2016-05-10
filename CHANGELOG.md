@@ -1,6 +1,26 @@
 Change Log
 ===
 
+v3.10.0
+---
+* Stable release containing changes from the last dev release (v3.10.0-dev.0)
+
+v3.10.0-dev.0
+---
+* [new-rule] `new-parens` rule (#1177)
+* [new-rule] `no-default-export` rule (#1182)
+* [new-rule-option] `order: ...` option for `member-ordering` rule (#1208)
+* [new-rule-option] "ignore-for-loop" option for `one-variable-per-declaration` rule (#1204)
+* [enhancement] "no-this-in-function-in-method" option renamed to "check-function-in-method" (#1203)
+* [bugfix] `semicolon` rule checks export statements (#1155)
+
+Thanks to our contributors!
+* @chrismbarr
+* @HamletDRC
+* @larshp
+* @patsissons
+* @YuichiNukiyama
+
 v3.9.0
 ---
 * Stable release containing changes from the last dev release (v3.9.0-dev.0)
