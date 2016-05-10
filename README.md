@@ -62,7 +62,7 @@ Please ensure that the TypeScript source files compile correctly _before_ runnin
 
 ##### CLI
 
-usage: `tslint [options] [file ...]`
+usage: `tslint [options] file ...`
 
 Options:
 
