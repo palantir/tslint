@@ -6,9 +6,15 @@ dependencies:
   pre:
     - case $CIRCLE_NODE_INDEX in 0) nvm use 0.10 ;; 1) nvm use 0.12 ;; 2) nvm use 4.2 ;; 3) nvm use 5.5 ;; esac
 deployment:
-  npm:
-    # match semver tag with optional dev prerelease tag (e.g. 3.12.7 or 3.12.7-dev.2)
-    tag: /\d\d?\.\d\d?\.\d\d?(-dev\.\d\d?)?/
+  npm-latest:
+    # match semver tag (e.g. 3.12.7)
+    tag: /\d\d?\.\d\d?\.\d\d?/
     owner: palantir
     commands:
-      - ./scripts/npmPublish.sh
+      - ./scripts/npmPublish.sh latest
+  npm-next:
+    # match semver tag with dev prerelease tag (e.g. 3.12.7-dev.2)
+    tag: /\d\d?\.\d\d?\.\d\d?-dev\.\d\d?/
+    owner: palantir
+    commands:
+      - ./scripts/npmPublish.sh next

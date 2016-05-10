@@ -7,4 +7,4 @@ echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
 chmod 0600 .npmrc
 
 echo "Publishing..."
-npm publish
+npm publish --tag $1
