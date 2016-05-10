@@ -16,7 +16,7 @@ class NoDefaultExportWalker extends Lint.RuleWalker {
             this.addFailure(this.createFailure(exportMember.getStart(), exportMember.getWidth(), Rule.FAILURE_STRING));
         }
         super.visitExportAssignment(node);
-   }
+    }
 
     // inline class declaration and function declaration exports use modifiers
     public visitNode(node: ts.Node) {
