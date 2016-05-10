@@ -107,6 +107,7 @@
         "../src/rules/noVarKeywordRule.ts",
         "../src/rules/noVarRequiresRule.ts",
         "../src/rules/objectLiteralSortKeysRule.ts",
+        "../src/rules/objectTypeEolRule.ts",
         "../src/rules/oneLineRule.ts",
         "../src/rules/oneVariablePerDeclarationRule.ts",
         "../src/rules/quotemarkRule.ts",
