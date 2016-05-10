@@ -22,7 +22,7 @@
   "dependencies": {
     "colors": "^1.1.2",
     "diff": "^2.2.1",
-    "findup-sync": "~0.4.0",
+    "findup-sync": "~0.3.0",
     "glob": "^7.0.3",
     "optimist": "~0.6.0",
     "resolve": "^1.1.7",
@@ -35,7 +35,7 @@
     "grunt-contrib-clean": "^1.0.0",
     "grunt-eslint": "^18.1.0",
     "grunt-mocha-test": "^0.12.7",
-    "grunt-npm-command": "^0.1.1",
+    "grunt-npm-command": "^0.1.2",
     "grunt-run": "~0.6.0",
     "grunt-ts": "^5.1.0",
     "grunt-tslint": "latest",
