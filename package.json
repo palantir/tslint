@@ -1,7 +1,7 @@
 {
   "name": "tslint",
   "version": "3.9.0",
-  "description": "a static analysis linter for TypeScript",
+  "description": "An extensible static analysis linter for the TypeScript language",
   "bin": {
     "tslint": "./bin/tslint"
   },
@@ -23,20 +23,20 @@
     "colors": "^1.1.2",
     "diff": "^2.2.1",
     "findup-sync": "~0.3.0",
-    "glob": "^6.0.1",
+    "glob": "^7.0.3",
     "optimist": "~0.6.0",
     "resolve": "^1.1.7",
-    "underscore.string": "~3.1.1"
+    "underscore.string": "^3.3.4"
   },
   "devDependencies": {
     "chai": "^3.0.0",
-    "grunt": "^0.4.5",
-    "grunt-cli": "^0.1.9",
-    "grunt-contrib-clean": "^0.6.0",
-    "grunt-jscs": "^1.8.0",
+    "grunt": "^1.0.1",
+    "grunt-cli": "^1.2.0",
+    "grunt-contrib-clean": "^1.0.0",
+    "grunt-eslint": "^18.1.0",
     "grunt-mocha-test": "^0.12.7",
-    "grunt-npm-command": "^0.1.1",
-    "grunt-run": "^0.3.0",
+    "grunt-npm-command": "^0.1.2",
+    "grunt-run": "~0.6.0",
     "grunt-ts": "^5.1.0",
     "grunt-tslint": "latest",
     "mocha": "^2.2.5",
