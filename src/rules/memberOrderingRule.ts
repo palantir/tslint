@@ -17,9 +17,62 @@
 import * as Lint from "../lint";
 import * as ts from "typescript";
 
+/* start old options */
 const OPTION_VARIABLES_BEFORE_FUNCTIONS = "variables-before-functions";
 const OPTION_STATIC_BEFORE_INSTANCE = "static-before-instance";
 const OPTION_PUBLIC_BEFORE_PRIVATE = "public-before-private";
+/* end old options */
+
+/* start new options */
+const OPTION_ORDER = "order";
+const PRESET_ORDERS: { [preset: string]: string[] } = {
+    "fields-first": [
+        "public-static-field",
+        "protected-static-field",
+        "private-static-field",
+        "public-instance-field",
+        "protected-instance-field",
+        "private-instance-field",
+        "constructor",
+        "public-static-method",
+        "protected-static-method",
+        "private-static-method",
+        "public-instance-method",
+        "protected-instance-method",
+        "private-instance-method",
+    ],
+    "statics-first": [
+        "public-static-field",
+        "public-static-method",
+        "protected-static-field",
+        "protected-static-method",
+        "private-static-field",
+        "private-static-method",
+        "public-instance-field",
+        "protected-instance-field",
+        "private-instance-field",
+        "constructor",
+        "public-instance-method",
+        "protected-instance-method",
+        "private-instance-method",
+    ],
+    "instance-sandwich": [
+        "public-static-field",
+        "protected-static-field",
+        "private-static-field",
+        "public-instance-field",
+        "protected-instance-field",
+        "private-instance-field",
+        "constructor",
+        "public-instance-method",
+        "protected-instance-method",
+        "private-instance-method",
+        "public-static-method",
+        "protected-static-method",
+        "private-static-method",
+    ],
+};
+/* end new options */
 
 export class Rule extends Lint.Rules.AbstractRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -27,6 +80,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
+/* start code supporting old options (i.e. "public-before-private") */
 interface IModifiers {
     isMethod: boolean;
     isPrivate: boolean;
@@ -49,36 +103,97 @@ function toString(modifiers: IModifiers): string {
         modifiers.isMethod ? "function" : "variable",
     ].join(" ");
 }
+/* end old code */
+
+/* start new code */
+enum AccessLevel {
+    PRIVATE,
+    PROTECTED,
+    PUBLIC,
+}
+
+enum Membership {
+    INSTANCE,
+    STATIC,
+}
+
+enum Kind {
+    FIELD,
+    METHOD,
+}
+
+interface INodeAndModifiers {
+    accessLevel: AccessLevel;
+    isConstructor: boolean;
+    kind: Kind;
+    membership: Membership;
+    node: ts.Node;
+}
+
+function getNodeAndModifiers(node: ts.Node, isMethod: boolean, isConstructor = false): INodeAndModifiers {
+    const { modifiers } = node;
+    const accessLevel = Lint.hasModifier(modifiers, ts.SyntaxKind.PrivateKeyword) ? AccessLevel.PRIVATE
+        : Lint.hasModifier(modifiers, ts.SyntaxKind.ProtectedKeyword) ? AccessLevel.PROTECTED
+        : AccessLevel.PUBLIC;
+    const kind = isMethod ? Kind.METHOD : Kind.FIELD;
+    const membership = Lint.hasModifier(modifiers, ts.SyntaxKind.StaticKeyword) ? Membership.STATIC : Membership.INSTANCE;
+    return {
+        accessLevel,
+        isConstructor,
+        kind,
+        membership,
+        node,
+    };
+}
+
+function getNodeOption({accessLevel, isConstructor, kind, membership}: INodeAndModifiers) {
+    if (isConstructor) {
+        return "constructor";
+    }
+
+    return [
+        AccessLevel[accessLevel].toLowerCase(),
+        Membership[membership].toLowerCase(),
+        Kind[kind].toLowerCase(),
+    ].join("-");
+}
+/* end new code */
 
 export class MemberOrderingWalker extends Lint.RuleWalker {
     private previousMember: IModifiers;
-
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
-        super(sourceFile, options);
-    }
+    private memberStack: INodeAndModifiers[][] = [];
 
     public visitClassDeclaration(node: ts.ClassDeclaration) {
         this.resetPreviousModifiers();
+
+        this.newMemberList();
         super.visitClassDeclaration(node);
+        this.checkMemberOrder();
     }
 
     public visitInterfaceDeclaration(node: ts.InterfaceDeclaration) {
         this.resetPreviousModifiers();
+
+        this.newMemberList();
         super.visitInterfaceDeclaration(node);
+        this.checkMemberOrder();
     }
 
     public visitMethodDeclaration(node: ts.MethodDeclaration) {
         this.checkModifiersAndSetPrevious(node, getModifiers(true, node.modifiers));
+        this.pushMember(getNodeAndModifiers(node, true));
         super.visitMethodDeclaration(node);
     }
 
     public visitMethodSignature(node: ts.SignatureDeclaration) {
         this.checkModifiersAndSetPrevious(node, getModifiers(true, node.modifiers));
+        this.pushMember(getNodeAndModifiers(node, true));
         super.visitMethodSignature(node);
     }
 
     public visitConstructorDeclaration(node: ts.ConstructorDeclaration) {
         this.checkModifiersAndSetPrevious(node, getModifiers(true, node.modifiers));
+        this.pushMember(getNodeAndModifiers(node, true, true));
         super.visitConstructorDeclaration(node);
     }
 
@@ -87,11 +202,13 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
         const isFunction = initializer != null
             && (initializer.kind === ts.SyntaxKind.ArrowFunction || initializer.kind === ts.SyntaxKind.FunctionExpression);
         this.checkModifiersAndSetPrevious(node, getModifiers(isFunction, node.modifiers));
+        this.pushMember(getNodeAndModifiers(node, isFunction));
         super.visitPropertyDeclaration(node);
     }
 
     public visitPropertySignature(node: ts.PropertyDeclaration) {
         this.checkModifiersAndSetPrevious(node, getModifiers(false, node.modifiers));
+        this.pushMember(getNodeAndModifiers(node, false));
         super.visitPropertySignature(node);
     }
 
@@ -99,6 +216,7 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
         // don't call super from here -- we want to skip the property declarations in type literals
     }
 
+    /* start old code */
     private resetPreviousModifiers() {
         this.previousMember = {
             isInstance: false,
@@ -138,4 +256,74 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
 
         return true;
     }
+    /* end old code */
+
+    /* start new code */
+    private newMemberList() {
+        this.memberStack.push([]);
+    }
+
+    private pushMember(node: INodeAndModifiers) {
+        this.memberStack[this.memberStack.length - 1].push(node);
+    }
+
+    private checkMemberOrder() {
+        const memberList = this.memberStack.pop();
+        if (this.hasOrderOption()) {
+            const order = this.getOrder();
+            const memberRank = memberList.map((n) => order.indexOf(getNodeOption(n)));
+
+            let prevRank = -1;
+            memberRank.forEach((rank, i) => {
+                // no explicit ordering for this kind of node specified, so continue
+                if (rank === -1) { return; }
+
+                // node should have come before last node, so add a failure
+                if (rank < prevRank) {
+                    // generate a nice and clear error message
+                    const node = memberList[i].node;
+                    const nodeType = order[rank].split("-").join(" ");
+                    const prevNodeType = order[prevRank].split("-").join(" ");
+
+                    const lowerRanks = memberRank.filter((r) => r < rank && r !== -1).sort();
+                    const locationHint = lowerRanks.length > 0
+                        ? `after ${order[lowerRanks[lowerRanks.length - 1]].split("-").join(" ")}s`
+                        : "at the beginning of the class/interface";
+
+                    const errorLine1 = `Declaration of ${nodeType} not allowed after declaration of ${prevNodeType}. ` +
+                        `Instead, this should come ${locationHint}.`;
+                    this.addFailure(this.createFailure(
+                        node.getStart(),
+                        node.getWidth(),
+                        errorLine1
+                    ));
+                } else {
+                    // keep track of last good node
+                    prevRank = rank;
+                }
+            });
+
+        }
+    }
+
+    private hasOrderOption() {
+        const allOptions = this.getOptions();
+        if (allOptions == null || allOptions.length === 0) {
+            return false;
+        }
+
+        const firstOption = allOptions[0];
+        return firstOption != null && typeof firstOption === "object" && firstOption[OPTION_ORDER] != null;
+    }
+
+    // assumes this.hasOrderOption() === true
+    private getOrder(): string[] {
+        const orderOption = this.getOptions()[0][OPTION_ORDER];
+        if (Array.isArray(orderOption)) {
+            return orderOption;
+        } else if (typeof orderOption === "string") {
+            return PRESET_ORDERS[orderOption] || PRESET_ORDERS["default"];
+        }
+    }
+    /* end new code */
 }
