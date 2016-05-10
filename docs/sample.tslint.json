@@ -44,6 +44,7 @@
       "static-before-instance",
       "variables-before-functions"
     ],
+    "new-parens": true,
     "no-angle-bracket-type-assertion": true,
     "no-any": false,
     "no-arg": true,
@@ -69,9 +70,8 @@
     "no-internal-module": true,
     "no-invalid-this": [
       true,
-      "no-this-in-function-in-method"
+      "check-function-in-method"
       ],
-    "no-multiple-variable-declaration": true,
     "no-null-keyword": true,
     "no-reference": true,
     "no-require-imports": true,
@@ -93,6 +93,9 @@
       "check-else",
       "check-finally",
       "check-whitespace"
+    ],
+    "one-variable-per-declaration": [true,
+      "ignore-for-loop"
     ],
     "quotemark": [
       true,

@@ -19,9 +19,9 @@ SimpleFormatter.prototype = Object.create({
             output += "[" + (line + 1) + ", " + (character + 1) + "]" + fileName + "\n";
         }
         return output;
-    }
+    },
 });
 
 module.exports = {
-    Formatter: SimpleFormatter
+    Formatter: SimpleFormatter,
 };

@@ -108,3 +108,11 @@ var a = 1
 for (var i = 0; i < 10; ++i) {
   // do something
 }
+
+export default LoginPage;
+                        ~ [unnecessary semicolon]
+export default LoginPage
+
+export = Date;
+             ~ [unnecessary semicolon]
+export = Date

@@ -28,7 +28,7 @@ import {
 import {consoleTestResultHandler, runTest} from "./test";
 
 let processed = optimist
-    .usage("Usage: $0 [options] [file ...]")
+    .usage("Usage: $0 [options] file ...")
     .check((argv: any) => {
         // at least one of file, help, version or unqualified argument must be present
         if (!(argv.h || argv.i || argv.test || argv.v || argv._.length > 0)) {

@@ -62,7 +62,7 @@ Please ensure that the TypeScript source files compile correctly _before_ runnin
 
 ##### CLI
 
-usage: `tslint [options] [file ...]`
+usage: `tslint [options] file ...`
 
 Options:
 
@@ -224,6 +224,7 @@ A sample configuration file with all options is available [here](https://github.
     * `static-before-instance` All static members must be declared before instance members.
     * `variables-before-functions` All member variables need to be declared before member functions.
        Member variables initialized to a function literal are treated as member functions.
+* `new-parens` enforces parentheses when invoking a constructor via the new keyword.
 * `no-angle-bracket-type-assertion` disallows usages of `<>` type assertions in favor of using the `as` keyword.
 * `no-any` diallows usages of `any` as a type decoration.
 * `no-arg` disallows access to `arguments.callee`.
@@ -239,9 +240,10 @@ A sample configuration file with all options is available [here](https://github.
 * `no-empty` disallows empty blocks.
 * `no-eval` disallows `eval` function invocations.
 * `no-inferrable-types` disallows explicit type declarations for variables or parameters initialized to a number, string, or boolean.
+   * `ignore-params` allows specifying an inferrable type as a function param
 * `no-internal-module` disallows internal `module` (use `namespace` instead).
 * `no-invalid-this` disallows using the `this` keyword outside of classes.
-    * `no-this-in-function-in-method` disallows using the `this` keyword in functions within class methods.
+    * `check-function-in-method` disallows using the `this` keyword in functions within class methods.
 * `no-namespace` disallows both internal `module`s and `namespace`, but allows ES6-style external modules.
     * `allow-declarations` allows `declare namespace ... {}` to describe external APIs.
 * `no-null-keyword` disallows use of the `null` keyword literal.
@@ -249,9 +251,9 @@ A sample configuration file with all options is available [here](https://github.
 * `no-require-imports` disallows invocation of `require()` (use ES6-style imports instead).
 * `no-shadowed-variable` disallows shadowed variable declarations.
 * `no-string-literal` disallows object access via string literals.
-* `no-switch-case-fall-through` disallows falling through case statements.
+* `no-switch-case-fall-through` disallows falling through case statements. As of TypeScript version 1.8, this rule can be enabled within the compiler by passing the `--noFallthroughCasesInSwitch` flag.
 * `no-trailing-whitespace` disallows trailing whitespace at the end of a line.
-* `no-unreachable` disallows unreachable code after `break`, `catch`, `throw`, and `return` statements.
+* `no-unreachable` disallows unreachable code after `break`, `catch`, `throw`, and `return` statements. This rule is supported and enforced by default within the TypeScript compiler since version 1.8.
 * `no-unused-expression` disallows unused expression statements, that is, expression statements that are not assignments or function invocations (and thus no-ops).
 * `no-unused-variable` disallows unused imports, variables, functions and private class members. Rule options:
     * `"check-parameters"` disallows unused function and constructor parameters.
@@ -269,6 +271,7 @@ A sample configuration file with all options is available [here](https://github.
   * `"check-open-brace"` checks that an open brace falls on the same line as its preceding expression.
   * `"check-whitespace"` checks preceding whitespace for the specified tokens.
 * `one-variable-per-declaration` disallows multiple variable definitions in the same statement.
+  * `"ignore-for-loop"` allows multiple variable definitions in for loop statement.
 * `quotemark` enforces consistent single or double quoted string literals. Rule options (at least one of `"double"` or `"single"` is required):
     * `"single"` enforces single quotes.
     * `"double"` enforces double quotes.
@@ -333,8 +336,12 @@ You may enable/disable TSLint or a subset of rules within certain lines of a fil
 * `/* tslint:enable */` - Enable all rules for the rest of the file
 * `/* tslint:disable:rule1 rule2 rule3... */` - Disable the listed rules for the rest of the file
 * `/* tslint:enable:rule1 rule2 rule3... */` - Enable the listed rules for the rest of the file
+* `// tslint:disable-next-line` - Disables all rules for the following line
+* `someCode(); // tslint:disable-line` - Disables all rules for the current line
+* `// tslint:disable-next-line:rule1 rule2 rule3...` - Disables the listed rules for the next line
+* etc.
 
-Rules flags enable or disable rules as they are parsed. A rule is enabled or disabled until a later directive commands otherwise. Disabling an already disabled rule or enabling an already enabled rule has no effect.
+Rules flags enable or disable rules as they are parsed. Disabling an already disabled rule or enabling an already enabled rule has no effect.
 
 For example, imagine the directive `/* tslint:disable */` on the first line of a file, `/* tslint:enable:ban class-name */` on the 10th line and `/* tslint:enable */` on the 20th. No rules will be checked between the 1st and 10th lines, only the `ban` and `class-name` rules will be checked between the 10th and 20th, and all rules will be checked for the remainder of the file.
 
@@ -348,7 +355,7 @@ If we don't have all the rules you're looking for, you can either write your own
 
 - [ESLint rules for TSLint](https://github.com/buzinas/tslint-eslint-rules) - Improve your TSLint with the missing ESLint Rules
 - [tslint-microsoft-contrib](https://github.com/Microsoft/tslint-microsoft-contrib) - A set of TSLint rules used on some Microsoft projects
-- [ng2lint](https://github.com/mgechev/ng2lint) - A set of TSLint rules for static code analysis of Angular 2 TypeScript projects
+- [codelyzer](https://github.com/mgechev/codelyzer) - A set of tslint rules for static code analysis of Angular 2 TypeScript projects
 
 #### Writing custom rules
 
