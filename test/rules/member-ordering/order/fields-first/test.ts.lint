@@ -14,7 +14,7 @@ class Good {
     private l = () => {};
 }
     
-Interface IGood {
+interface IGood {
     foo: number;
     arrowsAreFields: () => void;
     nonArrowsAreMethods(): void;
