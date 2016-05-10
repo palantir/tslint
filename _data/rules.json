@@ -218,22 +218,35 @@
     "ruleName": "member-ordering",
     "description": "Enforces member ordering.",
     "rationale": "A consistent ordering for class members can make classes easier to read, navigate, and edit.",
-    "optionsDescription": "\nThree arguments may be optionally provided:\n\n* `public-before-private ` All public members must be declared before private members.\n* `static-before-instance ` All static members must be declared before instance members.\n* `variables-before-functions` All variables needs to be declared before functions.",
+    "optionsDescription": "\nOne argument, which is an object, must be provided. It should contain an `order` property.\nThe `order` property should have a value of one of the following strings:\n\n* `fields-first`\n* `statics-first`\n* `instance-sandwich`\n\nAlternatively, the value for `order` maybe be an array consisting of the following strings:\n\n* `public-static-field`\n* `protected-static-field`\n* `private-static-field`\n* `public-instance-field`\n* `protected-instance-field`\n* `private-instance-field`\n* `constructor`\n* `public-static-method`\n* `protected-static-method`\n* `private-static-method`\n* `public-instance-method`\n* `protected-instance-method`\n* `private-instance-method`\n\nThis is useful if one of the preset orders does not meet your needs.",
     "options": {
-      "type": "list",
-      "listType": {
-        "type": "enum",
-        "enumValues": [
-          "public-before-private",
-          "static-before-instance",
-          "variables-before-functions"
-        ]
+      "type": "object",
+      "properties": {
+        "order": {
+          "type": "enum",
+          "enumValues": [
+            "fields-first",
+            "statics-first",
+            "instance-sandwich"
+          ]
+        }
       }
     },
     "optionExamples": [
-      "[true, \"public-before-private\", \"static-before-instance\"]"
+      "[true, { \"order\": \"fields-first\" }]"
     ],
     "type": "typescript"
+  },
+  {
+    "ruleName": "new-parens",
+    "description": "Requires parentheses when invoking a constructor via the `new` keyword.",
+    "rationale": "Maintains stylistic consistency with other function calls.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "style"
   },
   {
     "ruleName": "no-angle-bracket-type-assertion",
@@ -354,6 +367,18 @@
     "type": "functionality"
   },
   {
+    "ruleName": "no-default-export",
+    "description": "Disallows default exports in ES6-style modules.",
+    "descriptionDetails": "Use named exports instead.",
+    "rationale": "\nNamed imports/exports [promote clarity](https://github.com/palantir/tslint/issues/1182#issue-151780453).\nIn addition, current tooling differs on the correct way to handle default imports/exports.\nAvoiding them all together can help avoid tooling bugs and conflicts.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "maintainability"
+  },
+  {
     "ruleName": "no-duplicate-key",
     "description": "Disallows duplicate keys in object literals.",
     "rationale": "\nThere is no good reason to define an object literal with the same key twice.\nThis rule is now implemented in the TypeScript compiler and does not need to be used.",
@@ -434,19 +459,19 @@
     "ruleName": "no-invalid-this",
     "description": "Disallows using the `this` keyword outside of classes.",
     "rationale": "See [the rule's author's rationale here.](https://github.com/palantir/tslint/pull/1105#issue-147549402)",
-    "optionsDescription": "\nOne argument may be optionally provided:\n\n* `no-this-in-function-in-method` disallows using the `this` keyword in functions within class methods.",
+    "optionsDescription": "\nOne argument may be optionally provided:\n\n* `check-function-in-method` disallows using the `this` keyword in functions within class methods.",
     "options": {
       "type": "list",
       "listType": {
         "type": "enum",
         "enumValues": [
-          "no-this-in-function-in-method"
+          "check-function-in-method"
         ]
       }
     },
     "optionExamples": [
       "true",
-      "[true, \"no-this-in-function-in-method\"]"
+      "[true, \"check-function-in-method\"]"
     ],
     "type": "functionality"
   },
@@ -674,10 +699,19 @@
   {
     "ruleName": "one-variable-per-declaration",
     "description": "Disallows multiple variable definitions in the same declaration statement.",
-    "optionsDescription": "Not configurable.",
-    "options": {},
+    "optionsDescription": "\nOne argument may be optionally provided:\n\n* `ignore-for-loop` allows multiple variable definitions in a for loop declaration.",
+    "options": {
+      "type": "list",
+      "listType": {
+        "type": "enum",
+        "enumValues": [
+          "ignore-for-loop"
+        ]
+      }
+    },
     "optionExamples": [
-      "true"
+      "true",
+      "[true, \"ignore-for-loop\"]"
     ],
     "type": "style"
   },
