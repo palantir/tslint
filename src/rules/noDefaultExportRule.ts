@@ -17,4 +17,18 @@ class NoDefaultExportWalker extends Lint.RuleWalker {
         }
         super.visitExportAssignment(node);
    }
+
+    // inline class declaration and function declaration exports use modifiers
+    public visitNode(node: ts.Node) {
+        if (node.kind === ts.SyntaxKind.DefaultKeyword && node.parent != null) {
+            const nodes = node.parent.modifiers;
+            if (nodes != null &&
+                nodes.length === 2 &&
+                nodes[0].kind === ts.SyntaxKind.ExportKeyword &&
+                nodes[1].kind === ts.SyntaxKind.DefaultKeyword) {
+                    this.addFailure(this.createFailure(nodes[1].getStart(), nodes[1].getWidth(), Rule.FAILURE_STRING));
+            }
+        }
+        super.visitNode(node);
+    }
 }
