@@ -19,6 +19,18 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "new-parens",
+        description: "Requires parentheses when invoking a constructor via the `new` keyword.",
+        rationale: "Maintains stylistic consistency with other function calls.",
+        optionsDescription: "Not configurable.",
+        options: {},
+        optionExamples: ["true"],
+        type: "style",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING = "parentheses required when invoking a constructor";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {

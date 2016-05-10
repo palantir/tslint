@@ -35,15 +35,15 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: Lint.Utils.dedent`
             One argument may be optionally provided:
 
-            * \`${OPTION_IN_FUNCTION_IN_METHOD}\` disallows using the \`this\` keyword in functions within class methods.`,
+            * \`${OPTION_FUNCTION_IN_METHOD}\` disallows using the \`this\` keyword in functions within class methods.`,
         options: {
             type: "list",
             listType: {
                 type: "enum",
-                enumValues: [OPTION_IN_FUNCTION_IN_METHOD],
+                enumValues: [OPTION_FUNCTION_IN_METHOD],
             },
         },
-        optionExamples: ["true", `[true, "${OPTION_IN_FUNCTION_IN_METHOD}"]`],
+        optionExamples: ["true", `[true, "${OPTION_FUNCTION_IN_METHOD}"]`],
         type: "functionality",
     };
     /* tslint:enable:object-literal-sort-keys */

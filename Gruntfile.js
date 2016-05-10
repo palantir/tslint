@@ -63,8 +63,8 @@ module.exports = function (grunt) {
                 "!test/typings/**/*.ts",
             ],
             docs: [
-                "docs/**/*.ts"
-            ]
+                "docs/**/*.ts",
+            ],
         },
 
         ts: {
@@ -72,7 +72,7 @@ module.exports = function (grunt) {
                 tsconfig: "src/tsconfig.json",
             },
             docs: {
-                tsconfig: "docs/tsconfig.json"
+                tsconfig: "docs/tsconfig.json",
             },
             test: {
                 tsconfig: "test/tsconfig.json",
@@ -115,7 +115,7 @@ module.exports = function (grunt) {
         "clean:docs",
         "ts:docs",
         "tslint:docs",
-        "run:docs"
+        "run:docs",
     ]);
 
     // create default task

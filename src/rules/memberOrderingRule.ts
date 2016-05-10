@@ -81,19 +81,40 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Enforces member ordering.",
         rationale: "A consistent ordering for class members can make classes easier to read, navigate, and edit.",
         optionsDescription: Lint.Utils.dedent`
-            Three arguments may be optionally provided:
+            One argument, which is an object, must be provided. It should contain an \`order\` property.
+            The \`order\` property should have a value of one of the following strings:
 
-            * \`public-before-private \` All public members must be declared before private members.
-            * \`static-before-instance \` All static members must be declared before instance members.
-            * \`variables-before-functions\` All variables needs to be declared before functions.`,
+            * \`fields-first\`
+            * \`statics-first\`
+            * \`instance-sandwich\`
+
+            Alternatively, the value for \`order\` maybe be an array consisting of the following strings:
+
+            * \`public-static-field\`
+            * \`protected-static-field\`
+            * \`private-static-field\`
+            * \`public-instance-field\`
+            * \`protected-instance-field\`
+            * \`private-instance-field\`
+            * \`constructor\`
+            * \`public-static-method\`
+            * \`protected-static-method\`
+            * \`private-static-method\`
+            * \`public-instance-method\`
+            * \`protected-instance-method\`
+            * \`private-instance-method\`
+
+            This is useful if one of the preset orders does not meet your needs.`,
         options: {
-            type: "list",
-            listType: {
-                type: "enum",
-                enumValues: ["public-before-private", "static-before-instance", "variables-before-functions"],
+            type: "object",
+            properties: {
+                order: {
+                    type: "enum",
+                    enumValues: ["fields-first", "statics-first", "instance-sandwich"],
+                },
             },
         },
-        optionExamples: ['[true, "public-before-private", "static-before-instance"]'],
+        optionExamples: ['[true, { "order": "fields-first" }]'],
         type: "typescript",
     };
     /* tslint:enable:object-literal-sort-keys */
