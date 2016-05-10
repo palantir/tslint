@@ -219,11 +219,8 @@ A sample configuration file with all options is available [here](https://github.
 * `member-access` enforces using explicit visibility on class members
     * `"check-accessor"` enforces explicit visibility on get/set accessors (can only be public)
     * `"check-constructor"` enforces explicit visibility on constructors (can only be public)
-* `member-ordering` enforces member ordering. Rule options:
-    * `public-before-private` All public members must be declared before private members.
-    * `static-before-instance` All static members must be declared before instance members.
-    * `variables-before-functions` All member variables need to be declared before member functions.
-       Member variables initialized to a function literal are treated as member functions.
+* `member-ordering` enforces member ordering. The first option should be an object with an `order` key.
+   Values for `order` can be `fields-first`, `statics-first`, `instance-sandwich`, or a custom order.
 * `new-parens` enforces parentheses when invoking a constructor via the new keyword.
 * `no-angle-bracket-type-assertion` disallows usages of `<>` type assertions in favor of using the `as` keyword.
 * `no-any` diallows usages of `any` as a type decoration.
@@ -235,6 +232,7 @@ A sample configuration file with all options is available [here](https://github.
 * `no-construct` disallows access to the constructors of `String`, `Number`, and `Boolean`.
 * `no-constructor-vars` disallows the `public` and `private` modifiers for constructor parameters.
 * `no-debugger` disallows `debugger` statements.
+* `no-default-export` disallows default exports in ES6-style modules. Use named exports instead.
 * `no-duplicate-key` disallows duplicate keys in object literals.
 * `no-duplicate-variable` disallows duplicate variable declarations in the same block scope.
 * `no-empty` disallows empty blocks.
