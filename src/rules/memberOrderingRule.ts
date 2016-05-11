@@ -216,6 +216,11 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
         // don't call super from here -- we want to skip the property declarations in type literals
     }
 
+    public visitObjectLiteralExpression(node: ts.ObjectLiteralExpression) {
+        // again, don't call super here - object literals can have methods,
+        // and we don't wan't to check these
+    }
+
     /* start old code */
     private resetPreviousModifiers() {
         this.previousMember = {
