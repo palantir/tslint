@@ -1,6 +1,14 @@
 Change Log
 ===
 
+v3.10.1
+---
+* Stable release containing changes from the last dev release (v3.10.0-dev.1)
+
+v3.10.0-dev.1
+---
+* [bugfix] `member-ordering` rule doesn't crash on methods in object literals (#1243)
+
 v3.10.0
 ---
 * Stable release containing changes from the last dev release (v3.10.0-dev.0)
