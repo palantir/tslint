@@ -1,5 +1,5 @@
 {
   "rules": {
-    "ban": [true, ["window", "toString"]]
+    "ban": [true, ["window", "toString"], ["_", "forEach"]]
   }
 }
