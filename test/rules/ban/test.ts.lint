@@ -2,3 +2,12 @@ console.time();
 window.toString();
 ~~~~~~~~~~~~~~~    [function invocation disallowed: window.toString]
 console.log();
+document.window.toString();
+~~~~~~~~~~~~~~~~~~~~~~~~    [function invocation disallowed: window.toString]
+reference.randomContainer.window.toString();
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    [function invocation disallowed: window.toString]
+globals.getDocument().window.toString();
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    [function invocation disallowed: window.toString]
+_.keys(obj).forEach(fun);
+_.forEach(fun);
+~~~~~~~~~    [function invocation disallowed: _.forEach]
