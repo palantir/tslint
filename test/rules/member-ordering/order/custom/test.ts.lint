@@ -20,6 +20,7 @@ class AlsoOkay {
             someMethod() {}
         };
     }
+
     private z = 10;
 }
 
@@ -27,3 +28,9 @@ const foo = {
     // TS treats this as a method, but we should be careful not to
     someMethod() {}
 };
+
+function makeAClass() {
+    const myClass = class {
+        method(){}
+    };
+}
