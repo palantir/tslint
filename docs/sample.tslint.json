@@ -42,6 +42,7 @@
       true,
       { "order": "fields-first" }
     ],
+    "mergeable-namespace": true,
     "new-parens": true,
     "no-angle-bracket-type-assertion": true,
     "no-any": false,

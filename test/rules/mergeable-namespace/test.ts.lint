@@ -1,0 +1,22 @@
+// valid case
+var foo;
+namespace foo{
+    namespace foo {}
+}
+declare module buzz {}
+module bar {}
+
+// invalid case
+namespace a {}
+          ~ [mergeable namespace: 'a']
+namespace a {}
+          ~ [mergeable namespace: 'a']
+
+namespace b {
+    namespace b {}
+              ~ [mergeable namespace: 'b']
+    namespace b {}
+              ~ [mergeable namespace: 'b']
+    namespace b {}
+              ~ [mergeable namespace: 'b']
+}
