@@ -70,6 +70,10 @@ export class SyntaxWalker {
         this.walkChildren(node);
     }
 
+    protected visitClassExpression(node: ts.ClassExpression) {
+        this.walkChildren(node);
+    }
+
     protected visitCatchClause(node: ts.CatchClause) {
         this.walkChildren(node);
     }
@@ -350,6 +354,10 @@ export class SyntaxWalker {
 
             case ts.SyntaxKind.ClassDeclaration:
                 this.visitClassDeclaration(<ts.ClassDeclaration> node);
+                break;
+
+            case ts.SyntaxKind.ClassExpression:
+                this.visitClassExpression(<ts.ClassExpression> node);
                 break;
 
             case ts.SyntaxKind.CatchClause:

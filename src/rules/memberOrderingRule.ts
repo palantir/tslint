@@ -162,12 +162,21 @@ function getNodeOption({accessLevel, isConstructor, kind, membership}: INodeAndM
 export class MemberOrderingWalker extends Lint.RuleWalker {
     private previousMember: IModifiers;
     private memberStack: INodeAndModifiers[][] = [];
+    private hasOrderOption = this.getHasOrderOption();
 
     public visitClassDeclaration(node: ts.ClassDeclaration) {
         this.resetPreviousModifiers();
 
         this.newMemberList();
         super.visitClassDeclaration(node);
+        this.checkMemberOrder();
+    }
+
+    public visitClassExpression(node: ts.ClassExpression) {
+        this.resetPreviousModifiers();
+
+        this.newMemberList();
+        super.visitClassExpression(node);
         this.checkMemberOrder();
     }
 
@@ -265,16 +274,20 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
 
     /* start new code */
     private newMemberList() {
-        this.memberStack.push([]);
+        if (this.hasOrderOption) {
+            this.memberStack.push([]);
+        }
     }
 
     private pushMember(node: INodeAndModifiers) {
-        this.memberStack[this.memberStack.length - 1].push(node);
+        if (this.hasOrderOption) {
+            this.memberStack[this.memberStack.length - 1].push(node);
+        }
     }
 
     private checkMemberOrder() {
-        const memberList = this.memberStack.pop();
-        if (this.hasOrderOption()) {
+        if (this.hasOrderOption) {
+            const memberList = this.memberStack.pop();
             const order = this.getOrder();
             const memberRank = memberList.map((n) => order.indexOf(getNodeOption(n)));
 
@@ -307,11 +320,10 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
                     prevRank = rank;
                 }
             });
-
         }
     }
 
-    private hasOrderOption() {
+    private getHasOrderOption() {
         const allOptions = this.getOptions();
         if (allOptions == null || allOptions.length === 0) {
             return false;
