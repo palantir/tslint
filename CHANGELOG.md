@@ -4,6 +4,10 @@ Change Log
 v3.10.0-dev.2
 ---
 * [bugfix] `member-ordering` rule doesn't crash on methods in class expressions (#1252)
+* [bugfix] `ban` rule handles chained methods appropriately (#1234)
+
+Thanks to our contributors!
+* @marines
 
 v3.10.1
 ---
