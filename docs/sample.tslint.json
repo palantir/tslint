@@ -40,9 +40,7 @@
     "member-access": true,
     "member-ordering": [
       true,
-      "public-before-private",
-      "static-before-instance",
-      "variables-before-functions"
+      { "order": "fields-first" }
     ],
     "new-parens": true,
     "no-angle-bracket-type-assertion": true,
@@ -62,6 +60,7 @@
     "no-construct": true,
     "no-constructor-vars": true,
     "no-debugger": true,
+    "no-default-export": true,
     "no-duplicate-key": true,
     "no-duplicate-variable": true,
     "no-empty": true,

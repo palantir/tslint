@@ -44,19 +44,27 @@ export class BanFunctionWalker extends Lint.RuleWalker {
                 && expression.getChildCount() >= 3) {
 
             const firstToken = expression.getFirstToken();
-            const secondToken = expression.getChildAt(1);
-            const thirdToken = expression.getChildAt(2);
+            const firstChild = expression.getChildAt(0);
+            const secondChild = expression.getChildAt(1);
+            const thirdChild = expression.getChildAt(2);
 
-            const firstText = firstToken.getText();
-            const thirdText = thirdToken.getFullText();
+            const rightSideExpression = thirdChild.getFullText();
 
-            if (secondToken.kind === ts.SyntaxKind.DotToken) {
+            let leftSideExpression: string;
+
+            if (firstChild.getChildCount() > 0) {
+                leftSideExpression = firstChild.getLastToken().getText();
+            } else {
+                leftSideExpression = firstToken.getText();
+            }
+
+            if (secondChild.kind === ts.SyntaxKind.DotToken) {
                 for (const bannedFunction of this.bannedFunctions) {
-                    if (firstText === bannedFunction[0] && thirdText === bannedFunction[1]) {
+                    if (leftSideExpression === bannedFunction[0] && rightSideExpression === bannedFunction[1]) {
                         const failure = this.createFailure(
                             expression.getStart(),
                             expression.getWidth(),
-                            `${Rule.FAILURE_STRING_PART}${firstText}.${thirdText}`
+                            `${Rule.FAILURE_STRING_PART}${leftSideExpression}.${rightSideExpression}`
                         );
                         this.addFailure(failure);
                     }

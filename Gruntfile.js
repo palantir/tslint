@@ -8,42 +8,38 @@ if (process.platform  === "win32") {
 }
 
 module.exports = function (grunt) {
-    // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
     grunt.initConfig({
         pkg: grunt.file.readJSON("package.json"),
 
+        eslint: {
+            target: [
+                "Gruntfile.js",
+                "test/files/formatters/*.js",
+            ],
+        },
+
         clean: {
             core: ["lib/**/*.js", "lib/**/*.d.ts"],
-            test: ["build/", "test/config/node_modules/"]
+            test: ["build/", "test/config/node_modules/"],
         },
 
         mochaTest: {
             test: {
                 options: {
-                    reporter: "spec"
+                    reporter: "spec",
                 },
-                src: ["build/test/**/*Tests.js", "build/test/assert.js"]
-            }
+                src: ["build/test/**/*Tests.js", "build/test/assert.js"],
+            },
         },
 
         run: {
             testBin: {
                 cmd: "./test/check-bin.sh",
-                options: {quiet: Infinity}
+                options: {quiet: Infinity},
             },
             testRules: {
-                args: ["./build/test/ruleTestRunner.js"]
-            }
-        },
-
-        jscs: {
-            src: [
-                "Gruntfile.js",
-                "test/files/formatters/*.js"
-            ],
-            options: {
-                config: ".jscsrc"
-            }
+                args: ["./build/test/ruleTestRunner.js"],
+            },
         },
 
         tslint: {
@@ -52,36 +48,36 @@ module.exports = function (grunt) {
                 "src/formatters/**/*.ts",
                 "src/language/**/*.ts",
                 "src/rules/**/*.ts",
-                "src/test/**/*.ts"
+                "src/test/**/*.ts",
             ],
             test: [
                 "test/**/*.ts",
                 "!test/**/*.test.ts",
-                "!test/typings/**/*.ts"
-            ]
+                "!test/typings/**/*.ts",
+            ],
         },
 
         ts: {
             core: {
-                tsconfig: "src/tsconfig.json"
+                tsconfig: "src/tsconfig.json",
             },
             test: {
-                tsconfig: "test/tsconfig.json"
-            }
+                tsconfig: "test/tsconfig.json",
+            },
         },
 
         "npm-command": {
             test: {
                 options: {
-                    cwd: "./test/config"
-                }
-            }
-        }
+                    cwd: "./test/config",
+                },
+            },
+        },
     });
 
     // load NPM tasks
     grunt.loadNpmTasks("grunt-contrib-clean");
-    grunt.loadNpmTasks("grunt-jscs");
+    grunt.loadNpmTasks("grunt-eslint");
     grunt.loadNpmTasks("grunt-mocha-test");
     grunt.loadNpmTasks("grunt-run");
     grunt.loadNpmTasks("grunt-tslint");
@@ -92,7 +88,7 @@ module.exports = function (grunt) {
     grunt.registerTask("core", [
         "clean:core",
         "ts:core",
-        "tslint:src"
+        "tslint:src",
     ]);
     grunt.registerTask("test", [
         "clean:test",
@@ -104,5 +100,5 @@ module.exports = function (grunt) {
     ].concat(checkBinTest));
 
     // create default task
-    grunt.registerTask("default", ["jscs", "core", "test"]);
+    grunt.registerTask("default", ["eslint", "core", "test"]);
 };
