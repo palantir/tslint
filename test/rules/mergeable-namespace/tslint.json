@@ -1,5 +1,5 @@
 {
   "rules": {
-    "mergeable-namespace": true
+    "no-mergeable-namespace": true
   }
 }

@@ -221,7 +221,6 @@ A sample configuration file with all options is available [here](https://github.
     * `"check-constructor"` enforces explicit visibility on constructors (can only be public)
 * `member-ordering` enforces member ordering. The first option should be an object with an `order` key.
    Values for `order` can be `fields-first`, `statics-first`, `instance-sandwich`, or a custom order.
-* `mergeable-namespace` disallows mergeable namespaces in the same file.
 * `new-parens` enforces parentheses when invoking a constructor via the new keyword.
 * `no-angle-bracket-type-assertion` disallows usages of `<>` type assertions in favor of using the `as` keyword.
 * `no-any` diallows usages of `any` as a type decoration.
@@ -243,6 +242,7 @@ A sample configuration file with all options is available [here](https://github.
 * `no-internal-module` disallows internal `module` (use `namespace` instead).
 * `no-invalid-this` disallows using the `this` keyword outside of classes.
     * `check-function-in-method` disallows using the `this` keyword in functions within class methods.
+* `no-mergeable-namespace` disallows mergeable namespaces in the same file.
 * `no-namespace` disallows both internal `module`s and `namespace`, but allows ES6-style external modules.
     * `allow-declarations` allows `declare namespace ... {}` to describe external APIs.
 * `no-null-keyword` disallows use of the `null` keyword literal.

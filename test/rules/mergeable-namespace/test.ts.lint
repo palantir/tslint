@@ -8,15 +8,15 @@ module bar {}
 
 // invalid case
 namespace a {}
-          ~ [mergeable namespace: 'a']
+          ~ [Mergeable namespace a found. Merge its contents with the namespace on line 10.]
 namespace a {}
-          ~ [mergeable namespace: 'a']
+          ~ [Mergeable namespace a found. Merge its contents with the namespace on line 9.]
 
 namespace b {
     namespace b {}
-              ~ [mergeable namespace: 'b']
+              ~ [Mergeable namespace b found. Merge its contents with the namespace on line 14.]
     namespace b {}
-              ~ [mergeable namespace: 'b']
+              ~ [Mergeable namespace b found. Merge its contents with the namespace on line 13.]
     namespace b {}
-              ~ [mergeable namespace: 'b']
+              ~ [Mergeable namespace b found. Merge its contents with the namespace on line 13.]
 }
