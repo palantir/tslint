@@ -3,7 +3,6 @@ import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRINGS = {
-        CR: "Expected linebreak to be 'CR'",
         CRLF: "Expected linebreak to be 'CRLF'",
         LF: "Expected linebreak to be 'LF'",
     };
@@ -21,10 +20,6 @@ export class Rule extends Lint.Rules.AbstractRule {
         let failureString: string;
 
         switch (this.getOptions().ruleArguments[0]) {
-            case "CR":
-                // expectedEOL = "\r";
-                failureString = Rule.FAILURE_STRINGS.CR;
-                break;
             case "CRLF":
                 expectedEOL = "\r\n";
                 failureString = Rule.FAILURE_STRINGS.CRLF;
