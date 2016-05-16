@@ -1,6 +1,9 @@
 import * as ts from "typescript";
 import * as Lint from "../lint";
 
+const OPTION_LINEBREAK_STYLE_CRLF = "CRLF";
+const OPTION_LINEBREAK_STYLE_LF = "LF";
+
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRINGS = {
         CRLF: "Expected linebreak to be 'CRLF'",
@@ -20,11 +23,11 @@ export class Rule extends Lint.Rules.AbstractRule {
         let failureString: string;
 
         switch (this.getOptions().ruleArguments[0]) {
-            case "CRLF":
+            case OPTION_LINEBREAK_STYLE_CRLF:
                 expectedEOL = "\r\n";
                 failureString = Rule.FAILURE_STRINGS.CRLF;
                 break;
-            case "LF":
+            case OPTION_LINEBREAK_STYLE_LF:
                 expectedEOL = "\n";
                 failureString = Rule.FAILURE_STRINGS.LF;
                 break;
