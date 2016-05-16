@@ -73,6 +73,7 @@
         "rules/jsdocFormatRule.ts",
         "rules/labelPositionRule.ts",
         "rules/labelUndefinedRule.ts",
+        "rules/linebreakStyleRule.ts",
         "rules/maxLineLengthRule.ts",
         "rules/memberAccessRule.ts",
         "rules/memberOrderingRule.ts",
