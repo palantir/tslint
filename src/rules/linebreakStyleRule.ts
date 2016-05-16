@@ -6,8 +6,8 @@ const OPTION_LINEBREAK_STYLE_LF = "LF";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRINGS = {
-        CRLF: "Expected linebreak to be 'CRLF'",
-        LF: "Expected linebreak to be 'LF'",
+        CRLF: `Expected linebreak to be '${OPTION_LINEBREAK_STYLE_CRLF}'`,
+        LF: `Expected linebreak to be '${OPTION_LINEBREAK_STYLE_LF}'`,
     };
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -19,27 +19,16 @@ export class Rule extends Lint.Rules.AbstractRule {
             sourceFile.getFullText()
         );
 
-        let expectedEOL: string;
-        let failureString: string;
+        const linebreakStyle = this.getOptions().ruleArguments[0] || OPTION_LINEBREAK_STYLE_LF;
+        const expectLF = linebreakStyle === OPTION_LINEBREAK_STYLE_CRLF;
+        const expectedEOL = expectLF ? "\r\n" : "\n";
+        const failureString = expectLF ? Rule.FAILURE_STRINGS.CRLF : Rule.FAILURE_STRINGS.LF;
 
-        switch (this.getOptions().ruleArguments[0]) {
-            case OPTION_LINEBREAK_STYLE_CRLF:
-                expectedEOL = "\r\n";
-                failureString = Rule.FAILURE_STRINGS.CRLF;
-                break;
-            case OPTION_LINEBREAK_STYLE_LF:
-                expectedEOL = "\n";
-                failureString = Rule.FAILURE_STRINGS.LF;
-                break;
-        }
-
-        if (expectedEOL != null) {
-            for (let token = scanner.scan(); token !== ts.SyntaxKind.EndOfFileToken; token = scanner.scan()) {
-                if (token === ts.SyntaxKind.NewLineTrivia) {
-                    const text = scanner.getTokenText();
-                    if (text !== expectedEOL) {
-                        failures.push(this.createFailure(sourceFile, scanner, failureString));
-                    }
+        for (let token = scanner.scan(); token !== ts.SyntaxKind.EndOfFileToken; token = scanner.scan()) {
+            if (token === ts.SyntaxKind.NewLineTrivia) {
+                const text = scanner.getTokenText();
+                if (text !== expectedEOL) {
+                    failures.push(this.createFailure(sourceFile, scanner, failureString));
                 }
             }
         }
