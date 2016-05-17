@@ -1,5 +1,0 @@
-{
-    "rules": {
-        "object-type-eol": [true, "semicolon"]
-    }
-}
