@@ -65,11 +65,11 @@ class MyClass {
 }
 
 interface ITest {
-    foo?: string;		
-                ~ [unnecessary semicolon]		
-    bar: number;		
-               ~ [unnecessary semicolon]		
-    baz: boolean		
+    foo?: string;
+                ~ [unnecessary semicolon]
+    bar: number;
+               ~ [unnecessary semicolon]
+    baz: boolean
 }
 
 import {Router} from 'aurelia-router'

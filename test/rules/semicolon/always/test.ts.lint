@@ -71,7 +71,7 @@ interface ITest {
                ~nil [missing semicolon]
     baz: boolean;
 }
- 
+
 import {Router} from 'aurelia-router';
 
 import {Controller} from 'my-lib'
