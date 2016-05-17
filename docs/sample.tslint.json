@@ -71,6 +71,7 @@
       true,
       "check-function-in-method"
       ],
+    "no-mergeable-namespace": true,
     "no-null-keyword": true,
     "no-reference": true,
     "no-require-imports": true,
