@@ -85,6 +85,12 @@ describe("Configuration", () => {
             });
         });
 
+        it("extends with builtin", () => {
+            const config = loadConfigurationFromPath("./test/config/tslint-extends-builtin.json");
+            assert.isTrue(config.rules["no-var-keyword"]);
+            assert.isFalse(config.rules["no-eval"]);
+        });
+
         describe("with config not relative to tslint", () => {
             let tmpfile: string;
 
@@ -151,6 +157,17 @@ describe("Configuration", () => {
                 "rule-two": true,
                 "rule-three": "//not a comment",
                 "rule-four": "/*also not a comment*/",
+            });
+        });
+
+        it("can load a built-in configuration", () => {
+            const config = loadConfigurationFromPath("tslint:recommended");
+            assert.isTrue(config.rules["no-eval"]);
+        });
+
+        it("throws on an invalid built-in configuration path", () => {
+            assert.throws(() => {
+                loadConfigurationFromPath("tslint:doesnotexist");
             });
         });
     });

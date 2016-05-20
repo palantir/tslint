@@ -1,0 +1,6 @@
+{
+  "extends": "tslint:latest",
+  "rules": {
+    "no-eval": false
+  }
+}
