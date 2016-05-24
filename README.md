@@ -217,8 +217,8 @@ A sample configuration file with all options is available [here](https://github.
 * `label-undefined` checks that labels are defined before usage.
 * `max-line-length` sets the maximum length of a line.
 * `member-access` enforces using explicit visibility on class members
-    * `"check-accessor"` enforces explicit visibility on get/set accessors (can only be public)
-    * `"check-constructor"` enforces explicit visibility on constructors (can only be public)
+    * `"check-accessor"` enforces explicit visibility on get/set accessors
+    * `"check-constructor"` enforces explicit visibility on constructors
 * `member-ordering` enforces member ordering. The first option should be an object with an `order` key.
    Values for `order` can be `fields-first`, `statics-first`, `instance-sandwich`, or a custom order.
 * `new-parens` enforces parentheses when invoking a constructor via the new keyword.
