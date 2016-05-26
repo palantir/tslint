@@ -52,8 +52,12 @@ export function loadRules(ruleConfiguration: {[name: string]: any},
     }
 
     if (notFoundRules.length > 0) {
-        const errorMessage = `Could not find the following rules specified in the configuration:\n${notFoundRules.join("\n")}`;
-        throw new Error(errorMessage);
+        const ERROR_MESSAGE = `
+            Could not find implementations for the following rules specified in the configuration:\n
+            ${notFoundRules.join("\n")}\n
+            Try upgrading TSLint and/or ensuring that you have all necessary custom rules installed.
+        `;
+        throw new Error(ERROR_MESSAGE);
     } else {
         return rules;
     }
