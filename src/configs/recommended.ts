@@ -18,11 +18,11 @@
 export const rules = {
     "align": [true,
         "parameters",
-        "statements"
+        "statements",
     ],
     "class-name": true,
     "comment-format": [true,
-        "check-space"
+        "check-space",
     ],
     "curly": true,
     "eofline": true,
@@ -35,7 +35,7 @@ export const rules = {
     "max-line-length": [true, 120],
     "member-access": true,
     "member-ordering": [true, {
-        "order": "statics-first"
+        "order": "statics-first",
     }],
     "new-parens": true,
     "no-any": false,
@@ -50,7 +50,6 @@ export const rules = {
         "time",
         "timeEnd",
         "trace",
-        "warn"
     ],
     "no-construct": true,
     "no-constructor-vars": true,
@@ -79,20 +78,20 @@ export const rules = {
         "check-else",
         "check-finally",
         "check-open-brace",
-        "check-whitespace"
+        "check-whitespace",
     ],
     "one-variable-per-declaration": [true,
-        "ignore-for-loop"
+        "ignore-for-loop",
     ],
-    "quotemark": [true, "double"],
+    "quotemark": [true, "double", "avoid-escape"],
     "radix": true,
     "semicolon": true,
     "switch-default": true,
     "trailing-comma": [true,
         {
             "singleline": "never",
-            "multiline": "always"
-        }
+            "multiline": "always",
+        },
     ],
     "triple-equals": [true, "allow-null-check"],
     "typedef": false,
@@ -102,20 +101,20 @@ export const rules = {
             "index-signature": "nospace",
             "parameter": "nospace",
             "property-declaration": "nospace",
-            "variable-declaration": "nospace"
+            "variable-declaration": "nospace",
         }, {
             "call-signature": "onespace",
             "index-signature": "onespace",
             "parameter": "onespace",
             "property-declaration": "onespace",
-            "variable-declaration": "onespace"
-        }
+            "variable-declaration": "onespace",
+        },
     ],
     "use-isnan": true,
     "variable-name": [true,
         "ban-keywords",
         "check-format",
-        "allow-pascal-case"
+        "allow-pascal-case",
     ],
     "whitespace": [true,
         "check-branch",
@@ -123,6 +122,6 @@ export const rules = {
         "check-operator",
         "check-separator",
         "check-type",
-        "check-typecast"
-    ]
-}
+        "check-typecast",
+    ],
+};
