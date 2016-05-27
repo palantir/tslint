@@ -204,7 +204,6 @@ A sample configuration file with all options is available [here](https://github.
 * `indent` enforces indentation with tabs or spaces. Rule options (one is required):
     * `"tabs"` enforces consistent tabs.
     * `"spaces"` enforces consistent spaces.
-* `interface-name` enforces the rule that interface names must begin with a capital 'I'
 * `interface-name` enforces consistent internace name. Rule options:
     * `"always-prefix"` enforces interface names must have an 'I' prefix
     * `"never-prefix"` enforces interface name must not have an 'I' prefix
