@@ -165,7 +165,7 @@ export function loadConfigurationFromPath(configFilePath: string): IConfiguratio
 
 /**
  * Resolve configuration file path or node_module reference
- * @var filePath Relative ("./path"), absolute ("/path"), node module ("path"), or built-in ("tslint:path")
+ * @param filePath Relative ("./path"), absolute ("/path"), node module ("path"), or built-in ("tslint:path")
  */
 function resolveConfigurationPath(filePath: string, relativeTo?: string) {
     const matches = filePath.match(BUILT_IN_CONFIG);
