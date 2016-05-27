@@ -20,6 +20,7 @@ import * as Lint from "../lint";
 
 const OPTION_ALWAYS = "always";
 const OPTION_NEVER = "never";
+const OPTION_IGNORE_INTERFACES = "ignore-interfaces";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_MISSING = "missing semicolon";
@@ -91,6 +92,10 @@ class SemicolonWalker extends Lint.RuleWalker {
     }
 
     public visitInterfaceDeclaration(node: ts.InterfaceDeclaration) {
+        if (this.hasOption(OPTION_IGNORE_INTERFACES)) {
+            return;
+        }
+
         for (let member of node.members) {
             this.checkSemicolonAt(member);
         }
