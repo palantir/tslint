@@ -70,6 +70,8 @@ interface ITest {
     bar: number
                ~nil [missing semicolon]
     baz: boolean;
+
+    readonly raz: number;
 }
 
 import {Router} from 'aurelia-router';
