@@ -40,3 +40,21 @@ var NoTypesFn = function (
          ~         [expected variable-declaration: 'c' to have a typedef]
         d = a - b;
          ~         [expected variable-declaration: 'd' to have a typedef]
+
+class TsLint {
+    helloWorld() {
+               ~   [expected call-signature: 'helloWorld' to have a typedef]
+        return 'Hello World';
+    };
+
+    arrowHelloWorld = () => {
+                   ~          [expected member-variable-declaration: 'arrowHelloWorld' to have a typedef]
+                       ~      [expected call-signature to have a typedef]
+        return this.helloWorld();
+    };
+}
+
+setTimeout(() => {}, 1000);
+            ~               [expected call-signature to have a typedef]
+setTimeout(function() {}, 1000);
+                    ~            [expected call-signature to have a typedef]

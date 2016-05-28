@@ -38,6 +38,11 @@ class TypedefWalker extends Lint.RuleWalker {
         super.visitFunctionExpression(node);
     }
 
+    public visitArrowFunction(node: ts.FunctionLikeDeclaration) {
+        this.handleCallSignature(node);
+        this.walkChildren(node);
+    }
+
     public visitGetAccessor(node: ts.AccessorDeclaration) {
         this.handleCallSignature(node);
         super.visitGetAccessor(node);
