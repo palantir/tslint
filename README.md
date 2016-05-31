@@ -422,7 +422,7 @@ export class Formatter extends Lint.Formatters.AbstractFormatter {
 }
 ```
 
-Such custom formatters can also be written in JavaScript. Formatter files are always named with the suffix `Formatter` and referenced from TSLint without their suffix.
+Such custom formatters can also be written in JavaScript. Formatter files are always named with the suffix `Formatter` and the exported class within the file must be named `Formatter`. A formatter is referenced from TSLint without its suffix.
 
 Development
 -----------
