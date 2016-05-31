@@ -49,6 +49,7 @@
         "formatters/pmdFormatter.ts",
         "formatters/proseFormatter.ts",
         "formatters/verboseFormatter.ts",
+        "formatters/vsoFormatter.ts",
         "language/formatter/abstractFormatter.ts",
         "language/formatter/formatter.ts",
         "language/languageServiceHost.ts",
