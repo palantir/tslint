@@ -290,7 +290,8 @@ A sample configuration file with all options is available [here](https://github.
     * `"allow-null-check"` allows `==` and `!=` when comparing to `null`.
     * `"allow-undefined-check"` allows `==` and `!=` when comparing to `undefined`.
 * `typedef` enforces type definitions to exist. Rule options:
-    * `"call-signature"` checks return type of functions.
+    * `"call-signature"` checks return type of non-arrow functions.
+    * `"arrow-call-signature"` checks return type of arrow functions.
     * `"parameter"` checks type specifier of function parameters for non-arrow functions.
     * `"arrow-parameter"` checks type specifier of function parameters for arrow functions.
     * `"property-declaration"` checks return types of interface properties.

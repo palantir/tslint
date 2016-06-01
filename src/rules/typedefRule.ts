@@ -39,7 +39,8 @@ class TypedefWalker extends Lint.RuleWalker {
     }
 
     public visitArrowFunction(node: ts.FunctionLikeDeclaration) {
-        this.handleCallSignature(node);
+        const location = (node.parameters != null) ? node.parameters.end : null;
+        this.checkTypeAnnotation("arrow-call-signature", location, node.type, node.name);
         this.walkChildren(node);
     }
 
@@ -129,7 +130,7 @@ class TypedefWalker extends Lint.RuleWalker {
     private handleCallSignature(node: ts.SignatureDeclaration) {
         const location = (node.parameters != null) ? node.parameters.end : null;
         // set accessors can't have a return type.
-        if (node.kind !== ts.SyntaxKind.SetAccessor) {
+        if (node.kind !== ts.SyntaxKind.SetAccessor && node.kind !== ts.SyntaxKind.ArrowFunction) {
             this.checkTypeAnnotation("call-signature", location, node.type, node.name);
         }
     }
