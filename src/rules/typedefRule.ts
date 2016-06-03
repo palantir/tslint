@@ -40,8 +40,10 @@ class TypedefWalker extends Lint.RuleWalker {
 
     public visitArrowFunction(node: ts.FunctionLikeDeclaration) {
         const location = (node.parameters != null) ? node.parameters.end : null;
-        this.checkTypeAnnotation("arrow-call-signature", location, node.type, node.name);
-        this.walkChildren(node);
+        if (node.parent.kind !== ts.SyntaxKind.CallExpression) {
+            this.checkTypeAnnotation("arrow-call-signature", location, node.type, node.name);
+        }
+        super.visitArrowFunction(node);
     }
 
     public visitGetAccessor(node: ts.AccessorDeclaration) {
