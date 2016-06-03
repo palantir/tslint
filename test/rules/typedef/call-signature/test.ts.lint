@@ -21,3 +21,6 @@ var obj = {
 setTimeout(() => {}, 1000);
 setTimeout(function() {}, 1000);
                     ~            [expected call-signature to have a typedef]
+
+someFunc(n => n+1);
+someFunc(n => {});

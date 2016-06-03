@@ -18,5 +18,7 @@ var obj = {
 }
 
 setTimeout(() => {}, 1000);
-            ~               [expected arrow-call-signature to have a typedef]
 setTimeout(function() {}, 1000);
+
+someFunc(n => n+1);
+someFunc(n => {});
