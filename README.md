@@ -440,7 +440,7 @@ grunt
 #### `next` branch
 
 The [`next` branch of this repo](https://github.com/palantir/tslint/tree/next) tracks the latest TypeScript compiler
-nightly release as a `devDependency`. This allows you to develop the linter and its rules against the latest features of the
+nightly release as a `peerDependency`. This allows you to develop the linter and its rules against the latest features of the
 language. Releases from this branch are published to npm with the `next` dist-tag, so you may install the latest dev
 version of TSLint via `npm install tslint@next`.
 
