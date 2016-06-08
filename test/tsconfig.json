@@ -32,6 +32,8 @@
         "../typings/underscore/underscore.d.ts",
         "typings/chai/chai.d.ts",
         "typings/mocha/mocha.d.ts",
+        "../src/configs/latest.ts",
+        "../src/configs/recommended.ts",
         "../src/configuration.ts",
         "../src/enableDisableRules.ts",
         "../src/formatterLoader.ts",
