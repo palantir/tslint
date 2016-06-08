@@ -9,6 +9,7 @@ class Clazz { // comment
         console.log("test");
 ~nil                         [consecutive blank lines are disallowed]
 
+
     }
 ~nil                         [consecutive blank lines are disallowed]
 
