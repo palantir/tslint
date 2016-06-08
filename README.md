@@ -74,7 +74,13 @@ The configuration file specifies which rules are enabled and their options. A sa
    * - the name of an NPM module which has a "main" file that exports a config object
    * - a relative path to a JSON file
    */
-  "extends": "tslint:latest"
+  "extends": "tslint:latest",
+  "rules": [
+    /*
+     * Any rules specified here will override those from the base config we are extending
+     */
+    "no-constructor-vars": true
+  ]
 }
 ```
 
