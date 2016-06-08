@@ -1,12 +1,7 @@
 ---
 ruleName: semicolon
 description: Enforces consistent semicolon usage at the end of every statement.
-optionsDescription: |-
-
-  One of the following arguments must be provided:
-
-  * `"always"` enforces semicolons at the end of every statement.
-  * `"never"` disallows semicolons at the end of every statement except for when they are necessary.
+optionsDescription: "\nOne of the following arguments must be provided:\n\n* `\"always\"` enforces semicolons at the end of every statement.\n* `\"never\"` disallows semicolons at the end of every statement except for when they are necessary.\n        \nThe following arguments may be optionaly provided:\n* `\"ignore-interfaces\"` skips checking semicolons at the end of interface members."
 options:
   type: enum
   enumValues:
@@ -15,6 +10,7 @@ options:
 optionExamples:
   - '[true, "always"]'
   - '[true, "never"]'
+  - '[true, "always", "ignore-interfaces"]'
 type: style
 optionsJSON: |-
   {

@@ -181,6 +181,23 @@
     "type": "functionality"
   },
   {
+    "ruleName": "linebreak-style",
+    "description": "Enforces a consistent linebreak style.",
+    "optionsDescription": "\nOne of the following options must be provided:\n\n* `\"LF\"` requires LF (`\\n`) linebreaks\n* `\"CRLF\"` requires CRLF (`\\r\\n`) linebreaks",
+    "options": {
+      "type": "enum",
+      "enumValues": [
+        "LF",
+        "CRLF"
+      ]
+    },
+    "optionExamples": [
+      "[true, \"LF\"]",
+      "[true, \"CRLF\"]"
+    ],
+    "type": "maintainability"
+  },
+  {
     "ruleName": "max-line-length",
     "description": "Requires lines to be under a certain max length.",
     "rationale": "\nLimiting the length of a line of code improves code readability.\nIt also makes comparing code side-by-side easier and improves compatibility with\nvarious editors, IDEs, and diff viewers.",
@@ -476,6 +493,16 @@
     "type": "functionality"
   },
   {
+    "ruleName": "no-mergable-namespace",
+    "description": "Disallows mergeable namespaces in the same file.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "maintainability"
+  },
+  {
     "ruleName": "no-namespace",
     "description": "Disallows use of internal `module`s and `namespace`s.",
     "descriptionDetails": "This rule still allows the use of `declare module ... {}`",
@@ -752,7 +779,7 @@
   {
     "ruleName": "semicolon",
     "description": "Enforces consistent semicolon usage at the end of every statement.",
-    "optionsDescription": "\nOne of the following arguments must be provided:\n\n* `\"always\"` enforces semicolons at the end of every statement.\n* `\"never\"` disallows semicolons at the end of every statement except for when they are necessary.",
+    "optionsDescription": "\nOne of the following arguments must be provided:\n\n* `\"always\"` enforces semicolons at the end of every statement.\n* `\"never\"` disallows semicolons at the end of every statement except for when they are necessary.\n        \nThe following arguments may be optionaly provided:\n* `\"ignore-interfaces\"` skips checking semicolons at the end of interface members.",
     "options": {
       "type": "enum",
       "enumValues": [
@@ -762,7 +789,8 @@
     },
     "optionExamples": [
       "[true, \"always\"]",
-      "[true, \"never\"]"
+      "[true, \"never\"]",
+      "[true, \"always\", \"ignore-interfaces\"]"
     ],
     "type": "style"
   },
