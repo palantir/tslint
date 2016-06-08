@@ -30,13 +30,20 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: Lint.Utils.dedent`
             One of the following arguments must be provided:
 
-            * \`"always"\` enforces semicolons at the end of every statement.
-            * \`"never"\` disallows semicolons at the end of every statement except for when they are necessary.`,
+            * \`"${OPTION_ALWAYS}"\` enforces semicolons at the end of every statement.
+            * \`"${OPTION_NEVER}"\` disallows semicolons at the end of every statement except for when they are necessary.
+        
+            The following arguments may be optionaly provided:
+            * \`"${OPTION_IGNORE_INTERFACES}"\` skips checking semicolons at the end of interface members.`,
         options: {
             type: "enum",
-            enumValues: ["always", "never"],
+            enumValues: [OPTION_ALWAYS, OPTION_NEVER],
         },
-        optionExamples: ['[true, "always"]', '[true, "never"]'],
+        optionExamples: [
+            `[true, "${OPTION_ALWAYS}"]`,
+            `[true, "${OPTION_NEVER}"]`,
+            `[true, "${OPTION_ALWAYS}", "${OPTION_IGNORE_INTERFACES}"]`,
+        ],
         type: "style",
     };
     /* tslint:enable:object-literal-sort-keys */
