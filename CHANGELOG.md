@@ -1,6 +1,24 @@
 Change Log
 ===
 
+v3.11.0-dev.0
+---
+* [new-rule] `linebreak-style` rule (#123)
+* [new-rule] `no-mergable-namespace` rule (#843)
+* [enhancement] Add built-in configurations (#1261)
+* [enhancement] New vso formatter (#1281)
+* [new-rule-option] `ignore-interfaces` option for `semicolon` rule (#1233)
+* [bugfix] `no-default-export` rule handles more default export cases (#1241)
+
+Thanks to our contributors!
+* @cgwrench
+* @HamletDRC
+* @lijunle
+* @paldepind
+* @patsissons
+* @schmuli
+* @YuichiNukiyama
+
 v3.10.0-dev.3
 ---
 * [bugfix] `no-null-keyword` rule allows the use of `null` in type positions (#1265)
