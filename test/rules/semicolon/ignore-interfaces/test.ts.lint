@@ -66,9 +66,9 @@ class MyClass {
 
 interface ITest {
     foo?: string
-                ~nil [missing semicolon]
+
     bar: number
-               ~nil [missing semicolon]
+
     baz: boolean;
 }
 

@@ -5,6 +5,10 @@ v3.10.0-dev.3
 ---
 * [bugfix] `no-null-keyword` rule allows the use of `null` in type positions (#1265)
 
+v3.10.2
+---
+* Stable release containing changes from the last dev release (v3.10.0-dev.2)
+
 v3.10.0-dev.2
 ---
 * [bugfix] `member-ordering` rule doesn't crash on methods in class expressions (#1252)

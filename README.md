@@ -13,7 +13,7 @@ Supports:
 - custom rules
 - custom formatters
 - inline disabling / enabling of rules
-- integration with [msbuild](https://github.com/joshuakgoldberg/tslint.msbuild), [grunt](https://github.com/palantir/grunt-tslint), [gulp](https://github.com/panuhorsmalahti/gulp-tslint), [atom](https://github.com/AtomLinter/linter-tslint), [eclipse](https://github.com/palantir/eclipse-tslint), [sublime](https://packagecontrol.io/packages/SublimeLinter-contrib-tslint), [vim](https://github.com/scrooloose/syntastic), [visual studio](https://visualstudiogallery.msdn.microsoft.com/6edc26d4-47d8-4987-82ee-7c820d79be1d), [vscode](https://marketplace.visualstudio.com/items?itemName=eg2.tslint), [webstorm](https://www.jetbrains.com/webstorm/help/tslint.html), and more
+- integration with [msbuild](https://github.com/joshuakgoldberg/tslint.msbuild), [grunt](https://github.com/palantir/grunt-tslint), [gulp](https://github.com/panuhorsmalahti/gulp-tslint), [atom](https://github.com/AtomLinter/linter-tslint), [eclipse](https://github.com/palantir/eclipse-tslint), [emacs](http://flycheck.org), [sublime](https://packagecontrol.io/packages/SublimeLinter-contrib-tslint), [vim](https://github.com/scrooloose/syntastic), [visual studio](https://visualstudiogallery.msdn.microsoft.com/6edc26d4-47d8-4987-82ee-7c820d79be1d), [vscode](https://marketplace.visualstudio.com/items?itemName=eg2.tslint), [webstorm](https://www.jetbrains.com/webstorm/help/tslint.html), and more
 
 Table of Contents
 ------------
@@ -136,8 +136,9 @@ tslint accepts the following command-line options:
     outputting it to stdout or the file passed in --out. The core
     formatters are prose (human readable), json (machine readable)
     and verbose. prose is the default if this option is not used.
-    Other built-in options include pmd, msbuild, and checkstyle. Additonal
-    formatters can be added and used if the --formatters-dir option is set.
+    Other built-in options include pmd, msbuild, checkstyle, and vso.
+    Additonal formatters can be added and used if the --formatters-dir
+    option is set.
 
 --test:
     Runs tslint on the specified directory and checks if tslint's output matches
@@ -204,7 +205,6 @@ A sample configuration file with all options is available [here](https://github.
 * `indent` enforces indentation with tabs or spaces. Rule options (one is required):
     * `"tabs"` enforces consistent tabs.
     * `"spaces"` enforces consistent spaces.
-* `interface-name` enforces the rule that interface names must begin with a capital 'I'
 * `interface-name` enforces consistent internace name. Rule options:
     * `"always-prefix"` enforces interface names must have an 'I' prefix
     * `"never-prefix"` enforces interface name must not have an 'I' prefix
@@ -217,8 +217,8 @@ A sample configuration file with all options is available [here](https://github.
 * `label-undefined` checks that labels are defined before usage.
 * `max-line-length` sets the maximum length of a line.
 * `member-access` enforces using explicit visibility on class members
-    * `"check-accessor"` enforces explicit visibility on get/set accessors (can only be public)
-    * `"check-constructor"` enforces explicit visibility on constructors (can only be public)
+    * `"check-accessor"` enforces explicit visibility on get/set accessors
+    * `"check-constructor"` enforces explicit visibility on constructors
 * `member-ordering` enforces member ordering. The first option should be an object with an `order` key.
    Values for `order` can be `fields-first`, `statics-first`, `instance-sandwich`, or a custom order.
 * `new-parens` enforces parentheses when invoking a constructor via the new keyword.
@@ -242,6 +242,7 @@ A sample configuration file with all options is available [here](https://github.
 * `no-internal-module` disallows internal `module` (use `namespace` instead).
 * `no-invalid-this` disallows using the `this` keyword outside of classes.
     * `check-function-in-method` disallows using the `this` keyword in functions within class methods.
+* `no-mergeable-namespace` disallows mergeable namespaces in the same file.
 * `no-namespace` disallows both internal `module`s and `namespace`, but allows ES6-style external modules.
     * `allow-declarations` allows `declare namespace ... {}` to describe external APIs.
 * `no-null-keyword` disallows use of the `null` keyword literal.
@@ -422,7 +423,7 @@ export class Formatter extends Lint.Formatters.AbstractFormatter {
 }
 ```
 
-Such custom formatters can also be written in JavaScript. Formatter files are always named with the suffix `Formatter` and referenced from TSLint without their suffix.
+Such custom formatters can also be written in JavaScript. Formatter files are always named with the suffix `Formatter` and the exported class within the file must be named `Formatter`. A formatter is referenced from TSLint without its suffix.
 
 Development
 -----------
@@ -439,7 +440,7 @@ grunt
 #### `next` branch
 
 The [`next` branch of this repo](https://github.com/palantir/tslint/tree/next) tracks the latest TypeScript compiler
-nightly release as a `devDependency`. This allows you to develop the linter and its rules against the latest features of the
+nightly release as a `peerDependency`. This allows you to develop the linter and its rules against the latest features of the
 language. Releases from this branch are published to npm with the `next` dist-tag, so you may install the latest dev
 version of TSLint via `npm install tslint@next`.
 

@@ -1,4 +1,4 @@
-### Bug Report (delete this for feature requests)
+### Bug Report
 
 - __TSLint version__: `<fill this out>`
 - __TypeScript version__: `<fill this out>`
@@ -10,7 +10,7 @@
 (include if relevant)
 ```
 
-with `tslint.json`:
+with `tslint.json` configuration:
 
 ```json
 (include if relevant)

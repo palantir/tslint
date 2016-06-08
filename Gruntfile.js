@@ -45,6 +45,7 @@ module.exports = function (grunt) {
         tslint: {
             src: [
                 "src/*.ts",
+                "src/configs/**/*.ts",
                 "src/formatters/**/*.ts",
                 "src/language/**/*.ts",
                 "src/rules/**/*.ts",

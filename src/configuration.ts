@@ -66,6 +66,8 @@ export const DEFAULT_CONFIG = {
 const PACKAGE_DEPRECATION_MSG = "Configuration of TSLint via package.json has been deprecated, "
     + "please start using a tslint.json file instead (http://palantir.github.io/tslint/usage/tslint-json/).";
 
+const BUILT_IN_CONFIG = /^tslint:(.*)$/;
+
 /**
  * Searches for a TSLint configuration and returns the data from the config.
  * @param configFile A path to a config file, this can be null if the location of a config is not known
@@ -162,18 +164,29 @@ export function loadConfigurationFromPath(configFilePath: string): IConfiguratio
 }
 
 /**
- * Resolve configuration file path
- * @var relativeFilePath Relative path or package name (tslint-config-X) or package short name (X)
+ * Resolve configuration file path or node_module reference
+ * @param filePath Relative ("./path"), absolute ("/path"), node module ("path"), or built-in ("tslint:path")
  */
-function resolveConfigurationPath(relativeFilePath: string, relativeTo?: string) {
+function resolveConfigurationPath(filePath: string, relativeTo?: string) {
+    const matches = filePath.match(BUILT_IN_CONFIG);
+    const isBuiltInConfig = matches != null;
+    if (isBuiltInConfig) {
+        const configName = matches[1];
+        try {
+            return require.resolve(`./configs/${configName}`);
+        } catch (err) {
+            throw new Error(`${filePath} is not a built-in config, try "tslint:recommended" instead.`);
+        }
+    }
+
     const basedir = relativeTo || process.cwd();
     try {
-        return resolve.sync(relativeFilePath, { basedir });
+        return resolve.sync(filePath, { basedir });
     } catch (err) {
         try {
-            return require.resolve(relativeFilePath);
+            return require.resolve(filePath);
         } catch (err) {
-            throw new Error(`Invalid "extends" configuration value - could not require "${relativeFilePath}". ` +
+            throw new Error(`Invalid "extends" configuration value - could not require "${filePath}". ` +
                 "Review the Node lookup algorithm (https://nodejs.org/api/modules.html#modules_all_together) " +
                 "for the approximate method TSLint uses to find the referenced configuration file.");
         }

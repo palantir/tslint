@@ -178,6 +178,10 @@ export class SyntaxWalker {
         this.walkChildren(node);
     }
 
+    protected visitJsxExpression(node: ts.JsxExpression) {
+        this.walkChildren(node);
+    }
+
     protected visitJsxSelfClosingElement(node: ts.JsxSelfClosingElement) {
         this.walkChildren(node);
     }
@@ -462,6 +466,10 @@ export class SyntaxWalker {
 
             case ts.SyntaxKind.JsxElement:
                 this.visitJsxElement(<ts.JsxElement> node);
+                break;
+
+            case ts.SyntaxKind.JsxExpression:
+                this.visitJsxExpression(<ts.JsxExpression> node);
                 break;
 
             case ts.SyntaxKind.JsxSelfClosingElement:
