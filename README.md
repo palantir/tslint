@@ -91,7 +91,7 @@ tslint accepts the following command-line options:
     to the rules. If no option is specified, the config file named
     tslint.json is used, so long as it exists in the path.
     The format of the file is { rules: { /* rules list */ } },
-    where /* rules list */ is a key: value comma-seperated list of
+    where /* rules list */ is a key: value comma-separated list of
     rulename: rule-options pairs. Rule-options can be either a
     boolean true/false value denoting whether the rule is used or not,
     or a list [boolean, ...] where the boolean provides the same role
@@ -137,7 +137,7 @@ tslint accepts the following command-line options:
     formatters are prose (human readable), json (machine readable)
     and verbose. prose is the default if this option is not used.
     Other built-in options include pmd, msbuild, checkstyle, and vso.
-    Additonal formatters can be added and used if the --formatters-dir
+    Additional formatters can be added and used if the --formatters-dir
     option is set.
 
 --test:
@@ -205,9 +205,9 @@ A sample configuration file with all options is available [here](https://github.
 * `indent` enforces indentation with tabs or spaces. Rule options (one is required):
     * `"tabs"` enforces consistent tabs.
     * `"spaces"` enforces consistent spaces.
-* `interface-name` enforces consistent internace name. Rule options:
+* `interface-name` enforces consistent interface names. Rule options:
     * `"always-prefix"` enforces interface names must have an 'I' prefix
-    * `"never-prefix"` enforces interface name must not have an 'I' prefix
+    * `"never-prefix"` enforces interface names must not have an 'I' prefix
 * `jsdoc-format` enforces basic format rules for jsdoc comments -- comments starting with `/**`
     * each line contains an asterisk and asterisks must be aligned
     * each asterisk must be followed by either a space or a newline (except for the first and the last)
@@ -221,7 +221,7 @@ A sample configuration file with all options is available [here](https://github.
     * `"check-constructor"` enforces explicit visibility on constructors
 * `member-ordering` enforces member ordering. The first option should be an object with an `order` key.
    Values for `order` can be `fields-first`, `statics-first`, `instance-sandwich`, or a custom order.
-* `new-parens` enforces parentheses when invoking a constructor via the new keyword.
+* `new-parens` enforces parentheses when invoking a constructor via the `new` keyword.
 * `no-angle-bracket-type-assertion` disallows usages of `<>` type assertions in favor of using the `as` keyword.
 * `no-any` diallows usages of `any` as a type decoration.
 * `no-arg` disallows access to `arguments.callee`.
@@ -358,7 +358,7 @@ If we don't have all the rules you're looking for, you can either write your own
 
 #### Writing custom rules
 
-TSLint ships with a set of core rules that can be configured. However, users are also allowed to write their own rules, which allows them to enforce specific behavior not covered by the core of TSLint. TSLint's internal rules are itself written to be pluggable, so adding a new rule is as simple as creating a new rule file named by convention. New rules can be written in either TypeScript or Javascript; if written in TypeScript, the code must be compiled to Javascript before invoking TSLint.
+TSLint ships with a set of core rules that can be configured. However, users are also allowed to write their own rules, which allows them to enforce specific behavior not covered by the core of TSLint. TSLint's internal rules are itself written to be pluggable, so adding a new rule is as simple as creating a new rule file named by convention. New rules can be written in either TypeScript or JavaScript; if written in TypeScript, the code must be compiled to JavaScript before invoking TSLint.
 
 Rule names are always camel-cased and *must* contain the suffix `Rule`. Let us take the example of how to write a new rule to forbid all import statements (you know, *for science*). Let us name the rule file `noImportsRule.ts`. Rules can be referenced in `tslint.json` in their kebab-case forms, so `"no-imports": true` would turn on the rule.
 
