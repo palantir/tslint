@@ -19,8 +19,11 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
-    public static FAILURE_STRING_FACTORY = (memberType: string, memberName: string) => {
+    public static FAILURE_STRING_FACTORY = (memberType: string, memberName: string, publicOnly: boolean) => {
         memberName = memberName == null ? "" : ` '${memberName}'`;
+        if(publicOnly){
+            return `The ${memberType}${memberName} must be marked as 'public'`;
+        }
         return `The ${memberType}${memberName} must be marked either 'private', 'public', or 'protected'`;
     }
 
@@ -82,6 +85,7 @@ export class MemberAccessWalker extends Lint.RuleWalker {
         if (!hasAnyVisibilityModifiers) {
             let memberType: string;
             let memberName: string;
+            let publicOnly = false;
 
             if (node.kind === ts.SyntaxKind.MethodDeclaration) {
                 memberType = "class method";
@@ -91,6 +95,7 @@ export class MemberAccessWalker extends Lint.RuleWalker {
                 memberName = node.getChildAt(0).getText();
             } else if (node.kind === ts.SyntaxKind.Constructor) {
                 memberType = "class constructor";
+                publicOnly = true;
             } else if (node.kind === ts.SyntaxKind.GetAccessor) {
                 memberType = "get property accessor";
                 memberName = node.getChildAt(1).getText();
@@ -99,7 +104,8 @@ export class MemberAccessWalker extends Lint.RuleWalker {
                 memberName = node.getChildAt(1).getText();
             }
 
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING_FACTORY(memberType, memberName)));
+            const failureString = Rule.FAILURE_STRING_FACTORY(memberType, memberName, publicOnly);
+            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), failureString));
         }
     }
 }

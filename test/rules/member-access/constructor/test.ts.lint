@@ -1,8 +1,8 @@
 class ContructorsNoAccess {
     constructor(i: number);
-    ~~~~~~~~~~~~~~~~~~~~~~~ [The class constructor must be marked either 'private', 'public', or 'protected']
+    ~~~~~~~~~~~~~~~~~~~~~~~ [The class constructor must be marked as 'public']
     constructor(o: any) {}
-    ~~~~~~~~~~~~~~~~~~~~~~ [The class constructor must be marked either 'private', 'public', or 'protected']
+    ~~~~~~~~~~~~~~~~~~~~~~ [The class constructor must be marked as 'public']
 }
 
 class ContructorsAccess {
