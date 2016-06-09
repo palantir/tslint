@@ -31,19 +31,19 @@ Installation
 ------------
 <sup>[back to ToC &uarr;](#table-of-contents)</sup>
 
-##### CLI
+#### CLI
 
 ```
 npm install -g tslint typescript
 ```
 
-##### Library
+#### Library
 
 ```
 npm install tslint typescript
 ```
 
-##### Peer dependencies
+#### Peer dependencies
 
 `typescript` is a peer dependency of `tslint`. This allows you to update the compiler independently from the
 linter. This also means that `tslint` will have to use the same version of `tsc` used to actually compile your sources.
@@ -60,7 +60,50 @@ Usage
 
 Please ensure that the TypeScript source files compile correctly _before_ running the linter.
 
-##### CLI
+#### Configuration
+
+TSLint is configured via a file named `tslint.json`. This file is loaded from the current path, or the user's home directory, in that order.
+
+The configuration file specifies which rules are enabled and their options. A sample configuration file with all options is available [here](https://github.com/palantir/tslint/blob/master/docs/sample.tslint.json). These configurations may _extend_ other ones via the `"extends"` field in `tslint.json`.
+
+```js
+{
+  /*
+   * Possible values:
+   * - the name of a built-in config
+   * - the name of an NPM module which has a "main" file that exports a config object
+   * - a relative path to a JSON file
+   */
+  "extends": "tslint:latest",
+  "rules": [
+    /*
+     * Any rules specified here will override those from the base config we are extending
+     */
+    "no-constructor-vars": true
+  ],
+  "rulesDirectory": [
+    /*
+     * A list of relative or absolute paths to directories that contain custom rules.
+     * See the Custom Rules documentation below for more details.
+     */
+  ]
+}
+```
+
+Built-in configs include `tslint:latest` and `tslint:recommended`. You may inspect their source [here](https://github.com/palantir/tslint/tree/master/src/configs).
+
+__`tslint:recommended`__ is a stable, somewhat opinionated set of rules which we encourage for
+general TypeScript programming. This configuration follows semver, so it will _not_ have breaking
+changes across minor or patch releases.
+
+__`tslint:latest`__ extends `tslint:recommended` and is continuously updated to include configuration
+for the latest rules in every TSLint release. Using this config may introduce breaking changes across
+minor or patch releases as new rules are enabled which cause lint failures in your code.
+When we reach a major version bump, `tslint:recommended` will be updated to be identical to `tslint:latest`.
+
+See the [core rules list](#core-rules) below for descriptions of all the rules.
+
+#### CLI
 
 usage: `tslint [options] file ...`
 
@@ -79,8 +122,6 @@ Options:
 --test                test that tslint produces the correct output for the specified directory
 -v, --version         current version
 ```
-
-By default, configuration is loaded from `tslint.json`, if it exists in the current path, or the user's home directory, in that order.
 
 tslint accepts the following command-line options:
 
@@ -153,7 +194,7 @@ tslint accepts the following command-line options:
     Prints this help message.
 ```
 
-##### Library
+#### Library
 
 ```javascript
 var fileName = "Specify file name";
@@ -185,8 +226,6 @@ Core Rules
 <sup>[back to ToC &uarr;](#table-of-contents)</sup>
 
 Core rules are included in the `tslint` package.
-
-A sample configuration file with all options is available [here](https://github.com/palantir/tslint/blob/master/docs/sample.tslint.json).
 
 * `align` enforces vertical alignment. Rule options:
   * `"parameters"` checks alignment of function parameters.
