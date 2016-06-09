@@ -21,7 +21,7 @@ import * as Lint from "../lint";
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_FACTORY = (memberType: string, memberName: string, publicOnly: boolean) => {
         memberName = memberName == null ? "" : ` '${memberName}'`;
-        if(publicOnly){
+        if (publicOnly) {
             return `The ${memberType}${memberName} must be marked as 'public'`;
         }
         return `The ${memberType}${memberName} must be marked either 'private', 'public', or 'protected'`;
