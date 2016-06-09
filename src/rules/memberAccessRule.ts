@@ -19,7 +19,10 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
-    public static FAILURE_STRING = "default access modifier on member/method not allowed";
+    public static FAILURE_STRING_FACTORY = (memberType: string, memberName: string) => {
+        memberName = memberName ? " '" + memberName + "'" : "";
+        return `The ${memberType}${memberName} is missing an access modifier`;
+    }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new MemberAccessWalker(sourceFile, this.getOptions()));
@@ -77,7 +80,26 @@ export class MemberAccessWalker extends Lint.RuleWalker {
         );
 
         if (!hasAnyVisibilityModifiers) {
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+            let memberType: string;
+            let memberName: string;
+
+            if (node.kind === ts.SyntaxKind.MethodDeclaration) {
+                memberType = "class method";
+                memberName = node.getChildAt(0).getText();
+            } else if (node.kind === ts.SyntaxKind.PropertyDeclaration) {
+                memberType = "class property";
+                memberName = node.getChildAt(0).getText();
+            } else if (node.kind === ts.SyntaxKind.Constructor) {
+                memberType = "class constructor";
+            } else if (node.kind === ts.SyntaxKind.GetAccessor) {
+                memberType = "get property accessor";
+                memberName = node.getChildAt(1).getText();
+            } else if (node.kind === ts.SyntaxKind.SetAccessor) {
+                memberType = "set property accessor";
+                memberName = node.getChildAt(1).getText();
+            }
+
+            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING_FACTORY(memberType, memberName)));
         }
     }
 }

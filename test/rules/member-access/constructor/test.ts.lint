@@ -1,8 +1,8 @@
 class ContructorsNoAccess {
     constructor(i: number);
-    ~~~~~~~~~~~~~~~~~~~~~~~ [default access modifier on member/method not allowed]
+    ~~~~~~~~~~~~~~~~~~~~~~~ [The class constructor is missing an access modifier]
     constructor(o: any) {}
-    ~~~~~~~~~~~~~~~~~~~~~~ [default access modifier on member/method not allowed]
+    ~~~~~~~~~~~~~~~~~~~~~~ [The class constructor is missing an access modifier]
 }
 
 class ContructorsAccess {
