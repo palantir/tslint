@@ -1,8 +1,8 @@
 class ContructorsNoAccess {
     constructor(i: number);
-    ~~~~~~~~~~~~~~~~~~~~~~~ [The class constructor is missing an access modifier]
+    ~~~~~~~~~~~~~~~~~~~~~~~ [The class constructor must be marked either 'private', 'public', or 'protected']
     constructor(o: any) {}
-    ~~~~~~~~~~~~~~~~~~~~~~ [The class constructor is missing an access modifier]
+    ~~~~~~~~~~~~~~~~~~~~~~ [The class constructor must be marked either 'private', 'public', or 'protected']
 }
 
 class ContructorsAccess {

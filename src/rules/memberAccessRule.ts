@@ -20,8 +20,8 @@ import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_FACTORY = (memberType: string, memberName: string) => {
-        memberName = memberName ? " '" + memberName + "'" : "";
-        return `The ${memberType}${memberName} is missing an access modifier`;
+        memberName = memberName == null ? "" : ` '${memberName}'`;
+        return `The ${memberType}${memberName} must be marked either 'private', 'public', or 'protected'`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {

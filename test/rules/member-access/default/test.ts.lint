@@ -1,6 +1,6 @@
 declare class AmbientNoAccess {
     a(): number;
-    ~~~~~~~~~~~~ [The class method 'a' is missing an access modifier]
+    ~~~~~~~~~~~~ [The class method 'a' must be marked either 'private', 'public', or 'protected']
 }
 
 declare class AmbientAccess {
@@ -9,16 +9,16 @@ declare class AmbientAccess {
 
 class Members {
     i: number;
-    ~~~~~~~~~~ [The class property 'i' is missing an access modifier]
+    ~~~~~~~~~~ [The class property 'i' must be marked either 'private', 'public', or 'protected']
 
     public nPublic: number;
     protected nProtected: number;
     private nPrivate: number;
 
     noAccess(x: number): number;
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [The class method 'noAccess' is missing an access modifier]
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [The class method 'noAccess' must be marked either 'private', 'public', or 'protected']
     noAccess(o: any): any {}
-    ~~~~~~~~~~~~~~~~~~~~~~~~ [The class method 'noAccess' is missing an access modifier]
+    ~~~~~~~~~~~~~~~~~~~~~~~~ [The class method 'noAccess' must be marked either 'private', 'public', or 'protected']
 
     public access(x: number): number;
     public access(o: any): any {}
@@ -31,7 +31,7 @@ const obj = {
 function main() {
     class A {
         i: number;
-        ~~~~~~~~~~ [The class property 'i' is missing an access modifier]
+        ~~~~~~~~~~ [The class property 'i' must be marked either 'private', 'public', or 'protected']
         public n: number;
     }
 }

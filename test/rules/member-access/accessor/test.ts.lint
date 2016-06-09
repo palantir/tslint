@@ -4,9 +4,9 @@ class Members {
         return 1;
 ~~~~~~~~~~~~~~~~~
     }
-~~~~~ [The get property accessor 'g' is missing an access modifier]
+~~~~~ [The get property accessor 'g' must be marked either 'private', 'public', or 'protected']
     set s(o: any) {}
-    ~~~~~~~~~~~~~~~~ [The set property accessor 's' is missing an access modifier]
+    ~~~~~~~~~~~~~~~~ [The set property accessor 's' must be marked either 'private', 'public', or 'protected']
 
     public get publicG() {
         return 1;
