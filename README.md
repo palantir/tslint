@@ -75,12 +75,12 @@ The configuration file specifies which rules are enabled and their options. A sa
    * - a relative path to a JSON file
    */
   "extends": "tslint:latest",
-  "rules": [
+  "rules": {
     /*
      * Any rules specified here will override those from the base config we are extending
      */
     "no-constructor-vars": true
-  ],
+  },
   "rulesDirectory": [
     /*
      * A list of relative or absolute paths to directories that contain custom rules.
