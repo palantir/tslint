@@ -92,14 +92,9 @@ The configuration file specifies which rules are enabled and their options. A sa
 
 Built-in configs include `tslint:latest` and `tslint:recommended`. You may inspect their source [here](https://github.com/palantir/tslint/tree/master/src/configs).
 
-__`tslint:recommended`__ is a stable, somewhat opinionated set of rules which we encourage for
-general TypeScript programming. This configuration follows semver, so it will _not_ have breaking
-changes across minor or patch releases.
+__`tslint:recommended`__ is a stable, somewhat opinionated set of rules which we encourage for general TypeScript programming. This configuration follows semver, so it will _not_ have breaking changes across minor or patch releases.
 
-__`tslint:latest`__ extends `tslint:recommended` and is continuously updated to include configuration
-for the latest rules in every TSLint release. Using this config may introduce breaking changes across
-minor or patch releases as new rules are enabled which cause lint failures in your code.
-When we reach a major version bump, `tslint:recommended` will be updated to be identical to `tslint:latest`.
+__`tslint:latest`__ extends `tslint:recommended` and is continuously updated to include configuration for the latest rules in every TSLint release. Using this config may introduce breaking changes across minor releases as new rules are enabled which cause lint failures in your code. When TSLint reaches a major version bump, `tslint:recommended` will be updated to be identical to `tslint:latest`.
 
 See the [core rules list](#core-rules) below for descriptions of all the rules.
 
