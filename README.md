@@ -192,28 +192,26 @@ tslint accepts the following command-line options:
 #### Library
 
 ```javascript
-var fileName = "Specify file name";
+const Linter = require("tslint");
+const fs = require("fs");
 
-var configuration = {
+const fileName = "Specify file name";
+const configuration = {
     rules: {
         "variable-name": true,
         "quotemark": [true, "double"]
     }
 };
-
-var options = {
+const options = {
     formatter: "json",
     configuration: configuration,
-    rulesDirectory: "customRules/", // can be an array of directories
+    rulesDirectory: "customRules/",
     formattersDirectory: "customFormatters/"
 };
 
-var Linter = require("tslint");
-var fs = require("fs");
-var contents = fs.readFileSync(fileName, "utf8");
-
-var ll = new Linter(fileName, contents, options);
-var result = ll.lint();
+const fileContents = fs.readFileSync(fileName, "utf8");
+const linter = new Linter(fileName, fileContents, options);
+const result = linter.lint();
 ```
 
 Core Rules
