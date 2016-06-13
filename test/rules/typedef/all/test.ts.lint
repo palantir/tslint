@@ -18,7 +18,7 @@ var NoTypeObjectLiteralWithPropertyGetter = {
     },
 
     arrowMethodDef: () => {
-                     ~      [expected call-signature to have a typedef]
+                     ~      [expected arrow-call-signature to have a typedef]
         return 'also untyped';
     }
 };
@@ -40,3 +40,25 @@ var NoTypesFn = function (
          ~         [expected variable-declaration: 'c' to have a typedef]
         d = a - b;
          ~         [expected variable-declaration: 'd' to have a typedef]
+
+class TsLint {
+    helloWorld() {
+               ~   [expected call-signature: 'helloWorld' to have a typedef]
+        return 'Hello World';
+    };
+
+    arrowHelloWorld = () => {
+                   ~          [expected member-variable-declaration: 'arrowHelloWorld' to have a typedef]
+                       ~      [expected arrow-call-signature to have a typedef]
+        return this.helloWorld();
+    };
+}
+
+setTimeout(() => {}, 1000);
+setTimeout(function() {}, 1000);
+                    ~            [expected call-signature to have a typedef]
+
+someFunc(n => n+1);
+          ~        [expected arrow-parameter: 'n' to have a typedef]
+someFunc(n => {});
+          ~        [expected arrow-parameter: 'n' to have a typedef]
