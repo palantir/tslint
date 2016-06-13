@@ -95,6 +95,7 @@ export function consoleTestResultHandler(testResult: TestResult): boolean {
         const diffResults = diff.diffLines(results.markupFromMarkup, results.markupFromLinter);
         const didTestPass = !diffResults.some((diff) => diff.added || diff.removed);
 
+        /* tslint:disable:no-console */
         if (didTestPass) {
             console.log(colors.green(" Passed"));
         } else {
@@ -114,6 +115,7 @@ export function consoleTestResultHandler(testResult: TestResult): boolean {
                 process.stdout.write(color(diffResult.value));
             }
         }
+        /* tslint:enable:no-console */
     }
 
     return didAllTestsPass;

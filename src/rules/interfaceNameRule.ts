@@ -83,7 +83,6 @@ class NameWalker extends Lint.RuleWalker {
         return true;
     }
 
-
     private addFailureAt(position: number, width: number, failureString: string) {
         const failure = this.createFailure(position, width, failureString);
         this.addFailure(failure);
