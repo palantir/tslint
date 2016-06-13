@@ -41,7 +41,8 @@ export class Rule extends Lint.Rules.AbstractRule {
         const source = sourceFile.getFullText();
 
         for (let i = 0; i < lineStarts.length - 1; ++i) {
-            const from = lineStarts[i], to = lineStarts[i + 1];
+            const from = lineStarts[i];
+            const to = lineStarts[i + 1];
             if ((to - from - 1) > lineLimit && !((to - from - 2) === lineLimit && source[to - 2] === "\r")) {
                 // first condition above is whether the line (minus the newline) is larger than the line limit
                 // second two check for windows line endings, that is, check to make sure it is not the case

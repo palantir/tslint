@@ -16,7 +16,7 @@
 
 import {LintError} from "../../src/test/lintError";
 
-/* tslint:disable:object-literal-sort-keys */
+/* tslint:disable:object-literal-sort-keys no-consecutive-blank-lines */
 
 export const lintStr1 = `
 Yay some file contents
@@ -70,9 +70,11 @@ export const resultErrs3: LintError[] = [
   { startPos: { line: 3, col: 6 }, endPos: { line: 3, col: 7 }, message: "error3: fun" },
 ];
 
+
 export const lintStr4 = "";
 export const codeStr4 = "";
 export const resultErrs4: LintError[] = [];
+
 
 // this is a ideally formatted lint string, errors ordered by start position,
 // error messages one space after end of line of code above
@@ -92,6 +94,7 @@ export const resultErrs5: LintError[] = [
   { startPos: { line: 1, col: 12 }, endPos: { line: 2, col: 7 }, message: "another error" },
 ];
 
+
 export const lintStr6 = `
 if (code === lint-error-free) {
              ~~~~~~~~~~~~~~~    [err]
@@ -107,6 +110,7 @@ if (code === lint-error-free) {
 export const resultErrs6: LintError[] = [
     { startPos: { line: 1, col: 13 }, endPos: { line: 1, col: 28 }, message: "A longer error message I didn't want to type every time!" },
 ];
+
 
 export const lintStr7 = `
 someCode.something();
@@ -129,7 +133,5 @@ export const resultErrs7: LintError[] = [
   { startPos: { line: 1, col: 1 }, endPos: { line: 1, col: 1 }, message: "some error" },
   { startPos: { line: 3, col: 0 }, endPos: { line: 4, col: 0 }, message: "another error" },
 ];
-
-
 
 /* tslint:enable:object-literal-sort-keys */

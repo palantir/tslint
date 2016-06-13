@@ -43,6 +43,8 @@ class NoBitwiseWalker extends Lint.RuleWalker {
             case ts.SyntaxKind.GreaterThanGreaterThanGreaterThanEqualsToken:
                 this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
                 break;
+            default:
+                break;
         }
         super.visitBinaryExpression(node);
     }

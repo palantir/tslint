@@ -102,6 +102,8 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
                         prevTokenShouldBeFollowedByWhitespace = true;
                     }
                     break;
+                default:
+                    break;
             }
         });
     }

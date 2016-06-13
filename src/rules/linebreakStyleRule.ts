@@ -11,7 +11,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const failures = <Lint.RuleFailure[]>[];
+        const failures: Lint.RuleFailure[] = [];
         const scanner = ts.createScanner(
             sourceFile.languageVersion,
             false,

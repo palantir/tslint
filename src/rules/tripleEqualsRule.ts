@@ -54,6 +54,8 @@ class ComparisonWalker extends Lint.RuleWalker {
             case ts.SyntaxKind.ExclamationEqualsToken:
                 this.addFailure(this.createFailure(position, ComparisonWalker.COMPARISON_OPERATOR_WIDTH, Rule.NEQ_FAILURE_STRING));
                 break;
+            default:
+                break;
         }
     }
 
