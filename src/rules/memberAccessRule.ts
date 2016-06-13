@@ -84,25 +84,28 @@ export class MemberAccessWalker extends Lint.RuleWalker {
 
         if (!hasAnyVisibilityModifiers) {
             let memberType: string;
-            let memberName: string;
             let publicOnly = false;
 
             if (node.kind === ts.SyntaxKind.MethodDeclaration) {
                 memberType = "class method";
-                memberName = node.getChildAt(0).getText();
             } else if (node.kind === ts.SyntaxKind.PropertyDeclaration) {
                 memberType = "class property";
-                memberName = node.getChildAt(0).getText();
             } else if (node.kind === ts.SyntaxKind.Constructor) {
                 memberType = "class constructor";
                 publicOnly = true;
             } else if (node.kind === ts.SyntaxKind.GetAccessor) {
                 memberType = "get property accessor";
-                memberName = node.getChildAt(1).getText();
             } else if (node.kind === ts.SyntaxKind.SetAccessor) {
                 memberType = "set property accessor";
-                memberName = node.getChildAt(1).getText();
             }
+
+            // look for the identifier and get it's text
+            let memberName: string;
+            node.getChildren().forEach((n: ts.Node) => {
+                if (n.kind === ts.SyntaxKind.Identifier) {
+                    memberName = n.getText();
+                }
+            });
 
             const failureString = Rule.FAILURE_STRING_FACTORY(memberType, memberName, publicOnly);
             this.addFailure(this.createFailure(node.getStart(), node.getWidth(), failureString));
