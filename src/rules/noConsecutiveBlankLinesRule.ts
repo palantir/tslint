@@ -29,36 +29,36 @@ export class Rule extends Lint.Rules.AbstractRule {
 class NoConsecutiveBlankLinesWalker extends Lint.SkippableTokenAwareRuleWalker {
     public visitSourceFile(node: ts.SourceFile) {
         super.visitSourceFile(node);
-        
-        //Find all the lines that are blank or only contain whitespace
-        let blankLineIndexes:number[] = [];
+
+        // find all the lines that are blank or only contain whitespace
+        let blankLineIndexes: number[] = [];
         node.getFullText().split(/\n/).forEach(function(txt, i){
-            if(txt.trim()===""){
+            if (txt.trim() === "") {
                 blankLineIndexes.push(i);
             }
         });
 
-        //console.log("==================")
-        //console.log("Blank or whitespace line numbers ", blankLineIndexes.map((n)=>n+1))
-        
-        //Now only keep the found blank lines that are consecutive
-        let consecutiveBlankLineStarts:number[] = [];
-        for(let i=0; i < blankLineIndexes.length; i++) {
-            let diff = blankLineIndexes[i+1] - blankLineIndexes[i];
-            if(Math.abs(diff)==1) {
+        // console.log("==================")
+        // console.log("Blank or whitespace line numbers ", blankLineIndexes.map((n)=>n+1))
+
+        // now only keep the found blank lines that are consecutive
+        let consecutiveBlankLineStarts: number[] = [];
+        for (let i = 0; i < blankLineIndexes.length; i++) {
+            let diff = blankLineIndexes[i + 1] - blankLineIndexes[i];
+            if (Math.abs(diff) === 1) {
                 consecutiveBlankLineStarts.push(blankLineIndexes[i]);
             }
         }
-        
-        //Now only keep the beginning number in each sequence of consecutive numbers
-        let result:number[] = [];
-        let temp:number[] = [];
-        let difference:number;
+
+        // now only keep the beginning number in each sequence of consecutive numbers
+        let result: number[] = [];
+        let temp: number[] = [];
+        let difference: number;
         for (let i = 0; i < consecutiveBlankLineStarts.length; i += 1) {
             if (difference !== (consecutiveBlankLineStarts[i] - i)) {
                 if (difference !== undefined) {
-                    if(temp.length){
-                        result.push(temp[0])
+                    if (temp.length) {
+                        result.push(temp[0]);
                         this.addFailure(this.createFailure(temp[0], 1, Rule.FAILURE_STRING));
                     }
                     temp = [];
@@ -68,13 +68,13 @@ class NoConsecutiveBlankLinesWalker extends Lint.SkippableTokenAwareRuleWalker {
             temp.push(consecutiveBlankLineStarts[i]);
         }
 
-        if (temp.length>0) {
-            result.push(temp[0])
+        if (temp.length > 0) {
+            result.push(temp[0]);
             this.addFailure(this.createFailure(temp[0], 1, Rule.FAILURE_STRING));
         }
-        
-        //console.log("==================")
-        //console.log("First lines of CONSECUTIVE blank or whitespace lines", result.map((n)=>n+1))
-        //console.log("==================")
+
+        // console.log("==================")
+        // console.log("First lines of CONSECUTIVE blank or whitespace lines", result.map((n)=>n+1))
+        // console.log("==================")
     }
 }
