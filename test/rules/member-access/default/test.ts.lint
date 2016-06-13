@@ -1,6 +1,6 @@
 declare class AmbientNoAccess {
     a(): number;
-    ~~~~~~~~~~~~ [0]
+    ~~~~~~~~~~~~ [The class method 'a' must be marked either 'private', 'public', or 'protected']
 }
 
 declare class AmbientAccess {
@@ -9,16 +9,16 @@ declare class AmbientAccess {
 
 class Members {
     i: number;
-    ~~~~~~~~~~ [0]
+    ~~~~~~~~~~ [The class property 'i' must be marked either 'private', 'public', or 'protected']
 
     public nPublic: number;
     protected nProtected: number;
     private nPrivate: number;
 
     noAccess(x: number): number;
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [The class method 'noAccess' must be marked either 'private', 'public', or 'protected']
     noAccess(o: any): any {}
-    ~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+    ~~~~~~~~~~~~~~~~~~~~~~~~ [The class method 'noAccess' must be marked either 'private', 'public', or 'protected']
 
     public access(x: number): number;
     public access(o: any): any {}
@@ -31,9 +31,7 @@ const obj = {
 function main() {
     class A {
         i: number;
-        ~~~~~~~~~~ [0]
+        ~~~~~~~~~~ [The class property 'i' must be marked either 'private', 'public', or 'protected']
         public n: number;
     }
 }
-
-[0]: default access modifier on member/method not allowed

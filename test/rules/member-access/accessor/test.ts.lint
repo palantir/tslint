@@ -4,9 +4,9 @@ class Members {
         return 1;
 ~~~~~~~~~~~~~~~~~
     }
-~~~~~ [default access modifier on member/method not allowed]
+~~~~~ [The get property accessor 'g' must be marked either 'private', 'public', or 'protected']
     set s(o: any) {}
-    ~~~~~~~~~~~~~~~~ [default access modifier on member/method not allowed]
+    ~~~~~~~~~~~~~~~~ [The set property accessor 's' must be marked either 'private', 'public', or 'protected']
 
     public get publicG() {
         return 1;
