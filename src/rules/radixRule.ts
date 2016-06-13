@@ -19,7 +19,7 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
-    public static FAILURE_STRING = "missing radix parameter";
+    public static FAILURE_STRING = "Missing radix parameter";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const radixWalker = new RadixWalker(sourceFile, this.getOptions());

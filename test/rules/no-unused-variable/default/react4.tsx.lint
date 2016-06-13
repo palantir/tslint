@@ -1,4 +1,4 @@
 import * as React from "react";
-            ~~~~~               [unused variable: 'React']
+            ~~~~~               [Unused variable: 'React']
 
 console.log(<input type="text" />);

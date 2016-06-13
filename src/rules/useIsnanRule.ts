@@ -18,9 +18,6 @@
 import * as ts from "typescript";
 import * as Lint from "../lint";
 
-/**
- * Implementation of the use-isnan rule.
- */
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Found an invalid comparison for NaN: ";
 

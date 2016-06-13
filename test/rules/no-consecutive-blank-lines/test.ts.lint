@@ -5,7 +5,7 @@
 
 ~nil
 class Clazz { // comment
-~nil                     [consecutive blank lines are disallowed]
+~nil                     [0]
 
     public funcxion() {
 
@@ -14,11 +14,13 @@ class Clazz { // comment
 
 ~nil
         console.log("test");
-~nil                         [consecutive blank lines are disallowed]
+~nil                         [0]
 
     }
 
 
 ~nil
 }
-~nil  [consecutive blank lines are disallowed]
+~nil  [0]
+
+[0]: Consecutive blank lines are forbidden

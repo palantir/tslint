@@ -1,24 +1,24 @@
 var foo;
-~~~      [forbidden 'var' keyword, use 'let' or 'const' instead]
+~~~      [Forbidden 'var' keyword, use 'let' or 'const' instead]
 
 function tmp(t: any) {
     var x = 3;
-    ~~~        [forbidden 'var' keyword, use 'let' or 'const' instead]
+    ~~~        [Forbidden 'var' keyword, use 'let' or 'const' instead]
 }
 
 var i,
-~~~    [forbidden 'var' keyword, use 'let' or 'const' instead]
+~~~    [Forbidden 'var' keyword, use 'let' or 'const' instead]
     j;
 
 var [a, b] = [1, 2];
-~~~                  [forbidden 'var' keyword, use 'let' or 'const' instead]
+~~~                  [Forbidden 'var' keyword, use 'let' or 'const' instead]
 
 for (var n; false;);
-     ~~~             [forbidden 'var' keyword, use 'let' or 'const' instead]
+     ~~~             [Forbidden 'var' keyword, use 'let' or 'const' instead]
 for (var n1 in foo);
-     ~~~             [forbidden 'var' keyword, use 'let' or 'const' instead]
+     ~~~             [Forbidden 'var' keyword, use 'let' or 'const' instead]
 for (var n2 of foo);
-     ~~~             [forbidden 'var' keyword, use 'let' or 'const' instead]
+     ~~~             [Forbidden 'var' keyword, use 'let' or 'const' instead]
 
 declare var tmp2: any;
 

@@ -19,10 +19,10 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
-    public static FAILURE_STRING = "type decoration of 'any' is forbidden";
+    public static FAILURE_STRING = "Type declaration of 'any' is forbidden";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(<Lint.RuleWalker>(new NoAnyWalker(sourceFile, this.getOptions())));
+        return this.applyWithWalker(new NoAnyWalker(sourceFile, this.getOptions()));
     }
 }
 
