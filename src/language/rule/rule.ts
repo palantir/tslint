@@ -48,8 +48,9 @@ export interface IRuleMetadata {
     * Schema of the options the rule accepts.
     * The first boolean for whether the rule is enabled or not is already implied.
     * This field describes the options after that boolean.
+    * If null, this rule has no options and is not configurable.
     */
-    options: IRuleOption;
+    options: any;
 
    /**
     * Examples of what a standard config for the rule might look like.
@@ -63,22 +64,6 @@ export interface IRuleMetadata {
 }
 
 export type RuleType = "functionality" | "maintainability" | "style" | "typescript";
-
-export type RuleOptionType = "array" | "enum" | "list" | "number" | "object" | "string";
-
-export interface IBaseRuleOption { type?: RuleOptionType; }
-
-export interface IArrayRuleOption extends IBaseRuleOption { arrayMembers: IRuleOption[]; }
-export interface IEmptyRuleOption extends IBaseRuleOption { }
-export interface IEnumRuleOption extends IBaseRuleOption { enumValues: string[]; }
-export interface IListRuleOption extends IBaseRuleOption { listType: IRuleOption; }
-export interface INumberRuleOption extends IBaseRuleOption { }
-export interface IObjectRuleOption extends IBaseRuleOption { properties: { [key: string]: IRuleOption }; }
-export interface IStringRuleOption extends IBaseRuleOption { }
-
-export type IRuleOption = IArrayRuleOption | IEmptyRuleOption | IEnumRuleOption | IListRuleOption
-                        | INumberRuleOption | IObjectRuleOption | IStringRuleOption;
-
 
 export interface IOptions {
     ruleArguments?: any[];

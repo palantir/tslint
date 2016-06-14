@@ -19,12 +19,12 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 /* tslint:disable:object-literal-sort-keys */
-const SPACE_OPTIONS: Lint.IRuleOption = {
-    type: "enum",
-    enumValues: ["nospace", "onespace", "space"],
+const SPACE_OPTIONS = {
+    type: "string",
+    enum: ["nospace", "onespace", "space"],
 };
 
-const SPACE_OBJECT: Lint.IRuleOption = {
+const SPACE_OBJECT = {
     type: "object",
     properties: {
         "call-signature": SPACE_OPTIONS,
@@ -33,6 +33,7 @@ const SPACE_OBJECT: Lint.IRuleOption = {
         "property-declaration": SPACE_OPTIONS,
         "variable-declaration": SPACE_OPTIONS,
     },
+    additionalProperties: false,
 };
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -54,7 +55,8 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"variable-declaration"\` checks variable declaration.`,
         options: {
             type: "array",
-            arrayMembers: [SPACE_OBJECT, SPACE_OBJECT],
+            items: [SPACE_OBJECT, SPACE_OBJECT],
+            additionalItems: false,
         },
         optionExamples: [Lint.Utils.dedent`
             [

@@ -31,11 +31,13 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"arguments"\` checks alignment of function call arguments.
             * \`"statements"\` checks alignment of statements.`,
         options: {
-            type: "list",
-            listType: {
-                type: "enum",
-                enumValues: ["arguments", "parameters", "statements"],
+            type: "array",
+            items: {
+                type: "string",
+                enum: ["arguments", "parameters", "statements"],
             },
+            minLength: 1,
+            maxLength: 3,
         },
         optionExamples: ['[true, "parameters", "statements"]'],
         type: "style",
