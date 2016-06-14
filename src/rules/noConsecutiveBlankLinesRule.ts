@@ -38,43 +38,13 @@ class NoConsecutiveBlankLinesWalker extends Lint.SkippableTokenAwareRuleWalker {
             }
         });
 
-        // console.log("==================")
-        // console.log("Blank or whitespace line numbers ", blankLineIndexes.map((n)=>n+1))
-
-        // now only keep the found blank lines that are consecutive
-        let consecutiveBlankLineStarts: number[] = [];
+        // now only throw failures for the fisrt number from groups of consecutive blank line indexes
         for (let i = 0; i < blankLineIndexes.length; i++) {
-            let diff = blankLineIndexes[i + 1] - blankLineIndexes[i];
-            if (Math.abs(diff) === 1) {
-                consecutiveBlankLineStarts.push(blankLineIndexes[i]);
+            let diff = Math.abs(blankLineIndexes[i + 1] - blankLineIndexes[i]);
+            let prevDiff = Math.abs(blankLineIndexes[i] - blankLineIndexes[i - 1]);
+            if (diff === 1 && prevDiff !== 1) {
+                this.addFailure(this.createFailure(blankLineIndexes[i], 1, Rule.FAILURE_STRING));
             }
         }
-
-        // now only keep the beginning number in each sequence of consecutive numbers
-        let result: number[] = [];
-        let temp: number[] = [];
-        let difference: number;
-        for (let i = 0; i < consecutiveBlankLineStarts.length; i += 1) {
-            if (difference !== (consecutiveBlankLineStarts[i] - i)) {
-                if (difference !== undefined) {
-                    if (temp.length) {
-                        result.push(temp[0]);
-                        this.addFailure(this.createFailure(temp[0], 1, Rule.FAILURE_STRING));
-                    }
-                    temp = [];
-                }
-                difference = consecutiveBlankLineStarts[i] - i;
-            }
-            temp.push(consecutiveBlankLineStarts[i]);
-        }
-
-        if (temp.length > 0) {
-            result.push(temp[0]);
-            this.addFailure(this.createFailure(temp[0], 1, Rule.FAILURE_STRING));
-        }
-
-        // console.log("==================")
-        // console.log("First lines of CONSECUTIVE blank or whitespace lines", result.map((n)=>n+1))
-        // console.log("==================")
     }
 }
