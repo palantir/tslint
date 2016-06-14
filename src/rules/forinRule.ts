@@ -35,7 +35,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             See [MDN's \`for...in\`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...in)
             documentation for more information about \`for...in\` loops.`,
         optionsDescription: "Not configurable.",
-        options: {},
+        options: null,
         optionExamples: ["true"],
         type: "functionality",
     };

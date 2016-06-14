@@ -25,7 +25,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Ensures the file ends with a newline.",
         rationale: "It is a [standard convention](http://stackoverflow.com/q/729692/3124288) to end files with a newline.",
         optionsDescription: "Not configurable.",
-        options: {},
+        options: null,
         optionExamples: ["true"],
         type: "maintainability",
     };

@@ -36,11 +36,13 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"check-lowercase"\` requires that the first non-whitespace character of a comment must be lowercase, if applicable.
             * \`"check-uppercase"\` requires that the first non-whitespace character of a comment must be uppercase, if applicable.`,
         options: {
-            type: "list",
-            listType: {
-                type: "enum",
-                enumValues: ["check-space", "check-lowercase", "check-uppercase"],
+            type: "array",
+            items: {
+                type: "string",
+                enum: ["check-space", "check-lowercase", "check-uppercase"],
             },
+            minLength: 1,
+            maxLength: 3,
         },
         optionExamples: ['[true, "check-space", "check-lowercase"]'],
         type: "style",

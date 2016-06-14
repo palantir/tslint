@@ -34,7 +34,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             to be executed only if \`foo === bar\`. However, he forgot braces and \`bar++\` will be executed
             no matter what. This rule could prevent such a mistake.`,
         optionsDescription: "Not configurable.",
-        options: {},
+        options: null,
         optionExamples: ["true"],
         type: "functionality",
     };

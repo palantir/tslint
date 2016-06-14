@@ -30,6 +30,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: "An integer indicating the max length of lines.",
         options: {
             type: "number",
+            minimum: "1",
         },
         optionExamples: ["[true, 120]"],
         type: "maintainability",

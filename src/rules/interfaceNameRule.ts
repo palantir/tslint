@@ -33,8 +33,8 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"${OPTION_ALWAYS}"\` requires interface names to start with an "I"
             * \`"${OPTION_NEVER}"\` requires interface names to not have an "I" prefix`,
         options: {
-            type: "enum",
-            enumValues: [OPTION_ALWAYS, OPTION_NEVER],
+            type: "string",
+            enum: [OPTION_ALWAYS, OPTION_NEVER],
         },
         optionExamples: [`[true, "${OPTION_ALWAYS}"]`, `[true, "${OPTION_NEVER}"]`],
         type: "style",

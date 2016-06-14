@@ -32,7 +32,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             * one line comments must start with \`/** \` and end with \`*/\``,
         rationale: "Helps maintain a consistent, readable style for JSDoc comments.",
         optionsDescription: "Not configurable.",
-        options: {},
+        options: null,
         optionExamples: ["true"],
         type: "style",
     };

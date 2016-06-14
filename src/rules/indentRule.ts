@@ -35,8 +35,8 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"spaces"\` enforces consistent spaces.
             * \`"tabs"\` enforces consistent tabs.`,
         options: {
-            type: "enum",
-            enumValues: ["tabs", "spaces"],
+            type: "string",
+            enum: ["tabs", "spaces"],
         },
         optionExamples: ['[true, "spaces"]'],
         type: "maintainability",

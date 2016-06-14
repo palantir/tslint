@@ -15,8 +15,8 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"${OPTION_LINEBREAK_STYLE_LF}"\` requires LF (\`\\n\`) linebreaks
             * \`"${OPTION_LINEBREAK_STYLE_CRLF}"\` requires CRLF (\`\\r\\n\`) linebreaks`,
         options: {
-            type: "enum",
-            enumValues: [OPTION_LINEBREAK_STYLE_LF, OPTION_LINEBREAK_STYLE_CRLF],
+            type: "string",
+            enum: [OPTION_LINEBREAK_STYLE_LF, OPTION_LINEBREAK_STYLE_CRLF],
         },
         optionExamples: [`[true, "${OPTION_LINEBREAK_STYLE_LF}"]`, `[true, "${OPTION_LINEBREAK_STYLE_CRLF}"]`],
         type: "maintainability",

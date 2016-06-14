@@ -30,11 +30,13 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"check-accessor"\` enforces explicit visibility on get/set accessors (can only be public)
             * \`"check-constructor"\`  enforces explicit visibility on constructors (can only be public)`,
         options: {
-            type: "list",
-            listType: {
-                type: "enum",
-                enumValues: ["check-accessor", "check-constructor"],
+            type: "array",
+            items: {
+                type: "string",
+                enum: ["check-accessor", "check-constructor"],
             },
+            minLength: 0,
+            maxLength: 2,
         },
         optionExamples: ["true", '[true, "check-accessor"]'],
         type: "typescript",
