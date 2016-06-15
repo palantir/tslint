@@ -30,21 +30,29 @@ class NoConsecutiveBlankLinesWalker extends Lint.SkippableTokenAwareRuleWalker {
     public visitSourceFile(node: ts.SourceFile) {
         super.visitSourceFile(node);
 
+        const sourceFileText = node.getFullText();
+        const soureFileLines = sourceFileText.split(/\n/);
+
         // find all the lines that are blank or only contain whitespace
         let blankLineIndexes: number[] = [];
-        node.getFullText().split(/\n/).forEach(function(txt, i){
+        soureFileLines.forEach(function(txt, i){
             if (txt.trim() === "") {
                 blankLineIndexes.push(i);
             }
         });
 
         // now only throw failures for the fisrt number from groups of consecutive blank line indexes
-        for (let i = 0; i < blankLineIndexes.length; i++) {
-            let diff = Math.abs(blankLineIndexes[i + 1] - blankLineIndexes[i]);
-            let prevDiff = Math.abs(blankLineIndexes[i] - blankLineIndexes[i - 1]);
-            if (diff === 1 && prevDiff !== 1) {
-                this.addFailure(this.createFailure(blankLineIndexes[i], 1, Rule.FAILURE_STRING));
-            }
+        const sequences: number[][] = [];
+        let lastVal = -2;
+        for (const line of blankLineIndexes) {
+            line > lastVal + 1 ? sequences.push([line]) : sequences[sequences.length - 1].push(line);
+            lastVal = line;
         }
+        sequences
+            .filter((arr) => arr.length > 1).map((arr) => arr[0])
+            .forEach((startLineNum: number) => {
+                let startCharPos = node.getPositionOfLineAndCharacter(startLineNum + 1, 0);
+                this.addFailure(this.createFailure(startCharPos, 1, Rule.FAILURE_STRING));
+            });
     }
 }
