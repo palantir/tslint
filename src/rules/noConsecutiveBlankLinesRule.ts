@@ -30,27 +30,29 @@ class NoConsecutiveBlankLinesWalker extends Lint.SkippableTokenAwareRuleWalker {
     public visitSourceFile(node: ts.SourceFile) {
         super.visitSourceFile(node);
 
-        // starting with 1 to cover the case where the file starts with two blank lines
-        let newLinesInARowSeenSoFar = 1;
-        Lint.scanAllTokens(ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, node.text), (scanner: ts.Scanner) => {
-            const startPos = scanner.getStartPos();
-            if (this.tokensToSkipStartEndMap[startPos] != null) {
-                // tokens to skip are places where the scanner gets confused about what the token is, without the proper context
-                // (specifically, regex, identifiers, and templates). So skip those tokens.
-                scanner.setTextPos(this.tokensToSkipStartEndMap[startPos]);
-                newLinesInARowSeenSoFar = 0;
-                return;
-            }
+        const sourceFileText = node.getFullText();
+        const soureFileLines = sourceFileText.split(/\n/);
 
-            if (scanner.getToken() === ts.SyntaxKind.NewLineTrivia) {
-                newLinesInARowSeenSoFar += 1;
-                if (newLinesInARowSeenSoFar >= 3) {
-                    const failure = this.createFailure(scanner.getStartPos(), 1, Rule.FAILURE_STRING);
-                    this.addFailure(failure);
-                }
-            } else {
-                newLinesInARowSeenSoFar = 0;
+        // find all the lines that are blank or only contain whitespace
+        let blankLineIndexes: number[] = [];
+        soureFileLines.forEach(function(txt, i){
+            if (txt.trim() === "") {
+                blankLineIndexes.push(i);
             }
         });
+
+        // now only throw failures for the fisrt number from groups of consecutive blank line indexes
+        const sequences: number[][] = [];
+        let lastVal = -2;
+        for (const line of blankLineIndexes) {
+            line > lastVal + 1 ? sequences.push([line]) : sequences[sequences.length - 1].push(line);
+            lastVal = line;
+        }
+        sequences
+            .filter((arr) => arr.length > 1).map((arr) => arr[0])
+            .forEach((startLineNum: number) => {
+                let startCharPos = node.getPositionOfLineAndCharacter(startLineNum + 1, 0);
+                this.addFailure(this.createFailure(startCharPos, 1, Rule.FAILURE_STRING));
+            });
     }
 }

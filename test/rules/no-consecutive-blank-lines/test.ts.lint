@@ -5,7 +5,7 @@
 
 ~nil
 class Clazz { // comment
-~nil                     [consecutive blank lines are disallowed]
+~nil [consecutive blank lines are disallowed]
 
     public funcxion() {
 
@@ -14,11 +14,20 @@ class Clazz { // comment
 
 ~nil
         console.log("test");
-~nil                         [consecutive blank lines are disallowed]
+~nil [consecutive blank lines are disallowed]
 
     }
 
 
 ~nil
 }
-~nil  [consecutive blank lines are disallowed]
+~nil [consecutive blank lines are disallowed]
+
+//Begin whitespace
+// The next two lines of "code" contain only tabs or spaces, they are also considered "blank" lines
+        
+        
+~ [consecutive blank lines are disallowed]
+		
+		
+//End whitespace
