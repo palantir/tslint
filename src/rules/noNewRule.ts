@@ -20,6 +20,22 @@ import * as ts from "typescript";
 import * as NoUnusedExpression from "./noUnusedExpressionRule";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "no-new",
+        description: "Disallows unused 'new' expression statements.",
+        descriptionDetails: Lint.Utils.dedent`
+            Unused 'new' expressions indicate that a constructor is being invoked solely for its side effects.`,
+        rationale: Lint.Utils.dedent`
+            Detects constructs such as \`new SomeClass()\`, where a constructor is used solely for its side effects, which is considered
+            poor style.`,
+        optionsDescription: "Not configurable.",
+        options: null,
+        optionExamples: ["true"],
+        type: "functionality",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING = "do not use 'new' for side effects";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
