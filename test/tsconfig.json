@@ -98,6 +98,7 @@
         "../src/rules/noInvalidThisRule.ts",
         "../src/rules/noMergeableNamespaceRule.ts",
         "../src/rules/noNamespaceRule.ts",
+        "../src/rules/noNew.ts",
         "../src/rules/noNullKeywordRule.ts",
         "../src/rules/noReferenceRule.ts",
         "../src/rules/noRequireImportsRule.ts",
