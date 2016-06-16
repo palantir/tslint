@@ -381,6 +381,10 @@ Custom Rules
 ------------
 <sup>[back to ToC &uarr;](#table-of-contents)</sup>
 
+#### Custom rule sets from Palantir
+
+- [tslint-react](https://github.com/palantir/tslint-react) - Lint rules related to React & JSX.
+
 #### Custom rule sets from the community
 
 If we don't have all the rules you're looking for, you can either write your own custom rules or use custom rules that others have developed. The repos below are a good source of custom rules:
