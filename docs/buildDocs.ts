@@ -1,3 +1,36 @@
+/*
+ * Copyright 2016 Palantir Technologies, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
+ * This TS script reads the metadata from each TSLint built-in rule
+ * and serializes it in a format appropriate for the docs website.
+ *
+ * This script expects there to be a tslint-gh-pages directory
+ * parallel to the main tslint directory. The tslint-gh-pages should
+ * have the gh-pages branch of the TSLint repo checked out.
+ * One easy way to do this is with the following Git command:
+ *
+ * ```
+ * git worktree add -b gh-pages ../tslint-gh-pages origin/gh-pages
+ * ```
+ *
+ * See http://palantir.github.io/tslint/develop/docs/ for more info
+ *
+ */
+
 import * as fs from "fs";
 import * as glob from "glob";
 import * as path from "path";
@@ -18,7 +51,7 @@ for (const rulePath of rulePaths) {
         const fileData = generateRuleFile(metadata);
         const fileDirectory = path.join(DOCS_RULE_DIR, metadata.ruleName);
 
-        // write file for specific rule
+        // write file for each specific rule
         if (!fs.existsSync(fileDirectory)) {
             fs.mkdirSync(fileDirectory);
         }
