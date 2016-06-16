@@ -20,8 +20,8 @@ module.exports = function (grunt) {
 
         clean: {
             core: ["lib/**/*.js", "lib/**/*.d.ts"],
+            scripts: ["scripts/*.js"],
             test: ["build/", "test/config/node_modules/"],
-            docs: ["docs/*.js"],
         },
 
         mochaTest: {
@@ -44,7 +44,7 @@ module.exports = function (grunt) {
             docs: {
                 cmd: "node",
                 args: ["buildDocs.js"],
-                options: {cwd: "./docs"},
+                options: {cwd: "./scripts/"},
             },
         },
 
@@ -57,13 +57,13 @@ module.exports = function (grunt) {
                 "src/rules/**/*.ts",
                 "src/test/**/*.ts",
             ],
+            scripts: [
+                "scripts/**/*.ts",
+            ],
             test: [
                 "test/**/*.ts",
                 "!test/**/*.test.ts",
                 "!test/typings/**/*.ts",
-            ],
-            docs: [
-                "docs/**/*.ts",
             ],
         },
 
@@ -71,8 +71,8 @@ module.exports = function (grunt) {
             core: {
                 tsconfig: "src/tsconfig.json",
             },
-            docs: {
-                tsconfig: "docs/tsconfig.json",
+            scripts: {
+                tsconfig: "scripts/tsconfig.json",
             },
             test: {
                 tsconfig: "test/tsconfig.json",
@@ -103,6 +103,11 @@ module.exports = function (grunt) {
         "ts:core",
         "tslint:src",
     ]);
+    grunt.registerTask("scripts", [
+        "clean:scripts",
+        "ts:scripts",
+        "tslint:scripts",
+    ]);
     grunt.registerTask("test", [
         "clean:test",
         "npm-command:test",
@@ -111,13 +116,12 @@ module.exports = function (grunt) {
         "mochaTest",
         "run:testRules",
     ].concat(checkBinTest));
+    // generates new docs metadata files
     grunt.registerTask("docs", [
-        "clean:docs",
-        "ts:docs",
-        "tslint:docs",
+        "default",
         "run:docs",
     ]);
 
     // create default task
-    grunt.registerTask("default", ["eslint", "core", "test"]);
+    grunt.registerTask("default", ["eslint", "core", "scripts", "test"]);
 };
