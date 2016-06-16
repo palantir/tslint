@@ -8,7 +8,7 @@ v3.11.0
 v3.11.0-dev.0
 ---
 * [new-rule] `linebreak-style` rule (#123)
-* [new-rule] `no-mergable-namespace` rule (#843)
+* [new-rule] `no-mergeable-namespace` rule (#843)
 * [enhancement] Add built-in configurations (#1261)
 * [enhancement] New vso formatter (#1281)
 * [new-rule-option] `ignore-interfaces` option for `semicolon` rule (#1233)

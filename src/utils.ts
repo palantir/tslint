@@ -55,11 +55,11 @@ export function dedent(strings: string[], ...values: string[]) {
  */
 export function stripComments(content: string): string {
     /**
-    * First capturing group matches double quoted string
-    * Second matches single quotes string
-    * Third matches block comments
-    * Fourth matches line comments
-    */
+     * First capturing group matches double quoted string
+     * Second matches single quotes string
+     * Third matches block comments
+     * Fourth matches line comments
+     */
     const regexp: RegExp = /("(?:[^\\\"]*(?:\\.)?)*")|('(?:[^\\\']*(?:\\.)?)*')|(\/\*(?:\r?\n|.)*?\*\/)|(\/{2,}.*?(?:(?:\r?\n)|$))/g;
     let result = content.replace(regexp, (match, m1, m2, m3, m4) => {
         // Only one of m1, m2, m3, m4 matches

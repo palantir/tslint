@@ -91,6 +91,8 @@ class NoInferrableTypesWalker extends Lint.RuleWalker {
                             break;
                     }
                     break;
+                default:
+                    break;
             }
 
             if (failure != null) {

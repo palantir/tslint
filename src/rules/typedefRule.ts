@@ -72,6 +72,14 @@ class TypedefWalker extends Lint.RuleWalker {
         super.visitFunctionExpression(node);
     }
 
+    public visitArrowFunction(node: ts.FunctionLikeDeclaration) {
+        const location = (node.parameters != null) ? node.parameters.end : null;
+        if (node.parent.kind !== ts.SyntaxKind.CallExpression) {
+            this.checkTypeAnnotation("arrow-call-signature", location, node.type, node.name);
+        }
+        super.visitArrowFunction(node);
+    }
+
     public visitGetAccessor(node: ts.AccessorDeclaration) {
         this.handleCallSignature(node);
         super.visitGetAccessor(node);
@@ -102,6 +110,8 @@ class TypedefWalker extends Lint.RuleWalker {
                 case ts.SyntaxKind.SetAccessor:
                     this.visitSetAccessor(<ts.AccessorDeclaration> property);
                     break;
+                default:
+                    break;
             }
         }
     }
@@ -119,7 +129,9 @@ class TypedefWalker extends Lint.RuleWalker {
         switch (node.initializer.kind) {
             case ts.SyntaxKind.ArrowFunction:
             case ts.SyntaxKind.FunctionExpression:
-                this.handleCallSignature(<ts.FunctionExpression> node.initializer);
+                this.handleCallSignature(node.initializer as ts.FunctionExpression);
+                break;
+            default:
                 break;
         }
         super.visitPropertyAssignment(node);
@@ -158,7 +170,7 @@ class TypedefWalker extends Lint.RuleWalker {
     private handleCallSignature(node: ts.SignatureDeclaration) {
         const location = (node.parameters != null) ? node.parameters.end : null;
         // set accessors can't have a return type.
-        if (node.kind !== ts.SyntaxKind.SetAccessor) {
+        if (node.kind !== ts.SyntaxKind.SetAccessor && node.kind !== ts.SyntaxKind.ArrowFunction) {
             this.checkTypeAnnotation("call-signature", location, node.type, node.name);
         }
     }

@@ -43,7 +43,13 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "default access modifier on member/method not allowed";
+    public static FAILURE_STRING_FACTORY = (memberType: string, memberName: string, publicOnly: boolean) => {
+        memberName = memberName == null ? "" : ` '${memberName}'`;
+        if (publicOnly) {
+            return `The ${memberType}${memberName} must be marked as 'public'`;
+        }
+        return `The ${memberType}${memberName} must be marked either 'private', 'public', or 'protected'`;
+    }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new MemberAccessWalker(sourceFile, this.getOptions()));
@@ -101,7 +107,32 @@ export class MemberAccessWalker extends Lint.RuleWalker {
         );
 
         if (!hasAnyVisibilityModifiers) {
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+            let memberType: string;
+            let publicOnly = false;
+
+            if (node.kind === ts.SyntaxKind.MethodDeclaration) {
+                memberType = "class method";
+            } else if (node.kind === ts.SyntaxKind.PropertyDeclaration) {
+                memberType = "class property";
+            } else if (node.kind === ts.SyntaxKind.Constructor) {
+                memberType = "class constructor";
+                publicOnly = true;
+            } else if (node.kind === ts.SyntaxKind.GetAccessor) {
+                memberType = "get property accessor";
+            } else if (node.kind === ts.SyntaxKind.SetAccessor) {
+                memberType = "set property accessor";
+            }
+
+            // look for the identifier and get it's text
+            let memberName: string;
+            node.getChildren().forEach((n: ts.Node) => {
+                if (n.kind === ts.SyntaxKind.Identifier) {
+                    memberName = n.getText();
+                }
+            });
+
+            const failureString = Rule.FAILURE_STRING_FACTORY(memberType, memberName, publicOnly);
+            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), failureString));
         }
     }
 }
