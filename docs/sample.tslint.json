@@ -73,6 +73,7 @@
       ],
     "no-mergeable-namespace": true,
     "no-null-keyword": true,
+    "no-new": true,
     "no-reference": true,
     "no-require-imports": true,
     "no-shadowed-variable": true,

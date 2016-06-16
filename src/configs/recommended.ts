@@ -60,6 +60,7 @@ export const rules = {
     "no-eval": true,
     "no-internal-module": true,
     "no-namespace": true,
+    "no-new": true,
     "no-reference": true,
     "no-shadowed-variable": true,
     "no-string-literal": true,

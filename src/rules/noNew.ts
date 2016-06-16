@@ -20,7 +20,7 @@ import * as ts from "typescript";
 import * as NoUnusedExpression from "./noUnusedExpressionRule";
 
 export class Rule extends Lint.Rules.AbstractRule {
-    public static FAILURE_STRING = "expected an assignment or function call";
+    public static FAILURE_STRING = "do not use 'new' for side effects";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new NoNewWalker(sourceFile, this.getOptions()));
