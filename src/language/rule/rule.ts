@@ -29,12 +29,12 @@ export interface IRuleMetadata {
     */
     type: RuleType;
 
-    /**
+   /**
     * A short, one line description of what the rule does.
     */
     description: string;
 
-    /**
+   /**
     * More elaborate details about the rule.
     */
     descriptionDetails?: string;
