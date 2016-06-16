@@ -48,7 +48,7 @@ for (const rulePath of rulePaths) {
     const ruleModule = require(rulePath);
     const Rule = ruleModule.Rule as typeof AbstractRule;
     if (Rule != null && Rule.metadata != null) {
-        const metadata = Rule.metadata;
+        const { metadata } = Rule;
         const fileData = generateRuleFile(metadata);
         const fileDirectory = path.join(DOCS_RULE_DIR, metadata.ruleName);
 
@@ -63,15 +63,20 @@ for (const rulePath of rulePaths) {
 }
 
 // write overall data file, this is used to generate the index page for the rules
-const fileData = JSON.stringify(rulesJson, undefined, "  ");
+const fileData = JSON.stringify(rulesJson, undefined, 2);
 fs.writeFileSync(path.join(DOCS_DIR, "_data", "rules.json"), fileData);
 
+/**
+ * Based off a rule's metadata, generates a string Jekyll "HTML" file
+ * that only consists of a YAML front matter block.
+ */
 function generateRuleFile(metadata: IRuleMetadata) {
     const yamlData: any = {};
+    // TODO: Use Object.assign when Node 0.12 support is dropped (#1181)
     for (const key of Object.keys(metadata)) {
         yamlData[key] = (<any> metadata)[key];
     }
-    yamlData.optionsJSON = JSON.stringify(metadata.options, undefined, "  ");
+    yamlData.optionsJSON = JSON.stringify(metadata.options, undefined, 2);
     yamlData.layout = "rule";
     yamlData.title = `Rule: ${metadata.ruleName}`;
     return `---\n${yaml.safeDump(yamlData, <any> {lineWidth: 140})}---`;
