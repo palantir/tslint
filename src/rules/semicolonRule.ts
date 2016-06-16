@@ -23,6 +23,38 @@ const OPTION_NEVER = "never";
 const OPTION_IGNORE_INTERFACES = "ignore-interfaces";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "semicolon",
+        description: "Enforces consistent semicolon usage at the end of every statement.",
+        optionsDescription: Lint.Utils.dedent`
+            One of the following arguments must be provided:
+
+            * \`"${OPTION_ALWAYS}"\` enforces semicolons at the end of every statement.
+            * \`"${OPTION_NEVER}"\` disallows semicolons at the end of every statement except for when they are necessary.
+        
+            The following arguments may be optionaly provided:
+            * \`"${OPTION_IGNORE_INTERFACES}"\` skips checking semicolons at the end of interface members.`,
+        options: {
+            type: "array",
+            items: [{
+                type: "string",
+                enum: [OPTION_ALWAYS, OPTION_NEVER],
+            }, {
+                type: "string",
+                enum: [OPTION_IGNORE_INTERFACES],
+            }],
+            additionalItems: false,
+        },
+        optionExamples: [
+            `[true, "${OPTION_ALWAYS}"]`,
+            `[true, "${OPTION_NEVER}"]`,
+            `[true, "${OPTION_ALWAYS}", "${OPTION_IGNORE_INTERFACES}"]`,
+        ],
+        type: "style",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING_MISSING = "missing semicolon";
     public static FAILURE_STRING_UNNECESSARY = "unnecessary semicolon";
 

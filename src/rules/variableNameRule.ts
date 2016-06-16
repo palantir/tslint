@@ -27,6 +27,39 @@ const OPTION_CHECK_FORMAT = "check-format";
 const OPTION_ALLOW_PASCAL_CASE = "allow-pascal-case";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "variable-name",
+        description: "Checks variable names for various errors.",
+        optionsDescription: Lint.Utils.dedent`
+            Five arguments may be optionally provided:
+
+            * \`"${OPTION_CHECK_FORMAT}"\`: allows only camelCased or UPPER_CASED variable names
+              * \`"${OPTION_LEADING_UNDERSCORE}"\` allows underscores at the beginning (only has an effect if "check-format" specified)
+              * \`"${OPTION_TRAILING_UNDERSCORE}"\` allows underscores at the end. (only has an effect if "check-format" specified)
+              * \`"${OPTION_ALLOW_PASCAL_CASE}\` allows PascalCase in addtion to camelCase.
+            * \`"${OPTION_BAN_KEYWORDS}"\`: disallows the use of certain TypeScript keywords (\`any\`, \`Number\`, \`number\`, \`String\`,
+            \`string\`, \`Boolean\`, \`boolean\`, \`undefined\`) as variable or parameter names.`,
+        options: {
+            type: "array",
+            items: {
+                type: "string",
+                enum: [
+                    OPTION_CHECK_FORMAT,
+                    OPTION_LEADING_UNDERSCORE,
+                    OPTION_TRAILING_UNDERSCORE,
+                    OPTION_ALLOW_PASCAL_CASE,
+                    OPTION_BAN_KEYWORDS,
+                ],
+            },
+            minLength: 0,
+            maxLength: 5,
+        },
+        optionExamples: ['[true, "ban-keywords", "check-format", "allow-leading-underscore"]'],
+        type: "style",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FORMAT_FAILURE = "variable name must be in camelcase or uppercase";
     public static KEYWORD_FAILURE = "variable name clashes with keyword/type";
 

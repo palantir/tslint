@@ -5,6 +5,24 @@ const OPTION_LINEBREAK_STYLE_CRLF = "CRLF";
 const OPTION_LINEBREAK_STYLE_LF = "LF";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "linebreak-style",
+        description: "Enforces a consistent linebreak style.",
+        optionsDescription: Lint.Utils.dedent`
+            One of the following options must be provided:
+
+            * \`"${OPTION_LINEBREAK_STYLE_LF}"\` requires LF (\`\\n\`) linebreaks
+            * \`"${OPTION_LINEBREAK_STYLE_CRLF}"\` requires CRLF (\`\\r\\n\`) linebreaks`,
+        options: {
+            type: "string",
+            enum: [OPTION_LINEBREAK_STYLE_LF, OPTION_LINEBREAK_STYLE_CRLF],
+        },
+        optionExamples: [`[true, "${OPTION_LINEBREAK_STYLE_LF}"]`, `[true, "${OPTION_LINEBREAK_STYLE_CRLF}"]`],
+        type: "maintainability",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRINGS = {
         CRLF: `Expected linebreak to be '${OPTION_LINEBREAK_STYLE_CRLF}'`,
         LF: `Expected linebreak to be '${OPTION_LINEBREAK_STYLE_LF}'`,

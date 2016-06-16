@@ -19,6 +19,30 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "member-access",
+        description: "Requires explicit visibility declarations for class members.",
+        rationale: "Explicit visibility declarations can make code more readable and accessible for those new to TS.",
+        optionsDescription: Lint.Utils.dedent`
+            Two arguments may be optionally provided:
+
+            * \`"check-accessor"\` enforces explicit visibility on get/set accessors (can only be public)
+            * \`"check-constructor"\`  enforces explicit visibility on constructors (can only be public)`,
+        options: {
+            type: "array",
+            items: {
+                type: "string",
+                enum: ["check-accessor", "check-constructor"],
+            },
+            minLength: 0,
+            maxLength: 2,
+        },
+        optionExamples: ["true", '[true, "check-accessor"]'],
+        type: "typescript",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING_FACTORY = (memberType: string, memberName: string, publicOnly: boolean) => {
         memberName = memberName == null ? "" : ` '${memberName}'`;
         if (publicOnly) {

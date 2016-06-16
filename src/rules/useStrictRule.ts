@@ -19,6 +19,29 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "use-strict",
+        description: "Requires using ECMAScript 5's strict mode.",
+        optionsDescription: Lint.Utils.dedent`
+            Two arguments may be optionally provided:
+
+            * \`check-module\` checks that all top-level modules are using strict mode.
+            * \`check-function\` checks that all top-level functions are using strict mode.`,
+        options: {
+            type: "array",
+            items: {
+                type: "string",
+                enum: ["check-module", "check-function"],
+            },
+            minLength: 0,
+            maxLength: 2,
+        },
+        optionExamples: ['[true, "check-module"]'],
+        type: "functionality",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING = "missing 'use strict'";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
