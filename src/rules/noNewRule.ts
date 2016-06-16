@@ -42,7 +42,7 @@ class NoNewWalker extends NoUnusedExpression.NoUnusedExpressionWalker {
 
     protected visitNewExpression(node: ts.NewExpression) {
         super.visitNewExpression(node);
-        this.expressionIsUnused = false;
+        this.expressionIsUnused = true;
         this.expressionContainsNew = true;
     }
 

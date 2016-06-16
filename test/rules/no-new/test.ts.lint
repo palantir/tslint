@@ -14,12 +14,10 @@ function fun1() {
 'directive2'
 console.log('foo');
 'notdirective';
-~~~~~~~~~~~~~~~ [0]
 })();
 
 const a = () => {
 'use strict'; "use cool"; "use lint"; var a = 1; "notdirective"; }
-                                                 ~~~~~~~~~~~~~~~ [0]
 
 function fun2(a: number) {
     return 0;
@@ -40,7 +38,6 @@ class Foo {
         "ngInject";
         var a = 1;
         'notdirective';
-        ~~~~~~~~~~~~~~~ [0]
     }
 
     bar() {
@@ -86,14 +83,11 @@ async function f(foo: Promise<void>): Promise<number> {
     return 0;
 }
 
-new Foo();
-
 5;
 3 + 5;
 fun1() + fun1();
 (j === 0 ? fun1() : 5);
 () => {return fun1();};
-"use strct";
 
 // invalid code:
 
@@ -108,4 +102,4 @@ fun1() + new Foo();
 (j === 0 ? new Foo() : 5);
 ~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
 
-[0]: expected an assignment or function call
+[0]: do not use 'new' for side effects
