@@ -38,3 +38,4 @@ export default function Test() { }
        ~~~~~~~ [0]
 
 [0]: Use of default exports is forbidden
+

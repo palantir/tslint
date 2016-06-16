@@ -78,4 +78,4 @@ module module.mod
 }
 ~ [0]
 
-[0]: Internal modules are forbidden. Use ES6 module syntax instead.
+[0]: The internal 'module' syntax is deprecated, use the 'namespace' keyword instead.
