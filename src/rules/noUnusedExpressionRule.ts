@@ -104,6 +104,11 @@ class NoUnusedExpressionWalker extends Lint.RuleWalker {
         this.expressionIsUnused = false;
     }
 
+    protected visitNewExpression(node: ts.NewExpression) {
+        super.visitNewExpression(node);
+        this.expressionIsUnused = false;
+    }
+
     public visitConditionalExpression(node: ts.ConditionalExpression) {
         this.visitNode(node.condition);
         this.expressionIsUnused = true;
