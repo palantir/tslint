@@ -32,11 +32,13 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`${OPTION_IGNORE_PARMS}\` allows specifying an inferrable type annotation for function params.
             This can be useful when combining with the \`typedef\` rule.`,
         options: {
-            type: "list",
-            listType: {
-                type: "enum",
-                enumValues: [OPTION_IGNORE_PARMS],
+            type: "array",
+            items: {
+                type: "string",
+                enum: [OPTION_IGNORE_PARMS],
             },
+            minLength: 0,
+            maxLength: 1,
         },
         optionExamples: ["true", `[true, "${OPTION_IGNORE_PARMS}"]`],
         type: "typescript",

@@ -28,7 +28,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             [alternatives](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval)
             for most of the use cases for \`eval()\`.`,
         optionsDescription: "Not configurable.",
-        options: {},
+        options: null,
         optionExamples: ["true"],
         type: "functionality",
     };

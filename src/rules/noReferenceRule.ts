@@ -27,7 +27,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             Using \`/// <reference path=>\` comments to load other files is outdated.
             Use ES6-style imports to reference other files.`,
         optionsDescription: "Not configurable.",
-        options: {},
+        options: null,
         optionExamples: ["true"],
         type: "typescript",
     };

@@ -37,11 +37,13 @@ export class Rule extends Lint.Rules.AbstractRule {
 
             * \`${OPTION_FUNCTION_IN_METHOD}\` disallows using the \`this\` keyword in functions within class methods.`,
         options: {
-            type: "list",
-            listType: {
-                type: "enum",
-                enumValues: [OPTION_FUNCTION_IN_METHOD],
+            type: "array",
+            items: {
+                type: "string",
+                enum: [OPTION_FUNCTION_IN_METHOD],
             },
+            minLength: 0,
+            maxLength: 1,
         },
         optionExamples: ["true", `[true, "${OPTION_FUNCTION_IN_METHOD}"]`],
         type: "functionality",

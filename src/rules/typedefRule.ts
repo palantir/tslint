@@ -33,10 +33,10 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"variable-declaration"\` checks variable declarations.
             * \`"member-variable-declaration"\` checks member variable declarations.`,
         options: {
-            type: "list",
-            listType: {
-                type: "enum",
-                enumValues: [
+            type: "array",
+            items: {
+                type: "string",
+                enum: [
                     "call-signature",
                     "parameter",
                     "arrow-parameter",
@@ -45,6 +45,8 @@ export class Rule extends Lint.Rules.AbstractRule {
                     "member-variable-declaration",
                 ],
             },
+            minLength: 0,
+            maxLength: 6,
         },
         optionExamples: ['[true, "call-signature", "parameter", "member-variable-declaration"]'],
         type: "typescript",

@@ -32,11 +32,13 @@ export class Rule extends Lint.Rules.AbstractRule {
 
             * \`allow-declarations\` allows \`declare namespace ... {}\` to describe external APIs.`,
         options: {
-            type: "list",
-            listType: {
-                type: "enum",
-                enumValues: ["allow-declarations"],
+            type: "array",
+            items: {
+                type: "string",
+                enum: ["allow-declarations"],
             },
+            minLength: 0,
+            maxLength: 1,
         },
         optionExamples: ["true", '[true, "allow-declarations"]'],
         type: "typescript",

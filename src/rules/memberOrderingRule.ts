@@ -109,10 +109,20 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "object",
             properties: {
                 order: {
-                    type: "enum",
-                    enumValues: ["fields-first", "statics-first", "instance-sandwich"],
+                    oneOf: [{
+                        type: "string",
+                        enum: ["fields-first", "statics-first", "instance-sandwich"],
+                    }, {
+                        type: "array",
+                        items: {
+                            type: "string",
+                            enum: PRESET_ORDERS["statics-first"],
+                        },
+                        maxLength: 13,
+                    }],
                 },
             },
+            additionalProperties: false,
         },
         optionExamples: ['[true, { "order": "fields-first" }]'],
         type: "typescript",

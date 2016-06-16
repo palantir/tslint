@@ -45,19 +45,20 @@ export class Rule extends Lint.Rules.AbstractRule {
             Variable names that match the pattern will be ignored.`,
         options: {
             type: "array",
-            arrayMembers: [{
-                type: "list",
-                listType: {
-                    type: "enum",
-                    enumValues: ["check-parameters", "react"],
-                },
+            items: {
+                oneOf: [{
+                    type: "string",
+                    enum: ["check-parameters", "react"],
+                }, {
+                    type: "object",
+                    properties: {
+                        "ignore-pattern": {type: "string"},
+                    },
+                    additionalProperties: false,
+                }],
             },
-            {
-                type: "object",
-                properties: {
-                    "ignore-pattern": {type: "string"},
-                },
-            }],
+            minLength: 0,
+            maxLength: 3,
         },
         optionExamples: ['[true, "react"]', '[true, {"ignore-pattern": "^_"}]'],
         type: "functionality",

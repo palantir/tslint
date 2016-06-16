@@ -25,7 +25,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Requires keys in object literals to be sorted alphabetically",
         rationale: "Useful in preventing merge conflicts",
         optionsDescription: "Not configurable.",
-        options: {},
+        options: null,
         optionExamples: ["true"],
         type: "maintainability",
     };

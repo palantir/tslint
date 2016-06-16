@@ -25,7 +25,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Disallows `debugger` statements.",
         rationale: "In general, \`debugger\` statements aren't appropriate for production code.",
         optionsDescription: "Not configurable.",
-        options: {},
+        options: null,
         optionExamples: ["true"],
         type: "functionality",
     };

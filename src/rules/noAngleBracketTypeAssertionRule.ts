@@ -28,7 +28,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             work in \`.tsx\` files. This rule ensures that you have a consistent type assertion style
             across your codebase.`,
         optionsDescription: "Not configurable.",
-        options: {},
+        options: null,
         optionExamples: ["true"],
         type: "style",
     };

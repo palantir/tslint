@@ -36,8 +36,15 @@ export class Rule extends Lint.Rules.AbstractRule {
             The following arguments may be optionaly provided:
             * \`"${OPTION_IGNORE_INTERFACES}"\` skips checking semicolons at the end of interface members.`,
         options: {
-            type: "enum",
-            enumValues: [OPTION_ALWAYS, OPTION_NEVER],
+            type: "array",
+            items: [{
+                type: "string",
+                enum: [OPTION_ALWAYS, OPTION_NEVER],
+            }, {
+                type: "string",
+                enum: [OPTION_IGNORE_INTERFACES],
+            }],
+            additionalItems: false,
         },
         optionExamples: [
             `[true, "${OPTION_ALWAYS}"]`,

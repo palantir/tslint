@@ -41,10 +41,10 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"${OPTION_BAN_KEYWORDS}"\`: disallows the use of certain TypeScript keywords (\`any\`, \`Number\`, \`number\`, \`String\`,
             \`string\`, \`Boolean\`, \`boolean\`, \`undefined\`) as variable or parameter names.`,
         options: {
-            type: "list",
-            listType: {
-                type: "enum",
-                enumValues: [
+            type: "array",
+            items: {
+                type: "string",
+                enum: [
                     OPTION_CHECK_FORMAT,
                     OPTION_LEADING_UNDERSCORE,
                     OPTION_TRAILING_UNDERSCORE,
@@ -52,6 +52,8 @@ export class Rule extends Lint.Rules.AbstractRule {
                     OPTION_BAN_KEYWORDS,
                 ],
             },
+            minLength: 0,
+            maxLength: 5,
         },
         optionExamples: ['[true, "ban-keywords", "check-format", "allow-leading-underscore"]'],
         type: "style",

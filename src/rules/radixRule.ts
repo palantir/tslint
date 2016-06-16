@@ -28,7 +28,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             > Always specify this parameter to eliminate reader confusion and to guarantee predictable behavior.
             > Different implementations produce different results when a radix is not specified, usually defaulting the value to 10.`,
         optionsDescription: "Not configurable.",
-        options: {},
+        options: null,
         optionExamples: ["true"],
         type: "functionality",
     };

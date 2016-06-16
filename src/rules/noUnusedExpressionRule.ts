@@ -30,7 +30,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             Detects potential errors where an assignment or function call was intended. Also detects constructs such as
             \`new SomeClass()\`, where a constructor is used solely for its side effects, which is considered poor style.`,
         optionsDescription: "Not configurable.",
-        options: {},
+        options: null,
         optionExamples: ["true"],
         type: "functionality",
     };

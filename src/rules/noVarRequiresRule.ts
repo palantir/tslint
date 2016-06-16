@@ -27,7 +27,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             In other words, the use of forms such as \`var module = require("module")\` are banned.
             Instead use ES6 style imports or \`import foo = require('foo')\` imports.`,
         optionsDescription: "Not configurable.",
-        options: {},
+        options: null,
         optionExamples: ["true"],
         type: "typescript",
     };

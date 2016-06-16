@@ -38,11 +38,13 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"avoid-escape"\` allows you to use the "other" quotemark in cases where escaping would normally be required.
             For example, \`[true, "double", "avoid-escape"]\` would not report a failure on the string literal \`'Hello "World"'\`.`,
         options: {
-            type: "list",
-            listType: {
-                type: "enum",
-                enumValues: ["single", "double", "jsx-single", "jsx-double", "avoid-escape"],
+            type: "array",
+            items: {
+                type: "string",
+                enum: ["single", "double", "jsx-single", "jsx-double", "avoid-escape"],
             },
+            minLength: 0,
+            maxLength: 5,
         },
         optionExamples: ['[true, "single", "avoid-escape"]', '[true, "single", "jsx-double"]'],
         type: "style",

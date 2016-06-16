@@ -25,7 +25,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Disallows trailing whitespace at the end of a line.",
         rationale: "Keeps version control diffs clean as it prevents accidental whitespace from being committed.",
         optionsDescription: "Not configurable.",
-        options: {},
+        options: null,
         optionExamples: ["true"],
         type: "maintainability",
     };

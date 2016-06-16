@@ -38,11 +38,13 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"check-open-brace"\` checks that an open brace falls on the same line as its preceding expression.
             * \`"check-whitespace"\` checks preceding whitespace for the specified tokens.`,
         options: {
-            type: "list",
-            listType: {
-                type: "enum",
-                enumValues: ["check-catch", "check-finally", "check-else", "check-open-brace", "check-whitespace"],
+            type: "array",
+            items: {
+                type: "string",
+                enum: ["check-catch", "check-finally", "check-else", "check-open-brace", "check-whitespace"],
             },
+            minLength: 0,
+            maxLength: 5,
         },
         optionExamples: ['[true, "check-catch", "check-finally", "check-else"]'],
         type: "style",

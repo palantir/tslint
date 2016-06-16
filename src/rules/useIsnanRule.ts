@@ -30,7 +30,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             Since \`NaN !== NaN\`, comparisons with regular operators will produce unexpected results.
             So, instead of \`if (myVar === NaN)\`, do \`if (isNaN(myVar))\`.`,
         optionsDescription: "Not configurable.",
-        options: {},
+        options: null,
         optionExamples: ["true"],
         type: "functionality",
     };

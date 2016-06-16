@@ -25,7 +25,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Disallows shadowing variable declarations.",
         rationale: "Shadowing a variable masks access to it and obscures to what value an identifier actually refers.",
         optionsDescription: "Not configurable.",
-        options: {},
+        options: null,
         optionExamples: ["true"],
         type: "functionality",
     };

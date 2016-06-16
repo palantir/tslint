@@ -29,7 +29,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             In almost all cases, the regular function-call version is more appropriate.
             [More details](http://stackoverflow.com/q/4719320/3124288) are available on StackOverflow.`,
         optionsDescription: "Not configurable.",
-        options: {},
+        options: null,
         optionExamples: ["true"],
         type: "functionality",
     };

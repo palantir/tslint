@@ -27,7 +27,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             There is no good reason to define an object literal with the same key twice.
             This rule is now implemented in the TypeScript compiler and does not need to be used.`,
         optionsDescription: "Not configurable.",
-        options: {},
+        options: null,
         optionExamples: ["true"],
         type: "functionality",
     };

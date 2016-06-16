@@ -27,7 +27,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             This rule is primarily useful when using the \`var\` keyword -
             the compiler will detect if a \`let\` and \`const\` variable is used before it is declared.`,
         optionsDescription: "Not configurable.",
-        options: {},
+        options: null,
         optionExamples: ["true"],
         type: "functionality",
     };

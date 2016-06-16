@@ -27,10 +27,8 @@ export class Rule extends BanRule.Rule {
         rationale: "In general, \`console\` methods aren't appropriate for production code.",
         optionsDescription: "A list of method names to ban.",
         options: {
-            type: "list",
-            listType: {
-                type: "string",
-            },
+            type: "array",
+            items: { type: "string" },
         },
         optionExamples: [`[true, ["log", "error"]]`],
         type: "functionality",

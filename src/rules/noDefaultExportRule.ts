@@ -12,7 +12,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             In addition, current tooling differs on the correct way to handle default imports/exports.
             Avoiding them all together can help avoid tooling bugs and conflicts.`,
         optionsDescription: "Not configurable.",
-        options: {},
+        options: null,
         optionExamples: ["true"],
         type: "maintainability",
     };

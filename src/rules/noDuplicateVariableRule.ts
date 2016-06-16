@@ -30,7 +30,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             A variable can be reassigned if necessary -
             there's no good reason to have a duplicate variable declaration.`,
         optionsDescription: "Not configurable.",
-        options: {},
+        options: null,
         optionExamples: ["true"],
         type: "functionality",
     };

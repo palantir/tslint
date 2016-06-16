@@ -37,14 +37,15 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "object",
             properties: {
                 multiline: {
-                    type: "enum",
-                    enumValues: ["always", "never"],
+                    type: "string",
+                    enum: ["always", "never"],
                 },
                 singleline: {
-                    type: "enum",
-                    enumValues: ["always", "never"],
+                    type: "string",
+                    enum: ["always", "never"],
                 },
             },
+            additionalProperties: false,
         },
         optionExamples: ['[true, {"multiline": "always", "singleline": "never"}]'],
         type: "maintainability",

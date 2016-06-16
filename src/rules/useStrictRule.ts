@@ -29,11 +29,13 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`check-module\` checks that all top-level modules are using strict mode.
             * \`check-function\` checks that all top-level functions are using strict mode.`,
         options: {
-            type: "list",
-            listType: {
-                type: "enum",
-                enumValues: ["check-module", "check-function"],
+            type: "array",
+            items: {
+                type: "string",
+                enum: ["check-module", "check-function"],
             },
+            minLength: 0,
+            maxLength: 2,
         },
         optionExamples: ['[true, "check-module"]'],
         type: "functionality",

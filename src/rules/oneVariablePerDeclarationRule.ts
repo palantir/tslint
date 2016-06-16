@@ -30,11 +30,13 @@ export class Rule extends Lint.Rules.AbstractRule {
 
             * \`${OPTION_IGNORE_FOR_LOOP}\` allows multiple variable definitions in a for loop declaration.`,
         options: {
-            type: "list",
-            listType: {
-                type: "enum",
-                enumValues: [OPTION_IGNORE_FOR_LOOP],
+            type: "array",
+            items: {
+                type: "string",
+                enum: [OPTION_IGNORE_FOR_LOOP],
             },
+            minLength: 0,
+            maxLength: 1,
         },
         optionExamples: ["true", `[true, "${OPTION_IGNORE_FOR_LOOP}"]`],
         type: "style",

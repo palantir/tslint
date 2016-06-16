@@ -43,12 +43,14 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"check-type"\` checks for whitespace before a variable type specification.
             * \`"check-typecast"\` checks for whitespace between a typecast and its target.`,
         options: {
-            type: "list",
-            listType: {
-                type: "enum",
-                enumValues: ["check-branch", "check-decl", "check-operator", "check-module",
-                             "check-seperator", "check-type", "check-typecast"],
+            type: "array",
+            items: {
+                type: "string",
+                enum: ["check-branch", "check-decl", "check-operator", "check-module",
+                       "check-seperator", "check-type", "check-typecast"],
             },
+            minLength: 0,
+            maxLength: 7,
         },
         optionExamples: ['[true, "check-branch", "check-operator", "check-typecast"]'],
         type: "style",

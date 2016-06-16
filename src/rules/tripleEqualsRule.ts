@@ -36,11 +36,13 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"allow-null-check"\` allows \`==\` and \`!=\` when comparing to \`null\`.
             * \`"allow-undefined-check"\` allows \`==\` and \`!=\` when comparing to \`undefined\`.`,
         options: {
-            type: "list",
-            listType: {
-                type: "enum",
-                enumValues: [OPTION_ALLOW_NULL_CHECK, OPTION_ALLOW_UNDEFINED_CHECK],
+            type: "array",
+            items: {
+                type: "string",
+                enum: [OPTION_ALLOW_NULL_CHECK, OPTION_ALLOW_UNDEFINED_CHECK],
             },
+            minLength: 0,
+            maxLength: 2,
         },
         optionExamples: ["true", '[true, "allow-null-check"]', '[true, "allow-undefined-check"]'],
         type: "functionality",
