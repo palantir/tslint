@@ -47,6 +47,11 @@ class TsLint {
         return 'Hello World';
     };
 
+    regularMemberWithType: string = this.getValue();
+
+    regularMemberWithoutType = this.getValue();
+                            ~    [expected member-variable-declaration: 'regularMemberWithoutType' to have a typedef]
+
     arrowHelloWorld = () => {
                        ~      [expected arrow-call-signature to have a typedef]
         return this.helloWorld();
