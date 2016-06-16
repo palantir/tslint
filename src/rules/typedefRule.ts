@@ -19,6 +19,40 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "typedef",
+        description: "Requires type definitions to exist.",
+        optionsDescription: Lint.Utils.dedent`
+            Six arguments may be optionally provided:
+
+            * \`"call-signature"\` checks return type of functions.
+            * \`"parameter"\` checks type specifier of function parameters for non-arrow functions.
+            * \`"arrow-parameter"\` checks type specifier of function parameters for arrow functions.
+            * \`"property-declaration"\` checks return types of interface properties.
+            * \`"variable-declaration"\` checks variable declarations.
+            * \`"member-variable-declaration"\` checks member variable declarations.`,
+        options: {
+            type: "array",
+            items: {
+                type: "string",
+                enum: [
+                    "call-signature",
+                    "parameter",
+                    "arrow-parameter",
+                    "property-declaration",
+                    "variable-declaration",
+                    "member-variable-declaration",
+                ],
+            },
+            minLength: 0,
+            maxLength: 6,
+        },
+        optionExamples: ['[true, "call-signature", "parameter", "member-variable-declaration"]'],
+        type: "typescript",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING = "missing type declaration";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {

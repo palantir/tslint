@@ -19,6 +19,17 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "no-mergable-namespace",
+        description: "Disallows mergeable namespaces in the same file.",
+        optionsDescription: "Not configurable.",
+        options: null,
+        optionExamples: ["true"],
+        type: "maintainability",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static failureStringFactory(identifier: string, locationToMerge: ts.LineAndCharacter): string {
         return `Mergeable namespace ${identifier} found. Merge its contents with the namespace on line ${locationToMerge.line}.`;
     }
