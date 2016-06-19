@@ -236,6 +236,7 @@ Core rules are included in the `tslint` package.
 * `forin` enforces a `for ... in` statement to be filtered with an `if` statement.
 * `indent` enforces indentation with tabs or spaces. Rule options (one is required):
     * `"tabs"` enforces consistent tabs.
+        * additionally pass an object with an `"allow-spaces"` member for a maximum number of spaces allowed after the tabs
     * `"spaces"` enforces consistent spaces.
 * `interface-name` enforces consistent interface names. Rule options:
     * `"always-prefix"` enforces interface names must have an 'I' prefix
