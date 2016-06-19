@@ -277,6 +277,7 @@ Core rules are included in the `tslint` package.
 * `no-mergeable-namespace` disallows mergeable namespaces in the same file.
 * `no-namespace` disallows both internal `module`s and `namespace`, but allows ES6-style external modules.
     * `allow-declarations` allows `declare namespace ... {}` to describe external APIs.
+* `no-non-arrow-functions` disallows traditional `function () { ... }` declarations, preferring `() => { ... }` arrow lambdas.
 * `no-null-keyword` disallows use of the `null` keyword literal.
 * `no-reference` disallows `/// <reference path=>` imports (use ES6-style imports instead).
 * `no-require-imports` disallows invocation of `require()` (use ES6-style imports instead).

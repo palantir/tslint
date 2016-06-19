@@ -103,6 +103,7 @@
         "rules/noInvalidThisRule.ts",
         "rules/noMergeableNamespaceRule.ts",
         "rules/noNamespaceRule.ts",
+        "rules/noNonArrowFunctionsRule.ts",
         "rules/noNullKeywordRule.ts",
         "rules/noReferenceRule.ts",
         "rules/noRequireImportsRule.ts",
