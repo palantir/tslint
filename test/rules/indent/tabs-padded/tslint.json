@@ -1,0 +1,7 @@
+{
+  "rules": {
+    "indent": [true, "tabs", {
+      "allow-spaces": 3
+    }]
+  }
+}

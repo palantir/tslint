@@ -20,6 +20,7 @@ import * as Lint from "../lint";
 
 const OPTION_USE_TABS = "tabs";
 const OPTION_USE_SPACES = "spaces";
+const OPTION_ALLOW_SPACES = "allow-spaces";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -35,8 +36,18 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"spaces"\` enforces consistent spaces.
             * \`"tabs"\` enforces consistent tabs.`,
         options: {
-            type: "string",
-            enum: ["tabs", "spaces"],
+            type: "array",
+            items: {
+                oneOf: [{
+                    type: "string",
+                    enum: ["tabs", "spaces"],
+                }, {
+                    type: "object",
+                    properties: {
+                        "allow-spaces": {type: "number"},
+                    },
+                }],
+            },
         },
         optionExamples: ['[true, "spaces"]'],
         type: "maintainability",
@@ -55,6 +66,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 class IndentWalker extends Lint.RuleWalker {
     private failureString: string;
     private regExp: RegExp;
+    private allowedSpaces: number;
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
@@ -62,6 +74,7 @@ class IndentWalker extends Lint.RuleWalker {
         if (this.hasOption(OPTION_USE_TABS)) {
             this.regExp = new RegExp(" ");
             this.failureString = Rule.FAILURE_STRING_TABS;
+            this.checkAllowSpacesOption(this.getOptions());
         } else if (this.hasOption(OPTION_USE_SPACES)) {
             this.regExp = new RegExp("\t");
             this.failureString = Rule.FAILURE_STRING_SPACES;
@@ -111,10 +124,28 @@ class IndentWalker extends Lint.RuleWalker {
                 continue;
             }
 
-            if (fullLeadingWhitespace.match(this.regExp)) {
+            if (this.fullLeadingWhitespaceViolates(fullLeadingWhitespace)) {
                 this.addFailure(this.createFailure(lineStart, fullLeadingWhitespace.length, this.failureString));
             }
         }
         // no need to call super to visit the rest of the nodes, so don't call super here
+    }
+
+    private checkAllowSpacesOption(options: any) {
+        const allowSpacesOption = this.getOptions().filter((option: any) => {
+            return typeof option === "object" && option[OPTION_ALLOW_SPACES] != null;
+        })[0];
+
+        if (allowSpacesOption != null) {
+            this.allowedSpaces = allowSpacesOption[OPTION_ALLOW_SPACES];
+        }
+    }
+
+    private fullLeadingWhitespaceViolates(fullLeadingWhitespace: string): boolean {
+        if (this.failureString === Rule.FAILURE_STRING_SPACES || !this.allowedSpaces) {
+            return !!fullLeadingWhitespace.match(this.regExp);
+        }
+
+        return !(new RegExp(`^\t* {0,${this.allowedSpaces}}$`).test(fullLeadingWhitespace));
     }
 }
