@@ -1,6 +1,6 @@
 ---
 ruleName: triple-equals
-description: 'Requires `===` and `!==` in place of `==` and `!=`.'
+description: Requires `===` and `!==` in place of `==` and `!=`.
 optionsDescription: |-
 
   Two arguments may be optionally provided:
@@ -8,12 +8,14 @@ optionsDescription: |-
   * `"allow-null-check"` allows `==` and `!=` when comparing to `null`.
   * `"allow-undefined-check"` allows `==` and `!=` when comparing to `undefined`.
 options:
-  type: list
-  listType:
-    type: enum
-    enumValues:
+  type: array
+  items:
+    type: string
+    enum:
       - allow-null-check
       - allow-undefined-check
+  minLength: 0
+  maxLength: 2
 optionExamples:
   - 'true'
   - '[true, "allow-null-check"]'
@@ -21,14 +23,16 @@ optionExamples:
 type: functionality
 optionsJSON: |-
   {
-    "type": "list",
-    "listType": {
-      "type": "enum",
-      "enumValues": [
+    "type": "array",
+    "items": {
+      "type": "string",
+      "enum": [
         "allow-null-check",
         "allow-undefined-check"
       ]
-    }
+    },
+    "minLength": 0,
+    "maxLength": 2
   }
 layout: rule
 title: 'Rule: triple-equals'

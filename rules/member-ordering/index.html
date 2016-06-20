@@ -32,11 +32,31 @@ options:
   type: object
   properties:
     order:
-      type: enum
-      enumValues:
-        - fields-first
-        - statics-first
-        - instance-sandwich
+      oneOf:
+        - type: string
+          enum:
+            - fields-first
+            - statics-first
+            - instance-sandwich
+        - type: array
+          items:
+            type: string
+            enum:
+              - public-static-field
+              - public-static-method
+              - protected-static-field
+              - protected-static-method
+              - private-static-field
+              - private-static-method
+              - public-instance-field
+              - protected-instance-field
+              - private-instance-field
+              - constructor
+              - public-instance-method
+              - protected-instance-method
+              - private-instance-method
+          maxLength: 13
+  additionalProperties: false
 optionExamples:
   - '[true, { "order": "fields-first" }]'
 type: typescript
@@ -45,14 +65,41 @@ optionsJSON: |-
     "type": "object",
     "properties": {
       "order": {
-        "type": "enum",
-        "enumValues": [
-          "fields-first",
-          "statics-first",
-          "instance-sandwich"
+        "oneOf": [
+          {
+            "type": "string",
+            "enum": [
+              "fields-first",
+              "statics-first",
+              "instance-sandwich"
+            ]
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "public-static-field",
+                "public-static-method",
+                "protected-static-field",
+                "protected-static-method",
+                "private-static-field",
+                "private-static-method",
+                "public-instance-field",
+                "protected-instance-field",
+                "private-instance-field",
+                "constructor",
+                "public-instance-method",
+                "protected-instance-method",
+                "private-instance-method"
+              ]
+            },
+            "maxLength": 13
+          }
         ]
       }
-    }
+    },
+    "additionalProperties": false
   }
 layout: rule
 title: 'Rule: member-ordering'

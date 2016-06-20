@@ -9,24 +9,28 @@ optionsDescription: |-
   * `ignore-params` allows specifying an inferrable type annotation for function params.
   This can be useful when combining with the `typedef` rule.
 options:
-  type: list
-  listType:
-    type: enum
-    enumValues:
+  type: array
+  items:
+    type: string
+    enum:
       - ignore-params
+  minLength: 0
+  maxLength: 1
 optionExamples:
   - 'true'
   - '[true, "ignore-params"]'
 type: typescript
 optionsJSON: |-
   {
-    "type": "list",
-    "listType": {
-      "type": "enum",
-      "enumValues": [
+    "type": "array",
+    "items": {
+      "type": "string",
+      "enum": [
         "ignore-params"
       ]
-    }
+    },
+    "minLength": 0,
+    "maxLength": 1
   }
 layout: rule
 title: 'Rule: no-inferrable-types'

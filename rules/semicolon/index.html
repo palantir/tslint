@@ -1,12 +1,26 @@
 ---
 ruleName: semicolon
 description: Enforces consistent semicolon usage at the end of every statement.
-optionsDescription: "\nOne of the following arguments must be provided:\n\n* `\"always\"` enforces semicolons at the end of every statement.\n* `\"never\"` disallows semicolons at the end of every statement except for when they are necessary.\n        \nThe following arguments may be optionaly provided:\n* `\"ignore-interfaces\"` skips checking semicolons at the end of interface members."
+optionsDescription: |-
+
+  One of the following arguments must be provided:
+
+  * `"always"` enforces semicolons at the end of every statement.
+  * `"never"` disallows semicolons at the end of every statement except for when they are necessary.
+
+  The following arguments may be optionaly provided:
+  * `"ignore-interfaces"` skips checking semicolons at the end of interface members.
 options:
-  type: enum
-  enumValues:
-    - always
-    - never
+  type: array
+  items:
+    - type: string
+      enum:
+        - always
+        - never
+    - type: string
+      enum:
+        - ignore-interfaces
+  additionalItems: false
 optionExamples:
   - '[true, "always"]'
   - '[true, "never"]'
@@ -14,11 +28,23 @@ optionExamples:
 type: style
 optionsJSON: |-
   {
-    "type": "enum",
-    "enumValues": [
-      "always",
-      "never"
-    ]
+    "type": "array",
+    "items": [
+      {
+        "type": "string",
+        "enum": [
+          "always",
+          "never"
+        ]
+      },
+      {
+        "type": "string",
+        "enum": [
+          "ignore-interfaces"
+        ]
+      }
+    ],
+    "additionalItems": false
   }
 layout: rule
 title: 'Rule: semicolon'

@@ -12,25 +12,27 @@ optionsDescription: |-
   * `"variable-declaration"` checks variable declarations.
   * `"member-variable-declaration"` checks member variable declarations.
 options:
-  type: list
-  listType:
-    type: enum
-    enumValues:
+  type: array
+  items:
+    type: string
+    enum:
       - call-signature
       - parameter
       - arrow-parameter
       - property-declaration
       - variable-declaration
       - member-variable-declaration
+  minLength: 0
+  maxLength: 6
 optionExamples:
   - '[true, "call-signature", "parameter", "member-variable-declaration"]'
 type: typescript
 optionsJSON: |-
   {
-    "type": "list",
-    "listType": {
-      "type": "enum",
-      "enumValues": [
+    "type": "array",
+    "items": {
+      "type": "string",
+      "enum": [
         "call-signature",
         "parameter",
         "arrow-parameter",
@@ -38,7 +40,9 @@ optionsJSON: |-
         "variable-declaration",
         "member-variable-declaration"
       ]
-    }
+    },
+    "minLength": 0,
+    "maxLength": 6
   }
 layout: rule
 title: 'Rule: typedef'

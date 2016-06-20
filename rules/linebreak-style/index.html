@@ -1,10 +1,15 @@
 ---
 ruleName: linebreak-style
 description: Enforces a consistent linebreak style.
-optionsDescription: "\nOne of the following options must be provided:\n\n* `\"LF\"` requires LF (`\\n`) linebreaks\n* `\"CRLF\"` requires CRLF (`\\r\\n`) linebreaks"
+optionsDescription: |-
+
+  One of the following options must be provided:
+
+  * `"LF"` requires LF (`\n`) linebreaks
+  * `"CRLF"` requires CRLF (`\r\n`) linebreaks
 options:
-  type: enum
-  enumValues:
+  type: string
+  enum:
     - LF
     - CRLF
 optionExamples:
@@ -13,8 +18,8 @@ optionExamples:
 type: maintainability
 optionsJSON: |-
   {
-    "type": "enum",
-    "enumValues": [
+    "type": "string",
+    "enum": [
       "LF",
       "CRLF"
     ]

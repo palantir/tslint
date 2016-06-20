@@ -9,12 +9,14 @@ rationale: |-
 optionsDescription: An integer indicating the max length of lines.
 options:
   type: number
+  minimum: '1'
 optionExamples:
   - '[true, 120]'
 type: maintainability
 optionsJSON: |-
   {
-    "type": "number"
+    "type": "number",
+    "minimum": "1"
   }
 layout: rule
 title: 'Rule: max-line-length'

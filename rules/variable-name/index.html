@@ -12,31 +12,35 @@ optionsDescription: |-
   * `"ban-keywords"`: disallows the use of certain TypeScript keywords (`any`, `Number`, `number`, `String`,
   `string`, `Boolean`, `boolean`, `undefined`) as variable or parameter names.
 options:
-  type: list
-  listType:
-    type: enum
-    enumValues:
+  type: array
+  items:
+    type: string
+    enum:
       - check-format
       - allow-leading-underscore
       - allow-trailing-underscore
       - allow-pascal-case
       - ban-keywords
+  minLength: 0
+  maxLength: 5
 optionExamples:
   - '[true, "ban-keywords", "check-format", "allow-leading-underscore"]'
 type: style
 optionsJSON: |-
   {
-    "type": "list",
-    "listType": {
-      "type": "enum",
-      "enumValues": [
+    "type": "array",
+    "items": {
+      "type": "string",
+      "enum": [
         "check-format",
         "allow-leading-underscore",
         "allow-trailing-underscore",
         "allow-pascal-case",
         "ban-keywords"
       ]
-    }
+    },
+    "minLength": 0,
+    "maxLength": 5
   }
 layout: rule
 title: 'Rule: variable-name'

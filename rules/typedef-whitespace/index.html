@@ -17,13 +17,13 @@ optionsDescription: |-
   * `"variable-declaration"` checks variable declaration.
 options:
   type: array
-  arrayMembers:
+  items:
     - &ref_1
       type: object
       properties:
         call-signature: &ref_0
-          type: enum
-          enumValues:
+          type: string
+          enum:
             - nospace
             - onespace
             - space
@@ -31,7 +31,9 @@ options:
         parameter: *ref_0
         property-declaration: *ref_0
         variable-declaration: *ref_0
+      additionalProperties: false
     - *ref_1
+  additionalItems: false
 optionExamples:
   - |-
 
@@ -56,98 +58,101 @@ type: typescript
 optionsJSON: |-
   {
     "type": "array",
-    "arrayMembers": [
+    "items": [
       {
         "type": "object",
         "properties": {
           "call-signature": {
-            "type": "enum",
-            "enumValues": [
+            "type": "string",
+            "enum": [
               "nospace",
               "onespace",
               "space"
             ]
           },
           "index-signature": {
-            "type": "enum",
-            "enumValues": [
+            "type": "string",
+            "enum": [
               "nospace",
               "onespace",
               "space"
             ]
           },
           "parameter": {
-            "type": "enum",
-            "enumValues": [
+            "type": "string",
+            "enum": [
               "nospace",
               "onespace",
               "space"
             ]
           },
           "property-declaration": {
-            "type": "enum",
-            "enumValues": [
+            "type": "string",
+            "enum": [
               "nospace",
               "onespace",
               "space"
             ]
           },
           "variable-declaration": {
-            "type": "enum",
-            "enumValues": [
+            "type": "string",
+            "enum": [
               "nospace",
               "onespace",
               "space"
             ]
           }
-        }
+        },
+        "additionalProperties": false
       },
       {
         "type": "object",
         "properties": {
           "call-signature": {
-            "type": "enum",
-            "enumValues": [
+            "type": "string",
+            "enum": [
               "nospace",
               "onespace",
               "space"
             ]
           },
           "index-signature": {
-            "type": "enum",
-            "enumValues": [
+            "type": "string",
+            "enum": [
               "nospace",
               "onespace",
               "space"
             ]
           },
           "parameter": {
-            "type": "enum",
-            "enumValues": [
+            "type": "string",
+            "enum": [
               "nospace",
               "onespace",
               "space"
             ]
           },
           "property-declaration": {
-            "type": "enum",
-            "enumValues": [
+            "type": "string",
+            "enum": [
               "nospace",
               "onespace",
               "space"
             ]
           },
           "variable-declaration": {
-            "type": "enum",
-            "enumValues": [
+            "type": "string",
+            "enum": [
               "nospace",
               "onespace",
               "space"
             ]
           }
-        }
+        },
+        "additionalProperties": false
       }
-    ]
+    ],
+    "additionalItems": false
   }
 layout: rule
 title: 'Rule: typedef-whitespace'
