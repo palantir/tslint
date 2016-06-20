@@ -64,7 +64,7 @@ Please ensure that the TypeScript source files compile correctly _before_ runnin
 
 TSLint is configured via a file named `tslint.json`. This file is loaded from the current path, or the user's home directory, in that order.
 
-The configuration file specifies which rules are enabled and their options. A sample configuration file with all options is available [here](https://github.com/palantir/tslint/blob/master/docs/sample.tslint.json). These configurations may _extend_ other ones via the `"extends"` field in `tslint.json`.
+The configuration file specifies which rules are enabled and their options. These configurations may _extend_ other ones via the `"extends"` field in `tslint.json`.
 
 ```js
 {
