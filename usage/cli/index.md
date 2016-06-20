@@ -36,7 +36,7 @@ Options:
 ```
 
 By default, TSLint looks for a configuration file named `tslint.json` in the directory
-of the file being linted and, if not found, searches ancestor directories. A [sample config file][0] with all possible rules is available. Check out the [rules][1] section for more details on what rules are available. 
+of the file being linted and, if not found, searches ancestor directories. Check out the [rules][0] section for more details on what rules are available.
 
 tslint accepts the following command-line options:
 
@@ -109,5 +109,4 @@ tslint accepts the following command-line options:
     Prints this help message.
 ```
 
-[0]: https://github.com/palantir/tslint/blob/master/docs/sample.tslint.json
-[1]: {{site.baseurl | append: "/rules/"}}
+[0]: {{site.baseurl | append: "/rules/"}}
