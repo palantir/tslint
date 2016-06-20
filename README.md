@@ -247,6 +247,7 @@ Core rules are included in the `tslint` package.
     * one line comments must start with `/** ` and end with ` */`
 * `label-position` enforces labels only on sensible statements.
 * `label-undefined` checks that labels are defined before usage.
+* `linebreak-style` checks that line breaks used in source files are either linefeed or carriage-return linefeeds. By default linefeeds are required. This rule accepts one parameter, either "LF" or "CRLF".
 * `max-line-length` sets the maximum length of a line.
 * `member-access` enforces using explicit visibility on class members
     * `"check-accessor"` enforces explicit visibility on get/set accessors
