@@ -1,0 +1,18 @@
+#!/usr/bin/env node
+
+~nil [missing header]
+/*
+ * Bad header 3
+ */
+
+export class A {
+    public x = 1;
+
+    public void B() {
+        return 2;
+    }
+}
+
+/*
+ * Good header 4
+ */
