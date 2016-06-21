@@ -64,7 +64,7 @@ Please ensure that the TypeScript source files compile correctly _before_ runnin
 
 TSLint is configured via a file named `tslint.json`. This file is loaded from the current path, or the user's home directory, in that order.
 
-The configuration file specifies which rules are enabled and their options. A sample configuration file with all options is available [here](https://github.com/palantir/tslint/blob/master/docs/sample.tslint.json). These configurations may _extend_ other ones via the `"extends"` field in `tslint.json`.
+The configuration file specifies which rules are enabled and their options. These configurations may _extend_ other ones via the `"extends"` field in `tslint.json`.
 
 ```js
 {
@@ -192,28 +192,26 @@ tslint accepts the following command-line options:
 #### Library
 
 ```javascript
-var fileName = "Specify file name";
+const Linter = require("tslint");
+const fs = require("fs");
 
-var configuration = {
+const fileName = "Specify file name";
+const configuration = {
     rules: {
         "variable-name": true,
         "quotemark": [true, "double"]
     }
 };
-
-var options = {
+const options = {
     formatter: "json",
     configuration: configuration,
-    rulesDirectory: "customRules/", // can be an array of directories
+    rulesDirectory: "customRules/",
     formattersDirectory: "customFormatters/"
 };
 
-var Linter = require("tslint");
-var fs = require("fs");
-var contents = fs.readFileSync(fileName, "utf8");
-
-var ll = new Linter(fileName, contents, options);
-var result = ll.lint();
+const fileContents = fs.readFileSync(fileName, "utf8");
+const linter = new Linter(fileName, fileContents, options);
+const result = linter.lint();
 ```
 
 Core Rules
@@ -249,6 +247,7 @@ Core rules are included in the `tslint` package.
     * one line comments must start with `/** ` and end with ` */`
 * `label-position` enforces labels only on sensible statements.
 * `label-undefined` checks that labels are defined before usage.
+* `linebreak-style` checks that line breaks used in source files are either linefeed or carriage-return linefeeds. By default linefeeds are required. This rule accepts one parameter, either "LF" or "CRLF".
 * `max-line-length` sets the maximum length of a line.
 * `member-access` enforces using explicit visibility on class members
     * `"check-accessor"` enforces explicit visibility on get/set accessors
@@ -324,12 +323,13 @@ Core rules are included in the `tslint` package.
     * `"allow-null-check"` allows `==` and `!=` when comparing to `null`.
     * `"allow-undefined-check"` allows `==` and `!=` when comparing to `undefined`.
 * `typedef` enforces type definitions to exist. Rule options:
-    * `"call-signature"` checks return type of functions.
+    * `"call-signature"` checks return type of non-arrow functions.
+    * `"arrow-call-signature"` checks return type of arrow functions.
     * `"parameter"` checks type specifier of function parameters for non-arrow functions.
     * `"arrow-parameter"` checks type specifier of function parameters for arrow functions.
     * `"property-declaration"` checks return types of interface properties.
     * `"variable-declaration"` checks variable declarations.
-    * `"member-variable-declaration"` checks member variable declarations.
+    * `"member-variable-declaration"` checks member variable declarations. For arrow functions being assigned as properties, either the property itself or the arrow functions parameters must have a typedef.
 * `typedef-whitespace` enforces spacing whitespace for type definitions. Each rule option requires a value of `"nospace"`,
   `"onespace"` or `"space"` to require no space, exactly one or at least one space before or after the type specifier's
   colon. You can specify two objects containing the five options. The first one describes the left, the second one the
@@ -382,6 +382,10 @@ Custom Rules
 ------------
 <sup>[back to ToC &uarr;](#table-of-contents)</sup>
 
+#### Custom rule sets from Palantir
+
+- [tslint-react](https://github.com/palantir/tslint-react) - Lint rules related to React & JSX.
+
 #### Custom rule sets from the community
 
 If we don't have all the rules you're looking for, you can either write your own custom rules or use custom rules that others have developed. The repos below are a good source of custom rules:
@@ -389,6 +393,7 @@ If we don't have all the rules you're looking for, you can either write your own
 - [ESLint rules for TSLint](https://github.com/buzinas/tslint-eslint-rules) - Improve your TSLint with the missing ESLint Rules
 - [tslint-microsoft-contrib](https://github.com/Microsoft/tslint-microsoft-contrib) - A set of TSLint rules used on some Microsoft projects
 - [codelyzer](https://github.com/mgechev/codelyzer) - A set of tslint rules for static code analysis of Angular 2 TypeScript projects
+- [vrsource-tslint-rules](https://github.com/vrsource/vrsource-tslint-rules)
 
 #### Writing custom rules
 

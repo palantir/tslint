@@ -19,6 +19,24 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "max-line-length",
+        description: "Requires lines to be under a certain max length.",
+        rationale: Lint.Utils.dedent`
+            Limiting the length of a line of code improves code readability.
+            It also makes comparing code side-by-side easier and improves compatibility with
+            various editors, IDEs, and diff viewers.`,
+        optionsDescription: "An integer indicating the max length of lines.",
+        options: {
+            type: "number",
+            minimum: "1",
+        },
+        optionExamples: ["[true, 120]"],
+        type: "maintainability",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING_FACTORY = (lineLimit: number) => {
         return `Exceeds maximum line length of ${lineLimit}`;
     };
@@ -42,7 +60,8 @@ export class Rule extends Lint.Rules.AbstractRule {
         const source = sourceFile.getFullText();
 
         for (let i = 0; i < lineStarts.length - 1; ++i) {
-            const from = lineStarts[i], to = lineStarts[i + 1];
+            const from = lineStarts[i];
+            const to = lineStarts[i + 1];
             if ((to - from - 1) > lineLimit && !((to - from - 2) === lineLimit && source[to - 2] === "\r")) {
                 // first condition above is whether the line (minus the newline) is larger than the line limit
                 // second two check for windows line endings, that is, check to make sure it is not the case

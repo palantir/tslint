@@ -2,6 +2,7 @@
   "rules": {
       "typedef": [true,
          "call-signature",
+         "arrow-call-signature",
          "parameter",
          "arrow-parameter",
          "variable-declaration",

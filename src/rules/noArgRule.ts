@@ -19,7 +19,22 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
-    public static FAILURE_STRING = "Access to the arguments property is forbidden";
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "no-arg",
+        description: "Disallows use of `arguments.callee`.",
+        rationale: Lint.Utils.dedent`
+            Using \`arguments.callee\` makes various performance optimizations impossible.
+            See [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/arguments/callee)
+            for more details on why to avoid \`arguments.callee\`.`,
+        optionsDescription: "Not configurable.",
+        options: null,
+        optionExamples: ["true"],
+        type: "functionality",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
+    public static FAILURE_STRING = "Access to arguments.callee is forbidden";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new NoArgWalker(sourceFile, this.getOptions()));

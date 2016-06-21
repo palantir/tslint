@@ -122,7 +122,6 @@ describe("Configuration", () => {
             });
         });
 
-
         it("extends with package two levels (and relative path in rulesDirectory)", () => {
             let config = loadConfigurationFromPath("./test/config/tslint-extends-package-two-levels.json");
 

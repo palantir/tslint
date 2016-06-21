@@ -25,6 +25,32 @@ const OPTION_FINALLY = "check-finally";
 const OPTION_WHITESPACE = "check-whitespace";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "one-line",
+        description: "Requires the specified tokens to be on the same line as the expression preceding them.",
+        optionsDescription: Lint.Utils.dedent`
+            Five arguments may be optionally provided:
+
+            * \`"check-catch"\` checks that \`catch\` is on the same line as the closing brace for \`try\`.
+            * \`"check-finally"\` checks that \`finally\` is on the same line as the closing brace for \`catch\`.
+            * \`"check-else"\` checks that \`else\` is on the same line as the closing brace for \`if\`.
+            * \`"check-open-brace"\` checks that an open brace falls on the same line as its preceding expression.
+            * \`"check-whitespace"\` checks preceding whitespace for the specified tokens.`,
+        options: {
+            type: "array",
+            items: {
+                type: "string",
+                enum: ["check-catch", "check-finally", "check-else", "check-open-brace", "check-whitespace"],
+            },
+            minLength: 0,
+            maxLength: 5,
+        },
+        optionExamples: ['[true, "check-catch", "check-finally", "check-else"]'],
+        type: "style",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static BRACE_FAILURE_STRING = "misplaced opening brace";
     public static CATCH_FAILURE_STRING = "misplaced 'catch'";
     public static ELSE_FAILURE_STRING = "misplaced 'else'";
