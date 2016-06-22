@@ -115,6 +115,7 @@
         "../src/rules/objectLiteralSortKeysRule.ts",
         "../src/rules/oneLineRule.ts",
         "../src/rules/oneVariablePerDeclarationRule.ts",
+        "../src/rules/onlyArrowFunctionsRule.ts",
         "../src/rules/quotemarkRule.ts",
         "../src/rules/radixRule.ts",
         "../src/rules/semicolonRule.ts",
