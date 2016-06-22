@@ -15,4 +15,4 @@ let a: any = 2, // error
 let {a: c, b: d}: {c: any, d: number} = {c: 99, d: 100};  // error
                       ~~~                                          [0]
 
-[0]: type decoration of 'any' is forbidden
+[0]: Type declaration of 'any' is forbidden

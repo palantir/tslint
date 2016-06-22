@@ -33,7 +33,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_PART = " cannot be declared in the constructor";
+    public static FAILURE_STRING_FACTORY = (ident: string) => `Property '${ident}' cannot be declared in the constructor`;
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new NoConstructorVarsWalker(sourceFile, this.getOptions()));
@@ -45,8 +45,7 @@ export class NoConstructorVarsWalker extends Lint.RuleWalker {
         const parameters = node.parameters;
         for (let parameter of parameters) {
             if (parameter.modifiers != null && parameter.modifiers.length > 0) {
-                const name = <ts.Identifier> parameter.name;
-                const errorMessage = "'" + name.text + "'" + Rule.FAILURE_STRING_PART;
+                const errorMessage = Rule.FAILURE_STRING_FACTORY((parameter.name as ts.Identifier).text);
                 const lastModifier = parameter.modifiers[parameter.modifiers.length - 1];
                 const position = lastModifier.getEnd() - parameter.getStart();
                 this.addFailure(this.createFailure(parameter.getStart(), position, errorMessage));

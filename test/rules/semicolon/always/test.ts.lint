@@ -1,85 +1,86 @@
 var x = 3
-         ~nil [missing semicolon]
+         ~nil [Missing semicolon]
 a += b
-      ~nil [missing semicolon]
+      ~nil [Missing semicolon]
 
 c = () => {
 }
- ~nil [missing semicolon]
+ ~nil [Missing semicolon]
 
 d = function() { }
-                  ~nil [missing semicolon]
+                  ~nil [Missing semicolon]
 
 console.log("i am adam, am i?")
-                               ~nil [missing semicolon]
+                               ~nil [Missing semicolon]
 
 function xyz() {
     return
-          ~nil [missing semicolon]
+          ~nil [Missing semicolon]
 }
 
 switch(xyz) {
     case 1:
         break
-             ~nil [missing semicolon]
+             ~nil [Missing semicolon]
     case 2:
         continue
-                ~nil [missing semicolon]
+                ~nil [Missing semicolon]
 }
 
 throw new Error("some error")
-                             ~nil [missing semicolon]
+                             ~nil [Missing semicolon]
 
 do {
     var a = 4
-             ~nil [missing semicolon]
+             ~nil [Missing semicolon]
 } while(x == 3)
-               ~nil [missing semicolon]
+               ~nil [Missing semicolon]
 
 debugger
-        ~nil [missing semicolon]
+        ~nil [Missing semicolon]
 
 import v = require("i")
-                       ~nil [missing semicolon]
+                       ~nil [Missing semicolon]
 module M {
     export var x
-                ~nil [missing semicolon]
+                ~nil [Missing semicolon]
 }
 
 function useStrictMissingSemicolon() {
     "use strict"
-                ~nil [missing semicolon]
+                ~nil [Missing semicolon]
     return null;
 }
 
 class MyClass {
     public name : string
-                        ~nil [missing semicolon]
+                        ~nil [Missing semicolon]
     private index : number
-                          ~nil [missing semicolon]
+                          ~nil [Missing semicolon]
     private email : string;
 
     public initializedProperty = 6
-                                  ~nil [missing semicolon]
+                                  ~nil [Missing semicolon]
     public initializedMethodProperty = () => { return "hi"; }
 }
 
 interface ITest {
     foo?: string
-                ~nil [missing semicolon]
+                ~nil [Missing semicolon]
     bar: number
-               ~nil [missing semicolon]
+               ~nil [Missing semicolon]
     baz: boolean;
 }
 
 import {Router} from 'aurelia-router';
 
 import {Controller} from 'my-lib'
-                                 ~nil [missing semicolon]
+                                 ~nil [Missing semicolon]
 
 export default LoginPage;
 export default LoginPage
-                        ~nil [missing semicolon]
+                        ~nil [Missing semicolon]
 export = Date;
 export = Date
-             ~nil [missing semicolon]
+             ~nil [Missing semicolon]
+

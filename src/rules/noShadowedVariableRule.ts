@@ -31,7 +31,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "shadowed variable: '";
+    public static FAILURE_STRING_FACTORY = (name: string) => `Shadowed variable: '${name}'`;
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new NoShadowedVariableWalker(sourceFile, this.getOptions()));
@@ -52,11 +52,12 @@ class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<ScopeInfo,
         const variableDeclaration = Lint.getBindingElementVariableDeclaration(node);
 
         if (isSingleVariable) {
+            const name = node.name as ts.Identifier;
             if (variableDeclaration) {
                 const isBlockScopedVariable = Lint.isBlockScopedVariable(variableDeclaration);
-                this.handleSingleVariableIdentifier(<ts.Identifier> node.name, isBlockScopedVariable);
+                this.handleSingleVariableIdentifier(name, isBlockScopedVariable);
             } else {
-                this.handleSingleParameterIdentifier(<ts.Identifier> node.name);
+                this.handleSingleParameterIdentifier(name);
             }
         }
 
@@ -142,7 +143,7 @@ class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<ScopeInfo,
     }
 
     private addFailureOnIdentifier(ident: ts.Identifier) {
-        const failureString = Rule.FAILURE_STRING + ident.text + "'";
+        const failureString = Rule.FAILURE_STRING_FACTORY(ident.text);
         this.addFailure(this.createFailure(ident.getStart(), ident.getWidth(), failureString));
     }
 }

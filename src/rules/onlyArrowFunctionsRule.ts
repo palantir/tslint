@@ -21,27 +21,31 @@ import * as Lint from "../lint";
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
-        ruleName: "no-debugger",
-        description: "Disallows `debugger` statements.",
-        rationale: "In general, \`debugger\` statements aren't appropriate for production code.",
+        ruleName: "only-arrow-functions",
+        description: "Disallows traditional (non-arrow) function expressions.",
+        rationale: "Traditional functions don't bind lexical scope, which can lead to unexpected behavior when accessing 'this'.",
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: ["true"],
-        type: "functionality",
+        type: "typescript",
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "Use of debugger statements is forbidden";
+    public static FAILURE_STRING = "non-arrow functions are forbidden";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoDebuggerWalker(sourceFile, this.getOptions()));
+        return this.applyWithWalker(new OnlyArrowFunctionsWalker(sourceFile, this.getOptions()));
     }
 }
 
-class NoDebuggerWalker extends Lint.RuleWalker {
-    public visitDebuggerStatement(node: ts.Statement) {
-        const debuggerKeywordNode = node.getChildAt(0);
-        this.addFailure(this.createFailure(debuggerKeywordNode.getStart(), debuggerKeywordNode.getWidth(), Rule.FAILURE_STRING));
-        super.visitDebuggerStatement(node);
-   }
+class OnlyArrowFunctionsWalker extends Lint.RuleWalker {
+    public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
+        this.addFailure(this.createFailure(node.getStart(), "function".length, Rule.FAILURE_STRING));
+        super.visitFunctionDeclaration(node);
+    }
+
+    public visitFunctionExpression(node: ts.FunctionExpression) {
+        this.addFailure(this.createFailure(node.getStart(), "function".length, Rule.FAILURE_STRING));
+        super.visitFunctionExpression(node);
+    }
 }

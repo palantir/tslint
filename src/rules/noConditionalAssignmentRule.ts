@@ -35,7 +35,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "assignment in conditional: ";
+    public static FAILURE_STRING = "Assignments in conditional expressions are forbidden";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const walker = new NoConditionalAssignmentWalker(sourceFile, this.getOptions());

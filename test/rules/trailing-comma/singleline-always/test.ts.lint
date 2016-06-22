@@ -11,7 +11,7 @@ var x = [{
     d: 34,
     c: (a + b)
 }];
-~   [missing trailing comma]
+~   [Missing trailing comma]
 
 var s = {
     sA: 6,
@@ -52,18 +52,18 @@ var zz = [
 var a = [{a: 1, b: 2, d: 34, c: (a + b),},];
 
 var b = [{a: 1, b: 2, d: 34, c: (a + b)}];
-                                      ~    [missing trailing comma]
-                                       ~   [missing trailing comma]
+                                      ~    [Missing trailing comma]
+                                       ~   [Missing trailing comma]
 
 var c = {cA: 42, cB: 24,};
 
 var d = {dOne: 2, dTwo: 1};
-                        ~   [missing trailing comma]
+                        ~   [Missing trailing comma]
 
 var cc = [42, 24,];
 
 var dd = [2, 1];
-             ~   [missing trailing comma]
+             ~   [Missing trailing comma]
 
 var {
     sA,
@@ -104,12 +104,12 @@ var [
 var {cA, cB,} = c;
 
 var {dOne, dTwo} = d;
-              ~       [missing trailing comma]
+              ~       [Missing trailing comma]
 
 var [ccA, ccB,] = cc;
 
 var [ddOne, ddTwo] = dd;
-                ~        [missing trailing comma]
+                ~        [Missing trailing comma]
 
 import {
     ClassS,
@@ -132,4 +132,4 @@ import {
 import {ClassA, ClassB,} from "module";
 
 import {ClassC, ClassD} from "module";
-                     ~                 [missing trailing comma]
+                     ~                 [Missing trailing comma]

@@ -33,7 +33,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "duplicate key '";
+    public static FAILURE_STRING_FACTORY = (name: string) => `Duplicate key '${name}'`;
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new NoDuplicateKeyWalker(sourceFile, this.getOptions()));
@@ -56,7 +56,7 @@ class NoDuplicateKeyWalker extends Lint.RuleWalker {
         if (keyNode.kind === ts.SyntaxKind.Identifier) {
             const key = (<ts.Identifier> keyNode).text;
             if (objectKeys[key]) {
-                const failureString = Rule.FAILURE_STRING + key + "'";
+                const failureString = Rule.FAILURE_STRING_FACTORY(key);
                 this.addFailure(this.createFailure(keyNode.getStart(), keyNode.getWidth(), failureString));
             } else {
                 objectKeys[key] = true;

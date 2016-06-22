@@ -20,19 +20,22 @@ export import ItemAlias = someNamespace.Item;
 export const default = 'VALID';
 
 export default 'INVALID';
-       ~~~~~~~ [use of default exports is disallowed]
+       ~~~~~~~ [0]
 
 export default { }
-       ~~~~~~~ [use of default exports is disallowed]
+       ~~~~~~~ [0]
 
 export default class { }
-       ~~~~~~~ [use of default exports is disallowed]
+       ~~~~~~~ [0]
 
 export default class Test { }
-       ~~~~~~~ [use of default exports is disallowed]
+       ~~~~~~~ [0]
 
 export default function() { }
-       ~~~~~~~ [use of default exports is disallowed]
+       ~~~~~~~ [0]
        
 export default function Test() { }
-       ~~~~~~~ [use of default exports is disallowed]
+       ~~~~~~~ [0]
+
+[0]: Use of default exports is forbidden
+

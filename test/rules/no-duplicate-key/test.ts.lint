@@ -7,14 +7,14 @@ var x = {
     axa: 1,
     bd: 2,
     c: 3,
-    axa: 4, // failure
-    ~~~                [duplicate key 'axa']
+    axa: 4,
+    ~~~                [Duplicate key 'axa']
     d: 5,
     ba: 3,
-    bd: 6, // failure
-    ~~                [duplicate key 'bd']
-    axa: 6 // failure
-    ~~~               [duplicate key 'axa']
+    bd: 6,
+    ~~                [Duplicate key 'bd']
+    axa: 6
+    ~~~               [Duplicate key 'axa']
 };
 
 var z = {
@@ -29,10 +29,10 @@ var z = {
 };
 
 var interspersed = {
-    duplicated: 1, // failure
+    duplicated: 1,
     newContext: {},
-    duplicated: 2 // failure
-    ~~~~~~~~~~               [duplicate key 'duplicated']
+    duplicated: 2
+    ~~~~~~~~~~               [Duplicate key 'duplicated']
 };
 
 var n = {
