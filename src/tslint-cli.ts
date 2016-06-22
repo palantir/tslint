@@ -28,7 +28,7 @@ import {
 import {consoleTestResultHandler, runTest} from "./test";
 
 let processed = optimist
-    .usage("Usage: $0 [options] [file ...]")
+    .usage("Usage: $0 [options] file ...")
     .check((argv: any) => {
         // at least one of file, help, version or unqualified argument must be present
         if (!(argv.h || argv.i || argv.test || argv.v || argv._.length > 0)) {
@@ -75,7 +75,7 @@ let processed = optimist
         "t": {
             alias: "format",
             default: "prose",
-            describe: "output format (prose, json, verbose, pmd, msbuild, checkstyle)",
+            describe: "output format (prose, json, verbose, pmd, msbuild, checkstyle, vso)",
         },
         "test": {
             describe: "test that tslint produces the correct output for the specified directory",
@@ -114,7 +114,7 @@ if (argv.i != null) {
 }
 
 if (argv.test != null) {
-    const results = runTest(argv.test);
+    const results = runTest(argv.test, argv.r);
     const didAllTestsPass = consoleTestResultHandler(results);
     process.exit(didAllTestsPass ? 0 : 1);
 }
@@ -175,8 +175,9 @@ tslint accepts the following commandline options:
         outputting it to stdout or the file passed in --out. The core
         formatters are prose (human readable), json (machine readable)
         and verbose. prose is the default if this option is not used.
-        Other built-in options include pmd, msbuild, and checkstyle. Additonal
-        formatters can be added and used if the --formatters-dir option is set.
+        Other built-in options include pmd, msbuild, checkstyle, and vso.
+        Additonal formatters can be added and used if the --formatters-dir
+        option is set.
 
     --test:
         Runs tslint on the specified directory and checks if tslint's output matches

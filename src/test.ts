@@ -39,9 +39,9 @@ export interface TestResult {
     };
 }
 
-export function runTest(testDirectory: string): TestResult {
+export function runTest(testDirectory: string, rulesDirectory?: string | string[]): TestResult {
     const filesToLint = glob.sync(path.join(testDirectory, `**/*${FILE_EXTENSION}`));
-    const tslintConfig = JSON.parse(fs.readFileSync(path.join(testDirectory, "tslint.json"), "utf8"));
+    const tslintConfig = Linter.findConfiguration(path.join(testDirectory, "tslint.json"), null);
     const results: TestResult = { directory: testDirectory, results: {} };
 
     for (const fileToLint of filesToLint) {
@@ -54,7 +54,7 @@ export function runTest(testDirectory: string): TestResult {
             configuration: tslintConfig,
             formatter: "prose",
             formattersDirectory: "",
-            rulesDirectory: "",
+            rulesDirectory,
         };
         const linter = new Linter(fileBasename, fileTextWithoutMarkup, lintOptions);
         const errorsFromLinter: LintError[] = linter.lint().failures.map((failure) => {
@@ -95,6 +95,7 @@ export function consoleTestResultHandler(testResult: TestResult): boolean {
         const diffResults = diff.diffLines(results.markupFromMarkup, results.markupFromLinter);
         const didTestPass = !diffResults.some((diff) => diff.added || diff.removed);
 
+        /* tslint:disable:no-console */
         if (didTestPass) {
             console.log(colors.green(" Passed"));
         } else {
@@ -114,6 +115,7 @@ export function consoleTestResultHandler(testResult: TestResult): boolean {
                 process.stdout.write(color(diffResult.value));
             }
         }
+        /* tslint:enable:no-console */
     }
 
     return didAllTestsPass;

@@ -70,6 +70,10 @@ export class SyntaxWalker {
         this.walkChildren(node);
     }
 
+    protected visitClassExpression(node: ts.ClassExpression) {
+        this.walkChildren(node);
+    }
+
     protected visitCatchClause(node: ts.CatchClause) {
         this.walkChildren(node);
     }
@@ -170,7 +174,15 @@ export class SyntaxWalker {
         this.walkChildren(node);
     }
 
+    protected visitJsxAttribute(node: ts.JsxAttribute) {
+        this.walkChildren(node);
+    }
+
     protected visitJsxElement(node: ts.JsxElement) {
+        this.walkChildren(node);
+    }
+
+    protected visitJsxExpression(node: ts.JsxExpression) {
         this.walkChildren(node);
     }
 
@@ -352,6 +364,10 @@ export class SyntaxWalker {
                 this.visitClassDeclaration(<ts.ClassDeclaration> node);
                 break;
 
+            case ts.SyntaxKind.ClassExpression:
+                this.visitClassExpression(<ts.ClassExpression> node);
+                break;
+
             case ts.SyntaxKind.CatchClause:
                 this.visitCatchClause(<ts.CatchClause> node);
                 break;
@@ -452,8 +468,16 @@ export class SyntaxWalker {
                 this.visitInterfaceDeclaration(<ts.InterfaceDeclaration> node);
                 break;
 
+            case ts.SyntaxKind.JsxAttribute:
+                this.visitJsxAttribute(<ts.JsxAttribute> node);
+                break;
+
             case ts.SyntaxKind.JsxElement:
                 this.visitJsxElement(<ts.JsxElement> node);
+                break;
+
+            case ts.SyntaxKind.JsxExpression:
+                this.visitJsxExpression(<ts.JsxExpression> node);
                 break;
 
             case ts.SyntaxKind.JsxSelfClosingElement:

@@ -58,6 +58,7 @@ class MyClass {
     private index : number
                           ~nil [missing semicolon]
     private email : string;
+
     public initializedProperty = 6
                                   ~nil [missing semicolon]
     public initializedMethodProperty = () => { return "hi"; }
@@ -75,3 +76,10 @@ import {Router} from 'aurelia-router';
 
 import {Controller} from 'my-lib'
                                  ~nil [missing semicolon]
+
+export default LoginPage;
+export default LoginPage
+                        ~nil [missing semicolon]
+export = Date;
+export = Date
+             ~nil [missing semicolon]

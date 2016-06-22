@@ -19,6 +19,39 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "trailing-comma",
+        description: "Requires or disallows trailing commas in array and object literals, destructuring assignments and named imports.",
+        optionsDescription: Lint.Utils.dedent`
+            One argument which is an object with the keys \`multiline\` and \`singleline\`.
+            Both should be set to either \`"always"\` or \`"never"\`.
+
+            * \`"multiline"\` checks multi-line object literals.
+            * \`"singleline"\` checks single-line object literals.
+
+            A array is considered "multiline" if its closing bracket is on a line
+            after the last array element. The same general logic is followed for
+            object literals and named import statements.`,
+        options: {
+            type: "object",
+            properties: {
+                multiline: {
+                    type: "string",
+                    enum: ["always", "never"],
+                },
+                singleline: {
+                    type: "string",
+                    enum: ["always", "never"],
+                },
+            },
+            additionalProperties: false,
+        },
+        optionExamples: ['[true, {"multiline": "always", "singleline": "never"}]'],
+        type: "maintainability",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING_NEVER = "trailing comma";
     public static FAILURE_STRING_ALWAYS = "missing trailing comma";
 

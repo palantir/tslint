@@ -33,7 +33,7 @@ import {
 export function removeErrorMarkup(text: string): string {
     const textWithMarkup = text.split("\n");
     const lines = textWithMarkup.map(parseLine);
-    const codeText = lines.filter((line) => (line instanceof CodeLine)).map((line) => (<CodeLine>line).contents);
+    const codeText = lines.filter((line) => (line instanceof CodeLine)).map((line) => (line as CodeLine).contents);
     return codeText.join("\n");
 }
 
@@ -50,7 +50,7 @@ export function parseErrorsFromMarkup(text: string): LintError[] {
         throw lintSyntaxError(`text cannot start with an error mark line.`);
     }
 
-    const messageSubstitutionLines = <MessageSubstitutionLine[]>lines.filter((l) => l instanceof MessageSubstitutionLine);
+    const messageSubstitutionLines = lines.filter((l) => l instanceof MessageSubstitutionLine) as MessageSubstitutionLine[];
     const messageSubstitutions: { [key: string]: string } = {};
     for (const line of messageSubstitutionLines) {
         messageSubstitutions[line.key] = line.message;
@@ -144,7 +144,7 @@ function combineCodeTextAndErrorLines(codeText: string[], errorLinesForCodeText:
         resultText.push(code);
         resultText.push(...(errorLinesForCodeText[i].map((line) => printLine(line, code))));
         return resultText;
-    }, <string[]>[]);
+    }, []);
 }
 
 function createCodeLineNoToErrorsMap(lines: Line[]) {

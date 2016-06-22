@@ -1,0 +1,6 @@
+{
+    "rulesDirectory": "../custom-rules-2",
+    "rules": {
+        "no-fail": true
+    }
+}

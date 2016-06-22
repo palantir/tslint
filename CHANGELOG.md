@@ -1,6 +1,96 @@
 Change Log
 ===
 
+v3.11.0
+---
+* Stable release containing changes from the last dev release (v3.11.0-dev.0)
+
+v3.11.0-dev.0
+---
+* [new-rule] `linebreak-style` rule (#123)
+* [new-rule] `no-mergeable-namespace` rule (#843)
+* [enhancement] Add built-in configurations (#1261)
+* [enhancement] New vso formatter (#1281)
+* [new-rule-option] `ignore-interfaces` option for `semicolon` rule (#1233)
+* [bugfix] `no-default-export` rule handles more default export cases (#1241)
+
+Thanks to our contributors!
+* @cgwrench
+* @HamletDRC
+* @lijunle
+* @paldepind
+* @patsissons
+* @schmuli
+* @YuichiNukiyama
+
+v3.10.2
+---
+* Stable release containing changes from the last dev release (v3.10.0-dev.2)
+
+v3.10.0-dev.2
+---
+* [bugfix] `member-ordering` rule doesn't crash on methods in class expressions (#1252)
+* [bugfix] `ban` rule handles chained methods appropriately (#1234)
+
+Thanks to our contributors!
+* @marines
+
+v3.10.1
+---
+* Stable release containing changes from the last dev release (v3.10.0-dev.1)
+
+v3.10.0-dev.1
+---
+* [bugfix] `member-ordering` rule doesn't crash on methods in object literals (#1243)
+
+v3.10.0
+---
+* Stable release containing changes from the last dev release (v3.10.0-dev.0)
+
+v3.10.0-dev.0
+---
+* [new-rule] `new-parens` rule (#1177)
+* [new-rule] `no-default-export` rule (#1182)
+* [new-rule-option] `order: ...` option for `member-ordering` rule (#1208)
+* [new-rule-option] "ignore-for-loop" option for `one-variable-per-declaration` rule (#1204)
+* [enhancement] "no-this-in-function-in-method" option renamed to "check-function-in-method" (#1203)
+* [bugfix] `semicolon` rule checks export statements (#1155)
+
+Thanks to our contributors!
+* @chrismbarr
+* @HamletDRC
+* @larshp
+* @patsissons
+* @YuichiNukiyama
+
+v3.9.0
+---
+* Stable release containing changes from the last dev release (v3.9.0-dev.0)
+
+v3.9.0-dev.0
+---
+* [new-rule] `no-namespace` rule (#1133)
+* [new-rule] `one-variable-per-declaration` rule (#525)
+* [new-rule-option] "ignore-params" option for `no-inferrable-types` rule (#1190)
+* [new-rule-option] "no-this-in-function-in-method" option for `no-invalid-this` rule (#1179)
+* [enhancement] Single line enable/disable comments (#144)
+* [enhancement] Resolve `extends` packages relative to location of configuration file (#1171)
+* [enhancement] `Linter` class will throw an error if configuration is of an invalid type (#1167)
+* [bugfix] `use-isnan` allows assaignments to `NaN` (#1054)
+* [bugfix] `no-unreachable` handles allows hoisted type aliases (#564)
+* [bugfix] `member-ordering` rule now checks constructors (#1158)
+* [bugfix] `--test` CLI command works correctly with specifiying custom rules (#1195)
+
+Thanks to our contributors!
+* @abierbaum
+* @HamletDRC
+* @inthemill
+* @janslow
+* @JoshuaKGoldberg
+* @mprobst
+* @patsissions
+* @YuichiNukiyama
+
 v3.8.1
 ---
 * Stable release containing changes from the last dev release (v3.8.0-dev.1)

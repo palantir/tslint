@@ -6,6 +6,9 @@ if (isNaN(NaN)) {
 // no violation for correctly checking for isNaN
 if (isNaN(something)) { }
 
+// no violation for assignments
+let x = 0;
+x = NaN;
 
 // do not use equality operators to compare for NaN
 if (foo == NaN) {  }

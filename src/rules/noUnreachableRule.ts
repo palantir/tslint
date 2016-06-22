@@ -19,6 +19,18 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "no-unreachable",
+        description: "Disallows unreachable code after `break`, `catch`, `throw`, and `return` statements.",
+        rationale: "Unreachable code is often indication of a logic error.",
+        optionsDescription: "Not configurable.",
+        options: null,
+        optionExamples: ["true"],
+        type: "functionality",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING = "unreachable code";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -36,8 +48,9 @@ class NoUnreachableWalker extends Lint.RuleWalker {
 
     public visitNode(node: ts.Node) {
         const previousReturned = this.hasReturned;
-        // function declarations can be hoisted -- so set hasReturned to false until we're done with the function
-        if (node.kind === ts.SyntaxKind.FunctionDeclaration) {
+        // function declarations and type alias declarations can be hoisted
+        // -- so set hasReturned to false until we're done with the function
+        if (node.kind === ts.SyntaxKind.FunctionDeclaration || node.kind === ts.SyntaxKind.TypeAliasDeclaration) {
             this.hasReturned = false;
         }
 
@@ -50,7 +63,7 @@ class NoUnreachableWalker extends Lint.RuleWalker {
 
         // if there is further code after the hoisted function and we returned before that code is unreachable
         // so reset hasReturned to its previous state to check for that
-        if (node.kind === ts.SyntaxKind.FunctionDeclaration) {
+        if (node.kind === ts.SyntaxKind.FunctionDeclaration || node.kind === ts.SyntaxKind.TypeAliasDeclaration) {
             this.hasReturned = previousReturned;
         }
     }

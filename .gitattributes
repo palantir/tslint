@@ -3,3 +3,4 @@
 # being reported to be 1 character longer
 
 *.lint text eol=lf
+/test/rules/linebreak-style/**/CRLF/*.lint text eol=crlf

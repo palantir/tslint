@@ -1,0 +1,38 @@
+switch (value) {
+    case 1: break;
+    default: break;
+}
+
+export { SingleItem };
+
+export { FirstItem, SecondItem };
+
+export { Item as aliasForItem };
+
+export { ItemFromImport } from 'module';
+
+export * from './relativeModule';
+
+export namespace SomeNamespace { }
+
+export import ItemAlias = someNamespace.Item;
+
+export const default = 'VALID';
+
+export default 'INVALID';
+       ~~~~~~~ [use of default exports is disallowed]
+
+export default { }
+       ~~~~~~~ [use of default exports is disallowed]
+
+export default class { }
+       ~~~~~~~ [use of default exports is disallowed]
+
+export default class Test { }
+       ~~~~~~~ [use of default exports is disallowed]
+
+export default function() { }
+       ~~~~~~~ [use of default exports is disallowed]
+       
+export default function Test() { }
+       ~~~~~~~ [use of default exports is disallowed]

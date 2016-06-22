@@ -19,6 +19,18 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "no-internal-module",
+        description: "Disallows internal `module`",
+        rationale: "Using `module` leads to a confusion of concepts with external modules. Use the newer `namespace` keyword instead.",
+        optionsDescription: "Not configurable.",
+        options: null,
+        optionExamples: ["true"],
+        type: "typescript",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING = "forbidden internal module";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -38,17 +50,10 @@ class NoInternalModuleWalker extends Lint.RuleWalker {
         // an internal module declaration is not a namespace or a nested declaration
         // for external modules, node.name.kind will be a LiteralExpression instead of Identifier
         return !Lint.isNodeFlagSet(node, ts.NodeFlags.Namespace)
-            && !isNestedDeclaration(node)
+            && !Lint.isNestedModuleDeclaration(node)
             && node.name.kind === ts.SyntaxKind.Identifier
             && !isGlobalAugmentation(node);
     }
-}
-
-function isNestedDeclaration(node: ts.ModuleDeclaration) {
-    // in a declaration expression like 'module a.b.c' - 'a' is the top level module declaration node and 'b' and 'c'
-    // are nested therefore we can depend that a node's position will only match with its name's position for nested
-    // nodes
-    return node.name.pos === node.pos;
 }
 
 function isGlobalAugmentation(node: ts.ModuleDeclaration) {

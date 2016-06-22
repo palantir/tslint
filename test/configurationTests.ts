@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import * as os from "os";
+import * as path from "path";
 import * as fs from "fs";
 import {IConfigurationFile, extendConfigurationFile, loadConfigurationFromPath} from "../src/configuration";
 
@@ -83,6 +85,43 @@ describe("Configuration", () => {
             });
         });
 
+        it("extends with builtin", () => {
+            const config = loadConfigurationFromPath("./test/config/tslint-extends-builtin.json");
+            assert.isTrue(config.rules["no-var-keyword"]);
+            assert.isFalse(config.rules["no-eval"]);
+        });
+
+        describe("with config not relative to tslint", () => {
+            let tmpfile: string;
+
+            beforeEach(() => {
+                for (let i = 0; i < 5; i++) {
+                    const attempt = path.join(os.tmpdir(), `tslint.test${Math.round(Date.now() * Math.random())}.json`);
+                    if (!fs.existsSync(tmpfile)) {
+                        tmpfile = attempt;
+                        break;
+                    }
+                }
+                if (tmpfile === undefined) {
+                    throw new Error("Couldn't create temp file");
+                }
+            });
+
+            afterEach(() => {
+                if (tmpfile !== undefined) {
+                    fs.unlinkSync(tmpfile);
+                }
+            });
+
+            it("extends with package installed relative to tslint", () => {
+                fs.writeFileSync(tmpfile, JSON.stringify({ extends: "tslint-test-config-non-relative" }));
+                let config = loadConfigurationFromPath(tmpfile);
+                assert.deepEqual(config.rules, {
+                    "class-name": true,
+                });
+            });
+        });
+
         it("extends with package two levels (and relative path in rulesDirectory)", () => {
             let config = loadConfigurationFromPath("./test/config/tslint-extends-package-two-levels.json");
 
@@ -117,6 +156,17 @@ describe("Configuration", () => {
                 "rule-two": true,
                 "rule-three": "//not a comment",
                 "rule-four": "/*also not a comment*/",
+            });
+        });
+
+        it("can load a built-in configuration", () => {
+            const config = loadConfigurationFromPath("tslint:recommended");
+            assert.isTrue(config.rules["no-eval"]);
+        });
+
+        it("throws on an invalid built-in configuration path", () => {
+            assert.throws(() => {
+                loadConfigurationFromPath("tslint:doesnotexist");
             });
         });
     });

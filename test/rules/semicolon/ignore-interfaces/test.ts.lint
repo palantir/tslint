@@ -1,0 +1,85 @@
+var x = 3
+         ~nil [missing semicolon]
+a += b
+      ~nil [missing semicolon]
+
+c = () => {
+}
+ ~nil [missing semicolon]
+
+d = function() { }
+                  ~nil [missing semicolon]
+
+console.log("i am adam, am i?")
+                               ~nil [missing semicolon]
+
+function xyz() {
+    return
+          ~nil [missing semicolon]
+}
+
+switch(xyz) {
+    case 1:
+        break
+             ~nil [missing semicolon]
+    case 2:
+        continue
+                ~nil [missing semicolon]
+}
+
+throw new Error("some error")
+                             ~nil [missing semicolon]
+
+do {
+    var a = 4
+             ~nil [missing semicolon]
+} while(x == 3)
+               ~nil [missing semicolon]
+
+debugger
+        ~nil [missing semicolon]
+
+import v = require("i")
+                       ~nil [missing semicolon]
+module M {
+    export var x
+                ~nil [missing semicolon]
+}
+
+function useStrictMissingSemicolon() {
+    "use strict"
+                ~nil [missing semicolon]
+    return null;
+}
+
+class MyClass {
+    public name : string
+                        ~nil [missing semicolon]
+    private index : number
+                          ~nil [missing semicolon]
+    private email : string;
+
+    public initializedProperty = 6
+                                  ~nil [missing semicolon]
+    public initializedMethodProperty = () => { return "hi"; }
+}
+
+interface ITest {
+    foo?: string
+
+    bar: number
+
+    baz: boolean;
+}
+
+import {Router} from 'aurelia-router';
+
+import {Controller} from 'my-lib'
+                                 ~nil [missing semicolon]
+
+export default LoginPage;
+export default LoginPage
+                        ~nil [missing semicolon]
+export = Date;
+export = Date
+             ~nil [missing semicolon]

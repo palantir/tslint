@@ -20,6 +20,7 @@ import * as formatters from "./formatters";
 import * as linter from "./tslint";
 import * as rules from "./rules";
 import * as test from "./test";
+import * as utils from "./utils";
 import {RuleFailure} from "./language/rule/rule";
 
 export * from "./language/rule/rule";
@@ -36,6 +37,7 @@ export var Formatters = formatters;
 export var Linter = linter;
 export var Rules = rules;
 export var Test = test;
+export var Utils = utils;
 
 export interface LintResult {
     failureCount: number;
@@ -44,9 +46,15 @@ export interface LintResult {
     output: string;
 }
 
-export interface ILinterOptions {
+export interface ILinterOptionsRaw {
+    configuration?: any;
+    formatter?: string;
+    formattersDirectory?: string;
+    rulesDirectory?: string | string[];
+}
+
+export interface ILinterOptions extends ILinterOptionsRaw {
     configuration: any;
     formatter: string;
-    formattersDirectory: string;
     rulesDirectory: string | string[];
 }
