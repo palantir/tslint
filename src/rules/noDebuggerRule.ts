@@ -31,7 +31,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "use of debugger statements is disallowed";
+    public static FAILURE_STRING = "Use of debugger statements is forbidden";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new NoDebuggerWalker(sourceFile, this.getOptions()));

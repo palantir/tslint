@@ -7,7 +7,7 @@ case 1:
     break;
 ~~~~~~~~~~
 }
-~ [switch statement doesn't include a 'default' case]
+~ [Switch statement should include a 'default' case]
 
 switch (foo) {
 ~~~~~~~~~~~~~~
@@ -30,7 +30,7 @@ case 3:
     break;
 ~~~~~~~~~~
 }
-~ [switch statement doesn't include a 'default' case]
+~ [Switch statement should include a 'default' case]
 
 // valid
 switch (foo) {

@@ -1,4 +1,4 @@
 import * as React from "react/addons";
-            ~~~~~                      [unused variable: 'React']
+            ~~~~~                      [Unused variable: 'React']
 
 console.log(<div></div>);

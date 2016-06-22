@@ -30,7 +30,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "switch statement doesn't include a 'default' case";
+    public static FAILURE_STRING = "Switch statement should include a 'default' case";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new SwitchDefaultWalker(sourceFile, this.getOptions()));

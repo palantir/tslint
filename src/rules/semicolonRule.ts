@@ -55,8 +55,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_MISSING = "missing semicolon";
-    public static FAILURE_STRING_UNNECESSARY = "unnecessary semicolon";
+    public static FAILURE_STRING_MISSING = "Missing semicolon";
+    public static FAILURE_STRING_UNNECESSARY = "Unnecessary semicolon";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new SemicolonWalker(sourceFile, this.getOptions()));

@@ -4,7 +4,7 @@ var v = [{
     d: 34,
     c: (a + b),
 },];
- ~   [trailing comma]
+ ~   [Unnecessary trailing comma]
 
 var x = [{
     a: 1,
@@ -50,18 +50,18 @@ var zz = [
 ];
 
 var a = [{a: 1, b: 2, d: 34, c: (a + b),},];
-                                       ~     [trailing comma]
-                                         ~   [trailing comma]
+                                       ~     [Unnecessary trailing comma]
+                                         ~   [Unnecessary trailing comma]
 
 var b = [{a: 1, b: 2, d: 34, c: (a + b)}];
 
 var c = {cA: 42, cB: 24,};
-                       ~   [trailing comma]
+                       ~   [Unnecessary trailing comma]
 
 var d = {dOne: 2, dTwo: 1};
 
 var cc = [42, 24,];
-                ~   [trailing comma]
+                ~   [Unnecessary trailing comma]
 
 var dd = [2, 1];
 
@@ -102,12 +102,12 @@ var [
 ] = zz;
 
 var {cA, cB,} = c;
-           ~       [trailing comma]
+           ~       [Unnecessary trailing comma]
 
 var {dOne, dTwo} = d;
 
 var [ccA, ccB,] = cc;
-             ~        [trailing comma]
+             ~        [Unnecessary trailing comma]
 
 var [ddOne, ddTwo] = dd;
 
@@ -130,6 +130,6 @@ import {
 } from "module";
 
 import {ClassA, ClassB,} from "module";
-                      ~                 [trailing comma]
+                      ~                 [Unnecessary trailing comma]
 
 import {ClassC, ClassD} from "module";

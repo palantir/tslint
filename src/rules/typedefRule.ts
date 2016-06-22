@@ -56,8 +56,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "missing type declaration";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const typedefWalker = new TypedefWalker(sourceFile, this.getOptions());
-        return this.applyWithWalker(typedefWalker);
+        return this.applyWithWalker(new TypedefWalker(sourceFile, this.getOptions()));
     }
 }
 

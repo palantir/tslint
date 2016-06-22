@@ -18,9 +18,6 @@
 import * as ts from "typescript";
 import * as Lint from "../lint";
 
-/**
- * Implementation of the use-isnan rule.
- */
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {

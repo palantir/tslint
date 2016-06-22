@@ -52,8 +52,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_NEVER = "trailing comma";
-    public static FAILURE_STRING_ALWAYS = "missing trailing comma";
+    public static FAILURE_STRING_NEVER = "Unnecessary trailing comma";
+    public static FAILURE_STRING_ALWAYS = "Missing trailing comma";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new TrailingCommaWalker(sourceFile, this.getOptions()));

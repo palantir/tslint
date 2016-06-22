@@ -39,7 +39,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "forbidden bitwise operation";
+    public static FAILURE_STRING = "Forbidden bitwise operation";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new NoBitwiseWalker(sourceFile, this.getOptions()));
