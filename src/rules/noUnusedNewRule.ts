@@ -17,12 +17,12 @@
 
 import * as Lint from "../lint";
 import * as ts from "typescript";
-import * as NoUnusedExpression from "./noUnusedExpressionRule";
+import { NoUnusedExpressionWalker } from "./noUnusedExpressionRule";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
-        ruleName: "no-new",
+        ruleName: "no-unused-new",
         description: "Disallows unused 'new' expression statements.",
         descriptionDetails: Lint.Utils.dedent`
             Unused 'new' expressions indicate that a constructor is being invoked solely for its side effects.`,
@@ -39,17 +39,12 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "do not use 'new' for side effects";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoNewWalker(sourceFile, this.getOptions()));
+        return this.applyWithWalker(new NoUnusedNewWalker(sourceFile, this.getOptions()));
     }
 }
 
-class NoNewWalker extends NoUnusedExpression.NoUnusedExpressionWalker {
-    private expressionContainsNew: boolean;
-
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
-        super(sourceFile, options);
-        this.expressionContainsNew = false;
-    }
+class NoUnusedNewWalker extends NoUnusedExpressionWalker {
+    private expressionContainsNew: boolean = false;
 
     public visitExpressionStatement(node: ts.ExpressionStatement) {
         this.expressionContainsNew = false;
@@ -70,7 +65,7 @@ class NoNewWalker extends NoUnusedExpression.NoUnusedExpressionWalker {
                 || kind === ts.SyntaxKind.YieldExpression
                 || kind === ts.SyntaxKind.AwaitExpression;
 
-            if (!isValidStandaloneExpression && !NoUnusedExpression.NoUnusedExpressionWalker.isDirective(node)) {
+            if (!isValidStandaloneExpression && !NoUnusedExpressionWalker.isDirective(node)) {
                 this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
             }
         }

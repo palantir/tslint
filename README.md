@@ -278,7 +278,6 @@ Core rules are included in the `tslint` package.
 * `no-mergeable-namespace` disallows mergeable namespaces in the same file.
 * `no-namespace` disallows both internal `module`s and `namespace`, but allows ES6-style external modules.
     * `allow-declarations` allows `declare namespace ... {}` to describe external APIs.
-* `no-new` disallows unused expressions which include the new keyword.
 * `no-null-keyword` disallows use of the `null` keyword literal.
 * `no-reference` disallows `/// <reference path=>` imports (use ES6-style imports instead).
 * `no-require-imports` disallows invocation of `require()` (use ES6-style imports instead).
@@ -287,7 +286,8 @@ Core rules are included in the `tslint` package.
 * `no-switch-case-fall-through` disallows falling through case statements. As of TypeScript version 1.8, this rule can be enabled within the compiler by passing the `--noFallthroughCasesInSwitch` flag.
 * `no-trailing-whitespace` disallows trailing whitespace at the end of a line.
 * `no-unreachable` disallows unreachable code after `break`, `catch`, `throw`, and `return` statements. This rule is supported and enforced by default within the TypeScript compiler since version 1.8.
-* `no-unused-expression` disallows unused expression statements, that is, expression statements that are not assignments or function invocations (and thus no-ops). Combine with `no-new` to disallow expressions containing the new keyword.
+* `no-unused-expression` disallows unused expression statements, that is, expression statements that are not assignments or function invocations (and thus no-ops). Combine with `no-unused-new` to disallow expressions containing the new keyword.
+* `no-unused-new` disallows unused expressions statements which include the new keyword.
 * `no-unused-variable` disallows unused imports, variables, functions and private class members. Rule options:
     * `"check-parameters"` disallows unused function and constructor parameters.
         * NOTE: this option is experimental and does not work with classes that use abstract method declarations, among other things. Use at your own risk.
