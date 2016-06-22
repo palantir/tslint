@@ -21,8 +21,8 @@ import * as Lint from "../lint";
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
-        ruleName: "no-non-arrow-functions",
-        description: "Diallows traditional (non-arrow) function expressions.",
+        ruleName: "only-arrow-functions",
+        description: "Disallows traditional (non-arrow) function expressions.",
         rationale: "Traditional functions don't bind lexical scope, which can lead to unexpected behavior when accessing 'this'.",
         optionsDescription: "Not configurable.",
         options: null,
@@ -34,11 +34,11 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "non-arrow functions are forbidden";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoNonArrowFunctionsWalker(sourceFile, this.getOptions()));
+        return this.applyWithWalker(new OnlyArrowFunctionsWalker(sourceFile, this.getOptions()));
     }
 }
 
-class NoNonArrowFunctionsWalker extends Lint.RuleWalker {
+class OnlyArrowFunctionsWalker extends Lint.RuleWalker {
     public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
         this.addFailure(this.createFailure(node.getStart(), "function".length, Rule.FAILURE_STRING));
         super.visitFunctionDeclaration(node);

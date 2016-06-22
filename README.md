@@ -277,7 +277,6 @@ Core rules are included in the `tslint` package.
 * `no-mergeable-namespace` disallows mergeable namespaces in the same file.
 * `no-namespace` disallows both internal `module`s and `namespace`, but allows ES6-style external modules.
     * `allow-declarations` allows `declare namespace ... {}` to describe external APIs.
-* `no-non-arrow-functions` disallows traditional `function () { ... }` declarations, preferring `() => { ... }` arrow lambdas.
 * `no-null-keyword` disallows use of the `null` keyword literal.
 * `no-reference` disallows `/// <reference path=>` imports (use ES6-style imports instead).
 * `no-require-imports` disallows invocation of `require()` (use ES6-style imports instead).
@@ -304,6 +303,7 @@ Core rules are included in the `tslint` package.
   * `"check-whitespace"` checks preceding whitespace for the specified tokens.
 * `one-variable-per-declaration` disallows multiple variable definitions in the same statement.
   * `"ignore-for-loop"` allows multiple variable definitions in for loop statement.
+* `only-arrow-functions` disallows traditional `function () { ... }` declarations, preferring `() => { ... }` arrow lambdas.
 * `quotemark` enforces consistent single or double quoted string literals. Rule options (at least one of `"double"` or `"single"` is required):
     * `"single"` enforces single quotes.
     * `"double"` enforces double quotes.
