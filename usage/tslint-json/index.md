@@ -22,7 +22,7 @@ If a rule takes no options, you can simply set its value to a boolean, either `t
 If a rule takes options, you set its value to an array where the first value is a boolean indicating if the rule is enabled and the next values are options handled by the rule.
 Not all possible rules are listed here, be sure to [check out the full list][3].
 
-`tslint.json` configuration files may have comments in them (even though this is technically invalid JSON).
+`tslint.json` configuration files may have JavaScript-style `// single-line` and `/* multi-line */` comments in them (even though this is technically invalid JSON). If this confuses your syntax highlighter, you may want to switch it to JavaScript format.
 
 An example `tslint.json` file might look like this:
 
