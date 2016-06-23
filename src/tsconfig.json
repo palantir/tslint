@@ -112,6 +112,7 @@
         "rules/noTrailingWhitespaceRule.ts",
         "rules/noUnreachableRule.ts",
         "rules/noUnusedExpressionRule.ts",
+        "rules/noUnusedNewRule.ts",
         "rules/noUnusedVariableRule.ts",
         "rules/noUseBeforeDeclareRule.ts",
         "rules/noVarKeywordRule.ts",
