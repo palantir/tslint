@@ -142,7 +142,9 @@ export function loadConfigurationFromPath(configFilePath: string): IConfiguratio
         const resolvedConfigFilePath = resolveConfigurationPath(configFilePath);
         let configFile: IConfigurationFile;
         if (path.extname(resolvedConfigFilePath) === ".json") {
-            const fileContent = stripComments(fs.readFileSync(resolvedConfigFilePath).toString());
+            const fileContent = stripComments(fs.readFileSync(resolvedConfigFilePath)
+            .toString()
+            .replace(/^\uFEFF/, ""));
             configFile = JSON.parse(fileContent);
         } else {
             configFile = require(resolvedConfigFilePath);
