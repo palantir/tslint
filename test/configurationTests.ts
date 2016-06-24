@@ -159,6 +159,10 @@ describe("Configuration", () => {
             });
         });
 
+        it("can load .json files with BOM", () => {
+            assert.doesNotThrow(() => loadConfigurationFromPath("./test/config/tslint-with-bom.json"));
+        });
+
         it("can load a built-in configuration", () => {
             const config = loadConfigurationFromPath("tslint:recommended");
             assert.isTrue(config.rules["no-eval"]);
