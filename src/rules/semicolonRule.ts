@@ -32,7 +32,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
             * \`"${OPTION_ALWAYS}"\` enforces semicolons at the end of every statement.
             * \`"${OPTION_NEVER}"\` disallows semicolons at the end of every statement except for when they are necessary.
-        
+
             The following arguments may be optionaly provided:
             * \`"${OPTION_IGNORE_INTERFACES}"\` skips checking semicolons at the end of interface members.`,
         options: {
@@ -55,8 +55,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_MISSING = "missing semicolon";
-    public static FAILURE_STRING_UNNECESSARY = "unnecessary semicolon";
+    public static FAILURE_STRING_MISSING = "Missing semicolon";
+    public static FAILURE_STRING_UNNECESSARY = "Unnecessary semicolon";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new SemicolonWalker(sourceFile, this.getOptions()));

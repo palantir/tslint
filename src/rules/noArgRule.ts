@@ -34,7 +34,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "access forbidden to arguments property";
+    public static FAILURE_STRING = "Access to arguments.callee is forbidden";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new NoArgWalker(sourceFile, this.getOptions()));
@@ -47,7 +47,7 @@ class NoArgWalker extends Lint.RuleWalker {
         const name = node.name;
 
         if (expression.kind === ts.SyntaxKind.Identifier && name.text === "callee") {
-            const identifierExpression = <ts.Identifier> expression;
+            const identifierExpression = expression as ts.Identifier;
             if (identifierExpression.text === "arguments") {
                 this.addFailure(this.createFailure(expression.getStart(), expression.getWidth(), Rule.FAILURE_STRING));
             }

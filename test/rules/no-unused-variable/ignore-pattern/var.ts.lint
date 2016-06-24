@@ -1,7 +1,7 @@
 var x = 3;
 
 var y = x;
-    ~      [unused variable: 'y']
+    ~      [Unused variable: 'y']
 var _y = x;
 var z;
 
@@ -16,21 +16,21 @@ class ABCD {
 try {
   // code here
 } catch (e) {
-  // e is unused but that's still ok
+  // e is Unused but that's still ok
 }
 
 declare var tmp: any;
 
 export function testDestructuring() {
     var [a, b] = [1, 2];
-         ~               [unused variable: 'a']
-            ~            [unused variable: 'b']
+         ~               [Unused variable: 'a']
+            ~            [Unused variable: 'b']
     var [_a, _b] = [1, 2];
     var [c] = [3];
 
     var {d, e} = { d: 1, e: 2 };
-         ~                       [unused variable: 'd']
-            ~                    [unused variable: 'e']
+         ~                       [Unused variable: 'd']
+            ~                    [Unused variable: 'e']
     var {d: _d, e: _e} = { d: 1, e: 2 };
     var {f} = { f: 3 };
 
@@ -41,7 +41,7 @@ export var [foo, bar] = [1, 2];
 
 export function testUnusedSpread() {
   var a = [1, 2];
-      ~           [unused variable: 'a']
+      ~           [Unused variable: 'a']
   var _a = [1, 2];
   var b = [3, 4];
   var c = [...b, 5]; // make sure we see that b is being used
@@ -51,7 +51,7 @@ export function testUnusedSpread() {
 }
 
 for(let e of [1,2,3]) {
-        ~               [unused variable: 'e']
+        ~               [Unused variable: 'e']
 
 }
 
@@ -62,7 +62,7 @@ for(let _e of [1,2,3]) {
 export function testRenamingDestructure() {
   var a = 2;
   let {a: b} = {a: 4};
-          ~            [unused variable: 'b']
+          ~            [Unused variable: 'b']
   let {a: _b} = {a: 4};
   let {x: y} = {x: 7}; // false positive
   return a + y;

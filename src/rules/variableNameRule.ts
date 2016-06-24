@@ -37,7 +37,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"${OPTION_CHECK_FORMAT}"\`: allows only camelCased or UPPER_CASED variable names
               * \`"${OPTION_LEADING_UNDERSCORE}"\` allows underscores at the beginning (only has an effect if "check-format" specified)
               * \`"${OPTION_TRAILING_UNDERSCORE}"\` allows underscores at the end. (only has an effect if "check-format" specified)
-              * \`"${OPTION_ALLOW_PASCAL_CASE}\` allows PascalCase in addtion to camelCase.
+              * \`"${OPTION_ALLOW_PASCAL_CASE}"\` allows PascalCase in addtion to camelCase.
             * \`"${OPTION_BAN_KEYWORDS}"\`: disallows the use of certain TypeScript keywords (\`any\`, \`Number\`, \`number\`, \`String\`,
             \`string\`, \`Boolean\`, \`boolean\`, \`undefined\`) as variable or parameter names.`,
         options: {

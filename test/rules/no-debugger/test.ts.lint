@@ -3,6 +3,6 @@ var testVariable = "debugger";
 function testFunction(): number {
     if (testVariable === "debugger") {
         debugger;
-        ~~~~~~~~  [use of debugger statements is disallowed]
+        ~~~~~~~~  [Use of debugger statements is forbidden]
     }
 }

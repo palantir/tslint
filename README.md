@@ -64,7 +64,7 @@ Please ensure that the TypeScript source files compile correctly _before_ runnin
 
 TSLint is configured via a file named `tslint.json`. This file is loaded from the current path, or the user's home directory, in that order.
 
-The configuration file specifies which rules are enabled and their options. A sample configuration file with all options is available [here](https://github.com/palantir/tslint/blob/master/docs/sample.tslint.json). These configurations may _extend_ other ones via the `"extends"` field in `tslint.json`.
+The configuration file specifies which rules are enabled and their options. These configurations may _extend_ other ones via the `"extends"` field in `tslint.json`.
 
 ```js
 {
@@ -247,6 +247,7 @@ Core rules are included in the `tslint` package.
     * one line comments must start with `/** ` and end with ` */`
 * `label-position` enforces labels only on sensible statements.
 * `label-undefined` checks that labels are defined before usage.
+* `linebreak-style` checks that line breaks used in source files are either linefeed or carriage-return linefeeds. By default linefeeds are required. This rule accepts one parameter, either "LF" or "CRLF".
 * `max-line-length` sets the maximum length of a line.
 * `member-access` enforces using explicit visibility on class members
     * `"check-accessor"` enforces explicit visibility on get/set accessors
@@ -285,7 +286,8 @@ Core rules are included in the `tslint` package.
 * `no-switch-case-fall-through` disallows falling through case statements. As of TypeScript version 1.8, this rule can be enabled within the compiler by passing the `--noFallthroughCasesInSwitch` flag.
 * `no-trailing-whitespace` disallows trailing whitespace at the end of a line.
 * `no-unreachable` disallows unreachable code after `break`, `catch`, `throw`, and `return` statements. This rule is supported and enforced by default within the TypeScript compiler since version 1.8.
-* `no-unused-expression` disallows unused expression statements, that is, expression statements that are not assignments or function invocations (and thus no-ops).
+* `no-unused-expression` disallows unused expression statements, that is, expression statements that are not assignments or function invocations (and thus no-ops). Combine with `no-unused-new` to disallow expressions containing the new keyword.
+* `no-unused-new` disallows unused expressions statements which include the new keyword.
 * `no-unused-variable` disallows unused imports, variables, functions and private class members. Rule options:
     * `"check-parameters"` disallows unused function and constructor parameters.
         * NOTE: this option is experimental and does not work with classes that use abstract method declarations, among other things. Use at your own risk.
@@ -303,6 +305,7 @@ Core rules are included in the `tslint` package.
   * `"check-whitespace"` checks preceding whitespace for the specified tokens.
 * `one-variable-per-declaration` disallows multiple variable definitions in the same statement.
   * `"ignore-for-loop"` allows multiple variable definitions in for loop statement.
+* `only-arrow-functions` disallows traditional `function () { ... }` declarations, preferring `() => { ... }` arrow lambdas.
 * `quotemark` enforces consistent single or double quoted string literals. Rule options (at least one of `"double"` or `"single"` is required):
     * `"single"` enforces single quotes.
     * `"double"` enforces double quotes.

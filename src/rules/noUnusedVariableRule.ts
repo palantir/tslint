@@ -65,7 +65,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "unused variable: ";
+    public static FAILURE_STRING_FACTORY = (name: string) => `Unused variable: '${name}'`;
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const languageService = Lint.createLanguageService(sourceFile.fileName, sourceFile.getFullText());
@@ -128,7 +128,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
             const nameText = this.reactImport.name.getText();
             if (!this.isIgnored(nameText)) {
                 const start = this.reactImport.name.getStart();
-                this.addFailure(this.createFailure(start, nameText.length, `${Rule.FAILURE_STRING}'${nameText}'`));
+                this.addFailure(this.createFailure(start, nameText.length, Rule.FAILURE_STRING_FACTORY(nameText)));
             }
         }
     }
@@ -329,7 +329,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         const fileName = this.getSourceFile().fileName;
         const highlights = this.languageService.getDocumentHighlights(fileName, position, [fileName]);
         if ((highlights == null || highlights[0].highlightSpans.length <= 1) && !this.isIgnored(name)) {
-            this.addFailure(this.createFailure(position, name.length, `${Rule.FAILURE_STRING}'${name}'`));
+            this.addFailure(this.createFailure(position, name.length, Rule.FAILURE_STRING_FACTORY(name)));
         }
     }
 

@@ -27,8 +27,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             Unused expressions are expression statements which are not assignments or function calls
             (and thus usually no-ops).`,
         rationale: Lint.Utils.dedent`
-            Detects potential errors where an assignment or function call was intended. Also detects constructs such as
-            \`new SomeClass()\`, where a constructor is used solely for its side effects, which is considered poor style.`,
+            Detects potential errors where an assignment or function call was intended.`,
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: ["true"],
@@ -43,8 +42,38 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-class NoUnusedExpressionWalker extends Lint.RuleWalker {
-    private expressionIsUnused: boolean;
+export class NoUnusedExpressionWalker extends Lint.RuleWalker {
+    protected expressionIsUnused: boolean;
+
+    protected static isDirective(node: ts.Node, checkPreviousSiblings = true): boolean {
+        const { parent } = node;
+        const grandParentKind = parent.parent == null ? null : parent.parent.kind;
+        const isStringExpression = node.kind === ts.SyntaxKind.ExpressionStatement
+            && (node as ts.ExpressionStatement).expression.kind === ts.SyntaxKind.StringLiteral;
+        const parentIsSourceFile = parent.kind === ts.SyntaxKind.SourceFile;
+        const parentIsNSBody = parent.kind === ts.SyntaxKind.ModuleBlock;
+        const parentIsFunctionBody = parent.kind === ts.SyntaxKind.Block && [
+            ts.SyntaxKind.ArrowFunction,
+            ts.SyntaxKind.FunctionExpression,
+            ts.SyntaxKind.FunctionDeclaration,
+            ts.SyntaxKind.MethodDeclaration,
+            ts.SyntaxKind.Constructor,
+            ts.SyntaxKind.GetAccessor,
+            ts.SyntaxKind.SetAccessor,
+        ].indexOf(grandParentKind) > -1;
+
+        if (!(parentIsSourceFile || parentIsFunctionBody || parentIsNSBody) || !isStringExpression) {
+            return false;
+        }
+
+        if (checkPreviousSiblings) {
+            const siblings: ts.Node[] = [];
+            ts.forEachChild(node.parent, child => { siblings.push(child); });
+            return siblings.slice(0, siblings.indexOf(node)).every((n) => NoUnusedExpressionWalker.isDirective(n, false));
+        } else {
+            return true;
+        }
+    }
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
@@ -54,17 +83,7 @@ class NoUnusedExpressionWalker extends Lint.RuleWalker {
     public visitExpressionStatement(node: ts.ExpressionStatement) {
         this.expressionIsUnused = true;
         super.visitExpressionStatement(node);
-        if (this.expressionIsUnused) {
-            const { expression } = node;
-            const { kind } = expression;
-            const isValidStandaloneExpression = kind === ts.SyntaxKind.DeleteExpression
-                || kind === ts.SyntaxKind.YieldExpression
-                || kind === ts.SyntaxKind.AwaitExpression;
-
-            if (!isValidStandaloneExpression && !isDirective(node)) {
-                this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
-            }
-        }
+        this.checkExpressionUsage(node);
     }
 
     public visitBinaryExpression(node: ts.BinaryExpression) {
@@ -121,6 +140,11 @@ class NoUnusedExpressionWalker extends Lint.RuleWalker {
         this.expressionIsUnused = false;
     }
 
+    protected visitNewExpression(node: ts.NewExpression) {
+        super.visitNewExpression(node);
+        this.expressionIsUnused = false;
+    }
+
     public visitConditionalExpression(node: ts.ConditionalExpression) {
         this.visitNode(node.condition);
         this.expressionIsUnused = true;
@@ -133,34 +157,18 @@ class NoUnusedExpressionWalker extends Lint.RuleWalker {
         // being assigned to something or passed to a function, so consider the entire expression unused
         this.expressionIsUnused = firstExpressionIsUnused || secondExpressionIsUnused;
     }
-}
 
-function isDirective(node: ts.Node, checkPreviousSiblings = true): boolean {
-    const { parent } = node;
-    const grandParentKind = parent.parent == null ? null : parent.parent.kind;
-    const isStringExpression = node.kind === ts.SyntaxKind.ExpressionStatement
-        && (node as ts.ExpressionStatement).expression.kind === ts.SyntaxKind.StringLiteral;
-    const parentIsSourceFile = parent.kind === ts.SyntaxKind.SourceFile;
-    const parentIsNSBody = parent.kind === ts.SyntaxKind.ModuleBlock;
-    const parentIsFunctionBody = parent.kind === ts.SyntaxKind.Block && [
-        ts.SyntaxKind.ArrowFunction,
-        ts.SyntaxKind.FunctionExpression,
-        ts.SyntaxKind.FunctionDeclaration,
-        ts.SyntaxKind.MethodDeclaration,
-        ts.SyntaxKind.Constructor,
-        ts.SyntaxKind.GetAccessor,
-        ts.SyntaxKind.SetAccessor,
-    ].indexOf(grandParentKind) > -1;
+    protected checkExpressionUsage(node: ts.ExpressionStatement) {
+        if (this.expressionIsUnused) {
+            const { expression } = node;
+            const { kind } = expression;
+            const isValidStandaloneExpression = kind === ts.SyntaxKind.DeleteExpression
+                || kind === ts.SyntaxKind.YieldExpression
+                || kind === ts.SyntaxKind.AwaitExpression;
 
-    if (!(parentIsSourceFile || parentIsFunctionBody || parentIsNSBody) || !isStringExpression) {
-        return false;
-    }
-
-    if (checkPreviousSiblings) {
-        const siblings: ts.Node[] = [];
-        ts.forEachChild(node.parent, child => { siblings.push(child); });
-        return siblings.slice(0, siblings.indexOf(node)).every((n) => isDirective(n, false));
-    } else {
-        return true;
+            if (!isValidStandaloneExpression && !NoUnusedExpressionWalker.isDirective(node)) {
+                this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+            }
+        }
     }
 }

@@ -78,4 +78,4 @@ module module.mod
 }
 ~ [0]
 
-[0]: forbidden internal module
+[0]: The internal 'module' syntax is deprecated, use the 'namespace' keyword instead.
