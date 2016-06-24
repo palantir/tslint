@@ -1,0 +1,42 @@
+function a() {
+    
+    //This loop only uses the iterator to access the array item, so we can recommend a for-of loop here
+    for (var i = 0; i <= obj.arr.length; i++) {
+    ~~~~~~~~~~~~~~~~~~~~
+        console.log(obj.arr[i]);
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    }
+~~~~~ [0]  
+
+    //the index is used by itself, so a normal for loop is allowed here
+    for (var j = 0; j <= arr.length; j++) {
+        doMath(j);
+    }
+
+    //the index is used by itself, so a normal for loop is allowed here
+    for (var x = 0; x <= arr.length; x++) {
+        if(x > 5) {
+            doMath(x);
+        }
+        console.log(arr[x]);
+    }
+
+    //This iterates off of a hard-coded number and should be allowed
+    for (var k = 0; k <= 40; k++) {
+        doMath(k);
+    }
+
+    //For in loops are allowed
+    for (var z in obj) {
+        if (obj.hasOwnProperty(z)) {
+            console.log(z);
+        }
+    }
+    
+    //For of loops are allowed
+    for (var m of arr) {
+        console.log(m);
+    }
+}
+
+[0]: This standard for loop could be replaced with a for(... of ...) loop

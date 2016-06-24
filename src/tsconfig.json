@@ -73,6 +73,7 @@
         "rules/curlyRule.ts",
         "rules/eoflineRule.ts",
         "rules/forinRule.ts",
+        "rules/forofRule.ts",
         "rules/indentRule.ts",
         "rules/interfaceNameRule.ts",
         "rules/jsdocFormatRule.ts",
