@@ -157,7 +157,7 @@ class TypedefWalker extends Lint.RuleWalker {
 
         // If this is an arrow function, it doesn't need to have a typedef on the property declaration
         // as the typedefs can be on the function's parameters instead
-        const performCheck = !(node.initializer.kind === ts.SyntaxKind.ArrowFunction && node.type == null);
+        const performCheck = !(node.initializer != null && node.initializer.kind === ts.SyntaxKind.ArrowFunction && node.type == null);
 
         if (performCheck) {
             this.checkTypeAnnotation(optionName, node.name.getEnd(), node.type, node.name);

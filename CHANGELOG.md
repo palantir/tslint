@@ -1,6 +1,10 @@
 Change Log
 ===
 
+v3.12.0
+---
+* Stable release containing changes from the last dev release (v3.12.0-dev.0)
+
 v3.12.0-dev.0
 ---
 * [new-rule] `only-arrow-functions` rule (#1318)
@@ -45,10 +49,6 @@ Thanks to our contributors!
 * @patsissons
 * @schmuli
 * @YuichiNukiyama
-
-v3.10.0-dev.3
----
-* [bugfix] `no-null-keyword` rule allows the use of `null` in type positions (#1265)
 
 v3.10.2
 ---
@@ -115,7 +115,7 @@ Thanks to our contributors!
 * @janslow
 * @JoshuaKGoldberg
 * @mprobst
-* @patsissons
+* @patsissions
 * @YuichiNukiyama
 
 v3.8.1
@@ -279,10 +279,6 @@ v3.4.0-dev.1
 Thanks to our contributors!
 * @mmv
 * @pe8ter
-
-v3.3.0-dev.2
----
-* Add TypeScript peer dependency `>=1.9.0-dev` to support latest nightlies
 
 v3.3.0
 ---
