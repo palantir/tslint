@@ -1,10 +1,10 @@
 function a() {
-    
+
     //This loop only uses the iterator to access the array item, so we can recommend a for-of loop here
     for (var i = 0; i <= obj.arr.length; i++) {
-    ~~~~~~~~~~~~~~~~~~~~
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         console.log(obj.arr[i]);
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     }
 ~~~~~ [0]  
 
@@ -25,6 +25,27 @@ function a() {
     for (var k = 0; k <= 40; k++) {
         doMath(k);
     }
+
+    //Loop set up different, but uses the index alone - this is ok
+    for(var u=0, len=arr.length; u < len; u++){
+        doMath(u);
+    }
+
+    //Loop set up different, but uses the index alone - this is ok
+    for(var t=0, len=arr.length; t < len; t++){
+        if(t > 5) {
+            doMath(t);
+        }
+        console.log(arr[t]);
+    }
+
+    //Loop set up different, only uses the index to access the array - this should fail
+    for(var r=0, len=arr.length; r < len; r++){
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        console.log(arr[r]);
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    }
+~~~~~ [0]
 
     //For in loops are allowed
     for (var z in obj) {
