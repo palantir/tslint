@@ -5,11 +5,19 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "This standard for loop could be replaced with a for(... of ...) loop";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new ForOfWalker(sourceFile, this.getOptions()));
+        const languageService = Lint.createLanguageService(sourceFile.fileName, sourceFile.getFullText());
+        return this.applyWithWalker(new ForOfWalker(sourceFile, this.getOptions(), languageService));
     }
 }
 
 class ForOfWalker extends Lint.RuleWalker {
+    private languageService: ts.LanguageService;
+
+    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions, languageService: ts.LanguageService) {
+        super(sourceFile, options);
+        this.languageService = languageService;
+    }
+
     public visitForStatement(node: ts.ForStatement) {
         this.handleForStatement(node);
         super.visitForStatement(node);
@@ -20,20 +28,34 @@ class ForOfWalker extends Lint.RuleWalker {
 
         //Skip arrays thats just loop over a hard coded number
         if(arrayAccessNode.kind === ts.SyntaxKind.PropertyAccessExpression){
-            let incrementorVariable = node.incrementor.getFirstToken();
-            let loopSyntax = node.statement.getChildAt(1);
+            //If we are accessing the length of the array, then we are likely looping over it's values
+            if(arrayAccessNode.getLastToken().getText() === "length"){
+                const incrementorVariable = node.incrementor.getFirstToken();
+                const arrayToken = arrayAccessNode.getChildAt(0);
+                const loopSyntax = node.statement.getChildAt(1);
 
-            //Get the text of the array we need, but without the `.length` at the end
-            let arrayIndexAccess = arrayAccessNode.getText().replace(/\.length$/,"");
-            
-            //find `array[i]`-like usages by building up a regex 
-            let regexStr = `${arrayIndexAccess.replace(".","\\.")}\\[\\s*${incrementorVariable.getText().replace(".","\\.")}\\s*\\]`;
-            let containsAccess = new RegExp(regexStr, "g").test(loopSyntax.getText());
-
-            // TODO: Instead find usages of incrementorVariable that DO NOT match the regex above
-            if(containsAccess){
-                const failure = this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING);
-                this.addFailure(failure);
+                //Find all usages of the inrementer variable
+                const fileName = this.getSourceFile().fileName;
+                const highlights = this.languageService.getDocumentHighlights(fileName, incrementorVariable.getStart(), [fileName]);
+                //There are three usages when setting up the for loop,
+                //so remove those form the count to get the count inside the loop block
+                const inrementerCount = highlights[0].highlightSpans.length - 3;
+                
+                //find `array[i]`-like usages by building up a regex 
+                const arrayTokenForRegex = arrayToken.getText().replace(".","\\.");
+                const incrementorForRegex = incrementorVariable.getText().replace(".","\\.");
+                const regex = new RegExp(`${arrayTokenForRegex}\\[\\s*${incrementorForRegex}\\s*\\]`,"g");
+                const accessMatches = loopSyntax.getText().match(regex);
+                const matchCount = (accessMatches || []).length;
+                
+                // If there are more usages of the array item being access than the inrementer variable
+                // being used, then this loop could be replaced with a for-of loop instead.
+                //T his means that the incrementer variable is not used on its own anywhere and is ONLY
+                // used to access the array item.
+                if(matchCount >= inrementerCount){
+                    const failure = this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING);
+                    this.addFailure(failure);
+                }
             }
         }
     }
