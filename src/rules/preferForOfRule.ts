@@ -22,7 +22,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "prefer-for-of",
-        description: "Recommends a TypeScript for(... of ...) loop over a standard for loop if the index is only used to access the array being looped over.",
+        description: "Recommends a for of loop over a standard for loop if the index is only used to access the array being looped over.",
         rationale: "A for(... of ...) loop is easier to implement and read when the index is not needed.",
         optionsDescription: "Not configurable.",
         options: null,
