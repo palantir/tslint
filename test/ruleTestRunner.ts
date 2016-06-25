@@ -23,8 +23,10 @@ import {runTest, consoleTestResultHandler} from "../src/test";
 // needed to get colors to show up when passing through Grunt
 (colors as any).enabled = true;
 
+/* tslint:disable:no-console */
 console.log();
 console.log(colors.underline("Testing Lint Rules:"));
+/* tslint:enable:no-console */
 
 const testDirectories = glob.sync("test/rules/**/tslint.json").map(path.dirname);
 

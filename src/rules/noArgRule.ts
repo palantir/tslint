@@ -19,7 +19,22 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
-    public static FAILURE_STRING = "access forbidden to arguments property";
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "no-arg",
+        description: "Disallows use of `arguments.callee`.",
+        rationale: Lint.Utils.dedent`
+            Using \`arguments.callee\` makes various performance optimizations impossible.
+            See [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/arguments/callee)
+            for more details on why to avoid \`arguments.callee\`.`,
+        optionsDescription: "Not configurable.",
+        options: null,
+        optionExamples: ["true"],
+        type: "functionality",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
+    public static FAILURE_STRING = "Access to arguments.callee is forbidden";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new NoArgWalker(sourceFile, this.getOptions()));
@@ -32,7 +47,7 @@ class NoArgWalker extends Lint.RuleWalker {
         const name = node.name;
 
         if (expression.kind === ts.SyntaxKind.Identifier && name.text === "callee") {
-            const identifierExpression = <ts.Identifier> expression;
+            const identifierExpression = expression as ts.Identifier;
             if (identifierExpression.text === "arguments") {
                 this.addFailure(this.createFailure(expression.getStart(), expression.getWidth(), Rule.FAILURE_STRING));
             }

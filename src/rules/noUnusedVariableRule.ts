@@ -27,7 +27,45 @@ const REACT_NAMESPACE_IMPORT_NAME = "React";
 const MODULE_SPECIFIER_MATCH = /^["'](.+)['"]$/;
 
 export class Rule extends Lint.Rules.AbstractRule {
-    public static FAILURE_STRING = "unused variable: ";
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "no-unused-variable",
+        description: "Disallows unused imports, variables, functions and private class members.",
+        optionsDescription: Lint.Utils.dedent`
+            Three optional arguments may be optionally provided:
+
+            * \`"check-parameters"\` disallows unused function and constructor parameters.
+                * NOTE: this option is experimental and does not work with classes
+                that use abstract method declarations, among other things.
+            * \`"react"\` relaxes the rule for a namespace import named \`React\`
+            (from either the module \`"react"\` or \`"react/addons"\`).
+            Any JSX expression in the file will be treated as a usage of \`React\`
+            (because it expands to \`React.createElement \`).
+            * \`{"ignore-pattern": "pattern"}\` where pattern is a case-sensitive regexp.
+            Variable names that match the pattern will be ignored.`,
+        options: {
+            type: "array",
+            items: {
+                oneOf: [{
+                    type: "string",
+                    enum: ["check-parameters", "react"],
+                }, {
+                    type: "object",
+                    properties: {
+                        "ignore-pattern": {type: "string"},
+                    },
+                    additionalProperties: false,
+                }],
+            },
+            minLength: 0,
+            maxLength: 3,
+        },
+        optionExamples: ['[true, "react"]', '[true, {"ignore-pattern": "^_"}]'],
+        type: "functionality",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
+    public static FAILURE_STRING_FACTORY = (name: string) => `Unused variable: '${name}'`;
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const languageService = Lint.createLanguageService(sourceFile.fileName, sourceFile.getFullText());
@@ -90,7 +128,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
             const nameText = this.reactImport.name.getText();
             if (!this.isIgnored(nameText)) {
                 const start = this.reactImport.name.getStart();
-                this.addFailure(this.createFailure(start, nameText.length, `${Rule.FAILURE_STRING}'${nameText}'`));
+                this.addFailure(this.createFailure(start, nameText.length, Rule.FAILURE_STRING_FACTORY(nameText)));
             }
         }
     }
@@ -291,7 +329,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         const fileName = this.getSourceFile().fileName;
         const highlights = this.languageService.getDocumentHighlights(fileName, position, [fileName]);
         if ((highlights == null || highlights[0].highlightSpans.length <= 1) && !this.isIgnored(name)) {
-            this.addFailure(this.createFailure(position, name.length, `${Rule.FAILURE_STRING}'${name}'`));
+            this.addFailure(this.createFailure(position, name.length, Rule.FAILURE_STRING_FACTORY(name)));
         }
     }
 

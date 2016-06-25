@@ -19,7 +19,24 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
-    public static FAILURE_STRING = "duplicate variable: '";
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "no-duplicate-variable",
+        description: "Disallows duplicate variable declarations in the same block scope.",
+        descriptionDetails: Lint.Utils.dedent`
+            This rule is only useful when using the \`var\` keyword -
+            the compiler will detect redeclarations of \`let\` and \`const\` variables.`,
+        rationale: Lint.Utils.dedent`
+            A variable can be reassigned if necessary -
+            there's no good reason to have a duplicate variable declaration.`,
+        optionsDescription: "Not configurable.",
+        options: null,
+        optionExamples: ["true"],
+        type: "functionality",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
+    public static FAILURE_STRING_FACTORY = (name: string) => `Duplicate variable: '${name}'`;
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new NoDuplicateVariableWalker(sourceFile, this.getOptions()));
@@ -84,7 +101,7 @@ class NoDuplicateVariableWalker extends Lint.BlockScopeAwareRuleWalker<{}, Scope
     }
 
     private addFailureOnIdentifier(ident: ts.Identifier) {
-        const failureString = `${Rule.FAILURE_STRING}${ident.text}'`;
+        const failureString = Rule.FAILURE_STRING_FACTORY(ident.text);
         this.addFailure(this.createFailure(ident.getStart(), ident.getWidth(), failureString));
     }
 }

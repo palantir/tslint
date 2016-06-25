@@ -19,7 +19,21 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
-    public static FAILURE_STRING = "duplicate key '";
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "no-duplicate-key",
+        description: "Disallows duplicate keys in object literals.",
+        rationale: Lint.Utils.dedent`
+            There is no good reason to define an object literal with the same key twice.
+            This rule is now implemented in the TypeScript compiler and does not need to be used.`,
+        optionsDescription: "Not configurable.",
+        options: null,
+        optionExamples: ["true"],
+        type: "functionality",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
+    public static FAILURE_STRING_FACTORY = (name: string) => `Duplicate key '${name}'`;
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new NoDuplicateKeyWalker(sourceFile, this.getOptions()));
@@ -42,7 +56,7 @@ class NoDuplicateKeyWalker extends Lint.RuleWalker {
         if (keyNode.kind === ts.SyntaxKind.Identifier) {
             const key = (<ts.Identifier> keyNode).text;
             if (objectKeys[key]) {
-                const failureString = Rule.FAILURE_STRING + key + "'";
+                const failureString = Rule.FAILURE_STRING_FACTORY(key);
                 this.addFailure(this.createFailure(keyNode.getStart(), keyNode.getWidth(), failureString));
             } else {
                 objectKeys[key] = true;

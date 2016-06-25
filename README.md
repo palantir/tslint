@@ -31,19 +31,19 @@ Installation
 ------------
 <sup>[back to ToC &uarr;](#table-of-contents)</sup>
 
-##### CLI
+#### CLI
 
 ```
 npm install -g tslint typescript
 ```
 
-##### Library
+#### Library
 
 ```
 npm install tslint typescript
 ```
 
-##### Peer dependencies
+#### Peer dependencies
 
 `typescript` is a peer dependency of `tslint`. This allows you to update the compiler independently from the
 linter. This also means that `tslint` will have to use the same version of `tsc` used to actually compile your sources.
@@ -60,7 +60,45 @@ Usage
 
 Please ensure that the TypeScript source files compile correctly _before_ running the linter.
 
-##### CLI
+#### Configuration
+
+TSLint is configured via a file named `tslint.json`. This file is loaded from the current path, or the user's home directory, in that order.
+
+The configuration file specifies which rules are enabled and their options. These configurations may _extend_ other ones via the `"extends"` field in `tslint.json`.
+
+```js
+{
+  /*
+   * Possible values:
+   * - the name of a built-in config
+   * - the name of an NPM module which has a "main" file that exports a config object
+   * - a relative path to a JSON file
+   */
+  "extends": "tslint:latest",
+  "rules": {
+    /*
+     * Any rules specified here will override those from the base config we are extending
+     */
+    "no-constructor-vars": true
+  },
+  "rulesDirectory": [
+    /*
+     * A list of relative or absolute paths to directories that contain custom rules.
+     * See the Custom Rules documentation below for more details.
+     */
+  ]
+}
+```
+
+Built-in configs include `tslint:latest` and `tslint:recommended`. You may inspect their source [here](https://github.com/palantir/tslint/tree/master/src/configs).
+
+__`tslint:recommended`__ is a stable, somewhat opinionated set of rules which we encourage for general TypeScript programming. This configuration follows semver, so it will _not_ have breaking changes across minor or patch releases.
+
+__`tslint:latest`__ extends `tslint:recommended` and is continuously updated to include configuration for the latest rules in every TSLint release. Using this config may introduce breaking changes across minor releases as new rules are enabled which cause lint failures in your code. When TSLint reaches a major version bump, `tslint:recommended` will be updated to be identical to `tslint:latest`.
+
+See the [core rules list](#core-rules) below for descriptions of all the rules.
+
+#### CLI
 
 usage: `tslint [options] file ...`
 
@@ -80,8 +118,6 @@ Options:
 -v, --version         current version
 ```
 
-By default, configuration is loaded from `tslint.json`, if it exists in the current path, or the user's home directory, in that order.
-
 tslint accepts the following command-line options:
 
 ```
@@ -91,7 +127,7 @@ tslint accepts the following command-line options:
     to the rules. If no option is specified, the config file named
     tslint.json is used, so long as it exists in the path.
     The format of the file is { rules: { /* rules list */ } },
-    where /* rules list */ is a key: value comma-seperated list of
+    where /* rules list */ is a key: value comma-separated list of
     rulename: rule-options pairs. Rule-options can be either a
     boolean true/false value denoting whether the rule is used or not,
     or a list [boolean, ...] where the boolean provides the same role
@@ -137,7 +173,7 @@ tslint accepts the following command-line options:
     formatters are prose (human readable), json (machine readable)
     and verbose. prose is the default if this option is not used.
     Other built-in options include pmd, msbuild, checkstyle, and vso.
-    Additonal formatters can be added and used if the --formatters-dir
+    Additional formatters can be added and used if the --formatters-dir
     option is set.
 
 --test:
@@ -153,31 +189,29 @@ tslint accepts the following command-line options:
     Prints this help message.
 ```
 
-##### Library
+#### Library
 
 ```javascript
-var fileName = "Specify file name";
+const Linter = require("tslint");
+const fs = require("fs");
 
-var configuration = {
+const fileName = "Specify file name";
+const configuration = {
     rules: {
         "variable-name": true,
         "quotemark": [true, "double"]
     }
 };
-
-var options = {
+const options = {
     formatter: "json",
     configuration: configuration,
-    rulesDirectory: "customRules/", // can be an array of directories
+    rulesDirectory: "customRules/",
     formattersDirectory: "customFormatters/"
 };
 
-var Linter = require("tslint");
-var fs = require("fs");
-var contents = fs.readFileSync(fileName, "utf8");
-
-var ll = new Linter(fileName, contents, options);
-var result = ll.lint();
+const fileContents = fs.readFileSync(fileName, "utf8");
+const linter = new Linter(fileName, fileContents, options);
+const result = linter.lint();
 ```
 
 Core Rules
@@ -185,8 +219,6 @@ Core Rules
 <sup>[back to ToC &uarr;](#table-of-contents)</sup>
 
 Core rules are included in the `tslint` package.
-
-A sample configuration file with all options is available [here](https://github.com/palantir/tslint/blob/master/docs/sample.tslint.json).
 
 * `align` enforces vertical alignment. Rule options:
   * `"parameters"` checks alignment of function parameters.
@@ -205,9 +237,9 @@ A sample configuration file with all options is available [here](https://github.
 * `indent` enforces indentation with tabs or spaces. Rule options (one is required):
     * `"tabs"` enforces consistent tabs.
     * `"spaces"` enforces consistent spaces.
-* `interface-name` enforces consistent internace name. Rule options:
+* `interface-name` enforces consistent interface names. Rule options:
     * `"always-prefix"` enforces interface names must have an 'I' prefix
-    * `"never-prefix"` enforces interface name must not have an 'I' prefix
+    * `"never-prefix"` enforces interface names must not have an 'I' prefix
 * `jsdoc-format` enforces basic format rules for jsdoc comments -- comments starting with `/**`
     * each line contains an asterisk and asterisks must be aligned
     * each asterisk must be followed by either a space or a newline (except for the first and the last)
@@ -215,13 +247,14 @@ A sample configuration file with all options is available [here](https://github.
     * one line comments must start with `/** ` and end with ` */`
 * `label-position` enforces labels only on sensible statements.
 * `label-undefined` checks that labels are defined before usage.
+* `linebreak-style` checks that line breaks used in source files are either linefeed or carriage-return linefeeds. By default linefeeds are required. This rule accepts one parameter, either "LF" or "CRLF".
 * `max-line-length` sets the maximum length of a line.
 * `member-access` enforces using explicit visibility on class members
     * `"check-accessor"` enforces explicit visibility on get/set accessors
     * `"check-constructor"` enforces explicit visibility on constructors
 * `member-ordering` enforces member ordering. The first option should be an object with an `order` key.
    Values for `order` can be `fields-first`, `statics-first`, `instance-sandwich`, or a custom order.
-* `new-parens` enforces parentheses when invoking a constructor via the new keyword.
+* `new-parens` enforces parentheses when invoking a constructor via the `new` keyword.
 * `no-angle-bracket-type-assertion` disallows usages of `<>` type assertions in favor of using the `as` keyword.
 * `no-any` diallows usages of `any` as a type decoration.
 * `no-arg` disallows access to `arguments.callee`.
@@ -253,7 +286,8 @@ A sample configuration file with all options is available [here](https://github.
 * `no-switch-case-fall-through` disallows falling through case statements. As of TypeScript version 1.8, this rule can be enabled within the compiler by passing the `--noFallthroughCasesInSwitch` flag.
 * `no-trailing-whitespace` disallows trailing whitespace at the end of a line.
 * `no-unreachable` disallows unreachable code after `break`, `catch`, `throw`, and `return` statements. This rule is supported and enforced by default within the TypeScript compiler since version 1.8.
-* `no-unused-expression` disallows unused expression statements, that is, expression statements that are not assignments or function invocations (and thus no-ops).
+* `no-unused-expression` disallows unused expression statements, that is, expression statements that are not assignments or function invocations (and thus no-ops). Combine with `no-unused-new` to disallow expressions containing the new keyword.
+* `no-unused-new` disallows unused expressions statements which include the new keyword.
 * `no-unused-variable` disallows unused imports, variables, functions and private class members. Rule options:
     * `"check-parameters"` disallows unused function and constructor parameters.
         * NOTE: this option is experimental and does not work with classes that use abstract method declarations, among other things. Use at your own risk.
@@ -271,6 +305,7 @@ A sample configuration file with all options is available [here](https://github.
   * `"check-whitespace"` checks preceding whitespace for the specified tokens.
 * `one-variable-per-declaration` disallows multiple variable definitions in the same statement.
   * `"ignore-for-loop"` allows multiple variable definitions in for loop statement.
+* `only-arrow-functions` disallows traditional `function () { ... }` declarations, preferring `() => { ... }` arrow lambdas.
 * `quotemark` enforces consistent single or double quoted string literals. Rule options (at least one of `"double"` or `"single"` is required):
     * `"single"` enforces single quotes.
     * `"double"` enforces double quotes.
@@ -290,12 +325,13 @@ A sample configuration file with all options is available [here](https://github.
     * `"allow-null-check"` allows `==` and `!=` when comparing to `null`.
     * `"allow-undefined-check"` allows `==` and `!=` when comparing to `undefined`.
 * `typedef` enforces type definitions to exist. Rule options:
-    * `"call-signature"` checks return type of functions.
+    * `"call-signature"` checks return type of non-arrow functions.
+    * `"arrow-call-signature"` checks return type of arrow functions.
     * `"parameter"` checks type specifier of function parameters for non-arrow functions.
     * `"arrow-parameter"` checks type specifier of function parameters for arrow functions.
     * `"property-declaration"` checks return types of interface properties.
     * `"variable-declaration"` checks variable declarations.
-    * `"member-variable-declaration"` checks member variable declarations.
+    * `"member-variable-declaration"` checks member variable declarations. For arrow functions being assigned as properties, either the property itself or the arrow functions parameters must have a typedef.
 * `typedef-whitespace` enforces spacing whitespace for type definitions. Each rule option requires a value of `"nospace"`,
   `"onespace"` or `"space"` to require no space, exactly one or at least one space before or after the type specifier's
   colon. You can specify two objects containing the five options. The first one describes the left, the second one the
@@ -348,6 +384,10 @@ Custom Rules
 ------------
 <sup>[back to ToC &uarr;](#table-of-contents)</sup>
 
+#### Custom rule sets from Palantir
+
+- [tslint-react](https://github.com/palantir/tslint-react) - Lint rules related to React & JSX.
+
 #### Custom rule sets from the community
 
 If we don't have all the rules you're looking for, you can either write your own custom rules or use custom rules that others have developed. The repos below are a good source of custom rules:
@@ -355,10 +395,11 @@ If we don't have all the rules you're looking for, you can either write your own
 - [ESLint rules for TSLint](https://github.com/buzinas/tslint-eslint-rules) - Improve your TSLint with the missing ESLint Rules
 - [tslint-microsoft-contrib](https://github.com/Microsoft/tslint-microsoft-contrib) - A set of TSLint rules used on some Microsoft projects
 - [codelyzer](https://github.com/mgechev/codelyzer) - A set of tslint rules for static code analysis of Angular 2 TypeScript projects
+- [vrsource-tslint-rules](https://github.com/vrsource/vrsource-tslint-rules)
 
 #### Writing custom rules
 
-TSLint ships with a set of core rules that can be configured. However, users are also allowed to write their own rules, which allows them to enforce specific behavior not covered by the core of TSLint. TSLint's internal rules are itself written to be pluggable, so adding a new rule is as simple as creating a new rule file named by convention. New rules can be written in either TypeScript or Javascript; if written in TypeScript, the code must be compiled to Javascript before invoking TSLint.
+TSLint ships with a set of core rules that can be configured. However, users are also allowed to write their own rules, which allows them to enforce specific behavior not covered by the core of TSLint. TSLint's internal rules are itself written to be pluggable, so adding a new rule is as simple as creating a new rule file named by convention. New rules can be written in either TypeScript or JavaScript; if written in TypeScript, the code must be compiled to JavaScript before invoking TSLint.
 
 Rule names are always camel-cased and *must* contain the suffix `Rule`. Let us take the example of how to write a new rule to forbid all import statements (you know, *for science*). Let us name the rule file `noImportsRule.ts`. Rules can be referenced in `tslint.json` in their kebab-case forms, so `"no-imports": true` would turn on the rule.
 

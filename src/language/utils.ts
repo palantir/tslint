@@ -124,7 +124,6 @@ export function isNodeFlagSet(node: ts.Node, flagToCheck: ts.NodeFlags): boolean
     /* tslint:enable:no-bitwise */
 }
 
-
 /**
  * Returns true if decl is a nested module declaration, i.e. represents a segment of a dotted module path.
  */

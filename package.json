@@ -39,6 +39,7 @@
     "grunt-run": "~0.6.0",
     "grunt-ts": "^5.1.0",
     "grunt-tslint": "latest",
+    "js-yaml": "^3.4.6",
     "mocha": "^2.2.5",
     "tslint": "next",
     "tslint-test-config-non-relative": "file:test/external/tslint-test-config-non-relative",

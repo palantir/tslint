@@ -19,7 +19,27 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
-    public static FAILURE_STRING = "forbidden bitwise operation";
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "no-bitwise",
+        description: "Disallows bitwise operators.",
+        descriptionDetails: Lint.Utils.dedent`
+            Specifically, the following bitwise operators are banned:
+            \`&\`, \`&=\`, \`|\`, \`|=\`,
+            \`^\`, \`^=\`, \`<<\`, \`<<=\`,
+            \`>>\`, \`>>=\`, \`>>>\`, \`>>>=\`, and \`~\`.
+            This rule does not ban the use of \`&\` and \`|\` for intersection and union types.`,
+        rationale: Lint.Utils.dedent`
+            Bitwise operators are often typos - for example \`bool1 & bool2\` instead of \`bool1 && bool2\`.
+            They also can be an indicator of overly clever code which decreases maintainability.`,
+        optionsDescription: "Not configurable.",
+        options: null,
+        optionExamples: ["true"],
+        type: "functionality",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
+    public static FAILURE_STRING = "Forbidden bitwise operation";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new NoBitwiseWalker(sourceFile, this.getOptions()));
@@ -42,6 +62,8 @@ class NoBitwiseWalker extends Lint.RuleWalker {
             case ts.SyntaxKind.GreaterThanGreaterThanGreaterThanToken:
             case ts.SyntaxKind.GreaterThanGreaterThanGreaterThanEqualsToken:
                 this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+                break;
+            default:
                 break;
         }
         super.visitBinaryExpression(node);

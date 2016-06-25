@@ -86,6 +86,8 @@ async function f(foo: Promise<void>): Promise<number> {
     return 0;
 }
 
+new Foo();
+
 // invalid code:
 
 5;

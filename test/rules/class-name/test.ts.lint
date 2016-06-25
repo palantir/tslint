@@ -14,4 +14,4 @@ export default class {
     // should not fail
 }
 
-[0]: name must be in pascal case
+[0]: Class name must be in pascal case

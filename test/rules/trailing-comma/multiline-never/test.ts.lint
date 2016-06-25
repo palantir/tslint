@@ -3,7 +3,7 @@ var v = [{
     b: 2,
     d: 34,
     c: (a + b),
-              ~ [trailing comma]
+              ~ [Unnecessary trailing comma]
 },];
 
 var x = [{
@@ -15,7 +15,7 @@ var x = [{
 
 var s = {
     sA: 6,
-         ~ [trailing comma]
+         ~ [Unnecessary trailing comma]
 };
 
 var t = {
@@ -25,7 +25,7 @@ var t = {
 var y = {
     yA: 42,
     yB: 24,
-          ~ [trailing comma]
+          ~ [Unnecessary trailing comma]
 };
 
 var z = {
@@ -35,7 +35,7 @@ var z = {
 
 var ss = [
     6,
-     ~ [trailing comma]
+     ~ [Unnecessary trailing comma]
 ];
 
 var tt = [
@@ -45,7 +45,7 @@ var tt = [
 var yy = [
     42,
     24,
-      ~ [trailing comma]
+      ~ [Unnecessary trailing comma]
 ];
 
 var zz = [
@@ -67,7 +67,7 @@ var dd = [2, 1];
 
 var {
     sA,
-      ~ [trailing comma]
+      ~ [Unnecessary trailing comma]
 } = s;
 
 var {
@@ -77,7 +77,7 @@ var {
 var {
     yA,
     yB,
-      ~ [trailing comma]
+      ~ [Unnecessary trailing comma]
 } = y;
 
 var {
@@ -87,7 +87,7 @@ var {
 
 var [
     ssA,
-       ~ [trailing comma]
+       ~ [Unnecessary trailing comma]
 ] = ss;
 
 var [
@@ -97,7 +97,7 @@ var [
 var [
     yyA,
     yyB,
-       ~ [trailing comma]
+       ~ [Unnecessary trailing comma]
 ] = yy;
 
 var [
@@ -115,7 +115,7 @@ var [ddOne, ddTwo] = dd;
 
 import {
     ClassS,
-          ~ [trailing comma]
+          ~ [Unnecessary trailing comma]
 } from "module";
 
 import {
@@ -125,7 +125,7 @@ import {
 import {
     ClassV,
     ClassX,
-          ~ [trailing comma]
+          ~ [Unnecessary trailing comma]
 } from "module";
 
 import {

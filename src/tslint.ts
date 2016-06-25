@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-import {IFormatter} from "./language/formatter/formatter";
-import {RuleFailure} from "./language/rule/rule";
-import {getSourceFile} from "./language/utils";
+import { IFormatter } from "./language/formatter/formatter";
+import { RuleFailure } from "./language/rule/rule";
+import { getSourceFile } from "./language/utils";
 import {
     DEFAULT_CONFIG,
     findConfiguration,
@@ -26,11 +26,11 @@ import {
     getRulesDirectories,
     loadConfigurationFromPath,
 } from "./configuration";
-import {EnableDisableRulesWalker} from "./enableDisableRules";
-import {findFormatter} from "./formatterLoader";
-import {ILinterOptionsRaw, ILinterOptions, LintResult} from "./lint";
-import {loadRules} from "./ruleLoader";
-import {arrayify} from "./utils";
+import { EnableDisableRulesWalker } from "./enableDisableRules";
+import { findFormatter } from "./formatterLoader";
+import { ILinterOptionsRaw, ILinterOptions, LintResult } from "./lint";
+import { loadRules } from "./ruleLoader";
+import { arrayify } from "./utils";
 
 class Linter {
     public static VERSION = "3.11.0-dev.0";
@@ -114,5 +114,7 @@ class Linter {
     }
 }
 
+// tslint:disable-next-line:no-namespace
 namespace Linter {}
+
 export = Linter;

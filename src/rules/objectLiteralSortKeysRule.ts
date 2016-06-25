@@ -19,8 +19,19 @@ import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
-    public static FAILURE_STRING_PREFIX = "The key '";
-    public static FAILURE_STRING_POSTFIX = "' is not sorted alphabetically";
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "object-literal-sort-keys",
+        description: "Requires keys in object literals to be sorted alphabetically",
+        rationale: "Useful in preventing merge conflicts",
+        optionsDescription: "Not configurable.",
+        options: null,
+        optionExamples: ["true"],
+        type: "maintainability",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
+    public static FAILURE_STRING_FACTORY = (name: string) => `The key '${name}' is not sorted alphabetically`;
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new ObjectLiteralSortKeysWalker(sourceFile, this.getOptions()));
@@ -53,7 +64,7 @@ class ObjectLiteralSortKeysWalker extends Lint.RuleWalker {
             if (keyNode.kind === ts.SyntaxKind.Identifier) {
                 const key = (<ts.Identifier> keyNode).text;
                 if (key < lastSortedKey) {
-                    const failureString = Rule.FAILURE_STRING_PREFIX + key + Rule.FAILURE_STRING_POSTFIX;
+                    const failureString = Rule.FAILURE_STRING_FACTORY(key);
                     this.addFailure(this.createFailure(keyNode.getStart(), keyNode.getWidth(), failureString));
                     this.sortedStateStack[this.sortedStateStack.length - 1] = false;
                 } else {

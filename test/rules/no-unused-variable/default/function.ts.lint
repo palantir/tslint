@@ -3,12 +3,12 @@ function func1(x: number, y: number) {
 }
 
 var func2 = () => {
-    ~~~~~           [unused variable: 'func2']
+    ~~~~~           [Unused variable: 'func2']
     //
 };
 
 function func3() {
-         ~~~~~     [unused variable: 'func3']
+         ~~~~~     [Unused variable: 'func3']
     return func1(1, 2);
 }
 

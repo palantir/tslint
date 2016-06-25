@@ -10,4 +10,5 @@ var bar = new Bar;
 var fogefoge = new Bar(new Foo);
                        ~~~~~~~ [0]
 
-[0]: parentheses required when invoking a constructor
+[0]: Parentheses are required when invoking a constructor
+

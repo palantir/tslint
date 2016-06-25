@@ -1,0 +1,23 @@
+function foo(a: any) : any {
+~~~~~~~~                              [0]
+    return;
+}
+
+let a = () => {};
+let b = function () {};
+        ~~~~~~~~                 [0]
+
+function c() {}
+~~~~~~~~                 [0]
+
+function () {
+~~~~~~~~               [0]
+    // ...
+}
+
+((func) => func())(function e(): void {});
+                   ~~~~~~~~                   [0]
+
+((func) => func())(() => {});
+
+[0]: non-arrow functions are forbidden
