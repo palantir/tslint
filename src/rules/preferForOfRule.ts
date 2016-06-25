@@ -1,7 +1,36 @@
+/**
+ * @license
+ * Copyright 2016 Palantir Technologies, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import * as ts from "typescript";
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "prefer-for-of",
+        description: "Recommends a TypeScript for(... of ...) loop over a standard for loop if the index is only used to access the array being looped over.",
+        rationale: "A for(... of ...) loop is easier to implement and read when the index is not needed.",
+        optionsDescription: "Not configurable.",
+        options: null,
+        optionExamples: ["true"],
+        type: "typescript",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING = "This standard for loop could be replaced with a for(... of ...) loop";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -33,12 +62,12 @@ class ForOfWalker extends Lint.RuleWalker {
             const arrayToken = arrayAccessNode.getChildAt(0);
             const loopSyntax = node.statement.getChildAt(1);
 
-            // Find all usages of the inrementer variable
+            // Find all usages of the incrementor variable
             const fileName = this.getSourceFile().fileName;
             const highlights = this.languageService.getDocumentHighlights(fileName, incrementorVariable.getStart(), [fileName]);
             // There are three usages when setting up the for loop,
             // so remove those form the count to get the count inside the loop block
-            const inrementerCount = highlights[0].highlightSpans.length - 3;
+            const incrementorCount = highlights[0].highlightSpans.length - 3;
 
             // Find `array[i]`-like usages by building up a regex 
             const arrayTokenForRegex = arrayToken.getText().replace(".", "\\.");
@@ -47,11 +76,11 @@ class ForOfWalker extends Lint.RuleWalker {
             const accessMatches = loopSyntax.getText().match(regex);
             const matchCount = (accessMatches || []).length;
 
-            // If there are more usages of the array item being access than the inrementer variable
+            // If there are more usages of the array item being access than the incrementor variable
             // being used, then this loop could be replaced with a for-of loop instead.
-            // This means that the incrementer variable is not used on its own anywhere and is ONLY
+            // This means that the incrementor variable is not used on its own anywhere and is ONLY
             // used to access the array item.
-            if (matchCount >= inrementerCount) {
+            if (matchCount >= incrementorCount) {
                 const failure = this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING);
                 this.addFailure(failure);
             }
