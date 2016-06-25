@@ -1,6 +1,14 @@
 Change Log
 ===
 
+v3.12.1
+---
+* Stable release containing changes from the last dev release (v3.12.0-dev.1)
+
+v3.12.0-dev.1
+---
+* [bugfix] Fix null reference bug in typedef rule (#1345)
+
 v3.12.0
 ---
 * Stable release containing changes from the last dev release (v3.12.0-dev.0)
