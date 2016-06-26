@@ -37,6 +37,7 @@ export const DEFAULT_CONFIG = {
         "no-duplicate-variable": true,
         "no-eval": true,
         "no-internal-module": true,
+        "no-return-in-finally": true,
         "no-trailing-whitespace": true,
         "no-var-keyword": true,
         "one-line": [true, "check-open-brace", "check-whitespace"],

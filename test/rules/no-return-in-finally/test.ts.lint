@@ -1,0 +1,119 @@
+function() {
+    try {
+    } finally {
+        return;
+        ~~~~~~~    [finally block contains return statement]
+    }
+}
+
+function() {
+    try {
+    } catch {
+    } finally {
+        return 1;
+        ~~~~~~~~~    [finally block contains return statement]
+    }
+}
+
+function() {
+    try {
+    } catch {
+    } finally {
+        {
+            return 1;
+            ~~~~~~~~~    [finally block contains return statement]
+        }
+    }
+}
+
+function() {
+    try {
+    } catch {
+    } finally {
+        for (let i = 0; i < 5; ++i) {
+            if (i % 2 === 0) {
+                return 1;
+                ~~~~~~~~~    [finally block contains return statement]
+            }
+        }
+    }
+}
+
+function() {
+    try {
+    } catch {
+    } finally {
+        let i = 1;
+        while (i < 5) {
+            if (i % 2 === 0) {
+                return i;
+                ~~~~~~~~~    [finally block contains return statement]
+            }
+
+            ++i;
+        }
+    }
+}
+
+function() {
+    try {
+    } catch {
+    } finally {
+        let i = 1;
+        do {
+            if (i % 2 === 0) {
+                return i;
+                ~~~~~~~~~    [finally block contains return statement]
+            }
+
+            ++i;
+        } while (i < 5);
+    }
+}
+
+function() {
+    try {
+        if (foo()) {
+            try {
+                bar();
+            } catch {
+            } finally {
+                return 2;
+                ~~~~~~~~~    [finally block contains return statement]
+            }
+        }
+    } catch {
+    } finally {
+        for (const i of [1, 2, 3, 4, 5]) {
+            if (i % 2 === 0) {
+                return 1;
+                ~~~~~~~~~    [finally block contains return statement]
+            }
+        }
+    }
+}
+
+// valid
+function() {
+    try {
+    } finally {
+        (function() {
+            return 1;
+        })();
+    }
+}
+
+// valid
+function() {
+    try {
+        foo();
+    } finally {
+        class C {
+            bar() {
+                return 1;
+            }
+        }
+    }
+
+    return 1;
+}

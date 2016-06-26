@@ -1,0 +1,5 @@
+{
+    "rules": {
+        "no-return-in-finally": true
+    }
+}

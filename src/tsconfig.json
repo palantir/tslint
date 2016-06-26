@@ -106,6 +106,7 @@
         "rules/noNullKeywordRule.ts",
         "rules/noReferenceRule.ts",
         "rules/noRequireImportsRule.ts",
+        "rules/noReturnInFinallyRule.ts",
         "rules/noShadowedVariableRule.ts",
         "rules/noStringLiteralRule.ts",
         "rules/noSwitchCaseFallThroughRule.ts",
