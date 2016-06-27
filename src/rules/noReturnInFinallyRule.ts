@@ -35,72 +35,53 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "finally block contains return statement";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new FinallyBlockWalker(sourceFile, this.getOptions()));
+        return this.applyWithWalker(new NoReturnInFinallyScopeAwareWalker(sourceFile, this.getOptions()));
     }
+}
+
+/**
+ * Represents details associated with tracking finally scope.
+ */
+interface IFinallyScope {
+    /**
+     * A value indicating whether the current scope is within a finally block.
+     */
+    isFinallyBlock: boolean;
 }
 
 /**
  * Represents a block walker that identifies finally blocks and walks
  * only the blocks that do not change scope for return statements.
  */
-class FinallyBlockWalker extends Lint.RuleWalker {
-    private internalWalker: NoReturnInCurrentScopeWalker;
-
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
-        super(sourceFile, options);
-
-        this.internalWalker = new NoReturnInCurrentScopeWalker(sourceFile, options);
-    }
-
-    public getFailures(): Lint.RuleFailure[] {
-        return this.internalWalker.getFailures();
-    }
-
-    protected visitTryStatement(node: ts.TryStatement) {
-        super.visitTryStatement(node);
-
-        if (!node.finallyBlock) {
+class NoReturnInFinallyScopeAwareWalker extends Lint.ScopeAwareRuleWalker<IFinallyScope> {
+    protected visitReturnStatement(node: ts.ReturnStatement): void {
+        if (!this.getCurrentScope().isFinallyBlock) {
             return;
         }
 
-        ts.forEachChild(node.finallyBlock, this.internalWalker.walk.bind(this.internalWalker));
-    }
-}
-
-/**
- * Represents a block walker that only explores blocks that do not change scope
- * for return statements.
- */
-class NoReturnInCurrentScopeWalker extends Lint.RuleWalker {
-    protected visitReturnStatement(node: ts.ReturnStatement): void {
         this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
     }
 
-    protected visitNode(node: ts.Node) {
-        if (!this.canBlockContainReturnInCurrentScope(node.kind)) {
-            return;
-        }
-
-        super.visitNode(node);
+    public createScope(node: ts.Node): IFinallyScope {
+        return {
+            isFinallyBlock: this.isFinallyBlock(node),
+        };
     }
 
-    private canBlockContainReturnInCurrentScope(kind: ts.SyntaxKind): boolean {
-        return kind === ts.SyntaxKind.Block ||
-            kind === ts.SyntaxKind.BreakStatement ||
-            kind === ts.SyntaxKind.CaseClause ||
-            kind === ts.SyntaxKind.CatchClause ||
-            kind === ts.SyntaxKind.ConditionalExpression ||
-            kind === ts.SyntaxKind.DefaultClause ||
-            kind === ts.SyntaxKind.DoStatement ||
-            kind === ts.SyntaxKind.ForStatement ||
-            kind === ts.SyntaxKind.ForInStatement ||
-            kind === ts.SyntaxKind.ForOfStatement ||
-            kind === ts.SyntaxKind.IfStatement ||
-            kind === ts.SyntaxKind.LabeledStatement ||
-            kind === ts.SyntaxKind.ReturnStatement ||
-            kind === ts.SyntaxKind.SwitchStatement ||
-            kind === ts.SyntaxKind.TryStatement ||
-            kind === ts.SyntaxKind.WhileStatement ||
-            kind === ts.SyntaxKind.WithStatement;
+    protected isScopeBoundary(node: ts.Node): boolean {
+        return super.isScopeBoundary(node) || this.isFinallyBlock(node);
+    }
+
+    private isFinallyBlock(node: ts.Node): boolean {
+        const parent = node.parent;
+
+        return parent &&
+            node.kind === ts.SyntaxKind.Block &&
+            this.isTryStatement(parent) &&
+            parent.finallyBlock === node;
+    }
+
+    private isTryStatement(node: ts.Node): node is ts.TryStatement {
+        return node.kind === ts.SyntaxKind.TryStatement;
     }
 }
