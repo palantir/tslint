@@ -2,7 +2,7 @@ function() {
     try {
     } finally {
         return;
-        ~~~~~~~    [finally block contains return statement]
+        ~~~~~~~    [no-return-in-finally]
     }
 }
 
@@ -11,7 +11,7 @@ function() {
     } catch {
     } finally {
         return 1;
-        ~~~~~~~~~    [finally block contains return statement]
+        ~~~~~~~~~    [no-return-in-finally]
     }
 }
 
@@ -21,7 +21,7 @@ function() {
     } finally {
         {
             return 1;
-            ~~~~~~~~~    [finally block contains return statement]
+            ~~~~~~~~~    [no-return-in-finally]
         }
     }
 }
@@ -33,7 +33,7 @@ function() {
         for (let i = 0; i < 5; ++i) {
             if (i % 2 === 0) {
                 return 1;
-                ~~~~~~~~~    [finally block contains return statement]
+                ~~~~~~~~~    [no-return-in-finally]
             }
         }
     }
@@ -47,7 +47,7 @@ function() {
         while (i < 5) {
             if (i % 2 === 0) {
                 return i;
-                ~~~~~~~~~    [finally block contains return statement]
+                ~~~~~~~~~    [no-return-in-finally]
             }
 
             ++i;
@@ -63,7 +63,7 @@ function() {
         do {
             if (i % 2 === 0) {
                 return i;
-                ~~~~~~~~~    [finally block contains return statement]
+                ~~~~~~~~~    [no-return-in-finally]
             }
 
             ++i;
@@ -79,7 +79,7 @@ function() {
             } catch {
             } finally {
                 return 2;
-                ~~~~~~~~~    [finally block contains return statement]
+                ~~~~~~~~~    [no-return-in-finally]
             }
         }
     } catch {
@@ -87,9 +87,20 @@ function() {
         for (const i of [1, 2, 3, 4, 5]) {
             if (i % 2 === 0) {
                 return 1;
-                ~~~~~~~~~    [finally block contains return statement]
+                ~~~~~~~~~    [no-return-in-finally]
             }
         }
+    }
+}
+
+function foo() {
+    try {
+        try {
+        } finally {
+            return 1;
+            ~~~~~~~~~    [no-return-in-finally]
+        }
+    } catch {
     }
 }
 
@@ -117,3 +128,5 @@ function() {
 
     return 1;
 }
+
+[no-return-in-finally]: finally block contains return statement

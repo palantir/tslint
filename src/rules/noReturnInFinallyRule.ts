@@ -44,12 +44,12 @@ export class Rule extends Lint.Rules.AbstractRule {
  * only the blocks that do not change scope for return statements.
  */
 class FinallyBlockWalker extends Lint.RuleWalker {
-    private internalWalker: NoReturnInFinallyBlockWalker;
+    private internalWalker: NoReturnInCurrentScopeWalker;
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
 
-        this.internalWalker = new NoReturnInFinallyBlockWalker(sourceFile, options);
+        this.internalWalker = new NoReturnInCurrentScopeWalker(sourceFile, options);
     }
 
     public getFailures(): Lint.RuleFailure[] {
@@ -57,11 +57,13 @@ class FinallyBlockWalker extends Lint.RuleWalker {
     }
 
     protected visitTryStatement(node: ts.TryStatement) {
+        super.visitTryStatement(node);
+
         if (!node.finallyBlock) {
             return;
         }
 
-        ts.forEachChild(node, this.internalWalker.walk.bind(this.internalWalker));
+        ts.forEachChild(node.finallyBlock, this.internalWalker.walk.bind(this.internalWalker));
     }
 }
 
@@ -69,7 +71,7 @@ class FinallyBlockWalker extends Lint.RuleWalker {
  * Represents a block walker that only explores blocks that do not change scope
  * for return statements.
  */
-class NoReturnInFinallyBlockWalker extends Lint.RuleWalker {
+class NoReturnInCurrentScopeWalker extends Lint.RuleWalker {
     protected visitReturnStatement(node: ts.ReturnStatement): void {
         this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
     }
