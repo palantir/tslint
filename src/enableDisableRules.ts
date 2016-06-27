@@ -64,10 +64,23 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
                 const isEnabled = enableOrDisableMatch[1] === "enable";
                 const isCurrentLine = enableOrDisableMatch[3] === "line";
                 const isNextLine = enableOrDisableMatch[3] === "next-line";
+
                 let rulesList = ["all"];
-                if (commentTextParts.length > 2) {
+
+                if (commentTextParts.length === 2) {
+                    // an implicit whitespace separator is used for the rules list.
+                    rulesList = commentTextParts[1].split(/\s+/).slice(1);
+
+                    // remove empty items and potential comment end.
+                    rulesList = rulesList.filter(item => !!item && item.indexOf("*/") === -1);
+
+                    // potentially there were no items, so default to `all`.
+                    rulesList = rulesList.length > 0 ? rulesList : ["all"];
+                } else if (commentTextParts.length > 2) {
+                    // an explicit separator was specified for the rules list.
                     rulesList = commentTextParts[2].split(/\s+/);
                 }
+
                 for (const ruleToAdd of rulesList) {
                     if (!(ruleToAdd in this.enableDisableRuleMap)) {
                         this.enableDisableRuleMap[ruleToAdd] = [];

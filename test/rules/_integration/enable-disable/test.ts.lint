@@ -25,6 +25,19 @@ var AAAaA = 'test'
 /* tslint:enable:zasdadsa */
 var AAAaA = 'test'
 
+/* tslint:enable quotemark */
+var AAAaA = 'test'
+            ~~~~~~ [' should be "]
+/* tslint:disable */
+var AAAaA = 'test'
+/* tslint:enable quotemark variable-name */
+var AAAaA = 'test'
+    ~~~~~          [variable name must be in camelcase or uppercase]
+            ~~~~~~ [' should be "]
+/* tslint:disable quotemark */
+var AAAaA = 'test'
+    ~~~~~          [variable name must be in camelcase or uppercase]
+
 /* tslint:enable */
 var  re;
 re = /`/;
