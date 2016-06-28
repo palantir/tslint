@@ -1,6 +1,41 @@
 Change Log
 ===
 
+v3.12.1
+---
+* Stable release containing changes from the last dev release (v3.12.0-dev.1)
+
+v3.12.0-dev.1
+---
+* [bugfix] Fix null reference bug in typedef rule (#1345)
+
+v3.12.0
+---
+* Stable release containing changes from the last dev release (v3.12.0-dev.0)
+
+v3.12.0-dev.0
+---
+* [new-rule] `only-arrow-functions` rule (#1318)
+* [new-rule] `no-unused-new` rule (#1316)
+* [new-rule-option] `arrow-call-signature` option for `typedef` rule (#1284)
+* [enhancement] Metadata for every rule (#1311)
+* [enhancement] `typedef` rule is more flexible about the location of typedefs for arrow functions (#1176)
+* [enhancement] Failure messages are clearer and more consistent for many rules (#1303, #1307, #1309)
+* [bugfix] `no-consecutive-blank-lines` now handles lines with only whitespace correctly (#1249)
+* [bugfix] Correctly load `.json` config files that have a BOM (#1338)
+
+Thanks to our contributors!
+* @allannienhuis
+* @arnaudvalle
+* @bencoveney
+* @chrismbarr
+* @corydeppen
+* @HamletDRC
+* @JoshuaKGoldberg
+* @timbrown81
+* @tomduncalf
+* @YuichiNukiyama
+
 v3.11.0
 ---
 * Stable release containing changes from the last dev release (v3.11.0-dev.0)
