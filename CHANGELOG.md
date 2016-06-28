@@ -1,6 +1,10 @@
 Change Log
 ===
 
+v3.12.0-dev.2
+---
+* [enhancement] Support TypeScript v2.0.0-dev builds
+
 v3.12.0-dev.1
 ---
 * [bugfix] Fix null reference bug in typedef rule (#1345)
