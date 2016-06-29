@@ -207,6 +207,22 @@ const processFile = (file: string) => {
         process.exit(1);
     }
 
+    const buffer = new Buffer(256);
+    buffer.fill(0);
+    const fd = fs.openSync(file, "r");
+    try {
+        fs.readSync(fd, buffer, 0, 256, null);
+        if (buffer.readInt8(0) === 0x47 && buffer.readInt8(188) === 0x47) {
+            // MPEG transport streams use the '.ts' file extension. They use 0x47 as the frame
+            // separator, repeating every 188 bytes. It is unlikely to find that pattern in
+            // TypeScript source, so tslint ignores files with the specific pattern.
+            console.warn(`${file}: ignoring MPEG transport stream`);
+            return;
+        }
+    } finally {
+        fs.closeSync(fd);
+    }
+
     const contents = fs.readFileSync(file, "utf8");
     const configuration = findConfiguration(possibleConfigAbsolutePath, file);
 
