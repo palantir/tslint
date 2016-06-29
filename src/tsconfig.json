@@ -98,6 +98,7 @@
         "rules/noDuplicateVariableRule.ts",
         "rules/noEmptyRule.ts",
         "rules/noEvalRule.ts",
+        "rules/noImproperConstructorParamUsageRule.ts",
         "rules/noInferrableTypesRule.ts",
         "rules/noInternalModuleRule.ts",
         "rules/noInvalidThisRule.ts",
