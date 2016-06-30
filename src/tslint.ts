@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as ts from "typescript";
 import {
     DEFAULT_CONFIG,
     findConfiguration,
@@ -27,6 +28,7 @@ import { EnableDisableRulesWalker } from "./enableDisableRules";
 import { findFormatter } from "./formatterLoader";
 import { IFormatter } from "./language/formatter/formatter";
 import { RuleFailure } from "./language/rule/rule";
+import { TypedRule } from "./language/rule/typedRule";
 import { getSourceFile } from "./language/utils";
 import { ILinterOptions, ILinterOptionsRaw, LintResult } from "./lint";
 import { loadRules } from "./ruleLoader";
@@ -42,13 +44,40 @@ class Linter {
 
     private options: ILinterOptions;
 
-    constructor(private fileName: string, private source: string, options: ILinterOptionsRaw) {
+    public static getProgram(configFile: string, projectDirectory?: string): ts.Program {
+        if (projectDirectory === undefined) {
+            const lastSeparator = configFile.lastIndexOf("/");
+            if (lastSeparator < 0) {
+                projectDirectory = ".";
+            } else {
+                projectDirectory = configFile.substring(0, lastSeparator + 1);
+            }
+        }
+
+        const {config} = ts.readConfigFile(configFile, ts.sys.readFile);
+        const parsed = ts.parseJsonConfigFileContent(config, {readDirectory: ts.sys.readDirectory}, projectDirectory);
+        const host = ts.createCompilerHost(parsed.options, true);
+        const program = ts.createProgram(parsed.fileNames, parsed.options, host);
+
+        return program;
+    }
+
+    public static getFileNames(program: ts.Program): string[] {
+        return program.getSourceFiles().map(s => s.fileName).filter(l => l.substr(5) !== ".d.ts");
+    }
+
+    constructor(private fileName: string, private source: string, options: ILinterOptionsRaw, private program?: ts.Program) {
         this.options = this.computeFullOptions(options);
     }
 
     public lint(): LintResult {
         const failures: RuleFailure[] = [];
-        const sourceFile = getSourceFile(this.fileName, this.source);
+        let sourceFile: ts.SourceFile;
+        if (this.program) {
+            sourceFile = this.program.getSourceFile(this.fileName);
+        } else {
+            sourceFile = getSourceFile(this.fileName, this.source);
+        }
 
         // walk the code first to find all the intervals where rules are disabled
         const rulesWalker = new EnableDisableRulesWalker(sourceFile, {
@@ -63,7 +92,12 @@ class Linter {
         const configuredRules = loadRules(configuration, enableDisableRuleMap, rulesDirectories);
         const enabledRules = configuredRules.filter((r) => r.isEnabled());
         for (let rule of enabledRules) {
-            const ruleFailures = rule.apply(sourceFile);
+            let ruleFailures: RuleFailure[] = [];
+            if (this.program && rule instanceof TypedRule) {
+                ruleFailures = rule.applyWithProgram(sourceFile, this.program);
+            } else {
+                ruleFailures = rule.apply(sourceFile);
+            }
             for (let ruleFailure of ruleFailures) {
                 if (!this.containsRule(failures, ruleFailure)) {
                     failures.push(ruleFailure);

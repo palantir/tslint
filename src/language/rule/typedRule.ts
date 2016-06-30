@@ -15,5 +15,14 @@
  * limitations under the License.
  */
 
-export * from "./language/rule/abstractRule";
-export * from "./language/rule/typedRule";
+import * as ts from "typescript";
+import {RuleFailure} from "./rule";
+import {AbstractRule} from "./abstractRule";
+
+export abstract class TypedRule extends AbstractRule {
+    public apply(sourceFile: ts.SourceFile): RuleFailure[] {
+        return [];
+    }
+
+    public abstract applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): RuleFailure[];
+}
