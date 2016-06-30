@@ -21,7 +21,7 @@ import * as Lint from "../lint";
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
-        ruleName: "no-mergable-namespace",
+        ruleName: "no-mergeable-namespace",
         description: "Disallows mergeable namespaces in the same file.",
         optionsDescription: "Not configurable.",
         options: null,
