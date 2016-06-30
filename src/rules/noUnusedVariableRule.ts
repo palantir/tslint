@@ -67,7 +67,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static FAILURE_TYPE_FUNC = "function";
     public static FAILURE_TYPE_IMPORT = "import";
-    public static FAILURE_TYPE_METHOD = "method"
+    public static FAILURE_TYPE_METHOD = "method";
     public static FAILURE_TYPE_PARAM = "parameter";
     public static FAILURE_TYPE_PROP = "property";
     public static FAILURE_TYPE_VAR = "variable";
