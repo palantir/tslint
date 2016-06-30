@@ -108,6 +108,18 @@ expectOut $? 0 "tslint --test did not exit correctly for a passing test with cus
 ./bin/tslint -r test/files/custom-rules-2 --test test/files/custom-rule-cli-rule-test
 expectOut $? 0 "tslint --test did not exit correctly for a passing test with custom rules from the CLI"
 
+# make sure tslint exits correctly when tsconfig is specified but no files are given
+./bin/tslint -c test/files/tsconfig-test/tslint.json --project test/files/tsconfig-test/tsconfig.json
+expectOut $? 0 "tslint with tsconfig did not exit correctly"
+
+# make sure tslint only lints files given if tsconfig is also specified
+./bin/tslint -c test/files/tsconfig-test/tslint.json --project test/files/tsconfig-test/tsconfig.json test/files/tsconfig-test/other.test.ts
+expectOut $? 2 "tslint with tsconfig and files did not find lint failures from given files"
+
+# make sure tslint runs the type checker
+./bin/tslint -c test/files/tsconfig-test/tslint.json --project test/files/tsconfig-test/tsconfig.json --type-check
+expectOut $? 2 "tslint with --type-check flag did not find type checked lint failures"
+
 if [ $num_failures != 0 ]; then
   echo "Failed $num_failures tests"
   exit 1

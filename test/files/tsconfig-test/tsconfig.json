@@ -1,0 +1,6 @@
+{
+    "files": [
+        "good.test.ts",
+        "badTypes.test.ts"
+    ]
+}

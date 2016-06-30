@@ -1,0 +1,1 @@
+let x: string = 1 + "1";
