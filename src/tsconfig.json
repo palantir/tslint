@@ -126,6 +126,7 @@
         "rules/orderedImportsRule.ts",
         "rules/quotemarkRule.ts",
         "rules/radixRule.ts",
+        "rules/restrictPlusOperandsRule.ts",
         "rules/semicolonRule.ts",
         "rules/switchDefaultRule.ts",
         "rules/trailingCommaRule.ts",

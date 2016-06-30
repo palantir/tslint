@@ -1,0 +1,37 @@
+var x = 5;
+var y = "10";
+var z = 8.2;
+var w = "6.5";
+
+// bad
+var bad1  = 5 + "10";
+            ~~~~~~~~  [types must match]
+var bad2  = [] + 5;
+            ~~~~~~  [types must match]
+var bad3  = [] + {};
+            ~~~~~~~  [types must match]
+var bad4  = [] + [];
+            ~~~~~~~  [cannot add types undefined[]]
+var bad4  = 5 + [];
+            ~~~~~~  [types must match]
+var bad5  = "5" + {};
+            ~~~~~~~~  [types must match]
+var bad6  = 5.5 + "5";
+            ~~~~~~~~~  [types must match]
+var bad7  = "5.5" + 5;
+            ~~~~~~~~~  [types must match]
+var bad8  = x + y;
+            ~~~~~  [types must match]
+var bad9  = y + x;
+            ~~~~~  [types must match]
+var bad10 = x + {};
+            ~~~~~~  [types must match]
+var bad11 = [] + y;
+            ~~~~~~  [types must match]
+
+// good
+var good1 = 5 + 10;
+var good2 = "5.5" + "10";
+var good3 = parseFloat("5.5", 10), + 10;
+var good4 = x + z;
+var good5 = y + w;
