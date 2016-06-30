@@ -121,6 +121,7 @@
         "rules/oneLineRule.ts",
         "rules/oneVariablePerDeclarationRule.ts",
         "rules/onlyArrowFunctionsRule.ts",
+        "rules/orderedImportsRule.ts",
         "rules/quotemarkRule.ts",
         "rules/radixRule.ts",
         "rules/semicolonRule.ts",

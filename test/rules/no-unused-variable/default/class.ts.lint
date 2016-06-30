@@ -1,6 +1,6 @@
 class ABCD {
     private z2: number;
-            ~~          [Unused variable: 'z2']
+            ~~          [Unused property: 'z2']
     constructor() {
     }
 
@@ -17,7 +17,7 @@ class ABCD {
     }
 
     private mfunc4() {
-            ~~~~~~     [Unused variable: 'mfunc4']
+            ~~~~~~     [Unused method: 'mfunc4']
         //
     }
     static stillPublic: number;
