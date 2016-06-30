@@ -121,6 +121,7 @@
         "../src/rules/onlyArrowFunctionsRule.ts",
         "../src/rules/orderedImportsRule.ts",
         "../src/rules/quotemarkRule.ts",
+        "../src/rules/quotePropsRule.ts",
         "../src/rules/radixRule.ts",
         "../src/rules/restrictPlusOperandsRule.ts",
         "../src/rules/semicolonRule.ts",
