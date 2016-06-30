@@ -40,7 +40,7 @@ export function func7(f: (x: number) => number) {
 }
 
 export function func8([x, y]: [number, number]) {
-                          ~                       [Unused binding element: 'y']
+                          ~                       [Unused variable: 'y']
     return x;
 }
 
@@ -49,18 +49,18 @@ export class DestructuringTests {
     }
 
     public func9({a, b}) {
-                     ~     [Unused binding element: 'b']
+                     ~     [Unused variable: 'b']
         return a;
     }
 
     public func10([a, b]) {
-                      ~     [Unused binding element: 'b']
+                      ~     [Unused variable: 'b']
         return [a];
     }
 
     // destructuring with default value
     public func11([x = 0]) {
-                   ~         [Unused binding element: 'x']
+                   ~         [Unused variable: 'x']
         return;
     }
 }

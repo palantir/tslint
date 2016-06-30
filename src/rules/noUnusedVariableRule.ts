@@ -65,9 +65,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_TYPE_BIND_ELEM = "binding element";
     public static FAILURE_TYPE_FUNC = "function";
     public static FAILURE_TYPE_IMPORT = "import";
+    public static FAILURE_TYPE_METHOD = "method"
     public static FAILURE_TYPE_PARAM = "parameter";
     public static FAILURE_TYPE_PROP = "property";
     public static FAILURE_TYPE_VAR = "variable";
@@ -146,7 +146,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
 
         if (isSingleVariable && !this.skipBindingElement) {
             const variableIdentifier = <ts.Identifier> node.name;
-            this.validateReferencesForVariable(Rule.FAILURE_TYPE_BIND_ELEM, variableIdentifier.text, variableIdentifier.getStart());
+            this.validateReferencesForVariable(Rule.FAILURE_TYPE_VAR, variableIdentifier.text, variableIdentifier.getStart());
         }
 
         super.visitBindingElement(node);
@@ -228,7 +228,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
             const variableName = (<ts.Identifier> node.name).text;
 
             if (Lint.hasModifier(modifiers, ts.SyntaxKind.PrivateKeyword)) {
-                this.validateReferencesForVariable("method", variableName, node.name.getStart());
+                this.validateReferencesForVariable(Rule.FAILURE_TYPE_METHOD, variableName, node.name.getStart());
             }
         }
 
