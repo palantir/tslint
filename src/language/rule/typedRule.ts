@@ -21,6 +21,8 @@ import {AbstractRule} from "./abstractRule";
 
 export abstract class TypedRule extends AbstractRule {
     public apply(sourceFile: ts.SourceFile): RuleFailure[] {
+        // if no program is given to the linter, this rule will be silently
+        // ignored, since the type checker would not be available to the rule
         return [];
     }
 

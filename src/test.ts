@@ -74,6 +74,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
         };
 
         const program = ts.createProgram([fileCompileName], compilerOptions, compilerHost);
+        // perform type checking on the program, updating nodes with symbol table references
         ts.getPreEmitDiagnostics(program);
 
         const lintOptions = {

@@ -20,8 +20,8 @@ import {IOptions} from "../../lint";
 import {RuleWalker} from "./ruleWalker";
 
 export class ProgramAwareRuleWalker extends RuleWalker {
-    protected program: ts.Program;
-    protected typeChecker: ts.TypeChecker;
+    private program: ts.Program;
+    private typeChecker: ts.TypeChecker;
 
     constructor(sourceFile: ts.SourceFile, options: IOptions, program: ts.Program) {
         super(sourceFile, options);
