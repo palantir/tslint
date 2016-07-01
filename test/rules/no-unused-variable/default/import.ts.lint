@@ -1,9 +1,9 @@
 import  $ = require("jquery");
 import  _ = require("underscore");
 import  xyz = require("xyz");
-        ~~~                   [Unused variable: 'xyz']
+        ~~~                   [Unused import: 'xyz']
 import {createReadStream, createWriteStream} from "fs";
-        ~~~~~~~~~~~~~~~~                                [Unused variable: 'createReadStream']
+        ~~~~~~~~~~~~~~~~                                [Unused import: 'createReadStream']
 export import a = require("a");
 
 createWriteStream();
@@ -18,11 +18,11 @@ module S {
 }
 
 import * as foo from "libA";
-            ~~~              [Unused variable: 'foo']
+            ~~~              [Unused import: 'foo']
 import * as bar from "libB";
 import baz from "libC";
 import defaultExport, { namedExport } from "libD";
-       ~~~~~~~~~~~~~                               [Unused variable: 'defaultExport']
+       ~~~~~~~~~~~~~                               [Unused import: 'defaultExport']
 
 bar.someFunc();
 baz();
