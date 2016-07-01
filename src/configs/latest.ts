@@ -16,6 +16,9 @@
  */
 
 export const rules = {
+    "ordered-imports": [true, {
+        "named-imports-order": "lowercase-last",
+    }],
 };
 
 // work around "extends" being a keyword
