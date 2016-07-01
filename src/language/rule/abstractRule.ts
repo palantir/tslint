@@ -16,9 +16,10 @@
  */
 
 import * as ts from "typescript";
+
 import {IOptions} from "../../lint";
 import {RuleWalker} from "../walker/ruleWalker";
-import {IRule, IRuleMetadata, IDisabledInterval, RuleFailure} from "./rule";
+import {IDisabledInterval, IRule, IRuleMetadata, RuleFailure} from "./rule";
 
 export abstract class AbstractRule implements IRule {
     public static metadata: IRuleMetadata;

@@ -16,6 +16,7 @@
  */
 
 import * as ts from "typescript";
+
 import {RuleWalker} from "../walker/ruleWalker";
 
 export interface IRuleMetadata {

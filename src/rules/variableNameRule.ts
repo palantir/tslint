@@ -16,6 +16,7 @@
  */
 
 import * as ts from "typescript";
+
 import * as Lint from "../lint";
 
 const BANNED_KEYWORDS = ["any", "Number", "number", "String", "string", "Boolean", "boolean", "Undefined", "undefined"];

@@ -21,9 +21,9 @@ import * as fs from "fs";
 import * as glob from "glob";
 import * as path from "path";
 
-import * as Linter from "./tslint";
-import * as parse from "./test/parse";
 import {LintError} from "./test/lintError";
+import * as parse from "./test/parse";
+import * as Linter from "./tslint";
 
 const FILE_EXTENSION = ".lint";
 
