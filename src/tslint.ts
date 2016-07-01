@@ -16,6 +16,7 @@
  */
 
 import * as ts from "typescript";
+
 import {
     DEFAULT_CONFIG,
     findConfiguration,

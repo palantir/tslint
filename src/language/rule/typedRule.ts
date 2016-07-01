@@ -16,8 +16,9 @@
  */
 
 import * as ts from "typescript";
-import {RuleFailure} from "./rule";
+
 import {AbstractRule} from "./abstractRule";
+import {RuleFailure} from "./rule";
 
 export abstract class TypedRule extends AbstractRule {
     public apply(sourceFile: ts.SourceFile): RuleFailure[] {
