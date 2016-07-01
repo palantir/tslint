@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
-import * as fs from "fs";
+
 import {IConfigurationFile, extendConfigurationFile, loadConfigurationFromPath} from "../src/configuration";
 
 describe("Configuration", () => {

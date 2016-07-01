@@ -19,13 +19,14 @@ import * as fs from "fs";
 import * as glob from "glob";
 import * as optimist from "optimist";
 import * as path from "path";
-import * as Linter from "./tslint";
+
 import {
     CONFIG_FILENAME,
     DEFAULT_CONFIG,
     findConfiguration,
 } from "./configuration";
 import {consoleTestResultHandler, runTest} from "./test";
+import * as Linter from "./tslint";
 
 let processed = optimist
     .usage("Usage: $0 [options] file ...")

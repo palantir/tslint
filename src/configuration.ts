@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
+import * as findup from "findup-sync";
 import * as fs from "fs";
 import * as path from "path";
-import * as findup from "findup-sync";
 import * as resolve from "resolve";
 
 import {arrayify, objectify, stripComments} from "./utils";

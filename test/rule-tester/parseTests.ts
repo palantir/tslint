@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import * as testData from "./testData";
 import * as parse from "../../src/test/parse";
+import * as testData from "./testData";
 
 describe("Rule Test Parse", () => {
     describe("removeErrorMarkup", () => {

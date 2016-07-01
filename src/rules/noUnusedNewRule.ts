@@ -15,8 +15,9 @@
  * limitations under the License.
  */
 
-import * as Lint from "../lint";
 import * as ts from "typescript";
+
+import * as Lint from "../lint";
 import { NoUnusedExpressionWalker } from "./noUnusedExpressionRule";
 
 export class Rule extends Lint.Rules.AbstractRule {

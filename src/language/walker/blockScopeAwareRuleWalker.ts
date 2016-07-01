@@ -16,6 +16,7 @@
  */
 
 import * as ts from "typescript";
+
 import {ScopeAwareRuleWalker} from "./scopeAwareRuleWalker";
 
 /**

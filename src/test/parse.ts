@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {LintError, errorComparator, lintSyntaxError} from "./lintError";
 import {
-    Line,
-    ErrorLine,
     CodeLine,
-    MultilineErrorLine,
     EndErrorLine,
+    ErrorLine,
+    Line,
     MessageSubstitutionLine,
+    MultilineErrorLine,
     parseLine,
     printLine,
 } from "./lines";
+import {LintError, errorComparator, lintSyntaxError} from "./lintError";
 
 /**
  * Takes the full text of a .lint file and returns the contents of the file
