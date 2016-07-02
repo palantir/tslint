@@ -15,9 +15,6 @@
  * limitations under the License.
  */
 
-import { IFormatter } from "./language/formatter/formatter";
-import { RuleFailure } from "./language/rule/rule";
-import { getSourceFile } from "./language/utils";
 import {
     DEFAULT_CONFIG,
     findConfiguration,
@@ -28,7 +25,10 @@ import {
 } from "./configuration";
 import { EnableDisableRulesWalker } from "./enableDisableRules";
 import { findFormatter } from "./formatterLoader";
-import { ILinterOptionsRaw, ILinterOptions, LintResult } from "./lint";
+import { IFormatter } from "./language/formatter/formatter";
+import { RuleFailure } from "./language/rule/rule";
+import { getSourceFile } from "./language/utils";
+import { ILinterOptions, ILinterOptionsRaw, LintResult } from "./lint";
 import { loadRules } from "./ruleLoader";
 import { arrayify } from "./utils";
 

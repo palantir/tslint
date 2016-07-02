@@ -17,6 +17,7 @@
 
 import * as path from "path";
 import * as ts from "typescript";
+
 import {IDisabledInterval, RuleFailure} from "./rule/rule";
 
 export function getSourceFile(fileName: string, source: string): ts.SourceFile {

@@ -16,6 +16,7 @@
  */
 
 import * as ts from "typescript";
+
 import {IOptions} from "../../lint";
 import {RuleWalker} from "./ruleWalker";
 

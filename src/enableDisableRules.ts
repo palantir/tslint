@@ -16,6 +16,7 @@
  */
 
 import * as ts from "typescript";
+
 import {scanAllTokens} from "./language/utils";
 import {SkippableTokenAwareRuleWalker} from "./language/walker/skippableTokenAwareRuleWalker";
 import {IEnableDisablePosition} from "./ruleLoader";
