@@ -45,6 +45,9 @@ class Linter {
 
     private options: ILinterOptions;
 
+    /**
+     * Creates a TypeScript program object from a tsconfig.json file path and optional project directory.
+     */
     public static createProgram(configFile: string, projectDirectory?: string): ts.Program {
         if (projectDirectory === undefined) {
             const lastSeparator = configFile.lastIndexOf("/");
@@ -63,6 +66,10 @@ class Linter {
         return program;
     }
 
+    /**
+     * Returns a list of source file names from a TypeScript program. This includes all referenced
+     * files and excludes declaration (".d.ts") files.
+     */
     public static getFileNames(program: ts.Program): string[] {
         return program.getSourceFiles().map(s => s.fileName).filter(l => l.substr(-5) !== ".d.ts");
     }

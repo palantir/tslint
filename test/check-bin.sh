@@ -116,10 +116,6 @@ expectOut $? 0 "tslint with tsconfig did not exit correctly"
 ./bin/tslint -c test/files/tsconfig-test/tslint.json --project test/files/tsconfig-test/tsconfig.json test/files/tsconfig-test/other.test.ts
 expectOut $? 2 "tslint with tsconfig and files did not find lint failures from given files"
 
-# make sure tslint runs the type checker
-./bin/tslint -c test/files/tsconfig-test/tslint.json --project test/files/tsconfig-test/tsconfig.json --type-check
-expectOut $? 2 "tslint with --type-check flag did not find type checked lint failures"
-
 if [ $num_failures != 0 ]; then
   echo "Failed $num_failures tests"
   exit 1

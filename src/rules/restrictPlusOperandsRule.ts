@@ -32,8 +32,8 @@ export class Rule extends Lint.Rules.TypedRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static MISMATCHED_TYPES_FAILURE = "types must match";
-    public static UNSUPPORTED_TYPE_FAILURE = "cannot add types ";
+    public static MISMATCHED_TYPES_FAILURE = "Types of values used in '+' operation must match";
+    public static UNSUPPORTED_TYPE_FAILURE_FACTORY = (type: string) => `cannot add type ${type}`;
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         return this.applyWithWalker(new RestrictPlusOperandsWalker(sourceFile, this.getOptions(), program));
@@ -41,10 +41,6 @@ export class Rule extends Lint.Rules.TypedRule {
 }
 
 class RestrictPlusOperandsWalker extends Lint.ProgramAwareRuleWalker {
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions, program: ts.Program) {
-        super(sourceFile, options, program);
-    }
-
     public visitBinaryExpression(node: ts.BinaryExpression) {
         if (node.operatorToken.kind === ts.SyntaxKind.PlusToken) {
             const tc = this.getTypeChecker();
@@ -56,12 +52,11 @@ class RestrictPlusOperandsWalker extends Lint.ProgramAwareRuleWalker {
 
             if (leftType !== rightType) {
                 // mismatched types
-                const message = Rule.MISMATCHED_TYPES_FAILURE;
-                this.addFailure(this.createFailure(position, width, message));
+                this.addFailure(this.createFailure(position, width, Rule.MISMATCHED_TYPES_FAILURE));
             } else if (leftType !== "number" && leftType !== "string") {
                 // adding unsupported types
-                const message = Rule.UNSUPPORTED_TYPE_FAILURE + leftType;
-                this.addFailure(this.createFailure(position, width, message));
+                const failureString = Rule.UNSUPPORTED_TYPE_FAILURE_FACTORY(leftType);
+                this.addFailure(this.createFailure(position, width, failureString));
             }
         }
 

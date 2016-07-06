@@ -1,6 +1,5 @@
 {
     "rules": {
-        "no-console": [true, "log"],
-        "restrict-plus-operands": true
+        "no-console": [true, "log"]
     }
 }

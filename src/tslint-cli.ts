@@ -83,7 +83,7 @@ let processed = optimist
             describe: "test that tslint produces the correct output for the specified directory",
         },
         "project": {
-            describe: "tsconfig file",
+            describe: "tsconfig.json file",
         },
         "type-check": {
             describe: "enable type checking when linting a project",
@@ -260,7 +260,7 @@ const processFile = (file: string, program?: ts.Program) => {
 
 // if both files and tsconfig are present, use files
 let files = argv._;
-let program: ts.Program = undefined;
+let program: ts.Program;
 
 if (argv.project != null) {
     if (!fs.existsSync(argv.project)) {
@@ -279,9 +279,8 @@ if (argv.project != null) {
                 // emit any error messages
                 let message = ts.DiagnosticCategory[diag.category];
                 if (diag.file) {
-                    message += " at " + diag.file.fileName + ":";
                     const {line, character} = diag.file.getLineAndCharacterOfPosition(diag.start);
-                    message += (line + 1) + ":" + (character + 1) + ":";
+                    message += ` at ${diag.file.fileName}:${line + 1}:${character + 1}:`;
                 }
                 message += " " + ts.flattenDiagnosticMessageText(diag.messageText, "\n");
                 return message;
