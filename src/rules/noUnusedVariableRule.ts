@@ -82,7 +82,6 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class NoUnusedVariablesWalker extends Lint.RuleWalker {
-    private languageService: ts.LanguageService;
     private skipBindingElement: boolean;
     private skipParameterDeclaration: boolean;
     private skipVariableDeclaration: boolean;
@@ -92,9 +91,8 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     private isReactUsed: boolean;
     private reactImport: ts.NamespaceImport;
 
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions, languageService: ts.LanguageService) {
+    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions, private languageService: ts.LanguageService) {
         super(sourceFile, options);
-        this.languageService = languageService;
         this.skipVariableDeclaration = false;
         this.skipParameterDeclaration = false;
         this.hasSeenJsxElement = false;
