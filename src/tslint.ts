@@ -40,13 +40,9 @@ class Linter {
     public static getRulesDirectories = getRulesDirectories;
     public static loadConfigurationFromPath = loadConfigurationFromPath;
 
-    private fileName: string;
-    private source: string;
     private options: ILinterOptions;
 
-    constructor(fileName: string, source: string, options: ILinterOptionsRaw) {
-        this.fileName = fileName;
-        this.source = source;
+    constructor(private fileName: string, private source: string, options: ILinterOptionsRaw) {
         this.options = this.computeFullOptions(options);
     }
 

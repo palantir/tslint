@@ -23,17 +23,15 @@ import {IDisabledInterval, IRule, IRuleMetadata, RuleFailure} from "./rule";
 
 export abstract class AbstractRule implements IRule {
     public static metadata: IRuleMetadata;
-    private value: any;
     private options: IOptions;
 
-    constructor(ruleName: string, value: any, disabledIntervals: IDisabledInterval[]) {
+    constructor(ruleName: string, private value: any, disabledIntervals: IDisabledInterval[]) {
         let ruleArguments: any[] = [];
 
         if (Array.isArray(value) && value.length > 1) {
             ruleArguments = value.slice(1);
         }
 
-        this.value = value;
         this.options = {
             disabledIntervals: disabledIntervals,
             ruleArguments: ruleArguments,

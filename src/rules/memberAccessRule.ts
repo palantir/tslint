@@ -58,10 +58,6 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 export class MemberAccessWalker extends Lint.RuleWalker {
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
-        super(sourceFile, options);
-    }
-
     public visitConstructorDeclaration(node: ts.ConstructorDeclaration) {
         if (this.hasOption("check-constructor")) {
             // constructor is only allowed to have public or nothing, but the compiler will catch this

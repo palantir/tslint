@@ -85,12 +85,7 @@ export interface IRule {
 }
 
 export class RuleFailurePosition {
-    private position: number;
-    private lineAndCharacter: ts.LineAndCharacter;
-
-    constructor(position: number, lineAndCharacter: ts.LineAndCharacter) {
-        this.position = position;
-        this.lineAndCharacter = lineAndCharacter;
+    constructor(private position: number, private lineAndCharacter: ts.LineAndCharacter) {
     }
 
     public getPosition() {
@@ -120,25 +115,19 @@ export class RuleFailurePosition {
 }
 
 export class RuleFailure {
-    private sourceFile: ts.SourceFile;
     private fileName: string;
     private startPosition: RuleFailurePosition;
     private endPosition: RuleFailurePosition;
-    private failure: string;
-    private ruleName: string;
 
-    constructor(sourceFile: ts.SourceFile,
+    constructor(private sourceFile: ts.SourceFile,
                 start: number,
                 end: number,
-                failure: string,
-                ruleName: string) {
+                private failure: string,
+                private ruleName: string) {
 
-        this.sourceFile = sourceFile;
         this.fileName = sourceFile.fileName;
         this.startPosition = this.createFailurePosition(start);
         this.endPosition = this.createFailurePosition(end);
-        this.failure = failure;
-        this.ruleName = ruleName;
     }
 
     public getFileName() {
