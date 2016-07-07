@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2013 Palantir Technologies, Inc.
+ * Copyright 2016 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,11 @@ import {IOptions} from "../../lint";
 import {RuleWalker} from "./ruleWalker";
 
 export class ProgramAwareRuleWalker extends RuleWalker {
-    private program: ts.Program;
     private typeChecker: ts.TypeChecker;
 
-    constructor(sourceFile: ts.SourceFile, options: IOptions, program: ts.Program) {
+    constructor(sourceFile: ts.SourceFile, options: IOptions, private program: ts.Program) {
         super(sourceFile, options);
 
-        this.program = program;
         this.typeChecker = program.getTypeChecker();
     }
 
