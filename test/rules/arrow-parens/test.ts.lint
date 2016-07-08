@@ -3,6 +3,7 @@ var a = (a) => {};
 var b = (a: number) => {};
 var c = (a, b) => {};
 var f = (...rest) => {};
+var f = a: number => {}; // TSLint don't warn. But syntax is wrong.
 class Foo {
     a: (a) =>{}
 }
