@@ -1,0 +1,14 @@
+// valid case
+var a = (a) => {};
+var b = (a: number) => {};
+var c = (a, b) => {};
+var f = (...rest) => {};
+class Foo {
+    a: (a) =>{}
+}
+
+// invalid case
+var e = (a => {})(1);
+         ~            [Parentheses are required when define arrow function]
+var f = a => {};
+        ~             [Parentheses are required when define arrow function]
