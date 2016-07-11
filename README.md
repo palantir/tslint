@@ -226,7 +226,7 @@ const result = linter.lint();
 
 #### Type Checking
 
-To enable rules that work with the type checker, a TypeScript program object may be passed to the linter. Helper functions are provided to create a program from a `tsconfig.json` file. A project directory can be specified if project files do not lie in the same directory as the `tsconfig.json` file.
+To enable rules that work with the type checker, a TypeScript program object must be passed to the linter when using the programmatic API. Helper functions are provided to create a program from a `tsconfig.json` file. A project directory can be specified if project files do not lie in the same directory as the `tsconfig.json` file.
 
 ```javascript
 const program = Linter.createProgram("tsconfig.json", "projectDir/");
@@ -237,6 +237,8 @@ const results = files.map(file => {
     return result.lint();
 });
 ```
+
+When using the CLI, the `--project` flag will automatically create a program from the specified `tsconfig.json` file. Adding `--type-check` then enables rules that require the type checker.
 
 
 Core Rules
@@ -338,7 +340,7 @@ Core rules are included in the `tslint` package.
     * `"jsx-double"` enforces double quotes for JSX attributes.
     * `"avoid-escape"` allows you to use the "other" quotemark in cases where escaping would normally be required. For example, `[true, "double", "avoid-escape"]` would not report a failure on the string literal `'Hello "World"'`.
 * `radix` enforces the radix parameter of `parseInt`.
-* `restrict-plus-operands` enforces the type of addition operands to be both `string` or both `number`. Requires type checking to be enabled.
+* `restrict-plus-operands` enforces the type of addition operands to be both `string` or both `number` (requires type checking).
 * `semicolon` enforces consistent semicolon usage at the end of every statement. Rule options:
     * `"always"` enforces semicolons at the end of every statement.
     * `"never"` disallows semicolons at the end of every statement except for when they are necessary.
