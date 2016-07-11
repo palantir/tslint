@@ -115,7 +115,7 @@ Options:
 -e, --exclude         exclude globs from path expansion
 -t, --format          output format (prose, json, verbose, pmd, msbuild, checkstyle)  [default: "prose"]
 --test                test that tslint produces the correct output for the specified directory
---project             tsconfig.json file
+--project             path to tsconfig.json file
 --type-check          enable type checking when linting a project
 -v, --version         current version
 ```
@@ -233,7 +233,7 @@ const program = Linter.createProgram("tsconfig.json", "projectDir/");
 const files = Linter.getFileNames(program);
 const results = files.map(file => {
     const fileContents = program.getSourceFile(file).getFullText();
-    const linter = new Linter(file, fileContents, options, program());
+    const linter = new Linter(file, fileContents, options, program);
     return result.lint();
 });
 ```
@@ -338,7 +338,7 @@ Core rules are included in the `tslint` package.
     * `"jsx-double"` enforces double quotes for JSX attributes.
     * `"avoid-escape"` allows you to use the "other" quotemark in cases where escaping would normally be required. For example, `[true, "double", "avoid-escape"]` would not report a failure on the string literal `'Hello "World"'`.
 * `radix` enforces the radix parameter of `parseInt`.
-* `restrict-plus-operands` enforces the type of addition operands to be both `string` or both `number`
+* `restrict-plus-operands` enforces the type of addition operands to be both `string` or both `number`. Requires type checking to be enabled.
 * `semicolon` enforces consistent semicolon usage at the end of every statement. Rule options:
     * `"always"` enforces semicolons at the end of every statement.
     * `"never"` disallows semicolons at the end of every statement except for when they are necessary.
