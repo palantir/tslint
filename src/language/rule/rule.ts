@@ -62,6 +62,11 @@ export interface IRuleMetadata {
      * An explanation of why the rule is useful.
      */
     rationale?: string;
+
+    /**
+     * Whether or not the rule requires type info to run.
+     */
+    requiresTypeInfo?: boolean;
 }
 
 export type RuleType = "functionality" | "maintainability" | "style" | "typescript";

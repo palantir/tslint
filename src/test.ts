@@ -20,7 +20,9 @@ import * as diff from "diff";
 import * as fs from "fs";
 import * as glob from "glob";
 import * as path from "path";
+import * as ts from "typescript";
 
+import {createCompilerOptions} from "./language/utils";
 import {LintError} from "./test/lintError";
 import * as parse from "./test/parse";
 import * as Linter from "./tslint";
@@ -46,9 +48,34 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
 
     for (const fileToLint of filesToLint) {
         const fileBasename = path.basename(fileToLint, FILE_EXTENSION);
+        const fileCompileName = fileBasename.replace(/\.lint$/, "");
         const fileText = fs.readFileSync(fileToLint, "utf8");
         const fileTextWithoutMarkup = parse.removeErrorMarkup(fileText);
         const errorsFromMarkup = parse.parseErrorsFromMarkup(fileText);
+
+        const compilerOptions = createCompilerOptions();
+        const compilerHost: ts.CompilerHost = {
+            fileExists: () => true,
+            getCanonicalFileName: (filename: string) => filename,
+            getCurrentDirectory: () => "",
+            getDefaultLibFileName: () => ts.getDefaultLibFileName(compilerOptions),
+            getNewLine: () => "\n",
+            getSourceFile: function (filenameToGet: string) {
+                if (filenameToGet === this.getDefaultLibFileName()) {
+                    const fileText = fs.readFileSync(ts.getDefaultLibFilePath(compilerOptions)).toString();
+                    return ts.createSourceFile(filenameToGet, fileText, compilerOptions.target);
+                } else if (filenameToGet === fileCompileName) {
+                    return ts.createSourceFile(fileBasename, fileTextWithoutMarkup, compilerOptions.target, true);
+                }
+            },
+            readFile: () => null,
+            useCaseSensitiveFileNames: () => true,
+            writeFile: () => null,
+        };
+
+        const program = ts.createProgram([fileCompileName], compilerOptions, compilerHost);
+        // perform type checking on the program, updating nodes with symbol table references
+        ts.getPreEmitDiagnostics(program);
 
         const lintOptions = {
             configuration: tslintConfig,
@@ -56,7 +83,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
             formattersDirectory: "",
             rulesDirectory,
         };
-        const linter = new Linter(fileBasename, fileTextWithoutMarkup, lintOptions);
+        const linter = new Linter(fileBasename, fileTextWithoutMarkup, lintOptions, program);
         const errorsFromLinter: LintError[] = linter.lint().failures.map((failure) => {
             const startLineAndCharacter = failure.getStartPosition().getLineAndCharacter();
             const endLineAndCharacter = failure.getEndPosition().getLineAndCharacter();
