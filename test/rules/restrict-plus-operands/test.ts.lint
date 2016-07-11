@@ -1,0 +1,60 @@
+// aliases for number
+type MyNumber = number;
+type MyString = string;
+interface NumberStringPair {
+    first: MyNumber,
+    second: MyString
+}
+
+var x = 5;
+var y = "10";
+var z = 8.2;
+var w = "6.5";
+var pair: NumberStringPair = {
+    first: 5,
+    second: "10"
+};
+
+// bad
+var bad1  = 5 + "10";
+            ~~~~~~~~  [Types of values used in '+' operation must match]
+var bad2  = [] + 5;
+            ~~~~~~  [Types of values used in '+' operation must match]
+var bad3  = [] + {};
+            ~~~~~~~  [Types of values used in '+' operation must match]
+var bad4  = [] + [];
+            ~~~~~~~  [cannot add type undefined[]]
+var bad4  = 5 + [];
+            ~~~~~~  [Types of values used in '+' operation must match]
+var bad5  = "5" + {};
+            ~~~~~~~~  [Types of values used in '+' operation must match]
+var bad6  = 5.5 + "5";
+            ~~~~~~~~~  [Types of values used in '+' operation must match]
+var bad7  = "5.5" + 5;
+            ~~~~~~~~~  [Types of values used in '+' operation must match]
+var bad8  = x + y;
+            ~~~~~  [Types of values used in '+' operation must match]
+var bad9  = y + x;
+            ~~~~~  [Types of values used in '+' operation must match]
+var bad10 = x + {};
+            ~~~~~~  [Types of values used in '+' operation must match]
+var bad11 = [] + y;
+            ~~~~~~  [Types of values used in '+' operation must match]
+var bad12 = pair.first + "10";
+            ~~~~~~~~~~~~~~~~~  [Types of values used in '+' operation must match]
+var bad13 = 5 + pair.second;
+            ~~~~~~~~~~~~~~~  [Types of values used in '+' operation must match]
+var bad14 = pair + pair;
+            ~~~~~~~~~~~  [cannot add type NumberStringPair]
+
+// good
+var good1 = 5 + 10;
+var good2 = "5.5" + "10";
+var good3 = parseFloat("5.5", 10), + 10;
+var good4 = x + z;
+var good5 = y + w;
+
+var good6 = pair.first + 10;
+var good7 = pair.first + (10 as MyNumber);
+var good8 = "5.5" + pair.second;
+var good9 = ("5.5" as MyString) + pair.second;
