@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "global-ban": [true, "xit", "fit", "xdescribe", "fdescribe"]
+  }
+}
