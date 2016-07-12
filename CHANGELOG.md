@@ -1,6 +1,13 @@
 Change Log
 ===
 
+v3.14.0-dev.0
+---
+* [enhancement] Add optional type information to rules (#1323)
+
+Thanks to our contributors!
+* @ScottSWu
+
 v3.13.0
 ---
 * Stable release containing changes from the last dev release (v3.13.0-dev.0)
