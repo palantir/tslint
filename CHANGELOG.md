@@ -1,6 +1,10 @@
 Change Log
 ===
 
+v3.13.0
+---
+* Stable release containing changes from the last dev release (v3.13.0-dev.0)
+
 v3.13.0-dev.0
 ---
 * [new-rule] `ordered-imports` rule (#1325)

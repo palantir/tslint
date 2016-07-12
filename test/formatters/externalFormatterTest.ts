@@ -15,6 +15,7 @@
  */
 
 import * as ts from "typescript";
+
 import {IFormatter, RuleFailure, TestUtils} from "../lint";
 
 describe("External Formatter", () => {
