@@ -58,7 +58,7 @@ class NoBannedGlobalFunctionCallsWalker extends Lint.RuleWalker {
     if (expression.kind === ts.SyntaxKind.Identifier) {
       const identifierName = (<ts.Identifier> expression).text;
       if (this.bannedFunctions.indexOf(identifierName) !== -1) {
-        this.addFailure(this.createFailure(node.getStart(), node.getWidth(), `${Rule.FAILURE_STRING}${identifierName}`));
+        this.addFailure(this.createFailure(expression.getStart(), expression.getWidth(), `${Rule.FAILURE_STRING}${identifierName}`));
       }
 
     }

@@ -1,10 +1,10 @@
 describe("some text", () => {});
 xdescribe("some text", () => {});
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    [function invocation disallowed: xdescribe]
+~~~~~~~~~    [function invocation disallowed: xdescribe]
 fdescribe("some text", () => {});
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    [function invocation disallowed: fdescribe]
+~~~~~~~~~    [function invocation disallowed: fdescribe]
 it("some text", () => {});
 xit("some text", () => {});
-~~~~~~~~~~~~~~~~~~~~~~~~~~    [function invocation disallowed: xit]
+~~~    [function invocation disallowed: xit]
 fit("some text", () => {});
-~~~~~~~~~~~~~~~~~~~~~~~~~~    [function invocation disallowed: fit]
+~~~    [function invocation disallowed: fit]
