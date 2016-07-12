@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import * as findup from "findup-sync";
+const findup = require("findup-sync");
 import * as fs from "fs";
 import * as path from "path";
 import * as resolve from "resolve";
