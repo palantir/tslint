@@ -99,6 +99,7 @@
         "../src/rules/noDuplicateVariableRule.ts",
         "../src/rules/noEmptyRule.ts",
         "../src/rules/noEvalRule.ts",
+        "../src/rules/noForInArrayRule.ts",
         "../src/rules/noInferrableTypesRule.ts",
         "../src/rules/noInternalModuleRule.ts",
         "../src/rules/noInvalidThisRule.ts",
