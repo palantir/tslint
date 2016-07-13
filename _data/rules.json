@@ -531,7 +531,7 @@
     "type": "functionality"
   },
   {
-    "ruleName": "no-mergable-namespace",
+    "ruleName": "no-mergeable-namespace",
     "description": "Disallows mergeable namespaces in the same file.",
     "optionsDescription": "Not configurable.",
     "options": null,
