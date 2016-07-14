@@ -11,6 +11,7 @@ github_username:  palantir/tslint
 # Build settings
 markdown: kramdown
 markdown_ext: md
+exclude: [vendor]
 
 page_gen:
   - data: rules
