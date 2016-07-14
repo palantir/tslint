@@ -18,6 +18,7 @@
 // with due reference to https://github.com/Microsoft/TypeScript/blob/7813121c4d77e50aad0eed3152ef1f1156c7b574/scripts/tslint/noNullRule.ts
 
 import * as ts from "typescript";
+
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {

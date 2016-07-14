@@ -115,6 +115,8 @@ Options:
 -e, --exclude         exclude globs from path expansion
 -t, --format          output format (prose, json, verbose, pmd, msbuild, checkstyle)  [default: "prose"]
 --test                test that tslint produces the correct output for the specified directory
+--project             path to tsconfig.json file
+--type-check          enable type checking when linting a project
 -v, --version         current version
 ```
 
@@ -182,6 +184,14 @@ tslint accepts the following command-line options:
     specified directory as the configuration file for the tests. See the
     full tslint documentation for more details on how this can be used to test custom rules.
 
+--project:
+    The location of a tsconfig.json file that will be used to determine which
+    files will be linted.
+
+--type-check
+    Enables the type checker when running linting rules. --project must be
+    specified in order to enable type checking.
+
 -v, --version:
     The current version of tslint.
 
@@ -213,6 +223,23 @@ const fileContents = fs.readFileSync(fileName, "utf8");
 const linter = new Linter(fileName, fileContents, options);
 const result = linter.lint();
 ```
+
+#### Type Checking
+
+To enable rules that work with the type checker, a TypeScript program object must be passed to the linter when using the programmatic API. Helper functions are provided to create a program from a `tsconfig.json` file. A project directory can be specified if project files do not lie in the same directory as the `tsconfig.json` file.
+
+```javascript
+const program = Linter.createProgram("tsconfig.json", "projectDir/");
+const files = Linter.getFileNames(program);
+const results = files.map(file => {
+    const fileContents = program.getSourceFile(file).getFullText();
+    const linter = new Linter(file, fileContents, options, program);
+    return result.lint();
+});
+```
+
+When using the CLI, the `--project` flag will automatically create a program from the specified `tsconfig.json` file. Adding `--type-check` then enables rules that require the type checker.
+
 
 Core Rules
 -----
@@ -313,6 +340,7 @@ Core rules are included in the `tslint` package.
     * `"jsx-double"` enforces double quotes for JSX attributes.
     * `"avoid-escape"` allows you to use the "other" quotemark in cases where escaping would normally be required. For example, `[true, "double", "avoid-escape"]` would not report a failure on the string literal `'Hello "World"'`.
 * `radix` enforces the radix parameter of `parseInt`.
+* `restrict-plus-operands` enforces the type of addition operands to be both `string` or both `number` (requires type checking).
 * `semicolon` enforces consistent semicolon usage at the end of every statement. Rule options:
     * `"always"` enforces semicolons at the end of every statement.
     * `"never"` disallows semicolons at the end of every statement except for when they are necessary.

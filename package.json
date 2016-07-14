@@ -1,6 +1,6 @@
 {
   "name": "tslint",
-  "version": "3.13.0-dev.0",
+  "version": "3.14.0-dev.0",
   "description": "An extensible static analysis linter for the TypeScript language",
   "bin": {
     "tslint": "./bin/tslint"
@@ -43,7 +43,7 @@
     "mocha": "^2.2.5",
     "tslint": "next",
     "tslint-test-config-non-relative": "file:test/external/tslint-test-config-non-relative",
-    "typescript": "next"
+    "typescript": ">=2.0.0-dev"
   },
   "peerDependencies": {
     "typescript": ">=1.7.3 || >=1.8.0-dev || >=1.9.0-dev || >=2.0.0-dev || >=2.1.0-dev"
