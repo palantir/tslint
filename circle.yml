@@ -1,3 +1,6 @@
 machine:
   ruby:
     version: 2.3.0
+test:
+  override:
+    - bundle exec jekyll build
