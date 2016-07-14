@@ -59,7 +59,11 @@ class Linter {
         }
 
         const {config} = ts.readConfigFile(configFile, ts.sys.readFile);
-        const parsed = ts.parseJsonConfigFileContent(config, {readDirectory: ts.sys.readDirectory}, projectDirectory);
+        const parsed = ts.parseJsonConfigFileContent(config, {
+            fileExists: (path: string) => true,
+            readDirectory: ts.sys.readDirectory,
+            useCaseSensitiveFileNames: false,
+        }, projectDirectory);
         const host = ts.createCompilerHost(parsed.options, true);
         const program = ts.createProgram(parsed.fileNames, parsed.options, host);
 
@@ -74,7 +78,10 @@ class Linter {
         return program.getSourceFiles().map(s => s.fileName).filter(l => l.substr(-5) !== ".d.ts");
     }
 
-    constructor(private fileName: string, private source: string, options: ILinterOptionsRaw, private program?: ts.Program) {
+    constructor(private fileName: string,
+                private source: string,
+                options: ILinterOptionsRaw,
+                private program?: ts.Program) {
         this.options = this.computeFullOptions(options);
     }
 
