@@ -73,9 +73,12 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
             writeFile: () => null,
         };
 
-        const program = ts.createProgram([fileCompileName], compilerOptions, compilerHost);
-        // perform type checking on the program, updating nodes with symbol table references
-        ts.getPreEmitDiagnostics(program);
+        let program: ts.Program;
+        if (tslintConfig.linterOptions && tslintConfig.linterOptions.typeCheck) {
+            program = ts.createProgram([fileCompileName], compilerOptions, compilerHost);
+            // perform type checking on the program, updating nodes with symbol table references
+            ts.getPreEmitDiagnostics(program);
+        }
 
         const lintOptions = {
             configuration: tslintConfig,
