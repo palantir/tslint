@@ -23,10 +23,10 @@ import * as resolve from "resolve";
 import {arrayify, objectify, stripComments} from "./utils";
 
 export interface IConfigurationFile {
+    extends?: string | string[];
     linterOptions?: {
         typeCheck?: boolean,
     };
-    extends?: string | string[];
     rulesDirectory?: string | string[];
     rules?: any;
 }
