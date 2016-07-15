@@ -1,15 +1,23 @@
 ---
-layout: page
 title: CLI
-permalink: /usage/cli/
+layout: page
+permalink: "/usage/cli/"
 ---
+### Installation
 
-### Installation ###
+__Local__:
 
 ```
-npm install tslint -g
-npm install typescript -g
+// in your project's working directory
+$ npm install tslint typescript --save-dev
 ```
+
+__Global__:
+
+```
+$ npm install tslint typescript -g
+```
+
 
 {% include peer_dependencies.md %}
 
