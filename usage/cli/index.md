@@ -5,10 +5,9 @@ permalink: "/usage/cli/"
 ---
 ### Installation
 
-__Local__:
+__Local__ (in your project's working directory):
 
 ```
-// in your project's working directory
 $ npm install tslint typescript --save-dev
 ```
 
