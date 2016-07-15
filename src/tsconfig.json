@@ -52,6 +52,7 @@
         "formatters/msbuildFormatter.ts",
         "formatters/pmdFormatter.ts",
         "formatters/proseFormatter.ts",
+        "formatters/stylishFormatter.ts",
         "formatters/verboseFormatter.ts",
         "formatters/vsoFormatter.ts",
         "language/formatter/abstractFormatter.ts",
