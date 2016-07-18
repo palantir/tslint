@@ -15,6 +15,10 @@
          "url": "/contributing/"
       },
       {
+         "title": "Code Guidelines",
+         "url": "/code-guidelines/"
+      },
+      {
          "title": "Docs Development",
          "url": "/docs/"
       },
