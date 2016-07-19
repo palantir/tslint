@@ -24,6 +24,9 @@ import {arrayify, objectify, stripComments} from "./utils";
 
 export interface IConfigurationFile {
     extends?: string | string[];
+    linterOptions?: {
+        typeCheck?: boolean,
+    };
     rulesDirectory?: string | string[];
     rules?: any;
 }
