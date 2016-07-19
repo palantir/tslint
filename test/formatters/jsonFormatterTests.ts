@@ -39,9 +39,10 @@ describe("JSON Formatter", () => {
         ];
 
         /* tslint:disable:object-literal-sort-keys */
-        const expectedResult = [{
+        const expectedResult: any = [{
             name: TEST_FILE,
             failure: "first failure",
+            fixes: [],
             startPosition: {
                 position: 0,
                 line: 0,
@@ -57,6 +58,7 @@ describe("JSON Formatter", () => {
         {
             name: TEST_FILE,
             failure: "last failure",
+            fixes: [],
             startPosition: {
                 position: maxPosition - 1,
                 line: 5,
@@ -72,6 +74,7 @@ describe("JSON Formatter", () => {
         {
             name: TEST_FILE,
             failure: "full failure",
+            fixes: [],
             startPosition: {
                 position: 0,
                 line: 0,

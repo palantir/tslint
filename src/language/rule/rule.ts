@@ -89,6 +89,18 @@ export interface IRule {
     applyWithWalker(walker: RuleWalker): RuleFailure[];
 }
 
+export interface IReplacement {
+    start: number;
+    length: number;
+    text: string;
+}
+
+export interface IFix {
+    ruleName: string;
+    description: string;
+    replacements: IReplacement[];
+}
+
 export class RuleFailurePosition {
     constructor(private position: number, private lineAndCharacter: ts.LineAndCharacter) {
     }
@@ -128,7 +140,8 @@ export class RuleFailure {
                 start: number,
                 end: number,
                 private failure: string,
-                private ruleName: string) {
+                private ruleName: string,
+                private fixes: IFix[] = []) {
 
         this.fileName = sourceFile.fileName;
         this.startPosition = this.createFailurePosition(start);
@@ -155,10 +168,15 @@ export class RuleFailure {
         return this.failure;
     }
 
+    public getFixes() {
+        return this.fixes;
+    }
+
     public toJson(): any {
         return {
             endPosition: this.endPosition.toJson(),
             failure: this.failure,
+            fixes: this.fixes,
             name: this.fileName,
             ruleName: this.ruleName,
             startPosition: this.startPosition.toJson(),

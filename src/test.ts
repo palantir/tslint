@@ -22,19 +22,23 @@ import * as glob from "glob";
 import * as path from "path";
 import * as ts from "typescript";
 
+import {IReplacement} from "./language/rule/rule";
 import {createCompilerOptions} from "./language/utils";
 import {LintError} from "./test/lintError";
 import * as parse from "./test/parse";
 import * as Linter from "./tslint";
 
-const FILE_EXTENSION = ".lint";
+const MARKUP_FILE_EXTENSION = ".lint";
+const FIXES_FILE_EXTENSION = ".fix";
 
 export interface TestResult {
     directory: string;
     results: {
         [fileName: string]: {
-            errorsFromMarkup: LintError[];
             errorsFromLinter: LintError[];
+            errorsFromMarkup: LintError[];
+            fixesFromLinter: string;
+            fixesFromMarkup: string;
             markupFromLinter: string;
             markupFromMarkup: string;
         }
@@ -42,12 +46,12 @@ export interface TestResult {
 }
 
 export function runTest(testDirectory: string, rulesDirectory?: string | string[]): TestResult {
-    const filesToLint = glob.sync(path.join(testDirectory, `**/*${FILE_EXTENSION}`));
+    const filesToLint = glob.sync(path.join(testDirectory, `**/*${MARKUP_FILE_EXTENSION}`));
     const tslintConfig = Linter.findConfiguration(path.join(testDirectory, "tslint.json"), null);
     const results: TestResult = { directory: testDirectory, results: {} };
 
     for (const fileToLint of filesToLint) {
-        const fileBasename = path.basename(fileToLint, FILE_EXTENSION);
+        const fileBasename = path.basename(fileToLint, MARKUP_FILE_EXTENSION);
         const fileCompileName = fileBasename.replace(/\.lint$/, "");
         const fileText = fs.readFileSync(fileToLint, "utf8");
         const fileTextWithoutMarkup = parse.removeErrorMarkup(fileText);
@@ -87,7 +91,8 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
             rulesDirectory,
         };
         const linter = new Linter(fileBasename, fileTextWithoutMarkup, lintOptions, program);
-        const errorsFromLinter: LintError[] = linter.lint().failures.map((failure) => {
+        const failures = linter.lint().failures;
+        const errorsFromLinter: LintError[] = failures.map((failure) => {
             const startLineAndCharacter = failure.getStartPosition().getLineAndCharacter();
             const endLineAndCharacter = failure.getEndPosition().getLineAndCharacter();
 
@@ -104,9 +109,39 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
             };
         });
 
+        // test against fixed files
+        let fixedFileText: string;
+        let newFileText: string;
+        try {
+            const fixedFile = fileToLint.replace(/\.lint$/, FIXES_FILE_EXTENSION);
+            const stat = fs.statSync(fixedFile);
+            if (stat.isFile()) {
+                fixedFileText = fs.readFileSync(fixedFile, "utf8");
+                // accumulate replacements
+                const replacements = failures.reduce((acc, failure) => {
+                    const fixes = failure.getFixes();
+                    if (fixes.length > 0) {
+                        return acc.concat(fixes[0].replacements);
+                    } else {
+                        return acc;
+                    }
+                }, [] as IReplacement[]);
+                // sort in reverse so that diffs are properly applied
+                replacements.sort((a, b) => (b.start + b.length) - (a.start + a.length));
+                newFileText = replacements.reduce((acc, r) => {
+                    return acc.substring(0, r.start) + r.text + acc.substring(r.start + r.length);
+                }, fileTextWithoutMarkup);
+            }
+        } catch (e) {
+            fixedFileText = "";
+            newFileText = "";
+        }
+
         results.results[fileToLint] = {
-            errorsFromMarkup,
             errorsFromLinter,
+            errorsFromMarkup,
+            fixesFromLinter: newFileText,
+            fixesFromMarkup: fixedFileText,
             markupFromLinter: parse.createMarkupFromErrors(fileTextWithoutMarkup, errorsFromMarkup),
             markupFromMarkup: parse.createMarkupFromErrors(fileTextWithoutMarkup, errorsFromLinter),
         };
@@ -122,20 +157,40 @@ export function consoleTestResultHandler(testResult: TestResult): boolean {
         const results = testResult.results[fileName];
         process.stdout.write(`${fileName}:`);
 
-        const diffResults = diff.diffLines(results.markupFromMarkup, results.markupFromLinter);
-        const didTestPass = !diffResults.some((diff) => diff.added || diff.removed);
+        const markupDiffResults = diff.diffLines(results.markupFromMarkup, results.markupFromLinter);
+        const fixesDiffResults = diff.diffLines(results.fixesFromMarkup, results.fixesFromLinter);
+        const didMarkupTestPass = !markupDiffResults.some((diff) => diff.added || diff.removed);
+        const didFixesTestPass = !fixesDiffResults.some((diff) => diff.added || diff.removed);
 
         /* tslint:disable:no-console */
-        if (didTestPass) {
+        if (didMarkupTestPass && didFixesTestPass) {
             console.log(colors.green(" Passed"));
         } else {
             console.log(colors.red(" Failed!"));
-            console.log(colors.green(`Expected (from ${FILE_EXTENSION} file)`));
+        }
+        if (!didMarkupTestPass) {
+            console.log(colors.green(`Expected markup (from ${MARKUP_FILE_EXTENSION} file)`));
             console.log(colors.red("Actual (from TSLint)"));
 
             didAllTestsPass = false;
 
-            for (const diffResult of diffResults) {
+            for (const diffResult of markupDiffResults) {
+                let color = colors.grey;
+                if (diffResult.added) {
+                    color = colors.green;
+                } else if (diffResult.removed) {
+                    color = colors.red;
+                }
+                process.stdout.write(color(diffResult.value));
+            }
+        }
+        if (!didFixesTestPass) {
+            console.log(colors.green(`Expected fixes (from ${FIXES_FILE_EXTENSION} file)`));
+            console.log(colors.red("Actual (from TSLint)"));
+
+            didAllTestsPass = false;
+
+            for (const diffResult of fixesDiffResults) {
                 let color = colors.grey;
                 if (diffResult.added) {
                     color = colors.green;
