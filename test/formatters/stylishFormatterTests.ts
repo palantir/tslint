@@ -38,7 +38,7 @@ describe("Stylish Formatter", () => {
             new RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name"),
             new RuleFailure(sourceFile, 0, maxPosition, "full failure", "full-name"),
         ];
-        const expectedResult = (require('colors').supportsColor) ?
+        const expectedResult = (require("colors").supportsColor) ?
             "formatters/stylishFormatter.test.ts" + "\n" +
             "\u001b[31m1:\u001b[39m  \u001b[33mfirst-nam\u001b[39m  first failure" + "\n" +
             "\u001b[31m1:\u001b[39m  \u001b[33mescape   \u001b[39m  &<>'\" should be escaped" + "\n" +
