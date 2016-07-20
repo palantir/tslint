@@ -5,7 +5,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "quote-props",
-        description: "Quoting Style for Property Names",
+        description: "Enforces consistent object literal property quote style.",
         descriptionDetails: Lint.Utils.dedent`
             Object literal property names can be defined in two ways: using literals or using strings.
             For example, these two objects are equivalent:
@@ -22,8 +22,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             or vice-versa. Even so, you might decide to enforce a consistent style in your code.
 
             This rules lets you enforce consistent quoting of property names. Either they should always
-            be quoted (default behavior) or quoted only as needed ("as-needed").
-        `,
+            be quoted (default behavior) or quoted only as needed ("as-needed").`,
         optionsDescription: Lint.Utils.dedent`
             Possible settings are:
 
@@ -31,21 +30,14 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"as-needed"\`: Only property names which require quotes may be quoted (e.g. those with spaces in them).
 
             For ES6, computed property names (\`{[name]: value}\`) and methods (\`{foo() {}}\`) never need
-            to be quoted.
-        `,
+            to be quoted.`,
         options: {
-            type: "array",
-            items: [
-                {
-                    enum: ["always", "as-needed"],
-                    // TODO: eslint also supports "consistent", "consistent-as-needed" modes.
-                    // TODO: eslint supports "keywords", "unnecessary" and "numbers" options.
-                },
-            ],
-            minItems: 0,
-            maxItems: 1,
+            type: "string",
+            enum: ["always", "as-needed"],
+            // TODO: eslint also supports "consistent", "consistent-as-needed" modes.
+            // TODO: eslint supports "keywords", "unnecessary" and "numbers" options.
         },
-        optionExamples: ["true", "[true, \"as-needed\"]", "[true, \"always\"]"],
+        optionExamples: ["[true, \"as-needed\"]", "[true, \"always\"]"],
         type: "style",
     };
     /* tslint:enable:object-literal-sort-keys */
