@@ -32,7 +32,15 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "finally block contains return statement";
+    public static FAILURE_TYPE_BREAK = "break";
+
+    public static FAILURE_TYPE_CONTINUE = "continue";
+
+    public static FAILURE_TYPE_RETURN = "return";
+
+    public static FAILURE_TYPE_THROW = "throw";
+
+    public static FAILURE_STRING_FACTORY = (name: string) => `${name} statements in finally blocks are forbidden.`;
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new NoReturnInFinallyScopeAwareWalker(sourceFile, this.getOptions()));
@@ -44,9 +52,29 @@ export class Rule extends Lint.Rules.AbstractRule {
  */
 interface IFinallyScope {
     /**
+     * A value indicating whether the current scope is a `break` boundary.
+     */
+    isBreakBoundary: boolean;
+
+    /**
+     * A value indicating whether the current scope is a `continue` boundary.
+     */
+    isContinueBoundary: boolean;
+
+    /**
      * A value indicating whether the current scope is within a finally block.
      */
     isFinallyBlock: boolean;
+
+    /**
+     * A value indication whether the current scope is a `return` and `throw` boundary.
+     */
+    isReturnsThrowsBoundary: boolean;
+
+    /**
+     * A collection of `break` or `continue` labels in this scope.
+     */
+    labels: Array<string>;
 }
 
 /**
@@ -54,22 +82,84 @@ interface IFinallyScope {
  * only the blocks that do not change scope for return statements.
  */
 class NoReturnInFinallyScopeAwareWalker extends Lint.ScopeAwareRuleWalker<IFinallyScope> {
-    protected visitReturnStatement(node: ts.ReturnStatement): void {
-        if (!this.getCurrentScope().isFinallyBlock) {
+
+    protected visitBreakStatement(node: ts.BreakOrContinueStatement) {
+        if (!this.isControlFlowWithinFinallyBlock(this.isBreakBoundary, node)) {
+            super.visitBreakStatement(node);
             return;
         }
 
-        this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+        this.addFailure(
+            this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING_FACTORY(Rule.FAILURE_TYPE_BREAK)));
+    }
+
+    protected visitContinueStatement(node: ts.BreakOrContinueStatement) {
+        if (!this.isControlFlowWithinFinallyBlock(this.isContinueBoundary, node)) {
+            super.visitContinueStatement(node);
+            return;
+        }
+
+        this.addFailure(
+            this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING_FACTORY(Rule.FAILURE_TYPE_CONTINUE)));
+    }
+
+    protected visitLabeledStatement(node: ts.LabeledStatement) {
+        this.getCurrentScope().labels.push(node.label.text);
+
+        super.visitLabeledStatement(node);
+    }
+
+    protected visitReturnStatement(node: ts.ReturnStatement): void {
+        if (!this.isControlFlowWithinFinallyBlock(this.isReturnsOrThrowsBoundary)) {
+            super.visitReturnStatement(node);
+            return;
+        }
+
+        this.addFailure(
+            this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING_FACTORY(Rule.FAILURE_TYPE_RETURN)));
+    }
+
+    protected visitThrowStatement(node: ts.ThrowStatement): void {
+        if (!this.isControlFlowWithinFinallyBlock(this.isReturnsOrThrowsBoundary)) {
+            super.visitThrowStatement(node);
+            return;
+        }
+
+        this.addFailure(
+            this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING_FACTORY(Rule.FAILURE_TYPE_THROW)));
     }
 
     public createScope(node: ts.Node): IFinallyScope {
         return {
+            isBreakBoundary: this.isLoopBlock(node) || this.isCaseBlock(node),
+            isContinueBoundary: this.isLoopBlock(node),
             isFinallyBlock: this.isFinallyBlock(node),
+            isReturnsThrowsBoundary: super.isScopeBoundary(node),
+            labels: [],
         };
     }
 
     protected isScopeBoundary(node: ts.Node): boolean {
-        return super.isScopeBoundary(node) || this.isFinallyBlock(node);
+        return super.isScopeBoundary(node) ||
+                this.isFinallyBlock(node) ||
+                this.isLoopBlock(node) ||
+                this.isCaseBlock(node);
+    }
+
+    private isLoopBlock(node: ts.Node): boolean {
+        const parent = node.parent;
+
+        return parent &&
+            node.kind === ts.SyntaxKind.Block &&
+            (parent.kind === ts.SyntaxKind.ForInStatement ||
+            parent.kind === ts.SyntaxKind.ForOfStatement ||
+            parent.kind === ts.SyntaxKind.ForStatement ||
+            parent.kind === ts.SyntaxKind.WhileStatement ||
+            parent.kind === ts.SyntaxKind.DoStatement);
+    }
+
+    private isCaseBlock(node: ts.Node): boolean {
+        return node.kind === ts.SyntaxKind.CaseBlock;
     }
 
     private isFinallyBlock(node: ts.Node): boolean {
@@ -83,5 +173,37 @@ class NoReturnInFinallyScopeAwareWalker extends Lint.ScopeAwareRuleWalker<IFinal
 
     private isTryStatement(node: ts.Node): node is ts.TryStatement {
         return node.kind === ts.SyntaxKind.TryStatement;
+    }
+
+    private isReturnsOrThrowsBoundary(scope: IFinallyScope) {
+        return scope.isReturnsThrowsBoundary;
+    }
+
+    private isContinueBoundary(scope: IFinallyScope, node: ts.ContinueStatement): boolean {
+        return node.label ? scope.labels.indexOf(node.label.text) >= 0 : scope.isContinueBoundary;
+    }
+
+    private isBreakBoundary(scope: IFinallyScope, node: ts.BreakStatement): boolean {
+        return node.label ? scope.labels.indexOf(node.label.text) >= 0 : scope.isBreakBoundary;
+    }
+
+    private isControlFlowWithinFinallyBlock<TNode>(
+        isControlFlowBoundary: (scope: IFinallyScope, node?: TNode) => boolean, node?: TNode): boolean {
+        const scopes = this.getAllScopes();
+
+        let currentScope = this.getCurrentScope();
+        let depth = this.getCurrentDepth();
+
+        while (currentScope) {
+            if (isControlFlowBoundary(currentScope, node)) {
+                return false;
+            }
+
+            if (currentScope.isFinallyBlock) {
+                return true;
+            }
+
+            currentScope = scopes[--depth];
+        }
     }
 }
