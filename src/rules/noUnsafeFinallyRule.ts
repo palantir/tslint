@@ -22,7 +22,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-unsafe-finally",
-        description: "Disallows return statements in finally blocks.",
+        description: Lint.Utils.dedent`
+            Disallows control flow statements, such as \`return\`, \`continue\`,
+            \`break\` and \`throws\` in finally blocks.`,
         descriptionDetails: "",
         rationale: Lint.Utils.dedent`
             When used inside \`finally\` blocks, control flow statements,
@@ -88,7 +90,7 @@ interface IFinallyScope {
 class NoReturnInFinallyScopeAwareWalker extends Lint.ScopeAwareRuleWalker<IFinallyScope> {
 
     protected visitBreakStatement(node: ts.BreakOrContinueStatement) {
-        if (!this.isControlFlowWithinFinallyBlock(this.isBreakBoundary, node)) {
+        if (!this.isControlFlowWithinFinallyBlock(isBreakBoundary, node)) {
             super.visitBreakStatement(node);
             return;
         }
@@ -98,7 +100,7 @@ class NoReturnInFinallyScopeAwareWalker extends Lint.ScopeAwareRuleWalker<IFinal
     }
 
     protected visitContinueStatement(node: ts.BreakOrContinueStatement) {
-        if (!this.isControlFlowWithinFinallyBlock(this.isContinueBoundary, node)) {
+        if (!this.isControlFlowWithinFinallyBlock(isContinueBoundary, node)) {
             super.visitContinueStatement(node);
             return;
         }
@@ -114,7 +116,7 @@ class NoReturnInFinallyScopeAwareWalker extends Lint.ScopeAwareRuleWalker<IFinal
     }
 
     protected visitReturnStatement(node: ts.ReturnStatement): void {
-        if (!this.isControlFlowWithinFinallyBlock(this.isReturnsOrThrowsBoundary)) {
+        if (!this.isControlFlowWithinFinallyBlock(isReturnsOrThrowsBoundary)) {
             super.visitReturnStatement(node);
             return;
         }
@@ -124,7 +126,7 @@ class NoReturnInFinallyScopeAwareWalker extends Lint.ScopeAwareRuleWalker<IFinal
     }
 
     protected visitThrowStatement(node: ts.ThrowStatement): void {
-        if (!this.isControlFlowWithinFinallyBlock(this.isReturnsOrThrowsBoundary)) {
+        if (!this.isControlFlowWithinFinallyBlock(isReturnsOrThrowsBoundary)) {
             super.visitThrowStatement(node);
             return;
         }
@@ -134,61 +136,22 @@ class NoReturnInFinallyScopeAwareWalker extends Lint.ScopeAwareRuleWalker<IFinal
     }
 
     public createScope(node: ts.Node): IFinallyScope {
+        const isScopeBoundary = super.isScopeBoundary(node);
+
         return {
-            isBreakBoundary: this.isLoopBlock(node) || this.isCaseBlock(node),
-            isContinueBoundary: this.isLoopBlock(node),
-            isFinallyBlock: this.isFinallyBlock(node),
-            isReturnsThrowsBoundary: super.isScopeBoundary(node),
+            isBreakBoundary: isScopeBoundary || isLoopBlock(node) || isCaseBlock(node),
+            isContinueBoundary: isScopeBoundary || isLoopBlock(node),
+            isFinallyBlock: isFinallyBlock(node),
+            isReturnsThrowsBoundary: isScopeBoundary,
             labels: [],
         };
     }
 
     protected isScopeBoundary(node: ts.Node): boolean {
         return super.isScopeBoundary(node) ||
-                this.isFinallyBlock(node) ||
-                this.isLoopBlock(node) ||
-                this.isCaseBlock(node);
-    }
-
-    private isLoopBlock(node: ts.Node): boolean {
-        const parent = node.parent;
-
-        return parent &&
-            node.kind === ts.SyntaxKind.Block &&
-            (parent.kind === ts.SyntaxKind.ForInStatement ||
-            parent.kind === ts.SyntaxKind.ForOfStatement ||
-            parent.kind === ts.SyntaxKind.ForStatement ||
-            parent.kind === ts.SyntaxKind.WhileStatement ||
-            parent.kind === ts.SyntaxKind.DoStatement);
-    }
-
-    private isCaseBlock(node: ts.Node): boolean {
-        return node.kind === ts.SyntaxKind.CaseBlock;
-    }
-
-    private isFinallyBlock(node: ts.Node): boolean {
-        const parent = node.parent;
-
-        return parent &&
-            node.kind === ts.SyntaxKind.Block &&
-            this.isTryStatement(parent) &&
-            parent.finallyBlock === node;
-    }
-
-    private isTryStatement(node: ts.Node): node is ts.TryStatement {
-        return node.kind === ts.SyntaxKind.TryStatement;
-    }
-
-    private isReturnsOrThrowsBoundary(scope: IFinallyScope) {
-        return scope.isReturnsThrowsBoundary;
-    }
-
-    private isContinueBoundary(scope: IFinallyScope, node: ts.ContinueStatement): boolean {
-        return node.label ? scope.labels.indexOf(node.label.text) >= 0 : scope.isContinueBoundary;
-    }
-
-    private isBreakBoundary(scope: IFinallyScope, node: ts.BreakStatement): boolean {
-        return node.label ? scope.labels.indexOf(node.label.text) >= 0 : scope.isBreakBoundary;
+                isFinallyBlock(node) ||
+                isLoopBlock(node) ||
+                isCaseBlock(node);
     }
 
     private isControlFlowWithinFinallyBlock<TNode>(
@@ -210,4 +173,45 @@ class NoReturnInFinallyScopeAwareWalker extends Lint.ScopeAwareRuleWalker<IFinal
             currentScope = scopes[--depth];
         }
     }
+}
+
+function isLoopBlock(node: ts.Node): boolean {
+    const parent = node.parent;
+
+    return parent &&
+        node.kind === ts.SyntaxKind.Block &&
+        (parent.kind === ts.SyntaxKind.ForInStatement ||
+        parent.kind === ts.SyntaxKind.ForOfStatement ||
+        parent.kind === ts.SyntaxKind.ForStatement ||
+        parent.kind === ts.SyntaxKind.WhileStatement ||
+        parent.kind === ts.SyntaxKind.DoStatement);
+}
+
+function isCaseBlock(node: ts.Node): boolean {
+    return node.kind === ts.SyntaxKind.CaseBlock;
+}
+
+function isFinallyBlock(node: ts.Node): boolean {
+    const parent = node.parent;
+
+    return parent &&
+        node.kind === ts.SyntaxKind.Block &&
+        isTryStatement(parent) &&
+        parent.finallyBlock === node;
+}
+
+function isTryStatement(node: ts.Node): node is ts.TryStatement {
+    return node.kind === ts.SyntaxKind.TryStatement;
+}
+
+function isReturnsOrThrowsBoundary(scope: IFinallyScope) {
+    return scope.isReturnsThrowsBoundary;
+}
+
+function isContinueBoundary(scope: IFinallyScope, node: ts.ContinueStatement): boolean {
+    return node.label ? scope.labels.indexOf(node.label.text) >= 0 : scope.isContinueBoundary;
+}
+
+function isBreakBoundary(scope: IFinallyScope, node: ts.BreakStatement): boolean {
+    return node.label ? scope.labels.indexOf(node.label.text) >= 0 : scope.isBreakBoundary;
 }
