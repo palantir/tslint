@@ -4,7 +4,7 @@ import * as ts from "typescript";
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
-        ruleName: "quote-props",
+        ruleName: "object-literal-key-quotes",
         description: "Enforces consistent object literal property quote style.",
         descriptionDetails: Lint.Utils.dedent`
             Object literal property names can be defined in two ways: using literals or using strings.
@@ -46,8 +46,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static UNQUOTED_PROPERTY = (name: string) => `Unquoted property '${name}' found.`;
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const quotePropsWalker = new QuotePropsWalker(sourceFile, this.getOptions());
-        return this.applyWithWalker(quotePropsWalker);
+        const objectLiteralKeyQuotesWalker = new ObjectLiteralKeyQuotesWalker(sourceFile, this.getOptions());
+        return this.applyWithWalker(objectLiteralKeyQuotesWalker);
     }
 }
 
@@ -58,7 +58,7 @@ const NUMBER_REGEX = /^[0-9]+$/;
 
 type QuotesMode = "always" | "as-needed";
 
-class QuotePropsWalker extends Lint.RuleWalker {
+class ObjectLiteralKeyQuotesWalker extends Lint.RuleWalker {
     private mode: QuotesMode;
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
