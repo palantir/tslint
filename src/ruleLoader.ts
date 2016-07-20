@@ -18,8 +18,9 @@
 import * as fs from "fs";
 import * as path from "path";
 import {camelize} from "underscore.string";
+
 import {getRulesDirectories} from "./configuration";
-import {IRule, IDisabledInterval} from "./language/rule/rule";
+import {IDisabledInterval, IRule} from "./language/rule/rule";
 
 const moduleDirectory = path.dirname(module.filename);
 const CORE_RULES_DIRECTORY = path.resolve(moduleDirectory, ".", "rules");

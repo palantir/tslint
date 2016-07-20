@@ -17,6 +17,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as ts from "typescript";
+
 import * as Lint from "./lint";
 
 export function getSourceFile(fileName: string): ts.SourceFile {

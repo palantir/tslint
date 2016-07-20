@@ -16,12 +16,13 @@
  */
 
 import * as ts from "typescript";
+
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
-        ruleName: "no-mergable-namespace",
+        ruleName: "no-mergeable-namespace",
         description: "Disallows mergeable namespaces in the same file.",
         optionsDescription: "Not configurable.",
         options: null,
@@ -42,11 +43,8 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class NoMergeableNamespaceWalker extends Lint.RuleWalker {
-    private languageService: ts.LanguageService;
-
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions, languageService: ts.LanguageService) {
+    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions, private languageService: ts.LanguageService) {
         super(sourceFile, options);
-        this.languageService = languageService;
     }
 
     public visitModuleDeclaration(node: ts.ModuleDeclaration) {
