@@ -21,7 +21,7 @@ import * as Lint from "../lint";
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
-        ruleName: "no-return-in-finally",
+        ruleName: "no-unsafe-finally",
         description: "Disallows return statements in finally blocks.",
         descriptionDetails: "",
         rationale: Lint.Utils.dedent`
