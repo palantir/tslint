@@ -24,7 +24,11 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "no-return-in-finally",
         description: "Disallows return statements in finally blocks.",
         descriptionDetails: "",
-        rationale: "Return statements inside finally blocks have confusing semantics.",
+        rationale: Lint.Utils.dedent`
+            When used inside \`finally\` blocks, control flow statements,
+            such as \`return\`, \`continue\`, \`break\` and \`throws\`
+            override any other control flow statements in the same try/catch scope.
+            This is confusing and unexpected behavior.`,
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: ["true"],
