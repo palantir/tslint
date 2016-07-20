@@ -16,6 +16,7 @@
  */
 
 export const rules = {
+    "no-unsafe-finally": true,
 };
 
 // work around "extends" being a keyword
