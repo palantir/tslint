@@ -224,7 +224,7 @@ Core rules are included in the `tslint` package.
   * `"parameters"` checks alignment of function parameters.
   * `"arguments"` checks alignment of function call arguments.
   * `"statements"` checks alignment of statements.
-* `"arrow-parens"` requires parentheses when using arrow function.
+* `arrow-parens` requires parentheses around the parameters of arrow function definitions.
 * `ban` bans the use of specific functions. Options are ["object", "function"] pairs that ban the use of object.function().
 * `class-name` enforces PascalCased class and interface names.
 * `comment-format` enforces rules for single-line comments. Rule options:

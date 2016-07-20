@@ -10,6 +10,6 @@ class Foo {
 
 // invalid case
 var e = (a => {})(1);
-         ~            [Parentheses are required when define arrow function]
+         ~            [Parentheses are required around the parameters of an arrow function definition]
 var f = a => {};
-        ~             [Parentheses are required when define arrow function]
+        ~             [Parentheses are required around the parameters of an arrow function definition]

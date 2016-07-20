@@ -23,8 +23,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "arrow-parens",
-        description: "Requires parentheses when using arrow function.",
-        rationale: "Maintains stylistic consistency with other arrow function definition.",
+        description: "Requires parentheses around the parameters of arrow function definitions.",
+        rationale: "Maintains stylistic consistency with other arrow function definitions.",
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: ["true"],
@@ -32,7 +32,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "Parentheses are required when define arrow function";
+    public static FAILURE_STRING = "Parentheses are required around the parameters of an arrow function definition";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const newParensWalker = new ArrowParensWalker(sourceFile, this.getOptions());
