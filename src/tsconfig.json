@@ -69,6 +69,7 @@
         "language/walker/skippableTokenAwareRuleWalker.ts",
         "language/walker/syntaxWalker.ts",
         "rules/alignRule.ts",
+        "rules/arrowParensRule.ts",
         "rules/banRule.ts",
         "rules/classNameRule.ts",
         "rules/commentFormatRule.ts",
