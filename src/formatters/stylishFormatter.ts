@@ -21,76 +21,76 @@ import {RuleFailure} from "../language/rule/rule";
 import * as colors from "colors";
 
 export class Formatter extends AbstractFormatter {
-  public format(failures: RuleFailure[]): string {
-    if (typeof failures[0] === "undefined") {
-      return "\n";
+    public format(failures: RuleFailure[]): string {
+        if (typeof failures[0] === "undefined") {
+            return "\n";
+        }
+
+        const fileName        = failures[0].getFileName();
+        const positionMaxSize = this.getPositionMaxSize(failures);
+        const ruleMaxSize     = this.getRuleMaxSize(failures);
+
+        const outputLines = [
+            fileName,
+        ];
+
+        for (const failure of failures) {
+            const failureString = failure.getFailure();
+
+            // Rule
+            let ruleName = failure.getRuleName();
+            ruleName     = this.pad(ruleName, ruleMaxSize);
+            ruleName     = colors.yellow(ruleName);
+
+            // Lines
+            const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
+
+            let positionTuple = `${lineAndCharacter.line + 1}:${lineAndCharacter.character + 1}`;
+            positionTuple     = this.pad(positionTuple, positionMaxSize);
+            positionTuple     = colors.red(positionTuple);
+
+            // Ouput
+            const output = `${positionTuple}  ${ruleName}  ${failureString}`;
+
+            outputLines.push(output);
+        }
+
+        return outputLines.join("\n") + "\n\n";
     }
 
-    const fileName        = failures[0].getFileName();
-    const positionMaxSize = this.getPositionMaxSize(failures);
-    const ruleMaxSize     = this.getRuleMaxSize(failures);
+    private pad(str: string, len: number): string {
+        const padder = Array(len).join(" ");
 
-    const outputLines = [
-      fileName,
-    ];
-
-    for (const failure of failures) {
-      const failureString = failure.getFailure();
-
-      // Rule
-      let ruleName = failure.getRuleName();
-      ruleName     = this.pad(ruleName, ruleMaxSize);
-      ruleName     = colors.yellow(ruleName);
-
-      // Lines
-      const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
-
-      let positionTuple = `${lineAndCharacter.line + 1}:${lineAndCharacter.character + 1}`;
-      positionTuple     = this.pad(positionTuple, positionMaxSize);
-      positionTuple     = colors.red(positionTuple);
-
-      // Ouput
-      const output = `${positionTuple}  ${ruleName}  ${failureString}`;
-
-      outputLines.push(output);
+        return (str + padder).substring(0, padder.length);
     }
 
-    return outputLines.join("\n") + "\n\n";
-  }
+    private getPositionMaxSize(failures: RuleFailure[]): number {
+        let positionMaxSize = 0;
 
-  private pad(str: string, len: number): string {
-    const padder = Array(len).join(" ");
+        for (const failure of failures) {
+            const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
 
-    return (str + padder).substring(0, padder.length);
-  }
+            const positionSize = `${lineAndCharacter.line + 1}:${lineAndCharacter.character + 1}`.length;
 
-  private getPositionMaxSize(failures: RuleFailure[]): number {
-    let positionMaxSize = 0;
+            if (positionSize > positionMaxSize) {
+                positionMaxSize = positionSize;
+            }
+        }
 
-    for (const failure of failures) {
-      const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
-
-      const positionSize = `${lineAndCharacter.line + 1}:${lineAndCharacter.character + 1}`.length;
-
-      if (positionSize > positionMaxSize) {
-        positionMaxSize = positionSize;
-      }
+        return positionMaxSize;
     }
 
-    return positionMaxSize;
-  }
+    private getRuleMaxSize(failures: RuleFailure[]): number {
+        let ruleMaxSize = 0;
 
-  private getRuleMaxSize(failures: RuleFailure[]): number {
-    let ruleMaxSize = 0;
+        for (const failure of failures) {
+            const ruleSize = failure.getRuleName().length;
 
-    for (const failure of failures) {
-      const ruleSize = failure.getRuleName().length;
+            if (ruleSize > ruleMaxSize) {
+                ruleMaxSize = ruleSize;
+            }
+        }
 
-      if (ruleSize > ruleMaxSize) {
-        ruleMaxSize = ruleSize;
-      }
+        return ruleMaxSize;
     }
-
-    return ruleMaxSize;
-  }
 }
