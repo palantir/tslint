@@ -116,6 +116,7 @@
         "../src/rules/noUseBeforeDeclareRule.ts",
         "../src/rules/noVarKeywordRule.ts",
         "../src/rules/noVarRequiresRule.ts",
+        "../src/rules/objectLiteralKeyQuotesRule.ts",
         "../src/rules/objectLiteralSortKeysRule.ts",
         "../src/rules/oneLineRule.ts",
         "../src/rules/oneVariablePerDeclarationRule.ts",

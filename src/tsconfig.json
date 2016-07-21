@@ -120,6 +120,7 @@
         "rules/noUseBeforeDeclareRule.ts",
         "rules/noVarKeywordRule.ts",
         "rules/noVarRequiresRule.ts",
+        "rules/objectLiteralKeyQuotesRule.ts",
         "rules/objectLiteralSortKeysRule.ts",
         "rules/oneLineRule.ts",
         "rules/oneVariablePerDeclarationRule.ts",
