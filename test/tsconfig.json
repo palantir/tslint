@@ -110,6 +110,7 @@
         "../src/rules/noSwitchCaseFallThroughRule.ts",
         "../src/rules/noTrailingWhitespaceRule.ts",
         "../src/rules/noUnreachableRule.ts",
+        "../src/rules/noUnsafeFinallyRule.ts",
         "../src/rules/noUnusedExpressionRule.ts",
         "../src/rules/noUnusedNewRule.ts",
         "../src/rules/noUnusedVariableRule.ts",
