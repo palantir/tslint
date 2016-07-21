@@ -61,7 +61,7 @@ class NoForInArrayWalker extends Lint.ProgramAwareRuleWalker {
         const type = tc.getTypeAtLocation(iteratee);
 
         /* tslint:disable:no-bitwise */
-        const isArrayType = (type.flags & ts.TypeFlags.Reference) !== 0;
+        const isArrayType = type.symbol && type.symbol.name === "Array";
         const isStringType = (type.flags & ts.TypeFlags.StringLike) !== 0;
         /* tslint:enable:no-bitwise */
 

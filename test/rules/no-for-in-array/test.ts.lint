@@ -19,12 +19,16 @@ class C {
 }
 c = new C();
 
+class A<T> { }
+let refType: A<number>;
+
 // valid cases
 for (var k in o);
 for (var k in d);
 for (var k in map);
 for (var k in numArray);
 for (var k in c);
+for (var k in refType);
 
 // invalid cases
 for (var k in array);
