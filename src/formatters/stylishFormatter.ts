@@ -59,7 +59,7 @@ export class Formatter extends AbstractFormatter {
     }
 
     private pad(str: string, len: number): string {
-        const padder = Array(len).join(" ");
+        const padder = Array(len + 1).join(" ");
 
         return (str + padder).substring(0, padder.length);
     }
