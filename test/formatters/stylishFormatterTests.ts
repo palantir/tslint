@@ -39,17 +39,21 @@ describe("Stylish Formatter", () => {
             new RuleFailure(sourceFile, 0, maxPosition, "full failure", "full-name"),
         ];
 
+        const maxPositionObj = sourceFile.getLineAndCharacterOfPosition(maxPosition - 1);
+
+        const maxPositionTuple = `${maxPositionObj.line + 1}:${maxPositionObj.character + 1}`;
+
         const expectedResult = (require("colors").supportsColor) ?
             "formatters/stylishFormatter.test.ts" + "\n" +
             "\u001b[31m1:1\u001b[39m  \u001b[33mfirst-name\u001b[39m  first failure" + "\n" +
             "\u001b[31m1:3\u001b[39m  \u001b[33mescape    \u001b[39m  &<>'\" should be escaped" + "\n" +
-            "\u001b[31m9:3\u001b[39m  \u001b[33mlast-name \u001b[39m  last failure" + "\n" +
+            `\u001b[31m${maxPositionTuple}\u001b[39m  \u001b[33mlast-name \u001b[39m  last failure` + "\n" +
             "\u001b[31m1:1\u001b[39m  \u001b[33mfull-name \u001b[39m  full failure" + "\n" +
             "\n" :
             "formatters/stylishFormatter.test.ts" + "\n" +
             "1:1  first-name  first failure" + "\n" +
             "1:3  escape      &<>\'\" should be escaped" + "\n" +
-            "9:3  last-name   last failure" + "\n" +
+            `${maxPositionTuple}  last-name   last failure` + "\n" +
             "1:1  full-name   full failure" + "\n" +
             "\n";
 
