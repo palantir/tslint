@@ -254,6 +254,7 @@ Core rules are included in the `tslint` package.
 * `arrow-parens` requires parentheses around the parameters of arrow function definitions.
 * `ban` bans the use of specific functions. Options are ["object", "function"] pairs that ban the use of object.function().
 * `class-name` enforces PascalCased class and interface names.
+* `consecutive-function-overloads` enforces function overloads to be consecutive.
 * `comment-format` enforces rules for single-line comments. Rule options:
     * `"check-space"` enforces the rule that all single-line comments must begin with a space, as in `// comment`
         * note that comments starting with `///` are also allowed, for things such as `///<reference>`

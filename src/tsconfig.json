@@ -73,6 +73,7 @@
         "rules/banRule.ts",
         "rules/classNameRule.ts",
         "rules/commentFormatRule.ts",
+        "rules/consecutiveFunctionOverloadsRule.ts",
         "rules/curlyRule.ts",
         "rules/eoflineRule.ts",
         "rules/forinRule.ts",
