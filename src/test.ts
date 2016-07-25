@@ -22,7 +22,7 @@ import * as glob from "glob";
 import * as path from "path";
 import * as ts from "typescript";
 
-import {IReplacement} from "./language/rule/rule";
+import {Replacement} from "./language/rule/rule";
 import {createCompilerOptions} from "./language/utils";
 import {LintError} from "./test/lintError";
 import * as parse from "./test/parse";
@@ -118,19 +118,16 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
             if (stat.isFile()) {
                 fixedFileText = fs.readFileSync(fixedFile, "utf8");
                 // accumulate replacements
-                const replacements = failures.reduce((acc, failure) => {
+                let replacements: Replacement[] = [];
+                for (const failure of failures) {
                     const fixes = failure.getFixes();
                     if (fixes.length > 0) {
-                        return acc.concat(fixes[0].replacements);
-                    } else {
-                        return acc;
+                        replacements = replacements.concat(fixes[0].getReplacements());
                     }
-                }, [] as IReplacement[]);
+                }
                 // sort in reverse so that diffs are properly applied
-                replacements.sort((a, b) => (b.start + b.length) - (a.start + a.length));
-                newFileText = replacements.reduce((acc, r) => {
-                    return acc.substring(0, r.start) + r.text + acc.substring(r.start + r.length);
-                }, fileTextWithoutMarkup);
+                replacements.sort((a, b) => b.getEnd() - a.getEnd());
+                newFileText = replacements.reduce((text, r) => r.apply(text), fileTextWithoutMarkup);
             }
         } catch (e) {
             fixedFileText = "";
@@ -167,41 +164,33 @@ export function consoleTestResultHandler(testResult: TestResult): boolean {
             console.log(colors.green(" Passed"));
         } else {
             console.log(colors.red(" Failed!"));
-        }
-        if (!didMarkupTestPass) {
-            console.log(colors.green(`Expected markup (from ${MARKUP_FILE_EXTENSION} file)`));
-            console.log(colors.red("Actual (from TSLint)"));
-
             didAllTestsPass = false;
-
-            for (const diffResult of markupDiffResults) {
-                let color = colors.grey;
-                if (diffResult.added) {
-                    color = colors.green;
-                } else if (diffResult.removed) {
-                    color = colors.red;
-                }
-                process.stdout.write(color(diffResult.value));
+            if (!didMarkupTestPass) {
+                displayDiffResults(markupDiffResults, MARKUP_FILE_EXTENSION);
             }
-        }
-        if (!didFixesTestPass) {
-            console.log(colors.green(`Expected fixes (from ${FIXES_FILE_EXTENSION} file)`));
-            console.log(colors.red("Actual (from TSLint)"));
-
-            didAllTestsPass = false;
-
-            for (const diffResult of fixesDiffResults) {
-                let color = colors.grey;
-                if (diffResult.added) {
-                    color = colors.green;
-                } else if (diffResult.removed) {
-                    color = colors.red;
-                }
-                process.stdout.write(color(diffResult.value));
+            if (!didFixesTestPass) {
+                displayDiffResults(fixesDiffResults, FIXES_FILE_EXTENSION);
             }
         }
         /* tslint:enable:no-console */
     }
 
     return didAllTestsPass;
+}
+
+function displayDiffResults(diffResults: diff.IDiffResult[], extension: string) {
+    /* tslint:disable:no-console */
+    console.log(colors.green(`Expected (from ${extension} file)`));
+    console.log(colors.red("Actual (from TSLint)"));
+
+    for (const diffResult of diffResults) {
+        let color = colors.grey;
+        if (diffResult.added) {
+            color = colors.green;
+        } else if (diffResult.removed) {
+            color = colors.red;
+        }
+        process.stdout.write(color(diffResult.value));
+    }
+    /* tslint:enable:no-console */
 }

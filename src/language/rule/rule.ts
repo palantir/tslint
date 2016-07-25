@@ -89,16 +89,52 @@ export interface IRule {
     applyWithWalker(walker: RuleWalker): RuleFailure[];
 }
 
-export interface IReplacement {
-    start: number;
-    length: number;
-    text: string;
+export class Replacement {
+    constructor(private start: number, private length: number, private text: string) {
+    }
+
+    public getStart() {
+        return this.start;
+    }
+
+    public getLength() {
+        return this.length;
+    }
+
+    public getEnd() {
+        return this.start + this.length;
+    }
+
+    public getText() {
+        return this.text;
+    }
+
+    public apply(content: string) {
+        return content.substring(0, this.start) + this.text + content.substring(this.start + this.length);
+    }
 }
 
-export interface IFix {
-    ruleName: string;
-    description: string;
-    replacements: IReplacement[];
+export class Fix {
+    constructor(private ruleName: string, private description: string, private replacements: Replacement[]) {
+    }
+
+    public getRuleName() {
+        return this.ruleName;
+    }
+
+    public getDescription() {
+        return this.description;
+    }
+
+    public getReplacements() {
+        return this.replacements;
+    }
+
+    public apply(content: string) {
+        // sort replacements in reverse so that diffs are properly applied
+        this.replacements.sort((a, b) => b.getEnd() - a.getEnd());
+        return this.replacements.reduce((text, r) => r.apply(text), content);
+    }
 }
 
 export class RuleFailurePosition {
@@ -141,7 +177,7 @@ export class RuleFailure {
                 end: number,
                 private failure: string,
                 private ruleName: string,
-                private fixes: IFix[] = []) {
+                private fixes: Fix[] = []) {
 
         this.fileName = sourceFile.fileName;
         this.startPosition = this.createFailurePosition(start);
