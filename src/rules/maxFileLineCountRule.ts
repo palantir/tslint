@@ -14,9 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import * as ts from "typescript";
 import * as Lint from "../lint";
+import * as ts from "typescript";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -60,7 +59,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
         if (lineCount > lineLimit && disabledIntervals.length === 0) {
             const errorString = Rule.FAILURE_STRING_FACTORY(lineCount, lineLimit);
-            ruleFailures.push(new Lint.RuleFailure(sourceFile, 0, 0, errorString, this.getOptions().ruleName));
+            ruleFailures.push(new Lint.RuleFailure(sourceFile, 0, 1, errorString, this.getOptions().ruleName));
         }
 
         return ruleFailures;
