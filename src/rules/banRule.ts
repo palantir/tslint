@@ -37,7 +37,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 ],
             },
         },
-        optionExamples: [`[true, ["someObject", "someFunction"], ["someObject", "someFunction", "Optional explanation"]]`],
+        optionExamples: [`[true, ["someObject", "someFunction"], ["someObject", "otherFunction", "Optional explanation"]]`],
         type: "functionality",
     };
     /* tslint:enable:object-literal-sort-keys */
