@@ -21,8 +21,8 @@ import * as ts from "typescript";
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
-        ruleName: "no-improper-constructor-param-usage",
-        description: "Disallows constructor parameters to be accessed without the 'this.' prefix",
+        ruleName: "param-property-in-constructor",
+        description: "Disallows constructor parameter properties to be accessed without the 'this.' prefix",
         rationale: Lint.Utils.dedent`
             This helps enforce consistancy.
             When a constructor parameter is accessed without the 'this.' prefix, it is actually not acessing the same thing.
@@ -48,15 +48,13 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const languageService = Lint.createLanguageService(sourceFile.fileName, sourceFile.getFullText());
-        return this.applyWithWalker(new NoImproperCtorParamUsageWalker(sourceFile, this.getOptions(), languageService));
+        return this.applyWithWalker(new ParamPropInCtorWalker(sourceFile, this.getOptions(), languageService));
     }
 }
 
-export class NoImproperCtorParamUsageWalker extends Lint.RuleWalker {
+export class ParamPropInCtorWalker extends Lint.RuleWalker {
 
-    private languageService: ts.LanguageService;
-
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions, languageService: ts.LanguageService) {
+    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions, private languageService: ts.LanguageService) {
         super(sourceFile, options);
         this.languageService = languageService;
     }
@@ -64,9 +62,11 @@ export class NoImproperCtorParamUsageWalker extends Lint.RuleWalker {
     public visitConstructorDeclaration(node: ts.ConstructorDeclaration) {
         if (node.parameters && node.parameters.length > 0) {
             const fileName = this.getSourceFile().fileName;
-            node.parameters.forEach((param: ts.ParameterDeclaration) => {
-                this.validateParam(param, fileName);
-            });
+            for (let param of node.parameters) {
+                if (param.modifiers != null && param.modifiers.length > 0) {
+                    this.validateParam(param, fileName);
+                }
+            }
         }
         super.visitConstructorDeclaration(node);
     }
@@ -90,7 +90,7 @@ export class NoImproperCtorParamUsageWalker extends Lint.RuleWalker {
         const endPos = span.textSpan.start + span.textSpan.length;
         const nameSpanInfo = this.languageService.getNameOrDottedNameSpan(fileName, span.textSpan.start, endPos);
 
-        // If the difference between these two is 5 characters, then that account for the missing `this.`!
+        // If the difference between these two is exactly 5 characters it accounts for the missing `this.`!
         return nameSpanInfo.length - span.textSpan.length === 5;
     }
 }
