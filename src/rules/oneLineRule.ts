@@ -195,7 +195,7 @@ class OneLineWalker extends Lint.RuleWalker {
     public visitModuleDeclaration(node: ts.ModuleDeclaration) {
         const nameNode = node.name;
         const body = node.body;
-        if (body.kind === ts.SyntaxKind.ModuleBlock) {
+        if (body != null && body.kind === ts.SyntaxKind.ModuleBlock) {
             const openBraceToken = body.getChildAt(0);
             this.handleOpeningBrace(nameNode, openBraceToken);
         }
