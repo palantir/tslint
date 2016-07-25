@@ -53,30 +53,33 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
         const fileTextWithoutMarkup = parse.removeErrorMarkup(fileText);
         const errorsFromMarkup = parse.parseErrorsFromMarkup(fileText);
 
-        const compilerOptions = createCompilerOptions();
-        const compilerHost: ts.CompilerHost = {
-            fileExists: () => true,
-            getCanonicalFileName: (filename: string) => filename,
-            getCurrentDirectory: () => "",
-            getDefaultLibFileName: () => ts.getDefaultLibFileName(compilerOptions),
-            getDirectories: () => [],
-            getNewLine: () => "\n",
-            getSourceFile: function (filenameToGet: string) {
-                if (filenameToGet === this.getDefaultLibFileName()) {
-                    const fileText = fs.readFileSync(ts.getDefaultLibFilePath(compilerOptions)).toString();
-                    return ts.createSourceFile(filenameToGet, fileText, compilerOptions.target);
-                } else if (filenameToGet === fileCompileName) {
-                    return ts.createSourceFile(fileBasename, fileTextWithoutMarkup, compilerOptions.target, true);
-                }
-            },
-            readFile: () => null,
-            useCaseSensitiveFileNames: () => true,
-            writeFile: () => null,
-        };
+        let program: ts.Program;
+        if (tslintConfig.linterOptions && tslintConfig.linterOptions.typeCheck) {
+            const compilerOptions = createCompilerOptions();
+            const compilerHost: ts.CompilerHost = {
+                fileExists: () => true,
+                getCanonicalFileName: (filename: string) => filename,
+                getCurrentDirectory: () => "",
+                getDefaultLibFileName: () => ts.getDefaultLibFileName(compilerOptions),
+                getDirectories: () => [],
+                getNewLine: () => "\n",
+                getSourceFile: function (filenameToGet: string) {
+                    if (filenameToGet === this.getDefaultLibFileName()) {
+                        const fileText = fs.readFileSync(ts.getDefaultLibFilePath(compilerOptions)).toString();
+                        return ts.createSourceFile(filenameToGet, fileText, compilerOptions.target);
+                    } else if (filenameToGet === fileCompileName) {
+                        return ts.createSourceFile(fileBasename, fileTextWithoutMarkup, compilerOptions.target, true);
+                    }
+                },
+                readFile: () => null,
+                useCaseSensitiveFileNames: () => true,
+                writeFile: () => null,
+            };
 
-        const program = ts.createProgram([fileCompileName], compilerOptions, compilerHost);
-        // perform type checking on the program, updating nodes with symbol table references
-        ts.getPreEmitDiagnostics(program);
+            program = ts.createProgram([fileCompileName], compilerOptions, compilerHost);
+            // perform type checking on the program, updating nodes with symbol table references
+            ts.getPreEmitDiagnostics(program);
+        }
 
         const lintOptions = {
             configuration: tslintConfig,
