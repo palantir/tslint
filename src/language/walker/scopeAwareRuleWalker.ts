@@ -16,6 +16,7 @@
  */
 
 import * as ts from "typescript";
+
 import {RuleWalker} from "./ruleWalker";
 
 export abstract class ScopeAwareRuleWalker<T> extends RuleWalker {

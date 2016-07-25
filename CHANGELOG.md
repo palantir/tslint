@@ -1,6 +1,22 @@
 Change Log
 ===
 
+v3.13.0
+---
+* Stable release containing changes from the last dev release (v3.13.0-dev.0)
+
+v3.13.0-dev.0
+---
+* [new-rule] `ordered-imports` rule (#1325)
+* [enhancement] MPEG transport stream files are ignored by the CLI (#1357)
+
+Thanks to our contributors!
+* @chrismbarr
+* @corydeppen
+* @danvk
+* @janaagaard75
+* @mprobst
+
 v3.12.1
 ---
 * Stable release containing changes from the last dev release (v3.12.0-dev.1)

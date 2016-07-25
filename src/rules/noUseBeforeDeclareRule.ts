@@ -16,6 +16,7 @@
  */
 
 import * as ts from "typescript";
+
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -45,11 +46,8 @@ export class Rule extends Lint.Rules.AbstractRule {
 type VisitedVariables = {[varName: string]: boolean};
 
 class NoUseBeforeDeclareWalker extends Lint.ScopeAwareRuleWalker<VisitedVariables> {
-    private languageService: ts.LanguageService;
-
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions, languageService: ts.LanguageService) {
+    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions, private languageService: ts.LanguageService) {
         super(sourceFile, options);
-        this.languageService = languageService;
     }
 
     public createScope(): VisitedVariables {

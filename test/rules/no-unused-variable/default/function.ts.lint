@@ -8,7 +8,7 @@ var func2 = () => {
 };
 
 function func3() {
-         ~~~~~     [Unused variable: 'func3']
+         ~~~~~     [Unused function: 'func3']
     return func1(1, 2);
 }
 
