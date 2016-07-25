@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import * as ts from "typescript";
 import * as Lint from "../lint";
+import * as ts from "typescript";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
