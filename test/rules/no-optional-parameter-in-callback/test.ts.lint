@@ -50,7 +50,7 @@ function f3() {
 }
 
 var v1 = {
-    foo(x: (y?: number): void {
+    foo(x: (y?: number) => void): void {
             ~~~~~~~~~~  [error]
         var bar = 1;
     },
@@ -82,5 +82,14 @@ class c1 {
     }
 }
 
+class c2 {
+    foo(ob: {x: number, y: (z?: string) => void}): void {
+                            ~~~~~~~~~~  [error]
+    }
+}
 
-[error]: No optional parameters in callback positions
+declare function foo1(ob: {x: number}, y: {k: {p: (z?: string) => void}}): void;
+                                                   ~~~~~~~~~~  [error]
+
+
+[error]: No optional parameters in callback positions - consider writing `T | undefined` or something similar instead

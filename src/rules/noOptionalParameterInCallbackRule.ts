@@ -33,7 +33,8 @@ export class Rule extends Lint.Rules.TypedRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = `No optional parameters in callback positions`;
+    public static FAILURE_STRING =
+    `No optional parameters in callback positions - consider writing \`T | undefined\` or something similar instead`;
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         return this.applyWithWalker(new NoOptionalParameterInCallbackRule(sourceFile, this.getOptions(), program));
@@ -41,6 +42,8 @@ export class Rule extends Lint.Rules.TypedRule {
 }
 
 class NoOptionalParameterInCallbackRule extends Lint.ProgramAwareRuleWalker {
+
+    private checker = this.getTypeChecker();
 
     public visitInterfaceDeclaration(node: ts.InterfaceDeclaration): void {
         const members = node.members;
@@ -77,30 +80,57 @@ class NoOptionalParameterInCallbackRule extends Lint.ProgramAwareRuleWalker {
         super.visitFunctionExpression(node);
     }
 
+    /* tslint:disable:no-bitwise */
     private isFunctionType(type: ts.Type): boolean {
-        const tc = this.getTypeChecker();
-        return type.flags && ts.TypeFlags.ObjectType && tc.getSignaturesOfType(type, ts.SignatureKind.Call).length > 0;
+        return type.flags & ts.TypeFlags.ObjectType && this.checker.getSignaturesOfType(type, ts.SignatureKind.Call).length > 0;
+    }
+
+    private isObjectLiteralType(type: ts.Type) {
+        return type.symbol && (type.symbol.flags & (ts.SymbolFlags.ObjectLiteral | ts.SymbolFlags.TypeLiteral)) !== 0 &&
+            this.checker.getSignaturesOfType(type, ts.SignatureKind.Call).length === 0 &&
+            this.checker.getSignaturesOfType(type, ts.SignatureKind.Construct).length === 0;
+    }
+    /* tslint:enable:no-bitwise */
+
+    private validateFunctionType(node: ts.Type) {
+        const signatures = this.checker.getSignaturesOfType(node, ts.SignatureKind.Call);
+        for (const signature of signatures) {
+            for (const param of signature.parameters) {
+                const declarations = param.getDeclarations() as ts.ParameterDeclaration[];
+                for (const declaration of declarations) {
+                    if (this.checker.isOptionalParameter(declaration)) {
+                        this.addFailure(this.createFailure(declaration.getStart(), declaration.getWidth(), Rule.FAILURE_STRING));
+                    }
+                }
+            }
+        }
+    }
+
+    private handleObjectLiteralType(node: ts.Type) {
+        const props = this.checker.getPropertiesOfType(node);
+        for (const prop of props) {
+            for (const declaration of prop.declarations) {
+                const propType = this.checker.getTypeAtLocation(declaration);
+                if (this.isFunctionType(propType)) {
+                    this.validateFunctionType(propType);
+                }
+                if (this.isObjectLiteralType(propType)) {
+                    this.handleObjectLiteralType(propType);
+                }
+            }
+        }
     }
 
     private validateSignature(node: ts.SignatureDeclaration) {
-        const tc = this.getTypeChecker();
+        const that = this;
         const signatureParametersType: ts.Type[] = node.parameters.filter(p => !!p.type)
-            .map(function (parameter: ts.ParameterDeclaration) { return tc.getTypeAtLocation(parameter); });
+            .map(function (parameter: ts.ParameterDeclaration) { return that.checker.getTypeAtLocation(parameter); });
         for (const type of signatureParametersType) {
             if (this.isFunctionType(type)) {
-                const signatures = tc.getSignaturesOfType(type, ts.SignatureKind.Call);
-                for (const signature of signatures) {
-                    for (const param of signature.parameters) {
-                        const declarations = param.getDeclarations().map(function (declaration: ts.Declaration) {
-                            return <ts.ParameterDeclaration> declaration;
-                        });
-                        for (const declaration of declarations) {
-                            if (tc.isOptionalParameter(declaration)) {
-                                this.addFailure(this.createFailure(declaration.getStart(), declaration.getWidth(), Rule.FAILURE_STRING));
-                            }
-                        }
-                    }
-                }
+                this.validateFunctionType(type);
+            }
+            if (this.isObjectLiteralType(type)) {
+                this.handleObjectLiteralType(type);
             }
         }
     }
