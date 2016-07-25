@@ -16,6 +16,7 @@
  */
 
 import * as ts from "typescript";
+
 import * as Lint from "../lint";
 import * as BanRule from "./banRule";
 
