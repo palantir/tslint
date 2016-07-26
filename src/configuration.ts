@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import * as findup from "findup-sync";
+import findup = require("findup-sync");
 import * as fs from "fs";
 import * as path from "path";
 import * as resolve from "resolve";
@@ -24,6 +24,9 @@ import {arrayify, objectify, stripComments} from "./utils";
 
 export interface IConfigurationFile {
     extends?: string | string[];
+    linterOptions?: {
+        typeCheck?: boolean,
+    };
     rulesDirectory?: string | string[];
     rules?: any;
 }
@@ -38,6 +41,7 @@ export const DEFAULT_CONFIG = {
         "no-eval": true,
         "no-internal-module": true,
         "no-trailing-whitespace": true,
+        "no-unsafe-finally": true,
         "no-var-keyword": true,
         "one-line": [true, "check-open-brace", "check-whitespace"],
         "quotemark": [true, "double"],

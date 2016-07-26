@@ -15,13 +15,25 @@
  * limitations under the License.
  */
 
-export const rules = {
-    "no-unsafe-finally": true,
-    "ordered-imports": [true, {
-        "named-imports-order": "lowercase-last",
-    }],
-};
+import * as ts from "typescript";
 
-// work around "extends" being a keyword
-const xtends = "tslint:recommended";
-export { xtends as extends };
+import {IOptions} from "../../lint";
+import {RuleWalker} from "./ruleWalker";
+
+export class ProgramAwareRuleWalker extends RuleWalker {
+    private typeChecker: ts.TypeChecker;
+
+    constructor(sourceFile: ts.SourceFile, options: IOptions, private program: ts.Program) {
+        super(sourceFile, options);
+
+        this.typeChecker = program.getTypeChecker();
+    }
+
+    public getProgram(): ts.Program {
+        return this.program;
+    }
+
+    public getTypeChecker(): ts.TypeChecker {
+        return this.typeChecker;
+    }
+}
