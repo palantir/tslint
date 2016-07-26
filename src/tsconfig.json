@@ -103,6 +103,7 @@
         "rules/noDuplicateVariableRule.ts",
         "rules/noEmptyRule.ts",
         "rules/noEvalRule.ts",
+        "rules/noForInArrayRule.ts",
         "rules/noInferrableTypesRule.ts",
         "rules/noInternalModuleRule.ts",
         "rules/noInvalidThisRule.ts",
