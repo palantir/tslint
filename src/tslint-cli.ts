@@ -19,19 +19,21 @@ import * as fs from "fs";
 import * as glob from "glob";
 import * as optimist from "optimist";
 import * as path from "path";
-import * as Linter from "./tslint";
+import * as ts from "typescript";
+
 import {
     CONFIG_FILENAME,
     DEFAULT_CONFIG,
     findConfiguration,
 } from "./configuration";
 import {consoleTestResultHandler, runTest} from "./test";
+import * as Linter from "./tslint";
 
 let processed = optimist
     .usage("Usage: $0 [options] file ...")
     .check((argv: any) => {
-        // at least one of file, help, version or unqualified argument must be present
-        if (!(argv.h || argv.i || argv.test || argv.v || argv._.length > 0)) {
+        // at least one of file, help, version, project or unqualified argument must be present
+        if (!(argv.h || argv.i || argv.test || argv.v || argv.project || argv._.length > 0)) {
             throw "Missing files";
         }
 
@@ -75,10 +77,16 @@ let processed = optimist
         "t": {
             alias: "format",
             default: "prose",
-            describe: "output format (prose, json, verbose, pmd, msbuild, checkstyle, vso)",
+            describe: "output format (prose, json, stylish, verbose, pmd, msbuild, checkstyle, vso)",
         },
         "test": {
             describe: "test that tslint produces the correct output for the specified directory",
+        },
+        "project": {
+            describe: "tsconfig.json file",
+        },
+        "type-check": {
+            describe: "enable type checking when linting a project",
         },
         "v": {
             alias: "version",
@@ -185,6 +193,14 @@ tslint accepts the following commandline options:
         specified directory as the configuration file for the tests. See the
         full tslint documentation for more details on how this can be used to test custom rules.
 
+    --project:
+        The location of a tsconfig.json file that will be used to determine which
+        files will be linted.
+
+    --type-check
+        Enables the type checker when running linting rules. --project must be
+        specified in order to enable type checking.
+
     -v, --version:
         The current version of tslint.
 
@@ -201,10 +217,26 @@ if (argv.c && !fs.existsSync(argv.c)) {
 }
 const possibleConfigAbsolutePath = argv.c != null ? path.resolve(argv.c) : null;
 
-const processFile = (file: string) => {
+const processFile = (file: string, program?: ts.Program) => {
     if (!fs.existsSync(file)) {
         console.error(`Unable to open file: ${file}`);
         process.exit(1);
+    }
+
+    const buffer = new Buffer(256);
+    buffer.fill(0);
+    const fd = fs.openSync(file, "r");
+    try {
+        fs.readSync(fd, buffer, 0, 256, null);
+        if (buffer.readInt8(0) === 0x47 && buffer.readInt8(188) === 0x47) {
+            // MPEG transport streams use the '.ts' file extension. They use 0x47 as the frame
+            // separator, repeating every 188 bytes. It is unlikely to find that pattern in
+            // TypeScript source, so tslint ignores files with the specific pattern.
+            console.warn(`${file}: ignoring MPEG transport stream`);
+            return;
+        }
+    } finally {
+        fs.closeSync(fd);
     }
 
     const contents = fs.readFileSync(file, "utf8");
@@ -215,7 +247,7 @@ const processFile = (file: string) => {
         formatter: argv.t,
         formattersDirectory: argv.s,
         rulesDirectory: argv.r,
-    });
+    }, program);
 
     const lintResult = linter.lint();
 
@@ -226,8 +258,41 @@ const processFile = (file: string) => {
     }
 };
 
-const files = argv._;
+// if both files and tsconfig are present, use files
+let files = argv._;
+let program: ts.Program;
+
+if (argv.project != null) {
+    if (!fs.existsSync(argv.project)) {
+        console.error("Invalid option for project: " + argv.project);
+        process.exit(1);
+    }
+    program = Linter.createProgram(argv.project, path.dirname(argv.project));
+    if (files.length === 0) {
+        files = Linter.getFileNames(program);
+    }
+    if (argv["type-check"]) {
+        // if type checking, run the type checker
+        const diagnostics = ts.getPreEmitDiagnostics(program);
+        if (diagnostics.length > 0) {
+            const messages = diagnostics.map((diag) => {
+                // emit any error messages
+                let message = ts.DiagnosticCategory[diag.category];
+                if (diag.file) {
+                    const {line, character} = diag.file.getLineAndCharacterOfPosition(diag.start);
+                    message += ` at ${diag.file.fileName}:${line + 1}:${character + 1}:`;
+                }
+                message += " " + ts.flattenDiagnosticMessageText(diag.messageText, "\n");
+                return message;
+            });
+            throw new Error(messages.join("\n"));
+        }
+    } else {
+        // if not type checking, we don't need to pass in a program object
+        program = undefined;
+    }
+}
 
 for (const file of files) {
-    glob.sync(file, { ignore: argv.e }).forEach(processFile);
+    glob.sync(file, { ignore: argv.e }).forEach((file) => processFile(file, program));
 }

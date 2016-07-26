@@ -17,11 +17,11 @@
 
 import * as configuration from "./configuration";
 import * as formatters from "./formatters";
-import * as linter from "./tslint";
+import {RuleFailure} from "./language/rule/rule";
 import * as rules from "./rules";
 import * as test from "./test";
+import * as linter from "./tslint";
 import * as utils from "./utils";
-import {RuleFailure} from "./language/rule/rule";
 
 export * from "./language/rule/rule";
 export * from "./enableDisableRules";
