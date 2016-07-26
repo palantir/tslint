@@ -79,6 +79,7 @@
         "../src/rules/labelPositionRule.ts",
         "../src/rules/labelUndefinedRule.ts",
         "../src/rules/linebreakStyleRule.ts",
+        "../src/rules/maxFileLineCountRule.ts",
         "../src/rules/maxLineLengthRule.ts",
         "../src/rules/memberAccessRule.ts",
         "../src/rules/memberOrderingRule.ts",
