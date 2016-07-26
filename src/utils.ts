@@ -36,7 +36,7 @@ export function objectify(arg: any): any {
 /**
  * Removes leading indents from a template string without removing all leading whitespace
  */
-export function dedent(strings: string[], ...values: string[]) {
+export function dedent(strings: TemplateStringsArray, ...values: string[]) {
     let fullString = strings.reduce((accumulator, str, i) => {
         return accumulator + values[i - 1] + str;
     });
