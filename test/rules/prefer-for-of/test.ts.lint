@@ -4,7 +4,7 @@ function a() {
     for (var i = 0; i <= obj.arr.length; i++) {
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         console.log(obj.arr[i]);
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     }
 ~~~~~ [0]  
 
@@ -60,4 +60,4 @@ function a() {
     }
 }
 
-[0]: This standard for loop could be replaced with a for(... of ...) loop
+[0]: Expected a 'for-of' loop instead of a 'for' loop with this simple iteration

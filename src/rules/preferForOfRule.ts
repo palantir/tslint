@@ -22,7 +22,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "prefer-for-of",
-        description: "Recommends a for of loop over a standard for loop if the index is only used to access the array being looped over.",
+        description: "Recommends a 'for-of' loop over a standard 'for' loop if the index is only used to access the array being iterated.",
         rationale: "A for(... of ...) loop is easier to implement and read when the index is not needed.",
         optionsDescription: "Not configurable.",
         options: null,
@@ -31,27 +31,21 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "This standard for loop could be replaced with a for(... of ...) loop";
+    public static FAILURE_STRING = "Expected a 'for-of' loop instead of a 'for' loop with this simple iteration";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const languageService = Lint.createLanguageService(sourceFile.fileName, sourceFile.getFullText());
-        return this.applyWithWalker(new ForOfWalker(sourceFile, this.getOptions(), languageService));
+        return this.applyWithWalker(new PreferForOfWalker(sourceFile, this.getOptions(), languageService));
     }
 }
 
-class ForOfWalker extends Lint.RuleWalker {
+class PreferForOfWalker extends Lint.RuleWalker {
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions, private languageService: ts.LanguageService) {
         super(sourceFile, options);
-        this.languageService = languageService;
     }
 
     public visitForStatement(node: ts.ForStatement) {
-        this.handleForStatement(node);
-        super.visitForStatement(node);
-    }
-
-    private handleForStatement(node: ts.ForStatement) {
-        const arrayAccessNode = this.locateArrayNodeForLoop(node);
+        const arrayAccessNode = this.locateArrayNodeInForLoop(node);
 
         // Skip arrays thats just loop over a hard coded number
         // If we are accessing the length of the array, then we are likely looping over it's values
@@ -64,7 +58,7 @@ class ForOfWalker extends Lint.RuleWalker {
             const fileName = this.getSourceFile().fileName;
             const highlights = this.languageService.getDocumentHighlights(fileName, incrementorVariable.getStart(), [fileName]);
             // There are three usages when setting up the for loop,
-            // so remove those form the count to get the count inside the loop block
+            // so remove those from the count to get the count inside the loop block
             const incrementorCount = highlights[0].highlightSpans.length - 3;
 
             // Find `array[i]`-like usages by building up a regex 
@@ -83,29 +77,31 @@ class ForOfWalker extends Lint.RuleWalker {
                 this.addFailure(failure);
             }
         }
+
+        super.visitForStatement(node);
     }
 
-    private locateArrayNodeForLoop(forLoop: ts.ForStatement): ts.Node {
+    private locateArrayNodeInForLoop(forLoop: ts.ForStatement): ts.Node {
         let arrayAccessNode = forLoop.condition.getChildAt(2);
         // If We haven't found it, maybe it's not a standard for loop, try looking in the initializer for the array
         // Something like `for(var t=0, len=arr.length; t < len; t++)`
         if (arrayAccessNode.kind !== ts.SyntaxKind.PropertyAccessExpression) {
-            forLoop.initializer.getChildren().forEach((initNode: ts.Node) => {
+            for (let initNode of forLoop.initializer.getChildren()) {
                 // look in `var t=0, len=arr.length;`
                 if (initNode.kind === ts.SyntaxKind.SyntaxList) {
-                    initNode.getChildren().forEach((initVar: ts.Node) => {
+                    for (let initVar of initNode.getChildren()) {
                         // look in `t=0, len=arr.length;`
                         if (initVar.kind === ts.SyntaxKind.VariableDeclaration) {
-                            initVar.getChildren().forEach((initVarPart: ts.Node) => {
+                            for (let initVarPart of initVar.getChildren()) {
                                 // look in `len=arr.length`
                                 if (initVarPart.kind === ts.SyntaxKind.PropertyAccessExpression) {
                                     arrayAccessNode = initVarPart;
                                 }
-                            });
+                            }
                         }
-                    });
+                    }
                 }
-            });
+            }
         }
         return arrayAccessNode;
     }
