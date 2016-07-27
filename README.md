@@ -299,6 +299,7 @@ Core rules are included in the `tslint` package.
 * `no-duplicate-variable` disallows duplicate variable declarations in the same block scope.
 * `no-empty` disallows empty blocks.
 * `no-eval` disallows `eval` function invocations.
+* `no-for-in-array` disallows iterating over an array with a for-in loop (requires type checking).
 * `no-inferrable-types` disallows explicit type declarations for variables or parameters initialized to a number, string, or boolean.
    * `ignore-params` allows specifying an inferrable type as a function param
 * `no-internal-module` disallows internal `module` (use `namespace` instead).
