@@ -335,6 +335,7 @@ Core rules are included in the `tslint` package.
 * `one-variable-per-declaration` disallows multiple variable definitions in the same statement.
   * `"ignore-for-loop"` allows multiple variable definitions in for loop statement.
 * `only-arrow-functions` disallows traditional `function () { ... }` declarations, preferring `() => { ... }` arrow lambdas.
+* `prefer-for-of` recommends a [`for(... of ...)` loop](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...of) over a standard `for` loop if the index is only used to access the array being looped over.
 * `quotemark` enforces consistent single or double quoted string literals. Rule options (at least one of `"double"` or `"single"` is required):
     * `"single"` enforces single quotes.
     * `"double"` enforces double quotes.
