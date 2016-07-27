@@ -25,6 +25,13 @@ interface i4 {
     ["a"]();
 }
 
+interface i5 {
+    a(): string;
+    bar: {
+        a(): number;
+    }
+}
+
 
 // bad
 
@@ -37,7 +44,7 @@ interface b1 {
     ~~~~~~~~~~~~~  [All 'a' signatures should be adjacent]
 }
 
-interface b22 {
+interface b2 {
     a();
     a(x: number);
     b();
@@ -60,4 +67,14 @@ interface b4 {
     b(): void;
     ["a"](v: number): void;
     ~~~~~~~~~~~~~~~~~~~~~~~  [All 'a' signatures should be adjacent]
-}    
+}
+
+interface b5 {
+    a(): string;
+    bar: {
+        a(): number;
+        b();
+        a(b: number): void;
+        ~~~~~~~~~~~~~~~~~~~  [All 'a' signatures should be adjacent]
+    }
+}
