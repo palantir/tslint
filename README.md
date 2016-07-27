@@ -252,7 +252,7 @@ Core rules are included in the `tslint` package.
   * `"arguments"` checks alignment of function call arguments.
   * `"statements"` checks alignment of statements.
 * `arrow-parens` requires parentheses around the parameters of arrow function definitions.
-* `ban` bans the use of specific functions. Options are ["object", "function"] pairs that ban the use of object.function().
+* `ban` bans the use of specific functions. Options are `["object", "function"]` pairs that ban the use of `object.function()`.  An optional 3rd parameter may be provided (`["object", "function", "Use 'object.otherFunc' instead."]`) to offer an explanation as to why the function has been banned or to offer an alternative.
 * `class-name` enforces PascalCased class and interface names.
 * `comment-format` enforces rules for single-line comments. Rule options:
     * `"check-space"` enforces the rule that all single-line comments must begin with a space, as in `// comment`

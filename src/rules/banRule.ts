@@ -24,22 +24,25 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "ban",
         description: "Bans the use of specific functions or global methods.",
-        optionsDescription: "A list of `['object', 'method']` pairs which ban `object.method()`.",
+        descriptionDetails: "At this time, there is no way to disable global methods with this rule.",
+        optionsDescription: "A list of `['object', 'method', 'optional explanation here']` which ban `object.method()`.",
         options: {
             type: "list",
             listType: {
                 type: "array",
                 items: {type: "string"},
                 minLength: 1,
-                maxLength: 2,
+                maxLength: 3,
             },
         },
-        optionExamples: [`[true, ["someGlobalMethod"], ["console", "log"], ["someObject", "someFunction"]]`],
+        optionExamples: [`[true, ["someGlobalMethod"], ["someObject", "someFunction"], ["someObject", "otherFunction", "Optional explanation"]]`],
         type: "functionality",
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_PART = "function invocation disallowed: ";
+    public static FAILURE_STRING_FACTORY = (expression: string, messageAddition?: string) => {
+        return `Calls to '${expression}' are not allowed.${messageAddition ? " " + messageAddition : ""}`;
+    };
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const options = this.getOptions();
@@ -57,7 +60,7 @@ export class BanFunctionWalker extends Lint.RuleWalker {
     public addBannedFunction(bannedFunction: string[]) {
         if (bannedFunction.length === 1) {
             this.bannedGlobalFunctions.push(bannedFunction[0]);
-        } else if (bannedFunction.length === 2) {
+        } else if (bannedFunction.length >= 2) {
             this.bannedFunctions.push(bannedFunction);
         }
     }
@@ -96,7 +99,7 @@ export class BanFunctionWalker extends Lint.RuleWalker {
                         const failure = this.createFailure(
                             expression.getStart(),
                             expression.getWidth(),
-                            `${Rule.FAILURE_STRING_PART}${leftSideExpression}.${rightSideExpression}`
+                            Rule.FAILURE_STRING_FACTORY(`${leftSideExpression}.${rightSideExpression}`, bannedFunction[2])
                         );
                         this.addFailure(failure);
                     }
@@ -110,7 +113,7 @@ export class BanFunctionWalker extends Lint.RuleWalker {
             const identifierName = (<ts.Identifier> expression).text;
             if (this.bannedGlobalFunctions.indexOf(identifierName) !== -1) {
                 this.addFailure(this.createFailure(expression.getStart(), expression.getWidth(),
-                    `${Rule.FAILURE_STRING_PART}${identifierName}`));
+                    Rule.FAILURE_STRING_FACTORY(`${identifierName}`)));
             }
 
         }

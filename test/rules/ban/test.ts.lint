@@ -1,23 +1,25 @@
 console.time();
 window.toString();
-~~~~~~~~~~~~~~~    [function invocation disallowed: window.toString]
+~~~~~~~~~~~~~~~    [Calls to 'window.toString' are not allowed.]
 console.log();
 document.window.toString();
-~~~~~~~~~~~~~~~~~~~~~~~~    [function invocation disallowed: window.toString]
+~~~~~~~~~~~~~~~~~~~~~~~~    [Calls to 'window.toString' are not allowed.]
 reference.randomContainer.window.toString();
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    [function invocation disallowed: window.toString]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    [Calls to 'window.toString' are not allowed.]
 globals.getDocument().window.toString();
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    [function invocation disallowed: window.toString]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    [Calls to 'window.toString' are not allowed.]
 _.keys(obj).forEach(fun);
 _.forEach(fun);
-~~~~~~~~~    [function invocation disallowed: _.forEach]
+~~~~~~~~~    [Calls to '_.forEach' are not allowed.]
+_.filter(array);
+~~~~~~~~    [Calls to '_.filter' are not allowed. Use the native JavaScript 'myArray.filter' instead.]
 describe("some text", () => {});
 xdescribe("some text", () => {});
-~~~~~~~~~    [function invocation disallowed: xdescribe]
+~~~~~~~~~    [Calls to 'xdescribe' are not allowed.]
 fdescribe("some text", () => {});
-~~~~~~~~~    [function invocation disallowed: fdescribe]
+~~~~~~~~~    [Calls to 'fdescribe' are not allowed.]
 it("some text", () => {});
 xit("some text", () => {});
-~~~          [function invocation disallowed: xit]
+~~~          [Calls to 'xit' are not allowed.]
 fit("some text", () => {});
-~~~          [function invocation disallowed: fit]
+~~~          [Calls to 'fit' are not allowed.]
