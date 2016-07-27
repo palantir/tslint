@@ -1,6 +1,35 @@
 Change Log
 ===
 
+v3.14.0
+---
+* Stable release containing changes from the last dev releases (v3.14.0-dev.0, v3.14.0-dev.1)
+
+v3.14.0-dev.1
+---
+* [new-rule] `arrow-parens` rule (#777)
+* [new-rule] `max-file-line-count` rule (#1360)
+* [new-rule] `no-unsafe-finally` rule (#1349)
+* [new-rule] `no-for-in-array` rule (#1380)
+* [new-rule] `object-literal-key-quotes` rule (#1364)
+* [enhancement] Better `ban` rule failure messages (#1385)
+* [enhancement] New stylish formatter (#1406)
+
+Thanks to our contributors!
+* @chrismbarr
+* @danvk
+* @gjuchault
+* @lowkay
+* @ScottSWu
+* @YuichiNukiyama
+
+v3.14.0-dev.0
+---
+* [enhancement] Add optional type information to rules (#1323)
+
+Thanks to our contributors!
+* @ScottSWu
+
 v3.13.0
 ---
 * Stable release containing changes from the last dev release (v3.13.0-dev.0)
