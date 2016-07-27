@@ -252,7 +252,7 @@ Core rules are included in the `tslint` package.
   * `"arguments"` checks alignment of function call arguments.
   * `"statements"` checks alignment of statements.
 * `arrow-parens` requires parentheses around the parameters of arrow function definitions.
-* `ban` bans the use of specific functions. Options are ["object", "function"] pairs that ban the use of object.function().
+* `ban` bans the use of specific functions. Options are `["object", "function"]` pairs that ban the use of `object.function()`.  An optional 3rd parameter may be provided (`["object", "function", "Use 'object.otherFunc' instead."]`) to offer an explanation as to why the function has been banned or to offer an alternative.
 * `class-name` enforces PascalCased class and interface names.
 * `comment-format` enforces rules for single-line comments. Rule options:
     * `"check-space"` enforces the rule that all single-line comments must begin with a space, as in `// comment`
@@ -276,6 +276,7 @@ Core rules are included in the `tslint` package.
 * `label-position` enforces labels only on sensible statements.
 * `label-undefined` checks that labels are defined before usage.
 * `linebreak-style` checks that line breaks used in source files are either linefeed or carriage-return linefeeds. By default linefeeds are required. This rule accepts one parameter, either "LF" or "CRLF".
+* `max-file-line-count` sets the maximum number of lines for files.
 * `max-line-length` sets the maximum length of a line.
 * `member-access` enforces using explicit visibility on class members
     * `"check-accessor"` enforces explicit visibility on get/set accessors
@@ -298,6 +299,7 @@ Core rules are included in the `tslint` package.
 * `no-duplicate-variable` disallows duplicate variable declarations in the same block scope.
 * `no-empty` disallows empty blocks.
 * `no-eval` disallows `eval` function invocations.
+* `no-for-in-array` disallows iterating over an array with a for-in loop (requires type checking).
 * `no-inferrable-types` disallows explicit type declarations for variables or parameters initialized to a number, string, or boolean.
    * `ignore-params` allows specifying an inferrable type as a function param
 * `no-internal-module` disallows internal `module` (use `namespace` instead).
