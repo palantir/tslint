@@ -1,5 +1,10 @@
 {
   "rules": {
-    "ban": [true, ["window", "toString"], ["_", "forEach"]]
+    "ban": [
+      true, 
+      ["window", "toString"], 
+      ["_", "forEach"],
+      ["_", "filter", "Use the native JavaScript 'myArray.filter' instead."]
+    ]
   }
 }
