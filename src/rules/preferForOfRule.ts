@@ -40,9 +40,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class ForOfWalker extends Lint.RuleWalker {
-    private languageService: ts.LanguageService;
-
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions, languageService: ts.LanguageService) {
+    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions, private languageService: ts.LanguageService) {
         super(sourceFile, options);
         this.languageService = languageService;
     }
