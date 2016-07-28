@@ -28,7 +28,7 @@ export class Rule extends Lint.Rules.TypedRule {
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: ["true"],
-        type: "functionality",
+        type: "typescript",
         requiresTypeInfo: true,
     };
     /* tslint:enable:object-literal-sort-keys */
@@ -53,6 +53,19 @@ class NoOptionalParameterInCallbackRule extends Lint.ProgramAwareRuleWalker {
             }
         }
         super.visitInterfaceDeclaration(node);
+    }
+
+    public visitTypeLiteral(node: ts.TypeLiteralNode): void {
+        const props = this.checker.getPropertiesOfType(this.checker.getTypeAtLocation(node));
+        for (const prop of props) {
+            for (const declaration of prop.declarations) {
+                const propType = this.checker.getTypeAtLocation(declaration);
+                if (this.isFunctionType(propType)) {
+                    this.validateFunctionType(propType);
+                }
+            }
+        }
+        super.visitTypeLiteral(node);
     }
 
     public visitMethodDeclaration(node: ts.MethodDeclaration): void {
@@ -84,12 +97,6 @@ class NoOptionalParameterInCallbackRule extends Lint.ProgramAwareRuleWalker {
     private isFunctionType(type: ts.Type): boolean {
         return type.flags & ts.TypeFlags.ObjectType && this.checker.getSignaturesOfType(type, ts.SignatureKind.Call).length > 0;
     }
-
-    private isObjectLiteralType(type: ts.Type) {
-        return type.symbol && (type.symbol.flags & (ts.SymbolFlags.ObjectLiteral | ts.SymbolFlags.TypeLiteral)) !== 0 &&
-            this.checker.getSignaturesOfType(type, ts.SignatureKind.Call).length === 0 &&
-            this.checker.getSignaturesOfType(type, ts.SignatureKind.Construct).length === 0;
-    }
     /* tslint:enable:no-bitwise */
 
     private validateFunctionType(node: ts.Type) {
@@ -106,21 +113,6 @@ class NoOptionalParameterInCallbackRule extends Lint.ProgramAwareRuleWalker {
         }
     }
 
-    private handleObjectLiteralType(node: ts.Type) {
-        const props = this.checker.getPropertiesOfType(node);
-        for (const prop of props) {
-            for (const declaration of prop.declarations) {
-                const propType = this.checker.getTypeAtLocation(declaration);
-                if (this.isFunctionType(propType)) {
-                    this.validateFunctionType(propType);
-                }
-                if (this.isObjectLiteralType(propType)) {
-                    this.handleObjectLiteralType(propType);
-                }
-            }
-        }
-    }
-
     private validateSignature(node: ts.SignatureDeclaration) {
         const that = this;
         const signatureParametersType: ts.Type[] = node.parameters.filter(p => !!p.type)
@@ -128,9 +120,6 @@ class NoOptionalParameterInCallbackRule extends Lint.ProgramAwareRuleWalker {
         for (const type of signatureParametersType) {
             if (this.isFunctionType(type)) {
                 this.validateFunctionType(type);
-            }
-            if (this.isObjectLiteralType(type)) {
-                this.handleObjectLiteralType(type);
             }
         }
     }
