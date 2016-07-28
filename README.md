@@ -247,6 +247,7 @@ Core Rules
 
 Core rules are included in the `tslint` package.
 
+* `adjacent-overload-signatures` enforces function overloads to be consecutive.
 * `align` enforces vertical alignment. Rule options:
   * `"parameters"` checks alignment of function parameters.
   * `"arguments"` checks alignment of function call arguments.
