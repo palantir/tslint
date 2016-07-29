@@ -58,8 +58,6 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static FAILURE_STRING_MISSING = "Missing semicolon";
     public static FAILURE_STRING_UNNECESSARY = "Unnecessary semicolon";
-    public static FIX_STRING_MISSING = "Add semicolon";
-    public static FIX_STRING_UNNECESSARY = "Remove semicolon";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new SemicolonWalker(sourceFile, this.getOptions()));
@@ -152,12 +150,10 @@ class SemicolonWalker extends Lint.RuleWalker {
 
         if (always && !hasSemicolon) {
             const failureStart = Math.min(position, this.getLimit());
-            const fixes = [
-                this.createFix(Rule.FIX_STRING_UNNECESSARY, [
-                    this.createReplacement(failureStart, 0, ";"),
-                ]),
-            ];
-            this.addFailure(this.createFailure(failureStart, 0, Rule.FAILURE_STRING_MISSING, fixes));
+            const fixes = this.createFix([
+                this.createReplacement(failureStart, 0, ";"),
+            ]);
+            this.addFailure(this.createFailure(failureStart, 0, Rule.FAILURE_STRING_MISSING, [fixes]));
         } else if (this.hasOption(OPTION_NEVER) && hasSemicolon) {
             const scanner = ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, sourceFile.text);
             scanner.setTextPos(position);
@@ -170,12 +166,10 @@ class SemicolonWalker extends Lint.RuleWalker {
             if (tokenKind !== ts.SyntaxKind.OpenParenToken && tokenKind !== ts.SyntaxKind.OpenBracketToken
                     && tokenKind !== ts.SyntaxKind.PlusToken && tokenKind !== ts.SyntaxKind.MinusToken) {
                 const failureStart = Math.min(position - 1, this.getLimit());
-                const fixes = [
-                    this.createFix(Rule.FIX_STRING_UNNECESSARY, [
-                        this.createReplacement(failureStart, 1, ""),
-                    ]),
-                ];
-                this.addFailure(this.createFailure(failureStart, 1, Rule.FAILURE_STRING_UNNECESSARY, fixes));
+                const fixes = this.createFix([
+                    this.createReplacement(failureStart, 1, ""),
+                ]);
+                this.addFailure(this.createFailure(failureStart, 1, Rule.FAILURE_STRING_UNNECESSARY, [fixes]));
             }
         }
     }

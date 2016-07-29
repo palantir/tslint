@@ -122,11 +122,11 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
                 for (const failure of failures) {
                     const fixes = failure.getFixes();
                     if (fixes.length > 0) {
-                        replacements = replacements.concat(fixes[0].getReplacements());
+                        replacements = replacements.concat(fixes[0].replacements);
                     }
                 }
                 // sort in reverse so that diffs are properly applied
-                replacements.sort((a, b) => b.getEnd() - a.getEnd());
+                replacements.sort((a, b) => b.end - a.end);
                 newFileText = replacements.reduce((text, r) => r.apply(text), fileTextWithoutMarkup);
             }
         } catch (e) {

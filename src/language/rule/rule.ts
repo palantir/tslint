@@ -90,23 +90,23 @@ export interface IRule {
 }
 
 export class Replacement {
-    constructor(private start: number, private length: number, private text: string) {
+    constructor(private innerStart: number, private innerLength: number, private innerText: string) {
     }
 
-    public getStart() {
-        return this.start;
+    get start() {
+        return this.innerStart;
     }
 
-    public getLength() {
-        return this.length;
+    get length() {
+        return this.innerLength;
     }
 
-    public getEnd() {
-        return this.start + this.length;
+    get end() {
+        return this.innerStart + this.innerLength;
     }
 
-    public getText() {
-        return this.text;
+    get text() {
+        return this.innerText;
     }
 
     public apply(content: string) {
@@ -115,25 +115,21 @@ export class Replacement {
 }
 
 export class Fix {
-    constructor(private ruleName: string, private description: string, private replacements: Replacement[]) {
+    constructor(private innerRuleName: string, private innerReplacements: Replacement[]) {
     }
 
-    public getRuleName() {
-        return this.ruleName;
+    get ruleName() {
+        return this.innerRuleName;
     }
 
-    public getDescription() {
-        return this.description;
-    }
-
-    public getReplacements() {
-        return this.replacements;
+    get replacements() {
+        return this.innerReplacements;
     }
 
     public apply(content: string) {
         // sort replacements in reverse so that diffs are properly applied
-        this.replacements.sort((a, b) => b.getEnd() - a.getEnd());
-        return this.replacements.reduce((text, r) => r.apply(text), content);
+        this.innerReplacements.sort((a, b) => b.end - a.end);
+        return this.innerReplacements.reduce((text, r) => r.apply(text), content);
     }
 }
 
