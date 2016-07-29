@@ -173,7 +173,7 @@ export class RuleFailure {
                 end: number,
                 private failure: string,
                 private ruleName: string,
-                private fixes: Fix[] = []) {
+                private fix?: Fix) {
 
         this.fileName = sourceFile.fileName;
         this.startPosition = this.createFailurePosition(start);
@@ -200,15 +200,19 @@ export class RuleFailure {
         return this.failure;
     }
 
-    public getFixes() {
-        return this.fixes;
+    public hasFix() {
+        return this.fix !== undefined;
+    }
+
+    public getFix() {
+        return this.fix;
     }
 
     public toJson(): any {
         return {
             endPosition: this.endPosition.toJson(),
             failure: this.failure,
-            fixes: this.fixes,
+            fix: this.fix,
             name: this.fileName,
             ruleName: this.ruleName,
             startPosition: this.startPosition.toJson(),

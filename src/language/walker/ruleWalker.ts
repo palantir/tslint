@@ -69,10 +69,10 @@ export class RuleWalker extends SyntaxWalker {
         this.position += node.getFullWidth();
     }
 
-    public createFailure(start: number, width: number, failure: string, fixes: Fix[] = []): RuleFailure {
+    public createFailure(start: number, width: number, failure: string, fix?: Fix): RuleFailure {
         const from = (start > this.limit) ? this.limit : start;
         const to = ((start + width) > this.limit) ? this.limit : (start + width);
-        return new RuleFailure(this.sourceFile, from, to, failure, this.ruleName, fixes);
+        return new RuleFailure(this.sourceFile, from, to, failure, this.ruleName, fix);
     }
 
     public addFailure(failure: RuleFailure) {

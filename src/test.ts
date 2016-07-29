@@ -120,9 +120,9 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
                 // accumulate replacements
                 let replacements: Replacement[] = [];
                 for (const failure of failures) {
-                    const fixes = failure.getFixes();
-                    if (fixes.length > 0) {
-                        replacements = replacements.concat(fixes[0].replacements);
+                    if (failure.hasFix()) {
+                        const fix = failure.getFix();
+                        replacements = replacements.concat(fix.replacements);
                     }
                 }
                 // sort in reverse so that diffs are properly applied
