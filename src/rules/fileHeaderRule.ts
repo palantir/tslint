@@ -5,7 +5,7 @@ import * as Lint from "../lint";
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
-        ruleName: "enforce-header",
+        ruleName: "file-header",
         description: "Enforces a certain header comment for all files, matched by a regular expression.",
         optionsDescription: "Regular expression to match the header.",
         options: {
@@ -16,17 +16,17 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "missing header";
+    public static FAILURE_STRING = "missing file header";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const walker = new EnforceHeaderWalker(sourceFile, this.getOptions());
+        const walker = new FileHeaderWalker(sourceFile, this.getOptions());
         const options = this.getOptions().ruleArguments;
         walker.setRegexp(new RegExp(options[0].toString()));
         return this.applyWithWalker(walker);
     }
 }
 
-class EnforceHeaderWalker extends Lint.RuleWalker {
+class FileHeaderWalker extends Lint.RuleWalker {
     // match a single line or multi line comment with leading whitespace
     // the wildcard dot does not match new lines - we can use [\s\S] instead
     private commentRegexp: RegExp = /^\s*(\/\/(.*?)|\/\*([\s\S]*?)\*\/)/;

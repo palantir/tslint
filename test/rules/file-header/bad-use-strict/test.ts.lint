@@ -1,5 +1,5 @@
 "use strict";
-~nil [missing header]
+~nil [missing file header]
 
 /*
  * Bad header 5
@@ -8,7 +8,7 @@
 export class A {
     public x = 1;
 
-    public void B() {
+    public B() {
         return 2;
     }
 }
