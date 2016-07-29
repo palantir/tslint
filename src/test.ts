@@ -22,7 +22,7 @@ import * as glob from "glob";
 import * as path from "path";
 import * as ts from "typescript";
 
-import {Replacement} from "./language/rule/rule";
+import {Fix} from "./language/rule/rule";
 import {createCompilerOptions} from "./language/utils";
 import {LintError} from "./test/lintError";
 import * as parse from "./test/parse";
@@ -117,17 +117,13 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
             const stat = fs.statSync(fixedFile);
             if (stat.isFile()) {
                 fixedFileText = fs.readFileSync(fixedFile, "utf8");
-                // accumulate replacements
-                let replacements: Replacement[] = [];
+                const fixes: Fix[] = [];
                 for (const failure of failures) {
                     if (failure.hasFix()) {
-                        const fix = failure.getFix();
-                        replacements = replacements.concat(fix.replacements);
+                        fixes.push(failure.getFix());
                     }
                 }
-                // sort in reverse so that diffs are properly applied
-                replacements.sort((a, b) => b.end - a.end);
-                newFileText = replacements.reduce((text, r) => r.apply(text), fileTextWithoutMarkup);
+                newFileText = Fix.applyAll(fileTextWithoutMarkup, fixes);
             }
         } catch (e) {
             fixedFileText = "";

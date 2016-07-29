@@ -115,6 +115,17 @@ export class Replacement {
 }
 
 export class Fix {
+    public static applyAll(content: string, fixes: Fix[]) {
+        // accumulate replacements
+        let replacements: Replacement[] = [];
+        for (const fix of fixes) {
+            replacements = replacements.concat(fix.replacements);
+        }
+        // sort in reverse so that diffs are properly applied
+        replacements.sort((a, b) => b.end - a.end);
+        return replacements.reduce((text, r) => r.apply(text), content);
+    }
+
     constructor(private innerRuleName: string, private innerReplacements: Replacement[]) {
     }
 
