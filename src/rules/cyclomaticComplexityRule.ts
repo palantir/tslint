@@ -16,10 +16,16 @@
  */
 
 import * as ts from "typescript";
-
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
+
+    public static DEFAULT_THRESHOLD = 20;
+    private static MINIMUM_THRESHOLD = 1;
+
+    public static ANONYMOUS_FAILURE_STRING = "The cyclomatic complexity of the is higher than the threshold";
+    public static NAMED_FAILURE_STRING = "The cyclomatic complexity of is higher than the threshold for the function: ";
+
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "cyclomatic-complexity",
@@ -41,24 +47,155 @@ export class Rule extends Lint.Rules.AbstractRule {
             to errors or difficult to modify.`,
         optionsDescription: Lint.Utils.dedent`
             An optional upper limit for cyclomatic complexity can be specified. If no limit option
-            is provided a default value of $(Rule.DEFAULT_UPPER_LIMIT) will be used.`,
+            is provided a default value of $(Rule.DEFAULT_THRESHOLD) will be used.`,
         options: {
             type: "number",
-            minimum: "1",
+            minimum: "$(Rule.MINIMUM_THRESHOLD)",
         },
-        optionExamples: ["[true, 10]"],
+        optionExamples: ["[true, 20]"],
         type: "maintainability",
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static DEFAULT_UPPER_LIMIT = 10;
-
-    public static FAILURE_STRING = "The cyclomatic complexity of this function is higher than the allowed value";
-
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new CyclomaticComplexityWalker(sourceFile, this.getOptions()));
+        const threshold = this.getOptions().ruleArguments[0];
+        return this.applyWithWalker(new CyclomaticComplexityWalker(sourceFile, this.getOptions(), threshold));
+    }
+
+    public isEnabled(): boolean {
+        if (super.isEnabled()) {
+            const option = this.getOptions().ruleArguments[0];
+
+            // Disable the rule if the option is provided but non-numeric or less than the minimum.
+            if (option && (typeof option !== "number" || option < Rule.MINIMUM_THRESHOLD)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
 
 class CyclomaticComplexityWalker extends Lint.RuleWalker {
+
+    private functions: number[] = [];
+
+    public constructor(sourceFile: ts.SourceFile, options: Lint.IOptions, private threshold: number) {
+        super(sourceFile, options);
+    }
+
+    protected visitArrowFunction(node: ts.FunctionLikeDeclaration) {
+        this.startFunction();
+        super.visitArrowFunction(node);
+        this.endFunction(node);
+    }
+
+    protected visitBinaryExpression(node: ts.BinaryExpression) {
+        if(node.operatorToken.kind === ts.SyntaxKind.BarBarToken) {
+            this.incrementComplexity();
+        }
+        super.visitBinaryExpression(node);
+    }
+
+    protected visitCaseClause(node: ts.CaseClause) {
+        this.incrementComplexity();
+        this.visitCaseClause(node);
+    }
+
+    protected visitCatchClause(node: ts.CatchClause) {
+        this.incrementComplexity();
+        this.visitCatchClause(node);
+    }
+
+    protected visitConditionalExpression(node: ts.ConditionalExpression) {
+        this.incrementComplexity();
+        this.visitConditionalExpression(node);
+    }
+
+    protected visitDoStatement(node: ts.DoStatement) {
+        this.incrementComplexity();
+        this.visitDoStatement(node);
+    }
+
+    protected visitForStatement(node: ts.ForStatement) {
+        this.incrementComplexity();
+        this.visitForStatement(node);
+    }
+
+    protected visitForInStatement(node: ts.ForInStatement) {
+        this.incrementComplexity();
+        this.visitForInStatement(node);
+    }
+
+    protected visitForOfStatement(node: ts.ForOfStatement) {
+        this.incrementComplexity();
+        this.visitForOfStatement(node);
+    }
+
+    protected visitFunctionDeclaration(node: ts.FunctionDeclaration) {
+        this.startFunction();
+        this.visitFunctionDeclaration(node);
+        this.endFunction(node);
+    }
+
+    protected visitFunctionExpression(node: ts.FunctionExpression) {
+        this.startFunction();
+        this.visitFunctionExpression(node);
+        this.endFunction(node);
+    }
+
+    protected visitGetAccessor(node: ts.AccessorDeclaration) {
+        this.startFunction();
+        this.visitGetAccessor(node);
+        this.endFunction(node);
+    }
+
+    protected visitIfStatement(node: ts.IfStatement) {
+        this.incrementComplexity();
+        this.visitIfStatement(node);
+    }
+
+    protected visitMethodDeclaration(node: ts.MethodDeclaration) {
+        this.startFunction();
+        this.visitMethodDeclaration(node);
+        this.endFunction(node);
+    }
+
+    protected visitSetAccessor(node: ts.AccessorDeclaration) {
+        this.startFunction();
+        this.visitSetAccessor(node);
+        this.endFunction(node);
+    }
+
+    protected visitWhileStatement(node: ts.WhileStatement) {
+        this.walkChildren(node);
+    }
+
+    private startFunction() {
+        // Push an initial complexity value to the stack for the new function.
+        this.functions.push(1);
+    }
+
+    private endFunction(node: ts.FunctionLikeDeclaration) {
+        const complexity = this.functions.pop();
+
+        // Check for a violation.
+        if(complexity > this.threshold) {
+            let failureString: string;
+
+            // Attempt to find a name for the function.
+            if(node.name && node.name.kind === ts.SyntaxKind.Identifier) {
+                failureString = Rule.NAMED_FAILURE_STRING + (node.name as ts.Identifier).text;
+            } else {
+                failureString = Rule.ANONYMOUS_FAILURE_STRING;
+            }
+
+            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), failureString));
+        }
+    }
+
+    private incrementComplexity() {
+        if (this.functions.length) {
+            this.functions[this.functions.length - 1]++;
+        }
+    }
 }
