@@ -16,6 +16,7 @@
  */
 
 import * as ts from "typescript";
+
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -36,7 +37,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "duplicate variable: '";
+    public static FAILURE_STRING_FACTORY = (name: string) => `Duplicate variable: '${name}'`;
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new NoDuplicateVariableWalker(sourceFile, this.getOptions()));
@@ -101,7 +102,7 @@ class NoDuplicateVariableWalker extends Lint.BlockScopeAwareRuleWalker<{}, Scope
     }
 
     private addFailureOnIdentifier(ident: ts.Identifier) {
-        const failureString = `${Rule.FAILURE_STRING}${ident.text}'`;
+        const failureString = Rule.FAILURE_STRING_FACTORY(ident.text);
         this.addFailure(this.createFailure(ident.getStart(), ident.getWidth(), failureString));
     }
 }

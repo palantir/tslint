@@ -16,6 +16,7 @@
  */
 
 import * as ts from "typescript";
+
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -31,7 +32,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "forbidden 'var' keyword, use 'let' or 'const' instead";
+    public static FAILURE_STRING = "Forbidden 'var' keyword, use 'let' or 'const' instead";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const noVarKeywordWalker = new NoVarKeywordWalker(sourceFile, this.getOptions());

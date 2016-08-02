@@ -16,6 +16,7 @@
  */
 
 import * as ts from "typescript";
+
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -31,7 +32,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "parentheses required when invoking a constructor";
+    public static FAILURE_STRING = "Parentheses are required when invoking a constructor";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const newParensWalker = new NewParensWalker(sourceFile, this.getOptions());

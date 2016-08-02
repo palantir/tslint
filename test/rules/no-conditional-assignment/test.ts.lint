@@ -17,32 +17,34 @@ for (;;) { }
 
 // invalid cases
 if (x = 5) { }
-    ~~~~~      [assignment in conditional: ]
+    ~~~~~      [0]
 if (a && (b = 5)) { }
-          ~~~~~       [assignment in conditional: ]
+          ~~~~~       [0]
 else if (x = 2) { }
-         ~~~~~      [assignment in conditional: ]
+         ~~~~~      [0]
 
 do { } while (x = 4);
-              ~~~~~   [assignment in conditional: ]
+              ~~~~~   [0]
 
 while (x = 4);
-       ~~~~~   [assignment in conditional: ]
+       ~~~~~   [0]
 while ((x = y - 12));
-        ~~~~~~~~~~    [assignment in conditional: ]
+        ~~~~~~~~~~    [0]
 
 for (var x = 4; x = 8; x++) { }
-                ~~~~~           [assignment in conditional: ]
+                ~~~~~           [0]
 for (; (y == 2) && (x = 3); ) { }
-                    ~~~~~         [assignment in conditional: ]
+                    ~~~~~         [0]
 
 if (x += 2) { }
-    ~~~~~~      [assignment in conditional: ]
+    ~~~~~~      [0]
 else if (h || (x <<= 4)) { }
-               ~~~~~~~       [assignment in conditional: ]
+               ~~~~~~~       [0]
 
 do { } while (x ^= 4) { }
-              ~~~~~~      [assignment in conditional: ]
+              ~~~~~~      [0]
 while ((a = 5) && ((b == 4) || (c = 3)))
-        ~~~~~                            [assignment in conditional: ]
-                                ~~~~~    [assignment in conditional: ]
+        ~~~~~                            [0]
+                                ~~~~~    [0]
+
+[0]: Assignments in conditional expressions are forbidden

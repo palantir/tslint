@@ -16,6 +16,10 @@
  */
 
 export const rules = {
+    "no-unsafe-finally": true,
+    "ordered-imports": [true, {
+        "named-imports-order": "lowercase-last",
+    }],
 };
 
 // work around "extends" being a keyword

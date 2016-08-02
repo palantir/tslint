@@ -1,0 +1,105 @@
+"use strict";
+'use asm';
+"ngInject";
+'';
+
+function fun1() {
+    "use strict";
+    'someOtherDirective';
+    return 0;
+}
+
+(function() { "directive";
+'foo'
+'directive2'
+console.log('foo');
+'notdirective';
+})();
+
+const a = () => {
+'use strict'; "use cool"; "use lint"; var a = 1; "notdirective"; }
+
+function fun2(a: number) {
+    return 0;
+}
+
+function fun3(a: number, b: number) {
+    return 0;
+}
+
+namespace Fam { 'use strict'; 'use cool'; }
+module Bam { 'use strict'; 'use cool'; }
+namespace Az.Bz.Cz.Dz {
+    'ngInject';
+}
+
+class Foo {
+    constructor() {
+        "ngInject";
+        var a = 1;
+        'notdirective';
+    }
+
+    bar() {
+        'use strict';
+    }
+
+    get baz() {
+        'use asm';
+    }
+
+    set baz(newValue) {
+        "use asm";
+    }
+}
+
+// valid code:
+
+var i: number;
+var j = 3;
+i = 1 + 2;
+j = fun1();
+fun1();
+fun2(2);
+fun3(2, fun1());
+i++;
+i += 2;
+--i;
+i <<= 2;
+i = fun1() + fun1();
+j = (j === 0 ? 5 : 6);
+(j === 0 ? fun1() : fun2(j));
+(a => 5)(4);
+var obj = {};
+delete obj.key;
+function* g(): Iterable<number> {
+    for (let i = 0; i < 100; i++) {
+        yield i;
+    }
+}
+
+async function f(foo: Promise<void>): Promise<number> {
+    await foo;
+    return 0;
+}
+
+5;
+3 + 5;
+fun1() + fun1();
+(j === 0 ? fun1() : 5);
+() => {return fun1();};
+
+// invalid code:
+
+new Foo();
+~~~~~~~~~~ [0]
+5 + new Foo();
+~~~~~~~~~~~~~~ [0]
+new Foo() + new Foo();
+~~~~~~~~~~~~~~~~~~~~~~ [0]
+fun1() + new Foo();
+~~~~~~~~~~~~~~~~~~~ [0]
+(j === 0 ? new Foo() : 5);
+~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+
+[0]: do not use 'new' for side effects

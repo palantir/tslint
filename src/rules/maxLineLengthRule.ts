@@ -16,6 +16,7 @@
  */
 
 import * as ts from "typescript";
+
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -37,7 +38,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "exceeds maximum line length of ";
+    public static FAILURE_STRING_FACTORY = (lineLimit: number) => {
+        return `Exceeds maximum line length of ${lineLimit}`;
+    };
 
     public isEnabled(): boolean {
         if (super.isEnabled()) {
@@ -46,7 +49,6 @@ export class Rule extends Lint.Rules.AbstractRule {
                 return true;
             }
         }
-
         return false;
     }
 
@@ -54,7 +56,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         const ruleFailures: Lint.RuleFailure[] = [];
         const lineLimit = this.getOptions().ruleArguments[0];
         const lineStarts = sourceFile.getLineStarts();
-        const errorString = Rule.FAILURE_STRING + lineLimit;
+        const errorString = Rule.FAILURE_STRING_FACTORY(lineLimit);
         const disabledIntervals = this.getOptions().disabledIntervals;
         const source = sourceFile.getFullText();
 

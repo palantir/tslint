@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
-import * as fs from "fs";
+
 import {IConfigurationFile, extendConfigurationFile, loadConfigurationFromPath} from "../src/configuration";
 
 describe("Configuration", () => {
@@ -157,6 +158,10 @@ describe("Configuration", () => {
                 "rule-three": "//not a comment",
                 "rule-four": "/*also not a comment*/",
             });
+        });
+
+        it("can load .json files with BOM", () => {
+            assert.doesNotThrow(() => loadConfigurationFromPath("./test/config/tslint-with-bom.json"));
         });
 
         it("can load a built-in configuration", () => {

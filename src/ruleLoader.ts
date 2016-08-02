@@ -18,8 +18,9 @@
 import * as fs from "fs";
 import * as path from "path";
 import {camelize} from "underscore.string";
+
 import {getRulesDirectories} from "./configuration";
-import {IRule, IDisabledInterval} from "./language/rule/rule";
+import {IDisabledInterval, IRule} from "./language/rule/rule";
 
 const moduleDirectory = path.dirname(module.filename);
 const CORE_RULES_DIRECTORY = path.resolve(moduleDirectory, ".", "rules");
@@ -58,6 +59,7 @@ export function loadRules(ruleConfiguration: {[name: string]: any},
             Try upgrading TSLint and/or ensuring that you have all necessary custom rules installed.
             If TSLint was recently upgraded, you may have old rules configured which need to be cleaned up.
         `;
+
         throw new Error(ERROR_MESSAGE);
     } else {
         return rules;

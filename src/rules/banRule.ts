@@ -16,6 +16,7 @@
  */
 
 import * as ts from "typescript";
+
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -24,7 +25,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "ban",
         description: "Bans the use of specific functions.",
         descriptionDetails: "At this time, there is no way to disable global methods with this rule.",
-        optionsDescription: "A list of `['object', 'method']` pairs which ban `object.method()`.",
+        optionsDescription: "A list of `['object', 'method', 'optional explanation here']` which ban `object.method()`.",
         options: {
             type: "list",
             listType: {
@@ -32,15 +33,18 @@ export class Rule extends Lint.Rules.AbstractRule {
                 arrayMembers: [
                     { type: "string" },
                     { type: "string" },
+                    { type: "string" },
                 ],
             },
         },
-        optionExamples: [`[true, ["console", "log"], ["someObject", "someFunction"]]`],
+        optionExamples: [`[true, ["someObject", "someFunction"], ["someObject", "otherFunction", "Optional explanation"]]`],
         type: "functionality",
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_PART = "function invocation disallowed: ";
+    public static FAILURE_STRING_FACTORY = (expression: string, messageAddition?: string) => {
+        return `Calls to '${expression}' are not allowed.${messageAddition ? " " + messageAddition : ""}`;
+    };
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const options = this.getOptions();
@@ -85,7 +89,7 @@ export class BanFunctionWalker extends Lint.RuleWalker {
                         const failure = this.createFailure(
                             expression.getStart(),
                             expression.getWidth(),
-                            `${Rule.FAILURE_STRING_PART}${leftSideExpression}.${rightSideExpression}`
+                            Rule.FAILURE_STRING_FACTORY(`${leftSideExpression}.${rightSideExpression}`, bannedFunction[2])
                         );
                         this.addFailure(failure);
                     }

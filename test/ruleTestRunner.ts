@@ -18,7 +18,7 @@ import * as colors from "colors";
 import * as glob from "glob";
 import * as path from "path";
 
-import {runTest, consoleTestResultHandler} from "../src/test";
+import {consoleTestResultHandler, runTest} from "../src/test";
 
 // needed to get colors to show up when passing through Grunt
 (colors as any).enabled = true;

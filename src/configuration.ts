@@ -15,15 +15,18 @@
  * limitations under the License.
  */
 
+import findup = require("findup-sync");
 import * as fs from "fs";
 import * as path from "path";
-import * as findup from "findup-sync";
 import * as resolve from "resolve";
 
 import {arrayify, objectify, stripComments} from "./utils";
 
 export interface IConfigurationFile {
     extends?: string | string[];
+    linterOptions?: {
+        typeCheck?: boolean,
+    };
     rulesDirectory?: string | string[];
     rules?: any;
 }
@@ -38,6 +41,7 @@ export const DEFAULT_CONFIG = {
         "no-eval": true,
         "no-internal-module": true,
         "no-trailing-whitespace": true,
+        "no-unsafe-finally": true,
         "no-var-keyword": true,
         "one-line": [true, "check-open-brace", "check-whitespace"],
         "quotemark": [true, "double"],
@@ -142,7 +146,9 @@ export function loadConfigurationFromPath(configFilePath: string): IConfiguratio
         const resolvedConfigFilePath = resolveConfigurationPath(configFilePath);
         let configFile: IConfigurationFile;
         if (path.extname(resolvedConfigFilePath) === ".json") {
-            const fileContent = stripComments(fs.readFileSync(resolvedConfigFilePath).toString());
+            const fileContent = stripComments(fs.readFileSync(resolvedConfigFilePath)
+            .toString()
+            .replace(/^\uFEFF/, ""));
             configFile = JSON.parse(fileContent);
         } else {
             configFile = require(resolvedConfigFilePath);

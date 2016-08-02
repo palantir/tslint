@@ -16,6 +16,7 @@
  */
 
 import * as ts from "typescript";
+
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -56,8 +57,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "missing type declaration";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const typedefWalker = new TypedefWalker(sourceFile, this.getOptions());
-        return this.applyWithWalker(typedefWalker);
+        return this.applyWithWalker(new TypedefWalker(sourceFile, this.getOptions()));
     }
 }
 
@@ -158,7 +158,7 @@ class TypedefWalker extends Lint.RuleWalker {
 
         // If this is an arrow function, it doesn't need to have a typedef on the property declaration
         // as the typedefs can be on the function's parameters instead
-        const performCheck = !(node.initializer.kind === ts.SyntaxKind.ArrowFunction && node.type == null);
+        const performCheck = !(node.initializer != null && node.initializer.kind === ts.SyntaxKind.ArrowFunction && node.type == null);
 
         if (performCheck) {
             this.checkTypeAnnotation(optionName, node.name.getEnd(), node.type, node.name);

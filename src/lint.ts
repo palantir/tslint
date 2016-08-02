@@ -17,11 +17,11 @@
 
 import * as configuration from "./configuration";
 import * as formatters from "./formatters";
-import * as linter from "./tslint";
+import {RuleFailure} from "./language/rule/rule";
 import * as rules from "./rules";
 import * as test from "./test";
+import * as linter from "./tslint";
 import * as utils from "./utils";
-import {RuleFailure} from "./language/rule/rule";
 
 export * from "./language/rule/rule";
 export * from "./enableDisableRules";
@@ -42,19 +42,19 @@ export var Utils = utils;
 export interface LintResult {
     failureCount: number;
     failures: RuleFailure[];
-    format: string;
+    format: string | Function;
     output: string;
 }
 
 export interface ILinterOptionsRaw {
     configuration?: any;
-    formatter?: string;
+    formatter?: string | Function;
     formattersDirectory?: string;
     rulesDirectory?: string | string[];
 }
 
 export interface ILinterOptions extends ILinterOptionsRaw {
     configuration: any;
-    formatter: string;
+    formatter: string | Function;
     rulesDirectory: string | string[];
 }

@@ -16,6 +16,7 @@
  */
 
 import * as ts from "typescript";
+
 import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -42,10 +43,6 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class NoVarRequiresWalker extends Lint.ScopeAwareRuleWalker<{}> {
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
-        super(sourceFile, options);
-    }
-
     public createScope(): {} {
         return {};
     }

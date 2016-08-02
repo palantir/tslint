@@ -80,3 +80,10 @@ someFunc(n => n+1);
           ~        [expected arrow-parameter: 'n' to have a typedef]
 someFunc(n => {});
           ~        [expected arrow-parameter: 'n' to have a typedef]
+
+class A {
+    // property w/o an initializer
+    public foo;
+              ~ [expected member-variable-declaration: 'foo' to have a typedef]
+    private bar: number;
+}

@@ -67,6 +67,7 @@ export const rules = {
     "no-trailing-whitespace": true,
     "no-unreachable": true,
     "no-unused-expression": true,
+    "no-unused-new": true,
     "no-unused-variable": [true, "react"],
     // disable this rule as it is very heavy performance-wise and not that useful
     "no-use-before-declare": false,
