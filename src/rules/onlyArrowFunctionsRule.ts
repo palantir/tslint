@@ -25,9 +25,13 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "only-arrow-functions",
         description: "Disallows traditional (non-arrow) function expressions.",
         rationale: "Traditional functions don't bind lexical scope, which can lead to unexpected behavior when accessing 'this'.",
-        optionsDescription: "Not configurable.",
+        optionsDescription: Lint.Utils.dedent`
+            One argument may be optionally provided:
+
+            * \`"allow-declarations"\` allows standalone function declarations.
+        `,
         options: null,
-        optionExamples: ["true"],
+        optionExamples: ['true', '[true, "allow-declarations"]'],
         type: "typescript",
     };
     /* tslint:enable:object-literal-sort-keys */
@@ -41,7 +45,9 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class OnlyArrowFunctionsWalker extends Lint.RuleWalker {
     public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
-        this.addFailure(this.createFailure(node.getStart(), "function".length, Rule.FAILURE_STRING));
+        if (this.getOptions().indexOf("allow-declarations") === -1) {
+            this.addFailure(this.createFailure(node.getStart(), "function".length, Rule.FAILURE_STRING));
+        }
         super.visitFunctionDeclaration(node);
     }
 
