@@ -76,6 +76,7 @@
         "rules/classNameRule.ts",
         "rules/commentFormatRule.ts",
         "rules/curlyRule.ts",
+        "rules/cyclomaticComplexityRule.ts",
         "rules/eoflineRule.ts",
         "rules/forinRule.ts",
         "rules/indentRule.ts",

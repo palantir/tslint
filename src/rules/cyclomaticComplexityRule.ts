@@ -20,11 +20,11 @@ import * as Lint from "../lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
 
-    public static DEFAULT_THRESHOLD = 20;
-    private static MINIMUM_THRESHOLD = 1;
-
-    public static ANONYMOUS_FAILURE_STRING = "The cyclomatic complexity of the is higher than the threshold";
+    public static ANONYMOUS_FAILURE_STRING = "The cyclomatic complexity of is higher than the threshold";
     public static NAMED_FAILURE_STRING = "The cyclomatic complexity of is higher than the threshold for the function: ";
+
+    public static DEFAULT_THRESHOLD = 20;
+    public static MINIMUM_THRESHOLD = 1;
 
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -90,7 +90,7 @@ class CyclomaticComplexityWalker extends Lint.RuleWalker {
     }
 
     protected visitBinaryExpression(node: ts.BinaryExpression) {
-        if(node.operatorToken.kind === ts.SyntaxKind.BarBarToken) {
+        if (node.operatorToken.kind === ts.SyntaxKind.BarBarToken) {
             this.incrementComplexity();
         }
         super.visitBinaryExpression(node);
@@ -98,71 +98,71 @@ class CyclomaticComplexityWalker extends Lint.RuleWalker {
 
     protected visitCaseClause(node: ts.CaseClause) {
         this.incrementComplexity();
-        this.visitCaseClause(node);
+        super.visitCaseClause(node);
     }
 
     protected visitCatchClause(node: ts.CatchClause) {
         this.incrementComplexity();
-        this.visitCatchClause(node);
+        super.visitCatchClause(node);
     }
 
     protected visitConditionalExpression(node: ts.ConditionalExpression) {
         this.incrementComplexity();
-        this.visitConditionalExpression(node);
+        super.visitConditionalExpression(node);
     }
 
     protected visitDoStatement(node: ts.DoStatement) {
         this.incrementComplexity();
-        this.visitDoStatement(node);
+        super.visitDoStatement(node);
     }
 
     protected visitForStatement(node: ts.ForStatement) {
         this.incrementComplexity();
-        this.visitForStatement(node);
+        super.visitForStatement(node);
     }
 
     protected visitForInStatement(node: ts.ForInStatement) {
         this.incrementComplexity();
-        this.visitForInStatement(node);
+        super.visitForInStatement(node);
     }
 
     protected visitForOfStatement(node: ts.ForOfStatement) {
         this.incrementComplexity();
-        this.visitForOfStatement(node);
+        super.visitForOfStatement(node);
     }
 
     protected visitFunctionDeclaration(node: ts.FunctionDeclaration) {
         this.startFunction();
-        this.visitFunctionDeclaration(node);
+        super.visitFunctionDeclaration(node);
         this.endFunction(node);
     }
 
     protected visitFunctionExpression(node: ts.FunctionExpression) {
         this.startFunction();
-        this.visitFunctionExpression(node);
+        super.visitFunctionExpression(node);
         this.endFunction(node);
     }
 
     protected visitGetAccessor(node: ts.AccessorDeclaration) {
         this.startFunction();
-        this.visitGetAccessor(node);
+        super.visitGetAccessor(node);
         this.endFunction(node);
     }
 
     protected visitIfStatement(node: ts.IfStatement) {
         this.incrementComplexity();
-        this.visitIfStatement(node);
+        super.visitIfStatement(node);
     }
 
     protected visitMethodDeclaration(node: ts.MethodDeclaration) {
         this.startFunction();
-        this.visitMethodDeclaration(node);
+        super.visitMethodDeclaration(node);
         this.endFunction(node);
     }
 
     protected visitSetAccessor(node: ts.AccessorDeclaration) {
         this.startFunction();
-        this.visitSetAccessor(node);
+        super.visitSetAccessor(node);
         this.endFunction(node);
     }
 
@@ -179,11 +179,11 @@ class CyclomaticComplexityWalker extends Lint.RuleWalker {
         const complexity = this.functions.pop();
 
         // Check for a violation.
-        if(complexity > this.threshold) {
+        if (complexity > this.threshold) {
             let failureString: string;
 
             // Attempt to find a name for the function.
-            if(node.name && node.name.kind === ts.SyntaxKind.Identifier) {
+            if (node.name && node.name.kind === ts.SyntaxKind.Identifier) {
                 failureString = Rule.NAMED_FAILURE_STRING + (node.name as ts.Identifier).text;
             } else {
                 failureString = Rule.ANONYMOUS_FAILURE_STRING;

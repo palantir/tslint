@@ -1,0 +1,103 @@
+const validFunctionExpression = function() {
+    const condition1 = true ? "true" : "false";
+    const condition2 = true ? "true" : "false";
+}
+
+function validFunctionDeclaration() {
+    const condition1 = true ? "true" : "false";
+    const condition2 = true ? "true" : "false";
+}
+
+const validArrowFunction = () => {
+    const condition1 = true ? "true" : "false";
+    const condition2 = true ? "true" : "false";
+}
+
+class ValidClass {
+    get validGet(): string {
+        const condition1 = true ? "true" : "false";
+        const condition2 = true ? "true" : "false";
+        return "test";
+    }
+
+    set validSet(newValue: string) {
+        const condition1 = true ? "true" : "false";
+        const condition2 = true ? "true" : "false";
+    }
+
+    validMethod() {
+        const condition1 = true ? "true" : "false";
+        const condition2 = true ? "true" : "false";
+    }
+}
+
+const invalidFunctionExpression = function() {
+                                  ~~~~~~~~~~~~~
+    const condition1 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    const condition2 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    const condition3 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+}
+~  [The cyclomatic complexity of is higher than the threshold]
+
+function invalidFunctionDeclaration() {
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    const condition1 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    const condition2 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    const condition3 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+}
+~ [The cyclomatic complexity of is higher than the threshold for the function: invalidFunctionDeclaration]
+
+const invalidArrowFunction = () => {
+                             ~~~~~~~~
+    const condition1 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    const condition2 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    const condition3 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+}
+~ [The cyclomatic complexity of is higher than the threshold]
+
+class InvalidClass {
+    get invalidGet(): string {
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        const condition1 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        const condition2 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        const condition3 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        return "test";
+~~~~~~~~~~~~~~~~~~~~~~~
+    }
+~~~~~ [The cyclomatic complexity of is higher than the threshold for the function: invalidGet]
+
+    set invalidSet(newValue: string) {
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        const condition1 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        const condition2 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        const condition3 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    }
+~~~~~ [The cyclomatic complexity of is higher than the threshold for the function: invalidSet]
+
+    invalidMethod() {
+    ~~~~~~~~~~~~~~~~~~
+        const condition1 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        const condition2 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        const condition3 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    }
+~~~~~ [The cyclomatic complexity of is higher than the threshold for the function: invalidMethod]
+}
+

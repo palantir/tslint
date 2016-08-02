@@ -261,6 +261,7 @@ Core rules are included in the `tslint` package.
     * `"check-lowercase"` enforces the rule that the first non-whitespace character of a comment must be lowercase, if applicable.
     * `"check-uppercase"` enforces the rule that the first non-whitespace character of a comment must be uppercase, if applicable.
 * `curly` enforces braces for `if`/`for`/`do`/`while` statements.
+* `cyclomatic-complexity` enforces a threshold of cyclomatic complexity.
 * `eofline` enforces the file to end with a newline.
 * `forin` enforces a `for ... in` statement to be filtered with an `if` statement.
 * `indent` enforces indentation with tabs or spaces. Rule options (one is required):
