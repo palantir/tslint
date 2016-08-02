@@ -58,7 +58,7 @@ class AdjacentOverloadSignaturesWalker extends Lint.RuleWalker {
             if (member.name !== undefined) {
                 const methodName = getTextOfPropertyName(member.name);
                 if (methodName !== undefined) {
-                    if (seen[methodName] && last !== methodName) {
+                    if (hasProperty(seen, methodName) && last !== methodName) {
                         this.addFailure(this.createFailure(member.getStart(), member.getWidth(),
                             Rule.FAILURE_STRING_FACTORY(methodName)));
                     }
@@ -85,9 +85,14 @@ function getTextOfPropertyName(name: ts.PropertyName): string {
             if (isLiteralExpression(expression)) {
                 return expression.text;
             }
+            break;
         default:
             if (isLiteralExpression(name)) {
                 return name.text;
             }
     }
+}
+
+function hasProperty(map: { [name: string]: boolean }, key: string): boolean {
+    return Object.prototype.hasOwnProperty.call(map, key) ? map[key] : undefined;
 }
