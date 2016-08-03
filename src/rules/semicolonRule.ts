@@ -150,8 +150,8 @@ class SemicolonWalker extends Lint.RuleWalker {
 
         if (always && !hasSemicolon) {
             const failureStart = Math.min(position, this.getLimit());
-            const fix = this.createFix([
-                this.createReplacement(failureStart, 0, ";"),
+            const fix = new Lint.Fix(Rule.metadata.ruleName, [
+                this.appendText(failureStart, ";"),
             ]);
             this.addFailure(this.createFailure(failureStart, 0, Rule.FAILURE_STRING_MISSING, fix));
         } else if (this.hasOption(OPTION_NEVER) && hasSemicolon) {
@@ -166,8 +166,8 @@ class SemicolonWalker extends Lint.RuleWalker {
             if (tokenKind !== ts.SyntaxKind.OpenParenToken && tokenKind !== ts.SyntaxKind.OpenBracketToken
                     && tokenKind !== ts.SyntaxKind.PlusToken && tokenKind !== ts.SyntaxKind.MinusToken) {
                 const failureStart = Math.min(position - 1, this.getLimit());
-                const fix = this.createFix([
-                    this.createReplacement(failureStart, 1, ""),
+                const fix = new Lint.Fix(Rule.metadata.ruleName, [
+                    this.deleteText(failureStart, 1),
                 ]);
                 this.addFailure(this.createFailure(failureStart, 1, Rule.FAILURE_STRING_UNNECESSARY, fix));
             }

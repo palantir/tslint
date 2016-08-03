@@ -82,12 +82,16 @@ export class RuleWalker extends SyntaxWalker {
         }
     }
 
-    public createFix(replacements: Replacement[]): Fix {
-        return new Fix(this.ruleName, replacements);
-    }
-
     public createReplacement(start: number, length: number, text: string): Replacement {
         return new Replacement(start, length, text);
+    }
+
+    public appendText(start: number, text: string): Replacement {
+        return this.createReplacement(start, 0, text);
+    }
+
+    public deleteText(start: number, length: number): Replacement {
+        return this.createReplacement(start, length, "");
     }
 
     private existsFailure(failure: RuleFailure) {
