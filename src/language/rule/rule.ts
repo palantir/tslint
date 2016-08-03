@@ -90,6 +90,12 @@ export interface IRule {
 }
 
 export class Replacement {
+    public static applyAll(content: string, replacements: Replacement[]) {
+        // sort in reverse so that diffs are properly applied
+        replacements.sort((a, b) => b.end - a.end);
+        return replacements.reduce((text, r) => r.apply(text), content);
+    }
+
     constructor(private innerStart: number, private innerLength: number, private innerText: string) {
     }
 
@@ -121,9 +127,7 @@ export class Fix {
         for (const fix of fixes) {
             replacements = replacements.concat(fix.replacements);
         }
-        // sort in reverse so that diffs are properly applied
-        replacements.sort((a, b) => b.end - a.end);
-        return replacements.reduce((text, r) => r.apply(text), content);
+        return Replacement.applyAll(content, replacements);
     }
 
     constructor(private innerRuleName: string, private innerReplacements: Replacement[]) {
@@ -138,9 +142,7 @@ export class Fix {
     }
 
     public apply(content: string) {
-        // sort replacements in reverse so that diffs are properly applied
-        this.innerReplacements.sort((a, b) => b.end - a.end);
-        return this.innerReplacements.reduce((text, r) => r.apply(text), content);
+        return Replacement.applyAll(content, this.innerReplacements);
     }
 }
 

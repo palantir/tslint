@@ -117,12 +117,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
             const stat = fs.statSync(fixedFile);
             if (stat.isFile()) {
                 fixedFileText = fs.readFileSync(fixedFile, "utf8");
-                const fixes: Fix[] = [];
-                for (const failure of failures) {
-                    if (failure.hasFix()) {
-                        fixes.push(failure.getFix());
-                    }
-                }
+                const fixes = failures.filter(f => f.hasFix()).map(f => f.getFix());
                 newFileText = Fix.applyAll(fileTextWithoutMarkup, fixes);
             }
         } catch (e) {
