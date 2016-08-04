@@ -1,0 +1,11 @@
+var testVariable = "eval"
+                         ~nil [Missing semicolon]
+
+function a() {
+    function b() {
+        function c() {
+            console.log("hi")
+                             ~nil [Missing semicolon]
+        }
+    }
+}
