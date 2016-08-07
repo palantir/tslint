@@ -1,0 +1,65 @@
+class FailingExample1 {
+    constructor(fruit: string, public num: number, private animal: string, protected mineral: string) {
+        //Both usage here are OK since `fruit` is a regular parameter and not a class property
+        fruit = "banana";
+        this.fruit = "persimmon";
+
+        this.num = 10;
+        num = 5;
+        ~~~ [The constructor parameter 'num' should only be accessed with the 'this' keyword: 'this.num']
+
+        animal = "aardvark";
+        ~~~~~~ [The constructor parameter 'animal' should only be accessed with the 'this' keyword: 'this.animal']
+        this.animal = "skunk";
+
+        mineral = "Gypsum";
+        ~~~~~~~ [The constructor parameter 'mineral' should only be accessed with the 'this' keyword: 'this.mineral']
+        this.mineral = "Fluorite";
+    }
+}
+
+class FailingExample2 {
+    constructor(public thing: Object) {
+        const wow=thing.doTheThing()
+                  ~~~~~ [The constructor parameter 'thing' should only be accessed with the 'this' keyword: 'this.thing']
+        console.log(wow, thing.amazingDvdCollection);
+                         ~~~~~ [The constructor parameter 'thing' should only be accessed with the 'this' keyword: 'this.thing']
+        
+        const pasta = thing.nested.makePasta();
+                      ~~~~~ [The constructor parameter 'thing' should only be accessed with the 'this' keyword: 'this.thing']
+
+        thing = {};
+        ~~~~~ [The constructor parameter 'thing' should only be accessed with the 'this' keyword: 'this.thing']
+
+        this.thing.doSomethingElse();
+    }
+}
+
+class PassingExample1 {
+    //This is OK since `thing` is a regular parameter and not a class property here
+    constructor(thing: Object) {
+        const wow=thing.doTheThing()
+        console.log(wow,thing.amazingDvdCollection);
+        const pasta = thing.nested.makePasta();
+        thing = {};
+        this.thing.doSomethingElse();
+    }
+}
+
+class PassingExample2 {
+    constructor(a: string, private b: string, public c: string, protected d: string) {
+        this.a = "aaa";
+        this.b = "bbb";
+        this.c = "ccc";
+        this.d = "ddd";
+    }
+}
+
+class PassingExample3 {
+    constructor(a: Object, private b: Object, public c: Object, protected d: Object) {
+        this.a.doThing();
+        this.b.doOtherThing();
+        this.c.doAnotherThing();
+        this.d.doLastThing();
+    }
+}
