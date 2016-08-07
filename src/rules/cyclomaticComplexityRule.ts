@@ -31,20 +31,19 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "cyclomatic-complexity",
         description: "Enforces a threshold of cyclomatic complexity.",
         descriptionDetails: Lint.Utils.dedent`
-            Cyclomatic complexity is assessed for each function (including arrow functions). A
-            starting value of 1 is assigned and this value is then incremented for every statement
-            which can alter the control flow within the function.
-
-            The following control flow statements contribute to cyclomatic complexity:
+            Cyclomatic complexity is assessed for each function of any type. A starting value of 1
+            is assigned and this value is then incremented for every statement which can branch the
+            control flow within the function. The following statements and expressions contribute
+            to cyclomatic complexity:
             * \`catch\`
-            * \`if\` and \`else\`
-            * \`? :\`
+            * \`if\` and \`? :\`
             * \`||\` and \`&&\` due to short-circuit evaluation
-            * \`for\`, \`for in\` and \`for of\``,
+            * \`for\`, \`for in\` and \`for of\` loops
+            * \`while\` and \`do while\` loops`,
         rationale: Lint.Utils.dedent`
             Cyclomatic complexity is a code metric which indicates the level of complexity in a
-            section of code. High cyclomatic complexity indicates confusing code which may be prone
-            to errors or difficult to modify.`,
+            function. High cyclomatic complexity indicates confusing code which may be prone to
+            errors or difficult to modify.`,
         optionsDescription: Lint.Utils.dedent`
             An optional upper limit for cyclomatic complexity can be specified. If no limit option
             is provided a default value of $(Rule.DEFAULT_THRESHOLD) will be used.`,
@@ -52,7 +51,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "number",
             minimum: "$(Rule.MINIMUM_THRESHOLD)",
         },
-        optionExamples: ["[true, 20]"],
+        optionExamples: ["true", "[true, 20]"],
         type: "maintainability",
     };
     /* tslint:enable:object-literal-sort-keys */
