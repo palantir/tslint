@@ -58,20 +58,17 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:enable:object-literal-sort-keys */
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const threshold = this.getOptions().ruleArguments[0];
-        return this.applyWithWalker(new CyclomaticComplexityWalker(sourceFile, this.getOptions(), threshold));
+        return this.applyWithWalker(new CyclomaticComplexityWalker(sourceFile, this.getOptions(), this.threshold));
     }
 
     public isEnabled(): boolean {
-        if (super.isEnabled()) {
-            const option = this.getOptions().ruleArguments[0];
+        // Disable the rule if the option is provided but non-numeric or less than the minimum.
+        const isThresholdValid = typeof this.threshold === "number" && this.threshold >= Rule.MINIMUM_THRESHOLD;
+        return super.isEnabled() && isThresholdValid;
+    }
 
-            // Disable the rule if the option is provided but non-numeric or less than the minimum.
-            if (option && (typeof option !== "number" || option < Rule.MINIMUM_THRESHOLD)) {
-                return true;
-            }
-        }
-        return false;
+    private get threshold(): number {
+        return this.getOptions().ruleArguments[0] || Rule.DEFAULT_THRESHOLD;
     }
 }
 
@@ -90,8 +87,13 @@ class CyclomaticComplexityWalker extends Lint.RuleWalker {
     }
 
     protected visitBinaryExpression(node: ts.BinaryExpression) {
-        if (node.operatorToken.kind === ts.SyntaxKind.BarBarToken) {
-            this.incrementComplexity();
+        switch (node.operatorToken.kind) {
+            case ts.SyntaxKind.BarBarToken:
+            case ts.SyntaxKind.AmpersandAmpersandToken:
+                this.incrementComplexity();
+                break;
+            default:
+                break;
         }
         super.visitBinaryExpression(node);
     }
@@ -167,7 +169,8 @@ class CyclomaticComplexityWalker extends Lint.RuleWalker {
     }
 
     protected visitWhileStatement(node: ts.WhileStatement) {
-        this.walkChildren(node);
+        this.incrementComplexity();
+        super.visitWhileStatement(node);
     }
 
     private startFunction() {

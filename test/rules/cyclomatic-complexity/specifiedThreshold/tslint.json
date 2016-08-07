@@ -1,5 +1,5 @@
 {
   "rules": {
-    "cyclomatic-complexity": [true, "3"]
+    "cyclomatic-complexity": [true, 3]
   }
 }

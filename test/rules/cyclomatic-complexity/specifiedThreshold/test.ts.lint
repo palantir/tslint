@@ -1,34 +1,7 @@
+// Test each function type.
 const validFunctionExpression = function() {
     const condition1 = true ? "true" : "false";
     const condition2 = true ? "true" : "false";
-}
-
-function validFunctionDeclaration() {
-    const condition1 = true ? "true" : "false";
-    const condition2 = true ? "true" : "false";
-}
-
-const validArrowFunction = () => {
-    const condition1 = true ? "true" : "false";
-    const condition2 = true ? "true" : "false";
-}
-
-class ValidClass {
-    get validGet(): string {
-        const condition1 = true ? "true" : "false";
-        const condition2 = true ? "true" : "false";
-        return "test";
-    }
-
-    set validSet(newValue: string) {
-        const condition1 = true ? "true" : "false";
-        const condition2 = true ? "true" : "false";
-    }
-
-    validMethod() {
-        const condition1 = true ? "true" : "false";
-        const condition2 = true ? "true" : "false";
-    }
 }
 
 const invalidFunctionExpression = function() {
@@ -42,6 +15,12 @@ const invalidFunctionExpression = function() {
 }
 ~  [The cyclomatic complexity of is higher than the threshold]
 
+
+function validFunctionDeclaration() {
+    const condition1 = true ? "true" : "false";
+    const condition2 = true ? "true" : "false";
+}
+
 function invalidFunctionDeclaration() {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     const condition1 = true ? "true" : "false";
@@ -52,6 +31,11 @@ function invalidFunctionDeclaration() {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 }
 ~ [The cyclomatic complexity of is higher than the threshold for the function: invalidFunctionDeclaration]
+
+const validArrowFunction = () => {
+    const condition1 = true ? "true" : "false";
+    const condition2 = true ? "true" : "false";
+}
 
 const invalidArrowFunction = () => {
                              ~~~~~~~~
@@ -64,7 +48,13 @@ const invalidArrowFunction = () => {
 }
 ~ [The cyclomatic complexity of is higher than the threshold]
 
-class InvalidClass {
+class MyClass {
+    get validGet(): string {
+        const condition1 = true ? "true" : "false";
+        const condition2 = true ? "true" : "false";
+        return "test";
+    }
+
     get invalidGet(): string {
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~
         const condition1 = true ? "true" : "false";
@@ -78,6 +68,11 @@ class InvalidClass {
     }
 ~~~~~ [The cyclomatic complexity of is higher than the threshold for the function: invalidGet]
 
+    set validSet(newValue: string) {
+        const condition1 = true ? "true" : "false";
+        const condition2 = true ? "true" : "false";
+    }
+
     set invalidSet(newValue: string) {
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         const condition1 = true ? "true" : "false";
@@ -88,6 +83,11 @@ class InvalidClass {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     }
 ~~~~~ [The cyclomatic complexity of is higher than the threshold for the function: invalidSet]
+
+    validMethod() {
+        const condition1 = true ? "true" : "false";
+        const condition2 = true ? "true" : "false";
+    }
 
     invalidMethod() {
     ~~~~~~~~~~~~~~~~~~
@@ -101,3 +101,186 @@ class InvalidClass {
 ~~~~~ [The cyclomatic complexity of is higher than the threshold for the function: invalidMethod]
 }
 
+// Test each remaining expression type.
+function validBinaryExpression() {
+    return first || second && third
+}
+
+function invalidBinaryExpression() {
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    return first || second && third || fourth;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+}
+~ [The cyclomatic complexity of is higher than the threshold for the function: invalidBinaryExpression]
+
+function validSwitch() {
+    switch(5) {
+        case 0:
+            return 0;
+        case 1:
+            return 1;
+        default:
+            return -1;
+    }
+}
+
+function invalidSwitch() {
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    switch(5) {
+~~~~~~~~~~~~~~~~
+        case 0:
+~~~~~~~~~~~~~~~~
+            return 0;
+~~~~~~~~~~~~~~~~~~~~~~
+        case 1:
+~~~~~~~~~~~~~~~~
+            return 1;
+~~~~~~~~~~~~~~~~~~~~~~
+        case 2:
+~~~~~~~~~~~~~~~~
+            return 2;
+~~~~~~~~~~~~~~~~~~~~~~
+        default:
+~~~~~~~~~~~~~~~~
+            return -1;
+~~~~~~~~~~~~~~~~~~~~~~~
+    }
+~~~~~~
+}
+~  [The cyclomatic complexity of is higher than the threshold for the function: invalidSwitch]
+
+function validCatch() {
+    try { }
+    catch(error) { }
+    try { }
+    catch(error) { }
+    try { }
+    finally { }
+}
+
+function invalidCatch() {
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+    try { }
+~~~~~~~~~~~~
+    catch(error) { }
+~~~~~~~~~~~~~~~~~~~~~
+    try { }
+~~~~~~~~~~~~
+    catch(error) { }
+~~~~~~~~~~~~~~~~~~~~~
+    try { }
+~~~~~~~~~~~~
+    catch(error) { }
+~~~~~~~~~~~~~~~~~~~~~
+    try { }
+~~~~~~~~~~~~
+    finally { }
+~~~~~~~~~~~~~~~~
+}
+~  [The cyclomatic complexity of is higher than the threshold for the function: invalidCatch]
+
+function validDo() {
+    do { }
+    while (false)
+    do { }
+    while (false)
+}
+
+function invalidDo() {
+~~~~~~~~~~~~~~~~~~~~~~~
+    do { }
+~~~~~~~~~~~
+    while (false)
+~~~~~~~~~~~~~~~~~~
+    do { }
+~~~~~~~~~~~
+    while (false)
+~~~~~~~~~~~~~~~~~~
+    do { }
+~~~~~~~~~~~
+    while (false)
+~~~~~~~~~~~~~~~~~~
+}
+~ [The cyclomatic complexity of is higher than the threshold for the function: invalidDo]
+
+function validFor() {
+    for(;;) { }
+    for(;;) { }
+}
+
+function invalidFor() {
+~~~~~~~~~~~~~~~~~~~~~~~~
+    for(;;) { }
+~~~~~~~~~~~~~~~~
+    for(;;) { }
+~~~~~~~~~~~~~~~~
+    for(;;) { }
+~~~~~~~~~~~~~~~~
+}
+~ [The cyclomatic complexity of is higher than the threshold for the function: invalidFor]
+
+function validForIn() {
+    for(let i in [0,1,2]) { }
+    for(let i in [0,1,2]) { }
+}
+
+function invalidForIn() {
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+    for(let i in [0,1,2]) { }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    for(let i in [0,1,2]) { }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    for(let i in [0,1,2]) { }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+}
+~ [The cyclomatic complexity of is higher than the threshold for the function: invalidForIn]
+
+function validForOf() {
+    for(let i of [0,1,2]) { }
+    for(let i of [0,1,2]) { }
+}
+
+function invalidForOf() {
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+    for(let i of [0,1,2]) { }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    for(let i of [0,1,2]) { }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    for(let i of [0,1,2]) { }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+}
+~ [The cyclomatic complexity of is higher than the threshold for the function: invalidForOf]
+
+let variable = 1;
+
+function validIf() {
+    if(variable) { console.log(variable); }
+    if(variable) { console.log(variable); } else { console.log(variable); }
+}
+
+function invalidIf() {
+~~~~~~~~~~~~~~~~~~~~~~~
+    if(variable) { console.log(variable); }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    if(variable) { console.log(variable); } else { console.log(variable); }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    if(variable) { console.log(variable); }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+}
+~ [The cyclomatic complexity of is higher than the threshold for the function: invalidIf]
+
+function validWhile() {
+    while(false) { }
+    while(false) { }
+}
+
+function invalidWhile() {
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+    while(false) { }
+~~~~~~~~~~~~~~~~~~~~~
+    while(false) { }
+~~~~~~~~~~~~~~~~~~~~~
+    while(false) { }
+~~~~~~~~~~~~~~~~~~~~~
+}
+~ [The cyclomatic complexity of is higher than the threshold for the function: invalidWhile]
