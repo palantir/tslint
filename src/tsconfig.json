@@ -111,6 +111,7 @@
         "rules/noMergeableNamespaceRule.ts",
         "rules/noNamespaceRule.ts",
         "rules/noNullKeywordRule.ts",
+        "rules/noOptionalParameterInCallbackRule.ts",
         "rules/noReferenceRule.ts",
         "rules/noRequireImportsRule.ts",
         "rules/noShadowedVariableRule.ts",

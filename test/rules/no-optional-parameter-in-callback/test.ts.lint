@@ -1,0 +1,95 @@
+// good
+declare function f1(a: number);
+
+declare function f2(a?: number, b: (c: string, d: number) => void);
+
+interface i1 {
+    f1();
+    f2(a: symbol);
+    f3(a: number, b?: (c: string, d: number) => void);
+}
+
+class c1 {
+    ab(): number;
+	ab(x?: number, y?: number): number {
+		return 1;
+    }
+}
+
+function f3() {
+    function f4(x?: number, y?: (k: string) => void): number {
+        return 1;
+    }
+}
+
+module MyModule {
+    export class ClassA {
+        id: string;
+        ab(x?: number, y?: number): number {
+		    return 1;
+        }
+    }
+
+    export class ClassB {
+        id: string;
+    }
+}
+
+
+
+
+// bad
+declare function bar(a: (b: number, k?: string));
+                                    ~~~~~~~~~~  [error]
+
+function f3() {
+    function f4(x?: number, y?: (k?: string) => void): number {
+                                 ~~~~~~~~~~  [error]
+        return 1;
+    }
+}
+
+var v1 = {
+    foo(x: (y?: number) => void): void {
+            ~~~~~~~~~~  [error]
+        var bar = 1;
+    },
+    baz(): void {
+        var bar = 1;
+    }
+};
+
+module MyModule {
+    export class ClassA {
+        id: string;
+        ab(x?: number, y?: number): number {
+		    return 1;
+        }
+    }
+
+    export class ClassB {
+        id: string;
+        ab(x?: number, y?: (a?: void) => void): number {
+                            ~~~~~~~~  [error]
+		    return 1;
+        }
+    }
+}
+
+class c1 {
+    foo(x: number, y: (z?: string) => void): void {
+                       ~~~~~~~~~~  [error]
+    }
+}
+
+class c2 {
+    foo(ob: {x: number, y: (z?: string) => void}): void {
+                            ~~~~~~~~~~  [error]
+    }
+}
+
+declare function foo1(ob: {x: number}, y: {k: {p: (z?: string) => void}}): void;
+                                                   ~~~~~~~~~~  [error]
+
+
+[error]: No optional parameters in callback positions - consider writing `T | undefined` or something similar instead

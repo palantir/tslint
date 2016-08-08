@@ -310,6 +310,7 @@ Core rules are included in the `tslint` package.
 * `no-namespace` disallows both internal `module`s and `namespace`, but allows ES6-style external modules.
     * `allow-declarations` allows `declare namespace ... {}` to describe external APIs.
 * `no-null-keyword` disallows use of the `null` keyword literal.
+* `no-optional-parameter-in-callback` disallows use of optional parameters in callback positions.
 * `no-reference` disallows `/// <reference path=>` imports (use ES6-style imports instead).
 * `no-require-imports` disallows invocation of `require()` (use ES6-style imports instead).
 * `no-shadowed-variable` disallows shadowed variable declarations.
