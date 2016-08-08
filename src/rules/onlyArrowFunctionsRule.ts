@@ -31,7 +31,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"allow-declarations"\` allows standalone function declarations.
         `,
         options: null,
-        optionExamples: ['true', '[true, "allow-declarations"]'],
+        optionExamples: ["true", '[true, "allow-declarations"]'],
         type: "typescript",
     };
     /* tslint:enable:object-literal-sort-keys */
