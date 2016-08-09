@@ -248,7 +248,6 @@ Core Rules
 [See the TSLint website for a list of core rules included in the `tslint` package.]
 (http://palantir.github.io/tslint/rules/)
 
-
 Rule Flags
 -----
 <sup>[back to ToC &uarr;](#table-of-contents)</sup>
