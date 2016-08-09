@@ -19,6 +19,8 @@ import * as ts from "typescript";
 
 import * as Lint from "../lint";
 
+const OPTION_ALLOW_DECLARATIONS = "allow-declarations";
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -28,10 +30,18 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: Lint.Utils.dedent`
             One argument may be optionally provided:
 
-            * \`"allow-declarations"\` allows standalone function declarations.
+            * \`"${OPTION_ALLOW_DECLARATIONS}"\` allows standalone function declarations.
         `,
-        options: null,
-        optionExamples: ["true", '[true, "allow-declarations"]'],
+        options: {
+            type: "array",
+            items: {
+                type: "string",
+                enum: [OPTION_ALLOW_DECLARATIONS],
+            },
+            minLength: 0,
+            maxLength: 1,
+        },
+        optionExamples: ["true", `[true, "${OPTION_ALLOW_DECLARATIONS}"]`],
         type: "typescript",
     };
     /* tslint:enable:object-literal-sort-keys */
@@ -45,7 +55,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class OnlyArrowFunctionsWalker extends Lint.RuleWalker {
     public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
-        if (this.getOptions().indexOf("allow-declarations") === -1) {
+        if (this.getOptions().indexOf(OPTION_ALLOW_DECLARATIONS) === -1) {
             this.addFailure(this.createFailure(node.getStart(), "function".length, Rule.FAILURE_STRING));
         }
         super.visitFunctionDeclaration(node);

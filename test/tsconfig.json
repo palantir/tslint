@@ -73,6 +73,7 @@
         "../src/rules/commentFormatRule.ts",
         "../src/rules/curlyRule.ts",
         "../src/rules/eoflineRule.ts",
+        "../src/rules/fileHeaderRule.ts",
         "../src/rules/forinRule.ts",
         "../src/rules/indentRule.ts",
         "../src/rules/interfaceNameRule.ts",
