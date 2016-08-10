@@ -88,7 +88,7 @@ class CommentWalker extends Lint.SkippableTokenAwareRuleWalker {
                     }
                 }
                 if (this.hasOption(OPTION_UPPERCASE)) {
-                    if (!startsWithUppercase(commentText)) {
+                    if (!startsWithUppercase(commentText) && !isRuleFlag(commentText)) {
                         const uppercaseFailure = this.createFailure(startPosition, width, Rule.UPPERCASE_FAILURE);
                         this.addFailure(uppercaseFailure);
                     }
@@ -137,4 +137,11 @@ function startsWithSpace(commentText: string) {
     const firstCharacter = commentText.charAt(2); // first character after the space
     // three slashes (///) also works, to allow for ///<reference>
     return firstCharacter === " " || firstCharacter === "/";
+}
+
+function isRuleFlag(commentText: string): boolean {
+    // regex is: start of string followed by "/*" or "//"
+    // followed by any amount of whitespace followed by "tslint:"
+    // followed by either "enable" or "disable"
+    return /^(\/\*|\/\/)\s*tslint:(enable|disable)/.test(commentText);
 }
