@@ -217,44 +217,46 @@ if (argv.c && !fs.existsSync(argv.c)) {
 }
 const possibleConfigAbsolutePath = argv.c != null ? path.resolve(argv.c) : null;
 
-const processFile = (file: string, program?: ts.Program) => {
-    if (!fs.existsSync(file)) {
-        console.error(`Unable to open file: ${file}`);
-        process.exit(1);
-    }
+const processFiles = (files: string[], program?: ts.Program) => {
+    for (const file of files) {
+      if (!fs.existsSync(file)) {
+          console.error(`Unable to open file: ${file}`);
+          process.exit(1);
+      }
 
-    const buffer = new Buffer(256);
-    buffer.fill(0);
-    const fd = fs.openSync(file, "r");
-    try {
-        fs.readSync(fd, buffer, 0, 256, null);
-        if (buffer.readInt8(0) === 0x47 && buffer.readInt8(188) === 0x47) {
-            // MPEG transport streams use the '.ts' file extension. They use 0x47 as the frame
-            // separator, repeating every 188 bytes. It is unlikely to find that pattern in
-            // TypeScript source, so tslint ignores files with the specific pattern.
-            console.warn(`${file}: ignoring MPEG transport stream`);
-            return;
-        }
-    } finally {
-        fs.closeSync(fd);
-    }
+      const buffer = new Buffer(256);
+      buffer.fill(0);
+      const fd = fs.openSync(file, "r");
+      try {
+          fs.readSync(fd, buffer, 0, 256, null);
+          if (buffer.readInt8(0) === 0x47 && buffer.readInt8(188) === 0x47) {
+              // MPEG transport streams use the '.ts' file extension. They use 0x47 as the frame
+              // separator, repeating every 188 bytes. It is unlikely to find that pattern in
+              // TypeScript source, so tslint ignores files with the specific pattern.
+              console.warn(`${file}: ignoring MPEG transport stream`);
+              return;
+          }
+      } finally {
+          fs.closeSync(fd);
+      }
 
-    const contents = fs.readFileSync(file, "utf8");
-    const configuration = findConfiguration(possibleConfigAbsolutePath, file);
+      const contents = fs.readFileSync(file, "utf8");
+      const configuration = findConfiguration(possibleConfigAbsolutePath, file);
 
-    const linter = new Linter(file, contents, {
-        configuration,
-        formatter: argv.t,
-        formattersDirectory: argv.s,
-        rulesDirectory: argv.r,
-    }, program);
+      const linter = new Linter(file, contents, {
+          configuration,
+          formatter: argv.t,
+          formattersDirectory: argv.s,
+          rulesDirectory: argv.r,
+      }, program);
 
-    const lintResult = linter.lint();
+      const lintResult = linter.lint();
 
-    if (lintResult.failureCount > 0) {
-        outputStream.write(lintResult.output, () => {
-            process.exit(argv.force ? 0 : 2);
-        });
+      if (lintResult.failureCount > 0) {
+          outputStream.write(lintResult.output, () => {
+              process.exit(argv.force ? 0 : 2);
+          });
+      }
     }
 };
 
@@ -293,6 +295,4 @@ if (argv.project != null) {
     }
 }
 
-for (const file of files) {
-    glob.sync(file, { ignore: argv.e }).forEach((file) => processFile(file, program));
-}
+glob.sync(files, { ignore: argv.e }).forEach((file) => processFiles(files, program));
