@@ -294,6 +294,10 @@ export class SyntaxWalker {
         this.walkChildren(node);
     }
 
+    protected visitTupleType(node: ts.TupleTypeNode) {
+        this.walkChildren(node);
+    }
+
     protected visitTypeAliasDeclaration(node: ts.TypeAliasDeclaration) {
         this.walkChildren(node);
     }
@@ -602,6 +606,10 @@ export class SyntaxWalker {
 
             case ts.SyntaxKind.TryStatement:
                 this.visitTryStatement(<ts.TryStatement> node);
+                break;
+
+            case ts.SyntaxKind.TupleType:
+                this.visitTupleType(<ts.TupleTypeNode> node);
                 break;
 
             case ts.SyntaxKind.TypeAliasDeclaration:

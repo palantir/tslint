@@ -111,6 +111,22 @@ var [ccA, ccB,] = cc;
 
 var [ddOne, ddTwo] = dd;
 
+var a: [string, number] = null;
+
+var a: [string, number,] = null;
+                      ~          [Unnecessary trailing comma]
+
+var a: [
+    string,
+    number
+] = null;
+
+var a: [
+    string,
+    number,
+] = null;
+
+
 import {
     ClassS,
 } from "module";
@@ -133,3 +149,114 @@ import {ClassA, ClassB,} from "module";
                       ~                 [Unnecessary trailing comma]
 
 import {ClassC, ClassD} from "module";
+
+function foo(bar: string, baz: string);
+
+function foo(bar: string, baz: string,);
+                                     ~  [Unnecessary trailing comma]
+
+function foo(
+    bar: string,
+    baz: string
+);
+
+function foo(
+    bar: string,
+    baz: string,
+);
+
+var foo = function(bar: string, baz: string) { return 42; };
+
+var foo = function(bar: string, baz: string,) { return 42; };
+                                           ~                  [Unnecessary trailing comma]
+
+var foo = function(
+    bar: string,
+    baz: string
+) {
+    return 42;
+};
+
+var foo = function(
+    bar: string,
+    baz: string,
+) {
+    return 42;
+};
+
+function foo(bar: string, baz: string) { return 42; }
+
+function foo(bar: string, baz: string,) { return 42; }
+                                     ~                 [Unnecessary trailing comma]
+
+function foo(
+    bar: string,
+    baz: string
+) {
+    return 42;
+}
+
+function foo(
+    bar: string,
+    baz: string,
+) {
+    return 42;
+}
+
+function foo(bar: string, baz: string,
+    ack: string
+) {
+    return 42;
+}
+
+function foo(bar: string, baz: string,
+    ack: string,
+) {
+    return 42;
+}
+
+var foo = (bar: string, baz: string) => 42;
+
+var foo = (bar: string, baz: string,) => 42;
+                                   ~         [Unnecessary trailing comma]
+
+var foo = (
+    bar: string,
+    baz: string
+) => 42;
+
+var foo = (
+    bar: string,
+    baz: string,
+) => 42;
+
+var foo: (bar: string, baz: string) => number = null;
+
+var foo: (bar: string, baz: string,) => number = null;
+                                  ~                    [Unnecessary trailing comma]
+
+var foo: (
+    bar: string,
+    baz: string
+) => number = null;
+
+var foo: (
+    bar: string,
+    baz: string,
+) => number = null;
+
+var foo: (bar: string, baz: string) => number;
+
+var foo: (bar: string, baz: string,) => number;
+                                  ~             [Unnecessary trailing comma]
+
+var foo: (
+    bar: string,
+    baz: string
+) => number;
+
+var foo: (
+    bar: string,
+    baz: string,
+) => number
+
