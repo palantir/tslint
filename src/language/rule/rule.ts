@@ -89,6 +89,63 @@ export interface IRule {
     applyWithWalker(walker: RuleWalker): RuleFailure[];
 }
 
+export class Replacement {
+    public static applyAll(content: string, replacements: Replacement[]) {
+        // sort in reverse so that diffs are properly applied
+        replacements.sort((a, b) => b.end - a.end);
+        return replacements.reduce((text, r) => r.apply(text), content);
+    }
+
+    constructor(private innerStart: number, private innerLength: number, private innerText: string) {
+    }
+
+    get start() {
+        return this.innerStart;
+    }
+
+    get length() {
+        return this.innerLength;
+    }
+
+    get end() {
+        return this.innerStart + this.innerLength;
+    }
+
+    get text() {
+        return this.innerText;
+    }
+
+    public apply(content: string) {
+        return content.substring(0, this.start) + this.text + content.substring(this.start + this.length);
+    }
+}
+
+export class Fix {
+    public static applyAll(content: string, fixes: Fix[]) {
+        // accumulate replacements
+        let replacements: Replacement[] = [];
+        for (const fix of fixes) {
+            replacements = replacements.concat(fix.replacements);
+        }
+        return Replacement.applyAll(content, replacements);
+    }
+
+    constructor(private innerRuleName: string, private innerReplacements: Replacement[]) {
+    }
+
+    get ruleName() {
+        return this.innerRuleName;
+    }
+
+    get replacements() {
+        return this.innerReplacements;
+    }
+
+    public apply(content: string) {
+        return Replacement.applyAll(content, this.innerReplacements);
+    }
+}
+
 export class RuleFailurePosition {
     constructor(private position: number, private lineAndCharacter: ts.LineAndCharacter) {
     }
@@ -128,7 +185,8 @@ export class RuleFailure {
                 start: number,
                 end: number,
                 private failure: string,
-                private ruleName: string) {
+                private ruleName: string,
+                private fix?: Fix) {
 
         this.fileName = sourceFile.fileName;
         this.startPosition = this.createFailurePosition(start);
@@ -155,10 +213,19 @@ export class RuleFailure {
         return this.failure;
     }
 
+    public hasFix() {
+        return this.fix !== undefined;
+    }
+
+    public getFix() {
+        return this.fix;
+    }
+
     public toJson(): any {
         return {
             endPosition: this.endPosition.toJson(),
             failure: this.failure,
+            fix: this.fix,
             name: this.fileName,
             ruleName: this.ruleName,
             startPosition: this.startPosition.toJson(),
