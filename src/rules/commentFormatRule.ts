@@ -88,7 +88,7 @@ class CommentWalker extends Lint.SkippableTokenAwareRuleWalker {
                     }
                 }
                 if (this.hasOption(OPTION_UPPERCASE)) {
-                    if (!startsWithUppercase(commentText) && !isRuleFlag(commentText)) {
+                    if (!startsWithUppercase(commentText) && !isEnableDisableFlag(commentText)) {
                         const uppercaseFailure = this.createFailure(startPosition, width, Rule.UPPERCASE_FAILURE);
                         this.addFailure(uppercaseFailure);
                     }
@@ -139,7 +139,7 @@ function startsWithSpace(commentText: string) {
     return firstCharacter === " " || firstCharacter === "/";
 }
 
-function isRuleFlag(commentText: string): boolean {
+function isEnableDisableFlag(commentText: string): boolean {
     // regex is: start of string followed by "/*" or "//"
     // followed by any amount of whitespace followed by "tslint:"
     // followed by either "enable" or "disable"
