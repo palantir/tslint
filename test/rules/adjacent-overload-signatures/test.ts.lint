@@ -32,6 +32,10 @@ interface i5 {
     }
 }
 
+interface i6 {
+    toString(): string;
+}
+
 
 // bad
 
