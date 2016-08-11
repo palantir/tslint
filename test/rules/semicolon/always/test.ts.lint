@@ -84,3 +84,6 @@ export = Date;
 export = Date
              ~nil [Missing semicolon]
 
+type t = number;
+type t = number
+               ~nil [Missing semicolon]
