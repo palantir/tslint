@@ -156,7 +156,11 @@ class SemicolonWalker extends Lint.RuleWalker {
         const always = this.hasOption(OPTION_ALWAYS) || (this.getOptions() && this.getOptions().length === 0);
 
         if (always && !hasSemicolon) {
-            this.addFailure(this.createFailure(Math.min(position, this.getLimit()), 0, Rule.FAILURE_STRING_MISSING));
+            const failureStart = Math.min(position, this.getLimit());
+            const fix = new Lint.Fix(Rule.metadata.ruleName, [
+                this.appendText(failureStart, ";"),
+            ]);
+            this.addFailure(this.createFailure(failureStart, 0, Rule.FAILURE_STRING_MISSING, fix));
         } else if (this.hasOption(OPTION_NEVER) && hasSemicolon) {
             const scanner = ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, sourceFile.text);
             scanner.setTextPos(position);
@@ -168,7 +172,11 @@ class SemicolonWalker extends Lint.RuleWalker {
 
             if (tokenKind !== ts.SyntaxKind.OpenParenToken && tokenKind !== ts.SyntaxKind.OpenBracketToken
                     && tokenKind !== ts.SyntaxKind.PlusToken && tokenKind !== ts.SyntaxKind.MinusToken) {
-                this.addFailure(this.createFailure(Math.min(position - 1, this.getLimit()), 1, Rule.FAILURE_STRING_UNNECESSARY));
+                const failureStart = Math.min(position - 1, this.getLimit());
+                const fix = new Lint.Fix(Rule.metadata.ruleName, [
+                    this.deleteText(failureStart, 1),
+                ]);
+                this.addFailure(this.createFailure(failureStart, 1, Rule.FAILURE_STRING_UNNECESSARY, fix));
             }
         }
     }

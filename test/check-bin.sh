@@ -108,6 +108,13 @@ expectOut $? 0 "tslint --test did not exit correctly for a passing test with cus
 ./bin/tslint -r test/files/custom-rules-2 --test test/files/custom-rule-cli-rule-test
 expectOut $? 0 "tslint --test did not exit correctly for a passing test with custom rules from the CLI"
 
+# ensure --test command works correctly with fixes
+./bin/tslint --test test/files/fixes-test
+expectOut $? 0 "tslint --test did not exit correctly for a passing test with fixes"
+
+./bin/tslint --test test/files/incorrect-fixes-test
+expectOut $? 1 "tslint --test did not exit correctly for a failing test with fixes"
+
 # make sure tslint exits correctly when tsconfig is specified but no files are given
 ./bin/tslint -c test/files/tsconfig-test/tslint.json --project test/files/tsconfig-test/tsconfig.json
 expectOut $? 0 "tslint with tsconfig did not exit correctly"

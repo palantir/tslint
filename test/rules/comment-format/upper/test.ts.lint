@@ -18,5 +18,18 @@ class Clazz { // This comment is correct
 
 `${location.protocol}//${location.hostname}`
 
+// tslint should show error here
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [upper]
+
+// tslint: not a rule flag
+  ~~~~~~~~~~~~~~~~~~~~~~~~ [upper]
+
+//tslint:disable-next-line:no-unused-expression
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [space]
+class Invalid {}
+
+// tslint:disable-next-line:no-unused-expression
+class Valid {}
+
 [upper]: comment must start with uppercase letter
 [space]: comment must start with a space

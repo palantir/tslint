@@ -23,7 +23,7 @@ export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-for-in-array",
-        description: "Disallows for-in loops over array types.",
+        description: "Disallows iterating over an array with a for-in loop.",
         descriptionDetails: Lint.Utils.dedent`
             A for-in loop (\`for (var k in o)\`) iterates over the properties of an Object.
 
