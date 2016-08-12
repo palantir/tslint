@@ -140,11 +140,6 @@ class SemicolonWalker extends Lint.RuleWalker {
         super.visitExportAssignment(node);
     }
 
-    public visitTypeAliasDeclaration(node: ts.TypeAliasDeclaration) {
-        this.checkSemicolonAt(node);
-        super.visitTypeAliasDeclaration(node);
-    }
-
     private checkSemicolonAt(node: ts.Node) {
         const sourceFile = this.getSourceFile();
         const children = node.getChildren(sourceFile);

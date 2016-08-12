@@ -286,10 +286,6 @@ export class SyntaxWalker {
         this.walkChildren(node);
     }
 
-    protected visitTypeAliasDeclaration(node: ts.TypeAliasDeclaration) {
-        this.walkChildren(node);
-    }
-
     protected visitTypeAssertionExpression(node: ts.TypeAssertion) {
         this.walkChildren(node);
     }
@@ -586,10 +582,6 @@ export class SyntaxWalker {
 
             case ts.SyntaxKind.TryStatement:
                 this.visitTryStatement(<ts.TryStatement> node);
-                break;
-
-            case ts.SyntaxKind.TypeAliasDeclaration:
-                this.visitTypeAliasDeclaration(<ts.TypeAliasDeclaration> node);
                 break;
 
             case ts.SyntaxKind.TypeAssertionExpression:
