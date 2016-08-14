@@ -85,8 +85,9 @@ class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<ScopeInfo,
 
     public visitParameterDeclaration(node: ts.ParameterDeclaration) {
         const isSingleParameter = node.name.kind === ts.SyntaxKind.Identifier;
+        const isIndexSignature = node.parent.kind === ts.SyntaxKind.IndexSignature;
 
-        if (isSingleParameter) {
+        if (isSingleParameter && !isIndexSignature) {
             this.handleSingleParameterIdentifier(<ts.Identifier> node.name);
         }
 
