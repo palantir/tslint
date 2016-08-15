@@ -161,3 +161,23 @@ function testParameterDestructuring(
 function testSimpleBlockVar() {
     const simpleBlockVar = 4
 }
+
+interface SeparateIndexeSighatures1 {
+    [separate: string]: any;
+}
+interface SeparateIndexeSighatures2 {
+    [separate: number]: any;
+}
+
+const external = 1;
+interface ExternalIndexSignature1 {
+    [external: string]: any;
+}
+interface ExternalIndexSignature2 {
+    [external: number]: any;
+}
+
+interface CombinedIndexeSighatures {
+    [i: string]: any;
+    [i: number]: any;
+}
