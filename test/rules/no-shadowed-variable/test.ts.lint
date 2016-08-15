@@ -181,3 +181,34 @@ interface CombinedIndexeSighatures {
     [i: string]: any;
     [i: number]: any;
 }
+
+function constructorsWithArgs(
+    derivedCtor: new (...args: any[]) => any,
+    baseCtors: Array<new (...args: any[]) => any>): void {
+    // ...
+}
+
+function constructorsWithArgsConst(
+    derivedCtor: new (...args: any[]) => any,
+    baseCtors: Array<new (...args: any[]) => any>): void {
+    const args = [];
+}
+
+function constructorsWithArgsParamConst(
+    derivedCtor: new (...args: any[]) => any,
+    baseCtors: Array<new (...args: any[]) => any>,
+    args: any[]): void {
+    const args = [];
+          ~~~~       [Shadowed variable: 'args']
+}
+
+class MyClass { };
+
+declare type MyConstructor = new (myVariable: any) => MyClass;
+declare type MyFunction = (myParameter: any) => boolean;
+
+function creatorFunction(constructor: MyConstructor, filter: MyFunction): void {
+    const myVariable = 1;
+    const myParameter = 1;
+    console.log(myVariable);
+}

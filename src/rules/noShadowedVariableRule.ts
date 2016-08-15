@@ -79,6 +79,10 @@ class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<ScopeInfo,
         // don't call super, we don't need to check names in function types
     }
 
+    public visitConstructorType(node: ts.FunctionOrConstructorTypeNode) {
+        // don't call super, we don't need to check names in constructor types
+    }
+
     public visitIndexSignatureDeclaration(node: ts.SignatureDeclaration) {
         // don't call super, we don't want to walk index signatures
     }
