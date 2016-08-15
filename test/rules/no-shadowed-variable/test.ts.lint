@@ -161,8 +161,3 @@ function testParameterDestructuring(
 function testSimpleBlockVar() {
     const simpleBlockVar = 4
 }
-
-interface IFoo {
-    [i: string]: any;
-    [i: number]: any;
-}
