@@ -16,12 +16,12 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static LONGHAND_METHOD = "Expected method shorthand.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const objectShorthandWalker = new ObjectShorthandWalker(sourceFile, this.getOptions());
-        return this.applyWithWalker(objectShorthandWalker);
+        const objectLiteralShorthandWalker = new ObjectLiteralShorthandWalker(sourceFile, this.getOptions());
+        return this.applyWithWalker(objectLiteralShorthandWalker);
     }
 }
 
-class ObjectShorthandWalker extends Lint.RuleWalker {
+class ObjectLiteralShorthandWalker extends Lint.RuleWalker {
 
     public visitPropertyAssignment(node: ts.PropertyAssignment) {
         const name = node.name;
