@@ -26,5 +26,5 @@ const quotes = {
   "foo-bar"() {}
 };
 
-[property]: Expected property shorthand.
-[method]: Expected method shorthand.
+[property]: Expected property shorthand in object literal.
+[method]: Expected method shorthand in object literal.
