@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {arrayify, objectify, dedent} from "../src/utils";
+import {arrayify, dedent, objectify} from "../src/utils";
 
 describe("Utils", () => {
     it("arrayify", () => {
