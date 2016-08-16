@@ -128,7 +128,7 @@
         "rules/noVarRequiresRule.ts",
         "rules/objectLiteralKeyQuotesRule.ts",
         "rules/objectLiteralSortKeysRule.ts",
-        "rules/objectShorthand.ts",
+        "rules/objectShorthandRule.ts",
         "rules/oneLineRule.ts",
         "rules/oneVariablePerDeclarationRule.ts",
         "rules/onlyArrowFunctionsRule.ts",

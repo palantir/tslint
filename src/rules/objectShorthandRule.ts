@@ -5,9 +5,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "object-shorthand",
-        description: "Enforces use of ES6 object literal shorthand.",
-        descriptionDetails: Lint.Utils.dedent``,
-        optionsDescription: Lint.Utils.dedent``,
+        description: "Enforces use of ES6 object literal shorthand when possible.",
         options: null,
         optionExamples: ["true"],
         type: "style",
