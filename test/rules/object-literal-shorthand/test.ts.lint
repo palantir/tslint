@@ -20,11 +20,27 @@ const arrows = {
   x: (y) => y  // this is OK.
 };
 
+const namedFunctions = {
+  x: function y() {}  // named function expressions are also OK.
+};
+
 const quotes = {
   "foo-bar": function() {},
   ~~~~~~~~~~~~~~~~~~~~~~~~  [method]
   "foo-bar"() {}
 };
+
+const extraCases = {
+  x,
+  a: 123,
+  b: "hello",
+  c: 'c',
+  ["a" + "nested"]: {
+    x: x
+    ~~~~  [property]
+  }
+};
+
 
 [property]: Expected property shorthand in object literal.
 [method]: Expected method shorthand in object literal.

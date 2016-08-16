@@ -34,6 +34,11 @@ class ObjectLiteralShorthandWalker extends Lint.RuleWalker {
         }
 
         if (value.kind === ts.SyntaxKind.FunctionExpression) {
+            const fnNode = value as ts.FunctionExpression;
+            if (fnNode.name) {
+                return;  // named function expressions are OK.
+            }
+
             this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.LONGHAND_METHOD));
         }
 
