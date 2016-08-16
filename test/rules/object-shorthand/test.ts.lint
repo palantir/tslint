@@ -1,0 +1,30 @@
+const bad = {
+  w: function() {},
+  ~~~~~~~~~~~~~~~~  [method]
+  x: function *() {},
+  ~~~~~~~~~~~~~~~~~~  [method]
+  [y]: function() {},
+  ~~~~~~~~~~~~~~~~~~  [method]
+  z: z
+  ~~~~  [property]
+};
+
+const good = {
+  w() {},
+  *x() {},
+  [y]() {},
+  z
+};
+
+const arrows = {
+  x: (y) => y  // this is OK.
+};
+
+const quotes = {
+  "foo-bar": function() {},
+  ~~~~~~~~~~~~~~~~~~~~~~~~  [method]
+  "foo-bar"() {}
+};
+
+[property]: Expected property shorthand.
+[method]: Expected method shorthand.
