@@ -9,7 +9,7 @@ import {b, A, C} from 'foo'; // failure
         ~~~~                            [ordered-imports]
 
 
-// Source imports should be alphabetized.
+// Import sources should be alphabetized.
 import * as bar from 'bar';
 import * as foo from 'foo';
 
@@ -29,4 +29,4 @@ import someDefault from "module";
 import "something";
 
 [ordered-imports]: Named imports must be alphabetized.
-[ordered-sources]: Source imports within a group must be alphabetized.
+[ordered-sources]: Import sources within a group must be alphabetized.

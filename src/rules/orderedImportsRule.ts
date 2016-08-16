@@ -35,6 +35,14 @@ export class Rule extends Lint.Rules.AbstractRule {
             - Groups of imports are delineated by blank lines. You can use these to group imports
                 however you like, e.g. by first- vs. third-party or thematically.`,
         optionsDescription: Lint.Utils.dedent`
+            You may set the \`"import-sources-order"\` option to control the ordering of source
+            imports (the \`"foo"\` in \`import {A, B, C} from "foo"\`).
+
+            Possible values for \`"import-sources-order"\` are:
+            * \`"case-insensitive'\`: Correct order is \`"Bar"\`, \`"baz"\`, \`"Foo"\`. (This is the default.)
+            * \`"lowercase-first"\`: Correct order is \`"baz"\`, \`"Bar"\`, \`"Foo"\`.
+            * \`"lowercase-last"\`: Correct order is \`"Bar"\`, \`"Foo"\`, \`"baz"\`.
+
             You may set the \`"named-imports-order"\` option to control the ordering of named
             imports (the \`{A, B, C}\` in \`import {A, B, C} from "foo"\`).
 
@@ -44,23 +52,15 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"lowercase-first"\`: Correct order is \`{b, A, C}\`.
             * \`"lowercase-last"\`: Correct order is \`{A, C, b}\`.
 
-            You may set the \`"source-imports-order"\` option to control the ordering of source
-            imports (the \`"foo"\` in \`import {A, B, C} from "foo"\`).
-
-            Possible values for \`"source-imports-order"\` are:
-            * \`"case-insensitive'\`: Correct order is \`"Bar"\`, \`"baz"\`, \`"Foo"\`. (This is the default.)
-            * \`"lowercase-first"\`: Correct order is \`"baz"\`, \`"Bar"\`, \`"Foo"\`.
-            * \`"lowercase-last"\`: Correct order is \`"Bar"\`, \`"Foo"\`, \`"baz"\`.
-
         `,
         options: {
             type: "object",
             properties: {
-                "named-imports-order": {
+                "import-sources-order": {
                     type: "string",
                     enum: ["case-insensitive", "lowercase-first", "lowercase-last"],
                 },
-                "source-imports-order": {
+                "named-imports-order": {
                     type: "string",
                     enum: ["case-insensitive", "lowercase-first", "lowercase-last"],
                 },
@@ -69,14 +69,14 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: [
             "true",
-            '[true, {"named-imports-order": "lowercase-first", "source-imports-order": "lowercase-last"}]',
+            '[true, {"import-sources-order": "lowercase-last", "named-imports-order": "lowercase-first"}]',
         ],
         type: "style",
     };
     /* tslint:enable:object-literal-sort-keys */
 
+    public static IMPORT_SOURCES_UNORDERED = "Import sources within a group must be alphabetized.";
     public static NAMED_IMPORTS_UNORDERED = "Named imports must be alphabetized.";
-    public static SOURCE_IMPORTS_UNORDERED= "Source imports within a group must be alphabetized.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const orderedImportsWalker = new OrderedImportsWalker(sourceFile, this.getOptions());
@@ -118,26 +118,26 @@ const TRANSFORMS: {[ordering: string]: (x: string) => string} = {
 class OrderedImportsWalker extends Lint.RuleWalker {
     // This gets reset after every blank line.
     private lastImportSource: string = null;
+    private importSourcesOrderTransform: (x: string) => string = null;
     private namedImportsOrderTransform: (x: string) => string = null;
-    private sourceImportsOrderTransform: (x: string) => string = null;
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
 
         const optionSet = this.getOptions()[0] || {};
+        this.importSourcesOrderTransform =
+            TRANSFORMS[optionSet["import-sources-order"] || "case-insensitive"];
         this.namedImportsOrderTransform =
             TRANSFORMS[optionSet["named-imports-order"] || "case-insensitive"];
-        this.sourceImportsOrderTransform =
-            TRANSFORMS[optionSet["source-imports-order"] || "case-insensitive"];
     }
 
     // e.g. "import Foo from "./foo";"
     public visitImportDeclaration(node: ts.ImportDeclaration) {
-        const source = this.sourceImportsOrderTransform(node.moduleSpecifier.getText());
+        const source = this.importSourcesOrderTransform(node.moduleSpecifier.getText());
 
         if (this.lastImportSource && source < this.lastImportSource) {
             this.addFailure(this.createFailure(node.getStart(), node.getWidth(),
-                 Rule.SOURCE_IMPORTS_UNORDERED));
+                 Rule.IMPORT_SOURCES_UNORDERED));
         }
         this.lastImportSource = source;
 
