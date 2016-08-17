@@ -86,6 +86,10 @@ export class SyntaxWalker {
         this.walkChildren(node);
     }
 
+    protected visitConstructSignature(node: ts.ConstructSignatureDeclaration) {
+        this.walkChildren(node);
+    }
+
     protected visitConstructorDeclaration(node: ts.ConstructorDeclaration) {
         this.walkChildren(node);
     }
@@ -394,6 +398,10 @@ export class SyntaxWalker {
 
             case ts.SyntaxKind.ConditionalExpression:
                 this.visitConditionalExpression(<ts.ConditionalExpression> node);
+                break;
+
+            case ts.SyntaxKind.ConstructSignature:
+                this.visitConstructSignature(<ts.ConstructSignatureDeclaration> node);
                 break;
 
             case ts.SyntaxKind.Constructor:

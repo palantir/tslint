@@ -257,5 +257,247 @@ var foo: (
 var foo: (
     bar: string,
     baz: string,
-) => number
+) => number;
+
+var foo: new (bar: string, baz: string) => Test;
+                                     ~           [Missing trailing comma]
+
+var foo: new (bar: string, baz: string,) => Test;
+
+var foo: new (
+    bar: string,
+    baz: string
+) => Test;
+
+var foo: new (
+    bar: string,
+    baz: string,
+) => Test;
+
+var x = foo(42, 43);
+                 ~   [Missing trailing comma]
+
+var x = foo(42, 43,);
+
+var x = foo(
+    42,
+    43
+);
+
+var x = foo(
+    42,
+    43,
+);
+
+class Test<A, B, C> {
+                 ~    [Missing trailing comma]
+
+    constructor(bar: string) { }
+                          ~      [Missing trailing comma]
+
+    constructor(bar: string, baz: string,) { }
+
+    constructor(
+        bar: string,
+        baz: string,
+        ack: string
+    ) { }
+
+    constructor(
+        bar: string,
+        baz: string,
+        ack: string,
+        foo: string,
+    ) { }
+
+    public foo(bar: string, baz: string) {
+                                      ~    [Missing trailing comma]
+        return 42;
+    }
+
+    private foo2(bar: string, baz: string,) {
+        return 42;
+    }
+
+    public static foo3(
+        bar: string,
+        baz: string
+    ) {
+        return 42;
+    }
+
+    private static foo4(
+        bar: string,
+        baz: string,
+    ) {
+        return 42;
+    }
+
+    foo5<
+        T extends Test<[A, A], [A, A,], A>,
+                           ~                [Missing trailing comma]
+                                        ~   [Missing trailing comma]
+        U extends Test<B, B, B,>,
+        V extends Test<
+            [
+                C,
+                C
+            ],
+            [
+                C,
+                C,
+            ]
+            C
+        >
+    >(
+        bar: A,
+        baz: T,
+    ) {
+        return 42;
+    }
+
+    foo6<
+        T extends { foo: A; bar: B; },
+        U extends { foo: A; bar: B; },
+        V extends {
+            foo: A;
+            bar: B;
+        },
+        W extends {
+            foo: [
+                string,
+                string,
+            ];
+        },
+    >() { return 42; }
+
+    set bar(foo: string) { }
+                      ~      [Missing trailing comma]
+
+    set bar2(foo: string,) { }
+
+    set bar3(
+        foo: string
+    ) { }
+
+    set bar4(
+        foo: string,
+    ) { }
+}
+
+class Test2<A, B, C,> { }
+
+class Test3<
+    A,
+    B,
+    C
+> { }
+
+class Test4<
+    A,
+    B,
+    C,
+> { }
+
+interface ITest<A ,B, C> {
+                      ~    [Missing trailing comma]
+
+    new <U, V>(bar: U): ITest<U, U, V>;
+            ~                           [Missing trailing comma]
+                    ~                   [Missing trailing comma]
+                                    ~   [Missing trailing comma]
+
+    new <
+        U,
+        V
+    >(
+        bar: U,
+        baz: U,
+        ack: V 
+    ): ITest<
+        U,
+        U,
+        V
+    >;
+
+    new <
+        U,
+        V,
+    >(
+        bar: U,
+        baz: U,
+        ack: V,
+        foo: V,
+    ): ITest<
+        U,
+        U,
+        V,
+    >;
+
+    foo(bar: string, baz: string);
+                               ~   [Missing trailing comma]
+
+    foo2(bar: string, baz: string,);
+
+    foo3(
+        bar: string,
+        baz: string
+    );
+
+    foo4(
+        bar: string,
+        baz: string,
+    );
+
+    foo5<
+        T extends Test<[A, A], [A, A,], A>,
+                           ~                [Missing trailing comma]
+                                        ~   [Missing trailing comma]
+        U extends Test<B, B, B,>,
+        V extends Test<
+            [
+                C,
+                C
+            ],
+            [
+                C,
+                C,
+            ]
+            C
+        >
+    >(
+        bar: A,
+        baz: T,
+    );
+
+    foo6<
+        T extends { foo: A; bar: B; },
+        U extends { foo: A; bar: B; },
+        V extends {
+            foo: A;
+            bar: B;
+        },
+        W extends {
+            foo: [
+                string,
+                string
+            ];
+        }
+    >();
+}
+
+interface ITest2<A, B, C> { }
+                       ~      [Missing trailing comma]
+
+interface ITest3<
+    A,
+    B,
+    C
+> { }
+
+interface ITest4<
+    A,
+    B,
+    C,
+> { }
 

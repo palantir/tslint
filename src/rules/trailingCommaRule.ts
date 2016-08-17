@@ -65,65 +65,129 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class TrailingCommaWalker extends Lint.RuleWalker {
+    private static SYNTAX_LIST_WRAPPER_TOKENS: [ts.SyntaxKind, ts.SyntaxKind][] = [
+        [ts.SyntaxKind.OpenBracketToken, ts.SyntaxKind.CloseBracketToken],
+        [ts.SyntaxKind.OpenParenToken, ts.SyntaxKind.CloseParenToken],
+        [ts.SyntaxKind.LessThanToken, ts.SyntaxKind.GreaterThanToken],
+    ];
+
     public visitArrayLiteralExpression(node: ts.ArrayLiteralExpression) {
-        this.lintNode(node, 1);
+        this.lintChildNodeWithIndex(node, 1);
         super.visitArrayLiteralExpression(node);
     }
 
     public visitArrowFunction(node: ts.FunctionLikeDeclaration) {
-        this.lintNode(node, 1);
+        this.lintChildNodeWithIndex(node, 1);
         super.visitArrowFunction(node);
     }
 
     public visitBindingPattern(node: ts.BindingPattern) {
         if (node.kind === ts.SyntaxKind.ArrayBindingPattern || node.kind === ts.SyntaxKind.ObjectBindingPattern) {
-            this.lintNode(node, 1);
+            this.lintChildNodeWithIndex(node, 1);
         }
         super.visitBindingPattern(node);
     }
 
+    public visitCallExpression(node: ts.CallExpression) {
+        this.lintNode(node);
+        super.visitCallExpression(node);
+    }
+
+    public visitClassDeclaration(node: ts.ClassDeclaration) {
+        this.lintNode(node);
+        super.visitClassDeclaration(node);
+    }
+
+    public visitConstructSignature(node: ts.ConstructSignatureDeclaration) {
+        this.lintNode(node);
+        super.visitConstructSignature(node);
+    }
+
+    public visitConstructorDeclaration(node: ts.ConstructorDeclaration) {
+        this.lintNode(node);
+        super.visitConstructorDeclaration(node);
+    }
+
+    public visitConstructorType(node: ts.FunctionOrConstructorTypeNode) {
+        this.lintNode(node);
+        super.visitConstructorType(node);
+    }
+
     public visitFunctionType(node: ts.FunctionOrConstructorTypeNode) {
-        this.lintNode(node, 1);
+        this.lintChildNodeWithIndex(node, 1);
         super.visitFunctionType(node);
     }
 
     public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
-        this.visitFunctionLikeNode(node);
+        this.lintNode(node);
         super.visitFunctionDeclaration(node);
     }
 
     public visitFunctionExpression(node: ts.FunctionExpression) {
-        this.visitFunctionLikeNode(node);
+        this.lintNode(node);
         super.visitFunctionExpression(node);
     }
 
+    public visitInterfaceDeclaration(node: ts.InterfaceDeclaration) {
+        this.lintNode(node);
+        super.visitInterfaceDeclaration(node);
+    }
+
+    public visitMethodDeclaration(node: ts.MethodDeclaration) {
+        this.lintNode(node);
+        super.visitMethodDeclaration(node);
+    }
+
+    public visitMethodSignature(node: ts.SignatureDeclaration) {
+        this.lintNode(node);
+        super.visitMethodSignature(node);
+    }
+
     public visitNamedImports(node: ts.NamedImports) {
-        this.lintNode(node, 1);
+        this.lintChildNodeWithIndex(node, 1);
         super.visitNamedImports(node);
     }
 
     public visitObjectLiteralExpression(node: ts.ObjectLiteralExpression) {
-        this.lintNode(node, 1);
+        this.lintChildNodeWithIndex(node, 1);
         super.visitObjectLiteralExpression(node);
     }
 
+    public visitSetAccessor(node: ts.AccessorDeclaration) {
+        this.lintNode(node);
+        super.visitSetAccessor(node);
+    }
+
     public visitTupleType(node: ts.TupleTypeNode) {
-        this.lintNode(node, 1);
+        this.lintChildNodeWithIndex(node, 1);
         super.visitTupleType(node);
     }
 
-    private visitFunctionLikeNode(node: ts.Node) {
+    public visitTypeLiteral(node: ts.TypeLiteralNode) {
+        this.lintNode(node);
+        super.visitTypeLiteral(node);
+    }
+
+    public visitTypeReference(node: ts.TypeReferenceNode) {
+        this.lintNode(node);
+        super.visitTypeReference(node);
+    }
+
+    private lintNode(node: ts.Node) {
         const children = node.getChildren();
+
         for (let i = 0; i < children.length - 2; i++) {
-            if (children[i].kind === ts.SyntaxKind.OpenParenToken &&
-                children[i + 1].kind === ts.SyntaxKind.SyntaxList &&
-                children[i + 2].kind === ts.SyntaxKind.CloseParenToken) {
-                this.lintNode(node, i + 1);
-            }
+            TrailingCommaWalker.SYNTAX_LIST_WRAPPER_TOKENS.forEach(([openToken, closeToken]) => {
+                if (children[i].kind === openToken &&
+                    children[i + 1].kind === ts.SyntaxKind.SyntaxList &&
+                    children[i + 2].kind === closeToken) {
+                    this.lintChildNodeWithIndex(node, i + 1);
+                }
+            });
         }
     }
 
-    private lintNode(node: ts.Node, childNodeIndex: number) {
+    private lintChildNodeWithIndex(node: ts.Node, childNodeIndex: number) {
         const child = node.getChildAt(childNodeIndex);
         if (child != null && child.kind === ts.SyntaxKind.SyntaxList) {
             const grandChildren = child.getChildren();
