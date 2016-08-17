@@ -35,18 +35,31 @@ export class Rule extends Lint.Rules.AbstractRule {
             - Groups of imports are delineated by blank lines. You can use these to group imports
                 however you like, e.g. by first- vs. third-party or thematically.`,
         optionsDescription: Lint.Utils.dedent`
+            You may set the \`"import-sources-order"\` option to control the ordering of source
+            imports (the \`"foo"\` in \`import {A, B, C} from "foo"\`).
+
+            Possible values for \`"import-sources-order"\` are:
+            * \`"case-insensitive'\`: Correct order is \`"Bar"\`, \`"baz"\`, \`"Foo"\`. (This is the default.)
+            * \`"lowercase-first"\`: Correct order is \`"baz"\`, \`"Bar"\`, \`"Foo"\`.
+            * \`"lowercase-last"\`: Correct order is \`"Bar"\`, \`"Foo"\`, \`"baz"\`.
+
             You may set the \`"named-imports-order"\` option to control the ordering of named
-            imports (the \`{A, B, C}\` in \'import {A, B, C} from "foo"\`.)
+            imports (the \`{A, B, C}\` in \`import {A, B, C} from "foo"\`).
 
             Possible values for \`"named-imports-order"\` are:
 
             * \`"case-insensitive'\`: Correct order is \`{A, b, C}\`. (This is the default.)
             * \`"lowercase-first"\`: Correct order is \`{b, A, C}\`.
             * \`"lowercase-last"\`: Correct order is \`{A, C, b}\`.
+
         `,
         options: {
             type: "object",
             properties: {
+                "import-sources-order": {
+                    type: "string",
+                    enum: ["case-insensitive", "lowercase-first", "lowercase-last"],
+                },
                 "named-imports-order": {
                     type: "string",
                     enum: ["case-insensitive", "lowercase-first", "lowercase-last"],
@@ -54,13 +67,16 @@ export class Rule extends Lint.Rules.AbstractRule {
             },
             additionalProperties: false,
         },
-        optionExamples: ["true", '[true, {"named-imports-order": "lowercase-first"}]'],
+        optionExamples: [
+            "true",
+            '[true, {"import-sources-order": "lowercase-last", "named-imports-order": "lowercase-first"}]',
+        ],
         type: "style",
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static NAMED_IMPORTS_UNORDERED = "Named imports must be alphabetized.";
     public static IMPORT_SOURCES_UNORDERED = "Import sources within a group must be alphabetized.";
+    public static NAMED_IMPORTS_UNORDERED = "Named imports must be alphabetized.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const orderedImportsWalker = new OrderedImportsWalker(sourceFile, this.getOptions());
@@ -91,9 +107,9 @@ function findUnsortedPair(xs: ts.Node[], transform: (x: string) => string): [ts.
     return null;
 }
 
-// Transformations to apply to produce the desired ordering of named imports.
+// Transformations to apply to produce the desired ordering of imports.
 // The imports must be lexicographically sorted after applying the transform.
-const TRANFORMS: {[ordering: string]: (x: string) => string} = {
+const TRANSFORMS: {[ordering: string]: (x: string) => string} = {
     "case-insensitive": (x: string) => x.toLowerCase(),
     "lowercase-first": flipCase,
     "lowercase-last": (x: string) => x,
@@ -102,18 +118,22 @@ const TRANFORMS: {[ordering: string]: (x: string) => string} = {
 class OrderedImportsWalker extends Lint.RuleWalker {
     // This gets reset after every blank line.
     private lastImportSource: string = null;
-    private namedImportsOrder: string = null;
+    private importSourcesOrderTransform: (x: string) => string = null;
+    private namedImportsOrderTransform: (x: string) => string = null;
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
 
         const optionSet = this.getOptions()[0] || {};
-        this.namedImportsOrder = optionSet["named-imports-order"] || "case-insensitive";
+        this.importSourcesOrderTransform =
+            TRANSFORMS[optionSet["import-sources-order"] || "case-insensitive"];
+        this.namedImportsOrderTransform =
+            TRANSFORMS[optionSet["named-imports-order"] || "case-insensitive"];
     }
 
     // e.g. "import Foo from "./foo";"
     public visitImportDeclaration(node: ts.ImportDeclaration) {
-        const source = node.moduleSpecifier.getText();
+        const source = this.importSourcesOrderTransform(node.moduleSpecifier.getText());
 
         if (this.lastImportSource && source < this.lastImportSource) {
             this.addFailure(this.createFailure(node.getStart(), node.getWidth(),
@@ -129,7 +149,7 @@ class OrderedImportsWalker extends Lint.RuleWalker {
     public visitNamedImports(node: ts.NamedImports) {
         const imports = node.elements;
 
-        const pair = findUnsortedPair(imports, TRANFORMS[this.namedImportsOrder]);
+        const pair = findUnsortedPair(imports, this.namedImportsOrderTransform);
         if (pair !== null) {
             const [a, b] = pair;
             this.addFailure(
