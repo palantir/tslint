@@ -18,6 +18,10 @@ import * as foo from 'foo';
 import * as bar from 'bar'; // failure
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~            [ordered-sources]
 
+// Case is irrelevant for source import ordering.
+import {A, B} from 'Bar';
+import {A, B} from 'baz';
+import {A, B} from 'Foo'; // should not fail
 
 // Other styles of import statements.
 import someDefault, {nameA, nameBReallyLong as anotherName} from "./wherever";
