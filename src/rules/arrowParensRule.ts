@@ -56,7 +56,8 @@ class ArrowParensWalker extends Lint.RuleWalker {
                 isGenerics = true;
             }
 
-            if ((firstToken.kind !== ts.SyntaxKind.OpenParenToken || lastToken.kind !== ts.SyntaxKind.CloseParenToken) && !isGenerics) {
+            if ((firstToken.kind !== ts.SyntaxKind.OpenParenToken || lastToken.kind !== ts.SyntaxKind.CloseParenToken)
+                 && !isGenerics && node.flags !== ts.NodeFlags.Async) {
                 this.addFailure(this.createFailure(position, width, Rule.FAILURE_STRING));
             }
         }

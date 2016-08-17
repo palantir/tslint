@@ -19,6 +19,8 @@ var barbarbar = <T>(method: (a) => T) => {
 var piyo = <T, U>(method: () => T) => {
     method();
 };
+const validAsync = async (param: any) => {};
+const validAsync = async (param) => {};
 
 // invalid case
 var e = (a => {})(1);
