@@ -27,6 +27,3 @@ var e = (a => {})(1);
          ~            [Parentheses are required around the parameters of an arrow function definition]
 var f = a => {};
         ~             [Parentheses are required around the parameters of an arrow function definition]
-
-// I think should warn following case, but I have no idea to validate this. 
-const invalidAsync = async param => {};
