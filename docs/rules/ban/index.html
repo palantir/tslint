@@ -1,0 +1,37 @@
+---
+ruleName: ban
+description: Bans the use of specific functions.
+descriptionDetails: 'At this time, there is no way to disable global methods with this rule.'
+optionsDescription: 'A list of `[''object'', ''method'', ''optional explanation here'']` which ban `object.method()`.'
+options:
+  type: list
+  listType:
+    type: array
+    arrayMembers:
+      - type: string
+      - type: string
+      - type: string
+optionExamples:
+  - '[true, ["someObject", "someFunction"], ["someObject", "otherFunction", "Optional explanation"]]'
+type: functionality
+optionsJSON: |-
+  {
+    "type": "list",
+    "listType": {
+      "type": "array",
+      "arrayMembers": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "string"
+        }
+      ]
+    }
+  }
+layout: rule
+title: 'Rule: ban'
+---

@@ -1,0 +1,57 @@
+---
+ruleName: ordered-imports
+description: Requires that import statements be alphabetized.
+descriptionDetails: |-
+
+  Enforce a consistent ordering for ES6 imports:
+  - Named imports must be alphabetized (i.e. "import {A, B, C} from "foo";")
+      - The exact ordering can be controled by the named-imports-order option.
+      - "longName as name" imports are ordered by "longName".
+  - Import sources must be alphabetized within groups, i.e.:
+          import * as foo from "a";
+          import * as bar from "b";
+  - Groups of imports are delineated by blank lines. You can use these to group imports
+      however you like, e.g. by first- vs. third-party or thematically.
+optionsDescription: |-
+
+  You may set the `"named-imports-order"` option to control the ordering of named
+  imports (the `{A, B, C}` in 'import {A, B, C} from "foo"`.)
+
+  Possible values for `"named-imports-order"` are:
+
+  * `"case-insensitive'`: Correct order is `{A, b, C}`. (This is the default.)
+  * `"lowercase-first"`: Correct order is `{b, A, C}`.
+  * `"lowercase-last"`: Correct order is `{A, C, b}`.
+          
+options:
+  type: object
+  properties:
+    named-imports-order:
+      type: string
+      enum:
+        - case-insensitive
+        - lowercase-first
+        - lowercase-last
+  additionalProperties: false
+optionExamples:
+  - 'true'
+  - '[true, {"named-imports-order": "lowercase-first"}]'
+type: style
+optionsJSON: |-
+  {
+    "type": "object",
+    "properties": {
+      "named-imports-order": {
+        "type": "string",
+        "enum": [
+          "case-insensitive",
+          "lowercase-first",
+          "lowercase-last"
+        ]
+      }
+    },
+    "additionalProperties": false
+  }
+layout: rule
+title: 'Rule: ordered-imports'
+---
