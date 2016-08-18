@@ -26,6 +26,7 @@ import {
     DEFAULT_CONFIG,
     findConfiguration,
 } from "./configuration";
+import { LintResult } from "./lint";
 import {consoleTestResultHandler, runTest} from "./test";
 import * as Linter from "./tslint";
 
@@ -217,7 +218,7 @@ if (argv.c && !fs.existsSync(argv.c)) {
 }
 const possibleConfigAbsolutePath = argv.c != null ? path.resolve(argv.c) : null;
 
-const processFile = (file: string, program?: ts.Program) => {
+const processFile = (file: string, program?: ts.Program): LintResult => {
     if (!fs.existsSync(file)) {
         console.error(`Unable to open file: ${file}`);
         process.exit(1);
@@ -249,13 +250,7 @@ const processFile = (file: string, program?: ts.Program) => {
         rulesDirectory: argv.r,
     }, program);
 
-    const lintResult = linter.lint();
-
-    if (lintResult.failureCount > 0) {
-        outputStream.write(lintResult.output, () => {
-            process.exit(argv.force ? 0 : 2);
-        });
-    }
+    return linter.lint();
 };
 
 // if both files and tsconfig are present, use files
@@ -293,6 +288,26 @@ if (argv.project != null) {
     }
 }
 
+const writeFile = (content: string, header: string, footer: string): void => {
+    outputStream.write(header + content + footer, () => {
+        process.exit(argv.force ? 0 : 2);
+    });
+};
+
+let header: string = ``;
+let content: string = ``;
+let footer: string = ``;
 for (const file of files) {
-    glob.sync(file, { ignore: argv.e }).forEach((file) => processFile(file, program));
+    glob.sync(file, { ignore: argv.e }).forEach((file) => {
+        const result: LintResult = processFile(file, program);
+
+        if (result.failureCount > 0) {
+            content += result.output;
+        }
+
+        header = result.header;
+        footer = result.footer;
+    });
 }
+
+writeFile(content, header, footer);

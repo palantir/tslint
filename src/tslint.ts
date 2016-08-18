@@ -135,7 +135,9 @@ class Linter {
         return {
             failureCount: failures.length,
             failures: failures,
+            footer: formatter.getFooter(),
             format: this.options.formatter,
+            header: formatter.getHeader(),
             output: output,
         };
     }

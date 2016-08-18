@@ -2,8 +2,16 @@ import {AbstractFormatter} from "../language/formatter/abstractFormatter";
 import {RuleFailure} from "../language/rule/rule";
 
 export class Formatter extends AbstractFormatter {
+    public getHeader(): string {
+        return `<?xml version="1.0" encoding="utf-8"?><checkstyle version="4.3">`;
+    }
+
+    public getFooter(): string {
+        return `</checkstyle>`;
+    }
+
     public format(failures: RuleFailure[]): string {
-        let output = '<?xml version="1.0" encoding="utf-8"?><checkstyle version="4.3">';
+        let output = ``;
 
         if (failures.length) {
             output += `<file name="${this.escapeXml(failures[0].getFileName())}">`;
@@ -18,7 +26,6 @@ export class Formatter extends AbstractFormatter {
             output += "</file>";
         }
 
-        output += "</checkstyle>";
         return output;
     }
 

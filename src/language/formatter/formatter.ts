@@ -18,5 +18,7 @@
 import {RuleFailure} from "../rule/rule";
 
 export interface IFormatter {
+    getHeader(): string;
+    getFooter(): string;
     format(failures: RuleFailure[]): string;
 }
