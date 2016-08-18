@@ -1,0 +1,159 @@
+---
+ruleName: typedef-whitespace
+description: Requires or disallows whitespace for type definitions.
+descriptionDetails: Determines if a space is required or not before the colon in a type specifier.
+optionsDescription: |-
+
+  Two arguments which are both objects.
+  The first argument specifies how much space should be to the _left_ of a typedef colon.
+  The second argument specifies how much space should be to the _right_ of a typedef colon.
+  Each key should have a value of `"space"` or `"nospace"`.
+  Possible keys are:
+
+  * `"call-signature"` checks return type of functions.
+  * `"index-signature"` checks index type specifier of indexers.
+  * `"parameter"` checks function parameters.
+  * `"property-declaration"` checks object property declarations.
+  * `"variable-declaration"` checks variable declaration.
+options:
+  type: array
+  items:
+    - &ref_1
+      type: object
+      properties:
+        call-signature: &ref_0
+          type: string
+          enum:
+            - nospace
+            - onespace
+            - space
+        index-signature: *ref_0
+        parameter: *ref_0
+        property-declaration: *ref_0
+        variable-declaration: *ref_0
+      additionalProperties: false
+    - *ref_1
+  additionalItems: false
+optionExamples:
+  - |-
+
+    [
+      true,
+      {
+        "call-signature": "nospace",
+        "index-signature": "nospace",
+        "parameter": "nospace",
+        "property-declaration": "nospace",
+        "variable-declaration": "nospace"
+      },
+      {
+        "call-signature": "onespace",
+        "index-signature": "onespace",
+        "parameter": "onespace",
+        "property-declaration": "onespace",
+        "variable-declaration": "onespace"
+      }
+    ]
+type: typescript
+optionsJSON: |-
+  {
+    "type": "array",
+    "items": [
+      {
+        "type": "object",
+        "properties": {
+          "call-signature": {
+            "type": "string",
+            "enum": [
+              "nospace",
+              "onespace",
+              "space"
+            ]
+          },
+          "index-signature": {
+            "type": "string",
+            "enum": [
+              "nospace",
+              "onespace",
+              "space"
+            ]
+          },
+          "parameter": {
+            "type": "string",
+            "enum": [
+              "nospace",
+              "onespace",
+              "space"
+            ]
+          },
+          "property-declaration": {
+            "type": "string",
+            "enum": [
+              "nospace",
+              "onespace",
+              "space"
+            ]
+          },
+          "variable-declaration": {
+            "type": "string",
+            "enum": [
+              "nospace",
+              "onespace",
+              "space"
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "properties": {
+          "call-signature": {
+            "type": "string",
+            "enum": [
+              "nospace",
+              "onespace",
+              "space"
+            ]
+          },
+          "index-signature": {
+            "type": "string",
+            "enum": [
+              "nospace",
+              "onespace",
+              "space"
+            ]
+          },
+          "parameter": {
+            "type": "string",
+            "enum": [
+              "nospace",
+              "onespace",
+              "space"
+            ]
+          },
+          "property-declaration": {
+            "type": "string",
+            "enum": [
+              "nospace",
+              "onespace",
+              "space"
+            ]
+          },
+          "variable-declaration": {
+            "type": "string",
+            "enum": [
+              "nospace",
+              "onespace",
+              "space"
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    ],
+    "additionalItems": false
+  }
+layout: rule
+title: 'Rule: typedef-whitespace'
+---

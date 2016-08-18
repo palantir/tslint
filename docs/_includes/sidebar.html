@@ -1,0 +1,13 @@
+{% assign baseurl = site.baseurl | append: include.sidebar.url %}
+<h4 class="sidebar-title">{{include.sidebar.title}}</h4>
+<ul class="sidebar-links">
+   {% for item in include.sidebar.links %}
+      {% assign url = include.sidebar.url | append: item.url %}
+      {% if url == page.permalink %}
+         {% assign class = "active" %}
+      {% else %}
+         {% assign class = "" %}
+      {% endif %}
+      <li><h6 class="{{class}}"><a href="{{baseurl}}{{item.url}}">{{item.title}}</a></h6></li>
+   {% endfor %}
+</ul>
