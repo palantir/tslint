@@ -18,6 +18,14 @@ import {AbstractFormatter} from "../language/formatter/abstractFormatter";
 import {RuleFailure} from "../language/rule/rule";
 
 export class Formatter extends AbstractFormatter {
+    public getHeader(): string {
+        return ``;
+    }
+
+    public getFooter(): string {
+        return ``;
+    }
+
     public format(failures: RuleFailure[]): string {
         const outputLines = failures.map((failure: RuleFailure) => {
             const fileName = failure.getFileName();

@@ -39,30 +39,38 @@ describe("PMD Formatter", () => {
             new RuleFailure(sourceFile, 0, maxPosition, "full failure", "full-name"),
         ];
         const expectedResult =
-            "<pmd version=\"tslint\">" +
-                "<file name=\"formatters/pmdFormatter.test.ts\">" +
-                    "<violation begincolumn=\"1\" beginline=\"1\" priority=\"1\" rule=\"first failure\"> " +
-                    "</violation>" +
-                "</file>" +
-                "<file name=\"formatters/pmdFormatter.test.ts\">" +
-                    "<violation begincolumn=\"3\" beginline=\"1\" priority=\"1\" rule=\"&amp;&lt;&gt;&#39;&quot; should be escaped\"> " +
-                    "</violation>" +
-                "</file>" +
-                "<file name=\"formatters/pmdFormatter.test.ts\">" +
-                    "<violation begincolumn=\"3\" beginline=\"6\" priority=\"1\" rule=\"last failure\"> " +
-                    "</violation>" +
-                "</file>" +
-                "<file name=\"formatters/pmdFormatter.test.ts\">" +
-                    "<violation begincolumn=\"1\" beginline=\"1\" priority=\"1\" rule=\"full failure\"> " +
-                    "</violation>" +
-                "</file>" +
-            "</pmd>";
+            "<file name=\"formatters/pmdFormatter.test.ts\">" +
+                "<violation begincolumn=\"1\" beginline=\"1\" priority=\"1\" rule=\"first failure\"> " +
+                "</violation>" +
+            "</file>" +
+            "<file name=\"formatters/pmdFormatter.test.ts\">" +
+                "<violation begincolumn=\"3\" beginline=\"1\" priority=\"1\" rule=\"&amp;&lt;&gt;&#39;&quot; should be escaped\"> " +
+                "</violation>" +
+            "</file>" +
+            "<file name=\"formatters/pmdFormatter.test.ts\">" +
+                "<violation begincolumn=\"3\" beginline=\"6\" priority=\"1\" rule=\"last failure\"> " +
+                "</violation>" +
+            "</file>" +
+            "<file name=\"formatters/pmdFormatter.test.ts\">" +
+                "<violation begincolumn=\"1\" beginline=\"1\" priority=\"1\" rule=\"full failure\"> " +
+                "</violation>" +
+            "</file>";
 
         assert.equal(formatter.format(failures), expectedResult);
     });
 
     it("handles no failures", () => {
         const result = formatter.format([]);
-        assert.deepEqual(result, "<pmd version=\"tslint\"></pmd>");
+        assert.deepEqual(result, ``);
+    });
+
+    it("handles the header", () => {
+        const result = formatter.getHeader();
+        assert.deepEqual(result, `<pmd version="tslint">`);
+    });
+
+    it("handles the footer", () => {
+        const result = formatter.getFooter();
+        assert.deepEqual(result, `</pmd>`);
     });
 });

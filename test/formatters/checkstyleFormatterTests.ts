@@ -22,20 +22,28 @@ describe("Checkstyle Formatter", () => {
             new RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name"),
         ];
         const expectedResult =
-            '<?xml version="1.0" encoding="utf-8"?><checkstyle version="4.3">' +
             `<file name="${TEST_FILE}">` +
             '<error line="1" column="1" severity="warning" message="first failure" source="failure.tslint.first-name" />' +
             '<error line="1" column="3" severity="warning" message="&amp;&lt;&gt;&#39;&quot; should be escaped" ' +
             'source="failure.tslint.escape" />' +
             '<error line="6" column="3" severity="warning" message="last failure" source="failure.tslint.last-name" />' +
-            "</file>" +
-            "</checkstyle>";
+            "</file>";
 
         assert.equal(formatter.format(failures), expectedResult);
     });
 
     it("handles no failures", () => {
         const result = formatter.format([]);
-        assert.deepEqual(result, '<?xml version="1.0" encoding="utf-8"?><checkstyle version="4.3"></checkstyle>');
+        assert.deepEqual(result, ``);
+    });
+
+    it("handles the header", () => {
+        const result = formatter.getHeader();
+        assert.deepEqual(result, `<?xml version="1.0" encoding="utf-8"?><checkstyle version="4.3">`);
+    });
+
+    it("handles the footer", () => {
+        const result = formatter.getFooter();
+        assert.deepEqual(result, `</checkstyle>`);
     });
 });

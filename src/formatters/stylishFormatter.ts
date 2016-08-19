@@ -21,6 +21,14 @@ import {RuleFailure} from "../language/rule/rule";
 import * as colors from "colors";
 
 export class Formatter extends AbstractFormatter {
+    public getHeader(): string {
+        return ``;
+    }
+
+    public getFooter(): string {
+        return ``;
+    }
+
     public format(failures: RuleFailure[]): string {
         if (typeof failures[0] === "undefined") {
             return "\n";

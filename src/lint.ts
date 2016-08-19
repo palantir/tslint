@@ -43,6 +43,8 @@ export interface LintResult {
     failureCount: number;
     failures: RuleFailure[];
     format: string | Function;
+    header: string;
+    footer: string;
     output: string;
 }
 

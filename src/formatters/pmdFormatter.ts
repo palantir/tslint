@@ -19,8 +19,16 @@ import {AbstractFormatter} from "../language/formatter/abstractFormatter";
 import {RuleFailure} from "../language/rule/rule";
 
 export class Formatter extends AbstractFormatter {
+    public getHeader(): string {
+        return `<pmd version="tslint">`;
+    }
+
+    public getFooter(): string {
+        return `</pmd>`;
+    }
+
     public format(failures: RuleFailure[]): string {
-        let output = "<pmd version=\"tslint\">";
+        let output = ``;
 
         for (let failure of failures) {
             const failureString = failure.getFailure()
@@ -39,7 +47,6 @@ export class Formatter extends AbstractFormatter {
             output += " rule=\"" + failureString + "\"> </violation></file>";
         }
 
-        output += "</pmd>";
         return output;
     }
 }
