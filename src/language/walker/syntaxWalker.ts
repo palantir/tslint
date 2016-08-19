@@ -30,6 +30,10 @@ export class SyntaxWalker {
         this.walkChildren(node);
     }
 
+    protected visitArrayType(node: ts.ArrayTypeNode) {
+        this.walkChildren(node);
+    }
+
     protected visitArrowFunction(node: ts.FunctionLikeDeclaration) {
         this.walkChildren(node);
     }
@@ -326,6 +330,10 @@ export class SyntaxWalker {
 
             case ts.SyntaxKind.ArrayLiteralExpression:
                 this.visitArrayLiteralExpression(<ts.ArrayLiteralExpression> node);
+                break;
+
+            case ts.SyntaxKind.ArrayType:
+                this.visitArrayType(<ts.ArrayTypeNode> node);
                 break;
 
             case ts.SyntaxKind.ArrowFunction:
