@@ -127,6 +127,7 @@
         "rules/noVarKeywordRule.ts",
         "rules/noVarRequiresRule.ts",
         "rules/objectLiteralKeyQuotesRule.ts",
+        "rules/objectLiteralShorthandRule.ts",
         "rules/objectLiteralSortKeysRule.ts",
         "rules/oneLineRule.ts",
         "rules/oneVariablePerDeclarationRule.ts",

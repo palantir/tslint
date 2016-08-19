@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {arrayify, objectify} from "../src/utils";
+import {arrayify, dedent, objectify} from "../src/utils";
 
 describe("Utils", () => {
     it("arrayify", () => {
@@ -34,5 +34,16 @@ describe("Utils", () => {
         assert.deepEqual(objectify("foo"), {});
         assert.deepEqual(objectify(1), {});
         assert.deepEqual(objectify({foo: 1, mar: {baz: 2}}), {foo: 1, mar: {baz: 2}});
+    });
+
+    it("dedent", () => {
+        assert.equal(dedent`
+        foo
+        bar`, "\nfoo\nbar");
+
+        assert.equal(dedent`   one-line`, "one-line");
+
+        assert.equal(dedent`  `, "  ");
+        assert.equal(dedent``, "");
     });
 });
