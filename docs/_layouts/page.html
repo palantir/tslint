@@ -1,0 +1,31 @@
+---
+layout: default
+---
+<div class="page">
+   <article class="page-content">
+      {% unless page.hideTitle %}
+      <header class="post-header">
+         <h1 class="post-title">{{ page.title }}</h1>
+         <p>{{ page.hideTitle }}</p>
+      </header>
+      {% endunless %}
+
+      {{ content }}
+   </article>
+   <section class="page-sidebar">
+      {% comment %} There has to be a better way than this... {% endcomment %}
+
+      {% capture develop_len %}{{site.data.develop_sidebar.url | size}}{% endcapture %}
+      {% assign maybe_develop_url = page.url | remove: site.baseurl | truncate: develop_len,"" %}
+
+      {% capture usage_len %}{{site.data.usage_sidebar.url | size}}{% endcapture %}
+      {% assign maybe_usage_url = page.url | remove: site.baseurl | truncate: usage_len,"" %}
+
+      {% if maybe_develop_url == site.data.develop_sidebar.url %}
+         {% include sidebar.html sidebar=site.data.develop_sidebar %}
+      {% elsif maybe_usage_url == site.data.usage_sidebar.url %}
+         {% include sidebar.html sidebar=site.data.usage_sidebar %}
+      {% endif %}
+   </section>
+
+</div>

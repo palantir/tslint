@@ -98,6 +98,10 @@ class Linter {
             sourceFile = getSourceFile(this.fileName, this.source);
         }
 
+        if (sourceFile === undefined) {
+            throw new Error(`Invalid source file: ${this.fileName}. Ensure that the files supplied to lint have a .ts or .tsx extension.`);
+        }
+
         // walk the code first to find all the intervals where rules are disabled
         const rulesWalker = new EnableDisableRulesWalker(sourceFile, {
             disabledIntervals: [],

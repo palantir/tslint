@@ -1,6 +1,10 @@
 Change Log
 ===
 
+v3.14.0
+---
+* Stable release containing changes from the last dev releases (v3.14.0-dev.0, v3.14.0-dev.1)
+
 v3.14.0-dev.1
 ---
 * [new-rule] `arrow-parens` rule (#777)

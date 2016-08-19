@@ -22,29 +22,40 @@ import {camelize} from "underscore.string";
 const moduleDirectory = path.dirname(module.filename);
 const CORE_FORMATTERS_DIRECTORY = path.resolve(moduleDirectory, ".", "formatters");
 
-export function findFormatter(name: string, formattersDirectory?: string) {
-    if (typeof name === "function") {
+function isFunction(variable: any): variable is Function {
+    return typeof variable === "function";
+}
+
+function isString(variable: any): variable is string {
+    return typeof variable === "string";
+}
+
+export function findFormatter(name: string | Function, formattersDirectory?: string) {
+    if (isFunction(name)) {
         return name;
-    }
+    } else if (isString(name)) {
+        const camelizedName = camelize(`${name}Formatter`);
 
-    const camelizedName = camelize(`${name}Formatter`);
-
-    // first check for core formatters
-    let Formatter = loadFormatter(CORE_FORMATTERS_DIRECTORY, camelizedName);
-    if (Formatter != null) {
-        return Formatter;
-    }
-
-    // then check for rules within the first level of rulesDirectory
-    if (formattersDirectory) {
-        Formatter = loadFormatter(formattersDirectory, camelizedName);
-        if (Formatter) {
+        // first check for core formatters
+        let Formatter = loadFormatter(CORE_FORMATTERS_DIRECTORY, camelizedName);
+        if (Formatter != null) {
             return Formatter;
         }
-    }
 
-    // else try to resolve as module
-    return loadFormatterModule(name);
+        // then check for rules within the first level of rulesDirectory
+        if (formattersDirectory) {
+            Formatter = loadFormatter(formattersDirectory, camelizedName);
+            if (Formatter) {
+                return Formatter;
+            }
+        }
+
+        // else try to resolve as module
+        return loadFormatterModule(name);
+    } else {
+        // If an something else is passed as a name (e.g. object)
+        throw new Error(`Name of type ${typeof name} is not supported.`);
+    }
 }
 
 function loadFormatter(...paths: string[]) {

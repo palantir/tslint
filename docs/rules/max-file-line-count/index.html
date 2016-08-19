@@ -1,0 +1,22 @@
+---
+ruleName: max-file-line-count
+description: Requires files to remain under a certain number of lines
+rationale: |-
+
+  Limiting the number of lines allowed in a file allows files to remain small, 
+  single purpose, and maintainable.
+optionsDescription: An integer indicating the maximum number of lines.
+options:
+  type: number
+  minimum: '1'
+optionExamples:
+  - '[true, 300]'
+type: maintainability
+optionsJSON: |-
+  {
+    "type": "number",
+    "minimum": "1"
+  }
+layout: rule
+title: 'Rule: max-file-line-count'
+---

@@ -43,6 +43,11 @@ export function dedent(strings: TemplateStringsArray, ...values: string[]) {
 
     // match all leading spaces/tabs at the start of each line
     const match = fullString.match(/^[ \t]*(?=\S)/gm);
+    if (!match) {
+        // e.g. if the string is empty or all whitespace.
+        return fullString;
+    }
+
     // find the smallest indent, we don't want to remove all leading whitespace
     const indent = Math.min(...match.map(el => el.length));
     const regexp = new RegExp("^[ \\t]{" + indent + "}", "gm");
