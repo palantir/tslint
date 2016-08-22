@@ -17,7 +17,6 @@
 
 export const rules = {
     "adjacent-overload-signatures": true,
-    "no-for-in-array": true,
     "no-unsafe-finally": true,
     "object-literal-key-quotes": [true, "as-needed"],
     "object-literal-shorthand": true,
