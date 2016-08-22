@@ -1,6 +1,10 @@
 Change Log
 ===
 
+v3.15.1
+---
+* Enabled additional rules in `tslint:latest` configuration (#1506)
+
 v3.15.0
 ---
 * Stable release containing changes from the last dev release (v3.15.0-dev.0)
