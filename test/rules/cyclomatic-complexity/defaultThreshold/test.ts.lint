@@ -65,4 +65,4 @@ function validThresholdFail() {
     const condition20 = true ? "true" : "false";
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 }
-~ [The cyclomatic complexity of is higher than the threshold for the function: validThresholdFail]
+~ [The cyclomatic complexity is higher than the threshold for the function: validThresholdFail]

@@ -20,11 +20,11 @@ import * as ts from "typescript";
 
 export class Rule extends Lint.Rules.AbstractRule {
 
-    public static ANONYMOUS_FAILURE_STRING = "The cyclomatic complexity of is higher than the threshold";
-    public static NAMED_FAILURE_STRING = "The cyclomatic complexity of is higher than the threshold for the function: ";
+    public static ANONYMOUS_FAILURE_STRING = "The cyclomatic complexity is higher than the threshold";
+    public static NAMED_FAILURE_STRING = "The cyclomatic complexity is higher than the threshold for the function: ";
 
     public static DEFAULT_THRESHOLD = 20;
-    public static MINIMUM_THRESHOLD = 1;
+    public static MINIMUM_THRESHOLD = 5;
 
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
