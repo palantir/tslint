@@ -20,6 +20,21 @@ for (var n1 in foo);
 for (var n2 of foo);
      ~~~             [Forbidden 'var' keyword, use 'let' or 'const' instead]
 
+export var exportVar0 = 0;
+       ~~~                 [Forbidden 'var' keyword, use 'let' or 'const' instead]
+export   var  exportVar1 = 1;
+         ~~~                  [Forbidden 'var' keyword, use 'let' or 'const' instead]
+export   var  exportVar2 = 2,
+         ~~~                  [Forbidden 'var' keyword, use 'let' or 'const' instead]
+         exportVar21 = 21;
+export /* var tst */ var   exportVar3 = 3;
+                     ~~~                   [Forbidden 'var' keyword, use 'let' or 'const' instead]
+
+module quz {
+    export var i;
+           ~~~    [Forbidden 'var' keyword, use 'let' or 'const' instead]
+}
+
 declare var tmp2: any;
 
 let bar;
@@ -27,10 +42,6 @@ const qux;
 
 let k,
     l;
-
-module quz {
-    export var i;
-}
 
 let [x, y] = [1, 2];
 
@@ -40,3 +51,6 @@ for (let name in foo);
 for (let name of foo);
 for (const name in foo);
 for (const name of foo);
+
+export let exportLet = 1;
+export const exportConst = 1;
