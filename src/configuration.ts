@@ -32,6 +32,7 @@ export interface IConfigurationFile {
 }
 
 export const CONFIG_FILENAME = "tslint.json";
+/* tslint:disable:object-literal-key-quotes */
 export const DEFAULT_CONFIG = {
     "rules": {
         "class-name": true,
@@ -66,6 +67,7 @@ export const DEFAULT_CONFIG = {
         ],
     },
 };
+/* tslint:enable:object-literal-key-quotes */
 
 const PACKAGE_DEPRECATION_MSG = "Configuration of TSLint via package.json has been deprecated, "
     + "please start using a tslint.json file instead (http://palantir.github.io/tslint/usage/tslint-json/).";
