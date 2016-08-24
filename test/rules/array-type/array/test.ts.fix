@@ -1,0 +1,29 @@
+let x: number[] = [1] as number[];
+let y: string[] = <string[]>["2"];
+let z: any[] = [3, "4"];
+
+let xx: number[][] = [[1, 2], [3]];
+let yy: number[][] = [[4, 5], [6]];
+
+type Arr<T> = T[];
+
+// Ignore user defined aliases
+let yyyy: Arr<Arr<string>[][]> = [[[["2"]]]];
+
+interface ArrayClass<T> {
+    foo: T[];
+    bar: T[];
+    baz: Arr<T>;
+}
+
+function fooFunction(foo: ArrayClass<string>[]) {
+    return foo.map(e => e.foo);
+}
+
+function barFunction(bar: ArrayClass<String>[]) {
+    return bar.map(e => e.bar);
+}
+
+function bazFunction(baz: Arr<ArrayClass<String>>) {
+    return baz.map(e => e.baz);
+}
