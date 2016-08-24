@@ -36,7 +36,7 @@ import { loadRules } from "./ruleLoader";
 import { arrayify } from "./utils";
 
 class Linter {
-    public static VERSION = "3.14.0";
+    public static VERSION = "3.15.1";
 
     public static findConfiguration = findConfiguration;
     public static findConfigurationPath = findConfigurationPath;
@@ -91,6 +91,10 @@ class Linter {
             sourceFile = getSourceFile(this.fileName, this.source);
         }
 
+        if (sourceFile === undefined) {
+            throw new Error(`Invalid source file: ${this.fileName}. Ensure that the files supplied to lint have a .ts or .tsx extension.`);
+        }
+
         // walk the code first to find all the intervals where rules are disabled
         const rulesWalker = new EnableDisableRulesWalker(sourceFile, {
             disabledIntervals: [],
@@ -130,9 +134,9 @@ class Linter {
         const output = formatter.format(failures);
         return {
             failureCount: failures.length,
-            failures: failures,
+            failures,
             format: this.options.formatter,
-            output: output,
+            output,
         };
     }
 
@@ -150,7 +154,7 @@ class Linter {
         return {
             configuration: configuration || DEFAULT_CONFIG,
             formatter: formatter || "prose",
-            formattersDirectory: formattersDirectory,
+            formattersDirectory,
             rulesDirectory: arrayify(rulesDirectory).concat(arrayify(configuration.rulesDirectory)),
         };
     }

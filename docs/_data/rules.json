@@ -1,0 +1,1315 @@
+[
+  {
+    "ruleName": "adjacent-overload-signatures",
+    "description": "Enforces function overloads to be consecutive.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "typescript"
+  },
+  {
+    "ruleName": "align",
+    "description": "Enforces vertical alignment.",
+    "rationale": "Helps maintain a readable, consistent style in your codebase.",
+    "optionsDescription": "\nThree arguments may be optionally provided:\n\n* `\"parameters\"` checks alignment of function parameters.\n* `\"arguments\"` checks alignment of function call arguments.\n* `\"statements\"` checks alignment of statements.",
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "arguments",
+          "parameters",
+          "statements"
+        ]
+      },
+      "minLength": 1,
+      "maxLength": 3
+    },
+    "optionExamples": [
+      "[true, \"parameters\", \"statements\"]"
+    ],
+    "type": "style"
+  },
+  {
+    "ruleName": "arrow-parens",
+    "description": "Requires parentheses around the parameters of arrow function definitions.",
+    "rationale": "Maintains stylistic consistency with other arrow function definitions.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "style"
+  },
+  {
+    "ruleName": "ban",
+    "description": "Bans the use of specific functions.",
+    "descriptionDetails": "At this time, there is no way to disable global methods with this rule.",
+    "optionsDescription": "A list of `['object', 'method', 'optional explanation here']` which ban `object.method()`.",
+    "options": {
+      "type": "list",
+      "listType": {
+        "type": "array",
+        "arrayMembers": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "string"
+          },
+          {
+            "type": "string"
+          }
+        ]
+      }
+    },
+    "optionExamples": [
+      "[true, [\"someObject\", \"someFunction\"], [\"someObject\", \"otherFunction\", \"Optional explanation\"]]"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "class-name",
+    "description": "Enforces PascalCased class and interface names.",
+    "rationale": "Makes it easy to differentitate classes from regular variables at a glance.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "style"
+  },
+  {
+    "ruleName": "comment-format",
+    "description": "Enforces formatting rules for single-line comments.",
+    "rationale": "Helps maintain a consistent, readable style in your codebase.",
+    "optionsDescription": "\nThree arguments may be optionally provided:\n\n* `\"check-space\"` requires that all single-line comments must begin with a space, as in `// comment`\n    * note that comments starting with `///` are also allowed, for things such as `///<reference>`\n* `\"check-lowercase\"` requires that the first non-whitespace character of a comment must be lowercase, if applicable.\n* `\"check-uppercase\"` requires that the first non-whitespace character of a comment must be uppercase, if applicable.",
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "check-space",
+          "check-lowercase",
+          "check-uppercase"
+        ]
+      },
+      "minLength": 1,
+      "maxLength": 3
+    },
+    "optionExamples": [
+      "[true, \"check-space\", \"check-lowercase\"]"
+    ],
+    "type": "style"
+  },
+  {
+    "ruleName": "curly",
+    "description": "Enforces braces for `if`/`for`/`do`/`while` statements.",
+    "rationale": "\n```ts\nif (foo === bar)\n    foo++;\n    bar++;\n```\n\nIn the code above, the author almost certainly meant for both `foo++` and `bar++`\nto be executed only if `foo === bar`. However, he forgot braces and `bar++` will be executed\nno matter what. This rule could prevent such a mistake.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "eofline",
+    "description": "Ensures the file ends with a newline.",
+    "rationale": "It is a [standard convention](http://stackoverflow.com/q/729692/3124288) to end files with a newline.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "maintainability"
+  },
+  {
+    "ruleName": "file-header",
+    "description": "Enforces a certain header comment for all files, matched by a regular expression.",
+    "optionsDescription": "Regular expression to match the header.",
+    "options": {
+      "type": "string"
+    },
+    "optionExamples": [
+      "\"true\", \"Copyright \\d{4}\""
+    ],
+    "type": "style"
+  },
+  {
+    "ruleName": "forin",
+    "description": "Requires a `for ... in` statement to be filtered with an `if` statement.",
+    "rationale": "\n```ts\nfor (let key in someObject) {\n    if (someObject.hasOwnProperty(key)) {\n        // code here\n    }\n}\n```\nPrevents accidental interation over properties inherited from an object's prototype.\nSee [MDN's `for...in`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...in)\ndocumentation for more information about `for...in` loops.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "indent",
+    "description": "Enforces indentation with tabs or spaces.",
+    "rationale": "\nUsing only one of tabs or spaces for indentation leads to more consistent editor behavior,\ncleaner diffs in version control, and easier programatic manipulation.",
+    "optionsDescription": "\nOne of the following arguments must be provided:\n\n* `\"spaces\"` enforces consistent spaces.\n* `\"tabs\"` enforces consistent tabs.",
+    "options": {
+      "type": "string",
+      "enum": [
+        "tabs",
+        "spaces"
+      ]
+    },
+    "optionExamples": [
+      "[true, \"spaces\"]"
+    ],
+    "type": "maintainability"
+  },
+  {
+    "ruleName": "interface-name",
+    "description": "Requires interface names to begin with a capital 'I'",
+    "rationale": "Makes it easy to differentitate interfaces from regular classes at a glance.",
+    "optionsDescription": "\nOne of the following two options must be provided:\n\n* `\"always-prefix\"` requires interface names to start with an \"I\"\n* `\"never-prefix\"` requires interface names to not have an \"I\" prefix",
+    "options": {
+      "type": "string",
+      "enum": [
+        "always-prefix",
+        "never-prefix"
+      ]
+    },
+    "optionExamples": [
+      "[true, \"always-prefix\"]",
+      "[true, \"never-prefix\"]"
+    ],
+    "type": "style"
+  },
+  {
+    "ruleName": "jsdoc-format",
+    "description": "Enforces basic format rules for JSDoc comments.",
+    "descriptionDetails": "\nThe following rules are enforced for JSDoc comments (comments starting with `/**`):\n\n* each line contains an asterisk and asterisks must be aligned\n* each asterisk must be followed by either a space or a newline (except for the first and the last)\n* the only characters before the asterisk on each line must be whitespace characters\n* one line comments must start with `/** ` and end with `*/`",
+    "rationale": "Helps maintain a consistent, readable style for JSDoc comments.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "style"
+  },
+  {
+    "ruleName": "label-position",
+    "description": "Only allows labels in sensible locations.",
+    "descriptionDetails": "This rule only allows labels to be on `do/for/while/switch` statements.",
+    "rationale": "\nLabels in JavaScript only can be used in conjunction with `break` or `continue`,\nconstructs meant to be used for loop flow control. While you can theoretically use\nlabels on any block statement in JS, it is considered poor code structure to do so.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "label-undefined",
+    "description": "Checks that labels are defined before usage.",
+    "descriptionDetails": "This rule is now implemented in the TypeScript compiler and does not need to be used.",
+    "rationale": "Using `break` or `continue` to go to an out-of-scope label is an error in JS.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "linebreak-style",
+    "description": "Enforces a consistent linebreak style.",
+    "optionsDescription": "\nOne of the following options must be provided:\n\n* `\"LF\"` requires LF (`\\n`) linebreaks\n* `\"CRLF\"` requires CRLF (`\\r\\n`) linebreaks",
+    "options": {
+      "type": "string",
+      "enum": [
+        "LF",
+        "CRLF"
+      ]
+    },
+    "optionExamples": [
+      "[true, \"LF\"]",
+      "[true, \"CRLF\"]"
+    ],
+    "type": "maintainability"
+  },
+  {
+    "ruleName": "max-file-line-count",
+    "description": "Requires files to remain under a certain number of lines",
+    "rationale": "\nLimiting the number of lines allowed in a file allows files to remain small, \nsingle purpose, and maintainable.",
+    "optionsDescription": "An integer indicating the maximum number of lines.",
+    "options": {
+      "type": "number",
+      "minimum": "1"
+    },
+    "optionExamples": [
+      "[true, 300]"
+    ],
+    "type": "maintainability"
+  },
+  {
+    "ruleName": "max-line-length",
+    "description": "Requires lines to be under a certain max length.",
+    "rationale": "\nLimiting the length of a line of code improves code readability.\nIt also makes comparing code side-by-side easier and improves compatibility with\nvarious editors, IDEs, and diff viewers.",
+    "optionsDescription": "An integer indicating the max length of lines.",
+    "options": {
+      "type": "number",
+      "minimum": "1"
+    },
+    "optionExamples": [
+      "[true, 120]"
+    ],
+    "type": "maintainability"
+  },
+  {
+    "ruleName": "member-access",
+    "description": "Requires explicit visibility declarations for class members.",
+    "rationale": "Explicit visibility declarations can make code more readable and accessible for those new to TS.",
+    "optionsDescription": "\nTwo arguments may be optionally provided:\n\n* `\"check-accessor\"` enforces explicit visibility on get/set accessors (can only be public)\n* `\"check-constructor\"`  enforces explicit visibility on constructors (can only be public)",
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "check-accessor",
+          "check-constructor"
+        ]
+      },
+      "minLength": 0,
+      "maxLength": 2
+    },
+    "optionExamples": [
+      "true",
+      "[true, \"check-accessor\"]"
+    ],
+    "type": "typescript"
+  },
+  {
+    "ruleName": "member-ordering",
+    "description": "Enforces member ordering.",
+    "rationale": "A consistent ordering for class members can make classes easier to read, navigate, and edit.",
+    "optionsDescription": "\nOne argument, which is an object, must be provided. It should contain an `order` property.\nThe `order` property should have a value of one of the following strings:\n\n* `fields-first`\n* `statics-first`\n* `instance-sandwich`\n\nAlternatively, the value for `order` maybe be an array consisting of the following strings:\n\n* `public-static-field`\n* `protected-static-field`\n* `private-static-field`\n* `public-instance-field`\n* `protected-instance-field`\n* `private-instance-field`\n* `constructor`\n* `public-static-method`\n* `protected-static-method`\n* `private-static-method`\n* `public-instance-method`\n* `protected-instance-method`\n* `private-instance-method`\n\nThis is useful if one of the preset orders does not meet your needs.",
+    "options": {
+      "type": "object",
+      "properties": {
+        "order": {
+          "oneOf": [
+            {
+              "type": "string",
+              "enum": [
+                "fields-first",
+                "statics-first",
+                "instance-sandwich"
+              ]
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "public-static-field",
+                  "public-static-method",
+                  "protected-static-field",
+                  "protected-static-method",
+                  "private-static-field",
+                  "private-static-method",
+                  "public-instance-field",
+                  "protected-instance-field",
+                  "private-instance-field",
+                  "constructor",
+                  "public-instance-method",
+                  "protected-instance-method",
+                  "private-instance-method"
+                ]
+              },
+              "maxLength": 13
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "optionExamples": [
+      "[true, { \"order\": \"fields-first\" }]"
+    ],
+    "type": "typescript"
+  },
+  {
+    "ruleName": "new-parens",
+    "description": "Requires parentheses when invoking a constructor via the `new` keyword.",
+    "rationale": "Maintains stylistic consistency with other function calls.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "style"
+  },
+  {
+    "ruleName": "no-angle-bracket-type-assertion",
+    "description": "Requires the use of `as Type` for type assertions instead of `<Type>`.",
+    "rationale": "\nBoth formats of type assertions have the same effect, but only `as` type assertions\nwork in `.tsx` files. This rule ensures that you have a consistent type assertion style\nacross your codebase.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "style"
+  },
+  {
+    "ruleName": "no-any",
+    "description": "Diallows usages of `any` as a type declaration.",
+    "rationale": "Using `any` as a type declaration nullifies the compile-time benefits of the type system.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "typescript"
+  },
+  {
+    "ruleName": "no-arg",
+    "description": "Disallows use of `arguments.callee`.",
+    "rationale": "\nUsing `arguments.callee` makes various performance optimizations impossible.\nSee [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/arguments/callee)\nfor more details on why to avoid `arguments.callee`.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-bitwise",
+    "description": "Disallows bitwise operators.",
+    "descriptionDetails": "\nSpecifically, the following bitwise operators are banned:\n`&`, `&=`, `|`, `|=`,\n`^`, `^=`, `<<`, `<<=`,\n`>>`, `>>=`, `>>>`, `>>>=`, and `~`.\nThis rule does not ban the use of `&` and `|` for intersection and union types.",
+    "rationale": "\nBitwise operators are often typos - for example `bool1 & bool2` instead of `bool1 && bool2`.\nThey also can be an indicator of overly clever code which decreases maintainability.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-conditional-assignment",
+    "description": "Disallows any type of assignment in conditionals.",
+    "descriptionDetails": "This applies to `do-while`, `for`, `if`, and `while` statements.",
+    "rationale": "\nAssignments in conditionals are often typos:\nfor example `if (var1 = var2)` instead of `if (var1 == var2)`.\nThey also can be an indicator of overly clever code which decreases maintainability.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-consecutive-blank-lines",
+    "description": "Disallows more than one blank line in a row.",
+    "rationale": "Helps maintain a readable style in your codebase.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "style"
+  },
+  {
+    "ruleName": "no-console",
+    "description": "Bans the use of specified `console` methods.",
+    "rationale": "In general, `console` methods aren't appropriate for production code.",
+    "optionsDescription": "A list of method names to ban.",
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "optionExamples": [
+      "[true, \"log\", \"error\"]"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-constructor-vars",
+    "description": "Disallows parameter properties.",
+    "rationale": "\nParameter properties can be confusing to those new to TS as they are less explicit\nthan other ways of declaring and initializing class members.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "style"
+  },
+  {
+    "ruleName": "no-construct",
+    "description": "Disallows access to the constructors of `String`, `Number`, and `Boolean`.",
+    "descriptionDetails": "Disallows constructor use such as `new Number(foo)` but does not disallow `Number(foo)`.",
+    "rationale": "\nThere is little reason to use `String`, `Number`, or `Boolean` as constructors.\nIn almost all cases, the regular function-call version is more appropriate.\n[More details](http://stackoverflow.com/q/4719320/3124288) are available on StackOverflow.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-debugger",
+    "description": "Disallows `debugger` statements.",
+    "rationale": "In general, `debugger` statements aren't appropriate for production code.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-default-export",
+    "description": "Disallows default exports in ES6-style modules.",
+    "descriptionDetails": "Use named exports instead.",
+    "rationale": "\nNamed imports/exports [promote clarity](https://github.com/palantir/tslint/issues/1182#issue-151780453).\nIn addition, current tooling differs on the correct way to handle default imports/exports.\nAvoiding them all together can help avoid tooling bugs and conflicts.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "maintainability"
+  },
+  {
+    "ruleName": "no-duplicate-key",
+    "description": "Disallows duplicate keys in object literals.",
+    "rationale": "\nThere is no good reason to define an object literal with the same key twice.\nThis rule is now implemented in the TypeScript compiler and does not need to be used.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-duplicate-variable",
+    "description": "Disallows duplicate variable declarations in the same block scope.",
+    "descriptionDetails": "\nThis rule is only useful when using the `var` keyword -\nthe compiler will detect redeclarations of `let` and `const` variables.",
+    "rationale": "\nA variable can be reassigned if necessary -\nthere's no good reason to have a duplicate variable declaration.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-empty",
+    "description": "Disallows empty blocks.",
+    "descriptionDetails": "Blocks with a comment inside are not considered empty.",
+    "rationale": "Empty blocks are often indicators of missing code.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-eval",
+    "description": "Disallows `eval` function invocations.",
+    "rationale": "\n`eval()` is dangerous as it allows arbitrary code execution with full privileges. There are\n[alternatives](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval)\nfor most of the use cases for `eval()`.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-for-in-array",
+    "description": "Disallows iterating over an array with a for-in loop.",
+    "descriptionDetails": "\nA for-in loop (`for (var k in o)`) iterates over the properties of an Object.\n\nWhile it is legal to use for-in loops with array types, it is not common.\nfor-in will iterate over the indices of the array as strings, omitting any \"holes\" in\nthe array.\n\nMore common is to use for-of, which iterates over the values of an array.\nIf you want to iterate over the indices, alternatives include:\n\narray.forEach((value, index) => { ... });\nfor (const [index, value] of array.entries()) { ... }\nfor (let i = 0; i < array.length; i++) { ... }\n",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "requiresTypeInfo": true,
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-inferrable-types",
+    "description": "Disallows explicit type declarations for variables or parameters initialized to a number, string, or boolean.",
+    "rationale": "Explicit types where they can be easily infered by the compiler make code more verbose.",
+    "optionsDescription": "\nOne argument may be optionally provided:\n\n* `ignore-params` allows specifying an inferrable type annotation for function params.\nThis can be useful when combining with the `typedef` rule.",
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "ignore-params"
+        ]
+      },
+      "minLength": 0,
+      "maxLength": 1
+    },
+    "optionExamples": [
+      "true",
+      "[true, \"ignore-params\"]"
+    ],
+    "type": "typescript"
+  },
+  {
+    "ruleName": "no-internal-module",
+    "description": "Disallows internal `module`",
+    "rationale": "Using `module` leads to a confusion of concepts with external modules. Use the newer `namespace` keyword instead.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "typescript"
+  },
+  {
+    "ruleName": "no-invalid-this",
+    "description": "Disallows using the `this` keyword outside of classes.",
+    "rationale": "See [the rule's author's rationale here.](https://github.com/palantir/tslint/pull/1105#issue-147549402)",
+    "optionsDescription": "\nOne argument may be optionally provided:\n\n* `check-function-in-method` disallows using the `this` keyword in functions within class methods.",
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "check-function-in-method"
+        ]
+      },
+      "minLength": 0,
+      "maxLength": 1
+    },
+    "optionExamples": [
+      "true",
+      "[true, \"check-function-in-method\"]"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-mergeable-namespace",
+    "description": "Disallows mergeable namespaces in the same file.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "maintainability"
+  },
+  {
+    "ruleName": "no-namespace",
+    "description": "Disallows use of internal `module`s and `namespace`s.",
+    "descriptionDetails": "This rule still allows the use of `declare module ... {}`",
+    "rationale": "\nES6-style external modules are the standard way to modularize code.\nUsing `module {}` and `namespace {}` are outdated ways to organize TypeScript code.",
+    "optionsDescription": "\nOne argument may be optionally provided:\n\n* `allow-declarations` allows `declare namespace ... {}` to describe external APIs.",
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "allow-declarations"
+        ]
+      },
+      "minLength": 0,
+      "maxLength": 1
+    },
+    "optionExamples": [
+      "true",
+      "[true, \"allow-declarations\"]"
+    ],
+    "type": "typescript"
+  },
+  {
+    "ruleName": "no-null-keyword",
+    "description": "Disallows use of the `null` keyword literal.",
+    "rationale": "\nInstead of having the dual concepts of `null` and`undefined` in a codebase,\nthis rule ensures that only `undefined` is used.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-reference",
+    "description": "Disallows `/// <reference path=>` imports (use ES6-style imports instead).",
+    "rationale": "\nUsing `/// <reference path=>` comments to load other files is outdated.\nUse ES6-style imports to reference other files.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "typescript"
+  },
+  {
+    "ruleName": "no-require-imports",
+    "description": "Disallows invocation of `require()`.",
+    "rationale": "Prefer the newer ES6-style imports over `require()`.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "maintainability"
+  },
+  {
+    "ruleName": "no-shadowed-variable",
+    "description": "Disallows shadowing variable declarations.",
+    "rationale": "Shadowing a variable masks access to it and obscures to what value an identifier actually refers.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-string-literal",
+    "description": "Disallows object access via string literals.",
+    "rationale": "Encourages using strongly-typed property access.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-switch-case-fall-through",
+    "description": "Disallows falling through case statements.",
+    "descriptionDetails": "\nFor example, the following is not allowed:\n\n```ts\nswitch(foo) {\n    case 1:\n        someFunc(foo);\n    case 2:\n        someOtherFunc(foo);\n}\n```\n\nHowever, fall through is allowed when case statements are consecutive or\na magic `/* falls through */` comment is present. The following is valid:\n\n```ts\nswitch(foo) {\n    case 1:\n        someFunc(foo);\n        /* falls through */\n    case 2:\n    case 3:\n        someOtherFunc(foo);\n}\n```",
+    "rationale": "Fall though in switch statements is often unintentional and a bug.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-trailing-whitespace",
+    "description": "Disallows trailing whitespace at the end of a line.",
+    "rationale": "Keeps version control diffs clean as it prevents accidental whitespace from being committed.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "maintainability"
+  },
+  {
+    "ruleName": "no-unreachable",
+    "description": "Disallows unreachable code after `break`, `catch`, `throw`, and `return` statements.",
+    "rationale": "Unreachable code is often indication of a logic error.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-unsafe-finally",
+    "description": "\nDisallows control flow statements, such as `return`, `continue`,\n`break` and `throws` in finally blocks.",
+    "descriptionDetails": "",
+    "rationale": "\nWhen used inside `finally` blocks, control flow statements,\nsuch as `return`, `continue`, `break` and `throws`\noverride any other control flow statements in the same try/catch scope.\nThis is confusing and unexpected behavior.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-unused-expression",
+    "description": "Disallows unused expression statements.",
+    "descriptionDetails": "\nUnused expressions are expression statements which are not assignments or function calls\n(and thus usually no-ops).",
+    "rationale": "\nDetects potential errors where an assignment or function call was intended.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-unused-new",
+    "description": "Disallows unused 'new' expression statements.",
+    "descriptionDetails": "\nUnused 'new' expressions indicate that a constructor is being invoked solely for its side effects.",
+    "rationale": "\nDetects constructs such as `new SomeClass()`, where a constructor is used solely for its side effects, which is considered\npoor style.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-unused-variable",
+    "description": "Disallows unused imports, variables, functions and private class members.",
+    "optionsDescription": "\nThree optional arguments may be optionally provided:\n\n* `\"check-parameters\"` disallows unused function and constructor parameters.\n    * NOTE: this option is experimental and does not work with classes\n    that use abstract method declarations, among other things.\n* `\"react\"` relaxes the rule for a namespace import named `React`\n(from either the module `\"react\"` or `\"react/addons\"`).\nAny JSX expression in the file will be treated as a usage of `React`\n(because it expands to `React.createElement `).\n* `{\"ignore-pattern\": \"pattern\"}` where pattern is a case-sensitive regexp.\nVariable names that match the pattern will be ignored.",
+    "options": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "string",
+            "enum": [
+              "check-parameters",
+              "react"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "ignore-pattern": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        ]
+      },
+      "minLength": 0,
+      "maxLength": 3
+    },
+    "optionExamples": [
+      "[true, \"react\"]",
+      "[true, {\"ignore-pattern\": \"^_\"}]"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-use-before-declare",
+    "description": "Disallows usage of variables before their declaration.",
+    "descriptionDetails": "\nThis rule is primarily useful when using the `var` keyword -\nthe compiler will detect if a `let` and `const` variable is used before it is declared.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-var-keyword",
+    "description": "Disallows usage of the `var` keyword.",
+    "descriptionDetails": "Use `let` or `const` instead.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "no-var-requires",
+    "description": "Disallows the use of require statements except in import statements.",
+    "descriptionDetails": "\nIn other words, the use of forms such as `var module = require(\"module\")` are banned.\nInstead use ES6 style imports or `import foo = require('foo')` imports.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "typescript"
+  },
+  {
+    "ruleName": "object-literal-key-quotes",
+    "description": "Enforces consistent object literal property quote style.",
+    "descriptionDetails": "\nObject literal property names can be defined in two ways: using literals or using strings.\nFor example, these two objects are equivalent:\n\nvar object1 = {\n    property: true\n};\n\nvar object2 = {\n    \"property\": true\n};\n\nIn many cases, it doesn’t matter if you choose to use an identifier instead of a string\nor vice-versa. Even so, you might decide to enforce a consistent style in your code.\n\nThis rules lets you enforce consistent quoting of property names. Either they should always\nbe quoted (default behavior) or quoted only as needed (\"as-needed\").",
+    "optionsDescription": "\nPossible settings are:\n\n* `\"always\"`: Property names should always be quoted. (This is the default.)\n* `\"as-needed\"`: Only property names which require quotes may be quoted (e.g. those with spaces in them).\n\nFor ES6, computed property names (`{[name]: value}`) and methods (`{foo() {}}`) never need\nto be quoted.",
+    "options": {
+      "type": "string",
+      "enum": [
+        "always",
+        "as-needed"
+      ]
+    },
+    "optionExamples": [
+      "[true, \"as-needed\"]",
+      "[true, \"always\"]"
+    ],
+    "type": "style"
+  },
+  {
+    "ruleName": "object-literal-shorthand",
+    "description": "Enforces use of ES6 object literal shorthand when possible.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "style"
+  },
+  {
+    "ruleName": "object-literal-sort-keys",
+    "description": "Requires keys in object literals to be sorted alphabetically",
+    "rationale": "Useful in preventing merge conflicts",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "maintainability"
+  },
+  {
+    "ruleName": "one-line",
+    "description": "Requires the specified tokens to be on the same line as the expression preceding them.",
+    "optionsDescription": "\nFive arguments may be optionally provided:\n\n* `\"check-catch\"` checks that `catch` is on the same line as the closing brace for `try`.\n* `\"check-finally\"` checks that `finally` is on the same line as the closing brace for `catch`.\n* `\"check-else\"` checks that `else` is on the same line as the closing brace for `if`.\n* `\"check-open-brace\"` checks that an open brace falls on the same line as its preceding expression.\n* `\"check-whitespace\"` checks preceding whitespace for the specified tokens.",
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "check-catch",
+          "check-finally",
+          "check-else",
+          "check-open-brace",
+          "check-whitespace"
+        ]
+      },
+      "minLength": 0,
+      "maxLength": 5
+    },
+    "optionExamples": [
+      "[true, \"check-catch\", \"check-finally\", \"check-else\"]"
+    ],
+    "type": "style"
+  },
+  {
+    "ruleName": "one-variable-per-declaration",
+    "description": "Disallows multiple variable definitions in the same declaration statement.",
+    "optionsDescription": "\nOne argument may be optionally provided:\n\n* `ignore-for-loop` allows multiple variable definitions in a for loop declaration.",
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "ignore-for-loop"
+        ]
+      },
+      "minLength": 0,
+      "maxLength": 1
+    },
+    "optionExamples": [
+      "true",
+      "[true, \"ignore-for-loop\"]"
+    ],
+    "type": "style"
+  },
+  {
+    "ruleName": "only-arrow-functions",
+    "description": "Disallows traditional (non-arrow) function expressions.",
+    "rationale": "Traditional functions don't bind lexical scope, which can lead to unexpected behavior when accessing 'this'.",
+    "optionsDescription": "\nOne argument may be optionally provided:\n\n* `\"allow-declarations\"` allows standalone function declarations.\n        ",
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "allow-declarations"
+        ]
+      },
+      "minLength": 0,
+      "maxLength": 1
+    },
+    "optionExamples": [
+      "true",
+      "[true, \"allow-declarations\"]"
+    ],
+    "type": "typescript"
+  },
+  {
+    "ruleName": "ordered-imports",
+    "description": "Requires that import statements be alphabetized.",
+    "descriptionDetails": "\nEnforce a consistent ordering for ES6 imports:\n- Named imports must be alphabetized (i.e. \"import {A, B, C} from \"foo\";\")\n    - The exact ordering can be controled by the named-imports-order option.\n    - \"longName as name\" imports are ordered by \"longName\".\n- Import sources must be alphabetized within groups, i.e.:\n        import * as foo from \"a\";\n        import * as bar from \"b\";\n- Groups of imports are delineated by blank lines. You can use these to group imports\n    however you like, e.g. by first- vs. third-party or thematically.",
+    "optionsDescription": "\nYou may set the `\"import-sources-order\"` option to control the ordering of source\nimports (the `\"foo\"` in `import {A, B, C} from \"foo\"`).\n\nPossible values for `\"import-sources-order\"` are:\n* `\"case-insensitive'`: Correct order is `\"Bar\"`, `\"baz\"`, `\"Foo\"`. (This is the default.)\n* `\"lowercase-first\"`: Correct order is `\"baz\"`, `\"Bar\"`, `\"Foo\"`.\n* `\"lowercase-last\"`: Correct order is `\"Bar\"`, `\"Foo\"`, `\"baz\"`.\n\nYou may set the `\"named-imports-order\"` option to control the ordering of named\nimports (the `{A, B, C}` in `import {A, B, C} from \"foo\"`).\n\nPossible values for `\"named-imports-order\"` are:\n\n* `\"case-insensitive'`: Correct order is `{A, b, C}`. (This is the default.)\n* `\"lowercase-first\"`: Correct order is `{b, A, C}`.\n* `\"lowercase-last\"`: Correct order is `{A, C, b}`.\n\n        ",
+    "options": {
+      "type": "object",
+      "properties": {
+        "import-sources-order": {
+          "type": "string",
+          "enum": [
+            "case-insensitive",
+            "lowercase-first",
+            "lowercase-last"
+          ]
+        },
+        "named-imports-order": {
+          "type": "string",
+          "enum": [
+            "case-insensitive",
+            "lowercase-first",
+            "lowercase-last"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "optionExamples": [
+      "true",
+      "[true, {\"import-sources-order\": \"lowercase-last\", \"named-imports-order\": \"lowercase-first\"}]"
+    ],
+    "type": "style"
+  },
+  {
+    "ruleName": "quotemark",
+    "description": "Requires single or double quotes for string literals.",
+    "optionsDescription": "\nFive arguments may be optionally provided:\n\n* `\"single\"` enforces single quotes.\n* `\"double\"` enforces double quotes.\n* `\"jsx-single\"` enforces single quotes for JSX attributes.\n* `\"jsx-double\"` enforces double quotes for JSX attributes.\n* `\"avoid-escape\"` allows you to use the \"other\" quotemark in cases where escaping would normally be required.\nFor example, `[true, \"double\", \"avoid-escape\"]` would not report a failure on the string literal `'Hello \"World\"'`.",
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "single",
+          "double",
+          "jsx-single",
+          "jsx-double",
+          "avoid-escape"
+        ]
+      },
+      "minLength": 0,
+      "maxLength": 5
+    },
+    "optionExamples": [
+      "[true, \"single\", \"avoid-escape\"]",
+      "[true, \"single\", \"jsx-double\"]"
+    ],
+    "type": "style"
+  },
+  {
+    "ruleName": "radix",
+    "description": "Requires the radix parameter to be specified when calling `parseInt`.",
+    "rationale": "\nFrom [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/parseInt): \n> Always specify this parameter to eliminate reader confusion and to guarantee predictable behavior.\n> Different implementations produce different results when a radix is not specified, usually defaulting the value to 10.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "restrict-plus-operands",
+    "description": "When adding two variables, operands must both be of type number or of type string.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality",
+    "requiresTypeInfo": true
+  },
+  {
+    "ruleName": "semicolon",
+    "description": "Enforces consistent semicolon usage at the end of every statement.",
+    "optionsDescription": "\nOne of the following arguments must be provided:\n\n* `\"always\"` enforces semicolons at the end of every statement.\n* `\"never\"` disallows semicolons at the end of every statement except for when they are necessary.\n\nThe following arguments may be optionaly provided:\n* `\"ignore-interfaces\"` skips checking semicolons at the end of interface members.",
+    "options": {
+      "type": "array",
+      "items": [
+        {
+          "type": "string",
+          "enum": [
+            "always",
+            "never"
+          ]
+        },
+        {
+          "type": "string",
+          "enum": [
+            "ignore-interfaces"
+          ]
+        }
+      ],
+      "additionalItems": false
+    },
+    "optionExamples": [
+      "[true, \"always\"]",
+      "[true, \"never\"]",
+      "[true, \"always\", \"ignore-interfaces\"]"
+    ],
+    "type": "style"
+  },
+  {
+    "ruleName": "switch-default",
+    "description": "Require a `default` case in all `switch` statements.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "trailing-comma",
+    "description": "Requires or disallows trailing commas in array and object literals, destructuring assignments and named imports.",
+    "optionsDescription": "\nOne argument which is an object with the keys `multiline` and `singleline`.\nBoth should be set to either `\"always\"` or `\"never\"`.\n\n* `\"multiline\"` checks multi-line object literals.\n* `\"singleline\"` checks single-line object literals.\n\nA array is considered \"multiline\" if its closing bracket is on a line\nafter the last array element. The same general logic is followed for\nobject literals and named import statements.",
+    "options": {
+      "type": "object",
+      "properties": {
+        "multiline": {
+          "type": "string",
+          "enum": [
+            "always",
+            "never"
+          ]
+        },
+        "singleline": {
+          "type": "string",
+          "enum": [
+            "always",
+            "never"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "optionExamples": [
+      "[true, {\"multiline\": \"always\", \"singleline\": \"never\"}]"
+    ],
+    "type": "maintainability"
+  },
+  {
+    "ruleName": "triple-equals",
+    "description": "Requires `===` and `!==` in place of `==` and `!=`.",
+    "optionsDescription": "\nTwo arguments may be optionally provided:\n\n* `\"allow-null-check\"` allows `==` and `!=` when comparing to `null`.\n* `\"allow-undefined-check\"` allows `==` and `!=` when comparing to `undefined`.",
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "allow-null-check",
+          "allow-undefined-check"
+        ]
+      },
+      "minLength": 0,
+      "maxLength": 2
+    },
+    "optionExamples": [
+      "true",
+      "[true, \"allow-null-check\"]",
+      "[true, \"allow-undefined-check\"]"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "typedef",
+    "description": "Requires type definitions to exist.",
+    "optionsDescription": "\nSeven arguments may be optionally provided:\n\n* `\"call-signature\"` checks return type of functions.\n* `\"arrow-call-signature\"` checks return type of arrow functions.\n* `\"parameter\"` checks type specifier of function parameters for non-arrow functions.\n* `\"arrow-parameter\"` checks type specifier of function parameters for arrow functions.\n* `\"property-declaration\"` checks return types of interface properties.\n* `\"variable-declaration\"` checks variable declarations.\n* `\"member-variable-declaration\"` checks member variable declarations.",
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "call-signature",
+          "arrow-call-signature",
+          "parameter",
+          "arrow-parameter",
+          "property-declaration",
+          "variable-declaration",
+          "member-variable-declaration"
+        ]
+      },
+      "minLength": 0,
+      "maxLength": 7
+    },
+    "optionExamples": [
+      "[true, \"call-signature\", \"parameter\", \"member-variable-declaration\"]"
+    ],
+    "type": "typescript"
+  },
+  {
+    "ruleName": "typedef-whitespace",
+    "description": "Requires or disallows whitespace for type definitions.",
+    "descriptionDetails": "Determines if a space is required or not before the colon in a type specifier.",
+    "optionsDescription": "\nTwo arguments which are both objects.\nThe first argument specifies how much space should be to the _left_ of a typedef colon.\nThe second argument specifies how much space should be to the _right_ of a typedef colon.\nEach key should have a value of `\"space\"` or `\"nospace\"`.\nPossible keys are:\n\n* `\"call-signature\"` checks return type of functions.\n* `\"index-signature\"` checks index type specifier of indexers.\n* `\"parameter\"` checks function parameters.\n* `\"property-declaration\"` checks object property declarations.\n* `\"variable-declaration\"` checks variable declaration.",
+    "options": {
+      "type": "array",
+      "items": [
+        {
+          "type": "object",
+          "properties": {
+            "call-signature": {
+              "type": "string",
+              "enum": [
+                "nospace",
+                "onespace",
+                "space"
+              ]
+            },
+            "index-signature": {
+              "type": "string",
+              "enum": [
+                "nospace",
+                "onespace",
+                "space"
+              ]
+            },
+            "parameter": {
+              "type": "string",
+              "enum": [
+                "nospace",
+                "onespace",
+                "space"
+              ]
+            },
+            "property-declaration": {
+              "type": "string",
+              "enum": [
+                "nospace",
+                "onespace",
+                "space"
+              ]
+            },
+            "variable-declaration": {
+              "type": "string",
+              "enum": [
+                "nospace",
+                "onespace",
+                "space"
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "call-signature": {
+              "type": "string",
+              "enum": [
+                "nospace",
+                "onespace",
+                "space"
+              ]
+            },
+            "index-signature": {
+              "type": "string",
+              "enum": [
+                "nospace",
+                "onespace",
+                "space"
+              ]
+            },
+            "parameter": {
+              "type": "string",
+              "enum": [
+                "nospace",
+                "onespace",
+                "space"
+              ]
+            },
+            "property-declaration": {
+              "type": "string",
+              "enum": [
+                "nospace",
+                "onespace",
+                "space"
+              ]
+            },
+            "variable-declaration": {
+              "type": "string",
+              "enum": [
+                "nospace",
+                "onespace",
+                "space"
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      ],
+      "additionalItems": false
+    },
+    "optionExamples": [
+      "\n[\n  true,\n  {\n    \"call-signature\": \"nospace\",\n    \"index-signature\": \"nospace\",\n    \"parameter\": \"nospace\",\n    \"property-declaration\": \"nospace\",\n    \"variable-declaration\": \"nospace\"\n  },\n  {\n    \"call-signature\": \"onespace\",\n    \"index-signature\": \"onespace\",\n    \"parameter\": \"onespace\",\n    \"property-declaration\": \"onespace\",\n    \"variable-declaration\": \"onespace\"\n  }\n]"
+    ],
+    "type": "typescript"
+  },
+  {
+    "ruleName": "use-isnan",
+    "description": "Enforces use of the `isNaN()` function to check for NaN references instead of a comparison to the `NaN` constant.",
+    "rationale": "\nSince `NaN !== NaN`, comparisons with regular operators will produce unexpected results.\nSo, instead of `if (myVar === NaN)`, do `if (isNaN(myVar))`.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "use-strict",
+    "description": "Requires using ECMAScript 5's strict mode.",
+    "optionsDescription": "\nTwo arguments may be optionally provided:\n\n* `check-module` checks that all top-level modules are using strict mode.\n* `check-function` checks that all top-level functions are using strict mode.",
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "check-module",
+          "check-function"
+        ]
+      },
+      "minLength": 0,
+      "maxLength": 2
+    },
+    "optionExamples": [
+      "[true, \"check-module\"]"
+    ],
+    "type": "functionality"
+  },
+  {
+    "ruleName": "variable-name",
+    "description": "Checks variable names for various errors.",
+    "optionsDescription": "\nFive arguments may be optionally provided:\n\n* `\"check-format\"`: allows only camelCased or UPPER_CASED variable names\n  * `\"allow-leading-underscore\"` allows underscores at the beginning (only has an effect if \"check-format\" specified)\n  * `\"allow-trailing-underscore\"` allows underscores at the end. (only has an effect if \"check-format\" specified)\n  * `\"allow-pascal-case\"` allows PascalCase in addtion to camelCase.\n* `\"ban-keywords\"`: disallows the use of certain TypeScript keywords (`any`, `Number`, `number`, `String`,\n`string`, `Boolean`, `boolean`, `undefined`) as variable or parameter names.",
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "check-format",
+          "allow-leading-underscore",
+          "allow-trailing-underscore",
+          "allow-pascal-case",
+          "ban-keywords"
+        ]
+      },
+      "minLength": 0,
+      "maxLength": 5
+    },
+    "optionExamples": [
+      "[true, \"ban-keywords\", \"check-format\", \"allow-leading-underscore\"]"
+    ],
+    "type": "style"
+  },
+  {
+    "ruleName": "whitespace",
+    "description": "Enforces whitespace style conventions.",
+    "rationale": "Helps maintain a readable, consistent style in your codebase.",
+    "optionsDescription": "\nSeven arguments may be optionally provided:\n\n* `\"check-branch\"` checks branching statements (`if`/`else`/`for`/`while`) are followed by whitespace.\n* `\"check-decl\"`checks that variable declarations have whitespace around the equals token.\n* `\"check-operator\"` checks for whitespace around operator tokens.\n* `\"check-module\"` checks for whitespace in import & export statements.\n* `\"check-separator\"` checks for whitespace after separator tokens (`,`/`;`).\n* `\"check-type\"` checks for whitespace before a variable type specification.\n* `\"check-typecast\"` checks for whitespace between a typecast and its target.",
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "check-branch",
+          "check-decl",
+          "check-operator",
+          "check-module",
+          "check-separator",
+          "check-type",
+          "check-typecast"
+        ]
+      },
+      "minLength": 0,
+      "maxLength": 7
+    },
+    "optionExamples": [
+      "[true, \"check-branch\", \"check-operator\", \"check-typecast\"]"
+    ],
+    "type": "style"
+  }
+]

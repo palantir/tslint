@@ -36,21 +36,21 @@ describe("Configuration", () => {
         });
         assert.deepEqual(extendConfigurationFile({
             rules: {
-                "a": 1,
-                "b": 2,
+                a: 1,
+                b: 2,
             },
             rulesDirectory: ["foo", "bar"],
         }, {
             rules: {
-                "b": 1,
-                "c": 3,
+                b: 1,
+                c: 3,
             },
             rulesDirectory: "baz",
         }), {
             rules: {
-                "a": 1,
-                "b": 2,
-                "c": 3,
+                a: 1,
+                b: 2,
+                c: 3,
             },
             rulesDirectory: ["foo", "bar", "baz"],
         });

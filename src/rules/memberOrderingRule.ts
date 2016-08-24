@@ -144,7 +144,7 @@ interface IModifiers {
 function getModifiers(isMethod: boolean, modifiers?: ts.ModifiersArray): IModifiers {
     return {
         isInstance: !Lint.hasModifier(modifiers, ts.SyntaxKind.StaticKeyword),
-        isMethod: isMethod,
+        isMethod,
         isPrivate: Lint.hasModifier(modifiers, ts.SyntaxKind.PrivateKeyword),
     };
 }

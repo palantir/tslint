@@ -48,7 +48,7 @@ class NoConsecutiveBlankLinesWalker extends Lint.SkippableTokenAwareRuleWalker {
 
         // find all the lines that are blank or only contain whitespace
         let blankLineIndexes: number[] = [];
-        soureFileLines.forEach(function(txt, i){
+        soureFileLines.forEach((txt, i) => {
             if (txt.trim() === "") {
                 blankLineIndexes.push(i);
             }

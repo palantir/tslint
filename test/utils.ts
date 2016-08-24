@@ -55,7 +55,7 @@ export function createFailure(fileName: string, start: number[], end: number[], 
 
 // return a partial on createFailure
 export function createFailuresOnFile(fileName: string, failure: string) {
-    return function(start: number[], end: number[]) {
+    return (start: number[], end: number[]) => {
         return createFailure(fileName, start, end, failure);
     };
 }

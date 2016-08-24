@@ -89,7 +89,7 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
                     if (isCurrentLine) {
                         // start at the beginning of the current line
                         this.enableDisableRuleMap[ruleToAdd].push({
-                            isEnabled: isEnabled,
+                            isEnabled,
                             position: this.getStartOfLinePosition(node, startingPosition),
                         });
                         // end at the beginning of the next line
@@ -100,7 +100,7 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
                     } else {
                         // start at the current position
                         this.enableDisableRuleMap[ruleToAdd].push({
-                            isEnabled: isEnabled,
+                            isEnabled,
                             position: startingPosition,
                         });
                         // end at the beginning of the line following the next line
