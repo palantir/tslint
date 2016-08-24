@@ -24,7 +24,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static NAMED_FAILURE_STRING = "The cyclomatic complexity is higher than the threshold for the function: ";
 
     public static DEFAULT_THRESHOLD = 20;
-    public static MINIMUM_THRESHOLD = 5;
+    public static MINIMUM_THRESHOLD = 2;
 
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -110,6 +110,12 @@ class CyclomaticComplexityWalker extends Lint.RuleWalker {
     protected visitConditionalExpression(node: ts.ConditionalExpression) {
         this.incrementComplexity();
         super.visitConditionalExpression(node);
+    }
+
+    public visitConstructorDeclaration(node: ts.ConstructorDeclaration) {
+        this.startFunction();
+        super.visitConstructorDeclaration(node);
+        this.endFunction(node);
     }
 
     protected visitDoStatement(node: ts.DoStatement) {
