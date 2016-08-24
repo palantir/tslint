@@ -127,3 +127,7 @@ export default LoginPage
 export = Date;
              ~ [Unnecessary semicolon]
 export = Date
+
+type t = number;
+               ~ [Unnecessary semicolon]
+type t = number
