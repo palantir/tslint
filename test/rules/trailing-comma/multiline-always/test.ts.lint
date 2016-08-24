@@ -293,6 +293,48 @@ var x = foo(
     43,
 );
 
+var x = new Test("foo");
+
+var x = new Test("foo",);
+
+var x = new Test(
+    "foo"
+        ~ [Missing trailing comma]
+);
+
+var x = new Test(
+    "foo",
+);
+
+var x: { foo: string; bar: string };
+
+var x: { foo: string; bar: string; };
+
+var x: {
+    foo: string;
+    bar: string
+};
+
+var x: {
+    foo: string;
+    bar: string;
+};
+
+var x: { foo: string, bar: string };
+
+var x: { foo: string, bar: string, };
+
+var x: {
+    foo: string,
+    bar: string
+              ~ [Missing trailing comma]
+};
+
+var x: {
+    foo: string,
+    bar: string,
+};
+
 class Test<A, B, C> {
 
     constructor(bar: string) { }
@@ -509,4 +551,34 @@ interface ITest4<
     B,
     C,
 > { }
+
+enum Foo { BAR, BAZ }
+
+enum Foo { BAR, BAZ, }
+
+enum Foo {
+    Bar,
+    Baz
+      ~ [Missing trailing comma]
+}
+
+enum Foo {
+    Bar,
+    Baz,
+}
+
+const enum Foo { BAR = 1, BAZ = 2 }
+
+const enum Foo { BAR = 1, BAZ = 2, }
+
+const enum Foo {
+    Bar = 1,
+    Baz = 2
+          ~ [Missing trailing comma]
+}
+
+const enum Foo {
+    Bar = 1,
+    Baz = 2,
+}
 
