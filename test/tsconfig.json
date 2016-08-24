@@ -67,6 +67,7 @@
         "../src/rules.ts",
         "../src/rules/adjacentOverloadSignaturesRule.ts",
         "../src/rules/alignRule.ts",
+        "../src/rules/arrayTypeRule.ts",
         "../src/rules/arrowParensRule.ts",
         "../src/rules/banRule.ts",
         "../src/rules/classNameRule.ts",
