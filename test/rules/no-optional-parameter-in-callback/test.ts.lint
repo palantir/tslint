@@ -88,6 +88,21 @@ class c2 {
     }
 }
 
+interface Callback {
+    (a: string, b?: number): Callback;
+                ~~~~~~~~~~  [error]
+}
+
+function callbackable(cb: Callback) {
+    cb("");
+}
+
+type CB = (things?: any) => void;
+           ~~~~~~~~~~~~  [error]
+function do(a: CB, b: CB) {
+  // ...
+}
+
 declare function foo1(ob: {x: number}, y: {k: {p: (z?: string) => void}}): void;
                                                    ~~~~~~~~~~  [error]
 

@@ -37,11 +37,11 @@ export class Rule extends Lint.Rules.TypedRule {
     `No optional parameters in callback positions - consider writing \`T | undefined\` or something similar instead`;
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoOptionalParameterInCallbackRule(sourceFile, this.getOptions(), program));
+        return this.applyWithWalker(new NoOptionalParameterInCallbackWalker(sourceFile, this.getOptions(), program));
     }
 }
 
-class NoOptionalParameterInCallbackRule extends Lint.ProgramAwareRuleWalker {
+class NoOptionalParameterInCallbackWalker extends Lint.ProgramAwareRuleWalker {
 
     private checker = this.getTypeChecker();
 
@@ -114,9 +114,8 @@ class NoOptionalParameterInCallbackRule extends Lint.ProgramAwareRuleWalker {
     }
 
     private validateSignature(node: ts.SignatureDeclaration) {
-        const that = this;
         const signatureParametersType: ts.Type[] = node.parameters.filter(p => !!p.type)
-            .map(function (parameter: ts.ParameterDeclaration) { return that.checker.getTypeAtLocation(parameter); });
+            .map((parameter: ts.ParameterDeclaration) => { return this.checker.getTypeAtLocation(parameter); });
         for (const type of signatureParametersType) {
             if (this.isFunctionType(type)) {
                 this.validateFunctionType(type);
