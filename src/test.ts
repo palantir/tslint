@@ -66,7 +66,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
                 getCurrentDirectory: () => "",
                 getDefaultLibFileName: () => ts.getDefaultLibFileName(compilerOptions),
                 getNewLine: () => "\n",
-                getSourceFile: function (filenameToGet: string) {
+                getSourceFile(filenameToGet: string) {
                     if (filenameToGet === this.getDefaultLibFileName()) {
                         const fileText = fs.readFileSync(ts.getDefaultLibFilePath(compilerOptions)).toString();
                         return ts.createSourceFile(filenameToGet, fileText, compilerOptions.target);

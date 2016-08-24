@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+/* tslint:disable:object-literal-key-quotes */
 export const rules = {
     "align": [true,
         "parameters",
@@ -126,3 +127,4 @@ export const rules = {
         "check-typecast",
     ],
 };
+/* tslint:enable:object-literal-key-quotes */
