@@ -61,7 +61,7 @@ class NoOptionalParameterInCallbackWalker extends Lint.ProgramAwareRuleWalker {
             for (const declaration of prop.declarations) {
                 const propType = this.checker.getTypeAtLocation(declaration);
                 if (this.isFunctionType(propType)) {
-                    this.validateFunctionType(propType);
+                    this.validateFunctionType(propType, declaration);
                 }
             }
         }
@@ -99,14 +99,14 @@ class NoOptionalParameterInCallbackWalker extends Lint.ProgramAwareRuleWalker {
     }
     /* tslint:enable:no-bitwise */
 
-    private validateFunctionType(node: ts.Type) {
+    private validateFunctionType(node: ts.Type, parameter: ts.Declaration) {
         const signatures = this.checker.getSignaturesOfType(node, ts.SignatureKind.Call);
         for (const signature of signatures) {
             for (const param of signature.parameters) {
                 const declarations = param.getDeclarations() as ts.ParameterDeclaration[];
                 for (const declaration of declarations) {
                     if (this.checker.isOptionalParameter(declaration)) {
-                        this.addFailure(this.createFailure(declaration.getStart(), declaration.getWidth(), Rule.FAILURE_STRING));
+                        this.addFailure(this.createFailure(parameter.getStart(), parameter.getWidth(), Rule.FAILURE_STRING));
                     }
                 }
             }
@@ -114,12 +114,13 @@ class NoOptionalParameterInCallbackWalker extends Lint.ProgramAwareRuleWalker {
     }
 
     private validateSignature(node: ts.SignatureDeclaration) {
-        const signatureParametersType: ts.Type[] = node.parameters.filter(p => !!p.type)
-            .map((parameter: ts.ParameterDeclaration) => { return this.checker.getTypeAtLocation(parameter); });
-        for (const type of signatureParametersType) {
-            if (this.isFunctionType(type)) {
-                this.validateFunctionType(type);
+        const signatureParametersType = node.parameters.filter(p => !!p.type)
+            .map((parameter: ts.ParameterDeclaration) => { return {parameter,
+                type: this.checker.getTypeAtLocation(parameter)}; });
+        signatureParametersType.forEach((val) => {
+            if (this.isFunctionType(val.type)) {
+                this.validateFunctionType(val.type, val.parameter);
             }
-        }
+        });
     }
 }

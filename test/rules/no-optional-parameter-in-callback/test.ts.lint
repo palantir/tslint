@@ -40,18 +40,18 @@ module MyModule {
 
 // bad
 declare function bar(a: (b: number, k?: string));
-                                    ~~~~~~~~~~  [error]
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~  [error]
 
 function f3() {
     function f4(x?: number, y?: (k?: string) => void): number {
-                                 ~~~~~~~~~~  [error]
+                            ~~~~~~~~~~~~~~~~~~~~~~~~  [error]
         return 1;
     }
 }
 
 var v1 = {
     foo(x: (y?: number) => void): void {
-            ~~~~~~~~~~  [error]
+        ~~~~~~~~~~~~~~~~~~~~~~~  [error]
         var bar = 1;
     },
     baz(): void {
@@ -70,7 +70,7 @@ module MyModule {
     export class ClassB {
         id: string;
         ab(x?: number, y?: (a?: void) => void): number {
-                            ~~~~~~~~  [error]
+                       ~~~~~~~~~~~~~~~~~~~~~~  [error]
 		    return 1;
         }
     }
@@ -78,33 +78,39 @@ module MyModule {
 
 class c1 {
     foo(x: number, y: (z?: string) => void): void {
-                       ~~~~~~~~~~  [error]
+                   ~~~~~~~~~~~~~~~~~~~~~~~  [error]
     }
 }
 
 class c2 {
     foo(ob: {x: number, y: (z?: string) => void}): void {
-                            ~~~~~~~~~~  [error]
+                        ~~~~~~~~~~~~~~~~~~~~~~~  [error]
     }
 }
 
 interface Callback {
     (a: string, b?: number): Callback;
-                ~~~~~~~~~~  [error]
 }
 
 function callbackable(cb: Callback) {
+                      ~~~~~~~~~~~~  [error]
     cb("");
 }
 
-type CB = (things?: any) => void;
-           ~~~~~~~~~~~~  [error]
-function do(a: CB, b: CB) {
-  // ...
+declare function foo1(ob: {x: number}, y: {k: {p: (z?: string) => void}}): void;
+                                               ~~~~~~~~~~~~~~~~~~~~~~~  [error]
+
+interface Multicall {
+  (a: string, b: number, c: number, d?: Multicall): Multicall;
+  (a: string, b: number, c?: Multicall): Multicall;
+  (a: string): Multicall;
+  (): void;
 }
 
-declare function foo1(ob: {x: number}, y: {k: {p: (z?: string) => void}}): void;
-                                                   ~~~~~~~~~~  [error]
+function multicaller(x: Multicall) {
+                     ~~~~~~~~~~~~  [error]
+  x();
+}
 
 
 [error]: No optional parameters in callback positions - consider writing `T | undefined` or something similar instead
