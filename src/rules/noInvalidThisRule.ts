@@ -65,7 +65,7 @@ class NoInvalidThisWalker extends Lint.ScopeAwareRuleWalker<Scope> {
         let inFunction = node.kind === ts.SyntaxKind.FunctionDeclaration || node.kind === ts.SyntaxKind.FunctionExpression;
         return {
             inClass: isClassScope,
-            inFunction: inFunction,
+            inFunction,
         };
     }
 

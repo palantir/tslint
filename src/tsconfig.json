@@ -71,6 +71,7 @@
         "language/walker/syntaxWalker.ts",
         "rules/adjacentOverloadSignaturesRule.ts",
         "rules/alignRule.ts",
+        "rules/arrayTypeRule.ts",
         "rules/arrowParensRule.ts",
         "rules/banRule.ts",
         "rules/classNameRule.ts",

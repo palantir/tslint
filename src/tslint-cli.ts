@@ -42,53 +42,53 @@ let processed = optimist
         }
     })
     .options({
-        "c": {
+        c: {
             alias: "config",
             describe: "configuration file",
         },
-        "force": {
-            describe: "return status code 0 even if there are lint errors",
-            "type": "boolean",
-        },
-        "h": {
-            alias: "help",
-            describe: "display detailed help",
-        },
-        "i": {
-            alias: "init",
-            describe: "generate a tslint.json config file in the current working directory",
-        },
-        "o": {
-            alias: "out",
-            describe: "output file",
-        },
-        "r": {
-            alias: "rules-dir",
-            describe: "rules directory",
-        },
-        "s": {
-            alias: "formatters-dir",
-            describe: "formatters directory",
-        },
-        "e": {
+        e: {
             alias: "exclude",
             describe: "exclude globs from path expansion",
         },
-        "t": {
+        force: {
+            describe: "return status code 0 even if there are lint errors",
+            type: "boolean",
+        },
+        h: {
+            alias: "help",
+            describe: "display detailed help",
+        },
+        i: {
+            alias: "init",
+            describe: "generate a tslint.json config file in the current working directory",
+        },
+        o: {
+            alias: "out",
+            describe: "output file",
+        },
+        project: {
+            describe: "tsconfig.json file",
+        },
+        r: {
+            alias: "rules-dir",
+            describe: "rules directory",
+        },
+        s: {
+            alias: "formatters-dir",
+            describe: "formatters directory",
+        },
+        t: {
             alias: "format",
             default: "prose",
             describe: "output format (prose, json, stylish, verbose, pmd, msbuild, checkstyle, vso)",
         },
-        "test": {
+        test: {
             describe: "test that tslint produces the correct output for the specified directory",
-        },
-        "project": {
-            describe: "tsconfig.json file",
         },
         "type-check": {
             describe: "enable type checking when linting a project",
         },
-        "v": {
+        v: {
             alias: "version",
             describe: "current version",
         },

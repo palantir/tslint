@@ -30,6 +30,14 @@ debugger;
 import v = require("i");
 module M {
     export var x;
+    export function f(s: string): string;
+    export function f(n: number): number;
+    export function f(x: any) { return x; }
+}
+
+declare module "M" {
+    function f(): number;
+    function g(): number;
 }
 
 function useStrictMissingSemicolon() {
@@ -60,4 +68,5 @@ export default LoginPage;
 export default LoginPage;
 export = Date;
 export = Date;
-
+type t = number;
+type t = number;

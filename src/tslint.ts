@@ -143,9 +143,9 @@ class Linter {
         const output = formatter.format(failures);
         return {
             failureCount: failures.length,
-            failures: failures,
+            failures,
             format: this.options.formatter,
-            output: output,
+            output,
         };
     }
 
@@ -163,7 +163,7 @@ class Linter {
         return {
             configuration: configuration || DEFAULT_CONFIG,
             formatter: formatter || "prose",
-            formattersDirectory: formattersDirectory,
+            formattersDirectory,
             rulesDirectory: arrayify(rulesDirectory).concat(arrayify(configuration.rulesDirectory)),
         };
     }
