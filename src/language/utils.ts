@@ -47,6 +47,7 @@ export function getSourceFile(fileName: string, source: string): ts.SourceFile {
 
 export function createCompilerOptions(): ts.CompilerOptions {
     return {
+        allowJs: true,
         noResolve: true,
         target: ts.ScriptTarget.ES5,
     };

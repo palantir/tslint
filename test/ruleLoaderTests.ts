@@ -70,4 +70,24 @@ describe("Rule Loader", () => {
         const rules = loadRules(validConfiguration, {}, [RULES_DIRECTORY]);
         assert.equal(rules.length, 5);
     });
+
+    it("loads js rules", () => {
+        const validConfiguration: {[name: string]: any} = {
+            "class-name": true,
+        };
+
+        const rules = loadRules(validConfiguration, {}, RULES_DIRECTORY, true);
+        assert.equal(rules.length, 1);
+    });
+
+    it("throws if an invalid rule is adopted", () => {
+        const invalidConfiguration: {[name: string]: any} = {
+            "arrow-parens": true,
+        };
+
+        assert.throws(
+            () => loadRules(invalidConfiguration, {}, RULES_DIRECTORY, true),
+            /arrow-parens/
+        );
+    });
 });

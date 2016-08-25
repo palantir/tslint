@@ -22,6 +22,7 @@ import {RuleWalker} from "../walker/ruleWalker";
 import {IDisabledInterval, IRule, IRuleMetadata, RuleFailure} from "./rule";
 
 export abstract class AbstractRule implements IRule {
+    public static isAllowedInJs = false;
     public static metadata: IRuleMetadata;
     private options: IOptions;
 

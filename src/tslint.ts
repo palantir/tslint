@@ -31,7 +31,7 @@ import { IFormatter } from "./language/formatter/formatter";
 import { RuleFailure } from "./language/rule/rule";
 import { TypedRule } from "./language/rule/typedRule";
 import { getSourceFile } from "./language/utils";
-import { ILinterOptions, ILinterOptionsRaw, LintResult } from "./lint";
+import { ILinterOptions, ILinterOptionsRaw, IRule, LintResult } from "./lint";
 import { loadRules } from "./ruleLoader";
 import { arrayify } from "./utils";
 
@@ -105,7 +105,16 @@ class Linter {
 
         const rulesDirectories = this.options.rulesDirectory;
         const configuration = this.options.configuration.rules;
-        const configuredRules = loadRules(configuration, enableDisableRuleMap, rulesDirectories);
+        const jsConfiguration = this.options.configuration.jsRules;
+        const isJs = this.fileName.substr(-3) === ".js";
+        let configuredRules: IRule[];
+
+        if (jsConfiguration && isJs) {
+            configuredRules = loadRules(jsConfiguration, enableDisableRuleMap, rulesDirectories, true);
+        } else {
+            configuredRules = loadRules(configuration, enableDisableRuleMap, rulesDirectories, false);
+        }
+
         const enabledRules = configuredRules.filter((r) => r.isEnabled());
         for (let rule of enabledRules) {
             let ruleFailures: RuleFailure[] = [];
