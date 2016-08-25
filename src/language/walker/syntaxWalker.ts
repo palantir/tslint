@@ -182,10 +182,6 @@ export class SyntaxWalker {
         this.walkChildren(node);
     }
 
-    protected visitJsxSpreadAttribute(node: ts.JsxSpreadAttribute) {
-        this.walkChildren(node);
-    }
-
     protected visitJsxElement(node: ts.JsxElement) {
         this.walkChildren(node);
     }
@@ -195,6 +191,10 @@ export class SyntaxWalker {
     }
 
     protected visitJsxSelfClosingElement(node: ts.JsxSelfClosingElement) {
+        this.walkChildren(node);
+    }
+
+    protected visitJsxSpreadAttribute(node: ts.JsxSpreadAttribute) {
         this.walkChildren(node);
     }
 
@@ -488,10 +488,6 @@ export class SyntaxWalker {
                 this.visitJsxAttribute(<ts.JsxAttribute> node);
                 break;
 
-            case ts.SyntaxKind.JsxSpreadAttribute:
-                this.visitJsxSpreadAttribute(<ts.JsxSpreadAttribute> node);
-                break;
-
             case ts.SyntaxKind.JsxElement:
                 this.visitJsxElement(<ts.JsxElement> node);
                 break;
@@ -502,6 +498,10 @@ export class SyntaxWalker {
 
             case ts.SyntaxKind.JsxSelfClosingElement:
                 this.visitJsxSelfClosingElement(<ts.JsxSelfClosingElement> node);
+                break;
+
+            case ts.SyntaxKind.JsxSpreadAttribute:
+                this.visitJsxSpreadAttribute(<ts.JsxSpreadAttribute> node);
                 break;
 
             case ts.SyntaxKind.LabeledStatement:
