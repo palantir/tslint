@@ -30,10 +30,6 @@ export class SyntaxWalker {
         this.walkChildren(node);
     }
 
-    protected visitArrayType(node: ts.ArrayTypeNode) {
-        this.walkChildren(node);
-    }
-
     protected visitArrowFunction(node: ts.FunctionLikeDeclaration) {
         this.walkChildren(node);
     }
@@ -179,6 +175,10 @@ export class SyntaxWalker {
     }
 
     protected visitJsxAttribute(node: ts.JsxAttribute) {
+        this.walkChildren(node);
+    }
+
+    protected visitJsxSpreadAttribute(node: ts.JsxSpreadAttribute) {
         this.walkChildren(node);
     }
 
@@ -336,10 +336,6 @@ export class SyntaxWalker {
                 this.visitArrayLiteralExpression(<ts.ArrayLiteralExpression> node);
                 break;
 
-            case ts.SyntaxKind.ArrayType:
-                this.visitArrayType(<ts.ArrayTypeNode> node);
-                break;
-
             case ts.SyntaxKind.ArrowFunction:
                 this.visitArrowFunction(<ts.FunctionLikeDeclaration> node);
                 break;
@@ -482,6 +478,10 @@ export class SyntaxWalker {
 
             case ts.SyntaxKind.JsxAttribute:
                 this.visitJsxAttribute(<ts.JsxAttribute> node);
+                break;
+
+            case ts.SyntaxKind.JsxSpreadAttribute:
+                this.visitJsxSpreadAttribute(<ts.JsxSpreadAttribute> node);
                 break;
 
             case ts.SyntaxKind.JsxElement:
