@@ -14,7 +14,7 @@ v3.15.0-dev.0
 * [enhancement] Rules can automatically fix errors (#1423)
 * [enhancement] Better error messages for invalid source files (#1480)
 * [new-rule] `adjacent-overload-signatures` rule (#1426)
-* [new-rule] `file-header` rule (#1411)
+* [new-rule] `file-header` rule (#1441)
 * [new-rule] `object-literal-shorthand` rule (#1488)
 * [new-rule-option] `allow-declarations` option for `only-arrow-functions` rule (#1452)
 * [new-rule-option] `import-sources-order` option for `ordered-imports` rule (#1466)
