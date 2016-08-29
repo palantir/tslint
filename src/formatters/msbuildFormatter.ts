@@ -17,7 +17,20 @@
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
 import {RuleFailure} from "../language/rule/rule";
 
+import * as Lint from "../lint";
+
 export class Formatter extends AbstractFormatter {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IFormatterMetadata = {
+        formatterName: "msbuild",
+        description: "Formats errors for consumption by msbuild.",
+        descriptionDetails: Lint.Utils.dedent`The output is compatible with both msbuild and Visual
+            Studio. All failures have the 'warning' severity.`,
+        sample: "TODO",
+        consumer: "machine"
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public format(failures: RuleFailure[]): string {
         const outputLines = failures.map((failure: RuleFailure) => {
             const fileName = failure.getFileName();

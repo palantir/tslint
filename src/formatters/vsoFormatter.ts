@@ -17,7 +17,20 @@
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
 import {RuleFailure} from "../language/rule/rule";
 
+import * as Lint from "../lint";
+
 export class Formatter extends AbstractFormatter {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IFormatterMetadata = {
+        formatterName: "vso",
+        description: "Formats output as VSO/TFS logging commands.",
+        descriptionDetails: Lint.Utils.dedent`Integrates with Visual Studio Online and Team
+            Foundation Server by outputting errors as 'warning' logging commands.`,
+        sample: "TODO",
+        consumer: "machine"
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public format(failures: RuleFailure[]): string {
         const outputLines = failures.map((failure: RuleFailure) => {
             const fileName = failure.getFileName();

@@ -1,7 +1,20 @@
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
 import {RuleFailure} from "../language/rule/rule";
 
+import * as Lint from "../lint";
+
 export class Formatter extends AbstractFormatter {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IFormatterMetadata = {
+        formatterName: "checkstyle",
+        description: "Formats errors as through they were Checkstyle output.",
+        descriptionDetails: Lint.Utils.dedent`Imitates the XMLLogger from Checkstyle 4.3. All
+            failures have the 'warning' severity.`,
+        sample: "TODO",
+        consumer: "machine"
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public format(failures: RuleFailure[]): string {
         let output = '<?xml version="1.0" encoding="utf-8"?><checkstyle version="4.3">';
 

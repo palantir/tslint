@@ -18,7 +18,18 @@
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
 import {RuleFailure} from "../language/rule/rule";
 
+import * as Lint from "../lint";
+
 export class Formatter extends AbstractFormatter {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IFormatterMetadata = {
+        formatterName: "prose",
+        description: "The default formatter which outputs simple human-readable messages.",
+        sample: "TODO",
+        consumer: "human"
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public format(failures: RuleFailure[]): string {
         const outputLines = failures.map((failure: RuleFailure) => {
             const fileName = failure.getFileName();

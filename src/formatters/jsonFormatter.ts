@@ -18,7 +18,18 @@
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
 import {RuleFailure} from "../language/rule/rule";
 
+import * as Lint from "../lint";
+
 export class Formatter extends AbstractFormatter {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IFormatterMetadata = {
+        formatterName: "json",
+        description: "Formats errors as simple JSON.",
+        sample: "TODO",
+        consumer: "machine"
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public format(failures: RuleFailure[]): string {
         const failuresJSON = failures.map((failure) => failure.toJson());
         return JSON.stringify(failuresJSON);

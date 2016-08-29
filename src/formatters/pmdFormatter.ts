@@ -18,7 +18,19 @@
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
 import {RuleFailure} from "../language/rule/rule";
 
+import * as Lint from "../lint";
+
 export class Formatter extends AbstractFormatter {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IFormatterMetadata = {
+        formatterName: "pmd",
+        description: "Formats errors as through they were PMD output.",
+        descriptionDetails: "Imitates the XML output from PMD. All errors have a priority of 1.",
+        sample: "TODO",
+        consumer: "machine"
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public format(failures: RuleFailure[]): string {
         let output = "<pmd version=\"tslint\">";
 
