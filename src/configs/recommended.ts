@@ -91,8 +91,8 @@ export const rules = {
     "switch-default": true,
     "trailing-comma": [true,
         {
-            "singleline": "never",
             "multiline": "always",
+            "singleline": "never",
         },
     ],
     "triple-equals": [true, "allow-null-check"],
