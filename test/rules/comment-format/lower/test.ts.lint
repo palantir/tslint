@@ -19,7 +19,7 @@ class Clazz { // this comment is correct
 `${location.protocol}//${location.hostname}`
 
 //noinspection JSUnusedGlobalSymbols
-const unusedVar;
+const unusedVar = 'unneeded value';
 
 [lower]: comment must start with lowercase letter
 [space]: comment must start with a space
