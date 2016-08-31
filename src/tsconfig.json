@@ -80,7 +80,6 @@
         "rules/eoflineRule.ts",
         "rules/fileHeaderRule.ts",
         "rules/forinRule.ts",
-        "rules/globalBanRule.ts",
         "rules/indentRule.ts",
         "rules/interfaceNameRule.ts",
         "rules/jsdocFormatRule.ts",
