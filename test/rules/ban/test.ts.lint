@@ -23,3 +23,4 @@ xit("some text", () => {});
 ~~~          [Calls to 'xit' are not allowed.]
 fit("some text", () => {});
 ~~~          [Calls to 'fit' are not allowed.]
+someObject.fit()

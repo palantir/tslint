@@ -24,8 +24,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "ban",
         description: "Bans the use of specific functions or global methods.",
-        descriptionDetails: "At this time, there is no way to disable global methods with this rule.",
-        optionsDescription: "A list of `['object', 'method', 'optional explanation here']` which ban `object.method()`.",
+        optionsDescription: Lint.Utils.dedent`
+            A list of \`['object', 'method', 'optional explanation here']\` or \`['globalMethod']\` which ban \`object.method()\` 
+            or respectively \`globalMethod()\`.`,
         options: {
             type: "list",
             listType: {
@@ -35,7 +36,8 @@ export class Rule extends Lint.Rules.AbstractRule {
                 maxLength: 3,
             },
         },
-        optionExamples: [`[true, ["someGlobalMethod"], ["someObject", "someFunction"], ["someObject", "otherFunction", "Optional explanation"]]`],
+        optionExamples: [`[true, ["someGlobalMethod"], ["someObject", "someFunction"], 
+                          ["someObject", "otherFunction", "Optional explanation"]]`],
         type: "functionality",
     };
     /* tslint:enable:object-literal-sort-keys */
