@@ -97,6 +97,46 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-ts");
     grunt.loadNpmTasks("grunt-npm-command");
 
+    grunt.registerTask('validate-documentation', 'A task that validates that all rules defined in src are documented in README.md', function () {
+
+        function camelize(input) {
+            let result = '';
+            for (let i = 0, length = input.length; i < length; i++) {
+                let element = input[i];
+                if (element.toLowerCase() === element) {
+                    result = result + element;
+                } else {
+                    result = result + '-' + element.toLowerCase();
+                }
+            }
+            return result;
+        }
+
+        function convertToRuleName(filename) {
+            filename = filename
+                .replace(/Rule\..*/, '')  // file extension plus Rule name
+                .replace(/.*\//, '');     // leading path
+            return camelize(filename);
+        }
+
+        function getAllRuleNames() {
+            const ruleNames = [];
+            grunt.file.expand('src/rules/*Rule.ts').forEach(function(filename) {
+                ruleNames.push(convertToRuleName(filename));
+            });
+            ruleNames.sort();
+            return ruleNames;
+        }
+
+        const readmeText = grunt.file.read('README.md', { encoding: 'UTF-8' });
+
+        getAllRuleNames().forEach(function(ruleName) {
+            if (readmeText.indexOf("* `" + ruleName + "`") === -1) {
+                grunt.fail.warn('A rule was found that is not documented in README.md: ' + ruleName);
+            }
+        });
+    });
+
     // register custom tasks
     grunt.registerTask("core", [
         "clean:core",
@@ -115,6 +155,7 @@ module.exports = function (grunt) {
         "tslint:test",
         "mochaTest",
         "run:testRules",
+        "validate-documentation",
     ].concat(checkBinTest));
     // generates new docs metadata files
     grunt.registerTask("docs", [
