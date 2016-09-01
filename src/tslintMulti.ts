@@ -82,7 +82,7 @@ class MultiLinter {
         // Empty
     }
 
-    public lint(fileName: string, source: string, configuration: any = DEFAULT_CONFIG): void {
+    public lint(fileName: string, source?: string, configuration: any = DEFAULT_CONFIG): void {
         let sourceFile: ts.SourceFile;
         if (this.program) {
             sourceFile = this.program.getSourceFile(fileName);
