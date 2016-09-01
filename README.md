@@ -360,8 +360,8 @@ import * as Lint from "tslint/lib/lint";
 
 export class Formatter extends Lint.Formatters.AbstractFormatter {
     public format(failures: Lint.RuleFailure[]): string {
-        var failuresJSON = failures.map((failure: Lint.RuleFailure) => failure.toJson());
-        return JSON.stringify(failuresJSON);
+        const failuresJSON = failures.map((failure) => failure.toJson());
+        return JSON.stringify(failuresJSON) + "\n";
     }
 }
 ```

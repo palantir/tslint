@@ -21,6 +21,6 @@ import {RuleFailure} from "../language/rule/rule";
 export class Formatter extends AbstractFormatter {
     public format(failures: RuleFailure[]): string {
         const failuresJSON = failures.map((failure) => failure.toJson());
-        return JSON.stringify(failuresJSON);
+        return JSON.stringify(failuresJSON) + "\n";
     }
 }
