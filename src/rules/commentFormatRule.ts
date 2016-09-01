@@ -129,12 +129,18 @@ function startsWithSpace(commentText: string) {
         return true; // comment is "//"? Technically not a violation.
     }
 
+    const commentBody = commentText.substring(2);
+
     // whitelist //#region and //#endregion
-    if ((/^#(end)?region/).test(commentText.substring(2))) {
+    if ((/^#(end)?region/).test(commentBody)) {
+        return true;
+    }
+    // whitelist JetBrains IDEs' "//noinspection ..."
+    if ((/^noinspection\s/).test(commentBody)) {
         return true;
     }
 
-    const firstCharacter = commentText.charAt(2); // first character after the space
+    const firstCharacter = commentBody.charAt(0);
     // three slashes (///) also works, to allow for ///<reference>
     return firstCharacter === " " || firstCharacter === "/";
 }
