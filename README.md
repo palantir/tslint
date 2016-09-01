@@ -27,7 +27,6 @@ Table of Contents
 - [Development](#development)
 - [Creating a new release](#creating-a-new-release)
 
-
 Installation
 ------------
 <sup>[back to ToC &uarr;](#table-of-contents)</sup>
