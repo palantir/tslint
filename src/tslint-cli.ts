@@ -251,11 +251,11 @@ const processFile = (file: string, program?: ts.Program) => {
 
     const lintResult = linter.lint();
 
-    if (lintResult.failureCount > 0) {
-        outputStream.write(lintResult.output, () => {
+    outputStream.write(lintResult.output, () => {
+        if (lintResult.failureCount > 0) {
             process.exit(argv.force ? 0 : 2);
-        });
-    }
+        }
+    });
 };
 
 // if both files and tsconfig are present, use files
