@@ -46,7 +46,7 @@
     "typescript": "latest"
   },
   "peerDependencies": {
-    "typescript": ">=1.7.3"
+    "typescript": ">=1.7.3 || >=1.9.0-dev"
   },
   "license": "Apache-2.0",
   "typescript": {
