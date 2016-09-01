@@ -37,10 +37,11 @@ class ArrayTypeWalker extends Lint.RuleWalker {
     public visitArrayType(node: ts.ArrayTypeNode) {
         if (this.hasOption(OPTION_GENERIC)) {
             const typeName = node.elementType;
+            const parens = typeName.kind === ts.SyntaxKind.ParenthesizedType ? 1 : 0;
             const fix = new Lint.Fix(Rule.metadata.ruleName, [
-                this.appendText(typeName.getStart(), "Array<"),
+                this.createReplacement(typeName.getStart(), parens, "Array<"),
                 // Delete the square brackets and replace with an angle bracket
-                this.createReplacement(typeName.getEnd(), node.getEnd() - typeName.getEnd(), ">"),
+                this.createReplacement(typeName.getEnd() - parens, node.getEnd() - typeName.getEnd() + parens, ">"),
             ]);
             this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING_GENERIC, fix));
         }
@@ -59,13 +60,16 @@ class ArrayTypeWalker extends Lint.RuleWalker {
                     this.createReplacement(node.getStart(), node.getWidth(), "any[]"),
                 ]);
             } else if (typeArgs && typeArgs.length === 1) {
-                const typeStart = typeArgs[0].getStart();
-                const typeEnd = typeArgs[0].getEnd();
+                const type = typeArgs[0];
+                const typeStart = type.getStart();
+                const typeEnd = type.getEnd();
+                const parens = type.kind === ts.SyntaxKind.UnionType ||
+                    type.kind === ts.SyntaxKind.FunctionType || type.kind === ts.SyntaxKind.IntersectionType;
                 fix = new Lint.Fix(Rule.metadata.ruleName, [
                     // Delete Array and the first angle bracket
-                    this.deleteText(node.getStart(), typeStart - node.getStart()),
+                    this.createReplacement(node.getStart(), typeStart - node.getStart(), parens ? "(" : ""),
                     // Delete the last angle bracket and replace with square brackets
-                    this.createReplacement(typeEnd, node.getEnd() - typeEnd, "[]"),
+                    this.createReplacement(typeEnd, node.getEnd() - typeEnd, (parens ? ")" : "") + "[]"),
                 ]);
             }
             this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING_ARRAY, fix));
