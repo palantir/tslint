@@ -38,6 +38,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionExamples: ["true"],
         type: "functionality",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -46,7 +47,6 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FOR_FAILURE_STRING = "for statements must be braced";
     public static IF_FAILURE_STRING = "if statements must be braced";
     public static WHILE_FAILURE_STRING = "while statements must be braced";
-    public static isAllowedInJs = true;
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new CurlyWalker(sourceFile, this.getOptions()));

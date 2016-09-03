@@ -45,7 +45,7 @@ export function loadRules(ruleConfiguration: {[name: string]: any},
             if (Rule == null) {
                 notFoundRules.push(ruleName);
             } else {
-                if (!Rule.isAllowedInJs && isJs) {
+                if (isJs && Rule.metadata.typescriptOnly != null && Rule.metadata.typescriptOnly) {
                     notAllowedInJsRules.push(ruleName);
                 } else {
                     const all = "all"; // make the linter happy until we can turn it on and off
@@ -69,7 +69,7 @@ export function loadRules(ruleConfiguration: {[name: string]: any},
         throw new Error(ERROR_MESSAGE);
     } else if (notAllowedInJsRules.length > 0) {
         const JS_ERROR_MESSAGE = `
-           Could not adpot to JavaScript files for the following rules specified in the configuration:
+           Could not apply to JavaScript files for the following rules specified in the configuration:
            ${notAllowedInJsRules.join("\n")}
         `;
 
