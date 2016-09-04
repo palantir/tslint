@@ -16,20 +16,22 @@
  */
 
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
+import {IFormatterMetadata} from "../language/formatter/formatter";
 import {RuleFailure} from "../language/rule/rule";
 
-import * as Lint from "../lint";
 import * as colors from "colors";
+
+import * as Utils from "../utils";
 
 export class Formatter extends AbstractFormatter {
     /* tslint:disable:object-literal-sort-keys */
-    public static metadata: Lint.IFormatterMetadata = {
-        formatterName: "prose",
+    public static metadata: IFormatterMetadata = {
+        formatterName: "stylish",
         description: "Human-readable formatter which creates stylish messages.",
-        descriptionDetails: Lint.Utils.dedent`The output matches that produced by eslint's stylish
+        descriptionDetails: Utils.dedent`The output matches that produced by eslint's stylish
             formatter. Its readability enhanced through spacing and colouring`,
         sample: "TODO",
-        consumer: "human"
+        consumer: "human",
     };
     /* tslint:enable:object-literal-sort-keys */
 

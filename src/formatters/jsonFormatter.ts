@@ -16,17 +16,16 @@
  */
 
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
+import {IFormatterMetadata} from "../language/formatter/formatter";
 import {RuleFailure} from "../language/rule/rule";
-
-import * as Lint from "../lint";
 
 export class Formatter extends AbstractFormatter {
     /* tslint:disable:object-literal-sort-keys */
-    public static metadata: Lint.IFormatterMetadata = {
+    public static metadata: IFormatterMetadata = {
         formatterName: "json",
         description: "Formats errors as simple JSON.",
         sample: "TODO",
-        consumer: "machine"
+        consumer: "machine",
     };
     /* tslint:enable:object-literal-sort-keys */
 

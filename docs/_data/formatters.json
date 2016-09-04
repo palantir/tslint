@@ -1,0 +1,56 @@
+[
+  {
+    "formatterName": "checkstyle",
+    "description": "Formats errors as through they were Checkstyle output.",
+    "descriptionDetails": "Imitates the XMLLogger from Checkstyle 4.3. All\n            failures have the 'warning' severity.",
+    "sample": "TODO",
+    "consumer": "machine"
+  },
+  {
+    "formatterName": "json",
+    "description": "Formats errors as simple JSON.",
+    "sample": "TODO",
+    "consumer": "machine"
+  },
+  {
+    "formatterName": "msbuild",
+    "description": "Formats errors for consumption by msbuild.",
+    "descriptionDetails": "The output is compatible with both msbuild and Visual\n            Studio. All failures have the 'warning' severity.",
+    "sample": "TODO",
+    "consumer": "machine"
+  },
+  {
+    "formatterName": "pmd",
+    "description": "Formats errors as through they were PMD output.",
+    "descriptionDetails": "Imitates the XML output from PMD. All errors have a priority of 1.",
+    "sample": "TODO",
+    "consumer": "machine"
+  },
+  {
+    "formatterName": "prose",
+    "description": "The default formatter which outputs simple human-readable messages.",
+    "sample": "TODO",
+    "consumer": "human"
+  },
+  {
+    "formatterName": "stylish",
+    "description": "Human-readable formatter which creates stylish messages.",
+    "descriptionDetails": "The output matches that produced by eslint's stylish\n            formatter. Its readability enhanced through spacing and colouring",
+    "sample": "TODO",
+    "consumer": "human"
+  },
+  {
+    "formatterName": "verbose",
+    "description": "The human-readable formatter which includes the rule name in messages.",
+    "descriptionDetails": "The output is the same as the prose formatter with\n            the rule name included",
+    "sample": "TODO",
+    "consumer": "human"
+  },
+  {
+    "formatterName": "vso",
+    "description": "Formats output as VSO/TFS logging commands.",
+    "descriptionDetails": "Integrates with Visual Studio Online and Team\n            Foundation Server by outputting errors as 'warning' logging commands.",
+    "sample": "TODO",
+    "consumer": "machine"
+  }
+]

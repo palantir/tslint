@@ -15,19 +15,20 @@
  */
 
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
+import {IFormatterMetadata} from "../language/formatter/formatter";
 import {RuleFailure} from "../language/rule/rule";
 
-import * as Lint from "../lint";
+import * as Utils from "../utils";
 
 export class Formatter extends AbstractFormatter {
     /* tslint:disable:object-literal-sort-keys */
-    public static metadata: Lint.IFormatterMetadata = {
+    public static metadata: IFormatterMetadata = {
         formatterName: "vso",
         description: "Formats output as VSO/TFS logging commands.",
-        descriptionDetails: Lint.Utils.dedent`Integrates with Visual Studio Online and Team
+        descriptionDetails: Utils.dedent`Integrates with Visual Studio Online and Team
             Foundation Server by outputting errors as 'warning' logging commands.`,
         sample: "TODO",
-        consumer: "machine"
+        consumer: "machine",
     };
     /* tslint:enable:object-literal-sort-keys */
 

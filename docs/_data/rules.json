@@ -33,6 +33,23 @@
     "type": "style"
   },
   {
+    "ruleName": "array-type",
+    "description": "Requires using either 'T[]' or 'Array<T>' for arrays.",
+    "optionsDescription": "\nOne of the following arguments must be provided:\n\n* `\"array\"` enforces use of 'T[]'.\n* `\"generic\"` enforces use of 'Array<T>'.",
+    "options": {
+      "type": "string",
+      "enum": [
+        "array",
+        "generic"
+      ]
+    },
+    "optionExamples": [
+      "[true, array]",
+      "[true, generic]"
+    ],
+    "type": "style"
+  },
+  {
     "ruleName": "arrow-parens",
     "description": "Requires parentheses around the parameters of arrow function definitions.",
     "rationale": "Maintains stylistic consistency with other arrow function definitions.",

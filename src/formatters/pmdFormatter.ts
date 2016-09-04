@@ -16,18 +16,17 @@
  */
 
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
+import {IFormatterMetadata} from "../language/formatter/formatter";
 import {RuleFailure} from "../language/rule/rule";
-
-import * as Lint from "../lint";
 
 export class Formatter extends AbstractFormatter {
     /* tslint:disable:object-literal-sort-keys */
-    public static metadata: Lint.IFormatterMetadata = {
+    public static metadata: IFormatterMetadata = {
         formatterName: "pmd",
         description: "Formats errors as through they were PMD output.",
         descriptionDetails: "Imitates the XML output from PMD. All errors have a priority of 1.",
         sample: "TODO",
-        consumer: "machine"
+        consumer: "machine",
     };
     /* tslint:enable:object-literal-sort-keys */
 

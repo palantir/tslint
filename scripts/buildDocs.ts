@@ -39,8 +39,12 @@ import * as path from "path";
 import {AbstractRule} from "../lib/language/rule/abstractRule";
 import {IRuleMetadata} from "../lib/language/rule/rule";
 
+import {AbstractFormatter} from "../lib/language/formatter/abstractFormatter";
+import {IFormatterMetadata} from "../lib/language/formatter/formatter";
+
 const DOCS_DIR = "../docs";
 const DOCS_RULE_DIR = path.join(DOCS_DIR, "rules");
+const DOCS_FORMATTER_DIR = path.join(DOCS_DIR, "formatters");
 
 const rulePaths = glob.sync("../lib/rules/*Rule.js");
 const rulesJson: IRuleMetadata[] = [];
@@ -63,9 +67,34 @@ for (const rulePath of rulePaths) {
     }
 }
 
+const formatterPaths = glob.sync("../lib/formatters/*Formatter.js");
+const formattersJson: IFormatterMetadata[] = [];
+for (const formatterPath of formatterPaths) {
+    // tslint:disable-next-line:no-var-requires
+    const formatterModule = require(formatterPath);
+    const Formatter = formatterModule.Formatter as typeof AbstractFormatter;
+    if (Formatter != null && Formatter.metadata != null) {
+        const { metadata } = Formatter;
+        const fileData = generateFormatterFile(metadata);
+        const fileDirectory = path.join(DOCS_FORMATTER_DIR, metadata.formatterName);
+
+        // write file for each specific formatter
+        if (!fs.existsSync(fileDirectory)) {
+            fs.mkdirSync(fileDirectory);
+        }
+        fs.writeFileSync(path.join(fileDirectory, "index.html"), fileData);
+
+        formattersJson.push(metadata);
+    }
+}
+
 // write overall data file, this is used to generate the index page for the rules
-const fileData = JSON.stringify(rulesJson, undefined, 2);
-fs.writeFileSync(path.join(DOCS_DIR, "_data", "rules.json"), fileData);
+const ruleFileData = JSON.stringify(rulesJson, undefined, 2);
+fs.writeFileSync(path.join(DOCS_DIR, "_data", "rules.json"), ruleFileData);
+
+// write overall data file, this is used to generate the index page for the formatters
+const formatterFileData = JSON.stringify(formattersJson, undefined, 2);
+fs.writeFileSync(path.join(DOCS_DIR, "_data", "formatters.json"), formatterFileData);
 
 /**
  * Based off a rule's metadata, generates a string Jekyll "HTML" file
@@ -80,5 +109,20 @@ function generateRuleFile(metadata: IRuleMetadata) {
     yamlData.optionsJSON = JSON.stringify(metadata.options, undefined, 2);
     yamlData.layout = "rule";
     yamlData.title = `Rule: ${metadata.ruleName}`;
+    return `---\n${yaml.safeDump(yamlData, <any> {lineWidth: 140})}---`;
+}
+
+/**
+ * Based off a formatter's metadata, generates a string Jekyll "HTML" file
+ * that only consists of a YAML front matter block.
+ */
+function generateFormatterFile(metadata: IFormatterMetadata) {
+    const yamlData: any = {};
+    // TODO: Use Object.assign when Node 0.12 support is dropped (#1181)
+    for (const key of Object.keys(metadata)) {
+        yamlData[key] = (<any> metadata)[key];
+    }
+    yamlData.layout = "formatter";
+    yamlData.title = `Formatter: ${metadata.formatterName}`;
     return `---\n${yaml.safeDump(yamlData, <any> {lineWidth: 140})}---`;
 }

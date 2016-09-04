@@ -16,17 +16,16 @@
  */
 
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
+import {IFormatterMetadata} from "../language/formatter/formatter";
 import {RuleFailure} from "../language/rule/rule";
-
-import * as Lint from "../lint";
 
 export class Formatter extends AbstractFormatter {
     /* tslint:disable:object-literal-sort-keys */
-    public static metadata: Lint.IFormatterMetadata = {
+    public static metadata: IFormatterMetadata = {
         formatterName: "prose",
         description: "The default formatter which outputs simple human-readable messages.",
         sample: "TODO",
-        consumer: "human"
+        consumer: "human",
     };
     /* tslint:enable:object-literal-sort-keys */
 
