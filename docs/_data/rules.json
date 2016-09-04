@@ -151,7 +151,7 @@
       "type": "string"
     },
     "optionExamples": [
-      "\"true\", \"Copyright \\d{4}\""
+      "[true, \"Copyright \\\\d{4}\"]"
     ],
     "type": "style"
   },
