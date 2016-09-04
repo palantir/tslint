@@ -54,7 +54,6 @@ export const rules = {
     "no-construct": true,
     "no-constructor-vars": false,
     "no-debugger": true,
-    "no-duplicate-key": true,
     "no-duplicate-variable": true,
     "no-empty": true,
     "no-eval": true,
