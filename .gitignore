@@ -1,6 +1,8 @@
 .DS_Store
+.sass-cache
 .tscache/
 /build/
+/docs/site/
 /scripts/*.js
 /lib/
 node_modules/

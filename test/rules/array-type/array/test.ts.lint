@@ -36,3 +36,15 @@ function barFunction(bar: ArrayClass<String>[]) {
 function bazFunction(baz: Arr<ArrayClass<String>>) {
     return baz.map(e => e.baz);
 }
+
+let fooVar: Array<(c: number) => number>;
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [Array type using 'Array<T>' is forbidden. Use 'T[]' instead.]
+let barVar: ((c: number) => number)[];
+
+type fooUnion = Array<string|number|boolean>;
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [Array type using 'Array<T>' is forbidden. Use 'T[]' instead.]
+type barUnion = (string|number|boolean)[];
+
+type fooIntersection = Array<string & number>;
+                       ~~~~~~~~~~~~~~~~~~~~~~  [Array type using 'Array<T>' is forbidden. Use 'T[]' instead.]
+type barIntersection = (string & number)[];
