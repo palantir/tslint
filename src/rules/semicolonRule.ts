@@ -53,6 +53,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             `[true, "${OPTION_ALWAYS}", "${OPTION_IGNORE_INTERFACES}"]`,
         ],
         type: "style",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 

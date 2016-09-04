@@ -49,6 +49,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: ['[true, "single", "avoid-escape"]', '[true, "single", "jsx-double"]'],
         type: "style",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 

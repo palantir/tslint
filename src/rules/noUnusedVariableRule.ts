@@ -63,6 +63,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: ['[true, "react"]', '[true, {"ignore-pattern": "^_"}]'],
         type: "functionality",
+        typescriptOnly: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 

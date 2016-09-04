@@ -1,5 +1,8 @@
 {
   "rules": {
     "no-unused-expression": true
+  },
+  "jsRules": {
+    "no-unused-expression": true
   }
 }

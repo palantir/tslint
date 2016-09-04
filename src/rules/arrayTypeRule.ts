@@ -21,6 +21,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: ["[true, array]", "[true, generic]"],
         type: "style",
+        typescriptOnly: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 

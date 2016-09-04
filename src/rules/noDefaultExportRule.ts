@@ -33,6 +33,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionExamples: ["true"],
         type: "maintainability",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 

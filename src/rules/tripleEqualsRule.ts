@@ -47,6 +47,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: ["true", '[true, "allow-null-check"]', '[true, "allow-undefined-check"]'],
         type: "functionality",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 

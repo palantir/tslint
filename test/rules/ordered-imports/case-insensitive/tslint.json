@@ -1,5 +1,8 @@
 {
   "rules": {
     "ordered-imports": true
+  },
+  "jsRules": {
+    "ordered-imports": true
   }
 }

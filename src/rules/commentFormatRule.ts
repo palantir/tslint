@@ -47,6 +47,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: ['[true, "check-space", "check-lowercase"]'],
         type: "style",
+        typescriptOnly: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 

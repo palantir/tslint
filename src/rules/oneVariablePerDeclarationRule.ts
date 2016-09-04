@@ -41,6 +41,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: ["true", `[true, "${OPTION_IGNORE_FOR_LOOP}"]`],
         type: "style",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 

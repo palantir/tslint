@@ -82,12 +82,12 @@ describe("Rule Loader", () => {
 
     it("throws if an invalid rule is adopted", () => {
         const invalidConfiguration: {[name: string]: any} = {
-            "arrow-parens": true,
+            "array-type": [true, "array"],
         };
 
         assert.throws(
             () => loadRules(invalidConfiguration, {}, RULES_DIRECTORY, true),
-            /arrow-parens/
+            /array-type/
         );
     });
 });

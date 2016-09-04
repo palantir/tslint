@@ -40,6 +40,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: ['[true, "check-module"]'],
         type: "functionality",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 

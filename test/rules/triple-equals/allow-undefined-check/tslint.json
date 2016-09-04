@@ -1,5 +1,8 @@
 {
   "rules": {
     "triple-equals": [true, "allow-undefined-check"]
+  },
+  "jsRules": {
+    "triple-equals": [true, "allow-undefined-check"]
   }
 }

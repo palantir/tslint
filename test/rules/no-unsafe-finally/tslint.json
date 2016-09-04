@@ -1,5 +1,8 @@
 {
     "rules": {
         "no-unsafe-finally": true
+    },
+    "jsRules": {
+        "no-unsafe-finally": true
     }
 }

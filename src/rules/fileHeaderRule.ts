@@ -13,6 +13,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: ['"true", "Copyright \\d{4}"'],
         type: "style",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 

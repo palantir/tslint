@@ -1,0 +1,27 @@
+function testDoubleQuotes() {
+    // hello
+    "use strict"; // bye
+
+    var i = 3;
+}
+
+function testSingleQuotes() {
+    'use strict';
+}
+
+function testNoUseStrict() {
+~~~~~~~~                     [missing 'use strict']
+}
+
+function checkDepth() {
+    "use strict";
+
+    function innerFunction() {
+
+    }
+}
+
+function shouldPassUseStrictRule() {
+    "use strict"
+    return "This is a test"
+}

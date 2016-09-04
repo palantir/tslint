@@ -1,5 +1,8 @@
 {
   "rules": {
     "use-strict": [true, "check-function", "check-module"]
+  },
+  "jsRules": {
+    "use-strict": [true, "check-function", "check-module"]
   }
 }

@@ -43,6 +43,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: ["true", '[true, "allow-declarations"]'],
         type: "typescript",
+        typescriptOnly: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 

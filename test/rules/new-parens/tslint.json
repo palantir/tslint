@@ -1,5 +1,8 @@
 {
   "rules": {
     "new-parens": true
+  },
+  "jsRules": {
+    "new-parens": true
   }
 }

@@ -1,5 +1,8 @@
 {
   "rules": {
     "label-undefined": true
+  },
+  "jsRules": {
+    "label-undefined": true
   }
 }
