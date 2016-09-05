@@ -4,6 +4,7 @@ import * as Lint from "../lint";
 
 const OPTION_ARRAY = "array";
 const OPTION_GENERIC = "generic";
+const OPTION_ARRAY_SIMPLE = "array-simple";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -14,18 +15,21 @@ export class Rule extends Lint.Rules.AbstractRule {
             One of the following arguments must be provided:
 
             * \`"${OPTION_ARRAY}"\` enforces use of 'T[]'.
-            * \`"${OPTION_GENERIC}"\` enforces use of 'Array<T>'.`,
+            * \`"${OPTION_GENERIC}"\` enforces use of 'Array<T>'.
+            * \`"${OPTION_ARRAY_SIMPLE}"\` enforces use of 'T[]' if 'T' is a simple type (primitive or type reference).`,
         options: {
             type: "string",
-            enum: [OPTION_ARRAY, OPTION_GENERIC],
+            enum: [OPTION_ARRAY, OPTION_GENERIC, OPTION_ARRAY_SIMPLE],
         },
-        optionExamples: ["[true, array]", "[true, generic]"],
+        optionExamples: [`[true, ${OPTION_ARRAY}]`, `[true, ${OPTION_GENERIC}]`, `[true, ${OPTION_ARRAY_SIMPLE}]`],
         type: "style",
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING_ARRAY = "Array type using 'Array<T>' is forbidden. Use 'T[]' instead.";
     public static FAILURE_STRING_GENERIC = "Array type using 'T[]' is forbidden. Use 'Array<T>' instead.";
+    public static FAILURE_STRING_ARRAY_SIMPLE = "Array type using 'Array<T>' is forbidden for simple types. Use 'T[]' instead.";
+    public static FAILURE_STRING_GENERIC_SIMPLE = "Array type using 'T[]' is forbidden for simple types. Use 'Array<T>' instead.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const alignWalker = new ArrayTypeWalker(sourceFile, this.getOptions());
@@ -35,15 +39,16 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class ArrayTypeWalker extends Lint.RuleWalker {
     public visitArrayType(node: ts.ArrayTypeNode) {
-        if (this.hasOption(OPTION_GENERIC)) {
-            const typeName = node.elementType;
+        const typeName = node.elementType;
+        if (this.hasOption(OPTION_GENERIC) || this.hasOption(OPTION_ARRAY_SIMPLE) && !this.isSimpleType(typeName)) {
+            const failureString = this.hasOption(OPTION_GENERIC) ? Rule.FAILURE_STRING_GENERIC : Rule.FAILURE_STRING_GENERIC_SIMPLE;
             const parens = typeName.kind === ts.SyntaxKind.ParenthesizedType ? 1 : 0;
             const fix = new Lint.Fix(Rule.metadata.ruleName, [
                 this.createReplacement(typeName.getStart(), parens, "Array<"),
                 // Delete the square brackets and replace with an angle bracket
                 this.createReplacement(typeName.getEnd() - parens, node.getEnd() - typeName.getEnd() + parens, ">"),
             ]);
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING_GENERIC, fix));
+            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), failureString, fix));
         }
 
         super.visitArrayType(node);
@@ -51,30 +56,50 @@ class ArrayTypeWalker extends Lint.RuleWalker {
 
     public visitTypeReference(node: ts.TypeReferenceNode) {
         const typeName = node.typeName.getText();
-        if (this.hasOption(OPTION_ARRAY) && typeName === "Array") {
+        if (typeName === "Array" && (this.hasOption(OPTION_ARRAY) || this.hasOption(OPTION_ARRAY_SIMPLE))) {
+            const failureString = this.hasOption(OPTION_ARRAY) ? Rule.FAILURE_STRING_ARRAY : Rule.FAILURE_STRING_ARRAY_SIMPLE;
             const typeArgs = node.typeArguments;
-            let fix: Lint.Fix;
             if (!typeArgs || typeArgs.length === 0) {
                 // Create an 'any' array
-                fix = new Lint.Fix(Rule.metadata.ruleName, [
+                const fix = new Lint.Fix(Rule.metadata.ruleName, [
                     this.createReplacement(node.getStart(), node.getWidth(), "any[]"),
                 ]);
-            } else if (typeArgs && typeArgs.length === 1) {
+                this.addFailure(this.createFailure(node.getStart(), node.getWidth(), failureString, fix));
+            } else if (typeArgs && typeArgs.length === 1 && (!this.hasOption(OPTION_ARRAY_SIMPLE) || this.isSimpleType(typeArgs[0]))) {
                 const type = typeArgs[0];
                 const typeStart = type.getStart();
                 const typeEnd = type.getEnd();
                 const parens = type.kind === ts.SyntaxKind.UnionType ||
                     type.kind === ts.SyntaxKind.FunctionType || type.kind === ts.SyntaxKind.IntersectionType;
-                fix = new Lint.Fix(Rule.metadata.ruleName, [
+                const fix = new Lint.Fix(Rule.metadata.ruleName, [
                     // Delete Array and the first angle bracket
                     this.createReplacement(node.getStart(), typeStart - node.getStart(), parens ? "(" : ""),
                     // Delete the last angle bracket and replace with square brackets
                     this.createReplacement(typeEnd, node.getEnd() - typeEnd, (parens ? ")" : "") + "[]"),
                 ]);
+                this.addFailure(this.createFailure(node.getStart(), node.getWidth(), failureString, fix));
             }
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING_ARRAY, fix));
         }
 
         super.visitTypeReference(node);
+    }
+
+    private isSimpleType(nodeType: ts.TypeNode) {
+        // tslint:disable-next-line:no-console
+        console.log(ts.SyntaxKind[nodeType.kind]);
+        switch (nodeType.kind) {
+            case ts.SyntaxKind.AnyKeyword:
+            case ts.SyntaxKind.ArrayType:
+            case ts.SyntaxKind.BooleanKeyword:
+            case ts.SyntaxKind.NullKeyword:
+            case ts.SyntaxKind.NumberKeyword:
+            case ts.SyntaxKind.StringKeyword:
+            case ts.SyntaxKind.SymbolKeyword:
+            case ts.SyntaxKind.TypeReference:
+            case ts.SyntaxKind.VoidKeyword:
+                return true;
+            default:
+                return false;
+        }
     }
 }
