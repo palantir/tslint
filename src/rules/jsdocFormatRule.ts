@@ -77,7 +77,7 @@ class JsdocWalker extends Lint.SkippableTokenAwareRuleWalker {
         let jsdocPosition = currentPosition;
 
         // regex is: start of string, followed by any amount of whitespace, followed by /**
-        const isJsdocMatch = firstLine.match(/^\s*\/\*\*/);
+        const isJsdocMatch = firstLine.match(/^\s*\/\*\*\s/);
         if (isJsdocMatch != null) {
             if (lines.length === 1) {
                 const firstLineMatch = firstLine.match(/^\s*\/\*\* (.* )?\*\/$/);
