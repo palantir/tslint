@@ -23,6 +23,10 @@ I've even got characters where I shouldn't. How fun!    *
          */
     }
 
+    /**********************************************************/
+    /* this is just an arbitrary separator, not a jsdoc block */
+    /**********************************************************/
+
     /**
      * this is also jsdoc
      *and it has a problem on this line
