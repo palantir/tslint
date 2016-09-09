@@ -58,3 +58,9 @@ export interface ILinterOptions extends ILinterOptionsRaw {
     formatter: string | Function;
     rulesDirectory: string | string[];
 }
+
+export interface IMultiLinterOptions {
+    formatter?: string | Function;
+    formattersDirectory?: string;
+    rulesDirectory?: string | string[];
+}
