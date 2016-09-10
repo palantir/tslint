@@ -45,12 +45,14 @@ describe("Rule Loader", () => {
     });
 
     it("doesn't ignore leading or trailing underscores or dashes", () => {
+        /* tslint:disable:object-literal-sort-keys */
         const invalidConfiguration: {[name: string]: any} = {
             _indent: 6,
             forin_: true,
             "-quotemark": "single",
             "eofline-": true,
         };
+        /* tslint:enable:object-literal-sort-keys */
 
         assert.throws(
             () => loadRules(invalidConfiguration, {}, RULES_DIRECTORY),

@@ -48,3 +48,18 @@ let optionallyValid_ = "bar";
     ~~~~~~~~~~~~~~~~          [variable name must be in camelcase or uppercase]
 let _$httpBackend_ = "leading and trailing";
     ~~~~~~~~~~~~~~          [variable name must be in camelcase or uppercase]
+
+// Aliases.
+class X {
+  ValidAlias = ValidAlias;
+}
+
+var ValidAlias = some.ValidAlias;
+var ValidAlias = some.InValidAlias;
+    ~~~~~~~~~~                [variable name must be in camelcase or uppercase]
+
+var someObject = {MoreValidAlias: 1};
+var {MoreValidAlias: localVar} = someObject;
+var {MoreValidAlias: LocalVar} = someObject;
+                     ~~~~~~~~                [variable name must be in camelcase or uppercase]
+var {MoreValidAlias} = someObject;

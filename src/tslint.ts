@@ -21,22 +21,18 @@ import {
     DEFAULT_CONFIG,
     findConfiguration,
     findConfigurationPath,
-    getRelativePath,
     getRulesDirectories,
     loadConfigurationFromPath,
 } from "./configuration";
-import { EnableDisableRulesWalker } from "./enableDisableRules";
-import { findFormatter } from "./formatterLoader";
-import { IFormatter } from "./language/formatter/formatter";
-import { RuleFailure } from "./language/rule/rule";
-import { TypedRule } from "./language/rule/typedRule";
-import { getSourceFile } from "./language/utils";
-import { ILinterOptions, ILinterOptionsRaw, IRule, LintResult } from "./lint";
-import { loadRules } from "./ruleLoader";
+import { ILinterOptions, ILinterOptionsRaw,　IRule, LintResult } from "./lint";
+import * as MultiLinter from "./tslintMulti";
 import { arrayify } from "./utils";
 
+/**
+ * Linter that can lint exactly one file.
+ */
 class Linter {
-    public static VERSION = "3.15.1";
+    public static VERSION = MultiLinter.VERSION;
 
     public static findConfiguration = findConfiguration;
     public static findConfigurationPath = findConfigurationPath;
@@ -49,108 +45,25 @@ class Linter {
      * Creates a TypeScript program object from a tsconfig.json file path and optional project directory.
      */
     public static createProgram(configFile: string, projectDirectory?: string): ts.Program {
-        if (projectDirectory === undefined) {
-            const lastSeparator = configFile.lastIndexOf("/");
-            if (lastSeparator < 0) {
-                projectDirectory = ".";
-            } else {
-                projectDirectory = configFile.substring(0, lastSeparator + 1);
-            }
-        }
-
-        const {config} = ts.readConfigFile(configFile, ts.sys.readFile);
-        const parsed = ts.parseJsonConfigFileContent(config, {readDirectory: ts.sys.readDirectory}, projectDirectory);
-        const host = ts.createCompilerHost(parsed.options, true);
-        const program = ts.createProgram(parsed.fileNames, parsed.options, host);
-
-        return program;
+        return MultiLinter.createProgram(configFile, projectDirectory);
     }
-
+    
     /**
      * Returns a list of source file names from a TypeScript program. This includes all referenced
      * files and excludes declaration (".d.ts") files.
      */
     public static getFileNames(program: ts.Program): string[] {
-        return program.getSourceFiles().map(s => s.fileName).filter(l => l.substr(-5) !== ".d.ts");
+        return MultiLinter.getFileNames(program);
     }
 
     constructor(private fileName: string, private source: string, options: ILinterOptionsRaw, private program?: ts.Program) {
-        this.options = this.computeFullOptions(options);
+       this.options = this.computeFullOptions(options);
     }
 
     public lint(): LintResult {
-        const failures: RuleFailure[] = [];
-        let sourceFile: ts.SourceFile;
-        if (this.program) {
-            sourceFile = this.program.getSourceFile(this.fileName);
-            // check if the program has been type checked
-            if (!("resolvedModules" in sourceFile)) {
-                throw new Error("Program must be type checked before linting");
-            }
-        } else {
-            sourceFile = getSourceFile(this.fileName, this.source);
-        }
-
-        if (sourceFile === undefined) {
-            throw new Error(`Invalid source file: ${this.fileName}. Ensure that the files supplied to lint have a .ts or .tsx extension.`);
-        }
-
-        // walk the code first to find all the intervals where rules are disabled
-        const rulesWalker = new EnableDisableRulesWalker(sourceFile, {
-            disabledIntervals: [],
-            ruleName: "",
-        });
-        rulesWalker.walk(sourceFile);
-        const enableDisableRuleMap = rulesWalker.enableDisableRuleMap;
-
-        const rulesDirectories = this.options.rulesDirectory;
-        const configuration = this.options.configuration.rules;
-        const jsConfiguration = this.options.configuration.jsRules;
-        const isJs = this.fileName.substr(-3) === ".js";
-        let configuredRules: IRule[];
-
-        if (jsConfiguration && isJs) {
-            configuredRules = loadRules(jsConfiguration, enableDisableRuleMap, rulesDirectories, true);
-        } else {
-            configuredRules = loadRules(configuration, enableDisableRuleMap, rulesDirectories, false);
-        }
-
-        const enabledRules = configuredRules.filter((r) => r.isEnabled());
-        for (let rule of enabledRules) {
-            let ruleFailures: RuleFailure[] = [];
-            if (this.program && rule instanceof TypedRule) {
-                ruleFailures = rule.applyWithProgram(sourceFile, this.program);
-            } else {
-                ruleFailures = rule.apply(sourceFile);
-            }
-            for (let ruleFailure of ruleFailures) {
-                if (!this.containsRule(failures, ruleFailure)) {
-                    failures.push(ruleFailure);
-                }
-            }
-        }
-
-        let formatter: IFormatter;
-        const formattersDirectory = getRelativePath(this.options.formattersDirectory);
-
-        const Formatter = findFormatter(this.options.formatter, formattersDirectory);
-        if (Formatter) {
-            formatter = new Formatter();
-        } else {
-            throw new Error(`formatter '${this.options.formatter}' not found`);
-        }
-
-        const output = formatter.format(failures);
-        return {
-            failureCount: failures.length,
-            failures,
-            format: this.options.formatter,
-            output,
-        };
-    }
-
-    private containsRule(rules: RuleFailure[], rule: RuleFailure) {
-        return rules.some((r) => r.equals(rule));
+        const multiLinter: MultiLinter = new MultiLinter(this.options, this.program);
+        multiLinter.lint(this.fileName, this.source, this.options.configuration);
+        return multiLinter.getResult();
     }
 
     private computeFullOptions(options: ILinterOptionsRaw = {}): ILinterOptions {
@@ -166,7 +79,7 @@ class Linter {
             formattersDirectory,
             rulesDirectory: arrayify(rulesDirectory).concat(arrayify(configuration.rulesDirectory)),
         };
-    }
+      }
 }
 
 // tslint:disable-next-line:no-namespace

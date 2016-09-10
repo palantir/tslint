@@ -83,3 +83,64 @@ var failG = {
     asdfn: function () {}
     ~~~~~                 [The key 'asdfn' is not sorted alphabetically]
 };
+
+var passH = {
+    a: 1,
+    'b': 2,
+    c: 3
+}
+
+var failH = {
+    'b': 2,
+    a: 1,
+    ~      [The key 'a' is not sorted alphabetically]
+    c: 3
+}
+
+var passI = {
+    'Z': 1,
+    À: 2,
+    è: 3
+}
+
+var failI = {
+    À: 2,
+    'Z': 1,
+    ~~~    [The key 'Z' is not sorted alphabetically]
+    è: 3,
+}
+
+var passJ = {
+    1: 1,
+    '11': 2
+    2: 4,
+    A: 3,
+}
+
+var failJ = {
+    1: 1,
+    2: 4,
+    A: 3,
+    '11': 2
+    ~~~~   [The key '11' is not sorted alphabetically]
+}
+
+var passK = {
+    a: 1,
+    'b': {
+        'd': 4,
+        e: 5
+    },
+    c: 3
+}
+
+var failK = {
+    'b': {
+        e: 5,
+        'd': 4
+        ~~~    [The key 'd' is not sorted alphabetically]
+    },
+    a: 1,
+    ~     [The key 'a' is not sorted alphabetically]
+    c: 3
+}

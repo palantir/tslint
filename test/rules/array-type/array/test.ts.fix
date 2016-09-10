@@ -27,3 +27,12 @@ function barFunction(bar: ArrayClass<String>[]) {
 function bazFunction(baz: Arr<ArrayClass<String>>) {
     return baz.map(e => e.baz);
 }
+
+let fooVar: ((c: number) => number)[];
+let barVar: ((c: number) => number)[];
+
+type fooUnion = (string|number|boolean)[];
+type barUnion = (string|number|boolean)[];
+
+type fooIntersection = (string & number)[];
+type barIntersection = (string & number)[];

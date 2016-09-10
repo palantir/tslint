@@ -11,7 +11,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: {
             type: "string",
         },
-        optionExamples: ['"true", "Copyright \\d{4}"'],
+        optionExamples: ['[true, "Copyright \\\\d{4}"]'],
         type: "style",
         typescriptOnly: false,
     };

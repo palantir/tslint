@@ -23,21 +23,21 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "ban",
-        description: "Bans the use of specific functions.",
-        descriptionDetails: "At this time, there is no way to disable global methods with this rule.",
-        optionsDescription: "A list of `['object', 'method', 'optional explanation here']` which ban `object.method()`.",
+        description: "Bans the use of specific functions or global methods.",
+        optionsDescription: Lint.Utils.dedent`
+            A list of \`['object', 'method', 'optional explanation here']\` or \`['globalMethod']\` which ban \`object.method()\` 
+            or respectively \`globalMethod()\`.`,
         options: {
             type: "list",
             listType: {
                 type: "array",
-                arrayMembers: [
-                    { type: "string" },
-                    { type: "string" },
-                    { type: "string" },
-                ],
+                items: {type: "string"},
+                minLength: 1,
+                maxLength: 3,
             },
         },
-        optionExamples: [`[true, ["someObject", "someFunction"], ["someObject", "otherFunction", "Optional explanation"]]`],
+        optionExamples: [`[true, ["someGlobalMethod"], ["someObject", "someFunction"], 
+                          ["someObject", "otherFunction", "Optional explanation"]]`],
         type: "functionality",
         typescriptOnly: false,
     };
@@ -57,17 +57,29 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 export class BanFunctionWalker extends Lint.RuleWalker {
+    private bannedGlobalFunctions: string[] = [];
     private bannedFunctions: string[][] = [];
 
     public addBannedFunction(bannedFunction: string[]) {
-        this.bannedFunctions.push(bannedFunction);
+        if (bannedFunction.length === 1) {
+            this.bannedGlobalFunctions.push(bannedFunction[0]);
+        } else if (bannedFunction.length >= 2) {
+            this.bannedFunctions.push(bannedFunction);
+        }
     }
 
     public visitCallExpression(node: ts.CallExpression) {
         const expression = node.expression;
 
+        this.checkForObjectMethodBan(expression);
+        this.checkForGlobalBan(expression);
+
+        super.visitCallExpression(node);
+    }
+
+    private checkForObjectMethodBan(expression: ts.LeftHandSideExpression) {
         if (expression.kind === ts.SyntaxKind.PropertyAccessExpression
-                && expression.getChildCount() >= 3) {
+            && expression.getChildCount() >= 3) {
 
             const firstToken = expression.getFirstToken();
             const firstChild = expression.getChildAt(0);
@@ -97,7 +109,16 @@ export class BanFunctionWalker extends Lint.RuleWalker {
                 }
             }
         }
+    }
 
-        super.visitCallExpression(node);
+    private checkForGlobalBan(expression: ts.LeftHandSideExpression) {
+        if (expression.kind === ts.SyntaxKind.Identifier) {
+            const identifierName = (<ts.Identifier> expression).text;
+            if (this.bannedGlobalFunctions.indexOf(identifierName) !== -1) {
+                this.addFailure(this.createFailure(expression.getStart(), expression.getWidth(),
+                    Rule.FAILURE_STRING_FACTORY(`${identifierName}`)));
+            }
+
+        }
     }
 }
