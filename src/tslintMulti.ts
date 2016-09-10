@@ -31,7 +31,7 @@ import { IFormatter } from "./language/formatter/formatter";
 import { RuleFailure } from "./language/rule/rule";
 import { TypedRule } from "./language/rule/typedRule";
 import { getSourceFile } from "./language/utils";
-import { IMultiLinterOptions, LintResult } from "./lint";
+import { IMultiLinterOptions, IRule, LintResult } from "./lint";
 import { loadRules } from "./ruleLoader";
 import { arrayify } from "./utils";
 
@@ -109,7 +109,16 @@ class MultiLinter {
         const rulesDirectories = arrayify(this.options.rulesDirectory)
             .concat(arrayify(configuration.rulesDirectory));
         const configurationRules = configuration.rules;
-        const configuredRules = loadRules(configurationRules, enableDisableRuleMap, rulesDirectories);
+        const jsConfiguration = configuration.jsRules;
+        const isJs = fileName.substr(-3) === ".js";
+        let configuredRules: IRule[];
+
+        if (isJs) {
+            configuredRules = loadRules(jsConfiguration, enableDisableRuleMap, rulesDirectories, true);
+        } else {
+            configuredRules = loadRules(configurationRules, enableDisableRuleMap, rulesDirectories, false);
+        }
+
         const enabledRules = configuredRules.filter((r) => r.isEnabled());
         for (let rule of enabledRules) {
             let ruleFailures: RuleFailure[] = [];
