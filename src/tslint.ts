@@ -24,7 +24,7 @@ import {
     getRulesDirectories,
     loadConfigurationFromPath,
 } from "./configuration";
-import { ILinterOptions, ILinterOptionsRaw,　IRule, LintResult } from "./lint";
+import { ILinterOptions, ILinterOptionsRaw, LintResult } from "./lint";
 import * as MultiLinter from "./tslintMulti";
 import { arrayify } from "./utils";
 
@@ -47,7 +47,7 @@ class Linter {
     public static createProgram(configFile: string, projectDirectory?: string): ts.Program {
         return MultiLinter.createProgram(configFile, projectDirectory);
     }
-    
+
     /**
      * Returns a list of source file names from a TypeScript program. This includes all referenced
      * files and excludes declaration (".d.ts") files.
