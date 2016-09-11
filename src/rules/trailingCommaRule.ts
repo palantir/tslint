@@ -243,9 +243,17 @@ class TrailingCommaWalker extends Lint.RuleWalker {
                 const option = this.getOption(isMultiline ? "multiline" : "singleline");
 
                 if (hasTrailingComma && option === "never") {
-                    this.addFailure(this.createFailure(lastGrandChild.getStart(), 1, Rule.FAILURE_STRING_NEVER));
+                    const failureStart = lastGrandChild.getStart();
+                    const fix = new Lint.Fix(Rule.metadata.ruleName, [
+                        this.deleteText(failureStart, 1),
+                    ]);
+                    this.addFailure(this.createFailure(failureStart, 1, Rule.FAILURE_STRING_NEVER, fix));
                 } else if (!hasTrailingComma && option === "always") {
-                    this.addFailure(this.createFailure(lastGrandChild.getEnd() - 1, 1, Rule.FAILURE_STRING_ALWAYS));
+                    const failureStart = lastGrandChild.getEnd();
+                    const fix = new Lint.Fix(Rule.metadata.ruleName, [
+                        this.appendText(failureStart, ","),
+                    ]);
+                    this.addFailure(this.createFailure(failureStart - 1, 1, Rule.FAILURE_STRING_ALWAYS, fix));
                 }
             }
         }
