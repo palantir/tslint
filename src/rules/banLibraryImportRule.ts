@@ -1,8 +1,9 @@
 import * as ts from "typescript";
-import * as Lint from 'tslint/lib/lint';
+import * as Lint from "tslint/lib/lint";
 
 export class Rule extends Lint.Rules.AbstractRule {
-    public static FAILURE_STRING = "require(\"{0}\") will result in the entire \"{0}\" library being included. If this is intentional, you can suppress the rule with a tslint:ignore directive.";
+    public static FAILURE_STRING = "require(\"{0}\") will result in the entire \"{0}\" library being included. " + 
+        "If this is intentional, you can suppress the rule with a tslint:ignore directive.";
 
     public isEnabled(): boolean {
         if (super.isEnabled()) {
@@ -57,7 +58,7 @@ class NoRequireFullLibraryWalker extends Lint.RuleWalker {
     }
 
     public visitImportEqualsDeclaration(node: ts.ImportEqualsDeclaration) {
-        var moduleReference = <ts.ExternalModuleReference>node.moduleReference;
+        let moduleReference = <ts.ExternalModuleReference> node.moduleReference;
         // If it's an import require and not an import alias
         if (moduleReference.expression) {
             const matchedBannedLib = this.matchBannedLibrary(moduleReference.expression.getText());
