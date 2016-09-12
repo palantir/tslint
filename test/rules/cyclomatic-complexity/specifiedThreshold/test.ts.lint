@@ -13,7 +13,7 @@ const invalidFunctionExpression = function() {
     const condition3 = true ? "true" : "false";
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 }
-~  [The cyclomatic complexity is higher than the threshold]
+~  [The function has a cyclomatic complexity of 4 which is higher than the threshold of 3]
 
 
 function validFunctionDeclaration() {
@@ -30,7 +30,7 @@ function invalidFunctionDeclaration() {
     const condition3 = true ? "true" : "false";
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 }
-~ [The cyclomatic complexity is higher than the threshold for the function: invalidFunctionDeclaration]
+~ [The function invalidFunctionDeclaration has a cyclomatic complexity of 4 which is higher than the threshold of 3]
 
 const validArrowFunction = () => {
     const condition1 = true ? "true" : "false";
@@ -46,7 +46,7 @@ const invalidArrowFunction = () => {
     const condition3 = true ? "true" : "false";
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 }
-~ [The cyclomatic complexity is higher than the threshold]
+~ [The function has a cyclomatic complexity of 4 which is higher than the threshold of 3]
 
 class MyClass {
     get validGet(): string {
@@ -66,7 +66,7 @@ class MyClass {
         return "test";
 ~~~~~~~~~~~~~~~~~~~~~~
     }
-~~~~~ [The cyclomatic complexity is higher than the threshold for the function: invalidGet]
+~~~~~ [The function invalidGet has a cyclomatic complexity of 4 which is higher than the threshold of 3]
 
     set validSet(newValue: string) {
         const condition1 = true ? "true" : "false";
@@ -82,7 +82,7 @@ class MyClass {
         const condition3 = true ? "true" : "false";
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     }
-~~~~~ [The cyclomatic complexity is higher than the threshold for the function: invalidSet]
+~~~~~ [The function invalidSet has a cyclomatic complexity of 4 which is higher than the threshold of 3]
 
     validMethod() {
         const condition1 = true ? "true" : "false";
@@ -98,7 +98,7 @@ class MyClass {
         const condition3 = true ? "true" : "false";
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     }
-~~~~~ [The cyclomatic complexity is higher than the threshold for the function: invalidMethod]
+~~~~~ [The function invalidMethod has a cyclomatic complexity of 4 which is higher than the threshold of 3]
 }
 
 class validConstructor {
@@ -118,7 +118,7 @@ class invalidConstructor {
         const condition3 = true ? "true" : "false";
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     }
-~~~~~ [The cyclomatic complexity is higher than the threshold]
+~~~~~ [The function has a cyclomatic complexity of 4 which is higher than the threshold of 3]
 }
 
 // Test each remaining expression type.
@@ -131,7 +131,7 @@ function invalidBinaryExpression() {
     return first || second && third || fourth;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 }
-~ [The cyclomatic complexity is higher than the threshold for the function: invalidBinaryExpression]
+~ [The function invalidBinaryExpression has a cyclomatic complexity of 4 which is higher than the threshold of 3]
 
 function validSwitch() {
     switch(5) {
@@ -167,7 +167,7 @@ function invalidSwitch() {
     }
 ~~~~~
 }
-~  [The cyclomatic complexity is higher than the threshold for the function: invalidSwitch]
+~  [The function invalidSwitch has a cyclomatic complexity of 4 which is higher than the threshold of 3]
 
 function validCatch() {
     try { }
@@ -197,7 +197,7 @@ function invalidCatch() {
     finally { }
 ~~~~~~~~~~~~~~~
 }
-~  [The cyclomatic complexity is higher than the threshold for the function: invalidCatch]
+~  [The function invalidCatch has a cyclomatic complexity of 4 which is higher than the threshold of 3]
 
 function validDo() {
     do { }
@@ -221,7 +221,7 @@ function invalidDo() {
     while (false)
 ~~~~~~~~~~~~~~~~~
 }
-~ [The cyclomatic complexity is higher than the threshold for the function: invalidDo]
+~ [The function invalidDo has a cyclomatic complexity of 4 which is higher than the threshold of 3]
 
 function validFor() {
     for(;;) { }
@@ -237,7 +237,7 @@ function invalidFor() {
     for(;;) { }
 ~~~~~~~~~~~~~~~
 }
-~ [The cyclomatic complexity is higher than the threshold for the function: invalidFor]
+~ [The function invalidFor has a cyclomatic complexity of 4 which is higher than the threshold of 3]
 
 function validForIn() {
     for(let i in [0,1,2]) { }
@@ -253,7 +253,7 @@ function invalidForIn() {
     for(let i in [0,1,2]) { }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 }
-~ [The cyclomatic complexity is higher than the threshold for the function: invalidForIn]
+~ [The function invalidForIn has a cyclomatic complexity of 4 which is higher than the threshold of 3]
 
 function validForOf() {
     for(let i of [0,1,2]) { }
@@ -269,7 +269,7 @@ function invalidForOf() {
     for(let i of [0,1,2]) { }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 }
-~ [The cyclomatic complexity is higher than the threshold for the function: invalidForOf]
+~ [The function invalidForOf has a cyclomatic complexity of 4 which is higher than the threshold of 3]
 
 let variable = 1;
 
@@ -287,7 +287,7 @@ function invalidIf() {
     if(variable) { }
 ~~~~~~~~~~~~~~~~~~~~
 }
-~ [The cyclomatic complexity is higher than the threshold for the function: invalidIf]
+~ [The function invalidIf has a cyclomatic complexity of 4 which is higher than the threshold of 3]
 
 function validWhile() {
     while(false) { }
@@ -303,7 +303,7 @@ function invalidWhile() {
     while(false) { }
 ~~~~~~~~~~~~~~~~~~~~
 }
-~ [The cyclomatic complexity is higher than the threshold for the function: invalidWhile]
+~ [The function invalidWhile has a cyclomatic complexity of 4 which is higher than the threshold of 3]
 
 // Test that the rule behaves correctly for nested functions.
 
@@ -320,7 +320,7 @@ function outer1() {
         const condition5 = true ? "true" : "false";
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     }
-~~~~~ [The cyclomatic complexity is higher than the threshold for the function: inner1]
+~~~~~ [The function inner1 has a cyclomatic complexity of 4 which is higher than the threshold of 3]
 }
 
 // Invalid outer function, valid inner function.
@@ -341,7 +341,7 @@ function outer2() {
     }
 ~~~~~
 }
-~ [The cyclomatic complexity is higher than the threshold for the function: outer2]
+~ [The function outer2 has a cyclomatic complexity of 4 which is higher than the threshold of 3]
 
 // Both valid.
 function outer3() {
@@ -376,6 +376,6 @@ function outer4() {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     }
 ~~~~~
-~~~~~ [The cyclomatic complexity is higher than the threshold for the function: inner4]
+~~~~~ [The function inner4 has a cyclomatic complexity of 4 which is higher than the threshold of 3]
 }
-~ [The cyclomatic complexity is higher than the threshold for the function: outer4]
+~ [The function outer4 has a cyclomatic complexity of 4 which is higher than the threshold of 3]

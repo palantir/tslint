@@ -20,9 +20,6 @@ import * as ts from "typescript";
 
 export class Rule extends Lint.Rules.AbstractRule {
 
-    public static ANONYMOUS_FAILURE_STRING = "The cyclomatic complexity is higher than the threshold";
-    public static NAMED_FAILURE_STRING = "The cyclomatic complexity is higher than the threshold for the function: ";
-
     public static DEFAULT_THRESHOLD = 20;
     public static MINIMUM_THRESHOLD = 2;
 
@@ -55,6 +52,11 @@ export class Rule extends Lint.Rules.AbstractRule {
         type: "maintainability",
     };
     /* tslint:enable:object-literal-sort-keys */
+
+    public static ANONYMOUS_FAILURE_STRING = (expected: number, actual: number) =>
+        `The function has a cyclomatic complexity of ${actual} which is higher than the threshold of ${expected}`;
+    public static NAMED_FAILURE_STRING = (expected: number, actual: number, name: string) =>
+        `The function ${name} has a cyclomatic complexity of ${actual} which is higher than the threshold of ${expected}`;
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new CyclomaticComplexityWalker(sourceFile, this.getOptions(), this.threshold));
@@ -192,9 +194,9 @@ class CyclomaticComplexityWalker extends Lint.RuleWalker {
 
             // Attempt to find a name for the function.
             if (node.name && node.name.kind === ts.SyntaxKind.Identifier) {
-                failureString = Rule.NAMED_FAILURE_STRING + (node.name as ts.Identifier).text;
+                failureString = Rule.NAMED_FAILURE_STRING(this.threshold, complexity, (node.name as ts.Identifier).text);
             } else {
-                failureString = Rule.ANONYMOUS_FAILURE_STRING;
+                failureString = Rule.ANONYMOUS_FAILURE_STRING(this.threshold, complexity);
             }
 
             this.addFailure(this.createFailure(node.getStart(), node.getWidth(), failureString));
