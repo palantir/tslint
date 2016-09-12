@@ -1,8 +1,8 @@
-import * as ts from "typescript";
 import * as Lint from "tslint/lib/lint";
+import * as ts from "typescript";
 
 export class Rule extends Lint.Rules.AbstractRule {
-    public static FAILURE_STRING = "require(\"{0}\") will result in the entire \"{0}\" library being included. " + 
+    public static FAILURE_STRING = "require(\"{0}\") will result in the entire \"{0}\" library being included. " +
         "If this is intentional, you can suppress the rule with a tslint:ignore directive.";
 
     public isEnabled(): boolean {
