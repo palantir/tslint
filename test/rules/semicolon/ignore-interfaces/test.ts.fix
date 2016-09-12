@@ -70,3 +70,5 @@ export default LoginPage;
 export default LoginPage;
 export = Date;
 export = Date;
+type t = number;
+type t = number;

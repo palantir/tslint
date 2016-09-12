@@ -9,6 +9,10 @@ layout: page
    <h5>Rationale</h5>
    {{page.rationale | markdownify}}
 {% endif %}
+{% if page.requiresTypeInfo %}
+   <strong>Note:</strong>
+   <a href="https://github.com/palantir/tslint#type-checking">This rule requires type info to run</a>
+{% endif %}
 
 
 <h3>Config</h3>

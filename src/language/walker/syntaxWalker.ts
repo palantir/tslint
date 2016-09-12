@@ -30,6 +30,10 @@ export class SyntaxWalker {
         this.walkChildren(node);
     }
 
+    protected visitArrayType(node: ts.ArrayTypeNode) {
+        this.walkChildren(node);
+    }
+
     protected visitArrowFunction(node: ts.FunctionLikeDeclaration) {
         this.walkChildren(node);
     }
@@ -190,6 +194,10 @@ export class SyntaxWalker {
         this.walkChildren(node);
     }
 
+    protected visitJsxSpreadAttribute(node: ts.JsxSpreadAttribute) {
+        this.walkChildren(node);
+    }
+
     protected visitLabeledStatement(node: ts.LabeledStatement) {
         this.walkChildren(node);
     }
@@ -286,6 +294,10 @@ export class SyntaxWalker {
         this.walkChildren(node);
     }
 
+    protected visitTypeAliasDeclaration(node: ts.TypeAliasDeclaration) {
+        this.walkChildren(node);
+    }
+
     protected visitTypeAssertionExpression(node: ts.TypeAssertion) {
         this.walkChildren(node);
     }
@@ -326,6 +338,10 @@ export class SyntaxWalker {
 
             case ts.SyntaxKind.ArrayLiteralExpression:
                 this.visitArrayLiteralExpression(<ts.ArrayLiteralExpression> node);
+                break;
+
+            case ts.SyntaxKind.ArrayType:
+                this.visitArrayType(<ts.ArrayTypeNode> node);
                 break;
 
             case ts.SyntaxKind.ArrowFunction:
@@ -484,6 +500,10 @@ export class SyntaxWalker {
                 this.visitJsxSelfClosingElement(<ts.JsxSelfClosingElement> node);
                 break;
 
+            case ts.SyntaxKind.JsxSpreadAttribute:
+                this.visitJsxSpreadAttribute(<ts.JsxSpreadAttribute> node);
+                break;
+
             case ts.SyntaxKind.LabeledStatement:
                 this.visitLabeledStatement(<ts.LabeledStatement> node);
                 break;
@@ -582,6 +602,10 @@ export class SyntaxWalker {
 
             case ts.SyntaxKind.TryStatement:
                 this.visitTryStatement(<ts.TryStatement> node);
+                break;
+
+            case ts.SyntaxKind.TypeAliasDeclaration:
+                this.visitTypeAliasDeclaration(<ts.TypeAliasDeclaration> node);
                 break;
 
             case ts.SyntaxKind.TypeAssertionExpression:

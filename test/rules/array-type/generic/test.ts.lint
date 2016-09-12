@@ -1,0 +1,48 @@
+let x: Array<number> = [1] as number[];
+                              ~~~~~~~~  [Array type using 'T[]' is forbidden. Use 'Array<T>' instead.]
+let y: string[] = <Array<string>>["2"];
+       ~~~~~~~~                         [Array type using 'T[]' is forbidden. Use 'Array<T>' instead.]
+let z: Array = [3, "4"];
+
+let xx: Array<Array<number>> = [[1, 2], [3]];
+let yy: number[][] = [[4, 5], [6]];
+        ~~~~~~~~~~                  [Array type using 'T[]' is forbidden. Use 'Array<T>' instead.]
+        ~~~~~~~~                    [Array type using 'T[]' is forbidden. Use 'Array<T>' instead.]
+
+type Arr<T> = Array<T>;
+
+// Ignore user defined aliases
+let yyyy: Arr<Array<Arr<string>>[]> = [[[["2"]]]];
+              ~~~~~~~~~~~~~~~~~~~~                 [Array type using 'T[]' is forbidden. Use 'Array<T>' instead.]
+
+interface ArrayClass<T> {
+    foo: Array<T>;
+    bar: T[];
+         ~~~  [Array type using 'T[]' is forbidden. Use 'Array<T>' instead.]
+    baz: Arr<T>;
+}
+
+function fooFunction(foo: Array<ArrayClass<string>>) {
+    return foo.map(e => e.foo);
+}
+
+function barFunction(bar: ArrayClass<String>[]) {
+                          ~~~~~~~~~~~~~~~~~~~~    [Array type using 'T[]' is forbidden. Use 'Array<T>' instead.]
+    return bar.map(e => e.bar);
+}
+
+function bazFunction(baz: Arr<ArrayClass<String>>) {
+    return baz.map(e => e.baz);
+}
+
+let fooVar: Array<(c: number) => number>;
+let barVar: ((c: number) => number)[];
+            ~~~~~~~~~~~~~~~~~~~~~~~~~  [Array type using 'T[]' is forbidden. Use 'Array<T>' instead.]
+
+type fooUnion = Array<string|number|boolean>;
+type barUnion = (string|number|boolean)[];
+                ~~~~~~~~~~~~~~~~~~~~~~~~~  [Array type using 'T[]' is forbidden. Use 'Array<T>' instead.]
+
+type fooIntersection = Array<string & number>;
+type barIntersection = (string & number)[];
+                       ~~~~~~~~~~~~~~~~~~~  [Array type using 'T[]' is forbidden. Use 'Array<T>' instead.]
