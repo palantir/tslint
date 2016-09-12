@@ -86,6 +86,10 @@ export class SyntaxWalker {
         this.walkChildren(node);
     }
 
+    protected visitConstructSignature(node: ts.ConstructSignatureDeclaration) {
+        this.walkChildren(node);
+    }
+
     protected visitConstructorDeclaration(node: ts.ConstructorDeclaration) {
         this.walkChildren(node);
     }
@@ -294,6 +298,10 @@ export class SyntaxWalker {
         this.walkChildren(node);
     }
 
+    protected visitTupleType(node: ts.TupleTypeNode) {
+        this.walkChildren(node);
+    }
+
     protected visitTypeAliasDeclaration(node: ts.TypeAliasDeclaration) {
         this.walkChildren(node);
     }
@@ -390,6 +398,10 @@ export class SyntaxWalker {
 
             case ts.SyntaxKind.ConditionalExpression:
                 this.visitConditionalExpression(<ts.ConditionalExpression> node);
+                break;
+
+            case ts.SyntaxKind.ConstructSignature:
+                this.visitConstructSignature(<ts.ConstructSignatureDeclaration> node);
                 break;
 
             case ts.SyntaxKind.Constructor:
@@ -602,6 +614,10 @@ export class SyntaxWalker {
 
             case ts.SyntaxKind.TryStatement:
                 this.visitTryStatement(<ts.TryStatement> node);
+                break;
+
+            case ts.SyntaxKind.TupleType:
+                this.visitTupleType(<ts.TupleTypeNode> node);
                 break;
 
             case ts.SyntaxKind.TypeAliasDeclaration:
