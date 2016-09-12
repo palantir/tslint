@@ -19,6 +19,8 @@ import * as ts from "typescript";
 
 import * as Lint from "../lint";
 
+import { IDisabledInterval } from "../language/rule/rule";
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -38,6 +40,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
+    public static URL_REGEXP = /[^:/?#]:\/\/[^?#]/;
+
     public static FAILURE_STRING_FACTORY = (lineLimit: number) => {
         return `Exceeds maximum line length of ${lineLimit}`;
     };
@@ -53,8 +57,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        const ruleArgs = this.getOptions().ruleArguments;
         const ruleFailures: Lint.RuleFailure[] = [];
-        const lineLimit = this.getOptions().ruleArguments[0];
+        const lineLimit = ruleArgs[0];
         const lineStarts = sourceFile.getLineStarts();
         const errorString = Rule.FAILURE_STRING_FACTORY(lineLimit);
         const disabledIntervals = this.getOptions().disabledIntervals;
@@ -71,11 +76,73 @@ export class Rule extends Lint.Rules.AbstractRule {
                 // (and thus we are not actually over the limit).
                 const ruleFailure = new Lint.RuleFailure(sourceFile, from, to - 1, errorString, this.getOptions().ruleName);
                 if (!Lint.doesIntersect(ruleFailure, disabledIntervals)) {
-                    ruleFailures.push(ruleFailure);
+                    let report = true;
+                    if (ruleArgs.indexOf("ignoreUrls") > -1) {
+                        const lineContent = source.substring(from, to);
+                        report = !Rule.URL_REGEXP.test(lineContent);
+                    }
+                    if (report) {
+                        ruleFailures.push(ruleFailure);
+                    }
                 }
             }
-          }
-
-        return ruleFailures;
+        }
+        return this.applyWithWalker(new MaxLineLengthWalker(ruleFailures, sourceFile, this.getOptions()));
     }
+}
+
+class MaxLineLengthWalker extends Lint.SkippableTokenAwareRuleWalker {
+    protected ruleFailures: Lint.RuleFailure[];
+    private ignoredIntervals: IDisabledInterval[] = [];
+
+    constructor(ruleFailures: Lint.RuleFailure[], sourceFile: ts.SourceFile, options: Lint.IOptions) {
+        super(sourceFile, options);
+        this.ruleFailures = ruleFailures;
+    }
+
+    public visitSourceFile(node: ts.SourceFile) {
+        super.visitSourceFile(node);
+
+        Lint.scanAllTokens(ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, node.text), (scanner: ts.Scanner) => {
+            const token = scanner.getToken();
+            const startPos = scanner.getStartPos();
+            if (this.tokensToSkipStartEndMap[startPos] != null) {
+                // tokens to skip are places where the scanner gets confused about what the token is, without the proper context
+                // (specifically, regex, identifiers, and templates). So skip those tokens.
+                scanner.setTextPos(this.tokensToSkipStartEndMap[startPos]);
+                return;
+            }
+
+            if (token === ts.SyntaxKind.SingleLineCommentTrivia || token === ts.SyntaxKind.MultiLineCommentTrivia) {
+                const commentText = scanner.getTokenText();
+                const width = commentText.length;
+                if (this.hasOption("ignoreComments")) {
+                    this.ignoredIntervals.push({
+                        endPosition: startPos + width,
+                        startPosition: startPos,
+                    });
+                }
+            }
+        });
+
+        this.ruleFailures.forEach(failure => {
+            if (!Lint.doesIntersect(failure, this.ignoredIntervals)) {
+                this.addFailure(failure);
+            }
+        });
+    }
+
+    protected visitImportDeclaration(node: ts.ImportDeclaration) {
+        super.visitImportDeclaration(node);
+        // We only care to see if the module specifier, not the whole import declaration
+        const startPos = node.moduleSpecifier.getStart();
+        const text = node.moduleSpecifier.getText();
+        if (this.hasOption("ignoreImports")) {
+            this.ignoredIntervals.push({
+                endPosition: startPos + text.length,
+                startPosition: startPos,
+            });
+        }
+    }
+
 }
