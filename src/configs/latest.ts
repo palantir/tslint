@@ -17,6 +17,7 @@
 
 export const rules = {
     "adjacent-overload-signatures": true,
+    "cyclomatic-complexity": false,
     "no-unsafe-finally": true,
     "object-literal-key-quotes": [true, "as-needed"],
     "object-literal-shorthand": true,
