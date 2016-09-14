@@ -455,7 +455,7 @@ interface ITest<A ,B, C> {
     >(
         bar: U,
         baz: U,
-        ack: V 
+        ack: V
     ): ITest<
         U,
         U,
