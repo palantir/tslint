@@ -26,15 +26,24 @@ export class Formatter extends AbstractFormatter {
             return "\n";
         }
 
-        const fileName        = failures[0].getFileName();
+        const outputLines: Array<string> = [];
+
         const positionMaxSize = this.getPositionMaxSize(failures);
         const ruleMaxSize     = this.getRuleMaxSize(failures);
 
-        const outputLines = [
-            fileName,
-        ];
+        let currentFile: string;
 
         for (const failure of failures) {
+            // File name for each new file
+            const fileName = failure.getFileName();
+            if (currentFile !== fileName) {
+                if (currentFile) {
+                    outputLines.push("");
+                }
+                outputLines.push(fileName);
+                currentFile = fileName;
+            }
+
             const failureString = failure.getFailure();
 
             // Rule
