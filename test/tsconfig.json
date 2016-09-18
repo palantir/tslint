@@ -164,6 +164,7 @@
         "utilsTests.ts",
         "formatters/checkstyleFormatterTests.ts",
         "formatters/externalFormatterTest.ts",
+        "formatters/filelistFormatterTests.ts",
         "formatters/jsonFormatterTests.ts",
         "formatters/msbuildFormatterTests.ts",
         "formatters/pmdFormatterTests.ts",
