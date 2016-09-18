@@ -40,6 +40,7 @@
         "../src/formatterLoader.ts",
         "../src/formatters.ts",
         "../src/formatters/checkstyleFormatter.ts",
+        "../src/formatters/filelistFormatter.ts",
         "../src/formatters/index.ts",
         "../src/formatters/jsonFormatter.ts",
         "../src/formatters/msbuildFormatter.ts",
