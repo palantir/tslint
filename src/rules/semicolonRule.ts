@@ -34,7 +34,8 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"${OPTION_ALWAYS}"\` enforces semicolons at the end of every statement.
             * \`"${OPTION_NEVER}"\` disallows semicolons at the end of every statement except for when they are necessary.
 
-            The following arguments may be optionaly provided:
+            The following arguments may be optionally provided:
+
             * \`"${OPTION_IGNORE_INTERFACES}"\` skips checking semicolons at the end of interface members.`,
         options: {
             type: "array",
