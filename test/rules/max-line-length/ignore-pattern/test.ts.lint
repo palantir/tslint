@@ -1,0 +1,40 @@
+import { obj1, obj2, obj3, obj4 } from 'my-favorite-module/with/lots/of/deep/nested/modules';
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Exceeds maximum line length of 50]
+
+import {
+    obj1,
+    obj2,
+    obj3,
+    obj4,
+} from 'my-favorite-module/with/lots/of/deep/nested/modules';
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Exceeds maximum line length of 50]
+
+import {
+    obj1, obj2, obj3, obj4, just, trying, to, be, a, rebel, here
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Exceeds maximum line length of 50]
+} from 'my-favorite-module/with/lots/of/deep/nested/modules';
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Exceeds maximum line length of 50]
+
+var dep = require('really/really/really/really/really/really/really/really/long/module');
+const dep = require('another/really/really/really/really/really/really/really/really/long/module');
+
+let dep = require('this/really/really/really/long/module/is/not/allowed');
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Exceeds maximum line length of 50]
+
+var simpleName = 1;
+var complicatedNameIsAcomplicatedNameIsAcomplicatedName;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Exceeds maximum line length of 50]
+
+var complicatedNameIsAcomplicatedNameIsAcomplicat;
+
+var url = 'http://palantir.github.io/tslint/usage/third-party-tools/';
+
+                     foobar = 'this line will be ignored because it starts with foobar ...';
+
+/**
+ * This is a veryyyyyyyyyyyyyyyyyyyyyyyyyyyy loooooooooooooooonnnnnggggggggggggggg comment.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Exceeds maximum line length of 50]
+ */
+
+var complicatedNameIsAComplicatedName = 'Very Complicated!!!';  // Yup, it is complicated, that is all.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Exceeds maximum line length of 50]

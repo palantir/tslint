@@ -1,0 +1,12 @@
+{
+  "rules": {
+    "max-line-length": [
+      true,
+      {
+        "code": 50,
+        "ignore-pattern": "^\\s*(var|const)\\s.+=\\s*require\\s*\\(|^\\s*foobar",
+        "ignore-urls": "always"
+      }
+    ]
+  }
+}
