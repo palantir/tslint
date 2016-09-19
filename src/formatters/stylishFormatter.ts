@@ -26,20 +26,18 @@ export class Formatter extends AbstractFormatter {
             return "\n";
         }
 
-        const outputLines: Array<string> = [];
-
-        const positionMaxSize = this.getPositionMaxSize(failures);
-        const ruleMaxSize     = this.getRuleMaxSize(failures);
+        const outputLines: string[] = [];
+        const positionMaxSize       = this.getPositionMaxSize(failures);
+        const ruleMaxSize           = this.getRuleMaxSize(failures);
 
         let currentFile: string;
 
         for (const failure of failures) {
-            // File name for each new file
             const fileName = failure.getFileName();
+
+            // Output the name of each file once
             if (currentFile !== fileName) {
-                if (currentFile) {
-                    outputLines.push("");
-                }
+                outputLines.push("");
                 outputLines.push(fileName);
                 currentFile = fileName;
             }
@@ -62,6 +60,11 @@ export class Formatter extends AbstractFormatter {
             const output = `${positionTuple}  ${ruleName}  ${failureString}`;
 
             outputLines.push(output);
+        }
+
+        // Removes initial blank line
+        if (outputLines[0] === "") {
+            outputLines.shift();
         }
 
         return outputLines.join("\n") + "\n\n";
