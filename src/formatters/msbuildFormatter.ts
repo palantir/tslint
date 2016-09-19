@@ -25,8 +25,9 @@ export class Formatter extends AbstractFormatter {
     public static metadata: IFormatterMetadata = {
         formatterName: "msbuild",
         description: "Formats errors for consumption by msbuild.",
-        descriptionDetails: Utils.dedent`The output is compatible with both msbuild and Visual
-            Studio. All failures have the 'warning' severity.`,
+        descriptionDetails: Utils.dedent`
+            The output is compatible with both msbuild and Visual Studio. All failures have the
+            'warning' severity.`,
         sample: "TODO",
         consumer: "machine",
     };

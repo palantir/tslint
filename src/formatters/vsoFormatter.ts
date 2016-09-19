@@ -25,8 +25,9 @@ export class Formatter extends AbstractFormatter {
     public static metadata: IFormatterMetadata = {
         formatterName: "vso",
         description: "Formats output as VSO/TFS logging commands.",
-        descriptionDetails: Utils.dedent`Integrates with Visual Studio Online and Team
-            Foundation Server by outputting errors as 'warning' logging commands.`,
+        descriptionDetails: Utils.dedent`
+            Integrates with Visual Studio Online and Team Foundation Server by outputting errors
+            as 'warning' logging commands.`,
         sample: "TODO",
         consumer: "machine",
     };

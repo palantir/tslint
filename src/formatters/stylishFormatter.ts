@@ -28,8 +28,9 @@ export class Formatter extends AbstractFormatter {
     public static metadata: IFormatterMetadata = {
         formatterName: "stylish",
         description: "Human-readable formatter which creates stylish messages.",
-        descriptionDetails: Utils.dedent`The output matches that produced by eslint's stylish
-            formatter. Its readability enhanced through spacing and colouring`,
+        descriptionDetails: Utils.dedent`
+            The output matches that produced by eslint's stylish formatter. Its readability
+            enhanced through spacing and colouring`,
         sample: "TODO",
         consumer: "human",
     };

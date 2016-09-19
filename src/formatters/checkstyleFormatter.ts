@@ -9,8 +9,8 @@ export class Formatter extends AbstractFormatter {
     public static metadata: IFormatterMetadata = {
         formatterName: "checkstyle",
         description: "Formats errors as through they were Checkstyle output.",
-        descriptionDetails: Utils.dedent`Imitates the XMLLogger from Checkstyle 4.3. All
-            failures have the 'warning' severity.`,
+        descriptionDetails: Utils.dedent`
+            Imitates the XMLLogger from Checkstyle 4.3. All failures have the 'warning' severity.`,
         sample: "TODO",
         consumer: "machine",
     };

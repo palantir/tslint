@@ -19,15 +19,12 @@ import {AbstractFormatter} from "../language/formatter/abstractFormatter";
 import {IFormatterMetadata} from "../language/formatter/formatter";
 import {RuleFailure} from "../language/rule/rule";
 
-import * as Utils from "../utils";
-
 export class Formatter extends AbstractFormatter {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: IFormatterMetadata = {
         formatterName: "verbose",
         description: "The human-readable formatter which includes the rule name in messages.",
-        descriptionDetails: Utils.dedent`The output is the same as the prose formatter with
-            the rule name included`,
+        descriptionDetails: "The output is the same as the prose formatter with the rule name included",
         sample: "TODO",
         consumer: "human",
     };
