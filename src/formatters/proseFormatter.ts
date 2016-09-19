@@ -20,6 +20,10 @@ import {RuleFailure} from "../language/rule/rule";
 
 export class Formatter extends AbstractFormatter {
     public format(failures: RuleFailure[]): string {
+        if (failures.length === 0) {
+            return "";
+        }
+
         const outputLines = failures.map((failure: RuleFailure) => {
             const fileName = failure.getFileName();
             const failureString = failure.getFailure();

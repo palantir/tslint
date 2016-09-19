@@ -137,6 +137,7 @@
         "rules/oneVariablePerDeclarationRule.ts",
         "rules/onlyArrowFunctionsRule.ts",
         "rules/orderedImportsRule.ts",
+        "rules/preferForOfRule.ts",
         "rules/quotemarkRule.ts",
         "rules/radixRule.ts",
         "rules/restrictPlusOperandsRule.ts",
