@@ -20,7 +20,7 @@ import {RuleFailure} from "../language/rule/rule";
 
 export class Formatter extends AbstractFormatter {
     public format(failures: RuleFailure[]): string {
-        if (!failures.length) {
+        if (failures.length === 0) {
             return "";
         }
 
