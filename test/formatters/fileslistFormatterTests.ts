@@ -18,13 +18,13 @@ import * as ts from "typescript";
 
 import {IFormatter, RuleFailure, TestUtils} from "../lint";
 
-describe("File-list Formatter", () => {
-    const TEST_FILE = "formatters/filelistFormatter.test.ts";
+describe("Files-list Formatter", () => {
+    const TEST_FILE = "formatters/fileslistFormatter.test.ts";
     let sourceFile: ts.SourceFile;
     let formatter: IFormatter;
 
     before(() => {
-        const Formatter = TestUtils.getFormatter("filelist");
+        const Formatter = TestUtils.getFormatter("fileslist");
         sourceFile = TestUtils.getSourceFile(TEST_FILE);
         formatter = new Formatter();
     });

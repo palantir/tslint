@@ -20,14 +20,16 @@ import {RuleFailure} from "../language/rule/rule";
 
 export class Formatter extends AbstractFormatter {
     public format(failures: RuleFailure[]): string {
-        const files: Array<string> = [];
+        const files: string[] = [];
+        let currentFile: string;
 
-        failures.forEach((failure: RuleFailure) => {
+        for (const failure of failures) {
             const fileName = failure.getFileName();
-            if (files.indexOf(fileName) === -1) {
+            if (fileName !== currentFile) {
                 files.push(fileName);
+                currentFile = fileName;
             }
-        });
+        }
 
         return files.join("\n") + "\n";
     }

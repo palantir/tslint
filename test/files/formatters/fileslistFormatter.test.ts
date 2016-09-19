@@ -1,5 +1,5 @@
-module FileListModule {
-    export class FileListClass {
+module FilesListModule {
+    export class FilesListClass {
         name: string;
 
         constructor(name: string) {
