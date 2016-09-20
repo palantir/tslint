@@ -31,7 +31,9 @@ export class Formatter extends AbstractFormatter {
         descriptionDetails: Utils.dedent`
             The output matches that produced by eslint's stylish formatter. Its readability
             enhanced through spacing and colouring`,
-        sample: "TODO",
+        sample: Utils.dedent`
+        myFile.ts
+        1:14  semicolon  Missing semicolon`,
         consumer: "human",
     };
     /* tslint:enable:object-literal-sort-keys */

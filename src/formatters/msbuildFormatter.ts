@@ -28,7 +28,7 @@ export class Formatter extends AbstractFormatter {
         descriptionDetails: Utils.dedent`
             The output is compatible with both msbuild and Visual Studio. All failures have the
             'warning' severity.`,
-        sample: "TODO",
+        sample: "myFile.ts(1,14): warning: Missing semicolon",
         consumer: "machine",
     };
     /* tslint:enable:object-literal-sort-keys */
