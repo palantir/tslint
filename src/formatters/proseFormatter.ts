@@ -30,6 +30,10 @@ export class Formatter extends AbstractFormatter {
     /* tslint:enable:object-literal-sort-keys */
 
     public format(failures: RuleFailure[]): string {
+        if (failures.length === 0) {
+            return "";
+        }
+
         const outputLines = failures.map((failure: RuleFailure) => {
             const fileName = failure.getFileName();
             const failureString = failure.getFailure();

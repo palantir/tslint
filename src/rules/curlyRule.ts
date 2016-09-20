@@ -61,12 +61,12 @@ class CurlyWalker extends Lint.RuleWalker {
         super.visitForInStatement(node);
     }
 
-    public visitForOfStatement(node: ts.ForInStatement) {
+    public visitForOfStatement(node: ts.ForOfStatement) {
         if (!isStatementBraced(node.statement)) {
             this.addFailureForNode(node, Rule.FOR_FAILURE_STRING);
         }
 
-        super.visitForInStatement(node);
+        super.visitForOfStatement(node);
     }
 
     public visitForStatement(node: ts.ForStatement) {

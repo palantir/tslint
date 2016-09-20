@@ -2,8 +2,7 @@ var v = [{
     a: 1,
     b: 2,
     d: 34,
-    c: (a + b),
-              ~ [Unnecessary trailing comma]
+    c: (a + b)
 },];
 
 var x = [{
@@ -14,8 +13,7 @@ var x = [{
 }];
 
 var s = {
-    sA: 6,
-         ~ [Unnecessary trailing comma]
+    sA: 6
 };
 
 var t = {
@@ -24,8 +22,7 @@ var t = {
 
 var y = {
     yA: 42,
-    yB: 24,
-          ~ [Unnecessary trailing comma]
+    yB: 24
 };
 
 var z = {
@@ -34,8 +31,7 @@ var z = {
 };
 
 var ss = [
-    6,
-     ~ [Unnecessary trailing comma]
+    6
 ];
 
 var tt = [
@@ -44,8 +40,7 @@ var tt = [
 
 var yy = [
     42,
-    24,
-      ~ [Unnecessary trailing comma]
+    24
 ];
 
 var zz = [
@@ -66,8 +61,7 @@ var cc = [42, 24,];
 var dd = [2, 1];
 
 var {
-    sA,
-      ~ [Unnecessary trailing comma]
+    sA
 } = s;
 
 var {
@@ -76,8 +70,7 @@ var {
 
 var {
     yA,
-    yB,
-      ~ [Unnecessary trailing comma]
+    yB
 } = y;
 
 var {
@@ -86,8 +79,7 @@ var {
 } = z;
 
 var [
-    ssA,
-       ~ [Unnecessary trailing comma]
+    ssA
 ] = ss;
 
 var [
@@ -96,8 +88,7 @@ var [
 
 var [
     yyA,
-    yyB,
-       ~ [Unnecessary trailing comma]
+    yyB
 ] = yy;
 
 var [
@@ -124,13 +115,11 @@ var a: [
 
 var a: [
     string,
-    number,
-          ~ [Unnecessary trailing comma]
+    number
 ] = null;
 
 import {
-    ClassS,
-          ~ [Unnecessary trailing comma]
+    ClassS
 } from "module";
 
 import {
@@ -139,8 +128,7 @@ import {
 
 import {
     ClassV,
-    ClassX,
-          ~ [Unnecessary trailing comma]
+    ClassX
 } from "module";
 
 import {
@@ -163,8 +151,7 @@ function foo(
 
 function foo(
     bar: string,
-    baz: string,
-               ~ [Unnecessary trailing comma]
+    baz: string
 );
 
 var foo = function(bar: string, baz: string) { return 42; };
@@ -180,8 +167,7 @@ var foo = function(
 
 var foo = function(
     bar: string,
-    baz: string,
-               ~ [Unnecessary trailing comma]
+    baz: string
 ) {
     return 42;
 };
@@ -199,8 +185,7 @@ function foo(
 
 function foo(
     bar: string,
-    baz: string,
-               ~ [Unnecessary trailing comma]
+    baz: string
 ) {
     return 42;
 }
@@ -212,8 +197,7 @@ function foo(bar: string, baz: string,
 }
 
 function foo(bar: string, baz: string,
-    ack: string,
-               ~ [Unnecessary trailing comma]
+    ack: string
 ) {
     return 42;
 }
@@ -229,8 +213,7 @@ var foo = (
 
 var foo = (
     bar: string,
-    baz: string,
-               ~ [Unnecessary trailing comma]
+    baz: string
 ) => 42;
 
 var foo: (bar: string, baz: string) => number = null;
@@ -244,8 +227,7 @@ var foo: (
 
 var foo: (
     bar: string,
-    baz: string,
-               ~ [Unnecessary trailing comma]
+    baz: string
 ) => number = null;
 
 var foo: (bar: string, baz: string) => number;
@@ -259,8 +241,7 @@ var foo: (
 
 var foo: (
     bar: string,
-    baz: string,
-               ~ [Unnecessary trailing comma]
+    baz: string
 ) => number;
 
 var foo: new (bar: string, baz: string) => Test;
@@ -274,8 +255,7 @@ var foo: new (
 
 var foo: new (
     bar: string,
-    baz: string,
-               ~ [Unnecessary trailing comma]
+    baz: string
 ) => Test;
 
 var x = foo(42, 43);
@@ -289,8 +269,7 @@ var x = foo(
 
 var x = foo(
     42,
-    43,
-      ~ [Unnecessary trailing comma]
+    43
 );
 
 var x = new Test("foo");
@@ -302,8 +281,7 @@ var x = new Test(
 );
 
 var x = new Test(
-    "foo",
-         ~ [Unnecessary trailing comma]
+    "foo"
 );
 
 var x: { foo: string; bar: string };
@@ -331,8 +309,7 @@ var x: {
 
 var x: {
     foo: string,
-    bar: string,
-               ~ [Unnecessary trailing comma]
+    bar: string
 };
 
 class Test<A, B, C> {
@@ -351,8 +328,7 @@ class Test<A, B, C> {
         bar: string,
         baz: string,
         ack: string,
-        foo: string,
-                   ~ [Unnecessary trailing comma]
+        foo: string
     ) { }
 
     public foo(bar: string, baz: string) {
@@ -372,8 +348,7 @@ class Test<A, B, C> {
 
     private static foo4(
         bar: string,
-        baz: string,
-                   ~ [Unnecessary trailing comma]
+        baz: string
     ) {
         return 42;
     }
@@ -388,15 +363,13 @@ class Test<A, B, C> {
             ],
             [
                 C,
-                C,
-                 ~ [Unnecessary trailing comma]
+                C
             ]
             C
         >
     >(
         bar: A,
-        baz: T,
-              ~ [Unnecessary trailing comma]
+        baz: T
     ) {
         return 42;
     }
@@ -411,11 +384,9 @@ class Test<A, B, C> {
         W extends {
             foo: [
                 string,
-                string,
-                      ~ [Unnecessary trailing comma]
+                string
             ];
-        },
-         ~ [Unnecessary trailing comma]
+        }
     >() { return 42; }
 }
 
@@ -430,8 +401,7 @@ class Test3<
 class Test4<
     A,
     B,
-    C,
-     ~ [Unnecessary trailing comma]
+    C
 > { }
 
 interface ITest<A ,B, C> {
@@ -446,8 +416,7 @@ interface ITest<A ,B, C> {
 
     foo4(
         bar: string,
-        baz: string,
-                   ~ [Unnecessary trailing comma]
+        baz: string
     );
 
     foo5<
@@ -460,15 +429,13 @@ interface ITest<A ,B, C> {
             ],
             [
                 C,
-                C,
-                 ~ [Unnecessary trailing comma]
+                C
             ]
             C
         >
     >(
         bar: A,
-        baz: T,
-              ~ [Unnecessary trailing comma]
+        baz: T
     );
 
     foo6<
@@ -498,8 +465,7 @@ interface ITest3<
 interface ITest4<
     A,
     B,
-    C,
-     ~ [Unnecessary trailing comma]
+    C
 > { }
 
 enum Foo { BAR, BAZ }
@@ -513,8 +479,7 @@ enum Foo {
 
 enum Foo {
     Bar,
-    Baz,
-       ~ [Unnecessary trailing comma]
+    Baz
 }
 
 const enum Foo { BAR = 1, BAZ = 2 }
@@ -528,7 +493,6 @@ const enum Foo {
 
 const enum Foo {
     Bar = 1,
-    Baz = 2,
-           ~ [Unnecessary trailing comma]
+    Baz = 2
 }
 
