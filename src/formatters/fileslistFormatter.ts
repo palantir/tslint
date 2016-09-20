@@ -15,9 +15,22 @@
  * limitations under the License.
  */
 
-export { Formatter as JsonFormatter } from "./jsonFormatter";
-export { Formatter as PmdFormatter } from "./pmdFormatter";
-export { Formatter as ProseFormatter } from "./proseFormatter";
-export { Formatter as VerboseFormatter } from "./verboseFormatter";
-export { Formatter as StylishFormatter } from "./stylishFormatter";
-export { Formatter as FileslistFormatter } from "./fileslistFormatter";
+import {AbstractFormatter} from "../language/formatter/abstractFormatter";
+import {RuleFailure} from "../language/rule/rule";
+
+export class Formatter extends AbstractFormatter {
+    public format(failures: RuleFailure[]): string {
+        const files: string[] = [];
+        let currentFile: string;
+
+        for (const failure of failures) {
+            const fileName = failure.getFileName();
+            if (fileName !== currentFile) {
+                files.push(fileName);
+                currentFile = fileName;
+            }
+        }
+
+        return files.join("\n") + "\n";
+    }
+}

@@ -80,7 +80,7 @@ let processed = optimist
         t: {
             alias: "format",
             default: "prose",
-            describe: "output format (prose, json, stylish, verbose, pmd, msbuild, checkstyle, vso)",
+            describe: "output format (prose, json, stylish, verbose, pmd, msbuild, checkstyle, vso, fileslist)",
         },
         test: {
             describe: "test that tslint produces the correct output for the specified directory",

@@ -48,6 +48,7 @@
         "configs/latest.ts",
         "configs/recommended.ts",
         "formatters/checkstyleFormatter.ts",
+        "formatters/fileslistFormatter.ts",
         "formatters/index.ts",
         "formatters/jsonFormatter.ts",
         "formatters/msbuildFormatter.ts",
