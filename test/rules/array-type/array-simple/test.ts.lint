@@ -15,7 +15,7 @@ type Arr<T> = Array<T>;
 
 // Ignore user defined aliases
 let yyyy: Arr<Array<Arr<string>>[]> = [[[["2"]]]];
-              ~~~~~~~~~~~~~~~~~~                   [Array type using 'Array<T>' is forbidden for simple types. Use 'T[]' instead.]
+              ~~~~~~~~~~~~~~~~~~~~                 [Array type using 'T[]' is forbidden for non-simple types. Use 'Array<T>' instead.]
 
 interface ArrayClass<T> {
     foo: Array<T>;
@@ -25,11 +25,11 @@ interface ArrayClass<T> {
 }
 
 function fooFunction(foo: Array<ArrayClass<string>>) {
-                          ~~~~~~~~~~~~~~~~~~~~~~~~~    [Array type using 'Array<T>' is forbidden for simple types. Use 'T[]' instead.]
     return foo.map(e => e.foo);
 }
 
 function barFunction(bar: ArrayClass<String>[]) {
+                          ~~~~~~~~~~~~~~~~~~~~    [Array type using 'T[]' is forbidden for non-simple types. Use 'Array<T>' instead.]
     return bar.map(e => e.bar);
 }
 
@@ -39,12 +39,23 @@ function bazFunction(baz: Arr<ArrayClass<String>>) {
 
 let fooVar: Array<(c: number) => number>;
 let barVar: ((c: number) => number)[];
-            ~~~~~~~~~~~~~~~~~~~~~~~~~  [Array type using 'T[]' is forbidden for simple types. Use 'Array<T>' instead.]
+            ~~~~~~~~~~~~~~~~~~~~~~~~~  [Array type using 'T[]' is forbidden for non-simple types. Use 'Array<T>' instead.]
 
 type fooUnion = Array<string|number|boolean>;
 type barUnion = (string|number|boolean)[];
-                ~~~~~~~~~~~~~~~~~~~~~~~~~  [Array type using 'T[]' is forbidden for simple types. Use 'Array<T>' instead.]
+                ~~~~~~~~~~~~~~~~~~~~~~~~~  [Array type using 'T[]' is forbidden for non-simple types. Use 'Array<T>' instead.]
 
 type fooIntersection = Array<string & number>;
 type barIntersection = (string & number)[];
-                       ~~~~~~~~~~~~~~~~~~~  [Array type using 'T[]' is forbidden for simple types. Use 'Array<T>' instead.]
+                       ~~~~~~~~~~~~~~~~~~~  [Array type using 'T[]' is forbidden for non-simple types. Use 'Array<T>' instead.]
+
+namespace fooName {
+    type BarType =  { bar: string };
+    type BazType<T> = Arr<T>;
+}
+
+let v: Array<fooName.BarType> = [{ bar: "bar" }];
+       ~~~~~~~~~~~~~~~~~~~~~~                     [Array type using 'Array<T>' is forbidden for simple types. Use 'T[]' instead.]
+
+let w: fooName.BazType<string>[] = [["baz"]];
+       ~~~~~~~~~~~~~~~~~~~~~~~~~              [Array type using 'T[]' is forbidden for non-simple types. Use 'Array<T>' instead.]

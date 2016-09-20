@@ -14,9 +14,9 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: Lint.Utils.dedent`
             One of the following arguments must be provided:
 
-            * \`"${OPTION_ARRAY}"\` enforces use of 'T[]'.
-            * \`"${OPTION_GENERIC}"\` enforces use of 'Array<T>'.
-            * \`"${OPTION_ARRAY_SIMPLE}"\` enforces use of 'T[]' if 'T' is a simple type (primitive or type reference).`,
+            * \`"${OPTION_ARRAY}"\` enforces use of \`T[]\` for all types T.
+            * \`"${OPTION_GENERIC}"\` enforces use of \`Array<T>\` for all types T.
+            * \`"${OPTION_ARRAY_SIMPLE}"\` enforces use of \`T[]\` if \`T\` is a simple type (primitive or type reference).`,
         options: {
             type: "string",
             enum: [OPTION_ARRAY, OPTION_GENERIC, OPTION_ARRAY_SIMPLE],
@@ -29,7 +29,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_ARRAY = "Array type using 'Array<T>' is forbidden. Use 'T[]' instead.";
     public static FAILURE_STRING_GENERIC = "Array type using 'T[]' is forbidden. Use 'Array<T>' instead.";
     public static FAILURE_STRING_ARRAY_SIMPLE = "Array type using 'Array<T>' is forbidden for simple types. Use 'T[]' instead.";
-    public static FAILURE_STRING_GENERIC_SIMPLE = "Array type using 'T[]' is forbidden for simple types. Use 'Array<T>' instead.";
+    public static FAILURE_STRING_GENERIC_SIMPLE = "Array type using 'T[]' is forbidden for non-simple types. Use 'Array<T>' instead.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const alignWalker = new ArrayTypeWalker(sourceFile, this.getOptions());
@@ -85,8 +85,6 @@ class ArrayTypeWalker extends Lint.RuleWalker {
     }
 
     private isSimpleType(nodeType: ts.TypeNode) {
-        // tslint:disable-next-line:no-console
-        console.log(ts.SyntaxKind[nodeType.kind]);
         switch (nodeType.kind) {
             case ts.SyntaxKind.AnyKeyword:
             case ts.SyntaxKind.ArrayType:
@@ -95,9 +93,17 @@ class ArrayTypeWalker extends Lint.RuleWalker {
             case ts.SyntaxKind.NumberKeyword:
             case ts.SyntaxKind.StringKeyword:
             case ts.SyntaxKind.SymbolKeyword:
-            case ts.SyntaxKind.TypeReference:
             case ts.SyntaxKind.VoidKeyword:
                 return true;
+            case ts.SyntaxKind.TypeReference:
+                // TypeReferences must be non-generic or be another Array with a simple type
+                const node = nodeType as ts.TypeReferenceNode;
+                const typeArgs = node.typeArguments;
+                if (!typeArgs || typeArgs.length === 0 || node.typeName.getText() === "Array" && this.isSimpleType(typeArgs[0])) {
+                    return true;
+                } else {
+                    return false;
+                }
             default:
                 return false;
         }
