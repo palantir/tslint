@@ -10,6 +10,9 @@ let xx: Array<Array<number>> = [[1, 2], [3]];
               ~~~~~~~~~~~~~                   [Array type using 'Array<T>' is forbidden for simple types. Use 'T[]' instead.]
 let yy: number[][] = [[4, 5], [6]];
 
+let ya = [[1, "2"]] as[number, string][];
+                      ~~~~~~~~~~~~~~~~~~  [Array type using 'T[]' is forbidden for non-simple types. Use 'Array<T>' instead.]
+
 type Arr<T> = Array<T>;
               ~~~~~~~~  [Array type using 'Array<T>' is forbidden for simple types. Use 'T[]' instead.]
 
@@ -50,7 +53,7 @@ type barIntersection = (string & number)[];
                        ~~~~~~~~~~~~~~~~~~~  [Array type using 'T[]' is forbidden for non-simple types. Use 'Array<T>' instead.]
 
 namespace fooName {
-    type BarType =  { bar: string };
+    type BarType = { bar: string };
     type BazType<T> = Arr<T>;
 }
 
@@ -59,3 +62,7 @@ let v: Array<fooName.BarType> = [{ bar: "bar" }];
 
 let w: fooName.BazType<string>[] = [["baz"]];
        ~~~~~~~~~~~~~~~~~~~~~~~~~              [Array type using 'T[]' is forbidden for non-simple types. Use 'Array<T>' instead.]
+
+interface FooInterface {
+    '.bar': {baz: string[];};
+}

@@ -9,6 +9,9 @@ let yy: number[][] = [[4, 5], [6]];
         ~~~~~~~~~~                  [Array type using 'T[]' is forbidden. Use 'Array<T>' instead.]
         ~~~~~~~~                    [Array type using 'T[]' is forbidden. Use 'Array<T>' instead.]
 
+let ya = [[1, "2"]] as[number, string][];
+                      ~~~~~~~~~~~~~~~~~~  [Array type using 'T[]' is forbidden. Use 'Array<T>' instead.]
+
 type Arr<T> = Array<T>;
 
 // Ignore user defined aliases
@@ -46,3 +49,8 @@ type barUnion = (string|number|boolean)[];
 type fooIntersection = Array<string & number>;
 type barIntersection = (string & number)[];
                        ~~~~~~~~~~~~~~~~~~~  [Array type using 'T[]' is forbidden. Use 'Array<T>' instead.]
+
+interface FooInterface {
+    '.bar': {baz: string[];};
+                  ~~~~~~~~    [Array type using 'T[]' is forbidden. Use 'Array<T>' instead.]
+}

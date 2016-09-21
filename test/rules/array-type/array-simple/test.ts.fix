@@ -5,6 +5,8 @@ let z: any[] = [3, "4"];
 let xx: number[][] = [[1, 2], [3]];
 let yy: number[][] = [[4, 5], [6]];
 
+let ya = [[1, "2"]] as Array<[number, string]>;
+
 type Arr<T> = T[];
 
 // Ignore user defined aliases
@@ -38,10 +40,14 @@ type fooIntersection = Array<string & number>;
 type barIntersection = Array<string & number>;
 
 namespace fooName {
-    type BarType =  { bar: string };
+    type BarType = { bar: string };
     type BazType<T> = Arr<T>;
 }
 
 let v: fooName.BarType[] = [{ bar: "bar" }];
 
 let w: Array<fooName.BazType<string>> = [["baz"]];
+
+interface FooInterface {
+    '.bar': {baz: string[];};
+}
