@@ -12,10 +12,10 @@ if (true)
     console.log("x");
 }
 
-if (true)
-~~~~~~~~~
-    console.log("z");
-~~~~~~~~~~~~~~~~~~~~~ [if-must]
+    if (true)
+    ~~~~~~~~~
+        console.log("z");
+~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
 
 
 if (true) { console.log("good"); }
@@ -57,16 +57,16 @@ else
     console.log("x");
 }
 
-if (true) { console.log("y"); }
-else
-~~~~
-    console.log("x");
-~~~~~~~~~~~~~~~~~~~~~ [else-must]
+    if (true) { console.log("y"); }
+    else
+    ~~~~
+        console.log("x");
+~~~~~~~~~~~~~~~~~~~~~~~~~ [else-must]
 
 for (i = 0; i < 1; ++i) { console.log(i); }
 
-for (i = 0; i < 1; ++i) console.log(i);
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [for-must]
+    for (i = 0; i < 1; ++i) console.log(i);
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [for-must]
 
 for (i = 0; i < 1; ++i) {
     console.log("i");
@@ -77,16 +77,16 @@ for (j = 0; j < 1; ++j)
     console.log("j");
 }
 
-for (k = 0; k < 1; ++k)
-~~~~~~~~~~~~~~~~~~~~~~~
-    console.log("k");
-~~~~~~~~~~~~~~~~~~~~~ [for-must]
+    for (k = 0; k < 1; ++k)
+    ~~~~~~~~~~~~~~~~~~~~~~~
+        console.log("k");
+~~~~~~~~~~~~~~~~~~~~~~~~~ [for-must]
 
 
 for (i in foo) { console.log(i); }
 
-for (i in foo) console.log(i);
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [for-must]
+    for (i in foo) console.log(i);
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [for-must]
 
 for (i in foo) {
     console.log("i");
@@ -97,16 +97,16 @@ for (i in foo)
     console.log("j");
 }
 
-for (i in foo)
-~~~~~~~~~~~~~~
-    console.log("k");
-~~~~~~~~~~~~~~~~~~~~~ [for-must]
+    for (i in foo)
+    ~~~~~~~~~~~~~~
+        console.log("k");
+~~~~~~~~~~~~~~~~~~~~~~~~~ [for-must]
 
 
 for (let x of [1, 2, 3]) { console.log(i); }
 
-for (let x of [1, 2, 3]) console.log(i);
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [for-must]
+    for (let x of [1, 2, 3]) console.log(i);
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [for-must]
 
 for (let x of [1, 2, 3]) {
     console.log("i");
@@ -117,16 +117,16 @@ for (let x of [1, 2, 3])
     console.log("j");
 }
 
-for (let x of [1, 2, 3])
-~~~~~~~~~~~~~~~~~~~~~~~~
-    console.log("k");
-~~~~~~~~~~~~~~~~~~~~~ [for-must]
+    for (let x of [1, 2, 3])
+    ~~~~~~~~~~~~~~~~~~~~~~~~
+        console.log("k");
+~~~~~~~~~~~~~~~~~~~~~~~~~ [for-must]
 
 
 while (m < 0) { console.log("q"); }
 
-while (m < 0) console.log("q");
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [while-must]
+    while (m < 0) console.log("q");
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [while-must]
 
 while (m < 0) {
     console.log("q");
@@ -137,16 +137,16 @@ while (n < 0)
     console.log("r");
 }
 
-while (n < 0)
-~~~~~~~~~~~~~
-    console.log("s");
-~~~~~~~~~~~~~~~~~~~~~ [while-must]
+    while (n < 0)
+    ~~~~~~~~~~~~~
+        console.log("s");
+~~~~~~~~~~~~~~~~~~~~~~~~~ [while-must]
 
 
 do { console.log("m"); } while (i == 1);
 
-do console.log("m"); while (i == 1);
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [do-must]
+    do console.log("m"); while (i == 1);
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [do-must]
 
 do {
     console.log("m");
@@ -158,12 +158,12 @@ do
 }
 while (j == 1);
 
-do
-~~
-    console.log("o");
-~~~~~~~~~~~~~~~~~~~~~
-while (k == 1);
-~~~~~~~~~~~~~~~ [do-must]
+    do
+    ~~
+        console.log("o");
+~~~~~~~~~~~~~~~~~~~~~~~~~
+    while (k == 1);
+~~~~~~~~~~~~~~~~~~~ [do-must]
 
 [if-must]: if statements must be braced
 [else-must]: else statements must be braced
