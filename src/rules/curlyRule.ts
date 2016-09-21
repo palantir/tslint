@@ -19,6 +19,12 @@ import * as ts from "typescript";
 
 import * as Lint from "../lint";
 
+const OPTION_ALL = "all";
+const OPTION_SAME_LINE_SINGLE_LINE = "same-line-single-line";
+const OPTION_SAME_LINE_MULTI_LINE = "same-line-multi-line";
+const OPTION_NEXT_LINE_SINGLE_LINE = "next-line-single-line";
+const OPTION_NEXT_LINE_MULTI_LINE = "next-line-multi-line";
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -34,18 +40,53 @@ export class Rule extends Lint.Rules.AbstractRule {
             In the code above, the author almost certainly meant for both \`foo++\` and \`bar++\`
             to be executed only if \`foo === bar\`. However, he forgot braces and \`bar++\` will be executed
             no matter what. This rule could prevent such a mistake.`,
-        optionsDescription: "Not configurable.",
-        options: null,
-        optionExamples: ["true"],
+        optionsDescription: Lint.Utils.dedent`
+        The rule may be set to \`true\`, or to any combination of these arguments:
+
+        * \`"${OPTION_ALL}"\` requires braces for all control-flow statements
+        * \`"${OPTION_SAME_LINE_SINGLE_LINE}"\` requires braces for control-flow statements
+          that are on one line and start on the same line as their control-flow keyword
+        * \`"${OPTION_SAME_LINE_MULTI_LINE}"\` requires braces for control-flow statements
+          that are split between multiple lines and start on the same line as their control-flow keyword
+        * \`"${OPTION_NEXT_LINE_SINGLE_LINE}"\` requires braces for control-flow statements
+          that are on one line and start on the line after their control-flow keyword
+        * \`"${OPTION_NEXT_LINE_MULTI_LINE}"\` requires braces for control-flow statements
+          that are split between multiple lines and start on the line after their control-flow keyword
+        `,
+        options: {
+            type: "array",
+            items: {
+                type: "string",
+                enum: [
+                    OPTION_ALL,
+                    OPTION_SAME_LINE_SINGLE_LINE,
+                    OPTION_SAME_LINE_MULTI_LINE,
+                    OPTION_NEXT_LINE_SINGLE_LINE,
+                    OPTION_NEXT_LINE_MULTI_LINE,
+                ],
+            },
+        },
+        optionExamples: ["true", '[true, "same-line-single-line"]'],
         type: "functionality",
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static DO_FAILURE_STRING = "do statements must be braced";
-    public static ELSE_FAILURE_STRING = "else statements must be braced";
-    public static FOR_FAILURE_STRING = "for statements must be braced";
-    public static IF_FAILURE_STRING = "if statements must be braced";
-    public static WHILE_FAILURE_STRING = "while statements must be braced";
+    public static SAME_LINE_STRING = "same-line";
+    public static NEXT_LINE_STRING = "next-line";
+    public static SINGLE_LINE_STRING = "single-line";
+    public static MULTI_LINE_STRING = "multi-line";
+
+    public static MUST_BE_BRACED_STRING = "statements must be braced";
+    public static MUST_NOT_BE_BRACED_STRING = "statements must not be braced";
+
+    public static buildMessage(kind: string, sameLine: boolean, singleLine: boolean) {
+        return [
+            sameLine ? this.SAME_LINE_STRING : this.NEXT_LINE_STRING,
+            singleLine ? this.SINGLE_LINE_STRING : this.MULTI_LINE_STRING,
+            kind,
+            this.MUST_BE_BRACED_STRING,
+        ].join(" ");
+    }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new CurlyWalker(sourceFile, this.getOptions()));
@@ -54,74 +95,150 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class CurlyWalker extends Lint.RuleWalker {
     public visitForInStatement(node: ts.ForInStatement) {
-        if (!isStatementBraced(node.statement)) {
-            this.addFailureForNode(node, Rule.FOR_FAILURE_STRING);
-        }
-
+        this.validateIterationStatement(node, ts.SyntaxKind.ForKeyword);
         super.visitForInStatement(node);
     }
 
-    public visitForOfStatement(node: ts.ForOfStatement) {
-        if (!isStatementBraced(node.statement)) {
-            this.addFailureForNode(node, Rule.FOR_FAILURE_STRING);
-        }
-
+    public visitForOfStatement(node: ts.ForInStatement) {
+        this.validateIterationStatement(node, ts.SyntaxKind.ForKeyword);
         super.visitForOfStatement(node);
     }
 
     public visitForStatement(node: ts.ForStatement) {
-        if (!isStatementBraced(node.statement)) {
-            this.addFailureForNode(node, Rule.FOR_FAILURE_STRING);
-        }
-
+        this.validateIterationStatement(node, ts.SyntaxKind.ForKeyword);
         super.visitForStatement(node);
     }
 
     public visitIfStatement(node: ts.IfStatement) {
-        if (!isStatementBraced(node.thenStatement)) {
-            this.addFailure(this.createFailure(
-                node.getStart(),
-                node.thenStatement.getEnd() - node.getStart(),
-                Rule.IF_FAILURE_STRING
-            ));
-        }
-
-        if (node.elseStatement != null
-                && node.elseStatement.kind !== ts.SyntaxKind.IfStatement
-                && !isStatementBraced(node.elseStatement)) {
-
-            // find the else keyword to place the error appropriately
-            const elseKeywordNode = node.getChildren().filter((child) => child.kind === ts.SyntaxKind.ElseKeyword)[0];
-
-            this.addFailure(this.createFailure(
-                elseKeywordNode.getStart(),
-                node.elseStatement.getEnd() - elseKeywordNode.getStart(),
-                Rule.ELSE_FAILURE_STRING
-            ));
-        }
-
+        this.validateIfStatement(node);
         super.visitIfStatement(node);
     }
 
     public visitDoStatement(node: ts.DoStatement) {
-        if (!isStatementBraced(node.statement)) {
-            this.addFailureForNode(node, Rule.DO_FAILURE_STRING);
-        }
-
+        this.validateIterationStatement(node, ts.SyntaxKind.DoKeyword);
         super.visitDoStatement(node);
     }
 
     public visitWhileStatement(node: ts.WhileStatement) {
-        if (!isStatementBraced(node.statement)) {
-            this.addFailureForNode(node, Rule.WHILE_FAILURE_STRING);
-        }
-
+        this.validateIterationStatement(node, ts.SyntaxKind.WhileKeyword);
         super.visitWhileStatement(node);
     }
 
-    private addFailureForNode(node: ts.Node, failure: string) {
-        this.addFailure(this.createFailure(node.getStart(), node.getWidth(), failure));
+    private validateIfStatement(node: ts.IfStatement) {
+        const isIfSameLine = areOnSameLine(node, node.thenStatement);
+        const isIfSingleLine = isStatementSingleLine(node.thenStatement);
+        const isIfBraced = isStatementBraced(node.thenStatement);
+
+        // TODO: pass in custom start/end pos failure handler (see previous failure handling above)
+        this.validateStatementPositioning(node, ts.SyntaxKind.IfKeyword, isIfSameLine, isIfSingleLine, isIfBraced);
+
+        if (node.elseStatement != null &&
+            node.elseStatement.kind !== ts.SyntaxKind.IfStatement) {
+            const elseKeywordNode = getElseKeywordNode(node);
+            const isElseSameLine = areOnSameLine(elseKeywordNode, node.elseStatement);
+            const isElseSingleLine = isStatementSingleLine(node.elseStatement);
+            const isElseBraced = isStatementBraced(node.elseStatement);
+
+            this.validateStatementPositioning(node,
+                                              ts.SyntaxKind.ElseKeyword,
+                                              isElseSameLine,
+                                              isElseSingleLine,
+                                              isElseBraced);
+        }
     }
+
+    private validateIterationStatement(node: ts.IterationStatement, kind: ts.SyntaxKind) {
+        const isSameLine = areOnSameLine(node, node.statement);
+        const isSingleLine = isStatementSingleLine(node);
+        const isBraced = isStatementBraced(node.statement);
+
+        this.validateStatementPositioning(node, kind, isSameLine, isSingleLine, isBraced);
+    }
+
+    private validateStatementPositioning(node: ts.Node,
+                                         kind: ts.SyntaxKind,
+                                         isSameLine: boolean,
+                                         isSingleLine: boolean,
+                                         isBraced: boolean) {
+
+        if (((this.getOptions().length === 0) || this.hasOption(OPTION_ALL)) && !isBraced) {
+            // TODO: This needs to be moved out to customize for diff btwn if/iteration
+            this.addFailureForNode(node, kind, `${ts.tokenToString(kind)} ${Rule.MUST_BE_BRACED_STRING}`);
+            return;
+        }
+
+        const addFailure = () =>
+            this.addFailureForNode(node, kind, Rule.buildMessage(ts.tokenToString(kind), isSameLine, isSingleLine));
+
+        if (this.hasOption(OPTION_NEXT_LINE_MULTI_LINE) &&
+            !isSameLine &&
+            !isSingleLine &&
+            !isBraced) {
+            addFailure();
+        }
+
+        if (this.hasOption(OPTION_NEXT_LINE_SINGLE_LINE) &&
+            !isSameLine &&
+            isSingleLine &&
+            !isBraced) {
+            addFailure();
+        }
+
+        if (this.hasOption(OPTION_SAME_LINE_MULTI_LINE) &&
+            isSameLine &&
+            !isSingleLine &&
+            !isBraced) {
+            addFailure();
+        }
+
+        if (this.hasOption(OPTION_SAME_LINE_SINGLE_LINE) &&
+            isSameLine &&
+            isSingleLine &&
+            !isBraced) {
+            addFailure();
+        }
+    }
+
+    private addFailureForNode(node: ts.Node, kind: ts.SyntaxKind, failure: string) {
+        let startPos: number;
+        let width: number;
+
+        switch (kind) {
+            case ts.SyntaxKind.IfKeyword:
+                startPos = node.getStart();
+                width = (node as ts.IfStatement).thenStatement.getEnd() - startPos;
+                break;
+            case ts.SyntaxKind.ElseKeyword:
+                startPos = getElseKeywordNode(node as ts.IfStatement).getStart();
+                width = (node as ts.IfStatement).elseStatement.getEnd() - startPos;
+                break;
+            default:
+                startPos = node.getStart();
+                width = node.getWidth();
+        }
+
+        this.addFailure(this.createFailure(startPos, width, failure));
+    }
+}
+
+function getElseKeywordNode(node: ts.IfStatement) {
+    return node.getChildren().filter((child) => child.kind === ts.SyntaxKind.ElseKeyword)[0];
+}
+
+function isStatementSingleLine(node: ts.Statement) {
+    const file = node.getSourceFile();
+    const startPos = file.getLineAndCharacterOfPosition(node.getStart());
+    const endPos = file.getLineAndCharacterOfPosition(node.getEnd());
+
+    return startPos.line === endPos.line;
+}
+
+function areOnSameLine(node: ts.Node, statement: ts.Statement) {
+    const file = node.getSourceFile();
+    const nodeStartPos = file.getLineAndCharacterOfPosition(node.getStart());
+    const statementStartPos = file.getLineAndCharacterOfPosition(statement.getStart());
+
+    return nodeStartPos.line === statementStartPos.line;
 }
 
 function isStatementBraced(node: ts.Statement) {

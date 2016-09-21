@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "curly": [true, "same-line-single-line"]
+  }
+}

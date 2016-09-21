@@ -12,12 +12,47 @@ rationale: |-
   In the code above, the author almost certainly meant for both `foo++` and `bar++`
   to be executed only if `foo === bar`. However, he forgot braces and `bar++` will be executed
   no matter what. This rule could prevent such a mistake.
-optionsDescription: Not configurable.
-options: null
+optionsDescription: |
+
+  The rule may be set to `true`, or to any combination of these arguments:
+
+  * `"all"` requires braces for all control-flow statements
+  * `"same-line-single-line"` requires braces for control-flow statements
+    that are on one line and start on the same line as their control-flow keyword
+  * `"same-line-multi-line"` requires braces for control-flow statements
+    that are split between multiple lines and start on the same line as their control-flow keyword
+  * `"next-line-single-line"` requires braces for control-flow statements
+    that are on one line and start on the line after their control-flow keyword
+  * `"next-line-multi-line"` requires braces for control-flow statements
+    that are split between multiple lines and start on the line after their control-flow keyword
+options:
+  type: array
+  items:
+    type: string
+    enum:
+      - all
+      - same-line-single-line
+      - same-line-multi-line
+      - next-line-single-line
+      - next-line-multi-line
 optionExamples:
   - 'true'
+  - '[true, "same-line-single-line"]'
 type: functionality
-optionsJSON: 'null'
+optionsJSON: |-
+  {
+    "type": "array",
+    "items": {
+      "type": "string",
+      "enum": [
+        "all",
+        "same-line-single-line",
+        "same-line-multi-line",
+        "next-line-single-line",
+        "next-line-multi-line"
+      ]
+    }
+  }
 layout: rule
 title: 'Rule: curly'
 ---
