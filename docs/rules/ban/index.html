@@ -1,37 +1,35 @@
 ---
 ruleName: ban
-description: Bans the use of specific functions.
-descriptionDetails: 'At this time, there is no way to disable global methods with this rule.'
-optionsDescription: 'A list of `[''object'', ''method'', ''optional explanation here'']` which ban `object.method()`.'
+description: Bans the use of specific functions or global methods.
+optionsDescription: |-
+
+  A list of `['object', 'method', 'optional explanation here']` or `['globalMethod']` which ban `object.method()` 
+  or respectively `globalMethod()`.
 options:
   type: list
   listType:
     type: array
-    arrayMembers:
-      - type: string
-      - type: string
-      - type: string
+    items:
+      type: string
+    minLength: 1
+    maxLength: 3
 optionExamples:
-  - '[true, ["someObject", "someFunction"], ["someObject", "otherFunction", "Optional explanation"]]'
+  - |-
+    [true, ["someGlobalMethod"], ["someObject", "someFunction"], 
+                              ["someObject", "otherFunction", "Optional explanation"]]
 type: functionality
+layout: rule
+title: 'Rule: ban'
 optionsJSON: |-
   {
     "type": "list",
     "listType": {
       "type": "array",
-      "arrayMembers": [
-        {
-          "type": "string"
-        },
-        {
-          "type": "string"
-        },
-        {
-          "type": "string"
-        }
-      ]
+      "items": {
+        "type": "string"
+      },
+      "minLength": 1,
+      "maxLength": 3
     }
   }
-layout: rule
-title: 'Rule: ban'
 ---
