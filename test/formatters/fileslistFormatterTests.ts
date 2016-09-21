@@ -45,6 +45,6 @@ describe("Files-list Formatter", () => {
 
     it("handles no failures", () => {
         const result = formatter.format([]);
-        assert.equal(result, "\n");
+        assert.equal(result, "");
     });
 });
