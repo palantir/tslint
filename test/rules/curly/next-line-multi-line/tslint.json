@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "curly": [true, "next-line-multi-line"]
+  }
+}

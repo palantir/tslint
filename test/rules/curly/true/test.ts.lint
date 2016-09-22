@@ -85,15 +85,22 @@ if (true) {
 }
 else { console.log("x"); }
 
-if (true)
-{
-    console.log("y");
-}
-else { console.log("x"); }
+    if (true)
+    ~~~~~~~~~
+        console.log("y");
+~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
+    else { console.log("x"); }
 
     if (true) {
         console.log("y");
     }
+    else console.log("x");
+    ~~~~~~~~~~~~~~~~~~~~~~ [else-must]
+
+    if (true)
+    ~~~~~~~~~
+        console.log("y");
+~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
     else console.log("x");
     ~~~~~~~~~~~~~~~~~~~~~~ [else-must]
 
@@ -105,17 +112,26 @@ else {
     console.log("x");
 }
 
-if (true) {
-    console.log("y");
-}
-else
-{
-    console.log("x");
-}
+    if (true)
+    ~~~~~~~~~
+        console.log("y");
+~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
+    else {
+        console.log("x");
+    }
 
     if (true) {
         console.log("y");
     }
+    else
+    ~~~~
+        console.log("x");
+~~~~~~~~~~~~~~~~~~~~~~~~~ [else-must]
+
+    if (true)
+    ~~~~~~~~~
+        console.log("y");
+~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
     else
     ~~~~
         console.log("x");
@@ -159,16 +175,28 @@ else {
         .log("x");
 }
 
-if (true) { console
-                .log("y"); }
-else
-{
-    console
-        .log("x");
-}
+    if (true) console
+    ~~~~~~~~~~~~~~~~~
+                    .log("y");
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
+    else {
+        console
+            .log("x");
+    }
 
     if (true) { console
                     .log("y"); }
+    else
+    ~~~~
+        console
+~~~~~~~~~~~~~~~
+            .log("x");
+~~~~~~~~~~~~~~~~~~~~~~ [else-must]
+
+    if (true) console
+    ~~~~~~~~~~~~~~~~~
+                    .log("y");
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
     else
     ~~~~
         console
@@ -184,10 +212,30 @@ if (true) {
 else { console
             .log("x"); }
 
+    if (true)
+    ~~~~~~~~~
+        console
+~~~~~~~~~~~~~~~
+            .log("y");
+~~~~~~~~~~~~~~~~~~~~~~ [if-must]
+    else { console
+                .log("x"); }
+
     if (true) {
         console
             .log("y");
     }
+    else console
+    ~~~~~~~~~~~~
+            .log("x");
+~~~~~~~~~~~~~~~~~~~~~~ [else-must]
+
+    if (true)
+    ~~~~~~~~~
+        console
+~~~~~~~~~~~~~~~
+            .log("y");
+~~~~~~~~~~~~~~~~~~~~~~ [if-must]
     else console
     ~~~~~~~~~~~~
             .log("x");
@@ -203,16 +251,16 @@ else {
         .log("x");
 }
 
-if (true)
-{
-    console
-        .log("y");
-}
-else
-{
-    console
-        .log("x");
-}
+    if (true)
+    ~~~~~~~~~
+        console
+~~~~~~~~~~~~~~~
+            .log("y");
+~~~~~~~~~~~~~~~~~~~~~~ [if-must]
+    else {
+        console
+            .log("x");
+    }
 
     if (true) {
         console
@@ -224,6 +272,20 @@ else
 ~~~~~~~~~~~~~~~
             .log("x");
 ~~~~~~~~~~~~~~~~~~~~~~ [else-must]
+
+    if (true)
+    ~~~~~~~~~
+        console
+~~~~~~~~~~~~~~~
+            .log("y");
+~~~~~~~~~~~~~~~~~~~~~~ [if-must]
+    else
+    ~~~~
+        console
+~~~~~~~~~~~~~~~
+            .log("x");
+~~~~~~~~~~~~~~~~~~~~~~ [else-must]
+
 
 // single-liners
 // ss/ss

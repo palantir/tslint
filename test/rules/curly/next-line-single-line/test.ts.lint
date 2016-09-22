@@ -1,7 +1,6 @@
 if (true) { console.log("good"); }
 
-    if (true) console.log("bad");
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
+if (true) console.log("bad");
 
 if (true) {
     console.log("x");
@@ -12,8 +11,10 @@ if (true)
     console.log("x");
 }
 
-if (true)
-    console.log("z");
+    if (true)
+    ~~~~~~~~~
+        console.log("z");
+~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
 
 
 if (true) { console
@@ -41,18 +42,14 @@ if (true)
 if (true) { console.log("good"); }
 else { console.log("good"); }
 
-    if (true) console.log("bad");
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
-    else { console.log("good"); }
+if (true) console.log("bad");
+else { console.log("good"); }
 
-    if (true) { console.log("good"); }
-    else console.log("bad");
-    ~~~~~~~~~~~~~~~~~~~~~~~~ [else-must]
+if (true) { console.log("good"); }
+else console.log("bad");
 
-    if (true) console.log("bad");
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
-    else console.log("bad");
-    ~~~~~~~~~~~~~~~~~~~~~~~~ [else-must]
+if (true) console.log("bad");
+else console.log("bad");
 
 // ss/ns
 if (true) { console.log("y"); }
@@ -66,9 +63,11 @@ else
     console.log("x");
 }
 
-if (true) { console.log("y"); }
-else
-    console.log("x");
+    if (true) { console.log("y"); }
+    else
+    ~~~~
+        console.log("x");
+~~~~~~~~~~~~~~~~~~~~~~~~~ [else-must]
 
 // ns/ss
 if (true) {
@@ -76,20 +75,22 @@ if (true) {
 }
 else { console.log("x"); }
 
-if (true)
-    console.log("y");
-else { console.log("x"); }
-
-    if (true) {
+    if (true)
+    ~~~~~~~~~
         console.log("y");
-    }
-    else console.log("x");
-    ~~~~~~~~~~~~~~~~~~~~~~ [else-must]
+~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
+    else { console.log("x"); }
+
+if (true) {
+    console.log("y");
+}
+else console.log("x");
 
     if (true)
+    ~~~~~~~~~
         console.log("y");
+~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
     else console.log("x");
-    ~~~~~~~~~~~~~~~~~~~~~~ [else-must]
 
 // ns/ns
 if (true) {
@@ -99,22 +100,30 @@ else {
     console.log("x");
 }
 
-if (true)
-    console.log("y");
-else {
-    console.log("x");
-}
+    if (true)
+    ~~~~~~~~~
+        console.log("y");
+~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
+    else {
+        console.log("x");
+    }
 
-if (true) {
-    console.log("y");
-}
-else
-    console.log("x");
+    if (true) {
+        console.log("y");
+    }
+    else
+    ~~~~
+        console.log("x");
+~~~~~~~~~~~~~~~~~~~~~~~~~ [else-must]
 
-if (true)
-    console.log("y");
-else
-    console.log("x");
+    if (true)
+    ~~~~~~~~~
+        console.log("y");
+~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
+    else
+    ~~~~
+        console.log("x");
+~~~~~~~~~~~~~~~~~~~~~~~~~ [else-must]
 
 // sm/sm
 if (true) { console
@@ -138,7 +147,6 @@ else console
         .log("bad");
 
 // sm/nm
-
 if (true) { console
                 .log("y"); }
 else {
@@ -229,30 +237,24 @@ else
 // ss/ss
 if (true) { console.log("x"); } else { console.log("y"); }
 
-    if (true) console.log("x"); else { console.log("y"); }
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
+if (true) console.log("x"); else { console.log("y"); }
 
-    if (true) { console.log("x"); } else console.log("y");
-                                    ~~~~~~~~~~~~~~~~~~~~~~ [else-must]
+if (true) { console.log("x"); } else console.log("y");
 
-    if (true) console.log("x"); else console.log("y");
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
-                                ~~~~~~~~~~~~~~~~~~~~~~ [else-must]
+if (true) console.log("x"); else console.log("y");
 
 // ss/sm
 if (true) { console.log("x"); } else { console
                                             .log("y"); }
 
-    if (true) console.log("x"); else { console
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
-                                            .log("y"); }
+if (true) console.log("x"); else { console
+                                        .log("y"); }
 
 if (true) { console.log("x"); } else console
                                             .log("y");
 
-    if (true) console.log("x"); else console
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
-                                        .log("y");
+if (true) console.log("x"); else console
+                                    .log("y");
 
 // sm/ss
 if (true) { console
@@ -261,12 +263,10 @@ if (true) { console
 if (true) console
             .log("x"); else { console.log("y"); }
 
-    if (true) { console.log("x"); } else console.log("y");
-                                    ~~~~~~~~~~~~~~~~~~~~~~ [else-must]
+if (true) { console.log("x"); } else console.log("y");
 
-    if (true) console
-                .log("x"); else console.log("y");
-                           ~~~~~~~~~~~~~~~~~~~~~~ [else-must]
+if (true) console
+            .log("x"); else console.log("y");
 
 // sm/sm
 if (true) { console
@@ -288,8 +288,7 @@ if (true) console
 
 for (i = 0; i < 1; ++i) { console.log(i); }
 
-    for (i = 0; i < 1; ++i) console.log(i);
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [for-must]
+for (i = 0; i < 1; ++i) console.log(i);
 
 for (i = 0; i < 1; ++i) {
     console.log("i");
@@ -300,8 +299,11 @@ for (j = 0; j < 1; ++j)
     console.log("j");
 }
 
-for (k = 0; k < 1; ++k)
-    console.log("k");
+    for (k = 0; k < 1; ++k)
+    ~~~~~~~~~~~~~~~~~~~~~~~
+        console.log("k");
+~~~~~~~~~~~~~~~~~~~~~~~~~ [for-must]
+
 
 for (i = 0; i < 1; ++i) { console
                             .log(i); }
@@ -327,8 +329,7 @@ for (k = 0; k < 1; ++k)
 
 for (i in foo) { console.log(i); }
 
-    for (i in foo) console.log(i);
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [for-must]
+for (i in foo) console.log(i);
 
 for (i in foo) {
     console.log("i");
@@ -339,15 +340,17 @@ for (i in foo)
     console.log("j");
 }
 
-for (i in foo)
-    console.log("k");
+    for (i in foo)
+    ~~~~~~~~~~~~~~
+        console.log("k");
+~~~~~~~~~~~~~~~~~~~~~~~~~ [for-must]
 
 
 for (i in foo) { console
                     .log(i); }
 
-    for (i in foo) console
-                        .log(i);
+for (i in foo) console
+                    .log(i);
 
 for (i in foo) {
     console
@@ -367,8 +370,7 @@ for (i in foo)
 
 for (let x of [1, 2, 3]) { console.log(i); }
 
-    for (let x of [1, 2, 3]) console.log(i);
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [for-must]
+for (let x of [1, 2, 3]) console.log(i);
 
 for (let x of [1, 2, 3]) {
     console.log("i");
@@ -379,8 +381,10 @@ for (let x of [1, 2, 3])
     console.log("j");
 }
 
-for (let x of [1, 2, 3])
-    console.log("k");
+    for (let x of [1, 2, 3])
+    ~~~~~~~~~~~~~~~~~~~~~~~~
+        console.log("k");
+~~~~~~~~~~~~~~~~~~~~~~~~~ [for-must]
 
 
 for (let x of [1, 2, 3]) { console
@@ -407,8 +411,7 @@ for (let x of [1, 2, 3])
 
 while (m < 0) { console.log("q"); }
 
-    while (m < 0) console.log("q");
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [while-must]
+while (m < 0) console.log("q");
 
 while (m < 0) {
     console.log("q");
@@ -419,8 +422,10 @@ while (n < 0)
     console.log("r");
 }
 
-while (n < 0)
-    console.log("s");
+    while (n < 0)
+    ~~~~~~~~~~~~~
+        console.log("s");
+~~~~~~~~~~~~~~~~~~~~~~~~~ [while-must]
 
 
 while (m < 0) { console
@@ -447,8 +452,7 @@ while (n < 0)
 
 do { console.log("m"); } while (i == 1);
 
-    do console.log("m"); while (i == 1);
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [do-must]
+do console.log("m"); while (i == 1);
 
 do {
     console.log("m");
@@ -460,9 +464,12 @@ do
 }
 while (j == 1);
 
-do
-    console.log("o");
-while (k == 1);
+    do
+    ~~
+        console.log("o");
+~~~~~~~~~~~~~~~~~~~~~~~~~
+    while (k == 1);
+~~~~~~~~~~~~~~~~~~~ [do-must]
 
 
 do { console
@@ -489,8 +496,8 @@ do
 while (k == 1);
 
 
-[if-must]: same-line single-line if statements must be braced
-[else-must]: same-line single-line else statements must be braced
-[for-must]: same-line single-line for statements must be braced
-[do-must]: same-line single-line do statements must be braced
-[while-must]: same-line single-line while statements must be braced
+[if-must]: next-line single-line if statements must be braced
+[else-must]: next-line single-line else statements must be braced
+[for-must]: next-line single-line for statements must be braced
+[do-must]: next-line single-line do statements must be braced
+[while-must]: next-line single-line while statements must be braced
