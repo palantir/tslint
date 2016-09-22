@@ -149,7 +149,7 @@ class CurlyWalker extends Lint.RuleWalker {
 
     private validateIterationStatement(node: ts.IterationStatement, kind: ts.SyntaxKind) {
         const isSameLine = areOnSameLine(node, node.statement);
-        const isSingleLine = isStatementSingleLine(node);
+        const isSingleLine = isStatementSingleLine(node.statement);
         const isBraced = isStatementBraced(node.statement);
 
         this.validateStatementPositioning(node, kind, isSameLine, isSingleLine, isBraced);
