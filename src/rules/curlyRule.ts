@@ -129,7 +129,6 @@ class CurlyWalker extends Lint.RuleWalker {
         const isIfSingleLine = isStatementSingleLine(node.thenStatement);
         const isIfBraced = isStatementBraced(node.thenStatement);
 
-        // TODO: pass in custom start/end pos failure handler (see previous failure handling above)
         this.validateStatementPositioning(node, ts.SyntaxKind.IfKeyword, isIfSameLine, isIfSingleLine, isIfBraced);
 
         if (node.elseStatement != null &&
@@ -162,7 +161,6 @@ class CurlyWalker extends Lint.RuleWalker {
                                          isBraced: boolean) {
 
         if (((this.getOptions().length === 0) || this.hasOption(OPTION_ALL)) && !isBraced) {
-            // TODO: This needs to be moved out to customize for diff btwn if/iteration
             this.addFailureForNode(node, kind, `${ts.tokenToString(kind)} ${Rule.MUST_BE_BRACED_STRING}`);
             return;
         }
