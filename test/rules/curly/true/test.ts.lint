@@ -1,6 +1,6 @@
 if (true) { console.log("good"); }
 
-    if (true) console.log("bad"); // failure
+    if (true) console.log("bad");
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
 
 if (true) {
@@ -23,7 +23,7 @@ if (true) { console
 
     if (true) console
     ~~~~~~~~~~~~~~~~~
-                .log("bad"); // failure
+                .log("bad");
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
 
 if (true) {
@@ -44,35 +44,24 @@ if (true)
             .log("z");
 ~~~~~~~~~~~~~~~~~~~~~~ [if-must]
 
-
+// ss/ss
 if (true) { console.log("good"); }
 else { console.log("good"); }
 
-    if (true) console.log("bad"); // failure
+    if (true) console.log("bad");
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
     else { console.log("good"); }
 
     if (true) { console.log("good"); }
-    else console.log("bad"); // failure
+    else console.log("bad");
     ~~~~~~~~~~~~~~~~~~~~~~~~ [else-must]
 
-    if (true) console.log("bad"); // failure
+    if (true) console.log("bad");
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
-    else console.log("bad"); // failure
+    else console.log("bad");
     ~~~~~~~~~~~~~~~~~~~~~~~~ [else-must]
 
-if (true) { console.log("good"); } else { console.log("good"); }
-
-    if (true) console.log("bad"); else { console.log("good"); } // failure - if
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
-
-    if (true) { console.log("bad"); } else console.log("good"); // failure - else
-                                      ~~~~~~~~~~~~~~~~~~~~~~~~~ [else-must]
-
-    if (true) console.log("bad"); else console.log("good"); // failure - else
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                           [if-must]
-                                  ~~~~~~~~~~~~~~~~~~~~~~~~~ [else-must]
-
+// ss/ns
 if (true) { console.log("y"); }
 else {
     console.log("x");
@@ -90,7 +79,50 @@ else
         console.log("x");
 ~~~~~~~~~~~~~~~~~~~~~~~~~ [else-must]
 
+// ns/ss
+if (true) {
+    console.log("y");
+}
+else { console.log("x"); }
 
+if (true)
+{
+    console.log("y");
+}
+else { console.log("x"); }
+
+    if (true) {
+        console.log("y");
+    }
+    else console.log("x");
+    ~~~~~~~~~~~~~~~~~~~~~~ [else-must]
+
+// ns/ns
+if (true) {
+    console.log("y");
+}
+else {
+    console.log("x");
+}
+
+if (true) {
+    console.log("y");
+}
+else
+{
+    console.log("x");
+}
+
+    if (true) {
+        console.log("y");
+    }
+    else
+    ~~~~
+        console.log("x");
+~~~~~~~~~~~~~~~~~~~~~~~~~ [else-must]
+
+
+// sm/sm
 if (true) { console
                 .log("good"); }
 else { console
@@ -98,7 +130,7 @@ else { console
 
     if (true) console
     ~~~~~~~~~~~~~~~~~
-                .log("bad"); // failure
+                .log("bad");
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
     else { console
                 .log("good"); }
@@ -107,42 +139,19 @@ else { console
                     .log("good"); }
     else console
     ~~~~~~~~~~~~
-            .log("bad"); // failure
+            .log("bad");
 ~~~~~~~~~~~~~~~~~~~~~~~~ [else-must]
 
     if (true) console
     ~~~~~~~~~~~~~~~~~
-                .log("bad"); // failure
+                .log("bad");
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
     else console
     ~~~~~~~~~~~~
-            .log("bad"); // failure
+            .log("bad");
 ~~~~~~~~~~~~~~~~~~~~~~~~ [else-must]
 
-if (true) { console
-                .log("good"); } else { console
-                                            .log("good"); }
-
-    if (true) console
-    ~~~~~~~~~~~~~~~~~
-                .log("bad"); else { console
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
-                                        .log("good"); } // failure - if
-
-    if (true) { console
-                    .log("bad"); } else console
-                                   ~~~~~~~~~~~~
-                                              .log("good"); // failure - else
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [else-must]
-
-    if (true) console
-    ~~~~~~~~~~~~~~~~~
-                  .log("bad"); else console
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                  [if-must]
-                               ~~~~~~~~~~~~
-                                        .log("good"); // failure - else
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [else-must]
-
+// sm/nm
 if (true) { console
                 .log("y"); }
 else {
@@ -166,6 +175,131 @@ else
 ~~~~~~~~~~~~~~~
             .log("x");
 ~~~~~~~~~~~~~~~~~~~~~~ [else-must]
+
+// nm/sm
+if (true) {
+    console
+        .log("y");
+}
+else { console
+            .log("x"); }
+
+    if (true) {
+        console
+            .log("y");
+    }
+    else console
+    ~~~~~~~~~~~~
+            .log("x");
+~~~~~~~~~~~~~~~~~~~~~~ [else-must]
+
+// nm/nm
+if (true) {
+    console
+        .log("y");
+}
+else {
+    console
+        .log("x");
+}
+
+if (true)
+{
+    console
+        .log("y");
+}
+else
+{
+    console
+        .log("x");
+}
+
+    if (true) {
+        console
+            .log("y");
+    }
+    else
+    ~~~~
+        console
+~~~~~~~~~~~~~~~
+            .log("x");
+~~~~~~~~~~~~~~~~~~~~~~ [else-must]
+
+// single-liners
+// ss/ss
+if (true) { console.log("x"); } else { console.log("y"); }
+
+    if (true) console.log("x"); else { console.log("y"); }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
+
+    if (true) { console.log("x"); } else console.log("y");
+                                    ~~~~~~~~~~~~~~~~~~~~~~ [else-must]
+
+    if (true) console.log("x"); else console.log("y");
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
+                                ~~~~~~~~~~~~~~~~~~~~~~ [else-must]
+
+// ss/sm
+if (true) { console.log("x"); } else { console
+                                            .log("y"); }
+
+    if (true) console.log("x"); else { console
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
+                                            .log("y"); }
+
+    if (true) { console.log("x"); } else console
+                                    ~~~~~~~~~~~~
+                                                .log("y");
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [else-must]
+
+    if (true) console.log("x"); else console
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
+                                ~~~~~~~~~~~~
+                                        .log("y");
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [else-must]
+
+// sm/ss
+if (true) { console
+                .log("x"); } else { console.log("y"); }
+
+    if (true) console
+    ~~~~~~~~~~~~~~~~~
+                .log("x"); else { console.log("y"); }
+~~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
+
+    if (true) { console.log("x"); } else console.log("y");
+                                    ~~~~~~~~~~~~~~~~~~~~~~ [else-must]
+
+    if (true) console
+    ~~~~~~~~~~~~~~~~~
+                .log("x"); else console.log("y");
+~~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
+                           ~~~~~~~~~~~~~~~~~~~~~~ [else-must]
+
+// sm/sm
+if (true) { console
+                .log("good"); } else { console
+                                            .log("good"); }
+
+    if (true) console
+    ~~~~~~~~~~~~~~~~~
+                .log("bad"); else { console
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
+                                        .log("good"); }
+
+    if (true) { console
+                    .log("bad"); } else console
+                                   ~~~~~~~~~~~~
+                                              .log("good");
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [else-must]
+
+    if (true) console
+    ~~~~~~~~~~~~~~~~~
+                  .log("bad"); else console
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
+                               ~~~~~~~~~~~~
+                                        .log("good");
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [else-must]
 
 
 for (i = 0; i < 1; ++i) { console.log(i); }
