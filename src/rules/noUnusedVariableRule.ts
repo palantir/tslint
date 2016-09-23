@@ -27,7 +27,7 @@ const REACT_NAMESPACE_IMPORT_NAME = "React";
 
 const MODULE_SPECIFIER_MATCH = /^["'](.+)['"]$/;
 
-export class Rule extends Lint.Rules.AbstractRule {
+export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-unused-variable",
@@ -75,9 +75,14 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static FAILURE_STRING_FACTORY = (type: string, name: string) => `Unused ${type}: '${name}'`;
 
+    // no-undefined-variable optionally allows type-checking
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        return this.applyWithProgram(sourceFile, undefined);
+    }
+
+    public applyWithProgram(sourceFile: ts.SourceFile, program?: ts.Program): Lint.RuleFailure[] {
         const languageService = Lint.createLanguageService(sourceFile.fileName, sourceFile.getFullText());
-        return this.applyWithWalker(new NoUnusedVariablesWalker(sourceFile, this.getOptions(), languageService));
+        return this.applyWithWalker(new NoUnusedVariablesWalker(sourceFile, this.getOptions(), languageService, program));
     }
 }
 
@@ -91,7 +96,8 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     private isReactUsed: boolean;
     private reactImport: ts.NamespaceImport;
 
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions, private languageService: ts.LanguageService) {
+    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions,
+                private languageService: ts.LanguageService, private program?: ts.Program) {
         super(sourceFile, options);
         this.skipVariableDeclaration = false;
         this.skipParameterDeclaration = false;
