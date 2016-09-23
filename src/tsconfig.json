@@ -6,7 +6,7 @@
         "declaration": true,
         "sourceMap": false,
         "target": "es5",
-        "outDir": "../lib"
+        "outDir": "../build/src"
     },
     "atom": {
         "rewriteTsconfig": false

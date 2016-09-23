@@ -47,6 +47,15 @@ export interface TestResult {
 export function runTest(testDirectory: string, rulesDirectory?: string | string[]): TestResult {
     const filesToLint = glob.sync(path.join(testDirectory, `**/*${MARKUP_FILE_EXTENSION}`));
     const tslintConfig = Linter.findConfiguration(path.join(testDirectory, "tslint.json"), null);
+    const tsConfig = path.join(testDirectory, "tsconfig.json");
+    let compilerOptions: ts.CompilerOptions = {};
+    if (fs.existsSync(tsConfig)) {
+        const {config, error} = ts.readConfigFile(tsConfig, ts.sys.readFile);
+        if (error) {
+            throw new Error(JSON.stringify(error));
+        }
+        compilerOptions = ts.parseJsonConfigFileContent(config, {readDirectory: ts.sys.readDirectory}, testDirectory).options;
+    }
     const results: TestResult = { directory: testDirectory, results: {} };
 
     for (const fileToLint of filesToLint) {
@@ -58,7 +67,6 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
 
         let program: ts.Program;
         if (tslintConfig.linterOptions && tslintConfig.linterOptions.typeCheck) {
-            const compilerOptions: ts.CompilerOptions = {};
             const compilerHost: ts.CompilerHost = {
                 fileExists: () => true,
                 getCanonicalFileName: (filename: string) => filename,
