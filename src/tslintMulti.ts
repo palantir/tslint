@@ -39,7 +39,6 @@ import { arrayify } from "./utils";
  * Linter that can lint multiple files in consecutive runs.
  */
 class MultiLinter {
-
     public static VERSION = "3.15.1";
 
     public static findConfiguration = findConfiguration;
@@ -63,7 +62,11 @@ class MultiLinter {
         }
 
         const {config} = ts.readConfigFile(configFile, ts.sys.readFile);
-        const parsed = ts.parseJsonConfigFileContent(config, {readDirectory: ts.sys.readDirectory}, projectDirectory);
+        const parsed = ts.parseJsonConfigFileContent(config, {
+            fileExists: (path: string) => true,
+            readDirectory: ts.sys.readDirectory,
+            useCaseSensitiveFileNames: false,
+        }, projectDirectory);
         const host = ts.createCompilerHost(parsed.options, true);
         const program = ts.createProgram(parsed.fileNames, parsed.options, host);
 

@@ -29,6 +29,7 @@ export function getSourceFile(fileName: string, source: string): ts.SourceFile {
         getCanonicalFileName: (filename: string) => filename,
         getCurrentDirectory: () => "",
         getDefaultLibFileName: () => "lib.d.ts",
+        getDirectories: (path: string) => [],
         getNewLine: () => "\n",
         getSourceFile: (filenameToGet: string) => {
             if (filenameToGet === normalizedName) {
