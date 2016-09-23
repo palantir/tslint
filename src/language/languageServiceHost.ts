@@ -19,6 +19,35 @@ import * as ts from "typescript";
 
 import {createCompilerOptions} from "./utils";
 
+export interface LanguageServiceEditableHost extends ts.LanguageServiceHost {
+    editFile(fileName: string, newContent: string): void;
+}
+
+export function hostFromProgram(program: ts.Program): LanguageServiceEditableHost {
+    const files: {[name: string]: string} = {};
+    const fileVersions: {[name: string]: number} = {};
+    return {
+            getCompilationSettings: () => program.getCompilerOptions(),
+            getCurrentDirectory: () => program.getCurrentDirectory(),
+            getDefaultLibFileName: () => "lib.d.ts",
+            getScriptFileNames: () => program.getRootFileNames(),
+            getScriptSnapshot: (name: string) => ts.ScriptSnapshot.fromString(
+                files.hasOwnProperty(name) ? files[name] :
+                program.getSourceFile(name).getFullText()
+            ),
+            getScriptVersion: (name: string) => fileVersions.hasOwnProperty(name) ? fileVersions[name] + "" : "1",
+            log: () => { /* */ },
+            editFile(fileName: string, newContent: string) {
+                files[fileName] = newContent;
+                if (fileVersions.hasOwnProperty(fileName)) {
+                    fileVersions[fileName]++;
+                } else {
+                    fileVersions[fileName] = 0;
+                }
+            },
+        };
+}
+
 export function createLanguageServiceHost(fileName: string, source: string): ts.LanguageServiceHost {
     return {
         getCompilationSettings: () => createCompilerOptions(),
@@ -31,7 +60,7 @@ export function createLanguageServiceHost(fileName: string, source: string): ts.
     };
 }
 
-export function createLanguageService(fileName: string, source: string) {
-    const languageServiceHost = createLanguageServiceHost(fileName, source);
+export function createLanguageService(fileName: string, source: string, program?: ts.Program) {
+    const languageServiceHost = program ? hostFromProgram(program) : createLanguageServiceHost(fileName, source);
     return ts.createLanguageService(languageServiceHost);
 }

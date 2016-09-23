@@ -81,8 +81,9 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 
     public applyWithProgram(sourceFile: ts.SourceFile, program?: ts.Program): Lint.RuleFailure[] {
-        const languageService = Lint.createLanguageService(sourceFile.fileName, sourceFile.getFullText());
-        return this.applyWithWalker(new NoUnusedVariablesWalker(sourceFile, this.getOptions(), languageService, program));
+        let languageServiceHost = program ? Lint.hostFromProgram(program) :
+          Lint.createLanguageServiceHost(sourceFile.fileName, sourceFile.getFullText());
+        return this.applyWithWalker(new NoUnusedVariablesWalker(sourceFile, this.getOptions(), languageServiceHost, program));
     }
 }
 
@@ -95,10 +96,12 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     private ignorePattern: RegExp;
     private isReactUsed: boolean;
     private reactImport: ts.NamespaceImport;
+    private languageService: ts.LanguageService;
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions,
-                private languageService: ts.LanguageService, private program?: ts.Program) {
+                private languageServiceHost: ts.LanguageServiceHost, private program?: ts.Program) {
         super(sourceFile, options);
+        this.languageService = ts.createLanguageService(languageServiceHost);
         this.skipVariableDeclaration = false;
         this.skipParameterDeclaration = false;
         this.hasSeenJsxElement = false;
@@ -423,6 +426,23 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         let fix: Lint.Fix;
         if (replacements && replacements.length) {
             fix = new Lint.Fix("no-unused-variable", replacements);
+        }
+        // If we have the program, we can verify that the fix doesn't introduce failures
+        if (this.program) {
+            const program = this.languageService.getProgram();
+            const sf = this.getSourceFile();
+            const existingDiags = ts.getPreEmitDiagnostics(program, sf);
+            if (existingDiags.length > 0) {
+                throw new Error("Fix existing diagnostics before running no-unused-variable");
+            }
+            (this.languageServiceHost as any).editFile(sf.fileName, fix.apply(sf.getFullText()));
+            const newProgram = this.languageService.getProgram();
+            const newSf = newProgram.getSourceFile(sf.fileName);
+            const newDiags = ts.getPreEmitDiagnostics(newProgram, newSf);
+            if (newDiags.length > 0) {
+                console.error("rejecting fix because it causes errors");
+                return;
+            }
         }
         this.addFailure(this.createFailure(position, name.length, Rule.FAILURE_STRING_FACTORY(type, name), fix));
     }
