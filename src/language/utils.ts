@@ -117,6 +117,13 @@ export function getBindingElementVariableDeclaration(node: ts.BindingElement): t
 }
 
 /**
+ * Returns true if some ancestor of `node` satisfies `predicate`, including `node` itself.
+ */
+export function someAncestor(node: ts.Node, predicate: (n: ts.Node)=>boolean): boolean {
+    return predicate(node) || (node.parent && someAncestor(node.parent, predicate));
+}
+
+/**
  * Bitwise check for node flags.
  */
 export function isNodeFlagSet(node: ts.Node, flagToCheck: ts.NodeFlags): boolean {
