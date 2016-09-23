@@ -23,7 +23,6 @@ import * as path from "path";
 import * as ts from "typescript";
 
 import {Fix} from "./language/rule/rule";
-import {createCompilerOptions} from "./language/utils";
 import {LintError} from "./test/lintError";
 import * as parse from "./test/parse";
 import * as Linter from "./tslint";
@@ -59,7 +58,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
 
         let program: ts.Program;
         if (tslintConfig.linterOptions && tslintConfig.linterOptions.typeCheck) {
-            const compilerOptions = createCompilerOptions();
+            const compilerOptions: ts.CompilerOptions = {};
             const compilerHost: ts.CompilerHost = {
                 fileExists: () => true,
                 getCanonicalFileName: (filename: string) => filename,
@@ -74,6 +73,9 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
                         return ts.createSourceFile(filenameToGet, fileText, compilerOptions.target);
                     } else if (filenameToGet === fileCompileName) {
                         return ts.createSourceFile(fileBasename, fileTextWithoutMarkup, compilerOptions.target, true);
+                    } else if (fs.existsSync(path.resolve(path.dirname(fileToLint), filenameToGet))) {
+                        const text = fs.readFileSync(path.resolve(path.dirname(fileToLint), filenameToGet), {encoding: "utf-8"});
+                        return ts.createSourceFile(filenameToGet, text, compilerOptions.target, true);
                     }
                 },
                 readFile: () => null,
