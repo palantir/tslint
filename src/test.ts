@@ -65,7 +65,8 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
                 getCanonicalFileName: (filename: string) => filename,
                 getCurrentDirectory: () => "",
                 getDefaultLibFileName: () => ts.getDefaultLibFileName(compilerOptions),
-                getDirectories: (path: string) => [],
+                // TODO: include this field when compiling with TS 2.0
+                // getDirectories: (path: string) => [],
                 getNewLine: () => "\n",
                 getSourceFile(filenameToGet: string) {
                     if (filenameToGet === this.getDefaultLibFileName()) {

@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { existsSync } from "fs";
 import * as ts from "typescript";
 
 import {
@@ -39,7 +40,7 @@ import { arrayify } from "./utils";
  * Linter that can lint multiple files in consecutive runs.
  */
 class MultiLinter {
-    public static VERSION = "3.15.1";
+    public static VERSION = "4.0.0-dev";
 
     public static findConfiguration = findConfiguration;
     public static findConfigurationPath = findConfigurationPath;
@@ -61,12 +62,13 @@ class MultiLinter {
             }
         }
 
-        const {config} = ts.readConfigFile(configFile, ts.sys.readFile);
-        const parsed = ts.parseJsonConfigFileContent(config, {
-            fileExists: (path: string) => true,
+        const { config } = ts.readConfigFile(configFile, ts.sys.readFile);
+        const parseConfigHost = {
+            fileExists: existsSync,
             readDirectory: ts.sys.readDirectory,
-            useCaseSensitiveFileNames: false,
-        }, projectDirectory);
+            useCaseSensitiveFileNames: true,
+        };
+        const parsed = ts.parseJsonConfigFileContent(config, parseConfigHost, projectDirectory);
         const host = ts.createCompilerHost(parsed.options, true);
         const program = ts.createProgram(parsed.fileNames, parsed.options, host);
 

@@ -43,10 +43,10 @@
     "mocha": "^2.2.5",
     "tslint": "latest",
     "tslint-test-config-non-relative": "file:test/external/tslint-test-config-non-relative",
-    "typescript": "latest"
+    "typescript": "1.8.10"
   },
   "peerDependencies": {
-    "typescript": ">=2.0.0"
+    "typescript": ">=1.7.3"
   },
   "license": "Apache-2.0",
   "typescript": {
