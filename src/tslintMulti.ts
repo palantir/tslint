@@ -28,6 +28,7 @@ import {
 } from "./configuration";
 import { EnableDisableRulesWalker } from "./enableDisableRules";
 import { findFormatter } from "./formatterLoader";
+import { wrapProgram } from "./language/languageServiceHost";
 import { IFormatter } from "./language/formatter/formatter";
 import { RuleFailure } from "./language/rule/rule";
 import { TypedRule } from "./language/rule/typedRule";
@@ -48,6 +49,7 @@ class MultiLinter {
     public static loadConfigurationFromPath = loadConfigurationFromPath;
 
     private failures: RuleFailure[] = [];
+    private languageService: ts.LanguageService;
 
     /**
      * Creates a TypeScript program object from a tsconfig.json file path and optional project directory.
@@ -84,7 +86,9 @@ class MultiLinter {
     }
 
     constructor(private options: IMultiLinterOptions, private program?: ts.Program) {
-        // Empty
+        if (program) {
+            this.languageService = wrapProgram(program);
+        }
     }
 
     public lint(fileName: string, source?: string, configuration: any = DEFAULT_CONFIG): void {
@@ -119,7 +123,7 @@ class MultiLinter {
         for (let rule of enabledRules) {
             let ruleFailures: RuleFailure[] = [];
             if (this.program && rule instanceof TypedRule) {
-                ruleFailures = rule.applyWithProgram(sourceFile, this.program);
+                ruleFailures = rule.applyWithProgram(sourceFile, this.languageService);
             } else {
                 ruleFailures = rule.apply(sourceFile);
             }

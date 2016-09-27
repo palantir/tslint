@@ -80,10 +80,8 @@ export class Rule extends Lint.Rules.TypedRule {
         return this.applyWithProgram(sourceFile, undefined);
     }
 
-    public applyWithProgram(sourceFile: ts.SourceFile, program?: ts.Program): Lint.RuleFailure[] {
-        let languageServiceHost = program ? Lint.hostFromProgram(program) :
-          Lint.createLanguageServiceHost(sourceFile.fileName, sourceFile.getFullText());
-        return this.applyWithWalker(new NoUnusedVariablesWalker(sourceFile, this.getOptions(), languageServiceHost, program));
+    public applyWithProgram(sourceFile: ts.SourceFile, langSvc?: ts.LanguageService): Lint.RuleFailure[] {
+        return this.applyWithWalker(new NoUnusedVariablesWalker(sourceFile, this.getOptions(), langSvc));
     }
 }
 
@@ -96,16 +94,20 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     private ignorePattern: RegExp;
     private isReactUsed: boolean;
     private reactImport: ts.NamespaceImport;
-    private languageService: ts.LanguageService;
+    private dummyLanguageService: boolean;
+    private possibleFailures: Lint.RuleFailure[] = [];
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions,
-                private languageServiceHost: ts.LanguageServiceHost, private program?: ts.Program) {
+                private languageService?: ts.LanguageService) {
         super(sourceFile, options);
-        this.languageService = ts.createLanguageService(languageServiceHost);
         this.skipVariableDeclaration = false;
         this.skipParameterDeclaration = false;
         this.hasSeenJsxElement = false;
         this.isReactUsed = false;
+        if (!languageService) {
+            this.dummyLanguageService = true;
+            this.languageService = Lint.createLanguageService(sourceFile.fileName, sourceFile.getFullText());
+        }
 
         const ignorePatternOption = this.getOptions().filter((option: any) => {
             return typeof option === "object" && option["ignore-pattern"] != null;
@@ -144,9 +146,35 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
             if (!this.isIgnored(nameText)) {
                 const start = this.reactImport.name.getStart();
                 const msg = Rule.FAILURE_STRING_FACTORY(Rule.FAILURE_TYPE_IMPORT, nameText);
-                this.addFailure(this.createFailure(start, nameText.length, msg));
+                this.possibleFailures.push(this.createFailure(start, nameText.length, msg));
             }
         }
+
+        let someFixBrokeIt = false;
+        // Performance optimization: type-check the whole file before verifying individual fixes
+        if (this.possibleFailures.some(f => f.hasFix()) && !this.dummyLanguageService) {
+            let newText = Lint.Fix.applyAll(this.getSourceFile().getFullText(),
+                this.possibleFailures.map(f => f.getFix()).filter(f => !!f));
+
+            // If we have the program, we can verify that the fix doesn't introduce failures
+            if (Lint.checkEdit(this.languageService, this.getSourceFile(), newText).length > 0) {
+                console.error(`Fixes caused errors in ${this.getSourceFile().fileName}`);
+                someFixBrokeIt = true;
+            }
+        }
+
+        this.possibleFailures.forEach(f => {
+            if (!someFixBrokeIt || !f.hasFix()) {
+                this.addFailure(f);
+            } else {
+                let newText = f.getFix().apply(this.getSourceFile().getFullText());
+                if (Lint.checkEdit(this.languageService, this.getSourceFile(), newText).length > 0) {
+                    console.error(`Found one of the broken fixes in ${this.getSourceFile().fileName}`);
+                } else {
+                    this.addFailure(f);
+                }
+            }
+        });
     }
 
     public visitBindingElement(node: ts.BindingElement) {
@@ -427,24 +455,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         if (replacements && replacements.length) {
             fix = new Lint.Fix("no-unused-variable", replacements);
         }
-        // If we have the program, we can verify that the fix doesn't introduce failures
-        if (this.program) {
-            const program = this.languageService.getProgram();
-            const sf = this.getSourceFile();
-            const existingDiags = ts.getPreEmitDiagnostics(program, sf);
-            if (existingDiags.length > 0) {
-                throw new Error("Fix existing diagnostics before running no-unused-variable");
-            }
-            (this.languageServiceHost as any).editFile(sf.fileName, fix.apply(sf.getFullText()));
-            const newProgram = this.languageService.getProgram();
-            const newSf = newProgram.getSourceFile(sf.fileName);
-            const newDiags = ts.getPreEmitDiagnostics(newProgram, newSf);
-            if (newDiags.length > 0) {
-                console.error("rejecting fix because it causes errors");
-                return;
-            }
-        }
-        this.addFailure(this.createFailure(position, name.length, Rule.FAILURE_STRING_FACTORY(type, name), fix));
+        this.possibleFailures.push(this.createFailure(position, name.length, Rule.FAILURE_STRING_FACTORY(type, name), fix));
     }
 
     private isIgnored(name: string) {

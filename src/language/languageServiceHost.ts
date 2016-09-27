@@ -19,22 +19,27 @@ import * as ts from "typescript";
 
 import {createCompilerOptions} from "./utils";
 
-export interface LanguageServiceEditableHost extends ts.LanguageServiceHost {
+interface LanguageServiceEditableHost extends ts.LanguageServiceHost {
     editFile(fileName: string, newContent: string): void;
 }
 
-export function hostFromProgram(program: ts.Program): LanguageServiceEditableHost {
+export function wrapProgram(program: ts.Program): ts.LanguageService {
     const files: {[name: string]: string} = {};
     const fileVersions: {[name: string]: number} = {};
-    return {
+    const host: LanguageServiceEditableHost = {
             getCompilationSettings: () => program.getCompilerOptions(),
             getCurrentDirectory: () => program.getCurrentDirectory(),
-            getDefaultLibFileName: () => "lib.d.ts",
-            getScriptFileNames: () => program.getRootFileNames(),
-            getScriptSnapshot: (name: string) => ts.ScriptSnapshot.fromString(
-                files.hasOwnProperty(name) ? files[name] :
-                program.getSourceFile(name).getFullText()
-            ),
+            getDefaultLibFileName: () => null,
+            getScriptFileNames: () => program.getSourceFiles().map(sf => sf.fileName),
+            getScriptSnapshot: (name: string) => {
+                if (files.hasOwnProperty(name)) {
+                    return ts.ScriptSnapshot.fromString(files[name]);
+                }
+                if (!program.getSourceFile(name)) {
+                    return null;
+                }
+                return ts.ScriptSnapshot.fromString(program.getSourceFile(name).getFullText());
+            },
             getScriptVersion: (name: string) => fileVersions.hasOwnProperty(name) ? fileVersions[name] + "" : "1",
             log: () => { /* */ },
             editFile(fileName: string, newContent: string) {
@@ -46,6 +51,20 @@ export function hostFromProgram(program: ts.Program): LanguageServiceEditableHos
                 }
             },
         };
+    const langSvc = ts.createLanguageService(host, ts.createDocumentRegistry());
+    (langSvc as any).editFile = host.editFile;
+    return langSvc;
+}
+
+export function checkEdit(ls: ts.LanguageService, sf: ts.SourceFile, newText: string) {
+    (ls as any).editFile(sf.fileName, newText);
+    const newProgram = ls.getProgram();
+    const newSf = newProgram.getSourceFile(sf.fileName);
+    const newDiags = ts.getPreEmitDiagnostics(newProgram, newSf);
+    // revert
+    (ls as any).editFile(sf.fileName, sf.getFullText());
+    return newDiags;
+
 }
 
 export function createLanguageServiceHost(fileName: string, source: string): ts.LanguageServiceHost {
@@ -60,7 +79,7 @@ export function createLanguageServiceHost(fileName: string, source: string): ts.
     };
 }
 
-export function createLanguageService(fileName: string, source: string, program?: ts.Program) {
-    const languageServiceHost = program ? hostFromProgram(program) : createLanguageServiceHost(fileName, source);
+export function createLanguageService(fileName: string, source: string) {
+    const languageServiceHost = createLanguageServiceHost(fileName, source);
     return ts.createLanguageService(languageServiceHost);
 }

@@ -26,5 +26,5 @@ export abstract class TypedRule extends AbstractRule {
         throw new Error(`${this.getOptions().ruleName} requires type checking`);
     }
 
-    public abstract applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): RuleFailure[];
+    public abstract applyWithProgram(sourceFile: ts.SourceFile, languageService: ts.LanguageService): RuleFailure[];
 }
