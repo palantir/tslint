@@ -92,7 +92,7 @@ class MultiLinter {
         if (this.program) {
             sourceFile = this.program.getSourceFile(fileName);
             // check if the program has been type checked
-            if (!("resolvedModules" in sourceFile)) {
+            if (sourceFile && !("resolvedModules" in sourceFile)) {
                 throw new Error("Program must be type checked before linting");
             }
         } else {
