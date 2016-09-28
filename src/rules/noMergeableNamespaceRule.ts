@@ -35,8 +35,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         return `Mergeable namespace ${identifier} found. Merge its contents with the namespace on line ${locationToMerge.line}.`;
     }
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const languageService = Lint.createLanguageService(sourceFile.fileName, sourceFile.getFullText());
+    public apply(sourceFile: ts.SourceFile, languageService: ts.LanguageService): Lint.RuleFailure[] {
         const noMergeableNamespaceWalker = new NoMergeableNamespaceWalker(sourceFile, this.getOptions(), languageService);
         return this.applyWithWalker(noMergeableNamespaceWalker);
     }

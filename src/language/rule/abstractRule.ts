@@ -43,7 +43,7 @@ export abstract class AbstractRule implements IRule {
         return this.options;
     }
 
-    public abstract apply(sourceFile: ts.SourceFile): RuleFailure[];
+    public abstract apply(sourceFile: ts.SourceFile, languageService: ts.LanguageService): RuleFailure[];
 
     public applyWithWalker(walker: RuleWalker): RuleFailure[] {
         walker.walk(walker.getSourceFile());

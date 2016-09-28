@@ -28,7 +28,7 @@ import {
 } from "./configuration";
 import { EnableDisableRulesWalker } from "./enableDisableRules";
 import { findFormatter } from "./formatterLoader";
-import { wrapProgram } from "./language/languageServiceHost";
+import { createLanguageService, wrapProgram } from "./language/languageServiceHost";
 import { IFormatter } from "./language/formatter/formatter";
 import { RuleFailure } from "./language/rule/rule";
 import { TypedRule } from "./language/rule/typedRule";
@@ -101,6 +101,7 @@ class MultiLinter {
             }
         } else {
             sourceFile = getSourceFile(fileName, source);
+            this.languageService = createLanguageService(fileName, source);
         }
 
         if (sourceFile === undefined) {
@@ -125,7 +126,7 @@ class MultiLinter {
             if (this.program && rule instanceof TypedRule) {
                 ruleFailures = rule.applyWithProgram(sourceFile, this.languageService);
             } else {
-                ruleFailures = rule.apply(sourceFile);
+                ruleFailures = rule.apply(sourceFile, this.languageService);
             }
             for (let ruleFailure of ruleFailures) {
                 if (!this.containsRule(this.failures, ruleFailure)) {

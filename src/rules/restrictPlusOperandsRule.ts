@@ -35,7 +35,7 @@ export class Rule extends Lint.Rules.TypedRule {
     public static MISMATCHED_TYPES_FAILURE = "Types of values used in '+' operation must match";
     public static UNSUPPORTED_TYPE_FAILURE_FACTORY = (type: string) => `cannot add type ${type}`;
 
-    public applyWithProgram(sourceFile: ts.SourceFile, langSvc: Lint.TslintLanguageService): Lint.RuleFailure[] {
+    public applyWithProgram(sourceFile: ts.SourceFile, langSvc: ts.LanguageService): Lint.RuleFailure[] {
         return this.applyWithWalker(new RestrictPlusOperandsWalker(sourceFile, this.getOptions(), langSvc.getProgram()));
     }
 }

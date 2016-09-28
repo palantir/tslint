@@ -85,7 +85,7 @@ export interface IDisabledInterval {
 export interface IRule {
     getOptions(): IOptions;
     isEnabled(): boolean;
-    apply(sourceFile: ts.SourceFile): RuleFailure[];
+    apply(sourceFile: ts.SourceFile, languageService: ts.LanguageService): RuleFailure[];
     applyWithWalker(walker: RuleWalker): RuleFailure[];
 }
 

@@ -37,8 +37,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_PREFIX = "variable '";
     public static FAILURE_STRING_POSTFIX = "' used before declaration";
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const languageService = Lint.createLanguageService(sourceFile.fileName, sourceFile.getFullText());
+    public apply(sourceFile: ts.SourceFile, languageService: ts.LanguageService): Lint.RuleFailure[] {
         return this.applyWithWalker(new NoUseBeforeDeclareWalker(sourceFile, this.getOptions(), languageService));
     }
 }

@@ -76,12 +76,12 @@ export class Rule extends Lint.Rules.TypedRule {
     public static FAILURE_STRING_FACTORY = (type: string, name: string) => `Unused ${type}: '${name}'`;
 
     // no-undefined-variable optionally allows type-checking
-    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithProgram(sourceFile, undefined);
+    public apply(sourceFile: ts.SourceFile, languageService: ts.LanguageService): Lint.RuleFailure[] {
+        return this.applyWithProgram(sourceFile, languageService);
     }
 
-    public applyWithProgram(sourceFile: ts.SourceFile, langSvc?: ts.LanguageService): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoUnusedVariablesWalker(sourceFile, this.getOptions(), langSvc));
+    public applyWithProgram(sourceFile: ts.SourceFile, languageService: ts.LanguageService): Lint.RuleFailure[] {
+        return this.applyWithWalker(new NoUnusedVariablesWalker(sourceFile, this.getOptions(), languageService));
     }
 }
 
@@ -98,16 +98,12 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     private possibleFailures: Lint.RuleFailure[] = [];
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions,
-                private languageService?: ts.LanguageService) {
+                private languageService: ts.LanguageService) {
         super(sourceFile, options);
         this.skipVariableDeclaration = false;
         this.skipParameterDeclaration = false;
         this.hasSeenJsxElement = false;
         this.isReactUsed = false;
-        if (!languageService) {
-            this.dummyLanguageService = true;
-            this.languageService = Lint.createLanguageService(sourceFile.fileName, sourceFile.getFullText());
-        }
 
         const ignorePatternOption = this.getOptions().filter((option: any) => {
             return typeof option === "object" && option["ignore-pattern"] != null;

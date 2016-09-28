@@ -33,8 +33,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static FAILURE_STRING = "Expected a 'for-of' loop instead of a 'for' loop with this simple iteration";
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const languageService = Lint.createLanguageService(sourceFile.fileName, sourceFile.getFullText());
+    public apply(sourceFile: ts.SourceFile, languageService: ts.LanguageService): Lint.RuleFailure[] {
         return this.applyWithWalker(new PreferForOfWalker(sourceFile, this.getOptions(), languageService));
     }
 }
@@ -67,7 +66,7 @@ class PreferForOfWalker extends Lint.RuleWalker {
                     // so remove those from the count to get the count inside the loop block
                     const incrementorCount = highlights[0].highlightSpans.length - 3;
 
-                    // Find `array[i]`-like usages by building up a regex 
+                    // Find `array[i]`-like usages by building up a regex
                     const arrayTokenForRegex = arrayToken.getText().replace(".", "\\.");
                     const incrementorForRegex = incrementorVariable.getText().replace(".", "\\.");
                     const regex = new RegExp(`${arrayTokenForRegex}\\[\\s*${incrementorForRegex}\\s*\\]`, "g");
