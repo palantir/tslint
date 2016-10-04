@@ -44,6 +44,16 @@ import v = require("i")
 module M {
     export var x
                 ~nil [Missing semicolon]
+    export function f(s: string): string;
+    export function f(n: number): number
+                                        ~nil [Missing semicolon]
+    export function f(x: any) { return x; }
+}
+
+declare module "M" {
+    function f(): number;
+    function g(): number
+                        ~nil [Missing semicolon]
 }
 
 function useStrictMissingSemicolon() {
@@ -85,4 +95,6 @@ export default LoginPage
 export = Date;
 export = Date
              ~nil [Missing semicolon]
-
+type t = number;
+type t = number
+               ~nil [Missing semicolon]

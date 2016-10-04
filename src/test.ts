@@ -41,7 +41,7 @@ export interface TestResult {
             fixesFromMarkup: string;
             markupFromLinter: string;
             markupFromMarkup: string;
-        }
+        },
     };
 }
 
@@ -65,9 +65,9 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
                 getCanonicalFileName: (filename: string) => filename,
                 getCurrentDirectory: () => "",
                 getDefaultLibFileName: () => ts.getDefaultLibFileName(compilerOptions),
-                getDirectories: () => [],
+                getDirectories: (path: string) => [],
                 getNewLine: () => "\n",
-                getSourceFile: function (filenameToGet: string) {
+                getSourceFile(filenameToGet: string) {
                     if (filenameToGet === this.getDefaultLibFileName()) {
                         const fileText = fs.readFileSync(ts.getDefaultLibFilePath(compilerOptions)).toString();
                         return ts.createSourceFile(filenameToGet, fileText, compilerOptions.target);

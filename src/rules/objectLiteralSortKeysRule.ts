@@ -56,14 +56,15 @@ class ObjectLiteralSortKeysWalker extends Lint.RuleWalker {
 
     public visitPropertyAssignment(node: ts.PropertyAssignment) {
         const sortedState = this.sortedStateStack[this.sortedStateStack.length - 1];
+
         // skip remainder of object literal scan if a previous key was found
         // in an unsorted position. This ensures only one error is thrown at
         // a time and keeps error output clean.
         if (sortedState) {
             const lastSortedKey = this.lastSortedKeyStack[this.lastSortedKeyStack.length - 1];
             const keyNode = node.name;
-            if (keyNode.kind === ts.SyntaxKind.Identifier) {
-                const key = (<ts.Identifier> keyNode).text;
+            if (isIdentifierOrStringLiteral(keyNode)) {
+                const key = keyNode.text;
                 if (key < lastSortedKey) {
                     const failureString = Rule.FAILURE_STRING_FACTORY(key);
                     this.addFailure(this.createFailure(keyNode.getStart(), keyNode.getWidth(), failureString));
@@ -75,4 +76,8 @@ class ObjectLiteralSortKeysWalker extends Lint.RuleWalker {
         }
         super.visitPropertyAssignment(node);
     }
+}
+
+function isIdentifierOrStringLiteral(node: ts.Node): node is (ts.Identifier | ts.StringLiteral) {
+    return node.kind === ts.SyntaxKind.Identifier || node.kind === ts.SyntaxKind.StringLiteral;
 }

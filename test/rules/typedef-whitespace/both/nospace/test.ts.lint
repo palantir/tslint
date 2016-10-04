@@ -84,6 +84,16 @@ var withPreceedingSpacesWithSubsequentSpacesObject = {
     }
 };
 
+var noPreceedingSpaceWithSubsequentNewLineObject = {
+    _Prop:
+        "some property",
+
+    get Prop():
+        string {
+        return this._Prop;
+    }
+};
+
 // endregion
 
 // region Interface
@@ -134,6 +144,11 @@ interface WithPreceedingSpacesWithSubsequentSpacesInterface {
     Prop   :   string;
           ~           [expected nospace before colon in property-declaration]
             ~         [expected nospace after colon in property-declaration]
+}
+
+interface NoPreceedingSpaceNoSubsequentSpaceAndNewLineInterface {
+    Prop:
+        string;
 }
 
 // endregion
@@ -307,6 +322,23 @@ function withPreceedingSpacesWithSubsequentSpacesFn(a   :   number, b   :   numb
     } catch (ex   :   Exception) {
                  ~          [expected nospace before colon in variable-declaration]
                    ~        [expected nospace after colon in variable-declaration]
+        console.log(ex);
+    }
+}
+
+function noPreceedingSpaceNoSubsequentSpaceAndNewLineFn(a:
+    number, b:
+    number):
+    number {
+    var c:
+        number = a + b;
+    var d:
+        number = a - b;
+
+    try {
+        return c / d;
+    } catch (ex:
+        Exception) {
         console.log(ex);
     }
 }
@@ -546,6 +578,9 @@ function withPreceedingSpacesWithSubsequentSpaceSignature( )   : {};
 function withPreceedingSpacesWithSubsequentSpacesSignature( )   :   {};
                                                                ~            [expected nospace before colon in call-signature]
                                                                  ~          [expected nospace after colon in call-signature]
+
+function noPreceedingSpaceNoSubsequentSpaceAndNewLineSignature( ):
+    {};
 
 // endregion
 
@@ -810,6 +845,31 @@ class WithPreceedingSpacesWithSubsequentSpacesClass {
     )   :   void {}
        ~            [expected nospace before colon in call-signature]
          ~          [expected nospace after colon in call-signature]
+}
+
+class NoPreceedingSpaceNoSubsequentSpaceAndNewLineClass {
+    [index:number]:
+        string
+
+    Prop:
+        string = "some property";
+
+    public get name():
+        string {
+        return "some name";
+    }
+
+    public set name(a:
+        string):
+        void {}
+
+    public shemp(
+        a:
+        number,
+        b:
+        number
+    ):
+    void {}
 }
 
 // endregion

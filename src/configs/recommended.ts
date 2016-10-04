@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+/* tslint:disable:object-literal-key-quotes */
 export const rules = {
     "align": [true,
         "parameters",
@@ -89,8 +90,8 @@ export const rules = {
     "switch-default": true,
     "trailing-comma": [true,
         {
-            "singleline": "never",
             "multiline": "always",
+            "singleline": "never",
         },
     ],
     "triple-equals": [true, "allow-null-check"],
@@ -125,3 +126,4 @@ export const rules = {
         "check-typecast",
     ],
 };
+/* tslint:enable:object-literal-key-quotes */

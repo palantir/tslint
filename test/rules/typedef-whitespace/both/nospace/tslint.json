@@ -1,5 +1,6 @@
 {
   "rules": {
+    "no-trailing-whitespace": true,
     "typedef-whitespace": [true, {
       "call-signature": "nospace",
       "index-signature": "nospace",

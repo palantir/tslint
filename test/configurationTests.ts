@@ -36,21 +36,21 @@ describe("Configuration", () => {
         });
         assert.deepEqual(extendConfigurationFile({
             rules: {
-                "a": 1,
-                "b": 2,
+                a: 1,
+                b: 2,
             },
             rulesDirectory: ["foo", "bar"],
         }, {
             rules: {
-                "b": 1,
-                "c": 3,
+                b: 1,
+                c: 3,
             },
             rulesDirectory: "baz",
         }), {
             rules: {
-                "a": 1,
-                "b": 2,
-                "c": 3,
+                a: 1,
+                b: 2,
+                c: 3,
             },
             rulesDirectory: ["foo", "bar", "baz"],
         });
@@ -69,11 +69,13 @@ describe("Configuration", () => {
             let config = loadConfigurationFromPath("./test/config/tslint-extends-package.json");
 
             assert.isArray(config.rulesDirectory);
+            /* tslint:disable:object-literal-sort-keys */
             assert.deepEqual(config.rules, {
                 "rule-one": true,
                 "rule-two": true,
                 "rule-three": false,
             });
+            /* tslint:enable:object-literal-sort-keys */
         });
 
         it("extends with package without customization", () => {
@@ -130,12 +132,14 @@ describe("Configuration", () => {
             assert.lengthOf(config.rulesDirectory, 2);
             assert.isTrue(fs.existsSync(config.rulesDirectory[0]));
             assert.isTrue(fs.existsSync(config.rulesDirectory[1]));
+            /* tslint:disable:object-literal-sort-keys */
             assert.deepEqual(config.rules, {
                 "always-fail": false,
                 "rule-one": true,
                 "rule-two": true,
                 "rule-four": true,
             });
+            /* tslint:enable:object-literal-sort-keys */
         });
 
         it("extends with array", () => {
@@ -153,11 +157,13 @@ describe("Configuration", () => {
         it("can load .json files with comments", () => {
             const config = loadConfigurationFromPath("./test/config/tslint-with-comments.json");
 
+            /* tslint:disable:object-literal-sort-keys */
             assert.deepEqual(config.rules, {
                 "rule-two": true,
                 "rule-three": "//not a comment",
                 "rule-four": "/*also not a comment*/",
             });
+            /* tslint:enable:object-literal-sort-keys */
         });
 
         it("can load .json files with BOM", () => {

@@ -4,7 +4,7 @@ import * as ts from "typescript";
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
-        ruleName: "object-shorthand",
+        ruleName: "object-literal-shorthand",
         description: "Enforces use of ES6 object literal shorthand when possible.",
         options: null,
         optionExamples: ["true"],

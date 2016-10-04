@@ -32,6 +32,7 @@ export interface IConfigurationFile {
 }
 
 export const CONFIG_FILENAME = "tslint.json";
+/* tslint:disable:object-literal-key-quotes */
 export const DEFAULT_CONFIG = {
     "rules": {
         "class-name": true,
@@ -66,9 +67,7 @@ export const DEFAULT_CONFIG = {
         ],
     },
 };
-
-const PACKAGE_DEPRECATION_MSG = "Configuration of TSLint via package.json has been deprecated, "
-    + "please start using a tslint.json file instead (http://palantir.github.io/tslint/usage/tslint-json/).";
+/* tslint:enable:object-literal-key-quotes */
 
 const BUILT_IN_CONFIG = /^tslint:(.*)$/;
 
@@ -91,7 +90,7 @@ export function findConfiguration(configFile: string, inputFilePath: string): IC
  * the location of the config file is not known and you want to search for one.
  * @param inputFilePath A path to the current file being linted. This is the starting location
  * of the search for a configuration.
- * @returns An absolute path to a tslint.json file, a path to a package.json file with a tslintConfig field
+ * @returns An absolute path to a tslint.json file
  * or undefined if neither can be found.
  */
 export function findConfigurationPath(suppliedConfigFilePath: string, inputFilePath: string) {
@@ -105,12 +104,6 @@ export function findConfigurationPath(suppliedConfigFilePath: string, inputFileP
         // search for tslint.json from input file location
         let configFilePath = findup(CONFIG_FILENAME, { cwd: inputFilePath, nocase: true });
         if (configFilePath != null && fs.existsSync(configFilePath)) {
-            return path.resolve(configFilePath);
-        }
-
-        // search for package.json with tslintConfig property
-        configFilePath = findup("package.json", { cwd: inputFilePath, nocase: true });
-        if (configFilePath != null && require(configFilePath).tslintConfig != null) {
             return path.resolve(configFilePath);
         }
 
@@ -139,9 +132,6 @@ export function findConfigurationPath(suppliedConfigFilePath: string, inputFileP
 export function loadConfigurationFromPath(configFilePath: string): IConfigurationFile {
     if (configFilePath == null) {
         return DEFAULT_CONFIG;
-    } else if (path.basename(configFilePath) === "package.json") {
-        console.warn(PACKAGE_DEPRECATION_MSG);
-        return require(configFilePath).tslintConfig;
     } else {
         const resolvedConfigFilePath = resolveConfigurationPath(configFilePath);
         let configFile: IConfigurationFile;

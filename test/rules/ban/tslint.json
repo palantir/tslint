@@ -1,8 +1,12 @@
 {
   "rules": {
     "ban": [
-      true, 
-      ["window", "toString"], 
+      true,
+      ["xit"],
+      ["fit"],
+      ["xdescribe"],
+      ["fdescribe"],
+      ["window", "toString"],
       ["_", "forEach"],
       ["_", "filter", "Use the native JavaScript 'myArray.filter' instead."]
     ]

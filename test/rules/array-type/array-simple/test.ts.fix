@@ -1,0 +1,53 @@
+let x: number[] = [1] as number[];
+let y: string[] = <string[]>["2"];
+let z: any[] = [3, "4"];
+
+let xx: number[][] = [[1, 2], [3]];
+let yy: number[][] = [[4, 5], [6]];
+
+let ya = [[1, "2"]] as Array<[number, string]>;
+
+type Arr<T> = T[];
+
+// Ignore user defined aliases
+let yyyy: Arr<Array<Array<Arr<string>>>> = [[[["2"]]]];
+
+interface ArrayClass<T> {
+    foo: T[];
+    bar: T[];
+    baz: Arr<T>;
+}
+
+function fooFunction(foo: Array<ArrayClass<string>>) {
+    return foo.map(e => e.foo);
+}
+
+function barFunction(bar: Array<ArrayClass<String>>) {
+    return bar.map(e => e.bar);
+}
+
+function bazFunction(baz: Arr<ArrayClass<String>>) {
+    return baz.map(e => e.baz);
+}
+
+let fooVar: Array<(c: number) => number>;
+let barVar: Array<(c: number) => number>;
+
+type fooUnion = Array<string|number|boolean>;
+type barUnion = Array<string|number|boolean>;
+
+type fooIntersection = Array<string & number>;
+type barIntersection = Array<string & number>;
+
+namespace fooName {
+    type BarType = { bar: string };
+    type BazType<T> = Arr<T>;
+}
+
+let v: fooName.BarType[] = [{ bar: "bar" }];
+
+let w: Array<fooName.BazType<string>> = [["baz"]];
+
+interface FooInterface {
+    '.bar': {baz: string[];};
+}

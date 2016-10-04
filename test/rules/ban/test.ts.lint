@@ -13,3 +13,14 @@ _.forEach(fun);
 ~~~~~~~~~    [Calls to '_.forEach' are not allowed.]
 _.filter(array);
 ~~~~~~~~    [Calls to '_.filter' are not allowed. Use the native JavaScript 'myArray.filter' instead.]
+describe("some text", () => {});
+xdescribe("some text", () => {});
+~~~~~~~~~    [Calls to 'xdescribe' are not allowed.]
+fdescribe("some text", () => {});
+~~~~~~~~~    [Calls to 'fdescribe' are not allowed.]
+it("some text", () => {});
+xit("some text", () => {});
+~~~          [Calls to 'xit' are not allowed.]
+fit("some text", () => {});
+~~~          [Calls to 'fit' are not allowed.]
+someObject.fit()
