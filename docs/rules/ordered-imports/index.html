@@ -14,18 +14,33 @@ descriptionDetails: |-
       however you like, e.g. by first- vs. third-party or thematically.
 optionsDescription: |-
 
+  You may set the `"import-sources-order"` option to control the ordering of source
+  imports (the `"foo"` in `import {A, B, C} from "foo"`).
+
+  Possible values for `"import-sources-order"` are:
+  * `"case-insensitive'`: Correct order is `"Bar"`, `"baz"`, `"Foo"`. (This is the default.)
+  * `"lowercase-first"`: Correct order is `"baz"`, `"Bar"`, `"Foo"`.
+  * `"lowercase-last"`: Correct order is `"Bar"`, `"Foo"`, `"baz"`.
+
   You may set the `"named-imports-order"` option to control the ordering of named
-  imports (the `{A, B, C}` in 'import {A, B, C} from "foo"`.)
+  imports (the `{A, B, C}` in `import {A, B, C} from "foo"`).
 
   Possible values for `"named-imports-order"` are:
 
   * `"case-insensitive'`: Correct order is `{A, b, C}`. (This is the default.)
   * `"lowercase-first"`: Correct order is `{b, A, C}`.
   * `"lowercase-last"`: Correct order is `{A, C, b}`.
+
           
 options:
   type: object
   properties:
+    import-sources-order:
+      type: string
+      enum:
+        - case-insensitive
+        - lowercase-first
+        - lowercase-last
     named-imports-order:
       type: string
       enum:
@@ -35,12 +50,20 @@ options:
   additionalProperties: false
 optionExamples:
   - 'true'
-  - '[true, {"named-imports-order": "lowercase-first"}]'
+  - '[true, {"import-sources-order": "lowercase-last", "named-imports-order": "lowercase-first"}]'
 type: style
 optionsJSON: |-
   {
     "type": "object",
     "properties": {
+      "import-sources-order": {
+        "type": "string",
+        "enum": [
+          "case-insensitive",
+          "lowercase-first",
+          "lowercase-last"
+        ]
+      },
       "named-imports-order": {
         "type": "string",
         "enum": [

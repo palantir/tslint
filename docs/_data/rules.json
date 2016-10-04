@@ -1,5 +1,15 @@
 [
   {
+    "ruleName": "adjacent-overload-signatures",
+    "description": "Enforces function overloads to be consecutive.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "typescript"
+  },
+  {
     "ruleName": "align",
     "description": "Enforces vertical alignment.",
     "rationale": "Helps maintain a readable, consistent style in your codebase.",
@@ -115,6 +125,18 @@
       "true"
     ],
     "type": "maintainability"
+  },
+  {
+    "ruleName": "file-header",
+    "description": "Enforces a certain header comment for all files, matched by a regular expression.",
+    "optionsDescription": "Regular expression to match the header.",
+    "options": {
+      "type": "string"
+    },
+    "optionExamples": [
+      "\"true\", \"Copyright \\d{4}\""
+    ],
+    "type": "style"
   },
   {
     "ruleName": "forin",
@@ -804,6 +826,15 @@
     "type": "style"
   },
   {
+    "ruleName": "object-literal-shorthand",
+    "description": "Enforces use of ES6 object literal shorthand when possible.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "style"
+  },
+  {
     "ruleName": "object-literal-sort-keys",
     "description": "Requires keys in object literals to be sorted alphabetically",
     "rationale": "Useful in preventing merge conflicts",
@@ -863,10 +894,21 @@
     "ruleName": "only-arrow-functions",
     "description": "Disallows traditional (non-arrow) function expressions.",
     "rationale": "Traditional functions don't bind lexical scope, which can lead to unexpected behavior when accessing 'this'.",
-    "optionsDescription": "Not configurable.",
-    "options": null,
+    "optionsDescription": "\nOne argument may be optionally provided:\n\n* `\"allow-declarations\"` allows standalone function declarations.\n        ",
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "allow-declarations"
+        ]
+      },
+      "minLength": 0,
+      "maxLength": 1
+    },
     "optionExamples": [
-      "true"
+      "true",
+      "[true, \"allow-declarations\"]"
     ],
     "type": "typescript"
   },
@@ -874,10 +916,18 @@
     "ruleName": "ordered-imports",
     "description": "Requires that import statements be alphabetized.",
     "descriptionDetails": "\nEnforce a consistent ordering for ES6 imports:\n- Named imports must be alphabetized (i.e. \"import {A, B, C} from \"foo\";\")\n    - The exact ordering can be controled by the named-imports-order option.\n    - \"longName as name\" imports are ordered by \"longName\".\n- Import sources must be alphabetized within groups, i.e.:\n        import * as foo from \"a\";\n        import * as bar from \"b\";\n- Groups of imports are delineated by blank lines. You can use these to group imports\n    however you like, e.g. by first- vs. third-party or thematically.",
-    "optionsDescription": "\nYou may set the `\"named-imports-order\"` option to control the ordering of named\nimports (the `{A, B, C}` in 'import {A, B, C} from \"foo\"`.)\n\nPossible values for `\"named-imports-order\"` are:\n\n* `\"case-insensitive'`: Correct order is `{A, b, C}`. (This is the default.)\n* `\"lowercase-first\"`: Correct order is `{b, A, C}`.\n* `\"lowercase-last\"`: Correct order is `{A, C, b}`.\n        ",
+    "optionsDescription": "\nYou may set the `\"import-sources-order\"` option to control the ordering of source\nimports (the `\"foo\"` in `import {A, B, C} from \"foo\"`).\n\nPossible values for `\"import-sources-order\"` are:\n* `\"case-insensitive'`: Correct order is `\"Bar\"`, `\"baz\"`, `\"Foo\"`. (This is the default.)\n* `\"lowercase-first\"`: Correct order is `\"baz\"`, `\"Bar\"`, `\"Foo\"`.\n* `\"lowercase-last\"`: Correct order is `\"Bar\"`, `\"Foo\"`, `\"baz\"`.\n\nYou may set the `\"named-imports-order\"` option to control the ordering of named\nimports (the `{A, B, C}` in `import {A, B, C} from \"foo\"`).\n\nPossible values for `\"named-imports-order\"` are:\n\n* `\"case-insensitive'`: Correct order is `{A, b, C}`. (This is the default.)\n* `\"lowercase-first\"`: Correct order is `{b, A, C}`.\n* `\"lowercase-last\"`: Correct order is `{A, C, b}`.\n\n        ",
     "options": {
       "type": "object",
       "properties": {
+        "import-sources-order": {
+          "type": "string",
+          "enum": [
+            "case-insensitive",
+            "lowercase-first",
+            "lowercase-last"
+          ]
+        },
         "named-imports-order": {
           "type": "string",
           "enum": [
@@ -891,7 +941,7 @@
     },
     "optionExamples": [
       "true",
-      "[true, {\"named-imports-order\": \"lowercase-first\"}]"
+      "[true, {\"import-sources-order\": \"lowercase-last\", \"named-imports-order\": \"lowercase-first\"}]"
     ],
     "type": "style"
   },
@@ -1037,13 +1087,14 @@
   {
     "ruleName": "typedef",
     "description": "Requires type definitions to exist.",
-    "optionsDescription": "\nSix arguments may be optionally provided:\n\n* `\"call-signature\"` checks return type of functions.\n* `\"parameter\"` checks type specifier of function parameters for non-arrow functions.\n* `\"arrow-parameter\"` checks type specifier of function parameters for arrow functions.\n* `\"property-declaration\"` checks return types of interface properties.\n* `\"variable-declaration\"` checks variable declarations.\n* `\"member-variable-declaration\"` checks member variable declarations.",
+    "optionsDescription": "\nSeven arguments may be optionally provided:\n\n* `\"call-signature\"` checks return type of functions.\n* `\"arrow-call-signature\"` checks return type of arrow functions.\n* `\"parameter\"` checks type specifier of function parameters for non-arrow functions.\n* `\"arrow-parameter\"` checks type specifier of function parameters for arrow functions.\n* `\"property-declaration\"` checks return types of interface properties.\n* `\"variable-declaration\"` checks variable declarations.\n* `\"member-variable-declaration\"` checks member variable declarations.",
     "options": {
       "type": "array",
       "items": {
         "type": "string",
         "enum": [
           "call-signature",
+          "arrow-call-signature",
           "parameter",
           "arrow-parameter",
           "property-declaration",
@@ -1052,7 +1103,7 @@
         ]
       },
       "minLength": 0,
-      "maxLength": 6
+      "maxLength": 7
     },
     "optionExamples": [
       "[true, \"call-signature\", \"parameter\", \"member-variable-declaration\"]"
@@ -1237,7 +1288,7 @@
           "check-decl",
           "check-operator",
           "check-module",
-          "check-seperator",
+          "check-separator",
           "check-type",
           "check-typecast"
         ]

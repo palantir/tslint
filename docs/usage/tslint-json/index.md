@@ -28,7 +28,7 @@ An example `tslint.json` file might look like this:
 
 ```ts
 {
-    "rulesDirectory": ["path/to/custom/rules/direcotry/", "another/path/"],
+    "rulesDirectory": ["path/to/custom/rules/directory/", "another/path/"],
     "rules": {
         "class-name": true,
         "comment-format": [true, "check-space"],

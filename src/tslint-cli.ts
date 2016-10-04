@@ -27,7 +27,7 @@ import {
     findConfiguration,
 } from "./configuration";
 import {consoleTestResultHandler, runTest} from "./test";
-import * as Linter from "./tslint";
+import * as Linter from "./tslintMulti";
 
 let processed = optimist
     .usage("Usage: $0 [options] file ...")
@@ -42,53 +42,53 @@ let processed = optimist
         }
     })
     .options({
-        "c": {
+        c: {
             alias: "config",
             describe: "configuration file",
         },
-        "force": {
-            describe: "return status code 0 even if there are lint errors",
-            "type": "boolean",
-        },
-        "h": {
-            alias: "help",
-            describe: "display detailed help",
-        },
-        "i": {
-            alias: "init",
-            describe: "generate a tslint.json config file in the current working directory",
-        },
-        "o": {
-            alias: "out",
-            describe: "output file",
-        },
-        "r": {
-            alias: "rules-dir",
-            describe: "rules directory",
-        },
-        "s": {
-            alias: "formatters-dir",
-            describe: "formatters directory",
-        },
-        "e": {
+        e: {
             alias: "exclude",
             describe: "exclude globs from path expansion",
         },
-        "t": {
+        force: {
+            describe: "return status code 0 even if there are lint errors",
+            type: "boolean",
+        },
+        h: {
+            alias: "help",
+            describe: "display detailed help",
+        },
+        i: {
+            alias: "init",
+            describe: "generate a tslint.json config file in the current working directory",
+        },
+        o: {
+            alias: "out",
+            describe: "output file",
+        },
+        project: {
+            describe: "tsconfig.json file",
+        },
+        r: {
+            alias: "rules-dir",
+            describe: "rules directory",
+        },
+        s: {
+            alias: "formatters-dir",
+            describe: "formatters directory",
+        },
+        t: {
             alias: "format",
             default: "prose",
-            describe: "output format (prose, json, stylish, verbose, pmd, msbuild, checkstyle, vso)",
+            describe: "output format (prose, json, stylish, verbose, pmd, msbuild, checkstyle, vso, fileslist)",
         },
-        "test": {
+        test: {
             describe: "test that tslint produces the correct output for the specified directory",
-        },
-        "project": {
-            describe: "tsconfig.json file",
         },
         "type-check": {
             describe: "enable type checking when linting a project",
         },
-        "v": {
+        v: {
             alias: "version",
             describe: "current version",
         },
@@ -217,45 +217,48 @@ if (argv.c && !fs.existsSync(argv.c)) {
 }
 const possibleConfigAbsolutePath = argv.c != null ? path.resolve(argv.c) : null;
 
-const processFile = (file: string, program?: ts.Program) => {
-    if (!fs.existsSync(file)) {
-        console.error(`Unable to open file: ${file}`);
-        process.exit(1);
-    }
+const processFiles = (files: string[], program?: ts.Program) => {
 
-    const buffer = new Buffer(256);
-    buffer.fill(0);
-    const fd = fs.openSync(file, "r");
-    try {
-        fs.readSync(fd, buffer, 0, 256, null);
-        if (buffer.readInt8(0) === 0x47 && buffer.readInt8(188) === 0x47) {
-            // MPEG transport streams use the '.ts' file extension. They use 0x47 as the frame
-            // separator, repeating every 188 bytes. It is unlikely to find that pattern in
-            // TypeScript source, so tslint ignores files with the specific pattern.
-            console.warn(`${file}: ignoring MPEG transport stream`);
-            return;
-        }
-    } finally {
-        fs.closeSync(fd);
-    }
-
-    const contents = fs.readFileSync(file, "utf8");
-    const configuration = findConfiguration(possibleConfigAbsolutePath, file);
-
-    const linter = new Linter(file, contents, {
-        configuration,
+    const linter = new Linter({
         formatter: argv.t,
-        formattersDirectory: argv.s,
-        rulesDirectory: argv.r,
+        formattersDirectory: argv.s || "",
+        rulesDirectory: argv.r || "",
     }, program);
 
-    const lintResult = linter.lint();
+    for (const file of files) {
+        if (!fs.existsSync(file)) {
+            console.error(`Unable to open file: ${file}`);
+            process.exit(1);
+        }
 
-    if (lintResult.failureCount > 0) {
-        outputStream.write(lintResult.output, () => {
-            process.exit(argv.force ? 0 : 2);
-        });
+        const buffer = new Buffer(256);
+        buffer.fill(0);
+        const fd = fs.openSync(file, "r");
+        try {
+            fs.readSync(fd, buffer, 0, 256, null);
+            if (buffer.readInt8(0) === 0x47 && buffer.readInt8(188) === 0x47) {
+                // MPEG transport streams use the '.ts' file extension. They use 0x47 as the frame
+                // separator, repeating every 188 bytes. It is unlikely to find that pattern in
+                // TypeScript source, so tslint ignores files with the specific pattern.
+                console.warn(`${file}: ignoring MPEG transport stream`);
+                return;
+            }
+        } finally {
+            fs.closeSync(fd);
+        }
+
+        const contents = fs.readFileSync(file, "utf8");
+        const configuration = findConfiguration(possibleConfigAbsolutePath, file);
+        linter.lint(file, contents, configuration);
     }
+
+    const lintResult = linter.getResult();
+
+    outputStream.write(lintResult.output, () => {
+        if (lintResult.failureCount > 0) {
+            process.exit(argv.force ? 0 : 2);
+        }
+    });
 };
 
 // if both files and tsconfig are present, use files
@@ -293,6 +296,7 @@ if (argv.project != null) {
     }
 }
 
-for (const file of files) {
-    glob.sync(file, { ignore: argv.e }).forEach((file) => processFile(file, program));
-}
+files = files
+  .map((file: string) => glob.sync(file, { ignore: argv.e }))
+  .reduce((a: string[], b: string[]) => a.concat(b));
+processFiles(files, program);

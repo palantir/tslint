@@ -44,6 +44,17 @@ import v = require("i");
 module M {
     export var x;
                 ~ [Unnecessary semicolon]
+    export function f(s: string): string;
+                                        ~ [Unnecessary semicolon]
+    export function f(n: number): number
+    export function f(x: any) { return x; }
+                                        ~ [Unnecessary semicolon]
+}
+
+declare module "M" {
+    function f(): number;
+                        ~ [Unnecessary semicolon]
+    function g(): number
 }
 
 function useStrictUnnecessarySemicolon() {
@@ -116,3 +127,7 @@ export default LoginPage
 export = Date;
              ~ [Unnecessary semicolon]
 export = Date
+
+type t = number;
+               ~ [Unnecessary semicolon]
+type t = number

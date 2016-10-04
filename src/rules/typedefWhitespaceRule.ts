@@ -30,7 +30,7 @@ const SPACE_OBJECT = {
     properties: {
         "call-signature": SPACE_OPTIONS,
         "index-signature": SPACE_OPTIONS,
-        "parameter": SPACE_OPTIONS,
+        parameter: SPACE_OPTIONS,
         "property-declaration": SPACE_OPTIONS,
         "variable-declaration": SPACE_OPTIONS,
     },
@@ -249,12 +249,19 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
         if (this.hasRightOption(option)) {
             let positionToCheck = colonPosition + 1 - node.getStart();
 
+            // Don't enforce trailing spaces on newlines
+            // (https://github.com/palantir/tslint/issues/1354)
+            scanner.setTextPos(positionToCheck);
+            let kind = scanner.scan();
+            if (kind === ts.SyntaxKind.NewLineTrivia) {
+                return;
+            }
+
             let hasTrailingWhitespace: boolean;
             if (positionToCheck >= node.getWidth()) {
                 hasTrailingWhitespace = false;
             } else {
-                scanner.setTextPos(positionToCheck);
-                hasTrailingWhitespace = scanner.scan() === ts.SyntaxKind.WhitespaceTrivia;
+                hasTrailingWhitespace = kind === ts.SyntaxKind.WhitespaceTrivia;
             }
 
             positionToCheck = colonPosition + 2 - node.getStart();
