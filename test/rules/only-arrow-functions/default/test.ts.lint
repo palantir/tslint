@@ -20,4 +20,7 @@ function () {
 
 ((func) => func())(() => {});
 
+function* generator() {}
+let generator = function*() {}
+
 [0]: non-arrow functions are forbidden
