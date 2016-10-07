@@ -27,7 +27,7 @@ const REACT_NAMESPACE_IMPORT_NAME = "React";
 
 const MODULE_SPECIFIER_MATCH = /^["'](.+)['"]$/;
 
-export class Rule extends Lint.Rules.TypedRule {
+export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-unused-variable",
@@ -75,12 +75,7 @@ export class Rule extends Lint.Rules.TypedRule {
 
     public static FAILURE_STRING_FACTORY = (type: string, name: string) => `Unused ${type}: '${name}'`;
 
-    // no-undefined-variable optionally allows type-checking
     public apply(sourceFile: ts.SourceFile, languageService: ts.LanguageService): Lint.RuleFailure[] {
-        return this.applyWithProgram(sourceFile, languageService);
-    }
-
-    public applyWithProgram(sourceFile: ts.SourceFile, languageService: ts.LanguageService): Lint.RuleFailure[] {
         return this.applyWithWalker(new NoUnusedVariablesWalker(sourceFile, this.getOptions(), languageService));
     }
 }
@@ -94,7 +89,6 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     private ignorePattern: RegExp;
     private isReactUsed: boolean;
     private reactImport: ts.NamespaceImport;
-    private dummyLanguageService: boolean;
     private possibleFailures: Lint.RuleFailure[] = [];
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions,
@@ -148,7 +142,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
 
         let someFixBrokeIt = false;
         // Performance optimization: type-check the whole file before verifying individual fixes
-        if (this.possibleFailures.some(f => f.hasFix()) && !this.dummyLanguageService) {
+        if (this.possibleFailures.some(f => f.hasFix())) {
             let newText = Lint.Fix.applyAll(this.getSourceFile().getFullText(),
                 this.possibleFailures.map(f => f.getFix()).filter(f => !!f));
 
@@ -164,9 +158,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
                 this.addFailure(f);
             } else {
                 let newText = f.getFix().apply(this.getSourceFile().getFullText());
-                if (Lint.checkEdit(this.languageService, this.getSourceFile(), newText).length > 0) {
-                    console.error(`Found one of the broken fixes in ${this.getSourceFile().fileName}`);
-                } else {
+                if (Lint.checkEdit(this.languageService, this.getSourceFile(), newText).length === 0) {
                     this.addFailure(f);
                 }
             }

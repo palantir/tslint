@@ -57,14 +57,17 @@ export function wrapProgram(program: ts.Program): ts.LanguageService {
 }
 
 export function checkEdit(ls: ts.LanguageService, sf: ts.SourceFile, newText: string) {
-    (ls as any).editFile(sf.fileName, newText);
-    const newProgram = ls.getProgram();
-    const newSf = newProgram.getSourceFile(sf.fileName);
-    const newDiags = ts.getPreEmitDiagnostics(newProgram, newSf);
-    // revert
-    (ls as any).editFile(sf.fileName, sf.getFullText());
-    return newDiags;
-
+    if (ls.hasOwnProperty("editFile")) {
+        const host = ls as any as LanguageServiceEditableHost;
+        host.editFile(sf.fileName, newText);
+        const newProgram = ls.getProgram();
+        const newSf = newProgram.getSourceFile(sf.fileName);
+        const newDiags = ts.getPreEmitDiagnostics(newProgram, newSf);
+        // revert
+        host.editFile(sf.fileName, sf.getFullText());
+        return newDiags;
+    }
+    return [];
 }
 
 export function createLanguageServiceHost(fileName: string, source: string): ts.LanguageServiceHost {
