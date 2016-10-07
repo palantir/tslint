@@ -1,12 +1,36 @@
-import  $ = require("jquery");
-import  _ = require("underscore");
+/**
+ * Some license that appears in the leading trivia of a statement that will be deleted.
+ * This text will not be deleted.
+ */
 import  xyz = require("xyz");
         ~~~                   [Unused import: 'xyz']
-import {createReadStream, createWriteStream} from "fs";
-        ~~~~~~~~~~~~~~~~                                [Unused import: 'createReadStream']
-export import a = require("a");
+import  $ = require("jquery");
+import  _ = require("underscore");
+import {a1 as aa1, a2 as aa2} from "modA";
+              ~~~             [Unused import: 'aa1']
+aa2;
+import {a3 as aa3, a4 as aa4} from "modA";
+                         ~~~  [Unused import: 'aa4']
+aa3;
+// This import statement is unused and will be deleted along with this comment.
+import {a5, a6} from "modA";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [Unused import: 'import {a5, a6} from "modA";']
+import {a7} from "modA";
+~~~~~~~~~~~~~~~~~~~~~~~~      [Unused import: 'import {a7} from "modA";']
+import {a8, a9, a10} from "modA";
+            ~~                [Unused import: 'a9']
+                ~~~           [Unused import: 'a10']
+a8;
+import {a11, a12, a13} from "modA";
+        ~~~                   [Unused import: 'a11']
+             ~~~              [Unused import: 'a12']
+a13;
+import {a14, a15, a16} from "modA";
+             ~~~              [Unused import: 'a15']
+a14;
+a16;
 
-createWriteStream();
+export import a = require("a");
 
 $(_.xyz());
 
@@ -23,6 +47,11 @@ import * as bar from "libB";
 import baz from "libC";
 import defaultExport, { namedExport } from "libD";
        ~~~~~~~~~~~~~                               [Unused import: 'defaultExport']
+import d1, { d2 } from "libD";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                     [Unused import: 'import d1, { d2 } from "libD";']
+import d3, { d4 } from "libD";
+           ~~~~~~                                  [Unused import: '{ d4 }']
+d3;
 
 bar.someFunc();
 baz();
