@@ -28,8 +28,8 @@ import {
 } from "./configuration";
 import { EnableDisableRulesWalker } from "./enableDisableRules";
 import { findFormatter } from "./formatterLoader";
-import { createLanguageService, wrapProgram } from "./language/languageServiceHost";
 import { IFormatter } from "./language/formatter/formatter";
+import { createLanguageService, wrapProgram } from "./language/languageServiceHost";
 import { RuleFailure } from "./language/rule/rule";
 import { TypedRule } from "./language/rule/typedRule";
 import { getSourceFile } from "./language/utils";
