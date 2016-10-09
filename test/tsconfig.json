@@ -145,7 +145,6 @@
         "../src/rules/typedefRule.ts",
         "../src/rules/typedefWhitespaceRule.ts",
         "../src/rules/useIsnanRule.ts",
-        "../src/rules/useStrictRule.ts",
         "../src/rules/variableNameRule.ts",
         "../src/rules/whitespaceRule.ts",
         "../src/test.ts",
