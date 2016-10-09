@@ -1,9 +1,10 @@
 {
     "version": "2.0.3",
     "compilerOptions": {
-        "lib": ["dom", "es5", "es2015.core"],
         "module": "commonjs",
         "noImplicitAny": true,
+        "noUnusedParameters": true,
+        "noUnusedLocals": true,
         "declaration": false,
         "sourceMap": false,
         "target": "es5",

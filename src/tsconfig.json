@@ -3,6 +3,8 @@
     "compilerOptions": {
         "module": "commonjs",
         "noImplicitAny": true,
+        "noUnusedParameters": true,
+        "noUnusedLocals": true,
         "declaration": true,
         "sourceMap": false,
         "target": "es5",
