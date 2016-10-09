@@ -32,7 +32,6 @@ export const rules = {
     "interface-name": [true, "always-prefix"],
     "jsdoc-format": true,
     "label-position": true,
-    "label-undefined": true,
     "max-line-length": [true, 120],
     "member-access": true,
     "member-ordering": [true,
