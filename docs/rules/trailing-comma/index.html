@@ -1,9 +1,6 @@
 ---
 ruleName: trailing-comma
-description: |-
-
-  Requires or disallows trailing commas in array and object literals, destructuring assignments, function and tuple typings,
-  named imports and function parameters.
+description: 'Requires or disallows trailing commas in array and object literals, destructuring assignments and named imports.'
 optionsDescription: |-
 
   One argument which is an object with the keys `multiline` and `singleline`.
@@ -14,8 +11,7 @@ optionsDescription: |-
 
   A array is considered "multiline" if its closing bracket is on a line
   after the last array element. The same general logic is followed for
-  object literals, function and tuple typings, named import statements
-  and function parameters.
+  object literals and named import statements.
 options:
   type: object
   properties:
@@ -33,8 +29,6 @@ options:
 optionExamples:
   - '[true, {"multiline": "always", "singleline": "never"}]'
 type: maintainability
-layout: rule
-title: 'Rule: trailing-comma'
 optionsJSON: |-
   {
     "type": "object",
@@ -56,4 +50,6 @@ optionsJSON: |-
     },
     "additionalProperties": false
   }
+layout: rule
+title: 'Rule: trailing-comma'
 ---

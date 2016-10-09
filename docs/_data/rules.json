@@ -33,23 +33,6 @@
     "type": "style"
   },
   {
-    "ruleName": "array-type",
-    "description": "Requires using either 'T[]' or 'Array<T>' for arrays.",
-    "optionsDescription": "\nOne of the following arguments must be provided:\n\n* `\"array\"` enforces use of 'T[]'.\n* `\"generic\"` enforces use of 'Array<T>'.",
-    "options": {
-      "type": "string",
-      "enum": [
-        "array",
-        "generic"
-      ]
-    },
-    "optionExamples": [
-      "[true, array]",
-      "[true, generic]"
-    ],
-    "type": "style"
-  },
-  {
     "ruleName": "arrow-parens",
     "description": "Requires parentheses around the parameters of arrow function definitions.",
     "rationale": "Maintains stylistic consistency with other arrow function definitions.",
@@ -62,21 +45,28 @@
   },
   {
     "ruleName": "ban",
-    "description": "Bans the use of specific functions or global methods.",
-    "optionsDescription": "\nA list of `['object', 'method', 'optional explanation here']` or `['globalMethod']` which ban `object.method()` \nor respectively `globalMethod()`.",
+    "description": "Bans the use of specific functions.",
+    "descriptionDetails": "At this time, there is no way to disable global methods with this rule.",
+    "optionsDescription": "A list of `['object', 'method', 'optional explanation here']` which ban `object.method()`.",
     "options": {
       "type": "list",
       "listType": {
         "type": "array",
-        "items": {
-          "type": "string"
-        },
-        "minLength": 1,
-        "maxLength": 3
+        "arrayMembers": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "string"
+          },
+          {
+            "type": "string"
+          }
+        ]
       }
     },
     "optionExamples": [
-      "[true, [\"someGlobalMethod\"], [\"someObject\", \"someFunction\"], \n                          [\"someObject\", \"otherFunction\", \"Optional explanation\"]]"
+      "[true, [\"someObject\", \"someFunction\"], [\"someObject\", \"otherFunction\", \"Optional explanation\"]]"
     ],
     "type": "functionality"
   },
@@ -126,22 +116,6 @@
     "type": "functionality"
   },
   {
-    "ruleName": "cyclomatic-complexity",
-    "description": "Enforces a threshold of cyclomatic complexity.",
-    "descriptionDetails": "\nCyclomatic complexity is assessed for each function of any type. A starting value of 1\nis assigned and this value is then incremented for every statement which can branch the\ncontrol flow within the function. The following statements and expressions contribute\nto cyclomatic complexity:\n* `catch`\n* `if` and `? :`\n* `||` and `&&` due to short-circuit evaluation\n* `for`, `for in` and `for of` loops\n* `while` and `do while` loops",
-    "rationale": "\nCyclomatic complexity is a code metric which indicates the level of complexity in a\nfunction. High cyclomatic complexity indicates confusing code which may be prone to\nerrors or difficult to modify.",
-    "optionsDescription": "\nAn optional upper limit for cyclomatic complexity can be specified. If no limit option\nis provided a default value of $(Rule.DEFAULT_THRESHOLD) will be used.",
-    "options": {
-      "type": "number",
-      "minimum": "$(Rule.MINIMUM_THRESHOLD)"
-    },
-    "optionExamples": [
-      "true",
-      "[true, 20]"
-    ],
-    "type": "maintainability"
-  },
-  {
     "ruleName": "eofline",
     "description": "Ensures the file ends with a newline.",
     "rationale": "It is a [standard convention](http://stackoverflow.com/q/729692/3124288) to end files with a newline.",
@@ -160,7 +134,7 @@
       "type": "string"
     },
     "optionExamples": [
-      "[true, \"Copyright \\\\d{4}\"]"
+      "\"true\", \"Copyright \\d{4}\""
     ],
     "type": "style"
   },
@@ -983,17 +957,6 @@
     "type": "style"
   },
   {
-    "ruleName": "prefer-for-of",
-    "description": "Recommends a 'for-of' loop over a standard 'for' loop if the index is only used to access the array being iterated.",
-    "rationale": "A for(... of ...) loop is easier to implement and read when the index is not needed.",
-    "optionsDescription": "Not configurable.",
-    "options": null,
-    "optionExamples": [
-      "true"
-    ],
-    "type": "typescript"
-  },
-  {
     "ruleName": "quotemark",
     "description": "Requires single or double quotes for string literals.",
     "optionsDescription": "\nFive arguments may be optionally provided:\n\n* `\"single\"` enforces single quotes.\n* `\"double\"` enforces double quotes.\n* `\"jsx-single\"` enforces single quotes for JSX attributes.\n* `\"jsx-double\"` enforces double quotes for JSX attributes.\n* `\"avoid-escape\"` allows you to use the \"other\" quotemark in cases where escaping would normally be required.\nFor example, `[true, \"double\", \"avoid-escape\"]` would not report a failure on the string literal `'Hello \"World\"'`.",
@@ -1082,8 +1045,8 @@
   },
   {
     "ruleName": "trailing-comma",
-    "description": "\nRequires or disallows trailing commas in array and object literals, destructuring assignments, function and tuple typings,\nnamed imports and function parameters.",
-    "optionsDescription": "\nOne argument which is an object with the keys `multiline` and `singleline`.\nBoth should be set to either `\"always\"` or `\"never\"`.\n\n* `\"multiline\"` checks multi-line object literals.\n* `\"singleline\"` checks single-line object literals.\n\nA array is considered \"multiline\" if its closing bracket is on a line\nafter the last array element. The same general logic is followed for\nobject literals, function and tuple typings, named import statements\nand function parameters.",
+    "description": "Requires or disallows trailing commas in array and object literals, destructuring assignments and named imports.",
+    "optionsDescription": "\nOne argument which is an object with the keys `multiline` and `singleline`.\nBoth should be set to either `\"always\"` or `\"never\"`.\n\n* `\"multiline\"` checks multi-line object literals.\n* `\"singleline\"` checks single-line object literals.\n\nA array is considered \"multiline\" if its closing bracket is on a line\nafter the last array element. The same general logic is followed for\nobject literals and named import statements.",
     "options": {
       "type": "object",
       "properties": {
