@@ -36,49 +36,146 @@ import * as glob from "glob";
 import * as yaml from "js-yaml";
 import * as path from "path";
 
-import {AbstractRule} from "../lib/language/rule/abstractRule";
+import {IFormatterMetadata} from "../lib/language/formatter/formatter";
 import {IRuleMetadata} from "../lib/language/rule/rule";
 
+type Metadata = IRuleMetadata | IFormatterMetadata;
+type Documented = { metadata: Metadata };
+
+interface IDocumentation {
+    /**
+     * File name for the json data file listing.
+     */
+    dataFileName: string;
+
+    /**
+     * Exported item name from each file.
+     */
+    exportName: string;
+
+    /**
+     * Pattern matching files to be documented.
+     */
+    globPattern: string;
+
+    /**
+     * Key of the item's name within the metadata object.
+     */
+    nameMetadataKey: string;
+
+    /**
+     * Function to generate individual documentation pages.
+     */
+    pageGenerator: (metadata: any) => string;
+
+    /**
+     * Documentation subdirectory to output to.
+     */
+    subDirectory: string;
+}
+
 const DOCS_DIR = "../docs";
-const DOCS_RULE_DIR = path.join(DOCS_DIR, "rules");
 
-const rulePaths = glob.sync("../lib/rules/*Rule.js");
-const rulesJson: IRuleMetadata[] = [];
-for (const rulePath of rulePaths) {
+/**
+ * Documentation definition for rule modules.
+ */
+const ruleDocumentation: IDocumentation = {
+    dataFileName: "rules.json",
+    exportName: "Rule",
+    globPattern: "../lib/rules/*Rule.js",
+    nameMetadataKey: "ruleName",
+    pageGenerator: generateRuleFile,
+    subDirectory: path.join(DOCS_DIR, "rules"),
+};
+
+/**
+ * Documentation definition for formatter modules.
+ */
+const formatterDocumentation: IDocumentation = {
+    dataFileName: "formatters.json",
+    exportName: "Formatter",
+    globPattern: "../lib/formatters/*Formatter.js",
+    nameMetadataKey: "formatterName",
+    pageGenerator: generateFormatterFile,
+    subDirectory: path.join(DOCS_DIR, "formatters"),
+};
+
+/**
+ * Builds complete documentation.
+ */
+function buildDocumentation(documentation: IDocumentation) {
+    // Create each module's documentation file.
+    const paths = glob.sync(documentation.globPattern);
+    const metadataJson = paths.map((path: string) => {
+        return buildSingleModuleDocumentation(documentation, path);
+    });
+
+    // Create a data file with details of every module.
+    buildDocumentationDataFile(documentation, metadataJson);
+}
+
+/**
+ * Produces documentation for a single file/module.
+ */
+function buildSingleModuleDocumentation(documentation: IDocumentation, modulePath: string): Metadata {
+    // Load the module.
     // tslint:disable-next-line:no-var-requires
-    const ruleModule = require(rulePath);
-    const Rule = ruleModule.Rule as typeof AbstractRule;
-    if (Rule != null && Rule.metadata != null) {
-        const { metadata } = Rule;
-        const fileData = generateRuleFile(metadata);
-        const fileDirectory = path.join(DOCS_RULE_DIR, metadata.ruleName);
+    const module = require(modulePath);
+    const DocumentedItem = module[documentation.exportName] as Documented;
+    if (DocumentedItem != null && DocumentedItem.metadata != null) {
+        // Build the module's page.
+        const { metadata } = DocumentedItem;
+        const fileData = documentation.pageGenerator(metadata);
 
-        // write file for each specific rule
+        // Ensure a directory exists and write the module's file.
+        const moduleName = (metadata as any)[documentation.nameMetadataKey];
+        const fileDirectory = path.join(documentation.subDirectory, moduleName);
         if (!fs.existsSync(fileDirectory)) {
             fs.mkdirSync(fileDirectory);
         }
         fs.writeFileSync(path.join(fileDirectory, "index.html"), fileData);
 
-        rulesJson.push(metadata);
+        return metadata;
     }
 }
 
-// write overall data file, this is used to generate the index page for the rules
-const fileData = JSON.stringify(rulesJson, undefined, 2);
-fs.writeFileSync(path.join(DOCS_DIR, "_data", "rules.json"), fileData);
+function buildDocumentationDataFile(documentation: IDocumentation, metadataJson: any[]) {
+    const dataJson = JSON.stringify(metadataJson, undefined, 2);
+    fs.writeFileSync(path.join(DOCS_DIR, "_data", documentation.dataFileName), dataJson);
+}
 
 /**
- * Based off a rule's metadata, generates a string Jekyll "HTML" file
- * that only consists of a YAML front matter block.
+ * Generates Jekyll data from any item's metadata.
  */
-function generateRuleFile(metadata: IRuleMetadata) {
-    const yamlData: any = {};
+function generateJekyllData(metadata: any, type: string, name: string): any {
+    const jekyllData: any = {};
     // TODO: Use Object.assign when Node 0.12 support is dropped (#1181)
     for (const key of Object.keys(metadata)) {
-        yamlData[key] = (<any> metadata)[key];
+        jekyllData[key] = (<any> metadata)[key];
     }
+    jekyllData.layout = type.toLowerCase();
+    jekyllData.title = `${type}: ${name}`;
+    return jekyllData;
+}
+
+/**
+ * Based off a rule's metadata, generates a Jekyll "HTML" file
+ * that only consists of a YAML front matter block.
+ */
+function generateRuleFile(metadata: IRuleMetadata): string {
+    const yamlData: any = generateJekyllData(metadata, "Rule", metadata.ruleName);
     yamlData.optionsJSON = JSON.stringify(metadata.options, undefined, 2);
-    yamlData.layout = "rule";
-    yamlData.title = `Rule: ${metadata.ruleName}`;
     return `---\n${yaml.safeDump(yamlData, <any> {lineWidth: 140})}---`;
 }
+
+/**
+ * Based off a formatter's metadata, generates a Jekyll "HTML" file
+ * that only consists of a YAML front matter block.
+ */
+function generateFormatterFile(metadata: IFormatterMetadata): string {
+    const yamlData: any = generateJekyllData(metadata, "Formatter", metadata.formatterName);
+    return `---\n${yaml.safeDump(yamlData, <any> {lineWidth: 140})}---`;
+}
+
+buildDocumentation(ruleDocumentation);
+buildDocumentation(formatterDocumentation);

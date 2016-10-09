@@ -16,9 +16,48 @@
  */
 
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
+import {IFormatterMetadata} from "../language/formatter/formatter";
 import {RuleFailure} from "../language/rule/rule";
 
+import * as Utils from "../utils";
+
 export class Formatter extends AbstractFormatter {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: IFormatterMetadata = {
+        formatterName: "json",
+        description: "Formats errors as simple JSON.",
+        sample: Utils.dedent`
+        [
+            {
+                "endPosition": {
+                    "character": 13,
+                    "line": 0,
+                    "position": 13
+                },
+                "failure": "Missing semicolon",
+                "fix": {
+                    "innerRuleName": "semicolon",
+                    "innerReplacements": [
+                        {
+                            "innerStart": 13,
+                            "innerLength": 0,
+                            "innerText": ";"
+                        }
+                    ]
+                },
+                "name": "myFile.ts",
+                "ruleName": "semicolon",
+                "startPosition": {
+                    "character": 13,
+                    "line": 0,
+                    "position": 13
+                }
+            }
+        ]`,
+        consumer: "machine",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public format(failures: RuleFailure[]): string {
         const failuresJSON = failures.map((failure) => failure.toJson());
         return JSON.stringify(failuresJSON);
