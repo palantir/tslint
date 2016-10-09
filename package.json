@@ -21,9 +21,9 @@
   },
   "dependencies": {
     "colors": "^1.1.2",
-    "diff": "^2.2.1",
+    "diff": "^3.0.1",
     "findup-sync": "~0.3.0",
-    "glob": "^7.0.3",
+    "glob": "^7.1.1",
     "optimist": "~0.6.0",
     "resolve": "^1.1.7",
     "underscore.string": "^3.3.4"
@@ -33,17 +33,17 @@
     "grunt": "^1.0.1",
     "grunt-cli": "^1.2.0",
     "grunt-contrib-clean": "^1.0.0",
-    "grunt-eslint": "^18.1.0",
-    "grunt-mocha-test": "^0.12.7",
+    "grunt-eslint": "^19.0.0",
+    "grunt-mocha-test": "^0.13.2",
     "grunt-npm-command": "^0.1.2",
     "grunt-run": "~0.6.0",
-    "grunt-ts": "^5.1.0",
+    "grunt-ts": "^5.5.1",
     "grunt-tslint": "latest",
-    "js-yaml": "^3.4.6",
-    "mocha": "^2.2.5",
+    "js-yaml": "^3.6.1",
+    "mocha": "^3.1.0",
     "tslint": "latest",
     "tslint-test-config-non-relative": "file:test/external/tslint-test-config-non-relative",
-    "typescript": "1.8.10"
+    "typescript": "2.0.3"
   },
   "peerDependencies": {
     "typescript": ">=1.7.3"
