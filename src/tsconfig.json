@@ -90,7 +90,6 @@
         "rules/interfaceNameRule.ts",
         "rules/jsdocFormatRule.ts",
         "rules/labelPositionRule.ts",
-        "rules/labelUndefinedRule.ts",
         "rules/linebreakStyleRule.ts",
         "rules/maxFileLineCountRule.ts",
         "rules/maxLineLengthRule.ts",
