@@ -72,3 +72,12 @@ function a() {
     var b = ({c: dog}) => { dog++; };
     b({ c: 5 });
 }
+
+import { ITest as ITest0 } from './ImportRegularAlias';
+import {/*ensure comments works*/ ITest as ITest1 } from './ImportAliasWithComment';
+import {
+    ITest as ITest2
+} from './ImportWithLineBreaks';
+import {First, ITest as ITest3 } from './ImportAliasSecond';
+
+import ITest from './InterfaceFile';
