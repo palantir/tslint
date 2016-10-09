@@ -422,17 +422,6 @@
     "type": "functionality"
   },
   {
-    "ruleName": "no-constructor-vars",
-    "description": "Disallows parameter properties.",
-    "rationale": "\nParameter properties can be confusing to those new to TS as they are less explicit\nthan other ways of declaring and initializing class members.",
-    "optionsDescription": "Not configurable.",
-    "options": null,
-    "optionExamples": [
-      "true"
-    ],
-    "type": "style"
-  },
-  {
     "ruleName": "no-construct",
     "description": "Disallows access to the constructors of `String`, `Number`, and `Boolean`.",
     "descriptionDetails": "Disallows constructor use such as `new Number(foo)` but does not disallow `Number(foo)`.",
@@ -623,6 +612,17 @@
       "true"
     ],
     "type": "functionality"
+  },
+  {
+    "ruleName": "no-parameter-properties",
+    "description": "Disallows parameter properties.",
+    "rationale": "\nParameter properties can be confusing to those new to TS as they are less explicit\nthan other ways of declaring and initializing class members.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "style"
   },
   {
     "ruleName": "no-reference",

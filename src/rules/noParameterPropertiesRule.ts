@@ -22,8 +22,8 @@ import * as Lint from "../lint";
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
-        ruleName: "no-constructor-vars",
-        description: "Disallows parameter properties.",
+        ruleName: "no-parameter-properties",
+        description: "Disallows parameter properties in class constructors.",
         rationale: Lint.Utils.dedent`
             Parameter properties can be confusing to those new to TS as they are less explicit
             than other ways of declaring and initializing class members.`,
@@ -37,11 +37,11 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_FACTORY = (ident: string) => `Property '${ident}' cannot be declared in the constructor`;
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoConstructorVarsWalker(sourceFile, this.getOptions()));
+        return this.applyWithWalker(new NoParameterPropertiesWalker(sourceFile, this.getOptions()));
     }
 }
 
-export class NoConstructorVarsWalker extends Lint.RuleWalker {
+export class NoParameterPropertiesWalker extends Lint.RuleWalker {
     public visitConstructorDeclaration(node: ts.ConstructorDeclaration) {
         const parameters = node.parameters;
         for (let parameter of parameters) {

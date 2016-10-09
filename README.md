@@ -80,7 +80,7 @@ The configuration file specifies which rules are enabled and their options. Thes
     /*
      * Any rules specified here will override those from the base config we are extending
      */
-    "no-constructor-vars": true
+    "no-parameter-properties": true
   },
   "rulesDirectory": [
     /*
