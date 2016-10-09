@@ -17,10 +17,11 @@
     "linter"
   ],
   "scripts": {
-    "clean": "npm-run-all -p clean:core clean:test",
+    "clean": "npm-run-all -p clean:core clean:scripts clean:test",
     "clean:core": "rm -rf lib",
+    "clean:scripts": "rm scripts/*.js",
     "clean:test": "rm -rf build && rm -rf test/config/node_modules",
-    "docs": "cd ./scripts/ && node buildDocs.js",
+    "docs": "node scripts/buildDocs.js",
     "compile": "npm-run-all -p compile:core compile:scripts compile:test",
     "compile:core": "tsc -p src",
     "compile:scripts": "tsc -p scripts",

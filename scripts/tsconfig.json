@@ -7,10 +7,6 @@
         "noUnusedLocals": true,
         "declaration": false,
         "sourceMap": false,
-        "target": "es5",
-        "outDir": "."
-    },
-    "include": [
-        "./*"
-    ]
+        "target": "es5"
+    }
 }

@@ -76,6 +76,8 @@ interface IDocumentation {
 
 const DOCS_DIR = "../docs";
 
+process.chdir("./scripts");
+
 /**
  * Documentation definition for rule modules.
  */
