@@ -1,5 +1,5 @@
 {
-    "version": "1.6.2",
+    "version": "1.8.10",
     "compilerOptions": {
         "module": "commonjs",
         "noImplicitAny": true,
@@ -20,6 +20,7 @@
         "./rule-tester/*.ts"
     ],
     "files": [
+        "../custom-typings/object.d.ts",
         "../custom-typings/resolve.d.ts",
         "../typings/colors/colors.d.ts",
         "../typings/diff/diff.d.ts",
@@ -29,6 +30,7 @@
         "../typings/minimatch/minimatch.d.ts",
         "../typings/node/node.d.ts",
         "../typings/optimist/optimist.d.ts",
+        "../typings/tsd.d.ts",
         "../typings/underscore.string/underscore.string.d.ts",
         "../typings/underscore/underscore.d.ts",
         "typings/chai/chai.d.ts",
