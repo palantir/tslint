@@ -1,0 +1,39 @@
+/**
+ * Some license that appears in the leading trivia of a statement that will be deleted.
+ * This text will not be deleted.
+ */
+
+import  $ = require("jquery");
+import  _ = require("underscore");
+import {a2 as aa2} from "modA";
+aa2;
+import {a3 as aa3} from "modA";
+aa3;
+import {a8} from "modA";
+a8;
+import {a13} from "modA";
+a13;
+import {a14, a16} from "modA";
+a14;
+a16;
+
+export import a = require("a");
+
+$(_.xyz());
+
+/// <reference path="../externalFormatter.test.ts" />
+
+module S {
+  var template = "";
+}
+import * as bar from "libB";
+import baz from "libC";
+import { namedExport } from "libD";
+import d3 from "libD";
+d3;
+
+bar.someFunc();
+baz();
+namedExport();
+
+import "jquery";

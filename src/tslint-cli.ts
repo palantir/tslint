@@ -80,7 +80,7 @@ let processed = optimist
         t: {
             alias: "format",
             default: "prose",
-            describe: "output format (prose, json, stylish, verbose, pmd, msbuild, checkstyle, vso)",
+            describe: "output format (prose, json, stylish, verbose, pmd, msbuild, checkstyle, vso, fileslist)",
         },
         test: {
             describe: "test that tslint produces the correct output for the specified directory",
@@ -297,6 +297,6 @@ if (argv.project != null) {
 }
 
 files = files
-  .map((file: string) => glob.sync(file, { ignore: argv.e }))
+  .map((file: string) => glob.sync(file, { ignore: argv.e, nodir: true }))
   .reduce((a: string[], b: string[]) => a.concat(b));
 processFiles(files, program);

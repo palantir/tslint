@@ -391,7 +391,7 @@ Creating a new release
 ----------------------
 <sup>[back to ToC &uarr;](#table-of-contents)</sup>
 
-1. Bump the version number in `package.json` and `src/tslint.ts`
+1. Bump the version number in `package.json` and `src/tslintMulti.ts`
 2. Add release notes in `CHANGELOG.md`
 3. Run `grunt` to build the latest sources
 4. Commit with message `Prepare release <version>`
