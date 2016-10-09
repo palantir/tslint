@@ -1,8 +1,8 @@
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
 import {IFormatterMetadata} from "../language/formatter/formatter";
 import {Fix, RuleFailure} from "../language/rule/rule";
-import * as fs from "fs";
 import * as Utils from "../utils";
+import * as fs from "fs";
 
 export class Formatter extends AbstractFormatter {
     /* tslint:disable:object-literal-sort-keys */
