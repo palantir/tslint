@@ -1,8 +1,23 @@
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
+import {IFormatterMetadata} from "../language/formatter/formatter";
 import {Fix, RuleFailure} from "../language/rule/rule";
 import * as fs from "fs";
+import * as Utils from "../utils";
 
 export class Formatter extends AbstractFormatter {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: IFormatterMetadata = {
+        formatterName: "applyFixes",
+        description: "Automatically fixes lint failures.",
+        descriptionDetails: Utils.dedent`
+            Modifies source files and applies fixes for lint failures where possible. Changes
+            should be tested as not all fixes preserve semantics.`,
+        sample: Utils.dedent`
+            All done. Remember to test the changes, as not all fixes preserve semantics.`,
+        consumer: "machine",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public format(failures: RuleFailure[]): string {
         const files: {[file: string]: boolean} = {};
         failures.map(f => files[f.getFileName()] = true);
