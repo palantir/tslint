@@ -31,6 +31,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-unused-variable",
+        deprecationMessage: "Use the compiler options --noUnusedParameters and --noUnusedLocals instead.",
         description: "Disallows unused imports, variables, functions and private class members.",
         optionsDescription: Lint.Utils.dedent`
             Three optional arguments may be optionally provided:
@@ -331,7 +332,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
             node.modifiers,
             ts.SyntaxKind.PublicKeyword,
             ts.SyntaxKind.PrivateKeyword,
-            ts.SyntaxKind.ProtectedKeyword
+            ts.SyntaxKind.ProtectedKeyword,
         );
 
         if (!isSingleVariable && isPropertyParameter) {

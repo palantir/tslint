@@ -68,7 +68,8 @@ export const rules = {
     "no-unreachable": true,
     "no-unused-expression": true,
     "no-unused-new": true,
-    "no-unused-variable": [true, "react"],
+    // deprecated as of v4.0
+    "no-unused-variable": false,
     // disable this rule as it is very heavy performance-wise and not that useful
     "no-use-before-declare": false,
     "no-var-keyword": true,
