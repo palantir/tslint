@@ -63,7 +63,6 @@ module.exports = function (grunt) {
             test: [
                 "test/**/*.ts",
                 "!test/**/*.test.ts",
-                "!test/typings/**/*.ts",
             ],
         },
 
