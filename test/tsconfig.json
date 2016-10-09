@@ -9,8 +9,9 @@
     },
     "include": [
         "../src/**/*",
-        "./*",
-        "./formatters/*",
-        "./rule-tester/*"
+        "**/*"
+    ],
+    "exclude": [
+        "./files"
     ]
 }

@@ -17,7 +17,23 @@
     "linter"
   ],
   "scripts": {
-    "test": "grunt"
+    "clean": "npm-run-all -p clean:core clean:test",
+    "clean:core": "rm -rf lib",
+    "clean:test": "rm -rf build && rm -rf test/config/node_modules",
+    "docs": "cd ./scripts/ && node buildDocs.js",
+    "compile": "npm-run-all -p compile:core compile:scripts compile:test",
+    "compile:core": "tsc -p src",
+    "compile:scripts": "tsc -p scripts",
+    "compile:test": "tsc -p test",
+    "lint": "npm-run-all -p lint:core lint:test",
+    "lint:core": "tslint src/**/*.ts",
+    "lint:test": "tslint test/**/*.ts -e test/**/*.test.ts",
+    "test": "npm-run-all test:pre -p test:bin test:mocha test:rules",
+    "test:pre": "cd ./test/config && npm install",
+    "test:bin": "./test/check-bin.sh &> /dev/null",
+    "test:mocha": "mocha --reporter spec --colors build/test/**/*Tests.js build/test/assert.js",
+    "test:rules": "node ./build/test/ruleTestRunner.js",
+    "verify": "npm-run-all clean compile lint test docs"
   },
   "dependencies": {
     "colors": "^1.1.2",
@@ -42,17 +58,9 @@
     "@types/underscore": "^1.7.33",
     "@types/underscore.string": "0.0.30",
     "chai": "^3.0.0",
-    "grunt": "^1.0.1",
-    "grunt-cli": "^1.2.0",
-    "grunt-contrib-clean": "^1.0.0",
-    "grunt-eslint": "^19.0.0",
-    "grunt-mocha-test": "^0.13.2",
-    "grunt-npm-command": "^0.1.2",
-    "grunt-run": "~0.6.0",
-    "grunt-ts": "^6.0.0-beta.3",
-    "grunt-tslint": "latest",
     "js-yaml": "^3.6.1",
     "mocha": "^3.1.0",
+    "npm-run-all": "^3.1.0",
     "tslint": "latest",
     "tslint-test-config-non-relative": "file:test/external/tslint-test-config-non-relative",
     "typescript": "2.0.3"

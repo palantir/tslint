@@ -15,4 +15,4 @@ typings/.basedir.ts
 *.swp
 
 # grunt-ts, see See https://github.com/grunt-ts/grunt-ts/issues/77
-src/.baseDir.ts
+.baseDir.ts
