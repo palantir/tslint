@@ -21,7 +21,7 @@
     "clean:core": "rm -rf lib",
     "clean:test": "rm -rf build && rm -rf test/config/node_modules",
     "docs": "node scripts/buildDocs.js",
-    "compile": "npm-run-all -p compile:core compile:scripts compile:test",
+    "compile": "npm-run-all -p compile:core compile:test -s compile:scripts",
     "compile:core": "tsc -p src",
     "compile:scripts": "tsc -p scripts",
     "compile:test": "tsc -p test",
