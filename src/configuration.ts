@@ -170,13 +170,14 @@ export function loadConfigurationFromPath(configFilePath: string): IConfiguratio
         const configFileDir = path.dirname(resolvedConfigFilePath);
 
         configFile.rulesDirectory = getRulesDirectories(configFile.rulesDirectory, configFileDir);
-        // apply current configuration last to create a dependency "tree"
-        const configTree = arrayify(configFile.extends).map((name) => {
+        // load configurations, in order, using their identifiers or relative paths
+        // apply the current configuration last by placing it last in this array
+        const configs = arrayify(configFile.extends).map((name) => {
             const nextConfigFilePath = resolveConfigurationPath(name, configFileDir);
             return loadConfigurationFromPath(nextConfigFilePath);
         }).concat([configFile]);
 
-        return configTree.reduce(extendConfigurationFile, {});
+        return configs.reduce(extendConfigurationFile, {});
     }
 }
 
