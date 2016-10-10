@@ -173,9 +173,9 @@ export function loadConfigurationFromPath(configFilePath: string): IConfiguratio
         configFile.extends = arrayify(configFile.extends);
 
         for (const name of configFile.extends) {
-            const baseConfigFilePath = resolveConfigurationPath(name, configFileDir);
-            const baseConfigFile = loadConfigurationFromPath(baseConfigFilePath);
-            configFile = extendConfigurationFile(configFile, baseConfigFile);
+            const nextConfigFilePath = resolveConfigurationPath(name, configFileDir);
+            const nextConfigFile = loadConfigurationFromPath(nextConfigFilePath);
+            configFile = extendConfigurationFile(configFile, nextConfigFile);
         }
         return configFile;
     }
@@ -211,19 +211,19 @@ function resolveConfigurationPath(filePath: string, relativeTo?: string) {
     }
 }
 
-export function extendConfigurationFile(config: IConfigurationFile, baseConfig: IConfigurationFile): IConfigurationFile {
+export function extendConfigurationFile(targetConfig: IConfigurationFile, nextConfigSource: IConfigurationFile): IConfigurationFile {
     let combinedConfig: IConfigurationFile = {};
 
-    const baseRulesDirectory = arrayify(baseConfig.rulesDirectory);
-    const configRulesDirectory = arrayify(config.rulesDirectory);
-    combinedConfig.rulesDirectory = configRulesDirectory.concat(baseRulesDirectory);
+    const configRulesDirectory = arrayify(targetConfig.rulesDirectory);
+    const nextConfigRulesDirectory = arrayify(nextConfigSource.rulesDirectory);
+    combinedConfig.rulesDirectory = configRulesDirectory.concat(nextConfigRulesDirectory);
 
     combinedConfig.rules = {};
-    for (const name of Object.keys(objectify(baseConfig.rules))) {
-        combinedConfig.rules[name] = baseConfig.rules[name];
+    for (const name of Object.keys(objectify(targetConfig.rules))) {
+        combinedConfig.rules[name] = targetConfig.rules[name];
     }
-    for (const name of Object.keys(objectify(config.rules))) {
-        combinedConfig.rules[name] = config.rules[name];
+    for (const name of Object.keys(objectify(nextConfigSource.rules))) {
+        combinedConfig.rules[name] = nextConfigSource.rules[name];
     }
 
     combinedConfig.jsRules = {};
