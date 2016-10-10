@@ -13,6 +13,3 @@ typings/.basedir.ts
 # vim swap files
 *.swo
 *.swp
-
-# grunt-ts, see See https://github.com/grunt-ts/grunt-ts/issues/77
-.baseDir.ts
