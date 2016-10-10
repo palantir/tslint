@@ -22,6 +22,7 @@ Table of Contents
 - [Installation](#installation)
 - [Usage](#usage)
 - [Core Rules](#core-rules)
+- [Core Formatters](#core-formatters)
 - [Rule Flags](#rule-flags)
 - [Custom Rules](#custom-rules)
 - [Development](#development)
@@ -251,17 +252,10 @@ Core Rules
 
 Core Formatters
 -----
+<sup>[back to ToC &uarr;](#table-of-contents)</sup>
 
-Formatters are used to format the results of the linter before outputting it to stdout or
-the configured output file. The core formatters are:
-
-- __prose__: human readable (default)
-- __json__: machine readable
-- __verbose__: human readable (includes rule names)
-- __pmd__
-- __msbuild__
-- __checkstyle__
-- __vso__
+[See the TSLint website for a list of core formatters included in the `tslint` package.]
+(http://palantir.github.io/tslint/formatters/)
 
 Rule Flags
 -----
