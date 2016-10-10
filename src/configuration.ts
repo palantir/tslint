@@ -170,14 +170,13 @@ export function loadConfigurationFromPath(configFilePath: string): IConfiguratio
         const configFileDir = path.dirname(resolvedConfigFilePath);
 
         configFile.rulesDirectory = getRulesDirectories(configFile.rulesDirectory, configFileDir);
-        configFile.extends = arrayify(configFile.extends);
-
-        for (const name of configFile.extends) {
+        // apply current configuration last to create a dependency "tree"
+        const configTree = arrayify(configFile.extends).map((name) => {
             const nextConfigFilePath = resolveConfigurationPath(name, configFileDir);
-            const nextConfigFile = loadConfigurationFromPath(nextConfigFilePath);
-            configFile = extendConfigurationFile(configFile, nextConfigFile);
-        }
-        return configFile;
+            return loadConfigurationFromPath(nextConfigFilePath);
+        }).concat([configFile]);
+
+        return configTree.reduce(extendConfigurationFile, {});
     }
 }
 
@@ -211,7 +210,8 @@ function resolveConfigurationPath(filePath: string, relativeTo?: string) {
     }
 }
 
-export function extendConfigurationFile(targetConfig: IConfigurationFile, nextConfigSource: IConfigurationFile): IConfigurationFile {
+export function extendConfigurationFile(targetConfig: IConfigurationFile,
+                                        nextConfigSource: IConfigurationFile): IConfigurationFile {
     let combinedConfig: IConfigurationFile = {};
 
     const configRulesDirectory = arrayify(targetConfig.rulesDirectory);
@@ -222,6 +222,7 @@ export function extendConfigurationFile(targetConfig: IConfigurationFile, nextCo
     for (const name of Object.keys(objectify(targetConfig.rules))) {
         combinedConfig.rules[name] = targetConfig.rules[name];
     }
+    // next config source overwrites the target config object
     for (const name of Object.keys(objectify(nextConfigSource.rules))) {
         combinedConfig.rules[name] = nextConfigSource.rules[name];
     }
