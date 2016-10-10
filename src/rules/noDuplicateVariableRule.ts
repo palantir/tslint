@@ -71,11 +71,11 @@ class NoDuplicateVariableWalker extends Lint.BlockScopeAwareRuleWalker<{}, Scope
         this.visitBlock(node.block);
     }
 
-    public visitMethodSignature(node: ts.SignatureDeclaration) {
+    public visitMethodSignature(_node: ts.SignatureDeclaration) {
         // don't call super, we don't want to walk method signatures either
     }
 
-    public visitTypeLiteral(node: ts.TypeLiteralNode) {
+    public visitTypeLiteral(_node: ts.TypeLiteralNode) {
         // don't call super, we don't want to walk the inside of type nodes
     }
 
