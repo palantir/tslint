@@ -247,12 +247,16 @@ Core Rules
 -----
 <sup>[back to ToC &uarr;](#table-of-contents)</sup>
 
+_Rules_ encode logic for syntactic & semantic checks of TypeScript source code.
+
 [See the TSLint website for a list of core rules included in the `tslint` package.]
 (http://palantir.github.io/tslint/rules/)
 
 Core Formatters
 -----
 <sup>[back to ToC &uarr;](#table-of-contents)</sup>
+
+_Formatters_ allow for transformation of lint results into various forms before outputting to stdout or a file.
 
 [See the TSLint website for a list of core formatters included in the `tslint` package.]
 (http://palantir.github.io/tslint/formatters/)
