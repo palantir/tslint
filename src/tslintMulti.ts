@@ -132,25 +132,25 @@ class MultiLinter {
     }
 
     public getResult(): LintResult {
-      let formatter: IFormatter;
-      const formattersDirectory = getRelativePath(this.options.formattersDirectory);
+        let formatter: IFormatter;
+        const formattersDirectory = getRelativePath(this.options.formattersDirectory);
 
-      const formatterName = this.options.formatter || "prose";
-      const Formatter = findFormatter(formatterName, formattersDirectory);
-      if (Formatter) {
-          formatter = new Formatter();
-      } else {
-          throw new Error(`formatter '${formatterName}' not found`);
-      }
+        const formatterName = this.options.formatter || "prose";
+        const Formatter = findFormatter(formatterName, formattersDirectory);
+        if (Formatter) {
+            formatter = new Formatter();
+        } else {
+            throw new Error(`formatter '${formatterName}' not found`);
+        }
 
-      const output = formatter.format(this.failures);
+        const output = formatter.format(this.failures);
 
-      return {
-          failureCount: this.failures.length,
-          failures: this.failures,
-          format: formatterName,
-          output,
-      };
+        return {
+            failureCount: this.failures.length,
+            failures: this.failures,
+            format: formatterName,
+            output,
+        };
     }
 
     private containsRule(rules: RuleFailure[], rule: RuleFailure) {
