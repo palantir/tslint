@@ -33,6 +33,7 @@ interface i5 {
 }
 
 interface i6 {
+    // ensure no false positives for properties/methods available from prototype chain
     toString(): string;
 }
 
