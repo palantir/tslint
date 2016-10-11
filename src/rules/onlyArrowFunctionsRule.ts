@@ -55,16 +55,31 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class OnlyArrowFunctionsWalker extends Lint.RuleWalker {
     public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
-        if (!node.asteriskToken && !this.hasOption(OPTION_ALLOW_DECLARATIONS)) {
-            this.addFailure(this.createFailure(node.getStart(), "function".length, Rule.FAILURE_STRING));
+        if (!this.hasOption(OPTION_ALLOW_DECLARATIONS)) {
+            this.failUnlessExempt(node);
         }
         super.visitFunctionDeclaration(node);
     }
 
     public visitFunctionExpression(node: ts.FunctionExpression) {
-        if (!node.asteriskToken) {
-            this.addFailure(this.createFailure(node.getStart(), "function".length, Rule.FAILURE_STRING));
-        }
+        this.failUnlessExempt(node);
         super.visitFunctionExpression(node);
     }
+
+    private failUnlessExempt(node: ts.FunctionLikeDeclaration) {
+        if (!functionIsExempt(node)) {
+            this.addFailure(this.createFailure(node.getStart(), "function".length, Rule.FAILURE_STRING));
+        }
+    }
+}
+
+/** Generator functions and functions explicitly declaring `this` are allowed. */
+function functionIsExempt(node: ts.FunctionLikeDeclaration) {
+    return node.asteriskToken || hasThisParameter(node);
+}
+
+function hasThisParameter(node: ts.FunctionLikeDeclaration) {
+    const first = node.parameters[0];
+    return first && first.name.kind === ts.SyntaxKind.Identifier &&
+        (first.name as ts.Identifier).originalKeywordKind === ts.SyntaxKind.ThisKeyword;
 }
