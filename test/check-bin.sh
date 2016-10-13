@@ -26,7 +26,7 @@ expectOut () {
   # if Node 0.10.*, node will sometimes exit with status 8 when an error is thrown
   if [[ $expect != $actual || $nodeV == v0.10.* && $expect == 1 && $actual == 8 ]] ; then
     echo "$msg: expected $expect got $actual"
-    num_failures=$(expr $num_failures + 1)
+    ((num_failures += 1))
   fi
 }
 
@@ -85,7 +85,7 @@ fi
 ./tslint --init
 if [ ! -f tslint.json ]; then
   echo "--init failed, tslint.json not created"
-  num_failures=$(expr $num_failures + 1)
+  ((num_failures += 1))
 fi
 expectOut $? 0 "tslint with --init flag did not exit correctly"
 
@@ -125,7 +125,7 @@ expectOut $? 0 "tslint with tsconfig did not exit correctly"
 ./bin/tslint -c test/files/tsconfig-test/tslint.json --project test/files/tsconfig-test/tsconfig.json test/files/tsconfig-test/other.test.ts
 expectOut $? 2 "tslint with tsconfig and files did not find lint failures from given files"
 
-if [ $num_failures != 0 ]; then
+if (( num_failures != 0 )); then
   echo "Failed $num_failures tests"
   exit 1
 else
