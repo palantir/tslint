@@ -66,7 +66,7 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
         return Array.isArray(rule) ? rule[0] : rule;
     }
 
-    private getCurrentRuleState(ruleName: string, ruleEnableDisablePositions: IEnableDisablePosition[]): boolean {
+    private getLatestRuleState(ruleEnableDisablePositions: IEnableDisablePosition[]): boolean {
         return ruleEnableDisablePositions[ruleEnableDisablePositions.length - 1].isEnabled;
     }
 
@@ -106,7 +106,7 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
                         this.enableDisableRuleMap[ruleToAdd] = [];
                         stateToRestore = this.getInitialRuleState(ruleToAdd);
                     } else {
-                        stateToRestore = this.getCurrentRuleState(ruleToAdd, this.enableDisableRuleMap[ruleToAdd]);
+                        stateToRestore = this.getLatestRuleState(this.enableDisableRuleMap[ruleToAdd]);
                     }
                     if (isCurrentLine) {
                         // start at the beginning of the current line
