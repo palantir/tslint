@@ -18,8 +18,8 @@
   ],
   "scripts": {
     "clean": "npm-run-all -p clean:core clean:test",
-    "clean:core": "rm -rf lib",
-    "clean:test": "rm -rf build && rm -rf test/config/node_modules",
+    "clean:core": "rimraf lib",
+    "clean:test": "rimraf build && rimraf test/config/node_modules",
     "docs": "node scripts/buildDocs.js",
     "compile": "npm-run-all -p compile:core compile:test -s compile:scripts",
     "compile:core": "tsc -p src",
@@ -42,6 +42,7 @@
     "glob": "^7.1.1",
     "optimist": "~0.6.0",
     "resolve": "^1.1.7",
+    "rimraf": "^2.5.4",
     "underscore.string": "^3.3.4"
   },
   "devDependencies": {
