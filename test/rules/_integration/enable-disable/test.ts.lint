@@ -68,6 +68,7 @@ var s = 'xxx';
 //Test case for issue #1624
 // tslint:disable:quotemark variable-name
 var AAAaA = 'test' // tslint:disable-line:quotemark
-var AAAaA = 'test' // tslint:disable-line:variable-name    previously `quotemark` rule was enabled after previous line
+// tslint:disable-next-line:variable-name
+var AAAaA = 'test' //previously `quotemark` rule was enabled after previous line
 
 var AAAaA = 'test' // previously both `quotemark` and `variable-name` rules were enabled after previous lines
