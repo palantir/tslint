@@ -175,7 +175,7 @@ class Linter {
         const rulesWalker = new EnableDisableRulesWalker(sourceFile, {
             disabledIntervals: [],
             ruleName: "",
-        });
+        }, configuration.rules);
         rulesWalker.walk(sourceFile);
         const enableDisableRuleMap = rulesWalker.enableDisableRuleMap;
 

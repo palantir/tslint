@@ -19,10 +19,15 @@ import * as ts from "typescript";
 
 import {scanAllTokens} from "./language/utils";
 import {SkippableTokenAwareRuleWalker} from "./language/walker/skippableTokenAwareRuleWalker";
+import {IOptions} from "./lint";
 import {IEnableDisablePosition} from "./ruleLoader";
 
 export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
     public enableDisableRuleMap: {[rulename: string]: IEnableDisablePosition[]} = {};
+
+    constructor(sourceFile: ts.SourceFile, options: IOptions, private rules?: any) {
+        super(sourceFile, options);
+    }
 
     public visitSourceFile(node: ts.SourceFile) {
         super.visitSourceFile(node);
@@ -50,6 +55,19 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
         return node.getPositionOfLineAndCharacter(
             node.getLineAndCharacterOfPosition(position).line + lineOffset, 0
         );
+    }
+
+    private getInitialRuleState(ruleName: string): boolean {
+        if (!(ruleName in this.rules)) {
+            return false;
+        }
+        const rule = this.rules[ruleName];
+
+        return Array.isArray(rule) ? rule[0] : rule;
+    }
+
+    private getCurrentRuleState(ruleName: string, ruleEnableDisablePositions: IEnableDisablePosition[]): boolean {
+        return ruleEnableDisablePositions[ruleEnableDisablePositions.length - 1].isEnabled;
     }
 
     private handlePossibleTslintSwitch(commentText: string, startingPosition: number, node: ts.SourceFile, scanner: ts.Scanner) {
@@ -83,8 +101,12 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
                 }
 
                 for (const ruleToAdd of rulesList) {
+                    let stateToRestore: boolean;
                     if (!(ruleToAdd in this.enableDisableRuleMap)) {
                         this.enableDisableRuleMap[ruleToAdd] = [];
+                        stateToRestore = this.getInitialRuleState(ruleToAdd);
+                    } else {
+                        stateToRestore = this.getCurrentRuleState(ruleToAdd, this.enableDisableRuleMap[ruleToAdd]);
                     }
                     if (isCurrentLine) {
                         // start at the beginning of the current line
@@ -94,7 +116,7 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
                         });
                         // end at the beginning of the next line
                         this.enableDisableRuleMap[ruleToAdd].push({
-                            isEnabled: !isEnabled,
+                            isEnabled: stateToRestore,
                             position: scanner.getTextPos() + 1,
                         });
                     } else {
@@ -106,7 +128,7 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
                         // end at the beginning of the line following the next line
                         if (isNextLine) {
                             this.enableDisableRuleMap[ruleToAdd].push({
-                                isEnabled: !isEnabled,
+                                isEnabled: stateToRestore,
                                 position: this.getStartOfLinePosition(node, startingPosition, 2),
                             });
                         }
