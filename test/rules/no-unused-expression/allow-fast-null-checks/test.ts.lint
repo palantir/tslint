@@ -134,4 +134,3 @@ function interactionHandler(e) {
 }
 
 [0]: expected an assignment or function call
-

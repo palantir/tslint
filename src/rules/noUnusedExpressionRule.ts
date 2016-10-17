@@ -202,7 +202,7 @@ export class NoUnusedExpressionWalker extends Lint.RuleWalker {
 }
 
 function hasCallExpression(node: ts.Node): boolean {
-    const nodeToCheck = skipParenthesis(node);
+    const nodeToCheck = skipParentheses(node);
 
     if (nodeToCheck.kind === ts.SyntaxKind.CallExpression) {
         return true;
@@ -230,7 +230,7 @@ function isTopLevelExpression(node: ts.BinaryExpression): boolean {
     return nodeToCheck.kind === ts.SyntaxKind.ExpressionStatement;
 }
 
-function skipParenthesis(node: ts.Node): ts.Node {
+function skipParentheses(node: ts.Node): ts.Node {
     let nodeToReturn = node;
 
     while (nodeToReturn.kind === ts.SyntaxKind.ParenthesizedExpression) {
