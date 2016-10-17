@@ -115,4 +115,25 @@ a => fun2(a);
 "use strct";
 ~~~~~~~~~~~~ [0]
 
+afterEach((el) => {
+   el && el.remove();
+   ~~~~~~~~~~~~~~~~~~ [0]
+});
+
+checkParams((a, b) => {
+   (a || required('a')) && (b || required('b'));
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+});
+
+checkParams((a, b) => {
+   ((a && b) || required('a, b'));
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+});
+
+function interactionHandler(e) {
+    // fails in all cases since logical NOT operator is redundant
+    e && !e.preventDefault();
+    ~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+}
+
 [0]: expected an assignment or function call

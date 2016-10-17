@@ -19,6 +19,8 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
+const ALLOW_FAST_NULL_CHECKS = "allow-fast-null-checks";
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -29,9 +31,21 @@ export class Rule extends Lint.Rules.AbstractRule {
             (and thus usually no-ops).`,
         rationale: Lint.Utils.dedent`
             Detects potential errors where an assignment or function call was intended.`,
-        optionsDescription: "Not configurable.",
-        options: null,
-        optionExamples: ["true"],
+        optionsDescription: Lint.Utils.dedent`
+            One argument may be optionally provided:
+
+            * \`${ALLOW_FAST_NULL_CHECKS}\` allows to use logical operators to perform fast null checks and perform
+            method or function calls for side effects (e.g. \`e && e.preventDefault()\`).`,
+        options: {
+            type: "array",
+            items: {
+                type: "string",
+                enum: [ALLOW_FAST_NULL_CHECKS],
+            },
+            minLength: 0,
+            maxLength: 1,
+        },
+        optionExamples: ["true", `[true, "${ALLOW_FAST_NULL_CHECKS}"]`],
         type: "functionality",
         typescriptOnly: false,
     };
@@ -108,6 +122,15 @@ export class NoUnusedExpressionWalker extends Lint.RuleWalker {
             case ts.SyntaxKind.GreaterThanGreaterThanGreaterThanEqualsToken:
                 this.expressionIsUnused = false;
                 break;
+            case ts.SyntaxKind.AmpersandAmpersandToken:
+            case ts.SyntaxKind.BarBarToken:
+                if (this.hasOption(ALLOW_FAST_NULL_CHECKS) && isTopLevelExpression(node)) {
+                    this.expressionIsUnused = !hasCallExpression(node.right);
+                    break;
+                } else {
+                    this.expressionIsUnused = true;
+                    break;
+                }
             default:
                 this.expressionIsUnused = true;
         }
@@ -176,4 +199,43 @@ export class NoUnusedExpressionWalker extends Lint.RuleWalker {
             }
         }
     }
+}
+
+function hasCallExpression(node: ts.Node): boolean {
+    const nodeToCheck = skipParenthesis(node);
+
+    if (nodeToCheck.kind === ts.SyntaxKind.CallExpression) {
+        return true;
+    }
+
+    if (nodeToCheck.kind === ts.SyntaxKind.BinaryExpression) {
+        const operatorToken = (nodeToCheck as ts.BinaryExpression).operatorToken;
+
+        if (operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken ||
+            operatorToken.kind === ts.SyntaxKind.BarBarToken) {
+            return hasCallExpression((nodeToCheck as ts.BinaryExpression).right);
+        }
+    }
+
+    return false;
+}
+
+function isTopLevelExpression(node: ts.BinaryExpression): boolean {
+    let nodeToCheck = node.parent;
+
+    while (nodeToCheck.kind === ts.SyntaxKind.ParenthesizedExpression) {
+        nodeToCheck = nodeToCheck.parent;
+    }
+
+    return nodeToCheck.kind === ts.SyntaxKind.ExpressionStatement;
+}
+
+function skipParenthesis(node: ts.Node): ts.Node {
+    let nodeToReturn = node;
+
+    while (nodeToReturn.kind === ts.SyntaxKind.ParenthesizedExpression) {
+        nodeToReturn = (nodeToReturn as ts.ParenthesizedExpression).expression;
+    }
+
+    return nodeToReturn;
 }
