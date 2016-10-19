@@ -51,7 +51,7 @@ class MyClass {
     private email : string;
 
     public initializedProperty = 6;
-    public initializedMethodProperty = () => { return "hi"; }
+    public initializedMethodProperty = () => { return "hi"; };
     public initializedMethodPropertyWithoutSemicolon = () => { return "hi again"; }
 }
 
