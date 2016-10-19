@@ -1,0 +1,50 @@
+class BadClass {
+    badMember;
+    badFunction() { }
+}
+
+/**
+ * 
+ */
+class EmptyClass {
+   /**
+    * 
+    */
+    emptyProperty;
+
+    /**
+     * 
+     */
+    emptyMethod() { }
+}
+
+/**
+ * ...
+ */
+class GoodClass {
+   /**
+    * ...
+    */
+    goodProperty;
+
+    /**
+     * ...
+     */
+    goodMethod() { }
+}
+
+function BadFunction() { }
+~~~~~~~~~~~~~~~~~~~~~~~~~~      [0]
+
+/**
+ * 
+ */
+function EmptyFunction() { }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~      [0]
+
+/**
+ * ...
+ */
+function GoodFunction() { }
+
+[0]: Functions must have documentation.
