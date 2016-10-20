@@ -51,8 +51,14 @@ var AAAaA = 'test' /* tslint:disable-line */
 
 // tslint:disable-next-line:quotemark variable-name
 var AAAaA = 'test'
+var AAAaA = 'test'
+    ~~~~~          [variable name must be in camelcase or uppercase]
+            ~~~~~~                                 [' should be "]
 /* tslint:disable-next-line:quotemark variable-name */
 var AAAaA = 'test'
+var AAAaA = 'test'
+    ~~~~~          [variable name must be in camelcase or uppercase]
+            ~~~~~~                                 [' should be "]
 
 // tslint:disable
 var AAAaA = 'test' // tslint:enable-line:quotemark
@@ -64,3 +70,23 @@ var AAAaA = 'test'
 
 /* tslint:disable:quotemark */
 var s = 'xxx';
+
+var a = "testtesttesttesttesttesttesttesttesttesttesttesttest";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [exceeds maximum line length of 60]
+var a = "testtesttesttesttesttesttesttesttesttesttesttesttest"; // tslint:disable-line:max-line-length
+var a = "testtesttesttesttesttesttesttesttesttesttesttesttest";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [exceeds maximum line length of 60]
+// tslint:disable-next-line:max-line-length
+var a = "testtesttesttesttesttesttesttesttesttesttesttesttest";
+var a = "testtesttesttesttesttesttesttesttesttesttesttesttest";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [exceeds maximum line length of 60]
+
+var a = "test"; 
+               ~ [trailing whitespace]
+// tslint:disable-next-line
+var a = "test"; 
+var a = "test"; 
+               ~ [trailing whitespace]
+var a = "test"; // tslint:disable-line 
+var a = "test"; 
+               ~ [trailing whitespace]
