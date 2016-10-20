@@ -27,7 +27,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         descriptionDetails: Lint.Utils.dedent`
             Enforce a consistent ordering for ES6 imports:
             - Named imports must be alphabetized (i.e. "import {A, B, C} from "foo";")
-                - The exact ordering can be controled by the named-imports-order option.
+                - The exact ordering can be controlled by the named-imports-order option.
                 - "longName as name" imports are ordered by "longName".
             - Import sources must be alphabetized within groups, i.e.:
                     import * as foo from "a";
