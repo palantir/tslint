@@ -9,6 +9,7 @@ node_modules/
 tscommand*.txt
 # created by grunt-ts for faster compiling
 typings/.basedir.ts
+npm-debug.log
 
 # vim swap files
 *.swo
