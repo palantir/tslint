@@ -49,10 +49,8 @@ export function loadRules(ruleConfiguration: {[name: string]: any},
                 if (isJs && Rule.metadata && Rule.metadata.typescriptOnly != null && Rule.metadata.typescriptOnly) {
                     notAllowedInJsRules.push(ruleName);
                 } else {
-                    const all = "all"; // make the linter happy until we can turn it on and off
-                    const allList = (all in enableDisableRuleMap ? enableDisableRuleMap[all] : []);
                     const ruleSpecificList = (ruleName in enableDisableRuleMap ? enableDisableRuleMap[ruleName] : []);
-                    const disabledIntervals = buildDisabledIntervalsFromSwitches(ruleSpecificList, allList);
+                    const disabledIntervals = buildDisabledIntervalsFromSwitches(ruleSpecificList);
                     rules.push(new Rule(ruleName, ruleValue, disabledIntervals));
 
                     if (Rule.metadata && Rule.metadata.deprecationMessage && shownDeprecations.indexOf(Rule.metadata.ruleName) === -1) {
@@ -138,52 +136,28 @@ function loadRule(directory: string, ruleName: string) {
     return undefined;
 }
 
-/*
- * We're assuming both lists are already sorted top-down so compare the tops, use the smallest of the two,
- * and build the intervals that way.
+/**
+ * creates disabled intervals for rule based on list of swithers for it
+ * @param ruleSpecificList - contains all switchers for rule states sorted top-down and strictly alternating between enabled and disabled
  */
-function buildDisabledIntervalsFromSwitches(ruleSpecificList: IEnableDisablePosition[], allList: IEnableDisablePosition[]) {
-    let isCurrentlyDisabled = false;
-    let disabledStartPosition: number;
+function buildDisabledIntervalsFromSwitches(ruleSpecificList: IEnableDisablePosition[]) {
     const disabledIntervalList: IDisabledInterval[] = [];
-    let i = 0;
-    let j = 0;
+    // starting from second element in the list since first is always enabled in position 0;
+    let i = 1;
 
-    while (i < ruleSpecificList.length || j < allList.length) {
-        const ruleSpecificTopPositon = (i < ruleSpecificList.length ? ruleSpecificList[i].position : Infinity);
-        const allTopPositon = (j < allList.length ? allList[j].position : Infinity);
-        let newPositionToCheck: IEnableDisablePosition;
-        if (ruleSpecificTopPositon < allTopPositon) {
-            newPositionToCheck = ruleSpecificList[i];
-            i++;
-        } else {
-            newPositionToCheck = allList[j];
-            j++;
-        }
+    while (i < ruleSpecificList.length) {
+        const startPosition = ruleSpecificList[i].position;
 
-        // we're currently disabled and enabling, or currently enabled and disabling -- a switch
-        if (newPositionToCheck.isEnabled === isCurrentlyDisabled) {
-            if (!isCurrentlyDisabled) {
-                // start a new interval
-                disabledStartPosition = newPositionToCheck.position;
-                isCurrentlyDisabled = true;
-            } else {
-                // we're currently disabled and about to enable -- end the interval
-                disabledIntervalList.push({
-                    endPosition: newPositionToCheck.position,
-                    startPosition: disabledStartPosition,
-                });
-                isCurrentlyDisabled = false;
-            }
-        }
-    }
+        // rule enabled state is always alternating therefore we can use position of next switch as end of disabled interval 
+        // set endPosition as Infinity in case when last switch for rule in a file is disabled
+        const endPosition = ruleSpecificList[i + 1] ? ruleSpecificList[i + 1].position : Infinity;
 
-    if (isCurrentlyDisabled) {
-        // we started an interval but didn't finish one -- so finish it with an Infinity
         disabledIntervalList.push({
-            endPosition: Infinity,
-            startPosition: disabledStartPosition,
+            endPosition,
+            startPosition,
         });
+
+        i += 2;
     }
 
     return disabledIntervalList;
