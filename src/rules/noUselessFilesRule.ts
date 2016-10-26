@@ -6,7 +6,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-useless-files",
-        description: "Disallows files that only contain whitespace, or files that only contain comments.",
+        description: "Disallows empty files, files that only contain whitespace, and files that only contain comments.",
         descriptionDetails: `This rule is a reminder to not keep empty or commented out files around`,
         optionsDescription: "Not configurable.",
         options: null,
