@@ -1,0 +1,15 @@
+class one {
+    public foo = "bar";
+}
+
+class two {
+    public foo = "bar";
+}
+
+class three {
+    public foo = "bar";
+}
+
+class four {
+    public foo = "bar";
+}
