@@ -37,12 +37,12 @@ export class Formatter extends AbstractFormatter {
         const outputLines = failures.map((failure: RuleFailure) => {
             const fileName = failure.getFileName();
             const failureString = failure.getFailure();
-            const rule = failure.getRuleName();
+            const ruleCamelCase = failure.getRuleName().replace(/(\-\w)/g, (m) => m[1].toUpperCase());
 
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
             const positionTuple = `(${lineAndCharacter.line + 1},${lineAndCharacter.character + 1})`;
 
-            return `${fileName}${positionTuple}: warning ${rule}: ${failureString}`;
+            return `${fileName}${positionTuple}: warning ${ruleCamelCase}: ${failureString}`;
         });
 
         return outputLines.join("\n") + "\n";
