@@ -39,9 +39,9 @@ describe("MSBuild Formatter", () => {
         ];
 
         const expectedResult =
-            getFailureString(TEST_FILE, 1,  1, "first failure") +
-            getFailureString(TEST_FILE, 2, 12, "mid failure") +
-            getFailureString(TEST_FILE, 9,  2,  "last failure");
+            getFailureString(TEST_FILE, 1,  1, "first failure", "first-name") +
+            getFailureString(TEST_FILE, 2, 12, "mid failure", "mid-name") +
+            getFailureString(TEST_FILE, 9,  2,  "last failure", "last-name");
 
         const actualResult = formatter.format(failures);
         assert.equal(actualResult, expectedResult);
@@ -52,7 +52,7 @@ describe("MSBuild Formatter", () => {
         assert.equal(result, "\n");
     });
 
-    function getFailureString(file: string, line: number, character: number, reason: string) {
-        return `${file}(${line},${character}): warning: ${reason}\n`;
+    function getFailureString(file: string, line: number, character: number, reason: string, rule: string) {
+        return `${file}(${line},${character}): warning ${rule}: ${reason}\n`;
     }
 });
