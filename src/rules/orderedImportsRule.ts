@@ -109,6 +109,19 @@ function findUnsortedPair(xs: ts.Node[], transform: (x: string) => string): [ts.
     return null;
 }
 
+function sortByKey<T>(xs: T[], getSortKeyCallback: (x: T) => string): T[] {
+    return xs.sort((a, b) => {
+        const transformedA = getSortKeyCallback(a);
+        const transformedB = getSortKeyCallback(b);
+        if (transformedA > transformedB) {
+            return 1;
+        } else if (transformedA < transformedB) {
+            return -1;
+        }
+        return 0;
+    });
+}
+
 // Transformations to apply to produce the desired ordering of imports.
 // The imports must be lexicographically sorted after applying the transform.
 const TRANSFORMS: {[ordering: string]: (x: string) => string} = {
@@ -119,8 +132,9 @@ const TRANSFORMS: {[ordering: string]: (x: string) => string} = {
 };
 
 class OrderedImportsWalker extends Lint.RuleWalker {
-    // This gets reset after every blank line.
-    private lastImportSource: string = null;
+    private currentImportsBlock: ImportsBlock = new ImportsBlock();
+    // keep a reference to the last Fix object so when the entire block is replaced, the replacement can be added
+    private lastFix: Lint.Fix;
     private importSourcesOrderTransform: (x: string) => string = null;
     private namedImportsOrderTransform: (x: string) => string = null;
 
@@ -137,12 +151,14 @@ class OrderedImportsWalker extends Lint.RuleWalker {
     // e.g. "import Foo from "./foo";"
     public visitImportDeclaration(node: ts.ImportDeclaration) {
         const source = this.importSourcesOrderTransform(node.moduleSpecifier.getText());
+        const previousSource = this.currentImportsBlock.getLastImportSource();
+        this.currentImportsBlock.addImportDeclaration(node, source);
 
-        if (this.lastImportSource && source < this.lastImportSource) {
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(),
-                 Rule.IMPORT_SOURCES_UNORDERED));
+        if (previousSource && source < previousSource) {
+            this.lastFix = new Lint.Fix(Rule.metadata.ruleName, []);
+            const ruleFailure = this.createFailure(node.getStart(), node.getWidth(), Rule.IMPORT_SOURCES_UNORDERED, this.lastFix);
+            this.addFailure(ruleFailure);
         }
-        this.lastImportSource = source;
 
         super.visitImportDeclaration(node);
     }
@@ -155,25 +171,118 @@ class OrderedImportsWalker extends Lint.RuleWalker {
         const pair = findUnsortedPair(imports, this.namedImportsOrderTransform);
         if (pair !== null) {
             const [a, b] = pair;
-            this.addFailure(
-                this.createFailure(
-                    a.getStart(),
-                    b.getEnd() - a.getStart(),
-                    Rule.NAMED_IMPORTS_UNORDERED));
+            const start = imports[0].getStart();
+            const end = imports[imports.length - 1].getEnd();
+            const replacement = sortByKey(imports, (x) => this.namedImportsOrderTransform(x.getText())).map((x) => x.getText()).join(", ");
+            this.currentImportsBlock.replaceNamedImports(start, end - start, replacement);
+            this.lastFix = new Lint.Fix(Rule.metadata.ruleName, []);
+            const ruleFailure = this.createFailure(
+                a.getStart(),
+                b.getEnd() - a.getStart(),
+                Rule.NAMED_IMPORTS_UNORDERED,
+                this.lastFix);
+            this.addFailure(ruleFailure);
         }
 
         super.visitNamedImports(node);
     }
 
-    // Check for a blank line, in which case we should reset the import ordering.
+    // keep reading the block of import declarations until the block ends, then replace the entire block
+    // this allows the reorder of named imports to work well with reordering lines
     public visitNode(node: ts.Node) {
         const prefixLength = node.getStart() - node.getFullStart();
         const prefix = node.getFullText().slice(0, prefixLength);
+        const hasBlankLine = prefix.indexOf("\n\n") >= 0 || prefix.indexOf("\r\n\r\n") >= 0;
+        const notImportDeclaration = node.parent != null
+            && node.parent.kind === ts.SyntaxKind.SourceFile
+            && node.kind !== ts.SyntaxKind.ImportDeclaration;
 
-        if (prefix.indexOf("\n\n") >= 0 ||
-            prefix.indexOf("\r\n\r\n") >= 0) {
-            this.lastImportSource = null;
+        if (hasBlankLine || notImportDeclaration) {
+            // end of block
+            if (this.lastFix != null) {
+                const replacement = this.currentImportsBlock.getReplacement();
+                if (replacement != null) {
+                    this.lastFix.replacements.push(replacement);
+                }
+                this.lastFix = null;
+            }
+            this.currentImportsBlock = new ImportsBlock();
         }
         super.visitNode(node);
+    }
+}
+
+interface ImportDeclaration {
+    node: ts.ImportDeclaration;
+    nodeStartOffset: number;    // start position of node within source file
+    text: string;
+    sourceFile: string;
+}
+
+class ImportsBlock {
+    private importDeclarations: ImportDeclaration[] = [];
+
+    public addImportDeclaration(node: ts.ImportDeclaration, sourceFile: string) {
+        const start = this.getStartOffset(node);
+
+        this.importDeclarations.push({
+            node,
+            nodeStartOffset: start,
+            sourceFile,
+            text: node.getSourceFile().text.substring(start, this.getEndOffset(node)),
+        });
+    }
+
+    // replaces the named imports on the most recent import declaration    
+    public replaceNamedImports(fileOffset: number, length: number, replacement: string) {
+        const importDeclaration = this.getLastImportDeclaration();
+        const start = fileOffset -  importDeclaration.nodeStartOffset;
+
+        if (start < 0 || start + length > importDeclaration.node.getEnd()) {
+            throw "Unexpected named import position";
+        }
+
+        const initialText = importDeclaration.text;
+        importDeclaration.text = initialText.substring(0, start) + replacement + initialText.substring(start + length);
+    }
+
+    public getLastImportSource() {
+        if (this.importDeclarations.length === 0) {
+            return null;
+        }
+        return this.getLastImportDeclaration().sourceFile;
+    }
+
+    // creates a Lint.Replacement object with ordering fixes for the entire block    
+    public getReplacement() {
+        if (this.importDeclarations.length === 0) {
+            return null;
+        }
+        const sortedDeclarations = sortByKey(this.importDeclarations.slice(), (x) => x.sourceFile);
+        const fixedText = sortedDeclarations.map((x) => x.text).join("");
+        const start = this.importDeclarations[0].nodeStartOffset;
+        const end = this.getLastImportDeclaration().nodeStartOffset + this.getLastImportDeclaration().text.length;
+        return new Lint.Replacement(start, end - start, fixedText);
+    }
+
+    // gets the offset immediately after the end of the previous declaration to include comment above  
+    private getStartOffset(node: ts.ImportDeclaration) {
+        if (this.importDeclarations.length === 0) {
+            return node.getStart();
+        }
+        return this.getLastImportDeclaration().nodeStartOffset + this.getLastImportDeclaration().text.length;
+    }
+
+    // gets the offset of the end of the import's line, including newline, to include comment to the right
+    private getEndOffset(node: ts.ImportDeclaration) {
+        let endLineOffset = node.getSourceFile().text.indexOf("\n", node.end) + 1;
+        if (endLineOffset < 0) {
+            endLineOffset = node.getSourceFile().end;
+        }
+        return endLineOffset;
+    }
+
+    private getLastImportDeclaration() {
+        return this.importDeclarations[this.importDeclarations.length - 1];
     }
 }
