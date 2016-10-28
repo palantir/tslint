@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {camelize} from "underscore.string";
+
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
 import {IFormatterMetadata} from "../language/formatter/formatter";
 import {RuleFailure} from "../language/rule/rule";
@@ -37,12 +39,12 @@ export class Formatter extends AbstractFormatter {
         const outputLines = failures.map((failure: RuleFailure) => {
             const fileName = failure.getFileName();
             const failureString = failure.getFailure();
-            const ruleCamelCase = failure.getRuleName().replace(/(\-\w)/g, (m) => m[1].toUpperCase());
+            const camelizedRule = camelize(failure.getRuleName());
 
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
             const positionTuple = `(${lineAndCharacter.line + 1},${lineAndCharacter.character + 1})`;
 
-            return `${fileName}${positionTuple}: warning ${ruleCamelCase}: ${failureString}`;
+            return `${fileName}${positionTuple}: warning ${camelizedRule}: ${failureString}`;
         });
 
         return outputLines.join("\n") + "\n";
