@@ -60,6 +60,7 @@ export function loadRules(ruleConfiguration: {[name: string]: any},
                 }
             }
         }
+    }
 
     if (notFoundRules.length > 0) {
         const ERROR_MESSAGE = `
