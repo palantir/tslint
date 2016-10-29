@@ -1,7 +1,27 @@
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
+import {IFormatterMetadata} from "../language/formatter/formatter";
 import {RuleFailure} from "../language/rule/rule";
 
+import * as Utils from "../utils";
+
 export class Formatter extends AbstractFormatter {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: IFormatterMetadata = {
+        formatterName: "checkstyle",
+        description: "Formats errors as through they were Checkstyle output.",
+        descriptionDetails: Utils.dedent`
+            Imitates the XMLLogger from Checkstyle 4.3. All failures have the 'warning' severity.`,
+        sample: Utils.dedent`
+        <?xml version="1.0" encoding="utf-8"?>
+        <checkstyle version="4.3">
+            <file name="myFile.ts">
+                <error line="1" column="14" severity="warning" message="Missing semicolon" source="failure.tslint.semicolon" />
+            </file>
+        </checkstyle>`,
+        consumer: "machine",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public format(failures: RuleFailure[]): string {
         let output = '<?xml version="1.0" encoding="utf-8"?><checkstyle version="4.3">';
 

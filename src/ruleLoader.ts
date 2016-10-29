@@ -53,10 +53,13 @@ export function loadRules(ruleConfiguration: {[name: string]: any},
                     const ruleSpecificList = (ruleName in enableDisableRuleMap ? enableDisableRuleMap[ruleName] : []);
                     const disabledIntervals = buildDisabledIntervalsFromSwitches(ruleSpecificList, allList);
                     rules.push(new Rule(ruleName, ruleValue, disabledIntervals));
+
+                    if (Rule.metadata && Rule.metadata.deprecationMessage) {
+                        console.warn(`${Rule.metadata.ruleName} is deprecated. ${Rule.metadata.deprecationMessage}`);
+                    }
                 }
             }
         }
-    }
 
     if (notFoundRules.length > 0) {
         const ERROR_MESSAGE = `

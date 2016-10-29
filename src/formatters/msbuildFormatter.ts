@@ -15,9 +15,24 @@
  */
 
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
+import {IFormatterMetadata} from "../language/formatter/formatter";
 import {RuleFailure} from "../language/rule/rule";
 
+import * as Utils from "../utils";
+
 export class Formatter extends AbstractFormatter {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: IFormatterMetadata = {
+        formatterName: "msbuild",
+        description: "Formats errors for consumption by msbuild.",
+        descriptionDetails: Utils.dedent`
+            The output is compatible with both msbuild and Visual Studio. All failures have the
+            'warning' severity.`,
+        sample: "myFile.ts(1,14): warning: Missing semicolon",
+        consumer: "machine",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public format(failures: RuleFailure[]): string {
         const outputLines = failures.map((failure: RuleFailure) => {
             const fileName = failure.getFileName();

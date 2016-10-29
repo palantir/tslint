@@ -56,14 +56,16 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class OnlyArrowFunctionsWalker extends Lint.RuleWalker {
     public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
-        if (!this.hasOption(OPTION_ALLOW_DECLARATIONS)) {
+        if (!node.asteriskToken && !this.hasOption(OPTION_ALLOW_DECLARATIONS)) {
             this.addFailure(this.createFailure(node.getStart(), "function".length, Rule.FAILURE_STRING));
         }
         super.visitFunctionDeclaration(node);
     }
 
     public visitFunctionExpression(node: ts.FunctionExpression) {
-        this.addFailure(this.createFailure(node.getStart(), "function".length, Rule.FAILURE_STRING));
+        if (!node.asteriskToken) {
+            this.addFailure(this.createFailure(node.getStart(), "function".length, Rule.FAILURE_STRING));
+        }
         super.visitFunctionExpression(node);
     }
 }

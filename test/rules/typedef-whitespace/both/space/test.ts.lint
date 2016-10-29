@@ -78,6 +78,28 @@ var withPreceedingSpacesWithSubsequentSpacesObject = {
     }
 };
 
+var withPreceedingSpaceWithSubsequentNewLineObject = {
+    _Prop :
+        "some property",
+
+    get Prop() :
+        string {
+        return this._Prop;
+    }
+};
+
+var noPreceedingSpaceWithSubsequentSpaceAndNewLineObject = {
+    _Prop : 
+           ~ [trailing whitespace]
+        "some property",
+
+    get Prop() : 
+                ~ [trailing whitespace]
+        string {
+        return this._Prop;
+    }
+};
+
 // endregion
 
 // region Interface
@@ -122,6 +144,17 @@ interface WithPreceedingSpacesWithSubsequentSpaceInterface {
 
 interface WithPreceedingSpacesWithSubsequentSpacesInterface {
     Prop   :   string;
+}
+
+interface WithPreceedingSpaceNoSubsequentSpaceAndNewLineInterface {
+    Prop :
+        string;
+}
+
+interface WithPreceedingSpaceWithSubsequentSpaceAndNewLineInterface {
+    Prop : 
+          ~ [trailing whitespace]
+        string;
 }
 
 // endregion
@@ -259,6 +292,46 @@ function withPreceedingSpacesWithSubsequentSpacesFn(a   :   number, b   :   numb
     try {
         return c / d;
     } catch (ex   :   Exception) {
+        console.log(ex);
+    }
+}
+
+function withPreceedingSpaceNoSubsequentSpaceAndNewLineFn(a :
+    number, b :
+    number) :
+    number {
+    var c :
+        number = a + b;
+    var d :
+        number = a - b;
+
+    try {
+        return c / d;
+    } catch (ex :
+        Exception) {
+        console.log(ex);
+    }
+}
+
+function withPreceedingSpaceWithSubsequentSpaceAndNewLineFn(a : 
+                                                               ~ [trailing whitespace]
+    number, b : 
+               ~ [trailing whitespace]
+    number) : 
+             ~ [trailing whitespace]
+number {
+    var c : 
+           ~ [trailing whitespace]
+        number = a + b;
+    var d : 
+           ~ [trailing whitespace]
+        number = a - b;
+
+    try {
+        return c / d;
+    } catch (ex : 
+                 ~ [trailing whitespace]
+        Exception) {
         console.log(ex);
     }
 }
@@ -456,6 +529,13 @@ function withPreceedingSpacesNoSubsequentSpaceSignature( )   :{};
 function withPreceedingSpacesWithSubsequentSpaceSignature( )   : {};
 
 function withPreceedingSpacesWithSubsequentSpacesSignature( )   :   {};
+
+function withPreceedingSpaceNoSubsequentSpaceAndNewLineSignature( ) :
+    {};
+
+function withPreceedingSpaceWithSubsequentSpaceAndNewLineSignature( ) : 
+                                                                       ~ [trailing whitespace]
+    {};
 
 // endregion
 
@@ -666,6 +746,67 @@ class WithPreceedingSpacesWithSubsequentSpacesClass {
         a   :   number,
         b   :   number
     )   :   void {}
+}
+
+class WithPreceedingSpaceNoSubsequentSpaceAndNewLineClass {
+    [index :
+        number] :
+        string
+
+    Prop :
+        string = "some property";
+
+    public get name() :
+        string {
+        return "some name";
+    }
+
+    public set name(a :
+        string) :
+        void {}
+
+    public shemp(
+        a :
+        number,
+        b :
+        number
+    ) :
+    void {}
+}
+
+class WithPreceedingSpaceWithSubsequentSpaceAndNewLineClass {
+    [index : 
+            ~ [trailing whitespace]
+    number] : 
+             ~ [trailing whitespace]
+        string
+
+    Prop : 
+          ~ [trailing whitespace]
+        string = "some property";
+
+    public get name() : 
+                       ~ [trailing whitespace]
+        string {
+        return "some name";
+    }
+
+    public set name(a : 
+                       ~ [trailing whitespace]
+        string) : 
+                 ~ [trailing whitespace]
+        void {}
+
+    public shemp(
+        a : 
+           ~ [trailing whitespace]
+        number,
+        b : 
+           ~ [trailing whitespace]
+        number
+    ) : 
+       ~ [trailing whitespace]
+    void {}
 }
 
 // endregion

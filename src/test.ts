@@ -41,7 +41,7 @@ export interface TestResult {
             fixesFromMarkup: string;
             markupFromLinter: string;
             markupFromMarkup: string;
-        }
+        },
     };
 }
 
@@ -65,6 +65,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
                 getCanonicalFileName: (filename: string) => filename,
                 getCurrentDirectory: () => "",
                 getDefaultLibFileName: () => ts.getDefaultLibFileName(compilerOptions),
+                getDirectories: (_path: string) => [],
                 getNewLine: () => "\n",
                 getSourceFile(filenameToGet: string) {
                     if (filenameToGet === this.getDefaultLibFileName()) {

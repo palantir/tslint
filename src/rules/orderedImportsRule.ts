@@ -27,7 +27,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         descriptionDetails: Lint.Utils.dedent`
             Enforce a consistent ordering for ES6 imports:
             - Named imports must be alphabetized (i.e. "import {A, B, C} from "foo";")
-                - The exact ordering can be controled by the named-imports-order option.
+                - The exact ordering can be controlled by the named-imports-order option.
                 - "longName as name" imports are ordered by "longName".
             - Import sources must be alphabetized within groups, i.e.:
                     import * as foo from "a";
@@ -42,6 +42,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"case-insensitive'\`: Correct order is \`"Bar"\`, \`"baz"\`, \`"Foo"\`. (This is the default.)
             * \`"lowercase-first"\`: Correct order is \`"baz"\`, \`"Bar"\`, \`"Foo"\`.
             * \`"lowercase-last"\`: Correct order is \`"Bar"\`, \`"Foo"\`, \`"baz"\`.
+            * \`"any"\`: Allow any order.
 
             You may set the \`"named-imports-order"\` option to control the ordering of named
             imports (the \`{A, B, C}\` in \`import {A, B, C} from "foo"\`).
@@ -51,6 +52,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"case-insensitive'\`: Correct order is \`{A, b, C}\`. (This is the default.)
             * \`"lowercase-first"\`: Correct order is \`{b, A, C}\`.
             * \`"lowercase-last"\`: Correct order is \`{A, C, b}\`.
+            * \`"any"\`: Allow any order.
 
         `,
         options: {
@@ -58,11 +60,11 @@ export class Rule extends Lint.Rules.AbstractRule {
             properties: {
                 "import-sources-order": {
                     type: "string",
-                    enum: ["case-insensitive", "lowercase-first", "lowercase-last"],
+                    enum: ["case-insensitive", "lowercase-first", "lowercase-last", "any"],
                 },
                 "named-imports-order": {
                     type: "string",
-                    enum: ["case-insensitive", "lowercase-first", "lowercase-last"],
+                    enum: ["case-insensitive", "lowercase-first", "lowercase-last", "any"],
                 },
             },
             additionalProperties: false,
@@ -111,6 +113,7 @@ function findUnsortedPair(xs: ts.Node[], transform: (x: string) => string): [ts.
 // Transformations to apply to produce the desired ordering of imports.
 // The imports must be lexicographically sorted after applying the transform.
 const TRANSFORMS: {[ordering: string]: (x: string) => string} = {
+    any: () => "",
     "case-insensitive": (x: string) => x.toLowerCase(),
     "lowercase-first": flipCase,
     "lowercase-last": (x: string) => x,

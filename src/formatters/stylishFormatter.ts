@@ -16,25 +16,49 @@
  */
 
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
+import {IFormatterMetadata} from "../language/formatter/formatter";
 import {RuleFailure} from "../language/rule/rule";
 
 import * as colors from "colors";
 
+import * as Utils from "../utils";
+
 export class Formatter extends AbstractFormatter {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: IFormatterMetadata = {
+        formatterName: "stylish",
+        description: "Human-readable formatter which creates stylish messages.",
+        descriptionDetails: Utils.dedent`
+            The output matches that produced by eslint's stylish formatter. Its readability
+            enhanced through spacing and colouring`,
+        sample: Utils.dedent`
+        myFile.ts
+        1:14  semicolon  Missing semicolon`,
+        consumer: "human",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public format(failures: RuleFailure[]): string {
         if (typeof failures[0] === "undefined") {
             return "\n";
         }
 
-        const fileName        = failures[0].getFileName();
-        const positionMaxSize = this.getPositionMaxSize(failures);
-        const ruleMaxSize     = this.getRuleMaxSize(failures);
+        const outputLines: string[] = [];
+        const positionMaxSize       = this.getPositionMaxSize(failures);
+        const ruleMaxSize           = this.getRuleMaxSize(failures);
 
-        const outputLines = [
-            fileName,
-        ];
+        let currentFile: string;
 
         for (const failure of failures) {
+            const fileName = failure.getFileName();
+
+            // Output the name of each file once
+            if (currentFile !== fileName) {
+                outputLines.push("");
+                outputLines.push(fileName);
+                currentFile = fileName;
+            }
+
             const failureString = failure.getFailure();
 
             // Rule
@@ -53,6 +77,11 @@ export class Formatter extends AbstractFormatter {
             const output = `${positionTuple}  ${ruleName}  ${failureString}`;
 
             outputLines.push(output);
+        }
+
+        // Removes initial blank line
+        if (outputLines[0] === "") {
+            outputLines.shift();
         }
 
         return outputLines.join("\n") + "\n\n";

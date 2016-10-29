@@ -31,6 +31,11 @@ export interface IRuleMetadata {
     type: RuleType;
 
     /**
+     * A rule deprecation message, if applicable.
+     */
+    deprecationMessage?: string;
+
+    /**
      * A short, one line description of what the rule does.
      */
     description: string;

@@ -209,18 +209,6 @@
     "type": "functionality"
   },
   {
-    "ruleName": "label-undefined",
-    "description": "Checks that labels are defined before usage.",
-    "descriptionDetails": "This rule is now implemented in the TypeScript compiler and does not need to be used.",
-    "rationale": "Using `break` or `continue` to go to an out-of-scope label is an error in JS.",
-    "optionsDescription": "Not configurable.",
-    "options": null,
-    "optionExamples": [
-      "true"
-    ],
-    "type": "functionality"
-  },
-  {
     "ruleName": "linebreak-style",
     "description": "Enforces a consistent linebreak style.",
     "optionsDescription": "\nOne of the following options must be provided:\n\n* `\"LF\"` requires LF (`\\n`) linebreaks\n* `\"CRLF\"` requires CRLF (`\\r\\n`) linebreaks",
@@ -434,17 +422,6 @@
     "type": "functionality"
   },
   {
-    "ruleName": "no-constructor-vars",
-    "description": "Disallows parameter properties.",
-    "rationale": "\nParameter properties can be confusing to those new to TS as they are less explicit\nthan other ways of declaring and initializing class members.",
-    "optionsDescription": "Not configurable.",
-    "options": null,
-    "optionExamples": [
-      "true"
-    ],
-    "type": "style"
-  },
-  {
     "ruleName": "no-construct",
     "description": "Disallows access to the constructors of `String`, `Number`, and `Boolean`.",
     "descriptionDetails": "Disallows constructor use such as `new Number(foo)` but does not disallow `Number(foo)`.",
@@ -635,6 +612,17 @@
       "true"
     ],
     "type": "functionality"
+  },
+  {
+    "ruleName": "no-parameter-properties",
+    "description": "Disallows parameter properties.",
+    "rationale": "\nParameter properties can be confusing to those new to TS as they are less explicit\nthan other ways of declaring and initializing class members.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "style"
   },
   {
     "ruleName": "no-reference",
@@ -926,7 +914,7 @@
   {
     "ruleName": "ordered-imports",
     "description": "Requires that import statements be alphabetized.",
-    "descriptionDetails": "\nEnforce a consistent ordering for ES6 imports:\n- Named imports must be alphabetized (i.e. \"import {A, B, C} from \"foo\";\")\n    - The exact ordering can be controled by the named-imports-order option.\n    - \"longName as name\" imports are ordered by \"longName\".\n- Import sources must be alphabetized within groups, i.e.:\n        import * as foo from \"a\";\n        import * as bar from \"b\";\n- Groups of imports are delineated by blank lines. You can use these to group imports\n    however you like, e.g. by first- vs. third-party or thematically.",
+    "descriptionDetails": "\nEnforce a consistent ordering for ES6 imports:\n- Named imports must be alphabetized (i.e. \"import {A, B, C} from \"foo\";\")\n    - The exact ordering can be controlled by the named-imports-order option.\n    - \"longName as name\" imports are ordered by \"longName\".\n- Import sources must be alphabetized within groups, i.e.:\n        import * as foo from \"a\";\n        import * as bar from \"b\";\n- Groups of imports are delineated by blank lines. You can use these to group imports\n    however you like, e.g. by first- vs. third-party or thematically.",
     "optionsDescription": "\nYou may set the `\"import-sources-order\"` option to control the ordering of source\nimports (the `\"foo\"` in `import {A, B, C} from \"foo\"`).\n\nPossible values for `\"import-sources-order\"` are:\n* `\"case-insensitive'`: Correct order is `\"Bar\"`, `\"baz\"`, `\"Foo\"`. (This is the default.)\n* `\"lowercase-first\"`: Correct order is `\"baz\"`, `\"Bar\"`, `\"Foo\"`.\n* `\"lowercase-last\"`: Correct order is `\"Bar\"`, `\"Foo\"`, `\"baz\"`.\n\nYou may set the `\"named-imports-order\"` option to control the ordering of named\nimports (the `{A, B, C}` in `import {A, B, C} from \"foo\"`).\n\nPossible values for `\"named-imports-order\"` are:\n\n* `\"case-insensitive'`: Correct order is `{A, b, C}`. (This is the default.)\n* `\"lowercase-first\"`: Correct order is `{b, A, C}`.\n* `\"lowercase-last\"`: Correct order is `{A, C, b}`.\n\n        ",
     "options": {
       "type": "object",
@@ -1237,27 +1225,6 @@
     "options": null,
     "optionExamples": [
       "true"
-    ],
-    "type": "functionality"
-  },
-  {
-    "ruleName": "use-strict",
-    "description": "Requires using ECMAScript 5's strict mode.",
-    "optionsDescription": "\nTwo arguments may be optionally provided:\n\n* `check-module` checks that all top-level modules are using strict mode.\n* `check-function` checks that all top-level functions are using strict mode.",
-    "options": {
-      "type": "array",
-      "items": {
-        "type": "string",
-        "enum": [
-          "check-module",
-          "check-function"
-        ]
-      },
-      "minLength": 0,
-      "maxLength": 2
-    },
-    "optionExamples": [
-      "[true, \"check-module\"]"
     ],
     "type": "functionality"
   },

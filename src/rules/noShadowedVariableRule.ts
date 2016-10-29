@@ -72,23 +72,23 @@ class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<ScopeInfo,
         this.visitBlock(node.block);
     }
 
-    public visitCallSignature(node: ts.SignatureDeclaration) {
+    public visitCallSignature(_node: ts.SignatureDeclaration) {
         // don't call super, we don't need to check parameter names in call signatures
     }
 
-    public visitFunctionType(node: ts.FunctionOrConstructorTypeNode) {
+    public visitFunctionType(_node: ts.FunctionOrConstructorTypeNode) {
         // don't call super, we don't need to check names in function types
     }
 
-    public visitConstructorType(node: ts.FunctionOrConstructorTypeNode) {
+    public visitConstructorType(_node: ts.FunctionOrConstructorTypeNode) {
         // don't call super, we don't need to check names in constructor types
     }
 
-    public visitIndexSignatureDeclaration(node: ts.SignatureDeclaration) {
+    public visitIndexSignatureDeclaration(_node: ts.SignatureDeclaration) {
         // don't call super, we don't want to walk index signatures
     }
 
-    public visitMethodSignature(node: ts.SignatureDeclaration) {
+    public visitMethodSignature(_node: ts.SignatureDeclaration) {
         // don't call super, we don't want to walk method signatures either
     }
 
@@ -102,7 +102,7 @@ class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<ScopeInfo,
         super.visitParameterDeclaration(node);
     }
 
-    public visitTypeLiteral(node: ts.TypeLiteralNode) {
+    public visitTypeLiteral(_node: ts.TypeLiteralNode) {
         // don't call super, we don't want to walk the inside of type nodes
     }
 

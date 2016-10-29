@@ -22,6 +22,7 @@ Table of Contents
 - [Installation](#installation)
 - [Usage](#usage)
 - [Core Rules](#core-rules)
+- [Core Formatters](#core-formatters)
 - [Rule Flags](#rule-flags)
 - [Custom Rules](#custom-rules)
 - [Development](#development)
@@ -80,7 +81,7 @@ The configuration file specifies which rules are enabled and their options. Thes
     /*
      * Any rules specified here will override those from the base config we are extending
      */
-    "no-constructor-vars": true
+    "no-parameter-properties": true
   },
   "rulesDirectory": [
     /*
@@ -246,22 +247,19 @@ Core Rules
 -----
 <sup>[back to ToC &uarr;](#table-of-contents)</sup>
 
+_Rules_ encode logic for syntactic & semantic checks of TypeScript source code.
+
 [See the TSLint website for a list of core rules included in the `tslint` package.]
 (http://palantir.github.io/tslint/rules/)
 
 Core Formatters
 -----
+<sup>[back to ToC &uarr;](#table-of-contents)</sup>
 
-Formatters are used to format the results of the linter before outputting it to stdout or
-the configured output file. The core formatters are:
+_Formatters_ allow for transformation of lint results into various forms before outputting to stdout or a file.
 
-- __prose__: human readable (default)
-- __json__: machine readable
-- __verbose__: human readable (includes rule names)
-- __pmd__
-- __msbuild__
-- __checkstyle__
-- __vso__
+[See the TSLint website for a list of core formatters included in the `tslint` package.]
+(http://palantir.github.io/tslint/formatters/)
 
 Rule Flags
 -----
@@ -391,7 +389,7 @@ Creating a new release
 ----------------------
 <sup>[back to ToC &uarr;](#table-of-contents)</sup>
 
-1. Bump the version number in `package.json` and `src/tslint.ts`
+1. Bump the version number in `package.json` and `src/tslintMulti.ts`
 2. Add release notes in `CHANGELOG.md`
 3. Run `grunt` to build the latest sources
 4. Commit with message `Prepare release <version>`

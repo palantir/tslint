@@ -32,7 +32,6 @@ export const rules = {
     "interface-name": [true, "always-prefix"],
     "jsdoc-format": true,
     "label-position": true,
-    "label-undefined": true,
     "max-line-length": [true, 120],
     "member-access": true,
     "member-ordering": [true,
@@ -53,7 +52,6 @@ export const rules = {
         "trace",
     ],
     "no-construct": true,
-    "no-constructor-vars": false,
     "no-debugger": true,
     "no-duplicate-key": true,
     "no-duplicate-variable": true,
@@ -61,6 +59,7 @@ export const rules = {
     "no-eval": true,
     "no-internal-module": true,
     "no-namespace": true,
+    "no-parameter-properties": false,
     "no-reference": true,
     "no-shadowed-variable": true,
     "no-string-literal": true,
@@ -69,7 +68,8 @@ export const rules = {
     "no-unreachable": true,
     "no-unused-expression": true,
     "no-unused-new": true,
-    "no-unused-variable": [true, "react"],
+    // deprecated as of v4.0
+    "no-unused-variable": false,
     // disable this rule as it is very heavy performance-wise and not that useful
     "no-use-before-declare": false,
     "no-var-keyword": true,

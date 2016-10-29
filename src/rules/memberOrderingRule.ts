@@ -276,11 +276,11 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
         super.visitPropertySignature(node);
     }
 
-    public visitTypeLiteral(node: ts.TypeLiteralNode) {
+    public visitTypeLiteral(_node: ts.TypeLiteralNode) {
         // don't call super from here -- we want to skip the property declarations in type literals
     }
 
-    public visitObjectLiteralExpression(node: ts.ObjectLiteralExpression) {
+    public visitObjectLiteralExpression(_node: ts.ObjectLiteralExpression) {
         // again, don't call super here - object literals can have methods,
         // and we don't wan't to check these
     }
@@ -299,7 +299,7 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
             const failure = this.createFailure(
                 node.getStart(),
                 node.getWidth(),
-                `Declaration of ${toString(currentMember)} not allowed to appear after declaration of ${toString(this.previousMember)}`
+                `Declaration of ${toString(currentMember)} not allowed to appear after declaration of ${toString(this.previousMember)}`,
             );
             this.addFailure(failure);
         }
@@ -368,7 +368,7 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
                     this.addFailure(this.createFailure(
                         node.getStart(),
                         node.getWidth(),
-                        errorLine1
+                        errorLine1,
                     ));
                 } else {
                     // keep track of last good node
