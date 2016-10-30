@@ -24,6 +24,7 @@ import {IDisabledInterval, IRule} from "./language/rule/rule";
 
 const moduleDirectory = path.dirname(module.filename);
 const CORE_RULES_DIRECTORY = path.resolve(moduleDirectory, ".", "rules");
+const shownDeprecations: string[] = [];
 
 export interface IEnableDisablePosition {
     isEnabled: boolean;
@@ -49,8 +50,9 @@ export function loadRules(ruleConfiguration: {[name: string]: any},
                 const disabledIntervals = buildDisabledIntervalsFromSwitches(ruleSpecificList, allList);
                 rules.push(new Rule(ruleName, ruleValue, disabledIntervals));
 
-                if (Rule.metadata && Rule.metadata.deprecationMessage) {
+                if (Rule.metadata && Rule.metadata.deprecationMessage && shownDeprecations.indexOf(Rule.metadata.ruleName) === -1) {
                     console.warn(`${Rule.metadata.ruleName} is deprecated. ${Rule.metadata.deprecationMessage}`);
+                    shownDeprecations.push(Rule.metadata.ruleName);
                 }
             }
         }
