@@ -109,10 +109,10 @@ function findUnsortedPair(xs: ts.Node[], transform: (x: string) => string): [ts.
     return null;
 }
 
-function sortByKey<T>(xs: T[], getSortKeyCallback: (x: T) => string): T[] {
+function sortByKey<T>(xs: T[], getSortKey: (x: T) => string): T[] {
     return xs.sort((a, b) => {
-        const transformedA = getSortKeyCallback(a);
-        const transformedB = getSortKeyCallback(b);
+        const transformedA = getSortKey(a);
+        const transformedB = getSortKey(b);
         if (transformedA > transformedB) {
             return 1;
         } else if (transformedA < transformedB) {
@@ -216,19 +216,19 @@ interface ImportDeclaration {
     node: ts.ImportDeclaration;
     nodeStartOffset: number;    // start position of node within source file
     text: string;
-    sourceFile: string;
+    sourcePath: string;
 }
 
 class ImportsBlock {
     private importDeclarations: ImportDeclaration[] = [];
 
-    public addImportDeclaration(node: ts.ImportDeclaration, sourceFile: string) {
+    public addImportDeclaration(node: ts.ImportDeclaration, sourcePath: string) {
         const start = this.getStartOffset(node);
 
         this.importDeclarations.push({
             node,
             nodeStartOffset: start,
-            sourceFile,
+            sourcePath,
             text: node.getSourceFile().text.substring(start, this.getEndOffset(node)),
         });
     }
@@ -250,7 +250,7 @@ class ImportsBlock {
         if (this.importDeclarations.length === 0) {
             return null;
         }
-        return this.getLastImportDeclaration().sourceFile;
+        return this.getLastImportDeclaration().sourcePath;
     }
 
     // creates a Lint.Replacement object with ordering fixes for the entire block    
@@ -258,7 +258,7 @@ class ImportsBlock {
         if (this.importDeclarations.length === 0) {
             return null;
         }
-        const sortedDeclarations = sortByKey(this.importDeclarations.slice(), (x) => x.sourceFile);
+        const sortedDeclarations = sortByKey(this.importDeclarations.slice(), (x) => x.sourcePath);
         const fixedText = sortedDeclarations.map((x) => x.text).join("");
         const start = this.importDeclarations[0].nodeStartOffset;
         const end = this.getLastImportDeclaration().nodeStartOffset + this.getLastImportDeclaration().text.length;
