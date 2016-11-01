@@ -42,6 +42,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 class ObjectLiteralSortKeysWalker extends Lint.RuleWalker {
     // stacks are used to maintain state while recursing through nested object literals
     private lastSortedKeyStack: string[] = [];
+    private multilineFlagStack: boolean[] = [];
     private sortedStateStack: boolean[] = [];
 
     public visitObjectLiteralExpression(node: ts.ObjectLiteralExpression) {
@@ -49,18 +50,21 @@ class ObjectLiteralSortKeysWalker extends Lint.RuleWalker {
         this.lastSortedKeyStack.push("");
         // sorted state is always initially true
         this.sortedStateStack.push(true);
+        this.multilineFlagStack.push(this.isMultilineListNode(node));
         super.visitObjectLiteralExpression(node);
+        this.multilineFlagStack.pop();
         this.lastSortedKeyStack.pop();
         this.sortedStateStack.pop();
     }
 
     public visitPropertyAssignment(node: ts.PropertyAssignment) {
         const sortedState = this.sortedStateStack[this.sortedStateStack.length - 1];
+        const isMultiline = this.multilineFlagStack[this.multilineFlagStack.length - 1];
 
         // skip remainder of object literal scan if a previous key was found
         // in an unsorted position. This ensures only one error is thrown at
-        // a time and keeps error output clean.
-        if (sortedState) {
+        // a time and keeps error output clean. Skip also single line objects.
+        if (sortedState && isMultiline) {
             const lastSortedKey = this.lastSortedKeyStack[this.lastSortedKeyStack.length - 1];
             const keyNode = node.name;
             if (isIdentifierOrStringLiteral(keyNode)) {
@@ -75,6 +79,12 @@ class ObjectLiteralSortKeysWalker extends Lint.RuleWalker {
             }
         }
         super.visitPropertyAssignment(node);
+    }
+
+    private isMultilineListNode(node: ts.ObjectLiteralExpression) {
+        const startLineOfNode = this.getSourceFile().getLineAndCharacterOfPosition(node.getStart()).line;
+        const endLineOfNode = this.getSourceFile().getLineAndCharacterOfPosition(node.getEnd()).line;
+        return endLineOfNode !== startLineOfNode;
     }
 }
 
