@@ -109,6 +109,14 @@ function findUnsortedPair(xs: ts.Node[], transform: (x: string) => string): [ts.
     return null;
 }
 
+function removeQuotes(value: string) {
+    // strip out quotes
+    if (value && value.length > 1 && (value[0] === "'" || value[0] === "\"")) {
+        value = value.substr(1, value.length - 2);
+    }
+    return value;
+}
+
 function sortByKey<T>(xs: T[], getSortKey: (x: T) => string): T[] {
     return xs.sort((a, b) => {
         const transformedA = getSortKey(a);
@@ -150,7 +158,9 @@ class OrderedImportsWalker extends Lint.RuleWalker {
 
     // e.g. "import Foo from "./foo";"
     public visitImportDeclaration(node: ts.ImportDeclaration) {
-        const source = this.importSourcesOrderTransform(node.moduleSpecifier.getText());
+        let source = node.moduleSpecifier.getText();
+        source = removeQuotes(source);
+        source = this.importSourcesOrderTransform(source);
         const previousSource = this.currentImportsBlock.getLastImportSource();
         this.currentImportsBlock.addImportDeclaration(node, source);
 
@@ -214,8 +224,9 @@ class OrderedImportsWalker extends Lint.RuleWalker {
 
 interface ImportDeclaration {
     node: ts.ImportDeclaration;
+    nodeEndOffset: number;      // end position of node within source file
     nodeStartOffset: number;    // start position of node within source file
-    text: string;
+    text: string;               // initialized with original import text; modified if the named imports are reordered
     sourcePath: string;
 }
 
@@ -224,12 +235,21 @@ class ImportsBlock {
 
     public addImportDeclaration(node: ts.ImportDeclaration, sourcePath: string) {
         const start = this.getStartOffset(node);
+        const end = this.getEndOffset(node);
+        const text = node.getSourceFile().text.substring(start, end);
+
+        if (start > node.getStart() || end === 0) {
+            // skip block if any statements don't end with a newline to simplify implementation
+            this.importDeclarations = [];
+            return;
+        }
 
         this.importDeclarations.push({
             node,
+            nodeEndOffset: end,
             nodeStartOffset: start,
             sourcePath,
-            text: node.getSourceFile().text.substring(start, this.getEndOffset(node)),
+            text,
         });
     }
 
@@ -261,7 +281,7 @@ class ImportsBlock {
         const sortedDeclarations = sortByKey(this.importDeclarations.slice(), (x) => x.sourcePath);
         const fixedText = sortedDeclarations.map((x) => x.text).join("");
         const start = this.importDeclarations[0].nodeStartOffset;
-        const end = this.getLastImportDeclaration().nodeStartOffset + this.getLastImportDeclaration().text.length;
+        const end = this.getLastImportDeclaration().nodeEndOffset;
         return new Lint.Replacement(start, end - start, fixedText);
     }
 
@@ -270,15 +290,12 @@ class ImportsBlock {
         if (this.importDeclarations.length === 0) {
             return node.getStart();
         }
-        return this.getLastImportDeclaration().nodeStartOffset + this.getLastImportDeclaration().text.length;
+        return this.getLastImportDeclaration().nodeEndOffset;
     }
 
     // gets the offset of the end of the import's line, including newline, to include comment to the right
     private getEndOffset(node: ts.ImportDeclaration) {
         let endLineOffset = node.getSourceFile().text.indexOf("\n", node.end) + 1;
-        if (endLineOffset < 0) {
-            endLineOffset = node.getSourceFile().end;
-        }
         return endLineOffset;
     }
 

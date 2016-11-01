@@ -6,6 +6,10 @@ import {A, B} from 'foo'; // failure
 import {A, bz, C} from 'foo'; // failure
 import {A, b, C} from 'zfoo';
 
+import {g} from "./e/f"; // failure
+import {
+    a as d, b as c, // failure with named imports on different lines
+} from "x";
 
 // Import sources should be alphabetized.
 import * as bar from 'bar';
@@ -13,6 +17,13 @@ import * as foo from 'foo';
 
 import * as abc from 'abc';
 import * as bar from 'bar'; // failure
+import * as foo from 'foo';
+
+// ignore quotes
+import * as bar from 'bar';
+import * as foo from "foo";
+
+import * as bar from "bar";
 import * as foo from 'foo';
 
 // Case is irrelevant for source import ordering.
@@ -25,3 +36,9 @@ import someDefault, {nameA, nameBReallyLong as anotherName} from "./wherever";
 import someDefault from "module";
 import "something";
 
+
+// do not fix cases where a newline is missing
+import * as foo from 'foo';  import * as bar from 'bar';
+
+import * as foo from 'foo';
+import * as bar from 'bar';
