@@ -21,7 +21,7 @@ import * as Lint from "../lint";
 
 const OPTION_ALWAYS = "always";
 const OPTION_NEVER = "never";
-const OPTION_ALLOW_BOUND_CLASS_METHODS = "allow-bound-class-methods";
+const OPTION_ALLOW_BOUND_CLASS_METHODS = "ignore-bound-class-methods";
 const OPTION_IGNORE_INTERFACES = "ignore-interfaces";
 
 export class Rule extends Lint.Rules.AbstractRule {
