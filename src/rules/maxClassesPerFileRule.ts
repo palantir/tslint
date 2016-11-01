@@ -1,10 +1,6 @@
 ﻿import * as Lint from "../lint";
 import * as ts from "typescript";
 
-type IMaxClassesPerFileRuleOptions = [number, {
-    "ignore-filename-pattern": string;
-}];
-
 export class Rule extends Lint.Rules.AbstractRule {
 
     /* tslint:disable:object-literal-sort-keys */
@@ -16,11 +12,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: Lint.Utils.dedent`
             Ensures that files have a single responsibility so that that classes each exist in their own files`,
         optionsDescription: Lint.Utils.dedent`
-            Two arguments, the fisrt is required and the second is optional.
-
-            * The first argument is an integer indicating the maximum number of classes that can appear in a file.
-            * The second argument is an object that contains a single property named \`"ignore-filename-pattern"\` 
-            that specifies a regular expression pattern to match the filenames for files that you with to exclude from this rule.`,
+            The one required argument is an integer indicating the maximum number of classes that can appear in a file.`,
         options: {
             type: "array",
             items: [
@@ -28,20 +20,12 @@ export class Rule extends Lint.Rules.AbstractRule {
                     type: "number",
                     minimum: 1,
                 },
-                {
-                    type: "object",
-                    properties: {
-                        "ignore-filename-pattern": {
-                            type: "string",
-                        },
-                    },
-                },
             ],
             additionalItems: false,
             minLength: 1,
             maxLength: 2,
         },
-        optionExamples: ["[true, 2]", '[true, 1, {"ignore-filename-pattern": ".+\\.(model|tests)\\.ts$"}]'],
+        optionExamples: ["[true, 1]", "[true, 5]"],
         type: "maintainability",
     };
     /* tslint:enable:object-literal-sort-keys */
@@ -52,15 +36,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        let allFailures: Lint.RuleFailure[] = [];
-        const opts = <IMaxClassesPerFileRuleOptions> this.getOptions().ruleArguments;
-        const ignorePattern = opts[1] && opts[1]["ignore-filename-pattern"] ? opts[1]["ignore-filename-pattern"] : "";
-
-        // If no ignore pattern is provided, or we do not match the ignore pattern, then continue
-        if (ignorePattern === "" || !RegExp(ignorePattern).test(sourceFile.fileName)) {
-            allFailures = this.applyWithWalker(new MaxClassesPerFileWalker(sourceFile, this.getOptions()));
-        }
-        return allFailures;
+        return this.applyWithWalker(new MaxClassesPerFileWalker(sourceFile, this.getOptions()));
     }
 }
 
