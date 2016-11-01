@@ -54,11 +54,20 @@ class MaxClassesPerFileWalker extends Lint.RuleWalker {
     }
 
     public visitClassDeclaration(node: ts.ClassDeclaration) {
+        this.increaseClassCount(node);
+        super.visitClassDeclaration(node);
+    }
+
+    public visitClassExpression(node: ts.ClassExpression) {
+        this.increaseClassCount(node);
+        super.visitClassExpression(node);
+    }
+
+    private increaseClassCount(node: ts.ClassExpression | ts.ClassDeclaration) {
         this.classCount++;
         if (this.classCount > this.maxClassCount) {
             const msg = Rule.FAILURE_STRING_FACTORY(this.maxClassCount);
             this.addFailure(this.createFailure(node.getStart(), node.getWidth(), msg));
         }
-        super.visitClassDeclaration(node);
     }
 }
