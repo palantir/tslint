@@ -141,7 +141,6 @@ export const jsRules = {
     "label-position": true,
     "label-undefined": true,
     "max-line-length": [true, 120],
-    "member-access": true,
     "new-parens": true,
     "no-arg": true,
     "no-bitwise": true,
@@ -156,7 +155,6 @@ export const jsRules = {
         "trace",
     ],
     "no-construct": true,
-    "no-constructor-vars": false,
     "no-debugger": true,
     "no-duplicate-key": true,
     "no-duplicate-variable": true,
@@ -172,7 +170,6 @@ export const jsRules = {
     "no-unused-new": true,
     // disable this rule as it is very heavy performance-wise and not that useful
     "no-use-before-declare": false,
-    "no-var-keyword": true,
     "object-literal-sort-keys": true,
     "one-line": [true,
         "check-catch",
