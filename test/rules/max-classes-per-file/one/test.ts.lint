@@ -10,3 +10,10 @@ class two {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 }
 ~ [A maximum of 1 class per file is allowed]
+
+let three = class {
+            ~~~~~~~
+    public foo = "bar";
+~~~~~~~~~~~~~~~~~~~~~~~
+}
+~ [A maximum of 1 class per file is allowed]
