@@ -21,7 +21,7 @@ import * as Lint from "../lint";
 
 const OPTION_ALWAYS = "always";
 const OPTION_NEVER = "never";
-const OPTION_ALLOW_BOUND_CLASS_METHODS = "ignore-bound-class-methods";
+const OPTION_IGNORE_BOUND_CLASS_METHODS = "ignore-bound-class-methods";
 const OPTION_IGNORE_INTERFACES = "ignore-interfaces";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -37,7 +37,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
             The following arguments may be optionaly provided:
             * \`"${OPTION_IGNORE_INTERFACES}"\` skips checking semicolons at the end of interface members.
-            * \`"${OPTION_ALLOW_BOUND_CLASS_METHODS}"\` skips checking semicolons at the end of bound class methods.`,
+            * \`"${OPTION_IGNORE_BOUND_CLASS_METHODS}"\` skips checking semicolons at the end of bound class methods.`,
         options: {
             type: "array",
             items: [{
@@ -53,7 +53,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             `[true, "${OPTION_ALWAYS}"]`,
             `[true, "${OPTION_NEVER}"]`,
             `[true, "${OPTION_ALWAYS}", "${OPTION_IGNORE_INTERFACES}"]`,
-            `[true, "${OPTION_ALWAYS}", "${OPTION_ALLOW_BOUND_CLASS_METHODS}"]`,
+            `[true, "${OPTION_ALWAYS}", "${OPTION_IGNORE_BOUND_CLASS_METHODS}"]`,
         ],
         type: "style",
     };
@@ -121,7 +121,7 @@ class SemicolonWalker extends Lint.RuleWalker {
     public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
         const initializer = node.initializer;
         if (initializer && initializer.kind === ts.SyntaxKind.ArrowFunction) {
-            if (!this.hasOption(OPTION_ALLOW_BOUND_CLASS_METHODS)) {
+            if (!this.hasOption(OPTION_IGNORE_BOUND_CLASS_METHODS)) {
                 this.checkSemicolonAt(node, "never");
             }
         } else {
