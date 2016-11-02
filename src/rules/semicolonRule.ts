@@ -21,6 +21,7 @@ import * as Lint from "../lint";
 
 const OPTION_ALWAYS = "always";
 const OPTION_NEVER = "never";
+const OPTION_IGNORE_BOUND_CLASS_METHODS = "ignore-bound-class-methods";
 const OPTION_IGNORE_INTERFACES = "ignore-interfaces";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -35,7 +36,8 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"${OPTION_NEVER}"\` disallows semicolons at the end of every statement except for when they are necessary.
 
             The following arguments may be optionaly provided:
-            * \`"${OPTION_IGNORE_INTERFACES}"\` skips checking semicolons at the end of interface members.`,
+            * \`"${OPTION_IGNORE_INTERFACES}"\` skips checking semicolons at the end of interface members.
+            * \`"${OPTION_IGNORE_BOUND_CLASS_METHODS}"\` skips checking semicolons at the end of bound class methods.`,
         options: {
             type: "array",
             items: [{
@@ -51,6 +53,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             `[true, "${OPTION_ALWAYS}"]`,
             `[true, "${OPTION_NEVER}"]`,
             `[true, "${OPTION_ALWAYS}", "${OPTION_IGNORE_INTERFACES}"]`,
+            `[true, "${OPTION_ALWAYS}", "${OPTION_IGNORE_BOUND_CLASS_METHODS}"]`,
         ],
         type: "style",
     };
@@ -117,8 +120,11 @@ class SemicolonWalker extends Lint.RuleWalker {
 
     public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
         const initializer = node.initializer;
-        /* ALWAYS === "enabled" for this rule. */
-        if (this.hasOption(OPTION_NEVER) || !(initializer && initializer.kind === ts.SyntaxKind.ArrowFunction)) {
+        if (initializer && initializer.kind === ts.SyntaxKind.ArrowFunction) {
+            if (!this.hasOption(OPTION_IGNORE_BOUND_CLASS_METHODS)) {
+                this.checkSemicolonAt(node, "never");
+            }
+        } else {
             this.checkSemicolonAt(node);
         }
         super.visitPropertyDeclaration(node);
@@ -152,13 +158,14 @@ class SemicolonWalker extends Lint.RuleWalker {
         super.visitTypeAliasDeclaration(node);
     }
 
-    private checkSemicolonAt(node: ts.Node) {
+    private checkSemicolonAt(node: ts.Node, override?: "never") {
         const sourceFile = this.getSourceFile();
         const children = node.getChildren(sourceFile);
         const hasSemicolon = children.some((child) => child.kind === ts.SyntaxKind.SemicolonToken);
         const position = node.getStart(sourceFile) + node.getWidth(sourceFile);
+        const never = override === "never" || this.hasOption(OPTION_NEVER);
         // Backwards compatible with plain {"semicolon": true}
-        const always = this.hasOption(OPTION_ALWAYS) || (this.getOptions() && this.getOptions().length === 0);
+        const always = !never && (this.hasOption(OPTION_ALWAYS) || (this.getOptions() && this.getOptions().length === 0));
 
         if (always && !hasSemicolon) {
             const failureStart = Math.min(position, this.getLimit());
@@ -166,7 +173,7 @@ class SemicolonWalker extends Lint.RuleWalker {
                 this.appendText(failureStart, ";"),
             ]);
             this.addFailure(this.createFailure(failureStart, 0, Rule.FAILURE_STRING_MISSING, fix));
-        } else if (this.hasOption(OPTION_NEVER) && hasSemicolon) {
+        } else if (never && hasSemicolon) {
             const scanner = ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, sourceFile.text);
             scanner.setTextPos(position);
 
