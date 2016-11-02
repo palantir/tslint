@@ -118,7 +118,7 @@ function removeQuotes(value: string) {
 }
 
 function sortByKey<T>(xs: T[], getSortKey: (x: T) => string): T[] {
-    return xs.sort((a, b) => {
+    return xs.slice().sort((a, b) => {
         const transformedA = getSortKey(a);
         const transformedB = getSortKey(b);
         if (transformedA > transformedB) {
@@ -181,10 +181,16 @@ class OrderedImportsWalker extends Lint.RuleWalker {
         const pair = findUnsortedPair(imports, this.namedImportsOrderTransform);
         if (pair !== null) {
             const [a, b] = pair;
-            const start = imports[0].getStart();
-            const end = imports[imports.length - 1].getEnd();
-            const replacement = sortByKey(imports, (x) => this.namedImportsOrderTransform(x.getText())).map((x) => x.getText()).join(", ");
-            this.currentImportsBlock.replaceNamedImports(start, end - start, replacement);
+            const sortedDeclarations = sortByKey(imports, (x) => this.namedImportsOrderTransform(x.getText())).map((x) => x.getText());
+            // replace in reverse order to preserve earlier offsets
+            for (let i = imports.length - 1; i >= 0; i--) {
+                const start = imports[i].getStart();
+                const length = imports[i].getText().length;
+
+                // replace the named imports one at a time to preserve whitespace
+                this.currentImportsBlock.replaceNamedImports(start, length, sortedDeclarations[i]);
+            }
+
             this.lastFix = new Lint.Fix(Rule.metadata.ruleName, []);
             const ruleFailure = this.createFailure(
                 a.getStart(),
@@ -256,8 +262,12 @@ class ImportsBlock {
     // replaces the named imports on the most recent import declaration    
     public replaceNamedImports(fileOffset: number, length: number, replacement: string) {
         const importDeclaration = this.getLastImportDeclaration();
-        const start = fileOffset -  importDeclaration.nodeStartOffset;
+        if (importDeclaration == null) {
+            // nothing to replace. This can happen if the block is skipped
+            return;
+        }
 
+        const start = fileOffset - importDeclaration.nodeStartOffset;
         if (start < 0 || start + length > importDeclaration.node.getEnd()) {
             throw "Unexpected named import position";
         }

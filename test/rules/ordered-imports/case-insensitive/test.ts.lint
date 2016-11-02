@@ -12,7 +12,7 @@ import {bz, A, C} from 'foo'; // failure
 import {
     b as c,
     ~~~~~~~
-    a as d, // failure with named imports on different lines
+    a as d,
 ~~~~~~~~~~                            [Named imports must be alphabetized.]
 } from "x";
 import {g} from "./e/f"; // failure

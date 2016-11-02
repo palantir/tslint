@@ -8,7 +8,8 @@ import {A, b, C} from 'zfoo';
 
 import {g} from "./e/f"; // failure
 import {
-    a as d, b as c, // failure with named imports on different lines
+    a as d,
+    b as c,
 } from "x";
 
 // Import sources should be alphabetized.
