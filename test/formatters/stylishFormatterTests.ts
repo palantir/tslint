@@ -47,10 +47,10 @@ describe("Stylish Formatter", () => {
 
         const expectedResult = colors.enabled ?
             "formatters/stylishFormatter.test.ts" + "\n" +
-            "\u001b[33m1:1\u001b[39m  \u001b[90mfirst-name\u001b[39m  \u001b[31mfirst failure\u001b[39m" + "\n" +
-            "\u001b[33m1:3\u001b[39m  \u001b[90mescape    \u001b[39m  \u001b[31m&<>'\" should be escaped\u001b[39m" + "\n" +
-            `\u001b[33m${maxPositionTuple}\u001b[39m  \u001b[90mlast-name \u001b[39m  \u001b[31mlast failure\u001b[39m` + "\n" +
-            "\u001b[33m1:1\u001b[39m  \u001b[90mfull-name \u001b[39m  \u001b[31mfull failure\u001b[39m" + "\n" +
+            "\u001b[31m1:1\u001b[39m  \u001b[90mfirst-name\u001b[39m  \u001b[33mfirst failure\u001b[39m" + "\n" +
+            "\u001b[31m1:3\u001b[39m  \u001b[90mescape    \u001b[39m  \u001b[33m&<>'\" should be escaped\u001b[39m" + "\n" +
+            `\u001b[31m${maxPositionTuple}\u001b[39m  \u001b[90mlast-name \u001b[39m  \u001b[33mlast failure\u001b[39m` + "\n" +
+            "\u001b[31m1:1\u001b[39m  \u001b[90mfull-name \u001b[39m  \u001b[33mfull failure\u001b[39m" + "\n" +
             "\n" :
             "formatters/stylishFormatter.test.ts" + "\n" +
             "1:1  first-name  first failure" + "\n" +

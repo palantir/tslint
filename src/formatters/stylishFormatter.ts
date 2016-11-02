@@ -60,7 +60,7 @@ export class Formatter extends AbstractFormatter {
             }
 
             let failureString = failure.getFailure();
-            failureString     = colors.red(failureString);
+            failureString     = colors.yellow(failureString);
 
             // Rule
             let ruleName = failure.getRuleName();
@@ -72,7 +72,7 @@ export class Formatter extends AbstractFormatter {
 
             let positionTuple = `${lineAndCharacter.line + 1}:${lineAndCharacter.character + 1}`;
             positionTuple     = this.pad(positionTuple, positionMaxSize);
-            positionTuple     = colors.yellow(positionTuple);
+            positionTuple     = colors.red(positionTuple);
 
             // Ouput
             const output = `${positionTuple}  ${ruleName}  ${failureString}`;
