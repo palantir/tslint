@@ -41,7 +41,7 @@ import { arrayify } from "./utils";
  * Linter that can lint multiple files in consecutive runs.
  */
 class MultiLinter {
-    public static VERSION = "4.0.0-dev.0";
+    public static VERSION = "4.0.0-dev.1";
 
     public static findConfiguration = findConfiguration;
     public static findConfigurationPath = findConfigurationPath;
