@@ -46,7 +46,7 @@ export function loadRules(ruleConfiguration: {[name: string]: any},
             if (Rule == null) {
                 notFoundRules.push(ruleName);
             } else {
-                if (isJs && Rule.metadata.typescriptOnly != null && Rule.metadata.typescriptOnly) {
+                if (isJs && Rule.metadata && Rule.metadata.typescriptOnly != null && Rule.metadata.typescriptOnly) {
                     notAllowedInJsRules.push(ruleName);
                 } else {
                     const all = "all"; // make the linter happy until we can turn it on and off

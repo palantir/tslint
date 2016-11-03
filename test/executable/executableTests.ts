@@ -24,8 +24,9 @@ const EXECUTABLE_DIR = path.resolve(process.cwd(), "test", "executable");
 const EXECUTABLE_PATH = path.resolve(EXECUTABLE_DIR, "npm-like-executable");
 const TEMP_JSON_PATH = path.resolve(EXECUTABLE_DIR, "tslint.json");
 
-describe("Executable", () => {
-
+/* tslint:disable:only-arrow-functions */
+describe("Executable", function() {
+    this.slow(3000);    // the executable is JIT-ed each time it runs; avoid showing slowness warnings
     describe("Files", () => {
         it("exits with code 1 if no arguments passed", (done) => {
             execCli([], (err, stdout, stderr) => {
