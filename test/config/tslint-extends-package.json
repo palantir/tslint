@@ -1,5 +1,9 @@
 {
   "extends": "tslint-test-custom-rules",
+  "jsRules": {
+    "rule-two": true,
+    "rule-three": false
+  },
   "rules": {
     "rule-two": true,
     "rule-three": false
