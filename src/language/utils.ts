@@ -119,9 +119,9 @@ export function getBindingElementVariableDeclaration(node: ts.BindingElement): t
 }
 
 /**
- * Returns true if some ancestor of `node` satisfies `predicate`, including `node` itself.
+ * @returns true if some ancestor of `node` satisfies `predicate`, including `node` itself.
  */
-export function someAncestor(node: ts.Node, predicate: (n: ts.Node)=>boolean): boolean {
+export function someAncestor(node: ts.Node, predicate: (n: ts.Node) => boolean): boolean {
     return predicate(node) || (node.parent && someAncestor(node.parent, predicate));
 }
 
@@ -135,7 +135,7 @@ export function isNodeFlagSet(node: ts.Node, flagToCheck: ts.NodeFlags): boolean
 }
 
 /**
- * Returns true if decl is a nested module declaration, i.e. represents a segment of a dotted module path.
+ * @returns true if decl is a nested module declaration, i.e. represents a segment of a dotted module path.
  */
 export function isNestedModuleDeclaration(decl: ts.ModuleDeclaration) {
     // in a declaration expression like 'module a.b.c' - 'a' is the top level module declaration node and 'b' and 'c'
