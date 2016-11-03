@@ -6,11 +6,11 @@ import {A, B} from 'foo'; // failure
 import {A, bz, C} from 'foo'; // failure
 import {A, b, C} from 'zfoo';
 
-import {g} from "./e/f"; // failure
+import {g} from "y"; // failure
 import {
     a as d,
     b as c,
-} from "x";
+} from "z";
 
 // Import sources should be alphabetized.
 import * as bar from 'bar';
@@ -33,10 +33,9 @@ import {A, B} from 'baz';
 import {A, B} from 'Foo'; // should not fail
 
 // Other styles of import statements.
-import someDefault, {nameA, nameBReallyLong as anotherName} from "./wherever";
 import someDefault from "module";
 import "something";
-
+import someDefault, {nameA, nameBReallyLong as anotherName} from "./wherever";
 
 // do not fix cases where a newline is missing
 import * as foo from 'foo';  import * as bar from 'bar';

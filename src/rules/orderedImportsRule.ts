@@ -109,6 +109,22 @@ function findUnsortedPair(xs: ts.Node[], transform: (x: string) => string): [ts.
     return null;
 }
 
+function compare(a: string, b: string) {
+    const isLow = (value: string) => {
+        return [".", "/"].some((x) => value[0] === x);
+    };
+    if (isLow(a) && !isLow(b)) {
+        return 1;
+    } else if (!isLow(a) && isLow(b)) {
+        return -1;
+    } else if (a > b) {
+        return 1;
+    } else if (a < b) {
+        return -1;
+    }
+    return 0;
+}
+
 function removeQuotes(value: string) {
     // strip out quotes
     if (value && value.length > 1 && (value[0] === "'" || value[0] === "\"")) {
@@ -119,14 +135,7 @@ function removeQuotes(value: string) {
 
 function sortByKey<T>(xs: T[], getSortKey: (x: T) => string): T[] {
     return xs.slice().sort((a, b) => {
-        const transformedA = getSortKey(a);
-        const transformedB = getSortKey(b);
-        if (transformedA > transformedB) {
-            return 1;
-        } else if (transformedA < transformedB) {
-            return -1;
-        }
-        return 0;
+        return compare(getSortKey(a), getSortKey(b));
     });
 }
 
@@ -164,7 +173,7 @@ class OrderedImportsWalker extends Lint.RuleWalker {
         const previousSource = this.currentImportsBlock.getLastImportSource();
         this.currentImportsBlock.addImportDeclaration(node, source);
 
-        if (previousSource && source < previousSource) {
+        if (previousSource && compare(source, previousSource) === -1) {
             this.lastFix = new Lint.Fix(Rule.metadata.ruleName, []);
             const ruleFailure = this.createFailure(node.getStart(), node.getWidth(), Rule.IMPORT_SOURCES_UNORDERED, this.lastFix);
             this.addFailure(ruleFailure);

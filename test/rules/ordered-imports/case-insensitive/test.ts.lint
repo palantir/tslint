@@ -14,9 +14,9 @@ import {
     ~~~~~~~
     a as d,
 ~~~~~~~~~~                            [Named imports must be alphabetized.]
-} from "x";
-import {g} from "./e/f"; // failure
-~~~~~~~~~~~~~~~~~~~~~~~~            [Import sources within a group must be alphabetized.]
+} from "z";
+import {g} from "y"; // failure
+~~~~~~~~~~~~~~~~~~~~            [Import sources within a group must be alphabetized.]
 
 // Import sources should be alphabetized.
 import * as bar from 'bar';
@@ -42,10 +42,8 @@ import {A, B} from 'Foo'; // should not fail
 // Other styles of import statements.
 import someDefault, {nameA, nameBReallyLong as anotherName} from "./wherever";
 import someDefault from "module";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources within a group must be alphabetized.]
 import "something";
-
-[ordered-imports]: Named imports must be alphabetized.
-[ordered-sources]: Import sources within a group must be alphabetized.
 
 // do not fix cases where a newline is missing
 import * as foo from 'foo';  import * as bar from 'bar';
@@ -54,3 +52,5 @@ import * as foo from 'foo';  import * as bar from 'bar';
 import * as foo from 'foo';
 import * as bar from 'bar';
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources within a group must be alphabetized.]
+[ordered-imports]: Named imports must be alphabetized.
+[ordered-sources]: Import sources within a group must be alphabetized.
