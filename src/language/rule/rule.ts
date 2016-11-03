@@ -72,6 +72,11 @@ export interface IRuleMetadata {
      * Whether or not the rule requires type info to run.
      */
     requiresTypeInfo?: boolean;
+
+    /**
+     * Whether or not the rule use for TypeScript only.
+     */
+    typescriptOnly?: boolean;
 }
 
 export type RuleType = "functionality" | "maintainability" | "style" | "typescript";

@@ -1,5 +1,8 @@
 {
   "rules": {
     "no-switch-case-fall-through": true
+  },
+  "jsRules": {
+    "no-switch-case-fall-through": true
   }
 }

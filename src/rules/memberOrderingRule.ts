@@ -127,6 +127,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: ['[true, { "order": "fields-first" }]'],
         type: "typescript",
+        typescriptOnly: true,
     };
     /* tslint:enable:object-literal-sort-keys */
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {

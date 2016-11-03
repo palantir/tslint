@@ -38,6 +38,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: [`[true, "${OPTION_LINEBREAK_STYLE_LF}"]`, `[true, "${OPTION_LINEBREAK_STYLE_CRLF}"]`],
         type: "maintainability",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 

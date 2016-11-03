@@ -74,6 +74,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             '[true, {"import-sources-order": "lowercase-last", "named-imports-order": "lowercase-first"}]',
         ],
         type: "style",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 

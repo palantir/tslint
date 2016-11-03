@@ -1,5 +1,8 @@
 {
   "rules": {
     "no-duplicate-key": true
+  },
+  "jsRules": {
+    "no-duplicate-key": true
   }
 }

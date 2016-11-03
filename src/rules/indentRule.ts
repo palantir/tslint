@@ -41,6 +41,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: ['[true, "spaces"]'],
         type: "maintainability",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 

@@ -1,5 +1,8 @@
 {
   "rules": {
     "no-construct": true
+  },
+  "jsRules": {
+    "no-construct": true
   }
 }

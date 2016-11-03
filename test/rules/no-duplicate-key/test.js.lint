@@ -1,0 +1,46 @@
+var a = {
+    a: 1,
+    b: 2
+};
+
+var x = {
+    axa: 1,
+    bd: 2,
+    c: 3,
+    axa: 4,
+    ~~~                [Duplicate key 'axa']
+    d: 5,
+    ba: 3,
+    bd: 6,
+    ~~                [Duplicate key 'bd']
+    axa: 6
+    ~~~               [Duplicate key 'axa']
+};
+
+var z = {
+    c: [1, 2, 3],
+    d: {
+        b: "b",
+        a: 11,
+        c: [11, 22, 33]
+    },
+    a: 1,
+    b: "a"
+};
+
+var interspersed = {
+    duplicated: 1,
+    newContext: {},
+    duplicated: 2
+    ~~~~~~~~~~               [Duplicate key 'duplicated']
+};
+
+var n = {
+    constructor: function () {},
+    hasOwnProperty: function () {}
+};
+
+var foo = {
+    ["ab" + "cd"]: "efgh",
+    [x.axa]: "bar"
+}

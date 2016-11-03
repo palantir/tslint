@@ -33,6 +33,7 @@ export class Rule extends BanRule.Rule {
         },
         optionExamples: [`[true, "log", "error"]`],
         type: "functionality",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 

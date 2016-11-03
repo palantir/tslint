@@ -1,5 +1,8 @@
 {
   "rules": {
     "no-null-keyword": true
+  },
+  "jsRules": {
+    "no-null-keyword": true
   }
 }
