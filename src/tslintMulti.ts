@@ -101,7 +101,7 @@ class MultiLinter {
         }
 
         if (sourceFile === undefined) {
-            throw new Error(`Invalid source file: ${fileName}. Ensure that the files supplied to lint have a .ts or .tsx extension.`);
+            throw new Error(`Invalid source file: ${fileName}. Ensure that the files supplied to lint have a .ts, .tsx, or .js extension.`);
         }
 
         // walk the code first to find all the intervals where rules are disabled

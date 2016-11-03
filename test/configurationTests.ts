@@ -113,7 +113,7 @@ describe("Configuration", () => {
 
         it("extends with builtin", () => {
             const config = loadConfigurationFromPath("./test/config/tslint-extends-builtin.json");
-            assert.isTrue(config.jsRules["no-var-keyword"]);
+            assert.isUndefined(config.jsRules["no-var-keyword"]);
             assert.isFalse(config.jsRules["no-eval"]);
             assert.isTrue(config.rules["no-var-keyword"]);
             assert.isFalse(config.rules["no-eval"]);
@@ -144,9 +144,6 @@ describe("Configuration", () => {
             it("extends with package installed relative to tslint", () => {
                 fs.writeFileSync(tmpfile, JSON.stringify({ extends: "tslint-test-config-non-relative" }));
                 let config = loadConfigurationFromPath(tmpfile);
-                assert.deepEqual(config.jsRules, {
-                    "class-name": true,
-                });
                 assert.deepEqual(config.rules, {
                     "class-name": true,
                 });
