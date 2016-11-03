@@ -72,7 +72,6 @@ class MyClass {
     public initializedProperty = 6
                                   ~nil [Missing semicolon]
     public initializedMethodProperty = () => { return "hi"; };
-                                                             ~ [Unnecessary semicolon]
     public initializedMethodPropertyWithoutSemicolon = () => { return "hi again"; }
 }
 

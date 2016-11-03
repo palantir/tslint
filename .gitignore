@@ -5,6 +5,7 @@
 /docs/site/
 /scripts/*.js
 /lib/
+/test/executable/tslint.json
 node_modules/
 tscommand*.txt
 npm-debug.log

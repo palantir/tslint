@@ -6,8 +6,8 @@ class two {
     public foo = "bar";
 }
 
-class three {
-~~~~~~~~~~~~
+let three = class {
+            ~~~~~~~
     public foo = "bar";
 ~~~~~~~~~~~~~~~~~~~~~~~
 }
