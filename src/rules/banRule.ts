@@ -102,7 +102,7 @@ export class BanFunctionWalker extends Lint.RuleWalker {
                         const failure = this.createFailure(
                             expression.getStart(),
                             expression.getWidth(),
-                            Rule.FAILURE_STRING_FACTORY(`${leftSideExpression}.${rightSideExpression}`, bannedFunction[2])
+                            Rule.FAILURE_STRING_FACTORY(`${leftSideExpression}.${rightSideExpression}`, bannedFunction[2]),
                         );
                         this.addFailure(failure);
                     }

@@ -61,7 +61,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 type SourcePosition = {
     line: number;
     character: number;
-}
+};
 
 class AlignWalker extends Lint.RuleWalker {
     public visitConstructorDeclaration(node: ts.ConstructorDeclaration) {
