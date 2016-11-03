@@ -227,11 +227,12 @@ export function extendConfigurationFile(config: IConfigurationFile, baseConfig: 
         combinedConfig.rules[name] = config.rules[name];
     }
 
+    combinedConfig.jsRules = {};
     for (const name of Object.keys(objectify(baseConfig.jsRules))) {
-        combinedConfig.rules[name] = baseConfig.jsRules[name];
+        combinedConfig.jsRules[name] = baseConfig.jsRules[name];
     }
     for (const name of Object.keys(objectify(config.jsRules))) {
-        combinedConfig.rules[name] = config.jsRules[name];
+        combinedConfig.jsRules[name] = config.jsRules[name];
     }
 
     return combinedConfig;

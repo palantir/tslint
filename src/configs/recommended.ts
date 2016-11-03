@@ -139,7 +139,6 @@ export const jsRules = {
     "indent": [true, "spaces"],
     "jsdoc-format": true,
     "label-position": true,
-    "label-undefined": true,
     "max-line-length": [true, 120],
     "new-parens": true,
     "no-arg": true,
