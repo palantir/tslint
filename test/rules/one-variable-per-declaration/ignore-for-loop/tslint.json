@@ -3,5 +3,10 @@
     "one-variable-per-declaration": [true,
       "ignore-for-loop"
     ]
+  },
+  "jsRules": {
+    "one-variable-per-declaration": [true,
+      "ignore-for-loop"
+    ]
   }
 }

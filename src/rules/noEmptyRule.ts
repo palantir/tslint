@@ -30,6 +30,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionExamples: ["true"],
         type: "functionality",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -67,7 +68,8 @@ class BlockWalker extends Lint.RuleWalker {
                 param.modifiers,
                 ts.SyntaxKind.PrivateKeyword,
                 ts.SyntaxKind.ProtectedKeyword,
-                ts.SyntaxKind.PublicKeyword
+                ts.SyntaxKind.PublicKeyword,
+                ts.SyntaxKind.ReadonlyKeyword
             );
 
             if (hasPropertyAccessModifier) {

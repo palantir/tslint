@@ -23,6 +23,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: [`[true, ${OPTION_ARRAY}]`, `[true, ${OPTION_GENERIC}]`, `[true, ${OPTION_ARRAY_SIMPLE}]`],
         type: "style",
+        typescriptOnly: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 

@@ -79,6 +79,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             ]`,
         ],
         type: "typescript",
+        typescriptOnly: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 

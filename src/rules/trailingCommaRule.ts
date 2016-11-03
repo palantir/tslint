@@ -53,6 +53,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: ['[true, {"multiline": "always", "singleline": "never"}]'],
         type: "maintainability",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 

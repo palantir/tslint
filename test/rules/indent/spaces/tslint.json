@@ -1,5 +1,8 @@
 {
   "rules": {
     "indent": [true, "spaces"]
+  },
+  "jsRules": {
+    "indent": [true, "spaces"]
   }
 }

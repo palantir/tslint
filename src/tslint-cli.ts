@@ -297,6 +297,6 @@ if (argv.project != null) {
 }
 
 files = files
-  .map((file: string) => glob.sync(file, { ignore: argv.e }))
+  .map((file: string) => glob.sync(file, { ignore: argv.e, nodir: true }))
   .reduce((a: string[], b: string[]) => a.concat(b));
 processFiles(files, program);

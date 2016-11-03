@@ -144,3 +144,20 @@ var failK = {
     ~     [The key 'a' is not sorted alphabetically]
     c: 3
 }
+
+var passL = {z: 1, y: '1', x: [1, 2]};
+
+var failL = {x: 1, y: {
+    b: 1,
+    a: 2
+    ~    [The key 'a' is not sorted alphabetically]
+}, z: [1, 2]};
+
+var passM = {
+    x: 1,
+    y: {
+        a: 1,
+        b: 2
+    },
+    z: {z: 1, y: '1', x: [1, 2]}
+};
