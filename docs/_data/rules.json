@@ -457,17 +457,6 @@
     "type": "maintainability"
   },
   {
-    "ruleName": "no-duplicate-key",
-    "description": "Disallows duplicate keys in object literals.",
-    "rationale": "\nThere is no good reason to define an object literal with the same key twice.\nThis rule is now implemented in the TypeScript compiler and does not need to be used.",
-    "optionsDescription": "Not configurable.",
-    "options": null,
-    "optionExamples": [
-      "true"
-    ],
-    "type": "functionality"
-  },
-  {
     "ruleName": "no-duplicate-variable",
     "description": "Disallows duplicate variable declarations in the same block scope.",
     "descriptionDetails": "\nThis rule is only useful when using the `var` keyword -\nthe compiler will detect redeclarations of `let` and `const` variables.",
