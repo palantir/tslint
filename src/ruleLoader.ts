@@ -24,6 +24,7 @@ import {IDisabledInterval, IRule} from "./language/rule/rule";
 
 const moduleDirectory = path.dirname(module.filename);
 const CORE_RULES_DIRECTORY = path.resolve(moduleDirectory, ".", "rules");
+const shownDeprecations: string[] = [];
 
 export interface IEnableDisablePosition {
     isEnabled: boolean;
@@ -32,9 +33,11 @@ export interface IEnableDisablePosition {
 
 export function loadRules(ruleConfiguration: {[name: string]: any},
                           enableDisableRuleMap: {[rulename: string]: IEnableDisablePosition[]},
-                          rulesDirectories?: string | string[]): IRule[] {
+                          rulesDirectories?: string | string[],
+                          isJs?: boolean): IRule[] {
     const rules: IRule[] = [];
     const notFoundRules: string[] = [];
+    const notAllowedInJsRules: string[] = [];
 
     for (const ruleName in ruleConfiguration) {
         if (ruleConfiguration.hasOwnProperty(ruleName)) {
@@ -43,11 +46,20 @@ export function loadRules(ruleConfiguration: {[name: string]: any},
             if (Rule == null) {
                 notFoundRules.push(ruleName);
             } else {
-                const all = "all"; // make the linter happy until we can turn it on and off
-                const allList = (all in enableDisableRuleMap ? enableDisableRuleMap[all] : []);
-                const ruleSpecificList = (ruleName in enableDisableRuleMap ? enableDisableRuleMap[ruleName] : []);
-                const disabledIntervals = buildDisabledIntervalsFromSwitches(ruleSpecificList, allList);
-                rules.push(new Rule(ruleName, ruleValue, disabledIntervals));
+                if (isJs && Rule.metadata.typescriptOnly != null && Rule.metadata.typescriptOnly) {
+                    notAllowedInJsRules.push(ruleName);
+                } else {
+                    const all = "all"; // make the linter happy until we can turn it on and off
+                    const allList = (all in enableDisableRuleMap ? enableDisableRuleMap[all] : []);
+                    const ruleSpecificList = (ruleName in enableDisableRuleMap ? enableDisableRuleMap[ruleName] : []);
+                    const disabledIntervals = buildDisabledIntervalsFromSwitches(ruleSpecificList, allList);
+                    rules.push(new Rule(ruleName, ruleValue, disabledIntervals));
+
+                    if (Rule.metadata && Rule.metadata.deprecationMessage && shownDeprecations.indexOf(Rule.metadata.ruleName) === -1) {
+                        console.warn(`${Rule.metadata.ruleName} is deprecated. ${Rule.metadata.deprecationMessage}`);
+                        shownDeprecations.push(Rule.metadata.ruleName);
+                    }
+                }
             }
         }
     }
@@ -61,6 +73,13 @@ export function loadRules(ruleConfiguration: {[name: string]: any},
         `;
 
         throw new Error(ERROR_MESSAGE);
+    } else if (notAllowedInJsRules.length > 0) {
+        const JS_ERROR_MESSAGE = `
+           Could not apply to JavaScript files for the following rules specified in the configuration:
+           ${notAllowedInJsRules.join("\n")}
+        `;
+
+        throw new Error(JS_ERROR_MESSAGE);
     } else {
         return rules;
     }

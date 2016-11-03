@@ -1,5 +1,8 @@
 {
   "rules": {
     "no-unused-new": true
+  },
+  "jsRules": {
+    "no-unused-new": true
   }
 }

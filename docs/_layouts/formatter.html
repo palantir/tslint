@@ -1,0 +1,11 @@
+---
+layout: page
+---
+{{page.description | markdownify}}
+{% if page.descriptionDetails %}
+   {{page.descriptionDetails | markdownify}}
+{% endif %}
+{% if page.sample %}
+<h5>Sample Output</h5>
+<pre>{{page.sample | xml_escape | markdownify}}</pre>
+{% endif %}

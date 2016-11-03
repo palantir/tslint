@@ -1,5 +1,8 @@
 {
   "extends": "./tslint-custom-rules-with-two-dirs.json",
+  "jsRules": {
+    "always-fail": false
+  },
   "rules": {
     "always-fail": false
   }

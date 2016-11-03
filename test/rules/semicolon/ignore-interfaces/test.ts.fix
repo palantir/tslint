@@ -52,6 +52,7 @@ class MyClass {
 
     public initializedProperty = 6;
     public initializedMethodProperty = () => { return "hi"; }
+    public initializedMethodPropertyWithoutSemicolon = () => { return "hi again"; }
 }
 
 interface ITest {

@@ -1,5 +1,8 @@
 {
   "rules": {
     "only-arrow-functions": true
+  },
+  "jsRules": {
+    "only-arrow-functions": true
   }
 }

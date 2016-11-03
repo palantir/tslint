@@ -54,6 +54,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionExamples: ["true"],
         type: "functionality",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -82,7 +83,7 @@ export class NoSwitchCaseFallThroughWalker extends Lint.RuleWalker {
                         this.addFailure(this.createFailure(
                             switchClauses[i + 1].getStart(),
                             "case".length,
-                            `${Rule.FAILURE_STRING_PART}'case'`
+                            `${Rule.FAILURE_STRING_PART}'case'`,
                         ));
                     }
                 }

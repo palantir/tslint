@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "no-consecutive-blank-lines": true
+  },
+  "jsRules": {
+    "no-consecutive-blank-lines": true
+  }
+}

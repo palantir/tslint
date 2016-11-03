@@ -1,5 +1,8 @@
 {
   "rules": {
     "object-literal-shorthand": true
+  },
+  "jsRules": {
+    "object-literal-shorthand": true
   }
 }

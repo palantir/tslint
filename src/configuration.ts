@@ -24,6 +24,7 @@ import {arrayify, objectify, stripComments} from "./utils";
 
 export interface IConfigurationFile {
     extends?: string | string[];
+    jsRules?: any;
     linterOptions?: {
         typeCheck?: boolean,
     };
@@ -34,6 +35,28 @@ export interface IConfigurationFile {
 export const CONFIG_FILENAME = "tslint.json";
 /* tslint:disable:object-literal-key-quotes */
 export const DEFAULT_CONFIG = {
+    "jsRules": {
+        "class-name": true,
+        "comment-format": [true, "check-space"],
+        "indent": [true, "spaces"],
+        "no-duplicate-variable": true,
+        "no-eval": true,
+        "no-trailing-whitespace": true,
+        "no-unsafe-finally": true,
+        "no-var-keyword": true,
+        "one-line": [true, "check-open-brace", "check-whitespace"],
+        "quotemark": [true, "double"],
+        "semicolon": [true, "always"],
+        "triple-equals": [true, "allow-null-check"],
+        "variable-name": [true, "ban-keywords"],
+        "whitespace": [true,
+            "check-branch",
+            "check-decl",
+            "check-operator",
+            "check-separator",
+            "check-type",
+        ],
+    },
     "rules": {
         "class-name": true,
         "comment-format": [true, "check-space"],
@@ -202,6 +225,14 @@ export function extendConfigurationFile(config: IConfigurationFile, baseConfig: 
     }
     for (const name of Object.keys(objectify(config.rules))) {
         combinedConfig.rules[name] = config.rules[name];
+    }
+
+    combinedConfig.jsRules = {};
+    for (const name of Object.keys(objectify(baseConfig.jsRules))) {
+        combinedConfig.jsRules[name] = baseConfig.jsRules[name];
+    }
+    for (const name of Object.keys(objectify(config.jsRules))) {
+        combinedConfig.jsRules[name] = config.jsRules[name];
     }
 
     return combinedConfig;

@@ -1,5 +1,8 @@
 {
   "rules": {
     "no-use-before-declare": true
+  },
+  "jsRules": {
+    "no-use-before-declare": true
   }
 }

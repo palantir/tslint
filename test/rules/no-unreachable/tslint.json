@@ -1,5 +1,8 @@
 {
   "rules": {
     "no-unreachable": true
+  },
+  "jsRules": {
+    "no-unreachable": true
   }
 }

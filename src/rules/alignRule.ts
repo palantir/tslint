@@ -42,6 +42,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: ['[true, "parameters", "statements"]'],
         type: "style",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -60,7 +61,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 type SourcePosition = {
     line: number;
     character: number;
-}
+};
 
 class AlignWalker extends Lint.RuleWalker {
     public visitConstructorDeclaration(node: ts.ConstructorDeclaration) {

@@ -41,6 +41,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: ["true", '[true, "check-accessor"]'],
         type: "typescript",
+        typescriptOnly: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -100,7 +101,7 @@ export class MemberAccessWalker extends Lint.RuleWalker {
             node.modifiers,
             ts.SyntaxKind.PublicKeyword,
             ts.SyntaxKind.PrivateKeyword,
-            ts.SyntaxKind.ProtectedKeyword
+            ts.SyntaxKind.ProtectedKeyword,
         );
 
         if (!hasAnyVisibilityModifiers) {
