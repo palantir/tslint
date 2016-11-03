@@ -1,0 +1,496 @@
+if (true) { console.log("good"); }
+
+    if (true) console.log("bad");
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
+
+if (true) {
+    console.log("x");
+}
+
+if (true)
+{
+    console.log("x");
+}
+
+if (true)
+    console.log("z");
+
+
+if (true) { console
+                .log("good"); }
+
+if (true) console
+            .log("bad");
+
+if (true) {
+    console
+        .log("x");
+}
+
+if (true)
+{
+    console
+        .log("x");
+}
+
+if (true)
+    console
+        .log("z");
+
+// ss/ss
+if (true) { console.log("good"); }
+else { console.log("good"); }
+
+    if (true) console.log("bad");
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
+    else { console.log("good"); }
+
+    if (true) { console.log("good"); }
+    else console.log("bad");
+    ~~~~~~~~~~~~~~~~~~~~~~~~ [else-must]
+
+    if (true) console.log("bad");
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
+    else console.log("bad");
+    ~~~~~~~~~~~~~~~~~~~~~~~~ [else-must]
+
+// ss/ns
+if (true) { console.log("y"); }
+else {
+    console.log("x");
+}
+
+if (true) { console.log("y"); }
+else
+{
+    console.log("x");
+}
+
+if (true) { console.log("y"); }
+else
+    console.log("x");
+
+// ns/ss
+if (true) {
+    console.log("y");
+}
+else { console.log("x"); }
+
+if (true)
+    console.log("y");
+else { console.log("x"); }
+
+    if (true) {
+        console.log("y");
+    }
+    else console.log("x");
+    ~~~~~~~~~~~~~~~~~~~~~~ [else-must]
+
+    if (true)
+        console.log("y");
+    else console.log("x");
+    ~~~~~~~~~~~~~~~~~~~~~~ [else-must]
+
+// ns/ns
+if (true) {
+    console.log("y");
+}
+else {
+    console.log("x");
+}
+
+if (true)
+    console.log("y");
+else {
+    console.log("x");
+}
+
+if (true) {
+    console.log("y");
+}
+else
+    console.log("x");
+
+if (true)
+    console.log("y");
+else
+    console.log("x");
+
+// sm/sm
+if (true) { console
+                .log("good"); }
+else { console
+        .log("good"); }
+
+if (true) console
+            .log("bad");
+else { console
+            .log("good"); }
+
+if (true) { console
+                .log("good"); }
+else console
+        .log("bad");
+
+if (true) console
+            .log("bad");
+else console
+        .log("bad");
+
+// sm/nm
+
+if (true) { console
+                .log("y"); }
+else {
+    console
+        .log("x");
+}
+
+if (true) console
+                .log("y");
+else {
+    console
+        .log("x");
+}
+
+if (true) { console
+                .log("y"); }
+else
+    console
+        .log("x");
+
+if (true) console
+                .log("y");
+else
+    console
+        .log("x");
+
+// nm/sm
+if (true) {
+    console
+        .log("y");
+}
+else { console
+            .log("x"); }
+
+if (true)
+    console
+        .log("y");
+else { console
+            .log("x"); }
+
+if (true) {
+    console
+        .log("y");
+}
+else console
+        .log("x");
+
+if (true)
+    console
+        .log("y");
+else console
+        .log("x");
+
+// nm/nm
+if (true) {
+    console
+        .log("y");
+}
+else {
+    console
+        .log("x");
+}
+
+if (true)
+    console
+        .log("y");
+else {
+    console
+        .log("x");
+}
+
+if (true) {
+    console
+        .log("y");
+}
+else
+    console
+        .log("x");
+
+if (true)
+    console
+        .log("y");
+else
+    console
+        .log("x");
+
+// single-liners
+// ss/ss
+if (true) { console.log("x"); } else { console.log("y"); }
+
+    if (true) console.log("x"); else { console.log("y"); }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
+
+    if (true) { console.log("x"); } else console.log("y");
+                                    ~~~~~~~~~~~~~~~~~~~~~~ [else-must]
+
+    if (true) console.log("x"); else console.log("y");
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
+                                ~~~~~~~~~~~~~~~~~~~~~~ [else-must]
+
+// ss/sm
+if (true) { console.log("x"); } else { console
+                                            .log("y"); }
+
+    if (true) console.log("x"); else { console
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
+                                            .log("y"); }
+
+if (true) { console.log("x"); } else console
+                                            .log("y");
+
+    if (true) console.log("x"); else console
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [if-must]
+                                        .log("y");
+
+// sm/ss
+if (true) { console
+                .log("x"); } else { console.log("y"); }
+
+if (true) console
+            .log("x"); else { console.log("y"); }
+
+    if (true) { console.log("x"); } else console.log("y");
+                                    ~~~~~~~~~~~~~~~~~~~~~~ [else-must]
+
+    if (true) console
+                .log("x"); else console.log("y");
+                           ~~~~~~~~~~~~~~~~~~~~~~ [else-must]
+
+// sm/sm
+if (true) { console
+                .log("good"); } else { console
+                                            .log("good"); }
+
+if (true) console
+            .log("bad"); else { console
+                                    .log("good"); }
+
+if (true) { console
+                .log("bad"); } else console
+                                            .log("good");
+
+if (true) console
+                .log("bad"); else console
+                                    .log("good");
+
+
+for (i = 0; i < 1; ++i) { console.log(i); }
+
+    for (i = 0; i < 1; ++i) console.log(i);
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [for-must]
+
+for (i = 0; i < 1; ++i) {
+    console.log("i");
+}
+
+for (j = 0; j < 1; ++j)
+{
+    console.log("j");
+}
+
+for (k = 0; k < 1; ++k)
+    console.log("k");
+
+for (i = 0; i < 1; ++i) { console
+                            .log(i); }
+
+for (i = 0; i < 1; ++i) console
+                            .log(i);
+
+for (i = 0; i < 1; ++i) {
+    console
+        .log("i");
+}
+
+for (j = 0; j < 1; ++j)
+{
+    console
+        .log("j");
+}
+
+for (k = 0; k < 1; ++k)
+    console
+        .log("k");
+
+
+for (i in foo) { console.log(i); }
+
+    for (i in foo) console.log(i);
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [for-must]
+
+for (i in foo) {
+    console.log("i");
+}
+
+for (i in foo)
+{
+    console.log("j");
+}
+
+for (i in foo)
+    console.log("k");
+
+
+for (i in foo) { console
+                    .log(i); }
+
+    for (i in foo) console
+                        .log(i);
+
+for (i in foo) {
+    console
+        .log("i");
+}
+
+for (i in foo)
+{
+    console
+        .log("j");
+}
+
+for (i in foo)
+    console
+        .log("k");
+
+
+for (let x of [1, 2, 3]) { console.log(i); }
+
+    for (let x of [1, 2, 3]) console.log(i);
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [for-must]
+
+for (let x of [1, 2, 3]) {
+    console.log("i");
+}
+
+for (let x of [1, 2, 3])
+{
+    console.log("j");
+}
+
+for (let x of [1, 2, 3])
+    console.log("k");
+
+
+for (let x of [1, 2, 3]) { console
+                                .log(i); }
+
+for (let x of [1, 2, 3]) console
+                            .log(i);
+
+for (let x of [1, 2, 3]) {
+    console
+        .log("i");
+}
+
+for (let x of [1, 2, 3])
+{
+    console
+        .log("j");
+}
+
+for (let x of [1, 2, 3])
+    console
+        .log("k");
+
+
+while (m < 0) { console.log("q"); }
+
+    while (m < 0) console.log("q");
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [while-must]
+
+while (m < 0) {
+    console.log("q");
+}
+
+while (n < 0)
+{
+    console.log("r");
+}
+
+while (n < 0)
+    console.log("s");
+
+
+while (m < 0) { console
+                    .log("q"); }
+
+while (m < 0) console
+                .log("q");
+
+while (m < 0) {
+    console
+        .log("q");
+}
+
+while (n < 0)
+{
+    console
+        .log("r");
+}
+
+while (n < 0)
+    console
+        .log("s");
+
+
+do { console.log("m"); } while (i == 1);
+
+    do console.log("m"); while (i == 1);
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [do-must]
+
+do {
+    console.log("m");
+} while (i == 1);
+
+do
+{
+    console.log("n");
+}
+while (j == 1);
+
+do
+    console.log("o");
+while (k == 1);
+
+
+do { console
+        .log("m"); } while (i == 1);
+
+do console
+        .log("m"); while (i == 1);
+
+do {
+    console
+        .log("m");
+} while (i == 1);
+
+do
+{
+    console
+        .log("n");
+}
+while (j == 1);
+
+do
+    console
+        .log("o");
+while (k == 1);
+
+
+[if-must]: same-line single-line if statements must be braced
+[else-must]: same-line single-line else statements must be braced
+[for-must]: same-line single-line for statements must be braced
+[do-must]: same-line single-line do statements must be braced
+[while-must]: same-line single-line while statements must be braced

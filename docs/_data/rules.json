@@ -108,10 +108,23 @@
     "ruleName": "curly",
     "description": "Enforces braces for `if`/`for`/`do`/`while` statements.",
     "rationale": "\n```ts\nif (foo === bar)\n    foo++;\n    bar++;\n```\n\nIn the code above, the author almost certainly meant for both `foo++` and `bar++`\nto be executed only if `foo === bar`. However, he forgot braces and `bar++` will be executed\nno matter what. This rule could prevent such a mistake.",
-    "optionsDescription": "Not configurable.",
-    "options": null,
+    "optionsDescription": "\nThe rule may be set to `true`, or to any combination of these arguments:\n\n* `\"all\"` requires braces for all control-flow statements\n* `\"same-line-single-line\"` requires braces for control-flow statements\n  that are on one line and start on the same line as their control-flow keyword\n* `\"same-line-multi-line\"` requires braces for control-flow statements\n  that are split between multiple lines and start on the same line as their control-flow keyword\n* `\"next-line-single-line\"` requires braces for control-flow statements\n  that are on one line and start on the line after their control-flow keyword\n* `\"next-line-multi-line\"` requires braces for control-flow statements\n  that are split between multiple lines and start on the line after their control-flow keyword\n",
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "all",
+          "same-line-single-line",
+          "same-line-multi-line",
+          "next-line-single-line",
+          "next-line-multi-line"
+        ]
+      }
+    },
     "optionExamples": [
-      "true"
+      "true",
+      "[true, \"same-line-single-line\"]"
     ],
     "type": "functionality"
   },
