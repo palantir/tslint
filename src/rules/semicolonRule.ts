@@ -121,7 +121,9 @@ class SemicolonWalker extends Lint.RuleWalker {
 
     public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
         const initializer = node.initializer;
-        if (initializer && initializer.kind === ts.SyntaxKind.ArrowFunction) {
+
+        // check if this is a multi-line arrow function (`[^]` in the regex matches all characters including CR & LF)
+        if (initializer && initializer.kind === ts.SyntaxKind.ArrowFunction && /\{[^]*\n/.test(node.getText())) {
             if (!this.hasOption(OPTION_IGNORE_BOUND_CLASS_METHODS)) {
                 this.checkSemicolonAt(node, "never");
             }
