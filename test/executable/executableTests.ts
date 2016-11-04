@@ -217,6 +217,35 @@ describe("Executable", function() {
 
         });
     });
+
+    describe("globs and quotes", () => {
+        // when glob pattern is passed without quotes in npm script `process.env` will contain:
+        // on Windows - pattern string without any quotes
+        // on Linux - list of files that mathes glob (may differ from `glob` module results)
+
+        it("exits with code 2 if correctly finds file containing lint errors when glob is in double quotes", (done) => {
+            // when glob pattern is passed in double quotes in npm script `process.env` will contain:
+            // on Windows - pattern string without any quotes
+            // on Linux - pattern string without any quotes (glob is not expanded)
+            execCli(["-c", "./test/config/tslint-custom-rules.json", "-r", "./test/files/custom-rules", "src/**/tslint.ts"], (err) => {
+                assert.isNotNull(err, "process should exit with error");
+                assert.strictEqual(err.code, 2, "error code should be 2");
+                done();
+            });
+        });
+
+        it("exits with code 2 if correctly finds file containing lint errors when glob is in single quotes", (done) => {
+            // when glob pattern is passed in single quotes in npm script `process.env` will contain:
+            // on Windows - pattern string wrapped in single quotes
+            // on Linux - pattern string without any quotes (glob is not expanded)
+            execCli(["-c", "./test/config/tslint-custom-rules.json", "-r", "./test/files/custom-rules", "'src/**/tslint.ts'"], (err) => {
+                assert.isNotNull(err, "process should exit with error");
+                assert.strictEqual(err.code, 2, "error code should be 2");
+                done();
+            });
+        });
+
+    });
 });
 
 type ExecFileCallback = (error: any, stdout: string, stderr: string) => void;
