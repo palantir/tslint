@@ -20,11 +20,11 @@ import * as ts from "typescript";
 
 import {
     DEFAULT_CONFIG,
+    IConfigurationFile,
     findConfiguration,
     findConfigurationPath,
     getRelativePath,
     getRulesDirectories,
-    IConfigurationFile,
     loadConfigurationFromPath,
 } from "./configuration";
 import { EnableDisableRulesWalker } from "./enableDisableRules";
@@ -169,6 +169,6 @@ class MultiLinter {
 }
 
 // tslint:disable-next-line:no-namespace
-namespace MultiLinter {}
+namespace MultiLinter { }
 
 export = MultiLinter;
