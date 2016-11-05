@@ -32,6 +32,12 @@ export interface IConfigurationFile {
     rules?: any;
 }
 
+export interface IConfigurationLoadResult {
+    error?: Error;
+    path: string;
+    results?: IConfigurationFile;
+}
+
 export const CONFIG_FILENAME = "tslint.json";
 /* tslint:disable:object-literal-key-quotes */
 export const DEFAULT_CONFIG = {
@@ -99,11 +105,19 @@ const BUILT_IN_CONFIG = /^tslint:(.*)$/;
  * @param configFile A path to a config file, this can be null if the location of a config is not known
  * @param inputFileLocation A path to the current file being linted. This is the starting location
  * of the search for a configuration.
- * @returns A TSLint configuration object
+ * @returns Load status for a TSLint configuration object
  */
-export function findConfiguration(configFile: string, inputFilePath: string): IConfigurationFile {
-    const configPath = findConfigurationPath(configFile, inputFilePath);
-    return loadConfigurationFromPath(configPath);
+export function findConfiguration(configFile: string, inputFilePath: string): IConfigurationLoadResult {
+    const path = findConfigurationPath(configFile, inputFilePath);
+    const loadResult: IConfigurationLoadResult = { path };
+
+    try {
+        loadResult.results = loadConfigurationFromPath(path);
+    } catch (error) {
+        loadResult.error = error;
+    }
+
+    return loadResult;
 }
 
 /**

@@ -248,8 +248,14 @@ const processFiles = (files: string[], program?: ts.Program) => {
         }
 
         const contents = fs.readFileSync(file, "utf8");
-        const configuration = findConfiguration(possibleConfigAbsolutePath, file);
-        linter.lint(file, contents, configuration);
+        const configLoad = findConfiguration(possibleConfigAbsolutePath, file);
+
+        if (configLoad.results) {
+            linter.lint(file, contents, configLoad.results);
+        } else {
+            console.error(`Failed to load ${configLoad.path}: ${configLoad.error.message}`);
+            process.exit(1);
+        }
     }
 
     const lintResult = linter.getResult();
