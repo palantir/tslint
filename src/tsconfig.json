@@ -6,7 +6,7 @@
         "noUnusedParameters": true,
         "noUnusedLocals": true,
         "declaration": true,
-        "sourceMap": false,
+        "sourceMap": true,
         "target": "es5",
         "outDir": "../lib"
     }

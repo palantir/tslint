@@ -18,3 +18,4 @@ tslint.json
 /src/
 /test/
 tscommand*.txt
+*.js.map

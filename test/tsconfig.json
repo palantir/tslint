@@ -5,7 +5,7 @@
         "noImplicitAny": true,
         "noUnusedParameters": true,
         "noUnusedLocals": true,
-        "sourceMap": false,
+        "sourceMap": true,
         "target": "es5",
         "outDir": "../build"
     },
