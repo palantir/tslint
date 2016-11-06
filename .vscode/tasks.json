@@ -1,19 +1,36 @@
-// Available variables which can be used inside of strings.
-// ${workspaceRoot}: the root folder of the team
-// ${file}: the current opened file
-// ${fileBasename}: the current opened file's basename
-// ${fileDirname}: the current opened file's dirname
-// ${fileExtname}: the current opened file's extension
-// ${cwd}: the current working directory of the spawned process
-
-// A task runner that calls scripts/tsc-wrapper.js. The wrapper script traverses
-// up the file system until a valid `tsconfig.json` is found, and runs `tsc` from
-// node_modules with that path as the root
 {
-	"version": "0.1.0",
-	"command": "${workspaceRoot}/scripts/tsc-wrapper.js",
-	"isShellCommand": true,
-	"showOutput": "silent",
-	"args": ["${workspaceRoot}", "${fileDirname}"],
-	"problemMatcher": "$tsc"
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "0.1.0",
+    "command": "npm",
+    "isShellCommand": true,
+    "showOutput": "always",
+    "suppressTaskName": true,
+    "tasks": [
+        {
+            "taskName": "install",
+            "args": ["install"]
+        },
+        {
+            "taskName": "update",
+            "args": ["update"]
+        },
+        {
+            "taskName": "test",
+            "args": ["run", "test"]
+        },
+        {
+            "taskName": "test-rules",
+            "args": ["run", "test:rules"]
+        },
+        {
+            "taskName": "compile",
+            "args": ["run", "compile"]
+        },
+        {
+            "taskName": "verify",
+            "args": ["run", "verify"]
+        }
+    ]
 }
+
