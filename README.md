@@ -373,9 +373,10 @@ Development
 #### Quick Start
 
 ```bash
-git clone git@github.com:palantir/tslint.git
+git clone git@github.com:palantir/tslint.git --config core.autocrlf=input --config core.eol=lf
 npm install
-grunt
+npm run compile
+npm run test
 ```
 
 #### `next` branch
