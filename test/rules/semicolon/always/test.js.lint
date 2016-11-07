@@ -54,7 +54,19 @@ class MyClass {
 
     initializedProperty = 6
                            ~nil [Missing semicolon]
-    initializedMethodProperty = () => { return "hi"; }
+    public initializedMethodProperty = () => {
+        return "hi";
+    };
+     ~ [Unnecessary semicolon]
+
+    public initializedMethodPropertyWithoutSemicolon = () => {
+        return "hi again"; 
+    }
+
+    public initializedMethodProperty1Line = () => { return "hi"; };
+
+    public initializedMethodPropertyWithoutSemicolon1Line = () => { return "hi again"; }
+                                                                                        ~nil [Missing semicolon]
 }
 
 import {Router} from 'aurelia-router';
