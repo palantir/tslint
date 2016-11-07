@@ -28,6 +28,7 @@ import {
 } from "./configuration";
 import { consoleTestResultHandler, runTest } from "./test";
 import * as Linter from "./tslintMulti";
+import { updateNotifierCheck } from "./updateNotifier";
 
 let processed = optimist
     .usage("Usage: $0 [options] file ...")
@@ -267,6 +268,11 @@ const processFiles = (files: string[], program?: ts.Program) => {
             process.exit(argv.force ? 0 : 2);
         }
     });
+
+    if (lintResult.format === "prose") {
+        // Check to see if there are any updates available
+        updateNotifierCheck();
+    }
 };
 
 // if both files and tsconfig are present, use files
