@@ -47,5 +47,5 @@ export interface IFormatterMetadata {
 export type ConsumerType = "human" | "machine";
 
 export interface IFormatter {
-    format(failures: RuleFailure[]): string;
+    format(failures: RuleFailure[], fixes?: RuleFailure[]): string;
 }

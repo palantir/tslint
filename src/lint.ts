@@ -42,6 +42,7 @@ export var Utils = utils;
 export interface LintResult {
     failureCount: number;
     failures: RuleFailure[];
+    fixes?: RuleFailure[];
     format: string | Function;
     output: string;
 }
@@ -55,11 +56,13 @@ export interface ILinterOptionsRaw {
 
 export interface ILinterOptions extends ILinterOptionsRaw {
     configuration: any;
+    fix: boolean;
     formatter: string | Function;
     rulesDirectory: string | string[];
 }
 
 export interface IMultiLinterOptions {
+    fix: boolean;
     formatter?: string | Function;
     formattersDirectory?: string;
     rulesDirectory?: string | string[];

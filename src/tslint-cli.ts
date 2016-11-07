@@ -50,6 +50,9 @@ let processed = optimist
             alias: "exclude",
             describe: "exclude globs from path expansion",
         },
+        fix: {
+            describe: "Fixes some linting errors (may overwrite linted files)",
+        },
         force: {
             describe: "return status code 0 even if there are lint errors",
             type: "boolean",
@@ -152,6 +155,9 @@ tslint accepts the following commandline options:
         This option can be supplied multiple times if you need multiple
         globs to indicate which files to exclude.
 
+    --fix:
+        Fixes linting errors for select rules. This may overwrite linted files.
+
     --force:
         Return status code 0 even if there are any lint errors.
         Useful while running as npm script.
@@ -220,6 +226,7 @@ const possibleConfigAbsolutePath = argv.c != null ? path.resolve(argv.c) : null;
 const processFiles = (files: string[], program?: ts.Program) => {
 
     const linter = new Linter({
+        fix: argv.fix,
         formatter: argv.t,
         formattersDirectory: argv.s || "",
         rulesDirectory: argv.r || "",
