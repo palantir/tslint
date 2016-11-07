@@ -94,6 +94,7 @@ class MultiLinter {
         let enabledRules = this.getEnabledRules(fileName, source, configuration);
 
         if (this.options.fix) {
+            this.fixes = [];
             for (let rule of enabledRules) {
                 let fileFailures = this.applyRule(rule, sourceFile);
                 const fixes = fileFailures.map(f => f.getFix()).filter(f => !!f);
@@ -107,12 +108,17 @@ class MultiLinter {
                     sourceFile = this.getSourceFile(fileName, content);
                     enabledRules = this.getEnabledRules(fileName, content, configuration);
                 }
+                this.failures = this.failures.concat(fileFailures);
             }
         }
 
-        for (let rule of enabledRules) {
-            const fileFailures = this.applyRule(rule, sourceFile);
-            this.failures = this.failures.concat(fileFailures);
+        // make a 2nd pass if there were any fixes because the positions may be off        
+        if (!this.options.fix || this.fixes.length > 0) {
+            this.failures = [];
+            for (let rule of enabledRules) {
+                const fileFailures = this.applyRule(rule, sourceFile);
+                this.failures = this.failures.concat(fileFailures);
+            }
         }
     }
 
