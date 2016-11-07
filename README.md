@@ -392,7 +392,7 @@ Creating a new release
 
 1. Bump the version number in `package.json` and `src/tslintMulti.ts`
 2. Add release notes in `CHANGELOG.md`
-3. Run `grunt` to build the latest sources
+3. `npm run verify` to build the latest sources
 4. Commit with message `Prepare release <version>`
 5. Run `npm publish`
 6. Create a git tag for the new release and push it ([see existing tags here](https://github.com/palantir/tslint/tags))
