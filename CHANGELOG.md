@@ -1,6 +1,50 @@
 Change Log
 ===
 
+v4.0.0-dev.1
+---
+* 
+
+v4.0.0-dev.0
+---
+* **BREAKING CHANGES**
+    * [new-rule-option] The `semicolon` rule now disallows semicolons in multi-line bound class methods. To get the v3 behavior, use the `ignore-bound-class-methods` option (#1643)
+    * [enhancement] The `orderedImports` rule sorts relative modules below non-relative modules 
+    * [enhancement] Rename `no-constructor-vars` to `no-parameter-properties` (#1296)
+    * [enhancement] `use-strict` rule removed (#678)
+    * [enhancement] Drop support for configuration via package.json (#1579)
+    * [enhancement] `no-duplicate-key` rule removed; covered by compiler (#1109)
+    * [enhancement] `trailing-comma` supports function arguments
+    * [enhancement] Call formatter once for all file results (#656)
+    * [rule-change] `object-literal-sort-keys` now sorts quoted keys (#1529)
+    * [rule-change] `semicolon` now processes type aliases (#1475)
+    * [rule-change] `no-var-keyword` now rejects `export var` statements (#1256)
+    * [rule-change] `semicolon` no requires semicolon for function declaration with no body (#1447)
+    
+* **Deprecated**
+    * [deprecated] `no-unused-variable` rule. This is checked by the TypeScript v2 compiler using the flags [`--noUnusedParameters` and `--noUnusedLocals`](https://github.com/Microsoft/TypeScript/wiki/What%27s-new-in-TypeScript#flag-unused-declarations-with---nounusedparameters-and---nounusedlocals). (#1481)
+    * [deprecated] `label-undefined` rule deprecated; covered by compiler (#877)
+
+* [enhancement] `--fix` option added to automatically fix selected rules
+* [enhancement] Lint .js files (#1515)
+* [enhancement] `fileslist` formatter writes a list of files with errors without position or error type specifics (#1558
+* [new-fixer] `trailing-comma` auto fixed (#1546)
+* [new-fixer] `ordered-imports` auto fixed (#1640)
+* [new-fixer] `no-unused-variable` auto fixed for imports (#1568)
+* [new-fixer] `no-var-keyword` replaces `var` with `let` (#1547)
+* [new-fixer] `semicolon` auto fixed (#1423)
+* [new-rule] `cyclomaticComplexity`, enforces a threshold of cyclomatic complexity.] (#1464)
+* [new-rule] `prefer-for-of`, which errors when `for(var x of y)` can be used instead of `for(var i = 0; i < y.length; i++)` (#1335)
+* [new-rule] `array-type`, which requires using either `T[]' or 'Array<T>' for arrays (#1498)
+* [rule-change] `object-literal-sort-keys` checks multiline objects only (#1642)
+* [rule-change] `ban` rule now can ban global functions (#327)
+* [bugfix] always write lint result, even if using formatter (#1353)
+* [bugfix] npm run test:bin fails on Windows (#1635)
+* [bugfix] `no-empty` rule fixed when parameter has readonly modifier
+* [bugfix] Don't enforce trailing spaces on newlines in typedef-whitespace rule (#1531)
+* [bugfix] `jsdoc` rule should not match arbitrary comments (#1543)
+* [bugfix] `one-line` rule errors when declaring wildcard ambient modules (#1425)
+
 v3.15.1
 ---
 * Enabled additional rules in `tslint:latest` configuration (#1506)
