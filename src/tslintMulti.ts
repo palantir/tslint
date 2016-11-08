@@ -90,8 +90,8 @@ class MultiLinter {
     }
 
     public lint(fileName: string, source?: string, configuration: IConfigurationFile = DEFAULT_CONFIG): void {
+        const enabledRules = this.getEnabledRules(fileName, source, configuration);
         let sourceFile = this.getSourceFile(fileName, source);
-        let enabledRules = this.getEnabledRules(fileName, source, configuration);
         let hasLinterRun = false;
 
         if (this.options.fix) {
@@ -99,15 +99,14 @@ class MultiLinter {
             for (let rule of enabledRules) {
                 let fileFailures = this.applyRule(rule, sourceFile);
                 const fixes = fileFailures.map(f => f.getFix()).filter(f => !!f);
-                let content = fs.readFileSync(fileName, { encoding: "utf-8" });
+                source = fs.readFileSync(fileName, { encoding: "utf-8" });
                 if (fixes.length > 0) {
                     this.fixes = this.fixes.concat(fileFailures);
-                    content = Fix.applyAll(content, fixes);
-                    fs.writeFileSync(fileName, content, { encoding: "utf-8" });
+                    source = Fix.applyAll(source, fixes);
+                    fs.writeFileSync(fileName, source, { encoding: "utf-8" });
 
                     // reload AST if file is modified
-                    sourceFile = this.getSourceFile(fileName, content);
-                    enabledRules = this.getEnabledRules(fileName, content, configuration);
+                    sourceFile = this.getSourceFile(fileName, source);
                 }
                 this.failures = this.failures.concat(fileFailures);
             }
