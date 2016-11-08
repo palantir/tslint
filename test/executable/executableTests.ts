@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { createTempFile } from "../utils";
 import * as cp from "child_process";
 import * as fs from "fs";
 import * as os from "os";
@@ -112,6 +113,22 @@ describe("Executable", function() {
                 assert.strictEqual(err.code, 2, "error code should be 2");
                 done();
             });
+        });
+    });
+
+    describe("--fix flag", () => {
+        it("fixes multiple rules without overwriting each other", (done) => {
+            const tempFile = createTempFile("ts");
+            fs.createReadStream("test/files/multiple-fixes-test/multiple-fixes.test.ts").pipe(fs.createWriteStream(tempFile));
+            execCli(["-c", "test/files/multiple-fixes-test/tslint.json", tempFile, "--fix"],
+                (err, stdout) => {
+                    const content = fs.readFileSync(tempFile, "utf8");
+                    fs.unlinkSync(tempFile);
+                    assert.strictEqual(content, "import * as y from \"a_long_module\";\nimport * as x from \"b\";\n");
+                    assert.isNull(err, "process should exit without an error");
+                    assert.strictEqual(stdout, `Fixed 2 error(s) in ${tempFile}`);
+                    done();
+                });
         });
     });
 

@@ -92,6 +92,7 @@ class MultiLinter {
     public lint(fileName: string, source?: string, configuration: IConfigurationFile = DEFAULT_CONFIG): void {
         let sourceFile = this.getSourceFile(fileName, source);
         let enabledRules = this.getEnabledRules(fileName, source, configuration);
+        let hasLinterRun = false;
 
         if (this.options.fix) {
             this.fixes = [];
@@ -110,10 +111,11 @@ class MultiLinter {
                 }
                 this.failures = this.failures.concat(fileFailures);
             }
+            hasLinterRun = true;
         }
 
-        // make a 2nd pass if there were any fixes because the positions may be off        
-        if (!this.options.fix || this.fixes.length > 0) {
+        // make a 1st pass or make a 2nd pass if there were any fixes because the positions may be off        
+        if (!hasLinterRun || this.fixes.length > 0) {
             this.failures = [];
             for (let rule of enabledRules) {
                 const fileFailures = this.applyRule(rule, sourceFile);

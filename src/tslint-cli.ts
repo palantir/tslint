@@ -51,7 +51,7 @@ let processed = optimist
             describe: "exclude globs from path expansion",
         },
         fix: {
-            describe: "Fixes some linting errors (may overwrite linted files)",
+            describe: "Fixes linting errors for select rules. This may overwrite linted files",
         },
         force: {
             describe: "return status code 0 even if there are lint errors",

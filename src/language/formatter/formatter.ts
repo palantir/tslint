@@ -47,5 +47,10 @@ export interface IFormatterMetadata {
 export type ConsumerType = "human" | "machine";
 
 export interface IFormatter {
+    /**
+     * Formats linter results
+     * @param {RuleFailure[]} failures Linter errors that were not fixed
+     * @param {RuleFailure[]} fixes Fixed linter errors. Available when the `--fix` argument is used on the command line
+     */
     format(failures: RuleFailure[], fixes?: RuleFailure[]): string;
 }
