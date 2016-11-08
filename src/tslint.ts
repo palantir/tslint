@@ -75,6 +75,7 @@ class Linter {
 
         return {
             configuration: configuration || DEFAULT_CONFIG,
+            fix: false,
             formatter: formatter || "prose",
             formattersDirectory,
             rulesDirectory: arrayify(rulesDirectory).concat(arrayify(configuration.rulesDirectory)),

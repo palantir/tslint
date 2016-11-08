@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { existsSync } from "fs";
+import * as fs from "fs";
 import * as ts from "typescript";
 
 import {
@@ -30,10 +30,10 @@ import {
 import { EnableDisableRulesWalker } from "./enableDisableRules";
 import { findFormatter } from "./formatterLoader";
 import { IFormatter } from "./language/formatter/formatter";
-import { RuleFailure } from "./language/rule/rule";
+import {Fix, IRule, RuleFailure} from "./language/rule/rule";
 import { TypedRule } from "./language/rule/typedRule";
-import { getSourceFile } from "./language/utils";
-import { IMultiLinterOptions, IRule, LintResult } from "./lint";
+import * as utils from "./language/utils";
+import { IMultiLinterOptions, LintResult } from "./lint";
 import { loadRules } from "./ruleLoader";
 import { arrayify } from "./utils";
 
@@ -49,6 +49,7 @@ class MultiLinter {
     public static loadConfigurationFromPath = loadConfigurationFromPath;
 
     private failures: RuleFailure[] = [];
+    private fixes: RuleFailure[] = [];
 
     /**
      * Creates a TypeScript program object from a tsconfig.json file path and optional project directory.
@@ -65,7 +66,7 @@ class MultiLinter {
 
         const { config } = ts.readConfigFile(configFile, ts.sys.readFile);
         const parseConfigHost = {
-            fileExists: existsSync,
+            fileExists: fs.existsSync,
             readDirectory: ts.sys.readDirectory,
             useCaseSensitiveFileNames: true,
         };
@@ -89,54 +90,35 @@ class MultiLinter {
     }
 
     public lint(fileName: string, source?: string, configuration: IConfigurationFile = DEFAULT_CONFIG): void {
-        let sourceFile: ts.SourceFile;
-        if (this.program) {
-            sourceFile = this.program.getSourceFile(fileName);
-            // check if the program has been type checked
-            if (sourceFile && !("resolvedModules" in sourceFile)) {
-                throw new Error("Program must be type checked before linting");
-            }
-        } else {
-            sourceFile = getSourceFile(fileName, source);
-        }
+        const enabledRules = this.getEnabledRules(fileName, source, configuration);
+        let sourceFile = this.getSourceFile(fileName, source);
+        let hasLinterRun = false;
 
-        if (sourceFile === undefined) {
-            throw new Error(`Invalid source file: ${fileName}. Ensure that the files supplied to lint have a .ts, .tsx, or .js extension.`);
-        }
+        if (this.options.fix) {
+            this.fixes = [];
+            for (let rule of enabledRules) {
+                let fileFailures = this.applyRule(rule, sourceFile);
+                const fixes = fileFailures.map(f => f.getFix()).filter(f => !!f);
+                source = fs.readFileSync(fileName, { encoding: "utf-8" });
+                if (fixes.length > 0) {
+                    this.fixes = this.fixes.concat(fileFailures);
+                    source = Fix.applyAll(source, fixes);
+                    fs.writeFileSync(fileName, source, { encoding: "utf-8" });
 
-        // walk the code first to find all the intervals where rules are disabled
-        const rulesWalker = new EnableDisableRulesWalker(sourceFile, {
-            disabledIntervals: [],
-            ruleName: "",
-        });
-        rulesWalker.walk(sourceFile);
-        const enableDisableRuleMap = rulesWalker.enableDisableRuleMap;
-
-        const rulesDirectories = arrayify(this.options.rulesDirectory)
-            .concat(arrayify(configuration.rulesDirectory));
-        const configurationRules = configuration.rules;
-        const jsConfiguration = configuration.jsRules;
-        const isJs = fileName.substr(-3) === ".js";
-        let configuredRules: IRule[];
-
-        if (isJs) {
-            configuredRules = loadRules(jsConfiguration, enableDisableRuleMap, rulesDirectories, true);
-        } else {
-            configuredRules = loadRules(configurationRules, enableDisableRuleMap, rulesDirectories, false);
-        }
-
-        const enabledRules = configuredRules.filter((r) => r.isEnabled());
-        for (let rule of enabledRules) {
-            let ruleFailures: RuleFailure[] = [];
-            if (this.program && rule instanceof TypedRule) {
-                ruleFailures = rule.applyWithProgram(sourceFile, this.program);
-            } else {
-                ruleFailures = rule.apply(sourceFile);
-            }
-            for (let ruleFailure of ruleFailures) {
-                if (!this.containsRule(this.failures, ruleFailure)) {
-                    this.failures.push(ruleFailure);
+                    // reload AST if file is modified
+                    sourceFile = this.getSourceFile(fileName, source);
                 }
+                this.failures = this.failures.concat(fileFailures);
+            }
+            hasLinterRun = true;
+        }
+
+        // make a 1st pass or make a 2nd pass if there were any fixes because the positions may be off        
+        if (!hasLinterRun || this.fixes.length > 0) {
+            this.failures = [];
+            for (let rule of enabledRules) {
+                const fileFailures = this.applyRule(rule, sourceFile);
+                this.failures = this.failures.concat(fileFailures);
             }
         }
     }
@@ -153,14 +135,69 @@ class MultiLinter {
             throw new Error(`formatter '${formatterName}' not found`);
         }
 
-        const output = formatter.format(this.failures);
+        const output = formatter.format(this.failures, this.fixes);
 
         return {
             failureCount: this.failures.length,
             failures: this.failures,
+            fixes: this.fixes,
             format: formatterName,
             output,
         };
+    }
+
+    private applyRule(rule: IRule, sourceFile: ts.SourceFile) {
+        let ruleFailures: RuleFailure[] = [];
+        if (this.program && rule instanceof TypedRule) {
+            ruleFailures = rule.applyWithProgram(sourceFile, this.program);
+        } else {
+            ruleFailures = rule.apply(sourceFile);
+        }
+        let fileFailures: RuleFailure[] = [];
+        for (let ruleFailure of ruleFailures) {
+            if (!this.containsRule(this.failures, ruleFailure)) {
+                fileFailures.push(ruleFailure);
+            }
+        }
+        return fileFailures;
+    }
+
+    private getEnabledRules(fileName: string, source?: string, configuration: IConfigurationFile = DEFAULT_CONFIG): IRule[] {
+        const sourceFile = this.getSourceFile(fileName, source);
+
+        // walk the code first to find all the intervals where rules are disabled
+        const rulesWalker = new EnableDisableRulesWalker(sourceFile, {
+            disabledIntervals: [],
+            ruleName: "",
+        });
+        rulesWalker.walk(sourceFile);
+        const enableDisableRuleMap = rulesWalker.enableDisableRuleMap;
+
+        const rulesDirectories = arrayify(this.options.rulesDirectory)
+            .concat(arrayify(configuration.rulesDirectory));
+        const isJs = fileName.substr(-3) === ".js";
+        const configurationRules = isJs ? configuration.jsRules : configuration.rules;
+        let configuredRules = loadRules(configurationRules, enableDisableRuleMap, rulesDirectories, isJs);
+
+        return configuredRules.filter((r) => r.isEnabled());
+    }
+
+    private getSourceFile(fileName: string, source?: string) {
+        let sourceFile: ts.SourceFile;
+        if (this.program) {
+            sourceFile = this.program.getSourceFile(fileName);
+            // check if the program has been type checked
+            if (sourceFile && !("resolvedModules" in sourceFile)) {
+                throw new Error("Program must be type checked before linting");
+            }
+        } else {
+            sourceFile = utils.getSourceFile(fileName, source);
+        }
+
+        if (sourceFile === undefined) {
+            throw new Error(`Invalid source file: ${fileName}. Ensure that the files supplied to lint have a .ts, .tsx, or .js extension.`);
+        }
+        return sourceFile;
     }
 
     private containsRule(rules: RuleFailure[], rule: RuleFailure) {

@@ -15,10 +15,9 @@
  */
 
 import * as fs from "fs";
-import * as os from "os";
-import * as path from "path";
 
-import {IConfigurationFile, extendConfigurationFile, loadConfigurationFromPath} from "../src/configuration";
+import { IConfigurationFile, extendConfigurationFile, loadConfigurationFromPath } from "../src/configuration";
+import { createTempFile } from "./utils";
 
 describe("Configuration", () => {
     it("extendConfigurationFile", () => {
@@ -123,16 +122,7 @@ describe("Configuration", () => {
             let tmpfile: string;
 
             beforeEach(() => {
-                for (let i = 0; i < 5; i++) {
-                    const attempt = path.join(os.tmpdir(), `tslint.test${Math.round(Date.now() * Math.random())}.json`);
-                    if (!fs.existsSync(tmpfile)) {
-                        tmpfile = attempt;
-                        break;
-                    }
-                }
-                if (tmpfile === undefined) {
-                    throw new Error("Couldn't create temp file");
-                }
+                tmpfile = createTempFile("json");
             });
 
             afterEach(() => {
