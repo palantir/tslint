@@ -30,6 +30,24 @@ v4.0.0-dev.1
 * [bugfix] `no-empty` rule fixed when parameter has readonly modifier
 * [bugfix] `no-namespace` rule: do not flag nested or .d.ts namespaces (#1571)
 
+Thanks to our contributors!
+
+Alex Eagle 
+Andrii Dieiev 
+Ben Coveney 
+Boris Aranovich 
+Chris Barr 
+Cyril Gandon 
+Evgeniy Zhukovskiy 
+Jay Anslow 
+Kunal Marwaha 
+Martin Probst 
+Mingye Wang 
+Raghav Katyal 
+Sean Dawson 
+Yuichi Nukiyama 
+jakpaw 
+
 v4.0.0-dev.0
 ---
 * **BREAKING CHANGES**
@@ -53,6 +71,27 @@ v4.0.0-dev.0
 * [bugfix] Don't enforce trailing spaces on newlines in typedef-whitespace rule (#1531)
 * [bugfix] `jsdoc` rule should not match arbitrary comments (#1543)
 * [bugfix] `one-line` rule errors when declaring wildcard ambient modules (#1425)
+
+Thanks to our contributors!
+
+Alex Eagle 
+Andrii Dieiev 
+Andy Hanson 
+Ben Coveney 
+Boris Aranovich 
+Chris Barr 
+Christian Dreher 
+Claas Augner 
+Josh Goldberg 
+Martin Probst 
+Mike Deverell 
+Nina Hartmann 
+Satoshi Amemiya 
+Scott Wu 
+Steve Van Opstal 
+Umar Bolatov 
+Vladimir Matveev 
+Yui 
 
 v3.15.1
 ---
