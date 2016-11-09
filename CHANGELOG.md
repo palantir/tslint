@@ -15,10 +15,8 @@ v4.0.0-dev.1
     * [enhancement] Removed `label-undefined` rule; covered by compiler (#1614)
     * [enhancement] Rename `no-constructor-vars` to `no-parameter-properties` (#1296)
     * [rule-change] The `orderedImports` rule now sorts relative modules below non-relative modules (#1640)
-    
 * **Deprecated**
     * [deprecated] `no-unused-variable` rule. This is checked by the TypeScript v2 compiler using the flags [`--noUnusedParameters` and `--noUnusedLocals`](https://github.com/Microsoft/TypeScript/wiki/What%27s-new-in-TypeScript#flag-unused-declarations-with---nounusedparameters-and---nounusedlocals). (#1481)
-
 * [enhancement] Lint .js files (#1515)
 * [new-fixer] `no-var-keyword` replaces `var` with `let` (#1547)
 * [new-fixer] `trailing-comma` auto fixed (#1546)
@@ -32,21 +30,21 @@ v4.0.0-dev.1
 
 Thanks to our contributors!
 
-Alex Eagle 
-Andrii Dieiev 
-Ben Coveney 
-Boris Aranovich 
-Chris Barr 
-Cyril Gandon 
-Evgeniy Zhukovskiy 
-Jay Anslow 
-Kunal Marwaha 
-Martin Probst 
-Mingye Wang 
-Raghav Katyal 
-Sean Dawson 
-Yuichi Nukiyama 
-jakpaw 
+* Alex Eagle 
+* Andrii Dieiev 
+* Ben Coveney 
+* Boris Aranovich 
+* Chris Barr 
+* Cyril Gandon 
+* Evgeniy Zhukovskiy 
+* Jay Anslow 
+* Kunal Marwaha 
+* Martin Probst 
+* Mingye Wang 
+* Raghav Katyal 
+* Sean Dawson 
+* Yuichi Nukiyama 
+* jakpaw 
 
 v4.0.0-dev.0
 ---
@@ -59,7 +57,6 @@ v4.0.0-dev.0
     * [rule-change] `semicolon` now processes type aliases (#1475)
     * [rule-change] `no-var-keyword` now rejects `export var` statements (#1256)
     * [rule-change] `semicolon` now requires semicolon for function declaration with no body (#1447)
-    
 * [new-formatter] `fileslist` formatter writes a list of files with errors without position or error type specifics (#1558)
 * [new-rule] `cyclomaticComplexity`, enforces a threshold of cyclomatic complexity.] (#1464)
 * [new-rule] `prefer-for-of`, which errors when `for(var x of y)` can be used instead of `for(var i = 0; i < y.length; i++)` (#1335)
@@ -74,24 +71,24 @@ v4.0.0-dev.0
 
 Thanks to our contributors!
 
-Alex Eagle 
-Andrii Dieiev 
-Andy Hanson 
-Ben Coveney 
-Boris Aranovich 
-Chris Barr 
-Christian Dreher 
-Claas Augner 
-Josh Goldberg 
-Martin Probst 
-Mike Deverell 
-Nina Hartmann 
-Satoshi Amemiya 
-Scott Wu 
-Steve Van Opstal 
-Umar Bolatov 
-Vladimir Matveev 
-Yui 
+* Alex Eagle 
+* Andrii Dieiev 
+* Andy Hanson 
+* Ben Coveney 
+* Boris Aranovich 
+* Chris Barr 
+* Christian Dreher 
+* Claas Augner 
+* Josh Goldberg 
+* Martin Probst 
+* Mike Deverell 
+* Nina Hartmann 
+* Satoshi Amemiya 
+* Scott Wu 
+* Steve Van Opstal 
+* Umar Bolatov 
+* Vladimir Matveev 
+* Yui 
 
 v3.15.1
 ---
