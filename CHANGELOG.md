@@ -8,7 +8,7 @@ v4.0.0-dev.1
          (to get the v3 behavior, use the `ignore-bound-class-methods` option) (#1643) 
     * [enhancement] Removed `use-strict` rule (#678)
     * [enhancement] Removed `label-undefined` rule; covered by compiler (#1614)
-    * [enhancement] Rename `no-constructor-vars` to `no-parameter-properties` (#1296)
+    * [enhancement] Renamed `no-constructor-vars` to `no-parameter-properties` (#1296)
     * [rule-change] The `orderedImports` rule now sorts relative modules below non-relative modules (#1640)
 * **Deprecated**
     * [deprecated] `no-unused-variable` rule. This is checked by the TypeScript v2 compiler using the flags [`--noUnusedParameters` and `--noUnusedLocals`](https://github.com/Microsoft/TypeScript/wiki/What%27s-new-in-TypeScript#flag-unused-declarations-with---nounusedparameters-and---nounusedlocals). (#1481)
