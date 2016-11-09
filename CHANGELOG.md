@@ -1,11 +1,6 @@
 Change Log
 ===
 
-v4.0.0-dev.2 (not released)
----
-* [enhancement] `--fix` option added to automatically fix selected rules (#1697)
-* [new-fixer] `ordered-imports` auto fixed (#1640)
-
 v4.0.0-dev.1
 ---
 * **BREAKING CHANGES**
