@@ -123,12 +123,12 @@ describe("Executable", function() {
             execCli(["-c", "test/files/multiple-fixes-test/tslint.json", tempFile, "--fix"],
                 (err, stdout) => {
                     const content = fs.readFileSync(tempFile, "utf8");
-                    // compare against file name which will be retyrned by formatter (used in TypeScript)
-                    const denornalizedFileName = denormalizeWinPath(tempFile);
+                    // compare against file name which will be returned by formatter (used in TypeScript)
+                    const denormalizedFileName = denormalizeWinPath(tempFile);
                     fs.unlinkSync(tempFile);
                     assert.strictEqual(content, "import * as y from \"a_long_module\";\nimport * as x from \"b\";\n");
                     assert.isNull(err, "process should exit without an error");
-                    assert.strictEqual(stdout, `Fixed 2 error(s) in ${denornalizedFileName}`);
+                    assert.strictEqual(stdout, `Fixed 2 error(s) in ${denormalizedFileName}`);
                     done();
                 });
         });
