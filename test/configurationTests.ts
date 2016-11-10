@@ -180,13 +180,13 @@ describe("Configuration", () => {
                 "always-fail": false,
                 "no-fail": true,
                 "rule-one": true,
-                "rule-two": false,
+                "rule-two": true,
             });
             assert.deepEqual(config.rules, {
                 "always-fail": false,
                 "no-fail": true,
                 "rule-one": true,
-                "rule-two": false,
+                "rule-two": true,
             });
         });
 

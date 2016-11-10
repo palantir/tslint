@@ -106,14 +106,6 @@ describe("Executable", function() {
                 done();
             });
         });
-
-        it("exits with code 2 if several custom rules directories are specified in config file and file contains lint errors", (done) => {
-            execCli(["-c", "./test/config/tslint-custom-rules-with-two-dirs.json", "src/tslint.ts"], (err) => {
-                assert.isNotNull(err, "process should exit with error");
-                assert.strictEqual(err.code, 2, "error code should be 2");
-                done();
-            });
-        });
     });
 
     describe("--fix flag", () => {
