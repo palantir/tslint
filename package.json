@@ -41,7 +41,8 @@
     "glob": "^7.1.1",
     "optimist": "~0.6.0",
     "resolve": "^1.1.7",
-    "underscore.string": "^3.3.4"
+    "underscore.string": "^3.3.4",
+    "update-notifier": "^1.0.2"
   },
   "devDependencies": {
     "@types/chai": "^3.4.34",
