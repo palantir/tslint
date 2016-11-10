@@ -79,6 +79,17 @@ describe("Executable", function() {
                 done();
             });
         });
+
+        it("exits with code 1 if config file is invalid", (done) => {
+            execCli(["-c", "test/config/tslint-invalid.json", "src/tslint.ts"], (err, stdout, stderr) => {
+                assert.isNotNull(err, "process should exit with error");
+                assert.strictEqual(err.code, 1, "error code should be 1");
+
+                assert.include(stderr, "Invalid option for configuration", "stderr should contain notification about invalid json");
+                assert.strictEqual(stdout, "", "shouldn't contain any output in stdout");
+                done();
+            });
+        });
     });
 
     describe("Custom rules", () => {
