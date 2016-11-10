@@ -59,12 +59,13 @@ export class Formatter extends AbstractFormatter {
                 currentFile = fileName;
             }
 
-            const failureString = failure.getFailure();
+            let failureString = failure.getFailure();
+            failureString     = colors.yellow(failureString);
 
             // Rule
             let ruleName = failure.getRuleName();
             ruleName     = this.pad(ruleName, ruleMaxSize);
-            ruleName     = colors.yellow(ruleName);
+            ruleName     = colors.grey(ruleName);
 
             // Lines
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
