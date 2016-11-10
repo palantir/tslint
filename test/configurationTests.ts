@@ -23,6 +23,7 @@ describe("Configuration", () => {
     it("extendConfigurationFile", () => {
         const EMPTY_CONFIG: IConfigurationFile = {
             jsRules: {},
+            linterOptions: {},
             rules: {},
             rulesDirectory: [],
         };
@@ -32,15 +33,18 @@ describe("Configuration", () => {
         assert.deepEqual(extendConfigurationFile(EMPTY_CONFIG, {}), EMPTY_CONFIG);
         assert.deepEqual(extendConfigurationFile({}, {
             jsRules: { row: "oar" },
+            linterOptions: {},
             rules: { foo: "bar" },
             rulesDirectory: "foo",
         }), {
             jsRules: { row: "oar" },
+            linterOptions: {},
             rules: {foo: "bar"},
             rulesDirectory: ["foo"],
         });
         const actualConfig = extendConfigurationFile({
             jsRules: { row: "oar" },
+            linterOptions: {},
             rules: {
                 a: 1,
                 b: 1,
@@ -48,18 +52,20 @@ describe("Configuration", () => {
             rulesDirectory: ["foo", "bar"],
         }, {
             jsRules: { fly: "wings" },
+            linterOptions: {},
             rules: {
-                b: 1,
+                b: 2,
                 c: 3,
             },
             rulesDirectory: "baz",
-        });
+            });
+        /* tslint:disable:object-literal-sort-keys */
         const expectedConfig = {
-        }), {
             jsRules: {
-                fly: "wings",
                 row: "oar",
+                fly: "wings",
             },
+            linterOptions: {},
             rules: {
                 a: 1,
                 b: 2,
@@ -88,13 +94,13 @@ describe("Configuration", () => {
             /* tslint:disable:object-literal-sort-keys */
             assert.deepEqual(config.jsRules, {
                 "rule-one": true,
-                "rule-two": true,
                 "rule-three": false,
+                "rule-two": true,
             });
             assert.deepEqual(config.rules, {
                 "rule-one": true,
-                "rule-two": true,
                 "rule-three": false,
+                "rule-two": true,
             });
             /* tslint:enable:object-literal-sort-keys */
         });
@@ -180,7 +186,7 @@ describe("Configuration", () => {
                 "always-fail": false,
                 "no-fail": true,
                 "rule-one": true,
-                "rule-two": true,
+                "rule-two": false,
             });
         });
 

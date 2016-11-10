@@ -6,7 +6,6 @@
   },
   "rules": {
     "always-fail": true,
-    "no-fail": true,
-    "rule-two": true
+    "no-fail": true
   }
 }
