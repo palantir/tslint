@@ -307,7 +307,7 @@ if (argv.e) {
 }
 
 files = files
-    // remove single quotes which break mathing on Windows when glob is passed in single quotes
+    // remove single quotes which break matching on Windows when glob is passed in single quotes
     .map(trimSingleQuotes)
     .map((file: string) => glob.sync(file, { ignore: ignorePatterns, nodir: true }))
     .reduce((a: string[], b: string[]) => a.concat(b));
