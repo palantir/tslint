@@ -43,7 +43,6 @@ export const DEFAULT_CONFIG = {
         "no-eval": true,
         "no-trailing-whitespace": true,
         "no-unsafe-finally": true,
-        "no-var-keyword": true,
         "one-line": [true, "check-open-brace", "check-whitespace"],
         "quotemark": [true, "double"],
         "semicolon": [true, "always"],
