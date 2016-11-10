@@ -26,7 +26,7 @@ import {
     DEFAULT_CONFIG,
     findConfiguration,
 } from "./configuration";
-import {consoleTestResultHandler, runTest} from "./test";
+import { consoleTestResultHandler, runTest } from "./test";
 import * as Linter from "./tslintMulti";
 
 let processed = optimist
@@ -49,6 +49,7 @@ let processed = optimist
         e: {
             alias: "exclude",
             describe: "exclude globs from path expansion",
+            type: "string",
         },
         fix: {
             describe: "Fixes linting errors for select rules. This may overwrite linted files",
@@ -303,7 +304,19 @@ if (argv.project != null) {
     }
 }
 
+const trimSingleQuotes = (str: string) => str.replace(/^'|'$/g, "");
+
+let ignorePatterns: string[] = [];
+if (argv.e) {
+    const excludeArguments: string[] = Array.isArray(argv.e) ? argv.e : [argv.e];
+
+    ignorePatterns = excludeArguments.map(trimSingleQuotes);
+}
+
 files = files
-  .map((file: string) => glob.sync(file, { ignore: argv.e, nodir: true }))
-  .reduce((a: string[], b: string[]) => a.concat(b));
+    // remove single quotes which break matching on Windows when glob is passed in single quotes
+    .map(trimSingleQuotes)
+    .map((file: string) => glob.sync(file, { ignore: ignorePatterns, nodir: true }))
+    .reduce((a: string[], b: string[]) => a.concat(b));
+
 processFiles(files, program);

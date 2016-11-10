@@ -206,6 +206,6 @@ class MultiLinter {
 }
 
 // tslint:disable-next-line:no-namespace
-namespace MultiLinter {}
+namespace MultiLinter { }
 
 export = MultiLinter;
