@@ -2,7 +2,8 @@
   "rulesDirectory": ["../files/custom-rules-2", "../files/custom-rules/"],
   "jsRules": {
     "always-fail": true,
-    "no-fail": true
+    "no-fail": true,
+    "rule-two": true
   },
   "rules": {
     "always-fail": true,
