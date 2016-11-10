@@ -221,7 +221,7 @@ describe("Executable", function() {
     describe("globs and quotes", () => {
         // when glob pattern is passed without quotes in npm script `process.env` will contain:
         // on Windows - pattern string without any quotes
-        // on Linux - list of files that mathes glob (may differ from `glob` module results)
+        // on Linux - list of files that matches glob (may differ from `glob` module results)
 
         it("exits with code 2 if correctly finds file containing lint errors when glob is in double quotes", (done) => {
             // when glob pattern is passed in double quotes in npm script `process.env` will contain:
