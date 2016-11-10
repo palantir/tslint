@@ -77,10 +77,11 @@ class IndentWalker extends Lint.RuleWalker {
         }
 
         let endOfComment = -1;
+        let endOfTemplateString = -1;
         const scanner = ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, node.text);
         for (let lineStart of node.getLineStarts()) {
-            if (lineStart < endOfComment) {
-                // skip checking lines inside multi-line comments
+            if (lineStart < endOfComment || lineStart < endOfTemplateString) {
+                // skip checking lines inside multi-line comments or template strings
                 continue;
             }
 
@@ -104,6 +105,27 @@ class IndentWalker extends Lint.RuleWalker {
             const commentRanges = ts.getTrailingCommentRanges(node.text, lineStart);
             if (commentRanges) {
                 endOfComment = commentRanges[commentRanges.length - 1].end;
+            } else {
+                let scanType = currentScannedType;
+
+                // scan until we reach end of line, skipping over template strings
+                while (scanType !== ts.SyntaxKind.NewLineTrivia && scanType !== ts.SyntaxKind.EndOfFileToken) {
+                    if (scanType === ts.SyntaxKind.NoSubstitutionTemplateLiteral) {
+                        // template string without expressions - skip past it
+                        endOfTemplateString = scanner.getStartPos() + scanner.getTokenText().length;
+                    } else if (scanType === ts.SyntaxKind.TemplateHead) {
+                        // find end of template string containing expressions...
+                        while (scanType !== ts.SyntaxKind.TemplateTail && scanType !== ts.SyntaxKind.EndOfFileToken) {
+                            scanType = scanner.scan();
+                            if (scanType === ts.SyntaxKind.CloseBraceToken) {
+                                scanType = scanner.reScanTemplateToken();
+                            }
+                        }
+                        // ... and skip past it
+                        endOfTemplateString = scanner.getStartPos() + scanner.getTokenText().length;
+                    }
+                    scanType = scanner.scan();
+                }
             }
 
             if (currentScannedType === ts.SyntaxKind.SingleLineCommentTrivia
