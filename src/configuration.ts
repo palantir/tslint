@@ -170,14 +170,14 @@ export function loadConfigurationFromPath(configFilePath: string): IConfiguratio
         const configFileDir = path.dirname(resolvedConfigFilePath);
 
         configFile.rulesDirectory = getRulesDirectories(configFile.rulesDirectory, configFileDir);
-        configFile.extends = arrayify(configFile.extends);
+        // load configurations, in order, using their identifiers or relative paths
+        // apply the current configuration last by placing it last in this array
+        const configs = arrayify(configFile.extends).map((name) => {
+            const nextConfigFilePath = resolveConfigurationPath(name, configFileDir);
+            return loadConfigurationFromPath(nextConfigFilePath);
+        }).concat([configFile]);
 
-        for (const name of configFile.extends) {
-            const baseConfigFilePath = resolveConfigurationPath(name, configFileDir);
-            const baseConfigFile = loadConfigurationFromPath(baseConfigFilePath);
-            configFile = extendConfigurationFile(configFile, baseConfigFile);
-        }
-        return configFile;
+        return configs.reduce(extendConfigurationFile, {});
     }
 }
 
@@ -211,28 +211,29 @@ function resolveConfigurationPath(filePath: string, relativeTo?: string) {
     }
 }
 
-export function extendConfigurationFile(config: IConfigurationFile, baseConfig: IConfigurationFile): IConfigurationFile {
+export function extendConfigurationFile(targetConfig: IConfigurationFile,
+                                        nextConfigSource: IConfigurationFile): IConfigurationFile {
     let combinedConfig: IConfigurationFile = {};
 
-    const baseRulesDirectory = arrayify(baseConfig.rulesDirectory);
-    const configRulesDirectory = arrayify(config.rulesDirectory);
-    combinedConfig.rulesDirectory = configRulesDirectory.concat(baseRulesDirectory);
+    const configRulesDirectory = arrayify(targetConfig.rulesDirectory);
+    const nextConfigRulesDirectory = arrayify(nextConfigSource.rulesDirectory);
+    combinedConfig.rulesDirectory = configRulesDirectory.concat(nextConfigRulesDirectory);
 
-    combinedConfig.rules = {};
-    for (const name of Object.keys(objectify(baseConfig.rules))) {
-        combinedConfig.rules[name] = baseConfig.rules[name];
-    }
-    for (const name of Object.keys(objectify(config.rules))) {
-        combinedConfig.rules[name] = config.rules[name];
-    }
+    const combineProperties = (targetProperty: any, nextProperty: any) => {
+        let combinedProperty: any = {};
+        for (const name of Object.keys(objectify(targetProperty))) {
+            combinedProperty[name] = targetProperty[name];
+        }
+        // next config source overwrites the target config object
+        for (const name of Object.keys(objectify(nextProperty))) {
+            combinedProperty[name] = nextProperty[name];
+        }
+        return combinedProperty;
+    };
 
-    combinedConfig.jsRules = {};
-    for (const name of Object.keys(objectify(baseConfig.jsRules))) {
-        combinedConfig.jsRules[name] = baseConfig.jsRules[name];
-    }
-    for (const name of Object.keys(objectify(config.jsRules))) {
-        combinedConfig.jsRules[name] = config.jsRules[name];
-    }
+    combinedConfig.rules = combineProperties(targetConfig.rules, nextConfigSource.rules);
+    combinedConfig.jsRules = combineProperties(targetConfig.jsRules, nextConfigSource.jsRules);
+    combinedConfig.linterOptions = combineProperties(targetConfig.linterOptions, nextConfigSource.linterOptions);
 
     return combinedConfig;
 }

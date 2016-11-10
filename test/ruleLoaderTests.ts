@@ -1,4 +1,5 @@
-/*
+/**
+ * @license
  * Copyright 2013 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,7 +41,7 @@ describe("Rule Loader", () => {
 
         assert.throws(
             () => loadRules(invalidConfiguration, {}, RULES_DIRECTORY),
-            /invalidConfig1\ninvalidConfig2/
+            /invalidConfig1\ninvalidConfig2/,
         );
     });
 
@@ -56,7 +57,7 @@ describe("Rule Loader", () => {
 
         assert.throws(
             () => loadRules(invalidConfiguration, {}, RULES_DIRECTORY),
-            /_indent\nforin_\n-quotemark\neofline-/
+            /_indent\nforin_\n-quotemark\neofline-/,
         );
     });
 
