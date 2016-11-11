@@ -74,7 +74,7 @@ export interface IRuleMetadata {
     requiresTypeInfo?: boolean;
 
     /**
-     * Whether or not the rule use for TypeScript only.
+     * Whether or not the rule use for TypeScript only. If `false`, this rule may be used with .js files.
      */
     typescriptOnly: boolean;
 }
