@@ -1,0 +1,38 @@
+---
+ruleName: cyclomatic-complexity
+description: Enforces a threshold of cyclomatic complexity.
+descriptionDetails: |-
+
+  Cyclomatic complexity is assessed for each function of any type. A starting value of 1
+  is assigned and this value is then incremented for every statement which can branch the
+  control flow within the function. The following statements and expressions contribute
+  to cyclomatic complexity:
+  * `catch`
+  * `if` and `? :`
+  * `||` and `&&` due to short-circuit evaluation
+  * `for`, `for in` and `for of` loops
+  * `while` and `do while` loops
+rationale: |-
+
+  Cyclomatic complexity is a code metric which indicates the level of complexity in a
+  function. High cyclomatic complexity indicates confusing code which may be prone to
+  errors or difficult to modify.
+optionsDescription: |-
+
+  An optional upper limit for cyclomatic complexity can be specified. If no limit option
+  is provided a default value of $(Rule.DEFAULT_THRESHOLD) will be used.
+options:
+  type: number
+  minimum: $(Rule.MINIMUM_THRESHOLD)
+optionExamples:
+  - 'true'
+  - '[true, 20]'
+type: maintainability
+layout: rule
+title: 'Rule: cyclomatic-complexity'
+optionsJSON: |-
+  {
+    "type": "number",
+    "minimum": "$(Rule.MINIMUM_THRESHOLD)"
+  }
+---

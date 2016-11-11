@@ -1,0 +1,60 @@
+---
+ruleName: trailing-comma
+description: |-
+
+  Requires or disallows trailing commas in array and object literals, destructuring assignments, function and tuple typings,
+  named imports and function parameters.
+optionsDescription: |-
+
+  One argument which is an object with the keys `multiline` and `singleline`.
+  Both should be set to either `"always"` or `"never"`.
+
+  * `"multiline"` checks multi-line object literals.
+  * `"singleline"` checks single-line object literals.
+
+  A array is considered "multiline" if its closing bracket is on a line
+  after the last array element. The same general logic is followed for
+  object literals, function and tuple typings, named import statements
+  and function parameters.
+options:
+  type: object
+  properties:
+    multiline:
+      type: string
+      enum:
+        - always
+        - never
+    singleline:
+      type: string
+      enum:
+        - always
+        - never
+  additionalProperties: false
+optionExamples:
+  - '[true, {"multiline": "always", "singleline": "never"}]'
+type: maintainability
+typescriptOnly: false
+layout: rule
+title: 'Rule: trailing-comma'
+optionsJSON: |-
+  {
+    "type": "object",
+    "properties": {
+      "multiline": {
+        "type": "string",
+        "enum": [
+          "always",
+          "never"
+        ]
+      },
+      "singleline": {
+        "type": "string",
+        "enum": [
+          "always",
+          "never"
+        ]
+      }
+    },
+    "additionalProperties": false
+  }
+---

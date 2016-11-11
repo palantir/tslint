@@ -1,0 +1,38 @@
+---
+ruleName: only-arrow-functions
+description: Disallows traditional (non-arrow) function expressions.
+rationale: 'Traditional functions don''t bind lexical scope, which can lead to unexpected behavior when accessing ''this''.'
+optionsDescription: |-
+
+  One argument may be optionally provided:
+
+  * `"allow-declarations"` allows standalone function declarations.
+          
+options:
+  type: array
+  items:
+    type: string
+    enum:
+      - allow-declarations
+  minLength: 0
+  maxLength: 1
+optionExamples:
+  - 'true'
+  - '[true, "allow-declarations"]'
+type: typescript
+typescriptOnly: false
+layout: rule
+title: 'Rule: only-arrow-functions'
+optionsJSON: |-
+  {
+    "type": "array",
+    "items": {
+      "type": "string",
+      "enum": [
+        "allow-declarations"
+      ]
+    },
+    "minLength": 0,
+    "maxLength": 1
+  }
+---

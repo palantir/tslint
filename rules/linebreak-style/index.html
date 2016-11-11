@@ -1,0 +1,30 @@
+---
+ruleName: linebreak-style
+description: Enforces a consistent linebreak style.
+optionsDescription: |-
+
+  One of the following options must be provided:
+
+  * `"LF"` requires LF (`\n`) linebreaks
+  * `"CRLF"` requires CRLF (`\r\n`) linebreaks
+options:
+  type: string
+  enum:
+    - LF
+    - CRLF
+optionExamples:
+  - '[true, "LF"]'
+  - '[true, "CRLF"]'
+type: maintainability
+typescriptOnly: false
+layout: rule
+title: 'Rule: linebreak-style'
+optionsJSON: |-
+  {
+    "type": "string",
+    "enum": [
+      "LF",
+      "CRLF"
+    ]
+  }
+---
