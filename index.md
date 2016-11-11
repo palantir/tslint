@@ -35,7 +35,7 @@ Lint your TypeScript files!
 tslint -c path/to/tslint.json 'path/to/project/**/*.ts'
 ```
 
-Check out [the full usage guide][1] to learn more.
+Check out [the full usage guide][1] to learn more...
 
 [0]: http://www.typescriptlang.org/
 [1]: usage/cli
