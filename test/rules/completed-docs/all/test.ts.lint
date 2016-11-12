@@ -1,0 +1,59 @@
+class BadClass {
+~~~~~~~~~~~~~~~~       [0]
+    badProperty;
+    ~~~~~~~~~~~~       [1]
+    badMethod() { }
+    ~~~~~~~~~~~~~~~       [2]
+}
+
+/**
+ * 
+ */
+class EmptyClass {
+~~~~~~~~~~~~~~~~~~       [0]
+   /**
+    * 
+    */
+    emptyProperty;
+    ~~~~~~~~~~~~~~       [1]
+
+    /**
+     * 
+     */
+    emptyMethod() { }
+    ~~~~~~~~~~~~~~~~~       [2]
+}
+
+/**
+ * ...
+ */
+class GoodClass {
+   /**
+    * ...
+    */
+    goodProperty;
+
+    /**
+     * ...
+     */
+    goodMethod() { }
+}
+
+function BadFunction() { }
+~~~~~~~~~~~~~~~~~~~~~~~~~~      [3]
+
+/**
+ * 
+ */
+function EmptyFunction() { }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~      [3]
+
+/**
+ * ...
+ */
+function GoodFunction() { }
+
+[0]: Classes must have documentation.
+[1]: Properties must have documentation.
+[2]: Methods must have documentation.
+[3]: Functions must have documentation.
