@@ -6,6 +6,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "object-literal-shorthand",
         description: "Enforces use of ES6 object literal shorthand when possible.",
+        optionsDescription: "Not configurable.",
         options: null,
         optionExamples: ["true"],
         type: "style",

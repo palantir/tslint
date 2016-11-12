@@ -28,6 +28,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: ["true"],
+        rationale: "Improves readability and organization by grouping naturally related items together.",
         type: "typescript",
         typescriptOnly: true,
     };
