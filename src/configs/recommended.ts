@@ -64,7 +64,6 @@ export const rules = {
     "no-string-literal": true,
     "no-switch-case-fall-through": false,
     "no-trailing-whitespace": true,
-    "no-unreachable": true,
     "no-unused-expression": true,
     "no-unused-new": true,
     // deprecated as of v4.0
@@ -162,7 +161,6 @@ export const jsRules = {
     "no-string-literal": true,
     "no-switch-case-fall-through": false,
     "no-trailing-whitespace": true,
-    "no-unreachable": true,
     "no-unused-expression": true,
     "no-unused-new": true,
     // disable this rule as it is very heavy performance-wise and not that useful

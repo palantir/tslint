@@ -1,13 +1,20 @@
 Change Log
 ===
-
+<!--
+v4.0.0-dev.2 (not released)
+---
+* **BREAKING CHANGES**
+    * [removed-rule] Removed `no-unreachable` rule; covered by compiler (#661)
+* [enhancement] `--fix` option added to automatically fix selected rules (#1697)
+* [new-fixer] `ordered-imports` auto fixed (#1640)
+-->
 v4.0.0-dev.1
 ---
 * **BREAKING CHANGES**
     * [enhancement] The `semicolon` rule now disallows semicolons in multi-line bound class methods 
          (to get the v3 behavior, use the `ignore-bound-class-methods` option) (#1643) 
-    * [enhancement] Removed `use-strict` rule (#678)
-    * [enhancement] Removed `label-undefined` rule; covered by compiler (#1614)
+    * [removed-rule] Removed `use-strict` rule (#678)
+    * [removed-rule] Removed `label-undefined` rule; covered by compiler (#1614)
     * [enhancement] Renamed `no-constructor-vars` to `no-parameter-properties` (#1296)
     * [rule-change] The `orderedImports` rule now sorts relative modules below non-relative modules (#1640)
 * **Deprecated**
@@ -45,7 +52,7 @@ v4.0.0-dev.0
 ---
 * **BREAKING CHANGES**
     * [enhancement] Drop support for configuration via package.json (#1579)
-    * [enhancement] Removed `no-duplicate-key` rule; covered by compiler (#1109)
+    * [removed-rule] Removed `no-duplicate-key` rule; covered by compiler (#1109)
     * [enhancement] Call formatter once for all file results. Format output may be different (#656)
     * [rule-change] `trailing-comma` supports function declarations, expressions, and types (#1486)
     * [rule-change] `object-literal-sort-keys` now sorts quoted keys (#1529)
