@@ -30,12 +30,12 @@ import {
 import { EnableDisableRulesWalker } from "./enableDisableRules";
 import { findFormatter } from "./formatterLoader";
 import { IFormatter } from "./language/formatter/formatter";
-import {Fix, IRule, RuleFailure} from "./language/rule/rule";
+import { Fix, IRule, RuleFailure } from "./language/rule/rule";
 import { TypedRule } from "./language/rule/typedRule";
 import * as utils from "./language/utils";
 import { IMultiLinterOptions, LintResult } from "./lint";
 import { loadRules } from "./ruleLoader";
-import { arrayify } from "./utils";
+import { arrayify, dedent } from "./utils";
 
 /**
  * Linter that can lint multiple files in consecutive runs.
@@ -113,7 +113,7 @@ class MultiLinter {
             hasLinterRun = true;
         }
 
-        // make a 1st pass or make a 2nd pass if there were any fixes because the positions may be off        
+        // make a 1st pass or make a 2nd pass if there were any fixes because the positions may be off
         if (!hasLinterRun || this.fixes.length > 0) {
             this.failures = [];
             for (let rule of enabledRules) {
@@ -175,7 +175,7 @@ class MultiLinter {
 
         const rulesDirectories = arrayify(this.options.rulesDirectory)
             .concat(arrayify(configuration.rulesDirectory));
-        const isJs = fileName.substr(-3) === ".js";
+        const isJs = /\.jsx?$/i.test(fileName);
         const configurationRules = isJs ? configuration.jsRules : configuration.rules;
         let configuredRules = loadRules(configurationRules, enableDisableRuleMap, rulesDirectories, isJs);
 
@@ -195,7 +195,10 @@ class MultiLinter {
         }
 
         if (sourceFile === undefined) {
-            throw new Error(`Invalid source file: ${fileName}. Ensure that the files supplied to lint have a .ts, .tsx, or .js extension.`);
+            const INVALID_SOURCE_ERROR = dedent`
+                Invalid source file: ${fileName}. Ensure that the files supplied to lint have a .ts, .tsx, .js or .jsx extension.
+            `;
+            throw new Error(INVALID_SOURCE_ERROR);
         }
         return sourceFile;
     }
