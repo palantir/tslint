@@ -17,6 +17,7 @@
 
 /* tslint:disable:object-literal-key-quotes */
 export const rules = {
+    "adjacent-overload-signatures": true,
     "align": [true,
         "parameters",
         "statements",
@@ -26,6 +27,7 @@ export const rules = {
         "check-space",
     ],
     "curly": true,
+    "cyclomatic-complexity": false,
     "eofline": true,
     "forin": true,
     "indent": [true, "spaces"],
@@ -38,6 +40,7 @@ export const rules = {
         { "order": "statics-first" },
     ],
     "new-parens": true,
+    "max-classes-per-file": [true, 1],
     "no-any": false,
     "no-arg": true,
     "no-bitwise": true,
@@ -64,6 +67,7 @@ export const rules = {
     "no-string-literal": true,
     "no-switch-case-fall-through": false,
     "no-trailing-whitespace": true,
+    "no-unsafe-finally": true,
     "no-unused-expression": true,
     "no-unused-new": true,
     // deprecated as of v4.0
@@ -72,6 +76,8 @@ export const rules = {
     "no-use-before-declare": false,
     "no-var-keyword": true,
     "no-var-requires": true,
+    "object-literal-key-quotes": [true, "as-needed"],
+    "object-literal-shorthand": true,
     "object-literal-sort-keys": true,
     "one-line": [true,
         "check-catch",
@@ -83,6 +89,12 @@ export const rules = {
     "one-variable-per-declaration": [true,
         "ignore-for-loop",
     ],
+    "only-arrow-functions": [true, "allow-declarations"],
+    "ordered-imports": [true, {
+        "import-sources-order": "case-insensitive",
+        "named-imports-order": "case-insensitive",
+    }],
+    "prefer-for-of": true,
     "quotemark": [true, "double", "avoid-escape"],
     "radix": true,
     "semicolon": [true, "always"],
