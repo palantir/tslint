@@ -66,7 +66,6 @@ export const DEFAULT_CONFIG = {
         "class-name": true,
         "comment-format": [true, "check-space"],
         "indent": [true, "spaces"],
-        "no-duplicate-variable": true,
         "no-eval": true,
         "no-internal-module": true,
         "no-trailing-whitespace": true,
