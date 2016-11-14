@@ -22,6 +22,8 @@ export const rules = {
         "parameters",
         "statements",
     ],
+    "array-type": [true, "array-simple"],
+    "arrow-parens": true,
     "class-name": true,
     "comment-format": [true,
         "check-space",
