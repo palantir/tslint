@@ -17,8 +17,7 @@
 
 import * as ts from "typescript";
 
-import {IOptions} from "../../lint";
-import {Fix, IDisabledInterval, Replacement, RuleFailure} from "../rule/rule";
+import {Fix, IDisabledInterval, IOptions, Replacement, RuleFailure} from "../rule/rule";
 import {doesIntersect} from "../utils";
 import {SyntaxWalker} from "./syntaxWalker";
 

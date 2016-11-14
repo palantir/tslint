@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 const OPTION_BRACE = "check-open-brace";
 const OPTION_CATCH = "check-catch";

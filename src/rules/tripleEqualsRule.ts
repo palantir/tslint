@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 const OPTION_ALLOW_NULL_CHECK = "allow-null-check";
 const OPTION_ALLOW_UNDEFINED_CHECK = "allow-undefined-check";

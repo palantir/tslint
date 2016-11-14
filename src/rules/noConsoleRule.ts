@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 import * as BanRule from "./banRule";
 
 export class Rule extends BanRule.Rule {

@@ -24,9 +24,9 @@ import * as ts from "typescript";
 
 import {Fix} from "./language/rule/rule";
 import {createCompilerOptions} from "./language/utils";
+import * as Linter from "./linter";
 import {LintError} from "./test/lintError";
 import * as parse from "./test/parse";
-import * as Linter from "./tslint";
 
 const MARKUP_FILE_EXTENSION = ".lint";
 const FIXES_FILE_EXTENSION = ".fix";
@@ -86,13 +86,14 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
         }
 
         const lintOptions = {
-            configuration: tslintConfig,
+            fix: false,
             formatter: "prose",
             formattersDirectory: "",
             rulesDirectory,
         };
-        const linter = new Linter(fileBasename, fileTextWithoutMarkup, lintOptions, program);
-        const failures = linter.lint().failures;
+        const linter = new Linter(lintOptions, program);
+        linter.lint(fileBasename, fileTextWithoutMarkup, tslintConfig);
+        const failures = linter.getResult().failures;
         const errorsFromLinter: LintError[] = failures.map((failure) => {
             const startLineAndCharacter = failure.getStartPosition().getLineAndCharacter();
             const endLineAndCharacter = failure.getEndPosition().getLineAndCharacter();

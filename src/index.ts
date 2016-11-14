@@ -18,9 +18,9 @@
 import * as configuration from "./configuration";
 import * as formatters from "./formatters";
 import {RuleFailure} from "./language/rule/rule";
+import * as linter from "./linter";
 import * as rules from "./rules";
 import * as test from "./test";
-import * as linter from "./tslint";
 import * as utils from "./utils";
 
 export * from "./language/rule/rule";
@@ -47,21 +47,7 @@ export interface LintResult {
     output: string;
 }
 
-export interface ILinterOptionsRaw {
-    configuration?: any;
-    formatter?: string | Function;
-    formattersDirectory?: string;
-    rulesDirectory?: string | string[];
-}
-
-export interface ILinterOptions extends ILinterOptionsRaw {
-    configuration: any;
-    fix: boolean;
-    formatter: string | Function;
-    rulesDirectory: string | string[];
-}
-
-export interface IMultiLinterOptions {
+export interface ILinterOptions {
     fix: boolean;
     formatter?: string | Function;
     formattersDirectory?: string;

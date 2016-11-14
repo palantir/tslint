@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 const OPTION_LINEBREAK_STYLE_CRLF = "CRLF";
 const OPTION_LINEBREAK_STYLE_LF = "LF";

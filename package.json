@@ -5,8 +5,8 @@
   "bin": {
     "tslint": "./bin/tslint"
   },
-  "main": "./lib/tslint",
-  "typings": "./lib/tslint",
+  "main": "./lib/tslint/index.js",
+  "typings": "./lib/tslint/index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/palantir/tslint.git"

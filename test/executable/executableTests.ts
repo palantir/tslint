@@ -68,21 +68,20 @@ describe("Executable", function() {
 
     describe("Configuration file", () => {
         it("exits with code 0 if relative path is passed without `./`", (done) => {
-            execCli(["-c", "test/config/tslint-almost-empty.json", "src/tslint.ts"], (err) => {
+            execCli(["-c", "test/config/tslint-almost-empty.json", "src/test.ts"], (err) => {
                 assert.isNull(err, "process should exit without an error");
                 done();
             });
         });
 
         it("exits with code 0 if config file that extends relative config file", (done) => {
-            execCli(["-c", "test/config/tslint-extends-package-no-mod.json", "src/tslint.ts"], (err) => {
+            execCli(["-c", "test/config/tslint-extends-package-no-mod.json", "src/test.ts"], (err) => {
                 assert.isNull(err, "process should exit without an error");
                 done();
-            });
-        });
+            });        });
 
         it("exits with code 1 if config file is invalid", (done) => {
-            execCli(["-c", "test/config/tslint-invalid.json", "src/tslint.ts"], (err, stdout, stderr) => {
+            execCli(["-c", "test/config/tslint-invalid.json", "src/test.ts"], (err, stdout, stderr) => {
                 assert.isNotNull(err, "process should exit with error");
                 assert.strictEqual(err.code, 1, "error code should be 1");
 
@@ -95,7 +94,7 @@ describe("Executable", function() {
 
     describe("Custom rules", () => {
         it("exits with code 1 if nonexisting custom rules directory is passed", (done) => {
-            execCli(["-c", "./test/config/tslint-custom-rules.json", "-r", "./someRandomDir", "src/tslint.ts"], (err) => {
+            execCli(["-c", "./test/config/tslint-custom-rules.json", "-r", "./someRandomDir", "src/test.ts"], (err) => {
                 assert.isNotNull(err, "process should exit with error");
                 assert.strictEqual(err.code, 1, "error code should be 1");
                 done();
@@ -103,7 +102,7 @@ describe("Executable", function() {
         });
 
         it("exits with code 2 if custom rules directory is passed and file contains lint errors", (done) => {
-            execCli(["-c", "./test/config/tslint-custom-rules.json", "-r", "./test/files/custom-rules", "src/tslint.ts"], (err) => {
+            execCli(["-c", "./test/config/tslint-custom-rules.json", "-r", "./test/files/custom-rules", "src/test.ts"], (err) => {
                 assert.isNotNull(err, "process should exit with error");
                 assert.strictEqual(err.code, 2, "error code should be 2");
                 done();
@@ -111,7 +110,7 @@ describe("Executable", function() {
         });
 
         it("exits with code 2 if custom rules directory is specified in config file and file contains lint errors", (done) => {
-            execCli(["-c", "./test/config/tslint-custom-rules-with-dir.json", "src/tslint.ts"], (err) => {
+            execCli(["-c", "./test/config/tslint-custom-rules-with-dir.json", "src/test.ts"], (err) => {
                 assert.isNotNull(err, "process should exit with error");
                 assert.strictEqual(err.code, 2, "error code should be 2");
                 done();
@@ -139,7 +138,7 @@ describe("Executable", function() {
 
     describe("--force flag", () => {
         it("exits with code 0 if `--force` flag is passed", (done) => {
-            execCli(["-c", "./test/config/tslint-custom-rules.json", "-r", "./test/files/custom-rules", "--force", "src/tslint.ts"],
+            execCli(["-c", "./test/config/tslint-custom-rules.json", "-r", "./test/files/custom-rules", "--force", "src/test.ts"],
                 (err, stdout) => {
                     assert.isNull(err, "process should exit without an error");
                     assert.include(stdout, "failure", "errors should be reported");
@@ -249,7 +248,7 @@ describe("Executable", function() {
             // when glob pattern is passed in double quotes in npm script `process.env` will contain:
             // on Windows - pattern string without any quotes
             // on Linux - pattern string without any quotes (glob is not expanded)
-            execCli(["-c", "./test/config/tslint-custom-rules.json", "-r", "./test/files/custom-rules", "src/**/tslint.ts"], (err) => {
+            execCli(["-c", "./test/config/tslint-custom-rules.json", "-r", "./test/files/custom-rules", "src/**/test.ts"], (err) => {
                 assert.isNotNull(err, "process should exit with error");
                 assert.strictEqual(err.code, 2, "error code should be 2");
                 done();
@@ -260,7 +259,7 @@ describe("Executable", function() {
             // when glob pattern is passed in single quotes in npm script `process.env` will contain:
             // on Windows - pattern string wrapped in single quotes
             // on Linux - pattern string without any quotes (glob is not expanded)
-            execCli(["-c", "./test/config/tslint-custom-rules.json", "-r", "./test/files/custom-rules", "'src/**/tslint.ts'"], (err) => {
+            execCli(["-c", "./test/config/tslint-custom-rules.json", "-r", "./test/files/custom-rules", "'src/**/test.ts'"], (err) => {
                 assert.isNotNull(err, "process should exit with error");
                 assert.strictEqual(err.code, 2, "error code should be 2");
                 done();
