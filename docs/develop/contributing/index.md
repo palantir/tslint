@@ -4,12 +4,13 @@ title: Contributing
 permalink: /develop/contributing/
 ---
 
-To develop TSLint simply clone the repository, install dependencies and run grunt:
+To develop TSLint simply clone the repository, install dependencies:
 
 ```bash
-git clone git@github.com:palantir/tslint.git
+git clone git@github.com:palantir/tslint.git --config core.autocrlf=input --config core.eol=lf
 npm install
-grunt
+npm run compile
+npm run test
 ```
 
 #### `next` branch

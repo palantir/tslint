@@ -3,7 +3,7 @@ title: Custom Rules
 layout: page
 permalink: "/develop/custom-rules/"
 ---
-TSLint ships with a set of core rules that can be configured. However, users are also enabled to write their own rules, which allows them to enforce specific behavior not covered by the core of TSLint. TSLint's internal rules are itself written to be pluggable, so adding a new rule is as simple as creating a new rule file named by convention. New rules can be written in either TypeScript or Javascript; if written in TypeScript, the code must be compiled to Javascript before registering them with TSLint.
+TSLint ships with a set of core rules that can be configured. However, users are also allowed to write their own rules, which allows them to enforce specific behavior not covered by the core of TSLint. TSLint's internal rules are itself written to be pluggable, so adding a new rule is as simple as creating a new rule file named by convention. New rules can be written in either TypeScript or JavaScript; if written in TypeScript, the code must be compiled to JavaScript before invoking TSLint.
 
 __Important conventions__: Rule identifiers are always kebab-cased. Their implementation files are always `camelCasedRule.ts` and *must* contain the suffix `Rule`. 
 
@@ -11,12 +11,12 @@ Let us take the example of how to write a new rule to forbid all import statemen
 
 Now, let us first write the rule in TypeScript. A few things to note:
 
-- We import `tslint/lib/lint` to get the whole `Lint` namespace instead of just the `Linter` class.
+- We import `tslint/lib/index` to get the whole `Lint` namespace instead of just the `Linter` class.
 - The exported class must always be named `Rule` and extend from `Lint.Rules.AbstractRule`.
 
-```ts
+```typescript
 import * as ts from "typescript";
-import * as Lint from "tslint/lib/lint";
+import * as Lint from "tslint/lib/index";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "import statement forbidden";
