@@ -10,6 +10,7 @@ optionsDescription: |-
 
   The following arguments may be optionaly provided:
   * `"ignore-interfaces"` skips checking semicolons at the end of interface members.
+  * `"ignore-bound-class-methods"` skips checking semicolons at the end of bound class methods.
 options:
   type: array
   items:
@@ -25,7 +26,11 @@ optionExamples:
   - '[true, "always"]'
   - '[true, "never"]'
   - '[true, "always", "ignore-interfaces"]'
+  - '[true, "always", "ignore-bound-class-methods"]'
 type: style
+typescriptOnly: false
+layout: rule
+title: 'Rule: semicolon'
 optionsJSON: |-
   {
     "type": "array",
@@ -46,6 +51,4 @@ optionsJSON: |-
     ],
     "additionalItems": false
   }
-layout: rule
-title: 'Rule: semicolon'
 ---

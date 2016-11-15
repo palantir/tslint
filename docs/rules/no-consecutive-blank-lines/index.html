@@ -1,13 +1,24 @@
 ---
 ruleName: no-consecutive-blank-lines
-description: Disallows more than one blank line in a row.
+description: Disallows one or more blank lines in a row.
 rationale: Helps maintain a readable style in your codebase.
-optionsDescription: Not configurable.
-options: {}
+optionsDescription: |-
+
+  An optional number of maximum allowed sequential blanks can be specified. If no value
+  is provided, a default of $(Rule.DEFAULT_ALLOWED_BLANKS) will be used.
+options:
+  type: number
+  minimum: $(Rule.MINIMUM_ALLOWED_BLANKS)
 optionExamples:
   - 'true'
+  - '[true, 2]'
 type: style
-optionsJSON: '{}'
+typescriptOnly: false
 layout: rule
 title: 'Rule: no-consecutive-blank-lines'
+optionsJSON: |-
+  {
+    "type": "number",
+    "minimum": "$(Rule.MINIMUM_ALLOWED_BLANKS)"
+  }
 ---
