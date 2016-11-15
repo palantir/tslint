@@ -29,18 +29,18 @@ import {
 } from "./configuration";
 import { EnableDisableRulesWalker } from "./enableDisableRules";
 import { findFormatter } from "./formatterLoader";
+import { ILinterOptions, LintResult } from "./index";
 import { IFormatter } from "./language/formatter/formatter";
 import { Fix, IRule, RuleFailure } from "./language/rule/rule";
 import { TypedRule } from "./language/rule/typedRule";
 import * as utils from "./language/utils";
-import { IMultiLinterOptions, LintResult } from "./lint";
 import { loadRules } from "./ruleLoader";
 import { arrayify, dedent } from "./utils";
 
 /**
  * Linter that can lint multiple files in consecutive runs.
  */
-class MultiLinter {
+class Linter {
     public static VERSION = "4.0.0-dev";
 
     public static findConfiguration = findConfiguration;
@@ -85,8 +85,14 @@ class MultiLinter {
         return program.getSourceFiles().map(s => s.fileName).filter(l => l.substr(-5) !== ".d.ts");
     }
 
-    constructor(private options: IMultiLinterOptions, private program?: ts.Program) {
-        // Empty
+    constructor(private options: ILinterOptions, private program?: ts.Program) {
+        if (typeof options !== "object") {
+            throw new Error("Unknown Linter options type: " + typeof options);
+        }
+        if ((<any> options).configuration != null) {
+            throw new Error("ILinterOptions does not contain the property `configuration` as of version 4. " +
+                "Did you mean to pass the `IConfigurationFile` object to lint() ? ");
+        }
     }
 
     public lint(fileName: string, source?: string, configuration: IConfigurationFile = DEFAULT_CONFIG): void {
@@ -209,6 +215,6 @@ class MultiLinter {
 }
 
 // tslint:disable-next-line:no-namespace
-namespace MultiLinter { }
+namespace Linter { }
 
-export = MultiLinter;
+export = Linter;

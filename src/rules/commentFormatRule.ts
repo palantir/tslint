@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 const OPTION_SPACE = "check-space";
 const OPTION_LOWERCASE = "check-lowercase";

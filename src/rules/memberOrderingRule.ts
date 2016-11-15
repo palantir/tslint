@@ -16,7 +16,7 @@
  */
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 /* start old options */
 const OPTION_VARIABLES_BEFORE_FUNCTIONS = "variables-before-functions";

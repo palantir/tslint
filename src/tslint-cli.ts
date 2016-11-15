@@ -26,8 +26,8 @@ import {
     DEFAULT_CONFIG,
     findConfiguration,
 } from "./configuration";
+import * as Linter from "./linter";
 import { consoleTestResultHandler, runTest } from "./test";
-import * as Linter from "./tslintMulti";
 import { updateNotifierCheck } from "./updateNotifier";
 
 let processed = optimist

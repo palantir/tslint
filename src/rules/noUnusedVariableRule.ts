@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 const OPTION_REACT = "react";
 const OPTION_CHECK_PARAMETERS = "check-parameters";
