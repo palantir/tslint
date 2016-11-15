@@ -3,7 +3,7 @@
   "rules": {
     "max-line-length": {
       "mode": "warn",
-      "options": [10]
+      "options": 10
     },
 
     "interface-name": false,

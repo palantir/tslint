@@ -129,7 +129,6 @@ class Linter {
             this.failures = [];
             for (let rule of enabledRules) {
                 const fileFailures = this.applyRule(rule, sourceFile);
-                console.log(rule.isWarning());
                 if (rule.isWarning()) {
                     this.warnings = this.warnings.concat(fileFailures);
                 } else {

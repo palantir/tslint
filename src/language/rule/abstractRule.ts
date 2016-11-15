@@ -19,6 +19,7 @@ import * as ts from "typescript";
 
 import {RuleWalker} from "../walker/ruleWalker";
 import {IDisabledInterval, IOptions, IRule, IRuleMetadata, RuleFailure} from "./rule";
+import {arrayify} from "../../utils";
 
 export abstract class AbstractRule implements IRule {
     public static metadata: IRuleMetadata;
@@ -30,7 +31,7 @@ export abstract class AbstractRule implements IRule {
         if (Array.isArray(value) && value.length > 1) {
             ruleArguments = value.slice(1);
         } else if (value.options) {
-            ruleArguments = value.options; // BPO TODO make it an array if it isn't already
+            ruleArguments = arrayify(value.options);
         }
 
         this.options = {
