@@ -40,6 +40,8 @@ export var Test = test;
 export var Utils = utils;
 
 export interface LintResult {
+    warningCount: number;
+    warnings: RuleFailure[];
     failureCount: number;
     failures: RuleFailure[];
     fixes?: RuleFailure[];

@@ -1,8 +1,13 @@
 {
-  "extends": "tslint:latest",
+//  "extends": "tslint:latest",
   "rules": {
+    "max-line-length": {
+      "mode": "warn",
+      "options": [10]
+    },
+
     "interface-name": false,
-    "max-line-length": [true, 140],
+//    "max-line-length": [true, 140],
     "member-ordering": [true,
       "public-before-private",
       "static-before-instance",

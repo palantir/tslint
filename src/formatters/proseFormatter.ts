@@ -24,13 +24,13 @@ export class Formatter extends AbstractFormatter {
     public static metadata: IFormatterMetadata = {
         formatterName: "prose",
         description: "The default formatter which outputs simple human-readable messages.",
-        sample: "myFile.ts[1, 14]: Missing semicolon",
+        sample: "ERROR: myFile.ts[1, 14]: Missing semicolon",
         consumer: "human",
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public format(failures: RuleFailure[], fixes?: RuleFailure[]): string {
-        if (failures.length === 0 && (!fixes || fixes.length === 0)) {
+    public format(failures: RuleFailure[], fixes?: RuleFailure[], warnings?: RuleFailure[]): string {
+        if ((warnings.length === 0 && failures.length === 0) && (!fixes || fixes.length === 0)) {
             return "";
         }
 
@@ -52,6 +52,17 @@ export class Formatter extends AbstractFormatter {
             fixLines.push("");   // add a blank line between fixes and failures
         }
 
+        let warnLines = warnings.map((warning: RuleFailure) => {
+            const fileName = warning.getFileName();
+            const failureString = warning.getFailure();
+
+            const lineAndCharacter = warning.getStartPosition().getLineAndCharacter();
+            const positionTuple = `[${lineAndCharacter.line + 1}, ${lineAndCharacter.character + 1}]`;
+
+            return `WARN: ${fileName}${positionTuple}: ${failureString}`;
+        });
+        fixLines = fixLines.concat(warnLines);
+
         let errorLines = failures.map((failure: RuleFailure) => {
             const fileName = failure.getFileName();
             const failureString = failure.getFailure();
@@ -59,7 +70,7 @@ export class Formatter extends AbstractFormatter {
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
             const positionTuple = `[${lineAndCharacter.line + 1}, ${lineAndCharacter.character + 1}]`;
 
-            return `${fileName}${positionTuple}: ${failureString}`;
+            return `ERROR: ${fileName}${positionTuple}: ${failureString}`;
         });
 
         return fixLines.concat(errorLines).join("\n") + "\n";

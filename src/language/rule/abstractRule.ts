@@ -29,6 +29,8 @@ export abstract class AbstractRule implements IRule {
 
         if (Array.isArray(value) && value.length > 1) {
             ruleArguments = value.slice(1);
+        } else if (value.options) {
+            ruleArguments = value.options; // BPO TODO make it an array if it isn't already
         }
 
         this.options = {
@@ -49,6 +51,10 @@ export abstract class AbstractRule implements IRule {
         return walker.getFailures();
     }
 
+    public isWarning(): boolean {
+        return this.value.mode === "warn";
+    }
+
     public isEnabled(): boolean {
         const value = this.value;
 
@@ -58,6 +64,10 @@ export abstract class AbstractRule implements IRule {
 
         if (Array.isArray(value) && value.length > 0) {
             return value[0];
+        }
+
+        if (value.mode !== "off") {
+            return true;
         }
 
         return false;

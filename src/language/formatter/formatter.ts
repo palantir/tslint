@@ -51,6 +51,7 @@ export interface IFormatter {
      * Formats linter results
      * @param {RuleFailure[]} failures Linter errors that were not fixed
      * @param {RuleFailure[]} fixes Fixed linter errors. Available when the `--fix` argument is used on the command line
+     * @param {RuleFailure[]} warnings Linter warnings that were not fixed
      */
-    format(failures: RuleFailure[], fixes?: RuleFailure[]): string;
+    format(failures: RuleFailure[], fixes?: RuleFailure[], warnings?: RuleFailure[]): string;
 }

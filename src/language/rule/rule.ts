@@ -95,6 +95,7 @@ export interface IDisabledInterval {
 export interface IRule {
     getOptions(): IOptions;
     isEnabled(): boolean;
+    isWarning(): boolean;
     apply(sourceFile: ts.SourceFile): RuleFailure[];
     applyWithWalker(walker: RuleWalker): RuleFailure[];
 }

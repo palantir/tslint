@@ -49,6 +49,7 @@ class Linter {
     public static loadConfigurationFromPath = loadConfigurationFromPath;
 
     private failures: RuleFailure[] = [];
+    private warnings: RuleFailure[] = [];
     private fixes: RuleFailure[] = [];
 
     /**
@@ -114,7 +115,11 @@ class Linter {
                     // reload AST if file is modified
                     sourceFile = this.getSourceFile(fileName, source);
                 }
-                this.failures = this.failures.concat(fileFailures);
+                if (rule.isWarning()) {
+                    this.warnings = this.warnings.concat(fileFailures);
+                } else {
+                    this.failures = this.failures.concat(fileFailures);
+                }
             }
             hasLinterRun = true;
         }
@@ -124,7 +129,12 @@ class Linter {
             this.failures = [];
             for (let rule of enabledRules) {
                 const fileFailures = this.applyRule(rule, sourceFile);
-                this.failures = this.failures.concat(fileFailures);
+                console.log(rule.isWarning());
+                if (rule.isWarning()) {
+                    this.warnings = this.warnings.concat(fileFailures);
+                } else {
+                    this.failures = this.failures.concat(fileFailures);
+                }
             }
         }
     }
@@ -141,9 +151,11 @@ class Linter {
             throw new Error(`formatter '${formatterName}' not found`);
         }
 
-        const output = formatter.format(this.failures, this.fixes);
+        const output = formatter.format(this.failures, this.fixes, this.warnings);
 
         return {
+            warningCount: this.warnings.length,
+            warnings: this.warnings,
             failureCount: this.failures.length,
             failures: this.failures,
             fixes: this.fixes,
