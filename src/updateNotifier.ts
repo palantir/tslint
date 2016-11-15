@@ -18,19 +18,23 @@
 // tslint:disable-next-line:no-var-requires
 const updateNotifier = require("update-notifier");
 // tslint:disable-next-line:no-var-requires 
-const pkg = require("../package.json");
 
 export function updateNotifierCheck(): void {
-    // Check every 3 days for a new version
-    const cacheTime: number = 1000 * 60 * 60 * 24 * 3;
-    const changeLogUrl: string = "https://github.com/palantir/tslint/blob/master/CHANGELOG.md";
-    const notifier = updateNotifier({
-        pkg,
-        updateCheckInterval: cacheTime,
-    });
+    try {
+        const pkg = require("../package.json");
+        // Check every 3 days for a new version
+        const cacheTime: number = 1000 * 60 * 60 * 24 * 3;
+        const changeLogUrl: string = "https://github.com/palantir/tslint/blob/master/CHANGELOG.md";
+        const notifier = updateNotifier({
+            pkg,
+            updateCheckInterval: cacheTime,
+        });
 
-    if (notifier.notify && notifier.update) {
-        let message: string = `TSLint update available v${notifier.update.current} → v${notifier.update.latest} \n See ${changeLogUrl}`;
-        notifier.notify({ message });
+        if (notifier.notify && notifier.update) {
+            let message: string = `TSLint update available v${notifier.update.current} → v${notifier.update.latest} \n See ${changeLogUrl}`;
+            notifier.notify({ message });
+        }
+    } catch (error) {
+        // ignore error
     }
 };
