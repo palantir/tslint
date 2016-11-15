@@ -24,7 +24,7 @@ import {
     getRulesDirectories,
     loadConfigurationFromPath,
 } from "./configuration";
-import { ILinterOptions, ILinterOptionsRaw, LintResult } from "./lint";
+import * as lint from "./lint";
 import * as MultiLinter from "./tslintMulti";
 import { arrayify } from "./utils";
 
@@ -39,7 +39,7 @@ class Linter {
     public static getRulesDirectories = getRulesDirectories;
     public static loadConfigurationFromPath = loadConfigurationFromPath;
 
-    private options: ILinterOptions;
+    private options: lint.ILinterOptions;
 
     /**
      * Creates a TypeScript program object from a tsconfig.json file path and optional project directory.
@@ -56,17 +56,17 @@ class Linter {
         return MultiLinter.getFileNames(program);
     }
 
-    constructor(private fileName: string, private source: string, options: ILinterOptionsRaw, private program?: ts.Program) {
+    constructor(private fileName: string, private source: string, options: lint.ILinterOptionsRaw, private program?: ts.Program) {
        this.options = this.computeFullOptions(options);
     }
 
-    public lint(): LintResult {
+    public lint(): lint.LintResult {
         const multiLinter: MultiLinter = new MultiLinter(this.options, this.program);
         multiLinter.lint(this.fileName, this.source, this.options.configuration);
         return multiLinter.getResult();
     }
 
-    private computeFullOptions(options: ILinterOptionsRaw = {}): ILinterOptions {
+    private computeFullOptions(options: lint.ILinterOptionsRaw = {}): lint.ILinterOptions {
         if (typeof options !== "object") {
             throw new Error("Unknown Linter options type: " + typeof options);
         }
@@ -84,6 +84,9 @@ class Linter {
 }
 
 // tslint:disable-next-line:no-namespace
-namespace Linter {}
+namespace Linter {
+    export type LintResult = lint.LintResult;
+    export type ILinterOptionsRaw = lint.ILinterOptionsRaw;
+}
 
 export = Linter;
