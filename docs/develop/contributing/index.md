@@ -4,7 +4,7 @@ title: Contributing
 permalink: /develop/contributing/
 ---
 
-To develop TSLint simply clone the repository, install dependencies:
+To develop TSLint simply clone the repository and install dependencies:
 
 ```bash
 git clone git@github.com:palantir/tslint.git --config core.autocrlf=input --config core.eol=lf
