@@ -38,53 +38,27 @@ export class Formatter extends AbstractFormatter {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public format(failures: RuleFailure[], fixes?: RuleFailure[], warnings?: RuleFailure[]): string {
-        if (fixes) {
-            //blarg
-        }
-        if (typeof failures[0] === "undefined" && typeof warnings[0] === "undefined") {
-            return "\n";
+    public format(failures: RuleFailure[], warnings: RuleFailure[]): string {
+        let outputLines = this.mapToMessages('WARNING', warnings)
+          .concat(this.mapToMessages('ERROR', failures));
+
+        // Removes initial blank line
+        if (outputLines[0] === "") {
+            outputLines.shift();
         }
 
+        return outputLines.join("\n") + "\n";
+    }
+
+    private mapToMessages(mode: string, failures: RuleFailure[]): string[] {
+        if (!failures) {
+            return [];
+        }
         const outputLines: string[] = [];
-        const warningPositionMaxSize       = this.getPositionMaxSize(warnings);
-        const warningRuleMaxSize           = this.getRuleMaxSize(warnings);
-
         const positionMaxSize       = this.getPositionMaxSize(failures);
         const ruleMaxSize           = this.getRuleMaxSize(failures);
 
         let currentFile: string;
-
-        for (const warning of warnings) {
-            const fileName = warning.getFileName();
-            // Output the name of each file once
-            if (currentFile !== fileName) {
-                outputLines.push("");
-                outputLines.push(fileName);
-                currentFile = fileName;
-            }
-
-            let warningString = warning.getFailure();
-            warningString     = colors.yellow(warningString);
-
-            // Rule
-            let ruleName = warning.getRuleName();
-            ruleName     = this.pad(ruleName, warningRuleMaxSize);
-            ruleName     = colors.grey(ruleName);
-
-            // Lines
-            const lineAndCharacter = warning.getStartPosition().getLineAndCharacter();
-
-            console.log(lineAndCharacter);
-            let positionTuple = `${lineAndCharacter.line + 1}:${lineAndCharacter.character + 1}`;
-            positionTuple     = this.pad(positionTuple, warningPositionMaxSize);
-            positionTuple     = colors.blue('WARNING: ' + positionTuple);
-
-            // Output
-            const output = `${positionTuple}  ${ruleName}  ${warningString}`;
-
-            outputLines.push(output);
-        }
 
         for (const failure of failures) {
             const fileName = failure.getFileName();
@@ -109,20 +83,19 @@ export class Formatter extends AbstractFormatter {
 
             let positionTuple = `${lineAndCharacter.line + 1}:${lineAndCharacter.character + 1}`;
             positionTuple     = this.pad(positionTuple, positionMaxSize);
-            positionTuple     = colors.red('ERROR: ' + positionTuple);
+
+            if (mode === "WARNING") {
+                positionTuple     = colors.blue('WARNING: ' + positionTuple);
+            } else {
+                positionTuple     = colors.red('ERROR: ' + positionTuple);
+            }
 
             // Output
             const output = `${positionTuple}  ${ruleName}  ${failureString}`;
 
             outputLines.push(output);
         }
-
-        // Removes initial blank line
-        if (outputLines[0] === "") {
-            outputLines.shift();
-        }
-
-        return outputLines.join("\n") + "\n\n";
+        return outputLines;
     }
 
     private pad(str: string, len: number): string {

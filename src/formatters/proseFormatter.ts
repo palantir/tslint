@@ -29,8 +29,8 @@ export class Formatter extends AbstractFormatter {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public format(failures: RuleFailure[], fixes?: RuleFailure[], warnings?: RuleFailure[]): string {
-        if ((warnings.length === 0 && failures.length === 0) && (!fixes || fixes.length === 0)) {
+    public format(failures: RuleFailure[], warnings: RuleFailure[], fixes?: RuleFailure[]): string {
+        if ((warnings && warnings.length === 0 && failures && failures.length === 0) && (!fixes || fixes.length === 0)) {
             return "";
         }
 
@@ -52,27 +52,25 @@ export class Formatter extends AbstractFormatter {
             fixLines.push("");   // add a blank line between fixes and failures
         }
 
-        let warnLines = warnings.map((warning: RuleFailure) => {
-            const fileName = warning.getFileName();
-            const failureString = warning.getFailure();
+        return fixLines.concat(this.mapToMessages('WARNING', warnings))
+          .concat(this.mapToMessages('ERROR', failures))
+          .join("\n") + "\n";
 
-            const lineAndCharacter = warning.getStartPosition().getLineAndCharacter();
-            const positionTuple = `[${lineAndCharacter.line + 1}, ${lineAndCharacter.character + 1}]`;
+    }
 
-            return `WARN: ${fileName}${positionTuple}: ${failureString}`;
-        });
-        fixLines = fixLines.concat(warnLines);
-
-        let errorLines = failures.map((failure: RuleFailure) => {
+    private mapToMessages(mode: string, failures: RuleFailure[]): string[] {
+        if (!failures) {
+            return [];
+        }
+        return failures.map((failure: RuleFailure) => {
             const fileName = failure.getFileName();
             const failureString = failure.getFailure();
 
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
             const positionTuple = `[${lineAndCharacter.line + 1}, ${lineAndCharacter.character + 1}]`;
 
-            return `ERROR: ${fileName}${positionTuple}: ${failureString}`;
+            return `${mode}: ${fileName}${positionTuple}: ${failureString}`;
         });
 
-        return fixLines.concat(errorLines).join("\n") + "\n";
     }
 }

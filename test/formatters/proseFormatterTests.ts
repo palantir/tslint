@@ -39,9 +39,9 @@ describe("Prose Formatter", () => {
         ];
 
         const expectedResult =
-            TEST_FILE + getPositionString(1, 1) + "first failure\n" +
-            TEST_FILE + getPositionString(2, 12) + "mid failure\n" +
-            TEST_FILE + getPositionString(9, 2) + "last failure\n";
+            'ERROR:' + TEST_FILE + getPositionString(1, 1) + "first failure\n" +
+            'ERROR:' + TEST_FILE + getPositionString(2, 12) + "mid failure\n" +
+            'ERROR:' + TEST_FILE + getPositionString(9, 2) + "last failure\n";
 
         const actualResult = formatter.format(failures);
         assert.equal(actualResult, expectedResult);
@@ -63,9 +63,9 @@ describe("Prose Formatter", () => {
         const expectedResult =
             `Fixed 2 error(s) in ${TEST_FILE}\n` +
             `Fixed 1 error(s) in file2\n\n` +
-            `${TEST_FILE}${getPositionString(1, 1)}first failure\n`;
+            `ERROR: ${TEST_FILE}${getPositionString(1, 1)}first failure\n`;
 
-        const actualResult = formatter.format(failures, fixes);
+        const actualResult = formatter.format(failures, [], fixes);
         assert.equal(actualResult, expectedResult);
     });
 

@@ -127,6 +127,7 @@ class Linter {
         // make a 1st pass or make a 2nd pass if there were any fixes because the positions may be off
         if (!hasLinterRun || this.fixes.length > 0) {
             this.failures = [];
+            this.warnings = [];
             for (let rule of enabledRules) {
                 const fileFailures = this.applyRule(rule, sourceFile);
                 if (rule.isWarning()) {
@@ -150,7 +151,7 @@ class Linter {
             throw new Error(`formatter '${formatterName}' not found`);
         }
 
-        const output = formatter.format(this.failures, this.fixes, this.warnings);
+        const output = formatter.format(this.failures, this.warnings, this.fixes);
 
         return {
             warningCount: this.warnings.length,

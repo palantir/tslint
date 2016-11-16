@@ -30,23 +30,18 @@ export class Formatter extends AbstractFormatter {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public format(failures: RuleFailure[], fixes?: RuleFailure[], warnings?: RuleFailure[]): string {
-        if (fixes) {
-            //blarg
+    public format(failures: RuleFailure[], warnings: RuleFailure[]): string {
+
+        return this.mapToMessages('WARNING', warnings)
+            .concat(this.mapToMessages('ERROR', failures))
+            .join("\n") + "\n";
+    }
+
+    private mapToMessages(mode: string, failures: RuleFailure[]): string[] {
+        if (!failures) {
+            return [];
         }
-
-        const warningOutputLines = warnings.map((warning: RuleFailure) => {
-            const fileName = warning.getFileName();
-            const warningString = warning.getFailure();
-            const ruleName = warning.getRuleName();
-
-            const lineAndCharacter = warning.getStartPosition().getLineAndCharacter();
-            const positionTuple = "[" + (lineAndCharacter.line + 1) + ", " + (lineAndCharacter.character + 1) + "]";
-
-            return `WARNING: (${ruleName}) ${fileName}${positionTuple}: ${warningString}`;
-        });
-
-        const errorOutputLines = failures.map((failure: RuleFailure) => {
+        return failures.map((failure: RuleFailure) => {
             const fileName = failure.getFileName();
             const failureString = failure.getFailure();
             const ruleName = failure.getRuleName();
@@ -54,9 +49,8 @@ export class Formatter extends AbstractFormatter {
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
             const positionTuple = "[" + (lineAndCharacter.line + 1) + ", " + (lineAndCharacter.character + 1) + "]";
 
-            return `ERROR: (${ruleName}) ${fileName}${positionTuple}: ${failureString}`;
+            return `${mode}: (${ruleName}) ${fileName}${positionTuple}: ${failureString}`;
         });
 
-        return warningOutputLines.concat(errorOutputLines).join("\n") + "\n";
     }
 }

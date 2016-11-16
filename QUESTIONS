@@ -1,0 +1,9 @@
+
+
+1. Backward compat for tslint.json
+
+2. Backward compat for formatters
+
+3. vsoFormatter - switch 'type' between error & warning ?
+
+4. Add validation for "mode" of tslint.json ( error|warn|off|etc... )

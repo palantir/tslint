@@ -33,10 +33,7 @@ export class Formatter extends AbstractFormatter {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public format(failures: RuleFailure[], fixes?: RuleFailure[], warnings?: RuleFailure[]): string {
-        if (fixes) {
-            //blarg
-        }
+    public format(failures: RuleFailure[], warnings: RuleFailure[]): string {
         const all = failures.concat(warnings);
 
         const outputLines = all.map((failure: RuleFailure) => {
@@ -48,7 +45,7 @@ export class Formatter extends AbstractFormatter {
             const code = (failure.getRuleName ? failure.getRuleName() : "");
             const properties = `sourcepath=${fileName};linenumber=${line};columnnumber=${character};code=${code};`;
 
-            //TOOD? warnings should be 'warnings' and errors 'error'?
+            //TODO warnings should be type=warnings and errors type=error?
             return `##vso[task.logissue type=warning;${properties}]${failureString}`;
         });
 
