@@ -5,8 +5,7 @@
         "noImplicitAny": true,
         "noUnusedParameters": true,
         "noUnusedLocals": true,
-        "declaration": false,
-        "sourceMap": false,
+        "sourceMap": true,
         "target": "es5"
     }
 }
