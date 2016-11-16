@@ -1,5 +1,8 @@
 {
   "rules": {
     "no-unused-expression": [true, "allow-fast-null-checks"]
+  },
+  "jsRules": {
+    "no-unused-expression": [true, "allow-fast-null-checks"]
   }
 }
