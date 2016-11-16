@@ -192,7 +192,7 @@ tslint accepts the following commandline options:
         formatters are prose (human readable), json (machine readable)
         and verbose. prose is the default if this option is not used.
         Other built-in options include pmd, msbuild, checkstyle, and vso.
-        Additonal formatters can be added and used if the --formatters-dir
+        Additional formatters can be added and used if the --formatters-dir
         option is set.
 
     --test:
