@@ -39,9 +39,9 @@ describe("Prose Formatter", () => {
         ];
 
         const expectedResult =
-            'ERROR:' + TEST_FILE + getPositionString(1, 1) + "first failure\n" +
-            'ERROR:' + TEST_FILE + getPositionString(2, 12) + "mid failure\n" +
-            'ERROR:' + TEST_FILE + getPositionString(9, 2) + "last failure\n";
+            'ERROR: ' + TEST_FILE + getPositionString(1, 1) + "first failure\n" +
+            'ERROR: ' + TEST_FILE + getPositionString(2, 12) + "mid failure\n" +
+            'ERROR: ' + TEST_FILE + getPositionString(9, 2) + "last failure\n";
 
         const actualResult = formatter.format(failures);
         assert.equal(actualResult, expectedResult);
@@ -71,7 +71,7 @@ describe("Prose Formatter", () => {
 
     it("handles no failures", () => {
         const result = formatter.format([]);
-        assert.equal(result, "");
+        assert.equal(result, "\n");
     });
 
     function getPositionString(line: number, character: number) {
