@@ -11,12 +11,12 @@ Let us take the example of how to write a new rule to forbid all import statemen
 
 Now, let us first write the rule in TypeScript. A few things to note:
 
-- We import `tslint/lib/index` to get the whole `Lint` namespace instead of just the `Linter` class.
+- We import `tslint` to get the whole `Lint` namespace instead of just the `Linter` class.
 - The exported class must always be named `Rule` and extend from `Lint.Rules.AbstractRule`.
 
 ```typescript
 import * as ts from "typescript";
-import * as Lint from "tslint/lib/index";
+import * as Lint from "tslint/lib";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "import statement forbidden";
