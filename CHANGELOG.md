@@ -4,9 +4,9 @@ Change Log
 v4.0.0
 ---
 * **BREAKING CHANGES**
-    * [api-change] Minor changes to the API. See PR for changes and upgrade instructions (#1720)
+    * [api-change] Minor changes to the library API. See this PR for changes and upgrade instructions (#1720)
     * [removed-rule] Removed `no-unreachable` rule; covered by compiler (#661)
-    * [enhancement] Changed order of applied configuration files for the `extends` array (#1503)
+    * [enhancement] Changed order of applied configuration files for the `extends` array to make it more intuitive. (#1503)
     * [enhancement] Changed TypeScript peer dependency to >= 2.0.0 (#1710)
 * [new-rule] `completed-docs` rule added (#1644)
 * [new-fixer] `ordered-imports` auto fixed (#1640)
@@ -15,7 +15,6 @@ v4.0.0
 * [enhancement] Updated recommend rules (#1717)
 * [enhancement] `adjacent-overload-signatures` now works with classes, source files, modules, and namespaces (#1707)
 * [enhancement] Users are notified if they are using an old TSLint version (#1696)
-* [enhancement] VSCode
 * [bugfix] Lint `.jsx` files if `jsRules` are configured (#1714)
 * [bugfix] Command line glob patterns now handle single quotes (#1679)
 
