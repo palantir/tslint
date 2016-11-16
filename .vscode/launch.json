@@ -63,6 +63,27 @@
             "sourceMaps": true, 
             "outFiles": [],
             "outDir": "${workspaceRoot}/build"
+        },
+        {
+            "name": "Debug Document Generation",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceRoot}/scripts/buildDocs.ts",
+            "stopOnEntry": false,
+            "args": ["run", "test"],
+            "cwd": "${workspaceRoot}",
+            "preLaunchTask": "tsc",
+            "runtimeExecutable": null,
+            "runtimeArgs": [
+                "--nolazy"
+            ],
+            "env": {
+                "NODE_ENV": "development"
+            },
+            "console": "internalConsole",
+            "sourceMaps": true, 
+            "outFiles": [],
+            "outDir": "${workspaceRoot}/build"
         }
     ]
 }
