@@ -17,9 +17,9 @@
 
 import * as ts from "typescript";
 
+import {IOptions} from "./language/rule/rule";
 import {scanAllTokens} from "./language/utils";
 import {SkippableTokenAwareRuleWalker} from "./language/walker/skippableTokenAwareRuleWalker";
-import {IOptions} from "./lint";
 import {IEnableDisablePosition} from "./ruleLoader";
 
 export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
