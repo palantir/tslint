@@ -351,7 +351,7 @@ tsc --noImplicitAny noImportsRule.ts
 
 Then, if using the CLI, provide the directory that contains this rule as an option to `--rules-dir`. If using TSLint as a library or via `grunt-tslint`, the `options` hash must contain `"rulesDirectory": "..."`. If you run the linter, you'll see that we have now successfully banned all import statements via TSLint!
 
-Finally, add a line to your [`tslint.json` config file][0] for each of your custom rules.
+Finally, enable each custom rule in your [`tslint.json` config file][0] config file.
 
 Final notes:
 
