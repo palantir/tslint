@@ -38,7 +38,7 @@ export class Formatter extends AbstractFormatter {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public format(failures: RuleFailure[], warnings: RuleFailure[]): string {
+    public format(failures: RuleFailure[], warnings: RuleFailure[] = []): string {
         let outputLines = this.mapToMessages('WARNING', warnings)
           .concat(this.mapToMessages('ERROR', failures));
 
@@ -82,10 +82,10 @@ export class Formatter extends AbstractFormatter {
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
 
             let positionTuple = `${lineAndCharacter.line + 1}:${lineAndCharacter.character + 1}`;
-            positionTuple     = this.pad(positionTuple, positionMaxSize);
+            positionTuple = this.pad(positionTuple, positionMaxSize);
 
             if (mode === "WARNING") {
-                positionTuple     = colors.blue('WARNING: ' + positionTuple);
+                positionTuple = colors.blue('WARNING: ' + positionTuple);
             } else {
                 positionTuple     = colors.red('ERROR: ' + positionTuple);
             }

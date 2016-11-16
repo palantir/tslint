@@ -30,7 +30,7 @@ export class Formatter extends AbstractFormatter {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public format(failures: RuleFailure[], warnings: RuleFailure[]): string {
+    public format(failures: RuleFailure[], warnings: RuleFailure[] = []): string {
 
         return this.mapToMessages('WARNING', warnings)
             .concat(this.mapToMessages('ERROR', failures))
@@ -38,9 +38,6 @@ export class Formatter extends AbstractFormatter {
     }
 
     private mapToMessages(mode: string, failures: RuleFailure[]): string[] {
-        if (!failures) {
-            return [];
-        }
         return failures.map((failure: RuleFailure) => {
             const fileName = failure.getFileName();
             const failureString = failure.getFailure();

@@ -33,11 +33,8 @@ export class Formatter extends AbstractFormatter {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public format(failures: RuleFailure[], warnings: RuleFailure[]): string {
-        let all = failures;
-        if (warnings) {
-           all = all.concat(warnings);
-        }
+    public format(failures: RuleFailure[], warnings: RuleFailure[] = []): string {
+        const all = failures.concat(warnings);
 
         const outputLines = all.map((failure: RuleFailure) => {
             const fileName = failure.getFileName();

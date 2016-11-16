@@ -29,9 +29,9 @@ export class Formatter extends AbstractFormatter {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public format(failures: RuleFailure[], warnings: RuleFailure[], fixes?: RuleFailure[]): string {
+    public format(failures: RuleFailure[], warnings: RuleFailure[] = [], fixes?: RuleFailure[]): string {
         if ((warnings && warnings.length === 0 && failures && failures.length === 0) && (!fixes || fixes.length === 0)) {
-            return "";
+            return "\n";
         }
 
         let fixLines: string[] = [];
@@ -59,9 +59,6 @@ export class Formatter extends AbstractFormatter {
     }
 
     private mapToMessages(mode: string, failures: RuleFailure[]): string[] {
-        if (!failures) {
-            return [];
-        }
         return failures.map((failure: RuleFailure) => {
             const fileName = failure.getFileName();
             const failureString = failure.getFailure();
