@@ -38,16 +38,53 @@ export class Formatter extends AbstractFormatter {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public format(failures: RuleFailure[]): string {
-        if (typeof failures[0] === "undefined") {
+    public format(failures: RuleFailure[], fixes?: RuleFailure[], warnings?: RuleFailure[]): string {
+        if (fixes) {
+            //blarg
+        }
+        if (typeof failures[0] === "undefined" && typeof warnings[0] === "undefined") {
             return "\n";
         }
 
         const outputLines: string[] = [];
+        const warningPositionMaxSize       = this.getPositionMaxSize(warnings);
+        const warningRuleMaxSize           = this.getRuleMaxSize(warnings);
+
         const positionMaxSize       = this.getPositionMaxSize(failures);
         const ruleMaxSize           = this.getRuleMaxSize(failures);
 
         let currentFile: string;
+
+        for (const warning of warnings) {
+            const fileName = warning.getFileName();
+            // Output the name of each file once
+            if (currentFile !== fileName) {
+                outputLines.push("");
+                outputLines.push(fileName);
+                currentFile = fileName;
+            }
+
+            let warningString = warning.getFailure();
+            warningString     = colors.yellow(warningString);
+
+            // Rule
+            let ruleName = warning.getRuleName();
+            ruleName     = this.pad(ruleName, warningRuleMaxSize);
+            ruleName     = colors.grey(ruleName);
+
+            // Lines
+            const lineAndCharacter = warning.getStartPosition().getLineAndCharacter();
+
+            console.log(lineAndCharacter);
+            let positionTuple = `${lineAndCharacter.line + 1}:${lineAndCharacter.character + 1}`;
+            positionTuple     = this.pad(positionTuple, warningPositionMaxSize);
+            positionTuple     = colors.blue('WARNING: ' + positionTuple);
+
+            // Output
+            const output = `${positionTuple}  ${ruleName}  ${warningString}`;
+
+            outputLines.push(output);
+        }
 
         for (const failure of failures) {
             const fileName = failure.getFileName();
@@ -72,9 +109,9 @@ export class Formatter extends AbstractFormatter {
 
             let positionTuple = `${lineAndCharacter.line + 1}:${lineAndCharacter.character + 1}`;
             positionTuple     = this.pad(positionTuple, positionMaxSize);
-            positionTuple     = colors.red(positionTuple);
+            positionTuple     = colors.red('ERROR: ' + positionTuple);
 
-            // Ouput
+            // Output
             const output = `${positionTuple}  ${ruleName}  ${failureString}`;
 
             outputLines.push(output);

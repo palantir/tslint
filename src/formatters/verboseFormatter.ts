@@ -25,13 +25,28 @@ export class Formatter extends AbstractFormatter {
         formatterName: "verbose",
         description: "The human-readable formatter which includes the rule name in messages.",
         descriptionDetails: "The output is the same as the prose formatter with the rule name included",
-        sample: "(semicolon) myFile.ts[1, 14]: Missing semicolon",
+        sample: "ERROR: (semicolon) myFile.ts[1, 14]: Missing semicolon",
         consumer: "human",
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public format(failures: RuleFailure[]): string {
-        const outputLines = failures.map((failure: RuleFailure) => {
+    public format(failures: RuleFailure[], fixes?: RuleFailure[], warnings?: RuleFailure[]): string {
+        if (fixes) {
+            //blarg
+        }
+
+        const warningOutputLines = warnings.map((warning: RuleFailure) => {
+            const fileName = warning.getFileName();
+            const warningString = warning.getFailure();
+            const ruleName = warning.getRuleName();
+
+            const lineAndCharacter = warning.getStartPosition().getLineAndCharacter();
+            const positionTuple = "[" + (lineAndCharacter.line + 1) + ", " + (lineAndCharacter.character + 1) + "]";
+
+            return `WARNING: (${ruleName}) ${fileName}${positionTuple}: ${warningString}`;
+        });
+
+        const errorOutputLines = failures.map((failure: RuleFailure) => {
             const fileName = failure.getFileName();
             const failureString = failure.getFailure();
             const ruleName = failure.getRuleName();
@@ -39,9 +54,9 @@ export class Formatter extends AbstractFormatter {
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
             const positionTuple = "[" + (lineAndCharacter.line + 1) + ", " + (lineAndCharacter.character + 1) + "]";
 
-            return `(${ruleName}) ${fileName}${positionTuple}: ${failureString}`;
+            return `ERROR: (${ruleName}) ${fileName}${positionTuple}: ${failureString}`;
         });
 
-        return outputLines.join("\n") + "\n";
+        return warningOutputLines.concat(errorOutputLines).join("\n") + "\n";
     }
 }
