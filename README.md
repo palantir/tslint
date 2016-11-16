@@ -307,13 +307,15 @@ If we don't have all the rules you're looking for, you can either write your own
 
 TSLint ships with a set of core rules that can be configured. However, users are also allowed to write their own rules, which allows them to enforce specific behavior not covered by the core of TSLint. TSLint's internal rules are itself written to be pluggable, so adding a new rule is as simple as creating a new rule file named by convention. New rules can be written in either TypeScript or JavaScript; if written in TypeScript, the code must be compiled to JavaScript before invoking TSLint.
 
-__Important conventions__: Rule identifiers are always kebab-cased. Their implementation files are always `camelCasedRule.ts` and *must* contain the suffix `Rule`. 
-
 Let us take the example of how to write a new rule to forbid all import statements (you know, *for science*). Let us name the rule file `noImportsRule.ts`. Rules are referenced in `tslint.json` with their kebab-cased identifer, so `"no-imports": true` would configure the rule.
 
-Now, let us first write the rule in TypeScript. A few things to note:
-- We import `tslint` to get the whole `Lint` namespace instead of just the `Linter` class.
-- The exported class must always be named `Rule` and extend from `Lint.Rules.AbstractRule`.
+__Important conventions__: 
+* Rule identifiers are always kebab-cased.
+* Rule files are always camel-cased (`camelCasedRule.ts`).
+* Rule files *must* contain the suffix `Rule`. 
+* The exported class must always be named `Rule` and extend from `Lint.Rules.AbstractRule`.
+
+Now, let us first write the rule in TypeScript:
 
 ```typescript
 import * as ts from "typescript";
