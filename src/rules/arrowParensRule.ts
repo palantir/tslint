@@ -58,8 +58,10 @@ class ArrowParensWalker extends Lint.RuleWalker {
             }
 
             if ((firstToken.kind !== ts.SyntaxKind.OpenParenToken || lastToken.kind !== ts.SyntaxKind.CloseParenToken)
-                 && !isGenerics && node.flags !== ts.NodeFlags.Async) {
-                this.addFailure(this.createFailure(position, width, Rule.FAILURE_STRING));
+                && !isGenerics && node.flags !== ts.NodeFlags.Async) {
+
+                const fix = new Lint.Fix(Rule.metadata.ruleName, [new Lint.Replacement(position, width, `(${parameter.getText()})`)]);
+                this.addFailure(this.createFailure(position, width, Rule.FAILURE_STRING, fix));
             }
         }
         super.visitArrowFunction(node);
