@@ -10,6 +10,7 @@ v4.0.0
     * [enhancement] Changed TypeScript peer dependency to >= 2.0.0 (#1710)
 * [new-rule] `completed-docs` rule added (#1644)
 * [new-fixer] `ordered-imports` auto fixed (#1640)
+* [new-fixer] `arrow-parens` auto fixed (#1731)
 * [rule-change] `indent` rule now ignores template strings (#1611)
 * [enhancement] `--fix` option added to automatically fix selected rules (#1697)
 * [enhancement] Updated recommend rules (#1717)
