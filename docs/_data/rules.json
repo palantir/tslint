@@ -925,12 +925,14 @@
     "ruleName": "object-literal-key-quotes",
     "description": "Enforces consistent object literal property quote style.",
     "descriptionDetails": "\nObject literal property names can be defined in two ways: using literals or using strings.\nFor example, these two objects are equivalent:\n\nvar object1 = {\n    property: true\n};\n\nvar object2 = {\n    \"property\": true\n};\n\nIn many cases, it doesn’t matter if you choose to use an identifier instead of a string\nor vice-versa. Even so, you might decide to enforce a consistent style in your code.\n\nThis rules lets you enforce consistent quoting of property names. Either they should always\nbe quoted (default behavior) or quoted only as needed (\"as-needed\").",
-    "optionsDescription": "\nPossible settings are:\n\n* `\"always\"`: Property names should always be quoted. (This is the default.)\n* `\"as-needed\"`: Only property names which require quotes may be quoted (e.g. those with spaces in them).\n\nFor ES6, computed property names (`{[name]: value}`) and methods (`{foo() {}}`) never need\nto be quoted.",
+    "optionsDescription": "\nPossible settings are:\n\n* `\"always\"`: Property names should always be quoted. (This is the default.)\n* `\"as-needed\"`: Only property names which require quotes may be quoted (e.g. those with spaces in them).\n* `\"consistent\"`: Property names should either all be quoted or unquoted.\n* `\"consistent-as-needed\"`: If any property name requires quotes, then all properties must be quoted. Otherwise, no \nproperty names may be quoted.\n\nFor ES6, computed property names (`{[name]: value}`) and methods (`{foo() {}}`) never need\nto be quoted.",
     "options": {
       "type": "string",
       "enum": [
         "always",
-        "as-needed"
+        "as-needed",
+        "consistent",
+        "consistent-as-needed"
       ]
     },
     "optionExamples": [
