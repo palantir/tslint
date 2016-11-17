@@ -87,7 +87,7 @@ export class Formatter extends AbstractFormatter {
             if (mode === "WARNING") {
                 positionTuple = colors.blue('WARNING: ' + positionTuple);
             } else {
-                positionTuple     = colors.red('ERROR: ' + positionTuple);
+                positionTuple = colors.red('ERROR: ' + positionTuple);
             }
 
             // Output
