@@ -82,7 +82,7 @@ class Linter {
      * files and excludes declaration (".d.ts") files.
      */
     public static getFileNames(program: ts.Program): string[] {
-        return program.getSourceFiles().map(s => s.fileName).filter(l => l.substr(-5) !== ".d.ts");
+        return program.getSourceFiles().map((s) => s.fileName).filter((l) => l.substr(-5) !== ".d.ts");
     }
 
     constructor(private options: ILinterOptions, private program?: ts.Program) {
@@ -99,34 +99,38 @@ class Linter {
         const enabledRules = this.getEnabledRules(fileName, source, configuration);
         let sourceFile = this.getSourceFile(fileName, source);
         let hasLinterRun = false;
+        let fileFailures: RuleFailure[] = [];
 
         if (this.options.fix) {
             this.fixes = [];
             for (let rule of enabledRules) {
-                let fileFailures = this.applyRule(rule, sourceFile);
-                const fixes = fileFailures.map(f => f.getFix()).filter(f => !!f);
+                let ruleFailures = this.applyRule(rule, sourceFile);
+                const fixes = ruleFailures.map((f) => f.getFix()).filter((f) => !!f);
                 source = fs.readFileSync(fileName, { encoding: "utf-8" });
                 if (fixes.length > 0) {
-                    this.fixes = this.fixes.concat(fileFailures);
+                    this.fixes = this.fixes.concat(ruleFailures);
                     source = Fix.applyAll(source, fixes);
                     fs.writeFileSync(fileName, source, { encoding: "utf-8" });
 
                     // reload AST if file is modified
                     sourceFile = this.getSourceFile(fileName, source);
                 }
-                this.failures = this.failures.concat(fileFailures);
+                fileFailures = fileFailures.concat(ruleFailures);
             }
             hasLinterRun = true;
         }
 
         // make a 1st pass or make a 2nd pass if there were any fixes because the positions may be off
         if (!hasLinterRun || this.fixes.length > 0) {
-            this.failures = [];
+            fileFailures = [];
             for (let rule of enabledRules) {
-                const fileFailures = this.applyRule(rule, sourceFile);
-                this.failures = this.failures.concat(fileFailures);
+                const ruleFailures = this.applyRule(rule, sourceFile);
+                if (ruleFailures.length > 0) {
+                    fileFailures = fileFailures.concat(ruleFailures);
+                }
             }
         }
+        this.failures = this.failures.concat(fileFailures);
     }
 
     public getResult(): LintResult {
