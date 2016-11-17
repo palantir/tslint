@@ -158,7 +158,7 @@ class Linter {
 
     private applyRule(rule: IRule, sourceFile: ts.SourceFile) {
         let ruleFailures: RuleFailure[] = [];
-        if (this.program && rule instanceof TypedRule) {
+        if (this.program && TypedRule.isTypedRule(rule)) {
             ruleFailures = rule.applyWithProgram(sourceFile, this.program);
         } else {
             ruleFailures = rule.apply(sourceFile);
