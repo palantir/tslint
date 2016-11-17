@@ -15,13 +15,15 @@
  * limitations under the License.
  */
 
-import * as configuration from "./configuration";
-import * as formatters from "./formatters";
+import * as Configuration from "./configuration";
+import * as Formatters from "./formatters";
 import {RuleFailure} from "./language/rule/rule";
-import * as linter from "./linter";
-import * as rules from "./rules";
-import * as test from "./test";
-import * as utils from "./utils";
+import * as Linter from "./linter";
+import * as Rules from "./rules";
+import * as Test from "./test";
+import * as Utils from "./utils";
+
+export { Configuration, Formatters, Linter, Rules, Test, Utils };
 
 export * from "./language/rule/rule";
 export * from "./enableDisableRules";
@@ -31,13 +33,6 @@ export * from "./language/utils";
 export * from "./language/languageServiceHost";
 export * from "./language/walker";
 export * from "./language/formatter/formatter";
-
-export var Configuration = configuration;
-export var Formatters = formatters;
-export var Linter = linter;
-export var Rules = rules;
-export var Test = test;
-export var Utils = utils;
 
 export interface LintResult {
     failureCount: number;
