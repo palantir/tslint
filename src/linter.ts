@@ -160,13 +160,13 @@ class Linter {
         const output = formatter.format(this.failures, this.warnings, this.fixes);
 
         return {
-            warningCount: this.warnings.length,
-            warnings: this.warnings,
             failureCount: this.failures.length,
             failures: this.failures,
             fixes: this.fixes,
             format: formatterName,
             output,
+            warningCount: this.warnings.length,
+            warnings: this.warnings,
         };
     }
 

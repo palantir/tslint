@@ -45,7 +45,6 @@ export class Formatter extends AbstractFormatter {
             const code = (failure.getRuleName ? failure.getRuleName() : "");
             const properties = `sourcepath=${fileName};linenumber=${line};columnnumber=${character};code=${code};`;
 
-            //TODO warnings should be type=warnings and errors type=error?
             return `##vso[task.logissue type=warning;${properties}]${failureString}`;
         });
 

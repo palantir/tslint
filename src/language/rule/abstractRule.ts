@@ -17,9 +17,9 @@
 
 import * as ts from "typescript";
 
+import {arrayify} from "../../utils";
 import {RuleWalker} from "../walker/ruleWalker";
 import {IDisabledInterval, IOptions, IRule, IRuleMetadata, RuleFailure} from "./rule";
-import {arrayify} from "../../utils";
 
 export abstract class AbstractRule implements IRule {
     public static metadata: IRuleMetadata;

@@ -52,8 +52,8 @@ export class Formatter extends AbstractFormatter {
             fixLines.push("");   // add a blank line between fixes and failures
         }
 
-        return fixLines.concat(this.mapToMessages('WARNING', warnings))
-          .concat(this.mapToMessages('ERROR', failures))
+        return fixLines.concat(this.mapToMessages("WARNING", warnings))
+          .concat(this.mapToMessages("ERROR", failures))
           .join("\n") + "\n";
 
     }

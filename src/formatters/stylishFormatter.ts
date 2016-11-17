@@ -39,8 +39,8 @@ export class Formatter extends AbstractFormatter {
     /* tslint:enable:object-literal-sort-keys */
 
     public format(failures: RuleFailure[], warnings: RuleFailure[] = []): string {
-        let outputLines = this.mapToMessages('WARNING', warnings)
-          .concat(this.mapToMessages('ERROR', failures));
+        let outputLines = this.mapToMessages("WARNING", warnings)
+          .concat(this.mapToMessages("ERROR", failures));
 
         // Removes initial blank line
         if (outputLines[0] === "") {
@@ -85,9 +85,9 @@ export class Formatter extends AbstractFormatter {
             positionTuple = this.pad(positionTuple, positionMaxSize);
 
             if (mode === "WARNING") {
-                positionTuple = colors.blue('WARNING: ' + positionTuple);
+                positionTuple = colors.blue("WARNING: " + positionTuple);
             } else {
-                positionTuple = colors.red('ERROR: ' + positionTuple);
+                positionTuple = colors.red("ERROR: " + positionTuple);
             }
 
             // Output

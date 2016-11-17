@@ -32,8 +32,8 @@ export class Formatter extends AbstractFormatter {
 
     public format(failures: RuleFailure[], warnings: RuleFailure[] = []): string {
 
-        return this.mapToMessages('WARNING', warnings)
-            .concat(this.mapToMessages('ERROR', failures))
+        return this.mapToMessages("WARNING", warnings)
+            .concat(this.mapToMessages("ERROR", failures))
             .join("\n") + "\n";
     }
 

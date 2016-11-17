@@ -1,24 +1,32 @@
 {
-//  "extends": "tslint:latest",
+  "extends": "tslint:latest",
   "rules": {
-    "max-line-length": {
-      "mode": "warn",
-      "options": 10
+    "interface-name": {
+      "mode": "off"
     },
-
-    "interface-name": false,
-//    "max-line-length": [true, 140],
-    "member-ordering": [true,
-      "public-before-private",
-      "static-before-instance",
-      "variables-before-functions"
-    ],
-    "no-unused-variable": false,
-    "variable-name": [true,
-      "ban-keywords",
-      "check-format",
-      "allow-leading-underscore",
-      "allow-pascal-case"
-    ]
+    "max-line-length": {
+      "mode": "error",
+      "options": 140
+    },
+    "member-ordering": {
+      "mode": "error",
+      "options": [
+        "public-before-private",
+        "static-before-instance",
+        "variables-before-functions"
+      ]
+    },
+    "no-unused-variable": {
+      "mode": "error"
+    },
+    "variable-name": {
+      "mode": "error",
+      "options" : [
+        "ban-keywords",
+        "check-format",
+        "allow-leading-underscore",
+        "allow-pascal-case"
+      ]
+    }
   }
 }
