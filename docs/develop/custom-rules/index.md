@@ -51,6 +51,21 @@ Then, if using the CLI, provide the directory that contains this rule as an opti
 
 Finally, add a line to your [`tslint.json` config file][0] for each of your custom rules.
 
+---
+
+Now that you're written a rule to detect problems, let's modify it to *fix* them. 
+
+Instantiate a `Fix` object and pass it in as an argument to `addFailure`. This snippet replaces the offending import statement with an empty string:
+
+```typescript
+        // create a fixer for this failure
+        const replacement = new Lint.Replacement(node.getStart(), node.getWidth(), "");
+        const fix = new Lint.Fix("no-imports", [replacement]);
+
+        // create a failure at the current position
+        this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING, fix));
+```
+---
 Final notes:
 
 - Core rules cannot be overwritten with a custom implementation.
