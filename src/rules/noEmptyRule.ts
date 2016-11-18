@@ -36,7 +36,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static FAILURE_STRING = "block is empty";
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
         return this.applyWithWalker(new BlockWalker(sourceFile, this.getOptions()));
     }
 }

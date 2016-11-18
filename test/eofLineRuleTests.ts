@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {RuleLevel} from "../src/language/rule/rule";
 import {TestUtils} from "./lint";
 
 describe("<eofline>", () => {
@@ -23,7 +24,7 @@ describe("<eofline>", () => {
 
     it("ensures a trailing newline at EOF", () => {
         const actualFailures = TestUtils.applyRuleOnFile(fileName, EofLineRule);
-        const expectedFailure = TestUtils.createFailure(fileName, [4, 38], [4, 38], failureString);
+        const expectedFailure = TestUtils.createFailure(fileName, [4, 38], [4, 38], RuleLevel.ERROR, failureString);
 
         assert.equal(actualFailures.length, 1);
         assert.isTrue(actualFailures[0].equals(expectedFailure));

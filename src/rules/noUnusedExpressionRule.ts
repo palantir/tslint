@@ -39,7 +39,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static FAILURE_STRING = "expected an assignment or function call";
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
         return this.applyWithWalker(new NoUnusedExpressionWalker(sourceFile, this.getOptions()));
     }
 }

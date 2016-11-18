@@ -19,7 +19,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static FAILURE_STRING = "missing file header";
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
         const walker = new FileHeaderWalker(sourceFile, this.getOptions());
         const options = this.getOptions().ruleArguments;
         walker.setRegexp(new RegExp(options[0].toString()));

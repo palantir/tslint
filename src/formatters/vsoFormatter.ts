@@ -16,7 +16,7 @@
 
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
 import {IFormatterMetadata} from "../language/formatter/formatter";
-import {RuleFailure} from "../language/rule/rule";
+import {RuleViolation} from "../language/rule/rule";
 
 import * as Utils from "../utils";
 
@@ -33,12 +33,12 @@ export class Formatter extends AbstractFormatter {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public format(failures: RuleFailure[], warnings: RuleFailure[] = []): string {
+    public format(failures: RuleViolation[], warnings: RuleViolation[] = []): string {
         const all = failures.concat(warnings);
 
-        const outputLines = all.map((failure: RuleFailure) => {
+        const outputLines = all.map((failure: RuleViolation) => {
             const fileName = failure.getFileName();
-            const failureString = failure.getFailure();
+            const failureString = failure.getViolation();
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
             const line = lineAndCharacter.line + 1;
             const character = lineAndCharacter.character + 1;

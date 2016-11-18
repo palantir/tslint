@@ -19,13 +19,13 @@ import * as ts from "typescript";
 
 import {arrayify} from "../../utils";
 import {RuleWalker} from "../walker/ruleWalker";
-import {IDisabledInterval, IOptions, IRule, IRuleMetadata, RuleFailure} from "./rule";
+import {IDisabledInterval, IOptions, IRule, IRuleMetadata, RuleLevel, RuleViolation} from "./rule";
 
 export abstract class AbstractRule implements IRule {
     public static metadata: IRuleMetadata;
     private options: IOptions;
 
-    constructor(ruleName: string, private value: any, disabledIntervals: IDisabledInterval[]) {
+    constructor(ruleName: string, private value: any, ruleLevel: RuleLevel, disabledIntervals: IDisabledInterval[]) {
         let ruleArguments: any[] = [];
 
         if (Array.isArray(value) && value.length > 1) {
@@ -36,6 +36,7 @@ export abstract class AbstractRule implements IRule {
 
         this.options = {
             disabledIntervals,
+            ruleLevel,
             ruleArguments,
             ruleName,
         };
@@ -45,15 +46,11 @@ export abstract class AbstractRule implements IRule {
         return this.options;
     }
 
-    public abstract apply(sourceFile: ts.SourceFile): RuleFailure[];
+    public abstract apply(sourceFile: ts.SourceFile): RuleViolation[];
 
-    public applyWithWalker(walker: RuleWalker): RuleFailure[] {
+    public applyWithWalker(walker: RuleWalker): RuleViolation[] {
         walker.walk(walker.getSourceFile());
         return walker.getFailures();
-    }
-
-    public isWarning(): boolean {
-        return this.value.mode === "warn";
     }
 
     public isEnabled(): boolean {
@@ -67,7 +64,7 @@ export abstract class AbstractRule implements IRule {
             return value[0];
         }
 
-        if (value.mode !== "off") {
+        if (value.level !== "off") {
             return true;
         }
 

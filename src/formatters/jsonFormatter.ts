@@ -17,7 +17,7 @@
 
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
 import {IFormatterMetadata} from "../language/formatter/formatter";
-import {RuleFailure} from "../language/rule/rule";
+import {RuleViolation} from "../language/rule/rule";
 
 import * as Utils from "../utils";
 
@@ -58,7 +58,7 @@ export class Formatter extends AbstractFormatter {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public format(failures: RuleFailure[]): string {
+    public format(failures: RuleViolation[]): string {
         const failuresJSON = failures.map((failure) => failure.toJson());
         return JSON.stringify(failuresJSON);
     }

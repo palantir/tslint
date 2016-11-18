@@ -52,15 +52,15 @@ export class Rule extends Lint.Rules.AbstractRule {
         return false;
     }
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const ruleFailures: Lint.RuleFailure[] = [];
+    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
+        const ruleFailures: Lint.RuleViolation[] = [];
         const lineLimit: number = this.getOptions().ruleArguments[0];
         const lineCount: number = sourceFile.getLineStarts().length;
         const disabledIntervals = this.getOptions().disabledIntervals;
 
         if (lineCount > lineLimit && disabledIntervals.length === 0) {
             const errorString = Rule.FAILURE_STRING_FACTORY(lineCount, lineLimit);
-            ruleFailures.push(new Lint.RuleFailure(sourceFile, 0, 1, errorString, this.getOptions().ruleName));
+            ruleFailures.push(new Lint.RuleViolation(sourceFile, 0, 1, errorString, this.getOptions().ruleLevel, this.getOptions().ruleName));
         }
 
         return ruleFailures;

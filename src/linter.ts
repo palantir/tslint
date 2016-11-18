@@ -31,7 +31,7 @@ import { EnableDisableRulesWalker } from "./enableDisableRules";
 import { findFormatter } from "./formatterLoader";
 import { ILinterOptions, LintResult } from "./index";
 import { IFormatter } from "./language/formatter/formatter";
-import { Fix, IRule, RuleFailure } from "./language/rule/rule";
+import {Fix, IRule, RuleLevel, RuleViolation} from "./language/rule/rule";
 import { TypedRule } from "./language/rule/typedRule";
 import * as utils from "./language/utils";
 import { loadRules } from "./ruleLoader";
@@ -48,9 +48,8 @@ class Linter {
     public static getRulesDirectories = getRulesDirectories;
     public static loadConfigurationFromPath = loadConfigurationFromPath;
 
-    private failures: RuleFailure[] = [];
-    private warnings: RuleFailure[] = [];
-    private fixes: RuleFailure[] = [];
+    private violations: RuleViolation[] = [];
+    private fixes: RuleViolation[] = [];
 
     /**
      * Creates a TypeScript program object from a tsconfig.json file path and optional project directory.
@@ -100,49 +99,38 @@ class Linter {
         const enabledRules = this.getEnabledRules(fileName, source, configuration);
         let sourceFile = this.getSourceFile(fileName, source);
         let hasLinterRun = false;
-        let fileFailures: RuleFailure[] = [];
-        let fileWarnings: RuleFailure[] = [];
+        let fileViolations: RuleViolation[] = [];
 
         if (this.options.fix) {
             this.fixes = [];
             for (let rule of enabledRules) {
-                let ruleFailures = this.applyRule(rule, sourceFile);
-                const fixes = ruleFailures.map((f) => f.getFix()).filter((f) => !!f);
+                let ruleViolations = this.applyRule(rule, sourceFile);
+                const fixes = ruleViolations.map((f) => f.getFix()).filter((f) => !!f);
                 source = fs.readFileSync(fileName, { encoding: "utf-8" });
                 if (fixes.length > 0) {
-                    this.fixes = this.fixes.concat(ruleFailures);
+                    this.fixes = this.fixes.concat(ruleViolations);
                     source = Fix.applyAll(source, fixes);
                     fs.writeFileSync(fileName, source, { encoding: "utf-8" });
 
                     // reload AST if file is modified
                     sourceFile = this.getSourceFile(fileName, source);
                 }
-                if (rule.isWarning()) {
-                    fileWarnings = fileWarnings.concat(ruleFailures);
-                } else {
-                    fileFailures = fileFailures.concat(ruleFailures);
-                }
+                fileViolations = fileViolations.concat(ruleViolations);
             }
             hasLinterRun = true;
         }
 
         // make a 1st pass or make a 2nd pass if there were any fixes because the positions may be off
         if (!hasLinterRun || this.fixes.length > 0) {
-            fileFailures = [];
-            fileWarnings = [];
+            fileViolations = [];
             for (let rule of enabledRules) {
-                const ruleFailures = this.applyRule(rule, sourceFile);
-                if (ruleFailures.length > 0) {
-                    if (rule.isWarning()) {
-                        fileWarnings = fileWarnings.concat(ruleFailures);
-                    } else {
-                        fileFailures = fileFailures.concat(ruleFailures);
-                    }
+                const ruleViolations = this.applyRule(rule, sourceFile);
+                if (ruleViolations.length > 0) {
+                    fileViolations = fileViolations.concat(ruleViolations);
                 }
             }
         }
-        this.failures = this.failures.concat(fileFailures);
-        this.warnings = this.warnings.concat(fileWarnings);
+        this.violations = this.violations.concat(fileViolations);
     }
 
     public getResult(): LintResult {
@@ -157,29 +145,27 @@ class Linter {
             throw new Error(`formatter '${formatterName}' not found`);
         }
 
-        const output = formatter.format(this.failures, this.warnings, this.fixes);
+        const output = formatter.format(this.violations, this.fixes);
 
         return {
-            failureCount: this.failures.length,
-            failures: this.failures,
             fixes: this.fixes,
             format: formatterName,
             output,
-            warningCount: this.warnings.length,
-            warnings: this.warnings,
+            violationCount: this.violations.length,
+            violations: this.violations,
         };
     }
 
     private applyRule(rule: IRule, sourceFile: ts.SourceFile) {
-        let ruleFailures: RuleFailure[] = [];
+        let ruleFailures: RuleViolation[] = [];
         if (this.program && TypedRule.isTypedRule(rule)) {
             ruleFailures = rule.applyWithProgram(sourceFile, this.program);
         } else {
             ruleFailures = rule.apply(sourceFile);
         }
-        let fileFailures: RuleFailure[] = [];
+        let fileFailures: RuleViolation[] = [];
         for (let ruleFailure of ruleFailures) {
-            if (!this.containsRule(this.failures, ruleFailure)) {
+            if (!this.containsRule(this.violations, ruleFailure)) {
                 fileFailures.push(ruleFailure);
             }
         }
@@ -192,6 +178,7 @@ class Linter {
         // walk the code first to find all the intervals where rules are disabled
         const rulesWalker = new EnableDisableRulesWalker(sourceFile, {
             disabledIntervals: [],
+            ruleLevel: RuleLevel.ERROR,
             ruleName: "",
         });
         rulesWalker.walk(sourceFile);
@@ -227,7 +214,7 @@ class Linter {
         return sourceFile;
     }
 
-    private containsRule(rules: RuleFailure[], rule: RuleFailure) {
+    private containsRule(rules: RuleViolation[], rule: RuleViolation) {
         return rules.some((r) => r.equals(rule));
     }
 }

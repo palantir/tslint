@@ -49,7 +49,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static FAILURE_STRING = "'namespace' and 'module' are disallowed";
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
         return this.applyWithWalker(new NoNamespaceWalker(sourceFile, this.getOptions()));
     }
 }

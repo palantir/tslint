@@ -47,7 +47,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         return `Calls to '${expression}' are not allowed.${messageAddition ? " " + messageAddition : ""}`;
     };
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
         const options = this.getOptions();
         const banFunctionWalker = new BanFunctionWalker(sourceFile, options);
         const functionsToBan = options.ruleArguments;

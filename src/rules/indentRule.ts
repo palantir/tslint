@@ -48,7 +48,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_TABS = "tab indentation expected";
     public static FAILURE_STRING_SPACES = "space indentation expected";
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
         return this.applyWithWalker(new IndentWalker(sourceFile, this.getOptions()));
     }
 }

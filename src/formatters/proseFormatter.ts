@@ -17,7 +17,7 @@
 
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
 import {IFormatterMetadata} from "../language/formatter/formatter";
-import {RuleFailure} from "../language/rule/rule";
+import {RuleLevel, RuleViolation} from "../language/rule/rule";
 
 export class Formatter extends AbstractFormatter {
     /* tslint:disable:object-literal-sort-keys */
@@ -29,8 +29,8 @@ export class Formatter extends AbstractFormatter {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public format(failures: RuleFailure[], warnings: RuleFailure[] = [], fixes?: RuleFailure[]): string {
-        if ((warnings && warnings.length === 0 && failures && failures.length === 0) && (!fixes || fixes.length === 0)) {
+    public format(violations: RuleViolation[], fixes?: RuleViolation[]): string {
+        if (violations && violations.length === 0 && (!fixes || fixes.length === 0)) {
             return "\n";
         }
 
@@ -52,21 +52,20 @@ export class Formatter extends AbstractFormatter {
             fixLines.push("");   // add a blank line between fixes and failures
         }
 
-        return fixLines.concat(this.mapToMessages("WARNING", warnings))
-          .concat(this.mapToMessages("ERROR", failures))
+        return fixLines.concat(this.mapToMessages(violations))
           .join("\n") + "\n";
 
     }
 
-    private mapToMessages(mode: string, failures: RuleFailure[]): string[] {
-        return failures.map((failure: RuleFailure) => {
-            const fileName = failure.getFileName();
-            const failureString = failure.getFailure();
+    private mapToMessages(violations: RuleViolation[]): string[] {
+        return violations.map((violation: RuleViolation) => {
+            const fileName = violation.getFileName();
+            const failureString = violation.getViolation();
 
-            const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
+            const lineAndCharacter = violation.getStartPosition().getLineAndCharacter();
             const positionTuple = `[${lineAndCharacter.line + 1}, ${lineAndCharacter.character + 1}]`;
 
-            return `${mode}: ${fileName}${positionTuple}: ${failureString}`;
+            return `${RuleLevel[violation.getRuleLevel()]}: ${fileName}${positionTuple}: ${failureString}`;
         });
 
     }

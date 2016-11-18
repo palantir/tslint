@@ -37,7 +37,7 @@ export class Rule extends BanRule.Rule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
         const options = this.getOptions();
         const consoleBanWalker = new BanRule.BanFunctionWalker(sourceFile, this.getOptions());
         for (const option of options.ruleArguments) {

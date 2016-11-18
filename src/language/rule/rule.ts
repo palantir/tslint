@@ -81,8 +81,14 @@ export interface IRuleMetadata {
 
 export type RuleType = "functionality" | "maintainability" | "style" | "typescript";
 
+export enum RuleLevel {
+    "WARNING",
+    "ERROR"
+}
+
 export interface IOptions {
     ruleArguments?: any[];
+    ruleLevel: RuleLevel;
     ruleName: string;
     disabledIntervals: IDisabledInterval[];
 }
@@ -95,9 +101,8 @@ export interface IDisabledInterval {
 export interface IRule {
     getOptions(): IOptions;
     isEnabled(): boolean;
-    isWarning(): boolean;
-    apply(sourceFile: ts.SourceFile): RuleFailure[];
-    applyWithWalker(walker: RuleWalker): RuleFailure[];
+    apply(sourceFile: ts.SourceFile): RuleViolation[];
+    applyWithWalker(walker: RuleWalker): RuleViolation[];
 }
 
 export class Replacement {
@@ -157,7 +162,7 @@ export class Fix {
     }
 }
 
-export class RuleFailurePosition {
+export class RuleViolationPosition {
     constructor(private position: number, private lineAndCharacter: ts.LineAndCharacter) {
     }
 
@@ -177,25 +182,26 @@ export class RuleFailurePosition {
         };
     }
 
-    public equals(ruleFailurePosition: RuleFailurePosition) {
+    public equals(ruleFailurePosition: RuleViolationPosition) {
         const ll = this.lineAndCharacter;
         const rr = ruleFailurePosition.lineAndCharacter;
 
         return this.position === ruleFailurePosition.position
-            && ll.line === rr.line
-            && ll.character === rr.character;
+          && ll.line === rr.line
+          && ll.character === rr.character;
     }
 }
 
-export class RuleFailure {
+export class RuleViolation {
     private fileName: string;
-    private startPosition: RuleFailurePosition;
-    private endPosition: RuleFailurePosition;
+    private startPosition: RuleViolationPosition;
+    private endPosition: RuleViolationPosition;
 
     constructor(private sourceFile: ts.SourceFile,
                 start: number,
                 end: number,
-                private failure: string,
+                private violation: string,
+                private ruleLevel: RuleLevel,
                 private ruleName: string,
                 private fix?: Fix) {
 
@@ -208,20 +214,24 @@ export class RuleFailure {
         return this.fileName;
     }
 
+    public getRuleLevel() {
+        return this.ruleLevel;
+    }
+
     public getRuleName() {
         return this.ruleName;
     }
 
-    public getStartPosition(): RuleFailurePosition {
+    public getStartPosition(): RuleViolationPosition {
         return this.startPosition;
     }
 
-    public getEndPosition(): RuleFailurePosition {
+    public getEndPosition(): RuleViolationPosition {
         return this.endPosition;
     }
 
-    public getFailure() {
-        return this.failure;
+    public getViolation() {
+        return this.violation;
     }
 
     public hasFix() {
@@ -235,23 +245,24 @@ export class RuleFailure {
     public toJson(): any {
         return {
             endPosition: this.endPosition.toJson(),
-            failure: this.failure,
+            failure: this.violation,
             fix: this.fix,
             name: this.fileName,
+            ruleLevel: RuleLevel[this.ruleLevel],
             ruleName: this.ruleName,
             startPosition: this.startPosition.toJson(),
         };
     }
 
-    public equals(ruleFailure: RuleFailure) {
-        return this.failure  === ruleFailure.getFailure()
-            && this.fileName === ruleFailure.getFileName()
-            && this.startPosition.equals(ruleFailure.getStartPosition())
-            && this.endPosition.equals(ruleFailure.getEndPosition());
+    public equals(ruleFailure: RuleViolation) {
+        return this.violation  === ruleFailure.getViolation()
+          && this.fileName === ruleFailure.getFileName()
+          && this.startPosition.equals(ruleFailure.getStartPosition())
+          && this.endPosition.equals(ruleFailure.getEndPosition());
     }
 
     private createFailurePosition(position: number) {
         const lineAndCharacter = this.sourceFile.getLineAndCharacterOfPosition(position);
-        return new RuleFailurePosition(position, lineAndCharacter);
+        return new RuleViolationPosition(position, lineAndCharacter);
     }
 }

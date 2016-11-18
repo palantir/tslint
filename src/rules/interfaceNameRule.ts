@@ -46,7 +46,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "interface name must start with a capitalized I";
     public static FAILURE_STRING_NO_PREFIX = `interface name must not have an "I" prefix`;
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
         return this.applyWithWalker(new NameWalker(sourceFile, this.getOptions()));
     }
 }

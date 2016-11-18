@@ -43,7 +43,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static ALIGNMENT_FAILURE_STRING = "asterisks in jsdoc must be aligned";
     public static FORMAT_FAILURE_STRING = "jsdoc is not formatted correctly on this line";
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
         return this.applyWithWalker(new JsdocWalker(sourceFile, this.getOptions()));
     }
 }

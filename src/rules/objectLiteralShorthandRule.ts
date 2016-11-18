@@ -17,7 +17,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static LONGHAND_PROPERTY = "Expected property shorthand in object literal.";
     public static LONGHAND_METHOD = "Expected method shorthand in object literal.";
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
         const objectLiteralShorthandWalker = new ObjectLiteralShorthandWalker(sourceFile, this.getOptions());
         return this.applyWithWalker(objectLiteralShorthandWalker);
     }

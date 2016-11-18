@@ -1,6 +1,6 @@
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
 import {IFormatterMetadata} from "../language/formatter/formatter";
-import {RuleFailure} from "../language/rule/rule";
+import {RuleViolation} from "../language/rule/rule";
 
 import * as Utils from "../utils";
 
@@ -22,7 +22,7 @@ export class Formatter extends AbstractFormatter {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public format(failures: RuleFailure[]): string {
+    public format(failures: RuleViolation[]): string {
         let output = '<?xml version="1.0" encoding="utf-8"?><checkstyle version="4.3">';
 
         if (failures.length) {
@@ -31,7 +31,7 @@ export class Formatter extends AbstractFormatter {
                 output += `<error line="${failure.getStartPosition().getLineAndCharacter().line + 1}" `;
                 output += `column="${failure.getStartPosition().getLineAndCharacter().character + 1}" `;
                 output += `severity="warning" `;
-                output += `message="${this.escapeXml(failure.getFailure())}" `;
+                output += `message="${this.escapeXml(failure.getViolation())}" `;
                 // checkstyle parser wants "source" to have structure like <anything>dot<category>dot<type>
                 output += `source="failure.tslint.${this.escapeXml(failure.getRuleName())}" />`;
             }

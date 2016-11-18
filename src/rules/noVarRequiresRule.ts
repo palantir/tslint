@@ -37,7 +37,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static FAILURE_STRING = "require statement not part of an import statement";
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
         const requiresWalker = new NoVarRequiresWalker(sourceFile, this.getOptions());
         return this.applyWithWalker(requiresWalker);
     }

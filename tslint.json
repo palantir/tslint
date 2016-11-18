@@ -2,14 +2,14 @@
   "extends": "tslint:latest",
   "rules": {
     "interface-name": {
-      "mode": "off"
+      "level": "off"
     },
     "max-line-length": {
-      "mode": "error",
+      "level": "error",
       "options": 140
     },
     "member-ordering": {
-      "mode": "error",
+      "level": "error",
       "options": [
         "public-before-private",
         "static-before-instance",
@@ -17,10 +17,10 @@
       ]
     },
     "no-unused-variable": {
-      "mode": "error"
+      "level": "error"
     },
     "variable-name": {
-      "mode": "error",
+      "level": "error",
       "options" : [
         "ban-keywords",
         "check-format",

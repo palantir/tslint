@@ -47,8 +47,8 @@ export class Rule extends Lint.Rules.AbstractRule {
         LF: `Expected linebreak to be '${OPTION_LINEBREAK_STYLE_LF}'`,
     };
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const failures: Lint.RuleFailure[] = [];
+    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
+        const failures: Lint.RuleViolation[] = [];
         const scanner = ts.createScanner(
             sourceFile.languageVersion,
             false,
@@ -73,13 +73,13 @@ export class Rule extends Lint.Rules.AbstractRule {
         return failures;
     }
 
-    public createFailure(sourceFile: ts.SourceFile, scanner: ts.Scanner, failure: string): Lint.RuleFailure {
+    public createFailure(sourceFile: ts.SourceFile, scanner: ts.Scanner, failure: string): Lint.RuleViolation {
         // get the start of the current line
         const start = sourceFile.getPositionOfLineAndCharacter(sourceFile.getLineAndCharacterOfPosition(scanner.getStartPos()).line, 0);
         // since line endings are not visible, we simply end at the beginning of
         // the line ending, which happens to be the start of the token.
         const end = scanner.getStartPos();
 
-        return new Lint.RuleFailure(sourceFile, start, end, failure, this.getOptions().ruleName);
+        return new Lint.RuleViolation(sourceFile, start, end, failure, this.getOptions().ruleLevel, this.getOptions().ruleName);
     }
 }

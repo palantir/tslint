@@ -39,7 +39,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static FAILURE_STRING = "Assignments in conditional expressions are forbidden";
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
         const walker = new NoConditionalAssignmentWalker(sourceFile, this.getOptions());
         return this.applyWithWalker(walker);
     }

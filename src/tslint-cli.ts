@@ -227,6 +227,7 @@ const possibleConfigAbsolutePath = argv.c != null ? path.resolve(argv.c) : null;
 
 const processFiles = (files: string[], program?: ts.Program) => {
 
+    console.log("processFiles ------------");
     const linter = new Linter({
         fix: argv.fix,
         formatter: argv.t,
@@ -270,7 +271,8 @@ const processFiles = (files: string[], program?: ts.Program) => {
     const lintResult = linter.getResult();
 
     outputStream.write(lintResult.output, () => {
-        if (lintResult.failureCount > 0) {
+        console.log('cli write');
+        if (lintResult.violationCount > 0) {
             process.exit(argv.force ? 0 : 2);
         }
     });

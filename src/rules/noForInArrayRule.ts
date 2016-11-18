@@ -49,7 +49,7 @@ export class Rule extends Lint.Rules.TypedRule {
 
     public static FAILURE_STRING = "for-in loops over arrays are forbidden. Use for-of or array.forEach instead.";
 
-    public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+    public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleViolation[] {
         const noForInArrayWalker = new NoForInArrayWalker(sourceFile, this.getOptions(), program);
         return this.applyWithWalker(noForInArrayWalker);
     }

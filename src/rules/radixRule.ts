@@ -38,7 +38,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static FAILURE_STRING = "Missing radix parameter";
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
         const radixWalker = new RadixWalker(sourceFile, this.getOptions());
         return this.applyWithWalker(radixWalker);
     }

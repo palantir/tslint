@@ -18,7 +18,7 @@ import {camelize} from "underscore.string";
 
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
 import {IFormatterMetadata} from "../language/formatter/formatter";
-import {RuleFailure} from "../language/rule/rule";
+import {RuleViolation} from "../language/rule/rule";
 
 import * as Utils from "../utils";
 
@@ -35,10 +35,10 @@ export class Formatter extends AbstractFormatter {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public format(failures: RuleFailure[]): string {
-        const outputLines = failures.map((failure: RuleFailure) => {
+    public format(failures: RuleViolation[]): string {
+        const outputLines = failures.map((failure: RuleViolation) => {
             const fileName = failure.getFileName();
-            const failureString = failure.getFailure();
+            const failureString = failure.getViolation();
             const camelizedRule = camelize(failure.getRuleName());
 
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {RuleFailure} from "../rule/rule";
+import {RuleViolation} from "../rule/rule";
 
 export interface IFormatterMetadata {
     /**
@@ -49,9 +49,8 @@ export type ConsumerType = "human" | "machine";
 export interface IFormatter {
     /**
      * Formats linter results
-     * @param {RuleFailure[]} failures Linter errors that were not fixed
-     * @param {RuleFailure[]} warnings Linter warnings that were not fixed
-     * @param {RuleFailure[]} fixes Fixed linter errors. Available when the `--fix` argument is used on the command line
+     * @param {RuleViolation[]} violations Linter violations that were not fixed
+     * @param {RuleViolation[]} fixes Fixed linter violations. Available when the `--fix` argument is used on the command line
      */
-    format(failures: RuleFailure[], warnings?: RuleFailure[], fixes?: RuleFailure[]): string;
+    format(violations: RuleViolation[], fixes?: RuleViolation[]): string;
 }

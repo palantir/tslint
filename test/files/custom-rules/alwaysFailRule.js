@@ -12,7 +12,6 @@ var Rule = (function (_super) {
     Rule.prototype.apply = function (sourceFile) {
         return this.applyWithWalker(new AlwaysFailWalker(sourceFile, this.getOptions()));
     };
-    Rule.prototype.isWarning = function() { return false; };
     return Rule;
 })(Lint.Rules.AbstractRule);
 exports.Rule = Rule;

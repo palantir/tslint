@@ -52,7 +52,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static FAILURE_STRING_SUFFIX = " are not aligned";
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
         const alignWalker = new AlignWalker(sourceFile, this.getOptions());
         return this.applyWithWalker(alignWalker);
     }

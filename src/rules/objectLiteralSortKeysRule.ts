@@ -35,7 +35,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static FAILURE_STRING_FACTORY = (name: string) => `The key '${name}' is not sorted alphabetically`;
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
         return this.applyWithWalker(new ObjectLiteralSortKeysWalker(sourceFile, this.getOptions()));
     }
 }

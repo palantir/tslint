@@ -34,7 +34,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static FAILURE_STRING = "Expected a 'for-of' loop instead of a 'for' loop with this simple iteration";
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
         const languageService = Lint.createLanguageService(sourceFile.fileName, sourceFile.getFullText());
         return this.applyWithWalker(new PreferForOfWalker(sourceFile, this.getOptions(), languageService));
     }

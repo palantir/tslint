@@ -16,7 +16,8 @@
 
 import * as ts from "typescript";
 
-import {IFormatter, RuleFailure, TestUtils} from "../lint";
+import {RuleLevel} from "../../src/language/rule/rule";
+import {IFormatter, RuleViolation, TestUtils} from "../lint";
 
 describe("Prose Formatter", () => {
     const TEST_FILE = "formatters/proseFormatter.test.ts";
@@ -33,9 +34,9 @@ describe("Prose Formatter", () => {
         const maxPosition = sourceFile.getFullWidth();
 
         const failures = [
-            new RuleFailure(sourceFile, 0, 1, "first failure", "first-name"),
-            new RuleFailure(sourceFile, 32, 36, "mid failure", "mid-name"),
-            new RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name"),
+            new RuleViolation(sourceFile, 0, 1, "first failure", RuleLevel.ERROR, "first-name"),
+            new RuleViolation(sourceFile, 32, 36, "mid failure", RuleLevel.ERROR, "mid-name"),
+            new RuleViolation(sourceFile, maxPosition - 1, maxPosition, "last failure", RuleLevel.ERROR, "last-name"),
         ];
 
         const expectedResult =
@@ -49,14 +50,14 @@ describe("Prose Formatter", () => {
 
     it("formats fixes", () => {
         const failures = [
-            new RuleFailure(sourceFile, 0, 1, "first failure", "first-name"),
+            new RuleViolation(sourceFile, 0, 1, "first failure", RuleLevel.ERROR, "first-name"),
         ];
 
         const mockFix = { getFileName: () => { return "file2"; } } as any;
 
         const fixes = [
-            new RuleFailure(sourceFile, 0, 1, "first failure", "first-name"),
-            new RuleFailure(sourceFile, 32, 36, "mid failure", "mid-name"),
+            new RuleViolation(sourceFile, 0, 1, "first failure", RuleLevel.ERROR, "first-name"),
+            new RuleViolation(sourceFile, 32, 36, "mid failure", RuleLevel.ERROR, "mid-name"),
              mockFix,
         ];
 
@@ -65,7 +66,7 @@ describe("Prose Formatter", () => {
             `Fixed 1 error(s) in file2\n\n` +
             `ERROR: ${TEST_FILE}${getPositionString(1, 1)}first failure\n`;
 
-        const actualResult = formatter.format(failures, [], fixes);
+        const actualResult = formatter.format(failures, fixes);
         assert.equal(actualResult, expectedResult);
     });
 

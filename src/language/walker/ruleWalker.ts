@@ -17,16 +17,17 @@
 
 import * as ts from "typescript";
 
-import {Fix, IDisabledInterval, IOptions, Replacement, RuleFailure} from "../rule/rule";
 import {doesIntersect} from "../utils";
 import {SyntaxWalker} from "./syntaxWalker";
+import {Fix, IDisabledInterval, IOptions, Replacement, RuleLevel, RuleViolation} from "../rule/rule";
 
 export class RuleWalker extends SyntaxWalker {
     private limit: number;
     private position: number;
     private options: any[];
-    private failures: RuleFailure[];
+    private failures: RuleViolation[];
     private disabledIntervals: IDisabledInterval[];
+    private ruleLevel: RuleLevel;
     private ruleName: string;
 
     constructor(private sourceFile: ts.SourceFile, options: IOptions) {
@@ -37,6 +38,7 @@ export class RuleWalker extends SyntaxWalker {
         this.options = options.ruleArguments;
         this.limit = this.sourceFile.getFullWidth();
         this.disabledIntervals = options.disabledIntervals;
+        this.ruleLevel = options.ruleLevel;
         this.ruleName = options.ruleName;
     }
 
@@ -44,7 +46,7 @@ export class RuleWalker extends SyntaxWalker {
         return this.sourceFile;
     }
 
-    public getFailures(): RuleFailure[] {
+    public getFailures(): RuleViolation[] {
         return this.failures;
     }
 
@@ -68,13 +70,13 @@ export class RuleWalker extends SyntaxWalker {
         this.position += node.getFullWidth();
     }
 
-    public createFailure(start: number, width: number, failure: string, fix?: Fix): RuleFailure {
+    public createFailure(start: number, width: number, failure: string, fix?: Fix): RuleViolation {
         const from = (start > this.limit) ? this.limit : start;
         const to = ((start + width) > this.limit) ? this.limit : (start + width);
-        return new RuleFailure(this.sourceFile, from, to, failure, this.ruleName, fix);
+        return new RuleViolation(this.sourceFile, from, to, failure, this.ruleLevel, this.ruleName, fix);
     }
 
-    public addFailure(failure: RuleFailure) {
+    public addFailure(failure: RuleViolation) {
         // don't add failures for a rule if the failure intersects an interval where that rule is disabled
         if (!this.existsFailure(failure) && !doesIntersect(failure, this.disabledIntervals)) {
             this.failures.push(failure);
@@ -93,7 +95,7 @@ export class RuleWalker extends SyntaxWalker {
         return this.createReplacement(start, length, "");
     }
 
-    private existsFailure(failure: RuleFailure) {
+    private existsFailure(failure: RuleViolation) {
         return this.failures.some((f) => f.equals(failure));
     }
 }

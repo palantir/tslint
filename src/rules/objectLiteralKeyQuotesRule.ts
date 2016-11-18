@@ -46,7 +46,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static UNNEEDED_QUOTES = (name: string) => `Unnecessarily quoted property '${name}' found.`;
     public static UNQUOTED_PROPERTY = (name: string) => `Unquoted property '${name}' found.`;
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
         const objectLiteralKeyQuotesWalker = new ObjectLiteralKeyQuotesWalker(sourceFile, this.getOptions());
         return this.applyWithWalker(objectLiteralKeyQuotesWalker);
     }

@@ -65,7 +65,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FORMAT_FAILURE = "variable name must be in camelcase or uppercase";
     public static KEYWORD_FAILURE = "variable name clashes with keyword/type";
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
         const variableNameWalker = new VariableNameWalker(sourceFile, this.getOptions());
         return this.applyWithWalker(variableNameWalker);
     }

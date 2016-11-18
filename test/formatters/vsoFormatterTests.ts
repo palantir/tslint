@@ -16,7 +16,8 @@
 
 import * as ts from "typescript";
 
-import {IFormatter, RuleFailure, TestUtils} from "../lint";
+import {RuleLevel} from "../../src/language/rule/rule";
+import {IFormatter, RuleViolation, TestUtils} from "../lint";
 
 describe("VSO Formatter", () => {
     const TEST_FILE = "formatters/vsoFormatter.test.ts";
@@ -33,9 +34,9 @@ describe("VSO Formatter", () => {
         const maxPosition = sourceFile.getFullWidth();
 
         const failures = [
-            new RuleFailure(sourceFile, 0, 1, "first failure", "first-name"),
-            new RuleFailure(sourceFile, 32, 36, "mid failure", "mid-name"),
-            new RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name"),
+            new RuleViolation(sourceFile, 0, 1, "first failure", RuleLevel.ERROR, "first-name"),
+            new RuleViolation(sourceFile, 32, 36, "mid failure", RuleLevel.ERROR, "mid-name"),
+            new RuleViolation(sourceFile, maxPosition - 1, maxPosition, "last failure", RuleLevel.ERROR, "last-name"),
         ];
 
         const expectedResult =

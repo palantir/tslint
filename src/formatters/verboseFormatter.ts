@@ -17,7 +17,7 @@
 
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
 import {IFormatterMetadata} from "../language/formatter/formatter";
-import {RuleFailure} from "../language/rule/rule";
+import {RuleLevel, RuleViolation} from "../language/rule/rule";
 
 export class Formatter extends AbstractFormatter {
     /* tslint:disable:object-literal-sort-keys */
@@ -30,23 +30,22 @@ export class Formatter extends AbstractFormatter {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public format(failures: RuleFailure[], warnings: RuleFailure[] = []): string {
+    public format(violations: RuleViolation[]): string {
 
-        return this.mapToMessages("WARNING", warnings)
-            .concat(this.mapToMessages("ERROR", failures))
+        return this.mapToMessages(violations)
             .join("\n") + "\n";
     }
 
-    private mapToMessages(mode: string, failures: RuleFailure[]): string[] {
-        return failures.map((failure: RuleFailure) => {
-            const fileName = failure.getFileName();
-            const failureString = failure.getFailure();
-            const ruleName = failure.getRuleName();
+    private mapToMessages(violations: RuleViolation[]): string[] {
+        return violations.map((violation: RuleViolation) => {
+            const fileName = violation.getFileName();
+            const failureString = violation.getViolation();
+            const ruleName = violation.getRuleName();
 
-            const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
+            const lineAndCharacter = violation.getStartPosition().getLineAndCharacter();
             const positionTuple = "[" + (lineAndCharacter.line + 1) + ", " + (lineAndCharacter.character + 1) + "]";
 
-            return `${mode}: (${ruleName}) ${fileName}${positionTuple}: ${failureString}`;
+            return `${RuleLevel[violation.getRuleLevel()]}: (${ruleName}) ${fileName}${positionTuple}: ${failureString}`;
         });
 
     }
