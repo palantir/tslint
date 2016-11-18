@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+export { Error } from "../configuration";
+
 export interface PositionInFile {
    line: number;
    col: number;
