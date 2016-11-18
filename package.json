@@ -35,6 +35,7 @@
     "verify": "npm-run-all clean compile lint test docs"
   },
   "dependencies": {
+    "@types/node": "^6.0.45",
     "colors": "^1.1.2",
     "diff": "^3.0.1",
     "findup-sync": "~0.3.0",
@@ -52,7 +53,6 @@
     "@types/glob": "^5.0.30",
     "@types/js-yaml": "^3.5.28",
     "@types/mocha": "^2.2.32",
-    "@types/node": "^6.0.45",
     "@types/optimist": "0.0.29",
     "@types/resolve": "0.0.4",
     "@types/underscore": "^1.7.33",
