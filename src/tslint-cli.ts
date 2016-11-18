@@ -54,6 +54,7 @@ let processed = optimist
         },
         fix: {
             describe: "Fixes linting errors for select rules. This may overwrite linted files",
+            type: "boolean",
         },
         force: {
             describe: "return status code 0 even if there are lint errors",
