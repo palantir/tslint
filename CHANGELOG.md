@@ -12,6 +12,7 @@ v4.0.0
 * [new-fixer] `ordered-imports` auto fixed (#1640)
 * [new-fixer] `arrow-parens` auto fixed (#1731)
 * [rule-change] `indent` rule now ignores template strings (#1611)
+* [new-rule-option] `object-literal-key-quotes` adds the options `consistent` and `consistent-as-needed` (#1733)
 * [enhancement] `--fix` option added to automatically fix selected rules (#1697)
 * [enhancement] Updated recommend rules (#1717)
 * [enhancement] `adjacent-overload-signatures` now works with classes, source files, modules, and namespaces (#1707)
