@@ -119,3 +119,6 @@ let geoConfig: {
     timeout: 5000,
     enableHighAccuracy: false
 };
+
+declare module "*";
+declare module "someLibrary/*";
