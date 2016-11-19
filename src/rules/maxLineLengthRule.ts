@@ -41,7 +41,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static FAILURE_STRING_FACTORY = (lineLimit: number) => {
         return `Exceeds maximum line length of ${lineLimit}`;
-    };
+    }
 
     public isEnabled(): boolean {
         if (super.isEnabled()) {

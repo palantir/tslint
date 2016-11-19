@@ -101,7 +101,7 @@ export class MemberAccessWalker extends Lint.RuleWalker {
             node.modifiers,
             ts.SyntaxKind.PublicKeyword,
             ts.SyntaxKind.PrivateKeyword,
-            ts.SyntaxKind.ProtectedKeyword
+            ts.SyntaxKind.ProtectedKeyword,
         );
 
         if (!hasAnyVisibilityModifiers) {

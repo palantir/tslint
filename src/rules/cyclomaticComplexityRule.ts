@@ -54,10 +54,13 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static ANONYMOUS_FAILURE_STRING = (expected: number, actual: number) =>
-        `The function has a cyclomatic complexity of ${actual} which is higher than the threshold of ${expected}`;
-    public static NAMED_FAILURE_STRING = (expected: number, actual: number, name: string) =>
-        `The function ${name} has a cyclomatic complexity of ${actual} which is higher than the threshold of ${expected}`;
+    public static ANONYMOUS_FAILURE_STRING = (expected: number, actual: number) => {
+        return `The function has a cyclomatic complexity of ${actual} which is higher than the threshold of ${expected}`;
+    }
+
+    public static NAMED_FAILURE_STRING = (expected: number, actual: number, name: string) => {
+        return `The function ${name} has a cyclomatic complexity of ${actual} which is higher than the threshold of ${expected}`;
+    }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new CyclomaticComplexityWalker(sourceFile, this.getOptions(), this.threshold));

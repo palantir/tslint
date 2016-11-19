@@ -34,7 +34,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY = (name: string) => `All '${name}' signatures should be adjacent`;
+    public static FAILURE_STRING_FACTORY = (name: string) => {
+        return `All '${name}' signatures should be adjacent`;
+    }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new AdjacentOverloadSignaturesWalker(sourceFile, this.getOptions()));

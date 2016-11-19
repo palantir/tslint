@@ -90,7 +90,7 @@ describe("Rule Loader", () => {
 
         assert.throws(
             () => loadRules(invalidConfiguration, {}, RULES_DIRECTORY, true),
-            /array-type/
+            /array-type/,
         );
     });
 });

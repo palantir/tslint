@@ -77,5 +77,5 @@ class NoVarKeywordWalker extends Lint.RuleWalker {
     private fix = (node: ts.Node) => new Lint.Fix(Rule.metadata.ruleName, [
         this.deleteText(node.getStart(), "var".length),
         this.appendText(node.getStart(), "let"),
-    ]);
+    ])
 }
