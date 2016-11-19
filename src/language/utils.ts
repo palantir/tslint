@@ -77,7 +77,7 @@ export function scanAllTokens(scanner: ts.Scanner, callback: (s: ts.Scanner) => 
 /**
  * @returns true if any modifier kinds passed along exist in the given modifiers array
  */
-export function hasModifier(modifiers: ts.ModifiersArray, ...modifierKinds: ts.SyntaxKind[]) {
+export function hasModifier(modifiers: ts.ModifiersArray|null|undefined, ...modifierKinds: ts.SyntaxKind[]) {
     if (modifiers == null || modifierKinds == null) {
         return false;
     }
