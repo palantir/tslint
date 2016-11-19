@@ -23,10 +23,10 @@ describe("Rule Loader", () => {
     it("loads core rules", () => {
         const validConfiguration: {[name: string]: any} = {
             "class-name": true,
-            eofline: true,
-            forin: false,
+            "eofline": true,
+            "forin": false,
             "no-debugger": true,
-            quotemark: "single",
+            "quotemark": "single",
         };
 
         const rules = loadRules(validConfiguration, {}, RULES_DIRECTORY);
@@ -48,8 +48,8 @@ describe("Rule Loader", () => {
     it("doesn't ignore leading or trailing underscores or dashes", () => {
         /* tslint:disable:object-literal-sort-keys */
         const invalidConfiguration: {[name: string]: any} = {
-            _indent: 6,
-            forin_: true,
+            "_indent": 6,
+            "forin_": true,
             "-quotemark": "single",
             "eofline-": true,
         };
@@ -64,10 +64,10 @@ describe("Rule Loader", () => {
     it("works with rulesDirectory argument as an Array", () => {
         const validConfiguration: {[name: string]: any} = {
             "class-name": true,
-            eofline: true,
-            forin: false,
+            "eofline": true,
+            "forin": false,
             "no-debugger": true,
-            quotemark: "single",
+            "quotemark": "single",
         };
 
         const rules = loadRules(validConfiguration, {}, [RULES_DIRECTORY]);
