@@ -38,7 +38,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY = (name: string) => `Duplicate variable: '${name}'`;
+    public static FAILURE_STRING_FACTORY = (name: string) => {
+        return `Duplicate variable: '${name}'`;
+    }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new NoDuplicateVariableWalker(sourceFile, this.getOptions()));

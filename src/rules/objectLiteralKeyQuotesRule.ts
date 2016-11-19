@@ -1,3 +1,20 @@
+/**
+ * @license
+ * Copyright 2016 Palantir Technologies, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import * as Lint from "../index";
 import * as ts from "typescript";
 
@@ -46,8 +63,12 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:enable:object-literal-sort-keys */
 
     public static INCONSISTENT_PROPERTY = `All property names in this object literal must be consistently quoted or unquoted.`;
-    public static UNNEEDED_QUOTES = (name: string) => `Unnecessarily quoted property '${name}' found.`;
-    public static UNQUOTED_PROPERTY = (name: string) => `Unquoted property '${name}' found.`;
+    public static UNNEEDED_QUOTES = (name: string) => {
+        return `Unnecessarily quoted property '${name}' found.`;
+    }
+    public static UNQUOTED_PROPERTY = (name: string) => {
+        return `Unquoted property '${name}' found.`;
+    }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const objectLiteralKeyQuotesWalker = new ObjectLiteralKeyQuotesWalker(sourceFile, this.getOptions());
@@ -57,9 +78,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 // This is simplistic. See https://mothereff.in/js-properties for the gorey details.
 const IDENTIFIER_NAME_REGEX = /^(?:[\$A-Z_a-z])*$/;
-
 const NUMBER_REGEX = /^[0-9]+$/;
-
 type QuotesMode = "always" | "as-needed" | "consistent" | "consistent-as-needed";
 
 interface IObjectLiteralState {

@@ -45,7 +45,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static FAILURE_STRING_FACTORY = (expression: string, messageAddition?: string) => {
         return `Calls to '${expression}' are not allowed.${messageAddition ? " " + messageAddition : ""}`;
-    };
+    }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const options = this.getOptions();

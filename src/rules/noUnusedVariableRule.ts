@@ -74,8 +74,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_TYPE_PARAM = "parameter";
     public static FAILURE_TYPE_PROP = "property";
     public static FAILURE_TYPE_VAR = "variable";
-
-    public static FAILURE_STRING_FACTORY = (type: string, name: string) => `Unused ${type}: '${name}'`;
+    public static FAILURE_STRING_FACTORY = (type: string, name: string) => {
+        return `Unused ${type}: '${name}'`;
+    }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const languageService = Lint.createLanguageService(sourceFile.fileName, sourceFile.getFullText());
