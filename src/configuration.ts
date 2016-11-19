@@ -32,6 +32,14 @@ export interface IConfigurationFile {
     rules?: any;
 }
 
+/**
+ * Define `Error` here to avoid using `Error` from @types/node.
+ * Using the `node` version causes a compilation error when this code is used as an npm library if @types/node is not already imported.
+ */
+export interface Error {
+    message: string;
+}
+
 export interface IConfigurationLoadResult {
     error?: Error;
     path: string;
