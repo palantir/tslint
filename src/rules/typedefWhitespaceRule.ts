@@ -30,7 +30,7 @@ const SPACE_OBJECT = {
     properties: {
         "call-signature": SPACE_OPTIONS,
         "index-signature": SPACE_OPTIONS,
-        parameter: SPACE_OPTIONS,
+        "parameter": SPACE_OPTIONS,
         "property-declaration": SPACE_OPTIONS,
         "variable-declaration": SPACE_OPTIONS,
     },

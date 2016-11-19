@@ -20,11 +20,11 @@ import * as ts from "typescript";
 
 import {
     DEFAULT_CONFIG,
-    IConfigurationFile,
     findConfiguration,
     findConfigurationPath,
     getRelativePath,
     getRulesDirectories,
+    IConfigurationFile,
     loadConfigurationFromPath,
 } from "./configuration";
 import { EnableDisableRulesWalker } from "./enableDisableRules";
