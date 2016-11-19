@@ -11,10 +11,10 @@
 .vscode
 appveyor.yml
 circle.yml
-Gruntfile.js
 tslint.json
 /build/
 /docs/
+/scripts/
 /src/
 /test/
 tscommand*.txt

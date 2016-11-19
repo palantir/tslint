@@ -15,15 +15,15 @@
  */
 
 import * as fs from "fs";
-import * as os from "os";
-import * as path from "path";
 
-import {IConfigurationFile, extendConfigurationFile, loadConfigurationFromPath} from "../src/configuration";
+import { IConfigurationFile, extendConfigurationFile, loadConfigurationFromPath } from "../src/configuration";
+import { createTempFile } from "./utils";
 
 describe("Configuration", () => {
     it("extendConfigurationFile", () => {
         const EMPTY_CONFIG: IConfigurationFile = {
             jsRules: {},
+            linterOptions: {},
             rules: {},
             rulesDirectory: [],
         };
@@ -33,72 +33,80 @@ describe("Configuration", () => {
         assert.deepEqual(extendConfigurationFile(EMPTY_CONFIG, {}), EMPTY_CONFIG);
         assert.deepEqual(extendConfigurationFile({}, {
             jsRules: { row: "oar" },
+            linterOptions: {},
             rules: { foo: "bar" },
             rulesDirectory: "foo",
         }), {
             jsRules: { row: "oar" },
+            linterOptions: {},
             rules: {foo: "bar"},
             rulesDirectory: ["foo"],
         });
-        assert.deepEqual(extendConfigurationFile({
+        const actualConfig = extendConfigurationFile({
             jsRules: { row: "oar" },
+            linterOptions: {},
             rules: {
                 a: 1,
-                b: 2,
+                b: 1,
             },
             rulesDirectory: ["foo", "bar"],
         }, {
             jsRules: { fly: "wings" },
+            linterOptions: {},
             rules: {
-                b: 1,
+                b: 2,
                 c: 3,
             },
             rulesDirectory: "baz",
-        }), {
+            });
+        /* tslint:disable:object-literal-sort-keys */
+        const expectedConfig = {
             jsRules: {
-                fly: "wings",
                 row: "oar",
+                fly: "wings",
             },
+            linterOptions: {},
             rules: {
                 a: 1,
                 b: 2,
                 c: 3,
             },
             rulesDirectory: ["foo", "bar", "baz"],
-        });
+        };
+        assert.deepEqual(actualConfig, expectedConfig);
     });
 
     describe("loadConfigurationFromPath", () => {
         it("extends with relative path", () => {
-            let config = loadConfigurationFromPath("./test/config/tslint-extends-relative.json");
+            const config = loadConfigurationFromPath("./test/config/tslint-extends-relative.json");
 
             assert.isArray(config.rulesDirectory);
-            assert.isTrue(config.rules["no-fail"]);
-            assert.isFalse(config.rules["always-fail"]);
+            assert.isTrue(config.rules["no-fail"], "did not pick up 'no-fail' in base config");
+            assert.isFalse(config.rules["always-fail"], "did not set 'always-fail' in top config");
             assert.isTrue(config.jsRules["no-fail"]);
             assert.isFalse(config.jsRules["always-fail"]);
         });
 
         it("extends with package", () => {
-            let config = loadConfigurationFromPath("./test/config/tslint-extends-package.json");
+            const config = loadConfigurationFromPath("./test/config/tslint-extends-package.json");
 
             assert.isArray(config.rulesDirectory);
             /* tslint:disable:object-literal-sort-keys */
             assert.deepEqual(config.jsRules, {
                 "rule-one": true,
-                "rule-two": true,
                 "rule-three": false,
+                "rule-two": true,
             });
             assert.deepEqual(config.rules, {
                 "rule-one": true,
-                "rule-two": true,
                 "rule-three": false,
+                "rule-two": true,
             });
             /* tslint:enable:object-literal-sort-keys */
         });
 
         it("extends with package without customization", () => {
-            let config = loadConfigurationFromPath("./test/config/tslint-extends-package-no-mod.json");
+            const config = loadConfigurationFromPath("./test/config/tslint-extends-package-no-mod.json");
 
             assert.isArray(config.rulesDirectory);
             assert.deepEqual(config.jsRules, {
@@ -113,7 +121,7 @@ describe("Configuration", () => {
 
         it("extends with builtin", () => {
             const config = loadConfigurationFromPath("./test/config/tslint-extends-builtin.json");
-            assert.isTrue(config.jsRules["no-var-keyword"]);
+            assert.isUndefined(config.jsRules["no-var-keyword"]);
             assert.isFalse(config.jsRules["no-eval"]);
             assert.isTrue(config.rules["no-var-keyword"]);
             assert.isFalse(config.rules["no-eval"]);
@@ -123,16 +131,7 @@ describe("Configuration", () => {
             let tmpfile: string;
 
             beforeEach(() => {
-                for (let i = 0; i < 5; i++) {
-                    const attempt = path.join(os.tmpdir(), `tslint.test${Math.round(Date.now() * Math.random())}.json`);
-                    if (!fs.existsSync(tmpfile)) {
-                        tmpfile = attempt;
-                        break;
-                    }
-                }
-                if (tmpfile === undefined) {
-                    throw new Error("Couldn't create temp file");
-                }
+                tmpfile = createTempFile("json");
             });
 
             afterEach(() => {
@@ -144,9 +143,6 @@ describe("Configuration", () => {
             it("extends with package installed relative to tslint", () => {
                 fs.writeFileSync(tmpfile, JSON.stringify({ extends: "tslint-test-config-non-relative" }));
                 let config = loadConfigurationFromPath(tmpfile);
-                assert.deepEqual(config.jsRules, {
-                    "class-name": true,
-                });
                 assert.deepEqual(config.rules, {
                     "class-name": true,
                 });
@@ -184,13 +180,13 @@ describe("Configuration", () => {
                 "always-fail": false,
                 "no-fail": true,
                 "rule-one": true,
-                "rule-two": false,
+                "rule-two": true,
             });
             assert.deepEqual(config.rules, {
                 "always-fail": false,
                 "no-fail": true,
                 "rule-one": true,
-                "rule-two": false,
+                "rule-two": true,
             });
         });
 

@@ -15,6 +15,7 @@
  */
 
 import * as fs from "fs";
+import * as os from "os";
 import * as path from "path";
 import * as ts from "typescript";
 
@@ -81,4 +82,24 @@ export function assertContainsFailure(haystack: Lint.RuleFailure[], needle: Lint
 
         assert(false, "expected " + stringifiedNeedle + " within " + stringifiedHaystack);
     }
+}
+
+export function createTempFile(extension: string) {
+    let tmpfile: string;
+    for (let i = 0; i < 5; i++) {
+        const attempt = path.join(os.tmpdir(), `tslint.test${Math.round(Date.now() * Math.random())}.${extension}`);
+        if (!fs.existsSync(tmpfile)) {
+            tmpfile = attempt;
+            break;
+        }
+    }
+    if (tmpfile === undefined) {
+        throw new Error("Couldn't create temp file");
+    }
+    return tmpfile;
+}
+
+// converts Windows normalized paths (with backwards slash `\`) to paths used by TypeScript (with forward slash `/`)
+export function denormalizeWinPath(path: string): string {
+    return path.replace(/\\/g, "/");
 }

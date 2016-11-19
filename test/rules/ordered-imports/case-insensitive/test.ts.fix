@@ -1,0 +1,44 @@
+// Named imports should be alphabetized.
+import {A, B} from 'foo';
+import {A, B} from 'foo'; // failure
+
+// Case is irrelevant for named import ordering.
+import {A, bz, C} from 'foo'; // failure
+import {A, b, C} from 'zfoo';
+
+import {g} from "y"; // failure
+import {
+    a as d,
+    b as c,
+} from "z";
+
+// Import sources should be alphabetized.
+import * as bar from 'bar';
+import * as foo from 'foo';
+
+import * as abc from 'abc';
+import * as bar from 'bar'; // failure
+import * as foo from 'foo';
+
+// ignore quotes
+import * as bar from 'bar';
+import * as foo from "foo";
+
+import * as bar from "bar";
+import * as foo from 'foo';
+
+// Case is irrelevant for source import ordering.
+import {A, B} from 'Bar';
+import {A, B} from 'baz';
+import {A, B} from 'Foo'; // should not fail
+
+// Other styles of import statements.
+import someDefault from "module";
+import "something";
+import someDefault, {nameA, nameBReallyLong as anotherName} from "./wherever";
+
+// do not fix cases where a newline is missing
+import * as foo from 'foo';  import * as bar from 'bar';
+
+import * as foo from 'foo';
+import * as bar from 'bar';

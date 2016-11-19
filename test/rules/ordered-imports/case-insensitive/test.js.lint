@@ -25,7 +25,8 @@ import {A, B} from 'Foo'; // should not fail
 
 // Other styles of import statements.
 import someDefault, {nameA, nameBReallyLong as anotherName} from "./wherever";
-import someDefault from "module";
+import someDefault from "module";                                                                                  
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources within a group must be alphabetized.]
 import "something";
 
 [ordered-imports]: Named imports must be alphabetized.

@@ -1,5 +1,6 @@
 ---
 ruleName: no-unused-variable
+deprecationMessage: Use the compiler options --noUnusedParameters and --noUnusedLocals instead.
 description: 'Disallows unused imports, variables, functions and private class members.'
 optionsDescription: |-
 
@@ -33,6 +34,9 @@ optionExamples:
   - '[true, "react"]'
   - '[true, {"ignore-pattern": "^_"}]'
 type: functionality
+typescriptOnly: true
+layout: rule
+title: 'Rule: no-unused-variable'
 optionsJSON: |-
   {
     "type": "array",
@@ -59,6 +63,4 @@ optionsJSON: |-
     "minLength": 0,
     "maxLength": 3
   }
-layout: rule
-title: 'Rule: no-unused-variable'
 ---

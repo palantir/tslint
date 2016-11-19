@@ -364,7 +364,7 @@ class Test<A, B, C> {
             [
                 C,
                 C
-            ]
+            ],
             C
         >
     >(
@@ -430,7 +430,7 @@ interface ITest<A ,B, C> {
             [
                 C,
                 C
-            ]
+            ],
             C
         >
     >(

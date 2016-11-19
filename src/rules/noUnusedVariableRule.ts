@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 const OPTION_REACT = "react";
 const OPTION_CHECK_PARAMETERS = "check-parameters";
@@ -418,7 +418,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     private fail(type: string, name: string, position: number, replacements?: Lint.Replacement[]) {
         let fix: Lint.Fix;
         if (replacements && replacements.length) {
-            fix = new Lint.Fix("no-unused-variable", replacements);
+            fix = new Lint.Fix(Rule.metadata.ruleName, replacements);
         }
         this.addFailure(this.createFailure(position, name.length, Rule.FAILURE_STRING_FACTORY(type, name), fix));
     }

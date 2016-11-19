@@ -1,4 +1,4 @@
-﻿import * as Lint from "../lint";
+﻿import * as Lint from "../index";
 import * as ts from "typescript";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -27,6 +27,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: ["[true, 1]", "[true, 5]"],
         type: "maintainability",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 

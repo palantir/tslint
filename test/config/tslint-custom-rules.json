@@ -1,4 +1,7 @@
 {
+  "jsRules": {
+    "always-fail": true
+  },
   "rules": {
     "always-fail": true
   }

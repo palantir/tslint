@@ -4,6 +4,10 @@ a += b;
 c = () => {
 };
 
+f(() => {
+    return 1;
+});
+
 d = function() { };
 
 console.log("i am adam, am i?");
@@ -51,8 +55,17 @@ class MyClass {
     private email : string;
 
     public initializedProperty = 6;
-    public initializedMethodProperty = () => { return "hi"; }
-    public initializedMethodPropertyWithoutSemicolon = () => { return "hi again"; }
+    public initializedMethodProperty: mytype = () => {
+        return "hi";
+    }
+
+    public initializedMethodPropertyWithoutSemicolon = () => {
+        return "hi again"; 
+    }
+
+    public initializedMethodProperty1Line = () => { return "hi"; };
+
+    public initializedMethodPropertyWithoutSemicolon1Line = () => { return "hi again"; };
 }
 
 interface ITest {
