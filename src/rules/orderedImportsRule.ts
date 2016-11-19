@@ -143,7 +143,7 @@ function sortByKey<T>(xs: T[], getSortKey: (x: T) => string): T[] {
 // Transformations to apply to produce the desired ordering of imports.
 // The imports must be lexicographically sorted after applying the transform.
 const TRANSFORMS: {[ordering: string]: (x: string) => string} = {
-    any: () => "",
+    "any": () => "",
     "case-insensitive": (x: string) => x.toLowerCase(),
     "lowercase-first": flipCase,
     "lowercase-last": (x: string) => x,
