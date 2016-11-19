@@ -370,7 +370,7 @@ Just like rules, additional formatters can also be supplied to TSLint via `--for
 
 ```typescript
 import * as ts from "typescript";
-import * as Lint from "tslint/lib/lint";
+import * as Lint from "tslint";
 
 export class Formatter extends Lint.Formatters.AbstractFormatter {
     public format(failures: Lint.RuleFailure[]): string {
