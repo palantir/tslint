@@ -1,6 +1,10 @@
 Change Log
 ===
 
+v4.0.0-dev.2
+---
+* Include latest v4.0.0 changes
+
 v4.0.0
 ---
 * **BREAKING CHANGES**
@@ -192,6 +196,10 @@ Thanks to our contributors!
 * @danvk
 * @janaagaard75
 * @mprobst
+
+v3.12.0-dev.2
+---
+* [enhancement] Support TypeScript v2.0.0-dev builds
 
 v3.12.1
 ---

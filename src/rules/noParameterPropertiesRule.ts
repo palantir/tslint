@@ -35,7 +35,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY = (ident: string) => `Property '${ident}' cannot be declared in the constructor`;
+    public static FAILURE_STRING_FACTORY = (ident: string) => {
+        return `Property '${ident}' cannot be declared in the constructor`;
+    }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new NoParameterPropertiesWalker(sourceFile, this.getOptions()));

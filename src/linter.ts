@@ -20,11 +20,11 @@ import * as ts from "typescript";
 
 import {
     DEFAULT_CONFIG,
-    IConfigurationFile,
     findConfiguration,
     findConfigurationPath,
     getRelativePath,
     getRulesDirectories,
+    IConfigurationFile,
     loadConfigurationFromPath,
 } from "./configuration";
 import { EnableDisableRulesWalker } from "./enableDisableRules";
@@ -41,7 +41,7 @@ import { arrayify, dedent } from "./utils";
  * Linter that can lint multiple files in consecutive runs.
  */
 class Linter {
-    public static VERSION = "4.0.0";
+    public static VERSION = "4.0.0-dev.2";
 
     public static findConfiguration = findConfiguration;
     public static findConfigurationPath = findConfigurationPath;

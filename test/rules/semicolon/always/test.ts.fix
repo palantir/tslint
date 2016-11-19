@@ -68,6 +68,8 @@ interface ITest {
     foo?: string;
     bar: number;
     baz: boolean;
+
+    readonly raz: number;
 }
 
 import {Router} from 'aurelia-router';
