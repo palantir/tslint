@@ -58,7 +58,7 @@ class AdjacentOverloadSignaturesWalker extends Lint.RuleWalker {
     }
 
     public visitInterfaceDeclaration(node: ts.InterfaceDeclaration): void {
-        this.checkOverloadsAdjacent(node.members, member => member.name && getTextOfPropertyName(member.name));
+        this.checkOverloadsAdjacent(node.members, (member) => member.name && getTextOfPropertyName(member.name));
         super.visitInterfaceDeclaration(node);
     }
 
@@ -73,7 +73,7 @@ class AdjacentOverloadSignaturesWalker extends Lint.RuleWalker {
     }
 
     private visitStatements(statements: ts.Statement[]) {
-        this.checkOverloadsAdjacent(statements, statement => {
+        this.checkOverloadsAdjacent(statements, (statement) => {
             if (statement.kind === ts.SyntaxKind.FunctionDeclaration) {
                 const name = (statement as ts.FunctionDeclaration).name;
                 return name && name.text;
@@ -83,8 +83,8 @@ class AdjacentOverloadSignaturesWalker extends Lint.RuleWalker {
         });
     }
 
-    private visitMembers(members: (ts.TypeElement | ts.ClassElement)[]) {
-        this.checkOverloadsAdjacent(members, member => member.name && getTextOfPropertyName(member.name));
+    private visitMembers(members: Array<ts.TypeElement | ts.ClassElement>) {
+        this.checkOverloadsAdjacent(members, (member) => member.name && getTextOfPropertyName(member.name));
     }
 
     /** 'getOverloadName' may return undefined for nodes that cannot be overloads, e.g. a `const` declaration. */

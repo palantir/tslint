@@ -24,7 +24,7 @@ import {
     parseLine,
     printLine,
 } from "./lines";
-import {LintError, errorComparator, lintSyntaxError} from "./lintError";
+import {errorComparator, LintError, lintSyntaxError} from "./lintError";
 
 /**
  * Takes the full text of a .lint file and returns the contents of the file

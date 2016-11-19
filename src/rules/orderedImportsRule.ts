@@ -89,7 +89,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 // Convert aBcD --> AbCd
 function flipCase(x: string): string {
-    return x.split("").map(char => {
+    return x.split("").map((char) => {
         if (char >= "a" && char <= "z") {
             return char.toUpperCase();
         } else if (char >= "A" && char <= "Z") {

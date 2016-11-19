@@ -70,7 +70,7 @@ export class NoUnusedExpressionWalker extends Lint.RuleWalker {
 
         if (checkPreviousSiblings) {
             const siblings: ts.Node[] = [];
-            ts.forEachChild(node.parent, child => { siblings.push(child); });
+            ts.forEachChild(node.parent, (child) => { siblings.push(child); });
             return siblings.slice(0, siblings.indexOf(node)).every((n) => NoUnusedExpressionWalker.isDirective(n, false));
         } else {
             return true;

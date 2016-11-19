@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import * as Lint from "../index";
 import * as ts from "typescript";
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -79,7 +79,7 @@ interface IFinallyScope {
     /**
      * A collection of `break` or `continue` labels in this scope.
      */
-    labels: Array<string>;
+    labels: string[];
 }
 
 /**
