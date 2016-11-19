@@ -355,7 +355,7 @@ tsc --noImplicitAny noImportsRule.ts
 
 Then, if using the CLI, provide the directory that contains this rule as an option to `--rules-dir`. If using TSLint as a library or via `grunt-tslint`, the `options` hash must contain `"rulesDirectory": "..."`. If you run the linter, you'll see that we have now successfully banned all import statements via TSLint!
 
-Finally, enable each custom rule in your [`tslint.json` config file][0] config file.
+Finally, enable each custom rule in your [`tslint.json` config file](https://palantir.github.io/tslint/usage/tslint-json/) config file.
 
 Final notes:
 
@@ -412,5 +412,3 @@ Creating a new release
 4. Commit with message `Prepare release <version>`
 5. Run `npm publish`
 6. Create a git tag for the new release and push it ([see existing tags here](https://github.com/palantir/tslint/tags))
-
-[0]: {{site.baseurl | append: "/usage/tslint-json/"}}
