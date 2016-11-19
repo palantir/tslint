@@ -15,6 +15,9 @@
  * limitations under the License.
  */
 
+/**
+ * Enforces the invariant that the input is an array.
+ */
 export function arrayify<T>(arg: T | T[]): T[] {
     if (Array.isArray(arg)) {
         return arg;
@@ -25,6 +28,9 @@ export function arrayify<T>(arg: T | T[]): T[] {
     }
 }
 
+/**
+ * Enforces the invariant that the input is an object.
+ */
 export function objectify(arg: any): any {
     if (typeof arg === "object" && arg != null) {
         return arg;

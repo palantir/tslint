@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -41,7 +41,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static FAILURE_STRING_FACTORY = (lineLimit: number) => {
         return `Exceeds maximum line length of ${lineLimit}`;
-    };
+    }
 
     public isEnabled(): boolean {
         if (super.isEnabled()) {

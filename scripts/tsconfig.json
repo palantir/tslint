@@ -1,12 +1,11 @@
 {
-    "version": "2.0.3",
+    "version": "2.0.10",
     "compilerOptions": {
         "module": "commonjs",
         "noImplicitAny": true,
         "noUnusedParameters": true,
         "noUnusedLocals": true,
-        "declaration": false,
-        "sourceMap": false,
+        "sourceMap": true,
         "target": "es5"
     }
 }

@@ -48,7 +48,7 @@ export interface IRuleMetadata {
     /**
      * An explanation of the available options for the rule.
      */
-    optionsDescription?: string;
+    optionsDescription: string;
 
     /**
      * Schema of the options the rule accepts.
@@ -74,9 +74,9 @@ export interface IRuleMetadata {
     requiresTypeInfo?: boolean;
 
     /**
-     * Whether or not the rule use for TypeScript only.
+     * Whether or not the rule use for TypeScript only. If `false`, this rule may be used with .js files.
      */
-    typescriptOnly?: boolean;
+    typescriptOnly: boolean;
 }
 
 export type RuleType = "functionality" | "maintainability" | "style" | "typescript";

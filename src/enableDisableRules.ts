@@ -48,7 +48,7 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
 
     private getStartOfLinePosition(node: ts.SourceFile, position: number, lineOffset = 0) {
         return node.getPositionOfLineAndCharacter(
-            node.getLineAndCharacterOfPosition(position).line + lineOffset, 0
+            node.getLineAndCharacterOfPosition(position).line + lineOffset, 0,
         );
     }
 

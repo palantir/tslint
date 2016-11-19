@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-export * from "../src/lint";
+export * from "../src/index";
 
 import * as TestUtils from "./utils";
 

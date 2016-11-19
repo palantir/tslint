@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { Error } from "../configuration";
+
 export interface PositionInFile {
    line: number;
    col: number;
@@ -40,5 +42,5 @@ export function errorComparator(err1: LintError, err2: LintError) {
 }
 
 export function lintSyntaxError(message: string) {
-    return new Error(`Lint File Syntax Error: ${message}`);
+    return new Error(`Lint File Syntax Error: ${message}`) as Error;
 }

@@ -7,7 +7,9 @@
     "optionExamples": [
       "true"
     ],
-    "type": "typescript"
+    "rationale": "Improves readability and organization by grouping naturally related items together.",
+    "type": "typescript",
+    "typescriptOnly": true
   },
   {
     "ruleName": "align",
@@ -30,7 +32,28 @@
     "optionExamples": [
       "[true, \"parameters\", \"statements\"]"
     ],
-    "type": "style"
+    "type": "style",
+    "typescriptOnly": false
+  },
+  {
+    "ruleName": "array-type",
+    "description": "Requires using either 'T[]' or 'Array<T>' for arrays.",
+    "optionsDescription": "\nOne of the following arguments must be provided:\n\n* `\"array\"` enforces use of `T[]` for all types T.\n* `\"generic\"` enforces use of `Array<T>` for all types T.\n* `\"array-simple\"` enforces use of `T[]` if `T` is a simple type (primitive or type reference).",
+    "options": {
+      "type": "string",
+      "enum": [
+        "array",
+        "generic",
+        "array-simple"
+      ]
+    },
+    "optionExamples": [
+      "[true, array]",
+      "[true, generic]",
+      "[true, array-simple]"
+    ],
+    "type": "style",
+    "typescriptOnly": true
   },
   {
     "ruleName": "arrow-parens",
@@ -41,34 +64,29 @@
     "optionExamples": [
       "true"
     ],
-    "type": "style"
+    "type": "style",
+    "typescriptOnly": false
   },
   {
     "ruleName": "ban",
-    "description": "Bans the use of specific functions.",
-    "descriptionDetails": "At this time, there is no way to disable global methods with this rule.",
-    "optionsDescription": "A list of `['object', 'method', 'optional explanation here']` which ban `object.method()`.",
+    "description": "Bans the use of specific functions or global methods.",
+    "optionsDescription": "\nA list of `['object', 'method', 'optional explanation here']` or `['globalMethod']` which ban `object.method()` \nor respectively `globalMethod()`.",
     "options": {
       "type": "list",
       "listType": {
         "type": "array",
-        "arrayMembers": [
-          {
-            "type": "string"
-          },
-          {
-            "type": "string"
-          },
-          {
-            "type": "string"
-          }
-        ]
+        "items": {
+          "type": "string"
+        },
+        "minLength": 1,
+        "maxLength": 3
       }
     },
     "optionExamples": [
-      "[true, [\"someObject\", \"someFunction\"], [\"someObject\", \"otherFunction\", \"Optional explanation\"]]"
+      "[true, [\"someGlobalMethod\"], [\"someObject\", \"someFunction\"], \n                          [\"someObject\", \"otherFunction\", \"Optional explanation\"]]"
     ],
-    "type": "functionality"
+    "type": "functionality",
+    "typescriptOnly": false
   },
   {
     "ruleName": "class-name",
@@ -79,7 +97,8 @@
     "optionExamples": [
       "true"
     ],
-    "type": "style"
+    "type": "style",
+    "typescriptOnly": false
   },
   {
     "ruleName": "comment-format",
@@ -102,7 +121,31 @@
     "optionExamples": [
       "[true, \"check-space\", \"check-lowercase\"]"
     ],
-    "type": "style"
+    "type": "style",
+    "typescriptOnly": false
+  },
+  {
+    "ruleName": "completed-docs",
+    "description": "Enforces documentation for important items be filled out.",
+    "optionsDescription": "\nEither `true` to enable for all, or any of\n`[\"classes\", \"functions\", \"methods\", \"properties\"]\nto choose individual ones.`",
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "classes",
+          "functions",
+          "methods",
+          "properties"
+        ]
+      }
+    },
+    "optionExamples": [
+      "true",
+      "[true, [\"classes\", \"functions\"]"
+    ],
+    "type": "style",
+    "typescriptOnly": false
   },
   {
     "ruleName": "curly",
@@ -113,7 +156,25 @@
     "optionExamples": [
       "true"
     ],
-    "type": "functionality"
+    "type": "functionality",
+    "typescriptOnly": false
+  },
+  {
+    "ruleName": "cyclomatic-complexity",
+    "description": "Enforces a threshold of cyclomatic complexity.",
+    "descriptionDetails": "\nCyclomatic complexity is assessed for each function of any type. A starting value of 1\nis assigned and this value is then incremented for every statement which can branch the\ncontrol flow within the function. The following statements and expressions contribute\nto cyclomatic complexity:\n* `catch`\n* `if` and `? :`\n* `||` and `&&` due to short-circuit evaluation\n* `for`, `for in` and `for of` loops\n* `while` and `do while` loops",
+    "rationale": "\nCyclomatic complexity is a code metric which indicates the level of complexity in a\nfunction. High cyclomatic complexity indicates confusing code which may be prone to\nerrors or difficult to modify.",
+    "optionsDescription": "\nAn optional upper limit for cyclomatic complexity can be specified. If no limit option\nis provided a default value of $(Rule.DEFAULT_THRESHOLD) will be used.",
+    "options": {
+      "type": "number",
+      "minimum": "$(Rule.MINIMUM_THRESHOLD)"
+    },
+    "optionExamples": [
+      "true",
+      "[true, 20]"
+    ],
+    "type": "maintainability",
+    "typescriptOnly": false
   },
   {
     "ruleName": "eofline",
@@ -124,7 +185,8 @@
     "optionExamples": [
       "true"
     ],
-    "type": "maintainability"
+    "type": "maintainability",
+    "typescriptOnly": false
   },
   {
     "ruleName": "file-header",
@@ -134,9 +196,10 @@
       "type": "string"
     },
     "optionExamples": [
-      "\"true\", \"Copyright \\d{4}\""
+      "[true, \"Copyright \\\\d{4}\"]"
     ],
-    "type": "style"
+    "type": "style",
+    "typescriptOnly": false
   },
   {
     "ruleName": "forin",
@@ -147,7 +210,8 @@
     "optionExamples": [
       "true"
     ],
-    "type": "functionality"
+    "type": "functionality",
+    "typescriptOnly": false
   },
   {
     "ruleName": "indent",
@@ -164,7 +228,8 @@
     "optionExamples": [
       "[true, \"spaces\"]"
     ],
-    "type": "maintainability"
+    "type": "maintainability",
+    "typescriptOnly": false
   },
   {
     "ruleName": "interface-name",
@@ -182,7 +247,8 @@
       "[true, \"always-prefix\"]",
       "[true, \"never-prefix\"]"
     ],
-    "type": "style"
+    "type": "style",
+    "typescriptOnly": true
   },
   {
     "ruleName": "jsdoc-format",
@@ -194,7 +260,8 @@
     "optionExamples": [
       "true"
     ],
-    "type": "style"
+    "type": "style",
+    "typescriptOnly": false
   },
   {
     "ruleName": "label-position",
@@ -206,7 +273,8 @@
     "optionExamples": [
       "true"
     ],
-    "type": "functionality"
+    "type": "functionality",
+    "typescriptOnly": false
   },
   {
     "ruleName": "linebreak-style",
@@ -223,7 +291,32 @@
       "[true, \"LF\"]",
       "[true, \"CRLF\"]"
     ],
-    "type": "maintainability"
+    "type": "maintainability",
+    "typescriptOnly": false
+  },
+  {
+    "ruleName": "max-classes-per-file",
+    "description": "\nA file may not contain more than the specified number of classes \nif the file name does not match the \"ignore-filename-pattern\" option",
+    "rationale": "\nEnsures that files have a single responsibility so that that classes each exist in their own files",
+    "optionsDescription": "\nThe one required argument is an integer indicating the maximum number of classes that can appear in a file.",
+    "options": {
+      "type": "array",
+      "items": [
+        {
+          "type": "number",
+          "minimum": 1
+        }
+      ],
+      "additionalItems": false,
+      "minLength": 1,
+      "maxLength": 2
+    },
+    "optionExamples": [
+      "[true, 1]",
+      "[true, 5]"
+    ],
+    "type": "maintainability",
+    "typescriptOnly": false
   },
   {
     "ruleName": "max-file-line-count",
@@ -237,7 +330,8 @@
     "optionExamples": [
       "[true, 300]"
     ],
-    "type": "maintainability"
+    "type": "maintainability",
+    "typescriptOnly": false
   },
   {
     "ruleName": "max-line-length",
@@ -251,7 +345,8 @@
     "optionExamples": [
       "[true, 120]"
     ],
-    "type": "maintainability"
+    "type": "maintainability",
+    "typescriptOnly": false
   },
   {
     "ruleName": "member-access",
@@ -274,7 +369,8 @@
       "true",
       "[true, \"check-accessor\"]"
     ],
-    "type": "typescript"
+    "type": "typescript",
+    "typescriptOnly": true
   },
   {
     "ruleName": "member-ordering",
@@ -324,7 +420,8 @@
     "optionExamples": [
       "[true, { \"order\": \"fields-first\" }]"
     ],
-    "type": "typescript"
+    "type": "typescript",
+    "typescriptOnly": true
   },
   {
     "ruleName": "new-parens",
@@ -335,7 +432,8 @@
     "optionExamples": [
       "true"
     ],
-    "type": "style"
+    "type": "style",
+    "typescriptOnly": false
   },
   {
     "ruleName": "no-angle-bracket-type-assertion",
@@ -346,7 +444,8 @@
     "optionExamples": [
       "true"
     ],
-    "type": "style"
+    "type": "style",
+    "typescriptOnly": true
   },
   {
     "ruleName": "no-any",
@@ -357,7 +456,8 @@
     "optionExamples": [
       "true"
     ],
-    "type": "typescript"
+    "type": "typescript",
+    "typescriptOnly": true
   },
   {
     "ruleName": "no-arg",
@@ -368,7 +468,8 @@
     "optionExamples": [
       "true"
     ],
-    "type": "functionality"
+    "type": "functionality",
+    "typescriptOnly": false
   },
   {
     "ruleName": "no-bitwise",
@@ -380,7 +481,8 @@
     "optionExamples": [
       "true"
     ],
-    "type": "functionality"
+    "type": "functionality",
+    "typescriptOnly": false
   },
   {
     "ruleName": "no-conditional-assignment",
@@ -392,18 +494,24 @@
     "optionExamples": [
       "true"
     ],
-    "type": "functionality"
+    "type": "functionality",
+    "typescriptOnly": false
   },
   {
     "ruleName": "no-consecutive-blank-lines",
-    "description": "Disallows more than one blank line in a row.",
+    "description": "Disallows one or more blank lines in a row.",
     "rationale": "Helps maintain a readable style in your codebase.",
-    "optionsDescription": "Not configurable.",
-    "options": {},
+    "optionsDescription": "\nAn optional number of maximum allowed sequential blanks can be specified. If no value\nis provided, a default of $(Rule.DEFAULT_ALLOWED_BLANKS) will be used.",
+    "options": {
+      "type": "number",
+      "minimum": "$(Rule.MINIMUM_ALLOWED_BLANKS)"
+    },
     "optionExamples": [
-      "true"
+      "true",
+      "[true, 2]"
     ],
-    "type": "style"
+    "type": "style",
+    "typescriptOnly": false
   },
   {
     "ruleName": "no-console",
@@ -419,7 +527,8 @@
     "optionExamples": [
       "[true, \"log\", \"error\"]"
     ],
-    "type": "functionality"
+    "type": "functionality",
+    "typescriptOnly": false
   },
   {
     "ruleName": "no-construct",
@@ -431,7 +540,8 @@
     "optionExamples": [
       "true"
     ],
-    "type": "functionality"
+    "type": "functionality",
+    "typescriptOnly": false
   },
   {
     "ruleName": "no-debugger",
@@ -442,7 +552,8 @@
     "optionExamples": [
       "true"
     ],
-    "type": "functionality"
+    "type": "functionality",
+    "typescriptOnly": false
   },
   {
     "ruleName": "no-default-export",
@@ -454,7 +565,8 @@
     "optionExamples": [
       "true"
     ],
-    "type": "maintainability"
+    "type": "maintainability",
+    "typescriptOnly": false
   },
   {
     "ruleName": "no-duplicate-variable",
@@ -466,7 +578,8 @@
     "optionExamples": [
       "true"
     ],
-    "type": "functionality"
+    "type": "functionality",
+    "typescriptOnly": false
   },
   {
     "ruleName": "no-empty",
@@ -478,7 +591,8 @@
     "optionExamples": [
       "true"
     ],
-    "type": "functionality"
+    "type": "functionality",
+    "typescriptOnly": false
   },
   {
     "ruleName": "no-eval",
@@ -489,7 +603,8 @@
     "optionExamples": [
       "true"
     ],
-    "type": "functionality"
+    "type": "functionality",
+    "typescriptOnly": false
   },
   {
     "ruleName": "no-for-in-array",
@@ -501,7 +616,8 @@
       "true"
     ],
     "requiresTypeInfo": true,
-    "type": "functionality"
+    "type": "functionality",
+    "typescriptOnly": false
   },
   {
     "ruleName": "no-inferrable-types",
@@ -523,7 +639,8 @@
       "true",
       "[true, \"ignore-params\"]"
     ],
-    "type": "typescript"
+    "type": "typescript",
+    "typescriptOnly": true
   },
   {
     "ruleName": "no-internal-module",
@@ -534,7 +651,8 @@
     "optionExamples": [
       "true"
     ],
-    "type": "typescript"
+    "type": "typescript",
+    "typescriptOnly": true
   },
   {
     "ruleName": "no-invalid-this",
@@ -556,7 +674,8 @@
       "true",
       "[true, \"check-function-in-method\"]"
     ],
-    "type": "functionality"
+    "type": "functionality",
+    "typescriptOnly": false
   },
   {
     "ruleName": "no-mergeable-namespace",
@@ -566,7 +685,8 @@
     "optionExamples": [
       "true"
     ],
-    "type": "maintainability"
+    "type": "maintainability",
+    "typescriptOnly": true
   },
   {
     "ruleName": "no-namespace",
@@ -589,7 +709,8 @@
       "true",
       "[true, \"allow-declarations\"]"
     ],
-    "type": "typescript"
+    "type": "typescript",
+    "typescriptOnly": true
   },
   {
     "ruleName": "no-null-keyword",
@@ -600,18 +721,20 @@
     "optionExamples": [
       "true"
     ],
-    "type": "functionality"
+    "type": "functionality",
+    "typescriptOnly": false
   },
   {
     "ruleName": "no-parameter-properties",
-    "description": "Disallows parameter properties.",
+    "description": "Disallows parameter properties in class constructors.",
     "rationale": "\nParameter properties can be confusing to those new to TS as they are less explicit\nthan other ways of declaring and initializing class members.",
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
       "true"
     ],
-    "type": "style"
+    "type": "style",
+    "typescriptOnly": true
   },
   {
     "ruleName": "no-reference",
@@ -622,7 +745,8 @@
     "optionExamples": [
       "true"
     ],
-    "type": "typescript"
+    "type": "typescript",
+    "typescriptOnly": false
   },
   {
     "ruleName": "no-require-imports",
@@ -633,7 +757,8 @@
     "optionExamples": [
       "true"
     ],
-    "type": "maintainability"
+    "type": "maintainability",
+    "typescriptOnly": false
   },
   {
     "ruleName": "no-shadowed-variable",
@@ -644,7 +769,8 @@
     "optionExamples": [
       "true"
     ],
-    "type": "functionality"
+    "type": "functionality",
+    "typescriptOnly": false
   },
   {
     "ruleName": "no-string-literal",
@@ -655,7 +781,8 @@
     "optionExamples": [
       "true"
     ],
-    "type": "functionality"
+    "type": "functionality",
+    "typescriptOnly": false
   },
   {
     "ruleName": "no-switch-case-fall-through",
@@ -667,7 +794,8 @@
     "optionExamples": [
       "true"
     ],
-    "type": "functionality"
+    "type": "functionality",
+    "typescriptOnly": false
   },
   {
     "ruleName": "no-trailing-whitespace",
@@ -678,18 +806,8 @@
     "optionExamples": [
       "true"
     ],
-    "type": "maintainability"
-  },
-  {
-    "ruleName": "no-unreachable",
-    "description": "Disallows unreachable code after `break`, `catch`, `throw`, and `return` statements.",
-    "rationale": "Unreachable code is often indication of a logic error.",
-    "optionsDescription": "Not configurable.",
-    "options": null,
-    "optionExamples": [
-      "true"
-    ],
-    "type": "functionality"
+    "type": "maintainability",
+    "typescriptOnly": false
   },
   {
     "ruleName": "no-unsafe-finally",
@@ -701,7 +819,8 @@
     "optionExamples": [
       "true"
     ],
-    "type": "functionality"
+    "type": "functionality",
+    "typescriptOnly": false
   },
   {
     "ruleName": "no-unused-expression",
@@ -713,7 +832,8 @@
     "optionExamples": [
       "true"
     ],
-    "type": "functionality"
+    "type": "functionality",
+    "typescriptOnly": false
   },
   {
     "ruleName": "no-unused-new",
@@ -725,10 +845,12 @@
     "optionExamples": [
       "true"
     ],
-    "type": "functionality"
+    "type": "functionality",
+    "typescriptOnly": false
   },
   {
     "ruleName": "no-unused-variable",
+    "deprecationMessage": "Use the compiler options --noUnusedParameters and --noUnusedLocals instead.",
     "description": "Disallows unused imports, variables, functions and private class members.",
     "optionsDescription": "\nThree optional arguments may be optionally provided:\n\n* `\"check-parameters\"` disallows unused function and constructor parameters.\n    * NOTE: this option is experimental and does not work with classes\n    that use abstract method declarations, among other things.\n* `\"react\"` relaxes the rule for a namespace import named `React`\n(from either the module `\"react\"` or `\"react/addons\"`).\nAny JSX expression in the file will be treated as a usage of `React`\n(because it expands to `React.createElement `).\n* `{\"ignore-pattern\": \"pattern\"}` where pattern is a case-sensitive regexp.\nVariable names that match the pattern will be ignored.",
     "options": {
@@ -760,7 +882,8 @@
       "[true, \"react\"]",
       "[true, {\"ignore-pattern\": \"^_\"}]"
     ],
-    "type": "functionality"
+    "type": "functionality",
+    "typescriptOnly": true
   },
   {
     "ruleName": "no-use-before-declare",
@@ -771,7 +894,8 @@
     "optionExamples": [
       "true"
     ],
-    "type": "functionality"
+    "type": "functionality",
+    "typescriptOnly": false
   },
   {
     "ruleName": "no-var-keyword",
@@ -782,7 +906,8 @@
     "optionExamples": [
       "true"
     ],
-    "type": "functionality"
+    "type": "functionality",
+    "typescriptOnly": false
   },
   {
     "ruleName": "no-var-requires",
@@ -793,34 +918,40 @@
     "optionExamples": [
       "true"
     ],
-    "type": "typescript"
+    "type": "typescript",
+    "typescriptOnly": true
   },
   {
     "ruleName": "object-literal-key-quotes",
     "description": "Enforces consistent object literal property quote style.",
     "descriptionDetails": "\nObject literal property names can be defined in two ways: using literals or using strings.\nFor example, these two objects are equivalent:\n\nvar object1 = {\n    property: true\n};\n\nvar object2 = {\n    \"property\": true\n};\n\nIn many cases, it doesn’t matter if you choose to use an identifier instead of a string\nor vice-versa. Even so, you might decide to enforce a consistent style in your code.\n\nThis rules lets you enforce consistent quoting of property names. Either they should always\nbe quoted (default behavior) or quoted only as needed (\"as-needed\").",
-    "optionsDescription": "\nPossible settings are:\n\n* `\"always\"`: Property names should always be quoted. (This is the default.)\n* `\"as-needed\"`: Only property names which require quotes may be quoted (e.g. those with spaces in them).\n\nFor ES6, computed property names (`{[name]: value}`) and methods (`{foo() {}}`) never need\nto be quoted.",
+    "optionsDescription": "\nPossible settings are:\n\n* `\"always\"`: Property names should always be quoted. (This is the default.)\n* `\"as-needed\"`: Only property names which require quotes may be quoted (e.g. those with spaces in them).\n* `\"consistent\"`: Property names should either all be quoted or unquoted.\n* `\"consistent-as-needed\"`: If any property name requires quotes, then all properties must be quoted. Otherwise, no \nproperty names may be quoted.\n\nFor ES6, computed property names (`{[name]: value}`) and methods (`{foo() {}}`) never need\nto be quoted.",
     "options": {
       "type": "string",
       "enum": [
         "always",
-        "as-needed"
+        "as-needed",
+        "consistent",
+        "consistent-as-needed"
       ]
     },
     "optionExamples": [
       "[true, \"as-needed\"]",
       "[true, \"always\"]"
     ],
-    "type": "style"
+    "type": "style",
+    "typescriptOnly": false
   },
   {
     "ruleName": "object-literal-shorthand",
     "description": "Enforces use of ES6 object literal shorthand when possible.",
+    "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
       "true"
     ],
-    "type": "style"
+    "type": "style",
+    "typescriptOnly": false
   },
   {
     "ruleName": "object-literal-sort-keys",
@@ -831,7 +962,8 @@
     "optionExamples": [
       "true"
     ],
-    "type": "maintainability"
+    "type": "maintainability",
+    "typescriptOnly": false
   },
   {
     "ruleName": "one-line",
@@ -855,7 +987,8 @@
     "optionExamples": [
       "[true, \"check-catch\", \"check-finally\", \"check-else\"]"
     ],
-    "type": "style"
+    "type": "style",
+    "typescriptOnly": false
   },
   {
     "ruleName": "one-variable-per-declaration",
@@ -876,7 +1009,8 @@
       "true",
       "[true, \"ignore-for-loop\"]"
     ],
-    "type": "style"
+    "type": "style",
+    "typescriptOnly": false
   },
   {
     "ruleName": "only-arrow-functions",
@@ -898,13 +1032,14 @@
       "true",
       "[true, \"allow-declarations\"]"
     ],
-    "type": "typescript"
+    "type": "typescript",
+    "typescriptOnly": false
   },
   {
     "ruleName": "ordered-imports",
     "description": "Requires that import statements be alphabetized.",
     "descriptionDetails": "\nEnforce a consistent ordering for ES6 imports:\n- Named imports must be alphabetized (i.e. \"import {A, B, C} from \"foo\";\")\n    - The exact ordering can be controlled by the named-imports-order option.\n    - \"longName as name\" imports are ordered by \"longName\".\n- Import sources must be alphabetized within groups, i.e.:\n        import * as foo from \"a\";\n        import * as bar from \"b\";\n- Groups of imports are delineated by blank lines. You can use these to group imports\n    however you like, e.g. by first- vs. third-party or thematically.",
-    "optionsDescription": "\nYou may set the `\"import-sources-order\"` option to control the ordering of source\nimports (the `\"foo\"` in `import {A, B, C} from \"foo\"`).\n\nPossible values for `\"import-sources-order\"` are:\n* `\"case-insensitive'`: Correct order is `\"Bar\"`, `\"baz\"`, `\"Foo\"`. (This is the default.)\n* `\"lowercase-first\"`: Correct order is `\"baz\"`, `\"Bar\"`, `\"Foo\"`.\n* `\"lowercase-last\"`: Correct order is `\"Bar\"`, `\"Foo\"`, `\"baz\"`.\n\nYou may set the `\"named-imports-order\"` option to control the ordering of named\nimports (the `{A, B, C}` in `import {A, B, C} from \"foo\"`).\n\nPossible values for `\"named-imports-order\"` are:\n\n* `\"case-insensitive'`: Correct order is `{A, b, C}`. (This is the default.)\n* `\"lowercase-first\"`: Correct order is `{b, A, C}`.\n* `\"lowercase-last\"`: Correct order is `{A, C, b}`.\n\n        ",
+    "optionsDescription": "\nYou may set the `\"import-sources-order\"` option to control the ordering of source\nimports (the `\"foo\"` in `import {A, B, C} from \"foo\"`).\n\nPossible values for `\"import-sources-order\"` are:\n* `\"case-insensitive'`: Correct order is `\"Bar\"`, `\"baz\"`, `\"Foo\"`. (This is the default.)\n* `\"lowercase-first\"`: Correct order is `\"baz\"`, `\"Bar\"`, `\"Foo\"`.\n* `\"lowercase-last\"`: Correct order is `\"Bar\"`, `\"Foo\"`, `\"baz\"`.\n* `\"any\"`: Allow any order.\n\nYou may set the `\"named-imports-order\"` option to control the ordering of named\nimports (the `{A, B, C}` in `import {A, B, C} from \"foo\"`).\n\nPossible values for `\"named-imports-order\"` are:\n\n* `\"case-insensitive'`: Correct order is `{A, b, C}`. (This is the default.)\n* `\"lowercase-first\"`: Correct order is `{b, A, C}`.\n* `\"lowercase-last\"`: Correct order is `{A, C, b}`.\n* `\"any\"`: Allow any order.\n\n        ",
     "options": {
       "type": "object",
       "properties": {
@@ -913,7 +1048,8 @@
           "enum": [
             "case-insensitive",
             "lowercase-first",
-            "lowercase-last"
+            "lowercase-last",
+            "any"
           ]
         },
         "named-imports-order": {
@@ -921,7 +1057,8 @@
           "enum": [
             "case-insensitive",
             "lowercase-first",
-            "lowercase-last"
+            "lowercase-last",
+            "any"
           ]
         }
       },
@@ -931,7 +1068,20 @@
       "true",
       "[true, {\"import-sources-order\": \"lowercase-last\", \"named-imports-order\": \"lowercase-first\"}]"
     ],
-    "type": "style"
+    "type": "style",
+    "typescriptOnly": false
+  },
+  {
+    "ruleName": "prefer-for-of",
+    "description": "Recommends a 'for-of' loop over a standard 'for' loop if the index is only used to access the array being iterated.",
+    "rationale": "A for(... of ...) loop is easier to implement and read when the index is not needed.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "typescript",
+    "typescriptOnly": false
   },
   {
     "ruleName": "quotemark",
@@ -956,7 +1106,8 @@
       "[true, \"single\", \"avoid-escape\"]",
       "[true, \"single\", \"jsx-double\"]"
     ],
-    "type": "style"
+    "type": "style",
+    "typescriptOnly": false
   },
   {
     "ruleName": "radix",
@@ -967,7 +1118,8 @@
     "optionExamples": [
       "true"
     ],
-    "type": "functionality"
+    "type": "functionality",
+    "typescriptOnly": false
   },
   {
     "ruleName": "restrict-plus-operands",
@@ -978,12 +1130,13 @@
       "true"
     ],
     "type": "functionality",
+    "typescriptOnly": false,
     "requiresTypeInfo": true
   },
   {
     "ruleName": "semicolon",
     "description": "Enforces consistent semicolon usage at the end of every statement.",
-    "optionsDescription": "\nOne of the following arguments must be provided:\n\n* `\"always\"` enforces semicolons at the end of every statement.\n* `\"never\"` disallows semicolons at the end of every statement except for when they are necessary.\n\nThe following arguments may be optionaly provided:\n* `\"ignore-interfaces\"` skips checking semicolons at the end of interface members.",
+    "optionsDescription": "\nOne of the following arguments must be provided:\n\n* `\"always\"` enforces semicolons at the end of every statement.\n* `\"never\"` disallows semicolons at the end of every statement except for when they are necessary.\n\nThe following arguments may be optionaly provided:\n* `\"ignore-interfaces\"` skips checking semicolons at the end of interface members.\n* `\"ignore-bound-class-methods\"` skips checking semicolons at the end of bound class methods.",
     "options": {
       "type": "array",
       "items": [
@@ -1006,9 +1159,11 @@
     "optionExamples": [
       "[true, \"always\"]",
       "[true, \"never\"]",
-      "[true, \"always\", \"ignore-interfaces\"]"
+      "[true, \"always\", \"ignore-interfaces\"]",
+      "[true, \"always\", \"ignore-bound-class-methods\"]"
     ],
-    "type": "style"
+    "type": "style",
+    "typescriptOnly": false
   },
   {
     "ruleName": "switch-default",
@@ -1018,12 +1173,13 @@
     "optionExamples": [
       "true"
     ],
-    "type": "functionality"
+    "type": "functionality",
+    "typescriptOnly": false
   },
   {
     "ruleName": "trailing-comma",
-    "description": "Requires or disallows trailing commas in array and object literals, destructuring assignments and named imports.",
-    "optionsDescription": "\nOne argument which is an object with the keys `multiline` and `singleline`.\nBoth should be set to either `\"always\"` or `\"never\"`.\n\n* `\"multiline\"` checks multi-line object literals.\n* `\"singleline\"` checks single-line object literals.\n\nA array is considered \"multiline\" if its closing bracket is on a line\nafter the last array element. The same general logic is followed for\nobject literals and named import statements.",
+    "description": "\nRequires or disallows trailing commas in array and object literals, destructuring assignments, function and tuple typings,\nnamed imports and function parameters.",
+    "optionsDescription": "\nOne argument which is an object with the keys `multiline` and `singleline`.\nBoth should be set to either `\"always\"` or `\"never\"`.\n\n* `\"multiline\"` checks multi-line object literals.\n* `\"singleline\"` checks single-line object literals.\n\nA array is considered \"multiline\" if its closing bracket is on a line\nafter the last array element. The same general logic is followed for\nobject literals, function and tuple typings, named import statements\nand function parameters.",
     "options": {
       "type": "object",
       "properties": {
@@ -1047,7 +1203,8 @@
     "optionExamples": [
       "[true, {\"multiline\": \"always\", \"singleline\": \"never\"}]"
     ],
-    "type": "maintainability"
+    "type": "maintainability",
+    "typescriptOnly": false
   },
   {
     "ruleName": "triple-equals",
@@ -1070,7 +1227,8 @@
       "[true, \"allow-null-check\"]",
       "[true, \"allow-undefined-check\"]"
     ],
-    "type": "functionality"
+    "type": "functionality",
+    "typescriptOnly": false
   },
   {
     "ruleName": "typedef",
@@ -1096,7 +1254,8 @@
     "optionExamples": [
       "[true, \"call-signature\", \"parameter\", \"member-variable-declaration\"]"
     ],
-    "type": "typescript"
+    "type": "typescript",
+    "typescriptOnly": true
   },
   {
     "ruleName": "typedef-whitespace",
@@ -1204,7 +1363,8 @@
     "optionExamples": [
       "\n[\n  true,\n  {\n    \"call-signature\": \"nospace\",\n    \"index-signature\": \"nospace\",\n    \"parameter\": \"nospace\",\n    \"property-declaration\": \"nospace\",\n    \"variable-declaration\": \"nospace\"\n  },\n  {\n    \"call-signature\": \"onespace\",\n    \"index-signature\": \"onespace\",\n    \"parameter\": \"onespace\",\n    \"property-declaration\": \"onespace\",\n    \"variable-declaration\": \"onespace\"\n  }\n]"
     ],
-    "type": "typescript"
+    "type": "typescript",
+    "typescriptOnly": true
   },
   {
     "ruleName": "use-isnan",
@@ -1215,7 +1375,8 @@
     "optionExamples": [
       "true"
     ],
-    "type": "functionality"
+    "type": "functionality",
+    "typescriptOnly": false
   },
   {
     "ruleName": "variable-name",
@@ -1239,7 +1400,8 @@
     "optionExamples": [
       "[true, \"ban-keywords\", \"check-format\", \"allow-leading-underscore\"]"
     ],
-    "type": "style"
+    "type": "style",
+    "typescriptOnly": false
   },
   {
     "ruleName": "whitespace",
@@ -1266,6 +1428,7 @@
     "optionExamples": [
       "[true, \"check-branch\", \"check-operator\", \"check-typecast\"]"
     ],
-    "type": "style"
+    "type": "style",
+    "typescriptOnly": false
   }
 ]

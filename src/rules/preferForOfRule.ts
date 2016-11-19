@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 import * as ts from "typescript";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -28,6 +28,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionExamples: ["true"],
         type: "typescript",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 

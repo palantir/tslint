@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { createTempFile, denormalizeWinPath } from "../utils";
 import * as cp from "child_process";
 import * as fs from "fs";
 import * as os from "os";
@@ -24,8 +25,9 @@ const EXECUTABLE_DIR = path.resolve(process.cwd(), "test", "executable");
 const EXECUTABLE_PATH = path.resolve(EXECUTABLE_DIR, "npm-like-executable");
 const TEMP_JSON_PATH = path.resolve(EXECUTABLE_DIR, "tslint.json");
 
-describe("Executable", () => {
-
+/* tslint:disable:only-arrow-functions */
+describe("Executable", function() {
+    this.slow(3000);    // the executable is JIT-ed each time it runs; avoid showing slowness warnings
     describe("Files", () => {
         it("exits with code 1 if no arguments passed", (done) => {
             execCli([], (err, stdout, stderr) => {
@@ -66,15 +68,25 @@ describe("Executable", () => {
 
     describe("Configuration file", () => {
         it("exits with code 0 if relative path is passed without `./`", (done) => {
-            execCli(["-c", "test/config/tslint-almost-empty.json", "src/tslint.ts"], (err) => {
+            execCli(["-c", "test/config/tslint-almost-empty.json", "src/test.ts"], (err) => {
                 assert.isNull(err, "process should exit without an error");
                 done();
             });
         });
 
         it("exits with code 0 if config file that extends relative config file", (done) => {
-            execCli(["-c", "test/config/tslint-extends-package-no-mod.json", "src/tslint.ts"], (err) => {
+            execCli(["-c", "test/config/tslint-extends-package-no-mod.json", "src/test.ts"], (err) => {
                 assert.isNull(err, "process should exit without an error");
+                done();
+            });        });
+
+        it("exits with code 1 if config file is invalid", (done) => {
+            execCli(["-c", "test/config/tslint-invalid.json", "src/test.ts"], (err, stdout, stderr) => {
+                assert.isNotNull(err, "process should exit with error");
+                assert.strictEqual(err.code, 1, "error code should be 1");
+
+                assert.include(stderr, "Failed to load", "stderr should contain notification about failing to load json");
+                assert.strictEqual(stdout, "", "shouldn't contain any output in stdout");
                 done();
             });
         });
@@ -82,7 +94,7 @@ describe("Executable", () => {
 
     describe("Custom rules", () => {
         it("exits with code 1 if nonexisting custom rules directory is passed", (done) => {
-            execCli(["-c", "./test/config/tslint-custom-rules.json", "-r", "./someRandomDir", "src/tslint.ts"], (err) => {
+            execCli(["-c", "./test/config/tslint-custom-rules.json", "-r", "./someRandomDir", "src/test.ts"], (err) => {
                 assert.isNotNull(err, "process should exit with error");
                 assert.strictEqual(err.code, 1, "error code should be 1");
                 done();
@@ -90,7 +102,7 @@ describe("Executable", () => {
         });
 
         it("exits with code 2 if custom rules directory is passed and file contains lint errors", (done) => {
-            execCli(["-c", "./test/config/tslint-custom-rules.json", "-r", "./test/files/custom-rules", "src/tslint.ts"], (err) => {
+            execCli(["-c", "./test/config/tslint-custom-rules.json", "-r", "./test/files/custom-rules", "src/test.ts"], (err) => {
                 assert.isNotNull(err, "process should exit with error");
                 assert.strictEqual(err.code, 2, "error code should be 2");
                 done();
@@ -98,15 +110,7 @@ describe("Executable", () => {
         });
 
         it("exits with code 2 if custom rules directory is specified in config file and file contains lint errors", (done) => {
-            execCli(["-c", "./test/config/tslint-custom-rules-with-dir.json", "src/tslint.ts"], (err) => {
-                assert.isNotNull(err, "process should exit with error");
-                assert.strictEqual(err.code, 2, "error code should be 2");
-                done();
-            });
-        });
-
-        it("exits with code 2 if several custom rules directories are specified in config file and file contains lint errors", (done) => {
-            execCli(["-c", "./test/config/tslint-custom-rules-with-two-dirs.json", "src/tslint.ts"], (err) => {
+            execCli(["-c", "./test/config/tslint-custom-rules-with-dir.json", "src/test.ts"], (err) => {
                 assert.isNotNull(err, "process should exit with error");
                 assert.strictEqual(err.code, 2, "error code should be 2");
                 done();
@@ -114,9 +118,27 @@ describe("Executable", () => {
         });
     });
 
+    describe("--fix flag", () => {
+        it("fixes multiple rules without overwriting each other", (done) => {
+            const tempFile = createTempFile("ts");
+            fs.createReadStream("test/files/multiple-fixes-test/multiple-fixes.test.ts").pipe(fs.createWriteStream(tempFile));
+            execCli(["-c", "test/files/multiple-fixes-test/tslint.json", tempFile, "--fix"],
+                (err, stdout) => {
+                    const content = fs.readFileSync(tempFile, "utf8");
+                    // compare against file name which will be returned by formatter (used in TypeScript)
+                    const denormalizedFileName = denormalizeWinPath(tempFile);
+                    fs.unlinkSync(tempFile);
+                    assert.strictEqual(content, "import * as y from \"a_long_module\";\nimport * as x from \"b\";\n");
+                    assert.isNull(err, "process should exit without an error");
+                    assert.strictEqual(stdout, `Fixed 2 error(s) in ${denormalizedFileName}`);
+                    done();
+                });
+        });
+    });
+
     describe("--force flag", () => {
         it("exits with code 0 if `--force` flag is passed", (done) => {
-            execCli(["-c", "./test/config/tslint-custom-rules.json", "-r", "./test/files/custom-rules", "--force", "src/tslint.ts"],
+            execCli(["-c", "./test/config/tslint-custom-rules.json", "-r", "./test/files/custom-rules", "--force", "src/test.ts"],
                 (err, stdout) => {
                     assert.isNull(err, "process should exit without an error");
                     assert.include(stdout, "failure", "errors should be reported");
@@ -215,6 +237,35 @@ describe("Executable", () => {
             });
 
         });
+    });
+
+    describe("globs and quotes", () => {
+        // when glob pattern is passed without quotes in npm script `process.env` will contain:
+        // on Windows - pattern string without any quotes
+        // on Linux - list of files that matches glob (may differ from `glob` module results)
+
+        it("exits with code 2 if correctly finds file containing lint errors when glob is in double quotes", (done) => {
+            // when glob pattern is passed in double quotes in npm script `process.env` will contain:
+            // on Windows - pattern string without any quotes
+            // on Linux - pattern string without any quotes (glob is not expanded)
+            execCli(["-c", "./test/config/tslint-custom-rules.json", "-r", "./test/files/custom-rules", "src/**/test.ts"], (err) => {
+                assert.isNotNull(err, "process should exit with error");
+                assert.strictEqual(err.code, 2, "error code should be 2");
+                done();
+            });
+        });
+
+        it("exits with code 2 if correctly finds file containing lint errors when glob is in single quotes", (done) => {
+            // when glob pattern is passed in single quotes in npm script `process.env` will contain:
+            // on Windows - pattern string wrapped in single quotes
+            // on Linux - pattern string without any quotes (glob is not expanded)
+            execCli(["-c", "./test/config/tslint-custom-rules.json", "-r", "./test/files/custom-rules", "'src/**/test.ts'"], (err) => {
+                assert.isNotNull(err, "process should exit with error");
+                assert.strictEqual(err.code, 2, "error code should be 2");
+                done();
+            });
+        });
+
     });
 });
 

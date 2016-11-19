@@ -1,12 +1,5 @@
 [
   {
-    "formatterName": "applyFixes",
-    "description": "Automatically fixes lint failures.",
-    "descriptionDetails": "\nModifies source files and applies fixes for lint failures where possible. Changes\nshould be tested as not all fixes preserve semantics.",
-    "sample": "\nAll done. Remember to test the changes, as not all fixes preserve semantics.",
-    "consumer": "machine"
-  },
-  {
     "formatterName": "checkstyle",
     "description": "Formats errors as through they were Checkstyle output.",
     "descriptionDetails": "\nImitates the XMLLogger from Checkstyle 4.3. All failures have the 'warning' severity.",

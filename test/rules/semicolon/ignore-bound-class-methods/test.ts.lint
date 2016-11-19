@@ -71,8 +71,18 @@ class MyClass {
 
     public initializedProperty = 6
                                   ~nil [Missing semicolon]
-    public initializedMethodProperty = () => { return "hi"; };
-    public initializedMethodPropertyWithoutSemicolon = () => { return "hi again"; }
+    public initializedMethodProperty = () => {
+        return "hi";
+    };
+
+    public initializedMethodPropertyWithoutSemicolon = () => {
+        return "hi again"; 
+    }
+
+    public initializedMethodProperty1Line = () => { return "hi"; };
+
+    public initializedMethodPropertyWithoutSemicolon1Line = () => { return "hi again"; }
+                                                                                        ~nil [Missing semicolon]
 }
 
 interface ITest {

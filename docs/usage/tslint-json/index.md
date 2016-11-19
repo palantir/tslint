@@ -20,7 +20,8 @@ A path(s) to a directory of [custom rules][2]. This will always be treated as a 
 * `rules?: any`: Pairs of keys and values where each key is a rule name and each value is the configuration for that rule.
 If a rule takes no options, you can simply set its value to a boolean, either `true` or `false`, to enable or disable it.
 If a rule takes options, you set its value to an array where the first value is a boolean indicating if the rule is enabled and the next values are options handled by the rule.
-Not all possible rules are listed here, be sure to [check out the full list][3].
+Not all possible rules are listed here, be sure to [check out the full list][3]. These rules are applied to `.ts` and `.tsx` files.
+* `jsRules?: any`: Same format as `rules`. These rules are applied to `.js` and `.jsx` files. 
 
 `tslint.json` configuration files may have JavaScript-style `// single-line` and `/* multi-line */` comments in them (even though this is technically invalid JSON). If this confuses your syntax highlighter, you may want to switch it to JavaScript format.
 
@@ -49,6 +50,24 @@ An example `tslint.json` file might look like this:
             "property-declaration": "nospace",
             "variable-declaration": "nospace"
         }],
+        "variable-name": [true, "ban-keywords"],
+        "whitespace": [true,
+            "check-branch",
+            "check-decl",
+            "check-operator",
+            "check-separator",
+            "check-type"
+        ]
+    },
+    "jsRules": {
+        "indent": [true, "spaces"],
+        "no-duplicate-variable": true,
+        "no-eval": true,
+        "no-trailing-whitespace": true,
+        "one-line": [true, "check-open-brace", "check-whitespace"],
+        "quotemark": [true, "double"],
+        "semicolon": false,
+        "triple-equals": [true, "allow-null-check"],
         "variable-name": [true, "ban-keywords"],
         "whitespace": [true,
             "check-branch",

@@ -46,7 +46,7 @@ export function loadRules(ruleConfiguration: {[name: string]: any},
             if (Rule == null) {
                 notFoundRules.push(ruleName);
             } else {
-                if (isJs && Rule.metadata.typescriptOnly != null && Rule.metadata.typescriptOnly) {
+                if (isJs && Rule.metadata && Rule.metadata.typescriptOnly != null && Rule.metadata.typescriptOnly) {
                     notAllowedInJsRules.push(ruleName);
                 } else {
                     const all = "all"; // make the linter happy until we can turn it on and off
@@ -75,8 +75,10 @@ export function loadRules(ruleConfiguration: {[name: string]: any},
         throw new Error(ERROR_MESSAGE);
     } else if (notAllowedInJsRules.length > 0) {
         const JS_ERROR_MESSAGE = `
-           Could not apply to JavaScript files for the following rules specified in the configuration:
-           ${notAllowedInJsRules.join("\n")}
+            Following rules specified in configuration couldn't be applied to .js or .jsx files:
+                ${notAllowedInJsRules.join("\n")}
+
+            Make sure to exclude them from "jsRules" section of your tslint.json.
         `;
 
         throw new Error(JS_ERROR_MESSAGE);

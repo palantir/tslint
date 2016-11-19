@@ -1,6 +1,6 @@
 ---
-ruleName: no-constructor-vars
-description: Disallows parameter properties.
+ruleName: no-parameter-properties
+description: Disallows parameter properties in class constructors.
 rationale: |-
 
   Parameter properties can be confusing to those new to TS as they are less explicit
@@ -10,7 +10,8 @@ options: null
 optionExamples:
   - 'true'
 type: style
-optionsJSON: 'null'
+typescriptOnly: true
 layout: rule
-title: 'Rule: no-constructor-vars'
+title: 'Rule: no-parameter-properties'
+optionsJSON: 'null'
 ---

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+import * as Lint from "../index";
 import * as ts from "typescript";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -40,7 +40,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         let msg = `This file has ${lineCount} lines, which exceeds the maximum of ${lineLimit} lines allowed. `;
         msg += `Consider breaking this file up into smaller parts`;
         return msg;
-    };
+    }
 
     public isEnabled(): boolean {
         if (super.isEnabled()) {

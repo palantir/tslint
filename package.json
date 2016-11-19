@@ -1,12 +1,12 @@
 {
   "name": "tslint",
-  "version": "4.0.0-dev.1",
+  "version": "4.0.0-dev.2",
   "description": "An extensible static analysis linter for the TypeScript language",
   "bin": {
     "tslint": "./bin/tslint"
   },
-  "main": "./lib/tslint",
-  "typings": "./lib/tslint",
+  "main": "./lib/index.js",
+  "typings": "./lib/index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/palantir/tslint.git"
@@ -26,11 +26,11 @@
     "compile:scripts": "tsc -p scripts",
     "compile:test": "tsc -p test",
     "lint": "npm-run-all -p lint:core lint:test",
-    "lint:core": "tslint src/**/*.ts",
-    "lint:test": "tslint test/**/*.ts -e test/**/*.test.ts",
+    "lint:core": "tslint \"src/**/*.ts\"",
+    "lint:test": "tslint \"test/**/*.ts\" -e \"test/**/*.test.ts\"",
     "test": "npm-run-all test:pre -p test:mocha test:rules",
     "test:pre": "cd ./test/config && npm install",
-    "test:mocha": "mocha --reporter spec --colors build/test/**/*Tests.js build/test/assert.js",
+    "test:mocha": "mocha --reporter spec --colors \"build/test/**/*Tests.js\" build/test/assert.js",
     "test:rules": "node ./build/test/ruleTestRunner.js",
     "verify": "npm-run-all clean compile lint test docs"
   },
@@ -41,7 +41,8 @@
     "glob": "^7.1.1",
     "optimist": "~0.6.0",
     "resolve": "^1.1.7",
-    "underscore.string": "^3.3.4"
+    "underscore.string": "^3.3.4",
+    "update-notifier": "^1.0.2"
   },
   "devDependencies": {
     "@types/chai": "^3.4.34",
@@ -66,10 +67,7 @@
     "typescript": ">=2.0.0-dev"
   },
   "peerDependencies": {
-    "typescript": ">=1.7.3 || >=1.8.0-dev || >=1.9.0-dev || >=2.0.0-dev || >=2.1.0-dev || >= 2.2.0-dev"
+    "typescript": ">=2.0.0-dev || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev"
   },
-  "license": "Apache-2.0",
-  "typescript": {
-    "definition": "lib/tslint.d.ts"
-  }
+  "license": "Apache-2.0"
 }
