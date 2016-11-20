@@ -1,70 +1,46 @@
 function sampleFunc() {
 
-    //This loop only uses the iterator to access the array item, so we can recommend a for-of loop here
-    for (var a = 0; a <= obj.arr.length; a++) {
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // This loop only uses the iterator to access the array item, so we can recommend a for-of loop here
+    for (var a = 0; a < obj.arr.length; a++) {
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   [0]
         console.log(obj.arr[a]);
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     }
-~~~~~ [0]
 
-    //Same as above, but no curly braces
-    for (var b = 0; b <= obj.arr.length; b++) console.log(obj.arr[b]);
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+    // Same as above, but no curly braces
+    for (var b = 0; b < obj.arr.length; b++) console.log(obj.arr[b]);
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   [0]
 
-    //the index is used by itself, so a normal for loop is allowed here
-    for (var c = 0; c <= arr.length; c++) {
+    // the index is used by itself, so a normal for loop is allowed here
+    for (var c = 0; c < arr.length; c++) {
         doMath(c);
     }
 
-    //Same as above, but no curly braces
-    for (var d = 0; d <= arr.length; d++) doMath(d);
+    // Same as above, but no curly braces
+    for (var d = 0; d < arr.length; d++) doMath(d);
 
-    //the index is used by itself, so a normal for loop is allowed here
-    for (var e = 0; e <= arr.length; e++) {
+    // the index is used by itself, so a normal for loop is allowed here
+    for (var e = 0; e < arr.length; e++) {
         if(e > 5) {
             doMath(e);
         }
         console.log(arr[e]);
     }
 
-    //This iterates off of a hard-coded number and should be allowed
+    // This iterates off of a hard-coded number and should be allowed
     for (var f = 0; f <= 40; f++) {
         doMath(f);
     }
 
-    //Same as above, but no curly braces
+    // Same as above, but no curly braces
     for (var g = 0; g <= 40; g++) doMath(g);
 
-    //Loop set up different, but uses the index alone - this is ok
-    for(var h=0, len=arr.length; h < len; h++) {
-        doMath(h);
-    }
+    // multiple operations in the initializer
+    for(var h=0, len=arr.length; h < len; h++) {}
 
-    //Same as above, but no curly braces
-    for(var i=0, len=arr.length; i < len; i++) doMath(i);
+    // Same as above, but no curly braces
+    for(var i=0, len=arr.length; i < len; i++) arr[i];
 
-    //Loop set up different, but uses the index alone - this is ok
-    for(var j=0, len=arr.length; j < len; j++){
-        if(j > 5) {
-            doMath(j);
-        }
-        console.log(arr[j]);
-    }
-
-    //Loop set up different, only uses the index to access the array - this should fail
-    for(var k=0, len=arr.length; k < len; k++) {
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        console.log(arr[k]);
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    }
-~~~~~ [0]
-
-    //Same as above, but no curly braces
-    for(var l=0, len=arr.length; l < len; l++) console.log(arr[l]);
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
-
-    //Odd for loop setups
+    // Odd for loop setups
     var m = 0;
     for (;;) {
         if (m > 3) break;
@@ -79,28 +55,68 @@ function sampleFunc() {
 
     var o = 0;
     for (; o < arr.length; o++) {
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         console.log(arr[o]);
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     }
-~~~~~ [0]
     
-    //Prefix incrementor
+    // Prefix incrementor
     for(let p = 0; p < arr.length; ++p) {
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [0]
         arr[p].whatever();
-~~~~~~~~~~~~~~~~~~~~~~~~~~
     }
-~~~~~ [0]
 
-    //For in loops ARE allowed
+    // empty
+    for(let x = 0; x < arr.length; x++) {}
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   [0]
+
+    // missing
+    for(; x < arr.length; x++) {}
+    for(let x = 0;; x++) {}
+    for(let x = 0; x < arr.length;) {}
+
+    // mismatch
+    for(let x = 0; NOTX < arr.length; x++) {}
+    for(let x = 0; x < arr.length; NOTX++) {}
+    for(let NOTX = 0; x < arr.length; x++) {}
+
+    // decrement
+    for(let x = 0; x < arr.length; x--) {}
+
+    // not `<`
+    for(let x = 0; x <= arr.length; x++) {}
+
+    // wrong starting point
+    for(let x = 1; x < arr.length; x++) {}
+
+    // not `length` property
+    for(let x = 0; x < arr.length(); x++) {}
+
+    // alternate incrementor
+    for(let x = 0; x < arr.length; x+=1) {}
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   [0]
+    for(let x = 0; x < arr.length; x=x+1) {}
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   [0]
+    for(let x = 0; x < arr.length; x=1+x) {}
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   [0]
+
+    // adds too much
+    for(let x = 0; x < arr.length; x+=11) {}
+    for(let x = 0; x < arr.length; x=x+11) {}
+
+    for(let x = 0; x < arr.length; x++) {
+        x++;
+    }
+
+    // unexpected condition
+    for(let x = 0; true; x++) {}
+
+    // For-in loops ARE allowed
     for (var q in obj) {
         if (obj.hasOwnProperty(q)) {
             console.log(q);
         }
     }
     
-    //For of loops ARE allowed
+    // For-of loops ARE allowed
     for (var r of arr) {
         console.log(r);
     }
