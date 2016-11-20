@@ -1,6 +1,10 @@
 Change Log
 ===
 
+v4.0.1
+---
+* [bugfix] Removed `no-unused-variable` rule from recommended config, as it was causing spurious deprecation warnings.
+
 v4.0.0-dev.2
 ---
 * Include latest v4.0.0 changes
