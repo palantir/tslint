@@ -6,9 +6,7 @@ class Clazz { // This comment is correct
                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [upper]
         //this comment is on its own line, and starts with a lowercase _and_ no space
           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [upper]
-          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [space]
         console.log("test"); //This comment has no space
-                               ~~~~~~~~~~~~~~~~~~~~~~~~~ [space]
     }
     /// <reference or something>
 }
@@ -24,12 +22,11 @@ class Clazz { // This comment is correct
 // tslint: not a rule flag
   ~~~~~~~~~~~~~~~~~~~~~~~~ [upper]
 
-//tslint:disable-next-line:no-unused-expression
-  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [space]
 class Invalid {}
 
 // tslint:disable-next-line:no-unused-expression
 class Valid {}
 
+// todo write more tests
+
 [upper]: comment must start with uppercase letter or word from exceptions list
-[space]: comment must start with a space
