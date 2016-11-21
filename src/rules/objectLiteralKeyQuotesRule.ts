@@ -77,7 +77,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 // This is simplistic. See https://mothereff.in/js-properties for the gorey details.
-const IDENTIFIER_NAME_REGEX = /^(?:[\$A-Z_a-z])*$/;
+const IDENTIFIER_NAME_REGEX = /^(?:[\$A-Z_a-z])+$/;
 const NUMBER_REGEX = /^[0-9]+$/;
 type QuotesMode = "always" | "as-needed" | "consistent" | "consistent-as-needed";
 
