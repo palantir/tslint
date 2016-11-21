@@ -157,19 +157,19 @@ class Linter {
     }
 
     private applyRule(rule: IRule, sourceFile: ts.SourceFile) {
-        let ruleFailures: RuleViolation[] = [];
+        let ruleViolations: RuleViolation[] = [];
         if (this.program && TypedRule.isTypedRule(rule)) {
-            ruleFailures = rule.applyWithProgram(sourceFile, this.program);
+            ruleViolations = rule.applyWithProgram(sourceFile, this.program);
         } else {
-            ruleFailures = rule.apply(sourceFile);
+            ruleViolations = rule.apply(sourceFile);
         }
-        let fileFailures: RuleViolation[] = [];
-        for (let ruleFailure of ruleFailures) {
-            if (!this.containsRule(this.violations, ruleFailure)) {
-                fileFailures.push(ruleFailure);
+        let fileViolations: RuleViolation[] = [];
+        for (let ruleViolation of ruleViolations) {
+            if (!this.containsRule(this.violations, ruleViolation)) {
+                fileViolations.push(ruleViolation);
             }
         }
-        return fileFailures;
+        return fileViolations;
     }
 
     private getEnabledRules(fileName: string, source?: string, configuration: IConfigurationFile = DEFAULT_CONFIG): IRule[] {

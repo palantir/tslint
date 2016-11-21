@@ -68,10 +68,13 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
                 getDirectories: (_path: string) => [],
                 getNewLine: () => "\n",
                 getSourceFile(filenameToGet: string) {
+                    console.log('HEEEE', filenameToGet);
                     if (filenameToGet === this.getDefaultLibFileName()) {
                         const fileText = fs.readFileSync(ts.getDefaultLibFilePath(compilerOptions)).toString();
+                        console.log('RRRRR');
                         return ts.createSourceFile(filenameToGet, fileText, compilerOptions.target);
                     } else if (filenameToGet === fileCompileName) {
+                        console.log('~~~~~');
                         return ts.createSourceFile(fileBasename, fileTextWithoutMarkup, compilerOptions.target, true);
                     }
                 },
@@ -81,6 +84,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
             };
 
             program = ts.createProgram([fileCompileName], compilerOptions, compilerHost);
+
             // perform type checking on the program, updating nodes with symbol table references
             ts.getPreEmitDiagnostics(program);
         }

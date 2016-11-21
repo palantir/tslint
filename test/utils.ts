@@ -19,8 +19,8 @@ import * as os from "os";
 import * as path from "path";
 import * as ts from "typescript";
 
-import {RuleLevel} from "../src/language/rule/rule";
 import * as Lint from "./lint";
+import {RuleLevel} from "../src/language/rule/rule";
 
 export function getSourceFile(fileName: string): ts.SourceFile {
     const relativePath = path.join("test", "files", fileName);

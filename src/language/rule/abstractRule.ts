@@ -26,6 +26,7 @@ export abstract class AbstractRule implements IRule {
     private options: IOptions;
 
     constructor(ruleName: string, private value: any, ruleLevel: RuleLevel, disabledIntervals: IDisabledInterval[]) {
+        console.log('Create AbstractRule with intervals', disabledIntervals);
         let ruleArguments: any[] = [];
 
         if (Array.isArray(value) && value.length > 1) {
@@ -64,10 +65,10 @@ export abstract class AbstractRule implements IRule {
             return value[0];
         }
 
-        if (value.level !== "off") {
-            return true;
+        if (value.level === undefined || value.level === "off" || value.level === 'none') {
+            return false;
         }
 
-        return false;
+        return true;
     }
 }

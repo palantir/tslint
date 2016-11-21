@@ -16,8 +16,8 @@
 
 import * as ts from "typescript";
 
-import {RuleLevel} from "../../src/language/rule/rule";
 import {IFormatter, RuleViolation, TestUtils} from "../lint";
+import {RuleLevel} from "../../src/language/rule/rule";
 
 describe("External Formatter", () => {
     const TEST_FILE = "formatters/externalFormatter.test.ts";

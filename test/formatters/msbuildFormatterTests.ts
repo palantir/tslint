@@ -16,8 +16,8 @@
 
 import * as ts from "typescript";
 
-import {RuleLevel} from "../../src/language/rule/rule";
 import {IFormatter, RuleViolation, TestUtils} from "../lint";
+import {RuleLevel} from "../../src/language/rule/rule";
 
 describe("MSBuild Formatter", () => {
     const TEST_FILE = "formatters/msbuildFormatter.test.ts";

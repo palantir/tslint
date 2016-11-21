@@ -16,8 +16,8 @@
 
 import * as ts from "typescript";
 
-import {RuleLevel} from "../../src/language/rule/rule";
 import {Fix, IFormatter, Replacement, RuleViolation, TestUtils} from "../lint";
+import {RuleLevel} from "../../src/language/rule/rule";
 
 describe("JSON Formatter", () => {
     const TEST_FILE = "formatters/jsonFormatter.test.ts";
@@ -57,6 +57,7 @@ describe("JSON Formatter", () => {
                 character: 1,
             },
             ruleName: "first-name",
+            ruleLevel: "ERROR",
         },
         {
             name: TEST_FILE,
@@ -72,6 +73,7 @@ describe("JSON Formatter", () => {
                 character: 0,
             },
             ruleName: "last-name",
+            ruleLevel: "ERROR",
         },
         {
             name: TEST_FILE,
@@ -97,6 +99,7 @@ describe("JSON Formatter", () => {
                 character: 0,
             },
             ruleName: "full-name",
+            ruleLevel: "ERROR",
         }];
         /* tslint:enable:object-literal-sort-keys */
 

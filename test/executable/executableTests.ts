@@ -101,7 +101,7 @@ describe("Executable", function() {
             });
         });
 
-        it.only("exits with code 2 if custom rules directory is passed and file contains lint errors", (done) => {
+        it("exits with code 2 if custom rules directory is passed and file contains lint errors", (done) => {
             execCli(["-c", "./test/config/tslint-custom-rules.json", "-r", "./test/files/custom-rules", "src/test.ts"], (err) => {
                 assert.isNotNull(err, "process should exit with error");
                 assert.strictEqual(err.code, 2, "error code should be 2");

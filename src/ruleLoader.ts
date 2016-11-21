@@ -53,9 +53,7 @@ export function loadRules(ruleConfiguration: {[name: string]: any},
                     const allList = (all in enableDisableRuleMap ? enableDisableRuleMap[all] : []);
                     const ruleSpecificList = (ruleName in enableDisableRuleMap ? enableDisableRuleMap[ruleName] : []);
                     const disabledIntervals = buildDisabledIntervalsFromSwitches(ruleSpecificList, allList);
-                    const ruleLevel = Rule.ruleLevel;
-
-                    rules.push(new Rule(ruleName, ruleValue, ruleLevel, disabledIntervals));
+                    rules.push(new Rule(ruleName, ruleValue, Rule.ruleLevel, disabledIntervals));
 
                     if (Rule.metadata && Rule.metadata.deprecationMessage && shownDeprecations.indexOf(Rule.metadata.ruleName) === -1) {
                         console.warn(`${Rule.metadata.ruleName} is deprecated. ${Rule.metadata.deprecationMessage}`);

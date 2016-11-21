@@ -187,8 +187,8 @@ export class RuleViolationPosition {
         const rr = ruleFailurePosition.lineAndCharacter;
 
         return this.position === ruleFailurePosition.position
-          && ll.line === rr.line
-          && ll.character === rr.character;
+            && ll.line === rr.line
+            && ll.character === rr.character;
     }
 }
 
@@ -256,9 +256,9 @@ export class RuleViolation {
 
     public equals(ruleFailure: RuleViolation) {
         return this.violation  === ruleFailure.getViolation()
-          && this.fileName === ruleFailure.getFileName()
-          && this.startPosition.equals(ruleFailure.getStartPosition())
-          && this.endPosition.equals(ruleFailure.getEndPosition());
+            && this.fileName === ruleFailure.getFileName()
+            && this.startPosition.equals(ruleFailure.getStartPosition())
+            && this.endPosition.equals(ruleFailure.getEndPosition());
     }
 
     private createFailurePosition(position: number) {

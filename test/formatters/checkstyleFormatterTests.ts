@@ -1,7 +1,7 @@
 import * as ts from "typescript";
 
-import {RuleLevel} from "../../src/language/rule/rule";
 import {IFormatter, RuleViolation, TestUtils} from "../lint";
+import {RuleLevel} from "../../src/language/rule/rule";
 
 describe("Checkstyle Formatter", () => {
     const TEST_FILE = "formatters/pmdFormatter.test.ts"; // reuse existing sample file
