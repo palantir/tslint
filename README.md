@@ -213,9 +213,9 @@ tslint accepts the following command-line options:
 
 #### Library
 
-```javascript
-const Linter = require("tslint");
-const fs = require("fs");
+```js
+import { Linter } from "tslint";
+import * as fs from "fs";
 
 const fileName = "Specify file name";
 const configuration = {
@@ -240,7 +240,7 @@ const result = linter.lint();
 
 To enable rules that work with the type checker, a TypeScript program object must be passed to the linter when using the programmatic API. Helper functions are provided to create a program from a `tsconfig.json` file. A project directory can be specified if project files do not lie in the same directory as the `tsconfig.json` file.
 
-```javascript
+```js
 const program = Linter.createProgram("tsconfig.json", "projectDir/");
 const files = Linter.getFileNames(program);
 const results = files.map(file => {
@@ -321,20 +321,20 @@ __Important conventions__:
 
 Now, let us first write the rule in TypeScript:
 
-```typescript
+```ts
 import * as ts from "typescript";
-import * as Lint from "tslint";
+import { Rules, RuleFailure, RuleWalker } from "tslint";
 
-export class Rule extends Lint.Rules.AbstractRule {
+export class Rule extends Rules.AbstractRule {
     public static FAILURE_STRING = "import statement forbidden";
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+    public apply(sourceFile: ts.SourceFile): RuleFailure[] {
         return this.applyWithWalker(new NoImportsWalker(sourceFile, this.getOptions()));
     }
 }
 
 // The walker takes care of all the work.
-class NoImportsWalker extends Lint.RuleWalker {
+class NoImportsWalker extends RuleWalker {
     public visitImportDeclaration(node: ts.ImportDeclaration) {
         // create a failure at the current position
         this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
@@ -370,11 +370,11 @@ Just like rules, additional formatters can also be supplied to TSLint via `--for
 
 ```typescript
 import * as ts from "typescript";
-import * as Lint from "tslint";
+import { Formatters, RuleFailure } from "tslint";
 
-export class Formatter extends Lint.Formatters.AbstractFormatter {
-    public format(failures: Lint.RuleFailure[]): string {
-        var failuresJSON = failures.map((failure: Lint.RuleFailure) => failure.toJson());
+export class Formatter extends Formatters.AbstractFormatter {
+    public format(failures: RuleFailure[]): string {
+        var failuresJSON = failures.map((failure: RuleFailure) => failure.toJson());
         return JSON.stringify(failuresJSON);
     }
 }
