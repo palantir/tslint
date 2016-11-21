@@ -28,6 +28,8 @@ const TEMP_JSON_PATH = path.resolve(EXECUTABLE_DIR, "tslint.json");
 /* tslint:disable:only-arrow-functions */
 describe("Executable", function() {
     this.slow(3000);    // the executable is JIT-ed each time it runs; avoid showing slowness warnings
+    this.timeout(4000);
+
     describe("Files", () => {
         it("exits with code 1 if no arguments passed", (done) => {
             execCli([], (err, stdout, stderr) => {

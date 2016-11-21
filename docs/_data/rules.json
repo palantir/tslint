@@ -296,7 +296,7 @@
   },
   {
     "ruleName": "max-classes-per-file",
-    "description": "\nA file may not contain more than the specified number of classes \nif the file name does not match the \"ignore-filename-pattern\" option",
+    "description": "\nA file may not contain more than the specified number of classes",
     "rationale": "\nEnsures that files have a single responsibility so that that classes each exist in their own files",
     "optionsDescription": "\nThe one required argument is an integer indicating the maximum number of classes that can appear in a file.",
     "options": {
