@@ -20,8 +20,8 @@ import * as path from "path";
 import {camelize} from "underscore.string";
 
 import {getRulesDirectories} from "./configuration";
-import { IDisabledInterval, IRule } from "./language/rule/rule";
-import { dedent } from "./utils";
+import {IDisabledInterval, IRule} from "./language/rule/rule";
+import {dedent} from "./utils";
 
 const moduleDirectory = path.dirname(module.filename);
 const CORE_RULES_DIRECTORY = path.resolve(moduleDirectory, ".", "rules");
