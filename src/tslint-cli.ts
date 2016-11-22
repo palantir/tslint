@@ -26,6 +26,7 @@ import {
     DEFAULT_CONFIG,
     findConfiguration,
 } from "./configuration";
+import { FatalError } from "./error";
 import { RuleLevel } from "./language/rule/rule";
 import * as Linter from "./linter";
 import { consoleTestResultHandler, runTest } from "./test";
@@ -260,13 +261,7 @@ const processFiles = (files: string[], program?: ts.Program) => {
 
         const contents = fs.readFileSync(file, "utf8");
         const configLoad = findConfiguration(possibleConfigAbsolutePath, file);
-
-        if (configLoad.results) {
-            linter.lint(file, contents, configLoad.results);
-        } else {
-            console.error(`Failed to load ${configLoad.path}: ${configLoad.error.message}`);
-            process.exit(1);
-        }
+        linter.lint(file, contents, configLoad.results);
     }
 
     const lintResult = linter.getResult();
@@ -340,4 +335,13 @@ files = files
     .map((file: string) => glob.sync(file, { ignore: ignorePatterns, nodir: true }))
     .reduce((a: string[], b: string[]) => a.concat(b));
 
-processFiles(files, program);
+try {
+    processFiles(files, program);
+} catch (error) {
+    if (error.name === FatalError.NAME) {
+        console.error(error.message);
+        process.exit(1);
+    }
+    // rethrow unhandled error
+    throw error;
+}

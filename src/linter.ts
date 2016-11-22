@@ -102,7 +102,6 @@ class Linter {
         let fileViolations: RuleViolation[] = [];
 
         if (this.options.fix) {
-            this.fixes = [];
             for (let rule of enabledRules) {
                 let ruleViolations = this.applyRule(rule, sourceFile);
                 const fixes = ruleViolations.map((f) => f.getFix()).filter((f) => !!f);

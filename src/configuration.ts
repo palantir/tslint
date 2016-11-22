@@ -19,6 +19,7 @@ import findup = require("findup-sync");
 import * as fs from "fs";
 import * as path from "path";
 import * as resolve from "resolve";
+import { FatalError } from "./error";
 
 import {arrayify, objectify, stripComments} from "./utils";
 
@@ -32,16 +33,7 @@ export interface IConfigurationFile {
     rules?: any;
 }
 
-/**
- * Define `Error` here to avoid using `Error` from @types/node.
- * Using the `node` version causes a compilation error when this code is used as an npm library if @types/node is not already imported.
- */
-export interface Error {
-    message: string;
-}
-
 export interface IConfigurationLoadResult {
-    error?: Error;
     path: string;
     results?: IConfigurationFile;
 }
@@ -119,11 +111,10 @@ export function findConfiguration(configFile: string, inputFilePath: string): IC
 
     try {
         loadResult.results = loadConfigurationFromPath(path);
+        return loadResult;
     } catch (error) {
-        loadResult.error = error;
+        throw new FatalError(`Failed to load ${path}: ${error.message}`, error);
     }
-
-    return loadResult;
 }
 
 /**
