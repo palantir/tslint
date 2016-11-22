@@ -58,7 +58,9 @@ class AdjacentOverloadSignaturesWalker extends Lint.RuleWalker {
     }
 
     public visitInterfaceDeclaration(node: ts.InterfaceDeclaration): void {
-        this.checkOverloadsAdjacent(node.members, (member) => member.name && getTextOfPropertyName(member.name));
+        this.checkOverloadsAdjacent(node.members, (member) => {
+            return getTextOfPropertyName(member);
+        });
         super.visitInterfaceDeclaration(node);
     }
 
@@ -84,7 +86,9 @@ class AdjacentOverloadSignaturesWalker extends Lint.RuleWalker {
     }
 
     private visitMembers(members: Array<ts.TypeElement | ts.ClassElement>) {
-        this.checkOverloadsAdjacent(members, (member) => member.name && getTextOfPropertyName(member.name));
+        this.checkOverloadsAdjacent(members, (member) => {
+            return getTextOfPropertyName(member);
+        });
     }
 
     /** 'getOverloadName' may return undefined for nodes that cannot be overloads, e.g. a `const` declaration. */
@@ -109,19 +113,27 @@ function isLiteralExpression(node: ts.Node): node is ts.LiteralExpression {
     return node.kind === ts.SyntaxKind.StringLiteral || node.kind === ts.SyntaxKind.NumericLiteral;
 }
 
-function getTextOfPropertyName(name: ts.PropertyName): string {
-    switch (name.kind) {
+function getTextOfPropertyName(node: ts.InterfaceDeclaration | ts.TypeElement | ts.ClassElement): string {
+    let nameText: string;
+    if (node.name == null) {
+        return null;
+    }
+    switch (node.name.kind) {
         case ts.SyntaxKind.Identifier:
-            return (name as ts.Identifier).text;
+            nameText = (node.name as ts.Identifier).text;
+            break;
         case ts.SyntaxKind.ComputedPropertyName:
-            const { expression } = (name as ts.ComputedPropertyName);
+            const { expression } = (node.name as ts.ComputedPropertyName);
             if (isLiteralExpression(expression)) {
-                return expression.text;
+                nameText = expression.text;
             }
             break;
         default:
-            if (isLiteralExpression(name)) {
-                return name.text;
+            if (isLiteralExpression(node.name)) {
+                nameText = (<ts.StringLiteral> node.name).text;
             }
     }
+
+    const suffix = Lint.hasModifier(node.modifiers, ts.SyntaxKind.StaticKeyword) ? " __static__" : "";
+    return nameText + suffix;
 }
