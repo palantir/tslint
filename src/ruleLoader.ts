@@ -20,7 +20,8 @@ import * as path from "path";
 import {camelize} from "underscore.string";
 
 import {getRulesDirectories} from "./configuration";
-import {IDisabledInterval, IRule} from "./language/rule/rule";
+import { IDisabledInterval, IRule } from "./language/rule/rule";
+import { dedent } from "./utils";
 
 const moduleDirectory = path.dirname(module.filename);
 const CORE_RULES_DIRECTORY = path.resolve(moduleDirectory, ".", "rules");
@@ -65,26 +66,28 @@ export function loadRules(ruleConfiguration: {[name: string]: any},
     }
 
     if (notFoundRules.length > 0) {
-        const ERROR_MESSAGE = `
+        const warning = dedent`
             Could not find implementations for the following rules specified in the configuration:
-            ${notFoundRules.join("\n")}
+                ${notFoundRules.join("\n                ")}
             Try upgrading TSLint and/or ensuring that you have all necessary custom rules installed.
             If TSLint was recently upgraded, you may have old rules configured which need to be cleaned up.
         `;
 
-        throw new Error(ERROR_MESSAGE);
-    } else if (notAllowedInJsRules.length > 0) {
-        const JS_ERROR_MESSAGE = `
+        console.warn(warning);
+    }
+    if (notAllowedInJsRules.length > 0) {
+        const warning = dedent`
             Following rules specified in configuration couldn't be applied to .js or .jsx files:
-                ${notAllowedInJsRules.join("\n")}
-
+                ${notAllowedInJsRules.join("\n                ")}
             Make sure to exclude them from "jsRules" section of your tslint.json.
         `;
 
-        throw new Error(JS_ERROR_MESSAGE);
-    } else {
-        return rules;
+        console.warn(warning);
     }
+    if (rules.length === 0) {
+        console.warn("No valid rules have been specified");
+    }
+    return rules;
 }
 
 export function findRule(name: string, rulesDirectories?: string | string[]) {
