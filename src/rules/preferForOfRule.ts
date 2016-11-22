@@ -35,89 +35,158 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Expected a 'for-of' loop instead of a 'for' loop with this simple iteration";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const languageService = Lint.createLanguageService(sourceFile.fileName, sourceFile.getFullText());
-        return this.applyWithWalker(new PreferForOfWalker(sourceFile, this.getOptions(), languageService));
+        return this.applyWithWalker(new PreferForOfWalker(sourceFile, this.getOptions()));
     }
 }
 
+interface IIncrementorState {
+    arrayToken: ts.LeftHandSideExpression;
+    endIncrementPos: number;
+    onlyArrayAccess: boolean;
+}
+
 class PreferForOfWalker extends Lint.RuleWalker {
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions, private languageService: ts.LanguageService) {
+    // a map of incrementors and whether or not they are only used to index into an array reference in the for loop
+    private incrementorMap: { [name: string]: IIncrementorState };
+
+    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
+        this.incrementorMap = {};
     }
 
     public visitForStatement(node: ts.ForStatement) {
-        const arrayAccessNode = this.locateArrayNodeInForLoop(node);
+        const arrayNodeInfo = this.getForLoopHeaderInfo(node);
+        let indexVariableName: string;
+        if (arrayNodeInfo != null) {
+            const { indexVariable, arrayToken } = arrayNodeInfo;
+            indexVariableName = indexVariable.getText();
 
-        if (arrayAccessNode !== undefined) {
-            // Skip arrays thats just loop over a hard coded number
-            // If we are accessing the length of the array, then we are likely looping over it's values
-            if (arrayAccessNode.kind === ts.SyntaxKind.PropertyAccessExpression && arrayAccessNode.getLastToken().getText() === "length") {
-                let incrementorVariable = node.incrementor.getFirstToken();
-                if (/\+|-/g.test(incrementorVariable.getText())) {
-                    // If it's formatted as `++i` instead, we need to get the OTHER token
-                    incrementorVariable = node.incrementor.getLastToken();
-                }
-                const arrayToken = arrayAccessNode.getChildAt(0);
-                const loopSyntaxText = node.statement.getText();
-                // Find all usages of the incrementor variable
-                const fileName = this.getSourceFile().fileName;
-                const highlights = this.languageService.getDocumentHighlights(fileName, incrementorVariable.getStart(), [fileName]);
-
-                if (highlights && highlights.length > 0) {
-                    // There are *usually* three usages when setting up the for loop,
-                    // so remove those from the count to get the count inside the loop block
-                    const incrementorCount = highlights[0].highlightSpans.length - 3;
-
-                    // Find `array[i]`-like usages by building up a regex 
-                    const arrayTokenForRegex = arrayToken.getText().replace(".", "\\.");
-                    const incrementorForRegex = incrementorVariable.getText().replace(".", "\\.");
-                    const regex = new RegExp(`${arrayTokenForRegex}\\[\\s*${incrementorForRegex}\\s*\\]`, "g");
-                    const accessMatches = loopSyntaxText.match(regex);
-                    const matchCount = (accessMatches || []).length;
-
-                    // If there are more usages of the array item being access than the incrementor variable
-                    // being used, then this loop could be replaced with a for-of loop instead.
-                    // This means that the incrementor variable is not used on its own anywhere and is ONLY
-                    // used to access the array item.
-                    if (matchCount >= incrementorCount) {
-                        const failure = this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING);
-                        this.addFailure(failure);
-                    }
-                }
-            }
+            // store `for` loop state
+            this.incrementorMap[indexVariableName] = {
+                arrayToken,
+                endIncrementPos: node.incrementor.end,
+                onlyArrayAccess: true,
+            };
         }
 
         super.visitForStatement(node);
+
+        if (indexVariableName != null) {
+            const incrementorState = this.incrementorMap[indexVariableName];
+            if (incrementorState.onlyArrayAccess) {
+                const length = incrementorState.endIncrementPos - node.getStart() + 1;
+                const failure = this.createFailure(node.getStart(), length, Rule.FAILURE_STRING);
+                this.addFailure(failure);
+            }
+
+            // remove current `for` loop state
+            delete this.incrementorMap[indexVariableName];
+        }
     }
 
-    private locateArrayNodeInForLoop(forLoop: ts.ForStatement): ts.Node {
-        // Some oddly formatted (yet still valid!) `for` loops might not have children in the condition
-        // See: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for
-        if (forLoop.condition !== undefined) {
-            let arrayAccessNode = forLoop.condition.getChildAt(2);
-            // If We haven't found it, maybe it's not a standard for loop, try looking in the initializer for the array
-            // Something like `for(var t=0, len=arr.length; t < len; t++)`
-            if (arrayAccessNode.kind !== ts.SyntaxKind.PropertyAccessExpression && forLoop.initializer !== undefined) {
-                for (let initNode of forLoop.initializer.getChildren()) {
-                    // look in `var t=0, len=arr.length;`
-                    if (initNode.kind === ts.SyntaxKind.SyntaxList) {
-                        for (let initVar of initNode.getChildren()) {
-                            // look in `t=0, len=arr.length;`
-                            if (initVar.kind === ts.SyntaxKind.VariableDeclaration) {
-                                for (let initVarPart of initVar.getChildren()) {
-                                    // look in `len=arr.length`
-                                    if (initVarPart.kind === ts.SyntaxKind.PropertyAccessExpression) {
-                                        arrayAccessNode = initVarPart;
-                                    }
-                                }
-                            }
-                        }
+    public visitIdentifier(node: ts.Identifier) {
+        const incrementorState = this.incrementorMap[node.text];
+
+        // check if the identifier is an iterator and is currently in the `for` loop body
+        if (incrementorState != null && incrementorState.arrayToken != null && incrementorState.endIncrementPos < node.getStart()) {
+            // mark `onlyArrayAccess` false if iterator is used on anything except the array in the `for` loop header
+            if (node.parent.kind !== ts.SyntaxKind.ElementAccessExpression
+                || incrementorState.arrayToken.getText() !== (<ts.ElementAccessExpression> node.parent).expression.getText()) {
+
+                incrementorState.onlyArrayAccess = false;
+            }
+        }
+        super.visitIdentifier(node);
+    }
+
+    // returns the iterator and array of a `for` loop if the `for` loop is basic. Otherwise, `null`
+    private getForLoopHeaderInfo(forLoop: ts.ForStatement) {
+        let indexVariableName: string;
+        let indexVariable: ts.Identifier;
+
+        // assign `indexVariableName` if initializer is simple and starts at 0
+        if (forLoop.initializer != null && forLoop.initializer.kind === ts.SyntaxKind.VariableDeclarationList) {
+            const syntaxList = forLoop.initializer.getChildAt(1);
+            if (syntaxList.kind === ts.SyntaxKind.SyntaxList && syntaxList.getChildCount() === 1) {
+                const assignment = syntaxList.getChildAt(0);
+                if (assignment.kind === ts.SyntaxKind.VariableDeclaration) {
+                    const value = assignment.getChildAt(2).getText();
+                    if (value === "0") {
+                        indexVariable = <ts.Identifier> assignment.getChildAt(0);
+                        indexVariableName = indexVariable.getText();
                     }
                 }
             }
-            return arrayAccessNode;
-        } else {
-            return undefined;
         }
+
+        // ensure `for` condition
+        if (indexVariableName == null
+            || forLoop.condition == null
+            || forLoop.condition.kind !== ts.SyntaxKind.BinaryExpression
+            || forLoop.condition.getChildAt(0).getText() !== indexVariableName
+            || forLoop.condition.getChildAt(1).getText() !== "<") {
+
+            return null;
+        }
+
+        if (!this.isIncremented(forLoop.incrementor, indexVariableName)) {
+            return null;
+        }
+
+        // ensure that the condition checks a `length` property
+        const conditionRight = forLoop.condition.getChildAt(2);
+        if (conditionRight.kind === ts.SyntaxKind.PropertyAccessExpression) {
+            const propertyAccess = <ts.PropertyAccessExpression> conditionRight;
+            if (propertyAccess.name.getText() === "length") {
+                return { indexVariable, arrayToken: propertyAccess.expression };
+            }
+        }
+
+        return null;
+    }
+
+    private isIncremented(node: ts.Node, indexVariableName: string) {
+        if (node == null) {
+            return false;
+        }
+
+        // ensure variable is incremented
+        if (node.kind === ts.SyntaxKind.PrefixUnaryExpression) {
+            const incrementor = <ts.PrefixUnaryExpression> node;
+            if (incrementor.operator === ts.SyntaxKind.PlusPlusToken && incrementor.operand.getText() === indexVariableName) {
+                // x++
+                return true;
+            }
+        } else if (node.kind === ts.SyntaxKind.PostfixUnaryExpression) {
+            const incrementor = <ts.PostfixUnaryExpression> node;
+            if (incrementor.operator === ts.SyntaxKind.PlusPlusToken && incrementor.operand.getText() === indexVariableName) {
+                // ++x
+                return true;
+            }
+        } else if (node.kind === ts.SyntaxKind.BinaryExpression) {
+            const binaryExpression = <ts.BinaryExpression> node;
+            if (binaryExpression.operatorToken.getText() === "+="
+                && binaryExpression.left.getText() === indexVariableName
+                && binaryExpression.right.getText() === "1") {
+                // x += 1
+                return true;
+            }
+            if (binaryExpression.operatorToken.getText() === "="
+                && binaryExpression.left.getText() === indexVariableName) {
+                const addExpression = <ts.BinaryExpression> binaryExpression.right;
+                if (addExpression.operatorToken.getText() === "+") {
+                    if (addExpression.right.getText() === indexVariableName && addExpression.left.getText() === "1") {
+                        // x = 1 + x
+                        return true;
+                    } else if (addExpression.left.getText() === indexVariableName && addExpression.right.getText() === "1") {
+                        // x = x + 1
+                        return true;
+                    }
+                }
+            }
+        } else {
+            return false;
+        }
+        return false;
     }
 }
