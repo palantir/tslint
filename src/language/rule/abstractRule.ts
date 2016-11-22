@@ -27,7 +27,6 @@ export abstract class AbstractRule implements IRule {
 
     constructor(ruleName: string, private value: any, disabledIntervals: IDisabledInterval[]) {
         let ruleArguments: any[] = [];
-
         let ruleLevel = RuleLevel.ERROR;
 
         if (Array.isArray(value) && value.length > 1) {
@@ -70,7 +69,7 @@ export abstract class AbstractRule implements IRule {
             return value[0];
         }
 
-        if (value.level === undefined || value.level === "off" || value.level === "none") {
+        if (value.level === "off" || value.level === "none") {
             return false;
         }
 
