@@ -21,7 +21,7 @@ import * as Lint from "../index";
 
 enum QuoteMark {
     SINGLE_QUOTES,
-    DOUBLE_QUOTES
+    DOUBLE_QUOTES,
 }
 
 export class Rule extends Lint.Rules.AbstractRule {

@@ -106,7 +106,7 @@ export class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
 
         const comments = this.getTypeChecker().getSymbolAtLocation(node.name).getDocumentationComment();
 
-        if (comments.map(comment => comment.text).join("").trim() === "") {
+        if (comments.map((comment) => comment.text).join("").trim() === "") {
             this.addFailure(this.createDocumentationFailure(node, nodeToCheck));
         }
     }

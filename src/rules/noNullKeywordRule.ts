@@ -47,8 +47,18 @@ export class Rule extends Lint.Rules.AbstractRule {
 class NullWalker extends Lint.RuleWalker {
     public visitNode(node: ts.Node) {
         super.visitNode(node);
-        if (node.kind === ts.SyntaxKind.NullKeyword) {
+        if (node.kind === ts.SyntaxKind.NullKeyword && !isPartOfType(node)) {
             this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
         }
     }
+}
+
+function isPartOfType({ parent }: ts.Node) {
+    while (parent != null) {
+        if (ts.SyntaxKind.FirstTypeNode <= parent.kind && parent.kind <= ts.SyntaxKind.LastTypeNode) {
+            return true;
+        }
+        parent = parent.parent;
+    }
+    return false;
 }

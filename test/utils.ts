@@ -20,7 +20,6 @@ import * as path from "path";
 import * as ts from "typescript";
 
 import * as Lint from "./lint";
-import {RuleLevel} from "../src/language/rule/rule";
 
 export function getSourceFile(fileName: string): ts.SourceFile {
     const relativePath = path.join("test", "files", fileName);
@@ -47,7 +46,7 @@ export function applyRuleOnFile(fileName: string, Rule: any, ruleValue: any = tr
 
 // start and end are arrays with the first and second elements
 // being (one-indexed) line and character positions respectively
-export function createFailure(fileName: string, start: number[], end: number[], ruleLevel: RuleLevel, failure: string): Lint.RuleViolation {
+export function createFailure(fileName: string, start: number[], end: number[], ruleLevel: Lint.RuleLevel, failure: string): Lint.RuleViolation {
     const sourceFile = getSourceFile(fileName);
     const startPosition = sourceFile.getPositionOfLineAndCharacter(start[0] - 1, start[1] - 1);
     const endPosition = sourceFile.getPositionOfLineAndCharacter(end[0] - 1, end[1] - 1);
@@ -58,7 +57,7 @@ export function createFailure(fileName: string, start: number[], end: number[], 
 // return a partial on createFailure
 export function createFailuresOnFile(fileName: string, failure: string) {
     return (start: number[], end: number[]) => {
-        return createFailure(fileName, start, end, RuleLevel.ERROR, failure);
+        return createFailure(fileName, start, end, Lint.RuleLevel.ERROR, failure);
     };
 }
 

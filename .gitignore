@@ -4,6 +4,7 @@
 /build/
 /docs/site/
 /scripts/*.js
+/scripts/*.js.map
 /lib/
 /test/executable/tslint.json
 node_modules/

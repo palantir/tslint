@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {TestUtils} from "./lint";
-import {RuleLevel} from "../src/language/rule/rule";
+import {RuleLevel, TestUtils} from "./lint";
 
 describe("<eofline>", () => {
     const EofLineRule = TestUtils.getRule("eofline");

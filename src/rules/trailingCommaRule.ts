@@ -66,7 +66,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class TrailingCommaWalker extends Lint.RuleWalker {
-    private static SYNTAX_LIST_WRAPPER_TOKENS: [ts.SyntaxKind, ts.SyntaxKind][] = [
+    private static SYNTAX_LIST_WRAPPER_TOKENS: Array<[ts.SyntaxKind, ts.SyntaxKind]> = [
         [ts.SyntaxKind.OpenBraceToken, ts.SyntaxKind.CloseBraceToken],
         [ts.SyntaxKind.OpenBracketToken, ts.SyntaxKind.CloseBracketToken],
         [ts.SyntaxKind.OpenParenToken, ts.SyntaxKind.CloseParenToken],
@@ -189,8 +189,8 @@ class TrailingCommaWalker extends Lint.RuleWalker {
                 // as opposed to optionals alongside it. So instead of children[i + 1] having
                 // [ PropertySignature, Semicolon, PropertySignature, Semicolon ], the AST is
                 // [ PropertySignature, PropertySignature], where the Semicolons are under PropertySignature
-                const hasSemicolon = grandChildren.some(grandChild => {
-                    return grandChild.getChildren().some(ggc => ggc.kind === ts.SyntaxKind.SemicolonToken);
+                const hasSemicolon = grandChildren.some((grandChild) => {
+                    return grandChild.getChildren().some((ggc) => ggc.kind === ts.SyntaxKind.SemicolonToken);
                 });
 
                 if (!hasSemicolon) {

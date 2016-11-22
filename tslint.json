@@ -4,6 +4,9 @@
     "interface-name": {
       "level": "off"
     },
+    "max-classes-per-file": {
+      "level": "off"
+    },
     "max-line-length": {
       "level": "error",
       "options": 140
@@ -15,9 +18,6 @@
         "static-before-instance",
         "variables-before-functions"
       ]
-    },
-    "no-unused-variable": {
-      "level": "error"
     },
     "variable-name": {
       "level": "error",

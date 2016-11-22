@@ -1,5 +1,22 @@
-import * as Lint from "../index";
+/**
+ * @license
+ * Copyright 2016 Palantir Technologies, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import * as ts from "typescript";
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -28,13 +45,15 @@ export class Rule extends Lint.Rules.AbstractRule {
 
             * \`"always"\`: Property names should always be quoted. (This is the default.)
             * \`"as-needed"\`: Only property names which require quotes may be quoted (e.g. those with spaces in them).
+            * \`"consistent"\`: Property names should either all be quoted or unquoted.
+            * \`"consistent-as-needed"\`: If any property name requires quotes, then all properties must be quoted. Otherwise, no 
+            property names may be quoted.
 
             For ES6, computed property names (\`{[name]: value}\`) and methods (\`{foo() {}}\`) never need
             to be quoted.`,
         options: {
             type: "string",
-            enum: ["always", "as-needed"],
-            // TODO: eslint also supports "consistent", "consistent-as-needed" modes.
+            enum: ["always", "as-needed", "consistent", "consistent-as-needed"],
             // TODO: eslint supports "keywords", "unnecessary" and "numbers" options.
         },
         optionExamples: ["[true, \"as-needed\"]", "[true, \"always\"]"],
@@ -43,8 +62,13 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static UNNEEDED_QUOTES = (name: string) => `Unnecessarily quoted property '${name}' found.`;
-    public static UNQUOTED_PROPERTY = (name: string) => `Unquoted property '${name}' found.`;
+    public static INCONSISTENT_PROPERTY = `All property names in this object literal must be consistently quoted or unquoted.`;
+    public static UNNEEDED_QUOTES = (name: string) => {
+        return `Unnecessarily quoted property '${name}' found.`;
+    }
+    public static UNQUOTED_PROPERTY = (name: string) => {
+        return `Unquoted property '${name}' found.`;
+    }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
         const objectLiteralKeyQuotesWalker = new ObjectLiteralKeyQuotesWalker(sourceFile, this.getOptions());
@@ -54,13 +78,21 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 // This is simplistic. See https://mothereff.in/js-properties for the gorey details.
 const IDENTIFIER_NAME_REGEX = /^(?:[\$A-Z_a-z])*$/;
-
 const NUMBER_REGEX = /^[0-9]+$/;
+type QuotesMode = "always" | "as-needed" | "consistent" | "consistent-as-needed";
 
-type QuotesMode = "always" | "as-needed";
+interface IObjectLiteralState {
+    // potential failures for properties that have quotes but don't need them
+    quotesNotNeededProperties: Lint.RuleViolation[];
+    // potential failures for properties that don't have quotes
+    unquotedProperties: Lint.RuleViolation[];
+    // whether or not any of the properties require quotes
+    hasQuotesNeededProperty: boolean;
+}
 
 class ObjectLiteralKeyQuotesWalker extends Lint.RuleWalker {
     private mode: QuotesMode;
+    private currentState: IObjectLiteralState;
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
@@ -70,27 +102,59 @@ class ObjectLiteralKeyQuotesWalker extends Lint.RuleWalker {
 
     public visitPropertyAssignment(node: ts.PropertyAssignment) {
         const name = node.name;
-        if (this.mode === "always") {
-            if (name.kind !== ts.SyntaxKind.StringLiteral &&
-                name.kind !== ts.SyntaxKind.ComputedPropertyName) {
-                this.addFailure(this.createFailure(name.getStart(), name.getWidth(),
-                                                   Rule.UNQUOTED_PROPERTY(name.getText())));
-            }
-        } else if (this.mode === "as-needed") {
-            if (name.kind === ts.SyntaxKind.StringLiteral) {
-                // Check if the quoting is necessary.
-                const stringNode = name as ts.StringLiteral;
-                const property = stringNode.text;
+        if (name.kind !== ts.SyntaxKind.StringLiteral &&
+            name.kind !== ts.SyntaxKind.ComputedPropertyName) {
 
-                const isIdentifier = IDENTIFIER_NAME_REGEX.test(property);
-                const isNumber = NUMBER_REGEX.test(property);
-                if (isIdentifier || (isNumber && Number(property).toString() === property)) {
-                    this.addFailure(this.createFailure(stringNode.getStart(), stringNode.getWidth(),
-                                                    Rule.UNNEEDED_QUOTES(property)));
-                }
+            const errorText = Rule.UNQUOTED_PROPERTY(name.getText());
+            this.currentState.unquotedProperties.push(this.createFailure(name.getStart(), name.getWidth(), errorText));
+        }
+        if (name.kind === ts.SyntaxKind.StringLiteral) {
+            // Check if the quoting is necessary.
+            const stringNode = name as ts.StringLiteral;
+            const property = stringNode.text;
+
+            const isIdentifier = IDENTIFIER_NAME_REGEX.test(property);
+            const isNumber = NUMBER_REGEX.test(property);
+            if (isIdentifier || (isNumber && Number(property).toString() === property)) {
+                const errorText = Rule.UNNEEDED_QUOTES(property);
+                const failure = this.createFailure(stringNode.getStart(), stringNode.getWidth(), errorText);
+                this.currentState.quotesNotNeededProperties.push(failure);
+            } else {
+                this.currentState.hasQuotesNeededProperty = true;
             }
         }
 
         super.visitPropertyAssignment(node);
+    }
+
+    public visitObjectLiteralExpression(node: ts.ObjectLiteralExpression) {
+        let state: IObjectLiteralState = {
+            hasQuotesNeededProperty: false,
+            quotesNotNeededProperties: [],
+            unquotedProperties: [],
+        };
+        // a nested object literal should store its parent state to restore when finished
+        let previousState = this.currentState;
+        this.currentState = state;
+
+        super.visitObjectLiteralExpression(node);
+
+        if (this.mode === "always" || (this.mode === "consistent-as-needed" && state.hasQuotesNeededProperty)) {
+            for (const failure of state.unquotedProperties) {
+                this.addFailure(failure);
+            }
+        } else if (this.mode === "as-needed" || (this.mode === "consistent-as-needed" && !state.hasQuotesNeededProperty)) {
+            for (const failure of state.quotesNotNeededProperties) {
+                this.addFailure(failure);
+            }
+        } else if (this.mode === "consistent") {
+            const hasQuotedProperties = state.hasQuotesNeededProperty || state.quotesNotNeededProperties.length > 0;
+            const hasUnquotedProperties = state.unquotedProperties.length > 0;
+            if (hasQuotedProperties && hasUnquotedProperties) {
+                this.addFailure(this.createFailure(node.getStart(), 1, Rule.INCONSISTENT_PROPERTY));
+            }
+        }
+
+        this.currentState = previousState;
     }
 }

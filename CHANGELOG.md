@@ -1,6 +1,14 @@
 Change Log
 ===
 
+v4.0.1
+---
+* [bugfix] Removed `no-unused-variable` rule from recommended config, as it was causing spurious deprecation warnings.
+
+v4.0.0-dev.2
+---
+* Include latest v4.0.0 changes
+
 v4.0.0
 ---
 * **BREAKING CHANGES**
@@ -12,6 +20,7 @@ v4.0.0
 * [new-fixer] `ordered-imports` auto fixed (#1640)
 * [new-fixer] `arrow-parens` auto fixed (#1731)
 * [rule-change] `indent` rule now ignores template strings (#1611)
+* [new-rule-option] `object-literal-key-quotes` adds the options `consistent` and `consistent-as-needed` (#1733)
 * [enhancement] `--fix` option added to automatically fix selected rules (#1697)
 * [enhancement] Updated recommend rules (#1717)
 * [enhancement] `adjacent-overload-signatures` now works with classes, source files, modules, and namespaces (#1707)
@@ -191,6 +200,10 @@ Thanks to our contributors!
 * @danvk
 * @janaagaard75
 * @mprobst
+
+v3.12.0-dev.2
+---
+* [enhancement] Support TypeScript v2.0.0-dev builds
 
 v3.12.1
 ---

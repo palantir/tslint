@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import * as Lint from "../index";
 import * as ts from "typescript";
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -40,14 +40,12 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_TYPE_BREAK = "break";
-
     public static FAILURE_TYPE_CONTINUE = "continue";
-
     public static FAILURE_TYPE_RETURN = "return";
-
     public static FAILURE_TYPE_THROW = "throw";
-
-    public static FAILURE_STRING_FACTORY = (name: string) => `${name} statements in finally blocks are forbidden.`;
+    public static FAILURE_STRING_FACTORY = (name: string) => {
+        return `${name} statements in finally blocks are forbidden.`;
+    }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
         return this.applyWithWalker(new NoReturnInFinallyScopeAwareWalker(sourceFile, this.getOptions()));
@@ -81,7 +79,7 @@ interface IFinallyScope {
     /**
      * A collection of `break` or `continue` labels in this scope.
      */
-    labels: Array<string>;
+    labels: string[];
 }
 
 /**

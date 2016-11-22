@@ -82,8 +82,8 @@ export interface IRuleMetadata {
 export type RuleType = "functionality" | "maintainability" | "style" | "typescript";
 
 export enum RuleLevel {
-    "WARNING",
-    "ERROR"
+    "WARNING" = 1,
+    "ERROR",
 }
 
 export interface IOptions {

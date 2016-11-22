@@ -33,7 +33,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY = (name: string) => `The key '${name}' is not sorted alphabetically`;
+    public static FAILURE_STRING_FACTORY = (name: string) => {
+        return `The key '${name}' is not sorted alphabetically`;
+    }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
         return this.applyWithWalker(new ObjectLiteralSortKeysWalker(sourceFile, this.getOptions()));

@@ -69,7 +69,7 @@ class BlockWalker extends Lint.RuleWalker {
                 ts.SyntaxKind.PrivateKeyword,
                 ts.SyntaxKind.ProtectedKeyword,
                 ts.SyntaxKind.PublicKeyword,
-                ts.SyntaxKind.ReadonlyKeyword
+                ts.SyntaxKind.ReadonlyKeyword,
             );
 
             if (hasPropertyAccessModifier) {

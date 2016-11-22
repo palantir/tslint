@@ -16,8 +16,7 @@
 
 import * as ts from "typescript";
 
-import {IFormatter, RuleViolation, TestUtils} from "../lint";
-import {RuleLevel} from "../../src/language/rule/rule";
+import {IFormatter, RuleLevel, RuleViolation, TestUtils} from "../lint";
 
 describe("PMD Formatter", () => {
     const TEST_FILE = "formatters/pmdFormatter.test.ts";

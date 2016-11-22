@@ -31,7 +31,6 @@ console.log(colors.underline("Testing Lint Rules:"));
 const testDirectories = glob.sync("test/rules/**/tslint.json").map(path.dirname);
 
 for (const testDirectory of testDirectories) {
-    console.log('running against ', testDirectory);
     const results = runTest(testDirectory);
     const didAllTestsPass = consoleTestResultHandler(results);
     if (!didAllTestsPass) {

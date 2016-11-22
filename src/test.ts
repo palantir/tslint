@@ -68,13 +68,10 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
                 getDirectories: (_path: string) => [],
                 getNewLine: () => "\n",
                 getSourceFile(filenameToGet: string) {
-                    console.log('HEEEE', filenameToGet);
                     if (filenameToGet === this.getDefaultLibFileName()) {
                         const fileText = fs.readFileSync(ts.getDefaultLibFilePath(compilerOptions)).toString();
-                        console.log('RRRRR');
                         return ts.createSourceFile(filenameToGet, fileText, compilerOptions.target);
                     } else if (filenameToGet === fileCompileName) {
-                        console.log('~~~~~');
                         return ts.createSourceFile(fileBasename, fileTextWithoutMarkup, compilerOptions.target, true);
                     }
                 },
@@ -123,7 +120,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
             const stat = fs.statSync(fixedFile);
             if (stat.isFile()) {
                 fixedFileText = fs.readFileSync(fixedFile, "utf8");
-                const fixes = failures.filter(f => f.hasFix()).map(f => f.getFix());
+                const fixes = failures.filter((f) => f.hasFix()).map((f) => f.getFix());
                 newFileText = Fix.applyAll(fileTextWithoutMarkup, fixes);
             }
         } catch (e) {

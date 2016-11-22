@@ -53,7 +53,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             sourceFile.languageVersion,
             false,
             sourceFile.languageVariant,
-            sourceFile.getFullText()
+            sourceFile.getFullText(),
         );
 
         const linebreakStyle = this.getOptions().ruleArguments[0] || OPTION_LINEBREAK_STYLE_LF;

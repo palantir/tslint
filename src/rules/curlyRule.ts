@@ -83,7 +83,7 @@ class CurlyWalker extends Lint.RuleWalker {
             this.addFailure(this.createFailure(
                 node.getStart(),
                 node.thenStatement.getEnd() - node.getStart(),
-                Rule.IF_FAILURE_STRING
+                Rule.IF_FAILURE_STRING,
             ));
         }
 
@@ -97,7 +97,7 @@ class CurlyWalker extends Lint.RuleWalker {
             this.addFailure(this.createFailure(
                 elseKeywordNode.getStart(),
                 node.elseStatement.getEnd() - elseKeywordNode.getStart(),
-                Rule.ELSE_FAILURE_STRING
+                Rule.ELSE_FAILURE_STRING,
             ));
         }
 

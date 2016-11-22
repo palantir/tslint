@@ -16,8 +16,7 @@
 
 import * as ts from "typescript";
 
-import {Fix, IFormatter, Replacement, RuleViolation, TestUtils} from "../lint";
-import {RuleLevel} from "../../src/language/rule/rule";
+import {Fix, IFormatter, Replacement, RuleLevel, RuleViolation, TestUtils} from "../lint";
 
 describe("JSON Formatter", () => {
     const TEST_FILE = "formatters/jsonFormatter.test.ts";

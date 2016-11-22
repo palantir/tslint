@@ -25,14 +25,19 @@ export abstract class AbstractRule implements IRule {
     public static metadata: IRuleMetadata;
     private options: IOptions;
 
-    constructor(ruleName: string, private value: any, ruleLevel: RuleLevel, disabledIntervals: IDisabledInterval[]) {
-        console.log('Create AbstractRule with intervals', disabledIntervals);
+    constructor(ruleName: string, private value: any, disabledIntervals: IDisabledInterval[]) {
         let ruleArguments: any[] = [];
+
+        let ruleLevel = RuleLevel.ERROR;
 
         if (Array.isArray(value) && value.length > 1) {
             ruleArguments = value.slice(1);
         } else if (value.options) {
             ruleArguments = arrayify(value.options);
+        }
+
+        if (value.level === "warn") {
+            ruleLevel = RuleLevel.WARNING;
         }
 
         this.options = {
@@ -65,7 +70,7 @@ export abstract class AbstractRule implements IRule {
             return value[0];
         }
 
-        if (value.level === undefined || value.level === "off" || value.level === 'none') {
+        if (value.level === undefined || value.level === "off" || value.level === "none") {
             return false;
         }
 

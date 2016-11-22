@@ -16,8 +16,7 @@
 
 import * as ts from "typescript";
 
-import {IFormatter, RuleViolation, TestUtils} from "../lint";
-import {RuleLevel} from "../../src/language/rule/rule";
+import {IFormatter, RuleLevel, RuleViolation, TestUtils} from "../lint";
 
 describe("Verbose Formatter", () => {
     const TEST_FILE = "formatters/proseFormatter.test.ts";

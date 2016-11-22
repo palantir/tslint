@@ -1,5 +1,5 @@
-﻿import * as Lint from "../index";
-import * as ts from "typescript";
+﻿import * as ts from "typescript";
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
 
@@ -7,8 +7,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "max-classes-per-file",
         description: Lint.Utils.dedent`
-            A file may not contain more than the specified number of classes 
-            if the file name does not match the "ignore-filename-pattern" option`,
+            A file may not contain more than the specified number of classes`,
         rationale: Lint.Utils.dedent`
             Ensures that files have a single responsibility so that that classes each exist in their own files`,
         optionsDescription: Lint.Utils.dedent`

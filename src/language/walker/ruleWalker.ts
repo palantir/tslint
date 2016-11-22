@@ -17,9 +17,9 @@
 
 import * as ts from "typescript";
 
+import {Fix, IDisabledInterval, IOptions, Replacement, RuleLevel, RuleViolation} from "../rule/rule";
 import {doesIntersect} from "../utils";
 import {SyntaxWalker} from "./syntaxWalker";
-import {Fix, IDisabledInterval, IOptions, Replacement, RuleLevel, RuleViolation} from "../rule/rule";
 
 export class RuleWalker extends SyntaxWalker {
     private limit: number;
@@ -71,14 +71,12 @@ export class RuleWalker extends SyntaxWalker {
     }
 
     public createFailure(start: number, width: number, failure: string, fix?: Fix): RuleViolation {
-        console.log('createFailure');
         const from = (start > this.limit) ? this.limit : start;
         const to = ((start + width) > this.limit) ? this.limit : (start + width);
         return new RuleViolation(this.sourceFile, from, to, failure, this.ruleLevel, this.ruleName, fix);
     }
 
     public addFailure(failure: RuleViolation) {
-        console.log('addFailure');
         // don't add failures for a rule if the failure intersects an interval where that rule is disabled
         if (!this.existsFailure(failure) && !doesIntersect(failure, this.disabledIntervals)) {
             this.failures.push(failure);
