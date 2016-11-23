@@ -30,7 +30,7 @@ export function wrapProgram(program: ts.Program): ts.LanguageService {
             getCompilationSettings: () => program.getCompilerOptions(),
             getCurrentDirectory: () => program.getCurrentDirectory(),
             getDefaultLibFileName: () => null,
-            getScriptFileNames: () => program.getSourceFiles().map(sf => sf.fileName),
+            getScriptFileNames: () => program.getSourceFiles().map((sf) => sf.fileName),
             getScriptSnapshot: (name: string) => {
                 if (files.hasOwnProperty(name)) {
                     return ts.ScriptSnapshot.fromString(files[name]);
