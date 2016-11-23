@@ -147,8 +147,8 @@ class Linter {
         const output = formatter.format(this.failures, this.fixes);
 
         return {
+            failureCount: this.failures.length,
             failures: this.failures,
-            failuresCount: this.failures.length,
             fixes: this.fixes,
             format: formatterName,
             output,

@@ -35,8 +35,8 @@ export * from "./language/walker";
 export * from "./language/formatter/formatter";
 
 export interface LintResult {
+    failureCount: number;
     failures: RuleFailure[];
-    failuresCount: number;
     fixes?: RuleFailure[];
     format: string | Function;
     output: string;

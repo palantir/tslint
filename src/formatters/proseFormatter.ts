@@ -30,7 +30,7 @@ export class Formatter extends AbstractFormatter {
     /* tslint:enable:object-literal-sort-keys */
 
     public format(failures: RuleFailure[], fixes?: RuleFailure[]): string {
-        if (failures && failures.length === 0 && (!fixes || fixes.length === 0)) {
+        if (failures.length === 0 && (!fixes || fixes.length === 0)) {
             return "\n";
         }
 

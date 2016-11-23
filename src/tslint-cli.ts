@@ -267,7 +267,7 @@ const processFiles = (files: string[], program?: ts.Program) => {
     const lintResult = linter.getResult();
 
     outputStream.write(lintResult.output, () => {
-        if (lintResult.failuresCount > 0) {
+        if (lintResult.failureCount > 0) {
             const hasErrors = lintResult.failures.some((failure) => {
                 return failure.getRuleLevel() === RuleLevel.ERROR;
             });

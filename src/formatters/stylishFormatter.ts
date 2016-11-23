@@ -17,7 +17,7 @@
 
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
 import {IFormatterMetadata} from "../language/formatter/formatter";
-import {RuleFailure} from "../language/rule/rule";
+import {RuleFailure, RuleLevel} from "../language/rule/rule";
 
 import * as colors from "colors";
 
@@ -38,9 +38,8 @@ export class Formatter extends AbstractFormatter {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public format(failures: RuleFailure[], warnings: RuleFailure[] = []): string {
-        let outputLines = this.mapToMessages("WARNING", warnings)
-          .concat(this.mapToMessages("ERROR", failures));
+    public format(failures: RuleFailure[]): string {
+        let outputLines = this.mapToMessages(failures);
 
         // Removes initial blank line
         if (outputLines[0] === "") {
@@ -50,7 +49,7 @@ export class Formatter extends AbstractFormatter {
         return outputLines.join("\n") + "\n";
     }
 
-    private mapToMessages(mode: string, failures: RuleFailure[]): string[] {
+    private mapToMessages(failures: RuleFailure[]): string[] {
         if (!failures) {
             return [];
         }
@@ -84,10 +83,10 @@ export class Formatter extends AbstractFormatter {
             let positionTuple = `${lineAndCharacter.line + 1}:${lineAndCharacter.character + 1}`;
             positionTuple = this.pad(positionTuple, positionMaxSize);
 
-            if (mode === "WARNING") {
-                positionTuple = colors.blue("WARNING: " + positionTuple);
+            if (failure.getRuleLevel() === RuleLevel.WARNING) {
+                positionTuple = colors.blue(RuleLevel[failure.getRuleLevel()] + ": " + positionTuple);
             } else {
-                positionTuple = colors.red("ERROR: " + positionTuple);
+                positionTuple = colors.red(RuleLevel[failure.getRuleLevel()] + ": " + positionTuple);
             }
 
             // Output
