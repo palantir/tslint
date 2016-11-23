@@ -332,7 +332,6 @@ var x: {
 };
 
 class Test<A, B, C> {
-                 ~    [Missing trailing comma]
 
     constructor(bar: string) { }
                           ~      [Missing trailing comma]
@@ -378,8 +377,7 @@ class Test<A, B, C> {
     foo5<
         T extends Test<[A, A], [A, A,], A>,
                            ~                [Missing trailing comma]
-                                        ~   [Missing trailing comma]
-        U extends Test<B, B, B,>,
+        U extends Test<B, B, B>,
         V extends Test<
             [
                 C,
@@ -427,7 +425,7 @@ class Test<A, B, C> {
     ) { }
 }
 
-class Test2<A, B, C,> { }
+class Test2<A, B, C> { }
 
 class Test3<
     A,
@@ -442,12 +440,9 @@ class Test4<
 > { }
 
 interface ITest<A ,B, C> {
-                      ~    [Missing trailing comma]
 
     new <U, V>(bar: U): ITest<U, U, V>;
-            ~                           [Missing trailing comma]
                     ~                   [Missing trailing comma]
-                                    ~   [Missing trailing comma]
 
     new <
         U,
@@ -464,7 +459,7 @@ interface ITest<A ,B, C> {
 
     new <
         U,
-        V,
+        V
     >(
         bar: U,
         baz: U,
@@ -473,7 +468,7 @@ interface ITest<A ,B, C> {
     ): ITest<
         U,
         U,
-        V,
+        V
     >;
 
     foo(bar: string, baz: string);
@@ -494,8 +489,7 @@ interface ITest<A ,B, C> {
     foo5<
         T extends Test<[A, A], [A, A,], A>,
                            ~                [Missing trailing comma]
-                                        ~   [Missing trailing comma]
-        U extends Test<B, B, B,>,
+        U extends Test<B, B, B>,
         V extends Test<
             [
                 C,
@@ -529,7 +523,6 @@ interface ITest<A ,B, C> {
 }
 
 interface ITest2<A, B, C> { }
-                       ~      [Missing trailing comma]
 
 interface ITest3<
     A,

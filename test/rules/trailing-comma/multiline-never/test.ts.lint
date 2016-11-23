@@ -414,8 +414,7 @@ class Test<A, B, C> {
                 string,
                       ~ [Unnecessary trailing comma]
             ];
-        },
-         ~ [Unnecessary trailing comma]
+        }
     >() { return 42; }
 }
 
