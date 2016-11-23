@@ -93,7 +93,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
         };
         const linter = new Linter(lintOptions, program);
         linter.lint(fileBasename, fileTextWithoutMarkup, tslintConfig);
-        const failures = linter.getResult().violations;
+        const failures = linter.getResult().failures;
         const errorsFromLinter: LintError[] = failures.map((failure) => {
             const startLineAndCharacter = failure.getStartPosition().getLineAndCharacter();
             const endLineAndCharacter = failure.getEndPosition().getLineAndCharacter();
@@ -103,7 +103,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
                     col: endLineAndCharacter.character,
                     line: endLineAndCharacter.line,
                 },
-                message: failure.getViolation(),
+                message: failure.getFailure(),
                 startPos: {
                     col: startLineAndCharacter.character,
                     line: startLineAndCharacter.line,

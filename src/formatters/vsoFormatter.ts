@@ -38,7 +38,7 @@ export class Formatter extends AbstractFormatter {
 
         const outputLines = all.map((failure: RuleFailure) => {
             const fileName = failure.getFileName();
-            const failureString = failure.getViolation();
+            const failureString = failure.getFailure();
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
             const line = lineAndCharacter.line + 1;
             const character = lineAndCharacter.character + 1;

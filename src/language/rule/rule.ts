@@ -200,7 +200,7 @@ export class RuleFailure {
     constructor(private sourceFile: ts.SourceFile,
                 start: number,
                 end: number,
-                private violation: string,
+                private failure: string,
                 private ruleLevel: RuleLevel,
                 private ruleName: string,
                 private fix?: Fix) {
@@ -230,8 +230,8 @@ export class RuleFailure {
         return this.endPosition;
     }
 
-    public getViolation() {
-        return this.violation;
+    public getFailure() {
+        return this.failure;
     }
 
     public hasFix() {
@@ -245,7 +245,7 @@ export class RuleFailure {
     public toJson(): any {
         return {
             endPosition: this.endPosition.toJson(),
-            failure: this.violation,
+            failure: this.failure,
             fix: this.fix,
             name: this.fileName,
             ruleLevel: RuleLevel[this.ruleLevel],
@@ -255,7 +255,7 @@ export class RuleFailure {
     }
 
     public equals(ruleFailure: RuleFailure) {
-        return this.violation  === ruleFailure.getViolation()
+        return this.failure  === ruleFailure.getFailure()
             && this.fileName === ruleFailure.getFileName()
             && this.startPosition.equals(ruleFailure.getStartPosition())
             && this.endPosition.equals(ruleFailure.getEndPosition());

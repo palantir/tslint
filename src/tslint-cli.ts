@@ -267,9 +267,9 @@ const processFiles = (files: string[], program?: ts.Program) => {
     const lintResult = linter.getResult();
 
     outputStream.write(lintResult.output, () => {
-        if (lintResult.violationCount > 0) {
-            const hasErrors = lintResult.violations.some((violation) => {
-                return violation.getRuleLevel() === RuleLevel.ERROR;
+        if (lintResult.failuresCount > 0) {
+            const hasErrors = lintResult.failures.some((failure) => {
+                return failure.getRuleLevel() === RuleLevel.ERROR;
             });
             if (hasErrors) {
                 process.exit(argv.force ? 0 : 2);

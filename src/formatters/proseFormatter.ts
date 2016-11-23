@@ -29,8 +29,8 @@ export class Formatter extends AbstractFormatter {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public format(violations: RuleFailure[], fixes?: RuleFailure[]): string {
-        if (violations && violations.length === 0 && (!fixes || fixes.length === 0)) {
+    public format(failures: RuleFailure[], fixes?: RuleFailure[]): string {
+        if (failures && failures.length === 0 && (!fixes || fixes.length === 0)) {
             return "\n";
         }
 
@@ -52,20 +52,20 @@ export class Formatter extends AbstractFormatter {
             fixLines.push("");   // add a blank line between fixes and failures
         }
 
-        return fixLines.concat(this.mapToMessages(violations))
+        return fixLines.concat(this.mapToMessages(failures))
           .join("\n") + "\n";
 
     }
 
-    private mapToMessages(violations: RuleFailure[]): string[] {
-        return violations.map((violation: RuleFailure) => {
-            const fileName = violation.getFileName();
-            const failureString = violation.getViolation();
+    private mapToMessages(failures: RuleFailure[]): string[] {
+        return failures.map((failure: RuleFailure) => {
+            const fileName = failure.getFileName();
+            const failureString = failure.getFailure();
 
-            const lineAndCharacter = violation.getStartPosition().getLineAndCharacter();
+            const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
             const positionTuple = `[${lineAndCharacter.line + 1}, ${lineAndCharacter.character + 1}]`;
 
-            return `${RuleLevel[violation.getRuleLevel()]}: ${fileName}${positionTuple}: ${failureString}`;
+            return `${RuleLevel[failure.getRuleLevel()]}: ${fileName}${positionTuple}: ${failureString}`;
         });
 
     }

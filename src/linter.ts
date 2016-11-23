@@ -48,7 +48,7 @@ class Linter {
     public static getRulesDirectories = getRulesDirectories;
     public static loadConfigurationFromPath = loadConfigurationFromPath;
 
-    private violations: RuleFailure[] = [];
+    private failures: RuleFailure[] = [];
     private fixes: RuleFailure[] = [];
 
     /**
@@ -99,37 +99,37 @@ class Linter {
         const enabledRules = this.getEnabledRules(fileName, source, configuration);
         let sourceFile = this.getSourceFile(fileName, source);
         let hasLinterRun = false;
-        let fileViolations: RuleFailure[] = [];
+        let fileFailures: RuleFailure[] = [];
 
         if (this.options.fix) {
             for (let rule of enabledRules) {
-                let ruleViolations = this.applyRule(rule, sourceFile);
-                const fixes = ruleViolations.map((f) => f.getFix()).filter((f) => !!f);
+                let ruleFailures = this.applyRule(rule, sourceFile);
+                const fixes = ruleFailures.map((f) => f.getFix()).filter((f) => !!f);
                 source = fs.readFileSync(fileName, { encoding: "utf-8" });
                 if (fixes.length > 0) {
-                    this.fixes = this.fixes.concat(ruleViolations);
+                    this.fixes = this.fixes.concat(ruleFailures);
                     source = Fix.applyAll(source, fixes);
                     fs.writeFileSync(fileName, source, { encoding: "utf-8" });
 
                     // reload AST if file is modified
                     sourceFile = this.getSourceFile(fileName, source);
                 }
-                fileViolations = fileViolations.concat(ruleViolations);
+                fileFailures = fileFailures.concat(ruleFailures);
             }
             hasLinterRun = true;
         }
 
         // make a 1st pass or make a 2nd pass if there were any fixes because the positions may be off
         if (!hasLinterRun || this.fixes.length > 0) {
-            fileViolations = [];
+            fileFailures = [];
             for (let rule of enabledRules) {
-                const ruleViolations = this.applyRule(rule, sourceFile);
-                if (ruleViolations.length > 0) {
-                    fileViolations = fileViolations.concat(ruleViolations);
+                const ruleFailures = this.applyRule(rule, sourceFile);
+                if (ruleFailures.length > 0) {
+                    fileFailures = fileFailures.concat(ruleFailures);
                 }
             }
         }
-        this.violations = this.violations.concat(fileViolations);
+        this.failures = this.failures.concat(fileFailures);
     }
 
     public getResult(): LintResult {
@@ -144,31 +144,31 @@ class Linter {
             throw new Error(`formatter '${formatterName}' not found`);
         }
 
-        const output = formatter.format(this.violations, this.fixes);
+        const output = formatter.format(this.failures, this.fixes);
 
         return {
+            failures: this.failures,
+            failuresCount: this.failures.length,
             fixes: this.fixes,
             format: formatterName,
             output,
-            violationCount: this.violations.length,
-            violations: this.violations,
         };
     }
 
     private applyRule(rule: IRule, sourceFile: ts.SourceFile) {
-        let ruleViolations: RuleFailure[] = [];
+        let ruleFailures: RuleFailure[] = [];
         if (this.program && TypedRule.isTypedRule(rule)) {
-            ruleViolations = rule.applyWithProgram(sourceFile, this.program);
+            ruleFailures = rule.applyWithProgram(sourceFile, this.program);
         } else {
-            ruleViolations = rule.apply(sourceFile);
+            ruleFailures = rule.apply(sourceFile);
         }
-        let fileViolations: RuleFailure[] = [];
-        for (let ruleViolation of ruleViolations) {
-            if (!this.containsRule(this.violations, ruleViolation)) {
-                fileViolations.push(ruleViolation);
+        let fileFailures: RuleFailure[] = [];
+        for (let ruleFailure of ruleFailures) {
+            if (!this.containsRule(this.failures, ruleFailure)) {
+                fileFailures.push(ruleFailure);
             }
         }
-        return fileViolations;
+        return fileFailures;
     }
 
     private getEnabledRules(fileName: string, source?: string, configuration: IConfigurationFile = DEFAULT_CONFIG): IRule[] {

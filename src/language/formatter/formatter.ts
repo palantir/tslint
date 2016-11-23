@@ -49,8 +49,8 @@ export type ConsumerType = "human" | "machine";
 export interface IFormatter {
     /**
      * Formats linter results
-     * @param {RuleFailure[]} violations Linter violations that were not fixed
-     * @param {RuleFailure[]} fixes Fixed linter violations. Available when the `--fix` argument is used on the command line
+     * @param {RuleFailure[]} failures Linter failures that were not fixed
+     * @param {RuleFailure[]} fixes Fixed linter failures. Available when the `--fix` argument is used on the command line
      */
-    format(violations: RuleFailure[], fixes?: RuleFailure[]): string;
+    format(failures: RuleFailure[], fixes?: RuleFailure[]): string;
 }

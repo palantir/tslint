@@ -38,7 +38,7 @@ export class Formatter extends AbstractFormatter {
     public format(failures: RuleFailure[]): string {
         const outputLines = failures.map((failure: RuleFailure) => {
             const fileName = failure.getFileName();
-            const failureString = failure.getViolation();
+            const failureString = failure.getFailure();
             const camelizedRule = camelize(failure.getRuleName());
 
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();

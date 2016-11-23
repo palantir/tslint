@@ -70,7 +70,7 @@ export class Formatter extends AbstractFormatter {
                 currentFile = fileName;
             }
 
-            let failureString = failure.getViolation();
+            let failureString = failure.getFailure();
             failureString     = colors.yellow(failureString);
 
             // Rule

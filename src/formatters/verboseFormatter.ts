@@ -30,22 +30,22 @@ export class Formatter extends AbstractFormatter {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public format(violations: RuleFailure[]): string {
+    public format(failures: RuleFailure[]): string {
 
-        return this.mapToMessages(violations)
+        return this.mapToMessages(failures)
             .join("\n") + "\n";
     }
 
-    private mapToMessages(violations: RuleFailure[]): string[] {
-        return violations.map((violation: RuleFailure) => {
-            const fileName = violation.getFileName();
-            const failureString = violation.getViolation();
-            const ruleName = violation.getRuleName();
+    private mapToMessages(failures: RuleFailure[]): string[] {
+        return failures.map((failure: RuleFailure) => {
+            const fileName = failure.getFileName();
+            const failureString = failure.getFailure();
+            const ruleName = failure.getRuleName();
 
-            const lineAndCharacter = violation.getStartPosition().getLineAndCharacter();
+            const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
             const positionTuple = "[" + (lineAndCharacter.line + 1) + ", " + (lineAndCharacter.character + 1) + "]";
 
-            return `${RuleLevel[violation.getRuleLevel()]}: (${ruleName}) ${fileName}${positionTuple}: ${failureString}`;
+            return `${RuleLevel[failure.getRuleLevel()]}: (${ruleName}) ${fileName}${positionTuple}: ${failureString}`;
         });
 
     }
