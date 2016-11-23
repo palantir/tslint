@@ -53,8 +53,8 @@ export class Rule extends Lint.Rules.AbstractRule {
         return false;
     }
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
-        const ruleFailures: Lint.RuleViolation[] = [];
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        const ruleFailures: Lint.RuleFailure[] = [];
         const lineLimit = this.getOptions().ruleArguments[0];
         const lineStarts = sourceFile.getLineStarts();
         const errorString = Rule.FAILURE_STRING_FACTORY(lineLimit);
@@ -70,7 +70,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 // that we are only over by the limit by exactly one and that the character we are over the
                 // limit by is a '\r' character which does not count against the limit
                 // (and thus we are not actually over the limit).
-                const ruleFailure = new Lint.RuleViolation(sourceFile, from, to - 1, errorString, this.getOptions().ruleLevel, this.getOptions().ruleName);
+                const ruleFailure = new Lint.RuleFailure(sourceFile, from, to - 1, errorString, this.getOptions().ruleLevel, this.getOptions().ruleName);
                 if (!Lint.doesIntersect(ruleFailure, disabledIntervals)) {
                     ruleFailures.push(ruleFailure);
                 }

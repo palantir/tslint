@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import {Fix, IDisabledInterval, IOptions, Replacement, RuleLevel, RuleViolation} from "../rule/rule";
+import {Fix, IDisabledInterval, IOptions, Replacement, RuleFailure, RuleLevel} from "../rule/rule";
 import {doesIntersect} from "../utils";
 import {SyntaxWalker} from "./syntaxWalker";
 
@@ -25,7 +25,7 @@ export class RuleWalker extends SyntaxWalker {
     private limit: number;
     private position: number;
     private options: any[];
-    private failures: RuleViolation[];
+    private failures: RuleFailure[];
     private disabledIntervals: IDisabledInterval[];
     private ruleLevel: RuleLevel;
     private ruleName: string;
@@ -46,7 +46,7 @@ export class RuleWalker extends SyntaxWalker {
         return this.sourceFile;
     }
 
-    public getFailures(): RuleViolation[] {
+    public getFailures(): RuleFailure[] {
         return this.failures;
     }
 
@@ -70,13 +70,13 @@ export class RuleWalker extends SyntaxWalker {
         this.position += node.getFullWidth();
     }
 
-    public createFailure(start: number, width: number, failure: string, fix?: Fix): RuleViolation {
+    public createFailure(start: number, width: number, failure: string, fix?: Fix): RuleFailure {
         const from = (start > this.limit) ? this.limit : start;
         const to = ((start + width) > this.limit) ? this.limit : (start + width);
-        return new RuleViolation(this.sourceFile, from, to, failure, this.ruleLevel, this.ruleName, fix);
+        return new RuleFailure(this.sourceFile, from, to, failure, this.ruleLevel, this.ruleName, fix);
     }
 
-    public addFailure(failure: RuleViolation) {
+    public addFailure(failure: RuleFailure) {
         // don't add failures for a rule if the failure intersects an interval where that rule is disabled
         if (!this.existsFailure(failure) && !doesIntersect(failure, this.disabledIntervals)) {
             this.failures.push(failure);
@@ -95,7 +95,7 @@ export class RuleWalker extends SyntaxWalker {
         return this.createReplacement(start, length, "");
     }
 
-    private existsFailure(failure: RuleViolation) {
+    private existsFailure(failure: RuleFailure) {
         return this.failures.some((f) => f.equals(failure));
     }
 }

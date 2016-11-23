@@ -17,7 +17,7 @@
 
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
 import {IFormatterMetadata} from "../language/formatter/formatter";
-import {RuleLevel, RuleViolation} from "../language/rule/rule";
+import {RuleFailure, RuleLevel} from "../language/rule/rule";
 
 export class Formatter extends AbstractFormatter {
     /* tslint:disable:object-literal-sort-keys */
@@ -29,7 +29,7 @@ export class Formatter extends AbstractFormatter {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public format(violations: RuleViolation[], fixes?: RuleViolation[]): string {
+    public format(violations: RuleFailure[], fixes?: RuleFailure[]): string {
         if (violations && violations.length === 0 && (!fixes || fixes.length === 0)) {
             return "\n";
         }
@@ -57,8 +57,8 @@ export class Formatter extends AbstractFormatter {
 
     }
 
-    private mapToMessages(violations: RuleViolation[]): string[] {
-        return violations.map((violation: RuleViolation) => {
+    private mapToMessages(violations: RuleFailure[]): string[] {
+        return violations.map((violation: RuleFailure) => {
             const fileName = violation.getFileName();
             const failureString = violation.getViolation();
 

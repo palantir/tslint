@@ -45,7 +45,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static FAILURE_STRING = "for (... in ...) statements must be filtered with an if statement";
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new ForInWalker(sourceFile, this.getOptions()));
     }
 }

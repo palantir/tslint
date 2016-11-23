@@ -16,7 +16,7 @@
 
 import * as ts from "typescript";
 
-import {IFormatter, RuleLevel, RuleViolation, TestUtils} from "../lint";
+import {IFormatter, RuleFailure, RuleLevel, TestUtils} from "../lint";
 
 describe("Stylish Formatter", () => {
     const TEST_FILE = "formatters/stylishFormatter.test.ts";
@@ -33,10 +33,10 @@ describe("Stylish Formatter", () => {
         const maxPosition = sourceFile.getFullWidth();
 
         const failures = [
-            new RuleViolation(sourceFile, 0, 1, "first failure", RuleLevel.ERROR, "first-name"),
-            new RuleViolation(sourceFile, 2, 3, "&<>'\" should be escaped", RuleLevel.ERROR, "escape"),
-            new RuleViolation(sourceFile, maxPosition - 1, maxPosition, "last failure", RuleLevel.ERROR, "last-name"),
-            new RuleViolation(sourceFile, 0, maxPosition, "full failure", RuleLevel.ERROR, "full-name"),
+            new RuleFailure(sourceFile, 0, 1, "first failure", RuleLevel.ERROR, "first-name"),
+            new RuleFailure(sourceFile, 2, 3, "&<>'\" should be escaped", RuleLevel.ERROR, "escape"),
+            new RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", RuleLevel.ERROR, "last-name"),
+            new RuleFailure(sourceFile, 0, maxPosition, "full failure", RuleLevel.ERROR, "full-name"),
         ];
 
         const maxPositionObj = sourceFile.getLineAndCharacterOfPosition(maxPosition - 1);

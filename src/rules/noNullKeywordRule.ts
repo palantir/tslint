@@ -39,7 +39,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static FAILURE_STRING = "Use 'undefined' instead of 'null'";
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new NullWalker(sourceFile, this.getOptions()));
     }
 }

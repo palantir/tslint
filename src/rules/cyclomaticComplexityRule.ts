@@ -62,7 +62,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         return `The function ${name} has a cyclomatic complexity of ${actual} which is higher than the threshold of ${expected}`;
     }
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new CyclomaticComplexityWalker(sourceFile, this.getOptions(), this.threshold));
     }
 

@@ -55,7 +55,7 @@ export class Rule extends Lint.Rules.TypedRule {
         Rule.ARGUMENT_PROPERTIES,
     ];
 
-    public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleViolation[] {
+    public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         const options = this.getOptions();
         const completedDocsWalker = new CompletedDocsWalker(sourceFile, options, program);
 
@@ -111,7 +111,7 @@ export class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
         }
     }
 
-    private createDocumentationFailure(node: ts.Declaration, nodeToCheck: string): Lint.RuleViolation {
+    private createDocumentationFailure(node: ts.Declaration, nodeToCheck: string): Lint.RuleFailure {
         const start = node.getStart();
         const width = node.getText().split(/\r|\n/g)[0].length;
         const description = nodeToCheck[0].toUpperCase() + nodeToCheck.substring(1) + Rule.FAILURE_STRING_EXIST;

@@ -35,7 +35,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static FAILURE_STRING = "The internal 'module' syntax is deprecated, use the 'namespace' keyword instead.";
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new NoInternalModuleWalker(sourceFile, this.getOptions()));
     }
 }

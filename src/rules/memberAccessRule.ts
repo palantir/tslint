@@ -53,7 +53,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         return `The ${memberType}${memberName} must be marked either 'private', 'public', or 'protected'`;
     }
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new MemberAccessWalker(sourceFile, this.getOptions()));
     }
 }

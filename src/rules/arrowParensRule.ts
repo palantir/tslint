@@ -35,7 +35,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static FAILURE_STRING = "Parentheses are required around the parameters of an arrow function definition";
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const newParensWalker = new ArrowParensWalker(sourceFile, this.getOptions());
         return this.applyWithWalker(newParensWalker);
     }

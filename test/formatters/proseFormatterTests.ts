@@ -16,7 +16,7 @@
 
 import * as ts from "typescript";
 
-import {IFormatter, RuleLevel, RuleViolation, TestUtils} from "../lint";
+import {IFormatter, RuleFailure, RuleLevel, TestUtils} from "../lint";
 
 describe("Prose Formatter", () => {
     const TEST_FILE = "formatters/proseFormatter.test.ts";
@@ -33,9 +33,9 @@ describe("Prose Formatter", () => {
         const maxPosition = sourceFile.getFullWidth();
 
         const failures = [
-            new RuleViolation(sourceFile, 0, 1, "first failure", RuleLevel.ERROR, "first-name"),
-            new RuleViolation(sourceFile, 32, 36, "mid failure", RuleLevel.ERROR, "mid-name"),
-            new RuleViolation(sourceFile, maxPosition - 1, maxPosition, "last failure", RuleLevel.ERROR, "last-name"),
+            new RuleFailure(sourceFile, 0, 1, "first failure", RuleLevel.ERROR, "first-name"),
+            new RuleFailure(sourceFile, 32, 36, "mid failure", RuleLevel.ERROR, "mid-name"),
+            new RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", RuleLevel.ERROR, "last-name"),
         ];
 
         const expectedResult =
@@ -49,14 +49,14 @@ describe("Prose Formatter", () => {
 
     it("formats fixes", () => {
         const failures = [
-            new RuleViolation(sourceFile, 0, 1, "first failure", RuleLevel.ERROR, "first-name"),
+            new RuleFailure(sourceFile, 0, 1, "first failure", RuleLevel.ERROR, "first-name"),
         ];
 
         const mockFix = { getFileName: () => { return "file2"; } } as any;
 
         const fixes = [
-            new RuleViolation(sourceFile, 0, 1, "first failure", RuleLevel.ERROR, "first-name"),
-            new RuleViolation(sourceFile, 32, 36, "mid failure", RuleLevel.ERROR, "mid-name"),
+            new RuleFailure(sourceFile, 0, 1, "first failure", RuleLevel.ERROR, "first-name"),
+            new RuleFailure(sourceFile, 32, 36, "mid failure", RuleLevel.ERROR, "mid-name"),
              mockFix,
         ];
 

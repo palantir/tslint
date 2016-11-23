@@ -35,7 +35,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         return `A maximum of ${maxCount} ${maxClassWord} allowed`;
     }
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new MaxClassesPerFileWalker(sourceFile, this.getOptions()));
     }
 }

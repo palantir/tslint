@@ -55,7 +55,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static UPPERCASE_FAILURE = "comment must start with uppercase letter";
     public static LEADING_SPACE_FAILURE = "comment must start with a space";
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new CommentWalker(sourceFile, this.getOptions()));
     }
 }

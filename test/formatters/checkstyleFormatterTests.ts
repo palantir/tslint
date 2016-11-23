@@ -1,6 +1,6 @@
 import * as ts from "typescript";
 
-import {IFormatter, RuleLevel, RuleViolation, TestUtils} from "../lint";
+import {IFormatter, RuleFailure, RuleLevel, TestUtils} from "../lint";
 
 describe("Checkstyle Formatter", () => {
     const TEST_FILE = "formatters/pmdFormatter.test.ts"; // reuse existing sample file
@@ -17,9 +17,9 @@ describe("Checkstyle Formatter", () => {
         const maxPosition = sourceFile.getFullWidth();
 
         const failures = [
-            new RuleViolation(sourceFile, 0, 1, "first failure", RuleLevel.ERROR, "first-name"),
-            new RuleViolation(sourceFile, 2, 3, "&<>'\" should be escaped", RuleLevel.ERROR, "escape"),
-            new RuleViolation(sourceFile, maxPosition - 1, maxPosition, "last failure", RuleLevel.ERROR, "last-name"),
+            new RuleFailure(sourceFile, 0, 1, "first failure", RuleLevel.ERROR, "first-name"),
+            new RuleFailure(sourceFile, 2, 3, "&<>'\" should be escaped", RuleLevel.ERROR, "escape"),
+            new RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", RuleLevel.ERROR, "last-name"),
         ];
         const expectedResult =
             '<?xml version="1.0" encoding="utf-8"?><checkstyle version="4.3">' +

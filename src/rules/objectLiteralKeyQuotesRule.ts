@@ -70,7 +70,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         return `Unquoted property '${name}' found.`;
     }
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const objectLiteralKeyQuotesWalker = new ObjectLiteralKeyQuotesWalker(sourceFile, this.getOptions());
         return this.applyWithWalker(objectLiteralKeyQuotesWalker);
     }
@@ -83,9 +83,9 @@ type QuotesMode = "always" | "as-needed" | "consistent" | "consistent-as-needed"
 
 interface IObjectLiteralState {
     // potential failures for properties that have quotes but don't need them
-    quotesNotNeededProperties: Lint.RuleViolation[];
+    quotesNotNeededProperties: Lint.RuleFailure[];
     // potential failures for properties that don't have quotes
-    unquotedProperties: Lint.RuleViolation[];
+    unquotedProperties: Lint.RuleFailure[];
     // whether or not any of the properties require quotes
     hasQuotesNeededProperty: boolean;
 }

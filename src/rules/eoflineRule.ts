@@ -34,7 +34,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:enable:object-literal-sort-keys */
     public static FAILURE_STRING = "file should end with a newline";
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         if (sourceFile.text === "") {
             // if the file is empty, it "ends with a newline", so don't return a failure
             return [];
@@ -45,7 +45,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         if (eofTokenFullText.length === 0 || eofTokenFullText.charAt(eofTokenFullText.length - 1) !== "\n") {
             const start = eofToken.getStart();
             return [
-                new Lint.RuleViolation(sourceFile, start, start, Rule.FAILURE_STRING, this.getOptions().ruleLevel, this.getOptions().ruleName),
+                new Lint.RuleFailure(sourceFile, start, start, Rule.FAILURE_STRING, this.getOptions().ruleLevel, this.getOptions().ruleName),
             ];
         }
 

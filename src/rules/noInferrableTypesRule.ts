@@ -51,7 +51,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         return `LHS type (${type}) inferred by RHS expression, remove type annotation`;
     }
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new NoInferrableTypesWalker(sourceFile, this.getOptions()));
     }
 }

@@ -17,7 +17,7 @@
 
 import * as Configuration from "./configuration";
 import * as Formatters from "./formatters";
-import {RuleViolation} from "./language/rule/rule";
+import {RuleFailure} from "./language/rule/rule";
 import * as Linter from "./linter";
 import * as Rules from "./rules";
 import * as Test from "./test";
@@ -35,11 +35,11 @@ export * from "./language/walker";
 export * from "./language/formatter/formatter";
 
 export interface LintResult {
-    fixes?: RuleViolation[];
+    fixes?: RuleFailure[];
     format: string | Function;
     output: string;
     violationCount: number;
-    violations: RuleViolation[];
+    violations: RuleFailure[];
 }
 
 export interface ILinterOptions {

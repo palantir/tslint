@@ -39,7 +39,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         return `Property '${ident}' cannot be declared in the constructor`;
     }
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new NoParameterPropertiesWalker(sourceFile, this.getOptions()));
     }
 }

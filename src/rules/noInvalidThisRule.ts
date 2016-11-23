@@ -55,7 +55,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_OUTSIDE = "the \"this\" keyword is disallowed outside of a class body" ;
     public static FAILURE_STRING_INSIDE = "the \"this\" keyword is disallowed in function bodies inside class methods, " +
         "use arrow functions instead";
-    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new NoInvalidThisWalker(sourceFile, this.getOptions()));
     }
 }

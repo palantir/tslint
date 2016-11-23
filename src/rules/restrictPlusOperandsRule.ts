@@ -38,7 +38,7 @@ export class Rule extends Lint.Rules.TypedRule {
         return `cannot add type ${type}`;
     }
 
-    public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleViolation[] {
+    public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         return this.applyWithWalker(new RestrictPlusOperandsWalker(sourceFile, this.getOptions(), program));
     }
 }

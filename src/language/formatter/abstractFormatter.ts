@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
-import {RuleViolation} from "../rule/rule";
+import {RuleFailure} from "../rule/rule";
 import {IFormatter, IFormatterMetadata} from "./formatter";
 
 export abstract class AbstractFormatter implements IFormatter {
     public static metadata: IFormatterMetadata;
-    public abstract format(violations: RuleViolation[]): string;
+    public abstract format(violations: RuleFailure[]): string;
 }

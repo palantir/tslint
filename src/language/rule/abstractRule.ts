@@ -19,7 +19,7 @@ import * as ts from "typescript";
 
 import {arrayify} from "../../utils";
 import {RuleWalker} from "../walker/ruleWalker";
-import {IDisabledInterval, IOptions, IRule, IRuleMetadata, RuleLevel, RuleViolation} from "./rule";
+import {IDisabledInterval, IOptions, IRule, IRuleMetadata, RuleFailure, RuleLevel} from "./rule";
 
 export abstract class AbstractRule implements IRule {
     public static metadata: IRuleMetadata;
@@ -51,9 +51,9 @@ export abstract class AbstractRule implements IRule {
         return this.options;
     }
 
-    public abstract apply(sourceFile: ts.SourceFile): RuleViolation[];
+    public abstract apply(sourceFile: ts.SourceFile): RuleFailure[];
 
-    public applyWithWalker(walker: RuleWalker): RuleViolation[] {
+    public applyWithWalker(walker: RuleWalker): RuleFailure[] {
         walker.walk(walker.getSourceFile());
         return walker.getFailures();
     }

@@ -17,7 +17,7 @@
 
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
 import {IFormatterMetadata} from "../language/formatter/formatter";
-import {RuleViolation} from "../language/rule/rule";
+import {RuleFailure} from "../language/rule/rule";
 
 import * as Utils from "../utils";
 
@@ -37,7 +37,7 @@ export class Formatter extends AbstractFormatter {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public format(failures: RuleViolation[]): string {
+    public format(failures: RuleFailure[]): string {
         let output = "<pmd version=\"tslint\">";
 
         for (let failure of failures) {

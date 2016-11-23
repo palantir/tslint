@@ -81,7 +81,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static IMPORT_SOURCES_UNORDERED = "Import sources within a group must be alphabetized.";
     public static NAMED_IMPORTS_UNORDERED = "Named imports must be alphabetized.";
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const orderedImportsWalker = new OrderedImportsWalker(sourceFile, this.getOptions());
         return this.applyWithWalker(orderedImportsWalker);
     }

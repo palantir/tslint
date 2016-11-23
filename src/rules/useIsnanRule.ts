@@ -37,7 +37,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static FAILURE_STRING = "Found an invalid comparison for NaN: ";
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new UseIsnanRuleWalker(sourceFile, this.getOptions()));
     }
 }

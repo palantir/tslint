@@ -48,7 +48,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static IF_FAILURE_STRING = "if statements must be braced";
     public static WHILE_FAILURE_STRING = "while statements must be braced";
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new CurlyWalker(sourceFile, this.getOptions()));
     }
 }

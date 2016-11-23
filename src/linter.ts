@@ -31,7 +31,7 @@ import { EnableDisableRulesWalker } from "./enableDisableRules";
 import { findFormatter } from "./formatterLoader";
 import { ILinterOptions, LintResult } from "./index";
 import { IFormatter } from "./language/formatter/formatter";
-import {Fix, IRule, RuleLevel, RuleViolation} from "./language/rule/rule";
+import {Fix, IRule, RuleFailure, RuleLevel} from "./language/rule/rule";
 import { TypedRule } from "./language/rule/typedRule";
 import * as utils from "./language/utils";
 import { loadRules } from "./ruleLoader";
@@ -48,8 +48,8 @@ class Linter {
     public static getRulesDirectories = getRulesDirectories;
     public static loadConfigurationFromPath = loadConfigurationFromPath;
 
-    private violations: RuleViolation[] = [];
-    private fixes: RuleViolation[] = [];
+    private violations: RuleFailure[] = [];
+    private fixes: RuleFailure[] = [];
 
     /**
      * Creates a TypeScript program object from a tsconfig.json file path and optional project directory.
@@ -99,7 +99,7 @@ class Linter {
         const enabledRules = this.getEnabledRules(fileName, source, configuration);
         let sourceFile = this.getSourceFile(fileName, source);
         let hasLinterRun = false;
-        let fileViolations: RuleViolation[] = [];
+        let fileViolations: RuleFailure[] = [];
 
         if (this.options.fix) {
             for (let rule of enabledRules) {
@@ -156,13 +156,13 @@ class Linter {
     }
 
     private applyRule(rule: IRule, sourceFile: ts.SourceFile) {
-        let ruleViolations: RuleViolation[] = [];
+        let ruleViolations: RuleFailure[] = [];
         if (this.program && TypedRule.isTypedRule(rule)) {
             ruleViolations = rule.applyWithProgram(sourceFile, this.program);
         } else {
             ruleViolations = rule.apply(sourceFile);
         }
-        let fileViolations: RuleViolation[] = [];
+        let fileViolations: RuleFailure[] = [];
         for (let ruleViolation of ruleViolations) {
             if (!this.containsRule(this.violations, ruleViolation)) {
                 fileViolations.push(ruleViolation);
@@ -213,7 +213,7 @@ class Linter {
         return sourceFile;
     }
 
-    private containsRule(rules: RuleViolation[], rule: RuleViolation) {
+    private containsRule(rules: RuleFailure[], rule: RuleFailure) {
         return rules.some((r) => r.equals(rule));
     }
 }

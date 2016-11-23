@@ -54,7 +54,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static EQ_FAILURE_STRING = "== should be ===";
     public static NEQ_FAILURE_STRING = "!= should be !==";
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const comparisonWalker = new ComparisonWalker(sourceFile, this.getOptions());
         return this.applyWithWalker(comparisonWalker);
     }

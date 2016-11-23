@@ -47,7 +47,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         return `${name} statements in finally blocks are forbidden.`;
     }
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new NoReturnInFinallyScopeAwareWalker(sourceFile, this.getOptions()));
     }
 }

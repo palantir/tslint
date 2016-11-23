@@ -35,7 +35,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static FAILURE_STRING = "Forbidden 'var' keyword, use 'let' or 'const' instead";
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const noVarKeywordWalker = new NoVarKeywordWalker(sourceFile, this.getOptions());
         return this.applyWithWalker(noVarKeywordWalker);
     }

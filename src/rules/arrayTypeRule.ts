@@ -32,7 +32,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_ARRAY_SIMPLE = "Array type using 'Array<T>' is forbidden for simple types. Use 'T[]' instead.";
     public static FAILURE_STRING_GENERIC_SIMPLE = "Array type using 'T[]' is forbidden for non-simple types. Use 'Array<T>' instead.";
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const alignWalker = new ArrayTypeWalker(sourceFile, this.getOptions());
         return this.applyWithWalker(alignWalker);
     }

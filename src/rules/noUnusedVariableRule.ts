@@ -78,7 +78,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         return `Unused ${type}: '${name}'`;
     }
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const languageService = Lint.createLanguageService(sourceFile.fileName, sourceFile.getFullText());
         return this.applyWithWalker(new NoUnusedVariablesWalker(sourceFile, this.getOptions(), languageService));
     }

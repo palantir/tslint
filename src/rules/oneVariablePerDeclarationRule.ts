@@ -47,7 +47,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static FAILURE_STRING = "Multiple variable declarations in the same statement are forbidden";
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const oneVarWalker = new OneVariablePerDeclarationWalker(sourceFile, this.getOptions());
         return this.applyWithWalker(oneVarWalker);
     }

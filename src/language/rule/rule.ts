@@ -101,8 +101,8 @@ export interface IDisabledInterval {
 export interface IRule {
     getOptions(): IOptions;
     isEnabled(): boolean;
-    apply(sourceFile: ts.SourceFile): RuleViolation[];
-    applyWithWalker(walker: RuleWalker): RuleViolation[];
+    apply(sourceFile: ts.SourceFile): RuleFailure[];
+    applyWithWalker(walker: RuleWalker): RuleFailure[];
 }
 
 export class Replacement {
@@ -162,7 +162,7 @@ export class Fix {
     }
 }
 
-export class RuleViolationPosition {
+export class RuleFailurePosition {
     constructor(private position: number, private lineAndCharacter: ts.LineAndCharacter) {
     }
 
@@ -182,7 +182,7 @@ export class RuleViolationPosition {
         };
     }
 
-    public equals(ruleFailurePosition: RuleViolationPosition) {
+    public equals(ruleFailurePosition: RuleFailurePosition) {
         const ll = this.lineAndCharacter;
         const rr = ruleFailurePosition.lineAndCharacter;
 
@@ -192,10 +192,10 @@ export class RuleViolationPosition {
     }
 }
 
-export class RuleViolation {
+export class RuleFailure {
     private fileName: string;
-    private startPosition: RuleViolationPosition;
-    private endPosition: RuleViolationPosition;
+    private startPosition: RuleFailurePosition;
+    private endPosition: RuleFailurePosition;
 
     constructor(private sourceFile: ts.SourceFile,
                 start: number,
@@ -222,11 +222,11 @@ export class RuleViolation {
         return this.ruleName;
     }
 
-    public getStartPosition(): RuleViolationPosition {
+    public getStartPosition(): RuleFailurePosition {
         return this.startPosition;
     }
 
-    public getEndPosition(): RuleViolationPosition {
+    public getEndPosition(): RuleFailurePosition {
         return this.endPosition;
     }
 
@@ -254,7 +254,7 @@ export class RuleViolation {
         };
     }
 
-    public equals(ruleFailure: RuleViolation) {
+    public equals(ruleFailure: RuleFailure) {
         return this.violation  === ruleFailure.getViolation()
             && this.fileName === ruleFailure.getFileName()
             && this.startPosition.equals(ruleFailure.getStartPosition())
@@ -263,6 +263,6 @@ export class RuleViolation {
 
     private createFailurePosition(position: number) {
         const lineAndCharacter = this.sourceFile.getLineAndCharacterOfPosition(position);
-        return new RuleViolationPosition(position, lineAndCharacter);
+        return new RuleFailurePosition(position, lineAndCharacter);
     }
 }

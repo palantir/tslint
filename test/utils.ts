@@ -38,7 +38,7 @@ export function getFormatter(formatterName: string) {
     return Lint.findFormatter(formatterName, formattersDirectory);
 }
 
-export function applyRuleOnFile(fileName: string, Rule: any, ruleValue: any = true): Lint.RuleViolation[] {
+export function applyRuleOnFile(fileName: string, Rule: any, ruleValue: any = true): Lint.RuleFailure[] {
     const sourceFile = getSourceFile(fileName);
     const rule = new Rule("", ruleValue, Rule.ruleLevel, []);
     return rule.apply(sourceFile);
@@ -46,12 +46,12 @@ export function applyRuleOnFile(fileName: string, Rule: any, ruleValue: any = tr
 
 // start and end are arrays with the first and second elements
 // being (one-indexed) line and character positions respectively
-export function createFailure(fileName: string, start: number[], end: number[], ruleLevel: Lint.RuleLevel, failure: string): Lint.RuleViolation {
+export function createFailure(fileName: string, start: number[], end: number[], ruleLevel: Lint.RuleLevel, failure: string): Lint.RuleFailure {
     const sourceFile = getSourceFile(fileName);
     const startPosition = sourceFile.getPositionOfLineAndCharacter(start[0] - 1, start[1] - 1);
     const endPosition = sourceFile.getPositionOfLineAndCharacter(end[0] - 1, end[1] - 1);
 
-    return new Lint.RuleViolation(sourceFile, startPosition, endPosition, failure, ruleLevel, "");
+    return new Lint.RuleFailure(sourceFile, startPosition, endPosition, failure, ruleLevel, "");
 }
 
 // return a partial on createFailure
@@ -62,7 +62,7 @@ export function createFailuresOnFile(fileName: string, failure: string) {
 }
 
 // assert on array equality for failures
-export function assertFailuresEqual(actualFailures: Lint.RuleViolation[], expectedFailures: Lint.RuleViolation[]) {
+export function assertFailuresEqual(actualFailures: Lint.RuleFailure[], expectedFailures: Lint.RuleFailure[]) {
     assert.equal(actualFailures.length, expectedFailures.length);
     actualFailures.forEach((actualFailure, i) => {
         const startPosition = JSON.stringify(actualFailure.getStartPosition().toJson());
@@ -73,7 +73,7 @@ export function assertFailuresEqual(actualFailures: Lint.RuleViolation[], expect
 }
 
 // assert whether a failure array contains the given failure
-export function assertContainsFailure(haystack: Lint.RuleViolation[], needle: Lint.RuleViolation) {
+export function assertContainsFailure(haystack: Lint.RuleFailure[], needle: Lint.RuleFailure) {
     const haystackContainsNeedle = haystack.some((item) => item.equals(needle));
 
     if (!haystackContainsNeedle) {

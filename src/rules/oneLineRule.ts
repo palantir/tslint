@@ -59,7 +59,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FINALLY_FAILURE_STRING = "misplaced 'finally'";
     public static WHITESPACE_FAILURE_STRING = "missing whitespace";
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const oneLineWalker = new OneLineWalker(sourceFile, this.getOptions());
         return this.applyWithWalker(oneLineWalker);
     }
@@ -296,7 +296,7 @@ class OneLineWalker extends Lint.RuleWalker {
         const sourceFile = previousNode.getSourceFile();
         const previousNodeLine = sourceFile.getLineAndCharacterOfPosition(previousNode.getEnd()).line;
         const openBraceLine = sourceFile.getLineAndCharacterOfPosition(openBraceToken.getStart()).line;
-        let failure: Lint.RuleViolation;
+        let failure: Lint.RuleFailure;
 
         if (this.hasOption(OPTION_BRACE) && previousNodeLine !== openBraceLine) {
             failure = this.createFailure(openBraceToken.getStart(), openBraceToken.getWidth(), Rule.BRACE_FAILURE_STRING);

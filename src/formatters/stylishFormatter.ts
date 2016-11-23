@@ -17,7 +17,7 @@
 
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
 import {IFormatterMetadata} from "../language/formatter/formatter";
-import {RuleViolation} from "../language/rule/rule";
+import {RuleFailure} from "../language/rule/rule";
 
 import * as colors from "colors";
 
@@ -38,7 +38,7 @@ export class Formatter extends AbstractFormatter {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public format(failures: RuleViolation[], warnings: RuleViolation[] = []): string {
+    public format(failures: RuleFailure[], warnings: RuleFailure[] = []): string {
         let outputLines = this.mapToMessages("WARNING", warnings)
           .concat(this.mapToMessages("ERROR", failures));
 
@@ -50,7 +50,7 @@ export class Formatter extends AbstractFormatter {
         return outputLines.join("\n") + "\n";
     }
 
-    private mapToMessages(mode: string, failures: RuleViolation[]): string[] {
+    private mapToMessages(mode: string, failures: RuleFailure[]): string[] {
         if (!failures) {
             return [];
         }
@@ -104,7 +104,7 @@ export class Formatter extends AbstractFormatter {
         return (str + padder).substring(0, padder.length);
     }
 
-    private getPositionMaxSize(failures: RuleViolation[]): number {
+    private getPositionMaxSize(failures: RuleFailure[]): number {
         let positionMaxSize = 0;
 
         for (const failure of failures) {
@@ -120,7 +120,7 @@ export class Formatter extends AbstractFormatter {
         return positionMaxSize;
     }
 
-    private getRuleMaxSize(failures: RuleViolation[]): number {
+    private getRuleMaxSize(failures: RuleFailure[]): number {
         let ruleMaxSize = 0;
 
         for (const failure of failures) {

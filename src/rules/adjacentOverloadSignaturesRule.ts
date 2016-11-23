@@ -38,7 +38,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         return `All '${name}' signatures should be adjacent`;
     }
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleViolation[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new AdjacentOverloadSignaturesWalker(sourceFile, this.getOptions()));
     }
 }
