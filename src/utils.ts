@@ -55,7 +55,7 @@ export function dedent(strings: TemplateStringsArray, ...values: string[]) {
     }
 
     // find the smallest indent, we don't want to remove all leading whitespace
-    const indent = Math.min(...match.map(el => el.length));
+    const indent = Math.min(...match.map((el) => el.length));
     const regexp = new RegExp("^[ \\t]{" + indent + "}", "gm");
     fullString = indent > 0 ? fullString.replace(regexp, "") : fullString;
     return fullString;

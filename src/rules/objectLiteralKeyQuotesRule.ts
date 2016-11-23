@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import * as Lint from "../index";
 import * as ts from "typescript";
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -77,7 +77,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 // This is simplistic. See https://mothereff.in/js-properties for the gorey details.
-const IDENTIFIER_NAME_REGEX = /^(?:[\$A-Z_a-z])*$/;
+const IDENTIFIER_NAME_REGEX = /^(?:[\$A-Z_a-z])+$/;
 const NUMBER_REGEX = /^[0-9]+$/;
 type QuotesMode = "always" | "as-needed" | "consistent" | "consistent-as-needed";
 

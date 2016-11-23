@@ -118,11 +118,11 @@ function startsWith(commentText: string, changeCase: (str: string) => string) {
 }
 
 function startsWithLowercase(commentText: string) {
-    return startsWith(commentText, c => c.toLowerCase());
+    return startsWith(commentText, (c) => c.toLowerCase());
 }
 
 function startsWithUppercase(commentText: string) {
-    return startsWith(commentText, c => c.toUpperCase());
+    return startsWith(commentText, (c) => c.toUpperCase());
 }
 
 function startsWithSpace(commentText: string) {

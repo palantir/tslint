@@ -19,4 +19,5 @@ const o = {
   "0x0": 0,
   "true": 0, // failure
   ~~~~~~  [Unnecessarily quoted property 'true' found.]
+  '': 'always quote the empty string',
 };

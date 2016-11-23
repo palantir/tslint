@@ -14,6 +14,7 @@ TSLint supports:
 - custom formatters (failure reporters)
 - inline disabling / enabling of rules
 - configuration presets (`tslint:latest`, `tslint-react`, etc.) & composition
+- automatic fixing of formatting & style violations
 - integration with [msbuild](https://github.com/joshuakgoldberg/tslint.msbuild), [grunt](https://github.com/palantir/grunt-tslint), [gulp](https://github.com/panuhorsmalahti/gulp-tslint), [atom](https://github.com/AtomLinter/linter-tslint), [eclipse](https://github.com/palantir/eclipse-tslint), [emacs](http://flycheck.org), [sublime](https://packagecontrol.io/packages/SublimeLinter-contrib-tslint), [vim](https://github.com/scrooloose/syntastic), [visual studio](https://visualstudiogallery.msdn.microsoft.com/6edc26d4-47d8-4987-82ee-7c820d79be1d), [vscode](https://marketplace.visualstudio.com/items?itemName=eg2.tslint), [webstorm](https://www.jetbrains.com/webstorm/help/tslint.html), and more
 
 Table of Contents
@@ -115,7 +116,7 @@ Options:
 ```
 -c, --config          configuration file
 -e, --exclude         exclude globs from path expansion
---fix                 Fixes linting errors for select rules. This may overwrite linted files
+--fix                 fixes linting errors for select rules (this may overwrite linted files)
 --force               return status code 0 even if there are lint errors
 -h, --help            display detailed help
 -i, --init            generate a tslint.json config file in the current working directory
@@ -213,9 +214,9 @@ tslint accepts the following command-line options:
 
 #### Library
 
-```javascript
-const Linter = require("tslint");
-const fs = require("fs");
+```js
+import { Linter } from "tslint";
+import * as fs from "fs";
 
 const fileName = "Specify file name";
 const configuration = {
@@ -240,7 +241,7 @@ const result = linter.lint();
 
 To enable rules that work with the type checker, a TypeScript program object must be passed to the linter when using the programmatic API. Helper functions are provided to create a program from a `tsconfig.json` file. A project directory can be specified if project files do not lie in the same directory as the `tsconfig.json` file.
 
-```javascript
+```js
 const program = Linter.createProgram("tsconfig.json", "projectDir/");
 const files = Linter.getFileNames(program);
 const results = files.map(file => {
@@ -321,20 +322,20 @@ __Important conventions__:
 
 Now, let us first write the rule in TypeScript:
 
-```typescript
+```ts
 import * as ts from "typescript";
-import * as Lint from "tslint";
+import { Rules, RuleFailure, RuleWalker } from "tslint";
 
-export class Rule extends Lint.Rules.AbstractRule {
+export class Rule extends Rules.AbstractRule {
     public static FAILURE_STRING = "import statement forbidden";
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+    public apply(sourceFile: ts.SourceFile): RuleFailure[] {
         return this.applyWithWalker(new NoImportsWalker(sourceFile, this.getOptions()));
     }
 }
 
 // The walker takes care of all the work.
-class NoImportsWalker extends Lint.RuleWalker {
+class NoImportsWalker extends RuleWalker {
     public visitImportDeclaration(node: ts.ImportDeclaration) {
         // create a failure at the current position
         this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
@@ -355,7 +356,7 @@ tsc --noImplicitAny noImportsRule.ts
 
 Then, if using the CLI, provide the directory that contains this rule as an option to `--rules-dir`. If using TSLint as a library or via `grunt-tslint`, the `options` hash must contain `"rulesDirectory": "..."`. If you run the linter, you'll see that we have now successfully banned all import statements via TSLint!
 
-Finally, enable each custom rule in your [`tslint.json` config file][0] config file.
+Finally, enable each custom rule in your [`tslint.json` config file](https://palantir.github.io/tslint/usage/tslint-json/) config file.
 
 Final notes:
 
@@ -370,11 +371,11 @@ Just like rules, additional formatters can also be supplied to TSLint via `--for
 
 ```typescript
 import * as ts from "typescript";
-import * as Lint from "tslint/lib/lint";
+import { Formatters, RuleFailure } from "tslint";
 
-export class Formatter extends Lint.Formatters.AbstractFormatter {
-    public format(failures: Lint.RuleFailure[]): string {
-        var failuresJSON = failures.map((failure: Lint.RuleFailure) => failure.toJson());
+export class Formatter extends Formatters.AbstractFormatter {
+    public format(failures: RuleFailure[]): string {
+        var failuresJSON = failures.map((failure: RuleFailure) => failure.toJson());
         return JSON.stringify(failuresJSON);
     }
 }
@@ -412,5 +413,3 @@ Creating a new release
 4. Commit with message `Prepare release <version>`
 5. Run `npm publish`
 6. Create a git tag for the new release and push it ([see existing tags here](https://github.com/palantir/tslint/tags))
-
-[0]: {{site.baseurl | append: "/usage/tslint-json/"}}

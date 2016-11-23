@@ -26,6 +26,7 @@ import {
     DEFAULT_CONFIG,
     findConfiguration,
 } from "./configuration";
+import { FatalError } from "./error";
 import * as Linter from "./linter";
 import { consoleTestResultHandler, runTest } from "./test";
 import { updateNotifierCheck } from "./updateNotifier";
@@ -43,58 +44,58 @@ let processed = optimist
         }
     })
     .options({
-        c: {
+        "c": {
             alias: "config",
             describe: "configuration file",
         },
-        e: {
+        "e": {
             alias: "exclude",
             describe: "exclude globs from path expansion",
             type: "string",
         },
-        fix: {
-            describe: "Fixes linting errors for select rules. This may overwrite linted files",
+        "fix": {
+            describe: "fixes linting errors for select rules (this may overwrite linted files)",
             type: "boolean",
         },
-        force: {
+        "force": {
             describe: "return status code 0 even if there are lint errors",
             type: "boolean",
         },
-        h: {
+        "h": {
             alias: "help",
             describe: "display detailed help",
         },
-        i: {
+        "i": {
             alias: "init",
             describe: "generate a tslint.json config file in the current working directory",
         },
-        o: {
+        "o": {
             alias: "out",
             describe: "output file",
         },
-        project: {
+        "project": {
             describe: "tsconfig.json file",
         },
-        r: {
+        "r": {
             alias: "rules-dir",
             describe: "rules directory",
         },
-        s: {
+        "s": {
             alias: "formatters-dir",
             describe: "formatters directory",
         },
-        t: {
+        "t": {
             alias: "format",
             default: "prose",
             describe: "output format (prose, json, stylish, verbose, pmd, msbuild, checkstyle, vso, fileslist)",
         },
-        test: {
+        "test": {
             describe: "test that tslint produces the correct output for the specified directory",
         },
         "type-check": {
             describe: "enable type checking when linting a project",
         },
-        v: {
+        "v": {
             alias: "version",
             describe: "current version",
         },
@@ -259,13 +260,7 @@ const processFiles = (files: string[], program?: ts.Program) => {
 
         const contents = fs.readFileSync(file, "utf8");
         const configLoad = findConfiguration(possibleConfigAbsolutePath, file);
-
-        if (configLoad.results) {
-            linter.lint(file, contents, configLoad.results);
-        } else {
-            console.error(`Failed to load ${configLoad.path}: ${configLoad.error.message}`);
-            process.exit(1);
-        }
+        linter.lint(file, contents, configLoad.results);
     }
 
     const lintResult = linter.getResult();
@@ -332,4 +327,13 @@ files = files
     .map((file: string) => glob.sync(file, { ignore: ignorePatterns, nodir: true }))
     .reduce((a: string[], b: string[]) => a.concat(b));
 
-processFiles(files, program);
+try {
+    processFiles(files, program);
+} catch (error) {
+    if (error.name === FatalError.NAME) {
+        console.error(error.message);
+        process.exit(1);
+    }
+    // rethrow unhandled error
+    throw error;
+}

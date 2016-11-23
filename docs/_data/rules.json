@@ -296,7 +296,7 @@
   },
   {
     "ruleName": "max-classes-per-file",
-    "description": "\nA file may not contain more than the specified number of classes \nif the file name does not match the \"ignore-filename-pattern\" option",
+    "description": "\nA file may not contain more than the specified number of classes",
     "rationale": "\nEnsures that files have a single responsibility so that that classes each exist in their own files",
     "optionsDescription": "\nThe one required argument is an integer indicating the maximum number of classes that can appear in a file.",
     "options": {
@@ -850,7 +850,7 @@
   },
   {
     "ruleName": "no-unused-variable",
-    "deprecationMessage": "Use the compiler options --noUnusedParameters and --noUnusedLocals instead.",
+    "deprecationMessage": "Use the tsc compiler options --noUnusedParameters and --noUnusedLocals instead.",
     "description": "Disallows unused imports, variables, functions and private class members.",
     "optionsDescription": "\nThree optional arguments may be optionally provided:\n\n* `\"check-parameters\"` disallows unused function and constructor parameters.\n    * NOTE: this option is experimental and does not work with classes\n    that use abstract method declarations, among other things.\n* `\"react\"` relaxes the rule for a namespace import named `React`\n(from either the module `\"react\"` or `\"react/addons\"`).\nAny JSX expression in the file will be treated as a usage of `React`\n(because it expands to `React.createElement `).\n* `{\"ignore-pattern\": \"pattern\"}` where pattern is a case-sensitive regexp.\nVariable names that match the pattern will be ignored.",
     "options": {

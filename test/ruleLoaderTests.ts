@@ -23,51 +23,34 @@ describe("Rule Loader", () => {
     it("loads core rules", () => {
         const validConfiguration: {[name: string]: any} = {
             "class-name": true,
-            eofline: true,
-            forin: false,
+            "eofline": true,
+            "forin": false,
             "no-debugger": true,
-            quotemark: "single",
+            "quotemark": "single",
         };
 
         const rules = loadRules(validConfiguration, {}, RULES_DIRECTORY);
         assert.equal(rules.length, 5);
     });
 
-    it("throws if an invalid rule is found", () => {
+    it("ignores invalid rules", () => {
         const invalidConfiguration: {[name: string]: any} = {
-            invalidConfig1: true,
-            invalidConfig2: false,
+            "class-name": true,
+            "invalidConfig1": true,
+            "invalidConfig2": false,
         };
 
-        assert.throws(
-            () => loadRules(invalidConfiguration, {}, RULES_DIRECTORY),
-            /invalidConfig1\ninvalidConfig2/,
-        );
-    });
-
-    it("doesn't ignore leading or trailing underscores or dashes", () => {
-        /* tslint:disable:object-literal-sort-keys */
-        const invalidConfiguration: {[name: string]: any} = {
-            _indent: 6,
-            forin_: true,
-            "-quotemark": "single",
-            "eofline-": true,
-        };
-        /* tslint:enable:object-literal-sort-keys */
-
-        assert.throws(
-            () => loadRules(invalidConfiguration, {}, RULES_DIRECTORY),
-            /_indent\nforin_\n-quotemark\neofline-/,
-        );
+        const rules = loadRules(invalidConfiguration, {}, [RULES_DIRECTORY]);
+        assert.equal(rules.length, 1);
     });
 
     it("works with rulesDirectory argument as an Array", () => {
         const validConfiguration: {[name: string]: any} = {
             "class-name": true,
-            eofline: true,
-            forin: false,
+            "eofline": true,
+            "forin": false,
             "no-debugger": true,
-            quotemark: "single",
+            "quotemark": "single",
         };
 
         const rules = loadRules(validConfiguration, {}, [RULES_DIRECTORY]);
@@ -81,16 +64,5 @@ describe("Rule Loader", () => {
 
         const rules = loadRules(validConfiguration, {}, RULES_DIRECTORY, true);
         assert.equal(rules.length, 1);
-    });
-
-    it("throws if an invalid rule is adopted", () => {
-        const invalidConfiguration: {[name: string]: any} = {
-            "array-type": [true, "array"],
-        };
-
-        assert.throws(
-            () => loadRules(invalidConfiguration, {}, RULES_DIRECTORY, true),
-            /array-type/,
-        );
     });
 });

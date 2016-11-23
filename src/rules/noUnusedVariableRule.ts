@@ -31,7 +31,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-unused-variable",
-        deprecationMessage: "Use the compiler options --noUnusedParameters and --noUnusedLocals instead.",
+        deprecationMessage: "Use the tsc compiler options --noUnusedParameters and --noUnusedLocals instead.",
         description: "Disallows unused imports, variables, functions and private class members.",
         optionsDescription: Lint.Utils.dedent`
             Three optional arguments may be optionally provided:
@@ -197,7 +197,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         if (importClause.namedBindings != null) {
             if (importClause.namedBindings.kind === ts.SyntaxKind.NamedImports) {
                 let imports = node.importClause.namedBindings as ts.NamedImports;
-                usedNamedImports = imports.elements.map(e => this.isUsed(e.name.text, e.name.getStart()));
+                usedNamedImports = imports.elements.map((e) => this.isUsed(e.name.text, e.name.getStart()));
             }
             // Avoid deleting the whole statement if there's an import * inside
             if (importClause.namedBindings.kind === ts.SyntaxKind.NamespaceImport) {
@@ -206,7 +206,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         }
 
         // Delete the entire import statement if named and default imports all unused
-        if (!usesDefaultImport && usedNamedImports.every(e => !e)) {
+        if (!usesDefaultImport && usedNamedImports.every((e) => !e)) {
             this.fail(Rule.FAILURE_TYPE_IMPORT, node.getText(), node.getStart(), this.deleteImportStatement(node));
             super.visitImportDeclaration(node);
             return;
@@ -223,7 +223,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         if (importClause.namedBindings != null &&
             importClause.namedBindings.kind === ts.SyntaxKind.NamedImports) {
             // Delete the entire named imports if all unused, including curly braces.
-            if (usedNamedImports.every(e => !e)) {
+            if (usedNamedImports.every((e) => !e)) {
                 const start = importClause.name != null ? importClause.name.getEnd() : importClause.namedBindings.getStart();
                 this.fail(Rule.FAILURE_TYPE_IMPORT, importClause.namedBindings.getText(), importClause.namedBindings.getStart(), [
                     this.deleteText(start, importClause.namedBindings.getEnd() - start),
