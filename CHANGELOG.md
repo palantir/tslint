@@ -1,6 +1,10 @@
 Change Log
 ===
 
+v4.0.0-dev.3
+---
+* Include latest v4.0.2 changes
+
 v4.0.2
 ---
 * [enhancement] Don't exit when a rule can't be found. Print as a warning instead (#1771)
