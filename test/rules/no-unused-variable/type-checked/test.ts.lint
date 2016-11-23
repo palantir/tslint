@@ -1,0 +1,5 @@
+import {a, A} from './a';
+
+export class B {
+  static thing = a;
+}
