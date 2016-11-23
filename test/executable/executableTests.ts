@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { createTempFile, denormalizeWinPath } from "../utils";
 import * as cp from "child_process";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
+import { createTempFile, denormalizeWinPath } from "../utils";
 
 // when tests are run with mocha from npm scripts CWD points to project root
 const EXECUTABLE_DIR = path.resolve(process.cwd(), "test", "executable");
@@ -28,6 +28,8 @@ const TEMP_JSON_PATH = path.resolve(EXECUTABLE_DIR, "tslint.json");
 /* tslint:disable:only-arrow-functions */
 describe("Executable", function() {
     this.slow(3000);    // the executable is JIT-ed each time it runs; avoid showing slowness warnings
+    this.timeout(4000);
+
     describe("Files", () => {
         it("exits with code 1 if no arguments passed", (done) => {
             execCli([], (err, stdout, stderr) => {

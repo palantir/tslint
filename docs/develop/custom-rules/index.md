@@ -8,10 +8,10 @@ TSLint ships with a set of core rules that can be configured. However, users are
 Let us take the example of how to write a new rule to forbid all import statements (you know, *for science*). Let us name the rule file `noImportsRule.ts`. Rules are referenced in `tslint.json` with their kebab-cased identifer, so `"no-imports": true` would configure the rule.
 
 __Important conventions__: 
-* Rule identifiers are always kebab-cased.
-* Rule files are always camel-cased (`camelCasedRule.ts`).
-* Rule files *must* contain the suffix `Rule`. 
-* The exported class must always be named `Rule` and extend from `Lint.Rules.AbstractRule`.
+- Rule identifiers are always kebab-cased.
+- Rule files are always camel-cased (`camelCasedRule.ts`).
+- Rule files *must* contain the suffix `Rule`. 
+- The exported class must always be named `Rule` and extend from `Lint.Rules.AbstractRule`.
 
 Now, let us first write the rule in TypeScript:
 
@@ -58,12 +58,12 @@ Now that you're written a rule to detect problems, let's modify it to *fix* them
 Instantiate a `Fix` object and pass it in as an argument to `addFailure`. This snippet replaces the offending import statement with an empty string:
 
 ```typescript
-        // create a fixer for this failure
-        const replacement = new Lint.Replacement(node.getStart(), node.getWidth(), "");
-        const fix = new Lint.Fix("no-imports", [replacement]);
+// create a fixer for this failure
+const replacement = new Lint.Replacement(node.getStart(), node.getWidth(), "");
+const fix = new Lint.Fix("no-imports", [replacement]);
 
-        // create a failure at the current position
-        this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING, fix));
+// create a failure at the current position
+this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING, fix));
 ```
 ---
 Final notes:

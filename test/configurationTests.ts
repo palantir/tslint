@@ -16,7 +16,7 @@
 
 import * as fs from "fs";
 
-import { IConfigurationFile, extendConfigurationFile, loadConfigurationFromPath } from "../src/configuration";
+import { extendConfigurationFile, IConfigurationFile, loadConfigurationFromPath } from "../src/configuration";
 import { createTempFile } from "./utils";
 
 describe("Configuration", () => {

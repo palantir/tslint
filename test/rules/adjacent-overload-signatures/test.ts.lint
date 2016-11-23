@@ -111,3 +111,9 @@ declare namespace N {
     export function a(x: number): void;
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [All 'a' signatures should be adjacent]
 }
+
+class Foo {
+  public static bar() {}
+  constructor() {}
+  public bar() {}
+}

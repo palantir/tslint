@@ -20,11 +20,11 @@ import * as ts from "typescript";
 
 import {
     DEFAULT_CONFIG,
-    IConfigurationFile,
     findConfiguration,
     findConfigurationPath,
     getRelativePath,
     getRulesDirectories,
+    IConfigurationFile,
     loadConfigurationFromPath,
 } from "./configuration";
 import { EnableDisableRulesWalker } from "./enableDisableRules";
@@ -102,7 +102,6 @@ class Linter {
         let fileFailures: RuleFailure[] = [];
 
         if (this.options.fix) {
-            this.fixes = [];
             for (let rule of enabledRules) {
                 let ruleFailures = this.applyRule(rule, sourceFile);
                 const fixes = ruleFailures.map((f) => f.getFix()).filter((f) => !!f);
