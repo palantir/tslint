@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 const OPTION_IGNORE_PARMS = "ignore-params";
 
@@ -43,10 +43,13 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: ["true", `[true, "${OPTION_IGNORE_PARMS}"]`],
         type: "typescript",
+        typescriptOnly: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY = (type: string) => `LHS type (${type}) inferred by RHS expression, remove type annotation`;
+    public static FAILURE_STRING_FACTORY = (type: string) => {
+        return `LHS type (${type}) inferred by RHS expression, remove type annotation`;
+    }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new NoInferrableTypesWalker(sourceFile, this.getOptions()));

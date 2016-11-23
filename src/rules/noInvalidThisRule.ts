@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 interface Scope {
     inClass: boolean;
@@ -48,6 +48,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: ["true", `[true, "${OPTION_FUNCTION_IN_METHOD}"]`],
         type: "functionality",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 

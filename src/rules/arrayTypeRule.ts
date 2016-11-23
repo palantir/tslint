@@ -1,6 +1,6 @@
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 const OPTION_ARRAY = "array";
 const OPTION_GENERIC = "generic";
@@ -23,6 +23,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: [`[true, ${OPTION_ARRAY}]`, `[true, ${OPTION_GENERIC}]`, `[true, ${OPTION_ARRAY_SIMPLE}]`],
         type: "style",
+        typescriptOnly: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 

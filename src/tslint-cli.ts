@@ -26,8 +26,10 @@ import {
     DEFAULT_CONFIG,
     findConfiguration,
 } from "./configuration";
-import {consoleTestResultHandler, runTest} from "./test";
-import * as Linter from "./tslintMulti";
+import { FatalError } from "./error";
+import * as Linter from "./linter";
+import { consoleTestResultHandler, runTest } from "./test";
+import { updateNotifierCheck } from "./updateNotifier";
 
 let processed = optimist
     .usage("Usage: $0 [options] file ...")
@@ -42,53 +44,58 @@ let processed = optimist
         }
     })
     .options({
-        c: {
+        "c": {
             alias: "config",
             describe: "configuration file",
         },
-        e: {
+        "e": {
             alias: "exclude",
             describe: "exclude globs from path expansion",
+            type: "string",
         },
-        force: {
+        "fix": {
+            describe: "fixes linting errors for select rules (this may overwrite linted files)",
+            type: "boolean",
+        },
+        "force": {
             describe: "return status code 0 even if there are lint errors",
             type: "boolean",
         },
-        h: {
+        "h": {
             alias: "help",
             describe: "display detailed help",
         },
-        i: {
+        "i": {
             alias: "init",
             describe: "generate a tslint.json config file in the current working directory",
         },
-        o: {
+        "o": {
             alias: "out",
             describe: "output file",
         },
-        project: {
+        "project": {
             describe: "tsconfig.json file",
         },
-        r: {
+        "r": {
             alias: "rules-dir",
             describe: "rules directory",
         },
-        s: {
+        "s": {
             alias: "formatters-dir",
             describe: "formatters directory",
         },
-        t: {
+        "t": {
             alias: "format",
             default: "prose",
             describe: "output format (prose, json, stylish, verbose, pmd, msbuild, checkstyle, vso, fileslist)",
         },
-        test: {
+        "test": {
             describe: "test that tslint produces the correct output for the specified directory",
         },
         "type-check": {
             describe: "enable type checking when linting a project",
         },
-        v: {
+        "v": {
             alias: "version",
             describe: "current version",
         },
@@ -152,6 +159,9 @@ tslint accepts the following commandline options:
         This option can be supplied multiple times if you need multiple
         globs to indicate which files to exclude.
 
+    --fix:
+        Fixes linting errors for select rules. This may overwrite linted files.
+
     --force:
         Return status code 0 even if there are any lint errors.
         Useful while running as npm script.
@@ -184,7 +194,7 @@ tslint accepts the following commandline options:
         formatters are prose (human readable), json (machine readable)
         and verbose. prose is the default if this option is not used.
         Other built-in options include pmd, msbuild, checkstyle, and vso.
-        Additonal formatters can be added and used if the --formatters-dir
+        Additional formatters can be added and used if the --formatters-dir
         option is set.
 
     --test:
@@ -220,6 +230,7 @@ const possibleConfigAbsolutePath = argv.c != null ? path.resolve(argv.c) : null;
 const processFiles = (files: string[], program?: ts.Program) => {
 
     const linter = new Linter({
+        fix: argv.fix,
         formatter: argv.t,
         formattersDirectory: argv.s || "",
         rulesDirectory: argv.r || "",
@@ -248,8 +259,8 @@ const processFiles = (files: string[], program?: ts.Program) => {
         }
 
         const contents = fs.readFileSync(file, "utf8");
-        const configuration = findConfiguration(possibleConfigAbsolutePath, file);
-        linter.lint(file, contents, configuration);
+        const configLoad = findConfiguration(possibleConfigAbsolutePath, file);
+        linter.lint(file, contents, configLoad.results);
     }
 
     const lintResult = linter.getResult();
@@ -259,6 +270,11 @@ const processFiles = (files: string[], program?: ts.Program) => {
             process.exit(argv.force ? 0 : 2);
         }
     });
+
+    if (lintResult.format === "prose") {
+        // Check to see if there are any updates available
+        updateNotifierCheck();
+    }
 };
 
 // if both files and tsconfig are present, use files
@@ -296,7 +312,28 @@ if (argv.project != null) {
     }
 }
 
+const trimSingleQuotes = (str: string) => str.replace(/^'|'$/g, "");
+
+let ignorePatterns: string[] = [];
+if (argv.e) {
+    const excludeArguments: string[] = Array.isArray(argv.e) ? argv.e : [argv.e];
+
+    ignorePatterns = excludeArguments.map(trimSingleQuotes);
+}
+
 files = files
-  .map((file: string) => glob.sync(file, { ignore: argv.e, nodir: true }))
-  .reduce((a: string[], b: string[]) => a.concat(b));
-processFiles(files, program);
+    // remove single quotes which break matching on Windows when glob is passed in single quotes
+    .map(trimSingleQuotes)
+    .map((file: string) => glob.sync(file, { ignore: ignorePatterns, nodir: true }))
+    .reduce((a: string[], b: string[]) => a.concat(b));
+
+try {
+    processFiles(files, program);
+} catch (error) {
+    if (error.name === FatalError.NAME) {
+        console.error(error.message);
+        process.exit(1);
+    }
+    // rethrow unhandled error
+    throw error;
+}

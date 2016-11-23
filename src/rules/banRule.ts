@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -39,12 +39,13 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [`[true, ["someGlobalMethod"], ["someObject", "someFunction"], 
                           ["someObject", "otherFunction", "Optional explanation"]]`],
         type: "functionality",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING_FACTORY = (expression: string, messageAddition?: string) => {
         return `Calls to '${expression}' are not allowed.${messageAddition ? " " + messageAddition : ""}`;
-    };
+    }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const options = this.getOptions();
@@ -101,7 +102,7 @@ export class BanFunctionWalker extends Lint.RuleWalker {
                         const failure = this.createFailure(
                             expression.getStart(),
                             expression.getWidth(),
-                            Rule.FAILURE_STRING_FACTORY(`${leftSideExpression}.${rightSideExpression}`, bannedFunction[2])
+                            Rule.FAILURE_STRING_FACTORY(`${leftSideExpression}.${rightSideExpression}`, bannedFunction[2]),
                         );
                         this.addFailure(failure);
                     }

@@ -23,9 +23,9 @@ import * as path from "path";
 import * as ts from "typescript";
 
 import {Fix} from "./language/rule/rule";
+import * as Linter from "./linter";
 import {LintError} from "./test/lintError";
 import * as parse from "./test/parse";
-import * as Linter from "./tslint";
 
 const MARKUP_FILE_EXTENSION = ".lint";
 const FIXES_FILE_EXTENSION = ".fix";
@@ -40,13 +40,13 @@ export interface TestResult {
             fixesFromMarkup: string;
             markupFromLinter: string;
             markupFromMarkup: string;
-        }
+        },
     };
 }
 
 export function runTest(testDirectory: string, rulesDirectory?: string | string[]): TestResult {
     const filesToLint = glob.sync(path.join(testDirectory, `**/*${MARKUP_FILE_EXTENSION}`));
-    const tslintConfig = Linter.findConfiguration(path.join(testDirectory, "tslint.json"), null);
+    const tslintConfig = Linter.findConfiguration(path.join(testDirectory, "tslint.json"), null).results;
     const tsConfig = path.join(testDirectory, "tsconfig.json");
     let compilerOptions: ts.CompilerOptions = {};
     if (fs.existsSync(tsConfig)) {
@@ -72,8 +72,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
                 getCanonicalFileName: (filename: string) => filename,
                 getCurrentDirectory: () => "",
                 getDefaultLibFileName: () => ts.getDefaultLibFileName(compilerOptions),
-                // TODO: include this field when compiling with TS 2.0
-                // getDirectories: (path: string) => [],
+                getDirectories: (_path: string) => [],
                 getNewLine: () => "\n",
                 getSourceFile(filenameToGet: string) {
                     if (filenameToGet === this.getDefaultLibFileName()) {
@@ -97,13 +96,14 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
         }
 
         const lintOptions = {
-            configuration: tslintConfig,
+            fix: false,
             formatter: "prose",
             formattersDirectory: "",
             rulesDirectory,
         };
-        const linter = new Linter(fileBasename, fileTextWithoutMarkup, lintOptions, program);
-        const failures = linter.lint().failures;
+        const linter = new Linter(lintOptions, program);
+        linter.lint(fileBasename, fileTextWithoutMarkup, tslintConfig);
+        const failures = linter.getResult().failures;
         const errorsFromLinter: LintError[] = failures.map((failure) => {
             const startLineAndCharacter = failure.getStartPosition().getLineAndCharacter();
             const endLineAndCharacter = failure.getEndPosition().getLineAndCharacter();
@@ -129,7 +129,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
             const stat = fs.statSync(fixedFile);
             if (stat.isFile()) {
                 fixedFileText = fs.readFileSync(fixedFile, "utf8");
-                const fixes = failures.filter(f => f.hasFix()).map(f => f.getFix());
+                const fixes = failures.filter((f) => f.hasFix()).map((f) => f.getFix());
                 newFileText = Fix.applyAll(fileTextWithoutMarkup, fixes);
             }
         } catch (e) {

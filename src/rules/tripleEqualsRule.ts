@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 const OPTION_ALLOW_NULL_CHECK = "allow-null-check";
 const OPTION_ALLOW_UNDEFINED_CHECK = "allow-undefined-check";
@@ -47,6 +47,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: ["true", '[true, "allow-null-check"]', '[true, "allow-undefined-check"]'],
         type: "functionality",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 

@@ -32,6 +32,11 @@ interface i5 {
     }
 }
 
+interface i6 {
+    // ensure no false positives for properties/methods available from prototype chain
+    toString(): string;
+}
+
 
 // bad
 
@@ -77,4 +82,38 @@ interface b5 {
         a(b: number): void;
         ~~~~~~~~~~~~~~~~~~~  [All 'a' signatures should be adjacent]
     }
+}
+
+// Also works in classes, source files, modules, namespaces
+
+class C {
+    a(): void;
+    b(): void;
+    a(x: number): void;
+    ~~~~~~~~~~~~~~~~~~~  [All 'a' signatures should be adjacent]
+}
+
+declare function a(): void;
+declare function b(): void;
+declare function a(x: number): void;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [All 'a' signatures should be adjacent]
+
+declare module "m" {
+    export function a(): void;
+    export function b(): void;
+    export function a(x: number): void;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [All 'a' signatures should be adjacent]
+}
+
+declare namespace N {
+    export function a(): void;
+    export function b(): void;
+    export function a(x: number): void;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [All 'a' signatures should be adjacent]
+}
+
+class Foo {
+  public static bar() {}
+  constructor() {}
+  public bar() {}
 }

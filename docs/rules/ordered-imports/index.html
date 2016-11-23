@@ -5,7 +5,7 @@ descriptionDetails: |-
 
   Enforce a consistent ordering for ES6 imports:
   - Named imports must be alphabetized (i.e. "import {A, B, C} from "foo";")
-      - The exact ordering can be controled by the named-imports-order option.
+      - The exact ordering can be controlled by the named-imports-order option.
       - "longName as name" imports are ordered by "longName".
   - Import sources must be alphabetized within groups, i.e.:
           import * as foo from "a";
@@ -21,6 +21,7 @@ optionsDescription: |-
   * `"case-insensitive'`: Correct order is `"Bar"`, `"baz"`, `"Foo"`. (This is the default.)
   * `"lowercase-first"`: Correct order is `"baz"`, `"Bar"`, `"Foo"`.
   * `"lowercase-last"`: Correct order is `"Bar"`, `"Foo"`, `"baz"`.
+  * `"any"`: Allow any order.
 
   You may set the `"named-imports-order"` option to control the ordering of named
   imports (the `{A, B, C}` in `import {A, B, C} from "foo"`).
@@ -30,6 +31,7 @@ optionsDescription: |-
   * `"case-insensitive'`: Correct order is `{A, b, C}`. (This is the default.)
   * `"lowercase-first"`: Correct order is `{b, A, C}`.
   * `"lowercase-last"`: Correct order is `{A, C, b}`.
+  * `"any"`: Allow any order.
 
           
 options:
@@ -41,17 +43,22 @@ options:
         - case-insensitive
         - lowercase-first
         - lowercase-last
+        - any
     named-imports-order:
       type: string
       enum:
         - case-insensitive
         - lowercase-first
         - lowercase-last
+        - any
   additionalProperties: false
 optionExamples:
   - 'true'
   - '[true, {"import-sources-order": "lowercase-last", "named-imports-order": "lowercase-first"}]'
 type: style
+typescriptOnly: false
+layout: rule
+title: 'Rule: ordered-imports'
 optionsJSON: |-
   {
     "type": "object",
@@ -61,7 +68,8 @@ optionsJSON: |-
         "enum": [
           "case-insensitive",
           "lowercase-first",
-          "lowercase-last"
+          "lowercase-last",
+          "any"
         ]
       },
       "named-imports-order": {
@@ -69,12 +77,11 @@ optionsJSON: |-
         "enum": [
           "case-insensitive",
           "lowercase-first",
-          "lowercase-last"
+          "lowercase-last",
+          "any"
         ]
       }
     },
     "additionalProperties": false
   }
-layout: rule
-title: 'Rule: ordered-imports'
 ---

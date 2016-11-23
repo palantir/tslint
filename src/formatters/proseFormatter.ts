@@ -16,15 +16,43 @@
  */
 
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
+import {IFormatterMetadata} from "../language/formatter/formatter";
 import {RuleFailure} from "../language/rule/rule";
 
 export class Formatter extends AbstractFormatter {
-    public format(failures: RuleFailure[]): string {
-        if (failures.length === 0) {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: IFormatterMetadata = {
+        formatterName: "prose",
+        description: "The default formatter which outputs simple human-readable messages.",
+        sample: "myFile.ts[1, 14]: Missing semicolon",
+        consumer: "human",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
+    public format(failures: RuleFailure[], fixes?: RuleFailure[]): string {
+        if (failures.length === 0 && (!fixes || fixes.length === 0)) {
             return "";
         }
 
-        const outputLines = failures.map((failure: RuleFailure) => {
+        let fixLines: string[] = [];
+        if (fixes) {
+            let perFileFixes: { [fileName: string]: number } = {};
+            for (const fix of fixes) {
+                if (perFileFixes[fix.getFileName()] == null) {
+                    perFileFixes[fix.getFileName()] = 1;
+                } else {
+                    perFileFixes[fix.getFileName()]++;
+                }
+            }
+
+            Object.keys(perFileFixes).forEach((fixedFile: string) => {
+                const fixCount = perFileFixes[fixedFile];
+                fixLines.push(`Fixed ${fixCount} error(s) in ${fixedFile}`);
+            });
+            fixLines.push("");   // add a blank line between fixes and failures
+        }
+
+        let errorLines = failures.map((failure: RuleFailure) => {
             const fileName = failure.getFileName();
             const failureString = failure.getFailure();
 
@@ -34,6 +62,6 @@ export class Formatter extends AbstractFormatter {
             return `${fileName}${positionTuple}: ${failureString}`;
         });
 
-        return outputLines.join("\n") + "\n";
+        return fixLines.concat(errorLines).join("\n") + "\n";
     }
 }

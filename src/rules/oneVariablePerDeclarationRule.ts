@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 const OPTION_IGNORE_FOR_LOOP = "ignore-for-loop";
 
@@ -41,6 +41,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: ["true", `[true, "${OPTION_IGNORE_FOR_LOOP}"]`],
         type: "style",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 

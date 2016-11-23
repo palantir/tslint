@@ -1,6 +1,139 @@
 Change Log
 ===
 
+v4.0.2
+---
+* [enhancement] Don't exit when a rule can't be found. Print as a warning instead (#1771)
+* [api-change] Allow 3rd party apps to see exception when the config is invalid (#1764)
+* [bugfix] Don't flag a property named as empty string as not needing quotes in an object literal (#1762)
+* [bugfix] Report correct number of fixes done by --fix (#1767)
+* [bugfix] Fix false positives and exceptions in `prefer-for-of` (#1758)
+* [bugfix] Fix `adjacent-overload-signatures` false positive when a static function has the same name (#1772)
+
+Thanks to our contributors!
+* @gustavderdrache
+
+v4.0.1
+---
+* [bugfix] Removed `no-unused-variable` rule from recommended config, as it was causing spurious deprecation warnings.
+
+v4.0.0-dev.2
+---
+* Include latest v4.0.0 changes
+
+v4.0.0
+---
+* **BREAKING CHANGES**
+    * [api-change] Minor changes to the library API. See this PR for changes and upgrade instructions (#1720)
+    * [removed-rule] Removed `no-unreachable` rule; covered by compiler (#661)
+    * [enhancement] Changed order of applied configuration files for the `extends` array to make it more intuitive. (#1503)
+    * [enhancement] Changed TypeScript peer dependency to >= 2.0.0 (#1710)
+* [new-rule] `completed-docs` rule added (#1644)
+* [new-fixer] `ordered-imports` auto fixed (#1640)
+* [new-fixer] `arrow-parens` auto fixed (#1731)
+* [rule-change] `indent` rule now ignores template strings (#1611)
+* [new-rule-option] `object-literal-key-quotes` adds the options `consistent` and `consistent-as-needed` (#1733)
+* [enhancement] `--fix` option added to automatically fix selected rules (#1697)
+* [enhancement] Updated recommend rules (#1717)
+* [enhancement] `adjacent-overload-signatures` now works with classes, source files, modules, and namespaces (#1707)
+* [enhancement] Users are notified if they are using an old TSLint version (#1696)
+* [bugfix] Lint `.jsx` files if `jsRules` are configured (#1714)
+* [bugfix] Command line glob patterns now handle single quotes (#1679)
+
+Thanks to our contributors!
+* Andrii Dieiev
+* Andy
+* Chris Barr
+* Davie Schoots
+* Jordan Hawker
+* Josh Goldberg
+* Stepan Riha
+* Yuichi Nukiyama
+
+v4.0.0-dev.1
+---
+* **BREAKING CHANGES**
+    * [enhancement] The `semicolon` rule now disallows semicolons in multi-line bound class methods 
+         (to get the v3 behavior, use the `ignore-bound-class-methods` option) (#1643) 
+    * [removed-rule] Removed `use-strict` rule (#678)
+    * [removed-rule] Removed `label-undefined` rule; covered by compiler (#1614)
+    * [enhancement] Renamed `no-constructor-vars` to `no-parameter-properties` (#1296)
+    * [rule-change] The `orderedImports` rule now sorts relative modules below non-relative modules (#1640)
+* **Deprecated**
+    * [deprecated] `no-unused-variable` rule. This is checked by the TypeScript v2 compiler using the flags [`--noUnusedParameters` and `--noUnusedLocals`](https://github.com/Microsoft/TypeScript/wiki/What%27s-new-in-TypeScript#flag-unused-declarations-with---nounusedparameters-and---nounusedlocals). (#1481)
+* [enhancement] Lint .js files (#1515)
+* [new-fixer] `no-var-keyword` replaces `var` with `let` (#1547)
+* [new-fixer] `trailing-comma` auto fixed (#1546)
+* [new-fixer] `no-unused-variable` auto fixed for imports (#1568)
+* [new-fixer] `semicolon` auto fixed (#1423)
+* [new-rule] `max-classes-per-file` rule added (#1666)
+* [new-rule-option] `no-consecutive-blank-lines` rule now accepts a number value indicating max blank lines (#1650)
+* [new-rule-option] `ordered-inputs` rule option `input-sources-order` accepts value `any` (#1602)
+* [bugfix] `no-empty` rule fixed when parameter has readonly modifier
+* [bugfix] `no-namespace` rule: do not flag nested or .d.ts namespaces (#1571)
+
+Thanks to our contributors!
+
+* Alex Eagle 
+* Andrii Dieiev 
+* Ben Coveney 
+* Boris Aranovich 
+* Chris Barr 
+* Cyril Gandon 
+* Evgeniy Zhukovskiy 
+* Jay Anslow 
+* Kunal Marwaha 
+* Martin Probst 
+* Mingye Wang 
+* Raghav Katyal 
+* Sean Dawson 
+* Yuichi Nukiyama 
+* jakpaw 
+
+v4.0.0-dev.0
+---
+* **BREAKING CHANGES**
+    * [enhancement] Drop support for configuration via package.json (#1579)
+    * [removed-rule] Removed `no-duplicate-key` rule; covered by compiler (#1109)
+    * [enhancement] Call formatter once for all file results. Format output may be different (#656)
+    * [rule-change] `trailing-comma` supports function declarations, expressions, and types (#1486)
+    * [rule-change] `object-literal-sort-keys` now sorts quoted keys (#1529)
+    * [rule-change] `semicolon` now processes type aliases (#1475)
+    * [rule-change] `no-var-keyword` now rejects `export var` statements (#1256)
+    * [rule-change] `semicolon` now requires semicolon for function declaration with no body (#1447)
+* [new-formatter] `fileslist` formatter writes a list of files with errors without position or error type specifics (#1558)
+* [new-rule] `cyclomaticComplexity`, enforces a threshold of cyclomatic complexity.] (#1464)
+* [new-rule] `prefer-for-of`, which errors when `for(var x of y)` can be used instead of `for(var i = 0; i < y.length; i++)` (#1335)
+* [new-rule] `array-type`, which can require using either `T[]' or 'Array<T>' for arrays (#1498)
+* [rule-change] `object-literal-sort-keys` checks multiline objects only (#1642)
+* [rule-change] `ban` rule now can ban global functions (#327)
+* [bugfix] always write lint result, even if using formatter (#1353)
+* [bugfix] npm run test:bin fails on Windows (#1635)
+* [bugfix] Don't enforce trailing spaces on newlines in typedef-whitespace rule (#1531)
+* [bugfix] `jsdoc` rule should not match arbitrary comments (#1543)
+* [bugfix] `one-line` rule errors when declaring wildcard ambient modules (#1425)
+
+Thanks to our contributors!
+
+* Alex Eagle 
+* Andrii Dieiev 
+* Andy Hanson 
+* Ben Coveney 
+* Boris Aranovich 
+* Chris Barr 
+* Christian Dreher 
+* Claas Augner 
+* Josh Goldberg 
+* Martin Probst 
+* Mike Deverell 
+* Nina Hartmann 
+* Satoshi Amemiya 
+* Scott Wu 
+* Steve Van Opstal 
+* Umar Bolatov 
+* Vladimir Matveev 
+* Yui 
+
 v3.15.1
 ---
 * Enabled additional rules in `tslint:latest` configuration (#1506)
@@ -79,6 +212,10 @@ Thanks to our contributors!
 * @danvk
 * @janaagaard75
 * @mprobst
+
+v3.12.0-dev.2
+---
+* [enhancement] Support TypeScript v2.0.0-dev builds
 
 v3.12.1
 ---

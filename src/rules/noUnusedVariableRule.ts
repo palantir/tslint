@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 const OPTION_REACT = "react";
 const OPTION_CHECK_PARAMETERS = "check-parameters";
@@ -31,6 +31,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-unused-variable",
+        deprecationMessage: "Use the tsc compiler options --noUnusedParameters and --noUnusedLocals instead.",
         description: "Disallows unused imports, variables, functions and private class members.",
         optionsDescription: Lint.Utils.dedent`
             Three optional arguments may be optionally provided:
@@ -63,6 +64,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: ['[true, "react"]', '[true, {"ignore-pattern": "^_"}]'],
         type: "functionality",
+        typescriptOnly: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -72,8 +74,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_TYPE_PARAM = "parameter";
     public static FAILURE_TYPE_PROP = "property";
     public static FAILURE_TYPE_VAR = "variable";
-
-    public static FAILURE_STRING_FACTORY = (type: string, name: string) => `Unused ${type}: '${name}'`;
+    public static FAILURE_STRING_FACTORY = (type: string, name: string) => {
+        return `Unused ${type}: '${name}'`;
+    }
 
     public apply(sourceFile: ts.SourceFile, languageService: ts.LanguageService): Lint.RuleFailure[] {
         return this.applyWithWalker(new NoUnusedVariablesWalker(sourceFile, this.getOptions(), languageService));
@@ -219,7 +222,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         if (importClause.namedBindings != null) {
             if (importClause.namedBindings.kind === ts.SyntaxKind.NamedImports) {
                 let imports = node.importClause.namedBindings as ts.NamedImports;
-                usedNamedImports = imports.elements.map(e => this.isUsed(e.name.text, e.name.getStart()));
+                usedNamedImports = imports.elements.map((e) => this.isUsed(e.name.text, e.name.getStart()));
             }
             // Avoid deleting the whole statement if there's an import * inside
             if (importClause.namedBindings.kind === ts.SyntaxKind.NamespaceImport) {
@@ -228,7 +231,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         }
 
         // Delete the entire import statement if named and default imports all unused
-        if (!usesDefaultImport && usedNamedImports.every(e => !e)) {
+        if (!usesDefaultImport && usedNamedImports.every((e) => !e)) {
             this.fail(Rule.FAILURE_TYPE_IMPORT, node.getText(), node.getStart(), this.deleteImportStatement(node));
             super.visitImportDeclaration(node);
             return;
@@ -245,7 +248,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         if (importClause.namedBindings != null &&
             importClause.namedBindings.kind === ts.SyntaxKind.NamedImports) {
             // Delete the entire named imports if all unused, including curly braces.
-            if (usedNamedImports.every(e => !e)) {
+            if (usedNamedImports.every((e) => !e)) {
                 const start = importClause.name != null ? importClause.name.getEnd() : importClause.namedBindings.getStart();
                 this.fail(Rule.FAILURE_TYPE_IMPORT, importClause.namedBindings.getText(), importClause.namedBindings.getStart(), [
                     this.deleteText(start, importClause.namedBindings.getEnd() - start),
@@ -356,7 +359,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
             node.modifiers,
             ts.SyntaxKind.PublicKeyword,
             ts.SyntaxKind.PrivateKeyword,
-            ts.SyntaxKind.ProtectedKeyword
+            ts.SyntaxKind.ProtectedKeyword,
         );
 
         if (!isSingleVariable && isPropertyParameter) {
@@ -441,7 +444,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     private fail(type: string, name: string, position: number, replacements?: Lint.Replacement[]) {
         let fix: Lint.Fix;
         if (replacements && replacements.length) {
-            fix = new Lint.Fix("no-unused-variable", replacements);
+            fix = new Lint.Fix(Rule.metadata.ruleName, replacements);
         }
         this.possibleFailures.push(this.createFailure(position, name.length, Rule.FAILURE_STRING_FACTORY(type, name), fix));
     }

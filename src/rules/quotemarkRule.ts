@@ -17,11 +17,11 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 enum QuoteMark {
     SINGLE_QUOTES,
-    DOUBLE_QUOTES
+    DOUBLE_QUOTES,
 }
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -49,6 +49,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: ['[true, "single", "avoid-escape"]', '[true, "single", "jsx-double"]'],
         type: "style",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 

@@ -16,9 +16,19 @@
  */
 
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
+import {IFormatterMetadata} from "../language/formatter/formatter";
 import {RuleFailure} from "../language/rule/rule";
 
 export class Formatter extends AbstractFormatter {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: IFormatterMetadata = {
+        formatterName: "filesList",
+        description: "Lists files containing lint errors.",
+        sample: "directory/myFile.ts",
+        consumer: "machine",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public format(failures: RuleFailure[]): string {
         if (failures.length === 0) {
             return "";

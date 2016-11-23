@@ -1,5 +1,9 @@
 {
     "rulesDirectory": ["./rules"],
+    "jsRules": {
+        "rule-one": true,
+        "rule-two": false
+    },
     "rules": {
         "rule-one": true,
         "rule-two": false

@@ -29,8 +29,7 @@ export function getSourceFile(fileName: string, source: string): ts.SourceFile {
         getCanonicalFileName: (filename: string) => filename,
         getCurrentDirectory: () => "",
         getDefaultLibFileName: () => "lib.d.ts",
-        // TODO: include this field when compiling with TS 2.0
-        // getDirectories: (path: string) => [],
+        getDirectories: (_path: string) => [],
         getNewLine: () => "\n",
         getSourceFile: (filenameToGet: string) => {
             if (filenameToGet === normalizedName) {
@@ -49,6 +48,7 @@ export function getSourceFile(fileName: string, source: string): ts.SourceFile {
 
 export function createCompilerOptions(): ts.CompilerOptions {
     return {
+        allowJs: true,
         noResolve: true,
         target: ts.ScriptTarget.ES5,
     };
@@ -119,6 +119,13 @@ export function getBindingElementVariableDeclaration(node: ts.BindingElement): t
 }
 
 /**
+ * @returns true if some ancestor of `node` satisfies `predicate`, including `node` itself.
+ */
+export function someAncestor(node: ts.Node, predicate: (n: ts.Node) => boolean): boolean {
+    return predicate(node) || (node.parent && someAncestor(node.parent, predicate));
+}
+
+/**
  * Bitwise check for node flags.
  */
 export function isNodeFlagSet(node: ts.Node, flagToCheck: ts.NodeFlags): boolean {
@@ -128,7 +135,7 @@ export function isNodeFlagSet(node: ts.Node, flagToCheck: ts.NodeFlags): boolean
 }
 
 /**
- * Returns true if decl is a nested module declaration, i.e. represents a segment of a dotted module path.
+ * @returns true if decl is a nested module declaration, i.e. represents a segment of a dotted module path.
  */
 export function isNestedModuleDeclaration(decl: ts.ModuleDeclaration) {
     // in a declaration expression like 'module a.b.c' - 'a' is the top level module declaration node and 'b' and 'c'

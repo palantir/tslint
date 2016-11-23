@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -34,10 +34,13 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionExamples: ["true"],
         type: "functionality",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY = (name: string) => `Duplicate variable: '${name}'`;
+    public static FAILURE_STRING_FACTORY = (name: string) => {
+        return `Duplicate variable: '${name}'`;
+    }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new NoDuplicateVariableWalker(sourceFile, this.getOptions()));
@@ -71,11 +74,11 @@ class NoDuplicateVariableWalker extends Lint.BlockScopeAwareRuleWalker<{}, Scope
         this.visitBlock(node.block);
     }
 
-    public visitMethodSignature(node: ts.SignatureDeclaration) {
+    public visitMethodSignature(_node: ts.SignatureDeclaration) {
         // don't call super, we don't want to walk method signatures either
     }
 
-    public visitTypeLiteral(node: ts.TypeLiteralNode) {
+    public visitTypeLiteral(_node: ts.TypeLiteralNode) {
         // don't call super, we don't want to walk the inside of type nodes
     }
 

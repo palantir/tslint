@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 /* tslint:disable:object-literal-sort-keys */
 const SPACE_OPTIONS = {
@@ -30,7 +30,7 @@ const SPACE_OBJECT = {
     properties: {
         "call-signature": SPACE_OPTIONS,
         "index-signature": SPACE_OPTIONS,
-        parameter: SPACE_OPTIONS,
+        "parameter": SPACE_OPTIONS,
         "property-declaration": SPACE_OPTIONS,
         "variable-declaration": SPACE_OPTIONS,
     },
@@ -79,6 +79,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             ]`,
         ],
         type: "typescript",
+        typescriptOnly: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -89,9 +90,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class TypedefWhitespaceWalker extends Lint.RuleWalker {
     private static getColonPosition(node: ts.Node) {
-        const colon = node.getChildren().filter((child) =>
-            child.kind === ts.SyntaxKind.ColonToken
-        )[0];
+        const colon = node.getChildren().filter((child) => child.kind === ts.SyntaxKind.ColonToken)[0];
 
         return colon == null ? -1 : colon.getStart();
     }
@@ -240,7 +239,7 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
                 hasLeadingWhitespace,
                 hasSeveralLeadingWhitespaces,
                 colonPosition - 1,
-                message
+                message,
             );
         }
     }
@@ -282,7 +281,7 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
                 hasTrailingWhitespace,
                 hasSeveralTrailingWhitespaces,
                 colonPosition + 1,
-                message
+                message,
             );
         }
     }

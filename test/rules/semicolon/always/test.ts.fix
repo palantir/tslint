@@ -51,13 +51,25 @@ class MyClass {
     private email : string;
 
     public initializedProperty = 6;
-    public initializedMethodProperty = () => { return "hi"; }
+    public initializedMethodProperty = () => {
+        return "hi";
+    }
+
+    public initializedMethodPropertyWithoutSemicolon = () => {
+        return "hi again";
+    }
+
+    public initializedMethodProperty1Line = () => { return "hi"; };
+
+    public initializedMethodPropertyWithoutSemicolon1Line = () => { return "hi again"; };
 }
 
 interface ITest {
     foo?: string;
     bar: number;
     baz: boolean;
+
+    readonly raz: number;
 }
 
 import {Router} from 'aurelia-router';

@@ -8,7 +8,7 @@ Just like [custom rules][0], additional formatters can also be supplied to TSLin
 
 ```ts
 import * as ts from "typescript";
-import * as Lint from "tslint/lib/lint";
+import * as Lint from "tslint";
 
 export class Formatter extends Lint.Formatters.AbstractFormatter {
     public format(failures: Lint.RuleFailure[]): string {

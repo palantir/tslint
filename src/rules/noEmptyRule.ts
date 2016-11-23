@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -30,6 +30,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionExamples: ["true"],
         type: "functionality",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -67,7 +68,8 @@ class BlockWalker extends Lint.RuleWalker {
                 param.modifiers,
                 ts.SyntaxKind.PrivateKeyword,
                 ts.SyntaxKind.ProtectedKeyword,
-                ts.SyntaxKind.PublicKeyword
+                ts.SyntaxKind.PublicKeyword,
+                ts.SyntaxKind.ReadonlyKeyword,
             );
 
             if (hasPropertyAccessModifier) {

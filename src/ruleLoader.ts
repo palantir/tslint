@@ -21,9 +21,11 @@ import {camelize} from "underscore.string";
 
 import {getRulesDirectories} from "./configuration";
 import {IDisabledInterval, IRule} from "./language/rule/rule";
+import {dedent} from "./utils";
 
 const moduleDirectory = path.dirname(module.filename);
 const CORE_RULES_DIRECTORY = path.resolve(moduleDirectory, ".", "rules");
+const shownDeprecations: string[] = [];
 
 export interface IEnableDisablePosition {
     isEnabled: boolean;
@@ -32,9 +34,11 @@ export interface IEnableDisablePosition {
 
 export function loadRules(ruleConfiguration: {[name: string]: any},
                           enableDisableRuleMap: {[rulename: string]: IEnableDisablePosition[]},
-                          rulesDirectories?: string | string[]): IRule[] {
+                          rulesDirectories?: string | string[],
+                          isJs?: boolean): IRule[] {
     const rules: IRule[] = [];
     const notFoundRules: string[] = [];
+    const notAllowedInJsRules: string[] = [];
 
     for (const ruleName in ruleConfiguration) {
         if (ruleConfiguration.hasOwnProperty(ruleName)) {
@@ -43,27 +47,47 @@ export function loadRules(ruleConfiguration: {[name: string]: any},
             if (Rule == null) {
                 notFoundRules.push(ruleName);
             } else {
-                const all = "all"; // make the linter happy until we can turn it on and off
-                const allList = (all in enableDisableRuleMap ? enableDisableRuleMap[all] : []);
-                const ruleSpecificList = (ruleName in enableDisableRuleMap ? enableDisableRuleMap[ruleName] : []);
-                const disabledIntervals = buildDisabledIntervalsFromSwitches(ruleSpecificList, allList);
-                rules.push(new Rule(ruleName, ruleValue, disabledIntervals));
+                if (isJs && Rule.metadata && Rule.metadata.typescriptOnly != null && Rule.metadata.typescriptOnly) {
+                    notAllowedInJsRules.push(ruleName);
+                } else {
+                    const all = "all"; // make the linter happy until we can turn it on and off
+                    const allList = (all in enableDisableRuleMap ? enableDisableRuleMap[all] : []);
+                    const ruleSpecificList = (ruleName in enableDisableRuleMap ? enableDisableRuleMap[ruleName] : []);
+                    const disabledIntervals = buildDisabledIntervalsFromSwitches(ruleSpecificList, allList);
+                    rules.push(new Rule(ruleName, ruleValue, disabledIntervals));
+
+                    if (Rule.metadata && Rule.metadata.deprecationMessage && shownDeprecations.indexOf(Rule.metadata.ruleName) === -1) {
+                        console.warn(`${Rule.metadata.ruleName} is deprecated. ${Rule.metadata.deprecationMessage}`);
+                        shownDeprecations.push(Rule.metadata.ruleName);
+                    }
+                }
             }
         }
     }
 
     if (notFoundRules.length > 0) {
-        const ERROR_MESSAGE = `
+        const warning = dedent`
             Could not find implementations for the following rules specified in the configuration:
-            ${notFoundRules.join("\n")}
+                ${notFoundRules.join("\n                ")}
             Try upgrading TSLint and/or ensuring that you have all necessary custom rules installed.
             If TSLint was recently upgraded, you may have old rules configured which need to be cleaned up.
         `;
 
-        throw new Error(ERROR_MESSAGE);
-    } else {
-        return rules;
+        console.warn(warning);
     }
+    if (notAllowedInJsRules.length > 0) {
+        const warning = dedent`
+            Following rules specified in configuration couldn't be applied to .js or .jsx files:
+                ${notAllowedInJsRules.join("\n                ")}
+            Make sure to exclude them from "jsRules" section of your tslint.json.
+        `;
+
+        console.warn(warning);
+    }
+    if (rules.length === 0) {
+        console.warn("No valid rules have been specified");
+    }
+    return rules;
 }
 
 export function findRule(name: string, rulesDirectories?: string | string[]) {

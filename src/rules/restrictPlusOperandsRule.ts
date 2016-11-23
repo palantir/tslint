@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -28,12 +28,15 @@ export class Rule extends Lint.Rules.TypedRule {
         options: null,
         optionExamples: ["true"],
         type: "functionality",
+        typescriptOnly: false,
         requiresTypeInfo: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public static MISMATCHED_TYPES_FAILURE = "Types of values used in '+' operation must match";
-    public static UNSUPPORTED_TYPE_FAILURE_FACTORY = (type: string) => `cannot add type ${type}`;
+    public static UNSUPPORTED_TYPE_FAILURE_FACTORY = (type: string) => {
+        return `cannot add type ${type}`;
+    }
 
     public applyWithProgram(sourceFile: ts.SourceFile, langSvc: ts.LanguageService): Lint.RuleFailure[] {
         return this.applyWithWalker(new RestrictPlusOperandsWalker(sourceFile, this.getOptions(), langSvc.getProgram()));

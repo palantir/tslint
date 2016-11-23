@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import * as Lint from "../lint";
 import * as ts from "typescript";
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
 
@@ -50,13 +50,17 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: ["true", "[true, 20]"],
         type: "maintainability",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static ANONYMOUS_FAILURE_STRING = (expected: number, actual: number) =>
-        `The function has a cyclomatic complexity of ${actual} which is higher than the threshold of ${expected}`;
-    public static NAMED_FAILURE_STRING = (expected: number, actual: number, name: string) =>
-        `The function ${name} has a cyclomatic complexity of ${actual} which is higher than the threshold of ${expected}`;
+    public static ANONYMOUS_FAILURE_STRING = (expected: number, actual: number) => {
+        return `The function has a cyclomatic complexity of ${actual} which is higher than the threshold of ${expected}`;
+    }
+
+    public static NAMED_FAILURE_STRING = (expected: number, actual: number, name: string) => {
+        return `The function ${name} has a cyclomatic complexity of ${actual} which is higher than the threshold of ${expected}`;
+    }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new CyclomaticComplexityWalker(sourceFile, this.getOptions(), this.threshold));

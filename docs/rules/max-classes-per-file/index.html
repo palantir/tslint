@@ -1,0 +1,40 @@
+---
+ruleName: max-classes-per-file
+description: |-
+
+  A file may not contain more than the specified number of classes
+rationale: |-
+
+  Ensures that files have a single responsibility so that that classes each exist in their own files
+optionsDescription: |-
+
+  The one required argument is an integer indicating the maximum number of classes that can appear in a file.
+options:
+  type: array
+  items:
+    - type: number
+      minimum: 1
+  additionalItems: false
+  minLength: 1
+  maxLength: 2
+optionExamples:
+  - '[true, 1]'
+  - '[true, 5]'
+type: maintainability
+typescriptOnly: false
+layout: rule
+title: 'Rule: max-classes-per-file'
+optionsJSON: |-
+  {
+    "type": "array",
+    "items": [
+      {
+        "type": "number",
+        "minimum": 1
+      }
+    ],
+    "additionalItems": false,
+    "minLength": 1,
+    "maxLength": 2
+  }
+---

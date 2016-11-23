@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 const OPTION_LINEBREAK_STYLE_CRLF = "CRLF";
 const OPTION_LINEBREAK_STYLE_LF = "LF";
@@ -38,6 +38,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: [`[true, "${OPTION_LINEBREAK_STYLE_LF}"]`, `[true, "${OPTION_LINEBREAK_STYLE_CRLF}"]`],
         type: "maintainability",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -52,7 +53,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             sourceFile.languageVersion,
             false,
             sourceFile.languageVariant,
-            sourceFile.getFullText()
+            sourceFile.getFullText(),
         );
 
         const linebreakStyle = this.getOptions().ruleArguments[0] || OPTION_LINEBREAK_STYLE_LF;

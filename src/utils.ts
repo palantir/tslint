@@ -15,6 +15,9 @@
  * limitations under the License.
  */
 
+/**
+ * Enforces the invariant that the input is an array.
+ */
 export function arrayify<T>(arg: T | T[]): T[] {
     if (Array.isArray(arg)) {
         return arg;
@@ -25,6 +28,9 @@ export function arrayify<T>(arg: T | T[]): T[] {
     }
 }
 
+/**
+ * Enforces the invariant that the input is an object.
+ */
 export function objectify(arg: any): any {
     if (typeof arg === "object" && arg != null) {
         return arg;
@@ -49,7 +55,7 @@ export function dedent(strings: TemplateStringsArray, ...values: string[]) {
     }
 
     // find the smallest indent, we don't want to remove all leading whitespace
-    const indent = Math.min(...match.map(el => el.length));
+    const indent = Math.min(...match.map((el) => el.length));
     const regexp = new RegExp("^[ \\t]{" + indent + "}", "gm");
     fullString = indent > 0 ? fullString.replace(regexp, "") : fullString;
     return fullString;
@@ -66,7 +72,7 @@ export function stripComments(content: string): string {
      * Fourth matches line comments
      */
     const regexp: RegExp = /("(?:[^\\\"]*(?:\\.)?)*")|('(?:[^\\\']*(?:\\.)?)*')|(\/\*(?:\r?\n|.)*?\*\/)|(\/{2,}.*?(?:(?:\r?\n)|$))/g;
-    let result = content.replace(regexp, (match, m1, m2, m3, m4) => {
+    let result = content.replace(regexp, (match, _m1, _m2, m3, m4) => {
         // Only one of m1, m2, m3, m4 matches
         if (m3) {
             // A block comment. Replace with nothing

@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 const OPTION_BRACE = "check-open-brace";
 const OPTION_CATCH = "check-catch";
@@ -49,6 +49,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: ['[true, "check-catch", "check-finally", "check-else"]'],
         type: "style",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -195,7 +196,7 @@ class OneLineWalker extends Lint.RuleWalker {
     public visitModuleDeclaration(node: ts.ModuleDeclaration) {
         const nameNode = node.name;
         const body = node.body;
-        if (body.kind === ts.SyntaxKind.ModuleBlock) {
+        if (body != null && body.kind === ts.SyntaxKind.ModuleBlock) {
             const openBraceToken = body.getChildAt(0);
             this.handleOpeningBrace(nameNode, openBraceToken);
         }

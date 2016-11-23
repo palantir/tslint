@@ -19,7 +19,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -33,6 +33,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionExamples: ["true"],
         type: "functionality",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -46,8 +47,18 @@ export class Rule extends Lint.Rules.AbstractRule {
 class NullWalker extends Lint.RuleWalker {
     public visitNode(node: ts.Node) {
         super.visitNode(node);
-        if (node.kind === ts.SyntaxKind.NullKeyword) {
+        if (node.kind === ts.SyntaxKind.NullKeyword && !isPartOfType(node)) {
             this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
         }
     }
+}
+
+function isPartOfType({ parent }: ts.Node) {
+    while (parent != null) {
+        if (ts.SyntaxKind.FirstTypeNode <= parent.kind && parent.kind <= ts.SyntaxKind.LastTypeNode) {
+            return true;
+        }
+        parent = parent.parent;
+    }
+    return false;
 }

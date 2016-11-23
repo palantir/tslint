@@ -48,7 +48,7 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
 
     private getStartOfLinePosition(node: ts.SourceFile, position: number, lineOffset = 0) {
         return node.getPositionOfLineAndCharacter(
-            node.getLineAndCharacterOfPosition(position).line + lineOffset, 0
+            node.getLineAndCharacterOfPosition(position).line + lineOffset, 0,
         );
     }
 
@@ -73,7 +73,7 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
                     rulesList = commentTextParts[1].split(/\s+/).slice(1);
 
                     // remove empty items and potential comment end.
-                    rulesList = rulesList.filter(item => !!item && item.indexOf("*/") === -1);
+                    rulesList = rulesList.filter((item) => !!item && item.indexOf("*/") === -1);
 
                     // potentially there were no items, so default to `all`.
                     rulesList = rulesList.length > 0 ? rulesList : ["all"];

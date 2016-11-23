@@ -16,11 +16,28 @@
  */
 
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
+import {IFormatterMetadata} from "../language/formatter/formatter";
 import {RuleFailure} from "../language/rule/rule";
 
 import * as colors from "colors";
 
+import * as Utils from "../utils";
+
 export class Formatter extends AbstractFormatter {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: IFormatterMetadata = {
+        formatterName: "stylish",
+        description: "Human-readable formatter which creates stylish messages.",
+        descriptionDetails: Utils.dedent`
+            The output matches that produced by eslint's stylish formatter. Its readability
+            enhanced through spacing and colouring`,
+        sample: Utils.dedent`
+        myFile.ts
+        1:14  semicolon  Missing semicolon`,
+        consumer: "human",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public format(failures: RuleFailure[]): string {
         if (typeof failures[0] === "undefined") {
             return "\n";
@@ -42,12 +59,13 @@ export class Formatter extends AbstractFormatter {
                 currentFile = fileName;
             }
 
-            const failureString = failure.getFailure();
+            let failureString = failure.getFailure();
+            failureString     = colors.yellow(failureString);
 
             // Rule
             let ruleName = failure.getRuleName();
             ruleName     = this.pad(ruleName, ruleMaxSize);
-            ruleName     = colors.yellow(ruleName);
+            ruleName     = colors.grey(ruleName);
 
             // Lines
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();

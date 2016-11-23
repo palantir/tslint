@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import * as colors from "colors";
+
 import * as ts from "typescript";
 
 import {IFormatter, RuleFailure, TestUtils} from "../lint";
@@ -43,12 +45,12 @@ describe("Stylish Formatter", () => {
 
         const maxPositionTuple = `${maxPositionObj.line + 1}:${maxPositionObj.character + 1}`;
 
-        const expectedResult = (require("colors").supportsColor) ?
+        const expectedResult = colors.enabled ?
             "formatters/stylishFormatter.test.ts" + "\n" +
-            "\u001b[31m1:1\u001b[39m  \u001b[33mfirst-name\u001b[39m  first failure" + "\n" +
-            "\u001b[31m1:3\u001b[39m  \u001b[33mescape    \u001b[39m  &<>'\" should be escaped" + "\n" +
-            `\u001b[31m${maxPositionTuple}\u001b[39m  \u001b[33mlast-name \u001b[39m  last failure` + "\n" +
-            "\u001b[31m1:1\u001b[39m  \u001b[33mfull-name \u001b[39m  full failure" + "\n" +
+            "\u001b[31m1:1\u001b[39m  \u001b[90mfirst-name\u001b[39m  \u001b[33mfirst failure\u001b[39m" + "\n" +
+            "\u001b[31m1:3\u001b[39m  \u001b[90mescape    \u001b[39m  \u001b[33m&<>'\" should be escaped\u001b[39m" + "\n" +
+            `\u001b[31m${maxPositionTuple}\u001b[39m  \u001b[90mlast-name \u001b[39m  \u001b[33mlast failure\u001b[39m` + "\n" +
+            "\u001b[31m1:1\u001b[39m  \u001b[90mfull-name \u001b[39m  \u001b[33mfull failure\u001b[39m" + "\n" +
             "\n" :
             "formatters/stylishFormatter.test.ts" + "\n" +
             "1:1  first-name  first failure" + "\n" +

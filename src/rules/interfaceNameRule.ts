@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 const OPTION_ALWAYS = "always-prefix";
 const OPTION_NEVER = "never-prefix";
@@ -39,6 +39,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: [`[true, "${OPTION_ALWAYS}"]`, `[true, "${OPTION_NEVER}"]`],
         type: "style",
+        typescriptOnly: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 

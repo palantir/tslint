@@ -1,14 +1,16 @@
-import * as Lint from "../lint";
 import * as ts from "typescript";
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "object-literal-shorthand",
         description: "Enforces use of ES6 object literal shorthand when possible.",
+        optionsDescription: "Not configurable.",
         options: null,
         optionExamples: ["true"],
         type: "style",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 

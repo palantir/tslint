@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -33,6 +33,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionExamples: ["true"],
         type: "functionality",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -69,7 +70,7 @@ export class NoUnusedExpressionWalker extends Lint.RuleWalker {
 
         if (checkPreviousSiblings) {
             const siblings: ts.Node[] = [];
-            ts.forEachChild(node.parent, child => { siblings.push(child); });
+            ts.forEachChild(node.parent, (child) => { siblings.push(child); });
             return siblings.slice(0, siblings.indexOf(node)).every((n) => NoUnusedExpressionWalker.isDirective(n, false));
         } else {
             return true;

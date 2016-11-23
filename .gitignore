@@ -4,9 +4,12 @@
 /build/
 /docs/site/
 /scripts/*.js
+/scripts/*.js.map
 /lib/
+/test/executable/tslint.json
 node_modules/
 tscommand*.txt
+npm-debug.log
 # created by grunt-ts for faster compiling
 typings/.basedir.ts
 

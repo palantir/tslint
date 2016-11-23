@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 const OPTION_SPACE = "check-space";
 const OPTION_LOWERCASE = "check-lowercase";
@@ -47,6 +47,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: ['[true, "check-space", "check-lowercase"]'],
         type: "style",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -117,11 +118,11 @@ function startsWith(commentText: string, changeCase: (str: string) => string) {
 }
 
 function startsWithLowercase(commentText: string) {
-    return startsWith(commentText, c => c.toLowerCase());
+    return startsWith(commentText, (c) => c.toLowerCase());
 }
 
 function startsWithUppercase(commentText: string) {
-    return startsWith(commentText, c => c.toUpperCase());
+    return startsWith(commentText, (c) => c.toUpperCase());
 }
 
 function startsWithSpace(commentText: string) {

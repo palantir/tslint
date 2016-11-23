@@ -40,3 +40,8 @@ class testClass3 {
     }
 ~~~~~ [block is empty]
 }
+
+class testClass4 {
+    constructor(readonly allowed: any) {
+    }
+}

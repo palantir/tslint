@@ -17,6 +17,40 @@
 
 import {RuleFailure} from "../rule/rule";
 
+export interface IFormatterMetadata {
+    /**
+     * The name of the formatter.
+     */
+    formatterName: string;
+
+    /**
+     * A short, one line description of what the formatter does.
+     */
+    description: string;
+
+    /**
+     * More elaborate details about the formatter.
+     */
+    descriptionDetails?: string;
+
+    /**
+     * Sample output from the formatter.
+     */
+    sample: string;
+
+    /**
+     * Sample output from the formatter.
+     */
+    consumer: ConsumerType;
+}
+
+export type ConsumerType = "human" | "machine";
+
 export interface IFormatter {
-    format(failures: RuleFailure[]): string;
+    /**
+     * Formats linter results
+     * @param {RuleFailure[]} failures Linter errors that were not fixed
+     * @param {RuleFailure[]} fixes Fixed linter errors. Available when the `--fix` argument is used on the command line
+     */
+    format(failures: RuleFailure[], fixes?: RuleFailure[]): string;
 }

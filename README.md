@@ -14,6 +14,7 @@ TSLint supports:
 - custom formatters (failure reporters)
 - inline disabling / enabling of rules
 - configuration presets (`tslint:latest`, `tslint-react`, etc.) & composition
+- automatic fixing of formatting & style violations
 - integration with [msbuild](https://github.com/joshuakgoldberg/tslint.msbuild), [grunt](https://github.com/palantir/grunt-tslint), [gulp](https://github.com/panuhorsmalahti/gulp-tslint), [atom](https://github.com/AtomLinter/linter-tslint), [eclipse](https://github.com/palantir/eclipse-tslint), [emacs](http://flycheck.org), [sublime](https://packagecontrol.io/packages/SublimeLinter-contrib-tslint), [vim](https://github.com/scrooloose/syntastic), [visual studio](https://visualstudiogallery.msdn.microsoft.com/6edc26d4-47d8-4987-82ee-7c820d79be1d), [vscode](https://marketplace.visualstudio.com/items?itemName=eg2.tslint), [webstorm](https://www.jetbrains.com/webstorm/help/tslint.html), and more
 
 Table of Contents
@@ -22,6 +23,7 @@ Table of Contents
 - [Installation](#installation)
 - [Usage](#usage)
 - [Core Rules](#core-rules)
+- [Core Formatters](#core-formatters)
 - [Rule Flags](#rule-flags)
 - [Custom Rules](#custom-rules)
 - [Development](#development)
@@ -78,9 +80,15 @@ The configuration file specifies which rules are enabled and their options. Thes
   "extends": "tslint:latest",
   "rules": {
     /*
-     * Any rules specified here will override those from the base config we are extending
+     * Any rules specified here will override those from the base config we are extending.
      */
-    "no-constructor-vars": true
+    "curly": true
+  },
+  "jsRules": {
+    /*
+     * Any rules specified here will override those from the base config we are extending.
+     */
+    "curly": true
   },
   "rulesDirectory": [
     /*
@@ -107,16 +115,17 @@ Options:
 
 ```
 -c, --config          configuration file
+-e, --exclude         exclude globs from path expansion
+--fix                 fixes linting errors for select rules (this may overwrite linted files)
 --force               return status code 0 even if there are lint errors
 -h, --help            display detailed help
 -i, --init            generate a tslint.json config file in the current working directory
 -o, --out             output file
+--project             tsconfig.json file
 -r, --rules-dir       rules directory
 -s, --formatters-dir  formatters directory
--e, --exclude         exclude globs from path expansion
--t, --format          output format (prose, json, verbose, pmd, msbuild, checkstyle)  [default: "prose"]
+-t, --format          output format (prose, json, stylish, verbose, pmd, msbuild, checkstyle, vso, fileslist)  [default: "prose"]
 --test                test that tslint produces the correct output for the specified directory
---project             path to tsconfig.json file
 --type-check          enable type checking when linting a project
 -v, --version         current version
 ```
@@ -143,6 +152,9 @@ tslint accepts the following command-line options:
     A filename or glob which indicates files to exclude from linting.
     This option can be supplied multiple times if you need multiple
     globs to indicate which files to exclude.
+
+--fix:
+    Fixes linting errors for select rules. This may overwrite linted files.
 
 --force:
     Return status code 0 even if there are any lint errors.
@@ -202,9 +214,9 @@ tslint accepts the following command-line options:
 
 #### Library
 
-```javascript
-const Linter = require("tslint");
-const fs = require("fs");
+```js
+import { Linter } from "tslint";
+import * as fs from "fs";
 
 const fileName = "Specify file name";
 const configuration = {
@@ -229,7 +241,7 @@ const result = linter.lint();
 
 To enable rules that work with the type checker, a TypeScript program object must be passed to the linter when using the programmatic API. Helper functions are provided to create a program from a `tsconfig.json` file. A project directory can be specified if project files do not lie in the same directory as the `tsconfig.json` file.
 
-```javascript
+```js
 const program = Linter.createProgram("tsconfig.json", "projectDir/");
 const files = Linter.getFileNames(program);
 const results = files.map(file => {
@@ -246,22 +258,19 @@ Core Rules
 -----
 <sup>[back to ToC &uarr;](#table-of-contents)</sup>
 
+_Rules_ encode logic for syntactic & semantic checks of TypeScript source code.
+
 [See the TSLint website for a list of core rules included in the `tslint` package.]
 (http://palantir.github.io/tslint/rules/)
 
 Core Formatters
 -----
+<sup>[back to ToC &uarr;](#table-of-contents)</sup>
 
-Formatters are used to format the results of the linter before outputting it to stdout or
-the configured output file. The core formatters are:
+_Formatters_ allow for transformation of lint results into various forms before outputting to stdout or a file.
 
-- __prose__: human readable (default)
-- __json__: machine readable
-- __verbose__: human readable (includes rule names)
-- __pmd__
-- __msbuild__
-- __checkstyle__
-- __vso__
+[See the TSLint website for a list of core formatters included in the `tslint` package.]
+(http://palantir.github.io/tslint/formatters/)
 
 Rule Flags
 -----
@@ -303,26 +312,30 @@ If we don't have all the rules you're looking for, you can either write your own
 
 TSLint ships with a set of core rules that can be configured. However, users are also allowed to write their own rules, which allows them to enforce specific behavior not covered by the core of TSLint. TSLint's internal rules are itself written to be pluggable, so adding a new rule is as simple as creating a new rule file named by convention. New rules can be written in either TypeScript or JavaScript; if written in TypeScript, the code must be compiled to JavaScript before invoking TSLint.
 
-Rule names are always camel-cased and *must* contain the suffix `Rule`. Let us take the example of how to write a new rule to forbid all import statements (you know, *for science*). Let us name the rule file `noImportsRule.ts`. Rules can be referenced in `tslint.json` in their kebab-case forms, so `"no-imports": true` would turn on the rule.
+Let us take the example of how to write a new rule to forbid all import statements (you know, *for science*). Let us name the rule file `noImportsRule.ts`. Rules are referenced in `tslint.json` with their kebab-cased identifer, so `"no-imports": true` would configure the rule.
 
-Now, let us first write the rule in TypeScript. A few things to note:
-- We import `tslint/lib/lint` to get the whole `Lint` namespace instead of just the `Linter` class.
-- The exported class must always be named `Rule` and extend from `Lint.Rules.AbstractRule`.
+__Important conventions__: 
+* Rule identifiers are always kebab-cased.
+* Rule files are always camel-cased (`camelCasedRule.ts`).
+* Rule files *must* contain the suffix `Rule`. 
+* The exported class must always be named `Rule` and extend from `Lint.Rules.AbstractRule`.
 
-```typescript
+Now, let us first write the rule in TypeScript:
+
+```ts
 import * as ts from "typescript";
-import * as Lint from "tslint/lib/lint";
+import { Rules, RuleFailure, RuleWalker } from "tslint";
 
-export class Rule extends Lint.Rules.AbstractRule {
+export class Rule extends Rules.AbstractRule {
     public static FAILURE_STRING = "import statement forbidden";
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+    public apply(sourceFile: ts.SourceFile): RuleFailure[] {
         return this.applyWithWalker(new NoImportsWalker(sourceFile, this.getOptions()));
     }
 }
 
 // The walker takes care of all the work.
-class NoImportsWalker extends Lint.RuleWalker {
+class NoImportsWalker extends RuleWalker {
     public visitImportDeclaration(node: ts.ImportDeclaration) {
         // create a failure at the current position
         this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
@@ -338,10 +351,12 @@ Given a walker, TypeScript's parser visits the AST using the visitor pattern. So
 We still need to hook up this new rule to TSLint. First make sure to compile `noImportsRule.ts`:
 
 ```bash
-tsc -m commonjs --noImplicitAny noImportsRule.ts node_modules/tslint/lib/tslint.d.ts
+tsc --noImplicitAny noImportsRule.ts
 ```
 
 Then, if using the CLI, provide the directory that contains this rule as an option to `--rules-dir`. If using TSLint as a library or via `grunt-tslint`, the `options` hash must contain `"rulesDirectory": "..."`. If you run the linter, you'll see that we have now successfully banned all import statements via TSLint!
+
+Finally, enable each custom rule in your [`tslint.json` config file](https://palantir.github.io/tslint/usage/tslint-json/) config file.
 
 Final notes:
 
@@ -356,11 +371,11 @@ Just like rules, additional formatters can also be supplied to TSLint via `--for
 
 ```typescript
 import * as ts from "typescript";
-import * as Lint from "tslint/lib/lint";
+import { Formatters, RuleFailure } from "tslint";
 
-export class Formatter extends Lint.Formatters.AbstractFormatter {
-    public format(failures: Lint.RuleFailure[]): string {
-        var failuresJSON = failures.map((failure: Lint.RuleFailure) => failure.toJson());
+export class Formatter extends Formatters.AbstractFormatter {
+    public format(failures: RuleFailure[]): string {
+        var failuresJSON = failures.map((failure: RuleFailure) => failure.toJson());
         return JSON.stringify(failuresJSON);
     }
 }
@@ -375,9 +390,10 @@ Development
 #### Quick Start
 
 ```bash
-git clone git@github.com:palantir/tslint.git
+git clone git@github.com:palantir/tslint.git --config core.autocrlf=input --config core.eol=lf
 npm install
-grunt
+npm run compile
+npm run test
 ```
 
 #### `next` branch
@@ -393,7 +409,7 @@ Creating a new release
 
 1. Bump the version number in `package.json` and `src/tslintMulti.ts`
 2. Add release notes in `CHANGELOG.md`
-3. Run `grunt` to build the latest sources
+3. `npm run verify` to build the latest sources
 4. Commit with message `Prepare release <version>`
 5. Run `npm publish`
 6. Create a git tag for the new release and push it ([see existing tags here](https://github.com/palantir/tslint/tags))

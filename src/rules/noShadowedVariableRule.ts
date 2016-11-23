@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -29,10 +29,13 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionExamples: ["true"],
         type: "functionality",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY = (name: string) => `Shadowed variable: '${name}'`;
+    public static FAILURE_STRING_FACTORY = (name: string) => {
+        return `Shadowed variable: '${name}'`;
+    }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new NoShadowedVariableWalker(sourceFile, this.getOptions()));
@@ -71,23 +74,23 @@ class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<ScopeInfo,
         this.visitBlock(node.block);
     }
 
-    public visitCallSignature(node: ts.SignatureDeclaration) {
+    public visitCallSignature(_node: ts.SignatureDeclaration) {
         // don't call super, we don't need to check parameter names in call signatures
     }
 
-    public visitFunctionType(node: ts.FunctionOrConstructorTypeNode) {
+    public visitFunctionType(_node: ts.FunctionOrConstructorTypeNode) {
         // don't call super, we don't need to check names in function types
     }
 
-    public visitConstructorType(node: ts.FunctionOrConstructorTypeNode) {
+    public visitConstructorType(_node: ts.FunctionOrConstructorTypeNode) {
         // don't call super, we don't need to check names in constructor types
     }
 
-    public visitIndexSignatureDeclaration(node: ts.SignatureDeclaration) {
+    public visitIndexSignatureDeclaration(_node: ts.SignatureDeclaration) {
         // don't call super, we don't want to walk index signatures
     }
 
-    public visitMethodSignature(node: ts.SignatureDeclaration) {
+    public visitMethodSignature(_node: ts.SignatureDeclaration) {
         // don't call super, we don't want to walk method signatures either
     }
 
@@ -101,7 +104,7 @@ class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<ScopeInfo,
         super.visitParameterDeclaration(node);
     }
 
-    public visitTypeLiteral(node: ts.TypeLiteralNode) {
+    public visitTypeLiteral(_node: ts.TypeLiteralNode) {
         // don't call super, we don't want to walk the inside of type nodes
     }
 
