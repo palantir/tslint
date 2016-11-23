@@ -116,7 +116,7 @@ Options:
 ```
 -c, --config          configuration file
 -e, --exclude         exclude globs from path expansion
---fix                 fixes linting errors for select rules (his may overwrite linted files)
+--fix                 fixes linting errors for select rules (this may overwrite linted files)
 --force               return status code 0 even if there are lint errors
 -h, --help            display detailed help
 -i, --init            generate a tslint.json config file in the current working directory

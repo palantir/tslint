@@ -19,6 +19,57 @@ import * as ts from "typescript";
 
 import {createCompilerOptions} from "./utils";
 
+interface LanguageServiceEditableHost extends ts.LanguageServiceHost {
+    editFile(fileName: string, newContent: string): void;
+}
+
+export function wrapProgram(program: ts.Program): ts.LanguageService {
+    const files: {[name: string]: string} = {};
+    const fileVersions: {[name: string]: number} = {};
+    const host: LanguageServiceEditableHost = {
+            getCompilationSettings: () => program.getCompilerOptions(),
+            getCurrentDirectory: () => program.getCurrentDirectory(),
+            getDefaultLibFileName: () => null,
+            getScriptFileNames: () => program.getSourceFiles().map((sf) => sf.fileName),
+            getScriptSnapshot: (name: string) => {
+                if (files.hasOwnProperty(name)) {
+                    return ts.ScriptSnapshot.fromString(files[name]);
+                }
+                if (!program.getSourceFile(name)) {
+                    return null;
+                }
+                return ts.ScriptSnapshot.fromString(program.getSourceFile(name).getFullText());
+            },
+            getScriptVersion: (name: string) => fileVersions.hasOwnProperty(name) ? fileVersions[name] + "" : "1",
+            log: () => { /* */ },
+            editFile(fileName: string, newContent: string) {
+                files[fileName] = newContent;
+                if (fileVersions.hasOwnProperty(fileName)) {
+                    fileVersions[fileName]++;
+                } else {
+                    fileVersions[fileName] = 0;
+                }
+            },
+        };
+    const langSvc = ts.createLanguageService(host, ts.createDocumentRegistry());
+    (langSvc as any).editFile = host.editFile;
+    return langSvc;
+}
+
+export function checkEdit(ls: ts.LanguageService, sf: ts.SourceFile, newText: string) {
+    if (ls.hasOwnProperty("editFile")) {
+        const host = ls as any as LanguageServiceEditableHost;
+        host.editFile(sf.fileName, newText);
+        const newProgram = ls.getProgram();
+        const newSf = newProgram.getSourceFile(sf.fileName);
+        const newDiags = ts.getPreEmitDiagnostics(newProgram, newSf);
+        // revert
+        host.editFile(sf.fileName, sf.getFullText());
+        return newDiags;
+    }
+    return [];
+}
+
 export function createLanguageServiceHost(fileName: string, source: string): ts.LanguageServiceHost {
     return {
         getCompilationSettings: () => createCompilerOptions(),

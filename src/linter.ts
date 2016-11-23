@@ -31,6 +31,7 @@ import { EnableDisableRulesWalker } from "./enableDisableRules";
 import { findFormatter } from "./formatterLoader";
 import { ILinterOptions, LintResult } from "./index";
 import { IFormatter } from "./language/formatter/formatter";
+import { createLanguageService, wrapProgram } from "./language/languageServiceHost";
 import { Fix, IRule, RuleFailure } from "./language/rule/rule";
 import { TypedRule } from "./language/rule/typedRule";
 import * as utils from "./language/utils";
@@ -41,7 +42,7 @@ import { arrayify, dedent } from "./utils";
  * Linter that can lint multiple files in consecutive runs.
  */
 class Linter {
-    public static VERSION = "4.0.1";
+    public static VERSION = "4.0.2";
 
     public static findConfiguration = findConfiguration;
     public static findConfigurationPath = findConfigurationPath;
@@ -50,6 +51,7 @@ class Linter {
 
     private failures: RuleFailure[] = [];
     private fixes: RuleFailure[] = [];
+    private languageService: ts.LanguageService;
 
     /**
      * Creates a TypeScript program object from a tsconfig.json file path and optional project directory.
@@ -92,6 +94,10 @@ class Linter {
         if ((<any> options).configuration != null) {
             throw new Error("ILinterOptions does not contain the property `configuration` as of version 4. " +
                 "Did you mean to pass the `IConfigurationFile` object to lint() ? ");
+        }
+
+        if (program) {
+            this.languageService = wrapProgram(program);
         }
     }
 
@@ -158,9 +164,9 @@ class Linter {
     private applyRule(rule: IRule, sourceFile: ts.SourceFile) {
         let ruleFailures: RuleFailure[] = [];
         if (this.program && TypedRule.isTypedRule(rule)) {
-            ruleFailures = rule.applyWithProgram(sourceFile, this.program);
+            ruleFailures = rule.applyWithProgram(sourceFile, this.languageService);
         } else {
-            ruleFailures = rule.apply(sourceFile);
+            ruleFailures = rule.apply(sourceFile, this.languageService);
         }
         let fileFailures: RuleFailure[] = [];
         for (let ruleFailure of ruleFailures) {
@@ -201,6 +207,7 @@ class Linter {
             }
         } else {
             sourceFile = utils.getSourceFile(fileName, source);
+            this.languageService = createLanguageService(fileName, source);
         }
 
         if (sourceFile === undefined) {
