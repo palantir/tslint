@@ -40,23 +40,6 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class PromiseAsyncWalker extends Lint.RuleWalker {
-    private test(node: ts.FunctionExpression|ts.MethodDeclaration): void {
-        const isAsync   = node.getText().split(/[\(=]/)[0].match(/\s?async\s+?/) !== null;
-        const isPromise = node.type.getText().indexOf("Promise<") === 0;
-
-        if (isAsync || !isPromise) {
-            return;
-        }
-
-        this.addFailure(
-            this.createFailure(
-                node.getStart(),
-                node.getWidth(),
-                Rule.FAILURE_STRING
-            )
-        );
-    }
-
     public visitFunctionExpression(node: ts.FunctionExpression): void {
         this.test(node);
         super.visitFunctionExpression(node);
@@ -65,5 +48,16 @@ class PromiseAsyncWalker extends Lint.RuleWalker {
     public visitMethodDeclaration(node: ts.MethodDeclaration): void {
         this.test(node);
         super.visitMethodDeclaration(node);
+    }
+
+    private test(node: ts.FunctionExpression|ts.MethodDeclaration): void {
+        const isAsync   = node.getText().split(/[\(=]/)[0].match(/\s?async\s+?/) !== null;
+        const isPromise = node.type.getText().indexOf("Promise<") === 0;
+
+        if (isAsync || !isPromise) {
+            return;
+        }
+
+        this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
     }
 }
