@@ -4,9 +4,9 @@ Change Log
 v4.0.2
 ---
 * [enhancement] Don't exit when a rule can't be found. Print as a warning instead (#1771)
+* [api-change] Allow 3rd party apps to see exception when the config is invalid (#1764)
 * [bugfix] Don't flag a property named as empty string as not needing quotes in an object literal (#1762)
 * [bugfix] Report correct number of fixes done by --fix (#1767)
-* [bugfix] Allow 3rd party apps to see exception when the config is invalid (#1764)
 * [bugfix] Fix false positives and exceptions in `prefer-for-of` (#1758)
 * [bugfix] Fix `adjacent-overload-signatures` false positive when a static function has the same name (#1772)
 
