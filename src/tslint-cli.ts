@@ -54,7 +54,7 @@ let processed = optimist
             type: "string",
         },
         "fix": {
-            describe: "Fixes linting errors for select rules. This may overwrite linted files",
+            describe: "fixes linting errors for select rules (this may overwrite linted files)",
             type: "boolean",
         },
         "force": {
