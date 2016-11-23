@@ -35,7 +35,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "functions that return promises must be async";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new PreferForOfWalker(sourceFile, this.getOptions()));
+        return this.applyWithWalker(new PromiseAsyncWalker(sourceFile, this.getOptions()));
     }
 }
 
