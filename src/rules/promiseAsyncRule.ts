@@ -51,7 +51,7 @@ class PromiseAsyncWalker extends Lint.RuleWalker {
     }
 
     private test(node: ts.FunctionExpression|ts.MethodDeclaration): void {
-        const isAsync   = node.getText().split(/[\(=]/)[0].match(/\s?async\s+?/) !== null;
+        const isAsync   = node.getText().split(/[\(=]/)[0].match(/(^|\s)async($|\s)/) !== null;
         const isPromise = node.type.getText().indexOf("Promise<") === 0;
 
         if (isAsync || !isPromise) {
