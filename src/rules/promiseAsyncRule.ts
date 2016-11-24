@@ -18,7 +18,7 @@
 import * as ts from "typescript";
 import * as Lint from "../index";
 
-export class Rule extends Lint.Rules.AbstractRule {
+export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "promise-functions-async",
@@ -34,12 +34,12 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static FAILURE_STRING = "functions that return promises must be async";
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new PromiseAsyncWalker(sourceFile, this.getOptions()));
+    public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+        return this.applyWithWalker(new PromiseAsyncWalker(sourceFile, this.getOptions(), program));
     }
 }
 
-class PromiseAsyncWalker extends Lint.RuleWalker {
+class PromiseAsyncWalker extends Lint.ProgramAwareRuleWalker {
     public visitFunctionExpression(node: ts.FunctionExpression): void {
         this.test(node);
         super.visitFunctionExpression(node);
@@ -51,8 +51,10 @@ class PromiseAsyncWalker extends Lint.RuleWalker {
     }
 
     private test(node: ts.FunctionExpression|ts.MethodDeclaration): void {
-        const isAsync   = Lint.hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword);
-        const isPromise = node.type.getText().indexOf("Promise<") === 0;
+        const tc = this.getTypeChecker();
+
+        const isAsync = Lint.hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword);
+        const isPromise = tc.typeToString(tc.getTypeAtLocation(node)).indexOf("Promise<") === 0;
 
         if (isAsync || !isPromise) {
             return;
