@@ -1,32 +1,20 @@
 {
   "extends": "tslint:latest",
   "rules": {
-    "interface-name": {
-      "level": "off"
-    },
-    "max-classes-per-file": {
-      "level": "off"
-    },
-    "max-line-length": {
-      "level": "error",
-      "options": 140
-    },
-    "member-ordering": {
-      "level": "error",
-      "options": [
-        "public-before-private",
-        "static-before-instance",
-        "variables-before-functions"
-      ]
-    },
-    "variable-name": {
-      "level": "error",
-      "options" : [
-        "ban-keywords",
-        "check-format",
-        "allow-leading-underscore",
-        "allow-pascal-case"
-      ]
-    }
+    "interface-name": false,
+    "max-classes-per-file": false,
+    "max-line-length": [true, 140],
+    "member-ordering": [true,
+      "public-before-private",
+      "static-before-instance",
+      "variables-before-functions"
+    ],
+    "no-unused-variable": false,
+    "variable-name": [true,
+      "ban-keywords",
+      "check-format",
+      "allow-leading-underscore",
+      "allow-pascal-case"
+    ]
   }
 }
