@@ -74,7 +74,6 @@ class PreferForOfWalker extends Lint.RuleWalker {
         if (indexVariableName != null) {
             const incrementorState = this.incrementorMap[indexVariableName];
             if (incrementorState.onlyArrayAccess) {
-                    // Find `array[i]`-like usages by building up a regex 
                 const length = incrementorState.endIncrementPos - node.getStart() + 1;
                 const failure = this.createFailure(node.getStart(), length, Rule.FAILURE_STRING);
                 this.addFailure(failure);
