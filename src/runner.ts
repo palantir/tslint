@@ -49,12 +49,12 @@ export interface IRunnerOptions {
     /**
      * Whether to return status code 0 even if there are lint errors.
      */
-    force?: boolean;
+    force: boolean;
 
     /**
      * Whether to fixes linting errors for select rules. This may overwrite linted files.
      */
-    fix?: boolean;
+    fix: boolean;
 
     /**
      * Output format.
@@ -69,7 +69,7 @@ export interface IRunnerOptions {
     /**
      * Whether to generate a tslint.json config file in the current working directory.
      */
-    init?: boolean;
+    init: boolean;
 
     /**
      * Output file path.
@@ -94,12 +94,12 @@ export interface IRunnerOptions {
     /**
      * Whether to enable type checking when linting a project.
      */
-    typeCheck?: boolean;
+    typeCheck: boolean;
 
     /**
      * Current TSLint version.
      */
-    version?: boolean;
+    version: boolean;
 }
 
 export class Runner {
@@ -110,13 +110,13 @@ export class Runner {
     constructor(private options: IRunnerOptions, private outputStream: NodeJS.WritableStream) { }
 
     public run(onComplete: (status: number) => void) {
-        if (this.options.version != null) {
+        if (this.options.version) {
             this.outputStream.write(Linter.VERSION + "\n");
             onComplete(0);
             return;
         }
 
-        if (this.options.init != null) {
+        if (this.options.init) {
             if (fs.existsSync(CONFIG_FILENAME)) {
                 console.error(`Cannot generate ${CONFIG_FILENAME}: file already exists`);
                 onComplete(1);
@@ -129,7 +129,7 @@ export class Runner {
             return;
         }
 
-        if (this.options.test != null) {
+        if (this.options.test) {
             const results = runTest(this.options.test, this.options.rulesDirectory);
             const didAllTestsPass = consoleTestResultHandler(results);
             onComplete(didAllTestsPass ? 0 : 1);
