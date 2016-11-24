@@ -54,8 +54,14 @@ class PromiseAsyncWalker extends Lint.ProgramAwareRuleWalker {
     private test(node: ts.FunctionExpression|ts.MethodDeclaration): void {
         const tc = this.getTypeChecker();
 
+        const returnType = tc.typeToString(
+            tc.getReturnTypeOfSignature(
+                tc.getTypeAtLocation(node).getCallSignatures()[0]
+            )
+        );
+
         const isAsync = Lint.hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword);
-        const isPromise = tc.typeToString(tc.getTypeAtLocation(node)).indexOf("Promise<") === 0;
+        const isPromise = returnType.indexOf("Promise<") === 0;
 
         if (isAsync || !isPromise) {
             return;
