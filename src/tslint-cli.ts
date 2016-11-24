@@ -36,6 +36,7 @@ const processed = optimist
         "c": {
             alias: "config",
             describe: "configuration file",
+            type: "string",
         },
         "e": {
             alias: "exclude",
@@ -53,40 +54,50 @@ const processed = optimist
         "h": {
             alias: "help",
             describe: "display detailed help",
+            type: "boolean",
         },
         "i": {
             alias: "init",
             describe: "generate a tslint.json config file in the current working directory",
+            type: "boolean",
         },
         "o": {
             alias: "out",
             describe: "output file",
+            type: "string",
         },
         "project": {
             describe: "tsconfig.json file",
+            type: "string",
         },
         "r": {
             alias: "rules-dir",
             describe: "rules directory",
+            type: "string",
         },
         "s": {
             alias: "formatters-dir",
             describe: "formatters directory",
+            type: "string",
         },
         "t": {
             alias: "format",
             default: "prose",
             describe: "output format (prose, json, stylish, verbose, pmd, msbuild, checkstyle, vso, fileslist)",
+            type: "string",
         },
         "test": {
             describe: "test that tslint produces the correct output for the specified directory",
+            type: "string",
         },
         "type-check": {
             describe: "enable type checking when linting a project",
+            type: "boolean",
         },
         "v": {
             alias: "version",
             describe: "current version",
+            type: "boolean",
         },
     });
 const argv = processed.argv;
@@ -101,7 +112,7 @@ if (argv.o != null) {
     outputStream = process.stdout;
 }
 
-if ("help" in argv) {
+if (argv.help) {
     outputStream.write(processed.help());
     const outputString = `
 tslint accepts the following commandline options:
