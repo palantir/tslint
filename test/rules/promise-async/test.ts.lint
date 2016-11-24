@@ -1,0 +1,38 @@
+const nonAsyncPromiseFunction = function(p: Promise<void>) { return p; };
+                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    [0]
+
+// 'async' 'Promise'-returning functions are allowed
+const asyncPromiseFunction = async function(p: Promise<void>) { return p; };
+
+// non-'async' non-'Promise'-returning functions are allowed
+const nonAsyncNonPromiseFunction = function(n: number) { return n; };
+
+const nonAsyncPromiseArrowFunction = (p: Promise<void>) => p;
+                                     ~~~~~~~~~~~~~~~~~~~~~~~    [1]
+
+// 'async' 'Promise'-returning arrow functions are allowed
+const asyncPromiseArrowFunction = async (p: Promise<void>) => p;
+
+// non-'async' non-'Promise'-returning arrow functions are allowed
+const nonAsyncNonPromiseArrowFunction = (n: number) => n;
+
+class Test {
+    public nonAsyncPromiseMethod(p: Promise<void>) {
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    [1]
+        return p;
+    }
+
+    // 'async' 'Promise'-returning methods are allowed
+    public async asyncPromiseMethod(p: Promise<void>) {
+        return p;
+    }
+
+    // non-'async' non-'Promise'-returning methods are allowed
+    public async nonAsyncNonPromiseMethod(n: number) {
+        return n;
+    }
+}
+
+[0]: Non-'async' 'Promise'-returning functions are not allowed.
+[0]: Non-'async' 'Promise'-returning arrow functions are not allowed.
+[2]: Non-'async' 'Promise'-returning methods are not allowed.
