@@ -46,6 +46,8 @@ export class Rule extends Lint.Rules.AbstractRule {
 type VisitedVariables = {[varName: string]: boolean};
 
 class NoUseBeforeDeclareWalker extends Lint.ScopeAwareRuleWalker<VisitedVariables> {
+    private importedPropertiesPositions: number[] = [];
+
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions, private languageService: ts.LanguageService) {
         super(sourceFile, options);
     }
@@ -89,6 +91,9 @@ class NoUseBeforeDeclareWalker extends Lint.ScopeAwareRuleWalker<VisitedVariable
 
     public visitNamedImports(node: ts.NamedImports) {
         for (let namedImport of node.elements) {
+            if (namedImport.propertyName != null) {
+                this.saveImportedPropertiesPositions(namedImport.propertyName.getStart());
+            }
             this.validateUsageForVariable(namedImport.name.text, namedImport.name.getStart());
         }
         super.visitNamedImports(node);
@@ -120,12 +125,20 @@ class NoUseBeforeDeclareWalker extends Lint.ScopeAwareRuleWalker<VisitedVariable
             for (let highlight of highlights) {
                 for (let highlightSpan of highlight.highlightSpans) {
                     const referencePosition = highlightSpan.textSpan.start;
-                    if (referencePosition < position) {
+                    if (referencePosition < position && !this.isImportedPropertyName(referencePosition)) {
                         const failureString = Rule.FAILURE_STRING_PREFIX + name + Rule.FAILURE_STRING_POSTFIX;
                         this.addFailure(this.createFailure(referencePosition, name.length, failureString));
                     }
                 }
             }
         }
+    }
+
+    private saveImportedPropertiesPositions(position: number): void {
+        this.importedPropertiesPositions.push(position);
+    }
+
+    private isImportedPropertyName(position: number): boolean {
+        return this.importedPropertiesPositions.indexOf(position) !== -1;
     }
 }
