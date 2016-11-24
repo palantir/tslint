@@ -16,23 +16,11 @@
  */
 
 import * as fs from "fs";
-import * as glob from "glob";
 import * as optimist from "optimist";
-import * as path from "path";
-import * as ts from "typescript";
 
-import {
-    CONFIG_FILENAME,
-    DEFAULT_CONFIG,
-    findConfiguration,
-} from "./configuration";
-import { FatalError } from "./error";
-import { RuleLevel } from "./language/rule/rule";
-import * as Linter from "./linter";
-import { consoleTestResultHandler, runTest } from "./test";
-import { updateNotifierCheck } from "./updateNotifier";
+import { IRunnerOptions, Runner } from "./runner";
 
-let processed = optimist
+const processed = optimist
     .usage("Usage: $0 [options] file ...")
     .check((argv: any) => {
         // at least one of file, help, version, project or unqualified argument must be present
@@ -48,6 +36,7 @@ let processed = optimist
         "c": {
             alias: "config",
             describe: "configuration file",
+            type: "string",
         },
         "e": {
             alias: "exclude",
@@ -55,7 +44,7 @@ let processed = optimist
             type: "string",
         },
         "fix": {
-            describe: "Fixes linting errors for select rules. This may overwrite linted files",
+            describe: "fixes linting errors for select rules (this may overwrite linted files)",
             type: "boolean",
         },
         "force": {
@@ -65,45 +54,55 @@ let processed = optimist
         "h": {
             alias: "help",
             describe: "display detailed help",
+            type: "boolean",
         },
         "i": {
             alias: "init",
             describe: "generate a tslint.json config file in the current working directory",
+            type: "boolean",
         },
         "o": {
             alias: "out",
             describe: "output file",
+            type: "string",
         },
         "project": {
             describe: "tsconfig.json file",
+            type: "string",
         },
         "r": {
             alias: "rules-dir",
             describe: "rules directory",
+            type: "string",
         },
         "s": {
             alias: "formatters-dir",
             describe: "formatters directory",
+            type: "string",
         },
         "t": {
             alias: "format",
             default: "prose",
             describe: "output format (prose, json, stylish, verbose, pmd, msbuild, checkstyle, vso, fileslist)",
+            type: "string",
         },
         "test": {
             describe: "test that tslint produces the correct output for the specified directory",
+            type: "string",
         },
         "type-check": {
             describe: "enable type checking when linting a project",
+            type: "boolean",
         },
         "v": {
             alias: "version",
             describe: "current version",
+            type: "boolean",
         },
     });
 const argv = processed.argv;
 
-let outputStream: any;
+let outputStream: NodeJS.WritableStream;
 if (argv.o != null) {
     outputStream = fs.createWriteStream(argv.o, {
         flags: "w+",
@@ -113,29 +112,7 @@ if (argv.o != null) {
     outputStream = process.stdout;
 }
 
-if (argv.v != null) {
-    outputStream.write(Linter.VERSION + "\n");
-    process.exit(0);
-}
-
-if (argv.i != null) {
-    if (fs.existsSync(CONFIG_FILENAME)) {
-        console.error(`Cannot generate ${CONFIG_FILENAME}: file already exists`);
-        process.exit(1);
-    }
-
-    const tslintJSON = JSON.stringify(DEFAULT_CONFIG, undefined, "    ");
-    fs.writeFileSync(CONFIG_FILENAME, tslintJSON);
-    process.exit(0);
-}
-
-if (argv.test != null) {
-    const results = runTest(argv.test, argv.r);
-    const didAllTestsPass = consoleTestResultHandler(results);
-    process.exit(didAllTestsPass ? 0 : 1);
-}
-
-if ("help" in argv) {
+if (argv.help) {
     outputStream.write(processed.help());
     const outputString = `
 tslint accepts the following commandline options:
@@ -221,127 +198,22 @@ tslint accepts the following commandline options:
     process.exit(0);
 }
 
-// when provided, it should point to an existing location
-if (argv.c && !fs.existsSync(argv.c)) {
-    console.error("Invalid option for configuration: " + argv.c);
-    process.exit(1);
-}
-const possibleConfigAbsolutePath = argv.c != null ? path.resolve(argv.c) : null;
-
-const processFiles = (files: string[], program?: ts.Program) => {
-
-    const linter = new Linter({
-        fix: argv.fix,
-        formatter: argv.t,
-        formattersDirectory: argv.s || "",
-        rulesDirectory: argv.r || "",
-    }, program);
-
-    for (const file of files) {
-        if (!fs.existsSync(file)) {
-            console.error(`Unable to open file: ${file}`);
-            process.exit(1);
-        }
-
-        const buffer = new Buffer(256);
-        buffer.fill(0);
-        const fd = fs.openSync(file, "r");
-        try {
-            fs.readSync(fd, buffer, 0, 256, null);
-            if (buffer.readInt8(0) === 0x47 && buffer.readInt8(188) === 0x47) {
-                // MPEG transport streams use the '.ts' file extension. They use 0x47 as the frame
-                // separator, repeating every 188 bytes. It is unlikely to find that pattern in
-                // TypeScript source, so tslint ignores files with the specific pattern.
-                console.warn(`${file}: ignoring MPEG transport stream`);
-                return;
-            }
-        } finally {
-            fs.closeSync(fd);
-        }
-
-        const contents = fs.readFileSync(file, "utf8");
-        const configLoad = findConfiguration(possibleConfigAbsolutePath, file);
-        linter.lint(file, contents, configLoad.results);
-    }
-
-    const lintResult = linter.getResult();
-
-    outputStream.write(lintResult.output, () => {
-        if (lintResult.failureCount > 0) {
-            const hasErrors = lintResult.failures.some((failure) => {
-                return failure.getRuleLevel() === RuleLevel.ERROR;
-            });
-            if (hasErrors) {
-                process.exit(argv.force ? 0 : 2);
-            } else {
-                process.exit(0);
-            }
-        }
-    });
-
-    if (lintResult.format === "prose") {
-        // Check to see if there are any updates available
-        updateNotifierCheck();
-    }
+const options: IRunnerOptions = {
+    config: argv.c,
+    exclude: argv.exclude,
+    files: argv._,
+    fix: argv.fix,
+    force: argv.force,
+    format: argv.t,
+    formattersDirectory: argv.s,
+    init: argv.init,
+    out: argv.out,
+    project: argv.project,
+    rulesDirectory: argv.r,
+    test: argv.test,
+    typeCheck: argv["type-check"],
+    version: argv.v,
 };
 
-// if both files and tsconfig are present, use files
-let files = argv._;
-let program: ts.Program;
-
-if (argv.project != null) {
-    if (!fs.existsSync(argv.project)) {
-        console.error("Invalid option for project: " + argv.project);
-        process.exit(1);
-    }
-    program = Linter.createProgram(argv.project, path.dirname(argv.project));
-    if (files.length === 0) {
-        files = Linter.getFileNames(program);
-    }
-    if (argv["type-check"]) {
-        // if type checking, run the type checker
-        const diagnostics = ts.getPreEmitDiagnostics(program);
-        if (diagnostics.length > 0) {
-            const messages = diagnostics.map((diag) => {
-                // emit any error messages
-                let message = ts.DiagnosticCategory[diag.category];
-                if (diag.file) {
-                    const {line, character} = diag.file.getLineAndCharacterOfPosition(diag.start);
-                    message += ` at ${diag.file.fileName}:${line + 1}:${character + 1}:`;
-                }
-                message += " " + ts.flattenDiagnosticMessageText(diag.messageText, "\n");
-                return message;
-            });
-            throw new Error(messages.join("\n"));
-        }
-    } else {
-        // if not type checking, we don't need to pass in a program object
-        program = undefined;
-    }
-}
-
-const trimSingleQuotes = (str: string) => str.replace(/^'|'$/g, "");
-
-let ignorePatterns: string[] = [];
-if (argv.e) {
-    const excludeArguments: string[] = Array.isArray(argv.e) ? argv.e : [argv.e];
-
-    ignorePatterns = excludeArguments.map(trimSingleQuotes);
-}
-
-files = files
-    // remove single quotes which break matching on Windows when glob is passed in single quotes
-    .map(trimSingleQuotes)
-    .map((file: string) => glob.sync(file, { ignore: ignorePatterns, nodir: true }))
-    .reduce((a: string[], b: string[]) => a.concat(b));
-
-try {
-    processFiles(files, program);
-} catch (error) {
-    if (error.name === FatalError.NAME) {
-        console.error(error.message);
-        process.exit(1);
-    }
-    // rethrow unhandled error
-    throw error;
-}
+new Runner(options, outputStream)
+    .run((status: number) => process.exit(status));

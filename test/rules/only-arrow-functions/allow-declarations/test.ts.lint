@@ -20,4 +20,7 @@ function () {
 function* generator() {}
 let generator = function*() {}
 
+function hasThisParameter(this) {}
+let hasThisParameter = function(this) {}
+
 [0]: non-arrow functions are forbidden
