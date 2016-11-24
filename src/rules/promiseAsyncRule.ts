@@ -56,8 +56,8 @@ class PromiseAsyncWalker extends Lint.ProgramAwareRuleWalker {
 
         const returnType = tc.typeToString(
             tc.getReturnTypeOfSignature(
-                tc.getTypeAtLocation(node).getCallSignatures()[0]
-            )
+                tc.getTypeAtLocation(node).getCallSignatures()[0],
+            ),
         );
 
         const isAsync = Lint.hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword);
