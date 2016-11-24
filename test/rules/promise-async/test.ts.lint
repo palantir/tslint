@@ -18,7 +18,7 @@ const nonAsyncNonPromiseArrowFunction = (n: number) => n;
 
 class Test {
     public nonAsyncPromiseMethod(p: Promise<void>) {
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    [1]
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    [2]
         return p;
     }
 
@@ -28,11 +28,11 @@ class Test {
     }
 
     // non-'async' non-'Promise'-returning methods are allowed
-    public async nonAsyncNonPromiseMethod(n: number) {
+    public nonAsyncNonPromiseMethod(n: number) {
         return n;
     }
 }
 
 [0]: Non-'async' 'Promise'-returning functions are not allowed.
-[0]: Non-'async' 'Promise'-returning arrow functions are not allowed.
+[1]: Non-'async' 'Promise'-returning arrow functions are not allowed.
 [2]: Non-'async' 'Promise'-returning methods are not allowed.
