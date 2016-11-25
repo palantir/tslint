@@ -151,6 +151,7 @@ export class Runner {
             if (!fs.existsSync(this.options.project)) {
                 console.error("Invalid option for project: " + this.options.project);
                 onComplete(1);
+                return;
             }
             program = Linter.createProgram(this.options.project, path.dirname(this.options.project));
             if (files.length === 0) {
@@ -216,6 +217,7 @@ export class Runner {
             if (!fs.existsSync(file)) {
                 console.error(`Unable to open file: ${file}`);
                 onComplete(1);
+                return;
             }
 
             const buffer = new Buffer(256);
@@ -244,6 +246,8 @@ export class Runner {
         this.outputStream.write(lintResult.output, () => {
             if (lintResult.failureCount > 0) {
                 onComplete(this.options.force ? 0 : 2);
+            } else {
+                onComplete(0);
             }
         });
 
