@@ -49,12 +49,12 @@ export interface IRunnerOptions {
     /**
      * Whether to return status code 0 even if there are lint errors.
      */
-    force: boolean;
+    force?: boolean;
 
     /**
      * Whether to fixes linting errors for select rules. This may overwrite linted files.
      */
-    fix: boolean;
+    fix?: boolean;
 
     /**
      * Output format.
@@ -69,7 +69,7 @@ export interface IRunnerOptions {
     /**
      * Whether to generate a tslint.json config file in the current working directory.
      */
-    init: boolean;
+    init?: boolean;
 
     /**
      * Output file path.
@@ -94,12 +94,12 @@ export interface IRunnerOptions {
     /**
      * Whether to enable type checking when linting a project.
      */
-    typeCheck: boolean;
+    typeCheck?: boolean;
 
     /**
-     * Current TSLint version.
+     * Whether to show the current TSLint version.
      */
-    version: boolean;
+    version?: boolean;
 }
 
 export class Runner {
