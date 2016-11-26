@@ -7,7 +7,8 @@ const nonAsyncPromiseFunctionExpressionB = function() { return new Promise<void>
                                            ~~~~~~~~~~    [0]
 
 // 'async' 'Promise'-returning function expressions are allowed
-const asyncPromiseFunctionExpression = async function(p: Promise<void>) { return p; };
+const asyncPromiseFunctionExpressionA = async function(p: Promise<void>) { return p; };
+const asyncPromiseFunctionExpressionB = async function() { return new Promise<void>(); };
 
 // non-'async' non-'Promise'-returning function expressions are allowed
 const nonAsyncNonPromiseFunctionExpression = function(n: number) { return n; };
@@ -19,7 +20,8 @@ function nonAsyncPromiseFunctionDeclarationB() { return new Promise<void>(); }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    [0]
 
 // 'async' 'Promise'-returning function declarations are allowed
-async function asyncPromiseFunctionDeclaration(p: Promise<void>) { return p; }
+async function asyncPromiseFunctionDeclarationA(p: Promise<void>) { return p; }
+async function asyncPromiseFunctionDeclarationB() { return new Promise<void>(); }
 
 // non-'async' non-'Promise'-returning function declarations are allowed
 function nonAsyncNonPromiseFunctionDeclaration(n: number) { return n; }
@@ -31,7 +33,8 @@ const nonAsyncPromiseArrowFunctionB = () => new Promise<void>();
                                       ~~    [0]
 
 // 'async' 'Promise'-returning arrow functions are allowed
-const asyncPromiseArrowFunction = async (p: Promise<void>) => p;
+const asyncPromiseArrowFunctionA = async (p: Promise<void>) => p;
+const asyncPromiseArrowFunctionB = async () => new Promise<void>();
 
 // non-'async' non-'Promise'-returning arrow functions are allowed
 const nonAsyncNonPromiseArrowFunction = (n: number) => n;
@@ -48,8 +51,11 @@ class Test {
     }
 
     // 'async' 'Promise'-returning methods are allowed
-    public async asyncPromiseMethod(p: Promise<void>) {
+    public async asyncPromiseMethodA(p: Promise<void>) {
         return p;
+    }
+    public async asyncPromiseMethodB() {
+        return new Promise<void>();
     }
 
     // non-'async' non-'Promise'-returning methods are allowed
