@@ -1,0 +1,65 @@
+declare class Promise<T>{}
+
+const nonAsyncPromiseFunctionExpressionA = function(p: Promise<void>) { return p; };
+                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    [0]
+
+const nonAsyncPromiseFunctionExpressionB = function() { return new Promise<void>(); };
+                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    [0]
+
+// 'async' 'Promise'-returning function expressions are allowed
+const asyncPromiseFunctionExpression = async function(p: Promise<void>) { return p; };
+
+// non-'async' non-'Promise'-returning function expressions are allowed
+const nonAsyncNonPromiseFunctionExpression = function(n: number) { return n; };
+
+function nonAsyncPromiseFunctionDeclarationA(p: Promise<void>) { return p; }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    [0]
+
+function nonAsyncPromiseFunctionDeclarationB() { return new Promise<void>(); }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    [0]
+
+// 'async' 'Promise'-returning function declarations are allowed
+async function asyncPromiseFunctionDeclaration(p: Promise<void>) { return p; }
+
+// non-'async' non-'Promise'-returning function declarations are allowed
+function nonAsyncNonPromiseFunctionDeclaration(n: number) { return n; }
+
+const nonAsyncPromiseArrowFunctionA = (p: Promise<void>) => p;
+                                      ~~~~~~~~~~~~~~~~~~~~~~~    [0]
+
+const nonAsyncPromiseArrowFunctionB = () => new Promise<void>();
+                                      ~~~~~~~~~~~~~~~~~~~~~~~~~    [0]
+
+// 'async' 'Promise'-returning arrow functions are allowed
+const asyncPromiseArrowFunction = async (p: Promise<void>) => p;
+
+// non-'async' non-'Promise'-returning arrow functions are allowed
+const nonAsyncNonPromiseArrowFunction = (n: number) => n;
+
+class Test {
+    public nonAsyncPromiseMethodA(p: Promise<void>) {
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        return p;
+~~~~~~~~~~~~~~~~~
+    }
+~~~~~    [0]
+
+    public nonAsyncPromiseMethodB() {
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        return new Promise<void>();
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    }
+~~~~~    [0]
+
+    // 'async' 'Promise'-returning methods are allowed
+    public async asyncPromiseMethod(p: Promise<void>) {
+        return p;
+    }
+
+    // non-'async' non-'Promise'-returning methods are allowed
+    public nonAsyncNonPromiseMethod(n: number) {
+        return n;
+    }
+}
+
+[0]: functions that return promises must be async

@@ -21,13 +21,18 @@ import * as Lint from "../index";
 export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
-        ruleName: "promise-functions-async",
+        ruleName: "promise-function-async",
         description: "Requires any function or method that returns a promise to be marked async.",
-        rationale: "Ensures that a function can only either return a rejected promise or throw an Error object.",
+        rationale: Lint.Utils.dedent`
+            Ensures that each function is only capable of 1) returning a rejected promise, or 2)
+            throwing an Error object. In contrast, non-\`async\` \`Promise\`-returning functions
+            are technically capable of either. This practice removes a requirement for consuming
+            code to handle both cases.
+        `,
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: ["true"],
-        type: "functionality",
+        type: "typescript",
         typescriptOnly: false,
         requiresTypeInfo: true,
     };
@@ -41,17 +46,27 @@ export class Rule extends Lint.Rules.TypedRule {
 }
 
 class PromiseAsyncWalker extends Lint.ProgramAwareRuleWalker {
-    public visitFunctionExpression(node: ts.FunctionExpression): void {
+    public visitArrowFunction(node: ts.ArrowFunction) {
+        this.test(node);
+        super.visitArrowFunction(node);
+    }
+
+    public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
+        this.test(node);
+        super.visitFunctionDeclaration(node);
+    }
+
+    public visitFunctionExpression(node: ts.FunctionExpression) {
         this.test(node);
         super.visitFunctionExpression(node);
     }
 
-    public visitMethodDeclaration(node: ts.MethodDeclaration): void {
+    public visitMethodDeclaration(node: ts.MethodDeclaration) {
         this.test(node);
         super.visitMethodDeclaration(node);
     }
 
-    private test(node: ts.FunctionExpression|ts.MethodDeclaration): void {
+    private test(node: ts.SignatureDeclaration) {
         const tc = this.getTypeChecker();
 
         const returnType = tc.typeToString(

@@ -3,6 +3,6 @@
     "typeCheck": true
   },
   "rules": {
-    "promise-async": true
+    "promise-function-async": true
   }
 }
