@@ -1,10 +1,10 @@
 declare class Promise<T>{}
 
 const nonAsyncPromiseFunctionExpressionA = function(p: Promise<void>) { return p; };
-                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    [0]
+                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~    [0]
 
 const nonAsyncPromiseFunctionExpressionB = function() { return new Promise<void>(); };
-                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    [0]
+                                           ~~~~~~~~~~    [0]
 
 // 'async' 'Promise'-returning function expressions are allowed
 const asyncPromiseFunctionExpression = async function(p: Promise<void>) { return p; };
@@ -13,10 +13,10 @@ const asyncPromiseFunctionExpression = async function(p: Promise<void>) { return
 const nonAsyncNonPromiseFunctionExpression = function(n: number) { return n; };
 
 function nonAsyncPromiseFunctionDeclarationA(p: Promise<void>) { return p; }
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    [0]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    [0]
 
 function nonAsyncPromiseFunctionDeclarationB() { return new Promise<void>(); }
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    [0]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    [0]
 
 // 'async' 'Promise'-returning function declarations are allowed
 async function asyncPromiseFunctionDeclaration(p: Promise<void>) { return p; }
@@ -25,10 +25,10 @@ async function asyncPromiseFunctionDeclaration(p: Promise<void>) { return p; }
 function nonAsyncNonPromiseFunctionDeclaration(n: number) { return n; }
 
 const nonAsyncPromiseArrowFunctionA = (p: Promise<void>) => p;
-                                      ~~~~~~~~~~~~~~~~~~~~~~~    [0]
+                                      ~~~~~~~~~~~~~~~~~~    [0]
 
 const nonAsyncPromiseArrowFunctionB = () => new Promise<void>();
-                                      ~~~~~~~~~~~~~~~~~~~~~~~~~    [0]
+                                      ~~    [0]
 
 // 'async' 'Promise'-returning arrow functions are allowed
 const asyncPromiseArrowFunction = async (p: Promise<void>) => p;
@@ -38,18 +38,14 @@ const nonAsyncNonPromiseArrowFunction = (n: number) => n;
 
 class Test {
     public nonAsyncPromiseMethodA(p: Promise<void>) {
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    [0]
         return p;
-~~~~~~~~~~~~~~~~~
     }
-~~~~~    [0]
 
     public nonAsyncPromiseMethodB() {
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    [0]
         return new Promise<void>();
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     }
-~~~~~    [0]
 
     // 'async' 'Promise'-returning methods are allowed
     public async asyncPromiseMethod(p: Promise<void>) {
