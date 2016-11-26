@@ -66,7 +66,7 @@ class PromiseAsyncWalker extends Lint.ProgramAwareRuleWalker {
         super.visitMethodDeclaration(node);
     }
 
-    private test(node: ts.SignatureDeclaration) {
+    private test(node: ts.SignatureDeclaration & { body?: ts.Node}) {
         const tc = this.getTypeChecker();
 
         const signature = tc.getTypeAtLocation(node).getCallSignatures()[0];
@@ -75,7 +75,10 @@ class PromiseAsyncWalker extends Lint.ProgramAwareRuleWalker {
         const isAsync = Lint.hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword);
         const isPromise = returnType.indexOf("Promise<") === 0;
 
-        const signatureEnd = node.getText().split(/(\s+)?[\{=]/)[0].length;
+        const signatureEnd = node.body ?
+            node.body.getStart() - node.getStart() - 1 :
+            node.getWidth()
+        ;
 
         if (isAsync || !isPromise) {
             return;

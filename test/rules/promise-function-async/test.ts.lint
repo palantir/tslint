@@ -27,10 +27,10 @@ async function asyncPromiseFunctionDeclarationB() { return new Promise<void>(); 
 function nonAsyncNonPromiseFunctionDeclaration(n: number) { return n; }
 
 const nonAsyncPromiseArrowFunctionA = (p: Promise<void>) => p;
-                                      ~~~~~~~~~~~~~~~~~~    [0]
+                                      ~~~~~~~~~~~~~~~~~~~~~    [0]
 
 const nonAsyncPromiseArrowFunctionB = () => new Promise<void>();
-                                      ~~    [0]
+                                      ~~~~~    [0]
 
 // 'async' 'Promise'-returning arrow functions are allowed
 const asyncPromiseArrowFunctionA = async (p: Promise<void>) => p;
