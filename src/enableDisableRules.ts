@@ -17,6 +17,7 @@
 
 import * as ts from "typescript";
 
+import {AbstractRule} from "./language/rule/abstractRule";
 import {IOptions} from "./language/rule/rule";
 import {scanAllTokens} from "./language/utils";
 import {SkippableTokenAwareRuleWalker} from "./language/walker/skippableTokenAwareRuleWalker";
@@ -30,26 +31,13 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
 
         if (rules) {
             for (const rule in rules) {
-                if (rules.hasOwnProperty(rule) && isEnabled(rules[rule])) {
+                if (rules.hasOwnProperty(rule) && AbstractRule.isRuleEnabled(rules[rule])) {
                     this.enableDisableRuleMap[rule] = [{
                         isEnabled: true,
                         position: 0,
                     }];
                 }
             }
-        }
-
-        // use same logic as in AbstractRule
-        function isEnabled(value: any): boolean {
-            if (typeof value === "boolean") {
-                return value;
-            }
-
-            if (Array.isArray(value) && value.length > 0) {
-                return value[0];
-            }
-
-            return false;
         }
     }
 
