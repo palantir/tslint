@@ -8,6 +8,7 @@ TSLint ships with a set of core rules that can be configured. However, users are
 Let us take the example of how to write a new rule to forbid all import statements (you know, *for science*). Let us name the rule file `noImportsRule.ts`. Rules are referenced in `tslint.json` with their kebab-cased identifer, so `"no-imports": true` would configure the rule.
 
 __Important conventions__: 
+
 - Rule identifiers are always kebab-cased.
 - Rule files are always camel-cased (`camelCasedRule.ts`).
 - Rule files *must* contain the suffix `Rule`. 
