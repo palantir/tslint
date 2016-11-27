@@ -1,13 +1,55 @@
 Change Log
 ===
-<!--
-v4.0.0-dev.2 (not released)
+
+v4.0.2
+---
+* [enhancement] Don't exit when a rule can't be found. Print as a warning instead (#1771)
+* [api-change] Allow 3rd party apps to see exception when the config is invalid (#1764)
+* [bugfix] Don't flag a property named as empty string as not needing quotes in an object literal (#1762)
+* [bugfix] Report correct number of fixes done by --fix (#1767)
+* [bugfix] Fix false positives and exceptions in `prefer-for-of` (#1758)
+* [bugfix] Fix `adjacent-overload-signatures` false positive when a static function has the same name (#1772)
+
+Thanks to our contributors!
+* @gustavderdrache
+
+v4.0.1
+---
+* [bugfix] Removed `no-unused-variable` rule from recommended config, as it was causing spurious deprecation warnings.
+
+v4.0.0-dev.2
+---
+* Include latest v4.0.0 changes
+
+v4.0.0
 ---
 * **BREAKING CHANGES**
+    * [api-change] Minor changes to the library API. See this PR for changes and upgrade instructions (#1720)
     * [removed-rule] Removed `no-unreachable` rule; covered by compiler (#661)
-* [enhancement] `--fix` option added to automatically fix selected rules (#1697)
+    * [enhancement] Changed order of applied configuration files for the `extends` array to make it more intuitive. (#1503)
+    * [enhancement] Changed TypeScript peer dependency to >= 2.0.0 (#1710)
+* [new-rule] `completed-docs` rule added (#1644)
 * [new-fixer] `ordered-imports` auto fixed (#1640)
--->
+* [new-fixer] `arrow-parens` auto fixed (#1731)
+* [rule-change] `indent` rule now ignores template strings (#1611)
+* [new-rule-option] `object-literal-key-quotes` adds the options `consistent` and `consistent-as-needed` (#1733)
+* [enhancement] `--fix` option added to automatically fix selected rules (#1697)
+* [enhancement] Updated recommend rules (#1717)
+* [enhancement] `adjacent-overload-signatures` now works with classes, source files, modules, and namespaces (#1707)
+* [enhancement] Users are notified if they are using an old TSLint version (#1696)
+* [bugfix] Lint `.jsx` files if `jsRules` are configured (#1714)
+* [bugfix] Command line glob patterns now handle single quotes (#1679)
+
+Thanks to our contributors!
+* Andrii Dieiev
+* Andy
+* Chris Barr
+* Davie Schoots
+* Jordan Hawker
+* Josh Goldberg
+* Stepan Riha
+* Yuichi Nukiyama
+
 v4.0.0-dev.1
 ---
 * **BREAKING CHANGES**
@@ -170,6 +212,10 @@ Thanks to our contributors!
 * @danvk
 * @janaagaard75
 * @mprobst
+
+v3.12.0-dev.2
+---
+* [enhancement] Support TypeScript v2.0.0-dev builds
 
 v3.12.1
 ---

@@ -31,7 +31,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-unused-variable",
-        deprecationMessage: "Use the compiler options --noUnusedParameters and --noUnusedLocals instead.",
+        deprecationMessage: "Use the tsc compiler options --noUnusedParameters and --noUnusedLocals instead.",
         description: "Disallows unused imports, variables, functions and private class members.",
         optionsDescription: Lint.Utils.dedent`
             Three optional arguments may be optionally provided:
@@ -74,11 +74,11 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_TYPE_PARAM = "parameter";
     public static FAILURE_TYPE_PROP = "property";
     public static FAILURE_TYPE_VAR = "variable";
+    public static FAILURE_STRING_FACTORY = (type: string, name: string) => {
+        return `Unused ${type}: '${name}'`;
+    }
 
-    public static FAILURE_STRING_FACTORY = (type: string, name: string) => `Unused ${type}: '${name}'`;
-
-    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const languageService = Lint.createLanguageService(sourceFile.fileName, sourceFile.getFullText());
+    public apply(sourceFile: ts.SourceFile, languageService: ts.LanguageService): Lint.RuleFailure[] {
         return this.applyWithWalker(new NoUnusedVariablesWalker(sourceFile, this.getOptions(), languageService));
     }
 }
@@ -92,8 +92,10 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     private ignorePattern: RegExp;
     private isReactUsed: boolean;
     private reactImport: ts.NamespaceImport;
+    private possibleFailures: Lint.RuleFailure[] = [];
 
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions, private languageService: ts.LanguageService) {
+    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions,
+                private languageService: ts.LanguageService) {
         super(sourceFile, options);
         this.skipVariableDeclaration = false;
         this.skipParameterDeclaration = false;
@@ -137,9 +139,33 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
             if (!this.isIgnored(nameText)) {
                 const start = this.reactImport.name.getStart();
                 const msg = Rule.FAILURE_STRING_FACTORY(Rule.FAILURE_TYPE_IMPORT, nameText);
-                this.addFailure(this.createFailure(start, nameText.length, msg));
+                this.possibleFailures.push(this.createFailure(start, nameText.length, msg));
             }
         }
+
+        let someFixBrokeIt = false;
+        // Performance optimization: type-check the whole file before verifying individual fixes
+        if (this.possibleFailures.some((f) => f.hasFix())) {
+            let newText = Lint.Fix.applyAll(this.getSourceFile().getFullText(),
+                this.possibleFailures.map((f) => f.getFix()).filter((f) => !!f));
+
+            // If we have the program, we can verify that the fix doesn't introduce failures
+            if (Lint.checkEdit(this.languageService, this.getSourceFile(), newText).length > 0) {
+                console.error(`Fixes caused errors in ${this.getSourceFile().fileName}`);
+                someFixBrokeIt = true;
+            }
+        }
+
+        this.possibleFailures.forEach((f) => {
+            if (!someFixBrokeIt || !f.hasFix()) {
+                this.addFailure(f);
+            } else {
+                let newText = f.getFix().apply(this.getSourceFile().getFullText());
+                if (Lint.checkEdit(this.languageService, this.getSourceFile(), newText).length === 0) {
+                    this.addFailure(f);
+                }
+            }
+        });
     }
 
     public visitBindingElement(node: ts.BindingElement) {
@@ -196,7 +222,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         if (importClause.namedBindings != null) {
             if (importClause.namedBindings.kind === ts.SyntaxKind.NamedImports) {
                 let imports = node.importClause.namedBindings as ts.NamedImports;
-                usedNamedImports = imports.elements.map(e => this.isUsed(e.name.text, e.name.getStart()));
+                usedNamedImports = imports.elements.map((e) => this.isUsed(e.name.text, e.name.getStart()));
             }
             // Avoid deleting the whole statement if there's an import * inside
             if (importClause.namedBindings.kind === ts.SyntaxKind.NamespaceImport) {
@@ -205,7 +231,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         }
 
         // Delete the entire import statement if named and default imports all unused
-        if (!usesDefaultImport && usedNamedImports.every(e => !e)) {
+        if (!usesDefaultImport && usedNamedImports.every((e) => !e)) {
             this.fail(Rule.FAILURE_TYPE_IMPORT, node.getText(), node.getStart(), this.deleteImportStatement(node));
             super.visitImportDeclaration(node);
             return;
@@ -222,7 +248,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         if (importClause.namedBindings != null &&
             importClause.namedBindings.kind === ts.SyntaxKind.NamedImports) {
             // Delete the entire named imports if all unused, including curly braces.
-            if (usedNamedImports.every(e => !e)) {
+            if (usedNamedImports.every((e) => !e)) {
                 const start = importClause.name != null ? importClause.name.getEnd() : importClause.namedBindings.getStart();
                 this.fail(Rule.FAILURE_TYPE_IMPORT, importClause.namedBindings.getText(), importClause.namedBindings.getStart(), [
                     this.deleteText(start, importClause.namedBindings.getEnd() - start),
@@ -420,7 +446,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         if (replacements && replacements.length) {
             fix = new Lint.Fix(Rule.metadata.ruleName, replacements);
         }
-        this.addFailure(this.createFailure(position, name.length, Rule.FAILURE_STRING_FACTORY(type, name), fix));
+        this.possibleFailures.push(this.createFailure(position, name.length, Rule.FAILURE_STRING_FACTORY(type, name), fix));
     }
 
     private isIgnored(name: string) {

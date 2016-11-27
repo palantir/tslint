@@ -55,9 +55,9 @@ export class Rule extends Lint.Rules.TypedRule {
         Rule.ARGUMENT_PROPERTIES,
     ];
 
-    public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+    public applyWithProgram(sourceFile: ts.SourceFile, langSvc: ts.LanguageService): Lint.RuleFailure[] {
         const options = this.getOptions();
-        const completedDocsWalker = new CompletedDocsWalker(sourceFile, options, program);
+        const completedDocsWalker = new CompletedDocsWalker(sourceFile, options, langSvc.getProgram());
 
         const nodesToCheck = this.getNodesToCheck(options.ruleArguments);
         completedDocsWalker.setNodesToCheck(nodesToCheck);
@@ -106,7 +106,7 @@ export class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
 
         const comments = this.getTypeChecker().getSymbolAtLocation(node.name).getDocumentationComment();
 
-        if (comments.map(comment => comment.text).join("").trim() === "") {
+        if (comments.map((comment) => comment.text).join("").trim() === "") {
             this.addFailure(this.createDocumentationFailure(node, nodeToCheck));
         }
     }

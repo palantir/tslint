@@ -390,7 +390,7 @@ class Test<A, B, C> {
             [
                 C,
                 C,
-            ]
+            ],
             C
             ~ [Missing trailing comma]
         >
@@ -509,7 +509,7 @@ interface ITest<A ,B, C> {
             [
                 C,
                 C,
-            ]
+            ],
             C
             ~ [Missing trailing comma]
         >

@@ -25,6 +25,9 @@ optionsDescription: |-
 
   * `"always"`: Property names should always be quoted. (This is the default.)
   * `"as-needed"`: Only property names which require quotes may be quoted (e.g. those with spaces in them).
+  * `"consistent"`: Property names should either all be quoted or unquoted.
+  * `"consistent-as-needed"`: If any property name requires quotes, then all properties must be quoted. Otherwise, no 
+  property names may be quoted.
 
   For ES6, computed property names (`{[name]: value}`) and methods (`{foo() {}}`) never need
   to be quoted.
@@ -33,6 +36,8 @@ options:
   enum:
     - always
     - as-needed
+    - consistent
+    - consistent-as-needed
 optionExamples:
   - '[true, "as-needed"]'
   - '[true, "always"]'
@@ -45,7 +50,9 @@ optionsJSON: |-
     "type": "string",
     "enum": [
       "always",
-      "as-needed"
+      "as-needed",
+      "consistent",
+      "consistent-as-needed"
     ]
   }
 ---

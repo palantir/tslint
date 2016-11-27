@@ -18,13 +18,18 @@
 import * as ts from "typescript";
 
 import {AbstractRule} from "./abstractRule";
-import {RuleFailure} from "./rule";
+import {IRule, RuleFailure} from "./rule";
 
 export abstract class TypedRule extends AbstractRule {
-    public apply(_sourceFile: ts.SourceFile): RuleFailure[] {
+
+    public static isTypedRule(rule: IRule): rule is TypedRule {
+        return "applyWithProgram" in rule;
+    }
+
+    public apply(): RuleFailure[] {
         // if no program is given to the linter, throw an error
         throw new Error(`${this.getOptions().ruleName} requires type checking`);
     }
 
-    public abstract applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): RuleFailure[];
+    public abstract applyWithProgram(sourceFile: ts.SourceFile, languageService: ts.LanguageService): RuleFailure[];
 }

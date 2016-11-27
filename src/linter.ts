@@ -20,17 +20,18 @@ import * as ts from "typescript";
 
 import {
     DEFAULT_CONFIG,
-    IConfigurationFile,
     findConfiguration,
     findConfigurationPath,
     getRelativePath,
     getRulesDirectories,
+    IConfigurationFile,
     loadConfigurationFromPath,
 } from "./configuration";
 import { EnableDisableRulesWalker } from "./enableDisableRules";
 import { findFormatter } from "./formatterLoader";
 import { ILinterOptions, LintResult } from "./index";
 import { IFormatter } from "./language/formatter/formatter";
+import { createLanguageService, wrapProgram } from "./language/languageServiceHost";
 import { Fix, IRule, RuleFailure } from "./language/rule/rule";
 import { TypedRule } from "./language/rule/typedRule";
 import * as utils from "./language/utils";
@@ -41,7 +42,7 @@ import { arrayify, dedent } from "./utils";
  * Linter that can lint multiple files in consecutive runs.
  */
 class Linter {
-    public static VERSION = "4.0.0-dev";
+    public static VERSION = "4.0.2";
 
     public static findConfiguration = findConfiguration;
     public static findConfigurationPath = findConfigurationPath;
@@ -50,6 +51,7 @@ class Linter {
 
     private failures: RuleFailure[] = [];
     private fixes: RuleFailure[] = [];
+    private languageService: ts.LanguageService;
 
     /**
      * Creates a TypeScript program object from a tsconfig.json file path and optional project directory.
@@ -82,7 +84,7 @@ class Linter {
      * files and excludes declaration (".d.ts") files.
      */
     public static getFileNames(program: ts.Program): string[] {
-        return program.getSourceFiles().map(s => s.fileName).filter(l => l.substr(-5) !== ".d.ts");
+        return program.getSourceFiles().map((s) => s.fileName).filter((l) => l.substr(-5) !== ".d.ts");
     }
 
     constructor(private options: ILinterOptions, private program?: ts.Program) {
@@ -93,40 +95,47 @@ class Linter {
             throw new Error("ILinterOptions does not contain the property `configuration` as of version 4. " +
                 "Did you mean to pass the `IConfigurationFile` object to lint() ? ");
         }
+
+        if (program) {
+            this.languageService = wrapProgram(program);
+        }
     }
 
     public lint(fileName: string, source?: string, configuration: IConfigurationFile = DEFAULT_CONFIG): void {
         const enabledRules = this.getEnabledRules(fileName, source, configuration);
         let sourceFile = this.getSourceFile(fileName, source);
         let hasLinterRun = false;
+        let fileFailures: RuleFailure[] = [];
 
         if (this.options.fix) {
-            this.fixes = [];
             for (let rule of enabledRules) {
-                let fileFailures = this.applyRule(rule, sourceFile);
-                const fixes = fileFailures.map(f => f.getFix()).filter(f => !!f);
+                let ruleFailures = this.applyRule(rule, sourceFile);
+                const fixes = ruleFailures.map((f) => f.getFix()).filter((f) => !!f);
                 source = fs.readFileSync(fileName, { encoding: "utf-8" });
                 if (fixes.length > 0) {
-                    this.fixes = this.fixes.concat(fileFailures);
+                    this.fixes = this.fixes.concat(ruleFailures);
                     source = Fix.applyAll(source, fixes);
                     fs.writeFileSync(fileName, source, { encoding: "utf-8" });
 
                     // reload AST if file is modified
                     sourceFile = this.getSourceFile(fileName, source);
                 }
-                this.failures = this.failures.concat(fileFailures);
+                fileFailures = fileFailures.concat(ruleFailures);
             }
             hasLinterRun = true;
         }
 
         // make a 1st pass or make a 2nd pass if there were any fixes because the positions may be off
         if (!hasLinterRun || this.fixes.length > 0) {
-            this.failures = [];
+            fileFailures = [];
             for (let rule of enabledRules) {
-                const fileFailures = this.applyRule(rule, sourceFile);
-                this.failures = this.failures.concat(fileFailures);
+                const ruleFailures = this.applyRule(rule, sourceFile);
+                if (ruleFailures.length > 0) {
+                    fileFailures = fileFailures.concat(ruleFailures);
+                }
             }
         }
+        this.failures = this.failures.concat(fileFailures);
     }
 
     public getResult(): LintResult {
@@ -154,10 +163,10 @@ class Linter {
 
     private applyRule(rule: IRule, sourceFile: ts.SourceFile) {
         let ruleFailures: RuleFailure[] = [];
-        if (this.program && rule instanceof TypedRule) {
-            ruleFailures = rule.applyWithProgram(sourceFile, this.program);
+        if (this.program && TypedRule.isTypedRule(rule)) {
+            ruleFailures = rule.applyWithProgram(sourceFile, this.languageService);
         } else {
-            ruleFailures = rule.apply(sourceFile);
+            ruleFailures = rule.apply(sourceFile, this.languageService);
         }
         let fileFailures: RuleFailure[] = [];
         for (let ruleFailure of ruleFailures) {
@@ -198,6 +207,7 @@ class Linter {
             }
         } else {
             sourceFile = utils.getSourceFile(fileName, source);
+            this.languageService = createLanguageService(fileName, source);
         }
 
         if (sourceFile === undefined) {

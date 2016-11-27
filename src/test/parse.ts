@@ -24,7 +24,7 @@ import {
     parseLine,
     printLine,
 } from "./lines";
-import {LintError, errorComparator, lintSyntaxError} from "./lintError";
+import {errorComparator, LintError, lintSyntaxError} from "./lintError";
 
 /**
  * Takes the full text of a .lint file and returns the contents of the file
@@ -83,7 +83,7 @@ export function parseErrorsFromMarkup(text: string): LintError[] {
                 for (let nextLineNo = lineNo + 1; ; ++nextLineNo) {
                     if (!isValidErrorMarkupContinuation(errorLinesForCodeLines, nextLineNo)) {
                         throw lintSyntaxError(
-                            `Error mark starting at ${errorStartPos.line}:${errorStartPos.col} does not end correctly.`
+                            `Error mark starting at ${errorStartPos.line}:${errorStartPos.col} does not end correctly.`,
                         );
                     } else {
                         const nextErrorLine = errorLinesForCodeLines[nextLineNo].shift();
@@ -122,7 +122,7 @@ export function createMarkupFromErrors(code: string, lintErrors: LintError[]) {
             errorLinesForCodeText[startPos.line].push(new EndErrorLine(
                 startPos.col,
                 endPos.col,
-                message
+                message,
             ));
         } else {
             // multiline error

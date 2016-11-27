@@ -19,6 +19,7 @@ import findup = require("findup-sync");
 import * as fs from "fs";
 import * as path from "path";
 import * as resolve from "resolve";
+import { FatalError } from "./error";
 
 import {arrayify, objectify, stripComments} from "./utils";
 
@@ -33,7 +34,6 @@ export interface IConfigurationFile {
 }
 
 export interface IConfigurationLoadResult {
-    error?: Error;
     path: string;
     results?: IConfigurationFile;
 }
@@ -111,11 +111,10 @@ export function findConfiguration(configFile: string, inputFilePath: string): IC
 
     try {
         loadResult.results = loadConfigurationFromPath(path);
+        return loadResult;
     } catch (error) {
-        loadResult.error = error;
+        throw new FatalError(`Failed to load ${path}: ${error.message}`, error);
     }
-
-    return loadResult;
 }
 
 /**

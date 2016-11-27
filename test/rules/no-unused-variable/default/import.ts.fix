@@ -37,3 +37,7 @@ baz();
 namedExport();
 
 import "jquery";
+
+import abc = require('abc');
+import def = abc.someVar;
+console.log(def);
