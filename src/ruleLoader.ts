@@ -140,7 +140,7 @@ function loadRule(directory: string, ruleName: string) {
 }
 
 /**
- * creates disabled intervals for rule based on list of swithers for it
+ * creates disabled intervals for rule based on list of switchers for it
  * @param ruleSpecificList - contains all switchers for rule states sorted top-down and strictly alternating between enabled and disabled
  */
 function buildDisabledIntervalsFromSwitches(ruleSpecificList: IEnableDisablePosition[]) {

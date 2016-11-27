@@ -90,7 +90,7 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
         });
 
         if (end) {
-            // switchRule method is only called when rule state changes therefore we can safely use opposite state
+            // switchRuleState method is only called when rule state changes therefore we can safely use opposite state
             ruleStateMap.push({
                 isEnabled: !isEnabled,
                 position: end,
