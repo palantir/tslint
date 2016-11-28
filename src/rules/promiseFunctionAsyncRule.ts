@@ -47,43 +47,39 @@ export class Rule extends Lint.Rules.TypedRule {
 
 class PromiseAsyncWalker extends Lint.ProgramAwareRuleWalker {
     public visitArrowFunction(node: ts.ArrowFunction) {
-        this.test(node);
+        this.handleDeclaration(node);
         super.visitArrowFunction(node);
     }
 
     public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
-        this.test(node);
+        this.handleDeclaration(node);
         super.visitFunctionDeclaration(node);
     }
 
     public visitFunctionExpression(node: ts.FunctionExpression) {
-        this.test(node);
+        this.handleDeclaration(node);
         super.visitFunctionExpression(node);
     }
 
     public visitMethodDeclaration(node: ts.MethodDeclaration) {
-        this.test(node);
+        this.handleDeclaration(node);
         super.visitMethodDeclaration(node);
     }
 
-    private test(node: ts.SignatureDeclaration & { body?: ts.Node}) {
+    private handleDeclaration(node: ts.SignatureDeclaration & { body?: ts.Node }) {
         const tc = this.getTypeChecker();
-
         const signature = tc.getTypeAtLocation(node).getCallSignatures()[0];
         const returnType = tc.typeToString(tc.getReturnTypeOfSignature(signature));
 
         const isAsync = Lint.hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword);
         const isPromise = returnType.indexOf("Promise<") === 0;
 
-        const signatureEnd = node.body ?
-            node.body.getStart() - node.getStart() - 1 :
-            node.getWidth()
-        ;
+        const signatureEnd = node.body != null
+            ? node.body.getStart() - node.getStart() - 1
+            : node.getWidth();
 
-        if (isAsync || !isPromise) {
-            return;
+        if (isPromise && !isAsync) {
+            this.addFailure(this.createFailure(node.getStart(), signatureEnd, Rule.FAILURE_STRING));
         }
-
-        this.addFailure(this.createFailure(node.getStart(), signatureEnd, Rule.FAILURE_STRING));
     }
 }
