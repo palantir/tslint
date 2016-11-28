@@ -68,7 +68,7 @@ v4.0.0-dev.1
 * [new-fixer] `semicolon` auto fixed (#1423)
 * [new-rule] `max-classes-per-file` rule added (#1666)
 * [new-rule-option] `no-consecutive-blank-lines` rule now accepts a number value indicating max blank lines (#1650)
-* [new-rule-option] `ordered-inputs` rule option `input-sources-order` accepts value `any` (#1602)
+* [new-rule-option] `ordered-imports` rule option `import-sources-order` accepts value `any` (#1602)
 * [bugfix] `no-empty` rule fixed when parameter has readonly modifier
 * [bugfix] `no-namespace` rule: do not flag nested or .d.ts namespaces (#1571)
 
