@@ -119,7 +119,7 @@ class Foo {
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [All 'constructor' signatures should be adjacent]
 }
 
-// A semi-colon on it's own is a statement with no name
+// A semi-colon on its own is a statement with no name
 class Bar {
   private constructor() {}
   ;
