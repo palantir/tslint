@@ -16,13 +16,27 @@
  */
 
 import * as ts from "typescript";
-import * as Lint from "../lint";
+import * as Lint from "../index";
 import {isNodeFlagSet} from "../language/utils";
 
 export class Rule extends Lint.Rules.AbstractRule {
-    public static FAILURE_STRING_FACTORY = (identifier: string) => {
-        return `Identifier '${identifier}' never appears on the LHS of an assignment - use const instead of let for its declaration.`;
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "prefer-const",
+        description: "Requires that variable declarations use `const` instead of `let` if possible.",
+        descriptionDetails: Lint.Utils.dedent`
+            If a variable is only assigned to once when it is declared, it should be declared using 'const'`,
+        optionsDescription: "Not configurable.",
+        options: null,
+        optionExamples: ["true"],
+        type: "maintainability",
+        typescriptOnly: false,
     };
+    /* tslint:enable:object-literal-sort-keys */
+
+    public static FAILURE_STRING_FACTORY = (identifier: string) => {
+        return `Identifier '${identifier}' is never reassigned; use 'const' instead of 'let'.`;
+    }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const preferConstWalker = new PreferConstWalker(sourceFile, this.getOptions());
@@ -31,6 +45,9 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class PreferConstWalker extends Lint.BlockScopeAwareRuleWalker<{}, ScopeInfo> {
+    // the current non-exported `let` statement or `null` if not in one
+    private currentLetStatement: ts.VariableDeclarationList;
+
     public createScope() {
         return {};
     }
@@ -40,121 +57,71 @@ class PreferConstWalker extends Lint.BlockScopeAwareRuleWalker<{}, ScopeInfo> {
     }
 
     public onBlockScopeEnd() {
-        // TODO: check which 'let' declarations were actually assigned to in this block scope, report failures
-        const {declarationUsages} = this.getCurrentBlockScope();
-        for (const varName of Object.keys(declarationUsages)) {
-            if (declarationUsages[varName].usages === 0) {
-                const node = declarationUsages[varName].declaration;
-                this.addFailure(this.createFailure(
-                    node.getStart(),
-                    node.getWidth(),
-                    Rule.FAILURE_STRING_FACTORY(varName)
-                ));
+        let nonReassignedVariables = this.getCurrentBlockScope().getNonReassignedVariables();
+        const seenLetStatements: { [startPosition: string]: boolean } = {};
+        for (const usage of nonReassignedVariables) {
+            let fix: Lint.Fix;
+            if (!usage.reassignedSibling && !seenLetStatements[usage.letStatement.getStart().toString()]) {
+                // only fix if all variables in the `let` statement can use `const`
+                const replacement = new Lint.Replacement(usage.letStatement.getStart(), "let".length, "const");
+                fix = new Lint.Fix(Rule.metadata.ruleName, [replacement]);
+                seenLetStatements[usage.letStatement.getStart().toString()] = true;
             }
+            this.addFailure(this.createFailure(
+                usage.identifier.getStart(),
+                usage.identifier.getWidth(),
+                Rule.FAILURE_STRING_FACTORY(usage.identifier.text),
+                fix,
+            ));
         }
     }
 
-    public visitBinaryExpression(node: ts.BinaryExpression) {
+    protected visitBinaryExpression(node: ts.BinaryExpression) {
         if (isAssignmentOperator(node.operatorToken)) {
             this.handleLHSExpression(node.left);
         }
         super.visitBinaryExpression(node);
     }
 
-    public visitBindingPattern(node: ts.BindingPattern) {
-        for (const element of node.elements) {
-            if (element.name.kind === ts.SyntaxKind.Identifier) {
-                // TODO: is this right?
-                this.markAssignment(<ts.Identifier> element.name);
-            }
-        }
-        super.visitBindingPattern(node);
+    protected visitEndOfFileToken(node: ts.Node) {
+        this.onBlockScopeEnd();
+        super.visitEndOfFileToken(node);
     }
 
-    public visitForStatement(node: ts.ForStatement) {
-        this.handleAnyForStatement(node);
-        super.visitForStatement(node);
-    }
-
-    public visitForInStatement(node: ts.ForInStatement) {
-        this.handleAnyForStatement(node);
-        super.visitForInStatement(node);
-    }
-
-    public visitForOfStatement(node: ts.ForOfStatement) {
-        this.handleAnyForStatement(node);
-        super.visitForOfStatement(node);
-    }
-
-    public visitModuleDeclaration(node: ts.ModuleDeclaration) {
-        if (node.body.kind === ts.SyntaxKind.ModuleBlock) {
-            this.visitBlock(<ts.ModuleBlock> node.body);
-        }
-        super.visitModuleDeclaration(node);
-    }
-
-    public visitPrefixUnaryExpression(node: ts.PrefixUnaryExpression) {
+    protected visitPrefixUnaryExpression(node: ts.PrefixUnaryExpression) {
         this.handleUnaryExpression(node);
         super.visitPrefixUnaryExpression(node);
     }
 
-    public visitPostfixUnaryExpression(node: ts.PostfixUnaryExpression) {
+    protected visitPostfixUnaryExpression(node: ts.PostfixUnaryExpression) {
         this.handleUnaryExpression(node);
         super.visitPostfixUnaryExpression(node);
     }
 
-    public visitVariableStatement(node: ts.VariableStatement) {
-        for (const declaration of node.declarationList.declarations) {
-            if (isNodeFlagSet(declaration, ts.NodeFlags.Let)
-                    && !isNodeFlagSet(declaration, ts.NodeFlags.Export)
-                    && declaration.name.kind === ts.SyntaxKind.Identifier) {
-                const currentBlockScope = this.getCurrentBlockScope();
-                const identifier = <ts.Identifier> declaration.name;
-                currentBlockScope.declarationUsages[identifier.text] = {
-                    declaration,
-                    usages: 0
-                };
-            }
+    protected visitVariableDeclarationList(node: ts.VariableDeclarationList) {
+        if (isNodeFlagSet(node, ts.NodeFlags.Let) && !isNodeFlagSet(node, ts.NodeFlags.Export)) {
+            this.currentLetStatement = node;
         }
-        super.visitVariableStatement(node);
+        super.visitVariableDeclarationList(node);
+        this.currentLetStatement = null;
     }
 
-    private handleAnyForStatement(node: ts.ForStatement | ts.ForInStatement | ts.ForOfStatement) {
-        if (node.initializer.kind === ts.SyntaxKind.VariableDeclarationList) {
-            const declarations = (<ts.VariableDeclarationList> node.initializer).declarations;
-            for (const declaration of declarations) {
-                if (isNodeFlagSet(declaration, ts.NodeFlags.Let)) {
-                    // TODO: collect identifiers, sometimes within binding patterns
-                }
-            }
-        }
-    }
+    protected visitIdentifier(node: ts.Identifier) {
+        if (this.currentLetStatement != null
+            && (node.parent.kind === ts.SyntaxKind.VariableDeclaration
+                || (node.parent.kind === ts.SyntaxKind.BindingElement
+                    && node.parent.getText() === node.getText()))) {    // differentiates non-variable binding element from variables
 
-    private handleBindingLiteralExpression(node: ts.ArrayLiteralExpression | ts.ObjectLiteralExpression) {
-        if (node.kind === ts.SyntaxKind.ObjectLiteralExpression) {
-            const pattern = <ts.ObjectLiteralExpression> node;
-            for (const element of pattern.properties) {
-                if (element.name.kind === ts.SyntaxKind.Identifier) {
-                    this.markAssignment(<ts.Identifier> element.name);
-                } else if (isBindingPattern(element.name)) {
-                    // TODO: this.visitBindingPattern(element.name)?
-                    // this.handleBindingPatternIdentifiers(<ts.BindingPattern> element.name);
-                }
-            }
-        } else if (node.kind === ts.SyntaxKind.ArrayLiteralExpression) {
-            const pattern = <ts.ArrayLiteralExpression> node;
-            for (const element of pattern.elements) {
-                this.handleLHSExpression(element);
-            }
+            const currentBlockScope = this.getCurrentBlockScope();
+            currentBlockScope.addIdentifier(node, this.currentLetStatement);
         }
+        super.visitIdentifier(node);
     }
 
     private handleLHSExpression(node: ts.Expression) {
         node = unwrapParentheses(node);
         if (node.kind === ts.SyntaxKind.Identifier) {
             this.markAssignment(<ts.Identifier> node);
-        } else if (isBindingLiteralExpression(node)) {
-            this.handleBindingLiteralExpression(node);
         }
     }
 
@@ -165,39 +132,76 @@ class PreferConstWalker extends Lint.BlockScopeAwareRuleWalker<{}, ScopeInfo> {
     }
 
     private markAssignment(identifier: ts.Identifier) {
-        const varName = identifier.text;
         // look through block scopes from local -> global
         for (const blockScope of this.getAllBlockScopes().reverse()) {
-            if (blockScope.declarationUsages[varName] != null) {
-                blockScope.declarationUsages[varName].usages++;
+            if (blockScope.incrementIdentifier(identifier.text)) {
                 break;
             }
         }
     }
 }
 
+interface IVariableUsage {
+    letStatement: ts.VariableDeclarationList;
+    identifier: ts.Identifier;
+    // whether or not a different variable declaration that shares the same `let` statement is ever reassigned
+    reassignedSibling: boolean;
+}
+
 class ScopeInfo {
-    public declarationUsages: {
+    private identifierUsages: {
         [varName: string]: {
-            declaration: ts.VariableDeclaration,
-            usages: number
-        }
+            letStatement: ts.VariableDeclarationList,
+            identifier: ts.Identifier,
+            usages: number,
+        },
     } = {};
+    // variable names grouped by common `let` statements
+    private sharedLetSets: {
+        [letStartIndex: string]: { [variableName: string]: boolean },
+    } = {};
+
+    public addIdentifier(identifier: ts.Identifier, letStatement: ts.VariableDeclarationList) {
+        this.identifierUsages[identifier.text] = { letStatement, identifier, usages: 0 };
+        const letSetKey = letStatement.getStart().toString();
+        if (this.sharedLetSets[letSetKey] == null) {
+            this.sharedLetSets[letSetKey] = {};
+        }
+        this.sharedLetSets[letSetKey][identifier.text] = true;
+    }
+
+    public getNonReassignedVariables() {
+        let letCandidates: IVariableUsage[] = [];
+        for (const letSetKey of Object.keys(this.sharedLetSets)) {
+            const letSet = this.sharedLetSets[letSetKey];
+            const variableNames = Object.keys(letSet);
+            const anyReassigned = variableNames.some((key) => this.identifierUsages[key].usages > 0);
+            for (const variableName of variableNames) {
+                const usage = this.identifierUsages[variableName];
+                if (usage.usages === 0) {
+                    letCandidates.push({
+                        identifier: usage.identifier,
+                        letStatement: usage.letStatement,
+                        reassignedSibling: anyReassigned,
+                    });
+                }
+            }
+        }
+        return letCandidates;
+    }
+
+    public incrementIdentifier(varName: string) {
+        if (this.identifierUsages[varName] != null) {
+            this.identifierUsages[varName].usages++;
+            return true;
+        }
+        return false;
+    }
 }
 
 function isAssignmentOperator(token: ts.Node) {
     return token.kind >= ts.SyntaxKind.FirstAssignment
         && token.kind <= ts.SyntaxKind.LastAssignment;
-}
-
-function isBindingLiteralExpression(node: ts.Node): node is (ts.ArrayLiteralExpression | ts.ObjectLiteralExpression) {
-    return (node != null)
-        && (node.kind === ts.SyntaxKind.ObjectLiteralExpression || node.kind === ts.SyntaxKind.ArrayLiteralExpression);
-}
-
-function isBindingPattern(node: ts.Node): node is ts.BindingPattern {
-    return (node != null)
-        && (node.kind === ts.SyntaxKind.ArrayBindingPattern || node.kind === ts.SyntaxKind.ObjectBindingPattern);
 }
 
 function unwrapParentheses(node: ts.Expression) {

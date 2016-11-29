@@ -63,13 +63,13 @@ export abstract class BlockScopeAwareRuleWalker<T, U> extends ScopeAwareRuleWalk
 
         if (isNewBlockScope) {
             this.blockScopeStack.push(this.createBlockScope());
+            this.onBlockScopeStart();
         }
 
-        this.onBlockScopeStart();
         super.visitNode(node);
-        this.onBlockScopeEnd();
 
         if (isNewBlockScope) {
+            this.onBlockScopeEnd();
             this.blockScopeStack.pop();
         }
     }

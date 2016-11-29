@@ -1,0 +1,94 @@
+const a = 1;
+// different reassignments
+let b = 1;
+b = 2;
+let b1 = 1;
+b1++;
+let b2 = 1;
+b2--;
+let b3 = 1;
+b3 /= 2;
+let b4 = 1;
+--b4;
+// basic failure
+let c = 1; // failure
+    ~                 [Identifier 'c' is never reassigned; use 'const' instead of 'let'.]
+// multiple declarations
+const c5 = 5, c6 = 6;
+let c1 = 1, c2 = 2; // 2 failures
+    ~~                            [Identifier 'c1' is never reassigned; use 'const' instead of 'let'.]
+            ~~                    [Identifier 'c2' is never reassigned; use 'const' instead of 'let'.]
+let c3 = 1, c4 = 2; // 1 failure
+            ~~                   [Identifier 'c4' is never reassigned; use 'const' instead of 'let'.]
+c3 = 4;
+// destructuring
+let {h, i} = {h: 1, i: 1}; // failure for 'h'
+     ~                                        [Identifier 'h' is never reassigned; use 'const' instead of 'let'.]
+let [j, k] = [1, 1]; // failure for 'j'
+     ~                                  [Identifier 'j' is never reassigned; use 'const' instead of 'let'.]
+let [x1, x3] = [1, 2], [x2] = [3]; // failure for x1, x3
+     ~~                                                  [Identifier 'x1' is never reassigned; use 'const' instead of 'let'.]
+         ~~                                              [Identifier 'x3' is never reassigned; use 'const' instead of 'let'.]
+let {a: {b: {q}, c: {r}}} = { a: { b: { q: 3 }, c: { r: 2 } } }; // failure for 'r'
+                     ~                                                              [Identifier 'r' is never reassigned; use 'const' instead of 'let'.]
+i = 2;
+k = 2;
+q = 4;
+x2 = 5;
+// functions
+function myFunc(d: number, e: number) {
+    let f = 1; // failure
+        ~                 [Identifier 'f' is never reassigned; use 'const' instead of 'let'.]
+    const g = 1;
+    d = 2;
+}
+function myFunc2() {
+    let [l, m] = [1, 1]; // failure for 'l'
+         ~                                  [Identifier 'l' is never reassigned; use 'const' instead of 'let'.]
+    m = 2;
+    return l;
+}
+// for-of
+for (let n of [1, 1]) { // failure for 'n'
+         ~                                 [Identifier 'n' is never reassigned; use 'const' instead of 'let'.]
+    console.log(n);
+}
+for (let {o, p} of [{1, 1}, {1, 1}]) { // failure for 'o'
+          ~                                               [Identifier 'o' is never reassigned; use 'const' instead of 'let'.]
+    console.log(o);
+    p = 2;
+}
+// for loop
+for (let i1 = 0; i1 < 4; i1++) {
+}
+for (let i2 = 0;;) {    // failure
+         ~~                        [Identifier 'i2' is never reassigned; use 'const' instead of 'let'.]
+}
+for (const i2 = 0;;) {    // failure
+}
+// scope
+let sc = 0;
+let sc1 = 0;
+    ~~~      [Identifier 'sc1' is never reassigned; use 'const' instead of 'let'.]
+let sc2 = 0;
+let sc3 = 0;
+{
+    sc = 1;
+}
+for(;;) {
+    sc2 = 3;
+}
+class MyClass {
+    private classVar = 5;
+    public Increment() {
+        let sc4 = 0;
+        let sc5 = 0;    // error
+            ~~~                  [Identifier 'sc5' is never reassigned; use 'const' instead of 'let'.]
+        this.classVar++;
+        sc3++;
+        sc4++;
+    }
+}
+// separate declaration and assignment (no error)
+let x: number;
+x = 5;

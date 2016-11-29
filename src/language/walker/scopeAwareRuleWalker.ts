@@ -59,13 +59,13 @@ export abstract class ScopeAwareRuleWalker<T> extends RuleWalker {
 
         if (isNewScope) {
             this.scopeStack.push(this.createScope(node));
+            this.onScopeStart();
         }
 
-        this.onScopeStart();
         super.visitNode(node);
-        this.onScopeEnd();
 
         if (isNewScope) {
+            this.onScopeEnd();
             this.scopeStack.pop();
         }
     }

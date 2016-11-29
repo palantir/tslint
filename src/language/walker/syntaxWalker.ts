@@ -118,6 +118,10 @@ export class SyntaxWalker {
         this.walkChildren(node);
     }
 
+    protected visitEndOfFileToken(node: ts.Node) {
+        this.walkChildren(node);
+    }
+
     protected visitEnumDeclaration(node: ts.EnumDeclaration) {
         this.walkChildren(node);
     }
@@ -322,6 +326,10 @@ export class SyntaxWalker {
         this.walkChildren(node);
     }
 
+    protected visitVariableDeclarationList(node: ts.VariableDeclarationList) {
+        this.walkChildren(node);
+    }
+
     protected visitVariableStatement(node: ts.VariableStatement) {
         this.walkChildren(node);
     }
@@ -430,6 +438,10 @@ export class SyntaxWalker {
 
             case ts.SyntaxKind.ElementAccessExpression:
                 this.visitElementAccessExpression(<ts.ElementAccessExpression> node);
+                break;
+
+            case ts.SyntaxKind.EndOfFileToken:
+                this.visitEndOfFileToken(node);
                 break;
 
             case ts.SyntaxKind.EnumDeclaration:
@@ -638,6 +650,10 @@ export class SyntaxWalker {
 
             case ts.SyntaxKind.VariableDeclaration:
                 this.visitVariableDeclaration(<ts.VariableDeclaration> node);
+                break;
+
+            case ts.SyntaxKind.VariableDeclarationList:
+                this.visitVariableDeclarationList(<ts.VariableDeclarationList> node);
                 break;
 
             case ts.SyntaxKind.VariableStatement:
