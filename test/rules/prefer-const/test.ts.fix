@@ -76,3 +76,24 @@ class MyClass {
 // separate declaration and assignment (no error)
 let x: number;
 x = 5;
+
+// ignores RHS of declaration
+const usedAsRHS = 3;
+const LHS: number | string = usedAsRHS;
+
+// handle nested declaration
+const nest = () => {
+    const a = 4;
+    let b = 0;
+    const c = 1;
+    b = 2;
+    return a + b + c;
+};
+
+const nest2 = () => {
+    try {
+    } catch(error) {
+    }
+}
+
+export let x = 4;

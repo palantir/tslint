@@ -92,3 +92,29 @@ class MyClass {
 // separate declaration and assignment (no error)
 let x: number;
 x = 5;
+
+// ignores RHS of declaration
+let usedAsRHS = 3;
+    ~~~~~~~~~                  [Identifier 'usedAsRHS' is never reassigned; use 'const' instead of 'let'.]
+let LHS: number | string = usedAsRHS;
+    ~~~                  [Identifier 'LHS' is never reassigned; use 'const' instead of 'let'.]
+
+// handle nested declaration
+let nest = () => {
+    ~~~~          [Identifier 'nest' is never reassigned; use 'const' instead of 'let'.]
+    const a = 4;
+    let b = 0;
+    let c = 1;
+        ~      [Identifier 'c' is never reassigned; use 'const' instead of 'let'.]
+    b = 2;
+    return a + b + c;
+};
+
+let nest2 = () => {
+    ~~~~~           [Identifier 'nest2' is never reassigned; use 'const' instead of 'let'.]
+    try {
+    } catch(error) {
+    }
+}
+
+export let x = 4;
