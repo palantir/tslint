@@ -37,7 +37,6 @@ interface i6 {
     toString(): string;
 }
 
-
 // bad
 
 interface b1 {
@@ -114,6 +113,17 @@ declare namespace N {
 
 class Foo {
   public static bar() {}
-  constructor() {}
+  private constructor() {}
   public bar() {}
+  public constructor(foo: any) {}
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [All 'constructor' signatures should be adjacent]
 }
+
+// A semi-colon on its own is a statement with no name
+class Bar {
+  private constructor() {}
+  ;
+  public bar() {}
+  ;
+}
+
