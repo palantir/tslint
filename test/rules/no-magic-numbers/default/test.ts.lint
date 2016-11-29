@@ -1,0 +1,24 @@
+console.log(-1, 0, 1);
+
+const a = 1337;
+const b = {
+    a: 1338,
+    b: 0,
+}
+b.b = 1339;
+      ~~~~                          ['magic numbers' are no allowed]
+
+console.log(1340);
+            ~~~~                    ['magic numbers' are no allowed]
+for(let i = 0;i>1341;++i) {
+                ~~~~                ['magic numbers' are no allowed]
+}
+
+throw 1342;
+      ~~~~                          ['magic numbers' are no allowed]
+
+class A {
+    constructor (private a = 1337) {
+                             ~~~~   ['magic numbers' are no allowed]
+    }
+}

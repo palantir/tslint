@@ -678,6 +678,25 @@
     "typescriptOnly": false
   },
   {
+    "ruleName": "no-magic-numbers",
+    "description": "Disallows the use constant number values outside of variable assignment. -1, 0 and 1 are allowed by default.",
+    "rationale": "\nMagic numbers should be avoided as they often lack documentation, forcing\nthem to be stored in variables gives them implicit documentation.",
+    "optionsDescription": "A list of allowed number.",
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minLength": 1
+    },
+    "optionExamples": [
+      "true",
+      "[true, 1, 2, 3]"
+    ],
+    "type": "typescript",
+    "typescriptOnly": false
+  },
+  {
     "ruleName": "no-mergeable-namespace",
     "description": "Disallows mergeable namespaces in the same file.",
     "optionsDescription": "Not configurable.",
@@ -1082,6 +1101,19 @@
     ],
     "type": "typescript",
     "typescriptOnly": false
+  },
+  {
+    "ruleName": "promise-function-async",
+    "description": "Requires any function or method that returns a promise to be marked async.",
+    "rationale": "\nEnsures that each function is only capable of 1) returning a rejected promise, or 2)\nthrowing an Error object. In contrast, non-`async` `Promise`-returning functions\nare technically capable of either. This practice removes a requirement for consuming\ncode to handle both cases.\n        ",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "typescript",
+    "typescriptOnly": false,
+    "requiresTypeInfo": true
   },
   {
     "ruleName": "quotemark",
