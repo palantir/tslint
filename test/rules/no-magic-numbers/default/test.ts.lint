@@ -18,7 +18,13 @@ throw 1342;
       ~~~~                          ['magic numbers' are no allowed]
 
 class A {
+    static test = 1337;
+
     constructor (private a = 1337) {
                              ~~~~   ['magic numbers' are no allowed]
     }
+}
+
+enum Test {
+    key = 1337,
 }

@@ -51,6 +51,8 @@ export class Rule extends Lint.Rules.AbstractRule {
         ts.SyntaxKind.ShorthandPropertyAssignment,
         ts.SyntaxKind.VariableDeclaration,
         ts.SyntaxKind.VariableDeclarationList,
+        ts.SyntaxKind.EnumMember,
+        ts.SyntaxKind.PropertyDeclaration,
     ];
 
     public static DEFAULT_ALLOWED = [
