@@ -116,7 +116,10 @@ function isLiteralExpression(node: ts.Node): node is ts.LiteralExpression {
 function getTextOfPropertyName(node: ts.InterfaceDeclaration | ts.TypeElement | ts.ClassElement): string {
     let nameText: string;
     if (node.name == null) {
-        return null;
+        if (node.kind === ts.SyntaxKind.Constructor) {
+            return "constructor";
+        }
+        return undefined;
     }
     switch (node.name.kind) {
         case ts.SyntaxKind.Identifier:
