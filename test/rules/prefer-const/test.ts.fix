@@ -1,4 +1,5 @@
 const a = 1;
+
 // different reassignments
 let b = 1;
 b = 2;
@@ -10,13 +11,16 @@ let b3 = 1;
 b3 /= 2;
 let b4 = 1;
 --b4;
+
 // basic failure
 const c = 1; // failure
+
 // multiple declarations
 const c5 = 5, c6 = 6;
 const c1 = 1, c2 = 2; // 2 failures
 let c3 = 1, c4 = 2; // 1 failure
 c3 = 4;
+
 // destructuring
 let {h, i} = {h: 1, i: 1}; // failure for 'h'
 let [j, k] = [1, 1]; // failure for 'j'
@@ -26,6 +30,7 @@ i = 2;
 k = 2;
 q = 4;
 x2 = 5;
+
 // functions
 function myFunc(d: number, e: number) {
     const f = 1; // failure
@@ -37,6 +42,7 @@ function myFunc2() {
     m = 2;
     return l;
 }
+
 // for-of
 for (const n of [1, 1]) { // failure for 'n'
     console.log(n);
@@ -45,6 +51,7 @@ for (let {o, p} of [{1, 1}, {1, 1}]) { // failure for 'o'
     console.log(o);
     p = 2;
 }
+
 // for loop
 for (let i1 = 0; i1 < 4; i1++) {
 }
@@ -52,6 +59,7 @@ for (const i2 = 0;;) {    // failure
 }
 for (const i2 = 0;;) {    // failure
 }
+
 // scope
 let sc = 0;
 const sc1 = 0;
@@ -73,6 +81,7 @@ class MyClass {
         sc4++;
     }
 }
+
 // separate declaration and assignment (no error)
 let x: number;
 x = 5;
@@ -96,4 +105,11 @@ const nest2 = () => {
     }
 }
 
+// export
 export let x = 4;
+
+// array
+const arr = [];
+arr.push(0);
+arr[1] = 1;
+arr.length = 1;

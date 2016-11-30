@@ -143,3 +143,10 @@ export function isNestedModuleDeclaration(decl: ts.ModuleDeclaration) {
     // nodes
     return decl.name.pos === decl.pos;
 }
+
+export function unwrapParentheses(node: ts.Expression) {
+    while (node.kind === ts.SyntaxKind.ParenthesizedExpression) {
+        node = (node as ts.ParenthesizedExpression).expression;
+    }
+    return node;
+}

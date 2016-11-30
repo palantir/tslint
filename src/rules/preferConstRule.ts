@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 import * as Lint from "../index";
-import {isNodeFlagSet} from "../language/utils";
+import {isNodeFlagSet, unwrapParentheses} from "../language/utils";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -115,7 +115,7 @@ class PreferConstWalker extends Lint.BlockScopeAwareRuleWalker<{}, ScopeInfo> {
     private handleLHSExpression(node: ts.Expression) {
         node = unwrapParentheses(node);
         if (node.kind === ts.SyntaxKind.Identifier) {
-            this.markAssignment(<ts.Identifier> node);
+            this.markAssignment(node as ts.Identifier);
         }
     }
 
@@ -140,9 +140,10 @@ class PreferConstWalker extends Lint.BlockScopeAwareRuleWalker<{}, ScopeInfo> {
     }
 
     private markAssignment(identifier: ts.Identifier) {
+        const allBlockScopes = this.getAllBlockScopes();
         // look through block scopes from local -> global
-        for (const blockScope of this.getAllBlockScopes().reverse()) {
-            if (blockScope.incrementVariableUsages(identifier.text)) {
+        for (let i = allBlockScopes.length - 1; i >= 0; i--) {
+            if (allBlockScopes[i].incrementVariableUsage(identifier.text)) {
                 break;
             }
         }
@@ -179,7 +180,7 @@ class ScopeInfo {
     }
 
     public getConstCandiates() {
-        let constCandidates: IConstCandidate[] = [];
+        const constCandidates: IConstCandidate[] = [];
         for (const letSetKey of Object.keys(this.sharedLetSets)) {
             const variableNames = this.sharedLetSets[letSetKey];
             const anyReassigned = variableNames.some((key) => this.identifierUsages[key].usageCount > 0);
@@ -197,7 +198,7 @@ class ScopeInfo {
         return constCandidates;
     }
 
-    public incrementVariableUsages(varName: string) {
+    public incrementVariableUsage(varName: string) {
         if (this.identifierUsages[varName] != null) {
             this.identifierUsages[varName].usageCount++;
             return true;
@@ -209,11 +210,4 @@ class ScopeInfo {
 function isAssignmentOperator(token: ts.Node) {
     return token.kind >= ts.SyntaxKind.FirstAssignment
         && token.kind <= ts.SyntaxKind.LastAssignment;
-}
-
-function unwrapParentheses(node: ts.Expression) {
-    while (node.kind === ts.SyntaxKind.ParenthesizedExpression) {
-        node = (<ts.ParenthesizedExpression> node).expression;
-    }
-    return node;
 }
