@@ -25,8 +25,7 @@ export abstract class ScopeAwareRuleWalker<T> extends RuleWalker {
     constructor(sourceFile: ts.SourceFile, options?: any) {
         super(sourceFile, options);
 
-        // initialize stack with global scope
-        this.scopeStack = [this.createScope(sourceFile)];
+        this.scopeStack = [];
     }
 
     public abstract createScope(node: ts.Node): T;
@@ -59,19 +58,20 @@ export abstract class ScopeAwareRuleWalker<T> extends RuleWalker {
 
         if (isNewScope) {
             this.scopeStack.push(this.createScope(node));
+            this.onScopeStart();
         }
 
-        this.onScopeStart();
         super.visitNode(node);
-        this.onScopeEnd();
 
         if (isNewScope) {
+            this.onScopeEnd();
             this.scopeStack.pop();
         }
     }
 
     protected isScopeBoundary(node: ts.Node): boolean {
         return node.kind === ts.SyntaxKind.FunctionDeclaration
+            || node.kind === ts.SyntaxKind.SourceFile
             || node.kind === ts.SyntaxKind.FunctionExpression
             || node.kind === ts.SyntaxKind.PropertyAssignment
             || node.kind === ts.SyntaxKind.ShorthandPropertyAssignment
