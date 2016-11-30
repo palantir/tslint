@@ -79,11 +79,6 @@ class PreferConstWalker extends Lint.BlockScopeAwareRuleWalker<{}, ScopeInfo> {
         super.visitBinaryExpression(node);
     }
 
-    protected visitEndOfFileToken(node: ts.Node) {
-        this.onBlockScopeEnd();
-        super.visitEndOfFileToken(node);
-    }
-
     protected visitPrefixUnaryExpression(node: ts.PrefixUnaryExpression) {
         this.handleUnaryExpression(node);
         super.visitPrefixUnaryExpression(node);
