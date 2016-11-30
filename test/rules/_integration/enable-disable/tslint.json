@@ -1,6 +1,7 @@
 {
   "rules": {
     "quotemark": [true, "double"],
-    "variable-name": true
+    "variable-name": true,
+    "no-var-keyword": false
   }
 }

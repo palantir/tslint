@@ -25,6 +25,22 @@ export abstract class AbstractRule implements IRule {
     public static metadata: IRuleMetadata;
     private options: IOptions;
 
+    public static isRuleEnabled(ruleConfigValue: any): boolean {
+        if (typeof ruleConfigValue === "boolean") {
+            return ruleConfigValue;
+        }
+
+        if (Array.isArray(ruleConfigValue) && ruleConfigValue.length > 0) {
+            return ruleConfigValue[0];
+        }
+
+        if (ruleConfigValue.level !== "off" && ruleConfigValue.level !== "none") {
+            return true;
+        }
+
+        return false;
+    }
+
     constructor(ruleName: string, private value: any, disabledIntervals: IDisabledInterval[]) {
         let ruleArguments: any[] = [];
         let ruleLevel = RuleLevel.ERROR;
@@ -59,20 +75,6 @@ export abstract class AbstractRule implements IRule {
     }
 
     public isEnabled(): boolean {
-        const value = this.value;
-
-        if (typeof value === "boolean") {
-            return value;
-        }
-
-        if (Array.isArray(value) && value.length > 0) {
-            return value[0];
-        }
-
-        if (value.level === "off" || value.level === "none") {
-            return false;
-        }
-
-        return true;
+        return AbstractRule.isRuleEnabled(this.value);
     }
 }

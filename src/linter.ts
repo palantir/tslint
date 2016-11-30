@@ -179,20 +179,20 @@ class Linter {
 
     private getEnabledRules(fileName: string, source?: string, configuration: IConfigurationFile = DEFAULT_CONFIG): IRule[] {
         const sourceFile = this.getSourceFile(fileName, source);
+        const isJs = /\.jsx?$/i.test(fileName);
+        const configurationRules = isJs ? configuration.jsRules : configuration.rules;
 
         // walk the code first to find all the intervals where rules are disabled
         const rulesWalker = new EnableDisableRulesWalker(sourceFile, {
             disabledIntervals: [],
             ruleLevel: RuleLevel.ERROR,
             ruleName: "",
-        });
+        }, configurationRules);
         rulesWalker.walk(sourceFile);
         const enableDisableRuleMap = rulesWalker.enableDisableRuleMap;
 
         const rulesDirectories = arrayify(this.options.rulesDirectory)
             .concat(arrayify(configuration.rulesDirectory));
-        const isJs = /\.jsx?$/i.test(fileName);
-        const configurationRules = isJs ? configuration.jsRules : configuration.rules;
         let configuredRules = loadRules(configurationRules, enableDisableRuleMap, rulesDirectories, isJs);
 
         return configuredRules.filter((r) => r.isEnabled());

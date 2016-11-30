@@ -17,12 +17,29 @@
 
 import * as ts from "typescript";
 
+import {AbstractRule} from "./language/rule/abstractRule";
+import {IOptions} from "./language/rule/rule";
 import {scanAllTokens} from "./language/utils";
 import {SkippableTokenAwareRuleWalker} from "./language/walker/skippableTokenAwareRuleWalker";
 import {IEnableDisablePosition} from "./ruleLoader";
 
 export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
     public enableDisableRuleMap: {[rulename: string]: IEnableDisablePosition[]} = {};
+
+    constructor(sourceFile: ts.SourceFile, options: IOptions, rules: {[name: string]: any}) {
+        super(sourceFile, options);
+
+        if (rules) {
+            for (const rule in rules) {
+                if (rules.hasOwnProperty(rule) && AbstractRule.isRuleEnabled(rules[rule])) {
+                    this.enableDisableRuleMap[rule] = [{
+                        isEnabled: true,
+                        position: 0,
+                    }];
+                }
+            }
+        }
+    }
 
     public visitSourceFile(node: ts.SourceFile) {
         super.visitSourceFile(node);
@@ -50,6 +67,29 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
         return node.getPositionOfLineAndCharacter(
             node.getLineAndCharacterOfPosition(position).line + lineOffset, 0,
         );
+    }
+
+    private switchRuleState(ruleName: string, isEnabled: boolean, start: number, end?: number): void {
+        const ruleStateMap = this.enableDisableRuleMap[ruleName];
+
+        ruleStateMap.push({
+            isEnabled,
+            position: start,
+        });
+
+        if (end) {
+            // switchRuleState method is only called when rule state changes therefore we can safely use opposite state
+            ruleStateMap.push({
+                isEnabled: !isEnabled,
+                position: end,
+            });
+        }
+    }
+
+    private getLatestRuleState(ruleName: string): boolean {
+        const ruleStateMap = this.enableDisableRuleMap[ruleName];
+
+        return ruleStateMap[ruleStateMap.length - 1].isEnabled;
     }
 
     private handlePossibleTslintSwitch(commentText: string, startingPosition: number, node: ts.SourceFile, scanner: ts.Scanner) {
@@ -82,35 +122,44 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
                     rulesList = commentTextParts[2].split(/\s+/);
                 }
 
-                for (const ruleToAdd of rulesList) {
-                    if (!(ruleToAdd in this.enableDisableRuleMap)) {
-                        this.enableDisableRuleMap[ruleToAdd] = [];
+                if (rulesList.indexOf("all") !== -1) {
+                    // iterate over all enabled rules
+                    rulesList = Object.keys(this.enableDisableRuleMap);
+                }
+
+                for (const ruleToSwitch of rulesList) {
+                    if (!(ruleToSwitch in this.enableDisableRuleMap)) {
+                        // all rules enabled in configuration are already in map - skip switches for disabled rules
+                        continue;
                     }
+
+                    const previousState = this.getLatestRuleState(ruleToSwitch);
+
+                    if (previousState === isEnabled) {
+                        // no need to add switch points if there is no change in rule state
+                        continue;
+                    }
+
+                    let start: number;
+                    let end: number;
+
                     if (isCurrentLine) {
                         // start at the beginning of the current line
-                        this.enableDisableRuleMap[ruleToAdd].push({
-                            isEnabled,
-                            position: this.getStartOfLinePosition(node, startingPosition),
-                        });
+                        start = this.getStartOfLinePosition(node, startingPosition);
                         // end at the beginning of the next line
-                        this.enableDisableRuleMap[ruleToAdd].push({
-                            isEnabled: !isEnabled,
-                            position: scanner.getTextPos() + 1,
-                        });
-                    } else {
+                        end = scanner.getTextPos() + 1;
+                    } else if (isNextLine) {
                         // start at the current position
-                        this.enableDisableRuleMap[ruleToAdd].push({
-                            isEnabled,
-                            position: startingPosition,
-                        });
+                        start = startingPosition;
                         // end at the beginning of the line following the next line
-                        if (isNextLine) {
-                            this.enableDisableRuleMap[ruleToAdd].push({
-                                isEnabled: !isEnabled,
-                                position: this.getStartOfLinePosition(node, startingPosition, 2),
-                            });
-                        }
+                        end = this.getStartOfLinePosition(node, startingPosition, 2);
+                    } else {
+                        // disable rule for the rest of the file
+                        // start at the current position, but skip end position
+                        start = startingPosition;
                     }
+
+                    this.switchRuleState(ruleToSwitch, isEnabled, start, end);
                 }
             }
         }

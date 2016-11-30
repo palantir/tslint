@@ -49,12 +49,12 @@ export interface IRunnerOptions {
     /**
      * Whether to return status code 0 even if there are lint errors.
      */
-    force: boolean;
+    force?: boolean;
 
     /**
      * Whether to fixes linting errors for select rules. This may overwrite linted files.
      */
-    fix: boolean;
+    fix?: boolean;
 
     /**
      * Output format.
@@ -69,7 +69,7 @@ export interface IRunnerOptions {
     /**
      * Whether to generate a tslint.json config file in the current working directory.
      */
-    init: boolean;
+    init?: boolean;
 
     /**
      * Output file path.
@@ -94,12 +94,12 @@ export interface IRunnerOptions {
     /**
      * Whether to enable type checking when linting a project.
      */
-    typeCheck: boolean;
+    typeCheck?: boolean;
 
     /**
-     * Current TSLint version.
+     * Whether to show the current TSLint version.
      */
-    version: boolean;
+    version?: boolean;
 }
 
 export class Runner {
@@ -151,6 +151,7 @@ export class Runner {
             if (!fs.existsSync(this.options.project)) {
                 console.error("Invalid option for project: " + this.options.project);
                 onComplete(1);
+                return;
             }
             program = Linter.createProgram(this.options.project, path.dirname(this.options.project));
             if (files.length === 0) {
@@ -216,6 +217,7 @@ export class Runner {
             if (!fs.existsSync(file)) {
                 console.error(`Unable to open file: ${file}`);
                 onComplete(1);
+                return;
             }
 
             const buffer = new Buffer(256);
@@ -244,6 +246,8 @@ export class Runner {
         this.outputStream.write(lintResult.output, () => {
             if (lintResult.failureCount > 0) {
                 onComplete(this.options.force ? 0 : 2);
+            } else {
+                onComplete(0);
             }
         });
 
