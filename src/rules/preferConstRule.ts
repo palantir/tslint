@@ -45,8 +45,6 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class PreferConstWalker extends Lint.BlockScopeAwareRuleWalker<{}, ScopeInfo> {
-    private currentVariableDeclaration: ts.VariableDeclaration;
-
     public createScope() {
         return {};
     }
@@ -57,8 +55,7 @@ class PreferConstWalker extends Lint.BlockScopeAwareRuleWalker<{}, ScopeInfo> {
 
     public onBlockScopeEnd() {
         const seenLetStatements: { [startPosition: string]: boolean } = {};
-        let nonReassignedVariables = this.getCurrentBlockScope().getNonReassignedVariables();
-        for (const usage of nonReassignedVariables) {
+        for (const usage of this.getCurrentBlockScope().getConstCandiates()) {
             let fix: Lint.Fix;
             if (!usage.reassignedSibling && !seenLetStatements[usage.letStatement.getStart().toString()]) {
                 // only fix if all variables in the `let` statement can use `const`
@@ -98,26 +95,17 @@ class PreferConstWalker extends Lint.BlockScopeAwareRuleWalker<{}, ScopeInfo> {
     }
 
     protected visitVariableDeclaration(node: ts.VariableDeclaration) {
-        this.currentVariableDeclaration = node;
+        this.getCurrentBlockScope().currentVariableDeclaration = node;
         super.visitVariableDeclaration(node);
-        this.currentVariableDeclaration = null;
-    }
-
-    protected visitVariableDeclarationList(node: ts.VariableDeclarationList) {
-        let currentBlockScope = this.getCurrentBlockScope();
-        currentBlockScope.declarationListStack.push(node);
-        super.visitVariableDeclarationList(node);
-        currentBlockScope.declarationListStack.pop();
+        this.getCurrentBlockScope().currentVariableDeclaration = null;
     }
 
     protected visitIdentifier(node: ts.Identifier) {
-        const currentBlockScope = this.getCurrentBlockScope();
-        if (currentBlockScope.declarationListStack.length > 0) {
-            const currentDeclarationList = currentBlockScope.declarationListStack[currentBlockScope.declarationListStack.length - 1];
-            if (isNodeFlagSet(currentDeclarationList, ts.NodeFlags.Let)
-                && !isNodeFlagSet(currentDeclarationList.parent, ts.NodeFlags.Export)) {
+        if (this.getCurrentBlockScope().currentVariableDeclaration != null) {
+            const declarationList = this.getCurrentBlockScope().currentVariableDeclaration.parent;
+            if (isNodeFlagSet(declarationList, ts.NodeFlags.Let) && !isNodeFlagSet(declarationList.parent, ts.NodeFlags.Export)) {
                 if (this.isVariableDeclaration(node)) {
-                    currentBlockScope.addIdentifier(node, currentDeclarationList);
+                    this.getCurrentBlockScope().addVariable(node, declarationList);
                 }
             }
         }
@@ -138,13 +126,14 @@ class PreferConstWalker extends Lint.BlockScopeAwareRuleWalker<{}, ScopeInfo> {
     }
 
     private isVariableDeclaration(node: ts.Identifier) {
-        if (this.currentVariableDeclaration != null) {
+        if (this.getCurrentBlockScope().currentVariableDeclaration != null) {
             // `isBindingElementDeclaration` differentiates between non-variable binding elements and variable binding elements
             // for example in `let {a: {b}} = {a: {b: 1}}`, `a` is a non-variable and the 1st `b` is a variable
             const isBindingElementDeclaration = node.parent.kind === ts.SyntaxKind.BindingElement
                 && node.parent.getText() === node.getText();
             const isSimpleVariableDeclaration = node.parent.kind === ts.SyntaxKind.VariableDeclaration;
-            const inVariableDeclaration = this.currentVariableDeclaration.name.getEnd() >= node.getEnd();
+            // differentiates between the left and right hand side of a declaration
+            const inVariableDeclaration = this.getCurrentBlockScope().currentVariableDeclaration.name.getEnd() >= node.getEnd();
             return inVariableDeclaration && (isBindingElementDeclaration || isSimpleVariableDeclaration);
         }
         return false;
@@ -153,14 +142,14 @@ class PreferConstWalker extends Lint.BlockScopeAwareRuleWalker<{}, ScopeInfo> {
     private markAssignment(identifier: ts.Identifier) {
         // look through block scopes from local -> global
         for (const blockScope of this.getAllBlockScopes().reverse()) {
-            if (blockScope.incrementIdentifier(identifier.text)) {
+            if (blockScope.incrementVariableUsages(identifier.text)) {
                 break;
             }
         }
     }
 }
 
-interface IVariableUsage {
+interface IConstCandidate {
     letStatement: ts.VariableDeclarationList;
     identifier: ts.Identifier;
     // whether or not a different variable declaration that shares the same `let` statement is ever reassigned
@@ -168,39 +157,36 @@ interface IVariableUsage {
 }
 
 class ScopeInfo {
-    // the stack of const/let/var declarations
-    public declarationListStack: ts.VariableDeclarationList[] = [];
+    public currentVariableDeclaration: ts.VariableDeclaration;
+
     private identifierUsages: {
         [varName: string]: {
             letStatement: ts.VariableDeclarationList,
             identifier: ts.Identifier,
-            usages: number,
+            usageCount: number,
         },
     } = {};
     // variable names grouped by common `let` statements
-    private sharedLetSets: {
-        [letStartIndex: string]: { [variableName: string]: boolean },
-    } = {};
+    private sharedLetSets: {[letStartIndex: string]: string[]} = {};
 
-    public addIdentifier(identifier: ts.Identifier, letStatement: ts.VariableDeclarationList) {
-        this.identifierUsages[identifier.text] = { letStatement, identifier, usages: 0 };
+    public addVariable(identifier: ts.Identifier, letStatement: ts.VariableDeclarationList) {
+        this.identifierUsages[identifier.text] = { letStatement, identifier, usageCount: 0 };
         const letSetKey = letStatement.getStart().toString();
         if (this.sharedLetSets[letSetKey] == null) {
-            this.sharedLetSets[letSetKey] = {};
+            this.sharedLetSets[letSetKey] = [];
         }
-        this.sharedLetSets[letSetKey][identifier.text] = true;
+        this.sharedLetSets[letSetKey].push(identifier.text);
     }
 
-    public getNonReassignedVariables() {
-        let letCandidates: IVariableUsage[] = [];
+    public getConstCandiates() {
+        let constCandidates: IConstCandidate[] = [];
         for (const letSetKey of Object.keys(this.sharedLetSets)) {
-            const letSet = this.sharedLetSets[letSetKey];
-            const variableNames = Object.keys(letSet);
-            const anyReassigned = variableNames.some((key) => this.identifierUsages[key].usages > 0);
+            const variableNames = this.sharedLetSets[letSetKey];
+            const anyReassigned = variableNames.some((key) => this.identifierUsages[key].usageCount > 0);
             for (const variableName of variableNames) {
                 const usage = this.identifierUsages[variableName];
-                if (usage.usages === 0) {
-                    letCandidates.push({
+                if (usage.usageCount === 0) {
+                    constCandidates.push({
                         identifier: usage.identifier,
                         letStatement: usage.letStatement,
                         reassignedSibling: anyReassigned,
@@ -208,12 +194,12 @@ class ScopeInfo {
                 }
             }
         }
-        return letCandidates;
+        return constCandidates;
     }
 
-    public incrementIdentifier(varName: string) {
+    public incrementVariableUsages(varName: string) {
         if (this.identifierUsages[varName] != null) {
-            this.identifierUsages[varName].usages++;
+            this.identifierUsages[varName].usageCount++;
             return true;
         }
         return false;
