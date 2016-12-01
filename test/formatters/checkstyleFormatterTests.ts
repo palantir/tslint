@@ -3,27 +3,40 @@ import * as ts from "typescript";
 import {IFormatter, RuleFailure, TestUtils} from "../lint";
 
 describe("Checkstyle Formatter", () => {
-    const TEST_FILE = "formatters/pmdFormatter.test.ts"; // reuse existing sample file
-    let sourceFile: ts.SourceFile;
+    const TEST_FILE_1 = "formatters/jsonFormatter.test.ts"; // reuse existing sample file
+    const TEST_FILE_2 = "formatters/pmdFormatter.test.ts"; // reuse existing sample file
+    let sourceFile1: ts.SourceFile;
+    let sourceFile2: ts.SourceFile;
     let formatter: IFormatter;
 
     before(() => {
         const Formatter = TestUtils.getFormatter("checkstyle");
-        sourceFile = TestUtils.getSourceFile(TEST_FILE);
+        sourceFile1 = TestUtils.getSourceFile(TEST_FILE_1);
+        sourceFile2 = TestUtils.getSourceFile(TEST_FILE_2);
         formatter = new Formatter();
     });
 
     it("formats failures", () => {
-        const maxPosition = sourceFile.getFullWidth();
+        const maxPosition1 = sourceFile1.getFullWidth();
+        const maxPosition2 = sourceFile2.getFullWidth();
 
         const failures = [
-            new RuleFailure(sourceFile, 0, 1, "first failure", "first-name"),
-            new RuleFailure(sourceFile, 2, 3, "&<>'\" should be escaped", "escape"),
-            new RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name"),
+            new RuleFailure(sourceFile1, 0, 1, "first failure", "first-name"),
+            new RuleFailure(sourceFile1, 2, 3, "&<>'\" should be escaped", "escape"),
+            new RuleFailure(sourceFile1, maxPosition1 - 1, maxPosition1, "last failure", "last-name"),
+            new RuleFailure(sourceFile2, 0, 1, "first failure", "first-name"),
+            new RuleFailure(sourceFile2, 2, 3, "&<>'\" should be escaped", "escape"),
+            new RuleFailure(sourceFile2, maxPosition2 - 1, maxPosition2, "last failure", "last-name"),
         ];
         const expectedResult =
             '<?xml version="1.0" encoding="utf-8"?><checkstyle version="4.3">' +
-            `<file name="${TEST_FILE}">` +
+            `<file name="${TEST_FILE_1}">` +
+            '<error line="1" column="1" severity="warning" message="first failure" source="failure.tslint.first-name" />' +
+            '<error line="1" column="3" severity="warning" message="&amp;&lt;&gt;&#39;&quot; should be escaped" ' +
+            'source="failure.tslint.escape" />' +
+            '<error line="6" column="3" severity="warning" message="last failure" source="failure.tslint.last-name" />' +
+            "</file>" +
+            `<file name="${TEST_FILE_2}">` +
             '<error line="1" column="1" severity="warning" message="first failure" source="failure.tslint.first-name" />' +
             '<error line="1" column="3" severity="warning" message="&amp;&lt;&gt;&#39;&quot; should be escaped" ' +
             'source="failure.tslint.escape" />' +
