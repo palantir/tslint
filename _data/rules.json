@@ -7,6 +7,7 @@
     "optionExamples": [
       "true"
     ],
+    "rationale": "Improves readability and organization by grouping naturally related items together.",
     "type": "typescript",
     "typescriptOnly": true
   },
@@ -124,6 +125,29 @@
     "typescriptOnly": false
   },
   {
+    "ruleName": "completed-docs",
+    "description": "Enforces documentation for important items be filled out.",
+    "optionsDescription": "\nEither `true` to enable for all, or any of\n`[\"classes\", \"functions\", \"methods\", \"properties\"]\nto choose individual ones.`",
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "classes",
+          "functions",
+          "methods",
+          "properties"
+        ]
+      }
+    },
+    "optionExamples": [
+      "true",
+      "[true, [\"classes\", \"functions\"]"
+    ],
+    "type": "style",
+    "typescriptOnly": false
+  },
+  {
     "ruleName": "curly",
     "description": "Enforces braces for `if`/`for`/`do`/`while` statements.",
     "rationale": "\n```ts\nif (foo === bar)\n    foo++;\n    bar++;\n```\n\nIn the code above, the author almost certainly meant for both `foo++` and `bar++`\nto be executed only if `foo === bar`. However, he forgot braces and `bar++` will be executed\nno matter what. This rule could prevent such a mistake.",
@@ -149,7 +173,8 @@
       "true",
       "[true, 20]"
     ],
-    "type": "maintainability"
+    "type": "maintainability",
+    "typescriptOnly": false
   },
   {
     "ruleName": "eofline",
@@ -271,7 +296,7 @@
   },
   {
     "ruleName": "max-classes-per-file",
-    "description": "\nA file may not contain more than the specified number of classes \nif the file name does not match the \"ignore-filename-pattern\" option",
+    "description": "\nA file may not contain more than the specified number of classes",
     "rationale": "\nEnsures that files have a single responsibility so that that classes each exist in their own files",
     "optionsDescription": "\nThe one required argument is an integer indicating the maximum number of classes that can appear in a file.",
     "options": {
@@ -290,7 +315,8 @@
       "[true, 1]",
       "[true, 5]"
     ],
-    "type": "maintainability"
+    "type": "maintainability",
+    "typescriptOnly": false
   },
   {
     "ruleName": "max-file-line-count",
@@ -784,18 +810,6 @@
     "typescriptOnly": false
   },
   {
-    "ruleName": "no-unreachable",
-    "description": "Disallows unreachable code after `break`, `catch`, `throw`, and `return` statements.",
-    "rationale": "Unreachable code is often indication of a logic error.",
-    "optionsDescription": "Not configurable.",
-    "options": null,
-    "optionExamples": [
-      "true"
-    ],
-    "type": "functionality",
-    "typescriptOnly": false
-  },
-  {
     "ruleName": "no-unsafe-finally",
     "description": "\nDisallows control flow statements, such as `return`, `continue`,\n`break` and `throws` in finally blocks.",
     "descriptionDetails": "",
@@ -836,7 +850,7 @@
   },
   {
     "ruleName": "no-unused-variable",
-    "deprecationMessage": "Use the compiler options --noUnusedParameters and --noUnusedLocals instead.",
+    "deprecationMessage": "Use the tsc compiler options --noUnusedParameters and --noUnusedLocals instead.",
     "description": "Disallows unused imports, variables, functions and private class members.",
     "optionsDescription": "\nThree optional arguments may be optionally provided:\n\n* `\"check-parameters\"` disallows unused function and constructor parameters.\n    * NOTE: this option is experimental and does not work with classes\n    that use abstract method declarations, among other things.\n* `\"react\"` relaxes the rule for a namespace import named `React`\n(from either the module `\"react\"` or `\"react/addons\"`).\nAny JSX expression in the file will be treated as a usage of `React`\n(because it expands to `React.createElement `).\n* `{\"ignore-pattern\": \"pattern\"}` where pattern is a case-sensitive regexp.\nVariable names that match the pattern will be ignored.",
     "options": {
@@ -911,12 +925,14 @@
     "ruleName": "object-literal-key-quotes",
     "description": "Enforces consistent object literal property quote style.",
     "descriptionDetails": "\nObject literal property names can be defined in two ways: using literals or using strings.\nFor example, these two objects are equivalent:\n\nvar object1 = {\n    property: true\n};\n\nvar object2 = {\n    \"property\": true\n};\n\nIn many cases, it doesn’t matter if you choose to use an identifier instead of a string\nor vice-versa. Even so, you might decide to enforce a consistent style in your code.\n\nThis rules lets you enforce consistent quoting of property names. Either they should always\nbe quoted (default behavior) or quoted only as needed (\"as-needed\").",
-    "optionsDescription": "\nPossible settings are:\n\n* `\"always\"`: Property names should always be quoted. (This is the default.)\n* `\"as-needed\"`: Only property names which require quotes may be quoted (e.g. those with spaces in them).\n\nFor ES6, computed property names (`{[name]: value}`) and methods (`{foo() {}}`) never need\nto be quoted.",
+    "optionsDescription": "\nPossible settings are:\n\n* `\"always\"`: Property names should always be quoted. (This is the default.)\n* `\"as-needed\"`: Only property names which require quotes may be quoted (e.g. those with spaces in them).\n* `\"consistent\"`: Property names should either all be quoted or unquoted.\n* `\"consistent-as-needed\"`: If any property name requires quotes, then all properties must be quoted. Otherwise, no \nproperty names may be quoted.\n\nFor ES6, computed property names (`{[name]: value}`) and methods (`{foo() {}}`) never need\nto be quoted.",
     "options": {
       "type": "string",
       "enum": [
         "always",
-        "as-needed"
+        "as-needed",
+        "consistent",
+        "consistent-as-needed"
       ]
     },
     "optionExamples": [
@@ -929,6 +945,7 @@
   {
     "ruleName": "object-literal-shorthand",
     "description": "Enforces use of ES6 object literal shorthand when possible.",
+    "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
       "true"
@@ -1063,7 +1080,8 @@
     "optionExamples": [
       "true"
     ],
-    "type": "typescript"
+    "type": "typescript",
+    "typescriptOnly": false
   },
   {
     "ruleName": "quotemark",
