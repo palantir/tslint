@@ -679,9 +679,9 @@
   },
   {
     "ruleName": "no-magic-numbers",
-    "description": "Disallows the use constant number values outside of variable assignment. -1, 0 and 1 are allowed by default.",
+    "description": "\nDisallows the use constant number values outside of variable assignments.\nWhen no list of allowed values is specified, 0 and 1 are allowed by default.",
     "rationale": "\nMagic numbers should be avoided as they often lack documentation, forcing\nthem to be stored in variables gives them implicit documentation.",
-    "optionsDescription": "A list of allowed number.",
+    "optionsDescription": "A list of allowed numbers.",
     "options": {
       "type": "array",
       "items": {

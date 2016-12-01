@@ -19,15 +19,19 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
+import { IOptions } from "../language/rule/rule";
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-magic-numbers",
-        description: "Disallows the use constant number values outside of variable assignment. -1, 0 and 1 are allowed by default.",
+        description: Lint.Utils.dedent`
+            Disallows the use constant number values outside of variable assignments.
+            When no list of allowed values is specified, 0 and 1 are allowed by default.`,
         rationale: Lint.Utils.dedent`
             Magic numbers should be avoided as they often lack documentation, forcing
             them to be stored in variables gives them implicit documentation.`,
-        optionsDescription: "A list of allowed number.",
+        optionsDescription: "A list of allowed numbers.",
         options: {
             type: "array",
             items: {
@@ -43,17 +47,17 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static FAILURE_STRING = "'magic numbers' are no allowed";
 
-    public static ALLOWED_NODES = [
-        ts.SyntaxKind.ExportAssignment,
-        ts.SyntaxKind.FirstAssignment,
-        ts.SyntaxKind.LastAssignment,
-        ts.SyntaxKind.PropertyAssignment,
-        ts.SyntaxKind.ShorthandPropertyAssignment,
-        ts.SyntaxKind.VariableDeclaration,
-        ts.SyntaxKind.VariableDeclarationList,
-        ts.SyntaxKind.EnumMember,
-        ts.SyntaxKind.PropertyDeclaration,
-    ];
+    public static ALLOWED_NODES = {
+        [ts.SyntaxKind.ExportAssignment]: true,
+        [ts.SyntaxKind.FirstAssignment]: true,
+        [ts.SyntaxKind.LastAssignment]: true,
+        [ts.SyntaxKind.PropertyAssignment]: true,
+        [ts.SyntaxKind.ShorthandPropertyAssignment]: true,
+        [ts.SyntaxKind.VariableDeclaration]: true,
+        [ts.SyntaxKind.VariableDeclarationList]: true,
+        [ts.SyntaxKind.EnumMember]: true,
+        [ts.SyntaxKind.PropertyDeclaration]: true,
+    };
 
     public static DEFAULT_ALLOWED = [
         0,
@@ -66,13 +70,23 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class NoMagicNumbersWalker extends Lint.RuleWalker {
-    public visitNode(node: ts.Node) {
-        if (node.kind === ts.SyntaxKind.NumericLiteral &&
-            Rule.ALLOWED_NODES.indexOf(node.parent.kind) === -1) {
-            const options = this.getOptions();
+    private allowed: { [prop: string]: boolean };
+    constructor (sourceFile: ts.SourceFile, options: IOptions) {
+        super(sourceFile, options);
 
-            const allowed: number[] = options.length > 0 ? options : Rule.DEFAULT_ALLOWED;
-            if (allowed.indexOf(Number(node.getText())) === -1) {
+        const configOptions = this.getOptions();
+        const allowedArray: number[] = configOptions.length > 0 ? configOptions : Rule.DEFAULT_ALLOWED;
+
+        const allowed: { [prop: string]: boolean } = {};
+        allowedArray.forEach((value) => {
+            allowed[value] = true;
+        });
+        this.allowed = allowed;
+    }
+
+    public visitNode(node: ts.Node) {
+        if (node.kind === ts.SyntaxKind.NumericLiteral && !Rule.ALLOWED_NODES[node.parent.kind]) {
+            if (!this.allowed[node.getText()]) {
                 this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
             }
         }
