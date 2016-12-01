@@ -26,11 +26,11 @@ export class Formatter extends AbstractFormatter {
         let output = '<?xml version="1.0" encoding="utf-8"?><checkstyle version="4.3">';
 
         if (failures.length) {
-            var failuresSorted = failures.sort(function(a,b){
+            let failuresSorted = failures.sort((a, b) => {
                 return a.getFileName().localeCompare(b.getFileName());
             });
-            var previousFilename: string = null;
-            for (var failure of failuresSorted) {
+            let previousFilename: string = null;
+            for (let failure of failuresSorted) {
                 if (failure.getFileName() !== previousFilename) {
                     if (previousFilename) {
                         output += "</file>";

@@ -5,28 +5,28 @@ import {IFormatter, RuleFailure, TestUtils} from "../lint";
 describe("Checkstyle Formatter", () => {
     const TEST_FILE_1 = "formatters/jsonFormatter.test.ts"; // reuse existing sample file
     const TEST_FILE_2 = "formatters/pmdFormatter.test.ts"; // reuse existing sample file
-    let sourceFile_1: ts.SourceFile;
-    let sourceFile_2: ts.SourceFile;
+    let sourceFile1: ts.SourceFile;
+    let sourceFile2: ts.SourceFile;
     let formatter: IFormatter;
 
     before(() => {
         const Formatter = TestUtils.getFormatter("checkstyle");
-        sourceFile_1 = TestUtils.getSourceFile(TEST_FILE_1);
-        sourceFile_2 = TestUtils.getSourceFile(TEST_FILE_2);
+        sourceFile1 = TestUtils.getSourceFile(TEST_FILE_1);
+        sourceFile2 = TestUtils.getSourceFile(TEST_FILE_2);
         formatter = new Formatter();
     });
 
     it("formats failures", () => {
-        const maxPosition_1 = sourceFile_1.getFullWidth();
-        const maxPosition_2 = sourceFile_2.getFullWidth();
+        const maxPosition1 = sourceFile1.getFullWidth();
+        const maxPosition2 = sourceFile2.getFullWidth();
 
         const failures = [
-            new RuleFailure(sourceFile_1, 0, 1, "first failure", "first-name"),
-            new RuleFailure(sourceFile_1, 2, 3, "&<>'\" should be escaped", "escape"),
-            new RuleFailure(sourceFile_1, maxPosition_1 - 1, maxPosition_1, "last failure", "last-name"),
-            new RuleFailure(sourceFile_2, 0, 1, "first failure", "first-name"),
-            new RuleFailure(sourceFile_2, 2, 3, "&<>'\" should be escaped", "escape"),
-            new RuleFailure(sourceFile_2, maxPosition_2 - 1, maxPosition_2, "last failure", "last-name"),
+            new RuleFailure(sourceFile1, 0, 1, "first failure", "first-name"),
+            new RuleFailure(sourceFile1, 2, 3, "&<>'\" should be escaped", "escape"),
+            new RuleFailure(sourceFile1, maxPosition1 - 1, maxPosition1, "last failure", "last-name"),
+            new RuleFailure(sourceFile2, 0, 1, "first failure", "first-name"),
+            new RuleFailure(sourceFile2, 2, 3, "&<>'\" should be escaped", "escape"),
+            new RuleFailure(sourceFile2, maxPosition2 - 1, maxPosition2, "last failure", "last-name"),
         ];
         const expectedResult =
             '<?xml version="1.0" encoding="utf-8"?><checkstyle version="4.3">' +
