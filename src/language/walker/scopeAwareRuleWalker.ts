@@ -20,12 +20,16 @@ import * as ts from "typescript";
 import {RuleWalker} from "./ruleWalker";
 
 export abstract class ScopeAwareRuleWalker<T> extends RuleWalker {
+    protected fileIsModule: boolean;
     private scopeStack: T[];
 
     constructor(sourceFile: ts.SourceFile, options?: any) {
         super(sourceFile, options);
 
-        this.scopeStack = [];
+        this.fileIsModule = ts.isExternalModule(sourceFile);
+
+        // initialize with global scope if file is not a module
+        this.scopeStack = this.fileIsModule ? [] : [this.createScope(sourceFile)];
     }
 
     public abstract createScope(node: ts.Node): T;
@@ -71,7 +75,6 @@ export abstract class ScopeAwareRuleWalker<T> extends RuleWalker {
 
     protected isScopeBoundary(node: ts.Node): boolean {
         return node.kind === ts.SyntaxKind.FunctionDeclaration
-            || node.kind === ts.SyntaxKind.SourceFile
             || node.kind === ts.SyntaxKind.FunctionExpression
             || node.kind === ts.SyntaxKind.PropertyAssignment
             || node.kind === ts.SyntaxKind.ShorthandPropertyAssignment
@@ -84,6 +87,7 @@ export abstract class ScopeAwareRuleWalker<T> extends RuleWalker {
             || node.kind === ts.SyntaxKind.ClassExpression
             || node.kind === ts.SyntaxKind.InterfaceDeclaration
             || node.kind === ts.SyntaxKind.GetAccessor
-            || node.kind === ts.SyntaxKind.SetAccessor;
+            || node.kind === ts.SyntaxKind.SetAccessor
+            || (node.kind === ts.SyntaxKind.SourceFile && this.fileIsModule);
     }
 }
