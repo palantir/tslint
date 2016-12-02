@@ -355,7 +355,7 @@ class Test<A, B, C> {
 
     foo5<
         T extends Test<[A, A], [A, A,], A>,
-        U extends Test<B, B, B,>,
+        U extends Test<B, B, B>,
         V extends Test<
             [
                 C,
@@ -365,8 +365,8 @@ class Test<A, B, C> {
                 C,
                 C,
             ],
-            C,
-        >,
+            C
+        >
     >(
         bar: A,
         baz: T,
@@ -386,7 +386,7 @@ class Test<A, B, C> {
                 string,
                 string,
             ];
-        },
+        }
     >() { return 42; }
 
     set bar(foo: string) { }
@@ -402,29 +402,29 @@ class Test<A, B, C> {
     ) { }
 }
 
-class Test2<A, B, C,> { }
+class Test2<A, B, C> { }
 
 class Test3<
     A,
     B,
-    C,
+    C
 > { }
 
 class Test4<
     A,
     B,
-    C,
+    C
 > { }
 
 interface ITest<A ,B, C> {
 
     new <U, V>(bar: U): ITest<U, U, V>;
 
-    new <U, V,>(bar: U, baz: V,): ITest<U, U, V,>;
+    new <U, V>(bar: U, baz: V,): ITest<U, U, V>;
 
     new <
         U,
-        V,
+        V
     >(
         bar: U,
         baz: U,
@@ -432,12 +432,12 @@ interface ITest<A ,B, C> {
     ): ITest<
         U,
         U,
-        V,
+        V
     >;
 
     new <
         U,
-        V,
+        V
     >(
         bar: U,
         baz: U,
@@ -446,7 +446,7 @@ interface ITest<A ,B, C> {
     ): ITest<
         U,
         U,
-        V,
+        V
     >;
 
     foo(bar: string, baz: string);
@@ -465,7 +465,7 @@ interface ITest<A ,B, C> {
 
     foo5<
         T extends Test<[A, A], [A, A,], A>,
-        U extends Test<B, B, B,>,
+        U extends Test<B, B, B>,
         V extends Test<
             [
                 C,
@@ -475,8 +475,8 @@ interface ITest<A ,B, C> {
                 C,
                 C,
             ],
-            C,
-        >,
+            C
+        >
     >(
         bar: A,
         baz: T,
@@ -494,7 +494,7 @@ interface ITest<A ,B, C> {
                 string,
                 string,
             ];
-        },
+        }
     >();
 }
 
@@ -503,13 +503,13 @@ interface ITest2<A, B, C> { }
 interface ITest3<
     A,
     B,
-    C,
+    C
 > { }
 
 interface ITest4<
     A,
     B,
-    C,
+    C
 > { }
 
 enum Foo { BAR, BAZ }

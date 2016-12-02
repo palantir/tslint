@@ -378,8 +378,7 @@ class Test<A, B, C> {
     foo5<
         T extends Test<[A, A], [A, A,], A>,
                                     ~       [Unnecessary trailing comma]
-        U extends Test<B, B, B,>,
-                              ~   [Unnecessary trailing comma]
+        U extends Test<B, B, B>,
         V extends Test<
             [
                 C,
@@ -414,8 +413,7 @@ class Test<A, B, C> {
     >() { return 42; }
 }
 
-class Test2<A, B, C,> { }
-                   ~      [Unnecessary trailing comma]
+class Test2<A, B, C> { }
 
 
 class Test3<
@@ -449,8 +447,7 @@ interface ITest<A ,B, C> {
     foo5<
         T extends Test<[A, A], [A, A,], A>,
                                     ~       [Unnecessary trailing comma]
-        U extends Test<B, B, B,>,
-                              ~   [Unnecessary trailing comma]
+        U extends Test<B, B, B>,
         V extends Test<
             [
                 C,

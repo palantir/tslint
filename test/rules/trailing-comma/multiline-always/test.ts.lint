@@ -380,7 +380,7 @@ class Test<A, B, C> {
 
     foo5<
         T extends Test<[A, A], [A, A,], A>,
-        U extends Test<B, B, B,>,
+        U extends Test<B, B, B>,
         V extends Test<
             [
                 C,
@@ -392,9 +392,7 @@ class Test<A, B, C> {
                 C,
             ],
             C
-            ~ [Missing trailing comma]
         >
-        ~ [Missing trailing comma]
     >(
         bar: A,
         baz: T,
@@ -414,7 +412,7 @@ class Test<A, B, C> {
                 string,
                 string,
             ];
-        },
+        }
     >() { return 42; }
 
     set bar(foo: string) { }
@@ -431,46 +429,42 @@ class Test<A, B, C> {
     ) { }
 }
 
-class Test2<A, B, C,> { }
+class Test2<A, B, C> { }
 
 class Test3<
     A,
     B,
     C
-    ~ [Missing trailing comma]
 > { }
 
 class Test4<
     A,
     B,
-    C,
+    C
 > { }
 
 interface ITest<A ,B, C> {
 
     new <U, V>(bar: U): ITest<U, U, V>;
 
-    new <U, V,>(bar: U, baz: V,): ITest<U, U, V,>;
+    new <U, V>(bar: U, baz: V,): ITest<U, U, V>;
 
     new <
         U,
         V
-        ~ [Missing trailing comma]
     >(
         bar: U,
         baz: U,
-        ack: V
-             ~ [Missing trailing comma]
+        ack: V,
     ): ITest<
         U,
         U,
         V
-        ~ [Missing trailing comma]
     >;
 
     new <
         U,
-        V,
+        V
     >(
         bar: U,
         baz: U,
@@ -479,7 +473,7 @@ interface ITest<A ,B, C> {
     ): ITest<
         U,
         U,
-        V,
+        V
     >;
 
     foo(bar: string, baz: string);
@@ -499,7 +493,7 @@ interface ITest<A ,B, C> {
 
     foo5<
         T extends Test<[A, A], [A, A,], A>,
-        U extends Test<B, B, B,>,
+        U extends Test<B, B, B>,
         V extends Test<
             [
                 C,
@@ -511,9 +505,7 @@ interface ITest<A ,B, C> {
                 C,
             ],
             C
-            ~ [Missing trailing comma]
         >
-        ~ [Missing trailing comma]
     >(
         bar: A,
         baz: T,
@@ -533,7 +525,6 @@ interface ITest<A ,B, C> {
                      ~ [Missing trailing comma]
             ];
         }
-        ~ [Missing trailing comma]
     >();
 }
 
@@ -543,13 +534,12 @@ interface ITest3<
     A,
     B,
     C
-    ~ [Missing trailing comma]
 > { }
 
 interface ITest4<
     A,
     B,
-    C,
+    C
 > { }
 
 enum Foo { BAR, BAZ }
