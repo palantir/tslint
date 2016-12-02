@@ -135,6 +135,15 @@ export function isNodeFlagSet(node: ts.Node, flagToCheck: ts.NodeFlags): boolean
 }
 
 /**
+ * Bitwise check for type flags.
+ */
+export function isTypeFlagSet(typ: ts.Type, flagToCheck: ts.TypeFlags): boolean {
+    /* tslint:disable:no-bitwise */
+    return (typ.flags & flagToCheck) !== 0;
+    /* tslint:enable:no-bitwise */
+}
+
+/**
  * @returns true if decl is a nested module declaration, i.e. represents a segment of a dotted module path.
  */
 export function isNestedModuleDeclaration(decl: ts.ModuleDeclaration) {
