@@ -61,7 +61,7 @@ class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<ScopeInfo,
                 const isBlockScopedVariable = Lint.isBlockScopedVariable(variableDeclaration);
                 this.handleSingleVariableIdentifier(name, isBlockScopedVariable);
             } else {
-                this.handleSingleParameterIdentifier(name);
+                this.handleSingleVariableIdentifier(name, false);
             }
         }
 
@@ -98,7 +98,7 @@ class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<ScopeInfo,
         const isSingleParameter = node.name.kind === ts.SyntaxKind.Identifier;
 
         if (isSingleParameter) {
-            this.handleSingleParameterIdentifier(<ts.Identifier> node.name);
+            this.handleSingleVariableIdentifier(<ts.Identifier> node.name, false);
         }
 
         super.visitParameterDeclaration(node);
@@ -120,38 +120,36 @@ class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<ScopeInfo,
 
     private handleSingleVariableIdentifier(variableIdentifier: ts.Identifier, isBlockScoped: boolean) {
         const variableName = variableIdentifier.text;
-        const currentScope = this.getCurrentScope();
-        const currentBlockScope = this.getCurrentBlockScope();
 
-        // this var is shadowing if there's already a var of the same name in any available scope AND
-        // it is not in the current block (those are handled by the 'no-duplicate-variable' rule)
-        if (this.isVarInAnyScope(variableName) && currentBlockScope.varNames.indexOf(variableName) < 0) {
+        if (this.isVarInCurrentScope(variableName) && !this.inCurrentBlockScope(variableName)) {
+            // shadowing if there's already a `var` of the same name in the scope AND
+            // it's not in the current block (handled by the 'no-duplicate-variable' rule)
+            this.addFailureOnIdentifier(variableIdentifier);
+        } else if (this.inPreviousBlockScope(variableName)) {
+            // shadowing if there is a `var`, `let`, 'const`, or parameter in a previous block scope
             this.addFailureOnIdentifier(variableIdentifier);
         }
 
-        // regular vars should always be added to the scope; block-scoped vars should be added iff
-        // the current scope is same as current block scope
-        if (!isBlockScoped
-                || this.getCurrentBlockDepth() === 1
-                || this.getCurrentBlockDepth() === this.getCurrentDepth()) {
-            currentScope.varNames.push(variableName);
+        if (!isBlockScoped) {
+            // `var` variables go on the scope
+            this.getCurrentScope().variableNames.push(variableName);
         }
-        currentBlockScope.varNames.push(variableName);
+        // all variables go on block scope, including `var`
+        this.getCurrentBlockScope().variableNames.push(variableName);
     }
 
-    private handleSingleParameterIdentifier(variableIdentifier: ts.Identifier) {
-        // treat parameters as block-scoped variables
-        const variableName = variableIdentifier.text;
-        const currentScope = this.getCurrentScope();
-
-        if (this.isVarInAnyScope(variableName)) {
-            this.addFailureOnIdentifier(variableIdentifier);
-        }
-        currentScope.varNames.push(variableName);
+    private isVarInCurrentScope(varName: string) {
+        return this.getCurrentScope().variableNames.indexOf(varName) >= 0;
     }
 
-    private isVarInAnyScope(varName: string) {
-        return this.getAllScopes().some((scopeInfo) => scopeInfo.varNames.indexOf(varName) >= 0);
+    private inCurrentBlockScope(varName: string) {
+        return this.getCurrentBlockScope().variableNames.indexOf(varName) >= 0;
+    }
+
+    private inPreviousBlockScope(varName: string) {
+        return this.getAllBlockScopes().some((scopeInfo) => {
+            return scopeInfo !== this.getCurrentBlockScope() && scopeInfo.variableNames.indexOf(varName) >= 0 ;
+        });
     }
 
     private addFailureOnIdentifier(ident: ts.Identifier) {
@@ -161,5 +159,5 @@ class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<ScopeInfo,
 }
 
 class ScopeInfo {
-    public varNames: string[] = [];
+    public variableNames: string[] = [];
 }
