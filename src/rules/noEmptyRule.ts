@@ -19,6 +19,8 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
+const OPTION_IGNORE_CATCH = "allow-empty-catch";
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -26,9 +28,20 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Disallows empty blocks.",
         descriptionDetails: "Blocks with a comment inside are not considered empty.",
         rationale: "Empty blocks are often indicators of missing code.",
-        optionsDescription: "Not configurable.",
-        options: null,
-        optionExamples: ["true"],
+        optionsDescription: Lint.Utils.dedent`
+            One argument may be optionally provided:
+
+            * \`${OPTION_IGNORE_CATCH}\` allows empty catch clause.`,
+        options: {
+            type: "array",
+            items: {
+                type: "string",
+                enum: [OPTION_IGNORE_CATCH],
+            },
+            minLength: 0,
+            maxLength: 1,
+        },
+        optionExamples: ["true", `[true, "${OPTION_IGNORE_CATCH}"]`],
         type: "functionality",
         typescriptOnly: false,
     };
@@ -51,9 +64,14 @@ class BlockWalker extends Lint.RuleWalker {
         const hasCommentAfter = ts.getTrailingCommentRanges(sourceFileText, openBrace.getEnd()) != null;
         const hasCommentBefore = ts.getLeadingCommentRanges(sourceFileText, closeBrace.getFullStart()) != null;
         const isSkipped = this.ignoredBlocks.indexOf(node) !== -1;
+        const shouldIgnoreCatch = this.hasOption(OPTION_IGNORE_CATCH);
 
         if (node.statements.length <= 0 && !hasCommentAfter && !hasCommentBefore && !isSkipped) {
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+            if (node.parent.kind === ts.SyntaxKind.CatchClause && shouldIgnoreCatch) {
+                super.visitBlock(node);
+            } else {
+                this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+            }
         }
 
         super.visitBlock(node);

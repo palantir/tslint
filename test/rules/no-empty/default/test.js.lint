@@ -40,3 +40,17 @@ class testClass3 {
     }
 ~~~~~ [block is empty]
 }
+
+try {
+    ~
+} catch (e) {
+~ [block is empty]
+    console.log("foo");
+}
+
+try {
+    console.log("foo");
+} catch (e) {
+            ~
+}
+~ [block is empty]
