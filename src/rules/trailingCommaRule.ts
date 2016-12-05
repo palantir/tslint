@@ -70,7 +70,6 @@ class TrailingCommaWalker extends Lint.RuleWalker {
         [ts.SyntaxKind.OpenBraceToken, ts.SyntaxKind.CloseBraceToken],
         [ts.SyntaxKind.OpenBracketToken, ts.SyntaxKind.CloseBracketToken],
         [ts.SyntaxKind.OpenParenToken, ts.SyntaxKind.CloseParenToken],
-        [ts.SyntaxKind.LessThanToken, ts.SyntaxKind.GreaterThanToken],
     ];
 
     public visitArrayLiteralExpression(node: ts.ArrayLiteralExpression) {

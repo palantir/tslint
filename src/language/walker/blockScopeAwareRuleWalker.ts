@@ -29,23 +29,28 @@ export abstract class BlockScopeAwareRuleWalker<T, U> extends ScopeAwareRuleWalk
     constructor(sourceFile: ts.SourceFile, options?: any) {
         super(sourceFile, options);
 
-        // initialize stack with global scope
-        this.blockScopeStack = [this.createBlockScope()];
+        // initialize with global scope if file is not a module
+        this.blockScopeStack = this.fileIsModule ? [] : [this.createBlockScope()];
     }
 
     public abstract createBlockScope(): U;
+
+    // get all block scopes available at this depth
+    public getAllBlockScopes(): U[] {
+        return this.blockScopeStack;
+    }
 
     public getCurrentBlockScope(): U {
         return this.blockScopeStack[this.blockScopeStack.length - 1];
     }
 
+    public getCurrentBlockDepth(): number {
+        return this.blockScopeStack.length;
+    }
+
     // callback notifier when a block scope begins
     public onBlockScopeStart() {
         return;
-    }
-
-    public getCurrentBlockDepth(): number {
-        return this.blockScopeStack.length;
     }
 
     // callback notifier when a block scope ends
@@ -58,13 +63,13 @@ export abstract class BlockScopeAwareRuleWalker<T, U> extends ScopeAwareRuleWalk
 
         if (isNewBlockScope) {
             this.blockScopeStack.push(this.createBlockScope());
+            this.onBlockScopeStart();
         }
 
-        this.onBlockScopeStart();
         super.visitNode(node);
-        this.onBlockScopeEnd();
 
         if (isNewBlockScope) {
+            this.onBlockScopeEnd();
             this.blockScopeStack.pop();
         }
     }
