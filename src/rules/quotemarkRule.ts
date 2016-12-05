@@ -53,8 +53,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static SINGLE_QUOTE_FAILURE = "\" should be '";
-    public static DOUBLE_QUOTE_FAILURE = "' should be \"";
+    public static SINGLE_QUOTE_FAILURE = " \" should be '.";
+    public static DOUBLE_QUOTE_FAILURE = " ' should be \".";
 
     public isEnabled(): boolean {
         if (super.isEnabled()) {
