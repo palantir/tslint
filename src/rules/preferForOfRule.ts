@@ -94,7 +94,6 @@ class PreferForOfWalker extends Lint.RuleWalker {
             if (node.parent.kind === ts.SyntaxKind.ElementAccessExpression) {
                 const elementAccess = node.parent as ts.ElementAccessExpression;
                 const arrayIdentifier = elementAccess.expression as ts.Identifier;
-                // const argumentIdentifier = elementAccess.argumentExpression as ts.Identifier;
                 if (incrementorState.arrayToken.text !== arrayIdentifier.text) {
                     // iterator used in array other than one iterated over
                     incrementorState.onlyArrayReadAccess = false;
