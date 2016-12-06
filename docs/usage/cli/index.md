@@ -39,7 +39,7 @@ Options:
 --project             tsconfig.json file
 -r, --rules-dir       rules directory
 -s, --formatters-dir  formatters directory
--t, --format          output format (prose, json, stylish, verbose, pmd, msbuild, checkstyle, vso, fileslist)  [default: "prose"]
+-t, --format          output format (prose, json, stylish, verbose, pmd, msbuild, checkstyle, vso, fileslist, codeFrame)  [default: "prose"]
 --test                test that tslint produces the correct output for the specified directory
 --type-check          enable type checking when linting a project
 -v, --version         current version
