@@ -125,6 +125,16 @@ export function someAncestor(node: ts.Node, predicate: (n: ts.Node) => boolean):
     return predicate(node) || (node.parent && someAncestor(node.parent, predicate));
 }
 
+export function isAssignment(node: ts.Node) {
+    if (node.kind === ts.SyntaxKind.BinaryExpression) {
+        const binaryExpression = node as ts.BinaryExpression;
+        return binaryExpression.operatorToken.kind >= ts.SyntaxKind.FirstAssignment
+            && binaryExpression.operatorToken.kind <= ts.SyntaxKind.LastAssignment;
+    } else {
+        return false;
+    }
+}
+
 /**
  * Bitwise check for node flags.
  */

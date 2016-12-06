@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 import * as Lint from "../index";
-import {isNodeFlagSet, unwrapParentheses} from "../language/utils";
+import {isAssignment, isNodeFlagSet, unwrapParentheses} from "../language/utils";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -73,7 +73,7 @@ class PreferConstWalker extends Lint.BlockScopeAwareRuleWalker<{}, ScopeInfo> {
     }
 
     protected visitBinaryExpression(node: ts.BinaryExpression) {
-        if (isAssignmentOperator(node.operatorToken)) {
+        if (isAssignment(node)) {
             this.handleLHSExpression(node.left);
         }
         super.visitBinaryExpression(node);
@@ -200,9 +200,4 @@ class ScopeInfo {
         }
         return false;
     }
-}
-
-function isAssignmentOperator(token: ts.Node) {
-    return token.kind >= ts.SyntaxKind.FirstAssignment
-        && token.kind <= ts.SyntaxKind.LastAssignment;
 }
