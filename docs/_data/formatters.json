@@ -7,6 +7,13 @@
     "consumer": "machine"
   },
   {
+    "formatterName": "codeFrame",
+    "description": "Framed formatter which creates a frame of error code.",
+    "descriptionDetails": "\nPrints syntax highlighted code in a frame with a pointer to where\nexactly lint error is happening.",
+    "sample": "\nsrc/components/Payment.tsx\nParentheses are required around the parameters of an arrow function definition (arrow-parens)\n  21 |     public componentDidMount() {\n  22 |         this.input.focus();\n> 23 |         loadStripe().then(Stripe => Stripe.pay());\n     |                          ^\n  24 |     }\n  25 |\n  26 |     public render() {",
+    "consumer": "human"
+  },
+  {
     "formatterName": "filesList",
     "description": "Lists files containing lint errors.",
     "sample": "directory/myFile.ts",
@@ -43,13 +50,6 @@
     "description": "Human-readable formatter which creates stylish messages.",
     "descriptionDetails": "\nThe output matches that produced by eslint's stylish formatter. Its readability\nenhanced through spacing and colouring",
     "sample": "\nmyFile.ts\n1:14  semicolon  Missing semicolon",
-    "consumer": "human"
-  },
-  {
-    "formatterName": "codeFrame",
-    "description": "Framed formatter which creates a frame of error code.",
-    "descriptionDetails": "\nPrints syntax highlighted code in a frame with a pointer to where\nexactly lint error is happening.",
-    "sample": "",
     "consumer": "human"
   },
   {

@@ -1072,6 +1072,18 @@
     "typescriptOnly": false
   },
   {
+    "ruleName": "prefer-const",
+    "description": "Requires that variable declarations use `const` instead of `let` if possible.",
+    "descriptionDetails": "\nIf a variable is only assigned to once when it is declared, it should be declared using 'const'",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "maintainability",
+    "typescriptOnly": false
+  },
+  {
     "ruleName": "prefer-for-of",
     "description": "Recommends a 'for-of' loop over a standard 'for' loop if the index is only used to access the array being iterated.",
     "rationale": "A for(... of ...) loop is easier to implement and read when the index is not needed.",
@@ -1082,6 +1094,19 @@
     ],
     "type": "typescript",
     "typescriptOnly": false
+  },
+  {
+    "ruleName": "promise-function-async",
+    "description": "Requires any function or method that returns a promise to be marked async.",
+    "rationale": "\nEnsures that each function is only capable of 1) returning a rejected promise, or 2)\nthrowing an Error object. In contrast, non-`async` `Promise`-returning functions\nare technically capable of either. This practice removes a requirement for consuming\ncode to handle both cases.\n        ",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "typescript",
+    "typescriptOnly": false,
+    "requiresTypeInfo": true
   },
   {
     "ruleName": "quotemark",
