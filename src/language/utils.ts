@@ -130,6 +130,8 @@ export function isAssignment(node: ts.Node) {
         const binaryExpression = node as ts.BinaryExpression;
         return binaryExpression.operatorToken.kind >= ts.SyntaxKind.FirstAssignment
             && binaryExpression.operatorToken.kind <= ts.SyntaxKind.LastAssignment;
+    } else {
+        return false;
     }
 }
 
