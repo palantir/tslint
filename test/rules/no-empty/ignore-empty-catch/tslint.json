@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "no-empty": [true, "allow-empty-catch"]
+  },
+  "jsRules": {
+    "no-empty": [true, "allow-empty-catch"]
+  }
+}
