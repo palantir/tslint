@@ -45,16 +45,3 @@ class testClass4 {
     constructor(readonly allowed: any) {
     }
 }
-
-try {
-    ~
-} catch (e) {
-~ [block is empty]
-    console.log("foo");
-}
-
-try {
-    console.log("foo");
-} catch (e) {
-
-}
