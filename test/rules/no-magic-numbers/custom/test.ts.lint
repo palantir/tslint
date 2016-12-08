@@ -1,3 +1,4 @@
 console.log(1337);
+console.log(1337.7);
 console.log(1338);
             ~~~~                      ['magic numbers' are no allowed]
