@@ -2,6 +2,6 @@ console.log(1337);
 console.log(-1337);
 console.log(1337.7);
 console.log(1338);
-            ~~~~                      ['magic numbers' are no allowed]
+            ~~~~                      ['magic numbers' are not allowed]
 console.log(-1338)
-            ~~~~~                     ['magic numbers' are no allowed]
+            ~~~~~                     ['magic numbers' are not allowed]

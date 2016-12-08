@@ -27,7 +27,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "no-magic-numbers",
         description: Lint.Utils.dedent`
             Disallows the use constant number values outside of variable assignments.
-            When no list of allowed values is specified, 0 and 1 are allowed by default.`,
+            When no list of allowed values is specified, -1, 0 and 1 are allowed by default.`,
         rationale: Lint.Utils.dedent`
             Magic numbers should be avoided as they often lack documentation, forcing
             them to be stored in variables gives them implicit documentation.`,
@@ -45,7 +45,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "'magic numbers' are no allowed";
+    public static FAILURE_STRING = "'magic numbers' are not allowed";
 
     public static ALLOWED_NODES = {
         [ts.SyntaxKind.ExportAssignment]: true,
@@ -67,22 +67,21 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class NoMagicNumbersWalker extends Lint.RuleWalker {
-    private allowed: { [prop: string]: boolean };
+    // lookup object for allowed magic numbers
+    private allowed: { [prop: string]: boolean } = {};
     constructor (sourceFile: ts.SourceFile, options: IOptions) {
         super(sourceFile, options);
 
         const configOptions = this.getOptions();
         const allowedNumbers: number[] = configOptions.length > 0 ? configOptions : Rule.DEFAULT_ALLOWED;
 
-        const allowed: { [prop: string]: boolean } = {};
         allowedNumbers.forEach((value) => {
-            allowed[value] = true;
+            this.allowed[value] = true;
         });
-        this.allowed = allowed;
     }
 
     public visitNode(node: ts.Node) {
-        const isUnary = this.isUnaryNumericExpression(node)
+        const isUnary = this.isUnaryNumericExpression(node);
         if (node.kind === ts.SyntaxKind.NumericLiteral && !Rule.ALLOWED_NODES[node.parent.kind] || isUnary) {
             let text = node.getText();
             if (!this.allowed[text]) {
@@ -101,7 +100,7 @@ class NoMagicNumbersWalker extends Lint.RuleWalker {
         if (node.kind !== ts.SyntaxKind.PrefixUnaryExpression) {
             return false;
         }
-        const unaryNode = (<ts.PrefixUnaryExpression>node);
+        const unaryNode = (<ts.PrefixUnaryExpression> node);
         return unaryNode.operator === ts.SyntaxKind.MinusToken && unaryNode.operand.kind === ts.SyntaxKind.NumericLiteral;
     }
 }
