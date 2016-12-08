@@ -60,6 +60,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
 
     public static DEFAULT_ALLOWED = [
+        -1,
         0,
         1,
     ];
@@ -85,11 +86,26 @@ class NoMagicNumbersWalker extends Lint.RuleWalker {
     }
 
     public visitNode(node: ts.Node) {
-        if (node.kind === ts.SyntaxKind.NumericLiteral && !Rule.ALLOWED_NODES[node.parent.kind]) {
-            if (!this.allowed[node.getText()]) {
+        const isUnary = this.isUnaryNumericExpression(node)
+        if (node.kind === ts.SyntaxKind.NumericLiteral && !Rule.ALLOWED_NODES[node.parent.kind] || isUnary) {
+            let text = node.getText();
+            if (!this.allowed[text]) {
                 this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
             }
         }
-        super.visitNode(node);
+        if (!isUnary) {
+            super.visitNode(node);
+        }
+    }
+
+    /**
+     * Checks if a node is an unary expression with on a numeric operand.
+     */
+    private isUnaryNumericExpression(node: ts.Node): boolean {
+        if (node.kind !== ts.SyntaxKind.PrefixUnaryExpression) {
+            return false;
+        }
+        const unaryNode = (<ts.PrefixUnaryExpression>node);
+        return unaryNode.operator === ts.SyntaxKind.MinusToken && unaryNode.operand.kind === ts.SyntaxKind.NumericLiteral;
     }
 }
