@@ -59,11 +59,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         [ts.SyntaxKind.PropertyDeclaration]: true,
     };
 
-    public static DEFAULT_ALLOWED = [
-        -1,
-        0,
-        1,
-    ];
+    public static DEFAULT_ALLOWED = [ -1, 0, 1 ];
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new NoMagicNumbersWalker(sourceFile, this.getOptions()));
@@ -76,10 +72,10 @@ class NoMagicNumbersWalker extends Lint.RuleWalker {
         super(sourceFile, options);
 
         const configOptions = this.getOptions();
-        const allowedArray: number[] = configOptions.length > 0 ? configOptions : Rule.DEFAULT_ALLOWED;
+        const allowedNumbers: number[] = configOptions.length > 0 ? configOptions : Rule.DEFAULT_ALLOWED;
 
         const allowed: { [prop: string]: boolean } = {};
-        allowedArray.forEach((value) => {
+        allowedNumbers.forEach((value) => {
             allowed[value] = true;
         });
         this.allowed = allowed;
