@@ -154,20 +154,11 @@ export function isTypeFlagSet(type: ts.Type, flagToCheck: ts.TypeFlags): boolean
 }
 
 /**
- * Bitwise check for type flags.
+ * Bitwise check for object flags.
  */
 export function isObjectFlagSet(objectType: ts.ObjectType, flagToCheck: ts.ObjectFlags): boolean {
     /* tslint:disable:no-bitwise */
     return (objectType.objectFlags & flagToCheck) !== 0;
-    /* tslint:enable:no-bitwise */
-}
-
-/**
- * Bitwise check for type flags.
- */
-export function isModifierFlagSet(node: ts.Node, flagToCheck: ts.ModifierFlags): boolean {
-    /* tslint:disable:no-bitwise */
-    return (node.modifierFlags & flagToCheck) !== 0;
     /* tslint:enable:no-bitwise */
 }
 
