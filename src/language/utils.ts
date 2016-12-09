@@ -155,6 +155,7 @@ export function isTypeFlagSet(type: ts.Type, flagToCheck: ts.TypeFlags): boolean
 
 /**
  * Bitwise check for object flags.
+ * Does not work with TypeScript 2.0.x
  */
 export function isObjectFlagSet(objectType: ts.ObjectType, flagToCheck: ts.ObjectFlags): boolean {
     /* tslint:disable:no-bitwise */
