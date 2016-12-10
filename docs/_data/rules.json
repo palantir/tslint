@@ -214,6 +214,25 @@
     "typescriptOnly": false
   },
   {
+    "ruleName": "import-blacklist",
+    "description": "\nDisallows importing the specified modules directly via `import` and `require`.\nInstead only sub modules may be imported from that module.",
+    "rationale": "\nSome libraries allow importing their submodules instead of the entire module.\nThis is good practise as it avoids loading unused modules.",
+    "optionsDescription": "A list of blacklisted modules.",
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minLength": 1
+    },
+    "optionExamples": [
+      "true",
+      "[true, \"rxjs\", \"lodash\"]"
+    ],
+    "type": "typescript",
+    "typescriptOnly": false
+  },
+  {
     "ruleName": "indent",
     "description": "Enforces indentation with tabs or spaces.",
     "rationale": "\nUsing only one of tabs or spaces for indentation leads to more consistent editor behavior,\ncleaner diffs in version control, and easier programatic manipulation.",
@@ -641,6 +660,18 @@
     ],
     "type": "typescript",
     "typescriptOnly": true
+  },
+  {
+    "ruleName": "no-inferred-empty-object-type",
+    "description": "Disallow type inference of {} (empty object type) at function and constructor call sites",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality",
+    "typescriptOnly": true,
+    "requiresTypeInfo": true
   },
   {
     "ruleName": "no-internal-module",
@@ -1208,6 +1239,18 @@
     ],
     "type": "style",
     "typescriptOnly": false
+  },
+  {
+    "ruleName": "strict-boolean-expressions",
+    "description": "Usage of && or || operators should be with boolean operands and\nexpressions in If, Do, While and For statements should be of type boolean",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality",
+    "typescriptOnly": true,
+    "requiresTypeInfo": true
   },
   {
     "ruleName": "switch-default",
