@@ -96,7 +96,7 @@ class NoRequireFullLibraryWalker extends Lint.RuleWalker {
         super.visitImportDeclaration(node);
     }
 
-    public failure (node: ts.Node): void {
+    private failure (node: ts.Node): void {
         this.addFailure(this.createFailure(
             node.getStart() + 1, // take quotes into account
             node.getWidth() - 2,
