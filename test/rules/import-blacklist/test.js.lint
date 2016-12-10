@@ -1,0 +1,7 @@
+const _ = require('lodash');
+                   ~~~~~~ [0]
+const forOwn = require('lodash').forOwn;
+                        ~~~~~~ [0]
+const forOwn = require('lodash/forOwn');
+
+[0]: This import is not allowed.
