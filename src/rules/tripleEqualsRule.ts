@@ -74,10 +74,10 @@ class ComparisonWalker extends Lint.RuleWalker {
     private handleOperatorToken(position: number, operator: ts.SyntaxKind) {
         switch (operator) {
             case ts.SyntaxKind.EqualsEqualsToken:
-                this.addFailure(this.createFailure(position, ComparisonWalker.COMPARISON_OPERATOR_WIDTH, Rule.EQ_FAILURE_STRING));
+                this.addFailureAt(position, ComparisonWalker.COMPARISON_OPERATOR_WIDTH, Rule.EQ_FAILURE_STRING);
                 break;
             case ts.SyntaxKind.ExclamationEqualsToken:
-                this.addFailure(this.createFailure(position, ComparisonWalker.COMPARISON_OPERATOR_WIDTH, Rule.NEQ_FAILURE_STRING));
+                this.addFailureAt(position, ComparisonWalker.COMPARISON_OPERATOR_WIDTH, Rule.NEQ_FAILURE_STRING);
                 break;
             default:
                 break;

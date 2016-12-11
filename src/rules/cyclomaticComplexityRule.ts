@@ -203,7 +203,7 @@ class CyclomaticComplexityWalker extends Lint.RuleWalker {
                 failureString = Rule.ANONYMOUS_FAILURE_STRING(this.threshold, complexity);
             }
 
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), failureString));
+            this.addFailureAtNode(node, failureString);
         }
     }
 

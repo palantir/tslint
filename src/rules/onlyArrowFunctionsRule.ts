@@ -69,7 +69,7 @@ class OnlyArrowFunctionsWalker extends Lint.RuleWalker {
 
     private failUnlessExempt(node: ts.FunctionLikeDeclaration) {
         if (!functionIsExempt(node)) {
-            this.addFailure(this.createFailure(node.getStart(), "function".length, Rule.FAILURE_STRING));
+            this.addFailureAt(node.getStart(), "function".length, Rule.FAILURE_STRING);
         }
     }
 }

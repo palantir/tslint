@@ -119,9 +119,4 @@ class JsdocWalker extends Lint.SkippableTokenAwareRuleWalker {
             }
         }
     }
-
-    private addFailureAt(currentPosition: number, width: number, failureString: string) {
-        const failure = this.createFailure(currentPosition, width, failureString);
-        this.addFailure(failure);
-    }
 }

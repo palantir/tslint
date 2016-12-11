@@ -44,7 +44,7 @@ class NoInternalModuleWalker extends Lint.RuleWalker {
     public visitModuleDeclaration(node: ts.ModuleDeclaration) {
         if (this.isInternalModuleDeclaration(node)) {
             const start = this.getStartBeforeModule(node);
-            this.addFailure(this.createFailure(node.getStart() + start, "module".length, Rule.FAILURE_STRING));
+            this.addFailureAt(node.getStart() + start, "module".length, Rule.FAILURE_STRING);
         }
         super.visitModuleDeclaration(node);
     }

@@ -79,6 +79,6 @@ class NoNamespaceWalker extends Lint.RuleWalker {
             return;
         }
 
-        this.addFailure(this.createFailure(decl.getStart(), decl.getWidth(), Rule.FAILURE_STRING));
+        this.addFailureAtNode(decl, Rule.FAILURE_STRING);
     }
 }

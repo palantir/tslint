@@ -64,14 +64,14 @@ class StrictBooleanExpressionsRule extends Lint.ProgramAwareRuleWalker {
             let rhsType = this.checker.getTypeAtLocation(rhsExpression);
             if (!this.isBooleanType(lhsType)) {
                 if (lhsExpression.kind !== ts.SyntaxKind.BinaryExpression) {
-                    this.addFailure(this.createFailure(lhsExpression.getStart(), lhsExpression.getWidth(), Rule.BINARY_EXPRESSION_ERROR));
+                    this.addFailureAtNode(lhsExpression, Rule.BINARY_EXPRESSION_ERROR);
                 } else {
                     this.visitBinaryExpression(<ts.BinaryExpression> lhsExpression);
                 }
             }
             if (!this.isBooleanType(rhsType)) {
                 if (rhsExpression.kind !== ts.SyntaxKind.BinaryExpression) {
-                    this.addFailure(this.createFailure(rhsExpression.getStart(), rhsExpression.getWidth(), Rule.BINARY_EXPRESSION_ERROR));
+                    this.addFailureAtNode(rhsExpression, Rule.BINARY_EXPRESSION_ERROR);
                 } else {
                     this.visitBinaryExpression(<ts.BinaryExpression> rhsExpression);
                 }
@@ -86,7 +86,7 @@ class StrictBooleanExpressionsRule extends Lint.ProgramAwareRuleWalker {
             let expr = node.operand;
             let expType = this.checker.getTypeAtLocation(expr);
             if (!this.isBooleanType(expType)) {
-                this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.UNARY_EXPRESSION_ERROR));
+                this.addFailureAtNode(node, Rule.UNARY_EXPRESSION_ERROR);
             }
         }
         super.visitPrefixUnaryExpression(node);
@@ -111,7 +111,7 @@ class StrictBooleanExpressionsRule extends Lint.ProgramAwareRuleWalker {
         let cexp = node.condition;
         let expType = this.checker.getTypeAtLocation(cexp);
         if (!this.isBooleanType(expType)) {
-            this.addFailure(this.createFailure(cexp.getStart(), cexp.getWidth(), Rule.CONDITIONAL_EXPRESSION_ERROR));
+            this.addFailureAtNode(cexp, Rule.CONDITIONAL_EXPRESSION_ERROR);
         }
         super.visitConditionalExpression(node);
     }
@@ -120,7 +120,7 @@ class StrictBooleanExpressionsRule extends Lint.ProgramAwareRuleWalker {
         let cexp = node.condition;
         let expType = this.checker.getTypeAtLocation(cexp);
         if (!this.isBooleanType(expType)) {
-            this.addFailure(this.createFailure(cexp.getStart(), cexp.getWidth(), `For ${Rule.STATEMENT_ERROR}`));
+            this.addFailureAtNode(cexp, `For ${Rule.STATEMENT_ERROR}`);
         }
         super.visitForStatement(node);
     }
@@ -129,23 +129,24 @@ class StrictBooleanExpressionsRule extends Lint.ProgramAwareRuleWalker {
         let bexp = node.expression;
         let expType = this.checker.getTypeAtLocation(bexp);
         if (!this.isBooleanType(expType)) {
-            switch (node.kind) {
-            case ts.SyntaxKind.IfStatement:
-                this.addFailure(this.createFailure(bexp.getStart(), bexp.getWidth(), `If ${Rule.STATEMENT_ERROR}`));
-                break;
-            case ts.SyntaxKind.DoStatement:
-                this.addFailure(this.createFailure(bexp.getStart(), bexp.getWidth(), `Do-While ${Rule.STATEMENT_ERROR}`));
-                break;
-            case ts.SyntaxKind.WhileStatement:
-                this.addFailure(this.createFailure(bexp.getStart(), bexp.getWidth(), `While ${Rule.STATEMENT_ERROR}`));
-                break;
-            default:
-                throw new Error("Unknown Syntax Kind");
-            }
+            this.addFailureAtNode(bexp, `${failureTextForKind(node.kind)} ${Rule.STATEMENT_ERROR}`);
         }
     }
 
     private isBooleanType(btype: ts.Type): boolean {
         return utils.isTypeFlagSet(btype, ts.TypeFlags.BooleanLike);
+    }
+}
+
+function failureTextForKind(kind: ts.SyntaxKind) {
+    switch (kind) {
+        case ts.SyntaxKind.IfStatement:
+            return "If";
+        case ts.SyntaxKind.DoStatement:
+            return "Do-While";
+        case ts.SyntaxKind.WhileStatement:
+            return "While";
+        default:
+            throw new Error("Unknown Syntax Kind");
     }
 }

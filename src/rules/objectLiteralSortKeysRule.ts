@@ -74,7 +74,7 @@ class ObjectLiteralSortKeysWalker extends Lint.RuleWalker {
                 const key = keyNode.text;
                 if (key < lastSortedKey) {
                     const failureString = Rule.FAILURE_STRING_FACTORY(key);
-                    this.addFailure(this.createFailure(keyNode.getStart(), keyNode.getWidth(), failureString));
+                    this.addFailureAtNode(keyNode, failureString);
                     this.sortedStateStack[this.sortedStateStack.length - 1] = false;
                 } else {
                     this.lastSortedKeyStack[this.lastSortedKeyStack.length - 1] = key;

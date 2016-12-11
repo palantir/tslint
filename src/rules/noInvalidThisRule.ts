@@ -79,12 +79,12 @@ class NoInvalidThisWalker extends Lint.ScopeAwareRuleWalker<Scope> {
         });
 
         if (inClass === 0) {
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING_OUTSIDE));
+            this.addFailureAtNode(node, Rule.FAILURE_STRING_OUTSIDE);
         }
 
         const checkFuncInMethod = this.hasOption(DEPRECATED_OPTION_FUNCTION_IN_METHOD) || this.hasOption(OPTION_FUNCTION_IN_METHOD);
         if (checkFuncInMethod && inClass > 0 && inFunction > inClass) {
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING_INSIDE));
+            this.addFailureAtNode(node, Rule.FAILURE_STRING_INSIDE);
         }
     }
 

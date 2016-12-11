@@ -87,8 +87,7 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
             if (tokenKind === ts.SyntaxKind.WhitespaceTrivia || tokenKind === ts.SyntaxKind.NewLineTrivia) {
                 prevTokenShouldBeFollowedByWhitespace = false;
             } else if (prevTokenShouldBeFollowedByWhitespace) {
-                const failure = this.createFailure(startPos, 1, Rule.FAILURE_STRING);
-                this.addFailure(failure);
+                this.addFailureAt(startPos, 1, Rule.FAILURE_STRING);
                 prevTokenShouldBeFollowedByWhitespace = false;
             }
 
@@ -260,7 +259,7 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
         if (nextTokenType !== ts.SyntaxKind.WhitespaceTrivia
                 && nextTokenType !== ts.SyntaxKind.NewLineTrivia
                 && nextTokenType !== ts.SyntaxKind.EndOfFileToken) {
-            this.addFailure(this.createFailure(position, 1, Rule.FAILURE_STRING));
+            this.addFailureAt(position, 1, Rule.FAILURE_STRING);
         }
     }
 }

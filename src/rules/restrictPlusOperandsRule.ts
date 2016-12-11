@@ -55,11 +55,10 @@ class RestrictPlusOperandsWalker extends Lint.ProgramAwareRuleWalker {
 
             if (leftType !== rightType) {
                 // mismatched types
-                this.addFailure(this.createFailure(position, width, Rule.MISMATCHED_TYPES_FAILURE));
+                this.addFailureAt(position, width, Rule.MISMATCHED_TYPES_FAILURE);
             } else if (leftType !== "number" && leftType !== "string") {
                 // adding unsupported types
-                const failureString = Rule.UNSUPPORTED_TYPE_FAILURE_FACTORY(leftType);
-                this.addFailure(this.createFailure(position, width, failureString));
+                this.addFailureAt(position, width, Rule.UNSUPPORTED_TYPE_FAILURE_FACTORY(leftType));
             }
         }
 

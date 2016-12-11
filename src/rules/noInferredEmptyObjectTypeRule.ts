@@ -58,7 +58,7 @@ class NoInferredEmptyObjectTypeRule extends Lint.ProgramAwareRuleWalker {
                 let typeArgs = objType.typeArguments as ts.ObjectType[];
                 typeArgs.forEach((a) => {
                     if (this.isEmptyObjectInterface(a)) {
-                        this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.EMPTY_INTERFACE_INSTANCE));
+                        this.addFailureAtNode(node, Rule.EMPTY_INTERFACE_INSTANCE);
                     }
                 });
             }
@@ -71,7 +71,7 @@ class NoInferredEmptyObjectTypeRule extends Lint.ProgramAwareRuleWalker {
             let callSig = this.checker.getResolvedSignature(node);
             let retType = this.checker.getReturnTypeOfSignature(callSig) as ts.TypeReference;
             if (this.isEmptyObjectInterface(retType)) {
-                this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.EMPTY_INTERFACE_FUNCTION));
+                this.addFailureAtNode(node, Rule.EMPTY_INTERFACE_FUNCTION);
             }
         }
         super.visitCallExpression(node);

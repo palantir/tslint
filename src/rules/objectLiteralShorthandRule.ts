@@ -32,7 +32,7 @@ class ObjectLiteralShorthandWalker extends Lint.RuleWalker {
         if (name.kind === ts.SyntaxKind.Identifier &&
             value.kind === ts.SyntaxKind.Identifier &&
             name.getText() === value.getText()) {
-                this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.LONGHAND_PROPERTY));
+                this.addFailureAtNode(node, Rule.LONGHAND_PROPERTY);
         }
 
         if (value.kind === ts.SyntaxKind.FunctionExpression) {
@@ -41,7 +41,7 @@ class ObjectLiteralShorthandWalker extends Lint.RuleWalker {
                 return;  // named function expressions are OK.
             }
 
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.LONGHAND_METHOD));
+            this.addFailureAtNode(node, Rule.LONGHAND_METHOD);
         }
 
         super.visitPropertyAssignment(node);

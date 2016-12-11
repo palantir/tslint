@@ -130,7 +130,7 @@ export class MemberAccessWalker extends Lint.RuleWalker {
             });
 
             const failureString = Rule.FAILURE_STRING_FACTORY(memberType, memberName, publicOnly);
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), failureString));
+            this.addFailureAtNode(node, failureString);
         }
     }
 }
