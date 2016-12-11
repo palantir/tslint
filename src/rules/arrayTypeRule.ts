@@ -94,10 +94,12 @@ class ArrayTypeWalker extends Lint.RuleWalker {
             case ts.SyntaxKind.ArrayType:
             case ts.SyntaxKind.BooleanKeyword:
             case ts.SyntaxKind.NullKeyword:
+            case ts.SyntaxKind.UndefinedKeyword:
             case ts.SyntaxKind.NumberKeyword:
             case ts.SyntaxKind.StringKeyword:
             case ts.SyntaxKind.SymbolKeyword:
             case ts.SyntaxKind.VoidKeyword:
+            case ts.SyntaxKind.NeverKeyword:
                 return true;
             case ts.SyntaxKind.TypeReference:
                 // TypeReferences must be non-generic or be another Array with a simple type
