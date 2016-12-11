@@ -21,5 +21,17 @@ class Clazz { // this comment is correct
 //noinspection JSUnusedGlobalSymbols
 const unusedVar = 'unneeded value';
 
+// TODO: Write more tests
+
+// HACKING is not an exception
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [lower]
+
+// STDIN for input
+  ~~~~~~~~~~~~~~~~ [lower]
+// STDOUT for output
+  ~~~~~~~~~~~~~~~~~~ [lower]
+// stderr for errors
+
+
 [lower]: comment must start with lowercase letter, word from exceptions list or exceptions pattern
 [space]: comment must start with a space

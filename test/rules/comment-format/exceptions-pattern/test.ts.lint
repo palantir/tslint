@@ -22,9 +22,15 @@ class Clazz { // this comment is correct
 const unusedVar = 'unneeded value';
 
 // TODO: Write more tests
-
+  ~~~~~~~~~~~~~~~~~~~~~~~ [lower]
 // HACKING is not an exception
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [lower]
 
-[lower]: comment must start with lowercase letter or word from exceptions list
+// STDIN for input
+// STDOUT for output
+// stderr for errors
+
+
+
+[lower]: comment must start with lowercase letter, word from exceptions list or exceptions pattern
 [space]: comment must start with a space

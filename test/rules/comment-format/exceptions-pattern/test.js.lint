@@ -28,5 +28,11 @@ class Invalid {}
 class Valid {}
 
 // todo write more tests
+  ~~~~~~~~~~~~~~~~~~~~~~ [upper]
 
-[upper]: comment must start with uppercase letter or word from exceptions list
+// STDIN for input
+// STDOUT for output
+// stderr for errors
+
+
+[upper]: comment must start with uppercase letter, word from exceptions list or exceptions pattern

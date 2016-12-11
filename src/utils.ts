@@ -92,3 +92,10 @@ export function stripComments(content: string): string {
     });
     return result;
 };
+
+/**
+ * Escapes all special characters in RegExp pattern to avoid broken regular expressions and ensure proper matches
+ */
+export function escapeRegExp(re: string): string {
+    return re.replace(/[.+*?|^$\[]{}()\\]/g, "$&");
+}

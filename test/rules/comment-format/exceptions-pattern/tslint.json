@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "comment-format": [true, "check-space", "check-lowercase", {"ignorePattern": "STD\\w{2,3}"}]
+  },
+  "jsRules": {
+    "comment-format": [true, "check-uppercase", {"ignorePattern": "std(in|out|err)\\b"}]
+  }
+}
