@@ -28,8 +28,8 @@ interface IArrowMethods {
 
 class ArrowMethods {
     public a = 5;
-    private callback: () => void
     public b = "foo";
+    private callback: () => void;
     public c() {}
     public d = () => {};
     public e = function() {};

@@ -7,13 +7,14 @@ class Good {
     private f = foo();
     constructor() {}
     j = () => {};
+    jj: () => void;
     protected k() {};
     private l = () => {};
     public static g() {}
     protected static h() {}
     private static i = () => {};
 }
-    
+
 interface IGood {
     foo: number;
     arrowsAreFields: () => void;
