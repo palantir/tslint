@@ -39,6 +39,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             imports (the \`"foo"\` in \`import {A, B, C} from "foo"\`).
 
             Possible values for \`"import-sources-order"\` are:
+
             * \`"case-insensitive'\`: Correct order is \`"Bar"\`, \`"baz"\`, \`"Foo"\`. (This is the default.)
             * \`"lowercase-first"\`: Correct order is \`"baz"\`, \`"Bar"\`, \`"Foo"\`.
             * \`"lowercase-last"\`: Correct order is \`"Bar"\`, \`"Foo"\`, \`"baz"\`.
