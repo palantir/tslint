@@ -35,7 +35,7 @@
     "verify": "npm-run-all clean compile lint test docs"
   },
   "dependencies": {
-    "babel-code-frame": "^6.16.0",
+    "babel-code-frame": "^6.20.0",
     "colors": "^1.1.2",
     "diff": "^3.0.1",
     "findup-sync": "~0.3.0",
