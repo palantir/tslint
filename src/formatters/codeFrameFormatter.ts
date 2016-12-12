@@ -21,11 +21,7 @@ import { RuleFailure } from "../language/rule/rule";
 
 import * as colors from "colors";
 
-// TODO: once types for babel-code-frame are published, add it as a dependency and use import
-// @types/babel-code-frame PR: https://github.com/DefinitelyTyped/DefinitelyTyped/pull/13102
-// Please also see https://github.com/palantir/tslint/pull/1835#issuecomment-266217693
-// tslint:disable-next-line:no-var-requires
-const codeFrame = require("babel-code-frame");
+import codeFrame = require("babel-code-frame");
 
 import * as Utils from "../utils";
 
