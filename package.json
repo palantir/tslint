@@ -32,6 +32,7 @@
     "test:pre": "cd ./test/config && npm install",
     "test:mocha": "mocha --reporter spec --colors \"build/test/**/*Tests.js\" build/test/assert.js",
     "test:rules": "node ./build/test/ruleTestRunner.js",
+    "test:watch": "tsc -p test --watch",
     "verify": "npm-run-all clean compile lint test docs"
   },
   "dependencies": {

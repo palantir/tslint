@@ -13,6 +13,8 @@ npm run compile
 npm run test
 ```
 
+From there you can use `npm run test:watch` and `npm run test:rules -- my-rule-name` to try out changes to a rule.
+
 #### `next` branch
 
 The [`next` branch of the TSLint repo](https://github.com/palantir/tslint/tree/next) tracks the latest TypeScript
