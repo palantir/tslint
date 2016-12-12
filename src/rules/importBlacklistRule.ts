@@ -37,11 +37,11 @@ export class Rule extends Lint.Rules.AbstractRule {
             minLength: 1,
         },
         optionExamples: ["true", '[true, "rxjs", "lodash"]'],
-        type: "typescript",
+        type: "functionality",
         typescriptOnly: false,
     };
 
-    public static FAILURE_STRING = "This import is not allowed.";
+    public static FAILURE_STRING = "This import is blacklisted, import a submodule instead";
 
     public isEnabled(): boolean {
         return super.isEnabled() && this.getOptions().ruleArguments.length > 0;
@@ -56,14 +56,10 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class NoRequireFullLibraryWalker extends Lint.RuleWalker {
-    constructor (sourceFile: ts.SourceFile, options: Lint.IOptions, private blackList: string[]) {
+    private blacklist: string[];
+    constructor (sourceFile: ts.SourceFile, options: Lint.IOptions, blacklist: string[]) {
         super(sourceFile, options);
-    }
-
-    protected isListed(text: string): boolean {
-        return this.blackList.some((entry) => {
-            return text.substring(1, text.length - 1) === entry;
-        });
+        this.blacklist = blacklist;
     }
 
     public visitCallExpression(node: ts.CallExpression) {
@@ -71,9 +67,9 @@ class NoRequireFullLibraryWalker extends Lint.RuleWalker {
             node.expression.getText() === "require" &&
             node.arguments &&
             node.arguments[0] &&
-            this.isListed(node.arguments[0].getText())
+            this.isModuleBlacklisted(node.arguments[0].getText())
         ) {
-            this.failure(node.arguments[0]);
+            this.reportFailure(node.arguments[0]);
         }
         super.visitCallExpression(node);
     }
@@ -82,21 +78,27 @@ class NoRequireFullLibraryWalker extends Lint.RuleWalker {
         let moduleReference = <ts.ExternalModuleReference> node.moduleReference;
         // If it's an import require and not an import alias
         if (moduleReference.expression) {
-            if (this.isListed(moduleReference.expression.getText())) {
-                this.failure(moduleReference.expression);
+            if (this.isModuleBlacklisted(moduleReference.expression.getText())) {
+                this.reportFailure(moduleReference.expression);
             }
         }
         super.visitImportEqualsDeclaration(node);
     }
 
     public visitImportDeclaration(node: ts.ImportDeclaration) {
-        if (this.isListed(node.moduleSpecifier.getText())) {
-            this.failure(node.moduleSpecifier);
+        if (this.isModuleBlacklisted(node.moduleSpecifier.getText())) {
+            this.reportFailure(node.moduleSpecifier);
         }
         super.visitImportDeclaration(node);
     }
 
-    private failure (node: ts.Node): void {
+    private isModuleBlacklisted(text: string): boolean {
+        return this.blacklist.some((entry) => {
+            return text.substring(1, text.length - 1) === entry;
+        });
+    }
+
+    private reportFailure (node: ts.Expression): void {
         this.addFailure(this.createFailure(
             node.getStart() + 1, // take quotes into account
             node.getWidth() - 2,

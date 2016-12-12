@@ -229,7 +229,7 @@
       "true",
       "[true, \"rxjs\", \"lodash\"]"
     ],
-    "type": "typescript",
+    "type": "functionality",
     "typescriptOnly": false
   },
   {
