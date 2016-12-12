@@ -13,6 +13,10 @@ npm-debug.log
 # created by grunt-ts for faster compiling
 typings/.basedir.ts
 
+# IntelliJ idea
+/.idea/
+*.iml
+
 # vim swap files
 *.swo
 *.swp
