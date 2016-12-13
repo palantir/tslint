@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "import-blacklist": [true, "lodash", "rxjs"]
+  },
+  "jsRules": {
+    "import-blacklist": [true, "lodash", "rxjs"]
+  }
+}

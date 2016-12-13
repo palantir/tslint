@@ -17,7 +17,7 @@
 
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
 import {IFormatterMetadata} from "../language/formatter/formatter";
-import {RuleFailure} from "../language/rule/rule";
+import { RuleFailure } from "../language/rule/rule";
 
 import codeFrame = require("babel-code-frame");
 import * as colors from "colors";

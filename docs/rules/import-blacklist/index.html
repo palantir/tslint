@@ -1,0 +1,32 @@
+---
+ruleName: import-blacklist
+description: |-
+
+  Disallows importing the specified modules directly via `import` and `require`.
+  Instead only sub modules may be imported from that module.
+rationale: |-
+
+  Some libraries allow importing their submodules instead of the entire module.
+  This is good practise as it avoids loading unused modules.
+optionsDescription: A list of blacklisted modules.
+options:
+  type: array
+  items:
+    type: string
+  minLength: 1
+optionExamples:
+  - 'true'
+  - '[true, "rxjs", "lodash"]'
+type: functionality
+typescriptOnly: false
+layout: rule
+title: 'Rule: import-blacklist'
+optionsJSON: |-
+  {
+    "type": "array",
+    "items": {
+      "type": "string"
+    },
+    "minLength": 1
+  }
+---
