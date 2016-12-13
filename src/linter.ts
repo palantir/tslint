@@ -67,9 +67,10 @@ class Linter {
         }
 
         const { config } = ts.readConfigFile(configFile, ts.sys.readFile);
-        const parseConfigHost = {
+        const parseConfigHost: ts.ParseConfigHost = {
             fileExists: fs.existsSync,
             readDirectory: ts.sys.readDirectory,
+            readFile: (file) => fs.readFileSync(file, "utf8"),
             useCaseSensitiveFileNames: true,
         };
         const parsed = ts.parseJsonConfigFileContent(config, parseConfigHost, projectDirectory);

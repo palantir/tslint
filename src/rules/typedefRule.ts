@@ -185,7 +185,7 @@ class TypedefWalker extends Lint.RuleWalker {
         // catch statements will be the parent of the variable declaration
         // for-in/for-of loops will be the gradparent of the variable declaration
         if (node.parent != null && node.parent.parent != null
-                && node.parent.kind !== ts.SyntaxKind.CatchClause
+                && node.parent.parent.kind !== ts.SyntaxKind.CatchClause
                 && node.parent.parent.kind !== ts.SyntaxKind.ForInStatement
                 && node.parent.parent.kind !== ts.SyntaxKind.ForOfStatement) {
             this.checkTypeAnnotation("variable-declaration", node.name.getEnd(), node.type, node.name);
