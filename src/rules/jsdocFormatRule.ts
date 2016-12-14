@@ -63,12 +63,12 @@ class JsdocWalker extends Lint.SkippableTokenAwareRuleWalker {
             if (scanner.getToken() === ts.SyntaxKind.MultiLineCommentTrivia) {
                 const commentText = scanner.getTokenText();
                 const startPosition = scanner.getTokenPos();
-                this.findFailuresForJsdocComment(commentText, startPosition, node);
+                this.findFailuresForJsdocComment(commentText, startPosition);
             }
         });
     }
 
-    private findFailuresForJsdocComment(commentText: string, startingPosition: number, sourceFile: ts.SourceFile) {
+    private findFailuresForJsdocComment(commentText: string, startingPosition: number) {
         const currentPosition = startingPosition;
         // the file may be different depending on the OS it was originally authored on
         // can't rely on require('os').EOL or process.platform as that is the execution env
@@ -88,7 +88,7 @@ class JsdocWalker extends Lint.SkippableTokenAwareRuleWalker {
                 return;
             }
 
-            const indexToMatch = firstLine.indexOf("**") + sourceFile.getLineAndCharacterOfPosition(currentPosition).character;
+            const indexToMatch = firstLine.indexOf("**") + this.getLineAndCharacterOfPosition(currentPosition).character;
             // all lines but the first and last
             const otherLines = lines.splice(1, lines.length - 2);
             jsdocPosition += firstLine.length + 1; // + 1 for the splitted-out newline

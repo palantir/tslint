@@ -44,6 +44,10 @@ export class RuleWalker extends SyntaxWalker {
         return this.sourceFile;
     }
 
+    public getLineAndCharacterOfPosition(position: number): ts.LineAndCharacter {
+        return this.sourceFile.getLineAndCharacterOfPosition(position);
+    }
+
     public getFailures(): RuleFailure[] {
         return this.failures;
     }

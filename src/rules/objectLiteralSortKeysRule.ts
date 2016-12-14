@@ -85,8 +85,8 @@ class ObjectLiteralSortKeysWalker extends Lint.RuleWalker {
     }
 
     private isMultilineListNode(node: ts.ObjectLiteralExpression) {
-        const startLineOfNode = this.getSourceFile().getLineAndCharacterOfPosition(node.getStart()).line;
-        const endLineOfNode = this.getSourceFile().getLineAndCharacterOfPosition(node.getEnd()).line;
+        const startLineOfNode = this.getLineAndCharacterOfPosition(node.getStart()).line;
+        const endLineOfNode = this.getLineAndCharacterOfPosition(node.getEnd()).line;
         return endLineOfNode !== startLineOfNode;
     }
 }

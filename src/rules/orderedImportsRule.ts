@@ -173,7 +173,7 @@ class OrderedImportsWalker extends Lint.RuleWalker {
         source = removeQuotes(source);
         source = this.importSourcesOrderTransform(source);
         const previousSource = this.currentImportsBlock.getLastImportSource();
-        this.currentImportsBlock.addImportDeclaration(node, source);
+        this.currentImportsBlock.addImportDeclaration(this.getSourceFile(), node, source);
 
         if (previousSource && compare(source, previousSource) === -1) {
             this.lastFix = new Lint.Fix(Rule.metadata.ruleName, []);
@@ -244,10 +244,10 @@ interface ImportDeclaration {
 class ImportsBlock {
     private importDeclarations: ImportDeclaration[] = [];
 
-    public addImportDeclaration(node: ts.ImportDeclaration, sourcePath: string) {
+    public addImportDeclaration(sourceFile: ts.SourceFile, node: ts.ImportDeclaration, sourcePath: string) {
         const start = this.getStartOffset(node);
-        const end = this.getEndOffset(node);
-        const text = node.getSourceFile().text.substring(start, end);
+        const end = this.getEndOffset(sourceFile, node);
+        const text = sourceFile.text.substring(start, end);
 
         if (start > node.getStart() || end === 0) {
             // skip block if any statements don't end with a newline to simplify implementation
@@ -309,8 +309,8 @@ class ImportsBlock {
     }
 
     // gets the offset of the end of the import's line, including newline, to include comment to the right
-    private getEndOffset(node: ts.ImportDeclaration) {
-        let endLineOffset = node.getSourceFile().text.indexOf("\n", node.end) + 1;
+    private getEndOffset(sourceFile: ts.SourceFile, node: ts.ImportDeclaration) {
+        let endLineOffset = sourceFile.text.indexOf("\n", node.end) + 1;
         return endLineOffset;
     }
 
