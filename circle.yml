@@ -11,7 +11,7 @@ test:
 deployment:
   npm-latest:
     # match semver tag (e.g. 3.12.7)
-    tag: /^\d\d?\.\d\d?\.\d\d?$/
+    tag: /^\d\d?\.\d\d?\.\d\d?$/ 
     owner: palantir
     commands:
       - ./scripts/npmPublish.sh latest
