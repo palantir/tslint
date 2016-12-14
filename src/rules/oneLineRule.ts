@@ -69,7 +69,8 @@ class OneLineWalker extends Lint.RuleWalker {
     public visitIfStatement(node: ts.IfStatement) {
         const sourceFile = node.getSourceFile();
         const thenStatement = node.thenStatement;
-        if (thenStatement.kind === ts.SyntaxKind.Block) {
+        const thenIsBlock = thenStatement.kind === ts.SyntaxKind.Block;
+        if (thenIsBlock) {
             const expressionCloseParen = node.getChildAt(3);
             const thenOpeningBrace = thenStatement.getChildAt(0);
             this.handleOpeningBrace(expressionCloseParen, thenOpeningBrace);
@@ -83,7 +84,7 @@ class OneLineWalker extends Lint.RuleWalker {
                 const elseOpeningBrace = elseStatement.getChildAt(0);
                 this.handleOpeningBrace(elseKeyword, elseOpeningBrace);
             }
-            if (this.hasOption(OPTION_ELSE)) {
+            if (thenIsBlock && this.hasOption(OPTION_ELSE)) {
                 const thenStatementEndLine = sourceFile.getLineAndCharacterOfPosition(thenStatement.getEnd()).line;
                 const elseKeywordLine = sourceFile.getLineAndCharacterOfPosition(elseKeyword.getStart()).line;
                 if (thenStatementEndLine !== elseKeywordLine) {

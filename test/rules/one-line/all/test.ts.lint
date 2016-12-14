@@ -143,3 +143,9 @@ let geoConfig: {
 
 declare module "*";
 declare module "someLibrary/*";
+
+// No error if there are no braces
+if (true)
+    true;
+else
+    false;
