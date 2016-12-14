@@ -35,7 +35,7 @@ export class Rule extends Lint.Rules.TypedRule {
                 enum: ["classes", "functions", "methods", "properties"],
             },
         },
-        optionExamples: ["true", `[true, ["classes", "functions"]`],
+        optionExamples: ["true", `[true, "classes", "functions"]`],
         type: "style",
         typescriptOnly: false,
     };
