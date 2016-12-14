@@ -18,6 +18,7 @@
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { hasModifier } from "../language/utils";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -58,7 +59,7 @@ class ArrowParensWalker extends Lint.RuleWalker {
             }
 
             if ((firstToken.kind !== ts.SyntaxKind.OpenParenToken || lastToken.kind !== ts.SyntaxKind.CloseParenToken)
-                && !isGenerics && node.flags !== ts.NodeFlags.Async) {
+                && !isGenerics && !hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword)) {
 
                 const fix = new Lint.Fix(Rule.metadata.ruleName, [new Lint.Replacement(position, width, `(${parameter.getText()})`)]);
                 this.addFailureAt(position, width, Rule.FAILURE_STRING, fix);

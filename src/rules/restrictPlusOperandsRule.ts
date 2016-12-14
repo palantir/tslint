@@ -33,10 +33,7 @@ export class Rule extends Lint.Rules.TypedRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static MISMATCHED_TYPES_FAILURE = "Types of values used in '+' operation must match";
-    public static UNSUPPORTED_TYPE_FAILURE_FACTORY = (type: string) => {
-        return `cannot add type ${type}`;
-    }
+    public static INVALID_TYPES_ERROR = "Operands of '+' operation must either be both strings or both numbers";
 
     public applyWithProgram(sourceFile: ts.SourceFile, langSvc: ts.LanguageService): Lint.RuleFailure[] {
         return this.applyWithWalker(new RestrictPlusOperandsWalker(sourceFile, this.getOptions(), langSvc.getProgram()));
@@ -47,21 +44,28 @@ class RestrictPlusOperandsWalker extends Lint.ProgramAwareRuleWalker {
     public visitBinaryExpression(node: ts.BinaryExpression) {
         if (node.operatorToken.kind === ts.SyntaxKind.PlusToken) {
             const tc = this.getTypeChecker();
-            const leftType = tc.typeToString(tc.getTypeAtLocation(node.left));
-            const rightType = tc.typeToString(tc.getTypeAtLocation(node.right));
+
+            const leftType = getAddableType(node.left, tc);
+            const rightType = getAddableType(node.right, tc);
 
             const width = node.getWidth();
             const position = node.getStart();
 
-            if (leftType !== rightType) {
-                // mismatched types
-                this.addFailureAt(position, width, Rule.MISMATCHED_TYPES_FAILURE);
-            } else if (leftType !== "number" && leftType !== "string") {
-                // adding unsupported types
-                this.addFailureAt(position, width, Rule.UNSUPPORTED_TYPE_FAILURE_FACTORY(leftType));
+            if (leftType === "invalid" || rightType === "invalid" || leftType !== rightType) {
+                this.addFailureAt(position, width, Rule.INVALID_TYPES_ERROR);
             }
         }
 
         super.visitBinaryExpression(node);
     }
+}
+
+function getAddableType(node: ts.Expression, tc: ts.TypeChecker): "string" | "number" | "invalid" {
+    const type = tc.getTypeAtLocation(node);
+    if (type.flags === ts.TypeFlags.NumberLiteral || type.flags === ts.TypeFlags.Number) {
+        return "number";
+    } else if (type.flags === ts.TypeFlags.StringLiteral || type.flags === ts.TypeFlags.String) {
+        return "string";
+    }
+    return "invalid";
 }
