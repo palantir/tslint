@@ -99,8 +99,7 @@ class AdjacentOverloadSignaturesWalker extends Lint.RuleWalker {
             const name = getOverloadName(node);
             if (name !== undefined) {
                 if (name in seen && last !== name) {
-                    this.addFailure(this.createFailure(node.getStart(), node.getWidth(),
-                        Rule.FAILURE_STRING_FACTORY(name)));
+                    this.addFailureAtNode(node, Rule.FAILURE_STRING_FACTORY(name));
                 }
                 seen[name] = true;
             }

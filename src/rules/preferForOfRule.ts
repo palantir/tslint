@@ -75,9 +75,7 @@ class PreferForOfWalker extends Lint.RuleWalker {
         if (indexVariableName != null) {
             const incrementorState = this.incrementorMap[indexVariableName];
             if (incrementorState.onlyArrayReadAccess) {
-                const length = incrementorState.forLoopEndPosition - node.getStart();
-                const failure = this.createFailure(node.getStart(), length, Rule.FAILURE_STRING);
-                this.addFailure(failure);
+                this.addFailureFromStartToEnd(node.getStart(), incrementorState.forLoopEndPosition, Rule.FAILURE_STRING);
             }
 
             // remove current `for` loop state

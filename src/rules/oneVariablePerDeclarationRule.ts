@@ -58,7 +58,7 @@ class OneVariablePerDeclarationWalker extends Lint.RuleWalker {
         const { declarationList } = node;
 
         if (declarationList.declarations.length > 1) {
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+            this.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
 
         super.visitVariableStatement(node);
@@ -72,7 +72,7 @@ class OneVariablePerDeclarationWalker extends Lint.RuleWalker {
                 && initializer != null
                 && initializer.kind === ts.SyntaxKind.VariableDeclarationList
                 && initializer.declarations.length > 1) {
-            this.addFailure(this.createFailure(initializer.getStart(), initializer.getWidth(), Rule.FAILURE_STRING));
+            this.addFailureAtNode(initializer, Rule.FAILURE_STRING);
         }
 
         super.visitForStatement(node);

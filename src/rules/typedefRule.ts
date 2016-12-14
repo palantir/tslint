@@ -210,8 +210,7 @@ class TypedefWalker extends Lint.RuleWalker {
             if (name != null && name.kind === ts.SyntaxKind.Identifier) {
                 ns = `: '${(<ts.Identifier> name).text}'`;
             }
-            let failure = this.createFailure(location, 1, "expected " + option + ns + " to have a typedef");
-            this.addFailure(failure);
+            this.addFailureAt(location, 1, "expected " + option + ns + " to have a typedef");
         }
     }
 }

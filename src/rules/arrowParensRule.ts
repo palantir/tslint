@@ -62,7 +62,7 @@ class ArrowParensWalker extends Lint.RuleWalker {
                 && !isGenerics && !hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword)) {
 
                 const fix = new Lint.Fix(Rule.metadata.ruleName, [new Lint.Replacement(position, width, `(${parameter.getText()})`)]);
-                this.addFailure(this.createFailure(position, width, Rule.FAILURE_STRING, fix));
+                this.addFailureAt(position, width, Rule.FAILURE_STRING, fix);
             }
         }
         super.visitArrowFunction(node);

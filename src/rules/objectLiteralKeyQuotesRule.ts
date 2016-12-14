@@ -46,7 +46,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"always"\`: Property names should always be quoted. (This is the default.)
             * \`"as-needed"\`: Only property names which require quotes may be quoted (e.g. those with spaces in them).
             * \`"consistent"\`: Property names should either all be quoted or unquoted.
-            * \`"consistent-as-needed"\`: If any property name requires quotes, then all properties must be quoted. Otherwise, no 
+            * \`"consistent-as-needed"\`: If any property name requires quotes, then all properties must be quoted. Otherwise, no
             property names may be quoted.
 
             For ES6, computed property names (\`{[name]: value}\`) and methods (\`{foo() {}}\`) never need
@@ -151,7 +151,7 @@ class ObjectLiteralKeyQuotesWalker extends Lint.RuleWalker {
             const hasQuotedProperties = state.hasQuotesNeededProperty || state.quotesNotNeededProperties.length > 0;
             const hasUnquotedProperties = state.unquotedProperties.length > 0;
             if (hasQuotedProperties && hasUnquotedProperties) {
-                this.addFailure(this.createFailure(node.getStart(), 1, Rule.INCONSISTENT_PROPERTY));
+                this.addFailureAt(node.getStart(), 1, Rule.INCONSISTENT_PROPERTY);
             }
         }
 

@@ -90,7 +90,7 @@ class NoConditionalAssignmentWalker extends Lint.RuleWalker {
 
     private checkForAssignment(expression: ts.BinaryExpression) {
         if (isAssignmentToken(expression.operatorToken)) {
-            this.addFailure(this.createFailure(expression.getStart(), expression.getWidth(), Rule.FAILURE_STRING));
+            this.addFailureAtNode(expression, Rule.FAILURE_STRING);
         }
     }
 }

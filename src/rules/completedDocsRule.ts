@@ -107,15 +107,15 @@ export class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
         const comments = this.getTypeChecker().getSymbolAtLocation(node.name).getDocumentationComment();
 
         if (comments.map((comment) => comment.text).join("").trim() === "") {
-            this.addFailure(this.createDocumentationFailure(node, nodeToCheck));
+            this.addDocumentationFailure(node, nodeToCheck);
         }
     }
 
-    private createDocumentationFailure(node: ts.Declaration, nodeToCheck: string): Lint.RuleFailure {
+    private addDocumentationFailure(node: ts.Declaration, nodeToCheck: string): void {
         const start = node.getStart();
         const width = node.getText().split(/\r|\n/g)[0].length;
         const description = nodeToCheck[0].toUpperCase() + nodeToCheck.substring(1) + Rule.FAILURE_STRING_EXIST;
 
-        return this.createFailure(start, width, description);
+        this.addFailureAt(start, width, description);
     }
 }

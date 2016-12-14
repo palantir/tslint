@@ -51,7 +51,7 @@ class NoArgWalker extends Lint.RuleWalker {
         if (expression.kind === ts.SyntaxKind.Identifier && name.text === "callee") {
             const identifierExpression = expression as ts.Identifier;
             if (identifierExpression.text === "arguments") {
-                this.addFailure(this.createFailure(expression.getStart(), expression.getWidth(), Rule.FAILURE_STRING));
+                this.addFailureAtNode(expression, Rule.FAILURE_STRING);
             }
         }
 

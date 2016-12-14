@@ -94,7 +94,7 @@ class NoConsecutiveBlankLinesWalker extends Lint.SkippableTokenAwareRuleWalker {
             .map((arr) => arr[0])
             .forEach((startLineNum: number) => {
                 let startCharPos = node.getPositionOfLineAndCharacter(startLineNum + 1, 0);
-                this.addFailure(this.createFailure(startCharPos, 1, failureMessage));
+                this.addFailureAt(startCharPos, 1, failureMessage);
             });
     }
 }

@@ -79,7 +79,7 @@ class PromiseAsyncWalker extends Lint.ProgramAwareRuleWalker {
             : node.getWidth();
 
         if (isPromise && !isAsync) {
-            this.addFailure(this.createFailure(node.getStart(), signatureEnd, Rule.FAILURE_STRING));
+            this.addFailureAt(node.getStart(), signatureEnd, Rule.FAILURE_STRING);
         }
     }
 }

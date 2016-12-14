@@ -53,7 +53,7 @@ class BlockWalker extends Lint.RuleWalker {
         const isSkipped = this.ignoredBlocks.indexOf(node) !== -1;
 
         if (node.statements.length <= 0 && !hasCommentAfter && !hasCommentBefore && !isSkipped) {
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+            this.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
 
         super.visitBlock(node);

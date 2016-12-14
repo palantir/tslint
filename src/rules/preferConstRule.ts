@@ -63,12 +63,7 @@ class PreferConstWalker extends Lint.BlockScopeAwareRuleWalker<{}, ScopeInfo> {
                 fix = new Lint.Fix(Rule.metadata.ruleName, [replacement]);
                 seenLetStatements[usage.letStatement.getStart().toString()] = true;
             }
-            this.addFailure(this.createFailure(
-                usage.identifier.getStart(),
-                usage.identifier.getWidth(),
-                Rule.FAILURE_STRING_FACTORY(usage.identifier.text),
-                fix,
-            ));
+            this.addFailureAtNode(usage.identifier, Rule.FAILURE_STRING_FACTORY(usage.identifier.text), fix);
         }
     }
 

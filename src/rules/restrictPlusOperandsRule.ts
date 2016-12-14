@@ -52,7 +52,7 @@ class RestrictPlusOperandsWalker extends Lint.ProgramAwareRuleWalker {
             const position = node.getStart();
 
             if (leftType === "invalid" || rightType === "invalid" || leftType !== rightType) {
-                this.addFailure(this.createFailure(position, width, Rule.INVALID_TYPES_ERROR));
+                this.addFailureAt(position, width, Rule.INVALID_TYPES_ERROR);
             }
         }
 
