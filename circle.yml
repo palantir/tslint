@@ -7,7 +7,7 @@ dependencies:
     - case $CIRCLE_NODE_INDEX in 0) nvm use 4.2 ;; 1) nvm use 5.7 ;; 2) nvm use 6.1 ;; esac
 test:
   pre:
-    - [$CIRCLE_NODE_INDEX == 1] && npm i typescript@2.0.10
+    - if [[ $CIRCLE_NODE_INDEX == 1 ]] ; then npm i typescript@2.0.10 ; fi
   override:
     - npm run verify
 deployment:
