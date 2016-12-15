@@ -24,6 +24,27 @@ v4.1.0
 * [bugfix] `trailing-comma` was applied to parameter lists (#1775)
 * [api] CLI logic moved into API friendly class (#1688)
 
+Thanks to our contributors!
+
+* Alex Eagle
+* Andrii Dieiev
+* Andy Hanson
+* Art Chaidarun
+* Donald Pipowitch
+* Feisal Ahmad
+* Josh Goldberg
+* Klaus Meinhardt
+* Maciej Sypień
+* Mohsen Azimi
+* Ryan Lester
+* Simon Schick
+* Subhash Sharma
+* Timothy Slatcher
+* Yaroslav Admin
+* Yuichi Nukiyama
+* tdsmithATabc
+* @wmrowan
+
 v4.0.2
 ---
 * [enhancement] Don't exit when a rule can't be found. Print as a warning instead (#1771)
