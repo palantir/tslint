@@ -1,6 +1,29 @@
 Change Log
 ===
 
+v4.1.0
+---
+* [new-rule] `prefer-const` rule added (#1801)
+* [new-rule] `strict-boolean-expressions` rule added (#1820)
+* [new-rule] `no-magic-numbers` rule added (#1799)
+* [new-rule] `import-blacklist` rule added (#1841)
+* [new-rule] `promise-functions-async` rule added (#1779)
+* [new-rule] `no-inferred-empty-object-type`: a type must be specified when using a generic class/function/etc (#1821)
+* [new-rule-option] `allow-named-functions` added to `only-arrow-functions` (#1857)
+* [new-fixer] `quotemark` fixer added (#1790)
+* [new-formatter] `codeframe` formatter shows you the error in context (#1819)
+* [enhancement] `no-internal-module` failures highlight less text (#1781)
+* [enhancement] Avoid auto-fixing errors that would result in compilation errors for rules that use type-check (#1608)
+* [rule-change] `only-arrow-functions` will allow functions with a `this` parameter (#1597)
+* [bugfix] `no-use-before-declare` false positive on named import (#1620)
+* [bugfix] `prefer-for-of` was showing false positive when the element is assigned (#1813)
+* [bugfix] Some command line arguments were swallowing other arguments (#1783)
+* [bugfix] `tslint:disable-line` was re-enabling `tslint:disable` (#1634)
+* [bugfix] `adjacent-overload-signatures` did not work for constructors (#1800)
+* [bugfix] `checkstyle` formatter was reporting errors under one file (#1811)
+* [bugfix] `trailing-comma` was applied to parameter lists (#1775)
+* [api] CLI logic moved into API friendly class (#1688)
+
 v4.0.2
 ---
 * [enhancement] Don't exit when a rule can't be found. Print as a warning instead (#1771)
