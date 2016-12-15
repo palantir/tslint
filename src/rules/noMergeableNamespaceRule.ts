@@ -61,7 +61,7 @@ class NoMergeableNamespaceWalker extends Lint.RuleWalker {
 
         if (highlights == null || highlights[0].highlightSpans.length > 1) {
             const failureString = Rule.failureStringFactory(name, this.findLocationToMerge(position, highlights[0].highlightSpans));
-            this.addFailure(this.createFailure(position, name.length, failureString));
+            this.addFailureAt(position, name.length, failureString);
         }
     }
 

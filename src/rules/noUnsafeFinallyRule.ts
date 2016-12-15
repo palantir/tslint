@@ -94,8 +94,7 @@ class NoReturnInFinallyScopeAwareWalker extends Lint.ScopeAwareRuleWalker<IFinal
             return;
         }
 
-        this.addFailure(
-            this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING_FACTORY(Rule.FAILURE_TYPE_BREAK)));
+        this.addFailureAtNode(node, Rule.FAILURE_STRING_FACTORY(Rule.FAILURE_TYPE_BREAK));
     }
 
     protected visitContinueStatement(node: ts.BreakOrContinueStatement) {
@@ -104,8 +103,7 @@ class NoReturnInFinallyScopeAwareWalker extends Lint.ScopeAwareRuleWalker<IFinal
             return;
         }
 
-        this.addFailure(
-            this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING_FACTORY(Rule.FAILURE_TYPE_CONTINUE)));
+        this.addFailureAtNode(node, Rule.FAILURE_STRING_FACTORY(Rule.FAILURE_TYPE_CONTINUE));
     }
 
     protected visitLabeledStatement(node: ts.LabeledStatement) {
@@ -120,8 +118,7 @@ class NoReturnInFinallyScopeAwareWalker extends Lint.ScopeAwareRuleWalker<IFinal
             return;
         }
 
-        this.addFailure(
-            this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING_FACTORY(Rule.FAILURE_TYPE_RETURN)));
+        this.addFailureAtNode(node, Rule.FAILURE_STRING_FACTORY(Rule.FAILURE_TYPE_RETURN));
     }
 
     protected visitThrowStatement(node: ts.ThrowStatement): void {
@@ -130,8 +127,7 @@ class NoReturnInFinallyScopeAwareWalker extends Lint.ScopeAwareRuleWalker<IFinal
             return;
         }
 
-        this.addFailure(
-            this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING_FACTORY(Rule.FAILURE_TYPE_THROW)));
+        this.addFailureAtNode(node, Rule.FAILURE_STRING_FACTORY(Rule.FAILURE_TYPE_THROW));
     }
 
     public createScope(node: ts.Node): IFinallyScope {

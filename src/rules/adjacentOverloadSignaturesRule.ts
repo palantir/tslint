@@ -96,8 +96,7 @@ class AdjacentOverloadSignaturesWalker extends Lint.RuleWalker {
             if (overload) {
                 const { name, key } = overload;
                 if (key in seen && lastKey !== key) {
-                    this.addFailure(this.createFailure(node.getStart(), node.getWidth(),
-                        Rule.FAILURE_STRING_FACTORY(name)));
+                    this.addFailureAtNode(node, Rule.FAILURE_STRING_FACTORY(name));
                 }
                 seen[key] = true;
                 lastKey = key;

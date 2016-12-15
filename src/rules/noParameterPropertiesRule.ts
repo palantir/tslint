@@ -51,8 +51,7 @@ export class NoParameterPropertiesWalker extends Lint.RuleWalker {
             if (parameter.modifiers != null && parameter.modifiers.length > 0) {
                 const errorMessage = Rule.FAILURE_STRING_FACTORY((parameter.name as ts.Identifier).text);
                 const lastModifier = parameter.modifiers[parameter.modifiers.length - 1];
-                const position = lastModifier.getEnd() - parameter.getStart();
-                this.addFailure(this.createFailure(parameter.getStart(), position, errorMessage));
+                this.addFailureFromStartToEnd(parameter.getStart(), lastModifier.getEnd(), errorMessage);
             }
         }
         super.visitConstructorDeclaration(node);

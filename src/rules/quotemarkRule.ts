@@ -121,7 +121,7 @@ class QuotemarkWalker extends Lint.RuleWalker {
                     + expectedQuoteMark;
 
                 const fix = new Lint.Fix(Rule.metadata.ruleName, [ new Lint.Replacement(position, width, newText) ]);
-                this.addFailure(this.createFailure(position, width, failureMessage, fix));
+                this.addFailureAt(position, width, failureMessage, fix);
             }
         }
 

@@ -39,6 +39,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             imports (the \`"foo"\` in \`import {A, B, C} from "foo"\`).
 
             Possible values for \`"import-sources-order"\` are:
+
             * \`"case-insensitive'\`: Correct order is \`"Bar"\`, \`"baz"\`, \`"Foo"\`. (This is the default.)
             * \`"lowercase-first"\`: Correct order is \`"baz"\`, \`"Bar"\`, \`"Foo"\`.
             * \`"lowercase-last"\`: Correct order is \`"Bar"\`, \`"Foo"\`, \`"baz"\`.
@@ -176,8 +177,7 @@ class OrderedImportsWalker extends Lint.RuleWalker {
 
         if (previousSource && compare(source, previousSource) === -1) {
             this.lastFix = new Lint.Fix(Rule.metadata.ruleName, []);
-            const ruleFailure = this.createFailure(node.getStart(), node.getWidth(), Rule.IMPORT_SOURCES_UNORDERED, this.lastFix);
-            this.addFailure(ruleFailure);
+            this.addFailureAtNode(node, Rule.IMPORT_SOURCES_UNORDERED, this.lastFix);
         }
 
         super.visitImportDeclaration(node);
@@ -202,12 +202,7 @@ class OrderedImportsWalker extends Lint.RuleWalker {
             }
 
             this.lastFix = new Lint.Fix(Rule.metadata.ruleName, []);
-            const ruleFailure = this.createFailure(
-                a.getStart(),
-                b.getEnd() - a.getStart(),
-                Rule.NAMED_IMPORTS_UNORDERED,
-                this.lastFix);
-            this.addFailure(ruleFailure);
+            this.addFailureFromStartToEnd(a.getStart(), b.getEnd(), Rule.NAMED_IMPORTS_UNORDERED, this.lastFix);
         }
 
         super.visitNamedImports(node);
@@ -269,7 +264,7 @@ class ImportsBlock {
         });
     }
 
-    // replaces the named imports on the most recent import declaration    
+    // replaces the named imports on the most recent import declaration
     public replaceNamedImports(fileOffset: number, length: number, replacement: string) {
         const importDeclaration = this.getLastImportDeclaration();
         if (importDeclaration == null) {
@@ -293,7 +288,7 @@ class ImportsBlock {
         return this.getLastImportDeclaration().sourcePath;
     }
 
-    // creates a Lint.Replacement object with ordering fixes for the entire block    
+    // creates a Lint.Replacement object with ordering fixes for the entire block
     public getReplacement() {
         if (this.importDeclarations.length === 0) {
             return null;
@@ -305,7 +300,7 @@ class ImportsBlock {
         return new Lint.Replacement(start, end - start, fixedText);
     }
 
-    // gets the offset immediately after the end of the previous declaration to include comment above  
+    // gets the offset immediately after the end of the previous declaration to include comment above
     private getStartOffset(node: ts.ImportDeclaration) {
         if (this.importDeclarations.length === 0) {
             return node.getStart();

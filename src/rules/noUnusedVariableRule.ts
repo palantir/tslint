@@ -441,7 +441,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         return (highlights != null && highlights[0].highlightSpans.length > 1) || this.isIgnored(name);
     }
 
-    private fail(type: string, name: string, position: number, replacements?: Lint.Replacement[]) {
+    private fail(type: string, name: string, position: number, replacements: Lint.Replacement[]) {
         let fix: Lint.Fix;
         if (replacements && replacements.length) {
             fix = new Lint.Fix(Rule.metadata.ruleName, replacements);

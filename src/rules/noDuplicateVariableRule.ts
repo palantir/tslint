@@ -98,15 +98,10 @@ class NoDuplicateVariableWalker extends Lint.BlockScopeAwareRuleWalker<{}, Scope
         const currentBlockScope = this.getCurrentBlockScope();
 
         if (currentBlockScope.varNames.indexOf(variableName) >= 0) {
-            this.addFailureOnIdentifier(variableIdentifier);
+            this.addFailureAtNode(variableIdentifier, Rule.FAILURE_STRING_FACTORY(variableIdentifier.text));
         } else {
             currentBlockScope.varNames.push(variableName);
         }
-    }
-
-    private addFailureOnIdentifier(ident: ts.Identifier) {
-        const failureString = Rule.FAILURE_STRING_FACTORY(ident.text);
-        this.addFailure(this.createFailure(ident.getStart(), ident.getWidth(), failureString));
     }
 }
 

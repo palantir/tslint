@@ -63,7 +63,7 @@ class NoBitwiseWalker extends Lint.RuleWalker {
             case ts.SyntaxKind.GreaterThanGreaterThanEqualsToken:
             case ts.SyntaxKind.GreaterThanGreaterThanGreaterThanToken:
             case ts.SyntaxKind.GreaterThanGreaterThanGreaterThanEqualsToken:
-                this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+                this.addFailureAtNode(node, Rule.FAILURE_STRING);
                 break;
             default:
                 break;
@@ -73,7 +73,7 @@ class NoBitwiseWalker extends Lint.RuleWalker {
 
     public visitPrefixUnaryExpression(node: ts.PrefixUnaryExpression) {
         if (node.operator === ts.SyntaxKind.TildeToken) {
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+            this.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
         super.visitPrefixUnaryExpression(node);
     }

@@ -127,7 +127,7 @@ class NoUseBeforeDeclareWalker extends Lint.ScopeAwareRuleWalker<VisitedVariable
                     const referencePosition = highlightSpan.textSpan.start;
                     if (referencePosition < position && !this.isImportedPropertyName(referencePosition)) {
                         const failureString = Rule.FAILURE_STRING_PREFIX + name + Rule.FAILURE_STRING_POSTFIX;
-                        this.addFailure(this.createFailure(referencePosition, name.length, failureString));
+                        this.addFailureAt(referencePosition, name.length, failureString);
                     }
                 }
             }

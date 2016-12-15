@@ -58,6 +58,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
         const parseConfigHost = {
             fileExists: fs.existsSync,
             readDirectory: ts.sys.readDirectory,
+            readFile: (file: string) => fs.readFileSync(file, "utf8"),
             useCaseSensitiveFileNames: true,
         };
         compilerOptions = ts.parseJsonConfigFileContent(config, parseConfigHost, testDirectory).options;

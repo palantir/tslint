@@ -51,14 +51,20 @@ class NoInferredEmptyObjectTypeRule extends Lint.ProgramAwareRuleWalker {
 
     public visitNewExpression(node: ts.NewExpression): void {
         let nodeTypeArgs = node.typeArguments;
-        let isObjectReference = (o: ts.TypeReference) => utils.isTypeFlagSet(o, ts.TypeFlags.Reference);
+        let isObjectReference: (o: ts.TypeReference) => boolean;
+        if ((ts as any).TypeFlags.Reference != null) {
+            // typescript 2.0.x specific code
+            isObjectReference = (o: ts.TypeReference) => utils.isTypeFlagSet(o, (ts as any).TypeFlags.Reference);
+        } else {
+            isObjectReference = (o: ts.TypeReference) => utils.isTypeFlagSet(o, ts.TypeFlags.Object);
+        }
         if (nodeTypeArgs === undefined) {
             let objType = this.checker.getTypeAtLocation(node) as ts.TypeReference;
             if (isObjectReference(objType) && objType.typeArguments !== undefined) {
                 let typeArgs = objType.typeArguments as ts.ObjectType[];
                 typeArgs.forEach((a) => {
                     if (this.isEmptyObjectInterface(a)) {
-                        this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.EMPTY_INTERFACE_INSTANCE));
+                        this.addFailureAtNode(node, Rule.EMPTY_INTERFACE_INSTANCE);
                     }
                 });
             }
@@ -71,14 +77,20 @@ class NoInferredEmptyObjectTypeRule extends Lint.ProgramAwareRuleWalker {
             let callSig = this.checker.getResolvedSignature(node);
             let retType = this.checker.getReturnTypeOfSignature(callSig) as ts.TypeReference;
             if (this.isEmptyObjectInterface(retType)) {
-                this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.EMPTY_INTERFACE_FUNCTION));
+                this.addFailureAtNode(node, Rule.EMPTY_INTERFACE_FUNCTION);
             }
         }
         super.visitCallExpression(node);
     }
 
     private isEmptyObjectInterface(objType: ts.ObjectType): boolean {
-        let isAnonymous = utils.isTypeFlagSet(objType, ts.TypeFlags.Anonymous);
+        let isAnonymous: boolean;
+        if (ts.ObjectFlags == null) {
+            // typescript 2.0.x specific code
+            isAnonymous = utils.isTypeFlagSet(objType, (ts as any).TypeFlags.Anonymous);
+        } else {
+            isAnonymous = utils.isObjectFlagSet(objType, ts.ObjectFlags.Anonymous);
+        }
         let hasProblematicCallSignatures = false;
         let hasProperties = (objType.getProperties() !== undefined && objType.getProperties().length > 0);
         let hasNumberIndexType = objType.getNumberIndexType() !== undefined;

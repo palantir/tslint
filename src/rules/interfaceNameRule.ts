@@ -59,11 +59,11 @@ class NameWalker extends Lint.RuleWalker {
 
         if (always) {
             if (!this.startsWithI(interfaceName)) {
-                this.addFailureAt(node.name.getStart(), node.name.getWidth(), Rule.FAILURE_STRING);
+                this.addFailureAtNode(node.name, Rule.FAILURE_STRING);
             }
         } else if (this.hasOption(OPTION_NEVER)) {
             if (this.hasPrefixI(interfaceName)) {
-                this.addFailureAt(node.name.getStart(), node.name.getWidth(), Rule.FAILURE_STRING_NO_PREFIX);
+                this.addFailureAtNode(node.name, Rule.FAILURE_STRING_NO_PREFIX);
             }
         }
 
@@ -103,10 +103,4 @@ class NameWalker extends Lint.RuleWalker {
 
         return true;
     }
-
-    private addFailureAt(position: number, width: number, failureString: string) {
-        const failure = this.createFailure(position, width, failureString);
-        this.addFailure(failure);
-    }
-
 }
