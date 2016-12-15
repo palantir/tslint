@@ -70,7 +70,7 @@
   {
     "ruleName": "ban",
     "description": "Bans the use of specific functions or global methods.",
-    "optionsDescription": "\nA list of `['object', 'method', 'optional explanation here']` or `['globalMethod']` which ban `object.method()` \nor respectively `globalMethod()`.",
+    "optionsDescription": "\nA list of `['object', 'method', 'optional explanation here']` or `['globalMethod']` which ban `object.method()`\nor respectively `globalMethod()`.",
     "options": {
       "type": "list",
       "listType": {
@@ -83,7 +83,7 @@
       }
     },
     "optionExamples": [
-      "[true, [\"someGlobalMethod\"], [\"someObject\", \"someFunction\"], \n                          [\"someObject\", \"otherFunction\", \"Optional explanation\"]]"
+      "[true, [\"someGlobalMethod\"], [\"someObject\", \"someFunction\"],\n                          [\"someObject\", \"otherFunction\", \"Optional explanation\"]]"
     ],
     "type": "functionality",
     "typescriptOnly": false
@@ -142,7 +142,7 @@
     },
     "optionExamples": [
       "true",
-      "[true, [\"classes\", \"functions\"]"
+      "[true, \"classes\", \"functions\"]"
     ],
     "type": "style",
     "typescriptOnly": false
@@ -975,7 +975,7 @@
     "ruleName": "object-literal-key-quotes",
     "description": "Enforces consistent object literal property quote style.",
     "descriptionDetails": "\nObject literal property names can be defined in two ways: using literals or using strings.\nFor example, these two objects are equivalent:\n\nvar object1 = {\n    property: true\n};\n\nvar object2 = {\n    \"property\": true\n};\n\nIn many cases, it doesn’t matter if you choose to use an identifier instead of a string\nor vice-versa. Even so, you might decide to enforce a consistent style in your code.\n\nThis rules lets you enforce consistent quoting of property names. Either they should always\nbe quoted (default behavior) or quoted only as needed (\"as-needed\").",
-    "optionsDescription": "\nPossible settings are:\n\n* `\"always\"`: Property names should always be quoted. (This is the default.)\n* `\"as-needed\"`: Only property names which require quotes may be quoted (e.g. those with spaces in them).\n* `\"consistent\"`: Property names should either all be quoted or unquoted.\n* `\"consistent-as-needed\"`: If any property name requires quotes, then all properties must be quoted. Otherwise, no \nproperty names may be quoted.\n\nFor ES6, computed property names (`{[name]: value}`) and methods (`{foo() {}}`) never need\nto be quoted.",
+    "optionsDescription": "\nPossible settings are:\n\n* `\"always\"`: Property names should always be quoted. (This is the default.)\n* `\"as-needed\"`: Only property names which require quotes may be quoted (e.g. those with spaces in them).\n* `\"consistent\"`: Property names should either all be quoted or unquoted.\n* `\"consistent-as-needed\"`: If any property name requires quotes, then all properties must be quoted. Otherwise, no\nproperty names may be quoted.\n\nFor ES6, computed property names (`{[name]: value}`) and methods (`{foo() {}}`) never need\nto be quoted.",
     "options": {
       "type": "string",
       "enum": [
@@ -1066,13 +1066,14 @@
     "ruleName": "only-arrow-functions",
     "description": "Disallows traditional (non-arrow) function expressions.",
     "rationale": "Traditional functions don't bind lexical scope, which can lead to unexpected behavior when accessing 'this'.",
-    "optionsDescription": "\nOne argument may be optionally provided:\n\n* `\"allow-declarations\"` allows standalone function declarations.\n        ",
+    "optionsDescription": "\nTwo arguments may be optionally provided:\n\n* `\"allow-declarations\"` allows standalone function declarations.\n* `\"allow-named-functions\"` allows the expression `function foo() {}` but not `function() {}`.\n        ",
     "options": {
       "type": "array",
       "items": {
         "type": "string",
         "enum": [
-          "allow-declarations"
+          "allow-declarations",
+          "allow-named-functions"
         ]
       },
       "minLength": 0,
@@ -1080,7 +1081,7 @@
     },
     "optionExamples": [
       "true",
-      "[true, \"allow-declarations\"]"
+      "[true, \"allow-declarations\", \"allow-named-functions\"]"
     ],
     "type": "typescript",
     "typescriptOnly": false
@@ -1089,7 +1090,7 @@
     "ruleName": "ordered-imports",
     "description": "Requires that import statements be alphabetized.",
     "descriptionDetails": "\nEnforce a consistent ordering for ES6 imports:\n- Named imports must be alphabetized (i.e. \"import {A, B, C} from \"foo\";\")\n    - The exact ordering can be controlled by the named-imports-order option.\n    - \"longName as name\" imports are ordered by \"longName\".\n- Import sources must be alphabetized within groups, i.e.:\n        import * as foo from \"a\";\n        import * as bar from \"b\";\n- Groups of imports are delineated by blank lines. You can use these to group imports\n    however you like, e.g. by first- vs. third-party or thematically.",
-    "optionsDescription": "\nYou may set the `\"import-sources-order\"` option to control the ordering of source\nimports (the `\"foo\"` in `import {A, B, C} from \"foo\"`).\n\nPossible values for `\"import-sources-order\"` are:\n* `\"case-insensitive'`: Correct order is `\"Bar\"`, `\"baz\"`, `\"Foo\"`. (This is the default.)\n* `\"lowercase-first\"`: Correct order is `\"baz\"`, `\"Bar\"`, `\"Foo\"`.\n* `\"lowercase-last\"`: Correct order is `\"Bar\"`, `\"Foo\"`, `\"baz\"`.\n* `\"any\"`: Allow any order.\n\nYou may set the `\"named-imports-order\"` option to control the ordering of named\nimports (the `{A, B, C}` in `import {A, B, C} from \"foo\"`).\n\nPossible values for `\"named-imports-order\"` are:\n\n* `\"case-insensitive'`: Correct order is `{A, b, C}`. (This is the default.)\n* `\"lowercase-first\"`: Correct order is `{b, A, C}`.\n* `\"lowercase-last\"`: Correct order is `{A, C, b}`.\n* `\"any\"`: Allow any order.\n\n        ",
+    "optionsDescription": "\nYou may set the `\"import-sources-order\"` option to control the ordering of source\nimports (the `\"foo\"` in `import {A, B, C} from \"foo\"`).\n\nPossible values for `\"import-sources-order\"` are:\n\n* `\"case-insensitive'`: Correct order is `\"Bar\"`, `\"baz\"`, `\"Foo\"`. (This is the default.)\n* `\"lowercase-first\"`: Correct order is `\"baz\"`, `\"Bar\"`, `\"Foo\"`.\n* `\"lowercase-last\"`: Correct order is `\"Bar\"`, `\"Foo\"`, `\"baz\"`.\n* `\"any\"`: Allow any order.\n\nYou may set the `\"named-imports-order\"` option to control the ordering of named\nimports (the `{A, B, C}` in `import {A, B, C} from \"foo\"`).\n\nPossible values for `\"named-imports-order\"` are:\n\n* `\"case-insensitive'`: Correct order is `{A, b, C}`. (This is the default.)\n* `\"lowercase-first\"`: Correct order is `{b, A, C}`.\n* `\"lowercase-last\"`: Correct order is `{A, C, b}`.\n* `\"any\"`: Allow any order.\n\n        ",
     "options": {
       "type": "object",
       "properties": {
@@ -1187,7 +1188,7 @@
   {
     "ruleName": "radix",
     "description": "Requires the radix parameter to be specified when calling `parseInt`.",
-    "rationale": "\nFrom [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/parseInt): \n> Always specify this parameter to eliminate reader confusion and to guarantee predictable behavior.\n> Different implementations produce different results when a radix is not specified, usually defaulting the value to 10.",
+    "rationale": "\nFrom [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/parseInt):\n> Always specify this parameter to eliminate reader confusion and to guarantee predictable behavior.\n> Different implementations produce different results when a radix is not specified, usually defaulting the value to 10.",
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
