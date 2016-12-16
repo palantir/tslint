@@ -1,6 +1,11 @@
 Change Log
 ===
 
+v4.1.1
+---
+
+* [bugfix] `typedef` rule was showing false positive for `catch` clause (#1887)
+
 v4.1.0
 ---
 
