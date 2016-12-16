@@ -22,18 +22,17 @@ import * as Lint from "../index";
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
-        ruleName: "no-empty-interface",
-        description: "Forbids empty interfaces.",
-        rationale: "An empty interface is equivalent to its supertype (or `{}`).",
+        ruleName: "interface-over-type-literal",
+        description: "Prefer an interface declaration over `type T = { ... }`",
+        rationale: "style",
         optionsDescription: "Not configurable.",
         options: null,
-        type: "typescript",
+        type: "style",
         typescriptOnly: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "An empty interface is equivalent to `{}`.";
-    public static FAILURE_STRING_FOR_EXTENDS = "An interface declaring no members is equivalent to its supertype.";
+    public static FAILURE_STRING = "Use an interface instead of a type literal.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new Walker(sourceFile, this.getOptions()));
@@ -41,10 +40,10 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class Walker extends Lint.RuleWalker {
-    public visitInterfaceDeclaration(node: ts.InterfaceDeclaration) {
-        if (node.members.length === 0) {
-            this.addFailureAtNode(node.name, node.heritageClauses ? Rule.FAILURE_STRING_FOR_EXTENDS : Rule.FAILURE_STRING);
+    public visitTypeAliasDeclaration(node: ts.TypeAliasDeclaration) {
+        if (node.type.kind === ts.SyntaxKind.TypeLiteral) {
+            this.addFailureAtNode(node.name, Rule.FAILURE_STRING);
         }
-        super.visitInterfaceDeclaration(node);
+        super.visitTypeAliasDeclaration(node);
     }
 }

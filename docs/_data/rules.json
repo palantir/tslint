@@ -48,9 +48,9 @@
       ]
     },
     "optionExamples": [
-      "[true, array]",
-      "[true, generic]",
-      "[true, array-simple]"
+      "[true, \"array\"]",
+      "[true, \"generic\"]",
+      "[true, \"array-simple\"]"
     ],
     "type": "style",
     "typescriptOnly": true
@@ -266,6 +266,15 @@
       "[true, \"always-prefix\"]",
       "[true, \"never-prefix\"]"
     ],
+    "type": "style",
+    "typescriptOnly": true
+  },
+  {
+    "ruleName": "interface-over-type-literal",
+    "description": "Prefer an interface declaration over `type T = { ... }`",
+    "rationale": "style",
+    "optionsDescription": "Not configurable.",
+    "options": null,
     "type": "style",
     "typescriptOnly": true
   },
@@ -606,9 +615,6 @@
     "rationale": "An empty interface is equivalent to its supertype (or `{}`).",
     "optionsDescription": "Not configurable.",
     "options": null,
-    "optionExamples": [
-      "true"
-    ],
     "type": "typescript",
     "typescriptOnly": true
   },
