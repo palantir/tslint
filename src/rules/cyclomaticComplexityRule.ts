@@ -28,7 +28,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "cyclomatic-complexity",
         description: "Enforces a threshold of cyclomatic complexity.",
         descriptionDetails: Lint.Utils.dedent`
-            Cyclomatic complexity is assessed for each function of any type. A starting value of 1
+            Cyclomatic complexity is assessed for each function of any type. A starting value of 20
             is assigned and this value is then incremented for every statement which can branch the
             control flow within the function. The following statements and expressions contribute
             to cyclomatic complexity:
