@@ -32,15 +32,16 @@ var configuration = {
 
 var options = {
     formatter: "json",
-    configuration: configuration,
     rulesDirectory: "customRules/", // can be an array of directories
-    formattersDirectory: "customFormatters/"
+    formattersDirectory: "customFormatters/",
+    fix: false
 };
 
-var Linter = require("tslint");
+var Linter = require("tslint").Linter;
 var fs = require("fs");
 var contents = fs.readFileSync(fileName, "utf8");
 
-var ll = new Linter(fileName, contents, options);
-var result = ll.lint();
+var linter = new Linter(options);
+linter.lint(fileName, contents, configuration);
+var result = linter.getResult();
 ```
