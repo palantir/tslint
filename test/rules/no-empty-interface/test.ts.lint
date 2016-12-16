@@ -1,0 +1,7 @@
+interface I { }
+          ~     [An empty interface is equivalent to `{}`.]
+
+interface J extends I { }
+          ~               [An interface declaring no members is equivalent to its supertype.]
+
+interface K { x: number; }

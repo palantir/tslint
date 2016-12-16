@@ -162,7 +162,7 @@
   {
     "ruleName": "cyclomatic-complexity",
     "description": "Enforces a threshold of cyclomatic complexity.",
-    "descriptionDetails": "\nCyclomatic complexity is assessed for each function of any type. A starting value of 1\nis assigned and this value is then incremented for every statement which can branch the\ncontrol flow within the function. The following statements and expressions contribute\nto cyclomatic complexity:\n* `catch`\n* `if` and `? :`\n* `||` and `&&` due to short-circuit evaluation\n* `for`, `for in` and `for of` loops\n* `while` and `do while` loops",
+    "descriptionDetails": "\nCyclomatic complexity is assessed for each function of any type. A starting value of 20\nis assigned and this value is then incremented for every statement which can branch the\ncontrol flow within the function. The following statements and expressions contribute\nto cyclomatic complexity:\n* `catch`\n* `if` and `? :`\n* `||` and `&&` due to short-circuit evaluation\n* `for`, `for in` and `for of` loops\n* `while` and `do while` loops",
     "rationale": "\nCyclomatic complexity is a code metric which indicates the level of complexity in a\nfunction. High cyclomatic complexity indicates confusing code which may be prone to\nerrors or difficult to modify.",
     "optionsDescription": "\nAn optional upper limit for cyclomatic complexity can be specified. If no limit option\nis provided a default value of $(Rule.DEFAULT_THRESHOLD) will be used.",
     "options": {
@@ -599,6 +599,18 @@
     ],
     "type": "functionality",
     "typescriptOnly": false
+  },
+  {
+    "ruleName": "no-empty-interface",
+    "description": "Forbids empty interfaces.",
+    "rationale": "An empty interface is equivalent to its supertype (or `{}`).",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "typescript",
+    "typescriptOnly": true
   },
   {
     "ruleName": "no-empty",
