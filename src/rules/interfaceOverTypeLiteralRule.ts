@@ -23,7 +23,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "interface-over-type-literal",
-        description: "Prefer an interface declaration over `type T = { ... }`",
+        description: "Prefer an interface declaration over a type literal (`type T = { ... }`)",
         rationale: "style",
         optionsDescription: "Not configurable.",
         options: null,
