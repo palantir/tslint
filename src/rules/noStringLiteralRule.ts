@@ -52,7 +52,7 @@ class NoStringLiteralWalker extends Lint.RuleWalker {
 
                 // only create a failure if the identifier is valid, in which case there's no need to use string literals
                 if (isValidIdentifier(unquotedAccessorText)) {
-                    this.addFailure(this.createFailure(argument.getStart(), argument.getWidth(), Rule.FAILURE_STRING));
+                    this.addFailureAtNode(argument, Rule.FAILURE_STRING);
                 }
             }
         }

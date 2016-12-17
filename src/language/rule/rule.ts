@@ -95,7 +95,7 @@ export interface IDisabledInterval {
 export interface IRule {
     getOptions(): IOptions;
     isEnabled(): boolean;
-    apply(sourceFile: ts.SourceFile): RuleFailure[];
+    apply(sourceFile: ts.SourceFile, languageService: ts.LanguageService): RuleFailure[];
     applyWithWalker(walker: RuleWalker): RuleFailure[];
 }
 
@@ -190,6 +190,7 @@ export class RuleFailure {
     private fileName: string;
     private startPosition: RuleFailurePosition;
     private endPosition: RuleFailurePosition;
+    private rawLines: string;
 
     constructor(private sourceFile: ts.SourceFile,
                 start: number,
@@ -201,6 +202,7 @@ export class RuleFailure {
         this.fileName = sourceFile.fileName;
         this.startPosition = this.createFailurePosition(start);
         this.endPosition = this.createFailurePosition(end);
+        this.rawLines = sourceFile.text;
     }
 
     public getFileName() {
@@ -229,6 +231,10 @@ export class RuleFailure {
 
     public getFix() {
         return this.fix;
+    }
+
+    public getRawLines() {
+        return this.rawLines;
     }
 
     public toJson(): any {

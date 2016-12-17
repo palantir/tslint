@@ -99,8 +99,7 @@ class AdjacentOverloadSignaturesWalker extends Lint.RuleWalker {
             const name = getOverloadName(node);
             if (name !== undefined) {
                 if (name in seen && last !== name) {
-                    this.addFailure(this.createFailure(node.getStart(), node.getWidth(),
-                        Rule.FAILURE_STRING_FACTORY(name)));
+                    this.addFailureAtNode(node, Rule.FAILURE_STRING_FACTORY(name));
                 }
                 seen[name] = true;
             }
@@ -116,7 +115,10 @@ function isLiteralExpression(node: ts.Node): node is ts.LiteralExpression {
 function getTextOfPropertyName(node: ts.InterfaceDeclaration | ts.TypeElement | ts.ClassElement): string {
     let nameText: string;
     if (node.name == null) {
-        return null;
+        if (node.kind === ts.SyntaxKind.Constructor) {
+            return "constructor";
+        }
+        return undefined;
     }
     switch (node.name.kind) {
         case ts.SyntaxKind.Identifier:

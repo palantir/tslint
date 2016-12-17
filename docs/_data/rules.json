@@ -70,7 +70,7 @@
   {
     "ruleName": "ban",
     "description": "Bans the use of specific functions or global methods.",
-    "optionsDescription": "\nA list of `['object', 'method', 'optional explanation here']` or `['globalMethod']` which ban `object.method()` \nor respectively `globalMethod()`.",
+    "optionsDescription": "\nA list of `['object', 'method', 'optional explanation here']` or `['globalMethod']` which ban `object.method()`\nor respectively `globalMethod()`.",
     "options": {
       "type": "list",
       "listType": {
@@ -83,7 +83,7 @@
       }
     },
     "optionExamples": [
-      "[true, [\"someGlobalMethod\"], [\"someObject\", \"someFunction\"], \n                          [\"someObject\", \"otherFunction\", \"Optional explanation\"]]"
+      "[true, [\"someGlobalMethod\"], [\"someObject\", \"someFunction\"],\n                          [\"someObject\", \"otherFunction\", \"Optional explanation\"]]"
     ],
     "type": "functionality",
     "typescriptOnly": false
@@ -142,7 +142,7 @@
     },
     "optionExamples": [
       "true",
-      "[true, [\"classes\", \"functions\"]"
+      "[true, \"classes\", \"functions\"]"
     ],
     "type": "style",
     "typescriptOnly": false
@@ -162,7 +162,7 @@
   {
     "ruleName": "cyclomatic-complexity",
     "description": "Enforces a threshold of cyclomatic complexity.",
-    "descriptionDetails": "\nCyclomatic complexity is assessed for each function of any type. A starting value of 1\nis assigned and this value is then incremented for every statement which can branch the\ncontrol flow within the function. The following statements and expressions contribute\nto cyclomatic complexity:\n* `catch`\n* `if` and `? :`\n* `||` and `&&` due to short-circuit evaluation\n* `for`, `for in` and `for of` loops\n* `while` and `do while` loops",
+    "descriptionDetails": "\nCyclomatic complexity is assessed for each function of any type. A starting value of 20\nis assigned and this value is then incremented for every statement which can branch the\ncontrol flow within the function. The following statements and expressions contribute\nto cyclomatic complexity:\n* `catch`\n* `if` and `? :`\n* `||` and `&&` due to short-circuit evaluation\n* `for`, `for in` and `for of` loops\n* `while` and `do while` loops",
     "rationale": "\nCyclomatic complexity is a code metric which indicates the level of complexity in a\nfunction. High cyclomatic complexity indicates confusing code which may be prone to\nerrors or difficult to modify.",
     "optionsDescription": "\nAn optional upper limit for cyclomatic complexity can be specified. If no limit option\nis provided a default value of $(Rule.DEFAULT_THRESHOLD) will be used.",
     "options": {
@@ -209,6 +209,25 @@
     "options": null,
     "optionExamples": [
       "true"
+    ],
+    "type": "functionality",
+    "typescriptOnly": false
+  },
+  {
+    "ruleName": "import-blacklist",
+    "description": "\nDisallows importing the specified modules directly via `import` and `require`.\nInstead only sub modules may be imported from that module.",
+    "rationale": "\nSome libraries allow importing their submodules instead of the entire module.\nThis is good practise as it avoids loading unused modules.",
+    "optionsDescription": "A list of blacklisted modules.",
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minLength": 1
+    },
+    "optionExamples": [
+      "true",
+      "[true, \"rxjs\", \"lodash\"]"
     ],
     "type": "functionality",
     "typescriptOnly": false
@@ -582,6 +601,18 @@
     "typescriptOnly": false
   },
   {
+    "ruleName": "no-empty-interface",
+    "description": "Forbids empty interfaces.",
+    "rationale": "An empty interface is equivalent to its supertype (or `{}`).",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "typescript",
+    "typescriptOnly": true
+  },
+  {
     "ruleName": "no-empty",
     "description": "Disallows empty blocks.",
     "descriptionDetails": "Blocks with a comment inside are not considered empty.",
@@ -643,6 +674,18 @@
     "typescriptOnly": true
   },
   {
+    "ruleName": "no-inferred-empty-object-type",
+    "description": "Disallow type inference of {} (empty object type) at function and constructor call sites",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality",
+    "typescriptOnly": true,
+    "requiresTypeInfo": true
+  },
+  {
     "ruleName": "no-internal-module",
     "description": "Disallows internal `module`",
     "rationale": "Using `module` leads to a confusion of concepts with external modules. Use the newer `namespace` keyword instead.",
@@ -675,6 +718,25 @@
       "[true, \"check-function-in-method\"]"
     ],
     "type": "functionality",
+    "typescriptOnly": false
+  },
+  {
+    "ruleName": "no-magic-numbers",
+    "description": "\nDisallows the use constant number values outside of variable assignments.\nWhen no list of allowed values is specified, -1, 0 and 1 are allowed by default.",
+    "rationale": "\nMagic numbers should be avoided as they often lack documentation, forcing\nthem to be stored in variables gives them implicit documentation.",
+    "optionsDescription": "A list of allowed numbers.",
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minLength": 1
+    },
+    "optionExamples": [
+      "true",
+      "[true, 1, 2, 3]"
+    ],
+    "type": "typescript",
     "typescriptOnly": false
   },
   {
@@ -925,7 +987,7 @@
     "ruleName": "object-literal-key-quotes",
     "description": "Enforces consistent object literal property quote style.",
     "descriptionDetails": "\nObject literal property names can be defined in two ways: using literals or using strings.\nFor example, these two objects are equivalent:\n\nvar object1 = {\n    property: true\n};\n\nvar object2 = {\n    \"property\": true\n};\n\nIn many cases, it doesn’t matter if you choose to use an identifier instead of a string\nor vice-versa. Even so, you might decide to enforce a consistent style in your code.\n\nThis rules lets you enforce consistent quoting of property names. Either they should always\nbe quoted (default behavior) or quoted only as needed (\"as-needed\").",
-    "optionsDescription": "\nPossible settings are:\n\n* `\"always\"`: Property names should always be quoted. (This is the default.)\n* `\"as-needed\"`: Only property names which require quotes may be quoted (e.g. those with spaces in them).\n* `\"consistent\"`: Property names should either all be quoted or unquoted.\n* `\"consistent-as-needed\"`: If any property name requires quotes, then all properties must be quoted. Otherwise, no \nproperty names may be quoted.\n\nFor ES6, computed property names (`{[name]: value}`) and methods (`{foo() {}}`) never need\nto be quoted.",
+    "optionsDescription": "\nPossible settings are:\n\n* `\"always\"`: Property names should always be quoted. (This is the default.)\n* `\"as-needed\"`: Only property names which require quotes may be quoted (e.g. those with spaces in them).\n* `\"consistent\"`: Property names should either all be quoted or unquoted.\n* `\"consistent-as-needed\"`: If any property name requires quotes, then all properties must be quoted. Otherwise, no\nproperty names may be quoted.\n\nFor ES6, computed property names (`{[name]: value}`) and methods (`{foo() {}}`) never need\nto be quoted.",
     "options": {
       "type": "string",
       "enum": [
@@ -1016,13 +1078,14 @@
     "ruleName": "only-arrow-functions",
     "description": "Disallows traditional (non-arrow) function expressions.",
     "rationale": "Traditional functions don't bind lexical scope, which can lead to unexpected behavior when accessing 'this'.",
-    "optionsDescription": "\nOne argument may be optionally provided:\n\n* `\"allow-declarations\"` allows standalone function declarations.\n        ",
+    "optionsDescription": "\nTwo arguments may be optionally provided:\n\n* `\"allow-declarations\"` allows standalone function declarations.\n* `\"allow-named-functions\"` allows the expression `function foo() {}` but not `function() {}`.\n        ",
     "options": {
       "type": "array",
       "items": {
         "type": "string",
         "enum": [
-          "allow-declarations"
+          "allow-declarations",
+          "allow-named-functions"
         ]
       },
       "minLength": 0,
@@ -1030,7 +1093,7 @@
     },
     "optionExamples": [
       "true",
-      "[true, \"allow-declarations\"]"
+      "[true, \"allow-declarations\", \"allow-named-functions\"]"
     ],
     "type": "typescript",
     "typescriptOnly": false
@@ -1039,7 +1102,7 @@
     "ruleName": "ordered-imports",
     "description": "Requires that import statements be alphabetized.",
     "descriptionDetails": "\nEnforce a consistent ordering for ES6 imports:\n- Named imports must be alphabetized (i.e. \"import {A, B, C} from \"foo\";\")\n    - The exact ordering can be controlled by the named-imports-order option.\n    - \"longName as name\" imports are ordered by \"longName\".\n- Import sources must be alphabetized within groups, i.e.:\n        import * as foo from \"a\";\n        import * as bar from \"b\";\n- Groups of imports are delineated by blank lines. You can use these to group imports\n    however you like, e.g. by first- vs. third-party or thematically.",
-    "optionsDescription": "\nYou may set the `\"import-sources-order\"` option to control the ordering of source\nimports (the `\"foo\"` in `import {A, B, C} from \"foo\"`).\n\nPossible values for `\"import-sources-order\"` are:\n* `\"case-insensitive'`: Correct order is `\"Bar\"`, `\"baz\"`, `\"Foo\"`. (This is the default.)\n* `\"lowercase-first\"`: Correct order is `\"baz\"`, `\"Bar\"`, `\"Foo\"`.\n* `\"lowercase-last\"`: Correct order is `\"Bar\"`, `\"Foo\"`, `\"baz\"`.\n* `\"any\"`: Allow any order.\n\nYou may set the `\"named-imports-order\"` option to control the ordering of named\nimports (the `{A, B, C}` in `import {A, B, C} from \"foo\"`).\n\nPossible values for `\"named-imports-order\"` are:\n\n* `\"case-insensitive'`: Correct order is `{A, b, C}`. (This is the default.)\n* `\"lowercase-first\"`: Correct order is `{b, A, C}`.\n* `\"lowercase-last\"`: Correct order is `{A, C, b}`.\n* `\"any\"`: Allow any order.\n\n        ",
+    "optionsDescription": "\nYou may set the `\"import-sources-order\"` option to control the ordering of source\nimports (the `\"foo\"` in `import {A, B, C} from \"foo\"`).\n\nPossible values for `\"import-sources-order\"` are:\n\n* `\"case-insensitive'`: Correct order is `\"Bar\"`, `\"baz\"`, `\"Foo\"`. (This is the default.)\n* `\"lowercase-first\"`: Correct order is `\"baz\"`, `\"Bar\"`, `\"Foo\"`.\n* `\"lowercase-last\"`: Correct order is `\"Bar\"`, `\"Foo\"`, `\"baz\"`.\n* `\"any\"`: Allow any order.\n\nYou may set the `\"named-imports-order\"` option to control the ordering of named\nimports (the `{A, B, C}` in `import {A, B, C} from \"foo\"`).\n\nPossible values for `\"named-imports-order\"` are:\n\n* `\"case-insensitive'`: Correct order is `{A, b, C}`. (This is the default.)\n* `\"lowercase-first\"`: Correct order is `{b, A, C}`.\n* `\"lowercase-last\"`: Correct order is `{A, C, b}`.\n* `\"any\"`: Allow any order.\n\n        ",
     "options": {
       "type": "object",
       "properties": {
@@ -1072,6 +1135,18 @@
     "typescriptOnly": false
   },
   {
+    "ruleName": "prefer-const",
+    "description": "Requires that variable declarations use `const` instead of `let` if possible.",
+    "descriptionDetails": "\nIf a variable is only assigned to once when it is declared, it should be declared using 'const'",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "maintainability",
+    "typescriptOnly": false
+  },
+  {
     "ruleName": "prefer-for-of",
     "description": "Recommends a 'for-of' loop over a standard 'for' loop if the index is only used to access the array being iterated.",
     "rationale": "A for(... of ...) loop is easier to implement and read when the index is not needed.",
@@ -1082,6 +1157,19 @@
     ],
     "type": "typescript",
     "typescriptOnly": false
+  },
+  {
+    "ruleName": "promise-function-async",
+    "description": "Requires any function or method that returns a promise to be marked async.",
+    "rationale": "\nEnsures that each function is only capable of 1) returning a rejected promise, or 2)\nthrowing an Error object. In contrast, non-`async` `Promise`-returning functions\nare technically capable of either. This practice removes a requirement for consuming\ncode to handle both cases.\n        ",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "typescript",
+    "typescriptOnly": false,
+    "requiresTypeInfo": true
   },
   {
     "ruleName": "quotemark",
@@ -1112,7 +1200,7 @@
   {
     "ruleName": "radix",
     "description": "Requires the radix parameter to be specified when calling `parseInt`.",
-    "rationale": "\nFrom [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/parseInt): \n> Always specify this parameter to eliminate reader confusion and to guarantee predictable behavior.\n> Different implementations produce different results when a radix is not specified, usually defaulting the value to 10.",
+    "rationale": "\nFrom [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/parseInt):\n> Always specify this parameter to eliminate reader confusion and to guarantee predictable behavior.\n> Different implementations produce different results when a radix is not specified, usually defaulting the value to 10.",
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
@@ -1164,6 +1252,18 @@
     ],
     "type": "style",
     "typescriptOnly": false
+  },
+  {
+    "ruleName": "strict-boolean-expressions",
+    "description": "Usage of && or || operators should be with boolean operands and\nexpressions in If, Do, While and For statements should be of type boolean",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality",
+    "typescriptOnly": true,
+    "requiresTypeInfo": true
   },
   {
     "ruleName": "switch-default",

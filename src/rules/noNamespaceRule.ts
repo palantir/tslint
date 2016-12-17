@@ -72,13 +72,13 @@ class NoNamespaceWalker extends Lint.RuleWalker {
             return;
         }
         if (this.hasOption("allow-declarations")
-                && Lint.someAncestor(decl, (n) => Lint.isNodeFlagSet(n, ts.NodeFlags.Ambient))) {
+                && Lint.someAncestor(decl, (n) => Lint.hasModifier(n.modifiers, ts.SyntaxKind.DeclareKeyword))) {
             return;
         }
         if (Lint.isNestedModuleDeclaration(decl)) {
             return;
         }
 
-        this.addFailure(this.createFailure(decl.getStart(), decl.getWidth(), Rule.FAILURE_STRING));
+        this.addFailureAtNode(decl, Rule.FAILURE_STRING);
     }
 }

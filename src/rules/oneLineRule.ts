@@ -87,8 +87,7 @@ class OneLineWalker extends Lint.RuleWalker {
                 const thenStatementEndLine = sourceFile.getLineAndCharacterOfPosition(thenStatement.getEnd()).line;
                 const elseKeywordLine = sourceFile.getLineAndCharacterOfPosition(elseKeyword.getStart()).line;
                 if (thenStatementEndLine !== elseKeywordLine) {
-                    const failure = this.createFailure(elseKeyword.getStart(), elseKeyword.getWidth(), Rule.ELSE_FAILURE_STRING);
-                    this.addFailure(failure);
+                    this.addFailureAtNode(elseKeyword, Rule.ELSE_FAILURE_STRING);
                 }
             }
         }
@@ -121,8 +120,7 @@ class OneLineWalker extends Lint.RuleWalker {
             const tryClosingBraceLine = sourceFile.getLineAndCharacterOfPosition(tryClosingBrace.getEnd()).line;
             const catchKeywordLine = sourceFile.getLineAndCharacterOfPosition(catchKeyword.getStart()).line;
             if (tryClosingBraceLine !== catchKeywordLine) {
-                const failure = this.createFailure(catchKeyword.getStart(), catchKeyword.getWidth(), Rule.CATCH_FAILURE_STRING);
-                this.addFailure(failure);
+                this.addFailureAtNode(catchKeyword, Rule.CATCH_FAILURE_STRING);
             }
         }
 
@@ -136,8 +134,7 @@ class OneLineWalker extends Lint.RuleWalker {
                 const closingBraceLine = sourceFile.getLineAndCharacterOfPosition(closingBrace.getEnd()).line;
                 const finallyKeywordLine = sourceFile.getLineAndCharacterOfPosition(finallyKeyword.getStart()).line;
                 if (closingBraceLine !== finallyKeywordLine) {
-                    const failure = this.createFailure(finallyKeyword.getStart(), finallyKeyword.getWidth(), Rule.FINALLY_FAILURE_STRING);
-                    this.addFailure(failure);
+                    this.addFailureAtNode(finallyKeyword, Rule.FINALLY_FAILURE_STRING);
                 }
             }
         }
@@ -296,16 +293,16 @@ class OneLineWalker extends Lint.RuleWalker {
         const sourceFile = previousNode.getSourceFile();
         const previousNodeLine = sourceFile.getLineAndCharacterOfPosition(previousNode.getEnd()).line;
         const openBraceLine = sourceFile.getLineAndCharacterOfPosition(openBraceToken.getStart()).line;
-        let failure: Lint.RuleFailure;
+        let failure: string;
 
         if (this.hasOption(OPTION_BRACE) && previousNodeLine !== openBraceLine) {
-            failure = this.createFailure(openBraceToken.getStart(), openBraceToken.getWidth(), Rule.BRACE_FAILURE_STRING);
+            failure = Rule.BRACE_FAILURE_STRING;
         } else if (this.hasOption(OPTION_WHITESPACE) && previousNode.getEnd() === openBraceToken.getStart()) {
-            failure = this.createFailure(openBraceToken.getStart(), openBraceToken.getWidth(), Rule.WHITESPACE_FAILURE_STRING);
+            failure = Rule.WHITESPACE_FAILURE_STRING;
         }
 
         if (failure) {
-            this.addFailure(failure);
+            this.addFailureAtNode(openBraceToken, failure);
         }
     }
 }

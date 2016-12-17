@@ -31,6 +31,7 @@ import { EnableDisableRulesWalker } from "./enableDisableRules";
 import { findFormatter } from "./formatterLoader";
 import { ILinterOptions, LintResult } from "./index";
 import { IFormatter } from "./language/formatter/formatter";
+import { createLanguageService, wrapProgram } from "./language/languageServiceHost";
 import { Fix, IRule, RuleFailure } from "./language/rule/rule";
 import { TypedRule } from "./language/rule/typedRule";
 import * as utils from "./language/utils";
@@ -41,7 +42,7 @@ import { arrayify, dedent } from "./utils";
  * Linter that can lint multiple files in consecutive runs.
  */
 class Linter {
-    public static VERSION = "4.0.0-dev.3";
+    public static VERSION = "4.1.0-dev.0";
 
     public static findConfiguration = findConfiguration;
     public static findConfigurationPath = findConfigurationPath;
@@ -50,6 +51,7 @@ class Linter {
 
     private failures: RuleFailure[] = [];
     private fixes: RuleFailure[] = [];
+    private languageService: ts.LanguageService;
 
     /**
      * Creates a TypeScript program object from a tsconfig.json file path and optional project directory.
@@ -65,9 +67,10 @@ class Linter {
         }
 
         const { config } = ts.readConfigFile(configFile, ts.sys.readFile);
-        const parseConfigHost = {
+        const parseConfigHost: ts.ParseConfigHost = {
             fileExists: fs.existsSync,
             readDirectory: ts.sys.readDirectory,
+            readFile: (file) => fs.readFileSync(file, "utf8"),
             useCaseSensitiveFileNames: true,
         };
         const parsed = ts.parseJsonConfigFileContent(config, parseConfigHost, projectDirectory);
@@ -92,6 +95,10 @@ class Linter {
         if ((<any> options).configuration != null) {
             throw new Error("ILinterOptions does not contain the property `configuration` as of version 4. " +
                 "Did you mean to pass the `IConfigurationFile` object to lint() ? ");
+        }
+
+        if (program) {
+            this.languageService = wrapProgram(program);
         }
     }
 
@@ -158,9 +165,9 @@ class Linter {
     private applyRule(rule: IRule, sourceFile: ts.SourceFile) {
         let ruleFailures: RuleFailure[] = [];
         if (this.program && TypedRule.isTypedRule(rule)) {
-            ruleFailures = rule.applyWithProgram(sourceFile, this.program);
+            ruleFailures = rule.applyWithProgram(sourceFile, this.languageService);
         } else {
-            ruleFailures = rule.apply(sourceFile);
+            ruleFailures = rule.apply(sourceFile, this.languageService);
         }
         let fileFailures: RuleFailure[] = [];
         for (let ruleFailure of ruleFailures) {
@@ -173,19 +180,19 @@ class Linter {
 
     private getEnabledRules(fileName: string, source?: string, configuration: IConfigurationFile = DEFAULT_CONFIG): IRule[] {
         const sourceFile = this.getSourceFile(fileName, source);
+        const isJs = /\.jsx?$/i.test(fileName);
+        const configurationRules = isJs ? configuration.jsRules : configuration.rules;
 
         // walk the code first to find all the intervals where rules are disabled
         const rulesWalker = new EnableDisableRulesWalker(sourceFile, {
             disabledIntervals: [],
             ruleName: "",
-        });
+        }, configurationRules);
         rulesWalker.walk(sourceFile);
         const enableDisableRuleMap = rulesWalker.enableDisableRuleMap;
 
         const rulesDirectories = arrayify(this.options.rulesDirectory)
             .concat(arrayify(configuration.rulesDirectory));
-        const isJs = /\.jsx?$/i.test(fileName);
-        const configurationRules = isJs ? configuration.jsRules : configuration.rules;
         let configuredRules = loadRules(configurationRules, enableDisableRuleMap, rulesDirectories, isJs);
 
         return configuredRules.filter((r) => r.isEnabled());
@@ -201,6 +208,7 @@ class Linter {
             }
         } else {
             sourceFile = utils.getSourceFile(fileName, source);
+            this.languageService = createLanguageService(fileName, source);
         }
 
         if (sourceFile === undefined) {

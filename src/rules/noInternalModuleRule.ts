@@ -43,7 +43,8 @@ export class Rule extends Lint.Rules.AbstractRule {
 class NoInternalModuleWalker extends Lint.RuleWalker {
     public visitModuleDeclaration(node: ts.ModuleDeclaration) {
         if (this.isInternalModuleDeclaration(node)) {
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+            const start = this.getStartBeforeModule(node);
+            this.addFailureAt(node.getStart() + start, "module".length, Rule.FAILURE_STRING);
         }
         super.visitModuleDeclaration(node);
     }
@@ -56,10 +57,14 @@ class NoInternalModuleWalker extends Lint.RuleWalker {
             && node.name.kind === ts.SyntaxKind.Identifier
             && !isGlobalAugmentation(node);
     }
+
+    private getStartBeforeModule(node: ts.ModuleDeclaration) {
+        return node.getText().indexOf("module");
+    }
 }
 
 function isGlobalAugmentation(node: ts.ModuleDeclaration) {
-    // augmenting global uses a sepcial syntax that is allowed
+    // augmenting global uses a special syntax that is allowed
     // see https://github.com/Microsoft/TypeScript/pull/6213
     return node.name.kind === ts.SyntaxKind.Identifier && node.name.text === "global";
 }

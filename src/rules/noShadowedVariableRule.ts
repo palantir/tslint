@@ -156,7 +156,7 @@ class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<ScopeInfo,
 
     private addFailureOnIdentifier(ident: ts.Identifier) {
         const failureString = Rule.FAILURE_STRING_FACTORY(ident.text);
-        this.addFailure(this.createFailure(ident.getStart(), ident.getWidth(), failureString));
+        this.addFailureAtNode(ident, failureString);
     }
 }
 

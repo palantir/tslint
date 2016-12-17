@@ -21,3 +21,4 @@ export { Formatter as ProseFormatter } from "./proseFormatter";
 export { Formatter as VerboseFormatter } from "./verboseFormatter";
 export { Formatter as StylishFormatter } from "./stylishFormatter";
 export { Formatter as FileslistFormatter } from "./fileslistFormatter";
+export { Formatter as CodeFrameFormatter } from "./codeFrameFormatter";

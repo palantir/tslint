@@ -297,7 +297,7 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
             (optionValue === "onespace" || optionValue === "space");
 
         if (isFailure) {
-            this.addFailure(this.createFailure(failurePos, 1, message));
+            this.addFailureAt(failurePos, 1, message);
         }
     }
 }

@@ -77,8 +77,8 @@ export function scanAllTokens(scanner: ts.Scanner, callback: (s: ts.Scanner) => 
 /**
  * @returns true if any modifier kinds passed along exist in the given modifiers array
  */
-export function hasModifier(modifiers: ts.ModifiersArray, ...modifierKinds: ts.SyntaxKind[]) {
-    if (modifiers == null || modifierKinds == null) {
+export function hasModifier(modifiers: ts.ModifiersArray | undefined, ...modifierKinds: ts.SyntaxKind[]) {
+    if (modifiers === undefined || modifierKinds.length === 0) {
         return false;
     }
 
@@ -125,12 +125,41 @@ export function someAncestor(node: ts.Node, predicate: (n: ts.Node) => boolean):
     return predicate(node) || (node.parent && someAncestor(node.parent, predicate));
 }
 
+export function isAssignment(node: ts.Node) {
+    if (node.kind === ts.SyntaxKind.BinaryExpression) {
+        const binaryExpression = node as ts.BinaryExpression;
+        return binaryExpression.operatorToken.kind >= ts.SyntaxKind.FirstAssignment
+            && binaryExpression.operatorToken.kind <= ts.SyntaxKind.LastAssignment;
+    } else {
+        return false;
+    }
+}
+
 /**
  * Bitwise check for node flags.
  */
 export function isNodeFlagSet(node: ts.Node, flagToCheck: ts.NodeFlags): boolean {
     /* tslint:disable:no-bitwise */
     return (node.flags & flagToCheck) !== 0;
+    /* tslint:enable:no-bitwise */
+}
+
+/**
+ * Bitwise check for type flags.
+ */
+export function isTypeFlagSet(type: ts.Type, flagToCheck: ts.TypeFlags): boolean {
+    /* tslint:disable:no-bitwise */
+    return (type.flags & flagToCheck) !== 0;
+    /* tslint:enable:no-bitwise */
+}
+
+/**
+ * Bitwise check for object flags.
+ * Does not work with TypeScript 2.0.x
+ */
+export function isObjectFlagSet(objectType: ts.ObjectType, flagToCheck: ts.ObjectFlags): boolean {
+    /* tslint:disable:no-bitwise */
+    return (objectType.objectFlags & flagToCheck) !== 0;
     /* tslint:enable:no-bitwise */
 }
 
@@ -142,4 +171,11 @@ export function isNestedModuleDeclaration(decl: ts.ModuleDeclaration) {
     // are nested therefore we can depend that a node's position will only match with its name's position for nested
     // nodes
     return decl.name.pos === decl.pos;
+}
+
+export function unwrapParentheses(node: ts.Expression) {
+    while (node.kind === ts.SyntaxKind.ParenthesizedExpression) {
+        node = (node as ts.ParenthesizedExpression).expression;
+    }
+    return node;
 }

@@ -116,7 +116,12 @@ class QuotemarkWalker extends Lint.RuleWalker {
                     ? Rule.SINGLE_QUOTE_FAILURE
                     : Rule.DOUBLE_QUOTE_FAILURE;
 
-                this.addFailure(this.createFailure(position, width, failureMessage));
+                const newText = expectedQuoteMark
+                    + text.slice(1, -1).replace(new RegExp(expectedQuoteMark, "g"), `\\${expectedQuoteMark}`)
+                    + expectedQuoteMark;
+
+                const fix = new Lint.Fix(Rule.metadata.ruleName, [ new Lint.Replacement(position, width, newText) ]);
+                this.addFailureAt(position, width, failureMessage, fix);
             }
         }
 

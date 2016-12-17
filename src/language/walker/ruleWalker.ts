@@ -81,6 +81,21 @@ export class RuleWalker extends SyntaxWalker {
         }
     }
 
+    /** Add a failure with any arbitrary span. Prefer `addFailureAtNode` if possible. */
+    public addFailureAt(start: number, width: number, failure: string, fix?: Fix) {
+        this.addFailure(this.createFailure(start, width, failure, fix));
+    }
+
+    /** Like `addFailureAt` but uses start and end instead of start and width. */
+    public addFailureFromStartToEnd(start: number, end: number, failure: string, fix?: Fix) {
+        this.addFailureAt(start, end - start, failure, fix);
+    }
+
+    /** Add a failure using a node's span. */
+    public addFailureAtNode(node: ts.Node, failure: string, fix?: Fix) {
+        this.addFailureAt(node.getStart(), node.getWidth(), failure, fix);
+    }
+
     public createReplacement(start: number, length: number, text: string): Replacement {
         return new Replacement(start, length, text);
     }

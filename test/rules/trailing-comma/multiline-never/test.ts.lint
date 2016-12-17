@@ -414,8 +414,7 @@ class Test<A, B, C> {
                 string,
                       ~ [Unnecessary trailing comma]
             ];
-        },
-         ~ [Unnecessary trailing comma]
+        }
     >() { return 42; }
 }
 
@@ -430,8 +429,7 @@ class Test3<
 class Test4<
     A,
     B,
-    C,
-     ~ [Unnecessary trailing comma]
+    C
 > { }
 
 interface ITest<A ,B, C> {
@@ -498,8 +496,7 @@ interface ITest3<
 interface ITest4<
     A,
     B,
-    C,
-     ~ [Unnecessary trailing comma]
+    C
 > { }
 
 enum Foo { BAR, BAZ }

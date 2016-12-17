@@ -1,0 +1,179 @@
+class C { }
+enum MyEnum {
+	A, B, C
+}
+let anyType: {};
+let boolType: boolean;
+let bwrapType: Boolean;
+let numType = 9;
+let strType = "string";
+let objType = new Object();
+let classType = new C();
+let enumType = MyEnum.A;
+let boolFn = () => { return true; };
+let strFn = () => { return strType; };
+let numFn = () => { return numType; };
+let boolExpr = (strType !== undefined);
+
+/*** Binary Expressions ***/
+/*** Invalid Boolean Expressions ***/
+classType && boolType;
+~~~~~~~~~              [Operands for the && or || operator should be of type boolean]
+anyType && boolType;
+~~~~~~~              [Operands for the && or || operator should be of type boolean]
+numType && boolType;
+~~~~~~~              [Operands for the && or || operator should be of type boolean]
+boolType && strType;
+            ~~~~~~~  [Operands for the && or || operator should be of type boolean]
+boolType && objType && enumType;
+            ~~~~~~~              [Operands for the && or || operator should be of type boolean]
+                       ~~~~~~~~  [Operands for the && or || operator should be of type boolean]
+bwrapType && boolType;
+~~~~~~~~~              [Operands for the && or || operator should be of type boolean]
+
+boolType || classType;
+            ~~~~~~~~~  [Operands for the && or || operator should be of type boolean]
+boolType || anyType;
+            ~~~~~~~  [Operands for the && or || operator should be of type boolean]
+boolType || numType;
+            ~~~~~~~  [Operands for the && or || operator should be of type boolean]
+strType || boolType;
+~~~~~~~              [Operands for the && or || operator should be of type boolean]
+bwrapType || boolType;
+~~~~~~~~~              [Operands for the && or || operator should be of type boolean]
+objType || boolType || enumType;
+~~~~~~~                          [Operands for the && or || operator should be of type boolean]
+                       ~~~~~~~~  [Operands for the && or || operator should be of type boolean]
+
+boolExpr && strType;
+            ~~~~~~~  [Operands for the && or || operator should be of type boolean]
+numType || boolExpr;
+~~~~~~~              [Operands for the && or || operator should be of type boolean]
+numType && boolExpr || strType;
+~~~~~~~                         [Operands for the && or || operator should be of type boolean]
+                       ~~~~~~~  [Operands for the && or || operator should be of type boolean]
+bwrapType || boolExpr && bwrapType;
+~~~~~~~~~                           [Operands for the && or || operator should be of type boolean]
+                         ~~~~~~~~~  [Operands for the && or || operator should be of type boolean]
+
+/*** Valid Boolean Expressions ***/
+boolType && boolType;
+boolExpr || boolType;
+(numType > 0) && boolFn();
+(strType !== "bool") && boolExpr;
+(numType > 0) && (strType !== "bool");
+(strType !== undefined) || (numType < 0);
+
+/*** ConditionalExpression ***/
+/*** Invalid ***/
+strType ? strType : numType;
+~~~~~~~                      [Condition needs to be a boolean expression or literal]
+numType ? numType : numFn();
+~~~~~~~                      [Condition needs to be a boolean expression or literal]
+objType ? objType : boolExpr;
+~~~~~~~                       [Condition needs to be a boolean expression or literal]
+classType ? strType : undefined;
+~~~~~~~~~                        [Condition needs to be a boolean expression or literal]
+bwrapType ? 1 : 0;
+~~~~~~~~~          [Condition needs to be a boolean expression or literal]
+enumType ? 0 : 1;
+~~~~~~~~          [Condition needs to be a boolean expression or literal]
+
+/*** Valid ***/
+boolFn() ? numType : strType;
+boolType ? strType : undefined;
+
+/*** PrefixUnary Expressions ***/
+/*** Invalid ***/
+!!numType;
+ ~~~~~~~~  [Operand for the ! operator should be of type boolean]
+!strType;
+~~~~~~~~  [Operand for the ! operator should be of type boolean]
+!objType;
+~~~~~~~~  [Operand for the ! operator should be of type boolean]
+!enumType;
+~~~~~~~~~  [Operand for the ! operator should be of type boolean]
+!!classType;
+ ~~~~~~~~~~  [Operand for the ! operator should be of type boolean]
+!bwrapType;
+~~~~~~~~~~  [Operand for the ! operator should be of type boolean]
+!!undefined;
+ ~~~~~~~~~~  [Operand for the ! operator should be of type boolean]
+
+/*** Valid ***/
+!!boolFn();
+!boolExpr;
+!!boolType;
+
+/*** If Statement ***/
+/*** Invalid ***/
+if (numType) { /* statements */ }
+    ~~~~~~~                       [If statement condition needs to be a boolean expression or literal]
+if (objType) { /* statements */ }
+    ~~~~~~~                       [If statement condition needs to be a boolean expression or literal]
+if (strType) { /* statements */ }
+    ~~~~~~~                       [If statement condition needs to be a boolean expression or literal]
+if (bwrapType) { /* statements */ }
+    ~~~~~~~~~                       [If statement condition needs to be a boolean expression or literal]
+if (strFn()) { /* statements */ }
+    ~~~~~~~                       [If statement condition needs to be a boolean expression or literal]
+if (MyEnum.A) { /* statements */ }
+    ~~~~~~~~                       [If statement condition needs to be a boolean expression or literal]
+if (classType) { /* statements */ }
+    ~~~~~~~~~                       [If statement condition needs to be a boolean expression or literal]
+
+/*** Valid ***/
+if (boolFn()) { /* statements */ }
+if (boolExpr) { /* statements */ }
+if (boolType) { /* statements */ }
+
+/*** While Statement ***/
+/*** Invalid ***/
+while (numType) { /* statements */ }
+       ~~~~~~~                       [While statement condition needs to be a boolean expression or literal]
+while (objType) { /* statements */ }
+       ~~~~~~~                       [While statement condition needs to be a boolean expression or literal]
+while (strType) { /* statements */ }
+       ~~~~~~~                       [While statement condition needs to be a boolean expression or literal]
+while (strFn()) { /* statements */ }
+       ~~~~~~~                       [While statement condition needs to be a boolean expression or literal]
+while (bwrapType) { /* statements */ }
+       ~~~~~~~~~                       [While statement condition needs to be a boolean expression or literal]
+while (MyEnum.A) { /* statements */ }
+       ~~~~~~~~                       [While statement condition needs to be a boolean expression or literal]
+while (classType) { /* statements */ }
+       ~~~~~~~~~                       [While statement condition needs to be a boolean expression or literal]
+
+/*** Valid ***/
+while (boolFn()) { /* statements */ }
+while (boolExpr) { /* statements */ }
+while (boolType) { /* statements */ }
+
+/*** Do Statement ***/
+/*** Invalid ***/
+do { /* statements */ } while (numType);
+                               ~~~~~~~   [Do-While statement condition needs to be a boolean expression or literal]
+do { /* statements */ } while (objType);
+                               ~~~~~~~   [Do-While statement condition needs to be a boolean expression or literal]
+do { /* statements */ } while (strType);
+                               ~~~~~~~   [Do-While statement condition needs to be a boolean expression or literal]
+do { /* statements */ } while (bwrapType);
+                               ~~~~~~~~~   [Do-While statement condition needs to be a boolean expression or literal]
+do { /* statements */ } while (strFn());
+                               ~~~~~~~   [Do-While statement condition needs to be a boolean expression or literal]
+do { /* statements */ } while (MyEnum.A);
+                               ~~~~~~~~   [Do-While statement condition needs to be a boolean expression or literal]
+do { /* statements */ } while (classType);
+                               ~~~~~~~~~   [Do-While statement condition needs to be a boolean expression or literal]
+
+/*** Valid ***/
+do { /* statements */ } while (boolFn());
+do { /* statements */ } while (boolExpr);
+do { /* statements */ } while (boolType);
+
+/*** For Statement ***/
+/*** Invalid ***/
+for (let j = 0; j; j++) { /* statements */ }
+                ~                            [For statement condition needs to be a boolean expression or literal]
+/*** Valid ***/
+for (let j = 0; j > numType; j++) { /* statements */ }

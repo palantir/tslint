@@ -17,6 +17,7 @@
 
 import * as ts from "typescript";
 import * as Lint from "../index";
+import { isAssignment } from "../language/utils";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -40,9 +41,9 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 interface IIncrementorState {
-    arrayToken: ts.LeftHandSideExpression;
-    endIncrementPos: number;
-    onlyArrayAccess: boolean;
+    arrayToken: ts.Identifier;
+    forLoopEndPosition: number;
+    onlyArrayReadAccess: boolean;
 }
 
 class PreferForOfWalker extends Lint.RuleWalker {
@@ -54,7 +55,7 @@ class PreferForOfWalker extends Lint.RuleWalker {
         this.incrementorMap = {};
     }
 
-    public visitForStatement(node: ts.ForStatement) {
+    protected visitForStatement(node: ts.ForStatement) {
         const arrayNodeInfo = this.getForLoopHeaderInfo(node);
         let indexVariableName: string;
         if (arrayNodeInfo != null) {
@@ -63,9 +64,9 @@ class PreferForOfWalker extends Lint.RuleWalker {
 
             // store `for` loop state
             this.incrementorMap[indexVariableName] = {
-                arrayToken,
-                endIncrementPos: node.incrementor.end,
-                onlyArrayAccess: true,
+                arrayToken: arrayToken as ts.Identifier,
+                forLoopEndPosition: node.incrementor.end + 1,
+                onlyArrayReadAccess: true,
             };
         }
 
@@ -73,10 +74,8 @@ class PreferForOfWalker extends Lint.RuleWalker {
 
         if (indexVariableName != null) {
             const incrementorState = this.incrementorMap[indexVariableName];
-            if (incrementorState.onlyArrayAccess) {
-                const length = incrementorState.endIncrementPos - node.getStart() + 1;
-                const failure = this.createFailure(node.getStart(), length, Rule.FAILURE_STRING);
-                this.addFailure(failure);
+            if (incrementorState.onlyArrayReadAccess) {
+                this.addFailureFromStartToEnd(node.getStart(), incrementorState.forLoopEndPosition, Rule.FAILURE_STRING);
             }
 
             // remove current `for` loop state
@@ -84,16 +83,24 @@ class PreferForOfWalker extends Lint.RuleWalker {
         }
     }
 
-    public visitIdentifier(node: ts.Identifier) {
+    protected visitIdentifier(node: ts.Identifier) {
         const incrementorState = this.incrementorMap[node.text];
 
         // check if the identifier is an iterator and is currently in the `for` loop body
-        if (incrementorState != null && incrementorState.arrayToken != null && incrementorState.endIncrementPos < node.getStart()) {
-            // mark `onlyArrayAccess` false if iterator is used on anything except the array in the `for` loop header
-            if (node.parent.kind !== ts.SyntaxKind.ElementAccessExpression
-                || incrementorState.arrayToken.getText() !== (<ts.ElementAccessExpression> node.parent).expression.getText()) {
-
-                incrementorState.onlyArrayAccess = false;
+        if (incrementorState != null && incrementorState.arrayToken != null && incrementorState.forLoopEndPosition < node.getStart()) {
+            // check if iterator is used for something other than reading data from array
+            if (node.parent.kind === ts.SyntaxKind.ElementAccessExpression) {
+                const elementAccess = node.parent as ts.ElementAccessExpression;
+                const arrayIdentifier = elementAccess.expression as ts.Identifier;
+                if (incrementorState.arrayToken.text !== arrayIdentifier.text) {
+                    // iterator used in array other than one iterated over
+                    incrementorState.onlyArrayReadAccess = false;
+                } else if (isAssignment(elementAccess.parent)) {
+                    // array position is assigned a new value
+                    incrementorState.onlyArrayReadAccess = false;
+                }
+            } else {
+                incrementorState.onlyArrayReadAccess = false;
             }
         }
         super.visitIdentifier(node);

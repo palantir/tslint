@@ -26,16 +26,28 @@ export class Formatter extends AbstractFormatter {
         let output = '<?xml version="1.0" encoding="utf-8"?><checkstyle version="4.3">';
 
         if (failures.length) {
-            output += `<file name="${this.escapeXml(failures[0].getFileName())}">`;
-            for (let failure of failures) {
-                output += `<error line="${failure.getStartPosition().getLineAndCharacter().line + 1}" `;
-                output += `column="${failure.getStartPosition().getLineAndCharacter().character + 1}" `;
-                output += `severity="warning" `;
-                output += `message="${this.escapeXml(failure.getFailure())}" `;
+            let failuresSorted = failures.sort((a, b) => {
+                return a.getFileName().localeCompare(b.getFileName());
+            });
+            let previousFilename: string = null;
+            for (let failure of failuresSorted) {
+                if (failure.getFileName() !== previousFilename) {
+                    if (previousFilename) {
+                        output += "</file>";
+                    }
+                    previousFilename = failure.getFileName();
+                    output += "<file name=\"" + this.escapeXml(failure.getFileName()) + "\">";
+                }
+                output += "<error line=\"" + (failure.getStartPosition().getLineAndCharacter().line + 1) + "\" ";
+                output += "column=\"" + (failure.getStartPosition().getLineAndCharacter().character + 1) + "\" ";
+                output += "severity=\"warning\" ";
+                output += "message=\"" + this.escapeXml(failure.getFailure()) + "\" ";
                 // checkstyle parser wants "source" to have structure like <anything>dot<category>dot<type>
-                output += `source="failure.tslint.${this.escapeXml(failure.getRuleName())}" />`;
+                output += "source=\"failure.tslint." + this.escapeXml(failure.getRuleName()) + "\" />";
             }
-            output += "</file>";
+            if (previousFilename) {
+                output += "</file>";
+            }
         }
 
         output += "</checkstyle>";

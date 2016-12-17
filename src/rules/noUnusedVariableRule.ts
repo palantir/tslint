@@ -78,8 +78,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         return `Unused ${type}: '${name}'`;
     }
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const languageService = Lint.createLanguageService(sourceFile.fileName, sourceFile.getFullText());
+    public apply(sourceFile: ts.SourceFile, languageService: ts.LanguageService): Lint.RuleFailure[] {
         return this.applyWithWalker(new NoUnusedVariablesWalker(sourceFile, this.getOptions(), languageService));
     }
 }
@@ -93,8 +92,10 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     private ignorePattern: RegExp;
     private isReactUsed: boolean;
     private reactImport: ts.NamespaceImport;
+    private possibleFailures: Lint.RuleFailure[] = [];
 
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions, private languageService: ts.LanguageService) {
+    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions,
+                private languageService: ts.LanguageService) {
         super(sourceFile, options);
         this.skipVariableDeclaration = false;
         this.skipParameterDeclaration = false;
@@ -138,9 +139,33 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
             if (!this.isIgnored(nameText)) {
                 const start = this.reactImport.name.getStart();
                 const msg = Rule.FAILURE_STRING_FACTORY(Rule.FAILURE_TYPE_IMPORT, nameText);
-                this.addFailure(this.createFailure(start, nameText.length, msg));
+                this.possibleFailures.push(this.createFailure(start, nameText.length, msg));
             }
         }
+
+        let someFixBrokeIt = false;
+        // Performance optimization: type-check the whole file before verifying individual fixes
+        if (this.possibleFailures.some((f) => f.hasFix())) {
+            let newText = Lint.Fix.applyAll(this.getSourceFile().getFullText(),
+                this.possibleFailures.map((f) => f.getFix()).filter((f) => !!f));
+
+            // If we have the program, we can verify that the fix doesn't introduce failures
+            if (Lint.checkEdit(this.languageService, this.getSourceFile(), newText).length > 0) {
+                console.error(`Fixes caused errors in ${this.getSourceFile().fileName}`);
+                someFixBrokeIt = true;
+            }
+        }
+
+        this.possibleFailures.forEach((f) => {
+            if (!someFixBrokeIt || !f.hasFix()) {
+                this.addFailure(f);
+            } else {
+                let newText = f.getFix().apply(this.getSourceFile().getFullText());
+                if (Lint.checkEdit(this.languageService, this.getSourceFile(), newText).length === 0) {
+                    this.addFailure(f);
+                }
+            }
+        });
     }
 
     public visitBindingElement(node: ts.BindingElement) {
@@ -416,12 +441,12 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         return (highlights != null && highlights[0].highlightSpans.length > 1) || this.isIgnored(name);
     }
 
-    private fail(type: string, name: string, position: number, replacements?: Lint.Replacement[]) {
+    private fail(type: string, name: string, position: number, replacements: Lint.Replacement[]) {
         let fix: Lint.Fix;
         if (replacements && replacements.length) {
             fix = new Lint.Fix(Rule.metadata.ruleName, replacements);
         }
-        this.addFailure(this.createFailure(position, name.length, Rule.FAILURE_STRING_FACTORY(type, name), fix));
+        this.possibleFailures.push(this.createFailure(position, name.length, Rule.FAILURE_STRING_FACTORY(type, name), fix));
     }
 
     private isIgnored(name: string) {

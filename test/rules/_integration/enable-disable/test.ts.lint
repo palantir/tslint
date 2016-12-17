@@ -64,3 +64,19 @@ var AAAaA = 'test'
 
 /* tslint:disable:quotemark */
 var s = 'xxx';
+
+//Test case for issue #1624
+// tslint:disable:quotemark variable-name
+var AAAaA = 'test' // tslint:disable-line:quotemark
+// tslint:disable-next-line:variable-name
+var AAAaA = 'test' //previously `quotemark` rule was enabled after previous line
+
+var AAAaA = 'test' // previously both `quotemark` and `variable-name` rules were enabled after previous lines
+
+// tslint:enable:quotemark
+// tslint:disable
+var AAAaA = 'test' // tslint:disable-line:quotemark
+var AAAaA = 'test' // ensure that disable-line rule correctly handles previous `enable rule - disable all` switches
+
+// tslint:enable:no-var-keyword
+var AAAaA = 'test' // ensure that disabled in config rule isn't enabled

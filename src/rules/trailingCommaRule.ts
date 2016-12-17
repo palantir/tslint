@@ -70,7 +70,6 @@ class TrailingCommaWalker extends Lint.RuleWalker {
         [ts.SyntaxKind.OpenBraceToken, ts.SyntaxKind.CloseBraceToken],
         [ts.SyntaxKind.OpenBracketToken, ts.SyntaxKind.CloseBracketToken],
         [ts.SyntaxKind.OpenParenToken, ts.SyntaxKind.CloseParenToken],
-        [ts.SyntaxKind.LessThanToken, ts.SyntaxKind.GreaterThanToken],
     ];
 
     public visitArrayLiteralExpression(node: ts.ArrayLiteralExpression) {
@@ -248,13 +247,13 @@ class TrailingCommaWalker extends Lint.RuleWalker {
                     const fix = new Lint.Fix(Rule.metadata.ruleName, [
                         this.deleteText(failureStart, 1),
                     ]);
-                    this.addFailure(this.createFailure(failureStart, 1, Rule.FAILURE_STRING_NEVER, fix));
+                    this.addFailureAt(failureStart, 1, Rule.FAILURE_STRING_NEVER, fix);
                 } else if (!hasTrailingComma && option === "always") {
                     const failureStart = lastGrandChild.getEnd();
                     const fix = new Lint.Fix(Rule.metadata.ruleName, [
                         this.appendText(failureStart, ","),
                     ]);
-                    this.addFailure(this.createFailure(failureStart - 1, 1, Rule.FAILURE_STRING_ALWAYS, fix));
+                    this.addFailureAt(failureStart - 1, 1, Rule.FAILURE_STRING_ALWAYS, fix);
                 }
             }
         }

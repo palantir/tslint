@@ -296,12 +296,8 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
 
     private checkModifiersAndSetPrevious(node: ts.Node, currentMember: IModifiers) {
         if (!this.canAppearAfter(this.previousMember, currentMember)) {
-            const failure = this.createFailure(
-                node.getStart(),
-                node.getWidth(),
-                `Declaration of ${toString(currentMember)} not allowed to appear after declaration of ${toString(this.previousMember)}`,
-            );
-            this.addFailure(failure);
+            this.addFailureAtNode(node,
+                `Declaration of ${toString(currentMember)} not allowed to appear after declaration of ${toString(this.previousMember)}`);
         }
         this.previousMember = currentMember;
     }
@@ -365,11 +361,7 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
 
                     const errorLine1 = `Declaration of ${nodeType} not allowed after declaration of ${prevNodeType}. ` +
                         `Instead, this should come ${locationHint}.`;
-                    this.addFailure(this.createFailure(
-                        node.getStart(),
-                        node.getWidth(),
-                        errorLine1,
-                    ));
+                    this.addFailureAtNode(node, errorLine1);
                 } else {
                     // keep track of last good node
                     prevRank = rank;

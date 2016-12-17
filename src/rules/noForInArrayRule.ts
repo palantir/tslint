@@ -49,8 +49,8 @@ export class Rule extends Lint.Rules.TypedRule {
 
     public static FAILURE_STRING = "for-in loops over arrays are forbidden. Use for-of or array.forEach instead.";
 
-    public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        const noForInArrayWalker = new NoForInArrayWalker(sourceFile, this.getOptions(), program);
+    public applyWithProgram(sourceFile: ts.SourceFile, langSvc: ts.LanguageService): Lint.RuleFailure[] {
+        const noForInArrayWalker = new NoForInArrayWalker(sourceFile, this.getOptions(), langSvc.getProgram());
         return this.applyWithWalker(noForInArrayWalker);
     }
 }
@@ -67,7 +67,7 @@ class NoForInArrayWalker extends Lint.ProgramAwareRuleWalker {
         /* tslint:enable:no-bitwise */
 
         if (isArrayType || isStringType) {
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+            this.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
 
         super.visitForInStatement(node);

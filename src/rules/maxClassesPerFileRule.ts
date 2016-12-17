@@ -67,7 +67,7 @@ class MaxClassesPerFileWalker extends Lint.RuleWalker {
         this.classCount++;
         if (this.classCount > this.maxClassCount) {
             const msg = Rule.FAILURE_STRING_FACTORY(this.maxClassCount);
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), msg));
+            this.addFailureAtNode(node, msg);
         }
     }
 }

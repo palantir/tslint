@@ -35,7 +35,7 @@ export class Rule extends Lint.Rules.TypedRule {
                 enum: ["classes", "functions", "methods", "properties"],
             },
         },
-        optionExamples: ["true", `[true, ["classes", "functions"]`],
+        optionExamples: ["true", `[true, "classes", "functions"]`],
         type: "style",
         typescriptOnly: false,
     };
@@ -55,9 +55,9 @@ export class Rule extends Lint.Rules.TypedRule {
         Rule.ARGUMENT_PROPERTIES,
     ];
 
-    public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+    public applyWithProgram(sourceFile: ts.SourceFile, langSvc: ts.LanguageService): Lint.RuleFailure[] {
         const options = this.getOptions();
-        const completedDocsWalker = new CompletedDocsWalker(sourceFile, options, program);
+        const completedDocsWalker = new CompletedDocsWalker(sourceFile, options, langSvc.getProgram());
 
         const nodesToCheck = this.getNodesToCheck(options.ruleArguments);
         completedDocsWalker.setNodesToCheck(nodesToCheck);
@@ -107,15 +107,15 @@ export class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
         const comments = this.getTypeChecker().getSymbolAtLocation(node.name).getDocumentationComment();
 
         if (comments.map((comment) => comment.text).join("").trim() === "") {
-            this.addFailure(this.createDocumentationFailure(node, nodeToCheck));
+            this.addDocumentationFailure(node, nodeToCheck);
         }
     }
 
-    private createDocumentationFailure(node: ts.Declaration, nodeToCheck: string): Lint.RuleFailure {
+    private addDocumentationFailure(node: ts.Declaration, nodeToCheck: string): void {
         const start = node.getStart();
         const width = node.getText().split(/\r|\n/g)[0].length;
         const description = nodeToCheck[0].toUpperCase() + nodeToCheck.substring(1) + Rule.FAILURE_STRING_EXIST;
 
-        return this.createFailure(start, width, description);
+        this.addFailureAt(start, width, description);
     }
 }

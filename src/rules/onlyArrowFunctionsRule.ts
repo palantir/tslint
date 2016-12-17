@@ -20,6 +20,7 @@ import * as ts from "typescript";
 import * as Lint from "../index";
 
 const OPTION_ALLOW_DECLARATIONS = "allow-declarations";
+const OPTION_ALLOW_NAMED_FUNCTIONS = "allow-named-functions";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -28,20 +29,21 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Disallows traditional (non-arrow) function expressions.",
         rationale: "Traditional functions don't bind lexical scope, which can lead to unexpected behavior when accessing 'this'.",
         optionsDescription: Lint.Utils.dedent`
-            One argument may be optionally provided:
+            Two arguments may be optionally provided:
 
             * \`"${OPTION_ALLOW_DECLARATIONS}"\` allows standalone function declarations.
+            * \`"${OPTION_ALLOW_NAMED_FUNCTIONS}"\` allows the expression \`function foo() {}\` but not \`function() {}\`.
         `,
         options: {
             type: "array",
             items: {
                 type: "string",
-                enum: [OPTION_ALLOW_DECLARATIONS],
+                enum: [OPTION_ALLOW_DECLARATIONS, OPTION_ALLOW_NAMED_FUNCTIONS],
             },
             minLength: 0,
             maxLength: 1,
         },
-        optionExamples: ["true", `[true, "${OPTION_ALLOW_DECLARATIONS}"]`],
+        optionExamples: ["true", `[true, "${OPTION_ALLOW_DECLARATIONS}", "${OPTION_ALLOW_NAMED_FUNCTIONS}"]`],
         type: "typescript",
         typescriptOnly: false,
     };
@@ -56,16 +58,33 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class OnlyArrowFunctionsWalker extends Lint.RuleWalker {
     public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
-        if (!node.asteriskToken && !this.hasOption(OPTION_ALLOW_DECLARATIONS)) {
-            this.addFailure(this.createFailure(node.getStart(), "function".length, Rule.FAILURE_STRING));
+        if (!this.hasOption(OPTION_ALLOW_DECLARATIONS)) {
+            this.failUnlessExempt(node);
         }
         super.visitFunctionDeclaration(node);
     }
 
     public visitFunctionExpression(node: ts.FunctionExpression) {
-        if (!node.asteriskToken) {
-            this.addFailure(this.createFailure(node.getStart(), "function".length, Rule.FAILURE_STRING));
+        if (!(node.name && this.hasOption(OPTION_ALLOW_NAMED_FUNCTIONS))) {
+            this.failUnlessExempt(node);
         }
         super.visitFunctionExpression(node);
     }
+
+    private failUnlessExempt(node: ts.FunctionLikeDeclaration) {
+        if (!functionIsExempt(node)) {
+            this.addFailureAt(node.getStart(), "function".length, Rule.FAILURE_STRING);
+        }
+    }
+}
+
+/** Generator functions and functions explicitly declaring `this` are allowed. */
+function functionIsExempt(node: ts.FunctionLikeDeclaration) {
+    return node.asteriskToken || hasThisParameter(node);
+}
+
+function hasThisParameter(node: ts.FunctionLikeDeclaration) {
+    const first = node.parameters[0];
+    return first && first.name.kind === ts.SyntaxKind.Identifier &&
+        (first.name as ts.Identifier).originalKeywordKind === ts.SyntaxKind.ThisKeyword;
 }
