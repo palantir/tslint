@@ -28,7 +28,8 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "arrow-parens",
         description: "Requires parentheses around the parameters of arrow function definitions.",
         rationale: "Maintains stylistic consistency with other arrow function definitions.",
-        optionsDescription: Lint.Utils.dedent`if \`${AVOID_ON_SINGLE_PARAMETER}\` is specified, then arrow functions with one parameter 
+        optionsDescription: Lint.Utils.dedent`
+            if \`${AVOID_ON_SINGLE_PARAMETER}\` is specified, then arrow functions with one parameter 
             must not have parentheses if removing them is allowed by TypeScript.`,
         options: {
             type: "string",
