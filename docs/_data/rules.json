@@ -48,9 +48,9 @@
       ]
     },
     "optionExamples": [
-      "[true, array]",
-      "[true, generic]",
-      "[true, array-simple]"
+      "[true, \"array\"]",
+      "[true, \"generic\"]",
+      "[true, \"array-simple\"]"
     ],
     "type": "style",
     "typescriptOnly": true
@@ -87,6 +87,15 @@
     ],
     "type": "functionality",
     "typescriptOnly": false
+  },
+  {
+    "ruleName": "callable-types",
+    "description": "An interface or literal type with just a call signature can be written as a function type.",
+    "rationale": "style",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "type": "style",
+    "typescriptOnly": true
   },
   {
     "ruleName": "class-name",
