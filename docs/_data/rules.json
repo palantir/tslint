@@ -279,6 +279,15 @@
     "typescriptOnly": true
   },
   {
+    "ruleName": "interface-over-type-literal",
+    "description": "Prefer an interface declaration over `type T = { ... }`",
+    "rationale": "style",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "type": "style",
+    "typescriptOnly": true
+  },
+  {
     "ruleName": "jsdoc-format",
     "description": "Enforces basic format rules for JSDoc comments.",
     "descriptionDetails": "\nThe following rules are enforced for JSDoc comments (comments starting with `/**`):\n\n* each line contains an asterisk and asterisks must be aligned\n* each asterisk must be followed by either a space or a newline (except for the first and the last)\n* the only characters before the asterisk on each line must be whitespace characters\n* one line comments must start with `/** ` and end with `*/`",
@@ -615,9 +624,6 @@
     "rationale": "An empty interface is equivalent to its supertype (or `{}`).",
     "optionsDescription": "Not configurable.",
     "options": null,
-    "optionExamples": [
-      "true"
-    ],
     "type": "typescript",
     "typescriptOnly": true
   },
