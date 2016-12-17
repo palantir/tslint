@@ -1,0 +1,14 @@
+{
+  "rules": {
+    "arrow-parens": [
+      true,
+      "avoid-on-single-parameter"
+    ]
+  },
+  "jsRules": {
+    "arrow-parens": [
+      true,
+      "avoid-on-single-parameter"
+    ]
+  }
+}
