@@ -76,6 +76,7 @@ export abstract class BlockScopeAwareRuleWalker<T, U> extends ScopeAwareRuleWalk
 
     private isBlockScopeBoundary(node: ts.Node): boolean {
         return super.isScopeBoundary(node)
+            || node.kind === ts.SyntaxKind.Block
             || node.kind === ts.SyntaxKind.DoStatement
             || node.kind === ts.SyntaxKind.WhileStatement
             || node.kind === ts.SyntaxKind.ForStatement
@@ -83,13 +84,11 @@ export abstract class BlockScopeAwareRuleWalker<T, U> extends ScopeAwareRuleWalk
             || node.kind === ts.SyntaxKind.ForOfStatement
             || node.kind === ts.SyntaxKind.WithStatement
             || node.kind === ts.SyntaxKind.SwitchStatement
-            || (node.parent != null
-                && (node.parent.kind === ts.SyntaxKind.TryStatement
-                    || node.parent.kind === ts.SyntaxKind.IfStatement)
-                )
-            || (node.kind === ts.SyntaxKind.Block && node.parent != null
-                && (node.parent.kind === ts.SyntaxKind.Block
-                    || node.parent.kind === ts.SyntaxKind.SourceFile)
-                );
+            || isParentKind(node, ts.SyntaxKind.TryStatement)
+            || isParentKind(node, ts.SyntaxKind.IfStatement);
     }
+}
+
+function isParentKind(node: ts.Node, kind: ts.SyntaxKind) {
+    return node.parent != null && node.parent.kind === kind;
 }
