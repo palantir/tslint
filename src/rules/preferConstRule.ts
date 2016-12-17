@@ -107,6 +107,12 @@ class PreferConstWalker extends Lint.BlockScopeAwareRuleWalker<{}, ScopeInfo> {
         node = unwrapParentheses(node);
         if (node.kind === ts.SyntaxKind.Identifier) {
             this.markAssignment(node as ts.Identifier);
+        } else if (node.kind === ts.SyntaxKind.ArrayLiteralExpression) {
+            const deconstructionArray = node as ts.ArrayLiteralExpression;
+            deconstructionArray.elements.forEach((child) => {
+                // recursively unwrap destructuring arrays
+                this.handleLHSExpression(child);
+            });
         }
     }
 

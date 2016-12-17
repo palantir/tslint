@@ -26,6 +26,8 @@ let c3 = 1, c4 = 2; // 1 failure
 c3 = 4;
 
 // destructuring
+let destructLater = 4;
+[destructLater] = 5;
 let {h, i} = {h: 1, i: 1}; // failure for 'h'
      ~                                        [Identifier 'h' is never reassigned; use 'const' instead of 'let'.]
 let [j, k] = [1, 1]; // failure for 'j'
