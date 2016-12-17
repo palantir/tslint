@@ -87,9 +87,7 @@ class ObjectLiteralKeyQuotesWalker extends Lint.RuleWalker {
     }
 
     public visitObjectLiteralExpression(node: ts.ObjectLiteralExpression) {
-        // For backwards-compatibility only. Old versions of this rule did nothing for method declarations.
-        const properties = node.properties.filter(({ kind }) => kind !== ts.SyntaxKind.MethodDeclaration);
-
+        const { properties } = node;
         switch (this.mode) {
             case "always":
                 this.allMustHaveQuotes(properties);
