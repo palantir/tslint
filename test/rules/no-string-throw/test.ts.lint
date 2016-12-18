@@ -1,0 +1,30 @@
+let a: never = () => throw 'bla';
+                     ~~~~~~~~~~~~ [Throwing plain strings (not instances of Error) gives no stack traces]
+
+let b: never = () => throw new Error('bla');
+
+let c: never = () => throw 'string1' + 'string2' + 'string3';
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Throwing plain strings (not instances of Error) gives no stack traces]
+
+let d: never = () => throw 'string' + 1;
+                     ~~~~~~~~~~~~~~~~~~~ [Throwing plain strings (not instances of Error) gives no stack traces]
+
+let e: never = () => throw 'string1' + 1 + {};
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~ [Throwing plain strings (not instances of Error) gives no stack traces]
+
+let f: never = () => throw ('string');
+                     ~~~~~~~~~~~~~~~~~ [Throwing plain strings (not instances of Error) gives no stack traces]
+
+let g: never = () => throw 1 + 2 + ('string');
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~ [Throwing plain strings (not instances of Error) gives no stack traces]
+
+// no warning because rule does not check for toString()
+const one = 1;
+let h: never = () => throw one.toString();
+
+let i: never = () => throw `some template string`;
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Throwing plain strings (not instances of Error) gives no stack traces]
+
+const someVariable = 123;
+let j: never = () => throw `template with ${someVariable} string`;
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Throwing plain strings (not instances of Error) gives no stack traces]
