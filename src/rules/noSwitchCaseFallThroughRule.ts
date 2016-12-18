@@ -79,13 +79,13 @@ export class NoSwitchCaseFallThroughWalker extends Lint.RuleWalker {
                 // no break statements and no statements means the fallthrough is expected.
                 // last item doesn't need a break
                 if (isFallingThrough && switchClause.statements.length > 0 && ((switchClauses.length - 1) > i)) {
-                    if (!isFallThroughAllowed(switchClauses[i + 1])) {
+                    if (!isFallThroughAllowed(this.getSourceFile(), switchClauses[i + 1])) {
                         this.addFailureAt(switchClauses[i + 1].getStart(), "case".length, `${Rule.FAILURE_STRING_PART}'case'`);
                     }
                 }
             } else {
                 // case statement falling through a default
-                if (isFallingThrough && !isFallThroughAllowed(child)) {
+                if (isFallingThrough && !isFallThroughAllowed(this.getSourceFile(), child)) {
                     this.addFailureAt(switchClauses[i].getStart(), "default".length, Rule.FAILURE_STRING_PART + "'default'");
                 }
             }
@@ -103,8 +103,8 @@ function fallsThrough(statements: ts.NodeArray<ts.Statement>) {
     });
 }
 
-function isFallThroughAllowed(nextCaseOrDefaultStatement: ts.Node) {
-    const sourceFileText = nextCaseOrDefaultStatement.getSourceFile().text;
+function isFallThroughAllowed(sourceFile: ts.SourceFile, nextCaseOrDefaultStatement: ts.Node) {
+    const sourceFileText = sourceFile.text;
     const firstChild = nextCaseOrDefaultStatement.getChildAt(0);
     const commentRanges = ts.getLeadingCommentRanges(sourceFileText, firstChild.getFullStart());
     if (commentRanges != null) {

@@ -66,10 +66,10 @@ class NoMergeableNamespaceWalker extends Lint.RuleWalker {
     }
 
     private findLocationToMerge(currentPosition: number, highlightSpans: ts.HighlightSpan[]): ts.LineAndCharacter {
-        const { line } = ts.getLineAndCharacterOfPosition(this.getSourceFile(), currentPosition);
+        const { line } = this.getLineAndCharacterOfPosition(currentPosition);
 
         for (const span of highlightSpans) {
-            const lineAndCharacter = ts.getLineAndCharacterOfPosition(this.getSourceFile(), span.textSpan.start);
+            const lineAndCharacter = this.getLineAndCharacterOfPosition(span.textSpan.start);
             if (lineAndCharacter.line !== line) {
                 return lineAndCharacter;
             }
