@@ -22,8 +22,15 @@ let c3 = 1, c4 = 2; // 1 failure
 c3 = 4;
 
 // destructuring
-let destructLater = 4;
-[destructLater] = 5;
+{
+    let destructLater = 4;
+    [destructLater] = 5;
+    let a: number;
+    let b: number;
+    let c: any;
+    ({ eh: a, b, ...c } = { eh: 0, b: 1 });
+}
+
 let {h, i} = {h: 1, i: 1}; // failure for 'h'
 let [j, k] = [1, 1]; // failure for 'j'
 let [x1, x3] = [1, 2], [x2] = [3]; // failure for x1, x3
