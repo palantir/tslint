@@ -1,0 +1,14 @@
+async function f(): Promise<void> {
+    const x = doIt();
+              ~~~~~~  [0]
+    console.log(await doAsync());
+                ~~~~~~~~~~~~~~~  [0]
+    return print``;
+           ~~~~~~~  [0]
+}
+
+declare function doIt(): void;
+declare function doAsync(): Promise<void>;
+declare function print(strs: TemplateStringsArray): void;
+
+[0]: Expression has type `void`. Put it on its own line as a statement.
