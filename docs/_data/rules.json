@@ -59,10 +59,16 @@
     "ruleName": "arrow-parens",
     "description": "Requires parentheses around the parameters of arrow function definitions.",
     "rationale": "Maintains stylistic consistency with other arrow function definitions.",
-    "optionsDescription": "Not configurable.",
-    "options": null,
+    "optionsDescription": "\nif `avoid-on-single-parameter` is specified, then arrow functions with one parameter \nmust not have parentheses if removing them is allowed by TypeScript.",
+    "options": {
+      "type": "string",
+      "enum": [
+        "avoid-on-single-parameter"
+      ]
+    },
     "optionExamples": [
-      "true"
+      "true",
+      "[true, avoid-on-single-parameter]"
     ],
     "type": "style",
     "typescriptOnly": false
@@ -280,7 +286,7 @@
   },
   {
     "ruleName": "interface-over-type-literal",
-    "description": "Prefer an interface declaration over `type T = { ... }`",
+    "description": "Prefer an interface declaration over a type literal (`type T = { ... }`)",
     "rationale": "style",
     "optionsDescription": "Not configurable.",
     "options": null,

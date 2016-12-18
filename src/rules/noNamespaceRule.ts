@@ -58,27 +58,18 @@ class NoNamespaceWalker extends Lint.RuleWalker {
     public visitSourceFile(node: ts.SourceFile) {
         // Ignore all .d.ts files by returning and not walking their ASTs.
         // .d.ts declarations do not have the Ambient flag set, but are still declarations.
-        if (this.hasOption("allow-declarations") && node.fileName.match(/\.d\.ts$/)) {
+        if (this.hasOption("allow-declarations") && node.isDeclarationFile) {
             return;
         }
         this.walkChildren(node);
     }
 
     public visitModuleDeclaration(decl: ts.ModuleDeclaration) {
-        super.visitModuleDeclaration(decl);
-
         // declare module 'foo' {} is an external module, not a namespace.
-        if (decl.name.kind === ts.SyntaxKind.StringLiteral) {
+        if (decl.name.kind === ts.SyntaxKind.StringLiteral ||
+            this.hasOption("allow-declarations") && Lint.hasModifier(decl.modifiers, ts.SyntaxKind.DeclareKeyword)) {
             return;
         }
-        if (this.hasOption("allow-declarations")
-                && Lint.someAncestor(decl, (n) => Lint.hasModifier(n.modifiers, ts.SyntaxKind.DeclareKeyword))) {
-            return;
-        }
-        if (Lint.isNestedModuleDeclaration(decl)) {
-            return;
-        }
-
         this.addFailureAtNode(decl, Rule.FAILURE_STRING);
     }
 }
