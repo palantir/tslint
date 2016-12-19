@@ -30,10 +30,10 @@ export abstract class BlockScopeAwareRuleWalker<T, U> extends ScopeAwareRuleWalk
         super(sourceFile, options);
 
         // initialize with global scope if file is not a module
-        this.blockScopeStack = this.fileIsModule ? [] : [this.createBlockScope()];
+        this.blockScopeStack = this.fileIsModule ? [] : [this.createBlockScope(sourceFile)];
     }
 
-    public abstract createBlockScope(): U;
+    public abstract createBlockScope(node: ts.Node): U;
 
     // get all block scopes available at this depth
     public getAllBlockScopes(): U[] {
@@ -62,7 +62,7 @@ export abstract class BlockScopeAwareRuleWalker<T, U> extends ScopeAwareRuleWalk
         const isNewBlockScope = this.isBlockScopeBoundary(node);
 
         if (isNewBlockScope) {
-            this.blockScopeStack.push(this.createBlockScope());
+            this.blockScopeStack.push(this.createBlockScope(node));
             this.onBlockScopeStart();
         }
 
