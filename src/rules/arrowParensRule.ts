@@ -20,7 +20,7 @@ import * as ts from "typescript";
 import * as Lint from "../index";
 import { hasModifier } from "../language/utils";
 
-const AVOID_ON_SINGLE_PARAMETER = "avoid-on-single-parameter";
+const BAN_SINGLE_ARG_PARENS = "ban-single-arg-parens";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -29,13 +29,13 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Requires parentheses around the parameters of arrow function definitions.",
         rationale: "Maintains stylistic consistency with other arrow function definitions.",
         optionsDescription: Lint.Utils.dedent`
-            if \`${AVOID_ON_SINGLE_PARAMETER}\` is specified, then arrow functions with one parameter 
+            if \`${BAN_SINGLE_ARG_PARENS}\` is specified, then arrow functions with one parameter 
             must not have parentheses if removing them is allowed by TypeScript.`,
         options: {
             type: "string",
-            enum: [AVOID_ON_SINGLE_PARAMETER],
+            enum: [BAN_SINGLE_ARG_PARENS],
         },
-        optionExamples: [`true`, `[true, ${AVOID_ON_SINGLE_PARAMETER}]`],
+        optionExamples: [`true`, `[true, ${BAN_SINGLE_ARG_PARENS}]`],
         type: "style",
         typescriptOnly: false,
     };
@@ -55,7 +55,7 @@ class ArrowParensWalker extends Lint.RuleWalker {
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
-        this.avoidOnSingleParameter = this.hasOption(AVOID_ON_SINGLE_PARAMETER);
+        this.avoidOnSingleParameter = this.hasOption(BAN_SINGLE_ARG_PARENS);
     }
 
     public visitArrowFunction(node: ts.FunctionLikeDeclaration) {
