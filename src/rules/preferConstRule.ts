@@ -113,6 +113,22 @@ class PreferConstWalker extends Lint.BlockScopeAwareRuleWalker<{}, ScopeInfo> {
                 // recursively unwrap destructuring arrays
                 this.handleLHSExpression(child);
             });
+        } else if (node.kind === ts.SyntaxKind.ObjectLiteralExpression) {
+            for (const prop of (node as ts.ObjectLiteralExpression).properties) {
+                switch (prop.kind) {
+                    case ts.SyntaxKind.PropertyAssignment:
+                        this.handleLHSExpression(prop.initializer);
+                        break;
+                    case ts.SyntaxKind.ShorthandPropertyAssignment:
+                        this.handleLHSExpression(prop.name);
+                        break;
+                    case ts.SyntaxKind.SpreadAssignment:
+                        this.handleLHSExpression(prop.expression);
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
     }
 
