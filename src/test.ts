@@ -165,7 +165,7 @@ export function consoleTestResultHandler(testResult: TestResult): boolean {
         process.stdout.write(`${fileName}:`);
 
         const markupDiffResults = diff.diffLines(results.markupFromMarkup, results.markupFromLinter);
-        const fixesDiffResults = diff.diffLines(results.fixesFromMarkup, results.fixesFromLinter);
+        const fixesDiffResults = diff.diffLines(results.fixesFromLinter, results.fixesFromMarkup);
         const didMarkupTestPass = !markupDiffResults.some((diff) => diff.added || diff.removed);
         const didFixesTestPass = !fixesDiffResults.some((diff) => diff.added || diff.removed);
 
