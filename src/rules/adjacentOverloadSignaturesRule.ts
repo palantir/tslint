@@ -58,7 +58,7 @@ class AdjacentOverloadSignaturesWalker extends Lint.RuleWalker {
     }
 
     public visitInterfaceDeclaration(node: ts.InterfaceDeclaration): void {
-        this.checkOverloadsAdjacent(node.members, getTextOfPropertyName);
+        this.checkOverloadsAdjacent(node.members, getOverload);
         super.visitInterfaceDeclaration(node);
     }
 
@@ -84,7 +84,7 @@ class AdjacentOverloadSignaturesWalker extends Lint.RuleWalker {
     }
 
     private visitMembers(members: Array<ts.TypeElement | ts.ClassElement>) {
-        this.checkOverloadsAdjacent(members, getTextOfPropertyName);
+        this.checkOverloadsAdjacent(members, getOverload);
     }
 
     /** 'getOverloadName' may return undefined for nodes that cannot be overloads, e.g. a `const` declaration. */
@@ -118,9 +118,29 @@ function isLiteralExpression(node: ts.Node): node is ts.LiteralExpression {
     return node.kind === ts.SyntaxKind.StringLiteral || node.kind === ts.SyntaxKind.NumericLiteral;
 }
 
-function getTextOfPropertyName(node: ts.InterfaceDeclaration | ts.TypeElement | ts.ClassElement): Overload | undefined {
-    if (node.name == null) {
-        return node.kind === ts.SyntaxKind.Constructor ? { name: "constructor", key: "constructor" } : undefined;
+export function getOverloadKey(node: ts.TypeElement | ts.ClassElement): string | undefined {
+    const o = getOverload(node);
+    return o && o.key;
+}
+
+function getOverload(node: ts.TypeElement | ts.ClassElement): Overload | undefined {
+    // Check that it *is* an overload.
+    switch (node.kind) {
+        case ts.SyntaxKind.ConstructSignature:
+        case ts.SyntaxKind.Constructor:
+            return { name: "constructor", key: "constructor" };
+        case ts.SyntaxKind.CallSignature:
+            return { name: "()", key: "()" };
+        case ts.SyntaxKind.CallSignature:
+        case ts.SyntaxKind.MethodSignature:
+        case ts.SyntaxKind.MethodDeclaration:
+            break;
+        default:
+            return undefined;
+    }
+
+    if (node.name === undefined) {
+        return undefined;
     }
 
     const propertyInfo = getPropertyInfo(node.name);
