@@ -43,8 +43,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public isEnabled(): boolean {
-        if (super.isEnabled()) {
-            const option = this.getOptions().ruleArguments[0];
+        const ruleArguments = this.getOptions().ruleArguments;
+        if (super.isEnabled() && ruleArguments !== undefined) {
+            const option = ruleArguments[0];
             if (typeof option === "number" && option > 0) {
                 return true;
             }
@@ -54,15 +55,17 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const ruleFailures: Lint.RuleFailure[] = [];
-        const lineLimit: number = this.getOptions().ruleArguments[0];
-        const lineCount: number = sourceFile.getLineStarts().length;
-        const disabledIntervals = this.getOptions().disabledIntervals;
+        const ruleArguments = this.getOptions().ruleArguments;
+        if (ruleArguments !== undefined) {
+            const lineLimit: number = ruleArguments[0];
+            const lineCount: number = sourceFile.getLineStarts().length;
+            const disabledIntervals = this.getOptions().disabledIntervals;
 
-        if (lineCount > lineLimit && disabledIntervals.length === 0) {
-            const errorString = Rule.FAILURE_STRING_FACTORY(lineCount, lineLimit);
-            ruleFailures.push(new Lint.RuleFailure(sourceFile, 0, 1, errorString, this.getOptions().ruleName));
+            if (lineCount > lineLimit && disabledIntervals.length === 0) {
+                const errorString = Rule.FAILURE_STRING_FACTORY(lineCount, lineLimit);
+                ruleFailures.push(new Lint.RuleFailure(sourceFile, 0, 1, errorString, this.getOptions().ruleName));
+            }
         }
-
         return ruleFailures;
     }
 }

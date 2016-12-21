@@ -58,8 +58,11 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public isEnabled(): boolean {
         if (super.isEnabled()) {
-            const quoteMarkString = this.getOptions().ruleArguments[0];
-            return (quoteMarkString === "single" || quoteMarkString === "double");
+            const ruleArguments = this.getOptions().ruleArguments;
+            if (ruleArguments !== undefined) {
+                const quoteMarkString = ruleArguments[0];
+                return (quoteMarkString === "single" || quoteMarkString === "double");
+            }
         }
 
         return false;
@@ -96,7 +99,7 @@ class QuotemarkWalker extends Lint.RuleWalker {
     }
 
     public visitStringLiteral(node: ts.StringLiteral) {
-        const inJsx = (node.parent.kind === ts.SyntaxKind.JsxAttribute);
+        const inJsx = (node.parent !== undefined && node.parent.kind === ts.SyntaxKind.JsxAttribute);
         const text = node.getText();
         const width = node.getWidth();
         const position = node.getStart();

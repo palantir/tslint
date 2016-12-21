@@ -71,7 +71,7 @@ class NoInferrableTypesWalker extends Lint.RuleWalker {
 
     private checkDeclaration(node: ts.ParameterDeclaration | ts.VariableDeclaration) {
         if (node.type != null && node.initializer != null) {
-            let failure: string;
+            let failure: string | null = null;
 
             switch (node.type.kind) {
                 case ts.SyntaxKind.BooleanKeyword:

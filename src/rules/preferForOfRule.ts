@@ -57,7 +57,7 @@ class PreferForOfWalker extends Lint.RuleWalker {
 
     protected visitForStatement(node: ts.ForStatement) {
         const arrayNodeInfo = this.getForLoopHeaderInfo(node);
-        let indexVariableName: string;
+        let indexVariableName: string | null = null;
         if (arrayNodeInfo != null) {
             const { indexVariable, arrayToken } = arrayNodeInfo;
             indexVariableName = indexVariable.getText();
@@ -65,7 +65,7 @@ class PreferForOfWalker extends Lint.RuleWalker {
             // store `for` loop state
             this.incrementorMap[indexVariableName] = {
                 arrayToken: arrayToken as ts.Identifier,
-                forLoopEndPosition: node.incrementor.end + 1,
+                forLoopEndPosition: node.incrementor!.end + 1,
                 onlyArrayReadAccess: true,
             };
         }
@@ -87,7 +87,11 @@ class PreferForOfWalker extends Lint.RuleWalker {
         const incrementorState = this.incrementorMap[node.text];
 
         // check if the identifier is an iterator and is currently in the `for` loop body
-        if (incrementorState != null && incrementorState.arrayToken != null && incrementorState.forLoopEndPosition < node.getStart()) {
+        if (node.parent !== undefined
+            && incrementorState != null
+            && incrementorState.arrayToken != null
+            && incrementorState.forLoopEndPosition < node.getStart()) {
+
             // check if iterator is used for something other than reading data from array
             if (node.parent.kind === ts.SyntaxKind.ElementAccessExpression) {
                 const elementAccess = node.parent as ts.ElementAccessExpression;
@@ -95,7 +99,7 @@ class PreferForOfWalker extends Lint.RuleWalker {
                 if (incrementorState.arrayToken.text !== arrayIdentifier.text) {
                     // iterator used in array other than one iterated over
                     incrementorState.onlyArrayReadAccess = false;
-                } else if (isAssignment(elementAccess.parent)) {
+                } else if (elementAccess.parent !== undefined && isAssignment(elementAccess.parent)) {
                     // array position is assigned a new value
                     incrementorState.onlyArrayReadAccess = false;
                 }
@@ -108,8 +112,8 @@ class PreferForOfWalker extends Lint.RuleWalker {
 
     // returns the iterator and array of a `for` loop if the `for` loop is basic. Otherwise, `null`
     private getForLoopHeaderInfo(forLoop: ts.ForStatement) {
-        let indexVariableName: string;
-        let indexVariable: ts.Identifier;
+        let indexVariableName: string | null = null;
+        let indexVariable: ts.Identifier | null = null;
 
         // assign `indexVariableName` if initializer is simple and starts at 0
         if (forLoop.initializer != null && forLoop.initializer.kind === ts.SyntaxKind.VariableDeclarationList) {
@@ -136,7 +140,7 @@ class PreferForOfWalker extends Lint.RuleWalker {
             return null;
         }
 
-        if (!this.isIncremented(forLoop.incrementor, indexVariableName)) {
+        if (forLoop.incrementor === undefined || !this.isIncremented(forLoop.incrementor, indexVariableName)) {
             return null;
         }
 
@@ -145,7 +149,7 @@ class PreferForOfWalker extends Lint.RuleWalker {
         if (conditionRight.kind === ts.SyntaxKind.PropertyAccessExpression) {
             const propertyAccess = <ts.PropertyAccessExpression> conditionRight;
             if (propertyAccess.name.getText() === "length") {
-                return { indexVariable, arrayToken: propertyAccess.expression };
+                return { indexVariable: indexVariable as ts.Identifier, arrayToken: propertyAccess.expression };
             }
         }
 

@@ -101,7 +101,10 @@ class ObjectLiteralKeyQuotesWalker extends Lint.RuleWalker {
                 }
                 break;
             case "consistent-as-needed":
-                if (properties.some(({ name }) => name.kind === ts.SyntaxKind.StringLiteral && propertyNeedsQuotes(name.text))) {
+                if (properties.some(({ name }) => name === undefined
+                    || name.kind === ts.SyntaxKind.StringLiteral
+                    && propertyNeedsQuotes(name.text))) {
+
                     this.allMustHaveQuotes(properties);
                 } else {
                     this.noneMayHaveQuotes(properties, true);
@@ -116,7 +119,7 @@ class ObjectLiteralKeyQuotesWalker extends Lint.RuleWalker {
 
     private allMustHaveQuotes(properties: ts.ObjectLiteralElementLike[]) {
         for (const { name } of properties) {
-            if (name.kind !== ts.SyntaxKind.StringLiteral && name.kind !== ts.SyntaxKind.ComputedPropertyName) {
+            if (name !== undefined && name.kind !== ts.SyntaxKind.StringLiteral && name.kind !== ts.SyntaxKind.ComputedPropertyName) {
                 this.addFailureAtNode(name, Rule.UNQUOTED_PROPERTY(name.getText()));
             }
         }
@@ -124,7 +127,7 @@ class ObjectLiteralKeyQuotesWalker extends Lint.RuleWalker {
 
     private noneMayHaveQuotes(properties: ts.ObjectLiteralElementLike[], noneNeedQuotes?: boolean) {
         for (const { name } of properties) {
-            if (name.kind === ts.SyntaxKind.StringLiteral && (noneNeedQuotes || !propertyNeedsQuotes(name.text))) {
+            if (name !== undefined && name.kind === ts.SyntaxKind.StringLiteral && (noneNeedQuotes || !propertyNeedsQuotes(name.text))) {
                 this.addFailureAtNode(name, Rule.UNNEEDED_QUOTES(name.text));
             }
         }
@@ -133,11 +136,11 @@ class ObjectLiteralKeyQuotesWalker extends Lint.RuleWalker {
 
 function quotesAreInconsistent(properties: ts.ObjectLiteralElementLike[]): boolean {
     let propertiesAreQuoted: boolean | undefined; // inferred on first (non-computed) property
-    for (const { name: { kind } } of properties) {
-        if (kind === ts.SyntaxKind.ComputedPropertyName) {
+    for (const { name } of properties) {
+        if (name === undefined || name.kind === ts.SyntaxKind.ComputedPropertyName) {
             continue;
         }
-        const thisOneIsQuoted = kind === ts.SyntaxKind.StringLiteral;
+        const thisOneIsQuoted = name.kind === ts.SyntaxKind.StringLiteral;
         if (propertiesAreQuoted === undefined) {
             propertiesAreQuoted = thisOneIsQuoted;
         } else if (propertiesAreQuoted !== thisOneIsQuoted) {

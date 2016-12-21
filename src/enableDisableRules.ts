@@ -145,7 +145,7 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
                     }
 
                     let start: number;
-                    let end: number;
+                    let end: number | undefined;
 
                     if (isCurrentLine) {
                         // start at the beginning of the current line
@@ -161,6 +161,7 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
                         // disable rule for the rest of the file
                         // start at the current position, but skip end position
                         start = startingPosition;
+                        end = undefined;
                     }
 
                     this.switchRuleState(ruleToSwitch, isEnabled, start, end);

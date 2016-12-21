@@ -59,9 +59,10 @@ export class Rule extends Lint.Rules.TypedRule {
         const options = this.getOptions();
         const completedDocsWalker = new CompletedDocsWalker(sourceFile, options, langSvc.getProgram());
 
-        const nodesToCheck = this.getNodesToCheck(options.ruleArguments);
-        completedDocsWalker.setNodesToCheck(nodesToCheck);
-
+        if (options.ruleArguments !== undefined) {
+            const nodesToCheck = this.getNodesToCheck(options.ruleArguments);
+            completedDocsWalker.setNodesToCheck(nodesToCheck);
+        }
         return this.applyWithWalker(completedDocsWalker);
     }
 
@@ -100,13 +101,13 @@ export class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
     }
 
     private checkComments(node: ts.Declaration, nodeToCheck: string): void {
-        if (!this.nodesToCheck[nodeToCheck]) {
+        if (!this.nodesToCheck[nodeToCheck] || node.name === undefined) {
             return;
         }
 
         const comments = this.getTypeChecker().getSymbolAtLocation(node.name).getDocumentationComment();
 
-        if (comments.map((comment) => comment.text).join("").trim() === "") {
+        if (comments.map((comment: ts.SymbolDisplayPart) => comment.text).join("").trim() === "") {
             this.addDocumentationFailure(node, nodeToCheck);
         }
     }

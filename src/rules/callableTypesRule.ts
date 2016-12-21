@@ -95,7 +95,7 @@ function noSupertype(heritageClauses: ts.NodeArray<ts.HeritageClause> | undefine
 function renderSuggestion(call: ts.CallSignatureDeclaration): string {
     const typeParameters = call.typeParameters && call.typeParameters.map((p) => p.getText()).join(", ");
     const parameters = call.parameters.map((p) => p.getText()).join(", ");
-    const returnType = call.type.getText();
+    const returnType = call.type === undefined ? "void" : call.type.getText();
     let res = `(${parameters}) => ${returnType}`;
     if (typeParameters) {
         res = `<${typeParameters}>${res}`;

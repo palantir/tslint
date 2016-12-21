@@ -56,7 +56,7 @@ class PreferConstWalker extends Lint.BlockScopeAwareRuleWalker<{}, ScopeInfo> {
     public onBlockScopeEnd() {
         const seenLetStatements: { [startPosition: string]: boolean } = {};
         for (const usage of this.getCurrentBlockScope().getConstCandiates()) {
-            let fix: Lint.Fix;
+            let fix: Lint.Fix | undefined;
             if (!usage.reassignedSibling && !seenLetStatements[usage.letStatement.getStart().toString()]) {
                 // only fix if all variables in the `let` statement can use `const`
                 const replacement = new Lint.Replacement(usage.letStatement.getStart(), "let".length, "const");
@@ -87,13 +87,16 @@ class PreferConstWalker extends Lint.BlockScopeAwareRuleWalker<{}, ScopeInfo> {
     protected visitVariableDeclaration(node: ts.VariableDeclaration) {
         this.getCurrentBlockScope().currentVariableDeclaration = node;
         super.visitVariableDeclaration(node);
-        this.getCurrentBlockScope().currentVariableDeclaration = null;
+        this.getCurrentBlockScope().currentVariableDeclaration = undefined;
     }
 
     protected visitIdentifier(node: ts.Identifier) {
-        if (this.getCurrentBlockScope().currentVariableDeclaration != null) {
-            const declarationList = this.getCurrentBlockScope().currentVariableDeclaration.parent;
-            if (isNodeFlagSet(declarationList, ts.NodeFlags.Let)
+        const currentVariableDeclaration = this.getCurrentBlockScope().currentVariableDeclaration;
+        if (currentVariableDeclaration != null) {
+            const declarationList = currentVariableDeclaration.parent;
+            if (declarationList != null
+                && isNodeFlagSet(declarationList, ts.NodeFlags.Let)
+                && declarationList.parent != null
                 && !Lint.hasModifier(declarationList.parent.modifiers, ts.SyntaxKind.ExportKeyword)) {
                 if (this.isVariableDeclaration(node)) {
                     this.getCurrentBlockScope().addVariable(node, declarationList);
@@ -139,14 +142,15 @@ class PreferConstWalker extends Lint.BlockScopeAwareRuleWalker<{}, ScopeInfo> {
     }
 
     private isVariableDeclaration(node: ts.Identifier) {
-        if (this.getCurrentBlockScope().currentVariableDeclaration != null) {
+        const currentVariableDeclaration = this.getCurrentBlockScope().currentVariableDeclaration;
+        if (currentVariableDeclaration != null && node.parent !== undefined) {
             // `isBindingElementDeclaration` differentiates between non-variable binding elements and variable binding elements
             // for example in `let {a: {b}} = {a: {b: 1}}`, `a` is a non-variable and the 1st `b` is a variable
             const isBindingElementDeclaration = node.parent.kind === ts.SyntaxKind.BindingElement
                 && node.parent.getText() === node.getText();
             const isSimpleVariableDeclaration = node.parent.kind === ts.SyntaxKind.VariableDeclaration;
             // differentiates between the left and right hand side of a declaration
-            const inVariableDeclaration = this.getCurrentBlockScope().currentVariableDeclaration.name.getEnd() >= node.getEnd();
+            const inVariableDeclaration = currentVariableDeclaration.name.getEnd() >= node.getEnd();
             return inVariableDeclaration && (isBindingElementDeclaration || isSimpleVariableDeclaration);
         }
         return false;
@@ -171,7 +175,7 @@ interface IConstCandidate {
 }
 
 class ScopeInfo {
-    public currentVariableDeclaration: ts.VariableDeclaration;
+    public currentVariableDeclaration?: ts.VariableDeclaration;
 
     private identifierUsages: {
         [varName: string]: {

@@ -47,9 +47,14 @@ class MaxClassesPerFileWalker extends Lint.RuleWalker {
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
 
-        this.maxClassCount = options.ruleArguments[0];
-        if (isNaN(this.maxClassCount) || this.maxClassCount < 1) {
+        if (options.ruleArguments === undefined
+            || options.ruleArguments[0] === undefined
+            || isNaN(options.ruleArguments[0])
+            || options.ruleArguments[0] < 1) {
+
             this.maxClassCount = 1;
+        } else {
+            this.maxClassCount = options.ruleArguments[0];
         }
     }
 

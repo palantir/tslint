@@ -53,7 +53,7 @@ export class Formatter extends AbstractFormatter {
 
         const outputLines: string[] = [];
 
-        let currentFile: string;
+        let currentFile: string | undefined;
 
         for (const failure of failures) {
             const fileName = failure.getFileName();
@@ -66,7 +66,7 @@ export class Formatter extends AbstractFormatter {
             }
 
             let failureString = failure.getFailure();
-            failureString     = colors.red(failureString);
+            failureString = colors.red(failureString);
 
             // Rule
             let ruleName = failure.getRuleName();

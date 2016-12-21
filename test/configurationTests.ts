@@ -128,21 +128,21 @@ describe("Configuration", () => {
         });
 
         describe("with config not relative to tslint", () => {
-            let tmpfile: string;
+            let tmpfile: string | null;
 
             beforeEach(() => {
                 tmpfile = createTempFile("json");
             });
 
             afterEach(() => {
-                if (tmpfile !== undefined) {
+                if (tmpfile != null) {
                     fs.unlinkSync(tmpfile);
                 }
             });
 
             it("extends with package installed relative to tslint", () => {
-                fs.writeFileSync(tmpfile, JSON.stringify({ extends: "tslint-test-config-non-relative" }));
-                let config = loadConfigurationFromPath(tmpfile);
+                fs.writeFileSync(tmpfile!, JSON.stringify({ extends: "tslint-test-config-non-relative" }));
+                let config = loadConfigurationFromPath(tmpfile!);
                 assert.deepEqual(config.rules, {
                     "class-name": true,
                 });
@@ -154,8 +154,8 @@ describe("Configuration", () => {
 
             assert.isArray(config.rulesDirectory);
             assert.lengthOf(config.rulesDirectory, 2);
-            assert.isTrue(fs.existsSync(config.rulesDirectory[0]));
-            assert.isTrue(fs.existsSync(config.rulesDirectory[1]));
+            assert.isTrue(fs.existsSync(config.rulesDirectory![0]));
+            assert.isTrue(fs.existsSync(config.rulesDirectory![1]));
             /* tslint:disable:object-literal-sort-keys */
             assert.deepEqual(config.jsRules, {
                 "always-fail": false,

@@ -56,7 +56,8 @@ export class Rule extends Lint.Rules.AbstractRule {
             sourceFile.getFullText(),
         );
 
-        const linebreakStyle = this.getOptions().ruleArguments[0] || OPTION_LINEBREAK_STYLE_LF;
+        const ruleArguments = this.getOptions().ruleArguments;
+        const linebreakStyle = ruleArguments !== undefined && ruleArguments.length > 0 ? ruleArguments[0] : OPTION_LINEBREAK_STYLE_LF;
         const expectLF = linebreakStyle === OPTION_LINEBREAK_STYLE_CRLF;
         const expectedEOL = expectLF ? "\r\n" : "\n";
         const failureString = expectLF ? Rule.FAILURE_STRINGS.CRLF : Rule.FAILURE_STRINGS.LF;
