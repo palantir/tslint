@@ -17,6 +17,7 @@
 
 import * as ts from "typescript";
 
+import {doesIntersect} from "../utils";
 import {RuleWalker} from "../walker/ruleWalker";
 import {IDisabledInterval, IOptions, IRule, IRuleMetadata, RuleFailure} from "./rule";
 
@@ -36,7 +37,7 @@ export abstract class AbstractRule implements IRule {
         return false;
     }
 
-    constructor(ruleName: string, private value: any, disabledIntervals: IDisabledInterval[]) {
+    constructor(ruleName: string, private value: any, private disabledIntervals: IDisabledInterval[]) {
         let ruleArguments: any[] = [];
 
         if (Array.isArray(value) && value.length > 1) {
@@ -58,10 +59,21 @@ export abstract class AbstractRule implements IRule {
 
     public applyWithWalker(walker: RuleWalker): RuleFailure[] {
         walker.walk(walker.getSourceFile());
-        return walker.getFailures();
+        return this.filterFailures(walker.getFailures());
     }
 
     public isEnabled(): boolean {
         return AbstractRule.isRuleEnabled(this.value);
+    }
+
+    protected filterFailures(failures: RuleFailure[]): RuleFailure[] {
+        const result: RuleFailure[] = [];
+        for (const failure of failures) {
+            // don't add failures for a rule if the failure intersects an interval where that rule is disabled
+            if (!doesIntersect(failure, this.disabledIntervals) && !result.some((f) => f.equals(failure))) {
+                result.push(failure);
+            }
+        }
+        return result;
     }
 }
