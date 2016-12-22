@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 import * as Lint from "../index";
-import {isAssignment, unwrapParentheses} from "../language/utils";
+import {isAssignment, isCombinedModifierFlagSet, isCombinedNodeFlagSet, unwrapParentheses} from "../language/utils";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -45,20 +45,16 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class PreferConstWalker extends Lint.BlockScopeAwareRuleWalker<{}, ScopeInfo> {
-    public createScope() {
-        return {};
-    }
-
     private static collect(statements: ts.Statement[], scopeInfo: ScopeInfo) {
         for (const s of statements) {
             if (s.kind === ts.SyntaxKind.VariableStatement) {
-                PreferConstWalker.collectInVariableDeclarationList((s as ts.VariableStatement).declarationList, scopeInfo)
+                PreferConstWalker.collectInVariableDeclarationList((s as ts.VariableStatement).declarationList, scopeInfo);
             }
         }
     }
 
     private static collectInVariableDeclarationList(node: ts.VariableDeclarationList, scopeInfo: ScopeInfo) {
-        if (ts.getCombinedNodeFlags(node) & ts.NodeFlags.Let && !(ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Export)) {
+        if (isCombinedNodeFlagSet(node, ts.NodeFlags.Let) && !isCombinedModifierFlagSet(node, ts.ModifierFlags.Export)) {
             for (const decl of node.declarations) {
                 PreferConstWalker.addDeclarationName(decl.name, node, scopeInfo);
             }
@@ -68,14 +64,17 @@ class PreferConstWalker extends Lint.BlockScopeAwareRuleWalker<{}, ScopeInfo> {
     private static addDeclarationName(node: ts.BindingName, container: ts.VariableDeclarationList, scopeInfo: ScopeInfo) {
         if (node.kind === ts.SyntaxKind.Identifier) {
             scopeInfo.addVariable(node as ts.Identifier, container);
-        }
-        else {
+        } else {
             for (const el of (node as ts.BindingPattern).elements) {
                 if (el.kind === ts.SyntaxKind.BindingElement) {
-                    PreferConstWalker.addDeclarationName(el.name, container, scopeInfo)
+                    PreferConstWalker.addDeclarationName(el.name, container, scopeInfo);
                 }
             }
         }
+    }
+
+    public createScope() {
+        return {};
     }
 
     public createBlockScope(node: ts.Node) {
@@ -97,9 +96,16 @@ class PreferConstWalker extends Lint.BlockScopeAwareRuleWalker<{}, ScopeInfo> {
             case ts.SyntaxKind.ForOfStatement:
             case ts.SyntaxKind.ForInStatement:
                 const initializer = (node as ts.ForInStatement | ts.ForOfStatement | ts.ForStatement).initializer;
-                if (initializer && initializer.kind === ts.SyntaxKind.VariableDeclarationList){
-                    PreferConstWalker.collectInVariableDeclarationList(initializer as ts.VariableDeclarationList, scopeInfo)
+                if (initializer && initializer.kind === ts.SyntaxKind.VariableDeclarationList) {
+                    PreferConstWalker.collectInVariableDeclarationList(initializer as ts.VariableDeclarationList, scopeInfo);
                 }
+                break;
+            case ts.SyntaxKind.SwitchStatement:
+                for (const caseClause of (node as ts.SwitchStatement).caseBlock.clauses) {
+                    PreferConstWalker.collect(caseClause.statements, scopeInfo);
+                }
+                break;
+            default:
                 break;
         }
         return scopeInfo;

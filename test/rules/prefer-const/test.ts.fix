@@ -133,3 +133,12 @@ let forwardDecl: number;
 module E {
     const x = 1;
 }
+
+switch (1) {
+    case 1:
+        const x = 1;
+        break;
+    case 2:
+        const y = 1;
+        break;
+}

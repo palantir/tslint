@@ -156,3 +156,14 @@ module E {
     let x = 1;
         ~      [Identifier 'x' is never reassigned; use 'const' instead of 'let'.]
 }
+
+switch (1) {
+    case 1:
+        let x = 1;
+            ~      [Identifier 'x' is never reassigned; use 'const' instead of 'let'.]
+        break;
+    case 2:
+        let y = 1;
+            ~      [Identifier 'y' is never reassigned; use 'const' instead of 'let'.]
+        break;
+}
