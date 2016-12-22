@@ -53,7 +53,7 @@ class FileHeaderWalker extends Lint.RuleWalker {
             } else {
                 // either the third or fourth capture group contains the comment contents
                 const comment = match[2] ? match[2] : match[3];
-                if (comment.search(this.headerRegexp) < 0) {
+                if (comment !== undefined && comment.search(this.headerRegexp) < 0) {
                     this.addFailureAt(offset, 0, Rule.FAILURE_STRING);
                 }
             }
