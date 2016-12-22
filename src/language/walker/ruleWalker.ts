@@ -85,7 +85,7 @@ export class RuleWalker extends SyntaxWalker {
 
     /** Add a failure using a node's span. */
     public addFailureAtNode(node: ts.Node, failure: string, fix?: Fix) {
-        this.addFailureAt(node.getStart(), node.getWidth(), failure, fix);
+        this.addFailureAt(node.getStart(this.sourceFile), node.getWidth(this.sourceFile), failure, fix);
     }
 
     public createReplacement(start: number, length: number, text: string): Replacement {
