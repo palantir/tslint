@@ -19,8 +19,9 @@ import * as ts from "typescript";
 
 import {Fix, IOptions, Replacement, RuleFailure} from "../rule/rule";
 import {SyntaxWalker} from "./syntaxWalker";
+import {IWalker} from "./walker";
 
-export class RuleWalker extends SyntaxWalker {
+export class RuleWalker extends SyntaxWalker implements IWalker {
     private limit: number;
     private options: any[];
     private failures: RuleFailure[];

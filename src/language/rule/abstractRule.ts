@@ -18,7 +18,7 @@
 import * as ts from "typescript";
 
 import {doesIntersect} from "../utils";
-import {RuleWalker} from "../walker/ruleWalker";
+import {IWalker} from "../walker/walker";
 import {IDisabledInterval, IOptions, IRule, IRuleMetadata, RuleFailure} from "./rule";
 
 export abstract class AbstractRule implements IRule {
@@ -57,7 +57,7 @@ export abstract class AbstractRule implements IRule {
 
     public abstract apply(sourceFile: ts.SourceFile, languageService: ts.LanguageService): RuleFailure[];
 
-    public applyWithWalker(walker: RuleWalker): RuleFailure[] {
+    public applyWithWalker(walker: IWalker): RuleFailure[] {
         walker.walk(walker.getSourceFile());
         return this.filterFailures(walker.getFailures());
     }

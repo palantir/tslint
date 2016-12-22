@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import {RuleWalker} from "../walker/ruleWalker";
+import {IWalker} from "../walker/walker";
 
 export interface IRuleMetadata {
     /**
@@ -96,7 +96,7 @@ export interface IRule {
     getOptions(): IOptions;
     isEnabled(): boolean;
     apply(sourceFile: ts.SourceFile, languageService: ts.LanguageService): RuleFailure[];
-    applyWithWalker(walker: RuleWalker): RuleFailure[];
+    applyWithWalker(walker: IWalker): RuleFailure[];
 }
 
 export class Replacement {

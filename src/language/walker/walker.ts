@@ -15,10 +15,12 @@
  * limitations under the License.
  */
 
-export * from "./blockScopeAwareRuleWalker";
-export * from "./programAwareRuleWalker";
-export * from "./ruleWalker";
-export * from "./scopeAwareRuleWalker";
-export * from "./skippableTokenAwareRuleWalker";
-export * from "./syntaxWalker";
-export * from "./walker";
+import * as ts from "typescript";
+
+import {RuleFailure} from "../rule/rule";
+
+export interface IWalker {
+    getSourceFile(): ts.SourceFile;
+    walk(sourceFile: ts.SourceFile): void;
+    getFailures(): RuleFailure[];
+}
