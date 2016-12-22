@@ -22,7 +22,6 @@ import {SyntaxWalker} from "./syntaxWalker";
 
 export class RuleWalker extends SyntaxWalker {
     private limit: number;
-    private position: number;
     private options: any[];
     private failures: RuleFailure[];
     private ruleName: string;
@@ -30,7 +29,6 @@ export class RuleWalker extends SyntaxWalker {
     constructor(private sourceFile: ts.SourceFile, options: IOptions) {
         super();
 
-        this.position = 0;
         this.failures = [];
         this.options = options.ruleArguments;
         this.limit = this.sourceFile.getFullWidth();
@@ -63,10 +61,6 @@ export class RuleWalker extends SyntaxWalker {
         } else {
             return false;
         }
-    }
-
-    public skip(node: ts.Node) {
-        this.position += node.getFullWidth();
     }
 
     public createFailure(start: number, width: number, failure: string, fix?: Fix): RuleFailure {
