@@ -151,3 +151,8 @@ function useOfForwardDecl() {
 }
 
 let forwardDecl: number;
+
+module E {
+    let x = 1;
+        ~      [Identifier 'x' is never reassigned; use 'const' instead of 'let'.]
+}

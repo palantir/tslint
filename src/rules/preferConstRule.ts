@@ -87,8 +87,11 @@ class PreferConstWalker extends Lint.BlockScopeAwareRuleWalker<{}, ScopeInfo> {
             case ts.SyntaxKind.Block:
                 PreferConstWalker.collect((node as ts.Block).statements, scopeInfo);
                 break;
-            case ts.SyntaxKind.ModuleBlock:
-                PreferConstWalker.collect((node as ts.ModuleBlock).statements, scopeInfo);
+            case ts.SyntaxKind.ModuleDeclaration:
+                const body = (node as ts.ModuleDeclaration).body;
+                if (body && body.kind === ts.SyntaxKind.ModuleBlock) {
+                    PreferConstWalker.collect((body as ts.ModuleBlock).statements, scopeInfo);
+                }
                 break;
             case ts.SyntaxKind.ForStatement:
             case ts.SyntaxKind.ForOfStatement:
