@@ -38,7 +38,7 @@ export abstract class ScopeAwareRuleWalker<T> extends RuleWalker {
 
     // get all scopes available at this depth
     public getAllScopes(): T[] {
-        return this.scopeStack.slice();
+        return this.scopeStack;
     }
 
     public getCurrentDepth(): number {
