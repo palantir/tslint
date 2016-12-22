@@ -99,4 +99,12 @@ export class RuleWalker extends SyntaxWalker {
     public deleteText(start: number, length: number): Replacement {
         return this.createReplacement(start, length, "");
     }
+
+    public getRuleName(): string {
+        return this.ruleName;
+    }
+
+    public createFix(replacements: Replacement[]): Fix {
+        return new Fix(this.ruleName, replacements);
+    }
 }
