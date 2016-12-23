@@ -46,24 +46,31 @@ interface IIncrementorState {
     onlyArrayReadAccess: boolean;
 }
 
-class PreferForOfWalker extends Lint.RuleWalker {
-    // a map of incrementors and whether or not they are only used to index into an array reference in the for loop
-    private incrementorMap: { [name: string]: IIncrementorState };
-
+type IncrementorMap = { [name: string]: IIncrementorState };
+class PreferForOfWalker extends Lint.BlockScopeAwareRuleWalker<{}, IncrementorMap> {
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
-        this.incrementorMap = {};
+    }
+
+    public createScope() {
+        return {};
+    }
+
+    public createBlockScope() {
+        // a map of incrementors and whether or not they are only used to index into an array reference in the for loop
+        return {};
     }
 
     protected visitForStatement(node: ts.ForStatement) {
         const arrayNodeInfo = this.getForLoopHeaderInfo(node);
+        const currentBlockScope = this.getCurrentBlockScope();
         let indexVariableName: string;
         if (arrayNodeInfo != null) {
             const { indexVariable, arrayToken } = arrayNodeInfo;
             indexVariableName = indexVariable.getText();
 
             // store `for` loop state
-            this.incrementorMap[indexVariableName] = {
+            currentBlockScope[indexVariableName] = {
                 arrayToken: arrayToken as ts.Identifier,
                 forLoopEndPosition: node.incrementor.end + 1,
                 onlyArrayReadAccess: true,
@@ -73,39 +80,43 @@ class PreferForOfWalker extends Lint.RuleWalker {
         super.visitForStatement(node);
 
         if (indexVariableName != null) {
-            const incrementorState = this.incrementorMap[indexVariableName];
+            const incrementorState = currentBlockScope[indexVariableName];
             if (incrementorState.onlyArrayReadAccess) {
                 this.addFailureFromStartToEnd(node.getStart(), incrementorState.forLoopEndPosition, Rule.FAILURE_STRING);
             }
 
             // remove current `for` loop state
-            delete this.incrementorMap[indexVariableName];
+            delete currentBlockScope[indexVariableName];
         }
     }
 
     protected visitIdentifier(node: ts.Identifier) {
-        const incrementorState = this.incrementorMap[node.text];
+        const incrementorScope = this.findBlockScope((scope) => scope[node.text] != null);
 
-        // check if the identifier is an iterator and is currently in the `for` loop body
-        if (incrementorState != null && incrementorState.arrayToken != null && incrementorState.forLoopEndPosition < node.getStart()) {
-            // check if iterator is used for something other than reading data from array
-            if (node.parent.kind === ts.SyntaxKind.ElementAccessExpression) {
-                const elementAccess = node.parent as ts.ElementAccessExpression;
-                const arrayIdentifier = elementAccess.expression as ts.Identifier;
-                if (incrementorState.arrayToken.text !== arrayIdentifier.text) {
-                    // iterator used in array other than one iterated over
-                    incrementorState.onlyArrayReadAccess = false;
-                } else if (isAssignment(elementAccess.parent)) {
-                    // array position is assigned a new value
+        if (incrementorScope != null) {
+            const incrementorState = incrementorScope[node.text];
+
+            // check if the identifier is an iterator and is currently in the `for` loop body
+            if (incrementorState != null && incrementorState.arrayToken != null && incrementorState.forLoopEndPosition < node.getStart()) {
+                // check if iterator is used for something other than reading data from array
+                if (node.parent.kind === ts.SyntaxKind.ElementAccessExpression) {
+                    const elementAccess = node.parent as ts.ElementAccessExpression;
+                    const arrayIdentifier = elementAccess.expression as ts.Identifier;
+                    if (incrementorState.arrayToken.text !== arrayIdentifier.text) {
+                        // iterator used in array other than one iterated over
+                        incrementorState.onlyArrayReadAccess = false;
+                    } else if (isAssignment(elementAccess.parent)) {
+                        // array position is assigned a new value
+                        incrementorState.onlyArrayReadAccess = false;
+                    }
+                } else {
                     incrementorState.onlyArrayReadAccess = false;
                 }
-            } else {
-                incrementorState.onlyArrayReadAccess = false;
             }
+            super.visitIdentifier(node);
         }
-        super.visitIdentifier(node);
     }
-
+    
     // returns the iterator and array of a `for` loop if the `for` loop is basic. Otherwise, `null`
     private getForLoopHeaderInfo(forLoop: ts.ForStatement) {
         let indexVariableName: string;
