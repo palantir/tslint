@@ -122,3 +122,23 @@ const arr = [];
 arr.push(0);
 arr[1] = 1;
 arr.length = 1;
+
+// reassignment of the forward declaration
+function useOfForwardDecl() {
+    forwardDecl = 1;
+}
+
+let forwardDecl: number;
+
+module E {
+    const x = 1;
+}
+
+switch (1) {
+    case 1:
+        const x = 1;
+        break;
+    case 2:
+        const y = 1;
+        break;
+}
