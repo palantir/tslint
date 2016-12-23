@@ -55,7 +55,7 @@ class PreferConstWalker extends Lint.BlockScopeAwareRuleWalker<{}, ScopeInfo> {
 
     public onBlockScopeEnd() {
         const seenLetStatements: { [startPosition: string]: boolean } = {};
-        for (const usage of this.getCurrentBlockScope().getConstCandiates()) {
+        for (const usage of this.getCurrentBlockScope().getConstCandidates()) {
             let fix: Lint.Fix;
             if (!usage.reassignedSibling && !seenLetStatements[usage.letStatement.getStart().toString()]) {
                 // only fix if all variables in the `let` statement can use `const`
@@ -192,7 +192,7 @@ class ScopeInfo {
         this.sharedLetSets[letSetKey].push(identifier.text);
     }
 
-    public getConstCandiates() {
+    public getConstCandidates() {
         const constCandidates: IConstCandidate[] = [];
         for (const letSetKey of Object.keys(this.sharedLetSets)) {
             const variableNames = this.sharedLetSets[letSetKey];
