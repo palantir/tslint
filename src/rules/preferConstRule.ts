@@ -155,8 +155,8 @@ class PreferConstWalker extends Lint.BlockScopeAwareRuleWalker<{}, ScopeInfo> {
     private markAssignment(identifier: ts.Identifier) {
         const allBlockScopes = this.getAllBlockScopes();
         // look through block scopes from local -> global
-        for (let i = allBlockScopes.length - 1; i >= 0; i--) {
-            if (allBlockScopes[i].incrementVariableUsage(identifier.text)) {
+        for (const blockScope of allBlockScopes) {
+            if (blockScope.incrementVariableUsage(identifier.text)) {
                 break;
             }
         }
