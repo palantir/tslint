@@ -48,9 +48,9 @@
       ]
     },
     "optionExamples": [
-      "[true, array]",
-      "[true, generic]",
-      "[true, array-simple]"
+      "[true, \"array\"]",
+      "[true, \"generic\"]",
+      "[true, \"array-simple\"]"
     ],
     "type": "style",
     "typescriptOnly": true
@@ -59,10 +59,16 @@
     "ruleName": "arrow-parens",
     "description": "Requires parentheses around the parameters of arrow function definitions.",
     "rationale": "Maintains stylistic consistency with other arrow function definitions.",
-    "optionsDescription": "Not configurable.",
-    "options": null,
+    "optionsDescription": "\nif `ban-single-arg-parens` is specified, then arrow functions with one parameter \nmust not have parentheses if removing them is allowed by TypeScript.",
+    "options": {
+      "type": "string",
+      "enum": [
+        "ban-single-arg-parens"
+      ]
+    },
     "optionExamples": [
-      "true"
+      "true",
+      "[true, ban-single-arg-parens]"
     ],
     "type": "style",
     "typescriptOnly": false
@@ -87,6 +93,15 @@
     ],
     "type": "functionality",
     "typescriptOnly": false
+  },
+  {
+    "ruleName": "callable-types",
+    "description": "An interface or literal type with just a call signature can be written as a function type.",
+    "rationale": "style",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "type": "style",
+    "typescriptOnly": true
   },
   {
     "ruleName": "class-name",
@@ -162,7 +177,7 @@
   {
     "ruleName": "cyclomatic-complexity",
     "description": "Enforces a threshold of cyclomatic complexity.",
-    "descriptionDetails": "\nCyclomatic complexity is assessed for each function of any type. A starting value of 1\nis assigned and this value is then incremented for every statement which can branch the\ncontrol flow within the function. The following statements and expressions contribute\nto cyclomatic complexity:\n* `catch`\n* `if` and `? :`\n* `||` and `&&` due to short-circuit evaluation\n* `for`, `for in` and `for of` loops\n* `while` and `do while` loops",
+    "descriptionDetails": "\nCyclomatic complexity is assessed for each function of any type. A starting value of 20\nis assigned and this value is then incremented for every statement which can branch the\ncontrol flow within the function. The following statements and expressions contribute\nto cyclomatic complexity:\n* `catch`\n* `if` and `? :`\n* `||` and `&&` due to short-circuit evaluation\n* `for`, `for in` and `for of` loops\n* `while` and `do while` loops",
     "rationale": "\nCyclomatic complexity is a code metric which indicates the level of complexity in a\nfunction. High cyclomatic complexity indicates confusing code which may be prone to\nerrors or difficult to modify.",
     "optionsDescription": "\nAn optional upper limit for cyclomatic complexity can be specified. If no limit option\nis provided a default value of $(Rule.DEFAULT_THRESHOLD) will be used.",
     "options": {
@@ -266,6 +281,15 @@
       "[true, \"always-prefix\"]",
       "[true, \"never-prefix\"]"
     ],
+    "type": "style",
+    "typescriptOnly": true
+  },
+  {
+    "ruleName": "interface-over-type-literal",
+    "description": "Prefer an interface declaration over a type literal (`type T = { ... }`)",
+    "rationale": "style",
+    "optionsDescription": "Not configurable.",
+    "options": null,
     "type": "style",
     "typescriptOnly": true
   },
@@ -601,6 +625,15 @@
     "typescriptOnly": false
   },
   {
+    "ruleName": "no-empty-interface",
+    "description": "Forbids empty interfaces.",
+    "rationale": "An empty interface is equivalent to its supertype (or `{}`).",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "type": "typescript",
+    "typescriptOnly": true
+  },
+  {
     "ruleName": "no-empty",
     "description": "Disallows empty blocks.",
     "descriptionDetails": "Blocks with a comment inside are not considered empty.",
@@ -835,6 +868,14 @@
     "typescriptOnly": false
   },
   {
+    "ruleName": "no-string-throw",
+    "description": "Flags throwing plain strings or concatenations of strings because only Errors produce proper stack traces.",
+    "options": null,
+    "optionsDescription": "",
+    "type": "functionality",
+    "typescriptOnly": false
+  },
+  {
     "ruleName": "no-switch-case-fall-through",
     "description": "Disallows falling through case statements.",
     "descriptionDetails": "\nFor example, the following is not allowed:\n\n```ts\nswitch(foo) {\n    case 1:\n        someFunc(foo);\n    case 2:\n        someOtherFunc(foo);\n}\n```\n\nHowever, fall through is allowed when case statements are consecutive or\na magic `/* falls through */` comment is present. The following is valid:\n\n```ts\nswitch(foo) {\n    case 1:\n        someFunc(foo);\n        /* falls through */\n    case 2:\n    case 3:\n        someOtherFunc(foo);\n}\n```",
@@ -970,6 +1011,15 @@
     ],
     "type": "typescript",
     "typescriptOnly": true
+  },
+  {
+    "ruleName": "no-void-expression",
+    "description": "Requires expressions of type `void` to appear in statement position.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "requiresTypeInfo": true,
+    "type": "functionality",
+    "typescriptOnly": false
   },
   {
     "ruleName": "object-literal-key-quotes",
