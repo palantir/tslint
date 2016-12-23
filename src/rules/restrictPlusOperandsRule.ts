@@ -18,6 +18,7 @@
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { isTypeFlagSet } from "../language/utils";
 
 export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -40,6 +41,8 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 }
 
+type AddTypes = "string" | "number" | "invalid";
+
 class RestrictPlusOperandsWalker extends Lint.ProgramAwareRuleWalker {
     public visitBinaryExpression(node: ts.BinaryExpression) {
         if (node.operatorToken.kind === ts.SyntaxKind.PlusToken) {
@@ -60,12 +63,34 @@ class RestrictPlusOperandsWalker extends Lint.ProgramAwareRuleWalker {
     }
 }
 
-function getAddableType(node: ts.Expression, tc: ts.TypeChecker): "string" | "number" | "invalid" {
+function getAddableType(node: ts.Expression, tc: ts.TypeChecker): AddTypes {
     const type = tc.getTypeAtLocation(node);
-    if (type.flags === ts.TypeFlags.NumberLiteral || type.flags === ts.TypeFlags.Number) {
-        return "number";
-    } else if (type.flags === ts.TypeFlags.StringLiteral || type.flags === ts.TypeFlags.String) {
+    return getBaseTypeOfLiteralType(type);
+}
+
+function getBaseTypeOfLiteralType(type: ts.Type): AddTypes {
+    if (isTypeFlagSet(type, ts.TypeFlags.StringLiteral) || isTypeFlagSet(type, ts.TypeFlags.String)) {
         return "string";
+    } else if (isTypeFlagSet(type, ts.TypeFlags.NumberLiteral) || isTypeFlagSet(type, ts.TypeFlags.Number)) {
+        return "number";
+    } else if (isTypeFlagSet(type, ts.TypeFlags.Union) && !isTypeFlagSet(type, ts.TypeFlags.Enum)) {
+        const types = (type as ts.UnionType).types.map(getBaseTypeOfLiteralType);
+        return allSame(types) ? types[0] : "invalid";
+    } else if (isTypeFlagSet(type, ts.TypeFlags.EnumLiteral)) {
+        return getBaseTypeOfLiteralType((type as ts.EnumLiteralType).baseType);
     }
     return "invalid";
+}
+
+function allSame(array: string[]) {
+    if (array.length === 1) {
+        return true;
+    }
+
+    for (let i = 1; i < array.length; i++) {
+        if (array[0] !== array[i]) {
+            return false;
+        }
+    }
+    return true;
 }
