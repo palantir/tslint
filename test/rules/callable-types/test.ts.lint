@@ -1,0 +1,25 @@
+interface I {
+          ~   [Interface has only a call signature — use `type I = () => void` instead.]
+    (): void;
+}
+
+interface J extends Function {
+          ~                    [Interface has only a call signature — use `type J = () => void` instead.]
+    (): void;
+}
+
+type T = {
+    (): void;
+    ~~~~~~~~~ [Type literal has only a call signature — use `() => void` instead.]
+}
+
+type U = {
+    <T>(t: T): T;
+    ~~~~~~~~~~~~~ [Type literal has only a call signature — use `<T>(t: T) => T` instead.]
+}
+
+// Overloads OK
+interface K {
+    (x: number): number;
+    (x: string): string;
+}

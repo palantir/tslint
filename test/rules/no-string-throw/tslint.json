@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "no-string-throw": true
+  },
+  "jsRules": {
+    "no-string-throw": true
+  }
+}

@@ -212,3 +212,8 @@ function creatorFunction(constructor: MyConstructor, filter: MyFunction): void {
     const myParameter = 1;
     console.log(myVariable);
 }
+
+for (let i = 0; i < 3; i++) {
+    let i = 34;
+        ~       [Shadowed variable: 'i']
+}

@@ -108,3 +108,9 @@ let geoConfig
     timeout: 5000,
     enableHighAccuracy: false
 };
+
+// No error if there are no braces
+if (true)
+    true;
+else
+    false;

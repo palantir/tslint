@@ -27,7 +27,6 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: "An empty interface is equivalent to its supertype (or `{}`).",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
         type: "typescript",
         typescriptOnly: true,
     };
