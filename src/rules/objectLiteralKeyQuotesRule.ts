@@ -101,7 +101,7 @@ class ObjectLiteralKeyQuotesWalker extends Lint.RuleWalker {
                 }
                 break;
             case "consistent-as-needed":
-                if (properties.some(({ name }) => name.kind === ts.SyntaxKind.StringLiteral && propertyNeedsQuotes(name.text))) {
+                if (properties.some(({ name }) => name !== undefined && name.kind === ts.SyntaxKind.StringLiteral && propertyNeedsQuotes(name.text))) {
                     this.allMustHaveQuotes(properties);
                 } else {
                     this.noneMayHaveQuotes(properties, true);
@@ -116,7 +116,7 @@ class ObjectLiteralKeyQuotesWalker extends Lint.RuleWalker {
 
     private allMustHaveQuotes(properties: ts.ObjectLiteralElementLike[]) {
         for (const { name } of properties) {
-            if (name.kind !== ts.SyntaxKind.StringLiteral && name.kind !== ts.SyntaxKind.ComputedPropertyName) {
+            if (name !== undefined && name.kind !== ts.SyntaxKind.StringLiteral && name.kind !== ts.SyntaxKind.ComputedPropertyName) {
                 this.addFailureAtNode(name, Rule.UNQUOTED_PROPERTY(name.getText()));
             }
         }
@@ -124,7 +124,7 @@ class ObjectLiteralKeyQuotesWalker extends Lint.RuleWalker {
 
     private noneMayHaveQuotes(properties: ts.ObjectLiteralElementLike[], noneNeedQuotes?: boolean) {
         for (const { name } of properties) {
-            if (name.kind === ts.SyntaxKind.StringLiteral && (noneNeedQuotes || !propertyNeedsQuotes(name.text))) {
+            if (name !== undefined && name.kind === ts.SyntaxKind.StringLiteral && (noneNeedQuotes || !propertyNeedsQuotes(name.text))) {
                 this.addFailureAtNode(name, Rule.UNNEEDED_QUOTES(name.text));
             }
         }
