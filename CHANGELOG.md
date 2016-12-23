@@ -16,6 +16,15 @@ v4.2.0
 * [bugfix] `object-literal-key-quotes` now includes function names (#1874)
 * [bugfix] error when EOF comes after `disable-next-line` comment (#1902)
 
+Thanks to our contributors!
+
+* Andrew Scott
+* @andy-ms 
+* Andy Hanson
+* James Booth
+* Klaus Meinhardt
+* Vladimir Matveev
+
 v4.1.1
 ---
 
