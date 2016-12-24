@@ -12,8 +12,27 @@ function testFunction() {
 console.log(typeof window == 'object ')
             ~~~~~~~~~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
 
-var a = typeof foo === null
-        ~~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+const string = "string";
+typeof bar === string
 
-var bar = typeof baz == testFunction;
-          ~~~~~~~~~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+typeof bar === 123
+~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+typeof bar === undefined
+~~~~~~~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+typeof bar === null
+~~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+typeof bar === true
+~~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+typeof bar === false
+~~~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+
+123 === typeof bar
+~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+undefined === typeof bar
+~~~~~~~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+null === typeof bar
+~~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+true === typeof bar
+~~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+false === typeof bar
+~~~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]

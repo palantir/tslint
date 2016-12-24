@@ -51,24 +51,44 @@ class ComparisonWalker extends Lint.RuleWalker {
         return ComparisonWalker.LEGAL_TYPEOF_RESULTS.indexOf(node.getText()) > -1;
     }
 
+    private static isFaultyOtherSideOfTypeof(node: ts.Node): boolean {
+        switch (node.kind) {
+            case ts.SyntaxKind.StringLiteral:
+                if (!ComparisonWalker.isLegalStringLiteral(node)) {
+                    return true;
+                }
+                break;
+            case ts.SyntaxKind.Identifier:
+                if ((<ts.Identifier> node).originalKeywordKind === ts.SyntaxKind.UndefinedKeyword) {
+                    return true;
+                }
+                break;
+            case ts.SyntaxKind.NullKeyword:
+            case ts.SyntaxKind.FirstLiteralToken:
+            case ts.SyntaxKind.TrueKeyword:
+            case ts.SyntaxKind.FalseKeyword:
+            case ts.SyntaxKind.ObjectLiteralExpression:
+            case ts.SyntaxKind.ArrayLiteralExpression:
+                return true;
+            default: break;
+        }
+        return false;
+    }
+
     public visitBinaryExpression(node: ts.BinaryExpression) {
+        let isFaulty = false;
         if (ComparisonWalker.isCompareOperator(node.operatorToken)) {
             // typeof is at left
-            if (node.left.kind === ts.SyntaxKind.TypeOfExpression) {
-                if (node.right.kind !== ts.SyntaxKind.StringLiteral) {
-                    this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
-                } else if (!ComparisonWalker.isLegalStringLiteral(node.right)) {
-                    this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
-                }
+            if (node.left.kind === ts.SyntaxKind.TypeOfExpression && ComparisonWalker.isFaultyOtherSideOfTypeof(node.right)) {
+                isFaulty = true;
             }
             // typeof is at right
-            if (node.right.kind === ts.SyntaxKind.TypeOfExpression) {
-                if (node.left.kind !== ts.SyntaxKind.StringLiteral) {
-                    this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
-                } else if (!ComparisonWalker.isLegalStringLiteral(node.left)) {
-                    this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
-                }
+            if (node.right.kind === ts.SyntaxKind.TypeOfExpression && ComparisonWalker.isFaultyOtherSideOfTypeof(node.left)) {
+                isFaulty = true;
             }
+        }
+        if (isFaulty) {
+            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
         }
         super.visitBinaryExpression(node);
     }
