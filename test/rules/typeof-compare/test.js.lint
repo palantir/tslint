@@ -1,0 +1,19 @@
+var testVariable = 123;
+
+function testFunction() {
+    if (typeof x === 'null') {
+        ~~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+        console.log("called");
+    }
+    var x = typeof foo === 'undefied'
+            ~~~~~~~~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+}
+
+console.log(typeof window == 'object ')
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+
+var a = typeof foo === null
+        ~~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+
+var bar = typeof baz == testFunction;
+          ~~~~~~~~~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]

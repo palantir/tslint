@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "typeof-compare": true
+  },
+  "jsRules": {
+    "typeof-compare": true
+  }
+}
