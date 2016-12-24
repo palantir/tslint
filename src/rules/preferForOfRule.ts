@@ -116,7 +116,7 @@ class PreferForOfWalker extends Lint.BlockScopeAwareRuleWalker<{}, IncrementorMa
             super.visitIdentifier(node);
         }
     }
-    
+
     // returns the iterator and array of a `for` loop if the `for` loop is basic. Otherwise, `null`
     private getForLoopHeaderInfo(forLoop: ts.ForStatement) {
         let indexVariableName: string;
