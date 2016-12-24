@@ -45,17 +45,14 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public isEnabled(): boolean {
         const ruleArguments = this.getOptions().ruleArguments;
-        return super.isEnabled() && ruleArguments !== undefined && ruleArguments.length > 0;
+        return super.isEnabled() && ruleArguments.length > 0;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const options = this.getOptions();
-        if (options.ruleArguments !== undefined) {
-            return this.applyWithWalker(
-                new NoRequireFullLibraryWalker(sourceFile, options, options.ruleArguments),
-            );
-        }
-        return [];
+        return this.applyWithWalker(
+            new NoRequireFullLibraryWalker(sourceFile, options, options.ruleArguments),
+        );
     }
 }
 

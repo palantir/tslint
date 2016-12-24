@@ -59,10 +59,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     public isEnabled(): boolean {
         if (super.isEnabled()) {
             const ruleArguments = this.getOptions().ruleArguments;
-            if (ruleArguments !== undefined) {
-                const quoteMarkString = ruleArguments[0];
-                return (quoteMarkString === "single" || quoteMarkString === "double");
-            }
+            const quoteMarkString = ruleArguments[0];
+            return (quoteMarkString === "single" || quoteMarkString === "double");
         }
 
         return false;

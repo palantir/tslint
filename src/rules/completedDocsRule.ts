@@ -59,10 +59,8 @@ export class Rule extends Lint.Rules.TypedRule {
         const options = this.getOptions();
         const completedDocsWalker = new CompletedDocsWalker(sourceFile, options, langSvc.getProgram());
 
-        if (options.ruleArguments !== undefined) {
-            const nodesToCheck = this.getNodesToCheck(options.ruleArguments);
-            completedDocsWalker.setNodesToCheck(nodesToCheck);
-        }
+        const nodesToCheck = this.getNodesToCheck(options.ruleArguments);
+        completedDocsWalker.setNodesToCheck(nodesToCheck);
         return this.applyWithWalker(completedDocsWalker);
     }
 

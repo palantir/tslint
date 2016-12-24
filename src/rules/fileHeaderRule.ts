@@ -22,9 +22,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const walker = new FileHeaderWalker(sourceFile, this.getOptions());
         const options = this.getOptions().ruleArguments;
-        if (options !== undefined) {
-            walker.setRegexp(new RegExp(options[0].toString()));
-        }
+        walker.setRegexp(new RegExp(options[0].toString()));
         return this.applyWithWalker(walker);
     }
 }

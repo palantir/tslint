@@ -40,10 +40,8 @@ export class Rule extends BanRule.Rule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const options = this.getOptions();
         const consoleBanWalker = new BanRule.BanFunctionWalker(sourceFile, this.getOptions());
-        if (options.ruleArguments !== undefined) {
-            for (const option of options.ruleArguments) {
-                consoleBanWalker.addBannedFunction(["console", option]);
-            }
+        for (const option of options.ruleArguments) {
+            consoleBanWalker.addBannedFunction(["console", option]);
         }
         return this.applyWithWalker(consoleBanWalker);
     }
