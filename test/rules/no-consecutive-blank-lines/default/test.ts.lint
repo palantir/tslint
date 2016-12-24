@@ -30,3 +30,13 @@ class Clazz { // comment
 ~ [Consecutive blank lines are forbidden]
 		
 		
+let foo = `
+ 
+ 
+`;
+
+let bar = `${bar
+ 
+ 
+~ [Consecutive blank lines are forbidden]
+}`;

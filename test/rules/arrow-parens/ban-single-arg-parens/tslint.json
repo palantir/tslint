@@ -2,13 +2,13 @@
   "rules": {
     "arrow-parens": [
       true,
-      "avoid-on-single-parameter"
+      "ban-single-arg-parens"
     ]
   },
   "jsRules": {
     "arrow-parens": [
       true,
-      "avoid-on-single-parameter"
+      "ban-single-arg-parens"
     ]
   }
 }

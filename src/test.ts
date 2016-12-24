@@ -84,8 +84,8 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
                 getSourceFile(filenameToGet: string) {
                     const target = compilerOptions.target === undefined ? ts.ScriptTarget.ES5 : compilerOptions.target;
                     if (filenameToGet === ts.getDefaultLibFileName(compilerOptions)) {
-                        const fileText = fs.readFileSync(ts.getDefaultLibFilePath(compilerOptions)).toString();
-                        return ts.createSourceFile(filenameToGet, fileText, target);
+                        const fileContent = fs.readFileSync(ts.getDefaultLibFilePath(compilerOptions)).toString();
+                        return ts.createSourceFile(filenameToGet, fileContent, target);
                     } else if (filenameToGet === fileCompileName) {
                         return ts.createSourceFile(fileBasename, fileTextWithoutMarkup, target, true);
                     } else if (fs.existsSync(path.resolve(path.dirname(fileToLint), filenameToGet))) {

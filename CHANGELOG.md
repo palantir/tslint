@@ -1,6 +1,30 @@
 Change Log
 ===
 
+v4.2.0
+---
+
+* [new-rule] `no-string-throw` (#1878)
+* [new-rule] `no-empty-interface` (#1889)
+* [new-rule] `interface-over-type-literal` (#1890)
+* [new-rule] `callable-types` (#1891)
+* [new-rule] `no-void-expression` (#1903)
+* [new-rule-option] `ban-single-arg-parens` added to `arrow-parens` (#1893)
+* [bugfix] `prefer-const` handles destructuring arrays (#1894), destructuring objects (#1906), and forward references (#1908)
+* [bugfix] Don't error for misplaced braces for 'else' in `one-line` rule (#1866)
+* [bugfix] `no-shadowed-variable` now identifies shadowed `for` iterator (#1816)
+* [bugfix] `object-literal-key-quotes` now includes function names (#1874)
+* [bugfix] error when EOF comes after `disable-next-line` comment (#1902)
+
+Thanks to our contributors!
+
+* Andrew Scott
+* @andy-ms 
+* Andy Hanson
+* James Booth
+* Klaus Meinhardt
+* Vladimir Matveev
+
 v4.1.1
 ---
 

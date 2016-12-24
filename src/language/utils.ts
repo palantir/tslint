@@ -144,6 +144,24 @@ export function isNodeFlagSet(node: ts.Node, flagToCheck: ts.NodeFlags): boolean
 }
 
 /**
+ * Bitwise check for combined node flags.
+ */
+export function isCombinedNodeFlagSet(node: ts.Node, flagToCheck: ts.NodeFlags): boolean {
+    /* tslint:disable:no-bitwise */
+    return (ts.getCombinedNodeFlags(node) & flagToCheck) !== 0;
+    /* tslint:enable:no-bitwise */
+}
+
+/**
+ * Bitwise check for combined modifier flags.
+ */
+export function isCombinedModifierFlagSet(node: ts.Node, flagToCheck: ts.ModifierFlags): boolean {
+    /* tslint:disable:no-bitwise */
+    return (ts.getCombinedModifierFlags(node) & flagToCheck) !== 0;
+    /* tslint:enable:no-bitwise */
+}
+
+/**
  * Bitwise check for type flags.
  */
 export function isTypeFlagSet(type: ts.Type, flagToCheck: ts.TypeFlags): boolean {

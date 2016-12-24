@@ -58,9 +58,7 @@ class AdjacentOverloadSignaturesWalker extends Lint.RuleWalker {
     }
 
     public visitInterfaceDeclaration(node: ts.InterfaceDeclaration): void {
-        this.checkOverloadsAdjacent(node.members, (member) => {
-            return getTextOfPropertyName(member);
-        });
+        this.checkOverloadsAdjacent(node.members, getTextOfPropertyName);
         super.visitInterfaceDeclaration(node);
     }
 
@@ -78,7 +76,7 @@ class AdjacentOverloadSignaturesWalker extends Lint.RuleWalker {
         this.checkOverloadsAdjacent(statements, (statement) => {
             if (statement.kind === ts.SyntaxKind.FunctionDeclaration) {
                 const name = (statement as ts.FunctionDeclaration).name;
-                return name && name.text;
+                return name && { name: name.text, key: name.text };
             } else {
                 return undefined;
             }
@@ -86,56 +84,65 @@ class AdjacentOverloadSignaturesWalker extends Lint.RuleWalker {
     }
 
     private visitMembers(members: Array<ts.TypeElement | ts.ClassElement>) {
-        this.checkOverloadsAdjacent(members, (member) => {
-            return getTextOfPropertyName(member);
-        });
+        this.checkOverloadsAdjacent(members, getTextOfPropertyName);
     }
 
     /** 'getOverloadName' may return undefined for nodes that cannot be overloads, e.g. a `const` declaration. */
-    private checkOverloadsAdjacent<T extends ts.Node>(overloads: T[], getOverloadName: (node: T) => string | undefined) {
-        let last: string | undefined = undefined;
-        const seen: { [name: string]: true } = Object.create(null);
+    private checkOverloadsAdjacent<T extends ts.Node>(overloads: T[], getOverload: (node: T) => Overload | undefined) {
+        let lastKey: string | undefined = undefined;
+        const seen: { [key: string]: true } = Object.create(null);
         for (const node of overloads) {
-            const name = getOverloadName(node);
-            if (name !== undefined) {
-                if (name in seen && last !== name) {
+            const overload = getOverload(node);
+            if (overload) {
+                const { name, key } = overload;
+                if (key in seen && lastKey !== key) {
                     this.addFailureAtNode(node, Rule.FAILURE_STRING_FACTORY(name));
                 }
-                seen[name] = true;
+                seen[key] = true;
+                lastKey = key;
+            } else {
+                lastKey = undefined;
             }
-            last = name;
         }
     }
+}
+
+interface Overload {
+    /** Unique key for this overload. */
+    key: string;
+    /** Display name for the overload. `foo` and `static foo` have the same name but different keys. */
+    name: string;
 }
 
 function isLiteralExpression(node: ts.Node): node is ts.LiteralExpression {
     return node.kind === ts.SyntaxKind.StringLiteral || node.kind === ts.SyntaxKind.NumericLiteral;
 }
 
-function getTextOfPropertyName(node: ts.InterfaceDeclaration | ts.TypeElement | ts.ClassElement): string | undefined {
+function getTextOfPropertyName(node: ts.InterfaceDeclaration | ts.TypeElement | ts.ClassElement): Overload | undefined {
     let nameText: string = "";
     if (node.name == null) {
-        if (node.kind === ts.SyntaxKind.Constructor) {
-            return "constructor";
-        }
-        return undefined;
-    }
-    switch (node.name.kind) {
-        case ts.SyntaxKind.Identifier:
-            nameText = (node.name as ts.Identifier).text;
-            break;
-        case ts.SyntaxKind.ComputedPropertyName:
-            const { expression } = (node.name as ts.ComputedPropertyName);
-            if (isLiteralExpression(expression)) {
-                nameText = expression.text;
-            }
-            break;
-        default:
-            if (isLiteralExpression(node.name)) {
-                nameText = (<ts.StringLiteral> node.name).text;
-            }
+        return node.kind === ts.SyntaxKind.Constructor ? { name: "constructor", key: "constructor" } : undefined;
     }
 
-    const suffix = Lint.hasModifier(node.modifiers, ts.SyntaxKind.StaticKeyword) ? " __static__" : "";
-    return nameText + suffix;
+    const propertyInfo = getPropertyInfo(node.name);
+    if (!propertyInfo) {
+        return undefined;
+    }
+
+    const { name, computed } = propertyInfo;
+    const isStatic = Lint.hasModifier(node.modifiers, ts.SyntaxKind.StaticKeyword);
+    const key = (computed ? "0" : "1") + (isStatic ? "0" : "1") + name;
+    return { name, key };
+}
+
+function getPropertyInfo(name: ts.PropertyName): { name: string, computed?: boolean } | undefined {
+    switch (name.kind) {
+        case ts.SyntaxKind.Identifier:
+            return { name: (name as ts.Identifier).text };
+        case ts.SyntaxKind.ComputedPropertyName:
+            const { expression } = (name as ts.ComputedPropertyName);
+            return isLiteralExpression(expression) ? { name: expression.text } : { name: expression.getText(), computed: true };
+        default:
+            return isLiteralExpression(name) ? { name: (name as ts.StringLiteral).text } : undefined;
+    }
 }
