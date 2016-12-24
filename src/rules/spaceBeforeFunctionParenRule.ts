@@ -128,7 +128,7 @@ class FunctionWalker extends Lint.RuleWalker {
         });
     }
 
-    private getOption(optionName: OptionName): string {
+    private getOption(optionName: OptionName): string | undefined {
         return this.cachedOptions[optionName];
     }
 
@@ -137,7 +137,7 @@ class FunctionWalker extends Lint.RuleWalker {
         return filtered[0];
     }
 
-    private evaluateRuleAt(openParen: ts.Node, option: string): void {
+    private evaluateRuleAt(openParen: ts.Node | undefined, option: string): void {
         if (openParen === undefined) {
             return;
         }
