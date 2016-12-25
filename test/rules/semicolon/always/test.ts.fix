@@ -69,7 +69,6 @@ interface ITest {
     bar: number;
     qux: string;
     baz: boolean;
-
     readonly raz: number;
 }
 

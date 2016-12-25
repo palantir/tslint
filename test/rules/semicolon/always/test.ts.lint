@@ -92,9 +92,8 @@ interface ITest {
     bar: number
                ~nil [Missing semicolon]
     qux: string,
-                ~nil [Missing semicolon]
+               ~nil [Interface properties should be separated by semicolons]
     baz: boolean;
-
     readonly raz: number;
 }
 
