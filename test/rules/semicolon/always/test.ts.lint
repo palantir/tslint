@@ -91,6 +91,8 @@ interface ITest {
                 ~nil [Missing semicolon]
     bar: number
                ~nil [Missing semicolon]
+    qux: string,
+                ~nil [Missing semicolon]
     baz: boolean;
 
     readonly raz: number;
