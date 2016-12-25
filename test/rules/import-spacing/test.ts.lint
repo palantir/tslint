@@ -1,0 +1,36 @@
+// good
+import * as ts from 'typescript';
+
+// bad
+import* as ts from 'typescript'
+import*as ts from "typescript";
+import* as ts from "typescript";
+import *as ts from "typescript";
+import * as ts from"typescript";
+
+// good
+import {Expression} from "typescript";
+
+// bad
+import{Expression}from"typescript";
+import {Expression}from"typescript";
+import {Expression} from"typescript";
+import  {Expression} from "typescript";
+import {Expression}  from "typescript";
+import {Expression} from  "typescript";
+
+// good
+import {
+    Expression
+} from "typescript";
+
+// bad
+import{
+    Expression
+} from "typescript";
+import {
+    Expression
+}from "typescript";
+import {
+    Expression
+} from"typescript";
