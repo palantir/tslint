@@ -66,8 +66,8 @@ class MyClass {
 
 interface ITest {
     foo?: string;
-    bar: number;
-    qux: string;
+    bar: number; // handles comment
+    qux: string; // handles comment
     baz: boolean;
     readonly raz: number;
 }
