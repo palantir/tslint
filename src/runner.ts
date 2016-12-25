@@ -190,7 +190,7 @@ export class Runner {
             // remove single quotes which break matching on Windows when glob is passed in single quotes
             .map(Runner.trimSingleQuotes)
             .map((file: string) => glob.sync(file, { ignore: ignorePatterns, nodir: true }))
-            .reduce((a: string[], b: string[]) => a.concat(b));
+            .reduce((a: string[], b: string[]) => a.concat(b), []);
 
         try {
             this.processFiles(onComplete, files, program);

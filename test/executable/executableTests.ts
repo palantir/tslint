@@ -211,6 +211,14 @@ describe("Executable", function() {
                     done();
                 });
         });
+
+        it("exits with code 0 if `tsconfig.json` is passed but it includes no ts files", (done) => {
+            execCli(["-c", "test/files/tsconfig-no-ts-files/tslint.json", "--project", "test/files/tsconfig-no-ts-files/tsconfig.json"],
+                (err) => {
+                    assert.isNull(err, "process should exit without an error");
+                    done();
+                });
+        });
     });
 
     describe("--init flag", () => {
