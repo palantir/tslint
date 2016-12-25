@@ -26,7 +26,7 @@ const EXECUTABLE_PATH = path.resolve(EXECUTABLE_DIR, "npm-like-executable");
 const TEMP_JSON_PATH = path.resolve(EXECUTABLE_DIR, "tslint.json");
 
 /* tslint:disable:only-arrow-functions */
-describe("Executable", function() {
+describe("Executable", function () {
     this.slow(3000);    // the executable is JIT-ed each time it runs; avoid showing slowness warnings
     this.timeout(4000);
 
@@ -80,7 +80,8 @@ describe("Executable", function() {
             execCli(["-c", "test/config/tslint-extends-package-no-mod.json", "src/test.ts"], (err) => {
                 assert.isNull(err, "process should exit without an error");
                 done();
-            });        });
+            });
+        });
 
         it("exits with code 1 if config file is invalid", (done) => {
             execCli(["-c", "test/config/tslint-invalid.json", "src/test.ts"], (err, stdout, stderr) => {
