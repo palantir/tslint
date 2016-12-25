@@ -3,27 +3,38 @@ import * as ts from 'typescript';
 
 // bad
 import*as ts from "typescript";
-      ~~~~~~                    [Add space after *]
+~~~~~~                         [Add space after import]
+      ~~~~~~                   [Add space after *]
 import *as ts from "typescript";
-       ~~~~~~                    [Add space after *]
+       ~~~~~~                   [Add space after *]
 import *  as ts from "typescript";
-       ~~~~~~~~                 [Too many spaces after *]
+       ~~~~~~~~                   [Too many spaces after *]
 import *   as ts from "typescript";
-       ~~~~~~~~~                 [Too many spaces after *]
-import* as ts from 'typescript'
+       ~~~~~~~~~                   [Too many spaces after *]
 import* as ts from "typescript";
+~~~~~~                          [Add space after import]
 import * as ts from"typescript";
+import  * as ts from "typescript";
+~~~~~~~~                          [Too many spaces after import]
+import    * as ts from "typescript";
+~~~~~~~~~~                          [Too many spaces after import]
 
 // good
 import {Expression} from "typescript";
 
 // bad
 import{Expression}from"typescript";
+~~~~~~                             [Add space after import]
 import {Expression}from"typescript";
 import {Expression} from"typescript";
 import  {Expression} from "typescript";
+~~~~~~~~                               [Too many spaces after import]
 import {Expression}  from "typescript";
 import {Expression} from  "typescript";
+import  {Expression} from "typescript";
+~~~~~~~~                               [Too many spaces after import]
+import   {Expression} from "typescript";
+~~~~~~~~~                               [Too many spaces after import]
 
 // good
 import {
@@ -32,6 +43,7 @@ import {
 
 // bad
 import{
+~~~~~~  [Add space after import]
     Expression
 } from "typescript";
 import {
@@ -40,3 +52,11 @@ import {
 import {
     Expression
 } from"typescript";
+import  {
+~~~~~~~~  [Too many spaces after import]
+    Expression
+} from "typescript";
+import  {
+~~~~~~~~  [Too many spaces after import]
+    Expression
+} from "typescript";
