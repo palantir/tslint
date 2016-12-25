@@ -2,10 +2,16 @@
 import * as ts from 'typescript';
 
 // bad
-import* as ts from 'typescript'
 import*as ts from "typescript";
-import* as ts from "typescript";
+      ~~~~~~                    [Add space after *]
 import *as ts from "typescript";
+       ~~~~~~                    [Add space after *]
+import *  as ts from "typescript";
+       ~~~~~~~~                 [Too many spaces after *]
+import *   as ts from "typescript";
+       ~~~~~~~~~                 [Too many spaces after *]
+import* as ts from 'typescript'
+import* as ts from "typescript";
 import * as ts from"typescript";
 
 // good

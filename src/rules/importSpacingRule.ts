@@ -30,10 +30,6 @@ export class Rule extends Lint.Rules.AbstractRule {
         type: "style",
         typescriptOnly: false,
     };
-    /* tslint:enable:object-literal-sort-keys */
-
-    public static EQ_FAILURE_STRING = "== should be ===";
-    public static NEQ_FAILURE_STRING = "!= should be !==";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const comparisonWalker = new ImportStatementWalker(sourceFile, this.getOptions());
@@ -44,5 +40,15 @@ export class Rule extends Lint.Rules.AbstractRule {
 class ImportStatementWalker extends Lint.RuleWalker {
     public visitImportDeclaration(node: ts.ImportDeclaration) {
         super.visitImportDeclaration(node);
+    }
+
+    public visitNamespaceImport(node: ts.NamespaceImport) {
+        const text = node.getText();
+        if (text.indexOf("*as") > -1) {
+            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), "Add space after *"));
+        } else if (/\*\s{2,}as/.test(text)) {
+            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), "Too many spaces after *"));
+        }
+        super.visitNamespaceImport(node);
     }
 }
