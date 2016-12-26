@@ -1,8 +1,22 @@
 // ---------------------------------------------------------------------------------------------------------------------
+// Module with side effect import
+// ---------------------------------------------------------------------------------------------------------------------
+// good
+import "styles.css";
+
+// bad
+import"styles.css";
+~~~~~~             [Add space after import]
+import  "styles.css";
+~~~~~~~~             [Too many spaces after import]
+import   "styles.css";
+~~~~~~~~~             [Too many spaces after import]
+
+// ---------------------------------------------------------------------------------------------------------------------
 // Namespace import
 // ---------------------------------------------------------------------------------------------------------------------
 // good
-import * as ts from 'typescript';
+import * as ts from "typescript";
 
 // bad
 import*as ts from "typescript";
@@ -22,6 +36,8 @@ import  * as ts from "typescript";
 ~~~~~~~~                          [Too many spaces after import]
 import    * as ts from "typescript";
 ~~~~~~~~~~                          [Too many spaces after import]
+import * as ts from  "typescript";
+              ~~~~~~~               [Too many spaces after from]
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Single-line import

@@ -36,6 +36,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static TOO_MANY_SPACES_AFTER_STAR = "Too many spaces after *";
     public static ADD_SPACE_AFTER_STAR = "Add space after *";
     public static ADD_SPACE_AFTER_FROM = "Add space after from";
+    public static ADD_SPACE_BEFORE_FROM = "Add space before from";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const comparisonWalker = new ImportStatementWalker(sourceFile, this.getOptions());
@@ -45,23 +46,27 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class ImportStatementWalker extends Lint.RuleWalker {
     private static IMPORT_KEYWORD_LENGTH = 6; // "import".length;
-    private static FROM_KEYWORD_WIDTH = 4; // "from".length;
+    // private static FROM_KEYWORD_WIDTH = 4; // "from".length;
 
     public visitImportDeclaration(node: ts.ImportDeclaration) {
-        const nodeStart = node.getStart();
-        const importKeywordEnd = node.getStart() + ImportStatementWalker.IMPORT_KEYWORD_LENGTH;
-        const moduleSpecifierStart = node.moduleSpecifier.getStart();
-        const importClauseEnd = node.importClause.getEnd();
-        const importClauseStart = node.importClause.getStart();
+        if (!node.importClause) {
+            this.checkModuleWithSideEffect(node);
+        } else {
+            const nodeStart = node.getStart();
+            const importKeywordEnd = node.getStart() + ImportStatementWalker.IMPORT_KEYWORD_LENGTH;
+            const moduleSpecifierStart = node.moduleSpecifier.getStart();
+            const importClauseEnd = node.importClause.getEnd();
+            const importClauseStart = node.importClause.getStart();
+            const fromString = node.getText().substring(importClauseEnd - nodeStart, moduleSpecifierStart - nodeStart);
 
-        if (importKeywordEnd === importClauseStart) {
-            this.addFailure(this.createFailure(nodeStart, ImportStatementWalker.IMPORT_KEYWORD_LENGTH, Rule.ADD_SPACE_AFTER_IMPORT));
-        } else if (importClauseStart > (importKeywordEnd + 1)) {
-            this.addFailure(this.createFailure(nodeStart, importClauseStart - nodeStart, Rule.TOO_MANY_SPACES_AFTER_IMPORT));
-        }
-
-        if ((importClauseEnd + ImportStatementWalker.FROM_KEYWORD_WIDTH + 2) > moduleSpecifierStart) {
-            this.addFailure(this.createFailure(importClauseEnd, moduleSpecifierStart - importClauseEnd, Rule.ADD_SPACE_AFTER_FROM));
+            if (importKeywordEnd === importClauseStart) {
+                this.addFailure(this.createFailure(nodeStart, ImportStatementWalker.IMPORT_KEYWORD_LENGTH, Rule.ADD_SPACE_AFTER_IMPORT));
+            } else if (importClauseStart > (importKeywordEnd + 1)) {
+                this.addFailure(this.createFailure(nodeStart, importClauseStart - nodeStart, Rule.TOO_MANY_SPACES_AFTER_IMPORT));
+            }
+            if (/^from/.test(fromString)) {
+                this.addFailure(this.createFailure(importClauseEnd, moduleSpecifierStart - nodeStart, Rule.ADD_SPACE_BEFORE_FROM));
+            }
         }
         super.visitImportDeclaration(node);
     }
@@ -74,5 +79,16 @@ class ImportStatementWalker extends Lint.RuleWalker {
             this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.TOO_MANY_SPACES_AFTER_STAR));
         }
         super.visitNamespaceImport(node);
+    }
+
+    private checkModuleWithSideEffect(node: ts.ImportDeclaration) {
+        const moduleSpecifierStart = node.moduleSpecifier.getStart();
+        const nodeStart = node.getStart();
+        if ((nodeStart + ImportStatementWalker.IMPORT_KEYWORD_LENGTH + 1) < moduleSpecifierStart) {
+            this.addFailure(this.createFailure(nodeStart, moduleSpecifierStart - nodeStart, Rule.TOO_MANY_SPACES_AFTER_IMPORT));
+        }
+        if ((nodeStart + ImportStatementWalker.IMPORT_KEYWORD_LENGTH) === moduleSpecifierStart) {
+            this.addFailure(this.createFailure(nodeStart,  ImportStatementWalker.IMPORT_KEYWORD_LENGTH, Rule.ADD_SPACE_AFTER_IMPORT));
+        }
     }
 }
