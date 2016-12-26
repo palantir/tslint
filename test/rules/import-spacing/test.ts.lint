@@ -38,6 +38,22 @@ import    * as ts from "typescript";
 ~~~~~~~~~~                          [Too many spaces after import]
 import * as ts from  "typescript";
               ~~~~~~~               [Too many spaces after from]
+import
+~~~~~~ [No line break after import]
+* as ts from "typescript";
+
+import *
+      ~~
+as ts from "typescript";
+~~                      [No line break after *]
+
+import * as
+      ~~~~~             [No line break after * as]
+ts from "typescript";
+
+import * as ts
+from "typescript";
+~~~~              [No line break before from]
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Single-line import
@@ -99,22 +115,20 @@ import  {
     Expression
 } from "typescript";
 
-// import {
-//        ~
-//     Expression
-//     ~~~~~~~~~~
-// }
-// ~ [Add space after import clause]
-// from "typescript";
+import {
+    Expression
+}
+from "typescript";
+~ [No line break before from]
 
-// import {
-//     Expression
-// } from
-//  ~~~~~ [Add space after from]
-// "typescript";
+import {
+    Expression
+} from
+ ~~~~~ [No line break after from]
+"typescript";
 
-// import
-// ~~~~~~ [Add space after import]
-// {
-//     Expression
-// } from "typescript"
+import
+~~~~~~ [No line break after import]
+{
+    Expression
+} from "typescript"
