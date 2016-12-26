@@ -48,7 +48,6 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class ImportStatementWalker extends Lint.RuleWalker {
     private static IMPORT_KEYWORD_LENGTH = 6; // "import".length;
-    // private static FROM_KEYWORD_WIDTH = 4; // "from".length;
 
     public visitImportDeclaration(node: ts.ImportDeclaration) {
         if (!node.importClause) {
