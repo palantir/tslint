@@ -35,6 +35,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static ADD_SPACE_AFTER_IMPORT = "Add space after import";
     public static TOO_MANY_SPACES_AFTER_STAR = "Too many spaces after *";
     public static ADD_SPACE_AFTER_STAR = "Add space after *";
+    public static ADD_SPACE_AFTER_FROM = "Add space after from";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const comparisonWalker = new ImportStatementWalker(sourceFile, this.getOptions());
@@ -43,15 +44,24 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class ImportStatementWalker extends Lint.RuleWalker {
-    private static IMPORT_KEYWORD_LENGTH = "import".length;
+    private static IMPORT_KEYWORD_LENGTH = 6; // "import".length;
+    private static FROM_KEYWORD_WIDTH = 4; // "from".length;
 
     public visitImportDeclaration(node: ts.ImportDeclaration) {
+        const nodeStart = node.getStart();
         const importKeywordEnd = node.getStart() + ImportStatementWalker.IMPORT_KEYWORD_LENGTH;
+        const moduleSpecifierStart = node.moduleSpecifier.getStart();
+        const importClauseEnd = node.importClause.getEnd();
         const importClauseStart = node.importClause.getStart();
+
         if (importKeywordEnd === importClauseStart) {
-            this.addFailure(this.createFailure(node.getStart(), ImportStatementWalker.IMPORT_KEYWORD_LENGTH, Rule.ADD_SPACE_AFTER_IMPORT));
+            this.addFailure(this.createFailure(nodeStart, ImportStatementWalker.IMPORT_KEYWORD_LENGTH, Rule.ADD_SPACE_AFTER_IMPORT));
         } else if (importClauseStart > (importKeywordEnd + 1)) {
-            this.addFailure(this.createFailure(node.getStart(), importClauseStart - node.getStart(), Rule.TOO_MANY_SPACES_AFTER_IMPORT));
+            this.addFailure(this.createFailure(nodeStart, importClauseStart - nodeStart, Rule.TOO_MANY_SPACES_AFTER_IMPORT));
+        }
+
+        if ((importClauseEnd + ImportStatementWalker.FROM_KEYWORD_WIDTH + 2) > moduleSpecifierStart) {
+            this.addFailure(this.createFailure(importClauseEnd, moduleSpecifierStart - importClauseEnd, Rule.ADD_SPACE_AFTER_FROM));
         }
         super.visitImportDeclaration(node);
     }

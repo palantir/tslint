@@ -1,3 +1,6 @@
+// ---------------------------------------------------------------------------------------------------------------------
+// Namespace import
+// ---------------------------------------------------------------------------------------------------------------------
 // good
 import * as ts from 'typescript';
 
@@ -14,28 +17,41 @@ import *   as ts from "typescript";
 import* as ts from "typescript";
 ~~~~~~                          [Add space after import]
 import * as ts from"typescript";
+              ~~~~~              [Add space after from]
 import  * as ts from "typescript";
 ~~~~~~~~                          [Too many spaces after import]
 import    * as ts from "typescript";
 ~~~~~~~~~~                          [Too many spaces after import]
 
+// ---------------------------------------------------------------------------------------------------------------------
+// Single-line import
+// ---------------------------------------------------------------------------------------------------------------------
 // good
 import {Expression} from "typescript";
 
 // bad
 import{Expression}from"typescript";
 ~~~~~~                             [Add space after import]
+                  ~~~~              [Add space after from]
 import {Expression}from"typescript";
+                   ~~~~              [Add space after from]
+       ~~~~~~~~~~~~                  [Add space after import clause]
 import {Expression} from"typescript";
+                   ~~~~~             [Add space after from]
 import  {Expression} from "typescript";
 ~~~~~~~~                               [Too many spaces after import]
 import {Expression}  from "typescript";
+       ~~~~~~~~~~~~~~                  [Too many spaces after import clause]
 import {Expression} from  "typescript";
+                    ~~~~~~             [Too many spaces after from]
 import  {Expression} from "typescript";
 ~~~~~~~~                               [Too many spaces after import]
 import   {Expression} from "typescript";
 ~~~~~~~~~                               [Too many spaces after import]
 
+// ---------------------------------------------------------------------------------------------------------------------
+// Multi-line import
+// ---------------------------------------------------------------------------------------------------------------------
 // good
 import {
     Expression
@@ -46,17 +62,43 @@ import{
 ~~~~~~  [Add space after import]
     Expression
 } from "typescript";
-import {
-    Expression
+
+import {Expression
+       ~~~~~~~~~~~
 }from "typescript";
+~                  [Add space after import clause]
+
 import {
     Expression
 } from"typescript";
+ ~~~~~             [Add space after from]
+
 import  {
 ~~~~~~~~  [Too many spaces after import]
     Expression
 } from "typescript";
+
 import  {
 ~~~~~~~~  [Too many spaces after import]
     Expression
 } from "typescript";
+
+// import {
+//        ~
+//     Expression
+//     ~~~~~~~~~~
+// }
+// ~ [Add space after import clause]
+// from "typescript";
+
+// import {
+//     Expression
+// } from
+//  ~~~~~ [Add space after from]
+// "typescript";
+
+// import
+// ~~~~~~ [Add space after import]
+// {
+//     Expression
+// } from "typescript"
