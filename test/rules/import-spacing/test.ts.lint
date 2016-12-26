@@ -49,17 +49,18 @@ import {Expression} from "typescript";
 import{Expression}from"typescript";
 ~~~~~~                             [Add space after import]
                   ~~~~              [Add space after from]
+                  ~~~~              [Add space before from]
 import {Expression}from"typescript";
                    ~~~~              [Add space after from]
-       ~~~~~~~~~~~~                  [Add space after import clause]
+                   ~~~~              [Add space before from]
 import {Expression} from"typescript";
                    ~~~~~             [Add space after from]
 import  {Expression} from "typescript";
 ~~~~~~~~                               [Too many spaces after import]
 import {Expression}  from "typescript";
-       ~~~~~~~~~~~~~~                  [Too many spaces after import clause]
+                   ~~~~~~~             [Too many spaces before from]
 import {Expression} from  "typescript";
-                    ~~~~~~             [Too many spaces after from]
+                   ~~~~~~~              [Too many spaces after from]
 import  {Expression} from "typescript";
 ~~~~~~~~                               [Too many spaces after import]
 import   {Expression} from "typescript";
@@ -80,9 +81,8 @@ import{
 } from "typescript";
 
 import {Expression
-       ~~~~~~~~~~~
 }from "typescript";
-~                  [Add space after import clause]
+ ~~~~~                  [Add space before from]
 
 import {
     Expression

@@ -31,12 +31,14 @@ export class Rule extends Lint.Rules.AbstractRule {
         typescriptOnly: false,
     };
 
-    public static TOO_MANY_SPACES_AFTER_IMPORT = "Too many spaces after import";
     public static ADD_SPACE_AFTER_IMPORT = "Add space after import";
-    public static TOO_MANY_SPACES_AFTER_STAR = "Too many spaces after *";
+    public static TOO_MANY_SPACES_AFTER_IMPORT = "Too many spaces after import";
     public static ADD_SPACE_AFTER_STAR = "Add space after *";
+    public static TOO_MANY_SPACES_AFTER_STAR = "Too many spaces after *";
     public static ADD_SPACE_AFTER_FROM = "Add space after from";
+    public static TOO_MANY_SPACES_AFTER_FROM = "Too many spaces after from";
     public static ADD_SPACE_BEFORE_FROM = "Add space before from";
+    public static TOO_MANY_SPACES_BEFORE_FROM = "Too many spaces before from";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const comparisonWalker = new ImportStatementWalker(sourceFile, this.getOptions());
@@ -57,15 +59,26 @@ class ImportStatementWalker extends Lint.RuleWalker {
             const moduleSpecifierStart = node.moduleSpecifier.getStart();
             const importClauseEnd = node.importClause.getEnd();
             const importClauseStart = node.importClause.getStart();
-            const fromString = node.getText().substring(importClauseEnd - nodeStart, moduleSpecifierStart - nodeStart);
 
             if (importKeywordEnd === importClauseStart) {
                 this.addFailure(this.createFailure(nodeStart, ImportStatementWalker.IMPORT_KEYWORD_LENGTH, Rule.ADD_SPACE_AFTER_IMPORT));
             } else if (importClauseStart > (importKeywordEnd + 1)) {
                 this.addFailure(this.createFailure(nodeStart, importClauseStart - nodeStart, Rule.TOO_MANY_SPACES_AFTER_IMPORT));
             }
+
+            const fromString = node.getText().substring(importClauseEnd - nodeStart, moduleSpecifierStart - nodeStart);
+
+            if (/from$/.test(fromString)) {
+                this.addFailure(this.createFailure(importClauseEnd, fromString.length, Rule.ADD_SPACE_AFTER_FROM));
+            }
+            if (/from\s{2,}$/.test(fromString)) {
+                this.addFailure(this.createFailure(importClauseEnd, fromString.length, Rule.TOO_MANY_SPACES_AFTER_FROM));
+            }
+            if (/^\s{2,}from/.test(fromString)) {
+                this.addFailure(this.createFailure(importClauseEnd, fromString.length, Rule.TOO_MANY_SPACES_BEFORE_FROM));
+            }
             if (/^from/.test(fromString)) {
-                this.addFailure(this.createFailure(importClauseEnd, moduleSpecifierStart - nodeStart, Rule.ADD_SPACE_BEFORE_FROM));
+                this.addFailure(this.createFailure(importClauseEnd, fromString.length, Rule.ADD_SPACE_BEFORE_FROM));
             }
         }
         super.visitImportDeclaration(node);
