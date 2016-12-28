@@ -175,7 +175,7 @@ class SemicolonWalker extends Lint.RuleWalker {
             const fix = new Lint.Fix(Rule.metadata.ruleName, [
                 this.appendText(failureStart, ";"),
             ]);
-            this.addFailure(this.createFailure(failureStart, 0, Rule.FAILURE_STRING_MISSING, fix));
+            this.addFailureAt(failureStart, 0, Rule.FAILURE_STRING_MISSING, fix);
         } else if (never && hasSemicolon) {
             const scanner = ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, sourceFile.text);
             scanner.setTextPos(position);
@@ -191,7 +191,7 @@ class SemicolonWalker extends Lint.RuleWalker {
                 const fix = new Lint.Fix(Rule.metadata.ruleName, [
                     this.deleteText(failureStart, 1),
                 ]);
-                this.addFailure(this.createFailure(failureStart, 1, Rule.FAILURE_STRING_UNNECESSARY, fix));
+                this.addFailureAt(failureStart, 1, Rule.FAILURE_STRING_UNNECESSARY, fix);
             }
         }
     }

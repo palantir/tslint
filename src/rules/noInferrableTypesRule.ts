@@ -100,7 +100,7 @@ class NoInferrableTypesWalker extends Lint.RuleWalker {
             }
 
             if (failure != null) {
-                this.addFailure(this.createFailure(node.type.getStart(), node.type.getWidth(), Rule.FAILURE_STRING_FACTORY(failure)));
+                this.addFailureAtNode(node.type, Rule.FAILURE_STRING_FACTORY(failure));
             }
         }
     }

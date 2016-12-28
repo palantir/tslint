@@ -58,6 +58,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
         const parseConfigHost = {
             fileExists: fs.existsSync,
             readDirectory: ts.sys.readDirectory,
+            readFile: (file: string) => fs.readFileSync(file, "utf8"),
             useCaseSensitiveFileNames: true,
         };
         compilerOptions = ts.parseJsonConfigFileContent(config, parseConfigHost, testDirectory).options;
@@ -82,8 +83,8 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
                 getNewLine: () => "\n",
                 getSourceFile(filenameToGet: string) {
                     if (filenameToGet === this.getDefaultLibFileName()) {
-                        const fileText = fs.readFileSync(ts.getDefaultLibFilePath(compilerOptions)).toString();
-                        return ts.createSourceFile(filenameToGet, fileText, compilerOptions.target);
+                        const fileContent = fs.readFileSync(ts.getDefaultLibFilePath(compilerOptions)).toString();
+                        return ts.createSourceFile(filenameToGet, fileContent, compilerOptions.target);
                     } else if (filenameToGet === fileCompileName) {
                         return ts.createSourceFile(fileBasename, fileTextWithoutMarkup, compilerOptions.target, true);
                     } else if (fs.existsSync(path.resolve(path.dirname(fileToLint), filenameToGet))) {
@@ -164,7 +165,7 @@ export function consoleTestResultHandler(testResult: TestResult): boolean {
         process.stdout.write(`${fileName}:`);
 
         const markupDiffResults = diff.diffLines(results.markupFromMarkup, results.markupFromLinter);
-        const fixesDiffResults = diff.diffLines(results.fixesFromMarkup, results.fixesFromLinter);
+        const fixesDiffResults = diff.diffLines(results.fixesFromLinter, results.fixesFromMarkup);
         const didMarkupTestPass = !markupDiffResults.some((diff) => diff.added || diff.removed);
         const didFixesTestPass = !fixesDiffResults.some((diff) => diff.added || diff.removed);
 

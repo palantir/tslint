@@ -46,7 +46,7 @@ class NameWalker extends Lint.RuleWalker {
         if (node.name != null) {
             const className = node.name.getText();
             if (!this.isPascalCased(className)) {
-                this.addFailureAt(node.name.getStart(), node.name.getWidth());
+                this.addFailureAtNode(node.name, Rule.FAILURE_STRING);
             }
         }
 
@@ -56,7 +56,7 @@ class NameWalker extends Lint.RuleWalker {
     public visitInterfaceDeclaration(node: ts.InterfaceDeclaration) {
         const interfaceName = node.name.getText();
         if (!this.isPascalCased(interfaceName)) {
-            this.addFailureAt(node.name.getStart(), node.name.getWidth());
+            this.addFailureAtNode(node.name, Rule.FAILURE_STRING);
         }
 
         super.visitInterfaceDeclaration(node);
@@ -69,10 +69,5 @@ class NameWalker extends Lint.RuleWalker {
 
         const firstCharacter = name.charAt(0);
         return ((firstCharacter === firstCharacter.toUpperCase()) && name.indexOf("_") === -1);
-    }
-
-    private addFailureAt(position: number, width: number) {
-        const failure = this.createFailure(position, width, Rule.FAILURE_STRING);
-        this.addFailure(failure);
     }
 }

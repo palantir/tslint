@@ -48,7 +48,7 @@ class NullWalker extends Lint.RuleWalker {
     public visitNode(node: ts.Node) {
         super.visitNode(node);
         if (node.kind === ts.SyntaxKind.NullKeyword && !isPartOfType(node)) {
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+            this.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
     }
 }

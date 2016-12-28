@@ -67,7 +67,7 @@ class NoForInArrayWalker extends Lint.ProgramAwareRuleWalker {
         /* tslint:enable:no-bitwise */
 
         if (isArrayType || isStringType) {
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+            this.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
 
         super.visitForInStatement(node);

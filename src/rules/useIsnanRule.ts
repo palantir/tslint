@@ -46,7 +46,7 @@ class UseIsnanRuleWalker extends Lint.RuleWalker {
     protected visitBinaryExpression(node: ts.BinaryExpression): void {
         if ((this.isExpressionNaN(node.left) || this.isExpressionNaN(node.right))
                 && node.operatorToken.kind !== ts.SyntaxKind.EqualsToken) {
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING + node.getText()));
+            this.addFailureAtNode(node, Rule.FAILURE_STRING + node.getText());
         }
         super.visitBinaryExpression(node);
     }

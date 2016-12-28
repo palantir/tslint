@@ -68,7 +68,7 @@ class NoUnusedNewWalker extends NoUnusedExpressionWalker {
                 || kind === ts.SyntaxKind.AwaitExpression;
 
             if (!isValidStandaloneExpression && !NoUnusedExpressionWalker.isDirective(node)) {
-                this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+                this.addFailureAtNode(node, Rule.FAILURE_STRING);
             }
         }
     }

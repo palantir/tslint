@@ -77,7 +77,7 @@ export function scanAllTokens(scanner: ts.Scanner, callback: (s: ts.Scanner) => 
 /**
  * @returns true if any modifier kinds passed along exist in the given modifiers array
  */
-export function hasModifier(modifiers: ts.ModifiersArray|undefined, ...modifierKinds: ts.SyntaxKind[]) {
+export function hasModifier(modifiers: ts.ModifiersArray | undefined, ...modifierKinds: ts.SyntaxKind[]) {
     if (modifiers === undefined || modifierKinds.length === 0) {
         return false;
     }
@@ -145,11 +145,39 @@ export function isNodeFlagSet(node: ts.Node, flagToCheck: ts.NodeFlags): boolean
 }
 
 /**
+ * Bitwise check for combined node flags.
+ */
+export function isCombinedNodeFlagSet(node: ts.Node, flagToCheck: ts.NodeFlags): boolean {
+    /* tslint:disable:no-bitwise */
+    return (ts.getCombinedNodeFlags(node) & flagToCheck) !== 0;
+    /* tslint:enable:no-bitwise */
+}
+
+/**
+ * Bitwise check for combined modifier flags.
+ */
+export function isCombinedModifierFlagSet(node: ts.Node, flagToCheck: ts.ModifierFlags): boolean {
+    /* tslint:disable:no-bitwise */
+    return (ts.getCombinedModifierFlags(node) & flagToCheck) !== 0;
+    /* tslint:enable:no-bitwise */
+}
+
+/**
  * Bitwise check for type flags.
  */
-export function isTypeFlagSet(typ: ts.Type, flagToCheck: ts.TypeFlags): boolean {
+export function isTypeFlagSet(type: ts.Type, flagToCheck: ts.TypeFlags): boolean {
     /* tslint:disable:no-bitwise */
-    return (typ.flags & flagToCheck) !== 0;
+    return (type.flags & flagToCheck) !== 0;
+    /* tslint:enable:no-bitwise */
+}
+
+/**
+ * Bitwise check for object flags.
+ * Does not work with TypeScript 2.0.x
+ */
+export function isObjectFlagSet(objectType: ts.ObjectType, flagToCheck: ts.ObjectFlags): boolean {
+    /* tslint:disable:no-bitwise */
+    return (objectType.objectFlags & flagToCheck) !== 0;
     /* tslint:enable:no-bitwise */
 }
 
