@@ -17,7 +17,12 @@
 
 import * as ts from "typescript";
 import * as Lint from "../index";
-import {isAssignment, isCombinedModifierFlagSet, isCombinedNodeFlagSet, unwrapParentheses} from "../language/utils";
+import {
+    isAssignment,
+    isCombinedFlagSet,
+    isCombinedNodeFlagSet,
+    unwrapParentheses
+} from '../language/utils';
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -54,7 +59,7 @@ class PreferConstWalker extends Lint.BlockScopeAwareRuleWalker<{}, ScopeInfo> {
     }
 
     private static collectInVariableDeclarationList(node: ts.VariableDeclarationList, scopeInfo: ScopeInfo) {
-        if (isCombinedNodeFlagSet(node, ts.NodeFlags.Let) && !isCombinedModifierFlagSet(node, ts.ModifierFlags.Export)) {
+        if (isCombinedNodeFlagSet(node, ts.NodeFlags.Let) && !isCombinedFlagSet(node, 'Export')) {
             for (const decl of node.declarations) {
                 PreferConstWalker.addDeclarationName(decl.name, node, scopeInfo);
             }
