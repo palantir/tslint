@@ -19,6 +19,8 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
+const LINE_BREAK_REGEX = /\n|\r\n/;
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -39,6 +41,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static TOO_MANY_SPACES_AFTER_FROM = "Too many spaces after from";
     public static ADD_SPACE_BEFORE_FROM = "Add space before from";
     public static TOO_MANY_SPACES_BEFORE_FROM = "Too many spaces before from";
+    public static NO_LINE_BREAKS = "No line breaks are allowed in import declaration";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const comparisonWalker = new ImportStatementWalker(sourceFile, this.getOptions());
@@ -79,6 +82,16 @@ class ImportStatementWalker extends Lint.RuleWalker {
             if (/^from/.test(fromString)) {
                 this.addFailure(this.createFailure(importClauseEnd, fromString.length, Rule.ADD_SPACE_BEFORE_FROM));
             }
+
+            const text = node.getText();
+            const beforeImportClauseText = text.substring(0, importClauseStart - nodeStart);
+            const afterImportClauseText = text.substring(importClauseEnd - nodeStart);
+            if (LINE_BREAK_REGEX.test(beforeImportClauseText)) {
+                this.addFailure(this.createFailure(nodeStart, importClauseStart - nodeStart - 1, Rule.NO_LINE_BREAKS));
+            }
+            if (LINE_BREAK_REGEX.test(afterImportClauseText)) {
+                this.addFailure(this.createFailure(importClauseEnd, node.getEnd() - importClauseEnd, Rule.NO_LINE_BREAKS));
+            }
         }
         super.visitImportDeclaration(node);
     }
@@ -89,6 +102,8 @@ class ImportStatementWalker extends Lint.RuleWalker {
             this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.ADD_SPACE_AFTER_STAR));
         } else if (/\*\s{2,}as/.test(text)) {
             this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.TOO_MANY_SPACES_AFTER_STAR));
+        } else if (LINE_BREAK_REGEX.test(text)) {
+            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.NO_LINE_BREAKS));
         }
         super.visitNamespaceImport(node);
     }
@@ -101,6 +116,9 @@ class ImportStatementWalker extends Lint.RuleWalker {
         }
         if ((nodeStart + ImportStatementWalker.IMPORT_KEYWORD_LENGTH) === moduleSpecifierStart) {
             this.addFailure(this.createFailure(nodeStart,  ImportStatementWalker.IMPORT_KEYWORD_LENGTH, Rule.ADD_SPACE_AFTER_IMPORT));
+        }
+        if (LINE_BREAK_REGEX.test(node.getText())) {
+            this.addFailure(this.createFailure(nodeStart, node.getWidth(), Rule.NO_LINE_BREAKS));
         }
     }
 }

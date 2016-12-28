@@ -13,9 +13,9 @@ import   "styles.css";
 ~~~~~~~~~             [Too many spaces after import]
 
 import
-~~~~~~ [No line break after import]
+~~~~~~
 "styles.css";
-
+~~~~~~~~~~~~~ [No line breaks are allowed in import declaration]
 // ---------------------------------------------------------------------------------------------------------------------
 // Namespace import
 // ---------------------------------------------------------------------------------------------------------------------
@@ -43,21 +43,23 @@ import    * as ts from "typescript";
 import * as ts from  "typescript";
               ~~~~~~~               [Too many spaces after from]
 import
-~~~~~~ [No line break after import]
+~~~~~~ [No line breaks are allowed in import declaration]
 * as ts from "typescript";
 
 import *
-      ~~
+       ~
 as ts from "typescript";
-~~                      [No line break after *]
+~~~~~                      [No line breaks are allowed in import declaration]
 
 import * as
-      ~~~~~             [No line break after * as]
+       ~~~~
 ts from "typescript";
+~~                   [No line breaks are allowed in import declaration]
 
 import * as ts
 from "typescript";
-~~~~              [No line break before from]
+~~~~~~~~~~~~~~~~~~ [No line breaks are allowed in import declaration]
+
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Single-line import
@@ -85,6 +87,19 @@ import  {Expression} from "typescript";
 ~~~~~~~~                               [Too many spaces after import]
 import   {Expression} from "typescript";
 ~~~~~~~~~                               [Too many spaces after import]
+
+import
+~~~~~~                         [No line breaks are allowed in import declaration]
+{Expression} from "typescript";
+
+import {Expression}
+from "typescript";
+~~~~~~~~~~~~~~~~~~ [No line breaks are allowed in import declaration]
+
+import {Expression} from
+                   ~~~~~
+"typescript";
+~~~~~~~~~~~~~ [No line breaks are allowed in import declaration]
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Multi-line import
@@ -123,16 +138,17 @@ import {
     Expression
 }
 from "typescript";
-~ [No line break before from]
+~~~~~~~~~~~~~~~~~~ [No line breaks are allowed in import declaration]
 
 import {
     Expression
 } from
- ~~~~~ [No line break after from]
+ ~~~~~
 "typescript";
+~~~~~~~~~~~~~ [No line breaks are allowed in import declaration]
 
 import
-~~~~~~ [No line break after import]
+~~~~~~ [No line breaks are allowed in import declaration]
 {
     Expression
 } from "typescript"
