@@ -87,7 +87,7 @@ class NoInferredEmptyObjectTypeRule extends Lint.ProgramAwareRuleWalker {
         let isAnonymous: boolean;
         if (ts.ObjectFlags == null) {
             // typescript 2.0.x specific code
-            isAnonymous = utils.isTypeFlagSet(objType, (ts as any).TypeFlags.Anonymous);
+            //isAnonymous = utils.isTypeFlagSet(objType, (ts as any).TypeFlags.Anonymous);
         } else {
             isAnonymous = utils.isObjectFlagSet(objType, ts.ObjectFlags.Anonymous);
         }
