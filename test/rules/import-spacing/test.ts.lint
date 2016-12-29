@@ -57,6 +57,7 @@ ts from "typescript";
 ~~                   [No line breaks are allowed in import declaration]
 
 import * as ts
+              ~nil
 from "typescript";
 ~~~~~~~~~~~~~~~~~~ [No line breaks are allowed in import declaration]
 
@@ -93,6 +94,7 @@ import
 {Expression} from "typescript";
 
 import {Expression}
+                   ~nil
 from "typescript";
 ~~~~~~~~~~~~~~~~~~ [No line breaks are allowed in import declaration]
 
@@ -137,6 +139,7 @@ import  {
 import {
     Expression
 }
+ ~nil
 from "typescript";
 ~~~~~~~~~~~~~~~~~~ [No line breaks are allowed in import declaration]
 
