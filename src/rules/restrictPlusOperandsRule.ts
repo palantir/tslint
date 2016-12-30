@@ -41,15 +41,13 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 }
 
-type AddTypes = "string" | "number" | "invalid";
-
 class RestrictPlusOperandsWalker extends Lint.ProgramAwareRuleWalker {
     public visitBinaryExpression(node: ts.BinaryExpression) {
         if (node.operatorToken.kind === ts.SyntaxKind.PlusToken) {
             const tc = this.getTypeChecker();
 
-            const leftType = getAddableType(node.left, tc);
-            const rightType = getAddableType(node.right, tc);
+            const leftType = getBaseTypeOfLiteralType(tc.getTypeAtLocation(node.left));
+            const rightType = getBaseTypeOfLiteralType(tc.getTypeAtLocation(node.right));
 
             const width = node.getWidth();
             const position = node.getStart();
@@ -63,12 +61,7 @@ class RestrictPlusOperandsWalker extends Lint.ProgramAwareRuleWalker {
     }
 }
 
-function getAddableType(node: ts.Expression, tc: ts.TypeChecker): AddTypes {
-    const type = tc.getTypeAtLocation(node);
-    return getBaseTypeOfLiteralType(type);
-}
-
-function getBaseTypeOfLiteralType(type: ts.Type): AddTypes {
+function getBaseTypeOfLiteralType(type: ts.Type): "string" | "number" | "invalid" {
     if (isTypeFlagSet(type, ts.TypeFlags.StringLiteral) || isTypeFlagSet(type, ts.TypeFlags.String)) {
         return "string";
     } else if (isTypeFlagSet(type, ts.TypeFlags.NumberLiteral) || isTypeFlagSet(type, ts.TypeFlags.Number)) {
@@ -83,14 +76,5 @@ function getBaseTypeOfLiteralType(type: ts.Type): AddTypes {
 }
 
 function allSame(array: string[]) {
-    if (array.length === 1) {
-        return true;
-    }
-
-    for (let i = 1; i < array.length; i++) {
-        if (array[0] !== array[i]) {
-            return false;
-        }
-    }
-    return true;
+    return array.every((value) => value === array[0]);
 }
