@@ -115,7 +115,7 @@ class Walker extends Lint.RuleWalker {
                 this.addFailureAtNode(p1, Rule.FAILURE_STRING_SINGLE_PARAMETER_DIFFERENCE(p0.type.getText(), p1.type.getText()));
             }
         } else {
-            const extraParameter = signaturesDifferByOptionalParameter(a.parameters, b.parameters);
+            const extraParameter = signaturesDifferByOptionalOrRestParameter(a.parameters, b.parameters);
             if (extraParameter) {
                 this.addFailureAtNode(extraParameter, extraParameter.dotDotDotToken
                     ? Rule.FAILURE_STRING_OMITTING_REST_PARAMETER
@@ -154,14 +154,20 @@ function signaturesDifferBySingleParameter(types1: ts.ParameterDeclaration[], ty
 
 /**
  * Detect `a(): void` and `a(x: number): void`.
- * Returns the parameter declaration (`x: number` in this example) that should be optional.
+ * Returns the parameter declaration (`x: number` in this example) that should be optional/rest.
  */
-function signaturesDifferByOptionalParameter(types1: ts.ParameterDeclaration[], types2: ts.ParameterDeclaration[],
+function signaturesDifferByOptionalOrRestParameter(types1: ts.ParameterDeclaration[], types2: ts.ParameterDeclaration[],
     ): ts.ParameterDeclaration | undefined {
     const minLength = Math.min(types1.length, types2.length);
-    // Lengths must differ by 1.
-    if (Math.abs(types1.length - types2.length) !== 1) {
-        return undefined;
+    const longer = types1.length < types2.length ? types2 : types1;
+
+    // If one is has 2+ parameters more than the other, they must all be optional/rest.
+    // Differ by optional parameters: f() and f(x), f() and f(x, ?y, ...z)
+    // Not allowed: f() and f(x, y)
+    for (let i = minLength + 1; i < longer.length; i++) {
+        if (!parameterMayBeMissing(longer[i])) {
+            return undefined;
+        }
     }
 
     for (let i = 0; i < minLength; i++) {
@@ -170,7 +176,7 @@ function signaturesDifferByOptionalParameter(types1: ts.ParameterDeclaration[], 
         }
     }
 
-    return types1.length > types2.length ? types1[types1.length - 1] : types2[types2.length - 1];
+    return longer[longer.length - 1];
 }
 
 /**
@@ -245,6 +251,11 @@ function collectOverloads<T>(nodes: T[], getOverload: GetOverload<T>): ts.Signat
 
 function parametersAreEqual(a: ts.ParameterDeclaration, b: ts.ParameterDeclaration): boolean {
     return parametersHaveEqualSigils(a, b) && typesAreEqual(a.type, b.type);
+}
+
+/** True for optional/rest parameters. */
+function parameterMayBeMissing(p: ts.ParameterDeclaration): boolean {
+    return !!p.dotDotDotToken || !!p.questionToken;
 }
 
 /** False if one is optional and the other isn't, or one is a rest parameter and the other isn't. */

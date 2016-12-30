@@ -8,13 +8,18 @@ interface I {
     a2(): void;
     a2(x: number, y: number): void;
 
-    // No error for different return types.
+    // Error for arity difference greater than 1 if the additional parameters are all optional/rest.
     a3(): void;
-    a3(x: number): number;
+    a3(x: number, y?: number, ...z: number[]): void;
+                              ~~~~~~~~~~~~~~         [These overloads can be combined into one signature with a rest parameter.]
+
+    // No error for different return types.
+    a4(): void;
+    a4(x: number): number;
 
     // No error if one takes a type parameter and the other doesn't.
-    a4<T>(x: T): T;
-    a4(x: number): number;
+    a5<T>(x: T): T;
+    a5(x: number): number;
 
     // Error if only one defines a rest parameter.
     b(): void;
