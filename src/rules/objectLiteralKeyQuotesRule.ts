@@ -87,7 +87,8 @@ class ObjectLiteralKeyQuotesWalker extends Lint.RuleWalker {
     }
 
     public visitObjectLiteralExpression(node: ts.ObjectLiteralExpression) {
-        const { properties } = node;
+        const properties = node.properties.filter(({ kind }) =>
+            kind !== ts.SyntaxKind.ShorthandPropertyAssignment && kind !== ts.SyntaxKind.SpreadAssignment);
         switch (this.mode) {
             case "always":
                 this.allMustHaveQuotes(properties);
