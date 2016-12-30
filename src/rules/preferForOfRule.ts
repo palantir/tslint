@@ -46,18 +46,15 @@ interface IIncrementorState {
     onlyArrayReadAccess: boolean;
 }
 
+// a map of incrementors and whether or not they are only used to index into an array reference in the for loop
 type IncrementorMap = { [name: string]: IIncrementorState };
-class PreferForOfWalker extends Lint.BlockScopeAwareRuleWalker<{}, IncrementorMap> {
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
-        super(sourceFile, options);
-    }
 
+class PreferForOfWalker extends Lint.BlockScopeAwareRuleWalker<{}, IncrementorMap> {
     public createScope() {
         return {};
     }
 
     public createBlockScope() {
-        // a map of incrementors and whether or not they are only used to index into an array reference in the for loop
         return {};
     }
 

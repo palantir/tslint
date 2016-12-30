@@ -65,7 +65,7 @@ export abstract class BlockScopeAwareRuleWalker<T, U> extends ScopeAwareRuleWalk
                 return this.blockScopeStack[i];
             }
         }
-        return null;
+        return undefined;
     }
 
     protected visitNode(node: ts.Node) {
