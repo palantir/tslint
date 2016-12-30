@@ -72,12 +72,14 @@ export class RuleWalker extends SyntaxWalker {
         this.position += node.getFullWidth();
     }
 
+    /** @deprecated Prefer `addFailureAt` and its variants. */
     public createFailure(start: number, width: number, failure: string, fix?: Fix): RuleFailure {
         const from = (start > this.limit) ? this.limit : start;
         const to = ((start + width) > this.limit) ? this.limit : (start + width);
         return new RuleFailure(this.sourceFile, from, to, failure, this.ruleName, fix);
     }
 
+    /** @deprecated Prefer `addFailureAt` and its variants. */
     public addFailure(failure: RuleFailure) {
         // don't add failures for a rule if the failure intersects an interval where that rule is disabled
         if (!this.existsFailure(failure) && !doesIntersect(failure, this.disabledIntervals)) {

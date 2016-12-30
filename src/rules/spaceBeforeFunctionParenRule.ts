@@ -143,16 +143,15 @@ class FunctionWalker extends Lint.RuleWalker {
         }
 
         const hasSpace = this.isSpaceAt(openParen.getStart() - 1);
-        let failure: Lint.RuleFailure;
 
         if (hasSpace && option === "never") {
-            failure = this.createInvalidWhitespaceFailure(openParen.getStart() - 1);
+            const pos = openParen.getStart() - 1;
+            const fix = new Lint.Fix(Rule.metadata.ruleName, [ this.deleteText(pos, 1) ]);
+            this.addFailureAt(pos, 1, Rule.INVALID_WHITESPACE_ERROR, fix);
         } else if (!hasSpace && option === "always") {
-            failure = this.createMissingWhitespaceFailure(openParen.getStart());
-        }
-
-        if (failure !== undefined) {
-            this.addFailure(failure);
+            const pos = openParen.getStart();
+            const fix = new Lint.Fix(Rule.metadata.ruleName, [ this.appendText(pos, " ") ]);
+            this.addFailureAt(pos, 1, Rule.MISSING_WHITESPACE_ERROR, fix);
         }
     }
 
@@ -175,19 +174,5 @@ class FunctionWalker extends Lint.RuleWalker {
         const option = this.getOption("method");
         const openParen = this.getChildOfType(node, ts.SyntaxKind.OpenParenToken);
         this.evaluateRuleAt(openParen, option);
-    }
-
-    private createInvalidWhitespaceFailure(pos: number): Lint.RuleFailure {
-        const fix = new Lint.Fix(Rule.metadata.ruleName, [
-            this.deleteText(pos, 1),
-        ]);
-        return this.createFailure(pos, 1, Rule.INVALID_WHITESPACE_ERROR, fix);
-    }
-
-    private createMissingWhitespaceFailure(pos: number): Lint.RuleFailure {
-        const fix = new Lint.Fix(Rule.metadata.ruleName, [
-            this.appendText(pos, " "),
-        ]);
-        return this.createFailure(pos, 1, Rule.MISSING_WHITESPACE_ERROR, fix);
     }
 }

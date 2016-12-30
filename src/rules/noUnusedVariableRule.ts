@@ -83,6 +83,13 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
+interface Failure {
+    start: number;
+    width: number;
+    message: string;
+    fix?: Lint.Fix;
+}
+
 class NoUnusedVariablesWalker extends Lint.RuleWalker {
     private skipBindingElement: boolean;
     private skipParameterDeclaration: boolean;
@@ -92,7 +99,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     private ignorePattern: RegExp;
     private isReactUsed: boolean;
     private reactImport: ts.NamespaceImport;
-    private possibleFailures: Lint.RuleFailure[] = [];
+    private possibleFailures: Failure[] = [];
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions,
                 private languageService: ts.LanguageService) {
@@ -139,15 +146,15 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
             if (!this.isIgnored(nameText)) {
                 const start = this.reactImport.name.getStart();
                 const msg = Rule.FAILURE_STRING_FACTORY(Rule.FAILURE_TYPE_IMPORT, nameText);
-                this.possibleFailures.push(this.createFailure(start, nameText.length, msg));
+                this.possibleFailures.push({ start, width: nameText.length, message: msg });
             }
         }
 
         let someFixBrokeIt = false;
         // Performance optimization: type-check the whole file before verifying individual fixes
-        if (this.possibleFailures.some((f) => f.hasFix())) {
+        if (this.possibleFailures.some((f) => !!f.fix)) {
             let newText = Lint.Fix.applyAll(this.getSourceFile().getFullText(),
-                this.possibleFailures.map((f) => f.getFix()).filter((f) => !!f));
+                this.possibleFailures.map((f) => f.fix).filter((f) => !!f));
 
             // If we have the program, we can verify that the fix doesn't introduce failures
             if (Lint.checkEdit(this.languageService, this.getSourceFile(), newText).length > 0) {
@@ -157,12 +164,12 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         }
 
         this.possibleFailures.forEach((f) => {
-            if (!someFixBrokeIt || !f.hasFix()) {
-                this.addFailure(f);
+            if (!someFixBrokeIt || !f.fix) {
+                this.addFailureAt(f.start, f.width, f.message, f.fix);
             } else {
-                let newText = f.getFix().apply(this.getSourceFile().getFullText());
+                let newText = f.fix.apply(this.getSourceFile().getFullText());
                 if (Lint.checkEdit(this.languageService, this.getSourceFile(), newText).length === 0) {
-                    this.addFailure(f);
+                    this.addFailureAt(f.start, f.width, f.message, f.fix);
                 }
             }
         });
@@ -446,7 +453,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         if (replacements && replacements.length) {
             fix = new Lint.Fix(Rule.metadata.ruleName, replacements);
         }
-        this.possibleFailures.push(this.createFailure(position, name.length, Rule.FAILURE_STRING_FACTORY(type, name), fix));
+        this.possibleFailures.push({ start: position, width: name.length, message: Rule.FAILURE_STRING_FACTORY(type, name), fix });
     }
 
     private isIgnored(name: string) {
