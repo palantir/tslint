@@ -90,7 +90,7 @@ class Walker extends Lint.RuleWalker {
         this.checkOverloads(members, getOverloadName, typeParameters);
         function getOverloadName(member: ts.TypeElement | ts.ClassElement) {
             const key = getOverloadKey(member);
-            return key && { signature: member as any as ts.SignatureDeclaration, key };
+            return key === undefined ? undefined : { signature: member as any as ts.SignatureDeclaration, key };
         }
     }
 
@@ -177,7 +177,7 @@ function signaturesDifferByOptionalParameter(types1: ts.ParameterDeclaration[], 
  * Given a node, if it could potentially be an overload, return its signature and key.
  * All signatures which are overloads should have equal keys.
  */
-type GetOverload<T> = (node: T) => { signature: ts.SignatureDeclaration, key: string };
+type GetOverload<T> = (node: T) => { signature: ts.SignatureDeclaration, key: string } | undefined;
 
 /**
  * Returns true if typeName is the name of an *outer* type parameter.
@@ -258,7 +258,7 @@ function typeParametersAreEqual(a: ts.TypeParameterDeclaration, b: ts.TypeParame
 
 function typesAreEqual(a: ts.TypeNode | undefined, b: ts.TypeNode | undefined): boolean {
     // TODO: Could traverse AST so that formatting differences don't affect this.
-    return a === b || a && b && a.getText() === b.getText();
+    return a === b || !!a && !!b && a.getText() === b.getText();
 }
 
 /** Returns the first index where `a` and `b` differ. */
@@ -281,5 +281,5 @@ function forEachPair<T>(values: T[], action: (a: T, b: T) => void): void {
 }
 
 function arraysAreEqual<T>(a: T[] | undefined, b: T[] | undefined, eq: Equal<T>): boolean {
-    return a === b || a && b && a.length === b.length && a.every((x, idx) => eq(x, b[idx]));
+    return a === b || !!a && !!b && a.length === b.length && a.every((x, idx) => eq(x, b[idx]));
 }
