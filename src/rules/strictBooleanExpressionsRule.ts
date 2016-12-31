@@ -117,10 +117,12 @@ class StrictBooleanExpressionsRule extends Lint.ProgramAwareRuleWalker {
     }
 
     public visitForStatement(node: ts.ForStatement) {
-        let cexp = node.condition;
-        let expType = this.checker.getTypeAtLocation(cexp);
-        if (!this.isBooleanType(expType)) {
-            this.addFailureAtNode(cexp, `For ${Rule.STATEMENT_ERROR}`);
+        let forCondition = node.condition;
+        if (forCondition !== undefined) {
+            let expType = this.checker.getTypeAtLocation(forCondition);
+            if (!this.isBooleanType(expType)) {
+                this.addFailureAtNode(forCondition, `For ${Rule.STATEMENT_ERROR}`);
+            }
         }
         super.visitForStatement(node);
     }

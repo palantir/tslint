@@ -89,7 +89,7 @@ class VariableNameWalker extends Lint.RuleWalker {
             this.handleVariableNameKeyword(identifier);
             // A destructuring pattern that does not rebind an expression is always an alias, e.g. `var {Foo} = ...;`.
             // Only check if the name is rebound (`var {Foo: bar} = ...;`).
-            if (node.parent.kind !== ts.SyntaxKind.ObjectBindingPattern || node.propertyName) {
+            if (node.parent !== undefined && node.parent.kind !== ts.SyntaxKind.ObjectBindingPattern || node.propertyName) {
                 this.handleVariableNameFormat(identifier, node.initializer);
             }
         }
@@ -136,9 +136,10 @@ class VariableNameWalker extends Lint.RuleWalker {
         } else if (initializer.kind === ts.SyntaxKind.Identifier) {
             return (initializer as ts.Identifier).text === name.text;
         }
+        return false;
     }
 
-    private handleVariableNameFormat(name: ts.Identifier, initializer: ts.Expression) {
+    private handleVariableNameFormat(name: ts.Identifier, initializer?: ts.Expression) {
         const variableName = name.text;
 
         if (initializer && this.isAlias(name, initializer)) {

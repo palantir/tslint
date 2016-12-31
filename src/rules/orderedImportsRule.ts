@@ -102,7 +102,7 @@ function flipCase(x: string): string {
 
 // After applying a transformation, are the nodes sorted according to the text they contain?
 // If not, return the pair of nodes which are out of order.
-function findUnsortedPair(xs: ts.Node[], transform: (x: string) => string): [ts.Node, ts.Node] {
+function findUnsortedPair(xs: ts.Node[], transform: (x: string) => string): [ts.Node, ts.Node] | null {
     for (let i = 1; i < xs.length; i++) {
         if (transform(xs[i].getText()) < transform(xs[i - 1].getText())) {
             return [xs[i - 1], xs[i]];
@@ -153,9 +153,9 @@ const TRANSFORMS: {[ordering: string]: (x: string) => string} = {
 class OrderedImportsWalker extends Lint.RuleWalker {
     private currentImportsBlock: ImportsBlock = new ImportsBlock();
     // keep a reference to the last Fix object so when the entire block is replaced, the replacement can be added
-    private lastFix: Lint.Fix;
-    private importSourcesOrderTransform: (x: string) => string = null;
-    private namedImportsOrderTransform: (x: string) => string = null;
+    private lastFix: Lint.Fix | null;
+    private importSourcesOrderTransform: (x: string) => string;
+    private namedImportsOrderTransform: (x: string) => string;
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);

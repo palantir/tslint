@@ -74,7 +74,9 @@ class BlockWalker extends Lint.RuleWalker {
 
             if (hasPropertyAccessModifier) {
                 isSkipped = true;
-                this.ignoredBlocks.push(node.body);
+                if (node.body !== undefined) {
+                    this.ignoredBlocks.push(node.body);
+                }
                 break;
             }
 

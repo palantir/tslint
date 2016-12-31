@@ -135,11 +135,11 @@ class ObjectLiteralKeyQuotesWalker extends Lint.RuleWalker {
 
 function quotesAreInconsistent(properties: ts.ObjectLiteralElementLike[]): boolean {
     let propertiesAreQuoted: boolean | undefined; // inferred on first (non-computed) property
-    for (const { name: { kind } } of properties) {
-        if (kind === ts.SyntaxKind.ComputedPropertyName) {
+    for (const { name } of properties) {
+        if (name === undefined || name.kind === ts.SyntaxKind.ComputedPropertyName) {
             continue;
         }
-        const thisOneIsQuoted = kind === ts.SyntaxKind.StringLiteral;
+        const thisOneIsQuoted = name.kind === ts.SyntaxKind.StringLiteral;
         if (propertiesAreQuoted === undefined) {
             propertiesAreQuoted = thisOneIsQuoted;
         } else if (propertiesAreQuoted !== thisOneIsQuoted) {
