@@ -29,7 +29,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Requires parentheses around the parameters of arrow function definitions.",
         rationale: "Maintains stylistic consistency with other arrow function definitions.",
         optionsDescription: Lint.Utils.dedent`
-            if \`${BAN_SINGLE_ARG_PARENS}\` is specified, then arrow functions with one parameter 
+            if \`${BAN_SINGLE_ARG_PARENS}\` is specified, then arrow functions with one parameter
             must not have parentheses if removing them is allowed by TypeScript.`,
         options: {
             type: "string",
@@ -59,41 +59,33 @@ class ArrowParensWalker extends Lint.RuleWalker {
     }
 
     public visitArrowFunction(node: ts.FunctionLikeDeclaration) {
-        if (node.parameters.length === 1) {
+        if (node.parameters.length === 1 && node.typeParameters === undefined && !hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword)) {
             const parameter = node.parameters[0];
-            const text = parameter.getText();
-            const firstToken = node.getFirstToken();
-            const lastToken = node.getChildAt(2);
-            const width = text.length;
-            const position = parameter.getStart();
-            let isGenerics = false;
-
-            // If firstToken is LessThanToken, it would be Generics.
-            if (firstToken.kind === ts.SyntaxKind.LessThanToken) {
-                isGenerics = true;
-            }
-
-            if (!isGenerics && !hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword)) {
-                const hasParens = firstToken.kind === ts.SyntaxKind.OpenParenToken && lastToken.kind === ts.SyntaxKind.CloseParenToken;
-                if (!hasParens && !this.avoidOnSingleParameter) {
-                    const fix = new Lint.Fix(Rule.metadata.ruleName, [new Lint.Replacement(position, width, `(${parameter.getText()})`)]);
-                    this.addFailureAt(position, width, Rule.FAILURE_STRING_MISSING, fix);
-                } else if (hasParens
-                    && this.avoidOnSingleParameter
-                    && parameter.decorators == null
-                    && parameter.dotDotDotToken == null
-                    && parameter.initializer == null
-                    && parameter.modifiers == null
-                    && parameter.questionToken == null
-                    && parameter.type == null) {
-                    const fix = new Lint.Fix(Rule.metadata.ruleName, [
-                        new Lint.Replacement(lastToken.getStart(), 1, ``),
-                        new Lint.Replacement(firstToken.getStart(), 1, ``),
-                    ]);
-                    this.addFailureAt(position, width, Rule.FAILURE_STRING_EXISTS, fix);
-                }
+            const openParen = node.getFirstToken();
+            const hasParens = openParen.kind === ts.SyntaxKind.OpenParenToken;
+            if (!hasParens && !this.avoidOnSingleParameter) {
+                const fix = new Lint.Fix(Rule.metadata.ruleName, [
+                    this.appendText(parameter.getStart(), "("),
+                    this.appendText(parameter.getEnd(), ")"),
+                ]);
+                this.addFailureAtNode(parameter, Rule.FAILURE_STRING_MISSING, fix);
+            } else if (hasParens && this.avoidOnSingleParameter && isSimpleParameter(parameter)) {
+                const closeParen = node.getChildAt(2);
+                const fix = new Lint.Fix(Rule.metadata.ruleName, [
+                    this.deleteText(openParen.getStart(), 1),
+                    this.deleteText(closeParen.getStart(), 1),
+                ]);
+                this.addFailureAtNode(parameter, Rule.FAILURE_STRING_EXISTS, fix);
             }
         }
         super.visitArrowFunction(node);
     }
+}
+
+function isSimpleParameter(parameter: ts.ParameterDeclaration): boolean {
+    return parameter.name.kind === ts.SyntaxKind.Identifier
+        && parameter.dotDotDotToken === undefined
+        && parameter.initializer === undefined
+        && parameter.questionToken === undefined
+        && parameter.type === undefined;
 }

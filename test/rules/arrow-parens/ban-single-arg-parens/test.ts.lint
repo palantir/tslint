@@ -1,4 +1,6 @@
 // valid case
+var a = ([x, y]) => {};
+var aa = ({x, y}) => {};
 var b = (a: number) => {};
 var c = (a, b) => {};
 var f = (...rest) => {};
