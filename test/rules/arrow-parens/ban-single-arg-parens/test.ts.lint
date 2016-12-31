@@ -18,11 +18,14 @@ var piyo = <T, U>(method: () => T) => {
     method();
 };
 const validAsync = async (param: any) => {};
-const validAsync = async (param) => {};
+const invalidAsync = async (param) => {};
+                            ~~~~~ [0]
 
 var e = (a => {})(1);
 var f = ab => {};
 
 // invalid case
 var a = (a) => {};
-         ~         [Parentheses are prohibited around the parameter in this single parameter arrow function]
+         ~         [0]
+
+[0]: Parentheses are prohibited around the parameter in this single parameter arrow function

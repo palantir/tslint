@@ -18,7 +18,6 @@
 import * as ts from "typescript";
 
 import * as Lint from "../index";
-import { hasModifier } from "../language/utils";
 
 const BAN_SINGLE_ARG_PARENS = "ban-single-arg-parens";
 
@@ -59,9 +58,16 @@ class ArrowParensWalker extends Lint.RuleWalker {
     }
 
     public visitArrowFunction(node: ts.FunctionLikeDeclaration) {
-        if (node.parameters.length === 1 && node.typeParameters === undefined && !hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword)) {
+        if (node.parameters.length === 1 && node.typeParameters === undefined) {
             const parameter = node.parameters[0];
-            const openParen = node.getFirstToken();
+
+            let openParen = node.getFirstToken();
+            let openParenIndex = 0;
+            if (openParen.kind === ts.SyntaxKind.AsyncKeyword) {
+                openParen = node.getChildAt(1);
+                openParenIndex = 1;
+            }
+
             const hasParens = openParen.kind === ts.SyntaxKind.OpenParenToken;
             if (!hasParens && !this.avoidOnSingleParameter) {
                 const fix = new Lint.Fix(Rule.metadata.ruleName, [
@@ -70,7 +76,8 @@ class ArrowParensWalker extends Lint.RuleWalker {
                 ]);
                 this.addFailureAtNode(parameter, Rule.FAILURE_STRING_MISSING, fix);
             } else if (hasParens && this.avoidOnSingleParameter && isSimpleParameter(parameter)) {
-                const closeParen = node.getChildAt(2);
+                // Skip over the parameter to get the closing parenthesis
+                const closeParen = node.getChildAt(openParenIndex + 2);
                 const fix = new Lint.Fix(Rule.metadata.ruleName, [
                     this.deleteText(openParen.getStart(), 1),
                     this.deleteText(closeParen.getStart(), 1),
