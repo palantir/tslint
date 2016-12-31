@@ -24,7 +24,7 @@ import {SyntaxWalker} from "./syntaxWalker";
 export class RuleWalker extends SyntaxWalker {
     private limit: number;
     private position: number;
-    private options: any[];
+    private options?: any[];
     private failures: RuleFailure[];
     private disabledIntervals: IDisabledInterval[];
     private ruleName: string;

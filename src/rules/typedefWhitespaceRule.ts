@@ -150,7 +150,7 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
         super.visitVariableDeclaration(node);
     }
 
-    public checkSpace(option: string, node: ts.Node, typeNode: ts.TypeNode | ts.StringLiteral) {
+    public checkSpace(option: string, node: ts.Node, typeNode: ts.TypeNode | ts.StringLiteral | undefined) {
         if (this.hasOption(option) && typeNode != null) {
             const colonPosition = TypedefWhitespaceWalker.getColonPosition(node);
 
