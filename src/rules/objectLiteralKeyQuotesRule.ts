@@ -101,9 +101,8 @@ class ObjectLiteralKeyQuotesWalker extends Lint.RuleWalker {
                 }
                 break;
             case "consistent-as-needed":
-                if (properties.some(({ name }) => name === undefined
-                    || name.kind === ts.SyntaxKind.StringLiteral
-                    && propertyNeedsQuotes(name.text))) {
+                if (properties.some(({ name }) => name !== undefined
+                    && name.kind === ts.SyntaxKind.StringLiteral && propertyNeedsQuotes(name.text))) {
 
                     this.allMustHaveQuotes(properties);
                 } else {
