@@ -21,6 +21,6 @@ import {RuleFailure} from "../rule/rule";
 
 export interface IWalker {
     getSourceFile(): ts.SourceFile;
-    walk(sourceFile: ts.SourceFile): void;
+    walk(node: ts.Node): void;
     getFailures(): RuleFailure[];
 }
