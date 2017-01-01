@@ -47,7 +47,7 @@ export class Formatter extends AbstractFormatter {
         const positionMaxSize       = this.getPositionMaxSize(failures);
         const ruleMaxSize           = this.getRuleMaxSize(failures);
 
-        let currentFile: string;
+        let currentFile: string | undefined;
 
         for (const failure of failures) {
             const fileName = failure.getFileName();

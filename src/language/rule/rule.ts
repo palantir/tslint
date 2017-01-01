@@ -82,7 +82,7 @@ export interface IRuleMetadata {
 export type RuleType = "functionality" | "maintainability" | "style" | "typescript";
 
 export interface IOptions {
-    ruleArguments?: any[];
+    ruleArguments: any[];
     ruleName: string;
     disabledIntervals: IDisabledInterval[];
 }

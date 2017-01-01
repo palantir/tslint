@@ -1,0 +1,56 @@
+// Anonymous
+function () {}
+function (): void {
+}
+function (a: string, cb: ()=>{}): void {}
+
+var f = function () {};
+var f = function (): void {
+};
+var f = function (a: string, cb: ()=>{}): void {};
+
+
+// Named
+function foobar(){}
+function foobar(): void{
+}
+function foobar(a: string, cb: ()=>{}): void{}
+
+var f = function foobar(){};
+var f = function foobar(): void{
+};
+var f = function foobar(a: string, cb: ()=>{}): void{};
+
+
+// Async Arrow
+// ignore
+() => {};
+var arrow = () => {};
+
+async () => {};
+var arrow = async () => {};
+
+
+// Method
+interface IMyInterface {
+        one();
+        two(): void;
+        three(a: string, cb: ()=>{}): void;
+}
+class MyClass {
+        one() {}
+        two(): void {
+        }
+        three(a: string, cb: ()=>{}): void {}
+}
+
+
+// Constructor ignored
+class MyClass {
+        constructor () {}
+}
+class MyClass {
+        constructor(): void {
+        }
+}
+

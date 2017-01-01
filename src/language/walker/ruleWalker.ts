@@ -23,7 +23,7 @@ import {IWalker} from "./walker";
 
 export class RuleWalker extends SyntaxWalker implements IWalker {
     private limit: number;
-    private options: any[];
+    private options?: any[];
     private failures: RuleFailure[];
     private ruleName: string;
 

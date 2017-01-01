@@ -44,7 +44,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "This import is blacklisted, import a submodule instead";
 
     public isEnabled(): boolean {
-        return super.isEnabled() && this.getOptions().ruleArguments.length > 0;
+        const ruleArguments = this.getOptions().ruleArguments;
+        return super.isEnabled() && ruleArguments.length > 0;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {

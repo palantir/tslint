@@ -45,7 +45,7 @@ class ArrayTypeWalker extends Lint.RuleWalker {
             const failureString = this.hasOption(OPTION_GENERIC) ? Rule.FAILURE_STRING_GENERIC : Rule.FAILURE_STRING_GENERIC_SIMPLE;
             const parens = typeName.kind === ts.SyntaxKind.ParenthesizedType ? 1 : 0;
             // Add a space if the type is preceded by 'as' and the node has no leading whitespace
-            const space = !parens && node.parent.kind === ts.SyntaxKind.AsExpression &&
+            const space = !parens && node.parent!.kind === ts.SyntaxKind.AsExpression &&
                 node.getStart() === node.getFullStart() ? " " : "";
             const fix = new Lint.Fix(Rule.metadata.ruleName, [
                 this.createReplacement(typeName.getStart(), parens, space + "Array<"),

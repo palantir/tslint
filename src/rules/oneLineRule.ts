@@ -242,7 +242,7 @@ class OneLineWalker extends Lint.RuleWalker {
         const body = node.body;
         if (body != null && body.kind === ts.SyntaxKind.Block) {
             const arrowToken = getFirstChildOfKind(node, ts.SyntaxKind.EqualsGreaterThanToken);
-            const openBraceToken = node.body.getChildAt(0);
+            const openBraceToken = body.getChildAt(0);
             this.handleOpeningBrace(arrowToken, openBraceToken);
         }
         super.visitArrowFunction(node);
@@ -251,7 +251,7 @@ class OneLineWalker extends Lint.RuleWalker {
     private handleFunctionLikeDeclaration(node: ts.FunctionLikeDeclaration) {
         const body = node.body;
         if (body != null && body.kind === ts.SyntaxKind.Block) {
-            const openBraceToken = node.body.getChildAt(0);
+            const openBraceToken = body.getChildAt(0);
             if (node.type != null) {
                 this.handleOpeningBrace(node.type, openBraceToken);
             } else {
@@ -262,7 +262,7 @@ class OneLineWalker extends Lint.RuleWalker {
     }
 
     private handleClassLikeDeclaration(node: ts.ClassDeclaration | ts.InterfaceDeclaration) {
-        let lastNodeOfDeclaration: ts.Node = node.name;
+        let lastNodeOfDeclaration: ts.Node | undefined = node.name;
         const openBraceToken = getFirstChildOfKind(node, ts.SyntaxKind.OpenBraceToken);
 
         if (node.heritageClauses != null) {
@@ -284,14 +284,14 @@ class OneLineWalker extends Lint.RuleWalker {
         }
     }
 
-    private handleOpeningBrace(previousNode: ts.Node, openBraceToken: ts.Node) {
+    private handleOpeningBrace(previousNode: ts.Node | undefined, openBraceToken: ts.Node) {
         if (previousNode == null || openBraceToken == null) {
             return;
         }
 
         const previousNodeLine = this.getLineAndCharacterOfPosition(previousNode.getEnd()).line;
         const openBraceLine = this.getLineAndCharacterOfPosition(openBraceToken.getStart()).line;
-        let failure: string;
+        let failure: string | undefined = undefined;
 
         if (this.hasOption(OPTION_BRACE) && previousNodeLine !== openBraceLine) {
             failure = Rule.BRACE_FAILURE_STRING;

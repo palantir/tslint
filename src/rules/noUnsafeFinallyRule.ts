@@ -167,13 +167,14 @@ class NoReturnInFinallyScopeAwareWalker extends Lint.ScopeAwareRuleWalker<IFinal
 
             currentScope = scopes[--depth];
         }
+        return false;
     }
 }
 
 function isLoopBlock(node: ts.Node): boolean {
     const parent = node.parent;
 
-    return parent &&
+    return parent !== undefined &&
         node.kind === ts.SyntaxKind.Block &&
         (parent.kind === ts.SyntaxKind.ForInStatement ||
         parent.kind === ts.SyntaxKind.ForOfStatement ||
@@ -189,7 +190,7 @@ function isCaseBlock(node: ts.Node): boolean {
 function isFinallyBlock(node: ts.Node): boolean {
     const parent = node.parent;
 
-    return parent &&
+    return parent !== undefined &&
         node.kind === ts.SyntaxKind.Block &&
         isTryStatement(parent) &&
         parent.finallyBlock === node;

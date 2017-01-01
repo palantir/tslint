@@ -147,7 +147,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         // Performance optimization: type-check the whole file before verifying individual fixes
         if (this.possibleFailures.some((f) => f.hasFix())) {
             let newText = Lint.Fix.applyAll(this.getSourceFile().getFullText(),
-                this.possibleFailures.map((f) => f.getFix()).filter((f) => !!f));
+                this.possibleFailures.map((f) => f.getFix()).filter((f) => !!f) as Lint.Fix[]);
 
             // If we have the program, we can verify that the fix doesn't introduce failures
             if (Lint.checkEdit(this.languageService, this.getSourceFile(), newText).length > 0) {
@@ -157,10 +157,11 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         }
 
         this.possibleFailures.forEach((f) => {
-            if (!someFixBrokeIt || !f.hasFix()) {
+            const fix = f.getFix();
+            if (!someFixBrokeIt || fix === undefined) {
                 this.addFailure(f);
             } else {
-                let newText = f.getFix().apply(this.getSourceFile().getFullText());
+                let newText = fix.apply(this.getSourceFile().getFullText());
                 if (Lint.checkEdit(this.languageService, this.getSourceFile(), newText).length === 0) {
                     this.addFailure(f);
                 }
@@ -187,7 +188,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
 
     // skip exported and declared functions
     public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
-        if (!Lint.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword, ts.SyntaxKind.DeclareKeyword)) {
+        if (!Lint.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword, ts.SyntaxKind.DeclareKeyword) && node.name !== undefined) {
             const variableName = node.name.text;
             this.validateReferencesForVariable(Rule.FAILURE_TYPE_FUNC, variableName, node.name.getStart());
         }
@@ -220,7 +221,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
             usesDefaultImport = this.isUsed(variableIdentifier.text, variableIdentifier.getStart());
         }
         if (importClause.namedBindings != null) {
-            if (importClause.namedBindings.kind === ts.SyntaxKind.NamedImports) {
+            if (importClause.namedBindings.kind === ts.SyntaxKind.NamedImports && node.importClause !== undefined) {
                 let imports = node.importClause.namedBindings as ts.NamedImports;
                 usedNamedImports = imports.elements.map((e) => this.isUsed(e.name.text, e.name.getStart()));
             }
@@ -238,7 +239,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         }
 
         // Delete the default import and trailing comma if unused
-        if (importClause.name != null && !usesDefaultImport) {
+        if (importClause.name != null && !usesDefaultImport && importClause.namedBindings !== undefined) {
             // There must be some named imports or we would have been in case 1
             const end = importClause.namedBindings.getStart();
             this.fail(Rule.FAILURE_TYPE_IMPORT, importClause.name.text, importClause.name.getStart(), [
@@ -254,7 +255,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
                     this.deleteText(start, importClause.namedBindings.getEnd() - start),
                 ]);
             } else {
-                let imports = node.importClause.namedBindings as ts.NamedImports;
+                let imports = importClause.namedBindings as ts.NamedImports;
                 let priorElementUsed = false;
                 for (let idx = 0; idx < imports.elements.length; idx++) {
                     const namedImport = imports.elements[idx];
@@ -331,24 +332,26 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     }
 
     public visitNamespaceImport(node: ts.NamespaceImport) {
-        const importDeclaration = <ts.ImportDeclaration> node.parent.parent;
-        const moduleSpecifier = importDeclaration.moduleSpecifier.getText();
+        if (node.parent !== undefined) {
+            const importDeclaration = <ts.ImportDeclaration> node.parent.parent;
+            const moduleSpecifier = importDeclaration.moduleSpecifier.getText();
 
-        // extract the unquoted module being imported
-        const moduleNameMatch = moduleSpecifier.match(MODULE_SPECIFIER_MATCH);
-        const isReactImport = (moduleNameMatch != null) && (REACT_MODULES.indexOf(moduleNameMatch[1]) !== -1);
+            // extract the unquoted module being imported
+            const moduleNameMatch = moduleSpecifier.match(MODULE_SPECIFIER_MATCH);
+            const isReactImport = (moduleNameMatch != null) && (REACT_MODULES.indexOf(moduleNameMatch[1]) !== -1);
 
-        if (this.hasOption(OPTION_REACT) && isReactImport && node.name.text === REACT_NAMESPACE_IMPORT_NAME) {
-            this.reactImport = node;
-            const fileName = this.getSourceFile().fileName;
-            const position = node.name.getStart();
-            const highlights = this.languageService.getDocumentHighlights(fileName, position, [fileName]);
-            if (highlights != null && highlights[0].highlightSpans.length > 1) {
-                this.isReactUsed = true;
+            if (this.hasOption(OPTION_REACT) && isReactImport && node.name.text === REACT_NAMESPACE_IMPORT_NAME) {
+                this.reactImport = node;
+                const fileName = this.getSourceFile().fileName;
+                const position = node.name.getStart();
+                const highlights = this.languageService.getDocumentHighlights(fileName, position, [fileName]);
+                if (highlights != null && highlights[0].highlightSpans.length > 1) {
+                    this.isReactUsed = true;
+                }
+            } else {
+                this.validateReferencesForVariable(Rule.FAILURE_TYPE_IMPORT, node.name.text, node.name.getStart(),
+                    this.deleteImportStatement(importDeclaration));
             }
-        } else {
-            this.validateReferencesForVariable(Rule.FAILURE_TYPE_IMPORT, node.name.text, node.name.getStart(),
-                this.deleteImportStatement(importDeclaration));
         }
         super.visitNamespaceImport(node);
     }
@@ -441,8 +444,8 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         return (highlights != null && highlights[0].highlightSpans.length > 1) || this.isIgnored(name);
     }
 
-    private fail(type: string, name: string, position: number, replacements: Lint.Replacement[]) {
-        let fix: Lint.Fix;
+    private fail(type: string, name: string, position: number, replacements?: Lint.Replacement[]) {
+        let fix: Lint.Fix | undefined = undefined;
         if (replacements && replacements.length) {
             fix = new Lint.Fix(Rule.metadata.ruleName, replacements);
         }
