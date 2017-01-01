@@ -51,7 +51,9 @@ export class Rule extends Lint.Rules.AbstractRule {
         const options = this.getOptions();
         const banFunctionWalker = new BanFunctionWalker(sourceFile, options);
         const functionsToBan = options.ruleArguments;
-        functionsToBan.forEach((f) => banFunctionWalker.addBannedFunction(f));
+        if (functionsToBan !== undefined) {
+            functionsToBan.forEach((f) => banFunctionWalker.addBannedFunction(f));
+        }
         return this.applyWithWalker(banFunctionWalker);
     }
 }

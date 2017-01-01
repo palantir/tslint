@@ -144,8 +144,8 @@ export class Runner {
         }
 
         // if both files and tsconfig are present, use files
-        let files = this.options.files;
-        let program: ts.Program;
+        let files = this.options.files === undefined ? [] : this.options.files;
+        let program: ts.Program | undefined;
 
         if (this.options.project != null) {
             if (!fs.existsSync(this.options.project)) {
@@ -207,7 +207,7 @@ export class Runner {
     private processFiles(onComplete: (status: number) => void, files: string[], program?: ts.Program) {
         const possibleConfigAbsolutePath = this.options.config != null ? path.resolve(this.options.config) : null;
         const linter = new Linter({
-            fix: this.options.fix,
+            fix: !!this.options.fix,
             formatter: this.options.format,
             formattersDirectory: this.options.formattersDirectory || "",
             rulesDirectory: this.options.rulesDirectory || "",
@@ -224,7 +224,7 @@ export class Runner {
             buffer.fill(0);
             const fd = fs.openSync(file, "r");
             try {
-                fs.readSync(fd, buffer, 0, 256, null);
+                fs.readSync(fd, buffer, 0, 256, 0);
                 if (buffer.readInt8(0) === 0x47 && buffer.readInt8(188) === 0x47) {
                     // MPEG transport streams use the '.ts' file extension. They use 0x47 as the frame
                     // separator, repeating every 188 bytes. It is unlikely to find that pattern in

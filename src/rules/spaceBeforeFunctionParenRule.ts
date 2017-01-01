@@ -128,7 +128,7 @@ class FunctionWalker extends Lint.RuleWalker {
         });
     }
 
-    private getOption(optionName: OptionName): string {
+    private getOption(optionName: OptionName): string | undefined {
         return this.cachedOptions[optionName];
     }
 
@@ -137,13 +137,13 @@ class FunctionWalker extends Lint.RuleWalker {
         return filtered[0];
     }
 
-    private evaluateRuleAt(openParen: ts.Node, option: string): void {
-        if (openParen === undefined) {
+    private evaluateRuleAt(openParen?: ts.Node, option?: string): void {
+        if (openParen === undefined || option === undefined) {
             return;
         }
 
         const hasSpace = this.isSpaceAt(openParen.getStart() - 1);
-        let failure: Lint.RuleFailure;
+        let failure: Lint.RuleFailure | undefined = undefined;
 
         if (hasSpace && option === "never") {
             failure = this.createInvalidWhitespaceFailure(openParen.getStart() - 1);

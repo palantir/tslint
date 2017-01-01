@@ -58,6 +58,16 @@ export abstract class BlockScopeAwareRuleWalker<T, U> extends ScopeAwareRuleWalk
         return;
     }
 
+    public findBlockScope(predicate: (scope: U) => boolean) {
+        // look through block scopes from local -> global
+        for (let i = this.blockScopeStack.length - 1; i >= 0; i--) {
+            if (predicate(this.blockScopeStack[i])) {
+                return this.blockScopeStack[i];
+            }
+        }
+        return undefined;
+    }
+
     protected visitNode(node: ts.Node) {
         const isNewBlockScope = this.isBlockScopeBoundary(node);
 
