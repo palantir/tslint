@@ -47,14 +47,14 @@ class ComparisonWalker extends Lint.RuleWalker {
         return node.kind === ts.SyntaxKind.EqualsEqualsToken || node.kind === ts.SyntaxKind.EqualsEqualsEqualsToken;
     }
 
-    private static isLegalStringLiteral(node: ts.Node) {
-        return ComparisonWalker.LEGAL_TYPEOF_RESULTS.indexOf(node.getText()) > -1;
+    private static isLegalStringLiteral(node: ts.StringLiteral) {
+        return ComparisonWalker.LEGAL_TYPEOF_RESULTS.indexOf(node.text) > -1;
     }
 
     private static isFaultyOtherSideOfTypeof(node: ts.Node): boolean {
         switch (node.kind) {
             case ts.SyntaxKind.StringLiteral:
-                if (!ComparisonWalker.isLegalStringLiteral(node)) {
+                if (!ComparisonWalker.isLegalStringLiteral(node as ts.StringLiteral)) {
                     return true;
                 }
                 break;
