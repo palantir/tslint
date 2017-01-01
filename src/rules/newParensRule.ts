@@ -44,7 +44,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 class NewParensWalker extends Lint.RuleWalker {
     public visitNewExpression(node: ts.NewExpression) {
         if (node.arguments === undefined) {
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+            this.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
         super.visitNewExpression(node);
     }

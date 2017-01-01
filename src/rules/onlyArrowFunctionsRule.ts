@@ -20,6 +20,7 @@ import * as ts from "typescript";
 import * as Lint from "../index";
 
 const OPTION_ALLOW_DECLARATIONS = "allow-declarations";
+const OPTION_ALLOW_NAMED_FUNCTIONS = "allow-named-functions";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -28,20 +29,21 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Disallows traditional (non-arrow) function expressions.",
         rationale: "Traditional functions don't bind lexical scope, which can lead to unexpected behavior when accessing 'this'.",
         optionsDescription: Lint.Utils.dedent`
-            One argument may be optionally provided:
+            Two arguments may be optionally provided:
 
             * \`"${OPTION_ALLOW_DECLARATIONS}"\` allows standalone function declarations.
+            * \`"${OPTION_ALLOW_NAMED_FUNCTIONS}"\` allows the expression \`function foo() {}\` but not \`function() {}\`.
         `,
         options: {
             type: "array",
             items: {
                 type: "string",
-                enum: [OPTION_ALLOW_DECLARATIONS],
+                enum: [OPTION_ALLOW_DECLARATIONS, OPTION_ALLOW_NAMED_FUNCTIONS],
             },
             minLength: 0,
             maxLength: 1,
         },
-        optionExamples: ["true", `[true, "${OPTION_ALLOW_DECLARATIONS}"]`],
+        optionExamples: ["true", `[true, "${OPTION_ALLOW_DECLARATIONS}", "${OPTION_ALLOW_NAMED_FUNCTIONS}"]`],
         type: "typescript",
         typescriptOnly: false,
     };
@@ -63,13 +65,15 @@ class OnlyArrowFunctionsWalker extends Lint.RuleWalker {
     }
 
     public visitFunctionExpression(node: ts.FunctionExpression) {
-        this.failUnlessExempt(node);
+        if (!(node.name && this.hasOption(OPTION_ALLOW_NAMED_FUNCTIONS))) {
+            this.failUnlessExempt(node);
+        }
         super.visitFunctionExpression(node);
     }
 
     private failUnlessExempt(node: ts.FunctionLikeDeclaration) {
         if (!functionIsExempt(node)) {
-            this.addFailure(this.createFailure(node.getStart(), "function".length, Rule.FAILURE_STRING));
+            this.addFailureAt(node.getStart(), "function".length, Rule.FAILURE_STRING);
         }
     }
 }

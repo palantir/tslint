@@ -78,20 +78,17 @@ class CommentWalker extends Lint.SkippableTokenAwareRuleWalker {
                 const width = commentText.length - 2;
                 if (this.hasOption(OPTION_SPACE)) {
                     if (!startsWithSpace(commentText)) {
-                        const leadingSpaceFailure = this.createFailure(startPosition, width, Rule.LEADING_SPACE_FAILURE);
-                        this.addFailure(leadingSpaceFailure);
+                        this.addFailureAt(startPosition, width, Rule.LEADING_SPACE_FAILURE);
                     }
                 }
                 if (this.hasOption(OPTION_LOWERCASE)) {
                     if (!startsWithLowercase(commentText)) {
-                        const lowercaseFailure = this.createFailure(startPosition, width, Rule.LOWERCASE_FAILURE);
-                        this.addFailure(lowercaseFailure);
+                        this.addFailureAt(startPosition, width, Rule.LOWERCASE_FAILURE);
                     }
                 }
                 if (this.hasOption(OPTION_UPPERCASE)) {
                     if (!startsWithUppercase(commentText) && !isEnableDisableFlag(commentText)) {
-                        const uppercaseFailure = this.createFailure(startPosition, width, Rule.UPPERCASE_FAILURE);
-                        this.addFailure(uppercaseFailure);
+                        this.addFailureAt(startPosition, width, Rule.UPPERCASE_FAILURE);
                     }
                 }
             }

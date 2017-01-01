@@ -44,7 +44,7 @@ export class SwitchDefaultWalker extends Lint.RuleWalker {
         const hasDefaultCase = node.caseBlock.clauses.some((clause) => clause.kind === ts.SyntaxKind.DefaultClause);
 
         if (!hasDefaultCase) {
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+            this.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
 
         super.visitSwitchStatement(node);

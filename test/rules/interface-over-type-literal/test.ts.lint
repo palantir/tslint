@@ -1,0 +1,5 @@
+type T = { x: number; }
+     ~                  [Use an interface instead of a type literal.]
+
+type U = string;
+type V = { x: number; } | { y: string; };

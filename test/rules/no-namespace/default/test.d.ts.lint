@@ -1,0 +1,2 @@
+namespace N { }
+~~~~~~~~~~~~~~~ ['namespace' and 'module' are disallowed]

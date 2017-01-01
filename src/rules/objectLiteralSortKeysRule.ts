@@ -74,7 +74,7 @@ class ObjectLiteralSortKeysWalker extends Lint.RuleWalker {
                 const key = keyNode.text;
                 if (key < lastSortedKey) {
                     const failureString = Rule.FAILURE_STRING_FACTORY(key);
-                    this.addFailure(this.createFailure(keyNode.getStart(), keyNode.getWidth(), failureString));
+                    this.addFailureAtNode(keyNode, failureString);
                     this.sortedStateStack[this.sortedStateStack.length - 1] = false;
                 } else {
                     this.lastSortedKeyStack[this.lastSortedKeyStack.length - 1] = key;
@@ -85,8 +85,8 @@ class ObjectLiteralSortKeysWalker extends Lint.RuleWalker {
     }
 
     private isMultilineListNode(node: ts.ObjectLiteralExpression) {
-        const startLineOfNode = this.getSourceFile().getLineAndCharacterOfPosition(node.getStart()).line;
-        const endLineOfNode = this.getSourceFile().getLineAndCharacterOfPosition(node.getEnd()).line;
+        const startLineOfNode = this.getLineAndCharacterOfPosition(node.getStart()).line;
+        const endLineOfNode = this.getLineAndCharacterOfPosition(node.getEnd()).line;
         return endLineOfNode !== startLineOfNode;
     }
 }

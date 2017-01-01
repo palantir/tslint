@@ -45,7 +45,7 @@ class NoRequireImportsWalker extends Lint.RuleWalker {
         if (node.arguments != null && node.expression != null) {
             const callExpressionText = node.expression.getText(this.getSourceFile());
             if (callExpressionText === "require") {
-                this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+                this.addFailureAtNode(node, Rule.FAILURE_STRING);
             }
         }
         super.visitCallExpression(node);
@@ -54,7 +54,7 @@ class NoRequireImportsWalker extends Lint.RuleWalker {
     public visitImportEqualsDeclaration(node: ts.ImportEqualsDeclaration) {
         const {moduleReference} = node;
         if (moduleReference.kind === ts.SyntaxKind.ExternalModuleReference) {
-            this.addFailure(this.createFailure(moduleReference.getStart(), moduleReference.getWidth(), Rule.FAILURE_STRING));
+            this.addFailureAtNode(moduleReference, Rule.FAILURE_STRING);
         }
         super.visitImportEqualsDeclaration(node);
     }

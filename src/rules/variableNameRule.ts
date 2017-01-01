@@ -146,7 +146,7 @@ class VariableNameWalker extends Lint.RuleWalker {
         }
 
         if (this.shouldCheckFormat && !this.isCamelCase(variableName) && !isUpperCase(variableName)) {
-            this.addFailure(this.createFailure(name.getStart(), name.getWidth(), Rule.FORMAT_FAILURE));
+            this.addFailureAtNode(name, Rule.FORMAT_FAILURE);
         }
     }
 
@@ -154,7 +154,7 @@ class VariableNameWalker extends Lint.RuleWalker {
         const variableName = name.text;
 
         if (this.shouldBanKeywords && BANNED_KEYWORDS.indexOf(variableName) !== -1) {
-            this.addFailure(this.createFailure(name.getStart(), name.getWidth(), Rule.KEYWORD_FAILURE));
+            this.addFailureAtNode(name, Rule.KEYWORD_FAILURE);
         }
     }
 

@@ -58,11 +58,6 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-type SourcePosition = {
-    line: number;
-    character: number;
-};
-
 class AlignWalker extends Lint.RuleWalker {
     public visitConstructorDeclaration(node: ts.ConstructorDeclaration) {
         this.checkAlignment(Rule.PARAMETERS_OPTION, node.parameters);
@@ -104,22 +99,17 @@ class AlignWalker extends Lint.RuleWalker {
             return;
         }
 
-        let prevPos = getPosition(nodes[0]);
+        let prevPos = this.getLineAndCharacterOfPosition(nodes[0].getStart());
         const alignToColumn = prevPos.character;
 
         // skip first node in list
         for (let node of nodes.slice(1)) {
-            const curPos = getPosition(node);
+            const curPos = this.getLineAndCharacterOfPosition(node.getStart());
             if (curPos.line !== prevPos.line && curPos.character !== alignToColumn) {
-                this.addFailure(this.createFailure(node.getStart(), node.getWidth(), kind + Rule.FAILURE_STRING_SUFFIX));
+                this.addFailureAtNode(node, kind + Rule.FAILURE_STRING_SUFFIX);
                 break;
             }
             prevPos = curPos;
         }
     }
-
-}
-
-function getPosition(node: ts.Node): SourcePosition {
-    return node.getSourceFile().getLineAndCharacterOfPosition(node.getStart());
 }

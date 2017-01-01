@@ -25,7 +25,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "radix",
         description: "Requires the radix parameter to be specified when calling `parseInt`.",
         rationale: Lint.Utils.dedent`
-            From [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/parseInt): 
+            From [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/parseInt):
             > Always specify this parameter to eliminate reader confusion and to guarantee predictable behavior.
             > Different implementations produce different results when a radix is not specified, usually defaulting the value to 10.`,
         optionsDescription: "Not configurable.",
@@ -51,7 +51,7 @@ class RadixWalker extends Lint.RuleWalker {
         if (expression.kind === ts.SyntaxKind.Identifier
                 && node.getFirstToken().getText() === "parseInt"
                 && node.arguments.length < 2) {
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+            this.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
 
         super.visitCallExpression(node);

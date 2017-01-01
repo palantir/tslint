@@ -48,7 +48,7 @@ class NoDefaultExportWalker extends Lint.RuleWalker {
     public visitExportAssignment(node: ts.ExportAssignment) {
         const exportMember = node.getChildAt(1);
         if (exportMember != null && exportMember.kind === ts.SyntaxKind.DefaultKeyword) {
-            this.addFailure(this.createFailure(exportMember.getStart(), exportMember.getWidth(), Rule.FAILURE_STRING));
+            this.addFailureAtNode(exportMember, Rule.FAILURE_STRING);
         }
         super.visitExportAssignment(node);
     }
@@ -61,7 +61,7 @@ class NoDefaultExportWalker extends Lint.RuleWalker {
                 nodes.length === 2 &&
                 nodes[0].kind === ts.SyntaxKind.ExportKeyword &&
                 nodes[1].kind === ts.SyntaxKind.DefaultKeyword) {
-                    this.addFailure(this.createFailure(nodes[1].getStart(), nodes[1].getWidth(), Rule.FAILURE_STRING));
+                    this.addFailureAtNode(nodes[1], Rule.FAILURE_STRING);
             }
         }
         super.visitNode(node);

@@ -56,8 +56,7 @@ class NoConstructWalker extends Lint.RuleWalker {
             const identifier = <ts.Identifier> node.expression;
             const constructorName = identifier.text;
             if (NoConstructWalker.FORBIDDEN_CONSTRUCTORS.indexOf(constructorName) !== -1) {
-                const failure = this.createFailure(node.getStart(), identifier.getEnd() - node.getStart(), Rule.FAILURE_STRING);
-                this.addFailure(failure);
+                this.addFailureAt(node.getStart(), identifier.getEnd() - node.getStart(), Rule.FAILURE_STRING);
             }
         }
         super.visitNewExpression(node);

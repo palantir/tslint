@@ -86,8 +86,7 @@ class ForInWalker extends Lint.RuleWalker {
             }
         }
 
-        const failure = this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING);
-        this.addFailure(failure);
+        this.addFailureAtNode(node, Rule.FAILURE_STRING);
     }
 }
 

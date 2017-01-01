@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "space-before-function-paren": [true, "never"]
+  },
+  "jsRules": {
+    "space-before-function-paren": [true, "never"]
+  }
+}

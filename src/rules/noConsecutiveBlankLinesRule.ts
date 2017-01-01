@@ -64,9 +64,10 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-class NoConsecutiveBlankLinesWalker extends Lint.SkippableTokenAwareRuleWalker {
-    public visitSourceFile(node: ts.SourceFile) {
-        super.visitSourceFile(node);
+class NoConsecutiveBlankLinesWalker extends Lint.RuleWalker {
+    public walk(node: ts.SourceFile) {
+        const templateIntervals = this.getTemplateIntervals(node);
+        const lineStarts = node.getLineStarts();
 
         const options = this.getOptions();
         const allowedBlanks = options && options[0] || Rule.DEFAULT_ALLOWED_BLANKS;
@@ -92,9 +93,25 @@ class NoConsecutiveBlankLinesWalker extends Lint.SkippableTokenAwareRuleWalker {
         sequences
             .filter((arr) => arr.length > allowedBlanks)
             .map((arr) => arr[0])
-            .forEach((startLineNum: number) => {
-                let startCharPos = node.getPositionOfLineAndCharacter(startLineNum + 1, 0);
-                this.addFailure(this.createFailure(startCharPos, 1, failureMessage));
-            });
+            .map((startLineNum: number) => this.createFailure(lineStarts[startLineNum + 1], 1, failureMessage))
+            .filter((failure) => !Lint.doesIntersect(failure, templateIntervals))
+            .forEach((failure) => this.addFailure(failure));
+    }
+
+    private getTemplateIntervals(sourceFile: ts.SourceFile): Lint.IDisabledInterval[] {
+        const intervals: Lint.IDisabledInterval[] = [];
+        const cb = (node: ts.Node) => {
+            if (node.kind >= ts.SyntaxKind.FirstTemplateToken &&
+                node.kind <= ts.SyntaxKind.LastTemplateToken) {
+                intervals.push({
+                    endPosition: node.getEnd(),
+                    startPosition: node.getStart(sourceFile),
+                });
+            } else {
+                ts.forEachChild(node, cb);
+            }
+        };
+        ts.forEachChild(sourceFile, cb);
+        return intervals;
     }
 }

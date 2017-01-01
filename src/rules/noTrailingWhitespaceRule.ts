@@ -57,9 +57,7 @@ class NoTrailingWhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
 
             if (scanner.getToken() === ts.SyntaxKind.NewLineTrivia) {
                 if (lastSeenWasWhitespace) {
-                    const width = scanner.getStartPos() - lastSeenWhitespacePosition;
-                    const failure = this.createFailure(lastSeenWhitespacePosition, width, Rule.FAILURE_STRING);
-                    this.addFailure(failure);
+                    this.addFailureFromStartToEnd(lastSeenWhitespacePosition, scanner.getStartPos(), Rule.FAILURE_STRING);
                 }
                 lastSeenWasWhitespace = false;
             } else if (scanner.getToken() === ts.SyntaxKind.WhitespaceTrivia) {
