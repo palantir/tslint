@@ -32,13 +32,12 @@ export function getSourceFile(fileName: string, source: string): ts.SourceFile {
         getDirectories: (_path: string) => [],
         getNewLine: () => "\n",
         getSourceFile: (filenameToGet: string) => {
-            if (filenameToGet === normalizedName) {
-                return ts.createSourceFile(filenameToGet, source, compilerOptions.target, true);
-            }
+            const target = compilerOptions.target == null ? ts.ScriptTarget.ES5 : compilerOptions.target;
+            return ts.createSourceFile(filenameToGet, source, target, true);
         },
-        readFile: () => null,
+        readFile: (x: string) => x,
         useCaseSensitiveFileNames: () => true,
-        writeFile: () => null,
+        writeFile: (x: string) => x,
     };
 
     const program = ts.createProgram([normalizedName], compilerOptions, compilerHost);
@@ -96,8 +95,8 @@ export function isBlockScopedVariable(node: ts.VariableDeclaration | ts.Variable
         ? (<ts.VariableDeclaration> node).parent
         : (<ts.VariableStatement> node).declarationList;
 
-    return isNodeFlagSet(parentNode, ts.NodeFlags.Let)
-        || isNodeFlagSet(parentNode, ts.NodeFlags.Const);
+    return isNodeFlagSet(parentNode!, ts.NodeFlags.Let)
+        || isNodeFlagSet(parentNode!, ts.NodeFlags.Const);
 }
 
 export function isBlockScopedBindingElement(node: ts.BindingElement): boolean {
@@ -106,8 +105,8 @@ export function isBlockScopedBindingElement(node: ts.BindingElement): boolean {
     return (variableDeclaration == null) || isBlockScopedVariable(variableDeclaration);
 }
 
-export function getBindingElementVariableDeclaration(node: ts.BindingElement): ts.VariableDeclaration {
-    let currentParent = node.parent;
+export function getBindingElementVariableDeclaration(node: ts.BindingElement): ts.VariableDeclaration | null {
+    let currentParent = node.parent!;
     while (currentParent.kind !== ts.SyntaxKind.VariableDeclaration) {
         if (currentParent.parent == null) {
             return null; // function parameter, no variable declaration
@@ -122,7 +121,7 @@ export function getBindingElementVariableDeclaration(node: ts.BindingElement): t
  * @returns true if some ancestor of `node` satisfies `predicate`, including `node` itself.
  */
 export function someAncestor(node: ts.Node, predicate: (n: ts.Node) => boolean): boolean {
-    return predicate(node) || (node.parent && someAncestor(node.parent, predicate));
+    return predicate(node) || (node.parent != null && someAncestor(node.parent, predicate));
 }
 
 export function isAssignment(node: ts.Node) {

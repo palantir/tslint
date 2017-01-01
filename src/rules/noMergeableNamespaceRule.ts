@@ -74,5 +74,6 @@ class NoMergeableNamespaceWalker extends Lint.RuleWalker {
                 return lineAndCharacter;
             }
         }
+        throw new Error("expected more than one highlightSpan");
     }
 }

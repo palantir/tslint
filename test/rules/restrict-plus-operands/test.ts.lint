@@ -58,3 +58,4 @@ var good6 = pair.first + 10;
 var good7 = pair.first + (10 as MyNumber);
 var good8 = "5.5" + pair.second;
 var good9 = ("5.5" as MyString) + pair.second;
+const good10 = 'hello' + (someBoolean ? 'a' : 'b') + (() => someBoolean ? 'c' : 'd')() + 'e';
