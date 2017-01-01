@@ -248,6 +248,15 @@
     "typescriptOnly": false
   },
   {
+    "ruleName": "import-spacing",
+    "description": "Ensures proper spacing between import statement keywords",
+    "optionsDescription": "",
+    "options": {},
+    "optionExamples": [],
+    "type": "style",
+    "typescriptOnly": false
+  },
+  {
     "ruleName": "indent",
     "description": "Enforces indentation with tabs or spaces.",
     "rationale": "\nUsing only one of tabs or spaces for indentation leads to more consistent editor behavior,\ncleaner diffs in version control, and easier programatic manipulation.",
