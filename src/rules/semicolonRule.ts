@@ -36,6 +36,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"${OPTION_NEVER}"\` disallows semicolons at the end of every statement except for when they are necessary.
 
             The following arguments may be optionaly provided:
+
             * \`"${OPTION_IGNORE_INTERFACES}"\` skips checking semicolons at the end of interface members.
             * \`"${OPTION_IGNORE_BOUND_CLASS_METHODS}"\` skips checking semicolons at the end of bound class methods.`,
         options: {
