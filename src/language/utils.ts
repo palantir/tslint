@@ -196,3 +196,36 @@ export function unwrapParentheses(node: ts.Expression) {
     }
     return node;
 }
+
+export function isScopeBoundary(node: ts.Node): boolean {
+    return node.kind === ts.SyntaxKind.FunctionDeclaration
+        || node.kind === ts.SyntaxKind.FunctionExpression
+        || node.kind === ts.SyntaxKind.PropertyAssignment
+        || node.kind === ts.SyntaxKind.ShorthandPropertyAssignment
+        || node.kind === ts.SyntaxKind.MethodDeclaration
+        || node.kind === ts.SyntaxKind.Constructor
+        || node.kind === ts.SyntaxKind.ModuleDeclaration
+        || node.kind === ts.SyntaxKind.ArrowFunction
+        || node.kind === ts.SyntaxKind.ParenthesizedExpression
+        || node.kind === ts.SyntaxKind.ClassDeclaration
+        || node.kind === ts.SyntaxKind.ClassExpression
+        || node.kind === ts.SyntaxKind.InterfaceDeclaration
+        || node.kind === ts.SyntaxKind.GetAccessor
+        || node.kind === ts.SyntaxKind.SetAccessor
+        || node.kind === ts.SyntaxKind.SourceFile && ts.isExternalModule(node as ts.SourceFile);
+}
+
+export function isBlockScopeBoundary(node: ts.Node): boolean {
+    return isScopeBoundary(node)
+        || node.kind === ts.SyntaxKind.Block
+        || node.kind === ts.SyntaxKind.DoStatement
+        || node.kind === ts.SyntaxKind.WhileStatement
+        || node.kind === ts.SyntaxKind.ForStatement
+        || node.kind === ts.SyntaxKind.ForInStatement
+        || node.kind === ts.SyntaxKind.ForOfStatement
+        || node.kind === ts.SyntaxKind.WithStatement
+        || node.kind === ts.SyntaxKind.SwitchStatement
+        || node.parent !== undefined
+            && (node.parent.kind === ts.SyntaxKind.TryStatement
+            || node.parent.kind === ts.SyntaxKind.IfStatement);
+}

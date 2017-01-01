@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2013 Palantir Technologies, Inc.
+ * Copyright 2017 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,12 @@
  * limitations under the License.
  */
 
-export * from "./blockScopeAwareRuleWalker";
-export * from "./programAwareRuleWalker";
-export * from "./ruleWalker";
-export * from "./scopeAwareRuleWalker";
-export * from "./skippableTokenAwareRuleWalker";
-export * from "./syntaxWalker";
-export * from "./walker";
+import * as ts from "typescript";
+
+import {RuleFailure} from "../rule/rule";
+
+export interface IWalker {
+    getSourceFile(): ts.SourceFile;
+    walk(node: ts.Node): void;
+    getFailures(): RuleFailure[];
+}
