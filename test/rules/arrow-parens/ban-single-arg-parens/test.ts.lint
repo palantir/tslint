@@ -18,8 +18,6 @@ var piyo = <T, U>(method: () => T) => {
     method();
 };
 const validAsync = async (param: any) => {};
-const invalidAsync = async (param) => {};
-                            ~~~~~ [0]
 
 var e = (a => {})(1);
 var f = ab => {};
@@ -27,5 +25,7 @@ var f = ab => {};
 // invalid case
 var a = (a) => {};
          ~         [0]
+const invalidAsync = async (param) => {};
+                            ~~~~~ [0]
 
 [0]: Parentheses are prohibited around the parameter in this single parameter arrow function

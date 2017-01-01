@@ -18,10 +18,10 @@ var piyo = <T, U>(method: () => T) => {
     method();
 };
 const validAsync = async (param: any) => {};
-const invalidAsync = async param => {};
 
 var e = (a => {})(1);
 var f = ab => {};
 
 // invalid case
 var a = a => {};
+const invalidAsync = async param => {};
