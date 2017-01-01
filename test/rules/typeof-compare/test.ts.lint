@@ -26,6 +26,14 @@ typeof num !== "function";
 typeof num !== "symbol";
 typeof num !== "undefined";
 
+"number" !== typeof num;
+"object" !== typeof num;
+"string" !== typeof num;
+"boolean" !== typeof num;
+"function" !== typeof num;
+"symbol" !== typeof num;
+"undefined" !== typeof num;
+
 typeof num === "number";
 typeof num === "object";
 typeof num === "string";
@@ -33,6 +41,14 @@ typeof num === "boolean";
 typeof num === "function";
 typeof num === "symbol";
 typeof num === "undefined";
+
+"number" === typeof num;
+"object" === typeof num;
+"string" === typeof num;
+"boolean" === typeof num;
+"function" === typeof num;
+"symbol" === typeof num;
+"undefined" === typeof num;
 
 typeof num == "number";
 typeof num == "object";
@@ -42,6 +58,14 @@ typeof num == "function";
 typeof num == "symbol";
 typeof num == "undefined";
 
+"number" == typeof num;
+"object" == typeof num;
+"string" == typeof num;
+"boolean" == typeof num;
+"function" == typeof num;
+"symbol" == typeof num;
+"undefined" == typeof num;
+
 typeof num != "number";
 typeof num != "object";
 typeof num != "string";
@@ -49,6 +73,14 @@ typeof num != "boolean";
 typeof num != "function";
 typeof num != "symbol";
 typeof num != "undefined";
+
+"number" == typeof num;
+"object" == typeof num;
+"string" == typeof num;
+"boolean" == typeof num;
+"function" == typeof num;
+"symbol" == typeof num;
+"undefined" == typeof num;
 
 typeof bar === 123
 ~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
