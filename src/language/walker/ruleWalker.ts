@@ -64,6 +64,10 @@ export class RuleWalker extends SyntaxWalker implements IWalker {
         }
     }
 
+    public skip(_node: ts.Node) {
+        return; // TODO remove this method in next major version
+    }
+
     public createFailure(start: number, width: number, failure: string, fix?: Fix): RuleFailure {
         const from = (start > this.limit) ? this.limit : start;
         const to = ((start + width) > this.limit) ? this.limit : (start + width);
