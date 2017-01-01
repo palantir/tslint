@@ -58,7 +58,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class OnlyArrowFunctionsWalker extends Lint.RuleWalker {
     public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
-        if (!this.hasOption(OPTION_ALLOW_DECLARATIONS)) {
+        if (!this.hasOption(OPTION_ALLOW_DECLARATIONS) && !this.hasOption(OPTION_ALLOW_NAMED_FUNCTIONS)) {
             this.failUnlessExempt(node);
         }
         super.visitFunctionDeclaration(node);
