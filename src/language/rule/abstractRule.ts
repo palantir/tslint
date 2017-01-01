@@ -18,7 +18,7 @@
 import * as ts from "typescript";
 
 import {doesIntersect} from "../utils";
-import {IWalker} from "../walker/walker";
+import {IWalker} from "../walker";
 import {IDisabledInterval, IOptions, IRule, IRuleMetadata, RuleFailure} from "./rule";
 
 export abstract class AbstractRule implements IRule {

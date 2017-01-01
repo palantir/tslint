@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import {IWalker} from "../walker/walker";
+import {IWalker} from "../walker";
 
 export interface IRuleMetadata {
     /**
