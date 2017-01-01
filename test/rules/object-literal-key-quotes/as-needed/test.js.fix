@@ -16,4 +16,6 @@ const o = {
   "0x0": 0,
   true: 0, // failure
   '': 'always quote the empty string',
+  x,
+  ...y,
 };
