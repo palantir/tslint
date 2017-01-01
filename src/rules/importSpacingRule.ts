@@ -70,14 +70,13 @@ class ImportStatementWalker extends Lint.RuleWalker {
 
             if (/from$/.test(fromString)) {
                 this.addFailure(this.createFailure(importClauseEnd, fromString.length, Rule.ADD_SPACE_AFTER_FROM));
-            }
-            if (/from\s{2,}$/.test(fromString)) {
+            } else if (/from\s{2,}$/.test(fromString)) {
                 this.addFailure(this.createFailure(importClauseEnd, fromString.length, Rule.TOO_MANY_SPACES_AFTER_FROM));
             }
+
             if (/^\s{2,}from/.test(fromString)) {
                 this.addFailure(this.createFailure(importClauseEnd, fromString.length, Rule.TOO_MANY_SPACES_BEFORE_FROM));
-            }
-            if (/^from/.test(fromString)) {
+            } else if (/^from/.test(fromString)) {
                 this.addFailure(this.createFailure(importClauseEnd, fromString.length, Rule.ADD_SPACE_BEFORE_FROM));
             }
 
@@ -109,12 +108,13 @@ class ImportStatementWalker extends Lint.RuleWalker {
     private checkModuleWithSideEffect(node: ts.ImportDeclaration) {
         const moduleSpecifierStart = node.moduleSpecifier.getStart();
         const nodeStart = node.getStart();
+
         if ((nodeStart + "import".length + 1) < moduleSpecifierStart) {
             this.addFailure(this.createFailure(nodeStart, moduleSpecifierStart - nodeStart, Rule.TOO_MANY_SPACES_AFTER_IMPORT));
-        }
-        if ((nodeStart + "import".length) === moduleSpecifierStart) {
+        } else if ((nodeStart + "import".length) === moduleSpecifierStart) {
             this.addFailure(this.createFailure(nodeStart,  "import".length, Rule.ADD_SPACE_AFTER_IMPORT));
         }
+
         if (LINE_BREAK_REGEX.test(node.getText())) {
             this.addFailure(this.createFailure(nodeStart, node.getWidth(), Rule.NO_LINE_BREAKS));
         }
