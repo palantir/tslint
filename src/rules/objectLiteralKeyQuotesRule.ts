@@ -98,6 +98,7 @@ class ObjectLiteralKeyQuotesWalker extends Lint.RuleWalker {
                 break;
             case "consistent":
                 if (quotesAreInconsistent(properties)) {
+                    // No fix -- don't know if they would want to add quotes or remove them.
                     this.addFailureAt(node.getStart(), 1, Rule.INCONSISTENT_PROPERTY);
                 }
                 break;
@@ -120,7 +121,8 @@ class ObjectLiteralKeyQuotesWalker extends Lint.RuleWalker {
     private allMustHaveQuotes(properties: ts.ObjectLiteralElementLike[]) {
         for (const { name } of properties) {
             if (name !== undefined && name.kind !== ts.SyntaxKind.StringLiteral && name.kind !== ts.SyntaxKind.ComputedPropertyName) {
-                this.addFailureAtNode(name, Rule.UNQUOTED_PROPERTY(name.getText()));
+                const fix = this.fix(this.appendText(name.getStart(), '"'), this.appendText(name.getEnd(), '"'));
+                this.addFailureAtNode(name, Rule.UNQUOTED_PROPERTY(name.getText()), fix);
             }
         }
     }
@@ -128,9 +130,14 @@ class ObjectLiteralKeyQuotesWalker extends Lint.RuleWalker {
     private noneMayHaveQuotes(properties: ts.ObjectLiteralElementLike[], noneNeedQuotes?: boolean) {
         for (const { name } of properties) {
             if (name !== undefined && name.kind === ts.SyntaxKind.StringLiteral && (noneNeedQuotes || !propertyNeedsQuotes(name.text))) {
-                this.addFailureAtNode(name, Rule.UNNEEDED_QUOTES(name.text));
+                const fix = this.fix(this.deleteText(name.getStart(), 1), this.deleteText(name.getEnd() - 1, 1));
+                this.addFailureAtNode(name, Rule.UNNEEDED_QUOTES(name.text), fix);
             }
         }
+    }
+
+    private fix(...replacements: Lint.Replacement[]) {
+        return new Lint.Fix(Rule.metadata.ruleName, replacements);
     }
 }
 
