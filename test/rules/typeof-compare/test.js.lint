@@ -14,6 +14,41 @@ console.log(typeof window == 'object ')
 
 const string = "string";
 typeof bar === string
+typeof bar === `${string}`;
+typeof bar === `${"s"}tring`;
+
+var num = 123;
+typeof num !== "number";
+typeof num !== "object";
+typeof num !== "string";
+typeof num !== "boolean";
+typeof num !== "function";
+typeof num !== "symbol";
+typeof num !== "undefined";
+
+typeof num === "number";
+typeof num === "object";
+typeof num === "string";
+typeof num === "boolean";
+typeof num === "function";
+typeof num === "symbol";
+typeof num === "undefined";
+
+typeof num == "number";
+typeof num == "object";
+typeof num == "string";
+typeof num == "boolean";
+typeof num == "function";
+typeof num == "symbol";
+typeof num == "undefined";
+
+typeof num != "number";
+typeof num != "object";
+typeof num != "string";
+typeof num != "boolean";
+typeof num != "function";
+typeof num != "symbol";
+typeof num != "undefined";
 
 typeof bar === 123
 ~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
