@@ -1558,6 +1558,15 @@
     "typescriptOnly": true
   },
   {
+    "ruleName": "typeof-compare",
+    "description": "Makes sure result of `typeof` is compared to correct string values",
+    "optionsDescription": "",
+    "options": {},
+    "optionExamples": [],
+    "type": "functionality",
+    "typescriptOnly": false
+  },
+  {
     "ruleName": "use-isnan",
     "description": "Enforces use of the `isNaN()` function to check for NaN references instead of a comparison to the `NaN` constant.",
     "rationale": "\nSince `NaN !== NaN`, comparisons with regular operators will produce unexpected results.\nSo, instead of `if (myVar === NaN)`, do `if (isNaN(myVar))`.",
