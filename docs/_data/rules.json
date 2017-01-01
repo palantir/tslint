@@ -643,6 +643,18 @@
     "typescriptOnly": true
   },
   {
+    "ruleName": "no-inferred-empty-object-type",
+    "description": "Disallow type inference of {} (empty object type) at function and constructor call sites",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality",
+    "typescriptOnly": true,
+    "requiresTypeInfo": true
+  },
+  {
     "ruleName": "no-internal-module",
     "description": "Disallows internal `module`",
     "rationale": "Using `module` leads to a confusion of concepts with external modules. Use the newer `namespace` keyword instead.",
@@ -1191,6 +1203,18 @@
     "typescriptOnly": false
   },
   {
+    "ruleName": "strict-boolean-expressions",
+    "description": "Usage of && or || operators should be with boolean operands and\nexpressions in If, Do, While and For statements should be of type boolean",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality",
+    "typescriptOnly": true,
+    "requiresTypeInfo": true
+  },
+  {
     "ruleName": "switch-default",
     "description": "Require a `default` case in all `switch` statements.",
     "optionsDescription": "Not configurable.",
@@ -1390,6 +1414,15 @@
     ],
     "type": "typescript",
     "typescriptOnly": true
+  },
+  {
+    "ruleName": "typeof-compare",
+    "description": "Makes sure result of `typeof` is compared to correct string values",
+    "optionsDescription": "",
+    "options": {},
+    "optionExamples": [],
+    "type": "functionality",
+    "typescriptOnly": false
   },
   {
     "ruleName": "use-isnan",
