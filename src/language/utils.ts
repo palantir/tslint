@@ -196,3 +196,18 @@ export function unwrapParentheses(node: ts.Expression) {
     }
     return node;
 }
+
+/**
+ * Shim to look up NodeFlags or ModifierFlags depending on the TypeScript
+ * version, emitting a runtime error if neither can be found.
+ */
+export function isCombinedFlagSet(node: ts.Node, name: string): boolean {
+    if (ts.ModifierFlags && name in ts.ModifierFlags) {
+        return isCombinedModifierFlagSet(node, (<any> ts.ModifierFlags)[name]);
+    }
+    if (ts.NodeFlags && name in ts.NodeFlags) {
+        return isCombinedNodeFlagSet(node, (<any> ts.NodeFlags)[name]);
+    }
+
+    throw new Error(`Cannot find tag "${name}" in either ts.ModifierFlags or ts.NodeFlags`);
+}
