@@ -66,7 +66,7 @@ export function parseErrorsFromMarkup(text: string): LintError[] {
         // for each error marking on that line...
         while (errorLinesForLineOfCode.length > 0) {
             const errorLine = errorLinesForLineOfCode.shift();
-            const errorStartPos = { line: lineNo, col: errorLine.startCol };
+            const errorStartPos = { line: lineNo, col: errorLine!.startCol };
 
             // if the error starts and ends on this line, add it now to list of errors
             if (errorLine instanceof EndErrorLine) {
@@ -140,9 +140,10 @@ export function createMarkupFromErrors(code: string, lintErrors: LintError[]) {
 /* tslint:enable:object-literal-sort-keys */
 
 function combineCodeTextAndErrorLines(codeText: string[], errorLinesForCodeText: ErrorLine[][]) {
-    return codeText.reduce((resultText, code, i) => {
+    return codeText.reduce<string[]>((resultText, code, i) => {
         resultText.push(code);
-        resultText.push(...(errorLinesForCodeText[i].map((line) => printLine(line, code))));
+        const errorPrintLines = errorLinesForCodeText[i].map((line) => printLine(line, code)).filter((line) => line !== null) as string[];
+        resultText.push(...errorPrintLines);
         return resultText;
     }, []);
 }

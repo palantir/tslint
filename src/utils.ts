@@ -18,7 +18,7 @@
 /**
  * Enforces the invariant that the input is an array.
  */
-export function arrayify<T>(arg: T | T[]): T[] {
+export function arrayify<T>(arg?: T | T[]): T[] {
     if (Array.isArray(arg)) {
         return arg;
     } else if (arg != null) {

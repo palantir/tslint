@@ -26,7 +26,7 @@ const EXECUTABLE_PATH = path.resolve(EXECUTABLE_DIR, "npm-like-executable");
 const TEMP_JSON_PATH = path.resolve(EXECUTABLE_DIR, "tslint.json");
 
 /* tslint:disable:only-arrow-functions */
-describe("Executable", function () {
+describe("Executable", function (this: Mocha.ISuiteCallbackContext) {
     this.slow(3000);    // the executable is JIT-ed each time it runs; avoid showing slowness warnings
     this.timeout(4000);
 
@@ -298,6 +298,9 @@ function execCli(args: string[], options: cp.ExecFileOptions | ExecFileCallback,
     }
 
     return cp.execFile(filePath, args, options, (error, stdout, stderr) => {
+        if (cb === undefined) {
+            throw new Error("cb not defined");
+        }
         cb(error, stdout.trim(), stderr.trim());
     });
 }
