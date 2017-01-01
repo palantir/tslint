@@ -80,7 +80,8 @@ describe("Executable", function (this: Mocha.ISuiteCallbackContext) {
             execCli(["-c", "test/config/tslint-extends-package-no-mod.json", "src/test.ts"], (err) => {
                 assert.isNull(err, "process should exit without an error");
                 done();
-            });        });
+            });
+        });
 
         it("exits with code 1 if config file is invalid", (done) => {
             execCli(["-c", "test/config/tslint-invalid.json", "src/test.ts"], (err, stdout, stderr) => {
@@ -208,6 +209,14 @@ describe("Executable", function (this: Mocha.ISuiteCallbackContext) {
                 "test/files/tsconfig-test/other.test.ts"], (err) => {
                     assert.isNotNull(err, "process should exit with error");
                     assert.strictEqual(err.code, 2, "error code should be 2");
+                    done();
+                });
+        });
+
+        it("exits with code 0 if `tsconfig.json` is passed but it includes no ts files", (done) => {
+            execCli(["-c", "test/files/tsconfig-no-ts-files/tslint.json", "--project", "test/files/tsconfig-no-ts-files/tsconfig.json"],
+                (err) => {
+                    assert.isNull(err, "process should exit without an error");
                     done();
                 });
         });
