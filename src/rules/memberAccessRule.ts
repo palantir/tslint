@@ -45,7 +45,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY = (memberType: string, memberName: string, publicOnly: boolean) => {
+    public static FAILURE_STRING_FACTORY = (memberType: string, memberName: string | null, publicOnly: boolean) => {
         memberName = memberName == null ? "" : ` '${memberName}'`;
         if (publicOnly) {
             return `The ${memberType}${memberName} must be marked as 'public'`;
@@ -93,7 +93,7 @@ export class MemberAccessWalker extends Lint.RuleWalker {
     }
 
     private validateVisibilityModifiers(node: ts.Node) {
-        if (node.parent.kind === ts.SyntaxKind.ObjectLiteralExpression) {
+        if (node.parent!.kind === ts.SyntaxKind.ObjectLiteralExpression) {
             return;
         }
 
@@ -119,16 +119,17 @@ export class MemberAccessWalker extends Lint.RuleWalker {
                 memberType = "get property accessor";
             } else if (node.kind === ts.SyntaxKind.SetAccessor) {
                 memberType = "set property accessor";
+            } else {
+                throw new Error("unhandled node type");
             }
 
-            // look for the identifier and get it's text
-            let memberName: string;
+            // look for the identifier and get its text
+            let memberName: string | null = null;
             node.getChildren().forEach((n: ts.Node) => {
                 if (n.kind === ts.SyntaxKind.Identifier) {
                     memberName = n.getText();
                 }
             });
-
             const failureString = Rule.FAILURE_STRING_FACTORY(memberType, memberName, publicOnly);
             this.addFailureAtNode(node, failureString);
         }

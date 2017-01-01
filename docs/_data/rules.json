@@ -1292,6 +1292,59 @@
     "typescriptOnly": false
   },
   {
+    "description": "Require or disallow a space before function parenthesis",
+    "optionExamples": [
+      "true",
+      "[true, \"always\"]",
+      "[true, \"never\"]",
+      "[true, {\"anonymous\": \"always\", \"named\": \"never\", \"asyncArrow\": \"always\"}]"
+    ],
+    "options": {
+      "properties": {
+        "anonymous": {
+          "enum": [
+            "always",
+            "never"
+          ],
+          "type": "string"
+        },
+        "asyncArrow": {
+          "enum": [
+            "always",
+            "never"
+          ],
+          "type": "string"
+        },
+        "constructor": {
+          "enum": [
+            "always",
+            "never"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "always",
+            "never"
+          ],
+          "type": "string"
+        },
+        "named": {
+          "enum": [
+            "always",
+            "never"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "optionsDescription": "\nOne argument which is an object which may contain the keys `anonymous`, `named`, and `asyncArrow`\nThese should be set to either `\"always\"` or `\"never\"`.\n\n* `\"anonymous\"` checks before the opening paren in anonymous functions\n* `\"named\"` checks before the opening paren in named functions\n* `\"asyncArrow\"` checks before the opening paren in async arrow functions\n* `\"method\"` checks before the opening paren in class methods\n* `\"constructor\"` checks before the opening paren in class constructors\n        ",
+    "ruleName": "space-before-function-paren",
+    "type": "style",
+    "typescriptOnly": false
+  },
+  {
     "ruleName": "strict-boolean-expressions",
     "description": "Usage of && or || operators should be with boolean operands and\nexpressions in If, Do, While and For statements should be of type boolean",
     "optionsDescription": "Not configurable.",

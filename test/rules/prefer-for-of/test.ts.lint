@@ -132,4 +132,10 @@ function sampleFunc() {
     }
 }
 
+for (let shadow = 0; shadow < arr.length; shadow++) {
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   [0]
+    for (let shadow = 0; shadow < arr.length; shadow++) {
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   [0]
+    }
+}
 [0]: Expected a 'for-of' loop instead of a 'for' loop with this simple iteration

@@ -66,7 +66,7 @@ class NoVarKeywordWalker extends Lint.RuleWalker {
         super.visitForOfStatement(node);
     }
 
-    private handleInitializerNode(node: ts.VariableDeclarationList | ts.Expression) {
+    private handleInitializerNode(node: ts.VariableDeclarationList | ts.Expression | undefined) {
         if (node && node.kind === ts.SyntaxKind.VariableDeclarationList &&
                 !(Lint.isNodeFlagSet(node, ts.NodeFlags.Let) || Lint.isNodeFlagSet(node, ts.NodeFlags.Const))) {
             this.addFailureAt(node.getStart(), "var".length, Rule.FAILURE_STRING, this.fix(node));
