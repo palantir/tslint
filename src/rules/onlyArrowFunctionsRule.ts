@@ -73,8 +73,19 @@ class OnlyArrowFunctionsWalker extends Lint.RuleWalker {
 
     private failUnlessExempt(node: ts.FunctionLikeDeclaration) {
         if (!functionIsExempt(node)) {
-            this.addFailureAt(node.getStart(), "function".length, Rule.FAILURE_STRING);
+            this.addFailureAtNode(this.getFunctionKeyword(node), Rule.FAILURE_STRING);
         }
+    }
+
+    private getFunctionKeyword(node: ts.FunctionLikeDeclaration): ts.Node {
+        let functionKeyword: ts.Node|undefined = undefined;
+        for (const child of node.getChildren(this.getSourceFile())) {
+            if (child.kind === ts.SyntaxKind.FunctionKeyword) {
+                functionKeyword = child;
+                break;
+            }
+        }
+        return functionKeyword!;
     }
 }
 
