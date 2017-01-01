@@ -6,16 +6,16 @@ import "styles.css";
 
 // bad
 import"styles.css";
-~~~~~~             [Add space after import]
+~~~~~~             [Add space after 'import']
 import  "styles.css";
-~~~~~~~~             [Too many spaces after import]
+~~~~~~~~             [Too many spaces after 'import']
 import   "styles.css";
-~~~~~~~~~             [Too many spaces after import]
+~~~~~~~~~             [Too many spaces after 'import']
 
 import
 ~~~~~~
 "styles.css";
-~~~~~~~~~~~~~ [No line breaks are allowed in import declaration]
+~~~~~~~~~~~~~ [Line breaks are not allowed in import declaration]
 // ---------------------------------------------------------------------------------------------------------------------
 // Namespace import
 // ---------------------------------------------------------------------------------------------------------------------
@@ -24,42 +24,42 @@ import * as ts from "typescript";
 
 // bad
 import*as ts from "typescript";
-~~~~~~                         [Add space after import]
-      ~~~~~~                   [Add space after *]
+~~~~~~                         [Add space after 'import']
+      ~~~~~~                   [Add space after '*']
 import *as ts from "typescript";
-       ~~~~~~                   [Add space after *]
+       ~~~~~~                   [Add space after '*']
 import *  as ts from "typescript";
-       ~~~~~~~~                   [Too many spaces after *]
+       ~~~~~~~~                   [Too many spaces after '*']
 import *   as ts from "typescript";
-       ~~~~~~~~~                   [Too many spaces after *]
+       ~~~~~~~~~                   [Too many spaces after '*']
 import* as ts from "typescript";
-~~~~~~                          [Add space after import]
+~~~~~~                          [Add space after 'import']
 import * as ts from"typescript";
-              ~~~~~              [Add space after from]
+              ~~~~~              [Add space after 'from']
 import  * as ts from "typescript";
-~~~~~~~~                          [Too many spaces after import]
+~~~~~~~~                          [Too many spaces after 'import']
 import    * as ts from "typescript";
-~~~~~~~~~~                          [Too many spaces after import]
+~~~~~~~~~~                          [Too many spaces after 'import']
 import * as ts from  "typescript";
-              ~~~~~~~               [Too many spaces after from]
+              ~~~~~~~               [Too many spaces after 'from']
 import
-~~~~~~ [No line breaks are allowed in import declaration]
+~~~~~~ [Line breaks are not allowed in import declaration]
 * as ts from "typescript";
 
 import *
        ~
 as ts from "typescript";
-~~~~~                      [No line breaks are allowed in import declaration]
+~~~~~                      [Line breaks are not allowed in import declaration]
 
 import * as
        ~~~~
 ts from "typescript";
-~~                   [No line breaks are allowed in import declaration]
+~~                   [Line breaks are not allowed in import declaration]
 
 import * as ts
               ~nil
 from "typescript";
-~~~~~~~~~~~~~~~~~~ [No line breaks are allowed in import declaration]
+~~~~~~~~~~~~~~~~~~ [Line breaks are not allowed in import declaration]
 
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -70,38 +70,38 @@ import {Expression} from "typescript";
 
 // bad
 import{Expression}from"typescript";
-~~~~~~                             [Add space after import]
-                  ~~~~              [Add space after from]
-                  ~~~~              [Add space before from]
+~~~~~~                             [Add space after 'import']
+                  ~~~~              [Add space after 'from']
+                  ~~~~              [Add space before 'from']
 import {Expression}from"typescript";
-                   ~~~~              [Add space after from]
-                   ~~~~              [Add space before from]
+                   ~~~~              [Add space after 'from']
+                   ~~~~              [Add space before 'from']
 import {Expression} from"typescript";
-                   ~~~~~             [Add space after from]
+                   ~~~~~             [Add space after 'from']
 import  {Expression} from "typescript";
-~~~~~~~~                               [Too many spaces after import]
+~~~~~~~~                               [Too many spaces after 'import']
 import {Expression}  from "typescript";
-                   ~~~~~~~             [Too many spaces before from]
+                   ~~~~~~~             [Too many spaces before 'from']
 import {Expression} from  "typescript";
-                   ~~~~~~~              [Too many spaces after from]
+                   ~~~~~~~              [Too many spaces after 'from']
 import  {Expression} from "typescript";
-~~~~~~~~                               [Too many spaces after import]
+~~~~~~~~                               [Too many spaces after 'import']
 import   {Expression} from "typescript";
-~~~~~~~~~                               [Too many spaces after import]
+~~~~~~~~~                               [Too many spaces after 'import']
 
 import
-~~~~~~                         [No line breaks are allowed in import declaration]
+~~~~~~                         [Line breaks are not allowed in import declaration]
 {Expression} from "typescript";
 
 import {Expression}
                    ~nil
 from "typescript";
-~~~~~~~~~~~~~~~~~~ [No line breaks are allowed in import declaration]
+~~~~~~~~~~~~~~~~~~ [Line breaks are not allowed in import declaration]
 
 import {Expression} from
                    ~~~~~
 "typescript";
-~~~~~~~~~~~~~ [No line breaks are allowed in import declaration]
+~~~~~~~~~~~~~ [Line breaks are not allowed in import declaration]
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Multi-line import
@@ -113,26 +113,26 @@ import {
 
 // bad
 import{
-~~~~~~  [Add space after import]
+~~~~~~  [Add space after 'import']
     Expression
 } from "typescript";
 
 import {Expression
 }from "typescript";
- ~~~~~                  [Add space before from]
+ ~~~~~                  [Add space before 'from']
 
 import {
     Expression
 } from"typescript";
- ~~~~~             [Add space after from]
+ ~~~~~             [Add space after 'from']
 
 import  {
-~~~~~~~~  [Too many spaces after import]
+~~~~~~~~  [Too many spaces after 'import']
     Expression
 } from "typescript";
 
 import  {
-~~~~~~~~  [Too many spaces after import]
+~~~~~~~~  [Too many spaces after 'import']
     Expression
 } from "typescript";
 
@@ -141,17 +141,17 @@ import {
 }
  ~nil
 from "typescript";
-~~~~~~~~~~~~~~~~~~ [No line breaks are allowed in import declaration]
+~~~~~~~~~~~~~~~~~~ [Line breaks are not allowed in import declaration]
 
 import {
     Expression
 } from
  ~~~~~
 "typescript";
-~~~~~~~~~~~~~ [No line breaks are allowed in import declaration]
+~~~~~~~~~~~~~ [Line breaks are not allowed in import declaration]
 
 import
-~~~~~~ [No line breaks are allowed in import declaration]
+~~~~~~ [Line breaks are not allowed in import declaration]
 {
     Expression
 } from "typescript"

@@ -33,15 +33,15 @@ export class Rule extends Lint.Rules.AbstractRule {
         typescriptOnly: false,
     };
 
-    public static ADD_SPACE_AFTER_IMPORT = "Add space after import";
-    public static TOO_MANY_SPACES_AFTER_IMPORT = "Too many spaces after import";
-    public static ADD_SPACE_AFTER_STAR = "Add space after *";
-    public static TOO_MANY_SPACES_AFTER_STAR = "Too many spaces after *";
-    public static ADD_SPACE_AFTER_FROM = "Add space after from";
-    public static TOO_MANY_SPACES_AFTER_FROM = "Too many spaces after from";
-    public static ADD_SPACE_BEFORE_FROM = "Add space before from";
-    public static TOO_MANY_SPACES_BEFORE_FROM = "Too many spaces before from";
-    public static NO_LINE_BREAKS = "No line breaks are allowed in import declaration";
+    public static ADD_SPACE_AFTER_IMPORT = "Add space after 'import'";
+    public static TOO_MANY_SPACES_AFTER_IMPORT = "Too many spaces after 'import'";
+    public static ADD_SPACE_AFTER_STAR = "Add space after '*'";
+    public static TOO_MANY_SPACES_AFTER_STAR = "Too many spaces after '*'";
+    public static ADD_SPACE_AFTER_FROM = "Add space after 'from'";
+    public static TOO_MANY_SPACES_AFTER_FROM = "Too many spaces after 'from'";
+    public static ADD_SPACE_BEFORE_FROM = "Add space before 'from'";
+    public static TOO_MANY_SPACES_BEFORE_FROM = "Too many spaces before 'from'";
+    public static NO_LINE_BREAKS = "Line breaks are not allowed in import declaration";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const comparisonWalker = new ImportStatementWalker(sourceFile, this.getOptions());
