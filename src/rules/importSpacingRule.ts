@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2013 Palantir Technologies, Inc.
+ * Copyright 2017 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,20 +50,18 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class ImportStatementWalker extends Lint.RuleWalker {
-    private static IMPORT_KEYWORD_LENGTH = 6; // "import".length;
-
     public visitImportDeclaration(node: ts.ImportDeclaration) {
         if (!node.importClause) {
             this.checkModuleWithSideEffect(node);
         } else {
             const nodeStart = node.getStart();
-            const importKeywordEnd = node.getStart() + ImportStatementWalker.IMPORT_KEYWORD_LENGTH;
+            const importKeywordEnd = node.getStart() + "import".length;
             const moduleSpecifierStart = node.moduleSpecifier.getStart();
             const importClauseEnd = node.importClause.getEnd();
             const importClauseStart = node.importClause.getStart();
 
             if (importKeywordEnd === importClauseStart) {
-                this.addFailure(this.createFailure(nodeStart, ImportStatementWalker.IMPORT_KEYWORD_LENGTH, Rule.ADD_SPACE_AFTER_IMPORT));
+                this.addFailure(this.createFailure(nodeStart, "import".length, Rule.ADD_SPACE_AFTER_IMPORT));
             } else if (importClauseStart > (importKeywordEnd + 1)) {
                 this.addFailure(this.createFailure(nodeStart, importClauseStart - nodeStart, Rule.TOO_MANY_SPACES_AFTER_IMPORT));
             }
@@ -111,11 +109,11 @@ class ImportStatementWalker extends Lint.RuleWalker {
     private checkModuleWithSideEffect(node: ts.ImportDeclaration) {
         const moduleSpecifierStart = node.moduleSpecifier.getStart();
         const nodeStart = node.getStart();
-        if ((nodeStart + ImportStatementWalker.IMPORT_KEYWORD_LENGTH + 1) < moduleSpecifierStart) {
+        if ((nodeStart + "import".length + 1) < moduleSpecifierStart) {
             this.addFailure(this.createFailure(nodeStart, moduleSpecifierStart - nodeStart, Rule.TOO_MANY_SPACES_AFTER_IMPORT));
         }
-        if ((nodeStart + ImportStatementWalker.IMPORT_KEYWORD_LENGTH) === moduleSpecifierStart) {
-            this.addFailure(this.createFailure(nodeStart,  ImportStatementWalker.IMPORT_KEYWORD_LENGTH, Rule.ADD_SPACE_AFTER_IMPORT));
+        if ((nodeStart + "import".length) === moduleSpecifierStart) {
+            this.addFailure(this.createFailure(nodeStart,  "import".length, Rule.ADD_SPACE_AFTER_IMPORT));
         }
         if (LINE_BREAK_REGEX.test(node.getText())) {
             this.addFailure(this.createFailure(nodeStart, node.getWidth(), Rule.NO_LINE_BREAKS));
