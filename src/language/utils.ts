@@ -117,22 +117,17 @@ export function getBindingElementVariableDeclaration(node: ts.BindingElement): t
     return <ts.VariableDeclaration> currentParent;
 }
 
-/** Shim of Array.find */
-function find<T>(a: T[], predicate: (value: T) => boolean): T | undefined {
-    for (const value of a) {
-        if (predicate(value)) {
-            return value;
-        }
-    }
-    return undefined;
-}
-
 /**
  * Finds a child of a given node with a given kind.
  * Note: This uses `node.getChildren()`, which does extra parsing work to include tokens.
  */
-export function childOfKind(node: ts.Node, kind: ts.SyntaxKind): ts.Node | undefined {
-    return find(node.getChildren(), (child) => child.kind === kind);
+export function childOfKind(node: ts.Node, kind: ts.SyntaxKind, sourceFile?: ts.SourceFile): ts.Node | undefined {
+    for (const child of node.getChildren(sourceFile)) {
+        if (child.kind === kind) {
+            return child;
+        }
+    }
+    return undefined;
 }
 
 /**

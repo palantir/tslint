@@ -243,7 +243,7 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
             return;
         }
 
-        const equalsGreaterThanToken = Lint.childOfKind(node, ts.SyntaxKind.EqualsGreaterThanToken);
+        const equalsGreaterThanToken = Lint.childOfKind(node, ts.SyntaxKind.EqualsGreaterThanToken, this.getSourceFile());
         // condition so we don't crash if the arrow is somehow missing
         if (equalsGreaterThanToken === undefined) {
             return;

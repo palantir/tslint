@@ -69,10 +69,11 @@ class FunctionWalker extends Lint.RuleWalker {
     }
 
     protected visitArrowFunction(node: ts.FunctionLikeDeclaration): void {
+        const sourceFile = this.getSourceFile();
         const option = this.getOption("asyncArrow");
-        const syntaxList = Lint.childOfKind(node, ts.SyntaxKind.SyntaxList)!;
+        const syntaxList = Lint.childOfKind(node, ts.SyntaxKind.SyntaxList, sourceFile)!;
         const isAsyncArrow = syntaxList.getStart() === node.getStart() && syntaxList.getText() === "async";
-        const openParen = isAsyncArrow ? Lint.childOfKind(node, ts.SyntaxKind.OpenParenToken) : undefined;
+        const openParen = isAsyncArrow ? Lint.childOfKind(node, ts.SyntaxKind.OpenParenToken, sourceFile) : undefined;
         this.evaluateRuleAt(openParen, option);
 
         super.visitArrowFunction(node);
@@ -80,7 +81,7 @@ class FunctionWalker extends Lint.RuleWalker {
 
     protected visitConstructorDeclaration(node: ts.ConstructorDeclaration): void {
         const option = this.getOption("constructor");
-        const openParen = Lint.childOfKind(node, ts.SyntaxKind.OpenParenToken);
+        const openParen = Lint.childOfKind(node, ts.SyntaxKind.OpenParenToken, this.getSourceFile());
         this.evaluateRuleAt(openParen, option);
 
         super.visitConstructorDeclaration(node);
@@ -158,17 +159,18 @@ class FunctionWalker extends Lint.RuleWalker {
     }
 
     private visitFunction(node: ts.Node): void {
-        const identifier = Lint.childOfKind(node, ts.SyntaxKind.Identifier);
+        const sourceFile = this.getSourceFile();
+        const identifier = Lint.childOfKind(node, ts.SyntaxKind.Identifier, sourceFile);
         const hasIdentifier = identifier !== undefined && (identifier.getEnd() !== identifier.getStart());
         const optionName = hasIdentifier ? "named" : "anonymous";
         const option = this.getOption(optionName);
-        const openParen = Lint.childOfKind(node, ts.SyntaxKind.OpenParenToken);
+        const openParen = Lint.childOfKind(node, ts.SyntaxKind.OpenParenToken, sourceFile);
         this.evaluateRuleAt(openParen, option);
     }
 
     private visitMethod(node: ts.Node): void {
         const option = this.getOption("method");
-        const openParen = Lint.childOfKind(node, ts.SyntaxKind.OpenParenToken);
+        const openParen = Lint.childOfKind(node, ts.SyntaxKind.OpenParenToken, this.getSourceFile());
         this.evaluateRuleAt(openParen, option);
     }
 
