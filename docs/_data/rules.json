@@ -59,7 +59,7 @@
     "ruleName": "arrow-parens",
     "description": "Requires parentheses around the parameters of arrow function definitions.",
     "rationale": "Maintains stylistic consistency with other arrow function definitions.",
-    "optionsDescription": "\nif `ban-single-arg-parens` is specified, then arrow functions with one parameter \nmust not have parentheses if removing them is allowed by TypeScript.",
+    "optionsDescription": "\nif `ban-single-arg-parens` is specified, then arrow functions with one parameter\nmust not have parentheses if removing them is allowed by TypeScript.",
     "options": {
       "type": "string",
       "enum": [
@@ -68,7 +68,7 @@
     },
     "optionExamples": [
       "true",
-      "[true, ban-single-arg-parens]"
+      "[true, \"ban-single-arg-parens\"]"
     ],
     "type": "style",
     "typescriptOnly": false
@@ -1271,7 +1271,7 @@
   {
     "ruleName": "semicolon",
     "description": "Enforces consistent semicolon usage at the end of every statement.",
-    "optionsDescription": "\nOne of the following arguments must be provided:\n\n* `\"always\"` enforces semicolons at the end of every statement.\n* `\"never\"` disallows semicolons at the end of every statement except for when they are necessary.\n\nThe following arguments may be optionaly provided:\n* `\"ignore-interfaces\"` skips checking semicolons at the end of interface members.\n* `\"ignore-bound-class-methods\"` skips checking semicolons at the end of bound class methods.",
+    "optionsDescription": "\nOne of the following arguments must be provided:\n\n* `\"always\"` enforces semicolons at the end of every statement.\n* `\"never\"` disallows semicolons at the end of every statement except for when they are necessary.\n\nThe following arguments may be optionaly provided:\n\n* `\"ignore-interfaces\"` skips checking semicolons at the end of interface members.\n* `\"ignore-bound-class-methods\"` skips checking semicolons at the end of bound class methods.",
     "options": {
       "type": "array",
       "items": [
