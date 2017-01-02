@@ -188,9 +188,8 @@ class TrailingCommaWalker extends Lint.RuleWalker {
                 // as opposed to optionals alongside it. So instead of children[i + 1] having
                 // [ PropertySignature, Semicolon, PropertySignature, Semicolon ], the AST is
                 // [ PropertySignature, PropertySignature], where the Semicolons are under PropertySignature
-                const hasSemicolon = grandChildren.some((grandChild) => {
-                    return grandChild.getChildren().some((ggc) => ggc.kind === ts.SyntaxKind.SemicolonToken);
-                });
+                const hasSemicolon = grandChildren.some((grandChild) =>
+                    Lint.childOfKind(grandChild, ts.SyntaxKind.SemicolonToken) !== undefined);
 
                 if (!hasSemicolon) {
                     const endLineOfClosingElement = this.getSourceFile().getLineAndCharacterOfPosition(children[i + 2].getEnd()).line;

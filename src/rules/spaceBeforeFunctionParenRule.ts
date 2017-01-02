@@ -70,9 +70,9 @@ class FunctionWalker extends Lint.RuleWalker {
 
     protected visitArrowFunction(node: ts.FunctionLikeDeclaration): void {
         const option = this.getOption("asyncArrow");
-        const syntaxList = this.getChildOfType(node, ts.SyntaxKind.SyntaxList);
+        const syntaxList = Lint.childOfKind(node, ts.SyntaxKind.SyntaxList)!;
         const isAsyncArrow = syntaxList.getStart() === node.getStart() && syntaxList.getText() === "async";
-        const openParen = isAsyncArrow ? this.getChildOfType(node, ts.SyntaxKind.OpenParenToken) : undefined;
+        const openParen = isAsyncArrow ? Lint.childOfKind(node, ts.SyntaxKind.OpenParenToken) : undefined;
         this.evaluateRuleAt(openParen, option);
 
         super.visitArrowFunction(node);
@@ -80,7 +80,7 @@ class FunctionWalker extends Lint.RuleWalker {
 
     protected visitConstructorDeclaration(node: ts.ConstructorDeclaration): void {
         const option = this.getOption("constructor");
-        const openParen = this.getChildOfType(node, ts.SyntaxKind.OpenParenToken);
+        const openParen = Lint.childOfKind(node, ts.SyntaxKind.OpenParenToken);
         this.evaluateRuleAt(openParen, option);
 
         super.visitConstructorDeclaration(node);
@@ -132,11 +132,6 @@ class FunctionWalker extends Lint.RuleWalker {
         return this.cachedOptions[optionName];
     }
 
-    private getChildOfType(node: ts.Node, kind: ts.SyntaxKind): ts.Node {
-        const filtered = node.getChildren().filter((child: ts.Node): boolean => child.kind === kind);
-        return filtered[0];
-    }
-
     private evaluateRuleAt(openParen?: ts.Node, option?: string): void {
         if (openParen === undefined || option === undefined) {
             return;
@@ -163,17 +158,17 @@ class FunctionWalker extends Lint.RuleWalker {
     }
 
     private visitFunction(node: ts.Node): void {
-        const identifier = this.getChildOfType(node, ts.SyntaxKind.Identifier);
+        const identifier = Lint.childOfKind(node, ts.SyntaxKind.Identifier);
         const hasIdentifier = identifier !== undefined && (identifier.getEnd() !== identifier.getStart());
         const optionName = hasIdentifier ? "named" : "anonymous";
         const option = this.getOption(optionName);
-        const openParen = this.getChildOfType(node, ts.SyntaxKind.OpenParenToken);
+        const openParen = Lint.childOfKind(node, ts.SyntaxKind.OpenParenToken);
         this.evaluateRuleAt(openParen, option);
     }
 
     private visitMethod(node: ts.Node): void {
         const option = this.getOption("method");
-        const openParen = this.getChildOfType(node, ts.SyntaxKind.OpenParenToken);
+        const openParen = Lint.childOfKind(node, ts.SyntaxKind.OpenParenToken);
         this.evaluateRuleAt(openParen, option);
     }
 

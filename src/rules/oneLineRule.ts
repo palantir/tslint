@@ -78,7 +78,7 @@ class OneLineWalker extends Lint.RuleWalker {
         const elseStatement = node.elseStatement;
         if (elseStatement != null) {
             // find the else keyword
-            const elseKeyword = getFirstChildOfKind(node, ts.SyntaxKind.ElseKeyword);
+            const elseKeyword = Lint.childOfKind(node, ts.SyntaxKind.ElseKeyword)!;
             if (elseStatement.kind === ts.SyntaxKind.Block) {
                 const elseOpeningBrace = elseStatement.getChildAt(0);
                 this.handleOpeningBrace(elseKeyword, elseOpeningBrace);
@@ -96,7 +96,7 @@ class OneLineWalker extends Lint.RuleWalker {
     }
 
     public visitCatchClause(node: ts.CatchClause) {
-        const catchClosingParen = node.getChildren().filter((n) => n.kind === ts.SyntaxKind.CloseParenToken)[0];
+        const catchClosingParen = Lint.childOfKind(node, ts.SyntaxKind.CloseParenToken);
         const catchOpeningBrace = node.block.getChildAt(0);
         this.handleOpeningBrace(catchClosingParen, catchOpeningBrace);
         super.visitCatchClause(node);
@@ -105,7 +105,7 @@ class OneLineWalker extends Lint.RuleWalker {
     public visitTryStatement(node: ts.TryStatement) {
         const catchClause = node.catchClause;
         const finallyBlock = node.finallyBlock;
-        const finallyKeyword = node.getChildren().filter((n) => n.kind === ts.SyntaxKind.FinallyKeyword)[0];
+        const finallyKeyword = Lint.childOfKind(node, ts.SyntaxKind.FinallyKeyword);
 
         // "visit" try block
         const tryKeyword = node.getChildAt(0);
@@ -172,7 +172,7 @@ class OneLineWalker extends Lint.RuleWalker {
     public visitVariableDeclaration(node: ts.VariableDeclaration) {
         const initializer = node.initializer;
         if (initializer != null && initializer.kind === ts.SyntaxKind.ObjectLiteralExpression) {
-            const equalsToken = node.getChildren().filter((n) => n.kind === ts.SyntaxKind.EqualsToken)[0];
+            const equalsToken = Lint.childOfKind(node, ts.SyntaxKind.EqualsToken);
             const openBraceToken = initializer.getChildAt(0);
             this.handleOpeningBrace(equalsToken, openBraceToken);
         }
@@ -201,7 +201,7 @@ class OneLineWalker extends Lint.RuleWalker {
 
     public visitEnumDeclaration(node: ts.EnumDeclaration) {
         const nameNode = node.name;
-        const openBraceToken = getFirstChildOfKind(node, ts.SyntaxKind.OpenBraceToken);
+        const openBraceToken = Lint.childOfKind(node, ts.SyntaxKind.OpenBraceToken)!;
         this.handleOpeningBrace(nameNode, openBraceToken);
         super.visitEnumDeclaration(node);
     }
@@ -241,7 +241,7 @@ class OneLineWalker extends Lint.RuleWalker {
     public visitArrowFunction(node: ts.FunctionLikeDeclaration) {
         const body = node.body;
         if (body != null && body.kind === ts.SyntaxKind.Block) {
-            const arrowToken = getFirstChildOfKind(node, ts.SyntaxKind.EqualsGreaterThanToken);
+            const arrowToken = Lint.childOfKind(node, ts.SyntaxKind.EqualsGreaterThanToken);
             const openBraceToken = body.getChildAt(0);
             this.handleOpeningBrace(arrowToken, openBraceToken);
         }
@@ -255,7 +255,7 @@ class OneLineWalker extends Lint.RuleWalker {
             if (node.type != null) {
                 this.handleOpeningBrace(node.type, openBraceToken);
             } else {
-                const closeParenToken = getFirstChildOfKind(node, ts.SyntaxKind.CloseParenToken);
+                const closeParenToken = Lint.childOfKind(node, ts.SyntaxKind.CloseParenToken);
                 this.handleOpeningBrace(closeParenToken, openBraceToken);
             }
         }
@@ -263,7 +263,7 @@ class OneLineWalker extends Lint.RuleWalker {
 
     private handleClassLikeDeclaration(node: ts.ClassDeclaration | ts.InterfaceDeclaration) {
         let lastNodeOfDeclaration: ts.Node | undefined = node.name;
-        const openBraceToken = getFirstChildOfKind(node, ts.SyntaxKind.OpenBraceToken);
+        const openBraceToken = Lint.childOfKind(node, ts.SyntaxKind.OpenBraceToken)!;
 
         if (node.heritageClauses != null) {
             lastNodeOfDeclaration = node.heritageClauses[node.heritageClauses.length - 1];
@@ -303,8 +303,4 @@ class OneLineWalker extends Lint.RuleWalker {
             this.addFailureAtNode(openBraceToken, failure);
         }
     }
-}
-
-function getFirstChildOfKind(node: ts.Node, kind: ts.SyntaxKind) {
-    return node.getChildren().filter((child) => child.kind === kind)[0];
 }
