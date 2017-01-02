@@ -45,8 +45,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY = (memberType: string, memberName: string | null, publicOnly: boolean) => {
-        memberName = memberName == null ? "" : ` '${memberName}'`;
+    public static FAILURE_STRING_FACTORY = (memberType: string, memberName: string | undefined, publicOnly: boolean) => {
+        memberName = memberName === undefined ? "" : ` '${memberName}'`;
         if (publicOnly) {
             return `The ${memberType}${memberName} must be marked as 'public'`;
         }
@@ -124,12 +124,8 @@ export class MemberAccessWalker extends Lint.RuleWalker {
             }
 
             // look for the identifier and get its text
-            let memberName: string | null = null;
-            node.getChildren().forEach((n: ts.Node) => {
-                if (n.kind === ts.SyntaxKind.Identifier) {
-                    memberName = n.getText();
-                }
-            });
+            const member = Lint.childOfKind(node, ts.SyntaxKind.Identifier);
+            const memberName = member && member.getText();
             const failureString = Rule.FAILURE_STRING_FACTORY(memberType, memberName, publicOnly);
             this.addFailureAtNode(node, failureString);
         }

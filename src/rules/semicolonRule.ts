@@ -164,8 +164,7 @@ class SemicolonWalker extends Lint.RuleWalker {
 
     private checkSemicolonAt(node: ts.Node, override?: "never") {
         const sourceFile = this.getSourceFile();
-        const children = node.getChildren(sourceFile);
-        const hasSemicolon = children.some((child) => child.kind === ts.SyntaxKind.SemicolonToken);
+        const hasSemicolon = Lint.childOfKind(node, ts.SyntaxKind.SemicolonToken) !== undefined;
         const position = node.getStart(sourceFile) + node.getWidth(sourceFile);
         const never = override === "never" || this.hasOption(OPTION_NEVER);
         // Backwards compatible with plain {"semicolon": true}
