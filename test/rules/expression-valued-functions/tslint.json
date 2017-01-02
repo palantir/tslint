@@ -1,0 +1,8 @@
+{
+    "rules": {
+        "expression-valued-functions": true
+    },
+    "jsRules": {
+        "expression-valued-functions": true
+    }
+}

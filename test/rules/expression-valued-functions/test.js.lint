@@ -1,0 +1,31 @@
+// Copy of test.ts.lint
+
+// Invalid:
+(() => { return 0; });
+                ~ [0]
+(() => {
+    return 0;
+           ~ [0]
+});
+
+// Valid:
+(() => 0);
+(() => {});
+(() => { throw 0; })
+(() => { const x = 0; return x; });
+
+// No fix if there's a comment.
+(() => /**/ { return 0; });
+                     ~ [0]
+(() => { /**/ return 0; });
+                     ~ [0]
+(() => { return /**/ 0; });
+                     ~ [0]
+(() => { return 0 /**/ });
+                ~ [0]
+(() => { return 0 /**/; });
+                ~ [0]
+(() => { return 0; /**/ });
+                ~ [0]
+
+[0]: Arrow function body may be converted just this expression, with no `{ return ... }`.
