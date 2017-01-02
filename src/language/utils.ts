@@ -54,11 +54,16 @@ export function createCompilerOptions(): ts.CompilerOptions {
 }
 
 export function doesIntersect(failure: RuleFailure, disabledIntervals: IDisabledInterval[]) {
-    return disabledIntervals.some((interval) => {
-        const maxStart = Math.max(interval.startPosition, failure.getStartPosition().getPosition());
-        const minEnd = Math.min(interval.endPosition, failure.getEndPosition().getPosition());
-        return maxStart <= minEnd;
-    });
+    const failureStart = failure.getStartPosition().getPosition();
+    const failureEnd = failure.getEndPosition().getPosition();
+    for (const interval of disabledIntervals) {
+        const maxStart = Math.max(interval.startPosition, failureStart);
+        const minEnd = Math.min(interval.endPosition, failureEnd);
+        if (maxStart <= minEnd) {
+            return true;
+        }
+    }
+    return false;
 }
 
 export function scanAllTokens(scanner: ts.Scanner, callback: (s: ts.Scanner) => void) {
@@ -81,9 +86,12 @@ export function hasModifier(modifiers: ts.ModifiersArray | undefined, ...modifie
         return false;
     }
 
-    return modifiers.some((m) => {
-        return modifierKinds.some((k) => m.kind === k);
-    });
+    for (const modifier of modifiers) {
+        if (modifierKinds.indexOf(modifier.kind) !== -1) {
+            return true;
+        }
+    }
+    return false;
 }
 
 /**
