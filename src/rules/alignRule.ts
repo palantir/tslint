@@ -99,12 +99,14 @@ class AlignWalker extends Lint.RuleWalker {
             return;
         }
 
-        let prevPos = this.getLineAndCharacterOfPosition(nodes[0].getStart());
+        const sourceFile = this.getSourceFile();
+
+        let prevPos = this.getLineAndCharacterOfPosition(nodes[0].getStart(sourceFile));
         const alignToColumn = prevPos.character;
 
         // skip first node in list
         for (let node of nodes.slice(1)) {
-            const curPos = this.getLineAndCharacterOfPosition(node.getStart());
+            const curPos = this.getLineAndCharacterOfPosition(node.getStart(sourceFile));
             if (curPos.line !== prevPos.line && curPos.character !== alignToColumn) {
                 this.addFailureAtNode(node, kind + Rule.FAILURE_STRING_SUFFIX);
                 break;

@@ -80,22 +80,23 @@ export class BanFunctionWalker extends Lint.RuleWalker {
     }
 
     private checkForObjectMethodBan(expression: ts.LeftHandSideExpression) {
+        const sourceFile = this.getSourceFile();
         if (expression.kind === ts.SyntaxKind.PropertyAccessExpression
-            && expression.getChildCount() >= 3) {
+            && expression.getChildCount(sourceFile) >= 3) {
 
-            const firstToken = expression.getFirstToken();
-            const firstChild = expression.getChildAt(0);
-            const secondChild = expression.getChildAt(1);
-            const thirdChild = expression.getChildAt(2);
+            const firstToken = expression.getFirstToken(sourceFile);
+            const firstChild = expression.getChildAt(0, sourceFile);
+            const secondChild = expression.getChildAt(1, sourceFile);
+            const thirdChild = expression.getChildAt(2, sourceFile);
 
-            const rightSideExpression = thirdChild.getFullText();
+            const rightSideExpression = thirdChild.getFullText(sourceFile);
 
             let leftSideExpression: string;
 
-            if (firstChild.getChildCount() > 0) {
-                leftSideExpression = firstChild.getLastToken().getText();
+            if (firstChild.getChildCount(sourceFile) > 0) {
+                leftSideExpression = firstChild.getLastToken(sourceFile).getText(sourceFile);
             } else {
-                leftSideExpression = firstToken.getText();
+                leftSideExpression = firstToken.getText(sourceFile);
             }
 
             if (secondChild.kind === ts.SyntaxKind.DotToken) {

@@ -54,11 +54,12 @@ class ImportStatementWalker extends Lint.RuleWalker {
         if (!node.importClause) {
             this.checkModuleWithSideEffect(node);
         } else {
-            const nodeStart = node.getStart();
-            const importKeywordEnd = node.getStart() + "import".length;
-            const moduleSpecifierStart = node.moduleSpecifier.getStart();
+            const sourceFile = this.getSourceFile();
+            const nodeStart = node.getStart(sourceFile);
+            const importKeywordEnd = nodeStart + "import".length;
+            const moduleSpecifierStart = node.moduleSpecifier.getStart(sourceFile);
             const importClauseEnd = node.importClause.getEnd();
-            const importClauseStart = node.importClause.getStart();
+            const importClauseStart = node.importClause.getStart(sourceFile);
 
             if (importKeywordEnd === importClauseStart) {
                 this.addFailure(this.createFailure(nodeStart, "import".length, Rule.ADD_SPACE_AFTER_IMPORT));
@@ -66,7 +67,8 @@ class ImportStatementWalker extends Lint.RuleWalker {
                 this.addFailure(this.createFailure(nodeStart, importClauseStart - nodeStart, Rule.TOO_MANY_SPACES_AFTER_IMPORT));
             }
 
-            const fromString = node.getText().substring(importClauseEnd - nodeStart, moduleSpecifierStart - nodeStart);
+            const text = node.getText(sourceFile);
+            const fromString = text.substring(importClauseEnd - nodeStart, moduleSpecifierStart - nodeStart);
 
             if (/from$/.test(fromString)) {
                 this.addFailure(this.createFailure(importClauseEnd, fromString.length, Rule.ADD_SPACE_AFTER_FROM));
@@ -80,7 +82,6 @@ class ImportStatementWalker extends Lint.RuleWalker {
                 this.addFailure(this.createFailure(importClauseEnd, fromString.length, Rule.ADD_SPACE_BEFORE_FROM));
             }
 
-            const text = node.getText();
             const beforeImportClauseText = text.substring(0, importClauseStart - nodeStart);
             const afterImportClauseText = text.substring(importClauseEnd - nodeStart);
             if (LINE_BREAK_REGEX.test(beforeImportClauseText)) {
@@ -94,20 +95,21 @@ class ImportStatementWalker extends Lint.RuleWalker {
     }
 
     public visitNamespaceImport(node: ts.NamespaceImport) {
-        const text = node.getText();
+        const text = node.getText(this.getSourceFile());
         if (text.indexOf("*as") > -1) {
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.ADD_SPACE_AFTER_STAR));
+            this.addFailureAtNode(node, Rule.ADD_SPACE_AFTER_STAR);
         } else if (/\*\s{2,}as/.test(text)) {
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.TOO_MANY_SPACES_AFTER_STAR));
+            this.addFailureAtNode(node, Rule.TOO_MANY_SPACES_AFTER_STAR);
         } else if (LINE_BREAK_REGEX.test(text)) {
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.NO_LINE_BREAKS));
+            this.addFailureAtNode(node, Rule.NO_LINE_BREAKS);
         }
         super.visitNamespaceImport(node);
     }
 
     private checkModuleWithSideEffect(node: ts.ImportDeclaration) {
-        const moduleSpecifierStart = node.moduleSpecifier.getStart();
-        const nodeStart = node.getStart();
+        const sourceFile = this.getSourceFile();
+        const moduleSpecifierStart = node.moduleSpecifier.getStart(sourceFile);
+        const nodeStart = node.getStart(sourceFile);
 
         if ((nodeStart + "import".length + 1) < moduleSpecifierStart) {
             this.addFailure(this.createFailure(nodeStart, moduleSpecifierStart - nodeStart, Rule.TOO_MANY_SPACES_AFTER_IMPORT));
@@ -115,8 +117,8 @@ class ImportStatementWalker extends Lint.RuleWalker {
             this.addFailure(this.createFailure(nodeStart,  "import".length, Rule.ADD_SPACE_AFTER_IMPORT));
         }
 
-        if (LINE_BREAK_REGEX.test(node.getText())) {
-            this.addFailure(this.createFailure(nodeStart, node.getWidth(), Rule.NO_LINE_BREAKS));
+        if (LINE_BREAK_REGEX.test(node.getText(sourceFile))) {
+            this.addFailureFromStartToEnd(nodeStart, node.getEnd(), Rule.NO_LINE_BREAKS);
         }
     }
 }

@@ -111,8 +111,9 @@ export class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
     }
 
     private addDocumentationFailure(node: ts.Declaration, nodeToCheck: string): void {
-        const start = node.getStart();
-        const width = node.getText().split(/\r|\n/g)[0].length;
+        const sourceFile = this.getSourceFile();
+        const start = node.getStart(sourceFile);
+        const width = node.getText(sourceFile).split(/\r|\n/)[0].length;
         const description = nodeToCheck[0].toUpperCase() + nodeToCheck.substring(1) + Rule.FAILURE_STRING_EXIST;
 
         this.addFailureAt(start, width, description);

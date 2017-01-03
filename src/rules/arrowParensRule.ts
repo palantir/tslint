@@ -61,17 +61,19 @@ class ArrowParensWalker extends Lint.RuleWalker {
         if (node.parameters.length === 1 && node.typeParameters === undefined) {
             const parameter = node.parameters[0];
 
-            let openParen = node.getFirstToken();
+            const sourceFile = this.getSourceFile();
+
+            let openParen = node.getFirstToken(sourceFile);
             let openParenIndex = 0;
             if (openParen.kind === ts.SyntaxKind.AsyncKeyword) {
-                openParen = node.getChildAt(1);
+                openParen = node.getChildAt(1, sourceFile);
                 openParenIndex = 1;
             }
 
             const hasParens = openParen.kind === ts.SyntaxKind.OpenParenToken;
             if (!hasParens && !this.avoidOnSingleParameter) {
                 const fix = new Lint.Fix(Rule.metadata.ruleName, [
-                    this.appendText(parameter.getStart(), "("),
+                    this.appendText(parameter.getStart(sourceFile), "("),
                     this.appendText(parameter.getEnd(), ")"),
                 ]);
                 this.addFailureAtNode(parameter, Rule.FAILURE_STRING_MISSING, fix);
@@ -79,8 +81,8 @@ class ArrowParensWalker extends Lint.RuleWalker {
                 // Skip over the parameter to get the closing parenthesis
                 const closeParen = node.getChildAt(openParenIndex + 2);
                 const fix = new Lint.Fix(Rule.metadata.ruleName, [
-                    this.deleteText(openParen.getStart(), 1),
-                    this.deleteText(closeParen.getStart(), 1),
+                    this.deleteText(openParen.getStart(sourceFile), 1),
+                    this.deleteText(closeParen.getStart(sourceFile), 1),
                 ]);
                 this.addFailureAtNode(parameter, Rule.FAILURE_STRING_EXISTS, fix);
             }

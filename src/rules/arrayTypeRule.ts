@@ -44,11 +44,12 @@ class ArrayTypeWalker extends Lint.RuleWalker {
         if (this.hasOption(OPTION_GENERIC) || this.hasOption(OPTION_ARRAY_SIMPLE) && !this.isSimpleType(typeName)) {
             const failureString = this.hasOption(OPTION_GENERIC) ? Rule.FAILURE_STRING_GENERIC : Rule.FAILURE_STRING_GENERIC_SIMPLE;
             const parens = typeName.kind === ts.SyntaxKind.ParenthesizedType ? 1 : 0;
+            const sourceFile = this.getSourceFile();
             // Add a space if the type is preceded by 'as' and the node has no leading whitespace
             const space = !parens && node.parent!.kind === ts.SyntaxKind.AsExpression &&
-                node.getStart() === node.getFullStart() ? " " : "";
+                node.getStart(sourceFile) === node.getFullStart() ? " " : "";
             const fix = new Lint.Fix(Rule.metadata.ruleName, [
-                this.createReplacement(typeName.getStart(), parens, space + "Array<"),
+                this.createReplacement(typeName.getStart(sourceFile), parens, space + "Array<"),
                 // Delete the square brackets and replace with an angle bracket
                 this.createReplacement(typeName.getEnd() - parens, node.getEnd() - typeName.getEnd() + parens, ">"),
             ]);
@@ -59,36 +60,39 @@ class ArrayTypeWalker extends Lint.RuleWalker {
     }
 
     public visitTypeReference(node: ts.TypeReferenceNode) {
-        const typeName = node.typeName.getText();
-        if (typeName === "Array" && (this.hasOption(OPTION_ARRAY) || this.hasOption(OPTION_ARRAY_SIMPLE))) {
+        if (node.typeName.kind === ts.SyntaxKind.Identifier && (node.typeName as ts.Identifier).text === "Array" &&
+            (this.hasOption(OPTION_ARRAY) || this.hasOption(OPTION_ARRAY_SIMPLE))) {
             const failureString = this.hasOption(OPTION_ARRAY) ? Rule.FAILURE_STRING_ARRAY : Rule.FAILURE_STRING_ARRAY_SIMPLE;
             const typeArgs = node.typeArguments;
+            const sourceFile = this.getSourceFile();
+            const nodeStart = node.getStart(sourceFile);
+            const nodeEnd = node.getEnd();
             if (!typeArgs || typeArgs.length === 0) {
                 // Create an 'any' array
                 const fix = new Lint.Fix(Rule.metadata.ruleName, [
-                    this.createReplacement(node.getStart(), node.getWidth(), "any[]"),
+                    this.createReplacement(nodeStart, nodeEnd - nodeStart, "any[]"),
                 ]);
                 this.addFailureAtNode(node, failureString, fix);
             } else if (typeArgs && typeArgs.length === 1 && (!this.hasOption(OPTION_ARRAY_SIMPLE) || this.isSimpleType(typeArgs[0]))) {
                 const type = typeArgs[0];
-                const typeStart = type.getStart();
+                const typeStart = type.getStart(sourceFile);
                 const typeEnd = type.getEnd();
                 const parens = type.kind === ts.SyntaxKind.UnionType ||
                     type.kind === ts.SyntaxKind.FunctionType || type.kind === ts.SyntaxKind.IntersectionType;
                 const fix = new Lint.Fix(Rule.metadata.ruleName, [
                     // Delete Array and the first angle bracket
-                    this.createReplacement(node.getStart(), typeStart - node.getStart(), parens ? "(" : ""),
+                    this.createReplacement(nodeStart, typeStart - nodeStart, parens ? "(" : ""),
                     // Delete the last angle bracket and replace with square brackets
-                    this.createReplacement(typeEnd, node.getEnd() - typeEnd, (parens ? ")" : "") + "[]"),
+                    this.createReplacement(typeEnd, nodeEnd - typeEnd, (parens ? ")" : "") + "[]"),
                 ]);
-                this.addFailureAtNode(node, failureString, fix);
+                this.addFailureFromStartToEnd(nodeStart, nodeEnd, failureString, fix);
             }
         }
 
         super.visitTypeReference(node);
     }
 
-    private isSimpleType(nodeType: ts.TypeNode) {
+    private isSimpleType(nodeType: ts.TypeNode): boolean {
         switch (nodeType.kind) {
             case ts.SyntaxKind.AnyKeyword:
             case ts.SyntaxKind.ArrayType:
@@ -103,11 +107,9 @@ class ArrayTypeWalker extends Lint.RuleWalker {
                 // TypeReferences must be non-generic or be another Array with a simple type
                 const node = nodeType as ts.TypeReferenceNode;
                 const typeArgs = node.typeArguments;
-                if (!typeArgs || typeArgs.length === 0 || node.typeName.getText() === "Array" && this.isSimpleType(typeArgs[0])) {
-                    return true;
-                } else {
-                    return false;
-                }
+                return typeArgs === undefined || typeArgs.length === 0 ||
+                    node.typeName.kind === ts.SyntaxKind.Identifier && (node.typeName as ts.Identifier).text === "Array" &&
+                    this.isSimpleType(typeArgs[0]);
             default:
                 return false;
         }

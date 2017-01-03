@@ -80,16 +80,17 @@ class CurlyWalker extends Lint.RuleWalker {
 
     public visitIfStatement(node: ts.IfStatement) {
         if (!isStatementBraced(node.thenStatement)) {
-            this.addFailureFromStartToEnd(node.getStart(), node.thenStatement.getEnd(), Rule.IF_FAILURE_STRING);
+            this.addFailureFromStartToEnd(node.getStart(this.getSourceFile()), node.thenStatement.getEnd(), Rule.IF_FAILURE_STRING);
         }
 
         if (node.elseStatement != null
                 && node.elseStatement.kind !== ts.SyntaxKind.IfStatement
                 && !isStatementBraced(node.elseStatement)) {
 
+            const sourceFile = this.getSourceFile();
             // find the else keyword to place the error appropriately
-            const elseKeywordNode = Lint.childOfKind(node, ts.SyntaxKind.ElseKeyword, this.getSourceFile())!;
-            this.addFailureFromStartToEnd(elseKeywordNode.getStart(), node.elseStatement.getEnd(), Rule.ELSE_FAILURE_STRING);
+            const elseKeywordNode = Lint.childOfKind(node, ts.SyntaxKind.ElseKeyword, sourceFile)!;
+            this.addFailureFromStartToEnd(elseKeywordNode.getStart(sourceFile), node.elseStatement.getEnd(), Rule.ELSE_FAILURE_STRING);
         }
 
         super.visitIfStatement(node);
