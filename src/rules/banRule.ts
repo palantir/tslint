@@ -25,7 +25,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "ban",
         description: "Bans the use of specific functions or global methods.",
         optionsDescription: Lint.Utils.dedent`
-            A list of \`['object', 'method', 'optional explanation here']\` or \`['globalMethod']\` which ban \`object.method()\` 
+            A list of \`['object', 'method', 'optional explanation here']\` or \`['globalMethod']\` which ban \`object.method()\`
             or respectively \`globalMethod()\`.`,
         options: {
             type: "list",
@@ -36,7 +36,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 maxLength: 3,
             },
         },
-        optionExamples: [`[true, ["someGlobalMethod"], ["someObject", "someFunction"], 
+        optionExamples: [`[true, ["someGlobalMethod"], ["someObject", "someFunction"],
                           ["someObject", "otherFunction", "Optional explanation"]]`],
         type: "functionality",
         typescriptOnly: false,
@@ -51,7 +51,9 @@ export class Rule extends Lint.Rules.AbstractRule {
         const options = this.getOptions();
         const banFunctionWalker = new BanFunctionWalker(sourceFile, options);
         const functionsToBan = options.ruleArguments;
-        functionsToBan.forEach((f) => banFunctionWalker.addBannedFunction(f));
+        if (functionsToBan !== undefined) {
+            functionsToBan.forEach((f) => banFunctionWalker.addBannedFunction(f));
+        }
         return this.applyWithWalker(banFunctionWalker);
     }
 }
@@ -99,12 +101,8 @@ export class BanFunctionWalker extends Lint.RuleWalker {
             if (secondChild.kind === ts.SyntaxKind.DotToken) {
                 for (const bannedFunction of this.bannedFunctions) {
                     if (leftSideExpression === bannedFunction[0] && rightSideExpression === bannedFunction[1]) {
-                        const failure = this.createFailure(
-                            expression.getStart(),
-                            expression.getWidth(),
-                            Rule.FAILURE_STRING_FACTORY(`${leftSideExpression}.${rightSideExpression}`, bannedFunction[2]),
-                        );
-                        this.addFailure(failure);
+                        const failure = Rule.FAILURE_STRING_FACTORY(`${leftSideExpression}.${rightSideExpression}`, bannedFunction[2]);
+                        this.addFailureAtNode(expression, failure);
                     }
                 }
             }
@@ -115,8 +113,7 @@ export class BanFunctionWalker extends Lint.RuleWalker {
         if (expression.kind === ts.SyntaxKind.Identifier) {
             const identifierName = (<ts.Identifier> expression).text;
             if (this.bannedGlobalFunctions.indexOf(identifierName) !== -1) {
-                this.addFailure(this.createFailure(expression.getStart(), expression.getWidth(),
-                    Rule.FAILURE_STRING_FACTORY(`${identifierName}`)));
+                this.addFailureAtNode(expression, Rule.FAILURE_STRING_FACTORY(`${identifierName}`));
             }
 
         }

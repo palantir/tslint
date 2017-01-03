@@ -49,12 +49,15 @@ export class NoUnusedExpressionWalker extends Lint.RuleWalker {
 
     protected static isDirective(node: ts.Node, checkPreviousSiblings = true): boolean {
         const { parent } = node;
+        if (parent === undefined) {
+            return true;
+        }
         const grandParentKind = parent.parent == null ? null : parent.parent.kind;
         const isStringExpression = node.kind === ts.SyntaxKind.ExpressionStatement
             && (node as ts.ExpressionStatement).expression.kind === ts.SyntaxKind.StringLiteral;
         const parentIsSourceFile = parent.kind === ts.SyntaxKind.SourceFile;
         const parentIsNSBody = parent.kind === ts.SyntaxKind.ModuleBlock;
-        const parentIsFunctionBody = parent.kind === ts.SyntaxKind.Block && [
+        const parentIsFunctionBody = grandParentKind !== null && parent.kind === ts.SyntaxKind.Block && [
             ts.SyntaxKind.ArrowFunction,
             ts.SyntaxKind.FunctionExpression,
             ts.SyntaxKind.FunctionDeclaration,
@@ -70,7 +73,7 @@ export class NoUnusedExpressionWalker extends Lint.RuleWalker {
 
         if (checkPreviousSiblings) {
             const siblings: ts.Node[] = [];
-            ts.forEachChild(node.parent, (child) => { siblings.push(child); });
+            ts.forEachChild(parent, (child) => { siblings.push(child); });
             return siblings.slice(0, siblings.indexOf(node)).every((n) => NoUnusedExpressionWalker.isDirective(n, false));
         } else {
             return true;
@@ -169,7 +172,7 @@ export class NoUnusedExpressionWalker extends Lint.RuleWalker {
                 || kind === ts.SyntaxKind.AwaitExpression;
 
             if (!isValidStandaloneExpression && !NoUnusedExpressionWalker.isDirective(node)) {
-                this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+                this.addFailureAtNode(node, Rule.FAILURE_STRING);
             }
         }
     }

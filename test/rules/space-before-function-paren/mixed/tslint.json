@@ -1,0 +1,24 @@
+{
+  "rules": {
+    "space-before-function-paren": [
+        true,
+        {
+            "anonymous": "always",
+            "asyncArrow": "always",
+            "constructor": "ignore",
+            "method": "never",
+            "named": "never"
+        }
+    ]
+  },
+  "jsRules": {
+    "space-before-function-paren": [
+        true,
+        {
+            "anonymous": "always",
+            "asyncArrow": "always",
+            "named": "never"
+        }
+    ]
+  }
+}

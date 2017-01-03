@@ -120,6 +120,22 @@ function sampleFunc() {
     for (var r of arr) {
         console.log(r);
     }
+
+    // array element is assigned a new value
+    for (let x = 0; x < arr.length; x++) {
+        arr[x] = 4;
+    }
+
+    // access element other than current
+    for (let x = 0; x < arr.length; x++) {
+        let y = arr[x + 1];
+    }
 }
 
+for (let shadow = 0; shadow < arr.length; shadow++) {
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   [0]
+    for (let shadow = 0; shadow < arr.length; shadow++) {
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   [0]
+    }
+}
 [0]: Expected a 'for-of' loop instead of a 'for' loop with this simple iteration

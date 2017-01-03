@@ -53,8 +53,7 @@ class LabelPositionWalker extends Lint.RuleWalker {
                 && statement.kind !== ts.SyntaxKind.ForOfStatement
                 && statement.kind !== ts.SyntaxKind.WhileStatement
                 && statement.kind !== ts.SyntaxKind.SwitchStatement) {
-            const failure = this.createFailure(node.label.getStart(), node.label.getWidth(), Rule.FAILURE_STRING);
-            this.addFailure(failure);
+            this.addFailureAtNode(node.label, Rule.FAILURE_STRING);
         }
         super.visitLabeledStatement(node);
     }

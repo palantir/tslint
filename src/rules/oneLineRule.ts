@@ -67,9 +67,9 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class OneLineWalker extends Lint.RuleWalker {
     public visitIfStatement(node: ts.IfStatement) {
-        const sourceFile = node.getSourceFile();
         const thenStatement = node.thenStatement;
-        if (thenStatement.kind === ts.SyntaxKind.Block) {
+        const thenIsBlock = thenStatement.kind === ts.SyntaxKind.Block;
+        if (thenIsBlock) {
             const expressionCloseParen = node.getChildAt(3);
             const thenOpeningBrace = thenStatement.getChildAt(0);
             this.handleOpeningBrace(expressionCloseParen, thenOpeningBrace);
@@ -78,17 +78,16 @@ class OneLineWalker extends Lint.RuleWalker {
         const elseStatement = node.elseStatement;
         if (elseStatement != null) {
             // find the else keyword
-            const elseKeyword = getFirstChildOfKind(node, ts.SyntaxKind.ElseKeyword);
+            const elseKeyword = Lint.childOfKind(node, ts.SyntaxKind.ElseKeyword)!;
             if (elseStatement.kind === ts.SyntaxKind.Block) {
                 const elseOpeningBrace = elseStatement.getChildAt(0);
                 this.handleOpeningBrace(elseKeyword, elseOpeningBrace);
             }
-            if (this.hasOption(OPTION_ELSE)) {
-                const thenStatementEndLine = sourceFile.getLineAndCharacterOfPosition(thenStatement.getEnd()).line;
-                const elseKeywordLine = sourceFile.getLineAndCharacterOfPosition(elseKeyword.getStart()).line;
+            if (thenIsBlock && this.hasOption(OPTION_ELSE)) {
+                const thenStatementEndLine = this.getLineAndCharacterOfPosition(thenStatement.getEnd()).line;
+                const elseKeywordLine = this.getLineAndCharacterOfPosition(elseKeyword.getStart()).line;
                 if (thenStatementEndLine !== elseKeywordLine) {
-                    const failure = this.createFailure(elseKeyword.getStart(), elseKeyword.getWidth(), Rule.ELSE_FAILURE_STRING);
-                    this.addFailure(failure);
+                    this.addFailureAtNode(elseKeyword, Rule.ELSE_FAILURE_STRING);
                 }
             }
         }
@@ -97,17 +96,16 @@ class OneLineWalker extends Lint.RuleWalker {
     }
 
     public visitCatchClause(node: ts.CatchClause) {
-        const catchClosingParen = node.getChildren().filter((n) => n.kind === ts.SyntaxKind.CloseParenToken)[0];
+        const catchClosingParen = Lint.childOfKind(node, ts.SyntaxKind.CloseParenToken);
         const catchOpeningBrace = node.block.getChildAt(0);
         this.handleOpeningBrace(catchClosingParen, catchOpeningBrace);
         super.visitCatchClause(node);
     }
 
     public visitTryStatement(node: ts.TryStatement) {
-        const sourceFile = node.getSourceFile();
         const catchClause = node.catchClause;
         const finallyBlock = node.finallyBlock;
-        const finallyKeyword = node.getChildren().filter((n) => n.kind === ts.SyntaxKind.FinallyKeyword)[0];
+        const finallyKeyword = Lint.childOfKind(node, ts.SyntaxKind.FinallyKeyword);
 
         // "visit" try block
         const tryKeyword = node.getChildAt(0);
@@ -118,11 +116,10 @@ class OneLineWalker extends Lint.RuleWalker {
         if (this.hasOption(OPTION_CATCH) && catchClause != null) {
             const tryClosingBrace = node.tryBlock.getChildAt(node.tryBlock.getChildCount() - 1);
             const catchKeyword = catchClause.getChildAt(0);
-            const tryClosingBraceLine = sourceFile.getLineAndCharacterOfPosition(tryClosingBrace.getEnd()).line;
-            const catchKeywordLine = sourceFile.getLineAndCharacterOfPosition(catchKeyword.getStart()).line;
+            const tryClosingBraceLine = this.getLineAndCharacterOfPosition(tryClosingBrace.getEnd()).line;
+            const catchKeywordLine = this.getLineAndCharacterOfPosition(catchKeyword.getStart()).line;
             if (tryClosingBraceLine !== catchKeywordLine) {
-                const failure = this.createFailure(catchKeyword.getStart(), catchKeyword.getWidth(), Rule.CATCH_FAILURE_STRING);
-                this.addFailure(failure);
+                this.addFailureAtNode(catchKeyword, Rule.CATCH_FAILURE_STRING);
             }
         }
 
@@ -133,11 +130,10 @@ class OneLineWalker extends Lint.RuleWalker {
             if (this.hasOption(OPTION_FINALLY)) {
                 const previousBlock = catchClause != null ? catchClause.block : node.tryBlock;
                 const closingBrace = previousBlock.getChildAt(previousBlock.getChildCount() - 1);
-                const closingBraceLine = sourceFile.getLineAndCharacterOfPosition(closingBrace.getEnd()).line;
-                const finallyKeywordLine = sourceFile.getLineAndCharacterOfPosition(finallyKeyword.getStart()).line;
+                const closingBraceLine = this.getLineAndCharacterOfPosition(closingBrace.getEnd()).line;
+                const finallyKeywordLine = this.getLineAndCharacterOfPosition(finallyKeyword.getStart()).line;
                 if (closingBraceLine !== finallyKeywordLine) {
-                    const failure = this.createFailure(finallyKeyword.getStart(), finallyKeyword.getWidth(), Rule.FINALLY_FAILURE_STRING);
-                    this.addFailure(failure);
+                    this.addFailureAtNode(finallyKeyword, Rule.FINALLY_FAILURE_STRING);
                 }
             }
         }
@@ -176,7 +172,7 @@ class OneLineWalker extends Lint.RuleWalker {
     public visitVariableDeclaration(node: ts.VariableDeclaration) {
         const initializer = node.initializer;
         if (initializer != null && initializer.kind === ts.SyntaxKind.ObjectLiteralExpression) {
-            const equalsToken = node.getChildren().filter((n) => n.kind === ts.SyntaxKind.EqualsToken)[0];
+            const equalsToken = Lint.childOfKind(node, ts.SyntaxKind.EqualsToken);
             const openBraceToken = initializer.getChildAt(0);
             this.handleOpeningBrace(equalsToken, openBraceToken);
         }
@@ -205,7 +201,7 @@ class OneLineWalker extends Lint.RuleWalker {
 
     public visitEnumDeclaration(node: ts.EnumDeclaration) {
         const nameNode = node.name;
-        const openBraceToken = getFirstChildOfKind(node, ts.SyntaxKind.OpenBraceToken);
+        const openBraceToken = Lint.childOfKind(node, ts.SyntaxKind.OpenBraceToken)!;
         this.handleOpeningBrace(nameNode, openBraceToken);
         super.visitEnumDeclaration(node);
     }
@@ -245,8 +241,8 @@ class OneLineWalker extends Lint.RuleWalker {
     public visitArrowFunction(node: ts.FunctionLikeDeclaration) {
         const body = node.body;
         if (body != null && body.kind === ts.SyntaxKind.Block) {
-            const arrowToken = getFirstChildOfKind(node, ts.SyntaxKind.EqualsGreaterThanToken);
-            const openBraceToken = node.body.getChildAt(0);
+            const arrowToken = Lint.childOfKind(node, ts.SyntaxKind.EqualsGreaterThanToken);
+            const openBraceToken = body.getChildAt(0);
             this.handleOpeningBrace(arrowToken, openBraceToken);
         }
         super.visitArrowFunction(node);
@@ -255,19 +251,19 @@ class OneLineWalker extends Lint.RuleWalker {
     private handleFunctionLikeDeclaration(node: ts.FunctionLikeDeclaration) {
         const body = node.body;
         if (body != null && body.kind === ts.SyntaxKind.Block) {
-            const openBraceToken = node.body.getChildAt(0);
+            const openBraceToken = body.getChildAt(0);
             if (node.type != null) {
                 this.handleOpeningBrace(node.type, openBraceToken);
             } else {
-                const closeParenToken = getFirstChildOfKind(node, ts.SyntaxKind.CloseParenToken);
+                const closeParenToken = Lint.childOfKind(node, ts.SyntaxKind.CloseParenToken);
                 this.handleOpeningBrace(closeParenToken, openBraceToken);
             }
         }
     }
 
     private handleClassLikeDeclaration(node: ts.ClassDeclaration | ts.InterfaceDeclaration) {
-        let lastNodeOfDeclaration: ts.Node = node.name;
-        const openBraceToken = getFirstChildOfKind(node, ts.SyntaxKind.OpenBraceToken);
+        let lastNodeOfDeclaration: ts.Node | undefined = node.name;
+        const openBraceToken = Lint.childOfKind(node, ts.SyntaxKind.OpenBraceToken)!;
 
         if (node.heritageClauses != null) {
             lastNodeOfDeclaration = node.heritageClauses[node.heritageClauses.length - 1];
@@ -288,28 +284,23 @@ class OneLineWalker extends Lint.RuleWalker {
         }
     }
 
-    private handleOpeningBrace(previousNode: ts.Node, openBraceToken: ts.Node) {
+    private handleOpeningBrace(previousNode: ts.Node | undefined, openBraceToken: ts.Node) {
         if (previousNode == null || openBraceToken == null) {
             return;
         }
 
-        const sourceFile = previousNode.getSourceFile();
-        const previousNodeLine = sourceFile.getLineAndCharacterOfPosition(previousNode.getEnd()).line;
-        const openBraceLine = sourceFile.getLineAndCharacterOfPosition(openBraceToken.getStart()).line;
-        let failure: Lint.RuleFailure;
+        const previousNodeLine = this.getLineAndCharacterOfPosition(previousNode.getEnd()).line;
+        const openBraceLine = this.getLineAndCharacterOfPosition(openBraceToken.getStart()).line;
+        let failure: string | undefined = undefined;
 
         if (this.hasOption(OPTION_BRACE) && previousNodeLine !== openBraceLine) {
-            failure = this.createFailure(openBraceToken.getStart(), openBraceToken.getWidth(), Rule.BRACE_FAILURE_STRING);
+            failure = Rule.BRACE_FAILURE_STRING;
         } else if (this.hasOption(OPTION_WHITESPACE) && previousNode.getEnd() === openBraceToken.getStart()) {
-            failure = this.createFailure(openBraceToken.getStart(), openBraceToken.getWidth(), Rule.WHITESPACE_FAILURE_STRING);
+            failure = Rule.WHITESPACE_FAILURE_STRING;
         }
 
         if (failure) {
-            this.addFailure(failure);
+            this.addFailureAtNode(openBraceToken, failure);
         }
     }
-}
-
-function getFirstChildOfKind(node: ts.Node, kind: ts.SyntaxKind) {
-    return node.getChildren().filter((child) => child.kind === kind)[0];
 }

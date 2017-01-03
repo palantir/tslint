@@ -94,6 +94,7 @@ interface ITest {
                 ~ [Unnecessary semicolon]
     bar: number;
                ~ [Unnecessary semicolon]
+    qux: string,
     baz: boolean
 }
 

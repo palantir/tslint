@@ -29,7 +29,7 @@ export class Formatter extends AbstractFormatter {
             let failuresSorted = failures.sort((a, b) => {
                 return a.getFileName().localeCompare(b.getFileName());
             });
-            let previousFilename: string = null;
+            let previousFilename: string | null = null;
             for (let failure of failuresSorted) {
                 if (failure.getFileName() !== previousFilename) {
                     if (previousFilename) {

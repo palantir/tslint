@@ -78,7 +78,11 @@ class TypedefWalker extends Lint.RuleWalker {
     public visitArrowFunction(node: ts.FunctionLikeDeclaration) {
         const location = (node.parameters != null) ? node.parameters.end : null;
 
-        if (node.parent.kind !== ts.SyntaxKind.CallExpression && !isTypedPropertyDeclaration(node.parent)) {
+        if (location != null
+            && node.parent !== undefined
+            && node.parent.kind !== ts.SyntaxKind.CallExpression
+            && !isTypedPropertyDeclaration(node.parent)) {
+
             this.checkTypeAnnotation("arrow-call-signature", location, node.type, node.name);
         }
         super.visitArrowFunction(node);
@@ -122,13 +126,15 @@ class TypedefWalker extends Lint.RuleWalker {
 
     public visitParameterDeclaration(node: ts.ParameterDeclaration) {
         // a parameter's "type" could be a specific string value, for example `fn(option: "someOption", anotherOption: number)`
-        if (node.type == null || node.type.kind !== ts.SyntaxKind.StringLiteral) {
-            const isArrowFunction = node.parent.kind === ts.SyntaxKind.ArrowFunction;
-            let performCheck = true;
+        if ((node.type == null || node.type.kind !== ts.SyntaxKind.StringLiteral)
+            && node.parent !== undefined
+            && node.parent.parent !== undefined) {
 
-            let optionName: string;
+            const isArrowFunction = node.parent.kind === ts.SyntaxKind.ArrowFunction;
+
+            let optionName: string | null = null;
             if (isArrowFunction && isTypedPropertyDeclaration(node.parent.parent)) {
-                performCheck = false;
+                // leave optionName as null and don't perform check
             } else if (isArrowFunction && isPropertyDeclaration(node.parent.parent)) {
                 optionName = "member-variable-declaration";
             } else if (isArrowFunction) {
@@ -137,7 +143,7 @@ class TypedefWalker extends Lint.RuleWalker {
                 optionName = "parameter";
             }
 
-            if (performCheck) {
+            if (optionName !== null) {
                 this.checkTypeAnnotation(optionName, node.getEnd(), <ts.TypeNode> node.type, node.name);
             }
         }
@@ -185,7 +191,7 @@ class TypedefWalker extends Lint.RuleWalker {
         // catch statements will be the parent of the variable declaration
         // for-in/for-of loops will be the gradparent of the variable declaration
         if (node.parent != null && node.parent.parent != null
-                && node.parent.kind !== ts.SyntaxKind.CatchClause
+                && (node as ts.Node).parent!.kind !== ts.SyntaxKind.CatchClause
                 && node.parent.parent.kind !== ts.SyntaxKind.ForInStatement
                 && node.parent.parent.kind !== ts.SyntaxKind.ForOfStatement) {
             this.checkTypeAnnotation("variable-declaration", node.name.getEnd(), node.type, node.name);
@@ -196,22 +202,21 @@ class TypedefWalker extends Lint.RuleWalker {
     private handleCallSignature(node: ts.SignatureDeclaration) {
         const location = (node.parameters != null) ? node.parameters.end : null;
         // set accessors can't have a return type.
-        if (node.kind !== ts.SyntaxKind.SetAccessor && node.kind !== ts.SyntaxKind.ArrowFunction) {
+        if (location != null && node.kind !== ts.SyntaxKind.SetAccessor && node.kind !== ts.SyntaxKind.ArrowFunction) {
             this.checkTypeAnnotation("call-signature", location, node.type, node.name);
         }
     }
 
     private checkTypeAnnotation(option: string,
                                 location: number,
-                                typeAnnotation: ts.TypeNode,
+                                typeAnnotation: ts.TypeNode | undefined,
                                 name?: ts.Node) {
         if (this.hasOption(option) && typeAnnotation == null) {
             let ns = "";
             if (name != null && name.kind === ts.SyntaxKind.Identifier) {
                 ns = `: '${(<ts.Identifier> name).text}'`;
             }
-            let failure = this.createFailure(location, 1, "expected " + option + ns + " to have a typedef");
-            this.addFailure(failure);
+            this.addFailureAt(location, 1, "expected " + option + ns + " to have a typedef");
         }
     }
 }

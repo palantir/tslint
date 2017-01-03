@@ -44,8 +44,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public isEnabled(): boolean {
+        const ruleArguments = this.getOptions().ruleArguments;
         if (super.isEnabled()) {
-            const option = this.getOptions().ruleArguments[0];
+            const option = ruleArguments[0];
             if (typeof option === "number" && option > 0) {
                 return true;
             }
@@ -55,7 +56,8 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const ruleFailures: Lint.RuleFailure[] = [];
-        const lineLimit = this.getOptions().ruleArguments[0];
+        const ruleArguments = this.getOptions().ruleArguments;
+        const lineLimit = ruleArguments[0];
         const lineStarts = sourceFile.getLineStarts();
         const errorString = Rule.FAILURE_STRING_FACTORY(lineLimit);
         const disabledIntervals = this.getOptions().disabledIntervals;
@@ -76,8 +78,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                     ruleFailures.push(ruleFailure);
                 }
             }
-          }
-
+        }
         return ruleFailures;
     }
 }

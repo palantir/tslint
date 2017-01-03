@@ -188,9 +188,8 @@ class TrailingCommaWalker extends Lint.RuleWalker {
                 // as opposed to optionals alongside it. So instead of children[i + 1] having
                 // [ PropertySignature, Semicolon, PropertySignature, Semicolon ], the AST is
                 // [ PropertySignature, PropertySignature], where the Semicolons are under PropertySignature
-                const hasSemicolon = grandChildren.some((grandChild) => {
-                    return grandChild.getChildren().some((ggc) => ggc.kind === ts.SyntaxKind.SemicolonToken);
-                });
+                const hasSemicolon = grandChildren.some((grandChild) =>
+                    Lint.childOfKind(grandChild, ts.SyntaxKind.SemicolonToken) !== undefined);
 
                 if (!hasSemicolon) {
                     const endLineOfClosingElement = this.getSourceFile().getLineAndCharacterOfPosition(children[i + 2].getEnd()).line;
@@ -247,13 +246,13 @@ class TrailingCommaWalker extends Lint.RuleWalker {
                     const fix = new Lint.Fix(Rule.metadata.ruleName, [
                         this.deleteText(failureStart, 1),
                     ]);
-                    this.addFailure(this.createFailure(failureStart, 1, Rule.FAILURE_STRING_NEVER, fix));
+                    this.addFailureAt(failureStart, 1, Rule.FAILURE_STRING_NEVER, fix);
                 } else if (!hasTrailingComma && option === "always") {
                     const failureStart = lastGrandChild.getEnd();
                     const fix = new Lint.Fix(Rule.metadata.ruleName, [
                         this.appendText(failureStart, ","),
                     ]);
-                    this.addFailure(this.createFailure(failureStart - 1, 1, Rule.FAILURE_STRING_ALWAYS, fix));
+                    this.addFailureAt(failureStart - 1, 1, Rule.FAILURE_STRING_ALWAYS, fix);
                 }
             }
         }

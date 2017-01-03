@@ -35,7 +35,7 @@ export class Formatter extends AbstractFormatter {
         }
 
         const files: string[] = [];
-        let currentFile: string;
+        let currentFile: string | undefined;
 
         for (const failure of failures) {
             const fileName = failure.getFileName();

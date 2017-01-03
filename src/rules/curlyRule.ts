@@ -56,7 +56,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 class CurlyWalker extends Lint.RuleWalker {
     public visitForInStatement(node: ts.ForInStatement) {
         if (!isStatementBraced(node.statement)) {
-            this.addFailureForNode(node, Rule.FOR_FAILURE_STRING);
+            this.addFailureAtNode(node, Rule.FOR_FAILURE_STRING);
         }
 
         super.visitForInStatement(node);
@@ -64,7 +64,7 @@ class CurlyWalker extends Lint.RuleWalker {
 
     public visitForOfStatement(node: ts.ForOfStatement) {
         if (!isStatementBraced(node.statement)) {
-            this.addFailureForNode(node, Rule.FOR_FAILURE_STRING);
+            this.addFailureAtNode(node, Rule.FOR_FAILURE_STRING);
         }
 
         super.visitForOfStatement(node);
@@ -72,7 +72,7 @@ class CurlyWalker extends Lint.RuleWalker {
 
     public visitForStatement(node: ts.ForStatement) {
         if (!isStatementBraced(node.statement)) {
-            this.addFailureForNode(node, Rule.FOR_FAILURE_STRING);
+            this.addFailureAtNode(node, Rule.FOR_FAILURE_STRING);
         }
 
         super.visitForStatement(node);
@@ -80,11 +80,7 @@ class CurlyWalker extends Lint.RuleWalker {
 
     public visitIfStatement(node: ts.IfStatement) {
         if (!isStatementBraced(node.thenStatement)) {
-            this.addFailure(this.createFailure(
-                node.getStart(),
-                node.thenStatement.getEnd() - node.getStart(),
-                Rule.IF_FAILURE_STRING,
-            ));
+            this.addFailureFromStartToEnd(node.getStart(), node.thenStatement.getEnd(), Rule.IF_FAILURE_STRING);
         }
 
         if (node.elseStatement != null
@@ -92,13 +88,8 @@ class CurlyWalker extends Lint.RuleWalker {
                 && !isStatementBraced(node.elseStatement)) {
 
             // find the else keyword to place the error appropriately
-            const elseKeywordNode = node.getChildren().filter((child) => child.kind === ts.SyntaxKind.ElseKeyword)[0];
-
-            this.addFailure(this.createFailure(
-                elseKeywordNode.getStart(),
-                node.elseStatement.getEnd() - elseKeywordNode.getStart(),
-                Rule.ELSE_FAILURE_STRING,
-            ));
+            const elseKeywordNode = Lint.childOfKind(node, ts.SyntaxKind.ElseKeyword)!;
+            this.addFailureFromStartToEnd(elseKeywordNode.getStart(), node.elseStatement.getEnd(), Rule.ELSE_FAILURE_STRING);
         }
 
         super.visitIfStatement(node);
@@ -106,7 +97,7 @@ class CurlyWalker extends Lint.RuleWalker {
 
     public visitDoStatement(node: ts.DoStatement) {
         if (!isStatementBraced(node.statement)) {
-            this.addFailureForNode(node, Rule.DO_FAILURE_STRING);
+            this.addFailureAtNode(node, Rule.DO_FAILURE_STRING);
         }
 
         super.visitDoStatement(node);
@@ -114,14 +105,10 @@ class CurlyWalker extends Lint.RuleWalker {
 
     public visitWhileStatement(node: ts.WhileStatement) {
         if (!isStatementBraced(node.statement)) {
-            this.addFailureForNode(node, Rule.WHILE_FAILURE_STRING);
+            this.addFailureAtNode(node, Rule.WHILE_FAILURE_STRING);
         }
 
         super.visitWhileStatement(node);
-    }
-
-    private addFailureForNode(node: ts.Node, failure: string) {
-        this.addFailure(this.createFailure(node.getStart(), node.getWidth(), failure));
     }
 }
 

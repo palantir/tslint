@@ -46,7 +46,7 @@ export interface TestResult {
 
 export function runTest(testDirectory: string, rulesDirectory?: string | string[]): TestResult {
     const filesToLint = glob.sync(path.join(testDirectory, `**/*${MARKUP_FILE_EXTENSION}`));
-    const tslintConfig = Linter.findConfiguration(path.join(testDirectory, "tslint.json"), null).results;
+    const tslintConfig = Linter.findConfiguration(path.join(testDirectory, "tslint.json"), "").results;
     const tsConfig = path.join(testDirectory, "tsconfig.json");
     let compilerOptions: ts.CompilerOptions = { allowJs: true };
     if (fs.existsSync(tsConfig)) {
@@ -58,6 +58,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
         const parseConfigHost = {
             fileExists: fs.existsSync,
             readDirectory: ts.sys.readDirectory,
+            readFile: (file: string) => fs.readFileSync(file, "utf8"),
             useCaseSensitiveFileNames: true,
         };
         compilerOptions = ts.parseJsonConfigFileContent(config, parseConfigHost, testDirectory).options;
@@ -71,8 +72,8 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
         const fileTextWithoutMarkup = parse.removeErrorMarkup(fileText);
         const errorsFromMarkup = parse.parseErrorsFromMarkup(fileText);
 
-        let program: ts.Program;
-        if (tslintConfig.linterOptions && tslintConfig.linterOptions.typeCheck) {
+        let program: ts.Program | undefined = undefined;
+        if (tslintConfig !== undefined && tslintConfig.linterOptions && tslintConfig.linterOptions.typeCheck) {
             const compilerHost: ts.CompilerHost = {
                 fileExists: () => true,
                 getCanonicalFileName: (filename: string) => filename,
@@ -81,17 +82,19 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
                 getDirectories: (_path: string) => [],
                 getNewLine: () => "\n",
                 getSourceFile(filenameToGet: string) {
-                    if (filenameToGet === this.getDefaultLibFileName()) {
-                        const fileText = fs.readFileSync(ts.getDefaultLibFilePath(compilerOptions)).toString();
-                        return ts.createSourceFile(filenameToGet, fileText, compilerOptions.target);
+                    const target = compilerOptions.target === undefined ? ts.ScriptTarget.ES5 : compilerOptions.target;
+                    if (filenameToGet === ts.getDefaultLibFileName(compilerOptions)) {
+                        const fileContent = fs.readFileSync(ts.getDefaultLibFilePath(compilerOptions)).toString();
+                        return ts.createSourceFile(filenameToGet, fileContent, target);
                     } else if (filenameToGet === fileCompileName) {
-                        return ts.createSourceFile(fileBasename, fileTextWithoutMarkup, compilerOptions.target, true);
+                        return ts.createSourceFile(fileBasename, fileTextWithoutMarkup, target, true);
                     } else if (fs.existsSync(path.resolve(path.dirname(fileToLint), filenameToGet))) {
                         const text = fs.readFileSync(path.resolve(path.dirname(fileToLint), filenameToGet), {encoding: "utf-8"});
-                        return ts.createSourceFile(filenameToGet, text, compilerOptions.target, true);
+                        return ts.createSourceFile(filenameToGet, text, target, true);
                     }
+                    throw new Error("couldn't not get source file");
                 },
-                readFile: () => null,
+                readFile: (x: string) => x,
                 useCaseSensitiveFileNames: () => true,
                 writeFile: () => null,
             };
@@ -128,14 +131,14 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
         });
 
         // test against fixed files
-        let fixedFileText: string;
-        let newFileText: string;
+        let fixedFileText: string = "";
+        let newFileText: string = "";
         try {
             const fixedFile = fileToLint.replace(/\.lint$/, FIXES_FILE_EXTENSION);
             const stat = fs.statSync(fixedFile);
             if (stat.isFile()) {
                 fixedFileText = fs.readFileSync(fixedFile, "utf8");
-                const fixes = failures.filter((f) => f.hasFix()).map((f) => f.getFix());
+                const fixes = failures.filter((f) => f.hasFix()).map((f) => f.getFix()) as Fix[];
                 newFileText = Fix.applyAll(fileTextWithoutMarkup, fixes);
             }
         } catch (e) {
@@ -164,9 +167,9 @@ export function consoleTestResultHandler(testResult: TestResult): boolean {
         process.stdout.write(`${fileName}:`);
 
         const markupDiffResults = diff.diffLines(results.markupFromMarkup, results.markupFromLinter);
-        const fixesDiffResults = diff.diffLines(results.fixesFromMarkup, results.fixesFromLinter);
-        const didMarkupTestPass = !markupDiffResults.some((diff) => diff.added || diff.removed);
-        const didFixesTestPass = !fixesDiffResults.some((diff) => diff.added || diff.removed);
+        const fixesDiffResults = diff.diffLines(results.fixesFromLinter, results.fixesFromMarkup);
+        const didMarkupTestPass = !markupDiffResults.some((diff) => !!diff.added || !!diff.removed);
+        const didFixesTestPass = !fixesDiffResults.some((diff) => !!diff.added || !!diff.removed);
 
         /* tslint:disable:no-console */
         if (didMarkupTestPass && didFixesTestPass) {

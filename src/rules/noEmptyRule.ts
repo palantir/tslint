@@ -47,13 +47,13 @@ class BlockWalker extends Lint.RuleWalker {
     public visitBlock(node: ts.Block) {
         const openBrace = node.getChildAt(0);
         const closeBrace = node.getChildAt(node.getChildCount() - 1);
-        const sourceFileText = node.getSourceFile().text;
+        const sourceFileText = this.getSourceFile().text;
         const hasCommentAfter = ts.getTrailingCommentRanges(sourceFileText, openBrace.getEnd()) != null;
         const hasCommentBefore = ts.getLeadingCommentRanges(sourceFileText, closeBrace.getFullStart()) != null;
         const isSkipped = this.ignoredBlocks.indexOf(node) !== -1;
 
         if (node.statements.length <= 0 && !hasCommentAfter && !hasCommentBefore && !isSkipped) {
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+            this.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
 
         super.visitBlock(node);
@@ -74,7 +74,9 @@ class BlockWalker extends Lint.RuleWalker {
 
             if (hasPropertyAccessModifier) {
                 isSkipped = true;
-                this.ignoredBlocks.push(node.body);
+                if (node.body !== undefined) {
+                    this.ignoredBlocks.push(node.body);
+                }
                 break;
             }
 

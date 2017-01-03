@@ -45,8 +45,7 @@ class NoVarKeywordWalker extends Lint.RuleWalker {
     public visitVariableStatement(node: ts.VariableStatement) {
         if (!Lint.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)
                 && !Lint.isBlockScopedVariable(node)) {
-            this.addFailure(this.createFailure(node.declarationList.getStart(), "var".length, Rule.FAILURE_STRING,
-                 this.fix(node.declarationList)));
+            this.addFailureAt(node.declarationList.getStart(), "var".length, Rule.FAILURE_STRING, this.fix(node.declarationList));
         }
 
         super.visitVariableStatement(node);
@@ -67,10 +66,10 @@ class NoVarKeywordWalker extends Lint.RuleWalker {
         super.visitForOfStatement(node);
     }
 
-    private handleInitializerNode(node: ts.VariableDeclarationList | ts.Expression) {
+    private handleInitializerNode(node: ts.VariableDeclarationList | ts.Expression | undefined) {
         if (node && node.kind === ts.SyntaxKind.VariableDeclarationList &&
                 !(Lint.isNodeFlagSet(node, ts.NodeFlags.Let) || Lint.isNodeFlagSet(node, ts.NodeFlags.Const))) {
-            this.addFailure(this.createFailure(node.getStart(), "var".length, Rule.FAILURE_STRING, this.fix(node)));
+            this.addFailureAt(node.getStart(), "var".length, Rule.FAILURE_STRING, this.fix(node));
         }
     }
 

@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 import * as Lint from "../index";
-import {isNodeFlagSet, unwrapParentheses} from "../language/utils";
+import {isAssignment, isCombinedModifierFlagSet, isCombinedNodeFlagSet, unwrapParentheses} from "../language/utils";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -45,35 +45,88 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class PreferConstWalker extends Lint.BlockScopeAwareRuleWalker<{}, ScopeInfo> {
+    private static collect(statements: ts.Statement[], scopeInfo: ScopeInfo) {
+        for (const s of statements) {
+            if (s.kind === ts.SyntaxKind.VariableStatement) {
+                PreferConstWalker.collectInVariableDeclarationList((s as ts.VariableStatement).declarationList, scopeInfo);
+            }
+        }
+    }
+
+    private static collectInVariableDeclarationList(node: ts.VariableDeclarationList, scopeInfo: ScopeInfo) {
+        if (isCombinedNodeFlagSet(node, ts.NodeFlags.Let) && !isCombinedModifierFlagSet(node, ts.ModifierFlags.Export)) {
+            for (const decl of node.declarations) {
+                PreferConstWalker.addDeclarationName(decl.name, node, scopeInfo);
+            }
+        }
+    }
+
+    private static addDeclarationName(node: ts.BindingName, container: ts.VariableDeclarationList, scopeInfo: ScopeInfo) {
+        if (node.kind === ts.SyntaxKind.Identifier) {
+            scopeInfo.addVariable(node as ts.Identifier, container);
+        } else {
+            for (const el of (node as ts.BindingPattern).elements) {
+                if (el.kind === ts.SyntaxKind.BindingElement) {
+                    PreferConstWalker.addDeclarationName(el.name, container, scopeInfo);
+                }
+            }
+        }
+    }
+
     public createScope() {
         return {};
     }
 
-    public createBlockScope() {
-        return new ScopeInfo();
+    public createBlockScope(node: ts.Node) {
+        const scopeInfo = new ScopeInfo();
+        switch (node.kind) {
+            case ts.SyntaxKind.SourceFile:
+                PreferConstWalker.collect((node as ts.SourceFile).statements, scopeInfo);
+                break;
+            case ts.SyntaxKind.Block:
+                PreferConstWalker.collect((node as ts.Block).statements, scopeInfo);
+                break;
+            case ts.SyntaxKind.ModuleDeclaration:
+                const body = (node as ts.ModuleDeclaration).body;
+                if (body && body.kind === ts.SyntaxKind.ModuleBlock) {
+                    PreferConstWalker.collect((body as ts.ModuleBlock).statements, scopeInfo);
+                }
+                break;
+            case ts.SyntaxKind.ForStatement:
+            case ts.SyntaxKind.ForOfStatement:
+            case ts.SyntaxKind.ForInStatement:
+                const initializer = (node as ts.ForInStatement | ts.ForOfStatement | ts.ForStatement).initializer;
+                if (initializer && initializer.kind === ts.SyntaxKind.VariableDeclarationList) {
+                    PreferConstWalker.collectInVariableDeclarationList(initializer as ts.VariableDeclarationList, scopeInfo);
+                }
+                break;
+            case ts.SyntaxKind.SwitchStatement:
+                for (const caseClause of (node as ts.SwitchStatement).caseBlock.clauses) {
+                    PreferConstWalker.collect(caseClause.statements, scopeInfo);
+                }
+                break;
+            default:
+                break;
+        }
+        return scopeInfo;
     }
 
     public onBlockScopeEnd() {
         const seenLetStatements: { [startPosition: string]: boolean } = {};
         for (const usage of this.getCurrentBlockScope().getConstCandiates()) {
-            let fix: Lint.Fix;
+            let fix: Lint.Fix | undefined;
             if (!usage.reassignedSibling && !seenLetStatements[usage.letStatement.getStart().toString()]) {
                 // only fix if all variables in the `let` statement can use `const`
                 const replacement = new Lint.Replacement(usage.letStatement.getStart(), "let".length, "const");
                 fix = new Lint.Fix(Rule.metadata.ruleName, [replacement]);
                 seenLetStatements[usage.letStatement.getStart().toString()] = true;
             }
-            this.addFailure(this.createFailure(
-                usage.identifier.getStart(),
-                usage.identifier.getWidth(),
-                Rule.FAILURE_STRING_FACTORY(usage.identifier.text),
-                fix,
-            ));
+            this.addFailureAtNode(usage.identifier, Rule.FAILURE_STRING_FACTORY(usage.identifier.text), fix);
         }
     }
 
     protected visitBinaryExpression(node: ts.BinaryExpression) {
-        if (isAssignmentOperator(node.operatorToken)) {
+        if (isAssignment(node)) {
             this.handleLHSExpression(node.left);
         }
         super.visitBinaryExpression(node);
@@ -89,28 +142,32 @@ class PreferConstWalker extends Lint.BlockScopeAwareRuleWalker<{}, ScopeInfo> {
         super.visitPostfixUnaryExpression(node);
     }
 
-    protected visitVariableDeclaration(node: ts.VariableDeclaration) {
-        this.getCurrentBlockScope().currentVariableDeclaration = node;
-        super.visitVariableDeclaration(node);
-        this.getCurrentBlockScope().currentVariableDeclaration = null;
-    }
-
-    protected visitIdentifier(node: ts.Identifier) {
-        if (this.getCurrentBlockScope().currentVariableDeclaration != null) {
-            const declarationList = this.getCurrentBlockScope().currentVariableDeclaration.parent;
-            if (isNodeFlagSet(declarationList, ts.NodeFlags.Let) && !isNodeFlagSet(declarationList.parent, ts.NodeFlags.Export)) {
-                if (this.isVariableDeclaration(node)) {
-                    this.getCurrentBlockScope().addVariable(node, declarationList);
-                }
-            }
-        }
-        super.visitIdentifier(node);
-    }
-
     private handleLHSExpression(node: ts.Expression) {
         node = unwrapParentheses(node);
         if (node.kind === ts.SyntaxKind.Identifier) {
             this.markAssignment(node as ts.Identifier);
+        } else if (node.kind === ts.SyntaxKind.ArrayLiteralExpression) {
+            const deconstructionArray = node as ts.ArrayLiteralExpression;
+            deconstructionArray.elements.forEach((child) => {
+                // recursively unwrap destructuring arrays
+                this.handleLHSExpression(child);
+            });
+        } else if (node.kind === ts.SyntaxKind.ObjectLiteralExpression) {
+            for (const prop of (node as ts.ObjectLiteralExpression).properties) {
+                switch (prop.kind) {
+                    case ts.SyntaxKind.PropertyAssignment:
+                        this.handleLHSExpression(prop.initializer);
+                        break;
+                    case ts.SyntaxKind.ShorthandPropertyAssignment:
+                        this.handleLHSExpression(prop.name);
+                        break;
+                    case ts.SyntaxKind.SpreadAssignment:
+                        this.handleLHSExpression(prop.expression);
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
     }
 
@@ -118,20 +175,6 @@ class PreferConstWalker extends Lint.BlockScopeAwareRuleWalker<{}, ScopeInfo> {
         if (node.operator === ts.SyntaxKind.PlusPlusToken || node.operator === ts.SyntaxKind.MinusMinusToken) {
             this.handleLHSExpression(node.operand);
         }
-    }
-
-    private isVariableDeclaration(node: ts.Identifier) {
-        if (this.getCurrentBlockScope().currentVariableDeclaration != null) {
-            // `isBindingElementDeclaration` differentiates between non-variable binding elements and variable binding elements
-            // for example in `let {a: {b}} = {a: {b: 1}}`, `a` is a non-variable and the 1st `b` is a variable
-            const isBindingElementDeclaration = node.parent.kind === ts.SyntaxKind.BindingElement
-                && node.parent.getText() === node.getText();
-            const isSimpleVariableDeclaration = node.parent.kind === ts.SyntaxKind.VariableDeclaration;
-            // differentiates between the left and right hand side of a declaration
-            const inVariableDeclaration = this.getCurrentBlockScope().currentVariableDeclaration.name.getEnd() >= node.getEnd();
-            return inVariableDeclaration && (isBindingElementDeclaration || isSimpleVariableDeclaration);
-        }
-        return false;
     }
 
     private markAssignment(identifier: ts.Identifier) {
@@ -154,7 +197,6 @@ interface IConstCandidate {
 
 class ScopeInfo {
     public currentVariableDeclaration: ts.VariableDeclaration;
-
     private identifierUsages: {
         [varName: string]: {
             letStatement: ts.VariableDeclarationList,
@@ -200,9 +242,4 @@ class ScopeInfo {
         }
         return false;
     }
-}
-
-function isAssignmentOperator(token: ts.Node) {
-    return token.kind >= ts.SyntaxKind.FirstAssignment
-        && token.kind <= ts.SyntaxKind.LastAssignment;
 }

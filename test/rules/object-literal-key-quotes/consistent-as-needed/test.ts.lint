@@ -48,3 +48,6 @@ const u = {
     ~~~~~     [Unnecessarily quoted property 'egg' found.]
   }
 };
+const v = {
+    ...o,
+};

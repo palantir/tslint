@@ -36,6 +36,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"${OPTION_NEVER}"\` disallows semicolons at the end of every statement except for when they are necessary.
 
             The following arguments may be optionaly provided:
+
             * \`"${OPTION_IGNORE_INTERFACES}"\` skips checking semicolons at the end of interface members.
             * \`"${OPTION_IGNORE_BOUND_CLASS_METHODS}"\` skips checking semicolons at the end of bound class methods.`,
         options: {
@@ -61,6 +62,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING_MISSING = "Missing semicolon";
+    public static FAILURE_STRING_COMMA = "Interface properties should be separated by semicolons";
     public static FAILURE_STRING_UNNECESSARY = "Unnecessary semicolon";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -163,19 +165,28 @@ class SemicolonWalker extends Lint.RuleWalker {
 
     private checkSemicolonAt(node: ts.Node, override?: "never") {
         const sourceFile = this.getSourceFile();
-        const children = node.getChildren(sourceFile);
-        const hasSemicolon = children.some((child) => child.kind === ts.SyntaxKind.SemicolonToken);
+        const hasSemicolon = Lint.childOfKind(node, ts.SyntaxKind.SemicolonToken) !== undefined;
         const position = node.getStart(sourceFile) + node.getWidth(sourceFile);
         const never = override === "never" || this.hasOption(OPTION_NEVER);
         // Backwards compatible with plain {"semicolon": true}
         const always = !never && (this.hasOption(OPTION_ALWAYS) || (this.getOptions() && this.getOptions().length === 0));
 
         if (always && !hasSemicolon) {
-            const failureStart = Math.min(position, this.getLimit());
-            const fix = new Lint.Fix(Rule.metadata.ruleName, [
-                this.appendText(failureStart, ";"),
-            ]);
-            this.addFailure(this.createFailure(failureStart, 0, Rule.FAILURE_STRING_MISSING, fix));
+            const children = node.getChildren(sourceFile);
+            const lastChild = children[children.length - 1];
+            if (node.parent!.kind === ts.SyntaxKind.InterfaceDeclaration && lastChild.kind === ts.SyntaxKind.CommaToken) {
+                const failureStart = lastChild.getStart(sourceFile);
+                const fix = new Lint.Fix(Rule.metadata.ruleName, [
+                    this.createReplacement(failureStart, lastChild.getWidth(sourceFile), ";"),
+                ]);
+                this.addFailureAt(failureStart, 0, Rule.FAILURE_STRING_COMMA, fix);
+            } else {
+                const failureStart = Math.min(position, this.getLimit());
+                const fix = new Lint.Fix(Rule.metadata.ruleName, [
+                    this.appendText(failureStart, ";"),
+                ]);
+                this.addFailureAt(failureStart, 0, Rule.FAILURE_STRING_MISSING, fix);
+            }
         } else if (never && hasSemicolon) {
             const scanner = ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, sourceFile.text);
             scanner.setTextPos(position);
@@ -191,7 +202,7 @@ class SemicolonWalker extends Lint.RuleWalker {
                 const fix = new Lint.Fix(Rule.metadata.ruleName, [
                     this.deleteText(failureStart, 1),
                 ]);
-                this.addFailure(this.createFailure(failureStart, 1, Rule.FAILURE_STRING_UNNECESSARY, fix));
+                this.addFailureAt(failureStart, 1, Rule.FAILURE_STRING_UNNECESSARY, fix);
             }
         }
     }

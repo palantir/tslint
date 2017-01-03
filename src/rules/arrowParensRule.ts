@@ -19,21 +19,29 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
+const BAN_SINGLE_ARG_PARENS = "ban-single-arg-parens";
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "arrow-parens",
         description: "Requires parentheses around the parameters of arrow function definitions.",
         rationale: "Maintains stylistic consistency with other arrow function definitions.",
-        optionsDescription: "Not configurable.",
-        options: null,
-        optionExamples: ["true"],
+        optionsDescription: Lint.Utils.dedent`
+            if \`${BAN_SINGLE_ARG_PARENS}\` is specified, then arrow functions with one parameter
+            must not have parentheses if removing them is allowed by TypeScript.`,
+        options: {
+            type: "string",
+            enum: [BAN_SINGLE_ARG_PARENS],
+        },
+        optionExamples: [`true`, `[true, "${BAN_SINGLE_ARG_PARENS}"]`],
         type: "style",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "Parentheses are required around the parameters of an arrow function definition";
+    public static FAILURE_STRING_MISSING = "Parentheses are required around the parameters of an arrow function definition";
+    public static FAILURE_STRING_EXISTS = "Parentheses are prohibited around the parameter in this single parameter arrow function";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const newParensWalker = new ArrowParensWalker(sourceFile, this.getOptions());
@@ -42,28 +50,49 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class ArrowParensWalker extends Lint.RuleWalker {
-    public visitArrowFunction(node: ts.FunctionLikeDeclaration) {
-        if (node.parameters.length === 1) {
-            const parameter = node.parameters[0];
-            const text = parameter.getText();
-            const firstToken = node.getFirstToken();
-            const lastToken = node.getChildAt(2);
-            const width = text.length;
-            const position = parameter.getStart();
-            let isGenerics = false;
+    private avoidOnSingleParameter: boolean;
 
-            // If firstToken is LessThanToken, it would be Generics.
-            if (firstToken.kind === ts.SyntaxKind.LessThanToken) {
-                isGenerics = true;
+    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
+        super(sourceFile, options);
+        this.avoidOnSingleParameter = this.hasOption(BAN_SINGLE_ARG_PARENS);
+    }
+
+    public visitArrowFunction(node: ts.FunctionLikeDeclaration) {
+        if (node.parameters.length === 1 && node.typeParameters === undefined) {
+            const parameter = node.parameters[0];
+
+            let openParen = node.getFirstToken();
+            let openParenIndex = 0;
+            if (openParen.kind === ts.SyntaxKind.AsyncKeyword) {
+                openParen = node.getChildAt(1);
+                openParenIndex = 1;
             }
 
-            if ((firstToken.kind !== ts.SyntaxKind.OpenParenToken || lastToken.kind !== ts.SyntaxKind.CloseParenToken)
-                && !isGenerics && node.flags !== ts.NodeFlags.Async) {
-
-                const fix = new Lint.Fix(Rule.metadata.ruleName, [new Lint.Replacement(position, width, `(${parameter.getText()})`)]);
-                this.addFailure(this.createFailure(position, width, Rule.FAILURE_STRING, fix));
+            const hasParens = openParen.kind === ts.SyntaxKind.OpenParenToken;
+            if (!hasParens && !this.avoidOnSingleParameter) {
+                const fix = new Lint.Fix(Rule.metadata.ruleName, [
+                    this.appendText(parameter.getStart(), "("),
+                    this.appendText(parameter.getEnd(), ")"),
+                ]);
+                this.addFailureAtNode(parameter, Rule.FAILURE_STRING_MISSING, fix);
+            } else if (hasParens && this.avoidOnSingleParameter && isSimpleParameter(parameter)) {
+                // Skip over the parameter to get the closing parenthesis
+                const closeParen = node.getChildAt(openParenIndex + 2);
+                const fix = new Lint.Fix(Rule.metadata.ruleName, [
+                    this.deleteText(openParen.getStart(), 1),
+                    this.deleteText(closeParen.getStart(), 1),
+                ]);
+                this.addFailureAtNode(parameter, Rule.FAILURE_STRING_EXISTS, fix);
             }
         }
         super.visitArrowFunction(node);
     }
+}
+
+function isSimpleParameter(parameter: ts.ParameterDeclaration): boolean {
+    return parameter.name.kind === ts.SyntaxKind.Identifier
+        && parameter.dotDotDotToken === undefined
+        && parameter.initializer === undefined
+        && parameter.questionToken === undefined
+        && parameter.type === undefined;
 }

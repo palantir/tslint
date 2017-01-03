@@ -94,8 +94,7 @@ class NoReturnInFinallyScopeAwareWalker extends Lint.ScopeAwareRuleWalker<IFinal
             return;
         }
 
-        this.addFailure(
-            this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING_FACTORY(Rule.FAILURE_TYPE_BREAK)));
+        this.addFailureAtNode(node, Rule.FAILURE_STRING_FACTORY(Rule.FAILURE_TYPE_BREAK));
     }
 
     protected visitContinueStatement(node: ts.BreakOrContinueStatement) {
@@ -104,8 +103,7 @@ class NoReturnInFinallyScopeAwareWalker extends Lint.ScopeAwareRuleWalker<IFinal
             return;
         }
 
-        this.addFailure(
-            this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING_FACTORY(Rule.FAILURE_TYPE_CONTINUE)));
+        this.addFailureAtNode(node, Rule.FAILURE_STRING_FACTORY(Rule.FAILURE_TYPE_CONTINUE));
     }
 
     protected visitLabeledStatement(node: ts.LabeledStatement) {
@@ -120,8 +118,7 @@ class NoReturnInFinallyScopeAwareWalker extends Lint.ScopeAwareRuleWalker<IFinal
             return;
         }
 
-        this.addFailure(
-            this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING_FACTORY(Rule.FAILURE_TYPE_RETURN)));
+        this.addFailureAtNode(node, Rule.FAILURE_STRING_FACTORY(Rule.FAILURE_TYPE_RETURN));
     }
 
     protected visitThrowStatement(node: ts.ThrowStatement): void {
@@ -130,8 +127,7 @@ class NoReturnInFinallyScopeAwareWalker extends Lint.ScopeAwareRuleWalker<IFinal
             return;
         }
 
-        this.addFailure(
-            this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING_FACTORY(Rule.FAILURE_TYPE_THROW)));
+        this.addFailureAtNode(node, Rule.FAILURE_STRING_FACTORY(Rule.FAILURE_TYPE_THROW));
     }
 
     public createScope(node: ts.Node): IFinallyScope {
@@ -171,13 +167,14 @@ class NoReturnInFinallyScopeAwareWalker extends Lint.ScopeAwareRuleWalker<IFinal
 
             currentScope = scopes[--depth];
         }
+        return false;
     }
 }
 
 function isLoopBlock(node: ts.Node): boolean {
     const parent = node.parent;
 
-    return parent &&
+    return parent !== undefined &&
         node.kind === ts.SyntaxKind.Block &&
         (parent.kind === ts.SyntaxKind.ForInStatement ||
         parent.kind === ts.SyntaxKind.ForOfStatement ||
@@ -193,7 +190,7 @@ function isCaseBlock(node: ts.Node): boolean {
 function isFinallyBlock(node: ts.Node): boolean {
     const parent = node.parent;
 
-    return parent &&
+    return parent !== undefined &&
         node.kind === ts.SyntaxKind.Block &&
         isTryStatement(parent) &&
         parent.finallyBlock === node;

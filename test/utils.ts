@@ -86,15 +86,15 @@ export function assertContainsFailure(haystack: Lint.RuleFailure[], needle: Lint
 }
 
 export function createTempFile(extension: string) {
-    let tmpfile: string;
+    let tmpfile: string | null = null;
     for (let i = 0; i < 5; i++) {
         const attempt = path.join(os.tmpdir(), `tslint.test${Math.round(Date.now() * Math.random())}.${extension}`);
-        if (!fs.existsSync(tmpfile)) {
+        if (tmpfile === null || !fs.existsSync(tmpfile)) {
             tmpfile = attempt;
             break;
         }
     }
-    if (tmpfile === undefined) {
+    if (tmpfile == null) {
         throw new Error("Couldn't create temp file");
     }
     return tmpfile;

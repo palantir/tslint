@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import {RuleWalker} from "../walker/ruleWalker";
+import {IWalker} from "../walker";
 
 export interface IRuleMetadata {
     /**
@@ -87,8 +87,9 @@ export enum RuleLevel {
 }
 
 export interface IOptions {
-    ruleArguments?: any[];
+    ruleArguments: any[];
     ruleLevel: RuleLevel;
+
     ruleName: string;
     disabledIntervals: IDisabledInterval[];
 }
@@ -102,7 +103,7 @@ export interface IRule {
     getOptions(): IOptions;
     isEnabled(): boolean;
     apply(sourceFile: ts.SourceFile, languageService: ts.LanguageService): RuleFailure[];
-    applyWithWalker(walker: RuleWalker): RuleFailure[];
+    applyWithWalker(walker: IWalker): RuleFailure[];
 }
 
 export class Replacement {
@@ -196,6 +197,7 @@ export class RuleFailure {
     private fileName: string;
     private startPosition: RuleFailurePosition;
     private endPosition: RuleFailurePosition;
+    private rawLines: string;
 
     constructor(private sourceFile: ts.SourceFile,
                 start: number,
@@ -208,6 +210,7 @@ export class RuleFailure {
         this.fileName = sourceFile.fileName;
         this.startPosition = this.createFailurePosition(start);
         this.endPosition = this.createFailurePosition(end);
+        this.rawLines = sourceFile.text;
     }
 
     public getFileName() {
@@ -240,6 +243,10 @@ export class RuleFailure {
 
     public getFix() {
         return this.fix;
+    }
+
+    public getRawLines() {
+        return this.rawLines;
     }
 
     public toJson(): any {

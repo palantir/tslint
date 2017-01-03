@@ -21,7 +21,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "string",
             enum: [OPTION_ARRAY, OPTION_GENERIC, OPTION_ARRAY_SIMPLE],
         },
-        optionExamples: [`[true, ${OPTION_ARRAY}]`, `[true, ${OPTION_GENERIC}]`, `[true, ${OPTION_ARRAY_SIMPLE}]`],
+        optionExamples: [`[true, "${OPTION_ARRAY}"]`, `[true, "${OPTION_GENERIC}"]`, `[true, "${OPTION_ARRAY_SIMPLE}"]`],
         type: "style",
         typescriptOnly: true,
     };
@@ -45,14 +45,14 @@ class ArrayTypeWalker extends Lint.RuleWalker {
             const failureString = this.hasOption(OPTION_GENERIC) ? Rule.FAILURE_STRING_GENERIC : Rule.FAILURE_STRING_GENERIC_SIMPLE;
             const parens = typeName.kind === ts.SyntaxKind.ParenthesizedType ? 1 : 0;
             // Add a space if the type is preceded by 'as' and the node has no leading whitespace
-            const space = !parens && node.parent.kind === ts.SyntaxKind.AsExpression &&
+            const space = !parens && node.parent!.kind === ts.SyntaxKind.AsExpression &&
                 node.getStart() === node.getFullStart() ? " " : "";
             const fix = new Lint.Fix(Rule.metadata.ruleName, [
                 this.createReplacement(typeName.getStart(), parens, space + "Array<"),
                 // Delete the square brackets and replace with an angle bracket
                 this.createReplacement(typeName.getEnd() - parens, node.getEnd() - typeName.getEnd() + parens, ">"),
             ]);
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), failureString, fix));
+            this.addFailureAtNode(node, failureString, fix);
         }
 
         super.visitArrayType(node);
@@ -68,7 +68,7 @@ class ArrayTypeWalker extends Lint.RuleWalker {
                 const fix = new Lint.Fix(Rule.metadata.ruleName, [
                     this.createReplacement(node.getStart(), node.getWidth(), "any[]"),
                 ]);
-                this.addFailure(this.createFailure(node.getStart(), node.getWidth(), failureString, fix));
+                this.addFailureAtNode(node, failureString, fix);
             } else if (typeArgs && typeArgs.length === 1 && (!this.hasOption(OPTION_ARRAY_SIMPLE) || this.isSimpleType(typeArgs[0]))) {
                 const type = typeArgs[0];
                 const typeStart = type.getStart();
@@ -81,7 +81,7 @@ class ArrayTypeWalker extends Lint.RuleWalker {
                     // Delete the last angle bracket and replace with square brackets
                     this.createReplacement(typeEnd, node.getEnd() - typeEnd, (parens ? ")" : "") + "[]"),
                 ]);
-                this.addFailure(this.createFailure(node.getStart(), node.getWidth(), failureString, fix));
+                this.addFailureAtNode(node, failureString, fix);
             }
         }
 

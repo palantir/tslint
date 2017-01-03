@@ -64,9 +64,13 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
     }
 
     private getStartOfLinePosition(node: ts.SourceFile, position: number, lineOffset = 0) {
-        return node.getPositionOfLineAndCharacter(
-            node.getLineAndCharacterOfPosition(position).line + lineOffset, 0,
-        );
+        const line = ts.getLineAndCharacterOfPosition(node, position).line + lineOffset;
+        const lineStarts = node.getLineStarts();
+        if (line >= lineStarts.length) {
+            // next line ends with eof or there is no next line
+            return node.getFullWidth();
+        }
+        return lineStarts[line];
     }
 
     private switchRuleState(ruleName: string, isEnabled: boolean, start: number, end?: number): void {
@@ -141,7 +145,7 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
                     }
 
                     let start: number;
-                    let end: number;
+                    let end: number | undefined;
 
                     if (isCurrentLine) {
                         // start at the beginning of the current line
@@ -157,6 +161,7 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
                         // disable rule for the rest of the file
                         // start at the current position, but skip end position
                         start = startingPosition;
+                        end = undefined;
                     }
 
                     this.switchRuleState(ruleToSwitch, isEnabled, start, end);

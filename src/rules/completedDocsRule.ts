@@ -35,7 +35,7 @@ export class Rule extends Lint.Rules.TypedRule {
                 enum: ["classes", "functions", "methods", "properties"],
             },
         },
-        optionExamples: ["true", `[true, ["classes", "functions"]`],
+        optionExamples: ["true", `[true, "classes", "functions"]`],
         type: "style",
         typescriptOnly: false,
     };
@@ -61,7 +61,6 @@ export class Rule extends Lint.Rules.TypedRule {
 
         const nodesToCheck = this.getNodesToCheck(options.ruleArguments);
         completedDocsWalker.setNodesToCheck(nodesToCheck);
-
         return this.applyWithWalker(completedDocsWalker);
     }
 
@@ -100,22 +99,22 @@ export class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
     }
 
     private checkComments(node: ts.Declaration, nodeToCheck: string): void {
-        if (!this.nodesToCheck[nodeToCheck]) {
+        if (!this.nodesToCheck[nodeToCheck] || node.name === undefined) {
             return;
         }
 
         const comments = this.getTypeChecker().getSymbolAtLocation(node.name).getDocumentationComment();
 
-        if (comments.map((comment) => comment.text).join("").trim() === "") {
-            this.addFailure(this.createDocumentationFailure(node, nodeToCheck));
+        if (comments.map((comment: ts.SymbolDisplayPart) => comment.text).join("").trim() === "") {
+            this.addDocumentationFailure(node, nodeToCheck);
         }
     }
 
-    private createDocumentationFailure(node: ts.Declaration, nodeToCheck: string): Lint.RuleFailure {
+    private addDocumentationFailure(node: ts.Declaration, nodeToCheck: string): void {
         const start = node.getStart();
         const width = node.getText().split(/\r|\n/g)[0].length;
         const description = nodeToCheck[0].toUpperCase() + nodeToCheck.substring(1) + Rule.FAILURE_STRING_EXIST;
 
-        return this.createFailure(start, width, description);
+        this.addFailureAt(start, width, description);
     }
 }

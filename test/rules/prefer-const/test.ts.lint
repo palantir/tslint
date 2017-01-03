@@ -26,6 +26,15 @@ let c3 = 1, c4 = 2; // 1 failure
 c3 = 4;
 
 // destructuring
+{
+    let destructLater = 4;
+    [destructLater] = 5;
+    let a: number;
+    let b: number;
+    let c: any;
+    ({ eh: a, b, ...c } = { eh: 0, b: 1 });
+}
+
 let {h, i} = {h: 1, i: 1}; // failure for 'h'
      ~                                        [Identifier 'h' is never reassigned; use 'const' instead of 'let'.]
 let [j, k] = [1, 1]; // failure for 'j'
@@ -135,3 +144,26 @@ let arr = [];
 arr.push(0);
 arr[1] = 1;
 arr.length = 1;
+
+// reassignment of the forward declaration
+function useOfForwardDecl() {
+    forwardDecl = 1;
+}
+
+let forwardDecl: number;
+
+module E {
+    let x = 1;
+        ~      [Identifier 'x' is never reassigned; use 'const' instead of 'let'.]
+}
+
+switch (1) {
+    case 1:
+        let x = 1;
+            ~      [Identifier 'x' is never reassigned; use 'const' instead of 'let'.]
+        break;
+    case 2:
+        let y = 1;
+            ~      [Identifier 'y' is never reassigned; use 'const' instead of 'let'.]
+        break;
+}

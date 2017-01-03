@@ -35,21 +35,14 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "file should end with a newline";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        if (sourceFile.text === "") {
-            // if the file is empty, it "ends with a newline", so don't return a failure
+        const length = sourceFile.text.length;
+        if (length === 0 || // if the file is empty, it "ends with a newline", so don't return a failure
+            sourceFile.text[length - 1] === "\n") {
             return [];
         }
 
-        const eofToken = sourceFile.endOfFileToken;
-        const eofTokenFullText = eofToken.getFullText();
-        if (eofTokenFullText.length === 0 || eofTokenFullText.charAt(eofTokenFullText.length - 1) !== "\n") {
-            const start = eofToken.getStart();
-            return [
-                new Lint.RuleFailure(sourceFile, start, start, Rule.FAILURE_STRING,
-                  this.getOptions().ruleLevel, this.getOptions().ruleName),
-            ];
-        }
-
-        return [];
+        return this.filterFailures([
+            new Lint.RuleFailure(sourceFile, length, length, Rule.FAILURE_STRING, this.getOptions().ruleLevel, this.getOptions().ruleName),
+        ]);
     }
 }

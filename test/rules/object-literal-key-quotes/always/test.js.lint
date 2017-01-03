@@ -16,8 +16,11 @@ const o = {
   '010': 'but this one does.',
   '.123': 'as does this one',
   fn() { return },
+  ~~               [Unquoted property 'fn' found.]
   true: 0, // failure
   ~~~~  [Unquoted property 'true' found.]
   "0x0": 0,
   "true": 0,
+  x,
+  ...y,
 };

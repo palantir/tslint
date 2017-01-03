@@ -87,8 +87,7 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
             if (tokenKind === ts.SyntaxKind.WhitespaceTrivia || tokenKind === ts.SyntaxKind.NewLineTrivia) {
                 prevTokenShouldBeFollowedByWhitespace = false;
             } else if (prevTokenShouldBeFollowedByWhitespace) {
-                const failure = this.createFailure(startPos, 1, Rule.FAILURE_STRING);
-                this.addFailure(failure);
+                this.addFailureAt(startPos, 1, Rule.FAILURE_STRING);
                 prevTokenShouldBeFollowedByWhitespace = false;
             }
 
@@ -188,9 +187,16 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
         if (this.hasOption(OPTION_MODULE) && importClause != null) {
             // an import clause can have _both_ named bindings and a name (the latter for the default import)
             // but the named bindings always come last, so we only need to check that for whitespace
-            const position = (importClause.namedBindings == null) ? importClause.name.getEnd()
-                                                                  : importClause.namedBindings.getEnd();
-            this.checkForTrailingWhitespace(position);
+            let position: number | undefined = undefined;
+            if (importClause.namedBindings !== undefined) {
+                position = importClause.namedBindings.getEnd();
+            } else if (importClause.name !== undefined) {
+                position = importClause.name.getEnd();
+            }
+
+            if (position !== undefined) {
+                this.checkForTrailingWhitespace(position);
+            }
         }
         super.visitImportDeclaration(node);
     }
@@ -233,24 +239,18 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
     }
 
     private checkEqualsGreaterThanTokenInNode(node: ts.Node) {
-        let arrowChildNumber = -1;
-        node.getChildren().forEach((child, i) => {
-            if (child.kind === ts.SyntaxKind.EqualsGreaterThanToken) {
-                arrowChildNumber = i;
-            }
-        });
-
-        // condition so we don't crash if the arrow is somehow missing
-        if (arrowChildNumber !== -1) {
-            const equalsGreaterThanToken = node.getChildAt(arrowChildNumber);
-            if (this.hasOption(OPTION_OPERATOR)) {
-                let position = equalsGreaterThanToken.getFullStart();
-                this.checkForTrailingWhitespace(position);
-
-                position = equalsGreaterThanToken.getEnd();
-                this.checkForTrailingWhitespace(position);
-            }
+        if (!this.hasOption(OPTION_OPERATOR)) {
+            return;
         }
+
+        const equalsGreaterThanToken = Lint.childOfKind(node, ts.SyntaxKind.EqualsGreaterThanToken);
+        // condition so we don't crash if the arrow is somehow missing
+        if (equalsGreaterThanToken === undefined) {
+            return;
+        }
+
+        this.checkForTrailingWhitespace(equalsGreaterThanToken.getFullStart());
+        this.checkForTrailingWhitespace(equalsGreaterThanToken.getEnd());
     }
 
     private checkForTrailingWhitespace(position: number) {
@@ -260,7 +260,7 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
         if (nextTokenType !== ts.SyntaxKind.WhitespaceTrivia
                 && nextTokenType !== ts.SyntaxKind.NewLineTrivia
                 && nextTokenType !== ts.SyntaxKind.EndOfFileToken) {
-            this.addFailure(this.createFailure(position, 1, Rule.FAILURE_STRING));
+            this.addFailureAt(position, 1, Rule.FAILURE_STRING);
         }
     }
 }

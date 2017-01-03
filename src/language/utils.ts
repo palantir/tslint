@@ -32,13 +32,12 @@ export function getSourceFile(fileName: string, source: string): ts.SourceFile {
         getDirectories: (_path: string) => [],
         getNewLine: () => "\n",
         getSourceFile: (filenameToGet: string) => {
-            if (filenameToGet === normalizedName) {
-                return ts.createSourceFile(filenameToGet, source, compilerOptions.target, true);
-            }
+            const target = compilerOptions.target == null ? ts.ScriptTarget.ES5 : compilerOptions.target;
+            return ts.createSourceFile(filenameToGet, source, target, true);
         },
-        readFile: () => null,
+        readFile: (x: string) => x,
         useCaseSensitiveFileNames: () => true,
-        writeFile: () => null,
+        writeFile: (x: string) => x,
     };
 
     const program = ts.createProgram([normalizedName], compilerOptions, compilerHost);
@@ -77,7 +76,7 @@ export function scanAllTokens(scanner: ts.Scanner, callback: (s: ts.Scanner) => 
 /**
  * @returns true if any modifier kinds passed along exist in the given modifiers array
  */
-export function hasModifier(modifiers: ts.ModifiersArray|undefined, ...modifierKinds: ts.SyntaxKind[]) {
+export function hasModifier(modifiers: ts.ModifiersArray | undefined, ...modifierKinds: ts.SyntaxKind[]) {
     if (modifiers === undefined || modifierKinds.length === 0) {
         return false;
     }
@@ -96,8 +95,8 @@ export function isBlockScopedVariable(node: ts.VariableDeclaration | ts.Variable
         ? (<ts.VariableDeclaration> node).parent
         : (<ts.VariableStatement> node).declarationList;
 
-    return isNodeFlagSet(parentNode, ts.NodeFlags.Let)
-        || isNodeFlagSet(parentNode, ts.NodeFlags.Const);
+    return isNodeFlagSet(parentNode!, ts.NodeFlags.Let)
+        || isNodeFlagSet(parentNode!, ts.NodeFlags.Const);
 }
 
 export function isBlockScopedBindingElement(node: ts.BindingElement): boolean {
@@ -106,8 +105,8 @@ export function isBlockScopedBindingElement(node: ts.BindingElement): boolean {
     return (variableDeclaration == null) || isBlockScopedVariable(variableDeclaration);
 }
 
-export function getBindingElementVariableDeclaration(node: ts.BindingElement): ts.VariableDeclaration {
-    let currentParent = node.parent;
+export function getBindingElementVariableDeclaration(node: ts.BindingElement): ts.VariableDeclaration | null {
+    let currentParent = node.parent!;
     while (currentParent.kind !== ts.SyntaxKind.VariableDeclaration) {
         if (currentParent.parent == null) {
             return null; // function parameter, no variable declaration
@@ -118,11 +117,39 @@ export function getBindingElementVariableDeclaration(node: ts.BindingElement): t
     return <ts.VariableDeclaration> currentParent;
 }
 
+/** Shim of Array.find */
+function find<T>(a: T[], predicate: (value: T) => boolean): T | undefined {
+    for (const value of a) {
+        if (predicate(value)) {
+            return value;
+        }
+    }
+    return undefined;
+}
+
+/**
+ * Finds a child of a given node with a given kind.
+ * Note: This uses `node.getChildren()`, which does extra parsing work to include tokens.
+ */
+export function childOfKind(node: ts.Node, kind: ts.SyntaxKind): ts.Node | undefined {
+    return find(node.getChildren(), (child) => child.kind === kind);
+}
+
 /**
  * @returns true if some ancestor of `node` satisfies `predicate`, including `node` itself.
  */
 export function someAncestor(node: ts.Node, predicate: (n: ts.Node) => boolean): boolean {
-    return predicate(node) || (node.parent && someAncestor(node.parent, predicate));
+    return predicate(node) || (node.parent != null && someAncestor(node.parent, predicate));
+}
+
+export function isAssignment(node: ts.Node) {
+    if (node.kind === ts.SyntaxKind.BinaryExpression) {
+        const binaryExpression = node as ts.BinaryExpression;
+        return binaryExpression.operatorToken.kind >= ts.SyntaxKind.FirstAssignment
+            && binaryExpression.operatorToken.kind <= ts.SyntaxKind.LastAssignment;
+    } else {
+        return false;
+    }
 }
 
 /**
@@ -131,6 +158,43 @@ export function someAncestor(node: ts.Node, predicate: (n: ts.Node) => boolean):
 export function isNodeFlagSet(node: ts.Node, flagToCheck: ts.NodeFlags): boolean {
     /* tslint:disable:no-bitwise */
     return (node.flags & flagToCheck) !== 0;
+    /* tslint:enable:no-bitwise */
+}
+
+/**
+ * Bitwise check for combined node flags.
+ */
+export function isCombinedNodeFlagSet(node: ts.Node, flagToCheck: ts.NodeFlags): boolean {
+    /* tslint:disable:no-bitwise */
+    return (ts.getCombinedNodeFlags(node) & flagToCheck) !== 0;
+    /* tslint:enable:no-bitwise */
+}
+
+/**
+ * Bitwise check for combined modifier flags.
+ */
+export function isCombinedModifierFlagSet(node: ts.Node, flagToCheck: ts.ModifierFlags): boolean {
+    /* tslint:disable:no-bitwise */
+    return (ts.getCombinedModifierFlags(node) & flagToCheck) !== 0;
+    /* tslint:enable:no-bitwise */
+}
+
+/**
+ * Bitwise check for type flags.
+ */
+export function isTypeFlagSet(type: ts.Type, flagToCheck: ts.TypeFlags): boolean {
+    /* tslint:disable:no-bitwise */
+    return (type.flags & flagToCheck) !== 0;
+    /* tslint:enable:no-bitwise */
+}
+
+/**
+ * Bitwise check for object flags.
+ * Does not work with TypeScript 2.0.x
+ */
+export function isObjectFlagSet(objectType: ts.ObjectType, flagToCheck: ts.ObjectFlags): boolean {
+    /* tslint:disable:no-bitwise */
+    return (objectType.objectFlags & flagToCheck) !== 0;
     /* tslint:enable:no-bitwise */
 }
 
@@ -149,4 +213,37 @@ export function unwrapParentheses(node: ts.Expression) {
         node = (node as ts.ParenthesizedExpression).expression;
     }
     return node;
+}
+
+export function isScopeBoundary(node: ts.Node): boolean {
+    return node.kind === ts.SyntaxKind.FunctionDeclaration
+        || node.kind === ts.SyntaxKind.FunctionExpression
+        || node.kind === ts.SyntaxKind.PropertyAssignment
+        || node.kind === ts.SyntaxKind.ShorthandPropertyAssignment
+        || node.kind === ts.SyntaxKind.MethodDeclaration
+        || node.kind === ts.SyntaxKind.Constructor
+        || node.kind === ts.SyntaxKind.ModuleDeclaration
+        || node.kind === ts.SyntaxKind.ArrowFunction
+        || node.kind === ts.SyntaxKind.ParenthesizedExpression
+        || node.kind === ts.SyntaxKind.ClassDeclaration
+        || node.kind === ts.SyntaxKind.ClassExpression
+        || node.kind === ts.SyntaxKind.InterfaceDeclaration
+        || node.kind === ts.SyntaxKind.GetAccessor
+        || node.kind === ts.SyntaxKind.SetAccessor
+        || node.kind === ts.SyntaxKind.SourceFile && ts.isExternalModule(node as ts.SourceFile);
+}
+
+export function isBlockScopeBoundary(node: ts.Node): boolean {
+    return isScopeBoundary(node)
+        || node.kind === ts.SyntaxKind.Block
+        || node.kind === ts.SyntaxKind.DoStatement
+        || node.kind === ts.SyntaxKind.WhileStatement
+        || node.kind === ts.SyntaxKind.ForStatement
+        || node.kind === ts.SyntaxKind.ForInStatement
+        || node.kind === ts.SyntaxKind.ForOfStatement
+        || node.kind === ts.SyntaxKind.WithStatement
+        || node.kind === ts.SyntaxKind.SwitchStatement
+        || node.parent !== undefined
+            && (node.parent.kind === ts.SyntaxKind.TryStatement
+            || node.parent.kind === ts.SyntaxKind.IfStatement);
 }

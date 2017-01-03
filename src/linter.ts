@@ -42,7 +42,7 @@ import { arrayify, dedent } from "./utils";
  * Linter that can lint multiple files in consecutive runs.
  */
 class Linter {
-    public static VERSION = "4.0.2";
+    public static VERSION = "4.2.0";
 
     public static findConfiguration = findConfiguration;
     public static findConfigurationPath = findConfigurationPath;
@@ -67,9 +67,10 @@ class Linter {
         }
 
         const { config } = ts.readConfigFile(configFile, ts.sys.readFile);
-        const parseConfigHost = {
+        const parseConfigHost: ts.ParseConfigHost = {
             fileExists: fs.existsSync,
             readDirectory: ts.sys.readDirectory,
+            readFile: (file) => fs.readFileSync(file, "utf8"),
             useCaseSensitiveFileNames: true,
         };
         const parsed = ts.parseJsonConfigFileContent(config, parseConfigHost, projectDirectory);
@@ -101,7 +102,7 @@ class Linter {
         }
     }
 
-    public lint(fileName: string, source?: string, configuration: IConfigurationFile = DEFAULT_CONFIG): void {
+    public lint(fileName: string, source: string, configuration: IConfigurationFile = DEFAULT_CONFIG): void {
         const enabledRules = this.getEnabledRules(fileName, source, configuration);
         let sourceFile = this.getSourceFile(fileName, source);
         let hasLinterRun = false;
@@ -110,7 +111,7 @@ class Linter {
         if (this.options.fix) {
             for (let rule of enabledRules) {
                 let ruleFailures = this.applyRule(rule, sourceFile);
-                const fixes = ruleFailures.map((f) => f.getFix()).filter((f) => !!f);
+                const fixes = ruleFailures.map((f) => f.getFix()).filter((f): f is Fix => !!f) as Fix[];
                 source = fs.readFileSync(fileName, { encoding: "utf-8" });
                 if (fixes.length > 0) {
                     this.fixes = this.fixes.concat(ruleFailures);
@@ -140,7 +141,9 @@ class Linter {
 
     public getResult(): LintResult {
         let formatter: IFormatter;
-        const formattersDirectory = getRelativePath(this.options.formattersDirectory);
+        const formattersDirectory = this.options.formattersDirectory !== undefined
+            ? getRelativePath(this.options.formattersDirectory)
+            : undefined;
 
         const formatterName = this.options.formatter || "prose";
         const Formatter = findFormatter(formatterName, formattersDirectory);
@@ -177,7 +180,7 @@ class Linter {
         return fileFailures;
     }
 
-    private getEnabledRules(fileName: string, source?: string, configuration: IConfigurationFile = DEFAULT_CONFIG): IRule[] {
+    private getEnabledRules(fileName: string, source: string, configuration: IConfigurationFile = DEFAULT_CONFIG): IRule[] {
         const sourceFile = this.getSourceFile(fileName, source);
         const isJs = /\.jsx?$/i.test(fileName);
         const configurationRules = isJs ? configuration.jsRules : configuration.rules;
@@ -186,6 +189,7 @@ class Linter {
         const rulesWalker = new EnableDisableRulesWalker(sourceFile, {
             disabledIntervals: [],
             ruleLevel: RuleLevel.ERROR,
+            ruleArguments: [],
             ruleName: "",
         }, configurationRules);
         rulesWalker.walk(sourceFile);
@@ -198,7 +202,7 @@ class Linter {
         return configuredRules.filter((r) => r.isEnabled());
     }
 
-    private getSourceFile(fileName: string, source?: string) {
+    private getSourceFile(fileName: string, source: string) {
         let sourceFile: ts.SourceFile;
         if (this.program) {
             sourceFile = this.program.getSourceFile(fileName);
