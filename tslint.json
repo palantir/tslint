@@ -2,6 +2,7 @@
   "extends": "tslint:latest",
   "rules": {
     "interface-name": false,
+    "interface-over-type-literal": true,
     "file-header": [true,
       "Copyright \\d{4} Palantir Technologies, Inc."
     ],
@@ -13,6 +14,8 @@
       "variables-before-functions"
     ],
     "no-unused-variable": false,
+    "no-default-export": true,
+    "no-empty-interface": true,
     "prefer-const": true,
     "variable-name": [true,
       "ban-keywords",
