@@ -45,7 +45,14 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class NoAngleBracketTypeAssertionWalker extends Lint.RuleWalker {
     public visitTypeAssertionExpression(node: ts.TypeAssertion) {
-        this.addFailureAtNode(node, Rule.FAILURE_STRING);
+        const { expression, type } = node;
+        const fix = new Lint.Fix(Rule.metadata.ruleName, [
+            // add 'as' syntax at end
+            this.createReplacement(node.getEnd(), 0, ` as ${type.getText()}`),
+            // delete the angle bracket assertion
+            this.createReplacement(node.getStart(), expression.getStart() - node.getStart(), ""),
+        ]);
+        this.addFailureAtNode(node, Rule.FAILURE_STRING, fix);
         super.visitTypeAssertionExpression(node);
     }
 }
