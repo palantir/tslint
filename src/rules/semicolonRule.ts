@@ -172,8 +172,9 @@ class SemicolonWalker extends Lint.RuleWalker {
         const always = !never && (this.hasOption(OPTION_ALWAYS) || (this.getOptions() && this.getOptions().length === 0));
 
         if (always && !hasSemicolon) {
+            const children = node.getChildren(sourceFile);
             const lastChild = children[children.length - 1];
-            if (node.parent.kind === ts.SyntaxKind.InterfaceDeclaration && lastChild.kind === ts.SyntaxKind.CommaToken) {
+            if (node.parent!.kind === ts.SyntaxKind.InterfaceDeclaration && lastChild.kind === ts.SyntaxKind.CommaToken) {
                 const failureStart = lastChild.getStart(sourceFile);
                 const fix = new Lint.Fix(Rule.metadata.ruleName, [
                     this.createReplacement(failureStart, lastChild.getWidth(sourceFile), ";"),
