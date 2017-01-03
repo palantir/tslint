@@ -14,7 +14,6 @@
       "static-before-instance",
       "variables-before-functions"
     ],
-    "no-unused-variable": false,
     "no-default-export": true,
     "no-empty-interface": true,
     "prefer-const": true,
