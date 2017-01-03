@@ -60,7 +60,7 @@ class MyClass {
     }
 
     public initializedMethodPropertyWithoutSemicolon = () => {
-        return "hi again"; 
+        return "hi again";
     }
 
     public initializedMethodProperty1Line = () => { return "hi"; };
@@ -71,6 +71,7 @@ class MyClass {
 interface ITest {
     foo?: string;
     bar: number;
+    qux: string;
     baz: boolean;
 }
 
