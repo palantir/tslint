@@ -15,24 +15,28 @@
  * limitations under the License.
  */
 
-// tslint:disable-next-line:no-var-requires
+import { dedent } from "./utils";
+
+// tslint:disable-next-line no-var-requires
 const updateNotifier = require("update-notifier");
-// tslint:disable-next-line:no-var-requires 
 
 export function updateNotifierCheck(): void {
     try {
         const pkg = require("../package.json");
         // Check every 3 days for a new version
-        const cacheTime: number = 1000 * 60 * 60 * 24 * 3;
-        const changeLogUrl: string = "https://github.com/palantir/tslint/blob/master/CHANGELOG.md";
+        const cacheTime = 1000 * 60 * 60 * 24 * 3;
+        const changeLogUrl = "https://github.com/palantir/tslint/blob/master/CHANGELOG.md";
         const notifier = updateNotifier({
             pkg,
             updateCheckInterval: cacheTime,
         });
 
         if (notifier.notify && notifier.update) {
-            const message: string = `TSLint update available v${notifier.update.current} → v${notifier.update.latest} \n See ${changeLogUrl}`;
-            notifier.notify({ message });
+            notifier.notify({
+                message: dedent`
+                    TSLint update available v${notifier.update.current} → v${notifier.update.latest}.
+                    See ${changeLogUrl}`,
+            });
         }
     } catch (error) {
         // ignore error

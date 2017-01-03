@@ -142,7 +142,7 @@ describe("Configuration", () => {
 
             it("extends with package installed relative to tslint", () => {
                 fs.writeFileSync(tmpfile!, JSON.stringify({ extends: "tslint-test-config-non-relative" }));
-                let config = loadConfigurationFromPath(tmpfile!);
+                const config = loadConfigurationFromPath(tmpfile!);
                 assert.deepEqual(config.rules, {
                     "class-name": true,
                 });
@@ -150,7 +150,7 @@ describe("Configuration", () => {
         });
 
         it("extends with package two levels (and relative path in rulesDirectory)", () => {
-            let config = loadConfigurationFromPath("./test/config/tslint-extends-package-two-levels.json");
+            const config = loadConfigurationFromPath("./test/config/tslint-extends-package-two-levels.json");
 
             assert.isArray(config.rulesDirectory);
             assert.lengthOf(config.rulesDirectory, 2);
@@ -173,7 +173,7 @@ describe("Configuration", () => {
         });
 
         it("extends with array", () => {
-            let config = loadConfigurationFromPath("./test/config/tslint-extends-package-array.json");
+            const config = loadConfigurationFromPath("./test/config/tslint-extends-package-array.json");
 
             assert.isArray(config.rulesDirectory);
             assert.deepEqual(config.jsRules, {

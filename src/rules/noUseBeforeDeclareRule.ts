@@ -43,7 +43,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-type VisitedVariables = {[varName: string]: boolean};
+interface VisitedVariables {
+    [varName: string]: boolean;
+}
 
 class NoUseBeforeDeclareWalker extends Lint.ScopeAwareRuleWalker<VisitedVariables> {
     private importedPropertiesPositions: number[] = [];
