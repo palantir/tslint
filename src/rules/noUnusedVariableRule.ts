@@ -146,7 +146,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         let someFixBrokeIt = false;
         // Performance optimization: type-check the whole file before verifying individual fixes
         if (this.possibleFailures.some((f) => f.hasFix())) {
-            let newText = Lint.Fix.applyAll(this.getSourceFile().getFullText(),
+            const newText = Lint.Fix.applyAll(this.getSourceFile().getFullText(),
                 this.possibleFailures.map((f) => f.getFix()).filter((f) => !!f) as Lint.Fix[]);
 
             // If we have the program, we can verify that the fix doesn't introduce failures
@@ -161,7 +161,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
             if (!someFixBrokeIt || fix === undefined) {
                 this.addFailure(f);
             } else {
-                let newText = fix.apply(this.getSourceFile().getFullText());
+                const newText = fix.apply(this.getSourceFile().getFullText());
                 if (Lint.checkEdit(this.languageService, this.getSourceFile(), newText).length === 0) {
                     this.addFailure(f);
                 }
@@ -222,7 +222,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         }
         if (importClause.namedBindings != null) {
             if (importClause.namedBindings.kind === ts.SyntaxKind.NamedImports && node.importClause !== undefined) {
-                let imports = node.importClause.namedBindings as ts.NamedImports;
+                const imports = node.importClause.namedBindings as ts.NamedImports;
                 usedNamedImports = imports.elements.map((e) => this.isUsed(e.name.text, e.name.getStart()));
             }
             // Avoid deleting the whole statement if there's an import * inside
@@ -255,7 +255,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
                     this.deleteText(start, importClause.namedBindings.getEnd() - start),
                 ]);
             } else {
-                let imports = importClause.namedBindings as ts.NamedImports;
+                const imports = importClause.namedBindings as ts.NamedImports;
                 let priorElementUsed = false;
                 for (let idx = 0; idx < imports.elements.length; idx++) {
                     const namedImport = imports.elements[idx];
@@ -265,8 +265,8 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
                         const isLast = idx === imports.elements.length - 1;
                         // Before the first used import, consume trailing commas.
                         // Afterward, consume leading commas instead.
-                        let start = priorElementUsed ? imports.elements[idx - 1].getEnd() : namedImport.getStart();
-                        let end = priorElementUsed || isLast ? namedImport.getEnd() : imports.elements[idx + 1].getStart();
+                        const start = priorElementUsed ? imports.elements[idx - 1].getEnd() : namedImport.getStart();
+                        const end = priorElementUsed || isLast ? namedImport.getEnd() : imports.elements[idx + 1].getStart();
                         this.fail(Rule.FAILURE_TYPE_IMPORT, namedImport.name.text, namedImport.name.getStart(), [
                             this.deleteText(start, end - start),
                         ]);

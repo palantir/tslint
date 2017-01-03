@@ -83,7 +83,7 @@ class NoMagicNumbersWalker extends Lint.RuleWalker {
     public visitNode(node: ts.Node) {
         const isUnary = this.isUnaryNumericExpression(node);
         if (node.kind === ts.SyntaxKind.NumericLiteral && node.parent !== undefined && !Rule.ALLOWED_NODES[node.parent.kind] || isUnary) {
-            let text = node.getText();
+            const text = node.getText();
             if (!this.allowed[text]) {
                 this.addFailureAtNode(node, Rule.FAILURE_STRING);
             }

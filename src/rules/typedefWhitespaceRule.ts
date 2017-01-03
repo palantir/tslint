@@ -250,7 +250,7 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
             // Don't enforce trailing spaces on newlines
             // (https://github.com/palantir/tslint/issues/1354)
             scanner.setTextPos(positionToCheck);
-            let kind = scanner.scan();
+            const kind = scanner.scan();
             if (kind === ts.SyntaxKind.NewLineTrivia) {
                 return;
             }

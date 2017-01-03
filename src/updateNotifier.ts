@@ -31,7 +31,7 @@ export function updateNotifierCheck(): void {
         });
 
         if (notifier.notify && notifier.update) {
-            let message: string = `TSLint update available v${notifier.update.current} → v${notifier.update.latest} \n See ${changeLogUrl}`;
+            const message: string = `TSLint update available v${notifier.update.current} → v${notifier.update.latest} \n See ${changeLogUrl}`;
             notifier.notify({ message });
         }
     } catch (error) {

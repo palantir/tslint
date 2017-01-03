@@ -104,7 +104,7 @@ class TypedefWalker extends Lint.RuleWalker {
     }
 
     public visitObjectLiteralExpression(node: ts.ObjectLiteralExpression) {
-        for (let property of node.properties) {
+        for (const property of node.properties) {
             switch (property.kind) {
                 case ts.SyntaxKind.PropertyAssignment:
                     this.visitPropertyAssignment(<ts.PropertyAssignment> property);

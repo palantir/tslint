@@ -108,7 +108,7 @@ function isFallThroughAllowed(sourceFile: ts.SourceFile, nextCaseOrDefaultStatem
     const firstChild = nextCaseOrDefaultStatement.getChildAt(0);
     const commentRanges = ts.getLeadingCommentRanges(sourceFileText, firstChild.getFullStart());
     if (commentRanges != null) {
-        for (let commentRange of commentRanges) {
+        for (const commentRange of commentRanges) {
             const commentText = sourceFileText.substring(commentRange.pos, commentRange.end);
             if (commentText === "/* falls through */") {
                 return true;
