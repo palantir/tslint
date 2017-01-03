@@ -58,7 +58,7 @@ class AdjacentOverloadSignaturesWalker extends Lint.RuleWalker {
     }
 
     public visitInterfaceDeclaration(node: ts.InterfaceDeclaration): void {
-        this.checkOverloadsAdjacent(node.members, getOverload);
+        this.checkOverloadsAdjacent(node.members, getOverloadIfSignature);
         super.visitInterfaceDeclaration(node);
     }
 
@@ -84,7 +84,7 @@ class AdjacentOverloadSignaturesWalker extends Lint.RuleWalker {
     }
 
     private visitMembers(members: Array<ts.TypeElement | ts.ClassElement>) {
-        this.checkOverloadsAdjacent(members, getOverload);
+        this.checkOverloadsAdjacent(members, getOverloadIfSignature);
     }
 
     /** 'getOverloadName' may return undefined for nodes that cannot be overloads, e.g. a `const` declaration. */
@@ -118,25 +118,38 @@ function isLiteralExpression(node: ts.Node): node is ts.LiteralExpression {
     return node.kind === ts.SyntaxKind.StringLiteral || node.kind === ts.SyntaxKind.NumericLiteral;
 }
 
-export function getOverloadKey(node: ts.TypeElement | ts.ClassElement): string | undefined {
+export function getOverloadKey(node: ts.SignatureDeclaration): string | undefined {
     const o = getOverload(node);
     return o && o.key;
 }
 
-function getOverload(node: ts.TypeElement | ts.ClassElement): Overload | undefined {
-    // Check that it *is* an overload.
+function getOverloadIfSignature(node: ts.TypeElement | ts.ClassElement): Overload | undefined {
+    return isSignatureDeclaration(node) ? getOverload(node) : undefined;
+}
+
+export function isSignatureDeclaration(node: ts.Node): node is ts.SignatureDeclaration {
+    switch (node.kind) {
+        case ts.SyntaxKind.ConstructSignature:
+        case ts.SyntaxKind.Constructor:
+        case ts.SyntaxKind.CallSignature:
+        case ts.SyntaxKind.CallSignature:
+        case ts.SyntaxKind.MethodSignature:
+        case ts.SyntaxKind.MethodDeclaration:
+        case ts.SyntaxKind.FunctionDeclaration:
+            return true;
+        default:
+            return false;
+    }
+}
+
+function getOverload(node: ts.SignatureDeclaration): Overload | undefined {
     switch (node.kind) {
         case ts.SyntaxKind.ConstructSignature:
         case ts.SyntaxKind.Constructor:
             return { name: "constructor", key: "constructor" };
         case ts.SyntaxKind.CallSignature:
             return { name: "()", key: "()" };
-        case ts.SyntaxKind.CallSignature:
-        case ts.SyntaxKind.MethodSignature:
-        case ts.SyntaxKind.MethodDeclaration:
-            break;
         default:
-            return undefined;
     }
 
     if (node.name === undefined) {

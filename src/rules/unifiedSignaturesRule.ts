@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2013 Palantir Technologies, Inc.
+ * Copyright 2017 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
-import { getOverloadKey } from "./adjacentOverloadSignaturesRule";
+import { getOverloadKey, isSignatureDeclaration } from "./adjacentOverloadSignaturesRule";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -60,7 +60,7 @@ class Walker extends Lint.RuleWalker {
         super.visitModuleDeclaration(node);
     }
 
-    public visitInterfaceDeclaration(node: ts.InterfaceDeclaration): void {
+    public visitInterfaceDeclaration(node: ts.InterfaceDeclaration) {
         this.checkMembers(node.members, node.typeParameters);
         super.visitInterfaceDeclaration(node);
     }
@@ -89,8 +89,11 @@ class Walker extends Lint.RuleWalker {
     private checkMembers(members: Array<ts.TypeElement | ts.ClassElement>, typeParameters?: ts.TypeParameterDeclaration[]) {
         this.checkOverloads(members, getOverloadName, typeParameters);
         function getOverloadName(member: ts.TypeElement | ts.ClassElement) {
+            if (!isSignatureDeclaration(member)) {
+                return undefined;
+            }
             const key = getOverloadKey(member);
-            return key === undefined ? undefined : { signature: member as any as ts.SignatureDeclaration, key };
+            return key === undefined ? undefined : { signature: member, key };
         }
     }
 
@@ -112,7 +115,7 @@ class Walker extends Lint.RuleWalker {
             const params = signaturesDifferBySingleParameter(a.parameters, b.parameters);
             if (params) {
                 const [p0, p1] = params;
-                this.addFailureAtNode(p1, Rule.FAILURE_STRING_SINGLE_PARAMETER_DIFFERENCE(p0.type.getText(), p1.type.getText()));
+                this.addFailureAtNode(p1, Rule.FAILURE_STRING_SINGLE_PARAMETER_DIFFERENCE(typeText(p0), typeText(p1)));
             }
         } else {
             const extraParameter = signaturesDifferByOptionalOrRestParameter(a.parameters, b.parameters);
@@ -123,6 +126,10 @@ class Walker extends Lint.RuleWalker {
             }
         }
     }
+}
+
+function typeText({ type }: ts.ParameterDeclaration) {
+    return type === undefined ? "any" : type.getText();
 }
 
 function signaturesCanBeUnified(a: ts.SignatureDeclaration, b: ts.SignatureDeclaration, isTypeParameter: IsTypeParameter): boolean {
@@ -209,7 +216,7 @@ function getIsTypeParameter(typeParameters?: ts.TypeParameterDeclaration[]): IsT
 
 /** True if any of the outer type parameters are used in a signature. */
 function signatureUsesTypeParameter(sig: ts.SignatureDeclaration, isTypeParameter: IsTypeParameter): boolean {
-    return sig.parameters.some((p) => typeContainsTypeParameter(p.type));
+    return sig.parameters.some((p) => p.type !== undefined && typeContainsTypeParameter(p.type));
 
     function typeContainsTypeParameter(type: ts.Node): boolean {
         if (type.kind === ts.SyntaxKind.TypeReference) {
