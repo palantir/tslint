@@ -49,26 +49,18 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const options = this.getOptions();
-        return this.applyWithWalker(
-            new NoRequireFullLibraryWalker(sourceFile, options, options.ruleArguments),
-        );
+        return this.applyWithWalker(new NoRequireFullLibraryWalker(sourceFile, this.getOptions()));
     }
 }
 
 class NoRequireFullLibraryWalker extends Lint.RuleWalker {
-    private blacklist: string[];
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions, blacklist: string[]) {
-        super(sourceFile, options);
-        this.blacklist = blacklist;
-    }
-
     public visitCallExpression(node: ts.CallExpression) {
-        if (
-            node.expression.getText() === "require" &&
-            node.arguments &&
-            node.arguments[0] &&
-            this.isModuleBlacklisted(node.arguments[0].getText())
+        if (node.expression.kind === ts.SyntaxKind.Identifier &&
+            (node.expression as ts.Identifier).text === "require" &&
+            node.arguments !== undefined &&
+            node.arguments.length === 1 &&
+            isStringLiteral(node.arguments[0]) &&
+            this.hasOption((node.arguments[0] as ts.LiteralExpression).text)
         ) {
             this.reportFailure(node.arguments[0]);
         }
@@ -76,35 +68,38 @@ class NoRequireFullLibraryWalker extends Lint.RuleWalker {
     }
 
     public visitImportEqualsDeclaration(node: ts.ImportEqualsDeclaration) {
-        const moduleReference = node.moduleReference as ts.ExternalModuleReference;
-        // If it's an import require and not an import alias
-        if (moduleReference.expression) {
-            if (this.isModuleBlacklisted(moduleReference.expression.getText())) {
-                this.reportFailure(moduleReference.expression);
-            }
+        if (isExternalModuleReference(node.moduleReference) &&
+            node.moduleReference.expression !== undefined &&
+            isStringLiteral(node.moduleReference.expression) &&
+            this.hasOption(node.moduleReference.expression.text)) {
+
+            // If it's an import require and not an import alias
+            this.reportFailure(node.moduleReference.expression);
         }
         super.visitImportEqualsDeclaration(node);
     }
 
     public visitImportDeclaration(node: ts.ImportDeclaration) {
-        if (this.isModuleBlacklisted(node.moduleSpecifier.getText())) {
+        if (isStringLiteral(node.moduleSpecifier) && this.hasOption(node.moduleSpecifier.text)) {
             this.reportFailure(node.moduleSpecifier);
         }
         super.visitImportDeclaration(node);
     }
 
-    private isModuleBlacklisted(text: string): boolean {
-        return this.blacklist.some((entry) => {
-            return text.substring(1, text.length - 1) === entry;
-        });
-    }
-
-    private reportFailure(node: ts.Expression): void {
-        this.addFailureAt(
-            // take quotes into account
-            node.getStart() + 1,
-            node.getWidth() - 2,
+    private reportFailure(node: ts.Node) {
+        this.addFailureFromStartToEnd(
+            node.getStart(this.getSourceFile()) + 1,
+            node.getEnd() - 1,
             Rule.FAILURE_STRING,
         );
     }
+}
+
+function isStringLiteral(node: ts.Node): node is ts.LiteralExpression {
+    return node.kind === ts.SyntaxKind.StringLiteral ||
+        node.kind === ts.SyntaxKind.NoSubstitutionTemplateLiteral;
+}
+
+function isExternalModuleReference(node: ts.ModuleReference): node is ts.ExternalModuleReference {
+    return node.kind === ts.SyntaxKind.ExternalModuleReference;
 }
