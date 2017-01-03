@@ -16,6 +16,7 @@
     ],
     "no-default-export": true,
     "no-empty-interface": true,
+    "no-string-throw": true,
     "prefer-const": true,
     "variable-name": [true,
       "ban-keywords",

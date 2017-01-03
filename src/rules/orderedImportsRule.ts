@@ -274,7 +274,7 @@ class ImportsBlock {
 
         const start = fileOffset - importDeclaration.nodeStartOffset;
         if (start < 0 || start + length > importDeclaration.node.getEnd()) {
-            throw "Unexpected named import position";
+            throw new Error("Unexpected named import position");
         }
 
         const initialText = importDeclaration.text;
