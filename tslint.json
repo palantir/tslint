@@ -1,6 +1,7 @@
 {
   "extends": "tslint:latest",
   "rules": {
+    "callable-types": true,
     "interface-name": false,
     "interface-over-type-literal": true,
     "file-header": [true,
