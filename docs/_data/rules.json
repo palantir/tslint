@@ -1567,6 +1567,14 @@
     "typescriptOnly": true
   },
   {
+    "ruleName": "unified-signatures",
+    "description": "Warns for any two overloads that could be unified into one by using a union or an optional/rest parameter.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "type": "typescript",
+    "typescriptOnly": true
+  },
+  {
     "ruleName": "typeof-compare",
     "description": "Makes sure result of `typeof` is compared to correct string values",
     "optionsDescription": "",
