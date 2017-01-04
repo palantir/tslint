@@ -62,8 +62,8 @@ class OnlyArrowFunctionsWalker extends Lint.RuleWalker {
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
-        this.allowDeclarations = options.ruleArguments.indexOf(OPTION_ALLOW_DECLARATIONS) !== -1;
-        this.allowNamedFunctions = options.ruleArguments.indexOf(OPTION_ALLOW_NAMED_FUNCTIONS) !== -1;
+        this.allowDeclarations = this.hasOption(OPTION_ALLOW_DECLARATIONS);
+        this.allowNamedFunctions = this.hasOption(OPTION_ALLOW_NAMED_FUNCTIONS);
     }
 
     public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
