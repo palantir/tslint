@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @license
  * Copyright 2016 Palantir Technologies, Inc.
  *
