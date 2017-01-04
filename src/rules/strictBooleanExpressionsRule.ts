@@ -66,14 +66,14 @@ class StrictBooleanExpressionsRule extends Lint.ProgramAwareRuleWalker {
                 if (lhsExpression.kind !== ts.SyntaxKind.BinaryExpression) {
                     this.addFailureAtNode(lhsExpression, Rule.BINARY_EXPRESSION_ERROR);
                 } else {
-                    this.visitBinaryExpression(<ts.BinaryExpression> lhsExpression);
+                    this.visitBinaryExpression(lhsExpression as ts.BinaryExpression);
                 }
             }
             if (!this.isBooleanType(rhsType)) {
                 if (rhsExpression.kind !== ts.SyntaxKind.BinaryExpression) {
                     this.addFailureAtNode(rhsExpression, Rule.BINARY_EXPRESSION_ERROR);
                 } else {
-                    this.visitBinaryExpression(<ts.BinaryExpression> rhsExpression);
+                    this.visitBinaryExpression(rhsExpression as ts.BinaryExpression);
                 }
             }
         }

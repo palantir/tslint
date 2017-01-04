@@ -129,7 +129,7 @@ class PreferForOfWalker extends Lint.BlockScopeAwareRuleWalker<{}, IncrementorMa
                 if (assignment.kind === ts.SyntaxKind.VariableDeclaration) {
                     const value = assignment.getChildAt(2).getText();
                     if (value === "0") {
-                        indexVariable = <ts.Identifier> assignment.getChildAt(0);
+                        indexVariable = assignment.getChildAt(0) as ts.Identifier;
                         indexVariableName = indexVariable.getText();
                     }
                 }
@@ -153,7 +153,7 @@ class PreferForOfWalker extends Lint.BlockScopeAwareRuleWalker<{}, IncrementorMa
         // ensure that the condition checks a `length` property
         const conditionRight = forLoop.condition.getChildAt(2);
         if (conditionRight.kind === ts.SyntaxKind.PropertyAccessExpression) {
-            const propertyAccess = <ts.PropertyAccessExpression> conditionRight;
+            const propertyAccess = conditionRight as ts.PropertyAccessExpression;
             if (indexVariable != null && propertyAccess.name.getText() === "length") {
                 return { indexVariable: indexVariable!, arrayToken: propertyAccess.expression };
             }
@@ -169,19 +169,19 @@ class PreferForOfWalker extends Lint.BlockScopeAwareRuleWalker<{}, IncrementorMa
 
         // ensure variable is incremented
         if (node.kind === ts.SyntaxKind.PrefixUnaryExpression) {
-            const incrementor = <ts.PrefixUnaryExpression> node;
+            const incrementor = node as ts.PrefixUnaryExpression;
             if (incrementor.operator === ts.SyntaxKind.PlusPlusToken && incrementor.operand.getText() === indexVariableName) {
                 // x++
                 return true;
             }
         } else if (node.kind === ts.SyntaxKind.PostfixUnaryExpression) {
-            const incrementor = <ts.PostfixUnaryExpression> node;
+            const incrementor = node as ts.PostfixUnaryExpression;
             if (incrementor.operator === ts.SyntaxKind.PlusPlusToken && incrementor.operand.getText() === indexVariableName) {
                 // ++x
                 return true;
             }
         } else if (node.kind === ts.SyntaxKind.BinaryExpression) {
-            const binaryExpression = <ts.BinaryExpression> node;
+            const binaryExpression = node as ts.BinaryExpression;
             if (binaryExpression.operatorToken.getText() === "+="
                 && binaryExpression.left.getText() === indexVariableName
                 && binaryExpression.right.getText() === "1") {
@@ -190,7 +190,7 @@ class PreferForOfWalker extends Lint.BlockScopeAwareRuleWalker<{}, IncrementorMa
             }
             if (binaryExpression.operatorToken.getText() === "="
                 && binaryExpression.left.getText() === indexVariableName) {
-                const addExpression = <ts.BinaryExpression> binaryExpression.right;
+                const addExpression = binaryExpression.right as ts.BinaryExpression;
                 if (addExpression.operatorToken.getText() === "+") {
                     if (addExpression.right.getText() === indexVariableName && addExpression.left.getText() === "1") {
                         // x = 1 + x

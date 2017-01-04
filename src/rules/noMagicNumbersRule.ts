@@ -100,7 +100,7 @@ class NoMagicNumbersWalker extends Lint.RuleWalker {
         if (node.kind !== ts.SyntaxKind.PrefixUnaryExpression) {
             return false;
         }
-        const unaryNode = (<ts.PrefixUnaryExpression> node);
+        const unaryNode = (node as ts.PrefixUnaryExpression);
         return unaryNode.operator === ts.SyntaxKind.MinusToken && unaryNode.operand.kind === ts.SyntaxKind.NumericLiteral;
     }
 }
