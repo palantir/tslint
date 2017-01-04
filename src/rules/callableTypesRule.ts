@@ -66,9 +66,9 @@ class Walker extends Lint.RuleWalker {
                 return;
             }
 
-            const suggestion = renderSuggestion(call);
+            const suggestion = renderSuggestion(call, this.getSourceFile());
             if (node.kind === ts.SyntaxKind.InterfaceDeclaration) {
-                this.addFailureAtNode(node.name, Rule.failureStringForInterface(node.name.getText(), suggestion));
+                this.addFailureAtNode(node.name, Rule.failureStringForInterface(node.name.text, suggestion));
             } else {
                 this.addFailureAtNode(call, Rule.failureStringForTypeLiteral(suggestion));
             }
@@ -92,10 +92,10 @@ function noSupertype(heritageClauses: ts.NodeArray<ts.HeritageClause> | undefine
     return false;
 }
 
-function renderSuggestion(call: ts.CallSignatureDeclaration): string {
-    const typeParameters = call.typeParameters && call.typeParameters.map((p) => p.getText()).join(", ");
-    const parameters = call.parameters.map((p) => p.getText()).join(", ");
-    const returnType = call.type === undefined ? "void" : call.type.getText();
+function renderSuggestion(call: ts.CallSignatureDeclaration, sourceFile: ts.SourceFile): string {
+    const typeParameters = call.typeParameters && call.typeParameters.map((p) => p.getText(sourceFile)).join(", ");
+    const parameters = call.parameters.map((p) => p.getText(sourceFile)).join(", ");
+    const returnType = call.type === undefined ? "void" : call.type.getText(sourceFile);
     let res = `(${parameters}) => ${returnType}`;
     if (typeParameters) {
         res = `<${typeParameters}>${res}`;

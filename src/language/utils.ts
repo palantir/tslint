@@ -54,11 +54,16 @@ export function createCompilerOptions(): ts.CompilerOptions {
 }
 
 export function doesIntersect(failure: RuleFailure, disabledIntervals: IDisabledInterval[]) {
-    return disabledIntervals.some((interval) => {
-        const maxStart = Math.max(interval.startPosition, failure.getStartPosition().getPosition());
-        const minEnd = Math.min(interval.endPosition, failure.getEndPosition().getPosition());
-        return maxStart <= minEnd;
-    });
+    const failureStart = failure.getStartPosition().getPosition();
+    const failureEnd = failure.getEndPosition().getPosition();
+    for (const interval of disabledIntervals) {
+        const maxStart = Math.max(interval.startPosition, failureStart);
+        const minEnd = Math.min(interval.endPosition, failureEnd);
+        if (maxStart <= minEnd) {
+            return true;
+        }
+    }
+    return false;
 }
 
 export function scanAllTokens(scanner: ts.Scanner, callback: (s: ts.Scanner) => void) {
@@ -81,9 +86,12 @@ export function hasModifier(modifiers: ts.ModifiersArray | undefined, ...modifie
         return false;
     }
 
-    return modifiers.some((m) => {
-        return modifierKinds.some((k) => m.kind === k);
-    });
+    for (const modifier of modifiers) {
+        if (modifierKinds.indexOf(modifier.kind) !== -1) {
+            return true;
+        }
+    }
+    return false;
 }
 
 /**
@@ -117,22 +125,17 @@ export function getBindingElementVariableDeclaration(node: ts.BindingElement): t
     return currentParent as ts.VariableDeclaration;
 }
 
-/** Shim of Array.find */
-function find<T>(a: T[], predicate: (value: T) => boolean): T | undefined {
-    for (const value of a) {
-        if (predicate(value)) {
-            return value;
-        }
-    }
-    return undefined;
-}
-
 /**
  * Finds a child of a given node with a given kind.
  * Note: This uses `node.getChildren()`, which does extra parsing work to include tokens.
  */
-export function childOfKind(node: ts.Node, kind: ts.SyntaxKind): ts.Node | undefined {
-    return find(node.getChildren(), (child) => child.kind === kind);
+export function childOfKind(node: ts.Node, kind: ts.SyntaxKind, sourceFile?: ts.SourceFile): ts.Node | undefined {
+    for (const child of node.getChildren(sourceFile)) {
+        if (child.kind === kind) {
+            return child;
+        }
+    }
+    return undefined;
 }
 
 /**

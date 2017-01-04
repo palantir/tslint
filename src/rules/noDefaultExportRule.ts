@@ -46,7 +46,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class NoDefaultExportWalker extends Lint.RuleWalker {
     public visitExportAssignment(node: ts.ExportAssignment) {
-        const exportMember = node.getChildAt(1);
+        const exportMember = node.getChildAt(1, this.getSourceFile());
         if (exportMember != null && exportMember.kind === ts.SyntaxKind.DefaultKeyword) {
             this.addFailureAtNode(exportMember, Rule.FAILURE_STRING);
         }

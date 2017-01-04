@@ -89,11 +89,6 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class TypedefWhitespaceWalker extends Lint.RuleWalker {
-    private static getColonPosition(node: ts.Node) {
-        const colon = Lint.childOfKind(node, ts.SyntaxKind.ColonToken);
-        return colon && colon.getStart();
-    }
-
     public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
         this.checkSpace("call-signature", node, node.type);
         super.visitFunctionDeclaration(node);
@@ -151,7 +146,7 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
 
     public checkSpace(option: string, node: ts.Node, typeNode: ts.TypeNode | ts.StringLiteral | undefined) {
         if (this.hasOption(option) && typeNode != null) {
-            const colonPosition = TypedefWhitespaceWalker.getColonPosition(node);
+            const colonPosition = this.getColonPosition(node);
 
             if (colonPosition !== undefined) {
                 const scanner = ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, node.getText());
@@ -164,6 +159,12 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
 
     public hasOption(option: string) {
         return this.hasLeftOption(option) || this.hasRightOption(option);
+    }
+
+    private getColonPosition(node: ts.Node) {
+        const sourceFile = this.getSourceFile();
+        const colon = Lint.childOfKind(node, ts.SyntaxKind.ColonToken, sourceFile);
+        return colon && colon.getStart(sourceFile);
     }
 
     private hasLeftOption(option: string) {

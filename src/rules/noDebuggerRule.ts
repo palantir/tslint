@@ -42,8 +42,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class NoDebuggerWalker extends Lint.RuleWalker {
     public visitDebuggerStatement(node: ts.Statement) {
-        const debuggerKeywordNode = node.getChildAt(0);
-        this.addFailureAtNode(debuggerKeywordNode, Rule.FAILURE_STRING);
+        this.addFailureAt(node.getStart(this.getSourceFile()), "debugger".length, Rule.FAILURE_STRING);
         super.visitDebuggerStatement(node);
    }
 }

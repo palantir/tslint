@@ -118,7 +118,7 @@ export class MemberAccessWalker extends Lint.RuleWalker {
             } else if (node.kind === ts.SyntaxKind.Constructor) {
                 memberType = "class constructor";
                 publicOnly = true;
-                end = Lint.childOfKind(node, ts.SyntaxKind.ConstructorKeyword)!.getEnd();
+                end = Lint.childOfKind(node, ts.SyntaxKind.ConstructorKeyword, this.getSourceFile())!.getEnd();
             } else if (node.kind === ts.SyntaxKind.GetAccessor) {
                 memberType = "get property accessor";
                 end = (node as ts.AccessorDeclaration).name.getEnd();
@@ -135,7 +135,7 @@ export class MemberAccessWalker extends Lint.RuleWalker {
                 memberName = (node.name as ts.Identifier).text;
             }
             const failureString = Rule.FAILURE_STRING_FACTORY(memberType, memberName, publicOnly);
-            this.addFailureFromStartToEnd(node.getStart(), end, failureString);
+            this.addFailureFromStartToEnd(node.getStart(this.getSourceFile()), end, failureString);
         }
     }
 }

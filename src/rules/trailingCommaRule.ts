@@ -176,23 +176,24 @@ class TrailingCommaWalker extends Lint.RuleWalker {
 
     public visitTypeLiteral(node: ts.TypeLiteralNode) {
         this.lintNode(node);
+        const sourceFile = this.getSourceFile();
         // object type literals need to be inspected separately because they
         // have a different syntax list wrapper token, and they can be semicolon delimited
-        const children = node.getChildren();
+        const children = node.getChildren(sourceFile);
         for (let i = 0; i < children.length - 2; i++) {
             if (children[i].kind === ts.SyntaxKind.OpenBraceToken &&
                 children[i + 1].kind === ts.SyntaxKind.SyntaxList &&
                 children[i + 2].kind === ts.SyntaxKind.CloseBraceToken) {
-                const grandChildren = children[i + 1].getChildren();
+                const grandChildren = children[i + 1].getChildren(sourceFile);
                 // the AST is different from the grammar spec. The semicolons are included as tokens as part of *Signature,
                 // as opposed to optionals alongside it. So instead of children[i + 1] having
                 // [ PropertySignature, Semicolon, PropertySignature, Semicolon ], the AST is
                 // [ PropertySignature, PropertySignature], where the Semicolons are under PropertySignature
                 const hasSemicolon = grandChildren.some((grandChild) =>
-                    Lint.childOfKind(grandChild, ts.SyntaxKind.SemicolonToken) !== undefined);
+                    Lint.childOfKind(grandChild, ts.SyntaxKind.SemicolonToken, sourceFile) !== undefined);
 
                 if (!hasSemicolon) {
-                    const endLineOfClosingElement = this.getSourceFile().getLineAndCharacterOfPosition(children[i + 2].getEnd()).line;
+                    const endLineOfClosingElement = sourceFile.getLineAndCharacterOfPosition(children[i + 2].getEnd()).line;
                     this.lintChildNodeWithIndex(children[i + 1], grandChildren.length - 1, endLineOfClosingElement);
                 }
             }
