@@ -43,7 +43,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-type VisitedVariables = {[varName: string]: boolean};
+interface VisitedVariables {
+    [varName: string]: boolean;
+}
 
 class NoUseBeforeDeclareWalker extends Lint.ScopeAwareRuleWalker<VisitedVariables> {
     private importedPropertiesPositions: number[] = [];
@@ -90,7 +92,7 @@ class NoUseBeforeDeclareWalker extends Lint.ScopeAwareRuleWalker<VisitedVariable
     }
 
     public visitNamedImports(node: ts.NamedImports) {
-        for (let namedImport of node.elements) {
+        for (const namedImport of node.elements) {
             if (namedImport.propertyName != null) {
                 this.saveImportedPropertiesPositions(namedImport.propertyName.getStart());
             }
@@ -122,8 +124,8 @@ class NoUseBeforeDeclareWalker extends Lint.ScopeAwareRuleWalker<VisitedVariable
         const fileName = this.getSourceFile().fileName;
         const highlights = this.languageService.getDocumentHighlights(fileName, position, [fileName]);
         if (highlights != null) {
-            for (let highlight of highlights) {
-                for (let highlightSpan of highlight.highlightSpans) {
+            for (const highlight of highlights) {
+                for (const highlightSpan of highlight.highlightSpans) {
                     const referencePosition = highlightSpan.textSpan.start;
                     if (referencePosition < position && !this.isImportedPropertyName(referencePosition)) {
                         const failureString = Rule.FAILURE_STRING_PREFIX + name + Rule.FAILURE_STRING_POSTFIX;

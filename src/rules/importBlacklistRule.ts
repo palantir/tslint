@@ -101,7 +101,8 @@ class NoRequireFullLibraryWalker extends Lint.RuleWalker {
 
     private reportFailure (node: ts.Expression): void {
         this.addFailureAt(
-            node.getStart() + 1, // take quotes into account
+            // take quotes into account
+            node.getStart() + 1,
             node.getWidth() - 2,
             Rule.FAILURE_STRING,
         );

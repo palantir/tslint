@@ -274,7 +274,7 @@ class ImportsBlock {
 
         const start = fileOffset - importDeclaration.nodeStartOffset;
         if (start < 0 || start + length > importDeclaration.node.getEnd()) {
-            throw "Unexpected named import position";
+            throw new Error("Unexpected named import position");
         }
 
         const initialText = importDeclaration.text;
@@ -310,7 +310,7 @@ class ImportsBlock {
 
     // gets the offset of the end of the import's line, including newline, to include comment to the right
     private getEndOffset(sourceFile: ts.SourceFile, node: ts.ImportDeclaration) {
-        let endLineOffset = sourceFile.text.indexOf("\n", node.end) + 1;
+        const endLineOffset = sourceFile.text.indexOf("\n", node.end) + 1;
         return endLineOffset;
     }
 

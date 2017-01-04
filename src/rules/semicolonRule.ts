@@ -140,7 +140,7 @@ class SemicolonWalker extends Lint.RuleWalker {
             return;
         }
 
-        for (let member of node.members) {
+        for (const member of node.members) {
             this.checkSemicolonAt(member);
         }
         super.visitInterfaceDeclaration(node);

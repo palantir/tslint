@@ -16,7 +16,6 @@
  */
 
 import * as ts from "typescript";
-
 import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -35,11 +34,11 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Use an interface instead of a type literal.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new Walker(sourceFile, this.getOptions()));
+        return this.applyWithWalker(new InterfaceOverTypeLiteralWalker(sourceFile, this.getOptions()));
     }
 }
 
-class Walker extends Lint.RuleWalker {
+class InterfaceOverTypeLiteralWalker extends Lint.RuleWalker {
     public visitTypeAliasDeclaration(node: ts.TypeAliasDeclaration) {
         if (node.type.kind === ts.SyntaxKind.TypeLiteral) {
             this.addFailureAtNode(node.name, Rule.FAILURE_STRING);

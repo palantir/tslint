@@ -225,14 +225,14 @@ function resolveConfigurationPath(filePath: string, relativeTo?: string) {
 
 export function extendConfigurationFile(targetConfig: IConfigurationFile,
                                         nextConfigSource: IConfigurationFile): IConfigurationFile {
-    let combinedConfig: IConfigurationFile = {};
+    const combinedConfig: IConfigurationFile = {};
 
     const configRulesDirectory = arrayify(targetConfig.rulesDirectory);
     const nextConfigRulesDirectory = arrayify(nextConfigSource.rulesDirectory);
     combinedConfig.rulesDirectory = configRulesDirectory.concat(nextConfigRulesDirectory);
 
     const combineProperties = (targetProperty: any, nextProperty: any) => {
-        let combinedProperty: any = {};
+        const combinedProperty: any = {};
         for (const name of Object.keys(objectify(targetProperty))) {
             combinedProperty[name] = targetProperty[name];
         }
