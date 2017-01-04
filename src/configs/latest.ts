@@ -38,6 +38,7 @@ export const rules = {
     // added in v4.3
     "import-spacing": true,
     "space-before-function-paren": [true, "never"],
+    "typeof-compare": true,
     "unified-signatures": true,
 };
 // tslint:enable object-literal-sort-keys
