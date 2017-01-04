@@ -173,7 +173,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
 
         if (isSingleVariable && !this.skipBindingElement) {
-            const variableIdentifier = <ts.Identifier> node.name;
+            const variableIdentifier = node.name as ts.Identifier;
             this.validateReferencesForVariable(Rule.FAILURE_TYPE_VAR, variableIdentifier.text, variableIdentifier.getStart());
         }
 
@@ -316,7 +316,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     public visitMethodDeclaration(node: ts.MethodDeclaration) {
         if (node.name != null && node.name.kind === ts.SyntaxKind.Identifier) {
             const modifiers = node.modifiers;
-            const variableName = (<ts.Identifier> node.name).text;
+            const variableName = (node.name as ts.Identifier).text;
 
             if (Lint.hasModifier(modifiers, ts.SyntaxKind.PrivateKeyword)) {
                 this.validateReferencesForVariable(Rule.FAILURE_TYPE_METHOD, variableName, node.name.getStart());
@@ -333,7 +333,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
 
     public visitNamespaceImport(node: ts.NamespaceImport) {
         if (node.parent !== undefined) {
-            const importDeclaration = <ts.ImportDeclaration> node.parent.parent;
+            const importDeclaration = node.parent.parent as ts.ImportDeclaration;
             const moduleSpecifier = importDeclaration.moduleSpecifier.getText();
 
             // extract the unquoted module being imported
@@ -374,7 +374,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
                 && isSingleVariable
                 && !this.skipParameterDeclaration
                 && !Lint.hasModifier(node.modifiers, ts.SyntaxKind.PublicKeyword)) {
-            const nameNode = <ts.Identifier> node.name;
+            const nameNode = node.name as ts.Identifier;
             this.validateReferencesForVariable(Rule.FAILURE_TYPE_PARAM, nameNode.text, node.name.getStart());
         }
 
@@ -386,7 +386,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
         if (node.name != null && node.name.kind === ts.SyntaxKind.Identifier) {
             const modifiers = node.modifiers;
-            const variableName = (<ts.Identifier> node.name).text;
+            const variableName = (node.name as ts.Identifier).text;
 
             // check only if an explicit 'private' modifier is specified
             if (Lint.hasModifier(modifiers, ts.SyntaxKind.PrivateKeyword)) {
@@ -401,7 +401,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
 
         if (isSingleVariable && !this.skipVariableDeclaration) {
-            const variableIdentifier = <ts.Identifier> node.name;
+            const variableIdentifier = node.name as ts.Identifier;
             this.validateReferencesForVariable(Rule.FAILURE_TYPE_VAR, variableIdentifier.text, variableIdentifier.getStart());
         }
 

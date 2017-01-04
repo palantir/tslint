@@ -76,7 +76,7 @@ class NoRequireFullLibraryWalker extends Lint.RuleWalker {
     }
 
     public visitImportEqualsDeclaration(node: ts.ImportEqualsDeclaration) {
-        let moduleReference = <ts.ExternalModuleReference> node.moduleReference;
+        const moduleReference = node.moduleReference as ts.ExternalModuleReference;
         // If it's an import require and not an import alias
         if (moduleReference.expression) {
             if (this.isModuleBlacklisted(moduleReference.expression.getText())) {
