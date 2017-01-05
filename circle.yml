@@ -4,14 +4,14 @@ general:
       - gh-pages
 dependencies:
   pre:
-    - case $CIRCLE_NODE_INDEX in 0) nvm use 4.2 ;; 1) nvm use 5.7 ;; 2) nvm use 6.1 ;; esac
+    - case $CIRCLE_NODE_INDEX in 0) nvm use 4.2 ;; 1) nvm use 5.7 && ;; 2) nvm use 6.1 && ;; 2) nvm use 6.1 ;; esac
 test:
   override:
-    - npm run verify
+    - case $CIRCLE_NODE_INDEX in 0) npm run verify ;; 1) npm run verify ;; 2) npm run verify ;; 3) npm run clean && npm run compile && npm install typescript@2.0.10 && npm run test ;; 
 deployment:
   npm-latest:
     # match semver tag (e.g. 3.12.7)
-    tag: /^\d\d?\.\d\d?\.\d\d?$/
+    tag: /^\d\d?\.\d\d?\.\d\d?$/ 
     owner: palantir
     commands:
       - ./scripts/npmPublish.sh latest
