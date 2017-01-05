@@ -1,3 +1,20 @@
+/**
+ * @license
+ * Copyright 2016 Palantir Technologies, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -9,6 +26,7 @@ const ALWAYS_OR_NEVER = {
 export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         description: "Require or disallow a space before function parenthesis",
+        hasFix: true,
         optionExamples: [
             `true`,
             `[true, "always"]`,
@@ -173,16 +191,12 @@ class FunctionWalker extends Lint.RuleWalker {
     }
 
     private createInvalidWhitespaceFailure(pos: number): Lint.RuleFailure {
-        const fix = new Lint.Fix(Rule.metadata.ruleName, [
-            this.deleteText(pos, 1),
-        ]);
+        const fix = this.createFix(this.deleteText(pos, 1));
         return this.createFailure(pos, 1, Rule.INVALID_WHITESPACE_ERROR, fix);
     }
 
     private createMissingWhitespaceFailure(pos: number): Lint.RuleFailure {
-        const fix = new Lint.Fix(Rule.metadata.ruleName, [
-            this.appendText(pos, " "),
-        ]);
+        const fix = this.createFix(this.appendText(pos, " "));
         return this.createFailure(pos, 1, Rule.MISSING_WHITESPACE_ERROR, fix);
     }
 }

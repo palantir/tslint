@@ -34,9 +34,9 @@ export class Formatter extends AbstractFormatter {
             return "\n";
         }
 
-        let fixLines: string[] = [];
+        const fixLines: string[] = [];
         if (fixes) {
-            let perFileFixes: { [fileName: string]: number } = {};
+            const perFileFixes: { [fileName: string]: number } = {};
             for (const fix of fixes) {
                 if (perFileFixes[fix.getFileName()] == null) {
                     perFileFixes[fix.getFileName()] = 1;
@@ -51,11 +51,6 @@ export class Formatter extends AbstractFormatter {
             });
             fixLines.push("");   // add a blank line between fixes and failures
         }
-
-        return fixLines.concat(this.mapToMessages(failures))
-          .join("\n") + "\n";
-
-    }
 
     private mapToMessages(failures: RuleFailure[]): string[] {
         return failures.map((failure: RuleFailure) => {

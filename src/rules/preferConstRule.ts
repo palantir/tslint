@@ -26,6 +26,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Requires that variable declarations use `const` instead of `let` if possible.",
         descriptionDetails: Lint.Utils.dedent`
             If a variable is only assigned to once when it is declared, it should be declared using 'const'`,
+        hasFix: true,
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: ["true"],
@@ -117,8 +118,7 @@ class PreferConstWalker extends Lint.BlockScopeAwareRuleWalker<{}, ScopeInfo> {
             let fix: Lint.Fix | undefined;
             if (!usage.reassignedSibling && !seenLetStatements[usage.letStatement.getStart().toString()]) {
                 // only fix if all variables in the `let` statement can use `const`
-                const replacement = new Lint.Replacement(usage.letStatement.getStart(), "let".length, "const");
-                fix = new Lint.Fix(Rule.metadata.ruleName, [replacement]);
+                fix = this.createFix(this.createReplacement(usage.letStatement.getStart(), "let".length, "const"));
                 seenLetStatements[usage.letStatement.getStart().toString()] = true;
             }
             this.addFailureAtNode(usage.identifier, Rule.FAILURE_STRING_FACTORY(usage.identifier.text), fix);

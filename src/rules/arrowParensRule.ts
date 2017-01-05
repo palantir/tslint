@@ -26,6 +26,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "arrow-parens",
         description: "Requires parentheses around the parameters of arrow function definitions.",
+        hasFix: true,
         rationale: "Maintains stylistic consistency with other arrow function definitions.",
         optionsDescription: Lint.Utils.dedent`
             if \`${BAN_SINGLE_ARG_PARENS}\` is specified, then arrow functions with one parameter
@@ -70,18 +71,18 @@ class ArrowParensWalker extends Lint.RuleWalker {
 
             const hasParens = openParen.kind === ts.SyntaxKind.OpenParenToken;
             if (!hasParens && !this.avoidOnSingleParameter) {
-                const fix = new Lint.Fix(Rule.metadata.ruleName, [
+                const fix = this.createFix(
                     this.appendText(parameter.getStart(), "("),
                     this.appendText(parameter.getEnd(), ")"),
-                ]);
+                );
                 this.addFailureAtNode(parameter, Rule.FAILURE_STRING_MISSING, fix);
             } else if (hasParens && this.avoidOnSingleParameter && isSimpleParameter(parameter)) {
                 // Skip over the parameter to get the closing parenthesis
                 const closeParen = node.getChildAt(openParenIndex + 2);
-                const fix = new Lint.Fix(Rule.metadata.ruleName, [
+                const fix = this.createFix(
                     this.deleteText(openParen.getStart(), 1),
                     this.deleteText(closeParen.getStart(), 1),
-                ]);
+                );
                 this.addFailureAtNode(parameter, Rule.FAILURE_STRING_EXISTS, fix);
             }
         }

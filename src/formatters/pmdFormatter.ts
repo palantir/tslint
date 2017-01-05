@@ -40,7 +40,7 @@ export class Formatter extends AbstractFormatter {
     public format(failures: RuleFailure[]): string {
         let output = "<pmd version=\"tslint\">";
 
-        for (let failure of failures) {
+        for (const failure of failures) {
             const failureString = failure.getFailure()
                 .replace(/&/g, "&amp;")
                 .replace(/</g, "&lt;")
