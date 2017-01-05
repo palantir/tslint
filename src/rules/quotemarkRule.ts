@@ -29,6 +29,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "quotemark",
         description: "Requires single or double quotes for string literals.",
+        hasFix: true,
         optionsDescription: Lint.Utils.dedent`
             Five arguments may be optionally provided:
 

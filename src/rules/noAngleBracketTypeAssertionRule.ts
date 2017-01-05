@@ -24,6 +24,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-angle-bracket-type-assertion",
         description: "Requires the use of `as Type` for type assertions instead of `<Type>`.",
+        hasFix: true,
         rationale: Lint.Utils.dedent`
             Both formats of type assertions have the same effect, but only \`as\` type assertions
             work in \`.tsx\` files. This rule ensures that you have a consistent type assertion style

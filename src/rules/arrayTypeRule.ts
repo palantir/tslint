@@ -28,6 +28,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "array-type",
         description: "Requires using either 'T[]' or 'Array<T>' for arrays.",
+        hasFix: true,
         optionsDescription: Lint.Utils.dedent`
             One of the following arguments must be provided:
 

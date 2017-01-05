@@ -15,8 +15,9 @@
  * limitations under the License.
  */
 
-import * as Lint from "tslint";
 import * as ts from "typescript";
+
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -24,6 +25,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "no-string-throw",
         description: `Flags throwing plain strings or concatenations of strings ` +
             `because only Errors produce proper stack traces.`,
+        hasFix: true,
         options: null,
         optionsDescription: "",
         type: "functionality",
