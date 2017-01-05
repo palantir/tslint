@@ -26,6 +26,7 @@ const ALWAYS_OR_NEVER = {
 export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         description: "Require or disallow a space before function parenthesis",
+        hasFix: true,
         optionExamples: [
             `true`,
             `[true, "always"]`,

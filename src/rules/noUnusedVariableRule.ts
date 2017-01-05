@@ -33,6 +33,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "no-unused-variable",
         deprecationMessage: "Use the tsc compiler options --noUnusedParameters and --noUnusedLocals instead.",
         description: "Disallows unused imports, variables, functions and private class members.",
+        hasFix: true,
         optionsDescription: Lint.Utils.dedent`
             Three optional arguments may be optionally provided:
 

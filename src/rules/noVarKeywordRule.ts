@@ -25,6 +25,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "no-var-keyword",
         description: "Disallows usage of the `var` keyword.",
         descriptionDetails: "Use `let` or `const` instead.",
+        hasFix: true,
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: ["true"],

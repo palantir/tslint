@@ -40,6 +40,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
             This rules lets you enforce consistent quoting of property names. Either they should always
             be quoted (default behavior) or quoted only as needed ("as-needed").`,
+        hasFix: true,
         optionsDescription: Lint.Utils.dedent`
             Possible settings are:
 

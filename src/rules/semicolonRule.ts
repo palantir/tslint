@@ -29,6 +29,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "semicolon",
         description: "Enforces consistent semicolon usage at the end of every statement.",
+        hasFix: true,
         optionsDescription: Lint.Utils.dedent`
             One of the following arguments must be provided:
 
