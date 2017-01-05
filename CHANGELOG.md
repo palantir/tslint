@@ -4,6 +4,7 @@ Change Log
 v4.3.0
 ---
 
+* **Enabled additional rules in `tslint:latest` configuration** (#1981)
 * [new-rule] `space-before-function-paren` (#1897)
 * [new-rule] `typeof-compare` (#1927)
 * [new-rule] `import-spacing` (#1935)
@@ -24,7 +25,6 @@ v4.3.0
 * [bugfix] `prefer-for-of` no longer shows false positive when array is in parentheses (#1986)
 * [bugfix] `prefer-const` now works for TypeScript versions < 2.1.0 (#1989)
 * [enhancement] `member-access` narrow location of error (#1964)
-* [documentation] Show whether or not a rule has a fixer (#1985)
 
 Thanks to our contributors!
 
