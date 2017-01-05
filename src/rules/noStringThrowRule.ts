@@ -16,7 +16,6 @@
  */
 
 import * as ts from "typescript";
-import * as Lint from "../index";
 
 import * as Lint from "../index";
 
