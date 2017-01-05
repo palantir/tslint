@@ -10,7 +10,7 @@
         "declaration": true,
         "sourceMap": false,
         "target": "es5",
-        "lib": ["es6", "dom"],
+        "lib": ["es6"],
         "outDir": "../lib"
     }
 }

@@ -40,6 +40,14 @@ export function objectify(arg: any): any {
 }
 
 /**
+ * Replace hyphens in a rule name by upper-casing the letter after them.
+ * E.g. "foo-bar" -> "fooBar"
+ */
+export function camelize(stringWithHyphens: string): string {
+    return stringWithHyphens.replace(/-(.)/g, (_, nextLetter) => nextLetter.toUpperCase());
+}
+
+/**
  * Removes leading indents from a template string without removing all leading whitespace
  */
 export function dedent(strings: TemplateStringsArray, ...values: string[]) {
