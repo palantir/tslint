@@ -16,6 +16,7 @@
  */
 
 import * as ts from "typescript";
+import * as Lint from "../index";
 
 import * as Lint from "../index";
 
@@ -45,12 +46,9 @@ class Walker extends Lint.RuleWalker {
     public visitThrowStatement(node: ts.ThrowStatement) {
         const {expression} = node;
         if (this.stringConcatRecursive(expression)) {
-            const fix = new Lint.Fix(
-                    Rule.metadata.ruleName,
-                    [new Lint.Replacement(
-                            expression.getStart(),
-                            expression.getEnd() - expression.getStart(),
-                            `new Error(${expression.getText()})`)]);
+            const fix = this.createFix(this.createReplacement(expression.getStart(),
+                                                              expression.getEnd() - expression.getStart(),
+                                                              `new Error(${expression.getText()})`));
             this.addFailure(this.createFailure(
                     node.getStart(), node.getWidth(), Rule.FAILURE_STRING, fix));
         }
