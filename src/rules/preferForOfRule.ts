@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 import * as Lint from "../index";
-import { isAssignment } from "../language/utils";
+import { isAssignment, unwrapParentheses } from "../language/utils";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -98,7 +98,7 @@ class PreferForOfWalker extends Lint.BlockScopeAwareRuleWalker<{}, IncrementorMa
                 // check if iterator is used for something other than reading data from array
                 if (node.parent != null && node.parent.kind === ts.SyntaxKind.ElementAccessExpression) {
                     const elementAccess = node.parent as ts.ElementAccessExpression;
-                    const arrayIdentifier = elementAccess.expression as ts.Identifier;
+                    const arrayIdentifier = unwrapParentheses(elementAccess.expression) as ts.Identifier;
                     if (incrementorState.arrayToken.text !== arrayIdentifier.text) {
                         // iterator used in array other than one iterated over
                         incrementorState.onlyArrayReadAccess = false;
@@ -153,7 +153,7 @@ class PreferForOfWalker extends Lint.BlockScopeAwareRuleWalker<{}, IncrementorMa
         if (conditionRight.kind === ts.SyntaxKind.PropertyAccessExpression) {
             const propertyAccess = <ts.PropertyAccessExpression> conditionRight;
             if (indexVariable != null && propertyAccess.name.getText() === "length") {
-                return { indexVariable: indexVariable!, arrayToken: propertyAccess.expression };
+                return { indexVariable: indexVariable!, arrayToken: unwrapParentheses(propertyAccess.expression) };
             }
         }
 
