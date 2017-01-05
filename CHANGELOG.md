@@ -1,6 +1,44 @@
 Change Log
 ===
 
+v4.3.0
+---
+
+* [new-rule] `space-before-function-paren` (#1897)
+* [new-rule] `typeof-compare` (#1927)
+* [new-rule] `import-spacing` (#1935)
+* [new-rule] `unified-signatures` (#1944)
+* [new-fixer] `object-literal-key-quotes` (#1953)
+* [new-fixer] `no-angle-bracket-type-assertion` (#1979)
+* [bugfix] `adjacent-overload-signature` now handles static/computed function names (#1831)
+* [bugfix] `file-header` now handles files with only comments (#1913)
+* [bugfix] `no-consecutive-blank-lines` now allows blank lines in template strings (#1886)
+* [bugfix] `object-literal-key-quotes` no longer throws exception when using rest operator (#1916)
+* [bugfix] `restrict-plus-operands` no longer shows false positive in ternary operation (#1925)
+* [bugfix] `prefer-for-of` now handles nested `for` loops with reused iterator (#1926)
+* [bugfix] Exit gracefully when `tsconfig.json` passed as `--project` argument doens't have files (#1933)
+* [bugfix] `object-literal-key-quotes` now handles shorthand and spread properties (#1945)
+* [bugfix] `arrow-parens` Allow binding patterns `([x, y]) => ...` and `({x, y}) => ...` to have parens (#1958)
+* [bugfix] `semicolon` fixer now handles comma separator in interfaces and indicates failure when commas are using in interfaces (#1856)
+* [bugfix] `only-arrow-functions` option `allow-named-functions` now allows function declarations (#1961)
+* [bugfix] `prefer-for-of` no longer shows false positive when array is in parentheses (#1986)
+* [bugfix] `prefer-const` now works for TypeScript versions < 2.1.0 (#1989)
+* [enhancement] `member-access` narrow location of error (#1964)
+* [documentation] Show whether or not a rule has a fixer (#1985)
+
+Thanks to our contributors!
+
+* Andrii Dieiev
+* @andy-ms 
+* Andy Hanson
+* Josh Goldberg
+* Klaus Meinhardt
+* Linda_pp
+* Mohsen Azimi
+* Victor Grigoriu
+* Yuichi Nukiyama
+* cameron-mcateer
+
 v4.2.0
 ---
 
