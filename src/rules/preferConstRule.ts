@@ -55,7 +55,15 @@ class PreferConstWalker extends Lint.BlockScopeAwareRuleWalker<{}, ScopeInfo> {
     }
 
     private static collectInVariableDeclarationList(node: ts.VariableDeclarationList, scopeInfo: ScopeInfo) {
-        if (isCombinedNodeFlagSet(node, ts.NodeFlags.Let) && !isCombinedModifierFlagSet(node, ts.ModifierFlags.Export)) {
+        let allowConst: boolean;
+        if ((ts as any).getCombinedModifierFlags === undefined) {
+            // for back-compat, TypeScript < 2.1
+            allowConst = isCombinedNodeFlagSet(node, ts.NodeFlags.Let)
+                && !Lint.hasModifier(node.parent!.modifiers, ts.SyntaxKind.ExportKeyword);
+        } else {
+            allowConst = isCombinedNodeFlagSet(node, ts.NodeFlags.Let) && !isCombinedModifierFlagSet(node, ts.ModifierFlags.Export);
+        }
+        if (allowConst) {
             for (const decl of node.declarations) {
                 PreferConstWalker.addDeclarationName(decl.name, node, scopeInfo);
             }
