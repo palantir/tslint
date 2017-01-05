@@ -6,6 +6,7 @@
         "noUnusedParameters": true,
         "noUnusedLocals": true,
         "sourceMap": true,
-        "target": "es5"
+        "target": "es5",
+        "lib": ["es6", "dom"]
     }
 }

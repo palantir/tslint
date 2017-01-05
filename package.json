@@ -71,5 +71,8 @@
     "tslint-test-config-non-relative": "file:test/external/tslint-test-config-non-relative",
     "typescript": "2.1.4"
   },
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=4.2.6"
+  }
 }

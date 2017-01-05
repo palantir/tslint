@@ -90,15 +90,15 @@ class AdjacentOverloadSignaturesWalker extends Lint.RuleWalker {
     /** 'getOverloadName' may return undefined for nodes that cannot be overloads, e.g. a `const` declaration. */
     private checkOverloadsAdjacent<T extends ts.Node>(overloads: T[], getOverload: (node: T) => Overload | undefined) {
         let lastKey: string | undefined = undefined;
-        const seen: { [key: string]: true } = Object.create(null);
+        const seen = new Set<string>();
         for (const node of overloads) {
             const overload = getOverload(node);
             if (overload) {
                 const { name, key } = overload;
-                if (key in seen && lastKey !== key) {
+                if (seen.has(key) && lastKey !== key) {
                     this.addFailureAtNode(node, Rule.FAILURE_STRING_FACTORY(name));
                 }
-                seen[key] = true;
+                seen.add(key);
                 lastKey = key;
             } else {
                 lastKey = undefined;
