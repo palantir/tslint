@@ -22,7 +22,7 @@ import * as Lint from "../index";
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
-        ruleName: "misused-new",
+        ruleName: "no-misused-new",
         description: "Warns on apparent attempts to define constructors for interfaces or `new` for classes.",
         optionsDescription: "Not configurable.",
         options: null,

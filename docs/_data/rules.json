@@ -476,17 +476,6 @@
     "typescriptOnly": true
   },
   {
-    "ruleName": "misused-new",
-    "description": "Warns on apparent attempts to define constructors for interfaces or `new` for classes.",
-    "optionsDescription": "Not configurable.",
-    "options": null,
-    "optionExamples": [
-      "true"
-    ],
-    "type": "functionality",
-    "typescriptOnly": true
-  },
-  {
     "ruleName": "new-parens",
     "description": "Requires parentheses when invoking a constructor via the `new` keyword.",
     "rationale": "Maintains stylistic consistency with other function calls.",
@@ -789,6 +778,17 @@
       "true"
     ],
     "type": "maintainability",
+    "typescriptOnly": true
+  },
+  {
+    "ruleName": "no-misused-new",
+    "description": "Warns on apparent attempts to define constructors for interfaces or `new` for classes.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality",
     "typescriptOnly": true
   },
   {
