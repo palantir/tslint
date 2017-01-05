@@ -176,7 +176,7 @@ class OrderedImportsWalker extends Lint.RuleWalker {
         this.currentImportsBlock.addImportDeclaration(this.getSourceFile(), node, source);
 
         if (previousSource && compare(source, previousSource) === -1) {
-            this.lastFix = new Lint.Fix(Rule.metadata.ruleName, []);
+            this.lastFix = this.createFix();
             this.addFailureAtNode(node, Rule.IMPORT_SOURCES_UNORDERED, this.lastFix);
         }
 
@@ -201,7 +201,7 @@ class OrderedImportsWalker extends Lint.RuleWalker {
                 this.currentImportsBlock.replaceNamedImports(start, length, sortedDeclarations[i]);
             }
 
-            this.lastFix = new Lint.Fix(Rule.metadata.ruleName, []);
+            this.lastFix = this.createFix();
             this.addFailureFromStartToEnd(a.getStart(), b.getEnd(), Rule.NAMED_IMPORTS_UNORDERED, this.lastFix);
         }
 

@@ -190,16 +190,12 @@ class FunctionWalker extends Lint.RuleWalker {
     }
 
     private createInvalidWhitespaceFailure(pos: number): Lint.RuleFailure {
-        const fix = new Lint.Fix(Rule.metadata.ruleName, [
-            this.deleteText(pos, 1),
-        ]);
+        const fix = this.createFix(this.deleteText(pos, 1));
         return this.createFailure(pos, 1, Rule.INVALID_WHITESPACE_ERROR, fix);
     }
 
     private createMissingWhitespaceFailure(pos: number): Lint.RuleFailure {
-        const fix = new Lint.Fix(Rule.metadata.ruleName, [
-            this.appendText(pos, " "),
-        ]);
+        const fix = this.createFix(this.appendText(pos, " "));
         return this.createFailure(pos, 1, Rule.MISSING_WHITESPACE_ERROR, fix);
     }
 }

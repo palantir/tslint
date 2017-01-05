@@ -176,15 +176,11 @@ class SemicolonWalker extends Lint.RuleWalker {
             const lastChild = children[children.length - 1];
             if (node.parent!.kind === ts.SyntaxKind.InterfaceDeclaration && lastChild.kind === ts.SyntaxKind.CommaToken) {
                 const failureStart = lastChild.getStart(sourceFile);
-                const fix = new Lint.Fix(Rule.metadata.ruleName, [
-                    this.createReplacement(failureStart, lastChild.getWidth(sourceFile), ";"),
-                ]);
+                const fix = this.createFix(this.createReplacement(failureStart, lastChild.getWidth(sourceFile), ";"));
                 this.addFailureAt(failureStart, 0, Rule.FAILURE_STRING_COMMA, fix);
             } else {
                 const failureStart = Math.min(position, this.getLimit());
-                const fix = new Lint.Fix(Rule.metadata.ruleName, [
-                    this.appendText(failureStart, ";"),
-                ]);
+                const fix = this.createFix(this.appendText(failureStart, ";"));
                 this.addFailureAt(failureStart, 0, Rule.FAILURE_STRING_MISSING, fix);
             }
         } else if (never && hasSemicolon) {
@@ -199,9 +195,7 @@ class SemicolonWalker extends Lint.RuleWalker {
             if (tokenKind !== ts.SyntaxKind.OpenParenToken && tokenKind !== ts.SyntaxKind.OpenBracketToken
                     && tokenKind !== ts.SyntaxKind.PlusToken && tokenKind !== ts.SyntaxKind.MinusToken) {
                 const failureStart = Math.min(position - 1, this.getLimit());
-                const fix = new Lint.Fix(Rule.metadata.ruleName, [
-                    this.deleteText(failureStart, 1),
-                ]);
+                const fix = this.createFix(this.deleteText(failureStart, 1));
                 this.addFailureAt(failureStart, 1, Rule.FAILURE_STRING_UNNECESSARY, fix);
             }
         }

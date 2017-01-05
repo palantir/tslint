@@ -121,7 +121,7 @@ class QuotemarkWalker extends Lint.RuleWalker {
                     + text.slice(1, -1).replace(new RegExp(expectedQuoteMark, "g"), `\\${expectedQuoteMark}`)
                     + expectedQuoteMark;
 
-                const fix = new Lint.Fix(Rule.metadata.ruleName, [ new Lint.Replacement(position, width, newText) ]);
+                const fix = this.createFix(this.createReplacement(position, width, newText));
                 this.addFailureAt(position, width, failureMessage, fix);
             }
         }
