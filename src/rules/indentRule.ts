@@ -79,7 +79,7 @@ class IndentWalker extends Lint.RuleWalker {
         let endOfComment = -1;
         let endOfTemplateString = -1;
         const scanner = ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, node.text);
-        for (let lineStart of node.getLineStarts()) {
+        for (const lineStart of node.getLineStarts()) {
             if (lineStart < endOfComment || lineStart < endOfTemplateString) {
                 // skip checking lines inside multi-line comments or template strings
                 continue;

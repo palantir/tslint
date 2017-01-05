@@ -57,15 +57,24 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class OnlyArrowFunctionsWalker extends Lint.RuleWalker {
+    private allowDeclarations: boolean;
+    private allowNamedFunctions: boolean;
+
+    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
+        super(sourceFile, options);
+        this.allowDeclarations = this.hasOption(OPTION_ALLOW_DECLARATIONS);
+        this.allowNamedFunctions = this.hasOption(OPTION_ALLOW_NAMED_FUNCTIONS);
+    }
+
     public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
-        if (!this.hasOption(OPTION_ALLOW_DECLARATIONS)) {
+        if (!this.allowDeclarations && !this.allowNamedFunctions) {
             this.failUnlessExempt(node);
         }
         super.visitFunctionDeclaration(node);
     }
 
     public visitFunctionExpression(node: ts.FunctionExpression) {
-        if (!(node.name && this.hasOption(OPTION_ALLOW_NAMED_FUNCTIONS))) {
+        if (node.name === undefined || !this.allowNamedFunctions) {
             this.failUnlessExempt(node);
         }
         super.visitFunctionExpression(node);
@@ -73,7 +82,7 @@ class OnlyArrowFunctionsWalker extends Lint.RuleWalker {
 
     private failUnlessExempt(node: ts.FunctionLikeDeclaration) {
         if (!functionIsExempt(node)) {
-            this.addFailureAt(node.getStart(), "function".length, Rule.FAILURE_STRING);
+            this.addFailureAtNode(Lint.childOfKind(node, ts.SyntaxKind.FunctionKeyword)!, Rule.FAILURE_STRING);
         }
     }
 }

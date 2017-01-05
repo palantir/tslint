@@ -76,7 +76,7 @@ class NoRequireFullLibraryWalker extends Lint.RuleWalker {
     }
 
     public visitImportEqualsDeclaration(node: ts.ImportEqualsDeclaration) {
-        let moduleReference = <ts.ExternalModuleReference> node.moduleReference;
+        const moduleReference = node.moduleReference as ts.ExternalModuleReference;
         // If it's an import require and not an import alias
         if (moduleReference.expression) {
             if (this.isModuleBlacklisted(moduleReference.expression.getText())) {
@@ -101,7 +101,8 @@ class NoRequireFullLibraryWalker extends Lint.RuleWalker {
 
     private reportFailure (node: ts.Expression): void {
         this.addFailureAt(
-            node.getStart() + 1, // take quotes into account
+            // take quotes into account
+            node.getStart() + 1,
             node.getWidth() - 2,
             Rule.FAILURE_STRING,
         );

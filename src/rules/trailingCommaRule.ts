@@ -26,6 +26,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: Lint.Utils.dedent`
             Requires or disallows trailing commas in array and object literals, destructuring assignments, function and tuple typings,
             named imports and function parameters.`,
+        hasFix: true,
         optionsDescription: Lint.Utils.dedent`
             One argument which is an object with the keys \`multiline\` and \`singleline\`.
             Both should be set to either \`"always"\` or \`"never"\`.

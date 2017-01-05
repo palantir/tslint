@@ -29,6 +29,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "semicolon",
         description: "Enforces consistent semicolon usage at the end of every statement.",
+        hasFix: true,
         optionsDescription: Lint.Utils.dedent`
             One of the following arguments must be provided:
 
@@ -140,7 +141,7 @@ class SemicolonWalker extends Lint.RuleWalker {
             return;
         }
 
-        for (let member of node.members) {
+        for (const member of node.members) {
             this.checkSemicolonAt(member);
         }
         super.visitInterfaceDeclaration(node);
@@ -172,8 +173,9 @@ class SemicolonWalker extends Lint.RuleWalker {
         const always = !never && (this.hasOption(OPTION_ALWAYS) || (this.getOptions() && this.getOptions().length === 0));
 
         if (always && !hasSemicolon) {
+            const children = node.getChildren(sourceFile);
             const lastChild = children[children.length - 1];
-            if (node.parent.kind === ts.SyntaxKind.InterfaceDeclaration && lastChild.kind === ts.SyntaxKind.CommaToken) {
+            if (node.parent!.kind === ts.SyntaxKind.InterfaceDeclaration && lastChild.kind === ts.SyntaxKind.CommaToken) {
                 const failureStart = lastChild.getStart(sourceFile);
                 const fix = new Lint.Fix(Rule.metadata.ruleName, [
                     this.createReplacement(failureStart, lastChild.getWidth(sourceFile), ";"),

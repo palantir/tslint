@@ -26,6 +26,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "arrow-parens",
         description: "Requires parentheses around the parameters of arrow function definitions.",
+        hasFix: true,
         rationale: "Maintains stylistic consistency with other arrow function definitions.",
         optionsDescription: Lint.Utils.dedent`
             if \`${BAN_SINGLE_ARG_PARENS}\` is specified, then arrow functions with one parameter

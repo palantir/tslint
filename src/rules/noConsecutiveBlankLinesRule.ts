@@ -76,7 +76,7 @@ class NoConsecutiveBlankLinesWalker extends Lint.RuleWalker {
         const soureFileLines = sourceFileText.split(/\n/);
 
         // find all the lines that are blank or only contain whitespace
-        let blankLineIndexes: number[] = [];
+        const blankLineIndexes: number[] = [];
         soureFileLines.forEach((txt, i) => {
             if (txt.trim() === "") {
                 blankLineIndexes.push(i);
