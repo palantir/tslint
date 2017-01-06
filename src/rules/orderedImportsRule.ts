@@ -34,6 +34,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                     import * as bar from "b";
             - Groups of imports are delineated by blank lines. You can use these to group imports
                 however you like, e.g. by first- vs. third-party or thematically.`,
+        hasFix: true,
         optionsDescription: Lint.Utils.dedent`
             You may set the \`"import-sources-order"\` option to control the ordering of source
             imports (the \`"foo"\` in \`import {A, B, C} from "foo"\`).
@@ -102,7 +103,7 @@ function flipCase(x: string): string {
 
 // After applying a transformation, are the nodes sorted according to the text they contain?
 // If not, return the pair of nodes which are out of order.
-function findUnsortedPair(xs: ts.Node[], transform: (x: string) => string): [ts.Node, ts.Node] {
+function findUnsortedPair(xs: ts.Node[], transform: (x: string) => string): [ts.Node, ts.Node] | null {
     for (let i = 1; i < xs.length; i++) {
         if (transform(xs[i].getText()) < transform(xs[i - 1].getText())) {
             return [xs[i - 1], xs[i]];
@@ -153,9 +154,9 @@ const TRANSFORMS: {[ordering: string]: (x: string) => string} = {
 class OrderedImportsWalker extends Lint.RuleWalker {
     private currentImportsBlock: ImportsBlock = new ImportsBlock();
     // keep a reference to the last Fix object so when the entire block is replaced, the replacement can be added
-    private lastFix: Lint.Fix;
-    private importSourcesOrderTransform: (x: string) => string = null;
-    private namedImportsOrderTransform: (x: string) => string = null;
+    private lastFix: Lint.Fix | null;
+    private importSourcesOrderTransform: (x: string) => string;
+    private namedImportsOrderTransform: (x: string) => string;
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
@@ -176,7 +177,7 @@ class OrderedImportsWalker extends Lint.RuleWalker {
         this.currentImportsBlock.addImportDeclaration(this.getSourceFile(), node, source);
 
         if (previousSource && compare(source, previousSource) === -1) {
-            this.lastFix = new Lint.Fix(Rule.metadata.ruleName, []);
+            this.lastFix = this.createFix();
             this.addFailureAtNode(node, Rule.IMPORT_SOURCES_UNORDERED, this.lastFix);
         }
 
@@ -201,7 +202,7 @@ class OrderedImportsWalker extends Lint.RuleWalker {
                 this.currentImportsBlock.replaceNamedImports(start, length, sortedDeclarations[i]);
             }
 
-            this.lastFix = new Lint.Fix(Rule.metadata.ruleName, []);
+            this.lastFix = this.createFix();
             this.addFailureFromStartToEnd(a.getStart(), b.getEnd(), Rule.NAMED_IMPORTS_UNORDERED, this.lastFix);
         }
 
@@ -274,7 +275,7 @@ class ImportsBlock {
 
         const start = fileOffset - importDeclaration.nodeStartOffset;
         if (start < 0 || start + length > importDeclaration.node.getEnd()) {
-            throw "Unexpected named import position";
+            throw new Error("Unexpected named import position");
         }
 
         const initialText = importDeclaration.text;
@@ -310,7 +311,7 @@ class ImportsBlock {
 
     // gets the offset of the end of the import's line, including newline, to include comment to the right
     private getEndOffset(sourceFile: ts.SourceFile, node: ts.ImportDeclaration) {
-        let endLineOffset = sourceFile.text.indexOf("\n", node.end) + 1;
+        const endLineOffset = sourceFile.text.indexOf("\n", node.end) + 1;
         return endLineOffset;
     }
 

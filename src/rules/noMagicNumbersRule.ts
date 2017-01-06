@@ -69,7 +69,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 class NoMagicNumbersWalker extends Lint.RuleWalker {
     // lookup object for allowed magic numbers
     private allowed: { [prop: string]: boolean } = {};
-    constructor (sourceFile: ts.SourceFile, options: IOptions) {
+    constructor(sourceFile: ts.SourceFile, options: IOptions) {
         super(sourceFile, options);
 
         const configOptions = this.getOptions();
@@ -82,8 +82,8 @@ class NoMagicNumbersWalker extends Lint.RuleWalker {
 
     public visitNode(node: ts.Node) {
         const isUnary = this.isUnaryNumericExpression(node);
-        if (node.kind === ts.SyntaxKind.NumericLiteral && !Rule.ALLOWED_NODES[node.parent.kind] || isUnary) {
-            let text = node.getText();
+        if (node.kind === ts.SyntaxKind.NumericLiteral && node.parent !== undefined && !Rule.ALLOWED_NODES[node.parent.kind] || isUnary) {
+            const text = node.getText();
             if (!this.allowed[text]) {
                 this.addFailureAtNode(node, Rule.FAILURE_STRING);
             }
@@ -100,7 +100,7 @@ class NoMagicNumbersWalker extends Lint.RuleWalker {
         if (node.kind !== ts.SyntaxKind.PrefixUnaryExpression) {
             return false;
         }
-        const unaryNode = (<ts.PrefixUnaryExpression> node);
+        const unaryNode = (node as ts.PrefixUnaryExpression);
         return unaryNode.operator === ts.SyntaxKind.MinusToken && unaryNode.operand.kind === ts.SyntaxKind.NumericLiteral;
     }
 }

@@ -19,8 +19,7 @@
             },
             "console": "internalConsole",
             "sourceMaps": true,
-            "outFiles": [],
-            "outDir": "${workspaceRoot}/build"
+            "outFiles": ["${workspaceRoot}/build/**/*.js"]
         },
         {
             "name": "Debug Mocha Tests",
@@ -40,8 +39,7 @@
             },
             "console": "internalConsole",
             "sourceMaps": true, 
-            "outFiles": [],
-            "outDir": "${workspaceRoot}/build"
+            "outFiles": ["${workspaceRoot}/build/**/*.js"]
         },
         {
             "name": "Debug Rule Tests",
@@ -61,8 +59,7 @@
             },
             "console": "internalConsole",
             "sourceMaps": true, 
-            "outFiles": [],
-            "outDir": "${workspaceRoot}/build"
+            "outFiles": ["${workspaceRoot}/build/**/*.js"]
         },
         {
             "name": "Debug Document Generation",
@@ -82,8 +79,7 @@
             },
             "console": "internalConsole",
             "sourceMaps": true, 
-            "outFiles": [],
-            "outDir": "${workspaceRoot}/build"
+            "outFiles": ["${workspaceRoot}/build/**/*/js"]
         }
     ]
 }

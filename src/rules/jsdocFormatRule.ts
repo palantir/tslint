@@ -92,7 +92,7 @@ class JsdocWalker extends Lint.SkippableTokenAwareRuleWalker {
             // all lines but the first and last
             const otherLines = lines.splice(1, lines.length - 2);
             jsdocPosition += firstLine.length + 1; // + 1 for the splitted-out newline
-            for (let line of otherLines) {
+            for (const line of otherLines) {
                 // regex is: start of string, followed by any amount of whitespace, followed by *,
                 // followed by either a space or the end of the string
                 const asteriskMatch = line.match(/^\s*\*( |$)/);

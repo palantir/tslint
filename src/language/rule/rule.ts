@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import {RuleWalker} from "../walker/ruleWalker";
+import {IWalker} from "../walker";
 
 export interface IRuleMetadata {
     /**
@@ -44,6 +44,11 @@ export interface IRuleMetadata {
      * More elaborate details about the rule.
      */
     descriptionDetails?: string;
+
+    /**
+     * Whether or not the rule will provide fix suggestions.
+     */
+    hasFix?: boolean;
 
     /**
      * An explanation of the available options for the rule.
@@ -82,7 +87,7 @@ export interface IRuleMetadata {
 export type RuleType = "functionality" | "maintainability" | "style" | "typescript";
 
 export interface IOptions {
-    ruleArguments?: any[];
+    ruleArguments: any[];
     ruleName: string;
     disabledIntervals: IDisabledInterval[];
 }
@@ -96,7 +101,7 @@ export interface IRule {
     getOptions(): IOptions;
     isEnabled(): boolean;
     apply(sourceFile: ts.SourceFile, languageService: ts.LanguageService): RuleFailure[];
-    applyWithWalker(walker: RuleWalker): RuleFailure[];
+    applyWithWalker(walker: IWalker): RuleFailure[];
 }
 
 export class Replacement {

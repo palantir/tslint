@@ -1,0 +1,8 @@
+{
+    "rules": {
+        "file-header": [true, "Good header \\d"]
+    },
+    "jsRules": {
+        "file-header": [true, "Good header \\d"]
+    }
+}

@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -43,8 +44,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public isEnabled(): boolean {
+        const ruleArguments = this.getOptions().ruleArguments;
         if (super.isEnabled()) {
-            const option = this.getOptions().ruleArguments[0];
+            const option = ruleArguments[0];
             if (typeof option === "number" && option > 0) {
                 return true;
             }
@@ -54,7 +56,8 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const ruleFailures: Lint.RuleFailure[] = [];
-        const lineLimit: number = this.getOptions().ruleArguments[0];
+        const ruleArguments = this.getOptions().ruleArguments;
+        const lineLimit: number = ruleArguments[0];
         const lineCount: number = sourceFile.getLineStarts().length;
         const disabledIntervals = this.getOptions().disabledIntervals;
 
@@ -62,7 +65,6 @@ export class Rule extends Lint.Rules.AbstractRule {
             const errorString = Rule.FAILURE_STRING_FACTORY(lineCount, lineLimit);
             ruleFailures.push(new Lint.RuleFailure(sourceFile, 0, 1, errorString, this.getOptions().ruleName));
         }
-
         return ruleFailures;
     }
 }

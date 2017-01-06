@@ -42,47 +42,36 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class BlockWalker extends Lint.RuleWalker {
-    private ignoredBlocks: ts.Block[] = [];
-
     public visitBlock(node: ts.Block) {
-        const openBrace = node.getChildAt(0);
-        const closeBrace = node.getChildAt(node.getChildCount() - 1);
-        const sourceFileText = this.getSourceFile().text;
-        const hasCommentAfter = ts.getTrailingCommentRanges(sourceFileText, openBrace.getEnd()) != null;
-        const hasCommentBefore = ts.getLeadingCommentRanges(sourceFileText, closeBrace.getFullStart()) != null;
-        const isSkipped = this.ignoredBlocks.indexOf(node) !== -1;
+        if (node.statements.length === 0 && !isConstructorWithParameterProperties(node.parent!)) {
+            const sourceFile = this.getSourceFile();
+            const children = node.getChildren(sourceFile);
+            const openBrace = children[0];
+            const closeBrace = children[children.length - 1];
+            const sourceFileText = sourceFile.text;
 
-        if (node.statements.length <= 0 && !hasCommentAfter && !hasCommentBefore && !isSkipped) {
-            this.addFailureAtNode(node, Rule.FAILURE_STRING);
+            if (ts.getLeadingCommentRanges(sourceFileText, closeBrace.getFullStart()) === undefined &&
+                ts.getTrailingCommentRanges(sourceFileText, openBrace.getEnd()) === undefined) {
+
+                this.addFailureAtNode(node, Rule.FAILURE_STRING);
+            }
         }
 
         super.visitBlock(node);
     }
+}
 
-    public visitConstructorDeclaration(node: ts.ConstructorDeclaration) {
-        const parameters = node.parameters;
-        let isSkipped = false;
-
-        for (let param of parameters) {
-            const hasPropertyAccessModifier = Lint.hasModifier(
-                param.modifiers,
-                ts.SyntaxKind.PrivateKeyword,
-                ts.SyntaxKind.ProtectedKeyword,
-                ts.SyntaxKind.PublicKeyword,
-                ts.SyntaxKind.ReadonlyKeyword,
-            );
-
-            if (hasPropertyAccessModifier) {
-                isSkipped = true;
-                this.ignoredBlocks.push(node.body);
-                break;
-            }
-
-            if (isSkipped) {
-                break;
+function isConstructorWithParameterProperties(node: ts.Node): boolean {
+    if (node.kind === ts.SyntaxKind.Constructor) {
+        for (const parameter of (node as ts.ConstructorDeclaration).parameters) {
+            if (Lint.hasModifier(parameter.modifiers,
+                                 ts.SyntaxKind.PrivateKeyword,
+                                 ts.SyntaxKind.ProtectedKeyword,
+                                 ts.SyntaxKind.PublicKeyword,
+                                 ts.SyntaxKind.ReadonlyKeyword)) {
+                return true;
             }
         }
-
-        super.visitConstructorDeclaration(node);
     }
+    return false;
 }

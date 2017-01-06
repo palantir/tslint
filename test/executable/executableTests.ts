@@ -26,9 +26,11 @@ const EXECUTABLE_PATH = path.resolve(EXECUTABLE_DIR, "npm-like-executable");
 const TEMP_JSON_PATH = path.resolve(EXECUTABLE_DIR, "tslint.json");
 
 /* tslint:disable:only-arrow-functions */
-describe("Executable", function() {
+describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
+    // tslint:disable:no-invalid-this
     this.slow(3000);    // the executable is JIT-ed each time it runs; avoid showing slowness warnings
     this.timeout(4000);
+    // tslint:enable:no-invalid-this
 
     describe("Files", () => {
         it("exits with code 1 if no arguments passed", (done) => {
@@ -80,7 +82,8 @@ describe("Executable", function() {
             execCli(["-c", "test/config/tslint-extends-package-no-mod.json", "src/test.ts"], (err) => {
                 assert.isNull(err, "process should exit without an error");
                 done();
-            });        });
+            });
+        });
 
         it("exits with code 1 if config file is invalid", (done) => {
             execCli(["-c", "test/config/tslint-invalid.json", "src/test.ts"], (err, stdout, stderr) => {
@@ -211,6 +214,14 @@ describe("Executable", function() {
                     done();
                 });
         });
+
+        it("exits with code 0 if `tsconfig.json` is passed but it includes no ts files", (done) => {
+            execCli(["-c", "test/files/tsconfig-no-ts-files/tslint.json", "--project", "test/files/tsconfig-no-ts-files/tsconfig.json"],
+                (err) => {
+                    assert.isNull(err, "process should exit without an error");
+                    done();
+                });
+        });
     });
 
     describe("--init flag", () => {
@@ -289,6 +300,9 @@ function execCli(args: string[], options: cp.ExecFileOptions | ExecFileCallback,
     }
 
     return cp.execFile(filePath, args, options, (error, stdout, stderr) => {
+        if (cb === undefined) {
+            throw new Error("cb not defined");
+        }
         cb(error, stdout.trim(), stderr.trim());
     });
 }

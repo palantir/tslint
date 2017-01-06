@@ -17,26 +17,22 @@
 
 import * as ts from "typescript";
 
-import {Fix, IDisabledInterval, IOptions, Replacement, RuleFailure} from "../rule/rule";
-import {doesIntersect} from "../utils";
+import {Fix, IOptions, Replacement, RuleFailure} from "../rule/rule";
 import {SyntaxWalker} from "./syntaxWalker";
+import {IWalker} from "./walker";
 
-export class RuleWalker extends SyntaxWalker {
+export class RuleWalker extends SyntaxWalker implements IWalker {
     private limit: number;
-    private position: number;
-    private options: any[];
+    private options?: any[];
     private failures: RuleFailure[];
-    private disabledIntervals: IDisabledInterval[];
     private ruleName: string;
 
     constructor(private sourceFile: ts.SourceFile, options: IOptions) {
         super();
 
-        this.position = 0;
         this.failures = [];
         this.options = options.ruleArguments;
         this.limit = this.sourceFile.getFullWidth();
-        this.disabledIntervals = options.disabledIntervals;
         this.ruleName = options.ruleName;
     }
 
@@ -68,8 +64,8 @@ export class RuleWalker extends SyntaxWalker {
         }
     }
 
-    public skip(node: ts.Node) {
-        this.position += node.getFullWidth();
+    public skip(_node: ts.Node) {
+        return; // TODO remove this method in next major version
     }
 
     public createFailure(start: number, width: number, failure: string, fix?: Fix): RuleFailure {
@@ -79,10 +75,7 @@ export class RuleWalker extends SyntaxWalker {
     }
 
     public addFailure(failure: RuleFailure) {
-        // don't add failures for a rule if the failure intersects an interval where that rule is disabled
-        if (!this.existsFailure(failure) && !doesIntersect(failure, this.disabledIntervals)) {
-            this.failures.push(failure);
-        }
+        this.failures.push(failure);
     }
 
     /** Add a failure with any arbitrary span. Prefer `addFailureAtNode` if possible. */
@@ -97,7 +90,7 @@ export class RuleWalker extends SyntaxWalker {
 
     /** Add a failure using a node's span. */
     public addFailureAtNode(node: ts.Node, failure: string, fix?: Fix) {
-        this.addFailureAt(node.getStart(), node.getWidth(), failure, fix);
+        this.addFailureAt(node.getStart(this.sourceFile), node.getWidth(this.sourceFile), failure, fix);
     }
 
     public createReplacement(start: number, length: number, text: string): Replacement {
@@ -112,7 +105,11 @@ export class RuleWalker extends SyntaxWalker {
         return this.createReplacement(start, length, "");
     }
 
-    private existsFailure(failure: RuleFailure) {
-        return this.failures.some((f) => f.equals(failure));
+    public getRuleName(): string {
+        return this.ruleName;
+    }
+
+    public createFix(...replacements: Replacement[]): Fix {
+        return new Fix(this.ruleName, replacements);
     }
 }

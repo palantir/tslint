@@ -38,6 +38,7 @@
   {
     "ruleName": "array-type",
     "description": "Requires using either 'T[]' or 'Array<T>' for arrays.",
+    "hasFix": true,
     "optionsDescription": "\nOne of the following arguments must be provided:\n\n* `\"array\"` enforces use of `T[]` for all types T.\n* `\"generic\"` enforces use of `Array<T>` for all types T.\n* `\"array-simple\"` enforces use of `T[]` if `T` is a simple type (primitive or type reference).",
     "options": {
       "type": "string",
@@ -58,8 +59,9 @@
   {
     "ruleName": "arrow-parens",
     "description": "Requires parentheses around the parameters of arrow function definitions.",
+    "hasFix": true,
     "rationale": "Maintains stylistic consistency with other arrow function definitions.",
-    "optionsDescription": "\nif `ban-single-arg-parens` is specified, then arrow functions with one parameter \nmust not have parentheses if removing them is allowed by TypeScript.",
+    "optionsDescription": "\nif `ban-single-arg-parens` is specified, then arrow functions with one parameter\nmust not have parentheses if removing them is allowed by TypeScript.",
     "options": {
       "type": "string",
       "enum": [
@@ -68,7 +70,7 @@
     },
     "optionExamples": [
       "true",
-      "[true, ban-single-arg-parens]"
+      "[true, \"ban-single-arg-parens\"]"
     ],
     "type": "style",
     "typescriptOnly": false
@@ -245,6 +247,17 @@
       "[true, \"rxjs\", \"lodash\"]"
     ],
     "type": "functionality",
+    "typescriptOnly": false
+  },
+  {
+    "ruleName": "import-spacing",
+    "description": "Ensures proper spacing between import statement keywords",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "style",
     "typescriptOnly": false
   },
   {
@@ -481,6 +494,7 @@
   {
     "ruleName": "no-angle-bracket-type-assertion",
     "description": "Requires the use of `as Type` for type assertions instead of `<Type>`.",
+    "hasFix": true,
     "rationale": "\nBoth formats of type assertions have the same effect, but only `as` type assertions\nwork in `.tsx` files. This rule ensures that you have a consistent type assertion style\nacross your codebase.",
     "optionsDescription": "Not configurable.",
     "options": null,
@@ -870,8 +884,9 @@
   {
     "ruleName": "no-string-throw",
     "description": "Flags throwing plain strings or concatenations of strings because only Errors produce proper stack traces.",
+    "hasFix": true,
     "options": null,
-    "optionsDescription": "",
+    "optionsDescription": "Not configurable.",
     "type": "functionality",
     "typescriptOnly": false
   },
@@ -943,6 +958,7 @@
     "ruleName": "no-unused-variable",
     "deprecationMessage": "Use the tsc compiler options --noUnusedParameters and --noUnusedLocals instead.",
     "description": "Disallows unused imports, variables, functions and private class members.",
+    "hasFix": true,
     "optionsDescription": "\nThree optional arguments may be optionally provided:\n\n* `\"check-parameters\"` disallows unused function and constructor parameters.\n    * NOTE: this option is experimental and does not work with classes\n    that use abstract method declarations, among other things.\n* `\"react\"` relaxes the rule for a namespace import named `React`\n(from either the module `\"react\"` or `\"react/addons\"`).\nAny JSX expression in the file will be treated as a usage of `React`\n(because it expands to `React.createElement `).\n* `{\"ignore-pattern\": \"pattern\"}` where pattern is a case-sensitive regexp.\nVariable names that match the pattern will be ignored.",
     "options": {
       "type": "array",
@@ -992,6 +1008,7 @@
     "ruleName": "no-var-keyword",
     "description": "Disallows usage of the `var` keyword.",
     "descriptionDetails": "Use `let` or `const` instead.",
+    "hasFix": true,
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
@@ -1025,6 +1042,7 @@
     "ruleName": "object-literal-key-quotes",
     "description": "Enforces consistent object literal property quote style.",
     "descriptionDetails": "\nObject literal property names can be defined in two ways: using literals or using strings.\nFor example, these two objects are equivalent:\n\nvar object1 = {\n    property: true\n};\n\nvar object2 = {\n    \"property\": true\n};\n\nIn many cases, it doesn’t matter if you choose to use an identifier instead of a string\nor vice-versa. Even so, you might decide to enforce a consistent style in your code.\n\nThis rules lets you enforce consistent quoting of property names. Either they should always\nbe quoted (default behavior) or quoted only as needed (\"as-needed\").",
+    "hasFix": true,
     "optionsDescription": "\nPossible settings are:\n\n* `\"always\"`: Property names should always be quoted. (This is the default.)\n* `\"as-needed\"`: Only property names which require quotes may be quoted (e.g. those with spaces in them).\n* `\"consistent\"`: Property names should either all be quoted or unquoted.\n* `\"consistent-as-needed\"`: If any property name requires quotes, then all properties must be quoted. Otherwise, no\nproperty names may be quoted.\n\nFor ES6, computed property names (`{[name]: value}`) and methods (`{foo() {}}`) never need\nto be quoted.",
     "options": {
       "type": "string",
@@ -1140,6 +1158,7 @@
     "ruleName": "ordered-imports",
     "description": "Requires that import statements be alphabetized.",
     "descriptionDetails": "\nEnforce a consistent ordering for ES6 imports:\n- Named imports must be alphabetized (i.e. \"import {A, B, C} from \"foo\";\")\n    - The exact ordering can be controlled by the named-imports-order option.\n    - \"longName as name\" imports are ordered by \"longName\".\n- Import sources must be alphabetized within groups, i.e.:\n        import * as foo from \"a\";\n        import * as bar from \"b\";\n- Groups of imports are delineated by blank lines. You can use these to group imports\n    however you like, e.g. by first- vs. third-party or thematically.",
+    "hasFix": true,
     "optionsDescription": "\nYou may set the `\"import-sources-order\"` option to control the ordering of source\nimports (the `\"foo\"` in `import {A, B, C} from \"foo\"`).\n\nPossible values for `\"import-sources-order\"` are:\n\n* `\"case-insensitive'`: Correct order is `\"Bar\"`, `\"baz\"`, `\"Foo\"`. (This is the default.)\n* `\"lowercase-first\"`: Correct order is `\"baz\"`, `\"Bar\"`, `\"Foo\"`.\n* `\"lowercase-last\"`: Correct order is `\"Bar\"`, `\"Foo\"`, `\"baz\"`.\n* `\"any\"`: Allow any order.\n\nYou may set the `\"named-imports-order\"` option to control the ordering of named\nimports (the `{A, B, C}` in `import {A, B, C} from \"foo\"`).\n\nPossible values for `\"named-imports-order\"` are:\n\n* `\"case-insensitive'`: Correct order is `{A, b, C}`. (This is the default.)\n* `\"lowercase-first\"`: Correct order is `{b, A, C}`.\n* `\"lowercase-last\"`: Correct order is `{A, C, b}`.\n* `\"any\"`: Allow any order.\n\n        ",
     "options": {
       "type": "object",
@@ -1176,6 +1195,7 @@
     "ruleName": "prefer-const",
     "description": "Requires that variable declarations use `const` instead of `let` if possible.",
     "descriptionDetails": "\nIf a variable is only assigned to once when it is declared, it should be declared using 'const'",
+    "hasFix": true,
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
@@ -1212,6 +1232,7 @@
   {
     "ruleName": "quotemark",
     "description": "Requires single or double quotes for string literals.",
+    "hasFix": true,
     "optionsDescription": "\nFive arguments may be optionally provided:\n\n* `\"single\"` enforces single quotes.\n* `\"double\"` enforces double quotes.\n* `\"jsx-single\"` enforces single quotes for JSX attributes.\n* `\"jsx-double\"` enforces double quotes for JSX attributes.\n* `\"avoid-escape\"` allows you to use the \"other\" quotemark in cases where escaping would normally be required.\nFor example, `[true, \"double\", \"avoid-escape\"]` would not report a failure on the string literal `'Hello \"World\"'`.",
     "options": {
       "type": "array",
@@ -1262,7 +1283,8 @@
   {
     "ruleName": "semicolon",
     "description": "Enforces consistent semicolon usage at the end of every statement.",
-    "optionsDescription": "\nOne of the following arguments must be provided:\n\n* `\"always\"` enforces semicolons at the end of every statement.\n* `\"never\"` disallows semicolons at the end of every statement except for when they are necessary.\n\nThe following arguments may be optionaly provided:\n* `\"ignore-interfaces\"` skips checking semicolons at the end of interface members.\n* `\"ignore-bound-class-methods\"` skips checking semicolons at the end of bound class methods.",
+    "hasFix": true,
+    "optionsDescription": "\nOne of the following arguments must be provided:\n\n* `\"always\"` enforces semicolons at the end of every statement.\n* `\"never\"` disallows semicolons at the end of every statement except for when they are necessary.\n\nThe following arguments may be optionaly provided:\n\n* `\"ignore-interfaces\"` skips checking semicolons at the end of interface members.\n* `\"ignore-bound-class-methods\"` skips checking semicolons at the end of bound class methods.",
     "options": {
       "type": "array",
       "items": [
@@ -1292,6 +1314,60 @@
     "typescriptOnly": false
   },
   {
+    "description": "Require or disallow a space before function parenthesis",
+    "hasFix": true,
+    "optionExamples": [
+      "true",
+      "[true, \"always\"]",
+      "[true, \"never\"]",
+      "[true, {\"anonymous\": \"always\", \"named\": \"never\", \"asyncArrow\": \"always\"}]"
+    ],
+    "options": {
+      "properties": {
+        "anonymous": {
+          "enum": [
+            "always",
+            "never"
+          ],
+          "type": "string"
+        },
+        "asyncArrow": {
+          "enum": [
+            "always",
+            "never"
+          ],
+          "type": "string"
+        },
+        "constructor": {
+          "enum": [
+            "always",
+            "never"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "always",
+            "never"
+          ],
+          "type": "string"
+        },
+        "named": {
+          "enum": [
+            "always",
+            "never"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "optionsDescription": "\nOne argument which is an object which may contain the keys `anonymous`, `named`, and `asyncArrow`\nThese should be set to either `\"always\"` or `\"never\"`.\n\n* `\"anonymous\"` checks before the opening paren in anonymous functions\n* `\"named\"` checks before the opening paren in named functions\n* `\"asyncArrow\"` checks before the opening paren in async arrow functions\n* `\"method\"` checks before the opening paren in class methods\n* `\"constructor\"` checks before the opening paren in class constructors\n        ",
+    "ruleName": "space-before-function-paren",
+    "type": "style",
+    "typescriptOnly": false
+  },
+  {
     "ruleName": "strict-boolean-expressions",
     "description": "Usage of && or || operators should be with boolean operands and\nexpressions in If, Do, While and For statements should be of type boolean",
     "optionsDescription": "Not configurable.",
@@ -1317,6 +1393,7 @@
   {
     "ruleName": "trailing-comma",
     "description": "\nRequires or disallows trailing commas in array and object literals, destructuring assignments, function and tuple typings,\nnamed imports and function parameters.",
+    "hasFix": true,
     "optionsDescription": "\nOne argument which is an object with the keys `multiline` and `singleline`.\nBoth should be set to either `\"always\"` or `\"never\"`.\n\n* `\"multiline\"` checks multi-line object literals.\n* `\"singleline\"` checks single-line object literals.\n\nA array is considered \"multiline\" if its closing bracket is on a line\nafter the last array element. The same general logic is followed for\nobject literals, function and tuple typings, named import statements\nand function parameters.",
     "options": {
       "type": "object",
@@ -1500,6 +1577,28 @@
     },
     "optionExamples": [
       "\n[\n  true,\n  {\n    \"call-signature\": \"nospace\",\n    \"index-signature\": \"nospace\",\n    \"parameter\": \"nospace\",\n    \"property-declaration\": \"nospace\",\n    \"variable-declaration\": \"nospace\"\n  },\n  {\n    \"call-signature\": \"onespace\",\n    \"index-signature\": \"onespace\",\n    \"parameter\": \"onespace\",\n    \"property-declaration\": \"onespace\",\n    \"variable-declaration\": \"onespace\"\n  }\n]"
+    ],
+    "type": "typescript",
+    "typescriptOnly": true
+  },
+  {
+    "ruleName": "typeof-compare",
+    "description": "Makes sure result of `typeof` is compared to correct string values",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality",
+    "typescriptOnly": false
+  },
+  {
+    "ruleName": "unified-signatures",
+    "description": "Warns for any two overloads that could be unified into one by using a union or an optional/rest parameter.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
     ],
     "type": "typescript",
     "typescriptOnly": true

@@ -85,11 +85,11 @@ class VariableNameWalker extends Lint.RuleWalker {
 
     public visitBindingElement(node: ts.BindingElement) {
         if (node.name.kind === ts.SyntaxKind.Identifier) {
-            const identifier = <ts.Identifier> node.name;
+            const identifier = node.name as ts.Identifier;
             this.handleVariableNameKeyword(identifier);
             // A destructuring pattern that does not rebind an expression is always an alias, e.g. `var {Foo} = ...;`.
             // Only check if the name is rebound (`var {Foo: bar} = ...;`).
-            if (node.parent.kind !== ts.SyntaxKind.ObjectBindingPattern || node.propertyName) {
+            if (node.parent !== undefined && node.parent.kind !== ts.SyntaxKind.ObjectBindingPattern || node.propertyName) {
                 this.handleVariableNameFormat(identifier, node.initializer);
             }
         }
@@ -98,7 +98,7 @@ class VariableNameWalker extends Lint.RuleWalker {
 
     public visitParameterDeclaration(node: ts.ParameterDeclaration) {
         if (node.name.kind === ts.SyntaxKind.Identifier) {
-            const identifier = <ts.Identifier> node.name;
+            const identifier = node.name as ts.Identifier;
             this.handleVariableNameFormat(identifier, undefined /* parameters may not alias */);
             this.handleVariableNameKeyword(identifier);
         }
@@ -107,7 +107,7 @@ class VariableNameWalker extends Lint.RuleWalker {
 
     public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
         if (node.name != null && node.name.kind === ts.SyntaxKind.Identifier) {
-            const identifier = <ts.Identifier> node.name;
+            const identifier = node.name as ts.Identifier;
             this.handleVariableNameFormat(identifier, node.initializer);
             // do not check property declarations for keywords, they are allowed to be keywords
         }
@@ -116,7 +116,7 @@ class VariableNameWalker extends Lint.RuleWalker {
 
     public visitVariableDeclaration(node: ts.VariableDeclaration) {
         if (node.name.kind === ts.SyntaxKind.Identifier) {
-            const identifier = <ts.Identifier> node.name;
+            const identifier = node.name as ts.Identifier;
             this.handleVariableNameFormat(identifier, node.initializer);
             this.handleVariableNameKeyword(identifier);
         }
@@ -136,9 +136,10 @@ class VariableNameWalker extends Lint.RuleWalker {
         } else if (initializer.kind === ts.SyntaxKind.Identifier) {
             return (initializer as ts.Identifier).text === name.text;
         }
+        return false;
     }
 
-    private handleVariableNameFormat(name: ts.Identifier, initializer: ts.Expression) {
+    private handleVariableNameFormat(name: ts.Identifier, initializer?: ts.Expression) {
         const variableName = name.text;
 
         if (initializer && this.isAlias(name, initializer)) {

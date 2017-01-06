@@ -1,4 +1,10 @@
 function sampleFunc() {
+    // issue #1931, should not error
+    const value1 = [1];
+    const value2 = [2];
+    for (let i = 0; i < (value1).length; i++) {
+        const x = (value1)[i] === (value2)[i];
+    }
 
     // This loop only uses the iterator to access the array item, so we can recommend a for-of loop here
     for (var a = 0; a < obj.arr.length; a++) {
@@ -132,4 +138,10 @@ function sampleFunc() {
     }
 }
 
+for (let shadow = 0; shadow < arr.length; shadow++) {
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   [0]
+    for (let shadow = 0; shadow < arr.length; shadow++) {
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   [0]
+    }
+}
 [0]: Expected a 'for-of' loop instead of a 'for' loop with this simple iteration
