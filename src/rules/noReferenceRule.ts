@@ -44,7 +44,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class NoReferenceWalker extends Lint.RuleWalker {
     public visitSourceFile(node: ts.SourceFile) {
-        for (let ref of node.referencedFiles) {
+        for (const ref of node.referencedFiles) {
             this.addFailureFromStartToEnd(ref.pos, ref.end, Rule.FAILURE_STRING);
         }
     }

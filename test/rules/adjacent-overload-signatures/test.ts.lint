@@ -37,6 +37,20 @@ interface i6 {
     toString(): string;
 }
 
+interface i7 {
+    // Computed properties with different source code text OK
+    [Symbol.iterator](): void;
+    [Symbol.toStringTag](): void;
+}
+
+interface i8 {
+    // Computed property with same source code text as regular property OK
+    [Symbol.iterator](): void;
+    x: number;
+    "Symbol.iterator"(): void;
+}
+
+
 // bad
 
 interface b1 {
@@ -83,6 +97,13 @@ interface b5 {
     }
 }
 
+interface b6 {
+    (): void;
+    x: number;
+    (x: number): number;
+    ~~~~~~~~~~~~~~~~~~~~ [All '()' signatures should be adjacent]
+}
+
 // Also works in classes, source files, modules, namespaces
 
 class C {
@@ -127,3 +148,10 @@ class Bar {
   ;
 }
 
+interface I {
+    // Catches computed properties with same source code text
+    [Symbol.iterator](): void;
+    x: number;
+    [Symbol.iterator](): void;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~ [All 'Symbol.iterator' signatures should be adjacent]
+}

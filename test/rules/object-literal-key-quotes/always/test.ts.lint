@@ -21,4 +21,6 @@ const o = {
   ~~~~  [Unquoted property 'true' found.]
   "0x0": 0,
   "true": 0,
+  x,
+  ...y,
 };

@@ -51,7 +51,9 @@ export class Rule extends Lint.Rules.AbstractRule {
         const options = this.getOptions();
         const banFunctionWalker = new BanFunctionWalker(sourceFile, options);
         const functionsToBan = options.ruleArguments;
-        functionsToBan.forEach((f) => banFunctionWalker.addBannedFunction(f));
+        if (functionsToBan !== undefined) {
+            functionsToBan.forEach((f) => banFunctionWalker.addBannedFunction(f));
+        }
         return this.applyWithWalker(banFunctionWalker);
     }
 }
@@ -109,7 +111,7 @@ export class BanFunctionWalker extends Lint.RuleWalker {
 
     private checkForGlobalBan(expression: ts.LeftHandSideExpression) {
         if (expression.kind === ts.SyntaxKind.Identifier) {
-            const identifierName = (<ts.Identifier> expression).text;
+            const identifierName = (expression as ts.Identifier).text;
             if (this.bannedGlobalFunctions.indexOf(identifierName) !== -1) {
                 this.addFailureAtNode(expression, Rule.FAILURE_STRING_FACTORY(`${identifierName}`));
             }

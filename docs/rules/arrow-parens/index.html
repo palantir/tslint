@@ -1,10 +1,11 @@
 ---
 ruleName: arrow-parens
 description: Requires parentheses around the parameters of arrow function definitions.
+hasFix: true
 rationale: Maintains stylistic consistency with other arrow function definitions.
 optionsDescription: |-
 
-  if `ban-single-arg-parens` is specified, then arrow functions with one parameter 
+  if `ban-single-arg-parens` is specified, then arrow functions with one parameter
   must not have parentheses if removing them is allowed by TypeScript.
 options:
   type: string
@@ -12,7 +13,7 @@ options:
     - ban-single-arg-parens
 optionExamples:
   - 'true'
-  - '[true, ban-single-arg-parens]'
+  - '[true, "ban-single-arg-parens"]'
 type: style
 typescriptOnly: false
 layout: rule

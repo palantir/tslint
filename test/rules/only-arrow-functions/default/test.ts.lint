@@ -26,4 +26,10 @@ let generator = function*() {}
 function hasThisParameter(this) {}
 let hasThisParameter = function(this) {}
 
+export function exported() {}
+       ~~~~~~~~ [0]
+
+async function asyncFunction() {}
+      ~~~~~~~~ [0]
+
 [0]: non-arrow functions are forbidden

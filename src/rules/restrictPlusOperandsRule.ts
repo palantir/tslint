@@ -18,6 +18,7 @@
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { isTypeFlagSet } from "../language/utils";
 
 export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -45,8 +46,8 @@ class RestrictPlusOperandsWalker extends Lint.ProgramAwareRuleWalker {
         if (node.operatorToken.kind === ts.SyntaxKind.PlusToken) {
             const tc = this.getTypeChecker();
 
-            const leftType = getAddableType(node.left, tc);
-            const rightType = getAddableType(node.right, tc);
+            const leftType = getBaseTypeOfLiteralType(tc.getTypeAtLocation(node.left));
+            const rightType = getBaseTypeOfLiteralType(tc.getTypeAtLocation(node.right));
 
             const width = node.getWidth();
             const position = node.getStart();
@@ -60,12 +61,20 @@ class RestrictPlusOperandsWalker extends Lint.ProgramAwareRuleWalker {
     }
 }
 
-function getAddableType(node: ts.Expression, tc: ts.TypeChecker): "string" | "number" | "invalid" {
-    const type = tc.getTypeAtLocation(node);
-    if (type.flags === ts.TypeFlags.NumberLiteral || type.flags === ts.TypeFlags.Number) {
-        return "number";
-    } else if (type.flags === ts.TypeFlags.StringLiteral || type.flags === ts.TypeFlags.String) {
+function getBaseTypeOfLiteralType(type: ts.Type): "string" | "number" | "invalid" {
+    if (isTypeFlagSet(type, ts.TypeFlags.StringLiteral) || isTypeFlagSet(type, ts.TypeFlags.String)) {
         return "string";
+    } else if (isTypeFlagSet(type, ts.TypeFlags.NumberLiteral) || isTypeFlagSet(type, ts.TypeFlags.Number)) {
+        return "number";
+    } else if (isTypeFlagSet(type, ts.TypeFlags.Union) && !isTypeFlagSet(type, ts.TypeFlags.Enum)) {
+        const types = (type as ts.UnionType).types.map(getBaseTypeOfLiteralType);
+        return allSame(types) ? types[0] : "invalid";
+    } else if (isTypeFlagSet(type, ts.TypeFlags.EnumLiteral)) {
+        return getBaseTypeOfLiteralType((type as ts.EnumLiteralType).baseType);
     }
     return "invalid";
+}
+
+function allSame(array: string[]) {
+    return array.every((value) => value === array[0]);
 }

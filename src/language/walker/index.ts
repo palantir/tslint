@@ -21,3 +21,4 @@ export * from "./ruleWalker";
 export * from "./scopeAwareRuleWalker";
 export * from "./skippableTokenAwareRuleWalker";
 export * from "./syntaxWalker";
+export * from "./walker";

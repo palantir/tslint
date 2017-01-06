@@ -55,25 +55,25 @@ class StrictBooleanExpressionsRule extends Lint.ProgramAwareRuleWalker {
     }
 
     public visitBinaryExpression(node: ts.BinaryExpression) {
-        let isAndAndBinaryOperator = node.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken;
-        let isOrOrBinaryOperator = node.operatorToken.kind === ts.SyntaxKind.BarBarToken;
+        const isAndAndBinaryOperator = node.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken;
+        const isOrOrBinaryOperator = node.operatorToken.kind === ts.SyntaxKind.BarBarToken;
         if (isAndAndBinaryOperator || isOrOrBinaryOperator) {
-            let lhsExpression = node.left;
-            let lhsType = this.checker.getTypeAtLocation(lhsExpression);
-            let rhsExpression = node.right;
-            let rhsType = this.checker.getTypeAtLocation(rhsExpression);
+            const lhsExpression = node.left;
+            const lhsType = this.checker.getTypeAtLocation(lhsExpression);
+            const rhsExpression = node.right;
+            const rhsType = this.checker.getTypeAtLocation(rhsExpression);
             if (!this.isBooleanType(lhsType)) {
                 if (lhsExpression.kind !== ts.SyntaxKind.BinaryExpression) {
                     this.addFailureAtNode(lhsExpression, Rule.BINARY_EXPRESSION_ERROR);
                 } else {
-                    this.visitBinaryExpression(<ts.BinaryExpression> lhsExpression);
+                    this.visitBinaryExpression(lhsExpression as ts.BinaryExpression);
                 }
             }
             if (!this.isBooleanType(rhsType)) {
                 if (rhsExpression.kind !== ts.SyntaxKind.BinaryExpression) {
                     this.addFailureAtNode(rhsExpression, Rule.BINARY_EXPRESSION_ERROR);
                 } else {
-                    this.visitBinaryExpression(<ts.BinaryExpression> rhsExpression);
+                    this.visitBinaryExpression(rhsExpression as ts.BinaryExpression);
                 }
             }
         }
@@ -81,10 +81,10 @@ class StrictBooleanExpressionsRule extends Lint.ProgramAwareRuleWalker {
     }
 
     public visitPrefixUnaryExpression(node: ts.PrefixUnaryExpression) {
-        let isExclamationOperator = node.operator === ts.SyntaxKind.ExclamationToken;
+        const isExclamationOperator = node.operator === ts.SyntaxKind.ExclamationToken;
         if (isExclamationOperator) {
-            let expr = node.operand;
-            let expType = this.checker.getTypeAtLocation(expr);
+            const expr = node.operand;
+            const expType = this.checker.getTypeAtLocation(expr);
             if (!this.isBooleanType(expType)) {
                 this.addFailureAtNode(node, Rule.UNARY_EXPRESSION_ERROR);
             }
@@ -108,8 +108,8 @@ class StrictBooleanExpressionsRule extends Lint.ProgramAwareRuleWalker {
     }
 
     public visitConditionalExpression(node: ts.ConditionalExpression) {
-        let cexp = node.condition;
-        let expType = this.checker.getTypeAtLocation(cexp);
+        const cexp = node.condition;
+        const expType = this.checker.getTypeAtLocation(cexp);
         if (!this.isBooleanType(expType)) {
             this.addFailureAtNode(cexp, Rule.CONDITIONAL_EXPRESSION_ERROR);
         }
@@ -117,17 +117,19 @@ class StrictBooleanExpressionsRule extends Lint.ProgramAwareRuleWalker {
     }
 
     public visitForStatement(node: ts.ForStatement) {
-        let cexp = node.condition;
-        let expType = this.checker.getTypeAtLocation(cexp);
-        if (!this.isBooleanType(expType)) {
-            this.addFailureAtNode(cexp, `For ${Rule.STATEMENT_ERROR}`);
+        const forCondition = node.condition;
+        if (forCondition !== undefined) {
+            const expType = this.checker.getTypeAtLocation(forCondition);
+            if (!this.isBooleanType(expType)) {
+                this.addFailureAtNode(forCondition, `For ${Rule.STATEMENT_ERROR}`);
+            }
         }
         super.visitForStatement(node);
     }
 
     private checkStatement(node: StatementType) {
-        let bexp = node.expression;
-        let expType = this.checker.getTypeAtLocation(bexp);
+        const bexp = node.expression;
+        const expType = this.checker.getTypeAtLocation(bexp);
         if (!this.isBooleanType(expType)) {
             this.addFailureAtNode(bexp, `${failureTextForKind(node.kind)} ${Rule.STATEMENT_ERROR}`);
         }
