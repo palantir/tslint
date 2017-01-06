@@ -73,7 +73,16 @@ class Walker extends Lint.RuleWalker {
 
         const anyComments = hasComments(arrow) || hasComments(openBrace) || hasComments(statement) || hasComments(returnKeyword) ||
             hasComments(expr) || (semicolon && hasComments(semicolon)) || hasComments(closeBrace);
-        return anyComments ? undefined : this.createFix([
+        if (anyComments) {
+            return undefined;
+        }
+
+        return this.createFix([
+            // Object literal must be wrapped in `()`
+            ...(expr.kind === ts.SyntaxKind.ObjectLiteralExpression ? [
+                this.appendText(expr.getStart(), "("),
+                this.appendText(expr.getEnd(), ")"),
+            ] : []),
             // " {"
             deleteFromTo(arrow.end, openBrace.end),
             // "return "
