@@ -26,9 +26,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "import-spacing",
         description: "Ensures proper spacing between import statement keywords",
-        optionsDescription: "",
-        options: {},
-        optionExamples: [],
+        optionsDescription: "Not configurable.",
+        options: null,
+        optionExamples: ["true"],
         type: "style",
         typescriptOnly: false,
     };
