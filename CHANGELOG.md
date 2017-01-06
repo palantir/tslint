@@ -1,11 +1,6 @@
 Change Log
 ===
 
-v4.3.0-dev.0
----
-
-* Include latest v4.3.1 changes
-
 v4.3.1
 ---
 
