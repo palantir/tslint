@@ -68,7 +68,7 @@ class FunctionWalker extends Lint.RuleWalker {
         this.cacheOptions();
     }
 
-    protected visitArrowFunction(node: ts.FunctionLikeDeclaration): void {
+    protected visitArrowFunction(node: ts.ArrowFunction): void {
         const option = this.getOption("asyncArrow");
         const syntaxList = Lint.childOfKind(node, ts.SyntaxKind.SyntaxList)!;
         const isAsyncArrow = syntaxList.getStart() === node.getStart() && syntaxList.getText() === "async";

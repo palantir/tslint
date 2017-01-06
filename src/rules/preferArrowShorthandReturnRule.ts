@@ -19,21 +19,26 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
+const OPTION_MULTILINE = "multiline";
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
-        ruleName: "expression-valued-functions",
+        ruleName: "prefer-arrow-shorthand-return",
         description: "Suggests to convert `() => { return x; }` to `() => x`.",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [
+            `[true]`,
+            `[true, "${OPTION_MULTILINE}"]`,
+        ],
         type: "functionality",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING =
-        "Arrow function body may be converted just this expression, with no `{ return ... }`.";
+        "This arrow function body can be simplified by omitting the curly braces and the keyword 'return'.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new Walker(sourceFile, this.getOptions()));
@@ -41,31 +46,33 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class Walker extends Lint.RuleWalker {
-    public visitArrowFunction(node: ts.FunctionLikeDeclaration) {
+    public visitArrowFunction(node: ts.ArrowFunction) {
         if (node.body && node.body.kind === ts.SyntaxKind.Block) {
             const expr = getSimpleReturnExpression(node.body as ts.Block);
-            if (expr !== undefined) {
-                this.addFailureAtNode(expr, Rule.FAILURE_STRING, this.fix(node, node.body as ts.Block, expr));
+            if (expr !== undefined && (this.hasOption(OPTION_MULTILINE) || !this.isMultiline(node.body))) {
+                this.addFailureAtNode(node.body, Rule.FAILURE_STRING, this.createArrowFunctionFix(node, node.body as ts.Block, expr));
             }
         }
 
         super.visitArrowFunction(node);
     }
 
-    private fix(arrowFunction: ts.FunctionLikeDeclaration, body: ts.Block, expr: ts.Expression): Lint.Fix | undefined {
+    private isMultiline(node: ts.Node): boolean {
+        const getLine = (position: number) => this.getLineAndCharacterOfPosition(position).line;
+        return getLine(node.getEnd()) > getLine(node.getStart());
+    }
+
+    private createArrowFunctionFix(arrowFunction: ts.FunctionLikeDeclaration, body: ts.Block, expr: ts.Expression): Lint.Fix | undefined {
         const text = this.getSourceFile().text;
         const statement = expr.parent!;
+        const returnKeyword = Lint.childOfKind(statement, ts.SyntaxKind.ReturnKeyword)!;
         const arrow = Lint.childOfKind(arrowFunction, ts.SyntaxKind.EqualsGreaterThanToken)!;
         const openBrace = Lint.childOfKind(body, ts.SyntaxKind.OpenBraceToken)!;
         const closeBrace = Lint.childOfKind(body, ts.SyntaxKind.CloseBraceToken)!;
         const semicolon = Lint.childOfKind(statement, ts.SyntaxKind.SemicolonToken);
 
-        const anyComments = hasComments(arrow.end, openBrace.getStart()) ||
-            hasComments(statement.pos, statement.getStart()) ||
-            hasComments(expr.pos, expr.getStart()) ||
-            (semicolon
-                ? hasComments(semicolon.pos, semicolon.getStart()) || hasComments(semicolon.end, closeBrace.getStart())
-                : hasComments(expr.end, closeBrace.getStart()));
+        const anyComments = hasComments(arrow) || hasComments(openBrace) || hasComments(statement) || hasComments(returnKeyword) ||
+            hasComments(expr) || (semicolon && hasComments(semicolon)) || hasComments(closeBrace);
         return anyComments ? undefined : this.createFix([
             // " {"
             deleteFromTo(arrow.end, openBrace.end),
@@ -75,8 +82,8 @@ class Walker extends Lint.RuleWalker {
             deleteFromTo(expr.end, closeBrace.end),
         ]);
 
-        function hasComments(start: number, end: number): boolean {
-            return !isAllWhitespace(text, start, end);
+        function hasComments(node: ts.Node): boolean {
+            return ts.getTrailingCommentRanges(text, node.getEnd()) !== undefined;
         }
     }
 }
@@ -90,13 +97,4 @@ function getSimpleReturnExpression(block: ts.Block): ts.Expression | undefined {
 
 function deleteFromTo(start: number, end: number): Lint.Replacement {
     return new Lint.Replacement(start, end - start, "");
-}
-
-function isAllWhitespace(text: string, start: number, end: number): boolean {
-    for (let i = start; i < end; i++) {
-        if (!ts.isWhiteSpace(text.charCodeAt(i))) {
-            return false;
-        }
-    }
-    return true;
 }

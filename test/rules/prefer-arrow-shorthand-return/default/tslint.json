@@ -1,0 +1,8 @@
+{
+    "rules": {
+        "prefer-arrow-shorthand-return": true
+    },
+    "jsRules": {
+        "prefer-arrow-shorthand-return": true
+    }
+}

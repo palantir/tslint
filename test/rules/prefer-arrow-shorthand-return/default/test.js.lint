@@ -2,10 +2,9 @@
 
 // Invalid:
 (() => { return 0; });
-                ~ [0]
+       ~~~~~~~~~~~~~ [0]
 (() => {
     return 0;
-           ~ [0]
 });
 
 // Valid:
@@ -16,16 +15,16 @@
 
 // No fix if there's a comment.
 (() => /**/ { return 0; });
-                     ~ [0]
+            ~~~~~~~~~~~~~ [0]
 (() => { /**/ return 0; });
-                     ~ [0]
+       ~~~~~~~~~~~~~~~~~~ [0]
 (() => { return /**/ 0; });
-                     ~ [0]
+       ~~~~~~~~~~~~~~~~~~ [0]
 (() => { return 0 /**/ });
-                ~ [0]
+       ~~~~~~~~~~~~~~~~~ [0]
 (() => { return 0 /**/; });
-                ~ [0]
+       ~~~~~~~~~~~~~~~~~~ [0]
 (() => { return 0; /**/ });
-                ~ [0]
+       ~~~~~~~~~~~~~~~~~~ [0]
 
-[0]: Arrow function body may be converted just this expression, with no `{ return ... }`.
+[0]: This arrow function body can be simplified by omitting the curly braces and the keyword 'return'.

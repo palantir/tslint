@@ -77,7 +77,7 @@ class TrailingCommaWalker extends Lint.RuleWalker {
         super.visitArrayLiteralExpression(node);
     }
 
-    public visitArrowFunction(node: ts.FunctionLikeDeclaration) {
+    public visitArrowFunction(node: ts.ArrowFunction) {
         this.lintChildNodeWithIndex(node, 1);
         super.visitArrowFunction(node);
     }

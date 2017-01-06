@@ -139,7 +139,7 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
         });
     }
 
-    public visitArrowFunction(node: ts.FunctionLikeDeclaration) {
+    public visitArrowFunction(node: ts.ArrowFunction) {
         this.checkEqualsGreaterThanTokenInNode(node);
         super.visitArrowFunction(node);
     }

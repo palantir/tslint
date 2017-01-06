@@ -204,17 +204,6 @@
     "typescriptOnly": false
   },
   {
-    "ruleName": "expression-valued-functions",
-    "description": "Suggests to convert `() => { return x; }` to `() => x`.",
-    "optionsDescription": "Not configurable.",
-    "options": null,
-    "optionExamples": [
-      "true"
-    ],
-    "type": "functionality",
-    "typescriptOnly": false
-  },
-  {
     "ruleName": "file-header",
     "description": "Enforces a certain header comment for all files, matched by a regular expression.",
     "optionsDescription": "Regular expression to match the header.",
@@ -1190,6 +1179,18 @@
       "[true, {\"import-sources-order\": \"lowercase-last\", \"named-imports-order\": \"lowercase-first\"}]"
     ],
     "type": "style",
+    "typescriptOnly": false
+  },
+  {
+    "ruleName": "prefer-arrow-shorthand-return",
+    "description": "Suggests to convert `() => { return x; }` to `() => x`.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "[true]",
+      "[true, \"multiline\"]"
+    ],
+    "type": "functionality",
     "typescriptOnly": false
   },
   {

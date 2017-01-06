@@ -57,7 +57,7 @@ class ArrowParensWalker extends Lint.RuleWalker {
         this.avoidOnSingleParameter = this.hasOption(BAN_SINGLE_ARG_PARENS);
     }
 
-    public visitArrowFunction(node: ts.FunctionLikeDeclaration) {
+    public visitArrowFunction(node: ts.ArrowFunction) {
         if (node.parameters.length === 1 && node.typeParameters === undefined) {
             const parameter = node.parameters[0];
 
