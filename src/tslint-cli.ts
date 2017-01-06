@@ -25,11 +25,15 @@ const processed = optimist
     .check((argv: any) => {
         // at least one of file, help, version, project or unqualified argument must be present
         if (!(argv.h || argv.i || argv.test || argv.v || argv.project || argv._.length > 0)) {
-            throw new Error("Missing files");
+            // throw a string, otherwise a call stack is printed for this message
+            // tslint:disable-next-line:no-string-throw
+            throw "Missing files";
         }
 
         if (argv.f) {
-            throw new Error("-f option is no longer available. Supply files directly to the tslint command instead.");
+            // throw a string, otherwise a call stack is printed for this message
+            // tslint:disable-next-line:no-string-throw
+            throw "-f option is no longer available. Supply files directly to the tslint command instead.";
         }
     })
     .options({

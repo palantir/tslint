@@ -26,6 +26,7 @@ const ALWAYS_OR_NEVER = {
 export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         description: "Require or disallow a space before function parenthesis",
+        hasFix: true,
         optionExamples: [
             `true`,
             `[true, "always"]`,
@@ -190,16 +191,12 @@ class FunctionWalker extends Lint.RuleWalker {
     }
 
     private createInvalidWhitespaceFailure(pos: number): Lint.RuleFailure {
-        const fix = new Lint.Fix(Rule.metadata.ruleName, [
-            this.deleteText(pos, 1),
-        ]);
+        const fix = this.createFix(this.deleteText(pos, 1));
         return this.createFailure(pos, 1, Rule.INVALID_WHITESPACE_ERROR, fix);
     }
 
     private createMissingWhitespaceFailure(pos: number): Lint.RuleFailure {
-        const fix = new Lint.Fix(Rule.metadata.ruleName, [
-            this.appendText(pos, " "),
-        ]);
+        const fix = this.createFix(this.appendText(pos, " "));
         return this.createFailure(pos, 1, Rule.MISSING_WHITESPACE_ERROR, fix);
     }
 }

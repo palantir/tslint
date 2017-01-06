@@ -46,6 +46,11 @@ export interface IRuleMetadata {
     descriptionDetails?: string;
 
     /**
+     * Whether or not the rule will provide fix suggestions.
+     */
+    hasFix?: boolean;
+
+    /**
      * An explanation of the available options for the rule.
      */
     optionsDescription: string;
