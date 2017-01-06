@@ -266,9 +266,12 @@ function getHomeDir() {
     }
 }
 
-export function getRelativePath(directory: string, relativeTo?: string) {
-    const basePath = relativeTo || process.cwd();
-    return path.resolve(basePath, directory);
+export function getRelativePath(directory?: string | null, relativeTo?: string) {
+    if (directory != null) {
+        const basePath = relativeTo || process.cwd();
+        return path.resolve(basePath, directory);
+    }
+    return undefined;
 }
 
 /**
@@ -279,7 +282,9 @@ export function getRelativePath(directory: string, relativeTo?: string) {
  * @return An array of absolute paths to directories potentially containing rules
  */
 export function getRulesDirectories(directories?: string | string[], relativeTo?: string): string[] {
-    const rulesDirectories: string[] = arrayify(directories).map((dir) => getRelativePath(dir, relativeTo));
+    const rulesDirectories = arrayify(directories)
+        .map((dir) => getRelativePath(dir, relativeTo))
+        .filter((dir) => dir !== undefined) as string[];
 
     for (const directory of rulesDirectories) {
         if (directory != null && !fs.existsSync(directory)) {
