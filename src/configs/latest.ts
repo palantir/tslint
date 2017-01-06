@@ -15,8 +15,33 @@
  * limitations under the License.
  */
 
+// tslint:disable object-literal-sort-keys
 export const rules = {
+    // added in v3.x
+    "no-invalid-this": true,
+    "no-angle-bracket-type-assertion": true,
+
+    // added in v4.1
+    "only-arrow-functions": [true,
+        "allow-declarations",
+        // the following option was added in 4.1
+        "allow-named-functions",
+    ],
+    "prefer-const": true,
+
+    // added in v4.2
+    "callable-types": true,
+    "interface-over-type-literal": true,
+    "no-empty-interface": true,
+    "no-string-throw": true,
+
+    // added in v4.3
+    "import-spacing": true,
+    "space-before-function-paren": [true, "never"],
+    "typeof-compare": true,
+    "unified-signatures": true,
 };
+// tslint:enable object-literal-sort-keys
 
 // work around "extends" being a keyword
 const xtends = "tslint:recommended";

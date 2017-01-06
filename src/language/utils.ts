@@ -92,8 +92,8 @@ export function hasModifier(modifiers: ts.ModifiersArray | undefined, ...modifie
  */
 export function isBlockScopedVariable(node: ts.VariableDeclaration | ts.VariableStatement): boolean {
     const parentNode = (node.kind === ts.SyntaxKind.VariableDeclaration)
-        ? (<ts.VariableDeclaration> node).parent
-        : (<ts.VariableStatement> node).declarationList;
+        ? (node as ts.VariableDeclaration).parent
+        : (node as ts.VariableStatement).declarationList;
 
     return isNodeFlagSet(parentNode!, ts.NodeFlags.Let)
         || isNodeFlagSet(parentNode!, ts.NodeFlags.Const);
@@ -114,7 +114,7 @@ export function getBindingElementVariableDeclaration(node: ts.BindingElement): t
             currentParent = currentParent.parent;
         }
     }
-    return <ts.VariableDeclaration> currentParent;
+    return currentParent as ts.VariableDeclaration;
 }
 
 /** Shim of Array.find */

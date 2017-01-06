@@ -40,6 +40,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
             This rules lets you enforce consistent quoting of property names. Either they should always
             be quoted (default behavior) or quoted only as needed ("as-needed").`,
+        hasFix: true,
         optionsDescription: Lint.Utils.dedent`
             Possible settings are:
 
@@ -121,7 +122,7 @@ class ObjectLiteralKeyQuotesWalker extends Lint.RuleWalker {
     private allMustHaveQuotes(properties: ts.ObjectLiteralElementLike[]) {
         for (const { name } of properties) {
             if (name !== undefined && name.kind !== ts.SyntaxKind.StringLiteral && name.kind !== ts.SyntaxKind.ComputedPropertyName) {
-                const fix = this.fix(this.appendText(name.getStart(), '"'), this.appendText(name.getEnd(), '"'));
+                const fix = this.createFix(this.appendText(name.getStart(), '"'), this.appendText(name.getEnd(), '"'));
                 this.addFailureAtNode(name, Rule.UNQUOTED_PROPERTY(name.getText()), fix);
             }
         }
@@ -130,14 +131,10 @@ class ObjectLiteralKeyQuotesWalker extends Lint.RuleWalker {
     private noneMayHaveQuotes(properties: ts.ObjectLiteralElementLike[], noneNeedQuotes?: boolean) {
         for (const { name } of properties) {
             if (name !== undefined && name.kind === ts.SyntaxKind.StringLiteral && (noneNeedQuotes || !propertyNeedsQuotes(name.text))) {
-                const fix = this.fix(this.deleteText(name.getStart(), 1), this.deleteText(name.getEnd() - 1, 1));
+                const fix = this.createFix(this.deleteText(name.getStart(), 1), this.deleteText(name.getEnd() - 1, 1));
                 this.addFailureAtNode(name, Rule.UNNEEDED_QUOTES(name.text), fix);
             }
         }
-    }
-
-    private fix(...replacements: Lint.Replacement[]) {
-        return new Lint.Fix(Rule.metadata.ruleName, replacements);
     }
 }
 

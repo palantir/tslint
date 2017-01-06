@@ -47,7 +47,7 @@ class NoEvalWalker extends Lint.RuleWalker {
     public visitCallExpression(node: ts.CallExpression) {
         const expression = node.expression;
         if (expression.kind === ts.SyntaxKind.Identifier) {
-            const expressionName = (<ts.Identifier> expression).text;
+            const expressionName = (expression as ts.Identifier).text;
             if (expressionName === "eval") {
                 this.addFailureAtNode(expression, Rule.FAILURE_STRING);
             }

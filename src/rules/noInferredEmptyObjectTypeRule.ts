@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 import * as Lint from "../index";
-import * as utils from "../language/utils";
+import { isObjectFlagSet, isTypeFlagSet } from "../language/utils";
 
 export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -50,18 +50,18 @@ class NoInferredEmptyObjectTypeRule extends Lint.ProgramAwareRuleWalker {
     }
 
     public visitNewExpression(node: ts.NewExpression): void {
-        let nodeTypeArgs = node.typeArguments;
+        const nodeTypeArgs = node.typeArguments;
         let isObjectReference: (o: ts.TypeReference) => boolean;
         if ((ts as any).TypeFlags.Reference != null) {
             // typescript 2.0.x specific code
-            isObjectReference = (o: ts.TypeReference) => utils.isTypeFlagSet(o, (ts as any).TypeFlags.Reference);
+            isObjectReference = (o: ts.TypeReference) => isTypeFlagSet(o, (ts as any).TypeFlags.Reference);
         } else {
-            isObjectReference = (o: ts.TypeReference) => utils.isTypeFlagSet(o, ts.TypeFlags.Object);
+            isObjectReference = (o: ts.TypeReference) => isTypeFlagSet(o, ts.TypeFlags.Object);
         }
         if (nodeTypeArgs === undefined) {
-            let objType = this.checker.getTypeAtLocation(node) as ts.TypeReference;
+            const objType = this.checker.getTypeAtLocation(node) as ts.TypeReference;
             if (isObjectReference(objType) && objType.typeArguments !== undefined) {
-                let typeArgs = objType.typeArguments as ts.ObjectType[];
+                const typeArgs = objType.typeArguments as ts.ObjectType[];
                 typeArgs.forEach((a) => {
                     if (this.isEmptyObjectInterface(a)) {
                         this.addFailureAtNode(node, Rule.EMPTY_INTERFACE_INSTANCE);
@@ -74,8 +74,8 @@ class NoInferredEmptyObjectTypeRule extends Lint.ProgramAwareRuleWalker {
 
     public visitCallExpression(node: ts.CallExpression): void {
         if (node.typeArguments === undefined) {
-            let callSig = this.checker.getResolvedSignature(node);
-            let retType = this.checker.getReturnTypeOfSignature(callSig) as ts.TypeReference;
+            const callSig = this.checker.getResolvedSignature(node);
+            const retType = this.checker.getReturnTypeOfSignature(callSig) as ts.TypeReference;
             if (this.isEmptyObjectInterface(retType)) {
                 this.addFailureAtNode(node, Rule.EMPTY_INTERFACE_FUNCTION);
             }
@@ -87,18 +87,18 @@ class NoInferredEmptyObjectTypeRule extends Lint.ProgramAwareRuleWalker {
         let isAnonymous: boolean;
         if (ts.ObjectFlags == null) {
             // typescript 2.0.x specific code
-            isAnonymous = utils.isTypeFlagSet(objType, (ts as any).TypeFlags.Anonymous);
+            isAnonymous = isTypeFlagSet(objType, (ts as any).TypeFlags.Anonymous);
         } else {
-            isAnonymous = utils.isObjectFlagSet(objType, ts.ObjectFlags.Anonymous);
+            isAnonymous = isObjectFlagSet(objType, ts.ObjectFlags.Anonymous);
         }
         let hasProblematicCallSignatures = false;
-        let hasProperties = (objType.getProperties() !== undefined && objType.getProperties().length > 0);
-        let hasNumberIndexType = objType.getNumberIndexType() !== undefined;
-        let hasStringIndexType = objType.getStringIndexType() !== undefined;
-        let callSig = objType.getCallSignatures();
+        const hasProperties = (objType.getProperties() !== undefined && objType.getProperties().length > 0);
+        const hasNumberIndexType = objType.getNumberIndexType() !== undefined;
+        const hasStringIndexType = objType.getStringIndexType() !== undefined;
+        const callSig = objType.getCallSignatures();
         if (callSig !== undefined && callSig.length > 0) {
-            let isClean = callSig.every((sig) => {
-                let csigRetType = this.checker.getReturnTypeOfSignature(sig) as ts.TypeReference;
+            const isClean = callSig.every((sig) => {
+                const csigRetType = this.checker.getReturnTypeOfSignature(sig) as ts.TypeReference;
                 return this.isEmptyObjectInterface(csigRetType);
             });
             if (!isClean) {

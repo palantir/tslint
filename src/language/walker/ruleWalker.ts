@@ -109,7 +109,7 @@ export class RuleWalker extends SyntaxWalker implements IWalker {
         return this.ruleName;
     }
 
-    public createFix(replacements: Replacement[]): Fix {
+    public createFix(...replacements: Replacement[]): Fix {
         return new Fix(this.ruleName, replacements);
     }
 }

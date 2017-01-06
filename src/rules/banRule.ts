@@ -111,7 +111,7 @@ export class BanFunctionWalker extends Lint.RuleWalker {
 
     private checkForGlobalBan(expression: ts.LeftHandSideExpression) {
         if (expression.kind === ts.SyntaxKind.Identifier) {
-            const identifierName = (<ts.Identifier> expression).text;
+            const identifierName = (expression as ts.Identifier).text;
             if (this.bannedGlobalFunctions.indexOf(identifierName) !== -1) {
                 this.addFailureAtNode(expression, Rule.FAILURE_STRING_FACTORY(`${identifierName}`));
             }

@@ -1,0 +1,9 @@
+var a = 5 as any;
+
+var b = 5 as any as number;
+
+var c = (5 as any) as number;
+
+var d = 5 as any as number;
+
+var e = 5 as any as number;

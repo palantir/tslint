@@ -89,7 +89,7 @@ export function loadRules(ruleConfiguration: {[name: string]: any},
 }
 
 export function findRule(name: string, rulesDirectories?: string | string[]) {
-    let camelizedName = transformName(name);
+    const camelizedName = transformName(name);
 
     // first check for core rules
     let Rule = loadRule(CORE_RULES_DIRECTORY, camelizedName);
@@ -97,9 +97,9 @@ export function findRule(name: string, rulesDirectories?: string | string[]) {
         return Rule;
     }
 
-    let directories = getRulesDirectories(rulesDirectories);
+    const directories = getRulesDirectories(rulesDirectories);
 
-    for (let rulesDirectory of directories) {
+    for (const rulesDirectory of directories) {
         // then check for rules within the first level of rulesDirectory
         if (rulesDirectory != null) {
             Rule = loadRule(rulesDirectory, camelizedName);
