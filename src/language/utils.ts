@@ -73,6 +73,19 @@ export function scanAllTokens(scanner: ts.Scanner, callback: (s: ts.Scanner) => 
     }
 }
 
+export function scanAllTokensWithSkip(scanner: ts.Scanner, skipMap: Map<number, number>, callback: (s: ts.Scanner) => void) {
+    scanAllTokens(scanner, (s) => {
+        const skip = skipMap.get(s.getStartPos());
+        if (skip !== undefined) {
+            // tokens to skip are places where the scanner gets confused about what the token is, without the proper context
+            // (specifically, regex, identifiers, and templates). So skip those tokens.
+            s.setTextPos(skip);
+        } else {
+            callback(s);
+        }
+    });
+}
+
 /**
  * @returns true if any modifier kinds passed along exist in the given modifiers array
  */
@@ -236,4 +249,24 @@ export function isBlockScopeBoundary(node: ts.Node): boolean {
         || node.parent !== undefined
             && (node.parent.kind === ts.SyntaxKind.TryStatement
             || node.parent.kind === ts.SyntaxKind.IfStatement);
+}
+
+export function getSkippableTokens(sourceFile: ts.SourceFile) {
+    const tokensToSkipStartEndMap = new Map<number, number>();
+    const cb = (node: ts.Node): void => {
+        switch (node.kind) {
+            case ts.SyntaxKind.Identifier:
+            case ts.SyntaxKind.RegularExpressionLiteral:
+            case ts.SyntaxKind.TemplateExpression:
+                const start = node.getStart(sourceFile);
+                const end = node.getEnd();
+                if (start < end) {
+                    tokensToSkipStartEndMap.set(start, end);
+                }
+            default:
+                return ts.forEachChild(node, cb);
+        }
+    };
+    ts.forEachChild(sourceFile, cb);
+    return tokensToSkipStartEndMap;
 }

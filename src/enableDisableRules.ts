@@ -19,11 +19,11 @@ import * as ts from "typescript";
 
 import {AbstractRule} from "./language/rule/abstractRule";
 import {IOptions} from "./language/rule/rule";
-import {scanAllTokens} from "./language/utils";
-import {SkippableTokenAwareRuleWalker} from "./language/walker/skippableTokenAwareRuleWalker";
+import {getSkippableTokens, scanAllTokensWithSkip} from "./language/utils";
+import {RuleWalker} from "./language/walker";
 import {IEnableDisablePosition} from "./ruleLoader";
 
-export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
+export class EnableDisableRulesWalker extends RuleWalker {
     public enableDisableRuleMap: {[rulename: string]: IEnableDisablePosition[]} = {};
 
     constructor(sourceFile: ts.SourceFile, options: IOptions, rules: {[name: string]: any}) {
@@ -45,16 +45,7 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
         super.visitSourceFile(node);
         const scan = ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, node.text);
 
-        scanAllTokens(scan, (scanner: ts.Scanner) => {
-            const startPos = scanner.getStartPos();
-            const skip = this.getSkipEndFromStart(startPos);
-            if (skip !== undefined) {
-                // tokens to skip are places where the scanner gets confused about what the token is, without the proper context
-                // (specifically, regex, identifiers, and templates). So skip those tokens.
-                scanner.setTextPos(skip);
-                return;
-            }
-
+        scanAllTokensWithSkip(scan, getSkippableTokens(node), (scanner: ts.Scanner) => {
             if (scanner.getToken() === ts.SyntaxKind.MultiLineCommentTrivia ||
                 scanner.getToken() === ts.SyntaxKind.SingleLineCommentTrivia) {
                 const commentText = scanner.getTokenText();
