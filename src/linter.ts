@@ -141,9 +141,7 @@ class Linter {
 
     public getResult(): LintResult {
         let formatter: IFormatter;
-        const formattersDirectory = this.options.formattersDirectory !== undefined
-            ? getRelativePath(this.options.formattersDirectory)
-            : undefined;
+        const formattersDirectory = getRelativePath(this.options.formattersDirectory);
 
         const formatterName = this.options.formatter || "prose";
         const Formatter = findFormatter(formatterName, formattersDirectory);
