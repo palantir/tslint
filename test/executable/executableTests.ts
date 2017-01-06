@@ -26,7 +26,7 @@ const EXECUTABLE_PATH = path.resolve(EXECUTABLE_DIR, "npm-like-executable");
 const TEMP_JSON_PATH = path.resolve(EXECUTABLE_DIR, "tslint.json");
 
 /* tslint:disable:only-arrow-functions */
-describe("Executable", function (this: Mocha.ISuiteCallbackContext) {
+describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
     this.slow(3000);    // the executable is JIT-ed each time it runs; avoid showing slowness warnings
     this.timeout(4000);
 
