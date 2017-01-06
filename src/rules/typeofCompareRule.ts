@@ -24,9 +24,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "typeof-compare",
         description: "Makes sure result of `typeof` is compared to correct string values",
-        optionsDescription: "",
-        options: {},
-        optionExamples: [],
+        optionsDescription: "Not configurable.",
+        options: null,
+        optionExamples: ["true"],
         type: "functionality",
         typescriptOnly: false,
     };
