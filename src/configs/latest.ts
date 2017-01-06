@@ -18,7 +18,7 @@
 // tslint:disable object-literal-sort-keys
 export const rules = {
     // added in v3.x
-    "no-invalid-this": true,
+    "no-invalid-this": false,
     "no-angle-bracket-type-assertion": true,
 
     // added in v4.1
