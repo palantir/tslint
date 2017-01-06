@@ -58,7 +58,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class NoRequireFullLibraryWalker extends Lint.RuleWalker {
     private blacklist: string[];
-    constructor (sourceFile: ts.SourceFile, options: Lint.IOptions, blacklist: string[]) {
+    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions, blacklist: string[]) {
         super(sourceFile, options);
         this.blacklist = blacklist;
     }
@@ -99,7 +99,7 @@ class NoRequireFullLibraryWalker extends Lint.RuleWalker {
         });
     }
 
-    private reportFailure (node: ts.Expression): void {
+    private reportFailure(node: ts.Expression): void {
         this.addFailureAt(
             // take quotes into account
             node.getStart() + 1,
