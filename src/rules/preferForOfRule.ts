@@ -49,10 +49,8 @@ interface IIncrementorState {
 // a map of incrementors and whether or not they are only used to index into an array reference in the for loop
 type IncrementorMap = Map<string, IIncrementorState>;
 
-class PreferForOfWalker extends Lint.BlockScopeAwareRuleWalker<{}, IncrementorMap> {
-    public createScope() {
-        return new Map();
-    }
+class PreferForOfWalker extends Lint.BlockScopeAwareRuleWalker<void, IncrementorMap> {
+    public createScope() {} // tslint:disable-line:no-empty
 
     public createBlockScope() {
         return new Map();
@@ -199,8 +197,6 @@ class PreferForOfWalker extends Lint.BlockScopeAwareRuleWalker<{}, IncrementorMa
                     }
                 }
             }
-        } else {
-            return false;
         }
         return false;
     }
