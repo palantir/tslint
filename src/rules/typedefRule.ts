@@ -75,7 +75,7 @@ class TypedefWalker extends Lint.RuleWalker {
         super.visitFunctionExpression(node);
     }
 
-    public visitArrowFunction(node: ts.FunctionLikeDeclaration) {
+    public visitArrowFunction(node: ts.ArrowFunction) {
         const location = (node.parameters != null) ? node.parameters.end : null;
 
         if (location != null

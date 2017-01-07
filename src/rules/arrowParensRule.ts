@@ -29,7 +29,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         hasFix: true,
         rationale: "Maintains stylistic consistency with other arrow function definitions.",
         optionsDescription: Lint.Utils.dedent`
-            if \`${BAN_SINGLE_ARG_PARENS}\` is specified, then arrow functions with one parameter
+            If \`${BAN_SINGLE_ARG_PARENS}\` is specified, then arrow functions with one parameter
             must not have parentheses if removing them is allowed by TypeScript.`,
         options: {
             type: "string",
@@ -58,7 +58,7 @@ class ArrowParensWalker extends Lint.RuleWalker {
         this.avoidOnSingleParameter = this.hasOption(BAN_SINGLE_ARG_PARENS);
     }
 
-    public visitArrowFunction(node: ts.FunctionLikeDeclaration) {
+    public visitArrowFunction(node: ts.ArrowFunction) {
         if (node.parameters.length === 1 && node.typeParameters === undefined) {
             const parameter = node.parameters[0];
 

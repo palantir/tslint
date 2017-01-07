@@ -159,7 +159,7 @@ export class NoUnusedExpressionWalker extends Lint.RuleWalker {
         this.expressionIsUnused = true;
     }
 
-    public visitArrowFunction(node: ts.FunctionLikeDeclaration) {
+    public visitArrowFunction(node: ts.ArrowFunction) {
         super.visitArrowFunction(node);
         this.expressionIsUnused = true;
     }
