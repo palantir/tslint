@@ -28,6 +28,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Warns for any two overloads that could be unified into one by using a union or an optional/rest parameter.",
         optionsDescription: "Not configurable.",
         options: null,
+        optionExamples: ["true"],
         type: "typescript",
         typescriptOnly: true,
     };

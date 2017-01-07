@@ -26,9 +26,11 @@ const EXECUTABLE_PATH = path.resolve(EXECUTABLE_DIR, "npm-like-executable");
 const TEMP_JSON_PATH = path.resolve(EXECUTABLE_DIR, "tslint.json");
 
 /* tslint:disable:only-arrow-functions */
-describe("Executable", function (this: Mocha.ISuiteCallbackContext) {
+describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
+    // tslint:disable:no-invalid-this
     this.slow(3000);    // the executable is JIT-ed each time it runs; avoid showing slowness warnings
     this.timeout(4000);
+    // tslint:enable:no-invalid-this
 
     describe("Files", () => {
         it("exits with code 1 if no arguments passed", (done) => {

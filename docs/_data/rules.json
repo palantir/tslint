@@ -252,9 +252,11 @@
   {
     "ruleName": "import-spacing",
     "description": "Ensures proper spacing between import statement keywords",
-    "optionsDescription": "",
-    "options": {},
-    "optionExamples": [],
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
     "type": "style",
     "typescriptOnly": false
   },
@@ -884,7 +886,7 @@
     "description": "Flags throwing plain strings or concatenations of strings because only Errors produce proper stack traces.",
     "hasFix": true,
     "options": null,
-    "optionsDescription": "",
+    "optionsDescription": "Not configurable.",
     "type": "functionality",
     "typescriptOnly": false
   },
@@ -1582,9 +1584,11 @@
   {
     "ruleName": "typeof-compare",
     "description": "Makes sure result of `typeof` is compared to correct string values",
-    "optionsDescription": "",
-    "options": {},
-    "optionExamples": [],
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
     "type": "functionality",
     "typescriptOnly": false
   },
@@ -1593,6 +1597,9 @@
     "description": "Warns for any two overloads that could be unified into one by using a union or an optional/rest parameter.",
     "optionsDescription": "Not configurable.",
     "options": null,
+    "optionExamples": [
+      "true"
+    ],
     "type": "typescript",
     "typescriptOnly": true
   },

@@ -1,6 +1,11 @@
 Change Log
 ===
 
+v4.3.1
+---
+
+* [bugfix] Fix back-compat break. Allow formattersDirectory === null (#1997)
+
 v4.3.0
 ---
 
