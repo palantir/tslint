@@ -17,11 +17,10 @@
 
 import * as fs from "fs";
 import * as path from "path";
-import {camelize} from "underscore.string";
 
 import {getRulesDirectories} from "./configuration";
 import {IDisabledInterval, IRule} from "./language/rule/rule";
-import {dedent} from "./utils";
+import {camelize, dedent} from "./utils";
 
 const moduleDirectory = path.dirname(module.filename);
 const CORE_RULES_DIRECTORY = path.resolve(moduleDirectory, ".", "rules");
@@ -151,7 +150,7 @@ function buildDisabledIntervalsFromSwitches(ruleSpecificList: IEnableDisablePosi
     while (i < ruleSpecificList.length) {
         const startPosition = ruleSpecificList[i].position;
 
-        // rule enabled state is always alternating therefore we can use position of next switch as end of disabled interval 
+        // rule enabled state is always alternating therefore we can use position of next switch as end of disabled interval
         // set endPosition as Infinity in case when last switch for rule in a file is disabled
         const endPosition = ruleSpecificList[i + 1] ? ruleSpecificList[i + 1].position : Infinity;
 

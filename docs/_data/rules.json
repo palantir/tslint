@@ -951,10 +951,21 @@
     "description": "Disallows unused expression statements.",
     "descriptionDetails": "\nUnused expressions are expression statements which are not assignments or function calls\n(and thus usually no-ops).",
     "rationale": "\nDetects potential errors where an assignment or function call was intended.",
-    "optionsDescription": "Not configurable.",
-    "options": null,
+    "optionsDescription": "\nOne argument may be optionally provided:\n\n* `allow-fast-null-checks` allows to use logical operators to perform fast null checks and perform\nmethod or function calls for side effects (e.g. `e && e.preventDefault()`).",
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "allow-fast-null-checks"
+        ]
+      },
+      "minLength": 0,
+      "maxLength": 1
+    },
     "optionExamples": [
-      "true"
+      "true",
+      "[true, \"allow-fast-null-checks\"]"
     ],
     "type": "functionality",
     "typescriptOnly": false

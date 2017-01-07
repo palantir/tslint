@@ -208,11 +208,11 @@ function getIsTypeParameter(typeParameters?: ts.TypeParameterDeclaration[]): IsT
         return () => false;
     }
 
-    const set: { [key: string]: true } = Object.create(null);
+    const set = new Set<string>();
     for (const t of typeParameters) {
-        set[t.getText()] = true;
+        set.add(t.getText());
     }
-    return (typeName: string) => set[typeName];
+    return (typeName: string) => set.has(typeName);
 }
 
 /** True if any of the outer type parameters are used in a signature. */
@@ -235,9 +235,7 @@ function signatureUsesTypeParameter(sig: ts.SignatureDeclaration, isTypeParamete
  * Does not rely on overloads being adjacent. This is similar to code in adjacentOverloadSignaturesRule.ts, but not the same.
  */
 function collectOverloads<T>(nodes: T[], getOverload: GetOverload<T>): ts.SignatureDeclaration[][] {
-    const map: { [key: string]: ts.SignatureDeclaration[] } = Object.create(null);
-    // Array of values in the map.
-    const res: ts.SignatureDeclaration[][] = [];
+    const map = new Map<string, ts.SignatureDeclaration[]>();
     for (const sig of nodes) {
         const overload = getOverload(sig);
         if (!overload) {
@@ -245,16 +243,14 @@ function collectOverloads<T>(nodes: T[], getOverload: GetOverload<T>): ts.Signat
         }
 
         const { signature, key } = overload;
-        let overloads = map[key];
+        const overloads = map.get(key);
         if (overloads) {
             overloads.push(signature);
         } else {
-            overloads = [signature];
-            res.push(overloads);
-            map[key] = overloads;
+            map.set(key, [signature]);
         }
     }
-    return res;
+    return Array.from(map.values());
 }
 
 function parametersAreEqual(a: ts.ParameterDeclaration, b: ts.ParameterDeclaration): boolean {
