@@ -69,7 +69,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 class NoMagicNumbersWalker extends Lint.RuleWalker {
     // lookup object for allowed magic numbers
     private allowed: Set<string>;
-    constructor (sourceFile: ts.SourceFile, options: IOptions) {
+    constructor(sourceFile: ts.SourceFile, options: IOptions) {
         super(sourceFile, options);
 
         const configOptions = this.getOptions();
