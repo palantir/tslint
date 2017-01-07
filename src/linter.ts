@@ -42,7 +42,7 @@ import { arrayify, dedent } from "./utils";
  * Linter that can lint multiple files in consecutive runs.
  */
 class Linter {
-    public static VERSION = "4.3.0";
+    public static VERSION = "4.3.1";
 
     public static findConfiguration = findConfiguration;
     public static findConfigurationPath = findConfigurationPath;
@@ -141,9 +141,7 @@ class Linter {
 
     public getResult(): LintResult {
         let formatter: IFormatter;
-        const formattersDirectory = this.options.formattersDirectory !== undefined
-            ? getRelativePath(this.options.formattersDirectory)
-            : undefined;
+        const formattersDirectory = getRelativePath(this.options.formattersDirectory);
 
         const formatterName = this.options.formatter || "prose";
         const Formatter = findFormatter(formatterName, formattersDirectory);
