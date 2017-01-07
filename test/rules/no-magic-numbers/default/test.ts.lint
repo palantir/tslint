@@ -22,7 +22,6 @@ class A {
     static test = 1337;
 
     constructor (private a = 1337) {
-                             ~~~~   ['magic numbers' are not allowed]
     }
 }
 
