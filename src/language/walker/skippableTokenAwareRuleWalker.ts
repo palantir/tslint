@@ -17,15 +17,10 @@
 
 import * as ts from "typescript";
 
-import {IOptions} from "../rule/rule";
 import {RuleWalker} from "./ruleWalker";
 
 export class SkippableTokenAwareRuleWalker extends RuleWalker {
     private tokensToSkipStartEndMap = new Map<number, number>();
-
-    constructor(sourceFile: ts.SourceFile, options: IOptions) {
-        super(sourceFile, options);
-    }
 
     protected visitRegularExpressionLiteral(node: ts.Node) {
         this.addTokenToSkipFromNode(node);
