@@ -18,6 +18,7 @@
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { unwrapParentheses } from "../language/utils";
 
 const ALLOW_FAST_NULL_CHECKS = "allow-fast-null-checks";
 
@@ -201,8 +202,8 @@ export class NoUnusedExpressionWalker extends Lint.RuleWalker {
     }
 }
 
-function hasCallExpression(node: ts.Node): boolean {
-    const nodeToCheck = skipParentheses(node);
+function hasCallExpression(node: ts.Expression): boolean {
+    const nodeToCheck = unwrapParentheses(node);
 
     if (nodeToCheck.kind === ts.SyntaxKind.CallExpression) {
         return true;
@@ -220,22 +221,12 @@ function hasCallExpression(node: ts.Node): boolean {
     return false;
 }
 
-function isTopLevelExpression(node: ts.BinaryExpression): boolean {
-    let nodeToCheck = node.parent;
+function isTopLevelExpression(node: ts.Expression): boolean {
+    let nodeToCheck = node.parent as ts.Node;
 
     while (nodeToCheck.kind === ts.SyntaxKind.ParenthesizedExpression) {
-        nodeToCheck = nodeToCheck.parent;
+        nodeToCheck = nodeToCheck.parent as ts.Node;
     }
 
     return nodeToCheck.kind === ts.SyntaxKind.ExpressionStatement;
-}
-
-function skipParentheses(node: ts.Node): ts.Node {
-    let nodeToReturn = node;
-
-    while (nodeToReturn.kind === ts.SyntaxKind.ParenthesizedExpression) {
-        nodeToReturn = (nodeToReturn as ts.ParenthesizedExpression).expression;
-    }
-
-    return nodeToReturn;
 }
