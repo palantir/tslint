@@ -1,0 +1,26 @@
+---
+ruleName: arrow-return-shorthand
+description: 'Suggests to convert `() => { return x; }` to `() => x`.'
+hasFix: true
+optionsDescription: |-
+
+  If `multiline` is specified, then this will warn even if the function spans multiple lines.
+options:
+  type: string
+  enum:
+    - multiline
+optionExamples:
+  - '[true]'
+  - '[true, "multiline"]'
+type: style
+typescriptOnly: false
+layout: rule
+title: 'Rule: arrow-return-shorthand'
+optionsJSON: |-
+  {
+    "type": "string",
+    "enum": [
+      "multiline"
+    ]
+  }
+---

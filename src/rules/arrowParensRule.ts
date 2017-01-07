@@ -29,7 +29,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         hasFix: true,
         rationale: "Maintains stylistic consistency with other arrow function definitions.",
         optionsDescription: Lint.Utils.dedent`
-            if \`${BAN_SINGLE_ARG_PARENS}\` is specified, then arrow functions with one parameter
+            If \`${BAN_SINGLE_ARG_PARENS}\` is specified, then arrow functions with one parameter
             must not have parentheses if removing them is allowed by TypeScript.`,
         options: {
             type: "string",

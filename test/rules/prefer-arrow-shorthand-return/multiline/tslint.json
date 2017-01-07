@@ -1,5 +1,0 @@
-{
-    "rules": {
-        "prefer-arrow-shorthand-return": [true, "multiline"]
-    }
-}

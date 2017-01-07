@@ -24,15 +24,20 @@ const OPTION_MULTILINE = "multiline";
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
-        ruleName: "prefer-arrow-shorthand-return",
+        ruleName: "arrow-return-shorthand",
         description: "Suggests to convert `() => { return x; }` to `() => x`.",
-        optionsDescription: "Not configurable.",
-        options: null,
+        hasFix: true,
+        optionsDescription: Lint.Utils.dedent`
+            If \`${OPTION_MULTILINE}\` is specified, then this will warn even if the function spans multiple lines.`,
+        options: {
+            type: "string",
+            enum: [OPTION_MULTILINE],
+        },
         optionExamples: [
             `[true]`,
             `[true, "${OPTION_MULTILINE}"]`,
         ],
-        type: "functionality",
+        type: "style",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
