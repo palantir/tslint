@@ -19,3 +19,16 @@ const span = (
         text
     </span>
 );
+
+const span = (
+    <span>
+        {x + 'works with text'} // tslint:disable-line
+        works with text
+    </span>
+);
+
+const span = (
+    <span>
+        {x + 'failing test case'} // tslint:disable-line
+    </span>
+);
