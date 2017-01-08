@@ -33,5 +33,5 @@ const unusedVar = 'unneeded value';
 // stderr for errors
 
 
-[lower]: comment must start with lowercase letter, word from exceptions list or exceptions pattern
+[lower]: comment must start with lowercase letter or the word(s): TODO, HACK
 [space]: comment must start with a space

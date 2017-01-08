@@ -32,5 +32,5 @@ const unusedVar = 'unneeded value';
 
 
 
-[lower]: comment must start with lowercase letter, word from exceptions list or exceptions pattern
+[lower]: comment must start with lowercase letter or its start must match the regex pattern "STD\w{2,3}"
 [space]: comment must start with a space

@@ -31,5 +31,5 @@ class Invalid {}
 // tslint:disable-next-line:no-unused-expression
 class Valid {}
 
-[upper]: comment must start with uppercase letter, word from exceptions list or exceptions pattern
+[upper]: comment must start with uppercase letter
 [space]: comment must start with a space

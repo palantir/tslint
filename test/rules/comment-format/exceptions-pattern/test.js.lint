@@ -35,4 +35,4 @@ class Valid {}
 // stderr for errors
 
 
-[upper]: comment must start with uppercase letter, word from exceptions list or exceptions pattern
+[upper]: comment must start with uppercase letter or its start must match the regex pattern "std(in|out|err)\b"

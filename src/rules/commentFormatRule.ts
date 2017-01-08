@@ -22,7 +22,7 @@ import { escapeRegExp } from "../utils";
 
 interface IExceptionsObject {
     ignoreWords?: string[];
-    ignorePattern?: string[];
+    ignorePattern?: string;
 }
 
 type ExceptionsRegExp = RegExp | null;
@@ -95,9 +95,11 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static LOWERCASE_FAILURE = "comment must start with lowercase letter, word from exceptions list or exceptions pattern";
-    public static UPPERCASE_FAILURE = "comment must start with uppercase letter, word from exceptions list or exceptions pattern";
+    public static LOWERCASE_FAILURE = "comment must start with lowercase letter";
+    public static UPPERCASE_FAILURE = "comment must start with uppercase letter";
     public static LEADING_SPACE_FAILURE = "comment must start with a space";
+    public static IGNORE_WORDS_FAILURE_FACTORY = (words: string[]): string => ` or the word(s): ${words.join(", ")}`;
+    public static IGNORE_PATTERN_FAILURE_FACTORY = (pattern: string): string => ` or its start must match the regex pattern "${pattern}"`;
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new CommentWalker(sourceFile, this.getOptions()));
@@ -106,6 +108,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class CommentWalker extends Lint.SkippableTokenAwareRuleWalker {
     private exceptionsRegExp: ExceptionsRegExp;
+    private failureIgnorePart: string = "";
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
@@ -135,12 +138,12 @@ class CommentWalker extends Lint.SkippableTokenAwareRuleWalker {
                 }
                 if (this.hasOption(OPTION_LOWERCASE)) {
                     if (!startsWithLowercase(commentText) && !this.startsWithException(commentText)) {
-                        this.addFailureAt(startPosition, width, Rule.LOWERCASE_FAILURE);
+                        this.addFailureAt(startPosition, width, Rule.LOWERCASE_FAILURE + this.failureIgnorePart);
                     }
                 }
                 if (this.hasOption(OPTION_UPPERCASE)) {
                     if (!startsWithUppercase(commentText) && !isEnableDisableFlag(commentText) && !this.startsWithException(commentText)) {
-                        this.addFailureAt(startPosition, width, Rule.UPPERCASE_FAILURE);
+                        this.addFailureAt(startPosition, width, Rule.UPPERCASE_FAILURE + this.failureIgnorePart);
                     }
                 }
             }
@@ -165,11 +168,13 @@ class CommentWalker extends Lint.SkippableTokenAwareRuleWalker {
         }
 
         if (exceptionsObject.ignorePattern) {
+            this.failureIgnorePart = Rule.IGNORE_PATTERN_FAILURE_FACTORY(exceptionsObject.ignorePattern);
             // regex is "start of string"//"any amount of whitespace" followed by user provided ignore pattern
             return new RegExp(`^//\\s*(${exceptionsObject.ignorePattern})`);
         }
 
         if (exceptionsObject.ignoreWords) {
+            this.failureIgnorePart = Rule.IGNORE_WORDS_FAILURE_FACTORY(exceptionsObject.ignoreWords);
             // Converts all exceptions values to strings, trim whitespace, escapes RegExp special characters and combines into alternation  
             const wordsPattern = exceptionsObject.ignoreWords
                 .map(String)
