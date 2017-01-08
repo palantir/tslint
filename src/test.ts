@@ -92,7 +92,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
                         const text = fs.readFileSync(path.resolve(path.dirname(fileToLint), filenameToGet), {encoding: "utf-8"});
                         return ts.createSourceFile(filenameToGet, text, target, true);
                     }
-                    throw new Error("couldn't not get source file");
+                    throw new Error(`Couldn't get source file '${filenameToGet}'`);
                 },
                 readFile: (x: string) => x,
                 useCaseSensitiveFileNames: () => true,
