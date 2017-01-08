@@ -103,7 +103,7 @@ class AlignWalker extends Lint.RuleWalker {
         const alignToColumn = prevPos.character;
 
         // skip first node in list
-        for (let node of nodes.slice(1)) {
+        for (const node of nodes.slice(1)) {
             const curPos = this.getLineAndCharacterOfPosition(node.getStart());
             if (curPos.line !== prevPos.line && curPos.character !== alignToColumn) {
                 this.addFailureAtNode(node, kind + Rule.FAILURE_STRING_SUFFIX);

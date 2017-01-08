@@ -25,6 +25,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "no-var-keyword",
         description: "Disallows usage of the `var` keyword.",
         descriptionDetails: "Use `let` or `const` instead.",
+        hasFix: true,
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: ["true"],
@@ -45,7 +46,7 @@ class NoVarKeywordWalker extends Lint.RuleWalker {
     public visitVariableStatement(node: ts.VariableStatement) {
         if (!Lint.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)
                 && !Lint.isBlockScopedVariable(node)) {
-            this.addFailureAt(node.declarationList.getStart(), "var".length, Rule.FAILURE_STRING, this.fix(node.declarationList));
+            this.reportFailure(node.declarationList);
         }
 
         super.visitVariableStatement(node);
@@ -69,12 +70,14 @@ class NoVarKeywordWalker extends Lint.RuleWalker {
     private handleInitializerNode(node: ts.VariableDeclarationList | ts.Expression | undefined) {
         if (node && node.kind === ts.SyntaxKind.VariableDeclarationList &&
                 !(Lint.isNodeFlagSet(node, ts.NodeFlags.Let) || Lint.isNodeFlagSet(node, ts.NodeFlags.Const))) {
-            this.addFailureAt(node.getStart(), "var".length, Rule.FAILURE_STRING, this.fix(node));
+            this.reportFailure(node);
         }
     }
 
-    private fix = (node: ts.Node) => new Lint.Fix(Rule.metadata.ruleName, [
-        this.deleteText(node.getStart(), "var".length),
-        this.appendText(node.getStart(), "let"),
-    ]);
+    private reportFailure(node: ts.Node) {
+        const nodeStart = node.getStart(this.getSourceFile());
+        this.addFailureAt(nodeStart, "var".length, Rule.FAILURE_STRING, this.createFix(
+            this.createReplacement(nodeStart, "var".length, "let"),
+        ));
+    }
 }

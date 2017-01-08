@@ -21,12 +21,18 @@ const a = () => {
 'use strict'; "use cool"; "use lint"; var a = 1; "notdirective"; }
                                                  ~~~~~~~~~~~~~~~ [0]
 
-function fun2(a) {
+function fun2(a: number) {
     return 0;
 }
 
-function fun3(a, b) {
+function fun3(a: number, b: number) {
     return 0;
+}
+
+namespace Fam { 'use strict'; 'use cool'; }
+module Bam { 'use strict'; 'use cool'; }
+namespace Az.Bz.Cz.Dz {
+    'ngInject';
 }
 
 class Foo {
@@ -52,7 +58,7 @@ class Foo {
 
 // valid code:
 
-var i;
+var i: number;
 var j = 3;
 i = 1 + 2;
 j = fun1();
@@ -69,13 +75,13 @@ j = (j === 0 ? 5 : 6);
 (a => 5)(4);
 var obj = {};
 delete obj.key;
-function* g() {
+function* g(): Iterable<number> {
     for (let i = 0; i < 100; i++) {
         yield i;
     }
 }
 
-async function f(foo) {
+async function f(foo: Promise<void>): Promise<number> {
     await foo;
     return 0;
 }
@@ -108,5 +114,26 @@ a => fun2(a);
 ~~~~~~~~~~~~~~~~~~~~~~~ [0]
 "use strct";
 ~~~~~~~~~~~~ [0]
+
+afterEach((el) => {
+   el && el.remove();
+   ~~~~~~~~~~~~~~~~~~ [0]
+});
+
+checkParams((a, b) => {
+   (a || required('a')) && (b || required('b'));
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+});
+
+checkParams((a, b) => {
+   ((a && b) || required('a, b'));
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+});
+
+function interactionHandler(e) {
+    // fails in all cases since logical NOT operator is redundant
+    e && !e.preventDefault();
+    ~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+}
 
 [0]: expected an assignment or function call

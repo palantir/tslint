@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 import * as Lint from "../index";
-import { isAssignment } from "../language/utils";
+import { isAssignment, unwrapParentheses } from "../language/utils";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -47,15 +47,13 @@ interface IIncrementorState {
 }
 
 // a map of incrementors and whether or not they are only used to index into an array reference in the for loop
-type IncrementorMap = { [name: string]: IIncrementorState };
+type IncrementorMap = Map<string, IIncrementorState>;
 
-class PreferForOfWalker extends Lint.BlockScopeAwareRuleWalker<{}, IncrementorMap> {
-    public createScope() {
-        return {};
-    }
+class PreferForOfWalker extends Lint.BlockScopeAwareRuleWalker<void, IncrementorMap> {
+    public createScope() {} // tslint:disable-line:no-empty
 
     public createBlockScope() {
-        return {};
+        return new Map();
     }
 
     protected visitForStatement(node: ts.ForStatement) {
@@ -67,38 +65,38 @@ class PreferForOfWalker extends Lint.BlockScopeAwareRuleWalker<{}, IncrementorMa
             indexVariableName = indexVariable.getText();
 
             // store `for` loop state
-            currentBlockScope[indexVariableName] = {
+            currentBlockScope.set(indexVariableName, {
                 arrayToken: arrayToken as ts.Identifier,
                 forLoopEndPosition: node.incrementor.end + 1,
                 onlyArrayReadAccess: true,
-            };
+            });
         }
 
         super.visitForStatement(node);
 
         if (indexVariableName != null) {
-            const incrementorState = currentBlockScope[indexVariableName];
+            const incrementorState = currentBlockScope.get(indexVariableName)!;
             if (incrementorState.onlyArrayReadAccess) {
                 this.addFailureFromStartToEnd(node.getStart(), incrementorState.forLoopEndPosition, Rule.FAILURE_STRING);
             }
 
             // remove current `for` loop state
-            delete currentBlockScope[indexVariableName];
+            currentBlockScope.delete(indexVariableName);
         }
     }
 
     protected visitIdentifier(node: ts.Identifier) {
-        const incrementorScope = this.findBlockScope((scope) => scope[node.text] != null);
+        const incrementorScope = this.findBlockScope((scope) => scope.has(node.text));
 
         if (incrementorScope != null) {
-            const incrementorState = incrementorScope[node.text];
+            const incrementorState = incrementorScope.get(node.text);
 
             // check if the identifier is an iterator and is currently in the `for` loop body
             if (incrementorState != null && incrementorState.arrayToken != null && incrementorState.forLoopEndPosition < node.getStart()) {
                 // check if iterator is used for something other than reading data from array
                 if (node.parent != null && node.parent.kind === ts.SyntaxKind.ElementAccessExpression) {
                     const elementAccess = node.parent as ts.ElementAccessExpression;
-                    const arrayIdentifier = elementAccess.expression as ts.Identifier;
+                    const arrayIdentifier = unwrapParentheses(elementAccess.expression) as ts.Identifier;
                     if (incrementorState.arrayToken.text !== arrayIdentifier.text) {
                         // iterator used in array other than one iterated over
                         incrementorState.onlyArrayReadAccess = false;
@@ -127,7 +125,7 @@ class PreferForOfWalker extends Lint.BlockScopeAwareRuleWalker<{}, IncrementorMa
                 if (assignment.kind === ts.SyntaxKind.VariableDeclaration) {
                     const value = assignment.getChildAt(2).getText();
                     if (value === "0") {
-                        indexVariable = <ts.Identifier> assignment.getChildAt(0);
+                        indexVariable = assignment.getChildAt(0) as ts.Identifier;
                         indexVariableName = indexVariable.getText();
                     }
                 }
@@ -151,9 +149,9 @@ class PreferForOfWalker extends Lint.BlockScopeAwareRuleWalker<{}, IncrementorMa
         // ensure that the condition checks a `length` property
         const conditionRight = forLoop.condition.getChildAt(2);
         if (conditionRight.kind === ts.SyntaxKind.PropertyAccessExpression) {
-            const propertyAccess = <ts.PropertyAccessExpression> conditionRight;
+            const propertyAccess = conditionRight as ts.PropertyAccessExpression;
             if (indexVariable != null && propertyAccess.name.getText() === "length") {
-                return { indexVariable: indexVariable!, arrayToken: propertyAccess.expression };
+                return { indexVariable: indexVariable!, arrayToken: unwrapParentheses(propertyAccess.expression) };
             }
         }
 
@@ -167,19 +165,19 @@ class PreferForOfWalker extends Lint.BlockScopeAwareRuleWalker<{}, IncrementorMa
 
         // ensure variable is incremented
         if (node.kind === ts.SyntaxKind.PrefixUnaryExpression) {
-            const incrementor = <ts.PrefixUnaryExpression> node;
+            const incrementor = node as ts.PrefixUnaryExpression;
             if (incrementor.operator === ts.SyntaxKind.PlusPlusToken && incrementor.operand.getText() === indexVariableName) {
                 // x++
                 return true;
             }
         } else if (node.kind === ts.SyntaxKind.PostfixUnaryExpression) {
-            const incrementor = <ts.PostfixUnaryExpression> node;
+            const incrementor = node as ts.PostfixUnaryExpression;
             if (incrementor.operator === ts.SyntaxKind.PlusPlusToken && incrementor.operand.getText() === indexVariableName) {
                 // ++x
                 return true;
             }
         } else if (node.kind === ts.SyntaxKind.BinaryExpression) {
-            const binaryExpression = <ts.BinaryExpression> node;
+            const binaryExpression = node as ts.BinaryExpression;
             if (binaryExpression.operatorToken.getText() === "+="
                 && binaryExpression.left.getText() === indexVariableName
                 && binaryExpression.right.getText() === "1") {
@@ -188,7 +186,7 @@ class PreferForOfWalker extends Lint.BlockScopeAwareRuleWalker<{}, IncrementorMa
             }
             if (binaryExpression.operatorToken.getText() === "="
                 && binaryExpression.left.getText() === indexVariableName) {
-                const addExpression = <ts.BinaryExpression> binaryExpression.right;
+                const addExpression = binaryExpression.right as ts.BinaryExpression;
                 if (addExpression.operatorToken.getText() === "+") {
                     if (addExpression.right.getText() === indexVariableName && addExpression.left.getText() === "1") {
                         // x = 1 + x
@@ -199,8 +197,6 @@ class PreferForOfWalker extends Lint.BlockScopeAwareRuleWalker<{}, IncrementorMa
                     }
                 }
             }
-        } else {
-            return false;
         }
         return false;
     }

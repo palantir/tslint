@@ -92,8 +92,8 @@ export function hasModifier(modifiers: ts.ModifiersArray | undefined, ...modifie
  */
 export function isBlockScopedVariable(node: ts.VariableDeclaration | ts.VariableStatement): boolean {
     const parentNode = (node.kind === ts.SyntaxKind.VariableDeclaration)
-        ? (<ts.VariableDeclaration> node).parent
-        : (<ts.VariableStatement> node).declarationList;
+        ? (node as ts.VariableDeclaration).parent
+        : (node as ts.VariableStatement).declarationList;
 
     return isNodeFlagSet(parentNode!, ts.NodeFlags.Let)
         || isNodeFlagSet(parentNode!, ts.NodeFlags.Const);
@@ -114,17 +114,7 @@ export function getBindingElementVariableDeclaration(node: ts.BindingElement): t
             currentParent = currentParent.parent;
         }
     }
-    return <ts.VariableDeclaration> currentParent;
-}
-
-/** Shim of Array.find */
-function find<T>(a: T[], predicate: (value: T) => boolean): T | undefined {
-    for (const value of a) {
-        if (predicate(value)) {
-            return value;
-        }
-    }
-    return undefined;
+    return currentParent as ts.VariableDeclaration;
 }
 
 /**
@@ -132,7 +122,7 @@ function find<T>(a: T[], predicate: (value: T) => boolean): T | undefined {
  * Note: This uses `node.getChildren()`, which does extra parsing work to include tokens.
  */
 export function childOfKind(node: ts.Node, kind: ts.SyntaxKind): ts.Node | undefined {
-    return find(node.getChildren(), (child) => child.kind === kind);
+    return node.getChildren().find((child) => child.kind === kind);
 }
 
 /**

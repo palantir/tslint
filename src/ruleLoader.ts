@@ -17,11 +17,10 @@
 
 import * as fs from "fs";
 import * as path from "path";
-import {camelize} from "underscore.string";
 
 import {getRulesDirectories} from "./configuration";
 import {IDisabledInterval, IRule} from "./language/rule/rule";
-import {dedent} from "./utils";
+import {camelize, dedent} from "./utils";
 
 const moduleDirectory = path.dirname(module.filename);
 const CORE_RULES_DIRECTORY = path.resolve(moduleDirectory, ".", "rules");
@@ -89,7 +88,7 @@ export function loadRules(ruleConfiguration: {[name: string]: any},
 }
 
 export function findRule(name: string, rulesDirectories?: string | string[]) {
-    let camelizedName = transformName(name);
+    const camelizedName = transformName(name);
 
     // first check for core rules
     let Rule = loadRule(CORE_RULES_DIRECTORY, camelizedName);
@@ -97,9 +96,9 @@ export function findRule(name: string, rulesDirectories?: string | string[]) {
         return Rule;
     }
 
-    let directories = getRulesDirectories(rulesDirectories);
+    const directories = getRulesDirectories(rulesDirectories);
 
-    for (let rulesDirectory of directories) {
+    for (const rulesDirectory of directories) {
         // then check for rules within the first level of rulesDirectory
         if (rulesDirectory != null) {
             Rule = loadRule(rulesDirectory, camelizedName);
@@ -151,7 +150,7 @@ function buildDisabledIntervalsFromSwitches(ruleSpecificList: IEnableDisablePosi
     while (i < ruleSpecificList.length) {
         const startPosition = ruleSpecificList[i].position;
 
-        // rule enabled state is always alternating therefore we can use position of next switch as end of disabled interval 
+        // rule enabled state is always alternating therefore we can use position of next switch as end of disabled interval
         // set endPosition as Infinity in case when last switch for rule in a file is disabled
         const endPosition = ruleSpecificList[i + 1] ? ruleSpecificList[i + 1].position : Infinity;
 

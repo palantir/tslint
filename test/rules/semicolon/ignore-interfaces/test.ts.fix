@@ -66,9 +66,8 @@ class MyClass {
 
 interface ITest {
     foo?: string
-
     bar: number
-
+    qux: string,
     baz: boolean;
 }
 

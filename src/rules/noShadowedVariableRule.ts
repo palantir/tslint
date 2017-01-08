@@ -93,7 +93,7 @@ class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<Set, Set> 
         const isSingleParameter = node.name.kind === ts.SyntaxKind.Identifier;
 
         if (isSingleParameter) {
-            this.handleSingleVariableIdentifier(<ts.Identifier> node.name, false);
+            this.handleSingleVariableIdentifier(node.name as ts.Identifier, false);
         }
 
         super.visitParameterDeclaration(node);
@@ -107,7 +107,7 @@ class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<Set, Set> 
         const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
 
         if (isSingleVariable) {
-            this.handleSingleVariableIdentifier(<ts.Identifier> node.name, Lint.isBlockScopedVariable(node));
+            this.handleSingleVariableIdentifier(node.name as ts.Identifier, Lint.isBlockScopedVariable(node));
         }
 
         super.visitVariableDeclaration(node);

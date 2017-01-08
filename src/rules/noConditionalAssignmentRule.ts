@@ -81,7 +81,7 @@ class NoConditionalAssignmentWalker extends Lint.RuleWalker {
         this.isInConditional = true;
         if (expression.kind === ts.SyntaxKind.BinaryExpression) {
             // check for simple assignment in a conditional, like `if (a = 1) {`
-            this.checkForAssignment(<ts.BinaryExpression> expression);
+            this.checkForAssignment(expression as ts.BinaryExpression);
         }
         // walk the children of the conditional expression for nested assignments, like `if ((a = 1) && (b == 1)) {`
         this.walkChildren(expression);

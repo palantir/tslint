@@ -91,10 +91,11 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
                 prevTokenShouldBeFollowedByWhitespace = false;
             }
 
-            if (this.tokensToSkipStartEndMap[startPos] != null) {
+            const skip = this.getSkipEndFromStart(startPos);
+            if (skip !== undefined) {
                 // tokens to skip are places where the scanner gets confused about what the token is, without the proper context
                 // (specifically, regex, identifiers, and templates). So skip those tokens.
-                scanner.setTextPos(this.tokensToSkipStartEndMap[startPos]);
+                scanner.setTextPos(skip);
                 return;
             }
 
@@ -139,7 +140,7 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
         });
     }
 
-    public visitArrowFunction(node: ts.FunctionLikeDeclaration) {
+    public visitArrowFunction(node: ts.ArrowFunction) {
         this.checkEqualsGreaterThanTokenInNode(node);
         super.visitArrowFunction(node);
     }

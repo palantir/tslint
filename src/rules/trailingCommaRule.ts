@@ -26,6 +26,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: Lint.Utils.dedent`
             Requires or disallows trailing commas in array and object literals, destructuring assignments, function and tuple typings,
             named imports and function parameters.`,
+        hasFix: true,
         optionsDescription: Lint.Utils.dedent`
             One argument which is an object with the keys \`multiline\` and \`singleline\`.
             Both should be set to either \`"always"\` or \`"never"\`.
@@ -77,7 +78,7 @@ class TrailingCommaWalker extends Lint.RuleWalker {
         super.visitArrayLiteralExpression(node);
     }
 
-    public visitArrowFunction(node: ts.FunctionLikeDeclaration) {
+    public visitArrowFunction(node: ts.ArrowFunction) {
         this.lintChildNodeWithIndex(node, 1);
         super.visitArrowFunction(node);
     }
@@ -243,15 +244,11 @@ class TrailingCommaWalker extends Lint.RuleWalker {
 
                 if (hasTrailingComma && option === "never") {
                     const failureStart = lastGrandChild.getStart();
-                    const fix = new Lint.Fix(Rule.metadata.ruleName, [
-                        this.deleteText(failureStart, 1),
-                    ]);
+                    const fix = this.createFix(this.deleteText(failureStart, 1));
                     this.addFailureAt(failureStart, 1, Rule.FAILURE_STRING_NEVER, fix);
                 } else if (!hasTrailingComma && option === "always") {
                     const failureStart = lastGrandChild.getEnd();
-                    const fix = new Lint.Fix(Rule.metadata.ruleName, [
-                        this.appendText(failureStart, ","),
-                    ]);
+                    const fix = this.createFix(this.appendText(failureStart, ","));
                     this.addFailureAt(failureStart - 1, 1, Rule.FAILURE_STRING_ALWAYS, fix);
                 }
             }

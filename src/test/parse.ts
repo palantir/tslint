@@ -51,15 +51,20 @@ export function parseErrorsFromMarkup(text: string): LintError[] {
     }
 
     const messageSubstitutionLines = lines.filter((l) => l instanceof MessageSubstitutionLine) as MessageSubstitutionLine[];
-    const messageSubstitutions: { [key: string]: string } = {};
-    for (const line of messageSubstitutionLines) {
-        messageSubstitutions[line.key] = line.message;
-    }
+    const messageSubstitutions = new Map(messageSubstitutionLines.map(({ key, message }) =>
+        [key, message] as [string, string]));
 
     // errorLineForCodeLine[5] contains all the ErrorLine objects associated with the 5th line of code, for example
     const errorLinesForCodeLines = createCodeLineNoToErrorsMap(lines);
 
     const lintErrors: LintError[] = [];
+    function addError(errorLine: EndErrorLine, errorStartPos: { line: number, col: number }, lineNo: number) {
+        lintErrors.push({
+            startPos: errorStartPos,
+            endPos: { line: lineNo, col: errorLine.endCol },
+            message: messageSubstitutions.get(errorLine.message) || errorLine.message,
+        });
+    }
     // for each line of code...
     errorLinesForCodeLines.forEach((errorLinesForLineOfCode, lineNo) => {
 
@@ -70,11 +75,7 @@ export function parseErrorsFromMarkup(text: string): LintError[] {
 
             // if the error starts and ends on this line, add it now to list of errors
             if (errorLine instanceof EndErrorLine) {
-                lintErrors.push({
-                    startPos: errorStartPos,
-                    endPos: { line: lineNo, col: errorLine.endCol },
-                    message: messageSubstitutions[errorLine.message] || errorLine.message,
-                });
+                addError(errorLine, errorStartPos, lineNo);
 
             // if the error is the start of a multiline error
             } else if (errorLine instanceof MultilineErrorLine) {
@@ -90,11 +91,7 @@ export function parseErrorsFromMarkup(text: string): LintError[] {
 
                         // if end of multiline error, add it it list of errors
                         if (nextErrorLine instanceof EndErrorLine) {
-                            lintErrors.push({
-                                startPos: errorStartPos,
-                                endPos: { line: nextLineNo, col: nextErrorLine.endCol },
-                                message: messageSubstitutions[nextErrorLine.message] || nextErrorLine.message,
-                            });
+                            addError(nextErrorLine, errorStartPos, nextLineNo);
                             break;
                         }
                     }

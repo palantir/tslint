@@ -70,12 +70,10 @@ export class Rule extends Lint.Rules.TypedRule {
 }
 
 export class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
-    private nodesToCheck: { [i: string]: boolean } = {};
+    private nodesToCheck: Set<string>;
 
     public setNodesToCheck(nodesToCheck: string[]): void {
-        for (const nodeType of nodesToCheck) {
-            this.nodesToCheck[nodeType] = true;
-        }
+        this.nodesToCheck = new Set(nodesToCheck);
     }
 
     public visitClassDeclaration(node: ts.ClassDeclaration): void {
@@ -99,7 +97,7 @@ export class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
     }
 
     private checkComments(node: ts.Declaration, nodeToCheck: string): void {
-        if (!this.nodesToCheck[nodeToCheck] || node.name === undefined) {
+        if (!this.nodesToCheck.has(nodeToCheck) || node.name === undefined) {
             return;
         }
 

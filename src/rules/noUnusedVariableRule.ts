@@ -33,6 +33,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "no-unused-variable",
         deprecationMessage: "Use the tsc compiler options --noUnusedParameters and --noUnusedLocals instead.",
         description: "Disallows unused imports, variables, functions and private class members.",
+        hasFix: true,
         optionsDescription: Lint.Utils.dedent`
             Three optional arguments may be optionally provided:
 
@@ -146,7 +147,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         let someFixBrokeIt = false;
         // Performance optimization: type-check the whole file before verifying individual fixes
         if (this.possibleFailures.some((f) => f.hasFix())) {
-            let newText = Lint.Fix.applyAll(this.getSourceFile().getFullText(),
+            const newText = Lint.Fix.applyAll(this.getSourceFile().getFullText(),
                 this.possibleFailures.map((f) => f.getFix()).filter((f) => !!f) as Lint.Fix[]);
 
             // If we have the program, we can verify that the fix doesn't introduce failures
@@ -161,7 +162,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
             if (!someFixBrokeIt || fix === undefined) {
                 this.addFailure(f);
             } else {
-                let newText = fix.apply(this.getSourceFile().getFullText());
+                const newText = fix.apply(this.getSourceFile().getFullText());
                 if (Lint.checkEdit(this.languageService, this.getSourceFile(), newText).length === 0) {
                     this.addFailure(f);
                 }
@@ -173,7 +174,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
 
         if (isSingleVariable && !this.skipBindingElement) {
-            const variableIdentifier = <ts.Identifier> node.name;
+            const variableIdentifier = node.name as ts.Identifier;
             this.validateReferencesForVariable(Rule.FAILURE_TYPE_VAR, variableIdentifier.text, variableIdentifier.getStart());
         }
 
@@ -222,7 +223,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         }
         if (importClause.namedBindings != null) {
             if (importClause.namedBindings.kind === ts.SyntaxKind.NamedImports && node.importClause !== undefined) {
-                let imports = node.importClause.namedBindings as ts.NamedImports;
+                const imports = node.importClause.namedBindings as ts.NamedImports;
                 usedNamedImports = imports.elements.map((e) => this.isUsed(e.name.text, e.name.getStart()));
             }
             // Avoid deleting the whole statement if there's an import * inside
@@ -255,7 +256,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
                     this.deleteText(start, importClause.namedBindings.getEnd() - start),
                 ]);
             } else {
-                let imports = importClause.namedBindings as ts.NamedImports;
+                const imports = importClause.namedBindings as ts.NamedImports;
                 let priorElementUsed = false;
                 for (let idx = 0; idx < imports.elements.length; idx++) {
                     const namedImport = imports.elements[idx];
@@ -265,8 +266,8 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
                         const isLast = idx === imports.elements.length - 1;
                         // Before the first used import, consume trailing commas.
                         // Afterward, consume leading commas instead.
-                        let start = priorElementUsed ? imports.elements[idx - 1].getEnd() : namedImport.getStart();
-                        let end = priorElementUsed || isLast ? namedImport.getEnd() : imports.elements[idx + 1].getStart();
+                        const start = priorElementUsed ? imports.elements[idx - 1].getEnd() : namedImport.getStart();
+                        const end = priorElementUsed || isLast ? namedImport.getEnd() : imports.elements[idx + 1].getStart();
                         this.fail(Rule.FAILURE_TYPE_IMPORT, namedImport.name.text, namedImport.name.getStart(), [
                             this.deleteText(start, end - start),
                         ]);
@@ -316,7 +317,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     public visitMethodDeclaration(node: ts.MethodDeclaration) {
         if (node.name != null && node.name.kind === ts.SyntaxKind.Identifier) {
             const modifiers = node.modifiers;
-            const variableName = (<ts.Identifier> node.name).text;
+            const variableName = (node.name as ts.Identifier).text;
 
             if (Lint.hasModifier(modifiers, ts.SyntaxKind.PrivateKeyword)) {
                 this.validateReferencesForVariable(Rule.FAILURE_TYPE_METHOD, variableName, node.name.getStart());
@@ -333,7 +334,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
 
     public visitNamespaceImport(node: ts.NamespaceImport) {
         if (node.parent !== undefined) {
-            const importDeclaration = <ts.ImportDeclaration> node.parent.parent;
+            const importDeclaration = node.parent.parent as ts.ImportDeclaration;
             const moduleSpecifier = importDeclaration.moduleSpecifier.getText();
 
             // extract the unquoted module being imported
@@ -374,7 +375,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
                 && isSingleVariable
                 && !this.skipParameterDeclaration
                 && !Lint.hasModifier(node.modifiers, ts.SyntaxKind.PublicKeyword)) {
-            const nameNode = <ts.Identifier> node.name;
+            const nameNode = node.name as ts.Identifier;
             this.validateReferencesForVariable(Rule.FAILURE_TYPE_PARAM, nameNode.text, node.name.getStart());
         }
 
@@ -386,7 +387,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
         if (node.name != null && node.name.kind === ts.SyntaxKind.Identifier) {
             const modifiers = node.modifiers;
-            const variableName = (<ts.Identifier> node.name).text;
+            const variableName = (node.name as ts.Identifier).text;
 
             // check only if an explicit 'private' modifier is specified
             if (Lint.hasModifier(modifiers, ts.SyntaxKind.PrivateKeyword)) {
@@ -401,7 +402,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
 
         if (isSingleVariable && !this.skipVariableDeclaration) {
-            const variableIdentifier = <ts.Identifier> node.name;
+            const variableIdentifier = node.name as ts.Identifier;
             this.validateReferencesForVariable(Rule.FAILURE_TYPE_VAR, variableIdentifier.text, variableIdentifier.getStart());
         }
 

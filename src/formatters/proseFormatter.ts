@@ -34,25 +34,20 @@ export class Formatter extends AbstractFormatter {
             return "";
         }
 
-        let fixLines: string[] = [];
+        const fixLines: string[] = [];
         if (fixes) {
-            let perFileFixes: { [fileName: string]: number } = {};
+            const perFileFixes = new Map<string, number>();
             for (const fix of fixes) {
-                if (perFileFixes[fix.getFileName()] == null) {
-                    perFileFixes[fix.getFileName()] = 1;
-                } else {
-                    perFileFixes[fix.getFileName()]++;
-                }
+                perFileFixes.set(fix.getFileName(), (perFileFixes.get(fix.getFileName()) || 0) + 1);
             }
 
-            Object.keys(perFileFixes).forEach((fixedFile: string) => {
-                const fixCount = perFileFixes[fixedFile];
+            perFileFixes.forEach((fixCount, fixedFile) => {
                 fixLines.push(`Fixed ${fixCount} error(s) in ${fixedFile}`);
             });
             fixLines.push("");   // add a blank line between fixes and failures
         }
 
-        let errorLines = failures.map((failure: RuleFailure) => {
+        const errorLines = failures.map((failure: RuleFailure) => {
             const fileName = failure.getFileName();
             const failureString = failure.getFailure();
 
