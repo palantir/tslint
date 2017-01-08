@@ -42,7 +42,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<Set, Set> {
+class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<Set<string>, Set<string>> {
     public createScope() {
         return new Set();
     }
@@ -150,18 +150,5 @@ class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<Set, Set> 
     private addFailureOnIdentifier(ident: ts.Identifier) {
         const failureString = Rule.FAILURE_STRING_FACTORY(ident.text);
         this.addFailureAtNode(ident, failureString);
-    }
-}
-
-// ES6 Set shim for strings
-class Set {
-    private values: { [value: string]: true } = Object.create(null);
-
-    public add(name: string) {
-        this.values[name] = true;
-    }
-
-    public has(name: string) {
-        return name in this.values;
     }
 }
