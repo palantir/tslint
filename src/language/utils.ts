@@ -146,36 +146,40 @@ export function isAssignment(node: ts.Node) {
  * Bitwise check for node flags.
  */
 export function isNodeFlagSet(node: ts.Node, flagToCheck: ts.NodeFlags): boolean {
-    /* tslint:disable:no-bitwise */
+    // tslint:disable-next-line:no-bitwise
     return (node.flags & flagToCheck) !== 0;
-    /* tslint:enable:no-bitwise */
 }
 
 /**
  * Bitwise check for combined node flags.
  */
 export function isCombinedNodeFlagSet(node: ts.Node, flagToCheck: ts.NodeFlags): boolean {
-    /* tslint:disable:no-bitwise */
+    // tslint:disable-next-line:no-bitwise
     return (ts.getCombinedNodeFlags(node) & flagToCheck) !== 0;
-    /* tslint:enable:no-bitwise */
 }
 
 /**
  * Bitwise check for combined modifier flags.
  */
 export function isCombinedModifierFlagSet(node: ts.Node, flagToCheck: ts.ModifierFlags): boolean {
-    /* tslint:disable:no-bitwise */
+    // tslint:disable-next-line:no-bitwise
     return (ts.getCombinedModifierFlags(node) & flagToCheck) !== 0;
-    /* tslint:enable:no-bitwise */
 }
 
 /**
  * Bitwise check for type flags.
  */
 export function isTypeFlagSet(type: ts.Type, flagToCheck: ts.TypeFlags): boolean {
-    /* tslint:disable:no-bitwise */
+    // tslint:disable-next-line:no-bitwise
     return (type.flags & flagToCheck) !== 0;
-    /* tslint:enable:no-bitwise */
+}
+
+/**
+ * Bitwise check for symbol flags.
+ */
+export function isSymbolFlagSet(symbol: ts.Symbol, flagToCheck: ts.SymbolFlags): boolean {
+    // tslint:disable-next-line:no-bitwise
+    return (symbol.flags & flagToCheck) !== 0;
 }
 
 /**
@@ -183,9 +187,8 @@ export function isTypeFlagSet(type: ts.Type, flagToCheck: ts.TypeFlags): boolean
  * Does not work with TypeScript 2.0.x
  */
 export function isObjectFlagSet(objectType: ts.ObjectType, flagToCheck: ts.ObjectFlags): boolean {
-    /* tslint:disable:no-bitwise */
+    // tslint:disable-next-line:no-bitwise
     return (objectType.objectFlags & flagToCheck) !== 0;
-    /* tslint:enable:no-bitwise */
 }
 
 /**
