@@ -206,6 +206,10 @@ export class SyntaxWalker {
         this.walkChildren(node);
     }
 
+    protected visitJsxText(node: ts.JsxText) {
+        this.walkChildren(node);
+    }
+
     protected visitLabeledStatement(node: ts.LabeledStatement) {
         this.walkChildren(node);
     }
@@ -526,6 +530,10 @@ export class SyntaxWalker {
 
             case ts.SyntaxKind.JsxSpreadAttribute:
                 this.visitJsxSpreadAttribute(node as ts.JsxSpreadAttribute);
+                break;
+
+            case ts.SyntaxKind.JsxText:
+                this.visitJsxText(node as ts.JsxText);
                 break;
 
             case ts.SyntaxKind.LabeledStatement:
