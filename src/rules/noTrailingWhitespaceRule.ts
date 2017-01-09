@@ -41,6 +41,11 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class NoTrailingWhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
+    // prevents skipping of JsxText nodes
+    protected visitJsxText(node: ts.JsxText) {
+        this.walkChildren(node);
+    }
+
     public visitSourceFile(node: ts.SourceFile) {
         super.visitSourceFile(node);
         let lastSeenWasWhitespace = false;

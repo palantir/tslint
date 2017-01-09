@@ -27,6 +27,7 @@ const span = (
     </span>
 );
 
+// false negative test case
 const span = (
     <span>
         {x + 'failing test case'} // tslint:disable-line

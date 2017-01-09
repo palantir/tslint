@@ -1,0 +1,33 @@
+class Clazz {
+    public funcxion() {    
+                       ~~~~ [0]
+        console.log("test")   ;    
+                               ~~~~ [0]
+    }
+    
+~~~~ [0]
+    
+~~~~ [0]
+    private foobar() {
+    }
+}    
+ ~~~~ [0]
+
+const span = (    
+              ~~~~ [0]
+    <span>    
+          ~~~~ [0]
+        without this text test fails    
+                                    ~~~~ [0]
+        
+~~~~~~~~ [0]
+        {x + 'test'}    
+                    ~~~~ [0]
+        text    
+            ~~~~ [0]
+    </span>    
+           ~~~~ [0]
+);  
+  ~~ [0]
+
+[0]: trailing whitespace
