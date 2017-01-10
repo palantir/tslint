@@ -1,0 +1,19 @@
+declare const x: boolean;
+
+x;
+x;
+
+!x;
+!x;
+
+!x;
+!x;
+
+x;
+x;
+
+x;
+
+declare const y: boolean | undefined;
+y === true;
+
