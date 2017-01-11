@@ -105,6 +105,10 @@ export class RuleWalker extends SyntaxWalker implements IWalker {
         return this.createReplacement(start, length, "");
     }
 
+    public deleteFromTo(start: number, end: number): Replacement {
+        return this.createReplacement(start, end - start, "");
+    }
+
     public getRuleName(): string {
         return this.ruleName;
     }

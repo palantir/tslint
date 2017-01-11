@@ -139,22 +139,44 @@
     "ruleName": "comment-format",
     "description": "Enforces formatting rules for single-line comments.",
     "rationale": "Helps maintain a consistent, readable style in your codebase.",
-    "optionsDescription": "\nThree arguments may be optionally provided:\n\n* `\"check-space\"` requires that all single-line comments must begin with a space, as in `// comment`\n    * note that comments starting with `///` are also allowed, for things such as `///<reference>`\n* `\"check-lowercase\"` requires that the first non-whitespace character of a comment must be lowercase, if applicable.\n* `\"check-uppercase\"` requires that the first non-whitespace character of a comment must be uppercase, if applicable.",
+    "optionsDescription": "\nThree arguments may be optionally provided:\n\n* `\"check-space\"` requires that all single-line comments must begin with a space, as in `// comment`\n    * note that comments starting with `///` are also allowed, for things such as `///<reference>`\n* `\"check-lowercase\"` requires that the first non-whitespace character of a comment must be lowercase, if applicable.\n* `\"check-uppercase\"` requires that the first non-whitespace character of a comment must be uppercase, if applicable.\n\nExceptions to `\"check-lowercase\"` or `\"check-uppercase\"` can be managed with object that may be passed as last argument.\n\nOne of two options can be provided in this object:\n    \n    * `\"ignoreWords\"`  - array of strings - words that will be ignored at the beginning of the comment.\n    * `\"ignorePattern\"` - string - RegExp pattern that will be ignored at the beginning of the comment.\n",
     "options": {
       "type": "array",
       "items": {
-        "type": "string",
-        "enum": [
-          "check-space",
-          "check-lowercase",
-          "check-uppercase"
+        "anyOf": [
+          {
+            "type": "string",
+            "enum": [
+              "check-space",
+              "check-lowercase",
+              "check-uppercase"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "ignoreWords": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "ignorePattern": {
+                "type": "string"
+              }
+            },
+            "minProperties": 1,
+            "maxProperties": 1
+          }
         ]
       },
       "minLength": 1,
-      "maxLength": 3
+      "maxLength": 4
     },
     "optionExamples": [
-      "[true, \"check-space\", \"check-lowercase\"]"
+      "[true, \"check-space\", \"check-uppercase\"]",
+      "[true, \"check-lowercase\", {\"ignoreWords\": [\"TODO\", \"HACK\"]}]",
+      "[true, \"check-lowercase\", {\"ignorePattern\": \"STD\\w{2,3}\\b\"}]"
     ],
     "type": "style",
     "typescriptOnly": false
@@ -558,6 +580,19 @@
     ],
     "type": "functionality",
     "typescriptOnly": false
+  },
+  {
+    "ruleName": "no-boolean-literal-compare",
+    "description": "Warns on comparison to a boolean literal, as in `x === true`.",
+    "hasFix": true,
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "style",
+    "typescriptOnly": true,
+    "requiresTypeInfo": true
   },
   {
     "ruleName": "no-conditional-assignment",
