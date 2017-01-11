@@ -122,7 +122,7 @@ class PreferForOfWalker extends Lint.BlockScopeAwareRuleWalker<void, Incrementor
             const syntaxList = forLoop.initializer.getChildAt(1);
             if (syntaxList.kind === ts.SyntaxKind.SyntaxList && syntaxList.getChildCount() === 1) {
                 const assignment = syntaxList.getChildAt(0);
-                if (assignment.kind === ts.SyntaxKind.VariableDeclaration) {
+                if (assignment.kind === ts.SyntaxKind.VariableDeclaration && assignment.getChildCount() === 3) {
                     const value = assignment.getChildAt(2).getText();
                     if (value === "0") {
                         indexVariable = assignment.getChildAt(0) as ts.Identifier;
