@@ -22,7 +22,7 @@ import * as Lint from "../index";
 export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
-        ruleName: "no-boolean-compare",
+        ruleName: "no-boolean-literal-compare",
         description: "Warns on comparison to a boolean literal, as in `x === true`.",
         hasFix: true,
         optionsDescription: "Not configurable.",
@@ -62,14 +62,29 @@ class Walker extends Lint.ProgramAwareRuleWalker {
         }
 
         const deleted = node.left === expression
-            ? Lint.Replacement.deleteFromTo(node.left.end, node.end)
-            : Lint.Replacement.deleteFromTo(node.getStart(), node.right.getStart());
+            ? this.deleteFromTo(node.left.end, node.end)
+            : this.deleteFromTo(node.getStart(), node.right.getStart());
         const replacements = [deleted];
         if (negate) {
-            replacements.push(this.appendText(node.getStart(), "!"));
+            if (needsParenthesesForNegate(expression)) {
+                replacements.push(this.appendText(node.getStart(), "!("));
+                replacements.push(this.appendText(node.getEnd(), ")"));
+            } else {
+                replacements.push(this.appendText(node.getStart(), "!"));
+            }
         }
 
         this.addFailureAtNode(expression, Rule.FAILURE_STRING(negate), this.createFix(...replacements));
+    }
+}
+
+function needsParenthesesForNegate(node: ts.Expression) {
+    switch (node.kind) {
+        case ts.SyntaxKind.AsExpression:
+        case ts.SyntaxKind.BinaryExpression:
+            return true;
+        default:
+            return false;
     }
 }
 
@@ -93,9 +108,11 @@ function deconstructComparison(node: ts.BinaryExpression): { negate: boolean, ex
 
 function operatorKind(operatorToken: ts.BinaryOperatorToken): boolean | undefined {
     switch (operatorToken.kind) {
-        case ts.SyntaxKind.EqualsEqualsToken: case ts.SyntaxKind.EqualsEqualsEqualsToken:
+        case ts.SyntaxKind.EqualsEqualsToken:
+        case ts.SyntaxKind.EqualsEqualsEqualsToken:
             return true;
-        case ts.SyntaxKind.ExclamationEqualsToken: case ts.SyntaxKind.ExclamationEqualsEqualsToken:
+        case ts.SyntaxKind.ExclamationEqualsToken:
+        case ts.SyntaxKind.ExclamationEqualsEqualsToken:
             return false;
         default:
             return undefined;
