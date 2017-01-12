@@ -43,7 +43,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-type VisitedVariables = {[varName: string]: boolean};
+type VisitedVariables = Set<string>;
 
 class NoUseBeforeDeclareWalker extends Lint.ScopeAwareRuleWalker<VisitedVariables> {
     private importedPropertiesPositions: number[] = [];
@@ -53,7 +53,7 @@ class NoUseBeforeDeclareWalker extends Lint.ScopeAwareRuleWalker<VisitedVariable
     }
 
     public createScope(): VisitedVariables {
-        return {};
+        return new Set<string>();
     }
 
     public visitBindingElement(node: ts.BindingElement) {
@@ -62,7 +62,7 @@ class NoUseBeforeDeclareWalker extends Lint.ScopeAwareRuleWalker<VisitedVariable
 
         // use-before-declare errors for block-scoped vars are caught by tsc
         if (isSingleVariable && !isBlockScoped) {
-            const variableName = (<ts.Identifier> node.name).text;
+            const variableName = (node.name as ts.Identifier).text;
             this.validateUsageForVariable(variableName, node.name.getStart());
         }
 
@@ -83,14 +83,14 @@ class NoUseBeforeDeclareWalker extends Lint.ScopeAwareRuleWalker<VisitedVariable
     }
 
     public visitImportEqualsDeclaration(node: ts.ImportEqualsDeclaration) {
-        const name = <ts.Identifier> node.name;
+        const name = node.name as ts.Identifier;
         this.validateUsageForVariable(name.text, name.getStart());
 
         super.visitImportEqualsDeclaration(node);
     }
 
     public visitNamedImports(node: ts.NamedImports) {
-        for (let namedImport of node.elements) {
+        for (const namedImport of node.elements) {
             if (namedImport.propertyName != null) {
                 this.saveImportedPropertiesPositions(namedImport.propertyName.getStart());
             }
@@ -106,15 +106,15 @@ class NoUseBeforeDeclareWalker extends Lint.ScopeAwareRuleWalker<VisitedVariable
 
     public visitVariableDeclaration(node: ts.VariableDeclaration) {
         const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
-        const variableName = (<ts.Identifier> node.name).text;
+        const variableName = (node.name as ts.Identifier).text;
         const currentScope = this.getCurrentScope();
 
         // only validate on the first variable declaration within the current scope
-        if (isSingleVariable && currentScope[variableName] == null) {
+        if (isSingleVariable && !currentScope.has(variableName)) {
             this.validateUsageForVariable(variableName, node.getStart());
         }
 
-        currentScope[variableName] = true;
+        currentScope.add(variableName);
         super.visitVariableDeclaration(node);
     }
 
@@ -122,8 +122,8 @@ class NoUseBeforeDeclareWalker extends Lint.ScopeAwareRuleWalker<VisitedVariable
         const fileName = this.getSourceFile().fileName;
         const highlights = this.languageService.getDocumentHighlights(fileName, position, [fileName]);
         if (highlights != null) {
-            for (let highlight of highlights) {
-                for (let highlightSpan of highlight.highlightSpans) {
+            for (const highlight of highlights) {
+                for (const highlightSpan of highlight.highlightSpans) {
                     const referencePosition = highlightSpan.textSpan.start;
                     if (referencePosition < position && !this.isImportedPropertyName(referencePosition)) {
                         const failureString = Rule.FAILURE_STRING_PREFIX + name + Rule.FAILURE_STRING_POSTFIX;

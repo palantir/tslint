@@ -47,7 +47,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 export class NoParameterPropertiesWalker extends Lint.RuleWalker {
     public visitConstructorDeclaration(node: ts.ConstructorDeclaration) {
         const parameters = node.parameters;
-        for (let parameter of parameters) {
+        for (const parameter of parameters) {
             if (parameter.modifiers != null && parameter.modifiers.length > 0) {
                 const errorMessage = Rule.FAILURE_STRING_FACTORY((parameter.name as ts.Identifier).text);
                 const lastModifier = parameter.modifiers[parameter.modifiers.length - 1];

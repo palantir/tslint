@@ -73,7 +73,11 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     private get threshold(): number {
-        return this.getOptions().ruleArguments[0] || Rule.DEFAULT_THRESHOLD;
+        const ruleArguments = this.getOptions().ruleArguments;
+        if (ruleArguments[0] !== undefined) {
+            return ruleArguments[0];
+        }
+        return Rule.DEFAULT_THRESHOLD;
     }
 }
 
@@ -85,7 +89,7 @@ class CyclomaticComplexityWalker extends Lint.RuleWalker {
         super(sourceFile, options);
     }
 
-    protected visitArrowFunction(node: ts.FunctionLikeDeclaration) {
+    protected visitArrowFunction(node: ts.ArrowFunction) {
         this.startFunction();
         super.visitArrowFunction(node);
         this.endFunction(node);
@@ -193,7 +197,7 @@ class CyclomaticComplexityWalker extends Lint.RuleWalker {
         const complexity = this.functions.pop();
 
         // Check for a violation.
-        if (complexity > this.threshold) {
+        if (complexity !== undefined && complexity > this.threshold) {
             let failureString: string;
 
             // Attempt to find a name for the function.

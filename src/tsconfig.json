@@ -2,11 +2,15 @@
     "compilerOptions": {
         "module": "commonjs",
         "noImplicitAny": true,
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
         "noUnusedParameters": true,
         "noUnusedLocals": true,
+        "strictNullChecks": true,
         "declaration": true,
         "sourceMap": false,
         "target": "es5",
+        "lib": ["es6"],
         "outDir": "../lib"
     }
 }

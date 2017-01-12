@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "eofline": true
+  },
+  "jsRules": {
+    "eofline": true
+  }
+}

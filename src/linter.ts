@@ -42,7 +42,7 @@ import { arrayify, dedent } from "./utils";
  * Linter that can lint multiple files in consecutive runs.
  */
 class Linter {
-    public static VERSION = "4.2.0";
+    public static VERSION = "4.3.1";
 
     public static findConfiguration = findConfiguration;
     public static findConfigurationPath = findConfigurationPath;
@@ -92,7 +92,7 @@ class Linter {
         if (typeof options !== "object") {
             throw new Error("Unknown Linter options type: " + typeof options);
         }
-        if ((<any> options).configuration != null) {
+        if ((options as any).configuration != null) {
             throw new Error("ILinterOptions does not contain the property `configuration` as of version 4. " +
                 "Did you mean to pass the `IConfigurationFile` object to lint() ? ");
         }
@@ -102,16 +102,16 @@ class Linter {
         }
     }
 
-    public lint(fileName: string, source?: string, configuration: IConfigurationFile = DEFAULT_CONFIG): void {
+    public lint(fileName: string, source: string, configuration: IConfigurationFile = DEFAULT_CONFIG): void {
         const enabledRules = this.getEnabledRules(fileName, source, configuration);
         let sourceFile = this.getSourceFile(fileName, source);
         let hasLinterRun = false;
         let fileFailures: RuleFailure[] = [];
 
         if (this.options.fix) {
-            for (let rule of enabledRules) {
-                let ruleFailures = this.applyRule(rule, sourceFile);
-                const fixes = ruleFailures.map((f) => f.getFix()).filter((f) => !!f);
+            for (const rule of enabledRules) {
+                const ruleFailures = this.applyRule(rule, sourceFile);
+                const fixes = ruleFailures.map((f) => f.getFix()).filter((f): f is Fix => !!f) as Fix[];
                 source = fs.readFileSync(fileName, { encoding: "utf-8" });
                 if (fixes.length > 0) {
                     this.fixes = this.fixes.concat(ruleFailures);
@@ -129,7 +129,7 @@ class Linter {
         // make a 1st pass or make a 2nd pass if there were any fixes because the positions may be off
         if (!hasLinterRun || this.fixes.length > 0) {
             fileFailures = [];
-            for (let rule of enabledRules) {
+            for (const rule of enabledRules) {
                 const ruleFailures = this.applyRule(rule, sourceFile);
                 if (ruleFailures.length > 0) {
                     fileFailures = fileFailures.concat(ruleFailures);
@@ -169,8 +169,8 @@ class Linter {
         } else {
             ruleFailures = rule.apply(sourceFile, this.languageService);
         }
-        let fileFailures: RuleFailure[] = [];
-        for (let ruleFailure of ruleFailures) {
+        const fileFailures: RuleFailure[] = [];
+        for (const ruleFailure of ruleFailures) {
             if (!this.containsRule(this.failures, ruleFailure)) {
                 fileFailures.push(ruleFailure);
             }
@@ -178,7 +178,7 @@ class Linter {
         return fileFailures;
     }
 
-    private getEnabledRules(fileName: string, source?: string, configuration: IConfigurationFile = DEFAULT_CONFIG): IRule[] {
+    private getEnabledRules(fileName: string, source: string, configuration: IConfigurationFile = DEFAULT_CONFIG): IRule[] {
         const sourceFile = this.getSourceFile(fileName, source);
         const isJs = /\.jsx?$/i.test(fileName);
         const configurationRules = isJs ? configuration.jsRules : configuration.rules;
@@ -186,6 +186,7 @@ class Linter {
         // walk the code first to find all the intervals where rules are disabled
         const rulesWalker = new EnableDisableRulesWalker(sourceFile, {
             disabledIntervals: [],
+            ruleArguments: [],
             ruleName: "",
         }, configurationRules);
         rulesWalker.walk(sourceFile);
@@ -193,12 +194,12 @@ class Linter {
 
         const rulesDirectories = arrayify(this.options.rulesDirectory)
             .concat(arrayify(configuration.rulesDirectory));
-        let configuredRules = loadRules(configurationRules, enableDisableRuleMap, rulesDirectories, isJs);
+        const configuredRules = loadRules(configurationRules, enableDisableRuleMap, rulesDirectories, isJs);
 
         return configuredRules.filter((r) => r.isEnabled());
     }
 
-    private getSourceFile(fileName: string, source?: string) {
+    private getSourceFile(fileName: string, source: string) {
         let sourceFile: ts.SourceFile;
         if (this.program) {
             sourceFile = this.program.getSourceFile(fileName);

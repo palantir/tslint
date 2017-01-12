@@ -158,7 +158,7 @@ tslint accepts the following command-line options:
 
 --force:
     Return status code 0 even if there are any lint errors.
-    Useful while running as npm script.
+    Useful while running TSLint via an npm script.
 
 -i, --init:
     Generates a tslint.json config file in the current working directory.
@@ -387,20 +387,25 @@ Development
 -----------
 <sup>[back to ToC &uarr;](#table-of-contents)</sup>
 
+Requirements:
+
+- `node` v7
+- `yarn` v0.18
+
 #### Quick Start
 
 ```bash
 git clone git@github.com:palantir/tslint.git --config core.autocrlf=input --config core.eol=lf
-npm install
-npm run compile
-npm run test
+yarn install
+yarn compile
+yarn test
 ```
 
 #### `next` branch
 
 The [`next` branch of this repo](https://github.com/palantir/tslint/tree/next) tracks the latest TypeScript compiler
 nightly release as a `peerDependency`. This allows you to develop the linter and its rules against the latest features of the
-language. Releases from this branch are published to npm with the `next` dist-tag, so you may install the latest dev
+language. Releases from this branch are published to NPM with the `next` dist-tag, so you may install the latest dev
 version of TSLint via `npm install tslint@next`.
 
 Creating a new release
@@ -409,7 +414,7 @@ Creating a new release
 
 1. Bump the version number in `package.json` and `src/tslintMulti.ts`
 2. Add release notes in `CHANGELOG.md`
-3. `npm run verify` to build the latest sources
+3. `yarn verify` to build the latest sources
 4. Commit with message `Prepare release <version>`
 5. Run `npm publish`
 6. Create a git tag for the new release and push it ([see existing tags here](https://github.com/palantir/tslint/tags))

@@ -1,0 +1,105 @@
+var testVariable = 123;
+
+function testFunction() {
+    if (typeof x === 'null') {
+        ~~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+        console.log("called");
+    }
+    const x = typeof foo === 'undefied'
+              ~~~~~~~~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+}
+
+console.log(typeof window == 'object ')
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+
+const string = "string";
+typeof bar === string
+typeof bar === `${string}`;
+typeof bar === `${"s"}tring`;
+
+var num = 123;
+typeof num !== "number";
+typeof num !== "object";
+typeof num !== "string";
+typeof num !== "boolean";
+typeof num !== "function";
+typeof num !== "symbol";
+typeof num !== "undefined";
+
+"number" !== typeof num;
+"object" !== typeof num;
+"string" !== typeof num;
+"boolean" !== typeof num;
+"function" !== typeof num;
+"symbol" !== typeof num;
+"undefined" !== typeof num;
+
+typeof num === "number";
+typeof num === "object";
+typeof num === "string";
+typeof num === "boolean";
+typeof num === "function";
+typeof num === "symbol";
+typeof num === "undefined";
+
+"number" === typeof num;
+"object" === typeof num;
+"string" === typeof num;
+"boolean" === typeof num;
+"function" === typeof num;
+"symbol" === typeof num;
+"undefined" === typeof num;
+
+typeof num == "number";
+typeof num == "object";
+typeof num == "string";
+typeof num == "boolean";
+typeof num == "function";
+typeof num == "symbol";
+typeof num == "undefined";
+
+"number" == typeof num;
+"object" == typeof num;
+"string" == typeof num;
+"boolean" == typeof num;
+"function" == typeof num;
+"symbol" == typeof num;
+"undefined" == typeof num;
+
+typeof num != "number";
+typeof num != "object";
+typeof num != "string";
+typeof num != "boolean";
+typeof num != "function";
+typeof num != "symbol";
+typeof num != "undefined";
+
+"number" == typeof num;
+"object" == typeof num;
+"string" == typeof num;
+"boolean" == typeof num;
+"function" == typeof num;
+"symbol" == typeof num;
+"undefined" == typeof num;
+
+typeof bar === 123
+~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+typeof bar === undefined
+~~~~~~~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+typeof bar === null
+~~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+typeof bar === true
+~~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+typeof bar === false
+~~~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+
+123 === typeof bar
+~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+undefined === typeof bar
+~~~~~~~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+null === typeof bar
+~~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+true === typeof bar
+~~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+false === typeof bar
+~~~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]

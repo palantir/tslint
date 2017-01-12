@@ -44,7 +44,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "This import is blacklisted, import a submodule instead";
 
     public isEnabled(): boolean {
-        return super.isEnabled() && this.getOptions().ruleArguments.length > 0;
+        const ruleArguments = this.getOptions().ruleArguments;
+        return super.isEnabled() && ruleArguments.length > 0;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -57,7 +58,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class NoRequireFullLibraryWalker extends Lint.RuleWalker {
     private blacklist: string[];
-    constructor (sourceFile: ts.SourceFile, options: Lint.IOptions, blacklist: string[]) {
+    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions, blacklist: string[]) {
         super(sourceFile, options);
         this.blacklist = blacklist;
     }
@@ -75,7 +76,7 @@ class NoRequireFullLibraryWalker extends Lint.RuleWalker {
     }
 
     public visitImportEqualsDeclaration(node: ts.ImportEqualsDeclaration) {
-        let moduleReference = <ts.ExternalModuleReference> node.moduleReference;
+        const moduleReference = node.moduleReference as ts.ExternalModuleReference;
         // If it's an import require and not an import alias
         if (moduleReference.expression) {
             if (this.isModuleBlacklisted(moduleReference.expression.getText())) {
@@ -98,9 +99,10 @@ class NoRequireFullLibraryWalker extends Lint.RuleWalker {
         });
     }
 
-    private reportFailure (node: ts.Expression): void {
+    private reportFailure(node: ts.Expression): void {
         this.addFailureAt(
-            node.getStart() + 1, // take quotes into account
+            // take quotes into account
+            node.getStart() + 1,
             node.getWidth() - 2,
             Rule.FAILURE_STRING,
         );

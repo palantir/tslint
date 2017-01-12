@@ -90,9 +90,8 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class TypedefWhitespaceWalker extends Lint.RuleWalker {
     private static getColonPosition(node: ts.Node) {
-        const colon = node.getChildren().filter((child) => child.kind === ts.SyntaxKind.ColonToken)[0];
-
-        return colon == null ? -1 : colon.getStart();
+        const colon = Lint.childOfKind(node, ts.SyntaxKind.ColonToken);
+        return colon && colon.getStart();
     }
 
     public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
@@ -150,11 +149,11 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
         super.visitVariableDeclaration(node);
     }
 
-    public checkSpace(option: string, node: ts.Node, typeNode: ts.TypeNode | ts.StringLiteral) {
+    public checkSpace(option: string, node: ts.Node, typeNode: ts.TypeNode | ts.StringLiteral | undefined) {
         if (this.hasOption(option) && typeNode != null) {
             const colonPosition = TypedefWhitespaceWalker.getColonPosition(node);
 
-            if (colonPosition != null) {
+            if (colonPosition !== undefined) {
                 const scanner = ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, node.getText());
 
                 this.checkLeft(option, node, scanner, colonPosition);
@@ -251,7 +250,7 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
             // Don't enforce trailing spaces on newlines
             // (https://github.com/palantir/tslint/issues/1354)
             scanner.setTextPos(positionToCheck);
-            let kind = scanner.scan();
+            const kind = scanner.scan();
             if (kind === ts.SyntaxKind.NewLineTrivia) {
                 return;
             }

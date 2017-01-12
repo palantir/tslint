@@ -24,31 +24,32 @@ interface LanguageServiceEditableHost extends ts.LanguageServiceHost {
 }
 
 export function wrapProgram(program: ts.Program): ts.LanguageService {
-    const files: {[name: string]: string} = {};
-    const fileVersions: {[name: string]: number} = {};
+    const files = new Map<string, string>(); // file name -> content
+    const fileVersions = new Map<string, number>();
     const host: LanguageServiceEditableHost = {
             getCompilationSettings: () => program.getCompilerOptions(),
             getCurrentDirectory: () => program.getCurrentDirectory(),
-            getDefaultLibFileName: () => null,
+            getDefaultLibFileName: () => "lib.d.ts",
             getScriptFileNames: () => program.getSourceFiles().map((sf) => sf.fileName),
             getScriptSnapshot: (name: string) => {
-                if (files.hasOwnProperty(name)) {
-                    return ts.ScriptSnapshot.fromString(files[name]);
+                const file = files.get(name);
+                if (file !== undefined) {
+                    return ts.ScriptSnapshot.fromString(file);
                 }
                 if (!program.getSourceFile(name)) {
-                    return null;
+                    return undefined;
                 }
                 return ts.ScriptSnapshot.fromString(program.getSourceFile(name).getFullText());
             },
-            getScriptVersion: (name: string) => fileVersions.hasOwnProperty(name) ? fileVersions[name] + "" : "1",
+            getScriptVersion: (name: string) => {
+                const version = fileVersions.get(name);
+                return version === undefined ? "1" : String(version);
+            },
             log: () => { /* */ },
             editFile(fileName: string, newContent: string) {
-                files[fileName] = newContent;
-                if (fileVersions.hasOwnProperty(fileName)) {
-                    fileVersions[fileName]++;
-                } else {
-                    fileVersions[fileName] = 0;
-                }
+                files.set(fileName, newContent);
+                const prevVersion = fileVersions.get(fileName);
+                fileVersions.set(fileName, prevVersion === undefined ? 0 : prevVersion + 1);
             },
         };
     const langSvc = ts.createLanguageService(host, ts.createDocumentRegistry());

@@ -53,7 +53,7 @@ class NoConstructWalker extends Lint.RuleWalker {
 
     public visitNewExpression(node: ts.NewExpression) {
         if (node.expression.kind === ts.SyntaxKind.Identifier) {
-            const identifier = <ts.Identifier> node.expression;
+            const identifier = node.expression as ts.Identifier;
             const constructorName = identifier.text;
             if (NoConstructWalker.FORBIDDEN_CONSTRUCTORS.indexOf(constructorName) !== -1) {
                 this.addFailureAt(node.getStart(), identifier.getEnd() - node.getStart(), Rule.FAILURE_STRING);

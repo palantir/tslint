@@ -50,7 +50,7 @@ class NoMergeableNamespaceWalker extends Lint.RuleWalker {
     public visitModuleDeclaration(node: ts.ModuleDeclaration) {
         if (Lint.isNodeFlagSet(node, ts.NodeFlags.Namespace)
             && node.name.kind === ts.SyntaxKind.Identifier) {
-            this.validateReferencesForNamespace((<ts.Identifier> node.name).text, node.name.getStart());
+            this.validateReferencesForNamespace((node.name as ts.Identifier).text, node.name.getStart());
         }
         super.visitModuleDeclaration(node);
     }
@@ -74,5 +74,6 @@ class NoMergeableNamespaceWalker extends Lint.RuleWalker {
                 return lineAndCharacter;
             }
         }
+        throw new Error("expected more than one highlightSpan");
     }
 }

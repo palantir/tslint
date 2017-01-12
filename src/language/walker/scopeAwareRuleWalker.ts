@@ -17,19 +17,17 @@
 
 import * as ts from "typescript";
 
+import {isScopeBoundary} from "../utils";
 import {RuleWalker} from "./ruleWalker";
 
 export abstract class ScopeAwareRuleWalker<T> extends RuleWalker {
-    protected fileIsModule: boolean;
     private scopeStack: T[];
 
     constructor(sourceFile: ts.SourceFile, options?: any) {
         super(sourceFile, options);
 
-        this.fileIsModule = ts.isExternalModule(sourceFile);
-
         // initialize with global scope if file is not a module
-        this.scopeStack = this.fileIsModule ? [] : [this.createScope(sourceFile)];
+        this.scopeStack = ts.isExternalModule(sourceFile) ? [] : [this.createScope(sourceFile)];
     }
 
     public abstract createScope(node: ts.Node): T;
@@ -40,7 +38,7 @@ export abstract class ScopeAwareRuleWalker<T> extends RuleWalker {
 
     // get all scopes available at this depth
     public getAllScopes(): T[] {
-        return this.scopeStack.slice();
+        return this.scopeStack;
     }
 
     public getCurrentDepth(): number {
@@ -74,20 +72,6 @@ export abstract class ScopeAwareRuleWalker<T> extends RuleWalker {
     }
 
     protected isScopeBoundary(node: ts.Node): boolean {
-        return node.kind === ts.SyntaxKind.FunctionDeclaration
-            || node.kind === ts.SyntaxKind.FunctionExpression
-            || node.kind === ts.SyntaxKind.PropertyAssignment
-            || node.kind === ts.SyntaxKind.ShorthandPropertyAssignment
-            || node.kind === ts.SyntaxKind.MethodDeclaration
-            || node.kind === ts.SyntaxKind.Constructor
-            || node.kind === ts.SyntaxKind.ModuleDeclaration
-            || node.kind === ts.SyntaxKind.ArrowFunction
-            || node.kind === ts.SyntaxKind.ParenthesizedExpression
-            || node.kind === ts.SyntaxKind.ClassDeclaration
-            || node.kind === ts.SyntaxKind.ClassExpression
-            || node.kind === ts.SyntaxKind.InterfaceDeclaration
-            || node.kind === ts.SyntaxKind.GetAccessor
-            || node.kind === ts.SyntaxKind.SetAccessor
-            || (node.kind === ts.SyntaxKind.SourceFile && this.fileIsModule);
+        return isScopeBoundary(node);
     }
 }

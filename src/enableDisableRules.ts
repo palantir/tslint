@@ -47,10 +47,11 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
 
         scanAllTokens(scan, (scanner: ts.Scanner) => {
             const startPos = scanner.getStartPos();
-            if (this.tokensToSkipStartEndMap[startPos] != null) {
+            const skip = this.getSkipEndFromStart(startPos);
+            if (skip !== undefined) {
                 // tokens to skip are places where the scanner gets confused about what the token is, without the proper context
                 // (specifically, regex, identifiers, and templates). So skip those tokens.
-                scanner.setTextPos(this.tokensToSkipStartEndMap[startPos]);
+                scanner.setTextPos(skip);
                 return;
             }
 
@@ -117,7 +118,7 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
                     rulesList = commentTextParts[1].split(/\s+/).slice(1);
 
                     // remove empty items and potential comment end.
-                    rulesList = rulesList.filter((item) => !!item && item.indexOf("*/") === -1);
+                    rulesList = rulesList.filter((item) => !!item && !item.includes("*/"));
 
                     // potentially there were no items, so default to `all`.
                     rulesList = rulesList.length > 0 ? rulesList : ["all"];
@@ -145,7 +146,7 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
                     }
 
                     let start: number;
-                    let end: number;
+                    let end: number | undefined;
 
                     if (isCurrentLine) {
                         // start at the beginning of the current line
@@ -161,6 +162,7 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
                         // disable rule for the rest of the file
                         // start at the current position, but skip end position
                         start = startingPosition;
+                        end = undefined;
                     }
 
                     this.switchRuleState(ruleToSwitch, isEnabled, start, end);

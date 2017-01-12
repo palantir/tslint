@@ -18,7 +18,7 @@
 /**
  * Enforces the invariant that the input is an array.
  */
-export function arrayify<T>(arg: T | T[]): T[] {
+export function arrayify<T>(arg?: T | T[]): T[] {
     if (Array.isArray(arg)) {
         return arg;
     } else if (arg != null) {
@@ -37,6 +37,14 @@ export function objectify(arg: any): any {
     } else {
         return {};
     }
+}
+
+/**
+ * Replace hyphens in a rule name by upper-casing the letter after them.
+ * E.g. "foo-bar" -> "fooBar"
+ */
+export function camelize(stringWithHyphens: string): string {
+    return stringWithHyphens.replace(/-(.)/g, (_, nextLetter) => nextLetter.toUpperCase());
 }
 
 /**
@@ -72,14 +80,14 @@ export function stripComments(content: string): string {
      * Fourth matches line comments
      */
     const regexp: RegExp = /("(?:[^\\\"]*(?:\\.)?)*")|('(?:[^\\\']*(?:\\.)?)*')|(\/\*(?:\r?\n|.)*?\*\/)|(\/{2,}.*?(?:(?:\r?\n)|$))/g;
-    let result = content.replace(regexp, (match, _m1, _m2, m3, m4) => {
+    const result = content.replace(regexp, (match, _m1, _m2, m3, m4) => {
         // Only one of m1, m2, m3, m4 matches
         if (m3) {
             // A block comment. Replace with nothing
             return "";
         } else if (m4) {
             // A line comment. If it ends in \r?\n then keep it.
-            let length = m4.length;
+            const length = m4.length;
             if (length > 2 && m4[length - 1] === "\n") {
                 return m4[length - 2] === "\r" ? "\r\n" : "\n";
             } else {
@@ -92,3 +100,10 @@ export function stripComments(content: string): string {
     });
     return result;
 };
+
+/**
+ * Escapes all special characters in RegExp pattern to avoid broken regular expressions and ensure proper matches
+ */
+export function escapeRegExp(re: string): string {
+    return re.replace(/[.+*?|^$[\]{}()\\]/g, "\\$&");
+}

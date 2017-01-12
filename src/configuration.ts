@@ -34,7 +34,7 @@ export interface IConfigurationFile {
 }
 
 export interface IConfigurationLoadResult {
-    path: string;
+    path?: string;
     results?: IConfigurationFile;
 }
 
@@ -105,7 +105,7 @@ const BUILT_IN_CONFIG = /^tslint:(.*)$/;
  * of the search for a configuration.
  * @returns Load status for a TSLint configuration object
  */
-export function findConfiguration(configFile: string, inputFilePath: string): IConfigurationLoadResult {
+export function findConfiguration(configFile: string | null, inputFilePath: string): IConfigurationLoadResult {
     const path = findConfigurationPath(configFile, inputFilePath);
     const loadResult: IConfigurationLoadResult = { path };
 
@@ -127,7 +127,7 @@ export function findConfiguration(configFile: string, inputFilePath: string): IC
  * @returns An absolute path to a tslint.json file
  * or undefined if neither can be found.
  */
-export function findConfigurationPath(suppliedConfigFilePath: string, inputFilePath: string) {
+export function findConfigurationPath(suppliedConfigFilePath: string | null, inputFilePath: string) {
     if (suppliedConfigFilePath != null) {
         if (!fs.existsSync(suppliedConfigFilePath)) {
             throw new Error(`Could not find config file at: ${path.resolve(suppliedConfigFilePath)}`);
@@ -163,7 +163,7 @@ export function findConfigurationPath(suppliedConfigFilePath: string, inputFileP
  * 'path/to/config' will attempt to load a to/config file inside a node module named path
  * @returns a configuration object for TSLint loaded from the file at configFilePath
  */
-export function loadConfigurationFromPath(configFilePath: string): IConfigurationFile {
+export function loadConfigurationFromPath(configFilePath?: string): IConfigurationFile {
     if (configFilePath == null) {
         return DEFAULT_CONFIG;
     } else {
@@ -199,9 +199,9 @@ export function loadConfigurationFromPath(configFilePath: string): IConfiguratio
  */
 function resolveConfigurationPath(filePath: string, relativeTo?: string) {
     const matches = filePath.match(BUILT_IN_CONFIG);
-    const isBuiltInConfig = matches != null;
+    const isBuiltInConfig = matches != null && matches.length > 0;
     if (isBuiltInConfig) {
-        const configName = matches[1];
+        const configName = matches![1];
         try {
             return require.resolve(`./configs/${configName}`);
         } catch (err) {
@@ -225,14 +225,14 @@ function resolveConfigurationPath(filePath: string, relativeTo?: string) {
 
 export function extendConfigurationFile(targetConfig: IConfigurationFile,
                                         nextConfigSource: IConfigurationFile): IConfigurationFile {
-    let combinedConfig: IConfigurationFile = {};
+    const combinedConfig: IConfigurationFile = {};
 
     const configRulesDirectory = arrayify(targetConfig.rulesDirectory);
     const nextConfigRulesDirectory = arrayify(nextConfigSource.rulesDirectory);
     combinedConfig.rulesDirectory = configRulesDirectory.concat(nextConfigRulesDirectory);
 
     const combineProperties = (targetProperty: any, nextProperty: any) => {
-        let combinedProperty: any = {};
+        const combinedProperty: any = {};
         for (const name of Object.keys(objectify(targetProperty))) {
             combinedProperty[name] = targetProperty[name];
         }
@@ -266,11 +266,12 @@ function getHomeDir() {
     }
 }
 
-export function getRelativePath(directory: string, relativeTo?: string): string {
+export function getRelativePath(directory?: string | null, relativeTo?: string) {
     if (directory != null) {
         const basePath = relativeTo || process.cwd();
         return path.resolve(basePath, directory);
     }
+    return undefined;
 }
 
 /**
@@ -280,11 +281,13 @@ export function getRelativePath(directory: string, relativeTo?: string): string 
  * should be the path to the tslint.json file.
  * @return An array of absolute paths to directories potentially containing rules
  */
-export function getRulesDirectories(directories: string | string[], relativeTo?: string): string[] {
-    const rulesDirectories = arrayify(directories).map((dir) => getRelativePath(dir, relativeTo));
+export function getRulesDirectories(directories?: string | string[], relativeTo?: string): string[] {
+    const rulesDirectories = arrayify(directories)
+        .map((dir) => getRelativePath(dir, relativeTo))
+        .filter((dir) => dir !== undefined) as string[];
 
     for (const directory of rulesDirectories) {
-        if (!fs.existsSync(directory)) {
+        if (directory != null && !fs.existsSync(directory)) {
             throw new Error(`Could not find custom rule directory: ${directory}`);
         }
     }

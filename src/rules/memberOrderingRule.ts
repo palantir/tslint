@@ -340,33 +340,35 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
         if (this.hasOrderOption) {
             const memberList = this.memberStack.pop();
             const order = this.getOrder();
-            const memberRank = memberList.map((n) => order.indexOf(getNodeOption(n)));
+            if (memberList !== undefined && order !== null) {
+                const memberRank = memberList.map((n) => order.indexOf(getNodeOption(n)));
 
-            let prevRank = -1;
-            memberRank.forEach((rank, i) => {
-                // no explicit ordering for this kind of node specified, so continue
-                if (rank === -1) { return; }
+                let prevRank = -1;
+                memberRank.forEach((rank, i) => {
+                    // no explicit ordering for this kind of node specified, so continue
+                    if (rank === -1) { return; }
 
-                // node should have come before last node, so add a failure
-                if (rank < prevRank) {
-                    // generate a nice and clear error message
-                    const node = memberList[i].node;
-                    const nodeType = order[rank].split("-").join(" ");
-                    const prevNodeType = order[prevRank].split("-").join(" ");
+                    // node should have come before last node, so add a failure
+                    if (rank < prevRank) {
+                        // generate a nice and clear error message
+                        const node = memberList[i].node;
+                        const nodeType = order[rank].split("-").join(" ");
+                        const prevNodeType = order[prevRank].split("-").join(" ");
 
-                    const lowerRanks = memberRank.filter((r) => r < rank && r !== -1).sort();
-                    const locationHint = lowerRanks.length > 0
-                        ? `after ${order[lowerRanks[lowerRanks.length - 1]].split("-").join(" ")}s`
-                        : "at the beginning of the class/interface";
+                        const lowerRanks = memberRank.filter((r) => r < rank && r !== -1).sort();
+                        const locationHint = lowerRanks.length > 0
+                            ? `after ${order[lowerRanks[lowerRanks.length - 1]].split("-").join(" ")}s`
+                            : "at the beginning of the class/interface";
 
-                    const errorLine1 = `Declaration of ${nodeType} not allowed after declaration of ${prevNodeType}. ` +
-                        `Instead, this should come ${locationHint}.`;
-                    this.addFailureAtNode(node, errorLine1);
-                } else {
-                    // keep track of last good node
-                    prevRank = rank;
-                }
-            });
+                        const errorLine1 = `Declaration of ${nodeType} not allowed after declaration of ${prevNodeType}. ` +
+                            `Instead, this should come ${locationHint}.`;
+                        this.addFailureAtNode(node, errorLine1);
+                    } else {
+                        // keep track of last good node
+                        prevRank = rank;
+                    }
+                });
+            }
         }
     }
 
@@ -381,13 +383,14 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
     }
 
     // assumes this.hasOrderOption() === true
-    private getOrder(): string[] {
+    private getOrder(): string[] | null {
         const orderOption = this.getOptions()[0][OPTION_ORDER];
         if (Array.isArray(orderOption)) {
             return orderOption;
         } else if (typeof orderOption === "string") {
             return PRESET_ORDERS[orderOption] || PRESET_ORDERS["default"];
         }
+        return null;
     }
     /* end new code */
 }

@@ -97,6 +97,13 @@ interface b5 {
     }
 }
 
+interface b6 {
+    (): void;
+    x: number;
+    (x: number): number;
+    ~~~~~~~~~~~~~~~~~~~~ [All '()' signatures should be adjacent]
+}
+
 // Also works in classes, source files, modules, namespaces
 
 class C {

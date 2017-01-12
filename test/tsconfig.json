@@ -2,10 +2,14 @@
     "compilerOptions": {
         "module": "commonjs",
         "noImplicitAny": true,
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
         "noUnusedParameters": true,
         "noUnusedLocals": true,
+        "strictNullChecks": true,
         "sourceMap": true,
         "target": "es5",
+        "lib": ["es6"],
         "outDir": "../build"
     },
     "include": [
