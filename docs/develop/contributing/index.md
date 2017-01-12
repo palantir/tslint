@@ -24,7 +24,12 @@ version of TSLint via `npm install tslint@next`.
 
 You can test a specific test by using the `--test` command line parameter followed by your test directory. For example:
 ```
-tslint --test test/rules/curly
+// global tslint
+// point to a dir that has tslint.json and .lint files
+tslint --test test/rules/semicolon/always
+
+// locally built tslint
+./bin/tslint --test test/rules/semicolon/always
 ```
 
 #### Debugging in Visual Studio Code
