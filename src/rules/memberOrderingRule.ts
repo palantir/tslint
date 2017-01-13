@@ -136,26 +136,12 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 export class MemberOrderingWalker extends Lint.RuleWalker {
-    private readonly order: string[] | undefined = (() => {
-        const allOptions = this.getOptions();
-        if (allOptions == null || allOptions.length === 0) {
-            return undefined;
-        }
+    private readonly order: string[] | undefined;
 
-        const firstOption = allOptions[0];
-        if (firstOption == null || typeof firstOption !== "object") {
-            return undefined;
-        }
-
-        const orderOption = firstOption[OPTION_ORDER];
-        if (Array.isArray(orderOption)) {
-            return orderOption;
-        } else if (typeof orderOption === "string") {
-            return PRESET_ORDERS[orderOption] || PRESET_ORDERS["default"];
-        } else {
-            return undefined;
-        }
-    })();
+    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
+        super(sourceFile, options);
+        this.order = this.getOrder();
+    }
 
     public visitClassDeclaration(node: ts.ClassDeclaration) {
         this.visitMembers(node.members);
@@ -175,6 +161,27 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
     public visitTypeLiteral(node: ts.TypeLiteralNode) {
         this.visitMembers(node.members);
         super.visitTypeLiteral(node);
+    }
+
+    private getOrder(): string[] | undefined {
+        const allOptions = this.getOptions();
+        if (allOptions == null || allOptions.length === 0) {
+            return undefined;
+        }
+
+        const firstOption = allOptions[0];
+        if (firstOption == null || typeof firstOption !== "object") {
+            return undefined;
+        }
+
+        const orderOption = firstOption[OPTION_ORDER];
+        if (Array.isArray(orderOption)) {
+            return orderOption;
+        } else if (typeof orderOption === "string") {
+            return PRESET_ORDERS[orderOption] || PRESET_ORDERS["default"];
+        } else {
+            return undefined;
+        }
     }
 
     private visitMembers(members: Member[]) {
