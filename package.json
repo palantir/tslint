@@ -59,6 +59,7 @@
     "@types/node": "^6.0.56",
     "@types/optimist": "0.0.29",
     "@types/resolve": "0.0.4",
+    "@types/update-notifier": "^1.0.0",
     "chai": "^3.5.0",
     "js-yaml": "^3.7.0",
     "mocha": "^3.2.0",
