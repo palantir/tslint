@@ -61,6 +61,7 @@ export function doesIntersect(failure: RuleFailure, disabledIntervals: IDisabled
     });
 }
 
+/** @deprecated use forEachToken instead */
 export function scanAllTokens(scanner: ts.Scanner, callback: (s: ts.Scanner) => void) {
     let lastStartPos = -1;
     while (scanner.scan() !== ts.SyntaxKind.EndOfFileToken) {
@@ -236,4 +237,106 @@ export function isBlockScopeBoundary(node: ts.Node): boolean {
         || node.parent !== undefined
             && (node.parent.kind === ts.SyntaxKind.TryStatement
             || node.parent.kind === ts.SyntaxKind.IfStatement);
+}
+
+export interface TokenPosition {
+    /** The start of the token including all trivia before it */
+    fullStart: number;
+    /** The start of the token */
+    tokenStart: number;
+    /** The end of the token */
+    end: number;
+}
+export type ForEachCallback = (fullText: string, kind: ts.SyntaxKind, pos: TokenPosition) => void;
+export type FilterCallback = (node: ts.Node) => boolean;
+
+/**
+ * Iterate over all tokens of `node`
+ * 
+ * @description JsDoc comments are treated like regular comments and only visited if `skipTrivia` === false.
+ * 
+ * @param node The node whose tokens should be visited
+ * @param skipTrivia If set to false all trivia owned by `node` or its children is included
+ * @param cb Is called for every token of `node`. It gets the full text of the SourceFile and the position of the token within that text.
+ * @param filter If provided, will be called for every Node and Token found. If it returns false `cb` will not be called for this subtree.
+ */
+export function forEachToken(node: ts.Node, skipTrivia: boolean, cb: ForEachCallback, filter?: FilterCallback) {
+    // this function will most likely be called with SourceFile anyways, so there is no need for an additional parameter
+    const sourceFile = node.getSourceFile();
+    const fullText = sourceFile.text;
+    const scanner = skipTrivia ? undefined : ts.createScanner(sourceFile.languageVersion, false, sourceFile.languageVariant, fullText);
+    const iterateFn = filter === undefined ? iterateChildren : iterateWithFilter;
+
+    iterateFn(node);
+
+    // this function is used to save the if condition for the common case where no filter is provided
+    function iterateWithFilter(child: ts.Node): void {
+        if (filter!(child)) {
+            return iterateChildren(child);
+        }
+    }
+
+    function iterateChildren(child: ts.Node): void {
+        if (child.kind < ts.SyntaxKind.FirstNode) {
+            // we found a token, tokens have no children, stop recursing here
+            return callback(child);
+        }
+        /* Exclude everything contained in JsDoc, it will be handled with the other trivia anyway.
+         * When we would handle JsDoc tokens like regular ones, we would scan some trivia multiple times.
+         * Even worse, we would scan for trivia inside the JsDoc comment, which yields unexpected results.*/
+        if (child.kind !== ts.SyntaxKind.JSDocComment) {
+            // recurse into Node's children to find tokens
+            return child.getChildren(sourceFile).forEach(iterateFn);
+        }
+    }
+
+    function callback(token: ts.Node) {
+        const tokenStart = token.getStart(sourceFile);
+        if (!skipTrivia && tokenStart !== token.pos) {
+            // we only have to handle trivia before each token, because there is nothing after EndOfFileToken
+            handleTrivia(token.pos, tokenStart);
+        }
+        return cb(fullText, token.kind, {tokenStart, fullStart: token.pos, end: token.end});
+    }
+
+    /** 
+     * Scan the specified range to get all trivia tokens.
+     * This includes trailing trivia of the last token and the leading trivia of the current token
+     */
+    function handleTrivia(start: number, end: number) {
+        scanner!.setTextPos(start);
+        let position: number;
+        // we only get here if start !== end, so we can scan at least one time
+        do {
+            const kind = scanner!.scan();
+            position = scanner!.getTextPos();
+            cb(fullText, kind, {tokenStart: scanner!.getTokenPos(), end: position, fullStart: start});
+        } while (position < end);
+    }
+}
+
+// TODO whitespaceRule template expression
+
+/** Iterate over all comments owned by `node` or its children */
+export function forEachComment(node: ts.Node, cb: ForEachCallback) {
+    // get all tokens and skip trivia. comment ranges between tokens are parsed without the need of a scanner
+    return forEachToken(node, true, (fullText, _kind, pos) => {
+        // Comments before the first token (pos.fullStart === 0) are all considered leading comments, so no need for special treatment
+        ts.forEachLeadingCommentRange(fullText, pos.fullStart, commentCallback);
+        ts.forEachTrailingCommentRange(fullText, pos.end, commentCallback);
+        function commentCallback(tokenStart: number, end: number, kind: ts.SyntaxKind) {
+            cb(fullText, kind, {tokenStart, end, fullStart: pos.fullStart});
+        }
+    });
+}
+
+function hasCommentCallback() {
+    return true;
+}
+
+/** Checks if there are any comments between `position` and the next non-tivia token */
+export function hasCommentAfterPosition(text: string, position: number): boolean {
+    return ts.forEachTrailingCommentRange(text, position, hasCommentCallback) ||
+           ts.forEachLeadingCommentRange(text, position, hasCommentCallback) ||
+           false; // return boolean instead of undefined if no comment is found
 }
