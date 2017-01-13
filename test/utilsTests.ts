@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {arrayify, dedent, objectify} from "../src/utils";
+import {arrayify, dedent, escapeRegExp, objectify} from "../src/utils";
 
 describe("Utils", () => {
     it("arrayify", () => {
@@ -45,5 +45,16 @@ describe("Utils", () => {
 
         assert.equal(dedent`  `, "  ");
         assert.equal(dedent``, "");
+    });
+
+    it("escapeRegExp", () => {
+        const plus = escapeRegExp("(a+|d)?b[ci]{2,}");
+        const plusRe = new RegExp(plus);
+
+        // contains substring that matches regular expression pattern
+        assert.equal(plusRe.test("regexpaaaabcicmatch"), false);
+
+        // properly matches exact string with special characters
+        assert.equal(plusRe.test("string(a+|d)?b[ci]{2,}match"), true);
     });
 });

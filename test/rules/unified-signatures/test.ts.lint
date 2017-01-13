@@ -1,0 +1,6 @@
+// Works in non-declaration file too.
+function f(x: number): number;
+function f(x: string): string;
+function f(x: any): any {
+    return x;
+}

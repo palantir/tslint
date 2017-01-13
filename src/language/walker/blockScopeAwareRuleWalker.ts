@@ -17,6 +17,7 @@
 
 import * as ts from "typescript";
 
+import {isBlockScopeBoundary} from "../utils";
 import {ScopeAwareRuleWalker} from "./scopeAwareRuleWalker";
 
 /**
@@ -30,7 +31,7 @@ export abstract class BlockScopeAwareRuleWalker<T, U> extends ScopeAwareRuleWalk
         super(sourceFile, options);
 
         // initialize with global scope if file is not a module
-        this.blockScopeStack = this.fileIsModule ? [] : [this.createBlockScope(sourceFile)];
+        this.blockScopeStack = ts.isExternalModule(sourceFile) ? [] : [this.createBlockScope(sourceFile)];
     }
 
     public abstract createBlockScope(node: ts.Node): U;
@@ -85,20 +86,6 @@ export abstract class BlockScopeAwareRuleWalker<T, U> extends ScopeAwareRuleWalk
     }
 
     private isBlockScopeBoundary(node: ts.Node): boolean {
-        return super.isScopeBoundary(node)
-            || node.kind === ts.SyntaxKind.Block
-            || node.kind === ts.SyntaxKind.DoStatement
-            || node.kind === ts.SyntaxKind.WhileStatement
-            || node.kind === ts.SyntaxKind.ForStatement
-            || node.kind === ts.SyntaxKind.ForInStatement
-            || node.kind === ts.SyntaxKind.ForOfStatement
-            || node.kind === ts.SyntaxKind.WithStatement
-            || node.kind === ts.SyntaxKind.SwitchStatement
-            || isParentKind(node, ts.SyntaxKind.TryStatement)
-            || isParentKind(node, ts.SyntaxKind.IfStatement);
+        return isBlockScopeBoundary(node);
     }
-}
-
-function isParentKind(node: ts.Node, kind: ts.SyntaxKind) {
-    return node.parent != null && node.parent.kind === kind;
 }

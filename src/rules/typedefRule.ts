@@ -75,7 +75,7 @@ class TypedefWalker extends Lint.RuleWalker {
         super.visitFunctionExpression(node);
     }
 
-    public visitArrowFunction(node: ts.FunctionLikeDeclaration) {
+    public visitArrowFunction(node: ts.ArrowFunction) {
         const location = (node.parameters != null) ? node.parameters.end : null;
 
         if (location != null
@@ -104,19 +104,19 @@ class TypedefWalker extends Lint.RuleWalker {
     }
 
     public visitObjectLiteralExpression(node: ts.ObjectLiteralExpression) {
-        for (let property of node.properties) {
+        for (const property of node.properties) {
             switch (property.kind) {
                 case ts.SyntaxKind.PropertyAssignment:
-                    this.visitPropertyAssignment(<ts.PropertyAssignment> property);
+                    this.visitPropertyAssignment(property as ts.PropertyAssignment);
                     break;
                 case ts.SyntaxKind.MethodDeclaration:
-                    this.visitMethodDeclaration(<ts.MethodDeclaration> property);
+                    this.visitMethodDeclaration(property as ts.MethodDeclaration);
                     break;
                 case ts.SyntaxKind.GetAccessor:
-                    this.visitGetAccessor(<ts.AccessorDeclaration> property);
+                    this.visitGetAccessor(property as ts.AccessorDeclaration);
                     break;
                 case ts.SyntaxKind.SetAccessor:
-                    this.visitSetAccessor(<ts.AccessorDeclaration> property);
+                    this.visitSetAccessor(property as ts.AccessorDeclaration);
                     break;
                 default:
                     break;
@@ -144,7 +144,7 @@ class TypedefWalker extends Lint.RuleWalker {
             }
 
             if (optionName !== null) {
-                this.checkTypeAnnotation(optionName, node.getEnd(), <ts.TypeNode> node.type, node.name);
+                this.checkTypeAnnotation(optionName, node.getEnd(), node.type as ts.TypeNode, node.name);
             }
         }
         super.visitParameterDeclaration(node);
@@ -214,7 +214,7 @@ class TypedefWalker extends Lint.RuleWalker {
         if (this.hasOption(option) && typeAnnotation == null) {
             let ns = "";
             if (name != null && name.kind === ts.SyntaxKind.Identifier) {
-                ns = `: '${(<ts.Identifier> name).text}'`;
+                ns = `: '${(name as ts.Identifier).text}'`;
             }
             this.addFailureAt(location, 1, "expected " + option + ns + " to have a typedef");
         }

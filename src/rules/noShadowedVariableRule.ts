@@ -42,27 +42,22 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<ScopeInfo, ScopeInfo> {
+class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<Set<string>, Set<string>> {
     public createScope() {
-        return new ScopeInfo();
+        return new Set();
     }
 
     public createBlockScope() {
-        return new ScopeInfo();
+        return new Set();
     }
 
     public visitBindingElement(node: ts.BindingElement) {
         const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
-        const variableDeclaration = Lint.getBindingElementVariableDeclaration(node);
-
         if (isSingleVariable) {
             const name = node.name as ts.Identifier;
-            if (variableDeclaration) {
-                const isBlockScopedVariable = Lint.isBlockScopedVariable(variableDeclaration);
-                this.handleSingleVariableIdentifier(name, isBlockScopedVariable);
-            } else {
-                this.handleSingleVariableIdentifier(name, false);
-            }
+            const variableDeclaration = Lint.getBindingElementVariableDeclaration(node);
+            const isBlockScopedVariable = variableDeclaration !== null && Lint.isBlockScopedVariable(variableDeclaration);
+            this.handleSingleVariableIdentifier(name, isBlockScopedVariable);
         }
 
         super.visitBindingElement(node);
@@ -98,7 +93,7 @@ class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<ScopeInfo,
         const isSingleParameter = node.name.kind === ts.SyntaxKind.Identifier;
 
         if (isSingleParameter) {
-            this.handleSingleVariableIdentifier(<ts.Identifier> node.name, false);
+            this.handleSingleVariableIdentifier(node.name as ts.Identifier, false);
         }
 
         super.visitParameterDeclaration(node);
@@ -112,7 +107,7 @@ class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<ScopeInfo,
         const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
 
         if (isSingleVariable) {
-            this.handleSingleVariableIdentifier(<ts.Identifier> node.name, Lint.isBlockScopedVariable(node));
+            this.handleSingleVariableIdentifier(node.name as ts.Identifier, Lint.isBlockScopedVariable(node));
         }
 
         super.visitVariableDeclaration(node);
@@ -132,23 +127,23 @@ class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<ScopeInfo,
 
         if (!isBlockScoped) {
             // `var` variables go on the scope
-            this.getCurrentScope().variableNames.push(variableName);
+            this.getCurrentScope().add(variableName);
         }
         // all variables go on block scope, including `var`
-        this.getCurrentBlockScope().variableNames.push(variableName);
+        this.getCurrentBlockScope().add(variableName);
     }
 
     private isVarInCurrentScope(varName: string) {
-        return this.getCurrentScope().variableNames.indexOf(varName) >= 0;
+        return this.getCurrentScope().has(varName);
     }
 
     private inCurrentBlockScope(varName: string) {
-        return this.getCurrentBlockScope().variableNames.indexOf(varName) >= 0;
+        return this.getCurrentBlockScope().has(varName);
     }
 
     private inPreviousBlockScope(varName: string) {
         return this.getAllBlockScopes().some((scopeInfo) => {
-            return scopeInfo !== this.getCurrentBlockScope() && scopeInfo.variableNames.indexOf(varName) >= 0 ;
+            return scopeInfo !== this.getCurrentBlockScope() && scopeInfo.has(varName);
         });
     }
 
@@ -156,8 +151,4 @@ class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<ScopeInfo,
         const failureString = Rule.FAILURE_STRING_FACTORY(ident.text);
         this.addFailureAtNode(ident, failureString);
     }
-}
-
-class ScopeInfo {
-    public variableNames: string[] = [];
 }

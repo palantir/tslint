@@ -40,6 +40,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
             This rules lets you enforce consistent quoting of property names. Either they should always
             be quoted (default behavior) or quoted only as needed ("as-needed").`,
+        hasFix: true,
         optionsDescription: Lint.Utils.dedent`
             Possible settings are:
 
@@ -87,7 +88,8 @@ class ObjectLiteralKeyQuotesWalker extends Lint.RuleWalker {
     }
 
     public visitObjectLiteralExpression(node: ts.ObjectLiteralExpression) {
-        const { properties } = node;
+        const properties = node.properties.filter(({ kind }) =>
+            kind !== ts.SyntaxKind.ShorthandPropertyAssignment && kind !== ts.SyntaxKind.SpreadAssignment);
         switch (this.mode) {
             case "always":
                 this.allMustHaveQuotes(properties);
@@ -97,6 +99,7 @@ class ObjectLiteralKeyQuotesWalker extends Lint.RuleWalker {
                 break;
             case "consistent":
                 if (quotesAreInconsistent(properties)) {
+                    // No fix -- don't know if they would want to add quotes or remove them.
                     this.addFailureAt(node.getStart(), 1, Rule.INCONSISTENT_PROPERTY);
                 }
                 break;
@@ -119,7 +122,8 @@ class ObjectLiteralKeyQuotesWalker extends Lint.RuleWalker {
     private allMustHaveQuotes(properties: ts.ObjectLiteralElementLike[]) {
         for (const { name } of properties) {
             if (name !== undefined && name.kind !== ts.SyntaxKind.StringLiteral && name.kind !== ts.SyntaxKind.ComputedPropertyName) {
-                this.addFailureAtNode(name, Rule.UNQUOTED_PROPERTY(name.getText()));
+                const fix = this.createFix(this.appendText(name.getStart(), '"'), this.appendText(name.getEnd(), '"'));
+                this.addFailureAtNode(name, Rule.UNQUOTED_PROPERTY(name.getText()), fix);
             }
         }
     }
@@ -127,7 +131,8 @@ class ObjectLiteralKeyQuotesWalker extends Lint.RuleWalker {
     private noneMayHaveQuotes(properties: ts.ObjectLiteralElementLike[], noneNeedQuotes?: boolean) {
         for (const { name } of properties) {
             if (name !== undefined && name.kind === ts.SyntaxKind.StringLiteral && (noneNeedQuotes || !propertyNeedsQuotes(name.text))) {
-                this.addFailureAtNode(name, Rule.UNNEEDED_QUOTES(name.text));
+                const fix = this.createFix(this.deleteText(name.getStart(), 1), this.deleteText(name.getEnd() - 1, 1));
+                this.addFailureAtNode(name, Rule.UNNEEDED_QUOTES(name.text), fix);
             }
         }
     }

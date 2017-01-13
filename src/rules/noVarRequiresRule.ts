@@ -52,7 +52,7 @@ class NoVarRequiresWalker extends Lint.ScopeAwareRuleWalker<{}> {
         const expression = node.expression;
 
         if (this.getCurrentDepth() <= 1 && expression.kind === ts.SyntaxKind.Identifier) {
-            const identifierName = (<ts.Identifier> expression).text;
+            const identifierName = (expression as ts.Identifier).text;
             if (identifierName === "require") {
                 // if we're calling (invoking) require, then it's not part of an import statement
                 this.addFailureAtNode(node, Rule.FAILURE_STRING);

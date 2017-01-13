@@ -63,7 +63,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 class NoInvalidThisWalker extends Lint.ScopeAwareRuleWalker<Scope> {
     public createScope(node: ts.Node): Scope {
         const isClassScope = node.kind === ts.SyntaxKind.ClassDeclaration || node.kind === ts.SyntaxKind.ClassExpression;
-        let inFunction = node.kind === ts.SyntaxKind.FunctionDeclaration || node.kind === ts.SyntaxKind.FunctionExpression;
+        const inFunction = node.kind === ts.SyntaxKind.FunctionDeclaration || node.kind === ts.SyntaxKind.FunctionExpression;
         return {
             inClass: isClassScope,
             inFunction,

@@ -89,10 +89,11 @@ class MyClass {
 interface ITest {
     foo?: string
                 ~nil [Missing semicolon]
-    bar: number
+    bar: number // handles comment
                ~nil [Missing semicolon]
+    qux: string, // handles comment
+               ~nil [Interface properties should be separated by semicolons]
     baz: boolean;
-
     readonly raz: number;
 }
 

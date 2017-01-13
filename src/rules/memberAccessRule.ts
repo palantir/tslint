@@ -45,8 +45,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY = (memberType: string, memberName: string | null, publicOnly: boolean) => {
-        memberName = memberName == null ? "" : ` '${memberName}'`;
+    public static FAILURE_STRING_FACTORY = (memberType: string, memberName: string | undefined, publicOnly: boolean) => {
+        memberName = memberName === undefined ? "" : ` '${memberName}'`;
         if (publicOnly) {
             return `The ${memberType}${memberName} must be marked as 'public'`;
         }
@@ -92,7 +92,7 @@ export class MemberAccessWalker extends Lint.RuleWalker {
         super.visitSetAccessor(node);
     }
 
-    private validateVisibilityModifiers(node: ts.Node) {
+    private validateVisibilityModifiers(node: ts.ClassElement) {
         if (node.parent!.kind === ts.SyntaxKind.ObjectLiteralExpression) {
             return;
         }
@@ -108,30 +108,34 @@ export class MemberAccessWalker extends Lint.RuleWalker {
             let memberType: string;
             let publicOnly = false;
 
+            let end: number;
             if (node.kind === ts.SyntaxKind.MethodDeclaration) {
                 memberType = "class method";
+                end = (node as ts.MethodDeclaration).name.getEnd();
             } else if (node.kind === ts.SyntaxKind.PropertyDeclaration) {
                 memberType = "class property";
+                end = (node as ts.PropertyDeclaration).name.getEnd();
             } else if (node.kind === ts.SyntaxKind.Constructor) {
                 memberType = "class constructor";
                 publicOnly = true;
+                end = Lint.childOfKind(node, ts.SyntaxKind.ConstructorKeyword)!.getEnd();
             } else if (node.kind === ts.SyntaxKind.GetAccessor) {
                 memberType = "get property accessor";
+                end = (node as ts.AccessorDeclaration).name.getEnd();
             } else if (node.kind === ts.SyntaxKind.SetAccessor) {
                 memberType = "set property accessor";
+                end = (node as ts.AccessorDeclaration).name.getEnd();
             } else {
                 throw new Error("unhandled node type");
             }
 
+            let memberName: string|undefined = undefined;
             // look for the identifier and get its text
-            let memberName: string | null = null;
-            node.getChildren().forEach((n: ts.Node) => {
-                if (n.kind === ts.SyntaxKind.Identifier) {
-                    memberName = n.getText();
-                }
-            });
+            if (node.name !== undefined && node.name.kind === ts.SyntaxKind.Identifier) {
+                memberName = (node.name as ts.Identifier).text;
+            }
             const failureString = Rule.FAILURE_STRING_FACTORY(memberType, memberName, publicOnly);
-            this.addFailureAtNode(node, failureString);
+            this.addFailureFromStartToEnd(node.getStart(), end, failureString);
         }
     }
 }

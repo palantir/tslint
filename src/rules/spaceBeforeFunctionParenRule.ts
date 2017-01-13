@@ -1,3 +1,20 @@
+/**
+ * @license
+ * Copyright 2016 Palantir Technologies, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -9,6 +26,7 @@ const ALWAYS_OR_NEVER = {
 export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         description: "Require or disallow a space before function parenthesis",
+        hasFix: true,
         optionExamples: [
             `true`,
             `[true, "always"]`,
@@ -68,11 +86,11 @@ class FunctionWalker extends Lint.RuleWalker {
         this.cacheOptions();
     }
 
-    protected visitArrowFunction(node: ts.FunctionLikeDeclaration): void {
+    protected visitArrowFunction(node: ts.ArrowFunction): void {
         const option = this.getOption("asyncArrow");
-        const syntaxList = this.getChildOfType(node, ts.SyntaxKind.SyntaxList);
+        const syntaxList = Lint.childOfKind(node, ts.SyntaxKind.SyntaxList)!;
         const isAsyncArrow = syntaxList.getStart() === node.getStart() && syntaxList.getText() === "async";
-        const openParen = isAsyncArrow ? this.getChildOfType(node, ts.SyntaxKind.OpenParenToken) : undefined;
+        const openParen = isAsyncArrow ? Lint.childOfKind(node, ts.SyntaxKind.OpenParenToken) : undefined;
         this.evaluateRuleAt(openParen, option);
 
         super.visitArrowFunction(node);
@@ -80,7 +98,7 @@ class FunctionWalker extends Lint.RuleWalker {
 
     protected visitConstructorDeclaration(node: ts.ConstructorDeclaration): void {
         const option = this.getOption("constructor");
-        const openParen = this.getChildOfType(node, ts.SyntaxKind.OpenParenToken);
+        const openParen = Lint.childOfKind(node, ts.SyntaxKind.OpenParenToken);
         this.evaluateRuleAt(openParen, option);
 
         super.visitConstructorDeclaration(node);
@@ -132,11 +150,6 @@ class FunctionWalker extends Lint.RuleWalker {
         return this.cachedOptions[optionName];
     }
 
-    private getChildOfType(node: ts.Node, kind: ts.SyntaxKind): ts.Node {
-        const filtered = node.getChildren().filter((child: ts.Node): boolean => child.kind === kind);
-        return filtered[0];
-    }
-
     private evaluateRuleAt(openParen?: ts.Node, option?: string): void {
         if (openParen === undefined || option === undefined) {
             return;
@@ -163,31 +176,27 @@ class FunctionWalker extends Lint.RuleWalker {
     }
 
     private visitFunction(node: ts.Node): void {
-        const identifier = this.getChildOfType(node, ts.SyntaxKind.Identifier);
+        const identifier = Lint.childOfKind(node, ts.SyntaxKind.Identifier);
         const hasIdentifier = identifier !== undefined && (identifier.getEnd() !== identifier.getStart());
         const optionName = hasIdentifier ? "named" : "anonymous";
         const option = this.getOption(optionName);
-        const openParen = this.getChildOfType(node, ts.SyntaxKind.OpenParenToken);
+        const openParen = Lint.childOfKind(node, ts.SyntaxKind.OpenParenToken);
         this.evaluateRuleAt(openParen, option);
     }
 
     private visitMethod(node: ts.Node): void {
         const option = this.getOption("method");
-        const openParen = this.getChildOfType(node, ts.SyntaxKind.OpenParenToken);
+        const openParen = Lint.childOfKind(node, ts.SyntaxKind.OpenParenToken);
         this.evaluateRuleAt(openParen, option);
     }
 
     private createInvalidWhitespaceFailure(pos: number): Lint.RuleFailure {
-        const fix = new Lint.Fix(Rule.metadata.ruleName, [
-            this.deleteText(pos, 1),
-        ]);
+        const fix = this.createFix(this.deleteText(pos, 1));
         return this.createFailure(pos, 1, Rule.INVALID_WHITESPACE_ERROR, fix);
     }
 
     private createMissingWhitespaceFailure(pos: number): Lint.RuleFailure {
-        const fix = new Lint.Fix(Rule.metadata.ruleName, [
-            this.appendText(pos, " "),
-        ]);
+        const fix = this.createFix(this.appendText(pos, " "));
         return this.createFailure(pos, 1, Rule.MISSING_WHITESPACE_ERROR, fix);
     }
 }

@@ -74,7 +74,7 @@ export class NoSwitchCaseFallThroughWalker extends Lint.RuleWalker {
         switchClauses.forEach((child, i) => {
             const kind = child.kind;
             if (kind === ts.SyntaxKind.CaseClause) {
-                const switchClause = <ts.CaseClause> child;
+                const switchClause = child as ts.CaseClause;
                 isFallingThrough = fallsThrough(switchClause.statements);
                 // no break statements and no statements means the fallthrough is expected.
                 // last item doesn't need a break
@@ -108,7 +108,7 @@ function isFallThroughAllowed(sourceFile: ts.SourceFile, nextCaseOrDefaultStatem
     const firstChild = nextCaseOrDefaultStatement.getChildAt(0);
     const commentRanges = ts.getLeadingCommentRanges(sourceFileText, firstChild.getFullStart());
     if (commentRanges != null) {
-        for (let commentRange of commentRanges) {
+        for (const commentRange of commentRanges) {
             const commentText = sourceFileText.substring(commentRange.pos, commentRange.end);
             if (commentText === "/* falls through */") {
                 return true;
