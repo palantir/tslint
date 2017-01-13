@@ -68,12 +68,14 @@ export class RuleWalker extends SyntaxWalker implements IWalker {
         return; // TODO remove this method in next major version
     }
 
+    /** @deprecated Prefer `addFailureAt` and its variants. */
     public createFailure(start: number, width: number, failure: string, fix?: Fix): RuleFailure {
         const from = (start > this.limit) ? this.limit : start;
         const to = ((start + width) > this.limit) ? this.limit : (start + width);
         return new RuleFailure(this.sourceFile, from, to, failure, this.ruleName, fix);
     }
 
+    /** @deprecated Prefer `addFailureAt` and its variants. */
     public addFailure(failure: RuleFailure) {
         this.failures.push(failure);
     }

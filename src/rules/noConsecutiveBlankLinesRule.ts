@@ -90,12 +90,19 @@ class NoConsecutiveBlankLinesWalker extends Lint.RuleWalker {
             line > lastVal + 1 ? sequences.push([line]) : sequences[sequences.length - 1].push(line);
             lastVal = line;
         }
-        sequences
-            .filter((arr) => arr.length > allowedBlanks)
-            .map((arr) => arr[0])
-            .map((startLineNum: number) => this.createFailure(lineStarts[startLineNum + 1], 1, failureMessage))
-            .filter((failure) => !Lint.doesIntersect(failure, templateIntervals))
-            .forEach((failure) => this.addFailure(failure));
+
+        for (const arr of sequences) {
+            if (arr.length <= allowedBlanks) {
+                continue;
+            }
+
+            const startLineNum = arr[0];
+            const pos = lineStarts[startLineNum + 1];
+            const isInTemplate = templateIntervals.some((interval) => pos >= interval.startPosition && pos < interval.endPosition);
+            if (!isInTemplate) {
+                this.addFailureAt(pos, 1, failureMessage);
+            }
+        }
     }
 
     private getTemplateIntervals(sourceFile: ts.SourceFile): Lint.IDisabledInterval[] {
