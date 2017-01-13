@@ -106,7 +106,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-class CommentWalker extends Lint.SkippableTokenAwareRuleWalker {
+class CommentWalker extends Lint.RuleWalker {
     private exceptionsRegExp: ExceptionsRegExp;
     private failureIgnorePart: string = "";
 
@@ -117,19 +117,10 @@ class CommentWalker extends Lint.SkippableTokenAwareRuleWalker {
     }
 
     public visitSourceFile(node: ts.SourceFile) {
-        super.visitSourceFile(node);
-        Lint.scanAllTokens(ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, node.text), (scanner: ts.Scanner) => {
-            const skip = this.getSkipEndFromStart(scanner.getStartPos());
-            if (skip !== undefined) {
-                // tokens to skip are places where the scanner gets confused about what the token is, without the proper context
-                // (specifically, regex, identifiers, and templates). So skip those tokens.
-                scanner.setTextPos(skip);
-                return;
-            }
-
-            if (scanner.getToken() === ts.SyntaxKind.SingleLineCommentTrivia) {
-                const commentText = scanner.getTokenText();
-                const startPosition = scanner.getTokenPos() + 2;
+        Lint.forEachComment(node, (fullText, kind, pos) => {
+            if (kind === ts.SyntaxKind.SingleLineCommentTrivia) {
+                const commentText = fullText.substring(pos.tokenStart, pos.end);
+                const startPosition = pos.tokenStart + 2;
                 const width = commentText.length - 2;
                 if (this.hasOption(OPTION_SPACE)) {
                     if (!startsWithSpace(commentText)) {
