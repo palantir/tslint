@@ -1,6 +1,5 @@
 const span = (
     <span>
-        without this text test fails
         /* tslint:disable */
         {
             x + 'test'
@@ -12,7 +11,6 @@ const span = (
 
 const span = (
     <span>
-        without this text test fails
         // tslint:disable-next-line
         {x + 'test'}
              ~~~~~~ [' should be "]
@@ -22,13 +20,50 @@ const span = (
 
 const span = (
     <span>
-        {x + 'works with text'} // tslint:disable-line
+        {x + 'comment is ignored with text'} // tslint:disable-line
+             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [' should be "]
         works with text
     </span>
 );
 
 const span = (
     <span>
-        {x + 'failing test case'} // tslint:disable-line
+        {x + 'comment is ignored without text'} // tslint:disable-line
+             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [' should be "]
+    </span>
+);
+
+const span = (
+    <span>
+    /* tslint:disable */ <span>{x + 'ignores comments before element if not root'}</span>
+                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [' should be "]
+    </span>
+);
+
+const span = (
+    <span>
+        <span>{x + 'ignores comments after element if not root'}</span> /* tslint:disable-line */
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [' should be "]
+    </span>
+);
+
+const span = (
+    <span> /* tslint:disable-next-line */
+        <span>{x + 'ignores trailing comments of root element'}</span>
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [' should be "]
+    </span>
+);
+
+const span = (
+    <span>
+        {<span>{x + 'works for comments inside JsxExpression'}</span> /* tslint:disable-line */}
+    </span>
+);
+
+const span = (
+    <span>
+        {/* tslint:disable-next-line */}
+        {x + 'works for comment-only expressions'}
+        text
     </span>
 );
