@@ -5,6 +5,7 @@
       "check-decl",
       "check-operator",
       "check-module",
+      "check-preblock",
       "check-separator",
       "check-type",
       "check-typecast"
@@ -16,6 +17,7 @@
       "check-decl",
       "check-operator",
       "check-module",
+      "check-preblock",
       "check-separator",
       "check-type",
       "check-typecast"
