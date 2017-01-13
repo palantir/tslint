@@ -154,8 +154,8 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         let someFixBrokeIt = false;
         // Performance optimization: type-check the whole file before verifying individual fixes
         if (this.possibleFailures.some((f) => f.fix !== undefined)) {
-            let newText = Lint.Fix.applyAll(this.getSourceFile().getFullText(),
-                this.possibleFailures.map((f) => f.fix).filter((f) => f !== undefined));
+            const newText = Lint.Fix.applyAll(this.getSourceFile().getFullText(),
+                this.possibleFailures.map((f) => f.fix!).filter((f) => f !== undefined));
 
             // If we have the program, we can verify that the fix doesn't introduce failures
             if (Lint.checkEdit(this.languageService, this.getSourceFile(), newText).length > 0) {
@@ -165,10 +165,10 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
         }
 
         this.possibleFailures.forEach((f) => {
-            if (!someFixBrokeIt || f.fix !== undefined) {
+            if (!someFixBrokeIt || f.fix === undefined) {
                 this.addFailureAt(f.start, f.width, f.message, f.fix);
             } else {
-                let newText = f.fix.apply(this.getSourceFile().getFullText());
+                const newText = f.fix.apply(this.getSourceFile().getFullText());
                 if (Lint.checkEdit(this.languageService, this.getSourceFile(), newText).length === 0) {
                     this.addFailureAt(f.start, f.width, f.message, f.fix);
                 }
