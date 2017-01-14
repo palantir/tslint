@@ -49,11 +49,11 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoRequireFullLibraryWalker(sourceFile, this.getOptions()));
+        return this.applyWithWalker(new ImportBlacklistWalker(sourceFile, this.getOptions()));
     }
 }
 
-class NoRequireFullLibraryWalker extends Lint.RuleWalker {
+class ImportBlacklistWalker extends Lint.RuleWalker {
     public visitCallExpression(node: ts.CallExpression) {
         if (node.expression.kind === ts.SyntaxKind.Identifier &&
             (node.expression as ts.Identifier).text === "require" &&

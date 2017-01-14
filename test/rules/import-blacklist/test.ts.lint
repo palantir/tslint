@@ -10,4 +10,6 @@ import forOwn = require('lodash/forOwn');
 import {Observable} from rxjs;
 import forOwn = require(lodash);
 
+import * as notBlacklisted from "not-blacklisted";
+
 [0]: This import is blacklisted, import a submodule instead
