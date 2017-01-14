@@ -16,6 +16,7 @@
  */
 
 import * as fs from "fs";
+import * as path from "path";
 import * as ts from "typescript";
 
 import {
@@ -58,12 +59,7 @@ class Linter {
      */
     public static createProgram(configFile: string, projectDirectory?: string): ts.Program {
         if (projectDirectory === undefined) {
-            const lastSeparator = configFile.lastIndexOf("/");
-            if (lastSeparator < 0) {
-                projectDirectory = ".";
-            } else {
-                projectDirectory = configFile.substring(0, lastSeparator + 1);
-            }
+            projectDirectory = path.dirname(configFile);
         }
 
         const { config } = ts.readConfigFile(configFile, ts.sys.readFile);
