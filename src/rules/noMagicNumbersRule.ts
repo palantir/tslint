@@ -79,21 +79,21 @@ class NoMagicNumbersWalker extends Lint.RuleWalker {
     }
 
     public visitNode(node: ts.Node) {
-        const isUnary = this.isUnaryNumericExpression(node);
-        const isNumber = node.kind === ts.SyntaxKind.NumericLiteral && !Rule.ALLOWED_NODES.has(node.parent!.kind);
-        const isMagicNumber = (isNumber || isUnary) && !this.allowed.has(node.getText());
-        if (isMagicNumber) {
-            this.addFailureAtNode(node, Rule.FAILURE_STRING);
-        }
-        if (!isUnary) {
+        if (node.kind === ts.SyntaxKind.NumericLiteral || this.isNegativeNumericExpression(node)) {
+            const isAllowedNode = Rule.ALLOWED_NODES.has(node.parent!.kind);
+            const isAllowedNumber = this.allowed.has(node.getText());
+            if (!isAllowedNode && !isAllowedNumber) {
+                this.addFailureAtNode(node, Rule.FAILURE_STRING);
+            }
+        } else {
             super.visitNode(node);
         }
     }
 
     /**
-     * Checks if a node is an unary expression with on a numeric operand.
+     * Checks if a node is an negative unary expression with on a numeric operand.
      */
-    private isUnaryNumericExpression(node: ts.Node): boolean {
+    private isNegativeNumericExpression(node: ts.Node): boolean {
         if (node.kind !== ts.SyntaxKind.PrefixUnaryExpression) {
             return false;
         }
