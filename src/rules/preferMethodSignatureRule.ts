@@ -23,7 +23,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "prefer-method-signature",
-        description: "Prefer `foo(): void` over `foo: () => void`.",
+        description: "Prefer `foo(): void` over `foo: () => void` in interfaces and types.",
+        hasFix: true,
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: ["true"],
