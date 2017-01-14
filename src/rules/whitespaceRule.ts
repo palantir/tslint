@@ -80,7 +80,7 @@ class WhitespaceWalker extends Lint.RuleWalker {
         super.visitSourceFile(node);
 
         let prevTokenShouldBeFollowedByWhitespace = false;
-        Lint.forEachToken(node, false, (_text, tokenKind, pos) => {
+        Lint.forEachToken(node, false, (_text, tokenKind, pos, parent) => {
             if (tokenKind === ts.SyntaxKind.WhitespaceTrivia || tokenKind === ts.SyntaxKind.NewLineTrivia) {
                 prevTokenShouldBeFollowedByWhitespace = false;
                 return;
@@ -107,7 +107,7 @@ class WhitespaceWalker extends Lint.RuleWalker {
                     }
                     break;
                 case ts.SyntaxKind.EqualsToken:
-                    if (this.hasOption(OPTION_DECL)) {
+                    if (this.hasOption(OPTION_DECL) && parent.kind !== ts.SyntaxKind.JsxAttribute) {
                         prevTokenShouldBeFollowedByWhitespace = true;
                     }
                     break;
@@ -126,10 +126,6 @@ class WhitespaceWalker extends Lint.RuleWalker {
                 default:
                     break;
             }
-        },
-        (n) => {
-            // don't apply the whitespace rules to JSX specific syntax
-            return n.kind !== ts.SyntaxKind.JsxElement && n.kind !== ts.SyntaxKind.JsxSelfClosingElement;
         });
     }
 
