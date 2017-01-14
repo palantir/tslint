@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "no-unused-this": true
+  },
+  "jsRules": {
+    "no-unused-this": true
+  }
+}
