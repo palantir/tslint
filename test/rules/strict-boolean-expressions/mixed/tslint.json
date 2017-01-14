@@ -1,0 +1,8 @@
+{
+  "linterOptions": {
+    "typeCheck": true
+  },
+  "rules": {
+    "strict-boolean-expressions": [true, "allow-null-union", "allow-undefined-union", "allow-string", "allow-number"]
+  }
+}

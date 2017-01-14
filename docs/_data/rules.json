@@ -1433,11 +1433,25 @@
   },
   {
     "ruleName": "strict-boolean-expressions",
-    "description": "Usage of && or || operators should be with boolean operands and\nexpressions in If, Do, While and For statements should be of type boolean",
-    "optionsDescription": "Not configurable.",
-    "options": null,
+    "description": "\nRestricts the types allowed in boolean expressions. By default only booleans are allowed.\n\nThe following nodes are checked:\n* Arguments to the '!', '&&', and '||' operators\n* The condition in a conditional expression ('cond ? x : y')\n* Conditions for 'if', 'for', 'while', and 'do-while' statements.",
+    "optionsDescription": "\nThese options may be provided:\n\n* 'allow-null-union allows union types containing 'null'.\n  - It does *not* allow 'null' itself.\n* 'allow-undefined-union allows union types containing 'undefined'.\n  - It does *not* allow 'undefined' itself.\n* 'allow-string allows strings.\n  - It does *not* allow unions containing 'string'.\n  - It does *not* allow string literal types.\n* 'allow-number allows numbers.\n  - It does *not* allow unions containing 'number'.\n  - It does *not* allow enums or number literal types.",
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "allow-null-union",
+          "allow-undefined-union",
+          "allow-string",
+          "allow-number"
+        ]
+      },
+      "minLength": 0,
+      "maxLength": 4
+    },
     "optionExamples": [
-      "true"
+      "true",
+      "[true, allow-null-union, allow-undefined-union, allow-string, allow-number]"
     ],
     "type": "functionality",
     "typescriptOnly": true,

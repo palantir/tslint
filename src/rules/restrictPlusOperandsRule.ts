@@ -18,7 +18,7 @@
 import * as ts from "typescript";
 
 import * as Lint from "../index";
-import { isTypeFlagSet } from "../language/utils";
+import { isTypeFlagSet, isUnionType } from "../language/utils";
 
 export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -66,8 +66,8 @@ function getBaseTypeOfLiteralType(type: ts.Type): "string" | "number" | "invalid
         return "string";
     } else if (isTypeFlagSet(type, ts.TypeFlags.NumberLiteral) || isTypeFlagSet(type, ts.TypeFlags.Number)) {
         return "number";
-    } else if (isTypeFlagSet(type, ts.TypeFlags.Union) && !isTypeFlagSet(type, ts.TypeFlags.Enum)) {
-        const types = (type as ts.UnionType).types.map(getBaseTypeOfLiteralType);
+    } else if (isUnionType(type) && !isTypeFlagSet(type, ts.TypeFlags.Enum)) {
+        const types = type.types.map(getBaseTypeOfLiteralType);
         return allSame(types) ? types[0] : "invalid";
     } else if (isTypeFlagSet(type, ts.TypeFlags.EnumLiteral)) {
         return getBaseTypeOfLiteralType((type as ts.EnumLiteralType).baseType);

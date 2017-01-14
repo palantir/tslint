@@ -1,0 +1,12 @@
+declare const a: string;
+if (a) {}
+
+declare const b: boolean | string;
+if (b) {}
+    ~ [0]
+
+declare const c: "foo" | "bar";
+if (c) {}
+    ~ [0]
+
+[0]: If statement condition should be of type boolean or string

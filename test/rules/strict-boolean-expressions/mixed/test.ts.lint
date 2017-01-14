@@ -1,0 +1,6 @@
+// We allow string, we allow number, but we don't allow them in unions.
+declare const b: string | number;
+if (b) {}
+    ~ [0]
+
+[0]: If statement condition should be of type boolean, null-union, undefined-union, string, or number

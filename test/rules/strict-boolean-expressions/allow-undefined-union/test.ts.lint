@@ -1,0 +1,31 @@
+declare const ru: RegExp | undefined;
+if (ru) {}
+
+declare const bu: boolean | undefined;
+if (bu) {}
+
+// If it's always undefined, testing for it is wrong.
+declare const u: undefined;
+if (u) {}
+    ~ [0]
+
+declare const rn: RegExp | null;
+if (rn) {}
+    ~~ [0]
+
+declare const b: boolean;
+// Type of the condition is actually boolean | RegExp, but OK since we check each part separately.
+if (ru || b) {}
+
+// This still fails of course!
+declare const r: RegExp;
+if (r || r) {}
+    ~ [or]
+         ~ [or]
+
+// TODO: warn here? User might have meant to test for `undefined`, not the number.
+declare const nu: number | undefined;
+if (nu) {}
+
+[0]: If statement condition should be of type boolean or undefined-union
+[or]: Operands for the && and || operators should be of type boolean or undefined-union

@@ -1,0 +1,187 @@
+class C { }
+enum MyEnum {
+	A, B, C
+}
+let anyType: {};
+let boolType: boolean;
+let bwrapType: Boolean;
+let numType = 9;
+let strType = "string";
+let objType = new Object();
+let classType = new C();
+let enumType = MyEnum.A;
+let boolFn = () => { return true; };
+let strFn = () => { return strType; };
+let numFn = () => { return numType; };
+let boolExpr = (strType !== undefined);
+
+/*** Binary Expressions ***/
+/*** Invalid Boolean Expressions ***/
+classType && boolType;
+~~~~~~~~~ [andor]
+anyType && boolType;
+~~~~~~~ [andor]
+numType && boolType;
+~~~~~~~ [andor]
+boolType && strType;
+            ~~~~~~~ [andor]
+boolType && objType && enumType;
+            ~~~~~~~ [andor]
+                       ~~~~~~~~ [andor]
+bwrapType && boolType;
+~~~~~~~~~ [andor]
+
+boolType || classType;
+            ~~~~~~~~~ [andor]
+boolType || anyType;
+            ~~~~~~~ [andor]
+boolType || numType;
+            ~~~~~~~ [andor]
+strType || boolType;
+~~~~~~~ [andor]
+bwrapType || boolType;
+~~~~~~~~~ [andor]
+objType || boolType || enumType;
+~~~~~~~ [andor]
+                       ~~~~~~~~ [andor]
+
+boolExpr && strType;
+            ~~~~~~~ [andor]
+numType || boolExpr;
+~~~~~~~ [andor]
+numType && boolExpr || strType;
+~~~~~~~ [andor]
+                       ~~~~~~~ [andor]
+bwrapType || boolExpr && bwrapType;
+~~~~~~~~~ [andor]
+                         ~~~~~~~~~ [andor]
+
+/*** Valid Boolean Expressions ***/
+boolType && boolType;
+boolExpr || boolType;
+(numType > 0) && boolFn();
+(strType !== "bool") && boolExpr;
+(numType > 0) && (strType !== "bool");
+(strType !== undefined) || (numType < 0);
+
+/*** ConditionalExpression ***/
+/*** Invalid ***/
+strType ? strType : numType;
+~~~~~~~ [conditional]
+numType ? numType : numFn();
+~~~~~~~ [conditional]
+objType ? objType : boolExpr;
+~~~~~~~ [conditional]
+classType ? strType : undefined;
+~~~~~~~~~ [conditional]
+bwrapType ? 1 : 0;
+~~~~~~~~~ [conditional]
+enumType ? 0 : 1;
+~~~~~~~~ [conditional]
+
+/*** Valid ***/
+boolFn() ? numType : strType;
+boolType ? strType : undefined;
+
+/*** PrefixUnary Expressions ***/
+/*** Invalid ***/
+!!numType;
+  ~~~~~~~ [not]
+!strType;
+ ~~~~~~~ [not]
+!objType;
+ ~~~~~~~ [not]
+!enumType;
+ ~~~~~~~~ [not]
+!!classType;
+  ~~~~~~~~~ [not]
+!bwrapType;
+ ~~~~~~~~~ [not]
+!!undefined;
+  ~~~~~~~~~ [not]
+
+/*** Valid ***/
+!!boolFn();
+!boolExpr;
+!!boolType;
+
+/*** If Statement ***/
+/*** Invalid ***/
+if (numType) { /* statements */ }
+    ~~~~~~~ [If]
+if (objType) { /* statements */ }
+    ~~~~~~~ [If]
+if (strType) { /* statements */ }
+    ~~~~~~~ [If]
+if (bwrapType) { /* statements */ }
+    ~~~~~~~~~ [If]
+if (strFn()) { /* statements */ }
+    ~~~~~~~ [If]
+if (MyEnum.A) { /* statements */ }
+    ~~~~~~~~ [If]
+if (classType) { /* statements */ }
+    ~~~~~~~~~ [If]
+
+/*** Valid ***/
+if (boolFn()) { /* statements */ }
+if (boolExpr) { /* statements */ }
+if (boolType) { /* statements */ }
+
+/*** While Statement ***/
+/*** Invalid ***/
+while (numType) { /* statements */ }
+       ~~~~~~~ [While]
+while (objType) { /* statements */ }
+       ~~~~~~~ [While]
+while (strType) { /* statements */ }
+       ~~~~~~~ [While]
+while (strFn()) { /* statements */ }
+       ~~~~~~~ [While]
+while (bwrapType) { /* statements */ }
+       ~~~~~~~~~ [While]
+while (MyEnum.A) { /* statements */ }
+       ~~~~~~~~ [While]
+while (classType) { /* statements */ }
+       ~~~~~~~~~ [While]
+
+/*** Valid ***/
+while (boolFn()) { /* statements */ }
+while (boolExpr) { /* statements */ }
+while (boolType) { /* statements */ }
+
+/*** Do Statement ***/
+/*** Invalid ***/
+do { /* statements */ } while (numType);
+                               ~~~~~~~ [Do-While]
+do { /* statements */ } while (objType);
+                               ~~~~~~~ [Do-While]
+do { /* statements */ } while (strType);
+                               ~~~~~~~ [Do-While]
+do { /* statements */ } while (bwrapType);
+                               ~~~~~~~~~ [Do-While]
+do { /* statements */ } while (strFn());
+                               ~~~~~~~ [Do-While]
+do { /* statements */ } while (MyEnum.A);
+                               ~~~~~~~~ [Do-While]
+do { /* statements */ } while (classType);
+                               ~~~~~~~~~ [Do-While]
+
+/*** Valid ***/
+do { /* statements */ } while (boolFn());
+do { /* statements */ } while (boolExpr);
+do { /* statements */ } while (boolType);
+
+/*** For Statement ***/
+/*** Invalid ***/
+for (let j = 0; j; j++) { /* statements */ }
+                ~                            [For]
+/*** Valid ***/
+for (let j = 0; j > numType; j++) { /* statements */ }
+
+[andor]: Operands for the && and || operators should be of type boolean
+[conditional]: Condition should be of type boolean
+[not]: Operand for the ! operator should be of type boolean
+[Do-While]: Do-While statement condition should be of type boolean
+[For]: For statement condition should be of type boolean
+[If]: If statement condition should be of type boolean
+[While]: While statement condition should be of type boolean

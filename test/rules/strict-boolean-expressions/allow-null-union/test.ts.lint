@@ -1,0 +1,16 @@
+declare const rn: RegExp | null;
+if (rn) {}
+
+declare const bn: boolean | null;
+if (bn) {}
+
+// If it's always null, testing for it is wrong.
+declare const n: null;
+if (n) {}
+    ~ [0]
+
+declare const ru: RegExp | undefined;
+if (ru) {}
+    ~~ [0]
+
+[0]: If statement condition should be of type boolean or null-union

@@ -1,16 +1,59 @@
 ---
 ruleName: strict-boolean-expressions
 description: |-
-  Usage of && or || operators should be with boolean operands and
-  expressions in If, Do, While and For statements should be of type boolean
-optionsDescription: Not configurable.
-options: null
+
+  Restricts the types allowed in boolean expressions. By default only booleans are allowed.
+
+  The following nodes are checked:
+  * Arguments to the '!', '&&', and '||' operators
+  * The condition in a conditional expression ('cond ? x : y')
+  * Conditions for 'if', 'for', 'while', and 'do-while' statements.
+optionsDescription: |-
+
+  These options may be provided:
+
+  * 'allow-null-union allows union types containing 'null'.
+    - It does *not* allow 'null' itself.
+  * 'allow-undefined-union allows union types containing 'undefined'.
+    - It does *not* allow 'undefined' itself.
+  * 'allow-string allows strings.
+    - It does *not* allow unions containing 'string'.
+    - It does *not* allow string literal types.
+  * 'allow-number allows numbers.
+    - It does *not* allow unions containing 'number'.
+    - It does *not* allow enums or number literal types.
+options:
+  type: array
+  items:
+    type: string
+    enum:
+      - allow-null-union
+      - allow-undefined-union
+      - allow-string
+      - allow-number
+  minLength: 0
+  maxLength: 4
 optionExamples:
   - 'true'
+  - '[true, allow-null-union, allow-undefined-union, allow-string, allow-number]'
 type: functionality
 typescriptOnly: true
 requiresTypeInfo: true
 layout: rule
 title: 'Rule: strict-boolean-expressions'
-optionsJSON: 'null'
+optionsJSON: |-
+  {
+    "type": "array",
+    "items": {
+      "type": "string",
+      "enum": [
+        "allow-null-union",
+        "allow-undefined-union",
+        "allow-string",
+        "allow-number"
+      ]
+    },
+    "minLength": 0,
+    "maxLength": 4
+  }
 ---

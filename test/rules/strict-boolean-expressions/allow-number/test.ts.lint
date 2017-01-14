@@ -1,0 +1,20 @@
+declare const a: number;
+if (a) {}
+
+declare const b: boolean | number;
+if (b) {}
+    ~ [0]
+
+declare const c: 1 | 2;
+if (c) {}
+    ~ [0]
+
+enum E {
+    A,
+    B
+}
+declare var e: E;
+if (e) {}
+    ~ [0]
+
+[0]: If statement condition should be of type boolean or number
