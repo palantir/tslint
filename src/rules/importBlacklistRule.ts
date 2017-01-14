@@ -58,40 +58,35 @@ class ImportBlacklistWalker extends Lint.RuleWalker {
         if (node.expression.kind === ts.SyntaxKind.Identifier &&
             (node.expression as ts.Identifier).text === "require" &&
             node.arguments !== undefined &&
-            node.arguments.length === 1 &&
-            isStringLiteral(node.arguments[0]) &&
-            this.hasOption((node.arguments[0] as ts.LiteralExpression).text)
-        ) {
-            this.reportFailure(node.arguments[0]);
+            node.arguments.length === 1) {
+
+            this.checkForBannedImport(node.arguments[0]);
         }
         super.visitCallExpression(node);
     }
 
     public visitImportEqualsDeclaration(node: ts.ImportEqualsDeclaration) {
         if (isExternalModuleReference(node.moduleReference) &&
-            node.moduleReference.expression !== undefined &&
-            isStringLiteral(node.moduleReference.expression) &&
-            this.hasOption(node.moduleReference.expression.text)) {
-
+            node.moduleReference.expression !== undefined) {
             // If it's an import require and not an import alias
-            this.reportFailure(node.moduleReference.expression);
+            this.checkForBannedImport(node.moduleReference.expression);
         }
         super.visitImportEqualsDeclaration(node);
     }
 
     public visitImportDeclaration(node: ts.ImportDeclaration) {
-        if (isStringLiteral(node.moduleSpecifier) && this.hasOption(node.moduleSpecifier.text)) {
-            this.reportFailure(node.moduleSpecifier);
-        }
+        this.checkForBannedImport(node.moduleSpecifier);
         super.visitImportDeclaration(node);
     }
 
-    private reportFailure(node: ts.Node) {
-        this.addFailureFromStartToEnd(
-            node.getStart(this.getSourceFile()) + 1,
-            node.getEnd() - 1,
-            Rule.FAILURE_STRING,
-        );
+    private checkForBannedImport(expression: ts.Expression) {
+        if (isStringLiteral(expression) && this.hasOption(expression.text)) {
+            this.addFailureFromStartToEnd(
+                expression.getStart(this.getSourceFile()) + 1,
+                expression.getEnd() - 1,
+                Rule.FAILURE_STRING,
+            );
+        }
     }
 }
 
