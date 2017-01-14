@@ -53,16 +53,20 @@ export class Rule extends Lint.Rules.AbstractRule {
 class Walker extends Lint.RuleWalker {
     private allowPublic = this.hasOption(OPTION_ALLOW_PUBLIC);
     private allowProtected = this.hasOption(OPTION_ALLOW_PROTECTED);
-    private isThisUsedStack: boolean[] = [];
+    private stack: ThisUsed[] = [];
 
     public visitNode(node: ts.Node) {
         switch (node.kind) {
             case ts.SyntaxKind.ThisKeyword:
-                this.setThisUsed();
+            case ts.SyntaxKind.SuperKeyword:
+                this.setThisUsed(node);
                 break;
 
             case ts.SyntaxKind.MethodDeclaration:
-                const usesThis = this.withThisScope(() => super.visitNode(node));
+                const { name } = node as ts.MethodDeclaration;
+                const usesThis = this.withThisScope(
+                    name.kind === ts.SyntaxKind.Identifier ? name.text : undefined,
+                    () => super.visitNode(node));
                 if (!usesThis &&
                     node.parent!.kind !== ts.SyntaxKind.ObjectLiteralExpression &&
                     this.shouldWarnForModifiers(node as ts.MethodDeclaration)) {
@@ -72,7 +76,7 @@ class Walker extends Lint.RuleWalker {
 
             case ts.SyntaxKind.FunctionDeclaration:
             case ts.SyntaxKind.FunctionExpression:
-                this.withThisScope(() => super.visitNode(node));
+                this.withThisScope(undefined, () => super.visitNode(node));
                 break;
 
             default:
@@ -80,19 +84,25 @@ class Walker extends Lint.RuleWalker {
         }
     }
 
-    private setThisUsed() {
-        if (this.isThisUsedStack.length) {
-            this.isThisUsedStack[this.isThisUsedStack.length - 1] = true;
+    private setThisUsed(node: ts.Node) {
+        const cur = this.stack[this.stack.length - 1];
+        if (cur && !isRecursiveCall(node, cur)) {
+            cur.isThisUsed = true;
         }
     }
 
-    private withThisScope(recur: () => void): boolean {
-        this.isThisUsedStack.push(false);
+    private withThisScope(name: string | undefined, recur: () => void): boolean {
+        this.stack.push({ name, isThisUsed: false });
         recur();
-        return this.isThisUsedStack.pop()!;
+        return this.stack.pop()!.isThisUsed;
     }
 
     private shouldWarnForModifiers(node: ts.MethodDeclaration): boolean {
+        if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.StaticKeyword)) {
+            return false;
+        }
+        // TODO: Also return false if it's marked "override" (https://github.com/palantir/tslint/pull/2037)
+
         switch (methodVisibility(node)) {
             case Visibility.Public:
                 return !this.allowPublic;
@@ -102,6 +112,15 @@ class Walker extends Lint.RuleWalker {
                 return true;
         }
     }
+}
+
+interface ThisUsed { readonly name: string | undefined; isThisUsed: boolean; }
+
+function isRecursiveCall(thisOrSuper: ts.Node, cur: ThisUsed) {
+    const parent = thisOrSuper.parent!;
+    return thisOrSuper.kind === ts.SyntaxKind.ThisKeyword &&
+        parent.kind === ts.SyntaxKind.PropertyAccessExpression &&
+        (parent as ts.PropertyAccessExpression).name.text === cur.name;
 }
 
 const enum Visibility { Public, Protected, Private }
