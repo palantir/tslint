@@ -43,6 +43,12 @@ namespace X {
     }
 }
 
+enum E {
+    A,
+    B = E.A
+        ~ [Qualifier is unnecessary since 'E' is in scope.]
+}
+
 [N]: Qualifier is unnecessary since 'N' is in scope.
 [M]: Qualifier is unnecessary since 'M' is in scope.
 [NM]: Qualifier is unnecessary since 'N.M' is in scope.

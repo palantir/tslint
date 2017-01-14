@@ -34,3 +34,8 @@ namespace X {
     }
 }
 
+enum E {
+    A,
+    B = A
+}
+

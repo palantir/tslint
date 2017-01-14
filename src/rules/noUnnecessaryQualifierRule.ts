@@ -45,11 +45,17 @@ export class Rule extends Lint.Rules.TypedRule {
 }
 
 class Walker extends Lint.ProgramAwareRuleWalker {
-    private namespacesInScope: ts.ModuleDeclaration[] = [];
+    private namespacesInScope: Array<ts.ModuleDeclaration | ts.EnumDeclaration> = [];
 
     public visitModuleDeclaration(node: ts.ModuleDeclaration) {
         this.namespacesInScope.push(node);
         super.visitModuleDeclaration(node);
+        this.namespacesInScope.pop();
+    }
+
+    public visitEnumDeclaration(node: ts.EnumDeclaration) {
+        this.namespacesInScope.push(node);
+        super.visitEnumDeclaration(node);
         this.namespacesInScope.pop();
     }
 
