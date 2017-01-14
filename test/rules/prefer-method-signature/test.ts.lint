@@ -1,0 +1,18 @@
+interface I {
+    foo: () => void;
+    ~~~ [0]
+    bar: <T>() => T;
+    ~~~ [0]
+}
+
+type T = {
+    foo?: () => void;
+    ~~~ [0]
+}
+
+class C {
+    // OK in class
+    foo: () => void;
+}
+
+[0]: Use a method signature instead of a property signature of function type.

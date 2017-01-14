@@ -1281,6 +1281,18 @@
     "typescriptOnly": false
   },
   {
+    "ruleName": "prefer-method-signature",
+    "description": "Prefer `foo(): void` over `foo: () => void` in interfaces and types.",
+    "hasFix": true,
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "style",
+    "typescriptOnly": false
+  },
+  {
     "ruleName": "promise-function-async",
     "description": "Requires any function or method that returns a promise to be marked async.",
     "rationale": "\nEnsures that each function is only capable of 1) returning a rejected promise, or 2)\nthrowing an Error object. In contrast, non-`async` `Promise`-returning functions\nare technically capable of either. This practice removes a requirement for consuming\ncode to handle both cases.\n        ",
