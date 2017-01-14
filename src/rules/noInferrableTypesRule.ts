@@ -48,7 +48,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING_FACTORY = (type: string) => {
-        return `LHS type (${type}) inferred by RHS expression, remove type annotation`;
+        return `Type ${type} trivially inferred from a ${type} literal, remove type annotation`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {

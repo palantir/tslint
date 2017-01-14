@@ -582,6 +582,19 @@
     "typescriptOnly": false
   },
   {
+    "ruleName": "no-boolean-literal-compare",
+    "description": "Warns on comparison to a boolean literal, as in `x === true`.",
+    "hasFix": true,
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "style",
+    "typescriptOnly": true,
+    "requiresTypeInfo": true
+  },
+  {
     "ruleName": "no-conditional-assignment",
     "description": "Disallows any type of assignment in conditionals.",
     "descriptionDetails": "This applies to `do-while`, `for`, `if`, and `while` statements.",

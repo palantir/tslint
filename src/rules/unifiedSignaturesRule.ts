@@ -81,6 +81,9 @@ class Walker extends Lint.RuleWalker {
         this.checkOverloads(statements, (statement) => {
             if (statement.kind === ts.SyntaxKind.FunctionDeclaration) {
                 const fn = statement as ts.FunctionDeclaration;
+                if (fn.body) {
+                    return undefined;
+                }
                 return fn.name && { signature: fn, key: fn.name.text };
             } else {
                 return undefined;
@@ -91,7 +94,7 @@ class Walker extends Lint.RuleWalker {
     private checkMembers(members: Array<ts.TypeElement | ts.ClassElement>, typeParameters?: ts.TypeParameterDeclaration[]) {
         this.checkOverloads(members, getOverloadName, typeParameters);
         function getOverloadName(member: ts.TypeElement | ts.ClassElement) {
-            if (!isSignatureDeclaration(member)) {
+            if (!isSignatureDeclaration(member) || (member as ts.MethodDeclaration).body) {
                 return undefined;
             }
             const key = getOverloadKey(member);
