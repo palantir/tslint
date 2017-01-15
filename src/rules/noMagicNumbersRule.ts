@@ -68,7 +68,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class NoMagicNumbersWalker extends Lint.RuleWalker {
-    // lookup object for allowed magic numbers
+    // allowed magic numbers
     private allowed: Set<string>;
     constructor(sourceFile: ts.SourceFile, options: IOptions) {
         super(sourceFile, options);
@@ -79,25 +79,28 @@ class NoMagicNumbersWalker extends Lint.RuleWalker {
     }
 
     public visitNode(node: ts.Node) {
-        if (node.kind === ts.SyntaxKind.NumericLiteral || this.isNegativeNumericExpression(node)) {
-            const isAllowedNode = Rule.ALLOWED_NODES.has(node.parent!.kind);
-            const isAllowedNumber = this.allowed.has(node.getText());
-            if (!isAllowedNode && !isAllowedNumber) {
+        const num = getLiteralNumber(node);
+        if (num !== undefined) {
+            if (!Rule.ALLOWED_NODES.has(node.parent!.kind) && !this.allowed.has(num)) {
                 this.addFailureAtNode(node, Rule.FAILURE_STRING);
             }
         } else {
             super.visitNode(node);
         }
     }
+}
 
-    /**
-     * Checks if a node is an negative unary expression with on a numeric operand.
-     */
-    private isNegativeNumericExpression(node: ts.Node): boolean {
-        if (node.kind !== ts.SyntaxKind.PrefixUnaryExpression) {
-            return false;
-        }
-        const unaryNode = (node as ts.PrefixUnaryExpression);
-        return unaryNode.operator === ts.SyntaxKind.MinusToken && unaryNode.operand.kind === ts.SyntaxKind.NumericLiteral;
+/** If node is a number literal, return a string representation of that number. */
+function getLiteralNumber(node: ts.Node): string | undefined {
+    if (node.kind === ts.SyntaxKind.NumericLiteral) {
+        return (node as ts.NumericLiteral).text;
     }
+    if (node.kind !== ts.SyntaxKind.PrefixUnaryExpression) {
+        return undefined;
+    }
+    const { operator, operand } = node as ts.PrefixUnaryExpression;
+    if (operator === ts.SyntaxKind.MinusToken && operand.kind === ts.SyntaxKind.NumericLiteral) {
+        return "-" + (operand as ts.NumericLiteral).text;
+    }
+    return undefined;
 }
