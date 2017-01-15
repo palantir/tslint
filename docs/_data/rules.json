@@ -472,7 +472,7 @@
     "ruleName": "member-ordering",
     "description": "Enforces member ordering.",
     "rationale": "A consistent ordering for class members can make classes easier to read, navigate, and edit.",
-    "optionsDescription": "\nOne argument, which is an object, must be provided. It should contain an `order` property.\nThe `order` property should have a value of one of the following strings:\n\n* `fields-first`\n* `statics-first`\n* `instance-sandwich`\n\nAlternatively, the value for `order` maybe be an array consisting of the following strings:\n\n* `public-static-field`\n* `protected-static-field`\n* `private-static-field`\n* `public-instance-field`\n* `protected-instance-field`\n* `private-instance-field`\n* `constructor`\n* `public-static-method`\n* `protected-static-method`\n* `private-static-method`\n* `public-instance-method`\n* `protected-instance-method`\n* `private-instance-method`\n\nThis is useful if one of the preset orders does not meet your needs.",
+    "optionsDescription": "\nOne argument, which is an object, must be provided. It should contain an `order` property.\nThe `order` property should have a value of one of the following strings:\n\n* `variables-before-functions`\n* `static-before-instance`\n* `public-before-private`\n* `fields-first`\n* `instance-sandwich`\n* `statics-first`\n\nAlternatively, the value for `order` maybe be an array consisting of the following strings:\n\n* `public-static-field`\n* `public-static-method`\n* `protected-static-field`\n* `protected-static-method`\n* `private-static-field`\n* `private-static-method`\n* `public-instance-field`\n* `protected-instance-field`\n* `private-instance-field`\n* `public-constructor`\n* `protected-constructor`\n* `private-constructor`\n* `public-instance-method`\n* `protected-instance-method`\n* `private-instance-method`\n\nYou can also omit the access modifier to refer to \"public-\", \"protected-\", and \"private-\" all at once; for example, \"static-field\".\n\nYou can also make your own categories by using an object instead of a string:\n\n    {\n        \"name\": \"static non-private\",\n        \"kinds\": [\n            \"public-static-field\",\n            \"protected-static-field\",\n            \"public-static-method\",\n            \"protected-static-method\"\n        ]\n    }",
     "options": {
       "type": "object",
       "properties": {
@@ -481,9 +481,12 @@
             {
               "type": "string",
               "enum": [
+                "variables-before-functions",
+                "static-before-instance",
+                "public-before-private",
                 "fields-first",
-                "statics-first",
-                "instance-sandwich"
+                "instance-sandwich",
+                "statics-first"
               ]
             },
             {
@@ -500,7 +503,9 @@
                   "public-instance-field",
                   "protected-instance-field",
                   "private-instance-field",
-                  "constructor",
+                  "public-constructor",
+                  "protected-constructor",
+                  "private-constructor",
                   "public-instance-method",
                   "protected-instance-method",
                   "private-instance-method"
@@ -514,7 +519,9 @@
       "additionalProperties": false
     },
     "optionExamples": [
-      "[true, { \"order\": \"fields-first\" }]"
+      "[true, { \"order\": \"fields-first\" }]",
+      "\n[true, {\n    \"order\": [\n        \"static-field\",\n        \"instance-field\",\n        \"constructor\",\n        \"public-instance-method\",\n        \"protected-instance-method\",\n        \"private-instance-method\"\n    ]\n}]",
+      "\n[true, {\n    \"order\": [\n        {\n            \"name\": \"static non-private\",\n            \"kinds\": [\n                \"public-static-field\",\n                \"protected-static-field\",\n                \"public-static-method\",\n                \"protected-static-method\"\n            ]\n        },\n        \"constructor\"\n    ]\n}]"
     ],
     "type": "typescript",
     "typescriptOnly": true
@@ -1720,7 +1727,7 @@
     "ruleName": "whitespace",
     "description": "Enforces whitespace style conventions.",
     "rationale": "Helps maintain a readable, consistent style in your codebase.",
-    "optionsDescription": "\nSeven arguments may be optionally provided:\n\n* `\"check-branch\"` checks branching statements (`if`/`else`/`for`/`while`) are followed by whitespace.\n* `\"check-decl\"`checks that variable declarations have whitespace around the equals token.\n* `\"check-operator\"` checks for whitespace around operator tokens.\n* `\"check-module\"` checks for whitespace in import & export statements.\n* `\"check-separator\"` checks for whitespace after separator tokens (`,`/`;`).\n* `\"check-type\"` checks for whitespace before a variable type specification.\n* `\"check-typecast\"` checks for whitespace between a typecast and its target.",
+    "optionsDescription": "\nSeven arguments may be optionally provided:\n\n* `\"check-branch\"` checks branching statements (`if`/`else`/`for`/`while`) are followed by whitespace.\n* `\"check-decl\"`checks that variable declarations have whitespace around the equals token.\n* `\"check-operator\"` checks for whitespace around operator tokens.\n* `\"check-module\"` checks for whitespace in import & export statements.\n* `\"check-separator\"` checks for whitespace after separator tokens (`,`/`;`).\n* `\"check-type\"` checks for whitespace before a variable type specification.\n* `\"check-typecast\"` checks for whitespace between a typecast and its target.\n* `\"check-preblock\"` checks for whitespace before the opening brace of a block",
     "options": {
       "type": "array",
       "items": {
@@ -1732,7 +1739,8 @@
           "check-module",
           "check-separator",
           "check-type",
-          "check-typecast"
+          "check-typecast",
+          "check-preblock"
         ]
       },
       "minLength": 0,
