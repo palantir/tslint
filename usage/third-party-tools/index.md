@@ -16,6 +16,7 @@ _Note: Most of these tools are not maintained by TSLint._
 * [syntastic][10] ([VIM][11])
 * [Web Analyzer][12] ([Visual Studio][13])
 * [Webstorm][14]
+* [mocha-tslint][15] ([Mocha][16])
 
 
 [0]: https://github.com/palantir/grunt-tslint
@@ -33,3 +34,5 @@ _Note: Most of these tools are not maintained by TSLint._
 [12]: https://visualstudiogallery.msdn.microsoft.com/6edc26d4-47d8-4987-82ee-7c820d79be1d
 [13]: https://www.visualstudio.com/
 [14]: https://www.jetbrains.com/help/webstorm/2016.1/tslint.html
+[15]: https://github.com/t-sauer/mocha-tslint
+[16]: https://mochajs.org/
