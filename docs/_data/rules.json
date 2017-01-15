@@ -1456,6 +1456,18 @@
     "requiresTypeInfo": true
   },
   {
+    "ruleName": "strict-type-predicates",
+    "description": "\nWarns for type predicates that are always true or always false.\nWorks for 'typeof' comparisons to constants (e.g. 'typeof foo === \"string\"'), and equality comparison to 'null'/'undefined'.\nDoes not yet work for 'instanceof'.\nDoes *not* warn for 'if (x.y)' where 'x.y' is always truthy. For that, see strict-boolean-expressions.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality",
+    "typescriptOnly": true,
+    "requiresTypeInfo": true
+  },
+  {
     "ruleName": "switch-default",
     "description": "Require a `default` case in all `switch` statements.",
     "optionsDescription": "Not configurable.",
@@ -1720,7 +1732,7 @@
     "ruleName": "whitespace",
     "description": "Enforces whitespace style conventions.",
     "rationale": "Helps maintain a readable, consistent style in your codebase.",
-    "optionsDescription": "\nSeven arguments may be optionally provided:\n\n* `\"check-branch\"` checks branching statements (`if`/`else`/`for`/`while`) are followed by whitespace.\n* `\"check-decl\"`checks that variable declarations have whitespace around the equals token.\n* `\"check-operator\"` checks for whitespace around operator tokens.\n* `\"check-module\"` checks for whitespace in import & export statements.\n* `\"check-separator\"` checks for whitespace after separator tokens (`,`/`;`).\n* `\"check-type\"` checks for whitespace before a variable type specification.\n* `\"check-typecast\"` checks for whitespace between a typecast and its target.",
+    "optionsDescription": "\nSeven arguments may be optionally provided:\n\n* `\"check-branch\"` checks branching statements (`if`/`else`/`for`/`while`) are followed by whitespace.\n* `\"check-decl\"`checks that variable declarations have whitespace around the equals token.\n* `\"check-operator\"` checks for whitespace around operator tokens.\n* `\"check-module\"` checks for whitespace in import & export statements.\n* `\"check-separator\"` checks for whitespace after separator tokens (`,`/`;`).\n* `\"check-type\"` checks for whitespace before a variable type specification.\n* `\"check-typecast\"` checks for whitespace between a typecast and its target.\n* `\"check-preblock\"` checks for whitespace before the opening brace of a block",
     "options": {
       "type": "array",
       "items": {
@@ -1732,7 +1744,8 @@
           "check-module",
           "check-separator",
           "check-type",
-          "check-typecast"
+          "check-typecast",
+          "check-preblock"
         ]
       },
       "minLength": 0,

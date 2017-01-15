@@ -178,6 +178,11 @@ export function isTypeFlagSet(type: ts.Type, flagToCheck: ts.TypeFlags): boolean
     /* tslint:enable:no-bitwise */
 }
 
+/** Type predicate to test for a union type. */
+export function isUnionType(type: ts.Type): type is ts.UnionType {
+    return isTypeFlagSet(type, ts.TypeFlags.Union);
+}
+
 /**
  * Bitwise check for object flags.
  * Does not work with TypeScript 2.0.x

@@ -1,0 +1,19 @@
+---
+ruleName: strict-type-predicates
+description: |-
+
+  Warns for type predicates that are always true or always false.
+  Works for 'typeof' comparisons to constants (e.g. 'typeof foo === "string"'), and equality comparison to 'null'/'undefined'.
+  Does not yet work for 'instanceof'.
+  Does *not* warn for 'if (x.y)' where 'x.y' is always truthy. For that, see strict-boolean-expressions.
+optionsDescription: Not configurable.
+options: null
+optionExamples:
+  - 'true'
+type: functionality
+typescriptOnly: true
+requiresTypeInfo: true
+layout: rule
+title: 'Rule: strict-type-predicates'
+optionsJSON: 'null'
+---
