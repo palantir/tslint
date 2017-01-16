@@ -39,6 +39,10 @@ a {
   &:hover {
     text-decoration: underline;
   }
+
+  &:visited {
+	color: $link-visited-color;
+  }
 }
 
 h1 { font-size: 2.5rem; }
