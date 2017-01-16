@@ -1,0 +1,20 @@
+declare function get<T>(): T;
+
+if (get<string | number>()) {}
+    ~~~~~~~~~~~~~~~~~~~~~~ [If statement condition may be falsy if it is 0. Expected a boolean, undefined-union, or string.]
+
+if (get<string | boolean>()) {}
+
+if (get<string | undefined>()) {}
+
+if (get<boolean>()) {}
+if (get<string>()) {}
+if (get<RegExp | undefined>()) {}
+
+if (get<"" | "foo">()) {}
+
+// Mix of truthy values OK
+if (get<"foo" | "bar" | undefined>()) {}
+
+// Mix of falsy values not OK
+if (get<"" | boolean>()) {}

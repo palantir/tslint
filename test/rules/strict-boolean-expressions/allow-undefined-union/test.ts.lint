@@ -1,31 +1,28 @@
-declare const ru: RegExp | undefined;
-if (ru) {}
+declare function get<T>(): T;
+
+if (get<RegExp | undefined>()) {}
 
 declare const bu: boolean | undefined;
-if (bu) {}
+if (get<boolean | undefined>()) {}
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~ [If statement condition mixes multiple kinds of falsy values. Expected a boolean or undefined-union.]
 
 // If it's always undefined, testing for it is wrong.
-declare const u: undefined;
-if (u) {}
-    ~ [0]
+if (get<undefined>()) {}
+    ~~~~~~~~~~~~~~~~ [If statement condition is always falsy. Expected a boolean or undefined-union.]
 
-declare const rn: RegExp | null;
-if (rn) {}
-    ~~ [0]
+if (get<void>()) {}
+    ~~~~~~~~~~~ [If statement condition is always falsy. Expected a boolean or undefined-union.]
 
-declare const b: boolean;
+if (get<RegExp | null>()) {}
+    ~~~~~~~~~~~~~~~~~~~~ [If statement condition may be falsy if it is null. Expected a boolean or undefined-union.]
+
 // Type of the condition is actually boolean | RegExp, but OK since we check each part separately.
-if (ru || b) {}
+if (get<RegExp | undefined>() || get<boolean>()) {}
 
 // This still fails of course!
-declare const r: RegExp;
-if (r || r) {}
-    ~ [or]
-         ~ [or]
+if (get<RegExp>() || get<RegExp>()) {}
+    ~~~~~~~~~~~~~ [Operand for the || operator is always truthy. Expected a boolean or undefined-union.]
+                     ~~~~~~~~~~~~~ [Operand for the || operator is always truthy. Expected a boolean or undefined-union.]
 
-// TODO: warn here? User might have meant to test for `undefined`, not the number.
-declare const nu: number | undefined;
-if (nu) {}
-
-[0]: If statement condition should be of type boolean or undefined-union
-[or]: Operands for the && and || operators should be of type boolean or undefined-union
+if (get<number | undefined>()) {}
+    ~~~~~~~~~~~~~~~~~~~~~~~~~ [If statement condition may be falsy if it is 0. Expected a boolean or undefined-union.]

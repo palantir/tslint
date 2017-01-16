@@ -4,6 +4,7 @@ enum MyEnum {
 }
 let anyType: {};
 let boolType: boolean;
+let boolType2: boolean;
 let bwrapType: Boolean;
 let numType = 9;
 let strType = "string";
@@ -18,46 +19,46 @@ let boolExpr = (strType !== undefined);
 /*** Binary Expressions ***/
 /*** Invalid Boolean Expressions ***/
 classType && boolType;
-~~~~~~~~~ [andor]
+~~~~~~~~~ [Operand for the && operator is always truthy. Expected a boolean.]
 anyType && boolType;
-~~~~~~~ [andor]
+~~~~~~~ [Operand for the && operator is always truthy. Expected a boolean.]
 numType && boolType;
-~~~~~~~ [andor]
+~~~~~~~ [Operand for the && operator may be falsy if it is 0. Expected a boolean.]
 boolType && strType;
-            ~~~~~~~ [andor]
+            ~~~~~~~ [Operand for the && operator may be falsy if it is the empty string. Expected a boolean.]
 boolType && objType && enumType;
-            ~~~~~~~ [andor]
-                       ~~~~~~~~ [andor]
+            ~~~~~~~ [Operand for the && operator is always truthy. Expected a boolean.]
+                       ~~~~~~~~ [Operand for the && operator is an enum. Expected a boolean.]
 bwrapType && boolType;
-~~~~~~~~~ [andor]
+~~~~~~~~~ [Operand for the && operator is always truthy. Expected a boolean.]
 
 boolType || classType;
-            ~~~~~~~~~ [andor]
+            ~~~~~~~~~ [Operand for the || operator is always truthy. Expected a boolean.]
 boolType || anyType;
-            ~~~~~~~ [andor]
+            ~~~~~~~ [Operand for the || operator is always truthy. Expected a boolean.]
 boolType || numType;
-            ~~~~~~~ [andor]
+            ~~~~~~~ [Operand for the || operator may be falsy if it is 0. Expected a boolean.]
 strType || boolType;
-~~~~~~~ [andor]
+~~~~~~~ [Operand for the || operator may be falsy if it is the empty string. Expected a boolean.]
 bwrapType || boolType;
-~~~~~~~~~ [andor]
+~~~~~~~~~ [Operand for the || operator is always truthy. Expected a boolean.]
 objType || boolType || enumType;
-~~~~~~~ [andor]
-                       ~~~~~~~~ [andor]
+~~~~~~~ [Operand for the || operator is always truthy. Expected a boolean.]
+                       ~~~~~~~~ [Operand for the || operator is an enum. Expected a boolean.]
 
 boolExpr && strType;
-            ~~~~~~~ [andor]
+            ~~~~~~~ [Operand for the && operator may be falsy if it is the empty string. Expected a boolean.]
 numType || boolExpr;
-~~~~~~~ [andor]
+~~~~~~~ [Operand for the || operator may be falsy if it is 0. Expected a boolean.]
 numType && boolExpr || strType;
-~~~~~~~ [andor]
-                       ~~~~~~~ [andor]
+~~~~~~~ [Operand for the && operator may be falsy if it is 0. Expected a boolean.]
+                       ~~~~~~~ [Operand for the || operator may be falsy if it is the empty string. Expected a boolean.]
 bwrapType || boolExpr && bwrapType;
-~~~~~~~~~ [andor]
-                         ~~~~~~~~~ [andor]
+~~~~~~~~~ [Operand for the || operator is always truthy. Expected a boolean.]
+                         ~~~~~~~~~ [Operand for the && operator is always truthy. Expected a boolean.]
 
 /*** Valid Boolean Expressions ***/
-boolType && boolType;
+boolType && boolType2;
 boolExpr || boolType;
 (numType > 0) && boolFn();
 (strType !== "bool") && boolExpr;
@@ -67,17 +68,17 @@ boolExpr || boolType;
 /*** ConditionalExpression ***/
 /*** Invalid ***/
 strType ? strType : numType;
-~~~~~~~ [conditional]
+~~~~~~~ [Condition may be falsy if it is the empty string. Expected a boolean.]
 numType ? numType : numFn();
-~~~~~~~ [conditional]
+~~~~~~~ [Condition may be falsy if it is 0. Expected a boolean.]
 objType ? objType : boolExpr;
-~~~~~~~ [conditional]
+~~~~~~~ [Condition is always truthy. Expected a boolean.]
 classType ? strType : undefined;
-~~~~~~~~~ [conditional]
+~~~~~~~~~ [Condition is always truthy. Expected a boolean.]
 bwrapType ? 1 : 0;
-~~~~~~~~~ [conditional]
+~~~~~~~~~ [Condition is always truthy. Expected a boolean.]
 enumType ? 0 : 1;
-~~~~~~~~ [conditional]
+~~~~~~~~ [Condition is an enum. Expected a boolean.]
 
 /*** Valid ***/
 boolFn() ? numType : strType;
@@ -86,19 +87,20 @@ boolType ? strType : undefined;
 /*** PrefixUnary Expressions ***/
 /*** Invalid ***/
 !!numType;
-  ~~~~~~~ [not]
+  ~~~~~~~ [Operand for the ! operator may be falsy if it is 0. Expected a boolean.]
 !strType;
- ~~~~~~~ [not]
+ ~~~~~~~ [Operand for the ! operator may be falsy if it is the empty string. Expected a boolean.]
 !objType;
- ~~~~~~~ [not]
+ ~~~~~~~ [Operand for the ! operator is always truthy. Expected a boolean.]
 !enumType;
- ~~~~~~~~ [not]
+ ~~~~~~~~ [Operand for the ! operator is an enum. Expected a boolean.]
 !!classType;
-  ~~~~~~~~~ [not]
+  ~~~~~~~~~ [Operand for the ! operator is always truthy. Expected a boolean.]
 !bwrapType;
- ~~~~~~~~~ [not]
+ ~~~~~~~~~ [Operand for the ! operator is always truthy. Expected a boolean.]
 !!undefined;
-  ~~~~~~~~~ [not]
+ ~~~~~~~~~~ [Operand for the ! operator is always truthy. Expected a boolean.]
+  ~~~~~~~~~ [Operand for the ! operator is always falsy. Expected a boolean.]
 
 /*** Valid ***/
 !!boolFn();
@@ -108,19 +110,19 @@ boolType ? strType : undefined;
 /*** If Statement ***/
 /*** Invalid ***/
 if (numType) { /* statements */ }
-    ~~~~~~~ [If]
+    ~~~~~~~ [If statement condition may be falsy if it is 0. Expected a boolean.]
 if (objType) { /* statements */ }
-    ~~~~~~~ [If]
+    ~~~~~~~ [If statement condition is always truthy. Expected a boolean.]
 if (strType) { /* statements */ }
-    ~~~~~~~ [If]
+    ~~~~~~~ [If statement condition may be falsy if it is the empty string. Expected a boolean.]
 if (bwrapType) { /* statements */ }
-    ~~~~~~~~~ [If]
+    ~~~~~~~~~ [If statement condition is always truthy. Expected a boolean.]
 if (strFn()) { /* statements */ }
-    ~~~~~~~ [If]
+    ~~~~~~~ [If statement condition may be falsy if it is the empty string. Expected a boolean.]
 if (MyEnum.A) { /* statements */ }
-    ~~~~~~~~ [If]
+    ~~~~~~~~ [If statement condition is an enum. Expected a boolean.]
 if (classType) { /* statements */ }
-    ~~~~~~~~~ [If]
+    ~~~~~~~~~ [If statement condition is always truthy. Expected a boolean.]
 
 /*** Valid ***/
 if (boolFn()) { /* statements */ }
@@ -130,19 +132,19 @@ if (boolType) { /* statements */ }
 /*** While Statement ***/
 /*** Invalid ***/
 while (numType) { /* statements */ }
-       ~~~~~~~ [While]
+       ~~~~~~~ [While statement condition may be falsy if it is 0. Expected a boolean.]
 while (objType) { /* statements */ }
-       ~~~~~~~ [While]
+       ~~~~~~~ [While statement condition is always truthy. Expected a boolean.]
 while (strType) { /* statements */ }
-       ~~~~~~~ [While]
+       ~~~~~~~ [While statement condition may be falsy if it is the empty string. Expected a boolean.]
 while (strFn()) { /* statements */ }
-       ~~~~~~~ [While]
+       ~~~~~~~ [While statement condition may be falsy if it is the empty string. Expected a boolean.]
 while (bwrapType) { /* statements */ }
-       ~~~~~~~~~ [While]
+       ~~~~~~~~~ [While statement condition is always truthy. Expected a boolean.]
 while (MyEnum.A) { /* statements */ }
-       ~~~~~~~~ [While]
+       ~~~~~~~~ [While statement condition is an enum. Expected a boolean.]
 while (classType) { /* statements */ }
-       ~~~~~~~~~ [While]
+       ~~~~~~~~~ [While statement condition is always truthy. Expected a boolean.]
 
 /*** Valid ***/
 while (boolFn()) { /* statements */ }
@@ -152,19 +154,19 @@ while (boolType) { /* statements */ }
 /*** Do Statement ***/
 /*** Invalid ***/
 do { /* statements */ } while (numType);
-                               ~~~~~~~ [Do-While]
+                               ~~~~~~~ [Do-While statement condition may be falsy if it is 0. Expected a boolean.]
 do { /* statements */ } while (objType);
-                               ~~~~~~~ [Do-While]
+                               ~~~~~~~ [Do-While statement condition is always truthy. Expected a boolean.]
 do { /* statements */ } while (strType);
-                               ~~~~~~~ [Do-While]
+                               ~~~~~~~ [Do-While statement condition may be falsy if it is the empty string. Expected a boolean.]
 do { /* statements */ } while (bwrapType);
-                               ~~~~~~~~~ [Do-While]
+                               ~~~~~~~~~ [Do-While statement condition is always truthy. Expected a boolean.]
 do { /* statements */ } while (strFn());
-                               ~~~~~~~ [Do-While]
+                               ~~~~~~~ [Do-While statement condition may be falsy if it is the empty string. Expected a boolean.]
 do { /* statements */ } while (MyEnum.A);
-                               ~~~~~~~~ [Do-While]
+                               ~~~~~~~~ [Do-While statement condition is an enum. Expected a boolean.]
 do { /* statements */ } while (classType);
-                               ~~~~~~~~~ [Do-While]
+                               ~~~~~~~~~ [Do-While statement condition is always truthy. Expected a boolean.]
 
 /*** Valid ***/
 do { /* statements */ } while (boolFn());
@@ -174,14 +176,6 @@ do { /* statements */ } while (boolType);
 /*** For Statement ***/
 /*** Invalid ***/
 for (let j = 0; j; j++) { /* statements */ }
-                ~                            [For]
+                ~                            [For statement condition may be falsy if it is 0. Expected a boolean.]
 /*** Valid ***/
 for (let j = 0; j > numType; j++) { /* statements */ }
-
-[andor]: Operands for the && and || operators should be of type boolean
-[conditional]: Condition should be of type boolean
-[not]: Operand for the ! operator should be of type boolean
-[Do-While]: Do-While statement condition should be of type boolean
-[For]: For statement condition should be of type boolean
-[If]: If statement condition should be of type boolean
-[While]: While statement condition should be of type boolean

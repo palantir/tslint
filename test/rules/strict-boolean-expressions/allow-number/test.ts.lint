@@ -1,20 +1,19 @@
-declare const a: number;
-if (a) {}
+declare function get<T>(): T;
 
-declare const b: boolean | number;
-if (b) {}
-    ~ [0]
+if (get<number>()) {}
 
-declare const c: 1 | 2;
-if (c) {}
-    ~ [0]
+if (get<boolean | number>()) {}
+    ~~~~~~~~~~~~~~~~~~~~~~~ [If statement condition mixes multiple kinds of falsy values. Expected a boolean or number.]
 
-enum E {
-    A,
-    B
-}
-declare var e: E;
-if (e) {}
-    ~ [0]
+enum E {}
+if (get<E>()) {}
+    ~~~~~~~~ [If statement condition is an enum. Expected a boolean or number.]
 
-[0]: If statement condition should be of type boolean or number
+if (get<1 | 2>()) {}
+    ~~~~~~~~~~~~ [If statement condition is always truthy. Expected a boolean or number.]
+
+if (get<0>()) {}
+    ~~~~~~~~ [If statement condition is always falsy. Expected a boolean or number.]
+
+if (get<0 | 1>()) {}
+

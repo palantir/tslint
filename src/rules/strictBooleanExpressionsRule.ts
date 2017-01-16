@@ -22,6 +22,9 @@ const OPTION_ALLOW_NULL_UNION = "allow-null-union";
 const OPTION_ALLOW_UNDEFINED_UNION = "allow-undefined-union";
 const OPTION_ALLOW_STRING = "allow-string";
 const OPTION_ALLOW_NUMBER = "allow-number";
+const OPTION_ALLOW_MIX = "allow-mix";
+
+// tslint:disable:switch-default
 
 export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -46,7 +49,10 @@ export class Rule extends Lint.Rules.TypedRule {
               - It does *not* allow string literal types.
             * '${OPTION_ALLOW_NUMBER} allows numbers.
               - It does *not* allow unions containing 'number'.
-              - It does *not* allow enums or number literal types.`,
+              - It does *not* allow enums or number literal types.
+            * '${OPTION_ALLOW_MIX} allow multiple of the above to appear together.
+              - For example, 'string | number' or 'RegExp | null | undefined' would normally not be allowed.
+              - A type like '"foo" | "bar" | undefined' is always allowed, because it has only one way to be false.`,
         options: {
             type: "array",
             items: {
@@ -66,28 +72,43 @@ export class Rule extends Lint.Rules.TypedRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING(locationDescription: string, expected: string): string {
-        return locationDescription + " should be of type " + expected;
+    public static FAILURE_STRING(locationDescription: string, ty: TypeFailure, expected: string): string {
+        return `${locationDescription} ${this.tyFailure(ty)}. Expected a ${expected}.`;
+    }
+
+    private static tyFailure(ty: TypeFailure) {
+        switch (ty) {
+            case TypeFailure.AlwaysTruthy: return "is always truthy";
+            case TypeFailure.AlwaysFalsy: return "is always falsy";
+            case TypeFailure.String: return "may be falsy if it is the empty string";
+            case TypeFailure.Number: return "may be falsy if it is 0";
+            case TypeFailure.Null: return "may be falsy if it is null";
+            case TypeFailure.Undefined: return "may be falsy if it is undefined";
+            case TypeFailure.Enum: return "is an enum";
+            case TypeFailure.Mixes: return "mixes multiple kinds of falsy values";
+        }
     }
 
     public applyWithProgram(srcFile: ts.SourceFile, langSvc: ts.LanguageService): Lint.RuleFailure[] {
-        return this.applyWithWalker(new StrictBooleanExpressionsRule(srcFile, this.getOptions(), langSvc.getProgram()));
+        return this.applyWithWalker(new Walker(srcFile, this.getOptions(), langSvc.getProgram()));
     }
 }
 
-class StrictBooleanExpressionsRule extends Lint.ProgramAwareRuleWalker {
+class Walker extends Lint.ProgramAwareRuleWalker {
     private checker = this.getTypeChecker();
-    private allowNull = this.hasOption(OPTION_ALLOW_NULL_UNION);
-    private allowUndefined = this.hasOption(OPTION_ALLOW_UNDEFINED_UNION);
+    private allowNullUnion = this.hasOption(OPTION_ALLOW_NULL_UNION);
+    private allowUndefinedUnion = this.hasOption(OPTION_ALLOW_UNDEFINED_UNION);
     private allowString = this.hasOption(OPTION_ALLOW_STRING);
     private allowNumber = this.hasOption(OPTION_ALLOW_NUMBER);
+    private allowMix = this.hasOption(OPTION_ALLOW_MIX);
 
     public visitBinaryExpression(node: ts.BinaryExpression) {
-        if (isBinaryExpressionBoolean(node)) {
+        const op = binaryBooleanExpressionKind(node);
+        if (op !== undefined) {
             const checkHalf = (expr: ts.Expression) => {
                 // If it's another boolean binary expression, we'll check it when recursing.
                 if (!isBooleanBinaryExpression(expr)) {
-                    this.checkExpression(expr, "Operands for the && and || operators");
+                    this.checkExpression(expr, `Operand for the ${op} operator`);
                 }
             };
             checkHalf(node.left);
@@ -138,50 +159,172 @@ class StrictBooleanExpressionsRule extends Lint.ProgramAwareRuleWalker {
     }
 
     private checkExpression(node: ts.Expression, locationDescription: string): void {
-        if (!this.isTypeOk(this.checker.getTypeAtLocation(node))) {
-            this.addFailureAtNode(node, Rule.FAILURE_STRING(locationDescription, this.expectedTypeDescription()));
+        const failure = this.getTypeFailure(this.checker.getTypeAtLocation(node));
+        if (failure !== undefined) {
+            this.addFailureAtNode(node, Rule.FAILURE_STRING(locationDescription, failure, this.expectedTypeDescription()));
         }
     }
 
-    private isTypeOk(type: ts.Type): boolean {
-        return this.isNullable(type) ||
-            this.allowString && is(ts.TypeFlags.String) ||
-            this.allowNumber && is(ts.TypeFlags.Number) ||
-            is(ts.TypeFlags.BooleanLike);
+    private getTypeFailure(type: ts.Type): TypeFailure | undefined {
+        if (Lint.isUnionType(type)) {
+            return this.handleUnion(type);
+        }
 
-        function is(flag: ts.TypeFlags) {
-            return Lint.isTypeFlagSet(type, flag);
+        const kind = getKind(type);
+        const failure = this.failureForKind(kind, /*isInUnion*/false);
+        if (failure !== undefined) {
+            return failure;
+        }
+
+        switch (triState(kind)) {
+            case true:
+                return TypeFailure.AlwaysTruthy;
+            case false:
+                return TypeFailure.AlwaysFalsy;
+            case undefined:
+                return undefined;
         }
     }
 
-    private isNullable(type: ts.Type) {
-        return Lint.isUnionType(type) && type.types.some((part) =>
-            this.allowNull && Lint.isTypeFlagSet(part, ts.TypeFlags.Null) ||
-            this.allowUndefined && Lint.isTypeFlagSet(part, ts.TypeFlags.Undefined));
+    /** Fails if a kind of falsiness is not allowed. */
+    private failureForKind(kind: TypeKind, isInUnion: boolean): TypeFailure | undefined {
+        switch (kind) {
+            case TypeKind.String:
+            case TypeKind.FalseStringLiteral:
+                return this.allowString ? undefined : TypeFailure.String;
+            case TypeKind.Number:
+            case TypeKind.FalseNumberLiteral:
+                return this.allowNumber ? undefined : TypeFailure.Number;
+            case TypeKind.Enum:
+                return TypeFailure.Enum;
+            case TypeKind.Null:
+                return isInUnion && !this.allowNullUnion ? TypeFailure.Null : undefined;
+            case TypeKind.Undefined:
+                return isInUnion && !this.allowUndefinedUnion ? TypeFailure.Undefined : undefined;
+            default:
+                return undefined;
+        }
+    }
+
+    private handleUnion(type: ts.UnionType): TypeFailure | undefined {
+        // Tracks whether it's possibly truthy.
+        let anyTruthy = false;
+        // Counts falsy kinds to see if there's a mix. Also tracks whether it's possibly falsy.
+        let seenFalsy = 0;
+
+        for (const ty of type.types) {
+            const kind = getKind(ty);
+            const failure = this.failureForKind(kind, /*isInUnion*/true);
+            if (failure !== undefined) {
+                return failure;
+            }
+
+            switch (triState(kind)) {
+                case true:
+                    anyTruthy = true;
+                    break;
+                case false:
+                    seenFalsy++;
+                    break;
+                default:
+                    anyTruthy = true;
+                    seenFalsy++;
+            }
+        }
+
+        return seenFalsy === 0 ? TypeFailure.AlwaysTruthy
+            : !anyTruthy ? TypeFailure.AlwaysFalsy
+            : !this.allowMix && seenFalsy > 1 ? TypeFailure.Mixes : undefined;
     }
 
     private expectedTypeDescription(): string {
         const parts = ["boolean"];
-        if (this.allowNull) { parts.push("null-union"); }
-        if (this.allowUndefined) { parts.push("undefined-union"); }
+        if (this.allowNullUnion) { parts.push("null-union"); }
+        if (this.allowUndefinedUnion) { parts.push("undefined-union"); }
         if (this.allowString) { parts.push("string"); }
         if (this.allowNumber) { parts.push("number"); }
         return stringOr(parts);
     }
 }
 
-/** Matches `&&` and `||` operators. */
-function isBooleanBinaryExpression(node: ts.Expression): boolean {
-    return node.kind === ts.SyntaxKind.BinaryExpression && isBinaryExpressionBoolean(node as ts.BinaryExpression);
+export const enum TypeFailure {
+    AlwaysTruthy,
+    AlwaysFalsy,
+    String,
+    Number,
+    Null,
+    Undefined,
+    Enum,
+    Mixes,
 }
 
-function isBinaryExpressionBoolean(node: ts.BinaryExpression): boolean {
+const enum TypeKind {
+    String,
+    FalseStringLiteral,
+    Number,
+    FalseNumberLiteral,
+    Boolean,
+    FalseBooleanLiteral,
+    Null,
+    Undefined,
+    Enum,
+    AlwaysTruthy,
+}
+
+/** Divides a type into always true, always false, or unknown. */
+function triState(kind: TypeKind): boolean | undefined {
+    switch (kind) {
+        case TypeKind.String:
+        case TypeKind.Number:
+        case TypeKind.Boolean:
+        case TypeKind.Enum:
+            return undefined;
+
+        case TypeKind.Null:
+        case TypeKind.Undefined:
+        case TypeKind.FalseNumberLiteral:
+        case TypeKind.FalseStringLiteral:
+        case TypeKind.FalseBooleanLiteral:
+            return false;
+
+        case TypeKind.AlwaysTruthy:
+            return true;
+    }
+}
+
+function getKind(type: ts.Type): TypeKind {
+    return is(ts.TypeFlags.String) ? TypeKind.String
+        : is(ts.TypeFlags.Number) ? TypeKind.Number
+        : is(ts.TypeFlags.Boolean) ? TypeKind.Boolean
+        : is(ts.TypeFlags.Null) ? TypeKind.Null
+        : is(ts.TypeFlags.Undefined | ts.TypeFlags.Void) ? TypeKind.Undefined // tslint:disable-line:no-bitwise
+        : is(ts.TypeFlags.EnumLike) ? TypeKind.Enum
+        : is(ts.TypeFlags.NumberLiteral) ?
+            ((type as ts.LiteralType).text === "0" ? TypeKind.FalseNumberLiteral : TypeKind.AlwaysTruthy)
+        : is(ts.TypeFlags.StringLiteral) ?
+            ((type as ts.LiteralType).text === "" ? TypeKind.FalseStringLiteral : TypeKind.AlwaysTruthy)
+        : is(ts.TypeFlags.BooleanLiteral) ?
+            ((type as ts.IntrinsicType).intrinsicName === "true" ? TypeKind.AlwaysTruthy : TypeKind.FalseBooleanLiteral)
+        : TypeKind.AlwaysTruthy;
+
+    function is(flags: ts.TypeFlags) {
+        return Lint.isTypeFlagSet(type, flags);
+    }
+}
+
+/** Matches `&&` and `||` operators. */
+function isBooleanBinaryExpression(node: ts.Expression): boolean {
+    return node.kind === ts.SyntaxKind.BinaryExpression && binaryBooleanExpressionKind(node as ts.BinaryExpression) !== undefined;
+}
+
+function binaryBooleanExpressionKind(node: ts.BinaryExpression): "&&" | "||" | undefined {
     switch (node.operatorToken.kind) {
         case ts.SyntaxKind.AmpersandAmpersandToken:
+            return "&&";
         case ts.SyntaxKind.BarBarToken:
-            return true;
+            return "||";
         default:
-            return false;
+            return undefined;
     }
 }
 
@@ -197,5 +340,12 @@ function stringOr(parts: string[]): string {
                 res += parts[i] + ", ";
             }
             return res + "or " + parts[parts.length - 1];
+    }
+}
+
+declare module "typescript" {
+    // No other way to distinguish boolean literal true from boolean literal false
+    export interface IntrinsicType extends ts.Type {
+        intrinsicName: string;
     }
 }

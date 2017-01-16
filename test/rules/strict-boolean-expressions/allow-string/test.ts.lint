@@ -1,12 +1,14 @@
-declare const a: string;
-if (a) {}
+declare function get<T>(): T;
 
-declare const b: boolean | string;
-if (b) {}
-    ~ [0]
+if (get<string>()) {}
 
-declare const c: "foo" | "bar";
-if (c) {}
-    ~ [0]
+if (get<boolean | string>()) {}
+    ~~~~~~~~~~~~~~~~~~~~~~~ [If statement condition mixes multiple kinds of falsy values. Expected a boolean or string.]
 
-[0]: If statement condition should be of type boolean or string
+if (get<"foo" | "bar">()) {}
+    ~~~~~~~~~~~~~~~~~~~~ [If statement condition is always truthy. Expected a boolean or string.]
+
+if (get<"">()) {}
+    ~~~~~~~~~ [If statement condition is always falsy. Expected a boolean or string.]
+
+if (get<"foo" | "">()) {}
