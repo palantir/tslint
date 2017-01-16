@@ -391,19 +391,16 @@ function canHaveTrailingTrivia(tokenKind: ts.SyntaxKind, parent: ts.Node): boole
     return true;
 }
 
-function hasCommentCallback() {
-    return true;
-}
-
 /** 
- * Checks if there are any comments between `position` and the next non-tivia token
+ * Checks if there are any comments between `position` and the next non-trivia token
  * 
  * @param text The text to scan
  * @param position The position inside `text` where to start scanning. Make sure that this is a valid start position.
  *                 This value is typically obtained from `node.getFullStart()` or `node.getEnd()`
  */
 export function hasCommentAfterPosition(text: string, position: number): boolean {
-    return ts.forEachTrailingCommentRange(text, position, hasCommentCallback) ||
-           ts.forEachLeadingCommentRange(text, position, hasCommentCallback) ||
+    const cb = () => true;
+    return ts.forEachTrailingCommentRange(text, position, cb) ||
+           ts.forEachLeadingCommentRange(text, position, cb) ||
            false; // return boolean instead of undefined if no comment is found
 }
