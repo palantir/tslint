@@ -969,7 +969,7 @@
     "typescriptOnly": false
   },
   {
-    "ruleName": "strict-boolean-expressions",
+    "ruleName": "no-unsafe-any",
     "description": "\nWarns when using an expression of type 'any' in an unsafe way.\nType casts and tests are allowed.\nExpressions that work on all values (such as '\"\" + x') are allowed.",
     "optionsDescription": "Not configurable.",
     "options": null,

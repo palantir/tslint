@@ -21,7 +21,7 @@ import * as Lint from "../index";
 export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
-        ruleName: "strict-boolean-expressions",
+        ruleName: "no-unsafe-any",
         description: Lint.Utils.dedent`
             Warns when using an expression of type 'any' in an unsafe way.
             Type casts and tests are allowed.
