@@ -839,6 +839,17 @@
     "typescriptOnly": true
   },
   {
+    "ruleName": "no-misused-new",
+    "description": "Warns on apparent attempts to define constructors for interfaces or `new` for classes.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality",
+    "typescriptOnly": true
+  },
+  {
     "ruleName": "no-namespace",
     "description": "Disallows use of internal `module`s and `namespace`s.",
     "descriptionDetails": "This rule still allows the use of `declare module ... {}`",
