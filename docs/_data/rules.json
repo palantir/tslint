@@ -980,6 +980,19 @@
     "typescriptOnly": false
   },
   {
+    "ruleName": "no-unnecessary-qualifier",
+    "description": "Warns when a namespace qualifier (`A.x`) is unnecessary.",
+    "hasFix": true,
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "style",
+    "typescriptOnly": true,
+    "requiresTypeInfo": true
+  },
+  {
     "ruleName": "no-unsafe-finally",
     "description": "\nDisallows control flow statements, such as `return`, `continue`,\n`break` and `throws` in finally blocks.",
     "descriptionDetails": "",
