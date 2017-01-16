@@ -35,7 +35,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Enforces whitespace style conventions.",
         rationale: "Helps maintain a readable, consistent style in your codebase.",
         optionsDescription: Lint.Utils.dedent`
-            Seven arguments may be optionally provided:
+            Eight arguments may be optionally provided:
 
             * \`"check-branch"\` checks branching statements (\`if\`/\`else\`/\`for\`/\`while\`) are followed by whitespace.
             * \`"check-decl"\`checks that variable declarations have whitespace around the equals token.
@@ -68,7 +68,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
+class WhitespaceWalker extends Lint.RuleWalker {
     private scanner: ts.Scanner;
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
@@ -80,27 +80,14 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
         super.visitSourceFile(node);
 
         let prevTokenShouldBeFollowedByWhitespace = false;
-        this.scanner.setTextPos(0);
-
-        Lint.scanAllTokens(this.scanner, (scanner: ts.Scanner) => {
-            const startPos = scanner.getStartPos();
-            const tokenKind = scanner.getToken();
-
+        Lint.forEachToken(node, false, (_text, tokenKind, pos, parent) => {
             if (tokenKind === ts.SyntaxKind.WhitespaceTrivia || tokenKind === ts.SyntaxKind.NewLineTrivia) {
                 prevTokenShouldBeFollowedByWhitespace = false;
+                return;
             } else if (prevTokenShouldBeFollowedByWhitespace) {
-                this.addMissingWhitespaceErrorAt(startPos);
+                this.addMissingWhitespaceErrorAt(pos.tokenStart);
                 prevTokenShouldBeFollowedByWhitespace = false;
             }
-
-            const skip = this.getSkipEndFromStart(startPos);
-            if (skip !== undefined) {
-                // tokens to skip are places where the scanner gets confused about what the token is, without the proper context
-                // (specifically, regex, identifiers, and templates). So skip those tokens.
-                scanner.setTextPos(skip);
-                return;
-            }
-
             // check for trailing space after the given tokens
             switch (tokenKind) {
                 case ts.SyntaxKind.CatchKeyword:
@@ -120,7 +107,7 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
                     }
                     break;
                 case ts.SyntaxKind.EqualsToken:
-                    if (this.hasOption(OPTION_DECL)) {
+                    if (this.hasOption(OPTION_DECL) && parent.kind !== ts.SyntaxKind.JsxAttribute) {
                         prevTokenShouldBeFollowedByWhitespace = true;
                     }
                     break;
@@ -217,16 +204,6 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
             this.checkForTrailingWhitespace(position);
         }
         super.visitImportEqualsDeclaration(node);
-    }
-
-    public visitJsxElement(node: ts.JsxElement) {
-        this.addTokenToSkipFromNode(node);
-        super.visitJsxElement(node);
-    }
-
-    public visitJsxSelfClosingElement(node: ts.JsxSelfClosingElement) {
-        this.addTokenToSkipFromNode(node);
-        super.visitJsxSelfClosingElement(node);
     }
 
     public visitTypeAssertionExpression(node: ts.TypeAssertion) {

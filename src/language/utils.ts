@@ -61,6 +61,7 @@ export function doesIntersect(failure: RuleFailure, disabledIntervals: IDisabled
     });
 }
 
+/** @deprecated use forEachToken instead */
 export function scanAllTokens(scanner: ts.Scanner, callback: (s: ts.Scanner) => void) {
     let lastStartPos = -1;
     while (scanner.scan() !== ts.SyntaxKind.EndOfFileToken) {
@@ -146,36 +147,40 @@ export function isAssignment(node: ts.Node) {
  * Bitwise check for node flags.
  */
 export function isNodeFlagSet(node: ts.Node, flagToCheck: ts.NodeFlags): boolean {
-    /* tslint:disable:no-bitwise */
+    // tslint:disable-next-line:no-bitwise
     return (node.flags & flagToCheck) !== 0;
-    /* tslint:enable:no-bitwise */
 }
 
 /**
  * Bitwise check for combined node flags.
  */
 export function isCombinedNodeFlagSet(node: ts.Node, flagToCheck: ts.NodeFlags): boolean {
-    /* tslint:disable:no-bitwise */
+    // tslint:disable-next-line:no-bitwise
     return (ts.getCombinedNodeFlags(node) & flagToCheck) !== 0;
-    /* tslint:enable:no-bitwise */
 }
 
 /**
  * Bitwise check for combined modifier flags.
  */
 export function isCombinedModifierFlagSet(node: ts.Node, flagToCheck: ts.ModifierFlags): boolean {
-    /* tslint:disable:no-bitwise */
+    // tslint:disable-next-line:no-bitwise
     return (ts.getCombinedModifierFlags(node) & flagToCheck) !== 0;
-    /* tslint:enable:no-bitwise */
 }
 
 /**
  * Bitwise check for type flags.
  */
 export function isTypeFlagSet(type: ts.Type, flagToCheck: ts.TypeFlags): boolean {
-    /* tslint:disable:no-bitwise */
+    // tslint:disable-next-line:no-bitwise
     return (type.flags & flagToCheck) !== 0;
-    /* tslint:enable:no-bitwise */
+}
+
+/**
+ * Bitwise check for symbol flags.
+ */
+export function isSymbolFlagSet(symbol: ts.Symbol, flagToCheck: ts.SymbolFlags): boolean {
+    // tslint:disable-next-line:no-bitwise
+    return (symbol.flags & flagToCheck) !== 0;
 }
 
 /**
@@ -183,9 +188,8 @@ export function isTypeFlagSet(type: ts.Type, flagToCheck: ts.TypeFlags): boolean
  * Does not work with TypeScript 2.0.x
  */
 export function isObjectFlagSet(objectType: ts.ObjectType, flagToCheck: ts.ObjectFlags): boolean {
-    /* tslint:disable:no-bitwise */
+    // tslint:disable-next-line:no-bitwise
     return (objectType.objectFlags & flagToCheck) !== 0;
-    /* tslint:enable:no-bitwise */
 }
 
 /**
@@ -236,4 +240,170 @@ export function isBlockScopeBoundary(node: ts.Node): boolean {
         || node.parent !== undefined
             && (node.parent.kind === ts.SyntaxKind.TryStatement
             || node.parent.kind === ts.SyntaxKind.IfStatement);
+}
+
+export interface TokenPosition {
+    /** The start of the token including all trivia before it */
+    fullStart: number;
+    /** The start of the token */
+    tokenStart: number;
+    /** The end of the token */
+    end: number;
+}
+export type ForEachTokenCallback = (fullText: string, kind: ts.SyntaxKind, pos: TokenPosition, parent: ts.Node) => void;
+export type ForEachCommentCallback = (fullText: string, kind: ts.SyntaxKind, pos: TokenPosition) => void;
+export type FilterCallback = (node: ts.Node) => boolean;
+
+/**
+ * Iterate over all tokens of `node`
+ * 
+ * @description JsDoc comments are treated like regular comments and only visited if `skipTrivia` === false.
+ * 
+ * @param node The node whose tokens should be visited
+ * @param skipTrivia If set to false all trivia preceeding `node` or any of its children is included
+ * @param cb Is called for every token of `node`. It gets the full text of the SourceFile and the position of the token within that text.
+ * @param filter If provided, will be called for every Node and Token found. If it returns false `cb` will not be called for this subtree.
+ */
+export function forEachToken(node: ts.Node, skipTrivia: boolean, cb: ForEachTokenCallback, filter?: FilterCallback) {
+    // this function will most likely be called with SourceFile anyways, so there is no need for an additional parameter
+    const sourceFile = node.getSourceFile();
+    const fullText = sourceFile.text;
+    const iterateFn = filter === undefined ? iterateChildren : iterateWithFilter;
+    const handleTrivia = skipTrivia ? undefined : createTriviaHandler(sourceFile, cb);
+
+    iterateFn(node);
+
+    // this function is used to save the if condition for the common case where no filter is provided
+    function iterateWithFilter(child: ts.Node): void {
+        if (filter!(child)) {
+            return iterateChildren(child);
+        }
+    }
+
+    function iterateChildren(child: ts.Node): void {
+        if (child.kind < ts.SyntaxKind.FirstNode) {
+            // we found a token, tokens have no children, stop recursing here
+            return callback(child);
+        }
+        /* Exclude everything contained in JsDoc, it will be handled with the other trivia anyway.
+         * When we would handle JsDoc tokens like regular ones, we would scan some trivia multiple times.
+         * Even worse, we would scan for trivia inside the JsDoc comment, which yields unexpected results.*/
+        if (child.kind !== ts.SyntaxKind.JSDocComment) {
+            // recurse into Node's children to find tokens
+            return child.getChildren(sourceFile).forEach(iterateFn);
+        }
+    }
+
+    function callback(token: ts.Node) {
+        const tokenStart = token.getStart(sourceFile);
+        if (!skipTrivia && tokenStart !== token.pos) {
+            // we only have to handle trivia before each token, because there is nothing after EndOfFileToken
+            handleTrivia!(token.pos, tokenStart, token);
+        }
+        return cb(fullText, token.kind, {tokenStart, fullStart: token.pos, end: token.end}, token.parent!);
+    }
+}
+
+function createTriviaHandler(sourceFile: ts.SourceFile, cb: ForEachTokenCallback) {
+    const fullText = sourceFile.text;
+    const scanner = ts.createScanner(sourceFile.languageVersion, false, sourceFile.languageVariant, fullText);
+    /** 
+     * Scan the specified range to get all trivia tokens.
+     * This includes trailing trivia of the last token and the leading trivia of the current token
+     */
+    function handleTrivia(start: number, end: number, token: ts.Node) {
+        const parent = token.parent!;
+        // prevent false positives by not scanning inside JsxText
+        if (!canHaveLeadingTrivia(token.kind, parent)) {
+            return;
+        }
+        scanner.setTextPos(start);
+        let position: number;
+        // we only get here if start !== end, so we can scan at least one time
+        do {
+            const kind = scanner.scan();
+            position = scanner.getTextPos();
+            cb(fullText, kind, {tokenStart: scanner.getTokenPos(), end: position, fullStart: start}, parent);
+        } while (position < end);
+    }
+
+    return handleTrivia;
+}
+
+/** Iterate over all comments owned by `node` or its children */
+export function forEachComment(node: ts.Node, cb: ForEachCommentCallback) {
+    /* Visit all tokens and skip trivia.
+       Comment ranges between tokens are parsed without the need of a scanner.
+       forEachToken also does intentionally not pay attention to the correct comment ownership of nodes as it always
+       scans all trivia before each token, which could include trailing comments of the previous token.
+       Comment onwership is done right in this function*/
+    return forEachToken(node, true, (fullText, tokenKind, pos, parent) => {
+        // don't search for comments inside JsxText
+        if (canHaveLeadingTrivia(tokenKind, parent)) {
+            // Comments before the first token (pos.fullStart === 0) are all considered leading comments, so no need for special treatment
+            ts.forEachLeadingCommentRange(fullText, pos.fullStart, commentCallback);
+        }
+        if (canHaveTrailingTrivia(tokenKind, parent)) {
+            ts.forEachTrailingCommentRange(fullText, pos.end, commentCallback);
+        }
+        function commentCallback(tokenStart: number, end: number, kind: ts.SyntaxKind) {
+            cb(fullText, kind, {tokenStart, end, fullStart: pos.fullStart});
+        }
+    });
+}
+
+/** Exclude leading positions that would lead to scanning for trivia inside JsxText */
+function canHaveLeadingTrivia(tokenKind: ts.SyntaxKind, parent: ts.Node): boolean {
+    if (tokenKind === ts.SyntaxKind.JsxText) {
+        return false; // there is no trivia before JsxText
+    }
+    if (tokenKind === ts.SyntaxKind.OpenBraceToken) {
+        // before a JsxExpression inside a JsxElement's body can only be other JsxChild, but no trivia
+        return parent.kind !== ts.SyntaxKind.JsxExpression || parent.parent!.kind !== ts.SyntaxKind.JsxElement;
+    }
+    if (tokenKind === ts.SyntaxKind.LessThanToken) {
+        if (parent.kind === ts.SyntaxKind.JsxClosingElement) {
+            return false; // would be inside the element body
+        }
+        if (parent.kind === ts.SyntaxKind.JsxOpeningElement || parent.kind === ts.SyntaxKind.JsxSelfClosingElement) {
+            // there can only be leading trivia if we are at the end of the top level element
+            return parent.parent!.parent!.kind !== ts.SyntaxKind.JsxElement;
+        }
+    }
+    return true;
+}
+
+/** Exclude trailing positions that would lead to scanning for trivia inside JsxText */
+function canHaveTrailingTrivia(tokenKind: ts.SyntaxKind, parent: ts.Node): boolean {
+    if (tokenKind === ts.SyntaxKind.JsxText) {
+        return false; // there is no trivia after JsxText
+    }
+    if (tokenKind === ts.SyntaxKind.CloseBraceToken) {
+        // after a JsxExpression inside a JsxElement's body can only be other JsxChild, but no trivia
+        return parent.kind !== ts.SyntaxKind.JsxExpression || parent.parent!.kind !== ts.SyntaxKind.JsxElement;
+    }
+    if (tokenKind === ts.SyntaxKind.GreaterThanToken) {
+        if (parent.kind === ts.SyntaxKind.JsxOpeningElement) {
+            return false; // would be inside the element
+        }
+        if (parent.kind === ts.SyntaxKind.JsxClosingElement || parent.kind === ts.SyntaxKind.JsxSelfClosingElement) {
+            // there can only be trailing trivia if we are at the end of the top level element
+            return parent.parent!.parent!.kind !== ts.SyntaxKind.JsxElement;
+        }
+    }
+    return true;
+}
+
+/** 
+ * Checks if there are any comments between `position` and the next non-trivia token
+ * 
+ * @param text The text to scan
+ * @param position The position inside `text` where to start scanning. Make sure that this is a valid start position.
+ *                 This value is typically obtained from `node.getFullStart()` or `node.getEnd()`
+ */
+export function hasCommentAfterPosition(text: string, position: number): boolean {
+    const cb = () => true;
+    return ts.forEachTrailingCommentRange(text, position, cb) ||
+           ts.forEachLeadingCommentRange(text, position, cb) ||
+           false; // return boolean instead of undefined if no comment is found
 }

@@ -40,29 +40,19 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-class NoTrailingWhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
+class NoTrailingWhitespaceWalker extends Lint.RuleWalker {
     public visitSourceFile(node: ts.SourceFile) {
-        super.visitSourceFile(node);
         let lastSeenWasWhitespace = false;
         let lastSeenWhitespacePosition = 0;
-        Lint.scanAllTokens(ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, node.text), (scanner: ts.Scanner) => {
-            const skip = this.getSkipEndFromStart(scanner.getStartPos());
-            if (skip !== undefined) {
-                // tokens to skip are places where the scanner gets confused about what the token is, without the proper context
-                // (specifically, regex, identifiers, and templates). So skip those tokens.
-                scanner.setTextPos(skip);
-                lastSeenWasWhitespace = false;
-                return;
-            }
-
-            if (scanner.getToken() === ts.SyntaxKind.NewLineTrivia) {
+        Lint.forEachToken(node, false, (_text, kind, pos) => {
+            if (kind === ts.SyntaxKind.NewLineTrivia) {
                 if (lastSeenWasWhitespace) {
-                    this.addFailureFromStartToEnd(lastSeenWhitespacePosition, scanner.getStartPos(), Rule.FAILURE_STRING);
+                    this.addFailureFromStartToEnd(lastSeenWhitespacePosition, pos.tokenStart, Rule.FAILURE_STRING);
                 }
                 lastSeenWasWhitespace = false;
-            } else if (scanner.getToken() === ts.SyntaxKind.WhitespaceTrivia) {
+            } else if (kind === ts.SyntaxKind.WhitespaceTrivia) {
                 lastSeenWasWhitespace = true;
-                lastSeenWhitespacePosition = scanner.getStartPos();
+                lastSeenWhitespacePosition = pos.tokenStart;
             } else {
                 lastSeenWasWhitespace = false;
             }
