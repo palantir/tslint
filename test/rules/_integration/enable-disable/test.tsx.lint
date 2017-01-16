@@ -1,0 +1,35 @@
+const span = (
+    <span>
+        without this text test fails
+        /* tslint:disable */
+        {
+            x + 'test'
+                ~~~~~~ [' should be "]
+        }
+        text
+    </span>
+);
+
+const span = (
+    <span>
+        without this text test fails
+        // tslint:disable-next-line
+        {x + 'test'}
+             ~~~~~~ [' should be "]
+        text
+    </span>
+);
+
+const span = (
+    <span>
+        {x + 'works with text'} // tslint:disable-line
+        works with text
+    </span>
+);
+
+// false negative test case
+const span = (
+    <span>
+        {x + 'failing test case'} // tslint:disable-line
+    </span>
+);

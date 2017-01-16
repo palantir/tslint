@@ -37,6 +37,11 @@ export class SkippableTokenAwareRuleWalker extends RuleWalker {
         super.visitTemplateExpression(node);
     }
 
+    protected visitJsxText(node: ts.JsxText) {
+        this.addTokenToSkipFromNode(node);
+        super.visitJsxText(node);
+    }
+
     protected addTokenToSkipFromNode(node: ts.Node) {
         const start = node.getStart();
         const end = node.getEnd();
