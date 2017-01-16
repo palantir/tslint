@@ -1457,7 +1457,7 @@
   },
   {
     "ruleName": "strict-type-predicates",
-    "description": "\nWarns for type predicates that are always true or always false.\nWorks for 'typeof' comparisons to constants (e.g. 'typeof foo === \"string\"'), and equality comparison to 'null'/'undefined'.\nDoes not yet work for 'instanceof'.\nDoes *not* warn for 'if (x.y)' where 'x.y' is always truthy. For that, see strict-boolean-expressions.",
+    "description": "\nWarns for type predicates that are always true or always false.\nWorks for 'typeof' comparisons to constants (e.g. 'typeof foo === \"string\"'), and equality comparison to 'null'/'undefined'.\n(TypeScript won't let you compare '1 === 2', but it has an exception for '1 === undefined'.)\nDoes not yet work for 'instanceof'.\nDoes *not* warn for 'if (x.y)' where 'x.y' is always truthy. For that, see strict-boolean-expressions.",
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [

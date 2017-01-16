@@ -99,10 +99,6 @@ declare function get<T>(): T;
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [F]
 
     get<number | undefined>() === undefined;
-    get<string | undefined>() == null;
-    get<string | null>() == undefined;
-    get<string | null>() == null;
-    get<string | undefined>() == undefined;
 
     // 'null' and 'undefined' are not assignable to '{}'
 
@@ -111,6 +107,32 @@ declare function get<T>(): T;
 
     get<{}>() === undefined;
     ~~~~~~~~~~~~~~~~~~~~~~~ [F]
+
+    get<string | undefined>() == null;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Use '=== undefined' instead.]
+
+    get<string | null>() == undefined;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Use '=== null' instead.]
+
+    get<string | null>() == null;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Use '=== null' instead.]
+
+    get<string | undefined>() == undefined;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Use '=== undefined' instead.]
+
+    get<string | undefined>() != null;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Use '!== undefined' instead.]
+
+    get<{}>() == null;
+    ~~~~~~~~~~~~~~~~~ [F]
+
+    get<string | null | undefined>() == null;
+    get<string | null | undefined>() != undefined;
+
+    get<null|undefined>() == null;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [T]
+    get<null|undefined>() != undefined;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [F]
 }
 
 // negation

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2017 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,10 @@ export class Rule extends Lint.Rules.TypedRule {
         return `Expression is always ${value}.`;
     }
 
+    public static FAILURE_STRICT_PREFER_STRICT_EQUALS(value: "null" | "undefined", isPositive: boolean) {
+        return `Use '${isPositive ? "===" : "!=="} ${value}' instead.`;
+    }
+
     public applyWithProgram(srcFile: ts.SourceFile, langSvc: ts.LanguageService): Lint.RuleFailure[] {
         return this.applyWithWalker(new Walker(srcFile, this.getOptions(), langSvc.getProgram()));
     }
@@ -63,19 +67,37 @@ class Walker extends Lint.ProgramAwareRuleWalker {
             return;
         }
 
-        const { expression, predicate, isNullOrUndefined } = exprPred;
         const checker = this.getTypeChecker();
-        const exprType = checker.getTypeAtLocation(expression);
+        const exprType = checker.getTypeAtLocation(exprPred.expression);
         // TODO: could use checker.getBaseConstraintOfType to help with type parameters, but it's not publicly exposed.
         if (Lint.isTypeFlagSet(exprType, ts.TypeFlags.Any | ts.TypeFlags.TypeParameter)) {
             return;
         }
 
-        const value = getConstantBoolean(exprType, predicate);
-        // 'null'/'undefined' are the only two values *not* assignable to '{}'.
-        if (value !== undefined && (isNullOrUndefined || !isEmptyType(checker, exprType))) {
-            this.addFailureAtNode(node, Rule.FAILURE_STRING(value === isPositive));
+        const fail = (failure: string) => this.addFailureAtNode(node, failure);
+
+        if (exprPred.isPlain) {
+            const { predicate, isNullOrUndefined } = exprPred;
+            const value = getConstantBoolean(exprType, predicate);
+            // 'null'/'undefined' are the only two values *not* assignable to '{}'.
+            if (value !== undefined && (isNullOrUndefined || !isEmptyType(checker, exprType))) {
+                fail(Rule.FAILURE_STRING(value === isPositive));
+            }
+        } else {
+            const result = testNonStrictNullUndefined(exprType);
+            switch (typeof result) {
+                case "boolean":
+                    fail(Rule.FAILURE_STRING(result === isPositive));
+                    break;
+
+                case "string":
+                    fail(Rule.FAILURE_STRICT_PREFER_STRICT_EQUALS(result as "null" | "undefined", isPositive));
+                    break;
+
+                default:
+            }
         }
+
     }
 }
 
@@ -94,25 +116,24 @@ function getTypePredicateOneWay(left: ts.Expression, right: ts.Expression, isStr
             }
             const expression = (left as ts.TypeOfExpression).expression;
             const kind = (right as ts.StringLiteral).text;
-            return { expression, predicate: getTypePredicateForKind(kind), isNullOrUndefined: kind === "undefined" };
+            return { isPlain: true, expression, predicate: getTypePredicateForKind(kind), isNullOrUndefined: kind === "undefined" };
 
         case ts.SyntaxKind.NullKeyword:
-            return nullOrUndefined(false);
+            return nullOrUndefined(ts.TypeFlags.Null);
 
         case ts.SyntaxKind.Identifier:
             if ((right as ts.Identifier).text === "undefined") {
-                return nullOrUndefined(true);
+                return nullOrUndefined(undefinedFlags);
             }
 
         default:
             return undefined;
     }
 
-    function nullOrUndefined(isUndefined: boolean): TypePredicate {
-        const flags = isStrictEquals
-            ? isUndefined ? undefinedFlags : ts.TypeFlags.Null
-            : (ts.TypeFlags.Null | undefinedFlags);
-        return { expression: left, predicate: flagPredicate(flags), isNullOrUndefined: true };
+    function nullOrUndefined(flags: ts.TypeFlags): TypePredicate {
+        return isStrictEquals
+            ? { isPlain: true, expression: left, predicate: flagPredicate(flags), isNullOrUndefined: true }
+            : { isPlain: false, expression: left };
     }
 }
 
@@ -122,10 +143,17 @@ function isEmptyType(checker: ts.TypeChecker, type: ts.Type) {
 
 const undefinedFlags = ts.TypeFlags.Undefined | ts.TypeFlags.Void;
 
-interface TypePredicate {
+type TypePredicate = PlainTypePredicate | NonStrictNullUndefinedPredicate;
+interface PlainTypePredicate {
+    isPlain: true;
     expression: ts.Expression;
     predicate: Predicate;
     isNullOrUndefined: boolean;
+}
+/** For `== null` and the like. */
+interface NonStrictNullUndefinedPredicate {
+    isPlain: false;
+    expression: ts.Expression;
 }
 
 type Predicate = (type: ts.Type) => boolean;
@@ -168,13 +196,9 @@ function isFunction(t: ts.Type): boolean {
 
 /** Returns a boolean value if that should always be the result of a type predicate. */
 function getConstantBoolean(type: ts.Type, predicate: (t: ts.Type) => boolean): boolean | undefined {
-    if (!Lint.isUnionType(type)) {
-        return predicate(type);
-    }
-
     let anyTrue = false;
     let anyFalse = false;
-    for (const ty of type.types) {
+    for (const ty of unionParts(type)) {
         if (predicate(ty)) {
             anyTrue = true;
         } else {
@@ -189,9 +213,31 @@ function getConstantBoolean(type: ts.Type, predicate: (t: ts.Type) => boolean): 
     return anyTrue;
 }
 
+/** Returns bool for always/never true, or a string to recommend strict equality. */
+function testNonStrictNullUndefined(type: ts.Type): boolean | string | undefined {
+    let anyNull = false;
+    let anyUndefined = false;
+    let anyOther = false;
+    for (const ty of unionParts(type)) {
+        if (Lint.isTypeFlagSet(ty, ts.TypeFlags.Null)) {
+            anyNull = true;
+        } else if (Lint.isTypeFlagSet(ty, undefinedFlags)) {
+            anyUndefined = true;
+        } else {
+            anyOther = true;
+        }
+    }
+
+    return !anyOther ? true
+        : anyNull && anyUndefined ? undefined
+        : anyNull ? "null"
+        : anyUndefined ? "undefined"
+        : false;
+}
+
 interface Equals {
     isPositive: boolean; // True for "===" and "=="
-    isStrict: boolean;
+    isStrict: boolean; // True for "===" and "!=="
 }
 
 function getEquals(kind: ts.SyntaxKind): Equals | undefined {
@@ -207,4 +253,13 @@ function getEquals(kind: ts.SyntaxKind): Equals | undefined {
         default:
             return undefined;
     }
+}
+
+function unionParts(type: ts.Type) {
+    return isUnionType(type) ? type.types : [type];
+}
+
+/** Type predicate to test for a union type. */
+function isUnionType(type: ts.Type): type is ts.UnionType {
+    return Lint.isTypeFlagSet(type, ts.TypeFlags.Union);
 }
