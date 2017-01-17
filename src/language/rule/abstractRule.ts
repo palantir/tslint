@@ -17,7 +17,8 @@
 
 import * as ts from "typescript";
 
-import {arrayify, doesIntersect} from "../utils";
+import {arrayify} from "../../utils";
+import {doesIntersect} from "../utils";
 import {IWalker} from "../walker";
 import {IDisabledInterval, IOptions, IRule, IRuleMetadata, RuleFailure, RuleLevel} from "./rule";
 
@@ -57,8 +58,8 @@ export abstract class AbstractRule implements IRule {
 
         this.options = {
             disabledIntervals,
-            ruleLevel,
             ruleArguments,
+            ruleLevel,
             ruleName,
         };
     }

@@ -182,8 +182,8 @@ class Linter {
         // walk the code first to find all the intervals where rules are disabled
         const rulesWalker = new EnableDisableRulesWalker(sourceFile, {
             disabledIntervals: [],
-            ruleLevel: RuleLevel.ERROR,
             ruleArguments: [],
+            ruleLevel: RuleLevel.ERROR,
             ruleName: "",
         }, configurationRules);
         rulesWalker.walk(sourceFile);

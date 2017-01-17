@@ -18,6 +18,7 @@ import * as colors from "colors";
 
 import * as ts from "typescript";
 
+import {RuleLevel} from "../../src/language/rule/rule";
 import {IFormatter, RuleFailure, TestUtils} from "../lint";
 
 describe("CodeFrame Formatter", () => {
@@ -35,10 +36,10 @@ describe("CodeFrame Formatter", () => {
         const maxPosition = sourceFile.getFullWidth();
 
         const failures = [
-            new RuleFailure(sourceFile, 0, 1, "first failure", "first-name"),
-            new RuleFailure(sourceFile, 2, 3, "&<>'\" should be escaped", "escape"),
-            new RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name"),
-            new RuleFailure(sourceFile, 0, maxPosition, "full failure", "full-name"),
+            new RuleFailure(sourceFile, 0, 1, "first failure", RuleLevel.ERROR, "first-name"),
+            new RuleFailure(sourceFile, 2, 3, "&<>'\" should be escaped", RuleLevel.ERROR, "escape"),
+            new RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", RuleLevel.ERROR, "last-name"),
+            new RuleFailure(sourceFile, 0, maxPosition, "full failure", RuleLevel.ERROR, "full-name"),
         ];
 
         const expectedResultPlain =

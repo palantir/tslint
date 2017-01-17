@@ -40,7 +40,7 @@ export function getFormatter(formatterName: string) {
 
 export function applyRuleOnFile(fileName: string, Rule: any, ruleValue: any = true): Lint.RuleFailure[] {
     const sourceFile = getSourceFile(fileName);
-    const rule = new Rule("", ruleValue, Rule.ruleLevel, []);
+    const rule = new Rule("", ruleValue, []);
     return rule.apply(sourceFile);
 }
 
