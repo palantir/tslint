@@ -47,8 +47,7 @@ export class Formatter extends AbstractFormatter {
             fixLines.push("");   // add a blank line between fixes and failures
         }
 
-    private mapToMessages(failures: RuleFailure[]): string[] {
-        return failures.map((failure: RuleFailure) => {
+        const errorLines = failures.map((failure: RuleFailure) => {
             const fileName = failure.getFileName();
             const failureString = failure.getFailure();
 
@@ -58,5 +57,6 @@ export class Formatter extends AbstractFormatter {
             return `${RuleLevel[failure.getRuleLevel()]}: ${fileName}${positionTuple}: ${failureString}`;
         });
 
+        return fixLines.concat(errorLines).join("\n") + "\n";
     }
 }

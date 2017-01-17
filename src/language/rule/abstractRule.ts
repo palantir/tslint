@@ -52,7 +52,10 @@ export abstract class AbstractRule implements IRule {
             ruleArguments = arrayify(value.options);
         }
 
-        if (value.level === "warn") {
+        if (value.level &&
+            ( value.level.toLowerCase() === "warn" ||
+              value.level.toLowerCase() === "warning")) {
+
             ruleLevel = RuleLevel.WARNING;
         }
 
