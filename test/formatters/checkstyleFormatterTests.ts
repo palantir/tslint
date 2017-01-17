@@ -42,19 +42,19 @@ describe("Checkstyle Formatter", () => {
             new RuleFailure(sourceFile1, 2, 3, "&<>'\" should be escaped", RuleLevel.ERROR, "escape"),
             new RuleFailure(sourceFile1, maxPosition1 - 1, maxPosition1, "last failure", RuleLevel.ERROR, "last-name"),
             new RuleFailure(sourceFile2, 0, 1, "first failure", RuleLevel.ERROR, "first-name"),
-            new RuleFailure(sourceFile2, 2, 3, "&<>'\" should be escaped", RuleLevel.ERROR, "escape"),
-            new RuleFailure(sourceFile2, maxPosition2 - 1, maxPosition2, "last failure", RuleLevel.ERROR, "last-name"),
+            new RuleFailure(sourceFile2, 2, 3, "&<>'\" should be escaped", RuleLevel.WARNING, "escape"),
+            new RuleFailure(sourceFile2, maxPosition2 - 1, maxPosition2, "last failure", RuleLevel.WARNING, "last-name"),
         ];
         const expectedResult =
             '<?xml version="1.0" encoding="utf-8"?><checkstyle version="4.3">' +
             `<file name="${TEST_FILE_1}">` +
-            '<error line="1" column="1" severity="warning" message="first failure" source="failure.tslint.first-name" />' +
-            '<error line="1" column="3" severity="warning" message="&amp;&lt;&gt;&#39;&quot; should be escaped" ' +
+            '<error line="1" column="1" severity="error" message="first failure" source="failure.tslint.first-name" />' +
+            '<error line="1" column="3" severity="error" message="&amp;&lt;&gt;&#39;&quot; should be escaped" ' +
             'source="failure.tslint.escape" />' +
-            '<error line="6" column="3" severity="warning" message="last failure" source="failure.tslint.last-name" />' +
+            '<error line="6" column="3" severity="error" message="last failure" source="failure.tslint.last-name" />' +
             "</file>" +
             `<file name="${TEST_FILE_2}">` +
-            '<error line="1" column="1" severity="warning" message="first failure" source="failure.tslint.first-name" />' +
+            '<error line="1" column="1" severity="error" message="first failure" source="failure.tslint.first-name" />' +
             '<error line="1" column="3" severity="warning" message="&amp;&lt;&gt;&#39;&quot; should be escaped" ' +
             'source="failure.tslint.escape" />' +
             '<error line="6" column="3" severity="warning" message="last failure" source="failure.tslint.last-name" />' +
