@@ -35,25 +35,25 @@ describe("PMD Formatter", () => {
         const failures = [
             new RuleFailure(sourceFile, 0, 1, "first failure", RuleLevel.ERROR, "first-name"),
             new RuleFailure(sourceFile, 2, 3, "&<>'\" should be escaped", RuleLevel.ERROR, "escape"),
-            new RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", RuleLevel.ERROR, "last-name"),
-            new RuleFailure(sourceFile, 0, maxPosition, "full failure", RuleLevel.ERROR, "full-name"),
+            new RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", RuleLevel.WARNING, "last-name"),
+            new RuleFailure(sourceFile, 0, maxPosition, "full failure", RuleLevel.WARNING, "full-name"),
         ];
         const expectedResult =
             "<pmd version=\"tslint\">" +
                 "<file name=\"formatters/pmdFormatter.test.ts\">" +
-                    "<violation begincolumn=\"1\" beginline=\"1\" priority=\"1\" rule=\"first failure\"> " +
+                    "<violation begincolumn=\"1\" beginline=\"1\" priority=\"3\" rule=\"first failure\"> " +
                     "</violation>" +
                 "</file>" +
                 "<file name=\"formatters/pmdFormatter.test.ts\">" +
-                    "<violation begincolumn=\"3\" beginline=\"1\" priority=\"1\" rule=\"&amp;&lt;&gt;&#39;&quot; should be escaped\"> " +
+                    "<violation begincolumn=\"3\" beginline=\"1\" priority=\"3\" rule=\"&amp;&lt;&gt;&#39;&quot; should be escaped\"> " +
                     "</violation>" +
                 "</file>" +
                 "<file name=\"formatters/pmdFormatter.test.ts\">" +
-                    "<violation begincolumn=\"3\" beginline=\"6\" priority=\"1\" rule=\"last failure\"> " +
+                    "<violation begincolumn=\"3\" beginline=\"6\" priority=\"4\" rule=\"last failure\"> " +
                     "</violation>" +
                 "</file>" +
                 "<file name=\"formatters/pmdFormatter.test.ts\">" +
-                    "<violation begincolumn=\"1\" beginline=\"1\" priority=\"1\" rule=\"full failure\"> " +
+                    "<violation begincolumn=\"1\" beginline=\"1\" priority=\"4\" rule=\"full failure\"> " +
                     "</violation>" +
                 "</file>" +
             "</pmd>";
