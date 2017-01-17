@@ -52,5 +52,21 @@ class Constructor2 {
     ~~~~~~~~~~~~~~~~~ [0]
 }
 
+// Works for type literal, just like interface
+type T = {
+    x(): void;
+    y: number;
+    ~~~~~~~~~~ [0]
+}
+
+// Works for class inside object literal
+const o = {
+    foo: class C {
+        x(): void;
+        y: number;
+        ~~~~~~~~~~ [0]
+    }
+}
+
 [0]: Declaration of public instance member variable not allowed to appear after declaration of public instance member function
 

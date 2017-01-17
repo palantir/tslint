@@ -16,9 +16,7 @@
  */
 
 import { dedent } from "./utils";
-
-// tslint:disable-next-line no-var-requires
-const updateNotifier = require("update-notifier");
+import updateNotifier = require("update-notifier");
 
 export function updateNotifierCheck(): void {
     try {

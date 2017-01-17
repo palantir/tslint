@@ -34,7 +34,7 @@ export class SyntaxWalker {
         this.walkChildren(node);
     }
 
-    protected visitArrowFunction(node: ts.FunctionLikeDeclaration) {
+    protected visitArrowFunction(node: ts.ArrowFunction) {
         this.walkChildren(node);
     }
 
@@ -361,7 +361,7 @@ export class SyntaxWalker {
                 break;
 
             case ts.SyntaxKind.ArrowFunction:
-                this.visitArrowFunction(node as ts.FunctionLikeDeclaration);
+                this.visitArrowFunction(node as ts.ArrowFunction);
                 break;
 
             case ts.SyntaxKind.BinaryExpression:

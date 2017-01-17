@@ -47,17 +47,13 @@ interface IIncrementorState {
 }
 
 // a map of incrementors and whether or not they are only used to index into an array reference in the for loop
-interface IncrementorMap {
-    [name: string]: IIncrementorState;
-}
+type IncrementorMap = Map<string, IIncrementorState>;
 
-class PreferForOfWalker extends Lint.BlockScopeAwareRuleWalker<{}, IncrementorMap> {
-    public createScope() {
-        return {};
-    }
+class PreferForOfWalker extends Lint.BlockScopeAwareRuleWalker<void, IncrementorMap> {
+    public createScope() {} // tslint:disable-line:no-empty
 
     public createBlockScope() {
-        return {};
+        return new Map();
     }
 
     protected visitForStatement(node: ts.ForStatement) {
@@ -69,31 +65,31 @@ class PreferForOfWalker extends Lint.BlockScopeAwareRuleWalker<{}, IncrementorMa
             indexVariableName = indexVariable.getText();
 
             // store `for` loop state
-            currentBlockScope[indexVariableName] = {
+            currentBlockScope.set(indexVariableName, {
                 arrayToken: arrayToken as ts.Identifier,
                 forLoopEndPosition: node.incrementor.end + 1,
                 onlyArrayReadAccess: true,
-            };
+            });
         }
 
         super.visitForStatement(node);
 
         if (indexVariableName != null) {
-            const incrementorState = currentBlockScope[indexVariableName];
+            const incrementorState = currentBlockScope.get(indexVariableName)!;
             if (incrementorState.onlyArrayReadAccess) {
                 this.addFailureFromStartToEnd(node.getStart(), incrementorState.forLoopEndPosition, Rule.FAILURE_STRING);
             }
 
             // remove current `for` loop state
-            delete currentBlockScope[indexVariableName];
+            currentBlockScope.delete(indexVariableName);
         }
     }
 
     protected visitIdentifier(node: ts.Identifier) {
-        const incrementorScope = this.findBlockScope((scope) => scope[node.text] != null);
+        const incrementorScope = this.findBlockScope((scope) => scope.has(node.text));
 
         if (incrementorScope != null) {
-            const incrementorState = incrementorScope[node.text];
+            const incrementorState = incrementorScope.get(node.text);
 
             // check if the identifier is an iterator and is currently in the `for` loop body
             if (incrementorState != null && incrementorState.arrayToken != null && incrementorState.forLoopEndPosition < node.getStart()) {
@@ -126,7 +122,7 @@ class PreferForOfWalker extends Lint.BlockScopeAwareRuleWalker<{}, IncrementorMa
             const syntaxList = forLoop.initializer.getChildAt(1);
             if (syntaxList.kind === ts.SyntaxKind.SyntaxList && syntaxList.getChildCount() === 1) {
                 const assignment = syntaxList.getChildAt(0);
-                if (assignment.kind === ts.SyntaxKind.VariableDeclaration) {
+                if (assignment.kind === ts.SyntaxKind.VariableDeclaration && assignment.getChildCount() === 3) {
                     const value = assignment.getChildAt(2).getText();
                     if (value === "0") {
                         indexVariable = assignment.getChildAt(0) as ts.Identifier;
@@ -201,8 +197,6 @@ class PreferForOfWalker extends Lint.BlockScopeAwareRuleWalker<{}, IncrementorMa
                     }
                 }
             }
-        } else {
-            return false;
         }
         return false;
     }

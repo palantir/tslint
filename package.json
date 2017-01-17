@@ -1,6 +1,6 @@
 {
   "name": "tslint",
-  "version": "4.2.0",
+  "version": "4.3.1",
   "description": "An extensible static analysis linter for the TypeScript language",
   "bin": {
     "tslint": "./bin/tslint"
@@ -42,7 +42,6 @@
     "glob": "^7.1.1",
     "optimist": "~0.6.0",
     "resolve": "^1.1.7",
-    "underscore.string": "^3.3.4",
     "update-notifier": "^1.0.2"
   },
   "peerDependencies": {
@@ -60,8 +59,7 @@
     "@types/node": "^6.0.56",
     "@types/optimist": "0.0.29",
     "@types/resolve": "0.0.4",
-    "@types/underscore": "^1.7.36",
-    "@types/underscore.string": "0.0.30",
+    "@types/update-notifier": "^1.0.0",
     "chai": "^3.5.0",
     "js-yaml": "^3.7.0",
     "mocha": "^3.2.0",
@@ -71,5 +69,8 @@
     "tslint-test-config-non-relative": "file:test/external/tslint-test-config-non-relative",
     "typescript": "2.1.4"
   },
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=4.2.6"
+  }
 }

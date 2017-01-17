@@ -238,7 +238,7 @@ class OneLineWalker extends Lint.RuleWalker {
         super.visitConstructorDeclaration(node);
     }
 
-    public visitArrowFunction(node: ts.FunctionLikeDeclaration) {
+    public visitArrowFunction(node: ts.ArrowFunction) {
         const body = node.body;
         if (body != null && body.kind === ts.SyntaxKind.Block) {
             const arrowToken = Lint.childOfKind(node, ts.SyntaxKind.EqualsGreaterThanToken);

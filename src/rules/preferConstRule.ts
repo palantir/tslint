@@ -55,7 +55,15 @@ class PreferConstWalker extends Lint.BlockScopeAwareRuleWalker<{}, ScopeInfo> {
     }
 
     private static collectInVariableDeclarationList(node: ts.VariableDeclarationList, scopeInfo: ScopeInfo) {
-        if (isCombinedNodeFlagSet(node, ts.NodeFlags.Let) && !isCombinedModifierFlagSet(node, ts.ModifierFlags.Export)) {
+        let allowConst: boolean;
+        if ((ts as any).getCombinedModifierFlags === undefined) {
+            // for back-compat, TypeScript < 2.1
+            allowConst = isCombinedNodeFlagSet(node, ts.NodeFlags.Let)
+                && !Lint.hasModifier(node.parent!.modifiers, ts.SyntaxKind.ExportKeyword);
+        } else {
+            allowConst = isCombinedNodeFlagSet(node, ts.NodeFlags.Let) && !isCombinedModifierFlagSet(node, ts.ModifierFlags.Export);
+        }
+        if (allowConst) {
             for (const decl of node.declarations) {
                 PreferConstWalker.addDeclarationName(decl.name, node, scopeInfo);
             }
@@ -113,13 +121,13 @@ class PreferConstWalker extends Lint.BlockScopeAwareRuleWalker<{}, ScopeInfo> {
     }
 
     public onBlockScopeEnd() {
-        const seenLetStatements: { [startPosition: string]: boolean } = {};
+        const seenLetStatements = new Set<ts.VariableDeclarationList>();
         for (const usage of this.getCurrentBlockScope().getConstCandiates()) {
             let fix: Lint.Fix | undefined;
-            if (!usage.reassignedSibling && !seenLetStatements[usage.letStatement.getStart().toString()]) {
+            if (!usage.reassignedSibling && !seenLetStatements.has(usage.letStatement)) {
                 // only fix if all variables in the `let` statement can use `const`
                 fix = this.createFix(this.createReplacement(usage.letStatement.getStart(), "let".length, "const"));
-                seenLetStatements[usage.letStatement.getStart().toString()] = true;
+                seenLetStatements.add(usage.letStatement);
             }
             this.addFailureAtNode(usage.identifier, Rule.FAILURE_STRING_FACTORY(usage.identifier.text), fix);
         }
@@ -195,34 +203,34 @@ interface IConstCandidate {
     reassignedSibling: boolean;
 }
 
+interface UsageInfo {
+    letStatement: ts.VariableDeclarationList;
+    identifier: ts.Identifier;
+    usageCount: number;
+}
+
 class ScopeInfo {
     public currentVariableDeclaration: ts.VariableDeclaration;
-    private identifierUsages: {
-        [varName: string]: {
-            letStatement: ts.VariableDeclarationList,
-            identifier: ts.Identifier,
-            usageCount: number,
-        },
-    } = {};
+    private identifierUsages = new Map<string, UsageInfo>();
     // variable names grouped by common `let` statements
-    private sharedLetSets: {[letStartIndex: string]: string[]} = {};
+    private sharedLetSets = new Map<ts.VariableDeclarationList, string[]>();
 
     public addVariable(identifier: ts.Identifier, letStatement: ts.VariableDeclarationList) {
-        this.identifierUsages[identifier.text] = { letStatement, identifier, usageCount: 0 };
-        const letSetKey = letStatement.getStart().toString();
-        if (this.sharedLetSets[letSetKey] == null) {
-            this.sharedLetSets[letSetKey] = [];
+        this.identifierUsages.set(identifier.text, { letStatement, identifier, usageCount: 0 });
+        let shared = this.sharedLetSets.get(letStatement);
+        if (shared === undefined) {
+            shared = [];
+            this.sharedLetSets.set(letStatement, shared);
         }
-        this.sharedLetSets[letSetKey].push(identifier.text);
+        shared.push(identifier.text);
     }
 
     public getConstCandiates() {
         const constCandidates: IConstCandidate[] = [];
-        for (const letSetKey of Object.keys(this.sharedLetSets)) {
-            const variableNames = this.sharedLetSets[letSetKey];
-            const anyReassigned = variableNames.some((key) => this.identifierUsages[key].usageCount > 0);
+        this.sharedLetSets.forEach((variableNames) => {
+            const anyReassigned = variableNames.some((key) => this.identifierUsages.get(key)!.usageCount > 0);
             for (const variableName of variableNames) {
-                const usage = this.identifierUsages[variableName];
+                const usage = this.identifierUsages.get(variableName)!;
                 if (usage.usageCount === 0) {
                     constCandidates.push({
                         identifier: usage.identifier,
@@ -231,13 +239,14 @@ class ScopeInfo {
                     });
                 }
             }
-        }
+        });
         return constCandidates;
     }
 
     public incrementVariableUsage(varName: string) {
-        if (this.identifierUsages[varName] != null) {
-            this.identifierUsages[varName].usageCount++;
+        const usages = this.identifierUsages.get(varName);
+        if (usages !== undefined) {
+            usages.usageCount++;
             return true;
         }
         return false;

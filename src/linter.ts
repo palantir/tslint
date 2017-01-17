@@ -16,6 +16,7 @@
  */
 
 import * as fs from "fs";
+import * as path from "path";
 import * as ts from "typescript";
 
 import {
@@ -42,7 +43,7 @@ import { arrayify, dedent } from "./utils";
  * Linter that can lint multiple files in consecutive runs.
  */
 class Linter {
-    public static VERSION = "4.2.0";
+    public static VERSION = "4.3.1";
 
     public static findConfiguration = findConfiguration;
     public static findConfigurationPath = findConfigurationPath;
@@ -58,12 +59,7 @@ class Linter {
      */
     public static createProgram(configFile: string, projectDirectory?: string): ts.Program {
         if (projectDirectory === undefined) {
-            const lastSeparator = configFile.lastIndexOf("/");
-            if (lastSeparator < 0) {
-                projectDirectory = ".";
-            } else {
-                projectDirectory = configFile.substring(0, lastSeparator + 1);
-            }
+            projectDirectory = path.dirname(configFile);
         }
 
         const { config } = ts.readConfigFile(configFile, ts.sys.readFile);
@@ -141,9 +137,7 @@ class Linter {
 
     public getResult(): LintResult {
         let formatter: IFormatter;
-        const formattersDirectory = this.options.formattersDirectory !== undefined
-            ? getRelativePath(this.options.formattersDirectory)
-            : undefined;
+        const formattersDirectory = getRelativePath(this.options.formattersDirectory);
 
         const formatterName = this.options.formatter || "prose";
         const Formatter = findFormatter(formatterName, formattersDirectory);

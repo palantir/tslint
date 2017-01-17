@@ -19,11 +19,11 @@ import * as ts from "typescript";
 
 import {AbstractRule} from "./language/rule/abstractRule";
 import {IOptions} from "./language/rule/rule";
-import {scanAllTokens} from "./language/utils";
-import {SkippableTokenAwareRuleWalker} from "./language/walker/skippableTokenAwareRuleWalker";
+import {forEachComment, TokenPosition} from "./language/utils";
+import {RuleWalker} from "./language/walker/ruleWalker";
 import {IEnableDisablePosition} from "./ruleLoader";
 
-export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
+export class EnableDisableRulesWalker extends RuleWalker {
     public enableDisableRuleMap: {[rulename: string]: IEnableDisablePosition[]} = {};
 
     constructor(sourceFile: ts.SourceFile, options: IOptions, rules: {[name: string]: any}) {
@@ -42,24 +42,8 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
     }
 
     public visitSourceFile(node: ts.SourceFile) {
-        super.visitSourceFile(node);
-        const scan = ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, node.text);
-
-        scanAllTokens(scan, (scanner: ts.Scanner) => {
-            const startPos = scanner.getStartPos();
-            if (this.tokensToSkipStartEndMap[startPos] != null) {
-                // tokens to skip are places where the scanner gets confused about what the token is, without the proper context
-                // (specifically, regex, identifiers, and templates). So skip those tokens.
-                scanner.setTextPos(this.tokensToSkipStartEndMap[startPos]);
-                return;
-            }
-
-            if (scanner.getToken() === ts.SyntaxKind.MultiLineCommentTrivia ||
-                scanner.getToken() === ts.SyntaxKind.SingleLineCommentTrivia) {
-                const commentText = scanner.getTokenText();
-                const startPosition = scanner.getTokenPos();
-                this.handlePossibleTslintSwitch(commentText, startPosition, node, scanner);
-            }
+        forEachComment(node, (fullText, _kind, pos) => {
+            return this.handlePossibleTslintSwitch(fullText.substring(pos.tokenStart, pos.end), node, pos);
         });
     }
 
@@ -96,7 +80,7 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
         return ruleStateMap[ruleStateMap.length - 1].isEnabled;
     }
 
-    private handlePossibleTslintSwitch(commentText: string, startingPosition: number, node: ts.SourceFile, scanner: ts.Scanner) {
+    private handlePossibleTslintSwitch(commentText: string, node: ts.SourceFile, pos: TokenPosition) {
         // regex is: start of string followed by "/*" or "//" followed by any amount of whitespace followed by "tslint:"
         if (commentText.match(/^(\/\*|\/\/)\s*tslint:/)) {
             const commentTextParts = commentText.split(":");
@@ -117,7 +101,7 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
                     rulesList = commentTextParts[1].split(/\s+/).slice(1);
 
                     // remove empty items and potential comment end.
-                    rulesList = rulesList.filter((item) => !!item && item.indexOf("*/") === -1);
+                    rulesList = rulesList.filter((item) => !!item && !item.includes("*/"));
 
                     // potentially there were no items, so default to `all`.
                     rulesList = rulesList.length > 0 ? rulesList : ["all"];
@@ -149,18 +133,18 @@ export class EnableDisableRulesWalker extends SkippableTokenAwareRuleWalker {
 
                     if (isCurrentLine) {
                         // start at the beginning of the current line
-                        start = this.getStartOfLinePosition(node, startingPosition);
+                        start = this.getStartOfLinePosition(node, pos.tokenStart);
                         // end at the beginning of the next line
-                        end = scanner.getTextPos() + 1;
+                        end = pos.end + 1;
                     } else if (isNextLine) {
                         // start at the current position
-                        start = startingPosition;
+                        start = pos.tokenStart;
                         // end at the beginning of the line following the next line
-                        end = this.getStartOfLinePosition(node, startingPosition, 2);
+                        end = this.getStartOfLinePosition(node, pos.tokenStart, 2);
                     } else {
                         // disable rule for the rest of the file
                         // start at the current position, but skip end position
-                        start = startingPosition;
+                        start = pos.tokenStart;
                         end = undefined;
                     }
 

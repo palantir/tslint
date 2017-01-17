@@ -18,6 +18,7 @@
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { arraysAreEqual, Equal } from "../utils";
 
 import { getOverloadKey, isSignatureDeclaration } from "./adjacentOverloadSignaturesRule";
 
@@ -28,6 +29,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Warns for any two overloads that could be unified into one by using a union or an optional/rest parameter.",
         optionsDescription: "Not configurable.",
         options: null,
+        optionExamples: ["true"],
         type: "typescript",
         typescriptOnly: true,
     };
@@ -79,6 +81,9 @@ class Walker extends Lint.RuleWalker {
         this.checkOverloads(statements, (statement) => {
             if (statement.kind === ts.SyntaxKind.FunctionDeclaration) {
                 const fn = statement as ts.FunctionDeclaration;
+                if (fn.body) {
+                    return undefined;
+                }
                 return fn.name && { signature: fn, key: fn.name.text };
             } else {
                 return undefined;
@@ -89,7 +94,7 @@ class Walker extends Lint.RuleWalker {
     private checkMembers(members: Array<ts.TypeElement | ts.ClassElement>, typeParameters?: ts.TypeParameterDeclaration[]) {
         this.checkOverloads(members, getOverloadName, typeParameters);
         function getOverloadName(member: ts.TypeElement | ts.ClassElement) {
-            if (!isSignatureDeclaration(member)) {
+            if (!isSignatureDeclaration(member) || (member as ts.MethodDeclaration).body) {
                 return undefined;
             }
             const key = getOverloadKey(member);
@@ -198,20 +203,17 @@ type GetOverload<T> = (node: T) => { signature: ts.SignatureDeclaration, key: st
  */
 type IsTypeParameter = (typeName: string) => boolean;
 
-/** Return true if both parameters are equal. */
-type Equal<T> = (a: T, b: T) => boolean;
-
 /** Given type parameters, returns a function to test whether a type is one of those parameters. */
 function getIsTypeParameter(typeParameters?: ts.TypeParameterDeclaration[]): IsTypeParameter {
     if (!typeParameters) {
         return () => false;
     }
 
-    const set: { [key: string]: true } = Object.create(null);
+    const set = new Set<string>();
     for (const t of typeParameters) {
-        set[t.getText()] = true;
+        set.add(t.getText());
     }
-    return (typeName: string) => set[typeName];
+    return (typeName: string) => set.has(typeName);
 }
 
 /** True if any of the outer type parameters are used in a signature. */
@@ -234,9 +236,7 @@ function signatureUsesTypeParameter(sig: ts.SignatureDeclaration, isTypeParamete
  * Does not rely on overloads being adjacent. This is similar to code in adjacentOverloadSignaturesRule.ts, but not the same.
  */
 function collectOverloads<T>(nodes: T[], getOverload: GetOverload<T>): ts.SignatureDeclaration[][] {
-    const map: { [key: string]: ts.SignatureDeclaration[] } = Object.create(null);
-    // Array of values in the map.
-    const res: ts.SignatureDeclaration[][] = [];
+    const map = new Map<string, ts.SignatureDeclaration[]>();
     for (const sig of nodes) {
         const overload = getOverload(sig);
         if (!overload) {
@@ -244,16 +244,14 @@ function collectOverloads<T>(nodes: T[], getOverload: GetOverload<T>): ts.Signat
         }
 
         const { signature, key } = overload;
-        let overloads = map[key];
+        const overloads = map.get(key);
         if (overloads) {
             overloads.push(signature);
         } else {
-            overloads = [signature];
-            res.push(overloads);
-            map[key] = overloads;
+            map.set(key, [signature]);
         }
     }
-    return res;
+    return Array.from(map.values());
 }
 
 function parametersAreEqual(a: ts.ParameterDeclaration, b: ts.ParameterDeclaration): boolean {
@@ -296,8 +294,4 @@ function forEachPair<T>(values: T[], action: (a: T, b: T) => void): void {
             action(values[i], values[j]);
         }
     }
-}
-
-function arraysAreEqual<T>(a: T[] | undefined, b: T[] | undefined, eq: Equal<T>): boolean {
-    return a === b || !!a && !!b && a.length === b.length && a.every((x, idx) => eq(x, b[idx]));
 }

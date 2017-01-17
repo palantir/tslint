@@ -27,7 +27,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             `because only Errors produce proper stack traces.`,
         hasFix: true,
         options: null,
-        optionsDescription: "",
+        optionsDescription: "Not configurable.",
         type: "functionality",
         typescriptOnly: false,
     };

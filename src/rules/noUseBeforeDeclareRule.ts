@@ -43,9 +43,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-interface VisitedVariables {
-    [varName: string]: boolean;
-}
+type VisitedVariables = Set<string>;
 
 class NoUseBeforeDeclareWalker extends Lint.ScopeAwareRuleWalker<VisitedVariables> {
     private importedPropertiesPositions: number[] = [];
@@ -55,7 +53,7 @@ class NoUseBeforeDeclareWalker extends Lint.ScopeAwareRuleWalker<VisitedVariable
     }
 
     public createScope(): VisitedVariables {
-        return {};
+        return new Set<string>();
     }
 
     public visitBindingElement(node: ts.BindingElement) {
@@ -112,11 +110,11 @@ class NoUseBeforeDeclareWalker extends Lint.ScopeAwareRuleWalker<VisitedVariable
         const currentScope = this.getCurrentScope();
 
         // only validate on the first variable declaration within the current scope
-        if (isSingleVariable && currentScope[variableName] == null) {
+        if (isSingleVariable && !currentScope.has(variableName)) {
             this.validateUsageForVariable(variableName, node.getStart());
         }
 
-        currentScope[variableName] = true;
+        currentScope.add(variableName);
         super.visitVariableDeclaration(node);
     }
 

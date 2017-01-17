@@ -40,6 +40,14 @@ export function objectify(arg: any): any {
 }
 
 /**
+ * Replace hyphens in a rule name by upper-casing the letter after them.
+ * E.g. "foo-bar" -> "fooBar"
+ */
+export function camelize(stringWithHyphens: string): string {
+    return stringWithHyphens.replace(/-(.)/g, (_, nextLetter) => nextLetter.toUpperCase());
+}
+
+/**
  * Removes leading indents from a template string without removing all leading whitespace
  */
 export function dedent(strings: TemplateStringsArray, ...values: string[]) {
@@ -92,3 +100,17 @@ export function stripComments(content: string): string {
     });
     return result;
 };
+
+/**
+ * Escapes all special characters in RegExp pattern to avoid broken regular expressions and ensure proper matches
+ */
+export function escapeRegExp(re: string): string {
+    return re.replace(/[.+*?|^$[\]{}()\\]/g, "\\$&");
+}
+
+/** Return true if both parameters are equal. */
+export type Equal<T> = (a: T, b: T) => boolean;
+
+export function arraysAreEqual<T>(a: T[] | undefined, b: T[] | undefined, eq: Equal<T>): boolean {
+    return a === b || !!a && !!b && a.length === b.length && a.every((x, idx) => eq(x, b[idx]));
+}
