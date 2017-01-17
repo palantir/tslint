@@ -18,20 +18,20 @@
 import * as ts from "typescript";
 
 import {AbstractRule} from "./language/rule/abstractRule";
-import {IOptions} from "./language/rule/rule";
 import {forEachComment, TokenPosition} from "./language/utils";
-import {RuleWalker} from "./language/walker/ruleWalker";
 import {IEnableDisablePosition} from "./ruleLoader";
 
-export class EnableDisableRulesWalker extends RuleWalker {
-    public enableDisableRuleMap: {[rulename: string]: IEnableDisablePosition[]} = {};
+export class EnableDisableRulesWalker {
+    private enableDisableRuleMap: {[rulename: string]: IEnableDisablePosition[]};
+    private enabledRules: string[];
 
-    constructor(sourceFile: ts.SourceFile, options: IOptions, rules: {[name: string]: any}) {
-        super(sourceFile, options);
-
+    constructor(private sourceFile: ts.SourceFile, rules: {[name: string]: any}) {
+        this.enableDisableRuleMap = {};
+        this.enabledRules = [];
         if (rules) {
-            for (const rule in rules) {
-                if (rules.hasOwnProperty(rule) && AbstractRule.isRuleEnabled(rules[rule])) {
+            for (const rule of Object.keys(rules)) {
+                if (AbstractRule.isRuleEnabled(rules[rule])) {
+                    this.enabledRules.push(rule);
                     this.enableDisableRuleMap[rule] = [{
                         isEnabled: true,
                         position: 0,
@@ -41,24 +41,35 @@ export class EnableDisableRulesWalker extends RuleWalker {
         }
     }
 
-    public visitSourceFile(node: ts.SourceFile) {
-        forEachComment(node, (fullText, _kind, pos) => {
-            return this.handlePossibleTslintSwitch(fullText.substring(pos.tokenStart, pos.end), node, pos);
+    public getEnableDisableRuleMap() {
+        forEachComment(this.sourceFile, (fullText, kind, pos) => {
+            const commentText = kind === ts.SyntaxKind.SingleLineCommentTrivia
+                ? fullText.substring(pos.tokenStart + 2, pos.end)
+                : fullText.substring(pos.tokenStart + 2, pos.end - 2);
+            return this.handleComment(commentText, pos);
         });
+
+        return this.enableDisableRuleMap;
     }
 
-    private getStartOfLinePosition(node: ts.SourceFile, position: number, lineOffset = 0) {
-        const line = ts.getLineAndCharacterOfPosition(node, position).line + lineOffset;
-        const lineStarts = node.getLineStarts();
+    private getStartOfLinePosition(position: number, lineOffset = 0) {
+        const line = ts.getLineAndCharacterOfPosition(this.sourceFile, position).line + lineOffset;
+        const lineStarts = this.sourceFile.getLineStarts();
         if (line >= lineStarts.length) {
             // next line ends with eof or there is no next line
-            return node.getFullWidth();
+            // undefined switches the rule until the end and avoids an extra array entry
+            return undefined;
         }
         return lineStarts[line];
     }
 
     private switchRuleState(ruleName: string, isEnabled: boolean, start: number, end?: number): void {
         const ruleStateMap = this.enableDisableRuleMap[ruleName];
+        if (ruleStateMap === undefined || // skip switches for unknown or disabled rules
+            isEnabled === ruleStateMap[ruleStateMap.length - 1].isEnabled // no need to add switch points if there is no change
+        ) {
+            return;
+        }
 
         ruleStateMap.push({
             isEnabled,
@@ -66,7 +77,7 @@ export class EnableDisableRulesWalker extends RuleWalker {
         });
 
         if (end) {
-            // switchRuleState method is only called when rule state changes therefore we can safely use opposite state
+            // we only get here when rule state changes therefore we can safely use opposite state
             ruleStateMap.push({
                 isEnabled: !isEnabled,
                 position: end,
@@ -74,83 +85,70 @@ export class EnableDisableRulesWalker extends RuleWalker {
         }
     }
 
-    private getLatestRuleState(ruleName: string): boolean {
-        const ruleStateMap = this.enableDisableRuleMap[ruleName];
-
-        return ruleStateMap[ruleStateMap.length - 1].isEnabled;
+    private handleComment(commentText: string, pos: TokenPosition) {
+        const match = /^\s*tslint:/.exec(commentText);
+        if (match !== null) {
+            // remove everything up to the colon from text
+            commentText = commentText.substr(match[0].length);
+            this.handlePossibleTslintSwitch(commentText, pos);
+        }
     }
 
-    private handlePossibleTslintSwitch(commentText: string, node: ts.SourceFile, pos: TokenPosition) {
-        // regex is: start of string followed by "/*" or "//" followed by any amount of whitespace followed by "tslint:"
-        if (commentText.match(/^(\/\*|\/\/)\s*tslint:/)) {
-            const commentTextParts = commentText.split(":");
-            // regex is: start of string followed by either "enable" or "disable"
-            // followed optionally by -line or -next-line
-            // followed by either whitespace or end of string
-            const enableOrDisableMatch = commentTextParts[1].match(/^(enable|disable)(-(line|next-line))?(\s|$)/);
+    private handlePossibleTslintSwitch(commentText: string, pos: TokenPosition) {
+        // regex is: start of string followed by either "enable" or "disable"
+        // followed optionally by -line or -next-line
+        // followed by either colon, whitespace or end of string
+        const enableOrDisableMatch = /^(enable|disable)(?:-(line|next-line))?(:|\s|$)/.exec(commentText);
 
-            if (enableOrDisableMatch != null) {
-                const isEnabled = enableOrDisableMatch[1] === "enable";
-                const isCurrentLine = enableOrDisableMatch[3] === "line";
-                const isNextLine = enableOrDisableMatch[3] === "next-line";
-
-                let rulesList = ["all"];
-
-                if (commentTextParts.length === 2) {
-                    // an implicit whitespace separator is used for the rules list.
-                    rulesList = commentTextParts[1].split(/\s+/).slice(1);
-
-                    // remove empty items and potential comment end.
-                    rulesList = rulesList.filter((item) => !!item && !item.includes("*/"));
-
-                    // potentially there were no items, so default to `all`.
-                    rulesList = rulesList.length > 0 ? rulesList : ["all"];
-                } else if (commentTextParts.length > 2) {
-                    // an explicit separator was specified for the rules list.
-                    rulesList = commentTextParts[2].split(/\s+/);
-                }
-
-                if (rulesList.indexOf("all") !== -1) {
-                    // iterate over all enabled rules
-                    rulesList = Object.keys(this.enableDisableRuleMap);
-                }
-
-                for (const ruleToSwitch of rulesList) {
-                    if (!(ruleToSwitch in this.enableDisableRuleMap)) {
-                        // all rules enabled in configuration are already in map - skip switches for disabled rules
-                        continue;
-                    }
-
-                    const previousState = this.getLatestRuleState(ruleToSwitch);
-
-                    if (previousState === isEnabled) {
-                        // no need to add switch points if there is no change in rule state
-                        continue;
-                    }
-
-                    let start: number;
-                    let end: number | undefined;
-
-                    if (isCurrentLine) {
-                        // start at the beginning of the current line
-                        start = this.getStartOfLinePosition(node, pos.tokenStart);
-                        // end at the beginning of the next line
-                        end = pos.end + 1;
-                    } else if (isNextLine) {
-                        // start at the current position
-                        start = pos.tokenStart;
-                        // end at the beginning of the line following the next line
-                        end = this.getStartOfLinePosition(node, pos.tokenStart, 2);
-                    } else {
-                        // disable rule for the rest of the file
-                        // start at the current position, but skip end position
-                        start = pos.tokenStart;
-                        end = undefined;
-                    }
-
-                    this.switchRuleState(ruleToSwitch, isEnabled, start, end);
-                }
+        if (enableOrDisableMatch !== null) {
+            // remove everything matched by the previous regex to get only the specified rules
+            // split at whitespaces
+            // filter empty items coming from whitespaces at start, at end or empty list
+            let rulesList = commentText.substr(enableOrDisableMatch[0].length)
+                                       .split(/\s+/)
+                                       .filter((rule) => !!rule);
+            if (rulesList.length === 0 && enableOrDisableMatch[3] === ":") {
+                // nothing to do here: an explicit separator was specified but no rules to switch
+                return;
             }
+            if (rulesList.length === 0 ||
+                rulesList.indexOf("all") !== -1) {
+                // if list is empty we default to all enabled rules
+                // if `all` is specified we ignore the other rules and take all enabled rules
+                rulesList = this.enabledRules;
+            }
+
+            this.handleTslintLineSwitch(rulesList, enableOrDisableMatch[1] === "enable", enableOrDisableMatch[2], pos);
+        }
+    }
+
+    private handleTslintLineSwitch(rules: string[], isEnabled: boolean, modifier: string, pos: TokenPosition) {
+        let start: number | undefined;
+        let end: number | undefined;
+
+        if (modifier === "line") {
+            // start at the beginning of the line where comment starts
+            start = this.getStartOfLinePosition(pos.tokenStart)!;
+            // end at the beginning of the line following the comment
+            end = this.getStartOfLinePosition(pos.end, 1);
+        } else if (modifier === "next-line") {
+            // start at the beginning of the line following the comment
+            start = this.getStartOfLinePosition(pos.end, 1);
+            if (start === undefined) {
+                // no need to switch anything, there is no next line
+                return;
+            }
+            // end at the beginning of the line following the next line
+            end = this.getStartOfLinePosition(pos.end, 2);
+        } else {
+            // switch rule for the rest of the file
+            // start at the current position, but skip end position
+            start = pos.tokenStart;
+            end = undefined;
+        }
+
+        for (const ruleToSwitch of rules) {
+            this.switchRuleState(ruleToSwitch, isEnabled, start, end);
         }
     }
 }
