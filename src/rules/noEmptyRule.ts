@@ -46,6 +46,8 @@ class BlockWalker extends Lint.RuleWalker {
         if (node.statements.length === 0 && !isExcludedConstructor(node.parent!)) {
             const sourceFile = this.getSourceFile();
             const start = node.getStart(sourceFile);
+            // Block always starts with open brace. Adding 1 to its start gives us the end of the brace,
+            // which can be used to conveniently check for comments between braces
             if (!Lint.hasCommentAfterPosition(sourceFile.text, start + 1)) {
                 this.addFailureFromStartToEnd(start , node.getEnd(), Rule.FAILURE_STRING);
             }
