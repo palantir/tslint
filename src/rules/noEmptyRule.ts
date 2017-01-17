@@ -57,6 +57,13 @@ class BlockWalker extends Lint.RuleWalker {
 
 function isExcludedConstructor(node: ts.Node): boolean {
     if (node.kind === ts.SyntaxKind.Constructor) {
+        if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.PrivateKeyword, ts.SyntaxKind.ProtectedKeyword)) {
+            /* If constructor is private of protected, the block is allowed to be empty.
+               The constructor is there on purpose the disallow instantiation from outside the class */
+            /* The public modifier does not serve a purpose here. It can only be used to allow instantiation of a base class where
+               the super constructor is protected, but then the block would not be empty, because of the call to super() */
+            return true;
+        }
         for (const parameter of (node as ts.ConstructorDeclaration).parameters) {
             if (Lint.hasModifier(parameter.modifiers,
                                  ts.SyntaxKind.PrivateKeyword,
