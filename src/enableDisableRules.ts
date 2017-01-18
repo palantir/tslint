@@ -86,28 +86,20 @@ export class EnableDisableRulesWalker {
     }
 
     private handleComment(commentText: string, pos: TokenPosition) {
-        const match = /^\s*tslint:/.exec(commentText);
-        if (match !== null) {
-            // remove everything up to the colon from text
-            commentText = commentText.substr(match[0].length);
-            this.handlePossibleTslintSwitch(commentText, pos);
-        }
-    }
-
-    private handlePossibleTslintSwitch(commentText: string, pos: TokenPosition) {
-        // regex is: start of string followed by either "enable" or "disable"
+        // regex is: start of string followed by any amount of whitespace
+        // followed by tslint and colon
+        // followed by either "enable" or "disable"
         // followed optionally by -line or -next-line
         // followed by either colon, whitespace or end of string
-        const enableOrDisableMatch = /^(enable|disable)(?:-(line|next-line))?(:|\s|$)/.exec(commentText);
-
-        if (enableOrDisableMatch !== null) {
+        const match = /^\s*tslint:(enable|disable)(?:-(line|next-line))?(:|\s|$)/.exec(commentText);
+        if (match !== null) {
             // remove everything matched by the previous regex to get only the specified rules
             // split at whitespaces
             // filter empty items coming from whitespaces at start, at end or empty list
-            let rulesList = commentText.substr(enableOrDisableMatch[0].length)
+            let rulesList = commentText.substr(match[0].length)
                                        .split(/\s+/)
                                        .filter((rule) => !!rule);
-            if (rulesList.length === 0 && enableOrDisableMatch[3] === ":") {
+            if (rulesList.length === 0 && match[3] === ":") {
                 // nothing to do here: an explicit separator was specified but no rules to switch
                 return;
             }
@@ -118,7 +110,7 @@ export class EnableDisableRulesWalker {
                 rulesList = this.enabledRules;
             }
 
-            this.handleTslintLineSwitch(rulesList, enableOrDisableMatch[1] === "enable", enableOrDisableMatch[2], pos);
+            this.handleTslintLineSwitch(rulesList, match[1] === "enable", match[2], pos);
         }
     }
 

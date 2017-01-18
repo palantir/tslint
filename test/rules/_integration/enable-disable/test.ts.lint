@@ -115,3 +115,14 @@ var AAAaA = 'test'; //tslint:disable
             ~~~~~~ [' should be "]
 var AAAaA = 'test'
 
+// ensure that "all" switches all rules
+var AAAaA = 'test'; //tslint:enable-line all
+    ~~~~~          [variable name must be in camelcase or uppercase]
+            ~~~~~~ [' should be "]
+                      ~~~~~~~~~~~~~~~~~~~~~~ [comment must start with a space]
+
+// ensure that "all" switches all rules even if others are in the list
+var AAAaA = 'test'; //tslint:enable-line quotemark all
+    ~~~~~          [variable name must be in camelcase or uppercase]
+            ~~~~~~ [' should be "]
+                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [comment must start with a space]
