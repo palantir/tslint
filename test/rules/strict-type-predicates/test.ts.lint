@@ -172,5 +172,11 @@ declare function get<T>(): T;
     }
 }
 
+// Detects bad typeof
+{
+    typeof get<number>() === "orbject";
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [F]
+}
+
 [T]: Expression is always true.
 [F]: Expression is always false.
