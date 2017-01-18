@@ -16,3 +16,5 @@ typings/.basedir.ts
 # vim swap files
 *.swo
 *.swp
+
+docs/_data/rules.json
