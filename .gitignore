@@ -18,3 +18,4 @@ typings/.basedir.ts
 *.swp
 
 docs/_data/rules.json
+docs/rules/
