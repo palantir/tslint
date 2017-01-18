@@ -42,9 +42,12 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class Walker extends Lint.RuleWalker {
     public visitInterfaceDeclaration(node: ts.InterfaceDeclaration) {
-        if (node.members.length === 0) {
+        if (node.members.length === 0 &&
+            (node.heritageClauses === undefined ||
+             node.heritageClauses[0].types === undefined ||
+             // allow interfaces that extend 2 or more interfaces
+             node.heritageClauses[0].types!.length < 2)) {
             this.addFailureAtNode(node.name, node.heritageClauses ? Rule.FAILURE_STRING_FOR_EXTENDS : Rule.FAILURE_STRING);
         }
-        super.visitInterfaceDeclaration(node);
     }
 }
