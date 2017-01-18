@@ -174,9 +174,13 @@ declare function get<T>(): T;
 
 // Detects bad typeof
 {
-    typeof get<number>() === "orbject";
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [F]
+    typeof get<boolean>() === true;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [typeof]
+
+    typeof get<any>() === "orbject";
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [typeof]
 }
 
 [T]: Expression is always true.
 [F]: Expression is always false.
+[typeof]: Bad comparison for 'typeof'.
