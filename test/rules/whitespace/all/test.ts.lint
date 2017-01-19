@@ -88,6 +88,19 @@ var test = `
   <div class="repeat"
 `;
 
+var withinTemplateExpression = `${name==="something"?"foo":"bar"}`;
+                                      ~                             [missing whitespace]
+                                         ~                          [missing whitespace]
+                                                    ~               [missing whitespace]
+                                                     ~              [missing whitespace]
+                                                          ~         [missing whitespace]
+                                                           ~        [missing whitespace]
+var withinTemplateExpression = `${name === "something" ? "foo" : "bar"}`;
+
+var objectInsideTemplateExpression = `${({foo:"bar"}).foo}`;
+                                              ~                     [missing whitespace]
+var objectInsideTemplateExpression = `${({foo: "bar"}).foo}`;
+
 import { importA } from "libA";
 import { importB }from "libB";
                   ~            [missing whitespace]

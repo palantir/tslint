@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import {replicateStr} from "./utils";
-
 // Use classes here instead of interfaces because we want runtime type data
 export class Line { }
 export class CodeLine extends Line { constructor(public contents: string) { super(); } }
@@ -27,7 +25,7 @@ export class EndErrorLine extends ErrorLine {
     constructor(startCol: number, public endCol: number, public message: string) { super(startCol); }
 }
 
-// example matches (between the quotes): 
+// example matches (between the quotes):
 // "    ~~~~~~~~"
 const multilineErrorRegex = /^\s*(~+|~nil)$/;
 // "    ~~~~~~~~~   [some error message]"
@@ -80,7 +78,7 @@ export function printLine(line: Line, code?: string): string | null {
            throw new Error("Must supply argument for code parameter when line is an ErrorLine");
         }
 
-        const leadingSpaces = replicateStr(" ", line.startCol);
+        const leadingSpaces = " ".repeat(line.startCol);
         if (line instanceof MultilineErrorLine) {
             // special case for when the line of code is simply a newline.
             // use "~nil" to indicate the error continues on that line
@@ -88,11 +86,11 @@ export function printLine(line: Line, code?: string): string | null {
                 return ZERO_LENGTH_ERROR;
             }
 
-            const tildes = replicateStr("~", code.length - leadingSpaces.length);
+            const tildes = "~".repeat(code.length - leadingSpaces.length);
             return `${leadingSpaces}${tildes}`;
         } else if (line instanceof EndErrorLine) {
-            let tildes = replicateStr("~", line.endCol - line.startCol);
-            let endSpaces = replicateStr(" ", code.length - line.endCol);
+            let tildes = "~".repeat(line.endCol - line.startCol);
+            let endSpaces = " ".repeat(code.length - line.endCol);
             if (tildes.length === 0) {
                 tildes = ZERO_LENGTH_ERROR;
                 // because we add "~nil" we need four less spaces than normal at the end
