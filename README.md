@@ -247,7 +247,7 @@ const files = Linter.getFileNames(program);
 const results = files.map(file => {
     const fileContents = program.getSourceFile(file).getFullText();
     const linter = new Linter(file, fileContents, options, program);
-    return result.lint();
+    return linter.lint();
 });
 ```
 
