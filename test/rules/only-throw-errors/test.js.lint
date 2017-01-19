@@ -10,30 +10,30 @@ throw undefined;
 throw null;
       ~~~~    [0]
 
-var err = new Error();
-throw "an " + err;
-      ~~~~~~~~~~~    [0]
+const a = new Error();
+throw "an " + a;
+      ~~~~~~~~~    [0]
 
-var err = new Error();
-throw `${err}`
-      ~~~~~~~~    [0]
+const b = new Error();
+throw `${b}`
+      ~~~~~~    [0]
 
 throw new Error();
 
 throw new Error("error");
 
-var e = new Error("error");
-throw e;
+const c = new Error("error");
+throw c;
 
 try {
     throw new Error("error");
-} catch (e) {
-    throw e;
+} catch (d) {
+    throw d;
 }
 
-var err = "error";
-throw err;
-      ~~~    [0]
+const e = "error";
+throw e;
+      ~    [0]
 
 function foo(bar) {
     console.log(bar);
@@ -44,7 +44,7 @@ throw foo("error");
 throw new String("error");
       ~~~~~~~~~~~~~~~~~~~    [0]
 
-var foo = {
+const foo = {
     bar: "error"
 };
 throw foo.bar;

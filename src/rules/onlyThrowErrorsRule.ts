@@ -49,7 +49,7 @@ class OnlyThrowErrorsWalker extends Lint.ProgramAwareRuleWalker {
         const expression = node.expression;
         const type = this.getTypeChecker().getTypeAtLocation(expression);
 
-        if (type && this.symbolIsError(type)) {
+        if (type && !this.symbolIsError(type)) {
             this.addFailure(this.createFailure(expression.getStart(), expression.getWidth(), Rule.FAILURE_STRING));
         }
 
