@@ -18,7 +18,7 @@
 import * as ts from "typescript";
 
 import * as Lint from "../index";
-import { isTypeFlagSet, isUnionType } from "../language/utils";
+import { isTypeFlagSet } from "../language/utils";
 
 export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -77,4 +77,8 @@ function getBaseTypeOfLiteralType(type: ts.Type): "string" | "number" | "invalid
 
 function allSame(array: string[]) {
     return array.every((value) => value === array[0]);
+}
+
+function isUnionType(type: ts.Type): type is ts.UnionType {
+    return Lint.isTypeFlagSet(type, ts.TypeFlags.Union);
 }

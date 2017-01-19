@@ -60,7 +60,7 @@ export class Rule extends Lint.Rules.TypedRule {
                 enum: [OPTION_ALLOW_NULL_UNION, OPTION_ALLOW_UNDEFINED_UNION, OPTION_ALLOW_STRING, OPTION_ALLOW_NUMBER],
             },
             minLength: 0,
-            maxLength: 4,
+            maxLength: 5,
         },
         optionExamples: [
             "true",
@@ -72,20 +72,24 @@ export class Rule extends Lint.Rules.TypedRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING(locationDescription: string, ty: TypeFailure, expected: string): string {
-        return `${locationDescription} ${this.tyFailure(ty)}. Expected a ${expected}.`;
+    public static FAILURE_STRING(locationDescription: string, ty: TypeFailure, isUnionType: boolean, expectedTypes: string[]): string {
+        const expected = expectedTypes.length === 1
+            ? `Only ${expectedTypes[0]}s are allowed`
+            : `Allowed types are ${stringOr(expectedTypes)}`;
+        return `This type is not allowed in the ${locationDescription} because it ${this.tyFailure(ty, isUnionType)}. ${expected}.`;
     }
 
-    private static tyFailure(ty: TypeFailure) {
+    private static tyFailure(ty: TypeFailure, isUnionType: boolean) {
+        const is = isUnionType ? "could be" : "is";
         switch (ty) {
             case TypeFailure.AlwaysTruthy: return "is always truthy";
             case TypeFailure.AlwaysFalsy: return "is always falsy";
-            case TypeFailure.String: return "may be falsy if it is the empty string";
-            case TypeFailure.Number: return "may be falsy if it is 0";
-            case TypeFailure.Null: return "may be falsy if it is null";
-            case TypeFailure.Undefined: return "may be falsy if it is undefined";
-            case TypeFailure.Enum: return "is an enum";
-            case TypeFailure.Mixes: return "mixes multiple kinds of falsy values";
+            case TypeFailure.String: return `${is} a string`;
+            case TypeFailure.Number: return `${is} a number`;
+            case TypeFailure.Null: return `${is} null`;
+            case TypeFailure.Undefined: return `${is} undefined`;
+            case TypeFailure.Enum: return `${is} an enum`;
+            case TypeFailure.Mixes: return "unions more than one truthy/falsy type";
         }
     }
 
@@ -95,7 +99,6 @@ export class Rule extends Lint.Rules.TypedRule {
 }
 
 class Walker extends Lint.ProgramAwareRuleWalker {
-    private checker = this.getTypeChecker();
     private allowNullUnion = this.hasOption(OPTION_ALLOW_NULL_UNION);
     private allowUndefinedUnion = this.hasOption(OPTION_ALLOW_UNDEFINED_UNION);
     private allowString = this.hasOption(OPTION_ALLOW_STRING);
@@ -108,7 +111,7 @@ class Walker extends Lint.ProgramAwareRuleWalker {
             const checkHalf = (expr: ts.Expression) => {
                 // If it's another boolean binary expression, we'll check it when recursing.
                 if (!isBooleanBinaryExpression(expr)) {
-                    this.checkExpression(expr, `Operand for the ${op} operator`);
+                    this.checkExpression(expr, `operand for the '${op}' operator`);
                 }
             };
             checkHalf(node.left);
@@ -119,34 +122,34 @@ class Walker extends Lint.ProgramAwareRuleWalker {
 
     public visitPrefixUnaryExpression(node: ts.PrefixUnaryExpression) {
         if (node.operator === ts.SyntaxKind.ExclamationToken) {
-            this.checkExpression(node.operand, "Operand for the ! operator");
+            this.checkExpression(node.operand, "operand for the '!' operator");
         }
         super.visitPrefixUnaryExpression(node);
     }
 
     public visitIfStatement(node: ts.IfStatement) {
-        this.checkStatement(node, "If statement condition");
+        this.checkStatement(node, "'if' condition");
         super.visitIfStatement(node);
     }
 
     public visitWhileStatement(node: ts.WhileStatement) {
-        this.checkStatement(node, "While statement condition");
+        this.checkStatement(node, "'while' condition");
         super.visitWhileStatement(node);
     }
 
     public visitDoStatement(node: ts.DoStatement) {
-        this.checkStatement(node, "Do-While statement condition");
+        this.checkStatement(node, "'do-while' condition");
         super.visitDoStatement(node);
     }
 
     public visitConditionalExpression(node: ts.ConditionalExpression) {
-        this.checkExpression(node.condition, "Condition");
+        this.checkExpression(node.condition, "condition");
         super.visitConditionalExpression(node);
     }
 
     public visitForStatement(node: ts.ForStatement) {
         if (node.condition !== undefined) {
-            this.checkExpression(node.condition, "For statement condition");
+            this.checkExpression(node.condition, "'for' condition");
         }
         super.visitForStatement(node);
     }
@@ -159,14 +162,15 @@ class Walker extends Lint.ProgramAwareRuleWalker {
     }
 
     private checkExpression(node: ts.Expression, locationDescription: string): void {
-        const failure = this.getTypeFailure(this.checker.getTypeAtLocation(node));
+        const type = this.getTypeChecker().getTypeAtLocation(node);
+        const failure = this.getTypeFailure(type);
         if (failure !== undefined) {
-            this.addFailureAtNode(node, Rule.FAILURE_STRING(locationDescription, failure, this.expectedTypeDescription()));
+            this.addFailureAtNode(node, Rule.FAILURE_STRING(locationDescription, failure, isUnionType(type), this.expectedTypes()));
         }
     }
 
     private getTypeFailure(type: ts.Type): TypeFailure | undefined {
-        if (Lint.isUnionType(type)) {
+        if (isUnionType(type)) {
             return this.handleUnion(type);
         }
 
@@ -237,13 +241,13 @@ class Walker extends Lint.ProgramAwareRuleWalker {
             : !this.allowMix && seenFalsy > 1 ? TypeFailure.Mixes : undefined;
     }
 
-    private expectedTypeDescription(): string {
+    private expectedTypes(): string[] {
         const parts = ["boolean"];
         if (this.allowNullUnion) { parts.push("null-union"); }
         if (this.allowUndefinedUnion) { parts.push("undefined-union"); }
         if (this.allowString) { parts.push("string"); }
         if (this.allowNumber) { parts.push("number"); }
-        return stringOr(parts);
+        return parts;
     }
 }
 
@@ -341,6 +345,10 @@ function stringOr(parts: string[]): string {
             }
             return res + "or " + parts[parts.length - 1];
     }
+}
+
+function isUnionType(type: ts.Type): type is ts.UnionType {
+    return Lint.isTypeFlagSet(type, ts.TypeFlags.Union);
 }
 
 declare module "typescript" {

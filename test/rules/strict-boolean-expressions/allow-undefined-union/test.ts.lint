@@ -4,25 +4,25 @@ if (get<RegExp | undefined>()) {}
 
 declare const bu: boolean | undefined;
 if (get<boolean | undefined>()) {}
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~ [If statement condition mixes multiple kinds of falsy values. Expected a boolean or undefined-union.]
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~ [This type is not allowed in the 'if' condition because it unions more than one truthy/falsy type. Allowed types are boolean or undefined-union.]
 
 // If it's always undefined, testing for it is wrong.
 if (get<undefined>()) {}
-    ~~~~~~~~~~~~~~~~ [If statement condition is always falsy. Expected a boolean or undefined-union.]
+    ~~~~~~~~~~~~~~~~ [This type is not allowed in the 'if' condition because it is always falsy. Allowed types are boolean or undefined-union.]
 
 if (get<void>()) {}
-    ~~~~~~~~~~~ [If statement condition is always falsy. Expected a boolean or undefined-union.]
+    ~~~~~~~~~~~ [This type is not allowed in the 'if' condition because it is always falsy. Allowed types are boolean or undefined-union.]
 
 if (get<RegExp | null>()) {}
-    ~~~~~~~~~~~~~~~~~~~~ [If statement condition may be falsy if it is null. Expected a boolean or undefined-union.]
+    ~~~~~~~~~~~~~~~~~~~~ [This type is not allowed in the 'if' condition because it could be null. Allowed types are boolean or undefined-union.]
 
 // Type of the condition is actually boolean | RegExp, but OK since we check each part separately.
 if (get<RegExp | undefined>() || get<boolean>()) {}
 
 // This still fails of course!
 if (get<RegExp>() || get<RegExp>()) {}
-    ~~~~~~~~~~~~~ [Operand for the || operator is always truthy. Expected a boolean or undefined-union.]
-                     ~~~~~~~~~~~~~ [Operand for the || operator is always truthy. Expected a boolean or undefined-union.]
+    ~~~~~~~~~~~~~ [This type is not allowed in the operand for the '||' operator because it is always truthy. Allowed types are boolean or undefined-union.]
+                     ~~~~~~~~~~~~~ [This type is not allowed in the operand for the '||' operator because it is always truthy. Allowed types are boolean or undefined-union.]
 
 if (get<number | undefined>()) {}
-    ~~~~~~~~~~~~~~~~~~~~~~~~~ [If statement condition may be falsy if it is 0. Expected a boolean or undefined-union.]
+    ~~~~~~~~~~~~~~~~~~~~~~~~~ [This type is not allowed in the 'if' condition because it could be a number. Allowed types are boolean or undefined-union.]

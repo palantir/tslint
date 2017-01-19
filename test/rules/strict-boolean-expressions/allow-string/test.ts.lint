@@ -3,12 +3,12 @@ declare function get<T>(): T;
 if (get<string>()) {}
 
 if (get<boolean | string>()) {}
-    ~~~~~~~~~~~~~~~~~~~~~~~ [If statement condition mixes multiple kinds of falsy values. Expected a boolean or string.]
+    ~~~~~~~~~~~~~~~~~~~~~~~ [This type is not allowed in the 'if' condition because it unions more than one truthy/falsy type. Allowed types are boolean or string.]
 
 if (get<"foo" | "bar">()) {}
-    ~~~~~~~~~~~~~~~~~~~~ [If statement condition is always truthy. Expected a boolean or string.]
+    ~~~~~~~~~~~~~~~~~~~~ [This type is not allowed in the 'if' condition because it is always truthy. Allowed types are boolean or string.]
 
 if (get<"">()) {}
-    ~~~~~~~~~ [If statement condition is always falsy. Expected a boolean or string.]
+    ~~~~~~~~~ [This type is not allowed in the 'if' condition because it is always falsy. Allowed types are boolean or string.]
 
 if (get<"foo" | "">()) {}

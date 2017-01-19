@@ -19,43 +19,43 @@ let boolExpr = (strType !== undefined);
 /*** Binary Expressions ***/
 /*** Invalid Boolean Expressions ***/
 classType && boolType;
-~~~~~~~~~ [Operand for the && operator is always truthy. Expected a boolean.]
+~~~~~~~~~ [This type is not allowed in the operand for the '&&' operator because it is always truthy. Only booleans are allowed.]
 anyType && boolType;
-~~~~~~~ [Operand for the && operator is always truthy. Expected a boolean.]
+~~~~~~~ [This type is not allowed in the operand for the '&&' operator because it is always truthy. Only booleans are allowed.]
 numType && boolType;
-~~~~~~~ [Operand for the && operator may be falsy if it is 0. Expected a boolean.]
+~~~~~~~ [This type is not allowed in the operand for the '&&' operator because it is a number. Only booleans are allowed.]
 boolType && strType;
-            ~~~~~~~ [Operand for the && operator may be falsy if it is the empty string. Expected a boolean.]
+            ~~~~~~~ [This type is not allowed in the operand for the '&&' operator because it is a string. Only booleans are allowed.]
 boolType && objType && enumType;
-            ~~~~~~~ [Operand for the && operator is always truthy. Expected a boolean.]
-                       ~~~~~~~~ [Operand for the && operator is an enum. Expected a boolean.]
+            ~~~~~~~ [This type is not allowed in the operand for the '&&' operator because it is always truthy. Only booleans are allowed.]
+                       ~~~~~~~~ [This type is not allowed in the operand for the '&&' operator because it could be an enum. Only booleans are allowed.]
 bwrapType && boolType;
-~~~~~~~~~ [Operand for the && operator is always truthy. Expected a boolean.]
+~~~~~~~~~              [This type is not allowed in the operand for the '&&' operator because it is always truthy. Only booleans are allowed.]
 
 boolType || classType;
-            ~~~~~~~~~ [Operand for the || operator is always truthy. Expected a boolean.]
+            ~~~~~~~~~  [This type is not allowed in the operand for the '||' operator because it is always truthy. Only booleans are allowed.]
 boolType || anyType;
-            ~~~~~~~ [Operand for the || operator is always truthy. Expected a boolean.]
+            ~~~~~~~  [This type is not allowed in the operand for the '||' operator because it is always truthy. Only booleans are allowed.]
 boolType || numType;
-            ~~~~~~~ [Operand for the || operator may be falsy if it is 0. Expected a boolean.]
+            ~~~~~~~  [This type is not allowed in the operand for the '||' operator because it is a number. Only booleans are allowed.]
 strType || boolType;
-~~~~~~~ [Operand for the || operator may be falsy if it is the empty string. Expected a boolean.]
+~~~~~~~              [This type is not allowed in the operand for the '||' operator because it is a string. Only booleans are allowed.]
 bwrapType || boolType;
-~~~~~~~~~ [Operand for the || operator is always truthy. Expected a boolean.]
+~~~~~~~~~              [This type is not allowed in the operand for the '||' operator because it is always truthy. Only booleans are allowed.]
 objType || boolType || enumType;
-~~~~~~~ [Operand for the || operator is always truthy. Expected a boolean.]
-                       ~~~~~~~~ [Operand for the || operator is an enum. Expected a boolean.]
+~~~~~~~                          [This type is not allowed in the operand for the '||' operator because it is always truthy. Only booleans are allowed.]
+                       ~~~~~~~~  [This type is not allowed in the operand for the '||' operator because it could be an enum. Only booleans are allowed.]
 
 boolExpr && strType;
-            ~~~~~~~ [Operand for the && operator may be falsy if it is the empty string. Expected a boolean.]
+            ~~~~~~~  [This type is not allowed in the operand for the '&&' operator because it is a string. Only booleans are allowed.]
 numType || boolExpr;
-~~~~~~~ [Operand for the || operator may be falsy if it is 0. Expected a boolean.]
+~~~~~~~              [This type is not allowed in the operand for the '||' operator because it is a number. Only booleans are allowed.]
 numType && boolExpr || strType;
-~~~~~~~ [Operand for the && operator may be falsy if it is 0. Expected a boolean.]
-                       ~~~~~~~ [Operand for the || operator may be falsy if it is the empty string. Expected a boolean.]
+~~~~~~~                         [This type is not allowed in the operand for the '&&' operator because it is a number. Only booleans are allowed.]
+                       ~~~~~~~  [This type is not allowed in the operand for the '||' operator because it is a string. Only booleans are allowed.]
 bwrapType || boolExpr && bwrapType;
-~~~~~~~~~ [Operand for the || operator is always truthy. Expected a boolean.]
-                         ~~~~~~~~~ [Operand for the && operator is always truthy. Expected a boolean.]
+~~~~~~~~~                           [This type is not allowed in the operand for the '||' operator because it is always truthy. Only booleans are allowed.]
+                         ~~~~~~~~~  [This type is not allowed in the operand for the '&&' operator because it is always truthy. Only booleans are allowed.]
 
 /*** Valid Boolean Expressions ***/
 boolType && boolType2;
@@ -68,17 +68,17 @@ boolExpr || boolType;
 /*** ConditionalExpression ***/
 /*** Invalid ***/
 strType ? strType : numType;
-~~~~~~~ [Condition may be falsy if it is the empty string. Expected a boolean.]
+~~~~~~~                      [This type is not allowed in the condition because it is a string. Only booleans are allowed.]
 numType ? numType : numFn();
-~~~~~~~ [Condition may be falsy if it is 0. Expected a boolean.]
+~~~~~~~                      [This type is not allowed in the condition because it is a number. Only booleans are allowed.]
 objType ? objType : boolExpr;
-~~~~~~~ [Condition is always truthy. Expected a boolean.]
+~~~~~~~                       [This type is not allowed in the condition because it is always truthy. Only booleans are allowed.]
 classType ? strType : undefined;
-~~~~~~~~~ [Condition is always truthy. Expected a boolean.]
+~~~~~~~~~                        [This type is not allowed in the condition because it is always truthy. Only booleans are allowed.]
 bwrapType ? 1 : 0;
-~~~~~~~~~ [Condition is always truthy. Expected a boolean.]
+~~~~~~~~~          [This type is not allowed in the condition because it is always truthy. Only booleans are allowed.]
 enumType ? 0 : 1;
-~~~~~~~~ [Condition is an enum. Expected a boolean.]
+~~~~~~~~          [This type is not allowed in the condition because it could be an enum. Only booleans are allowed.]
 
 /*** Valid ***/
 boolFn() ? numType : strType;
@@ -87,20 +87,20 @@ boolType ? strType : undefined;
 /*** PrefixUnary Expressions ***/
 /*** Invalid ***/
 !!numType;
-  ~~~~~~~ [Operand for the ! operator may be falsy if it is 0. Expected a boolean.]
+  ~~~~~~~  [This type is not allowed in the operand for the '!' operator because it is a number. Only booleans are allowed.]
 !strType;
- ~~~~~~~ [Operand for the ! operator may be falsy if it is the empty string. Expected a boolean.]
+ ~~~~~~~  [This type is not allowed in the operand for the '!' operator because it is a string. Only booleans are allowed.]
 !objType;
- ~~~~~~~ [Operand for the ! operator is always truthy. Expected a boolean.]
+ ~~~~~~~  [This type is not allowed in the operand for the '!' operator because it is always truthy. Only booleans are allowed.]
 !enumType;
- ~~~~~~~~ [Operand for the ! operator is an enum. Expected a boolean.]
+ ~~~~~~~~  [This type is not allowed in the operand for the '!' operator because it could be an enum. Only booleans are allowed.]
 !!classType;
-  ~~~~~~~~~ [Operand for the ! operator is always truthy. Expected a boolean.]
+  ~~~~~~~~~  [This type is not allowed in the operand for the '!' operator because it is always truthy. Only booleans are allowed.]
 !bwrapType;
- ~~~~~~~~~ [Operand for the ! operator is always truthy. Expected a boolean.]
+ ~~~~~~~~~  [This type is not allowed in the operand for the '!' operator because it is always truthy. Only booleans are allowed.]
 !!undefined;
- ~~~~~~~~~~ [Operand for the ! operator is always truthy. Expected a boolean.]
-  ~~~~~~~~~ [Operand for the ! operator is always falsy. Expected a boolean.]
+ ~~~~~~~~~~  [This type is not allowed in the operand for the '!' operator because it is always truthy. Only booleans are allowed.]
+  ~~~~~~~~~  [This type is not allowed in the operand for the '!' operator because it is always falsy. Only booleans are allowed.]
 
 /*** Valid ***/
 !!boolFn();
@@ -110,19 +110,19 @@ boolType ? strType : undefined;
 /*** If Statement ***/
 /*** Invalid ***/
 if (numType) { /* statements */ }
-    ~~~~~~~ [If statement condition may be falsy if it is 0. Expected a boolean.]
+    ~~~~~~~                       [This type is not allowed in the 'if' condition because it is a number. Only booleans are allowed.]
 if (objType) { /* statements */ }
-    ~~~~~~~ [If statement condition is always truthy. Expected a boolean.]
+    ~~~~~~~                       [This type is not allowed in the 'if' condition because it is always truthy. Only booleans are allowed.]
 if (strType) { /* statements */ }
-    ~~~~~~~ [If statement condition may be falsy if it is the empty string. Expected a boolean.]
+    ~~~~~~~                       [This type is not allowed in the 'if' condition because it is a string. Only booleans are allowed.]
 if (bwrapType) { /* statements */ }
-    ~~~~~~~~~ [If statement condition is always truthy. Expected a boolean.]
+    ~~~~~~~~~                       [This type is not allowed in the 'if' condition because it is always truthy. Only booleans are allowed.]
 if (strFn()) { /* statements */ }
-    ~~~~~~~ [If statement condition may be falsy if it is the empty string. Expected a boolean.]
+    ~~~~~~~                       [This type is not allowed in the 'if' condition because it is a string. Only booleans are allowed.]
 if (MyEnum.A) { /* statements */ }
-    ~~~~~~~~ [If statement condition is an enum. Expected a boolean.]
+    ~~~~~~~~                       [This type is not allowed in the 'if' condition because it is an enum. Only booleans are allowed.]
 if (classType) { /* statements */ }
-    ~~~~~~~~~ [If statement condition is always truthy. Expected a boolean.]
+    ~~~~~~~~~                       [This type is not allowed in the 'if' condition because it is always truthy. Only booleans are allowed.]
 
 /*** Valid ***/
 if (boolFn()) { /* statements */ }
@@ -132,19 +132,19 @@ if (boolType) { /* statements */ }
 /*** While Statement ***/
 /*** Invalid ***/
 while (numType) { /* statements */ }
-       ~~~~~~~ [While statement condition may be falsy if it is 0. Expected a boolean.]
+       ~~~~~~~                       [This type is not allowed in the 'while' condition because it is a number. Only booleans are allowed.]
 while (objType) { /* statements */ }
-       ~~~~~~~ [While statement condition is always truthy. Expected a boolean.]
+       ~~~~~~~                       [This type is not allowed in the 'while' condition because it is always truthy. Only booleans are allowed.]
 while (strType) { /* statements */ }
-       ~~~~~~~ [While statement condition may be falsy if it is the empty string. Expected a boolean.]
+       ~~~~~~~                       [This type is not allowed in the 'while' condition because it is a string. Only booleans are allowed.]
 while (strFn()) { /* statements */ }
-       ~~~~~~~ [While statement condition may be falsy if it is the empty string. Expected a boolean.]
+       ~~~~~~~                       [This type is not allowed in the 'while' condition because it is a string. Only booleans are allowed.]
 while (bwrapType) { /* statements */ }
-       ~~~~~~~~~ [While statement condition is always truthy. Expected a boolean.]
+       ~~~~~~~~~                       [This type is not allowed in the 'while' condition because it is always truthy. Only booleans are allowed.]
 while (MyEnum.A) { /* statements */ }
-       ~~~~~~~~ [While statement condition is an enum. Expected a boolean.]
+       ~~~~~~~~                       [This type is not allowed in the 'while' condition because it is an enum. Only booleans are allowed.]
 while (classType) { /* statements */ }
-       ~~~~~~~~~ [While statement condition is always truthy. Expected a boolean.]
+       ~~~~~~~~~                       [This type is not allowed in the 'while' condition because it is always truthy. Only booleans are allowed.]
 
 /*** Valid ***/
 while (boolFn()) { /* statements */ }
@@ -154,19 +154,19 @@ while (boolType) { /* statements */ }
 /*** Do Statement ***/
 /*** Invalid ***/
 do { /* statements */ } while (numType);
-                               ~~~~~~~ [Do-While statement condition may be falsy if it is 0. Expected a boolean.]
+                               ~~~~~~~   [This type is not allowed in the 'do-while' condition because it is a number. Only booleans are allowed.]
 do { /* statements */ } while (objType);
-                               ~~~~~~~ [Do-While statement condition is always truthy. Expected a boolean.]
+                               ~~~~~~~   [This type is not allowed in the 'do-while' condition because it is always truthy. Only booleans are allowed.]
 do { /* statements */ } while (strType);
-                               ~~~~~~~ [Do-While statement condition may be falsy if it is the empty string. Expected a boolean.]
+                               ~~~~~~~   [This type is not allowed in the 'do-while' condition because it is a string. Only booleans are allowed.]
 do { /* statements */ } while (bwrapType);
-                               ~~~~~~~~~ [Do-While statement condition is always truthy. Expected a boolean.]
+                               ~~~~~~~~~   [This type is not allowed in the 'do-while' condition because it is always truthy. Only booleans are allowed.]
 do { /* statements */ } while (strFn());
-                               ~~~~~~~ [Do-While statement condition may be falsy if it is the empty string. Expected a boolean.]
+                               ~~~~~~~   [This type is not allowed in the 'do-while' condition because it is a string. Only booleans are allowed.]
 do { /* statements */ } while (MyEnum.A);
-                               ~~~~~~~~ [Do-While statement condition is an enum. Expected a boolean.]
+                               ~~~~~~~~   [This type is not allowed in the 'do-while' condition because it is an enum. Only booleans are allowed.]
 do { /* statements */ } while (classType);
-                               ~~~~~~~~~ [Do-While statement condition is always truthy. Expected a boolean.]
+                               ~~~~~~~~~   [This type is not allowed in the 'do-while' condition because it is always truthy. Only booleans are allowed.]
 
 /*** Valid ***/
 do { /* statements */ } while (boolFn());
@@ -176,6 +176,6 @@ do { /* statements */ } while (boolType);
 /*** For Statement ***/
 /*** Invalid ***/
 for (let j = 0; j; j++) { /* statements */ }
-                ~                            [For statement condition may be falsy if it is 0. Expected a boolean.]
+                ~                            [This type is not allowed in the 'for' condition because it is a number. Only booleans are allowed.]
 /*** Valid ***/
 for (let j = 0; j > numType; j++) { /* statements */ }

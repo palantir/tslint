@@ -1,7 +1,7 @@
 declare function get<T>(): T;
 
 if (get<string | number>()) {}
-    ~~~~~~~~~~~~~~~~~~~~~~ [If statement condition may be falsy if it is 0. Expected a boolean, undefined-union, or string.]
+    ~~~~~~~~~~~~~~~~~~~~~~ [This type is not allowed in the 'if' condition because it could be a number. Allowed types are boolean, undefined-union, or string.]
 
 if (get<string | boolean>()) {}
     ~~~~~~~~~~~~~~~~~~~~~~~ [mix]
@@ -22,4 +22,7 @@ if (get<"foo" | "bar" | undefined>()) {}
 if (get<"" | boolean>()) {}
     ~~~~~~~~~~~~~~~~~~~ [mix]
 
-[mix]: If statement condition mixes multiple kinds of falsy values. Expected a boolean, undefined-union, or string.
+// Mix of 1 falsy with any number of truthy OK
+if (get<string | RegExp>()) {}
+
+[mix]: This type is not allowed in the 'if' condition because it unions more than one truthy/falsy type. Allowed types are boolean, undefined-union, or string.

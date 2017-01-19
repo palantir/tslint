@@ -183,11 +183,6 @@ export function isSymbolFlagSet(symbol: ts.Symbol, flagToCheck: ts.SymbolFlags):
     return (symbol.flags & flagToCheck) !== 0;
 }
 
-/** Type predicate to test for a union type. */
-export function isUnionType(type: ts.Type): type is ts.UnionType {
-    return isTypeFlagSet(type, ts.TypeFlags.Union);
-}
-
 /**
  * Bitwise check for object flags.
  * Does not work with TypeScript 2.0.x
@@ -261,9 +256,9 @@ export type FilterCallback = (node: ts.Node) => boolean;
 
 /**
  * Iterate over all tokens of `node`
- * 
+ *
  * @description JsDoc comments are treated like regular comments and only visited if `skipTrivia` === false.
- * 
+ *
  * @param node The node whose tokens should be visited
  * @param skipTrivia If set to false all trivia preceeding `node` or any of its children is included
  * @param cb Is called for every token of `node`. It gets the full text of the SourceFile and the position of the token within that text.
@@ -315,7 +310,7 @@ export function forEachToken(node: ts.Node, skipTrivia: boolean, cb: ForEachToke
 function createTriviaHandler(sourceFile: ts.SourceFile, cb: ForEachTokenCallback) {
     const fullText = sourceFile.text;
     const scanner = ts.createScanner(sourceFile.languageVersion, false, sourceFile.languageVariant, fullText);
-    /** 
+    /**
      * Scan the specified range to get all trivia tokens.
      * This includes trailing trivia of the last token and the leading trivia of the current token
      */
@@ -409,9 +404,9 @@ function canHaveTrailingTrivia(tokenKind: ts.SyntaxKind, parent: ts.Node): boole
     return true;
 }
 
-/** 
+/**
  * Checks if there are any comments between `position` and the next non-trivia token
- * 
+ *
  * @param text The text to scan
  * @param position The position inside `text` where to start scanning. Make sure that this is a valid start position.
  *                 This value is typically obtained from `node.getFullStart()` or `node.getEnd()`
