@@ -193,6 +193,34 @@ export function isObjectFlagSet(objectType: ts.ObjectType, flagToCheck: ts.Objec
 }
 
 /**
+ * @returns true if type is or extends from a class of the given name
+ */
+export function isTypeOfClassName(type: ts.Type, className: string): boolean {
+    if (isTypeClassName(type, className)) {
+        return true;
+    }
+
+    const baseTypes = type.getBaseTypes();
+
+    if (baseTypes) {
+        for (const baseType of type.getBaseTypes()) {
+            if (isTypeClassName(baseType, className)) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+/**
+ * @returns true if type is a class of the given name
+ */
+export function isTypeClassName(type: ts.Type, className: string): boolean {
+    return !!(type.symbol && type.symbol.name === className);
+}
+
+/**
  * @returns true if decl is a nested module declaration, i.e. represents a segment of a dotted module path.
  */
 export function isNestedModuleDeclaration(decl: ts.ModuleDeclaration) {

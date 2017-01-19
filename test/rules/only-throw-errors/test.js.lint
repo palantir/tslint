@@ -1,0 +1,53 @@
+throw "error";
+      ~~~~~~~    [0]
+
+throw 0;
+      ~    [0]
+
+throw undefined;
+      ~~~~~~~~~    [0]
+
+throw null;
+      ~~~~    [0]
+
+var err = new Error();
+throw "an " + err;
+      ~~~~~~~~~~~    [0]
+
+var err = new Error();
+throw `${err}`
+      ~~~~~~~~    [0]
+
+throw new Error();
+
+throw new Error("error");
+
+var e = new Error("error");
+throw e;
+
+try {
+    throw new Error("error");
+} catch (e) {
+    throw e;
+}
+
+var err = "error";
+throw err;
+      ~~~    [0]
+
+function foo(bar) {
+    console.log(bar);
+}
+throw foo("error");
+      ~~~~~~~~~~~~    [0]
+
+throw new String("error");
+      ~~~~~~~~~~~~~~~~~~~    [0]
+
+var foo = {
+    bar: "error"
+};
+throw foo.bar;
+      ~~~~~~~    [0]
+
+[0]: Only Error instances may be thrown

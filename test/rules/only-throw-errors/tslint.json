@@ -1,0 +1,11 @@
+{
+  "linterOptions": {
+    "typeCheck": true
+  },
+  "rules": {
+    "only-throw-errors": true
+  },
+  "jsRules": {
+    "only-throw-errors": true
+  }
+}

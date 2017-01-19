@@ -1,0 +1,53 @@
+throw "error";
+      ~~~~~~~    [0]
+
+throw 0;
+      ~    [0]
+
+throw undefined;
+      ~~~~~~~~~    [0]
+
+throw null;
+      ~~~~    [0]
+
+const a = new Error();
+throw "an " + a;
+      ~~~~~~~~~    [0]
+
+const b = new Error();
+throw `${b}`
+      ~~~~~~    [0]
+
+throw new Error();
+
+throw new Error("error");
+
+const c = new Error("error");
+throw c;
+
+try {
+    throw new Error("error");
+} catch (d) {
+    throw d;
+}
+
+const e = "error";
+throw e;
+      ~    [0]
+
+function foo(bar) {
+    console.log(bar);
+}
+throw foo("error");
+      ~~~~~~~~~~~~    [0]
+
+throw new String("error");
+      ~~~~~~~~~~~~~~~~~~~    [0]
+
+const foo = {
+    bar: "error"
+};
+throw foo.bar;
+      ~~~~~~~    [0]
+
+[0]: Only Error instances may be thrown
