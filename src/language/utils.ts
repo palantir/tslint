@@ -281,7 +281,10 @@ export function forEachToken(node: ts.Node, skipTrivia: boolean, cb: ForEachToke
     }
 
     function iterateChildren(child: ts.Node): void {
-        if (child.kind < ts.SyntaxKind.FirstNode) {
+        if (child.kind < ts.SyntaxKind.FirstNode ||
+            // for backwards compatibility to typescript 2.0.10
+            // JsxText was no Token, but a Node in that version
+            child.kind === ts.SyntaxKind.JsxText) {
             // we found a token, tokens have no children, stop recursing here
             return callback(child);
         }
@@ -341,13 +344,20 @@ export function forEachComment(node: ts.Node, cb: ForEachCommentCallback) {
         // don't search for comments inside JsxText
         if (canHaveLeadingTrivia(tokenKind, parent)) {
             // Comments before the first token (pos.fullStart === 0) are all considered leading comments, so no need for special treatment
-            ts.forEachLeadingCommentRange(fullText, pos.fullStart, commentCallback);
+            const comments = ts.getLeadingCommentRanges(fullText, pos.fullStart);
+            if (comments !== undefined) {
+                for (const comment of comments) {
+                    cb(fullText, comment.kind, {fullStart: pos.fullStart, tokenStart: comment.pos, end: comment.end});
+                }
+            }
         }
         if (canHaveTrailingTrivia(tokenKind, parent)) {
-            ts.forEachTrailingCommentRange(fullText, pos.end, commentCallback);
-        }
-        function commentCallback(tokenStart: number, end: number, kind: ts.SyntaxKind) {
-            cb(fullText, kind, {tokenStart, end, fullStart: pos.fullStart});
+            const comments = ts.getTrailingCommentRanges(fullText, pos.end);
+            if (comments !== undefined) {
+                for (const comment of comments) {
+                    cb(fullText, comment.kind, {fullStart: pos.fullStart, tokenStart: comment.pos, end: comment.end});
+                }
+            }
         }
     });
 }
@@ -402,8 +412,6 @@ function canHaveTrailingTrivia(tokenKind: ts.SyntaxKind, parent: ts.Node): boole
  *                 This value is typically obtained from `node.getFullStart()` or `node.getEnd()`
  */
 export function hasCommentAfterPosition(text: string, position: number): boolean {
-    const cb = () => true;
-    return ts.forEachTrailingCommentRange(text, position, cb) ||
-           ts.forEachLeadingCommentRange(text, position, cb) ||
-           false; // return boolean instead of undefined if no comment is found
+    return ts.getTrailingCommentRanges(text, position) !== undefined ||
+           ts.getTrailingCommentRanges(text, position) !== undefined;
 }
