@@ -192,10 +192,11 @@ tslint accepts the following command-line options:
     option is set.
 
 --test:
-    Runs tslint on the specified directory and checks if tslint's output matches
-    the expected output in .lint files. Automatically loads the tslint.json file in the
-    specified directory as the configuration file for the tests. See the
-    full tslint documentation for more details on how this can be used to test custom rules.
+    Runs tslint on matched directories and checks if tslint outputs
+    match the expected output in .lint files. Automatically loads the
+    tslint.json files in the directories as the configuration file for
+    the tests. See the full tslint documentation for more details on how
+    this can be used to test custom rules.
 
 --project:
     The location of a tsconfig.json file that will be used to determine which
