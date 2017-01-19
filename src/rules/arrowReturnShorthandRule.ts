@@ -85,11 +85,11 @@ class Walker extends Lint.RuleWalker {
                 this.appendText(expr.getEnd(), ")"),
             ] : []),
             // " {"
-            deleteFromTo(arrow.end, openBrace.end),
+            this.deleteFromTo(arrow.end, openBrace.end),
             // "return "
-            deleteFromTo(statement.getStart(), expr.getStart()),
+            this.deleteFromTo(statement.getStart(), expr.getStart()),
             // " }" (may include semicolon)
-            deleteFromTo(expr.end, closeBrace.end),
+            this.deleteFromTo(expr.end, closeBrace.end),
         );
 
         function hasComments(node: ts.Node): boolean {
@@ -103,8 +103,4 @@ function getSimpleReturnExpression(block: ts.Block): ts.Expression | undefined {
     return block.statements.length === 1 && block.statements[0].kind === ts.SyntaxKind.ReturnStatement
         ? (block.statements[0] as ts.ReturnStatement).expression
         : undefined;
-}
-
-function deleteFromTo(start: number, end: number): Lint.Replacement {
-    return new Lint.Replacement(start, end - start, "");
 }

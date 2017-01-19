@@ -16,6 +16,7 @@
  */
 
 // tslint:disable object-literal-sort-keys
+// tslint:disable:object-literal-key-quotes
 export const rules = {
     // added in v3.x
     "no-invalid-this": false,
@@ -37,7 +38,13 @@ export const rules = {
 
     // added in v4.3
     "import-spacing": true,
-    "space-before-function-paren": [true, "never"],
+    "space-before-function-paren": [true, {
+        "anonymous": "never",
+        "asyncArrow": "always",
+        "constructor": "never",
+        "method": "never",
+        "named": "never",
+    }],
     "typeof-compare": true,
     "unified-signatures": true,
 };

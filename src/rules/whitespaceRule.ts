@@ -26,6 +26,7 @@ const OPTION_MODULE = "check-module";
 const OPTION_SEPARATOR = "check-separator";
 const OPTION_TYPE = "check-type";
 const OPTION_TYPECAST = "check-typecast";
+const OPTION_PREBLOCK = "check-preblock";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -34,7 +35,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Enforces whitespace style conventions.",
         rationale: "Helps maintain a readable, consistent style in your codebase.",
         optionsDescription: Lint.Utils.dedent`
-            Seven arguments may be optionally provided:
+            Eight arguments may be optionally provided:
 
             * \`"check-branch"\` checks branching statements (\`if\`/\`else\`/\`for\`/\`while\`) are followed by whitespace.
             * \`"check-decl"\`checks that variable declarations have whitespace around the equals token.
@@ -42,13 +43,14 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"check-module"\` checks for whitespace in import & export statements.
             * \`"check-separator"\` checks for whitespace after separator tokens (\`,\`/\`;\`).
             * \`"check-type"\` checks for whitespace before a variable type specification.
-            * \`"check-typecast"\` checks for whitespace between a typecast and its target.`,
+            * \`"check-typecast"\` checks for whitespace between a typecast and its target.
+            * \`"check-preblock"\` checks for whitespace before the opening brace of a block`,
         options: {
             type: "array",
             items: {
                 type: "string",
                 enum: ["check-branch", "check-decl", "check-operator", "check-module",
-                       "check-separator", "check-type", "check-typecast"],
+                       "check-separator", "check-type", "check-typecast", "check-preblock"],
             },
             minLength: 0,
             maxLength: 7,
@@ -66,7 +68,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
+class WhitespaceWalker extends Lint.RuleWalker {
     private scanner: ts.Scanner;
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
@@ -78,27 +80,14 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
         super.visitSourceFile(node);
 
         let prevTokenShouldBeFollowedByWhitespace = false;
-        this.scanner.setTextPos(0);
-
-        Lint.scanAllTokens(this.scanner, (scanner: ts.Scanner) => {
-            const startPos = scanner.getStartPos();
-            const tokenKind = scanner.getToken();
-
+        Lint.forEachToken(node, false, (_text, tokenKind, pos, parent) => {
             if (tokenKind === ts.SyntaxKind.WhitespaceTrivia || tokenKind === ts.SyntaxKind.NewLineTrivia) {
                 prevTokenShouldBeFollowedByWhitespace = false;
+                return;
             } else if (prevTokenShouldBeFollowedByWhitespace) {
-                this.addFailureAt(startPos, 1, Rule.FAILURE_STRING);
+                this.addMissingWhitespaceErrorAt(pos.tokenStart);
                 prevTokenShouldBeFollowedByWhitespace = false;
             }
-
-            const skip = this.getSkipEndFromStart(startPos);
-            if (skip !== undefined) {
-                // tokens to skip are places where the scanner gets confused about what the token is, without the proper context
-                // (specifically, regex, identifiers, and templates). So skip those tokens.
-                scanner.setTextPos(skip);
-                return;
-            }
-
             // check for trailing space after the given tokens
             switch (tokenKind) {
                 case ts.SyntaxKind.CatchKeyword:
@@ -118,7 +107,7 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
                     }
                     break;
                 case ts.SyntaxKind.EqualsToken:
-                    if (this.hasOption(OPTION_DECL)) {
+                    if (this.hasOption(OPTION_DECL) && parent.kind !== ts.SyntaxKind.JsxAttribute) {
                         prevTokenShouldBeFollowedByWhitespace = true;
                     }
                     break;
@@ -152,6 +141,13 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
             this.checkForTrailingWhitespace(node.right.getFullStart());
         }
         super.visitBinaryExpression(node);
+    }
+
+    protected visitBlock(block: ts.Block) {
+        if (this.hasOption(OPTION_PREBLOCK)) {
+            this.checkForTrailingWhitespace(block.getFullStart());
+        }
+        super.visitBlock(block);
     }
 
     // check for spaces between ternary operator symbols
@@ -210,16 +206,6 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
         super.visitImportEqualsDeclaration(node);
     }
 
-    public visitJsxElement(node: ts.JsxElement) {
-        this.addTokenToSkipFromNode(node);
-        super.visitJsxElement(node);
-    }
-
-    public visitJsxSelfClosingElement(node: ts.JsxSelfClosingElement) {
-        this.addTokenToSkipFromNode(node);
-        super.visitJsxSelfClosingElement(node);
-    }
-
     public visitTypeAssertionExpression(node: ts.TypeAssertion) {
         if (this.hasOption(OPTION_TYPECAST)) {
             const position = node.expression.getFullStart();
@@ -261,7 +247,12 @@ class WhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
         if (nextTokenType !== ts.SyntaxKind.WhitespaceTrivia
                 && nextTokenType !== ts.SyntaxKind.NewLineTrivia
                 && nextTokenType !== ts.SyntaxKind.EndOfFileToken) {
-            this.addFailureAt(position, 1, Rule.FAILURE_STRING);
+            this.addMissingWhitespaceErrorAt(position);
         }
+    }
+
+    private addMissingWhitespaceErrorAt(position: number) {
+        const fix = this.createFix(this.appendText(position, " "));
+        this.addFailureAt(position, 1, Rule.FAILURE_STRING, fix);
     }
 }

@@ -132,6 +132,9 @@ function buildSingleModuleDocumentation(documentation: IDocumentation, modulePat
         // Ensure a directory exists and write the module's file.
         const moduleName = (metadata as any)[documentation.nameMetadataKey];
         const fileDirectory = path.join(documentation.subDirectory, moduleName);
+        if (!fs.existsSync(documentation.subDirectory)) {
+            fs.mkdirSync(documentation.subDirectory);
+        }
         if (!fs.existsSync(fileDirectory)) {
             fs.mkdirSync(fileDirectory);
         }
