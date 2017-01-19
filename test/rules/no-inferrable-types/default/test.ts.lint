@@ -5,6 +5,10 @@ let y: boolean = false;
        ~~~~~~~          [boolean]
 let z: string = "foo";
        ~~~~~~           [string]
+class C {
+    x: number = 1;
+       ~~~~~~           [number]
+}
 
 // errors, types are inferrable
 function foo (a: number = 5, b: boolean = true, c: string = "bah") { }
