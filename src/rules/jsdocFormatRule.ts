@@ -48,22 +48,11 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-class JsdocWalker extends Lint.SkippableTokenAwareRuleWalker {
+class JsdocWalker extends Lint.RuleWalker {
     public visitSourceFile(node: ts.SourceFile) {
-        super.visitSourceFile(node);
-        Lint.scanAllTokens(ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, node.text), (scanner: ts.Scanner) => {
-            const skip = this.getSkipEndFromStart(scanner.getStartPos());
-            if (skip !== undefined) {
-                // tokens to skip are places where the scanner gets confused about what the token is, without the proper context
-                // (specifically, regex, identifiers, and templates). So skip those tokens.
-                scanner.setTextPos(skip);
-                return;
-            }
-
-            if (scanner.getToken() === ts.SyntaxKind.MultiLineCommentTrivia) {
-                const commentText = scanner.getTokenText();
-                const startPosition = scanner.getTokenPos();
-                this.findFailuresForJsdocComment(commentText, startPosition);
+        Lint.forEachComment(node, (fullText, kind, pos) => {
+            if (kind === ts.SyntaxKind.MultiLineCommentTrivia) {
+                this.findFailuresForJsdocComment(fullText.substring(pos.tokenStart, pos.end), pos.tokenStart);
             }
         });
     }

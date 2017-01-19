@@ -25,7 +25,13 @@ export class FooComponent extends React.Component<IFooProps, IFooState> {
 
     public render() {
         return (
-            <div onClick={() => this.onClick()}>
+            <div onClick={() => this.onClick()} class={true===false?"foo":"bar"}>
+                                                           ~                      [missing whitespace]
+                                                              ~                   [missing whitespace]
+                                                                   ~              [missing whitespace]
+                                                                    ~             [missing whitespace]
+                                                                         ~        [missing whitespace]
+                                                                          ~       [missing whitespace]
                 {this.state.bar.map((s) => <span>{s}</span>)}
                 <BazComponent someProp={123} anotherProp={456} />
             </div>
