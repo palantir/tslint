@@ -17,10 +17,59 @@
 
 import * as ts from "typescript";
 
-import {RuleFailure} from "../rule/rule";
+import {Fix, IOptions, Replacement, RuleFailure} from "../rule/rule";
+import {IWalker} from "./walker";
 
 export interface IWalker {
     getSourceFile(): ts.SourceFile;
-    walk(node: ts.Node): void;
+    walk(sourceFile: ts.SourceFile): void;
     getFailures(): RuleFailure[];
+}
+
+export abstract class AbstractWalker implements IWalker {
+    public readonly options: ReadonlyArray<any>;
+    public readonly ruleName: string;
+    private limit: number;
+    private failures: RuleFailure[];
+
+    constructor(public readonly sourceFile: ts.SourceFile, options: IOptions) {
+        this.failures = [];
+        this.options = options.ruleArguments;
+        this.limit = sourceFile.getFullWidth();
+        this.ruleName = options.ruleName;
+    }
+
+    public abstract walk(sourceFile: ts.SourceFile): void;
+
+    public getSourceFile() {
+        return this.sourceFile;
+    }
+
+    public getFailures() {
+        return this.failures;
+    }
+
+    public hasOption(option: any) {
+        return this.options.indexOf(option) !== -1;
+    }
+
+    /** Add a failure with any arbitrary span. Prefer `addFailureAtNode` if possible. */
+    public addFailureAt(start: number, width: number, failure: string, fix?: Fix) {
+        this.addFailure(start, start + width, failure, fix);
+    }
+
+    public addFailure(start: number, end: number, failure: string, fix?: Fix) {
+        this.failures.push(
+            new RuleFailure(this.sourceFile, Math.min(start, this.limit), Math.min(end, this.limit), failure, this.ruleName, fix),
+        );
+    }
+
+    /** Add a failure using a node's span. */
+    public addFailureAtNode(node: ts.Node, failure: string, fix?: Fix) {
+        this.addFailure(node.getStart(this.sourceFile), node.getEnd(), failure, fix);
+    }
+
+    public createFix(...replacements: Replacement[]) {
+        return new Fix(this.ruleName, replacements);
+    }
 }
