@@ -18,7 +18,7 @@
 import * as ts from "typescript";
 
 import * as Lint from "../index";
-import { isTypeOfClassName } from "../language/utils";
+import { isTypeFlagSet, isTypeOfClassName } from "../language/utils";
 
 export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -49,7 +49,7 @@ class OnlyThrowErrorsWalker extends Lint.ProgramAwareRuleWalker {
         const expression = node.expression;
         const type = this.getTypeChecker().getTypeAtLocation(expression);
 
-        if (type && !this.symbolIsError(type)) {
+        if (type && !isTypeFlagSet(type, ts.TypeFlags.Any) && !this.symbolIsError(type)) {
             this.addFailure(this.createFailure(expression.getStart(), expression.getWidth(), Rule.FAILURE_STRING));
         }
 

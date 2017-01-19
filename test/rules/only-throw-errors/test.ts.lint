@@ -44,10 +44,4 @@ throw foo("error");
 throw new String("error");
       ~~~~~~~~~~~~~~~~~~~    [0]
 
-const foo = {
-    bar: "error"
-};
-throw foo.bar;
-      ~~~~~~~    [0]
-
 [0]: Only Error instances may be thrown
