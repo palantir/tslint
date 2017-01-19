@@ -4,7 +4,6 @@
 - [ ] New feature, bugfix, or enhancement
   - [ ] Includes tests
 - [ ] Documentation update
-- [ ] Enable CircleCI for your fork (https://circleci.com/add-projects)
 
 #### What changes did you make?
 
