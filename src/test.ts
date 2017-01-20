@@ -44,6 +44,11 @@ export interface TestResult {
     };
 }
 
+export function runTests(pattern: string, rulesDirectory?: string | string[]): TestResult[] {
+    return glob.sync(`${pattern}/tslint.json`)
+        .map((directory: string): TestResult => runTest(path.dirname(directory), rulesDirectory));
+}
+
 export function runTest(testDirectory: string, rulesDirectory?: string | string[]): TestResult {
     // needed to get colors to show up when passing through Grunt
     (colors as any).enabled = true;
@@ -160,6 +165,18 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
     }
 
     return results;
+}
+
+export function consoleTestResultsHandler(testResults: TestResult[]): boolean {
+    let didAllTestsPass = true;
+
+    for (const testResult of testResults) {
+        if (!consoleTestResultHandler(testResult)) {
+            didAllTestsPass = false;
+        }
+    }
+
+    return didAllTestsPass;
 }
 
 export function consoleTestResultHandler(testResult: TestResult): boolean {
