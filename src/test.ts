@@ -45,6 +45,9 @@ export interface TestResult {
 }
 
 export function runTest(testDirectory: string, rulesDirectory?: string | string[]): TestResult {
+    // needed to get colors to show up when passing through Grunt
+    (colors as any).enabled = true;
+
     const filesToLint = glob.sync(path.join(testDirectory, `**/*${MARKUP_FILE_EXTENSION}`));
     const tslintConfig = Linter.findConfiguration(path.join(testDirectory, "tslint.json"), "").results;
     const tsConfig = path.join(testDirectory, "tsconfig.json");
