@@ -76,9 +76,9 @@ describe("Configuration", () => {
         assert.deepEqual(actualConfig, expectedConfig);
     });
 
-    describe("loadConfigurationFromPath", () => {
+    describe("loadConfigurationFromPath legacy", () => {
         it("extends with relative path", () => {
-            const config = loadConfigurationFromPath("./test/config/tslint-extends-relative.json");
+            const config = loadConfigurationFromPath("./test/config-legacy/tslint-extends-relative.json");
 
             assert.isArray(config.rulesDirectory);
             assert.isTrue(config.rules["no-fail"], "did not pick up 'no-fail' in base config");
@@ -88,7 +88,7 @@ describe("Configuration", () => {
         });
 
         it("extends with package", () => {
-            const config = loadConfigurationFromPath("./test/config/tslint-extends-package.json");
+            const config = loadConfigurationFromPath("./test/config-legacy/tslint-extends-package.json");
 
             assert.isArray(config.rulesDirectory);
             /* tslint:disable:object-literal-sort-keys */
@@ -106,7 +106,7 @@ describe("Configuration", () => {
         });
 
         it("extends with package without customization", () => {
-            const config = loadConfigurationFromPath("./test/config/tslint-extends-package-no-mod.json");
+            const config = loadConfigurationFromPath("./test/config-legacy/tslint-extends-package-no-mod.json");
 
             assert.isArray(config.rulesDirectory);
             assert.deepEqual(config.jsRules, {
@@ -120,7 +120,7 @@ describe("Configuration", () => {
         });
 
         it("extends with builtin", () => {
-            const config = loadConfigurationFromPath("./test/config/tslint-extends-builtin.json");
+            const config = loadConfigurationFromPath("./test/config-legacy/tslint-extends-builtin.json");
             assert.isUndefined(config.jsRules["no-var-keyword"]);
             assert.isFalse(config.jsRules["no-eval"]);
             assert.isTrue(config.rules["no-var-keyword"]);
@@ -150,7 +150,7 @@ describe("Configuration", () => {
         });
 
         it("extends with package two levels (and relative path in rulesDirectory)", () => {
-            const config = loadConfigurationFromPath("./test/config/tslint-extends-package-two-levels.json");
+            const config = loadConfigurationFromPath("./test/config-legacy/tslint-extends-package-two-levels.json");
 
             assert.isArray(config.rulesDirectory);
             assert.lengthOf(config.rulesDirectory, 2);
@@ -173,7 +173,7 @@ describe("Configuration", () => {
         });
 
         it("extends with array", () => {
-            const config = loadConfigurationFromPath("./test/config/tslint-extends-package-array.json");
+            const config = loadConfigurationFromPath("./test/config-legacy/tslint-extends-package-array.json");
 
             assert.isArray(config.rulesDirectory);
             assert.deepEqual(config.jsRules, {
@@ -191,7 +191,7 @@ describe("Configuration", () => {
         });
 
         it("can load .json files with comments", () => {
-            const config = loadConfigurationFromPath("./test/config/tslint-with-comments.json");
+            const config = loadConfigurationFromPath("./test/config-legacy/tslint-with-comments.json");
 
             /* tslint:disable:object-literal-sort-keys */
             assert.deepEqual(config.jsRules, {
@@ -208,7 +208,7 @@ describe("Configuration", () => {
         });
 
         it("can load .json files with BOM", () => {
-            assert.doesNotThrow(() => loadConfigurationFromPath("./test/config/tslint-with-bom.json"));
+            assert.doesNotThrow(() => loadConfigurationFromPath("./test/config-legacy/tslint-with-bom.json"));
         });
 
         it("can load a built-in configuration", () => {

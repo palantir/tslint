@@ -1,0 +1,20 @@
+{
+  // a nice comment
+  "jsRules": {
+      /*
+      "rule-one": true,
+      */
+      "rule-two": true,
+      "rule-three": "//not a comment",
+      "rule-four": "/*also not a comment*/"
+  },
+  // a nice comment
+  "rules": {
+      /*
+      "rule-one": true,
+      */
+      "rule-two": true,
+      "rule-three": "//not a comment",
+      "rule-four": "/*also not a comment*/"
+  }
+}

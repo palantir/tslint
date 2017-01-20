@@ -1,0 +1,12 @@
+{
+  "extends": [
+    "tslint-test-custom-rules",
+    "./tslint-custom-rules-with-two-dirs.json"
+  ],
+  "jsRules": {
+    "always-fail": false
+  },
+  "rules": {
+    "always-fail": false
+  }
+}

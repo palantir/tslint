@@ -1,0 +1,9 @@
+{
+  "rulesDirectory": "../files/custom-rules/",
+  "jsRules": {
+    "always-fail": true
+  },
+  "rules": {
+    "always-fail": true
+  }
+}

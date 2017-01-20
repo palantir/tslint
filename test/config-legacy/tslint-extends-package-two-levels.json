@@ -1,0 +1,10 @@
+{
+  "extends": "tslint-test-config/tslint.json",
+  "rulesDirectory": "../files/custom-rules",
+  "jsRules": {
+    "always-fail": false
+  },
+  "rules": {
+    "always-fail": false
+  }
+}
