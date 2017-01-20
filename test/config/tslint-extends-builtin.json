@@ -1,9 +1,13 @@
 {
   "extends": "tslint:latest",
   "jsRules": {
-    "no-eval": false
+    "no-eval": {
+      "level": "none"
+    }
   },
   "rules": {
-    "no-eval": false
+    "no-eval": {
+      "level": "none"
+    }
   }
 }

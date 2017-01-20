@@ -2,9 +2,13 @@
   "extends": "tslint-test-config/tslint.json",
   "rulesDirectory": "../files/custom-rules",
   "jsRules": {
-    "always-fail": false
+    "always-fail": {
+      "level": "none"
+    }
   },
   "rules": {
-    "always-fail": false
+    "always-fail": {
+      "level": "none"
+    }
   }
 }

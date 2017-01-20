@@ -1,8 +1,12 @@
 {
   "jsRules": {
-    "always-fail": true
+    "always-fail": {
+      "level": "error"
+    }
   },
   "rules": {
-    "always-fail": true
+    "always-fail": {
+      "level": "error"
+    }
   }
 }

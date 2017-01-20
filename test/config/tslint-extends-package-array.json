@@ -4,9 +4,13 @@
     "./tslint-custom-rules-with-two-dirs.json"
   ],
   "jsRules": {
-    "always-fail": false
+    "always-fail": {
+      "level": "none"
+    }
   },
   "rules": {
-    "always-fail": false
+    "always-fail": {
+      "level": "none"
+    }
   }
 }
