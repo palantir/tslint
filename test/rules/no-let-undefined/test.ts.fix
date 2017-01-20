@@ -1,0 +1,6 @@
+let x: string | undefined;
+
+for (let y: number | undefined; y < 2; y++) {}
+
+let z;
+

@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "no-let-undefined": [true]
+  },
+  "jsRules": {
+    "no-let-undefined": [true]
+  }
+}

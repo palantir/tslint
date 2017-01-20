@@ -1,0 +1,9 @@
+let x: string | undefined = undefined;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+
+for (let y: number | undefined = undefined; y < 2; y++) {}
+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+
+let z;
+
+[0]: Unnecessary initialization to 'undefined'.
