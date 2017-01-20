@@ -23,12 +23,18 @@ import {consoleTestResultHandler, runTest} from "../src/test";
 // needed to get colors to show up when passing through Grunt
 (colors as any).enabled = true;
 
+let testDirectories = glob.sync("test/rules/**/tslint.json").map(path.dirname);
+const ruleRegexp = process.argv[2];
+if (ruleRegexp) {
+    const rgx = new RegExp(ruleRegexp);
+    testDirectories = testDirectories.filter(dir => rgx.test(dir));
+}
+
 /* tslint:disable:no-console */
 console.log();
-console.log(colors.underline("Testing Lint Rules:"));
+const matching = ruleRegexp ? ` matching '${ruleRegexp}'` : "";
+console.log(colors.underline(`Testing Lint Rules${matching}:`));
 /* tslint:enable:no-console */
-
-const testDirectories = glob.sync("test/rules/**/tslint.json").map(path.dirname);
 
 for (const testDirectory of testDirectories) {
     const results = runTest(testDirectory);
