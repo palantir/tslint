@@ -413,5 +413,5 @@ function canHaveTrailingTrivia(tokenKind: ts.SyntaxKind, parent: ts.Node): boole
  */
 export function hasCommentAfterPosition(text: string, position: number): boolean {
     return ts.getTrailingCommentRanges(text, position) !== undefined ||
-           ts.getTrailingCommentRanges(text, position) !== undefined;
+           ts.getLeadingCommentRanges(text, position) !== undefined;
 }
