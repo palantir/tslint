@@ -348,7 +348,7 @@ function stringOr(parts: string[]): string {
 }
 
 function isUnionType(type: ts.Type): type is ts.UnionType {
-    return Lint.isTypeFlagSet(type, ts.TypeFlags.Union);
+    return Lint.isTypeFlagSet(type, ts.TypeFlags.Union) && !Lint.isTypeFlagSet(type, ts.TypeFlags.Enum);
 }
 
 declare module "typescript" {
