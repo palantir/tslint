@@ -90,33 +90,20 @@ function needsParenthesesForNegate(node: ts.Expression) {
 
 function deconstructComparison(node: ts.BinaryExpression): { negate: boolean, expression: ts.Expression } | undefined {
     const { left, operatorToken, right } = node;
-    const operator = operatorKind(operatorToken);
-    if (operator === undefined) {
+    const eq = Lint.getEqualsKind(operatorToken);
+    if (!eq) {
         return undefined;
     }
 
     const leftValue = booleanFromExpression(left);
     if (leftValue !== undefined) {
-        return { negate: leftValue !== operator, expression: right };
+        return { negate: leftValue !== eq.isPositive, expression: right };
     }
     const rightValue = booleanFromExpression(right);
     if (rightValue !== undefined) {
-        return { negate: rightValue !== operator, expression: left };
+        return { negate: rightValue !== eq.isPositive, expression: left };
     }
     return undefined;
-}
-
-function operatorKind(operatorToken: ts.BinaryOperatorToken): boolean | undefined {
-    switch (operatorToken.kind) {
-        case ts.SyntaxKind.EqualsEqualsToken:
-        case ts.SyntaxKind.EqualsEqualsEqualsToken:
-            return true;
-        case ts.SyntaxKind.ExclamationEqualsToken:
-        case ts.SyntaxKind.ExclamationEqualsEqualsToken:
-            return false;
-        default:
-            return undefined;
-    }
 }
 
 function booleanFromExpression(node: ts.Expression): boolean | undefined {

@@ -56,14 +56,14 @@ export class Rule extends Lint.Rules.TypedRule {
 
 class Walker extends Lint.ProgramAwareRuleWalker {
     public visitBinaryExpression(node: ts.BinaryExpression) {
-        const equals = getEquals(node.operatorToken.kind);
+        const equals = Lint.getEqualsKind(node.operatorToken);
         if (equals) {
             this.checkEquals(node, equals);
         }
         super.visitBinaryExpression(node);
     }
 
-    private checkEquals(node: ts.BinaryExpression, { isStrict, isPositive }: Equals) {
+    private checkEquals(node: ts.BinaryExpression, { isStrict, isPositive }: Lint.EqualsKind) {
         const exprPred = getTypePredicate(node, isStrict);
         if (!exprPred) {
             return;
@@ -132,7 +132,7 @@ function getTypePredicateOneWay(left: ts.Expression, right: ts.Expression, isStr
             return nullOrUndefined(ts.TypeFlags.Null);
 
         case ts.SyntaxKind.Identifier:
-            if ((right as ts.Identifier).text === "undefined") {
+            if ((right as ts.Identifier).originalKeywordKind === ts.SyntaxKind.UndefinedKeyword) {
                 return nullOrUndefined(undefinedFlags);
             }
 
@@ -248,26 +248,6 @@ function testNonStrictNullUndefined(type: ts.Type): boolean | string | undefined
         : anyNull ? "null"
         : anyUndefined ? "undefined"
         : false;
-}
-
-interface Equals {
-    isPositive: boolean; // True for "===" and "=="
-    isStrict: boolean; // True for "===" and "!=="
-}
-
-function getEquals(kind: ts.SyntaxKind): Equals | undefined {
-    switch (kind) {
-        case ts.SyntaxKind.EqualsEqualsToken:
-            return { isPositive: true, isStrict: false };
-        case ts.SyntaxKind.EqualsEqualsEqualsToken:
-            return { isPositive: true, isStrict: true };
-        case ts.SyntaxKind.ExclamationEqualsToken:
-            return { isPositive: false, isStrict: false };
-        case ts.SyntaxKind.ExclamationEqualsEqualsToken:
-            return { isPositive: false, isStrict: true };
-        default:
-            return undefined;
-    }
 }
 
 function unionParts(type: ts.Type) {
