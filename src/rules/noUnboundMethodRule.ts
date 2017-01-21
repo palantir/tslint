@@ -32,7 +32,7 @@ export class Rule extends Lint.Rules.TypedRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "'this' may be unbound when a method is used as a property without being invoked.";
+    public static FAILURE_STRING = "Avoid referencing unbound methods which may cause unintentional scoping of 'this'.";
 
     public applyWithProgram(srcFile: ts.SourceFile, langSvc: ts.LanguageService): Lint.RuleFailure[] {
         return this.applyWithWalker(new Walker(srcFile, this.getOptions(), langSvc.getProgram()));

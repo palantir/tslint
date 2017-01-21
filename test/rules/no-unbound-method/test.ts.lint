@@ -25,4 +25,4 @@ i.foo;
 ~~~~~ [0]
 i.bar;
 
-[0]: 'this' may be unbound when a method is used as a property without being invoked.
+[0]: Avoid referencing unbound methods which may cause unintentional scoping of 'this'.
