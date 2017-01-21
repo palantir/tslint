@@ -1,5 +1,0 @@
-{
-  "rules": {
-    "no-unused-this": [true, "allow-public", "allow-protected"]
-  }
-}

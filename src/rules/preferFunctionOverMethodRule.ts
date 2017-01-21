@@ -25,7 +25,7 @@ const OPTION_ALLOW_PROTECTED = "allow-protected";
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
-        ruleName: "no-unused-this",
+        ruleName: "prefer-function-over-method",
         description: "Warns for methods that do not use 'this'.",
         optionsDescription: Lint.Utils.dedent`
             "${OPTION_ALLOW_PUBLIC}" excludes public methods.
