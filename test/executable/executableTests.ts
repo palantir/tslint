@@ -159,8 +159,23 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
             });
         });
 
+        it("exits with code 0 if `--test` flag is used with a wildcard", (done) => {
+            execCli(["--test", "test/rules/no-e*"], (err) => {
+                assert.isNull(err, "process should exit without an error");
+                done();
+            });
+        });
+
         it("exits with code 1 if `--test` flag is used with incorrect rule", (done) => {
             execCli(["--test", "test/files/incorrect-rule-test"], (err) => {
+                assert.isNotNull(err, "process should exit with error");
+                assert.strictEqual(err.code, 1, "error code should be 1");
+                done();
+            });
+        });
+
+        it("exits with code 1 if `--test` flag is used with incorrect rule in a wildcard", (done) => {
+            execCli(["--test", "test/files/incorrect-rule-*"], (err) => {
                 assert.isNotNull(err, "process should exit with error");
                 assert.strictEqual(err.code, 1, "error code should be 1");
                 done();
