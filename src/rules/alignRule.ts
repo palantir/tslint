@@ -24,6 +24,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "align",
         description: "Enforces vertical alignment.",
+        hasFix: true,
         rationale: "Helps maintain a readable, consistent style in your codebase.",
         optionsDescription: Lint.Utils.dedent`
             Three arguments may be optionally provided:
