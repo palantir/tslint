@@ -6,4 +6,8 @@ for (let y: number | undefined = undefined; y < 2; y++) {}
 
 let z;
 
+const x = undefined;
+
+function f(x: string | undefined = undefined) {}
+
 [0]: Unnecessary initialization to 'undefined'.

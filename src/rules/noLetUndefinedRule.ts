@@ -24,6 +24,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-let-undefined",
         description: "Forbids a 'let' statement to be initialized to 'undefined'.",
+        hasFix: true,
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: ["true"],
