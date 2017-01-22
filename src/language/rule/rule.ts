@@ -111,6 +111,22 @@ export class Replacement {
         return replacements.reduce((text, r) => r.apply(text), content);
     }
 
+    public static replaceFromTo(start: number, end: number, text: string) {
+        return new Replacement(start, end - start, text);
+    }
+
+    public static deleteText(start: number, length: number) {
+        return new Replacement(start, length, "");
+    }
+
+    public static deleteFromTo(start: number, end: number) {
+        return new Replacement(start, end - start, "");
+    }
+
+    public static appendText(start: number, text: string) {
+        return new Replacement(start, 0, text);
+    }
+
     constructor(private innerStart: number, private innerLength: number, private innerText: string) {
     }
 
