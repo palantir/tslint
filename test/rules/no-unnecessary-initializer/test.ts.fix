@@ -1,0 +1,15 @@
+let a: string | undefined;
+var b: string | undefined;
+
+for (let c: number | undefined; c < 2; c++) {}
+
+let d;
+
+const e = undefined;
+
+function f(x: string | undefined = undefined) {}
+
+declare function get<T>(): T
+const { g } = get<{ g?: number }>();
+const [h] = get<number[]>();
+
