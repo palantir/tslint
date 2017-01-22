@@ -14,6 +14,7 @@ function invalidParametersAlignment3(a,
                              b,
                              ~  [parameters are not aligned]
                            c) {
+                           ~  [parameters are not aligned]
     var i = 0;
 }
 
