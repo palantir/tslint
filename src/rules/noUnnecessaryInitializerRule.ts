@@ -58,12 +58,26 @@ class Walker extends Lint.RuleWalker {
         super.visitVariableDeclaration(node);
     }
 
-    public visitParameterDeclaration(node: ts.ParameterDeclaration) {
-        if (isUndefined(node.initializer)) {
-            // No fix since they may want to remove '| undefined' from the type.
-            this.addFailureAtNode(node, Rule.FAILURE_STRING_PARAMETER);
-        }
-        super.visitParameterDeclaration(node);
+    public visitMethodDeclaration(node: ts.MethodDeclaration) {
+        this.checkSignature(node);
+        super.visitMethodDeclaration(node);
+    }
+    public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
+        this.checkSignature(node);
+        super.visitFunctionDeclaration(node);
+    }
+    public visitConstructorDeclaration(node: ts.ConstructorDeclaration) {
+        this.checkSignature(node);
+        super.visitConstructorDeclaration(node);
+    }
+
+    private checkSignature({ parameters }: ts.MethodDeclaration | ts.FunctionDeclaration | ts.ConstructorDeclaration) {
+        parameters.forEach((parameter, i) => {
+            if (isUndefined(parameter.initializer) && parametersAllOptionalAfter(parameters, i)) {
+                // No fix since they may want to remove '| undefined' from the type.
+                this.addFailureAtNode(parameter, Rule.FAILURE_STRING_PARAMETER);
+            }
+        });
     }
 
     private checkInitializer(node: ts.VariableDeclaration | ts.BindingElement | ts.ParameterDeclaration) {
@@ -76,6 +90,18 @@ class Walker extends Lint.RuleWalker {
             node.end));
         this.addFailureAtNode(node, Rule.FAILURE_STRING, fix);
     }
+}
+
+function parametersAllOptionalAfter(parameters: ts.ParameterDeclaration[], idx: number): boolean {
+    for (let i = idx + 1; i < parameters.length; i++) {
+        if (parameters[i].questionToken) {
+            return true;
+        }
+        if (!parameters[i].initializer) {
+            return false;
+        }
+    }
+    return true;
 }
 
 function isUndefined(node: ts.Node | undefined): boolean {

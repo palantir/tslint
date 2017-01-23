@@ -7,7 +7,8 @@ let d;
 
 const e = undefined;
 
-function f(x: string | undefined = undefined) {}
+function f(x: string | undefined = undefined, bar: number) {}
+function f2(x: string | undefined = undefined, bar: number = 1) {}
 
 declare function get<T>(): T
 const { g } = get<{ g?: number }>();
