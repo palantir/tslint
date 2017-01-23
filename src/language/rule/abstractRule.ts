@@ -19,7 +19,7 @@ import * as ts from "typescript";
 
 import {doesIntersect} from "../utils";
 import {IWalker} from "../walker";
-import {IDisabledInterval, IOptions, IRule, IRuleMetadata, RuleFailure} from "./rule";
+import {IDisabledInterval, IOptions, IRule, IRuleMetadata, RuleFailure, WalkContext} from "./rule";
 
 export abstract class AbstractRule implements IRule {
     public static metadata: IRuleMetadata;
@@ -57,9 +57,15 @@ export abstract class AbstractRule implements IRule {
 
     public abstract apply(sourceFile: ts.SourceFile, languageService: ts.LanguageService): RuleFailure[];
 
-    public applyWithWalker(walker: IWalker): RuleFailure[] {
+    protected applyWithWalker(walker: IWalker): RuleFailure[] {
         walker.walk(walker.getSourceFile());
         return this.filterFailures(walker.getFailures());
+    }
+
+    protected applyWithFunction<T>(sourceFile: ts.SourceFile, options: T, walkFn: (ctx: WalkContext<T>) => void) {
+        const ctx = new WalkContext<T>(sourceFile, this.options.ruleName, options);
+        walkFn(ctx);
+        return this.filterFailures(ctx.getFailures());
     }
 
     public isEnabled(): boolean {
