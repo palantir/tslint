@@ -23,7 +23,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-unnecessary-initializer",
-        description: "Forbids a 'var'/'let' statementor destructuring initializer to be initialized to 'undefined'.",
+        description: "Forbids a 'var'/'let' statement or destructuring initializer to be initialized to 'undefined'.",
         hasFix: true,
         optionsDescription: "Not configurable.",
         options: null,
