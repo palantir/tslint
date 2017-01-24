@@ -14,7 +14,8 @@ class X {
 
     foo() {}
     "goo"() {}
-    hoo() {}
+    Hoo() {}
+    ioo() {}
     bar() {}
     ~~~ ['bar' should come alphabetically before 'foo']
 

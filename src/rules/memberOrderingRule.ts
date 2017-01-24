@@ -251,7 +251,7 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
                     }
 
                     const curName = nameString(member.name);
-                    if (prevName !== undefined && curName < prevName) {
+                    if (prevName !== undefined && caseInsensitiveLess(curName, prevName)) {
                         this.addFailureAtNode(member.name,
                             Rule.FAILURE_STRING_ALPHABETIZE(this.findLowerName(members, rank, curName), curName));
                     } else {
@@ -272,7 +272,7 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
                 continue;
             }
             const name = nameString(member.name);
-            if (name > targetName) {
+            if (caseInsensitiveLess(targetName, name)) {
                 return name;
             }
         }
@@ -302,6 +302,10 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
     private rankName(rank: Rank): string {
         return this.opts.order[rank].name;
     }
+}
+
+function caseInsensitiveLess(a: string, b: string) {
+    return a.toLowerCase() < b.toLowerCase();
 }
 
 function memberKindForConstructor(access: Access): MemberKind {
