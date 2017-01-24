@@ -32,4 +32,8 @@ export abstract class AbstractWalker<T> extends WalkContext<T> implements IWalke
     public getSourceFile() {
         return this.sourceFile;
     }
+
+    public getFailures() {
+        return this.failures;
+    }
 }

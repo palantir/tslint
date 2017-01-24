@@ -61,10 +61,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static DEFAULT_ALLOWED = [ -1, 0, 1 ];
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const options = this.getOptions();
-        const ruleArguments = options.ruleArguments;
-        const allowedNumbers = ruleArguments.length > 0 ? ruleArguments : Rule.DEFAULT_ALLOWED;
-        return this.applyWithWalker(new NoMagicNumbersWalker(sourceFile, options.ruleName, new Set(allowedNumbers.map(String))));
+        const allowedNumbers = this.ruleArguments.length > 0 ? this.ruleArguments : Rule.DEFAULT_ALLOWED;
+        return this.applyWithWalker(new NoMagicNumbersWalker(sourceFile, this.ruleName, new Set(allowedNumbers.map(String))));
     }
 }
 

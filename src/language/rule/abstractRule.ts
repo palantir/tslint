@@ -23,7 +23,7 @@ import {IDisabledInterval, IOptions, IRule, IRuleMetadata, RuleFailure, WalkCont
 
 export abstract class AbstractRule implements IRule {
     public static metadata: IRuleMetadata;
-    private options: IOptions;
+    protected readonly ruleArguments: any[];
 
     public static isRuleEnabled(ruleConfigValue: any): boolean {
         if (typeof ruleConfigValue === "boolean") {
@@ -37,22 +37,24 @@ export abstract class AbstractRule implements IRule {
         return false;
     }
 
-    constructor(ruleName: string, private value: any, private disabledIntervals: IDisabledInterval[]) {
-        let ruleArguments: any[] = [];
-
+    constructor(protected readonly ruleName: string, private value: any, private disabledIntervals: IDisabledInterval[]) {
         if (Array.isArray(value) && value.length > 1) {
-            ruleArguments = value.slice(1);
+            this.ruleArguments = value.slice(1);
+        } else {
+            this.ruleArguments = [];
         }
-
-        this.options = {
-            disabledIntervals,
-            ruleArguments,
-            ruleName,
-        };
     }
 
     public getOptions(): IOptions {
-        return this.options;
+        return {
+            disabledIntervals: this.disabledIntervals,
+            ruleArguments: this.ruleArguments,
+            ruleName: this.ruleName,
+        };
+    }
+
+    public isEnabled(): boolean {
+        return AbstractRule.isRuleEnabled(this.value);
     }
 
     public abstract apply(sourceFile: ts.SourceFile, languageService: ts.LanguageService): RuleFailure[];
@@ -62,14 +64,18 @@ export abstract class AbstractRule implements IRule {
         return this.filterFailures(walker.getFailures());
     }
 
-    protected applyWithFunction<T>(sourceFile: ts.SourceFile, options: T, walkFn: (ctx: WalkContext<T>) => void) {
-        const ctx = new WalkContext<T>(sourceFile, this.options.ruleName, options);
+    protected applyWithFunction(sourceFile: ts.SourceFile, walkFn: (ctx: WalkContext<void>) => void): RuleFailure[];
+    protected applyWithFunction<T>(sourceFile: ts.SourceFile,
+                                   walkFn: (ctx: WalkContext<T>) => void,
+                                   options: T,
+                                   languageService?: ts.LanguageService): RuleFailure[];
+    protected applyWithFunction<T>(sourceFile: ts.SourceFile,
+                                   walkFn: (ctx: WalkContext<T | void>) => void,
+                                   options?: T,
+                                   languageService?: ts.LanguageService): RuleFailure[] {
+        const ctx = new WalkContext<T | void>(sourceFile, this.ruleName, options, languageService);
         walkFn(ctx);
-        return this.filterFailures(ctx.getFailures());
-    }
-
-    public isEnabled(): boolean {
-        return AbstractRule.isRuleEnabled(this.value);
+        return this.filterFailures(ctx.failures);
     }
 
     protected filterFailures(failures: RuleFailure[]): RuleFailure[] {
