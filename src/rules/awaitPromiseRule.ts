@@ -21,7 +21,7 @@ import * as Lint from "../index";
 export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
-        ruleName: "strict-boolean-expressions",
+        ruleName: "await-promise",
         description: "Warns for an awaited value that is not a Promise.",
         optionsDescription: "Not configurable.",
         options: null,
