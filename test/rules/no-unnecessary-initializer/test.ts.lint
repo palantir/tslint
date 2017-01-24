@@ -11,6 +11,7 @@ let d;
 const e = undefined;
 
 function f(x: string | undefined = undefined, bar: number) {}
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
 function f2(x: string | undefined = undefined, bar: number = 1) {}
             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [1]
 

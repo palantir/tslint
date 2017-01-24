@@ -73,18 +73,24 @@ class Walker extends Lint.RuleWalker {
 
     private checkSignature({ parameters }: ts.MethodDeclaration | ts.FunctionDeclaration | ts.ConstructorDeclaration) {
         parameters.forEach((parameter, i) => {
-            if (isUndefined(parameter.initializer) && parametersAllOptionalAfter(parameters, i)) {
-                // No fix since they may want to remove '| undefined' from the type.
-                this.addFailureAtNode(parameter, Rule.FAILURE_STRING_PARAMETER);
+            if (isUndefined(parameter.initializer)) {
+                if (parametersAllOptionalAfter(parameters, i)) {
+                    // No fix since they may want to remove '| undefined' from the type.
+                    this.addFailureAtNode(parameter, Rule.FAILURE_STRING_PARAMETER);
+                } else {
+                    this.failWithFix(parameter);
+                }
             }
         });
     }
 
-    private checkInitializer(node: ts.VariableDeclaration | ts.BindingElement | ts.ParameterDeclaration) {
-        if (!isUndefined(node.initializer)) {
-            return;
+    private checkInitializer(node: ts.VariableDeclaration | ts.BindingElement) {
+        if (isUndefined(node.initializer)) {
+            this.failWithFix(node);
         }
+    }
 
+    private failWithFix(node: ts.VariableDeclaration | ts.BindingElement | ts.ParameterDeclaration) {
         const fix = this.createFix(this.deleteFromTo(
             Lint.childOfKind(node, ts.SyntaxKind.EqualsToken)!.pos,
             node.end));
