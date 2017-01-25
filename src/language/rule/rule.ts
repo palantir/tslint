@@ -283,12 +283,9 @@ export class WalkContext<T> {
     public readonly failures: RuleFailure[];
     private limit: number;
 
-    constructor(public readonly sourceFile: ts.SourceFile,
-                public readonly ruleName: string,
-                public readonly options: T,
-                public readonly languageService?: ts.LanguageService) {
+    constructor(public readonly sourceFile: ts.SourceFile, public readonly ruleName: string, public readonly options: T) {
         this.failures = [];
-        this.limit = sourceFile.getFullWidth();
+        this.limit = sourceFile.end;
     }
 
     /** Add a failure with any arbitrary span. Prefer `addFailureAtNode` if possible. */
