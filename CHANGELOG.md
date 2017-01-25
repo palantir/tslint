@@ -19,7 +19,6 @@ v4.4.0
 * [new-rule-option] `allow-fast-null-checks` added to `no-unused-expression` (#1638)
 * [new-rule-option] `comment-format-rule` adds `ignore-words` and `ignore-pattern` options (#1757)
 * [new-rule-option] `whitespace` adds `check-preblock` option (#2002)
-* [new-rule-option] `member-ordering` adds categories, allowing flexible ordering of different types of members (#2041)
 * [new-rule-option] `strict-boolean-expressions` adds `allow-null-union`, `allow-undefined-union`, `allow-string`, and `allow-number` and  (#2033)
 * [new-fixer] `align` (#2097)
 * [new-fixer] `no-trailing-whitespace` (#2060)
@@ -33,6 +32,22 @@ v4.4.0
 * [bugfix] `whitespace` finds all whitespace errors in JsxExpressions and TemplateExpressions (#2036)
 * [bugfix] `comment-format` no more false positives in JsxText (#2036)
 * [enhancement] `--test` option now accepts glob (#2079)
+
+Thanks to our contributors!
+
+* Alexander Rusakov
+* Andrii Dieiev
+* @andy-ms 
+* Andy Hanson
+* Josh Goldberg
+* Kei Son
+* Klaus Meinhardt
+* Krati Ahuja
+* Martin Probst
+* Mohsen Azimi
+* Noah Chen
+* Romke van der Meulen
+* cameron-mcateer
 
 v4.3.1
 ---
