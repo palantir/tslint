@@ -13,7 +13,7 @@ v4.4.0
 * [new-rule] `await-promise` (#2102)
 * [new-rule] `no-floating-promises` (#1632)
 * [new-rule] `strict-type-predicates` (#2046)
-* [new-rule] `misused-new` (#1963)
+* [new-rule] `no-misused-new` (#1963)
 * [new-rule] `prefer-method-signature` (#2028)
 * [new-rule] `prefer-function-over-method` (#2037)
 * [new-rule-option] `allow-fast-null-checks` added to `no-unused-expression` (#1638)
