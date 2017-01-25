@@ -51,7 +51,7 @@ export const rules = {
     // added in v4.4
     "arrow-return-shorthand": true,
     "no-unnecessary-initializer": true,
-    "no-misused-new ": true,
+    "no-misused-new": true,
 };
 // tslint:enable object-literal-sort-keys
 

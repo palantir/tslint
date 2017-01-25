@@ -1,6 +1,11 @@
 Change Log
 ===
 
+v4.4.1
+---
+
+* [bugfix] errant space in recommended ruleset (couldn't find `no-misused-new`)
+
 v4.4.0
 ---
 
@@ -45,7 +50,6 @@ Thanks to our contributors!
 * Krati Ahuja
 * Martin Probst
 * Mohsen Azimi
-* Noah Chen
 * Romke van der Meulen
 * cameron-mcateer
 
