@@ -22,14 +22,17 @@ v4.4.0
 * [new-rule-option] `member-ordering` adds categories, allowing flexible ordering of different types of members (#2041)
 * [new-rule-option] `strict-boolean-expressions` adds `allow-null-union`, `allow-undefined-union`, `allow-string`, and `allow-number` and  (#2033)
 * [new-fixer] `align` (#2097)
+* [new-fixer] `no-trailing-whitespace` (#2060)
 * [bugfix] `no-magic-numbers` false positive on default parameter values (#2004)
 * [bugfix] `no-empty-interface` allow empty interface with 2 or more parents (#2070)
 * [bugfix] `no-trailing-whitespace` fixed for comments and EOF (#2060)
-* [bugfix] `no-empty` no longer fails for private or protected constructor
+* [bugfix] `no-empty` no longer fails for private or protected constructor (#1976)
 * [bugfix] `tslint:disable`/`tslint-enable` now handles multiple rules and fixes what code is enabled/disabled (#2061) 
 * [bugfix] `no-inferrable-types` now validates property declarations (#2081)
 * [bugfix] `unified-signatures` false positive (#2016)
-* [enhancement] `--test` option now accepts glob
+* [bugfix] `whitespace` finds all whitespace errors in JsxExpressions and TemplateExpressions (#2036)
+* [bugfix] `comment-format` no more false positives in JsxText (#2036)
+* [enhancement] `--test` option now accepts glob (#2079)
 
 v4.3.1
 ---
