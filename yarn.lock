@@ -980,7 +980,7 @@ timed-out@^3.0.0:
 "tslint-test-config-non-relative@file:test/external/tslint-test-config-non-relative":
   version "0.0.1"
 
-tslint@^4.4.0:
+tslint@latest:
   version "4.4.0"
   resolved "https://https://registry.yarnpkg.com/tslint/-/tslint-4.4.0.tgz#748d17bf8598dd044cca5771a03353ea422da29e"
   dependencies:
