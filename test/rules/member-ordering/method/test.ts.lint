@@ -68,4 +68,5 @@ const o = {
     }
 }
 
-[0]: Declaration of field not allowed after declaration of method. Instead, this should come at the beginning of the class/interface.
+[0]: Declaration of public instance member variable not allowed to appear after declaration of public instance member function
+

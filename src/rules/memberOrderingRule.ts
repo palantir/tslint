@@ -18,105 +18,16 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
+/* start old options */
+const OPTION_VARIABLES_BEFORE_FUNCTIONS = "variables-before-functions";
+const OPTION_STATIC_BEFORE_INSTANCE = "static-before-instance";
+const OPTION_PUBLIC_BEFORE_PRIVATE = "public-before-private";
+/* end old options */
+
+/* start new options */
 const OPTION_ORDER = "order";
-
-enum MemberKind {
-    publicStaticField,
-    publicStaticMethod,
-    protectedStaticField,
-    protectedStaticMethod,
-    privateStaticField,
-    privateStaticMethod,
-    publicInstanceField,
-    protectedInstanceField,
-    privateInstanceField,
-    publicConstructor,
-    protectedConstructor,
-    privateConstructor,
-    publicInstanceMethod,
-    protectedInstanceMethod,
-    privateInstanceMethod,
-}
-
-const PRESETS = new Map<string, MemberCategoryJson[]>([
-    ["variables-before-functions", [
-        {
-            kinds: [
-                "public-static-field",
-                "protected-static-field",
-                "private-static-field",
-                "public-instance-field",
-                "protected-instance-field",
-                "private-instance-field",
-            ],
-            name: "field",
-        },
-        {
-            kinds: [
-                "constructor",
-                "public-static-method",
-                "protected-static-method",
-                "private-static-method",
-                "public-instance-method",
-                "protected-instance-method",
-                "private-instance-method",
-            ],
-            name: "method",
-        },
-    ]],
-    ["static-before-instance", [
-        {
-            kinds: [
-                "public-static-field",
-                "public-static-method",
-                "protected-static-field",
-                "protected-static-method",
-                "private-static-field",
-                "private-static-method",
-            ],
-            name: "static member",
-        },
-        {
-            kinds: [
-                "public-instance-field",
-                "protected-instance-field",
-                "private-instance-field",
-                "constructor",
-                "public-instance-method",
-                "protected-instance-method",
-                "private-instance-method",
-            ],
-            name: "instance member",
-        },
-    ]],
-    ["public-before-private", [
-        {
-            kinds: [
-                "public-static-field",
-                "protected-static-field",
-                "public-instance-field",
-                "protected-instance-field",
-                "public-instance-method",
-                "protected-instance-method",
-                "public-static-method",
-                "protected-static-method",
-                "public-constructor",
-                "protected-constructor",
-            ],
-            name: "public member",
-        },
-        {
-            kinds: [
-                "private-static-field",
-                "private-instance-field",
-                "private-instance-method",
-                "private-static-method",
-                "private-constructor",
-            ],
-            name: "private member",
-        },
-    ]],
-    ["fields-first", [
+const PRESET_ORDERS: { [preset: string]: string[] } = {
+    "fields-first": [
         "public-static-field",
         "protected-static-field",
         "private-static-field",
@@ -130,8 +41,8 @@ const PRESETS = new Map<string, MemberCategoryJson[]>([
         "public-instance-method",
         "protected-instance-method",
         "private-instance-method",
-    ]],
-    ["instance-sandwich", [
+    ],
+    "instance-sandwich": [
         "public-static-field",
         "protected-static-field",
         "private-static-field",
@@ -145,8 +56,8 @@ const PRESETS = new Map<string, MemberCategoryJson[]>([
         "public-static-method",
         "protected-static-method",
         "private-static-method",
-    ]],
-    ["statics-first", [
+    ],
+    "statics-first": [
         "public-static-field",
         "public-static-method",
         "protected-static-field",
@@ -160,42 +71,9 @@ const PRESETS = new Map<string, MemberCategoryJson[]>([
         "public-instance-method",
         "protected-instance-method",
         "private-instance-method",
-    ]],
-]);
-const PRESET_NAMES = Array.from(PRESETS.keys());
-
-const allMemberKindNames = mapDefined(Object.keys(MemberKind), (key) => {
-    const mk = (MemberKind as any)[key];
-    return typeof mk === "number" ? MemberKind[mk].replace(/[A-Z]/g, (cap) => "-" + cap.toLowerCase()) : undefined;
-});
-
-function namesMarkdown(names: string[]): string {
-    return names.map((name) => "* `" + name + "`").join("\n    ");
-}
-
-const optionsDescription = Lint.Utils.dedent`
-    One argument, which is an object, must be provided. It should contain an \`order\` property.
-    The \`order\` property should have a value of one of the following strings:
-
-    ${namesMarkdown(PRESET_NAMES)}
-
-    Alternatively, the value for \`order\` maybe be an array consisting of the following strings:
-
-    ${namesMarkdown(allMemberKindNames)}
-
-    You can also omit the access modifier to refer to "public-", "protected-", and "private-" all at once; for example, "static-field".
-
-    You can also make your own categories by using an object instead of a string:
-
-        {
-            "name": "static non-private",
-            "kinds": [
-                "public-static-field",
-                "protected-static-field",
-                "public-static-method",
-                "protected-static-method"
-            ]
-        }`;
+    ],
+};
+/* end new options */
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -203,19 +81,43 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "member-ordering",
         description: "Enforces member ordering.",
         rationale: "A consistent ordering for class members can make classes easier to read, navigate, and edit.",
-        optionsDescription,
+        optionsDescription: Lint.Utils.dedent`
+            One argument, which is an object, must be provided. It should contain an \`order\` property.
+            The \`order\` property should have a value of one of the following strings:
+
+            * \`fields-first\`
+            * \`statics-first\`
+            * \`instance-sandwich\`
+
+            Alternatively, the value for \`order\` maybe be an array consisting of the following strings:
+
+            * \`public-static-field\`
+            * \`protected-static-field\`
+            * \`private-static-field\`
+            * \`public-instance-field\`
+            * \`protected-instance-field\`
+            * \`private-instance-field\`
+            * \`constructor\`
+            * \`public-static-method\`
+            * \`protected-static-method\`
+            * \`private-static-method\`
+            * \`public-instance-method\`
+            * \`protected-instance-method\`
+            * \`private-instance-method\`
+
+            This is useful if one of the preset orders does not meet your needs.`,
         options: {
             type: "object",
             properties: {
                 order: {
                     oneOf: [{
                         type: "string",
-                        enum: PRESET_NAMES,
+                        enum: ["fields-first", "statics-first", "instance-sandwich"],
                     }, {
                         type: "array",
                         items: {
                             type: "string",
-                            enum: allMemberKindNames,
+                            enum: PRESET_ORDERS["statics-first"],
                         },
                         maxLength: 13,
                     }],
@@ -223,35 +125,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             },
             additionalProperties: false,
         },
-        optionExamples: [
-            '[true, { "order": "fields-first" }]',
-            Lint.Utils.dedent`
-                [true, {
-                    "order": [
-                        "static-field",
-                        "instance-field",
-                        "constructor",
-                        "public-instance-method",
-                        "protected-instance-method",
-                        "private-instance-method"
-                    ]
-                }]`,
-            Lint.Utils.dedent`
-                [true, {
-                    "order": [
-                        {
-                            "name": "static non-private",
-                            "kinds": [
-                                "public-static-field",
-                                "protected-static-field",
-                                "public-static-method",
-                                "protected-static-method"
-                            ]
-                        },
-                        "constructor"
-                    ]
-                }]`,
-        ],
+        optionExamples: ['[true, { "order": "fields-first" }]'],
         type: "typescript",
         typescriptOnly: true,
     };
@@ -262,11 +136,11 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 export class MemberOrderingWalker extends Lint.RuleWalker {
-    private readonly order: MemberCategory[];
+    private readonly order: string[] | undefined;
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
-        this.order = getOrder(this.getOptions());
+        this.order = this.getOrder();
     }
 
     public visitClassDeclaration(node: ts.ClassDeclaration) {
@@ -289,7 +163,37 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
         super.visitTypeLiteral(node);
     }
 
+    private getOrder(): string[] | undefined {
+        const allOptions = this.getOptions();
+        if (allOptions == null || allOptions.length === 0) {
+            return undefined;
+        }
+
+        const firstOption = allOptions[0];
+        if (firstOption == null || typeof firstOption !== "object") {
+            return undefined;
+        }
+
+        const orderOption = firstOption[OPTION_ORDER];
+        if (Array.isArray(orderOption)) {
+            return orderOption;
+        } else if (typeof orderOption === "string") {
+            return PRESET_ORDERS[orderOption] || PRESET_ORDERS["default"];
+        } else {
+            return undefined;
+        }
+    }
+
     private visitMembers(members: Member[]) {
+        if (this.order === undefined) {
+            this.checkUsingOldOptions(members);
+        } else {
+            this.checkUsingNewOptions(members);
+        }
+    }
+
+    /* start new code */
+    private checkUsingNewOptions(members: Member[]) {
         let prevRank = -1;
         for (const member of members) {
             const rank = this.memberRank(member);
@@ -328,138 +232,122 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
     }
 
     private memberRank(member: Member): Rank | -1 {
-        const optionName = getMemberKind(member);
-        if (optionName === undefined) {
-            return -1;
-        }
-        return this.order.findIndex((category) => category.has(optionName));
+        const optionName = getOptionName(member);
+        return optionName === undefined ? -1 : this.order!.indexOf(optionName);
     }
 
     private rankName(rank: Rank): string {
-        return this.order[rank].name;
+        return this.order![rank].replace(/-/g, " ");
     }
-}
+    /* end new code */
 
-function memberKindForConstructor(access: Access): MemberKind {
-    return (MemberKind as any)[access + "Constructor"];
-}
-
-function memberKindForMethodOrField(access: Access, membership: "Static" | "Instance", kind: "Method" | "Field"): MemberKind {
-    return (MemberKind as any)[access + membership + kind];
-}
-
-const allAccess: Access[] = ["public", "protected", "private"];
-
-function memberKindFromName(name: string): MemberKind[] {
-    const kind = (MemberKind as any)[Lint.Utils.camelize(name)];
-    return typeof kind === "number" ? [kind as MemberKind] : allAccess.map(addModifier);
-
-    function addModifier(modifier: string) {
-        const modifiedKind = (MemberKind as any)[Lint.Utils.camelize(modifier + "-" + name)];
-        if (typeof modifiedKind !== "number") {
-            throw new Error(`Bad member kind: ${name}`);
+    /* start old code */
+    private checkUsingOldOptions(members: Member[]) {
+        let previousModifiers: IModifiers | undefined;
+        for (const member of members) {
+            const modifiers = getModifiers(member);
+            if (previousModifiers !== undefined && !this.canAppearAfter(previousModifiers, modifiers)) {
+                this.addFailureAtNode(member,
+                    `Declaration of ${toString(modifiers)} not allowed to appear after declaration of ${toString(previousModifiers)}`);
+            }
+            previousModifiers = modifiers;
         }
-        return modifiedKind;
     }
+
+    private canAppearAfter(previousMember: IModifiers | undefined, currentMember: IModifiers) {
+        if (previousMember === undefined) {
+            return true;
+        }
+
+        if (this.hasOption(OPTION_VARIABLES_BEFORE_FUNCTIONS) && previousMember.isMethod !== currentMember.isMethod) {
+            return Number(previousMember.isMethod) < Number(currentMember.isMethod);
+        }
+
+        if (this.hasOption(OPTION_STATIC_BEFORE_INSTANCE) && previousMember.isInstance !== currentMember.isInstance) {
+            return Number(previousMember.isInstance) < Number(currentMember.isInstance);
+        }
+
+        if (this.hasOption(OPTION_PUBLIC_BEFORE_PRIVATE) && previousMember.isPrivate !== currentMember.isPrivate) {
+            return Number(previousMember.isPrivate) < Number(currentMember.isPrivate);
+        }
+
+        return true;
+    }
+    /* end old code */
 }
 
-function getMemberKind(member: Member): MemberKind | undefined {
-    const accessLevel =  hasModifier(ts.SyntaxKind.PrivateKeyword) ? "private"
-        : hasModifier(ts.SyntaxKind.ProtectedKeyword) ? "protected"
-        : "public";
+/* start code supporting old options (i.e. "public-before-private") */
+interface IModifiers {
+    isMethod: boolean;
+    isPrivate: boolean;
+    isInstance: boolean;
+}
 
+function getModifiers(member: Member): IModifiers {
+    return {
+        isInstance: !Lint.hasModifier(member.modifiers, ts.SyntaxKind.StaticKeyword),
+        isMethod: isMethodOrConstructor(member),
+        isPrivate: Lint.hasModifier(member.modifiers, ts.SyntaxKind.PrivateKeyword),
+    };
+}
+
+function toString(modifiers: IModifiers): string {
+    return [
+        modifiers.isPrivate ? "private" : "public",
+        modifiers.isInstance ? "instance" : "static",
+        "member",
+        modifiers.isMethod ? "function" : "variable",
+    ].join(" ");
+}
+/* end old code */
+
+/* start new code */
+const enum MemberKind { Method, Constructor, Field, Ignore }
+function getMemberKind(member: Member): MemberKind {
     switch (member.kind) {
         case ts.SyntaxKind.Constructor:
         case ts.SyntaxKind.ConstructSignature:
-            return memberKindForConstructor(accessLevel);
-
-        case ts.SyntaxKind.PropertyDeclaration:
-        case ts.SyntaxKind.PropertySignature:
-            return methodOrField(isFunctionLiteral((member as ts.PropertyDeclaration).initializer));
-
+            return MemberKind.Constructor;
         case ts.SyntaxKind.MethodDeclaration:
         case ts.SyntaxKind.MethodSignature:
-            return methodOrField(true);
-
+            return MemberKind.Method;
+        case ts.SyntaxKind.PropertyDeclaration:
+        case ts.SyntaxKind.PropertySignature:
+            const { initializer } = member as ts.PropertyDeclaration;
+            const isFunction = initializer !== undefined &&
+                (initializer.kind === ts.SyntaxKind.ArrowFunction || initializer.kind === ts.SyntaxKind.FunctionExpression);
+            return isFunction ? MemberKind.Method : MemberKind.Field;
         default:
+            return MemberKind.Ignore;
+    }
+}
+
+function isMethodOrConstructor(member: Member) {
+    const kind = getMemberKind(member);
+    return kind === MemberKind.Method || kind === MemberKind.Constructor;
+}
+
+/** Returns e.g. "public-static-field". */
+function getOptionName(member: Member): string | undefined {
+    const memberKind = getMemberKind(member);
+    switch (memberKind) {
+        case MemberKind.Constructor:
+            return "constructor";
+        case MemberKind.Ignore:
             return undefined;
+        default:
+            const accessLevel = hasModifier(ts.SyntaxKind.PrivateKeyword) ? "private"
+                : hasModifier(ts.SyntaxKind.ProtectedKeyword) ? "protected"
+                : "public";
+            const membership = hasModifier(ts.SyntaxKind.StaticKeyword) ? "static" : "instance";
+            const kind = memberKind === MemberKind.Method ? "method" : "field";
+            return `${accessLevel}-${membership}-${kind}`;
     }
-
-    function methodOrField(isMethod: boolean) {
-        const membership = hasModifier(ts.SyntaxKind.StaticKeyword) ? "Static" : "Instance";
-        return memberKindForMethodOrField(accessLevel, membership, isMethod ? "Method" : "Field");
-    }
-
     function hasModifier(kind: ts.SyntaxKind) {
         return Lint.hasModifier(member.modifiers, kind);
     }
 }
 
-type MemberCategoryJson = { name: string, kinds: string[] } | string;
-class MemberCategory {
-    constructor(readonly name: string, private readonly kinds: Set<MemberKind>) {}
-    public has(kind: MemberKind) { return this.kinds.has(kind); }
-}
-
 type Member = ts.TypeElement | ts.ClassElement;
 type Rank = number;
-
-type Access = "public" | "protected" | "private";
-
-function getOrder(options: any[]): MemberCategory[] {
-    return getOrderJson(options).map((cat) => typeof cat === "string"
-        ? new MemberCategory(cat.replace(/-/g, " "), new Set(memberKindFromName(cat)))
-        : new MemberCategory(cat.name, new Set(flatMap(cat.kinds, memberKindFromName))));
-}
-function getOrderJson(allOptions: any[]): MemberCategoryJson[] {
-    if (allOptions == null || allOptions.length === 0 || allOptions[0] == null) {
-        throw new Error("Got empty options");
-    }
-
-    const firstOption = allOptions[0];
-    if (typeof firstOption !== "object") {
-        return categoryFromOption(firstOption);
-    }
-
-    return categoryFromOption(firstOption[OPTION_ORDER]);
-}
-function categoryFromOption(orderOption: {}): MemberCategoryJson[] {
-    if (Array.isArray(orderOption)) {
-        return orderOption;
-    }
-
-    const preset = PRESETS.get(orderOption as string);
-    if (!preset) {
-        throw new Error(`Bad order: ${JSON.stringify(orderOption)}`);
-    }
-    return preset;
-}
-
-function isFunctionLiteral(node: ts.Node | undefined) {
-    switch (node && node.kind) {
-        case ts.SyntaxKind.ArrowFunction:
-        case ts.SyntaxKind.FunctionExpression:
-            return true;
-        default:
-            return false;
-    }
-}
-
-function mapDefined<T, U>(inputs: T[], getOutput: (input: T) => U | undefined): U[] {
-    const out = [];
-    for (const input of inputs) {
-        const output = getOutput(input);
-        if (output !== undefined) {
-            out.push(output);
-        }
-    }
-    return out;
-}
-
-function flatMap<T, U>(inputs: T[], getOutputs: (input: T) => U[]): U[] {
-    const out = [];
-    for (const input of inputs) {
-        out.push(...getOutputs(input));
-    }
-    return out;
-}
+/* end new code */
