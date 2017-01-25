@@ -2,7 +2,7 @@
 ruleName: comment-format
 description: Enforces formatting rules for single-line comments.
 rationale: 'Helps maintain a consistent, readable style in your codebase.'
-optionsDescription: |-
+optionsDescription: |
 
   Three arguments may be optionally provided:
 
@@ -10,18 +10,38 @@ optionsDescription: |-
       * note that comments starting with `///` are also allowed, for things such as `///<reference>`
   * `"check-lowercase"` requires that the first non-whitespace character of a comment must be lowercase, if applicable.
   * `"check-uppercase"` requires that the first non-whitespace character of a comment must be uppercase, if applicable.
+
+  Exceptions to `"check-lowercase"` or `"check-uppercase"` can be managed with object that may be passed as last argument.
+
+  One of two options can be provided in this object:
+      
+      * `"ignore-words"`  - array of strings - words that will be ignored at the beginning of the comment.
+      * `"ignore-pattern"` - string - RegExp pattern that will be ignored at the beginning of the comment.
 options:
   type: array
   items:
-    type: string
-    enum:
-      - check-space
-      - check-lowercase
-      - check-uppercase
+    anyOf:
+      - type: string
+        enum:
+          - check-space
+          - check-lowercase
+          - check-uppercase
+      - type: object
+        properties:
+          ignore-words:
+            type: array
+            items:
+              type: string
+          ignore-pattern:
+            type: string
+        minProperties: 1
+        maxProperties: 1
   minLength: 1
-  maxLength: 3
+  maxLength: 4
 optionExamples:
-  - '[true, "check-space", "check-lowercase"]'
+  - '[true, "check-space", "check-uppercase"]'
+  - '[true, "check-lowercase", {"ignore-words": ["TODO", "HACK"]}]'
+  - '[true, "check-lowercase", {"ignore-pattern": "STD\w{2,3}\b"}]'
 type: style
 typescriptOnly: false
 layout: rule
@@ -30,14 +50,34 @@ optionsJSON: |-
   {
     "type": "array",
     "items": {
-      "type": "string",
-      "enum": [
-        "check-space",
-        "check-lowercase",
-        "check-uppercase"
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "check-space",
+            "check-lowercase",
+            "check-uppercase"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "ignore-words": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "ignore-pattern": {
+              "type": "string"
+            }
+          },
+          "minProperties": 1,
+          "maxProperties": 1
+        }
       ]
     },
     "minLength": 1,
-    "maxLength": 3
+    "maxLength": 4
   }
 ---

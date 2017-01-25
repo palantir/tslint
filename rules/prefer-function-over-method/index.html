@@ -1,0 +1,28 @@
+---
+ruleName: prefer-function-over-method
+description: Warns for methods that do not use 'this'.
+optionsDescription: |-
+
+  "allow-public" excludes public methods.
+  "allow-protected" excludes protected methods.
+options:
+  type: string
+  enum:
+    - allow-public
+    - allow-protected
+optionExamples:
+  - 'true'
+  - '[true, "allow-public", "allow-protected"]'
+type: style
+typescriptOnly: false
+layout: rule
+title: 'Rule: prefer-function-over-method'
+optionsJSON: |-
+  {
+    "type": "string",
+    "enum": [
+      "allow-public",
+      "allow-protected"
+    ]
+  }
+---

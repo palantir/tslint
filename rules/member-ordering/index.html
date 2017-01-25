@@ -7,27 +7,44 @@ optionsDescription: |-
   One argument, which is an object, must be provided. It should contain an `order` property.
   The `order` property should have a value of one of the following strings:
 
+  * `variables-before-functions`
+  * `static-before-instance`
+  * `public-before-private`
   * `fields-first`
-  * `statics-first`
   * `instance-sandwich`
+  * `statics-first`
 
   Alternatively, the value for `order` maybe be an array consisting of the following strings:
 
   * `public-static-field`
+  * `public-static-method`
   * `protected-static-field`
+  * `protected-static-method`
   * `private-static-field`
+  * `private-static-method`
   * `public-instance-field`
   * `protected-instance-field`
   * `private-instance-field`
-  * `constructor`
-  * `public-static-method`
-  * `protected-static-method`
-  * `private-static-method`
+  * `public-constructor`
+  * `protected-constructor`
+  * `private-constructor`
   * `public-instance-method`
   * `protected-instance-method`
   * `private-instance-method`
 
-  This is useful if one of the preset orders does not meet your needs.
+  You can also omit the access modifier to refer to "public-", "protected-", and "private-" all at once; for example, "static-field".
+
+  You can also make your own categories by using an object instead of a string:
+
+      {
+          "name": "static non-private",
+          "kinds": [
+              "public-static-field",
+              "protected-static-field",
+              "public-static-method",
+              "protected-static-method"
+          ]
+      }
 options:
   type: object
   properties:
@@ -35,9 +52,12 @@ options:
       oneOf:
         - type: string
           enum:
+            - variables-before-functions
+            - static-before-instance
+            - public-before-private
             - fields-first
-            - statics-first
             - instance-sandwich
+            - statics-first
         - type: array
           items:
             type: string
@@ -51,7 +71,9 @@ options:
               - public-instance-field
               - protected-instance-field
               - private-instance-field
-              - constructor
+              - public-constructor
+              - protected-constructor
+              - private-constructor
               - public-instance-method
               - protected-instance-method
               - private-instance-method
@@ -59,6 +81,34 @@ options:
   additionalProperties: false
 optionExamples:
   - '[true, { "order": "fields-first" }]'
+  - |-
+
+    [true, {
+        "order": [
+            "static-field",
+            "instance-field",
+            "constructor",
+            "public-instance-method",
+            "protected-instance-method",
+            "private-instance-method"
+        ]
+    }]
+  - |-
+
+    [true, {
+        "order": [
+            {
+                "name": "static non-private",
+                "kinds": [
+                    "public-static-field",
+                    "protected-static-field",
+                    "public-static-method",
+                    "protected-static-method"
+                ]
+            },
+            "constructor"
+        ]
+    }]
 type: typescript
 typescriptOnly: true
 layout: rule
@@ -72,9 +122,12 @@ optionsJSON: |-
           {
             "type": "string",
             "enum": [
+              "variables-before-functions",
+              "static-before-instance",
+              "public-before-private",
               "fields-first",
-              "statics-first",
-              "instance-sandwich"
+              "instance-sandwich",
+              "statics-first"
             ]
           },
           {
@@ -91,7 +144,9 @@ optionsJSON: |-
                 "public-instance-field",
                 "protected-instance-field",
                 "private-instance-field",
-                "constructor",
+                "public-constructor",
+                "protected-constructor",
+                "private-constructor",
                 "public-instance-method",
                 "protected-instance-method",
                 "private-instance-method"

@@ -1,0 +1,32 @@
+---
+ruleName: no-floating-promises
+description: Promises returned by functions must be handled appropriately.
+optionsDescription: |-
+
+  A list of 'string' names of any additional classes that should also be handled as Promises.
+          
+options:
+  type: list
+  listType:
+    type: array
+    items:
+      type: string
+optionExamples:
+  - 'true'
+  - '[true, "JQueryPromise"]'
+rationale: 'Unhandled Promises can cause unexpected behavior, such as resolving at unexpected times.'
+type: functionality
+typescriptOnly: false
+layout: rule
+title: 'Rule: no-floating-promises'
+optionsJSON: |-
+  {
+    "type": "list",
+    "listType": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+---

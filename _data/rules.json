@@ -14,6 +14,7 @@
   {
     "ruleName": "align",
     "description": "Enforces vertical alignment.",
+    "hasFix": true,
     "rationale": "Helps maintain a readable, consistent style in your codebase.",
     "optionsDescription": "\nThree arguments may be optionally provided:\n\n* `\"parameters\"` checks alignment of function parameters.\n* `\"arguments\"` checks alignment of function call arguments.\n* `\"statements\"` checks alignment of statements.",
     "options": {
@@ -61,7 +62,7 @@
     "description": "Requires parentheses around the parameters of arrow function definitions.",
     "hasFix": true,
     "rationale": "Maintains stylistic consistency with other arrow function definitions.",
-    "optionsDescription": "\nif `ban-single-arg-parens` is specified, then arrow functions with one parameter\nmust not have parentheses if removing them is allowed by TypeScript.",
+    "optionsDescription": "\nIf `ban-single-arg-parens` is specified, then arrow functions with one parameter\nmust not have parentheses if removing them is allowed by TypeScript.",
     "options": {
       "type": "string",
       "enum": [
@@ -74,6 +75,36 @@
     ],
     "type": "style",
     "typescriptOnly": false
+  },
+  {
+    "ruleName": "arrow-return-shorthand",
+    "description": "Suggests to convert `() => { return x; }` to `() => x`.",
+    "hasFix": true,
+    "optionsDescription": "\nIf `multiline` is specified, then this will warn even if the function spans multiple lines.",
+    "options": {
+      "type": "string",
+      "enum": [
+        "multiline"
+      ]
+    },
+    "optionExamples": [
+      "[true]",
+      "[true, \"multiline\"]"
+    ],
+    "type": "style",
+    "typescriptOnly": false
+  },
+  {
+    "ruleName": "await-promise",
+    "description": "Warns for an awaited value that is not a Promise.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality",
+    "typescriptOnly": true,
+    "requiresTypeInfo": true
   },
   {
     "ruleName": "ban",
@@ -121,22 +152,44 @@
     "ruleName": "comment-format",
     "description": "Enforces formatting rules for single-line comments.",
     "rationale": "Helps maintain a consistent, readable style in your codebase.",
-    "optionsDescription": "\nThree arguments may be optionally provided:\n\n* `\"check-space\"` requires that all single-line comments must begin with a space, as in `// comment`\n    * note that comments starting with `///` are also allowed, for things such as `///<reference>`\n* `\"check-lowercase\"` requires that the first non-whitespace character of a comment must be lowercase, if applicable.\n* `\"check-uppercase\"` requires that the first non-whitespace character of a comment must be uppercase, if applicable.",
+    "optionsDescription": "\nThree arguments may be optionally provided:\n\n* `\"check-space\"` requires that all single-line comments must begin with a space, as in `// comment`\n    * note that comments starting with `///` are also allowed, for things such as `///<reference>`\n* `\"check-lowercase\"` requires that the first non-whitespace character of a comment must be lowercase, if applicable.\n* `\"check-uppercase\"` requires that the first non-whitespace character of a comment must be uppercase, if applicable.\n\nExceptions to `\"check-lowercase\"` or `\"check-uppercase\"` can be managed with object that may be passed as last argument.\n\nOne of two options can be provided in this object:\n    \n    * `\"ignore-words\"`  - array of strings - words that will be ignored at the beginning of the comment.\n    * `\"ignore-pattern\"` - string - RegExp pattern that will be ignored at the beginning of the comment.\n",
     "options": {
       "type": "array",
       "items": {
-        "type": "string",
-        "enum": [
-          "check-space",
-          "check-lowercase",
-          "check-uppercase"
+        "anyOf": [
+          {
+            "type": "string",
+            "enum": [
+              "check-space",
+              "check-lowercase",
+              "check-uppercase"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "ignore-words": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "ignore-pattern": {
+                "type": "string"
+              }
+            },
+            "minProperties": 1,
+            "maxProperties": 1
+          }
         ]
       },
       "minLength": 1,
-      "maxLength": 3
+      "maxLength": 4
     },
     "optionExamples": [
-      "[true, \"check-space\", \"check-lowercase\"]"
+      "[true, \"check-space\", \"check-uppercase\"]",
+      "[true, \"check-lowercase\", {\"ignore-words\": [\"TODO\", \"HACK\"]}]",
+      "[true, \"check-lowercase\", {\"ignore-pattern\": \"STD\\w{2,3}\\b\"}]"
     ],
     "type": "style",
     "typescriptOnly": false
@@ -432,7 +485,7 @@
     "ruleName": "member-ordering",
     "description": "Enforces member ordering.",
     "rationale": "A consistent ordering for class members can make classes easier to read, navigate, and edit.",
-    "optionsDescription": "\nOne argument, which is an object, must be provided. It should contain an `order` property.\nThe `order` property should have a value of one of the following strings:\n\n* `fields-first`\n* `statics-first`\n* `instance-sandwich`\n\nAlternatively, the value for `order` maybe be an array consisting of the following strings:\n\n* `public-static-field`\n* `protected-static-field`\n* `private-static-field`\n* `public-instance-field`\n* `protected-instance-field`\n* `private-instance-field`\n* `constructor`\n* `public-static-method`\n* `protected-static-method`\n* `private-static-method`\n* `public-instance-method`\n* `protected-instance-method`\n* `private-instance-method`\n\nThis is useful if one of the preset orders does not meet your needs.",
+    "optionsDescription": "\nOne argument, which is an object, must be provided. It should contain an `order` property.\nThe `order` property should have a value of one of the following strings:\n\n* `variables-before-functions`\n* `static-before-instance`\n* `public-before-private`\n* `fields-first`\n* `instance-sandwich`\n* `statics-first`\n\nAlternatively, the value for `order` maybe be an array consisting of the following strings:\n\n* `public-static-field`\n* `public-static-method`\n* `protected-static-field`\n* `protected-static-method`\n* `private-static-field`\n* `private-static-method`\n* `public-instance-field`\n* `protected-instance-field`\n* `private-instance-field`\n* `public-constructor`\n* `protected-constructor`\n* `private-constructor`\n* `public-instance-method`\n* `protected-instance-method`\n* `private-instance-method`\n\nYou can also omit the access modifier to refer to \"public-\", \"protected-\", and \"private-\" all at once; for example, \"static-field\".\n\nYou can also make your own categories by using an object instead of a string:\n\n    {\n        \"name\": \"static non-private\",\n        \"kinds\": [\n            \"public-static-field\",\n            \"protected-static-field\",\n            \"public-static-method\",\n            \"protected-static-method\"\n        ]\n    }",
     "options": {
       "type": "object",
       "properties": {
@@ -441,9 +494,12 @@
             {
               "type": "string",
               "enum": [
+                "variables-before-functions",
+                "static-before-instance",
+                "public-before-private",
                 "fields-first",
-                "statics-first",
-                "instance-sandwich"
+                "instance-sandwich",
+                "statics-first"
               ]
             },
             {
@@ -460,7 +516,9 @@
                   "public-instance-field",
                   "protected-instance-field",
                   "private-instance-field",
-                  "constructor",
+                  "public-constructor",
+                  "protected-constructor",
+                  "private-constructor",
                   "public-instance-method",
                   "protected-instance-method",
                   "private-instance-method"
@@ -474,7 +532,9 @@
       "additionalProperties": false
     },
     "optionExamples": [
-      "[true, { \"order\": \"fields-first\" }]"
+      "[true, { \"order\": \"fields-first\" }]",
+      "\n[true, {\n    \"order\": [\n        \"static-field\",\n        \"instance-field\",\n        \"constructor\",\n        \"public-instance-method\",\n        \"protected-instance-method\",\n        \"private-instance-method\"\n    ]\n}]",
+      "\n[true, {\n    \"order\": [\n        {\n            \"name\": \"static non-private\",\n            \"kinds\": [\n                \"public-static-field\",\n                \"protected-static-field\",\n                \"public-static-method\",\n                \"protected-static-method\"\n            ]\n        },\n        \"constructor\"\n    ]\n}]"
     ],
     "type": "typescript",
     "typescriptOnly": true
@@ -540,6 +600,19 @@
     ],
     "type": "functionality",
     "typescriptOnly": false
+  },
+  {
+    "ruleName": "no-boolean-literal-compare",
+    "description": "Warns on comparison to a boolean literal, as in `x === true`.",
+    "hasFix": true,
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "style",
+    "typescriptOnly": true,
+    "requiresTypeInfo": true
   },
   {
     "ruleName": "no-conditional-assignment",
@@ -673,6 +746,27 @@
     "typescriptOnly": false
   },
   {
+    "ruleName": "no-floating-promises",
+    "description": "Promises returned by functions must be handled appropriately.",
+    "optionsDescription": "\nA list of 'string' names of any additional classes that should also be handled as Promises.\n        ",
+    "options": {
+      "type": "list",
+      "listType": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "optionExamples": [
+      "true",
+      "[true, \"JQueryPromise\"]"
+    ],
+    "rationale": "Unhandled Promises can cause unexpected behavior, such as resolving at unexpected times.",
+    "type": "functionality",
+    "typescriptOnly": false
+  },
+  {
     "ruleName": "no-for-in-array",
     "description": "Disallows iterating over an array with a for-in loop.",
     "descriptionDetails": "\nA for-in loop (`for (var k in o)`) iterates over the properties of an Object.\n\nWhile it is legal to use for-in loops with array types, it is not common.\nfor-in will iterate over the indices of the array as strings, omitting any \"holes\" in\nthe array.\n\nMore common is to use for-of, which iterates over the values of an array.\nIf you want to iterate over the indices, alternatives include:\n\narray.forEach((value, index) => { ... });\nfor (const [index, value] of array.entries()) { ... }\nfor (let i = 0; i < array.length; i++) { ... }\n",
@@ -783,6 +877,17 @@
       "true"
     ],
     "type": "maintainability",
+    "typescriptOnly": true
+  },
+  {
+    "ruleName": "no-misused-new",
+    "description": "Warns on apparent attempts to define constructors for interfaces or `new` for classes.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality",
     "typescriptOnly": true
   },
   {
@@ -908,12 +1013,62 @@
     "description": "Disallows trailing whitespace at the end of a line.",
     "rationale": "Keeps version control diffs clean as it prevents accidental whitespace from being committed.",
     "optionsDescription": "Not configurable.",
+    "hasFix": true,
     "options": null,
     "optionExamples": [
       "true"
     ],
     "type": "maintainability",
     "typescriptOnly": false
+  },
+  {
+    "ruleName": "no-unbound-method",
+    "description": "Warns when a method is used as outside of a method call.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality",
+    "typescriptOnly": true,
+    "requiresTypeInfo": true
+  },
+  {
+    "ruleName": "no-unnecessary-initializer",
+    "description": "Forbids a 'var'/'let' statement or destructuring initializer to be initialized to 'undefined'.",
+    "hasFix": true,
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "style",
+    "typescriptOnly": false
+  },
+  {
+    "ruleName": "no-unnecessary-qualifier",
+    "description": "Warns when a namespace qualifier (`A.x`) is unnecessary.",
+    "hasFix": true,
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "style",
+    "typescriptOnly": true,
+    "requiresTypeInfo": true
+  },
+  {
+    "ruleName": "no-unsafe-any",
+    "description": "\nWarns when using an expression of type 'any' in an unsafe way.\nType casts and tests are allowed.\nExpressions that work on all values (such as '\"\" + x') are allowed.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality",
+    "typescriptOnly": true,
+    "requiresTypeInfo": true
   },
   {
     "ruleName": "no-unsafe-finally",
@@ -933,10 +1088,21 @@
     "description": "Disallows unused expression statements.",
     "descriptionDetails": "\nUnused expressions are expression statements which are not assignments or function calls\n(and thus usually no-ops).",
     "rationale": "\nDetects potential errors where an assignment or function call was intended.",
-    "optionsDescription": "Not configurable.",
-    "options": null,
+    "optionsDescription": "\nOne argument may be optionally provided:\n\n* `allow-fast-null-checks` allows to use logical operators to perform fast null checks and perform\nmethod or function calls for side effects (e.g. `e && e.preventDefault()`).",
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "allow-fast-null-checks"
+        ]
+      },
+      "minLength": 0,
+      "maxLength": 1
+    },
     "optionExamples": [
-      "true"
+      "true",
+      "[true, \"allow-fast-null-checks\"]"
     ],
     "type": "functionality",
     "typescriptOnly": false
@@ -1217,6 +1383,36 @@
     "typescriptOnly": false
   },
   {
+    "ruleName": "prefer-function-over-method",
+    "description": "Warns for methods that do not use 'this'.",
+    "optionsDescription": "\n\"allow-public\" excludes public methods.\n\"allow-protected\" excludes protected methods.",
+    "options": {
+      "type": "string",
+      "enum": [
+        "allow-public",
+        "allow-protected"
+      ]
+    },
+    "optionExamples": [
+      "true",
+      "[true, \"allow-public\", \"allow-protected\"]"
+    ],
+    "type": "style",
+    "typescriptOnly": false
+  },
+  {
+    "ruleName": "prefer-method-signature",
+    "description": "Prefer `foo(): void` over `foo: () => void` in interfaces and types.",
+    "hasFix": true,
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "style",
+    "typescriptOnly": false
+  },
+  {
     "ruleName": "promise-function-async",
     "description": "Requires any function or method that returns a promise to be marked async.",
     "rationale": "\nEnsures that each function is only capable of 1) returning a rejected promise, or 2)\nthrowing an Error object. In contrast, non-`async` `Promise`-returning functions\nare technically capable of either. This practice removes a requirement for consuming\ncode to handle both cases.\n        ",
@@ -1369,7 +1565,33 @@
   },
   {
     "ruleName": "strict-boolean-expressions",
-    "description": "Usage of && or || operators should be with boolean operands and\nexpressions in If, Do, While and For statements should be of type boolean",
+    "description": "\nRestricts the types allowed in boolean expressions. By default only booleans are allowed.\n\nThe following nodes are checked:\n* Arguments to the '!', '&&', and '||' operators\n* The condition in a conditional expression ('cond ? x : y')\n* Conditions for 'if', 'for', 'while', and 'do-while' statements.",
+    "optionsDescription": "\nThese options may be provided:\n\n* 'allow-null-union allows union types containing 'null'.\n  - It does *not* allow 'null' itself.\n* 'allow-undefined-union allows union types containing 'undefined'.\n  - It does *not* allow 'undefined' itself.\n* 'allow-string allows strings.\n  - It does *not* allow unions containing 'string'.\n  - It does *not* allow string literal types.\n* 'allow-number allows numbers.\n  - It does *not* allow unions containing 'number'.\n  - It does *not* allow enums or number literal types.\n* 'allow-mix allow multiple of the above to appear together.\n  - For example, 'string | number' or 'RegExp | null | undefined' would normally not be allowed.\n  - A type like '\"foo\" | \"bar\" | undefined' is always allowed, because it has only one way to be false.",
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "allow-null-union",
+          "allow-undefined-union",
+          "allow-string",
+          "allow-number"
+        ]
+      },
+      "minLength": 0,
+      "maxLength": 5
+    },
+    "optionExamples": [
+      "true",
+      "[true, allow-null-union, allow-undefined-union, allow-string, allow-number]"
+    ],
+    "type": "functionality",
+    "typescriptOnly": true,
+    "requiresTypeInfo": true
+  },
+  {
+    "ruleName": "strict-type-predicates",
+    "description": "\nWarns for type predicates that are always true or always false.\nWorks for 'typeof' comparisons to constants (e.g. 'typeof foo === \"string\"'), and equality comparison to 'null'/'undefined'.\n(TypeScript won't let you compare '1 === 2', but it has an exception for '1 === undefined'.)\nDoes not yet work for 'instanceof'.\nDoes *not* warn for 'if (x.y)' where 'x.y' is always truthy. For that, see strict-boolean-expressions.",
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
@@ -1644,7 +1866,7 @@
     "ruleName": "whitespace",
     "description": "Enforces whitespace style conventions.",
     "rationale": "Helps maintain a readable, consistent style in your codebase.",
-    "optionsDescription": "\nSeven arguments may be optionally provided:\n\n* `\"check-branch\"` checks branching statements (`if`/`else`/`for`/`while`) are followed by whitespace.\n* `\"check-decl\"`checks that variable declarations have whitespace around the equals token.\n* `\"check-operator\"` checks for whitespace around operator tokens.\n* `\"check-module\"` checks for whitespace in import & export statements.\n* `\"check-separator\"` checks for whitespace after separator tokens (`,`/`;`).\n* `\"check-type\"` checks for whitespace before a variable type specification.\n* `\"check-typecast\"` checks for whitespace between a typecast and its target.",
+    "optionsDescription": "\nEight arguments may be optionally provided:\n\n* `\"check-branch\"` checks branching statements (`if`/`else`/`for`/`while`) are followed by whitespace.\n* `\"check-decl\"`checks that variable declarations have whitespace around the equals token.\n* `\"check-operator\"` checks for whitespace around operator tokens.\n* `\"check-module\"` checks for whitespace in import & export statements.\n* `\"check-separator\"` checks for whitespace after separator tokens (`,`/`;`).\n* `\"check-type\"` checks for whitespace before a variable type specification.\n* `\"check-typecast\"` checks for whitespace between a typecast and its target.\n* `\"check-preblock\"` checks for whitespace before the opening brace of a block",
     "options": {
       "type": "array",
       "items": {
@@ -1656,7 +1878,8 @@
           "check-module",
           "check-separator",
           "check-type",
-          "check-typecast"
+          "check-typecast",
+          "check-preblock"
         ]
       },
       "minLength": 0,
