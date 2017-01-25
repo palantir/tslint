@@ -59,7 +59,7 @@ class PreferForOfWalker extends Lint.BlockScopeAwareRuleWalker<void, Incrementor
     protected visitForStatement(node: ts.ForStatement) {
         const arrayNodeInfo = this.getForLoopHeaderInfo(node);
         const currentBlockScope = this.getCurrentBlockScope();
-        let indexVariableName: string | undefined = undefined;
+        let indexVariableName: string | undefined;
         if (node.incrementor != null && arrayNodeInfo != null) {
             const { indexVariable, arrayToken } = arrayNodeInfo;
             indexVariableName = indexVariable.getText();
@@ -114,8 +114,8 @@ class PreferForOfWalker extends Lint.BlockScopeAwareRuleWalker<void, Incrementor
 
     // returns the iterator and array of a `for` loop if the `for` loop is basic. Otherwise, `null`
     private getForLoopHeaderInfo(forLoop: ts.ForStatement) {
-        let indexVariableName: string | undefined = undefined;
-        let indexVariable: ts.Identifier | undefined = undefined;
+        let indexVariableName: string | undefined;
+        let indexVariable: ts.Identifier | undefined;
 
         // assign `indexVariableName` if initializer is simple and starts at 0
         if (forLoop.initializer != null && forLoop.initializer.kind === ts.SyntaxKind.VariableDeclarationList) {
