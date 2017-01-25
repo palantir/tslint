@@ -135,6 +135,6 @@ function methodVisibility(node: ts.MethodDeclaration): Visibility {
     } else if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.ProtectedKeyword)) {
         return Visibility.Protected;
     } else {
-        return Visibility.Protected;
+        return Visibility.Public;
     }
 }
