@@ -50,14 +50,7 @@ export const rules = {
 
     // added in v4.4
     "arrow-return-shorthand": true,
-    "no-unbound-method": true,
-    "no-boolean-literal-compare": true,
-    "no-unsafe-any": true,
-    "no-unnecessary-qualifier": true,
     "no-unnecessary-initializer": true,
-    "await-promise": true,
-    "no-floating-promises": true,
-    "strict-type-predicates": true,
     "no-misused-new ": true,
     "prefer-method-signature": true,
     "prefer-function-over-method": false,
