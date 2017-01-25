@@ -52,8 +52,6 @@ export const rules = {
     "arrow-return-shorthand": true,
     "no-unnecessary-initializer": true,
     "no-misused-new ": true,
-    "prefer-method-signature": true,
-    "prefer-function-over-method": false,
 };
 // tslint:enable object-literal-sort-keys
 
