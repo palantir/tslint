@@ -81,7 +81,10 @@ class WhitespaceWalker extends Lint.RuleWalker {
 
         let prevTokenShouldBeFollowedByWhitespace = false;
         Lint.forEachToken(node, false, (_text, tokenKind, pos, parent) => {
-            if (tokenKind === ts.SyntaxKind.WhitespaceTrivia || tokenKind === ts.SyntaxKind.NewLineTrivia) {
+            if (tokenKind === ts.SyntaxKind.WhitespaceTrivia ||
+                tokenKind === ts.SyntaxKind.NewLineTrivia ||
+                tokenKind === ts.SyntaxKind.EndOfFileToken) {
+
                 prevTokenShouldBeFollowedByWhitespace = false;
                 return;
             } else if (prevTokenShouldBeFollowedByWhitespace) {
