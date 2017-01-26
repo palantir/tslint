@@ -1,4 +1,4 @@
 class C {
     a() {}
-    ~ [Method does not use 'this'. Use a function instead.]
+    ~ [Class method does not use 'this'. Use a function instead.]
 }
