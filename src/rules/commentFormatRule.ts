@@ -168,7 +168,7 @@ class CommentWalker extends Lint.RuleWalker {
         if (exceptionsObject["ignore-words"]) {
             const ignoreWords = exceptionsObject["ignore-words"] as string[];
             this.failureIgnorePart = Rule.IGNORE_WORDS_FAILURE_FACTORY(ignoreWords);
-            // Converts all exceptions values to strings, trim whitespace, escapes RegExp special characters and combines into alternation  
+            // Converts all exceptions values to strings, trim whitespace, escapes RegExp special characters and combines into alternation
             const wordsPattern = ignoreWords
                 .map(String)
                 .map((str) => str.trim())
