@@ -262,8 +262,9 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
     }
 
     public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
-        const { initializer } = node;
-        const isFunction = initializer != null
+        const { initializer, type } = node;
+        const isFunction = type && type.kind === ts.SyntaxKind.FunctionType
+            || initializer != null
             && (initializer.kind === ts.SyntaxKind.ArrowFunction || initializer.kind === ts.SyntaxKind.FunctionExpression);
         this.checkModifiersAndSetPrevious(node, getModifiers(isFunction, node.modifiers));
         this.pushMember(getNodeAndModifiers(node, isFunction));

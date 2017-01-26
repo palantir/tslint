@@ -10,10 +10,11 @@ class Good {
     protected static h() {}
     private static i = () => {};
     j = () => {};
+    jj: () => void;
     protected k() {};
     private l = () => {};
 }
-    
+
 interface IGood {
     foo: number;
     arrowsAreFields: () => void;
