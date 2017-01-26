@@ -99,8 +99,10 @@ class Linter {
     }
 
     public lint(fileName: string, source: string, configuration: IConfigurationFile = DEFAULT_CONFIG): void {
-        const enabledRules = this.getEnabledRules(fileName, source, configuration);
         let sourceFile = this.getSourceFile(fileName, source);
+        const isJs = /\.jsx?$/i.test(fileName);
+
+        const enabledRules = this.getEnabledRules(sourceFile, configuration, isJs);
         let hasLinterRun = false;
         let fileFailures: RuleFailure[] = [];
 
@@ -174,9 +176,7 @@ class Linter {
         return fileFailures;
     }
 
-    private getEnabledRules(fileName: string, source: string, configuration: IConfigurationFile = DEFAULT_CONFIG): IRule[] {
-        const sourceFile = this.getSourceFile(fileName, source);
-        const isJs = /\.jsx?$/i.test(fileName);
+    private getEnabledRules(sourceFile: ts.SourceFile, configuration: IConfigurationFile = DEFAULT_CONFIG, isJs: boolean): IRule[] {
         const configurationRules = isJs ? configuration.jsRules : configuration.rules;
 
         // walk the code first to find all the intervals where rules are disabled

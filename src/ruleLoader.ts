@@ -25,6 +25,7 @@ import {camelize, dedent} from "./utils";
 const moduleDirectory = path.dirname(module.filename);
 const CORE_RULES_DIRECTORY = path.resolve(moduleDirectory, ".", "rules");
 const shownDeprecations: string[] = [];
+const cachedRules: { [fullPath: string]: IRule | null } = {};
 
 export interface IEnableDisablePosition {
     isEnabled: boolean;
@@ -127,14 +128,19 @@ function transformName(name: string) {
  */
 function loadRule(directory: string, ruleName: string) {
     const fullPath = path.join(directory, ruleName);
+    if (cachedRules[fullPath] !== undefined) {
+        return cachedRules[fullPath];
+    }
 
     if (fs.existsSync(fullPath + ".js")) {
         const ruleModule = require(fullPath);
         if (ruleModule && ruleModule.Rule) {
+            cachedRules[fullPath] = ruleModule.Rule;
             return ruleModule.Rule;
         }
     }
 
+    cachedRules[fullPath] = null;
     return undefined;
 }
 
