@@ -1,6 +1,12 @@
 Change Log
 ===
 
+v4.4.2
+---
+
+* [bugfix] `whitespace` rule caused false positive on EOF (#2131)
+* [bugfix] WebStorm fails because `json` formatter parameter has extra space (#2132)
+
 v4.4.1
 ---
 
