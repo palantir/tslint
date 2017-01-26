@@ -18,9 +18,10 @@
 import * as fs from "fs";
 import * as path from "path";
 
-import {getRulesDirectories} from "./configuration";
-import {IDisabledInterval, IRule} from "./language/rule/rule";
-import {camelize, dedent} from "./utils";
+import { getRulesDirectories } from "./configuration";
+import { AbstractRule } from "./language/rule/abstractRule";
+import { IDisabledInterval, IRule } from "./language/rule/rule";
+import { camelize, dedent } from "./utils";
 
 const moduleDirectory = path.dirname(module.filename);
 const CORE_RULES_DIRECTORY = path.resolve(moduleDirectory, ".", "rules");
@@ -43,20 +44,22 @@ export function loadRules(ruleConfiguration: {[name: string]: any},
     for (const ruleName in ruleConfiguration) {
         if (ruleConfiguration.hasOwnProperty(ruleName)) {
             const ruleValue = ruleConfiguration[ruleName];
-            const Rule = findRule(ruleName, rulesDirectories);
-            if (Rule == null) {
-                notFoundRules.push(ruleName);
-            } else {
-                if (isJs && Rule.metadata && Rule.metadata.typescriptOnly != null && Rule.metadata.typescriptOnly) {
-                    notAllowedInJsRules.push(ruleName);
+            if (AbstractRule.isRuleEnabled(ruleValue) || enableDisableRuleMap.hasOwnProperty(ruleName)) {
+                const Rule = findRule(ruleName, rulesDirectories);
+                if (Rule == null) {
+                    notFoundRules.push(ruleName);
                 } else {
-                    const ruleSpecificList = (ruleName in enableDisableRuleMap ? enableDisableRuleMap[ruleName] : []);
-                    const disabledIntervals = buildDisabledIntervalsFromSwitches(ruleSpecificList);
-                    rules.push(new Rule(ruleName, ruleValue, disabledIntervals));
+                    if (isJs && Rule.metadata && Rule.metadata.typescriptOnly != null && Rule.metadata.typescriptOnly) {
+                        notAllowedInJsRules.push(ruleName);
+                    } else {
+                        const ruleSpecificList = (ruleName in enableDisableRuleMap ? enableDisableRuleMap[ruleName] : []);
+                        const disabledIntervals = buildDisabledIntervalsFromSwitches(ruleSpecificList);
+                        rules.push(new Rule(ruleName, ruleValue, disabledIntervals));
 
-                    if (Rule.metadata && Rule.metadata.deprecationMessage && shownDeprecations.indexOf(Rule.metadata.ruleName) === -1) {
-                        console.warn(`${Rule.metadata.ruleName} is deprecated. ${Rule.metadata.deprecationMessage}`);
-                        shownDeprecations.push(Rule.metadata.ruleName);
+                        if (Rule.metadata && Rule.metadata.deprecationMessage && shownDeprecations.indexOf(Rule.metadata.ruleName) === -1) {
+                            console.warn(`${Rule.metadata.ruleName} is deprecated. ${Rule.metadata.deprecationMessage}`);
+                            shownDeprecations.push(Rule.metadata.ruleName);
+                        }
                     }
                 }
             }
