@@ -5,4 +5,4 @@ class C {
             ~ [0]
 }
 
-[0]: Method does not use 'this'. Use a function instead.
+[0]: Class method does not use 'this'. Use a function instead.
