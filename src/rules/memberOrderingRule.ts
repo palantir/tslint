@@ -39,83 +39,6 @@ enum MemberKind {
 }
 
 const PRESETS = new Map<string, MemberCategoryJson[]>([
-    ["variables-before-functions", [
-        {
-            kinds: [
-                "public-static-field",
-                "protected-static-field",
-                "private-static-field",
-                "public-instance-field",
-                "protected-instance-field",
-                "private-instance-field",
-            ],
-            name: "field",
-        },
-        {
-            kinds: [
-                "constructor",
-                "public-static-method",
-                "protected-static-method",
-                "private-static-method",
-                "public-instance-method",
-                "protected-instance-method",
-                "private-instance-method",
-            ],
-            name: "method",
-        },
-    ]],
-    ["static-before-instance", [
-        {
-            kinds: [
-                "public-static-field",
-                "public-static-method",
-                "protected-static-field",
-                "protected-static-method",
-                "private-static-field",
-                "private-static-method",
-            ],
-            name: "static member",
-        },
-        {
-            kinds: [
-                "public-instance-field",
-                "protected-instance-field",
-                "private-instance-field",
-                "constructor",
-                "public-instance-method",
-                "protected-instance-method",
-                "private-instance-method",
-            ],
-            name: "instance member",
-        },
-    ]],
-    ["public-before-private", [
-        {
-            kinds: [
-                "public-static-field",
-                "protected-static-field",
-                "public-instance-field",
-                "protected-instance-field",
-                "public-instance-method",
-                "protected-instance-method",
-                "public-static-method",
-                "protected-static-method",
-                "public-constructor",
-                "protected-constructor",
-            ],
-            name: "public member",
-        },
-        {
-            kinds: [
-                "private-static-field",
-                "private-instance-field",
-                "private-instance-method",
-                "private-static-method",
-                "private-constructor",
-            ],
-            name: "private member",
-        },
-    ]],
     ["fields-first", [
         "public-static-field",
         "protected-static-field",
@@ -418,7 +341,8 @@ function getOrderJson(allOptions: any[]): MemberCategoryJson[] {
 
     const firstOption = allOptions[0];
     if (typeof firstOption !== "object") {
-        return categoryFromOption(firstOption);
+        // Undocumented direct string option. Deprecate eventually.
+        return convertFromOldStyleOptions(allOptions); // presume it to be string[]
     }
 
     return categoryFromOption(firstOption[OPTION_ORDER]);
@@ -433,6 +357,53 @@ function categoryFromOption(orderOption: {}): MemberCategoryJson[] {
         throw new Error(`Bad order: ${JSON.stringify(orderOption)}`);
     }
     return preset;
+}
+
+/**
+ * Convert from undocumented old-style options.
+ * This is designed to mimic the old behavior and should be removed eventually.
+ */
+function convertFromOldStyleOptions(options: string[]): MemberCategoryJson[] {
+    let categories: NameAndKinds[] = [{ name: "member", kinds: allMemberKindNames }];
+    if (hasOption("variables-before-functions")) {
+        categories = splitOldStyleOptions(categories, (kind) => kind.includes("field"), "field", "method");
+    }
+    if (hasOption("static-before-instance")) {
+        categories = splitOldStyleOptions(categories, (kind) => kind.includes("static"), "static", "instance");
+    }
+    if (hasOption("public-before-private")) {
+        // 'protected' is considered public
+        categories = splitOldStyleOptions(categories, (kind) => !kind.includes("private"), "public", "private");
+    }
+    return categories;
+
+    function hasOption(x: string): boolean {
+        return options.indexOf(x) !== -1;
+    }
+}
+interface NameAndKinds { name: string; kinds: string[]; }
+function splitOldStyleOptions(categories: NameAndKinds[], filter: (name: string) => boolean, a: string, b: string): NameAndKinds[] {
+    const newCategories: NameAndKinds[]  = [];
+    for (const cat of categories) {
+        const yes = []; const no = [];
+        for (const kind of cat.kinds) {
+            if (filter(kind)) {
+                yes.push(kind);
+            } else {
+                no.push(kind);
+            }
+        }
+        const augmentName = (s: string) => {
+            if (a === "field") {
+                // Replace "member" with "field"/"method" instead of augmenting.
+                return s;
+            }
+            return `${s} ${cat.name}`;
+        };
+        newCategories.push({ name: augmentName(a), kinds: yes });
+        newCategories.push({ name: augmentName(b), kinds: no });
+    }
+    return newCategories;
 }
 
 function isFunctionLiteral(node: ts.Node | undefined) {
