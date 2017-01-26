@@ -42,6 +42,7 @@ export interface TestResult {
             markupFromMarkup: string;
         },
     };
+    timeMs?: number;
 }
 
 export function runTests(pattern: string, rulesDirectory?: string | string[]): TestResult[] {
@@ -74,6 +75,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
     const results: TestResult = { directory: testDirectory, results: {} };
 
     for (const fileToLint of filesToLint) {
+        const startTime = new Date().getTime();
         const fileBasename = path.basename(fileToLint, MARKUP_FILE_EXTENSION);
         const fileCompileName = fileBasename.replace(/\.lint$/, "");
         const fileText = fs.readFileSync(fileToLint, "utf8");
@@ -162,6 +164,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
             markupFromLinter: parse.createMarkupFromErrors(fileTextWithoutMarkup, errorsFromMarkup),
             markupFromMarkup: parse.createMarkupFromErrors(fileTextWithoutMarkup, errorsFromLinter),
         };
+        results.timeMs = new Date().getTime() - startTime;
     }
 
     return results;
@@ -193,7 +196,8 @@ export function consoleTestResultHandler(testResult: TestResult): boolean {
 
         /* tslint:disable:no-console */
         if (didMarkupTestPass && didFixesTestPass) {
-            console.log(colors.green(" Passed"));
+            const slowness = testResult.timeMs > 100 ? colors.red(` (${testResult.timeMs} ms)`) : "";
+            console.log(colors.green(` Passed`) + slowness);
         } else {
             console.log(colors.red(" Failed!"));
             didAllTestsPass = false;
