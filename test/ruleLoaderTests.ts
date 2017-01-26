@@ -15,7 +15,11 @@
  * limitations under the License.
  */
 
-import {loadRules} from "./lint";
+import * as diff from "diff";
+import * as fs from "fs";
+import * as path from "path";
+import { camelize } from "../src/utils";
+import { loadRules } from "./lint";
 
 describe("Rule Loader", () => {
     const RULES_DIRECTORY = "build/src/rules";
@@ -64,5 +68,33 @@ describe("Rule Loader", () => {
 
         const rules = loadRules(validConfiguration, {}, RULES_DIRECTORY, true);
         assert.equal(rules.length, 1);
+    });
+
+    it("tests every rule", () => {
+        const rulesDir = "src/rules";
+        const testsDir = "test/rules";
+        const rules = fs.readdirSync(rulesDir)
+            .filter((file) => /Rule.ts$/.test(file))
+            .map((file) => file.substr(0, file.length - "Rule.ts".length))
+            .sort()
+            .join("\n");
+        const tests = fs.readdirSync(testsDir)
+            .filter((file) => !file.startsWith("_") && fs.statSync(path.join(testsDir, file)).isDirectory())
+            .map(camelize)
+            .sort()
+            .join("\n");
+        const diffResults = diff.diffLines(rules, tests);
+        let testFailed = false;
+        for (const result of diffResults) {
+            if (result.added) {
+                console.warn("Test has no matching rule: " + result.value);
+                testFailed = true;
+            } else if (result.removed) {
+                console.warn("Missing test: " + result.value);
+                testFailed = true;
+            }
+        }
+
+        assert.isFalse(testFailed, "List of rules doesn't match list of tests");
     });
 });
