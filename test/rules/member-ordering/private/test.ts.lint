@@ -1,0 +1,10 @@
+class Foo {
+    private x: number;
+    private bar(): any {
+        var bla: { a: string } = {a: '1'};
+    }
+    y: number;
+    ~~~~~~~~~~ [0]
+}
+
+[0]: Declaration of public instance member variable not allowed to appear after declaration of private instance member function
