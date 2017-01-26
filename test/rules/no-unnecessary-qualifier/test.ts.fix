@@ -20,8 +20,8 @@ namespace A.B.C2 {
     const copy = C1.D;
 }
 
-import * as B from "./b";
-declare module "./b" {
+import * as B from "./b.test";
+declare module "./b.test" {
     const x: T;
 }
 
