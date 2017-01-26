@@ -18,15 +18,15 @@
 import * as fs from "fs";
 import * as path from "path";
 
-import { getRulesDirectories } from "./configuration";
+import { getRelativePath } from "./configuration";
 import { AbstractRule } from "./language/rule/abstractRule";
 import { IDisabledInterval, IRule } from "./language/rule/rule";
-import { camelize, dedent } from "./utils";
+import { arrayify, camelize, dedent } from "./utils";
 
 const moduleDirectory = path.dirname(module.filename);
 const CORE_RULES_DIRECTORY = path.resolve(moduleDirectory, ".", "rules");
 const shownDeprecations: string[] = [];
-const cachedRules: { [fullPath: string]: IRule | null } = {};
+const cachedRules: { [fullPath: string]: typeof AbstractRule | null } = {}; // null indicates that the rule was not found
 
 export interface IEnableDisablePosition {
     isEnabled: boolean;
@@ -45,7 +45,7 @@ export function loadRules(ruleConfiguration: {[name: string]: any},
         if (ruleConfiguration.hasOwnProperty(ruleName)) {
             const ruleValue = ruleConfiguration[ruleName];
             if (AbstractRule.isRuleEnabled(ruleValue) || enableDisableRuleMap.hasOwnProperty(ruleName)) {
-                const Rule = findRule(ruleName, rulesDirectories);
+                const Rule: (typeof AbstractRule) | null = findRule(ruleName, rulesDirectories);
                 if (Rule == null) {
                     notFoundRules.push(ruleName);
                 } else {
@@ -54,7 +54,7 @@ export function loadRules(ruleConfiguration: {[name: string]: any},
                     } else {
                         const ruleSpecificList = (ruleName in enableDisableRuleMap ? enableDisableRuleMap[ruleName] : []);
                         const disabledIntervals = buildDisabledIntervalsFromSwitches(ruleSpecificList);
-                        rules.push(new Rule(ruleName, ruleValue, disabledIntervals));
+                        rules.push(new (Rule as any)(ruleName, ruleValue, disabledIntervals));
 
                         if (Rule.metadata && Rule.metadata.deprecationMessage && shownDeprecations.indexOf(Rule.metadata.ruleName) === -1) {
                             console.warn(`${Rule.metadata.ruleName} is deprecated. ${Rule.metadata.deprecationMessage}`);
@@ -93,26 +93,22 @@ export function loadRules(ruleConfiguration: {[name: string]: any},
 
 export function findRule(name: string, rulesDirectories?: string | string[]) {
     const camelizedName = transformName(name);
+    let Rule: typeof AbstractRule | null;
 
     // first check for core rules
-    let Rule = loadRule(CORE_RULES_DIRECTORY, camelizedName);
-    if (Rule != null) {
-        return Rule;
-    }
+    Rule = loadCachedRule(CORE_RULES_DIRECTORY, camelizedName);
 
-    const directories = getRulesDirectories(rulesDirectories);
-
-    for (const rulesDirectory of directories) {
+    if (Rule == null) {
         // then check for rules within the first level of rulesDirectory
-        if (rulesDirectory != null) {
-            Rule = loadRule(rulesDirectory, camelizedName);
+        for (const dir of arrayify(rulesDirectories)) {
+            Rule = loadCachedRule(dir, camelizedName, true);
             if (Rule != null) {
-                return Rule;
+                break;
             }
         }
     }
 
-    return undefined;
+    return Rule;
 }
 
 function transformName(name: string) {
@@ -131,20 +127,39 @@ function transformName(name: string) {
  */
 function loadRule(directory: string, ruleName: string) {
     const fullPath = path.join(directory, ruleName);
+    if (fs.existsSync(fullPath + ".js")) {
+        const ruleModule = require(fullPath);
+        if (ruleModule && ruleModule.Rule) {
+            return ruleModule.Rule;
+        }
+    }
+    return undefined;
+}
+
+function loadCachedRule(directory: string, ruleName: string, isCustomPath = false) {
+    // use cached value if available
+    const fullPath = path.join(directory, ruleName);
     if (cachedRules[fullPath] !== undefined) {
         return cachedRules[fullPath];
     }
 
-    if (fs.existsSync(fullPath + ".js")) {
-        const ruleModule = require(fullPath);
-        if (ruleModule && ruleModule.Rule) {
-            cachedRules[fullPath] = ruleModule.Rule;
-            return ruleModule.Rule;
+    // get absolute path
+    let absolutePath: string | undefined = directory;
+    if (isCustomPath) {
+        absolutePath = getRelativePath(directory);
+        if (absolutePath != null) {
+            if (!fs.existsSync(absolutePath)) {
+                throw new Error(`Could not find custom rule directory: ${directory}`);
+            }
         }
     }
 
-    cachedRules[fullPath] = null;
-    return undefined;
+    let Rule: typeof AbstractRule | null = null;
+    if (absolutePath != null) {
+        Rule = loadRule(absolutePath, ruleName);
+    }
+    cachedRules[fullPath] = Rule;
+    return Rule;
 }
 
 /**
