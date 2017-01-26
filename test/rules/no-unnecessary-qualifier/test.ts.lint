@@ -28,8 +28,8 @@ namespace A.B.C2 {
                  ~~~ [Qualifier is unnecessary since 'A.B' is in scope.]
 }
 
-import * as B from "./b";
-declare module "./b" {
+import * as B from "./b.test";
+declare module "./b.test" {
     const x: B.T;
              ~ [Qualifier is unnecessary since 'B' is in scope.]
 }

@@ -452,7 +452,7 @@ class NoUnusedVariablesWalker extends Lint.RuleWalker {
     }
 
     private fail(type: string, name: string, position: number, replacements?: Lint.Replacement[]) {
-        let fix: Lint.Fix | undefined = undefined;
+        let fix: Lint.Fix | undefined;
         if (replacements && replacements.length) {
             fix = new Lint.Fix(Rule.metadata.ruleName, replacements);
         }
