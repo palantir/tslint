@@ -1,0 +1,9 @@
+const foo = <div>Hello world!</div>
+                 ~~~~~~~~~~~~         [0]
+
+const bar = <div>{'Hello world!'}</div>
+                   ~~~~~~~~~~~~       [0]
+
+const baz = <div>{translate('hello-world')}</div>
+
+[0]: No string literal in JSX. Use a translation function.

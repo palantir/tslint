@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "no-string-jsx": true
+  },
+  "jsRules": {
+    "no-string-jsx": true
+  }
+}
