@@ -37,7 +37,8 @@ export class Rule extends Lint.Rules.TypedRule {
         optionExamples: ["true", `[true, "JQueryPromise"]`],
         rationale: "Unhandled Promises can cause unexpected behavior, such as resolving at unexpected times.",
         type: "functionality",
-        typescriptOnly: false,
+        typescriptOnly: true,
+        requiresTypeInfo: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
