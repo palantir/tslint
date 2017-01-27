@@ -25,4 +25,10 @@ i.foo;
 ~~~~~ [0]
 i.bar;
 
+c.method === i.foo;
+[0].forEach(c.method || i.foo);
+            ~~~~~~~~ [0]
+                        ~~~~~ [0]
+[0].forEach(c.method.bind(c));
+
 [0]: Avoid referencing unbound methods which may cause unintentional scoping of 'this'.
