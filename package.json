@@ -72,6 +72,6 @@
   },
   "license": "Apache-2.0",
   "engines": {
-    "node": ">=4.2.6"
+    "node": ">=4.1.2"
   }
 }
