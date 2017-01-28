@@ -82,6 +82,6 @@ const [ paramA, paramB ] = [ 'test', 15 ];
 
 const { paramA, paramB } = { paramA: "test", paramB: 15 };
 
-const [ paramA, paramB ]: { paramA: string, paramB: number } = [ 'test', 15 ];
+const [ paramA3, paramB3 ]: [ number, string ] = [15, 'test'];
 
 const { paramA, paramB }: { paramA: string, paramB: number } = { paramA: "test", paramB: 15 };
