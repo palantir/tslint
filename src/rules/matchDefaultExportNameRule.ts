@@ -19,7 +19,7 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
-export class Rule extends Lint.Rules.AbstractRule {
+export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "match-default-export-name",
@@ -36,10 +36,10 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING(importName: string, exportName: string): string {
-        return `Default export '${exportName}' is imported as '${importName}'.`;
+        return `Expected import '${importName}' to match the default export '${exportName}'.`;
     }
 
-    public apply(sourceFile: ts.SourceFile, langSvc: ts.LanguageService): Lint.RuleFailure[] {
+    public applyWithProgram(sourceFile: ts.SourceFile, langSvc: ts.LanguageService): Lint.RuleFailure[] {
         return this.applyWithWalker(new Walker(sourceFile, this.getOptions(), langSvc.getProgram()));
     }
 }
