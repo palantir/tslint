@@ -25,4 +25,8 @@ i.foo;
 ~~~~~ [0]
 i.bar;
 
+
+<button onClick={c.method}>Click me!</button>;
+                 ~~~~~~~~ [0]
+
 [0]: Avoid referencing unbound methods which may cause unintentional scoping of 'this'.
