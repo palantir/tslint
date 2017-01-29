@@ -1,4 +1,4 @@
-import {a, A} from './a';
+import {a, A} from './a.test';
 
 export class B {
   static thing = a;

@@ -133,7 +133,7 @@ class Walker extends Lint.RuleWalker {
      * (As opposed to if/else, switch, or loops, which need their own handling.)
      */
     private combineSequentialChildren(node: ts.Node): Super {
-        let seenSingle: Single | undefined = undefined;
+        let seenSingle: Single | undefined;
         const res = ts.forEachChild<Super | undefined>(node, (child) => {
             const childSuper = this.getSuperForNode(child);
             switch (childSuper) {
