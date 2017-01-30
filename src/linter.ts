@@ -33,7 +33,7 @@ import { findFormatter } from "./formatterLoader";
 import { ILinterOptions, LintResult } from "./index";
 import { IFormatter } from "./language/formatter/formatter";
 import { createLanguageService, wrapProgram } from "./language/languageServiceHost";
-import { Fix, IRule, RuleFailure, RuleLevel } from "./language/rule/rule";
+import { Fix, IRule, RuleFailure } from "./language/rule/rule";
 import { TypedRule } from "./language/rule/typedRule";
 import * as utils from "./language/utils";
 import { loadRules } from "./ruleLoader";

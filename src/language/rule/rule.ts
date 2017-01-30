@@ -116,6 +116,7 @@ export interface IRuleFailureJson {
     failure: string;
     fix?: Fix;
     name: string;
+    ruleLevel: string;
     ruleName: string;
     startPosition: IRuleFailurePositionJson;
 }
