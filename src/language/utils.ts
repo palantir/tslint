@@ -230,16 +230,20 @@ export function isScopeBoundary(node: ts.Node): boolean {
 export function isBlockScopeBoundary(node: ts.Node): boolean {
     return isScopeBoundary(node)
         || node.kind === ts.SyntaxKind.Block
-        || node.kind === ts.SyntaxKind.DoStatement
-        || node.kind === ts.SyntaxKind.WhileStatement
-        || node.kind === ts.SyntaxKind.ForStatement
-        || node.kind === ts.SyntaxKind.ForInStatement
-        || node.kind === ts.SyntaxKind.ForOfStatement
+        || isLoop(node)
         || node.kind === ts.SyntaxKind.WithStatement
         || node.kind === ts.SyntaxKind.SwitchStatement
         || node.parent !== undefined
             && (node.parent.kind === ts.SyntaxKind.TryStatement
             || node.parent.kind === ts.SyntaxKind.IfStatement);
+}
+
+export function isLoop(node: ts.Node): node is ts.IterationStatement {
+   return node.kind === ts.SyntaxKind.DoStatement
+        || node.kind === ts.SyntaxKind.WhileStatement
+        || node.kind === ts.SyntaxKind.ForStatement
+        || node.kind === ts.SyntaxKind.ForInStatement
+        || node.kind === ts.SyntaxKind.ForOfStatement;
 }
 
 export interface TokenPosition {
