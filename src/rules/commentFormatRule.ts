@@ -21,8 +21,8 @@ import * as Lint from "../index";
 import { escapeRegExp } from "../utils";
 
 interface IExceptionsObject {
-    ignoreWords?: string[];
-    ignorePattern?: string;
+    "ignore-words"?: string[];
+    "ignore-pattern"?: string;
 }
 
 type ExceptionsRegExp = RegExp | null;
@@ -49,8 +49,8 @@ export class Rule extends Lint.Rules.AbstractRule {
             
             One of two options can be provided in this object:
                 
-                * \`"ignoreWords"\`  - array of strings - words that will be ignored at the beginning of the comment.
-                * \`"ignorePattern"\` - string - RegExp pattern that will be ignored at the beginning of the comment.
+                * \`"ignore-words"\`  - array of strings - words that will be ignored at the beginning of the comment.
+                * \`"ignore-pattern"\` - string - RegExp pattern that will be ignored at the beginning of the comment.
             `,
         options: {
             type: "array",
@@ -67,13 +67,13 @@ export class Rule extends Lint.Rules.AbstractRule {
                     {
                         type: "object",
                         properties: {
-                            ignoreWords: {
+                            "ignore-words": {
                                 type: "array",
                                 items: {
                                     type: "string",
                                 },
                             },
-                            ignorePattern: {
+                            "ignore-pattern": {
                                 type: "string",
                             },
                         },
@@ -87,8 +87,8 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: [
             '[true, "check-space", "check-uppercase"]',
-            '[true, "check-lowercase", {"ignoreWords": ["TODO", "HACK"]}]',
-            '[true, "check-lowercase", {"ignorePattern": "STD\\w{2,3}\\b"}]',
+            '[true, "check-lowercase", {"ignore-words": ["TODO", "HACK"]}]',
+            '[true, "check-lowercase", {"ignore-pattern": "STD\\w{2,3}\\b"}]',
         ],
         type: "style",
         typescriptOnly: false,
@@ -158,16 +158,18 @@ class CommentWalker extends Lint.RuleWalker {
             return null;
         }
 
-        if (exceptionsObject.ignorePattern) {
-            this.failureIgnorePart = Rule.IGNORE_PATTERN_FAILURE_FACTORY(exceptionsObject.ignorePattern);
+        if (exceptionsObject["ignore-pattern"]) {
+            const ignorePattern = exceptionsObject["ignore-pattern"] as string;
+            this.failureIgnorePart = Rule.IGNORE_PATTERN_FAILURE_FACTORY(ignorePattern);
             // regex is "start of string"//"any amount of whitespace" followed by user provided ignore pattern
-            return new RegExp(`^//\\s*(${exceptionsObject.ignorePattern})`);
+            return new RegExp(`^//\\s*(${ignorePattern})`);
         }
 
-        if (exceptionsObject.ignoreWords) {
-            this.failureIgnorePart = Rule.IGNORE_WORDS_FAILURE_FACTORY(exceptionsObject.ignoreWords);
-            // Converts all exceptions values to strings, trim whitespace, escapes RegExp special characters and combines into alternation  
-            const wordsPattern = exceptionsObject.ignoreWords
+        if (exceptionsObject["ignore-words"]) {
+            const ignoreWords = exceptionsObject["ignore-words"] as string[];
+            this.failureIgnorePart = Rule.IGNORE_WORDS_FAILURE_FACTORY(ignoreWords);
+            // Converts all exceptions values to strings, trim whitespace, escapes RegExp special characters and combines into alternation
+            const wordsPattern = ignoreWords
                 .map(String)
                 .map((str) => str.trim())
                 .map(escapeRegExp)

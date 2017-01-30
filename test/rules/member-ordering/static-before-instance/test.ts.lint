@@ -1,0 +1,10 @@
+class Foo {
+    x: number;
+    static y: number;
+    ~~~~~~~~~~~~~~~~~ [0]
+    constructor() {
+        // nothing to do
+    }
+}
+
+[0]: Declaration of static member not allowed after declaration of instance member. Instead, this should come at the beginning of the class/interface.

@@ -15,10 +15,16 @@
  * limitations under the License.
  */
 
-import {loadRules} from "./lint";
+import * as diff from "diff";
+import * as fs from "fs";
+import * as path from "path";
+import { camelize } from "../src/utils";
+import { loadRules } from "./lint";
 
 describe("Rule Loader", () => {
-    const RULES_DIRECTORY = "build/src/rules";
+    const builtRulesDir = "build/src/rules";
+    const srcRulesDir = "src/rules";
+    const testRulesDir = "test/rules";
 
     it("loads core rules", () => {
         const validConfiguration: {[name: string]: any} = {
@@ -29,7 +35,7 @@ describe("Rule Loader", () => {
             "quotemark": "single",
         };
 
-        const rules = loadRules(validConfiguration, {}, RULES_DIRECTORY);
+        const rules = loadRules(validConfiguration, {}, builtRulesDir);
         assert.equal(rules.length, 5);
     });
 
@@ -40,7 +46,7 @@ describe("Rule Loader", () => {
             "invalidConfig2": false,
         };
 
-        const rules = loadRules(invalidConfiguration, {}, [RULES_DIRECTORY]);
+        const rules = loadRules(invalidConfiguration, {}, [builtRulesDir]);
         assert.equal(rules.length, 1);
     });
 
@@ -53,7 +59,7 @@ describe("Rule Loader", () => {
             "quotemark": "single",
         };
 
-        const rules = loadRules(validConfiguration, {}, [RULES_DIRECTORY]);
+        const rules = loadRules(validConfiguration, {}, [builtRulesDir]);
         assert.equal(rules.length, 5);
     });
 
@@ -62,7 +68,52 @@ describe("Rule Loader", () => {
             "class-name": true,
         };
 
-        const rules = loadRules(validConfiguration, {}, RULES_DIRECTORY, true);
+        const rules = loadRules(validConfiguration, {}, builtRulesDir, true);
         assert.equal(rules.length, 1);
     });
+
+    it("tests every rule", () => {
+        const rules = fs.readdirSync(srcRulesDir)
+            .filter((file) => /Rule.ts$/.test(file))
+            .map((file) => file.substr(0, file.length - "Rule.ts".length))
+            .sort()
+            .join("\n");
+        const tests = fs.readdirSync(testRulesDir)
+            .filter((file) => !file.startsWith("_") && fs.statSync(path.join(testRulesDir, file)).isDirectory())
+            .map(camelize)
+            .sort()
+            .join("\n");
+        const diffResults = diff.diffLines(rules, tests);
+        let testFailed = false;
+        for (const result of diffResults) {
+            if (result.added) {
+                console.warn("Test has no matching rule: " + result.value);
+                testFailed = true;
+            } else if (result.removed) {
+                console.warn("Missing test: " + result.value);
+                testFailed = true;
+            }
+        }
+
+        assert.isFalse(testFailed, "List of rules doesn't match list of tests");
+    });
+
+    it("ensures that `.ts` files in `rules/` end in `.test.ts` to avoid being linted", () => {
+        walkSync(testRulesDir, (filename) => {
+            if (/\.ts$/.test(filename)) {
+                assert.match(filename, /\.test\.ts$/);
+            }
+        });
+    });
+
+    const walkSync = (dir: string, cb: (filename: string) => void) => {
+        fs.readdirSync(dir).forEach((file) => {
+            const fullPath = path.join(dir, file);
+            if (fs.statSync(path.join(dir, file)).isDirectory()) {
+                walkSync(fullPath, cb);
+            } else {
+                cb(fullPath);
+            }
+        });
+    };
 });

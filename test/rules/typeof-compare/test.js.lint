@@ -2,15 +2,15 @@ var testVariable = 123;
 
 function testFunction() {
     if (typeof x === 'null') {
-        ~~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+        ~~~~~~~~~~~~~~~~~~~      [0]
         console.log("called");
     }
     const x = typeof foo === 'undefied'
-              ~~~~~~~~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+              ~~~~~~~~~~~~~~~~~~~~~~~~~      [0]
 }
 
 console.log(typeof window == 'object ')
-            ~~~~~~~~~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~      [0]
 
 const string = "string";
 typeof bar === string
@@ -81,25 +81,29 @@ typeof num != "undefined";
 "function" == typeof num;
 "symbol" == typeof num;
 "undefined" == typeof num;
+"frizzle" == typeof num;
+~~~~~~~~~~~~~~~~~~~~~~~ [0]
 
 typeof bar === 123
-~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+~~~~~~~~~~~~~~~~~~      [0]
 typeof bar === undefined
-~~~~~~~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+~~~~~~~~~~~~~~~~~~~~~~~~      [0]
 typeof bar === null
-~~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+~~~~~~~~~~~~~~~~~~~      [0]
 typeof bar === true
-~~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+~~~~~~~~~~~~~~~~~~~      [0]
 typeof bar === false
-~~~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+~~~~~~~~~~~~~~~~~~~~      [0]
 
 123 === typeof bar
-~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+~~~~~~~~~~~~~~~~~~      [0]
 undefined === typeof bar
-~~~~~~~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+~~~~~~~~~~~~~~~~~~~~~~~~      [0]
 null === typeof bar
-~~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+~~~~~~~~~~~~~~~~~~~      [0]
 true === typeof bar
-~~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+~~~~~~~~~~~~~~~~~~~      [0]
 false === typeof bar
-~~~~~~~~~~~~~~~~~~~~      [typeof must be compared to correct value]
+~~~~~~~~~~~~~~~~~~~~      [0]
+
+[0]: 'typeof' expression must be compared to one of: "undefined", "string", "boolean", "number", "function", "object", "symbol"

@@ -27,7 +27,7 @@ import {
 } from "./configuration";
 import { FatalError } from "./error";
 import * as Linter from "./linter";
-import { consoleTestResultHandler, runTest } from "./test";
+import { consoleTestResultsHandler, runTests } from "./test";
 import { updateNotifierCheck } from "./updateNotifier";
 
 export interface IRunnerOptions {
@@ -130,8 +130,8 @@ export class Runner {
         }
 
         if (this.options.test) {
-            const results = runTest(this.options.test, this.options.rulesDirectory);
-            const didAllTestsPass = consoleTestResultHandler(results);
+            const results = runTests(this.options.test, this.options.rulesDirectory);
+            const didAllTestsPass = consoleTestResultsHandler(results);
             onComplete(didAllTestsPass ? 0 : 1);
             return;
         }

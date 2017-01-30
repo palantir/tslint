@@ -43,17 +43,13 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class BlockWalker extends Lint.RuleWalker {
     public visitBlock(node: ts.Block) {
-        if (node.statements.length === 0 && !isConstructorWithParameterProperties(node.parent!)) {
+        if (node.statements.length === 0 && !isExcludedConstructor(node.parent!)) {
             const sourceFile = this.getSourceFile();
-            const children = node.getChildren(sourceFile);
-            const openBrace = children[0];
-            const closeBrace = children[children.length - 1];
-            const sourceFileText = sourceFile.text;
-
-            if (ts.getLeadingCommentRanges(sourceFileText, closeBrace.getFullStart()) === undefined &&
-                ts.getTrailingCommentRanges(sourceFileText, openBrace.getEnd()) === undefined) {
-
-                this.addFailureAtNode(node, Rule.FAILURE_STRING);
+            const start = node.getStart(sourceFile);
+            // Block always starts with open brace. Adding 1 to its start gives us the end of the brace,
+            // which can be used to conveniently check for comments between braces
+            if (!Lint.hasCommentAfterPosition(sourceFile.text, start + 1)) {
+                this.addFailureFromStartToEnd(start , node.getEnd(), Rule.FAILURE_STRING);
             }
         }
 
@@ -61,8 +57,15 @@ class BlockWalker extends Lint.RuleWalker {
     }
 }
 
-function isConstructorWithParameterProperties(node: ts.Node): boolean {
+function isExcludedConstructor(node: ts.Node): boolean {
     if (node.kind === ts.SyntaxKind.Constructor) {
+        if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.PrivateKeyword, ts.SyntaxKind.ProtectedKeyword)) {
+            /* If constructor is private or protected, the block is allowed to be empty.
+               The constructor is there on purpose to disallow instantiation from outside the class */
+            /* The public modifier does not serve a purpose here. It can only be used to allow instantiation of a base class where
+               the super constructor is protected. But then the block would not be empty, because of the call to super() */
+            return true;
+        }
         for (const parameter of (node as ts.ConstructorDeclaration).parameters) {
             if (Lint.hasModifier(parameter.modifiers,
                                  ts.SyntaxKind.PrivateKeyword,

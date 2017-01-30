@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "prefer-function-over-method": true
+  },
+  "jsRules": {
+    "prefer-function-over-method": true
+  }
+}

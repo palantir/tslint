@@ -230,16 +230,20 @@ export function isScopeBoundary(node: ts.Node): boolean {
 export function isBlockScopeBoundary(node: ts.Node): boolean {
     return isScopeBoundary(node)
         || node.kind === ts.SyntaxKind.Block
-        || node.kind === ts.SyntaxKind.DoStatement
-        || node.kind === ts.SyntaxKind.WhileStatement
-        || node.kind === ts.SyntaxKind.ForStatement
-        || node.kind === ts.SyntaxKind.ForInStatement
-        || node.kind === ts.SyntaxKind.ForOfStatement
+        || isLoop(node)
         || node.kind === ts.SyntaxKind.WithStatement
         || node.kind === ts.SyntaxKind.SwitchStatement
         || node.parent !== undefined
             && (node.parent.kind === ts.SyntaxKind.TryStatement
             || node.parent.kind === ts.SyntaxKind.IfStatement);
+}
+
+export function isLoop(node: ts.Node): node is ts.IterationStatement {
+   return node.kind === ts.SyntaxKind.DoStatement
+        || node.kind === ts.SyntaxKind.WhileStatement
+        || node.kind === ts.SyntaxKind.ForStatement
+        || node.kind === ts.SyntaxKind.ForInStatement
+        || node.kind === ts.SyntaxKind.ForOfStatement;
 }
 
 export interface TokenPosition {
@@ -256,9 +260,9 @@ export type FilterCallback = (node: ts.Node) => boolean;
 
 /**
  * Iterate over all tokens of `node`
- * 
+ *
  * @description JsDoc comments are treated like regular comments and only visited if `skipTrivia` === false.
- * 
+ *
  * @param node The node whose tokens should be visited
  * @param skipTrivia If set to false all trivia preceeding `node` or any of its children is included
  * @param cb Is called for every token of `node`. It gets the full text of the SourceFile and the position of the token within that text.
@@ -310,7 +314,7 @@ export function forEachToken(node: ts.Node, skipTrivia: boolean, cb: ForEachToke
 function createTriviaHandler(sourceFile: ts.SourceFile, cb: ForEachTokenCallback) {
     const fullText = sourceFile.text;
     const scanner = ts.createScanner(sourceFile.languageVersion, false, sourceFile.languageVariant, fullText);
-    /** 
+    /**
      * Scan the specified range to get all trivia tokens.
      * This includes trailing trivia of the last token and the leading trivia of the current token
      */
@@ -404,14 +408,34 @@ function canHaveTrailingTrivia(tokenKind: ts.SyntaxKind, parent: ts.Node): boole
     return true;
 }
 
-/** 
+/**
  * Checks if there are any comments between `position` and the next non-trivia token
- * 
+ *
  * @param text The text to scan
  * @param position The position inside `text` where to start scanning. Make sure that this is a valid start position.
  *                 This value is typically obtained from `node.getFullStart()` or `node.getEnd()`
  */
 export function hasCommentAfterPosition(text: string, position: number): boolean {
     return ts.getTrailingCommentRanges(text, position) !== undefined ||
-           ts.getTrailingCommentRanges(text, position) !== undefined;
+           ts.getLeadingCommentRanges(text, position) !== undefined;
+}
+
+export interface EqualsKind {
+    isPositive: boolean; // True for "===" and "=="
+    isStrict: boolean; // True for "===" and "!=="
+}
+
+export function getEqualsKind(node: ts.BinaryOperatorToken): EqualsKind | undefined {
+    switch (node.kind) {
+        case ts.SyntaxKind.EqualsEqualsToken:
+            return { isPositive: true, isStrict: false };
+        case ts.SyntaxKind.EqualsEqualsEqualsToken:
+            return { isPositive: true, isStrict: true };
+        case ts.SyntaxKind.ExclamationEqualsToken:
+            return { isPositive: false, isStrict: false };
+        case ts.SyntaxKind.ExclamationEqualsEqualsToken:
+            return { isPositive: false, isStrict: true };
+        default:
+            return undefined;
+    }
 }

@@ -43,7 +43,7 @@ import { arrayify, dedent } from "./utils";
  * Linter that can lint multiple files in consecutive runs.
  */
 class Linter {
-    public static VERSION = "4.3.1";
+    public static VERSION = "4.4.2";
 
     public static findConfiguration = findConfiguration;
     public static findConfigurationPath = findConfigurationPath;
@@ -180,14 +180,7 @@ class Linter {
         const configurationRules = isJs ? configuration.jsRules : configuration.rules;
 
         // walk the code first to find all the intervals where rules are disabled
-        const rulesWalker = new EnableDisableRulesWalker(sourceFile, {
-            disabledIntervals: [],
-            ruleArguments: [],
-            ruleLevel: RuleLevel.ERROR,
-            ruleName: "",
-        }, configurationRules);
-        rulesWalker.walk(sourceFile);
-        const enableDisableRuleMap = rulesWalker.enableDisableRuleMap;
+        const enableDisableRuleMap = new EnableDisableRulesWalker(sourceFile, configurationRules).getEnableDisableRuleMap();
 
         const rulesDirectories = arrayify(this.options.rulesDirectory)
             .concat(arrayify(configuration.rulesDirectory));

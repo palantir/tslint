@@ -1,16 +1,30 @@
 class Clazz {
     public funcxion() {    
-                       ~~~~ [0]
+                       ~~~~ [trailing whitespace]
         console.log("test")   ;    
-                               ~~~~ [0]
+                               ~~~~ [trailing whitespace]
     }
     
-~~~~ [0]
+~~~~ [trailing whitespace]
     
-~~~~ [0]
+~~~~ [trailing whitespace]
     private foobar() {
     }
 }    
- ~~~~ [0]
+ ~~~~ [trailing whitespace]
+// single line comment without trailing whitespace
+// single line comment with trailing whitespace   
+                                               ~~~ [trailing whitespace]
+ /* single line multiline comment */
+/* whitespace after comment */ 
+                              ~ [trailing whitespace]
+/* first line has trailing whitespace  
+                                     ~~ [trailing whitespace]
+   second line is ok
+   last line is not checked         */
+/*
+ */
 
-[0]: trailing whitespace
+// following line checks for trailing whitespace before EOF
+   
+~~~ [trailing whitespace]

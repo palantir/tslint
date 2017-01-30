@@ -52,7 +52,7 @@ describe("Prose Formatter", () => {
             new RuleFailure(sourceFile, 0, 1, "first failure", RuleLevel.ERROR, "first-name"),
         ];
 
-        const mockFix = { getFileName: () => { return "file2"; } } as any;
+        const mockFix = { getFileName: () => "file2" } as any;
 
         const fixes = [
             new RuleFailure(sourceFile, 0, 1, "first failure", RuleLevel.ERROR, "first-name"),

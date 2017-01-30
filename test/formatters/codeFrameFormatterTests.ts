@@ -27,6 +27,7 @@ describe("CodeFrame Formatter", () => {
     let formatter: IFormatter;
 
     before(() => {
+        (colors as any).enabled = true;
         const Formatter = TestUtils.getFormatter("codeFrame");
         sourceFile = TestUtils.getSourceFile(TEST_FILE);
         formatter = new Formatter();
