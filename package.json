@@ -1,6 +1,6 @@
 {
   "name": "tslint",
-  "version": "4.3.1",
+  "version": "4.4.2",
   "description": "An extensible static analysis linter for the TypeScript language",
   "bin": {
     "tslint": "./bin/tslint"
@@ -25,9 +25,10 @@
     "compile:core": "tsc -p src",
     "compile:scripts": "tsc -p scripts",
     "compile:test": "tsc -p test",
-    "lint": "npm-run-all -p lint:core lint:test",
+    "lint": "npm-run-all -p lint:core lint:test lint:from-bin",
     "lint:core": "tslint \"src/**/*.ts\"",
     "lint:test": "tslint \"test/**/*.ts\" -e \"test/**/*.test.ts\"",
+    "lint:from-bin": "bin/tslint \"{src,test}/**/*.ts\" -e \"test/**/*.test.ts\"",
     "test": "npm-run-all test:pre -p test:mocha test:rules",
     "test:pre": "cd ./test/config && npm install",
     "test:mocha": "mocha --reporter spec --colors \"build/test/**/*Tests.js\" build/test/assert.js",
@@ -71,6 +72,6 @@
   },
   "license": "Apache-2.0",
   "engines": {
-    "node": ">=4.2.6"
+    "node": ">=4.1.2"
   }
 }

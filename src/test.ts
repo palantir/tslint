@@ -80,7 +80,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
         const fileTextWithoutMarkup = parse.removeErrorMarkup(fileText);
         const errorsFromMarkup = parse.parseErrorsFromMarkup(fileText);
 
-        let program: ts.Program | undefined = undefined;
+        let program: ts.Program | undefined;
         if (tslintConfig !== undefined && tslintConfig.linterOptions && tslintConfig.linterOptions.typeCheck) {
             const compilerHost: ts.CompilerHost = {
                 fileExists: () => true,
