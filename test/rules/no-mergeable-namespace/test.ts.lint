@@ -8,6 +8,7 @@ module bar {}
 
 // invalid case
 namespace a {}
+namespace a {}
           ~ [Mergeable namespace 'a' found. Merge its contents with the namespace on line 6.]
 
 namespace b {
