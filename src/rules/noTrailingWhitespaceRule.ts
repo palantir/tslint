@@ -19,6 +19,8 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
+const OPTION_IGNORE_COMMENTS = "ignore-comments";
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -27,9 +29,18 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: "Keeps version control diffs clean as it prevents accidental whitespace from being committed.",
         optionsDescription: "Not configurable.",
         hasFix: true,
-        options: null,
-        optionExamples: ["true"],
-        type: "maintainability",
+        options: {
+            type: "array",
+            items: {
+                type: "string",
+                enum: [OPTION_IGNORE_COMMENTS],
+            },
+        },
+        optionExamples: [
+            "true",
+            `[true, "${OPTION_IGNORE_COMMENTS}"]`,
+        ],
+        type: "style",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
@@ -55,29 +66,31 @@ class NoTrailingWhitespaceWalker extends Lint.RuleWalker {
                 lastSeenWasWhitespace = true;
                 lastSeenWhitespacePosition = pos.tokenStart;
             } else {
-                if (kind === ts.SyntaxKind.SingleLineCommentTrivia) {
-                    const commentText = fullText.substring(pos.tokenStart + 2, pos.end);
-                    const match = /\s+$/.exec(commentText);
-                    if (match !== null) {
-                        this.reportFailure(pos.end - match[0].length, pos.end);
-                    }
-                } else if (kind === ts.SyntaxKind.MultiLineCommentTrivia) {
-                    let startPos = pos.tokenStart + 2;
-                    const commentText = fullText.substring(startPos, pos.end - 2);
-                    const lines = commentText.split("\n");
-                    // we don't want to check the content of the last comment line, as it is always followed by */
-                    const len = lines.length - 1;
-                    for (let i = 0; i < len; ++i) {
-                        let line = lines[i];
-                        // remove carriage return at the end, it is does not account to trailing whitespace
-                        if (line.endsWith("\r")) {
-                            line = line.substr(0, line.length - 1);
+                if (!this.hasOption(OPTION_IGNORE_COMMENTS)) {
+                    if (kind === ts.SyntaxKind.SingleLineCommentTrivia) {
+                        const commentText = fullText.substring(pos.tokenStart + 2, pos.end);
+                        const match = /\s+$/.exec(commentText);
+                        if (match !== null) {
+                            this.reportFailure(pos.end - match[0].length, pos.end);
                         }
-                        const start = line.search(/\s+$/);
-                        if (start !== -1) {
-                            this.reportFailure(startPos + start, startPos + line.length);
+                    } else if (kind === ts.SyntaxKind.MultiLineCommentTrivia) {
+                        let startPos = pos.tokenStart + 2;
+                        const commentText = fullText.substring(startPos, pos.end - 2);
+                        const lines = commentText.split("\n");
+                        // we don't want to check the content of the last comment line, as it is always followed by */
+                        const len = lines.length - 1;
+                        for (let i = 0; i < len; ++i) {
+                            let line = lines[i];
+                            // remove carriage return at the end, it is does not account to trailing whitespace
+                            if (line.endsWith("\r")) {
+                                line = line.substr(0, line.length - 1);
+                            }
+                            const start = line.search(/\s+$/);
+                            if (start !== -1) {
+                                this.reportFailure(startPos + start, startPos + line.length);
+                            }
+                            startPos += lines[i].length + 1;
                         }
-                        startPos += lines[i].length + 1;
                     }
                 }
                 lastSeenWasWhitespace = false;
