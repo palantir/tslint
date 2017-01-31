@@ -10,7 +10,7 @@ dependencies:
     - yarn
 test:
   override:
-    - case $CIRCLE_NODE_INDEX in [0-2]) yarn verify ;; 3) yarn clean && yarn compile && npm i typescript@2.0.10 && yarn test ;; esac:
+    - case $CIRCLE_NODE_INDEX in [0-2]) yarn verify ;; 3) npm run clean && yarn compile && yarn add typescript@2.0.10 && yarn test ;; esac:
         parallel: true
 deployment:
   npm-latest:
