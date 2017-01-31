@@ -41,7 +41,7 @@ export class Rule extends Lint.Rules.TypedRule {
 
 class Walker extends Lint.ProgramAwareRuleWalker {
     public visitPropertyAccessExpression(node: ts.PropertyAccessExpression) {
-        if (!isInCall(node)) {
+        if (!isSafeUse(node)) {
             const symbol = this.getTypeChecker().getSymbolAtLocation(node);
             const declaration = symbol && symbol.valueDeclaration;
             if (declaration && isMethod(declaration)) {
@@ -62,13 +62,19 @@ function isMethod(node: ts.Node): boolean {
     }
 }
 
-function isInCall(node: ts.Node): boolean {
+function isSafeUse(node: ts.Node): boolean {
     const parent = node.parent!;
     switch (parent.kind) {
         case ts.SyntaxKind.CallExpression:
             return (parent as ts.CallExpression).expression === node;
         case ts.SyntaxKind.TaggedTemplateExpression:
             return (parent as ts.TaggedTemplateExpression).tag === node;
+        // E.g. `obj.method.bind(obj)`.
+        case ts.SyntaxKind.PropertyAccessExpression:
+            return true;
+        // Allow most binary operators, but don't allow e.g. `myArray.forEach(obj.method || otherObj.otherMethod)`.
+        case ts.SyntaxKind.BinaryExpression:
+            return (parent as ts.BinaryExpression).operatorToken.kind !== ts.SyntaxKind.BarBarToken;
         default:
             return false;
     }
