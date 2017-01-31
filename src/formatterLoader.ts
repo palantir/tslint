@@ -34,6 +34,7 @@ export function findFormatter(name: string | Function, formattersDirectory?: str
     if (isFunction(name)) {
         return name;
     } else if (isString(name)) {
+        name = name.trim();
         const camelizedName = camelize(`${name}Formatter`);
 
         // first check for core formatters

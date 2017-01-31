@@ -32,8 +32,10 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"parameter"\` checks type specifier of function parameters for non-arrow functions.
             * \`"arrow-parameter"\` checks type specifier of function parameters for arrow functions.
             * \`"property-declaration"\` checks return types of interface properties.
-            * \`"variable-declaration"\` checks variable declarations.
-            * \`"member-variable-declaration"\` checks member variable declarations.`,
+            * \`"variable-declaration"\` checks non-binding variable declarations.
+            * \`"member-variable-declaration"\` checks member variable declarations.
+            * \`"object-destructuring"\` checks object destructuring declarations.
+            * \`"array-destructuring"\` checks array destructuring declarations.`,
         options: {
             type: "array",
             items: {
@@ -46,6 +48,8 @@ export class Rule extends Lint.Rules.AbstractRule {
                     "property-declaration",
                     "variable-declaration",
                     "member-variable-declaration",
+                    "object-destructuring",
+                    "array-destructuring",
                 ],
             },
             minLength: 0,
@@ -194,7 +198,21 @@ class TypedefWalker extends Lint.RuleWalker {
                 && (node as ts.Node).parent!.kind !== ts.SyntaxKind.CatchClause
                 && node.parent.parent.kind !== ts.SyntaxKind.ForInStatement
                 && node.parent.parent.kind !== ts.SyntaxKind.ForOfStatement) {
-            this.checkTypeAnnotation("variable-declaration", node.name.getEnd(), node.type, node.name);
+
+            let rule: string;
+            switch (node.name.kind) {
+                case ts.SyntaxKind.ObjectBindingPattern:
+                    rule = "object-destructuring";
+                    break;
+                case ts.SyntaxKind.ArrayBindingPattern:
+                    rule = "array-destructuring";
+                    break;
+                default:
+                    rule = "variable-declaration";
+                    break;
+            }
+
+            this.checkTypeAnnotation(rule, node.name.getEnd(), node.type, node.name);
         }
         super.visitVariableDeclaration(node);
     }
@@ -212,13 +230,33 @@ class TypedefWalker extends Lint.RuleWalker {
                                 typeAnnotation: ts.TypeNode | undefined,
                                 name?: ts.Node) {
         if (this.hasOption(option) && typeAnnotation == null) {
-            let ns = "";
-            if (name != null && name.kind === ts.SyntaxKind.Identifier) {
-                ns = `: '${(name as ts.Identifier).text}'`;
-            }
-            this.addFailureAt(location, 1, "expected " + option + ns + " to have a typedef");
+            this.addFailureAt(location, 1, "expected " + option + getName(name, ": '", "'") + " to have a typedef");
         }
     }
+}
+
+function getName(name?: ts.Node, prefix?: string, suffix?: string): string {
+    let ns = "";
+
+    if (name != null) {
+        switch (name.kind) {
+            case ts.SyntaxKind.Identifier:
+                ns = (name as ts.Identifier).text;
+                break;
+            case ts.SyntaxKind.BindingElement:
+                ns = getName((name as ts.BindingElement).name);
+                break;
+            case ts.SyntaxKind.ArrayBindingPattern:
+                ns = `[ ${(name as ts.ArrayBindingPattern).elements.map( (n) => getName(n) ).join(", ")} ]`;
+                break;
+            case ts.SyntaxKind.ObjectBindingPattern:
+                ns = `{ ${(name as ts.ObjectBindingPattern).elements.map( (n) => getName(n) ).join(", ")} }`;
+                break;
+            default:
+                break;
+        }
+    }
+    return ns ? `${prefix || ""}${ns}${suffix || ""}` : "";
 }
 
 function isPropertyDeclaration(node: ts.Node): node is ts.PropertyDeclaration {

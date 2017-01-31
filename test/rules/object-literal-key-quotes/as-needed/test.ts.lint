@@ -12,6 +12,7 @@ const o = {
   .123: "float",
   '123': 'numbers do not need quotes', // failure
   ~~~~~  [Unnecessarily quoted property '123' found.]
+  1.23: null,
   '010': 'but this one does.',
   '.123': 'as does this one',
   fn() { return },
