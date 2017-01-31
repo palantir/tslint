@@ -301,7 +301,7 @@ If we don't have all the rules you're looking for, you can either write your own
 
 - [ESLint rules for TSLint](https://github.com/buzinas/tslint-eslint-rules) - Improve your TSLint with the missing ESLint Rules
 - [tslint-microsoft-contrib](https://github.com/Microsoft/tslint-microsoft-contrib) - A set of TSLint rules used on some Microsoft projects
-- [codelyzer](https://github.com/mgechev/codelyzer) - A set of tslint rules for static code analysis of Angular 2 TypeScript projects
+- [codelyzer](https://github.com/mgechev/codelyzer) - A set of tslint rules for static code analysis of Angular TypeScript projects
 - [vrsource-tslint-rules](https://github.com/vrsource/vrsource-tslint-rules)
 
 #### Writing custom rules
