@@ -266,6 +266,7 @@ function getHomeDir() {
     }
 }
 
+// returns the absolute path (contrary to what the name implies)
 export function getRelativePath(directory?: string | null, relativeTo?: string) {
     if (directory != null) {
         const basePath = relativeTo || process.cwd();

@@ -32,11 +32,11 @@ describe("Rule Loader", () => {
             "eofline": true,
             "forin": false,
             "no-debugger": true,
-            "quotemark": "single",
+            "quotemark": [true, "single"],
         };
 
         const rules = loadRules(validConfiguration, {}, builtRulesDir);
-        assert.equal(rules.length, 5);
+        assert.equal(rules.length, 4);
     });
 
     it("ignores invalid rules", () => {
@@ -50,17 +50,30 @@ describe("Rule Loader", () => {
         assert.equal(rules.length, 1);
     });
 
+    it("loads disabled rules if rule in enableDisableRuleMap", () => {
+        const validConfiguration: {[name: string]: any} = {
+            "class-name": true,
+            "eofline": true,
+            "forin": false,
+            "no-debugger": true,
+            "quotemark": [true, "single"],
+        };
+
+        const rules = loadRules(validConfiguration, {forin: [{isEnabled: true, position: 4}]}, builtRulesDir);
+        assert.equal(rules.length, 5);
+    });
+
     it("works with rulesDirectory argument as an Array", () => {
         const validConfiguration: {[name: string]: any} = {
             "class-name": true,
             "eofline": true,
             "forin": false,
             "no-debugger": true,
-            "quotemark": "single",
+            "quotemark": [true, "single"],
         };
 
         const rules = loadRules(validConfiguration, {}, [builtRulesDir]);
-        assert.equal(rules.length, 5);
+        assert.equal(rules.length, 4);
     });
 
     it("loads js rules", () => {
