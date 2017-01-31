@@ -26,7 +26,7 @@ import { arrayify, camelize, dedent } from "./utils";
 const moduleDirectory = path.dirname(module.filename);
 const CORE_RULES_DIRECTORY = path.resolve(moduleDirectory, ".", "rules");
 const shownDeprecations: string[] = [];
-const cachedRules: { [fullPath: string]: typeof AbstractRule | null } = {}; // null indicates that the rule was not found
+const cachedRules = new Map<string, typeof AbstractRule | null>(); // null indicates that the rule was not found
 
 export interface IEnableDisablePosition {
     isEnabled: boolean;
@@ -139,8 +139,9 @@ function loadRule(directory: string, ruleName: string) {
 function loadCachedRule(directory: string, ruleName: string, isCustomPath = false) {
     // use cached value if available
     const fullPath = path.join(directory, ruleName);
-    if (cachedRules[fullPath] !== undefined) {
-        return cachedRules[fullPath];
+    const cachedRule = cachedRules.get(fullPath);
+    if (cachedRule !== undefined) {
+        return cachedRule;
     }
 
     // get absolute path
@@ -158,7 +159,7 @@ function loadCachedRule(directory: string, ruleName: string, isCustomPath = fals
     if (absolutePath != null) {
         Rule = loadRule(absolutePath, ruleName);
     }
-    cachedRules[fullPath] = Rule;
+    cachedRules.set(fullPath, Rule);
     return Rule;
 }
 
