@@ -59,7 +59,7 @@ describe("Rule Loader", () => {
             "quotemark": [true, "single"],
         };
 
-        const rules = loadRules(validConfiguration, {forin: [{isEnabled: true, position: 4}]}, RULES_DIRECTORY);
+        const rules = loadRules(validConfiguration, {forin: [{isEnabled: true, position: 4}]}, builtRulesDir);
         assert.equal(rules.length, 5);
     });
 
