@@ -1,3 +1,9 @@
+// should not flag (#2159)
+const columns = [{ data: [1] }];
+for (let i = 0; i < columns[0].data.length; i++) {
+    columns.map((x) => x.data[i]);
+}
+
 function sampleFunc() {
     // issue #1931, should not error
     const value1 = [1];
