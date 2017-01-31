@@ -24,6 +24,7 @@ import {
     CONFIG_FILENAME,
     DEFAULT_CONFIG,
     findConfiguration,
+    IConfigurationFile,
 } from "./configuration";
 import { FatalError } from "./error";
 import * as Linter from "./linter";
@@ -213,6 +214,8 @@ export class Runner {
             rulesDirectory: this.options.rulesDirectory || "",
         }, program);
 
+        let lastFolder: string | undefined;
+        let configFile: IConfigurationFile | undefined;
         for (const file of files) {
             if (!fs.existsSync(file)) {
                 console.error(`Unable to open file: ${file}`);
@@ -237,8 +240,12 @@ export class Runner {
             }
 
             const contents = fs.readFileSync(file, "utf8");
-            const configLoad = findConfiguration(possibleConfigAbsolutePath, file);
-            linter.lint(file, contents, configLoad.results);
+            const folder = path.dirname(file);
+            if (lastFolder !== folder) {
+                configFile = findConfiguration(possibleConfigAbsolutePath, folder).results;
+                lastFolder = folder;
+            }
+            linter.lint(file, contents, configFile);
         }
 
         const lintResult = linter.getResult();
