@@ -53,15 +53,15 @@ export abstract class AbstractRule implements IRule {
         };
     }
 
-    public isEnabled(): boolean {
-        return AbstractRule.isRuleEnabled(this.value);
-    }
-
     public abstract apply(sourceFile: ts.SourceFile, languageService: ts.LanguageService): RuleFailure[];
 
     public applyWithWalker(walker: IWalker): RuleFailure[] {
         walker.walk(walker.getSourceFile());
         return this.filterFailures(walker.getFailures());
+    }
+
+    public isEnabled(): boolean {
+        return AbstractRule.isRuleEnabled(this.value);
     }
 
     protected applyWithFunction(sourceFile: ts.SourceFile, walkFn: (ctx: WalkContext<void>) => void): RuleFailure[];
