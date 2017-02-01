@@ -24,6 +24,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-any",
         description: "Diallows usages of `any` as a type declaration.",
+        hasFix: true,
         rationale: "Using `any` as a type declaration nullifies the compile-time benefits of the type system.",
         optionsDescription: "Not configurable.",
         options: null,
@@ -42,7 +43,10 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class NoAnyWalker extends Lint.RuleWalker {
     public visitAnyKeyword(node: ts.Node) {
-        this.addFailureAtNode(node, Rule.FAILURE_STRING);
+        const fix = this.createFix(
+            this.createReplacement(node.getStart(), node.getWidth(), "{}"),
+        );
+        this.addFailureAtNode(node, Rule.FAILURE_STRING, fix);
         super.visitAnyKeyword(node);
     }
 }
