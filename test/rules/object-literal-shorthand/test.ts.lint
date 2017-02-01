@@ -42,5 +42,5 @@ const extraCases = {
 };
 
 
-[property]: Expected property shorthand in object literal.
-[method]: Expected method shorthand in object literal.
+[property]: Expected property shorthand in object literal ('{foo, bar}').
+[method]: Expected method shorthand in object literal ('{foo() {...}}').
