@@ -17,7 +17,8 @@
 
 import * as ts from "typescript";
 
-import {RuleFailure, WalkContext} from "../rule/rule";
+import {RuleFailure} from "../rule/rule";
+import {WalkContext} from "./walkContext";
 import {IWalker} from "./walker";
 
 export interface IWalker {

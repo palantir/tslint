@@ -17,6 +17,8 @@
 
 import * as ts from "typescript";
 
+import {IWalker} from "../walker";
+
 export interface IRuleMetadata {
     /**
      * The kebab-case name of the rule.
@@ -99,6 +101,7 @@ export interface IRule {
     getOptions(): IOptions;
     isEnabled(): boolean;
     apply(sourceFile: ts.SourceFile, languageService: ts.LanguageService): RuleFailure[];
+    applyWithWalker(walker: IWalker): RuleFailure[];
 }
 
 export class Replacement {
@@ -276,35 +279,5 @@ export class RuleFailure {
     private createFailurePosition(position: number) {
         const lineAndCharacter = this.sourceFile.getLineAndCharacterOfPosition(position);
         return new RuleFailurePosition(position, lineAndCharacter);
-    }
-}
-
-export class WalkContext<T> {
-    public readonly failures: RuleFailure[];
-    private limit: number;
-
-    constructor(public readonly sourceFile: ts.SourceFile, public readonly ruleName: string, public readonly options: T) {
-        this.failures = [];
-        this.limit = sourceFile.end;
-    }
-
-    /** Add a failure with any arbitrary span. Prefer `addFailureAtNode` if possible. */
-    public addFailureAt(start: number, width: number, failure: string, fix?: Fix) {
-        this.addFailure(start, start + width, failure, fix);
-    }
-
-    public addFailure(start: number, end: number, failure: string, fix?: Fix) {
-        this.failures.push(
-            new RuleFailure(this.sourceFile, Math.min(start, this.limit), Math.min(end, this.limit), failure, this.ruleName, fix),
-        );
-    }
-
-    /** Add a failure using a node's span. */
-    public addFailureAtNode(node: ts.Node, failure: string, fix?: Fix) {
-        this.addFailure(node.getStart(this.sourceFile), node.getEnd(), failure, fix);
-    }
-
-    public createFix(...replacements: Replacement[]) {
-        return new Fix(this.ruleName, replacements);
     }
 }
