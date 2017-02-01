@@ -87,7 +87,7 @@ class TypedefWalker extends Lint.RuleWalker {
             && node.parent.kind !== ts.SyntaxKind.CallExpression
             && !isTypedPropertyDeclaration(node.parent)) {
 
-            this.checkTypeAnnotation("arrow-call-signature", location, node.type, node.name);
+            this.checkTypeAnnotation("arrow-call-signature", node.getStart(), node.type, node.name);
         }
         super.visitArrowFunction(node);
     }
@@ -148,7 +148,7 @@ class TypedefWalker extends Lint.RuleWalker {
             }
 
             if (optionName !== null) {
-                this.checkTypeAnnotation(optionName, node.getEnd(), node.type as ts.TypeNode, node.name);
+                this.checkTypeAnnotation(optionName, node.getStart(), node.type as ts.TypeNode, node.name);
             }
         }
         super.visitParameterDeclaration(node);
@@ -174,14 +174,14 @@ class TypedefWalker extends Lint.RuleWalker {
         const performCheck = !(node.initializer != null && node.initializer.kind === ts.SyntaxKind.ArrowFunction && node.type == null);
 
         if (performCheck) {
-            this.checkTypeAnnotation(optionName, node.name.getEnd(), node.type, node.name);
+            this.checkTypeAnnotation(optionName, node.name.getStart(), node.type, node.name);
         }
         super.visitPropertyDeclaration(node);
     }
 
     public visitPropertySignature(node: ts.PropertyDeclaration) {
         const optionName = "property-declaration";
-        this.checkTypeAnnotation(optionName, node.name.getEnd(), node.type, node.name);
+        this.checkTypeAnnotation(optionName, node.name.getStart(), node.type, node.name);
         super.visitPropertySignature(node);
     }
 
@@ -211,8 +211,7 @@ class TypedefWalker extends Lint.RuleWalker {
                     rule = "variable-declaration";
                     break;
             }
-
-            this.checkTypeAnnotation(rule, node.name.getEnd(), node.type, node.name);
+            this.checkTypeAnnotation(rule, node.name.getStart(), node.type, node.name);
         }
         super.visitVariableDeclaration(node);
     }
@@ -221,7 +220,11 @@ class TypedefWalker extends Lint.RuleWalker {
         const location = (node.parameters != null) ? node.parameters.end : null;
         // set accessors can't have a return type.
         if (location != null && node.kind !== ts.SyntaxKind.SetAccessor && node.kind !== ts.SyntaxKind.ArrowFunction) {
-            this.checkTypeAnnotation("call-signature", location, node.type, node.name);
+            let errorLocation = node.getStart();
+            if (node.name !== undefined){
+                errorLocation = node.name.getStart();
+            }
+            this.checkTypeAnnotation("call-signature", errorLocation, node.type, node.name);
         }
     }
 
