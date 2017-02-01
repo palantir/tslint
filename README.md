@@ -216,26 +216,21 @@ tslint accepts the following command-line options:
 #### Library
 
 ```js
-import { Linter } from "tslint";
+import { Linter, Configuration } from "tslint";
 import * as fs from "fs";
 
-const fileName = "Specify file name";
-const configuration = {
-    rules: {
-        "variable-name": true,
-        "quotemark": [true, "double"]
-    }
-};
+const fileName = "Specify input file name";
+const configurationFilename = "Specify configuration file name";
 const options = {
     formatter: "json",
-    configuration: configuration,
     rulesDirectory: "customRules/",
     formattersDirectory: "customFormatters/"
 };
 
 const fileContents = fs.readFileSync(fileName, "utf8");
-const linter = new Linter(fileName, fileContents, options);
-const result = linter.lint();
+const linter = new Linter(options);
+const configLoad = Configuration.findConfiguration(configurationFilename, filename);
+const result = linter.lint(fileName, fileContents, configLoad.results);
 ```
 
 #### Type Checking
@@ -306,7 +301,7 @@ If we don't have all the rules you're looking for, you can either write your own
 
 - [ESLint rules for TSLint](https://github.com/buzinas/tslint-eslint-rules) - Improve your TSLint with the missing ESLint Rules
 - [tslint-microsoft-contrib](https://github.com/Microsoft/tslint-microsoft-contrib) - A set of TSLint rules used on some Microsoft projects
-- [codelyzer](https://github.com/mgechev/codelyzer) - A set of tslint rules for static code analysis of Angular 2 TypeScript projects
+- [codelyzer](https://github.com/mgechev/codelyzer) - A set of tslint rules for static code analysis of Angular TypeScript projects
 - [vrsource-tslint-rules](https://github.com/vrsource/vrsource-tslint-rules)
 
 #### Writing custom rules
@@ -315,10 +310,10 @@ TSLint ships with a set of core rules that can be configured. However, users are
 
 Let us take the example of how to write a new rule to forbid all import statements (you know, *for science*). Let us name the rule file `noImportsRule.ts`. Rules are referenced in `tslint.json` with their kebab-cased identifer, so `"no-imports": true` would configure the rule.
 
-__Important conventions__: 
+__Important conventions__:
 * Rule identifiers are always kebab-cased.
 * Rule files are always camel-cased (`camelCasedRule.ts`).
-* Rule files *must* contain the suffix `Rule`. 
+* Rule files *must* contain the suffix `Rule`.
 * The exported class must always be named `Rule` and extend from `Lint.Rules.AbstractRule`.
 
 Now, let us first write the rule in TypeScript:

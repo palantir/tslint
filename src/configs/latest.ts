@@ -47,6 +47,11 @@ export const rules = {
     }],
     "typeof-compare": true,
     "unified-signatures": true,
+
+    // added in v4.4
+    "arrow-return-shorthand": true,
+    "no-unnecessary-initializer": true,
+    "no-misused-new": true,
 };
 // tslint:enable object-literal-sort-keys
 

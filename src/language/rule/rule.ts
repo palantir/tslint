@@ -104,6 +104,21 @@ export interface IRule {
     applyWithWalker(walker: IWalker): RuleFailure[];
 }
 
+export interface IRuleFailureJson {
+    endPosition: IRuleFailurePositionJson;
+    failure: string;
+    fix?: Fix;
+    name: string;
+    ruleName: string;
+    startPosition: IRuleFailurePositionJson;
+}
+
+export interface IRuleFailurePositionJson {
+    character: number;
+    line: number;
+    position: number;
+}
+
 export class Replacement {
     public static applyAll(content: string, replacements: Replacement[]) {
         // sort in reverse so that diffs are properly applied
@@ -189,7 +204,7 @@ export class RuleFailurePosition {
         return this.lineAndCharacter;
     }
 
-    public toJson() {
+    public toJson(): IRuleFailurePositionJson {
         return {
             character: this.lineAndCharacter.character,
             line: this.lineAndCharacter.line,
@@ -258,7 +273,7 @@ export class RuleFailure {
         return this.rawLines;
     }
 
-    public toJson(): any {
+    public toJson(): IRuleFailureJson {
         return {
             endPosition: this.endPosition.toJson(),
             failure: this.failure,

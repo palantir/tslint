@@ -59,7 +59,7 @@ class PreferForOfWalker extends Lint.BlockScopeAwareRuleWalker<void, Incrementor
     protected visitForStatement(node: ts.ForStatement) {
         const arrayNodeInfo = this.getForLoopHeaderInfo(node);
         const currentBlockScope = this.getCurrentBlockScope();
-        let indexVariableName: string | undefined = undefined;
+        let indexVariableName: string | undefined;
         if (node.incrementor != null && arrayNodeInfo != null) {
             const { indexVariable, arrayToken } = arrayNodeInfo;
             indexVariableName = indexVariable.getText();
@@ -94,10 +94,10 @@ class PreferForOfWalker extends Lint.BlockScopeAwareRuleWalker<void, Incrementor
             // check if the identifier is an iterator and is currently in the `for` loop body
             if (incrementorState != null && incrementorState.arrayToken != null && incrementorState.forLoopEndPosition < node.getStart()) {
                 // check if iterator is used for something other than reading data from array
-                if (node.parent != null && node.parent.kind === ts.SyntaxKind.ElementAccessExpression) {
+                if (node.parent!.kind === ts.SyntaxKind.ElementAccessExpression) {
                     const elementAccess = node.parent as ts.ElementAccessExpression;
                     const arrayIdentifier = unwrapParentheses(elementAccess.expression) as ts.Identifier;
-                    if (incrementorState.arrayToken.text !== arrayIdentifier.text) {
+                    if (incrementorState.arrayToken.getText() !== arrayIdentifier.getText()) {
                         // iterator used in array other than one iterated over
                         incrementorState.onlyArrayReadAccess = false;
                     } else if (elementAccess.parent != null && isAssignment(elementAccess.parent)) {
@@ -114,8 +114,8 @@ class PreferForOfWalker extends Lint.BlockScopeAwareRuleWalker<void, Incrementor
 
     // returns the iterator and array of a `for` loop if the `for` loop is basic. Otherwise, `null`
     private getForLoopHeaderInfo(forLoop: ts.ForStatement) {
-        let indexVariableName: string | undefined = undefined;
-        let indexVariable: ts.Identifier | undefined = undefined;
+        let indexVariableName: string | undefined;
+        let indexVariable: ts.Identifier | undefined;
 
         // assign `indexVariableName` if initializer is simple and starts at 0
         if (forLoop.initializer != null && forLoop.initializer.kind === ts.SyntaxKind.VariableDeclarationList) {

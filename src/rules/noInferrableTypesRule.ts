@@ -69,7 +69,12 @@ class NoInferrableTypesWalker extends Lint.RuleWalker {
         super.visitParameterDeclaration(node);
     }
 
-    private checkDeclaration(node: ts.ParameterDeclaration | ts.VariableDeclaration) {
+    public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
+        this.checkDeclaration(node);
+        super.visitPropertyDeclaration(node);
+    }
+
+    private checkDeclaration(node: ts.ParameterDeclaration | ts.VariableDeclaration | ts.PropertyDeclaration) {
         if (node.type != null && node.initializer != null) {
             let failure: string | null = null;
 

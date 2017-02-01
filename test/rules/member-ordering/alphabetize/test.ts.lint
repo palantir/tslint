@@ -1,0 +1,25 @@
+class X {
+    // Different categories have alphabetization together.
+    bar: number;
+    foo: string;
+
+    [Symbol.iterator]() {}
+    // No ordering among computed properties
+    [Symbol.alpherator]() {}
+
+    0() {}
+    2() {}
+    1() {}
+    ~ ['1' should come alphabetically before '2']
+
+    foo() {}
+    "goo"() {}
+    Hoo() {}
+    ioo() {}
+    bar() {}
+    ~~~ ['bar' should come alphabetically before 'foo']
+
+    // Computed properties must go at the beginning.
+    [Symbol.zeterator]() {}
+    ~~~~~~~~~~~~~~~~~~ [Computed property should come alphabetically before '0']
+}

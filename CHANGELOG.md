@@ -1,6 +1,64 @@
 Change Log
 ===
 
+v4.4.2
+---
+
+* [bugfix] `whitespace` rule caused false positive on EOF (#2131)
+* [bugfix] WebStorm fails because `json` formatter parameter has extra space (#2132)
+
+v4.4.1
+---
+
+* [bugfix] errant space in recommended ruleset (couldn't find `no-misused-new`)
+
+v4.4.0
+---
+
+* [new-rule] `arrow-return-shorthand` (#1972)
+* [new-rule] `no-unbound-method` (#2089)
+* [new-rule] `no-boolean-literal-compare` (#2013)
+* [new-rule] `no-unsafe-any` (#2047)
+* [new-rule] `no-unnecessary-qualifier` (#2008)
+* [new-rule] `no-unnecessary-initializer` (#2106)
+* [new-rule] `await-promise` (#2102)
+* [new-rule] `no-floating-promises` (#1632)
+* [new-rule] `strict-type-predicates` (#2046)
+* [new-rule] `no-misused-new` (#1963)
+* [new-rule] `prefer-method-signature` (#2028)
+* [new-rule] `prefer-function-over-method` (#2037)
+* [new-rule-option] `allow-fast-null-checks` added to `no-unused-expression` (#1638)
+* [new-rule-option] `comment-format-rule` adds `ignore-words` and `ignore-pattern` options (#1757)
+* [new-rule-option] `whitespace` adds `check-preblock` option (#2002)
+* [new-rule-option] `strict-boolean-expressions` adds `allow-null-union`, `allow-undefined-union`, `allow-string`, and `allow-number` and  (#2033)
+* [new-fixer] `align` (#2097)
+* [new-fixer] `no-trailing-whitespace` (#2060)
+* [bugfix] `no-magic-numbers` false positive on default parameter values (#2004)
+* [bugfix] `no-empty-interface` allow empty interface with 2 or more parents (#2070)
+* [bugfix] `no-trailing-whitespace` fixed for comments and EOF (#2060)
+* [bugfix] `no-empty` no longer fails for private or protected constructor (#1976)
+* [bugfix] `tslint:disable`/`tslint-enable` now handles multiple rules and fixes what code is enabled/disabled (#2061) 
+* [bugfix] `no-inferrable-types` now validates property declarations (#2081)
+* [bugfix] `unified-signatures` false positive (#2016)
+* [bugfix] `whitespace` finds all whitespace errors in JsxExpressions and TemplateExpressions (#2036)
+* [bugfix] `comment-format` no more false positives in JsxText (#2036)
+* [enhancement] `--test` option now accepts glob (#2079)
+
+Thanks to our contributors!
+
+* Alexander Rusakov
+* Andrii Dieiev
+* @andy-ms 
+* Andy Hanson
+* Josh Goldberg
+* Kei Son
+* Klaus Meinhardt
+* Krati Ahuja
+* Martin Probst
+* Mohsen Azimi
+* Romke van der Meulen
+* cameron-mcateer
+
 v4.3.1
 ---
 

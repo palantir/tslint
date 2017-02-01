@@ -43,7 +43,7 @@ import { arrayify, dedent } from "./utils";
  * Linter that can lint multiple files in consecutive runs.
  */
 class Linter {
-    public static VERSION = "4.3.1";
+    public static VERSION = "4.4.2";
 
     public static findConfiguration = findConfiguration;
     public static findConfigurationPath = findConfigurationPath;
@@ -99,8 +99,10 @@ class Linter {
     }
 
     public lint(fileName: string, source: string, configuration: IConfigurationFile = DEFAULT_CONFIG): void {
-        const enabledRules = this.getEnabledRules(fileName, source, configuration);
         let sourceFile = this.getSourceFile(fileName, source);
+        const isJs = /\.jsx?$/i.test(fileName);
+
+        const enabledRules = this.getEnabledRules(sourceFile, configuration, isJs);
         let hasLinterRun = false;
         let fileFailures: RuleFailure[] = [];
 
@@ -174,19 +176,11 @@ class Linter {
         return fileFailures;
     }
 
-    private getEnabledRules(fileName: string, source: string, configuration: IConfigurationFile = DEFAULT_CONFIG): IRule[] {
-        const sourceFile = this.getSourceFile(fileName, source);
-        const isJs = /\.jsx?$/i.test(fileName);
+    private getEnabledRules(sourceFile: ts.SourceFile, configuration: IConfigurationFile = DEFAULT_CONFIG, isJs: boolean): IRule[] {
         const configurationRules = isJs ? configuration.jsRules : configuration.rules;
 
         // walk the code first to find all the intervals where rules are disabled
-        const rulesWalker = new EnableDisableRulesWalker(sourceFile, {
-            disabledIntervals: [],
-            ruleArguments: [],
-            ruleName: "",
-        }, configurationRules);
-        rulesWalker.walk(sourceFile);
-        const enableDisableRuleMap = rulesWalker.enableDisableRuleMap;
+        const enableDisableRuleMap = new EnableDisableRulesWalker(sourceFile, configurationRules).getEnableDisableRuleMap();
 
         const rulesDirectories = arrayify(this.options.rulesDirectory)
             .concat(arrayify(configuration.rulesDirectory));

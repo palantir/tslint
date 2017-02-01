@@ -9,6 +9,7 @@ const o = {
   1e4: "something",
   .123: "float",
   123: 'numbers do not need quotes', // failure
+  1.23: null,
   '010': 'but this one does.',
   '.123': 'as does this one',
   fn() { return },

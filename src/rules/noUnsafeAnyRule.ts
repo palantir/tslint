@@ -70,13 +70,12 @@ class Walker extends Lint.ProgramAwareRuleWalker {
 
             case ts.SyntaxKind.BinaryExpression:
                 const { left, right, operatorToken } = parent as ts.BinaryExpression;
+                // Allow equality since all values support equality.
+                if (Lint.getEqualsKind(operatorToken) !== undefined) {
+                    return true;
+                }
                 switch (operatorToken.kind) {
                     case ts.SyntaxKind.InstanceOfKeyword: // Allow test
-                    // Allow equality since all values support equality.
-                    case ts.SyntaxKind.EqualsEqualsToken:
-                    case ts.SyntaxKind.EqualsEqualsEqualsToken:
-                    case ts.SyntaxKind.ExclamationEqualsToken:
-                    case ts.SyntaxKind.ExclamationEqualsEqualsToken:
                         return true;
                     case ts.SyntaxKind.PlusToken: // Allow stringification
                         return node === left ? this.isStringLike(right) : this.isStringLike(left);

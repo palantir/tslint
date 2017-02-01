@@ -1,0 +1,4 @@
+class C {
+    a() {}
+    ~ [Class method does not use 'this'. Use a function instead.]
+}

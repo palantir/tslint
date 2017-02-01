@@ -230,16 +230,20 @@ export function isScopeBoundary(node: ts.Node): boolean {
 export function isBlockScopeBoundary(node: ts.Node): boolean {
     return isScopeBoundary(node)
         || node.kind === ts.SyntaxKind.Block
-        || node.kind === ts.SyntaxKind.DoStatement
-        || node.kind === ts.SyntaxKind.WhileStatement
-        || node.kind === ts.SyntaxKind.ForStatement
-        || node.kind === ts.SyntaxKind.ForInStatement
-        || node.kind === ts.SyntaxKind.ForOfStatement
+        || isLoop(node)
         || node.kind === ts.SyntaxKind.WithStatement
         || node.kind === ts.SyntaxKind.SwitchStatement
         || node.parent !== undefined
             && (node.parent.kind === ts.SyntaxKind.TryStatement
             || node.parent.kind === ts.SyntaxKind.IfStatement);
+}
+
+export function isLoop(node: ts.Node): node is ts.IterationStatement {
+   return node.kind === ts.SyntaxKind.DoStatement
+        || node.kind === ts.SyntaxKind.WhileStatement
+        || node.kind === ts.SyntaxKind.ForStatement
+        || node.kind === ts.SyntaxKind.ForInStatement
+        || node.kind === ts.SyntaxKind.ForOfStatement;
 }
 
 export interface TokenPosition {
@@ -414,4 +418,24 @@ function canHaveTrailingTrivia(tokenKind: ts.SyntaxKind, parent: ts.Node): boole
 export function hasCommentAfterPosition(text: string, position: number): boolean {
     return ts.getTrailingCommentRanges(text, position) !== undefined ||
            ts.getLeadingCommentRanges(text, position) !== undefined;
+}
+
+export interface EqualsKind {
+    isPositive: boolean; // True for "===" and "=="
+    isStrict: boolean; // True for "===" and "!=="
+}
+
+export function getEqualsKind(node: ts.BinaryOperatorToken): EqualsKind | undefined {
+    switch (node.kind) {
+        case ts.SyntaxKind.EqualsEqualsToken:
+            return { isPositive: true, isStrict: false };
+        case ts.SyntaxKind.EqualsEqualsEqualsToken:
+            return { isPositive: true, isStrict: true };
+        case ts.SyntaxKind.ExclamationEqualsToken:
+            return { isPositive: false, isStrict: false };
+        case ts.SyntaxKind.ExclamationEqualsEqualsToken:
+            return { isPositive: false, isStrict: true };
+        default:
+            return undefined;
+    }
 }

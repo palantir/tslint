@@ -22,10 +22,6 @@ import * as Lint from "../index";
 const OPTION_ALLOW_NULL_CHECK = "allow-null-check";
 const OPTION_ALLOW_UNDEFINED_CHECK = "allow-undefined-check";
 
-function isUndefinedExpression(expression: ts.Expression) {
-    return expression.kind === ts.SyntaxKind.Identifier && expression.getText() === "undefined";
-}
-
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -61,36 +57,23 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class ComparisonWalker extends Lint.RuleWalker {
-    private static COMPARISON_OPERATOR_WIDTH = 2;
+    private allowNull = this.hasOption(OPTION_ALLOW_NULL_CHECK);
+    private allowUndefined = this.hasOption(OPTION_ALLOW_UNDEFINED_CHECK);
 
     public visitBinaryExpression(node: ts.BinaryExpression) {
-        if (!this.isExpressionAllowed(node)) {
-            const position = node.getChildAt(1).getStart();
-            this.handleOperatorToken(position, node.operatorToken.kind);
+        const eq = Lint.getEqualsKind(node.operatorToken);
+        if (eq && !eq.isStrict && !this.isExpressionAllowed(node)) {
+            this.addFailureAtNode(node.operatorToken, eq.isPositive ? Rule.EQ_FAILURE_STRING : Rule.NEQ_FAILURE_STRING);
         }
         super.visitBinaryExpression(node);
     }
 
-    private handleOperatorToken(position: number, operator: ts.SyntaxKind) {
-        switch (operator) {
-            case ts.SyntaxKind.EqualsEqualsToken:
-                this.addFailureAt(position, ComparisonWalker.COMPARISON_OPERATOR_WIDTH, Rule.EQ_FAILURE_STRING);
-                break;
-            case ts.SyntaxKind.ExclamationEqualsToken:
-                this.addFailureAt(position, ComparisonWalker.COMPARISON_OPERATOR_WIDTH, Rule.NEQ_FAILURE_STRING);
-                break;
-            default:
-                break;
-        }
-    }
-
-    private isExpressionAllowed(node: ts.BinaryExpression) {
-        const nullKeyword = ts.SyntaxKind.NullKeyword;
-
-        return (
-            this.hasOption(OPTION_ALLOW_NULL_CHECK) && (node.left.kind === nullKeyword || node.right.kind === nullKeyword)
-        ) || (
-            this.hasOption(OPTION_ALLOW_UNDEFINED_CHECK) && (isUndefinedExpression(node.left) || isUndefinedExpression(node.right))
-        );
+    private isExpressionAllowed({ left, right }: ts.BinaryExpression) {
+        const isAllowed = (n: ts.Expression) =>
+            n.kind === ts.SyntaxKind.NullKeyword ? this.allowNull
+            : this.allowUndefined &&
+                n.kind === ts.SyntaxKind.Identifier &&
+                (n as ts.Identifier).originalKeywordKind === ts.SyntaxKind.UndefinedKeyword;
+        return isAllowed(left) || isAllowed(right);
     }
 }
