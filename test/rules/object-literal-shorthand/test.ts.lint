@@ -1,12 +1,12 @@
 const bad = {
   w: function() {},
-  ~~~~~~~~~~~~~~~~  [method]
+  ~~~~~~~~~~~~~~~~  [Expected method shorthand in object literal ('{w() {...}}').]
   x: function *() {},
-  ~~~~~~~~~~~~~~~~~~  [method]
+  ~~~~~~~~~~~~~~~~~~  [Expected method shorthand in object literal ('{x*() {...}}').]
   [y]: function() {},
-  ~~~~~~~~~~~~~~~~~~  [method]
+  ~~~~~~~~~~~~~~~~~~  [Expected method shorthand in object literal ('{[y]() {...}}').]
   z: z
-  ~~~~  [property]
+  ~~~~  [Expected property shorthand in object literal ('{z}').]
 };
 
 const good = {
@@ -26,7 +26,7 @@ const namedFunctions = {
 
 const quotes = {
   "foo-bar": function() {},
-  ~~~~~~~~~~~~~~~~~~~~~~~~  [method]
+  ~~~~~~~~~~~~~~~~~~~~~~~~  [Expected method shorthand in object literal ('{"foo-bar"() {...}}').]
   "foo-bar"() {}
 };
 
@@ -37,7 +37,7 @@ const extraCases = {
   c: 'c',
   ["a" + "nested"]: {
     x: x
-    ~~~~  [property]
+    ~~~~  [Expected property shorthand in object literal ('{x}').]
   }
 };
 
