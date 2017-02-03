@@ -18,9 +18,23 @@
 import * as ts from "typescript";
 
 import {RuleFailure} from "../rule/rule";
+import {WalkContext} from "./walkContext";
+import {IWalker} from "./walker";
 
 export interface IWalker {
     getSourceFile(): ts.SourceFile;
-    walk(node: ts.Node): void;
+    walk(sourceFile: ts.SourceFile): void;
     getFailures(): RuleFailure[];
+}
+
+export abstract class AbstractWalker<T> extends WalkContext<T> implements IWalker {
+    public abstract walk(sourceFile: ts.SourceFile): void;
+
+    public getSourceFile() {
+        return this.sourceFile;
+    }
+
+    public getFailures() {
+        return this.failures;
+    }
 }

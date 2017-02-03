@@ -28,7 +28,7 @@ export abstract class TypedRule extends AbstractRule {
 
     public apply(): RuleFailure[] {
         // if no program is given to the linter, throw an error
-        throw new Error(`${this.getOptions().ruleName} requires type checking`);
+        throw new Error(`${this.ruleName} requires type checking`);
     }
 
     public abstract applyWithProgram(sourceFile: ts.SourceFile, languageService: ts.LanguageService): RuleFailure[];

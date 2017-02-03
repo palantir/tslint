@@ -19,8 +19,6 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
-import { IOptions } from "../language/rule/rule";
-
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -63,44 +61,29 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static DEFAULT_ALLOWED = [ -1, 0, 1 ];
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoMagicNumbersWalker(sourceFile, this.getOptions()));
+        const allowedNumbers = this.ruleArguments.length > 0 ? this.ruleArguments : Rule.DEFAULT_ALLOWED;
+        return this.applyWithWalker(new NoMagicNumbersWalker(sourceFile, this.ruleName, new Set(allowedNumbers.map(String))));
     }
 }
 
-class NoMagicNumbersWalker extends Lint.RuleWalker {
-    // allowed magic numbers
-    private allowed: Set<string>;
-    constructor(sourceFile: ts.SourceFile, options: IOptions) {
-        super(sourceFile, options);
-
-        const configOptions = this.getOptions();
-        const allowedNumbers: number[] = configOptions.length > 0 ? configOptions : Rule.DEFAULT_ALLOWED;
-        this.allowed = new Set(allowedNumbers.map(String));
+class NoMagicNumbersWalker extends Lint.AbstractWalker<Set<string>> {
+    public walk(sourceFile: ts.SourceFile) {
+        const cb = (node: ts.Node): void => {
+            if (node.kind === ts.SyntaxKind.NumericLiteral) {
+                this.checkNumericLiteral(node, (node as ts.NumericLiteral).text);
+            } else if (node.kind === ts.SyntaxKind.PrefixUnaryExpression &&
+                       (node as ts.PrefixUnaryExpression).operator === ts.SyntaxKind.MinusToken) {
+                this.checkNumericLiteral(node, "-" + ((node as ts.PrefixUnaryExpression).operand as ts.NumericLiteral).text);
+            } else {
+                ts.forEachChild(node, cb);
+            }
+        };
+        return ts.forEachChild(sourceFile, cb);
     }
 
-    public visitNode(node: ts.Node) {
-        const num = getLiteralNumber(node);
-        if (num !== undefined) {
-            if (!Rule.ALLOWED_NODES.has(node.parent!.kind) && !this.allowed.has(num)) {
-                this.addFailureAtNode(node, Rule.FAILURE_STRING);
-            }
-        } else {
-            super.visitNode(node);
+    private checkNumericLiteral(node: ts.Node, num: string) {
+        if (!Rule.ALLOWED_NODES.has(node.parent!.kind) && !this.options.has(num)) {
+            this.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
     }
-}
-
-/** If node is a number literal, return a string representation of that number. */
-function getLiteralNumber(node: ts.Node): string | undefined {
-    if (node.kind === ts.SyntaxKind.NumericLiteral) {
-        return (node as ts.NumericLiteral).text;
-    }
-    if (node.kind !== ts.SyntaxKind.PrefixUnaryExpression) {
-        return undefined;
-    }
-    const { operator, operand } = node as ts.PrefixUnaryExpression;
-    if (operator === ts.SyntaxKind.MinusToken && operand.kind === ts.SyntaxKind.NumericLiteral) {
-        return "-" + (operand as ts.NumericLiteral).text;
-    }
-    return undefined;
 }
