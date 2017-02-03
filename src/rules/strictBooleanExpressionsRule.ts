@@ -51,8 +51,8 @@ export class Rule extends Lint.Rules.TypedRule {
               - It does *not* allow unions containing 'number'.
               - It does *not* allow enums or number literal types.
             * '${OPTION_ALLOW_MIX} allow multiple of the above to appear together.
-              - For example, 'string | number' or 'RegExp | null | undefined' would normally not be allowed.
-              - A type like '"foo" | "bar" | undefined' is always allowed, because it has only one way to be false.`,
+              - For example, \`string | number\` or \`RegExp | null | undefined\` would normally not be allowed.
+              - A type like \`"foo" | "bar" | undefined\` is always allowed, because it has only one way to be false.`,
         options: {
             type: "array",
             items: {
