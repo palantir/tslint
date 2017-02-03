@@ -1,0 +1,85 @@
+function foo(bar) {
+    if (!bar) {
+        return;
+    }
+~nil  [0]
+    return bar;
+}
+
+function foo(bar) {
+    if (!bar) {
+        var statement = '';
+~nil  [0]
+        return statement;
+    }
+
+    return bar;
+}
+
+function foo(bar) {
+    if (!bar) {
+        return;
+    }
+~nil  [0]
+    /* multi-line
+    comment */
+    return bar;
+}
+
+var fn = () => null;
+function foo() {
+    fn();
+~nil  [0]
+    return;
+}
+
+function foo() {
+    return;
+}
+
+function foo() {
+
+    return;
+}
+
+function foo(bar) {
+    if (!bar) return;
+}
+
+function foo(bar) {
+    let someCall;
+    if (!bar) return;
+}
+
+function foo(bar) {
+    if (!bar) { return };
+}
+
+function foo(bar) {
+    if (!bar) {
+        return;
+    }
+}
+
+function foo(bar) {
+    if (!bar) {
+        return;
+    }
+
+    return bar;
+}
+
+function foo(bar) {
+    if (!bar) {
+
+        return;
+    }
+}
+
+function foo() {
+
+    // comment
+    return;
+}
+
+[0]: Missing blank line before return
