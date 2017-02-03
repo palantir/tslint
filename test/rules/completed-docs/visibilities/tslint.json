@@ -1,0 +1,15 @@
+{
+  "linterOptions": {
+    "typeCheck": true
+  },
+  "rules": {
+    "completed-docs": [true, {
+      "enums": {
+        "visibilities": ["exported"]
+      },
+      "interfaces": {
+        "visibilities": ["internal"]
+      }
+    }]
+  }
+}
