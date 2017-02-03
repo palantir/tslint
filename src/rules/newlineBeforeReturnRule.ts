@@ -68,9 +68,9 @@ class NewlineBeforeReturnWalker extends Lint.RuleWalker {
     private getIndex(node: ts.Node) {
         const children = node.parent ? node.parent.getChildren() : [];
         // For some reason instances are not the same and indexOf doesn't work with given node directly
-        const child = children.filter((child: ts.Node) => child.pos === node.pos && child.end === node.end)[0];
+        const foundChild = children.filter((child: ts.Node) => child.pos === node.pos && child.end === node.end)[0];
 
-        return children.indexOf(child);
+        return children.indexOf(foundChild);
     }
 
     private validateBlankLine(line: number) {
@@ -78,9 +78,9 @@ class NewlineBeforeReturnWalker extends Lint.RuleWalker {
         const position = source.getPositionOfLineAndCharacter(line - 1, 0);
         const end = source.getLineEndOfPosition(position);
         const all = source.getText().substr(position, end - position);
-        const trimmed = all.replace(/\s+/, '');
+        const trimmed = all.replace(/\s+/, "");
 
-        if (trimmed !== '') {
+        if (trimmed !== "") {
             this.addFailureFromStartToEnd(position, position, Rule.FAILURE_STRING_FACTORY());
         }
     }
