@@ -17,10 +17,45 @@
 
 import * as ts from "typescript";
 
-import {RuleFailure} from "../rule/rule";
+import {Fix, Replacement, RuleFailure} from "../rule/rule";
 
 export interface IWalker {
     getSourceFile(): ts.SourceFile;
     walk(node: ts.Node): void;
     getFailures(): RuleFailure[];
+}
+
+//move this somewhere else
+export class WalkContext {
+    public readonly ruleName: string;
+    public readonly limit: number;
+    private readonly failures: RuleFailure[];
+
+    constructor(public readonly sourceFile: ts.SourceFile) {
+        this.failures = [];
+        this.limit = sourceFile.getFullWidth();
+    }
+
+    public getFailures(): RuleFailure[] {
+        return this.failures;
+    }
+
+    public addFailureAt(start: number, width: number, failure: string, fix?: Fix) {
+        this.addFailure(start, start + width, failure, fix);
+    }
+
+    public addFailure(start: number, end: number, failure: string, fix?: Fix) {
+        this.failures.push(
+            new RuleFailure(this.sourceFile, Math.min(start, this.limit), Math.min(end, this.limit), failure, this.ruleName, fix),
+        );
+    }
+
+    /** Add a failure using a node's span. */
+    public addFailureAtNode(node: ts.Node, failure: string, fix?: Fix) {
+        this.addFailure(node.getStart(this.sourceFile), node.getEnd(), failure, fix);
+    }
+
+    public createFix(...replacements: Replacement[]) {
+        return new Fix(this.ruleName, replacements);
+    }
 }
