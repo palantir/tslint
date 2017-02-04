@@ -76,7 +76,7 @@ class NewlineBeforeReturnWalker extends Lint.RuleWalker {
     private validateBlankLine(line: number) {
         const source = this.getSourceFile();
         const position = source.getPositionOfLineAndCharacter(line - 1, 0);
-        const end = source.getLineEndOfPosition(position);
+        const end = source.getPositionOfLineAndCharacter(line, 0) - 1;
         const all = source.getText().substr(position, end - position);
         const trimmed = all.replace(/\s+/, "");
 
