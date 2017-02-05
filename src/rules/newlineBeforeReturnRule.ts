@@ -49,7 +49,7 @@ class NewlineBeforeReturnWalker extends Lint.RuleWalker {
         super.visitReturnStatement(node);
 
         const parent = node.parent!;
-        if (!NewlineBeforeReturnWalker.isBlockLike(parent)) {
+        if (!isBlockLike(parent)) {
             // `node` is the only statement within this "block scope". No need to do any further validation.
             return;
         }
@@ -81,8 +81,8 @@ class NewlineBeforeReturnWalker extends Lint.RuleWalker {
             this.addFailureFromStartToEnd(position, position, Rule.FAILURE_STRING_FACTORY());
         }
     }
+}
 
-    private static isBlockLike(node: ts.Node): node is ts.BlockLike {
-        return "statements" in node;
-    }
+function isBlockLike(node: ts.Node): node is ts.BlockLike {
+    return "statements" in node;
 }
