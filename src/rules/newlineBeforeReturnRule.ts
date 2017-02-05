@@ -48,29 +48,27 @@ class NewlineBeforeReturnWalker extends Lint.RuleWalker {
     public visitReturnStatement(node: ts.ReturnStatement) {
         super.visitReturnStatement(node);
 
+        const parent = node.parent!;
+        if (!NewlineBeforeReturnWalker.isBlockLike(parent)) {
+            // `node` is the only statement within this "block scope". No need to do any further validation.
+            return;
+        }
+
+        const index = parent.statements.indexOf(node as ts.Statement);
+        if (index === 0) {
+            // First element in the block so no need to check for the blank line.
+            return;
+        }
+
         let start = node.getStart();
-        const comments = ts.getLeadingCommentRanges(node.getSourceFile().text, node.getFullStart());
+        const comments = ts.getLeadingCommentRanges(this.getSourceFile().text, node.getFullStart());
         if (comments) {
             // In case the return statement is preceded by a comment, we use comments start as the starting position
             start = comments[0].pos;
         }
         const lc = this.getLineAndCharacterOfPosition(start);
-        const index = this.getIndex(node);
-        const prev = index > -1 && node.parent ? node.parent.getChildAt(index - 1) : undefined;
-        // In case previous token was either
-        if (prev && ([ts.SyntaxKind.OpenBraceToken, ts.SyntaxKind.CloseParenToken].indexOf(prev.kind) !== -1)) {
-            return;
-        }
 
         this.validateBlankLine(lc.line);
-    }
-
-    private getIndex(node: ts.Node) {
-        const children = node.parent ? node.parent.getChildren() : [];
-        // For some reason instances are not the same and indexOf doesn't work with given node directly
-        const foundChild = children.filter((child: ts.Node) => child.pos === node.pos && child.end === node.end)[0];
-
-        return children.indexOf(foundChild);
     }
 
     private validateBlankLine(line: number) {
@@ -78,10 +76,13 @@ class NewlineBeforeReturnWalker extends Lint.RuleWalker {
         const position = source.getPositionOfLineAndCharacter(line - 1, 0);
         const end = source.getPositionOfLineAndCharacter(line, 0) - 1;
         const all = source.getText().substr(position, end - position);
-        const trimmed = all.replace(/\s+/, "");
 
-        if (trimmed !== "") {
+        if (all.search(/\S/) !== -1) {
             this.addFailureFromStartToEnd(position, position, Rule.FAILURE_STRING_FACTORY());
         }
+    }
+
+    private static isBlockLike(node: ts.Node): node is ts.BlockLike {
+        return "statements" in node;
     }
 }
