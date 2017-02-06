@@ -23,6 +23,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "object-literal-shorthand",
         description: "Enforces use of ES6 object literal shorthand when possible.",
+        hasFix: true,
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: ["true"],
@@ -49,7 +50,12 @@ class ObjectLiteralShorthandWalker extends Lint.RuleWalker {
         if (name.kind === ts.SyntaxKind.Identifier &&
             value.kind === ts.SyntaxKind.Identifier &&
             name.getText() === value.getText()) {
-                this.addFailureAtNode(node, Rule.LONGHAND_PROPERTY);
+                // Delete from name start up to value to include the ':'.
+                const lengthToValueStart = value.getStart() - name.getStart();
+                const fix = this.createFix(
+                    this.deleteText(name.getStart(), lengthToValueStart),
+                );
+                this.addFailureAtNode(node, Rule.LONGHAND_PROPERTY, fix);
         }
 
         if (value.kind === ts.SyntaxKind.FunctionExpression) {
