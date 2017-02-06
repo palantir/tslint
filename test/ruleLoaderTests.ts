@@ -18,6 +18,7 @@
 import * as diff from "diff";
 import * as fs from "fs";
 import * as path from "path";
+import {RuleSeverity} from "../src/language/rule/rule";
 import { camelize } from "../src/utils";
 import { loadRules } from "./lint";
 
@@ -48,6 +49,49 @@ describe("Rule Loader", () => {
 
         const rules = loadRules(invalidConfiguration, {}, [builtRulesDir]);
         assert.equal(rules.length, 1);
+    });
+
+    it("properly sets rule severity with options", () => {
+        const withOptions = {
+            "callable-types": true,
+            "max-line-length": {
+                options: 140,
+                severity: "warning",
+            },
+        };
+
+        const rules = loadRules(withOptions, {}, [builtRulesDir]);
+        assert.equal(rules.length, 2);
+        assert.equal(rules[0].getOptions().ruleSeverity, RuleSeverity.ERROR);
+        assert.equal(rules[1].getOptions().ruleSeverity, RuleSeverity.WARNING);
+    });
+
+    it("properly sets rule severity with no options", () => {
+        const noOptions = {
+            "callable-types": true,
+            "interface-name": {
+                severity: "warning",
+            },
+        };
+
+        const rules = loadRules(noOptions, {}, [builtRulesDir]);
+        assert.equal(rules.length, 2);
+        assert.equal(rules[0].getOptions().ruleSeverity, RuleSeverity.ERROR);
+        assert.equal(rules[1].getOptions().ruleSeverity, RuleSeverity.WARNING);
+    });
+
+    it("properly sets rule severity with options but no severity", () => {
+        const noSeverity = {
+            "callable-types": true,
+            "max-line-length": {
+                options: 140,
+            },
+        };
+
+        const rules = loadRules(noSeverity, {}, [builtRulesDir]);
+        assert.equal(rules.length, 2);
+        assert.equal(rules[0].getOptions().ruleSeverity, RuleSeverity.ERROR);
+        assert.equal(rules[1].getOptions().ruleSeverity, RuleSeverity.ERROR);
     });
 
     it("loads disabled rules if rule in enableDisableRuleMap", () => {

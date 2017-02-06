@@ -53,8 +53,8 @@ export abstract class AbstractRule implements IRule {
         }
 
         if (value.severity &&
-            ( value.severity.toLowerCase() === "warn" ||
-              value.severity.toLowerCase() === "warning")) {
+            (value.severity.toLowerCase() === "warn" ||
+            value.severity.toLowerCase() === "warning")) {
 
             ruleSeverity = RuleSeverity.WARNING;
         }

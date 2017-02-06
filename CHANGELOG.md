@@ -12,24 +12,25 @@ v5.0.0
         - pmdFormatter - default was priority 1, is not priority 3
 * [enhancement] Enable WARN with new config file format (#629, #345)
     * Valid values for `severity`: "error|warn|warning|none|off"
-    * Previous
+    * Old style
     * ```{
         "extends": "tslint:latest",
         "rules": {
           "callable-types": true
         }
       }``
-    * New, with `interface` name generating warnings
+    * New style, with `interface-name` generating warnings, and passing options to `max-line-length`
     * ``` {
         "extends": "tslint:latest",
         "rules": {
-          "callable-types": {
-            "enabled": true,
-            "severity": "error"   // this is optional, "error" is default
-          },
+          "callable-types": true,
           "interface-name": {
-            "enabled": true,
             "severity": "warn"
+          },
+          "max-line-length": {
+            "options": 140,
+            "severity": "warning"
+          }
         }
       }``
 
