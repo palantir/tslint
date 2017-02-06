@@ -99,7 +99,7 @@ Besides that you *should* convert the `ruleArguments` to a useful format before 
 There are also some differences in the methods provided. Let's say we did some garbage collection while porting methods of `RuleWalker` to `AbstractWalker`.
 
 `RuleWalker` | `AbstractRule` | alternative
-- | - | -
+------------ | -------------- | -----------
 `createFailure()` and `addFailure()` | use `addFailureAt()` to add a failure with start and width |
 `addFailureFromStartToEnd()` | `addFailure()` |
 `createReplacement()` | - | `new Lint.Replacement()`
