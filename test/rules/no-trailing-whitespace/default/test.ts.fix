@@ -17,4 +17,14 @@ class Clazz {
 /*
  */
 
+/**
+ * JSDoc comment with trailing whitespace
+ *
+ */
+
+/***
+ * not a JSDoc comment
+ *
+ */
+
 // following line checks for trailing whitespace before EOF

@@ -27,9 +27,7 @@ class Clazz {
 
 /**
  * JSDoc comment with trailing whitespace 
-                                         ~ [trailing whitespace]
  * 
-  ~ [trailing whitespace]
  */
 
 /***
