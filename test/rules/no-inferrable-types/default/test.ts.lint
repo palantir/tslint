@@ -16,6 +16,15 @@ function foo (a: number = 5, b: boolean = true, c: string = "bah") { }
                                 ~~~~~~~                                [boolean]
                                                    ~~~~~~              [string]
 
+class Foo {
+    bar: number = 0;
+         ~~~~~~          [number]
+    baz: boolean = true,
+         ~~~~~~~         [boolean]
+    bas: string = "moar";
+         ~~~~~~          [string]
+}
+
 // not errors, inferrable type is not declared
 let _x = 7;
 let _y = false;
