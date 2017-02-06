@@ -73,7 +73,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 // limit by is a '\r' character which does not count against the limit
                 // (and thus we are not actually over the limit).
                 const ruleFailure = new Lint.RuleFailure(sourceFile, from, to - 1, errorString,
-                  this.getOptions().ruleLevel, this.getOptions().ruleName);
+                  this.getOptions().ruleSeverity, this.getOptions().ruleName);
                 if (!Lint.doesIntersect(ruleFailure, disabledIntervals)) {
                     ruleFailures.push(ruleFailure);
                 }

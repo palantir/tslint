@@ -16,7 +16,7 @@
 
 import * as ts from "typescript";
 
-import {IFormatter, RuleFailure, RuleLevel, TestUtils} from "../lint";
+import {IFormatter, RuleFailure, RuleSeverity, TestUtils} from "../lint";
 
 describe("PMD Formatter", () => {
     const TEST_FILE = "formatters/pmdFormatter.test.ts";
@@ -33,10 +33,10 @@ describe("PMD Formatter", () => {
         const maxPosition = sourceFile.getFullWidth();
 
         const failures = [
-            new RuleFailure(sourceFile, 0, 1, "first failure", RuleLevel.ERROR, "first-name"),
-            new RuleFailure(sourceFile, 2, 3, "&<>'\" should be escaped", RuleLevel.ERROR, "escape"),
-            new RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", RuleLevel.WARNING, "last-name"),
-            new RuleFailure(sourceFile, 0, maxPosition, "full failure", RuleLevel.WARNING, "full-name"),
+            new RuleFailure(sourceFile, 0, 1, "first failure", RuleSeverity.ERROR, "first-name"),
+            new RuleFailure(sourceFile, 2, 3, "&<>'\" should be escaped", RuleSeverity.ERROR, "escape"),
+            new RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", RuleSeverity.WARNING, "last-name"),
+            new RuleFailure(sourceFile, 0, maxPosition, "full failure", RuleSeverity.WARNING, "full-name"),
         ];
         const expectedResult =
             "<pmd version=\"tslint\">" +

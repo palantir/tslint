@@ -2,18 +2,18 @@
   "extends": "tslint-test-custom-rules",
   "jsRules": {
     "rule-two": {
-      "level": "error"
+      "severity": "error"
     },
     "rule-three": {
-      "level": "none"
+      "severity": "none"
     }
   },
   "rules": {
     "rule-two": {
-      "level": "error"
+      "severity": "error"
     },
     "rule-three": {
-      "level": "none"
+      "severity": "none"
     }
   }
 }

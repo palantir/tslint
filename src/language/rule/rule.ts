@@ -86,14 +86,14 @@ export interface IRuleMetadata {
 
 export type RuleType = "functionality" | "maintainability" | "style" | "typescript";
 
-export enum RuleLevel {
-    "WARNING" = 1,
-    "ERROR",
+export enum RuleSeverity {
+    WARNING = 1,
+    ERROR,
 }
 
 export interface IOptions {
     ruleArguments: any[];
-    ruleLevel: RuleLevel;
+    ruleSeverity: RuleSeverity;
 
     ruleName: string;
     disabledIntervals: IDisabledInterval[];
@@ -116,7 +116,7 @@ export interface IRuleFailureJson {
     failure: string;
     fix?: Fix;
     name: string;
-    ruleLevel: string;
+    ruleSeverity: string;
     ruleName: string;
     startPosition: IRuleFailurePositionJson;
 }
@@ -224,7 +224,7 @@ export class RuleFailure {
                 start: number,
                 end: number,
                 private failure: string,
-                private ruleLevel: RuleLevel,
+                private ruleSeverity: RuleSeverity,
                 private ruleName: string,
                 private fix?: Fix) {
 
@@ -238,8 +238,8 @@ export class RuleFailure {
         return this.fileName;
     }
 
-    public getRuleLevel() {
-        return this.ruleLevel;
+    public getRuleSeverity() {
+        return this.ruleSeverity;
     }
 
     public getRuleName() {
@@ -276,8 +276,8 @@ export class RuleFailure {
             failure: this.failure,
             fix: this.fix,
             name: this.fileName,
-            ruleLevel: RuleLevel[this.ruleLevel],
             ruleName: this.ruleName,
+            ruleSeverity: RuleSeverity[this.ruleSeverity],
             startPosition: this.startPosition.toJson(),
         };
     }

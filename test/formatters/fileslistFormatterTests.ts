@@ -16,7 +16,7 @@
 
 import * as ts from "typescript";
 
-import {IFormatter, RuleFailure, RuleLevel, TestUtils} from "../lint";
+import {IFormatter, RuleFailure, RuleSeverity, TestUtils} from "../lint";
 
 describe("Files-list Formatter", () => {
     const TEST_FILE = "formatters/fileslistFormatter.test.ts";
@@ -32,8 +32,8 @@ describe("Files-list Formatter", () => {
     it("formats failures", () => {
         // this part really doesn't matter, as long as we get some failure`
         const failures = [
-            new RuleFailure(sourceFile, 0, 1, "first failure", RuleLevel.ERROR, "first-name"),
-            new RuleFailure(sourceFile, 32, 36, "last failure", RuleLevel.ERROR, "last-name"),
+            new RuleFailure(sourceFile, 0, 1, "first failure", RuleSeverity.ERROR, "first-name"),
+            new RuleFailure(sourceFile, 32, 36, "last failure", RuleSeverity.ERROR, "last-name"),
         ];
 
         // we only print file-names in this formatter

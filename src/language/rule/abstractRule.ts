@@ -20,7 +20,7 @@ import * as ts from "typescript";
 import {arrayify} from "../../utils";
 import {doesIntersect} from "../utils";
 import {IWalker} from "../walker";
-import {IDisabledInterval, IOptions, IRule, IRuleMetadata, RuleFailure, RuleLevel} from "./rule";
+import {IDisabledInterval, IOptions, IRule, IRuleMetadata, RuleFailure, RuleSeverity} from "./rule";
 
 export abstract class AbstractRule implements IRule {
     public static metadata: IRuleMetadata;
@@ -35,7 +35,7 @@ export abstract class AbstractRule implements IRule {
             return ruleConfigValue[0];
         }
 
-        if (ruleConfigValue.level !== "off" && ruleConfigValue.level !== "none") {
+        if (ruleConfigValue.severity !== "off" && ruleConfigValue.severity !== "none") {
             return true;
         }
 
@@ -44,7 +44,7 @@ export abstract class AbstractRule implements IRule {
 
     constructor(ruleName: string, private value: any, private disabledIntervals: IDisabledInterval[]) {
         let ruleArguments: any[] = [];
-        let ruleLevel = RuleLevel.ERROR;
+        let ruleSeverity = RuleSeverity.ERROR;
 
         if (Array.isArray(value) && value.length > 1) {
             ruleArguments = value.slice(1);
@@ -52,17 +52,17 @@ export abstract class AbstractRule implements IRule {
             ruleArguments = arrayify(value.options);
         }
 
-        if (value.level &&
-            ( value.level.toLowerCase() === "warn" ||
-              value.level.toLowerCase() === "warning")) {
+        if (value.severity &&
+            ( value.severity.toLowerCase() === "warn" ||
+              value.severity.toLowerCase() === "warning")) {
 
-            ruleLevel = RuleLevel.WARNING;
+            ruleSeverity = RuleSeverity.WARNING;
         }
 
         this.options = {
             disabledIntervals,
             ruleArguments,
-            ruleLevel,
+            ruleSeverity,
             ruleName,
         };
     }

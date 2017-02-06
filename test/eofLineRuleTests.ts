@@ -15,7 +15,7 @@
  */
 
 import { Rule } from "../src/rules/eoflineRule";
-import { RuleLevel, TestUtils } from "./lint";
+import { RuleSeverity, TestUtils } from "./lint";
 
 describe("<eofline>", () => {
     const EofLineRule = TestUtils.getRule("eofline") as Rule | null;
@@ -24,7 +24,7 @@ describe("<eofline>", () => {
 
     it("ensures a trailing newline at EOF", () => {
         const actualFailures = TestUtils.applyRuleOnFile(fileName, EofLineRule);
-        const expectedFailure = TestUtils.createFailure(fileName, [4, 38], [4, 38], RuleLevel.ERROR, failureString);
+        const expectedFailure = TestUtils.createFailure(fileName, [4, 38], [4, 38], RuleSeverity.ERROR, failureString);
 
         assert.equal(actualFailures.length, 1);
         assert.isTrue(actualFailures[0].equals(expectedFailure));

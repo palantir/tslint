@@ -2,12 +2,12 @@
   "extends": "tslint:latest",
   "jsRules": {
     "no-eval": {
-      "level": "none"
+      "severity": "none"
     }
   },
   "rules": {
     "no-eval": {
-      "level": "none"
+      "severity": "none"
     }
   }
 }

@@ -1,7 +1,7 @@
 {
     "jsRules": {
         "rule": {
-            "level": "error"
+            "severity": "error"
         }
     }
 }

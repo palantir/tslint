@@ -17,7 +17,7 @@
 
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
 import {IFormatterMetadata} from "../language/formatter/formatter";
-import {RuleFailure, RuleLevel} from "../language/rule/rule";
+import {RuleFailure, RuleSeverity} from "../language/rule/rule";
 
 import * as colors from "colors";
 
@@ -83,10 +83,10 @@ export class Formatter extends AbstractFormatter {
             let positionTuple = `${lineAndCharacter.line + 1}:${lineAndCharacter.character + 1}`;
             positionTuple = this.pad(positionTuple, positionMaxSize);
 
-            if (failure.getRuleLevel() === RuleLevel.WARNING) {
-                positionTuple = colors.blue(RuleLevel[failure.getRuleLevel()] + ": " + positionTuple);
+            if (failure.getRuleSeverity() === RuleSeverity.WARNING) {
+                positionTuple = colors.blue(RuleSeverity[failure.getRuleSeverity()] + ": " + positionTuple);
             } else {
-                positionTuple = colors.red(RuleLevel[failure.getRuleLevel()] + ": " + positionTuple);
+                positionTuple = colors.red(RuleSeverity[failure.getRuleSeverity()] + ": " + positionTuple);
             }
 
             // Output

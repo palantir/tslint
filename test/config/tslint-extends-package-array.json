@@ -5,12 +5,12 @@
   ],
   "jsRules": {
     "always-fail": {
-      "level": "none"
+      "severity": "none"
     }
   },
   "rules": {
     "always-fail": {
-      "level": "none"
+      "severity": "none"
     }
   }
 }

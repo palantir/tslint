@@ -81,10 +81,10 @@ describe("Configuration", () => {
             const config = loadConfigurationFromPath("./test/config/tslint-extends-relative.json");
 
             assert.isArray(config.rulesDirectory);
-            assert.equal("error", config.rules["no-fail"].level, "did not pick up 'no-fail' in base config");
-            assert.equal("none", config.rules["always-fail"].level, "did not set 'always-fail' in top config");
-            assert.equal("error", config.jsRules["no-fail"].level);
-            assert.equal("none", config.jsRules["always-fail"].level);
+            assert.equal("error", config.rules["no-fail"].severity, "did not pick up 'no-fail' in base config");
+            assert.equal("none", config.rules["always-fail"].severity, "did not set 'always-fail' in top config");
+            assert.equal("error", config.jsRules["no-fail"].severity);
+            assert.equal("none", config.jsRules["always-fail"].severity);
         });
 
         it("extends with package", () => {
@@ -95,19 +95,19 @@ describe("Configuration", () => {
             assert.deepEqual(config.jsRules, {
                 "rule-one": true,
                 "rule-three": {
-                    level: "none",
+                    severity: "none",
                 },
                 "rule-two": {
-                    level: "error",
+                    severity: "error",
                 },
             });
             assert.deepEqual(config.rules, {
                 "rule-one": true,
                 "rule-three": {
-                    level: "none",
+                    severity: "none",
                 },
                 "rule-two": {
-                    level: "error",
+                    severity: "error",
                 },
             });
             /* tslint:enable:object-literal-sort-keys */
@@ -130,9 +130,9 @@ describe("Configuration", () => {
         it("extends with builtin", () => {
             const config = loadConfigurationFromPath("./test/config/tslint-extends-builtin.json");
             assert.isUndefined(config.jsRules["no-var-keyword"]);
-            assert.equal("none", config.jsRules["no-eval"].level);
+            assert.equal("none", config.jsRules["no-eval"].severity);
             assert.isTrue(config.rules["no-var-keyword"]);
-            assert.equal("none", config.rules["no-eval"].level);
+            assert.equal("none", config.rules["no-eval"].severity);
         });
 
         describe("with config not relative to tslint", () => {
@@ -167,7 +167,7 @@ describe("Configuration", () => {
             /* tslint:disable:object-literal-sort-keys */
             assert.deepEqual(config.jsRules, {
                 "always-fail": {
-                    level: "none",
+                    severity: "none",
                 },
                 "rule-one": true,
                 "rule-two": true,
@@ -175,7 +175,7 @@ describe("Configuration", () => {
             });
             assert.deepEqual(config.rules, {
                 "always-fail": {
-                    level: "none",
+                    severity: "none",
                 },
                 "rule-one": true,
                 "rule-two": true,
@@ -190,26 +190,26 @@ describe("Configuration", () => {
             assert.isArray(config.rulesDirectory);
             assert.deepEqual(config.jsRules, {
                 "always-fail": {
-                    level: "none",
+                    severity: "none",
                 },
                 "no-fail": {
-                    level: "error",
+                    severity: "error",
                 },
                 "rule-one": true,
                 "rule-two": {
-                    level: "error",
+                    severity: "error",
                 },
             });
             assert.deepEqual(config.rules, {
                 "always-fail": {
-                    level: "none",
+                    severity: "none",
                 },
                 "no-fail": {
-                    level: "error",
+                    severity: "error",
                 },
                 "rule-one": true,
                 "rule-two": {
-                    level: "error",
+                    severity: "error",
                 },
             });
         });
@@ -220,14 +220,14 @@ describe("Configuration", () => {
             /* tslint:disable:object-literal-sort-keys */
             assert.deepEqual(config.jsRules, {
                 "rule-two": {
-                    level: "error",
+                    severity: "error",
                 },
                 "rule-three": "//not a comment",
                 "rule-four": "/*also not a comment*/",
             });
             assert.deepEqual(config.rules, {
                 "rule-two": {
-                    level: "error",
+                    severity: "error",
                 },
                 "rule-three": "//not a comment",
                 "rule-four": "/*also not a comment*/",

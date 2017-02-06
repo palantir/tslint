@@ -17,7 +17,7 @@
 
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
 import {IFormatterMetadata} from "../language/formatter/formatter";
-import {RuleFailure, RuleLevel} from "../language/rule/rule";
+import {RuleFailure, RuleSeverity} from "../language/rule/rule";
 
 import * as Utils from "../utils";
 
@@ -49,7 +49,7 @@ export class Formatter extends AbstractFormatter {
                 .replace(/"/g, "&quot;");
 
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
-            const priority = failure.getRuleLevel() === RuleLevel.WARNING ? 4 : 3;
+            const priority = failure.getRuleSeverity() === RuleSeverity.WARNING ? 4 : 3;
 
             output += "<file name=\"" + failure.getFileName();
             output += "\"><violation begincolumn=\"" + (lineAndCharacter.character + 1);

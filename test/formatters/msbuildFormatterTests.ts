@@ -16,7 +16,7 @@
 
 import * as ts from "typescript";
 
-import {IFormatter, RuleFailure, RuleLevel, TestUtils} from "../lint";
+import {IFormatter, RuleFailure, RuleSeverity, TestUtils} from "../lint";
 
 describe("MSBuild Formatter", () => {
     const TEST_FILE = "formatters/msbuildFormatter.test.ts";
@@ -33,9 +33,9 @@ describe("MSBuild Formatter", () => {
         const maxPosition = sourceFile.getFullWidth();
 
         const failures = [
-            new RuleFailure(sourceFile, 0, 1, "first failure", RuleLevel.ERROR, "first-name"),
-            new RuleFailure(sourceFile, 32, 36, "mid failure", RuleLevel.ERROR, "mid-name"),
-            new RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", RuleLevel.WARNING, "last-name"),
+            new RuleFailure(sourceFile, 0, 1, "first failure", RuleSeverity.ERROR, "first-name"),
+            new RuleFailure(sourceFile, 32, 36, "mid failure", RuleSeverity.ERROR, "mid-name"),
+            new RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", RuleSeverity.WARNING, "last-name"),
         ];
 
         const expectedResult =
@@ -52,7 +52,7 @@ describe("MSBuild Formatter", () => {
         assert.equal(result, "\n");
     });
 
-    function getFailureString(file: string, line: number, character: number, level: string, reason: string, ruleCamelCase: string) {
-        return `${file}(${line},${character}): ${level} ${ruleCamelCase}: ${reason}\n`;
+    function getFailureString(file: string, line: number, character: number, severity: string, reason: string, ruleCamelCase: string) {
+        return `${file}(${line},${character}): ${severity} ${ruleCamelCase}: ${reason}\n`;
     }
 });

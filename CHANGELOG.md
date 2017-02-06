@@ -11,7 +11,7 @@ v5.0.0
         - msbuildFormatter - default was "warning", is now "error"
         - pmdFormatter - default was priority 1, is not priority 3
 * [enhancement] Enable WARN with new config file format (#629, #345)
-    * Valid values for `level`: "error|warn|warning|none|off"
+    * Valid values for `severity`: "error|warn|warning|none|off"
     * Previous
     * ```{
         "extends": "tslint:latest",
@@ -25,11 +25,11 @@ v5.0.0
         "rules": {
           "callable-types": {
             "enabled": true,
-            "level": "error"   // this is optional, "error" is default
+            "severity": "error"   // this is optional, "error" is default
           },
           "interface-name": {
             "enabled": true,
-            "level": "warn"
+            "severity": "warn"
         }
       }``
 

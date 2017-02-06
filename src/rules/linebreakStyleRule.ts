@@ -81,6 +81,6 @@ export class Rule extends Lint.Rules.AbstractRule {
         // the line ending, which happens to be the start of the token.
         const end = scanner.getStartPos();
 
-        return new Lint.RuleFailure(sourceFile, start, end, failure, this.getOptions().ruleLevel, this.getOptions().ruleName);
+        return new Lint.RuleFailure(sourceFile, start, end, failure, this.getOptions().ruleSeverity, this.getOptions().ruleName);
     }
 }

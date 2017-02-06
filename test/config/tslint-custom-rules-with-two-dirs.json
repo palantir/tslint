@@ -2,24 +2,24 @@
   "rulesDirectory": ["../files/custom-rules-2", "../files/custom-rules/"],
   "jsRules": {
     "always-fail": {
-      "level": "error"
+      "severity": "error"
     },
     "no-fail": {
-      "level": "error"
+      "severity": "error"
     },
     "rule-two": {
-      "level": "error"
+      "severity": "error"
     }
   },
   "rules": {
     "always-fail": {
-      "level": "error"
+      "severity": "error"
     },
     "no-fail": {
-      "level": "error"
+      "severity": "error"
     },
     "rule-two": {
-      "level": "error"
+      "severity": "error"
     }
   }
 }

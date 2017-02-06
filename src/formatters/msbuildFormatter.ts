@@ -17,7 +17,7 @@
 
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
 import {IFormatterMetadata} from "../language/formatter/formatter";
-import {RuleFailure, RuleLevel} from "../language/rule/rule";
+import {RuleFailure, RuleSeverity} from "../language/rule/rule";
 
 import {camelize, dedent} from "../utils";
 
@@ -42,9 +42,9 @@ export class Formatter extends AbstractFormatter {
 
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
             const positionTuple = `(${lineAndCharacter.line + 1},${lineAndCharacter.character + 1})`;
-            const level = RuleLevel[failure.getRuleLevel()].toLowerCase();
+            const severity = RuleSeverity[failure.getRuleSeverity()].toLowerCase();
 
-            return `${fileName}${positionTuple}: ${level} ${camelizedRule}: ${failureString}`;
+            return `${fileName}${positionTuple}: ${severity} ${camelizedRule}: ${failureString}`;
         });
 
         return outputLines.join("\n") + "\n";

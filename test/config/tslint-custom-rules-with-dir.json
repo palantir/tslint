@@ -2,12 +2,12 @@
   "rulesDirectory": "../files/custom-rules/",
   "jsRules": {
     "always-fail": {
-      "level": "error"
+      "severity": "error"
     }
   },
   "rules": {
     "always-fail": {
-      "level": "error"
+      "severity": "error"
     }
   }
 }

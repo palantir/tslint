@@ -63,7 +63,8 @@ export class Rule extends Lint.Rules.AbstractRule {
 
         if (lineCount > lineLimit && disabledIntervals.length === 0) {
             const errorString = Rule.FAILURE_STRING_FACTORY(lineCount, lineLimit);
-            ruleFailures.push(new Lint.RuleFailure(sourceFile, 0, 1, errorString, this.getOptions().ruleLevel, this.getOptions().ruleName));
+            ruleFailures.push(new Lint.RuleFailure(sourceFile, 0, 1, errorString,
+              this.getOptions().ruleSeverity, this.getOptions().ruleName));
         }
         return ruleFailures;
     }

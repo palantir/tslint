@@ -5,7 +5,7 @@
       "rule-one": true,
       */
       "rule-two": {
-        "level": "error" // after comment
+        "severity": "error" // after comment
       },
       "rule-three": "//not a comment",
       "rule-four": "/*also not a comment*/"
@@ -16,7 +16,7 @@
       "rule-one": true,
       */
       "rule-two": {
-        "level": "error"
+        "severity": "error"
         // after comment
       },
       "rule-three": "//not a comment",

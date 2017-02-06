@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import {IFormatter, RuleFailure, RuleLevel, TestUtils} from "../lint";
+import {IFormatter, RuleFailure, RuleSeverity, TestUtils} from "../lint";
 
 describe("Checkstyle Formatter", () => {
     const TEST_FILE_1 = "formatters/jsonFormatter.test.ts"; // reuse existing sample file
@@ -38,12 +38,12 @@ describe("Checkstyle Formatter", () => {
         const maxPosition2 = sourceFile2.getFullWidth();
 
         const failures = [
-            new RuleFailure(sourceFile1, 0, 1, "first failure", RuleLevel.ERROR, "first-name"),
-            new RuleFailure(sourceFile1, 2, 3, "&<>'\" should be escaped", RuleLevel.ERROR, "escape"),
-            new RuleFailure(sourceFile1, maxPosition1 - 1, maxPosition1, "last failure", RuleLevel.ERROR, "last-name"),
-            new RuleFailure(sourceFile2, 0, 1, "first failure", RuleLevel.ERROR, "first-name"),
-            new RuleFailure(sourceFile2, 2, 3, "&<>'\" should be escaped", RuleLevel.WARNING, "escape"),
-            new RuleFailure(sourceFile2, maxPosition2 - 1, maxPosition2, "last failure", RuleLevel.WARNING, "last-name"),
+            new RuleFailure(sourceFile1, 0, 1, "first failure", RuleSeverity.ERROR, "first-name"),
+            new RuleFailure(sourceFile1, 2, 3, "&<>'\" should be escaped", RuleSeverity.ERROR, "escape"),
+            new RuleFailure(sourceFile1, maxPosition1 - 1, maxPosition1, "last failure", RuleSeverity.ERROR, "last-name"),
+            new RuleFailure(sourceFile2, 0, 1, "first failure", RuleSeverity.ERROR, "first-name"),
+            new RuleFailure(sourceFile2, 2, 3, "&<>'\" should be escaped", RuleSeverity.WARNING, "escape"),
+            new RuleFailure(sourceFile2, maxPosition2 - 1, maxPosition2, "last failure", RuleSeverity.WARNING, "last-name"),
         ];
         const expectedResult =
             '<?xml version="1.0" encoding="utf-8"?><checkstyle version="4.3">' +

@@ -16,7 +16,7 @@
 
 import * as ts from "typescript";
 
-import {Fix, IFormatter, Replacement, RuleFailure, RuleLevel, TestUtils} from "../lint";
+import {Fix, IFormatter, Replacement, RuleFailure, RuleSeverity, TestUtils} from "../lint";
 
 describe("JSON Formatter", () => {
     const TEST_FILE = "formatters/jsonFormatter.test.ts";
@@ -33,9 +33,9 @@ describe("JSON Formatter", () => {
         const maxPosition = sourceFile.getFullWidth();
 
         const failures = [
-            new RuleFailure(sourceFile, 0, 1, "first failure", RuleLevel.ERROR, "first-name"),
-            new RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", RuleLevel.ERROR, "last-name"),
-            new RuleFailure(sourceFile, 0, maxPosition, "full failure", RuleLevel.ERROR, "full-name",
+            new RuleFailure(sourceFile, 0, 1, "first failure", RuleSeverity.ERROR, "first-name"),
+            new RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", RuleSeverity.ERROR, "last-name"),
+            new RuleFailure(sourceFile, 0, maxPosition, "full failure", RuleSeverity.ERROR, "full-name",
                 new Fix("full-name", [
                     new Replacement(0, 0, ""),
                 ])),
@@ -56,7 +56,7 @@ describe("JSON Formatter", () => {
                 character: 1,
             },
             ruleName: "first-name",
-            ruleLevel: "ERROR",
+            ruleSeverity: "ERROR",
         },
         {
             name: TEST_FILE,
@@ -72,7 +72,7 @@ describe("JSON Formatter", () => {
                 character: 0,
             },
             ruleName: "last-name",
-            ruleLevel: "ERROR",
+            ruleSeverity: "ERROR",
         },
         {
             name: TEST_FILE,
@@ -98,7 +98,7 @@ describe("JSON Formatter", () => {
                 character: 0,
             },
             ruleName: "full-name",
-            ruleLevel: "ERROR",
+            ruleSeverity: "ERROR",
         }];
         /* tslint:enable:object-literal-sort-keys */
 
