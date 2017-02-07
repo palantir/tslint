@@ -25,7 +25,12 @@ console.log();
 console.log(colors.underline("Testing Lint Rules:"));
 /* tslint:enable:no-console */
 
-const testDirectories = glob.sync("test/rules/**/tslint.json").map(path.dirname);
+// Support running a subset of lint rules:
+// node ./build/test/ruleTestRunner.js "test/rules/require-jsdoc/*/tslint.json"
+
+const useCustomRuleGlob = process.argv.length === 3;
+const testGlob = useCustomRuleGlob ? process.argv[2] : "test/rules/**/tslint.json";
+const testDirectories = glob.sync(testGlob).map(path.dirname);
 
 for (const testDirectory of testDirectories) {
     const results = runTest(testDirectory);
