@@ -24,8 +24,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "ban-types",
         description: Lint.Utils.dedent`
-        Bans specific global types from being used. Does not ban the
-        corresponding runtime objects from being used.`,
+            Bans specific global types from being used. Does not ban the
+            corresponding runtime objects from being used.`,
         options: {
             type: "list",
             listType: {
@@ -36,8 +36,8 @@ export class Rule extends Lint.Rules.AbstractRule {
             },
         },
         optionsDescription: Lint.Utils.dedent`
-        A list of \`["type", "optional explanation here"]\`, which bans
-        \`type\``,
+            A list of \`["regex", "optional explanation here"]\`, which bans
+            types that match \`regex\``,
         optionExamples: [`[true, ["Object", "Use {} instead."], ["String"]]`],
         type: "typescript",
         typescriptOnly: true,
@@ -65,7 +65,8 @@ class BanTypeWalker extends Lint.RuleWalker {
     public visitTypeReference(node: ts.TypeReferenceNode) {
         const typeName = node.typeName.getText();
         const ban =
-            this.bans.find(([bannedType]) => typeName === bannedType) as string[];
+            this.bans.find(([bannedType]) =>
+                typeName.match(`^${bannedType}$`) != null) as string[];
         if (ban) {
             this.addFailure(this.createFailure(
                 node.getStart(), node.getWidth(),

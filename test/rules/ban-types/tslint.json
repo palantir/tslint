@@ -3,7 +3,8 @@
     "ban-types": [
       true,
       ["String", "Use 'string' instead."],
-      ["Object"]
+      ["Object"],
+      ["Fo*"]
     ]
   }
 }
