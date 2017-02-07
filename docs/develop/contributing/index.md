@@ -41,4 +41,4 @@ The current debug configurations are:
 - Debug CLI: Used to debug TSLint using command line arguments. Modify the `args` array in `.vscode/launch.json` to add arguments.
 - Debug Mocha Tests: Runs non-rule tests
 - Debug Rule Tests: Runs rule tests (under `test/rules`)
-- Deubg Document Generation: Debug the `scripts/buildDocs.ts` script.
+- Debug Document Generation: Debug the `scripts/buildDocs.ts` script.

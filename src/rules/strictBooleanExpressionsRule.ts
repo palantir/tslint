@@ -34,25 +34,26 @@ export class Rule extends Lint.Rules.TypedRule {
             Restricts the types allowed in boolean expressions. By default only booleans are allowed.
 
             The following nodes are checked:
-            * Arguments to the '!', '&&', and '||' operators
-            * The condition in a conditional expression ('cond ? x : y')
-            * Conditions for 'if', 'for', 'while', and 'do-while' statements.`,
+
+            * Arguments to the \`!\`, \`&&\`, and \`||\` operators
+            * The condition in a conditional expression (\`cond ? x : y\`)
+            * Conditions for \`if\`, \`for\`, \`while\`, and \`do-while\` statements.`,
         optionsDescription: Lint.Utils.dedent`
             These options may be provided:
 
-            * '${OPTION_ALLOW_NULL_UNION} allows union types containing 'null'.
-              - It does *not* allow 'null' itself.
-            * '${OPTION_ALLOW_UNDEFINED_UNION} allows union types containing 'undefined'.
-              - It does *not* allow 'undefined' itself.
-            * '${OPTION_ALLOW_STRING} allows strings.
-              - It does *not* allow unions containing 'string'.
+            * \`${OPTION_ALLOW_NULL_UNION}\` allows union types containing \`null\`.
+              - It does *not* allow \`null\` itself.
+            * \`${OPTION_ALLOW_UNDEFINED_UNION}\` allows union types containing \`undefined\`.
+              - It does *not* allow \`undefined\` itself.
+            * \`${OPTION_ALLOW_STRING}\` allows strings.
+              - It does *not* allow unions containing \`string\`.
               - It does *not* allow string literal types.
-            * '${OPTION_ALLOW_NUMBER} allows numbers.
-              - It does *not* allow unions containing 'number'.
+            * \`${OPTION_ALLOW_NUMBER}\` allows numbers.
+              - It does *not* allow unions containing \`number\`.
               - It does *not* allow enums or number literal types.
-            * '${OPTION_ALLOW_MIX} allow multiple of the above to appear together.
-              - For example, 'string | number' or 'RegExp | null | undefined' would normally not be allowed.
-              - A type like '"foo" | "bar" | undefined' is always allowed, because it has only one way to be false.`,
+            * \`${OPTION_ALLOW_MIX}\` allow multiple of the above to appear together.
+              - For example, \`string | number\` or \`RegExp | null | undefined\` would normally not be allowed.
+              - A type like \`"foo" | "bar" | undefined\` is always allowed, because it has only one way to be false.`,
         options: {
             type: "array",
             items: {
