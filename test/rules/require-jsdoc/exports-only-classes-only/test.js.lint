@@ -1,0 +1,7 @@
+class MyClass {
+      
+}
+
+export function myUndocumentedFunc() {
+
+} 

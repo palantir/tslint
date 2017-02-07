@@ -1,0 +1,11 @@
+{ 
+  "linterOptions": {
+    "typeCheck": true
+  },
+  "rules": {
+    "require-jsdoc": [true, {"functionDeclaration": false, "methodDefinition": false}]
+  },
+  "jsRules": {
+    "require-jsdoc": [true, {"functionDeclaration": false, "methodDefinition": false}]
+  }
+}

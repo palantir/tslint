@@ -1,0 +1,11 @@
+{ 
+  "linterOptions": {
+    "typeCheck": true
+  },
+  "rules": {
+    "require-jsdoc": [true, {"exportedOnly": false}]
+  },
+  "jsRules": {
+    "require-jsdoc": [true, {"exportedOnly": false}]
+  }
+}
