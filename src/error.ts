@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+const shownWarnings = new Set<string>();
+
 /**
  * Generic error typing for EcmaScript errors
  * Define `Error` here to avoid using `Error` from @types/node.
@@ -36,5 +38,12 @@ export class FatalError extends Error {
         super(message);
         this.name = FatalError.NAME;
         this.stack = new Error().stack;
+    }
+}
+
+export function showWarningOnce(message: string) {
+    if (!shownWarnings.has(message)) {
+        console.warn(message);
+        shownWarnings.add(message);
     }
 }

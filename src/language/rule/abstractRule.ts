@@ -37,7 +37,7 @@ export abstract class AbstractRule implements IRule {
         return false;
     }
 
-    constructor(protected readonly ruleName: string, private value: any, private disabledIntervals: IDisabledInterval[]) {
+    constructor(public readonly ruleName: string, private value: any, private disabledIntervals: IDisabledInterval[]) {
         if (Array.isArray(value) && value.length > 1) {
             this.ruleArguments = value.slice(1);
         } else {

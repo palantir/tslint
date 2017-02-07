@@ -19,13 +19,13 @@ import * as fs from "fs";
 import * as path from "path";
 
 import { getRelativePath } from "./configuration";
+import { showWarningOnce } from "./error";
 import { AbstractRule } from "./language/rule/abstractRule";
 import { IDisabledInterval, IRule } from "./language/rule/rule";
 import { arrayify, camelize, dedent } from "./utils";
 
 const moduleDirectory = path.dirname(module.filename);
 const CORE_RULES_DIRECTORY = path.resolve(moduleDirectory, ".", "rules");
-const shownDeprecations: string[] = [];
 const cachedRules = new Map<string, typeof AbstractRule | null>(); // null indicates that the rule was not found
 
 export interface IEnableDisablePosition {
@@ -56,9 +56,8 @@ export function loadRules(ruleConfiguration: {[name: string]: any},
                         const disabledIntervals = buildDisabledIntervalsFromSwitches(ruleSpecificList);
                         rules.push(new (Rule as any)(ruleName, ruleValue, disabledIntervals));
 
-                        if (Rule.metadata && Rule.metadata.deprecationMessage && shownDeprecations.indexOf(Rule.metadata.ruleName) === -1) {
-                            console.warn(`${Rule.metadata.ruleName} is deprecated. ${Rule.metadata.deprecationMessage}`);
-                            shownDeprecations.push(Rule.metadata.ruleName);
+                        if (Rule.metadata && Rule.metadata.deprecationMessage) {
+                            showWarningOnce(`${Rule.metadata.ruleName} is deprecated. ${Rule.metadata.deprecationMessage}`);
                         }
                     }
                 }

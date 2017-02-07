@@ -29,6 +29,7 @@ import {
     loadConfigurationFromPath,
 } from "./configuration";
 import { EnableDisableRulesWalker } from "./enableDisableRules";
+import { showWarningOnce } from "./error";
 import { findFormatter } from "./formatterLoader";
 import { ILinterOptions, LintResult } from "./index";
 import { IFormatter } from "./language/formatter/formatter";
@@ -162,8 +163,12 @@ class Linter {
 
     private applyRule(rule: IRule, sourceFile: ts.SourceFile) {
         let ruleFailures: RuleFailure[] = [];
-        if (this.program && TypedRule.isTypedRule(rule)) {
-            ruleFailures = rule.applyWithProgram(sourceFile, this.languageService);
+        if (TypedRule.isTypedRule(rule)) {
+            if (this.program) {
+                ruleFailures = rule.applyWithProgram(sourceFile, this.languageService);
+            } else {
+                showWarningOnce(`Warning: The '${rule.ruleName}' rule requires type checking. This rule will be ignored.`);
+            }
         } else {
             ruleFailures = rule.apply(sourceFile, this.languageService);
         }
