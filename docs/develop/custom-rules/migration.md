@@ -1,5 +1,11 @@
 ## Using `WalkContext<T>` and `Rule#applyWithFunction`
-If you have a rule with a pretty simple implementation, you don't need to declare a class which extends a Walker class.
+If you have a rule with a pretty simple implementation, you don't need to declare a class which extends the `Walker` class. Instead, you can define a callback function that accepts following arguments:
+
+- `ctx: WalkContext<T>`: An object containing rule information, the `ts.sourceFile` object, and functions for adding failures
+- `rule: T` (optional): An object containing the parsed rule arguments
+
+Use this callback as an argument to `applyWithFunction`.
+
 Let's look at `no-null-keyword` as an example:
 ```ts
 import * as ts from "typescript";
@@ -9,29 +15,32 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Use 'undefined' instead of 'null'";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        // applyWithFunction creates a WalkContext and passes it to `walk`
-        // we could pass options as 3rd parameter if needed, but please don't just call this.getOptions() and pass that.
-        // `options` should be an object containing a "parsed" version of `this.ruleArguments`
+        // Call `applyWithFunction` with your callback function, `walk`.
+        // This creates a `WalkContext<T>` and passes it in as an argument.
+        // An optional 3rd parameter allows you to pass in a parsed version of `this.ruleArguments`. If used, it is not recommended to
+        //     simply pass in `this.getOptions()`, but to parse it into a more useful object instead.
         return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-// the type parameter of `WalkContext` is the type of `options`. Here it is `void` because we don't pass any options in the example
+// Here, the options object type is `void` because we don't pass any options in this example.
 function walk(ctx: Lint.WalkContext<void>) {
-    // `ctx.sourceFile` is the top of the AST
-    // start recursing into the AST, call function `cb` for every child of SourceFile
+    // Recursively walk the AST starting with root node, `ctx.sourceFile`.
+    // Call the function `cb` (defined below) for each child.
     return ts.forEachChild(ctx.sourceFile, cb);
+    
     function cb(node: ts.Node): void {
-        // don't recurse into type nodes
+        // Stop recursing further into the AST by returning early. Here, we ignore type nodes.
         if (node.kind >= ts.SyntaxKind.FirstTypeNode && node.kind <= ts.SyntaxKind.LastTypeNode) {
-            return; // skip type nodes
+            return;
         }
-        // we are searching for the null keyword
+        
+        // Add failures using the `WalkContext<T>` object. Here, we add a failure if we find the null keyword.
         if (node.kind === ts.SyntaxKind.NullKeyword) {
-            // if we found one, we add a failure to the WalkContext
             return ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
-        // recurse deeper in the AST, call function `cb` for every child of the current node
+        
+        // Continue recursion into the AST by calling function `cb` for every child of the current node.
         return ts.forEachChild(node, cb);
     }
 }
@@ -53,36 +62,35 @@ export class Rule extends Lint.Rules.AbstractRule {
     ]);
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        // We convert the `ruleArguments` into a useful format before passing it to the constructor of AbstractWalker
+        // We convert the `ruleArguments` into a useful format before passing it to the constructor of AbstractWalker.
         return this.applyWithWalker(new NoMagicNumbersWalker(sourceFile, this.ruleName, new Set(this.ruleArguments.map(String))));
     }
 }
 
-// the type parameter of AbstractWalker corresponds to the third constructor parameter
+// The type parameter of AbstractWalker corresponds to the third constructor parameter.
 class NoMagicNumbersWalker extends Lint.AbstractWalker<Set<string>> {
-    // you need to implement this abstract method
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
-            // we are searching for numbers
+            // Finds specific node types and do checking.
             if (node.kind === ts.SyntaxKind.NumericLiteral) {
-                // the main benefit of AbstractWalker over WalkContext: methods instead of closures
                 this.checkNumericLiteral(node, (node as ts.NumericLiteral).text);
             } else if (node.kind === ts.SyntaxKind.PrefixUnaryExpression &&
                        (node as ts.PrefixUnaryExpression).operator === ts.SyntaxKind.MinusToken) {
                 this.checkNumericLiteral(node, "-" + ((node as ts.PrefixUnaryExpression).operand as ts.NumericLiteral).text);
             } else {
-                // recurse deeper, call function `cb` for all children of the current node
+                // Continue rescursion: call function `cb` for all children of the current node.
                 return ts.forEachChild(node, cb);
             }
         };
-        // start recursion for all children of `sourceFile`
+        
+        // Start recursion for all children of `sourceFile`.
         return ts.forEachChild(sourceFile, cb);
     }
 
     private checkNumericLiteral(node: ts.Node, num: string) {
-        // `this.options` is the third constructor parameter from above (the Set we created in Rule.apply)
+        // `this.options` is the third constructor parameter from above (the Set we created in `Rule.apply`)
         if (!Rule.ALLOWED_NODES.has(node.parent!.kind) && !this.options.has(num)) {
-            // add failures to the Walker
+            // Add failures to the Walker.
             this.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
     }
@@ -90,28 +98,28 @@ class NoMagicNumbersWalker extends Lint.AbstractWalker<Set<string>> {
 ```
 
 ## Migrating from `RuleWalker` to `AbstractWalker`
-The main difference is, that you need to implement the AST recursion yourself. But why would you want to do that?
+The main difference between `RuleWalker` and `AbstractWalker` is that you need to implement the AST recursion yourself. But why would you want to do that?
 __Performance!__ `RuleWalker` wants to be "one walker to rule them all" (pun intended). It's easy to use but that convenience 
 makes it slow by default. When implementing the walking yourself, you only need to do as much work as needed.
 
 Besides that you *should* convert the `ruleArguments` to a useful format before passing it to `AbstractWalker` as seen above.
 
-There are also some differences in the methods provided. Let's say we did some garbage collection while porting methods of `RuleWalker` to `AbstractWalker`.
+This table describes the equivalent methods between the two classes:
 
-`RuleWalker` | `AbstractRule` | alternative
------------- | -------------- | -----------
-`createFailure()` and `addFailure()` | use `addFailureAt()` to add a failure with start and width |
-`addFailureFromStartToEnd()` | `addFailure()` |
-`createReplacement()` | - | `new Lint.Replacement()`
-`deleteText()` | - | `Lint.Replacement.deleteText()`
-`deleteFromTo()` | - | `Lint.Replacement.deleteFromTo()`
-`appendText()` | - | `Lint.Replacement.appendText()`
-`hasOption()` and `getOptions()` | use `this.options` directly |
-`getLineAndCharacterOfPosition()` | - | `ts.getLineAndCharacterOfPosition(this.sourceFile, ...)`
-`getLimit()` | if you really need it: `this.sourceFile.end` |
-`getSourceFile()` | is available to be compatible, but prefer `this.sourceFile` |
-`getFailures()` | is available to be compatible, but prefer `this.failures` |
-`skip()` | - | just don't use it, it's a noop
-`getRuleName()` | `this.ruleName` |
+`RuleWalker` | `AbstractWalker`
+------------ | --------------
+`this.createFailure()` and `this.addFailure()` | `this.addFailureAt()`
+`this.addFailureFromStartToEnd()` | `this.addFailure()`
+`this.createReplacement()` | `new Lint.Replacement()`
+`this.deleteText()` | `Lint.Replacement.deleteText()`
+`this.deleteFromTo()` | `Lint.Replacement.deleteFromTo()`
+`this.appendText()` | `Lint.Replacement.appendText()`
+`this.hasOption()` and `this.getOptions()` | use `this.options` directly
+`this.getLineAndCharacterOfPosition()` | `ts.getLineAndCharacterOfPosition(this.sourceFile, ...)`
+`this.getLimit()` | `this.sourceFile.end` 
+`this.getSourceFile()` | is available to be compatible, but prefer `this.sourceFile` 
+`this.getFailures()` | is available to be compatible, but prefer `this.failures`
+`this.skip()` | just don't use it, it's a noop
+`this.getRuleName()` | `this.ruleName`
 
 
