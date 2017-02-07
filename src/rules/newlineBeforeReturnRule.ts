@@ -16,7 +16,6 @@
  */
 
 import * as ts from "typescript";
-
 import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -67,17 +66,12 @@ class NewlineBeforeReturnWalker extends Lint.RuleWalker {
         }
         const lc = this.getLineAndCharacterOfPosition(start);
 
-        this.validateBlankLine(lc.line);
-    }
+        const prev = parent.statements[index - 1];
+        const prevLine = this.getLineAndCharacterOfPosition(prev.getEnd()).line;
 
-    private validateBlankLine(line: number) {
-        const source = this.getSourceFile();
-        const position = source.getPositionOfLineAndCharacter(line - 1, 0);
-        const end = source.getPositionOfLineAndCharacter(line, 0) - 1;
-        const all = source.getText().substr(position, end - position);
-
-        if (all.search(/\S/) !== -1) {
-            this.addFailureFromStartToEnd(position, position, Rule.FAILURE_STRING_FACTORY());
+        if (prevLine >= lc.line - 1) {
+            // Previous statement is on the same or previous line
+            this.addFailureFromStartToEnd(start, start, Rule.FAILURE_STRING_FACTORY());
         }
     }
 }

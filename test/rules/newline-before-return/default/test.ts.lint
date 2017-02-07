@@ -2,15 +2,15 @@ function foo(bar) {
     if (!bar) {
         return;
     }
-~nil  [0]
     return bar;
+    ~nil  [0]
 }
 
 function foo(bar) {
     if (!bar) {
         var statement = '';
-~nil  [0]
         return statement;
+        ~nil  [0]
     }
 
     return bar;
@@ -20,8 +20,8 @@ function foo(bar) {
     if (!bar) {
         return;
     }
-~nil  [0]
     /* multi-line
+    ~nil  [0]
     comment */
     return bar;
 }
@@ -29,8 +29,13 @@ function foo(bar) {
 var fn = () => null;
 function foo() {
     fn();
-~nil  [0]
     return;
+    ~nil  [0]
+}
+
+function foo(fn) {
+    fn(); return;
+          ~nil [0]
 }
 
 function foo() {
