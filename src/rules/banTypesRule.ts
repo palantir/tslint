@@ -24,7 +24,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "ban-types",
         description: Lint.Utils.dedent`
-            Bans specific global types from being used. Does not ban the
+            Bans specific types from being used. Does not ban the
             corresponding runtime objects from being used.`,
         options: {
             type: "list",
