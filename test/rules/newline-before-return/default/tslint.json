@@ -1,0 +1,5 @@
+{
+    "rules": {
+        "newline-before-return": true
+    }
+}
