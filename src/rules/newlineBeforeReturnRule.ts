@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2013 Palantir Technologies, Inc.
+ * Copyright 2017 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "newline-before-return",
         description: "Enforces blank line before return when not the only line in the block.",
         rationale: "Helps maintain a readable style in your codebase.",
-        optionsDescription: Lint.Utils.dedent`
-            TSLint implementation of http://eslint.org/docs/rules/newline-before-return.`,
+        optionsDescription: "Not configurable.",
         options: {},
         optionExamples: ["true"],
         type: "style",
