@@ -1,5 +1,20 @@
 ## Performance tips
 
+### Don't call the LanguageService repeatedly
+The LanguageService is designed to serve editors. By design it does as little work to serve requests as possible.
+For most requests no cache is used.
+
+Let's say you need all usages of a variable. The LanguageService needs to check the whole AST subtree in which the variable is in scope.
+Doing that once is barely noticable. But doing it over and over again, will result in pretty bad performance (looking at you `no-unused-variable`).
+
+### Use the TypeChecker only when needed
+The TypeChecker is a really mighty tool, but that comes with a cost. To create a TypeChecker the Program first has to locate, read, parse and bind all SourceFiles referenced.
+To avoid that cost, try to avoid the TypeChecker where possible.
+
+If you are interested in the JSDoc of a function for example, you *could* ask the TypeChecker.
+But there's another way: call `.getChildren()` on the FunctionDeclaration and search for nodes of kind `ts.SyntaxKind.JSDocComment`.
+Those nodes will precede other nodes in the array.
+
 ### Avoid walking the AST if possible
 Some rules work directly on the content of the source file.
 
