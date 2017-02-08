@@ -1,10 +1,9 @@
 ## Using `WalkContext<T>` and `Rule#applyWithFunction`
-If you have a rule with a pretty simple implementation, you don't need to declare a class which extends the `Walker` class. Instead, you can define a callback function that accepts following arguments:
+If you have a rule with a pretty simple implementation, you don't need to declare a class which extends the `Walker` class. Instead, you can define a callback function that accepts following argument:
 
-- `ctx: WalkContext<T>`: An object containing rule information, the `ts.sourceFile` object, and functions for adding failures
-- `rule: T` (optional): An object containing the parsed rule arguments
+- `ctx: WalkContext<T>`: An object containing rule information, an object `options: T` containing the parsed rule arguments, the `ts.sourceFile` object, and functions for adding failures
 
-Use this callback as an argument to `applyWithFunction`.
+Use this callback as an argument to `applyWithFunction`. You can also pass your parsed rule arguments as optional 3rd parameter.
 
 Let's look at `no-null-keyword` as an example:
 ```ts
