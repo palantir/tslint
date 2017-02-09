@@ -5,10 +5,13 @@
   - [ ] Includes tests
 - [ ] Documentation update
 
-#### What changes did you make?
+#### Overview of change:
 
-(give an overview)
 
 #### Is there anything you'd like reviewers to focus on?
 
-(optional)
+<!-- optional -->
+
+#### Change log entry
+
+<!-- optional (example: "[new-rule] `arrow-return-shorthand`") -->
