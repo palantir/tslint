@@ -19,7 +19,7 @@
   "scripts": {
     "clean": "npm-run-all -p clean:core clean:test",
     "clean:core": "rimraf lib",
-    "clean:test": "rimraf build && rimraf test/config/node_modules",
+    "clean:test": "rimraf build && rimraf test/config/node_modules && rimraf test/config-legacy/node_modules",
     "docs": "node scripts/buildDocs.js",
     "compile": "npm-run-all -p compile:core compile:test -s compile:scripts",
     "compile:core": "tsc -p src",
@@ -30,7 +30,7 @@
     "lint:test": "tslint \"test/**/*.ts\" -e \"test/**/*.test.ts\"",
     "lint:from-bin": "bin/tslint \"{src,test}/**/*.ts\" -e \"test/**/*.test.ts\"",
     "test": "npm-run-all test:pre -p test:mocha test:rules",
-    "test:pre": "cd ./test/config && npm install",
+    "test:pre": "cd ./test/config && npm install && cd ../config-legacy && npm install",
     "test:mocha": "mocha --reporter spec --colors \"build/test/**/*Tests.js\" build/test/assert.js",
     "test:rules": "node ./build/test/ruleTestRunner.js",
     "verify": "npm-run-all clean compile lint test docs"
