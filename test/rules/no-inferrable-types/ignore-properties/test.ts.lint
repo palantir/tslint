@@ -5,21 +5,20 @@ let y: boolean = false;
        ~~~~~~~          [boolean]
 let z: string = "foo";
        ~~~~~~           [string]
-
-// not errors, we are skipping params
-function foo (a: number = 5, b: boolean = true, c: string = "bah") { }
-
-class TestClass {
-   doSomething(a: number = 5, b: boolean = true, c: string = "bah") {}
+class C {
+    x: number = 1;
 }
+
+// errors, types are inferrable
+function foo (a: number = 5, b: boolean = true, c: string = "bah") { }
+                 ~~~~~~                                                [number]
+                                ~~~~~~~                                [boolean]
+                                                   ~~~~~~              [string]
 
 class Foo {
     bar: number = 0;
-         ~~~~~~          [number]
     baz: boolean = true,
-         ~~~~~~~         [boolean]
     bas: string = "moar";
-         ~~~~~~          [string]
 }
 
 // not errors, inferrable type is not declared

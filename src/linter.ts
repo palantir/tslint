@@ -29,6 +29,7 @@ import {
     loadConfigurationFromPath,
 } from "./configuration";
 import { EnableDisableRulesWalker } from "./enableDisableRules";
+import { isError, showWarningOnce } from "./error";
 import { findFormatter } from "./formatterLoader";
 import { ILinterOptions, LintResult } from "./index";
 import { IFormatter } from "./language/formatter/formatter";
@@ -162,11 +163,20 @@ class Linter {
 
     private applyRule(rule: IRule, sourceFile: ts.SourceFile) {
         let ruleFailures: RuleFailure[] = [];
-        if (this.program && TypedRule.isTypedRule(rule)) {
-            ruleFailures = rule.applyWithProgram(sourceFile, this.languageService);
-        } else {
-            ruleFailures = rule.apply(sourceFile, this.languageService);
+        try {
+            if (TypedRule.isTypedRule(rule) && this.program) {
+                ruleFailures = rule.applyWithProgram(sourceFile, this.languageService);
+            } else {
+                ruleFailures = rule.apply(sourceFile, this.languageService);
+            }
+        } catch (error) {
+            if (isError(error)) {
+                showWarningOnce(`Warning: ${error.message}`);
+            } else {
+                console.warn(`Warning: ${error}`);
+            }
         }
+
         const fileFailures: RuleFailure[] = [];
         for (const ruleFailure of ruleFailures) {
             if (!this.containsRule(this.failures, ruleFailure)) {

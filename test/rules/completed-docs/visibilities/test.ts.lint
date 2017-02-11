@@ -1,0 +1,26 @@
+export enum BadExportedEnum { }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~      [Documentation must exist for exported enums.]
+
+/**
+ * ...
+ */
+export enum GoodExportedEnum { }
+
+enum BadInternalEnum { }
+
+/**
+ * ...
+ */
+enum GoodInternalEnum { }
+
+export interface BadExportedInterface { }
+
+export interface GoodExportedInterface { }
+
+interface BadInternalInterface { }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~      [Documentation must exist for interfaces.]
+
+/**
+ * ...
+ */
+interface GoodInternalInterface { }
