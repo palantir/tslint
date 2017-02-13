@@ -10,6 +10,7 @@ let strType = "string";
 let objType = new Object();
 let classType = new C();
 let enumType = MyEnum.A;
+let numFromEnumType = MyEnum.A | MyEnum.B;
 let boolFn = () => { return true; };
 let strFn = () => { return strType; };
 let numFn = () => { return numType; };
@@ -58,6 +59,9 @@ classType ? strType : undefined;
 bwrapType ? 1 : 0;
 boolFn() ? numType : strType;
 boolType ? strType : undefined;
+enumType !== undefined ? enumType : MyEnum.B;
+enumType & MyEnum.A ? 1 : 0;
+numFromEnumType & MyEnum.A ? 1 : 0;
 
 /*** PrefixUnary Expressions ***/
 /*** Invalid ***/
@@ -74,10 +78,12 @@ boolType ? strType : undefined;
 !!boolFn();
 !boolExpr;
 !!boolType;
+!(enumType & MyEnum.A);
+!(numFromEnumType & MyEnum.A);
 
 /*** If Statement ***/
 /*** Invalid ***/
-if (MyEnum.A) { /* statements */ }
+if (enumType) { /* statements */ }
     ~~~~~~~~                       [If statement condition cannot be an Enum expression]
 
 /*** Valid ***/
@@ -90,10 +96,12 @@ if (classType) { /* statements */ }
 if (boolFn()) { /* statements */ }
 if (boolExpr) { /* statements */ }
 if (boolType) { /* statements */ }
+if (enumType & MyEnum.A) { /* statements */ }
+if (numFromEnumType & MyEnum.A) { /* statements */ }
 
 /*** While Statement ***/
 /*** Invalid ***/
-while (MyEnum.A) { /* statements */ }
+while (enumType) { /* statements */ }
        ~~~~~~~~                       [While statement condition cannot be an Enum expression]
 
 /*** Valid ***/
@@ -106,10 +114,12 @@ while (classType) { /* statements */ }
 while (boolFn()) { /* statements */ }
 while (boolExpr) { /* statements */ }
 while (boolType) { /* statements */ }
+while (enumType & MyEnum.A) { /* statements */ }
+while (numFromEnumType & MyEnum.A) { /* statements */ }
 
 /*** Do Statement ***/
 /*** Invalid ***/
-do { /* statements */ } while (MyEnum.A);
+do { /* statements */ } while (enumType);
                                ~~~~~~~~  [Do-While statement condition cannot be an Enum expression]
 
 /*** Valid ***/
@@ -122,6 +132,8 @@ do { /* statements */ } while (classType);
 do { /* statements */ } while (boolFn());
 do { /* statements */ } while (boolExpr);
 do { /* statements */ } while (boolType);
+do { /* statements */ } while (enumType & MyEnum.A);
+do { /* statements */ } while (numFromEnumType & MyEnum.A);
 
 /*** For Statement ***/
 /*** Valid ***/
