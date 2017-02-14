@@ -80,7 +80,7 @@ for (let i1 = 0; i1 < 4; i1++) {
 for (let i2 = 0;;) {    // failure
          ~~                        [Identifier 'i2' is never reassigned; use 'const' instead of 'let'.]
 }
-for (const i2 = 0;;) {    // failure
+for (const i2 = 0;;) {
 }
 
 // scope
@@ -130,8 +130,12 @@ let nest = () => {
 
 let nest2 = () => {
     ~~~~~           [Identifier 'nest2' is never reassigned; use 'const' instead of 'let'.]
+    let error = false;
+        ~~~~~           [Identifier 'error' is never reassigned; use 'const' instead of 'let'.]
     try {
     } catch(error) {
+        // variable error is block scoped
+        error = true;
     }
 }
 
@@ -167,3 +171,80 @@ switch (1) {
             ~      [Identifier 'y' is never reassigned; use 'const' instead of 'let'.]
         break;
 }
+
+var someVariable = 0;
+    ~~~~~~~~~~~~           [Identifier 'someVariable' is never reassigned; use 'const' instead of 'var'.]
+function funcxion(someVariable, someParameter) {
+    someVariable = 1;
+    {
+        var var1 = 0;
+        var var2 = 0;
+            ~~~~           [Identifier 'var2' is never reassigned; use 'const' instead of 'var'.]
+    }
+    {
+        var1 = 1;
+    }
+    {
+        let var2 = 1;
+        var2 = 2;
+    }
+}
+
+let shadowed1 = 0;
+    ~~~~~~~~~           [Identifier 'shadowed1' is never reassigned; use 'const' instead of 'let'.]
+let shadowed2 = 0;
+    ~~~~~~~~~           [Identifier 'shadowed2' is never reassigned; use 'const' instead of 'let'.]
+let shadowed3 = 0;
+    ~~~~~~~~~           [Identifier 'shadowed3' is never reassigned; use 'const' instead of 'let'.]
+function shadowVariables({shadowed1, ...shadowed2}, shadowed3) {
+    shadowed1 = 1;
+    shadowed2 = 1;
+    shadowed3 = 1;
+}
+
+// no error in for loop initializer
+for (let i = 1, l = arr.length; i < l; ++i) {
+}
+
+{
+    let d1 = 0;
+    let d2 = 0;
+    let d3 = 0;
+    let d4 = 0;
+    [(d1), ([d2]), ...[d3 = 1, ...(d4)]] = [];
+}
+
+{
+    let d1 = 0;
+    let d2 = 0;
+    let d3 = 0;
+    let d4 = 0;
+    let d5 = 0;
+    ({
+        d1 = 2,
+        foo: d2,
+        bar: {
+            ...d3
+        },
+        baz: {d4} = {},
+        ...(d5),
+    } = {});
+}
+
+{
+    let var1 = 0;
+        ~~~~           [Identifier 'var1' is never reassigned; use 'const' instead of 'let'.]
+    let var2 = 0;
+    function foo(var1 = var2 = 1, var2 = var1 = 1) {}
+    function foo2(p1 = var2 = 1) {
+        let var2 = 0;
+            ~~~~           [Identifier 'var2' is never reassigned; use 'const' instead of 'let'.]
+    }
+}
+
+// cannot fix, because of uninitialized variables
+let uninitialized;
+    ~~~~~~~~~~~~~           [Identifier 'uninitialized' is never reassigned; use 'const' instead of 'let'.]
+let initialized1 = 0, uninitialized2;
+    ~~~~~~~~~~~~           [Identifier 'initialized1' is never reassigned; use 'const' instead of 'let'.]
+                      ~~~~~~~~~~~~~~           [Identifier 'uninitialized2' is never reassigned; use 'const' instead of 'let'.]
