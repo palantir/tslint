@@ -28,7 +28,8 @@ export class Rule extends Lint.Rules.TypedRule {
         Usage of \`&&\` or \`||\` operators should not be with Enum type and expressions
          in \`do-while\`, \`for\`, \`if\`, and \`while\` statements should not be of Enum type.`,
         rationale: Lint.Utils.dedent `
-        Usage of Enum type in boolean expressions is often confusing especially because the first member of an Enum type is given a default value of 0.`,
+        Usage of Enum type in boolean expressions is often confusing especially because
+         the first member of an Enum type is given a default value of 0.`,
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: ["true"],
