@@ -29,7 +29,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Enforces indentation with tabs or spaces.",
         rationale: Lint.Utils.dedent`
             Using only one of tabs or spaces for indentation leads to more consistent editor behavior,
-            cleaner diffs in version control, and easier programatic manipulation.`,
+            cleaner diffs in version control, and easier programmatic manipulation.`,
         optionsDescription: Lint.Utils.dedent`
             One of the following arguments must be provided:
 
