@@ -34,8 +34,8 @@ export class Rule extends Lint.Rules.TypedRule {
 
     public static FAILURE_STRING = "'await' of non-Promise.";
 
-    public applyWithProgram(srcFile: ts.SourceFile, langSvc: ts.LanguageService): Lint.RuleFailure[] {
-        return this.applyWithWalker(new Walker(srcFile, this.getOptions(), langSvc.getProgram()));
+    public applyWithProgram(srcFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+        return this.applyWithWalker(new Walker(srcFile, this.getOptions(), program));
     }
 }
 

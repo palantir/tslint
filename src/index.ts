@@ -30,7 +30,6 @@ export * from "./enableDisableRules";
 export * from "./formatterLoader";
 export * from "./ruleLoader";
 export * from "./language/utils";
-export * from "./language/languageServiceHost";
 export * from "./language/walker";
 export * from "./language/formatter/formatter";
 

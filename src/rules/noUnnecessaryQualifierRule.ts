@@ -40,8 +40,8 @@ export class Rule extends Lint.Rules.TypedRule {
         return `Qualifier is unnecessary since '${name}' is in scope.`;
     }
 
-    public applyWithProgram(sourceFile: ts.SourceFile, langSvc: ts.LanguageService): Lint.RuleFailure[] {
-        return this.applyWithWalker(new Walker(sourceFile, this.getOptions(), langSvc.getProgram()));
+    public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+        return this.applyWithWalker(new Walker(sourceFile, this.getOptions(), program));
     }
 }
 

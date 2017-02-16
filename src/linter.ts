@@ -34,7 +34,6 @@ import { isError, showWarningOnce } from "./error";
 import { findFormatter } from "./formatterLoader";
 import { ILinterOptions, LintResult } from "./index";
 import { IFormatter } from "./language/formatter/formatter";
-import { createLanguageService, wrapProgram } from "./language/languageServiceHost";
 import { Fix, IRule, isTypedRule, RuleFailure, RuleSeverity } from "./language/rule/rule";
 import * as utils from "./language/utils";
 import { loadRules } from "./ruleLoader";
@@ -53,7 +52,6 @@ class Linter {
 
     private failures: RuleFailure[] = [];
     private fixes: RuleFailure[] = [];
-    private languageService: ts.LanguageService;
 
     /**
      * Creates a TypeScript program object from a tsconfig.json file path and optional project directory.
@@ -92,10 +90,6 @@ class Linter {
         if ((options as any).configuration != null) {
             throw new Error("ILinterOptions does not contain the property `configuration` as of version 4. " +
                 "Did you mean to pass the `IConfigurationFile` object to lint() ? ");
-        }
-
-        if (program) {
-            this.languageService = wrapProgram(program);
         }
     }
 
@@ -179,9 +173,9 @@ class Linter {
         let ruleFailures: RuleFailure[] = [];
         try {
             if (this.program && isTypedRule(rule)) {
-                ruleFailures = rule.applyWithProgram(sourceFile, this.languageService);
+                ruleFailures = rule.applyWithProgram(sourceFile, this.program);
             } else {
-                ruleFailures = rule.apply(sourceFile, this.languageService);
+                ruleFailures = rule.apply(sourceFile);
             }
         } catch (error) {
             if (isError(error)) {
@@ -223,7 +217,6 @@ class Linter {
             }
         } else {
             sourceFile = utils.getSourceFile(fileName, source);
-            this.languageService = createLanguageService(fileName, source);
         }
 
         if (sourceFile === undefined) {

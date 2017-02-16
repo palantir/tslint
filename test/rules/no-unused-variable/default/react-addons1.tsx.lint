@@ -1,4 +1,0 @@
-import * as React from "react/addons";
-            ~~~~~                      [Unused import: 'React']
-
-console.log(<div></div>);

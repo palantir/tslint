@@ -19,7 +19,7 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
-export class Rule extends Lint.Rules.AbstractRule {
+export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-use-before-declare",
@@ -35,110 +35,61 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_PREFIX = "variable '";
-    public static FAILURE_STRING_POSTFIX = "' used before declaration";
+    public static FAILURE_STRING(name: string) {
+        return `variable '${name}' used before declaration`;
+    }
 
-    public apply(sourceFile: ts.SourceFile, languageService: ts.LanguageService): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoUseBeforeDeclareWalker(sourceFile, this.getOptions(), languageService));
+    public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+        return this.applyWithWalker(new NoUseBeforeDeclareWalker(sourceFile, this.getOptions(), program));
     }
 }
 
-type VisitedVariables = Set<string>;
+class NoUseBeforeDeclareWalker extends Lint.ProgramAwareRuleWalker {
+    public visitIdentifier(node: ts.Identifier) {
+        const parent = node.parent!;
 
-class NoUseBeforeDeclareWalker extends Lint.ScopeAwareRuleWalker<VisitedVariables> {
-    private importedPropertiesPositions: number[] = [];
-
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions, private languageService: ts.LanguageService) {
-        super(sourceFile, options);
-    }
-
-    public createScope(): VisitedVariables {
-        return new Set<string>();
-    }
-
-    public visitBindingElement(node: ts.BindingElement) {
-        const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
-        const isBlockScoped = Lint.isBlockScopedBindingElement(node);
-
-        // use-before-declare errors for block-scoped vars are caught by tsc
-        if (isSingleVariable && !isBlockScoped) {
-            const variableName = (node.name as ts.Identifier).text;
-            this.validateUsageForVariable(variableName, node.name.getStart());
-        }
-
-        super.visitBindingElement(node);
-    }
-
-    public visitImportDeclaration(node: ts.ImportDeclaration) {
-        const importClause = node.importClause;
-
-        // named imports & namespace imports handled by other walker methods
-        // importClause will be null for bare imports
-        if (importClause != null && importClause.name != null) {
-            const variableIdentifier = importClause.name;
-            this.validateUsageForVariable(variableIdentifier.text, variableIdentifier.getStart());
-        }
-
-        super.visitImportDeclaration(node);
-    }
-
-    public visitImportEqualsDeclaration(node: ts.ImportEqualsDeclaration) {
-        const name = node.name as ts.Identifier;
-        this.validateUsageForVariable(name.text, name.getStart());
-
-        super.visitImportEqualsDeclaration(node);
-    }
-
-    public visitNamedImports(node: ts.NamedImports) {
-        for (const namedImport of node.elements) {
-            if (namedImport.propertyName != null) {
-                this.saveImportedPropertiesPositions(namedImport.propertyName.getStart());
-            }
-            this.validateUsageForVariable(namedImport.name.text, namedImport.name.getStart());
-        }
-        super.visitNamedImports(node);
-    }
-
-    public visitNamespaceImport(node: ts.NamespaceImport) {
-        this.validateUsageForVariable(node.name.text, node.name.getStart());
-        super.visitNamespaceImport(node);
-    }
-
-    public visitVariableDeclaration(node: ts.VariableDeclaration) {
-        const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
-        const variableName = (node.name as ts.Identifier).text;
-        const currentScope = this.getCurrentScope();
-
-        // only validate on the first variable declaration within the current scope
-        if (isSingleVariable && !currentScope.has(variableName)) {
-            this.validateUsageForVariable(variableName, node.getStart());
-        }
-
-        currentScope.add(variableName);
-        super.visitVariableDeclaration(node);
-    }
-
-    private validateUsageForVariable(name: string, position: number) {
-        const fileName = this.getSourceFile().fileName;
-        const highlights = this.languageService.getDocumentHighlights(fileName, position, [fileName]);
-        if (highlights != null) {
-            for (const highlight of highlights) {
-                for (const highlightSpan of highlight.highlightSpans) {
-                    const referencePosition = highlightSpan.textSpan.start;
-                    if (referencePosition < position && !this.isImportedPropertyName(referencePosition)) {
-                        const failureString = Rule.FAILURE_STRING_PREFIX + name + Rule.FAILURE_STRING_POSTFIX;
-                        this.addFailureAt(referencePosition, name.length, failureString);
-                    }
+        switch (parent!.kind) {
+            case ts.SyntaxKind.PropertyAccessExpression:
+                if ((parent as ts.PropertyAccessExpression).name === node) {
+                    // Ignore `y` in `x.y`.
+                   return;
                 }
-            }
+                break;
+
+            case ts.SyntaxKind.TypeReference:
+                // Ignore types.
+                return;
+
+            default:
         }
-    }
 
-    private saveImportedPropertiesPositions(position: number): void {
-        this.importedPropertiesPositions.push(position);
-    }
+        const checker = this.getTypeChecker();
+        const symbol = parent.kind === ts.SyntaxKind.ExportSpecifier
+            ? checker.getExportSpecifierLocalTargetSymbol(parent as ts.ExportSpecifier)
+            : checker.getSymbolAtLocation(node);
+        if (!symbol) {
+            return;
+        }
 
-    private isImportedPropertyName(position: number): boolean {
-        return this.importedPropertiesPositions.indexOf(position) !== -1;
+        const { declarations } = symbol;
+        if (!declarations) {
+            return;
+        }
+
+        const declaredBefore = declarations.some((decl) => {
+            switch (decl.kind) {
+                case ts.SyntaxKind.FunctionDeclaration:
+                    // Functions may be declared later.
+                    return true;
+                default:
+                    // Use <= in case this *is* the declaration.
+                    // If it's a global declared in a different file, OK.
+                    return decl.pos <= node.pos || decl.getSourceFile() !== this.getSourceFile();
+            }
+        });
+
+        if (!declaredBefore) {
+            this.addFailureAtNode(node, Rule.FAILURE_STRING(node.text));
+        }
     }
 }
