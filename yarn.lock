@@ -1130,6 +1130,10 @@ tslint@latest:
     resolve "^1.1.7"
     update-notifier "^1.0.2"
 
+tsutils@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/tsutils/-/tsutils-1.0.0.tgz#a1f87d1092179987d13a1a8406deaec28ac3a0ad"
+
 type-detect@0.1.1:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/type-detect/-/type-detect-0.1.1.tgz#0ba5ec2a885640e470ea4e8505971900dac58822"
