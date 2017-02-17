@@ -23,7 +23,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-any",
-        description: "Diallows usages of `any` as a type declaration.",
+        description: "Disallows usages of `any` as a type declaration.",
         hasFix: true,
         rationale: "Using `any` as a type declaration nullifies the compile-time benefits of the type system.",
         optionsDescription: "Not configurable.",
