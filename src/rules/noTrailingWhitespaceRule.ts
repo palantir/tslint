@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -73,29 +74,29 @@ export class Rule extends Lint.Rules.AbstractRule {
 function walk(ctx: Lint.WalkContext<IgnoreOption>) {
     let lastSeenWasWhitespace = false;
     let lastSeenWhitespacePosition = 0;
-    Lint.forEachToken(ctx.sourceFile, false, (fullText, kind, pos) => {
+    utils.forEachTokenWithTrivia(ctx.sourceFile, (fullText, kind, range) => {
         if (kind === ts.SyntaxKind.NewLineTrivia || kind === ts.SyntaxKind.EndOfFileToken) {
             if (lastSeenWasWhitespace) {
-                reportFailure(ctx, lastSeenWhitespacePosition, pos.tokenStart);
+                reportFailure(ctx, lastSeenWhitespacePosition, range.pos);
             }
             lastSeenWasWhitespace = false;
         } else if (kind === ts.SyntaxKind.WhitespaceTrivia) {
             lastSeenWasWhitespace = true;
-            lastSeenWhitespacePosition = pos.tokenStart;
+            lastSeenWhitespacePosition = range.pos;
         } else {
             if (ctx.options !== IgnoreOption.Comments) {
                 if (kind === ts.SyntaxKind.SingleLineCommentTrivia) {
-                    const commentText = fullText.substring(pos.tokenStart + 2, pos.end);
+                    const commentText = fullText.substring(range.pos + 2, range.end);
                     const match = /\s+$/.exec(commentText);
                     if (match !== null) {
-                        reportFailure(ctx, pos.end - match[0].length, pos.end);
+                        reportFailure(ctx, range.end - match[0].length, range.end);
                     }
                 } else if (kind === ts.SyntaxKind.MultiLineCommentTrivia &&
                            (ctx.options !== IgnoreOption.JsDoc ||
-                            fullText[pos.tokenStart + 2] !== "*" ||
-                            fullText[pos.tokenStart + 3] === "*")) {
-                    let startPos = pos.tokenStart + 2;
-                    const commentText = fullText.substring(startPos, pos.end - 2);
+                            fullText[range.pos + 2] !== "*" ||
+                            fullText[range.pos + 3] === "*")) {
+                    let startPos = range.pos + 2;
+                    const commentText = fullText.substring(startPos, range.end - 2);
                     const lines = commentText.split("\n");
                     // we don't want to check the content of the last comment line, as it is always followed by */
                     const len = lines.length - 1;

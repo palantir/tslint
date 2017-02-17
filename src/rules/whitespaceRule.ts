@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -80,7 +81,7 @@ class WhitespaceWalker extends Lint.RuleWalker {
         super.visitSourceFile(node);
 
         let prevTokenShouldBeFollowedByWhitespace = false;
-        Lint.forEachToken(node, false, (_text, tokenKind, pos, parent) => {
+        utils.forEachTokenWithTrivia(node, (_text, tokenKind, range, parent) => {
             if (tokenKind === ts.SyntaxKind.WhitespaceTrivia ||
                 tokenKind === ts.SyntaxKind.NewLineTrivia ||
                 tokenKind === ts.SyntaxKind.EndOfFileToken) {
@@ -88,7 +89,7 @@ class WhitespaceWalker extends Lint.RuleWalker {
                 prevTokenShouldBeFollowedByWhitespace = false;
                 return;
             } else if (prevTokenShouldBeFollowedByWhitespace) {
-                this.addMissingWhitespaceErrorAt(pos.tokenStart);
+                this.addMissingWhitespaceErrorAt(range.pos);
                 prevTokenShouldBeFollowedByWhitespace = false;
             }
             // check for trailing space after the given tokens

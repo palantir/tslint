@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -67,7 +68,7 @@ class Walker extends Lint.ProgramAwareRuleWalker {
                 break;
             case ts.SyntaxKind.PropertyAccessExpression:
                 const { expression, name } = node as ts.PropertyAccessExpression;
-                if (isEntityNameExpression(expression)) {
+                if (utils.isEntityNameExpression(expression)) {
                     this.visitNamespaceAccess(node, expression, name);
                     break;
                 }
@@ -124,11 +125,6 @@ class Walker extends Lint.ProgramAwareRuleWalker {
     private tryGetAliasedSymbol(symbol: ts.Symbol): ts.Symbol | undefined {
         return Lint.isSymbolFlagSet(symbol, ts.SymbolFlags.Alias) ? this.getTypeChecker().getAliasedSymbol(symbol) : undefined;
     }
-}
-
-function isEntityNameExpression(expr: ts.Expression): expr is ts.EntityNameExpression {
-    return expr.kind === ts.SyntaxKind.Identifier ||
-        expr.kind === ts.SyntaxKind.PropertyAccessExpression && isEntityNameExpression((expr as ts.PropertyAccessExpression).expression);
 }
 
 // TODO: Should just be `===`. See https://github.com/palantir/tslint/issues/1969
