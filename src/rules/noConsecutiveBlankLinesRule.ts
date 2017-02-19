@@ -98,14 +98,12 @@ class NoConsecutiveBlankLinesWalker extends Lint.RuleWalker {
             }
 
             const startLineNum = arr[0];
+            const endLineNum = arr[arr.length - 1];
             const pos = lineStarts[startLineNum + 1];
-            let end = pos + 1;
+            const end = lineStarts[endLineNum];
             const isInTemplate = templateIntervals.some((interval) => pos >= interval.startPosition && pos < interval.endPosition);
+            
             if (!isInTemplate) {
-                const txt = soureFileLines[node.getLineAndCharacterOfPosition(pos).line];
-                if (txt.endsWith(" ") || txt.endsWith("\t")) {
-                    end += txt.length;
-                }
                 const fix = this.createFix(this.deleteFromTo(pos, end));
                 this.addFailureAt(pos, 1, failureMessage, fix);
             }
