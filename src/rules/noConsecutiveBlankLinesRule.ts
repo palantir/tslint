@@ -98,7 +98,7 @@ class NoConsecutiveBlankLinesWalker extends Lint.RuleWalker {
             }
 
             const startLineNum = arr[0];
-            const endLineNum = arr[arr.length - 1];
+            const endLineNum = arr[arr.length - allowedBlanks];
             const pos = lineStarts[startLineNum + 1];
             const end = lineStarts[endLineNum];
             const isInTemplate = templateIntervals.some((interval) => pos >= interval.startPosition && pos < interval.endPosition);
