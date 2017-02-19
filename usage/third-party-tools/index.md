@@ -17,6 +17,7 @@ _Note: Most of these tools are not maintained by TSLint._
 * [Web Analyzer][12] ([Visual Studio][13])
 * [Webstorm][14]
 * [mocha-tslint][15] ([Mocha][16])
+* [tslint.tmbundle][17] ([TextMate][18])
 
 
 [0]: https://github.com/palantir/grunt-tslint
@@ -36,3 +37,5 @@ _Note: Most of these tools are not maintained by TSLint._
 [14]: https://www.jetbrains.com/help/webstorm/2016.1/tslint.html
 [15]: https://github.com/t-sauer/mocha-tslint
 [16]: https://mochajs.org/
+[17]: https://github.com/natesilva/tslint.tmbundle
+[18]: https://macromates.com
