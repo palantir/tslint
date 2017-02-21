@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2013 Palantir Technologies, Inc.
+ * Copyright 2017 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-non-null-assertion",
-        description: "Disallows non null assertions.",
+        description: "Disallows non-null assertions.",
+        rationale: "Using non-null assertion cancels the benefits of the strict null checking mode.",
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: ["true"],
