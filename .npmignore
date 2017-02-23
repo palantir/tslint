@@ -12,6 +12,7 @@
 appveyor.yml
 circle.yml
 tslint.json
+yarn.lock
 /build/
 /docs/
 /scripts/
