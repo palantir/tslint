@@ -11,7 +11,7 @@ var x = [{
     d: 34,
     c: (a + b)
 }];
-~   [Missing trailing comma]
+ ~nil   [Missing trailing comma]
 
 var s = {
     sA: 6,
@@ -52,18 +52,18 @@ var zz = [
 var a = [{a: 1, b: 2, d: 34, c: (a + b),},];
 
 var b = [{a: 1, b: 2, d: 34, c: (a + b)}];
-                                      ~    [Missing trailing comma]
-                                       ~   [Missing trailing comma]
+                                       ~nil    [Missing trailing comma]
+                                        ~nil   [Missing trailing comma]
 
 var c = {cA: 42, cB: 24,};
 
 var d = {dOne: 2, dTwo: 1};
-                        ~   [Missing trailing comma]
+                         ~nil   [Missing trailing comma]
 
 var cc = [42, 24,];
 
 var dd = [2, 1];
-             ~   [Missing trailing comma]
+              ~nil   [Missing trailing comma]
 
 var {
     sA,
@@ -104,12 +104,12 @@ var [
 var {cA, cB,} = c;
 
 var {dOne, dTwo} = d;
-              ~       [Missing trailing comma]
+               ~nil       [Missing trailing comma]
 
 var [ccA, ccB,] = cc;
 
 var [ddOne, ddTwo] = dd;
-                ~        [Missing trailing comma]
+                 ~nil        [Missing trailing comma]
 
 var a: [string, number] = null;
 
@@ -146,10 +146,10 @@ import {
 import {ClassA, ClassB,} from "module";
 
 import {ClassC, ClassD} from "module";
-                     ~                 [Missing trailing comma]
+                      ~nil                 [Missing trailing comma]
 
 function foo(bar: string, baz: string);
-                                    ~   [Missing trailing comma]
+                                     ~nil   [Missing trailing comma]
 
 function foo(bar: string, baz: string,);
 
@@ -164,7 +164,7 @@ function foo(
 );
 
 var foo = function(bar: string, baz: string) { return 42; };
-                                          ~                  [Missing trailing comma]
+                                           ~nil                  [Missing trailing comma]
 
 var foo = function(bar: string, baz: string,) { return 42; };
 
@@ -183,7 +183,7 @@ var foo = function(
 };
 
 function foo(bar: string, baz: string) { return 42; }
-                                    ~                 [Missing trailing comma]
+                                     ~nil                 [Missing trailing comma]
 
 function foo(bar: string, baz: string,) { return 42; }
 
@@ -214,7 +214,7 @@ function foo(bar: string, baz: string,
 }
 
 var foo = (bar: string, baz: string) => 42;
-                                  ~         [Missing trailing comma]
+                                   ~nil         [Missing trailing comma]
 
 var foo = (bar: string, baz: string,) => 42;
 
@@ -229,7 +229,7 @@ var foo = (
 ) => 42;
 
 var foo: (bar: string, baz: string) => number = null;
-                                 ~                    [Missing trailing comma]
+                                  ~nil                    [Missing trailing comma]
 
 var foo: (bar: string, baz: string,) => number = null;
 
@@ -244,7 +244,7 @@ var foo: (
 ) => number = null;
 
 var foo: (bar: string, baz: string) => number;
-                                 ~             [Missing trailing comma]
+                                  ~nil             [Missing trailing comma]
 
 var foo: (bar: string, baz: string,) => number;
 
@@ -259,7 +259,7 @@ var foo: (
 ) => number;
 
 var foo: new (bar: string, baz: string) => Test;
-                                     ~           [Missing trailing comma]
+                                      ~nil           [Missing trailing comma]
 
 var foo: new (bar: string, baz: string,) => Test;
 
@@ -274,7 +274,7 @@ var foo: new (
 ) => Test;
 
 var x = foo(42, 43);
-                 ~   [Missing trailing comma]
+                  ~nil   [Missing trailing comma]
 
 var x = foo(42, 43,);
 
@@ -289,7 +289,7 @@ var x = foo(
 );
 
 var x = new Test("foo");
-                     ~   [Missing trailing comma]
+                      ~nil   [Missing trailing comma]
 
 var x = new Test("foo",);
 
@@ -316,7 +316,7 @@ var x: {
 };
 
 var x: { foo: string, bar: string };
-                                ~    [Missing trailing comma]
+                                 ~nil    [Missing trailing comma]
 
 var x: { foo: string, bar: string, };
 
@@ -333,7 +333,7 @@ var x: {
 class Test<A, B, C> {
 
     constructor(bar: string) { }
-                          ~      [Missing trailing comma]
+                           ~nil      [Missing trailing comma]
 
     constructor(bar: string, baz: string,) { }
 
@@ -351,7 +351,7 @@ class Test<A, B, C> {
     ) { }
 
     public foo(bar: string, baz: string) {
-                                      ~    [Missing trailing comma]
+                                       ~nil    [Missing trailing comma]
         return 42;
     }
 
@@ -410,7 +410,7 @@ class Test<A, B, C> {
     >() { return 42; }
 
     set bar(foo: string) { }
-                      ~      [Missing trailing comma]
+                       ~nil      [Missing trailing comma]
 
     set bar2(foo: string,) { }
 
@@ -440,7 +440,7 @@ class Test4<
 interface ITest<A ,B, C> {
 
     new <U, V>(bar: U): ITest<U, U, V>;
-                    ~                   [Missing trailing comma]
+                     ~nil                   [Missing trailing comma]
 
     new <
         U,
@@ -470,7 +470,7 @@ interface ITest<A ,B, C> {
     >;
 
     foo(bar: string, baz: string);
-                               ~   [Missing trailing comma]
+                                ~nil   [Missing trailing comma]
 
     foo2(bar: string, baz: string,);
 
@@ -534,7 +534,7 @@ interface ITest4<
 > { }
 
 enum Foo { BAR, BAZ }
-                  ~   [Missing trailing comma]
+                   ~nil   [Missing trailing comma]
 
 enum Foo { BAR, BAZ, }
 
@@ -549,7 +549,7 @@ enum Foo {
 }
 
 const enum Foo { BAR = 1, BAZ = 2 }
-                                ~   [Missing trailing comma]
+                                 ~nil   [Missing trailing comma]
 
 const enum Foo { BAR = 1, BAZ = 2, }
 

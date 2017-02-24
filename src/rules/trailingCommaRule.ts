@@ -164,7 +164,7 @@ class TrailingCommaWalker extends Lint.AbstractWalker<Options> {
                 Lint.Replacement.deleteText(list.end - 1, 1),
             ));
         } else if (!hasTrailingComma && option === "always") {
-            this.addFailureAt(list.end - 1, 1, Rule.FAILURE_STRING_ALWAYS, this.createFix(
+            this.addFailureAt(list.end, 0, Rule.FAILURE_STRING_ALWAYS, this.createFix(
                 Lint.Replacement.appendText(list.end, ","),
             ));
         }
