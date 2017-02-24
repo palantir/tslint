@@ -40,38 +40,33 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoUseBeforeDeclareWalker(sourceFile, this.getOptions(), program));
+        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, program.getTypeChecker()));
     }
 }
 
-class NoUseBeforeDeclareWalker extends Lint.ProgramAwareRuleWalker {
-    public visitIdentifier(node: ts.Identifier) {
-        const parent = node.parent!;
-
-        switch (parent!.kind) {
-            case ts.SyntaxKind.PropertyAccessExpression:
-                if ((parent as ts.PropertyAccessExpression).name === node) {
-                    // Ignore `y` in `x.y`.
-                   return;
-                }
-                break;
-
+function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
+    function recur(node: ts.Node): void {
+        switch (node.kind) {
             case ts.SyntaxKind.TypeReference:
                 // Ignore types.
                 return;
-
+            case ts.SyntaxKind.PropertyAccessExpression:
+                // Ignore `y` in `x.y`, but recurse to `x`.
+                return recur((node as ts.PropertyAccessExpression).expression);
+            case ts.SyntaxKind.Identifier:
+                return checkIdentifier(node as ts.Identifier, checker.getSymbolAtLocation(node));
+            case ts.SyntaxKind.ExportSpecifier:
+                return checkIdentifier(
+                    (node as ts.ExportSpecifier).name,
+                    checker.getExportSpecifierLocalTargetSymbol(node as ts.ExportSpecifier));
             default:
+                return ts.forEachChild(node, recur);
         }
+    }
+    ts.forEachChild(ctx.sourceFile, recur);
 
-        const checker = this.getTypeChecker();
-        const symbol = parent.kind === ts.SyntaxKind.ExportSpecifier
-            ? checker.getExportSpecifierLocalTargetSymbol(parent as ts.ExportSpecifier)
-            : checker.getSymbolAtLocation(node);
-        if (!symbol) {
-            return;
-        }
-
-        const { declarations } = symbol;
+    function checkIdentifier(node: ts.Identifier, symbol: ts.Symbol | undefined): void {
+        const declarations = symbol && symbol.declarations;
         if (!declarations) {
             return;
         }
@@ -82,14 +77,14 @@ class NoUseBeforeDeclareWalker extends Lint.ProgramAwareRuleWalker {
                     // Functions may be declared later.
                     return true;
                 default:
-                    // Use <= in case this *is* the declaration.
+                    // Use `<=` in case this *is* the declaration.
                     // If it's a global declared in a different file, OK.
-                    return decl.pos <= node.pos || decl.getSourceFile() !== this.getSourceFile();
+                    return decl.pos <= node.pos || decl.getSourceFile() !== ctx.sourceFile;
             }
         });
 
         if (!declaredBefore) {
-            this.addFailureAtNode(node, Rule.FAILURE_STRING(node.text));
+            ctx.addFailureAtNode(node, Rule.FAILURE_STRING(node.text));
         }
     }
 }
