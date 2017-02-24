@@ -134,7 +134,7 @@ class TrailingCommaWalker extends Lint.AbstractWalker<Options> {
         }
         // The trailing comma is part of the last member and therefore not present as hasTrailingComma on the NodeArray
         const hasTrailingComma = sourceText[members.end - 1] === ",";
-        return this.checkComma(hasTrailingComma, this.getOption(members, node.end), members.end);
+        return this.checkComma(hasTrailingComma, members, node.end);
     }
 
     private checkListWithEndToken(node: ts.Node, list: ts.NodeArray<ts.Node>, closeTokenKind: ts.SyntaxKind) {
@@ -143,7 +143,7 @@ class TrailingCommaWalker extends Lint.AbstractWalker<Options> {
         }
         const token = Lint.childOfKind(node, closeTokenKind);
         if (token !== undefined) {
-            return this.checkComma(list.hasTrailingComma, this.getOption(list, token.end), list.end);
+            return this.checkComma(list.hasTrailingComma, list, token.end);
         }
     }
 
@@ -151,24 +151,21 @@ class TrailingCommaWalker extends Lint.AbstractWalker<Options> {
         if (list.length === 0) {
             return;
         }
-        return this.checkComma(list.hasTrailingComma, this.getOption(list, closeElementPos), list.end);
+        return this.checkComma(list.hasTrailingComma, list, closeElementPos);
     }
 
-    /** Get the config for multiline or singleline. Expects `list.length !== 0` */
-    private getOption(list: ts.NodeArray<ts.Node>, closeElementPos: number) {
+    /* Expects `list.length !== 0` */
+    private checkComma(hasTrailingComma: boolean | undefined, list: ts.NodeArray<ts.Node>, closeTokenPos: number) {
         const lastElementLine = ts.getLineAndCharacterOfPosition(this.sourceFile, list[list.length - 1].end).line;
-        const closingTokenLine = ts.getLineAndCharacterOfPosition(this.sourceFile, closeElementPos).line;
-        return lastElementLine !== closingTokenLine ? this.options.multiline : this.options.singleline;
-    }
-
-    private checkComma(hasTrailingComma: boolean | undefined, option: string, end: number) {
+        const closeTokenLine = ts.getLineAndCharacterOfPosition(this.sourceFile, closeTokenPos).line;
+        const option = lastElementLine === closeTokenLine ? this.options.singleline : this.options.multiline;
         if (hasTrailingComma && option === "never") {
-            this.addFailureAt(end - 1, 1, Rule.FAILURE_STRING_NEVER, this.createFix(
-                Lint.Replacement.deleteText(end - 1, 1),
+            this.addFailureAt(list.end - 1, 1, Rule.FAILURE_STRING_NEVER, this.createFix(
+                Lint.Replacement.deleteText(list.end - 1, 1),
             ));
         } else if (!hasTrailingComma && option === "always") {
-            this.addFailureAt(end - 1, 1, Rule.FAILURE_STRING_ALWAYS, this.createFix(
-                Lint.Replacement.appendText(end, ","),
+            this.addFailureAt(list.end - 1, 1, Rule.FAILURE_STRING_ALWAYS, this.createFix(
+                Lint.Replacement.appendText(list.end, ","),
             ));
         }
     }
