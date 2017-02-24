@@ -29,7 +29,7 @@ import {
     loadConfigurationFromPath,
 } from "./configuration";
 import { EnableDisableRulesWalker } from "./enableDisableRules";
-import { showWarningOnce } from "./error";
+import { isError, showWarningOnce } from "./error";
 import { findFormatter } from "./formatterLoader";
 import { ILinterOptions, LintResult } from "./index";
 import { IFormatter } from "./language/formatter/formatter";
@@ -163,15 +163,20 @@ class Linter {
 
     private applyRule(rule: IRule, sourceFile: ts.SourceFile) {
         let ruleFailures: RuleFailure[] = [];
-        if (TypedRule.isTypedRule(rule)) {
-            if (this.program) {
+        try {
+            if (TypedRule.isTypedRule(rule) && this.program) {
                 ruleFailures = rule.applyWithProgram(sourceFile, this.languageService);
             } else {
-                showWarningOnce(`Warning: The '${rule.ruleName}' rule requires type checking. This rule will be ignored.`);
+                ruleFailures = rule.apply(sourceFile, this.languageService);
             }
-        } else {
-            ruleFailures = rule.apply(sourceFile, this.languageService);
+        } catch (error) {
+            if (isError(error)) {
+                showWarningOnce(`Warning: ${error.message}`);
+            } else {
+                console.warn(`Warning: ${error}`);
+            }
         }
+
         const fileFailures: RuleFailure[] = [];
         for (const ruleFailure of ruleFailures) {
             if (!this.containsRule(this.failures, ruleFailure)) {

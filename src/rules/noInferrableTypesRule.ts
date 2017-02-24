@@ -32,9 +32,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-inferrable-types",
         description: "Disallows explicit type declarations for variables or parameters initialized to a number, string, or boolean.",
-        rationale: "Explicit types where they can be easily infered by the compiler make code more verbose.",
+        rationale: "Explicit types where they can be easily inferred by the compiler make code more verbose.",
         optionsDescription: Lint.Utils.dedent`
-            Two argument may be optionally provided:
+            Two arguments may be optionally provided:
 
             * \`${OPTION_IGNORE_PARMS}\` allows specifying an inferrable type annotation for function params.
             This can be useful when combining with the \`typedef\` rule.
