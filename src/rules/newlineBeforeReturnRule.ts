@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as utils from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -47,7 +48,7 @@ class NewlineBeforeReturnWalker extends Lint.RuleWalker {
         super.visitReturnStatement(node);
 
         const parent = node.parent!;
-        if (!isBlockLike(parent)) {
+        if (!utils.isBlockLike(parent)) {
             // `node` is the only statement within this "block scope". No need to do any further validation.
             return;
         }
@@ -74,8 +75,4 @@ class NewlineBeforeReturnWalker extends Lint.RuleWalker {
             this.addFailureFromStartToEnd(start, start, Rule.FAILURE_STRING_FACTORY());
         }
     }
-}
-
-function isBlockLike(node: ts.Node): node is ts.BlockLike {
-    return "statements" in node;
 }

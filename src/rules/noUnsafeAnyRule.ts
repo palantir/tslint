@@ -42,9 +42,12 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 }
 
+// This is marked @internal, but we need it!
+const isExpression: (node: ts.Node) => node is ts.Expression = (ts as any).isExpression;
+
 class Walker extends Lint.ProgramAwareRuleWalker {
     public visitNode(node: ts.Node) {
-        if (ts.isExpression(node) && isAny(this.getType(node)) && !this.isAllowedLocation(node)) {
+        if (isExpression(node) && isAny(this.getType(node)) && !this.isAllowedLocation(node)) {
             this.addFailureAtNode(node, Rule.FAILURE_STRING);
         } else {
             super.visitNode(node);
@@ -110,9 +113,4 @@ class Walker extends Lint.ProgramAwareRuleWalker {
 
 function isAny(type: ts.Type | undefined): boolean {
     return type !== undefined && Lint.isTypeFlagSet(type, ts.TypeFlags.Any);
-}
-
-// This is marked @internal, but we need it!
-declare module "typescript" {
-    export function isExpression(node: ts.Node): node is ts.Expression;
 }

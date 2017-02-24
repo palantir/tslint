@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -50,9 +51,9 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class JsdocWalker extends Lint.RuleWalker {
     public visitSourceFile(node: ts.SourceFile) {
-        Lint.forEachComment(node, (fullText, kind, pos) => {
-            if (kind === ts.SyntaxKind.MultiLineCommentTrivia) {
-                this.findFailuresForJsdocComment(fullText.substring(pos.tokenStart, pos.end), pos.tokenStart);
+        utils.forEachComment(node, (fullText, comment) => {
+            if (comment.kind === ts.SyntaxKind.MultiLineCommentTrivia) {
+                this.findFailuresForJsdocComment(fullText.substring(comment.pos, comment.end), comment.pos);
             }
         });
     }
