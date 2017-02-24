@@ -120,7 +120,6 @@ var a: [string, number,] = null;
 var a: [
     string,
     number
-         ~ [Missing trailing comma]
 ] = null;
 
 var a: [
@@ -379,17 +378,16 @@ class Test<A, B, C> {
     }
 
     foo5<
-        T extends Test<[A, A], [A, A,], A>,
+        T extends Test<[A, A], [A, A], A>,
         U extends Test<B, B, B>,
         V extends Test<
             [
                 C,
                 C
-                ~ [Missing trailing comma]
             ],
             [
                 C,
-                C,
+                C
             ],
             C
         >
@@ -492,17 +490,16 @@ interface ITest<A ,B, C> {
     );
 
     foo5<
-        T extends Test<[A, A], [A, A,], A>,
+        T extends Test<[A, A], [A, A], A>,
         U extends Test<B, B, B>,
         V extends Test<
             [
                 C,
                 C
-                ~ [Missing trailing comma]
             ],
             [
                 C,
-                C,
+                C
             ],
             C
         >
@@ -522,7 +519,6 @@ interface ITest<A ,B, C> {
             foo: [
                 string,
                 string
-                     ~ [Missing trailing comma]
             ];
         }
     >();
@@ -572,3 +568,8 @@ const enum Foo {
     Baz = 2,
 }
 
+export {
+    foo,
+    bar
+      ~ [Missing trailing comma]
+};
