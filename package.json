@@ -28,7 +28,7 @@
     "lint": "npm-run-all -p lint:core lint:test lint:from-bin",
     "lint:core": "tslint \"src/**/*.ts\"",
     "lint:test": "tslint \"test/**/*.ts\" -e \"test/**/*.test.ts\"",
-    "lint:from-bin": "bin/tslint \"{src,test}/**/*.ts\" -e \"test/**/*.test.ts\"",
+    "lint:from-bin": "node bin/tslint \"{src,test}/**/*.ts\" -e \"test/**/*.test.ts\"",
     "test": "npm-run-all test:pre -p test:mocha test:rules",
     "test:pre": "cd ./test/config && npm install",
     "test:mocha": "mocha --reporter spec --colors \"build/test/**/*Tests.js\" build/test/assert.js",
