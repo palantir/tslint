@@ -9,7 +9,6 @@ switch (foo) {
     ~~~~    [expected a 'break' before 'case']
     case 4:
     default:
-    ~~~~~~~  [expected a 'break' before 'default']
         break;
 }
 
@@ -27,7 +26,6 @@ switch (foo) {
     case 1:
     case 2:
     default:
-    ~~~~~~~  [expected a 'break' before 'default']
         bar();
 }
 
@@ -36,7 +34,6 @@ switch (foo) {
         switch (bar) {
             case "":
             default:
-            ~~~~~~~  [expected a 'break' before 'default']
                 break;
         }
     case 2:
@@ -72,8 +69,11 @@ switch (foo) {
         bar();
         /* Testing */
         /* falls through */
+    default:
+        bar();
+        // falls through
     case 3:
-    break;
+        break;
 }
 
 // valid
@@ -84,4 +84,48 @@ switch (foo) {
     case 3:
         break;
     default:
+}
+
+// recognise blocks
+switch (foo) {
+    case 1: {
+        break;
+    }
+    case 2:
+}
+
+// recognise if-else
+switch (foo) {
+    case 1:
+        if (bar) {
+            break;
+        } else {
+            return;
+        }
+    case 2:
+        if (bar) {
+            break;
+        }
+    case 3:
+    ~~~~    [expected a 'break' before 'case']
+}
+
+// allow throw
+switch (foo) {
+    case 1:
+        throw bar;
+    case 2:
+}
+
+// handle nested switch statements
+switch (foo) {
+    case 1:
+        switch (bar) {
+            case 1:
+                foobar(); // this case clause falls through and returns in the default clause
+            default:
+            ~~~~~~~    [expected a 'break' before 'default']
+                return; 
+        }
+    case 2:
 }
