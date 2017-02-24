@@ -25,6 +25,8 @@
 
 import GitHubApi = require("github");
 import * as fs from "fs";
+import * as os from "os";
+import * as path from "path";
 
 const github = new GitHubApi({
     host: "api.github.com",
@@ -37,12 +39,15 @@ const repoInfo = {
     repo: "tslint",
 };
 
+const tokenFile = path.join(os.homedir(), "github_token.txt");
+
 // authenticate
 const auth: GitHubApi.Auth = {
-    token: fs.readFileSync("../../github_token.txt", "utf8").toString().trim(),
+    token: fs.readFileSync(tokenFile, "utf8").toString().trim(),
     type: "oauth",
 };
 console.log("Using OAuth token " + auth.token + "\n");
+
 github.authenticate(auth);
 
 const commits: ICommit[] = [];
