@@ -46,7 +46,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         return allowed === 1
             ? "Consecutive blank lines are forbidden"
             : `Exceeds the ${allowed} allowed consecutive blank lines`;
-    };
+    }
 
     /**
      * Disable the rule if the option is provided but non-numeric or less than the minimum.
