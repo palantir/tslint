@@ -11,8 +11,8 @@ class Clazz { // comment
 
 
         // still allowed since 2 lines only
-        
-        
+ 
+ 
         // this one won't be allowed anymore
 
         console.log("test");
@@ -24,4 +24,5 @@ class Clazz { // comment
 
 //Begin whitespace
 // The next lines contain only tabs or spaces, they are also considered "blank" lines
-		
+        
+            
