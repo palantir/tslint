@@ -1,0 +1,17 @@
+/** I am documented */
+export class Documented {
+      
+}
+
+export class Undocumented {
+             ~~~~~~~~~~~~   [Missing JSDoc comment.]
+}
+
+/** I am documented **/
+function iAmDocumented() {
+
+}
+
+function iAmUnDocumented() {
+
+}

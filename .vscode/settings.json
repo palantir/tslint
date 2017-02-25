@@ -9,15 +9,15 @@
 	"editor.wrappingColumn": 140,
 
 	// The folders to exclude when doing a full text search in the workspace.
-	"search.excludeFolders": [
-		".git",
-		".tscache",
-		"bower_components",
-                "bin",
-		"build",
-                "lib",
-		"node_modules"
-	],
+	"search.exclude": {
+		".git": true,
+		".tscache": true,
+		"node_modules": true,
+		"bower_components": true,
+		"bin": true,
+		"lib" : true,
+		"build": true
+	},
 
 	// Always use project's provided typescript compiler version
 	"typescript.tsdk": "node_modules/typescript/lib"

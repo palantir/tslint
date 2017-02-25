@@ -1,0 +1,7 @@
+class MyOKClass {
+
+}
+
+export class MyClass {
+             ~~~~~~~   [Missing JSDoc comment.]
+}
