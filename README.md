@@ -5,7 +5,7 @@
 
 TSLint
 ======
-
+ 
 An extensible linter for the [TypeScript language](https://github.com/Microsoft/TypeScript).
 
 TSLint supports:
