@@ -84,7 +84,12 @@ class MyClass {
 
     public initializedMethodPropertyWithoutSemicolon1Line = () => { return "hi again"; }
                                                                                         ~nil [Missing semicolon]
-}
+    public someMethod() {
+        return;
+    };
+     ~ [Unnecessary semicolon]
+};
+ ~ [Unnecessary semicolon]
 
 interface ITest {
     foo?: string
@@ -92,7 +97,7 @@ interface ITest {
     bar: number // handles comment
                ~nil [Missing semicolon]
     qux: string, // handles comment
-               ~nil [Interface properties should be separated by semicolons]
+               ~ [Interface properties should be separated by semicolons]
     baz: boolean;
     readonly raz: number;
 }
@@ -111,3 +116,10 @@ export = Date
 type t = number;
 type t = number
                ~nil [Missing semicolon]
+
+if (true);
+         ~ [Unnecessary semicolon]
+for(;;);
+
+;
+~ [Unnecessary semicolon]

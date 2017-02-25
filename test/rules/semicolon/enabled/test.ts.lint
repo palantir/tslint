@@ -96,7 +96,7 @@ interface ITest {
     bar: number
                ~nil [Missing semicolon]
     qux: string,
-               ~nil [Interface properties should be separated by semicolons]
+               ~ [Interface properties should be separated by semicolons]
     baz: boolean;
 }
 

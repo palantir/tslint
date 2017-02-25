@@ -62,6 +62,9 @@ class MyClass {
     public initializedMethodProperty1Line = () => { return "hi"; };
 
     public initializedMethodPropertyWithoutSemicolon1Line = () => { return "hi again"; };
+    public someMethod() {
+        return;
+    }
 }
 
 interface ITest {
@@ -82,3 +85,8 @@ export = Date;
 export = Date;
 type t = number;
 type t = number;
+
+if (true);
+for(;;);
+
+

@@ -87,7 +87,12 @@ class MyClass {
 
     public initializedMethodPropertyWithoutSemicolon1Line = () => { return "hi again"; }
                                                                                      ~ [Unnecessary semicolon]
-}
+    public someMethod() {
+        return
+    };
+     ~ [Unnecessary semicolon]
+};
+ ~ [Unnecessary semicolon]
 
 interface ITest {
     foo?: string;
@@ -146,3 +151,10 @@ export = Date
 type t = number;
                ~ [Unnecessary semicolon]
 type t = number
+
+if (true);
+         ~ [Unnecessary semicolon]
+for(;;);
+
+;
+~ [Unnecessary semicolon]
