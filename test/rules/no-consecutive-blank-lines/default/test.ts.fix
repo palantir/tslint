@@ -16,12 +16,12 @@ class Clazz { // comment
 
 //Begin whitespace
 // The next two lines of "code" contain only tabs or spaces, they are also considered "blank" lines
-		
+        
 let foo = `
  
  
 `;
 
 let bar = `${bar
-
+ 
 }`;
