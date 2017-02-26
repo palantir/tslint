@@ -1,0 +1,111 @@
+/**
+ * @license
+ * Copyright 2017 Palantir Technologies, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { isBinaryExpression } from "tsutils";
+import * as ts from "typescript";
+
+import * as Lint from "../index";
+
+const OPTION_BINARY_OK = "binary-ok";
+
+export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "prefer-template",
+        description: "Prefer a template expression over string literal concatenation.",
+        optionsDescription: Lint.Utils.dedent`
+            If \`${OPTION_BINARY_OK}\` is specified, then a single concatenation (\`x + y\`) is allowed, but not more (\`x + y + z\`).`,
+        options: {
+            type: "string",
+            enum: [OPTION_BINARY_OK],
+        },
+        optionExamples: ["true"],
+        type: "style",
+        typescriptOnly: false,
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
+    public static FAILURE_STRING = "Use a template literal instead of concatenating with a string literal.";
+
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        if (sourceFile.isDeclarationFile) {
+            return []; // Not possible in a declaration file
+        }
+
+        const binaryOk = this.getOptions().ruleArguments.indexOf(OPTION_BINARY_OK) !== -1;
+        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, binaryOk));
+    }
+}
+
+function walk(ctx: Lint.WalkContext<void>, binaryOk: boolean): void {
+    return ts.forEachChild(ctx.sourceFile, cb);
+    function cb(node: ts.Node): void {
+        if (isError(node, binaryOk)) {
+            ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
+        } else {
+            return ts.forEachChild(node, cb);
+        }
+    }
+}
+
+function isError(node: ts.Node, binaryOk: boolean): boolean {
+    if (!isPlusExpression(node)) {
+        return false;
+    }
+
+    const { left, right } = node;
+    const l = isStringLike(left);
+    const r = isStringLike(right);
+
+    if (l && r) {
+        // If they're both string literals, ignore. It might be for formatting.
+        return false;
+    } else if (!l && !r) {
+        // Watch out for `"a" + b + c`.
+        return containsAnyStringLiterals(left);
+    } else if (l) {
+        // `"x" + y`
+        return !binaryOk;
+    } else {
+        // `? + "b"`
+        return !binaryOk || isPlusExpression(left);
+    }
+}
+
+function containsAnyStringLiterals(node: ts.Node): boolean {
+    if (!isPlusExpression(node)) {
+        return false;
+    }
+
+    const { left, right } = node;
+    return isStringLike(right) || isStringLike(left) || containsAnyStringLiterals(left);
+}
+
+function isPlusExpression(node: ts.Node): node is ts.BinaryExpression {
+    return isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.PlusToken;
+}
+
+function isStringLike(node: ts.Node): node is ts.StringLiteral | ts.TemplateLiteral {
+    switch (node.kind) {
+        case ts.SyntaxKind.StringLiteral:
+        case ts.SyntaxKind.NoSubstitutionTemplateLiteral:
+        case ts.SyntaxKind.TemplateExpression:
+            return true;
+        default:
+            return false;
+    }
+}
