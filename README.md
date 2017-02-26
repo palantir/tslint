@@ -107,6 +107,9 @@ __`tslint:recommended`__ is a stable, somewhat opinionated set of rules which we
 
 __`tslint:latest`__ extends `tslint:recommended` and is continuously updated to include configuration for the latest rules in every TSLint release. Using this config may introduce breaking changes across minor releases as new rules are enabled which cause lint failures in your code. When TSLint reaches a major version bump, `tslint:recommended` will be updated to be identical to `tslint:latest`.
 
+__`tslint:all`__ turns on all rules to their strictest settings. This will use type checking, so it must be combined with the `--project` option.
+(Exceptions are [`"ban"`](https://palantir.github.io/tslint/rules/ban/), [`"import-blacklist"`](https://palantir.github.io/tslint/rules/import-blacklist/), and [`"file-header"`](https://palantir.github.io/tslint/rules/file-header/), which have no sensible defaults.)
+
 See the [core rules list](#core-rules) below for descriptions of all the rules.
 
 #### CLI
