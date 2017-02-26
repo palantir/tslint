@@ -133,6 +133,17 @@ export function someAncestor(node: ts.Node, predicate: (n: ts.Node) => boolean):
     return predicate(node) || (node.parent != null && someAncestor(node.parent, predicate));
 }
 
+export function ancestorWhere<T extends ts.Node>(node: ts.Node, predicate: (n: ts.Node) => boolean): ts.Node | undefined {
+    let cur: ts.Node | undefined = node;
+    do {
+        if (predicate(cur)) {
+            return cur as T;
+        }
+        cur = cur.parent;
+    } while (cur);
+    return undefined;
+}
+
 export function isAssignment(node: ts.Node) {
     if (node.kind === ts.SyntaxKind.BinaryExpression) {
         const binaryExpression = node as ts.BinaryExpression;
