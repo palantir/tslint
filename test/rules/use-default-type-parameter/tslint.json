@@ -1,0 +1,8 @@
+{
+  "linterOptions": {
+    "typeCheck": true
+  },
+  "rules": {
+    "use-default-type-parameter": true
+  }
+}
