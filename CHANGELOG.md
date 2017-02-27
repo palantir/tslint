@@ -30,6 +30,8 @@ v4.5.0
 - [enhancement] Don't exit when a rule requires type checking but type checking is not enabled (#2188)
 - [enhancement] `no-switch-case-fallthrough` allow single line comment `// falls through` (#2218)
 - [enhancement] `no-unbound-method` allows property access and binary expressions (#2143)
+- [api] Introduce `AbstractWalker` for performance (#2093)
+    - see [performance] (https://palantir.github.io/tslint/develop/custom-rules/performance.html) and [migration] (https://palantir.github.io/tslint/develop/custom-rules/migration.html) docs
 
 Thanks to our contributors!
 
