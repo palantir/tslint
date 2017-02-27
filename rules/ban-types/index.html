@@ -1,0 +1,37 @@
+---
+ruleName: ban-types
+description: |-
+
+  Bans specific types from being used. Does not ban the
+  corresponding runtime objects from being used.
+options:
+  type: list
+  listType:
+    type: array
+    items:
+      type: string
+    minLength: 1
+    maxLength: 2
+optionsDescription: |-
+
+  A list of `["regex", "optional explanation here"]`, which bans
+  types that match `regex`
+optionExamples:
+  - '[true, ["Object", "Use {} instead."], ["String"]]'
+type: typescript
+typescriptOnly: true
+layout: rule
+title: 'Rule: ban-types'
+optionsJSON: |-
+  {
+    "type": "list",
+    "listType": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minLength": 1,
+      "maxLength": 2
+    }
+  }
+---

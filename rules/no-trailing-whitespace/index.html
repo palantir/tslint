@@ -2,14 +2,37 @@
 ruleName: no-trailing-whitespace
 description: Disallows trailing whitespace at the end of a line.
 rationale: Keeps version control diffs clean as it prevents accidental whitespace from being committed.
-optionsDescription: Not configurable.
+optionsDescription: |-
+
+  Possible settings are:
+
+  * `"ignore-comments"`: Allows trailing whitespace in comments.
+  * `"ignore-jsdoc"`: Allows trailing whitespace only in JSDoc comments.
 hasFix: true
-options: null
+options:
+  type: array
+  items:
+    type: string
+    enum:
+      - ignore-comments
+      - ignore-jsdoc
 optionExamples:
   - 'true'
-type: maintainability
+  - '[true, "ignore-comments"]'
+  - '[true, "ignore-jsdoc"]'
+type: style
 typescriptOnly: false
 layout: rule
 title: 'Rule: no-trailing-whitespace'
-optionsJSON: 'null'
+optionsJSON: |-
+  {
+    "type": "array",
+    "items": {
+      "type": "string",
+      "enum": [
+        "ignore-comments",
+        "ignore-jsdoc"
+      ]
+    }
+  }
 ---

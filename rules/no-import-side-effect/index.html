@@ -1,0 +1,40 @@
+---
+description: Avoid import statements with side-effect.
+optionExamples:
+  - 'true'
+  - '[true, { "ignore-module": "(\.html|\.css)$" }]'
+options:
+  items:
+    properties:
+      ignore-module:
+        type: string
+    type: object
+  maxLength: 1
+  minLength: 0
+  type: array
+optionsDescription: |-
+
+  One argument may be optionally provided:
+
+  * `ignore-module` allows to specify a regex and ignore modules which it matches.
+rationale: Imports with side effects may have behavior which is hard for static verification.
+ruleName: no-import-side-effect
+type: typescript
+typescriptOnly: false
+layout: rule
+title: 'Rule: no-import-side-effect'
+optionsJSON: |-
+  {
+    "items": {
+      "properties": {
+        "ignore-module": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "maxLength": 1,
+    "minLength": 0,
+    "type": "array"
+  }
+---

@@ -10,8 +10,10 @@ optionsDescription: |-
   * `"parameter"` checks type specifier of function parameters for non-arrow functions.
   * `"arrow-parameter"` checks type specifier of function parameters for arrow functions.
   * `"property-declaration"` checks return types of interface properties.
-  * `"variable-declaration"` checks variable declarations.
+  * `"variable-declaration"` checks non-binding variable declarations.
   * `"member-variable-declaration"` checks member variable declarations.
+  * `"object-destructuring"` checks object destructuring declarations.
+  * `"array-destructuring"` checks array destructuring declarations.
 options:
   type: array
   items:
@@ -24,6 +26,8 @@ options:
       - property-declaration
       - variable-declaration
       - member-variable-declaration
+      - object-destructuring
+      - array-destructuring
   minLength: 0
   maxLength: 7
 optionExamples:
@@ -44,7 +48,9 @@ optionsJSON: |-
         "arrow-parameter",
         "property-declaration",
         "variable-declaration",
-        "member-variable-declaration"
+        "member-variable-declaration",
+        "object-destructuring",
+        "array-destructuring"
       ]
     },
     "minLength": 0,

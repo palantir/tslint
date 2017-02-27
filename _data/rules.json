@@ -128,6 +128,27 @@
     "typescriptOnly": false
   },
   {
+    "ruleName": "ban-types",
+    "description": "\nBans specific types from being used. Does not ban the\ncorresponding runtime objects from being used.",
+    "options": {
+      "type": "list",
+      "listType": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "minLength": 1,
+        "maxLength": 2
+      }
+    },
+    "optionsDescription": "\nA list of `[\"regex\", \"optional explanation here\"]`, which bans\ntypes that match `regex`",
+    "optionExamples": [
+      "[true, [\"Object\", \"Use {} instead.\"], [\"String\"]]"
+    ],
+    "type": "typescript",
+    "typescriptOnly": true
+  },
+  {
     "ruleName": "callable-types",
     "description": "An interface or literal type with just a call signature can be written as a function type.",
     "rationale": "style",
@@ -139,7 +160,7 @@
   {
     "ruleName": "class-name",
     "description": "Enforces PascalCased class and interface names.",
-    "rationale": "Makes it easy to differentitate classes from regular variables at a glance.",
+    "rationale": "Makes it easy to differentiate classes from regular variables at a glance.",
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
@@ -197,22 +218,167 @@
   {
     "ruleName": "completed-docs",
     "description": "Enforces documentation for important items be filled out.",
-    "optionsDescription": "\nEither `true` to enable for all, or any of\n`[\"classes\", \"functions\", \"methods\", \"properties\"]\nto choose individual ones.`",
+    "optionsDescription": "\n `true` to enable for [\"classes\", \"functions\", \"methods\", \"properties\"],\n or an array with each item in one of two formats:\n\n* `string` to enable for that type\n* `object` keying types to when their documentation is required:\n    * `\"methods\"` and `\"properties may specify:\n        * `\"privacies\":\n            * `\"all\"`\n            * `\"private\"`\n            * `\"protected\"`\n            * `\"public\"`\n        * `\"locations:\n            * `\"all\"`\n            * `\"instance\"`\n            * `\"static\"`\n    * All other types may specify `\"visibilities\"`:\n        * `\"all\"`\n        * `\"exported\"`\n        * `\"internal\"`\n\nTypes that may be enabled are:\n\n    * `\"classes\"`\n    * `\"enums\"`\n    * `\"functions\"`\n    * `\"interfaces\"`\n    * `\"methods\"`\n    * `\"namespaces\"`\n    * `\"properties\"`\n    * `\"types\"`\n    * `\"variables\"`",
     "options": {
       "type": "array",
       "items": {
-        "type": "string",
-        "enum": [
-          "classes",
-          "functions",
-          "methods",
-          "properties"
+        "anyOf": [
+          {
+            "enum": [
+              "classes",
+              "functions",
+              "methods",
+              "properties"
+            ],
+            "type": "string"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "classes": {
+                "properties": {
+                  "visibilities": {
+                    "enum": [
+                      "all",
+                      "exported",
+                      "internal"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "enums": {
+                "properties": {
+                  "visibilities": {
+                    "enum": [
+                      "all",
+                      "exported",
+                      "internal"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "functions": {
+                "properties": {
+                  "visibilities": {
+                    "enum": [
+                      "all",
+                      "exported",
+                      "internal"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "interfaces": {
+                "properties": {
+                  "visibilities": {
+                    "enum": [
+                      "all",
+                      "exported",
+                      "internal"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "methods": {
+                "properties": {
+                  "locations": {
+                    "enum": [
+                      "all",
+                      "instance",
+                      "static"
+                    ],
+                    "type": "string"
+                  },
+                  "privacies": {
+                    "enum": [
+                      "all",
+                      "private",
+                      "protected",
+                      "public"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "namespaces": {
+                "properties": {
+                  "visibilities": {
+                    "enum": [
+                      "all",
+                      "exported",
+                      "internal"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "properties": {
+                "properties": {
+                  "locations": {
+                    "enum": [
+                      "all",
+                      "instance",
+                      "static"
+                    ],
+                    "type": "string"
+                  },
+                  "privacies": {
+                    "enum": [
+                      "all",
+                      "private",
+                      "protected",
+                      "public"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "types": {
+                "properties": {
+                  "visibilities": {
+                    "enum": [
+                      "all",
+                      "exported",
+                      "internal"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "variables": {
+                "properties": {
+                  "visibilities": {
+                    "enum": [
+                      "all",
+                      "exported",
+                      "internal"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
         ]
       }
     },
     "optionExamples": [
       "true",
-      "[true, \"classes\", \"functions\"]"
+      "[true, \"enums\", \"functions\", \"methods\"]",
+      "[true, {\n                \"enums\": true,\n                \"functions\": {\n                    \"visibilities\": [\"exported\"]\n                },\n                \"methods\": {\n                    \"locations\": [\"instance\"]\n                    \"privacies\": [\"public\", \"protected\"]\n                }\n            }]"
     ],
     "type": "style",
     "typescriptOnly": false
@@ -274,7 +440,7 @@
   {
     "ruleName": "forin",
     "description": "Requires a `for ... in` statement to be filtered with an `if` statement.",
-    "rationale": "\n```ts\nfor (let key in someObject) {\n    if (someObject.hasOwnProperty(key)) {\n        // code here\n    }\n}\n```\nPrevents accidental interation over properties inherited from an object's prototype.\nSee [MDN's `for...in`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...in)\ndocumentation for more information about `for...in` loops.",
+    "rationale": "\n```ts\nfor (let key in someObject) {\n    if (someObject.hasOwnProperty(key)) {\n        // code here\n    }\n}\n```\nPrevents accidental iteration over properties inherited from an object's prototype.\nSee [MDN's `for...in`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...in)\ndocumentation for more information about `for...in` loops.",
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
@@ -316,7 +482,7 @@
   {
     "ruleName": "indent",
     "description": "Enforces indentation with tabs or spaces.",
-    "rationale": "\nUsing only one of tabs or spaces for indentation leads to more consistent editor behavior,\ncleaner diffs in version control, and easier programatic manipulation.",
+    "rationale": "\nUsing only one of tabs or spaces for indentation leads to more consistent editor behavior,\ncleaner diffs in version control, and easier programmatic manipulation.",
     "optionsDescription": "\nOne of the following arguments must be provided:\n\n* `\"spaces\"` enforces consistent spaces.\n* `\"tabs\"` enforces consistent tabs.",
     "options": {
       "type": "string",
@@ -334,7 +500,7 @@
   {
     "ruleName": "interface-name",
     "description": "Requires interface names to begin with a capital 'I'",
-    "rationale": "Makes it easy to differentitate interfaces from regular classes at a glance.",
+    "rationale": "Makes it easy to differentiate interfaces from regular classes at a glance.",
     "optionsDescription": "\nOne of the following two options must be provided:\n\n* `\"always-prefix\"` requires interface names to start with an \"I\"\n* `\"never-prefix\"` requires interface names to not have an \"I\" prefix",
     "options": {
       "type": "string",
@@ -353,9 +519,12 @@
   {
     "ruleName": "interface-over-type-literal",
     "description": "Prefer an interface declaration over a type literal (`type T = { ... }`)",
-    "rationale": "style",
+    "rationale": "Interfaces are generally preferred over type literals because interfaces can be implemented, extended and merged.",
     "optionsDescription": "Not configurable.",
     "options": null,
+    "optionExamples": [
+      "true"
+    ],
     "type": "style",
     "typescriptOnly": true
   },
@@ -402,6 +571,18 @@
     ],
     "type": "maintainability",
     "typescriptOnly": false
+  },
+  {
+    "ruleName": "match-default-export-name",
+    "description": "\nRequires that a default import have the same name as the declaration it imports.\nDoes nothing for anonymous default exports.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "style",
+    "typescriptOnly": true,
+    "requiresTypeInfo": true
   },
   {
     "ruleName": "max-classes-per-file",
@@ -485,7 +666,7 @@
     "ruleName": "member-ordering",
     "description": "Enforces member ordering.",
     "rationale": "A consistent ordering for class members can make classes easier to read, navigate, and edit.",
-    "optionsDescription": "\nOne argument, which is an object, must be provided. It should contain an `order` property.\nThe `order` property should have a value of one of the following strings:\n\n* `variables-before-functions`\n* `static-before-instance`\n* `public-before-private`\n* `fields-first`\n* `instance-sandwich`\n* `statics-first`\n\nAlternatively, the value for `order` maybe be an array consisting of the following strings:\n\n* `public-static-field`\n* `public-static-method`\n* `protected-static-field`\n* `protected-static-method`\n* `private-static-field`\n* `private-static-method`\n* `public-instance-field`\n* `protected-instance-field`\n* `private-instance-field`\n* `public-constructor`\n* `protected-constructor`\n* `private-constructor`\n* `public-instance-method`\n* `protected-instance-method`\n* `private-instance-method`\n\nYou can also omit the access modifier to refer to \"public-\", \"protected-\", and \"private-\" all at once; for example, \"static-field\".\n\nYou can also make your own categories by using an object instead of a string:\n\n    {\n        \"name\": \"static non-private\",\n        \"kinds\": [\n            \"public-static-field\",\n            \"protected-static-field\",\n            \"public-static-method\",\n            \"protected-static-method\"\n        ]\n    }",
+    "optionsDescription": "\nOne argument, which is an object, must be provided. It should contain an `order` property.\nThe `order` property should have a value of one of the following strings:\n\n* `fields-first`\n* `instance-sandwich`\n* `statics-first`\n\nAlternatively, the value for `order` maybe be an array consisting of the following strings:\n\n* `public-static-field`\n* `public-static-method`\n* `protected-static-field`\n* `protected-static-method`\n* `private-static-field`\n* `private-static-method`\n* `public-instance-field`\n* `protected-instance-field`\n* `private-instance-field`\n* `public-constructor`\n* `protected-constructor`\n* `private-constructor`\n* `public-instance-method`\n* `protected-instance-method`\n* `private-instance-method`\n\nYou can also omit the access modifier to refer to \"public-\", \"protected-\", and \"private-\" all at once; for example, \"static-field\".\n\nYou can also make your own categories by using an object instead of a string:\n\n    {\n        \"name\": \"static non-private\",\n        \"kinds\": [\n            \"public-static-field\",\n            \"protected-static-field\",\n            \"public-static-method\",\n            \"protected-static-method\"\n        ]\n    }\n\nThe 'alphabetize' option will enforce that members within the same category should be alphabetically sorted by name.",
     "options": {
       "type": "object",
       "properties": {
@@ -494,9 +675,6 @@
             {
               "type": "string",
               "enum": [
-                "variables-before-functions",
-                "static-before-instance",
-                "public-before-private",
                 "fields-first",
                 "instance-sandwich",
                 "statics-first"
@@ -540,6 +718,18 @@
     "typescriptOnly": true
   },
   {
+    "ruleName": "newline-before-return",
+    "description": "Enforces blank line before return when not the only line in the block.",
+    "rationale": "Helps maintain a readable style in your codebase.",
+    "optionsDescription": "Not configurable.",
+    "options": {},
+    "optionExamples": [
+      "true"
+    ],
+    "type": "style",
+    "typescriptOnly": false
+  },
+  {
     "ruleName": "new-parens",
     "description": "Requires parentheses when invoking a constructor via the `new` keyword.",
     "rationale": "Maintains stylistic consistency with other function calls.",
@@ -566,7 +756,8 @@
   },
   {
     "ruleName": "no-any",
-    "description": "Diallows usages of `any` as a type declaration.",
+    "description": "Disallows usages of `any` as a type declaration.",
+    "hasFix": true,
     "rationale": "Using `any` as a type declaration nullifies the compile-time benefits of the type system.",
     "optionsDescription": "Not configurable.",
     "options": null,
@@ -630,6 +821,7 @@
   {
     "ruleName": "no-consecutive-blank-lines",
     "description": "Disallows one or more blank lines in a row.",
+    "hasFix": true,
     "rationale": "Helps maintain a readable style in your codebase.",
     "optionsDescription": "\nAn optional number of maximum allowed sequential blanks can be specified. If no value\nis provided, a default of $(Rule.DEFAULT_ALLOWED_BLANKS) will be used.",
     "options": {
@@ -699,6 +891,18 @@
     "typescriptOnly": false
   },
   {
+    "ruleName": "no-duplicate-super",
+    "description": "Warns if 'super()' appears twice in a constructor.",
+    "rationale": "The second call to 'super()' will fail at runtime.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality",
+    "typescriptOnly": false
+  },
+  {
     "ruleName": "no-duplicate-variable",
     "description": "Disallows duplicate variable declarations in the same block scope.",
     "descriptionDetails": "\nThis rule is only useful when using the `var` keyword -\nthe compiler will detect redeclarations of `let` and `const` variables.",
@@ -764,7 +968,8 @@
     ],
     "rationale": "Unhandled Promises can cause unexpected behavior, such as resolving at unexpected times.",
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": true,
+    "requiresTypeInfo": true
   },
   {
     "ruleName": "no-for-in-array",
@@ -780,24 +985,52 @@
     "typescriptOnly": false
   },
   {
+    "description": "Avoid import statements with side-effect.",
+    "optionExamples": [
+      "true",
+      "[true, { \"ignore-module\": \"(\\.html|\\.css)$\" }]"
+    ],
+    "options": {
+      "items": {
+        "properties": {
+          "ignore-module": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "maxLength": 1,
+      "minLength": 0,
+      "type": "array"
+    },
+    "optionsDescription": "\nOne argument may be optionally provided:\n\n* `ignore-module` allows to specify a regex and ignore modules which it matches.",
+    "rationale": "Imports with side effects may have behavior which is hard for static verification.",
+    "ruleName": "no-import-side-effect",
+    "type": "typescript",
+    "typescriptOnly": false
+  },
+  {
     "ruleName": "no-inferrable-types",
     "description": "Disallows explicit type declarations for variables or parameters initialized to a number, string, or boolean.",
-    "rationale": "Explicit types where they can be easily infered by the compiler make code more verbose.",
-    "optionsDescription": "\nOne argument may be optionally provided:\n\n* `ignore-params` allows specifying an inferrable type annotation for function params.\nThis can be useful when combining with the `typedef` rule.",
+    "rationale": "Explicit types where they can be easily inferred by the compiler make code more verbose.",
+    "optionsDescription": "\nTwo arguments may be optionally provided:\n\n* `ignore-params` allows specifying an inferrable type annotation for function params.\nThis can be useful when combining with the `typedef` rule.\n* `ignore-properties` allows specifying an inferrable type annotation for class properties.",
     "options": {
       "type": "array",
       "items": {
         "type": "string",
         "enum": [
-          "ignore-params"
+          "ignore-params",
+          "ignore-properties"
         ]
       },
       "minLength": 0,
-      "maxLength": 1
+      "maxLength": 2
     },
+    "hasFix": true,
     "optionExamples": [
       "true",
-      "[true, \"ignore-params\"]"
+      "[true, \"ignore-params\"]",
+      "[true, \"ignore-params\", \"ignore-properties\"]"
     ],
     "type": "typescript",
     "typescriptOnly": true
@@ -915,6 +1148,18 @@
     "typescriptOnly": true
   },
   {
+    "ruleName": "no-non-null-assertion",
+    "description": "Disallows non-null assertions.",
+    "rationale": "Using non-null assertion cancels the benefits of the strict null checking mode.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "typescript",
+    "typescriptOnly": true
+  },
+  {
     "ruleName": "no-null-keyword",
     "description": "Disallows use of the `null` keyword literal.",
     "rationale": "\nInstead of having the dual concepts of `null` and`undefined` in a codebase,\nthis rule ensures that only `undefined` is used.",
@@ -1012,13 +1257,24 @@
     "ruleName": "no-trailing-whitespace",
     "description": "Disallows trailing whitespace at the end of a line.",
     "rationale": "Keeps version control diffs clean as it prevents accidental whitespace from being committed.",
-    "optionsDescription": "Not configurable.",
+    "optionsDescription": "\nPossible settings are:\n\n* `\"ignore-comments\"`: Allows trailing whitespace in comments.\n* `\"ignore-jsdoc\"`: Allows trailing whitespace only in JSDoc comments.",
     "hasFix": true,
-    "options": null,
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "ignore-comments",
+          "ignore-jsdoc"
+        ]
+      }
+    },
     "optionExamples": [
-      "true"
+      "true",
+      "[true, \"ignore-comments\"]",
+      "[true, \"ignore-jsdoc\"]"
     ],
-    "type": "maintainability",
+    "type": "style",
     "typescriptOnly": false
   },
   {
@@ -1229,6 +1485,7 @@
   {
     "ruleName": "object-literal-shorthand",
     "description": "Enforces use of ES6 object literal shorthand when possible.",
+    "hasFix": true,
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
@@ -1384,8 +1641,8 @@
   },
   {
     "ruleName": "prefer-function-over-method",
-    "description": "Warns for methods that do not use 'this'.",
-    "optionsDescription": "\n\"allow-public\" excludes public methods.\n\"allow-protected\" excludes protected methods.",
+    "description": "Warns for class methods that do not use 'this'.",
+    "optionsDescription": "\n\"allow-public\" excludes checking of public methods.\n\"allow-protected\" excludes checking of protected methods.",
     "options": {
       "type": "string",
       "enum": [
@@ -1480,7 +1737,7 @@
     "ruleName": "semicolon",
     "description": "Enforces consistent semicolon usage at the end of every statement.",
     "hasFix": true,
-    "optionsDescription": "\nOne of the following arguments must be provided:\n\n* `\"always\"` enforces semicolons at the end of every statement.\n* `\"never\"` disallows semicolons at the end of every statement except for when they are necessary.\n\nThe following arguments may be optionaly provided:\n\n* `\"ignore-interfaces\"` skips checking semicolons at the end of interface members.\n* `\"ignore-bound-class-methods\"` skips checking semicolons at the end of bound class methods.",
+    "optionsDescription": "\nOne of the following arguments must be provided:\n\n* `\"always\"` enforces semicolons at the end of every statement.\n* `\"never\"` disallows semicolons at the end of every statement except for when they are necessary.\n\nThe following arguments may be optionally provided:\n\n* `\"ignore-interfaces\"` skips checking semicolons at the end of interface members.\n* `\"ignore-bound-class-methods\"` skips checking semicolons at the end of bound class methods.",
     "options": {
       "type": "array",
       "items": [
@@ -1565,8 +1822,8 @@
   },
   {
     "ruleName": "strict-boolean-expressions",
-    "description": "\nRestricts the types allowed in boolean expressions. By default only booleans are allowed.\n\nThe following nodes are checked:\n* Arguments to the '!', '&&', and '||' operators\n* The condition in a conditional expression ('cond ? x : y')\n* Conditions for 'if', 'for', 'while', and 'do-while' statements.",
-    "optionsDescription": "\nThese options may be provided:\n\n* 'allow-null-union allows union types containing 'null'.\n  - It does *not* allow 'null' itself.\n* 'allow-undefined-union allows union types containing 'undefined'.\n  - It does *not* allow 'undefined' itself.\n* 'allow-string allows strings.\n  - It does *not* allow unions containing 'string'.\n  - It does *not* allow string literal types.\n* 'allow-number allows numbers.\n  - It does *not* allow unions containing 'number'.\n  - It does *not* allow enums or number literal types.\n* 'allow-mix allow multiple of the above to appear together.\n  - For example, 'string | number' or 'RegExp | null | undefined' would normally not be allowed.\n  - A type like '\"foo\" | \"bar\" | undefined' is always allowed, because it has only one way to be false.",
+    "description": "\nRestricts the types allowed in boolean expressions. By default only booleans are allowed.\n\nThe following nodes are checked:\n\n* Arguments to the `!`, `&&`, and `||` operators\n* The condition in a conditional expression (`cond ? x : y`)\n* Conditions for `if`, `for`, `while`, and `do-while` statements.",
+    "optionsDescription": "\nThese options may be provided:\n\n* `allow-null-union` allows union types containing `null`.\n  - It does *not* allow `null` itself.\n* `allow-undefined-union` allows union types containing `undefined`.\n  - It does *not* allow `undefined` itself.\n* `allow-string` allows strings.\n  - It does *not* allow unions containing `string`.\n  - It does *not* allow string literal types.\n* `allow-number` allows numbers.\n  - It does *not* allow unions containing `number`.\n  - It does *not* allow enums or number literal types.\n* `allow-mix` allow multiple of the above to appear together.\n  - For example, `string | number` or `RegExp | null | undefined` would normally not be allowed.\n  - A type like `\"foo\" | \"bar\" | undefined` is always allowed, because it has only one way to be false.",
     "options": {
       "type": "array",
       "items": {
@@ -1670,7 +1927,7 @@
   {
     "ruleName": "typedef",
     "description": "Requires type definitions to exist.",
-    "optionsDescription": "\nSeven arguments may be optionally provided:\n\n* `\"call-signature\"` checks return type of functions.\n* `\"arrow-call-signature\"` checks return type of arrow functions.\n* `\"parameter\"` checks type specifier of function parameters for non-arrow functions.\n* `\"arrow-parameter\"` checks type specifier of function parameters for arrow functions.\n* `\"property-declaration\"` checks return types of interface properties.\n* `\"variable-declaration\"` checks variable declarations.\n* `\"member-variable-declaration\"` checks member variable declarations.",
+    "optionsDescription": "\nSeven arguments may be optionally provided:\n\n* `\"call-signature\"` checks return type of functions.\n* `\"arrow-call-signature\"` checks return type of arrow functions.\n* `\"parameter\"` checks type specifier of function parameters for non-arrow functions.\n* `\"arrow-parameter\"` checks type specifier of function parameters for arrow functions.\n* `\"property-declaration\"` checks return types of interface properties.\n* `\"variable-declaration\"` checks non-binding variable declarations.\n* `\"member-variable-declaration\"` checks member variable declarations.\n* `\"object-destructuring\"` checks object destructuring declarations.\n* `\"array-destructuring\"` checks array destructuring declarations.",
     "options": {
       "type": "array",
       "items": {
@@ -1682,7 +1939,9 @@
           "arrow-parameter",
           "property-declaration",
           "variable-declaration",
-          "member-variable-declaration"
+          "member-variable-declaration",
+          "object-destructuring",
+          "array-destructuring"
         ]
       },
       "minLength": 0,
@@ -1840,7 +2099,7 @@
   {
     "ruleName": "variable-name",
     "description": "Checks variable names for various errors.",
-    "optionsDescription": "\nFive arguments may be optionally provided:\n\n* `\"check-format\"`: allows only camelCased or UPPER_CASED variable names\n  * `\"allow-leading-underscore\"` allows underscores at the beginning (only has an effect if \"check-format\" specified)\n  * `\"allow-trailing-underscore\"` allows underscores at the end. (only has an effect if \"check-format\" specified)\n  * `\"allow-pascal-case\"` allows PascalCase in addtion to camelCase.\n* `\"ban-keywords\"`: disallows the use of certain TypeScript keywords (`any`, `Number`, `number`, `String`,\n`string`, `Boolean`, `boolean`, `undefined`) as variable or parameter names.",
+    "optionsDescription": "\nFive arguments may be optionally provided:\n\n* `\"check-format\"`: allows only camelCased or UPPER_CASED variable names\n  * `\"allow-leading-underscore\"` allows underscores at the beginning (only has an effect if \"check-format\" specified)\n  * `\"allow-trailing-underscore\"` allows underscores at the end. (only has an effect if \"check-format\" specified)\n  * `\"allow-pascal-case\"` allows PascalCase in addition to camelCase.\n* `\"ban-keywords\"`: disallows the use of certain TypeScript keywords (`any`, `Number`, `number`, `String`,\n`string`, `Boolean`, `boolean`, `undefined`) as variable or parameter names.",
     "options": {
       "type": "array",
       "items": {

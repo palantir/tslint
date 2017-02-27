@@ -1,24 +1,28 @@
 ---
 ruleName: no-inferrable-types
 description: 'Disallows explicit type declarations for variables or parameters initialized to a number, string, or boolean.'
-rationale: Explicit types where they can be easily infered by the compiler make code more verbose.
+rationale: Explicit types where they can be easily inferred by the compiler make code more verbose.
 optionsDescription: |-
 
-  One argument may be optionally provided:
+  Two arguments may be optionally provided:
 
   * `ignore-params` allows specifying an inferrable type annotation for function params.
   This can be useful when combining with the `typedef` rule.
+  * `ignore-properties` allows specifying an inferrable type annotation for class properties.
 options:
   type: array
   items:
     type: string
     enum:
       - ignore-params
+      - ignore-properties
   minLength: 0
-  maxLength: 1
+  maxLength: 2
+hasFix: true
 optionExamples:
   - 'true'
   - '[true, "ignore-params"]'
+  - '[true, "ignore-params", "ignore-properties"]'
 type: typescript
 typescriptOnly: true
 layout: rule
@@ -29,10 +33,11 @@ optionsJSON: |-
     "items": {
       "type": "string",
       "enum": [
-        "ignore-params"
+        "ignore-params",
+        "ignore-properties"
       ]
     },
     "minLength": 0,
-    "maxLength": 1
+    "maxLength": 2
   }
 ---

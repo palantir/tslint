@@ -3,21 +3,95 @@ ruleName: completed-docs
 description: Enforces documentation for important items be filled out.
 optionsDescription: |-
 
-  Either `true` to enable for all, or any of
-  `["classes", "functions", "methods", "properties"]
-  to choose individual ones.`
+   `true` to enable for ["classes", "functions", "methods", "properties"],
+   or an array with each item in one of two formats:
+
+  * `string` to enable for that type
+  * `object` keying types to when their documentation is required:
+      * `"methods"` and `"properties may specify:
+          * `"privacies":
+              * `"all"`
+              * `"private"`
+              * `"protected"`
+              * `"public"`
+          * `"locations:
+              * `"all"`
+              * `"instance"`
+              * `"static"`
+      * All other types may specify `"visibilities"`:
+          * `"all"`
+          * `"exported"`
+          * `"internal"`
+
+  Types that may be enabled are:
+
+      * `"classes"`
+      * `"enums"`
+      * `"functions"`
+      * `"interfaces"`
+      * `"methods"`
+      * `"namespaces"`
+      * `"properties"`
+      * `"types"`
+      * `"variables"`
 options:
   type: array
   items:
-    type: string
-    enum:
-      - classes
-      - functions
-      - methods
-      - properties
+    anyOf:
+      - enum:
+          - classes
+          - functions
+          - methods
+          - properties
+        type: string
+      - type: object
+        properties:
+          classes: &ref_0
+            properties:
+              visibilities:
+                enum:
+                  - all
+                  - exported
+                  - internal
+                type: string
+            type: object
+          enums: *ref_0
+          functions: *ref_0
+          interfaces: *ref_0
+          methods: &ref_1
+            properties:
+              locations:
+                enum:
+                  - all
+                  - instance
+                  - static
+                type: string
+              privacies:
+                enum:
+                  - all
+                  - private
+                  - protected
+                  - public
+                type: string
+            type: object
+          namespaces: *ref_0
+          properties: *ref_1
+          types: *ref_0
+          variables: *ref_0
 optionExamples:
   - 'true'
-  - '[true, "classes", "functions"]'
+  - '[true, "enums", "functions", "methods"]'
+  - |-
+    [true, {
+                    "enums": true,
+                    "functions": {
+                        "visibilities": ["exported"]
+                    },
+                    "methods": {
+                        "locations": ["instance"]
+                        "privacies": ["public", "protected"]
+                    }
+                }]
 type: style
 typescriptOnly: false
 layout: rule
@@ -26,12 +100,156 @@ optionsJSON: |-
   {
     "type": "array",
     "items": {
-      "type": "string",
-      "enum": [
-        "classes",
-        "functions",
-        "methods",
-        "properties"
+      "anyOf": [
+        {
+          "enum": [
+            "classes",
+            "functions",
+            "methods",
+            "properties"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "classes": {
+              "properties": {
+                "visibilities": {
+                  "enum": [
+                    "all",
+                    "exported",
+                    "internal"
+                  ],
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "enums": {
+              "properties": {
+                "visibilities": {
+                  "enum": [
+                    "all",
+                    "exported",
+                    "internal"
+                  ],
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "functions": {
+              "properties": {
+                "visibilities": {
+                  "enum": [
+                    "all",
+                    "exported",
+                    "internal"
+                  ],
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "interfaces": {
+              "properties": {
+                "visibilities": {
+                  "enum": [
+                    "all",
+                    "exported",
+                    "internal"
+                  ],
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "methods": {
+              "properties": {
+                "locations": {
+                  "enum": [
+                    "all",
+                    "instance",
+                    "static"
+                  ],
+                  "type": "string"
+                },
+                "privacies": {
+                  "enum": [
+                    "all",
+                    "private",
+                    "protected",
+                    "public"
+                  ],
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "namespaces": {
+              "properties": {
+                "visibilities": {
+                  "enum": [
+                    "all",
+                    "exported",
+                    "internal"
+                  ],
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "properties": {
+              "properties": {
+                "locations": {
+                  "enum": [
+                    "all",
+                    "instance",
+                    "static"
+                  ],
+                  "type": "string"
+                },
+                "privacies": {
+                  "enum": [
+                    "all",
+                    "private",
+                    "protected",
+                    "public"
+                  ],
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "types": {
+              "properties": {
+                "visibilities": {
+                  "enum": [
+                    "all",
+                    "exported",
+                    "internal"
+                  ],
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "variables": {
+              "properties": {
+                "visibilities": {
+                  "enum": [
+                    "all",
+                    "exported",
+                    "internal"
+                  ],
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          }
+        }
       ]
     }
   }

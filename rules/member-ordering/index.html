@@ -7,9 +7,6 @@ optionsDescription: |-
   One argument, which is an object, must be provided. It should contain an `order` property.
   The `order` property should have a value of one of the following strings:
 
-  * `variables-before-functions`
-  * `static-before-instance`
-  * `public-before-private`
   * `fields-first`
   * `instance-sandwich`
   * `statics-first`
@@ -45,6 +42,8 @@ optionsDescription: |-
               "protected-static-method"
           ]
       }
+
+  The 'alphabetize' option will enforce that members within the same category should be alphabetically sorted by name.
 options:
   type: object
   properties:
@@ -52,9 +51,6 @@ options:
       oneOf:
         - type: string
           enum:
-            - variables-before-functions
-            - static-before-instance
-            - public-before-private
             - fields-first
             - instance-sandwich
             - statics-first
@@ -122,9 +118,6 @@ optionsJSON: |-
           {
             "type": "string",
             "enum": [
-              "variables-before-functions",
-              "static-before-instance",
-              "public-before-private",
               "fields-first",
               "instance-sandwich",
               "statics-first"
