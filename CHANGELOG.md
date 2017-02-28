@@ -1,6 +1,12 @@
 Change Log
 ===
 
+v4.5.1
+---
+
+- [enhancement] Updated recommended rules to include `ban-types` and `no-duplicate-super` (#2271)
+- [bugfix] `object-literal-key-quotes` handle negative number property name (#2273)
+
 v4.5.0
 ---
 

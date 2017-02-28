@@ -63,6 +63,7 @@ export const rules = {
         ["String", "Avoid using the `String` type. Did you mean `string`?"],
         ["Symbol", "Avoid using the `Symbol` type. Did you mean `symbol`?"],
     ],
+    "no-duplicate-super": true,
 };
 // tslint:enable object-literal-sort-keys
 
