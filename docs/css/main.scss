@@ -12,9 +12,10 @@ $base-font-size:   16px;
 $small-font-size:  $base-font-size * 0.875;
 $base-line-height: 1.5;
 
-$text-color:       #606c71;
-$link-color:       #1e6bb8;
-$heading-color:    #159957;
+$heading-color:        #159957;
+$text-color:           #606c71;
+$link-color:           #1e6bb8;
+$link-visited-color:   #7d0ce8;
 
 // Import partials from `sass_dir` (defaults to `_sass`)
 @import

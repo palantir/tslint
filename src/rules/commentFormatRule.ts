@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -117,10 +118,10 @@ class CommentWalker extends Lint.RuleWalker {
     }
 
     public visitSourceFile(node: ts.SourceFile) {
-        Lint.forEachComment(node, (fullText, kind, pos) => {
-            if (kind === ts.SyntaxKind.SingleLineCommentTrivia) {
-                const commentText = fullText.substring(pos.tokenStart, pos.end);
-                const startPosition = pos.tokenStart + 2;
+        utils.forEachComment(node, (fullText, comment) => {
+            if (comment.kind === ts.SyntaxKind.SingleLineCommentTrivia) {
+                const commentText = fullText.substring(comment.pos, comment.end);
+                const startPosition = comment.pos + 2;
                 const width = commentText.length - 2;
                 if (this.hasOption(OPTION_SPACE)) {
                     if (!startsWithSpace(commentText)) {

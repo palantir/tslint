@@ -5,10 +5,6 @@
 class Clazz { // comment
 
 
-
-~nil
-
-~nil [Exceeds the 2 allowed consecutive blank lines]
     public funcxion() {
 
         // also comment
@@ -17,11 +13,6 @@ class Clazz { // comment
         // still allowed since 2 lines only
  
  
-
-~nil
-        
-~nil [Exceeds the 2 allowed consecutive blank lines]
-        
         // this one won't be allowed anymore
 
         console.log("test");
@@ -35,6 +26,3 @@ class Clazz { // comment
 // The next lines contain only tabs or spaces, they are also considered "blank" lines
         
             
-		
-~ [Exceeds the 2 allowed consecutive blank lines]
-		

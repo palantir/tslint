@@ -392,7 +392,12 @@ class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
             return;
         }
 
-        const comments = this.getTypeChecker().getSymbolAtLocation(node.name).getDocumentationComment();
+        const symbol = this.getTypeChecker().getSymbolAtLocation(node.name);
+        if (!symbol) {
+            return;
+        }
+
+        const comments = symbol.getDocumentationComment();
         this.checkComments(node, nodeType, comments);
     }
 

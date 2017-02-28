@@ -1,6 +1,6 @@
 {
   "name": "tslint",
-  "version": "4.4.2",
+  "version": "4.5.0",
   "description": "An extensible static analysis linter for the TypeScript language",
   "bin": {
     "tslint": "./bin/tslint"
@@ -28,7 +28,7 @@
     "lint": "npm-run-all -p lint:core lint:test lint:from-bin",
     "lint:core": "tslint \"src/**/*.ts\"",
     "lint:test": "tslint \"test/**/*.ts\" -e \"test/**/*.test.ts\"",
-    "lint:from-bin": "bin/tslint \"{src,test}/**/*.ts\" -e \"test/**/*.test.ts\"",
+    "lint:from-bin": "node bin/tslint \"{src,test}/**/*.ts\" -e \"test/**/*.test.ts\"",
     "test": "npm-run-all test:pre -p test:mocha test:rules",
     "test:pre": "cd ./test/config && npm install",
     "test:mocha": "mocha --reporter spec --colors \"build/test/**/*Tests.js\" build/test/assert.js",
@@ -43,6 +43,7 @@
     "glob": "^7.1.1",
     "optimist": "~0.6.0",
     "resolve": "^1.1.7",
+    "tsutils": "^1.1.0",
     "update-notifier": "^2.0.0"
   },
   "peerDependencies": {
@@ -54,6 +55,7 @@
     "@types/colors": "^0.6.33",
     "@types/diff": "0.0.31",
     "@types/findup-sync": "^0.3.29",
+    "@types/github": "^0.0.0",
     "@types/glob": "^5.0.30",
     "@types/js-yaml": "^3.5.29",
     "@types/mocha": "^2.2.35",
@@ -62,13 +64,14 @@
     "@types/resolve": "0.0.4",
     "@types/update-notifier": "^1.0.0",
     "chai": "^3.5.0",
+    "github": "^8.1.1",
     "js-yaml": "^3.7.0",
     "mocha": "^3.2.0",
     "npm-run-all": "^3.1.0",
     "rimraf": "^2.5.4",
     "tslint": "latest",
     "tslint-test-config-non-relative": "file:test/external/tslint-test-config-non-relative",
-    "typescript": "2.1.4"
+    "typescript": "^2.2.1"
   },
   "license": "Apache-2.0",
   "engines": {
