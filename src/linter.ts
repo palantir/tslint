@@ -101,6 +101,9 @@ class Linter {
 
     public lint(fileName: string, source: string, configuration: IConfigurationFile = DEFAULT_CONFIG): void {
         let sourceFile = this.getSourceFile(fileName, source);
+        if (this.options.showFiles) {
+            console.log(`Linting: ${fileName}`);
+        }
         const isJs = /\.jsx?$/i.test(fileName);
 
         const enabledRules = this.getEnabledRules(sourceFile, configuration, isJs);
