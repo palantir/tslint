@@ -29,7 +29,6 @@ import {
 import { FatalError } from "./error";
 import * as Linter from "./linter";
 import { consoleTestResultsHandler, runTests } from "./test";
-import { updateNotifierCheck } from "./updateNotifier";
 
 export interface IRunnerOptions {
     /**
@@ -257,10 +256,5 @@ export class Runner {
                 onComplete(0);
             }
         });
-
-        if (lintResult.format === "prose") {
-            // Check to see if there are any updates available
-            updateNotifierCheck();
-        }
     }
 }
