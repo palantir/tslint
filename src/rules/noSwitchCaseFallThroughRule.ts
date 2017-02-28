@@ -62,7 +62,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_PART = "expected a 'break' before ";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoSwitchCaseFallThroughWalker(sourceFile, this.ruleName, undefined));
+        return this.applyWithWalker(new NoSwitchCaseFallThroughWalker(sourceFile, this.ruleSeverity, this.ruleName, undefined));
     }
 }
 
