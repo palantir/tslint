@@ -17,23 +17,16 @@
 
 import * as fs from "fs";
 import * as path from "path";
+import {FormatterFunction} from "./index";
 import {camelize} from "./utils";
 
 const moduleDirectory = path.dirname(module.filename);
 const CORE_FORMATTERS_DIRECTORY = path.resolve(moduleDirectory, ".", "formatters");
 
-function isFunction(variable: any): variable is Function {
-    return typeof variable === "function";
-}
-
-function isString(variable: any): variable is string {
-    return typeof variable === "string";
-}
-
-export function findFormatter(name: string | Function, formattersDirectory?: string) {
-    if (isFunction(name)) {
+export function findFormatter(name: string | FormatterFunction, formattersDirectory?: string) {
+    if (typeof name === "function") {
         return name;
-    } else if (isString(name)) {
+    } else if (typeof name === "string") {
         name = name.trim();
         const camelizedName = camelize(`${name}Formatter`);
 
