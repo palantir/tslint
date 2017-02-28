@@ -110,23 +110,4 @@ describe("Rule Loader", () => {
 
         assert.isFalse(testFailed, "List of rules doesn't match list of tests");
     });
-
-    it("ensures that `.ts` files in `rules/` end in `.test.ts` to avoid being linted", () => {
-        walkSync(testRulesDir, (filename) => {
-            if (/\.ts$/.test(filename)) {
-                assert.match(filename, /\.test\.ts$/);
-            }
-        });
-    });
-
-    const walkSync = (dir: string, cb: (filename: string) => void) => {
-        fs.readdirSync(dir).forEach((file) => {
-            const fullPath = path.join(dir, file);
-            if (fs.statSync(path.join(dir, file)).isDirectory()) {
-                walkSync(fullPath, cb);
-            } else {
-                cb(fullPath);
-            }
-        });
-    };
 });
