@@ -33,13 +33,14 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "string",
             enum: [OPTION_BINARY_OK],
         },
-        optionExamples: ["true"],
+        optionExamples: ["true", `[true, "${OPTION_BINARY_OK}"]`],
         type: "style",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING = "Use a template literal instead of concatenating with a string literal.";
+    public static FAILURE_STRING_MULTILINE = "Use a multiline template literal instead of concatenating string literals with newlines.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         if (sourceFile.isDeclarationFile) {
@@ -54,17 +55,18 @@ export class Rule extends Lint.Rules.AbstractRule {
 function walk(ctx: Lint.WalkContext<void>, binaryOk: boolean): void {
     return ts.forEachChild(ctx.sourceFile, cb);
     function cb(node: ts.Node): void {
-        if (isError(node, binaryOk)) {
-            ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
+        const failure = getError(node, binaryOk);
+        if (failure) {
+            ctx.addFailureAtNode(node, failure);
         } else {
             return ts.forEachChild(node, cb);
         }
     }
 }
 
-function isError(node: ts.Node, binaryOk: boolean): boolean {
+function getError(node: ts.Node, binaryOk: boolean): string | undefined {
     if (!isPlusExpression(node)) {
-        return false;
+        return undefined;
     }
 
     const { left, right } = node;
@@ -72,21 +74,33 @@ function isError(node: ts.Node, binaryOk: boolean): boolean {
     const r = isStringLike(right);
 
     if (l && r) {
-        // If they're both string literals, ignore. It might be for formatting.
-        return false;
+        // They're both strings.
+        // If they're joined by a newline, recommend a template expression instead.
+        // Otherwise ignore. ("a" + "b", probably writing a long newline-less string on many lines.)
+        return containsNewline(left as StringLike) || containsNewline(right as StringLike) ? Rule.FAILURE_STRING_MULTILINE : undefined;
     } else if (!l && !r) {
         // Watch out for `"a" + b + c`.
-        return containsAnyStringLiterals(left);
+        return containsAnyStringLiterals(left) ? Rule.FAILURE_STRING : undefined;
     } else if (l) {
         // `"x" + y`
-        return !binaryOk;
+        return !binaryOk ? Rule.FAILURE_STRING : undefined;
     } else {
         // `? + "b"`
-        return !binaryOk || isPlusExpression(left);
+        return !binaryOk || isPlusExpression(left) ? Rule.FAILURE_STRING : undefined;
     }
 }
 
-function containsAnyStringLiterals(node: ts.Node): boolean {
+type StringLike = ts.StringLiteral | ts.TemplateLiteral;
+
+function containsNewline(node: StringLike): boolean {
+    if (node.kind === ts.SyntaxKind.TemplateExpression) {
+        return node.templateSpans.some(({ literal: { text } }) => text.includes("\n"));
+    } else {
+        return node.text.includes("\n");
+    }
+}
+
+function containsAnyStringLiterals(node: ts.Expression): boolean {
     if (!isPlusExpression(node)) {
         return false;
     }
@@ -99,7 +113,7 @@ function isPlusExpression(node: ts.Node): node is ts.BinaryExpression {
     return isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.PlusToken;
 }
 
-function isStringLike(node: ts.Node): node is ts.StringLiteral | ts.TemplateLiteral {
+function isStringLike(node: ts.Node): node is StringLike {
     switch (node.kind) {
         case ts.SyntaxKind.StringLiteral:
         case ts.SyntaxKind.NoSubstitutionTemplateLiteral:
