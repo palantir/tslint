@@ -97,7 +97,7 @@ Some examples:
 `node.getStart()` scans the source to skip all the leading trivia. Although barely noticeable, this operation is not for free.
 If you need the start position of a node more than once per function, consider caching it.
 
-`node.getWidth()` is most of the time used together with `node.getStart()` to get the node's span. Internally it uses `node.getStart() - node.getEnd()` which effectively doubles the calls to `node.getStart()`. Consider using `node.getEnd()` instead and calculate the width yourself if necessary.
+`node.getWidth()` is most of the time used together with `node.getStart()` to get the node's span. Internally it uses `node.getEnd() - node.getStart()` which effectively doubles the calls to `node.getStart()`. Consider using `node.getEnd()` instead and calculate the width yourself if necessary.
 
 `node.getText()` calculates the start of the node and returns a substring until the end of the token.
 Most of the time this not needed, because this substring is already contained in the node.
