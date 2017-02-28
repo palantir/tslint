@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
+import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import {AbstractRule} from "./language/rule/abstractRule";
-import {forEachComment, TokenPosition} from "./language/utils";
 import {IEnableDisablePosition} from "./ruleLoader";
 
 export class EnableDisableRulesWalker {
@@ -42,11 +42,11 @@ export class EnableDisableRulesWalker {
     }
 
     public getEnableDisableRuleMap() {
-        forEachComment(this.sourceFile, (fullText, kind, pos) => {
-            const commentText = kind === ts.SyntaxKind.SingleLineCommentTrivia
-                ? fullText.substring(pos.tokenStart + 2, pos.end)
-                : fullText.substring(pos.tokenStart + 2, pos.end - 2);
-            return this.handleComment(commentText, pos);
+        utils.forEachComment(this.sourceFile, (fullText, comment) => {
+            const commentText = comment.kind === ts.SyntaxKind.SingleLineCommentTrivia
+                ? fullText.substring(comment.pos + 2, comment.end)
+                : fullText.substring(comment.pos + 2, comment.end - 2);
+            return this.handleComment(commentText, comment);
         });
 
         return this.enableDisableRuleMap;
@@ -85,7 +85,7 @@ export class EnableDisableRulesWalker {
         }
     }
 
-    private handleComment(commentText: string, pos: TokenPosition) {
+    private handleComment(commentText: string, range: ts.TextRange) {
         // regex is: start of string followed by any amount of whitespace
         // followed by tslint and colon
         // followed by either "enable" or "disable"
@@ -110,32 +110,32 @@ export class EnableDisableRulesWalker {
                 rulesList = this.enabledRules;
             }
 
-            this.handleTslintLineSwitch(rulesList, match[1] === "enable", match[2], pos);
+            this.handleTslintLineSwitch(rulesList, match[1] === "enable", match[2], range);
         }
     }
 
-    private handleTslintLineSwitch(rules: string[], isEnabled: boolean, modifier: string, pos: TokenPosition) {
+    private handleTslintLineSwitch(rules: string[], isEnabled: boolean, modifier: string, range: ts.TextRange) {
         let start: number | undefined;
         let end: number | undefined;
 
         if (modifier === "line") {
             // start at the beginning of the line where comment starts
-            start = this.getStartOfLinePosition(pos.tokenStart)!;
+            start = this.getStartOfLinePosition(range.pos)!;
             // end at the beginning of the line following the comment
-            end = this.getStartOfLinePosition(pos.end, 1);
+            end = this.getStartOfLinePosition(range.end, 1);
         } else if (modifier === "next-line") {
             // start at the beginning of the line following the comment
-            start = this.getStartOfLinePosition(pos.end, 1);
+            start = this.getStartOfLinePosition(range.end, 1);
             if (start === undefined) {
                 // no need to switch anything, there is no next line
                 return;
             }
             // end at the beginning of the line following the next line
-            end = this.getStartOfLinePosition(pos.end, 2);
+            end = this.getStartOfLinePosition(range.end, 2);
         } else {
             // switch rule for the rest of the file
             // start at the current position, but skip end position
-            start = pos.tokenStart;
+            start = range.pos;
             end = undefined;
         }
 

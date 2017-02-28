@@ -15,12 +15,13 @@
  * limitations under the License.
  */
 
+import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
 import { arraysAreEqual, Equal } from "../utils";
 
-import { getOverloadKey, isSignatureDeclaration } from "./adjacentOverloadSignaturesRule";
+import { getOverloadKey } from "./adjacentOverloadSignaturesRule";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -94,7 +95,7 @@ class Walker extends Lint.RuleWalker {
     private checkMembers(members: Array<ts.TypeElement | ts.ClassElement>, typeParameters?: ts.TypeParameterDeclaration[]) {
         this.checkOverloads(members, getOverloadName, typeParameters);
         function getOverloadName(member: ts.TypeElement | ts.ClassElement) {
-            if (!isSignatureDeclaration(member) || (member as ts.MethodDeclaration).body) {
+            if (!utils.isSignatureDeclaration(member) || (member as ts.MethodDeclaration).body) {
                 return undefined;
             }
             const key = getOverloadKey(member);

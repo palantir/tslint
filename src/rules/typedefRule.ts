@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -139,7 +140,7 @@ class TypedefWalker extends Lint.RuleWalker {
             let optionName: string | null = null;
             if (isArrowFunction && isTypedPropertyDeclaration(node.parent.parent)) {
                 // leave optionName as null and don't perform check
-            } else if (isArrowFunction && isPropertyDeclaration(node.parent.parent)) {
+            } else if (isArrowFunction && utils.isPropertyDeclaration(node.parent.parent)) {
                 optionName = "member-variable-declaration";
             } else if (isArrowFunction) {
                 optionName = "arrow-parameter";
@@ -259,10 +260,6 @@ function getName(name?: ts.Node, prefix?: string, suffix?: string): string {
     return ns ? `${prefix || ""}${ns}${suffix || ""}` : "";
 }
 
-function isPropertyDeclaration(node: ts.Node): node is ts.PropertyDeclaration {
-    return node.kind === ts.SyntaxKind.PropertyDeclaration;
-}
-
 function isTypedPropertyDeclaration(node: ts.Node): boolean {
-    return isPropertyDeclaration(node) && node.type != null;
+    return utils.isPropertyDeclaration(node) && node.type != null;
 }

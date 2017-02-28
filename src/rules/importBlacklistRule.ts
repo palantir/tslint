@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as utils from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -66,7 +67,7 @@ class ImportBlacklistWalker extends Lint.RuleWalker {
     }
 
     public visitImportEqualsDeclaration(node: ts.ImportEqualsDeclaration) {
-        if (isExternalModuleReference(node.moduleReference) &&
+        if (utils.isExternalModuleReference(node.moduleReference) &&
             node.moduleReference.expression !== undefined) {
             // If it's an import require and not an import alias
             this.checkForBannedImport(node.moduleReference.expression);
@@ -80,7 +81,7 @@ class ImportBlacklistWalker extends Lint.RuleWalker {
     }
 
     private checkForBannedImport(expression: ts.Expression) {
-        if (isStringLiteral(expression) && this.hasOption(expression.text)) {
+        if (utils.isTextualLiteral(expression) && this.hasOption(expression.text)) {
             this.addFailureFromStartToEnd(
                 expression.getStart(this.getSourceFile()) + 1,
                 expression.getEnd() - 1,
@@ -88,13 +89,4 @@ class ImportBlacklistWalker extends Lint.RuleWalker {
             );
         }
     }
-}
-
-function isStringLiteral(node: ts.Node): node is ts.LiteralExpression {
-    return node.kind === ts.SyntaxKind.StringLiteral ||
-        node.kind === ts.SyntaxKind.NoSubstitutionTemplateLiteral;
-}
-
-function isExternalModuleReference(node: ts.ModuleReference): node is ts.ExternalModuleReference {
-    return node.kind === ts.SyntaxKind.ExternalModuleReference;
 }

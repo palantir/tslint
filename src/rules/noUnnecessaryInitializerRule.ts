@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -45,7 +46,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class Walker extends Lint.RuleWalker {
     public visitVariableDeclaration(node: ts.VariableDeclaration) {
-        if (isBindingPattern(node.name)) {
+        if (utils.isBindingPattern(node.name)) {
             for (const elem of node.name.elements) {
                 if (elem.kind === ts.SyntaxKind.BindingElement) {
                     this.checkInitializer(elem);
@@ -114,8 +115,4 @@ function isUndefined(node: ts.Node | undefined): boolean {
     return node !== undefined &&
         node.kind === ts.SyntaxKind.Identifier &&
         (node as ts.Identifier).originalKeywordKind === ts.SyntaxKind.UndefinedKeyword;
-}
-
-function isBindingPattern(node: ts.Node): node is ts.ArrayBindingPattern | ts.ObjectBindingPattern {
-    return node.kind === ts.SyntaxKind.ArrayBindingPattern || node.kind === ts.SyntaxKind.ObjectBindingPattern;
 }

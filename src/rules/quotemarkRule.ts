@@ -82,9 +82,10 @@ class QuotemarkWalker extends Lint.RuleWalker {
 
     public visitStringLiteral(node: ts.StringLiteral) {
         const expectedQuoteMark = node.parent!.kind === ts.SyntaxKind.JsxAttribute ? this.jsxQuoteMark : this.quoteMark;
-        const actualQuoteMark = node.getText()[0];
+        const text = node.getText();
+        const actualQuoteMark = text[0];
         if (actualQuoteMark !== expectedQuoteMark && !(this.avoidEscape && node.text.includes(expectedQuoteMark))) {
-            const escapedText = node.text.replace(new RegExp(expectedQuoteMark, "g"), `\\${expectedQuoteMark}`);
+            const escapedText = text.slice(1, -1).replace(new RegExp(expectedQuoteMark, "g"), `\\${expectedQuoteMark}`);
             const newText = expectedQuoteMark + escapedText + expectedQuoteMark;
             this.addFailureAtNode(node, Rule.FAILURE_STRING(actualQuoteMark, expectedQuoteMark),
                 this.createFix(this.createReplacement(node.getStart(), node.getWidth(), newText)));

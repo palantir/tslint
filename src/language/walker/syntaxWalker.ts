@@ -234,6 +234,10 @@ export class SyntaxWalker {
         this.walkChildren(node);
     }
 
+    protected visitNonNullExpression(node: ts.NonNullExpression) {
+        this.walkChildren(node);
+    }
+
     protected visitNumericLiteral(node: ts.NumericLiteral) {
         this.walkChildren(node);
     }
@@ -558,6 +562,10 @@ export class SyntaxWalker {
 
             case ts.SyntaxKind.NewExpression:
                 this.visitNewExpression(node as ts.NewExpression);
+                break;
+
+            case ts.SyntaxKind.NonNullExpression:
+                this.visitNonNullExpression(node as ts.NonNullExpression);
                 break;
 
             case ts.SyntaxKind.NumericLiteral:
