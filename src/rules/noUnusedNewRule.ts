@@ -18,7 +18,6 @@
 import * as ts from "typescript";
 
 import * as Lint from "../index";
-import { NoUnusedExpressionWalker } from "./noUnusedExpressionRule";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -40,36 +39,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static FAILURE_STRING = "do not use 'new' for side effects";
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoUnusedNewWalker(sourceFile, this.getOptions()));
-    }
-}
-
-class NoUnusedNewWalker extends NoUnusedExpressionWalker {
-    private expressionContainsNew: boolean = false;
-
-    public visitExpressionStatement(node: ts.ExpressionStatement) {
-        this.expressionContainsNew = false;
-        super.visitExpressionStatement(node);
-    }
-
-    protected visitNewExpression(node: ts.NewExpression) {
-        super.visitNewExpression(node);
-        this.expressionIsUnused = true;
-        this.expressionContainsNew = true;
-    }
-
-    protected checkExpressionUsage(node: ts.ExpressionStatement) {
-        if (this.expressionIsUnused && this.expressionContainsNew) {
-            const { expression } = node;
-            const { kind } = expression;
-            const isValidStandaloneExpression = kind === ts.SyntaxKind.DeleteExpression
-                || kind === ts.SyntaxKind.YieldExpression
-                || kind === ts.SyntaxKind.AwaitExpression;
-
-            if (!isValidStandaloneExpression && !NoUnusedExpressionWalker.isDirective(node)) {
-                this.addFailureAtNode(node, Rule.FAILURE_STRING);
-            }
-        }
+    public apply(_sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        return [];
     }
 }

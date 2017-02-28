@@ -1,0 +1,9 @@
+{
+  "rules": {
+    "no-unused-expression": [
+      true,
+      "allow-new-side-effects",
+      "allow-fast-null-checks"
+    ]
+  }
+}
