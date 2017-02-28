@@ -70,3 +70,94 @@ figcaption {
         }
     }
 }
+
+
+/**
+ * Rules & Feature Badges
+ */
+ .rules-list {
+    list-style: none;
+    margin: 0 !important; //need to override the `main-content ul` selector
+
+    > li {
+        &:nth-child(odd) {
+            a {
+                background-color: rgba(0, 0, 0, .03);
+            }
+        }
+
+        a {
+            display: block;
+            border-left: 3px solid transparent;
+            text-decoration: none;
+            padding: .75rem;
+            
+            &:hover {
+                background-color: rgba(0, 0, 0,.075);
+                border-left-color: #159957;
+            }
+        }
+    }
+ }
+
+ .rule-features {
+    display: -webkit-box;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+ }
+
+ .feature {
+    display: inline-block;
+    margin-right: 2px;
+    padding: 2px 4px;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border: 1px solid transparent;
+    border-radius: .25rem;
+    cursor: help;
+
+    &:before {
+        display: inline-block;
+        margin-right: 2px;
+    }
+
+    &.feature-sm {
+        padding: 1px 3px;
+        font-size: 75%;
+    }
+
+    &.feature-ts-only {
+        background-color: #fcf8e3;
+        border-color: #faf2cc;
+        color: #8a6d3b;
+
+        &:before {
+            content: "\1F4C4"; //page facing up icon
+        }
+    }
+
+    &.feature-fixer {
+        background-color: #dff0d8;
+        border-color: #d0e9c6;
+        color: #3c763d;
+        
+        &:before {
+            content: "\1f527"; //wrench icon
+        }
+    }
+
+    &.feature-requires-type-info {
+        background-color: #f2dede;
+        border-color: #ebcccc;
+        color: #a94442;
+
+        &:before {
+            content: "\1F6C8"; //information-circle icon
+        }
+    }
+ }
