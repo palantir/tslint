@@ -61,6 +61,7 @@ export const rules = {
         ["Boolean", "Avoid using the `Boolean` type. Did you mean `boolean`?"],
         ["Number", "Avoid using the `Number` type. Did you mean `number`?"],
         ["String", "Avoid using the `String` type. Did you mean `string`?"],
+        ["Symbol", "Avoid using the `Symbol` type. Did you mean `symbol`?"],
     ],
 };
 // tslint:enable object-literal-sort-keys
