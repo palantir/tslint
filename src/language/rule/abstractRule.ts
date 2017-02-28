@@ -20,7 +20,7 @@ import * as ts from "typescript";
 import {arrayify} from "../../utils";
 import {doesIntersect} from "../utils";
 import {IWalker, WalkContext} from "../walker";
-import {IDisabledInterval, IOptions, IRule, IRuleMetadata, RuleFailure, RuleSeverity} from "./rule";
+import { IDisabledInterval, IOptions, IRule, IRuleMetadata, RuleFailure, RuleSeverity } from "./rule";
 
 export abstract class AbstractRule implements IRule {
     public static metadata: IRuleMetadata;
@@ -44,7 +44,7 @@ export abstract class AbstractRule implements IRule {
     }
 
     constructor(public readonly ruleName: string, private value: any, private disabledIntervals: IDisabledInterval[]) {
-        let ruleSeverity = RuleSeverity.ERROR;
+        let ruleSeverity: RuleSeverity = "error";
 
         if (Array.isArray(value) && value.length > 1) {
             this.ruleArguments = value.slice(1);
@@ -60,7 +60,7 @@ export abstract class AbstractRule implements IRule {
             (value.severity.toLowerCase() === "warn" ||
             value.severity.toLowerCase() === "warning")) {
 
-            ruleSeverity = RuleSeverity.WARNING;
+            ruleSeverity = "warning";
         }
 
         this.ruleSeverity = ruleSeverity;

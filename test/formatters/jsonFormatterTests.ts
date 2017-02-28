@@ -16,7 +16,7 @@
 
 import * as ts from "typescript";
 
-import {Fix, IFormatter, Replacement, RuleFailure, RuleSeverity, TestUtils} from "../lint";
+import { Fix, IFormatter, Replacement, RuleFailure, TestUtils } from "../lint";
 
 describe("JSON Formatter", () => {
     const TEST_FILE = "formatters/jsonFormatter.test.ts";
@@ -33,9 +33,9 @@ describe("JSON Formatter", () => {
         const maxPosition = sourceFile.getFullWidth();
 
         const failures = [
-            new RuleFailure(sourceFile, 0, 1, "first failure", RuleSeverity.ERROR, "first-name"),
-            new RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", RuleSeverity.ERROR, "last-name"),
-            new RuleFailure(sourceFile, 0, maxPosition, "full failure", RuleSeverity.ERROR, "full-name",
+            new RuleFailure(sourceFile, 0, 1, "first failure", "error", "first-name"),
+            new RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "error", "last-name"),
+            new RuleFailure(sourceFile, 0, maxPosition, "full failure", "error", "full-name",
                 new Fix("full-name", [
                     new Replacement(0, 0, ""),
                 ])),

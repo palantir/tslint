@@ -86,10 +86,7 @@ export interface IRuleMetadata {
 
 export type RuleType = "functionality" | "maintainability" | "style" | "typescript";
 
-export enum RuleSeverity {
-    WARNING = 1,
-    ERROR,
-}
+export type RuleSeverity = "warning" | "error";
 
 export interface IOptions {
     ruleArguments: any[];
@@ -293,7 +290,7 @@ export class RuleFailure {
             fix: this.fix,
             name: this.fileName,
             ruleName: this.ruleName,
-            ruleSeverity: RuleSeverity[this.ruleSeverity],
+            ruleSeverity: this.ruleSeverity.toUpperCase(),
             startPosition: this.startPosition.toJson(),
         };
     }

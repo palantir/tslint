@@ -17,7 +17,7 @@
 
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
 import {IFormatterMetadata} from "../language/formatter/formatter";
-import {RuleFailure, RuleSeverity} from "../language/rule/rule";
+import { RuleFailure } from "../language/rule/rule";
 
 import * as Utils from "../utils";
 
@@ -48,7 +48,7 @@ export class Formatter extends AbstractFormatter {
             });
             let previousFilename: string | null = null;
             for (const failure of failuresSorted) {
-                const severity = RuleSeverity[failure.getRuleSeverity()].toLowerCase();
+                const severity = failure.getRuleSeverity();
                 if (failure.getFileName() !== previousFilename) {
                     if (previousFilename) {
                         output += "</file>";

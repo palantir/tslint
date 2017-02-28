@@ -17,7 +17,7 @@
 
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
 import {IFormatterMetadata} from "../language/formatter/formatter";
-import {RuleFailure, RuleSeverity} from "../language/rule/rule";
+import {RuleFailure} from "../language/rule/rule";
 
 export class Formatter extends AbstractFormatter {
     /* tslint:disable:object-literal-sort-keys */
@@ -54,7 +54,7 @@ export class Formatter extends AbstractFormatter {
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
             const positionTuple = `[${lineAndCharacter.line + 1}, ${lineAndCharacter.character + 1}]`;
 
-            return `${RuleSeverity[failure.getRuleSeverity()]}: ${fileName}${positionTuple}: ${failureString}`;
+            return `${failure.getRuleSeverity().toUpperCase()}: ${fileName}${positionTuple}: ${failureString}`;
         });
 
         return fixLines.concat(errorLines).join("\n") + "\n";

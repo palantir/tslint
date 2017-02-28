@@ -18,7 +18,6 @@
 import * as diff from "diff";
 import * as fs from "fs";
 import * as path from "path";
-import {RuleSeverity} from "../src/language/rule/rule";
 import { camelize } from "../src/utils";
 import { loadRules } from "./lint";
 
@@ -62,8 +61,8 @@ describe("Rule Loader", () => {
 
         const rules = loadRules(withOptions, {}, [builtRulesDir]);
         assert.equal(rules.length, 2);
-        assert.equal(rules[0].getOptions().ruleSeverity, RuleSeverity.ERROR);
-        assert.equal(rules[1].getOptions().ruleSeverity, RuleSeverity.WARNING);
+        assert.equal(rules[0].getOptions().ruleSeverity, "error");
+        assert.equal(rules[1].getOptions().ruleSeverity, "warning");
     });
 
     it("properly sets rule severity with no options", () => {
@@ -76,8 +75,8 @@ describe("Rule Loader", () => {
 
         const rules = loadRules(noOptions, {}, [builtRulesDir]);
         assert.equal(rules.length, 2);
-        assert.equal(rules[0].getOptions().ruleSeverity, RuleSeverity.ERROR);
-        assert.equal(rules[1].getOptions().ruleSeverity, RuleSeverity.WARNING);
+        assert.equal(rules[0].getOptions().ruleSeverity, "error");
+        assert.equal(rules[1].getOptions().ruleSeverity, "warning");
     });
 
     it("properly sets rule severity with options but no severity", () => {
@@ -90,8 +89,8 @@ describe("Rule Loader", () => {
 
         const rules = loadRules(noSeverity, {}, [builtRulesDir]);
         assert.equal(rules.length, 2);
-        assert.equal(rules[0].getOptions().ruleSeverity, RuleSeverity.ERROR);
-        assert.equal(rules[1].getOptions().ruleSeverity, RuleSeverity.ERROR);
+        assert.equal(rules[0].getOptions().ruleSeverity, "error");
+        assert.equal(rules[1].getOptions().ruleSeverity, "error");
     });
 
     it("loads disabled rules if rule in enableDisableRuleMap", () => {

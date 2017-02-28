@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import {Fix, IOptions, Replacement, RuleFailure, RuleSeverity} from "../rule/rule";
+import { Fix, IOptions, Replacement, RuleFailure, RuleSeverity } from "../rule/rule";
 import {SyntaxWalker} from "./syntaxWalker";
 import {IWalker} from "./walker";
 

@@ -18,7 +18,6 @@ import * as colors from "colors";
 
 import * as ts from "typescript";
 
-import {RuleSeverity} from "../../src/language/rule/rule";
 import {IFormatter, RuleFailure, TestUtils} from "../lint";
 
 describe("CodeFrame Formatter", () => {
@@ -37,10 +36,10 @@ describe("CodeFrame Formatter", () => {
         const maxPosition = sourceFile.getFullWidth();
 
         const failures = [
-            new RuleFailure(sourceFile, 0, 1, "first failure", RuleSeverity.ERROR, "first-name"),
-            new RuleFailure(sourceFile, 2, 3, "&<>'\" should be escaped", RuleSeverity.ERROR, "escape"),
-            new RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", RuleSeverity.ERROR, "last-name"),
-            new RuleFailure(sourceFile, 0, maxPosition, "full failure", RuleSeverity.ERROR, "full-name"),
+            new RuleFailure(sourceFile, 0, 1, "first failure", "error", "first-name"),
+            new RuleFailure(sourceFile, 2, 3, "&<>'\" should be escaped", "error", "escape"),
+            new RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "error", "last-name"),
+            new RuleFailure(sourceFile, 0, maxPosition, "full failure", "error", "full-name"),
         ];
 
         const expectedResultPlain =

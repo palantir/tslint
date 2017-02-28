@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import {Fix, Replacement, RuleFailure, RuleSeverity} from "../rule/rule";
+import { Fix, Replacement, RuleFailure, RuleSeverity } from "../rule/rule";
 
 export class WalkContext<T> {
     public readonly failures: RuleFailure[] = [];

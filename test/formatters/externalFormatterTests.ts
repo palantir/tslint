@@ -16,7 +16,7 @@
 
 import * as ts from "typescript";
 
-import {IFormatter, RuleFailure, RuleSeverity, TestUtils} from "../lint";
+import { IFormatter, RuleFailure, TestUtils } from "../lint";
 
 describe("External Formatter", () => {
     const TEST_FILE = "formatters/externalFormatter.test.ts";
@@ -33,9 +33,9 @@ describe("External Formatter", () => {
     it("formats failures", () => {
         const maxPosition = sourceFile.getFullWidth();
         const failures = [
-            new RuleFailure(sourceFile, 0, 1, "first failure", RuleSeverity.ERROR, "first-name"),
-            new RuleFailure(sourceFile, 32, 36, "mid failure", RuleSeverity.ERROR, "mid-name"),
-            new RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", RuleSeverity.ERROR, "last-name"),
+            new RuleFailure(sourceFile, 0, 1, "first failure", "error", "first-name"),
+            new RuleFailure(sourceFile, 32, 36, "mid failure", "error", "mid-name"),
+            new RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "error", "last-name"),
         ];
 
         const expectedResult =
