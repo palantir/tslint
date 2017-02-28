@@ -52,6 +52,16 @@ export const rules = {
     "arrow-return-shorthand": true,
     "no-unnecessary-initializer": true,
     "no-misused-new": true,
+
+    // added in v4.5
+    "ban-types": [
+        true,
+        ["Object", "Avoid using the `Object` type. Did you mean `object`?"],
+        ["Function", "Avoid using the `Function` type. Prefer a specific function type, like `() => void`."],
+        ["Boolean", "Avoid using the `Boolean` type. Did you mean `boolean`?"],
+        ["Number", "Avoid using the `Number` type. Did you mean `number`?"],
+        ["String", "Avoid using the `String` type. Did you mean `string`?"]
+    ],
 };
 // tslint:enable object-literal-sort-keys
 
