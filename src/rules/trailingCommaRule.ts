@@ -15,13 +15,14 @@
  * limitations under the License.
  */
 
+import { getChildOfKind } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
 
 interface Options {
-    multiline: string;
-    singleline: string;
+    multiline?: "always" | "never";
+    singleline?: "always" | "never";
 }
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -127,7 +128,7 @@ class TrailingCommaWalker extends Lint.AbstractWalker<Options> {
         }
         const sourceText = this.sourceFile.text;
         for (const member of members) {
-            // PropertSignature in TypeLiteral can end with semicolon or comma. If one ends with a semicolon, don't check for trailing comma
+            // PropertySignature in TypeLiteral can end with semicolon or comma. If one ends with a semicolon don't check for trailing comma
             if (sourceText[member.end - 1] === ";") {
                 return;
             }
@@ -141,7 +142,7 @@ class TrailingCommaWalker extends Lint.AbstractWalker<Options> {
         if (list.length === 0) {
             return;
         }
-        const token = Lint.childOfKind(node, closeTokenKind);
+        const token = getChildOfKind(node, closeTokenKind, this.sourceFile);
         if (token !== undefined) {
             return this.checkComma(list.hasTrailingComma, list, token.end);
         }
