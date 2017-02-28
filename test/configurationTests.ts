@@ -113,6 +113,24 @@ describe("Configuration", () => {
             /* tslint:enable:object-literal-sort-keys */
         });
 
+        it("extends with package - boolean configuration", () => {
+            const config = loadConfigurationFromPath("./test/config/tslint-extends-package-boolean.json");
+
+            assert.isArray(config.rulesDirectory);
+            /* tslint:disable:object-literal-sort-keys */
+            assert.deepEqual(config.jsRules, {
+                "rule-one": true,
+                "rule-three": false,
+                "rule-two": true,
+            });
+            assert.deepEqual(config.rules, {
+                "rule-one": true,
+                "rule-three": false,
+                "rule-two": true,
+            });
+            /* tslint:enable:object-literal-sort-keys */
+        });
+
         it("extends with package without customization", () => {
             const config = loadConfigurationFromPath("./test/config/tslint-extends-package-no-mod.json");
 
