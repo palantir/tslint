@@ -155,7 +155,7 @@ function quotesAreInconsistent(properties: ts.ObjectLiteralElementLike[]): boole
 }
 
 function propertyNeedsQuotes(property: string): boolean {
-    return !IDENTIFIER_NAME_REGEX.test(property) && Number(property).toString() !== property;
+    return !IDENTIFIER_NAME_REGEX.test(property) && (Number(property).toString() !== property || property.startsWith("-"));
 }
 
 // This is simplistic. See https://mothereff.in/js-properties for the gorey details.
