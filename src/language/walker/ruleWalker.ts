@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import { Fix, IOptions, Replacement, RuleFailure, RuleSeverity } from "../rule/rule";
+import {Fix, IOptions, Replacement, RuleFailure} from "../rule/rule";
 import {SyntaxWalker} from "./syntaxWalker";
 import {IWalker} from "./walker";
 
@@ -25,7 +25,6 @@ export class RuleWalker extends SyntaxWalker implements IWalker {
     private limit: number;
     private options?: any[];
     private failures: RuleFailure[];
-    private ruleSeverity: RuleSeverity;
     private ruleName: string;
 
     constructor(private sourceFile: ts.SourceFile, options: IOptions) {
@@ -34,7 +33,6 @@ export class RuleWalker extends SyntaxWalker implements IWalker {
         this.failures = [];
         this.options = options.ruleArguments;
         this.limit = this.sourceFile.getFullWidth();
-        this.ruleSeverity = options.ruleSeverity;
         this.ruleName = options.ruleName;
     }
 
@@ -74,7 +72,7 @@ export class RuleWalker extends SyntaxWalker implements IWalker {
     public createFailure(start: number, width: number, failure: string, fix?: Fix): RuleFailure {
         const from = (start > this.limit) ? this.limit : start;
         const to = ((start + width) > this.limit) ? this.limit : (start + width);
-        return new RuleFailure(this.sourceFile, from, to, failure, this.ruleSeverity, this.ruleName, fix);
+        return new RuleFailure(this.sourceFile, from, to, failure, this.ruleName, fix);
     }
 
     /** @deprecated Prefer `addFailureAt` and its variants. */

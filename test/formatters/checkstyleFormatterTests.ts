@@ -17,7 +17,8 @@
 
 import * as ts from "typescript";
 
-import { IFormatter, RuleFailure, TestUtils } from "../lint";
+import { IFormatter, TestUtils } from "../lint";
+import { createFailure } from "./utils";
 
 describe("Checkstyle Formatter", () => {
     const TEST_FILE_1 = "formatters/jsonFormatter.test.ts"; // reuse existing sample file
@@ -38,12 +39,12 @@ describe("Checkstyle Formatter", () => {
         const maxPosition2 = sourceFile2.getFullWidth();
 
         const failures = [
-            new RuleFailure(sourceFile1, 0, 1, "first failure", "error", "first-name"),
-            new RuleFailure(sourceFile1, 2, 3, "&<>'\" should be escaped", "error", "escape"),
-            new RuleFailure(sourceFile1, maxPosition1 - 1, maxPosition1, "last failure", "error", "last-name"),
-            new RuleFailure(sourceFile2, 0, 1, "first failure", "error", "first-name"),
-            new RuleFailure(sourceFile2, 2, 3, "&<>'\" should be escaped", "warning", "escape"),
-            new RuleFailure(sourceFile2, maxPosition2 - 1, maxPosition2, "last failure", "warning", "last-name"),
+            createFailure(sourceFile1, 0, 1, "first failure", "first-name", undefined, "error"),
+            createFailure(sourceFile1, 2, 3, "&<>'\" should be escaped", "escape", undefined, "error"),
+            createFailure(sourceFile1, maxPosition1 - 1, maxPosition1, "last failure", "last-name", undefined, "error"),
+            createFailure(sourceFile2, 0, 1, "first failure", "first-name", undefined, "error"),
+            createFailure(sourceFile2, 2, 3, "&<>'\" should be escaped", "escape", undefined, "warning"),
+            createFailure(sourceFile2, maxPosition2 - 1, maxPosition2, "last failure", "last-name", undefined, "warning"),
         ];
         const expectedResult =
             '<?xml version="1.0" encoding="utf-8"?><checkstyle version="4.3">' +

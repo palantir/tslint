@@ -46,19 +46,18 @@ export function applyRuleOnFile(fileName: string, Rule: any, ruleValue: any = tr
 
 // start and end are arrays with the first and second elements
 // being (one-indexed) line and character positions respectively
-export function createFailure(fileName: string, start: number[], end: number[],
-                              ruleSeverity: Lint.RuleSeverity, failure: string): Lint.RuleFailure {
+export function createFailure(fileName: string, start: number[], end: number[], failure: string): Lint.RuleFailure {
     const sourceFile = getSourceFile(fileName);
     const startPosition = sourceFile.getPositionOfLineAndCharacter(start[0] - 1, start[1] - 1);
     const endPosition = sourceFile.getPositionOfLineAndCharacter(end[0] - 1, end[1] - 1);
 
-    return new Lint.RuleFailure(sourceFile, startPosition, endPosition, failure, ruleSeverity, "");
+    return new Lint.RuleFailure(sourceFile, startPosition, endPosition, failure, "");
 }
 
 // return a partial on createFailure
 export function createFailuresOnFile(fileName: string, failure: string) {
     return (start: number[], end: number[]) => {
-        return createFailure(fileName, start, end, "error", failure);
+        return createFailure(fileName, start, end, failure);
     };
 }
 

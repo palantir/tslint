@@ -18,7 +18,7 @@
 import * as utils from "tsutils";
 import * as ts from "typescript";
 
-import {AbstractRule} from "./language/rule/abstractRule";
+import {isRuleEnabled} from "./configuration";
 import {IEnableDisablePosition} from "./ruleLoader";
 
 export class EnableDisableRulesWalker {
@@ -30,7 +30,7 @@ export class EnableDisableRulesWalker {
         this.enabledRules = [];
         if (rules) {
             for (const rule of Object.keys(rules)) {
-                if (AbstractRule.isRuleEnabled(rules[rule])) {
+                if (isRuleEnabled(rules[rule])) {
                     this.enabledRules.push(rule);
                     this.enableDisableRuleMap[rule] = [{
                         isEnabled: true,

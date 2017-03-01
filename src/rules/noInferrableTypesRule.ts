@@ -64,7 +64,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoInferrableTypesWalker(sourceFile, this.ruleSeverity, this.ruleName, {
+        return this.applyWithWalker(new NoInferrableTypesWalker(sourceFile, this.ruleName, {
             ignoreParameters: this.ruleArguments.indexOf(OPTION_IGNORE_PARMS) !== -1,
             ignoreProperties: this.ruleArguments.indexOf(OPTION_IGNORE_PROPERTIES) !== -1,
         }));

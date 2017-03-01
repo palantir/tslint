@@ -16,7 +16,8 @@
 
 import * as ts from "typescript";
 
-import { IFormatter, RuleFailure, TestUtils } from "../lint";
+import { IFormatter, TestUtils } from "../lint";
+import { createFailure } from "./utils";
 
 describe("MSBuild Formatter", () => {
     const TEST_FILE = "formatters/msbuildFormatter.test.ts";
@@ -33,15 +34,15 @@ describe("MSBuild Formatter", () => {
         const maxPosition = sourceFile.getFullWidth();
 
         const failures = [
-            new RuleFailure(sourceFile, 0, 1, "first failure", "error", "first-name"),
-            new RuleFailure(sourceFile, 32, 36, "mid failure", "error", "mid-name"),
-            new RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "warning", "last-name"),
+            createFailure(sourceFile, 0, 1, "first failure", "first-name", undefined, "error"),
+            createFailure(sourceFile, 32, 36, "mid failure", "mid-name", undefined, "error"),
+            createFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name", undefined, "warning"),
         ];
 
         const expectedResult =
-            getFailureString(TEST_FILE, 1,  1, "error", "first failure", "firstName") +
-            getFailureString(TEST_FILE, 2, 12, "error", "mid failure", "midName") +
-            getFailureString(TEST_FILE, 9,  2, "warning",  "last failure", "lastName");
+            getFailureString(TEST_FILE, 1,  1, "first failure", "firstName", "error") +
+            getFailureString(TEST_FILE, 2, 12, "mid failure", "midName", "error") +
+            getFailureString(TEST_FILE, 9,  2,  "last failure", "lastName", "warning");
 
         const actualResult = formatter.format(failures);
         assert.equal(actualResult, expectedResult);
@@ -52,7 +53,7 @@ describe("MSBuild Formatter", () => {
         assert.equal(result, "\n");
     });
 
-    function getFailureString(file: string, line: number, character: number, severity: string, reason: string, ruleCamelCase: string) {
+    function getFailureString(file: string, line: number, character: number, reason: string, ruleCamelCase: string, severity: string) {
         return `${file}(${line},${character}): ${severity} ${ruleCamelCase}: ${reason}\n`;
     }
 });

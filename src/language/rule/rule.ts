@@ -232,12 +232,12 @@ export class RuleFailure {
     private startPosition: RuleFailurePosition;
     private endPosition: RuleFailurePosition;
     private rawLines: string;
+    private ruleSeverity: RuleSeverity;
 
     constructor(private sourceFile: ts.SourceFile,
                 start: number,
                 end: number,
                 private failure: string,
-                private ruleSeverity: RuleSeverity,
                 private ruleName: string,
                 private fix?: Fix) {
 
@@ -245,14 +245,11 @@ export class RuleFailure {
         this.startPosition = this.createFailurePosition(start);
         this.endPosition = this.createFailurePosition(end);
         this.rawLines = sourceFile.text;
+        this.ruleSeverity = "warning";
     }
 
     public getFileName() {
         return this.fileName;
-    }
-
-    public getRuleSeverity() {
-        return this.ruleSeverity;
     }
 
     public getRuleName() {
@@ -281,6 +278,14 @@ export class RuleFailure {
 
     public getRawLines() {
         return this.rawLines;
+    }
+
+    public getRuleSeverity() {
+        return this.ruleSeverity;
+    }
+
+    public setRuleSeverity(value: RuleSeverity) {
+        this.ruleSeverity = value;
     }
 
     public toJson(): IRuleFailureJson {

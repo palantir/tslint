@@ -21,7 +21,7 @@ import * as path from "path";
 import * as resolve from "resolve";
 import { FatalError } from "./error";
 
-import {arrayify, objectify, stripComments} from "./utils";
+import { arrayify, objectify, stripComments } from "./utils";
 
 export interface IConfigurationFile {
     extends?: string | string[];
@@ -39,11 +39,9 @@ export interface IConfigurationLoadResult {
 }
 
 export const CONFIG_FILENAME = "tslint.json";
-/* tslint:disable:object-literal-key-quotes */
 export const DEFAULT_CONFIG = {
-    "extends": "tslint:recommended",
+    extends: "tslint:recommended",
 };
-/* tslint:enable:object-literal-key-quotes */
 
 const BUILT_IN_CONFIG = /^tslint:(.*)$/;
 
@@ -243,4 +241,31 @@ export function getRulesDirectories(directories?: string | string[], relativeTo?
     }
 
     return rulesDirectories;
+}
+
+export function isRuleEnabled(ruleConfigValue: any): boolean {
+    if (typeof ruleConfigValue === "boolean") {
+        return ruleConfigValue;
+    }
+
+    if (Array.isArray(ruleConfigValue) && ruleConfigValue.length > 0) {
+        return ruleConfigValue[0];
+    }
+
+    if (ruleConfigValue.severity !== "off" && ruleConfigValue.severity !== "none") {
+        return true;
+    }
+
+    return false;
+}
+
+export function getRuleSeverity(ruleConfigValue: any) {
+    if (ruleConfigValue.severity &&
+        (ruleConfigValue.severity.toLowerCase() === "warn" ||
+        ruleConfigValue.severity.toLowerCase() === "warning")) {
+
+        return "warning";
+    }
+
+    return "error";
 }

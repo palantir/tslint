@@ -17,6 +17,7 @@
 
 import * as ts from "typescript";
 
+import { getRuleSeverity, isRuleEnabled } from "../../configuration";
 import {arrayify} from "../../utils";
 import {doesIntersect} from "../utils";
 import {IWalker, WalkContext} from "../walker";
@@ -27,25 +28,7 @@ export abstract class AbstractRule implements IRule {
     protected readonly ruleArguments: any[];
     protected readonly ruleSeverity: RuleSeverity;
 
-    public static isRuleEnabled(ruleConfigValue: any): boolean {
-        if (typeof ruleConfigValue === "boolean") {
-            return ruleConfigValue;
-        }
-
-        if (Array.isArray(ruleConfigValue) && ruleConfigValue.length > 0) {
-            return ruleConfigValue[0];
-        }
-
-        if (ruleConfigValue.severity !== "off" && ruleConfigValue.severity !== "none") {
-            return true;
-        }
-
-        return false;
-    }
-
     constructor(public readonly ruleName: string, private value: any, private disabledIntervals: IDisabledInterval[]) {
-        let ruleSeverity: RuleSeverity = "error";
-
         if (Array.isArray(value) && value.length > 1) {
             this.ruleArguments = value.slice(1);
         } else {
@@ -56,14 +39,7 @@ export abstract class AbstractRule implements IRule {
             this.ruleArguments = arrayify(value.options);
         }
 
-        if (value.severity &&
-            (value.severity.toLowerCase() === "warn" ||
-            value.severity.toLowerCase() === "warning")) {
-
-            ruleSeverity = "warning";
-        }
-
-        this.ruleSeverity = ruleSeverity;
+        this.ruleSeverity = getRuleSeverity(value);
     }
 
     public getOptions(): IOptions {
@@ -83,13 +59,13 @@ export abstract class AbstractRule implements IRule {
     }
 
     public isEnabled(): boolean {
-        return AbstractRule.isRuleEnabled(this.value);
+        return isRuleEnabled(this.value);
     }
 
     protected applyWithFunction(sourceFile: ts.SourceFile, walkFn: (ctx: WalkContext<void>) => void): RuleFailure[];
     protected applyWithFunction<T>(sourceFile: ts.SourceFile, walkFn: (ctx: WalkContext<T>) => void, options: T): RuleFailure[];
     protected applyWithFunction<T>(sourceFile: ts.SourceFile, walkFn: (ctx: WalkContext<T | void>) => void, options?: T): RuleFailure[] {
-        const ctx = new WalkContext(sourceFile, this.ruleSeverity, this.ruleName, options);
+        const ctx = new WalkContext(sourceFile, this.ruleName, options);
         walkFn(ctx);
         return this.filterFailures(ctx.failures);
     }
