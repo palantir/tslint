@@ -17,25 +17,16 @@
 
 import * as ts from "typescript";
 
+import { getRuleSeverity, isRuleEnabled } from "../../configuration";
+import {arrayify} from "../../utils";
 import {doesIntersect} from "../utils";
 import {IWalker, WalkContext} from "../walker";
-import {IDisabledInterval, IOptions, IRule, IRuleMetadata, RuleFailure} from "./rule";
+import { IDisabledInterval, IOptions, IRule, IRuleMetadata, RuleFailure, RuleSeverity } from "./rule";
 
 export abstract class AbstractRule implements IRule {
     public static metadata: IRuleMetadata;
     protected readonly ruleArguments: any[];
-
-    public static isRuleEnabled(ruleConfigValue: any): boolean {
-        if (typeof ruleConfigValue === "boolean") {
-            return ruleConfigValue;
-        }
-
-        if (Array.isArray(ruleConfigValue) && ruleConfigValue.length > 0) {
-            return ruleConfigValue[0];
-        }
-
-        return false;
-    }
+    protected readonly ruleSeverity: RuleSeverity;
 
     constructor(public readonly ruleName: string, private value: any, private disabledIntervals: IDisabledInterval[]) {
         if (Array.isArray(value) && value.length > 1) {
@@ -43,6 +34,12 @@ export abstract class AbstractRule implements IRule {
         } else {
             this.ruleArguments = [];
         }
+
+        if (value.options) {
+            this.ruleArguments = arrayify(value.options);
+        }
+
+        this.ruleSeverity = getRuleSeverity(value);
     }
 
     public getOptions(): IOptions {
@@ -50,6 +47,7 @@ export abstract class AbstractRule implements IRule {
             disabledIntervals: this.disabledIntervals,
             ruleArguments: this.ruleArguments,
             ruleName: this.ruleName,
+            ruleSeverity: this.ruleSeverity,
         };
     }
 
@@ -61,7 +59,7 @@ export abstract class AbstractRule implements IRule {
     }
 
     public isEnabled(): boolean {
-        return AbstractRule.isRuleEnabled(this.value);
+        return isRuleEnabled(this.value);
     }
 
     protected applyWithFunction(sourceFile: ts.SourceFile, walkFn: (ctx: WalkContext<void>) => void): RuleFailure[];

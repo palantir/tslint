@@ -18,7 +18,7 @@
 import * as fs from "fs";
 import * as path from "path";
 
-import { getRelativePath } from "./configuration";
+import { getRelativePath, isRuleEnabled } from "./configuration";
 import { showWarningOnce } from "./error";
 import { AbstractRule } from "./language/rule/abstractRule";
 import { IDisabledInterval, IRule } from "./language/rule/rule";
@@ -44,7 +44,7 @@ export function loadRules(ruleConfiguration: {[name: string]: any},
     for (const ruleName in ruleConfiguration) {
         if (ruleConfiguration.hasOwnProperty(ruleName)) {
             const ruleValue = ruleConfiguration[ruleName];
-            if (AbstractRule.isRuleEnabled(ruleValue) || enableDisableRuleMap.hasOwnProperty(ruleName)) {
+            if (isRuleEnabled(ruleValue) || enableDisableRuleMap.hasOwnProperty(ruleName)) {
                 const Rule: (typeof AbstractRule) | null = findRule(ruleName, rulesDirectories);
                 if (Rule == null) {
                     notFoundRules.push(ruleName);

@@ -24,7 +24,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "max-file-line-count",
         description: "Requires files to remain under a certain number of lines",
         rationale: Lint.Utils.dedent`
-            Limiting the number of lines allowed in a file allows files to remain small, 
+            Limiting the number of lines allowed in a file allows files to remain small,
             single purpose, and maintainable.`,
         optionsDescription: "An integer indicating the maximum number of lines.",
         options: {
@@ -63,7 +63,8 @@ export class Rule extends Lint.Rules.AbstractRule {
 
         if (lineCount > lineLimit && disabledIntervals.length === 0) {
             const errorString = Rule.FAILURE_STRING_FACTORY(lineCount, lineLimit);
-            ruleFailures.push(new Lint.RuleFailure(sourceFile, 0, 1, errorString, this.getOptions().ruleName));
+            ruleFailures.push(new Lint.RuleFailure(sourceFile, 0, 1, errorString,
+              this.getOptions().ruleName));
         }
         return ruleFailures;
     }

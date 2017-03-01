@@ -34,8 +34,10 @@ export class Formatter extends AbstractFormatter {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public format(failures: RuleFailure[]): string {
-        const outputLines = failures.map((failure: RuleFailure) => {
+    public format(failures: RuleFailure[], warnings: RuleFailure[] = []): string {
+        const all = failures.concat(warnings);
+
+        const outputLines = all.map((failure: RuleFailure) => {
             const fileName = failure.getFileName();
             const failureString = failure.getFailure();
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();

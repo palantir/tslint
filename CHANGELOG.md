@@ -1,6 +1,42 @@
 Change Log
 ===
 
+<!--
+
+v5.0.0
+---
+
+* **BREAKING CHANGES**
+    * The severity level is now configurable, and defaults to severity "error"
+    * The following formatters have change output:
+        - msbuildFormatter - default was "warning"; it is now "error"
+        - pmdFormatter - default was priority 1; it is now "error" (priority 3). If set to "warning", it will output priority 4
+* [enhancement] Enable WARN with new config file format (#629, #345)
+    * Valid values for `severity`: "error|warn|warning|none|off"
+    * Old style
+    * ```{
+        "extends": "tslint:latest",
+        "rules": {
+          "callable-types": true
+        }
+      }``
+    * New style, with `interface-name` generating warnings, and passing options to `max-line-length`
+    * ``` {
+        "extends": "tslint:latest",
+        "rules": {
+          "callable-types": true,
+          "interface-name": {
+            "severity": "warn"
+          },
+          "max-line-length": {
+            "options": 140,
+            "severity": "warning"
+          }
+        }
+      }``
+
+-->
+
 v4.5.1
 ---
 

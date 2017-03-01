@@ -1,9 +1,13 @@
 {
   "rulesDirectory": "../files/custom-rules/",
   "jsRules": {
-    "always-fail": true
+    "always-fail": {
+      "severity": "error"
+    }
   },
   "rules": {
-    "always-fail": true
+    "always-fail": {
+      "severity": "error"
+    }
   }
 }

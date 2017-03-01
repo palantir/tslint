@@ -81,14 +81,40 @@ describe("Configuration", () => {
             const config = loadConfigurationFromPath("./test/config/tslint-extends-relative.json");
 
             assert.isArray(config.rulesDirectory);
-            assert.isTrue(config.rules["no-fail"], "did not pick up 'no-fail' in base config");
-            assert.isFalse(config.rules["always-fail"], "did not set 'always-fail' in top config");
-            assert.isTrue(config.jsRules["no-fail"]);
-            assert.isFalse(config.jsRules["always-fail"]);
+            assert.equal("error", config.rules["no-fail"].severity, "did not pick up 'no-fail' in base config");
+            assert.equal("none", config.rules["always-fail"].severity, "did not set 'always-fail' in top config");
+            assert.equal("error", config.jsRules["no-fail"].severity);
+            assert.equal("none", config.jsRules["always-fail"].severity);
         });
 
         it("extends with package", () => {
             const config = loadConfigurationFromPath("./test/config/tslint-extends-package.json");
+
+            assert.isArray(config.rulesDirectory);
+            /* tslint:disable:object-literal-sort-keys */
+            assert.deepEqual(config.jsRules, {
+                "rule-one": true,
+                "rule-three": {
+                    severity: "none",
+                },
+                "rule-two": {
+                    severity: "error",
+                },
+            });
+            assert.deepEqual(config.rules, {
+                "rule-one": true,
+                "rule-three": {
+                    severity: "none",
+                },
+                "rule-two": {
+                    severity: "error",
+                },
+            });
+            /* tslint:enable:object-literal-sort-keys */
+        });
+
+        it("extends with package - boolean configuration", () => {
+            const config = loadConfigurationFromPath("./test/config/tslint-extends-package-boolean.json");
 
             assert.isArray(config.rulesDirectory);
             /* tslint:disable:object-literal-sort-keys */
@@ -122,9 +148,9 @@ describe("Configuration", () => {
         it("extends with builtin", () => {
             const config = loadConfigurationFromPath("./test/config/tslint-extends-builtin.json");
             assert.isUndefined(config.jsRules["no-var-keyword"]);
-            assert.isFalse(config.jsRules["no-eval"]);
+            assert.equal("none", config.jsRules["no-eval"].severity);
             assert.isTrue(config.rules["no-var-keyword"]);
-            assert.isFalse(config.rules["no-eval"]);
+            assert.equal("none", config.rules["no-eval"].severity);
         });
 
         describe("with config not relative to tslint", () => {
@@ -158,13 +184,17 @@ describe("Configuration", () => {
             assert.isTrue(fs.existsSync(config.rulesDirectory![1]));
             /* tslint:disable:object-literal-sort-keys */
             assert.deepEqual(config.jsRules, {
-                "always-fail": false,
+                "always-fail": {
+                    severity: "none",
+                },
                 "rule-one": true,
                 "rule-two": true,
                 "rule-four": true,
             });
             assert.deepEqual(config.rules, {
-                "always-fail": false,
+                "always-fail": {
+                    severity: "none",
+                },
                 "rule-one": true,
                 "rule-two": true,
                 "rule-four": true,
@@ -177,16 +207,28 @@ describe("Configuration", () => {
 
             assert.isArray(config.rulesDirectory);
             assert.deepEqual(config.jsRules, {
-                "always-fail": false,
-                "no-fail": true,
+                "always-fail": {
+                    severity: "none",
+                },
+                "no-fail": {
+                    severity: "error",
+                },
                 "rule-one": true,
-                "rule-two": true,
+                "rule-two": {
+                    severity: "error",
+                },
             });
             assert.deepEqual(config.rules, {
-                "always-fail": false,
-                "no-fail": true,
+                "always-fail": {
+                    severity: "none",
+                },
+                "no-fail": {
+                    severity: "error",
+                },
                 "rule-one": true,
-                "rule-two": true,
+                "rule-two": {
+                    severity: "error",
+                },
             });
         });
 
@@ -195,12 +237,16 @@ describe("Configuration", () => {
 
             /* tslint:disable:object-literal-sort-keys */
             assert.deepEqual(config.jsRules, {
-                "rule-two": true,
+                "rule-two": {
+                    severity: "error",
+                },
                 "rule-three": "//not a comment",
                 "rule-four": "/*also not a comment*/",
             });
             assert.deepEqual(config.rules, {
-                "rule-two": true,
+                "rule-two": {
+                    severity: "error",
+                },
                 "rule-three": "//not a comment",
                 "rule-four": "/*also not a comment*/",
             });

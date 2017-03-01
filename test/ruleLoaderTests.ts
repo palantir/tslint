@@ -50,6 +50,49 @@ describe("Rule Loader", () => {
         assert.equal(rules.length, 1);
     });
 
+    it("properly sets rule severity with options", () => {
+        const withOptions = {
+            "callable-types": true,
+            "max-line-length": {
+                options: 140,
+                severity: "warning",
+            },
+        };
+
+        const rules = loadRules(withOptions, {}, [builtRulesDir]);
+        assert.equal(rules.length, 2);
+        assert.equal(rules[0].getOptions().ruleSeverity, "error");
+        assert.equal(rules[1].getOptions().ruleSeverity, "warning");
+    });
+
+    it("properly sets rule severity with no options", () => {
+        const noOptions = {
+            "callable-types": true,
+            "interface-name": {
+                severity: "warning",
+            },
+        };
+
+        const rules = loadRules(noOptions, {}, [builtRulesDir]);
+        assert.equal(rules.length, 2);
+        assert.equal(rules[0].getOptions().ruleSeverity, "error");
+        assert.equal(rules[1].getOptions().ruleSeverity, "warning");
+    });
+
+    it("properly sets rule severity with options but no severity", () => {
+        const noSeverity = {
+            "callable-types": true,
+            "max-line-length": {
+                options: 140,
+            },
+        };
+
+        const rules = loadRules(noSeverity, {}, [builtRulesDir]);
+        assert.equal(rules.length, 2);
+        assert.equal(rules[0].getOptions().ruleSeverity, "error");
+        assert.equal(rules[1].getOptions().ruleSeverity, "error");
+    });
+
     it("loads disabled rules if rule in enableDisableRuleMap", () => {
         const validConfiguration: {[name: string]: any} = {
             "class-name": true,
