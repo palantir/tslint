@@ -251,10 +251,10 @@ export class Runner {
         const lintResult = linter.getResult();
 
         this.outputStream.write(lintResult.output, () => {
-            if (lintResult.failureCount > 0) {
-                onComplete(this.options.force ? 0 : 2);
-            } else {
+            if (this.options.force || lintResult.errorCount === 0) {
                 onComplete(0);
+            } else {
+                onComplete(2);
             }
         });
 

@@ -164,12 +164,14 @@ class Linter {
 
         const output = formatter.format(this.failures, this.fixes);
 
+        const errorCount = this.failures.filter((failure) => failure.getRuleSeverity() === "error").length;
         return {
-            failureCount: this.failures.length,
+            errorCount,
             failures: this.failures,
             fixes: this.fixes,
             format: formatterName,
             output,
+            warningCount: this.failures.length - errorCount,
         };
     }
 
