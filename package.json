@@ -47,7 +47,7 @@
     "update-notifier": "^2.0.0"
   },
   "peerDependencies": {
-    "typescript": ">=2.0.0"
+    "typescript": ">=2.0.0 || >=2.0.0-dev || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev"
   },
   "devDependencies": {
     "@types/babel-code-frame": "^6.20.0",
