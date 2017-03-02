@@ -86,12 +86,11 @@ export interface IRuleMetadata {
 
 export type RuleType = "functionality" | "maintainability" | "style" | "typescript";
 
-export type RuleSeverity = "warning" | "error";
+export type RuleSeverity = "warning" | "error" | "off";
 
 export interface IOptions {
     ruleArguments: any[];
     ruleSeverity: RuleSeverity;
-
     ruleName: string;
     disabledIntervals: IDisabledInterval[];
 }
@@ -245,7 +244,7 @@ export class RuleFailure {
         this.startPosition = this.createFailurePosition(start);
         this.endPosition = this.createFailurePosition(end);
         this.rawLines = sourceFile.text;
-        this.ruleSeverity = "warning";
+        this.ruleSeverity = "error";
     }
 
     public getFileName() {

@@ -23,7 +23,7 @@ describe("<eofline>", () => {
     const failureString = Rule.FAILURE_STRING;
 
     it("ensures a trailing newline at EOF", () => {
-        const actualFailures = TestUtils.applyRuleOnFile(fileName, EofLineRule);
+        const actualFailures = TestUtils.applyRuleOnFile(fileName, EofLineRule!);
         const expectedFailure = TestUtils.createFailure(fileName, [4, 38], [4, 38], failureString);
 
         assert.equal(actualFailures.length, 1);

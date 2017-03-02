@@ -20,6 +20,7 @@ import * as path from "path";
 import * as ts from "typescript";
 
 import {
+    convertRuleOptions,
     DEFAULT_CONFIG,
     findConfiguration,
     findConfigurationPath,
@@ -201,14 +202,14 @@ class Linter {
     }
 
     private getEnabledRules(sourceFile: ts.SourceFile, configuration: IConfigurationFile = DEFAULT_CONFIG, isJs: boolean): IRule[] {
-        const configurationRules = isJs ? configuration.jsRules : configuration.rules;
+        const ruleOptionsList = convertRuleOptions(isJs ? configuration.jsRules : configuration.rules);
 
         // walk the code first to find all the intervals where rules are disabled
-        const enableDisableRuleMap = new EnableDisableRulesWalker(sourceFile, configurationRules).getEnableDisableRuleMap();
+        const enableDisableRuleMap = new EnableDisableRulesWalker(sourceFile, ruleOptionsList).getEnableDisableRuleMap();
 
         const rulesDirectories = arrayify(this.options.rulesDirectory)
             .concat(arrayify(configuration.rulesDirectory));
-        const configuredRules = loadRules(configurationRules, enableDisableRuleMap, rulesDirectories, isJs);
+        const configuredRules = loadRules(ruleOptionsList, enableDisableRuleMap, rulesDirectories, isJs);
 
         return configuredRules.filter((r) => r.isEnabled());
     }

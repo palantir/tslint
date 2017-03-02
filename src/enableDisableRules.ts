@@ -17,26 +17,24 @@
 
 import * as utils from "tsutils";
 import * as ts from "typescript";
+import { IOptions } from "./language/rule/rule";
 
-import {isRuleEnabled} from "./configuration";
-import {IEnableDisablePosition} from "./ruleLoader";
+import { IEnableDisablePosition } from "./ruleLoader";
 
 export class EnableDisableRulesWalker {
-    private enableDisableRuleMap: {[rulename: string]: IEnableDisablePosition[]};
+    private enableDisableRuleMap: Map<string, IEnableDisablePosition[]>;
     private enabledRules: string[];
 
-    constructor(private sourceFile: ts.SourceFile, rules: {[name: string]: any}) {
-        this.enableDisableRuleMap = {};
+    constructor(private sourceFile: ts.SourceFile, ruleOptionsList: IOptions[]) {
+        this.enableDisableRuleMap = new Map<string, IEnableDisablePosition[]>();
         this.enabledRules = [];
-        if (rules) {
-            for (const rule of Object.keys(rules)) {
-                if (isRuleEnabled(rules[rule])) {
-                    this.enabledRules.push(rule);
-                    this.enableDisableRuleMap[rule] = [{
-                        isEnabled: true,
-                        position: 0,
-                    }];
-                }
+        for (const ruleOptions of ruleOptionsList) {
+            if (ruleOptions.ruleSeverity !== "off") {
+                this.enabledRules.push(ruleOptions.ruleName);
+                this.enableDisableRuleMap.set(ruleOptions.ruleName, [{
+                    isEnabled: true,
+                    position: 0,
+                }]);
             }
         }
     }
@@ -64,7 +62,7 @@ export class EnableDisableRulesWalker {
     }
 
     private switchRuleState(ruleName: string, isEnabled: boolean, start: number, end?: number): void {
-        const ruleStateMap = this.enableDisableRuleMap[ruleName];
+        const ruleStateMap = this.enableDisableRuleMap.get(ruleName);
         if (ruleStateMap === undefined || // skip switches for unknown or disabled rules
             isEnabled === ruleStateMap[ruleStateMap.length - 1].isEnabled // no need to add switch points if there is no change
         ) {
@@ -97,8 +95,8 @@ export class EnableDisableRulesWalker {
             // split at whitespaces
             // filter empty items coming from whitespaces at start, at end or empty list
             let rulesList = commentText.substr(match[0].length)
-                                       .split(/\s+/)
-                                       .filter((rule) => !!rule);
+                .split(/\s+/)
+                .filter((rule) => !!rule);
             if (rulesList.length === 0 && match[3] === ":") {
                 // nothing to do here: an explicit separator was specified but no rules to switch
                 return;
