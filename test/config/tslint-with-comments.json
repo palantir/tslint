@@ -7,8 +7,8 @@
       "rule-two": {
         "severity": "error" // after comment
       },
-      "rule-three": "//not a comment",
-      "rule-four": "/*also not a comment*/"
+      "rule-three": [true, "//not a comment"],
+      "rule-four": [true, "/*also not a comment*/"]
   },
   // a nice comment
   "rules": {
@@ -19,7 +19,7 @@
         "severity": "error"
         // after comment
       },
-      "rule-three": "//not a comment",
-      "rule-four": "/*also not a comment*/"
+      "rule-three": [true, "//not a comment"],
+      "rule-four": [true, "/*also not a comment*/"]
   }
 }

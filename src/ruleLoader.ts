@@ -18,10 +18,10 @@
 import * as fs from "fs";
 import * as path from "path";
 
-import { getRelativePath, isRuleEnabled } from "./configuration";
+import { getRelativePath } from "./configuration";
 import { showWarningOnce } from "./error";
 import { AbstractRule } from "./language/rule/abstractRule";
-import { IDisabledInterval, IRule } from "./language/rule/rule";
+import { IDisabledInterval, IOptions, IRule } from "./language/rule/rule";
 import { arrayify, camelize, dedent } from "./utils";
 
 const moduleDirectory = path.dirname(module.filename);
@@ -33,7 +33,7 @@ export interface IEnableDisablePosition {
     position: number;
 }
 
-export function loadRules(ruleConfiguration: {[name: string]: any},
+export function loadRules(ruleOptionsList: IOptions[],
                           enableDisableRuleMap: {[rulename: string]: IEnableDisablePosition[]},
                           rulesDirectories?: string | string[],
                           isJs?: boolean): IRule[] {
@@ -41,24 +41,22 @@ export function loadRules(ruleConfiguration: {[name: string]: any},
     const notFoundRules: string[] = [];
     const notAllowedInJsRules: string[] = [];
 
-    for (const ruleName in ruleConfiguration) {
-        if (ruleConfiguration.hasOwnProperty(ruleName)) {
-            const ruleValue = ruleConfiguration[ruleName];
-            if (isRuleEnabled(ruleValue) || enableDisableRuleMap.hasOwnProperty(ruleName)) {
-                const Rule: (typeof AbstractRule) | null = findRule(ruleName, rulesDirectories);
-                if (Rule == null) {
-                    notFoundRules.push(ruleName);
+    for (const ruleOptions of ruleOptionsList) {
+        const ruleName = ruleOptions.ruleName;
+        if (ruleOptions.ruleSeverity !== "off" || enableDisableRuleMap.hasOwnProperty(ruleName)) {
+            const Rule: (typeof AbstractRule) | null = findRule(ruleName, rulesDirectories);
+            if (Rule == null) {
+                notFoundRules.push(ruleName);
+            } else {
+                if (isJs && Rule.metadata && Rule.metadata.typescriptOnly != null && Rule.metadata.typescriptOnly) {
+                    notAllowedInJsRules.push(ruleName);
                 } else {
-                    if (isJs && Rule.metadata && Rule.metadata.typescriptOnly != null && Rule.metadata.typescriptOnly) {
-                        notAllowedInJsRules.push(ruleName);
-                    } else {
-                        const ruleSpecificList = (ruleName in enableDisableRuleMap ? enableDisableRuleMap[ruleName] : []);
-                        const disabledIntervals = buildDisabledIntervalsFromSwitches(ruleSpecificList);
-                        rules.push(new (Rule as any)(ruleName, ruleValue, disabledIntervals));
+                    const ruleSpecificList = (ruleName in enableDisableRuleMap ? enableDisableRuleMap[ruleName] : []);
+                    ruleOptions.disabledIntervals = buildDisabledIntervalsFromSwitches(ruleSpecificList);
+                    rules.push(new (Rule as any)(ruleOptions));
 
-                        if (Rule.metadata && Rule.metadata.deprecationMessage) {
-                            showWarningOnce(`${Rule.metadata.ruleName} is deprecated. ${Rule.metadata.deprecationMessage}`);
-                        }
+                    if (Rule.metadata && Rule.metadata.deprecationMessage) {
+                        showWarningOnce(`${Rule.metadata.ruleName} is deprecated. ${Rule.metadata.deprecationMessage}`);
                     }
                 }
             }

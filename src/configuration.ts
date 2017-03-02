@@ -21,16 +21,17 @@ import * as path from "path";
 import * as resolve from "resolve";
 import { FatalError } from "./error";
 
+import { IOptions, RuleSeverity } from "./language/rule/rule";
 import { arrayify, objectify, stripComments } from "./utils";
 
 export interface IConfigurationFile {
-    extends?: string | string[];
-    jsRules?: any;
+    extends: string[];
+    jsRules: Map<string, Partial<IOptions>>;
     linterOptions?: {
         typeCheck?: boolean,
     };
-    rulesDirectory?: string | string[];
-    rules?: any;
+    rulesDirectory: string[];
+    rules: Map<string, Partial<IOptions>>;
 }
 
 export interface IConfigurationLoadResult {
@@ -39,8 +40,19 @@ export interface IConfigurationLoadResult {
 }
 
 export const CONFIG_FILENAME = "tslint.json";
-export const DEFAULT_CONFIG = {
-    extends: "tslint:recommended",
+
+export const DEFAULT_CONFIG: IConfigurationFile = {
+    extends: ["tslint:recommended"],
+    jsRules: new Map<string, Partial<IOptions>>(),
+    rules: new Map<string, Partial<IOptions>>(),
+    rulesDirectory: [],
+};
+
+export const EMPTY_CONFIG: IConfigurationFile = {
+    extends: [],
+    jsRules: new Map<string, Partial<IOptions>>(),
+    rules: new Map<string, Partial<IOptions>>(),
+    rulesDirectory: [],
 };
 
 const BUILT_IN_CONFIG = /^tslint:(.*)$/;
@@ -115,28 +127,28 @@ export function loadConfigurationFromPath(configFilePath?: string): IConfigurati
         return DEFAULT_CONFIG;
     } else {
         const resolvedConfigFilePath = resolveConfigurationPath(configFilePath);
-        let configFile: IConfigurationFile;
+        let rawConfigFile: any;
         if (path.extname(resolvedConfigFilePath) === ".json") {
             const fileContent = stripComments(fs.readFileSync(resolvedConfigFilePath)
             .toString()
             .replace(/^\uFEFF/, ""));
-            configFile = JSON.parse(fileContent);
+            rawConfigFile = JSON.parse(fileContent);
         } else {
-            configFile = require(resolvedConfigFilePath);
+            rawConfigFile = require(resolvedConfigFilePath);
             delete require.cache[resolvedConfigFilePath];
         }
 
         const configFileDir = path.dirname(resolvedConfigFilePath);
+        const configFile = parseConfigFile(rawConfigFile, configFileDir);
 
-        configFile.rulesDirectory = getRulesDirectories(configFile.rulesDirectory, configFileDir);
         // load configurations, in order, using their identifiers or relative paths
         // apply the current configuration last by placing it last in this array
-        const configs = arrayify(configFile.extends).map((name) => {
+        const configs = configFile.extends.map((name) => {
             const nextConfigFilePath = resolveConfigurationPath(name, configFileDir);
             return loadConfigurationFromPath(nextConfigFilePath);
         }).concat([configFile]);
 
-        return configs.reduce(extendConfigurationFile, {});
+        return configs.reduce(extendConfigurationFile, EMPTY_CONFIG);
     }
 }
 
@@ -172,11 +184,6 @@ function resolveConfigurationPath(filePath: string, relativeTo?: string) {
 
 export function extendConfigurationFile(targetConfig: IConfigurationFile,
                                         nextConfigSource: IConfigurationFile): IConfigurationFile {
-    const combinedConfig: IConfigurationFile = {};
-
-    const configRulesDirectory = arrayify(targetConfig.rulesDirectory);
-    const nextConfigRulesDirectory = arrayify(nextConfigSource.rulesDirectory);
-    combinedConfig.rulesDirectory = configRulesDirectory.concat(nextConfigRulesDirectory);
 
     const combineProperties = (targetProperty: any, nextProperty: any) => {
         const combinedProperty: any = {};
@@ -190,11 +197,32 @@ export function extendConfigurationFile(targetConfig: IConfigurationFile,
         return combinedProperty;
     };
 
-    combinedConfig.rules = combineProperties(targetConfig.rules, nextConfigSource.rules);
-    combinedConfig.jsRules = combineProperties(targetConfig.jsRules, nextConfigSource.jsRules);
-    combinedConfig.linterOptions = combineProperties(targetConfig.linterOptions, nextConfigSource.linterOptions);
+    const combineMaps = (target: Map<string, Partial<IOptions>>, next: Map<string, Partial<IOptions>>) => {
+        const combined = new Map<string, Partial<IOptions>>();
+        target.forEach((options, ruleName) => {
+            combined.set(ruleName, options);
+        });
+        next.forEach((options, ruleName) => {
+            const combinedRule = combined.get(ruleName);
+            if (combinedRule != null) {
+                combined.set(ruleName, combineProperties(combinedRule, options));
+            } else {
+                combined.set(ruleName, options);
+            }
+        });
+        return combined;
+    };
 
-    return combinedConfig;
+    const combinedRulesDirs = targetConfig.rulesDirectory.concat(nextConfigSource.rulesDirectory);
+    const dedupedRulesDirs = Array.from(new Set(combinedRulesDirs));
+
+    return {
+        extends: [],
+        jsRules: combineMaps(targetConfig.jsRules, nextConfigSource.jsRules),
+        linterOptions: combineProperties(targetConfig.linterOptions, nextConfigSource.linterOptions),
+        rules: combineMaps(targetConfig.rules, nextConfigSource.rules),
+        rulesDirectory: dedupedRulesDirs,
+    };
 }
 
 function getHomeDir() {
@@ -243,29 +271,102 @@ export function getRulesDirectories(directories?: string | string[], relativeTo?
     return rulesDirectories;
 }
 
-export function isRuleEnabled(ruleConfigValue: any): boolean {
-    if (typeof ruleConfigValue === "boolean") {
-        return ruleConfigValue;
+/**
+ * Parses the options of a single rule and upgrades legacy settings such as `true`, `[true, "option"]`
+ *
+ * @param ruleConfigValue The raw option setting of a rule
+ */
+function parseRuleOptions(ruleConfigValue: any): Partial<IOptions> {
+    let ruleArguments: any[] | undefined;
+    let ruleSeverity: RuleSeverity | undefined;
+
+    if (ruleConfigValue == null) {
+        ruleArguments = [];
+        ruleSeverity = "off";
+    } else if (Array.isArray(ruleConfigValue) && ruleConfigValue.length > 0) {
+        // old style: array
+        ruleArguments = ruleConfigValue.slice(1);
+        ruleSeverity = ruleConfigValue[0] === true ? "error" : "off";
+    } else if (typeof ruleConfigValue === "boolean") {
+        // old style: boolean
+        ruleArguments = [];
+        ruleSeverity = ruleConfigValue === true ? "error" : "off";
+    } else if (ruleConfigValue.severity) {
+        switch (ruleConfigValue.severity.toLowerCase()) {
+            case "warn":
+            case "warning":
+                ruleSeverity = "warning";
+                break;
+            case "error":
+                ruleSeverity = "error";
+                break;
+            default:
+                ruleSeverity = "off";
+        }
+    } else if (typeof ruleConfigValue === "object") {
+        ruleSeverity = undefined;
+    } else {
+        ruleSeverity = "off";
     }
 
-    if (Array.isArray(ruleConfigValue) && ruleConfigValue.length > 0) {
-        return ruleConfigValue[0];
+    if (ruleConfigValue && ruleConfigValue.options) {
+        ruleArguments = arrayify(ruleConfigValue.options);
     }
 
-    if (ruleConfigValue.severity !== "off" && ruleConfigValue.severity !== "none") {
-        return true;
-    }
-
-    return false;
+    return {
+        ruleArguments,
+        ruleSeverity,
+    };
 }
 
-export function getRuleSeverity(ruleConfigValue: any) {
-    if (ruleConfigValue.severity &&
-        (ruleConfigValue.severity.toLowerCase() === "warn" ||
-        ruleConfigValue.severity.toLowerCase() === "warning")) {
+/**
+ * Parses a config file and normalizes legacy config settings
+ *
+ * @param configFile The raw object read from the JSON of a config file
+ * @param configFileDir The directory of the config file
+ */
+export function parseConfigFile(configFile: any, configFileDir?: string): IConfigurationFile {
+    const rules = new Map<string, Partial<IOptions>>();
+    const jsRules = new Map<string, Partial<IOptions>>();
 
-        return "warning";
+    if (configFile.rules) {
+        for (const ruleName in configFile.rules) {
+            if (configFile.rules.hasOwnProperty(ruleName)) {
+                rules.set(ruleName, parseRuleOptions(configFile.rules[ruleName]));
+            }
+        }
     }
 
-    return "error";
+    if (configFile.jsRules) {
+        for (const ruleName in configFile.jsRules) {
+            if (configFile.jsRules.hasOwnProperty(ruleName)) {
+                jsRules.set(ruleName, parseRuleOptions(configFile.jsRules[ruleName]));
+            }
+        }
+    }
+
+    return {
+        extends: arrayify(configFile.extends),
+        jsRules,
+        linterOptions: configFile.linterOptions || {},
+        rulesDirectory: getRulesDirectories(configFile.rulesDirectory, configFileDir),
+        rules,
+    };
+}
+
+/**
+ * Fills in default values for `IOption` properties and outputs an array of `IOption`
+ */
+export function convertRuleOptions(ruleConfiguration: Map<string, Partial<IOptions>>): IOptions[] {
+    const output: IOptions[] = [];
+    ruleConfiguration.forEach((partialOptions, ruleName) => {
+        const options: IOptions = {
+            disabledIntervals: [],
+            ruleArguments: partialOptions.ruleArguments || [],
+            ruleName,
+            ruleSeverity: partialOptions.ruleSeverity || "error",
+        };
+        output.push(options);
+    });
+    return output;
 }
