@@ -91,7 +91,7 @@ figcaption {
             border-left: 3px solid transparent;
             text-decoration: none;
             padding: .75rem;
-            
+
             &:hover {
                 background-color: rgba(0, 0, 0,.075);
                 border-left-color: #159957;
@@ -145,7 +145,7 @@ figcaption {
         background-color: #DFF0D8;
         border-color: #D0E9C6;
         color: #3C763D;
-        
+
         &:before {
             content: "\1f527"; //"wrench" icon - http://www.fileformat.info/info/unicode/char/1f527/index.htm
         }
@@ -160,14 +160,13 @@ figcaption {
             content: "\2139"; //"information source" icon - http://www.fileformat.info/info/unicode/char/2139/index.htm
             //Surround it with a blue circle
             border-radius: 50%;
-            padding: 0 6px;
             background: #0078D7;
             color: #FFF;
         }
 
         &.feature-sm {
             &:before {
-                padding: 0 5px;
+                width: 1em;
             }
         }
     }
