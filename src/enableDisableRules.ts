@@ -22,19 +22,19 @@ import { IOptions } from "./language/rule/rule";
 import { IEnableDisablePosition } from "./ruleLoader";
 
 export class EnableDisableRulesWalker {
-    private enableDisableRuleMap: { [rulename: string]: IEnableDisablePosition[] };
+    private enableDisableRuleMap: Map<string, IEnableDisablePosition[]>;
     private enabledRules: string[];
 
     constructor(private sourceFile: ts.SourceFile, ruleOptionsList: IOptions[]) {
-        this.enableDisableRuleMap = {};
+        this.enableDisableRuleMap = new Map<string, IEnableDisablePosition[]>();
         this.enabledRules = [];
         for (const ruleOptions of ruleOptionsList) {
             if (ruleOptions.ruleSeverity !== "off") {
                 this.enabledRules.push(ruleOptions.ruleName);
-                this.enableDisableRuleMap[ruleOptions.ruleName] = [{
+                this.enableDisableRuleMap.set(ruleOptions.ruleName, [{
                     isEnabled: true,
                     position: 0,
-                }];
+                }]);
             }
         }
     }
@@ -62,7 +62,7 @@ export class EnableDisableRulesWalker {
     }
 
     private switchRuleState(ruleName: string, isEnabled: boolean, start: number, end?: number): void {
-        const ruleStateMap = this.enableDisableRuleMap[ruleName];
+        const ruleStateMap = this.enableDisableRuleMap.get(ruleName);
         if (ruleStateMap === undefined || // skip switches for unknown or disabled rules
             isEnabled === ruleStateMap[ruleStateMap.length - 1].isEnabled // no need to add switch points if there is no change
         ) {

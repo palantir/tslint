@@ -34,7 +34,7 @@ export interface IEnableDisablePosition {
 }
 
 export function loadRules(ruleOptionsList: IOptions[],
-                          enableDisableRuleMap: {[rulename: string]: IEnableDisablePosition[]},
+                          enableDisableRuleMap: Map<string, IEnableDisablePosition[]>,
                           rulesDirectories?: string | string[],
                           isJs?: boolean): IRule[] {
     const rules: IRule[] = [];
@@ -43,15 +43,16 @@ export function loadRules(ruleOptionsList: IOptions[],
 
     for (const ruleOptions of ruleOptionsList) {
         const ruleName = ruleOptions.ruleName;
-        if (ruleOptions.ruleSeverity !== "off" || enableDisableRuleMap.hasOwnProperty(ruleName)) {
+        const enableDisableRules = enableDisableRuleMap.get(ruleName);
+        if (ruleOptions.ruleSeverity !== "off" || enableDisableRuleMap) {
             const Rule: (typeof AbstractRule) | null = findRule(ruleName, rulesDirectories);
             if (Rule == null) {
                 notFoundRules.push(ruleName);
             } else {
-                if (isJs && Rule.metadata && Rule.metadata.typescriptOnly != null && Rule.metadata.typescriptOnly) {
+                if (isJs && Rule.metadata && Rule.metadata.typescriptOnly) {
                     notAllowedInJsRules.push(ruleName);
                 } else {
-                    const ruleSpecificList = (ruleName in enableDisableRuleMap ? enableDisableRuleMap[ruleName] : []);
+                    const ruleSpecificList = enableDisableRules || [];
                     ruleOptions.disabledIntervals = buildDisabledIntervalsFromSwitches(ruleSpecificList);
                     rules.push(new (Rule as any)(ruleOptions));
 
