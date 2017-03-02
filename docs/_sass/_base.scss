@@ -132,32 +132,43 @@ figcaption {
     }
 
     &.feature-ts-only {
-        background-color: #fcf8e3;
-        border-color: #faf2cc;
-        color: #8a6d3b;
+        background-color: #FCF8E3;
+        border-color: #FAF2CC;
+        color: #8A6D3B;
 
         &:before {
-            content: "\1F4C4"; //page facing up icon
+            content: "\1F4C4"; //"page facing up" icon - http://www.fileformat.info/info/unicode/char/1F4C4/index.htm
         }
     }
 
     &.feature-fixer {
-        background-color: #dff0d8;
-        border-color: #d0e9c6;
-        color: #3c763d;
+        background-color: #DFF0D8;
+        border-color: #D0E9C6;
+        color: #3C763D;
         
         &:before {
-            content: "\1f527"; //wrench icon
+            content: "\1f527"; //"wrench" icon - http://www.fileformat.info/info/unicode/char/1f527/index.htm
         }
     }
 
     &.feature-requires-type-info {
-        background-color: #f2dede;
-        border-color: #ebcccc;
-        color: #a94442;
+        background-color: #F2DEDE;
+        border-color: #EBCCCC;
+        color: #A94442;
 
         &:before {
-            content: "\1F6C8"; //information-circle icon
+            content: "\2139"; //"information source" icon - http://www.fileformat.info/info/unicode/char/2139/index.htm
+            //Surround it with a blue circle
+            border-radius: 50%;
+            padding: 0 6px;
+            background: #0078D7;
+            color: #FFF;
+        }
+
+        &.feature-sm {
+            &:before {
+                padding: 0 5px;
+            }
         }
     }
  }
