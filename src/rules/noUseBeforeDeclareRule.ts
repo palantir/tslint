@@ -45,7 +45,7 @@ export class Rule extends Lint.Rules.TypedRule {
 }
 
 function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
-    function recur(node: ts.Node): void {
+    return ts.forEachChild(ctx.sourceFile, function recur(node: ts.Node): void {
         switch (node.kind) {
             case ts.SyntaxKind.TypeReference:
                 // Ignore types.
@@ -62,8 +62,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
             default:
                 return ts.forEachChild(node, recur);
         }
-    }
-    ts.forEachChild(ctx.sourceFile, recur);
+    });
 
     function checkIdentifier(node: ts.Identifier, symbol: ts.Symbol | undefined): void {
         const declarations = symbol && symbol.declarations;
