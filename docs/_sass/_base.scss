@@ -101,6 +101,7 @@ figcaption {
  }
 
  .rule-features {
+     //This is the container for a list of feature badges
     display: -webkit-box;
     display: -moz-box;
     display: -ms-flexbox;
@@ -109,6 +110,7 @@ figcaption {
  }
 
  .feature {
+     //This is the setup for the a feature badge
     display: inline-block;
     margin-right: 2px;
     padding: 2px 4px;
@@ -122,16 +124,19 @@ figcaption {
     cursor: help;
 
     &:before {
+        //This is the setup for the icon that appears inside the badge
         display: inline-block;
         margin-right: 2px;
     }
 
     &.feature-sm {
+        //This class is added to make the feature badge smaller.  This is used on the rules list
         padding: 1px 3px;
         font-size: 75%;
     }
 
     &.feature-ts-only {
+        //This feature badge is added to rules that are "TypeScript Only"
         background-color: #FCF8E3;
         border-color: #FAF2CC;
         color: #8A6D3B;
@@ -142,6 +147,7 @@ figcaption {
     }
 
     &.feature-fixer {
+        //This feature badge is added to rules that have an auto-fixer
         background-color: #DFF0D8;
         border-color: #D0E9C6;
         color: #3C763D;
@@ -152,6 +158,7 @@ figcaption {
     }
 
     &.feature-requires-type-info {
+        //This feature badge is added to rules that require type information
         background-color: #F2DEDE;
         border-color: #EBCCCC;
         color: #A94442;
@@ -162,12 +169,7 @@ figcaption {
             border-radius: 50%;
             background: #0078D7;
             color: #FFF;
-        }
-
-        &.feature-sm {
-            &:before {
-                width: 1em;
-            }
+            width: 1em;
         }
     }
  }
