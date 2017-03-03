@@ -218,7 +218,7 @@
   {
     "ruleName": "completed-docs",
     "description": "Enforces documentation for important items be filled out.",
-    "optionsDescription": "\n `true` to enable for [\"classes\", \"functions\", \"methods\", \"properties\"],\n or an array with each item in one of two formats:\n\n* `string` to enable for that type\n* `object` keying types to when their documentation is required:\n    * `\"methods\"` and `\"properties may specify:\n        * `\"privacies\":\n            * `\"all\"`\n            * `\"private\"`\n            * `\"protected\"`\n            * `\"public\"`\n        * `\"locations:\n            * `\"all\"`\n            * `\"instance\"`\n            * `\"static\"`\n    * All other types may specify `\"visibilities\"`:\n        * `\"all\"`\n        * `\"exported\"`\n        * `\"internal\"`\n\nTypes that may be enabled are:\n\n    * `\"classes\"`\n    * `\"enums\"`\n    * `\"functions\"`\n    * `\"interfaces\"`\n    * `\"methods\"`\n    * `\"namespaces\"`\n    * `\"properties\"`\n    * `\"types\"`\n    * `\"variables\"`",
+    "optionsDescription": "\n`true` to enable for [\"classes\", \"functions\", \"methods\", \"properties\"],\nor an array with each item in one of two formats:\n\n* `string` to enable for that type\n* `object` keying types to when their documentation is required:\n    * `\"methods\"` and `\"properties may specify:\n        * `\"privacies\":\n            * `\"all\"`\n            * `\"private\"`\n            * `\"protected\"`\n            * `\"public\"`\n        * `\"locations:\n            * `\"all\"`\n            * `\"instance\"`\n            * `\"static\"`\n    * All other types may specify `\"visibilities\"`:\n        * `\"all\"`\n        * `\"exported\"`\n        * `\"internal\"`\n\nTypes that may be enabled are:\n\n    * `\"classes\"`\n    * `\"enums\"`\n    * `\"functions\"`\n    * `\"interfaces\"`\n    * `\"methods\"`\n    * `\"namespaces\"`\n    * `\"properties\"`\n    * `\"types\"`\n    * `\"variables\"`",
     "options": {
       "type": "array",
       "items": {
@@ -1378,8 +1378,7 @@
   },
   {
     "ruleName": "no-unused-variable",
-    "deprecationMessage": "Use the tsc compiler options --noUnusedParameters and --noUnusedLocals instead.",
-    "description": "Disallows unused imports, variables, functions and private class members.",
+    "description": "Disallows unused imports, variables, functions and\n            private class members. Similar to tsc's --noUnusedParameters and --noUnusedLocals\n            options, but does not interrupt code compilation.",
     "hasFix": true,
     "optionsDescription": "\nThree optional arguments may be optionally provided:\n\n* `\"check-parameters\"` disallows unused function and constructor parameters.\n    * NOTE: this option is experimental and does not work with classes\n    that use abstract method declarations, among other things.\n* `\"react\"` relaxes the rule for a namespace import named `React`\n(from either the module `\"react\"` or `\"react/addons\"`).\nAny JSX expression in the file will be treated as a usage of `React`\n(because it expands to `React.createElement `).\n* `{\"ignore-pattern\": \"pattern\"}` where pattern is a case-sensitive regexp.\nVariable names that match the pattern will be ignored.",
     "options": {
