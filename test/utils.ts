@@ -28,6 +28,12 @@ export function getSourceFile(fileName: string): ts.SourceFile {
     return Lint.getSourceFile(fileName, source);
 }
 
+export function getSourceFileAbsolute(fileName: string): ts.SourceFile {
+    const source = fs.readFileSync(fileName, "utf8");
+
+    return Lint.getSourceFile(fileName, source);
+}
+
 export function getRule(ruleName: string) {
     const rulesDirectory = path.join(path.dirname(module.filename), "../src/rules");
     return Lint.findRule(ruleName, rulesDirectory);
