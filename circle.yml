@@ -5,12 +5,12 @@ general:
 dependencies:
   pre:
     - node ./scripts/assertMinCircleNodes.js $CIRCLE_NODE_TOTAL
-    - case $CIRCLE_NODE_INDEX in 0) nvm use 4.1.2 ;; 1) nvm use 5.7 ;; [2-4]) nvm use 6.1 ;; esac
+    - case $CIRCLE_NODE_INDEX in 0) nvm use 4.1.2 ;; 1) nvm use 5.7 ;; [2-3]) nvm use 6.1 ;; esac
   override:
     - yarn
 test:
   override:
-    - case $CIRCLE_NODE_INDEX in [0-2]) yarn verify ;; 3) npm run clean && yarn compile && yarn add typescript@2.0.10 && yarn test ;; 4) npm run clean && yarn compile && yarn add typescript@next && yarn test ;; esac:
+    - case $CIRCLE_NODE_INDEX in [0-1]) yarn verify ;; 2) npm run clean && yarn compile && yarn add typescript@2.0.10 && yarn test ;; 3) npm run clean && yarn compile && yarn add typescript@next && yarn test ;; esac:
         parallel: true
 deployment:
   npm-latest:
