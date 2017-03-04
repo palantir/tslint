@@ -20,6 +20,7 @@ import * as path from "path";
 import * as ts from "typescript";
 
 import {
+    convertRuleOptions,
     DEFAULT_CONFIG,
     findConfiguration,
     findConfigurationPath,
@@ -34,7 +35,7 @@ import { findFormatter } from "./formatterLoader";
 import { ILinterOptions, LintResult } from "./index";
 import { IFormatter } from "./language/formatter/formatter";
 import { createLanguageService, wrapProgram } from "./language/languageServiceHost";
-import { Fix, IRule, RuleFailure } from "./language/rule/rule";
+import { Fix, IRule, RuleFailure, RuleSeverity } from "./language/rule/rule";
 import { TypedRule } from "./language/rule/typedRule";
 import * as utils from "./language/utils";
 import { loadRules } from "./ruleLoader";
@@ -136,6 +137,18 @@ class Linter {
             }
         }
         this.failures = this.failures.concat(fileFailures);
+
+        // add rule severity to failures
+        const ruleSeverityMap = new Map(enabledRules.map((rule) => {
+            return [rule.getOptions().ruleName, rule.getOptions().ruleSeverity] as [string, RuleSeverity];
+        }));
+        for (const failure of this.failures) {
+            const severity = ruleSeverityMap.get(failure.getRuleName());
+            if (severity === undefined) {
+                throw new Error(`Severity for rule '${failure.getRuleName()} not found`);
+            }
+            failure.setRuleSeverity(severity);
+        }
     }
 
     public getResult(): LintResult {
@@ -154,12 +167,14 @@ class Linter {
 
         const output = formatter.format(this.failures, this.fixes);
 
+        const errorCount = this.failures.filter((failure) => failure.getRuleSeverity() === "error").length;
         return {
-            failureCount: this.failures.length,
+            errorCount,
             failures: this.failures,
             fixes: this.fixes,
             format: formatterName,
             output,
+            warningCount: this.failures.length - errorCount,
         };
     }
 
@@ -189,14 +204,14 @@ class Linter {
     }
 
     private getEnabledRules(sourceFile: ts.SourceFile, configuration: IConfigurationFile = DEFAULT_CONFIG, isJs: boolean): IRule[] {
-        const configurationRules = isJs ? configuration.jsRules : configuration.rules;
+        const ruleOptionsList = convertRuleOptions(isJs ? configuration.jsRules : configuration.rules);
 
         // walk the code first to find all the intervals where rules are disabled
-        const enableDisableRuleMap = new EnableDisableRulesWalker(sourceFile, configurationRules).getEnableDisableRuleMap();
+        const enableDisableRuleMap = new EnableDisableRulesWalker(sourceFile, ruleOptionsList).getEnableDisableRuleMap();
 
         const rulesDirectories = arrayify(this.options.rulesDirectory)
             .concat(arrayify(configuration.rulesDirectory));
-        const configuredRules = loadRules(configurationRules, enableDisableRuleMap, rulesDirectories, isJs);
+        const configuredRules = loadRules(ruleOptionsList, enableDisableRuleMap, rulesDirectories, isJs);
 
         return configuredRules.filter((r) => r.isEnabled());
     }

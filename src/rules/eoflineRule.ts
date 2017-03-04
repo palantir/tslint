@@ -42,7 +42,8 @@ export class Rule extends Lint.Rules.AbstractRule {
         }
 
         return this.filterFailures([
-            new Lint.RuleFailure(sourceFile, length, length, Rule.FAILURE_STRING, this.getOptions().ruleName),
+            new Lint.RuleFailure(sourceFile, length, length, Rule.FAILURE_STRING,
+              this.getOptions().ruleName),
         ]);
     }
 }

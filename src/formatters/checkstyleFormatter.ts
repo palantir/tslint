@@ -17,7 +17,7 @@
 
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
 import {IFormatterMetadata} from "../language/formatter/formatter";
-import {RuleFailure} from "../language/rule/rule";
+import { RuleFailure } from "../language/rule/rule";
 
 import * as Utils from "../utils";
 
@@ -48,6 +48,7 @@ export class Formatter extends AbstractFormatter {
             });
             let previousFilename: string | null = null;
             for (const failure of failuresSorted) {
+                const severity = failure.getRuleSeverity();
                 if (failure.getFileName() !== previousFilename) {
                     if (previousFilename) {
                         output += "</file>";
@@ -57,7 +58,7 @@ export class Formatter extends AbstractFormatter {
                 }
                 output += "<error line=\"" + (failure.getStartPosition().getLineAndCharacter().line + 1) + "\" ";
                 output += "column=\"" + (failure.getStartPosition().getLineAndCharacter().character + 1) + "\" ";
-                output += "severity=\"warning\" ";
+                output += "severity=\"" + severity + "\" ";
                 output += "message=\"" + this.escapeXml(failure.getFailure()) + "\" ";
                 // checkstyle parser wants "source" to have structure like <anything>dot<category>dot<type>
                 output += "source=\"failure.tslint." + this.escapeXml(failure.getRuleName()) + "\" />";

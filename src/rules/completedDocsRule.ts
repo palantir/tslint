@@ -140,8 +140,8 @@ export class Rule extends Lint.Rules.TypedRule {
         ruleName: "completed-docs",
         description: "Enforces documentation for important items be filled out.",
         optionsDescription: Lint.Utils.dedent`
-             \`true\` to enable for ["${ARGUMENT_CLASSES}", "${ARGUMENT_FUNCTIONS}", "${ARGUMENT_METHODS}", "${ARGUMENT_PROPERTIES}"],
-             or an array with each item in one of two formats:
+            \`true\` to enable for ["${ARGUMENT_CLASSES}", "${ARGUMENT_FUNCTIONS}", "${ARGUMENT_METHODS}", "${ARGUMENT_PROPERTIES}"],
+            or an array with each item in one of two formats:
 
             * \`string\` to enable for that type
             * \`object\` keying types to when their documentation is required:
