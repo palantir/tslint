@@ -238,7 +238,7 @@ class OneLineWalker extends Lint.RuleWalker {
         super.visitConstructorDeclaration(node);
     }
 
-    public visitArrowFunction(node: ts.FunctionLikeDeclaration) {
+    public visitArrowFunction(node: ts.ArrowFunction) {
         const body = node.body;
         if (body != null && body.kind === ts.SyntaxKind.Block) {
             const arrowToken = Lint.childOfKind(node, ts.SyntaxKind.EqualsGreaterThanToken);
@@ -291,7 +291,7 @@ class OneLineWalker extends Lint.RuleWalker {
 
         const previousNodeLine = this.getLineAndCharacterOfPosition(previousNode.getEnd()).line;
         const openBraceLine = this.getLineAndCharacterOfPosition(openBraceToken.getStart()).line;
-        let failure: string | undefined = undefined;
+        let failure: string | undefined;
 
         if (this.hasOption(OPTION_BRACE) && previousNodeLine !== openBraceLine) {
             failure = Rule.BRACE_FAILURE_STRING;

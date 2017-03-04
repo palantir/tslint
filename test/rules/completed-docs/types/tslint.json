@@ -1,0 +1,19 @@
+{
+  "linterOptions": {
+    "typeCheck": true
+  },
+  "rules": {
+    "completed-docs": [
+      true,
+      "classes",
+      "enums",
+      "functions",
+      "interfaces",
+      "methods",
+      "namespaces",
+      "properties",
+      "types",
+      "variables"
+    ]
+  }
+}

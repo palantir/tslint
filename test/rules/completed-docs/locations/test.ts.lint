@@ -1,0 +1,31 @@
+class Class {
+    badInstanceProperty = 1;
+
+    /**
+     * ...
+     */
+    goodInstanceProperty = 1;
+
+    /**
+     * ...
+     */
+    static badStaticProperty = 1;
+
+    static goodStaticProperty = 1;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       [Documentation must exist for static properties.]
+
+    badInstanceMethod() { }
+    ~~~~~~~~~~~~~~~~~~~~~~~       [Documentation must exist for methods.]
+
+    /**
+     * ...
+     */
+    goodInstanceMethod() { }
+
+    static badStaticMethod() { }
+
+    /**
+     * ...
+     */
+    static goodStaticMethod() { }
+}

@@ -15,9 +15,18 @@
  * limitations under the License.
  */
 
+import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { escapeRegExp } from "../utils";
+
+interface IExceptionsObject {
+    "ignore-words"?: string[];
+    "ignore-pattern"?: string;
+}
+
+type ExceptionsRegExp = RegExp | null;
 
 const OPTION_SPACE = "check-space";
 const OPTION_LOWERCASE = "check-lowercase";
@@ -35,17 +44,53 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"check-space"\` requires that all single-line comments must begin with a space, as in \`// comment\`
                 * note that comments starting with \`///\` are also allowed, for things such as \`///<reference>\`
             * \`"check-lowercase"\` requires that the first non-whitespace character of a comment must be lowercase, if applicable.
-            * \`"check-uppercase"\` requires that the first non-whitespace character of a comment must be uppercase, if applicable.`,
+            * \`"check-uppercase"\` requires that the first non-whitespace character of a comment must be uppercase, if applicable.
+            
+            Exceptions to \`"check-lowercase"\` or \`"check-uppercase"\` can be managed with object that may be passed as last argument.
+            
+            One of two options can be provided in this object:
+                
+                * \`"ignore-words"\`  - array of strings - words that will be ignored at the beginning of the comment.
+                * \`"ignore-pattern"\` - string - RegExp pattern that will be ignored at the beginning of the comment.
+            `,
         options: {
             type: "array",
             items: {
-                type: "string",
-                enum: ["check-space", "check-lowercase", "check-uppercase"],
+                anyOf: [
+                    {
+                        type: "string",
+                        enum: [
+                            "check-space",
+                            "check-lowercase",
+                            "check-uppercase",
+                        ],
+                    },
+                    {
+                        type: "object",
+                        properties: {
+                            "ignore-words": {
+                                type: "array",
+                                items: {
+                                    type: "string",
+                                },
+                            },
+                            "ignore-pattern": {
+                                type: "string",
+                            },
+                        },
+                        minProperties: 1,
+                        maxProperties: 1,
+                    },
+                ],
             },
             minLength: 1,
-            maxLength: 3,
+            maxLength: 4,
         },
-        optionExamples: ['[true, "check-space", "check-lowercase"]'],
+        optionExamples: [
+            '[true, "check-space", "check-uppercase"]',
+            '[true, "check-lowercase", {"ignore-words": ["TODO", "HACK"]}]',
+            '[true, "check-lowercase", {"ignore-pattern": "STD\\w{2,3}\\b"}]',
+        ],
         type: "style",
         typescriptOnly: false,
     };
@@ -54,27 +99,29 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static LOWERCASE_FAILURE = "comment must start with lowercase letter";
     public static UPPERCASE_FAILURE = "comment must start with uppercase letter";
     public static LEADING_SPACE_FAILURE = "comment must start with a space";
+    public static IGNORE_WORDS_FAILURE_FACTORY = (words: string[]): string => ` or the word(s): ${words.join(", ")}`;
+    public static IGNORE_PATTERN_FAILURE_FACTORY = (pattern: string): string => ` or its start must match the regex pattern "${pattern}"`;
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new CommentWalker(sourceFile, this.getOptions()));
     }
 }
 
-class CommentWalker extends Lint.SkippableTokenAwareRuleWalker {
-    public visitSourceFile(node: ts.SourceFile) {
-        super.visitSourceFile(node);
-        Lint.scanAllTokens(ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, node.text), (scanner: ts.Scanner) => {
-            const startPos = scanner.getStartPos();
-            if (this.tokensToSkipStartEndMap[startPos] != null) {
-                // tokens to skip are places where the scanner gets confused about what the token is, without the proper context
-                // (specifically, regex, identifiers, and templates). So skip those tokens.
-                scanner.setTextPos(this.tokensToSkipStartEndMap[startPos]);
-                return;
-            }
+class CommentWalker extends Lint.RuleWalker {
+    private exceptionsRegExp: ExceptionsRegExp;
+    private failureIgnorePart: string = "";
 
-            if (scanner.getToken() === ts.SyntaxKind.SingleLineCommentTrivia) {
-                const commentText = scanner.getTokenText();
-                const startPosition = scanner.getTokenPos() + 2;
+    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
+        super(sourceFile, options);
+
+        this.exceptionsRegExp = this.composeExceptionsRegExp();
+    }
+
+    public visitSourceFile(node: ts.SourceFile) {
+        utils.forEachComment(node, (fullText, comment) => {
+            if (comment.kind === ts.SyntaxKind.SingleLineCommentTrivia) {
+                const commentText = fullText.substring(comment.pos, comment.end);
+                const startPosition = comment.pos + 2;
                 const width = commentText.length - 2;
                 if (this.hasOption(OPTION_SPACE)) {
                     if (!startsWithSpace(commentText)) {
@@ -82,19 +129,59 @@ class CommentWalker extends Lint.SkippableTokenAwareRuleWalker {
                     }
                 }
                 if (this.hasOption(OPTION_LOWERCASE)) {
-                    if (!startsWithLowercase(commentText)) {
-                        this.addFailureAt(startPosition, width, Rule.LOWERCASE_FAILURE);
+                    if (!startsWithLowercase(commentText) && !this.startsWithException(commentText)) {
+                        this.addFailureAt(startPosition, width, Rule.LOWERCASE_FAILURE + this.failureIgnorePart);
                     }
                 }
                 if (this.hasOption(OPTION_UPPERCASE)) {
-                    if (!startsWithUppercase(commentText) && !isEnableDisableFlag(commentText)) {
-                        this.addFailureAt(startPosition, width, Rule.UPPERCASE_FAILURE);
+                    if (!startsWithUppercase(commentText) && !isEnableDisableFlag(commentText) && !this.startsWithException(commentText)) {
+                        this.addFailureAt(startPosition, width, Rule.UPPERCASE_FAILURE + this.failureIgnorePart);
                     }
                 }
             }
         });
     }
 
+    private startsWithException(commentText: string): boolean {
+        if (this.exceptionsRegExp == null) {
+            return false;
+        }
+
+        return this.exceptionsRegExp.test(commentText);
+    }
+
+    private composeExceptionsRegExp(): ExceptionsRegExp {
+        const optionsList = this.getOptions() as Array<string | IExceptionsObject>;
+        const exceptionsObject = optionsList[optionsList.length - 1];
+
+        // early return if last element is string instead of exceptions object
+        if (typeof exceptionsObject === "string" || !exceptionsObject) {
+            return null;
+        }
+
+        if (exceptionsObject["ignore-pattern"]) {
+            const ignorePattern = exceptionsObject["ignore-pattern"] as string;
+            this.failureIgnorePart = Rule.IGNORE_PATTERN_FAILURE_FACTORY(ignorePattern);
+            // regex is "start of string"//"any amount of whitespace" followed by user provided ignore pattern
+            return new RegExp(`^//\\s*(${ignorePattern})`);
+        }
+
+        if (exceptionsObject["ignore-words"]) {
+            const ignoreWords = exceptionsObject["ignore-words"] as string[];
+            this.failureIgnorePart = Rule.IGNORE_WORDS_FAILURE_FACTORY(ignoreWords);
+            // Converts all exceptions values to strings, trim whitespace, escapes RegExp special characters and combines into alternation
+            const wordsPattern = ignoreWords
+                .map(String)
+                .map((str) => str.trim())
+                .map(escapeRegExp)
+                .join("|");
+
+            // regex is "start of string"//"any amount of whitespace"("any word from ignore list") followed by non alphanumeric character
+            return new RegExp(`^//\\s*(${wordsPattern})\\b`);
+        }
+
+        return null;
+    }
 }
 
 function startsWith(commentText: string, changeCase: (str: string) => string) {

@@ -1,7 +1,13 @@
 console.log(1337);
 console.log(-1337);
+console.log(- 1337);
 console.log(1337.7);
 console.log(1338);
             ~~~~                      ['magic numbers' are not allowed]
 console.log(-1338)
             ~~~~~                     ['magic numbers' are not allowed]
+export let x = 1337;
+export let x = -1337;
+export let x = 1337.7;
+export let x = 1338;
+export let x = -1338;

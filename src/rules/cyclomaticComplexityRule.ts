@@ -89,7 +89,7 @@ class CyclomaticComplexityWalker extends Lint.RuleWalker {
         super(sourceFile, options);
     }
 
-    protected visitArrowFunction(node: ts.FunctionLikeDeclaration) {
+    protected visitArrowFunction(node: ts.ArrowFunction) {
         this.startFunction();
         super.visitArrowFunction(node);
         this.endFunction(node);

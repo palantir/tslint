@@ -1,0 +1,25 @@
+export class Aaa {
+~~~~~~~~~~~~~~~~~~       [Documentation must exist for exported classes.]
+    public bbb;
+    ~~~~~~~~~~~       [Documentation must exist for public properties.]
+
+    public ccc() { }
+    ~~~~~~~~~~~~~~~~       [Documentation must exist for public methods.]
+
+    // TODO: TypeScript API doesn't give us a symbol for this, so we must ignore it.
+    // https://github.com/Microsoft/TypeScript/issues/14257
+    [Symbol.iterator]() {}
+}
+
+export enum Ddd { }
+
+export function Eee() { }
+~~~~~~~~~~~~~~~~~~~~~~~~~       [Documentation must exist for exported functions.]
+
+export interface Fff { }
+
+export namespace Ggg { }
+
+export type Hhh = any;
+
+export const i = true;

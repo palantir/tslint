@@ -1,0 +1,263 @@
+declare const b: boolean;
+declare const b2: boolean;
+declare const n: number;
+
+// Simple
+{
+    class {
+        constructor() {
+            super();
+            ~~~~~~~~
+            super();
+~~~~~~~~~~~~~~~~~~~ [0]
+        }
+    }
+
+    class {
+        constructor() {
+            super();
+            super.foo();
+        }
+    }
+
+    class {
+        constructor() {
+            super();
+
+            class C2 {
+                constructor() {
+                    super();
+                }
+            }
+        }
+    }
+
+    class {
+        constructor() {
+            super(super());
+            ~~~~~~~~~~~~~ [0]
+        }
+    }
+}
+
+// If/else
+{
+    class {
+        constructor() {
+            if (b) {
+                super();
+                return;
+            }
+            super();
+        }
+    }
+
+    class {
+        constructor() {
+            if (b) {
+                super();
+            } else {
+                super();
+            }
+        }
+    }
+
+    class {
+        constructor() {
+            if (b) {
+                super();
+                return;
+            } else if (b2) {
+                super();
+                ~~~~~~~~
+            }
+~~~~~~~~~~~~~
+            super();
+~~~~~~~~~~~~~~~~~~~ [0]
+        }
+    }
+
+    class {
+        constructor() {
+            if (b) {
+                super();
+                return;
+            } else if (b) {
+                super();
+                return;
+            }
+            super();
+        }
+    }
+}
+
+// Loop
+{
+    class {
+        constructor() {
+            while (b) {
+                if (b) {
+                    super();
+                    break;
+                }
+            }
+        }
+    }
+
+    class {
+        constructor() {
+            while (b) {
+                if (b) {
+                    super();
+                    break;
+                }
+                if (b2) {
+                    super();
+                    break;
+                }
+                super();
+                break;
+            }
+        }
+    }
+
+    class {
+        constructor() {
+            while (b) {
+                if (b) {
+                    super();
+                    return;
+                } else {
+                    super();
+                    return;
+                }
+            }
+            super();
+        }
+    }
+
+    class {
+        constructor() {
+            while (b) {
+                if (b) {
+                    super();
+                    return;
+                } else {
+                    super();
+                    ~~~~~~~
+                    break;
+~~~~~~~~~~~~~~~~~~~~~~~~~
+                }
+~~~~~~~~~~~~~~~~~
+            }
+~~~~~~~~~~~~~
+            super();
+~~~~~~~~~~~~~~~~~~~ [0]
+        }
+    }
+
+    class {
+        constructor() {
+            while (b) {
+                if (b) {
+                    super();
+                    ~~~~~~~
+                    break;
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+                } else {
+~~~~~~~~~~~~~~~~~~~~~~~~
+                    super();
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                    return;
+~~~~~~~~~~~~~~~~~~~~~~~~~
+                }
+~~~~~~~~~~~~~~~~~
+            }
+~~~~~~~~~~~~~
+            super();
+~~~~~~~~~~~~~~~~~~~ [0]
+        }
+    }
+}
+
+// Switch
+{
+    class {
+        constructor() {
+            switch (n) {
+                case 0:
+                    super();
+                    ~~~~~~~~
+                case 1:
+~~~~~~~~~~~~~~~~~~~~~~~
+                    super();
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+            }
+        }
+    }
+
+    class {
+        constructor() {
+            switch (n) {
+                case 0:
+                    super();
+                    break;
+                case 1:
+                    super();
+                    break;
+            }
+        }
+    }
+
+    class {
+        constructor() {
+            switch (n) {
+                case 0:
+                    super();
+                    break;
+                case 1:
+                    super();
+                    ~~~~~~~~
+                    break;
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+            }
+~~~~~~~~~~~~~
+            super();
+~~~~~~~~~~~~~~~~~~~ [0]
+        }
+    }
+}
+
+// Wierd
+{
+    class {
+        constructor() {
+            if (b) {
+                super();
+                {
+                    return;
+                }
+            }
+            super();
+        }
+    }
+
+    class {
+        constructor() {
+            switch (n) {
+                case 0:
+                    if (b) {
+                        super();
+                        return;
+                    } else {
+                        super();
+                        if (b2) return; else return;
+                    }
+            }
+            super();
+        }
+    }
+}
+
+[0]: Multiple calls to 'super()' found. It must be called only once.
+[1]: 'super()' called in a loop. It must be called only once.

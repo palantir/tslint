@@ -86,3 +86,29 @@ export function each(obj, iterator, context) {
 
 export {each as forEach};
 import "libE";
+
+function foobar(){}
+                 ~ [missing whitespace]
+
+function foorbar()
+{}
+
+if (){
+     ~ [missing whitespace]
+    //
+} else{}
+      ~ [missing whitespace]
+
+if ()
+{}
+else
+{}
+
+/* some comment */{
+    // some code with a preceding comment
+}
+
+{
+    const foo = 123;
+    // code that just wants to be encapsulated in a block scope
+}

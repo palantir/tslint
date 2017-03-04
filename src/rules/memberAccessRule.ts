@@ -129,7 +129,7 @@ export class MemberAccessWalker extends Lint.RuleWalker {
                 throw new Error("unhandled node type");
             }
 
-            let memberName: string|undefined = undefined;
+            let memberName: string|undefined;
             // look for the identifier and get its text
             if (node.name !== undefined && node.name.kind === ts.SyntaxKind.Identifier) {
                 memberName = (node.name as ts.Identifier).text;

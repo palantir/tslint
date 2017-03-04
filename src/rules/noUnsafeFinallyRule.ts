@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as utils from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -192,12 +193,8 @@ function isFinallyBlock(node: ts.Node): boolean {
 
     return parent !== undefined &&
         node.kind === ts.SyntaxKind.Block &&
-        isTryStatement(parent) &&
+        utils.isTryStatement(parent) &&
         parent.finallyBlock === node;
-}
-
-function isTryStatement(node: ts.Node): node is ts.TryStatement {
-    return node.kind === ts.SyntaxKind.TryStatement;
 }
 
 function isReturnsOrThrowsBoundary(scope: IFinallyScope) {

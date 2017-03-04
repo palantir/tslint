@@ -1,6 +1,122 @@
 Change Log
 ===
 
+v4.5.1
+---
+
+- [enhancement] Updated recommended rules to include `ban-types` and `no-duplicate-super` (#2271)
+- [bugfix] `object-literal-key-quotes` handle negative number property name (#2273)
+
+v4.5.0
+---
+
+- [new-rule] `no-import-side-effect` (#2155)
+- [new-rule] `match-default-export-name` (#2117)
+- [new-rule] `no-non-null-assertion` (#2221)
+- [new-rule] `ban-types` (#2175)
+- [new-rule] `no-duplicate-super` (#2038)
+- [new-rule] `newline-before-return` (#2173)
+- [new-rule-option] `completed-docs` adds options for location, type, and privacy. Also adds interfaces, enums, types (#2095)
+- [new-rule-option] `no-inferrable-types` adds option  `ignore-properties` (#2178)
+- [new-rule-option] `typedef` adds options `object-destructuring` and `array-destructuring` options (#2146)
+- [new-rule-option] `member-ordering` adds option `alphabetize` (#2101)
+- [new-rule-option] `no-trailing-whitespace` adds option `ignore-jsdoc` (#2177)
+- [new-rule-option] `no-trailing-whitespace` adds option `ignore-comments` option (#2153)
+- [new-fixer] `no-inferrable-types` automatically remove inferrable type annotations (#2178)
+- [new-fixer] `no-any` (#2165)
+- [new-fixer] `noConsecutiveBlankLines` (#2201)
+- [new-fixer] `object-literal-shorthand` (#2165)
+- [bugfix] `no-switch-case-fallthrough` handle break, throw, continue and return nested in block, if-else and switch (#2218)
+- [bugfix] `no-switch-case-fallthrough` allow empty case clauses before default clause (#2218)
+- [bugfix] `no-mergeable-namespace` ignore property types that can't be merged (#2105)
+- [bugfix] `object-literal-key-quotes` no need to quote a float if its .toString() is the same. (#2144)
+- [bugfix] `no-consecutive-blank-lines` Correctly apply fixes at EOF (#2239)
+- [bugfix]: Fixes installation issue with node 7.5 (#2212)
+- [bugfix]: `quotemark` now handles escaped chars (#2224)
+- [enhancement] Don't exit when a rule requires type checking but type checking is not enabled (#2188)
+- [enhancement] `no-switch-case-fallthrough` allow single line comment `// falls through` (#2218)
+- [enhancement] `no-unbound-method` allows property access and binary expressions (#2143)
+- [api] Introduce `AbstractWalker` for performance (#2093)
+    - see [performance] (https://palantir.github.io/tslint/develop/custom-rules/performance.html) and [migration] (https://palantir.github.io/tslint/develop/custom-rules/migration.html) docs
+
+Thanks to our contributors!
+
+- Andy Hanson
+- Stefan Reichel
+- Shlomi Assaf
+- Josh Goldberg
+- Minko Gechev
+- Irfan Hudda
+- Klaus Meinhardt
+- Martin Probst
+- Naoto Usuyama
+- Caleb Eggensperger
+- Arturs Vonda
+- Joscha Feth
+- Moritz
+- Alexander Rusakov
+- Alex Ryan
+- Andy
+- Yuichi Nukiyama
+
+v4.4.2
+---
+
+* [bugfix] `whitespace` rule caused false positive on EOF (#2131)
+* [bugfix] WebStorm fails because `json` formatter parameter has extra space (#2132)
+
+v4.4.1
+---
+
+* [bugfix] errant space in recommended ruleset (couldn't find `no-misused-new`)
+
+v4.4.0
+---
+
+* [new-rule] `arrow-return-shorthand` (#1972)
+* [new-rule] `no-unbound-method` (#2089)
+* [new-rule] `no-boolean-literal-compare` (#2013)
+* [new-rule] `no-unsafe-any` (#2047)
+* [new-rule] `no-unnecessary-qualifier` (#2008)
+* [new-rule] `no-unnecessary-initializer` (#2106)
+* [new-rule] `await-promise` (#2102)
+* [new-rule] `no-floating-promises` (#1632)
+* [new-rule] `strict-type-predicates` (#2046)
+* [new-rule] `no-misused-new` (#1963)
+* [new-rule] `prefer-method-signature` (#2028)
+* [new-rule] `prefer-function-over-method` (#2037)
+* [new-rule-option] `allow-fast-null-checks` added to `no-unused-expression` (#1638)
+* [new-rule-option] `comment-format-rule` adds `ignore-words` and `ignore-pattern` options (#1757)
+* [new-rule-option] `whitespace` adds `check-preblock` option (#2002)
+* [new-rule-option] `strict-boolean-expressions` adds `allow-null-union`, `allow-undefined-union`, `allow-string`, and `allow-number` and  (#2033)
+* [new-fixer] `align` (#2097)
+* [new-fixer] `no-trailing-whitespace` (#2060)
+* [bugfix] `no-magic-numbers` false positive on default parameter values (#2004)
+* [bugfix] `no-empty-interface` allow empty interface with 2 or more parents (#2070)
+* [bugfix] `no-trailing-whitespace` fixed for comments and EOF (#2060)
+* [bugfix] `no-empty` no longer fails for private or protected constructor (#1976)
+* [bugfix] `tslint:disable`/`tslint-enable` now handles multiple rules and fixes what code is enabled/disabled (#2061)
+* [bugfix] `no-inferrable-types` now validates property declarations (#2081)
+* [bugfix] `unified-signatures` false positive (#2016)
+* [bugfix] `whitespace` finds all whitespace errors in JsxExpressions and TemplateExpressions (#2036)
+* [bugfix] `comment-format` no more false positives in JsxText (#2036)
+* [enhancement] `--test` option now accepts glob (#2079)
+
+Thanks to our contributors!
+
+* Alexander Rusakov
+* Andrii Dieiev
+* @andy-ms
+* Andy Hanson
+* Josh Goldberg
+* Kei Son
+* Klaus Meinhardt
+* Krati Ahuja
+* Martin Probst
+* Mohsen Azimi
+* Romke van der Meulen
+* cameron-mcateer
+
 v4.3.0-dev.0
 ---
 
@@ -39,7 +155,7 @@ v4.3.0
 Thanks to our contributors!
 
 * Andrii Dieiev
-* @andy-ms 
+* @andy-ms
 * Andy Hanson
 * Josh Goldberg
 * Klaus Meinhardt
@@ -67,7 +183,7 @@ v4.2.0
 Thanks to our contributors!
 
 * Andrew Scott
-* @andy-ms 
+* @andy-ms
 * Andy Hanson
 * James Booth
 * Klaus Meinhardt
@@ -181,8 +297,8 @@ v4.0.0-dev.1
 ---
 
 * **BREAKING CHANGES**
-    * [enhancement] The `semicolon` rule now disallows semicolons in multi-line bound class methods 
-         (to get the v3 behavior, use the `ignore-bound-class-methods` option) (#1643) 
+    * [enhancement] The `semicolon` rule now disallows semicolons in multi-line bound class methods
+         (to get the v3 behavior, use the `ignore-bound-class-methods` option) (#1643)
     * [removed-rule] Removed `use-strict` rule (#678)
     * [removed-rule] Removed `label-undefined` rule; covered by compiler (#1614)
     * [enhancement] Renamed `no-constructor-vars` to `no-parameter-properties` (#1296)
@@ -202,21 +318,21 @@ v4.0.0-dev.1
 
 Thanks to our contributors!
 
-* Alex Eagle 
-* Andrii Dieiev 
-* Ben Coveney 
-* Boris Aranovich 
-* Chris Barr 
-* Cyril Gandon 
-* Evgeniy Zhukovskiy 
-* Jay Anslow 
-* Kunal Marwaha 
-* Martin Probst 
-* Mingye Wang 
-* Raghav Katyal 
-* Sean Dawson 
-* Yuichi Nukiyama 
-* jakpaw 
+* Alex Eagle
+* Andrii Dieiev
+* Ben Coveney
+* Boris Aranovich
+* Chris Barr
+* Cyril Gandon
+* Evgeniy Zhukovskiy
+* Jay Anslow
+* Kunal Marwaha
+* Martin Probst
+* Mingye Wang
+* Raghav Katyal
+* Sean Dawson
+* Yuichi Nukiyama
+* jakpaw
 
 v4.0.0-dev.0
 ---
@@ -244,24 +360,24 @@ v4.0.0-dev.0
 
 Thanks to our contributors!
 
-* Alex Eagle 
-* Andrii Dieiev 
-* Andy Hanson 
-* Ben Coveney 
-* Boris Aranovich 
-* Chris Barr 
-* Christian Dreher 
-* Claas Augner 
-* Josh Goldberg 
-* Martin Probst 
-* Mike Deverell 
-* Nina Hartmann 
-* Satoshi Amemiya 
-* Scott Wu 
-* Steve Van Opstal 
-* Umar Bolatov 
-* Vladimir Matveev 
-* Yui 
+* Alex Eagle
+* Andrii Dieiev
+* Andy Hanson
+* Ben Coveney
+* Boris Aranovich
+* Chris Barr
+* Christian Dreher
+* Claas Augner
+* Josh Goldberg
+* Martin Probst
+* Mike Deverell
+* Nina Hartmann
+* Satoshi Amemiya
+* Scott Wu
+* Steve Van Opstal
+* Umar Bolatov
+* Vladimir Matveev
+* Yui
 
 v3.15.1
 ---

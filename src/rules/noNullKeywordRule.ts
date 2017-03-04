@@ -40,25 +40,19 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Use 'undefined' instead of 'null'";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NullWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class NullWalker extends Lint.RuleWalker {
-    public visitNode(node: ts.Node) {
-        super.visitNode(node);
-        if (node.kind === ts.SyntaxKind.NullKeyword && !isPartOfType(node)) {
-            this.addFailureAtNode(node, Rule.FAILURE_STRING);
+function walk(ctx: Lint.WalkContext<void>) {
+    return ts.forEachChild(ctx.sourceFile, cb);
+    function cb(node: ts.Node): void {
+        if (node.kind >= ts.SyntaxKind.FirstTypeNode && node.kind <= ts.SyntaxKind.LastTypeNode) {
+            return; // skip type nodes
         }
-    }
-}
-
-function isPartOfType({ parent }: ts.Node) {
-    while (parent != null) {
-        if (ts.SyntaxKind.FirstTypeNode <= parent.kind && parent.kind <= ts.SyntaxKind.LastTypeNode) {
-            return true;
+        if (node.kind === ts.SyntaxKind.NullKeyword) {
+            return ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
-        parent = parent.parent;
+        return ts.forEachChild(node, cb);
     }
-    return false;
 }

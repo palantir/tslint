@@ -1,0 +1,54 @@
+declare const x: any;
+
+function f(x: any) {
+    x.foo;
+    ~ [0]
+    x(0);
+    ~ [0]
+    x``;
+    ~ [0]
+    x + 3;
+    ~ [0]
+
+    // OK to pass it to a function that takes `any`
+    g(x);
+    // Not OK to pass to any other function.
+    [].map(x);
+           ~ [0]
+
+    // Same for constructors
+    new X(x);
+    new Y(x);
+          ~ [0]
+}
+
+class X { constructor(x: any) {} }
+class Y { constructor(x: number) {} }
+
+function g(x: any): string {
+    if (x === undefined) {
+        return "undefined";
+    }
+    if (typeof x === "string") {
+        return `string: ${x}`;
+    }
+    if (x instanceof Array) {
+        // Once it's been tested, OK to use it as an array.
+        return `Array, length ${x.length}`;
+    }
+    if (Math.random() > 0.5) {
+        // Allow explicit cast
+        return (<string> x).toLowerCase() + (x as string).toUpperCase();
+    }
+
+    "" + x;
+    x + "";
+    let s = "";
+    s += x;
+    x += s;
+    ~ [0]
+
+    return `other: ${x}`;
+}
+
+[0]: Unsafe use of expression of type 'any'.

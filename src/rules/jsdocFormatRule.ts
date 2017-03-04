@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -48,22 +49,11 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-class JsdocWalker extends Lint.SkippableTokenAwareRuleWalker {
+class JsdocWalker extends Lint.RuleWalker {
     public visitSourceFile(node: ts.SourceFile) {
-        super.visitSourceFile(node);
-        Lint.scanAllTokens(ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, node.text), (scanner: ts.Scanner) => {
-            const startPos = scanner.getStartPos();
-            if (this.tokensToSkipStartEndMap[startPos] != null) {
-                // tokens to skip are places where the scanner gets confused about what the token is, without the proper context
-                // (specifically, regex, identifiers, and templates). So skip those tokens.
-                scanner.setTextPos(this.tokensToSkipStartEndMap[startPos]);
-                return;
-            }
-
-            if (scanner.getToken() === ts.SyntaxKind.MultiLineCommentTrivia) {
-                const commentText = scanner.getTokenText();
-                const startPosition = scanner.getTokenPos();
-                this.findFailuresForJsdocComment(commentText, startPosition);
+        utils.forEachComment(node, (fullText, comment) => {
+            if (comment.kind === ts.SyntaxKind.MultiLineCommentTrivia) {
+                this.findFailuresForJsdocComment(fullText.substring(comment.pos, comment.end), comment.pos);
             }
         });
     }

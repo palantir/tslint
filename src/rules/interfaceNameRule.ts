@@ -27,7 +27,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "interface-name",
         description: "Requires interface names to begin with a capital 'I'",
-        rationale: "Makes it easy to differentitate interfaces from regular classes at a glance.",
+        rationale: "Makes it easy to differentiate interfaces from regular classes at a glance.",
         optionsDescription: Lint.Utils.dedent`
             One of the following two options must be provided:
 

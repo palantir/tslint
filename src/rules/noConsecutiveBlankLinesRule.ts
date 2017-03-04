@@ -15,18 +15,19 @@
  * limitations under the License.
  */
 
+import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static DEFAULT_ALLOWED_BLANKS = 1;
-    public static MINIMUM_ALLOWED_BLANKS = 1;
 
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-consecutive-blank-lines",
         description: "Disallows one or more blank lines in a row.",
+        hasFix: true,
         rationale: "Helps maintain a readable style in your codebase.",
         optionsDescription: Lint.Utils.dedent`
             An optional number of maximum allowed sequential blanks can be specified. If no value
@@ -45,73 +46,81 @@ export class Rule extends Lint.Rules.AbstractRule {
         return allowed === 1
             ? "Consecutive blank lines are forbidden"
             : `Exceeds the ${allowed} allowed consecutive blank lines`;
-    };
+    }
 
     /**
      * Disable the rule if the option is provided but non-numeric or less than the minimum.
      */
     public isEnabled(): boolean {
-        if (!super.isEnabled()) {
-            return false;
-        }
-        const options = this.getOptions();
-        const allowedBlanks = options.ruleArguments && options.ruleArguments[0] || Rule.DEFAULT_ALLOWED_BLANKS;
-        return typeof allowedBlanks === "number" && allowedBlanks >= Rule.MINIMUM_ALLOWED_BLANKS;
+        return super.isEnabled() &&
+            (!this.ruleArguments[0] ||
+             typeof this.ruleArguments[0] === "number" && this.ruleArguments[0] > 0);
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoConsecutiveBlankLinesWalker(sourceFile, this.getOptions()));
+        const limit: number = this.ruleArguments[0] || Rule.DEFAULT_ALLOWED_BLANKS;
+        return this.applyWithFunction(sourceFile, walk, limit);
     }
 }
 
-class NoConsecutiveBlankLinesWalker extends Lint.RuleWalker {
-    public walk(node: ts.SourceFile) {
-        const templateIntervals = this.getTemplateIntervals(node);
-        const lineStarts = node.getLineStarts();
+function walk(ctx: Lint.WalkContext<number>) {
+    const sourceText = ctx.sourceFile.text;
+    const threshold = ctx.options + 1;
+    const possibleFailures: ts.TextRange[] = [];
+    let consecutiveBlankLines = 0;
 
-        const options = this.getOptions();
-        const allowedBlanks = options && options[0] || Rule.DEFAULT_ALLOWED_BLANKS;
-        const failureMessage = Rule.FAILURE_STRING_FACTORY(allowedBlanks);
-        const sourceFileText = node.getFullText();
-        const soureFileLines = sourceFileText.split(/\n/);
-
-        // find all the lines that are blank or only contain whitespace
-        const blankLineIndexes: number[] = [];
-        soureFileLines.forEach((txt, i) => {
-            if (txt.trim() === "") {
-                blankLineIndexes.push(i);
-            }
-        });
-
-        // now only throw failures for the fisrt number from groups of consecutive blank line indexes
-        const sequences: number[][] = [];
-        let lastVal = -2;
-        for (const line of blankLineIndexes) {
-            line > lastVal + 1 ? sequences.push([line]) : sequences[sequences.length - 1].push(line);
-            lastVal = line;
-        }
-        sequences
-            .filter((arr) => arr.length > allowedBlanks)
-            .map((arr) => arr[0])
-            .map((startLineNum: number) => this.createFailure(lineStarts[startLineNum + 1], 1, failureMessage))
-            .filter((failure) => !Lint.doesIntersect(failure, templateIntervals))
-            .forEach((failure) => this.addFailure(failure));
-    }
-
-    private getTemplateIntervals(sourceFile: ts.SourceFile): Lint.IDisabledInterval[] {
-        const intervals: Lint.IDisabledInterval[] = [];
-        const cb = (node: ts.Node) => {
-            if (node.kind >= ts.SyntaxKind.FirstTemplateToken &&
-                node.kind <= ts.SyntaxKind.LastTemplateToken) {
-                intervals.push({
-                    endPosition: node.getEnd(),
-                    startPosition: node.getStart(sourceFile),
+    for (const line of utils.getLineRanges(ctx.sourceFile)) {
+        if (sourceText.substring(line.pos, line.end).search(/\S/) === -1) {
+            ++consecutiveBlankLines;
+            if (consecutiveBlankLines === threshold) {
+                possibleFailures.push({
+                    end: line.end,
+                    pos: line.pos,
                 });
-            } else {
-                ts.forEachChild(node, cb);
+            } else if (consecutiveBlankLines > threshold) {
+                possibleFailures[possibleFailures.length - 1].end = line.end;
             }
-        };
-        ts.forEachChild(sourceFile, cb);
-        return intervals;
+        } else {
+            consecutiveBlankLines = 0;
+        }
     }
+
+    if (possibleFailures.length === 0) {
+        return;
+    }
+    const failureString = Rule.FAILURE_STRING_FACTORY(ctx.options);
+    const templateRanges = getTemplateRanges(ctx.sourceFile);
+    for (const possibleFailure of possibleFailures) {
+        if (!templateRanges.some((template) => template.pos < possibleFailure.pos && possibleFailure.pos < template.end)) {
+            ctx.addFailureAt(possibleFailure.pos, 1, failureString, ctx.createFix(
+                Lint.Replacement.deleteFromTo(
+                    // special handling for fixing blank lines at the end of the file
+                    // to fix this we need to cut off the line break of the last allowed blank line, too
+                    possibleFailure.end === sourceText.length ? getStartOfLineBreak(sourceText, possibleFailure.pos) : possibleFailure.pos,
+                    possibleFailure.end,
+                ),
+            ));
+        }
+    }
+}
+
+function getStartOfLineBreak(sourceText: string, pos: number) {
+    return sourceText[pos - 2] === "\r" ? pos - 1 : pos - 1;
+}
+
+function getTemplateRanges(sourceFile: ts.SourceFile): ts.TextRange[] {
+    const intervals: ts.TextRange[] = [];
+    const cb = (node: ts.Node): void => {
+        if (node.kind >= ts.SyntaxKind.FirstTemplateToken &&
+            node.kind <= ts.SyntaxKind.LastTemplateToken) {
+            intervals.push({
+                end: node.end,
+                pos: node.getStart(sourceFile),
+            });
+        } else {
+            return ts.forEachChild(node, cb);
+        }
+    };
+    ts.forEachChild(sourceFile, cb);
+    return intervals;
 }

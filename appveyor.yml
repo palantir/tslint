@@ -1,6 +1,6 @@
 environment:
   matrix:
-  - nodejs_version: "4.2"
+  - nodejs_version: "4.1.2"
   - nodejs_version: "5.7"
   - nodejs_version: "6.1"
 

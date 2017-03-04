@@ -192,10 +192,11 @@ tslint accepts the following command-line options:
     option is set.
 
 --test:
-    Runs tslint on the specified directory and checks if tslint's output matches
-    the expected output in .lint files. Automatically loads the tslint.json file in the
-    specified directory as the configuration file for the tests. See the
-    full tslint documentation for more details on how this can be used to test custom rules.
+    Runs tslint on matched directories and checks if tslint outputs
+    match the expected output in .lint files. Automatically loads the
+    tslint.json files in the directories as the configuration file for
+    the tests. See the full tslint documentation for more details on how
+    this can be used to test custom rules.
 
 --project:
     The location of a tsconfig.json file that will be used to determine which
@@ -215,26 +216,21 @@ tslint accepts the following command-line options:
 #### Library
 
 ```js
-import { Linter } from "tslint";
+import { Linter, Configuration } from "tslint";
 import * as fs from "fs";
 
-const fileName = "Specify file name";
-const configuration = {
-    rules: {
-        "variable-name": true,
-        "quotemark": [true, "double"]
-    }
-};
+const fileName = "Specify input file name";
+const configurationFilename = "Specify configuration file name";
 const options = {
     formatter: "json",
-    configuration: configuration,
     rulesDirectory: "customRules/",
     formattersDirectory: "customFormatters/"
 };
 
 const fileContents = fs.readFileSync(fileName, "utf8");
-const linter = new Linter(fileName, fileContents, options);
-const result = linter.lint();
+const linter = new Linter(options);
+const configLoad = Configuration.findConfiguration(configurationFilename, filename);
+const result = linter.lint(fileName, fileContents, configLoad.results);
 ```
 
 #### Type Checking
@@ -247,7 +243,7 @@ const files = Linter.getFileNames(program);
 const results = files.map(file => {
     const fileContents = program.getSourceFile(file).getFullText();
     const linter = new Linter(file, fileContents, options, program);
-    return result.lint();
+    return linter.lint();
 });
 ```
 
@@ -305,7 +301,7 @@ If we don't have all the rules you're looking for, you can either write your own
 
 - [ESLint rules for TSLint](https://github.com/buzinas/tslint-eslint-rules) - Improve your TSLint with the missing ESLint Rules
 - [tslint-microsoft-contrib](https://github.com/Microsoft/tslint-microsoft-contrib) - A set of TSLint rules used on some Microsoft projects
-- [codelyzer](https://github.com/mgechev/codelyzer) - A set of tslint rules for static code analysis of Angular 2 TypeScript projects
+- [codelyzer](https://github.com/mgechev/codelyzer) - A set of tslint rules for static code analysis of Angular TypeScript projects
 - [vrsource-tslint-rules](https://github.com/vrsource/vrsource-tslint-rules)
 
 #### Writing custom rules
@@ -314,10 +310,10 @@ TSLint ships with a set of core rules that can be configured. However, users are
 
 Let us take the example of how to write a new rule to forbid all import statements (you know, *for science*). Let us name the rule file `noImportsRule.ts`. Rules are referenced in `tslint.json` with their kebab-cased identifer, so `"no-imports": true` would configure the rule.
 
-__Important conventions__: 
+__Important conventions__:
 * Rule identifiers are always kebab-cased.
 * Rule files are always camel-cased (`camelCasedRule.ts`).
-* Rule files *must* contain the suffix `Rule`. 
+* Rule files *must* contain the suffix `Rule`.
 * The exported class must always be named `Rule` and extend from `Lint.Rules.AbstractRule`.
 
 Now, let us first write the rule in TypeScript:

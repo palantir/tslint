@@ -1,0 +1,20 @@
+let a: Object;
+       ~~~~~~  [Don't use 'Object' as a type.]
+let b: {c: String};
+           ~~~~~~   [Don't use 'String' as a type. Use 'string' instead.]
+function foo(a: String) {}
+                ~~~~~~     [Don't use 'String' as a type. Use 'string' instead.]
+'a' as String;
+       ~~~~~~  [Don't use 'String' as a type. Use 'string' instead.]
+let c: F;
+       ~ [Don't use 'F' as a type.]
+let d: Foooooo;
+       ~~~~~~~ [Don't use 'Foooooo' as a type.]
+
+// no warning for separately scoped types
+let e: foo.String;
+
+// no warning for actual uses.
+let f = Object();
+let g = Object.create(null);
+let h = String(false);
