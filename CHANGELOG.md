@@ -17,19 +17,22 @@ v5.0.0
 - [enhancement] Enable WARN with new config file format (#629, #345)
     - Valid values for `severity`: "error|warn|warning|none|off"
     - Old style:
-        ```
-        {
-            "extends": "tslint:latest",
-            "rules": {
+
+    ```json
+    {
+        "extends": "tslint:latest",
+        "rules": {
             "callable-types": true
-            }
         }
-        ```
+    }
+    ```
+
     - New style, with `interface-name` generating warnings, and passing options to `max-line-length`:
-        ```
-        {
-            "extends": "tslint:latest",
-            "rules": {
+
+    ```json
+    {
+        "extends": "tslint:latest",
+        "rules": {
             "callable-types": true,
             "interface-name": {
                 "severity": "warn"
@@ -38,9 +41,9 @@ v5.0.0
                 "options": 140,
                 "severity": "warning"
             }
-            }
         }
-        ```
+    }
+    ```
 
 v4.5.1-dev.0
 ---
