@@ -23,6 +23,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "object-literal-shorthand",
         description: "Enforces use of ES6 object literal shorthand when possible.",
+        hasFix: true,
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: ["true"],
@@ -31,8 +32,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static LONGHAND_PROPERTY = "Expected property shorthand in object literal.";
-    public static LONGHAND_METHOD = "Expected method shorthand in object literal.";
+    public static LONGHAND_PROPERTY = "Expected property shorthand in object literal ";
+    public static LONGHAND_METHOD = "Expected method shorthand in object literal ";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const objectLiteralShorthandWalker = new ObjectLiteralShorthandWalker(sourceFile, this.getOptions());
@@ -49,7 +50,12 @@ class ObjectLiteralShorthandWalker extends Lint.RuleWalker {
         if (name.kind === ts.SyntaxKind.Identifier &&
             value.kind === ts.SyntaxKind.Identifier &&
             name.getText() === value.getText()) {
-                this.addFailureAtNode(node, Rule.LONGHAND_PROPERTY);
+                // Delete from name start up to value to include the ':'.
+                const lengthToValueStart = value.getStart() - name.getStart();
+                const fix = this.createFix(
+                    this.deleteText(name.getStart(), lengthToValueStart),
+                );
+                this.addFailureAtNode(node, Rule.LONGHAND_PROPERTY + `('{${name.getText()}}').`, fix);
         }
 
         if (value.kind === ts.SyntaxKind.FunctionExpression) {
@@ -57,8 +63,8 @@ class ObjectLiteralShorthandWalker extends Lint.RuleWalker {
             if (fnNode.name) {
                 return;  // named function expressions are OK.
             }
-
-            this.addFailureAtNode(node, Rule.LONGHAND_METHOD);
+            const star = fnNode.asteriskToken ? fnNode.asteriskToken.getText() : "";
+            this.addFailureAtNode(node, Rule.LONGHAND_METHOD + `('{${name.getText()}${star}() {...}}').`);
         }
 
         super.visitPropertyAssignment(node);

@@ -25,7 +25,6 @@ const EXECUTABLE_DIR = path.resolve(process.cwd(), "test", "executable");
 const EXECUTABLE_PATH = path.resolve(EXECUTABLE_DIR, "npm-like-executable");
 const TEMP_JSON_PATH = path.resolve(EXECUTABLE_DIR, "tslint.json");
 
-/* tslint:disable:only-arrow-functions */
 describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
     // tslint:disable:no-invalid-this
     this.slow(3000);    // the executable is JIT-ed each time it runs; avoid showing slowness warnings
@@ -160,8 +159,23 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
             });
         });
 
+        it("exits with code 0 if `--test` flag is used with a wildcard", (done) => {
+            execCli(["--test", "test/rules/no-e*"], (err) => {
+                assert.isNull(err, "process should exit without an error");
+                done();
+            });
+        });
+
         it("exits with code 1 if `--test` flag is used with incorrect rule", (done) => {
             execCli(["--test", "test/files/incorrect-rule-test"], (err) => {
+                assert.isNotNull(err, "process should exit with error");
+                assert.strictEqual(err.code, 1, "error code should be 1");
+                done();
+            });
+        });
+
+        it("exits with code 1 if `--test` flag is used with incorrect rule in a wildcard", (done) => {
+            execCli(["--test", "test/files/incorrect-rule-*"], (err) => {
                 assert.isNotNull(err, "process should exit with error");
                 assert.strictEqual(err.code, 1, "error code should be 1");
                 done();
@@ -289,7 +303,7 @@ function execCli(args: string[], options: cp.ExecFileOptions, cb: ExecFileCallba
 function execCli(args: string[], options: cp.ExecFileOptions | ExecFileCallback, cb?: ExecFileCallback): cp.ChildProcess {
     let filePath = EXECUTABLE_PATH;
 
-    // Specify extension for Windows executable to avoid ENOENT errors 
+    // Specify extension for Windows executable to avoid ENOENT errors
     if (os.platform() === "win32") {
         filePath += ".cmd";
     }

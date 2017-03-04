@@ -47,61 +47,57 @@ interface IIncrementorState {
 }
 
 // a map of incrementors and whether or not they are only used to index into an array reference in the for loop
-interface IncrementorMap {
-    [name: string]: IIncrementorState;
-}
+type IncrementorMap = Map<string, IIncrementorState>;
 
-class PreferForOfWalker extends Lint.BlockScopeAwareRuleWalker<{}, IncrementorMap> {
-    public createScope() {
-        return {};
-    }
+class PreferForOfWalker extends Lint.BlockScopeAwareRuleWalker<void, IncrementorMap> {
+    public createScope() {} // tslint:disable-line:no-empty
 
     public createBlockScope() {
-        return {};
+        return new Map();
     }
 
     protected visitForStatement(node: ts.ForStatement) {
         const arrayNodeInfo = this.getForLoopHeaderInfo(node);
         const currentBlockScope = this.getCurrentBlockScope();
-        let indexVariableName: string | undefined = undefined;
+        let indexVariableName: string | undefined;
         if (node.incrementor != null && arrayNodeInfo != null) {
             const { indexVariable, arrayToken } = arrayNodeInfo;
             indexVariableName = indexVariable.getText();
 
             // store `for` loop state
-            currentBlockScope[indexVariableName] = {
+            currentBlockScope.set(indexVariableName, {
                 arrayToken: arrayToken as ts.Identifier,
                 forLoopEndPosition: node.incrementor.end + 1,
                 onlyArrayReadAccess: true,
-            };
+            });
         }
 
         super.visitForStatement(node);
 
         if (indexVariableName != null) {
-            const incrementorState = currentBlockScope[indexVariableName];
+            const incrementorState = currentBlockScope.get(indexVariableName)!;
             if (incrementorState.onlyArrayReadAccess) {
                 this.addFailureFromStartToEnd(node.getStart(), incrementorState.forLoopEndPosition, Rule.FAILURE_STRING);
             }
 
             // remove current `for` loop state
-            delete currentBlockScope[indexVariableName];
+            currentBlockScope.delete(indexVariableName);
         }
     }
 
     protected visitIdentifier(node: ts.Identifier) {
-        const incrementorScope = this.findBlockScope((scope) => scope[node.text] != null);
+        const incrementorScope = this.findBlockScope((scope) => scope.has(node.text));
 
         if (incrementorScope != null) {
-            const incrementorState = incrementorScope[node.text];
+            const incrementorState = incrementorScope.get(node.text);
 
             // check if the identifier is an iterator and is currently in the `for` loop body
             if (incrementorState != null && incrementorState.arrayToken != null && incrementorState.forLoopEndPosition < node.getStart()) {
                 // check if iterator is used for something other than reading data from array
-                if (node.parent != null && node.parent.kind === ts.SyntaxKind.ElementAccessExpression) {
+                if (node.parent!.kind === ts.SyntaxKind.ElementAccessExpression) {
                     const elementAccess = node.parent as ts.ElementAccessExpression;
                     const arrayIdentifier = unwrapParentheses(elementAccess.expression) as ts.Identifier;
-                    if (incrementorState.arrayToken.text !== arrayIdentifier.text) {
+                    if (incrementorState.arrayToken.getText() !== arrayIdentifier.getText()) {
                         // iterator used in array other than one iterated over
                         incrementorState.onlyArrayReadAccess = false;
                     } else if (elementAccess.parent != null && isAssignment(elementAccess.parent)) {
@@ -118,15 +114,15 @@ class PreferForOfWalker extends Lint.BlockScopeAwareRuleWalker<{}, IncrementorMa
 
     // returns the iterator and array of a `for` loop if the `for` loop is basic. Otherwise, `null`
     private getForLoopHeaderInfo(forLoop: ts.ForStatement) {
-        let indexVariableName: string | undefined = undefined;
-        let indexVariable: ts.Identifier | undefined = undefined;
+        let indexVariableName: string | undefined;
+        let indexVariable: ts.Identifier | undefined;
 
         // assign `indexVariableName` if initializer is simple and starts at 0
         if (forLoop.initializer != null && forLoop.initializer.kind === ts.SyntaxKind.VariableDeclarationList) {
             const syntaxList = forLoop.initializer.getChildAt(1);
             if (syntaxList.kind === ts.SyntaxKind.SyntaxList && syntaxList.getChildCount() === 1) {
                 const assignment = syntaxList.getChildAt(0);
-                if (assignment.kind === ts.SyntaxKind.VariableDeclaration) {
+                if (assignment.kind === ts.SyntaxKind.VariableDeclaration && assignment.getChildCount() === 3) {
                     const value = assignment.getChildAt(2).getText();
                     if (value === "0") {
                         indexVariable = assignment.getChildAt(0) as ts.Identifier;
@@ -201,8 +197,6 @@ class PreferForOfWalker extends Lint.BlockScopeAwareRuleWalker<{}, IncrementorMa
                     }
                 }
             }
-        } else {
-            return false;
         }
         return false;
     }

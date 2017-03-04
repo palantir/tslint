@@ -20,56 +20,81 @@ import * as ts from "typescript";
 import * as Lint from "../index";
 
 const OPTION_IGNORE_PARMS = "ignore-params";
+const OPTION_IGNORE_PROPERTIES = "ignore-properties";
+
+interface IOptions {
+    ignoreParameters: boolean;
+    ignoreProperties: boolean;
+}
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-inferrable-types",
         description: "Disallows explicit type declarations for variables or parameters initialized to a number, string, or boolean.",
-        rationale: "Explicit types where they can be easily infered by the compiler make code more verbose.",
+        rationale: "Explicit types where they can be easily inferred by the compiler make code more verbose.",
         optionsDescription: Lint.Utils.dedent`
-            One argument may be optionally provided:
+            Two arguments may be optionally provided:
 
             * \`${OPTION_IGNORE_PARMS}\` allows specifying an inferrable type annotation for function params.
-            This can be useful when combining with the \`typedef\` rule.`,
+            This can be useful when combining with the \`typedef\` rule.
+            * \`${OPTION_IGNORE_PROPERTIES}\` allows specifying an inferrable type annotation for class properties.`,
         options: {
             type: "array",
             items: {
                 type: "string",
-                enum: [OPTION_IGNORE_PARMS],
+                enum: [OPTION_IGNORE_PARMS, OPTION_IGNORE_PROPERTIES],
             },
             minLength: 0,
-            maxLength: 1,
+            maxLength: 2,
         },
-        optionExamples: ["true", `[true, "${OPTION_IGNORE_PARMS}"]`],
+        hasFix: true,
+        optionExamples: [
+            "true",
+            `[true, "${OPTION_IGNORE_PARMS}"]`,
+            `[true, "${OPTION_IGNORE_PARMS}", "${OPTION_IGNORE_PROPERTIES}"]`,
+        ],
         type: "typescript",
         typescriptOnly: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING_FACTORY = (type: string) => {
-        return `LHS type (${type}) inferred by RHS expression, remove type annotation`;
+        return `Type ${type} trivially inferred from a ${type} literal, remove type annotation`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoInferrableTypesWalker(sourceFile, this.getOptions()));
+        return this.applyWithWalker(new NoInferrableTypesWalker(sourceFile, this.ruleName, {
+            ignoreParameters: this.ruleArguments.indexOf(OPTION_IGNORE_PARMS) !== -1,
+            ignoreProperties: this.ruleArguments.indexOf(OPTION_IGNORE_PROPERTIES) !== -1,
+        }));
     }
 }
 
-class NoInferrableTypesWalker extends Lint.RuleWalker {
-    public visitVariableDeclaration(node: ts.VariableDeclaration) {
-        this.checkDeclaration(node);
-        super.visitVariableDeclaration(node);
+class NoInferrableTypesWalker extends Lint.AbstractWalker<IOptions> {
+    public walk(sourceFile: ts.SourceFile) {
+        const cb = (node: ts.Node): void => {
+            switch (node.kind) {
+                case ts.SyntaxKind.Parameter:
+                    if (!this.options.ignoreParameters) {
+                        this.checkDeclaration(node as ts.ParameterDeclaration);
+                    }
+                    break;
+                case ts.SyntaxKind.PropertyDeclaration:
+                    if (this.options.ignoreProperties) {
+                        break;
+                    }
+                    /* falls through*/
+                case ts.SyntaxKind.VariableDeclaration:
+                    this.checkDeclaration(node as ts.VariableLikeDeclaration);
+                default:
+            }
+            return ts.forEachChild(node, cb);
+        };
+        return ts.forEachChild(sourceFile, cb);
     }
 
-    public visitParameterDeclaration(node: ts.ParameterDeclaration) {
-        if (!this.hasOption(OPTION_IGNORE_PARMS)) {
-            this.checkDeclaration(node);
-        }
-        super.visitParameterDeclaration(node);
-    }
-
-    private checkDeclaration(node: ts.ParameterDeclaration | ts.VariableDeclaration) {
+    private checkDeclaration(node: ts.VariableLikeDeclaration) {
         if (node.type != null && node.initializer != null) {
             let failure: string | null = null;
 
@@ -100,7 +125,10 @@ class NoInferrableTypesWalker extends Lint.RuleWalker {
             }
 
             if (failure != null) {
-                this.addFailureAtNode(node.type, Rule.FAILURE_STRING_FACTORY(failure));
+                this.addFailureAtNode(node.type,
+                                      Rule.FAILURE_STRING_FACTORY(failure),
+                                      this.createFix(Lint.Replacement.deleteFromTo(node.name.end, node.type.end)),
+                );
             }
         }
     }

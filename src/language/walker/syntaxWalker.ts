@@ -34,7 +34,7 @@ export class SyntaxWalker {
         this.walkChildren(node);
     }
 
-    protected visitArrowFunction(node: ts.FunctionLikeDeclaration) {
+    protected visitArrowFunction(node: ts.ArrowFunction) {
         this.walkChildren(node);
     }
 
@@ -234,6 +234,14 @@ export class SyntaxWalker {
         this.walkChildren(node);
     }
 
+    protected visitNonNullExpression(node: ts.NonNullExpression) {
+        this.walkChildren(node);
+    }
+
+    protected visitNumericLiteral(node: ts.NumericLiteral) {
+        this.walkChildren(node);
+    }
+
     protected visitObjectLiteralExpression(node: ts.ObjectLiteralExpression) {
         this.walkChildren(node);
     }
@@ -361,7 +369,7 @@ export class SyntaxWalker {
                 break;
 
             case ts.SyntaxKind.ArrowFunction:
-                this.visitArrowFunction(node as ts.FunctionLikeDeclaration);
+                this.visitArrowFunction(node as ts.ArrowFunction);
                 break;
 
             case ts.SyntaxKind.BinaryExpression:
@@ -554,6 +562,14 @@ export class SyntaxWalker {
 
             case ts.SyntaxKind.NewExpression:
                 this.visitNewExpression(node as ts.NewExpression);
+                break;
+
+            case ts.SyntaxKind.NonNullExpression:
+                this.visitNonNullExpression(node as ts.NonNullExpression);
+                break;
+
+            case ts.SyntaxKind.NumericLiteral:
+                this.visitNumericLiteral(node as ts.NumericLiteral);
                 break;
 
             case ts.SyntaxKind.ObjectBindingPattern:

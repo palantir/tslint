@@ -19,8 +19,6 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
-import { IOptions } from "../language/rule/rule";
-
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -47,60 +45,45 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static FAILURE_STRING = "'magic numbers' are not allowed";
 
-    public static ALLOWED_NODES = {
-        [ts.SyntaxKind.ExportAssignment]: true,
-        [ts.SyntaxKind.FirstAssignment]: true,
-        [ts.SyntaxKind.LastAssignment]: true,
-        [ts.SyntaxKind.PropertyAssignment]: true,
-        [ts.SyntaxKind.ShorthandPropertyAssignment]: true,
-        [ts.SyntaxKind.VariableDeclaration]: true,
-        [ts.SyntaxKind.VariableDeclarationList]: true,
-        [ts.SyntaxKind.EnumMember]: true,
-        [ts.SyntaxKind.PropertyDeclaration]: true,
-    };
+    public static ALLOWED_NODES = new Set<ts.SyntaxKind>([
+        ts.SyntaxKind.ExportAssignment,
+        ts.SyntaxKind.FirstAssignment,
+        ts.SyntaxKind.LastAssignment,
+        ts.SyntaxKind.PropertyAssignment,
+        ts.SyntaxKind.ShorthandPropertyAssignment,
+        ts.SyntaxKind.VariableDeclaration,
+        ts.SyntaxKind.VariableDeclarationList,
+        ts.SyntaxKind.EnumMember,
+        ts.SyntaxKind.PropertyDeclaration,
+        ts.SyntaxKind.Parameter,
+    ]);
 
     public static DEFAULT_ALLOWED = [ -1, 0, 1 ];
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoMagicNumbersWalker(sourceFile, this.getOptions()));
+        const allowedNumbers = this.ruleArguments.length > 0 ? this.ruleArguments : Rule.DEFAULT_ALLOWED;
+        return this.applyWithWalker(new NoMagicNumbersWalker(sourceFile, this.ruleName, new Set(allowedNumbers.map(String))));
     }
 }
 
-class NoMagicNumbersWalker extends Lint.RuleWalker {
-    // lookup object for allowed magic numbers
-    private allowed: { [prop: string]: boolean } = {};
-    constructor(sourceFile: ts.SourceFile, options: IOptions) {
-        super(sourceFile, options);
-
-        const configOptions = this.getOptions();
-        const allowedNumbers: number[] = configOptions.length > 0 ? configOptions : Rule.DEFAULT_ALLOWED;
-
-        allowedNumbers.forEach((value) => {
-            this.allowed[value] = true;
-        });
-    }
-
-    public visitNode(node: ts.Node) {
-        const isUnary = this.isUnaryNumericExpression(node);
-        if (node.kind === ts.SyntaxKind.NumericLiteral && node.parent !== undefined && !Rule.ALLOWED_NODES[node.parent.kind] || isUnary) {
-            const text = node.getText();
-            if (!this.allowed[text]) {
-                this.addFailureAtNode(node, Rule.FAILURE_STRING);
+class NoMagicNumbersWalker extends Lint.AbstractWalker<Set<string>> {
+    public walk(sourceFile: ts.SourceFile) {
+        const cb = (node: ts.Node): void => {
+            if (node.kind === ts.SyntaxKind.NumericLiteral) {
+                this.checkNumericLiteral(node, (node as ts.NumericLiteral).text);
+            } else if (node.kind === ts.SyntaxKind.PrefixUnaryExpression &&
+                       (node as ts.PrefixUnaryExpression).operator === ts.SyntaxKind.MinusToken) {
+                this.checkNumericLiteral(node, "-" + ((node as ts.PrefixUnaryExpression).operand as ts.NumericLiteral).text);
+            } else {
+                ts.forEachChild(node, cb);
             }
-        }
-        if (!isUnary) {
-            super.visitNode(node);
-        }
+        };
+        return ts.forEachChild(sourceFile, cb);
     }
 
-    /**
-     * Checks if a node is an unary expression with on a numeric operand.
-     */
-    private isUnaryNumericExpression(node: ts.Node): boolean {
-        if (node.kind !== ts.SyntaxKind.PrefixUnaryExpression) {
-            return false;
+    private checkNumericLiteral(node: ts.Node, num: string) {
+        if (!Rule.ALLOWED_NODES.has(node.parent!.kind) && !this.options.has(num)) {
+            this.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
-        const unaryNode = (node as ts.PrefixUnaryExpression);
-        return unaryNode.operator === ts.SyntaxKind.MinusToken && unaryNode.operand.kind === ts.SyntaxKind.NumericLiteral;
     }
 }

@@ -9,7 +9,6 @@ switch (foo) {
     ~~~~    [expected a 'break' before 'case']
     case 4:
     default:
-    ~~~~~~~  [expected a 'break' before 'default']
         break;
 }
 
@@ -27,7 +26,6 @@ switch (foo) {
     case 1:
     case 2:
     default:
-    ~~~~~~~  [expected a 'break' before 'default']
         bar();
 }
 
@@ -36,7 +34,6 @@ switch (foo) {
         switch (bar) {
             case "":
             default:
-            ~~~~~~~  [expected a 'break' before 'default']
                 break;
         }
     case 2:

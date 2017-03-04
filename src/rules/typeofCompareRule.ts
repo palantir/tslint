@@ -19,6 +19,8 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
+const LEGAL_TYPEOF_RESULTS = new Set(["undefined", "string", "boolean", "number", "function", "object", "symbol"]);
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -32,65 +34,45 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "typeof must be compared to correct value";
+    public static FAILURE_STRING =
+        `'typeof' expression must be compared to one of: ${Array.from(LEGAL_TYPEOF_RESULTS).map((x) => `"${x}"`).join(", ")}`;
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const comparisonWalker = new ComparisonWalker(sourceFile, this.getOptions());
-        return this.applyWithWalker(comparisonWalker);
+        return this.applyWithWalker(new Walker(sourceFile, this.getOptions()));
     }
 }
 
-class ComparisonWalker extends Lint.RuleWalker {
-    private static LEGAL_TYPEOF_RESULTS = ["undefined", "string", "boolean", "number", "function", "object", "symbol"];
-
-    private static isCompareOperator(node: ts.Node): boolean {
-        return node.kind === ts.SyntaxKind.EqualsEqualsToken || node.kind === ts.SyntaxKind.EqualsEqualsEqualsToken;
-    }
-
-    private static isLegalStringLiteral(node: ts.StringLiteral) {
-        return ComparisonWalker.LEGAL_TYPEOF_RESULTS.indexOf(node.text) > -1;
-    }
-
-    private static isFaultyOtherSideOfTypeof(node: ts.Node): boolean {
-        switch (node.kind) {
-            case ts.SyntaxKind.StringLiteral:
-                if (!ComparisonWalker.isLegalStringLiteral(node as ts.StringLiteral)) {
-                    return true;
-                }
-                break;
-            case ts.SyntaxKind.Identifier:
-                if ((node as ts.Identifier).originalKeywordKind === ts.SyntaxKind.UndefinedKeyword) {
-                    return true;
-                }
-                break;
-            case ts.SyntaxKind.NullKeyword:
-            case ts.SyntaxKind.FirstLiteralToken:
-            case ts.SyntaxKind.TrueKeyword:
-            case ts.SyntaxKind.FalseKeyword:
-            case ts.SyntaxKind.ObjectLiteralExpression:
-            case ts.SyntaxKind.ArrayLiteralExpression:
-                return true;
-            default: break;
-        }
-        return false;
-    }
-
+class Walker extends Lint.RuleWalker {
     public visitBinaryExpression(node: ts.BinaryExpression) {
-        let isFaulty = false;
-        if (ComparisonWalker.isCompareOperator(node.operatorToken)) {
-            // typeof is at left
-            if (node.left.kind === ts.SyntaxKind.TypeOfExpression && ComparisonWalker.isFaultyOtherSideOfTypeof(node.right)) {
-                isFaulty = true;
-            }
-            // typeof is at right
-            if (node.right.kind === ts.SyntaxKind.TypeOfExpression && ComparisonWalker.isFaultyOtherSideOfTypeof(node.left)) {
-                isFaulty = true;
-            }
-        }
-        if (isFaulty) {
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+        const { operatorToken, left, right } = node;
+        if (Lint.getEqualsKind(operatorToken) && (isFaultyTypeof(left, right) || isFaultyTypeof(right, left))) {
+            this.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
         super.visitBinaryExpression(node);
     }
+}
 
+function isFaultyTypeof(left: ts.Expression, right: ts.Expression) {
+    return left.kind === ts.SyntaxKind.TypeOfExpression && isFaultyTypeofResult(right);
+}
+
+function isFaultyTypeofResult(node: ts.Node): boolean {
+    switch (node.kind) {
+        case ts.SyntaxKind.StringLiteral:
+            return !LEGAL_TYPEOF_RESULTS.has((node as ts.StringLiteral).text);
+
+        case ts.SyntaxKind.Identifier:
+            return (node as ts.Identifier).originalKeywordKind === ts.SyntaxKind.UndefinedKeyword;
+
+        case ts.SyntaxKind.NullKeyword:
+        case ts.SyntaxKind.NumericLiteral:
+        case ts.SyntaxKind.TrueKeyword:
+        case ts.SyntaxKind.FalseKeyword:
+        case ts.SyntaxKind.ObjectLiteralExpression:
+        case ts.SyntaxKind.ArrayLiteralExpression:
+            return true;
+
+        default:
+            return false;
+    }
 }

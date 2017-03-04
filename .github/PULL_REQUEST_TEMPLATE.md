@@ -4,12 +4,15 @@
 - [ ] New feature, bugfix, or enhancement
   - [ ] Includes tests
 - [ ] Documentation update
-- [ ] Enable CircleCI for your fork (https://circleci.com/add-projects)
 
-#### What changes did you make?
+#### Overview of change:
 
-(give an overview)
 
 #### Is there anything you'd like reviewers to focus on?
 
-(optional)
+<!-- optional -->
+
+#### CHANGELOG.md entry:
+
+<!-- optional (example: "[new-rule] `arrow-return-shorthand`") -->
+<!-- suggested tags: [new-rule], [new-rule-option], [new-fixer], [bugfix], [enhancement], [api], [rule-change], [no-log] -->

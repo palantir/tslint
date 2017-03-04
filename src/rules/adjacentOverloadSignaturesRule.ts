@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -89,16 +90,16 @@ class AdjacentOverloadSignaturesWalker extends Lint.RuleWalker {
 
     /** 'getOverloadName' may return undefined for nodes that cannot be overloads, e.g. a `const` declaration. */
     private checkOverloadsAdjacent<T extends ts.Node>(overloads: T[], getOverload: (node: T) => Overload | undefined) {
-        let lastKey: string | undefined = undefined;
-        const seen: { [key: string]: true } = Object.create(null);
+        let lastKey: string | undefined;
+        const seen = new Set<string>();
         for (const node of overloads) {
             const overload = getOverload(node);
             if (overload) {
                 const { name, key } = overload;
-                if (key in seen && lastKey !== key) {
+                if (seen.has(key) && lastKey !== key) {
                     this.addFailureAtNode(node, Rule.FAILURE_STRING_FACTORY(name));
                 }
-                seen[key] = true;
+                seen.add(key);
                 lastKey = key;
             } else {
                 lastKey = undefined;
@@ -114,32 +115,13 @@ interface Overload {
     name: string;
 }
 
-function isLiteralExpression(node: ts.Node): node is ts.LiteralExpression {
-    return node.kind === ts.SyntaxKind.StringLiteral || node.kind === ts.SyntaxKind.NumericLiteral;
-}
-
 export function getOverloadKey(node: ts.SignatureDeclaration): string | undefined {
     const o = getOverload(node);
     return o && o.key;
 }
 
 function getOverloadIfSignature(node: ts.TypeElement | ts.ClassElement): Overload | undefined {
-    return isSignatureDeclaration(node) ? getOverload(node) : undefined;
-}
-
-export function isSignatureDeclaration(node: ts.Node): node is ts.SignatureDeclaration {
-    switch (node.kind) {
-        case ts.SyntaxKind.ConstructSignature:
-        case ts.SyntaxKind.Constructor:
-        case ts.SyntaxKind.CallSignature:
-        case ts.SyntaxKind.CallSignature:
-        case ts.SyntaxKind.MethodSignature:
-        case ts.SyntaxKind.MethodDeclaration:
-        case ts.SyntaxKind.FunctionDeclaration:
-            return true;
-        default:
-            return false;
-    }
+    return utils.isSignatureDeclaration(node) ? getOverload(node) : undefined;
 }
 
 function getOverload(node: ts.SignatureDeclaration): Overload | undefined {
@@ -173,8 +155,8 @@ function getPropertyInfo(name: ts.PropertyName): { name: string, computed?: bool
             return { name: (name as ts.Identifier).text };
         case ts.SyntaxKind.ComputedPropertyName:
             const { expression } = (name as ts.ComputedPropertyName);
-            return isLiteralExpression(expression) ? { name: expression.text } : { name: expression.getText(), computed: true };
+            return utils.isLiteralExpression(expression) ? { name: expression.text } : { name: expression.getText(), computed: true };
         default:
-            return isLiteralExpression(name) ? { name: (name as ts.StringLiteral).text } : undefined;
+            return utils.isLiteralExpression(name) ? { name: (name as ts.StringLiteral).text } : undefined;
     }
 }

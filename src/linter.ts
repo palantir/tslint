@@ -16,6 +16,7 @@
  */
 
 import * as fs from "fs";
+import * as path from "path";
 import * as ts from "typescript";
 
 import {
@@ -28,6 +29,7 @@ import {
     loadConfigurationFromPath,
 } from "./configuration";
 import { EnableDisableRulesWalker } from "./enableDisableRules";
+import { isError, showWarningOnce } from "./error";
 import { findFormatter } from "./formatterLoader";
 import { ILinterOptions, LintResult } from "./index";
 import { IFormatter } from "./language/formatter/formatter";
@@ -42,7 +44,7 @@ import { arrayify, dedent } from "./utils";
  * Linter that can lint multiple files in consecutive runs.
  */
 class Linter {
-    public static VERSION = "4.3.0-dev.0";
+    public static VERSION = "4.5.1-dev.0";
 
     public static findConfiguration = findConfiguration;
     public static findConfigurationPath = findConfigurationPath;
@@ -58,12 +60,7 @@ class Linter {
      */
     public static createProgram(configFile: string, projectDirectory?: string): ts.Program {
         if (projectDirectory === undefined) {
-            const lastSeparator = configFile.lastIndexOf("/");
-            if (lastSeparator < 0) {
-                projectDirectory = ".";
-            } else {
-                projectDirectory = configFile.substring(0, lastSeparator + 1);
-            }
+            projectDirectory = path.dirname(configFile);
         }
 
         const { config } = ts.readConfigFile(configFile, ts.sys.readFile);
@@ -103,8 +100,10 @@ class Linter {
     }
 
     public lint(fileName: string, source: string, configuration: IConfigurationFile = DEFAULT_CONFIG): void {
-        const enabledRules = this.getEnabledRules(fileName, source, configuration);
         let sourceFile = this.getSourceFile(fileName, source);
+        const isJs = /\.jsx?$/i.test(fileName);
+
+        const enabledRules = this.getEnabledRules(sourceFile, configuration, isJs);
         let hasLinterRun = false;
         let fileFailures: RuleFailure[] = [];
 
@@ -166,11 +165,20 @@ class Linter {
 
     private applyRule(rule: IRule, sourceFile: ts.SourceFile) {
         let ruleFailures: RuleFailure[] = [];
-        if (this.program && TypedRule.isTypedRule(rule)) {
-            ruleFailures = rule.applyWithProgram(sourceFile, this.languageService);
-        } else {
-            ruleFailures = rule.apply(sourceFile, this.languageService);
+        try {
+            if (TypedRule.isTypedRule(rule) && this.program) {
+                ruleFailures = rule.applyWithProgram(sourceFile, this.languageService);
+            } else {
+                ruleFailures = rule.apply(sourceFile, this.languageService);
+            }
+        } catch (error) {
+            if (isError(error)) {
+                showWarningOnce(`Warning: ${error.message}`);
+            } else {
+                console.warn(`Warning: ${error}`);
+            }
         }
+
         const fileFailures: RuleFailure[] = [];
         for (const ruleFailure of ruleFailures) {
             if (!this.containsRule(this.failures, ruleFailure)) {
@@ -180,19 +188,11 @@ class Linter {
         return fileFailures;
     }
 
-    private getEnabledRules(fileName: string, source: string, configuration: IConfigurationFile = DEFAULT_CONFIG): IRule[] {
-        const sourceFile = this.getSourceFile(fileName, source);
-        const isJs = /\.jsx?$/i.test(fileName);
+    private getEnabledRules(sourceFile: ts.SourceFile, configuration: IConfigurationFile = DEFAULT_CONFIG, isJs: boolean): IRule[] {
         const configurationRules = isJs ? configuration.jsRules : configuration.rules;
 
         // walk the code first to find all the intervals where rules are disabled
-        const rulesWalker = new EnableDisableRulesWalker(sourceFile, {
-            disabledIntervals: [],
-            ruleArguments: [],
-            ruleName: "",
-        }, configurationRules);
-        rulesWalker.walk(sourceFile);
-        const enableDisableRuleMap = rulesWalker.enableDisableRuleMap;
+        const enableDisableRuleMap = new EnableDisableRulesWalker(sourceFile, configurationRules).getEnableDisableRuleMap();
 
         const rulesDirectories = arrayify(this.options.rulesDirectory)
             .concat(arrayify(configuration.rulesDirectory));

@@ -66,8 +66,8 @@ function getBaseTypeOfLiteralType(type: ts.Type): "string" | "number" | "invalid
         return "string";
     } else if (isTypeFlagSet(type, ts.TypeFlags.NumberLiteral) || isTypeFlagSet(type, ts.TypeFlags.Number)) {
         return "number";
-    } else if (isTypeFlagSet(type, ts.TypeFlags.Union) && !isTypeFlagSet(type, ts.TypeFlags.Enum)) {
-        const types = (type as ts.UnionType).types.map(getBaseTypeOfLiteralType);
+    } else if (isUnionType(type) && !isTypeFlagSet(type, ts.TypeFlags.Enum)) {
+        const types = type.types.map(getBaseTypeOfLiteralType);
         return allSame(types) ? types[0] : "invalid";
     } else if (isTypeFlagSet(type, ts.TypeFlags.EnumLiteral)) {
         return getBaseTypeOfLiteralType((type as ts.EnumLiteralType).baseType);
@@ -77,4 +77,8 @@ function getBaseTypeOfLiteralType(type: ts.Type): "string" | "number" | "invalid
 
 function allSame(array: string[]) {
     return array.every((value) => value === array[0]);
+}
+
+function isUnionType(type: ts.Type): type is ts.UnionType {
+    return Lint.isTypeFlagSet(type, ts.TypeFlags.Union);
 }

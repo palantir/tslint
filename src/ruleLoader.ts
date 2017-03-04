@@ -17,15 +17,16 @@
 
 import * as fs from "fs";
 import * as path from "path";
-import {camelize} from "underscore.string";
 
-import {getRulesDirectories} from "./configuration";
-import {IDisabledInterval, IRule} from "./language/rule/rule";
-import {dedent} from "./utils";
+import { getRelativePath } from "./configuration";
+import { showWarningOnce } from "./error";
+import { AbstractRule } from "./language/rule/abstractRule";
+import { IDisabledInterval, IRule } from "./language/rule/rule";
+import { arrayify, camelize, dedent } from "./utils";
 
 const moduleDirectory = path.dirname(module.filename);
 const CORE_RULES_DIRECTORY = path.resolve(moduleDirectory, ".", "rules");
-const shownDeprecations: string[] = [];
+const cachedRules = new Map<string, typeof AbstractRule | null>(); // null indicates that the rule was not found
 
 export interface IEnableDisablePosition {
     isEnabled: boolean;
@@ -43,20 +44,21 @@ export function loadRules(ruleConfiguration: {[name: string]: any},
     for (const ruleName in ruleConfiguration) {
         if (ruleConfiguration.hasOwnProperty(ruleName)) {
             const ruleValue = ruleConfiguration[ruleName];
-            const Rule = findRule(ruleName, rulesDirectories);
-            if (Rule == null) {
-                notFoundRules.push(ruleName);
-            } else {
-                if (isJs && Rule.metadata && Rule.metadata.typescriptOnly != null && Rule.metadata.typescriptOnly) {
-                    notAllowedInJsRules.push(ruleName);
+            if (AbstractRule.isRuleEnabled(ruleValue) || enableDisableRuleMap.hasOwnProperty(ruleName)) {
+                const Rule: (typeof AbstractRule) | null = findRule(ruleName, rulesDirectories);
+                if (Rule == null) {
+                    notFoundRules.push(ruleName);
                 } else {
-                    const ruleSpecificList = (ruleName in enableDisableRuleMap ? enableDisableRuleMap[ruleName] : []);
-                    const disabledIntervals = buildDisabledIntervalsFromSwitches(ruleSpecificList);
-                    rules.push(new Rule(ruleName, ruleValue, disabledIntervals));
+                    if (isJs && Rule.metadata && Rule.metadata.typescriptOnly != null && Rule.metadata.typescriptOnly) {
+                        notAllowedInJsRules.push(ruleName);
+                    } else {
+                        const ruleSpecificList = (ruleName in enableDisableRuleMap ? enableDisableRuleMap[ruleName] : []);
+                        const disabledIntervals = buildDisabledIntervalsFromSwitches(ruleSpecificList);
+                        rules.push(new (Rule as any)(ruleName, ruleValue, disabledIntervals));
 
-                    if (Rule.metadata && Rule.metadata.deprecationMessage && shownDeprecations.indexOf(Rule.metadata.ruleName) === -1) {
-                        console.warn(`${Rule.metadata.ruleName} is deprecated. ${Rule.metadata.deprecationMessage}`);
-                        shownDeprecations.push(Rule.metadata.ruleName);
+                        if (Rule.metadata && Rule.metadata.deprecationMessage) {
+                            showWarningOnce(`${Rule.metadata.ruleName} is deprecated. ${Rule.metadata.deprecationMessage}`);
+                        }
                     }
                 }
             }
@@ -90,26 +92,22 @@ export function loadRules(ruleConfiguration: {[name: string]: any},
 
 export function findRule(name: string, rulesDirectories?: string | string[]) {
     const camelizedName = transformName(name);
+    let Rule: typeof AbstractRule | null;
 
     // first check for core rules
-    let Rule = loadRule(CORE_RULES_DIRECTORY, camelizedName);
-    if (Rule != null) {
-        return Rule;
-    }
+    Rule = loadCachedRule(CORE_RULES_DIRECTORY, camelizedName);
 
-    const directories = getRulesDirectories(rulesDirectories);
-
-    for (const rulesDirectory of directories) {
+    if (Rule == null) {
         // then check for rules within the first level of rulesDirectory
-        if (rulesDirectory != null) {
-            Rule = loadRule(rulesDirectory, camelizedName);
+        for (const dir of arrayify(rulesDirectories)) {
+            Rule = loadCachedRule(dir, camelizedName, true);
             if (Rule != null) {
-                return Rule;
+                break;
             }
         }
     }
 
-    return undefined;
+    return Rule;
 }
 
 function transformName(name: string) {
@@ -128,15 +126,40 @@ function transformName(name: string) {
  */
 function loadRule(directory: string, ruleName: string) {
     const fullPath = path.join(directory, ruleName);
-
     if (fs.existsSync(fullPath + ".js")) {
         const ruleModule = require(fullPath);
         if (ruleModule && ruleModule.Rule) {
             return ruleModule.Rule;
         }
     }
-
     return undefined;
+}
+
+function loadCachedRule(directory: string, ruleName: string, isCustomPath = false) {
+    // use cached value if available
+    const fullPath = path.join(directory, ruleName);
+    const cachedRule = cachedRules.get(fullPath);
+    if (cachedRule !== undefined) {
+        return cachedRule;
+    }
+
+    // get absolute path
+    let absolutePath: string | undefined = directory;
+    if (isCustomPath) {
+        absolutePath = getRelativePath(directory);
+        if (absolutePath != null) {
+            if (!fs.existsSync(absolutePath)) {
+                throw new Error(`Could not find custom rule directory: ${directory}`);
+            }
+        }
+    }
+
+    let Rule: typeof AbstractRule | null = null;
+    if (absolutePath != null) {
+        Rule = loadRule(absolutePath, ruleName);
+    }
+    cachedRules.set(fullPath, Rule);
+    return Rule;
 }
 
 /**
@@ -151,7 +174,7 @@ function buildDisabledIntervalsFromSwitches(ruleSpecificList: IEnableDisablePosi
     while (i < ruleSpecificList.length) {
         const startPosition = ruleSpecificList[i].position;
 
-        // rule enabled state is always alternating therefore we can use position of next switch as end of disabled interval 
+        // rule enabled state is always alternating therefore we can use position of next switch as end of disabled interval
         // set endPosition as Infinity in case when last switch for rule in a file is disabled
         const endPosition = ruleSpecificList[i + 1] ? ruleSpecificList[i + 1].position : Infinity;
 
