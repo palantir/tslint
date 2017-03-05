@@ -24,11 +24,13 @@ const OPTION_ALWAYS = "always";
 const OPTION_NEVER = "never";
 const OPTION_IGNORE_BOUND_CLASS_METHODS = "ignore-bound-class-methods";
 const OPTION_IGNORE_INTERFACES = "ignore-interfaces";
+const OPTION_IGNORE_TYPE_LITERALS = "ignore-type-literals";
 
 interface Options {
     always: boolean;
     boundClassMethods: boolean;
     interfaces: boolean;
+    typeLiterals: boolean;
 }
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -46,6 +48,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             The following arguments may be optionally provided:
 
             * \`"${OPTION_IGNORE_INTERFACES}"\` skips checking semicolons at the end of interface members.
+            * \`"${OPTION_IGNORE_TYPE_LITERALS}"\` skips checking semicolons at the end of type literal members.
             * \`"${OPTION_IGNORE_BOUND_CLASS_METHODS}"\` skips checking semicolons at the end of bound class methods.`,
         options: {
             type: "array",
@@ -55,6 +58,9 @@ export class Rule extends Lint.Rules.AbstractRule {
             }, {
                 type: "string",
                 enum: [OPTION_IGNORE_INTERFACES],
+            }, {
+                type: "string",
+                enum: [OPTION_IGNORE_TYPE_LITERALS],
             }],
             additionalItems: false,
         },
@@ -63,6 +69,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             `[true, "${OPTION_NEVER}"]`,
             `[true, "${OPTION_ALWAYS}", "${OPTION_IGNORE_INTERFACES}"]`,
             `[true, "${OPTION_ALWAYS}", "${OPTION_IGNORE_BOUND_CLASS_METHODS}"]`,
+            `[true, "${OPTION_ALWAYS}", "${OPTION_IGNORE_TYPE_LITERALS}"]`,
         ],
         type: "style",
         typescriptOnly: false,
@@ -70,7 +77,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING_MISSING = "Missing semicolon";
-    public static FAILURE_STRING_COMMA = "Interface properties should be separated by semicolons";
+    public static FAILURE_STRING_COMMA = "Properties should be separated by semicolons";
     public static FAILURE_STRING_UNNECESSARY = "Unnecessary semicolon";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -78,6 +85,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             always: this.ruleArguments.indexOf(OPTION_NEVER) === -1,
             boundClassMethods: this.ruleArguments.indexOf(OPTION_IGNORE_BOUND_CLASS_METHODS) === -1,
             interfaces: this.ruleArguments.indexOf(OPTION_IGNORE_INTERFACES) === -1,
+            typeLiterals: this.ruleArguments.indexOf(OPTION_IGNORE_TYPE_LITERALS) === -1,
         };
         return this.applyWithWalker(new SemicolonWalker(sourceFile, this.ruleName, options));
     }
@@ -99,12 +107,6 @@ class SemicolonWalker extends Lint.AbstractWalker<Options> {
                 case ts.SyntaxKind.ExportAssignment:
                     this.checkSemicolonAt(node);
                     break;
-                case ts.SyntaxKind.FunctionDeclaration:
-                    // ambient declaration
-                    if ((node as ts.FunctionDeclaration).body === undefined) {
-                        this.checkSemicolonAt(node);
-                    }
-                    break;
                 case ts.SyntaxKind.TypeAliasDeclaration:
                 case ts.SyntaxKind.ImportDeclaration:
                 case ts.SyntaxKind.ExportDeclaration:
@@ -114,9 +116,20 @@ class SemicolonWalker extends Lint.AbstractWalker<Options> {
                 case ts.SyntaxKind.PropertyDeclaration:
                     this.visitPropertyDeclaration(node as ts.PropertyDeclaration);
                     break;
+                case ts.SyntaxKind.MethodDeclaration:
+                case ts.SyntaxKind.FunctionDeclaration:
+                    if ((node as ts.FunctionLikeDeclaration).body === undefined) {
+                        this.checkSemicolonOrLineBreak(node);
+                    }
+                    break;
                 case ts.SyntaxKind.InterfaceDeclaration:
                     if (this.options.interfaces) {
-                        this.checkInterface(node as ts.InterfaceDeclaration);
+                        this.checkInterfaceOrTypeLiteral(node as ts.InterfaceDeclaration);
+                    }
+                    break;
+                case ts.SyntaxKind.TypeLiteral:
+                    if (this.options.typeLiterals) {
+                        this.checkInterfaceOrTypeLiteral(node as ts.TypeLiteralNode);
                     }
                     break;
                 case ts.SyntaxKind.SemicolonClassElement:
@@ -143,7 +156,7 @@ class SemicolonWalker extends Lint.AbstractWalker<Options> {
                 }
             }
         } else {
-            this.checkSemicolonAt(node);
+            this.checkSemicolonOrLineBreak(node);
         }
     }
 
@@ -177,7 +190,7 @@ class SemicolonWalker extends Lint.AbstractWalker<Options> {
         }
     }
 
-    private checkInterface(node: ts.InterfaceDeclaration) {
+    private checkInterfaceOrTypeLiteral(node: ts.InterfaceDeclaration | ts.TypeLiteralNode) {
         for (const member of node.members) {
             const lastChar = this.sourceFile.text[member.end - 1];
             const hasSemicolon = lastChar === ";";

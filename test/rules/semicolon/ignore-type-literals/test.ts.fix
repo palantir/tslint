@@ -76,9 +76,9 @@ interface ITest {
     baz: boolean;
     readonly raz: number;
     literal: {
-        foo;
+        foo,
         bar;
-        baz;
+        baz
     };
 }
 

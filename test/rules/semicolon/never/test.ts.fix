@@ -61,7 +61,9 @@ class MyClass {
     public initializedMethodProperty1Line = () => { return "hi" }
 
     public initializedMethodPropertyWithoutSemicolon1Line = () => { return "hi again" }
-    public someMethod() {
+    public someMethod(): void
+    public someMethod(param): void
+    public someMethod(param?) {
         return
     }
 }
@@ -71,6 +73,11 @@ interface ITest {
     bar: number
     qux: string,
     baz: boolean
+    literal: {
+        foo,
+        bar
+        baz
+    }
 }
 
 import {Router} from 'aurelia-router'

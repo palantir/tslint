@@ -84,7 +84,10 @@ class MyClass {
 
     public initializedMethodPropertyWithoutSemicolon1Line = () => { return "hi again"; }
                                                                                         ~nil [Missing semicolon]
-    public someMethod() {
+    public someMethod(): void;
+    public someMethod(param): void
+                                  ~nil [Missing semicolon]
+    public someMethod(param?) {
         return;
     };
      ~ [Unnecessary semicolon]
@@ -97,9 +100,16 @@ interface ITest {
     bar: number // handles comment
                ~nil [Missing semicolon]
     qux: string, // handles comment
-               ~ [Interface properties should be separated by semicolons]
+               ~ [Properties should be separated by semicolons]
     baz: boolean;
     readonly raz: number;
+    literal: {
+        foo,
+           ~ [Properties should be separated by semicolons]
+        bar;
+        baz
+           ~nil [Missing semicolon]
+    };
 }
 
 import {Router} from 'aurelia-router';
