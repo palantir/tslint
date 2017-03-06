@@ -1,0 +1,71 @@
+export function func1(x: number, y: number, ...args: number[]) {
+                                               ~~~~              ['args' is declared but never used.]
+    return x + y;
+}
+
+export function func2(x: number, y: number, ...args: number[]) {
+                                 ~                               ['y' is declared but never used.]
+    return x + args[0];
+}
+
+export function func3(x?: number, y?: number) {
+                                  ~             ['y' is declared but never used.]
+    return x;
+}
+
+export interface ITestInterface {
+    func4(x: number, y: number): number;
+}
+
+export class ABCD {
+    constructor(private x: number, public y: number, private z: number) {
+                        ~                                                 [Property 'x' is declared but never used.]
+    }
+
+    func5() {
+        return this.z;
+    }
+}
+
+export interface ITestMapInterface {
+    [key: string]: string;
+}
+
+export function func6(...args: number[]) {
+    return args;
+}
+
+export function func7(f: (x: number) => number) {
+    return f;
+}
+
+export function func8([x, y]: [number, number]) {
+                          ~                       ['y' is declared but never used.]
+    return x;
+}
+
+export class DestructuringTests {
+    constructor(public x: number, public [y, z]) { // tsc error on binding pattern
+    }
+
+    public func9({a, b}) {
+                     ~     ['b' is declared but never used.]
+        return a;
+    }
+
+    public func10([a, b]) {
+                      ~     ['b' is declared but never used.]
+        return [a];
+    }
+
+    // destructuring with default value
+    public func11([x = 0]) {
+                   ~         ['x' is declared but never used.]
+        return;
+    }
+}
+
+abstract class AbstractTest {
+               ~~~~~~~~~~~~ ['AbstractTest' is declared but never used.]
+    abstract foo(x);
+}

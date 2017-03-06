@@ -1,0 +1,8 @@
+{
+  "linterOptions": {
+    "typeCheck": true
+  },
+  "rules": {
+    "no-unused-variable": [true, {"ignore-pattern": "^[_R]"}]
+  }
+}

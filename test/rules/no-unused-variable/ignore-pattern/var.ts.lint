@@ -1,0 +1,71 @@
+var x = 3;
+
+var y = x;
+    ~      ['y' is declared but never used.]
+var _y = x;
+var z;
+
+export var abcd = 3;
+
+class ABCD {
+      ~~~~   ['ABCD' is declared but never used.]
+    constructor() {
+        z = 3;
+    }
+}
+
+try {
+  // code here
+} catch (e) {
+  // e is Unused but that's still ok
+}
+
+declare var tmp: any;
+            ~~~       ['tmp' is declared but never used.]
+
+export function testDestructuring() {
+    var [a, b] = [1, 2];
+         ~               ['a' is declared but never used.]
+            ~            ['b' is declared but never used.]
+    var [_a, _b] = [1, 2];
+    var [c] = [3];
+
+    var {d, e} = { d: 1, e: 2 };
+         ~                       ['d' is declared but never used.]
+            ~                    ['e' is declared but never used.]
+    var {d: _d, e: _e} = { d: 1, e: 2 };
+    var {f} = { f: 3 };
+
+    return c * f;
+}
+
+export var [foo, bar] = [1, 2];
+
+export function testUnusedSpread() {
+  var a = [1, 2];
+      ~           ['a' is declared but never used.]
+  var _a = [1, 2];
+  var b = [3, 4];
+  var c = [...b, 5]; // make sure we see that b is being used
+
+  return c;
+
+}
+
+for(let e of [1,2,3]) {
+        ~               ['e' is declared but never used.]
+
+}
+
+for(let _e of [1,2,3]) {
+
+}
+
+export function testRenamingDestructure() {
+  var a = 2;
+  let {a: b} = {a: 4};
+          ~            ['b' is declared but never used.]
+  let {a: _b} = {a: 4};
+  let {x: y} = {x: 7}; // false positive
+  return a + y;
+}
