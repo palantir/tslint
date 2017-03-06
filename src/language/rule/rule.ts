@@ -107,6 +107,10 @@ export interface IRule {
     applyWithWalker(walker: IWalker): RuleFailure[];
 }
 
+export interface ITypedRule extends IRule {
+    applyWithProgram(sourceFile: ts.SourceFile, languageService: ts.LanguageService): RuleFailure[];
+}
+
 export interface IRuleFailureJson {
     endPosition: IRuleFailurePositionJson;
     failure: string;
@@ -121,6 +125,10 @@ export interface IRuleFailurePositionJson {
     character: number;
     line: number;
     position: number;
+}
+
+export function isTypedRule(rule: IRule): rule is ITypedRule {
+    return "applyWithProgram" in rule;
 }
 
 export class Replacement {
