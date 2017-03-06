@@ -28,4 +28,7 @@ var a = (a) => {};
 const invalidAsync = async (param) => {};
                             ~~~~~ [0]
 
+// parens required when return type annotation is present
+const fn = (param): void => {};
+
 [0]: Parentheses are prohibited around the parameter in this single parameter arrow function
