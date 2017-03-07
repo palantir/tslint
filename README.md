@@ -74,8 +74,10 @@ The configuration file specifies which rules are enabled and their options. Thes
   /*
    * Possible values:
    * - the name of a built-in config
-   * - the name of an NPM module which has a "main" file that exports a config object
-   * - a relative path to a JSON file
+   * - a string that can be resolved as a module that exports the config object, e.g.:
+   *   - an npm package name
+   *   - an npm package name followed by the path to a file inside
+   *   - a relative path to a JSON file
    */
   "extends": "tslint:latest",
   "rules": {
