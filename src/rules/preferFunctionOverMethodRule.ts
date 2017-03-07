@@ -99,7 +99,7 @@ class PreferFunctionOverMethodWalker extends Lint.RuleWalker {
     }
 
     private shouldWarnForModifiers(node: ts.MethodDeclaration): boolean {
-        if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.StaticKeyword)) {
+        if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.StaticKeyword, ts.SyntaxKind.AbstractKeyword)) {
             return false;
         }
         // TODO: Also return false if it's marked "override" (https://github.com/palantir/tslint/pull/2037)
