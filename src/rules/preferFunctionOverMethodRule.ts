@@ -15,12 +15,18 @@
  * limitations under the License.
  */
 
+import { getPropertyName, hasModifier, hasOwnThisReference, isMethodDeclaration } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
 
 const OPTION_ALLOW_PUBLIC = "allow-public";
 const OPTION_ALLOW_PROTECTED = "allow-protected";
+
+interface Options {
+    allowPublic: boolean;
+    allowProtected: boolean;
+}
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -46,72 +52,55 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Class method does not use 'this'. Use a function instead.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new PreferFunctionOverMethodWalker(sourceFile, this.getOptions()));
+        return this.applyWithWalker(new PreferFunctionOverMethodWalker(sourceFile, this.ruleName, {
+            allowProtected: this.ruleArguments.indexOf(OPTION_ALLOW_PROTECTED) !== -1,
+            allowPublic: this.ruleArguments.indexOf(OPTION_ALLOW_PUBLIC) !== -1,
+        }));
     }
 }
 
-class PreferFunctionOverMethodWalker extends Lint.RuleWalker {
-    private allowPublic = this.hasOption(OPTION_ALLOW_PUBLIC);
-    private allowProtected = this.hasOption(OPTION_ALLOW_PROTECTED);
-    private stack: ThisUsed[] = [];
+class PreferFunctionOverMethodWalker extends Lint.AbstractWalker<Options> {
+    private currentScope?: ThisUsed;
 
-    public visitNode(node: ts.Node) {
-        switch (node.kind) {
-            case ts.SyntaxKind.ThisKeyword:
-            case ts.SyntaxKind.SuperKeyword:
-                this.setThisUsed(node);
-                break;
-
-            case ts.SyntaxKind.MethodDeclaration:
-                const { name } = node as ts.MethodDeclaration;
-                const usesThis = this.withThisScope(
-                    name.kind === ts.SyntaxKind.Identifier ? name.text : undefined,
-                    () => super.visitNode(node),
-                );
-                if (!usesThis
-                        && node.parent!.kind !== ts.SyntaxKind.ObjectLiteralExpression
-                        && this.shouldWarnForModifiers(node as ts.MethodDeclaration)) {
-                    this.addFailureAtNode((node as ts.MethodDeclaration).name, Rule.FAILURE_STRING);
+    public walk(sourceFile: ts.SourceFile) {
+        const cb = (node: ts.Node): void => {
+            if (isMethodDeclaration(node) && !this.isExempt(node)) {
+                // currentScope is always undefined here, so we don't need to save it and just set it to undefined afterwards
+                const scope = this.currentScope = {
+                    isThisUsed: false,
+                    name: getPropertyName(node.name),
+                };
+                ts.forEachChild(node, cb);
+                if (!scope.isThisUsed) {
+                    this.addFailureAtNode(node.name, Rule.FAILURE_STRING);
                 }
-                break;
+                this.currentScope = undefined;
+            } else if (hasOwnThisReference(node)) {
+                const scope = this.currentScope;
+                this.currentScope = undefined;
+                ts.forEachChild(node, cb);
+                this.currentScope = scope;
+            } else if (this.currentScope !== undefined &&
+                       (node.kind === ts.SyntaxKind.ThisKeyword && !isRecursiveCall(node, this.currentScope.name) ||
+                        node.kind === ts.SyntaxKind.SuperKeyword)) {
+                this.currentScope.isThisUsed = true;
+            } else {
+                return ts.forEachChild(node, cb);
+            }
 
-            case ts.SyntaxKind.FunctionDeclaration:
-            case ts.SyntaxKind.FunctionExpression:
-                this.withThisScope(undefined, () => super.visitNode(node));
-                break;
-
-            default:
-                super.visitNode(node);
-        }
+        };
+        return ts.forEachChild(sourceFile, cb);
     }
 
-    private setThisUsed(node: ts.Node) {
-        const cur = this.stack[this.stack.length - 1];
-        if (cur && !isRecursiveCall(node, cur)) {
-            cur.isThisUsed = true;
-        }
-    }
-
-    private withThisScope(name: string | undefined, recur: () => void): boolean {
-        this.stack.push({ name, isThisUsed: false });
-        recur();
-        return this.stack.pop()!.isThisUsed;
-    }
-
-    private shouldWarnForModifiers(node: ts.MethodDeclaration): boolean {
-        if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.StaticKeyword, ts.SyntaxKind.AbstractKeyword)) {
-            return false;
-        }
-        // TODO: Also return false if it's marked "override" (https://github.com/palantir/tslint/pull/2037)
-
-        switch (methodVisibility(node)) {
-            case Visibility.Public:
-                return !this.allowPublic;
-            case Visibility.Protected:
-                return !this.allowProtected;
-            default:
-                return true;
-        }
+    private isExempt(node: ts.MethodDeclaration): boolean {
+        // TODO: handle the override keyword once it lands in the language
+        return node.body === undefined || // exclude abstract methods and overload signatures
+            // exclude object methods
+            node.parent!.kind !== ts.SyntaxKind.ClassDeclaration && node.parent!.kind !== ts.SyntaxKind.ClassExpression ||
+            hasModifier(node.modifiers, ts.SyntaxKind.StaticKeyword) ||
+            this.options.allowProtected && hasModifier(node.modifiers, ts.SyntaxKind.ProtectedKeyword) ||
+            this.options.allowPublic && (hasModifier(node.modifiers, ts.SyntaxKind.PublicKeyword) ||
+                                         !hasModifier(node.modifiers, ts.SyntaxKind.ProtectedKeyword, ts.SyntaxKind.PrivateKeyword));
     }
 }
 
@@ -120,21 +109,8 @@ interface ThisUsed {
     isThisUsed: boolean;
 }
 
-function isRecursiveCall(thisOrSuper: ts.Node, cur: ThisUsed) {
-    const parent = thisOrSuper.parent!;
-    return thisOrSuper.kind === ts.SyntaxKind.ThisKeyword
-        && parent.kind === ts.SyntaxKind.PropertyAccessExpression
-        && (parent as ts.PropertyAccessExpression).name.text === cur.name;
-}
-
-const enum Visibility { Public, Protected, Private }
-
-function methodVisibility(node: ts.MethodDeclaration): Visibility {
-    if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.PrivateKeyword)) {
-        return Visibility.Private;
-    } else if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.ProtectedKeyword)) {
-        return Visibility.Protected;
-    } else {
-        return Visibility.Public;
-    }
+function isRecursiveCall(node: ts.Node, name?: string) {
+    return name !== undefined &&
+        node.parent!.kind === ts.SyntaxKind.PropertyAccessExpression &&
+        (node.parent as ts.PropertyAccessExpression).name.text === name;
 }
