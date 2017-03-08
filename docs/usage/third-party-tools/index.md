@@ -18,6 +18,7 @@ _Note: Most of these tools are not maintained by TSLint._
 * [Webstorm][14]
 * [mocha-tslint][15] ([Mocha][16])
 * [tslint.tmbundle][17] ([TextMate][18])
+* [generator-tslint][19]
 
 
 [0]: https://github.com/palantir/grunt-tslint
@@ -39,3 +40,4 @@ _Note: Most of these tools are not maintained by TSLint._
 [16]: https://mochajs.org/
 [17]: https://github.com/natesilva/tslint.tmbundle
 [18]: https://macromates.com
+[19]: https://github.com/greybax/generator-tslint
