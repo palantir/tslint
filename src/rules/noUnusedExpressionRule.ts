@@ -69,51 +69,53 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "unused expression, expected an assignment or function call";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk, {
+        return this.applyWithWalker(new NoUnusedExpressionWalker(sourceFile, this.ruleName, {
             allowFastNullChecks: this.ruleArguments.indexOf(ALLOW_FAST_NULL_CHECKS) !== -1,
             allowNew: this.ruleArguments.indexOf(ALLOW_NEW) !== -1,
             allowTaggedTemplate: this.ruleArguments.indexOf(ALLOW_TAGGED_TEMPLATE) !== -1,
-        });
+        }));
     }
 }
 
-function walk(ctx: Lint.WalkContext<Options>) {
-    return ts.forEachChild(ctx.sourceFile, cb);
-    function cb(node: ts.Node): void {
-        if (isExpressionStatement(node)) {
-            if (!isDirective(node) && isUnusedExpression(node.expression)) {
-                addFailure(node);
-            }
-        } else if (isVoidExpression(node)) {
-            // allow `void 0`
-            if (!isLiteralZero(node.expression) && isUnusedExpression(node.expression)) {
-                addFailure(node.expression);
-            }
-        } else if (isBinaryExpression(node)) {
-            if (node.operatorToken.kind === ts.SyntaxKind.CommaToken) {
-                // allow indirect eval: `(0, eval)("code");`
-                if (!isIndirectEval(node) && isUnusedExpression(node.left)) {
-                    addFailure(node.left);
+class NoUnusedExpressionWalker extends Lint.AbstractWalker<Options> {
+    public walk(sourceFile: ts.SourceFile) {
+        const cb = (node: ts.Node): void => {
+            if (isExpressionStatement(node)) {
+                if (!isDirective(node) && this.isUnusedExpression(node.expression)) {
+                    this.reportFailure(node);
+                }
+            } else if (isVoidExpression(node)) {
+                // allow `void 0`
+                if (!isLiteralZero(node.expression) && this.isUnusedExpression(node.expression)) {
+                    this.reportFailure(node.expression);
+                }
+            } else if (isBinaryExpression(node)) {
+                if (node.operatorToken.kind === ts.SyntaxKind.CommaToken) {
+                    // allow indirect eval: `(0, eval)("code");`
+                    if (!isIndirectEval(node) && this.isUnusedExpression(node.left)) {
+                        this.reportFailure(node.left);
+                    }
                 }
             }
-        }
-        return ts.forEachChild(node, cb);
+            return ts.forEachChild(node, cb);
+        };
+        return ts.forEachChild(sourceFile, cb);
     }
 
-    function addFailure(node: ts.Node) {
-        const start = node.getStart(ctx.sourceFile);
+    private reportFailure(node: ts.Node) {
+        const start = node.getStart(this.sourceFile);
         const end = node.end;
         // don't add a new failure if it is contained in another failure's span
-        for (const failure of ctx.failures) {
+        for (const failure of this.failures) {
             if (failure.getStartPosition().getPosition() <= start &&
                 failure.getEndPosition().getPosition() >= end) {
                 return;
             }
         }
-        ctx.addFailure(start, end, Rule.FAILURE_STRING);
+        this.addFailure(start, end, Rule.FAILURE_STRING);
     }
 
-    function isUnusedExpression(expression: ts.Expression): boolean {
+    private isUnusedExpression(expression: ts.Expression): boolean {
         expression = unwrapParentheses(expression);
         switch (expression.kind) {
             case ts.SyntaxKind.CallExpression:
@@ -123,9 +125,9 @@ function walk(ctx: Lint.WalkContext<Options>) {
             case ts.SyntaxKind.PostfixUnaryExpression:
                 return false;
             case ts.SyntaxKind.NewExpression:
-                return !ctx.options.allowNew;
+                return !this.options.allowNew;
             case ts.SyntaxKind.TaggedTemplateExpression:
-                return !ctx.options.allowTaggedTemplate;
+                return !this.options.allowTaggedTemplate;
             default:
         }
         if (isPrefixUnaryExpression(expression) &&
@@ -133,18 +135,18 @@ function walk(ctx: Lint.WalkContext<Options>) {
             return false;
         }
         if (isConditionalExpression(expression)) {
-            return isUnusedExpression(expression.whenTrue) || isUnusedExpression(expression.whenFalse);
+            return this.isUnusedExpression(expression.whenTrue) || this.isUnusedExpression(expression.whenFalse);
         }
         if (isBinaryExpression(expression)) {
             const operatorKind = expression.operatorToken.kind;
             if (isAssignmentKind(operatorKind)) {
                 return false;
             }
-            if (ctx.options.allowFastNullChecks &&
+            if (this.options.allowFastNullChecks &&
                 (operatorKind === ts.SyntaxKind.AmpersandAmpersandToken || operatorKind === ts.SyntaxKind.BarBarToken)) {
-                return isUnusedExpression(expression.right);
+                return this.isUnusedExpression(expression.right);
             } else if (operatorKind === ts.SyntaxKind.CommaToken) {
-                return isUnusedExpression(expression.left) || isUnusedExpression(expression.right);
+                return this.isUnusedExpression(expression.left) || this.isUnusedExpression(expression.right);
             }
         }
         return true;
