@@ -85,7 +85,6 @@ export const rules = {
     "no-trailing-whitespace": true,
     "no-unsafe-finally": true,
     "no-unused-expression": true,
-    "no-unused-new": true,
     // disable this rule as it is very heavy performance-wise and not that useful
     "no-use-before-declare": false,
     "no-var-keyword": true,
@@ -217,7 +216,6 @@ export const jsRules = {
     "no-switch-case-fall-through": false,
     "no-trailing-whitespace": true,
     "no-unused-expression": true,
-    "no-unused-new": true,
     // disable this rule as it is very heavy performance-wise and not that useful
     "no-use-before-declare": false,
     "object-literal-sort-keys": true,
