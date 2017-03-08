@@ -73,12 +73,7 @@ interface ITest {
     bar: number
     qux: string,
     baz: boolean
-    literal: {
-        foo,
-        bar
-        baz
-    }
-}
+    bas: never}
 
 import {Router} from 'aurelia-router'
 

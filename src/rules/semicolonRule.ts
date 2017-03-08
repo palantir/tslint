@@ -24,13 +24,11 @@ const OPTION_ALWAYS = "always";
 const OPTION_NEVER = "never";
 const OPTION_IGNORE_BOUND_CLASS_METHODS = "ignore-bound-class-methods";
 const OPTION_IGNORE_INTERFACES = "ignore-interfaces";
-const OPTION_IGNORE_TYPE_LITERALS = "ignore-type-literals";
 
 interface Options {
     always: boolean;
     boundClassMethods: boolean;
     interfaces: boolean;
-    typeLiterals: boolean;
 }
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -48,7 +46,6 @@ export class Rule extends Lint.Rules.AbstractRule {
             The following arguments may be optionally provided:
 
             * \`"${OPTION_IGNORE_INTERFACES}"\` skips checking semicolons at the end of interface members.
-            * \`"${OPTION_IGNORE_TYPE_LITERALS}"\` skips checking semicolons at the end of type literal members.
             * \`"${OPTION_IGNORE_BOUND_CLASS_METHODS}"\` skips checking semicolons at the end of bound class methods.`,
         options: {
             type: "array",
@@ -58,9 +55,6 @@ export class Rule extends Lint.Rules.AbstractRule {
             }, {
                 type: "string",
                 enum: [OPTION_IGNORE_INTERFACES],
-            }, {
-                type: "string",
-                enum: [OPTION_IGNORE_TYPE_LITERALS],
             }],
             additionalItems: false,
         },
@@ -69,7 +63,6 @@ export class Rule extends Lint.Rules.AbstractRule {
             `[true, "${OPTION_NEVER}"]`,
             `[true, "${OPTION_ALWAYS}", "${OPTION_IGNORE_INTERFACES}"]`,
             `[true, "${OPTION_ALWAYS}", "${OPTION_IGNORE_BOUND_CLASS_METHODS}"]`,
-            `[true, "${OPTION_ALWAYS}", "${OPTION_IGNORE_TYPE_LITERALS}"]`,
         ],
         type: "style",
         typescriptOnly: false,
@@ -85,7 +78,6 @@ export class Rule extends Lint.Rules.AbstractRule {
             always: this.ruleArguments.indexOf(OPTION_NEVER) === -1,
             boundClassMethods: this.ruleArguments.indexOf(OPTION_IGNORE_BOUND_CLASS_METHODS) === -1,
             interfaces: this.ruleArguments.indexOf(OPTION_IGNORE_INTERFACES) === -1,
-            typeLiterals: this.ruleArguments.indexOf(OPTION_IGNORE_TYPE_LITERALS) === -1,
         };
         return this.applyWithWalker(new SemicolonWalker(sourceFile, this.ruleName, options));
     }
@@ -124,12 +116,7 @@ class SemicolonWalker extends Lint.AbstractWalker<Options> {
                     break;
                 case ts.SyntaxKind.InterfaceDeclaration:
                     if (this.options.interfaces) {
-                        this.checkInterfaceOrTypeLiteral(node as ts.InterfaceDeclaration);
-                    }
-                    break;
-                case ts.SyntaxKind.TypeLiteral:
-                    if (this.options.typeLiterals) {
-                        this.checkInterfaceOrTypeLiteral(node as ts.TypeLiteralNode);
+                        this.checkInterface(node as ts.InterfaceDeclaration);
                     }
                     break;
                 case ts.SyntaxKind.SemicolonClassElement:
@@ -190,7 +177,7 @@ class SemicolonWalker extends Lint.AbstractWalker<Options> {
         }
     }
 
-    private checkInterfaceOrTypeLiteral(node: ts.InterfaceDeclaration | ts.TypeLiteralNode) {
+    private checkInterface(node: ts.InterfaceDeclaration) {
         for (const member of node.members) {
             const lastChar = this.sourceFile.text[member.end - 1];
             const hasSemicolon = lastChar === ";";
@@ -202,7 +189,8 @@ class SemicolonWalker extends Lint.AbstractWalker<Options> {
                 } else {
                     this.reportMissing(member.end);
                 }
-            } else if (!this.options.always && hasSemicolon && this.isFollowedByLineBreak(member.end)) {
+            } else if (!this.options.always && hasSemicolon &&
+                       (member === node.members[node.members.length - 1] || this.isFollowedByLineBreak(member.end))) {
                 this.reportUnnecessary(member.end - 1);
             }
         }

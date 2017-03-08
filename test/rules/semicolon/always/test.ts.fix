@@ -75,11 +75,6 @@ interface ITest {
     qux: string; // handles comment
     baz: boolean;
     readonly raz: number;
-    literal: {
-        foo;
-        bar;
-        baz;
-    };
 }
 
 import {Router} from 'aurelia-router';

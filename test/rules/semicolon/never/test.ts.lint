@@ -104,13 +104,8 @@ interface ITest {
                ~ [Unnecessary semicolon]
     qux: string,
     baz: boolean
-    literal: {
-        foo,
-        bar;
-           ~ [Unnecessary semicolon]
-        baz
-    }
-}
+    bas: never;}
+              ~ [Unnecessary semicolon]
 
 import {Router} from 'aurelia-router'
 

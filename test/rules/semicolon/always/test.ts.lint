@@ -103,13 +103,6 @@ interface ITest {
                ~ [Properties should be separated by semicolons]
     baz: boolean;
     readonly raz: number;
-    literal: {
-        foo,
-           ~ [Properties should be separated by semicolons]
-        bar;
-        baz
-           ~nil [Missing semicolon]
-    };
 }
 
 import {Router} from 'aurelia-router';
