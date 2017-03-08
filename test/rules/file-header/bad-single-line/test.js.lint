@@ -1,7 +1,5 @@
-/*
+// Bad header 1
 ~nil [missing file header]
- * Bad header 1
- */
 
 export class A {
     x = 1;

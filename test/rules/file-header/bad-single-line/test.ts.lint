@@ -1,12 +1,10 @@
-/*
+// Bad header 1
 ~nil [missing file header]
- * Bad header 1
- */
 
 export class A {
-    x = 1;
+    public x = 1;
 
-    B() {
+    public B() {
         return 2;
     }
 }
