@@ -1,3 +1,6 @@
+declare module "*";
+                  ~ [Unnecessary semicolon]
+declare module "foo" {}
 var x = 3;
          ~ [Unnecessary semicolon]
 a += b;

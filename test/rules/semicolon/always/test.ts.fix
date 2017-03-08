@@ -1,3 +1,5 @@
+declare module "*";
+declare module "foo" {}
 var x = 3;
 a += b;
 

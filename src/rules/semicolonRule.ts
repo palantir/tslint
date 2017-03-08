@@ -105,6 +105,12 @@ class SemicolonWalker extends Lint.AbstractWalker<Options> {
                 case ts.SyntaxKind.DebuggerStatement:
                     this.checkSemicolonOrLineBreak(node);
                     break;
+                case ts.SyntaxKind.ModuleDeclaration:
+                    // shorthand module declaration
+                    if ((node as ts.ModuleDeclaration).body === undefined) {
+                        this.checkSemicolonOrLineBreak(node);
+                    }
+                    break;
                 case ts.SyntaxKind.PropertyDeclaration:
                     this.visitPropertyDeclaration(node as ts.PropertyDeclaration);
                     break;

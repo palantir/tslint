@@ -1,3 +1,6 @@
+declare module "*"
+                  ~nil [Missing semicolon]
+declare module "foo" {}
 var x = 3
          ~nil [Missing semicolon]
 a += b
