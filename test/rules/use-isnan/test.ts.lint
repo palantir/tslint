@@ -39,6 +39,10 @@ x = x >> NaN;
 x = NaN >>> x;
 x = x & NaN;
 
+// no violation for other operators
+if (x instanceof NaN) { }
+if (NaN in x) { }
+
 // do not use equality operators to compare for NaN
 if (foo == NaN) {  }
     ~~~~~~~~~~         [Found an invalid comparison for NaN: foo == NaN]
