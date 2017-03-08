@@ -56,13 +56,13 @@ class UseIsnanRuleWalker extends Lint.RuleWalker {
     }
 
     private isComparisonOperator(operator: ts.BinaryOperator) {
-        return (operator == ts.SyntaxKind.LessThanToken
-            || operator == ts.SyntaxKind.GreaterThanToken
-            || operator == ts.SyntaxKind.LessThanEqualsToken
-            || operator == ts.SyntaxKind.GreaterThanEqualsToken
-            || operator == ts.SyntaxKind.EqualsEqualsToken
-            || operator == ts.SyntaxKind.ExclamationEqualsToken
-            || operator == ts.SyntaxKind.EqualsEqualsEqualsToken
-            || operator == ts.SyntaxKind.ExclamationEqualsEqualsToken);
+        return (operator === ts.SyntaxKind.LessThanToken
+            || operator === ts.SyntaxKind.GreaterThanToken
+            || operator === ts.SyntaxKind.LessThanEqualsToken
+            || operator === ts.SyntaxKind.GreaterThanEqualsToken
+            || operator === ts.SyntaxKind.EqualsEqualsToken
+            || operator === ts.SyntaxKind.ExclamationEqualsToken
+            || operator === ts.SyntaxKind.EqualsEqualsEqualsToken
+            || operator === ts.SyntaxKind.ExclamationEqualsEqualsToken);
     }
 }
