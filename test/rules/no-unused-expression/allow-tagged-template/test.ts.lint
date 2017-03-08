@@ -190,6 +190,5 @@ let a = [(3 + 4), ((1 + 1, 8) * 4)];
 `foo`;
 ~~~~~~ [0]
 foo`bar`;
-~~~~~~~~~ [0]
 
 [0]: unused expression, expected an assignment or function call

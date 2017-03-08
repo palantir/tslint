@@ -25,11 +25,13 @@ import * as Lint from "../index";
 import { unwrapParentheses } from "../language/utils";
 
 const ALLOW_FAST_NULL_CHECKS = "allow-fast-null-checks";
-const ALLOW_NEW_SIDE_EFFECTS = "allow-new-side-effects";
+const ALLOW_NEW = "allow-new";
+const ALLOW_TAGGED_TEMPLATE = "allow-tagged-template";
 
 interface Options {
     allowFastNullChecks: boolean;
-    allowNewSideEffects: boolean;
+    allowNew: boolean;
+    allowTaggedTemplate: boolean;
 }
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -47,7 +49,8 @@ export class Rule extends Lint.Rules.AbstractRule {
 
             * \`${ALLOW_FAST_NULL_CHECKS}\` allows to use logical operators to perform fast null checks and perform
             method or function calls for side effects (e.g. \`e && e.preventDefault()\`).
-            * \`${ALLOW_NEW_SIDE_EFFECTS}\` allows 'new' expressions for side effects (e.g. \`new ModifyGlobalState();\`.`,
+            * \`${ALLOW_NEW}\` allows 'new' expressions for side effects (e.g. \`new ModifyGlobalState();\`.
+            * \`${ALLOW_TAGGED_TEMPLATE}\` allows tagged templates for side effects (e.g. \`this.add\\\`foo\\\`;\`.`,
         options: {
             type: "array",
             items: {
@@ -68,7 +71,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk, {
             allowFastNullChecks: this.ruleArguments.indexOf(ALLOW_FAST_NULL_CHECKS) !== -1,
-            allowNewSideEffects: this.ruleArguments.indexOf(ALLOW_NEW_SIDE_EFFECTS) !== -1,
+            allowNew: this.ruleArguments.indexOf(ALLOW_NEW) !== -1,
+            allowTaggedTemplate: this.ruleArguments.indexOf(ALLOW_TAGGED_TEMPLATE) !== -1,
         });
     }
 }
@@ -119,7 +123,9 @@ function walk(ctx: Lint.WalkContext<Options>) {
             case ts.SyntaxKind.PostfixUnaryExpression:
                 return false;
             case ts.SyntaxKind.NewExpression:
-                return !ctx.options.allowNewSideEffects;
+                return !ctx.options.allowNew;
+            case ts.SyntaxKind.TaggedTemplateExpression:
+                return !ctx.options.allowTaggedTemplate;
             default:
         }
         if (isPrefixUnaryExpression(expression) &&

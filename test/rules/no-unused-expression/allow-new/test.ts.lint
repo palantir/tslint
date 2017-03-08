@@ -87,7 +87,8 @@ async function f(foo: Promise<void>): Promise<number> {
 }
 
 new Foo();
-~~~~~~~~~~ [0]
+
+bar.foo || (bar.foo = new Foo());
 
 // invalid code:
 
@@ -118,17 +119,14 @@ a => fun2(a);
 
 afterEach((el) => {
    el && el.remove();
-   ~~~~~~~~~~~~~~~~~~ [0]
 });
 
 checkParams((a, b) => {
    (a || required('a')) && (b || required('b'));
-   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
 });
 
 checkParams((a, b) => {
    ((a && b) || required('a, b'));
-   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
 });
 
 function interactionHandler(e) {
@@ -143,53 +141,5 @@ if (foo)
 else
     var1 = 2, var2;
     ~~~~~~~~~~~~~~~ [0]
-
-(0,eval)('"foobar";');
-(foo,eval)('"foobar";');
- ~~~ [0]
-(foo(),eval)('"foobar";');
-(0, 1, eval)('"foobar";');
- ~~~~ [0]
-(1, eval)('"foobar";');
- ~ [0]
-(0, foo)('"foobar":');
- ~ [0]
-var2 = (0, 1, 2);
-        ~~~~ [0]
-(0, 1, 2);
-~~~~~~~~~~ [0]
-
-var1 = void 0;
-var1 = void 1;
-            ~ [0]
-var1 = void foo;
-            ~~~ [0]
-var1 = void foo === bar;
-            ~~~ [0]
-
-var1 = void (foo === bar);
-            ~~~~~~~~~~~~~ [0]
-var1 = void (foo = bar);
-var1 = void foo.bar;
-            ~~~~~~~ [0]
-var1 = void foo();
-
-switch(l) {
-  case 0, 1:
-       ~ [0]
-    return 'zero or one';
-  default:
-    return 'more than one';
-}
-
-let x = Math.pow((3, 5));
-                  ~ [0]
-let a = [(3 + 4), ((1 + 1, 8) * 4)];
-                    ~~~~~ [0]
-
-`foo`;
-~~~~~~ [0]
-foo`bar`;
-~~~~~~~~~ [0]
 
 [0]: unused expression, expected an assignment or function call
