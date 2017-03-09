@@ -43,6 +43,7 @@ export interface TestOutput {
 
 export interface SkippedTest {
     skipped: true;
+    requirement: string;
 }
 
 export interface TestResult {
@@ -87,9 +88,12 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
         let fileText = fs.readFileSync(fileToLint, "utf8");
         const tsVersionRequirement = parse.getTypescriptVersionRequirement(fileText);
         if (tsVersionRequirement) {
-            if (!semver.satisfies(ts.version, tsVersionRequirement)) {
+            const tsVersion = new semver.SemVer(ts.version);
+            // remove prerelease suffix when matching to allow testing with nightly builds
+            if (!semver.satisfies(`${tsVersion.major}.${tsVersion.minor}.${tsVersion.patch}`, tsVersionRequirement)) {
                 results.results[fileToLint] = {
-                    skipped : true,
+                    requirement: tsVersionRequirement,
+                    skipped: true,
                 };
                 continue;
             }
@@ -213,7 +217,7 @@ export function consoleTestResultHandler(testResult: TestResult): boolean {
 
         /* tslint:disable:no-console */
         if (results.skipped) {
-            console.log(colors.yellow(" Skipped"));
+            console.log(colors.yellow(` Skipped, requires typescript ${results.requirement}`));
         } else {
             const markupDiffResults = diff.diffLines(results.markupFromMarkup, results.markupFromLinter);
             const fixesDiffResults = diff.diffLines(results.fixesFromLinter, results.fixesFromMarkup);

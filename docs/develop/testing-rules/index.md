@@ -99,7 +99,18 @@ Again, we can run `grunt test` to make sure our rule is producing the output we 
 
 ##### Typescript version requirement #####
 
-Sometimes a rule requires a minimum version of the typescript compiler. To skip
+Sometimes a rule requires a minimum version of the typescript compiler or your test contains syntax that older versions of the typescript parser cannot handle.
+When testing with multiple versions of typescript - like `tslint` does in CI - those tests will fail.
+
+To avoid failing tests, each test file can specify a version requirement for typescript **in the first line**. If you don't specify one, the test will always be executed.
+
+Example:
+```
+[typescript]: >= 2.1.0
+```
+
+The syntax should look familiar, because it is basically the shorthand syntax from the chapter above. It needs to start with `[typescript]:`.
+The following part can be any [version range](https://github.com/npm/node-semver#ranges). The prerelease suffix will be removed before matching to allow testing with nightly builds.
 
 ### Tips & Tricks ###
 
