@@ -112,35 +112,30 @@ export class Runner {
     public run(onComplete: (status: number) => void) {
         if (this.options.version) {
             this.outputStream.write(Linter.VERSION + "\n");
-            onComplete(0);
-            return;
+            return onComplete(0);
         }
 
         if (this.options.init) {
             if (fs.existsSync(CONFIG_FILENAME)) {
                 console.error(`Cannot generate ${CONFIG_FILENAME}: file already exists`);
-                onComplete(1);
-                return;
+                return onComplete(1);
             }
 
             const tslintJSON = JSON.stringify(DEFAULT_CONFIG, undefined, "    ");
             fs.writeFileSync(CONFIG_FILENAME, tslintJSON);
-            onComplete(0);
-            return;
+            return onComplete(0);
         }
 
         if (this.options.test) {
-            const results = runTests(this.options.test, this.options.rulesDirectory);
+            const results = runTests((this.options.files || []).map(Runner.trimSingleQuotes), this.options.rulesDirectory);
             const didAllTestsPass = consoleTestResultsHandler(results);
-            onComplete(didAllTestsPass ? 0 : 1);
-            return;
+            return onComplete(didAllTestsPass ? 0 : 1);
         }
 
         // when provided, it should point to an existing location
         if (this.options.config && !fs.existsSync(this.options.config)) {
             console.error("Invalid option for configuration: " + this.options.config);
-            onComplete(1);
-            return;
+            return onComplete(1);
         }
 
         // if both files and tsconfig are present, use files
@@ -150,8 +145,7 @@ export class Runner {
         if (this.options.project != null) {
             if (!fs.existsSync(this.options.project)) {
                 console.error("Invalid option for project: " + this.options.project);
-                onComplete(1);
-                return;
+                return onComplete(1);
             }
             program = Linter.createProgram(this.options.project, path.dirname(this.options.project));
             if (files.length === 0) {
@@ -171,12 +165,16 @@ export class Runner {
                         message += " " + ts.flattenDiagnosticMessageText(diag.messageText, "\n");
                         return message;
                     });
-                    throw new Error(messages.join("\n"));
+                    console.error(messages.join("\n"));
+                    return onComplete(this.options.force ? 0 : 1);
                 }
             } else {
                 // if not type checking, we don't need to pass in a program object
                 program = undefined;
             }
+        } else if (this.options.typeCheck) {
+            console.error("--project must be specified in order to enable type checking.");
+            return onComplete(1);
         }
 
         let ignorePatterns: string[] = [];
@@ -197,7 +195,7 @@ export class Runner {
         } catch (error) {
             if (error.name === FatalError.NAME) {
                 console.error(error.message);
-                onComplete(1);
+                return onComplete(1);
             }
             // rethrow unhandled error
             throw error;
@@ -215,26 +213,26 @@ export class Runner {
 
         let lastFolder: string | undefined;
         let configFile: IConfigurationFile | undefined;
+        const buffer = Buffer.allocUnsafe(256);
         for (const file of files) {
             if (!fs.existsSync(file)) {
                 console.error(`Unable to open file: ${file}`);
-                onComplete(1);
-                return;
+                return onComplete(1);
             }
 
-            const buffer = new Buffer(256);
             buffer.fill(0);
             const fd = fs.openSync(file, "r");
             try {
                 fs.readSync(fd, buffer, 0, 256, 0);
-                if (buffer.readInt8(0) === 0x47 && buffer.readInt8(188) === 0x47) {
+                if (buffer.readInt8(0, true) === 0x47 && buffer.readInt8(188, true) === 0x47) {
                     // MPEG transport streams use the '.ts' file extension. They use 0x47 as the frame
                     // separator, repeating every 188 bytes. It is unlikely to find that pattern in
                     // TypeScript source, so tslint ignores files with the specific pattern.
                     console.warn(`${file}: ignoring MPEG transport stream`);
-                    return;
+                    fs.closeSync(fd);
+                    continue;
                 }
-            } finally {
+            } catch (e) {
                 fs.closeSync(fd);
             }
 
