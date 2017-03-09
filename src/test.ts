@@ -20,6 +20,7 @@ import * as diff from "diff";
 import * as fs from "fs";
 import * as glob from "glob";
 import * as path from "path";
+import * as semver from "semver";
 import * as ts from "typescript";
 
 import {Fix} from "./language/rule/rule";
@@ -30,17 +31,24 @@ import * as parse from "./test/parse";
 const MARKUP_FILE_EXTENSION = ".lint";
 const FIXES_FILE_EXTENSION = ".fix";
 
+export interface TestOutput {
+    skipped: false;
+    errorsFromLinter: LintError[];
+    errorsFromMarkup: LintError[];
+    fixesFromLinter: string;
+    fixesFromMarkup: string;
+    markupFromLinter: string;
+    markupFromMarkup: string;
+}
+
+export interface SkippedTest {
+    skipped: true;
+}
+
 export interface TestResult {
     directory: string;
     results: {
-        [fileName: string]: {
-            errorsFromLinter: LintError[];
-            errorsFromMarkup: LintError[];
-            fixesFromLinter: string;
-            fixesFromMarkup: string;
-            markupFromLinter: string;
-            markupFromMarkup: string;
-        },
+        [fileName: string]: TestOutput | SkippedTest,
     };
 }
 
@@ -76,7 +84,23 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
     for (const fileToLint of filesToLint) {
         const fileBasename = path.basename(fileToLint, MARKUP_FILE_EXTENSION);
         const fileCompileName = fileBasename.replace(/\.lint$/, "");
-        const fileText = fs.readFileSync(fileToLint, "utf8");
+        let fileText = fs.readFileSync(fileToLint, "utf8");
+        const tsVersionRequirement = parse.getTypescriptVersionRequirement(fileText);
+        if (tsVersionRequirement) {
+            if (!semver.satisfies(ts.version, tsVersionRequirement)) {
+                results.results[fileToLint] = {
+                    skipped : true,
+                };
+                continue;
+            }
+            // remove the first line from the file before continuing
+            const lineBreak = fileText.search(/\n/);
+            if (lineBreak === -1) {
+                fileText = "";
+            } else {
+                fileText = fileText.substr(lineBreak + 1);
+            }
+        }
         const fileTextWithoutMarkup = parse.removeErrorMarkup(fileText);
         const errorsFromMarkup = parse.parseErrorsFromMarkup(fileText);
 
@@ -161,6 +185,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
             fixesFromMarkup: fixedFileText,
             markupFromLinter: parse.createMarkupFromErrors(fileTextWithoutMarkup, errorsFromMarkup),
             markupFromMarkup: parse.createMarkupFromErrors(fileTextWithoutMarkup, errorsFromLinter),
+            skipped: false,
         };
     }
 
@@ -186,22 +211,26 @@ export function consoleTestResultHandler(testResult: TestResult): boolean {
         const results = testResult.results[fileName];
         process.stdout.write(`${fileName}:`);
 
-        const markupDiffResults = diff.diffLines(results.markupFromMarkup, results.markupFromLinter);
-        const fixesDiffResults = diff.diffLines(results.fixesFromLinter, results.fixesFromMarkup);
-        const didMarkupTestPass = !markupDiffResults.some((diff) => !!diff.added || !!diff.removed);
-        const didFixesTestPass = !fixesDiffResults.some((diff) => !!diff.added || !!diff.removed);
-
         /* tslint:disable:no-console */
-        if (didMarkupTestPass && didFixesTestPass) {
-            console.log(colors.green(" Passed"));
+        if (results.skipped) {
+            console.log(colors.yellow(" Skipped"));
         } else {
-            console.log(colors.red(" Failed!"));
-            didAllTestsPass = false;
-            if (!didMarkupTestPass) {
-                displayDiffResults(markupDiffResults, MARKUP_FILE_EXTENSION);
-            }
-            if (!didFixesTestPass) {
-                displayDiffResults(fixesDiffResults, FIXES_FILE_EXTENSION);
+            const markupDiffResults = diff.diffLines(results.markupFromMarkup, results.markupFromLinter);
+            const fixesDiffResults = diff.diffLines(results.fixesFromLinter, results.fixesFromMarkup);
+            const didMarkupTestPass = !markupDiffResults.some((diff) => !!diff.added || !!diff.removed);
+            const didFixesTestPass = !fixesDiffResults.some((diff) => !!diff.added || !!diff.removed);
+
+            if (didMarkupTestPass && didFixesTestPass) {
+                console.log(colors.green(" Passed"));
+            } else {
+                console.log(colors.red(" Failed!"));
+                didAllTestsPass = false;
+                if (!didMarkupTestPass) {
+                    displayDiffResults(markupDiffResults, MARKUP_FILE_EXTENSION);
+                }
+                if (!didFixesTestPass) {
+                    displayDiffResults(fixesDiffResults, FIXES_FILE_EXTENSION);
+                }
             }
         }
         /* tslint:enable:no-console */

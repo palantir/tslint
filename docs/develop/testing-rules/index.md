@@ -97,6 +97,9 @@ Then, at the bottom of our test file, we specify what full message each shortcut
 
 Again, we can run `grunt test` to make sure our rule is producing the output we expect. If it isn't we'll see the difference between the output from the rule and the output we marked.
 
+##### Typescript version requirement #####
+
+Sometimes a rule requires a minimum version of the typescript compiler. To skip
 
 ### Tips & Tricks ###
 
