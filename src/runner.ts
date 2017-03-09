@@ -213,14 +213,13 @@ export class Runner {
 
         let lastFolder: string | undefined;
         let configFile: IConfigurationFile | undefined;
-        const buffer = Buffer.allocUnsafe(256);
         for (const file of files) {
             if (!fs.existsSync(file)) {
                 console.error(`Unable to open file: ${file}`);
                 return onComplete(1);
             }
 
-            buffer.fill(0);
+            const buffer = new Buffer(256);
             const fd = fs.openSync(file, "r");
             try {
                 fs.readSync(fd, buffer, 0, 256, 0);
