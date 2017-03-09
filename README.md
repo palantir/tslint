@@ -123,7 +123,7 @@ Options:
 -h, --help            display detailed help
 -i, --init            generate a tslint.json config file in the current working directory
 -o, --out             output file
---project             tsconfig.json file
+-p, --project         tsconfig.json file
 -r, --rules-dir       rules directory
 -s, --formatters-dir  formatters directory
 -t, --format          output format (prose, json, stylish, verbose, pmd, msbuild, checkstyle, vso, fileslist)  [default: "prose"]
@@ -200,7 +200,7 @@ tslint accepts the following command-line options:
     the tests. See the full tslint documentation for more details on how
     this can be used to test custom rules.
 
---project:
+-p, --project:
     The location of a tsconfig.json file that will be used to determine which
     files will be linted.
 
