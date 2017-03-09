@@ -210,6 +210,15 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                 done();
             });
         });
+
+        it("can be used with multiple paths", (done) => {
+            // pass a failing test as second path to make sure it gets executed
+            execCli(["--test", "test/files/custom-rule-rule-test", "test/files/incorrect-fixes-test"], (err) => {
+                assert.isNotNull(err, "process should exit with error");
+                assert.strictEqual(err.code, 1, "error code should be 1");
+                done();
+            });
+        });
     });
 
     describe("tsconfig.json", () => {
@@ -230,11 +239,21 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
         });
 
         it("exits with code 0 if `tsconfig.json` is passed but it includes no ts files", (done) => {
-            execCli(["-c", "test/files/tsconfig-no-ts-files/tslint.json", "--project", "test/files/tsconfig-no-ts-files/tsconfig.json"],
+            execCli(["-c", "test/files/tsconfig-no-ts-files/tslint.json", "-p", "test/files/tsconfig-no-ts-files/tsconfig.json"],
                 (err) => {
                     assert.isNull(err, "process should exit without an error");
                     done();
                 });
+        });
+    });
+
+    describe("--type-check", () => {
+        it("exits with code 1 if --project is not passed", (done) => {
+            execCli(["--type-check"], (err) => {
+                assert.isNotNull(err, "process should exit with error");
+                assert.strictEqual(err.code, 2, "error code should be 2");
+                done();
+            });
         });
     });
 
