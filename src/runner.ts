@@ -228,10 +228,9 @@ export class Runner {
                     // separator, repeating every 188 bytes. It is unlikely to find that pattern in
                     // TypeScript source, so tslint ignores files with the specific pattern.
                     console.warn(`${file}: ignoring MPEG transport stream`);
-                    fs.closeSync(fd);
                     continue;
                 }
-            } catch (e) {
+            } finally {
                 fs.closeSync(fd);
             }
 
