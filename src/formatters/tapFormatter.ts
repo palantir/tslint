@@ -71,7 +71,7 @@ export class Formatter extends AbstractFormatter {
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
 
             return Utils.dedent`
-                not ok ${String(i+ 1)} - ${failureMessage}
+                not ok ${String(i + 1)} - ${failureMessage}
                   ---
                   message : ${failureMessage}
                   severity: ${failureSeverity}
