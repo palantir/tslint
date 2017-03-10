@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import * as utils from "tsutils";
+import { getPreviousStatement } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -33,46 +33,51 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY() {
-        return "Missing blank line before return";
-    }
+    public static FAILURE_STRING = "Missing blank line before return";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NewlineBeforeReturnWalker(sourceFile, this.getOptions()));
+        return this.applyWithWalker(new NewlineBeforeReturnWalker(sourceFile, this.ruleName, undefined));
     }
 }
 
-class NewlineBeforeReturnWalker extends Lint.RuleWalker {
+class NewlineBeforeReturnWalker extends Lint.AbstractWalker<void> {
+    public walk(sourceFile: ts.SourceFile) {
+        const cb = (node: ts.Node): void => {
+            if (node.kind === ts.SyntaxKind.ReturnStatement) {
+                this.visitReturnStatement(node as ts.ReturnStatement);
+            }
+            return ts.forEachChild(node, cb);
+        };
+        return ts.forEachChild(sourceFile, cb);
+    }
 
-    public visitReturnStatement(node: ts.ReturnStatement) {
-        super.visitReturnStatement(node);
-
-        const parent = node.parent!;
-        if (!utils.isBlockLike(parent)) {
-            // `node` is the only statement within this "block scope". No need to do any further validation.
+    private visitReturnStatement(node: ts.ReturnStatement) {
+        const prev = getPreviousStatement(node);
+        if (prev === undefined) {
+            // return is not within a block (e.g. the only child of an IfStatement) or the first statement of the block
+            // no need to check for preceding newline
             return;
         }
 
-        const index = parent.statements.indexOf(node as ts.Statement);
-        if (index === 0) {
-            // First element in the block so no need to check for the blank line.
-            return;
-        }
-
-        let start = node.getStart();
-        const comments = ts.getLeadingCommentRanges(this.getSourceFile().text, node.getFullStart());
+        let start = node.getStart(this.sourceFile);
+        let line = ts.getLineAndCharacterOfPosition(this.sourceFile, start).line;
+        const comments = ts.getLeadingCommentRanges(this.sourceFile.text, node.pos);
         if (comments) {
-            // In case the return statement is preceded by a comment, we use comments start as the starting position
-            start = comments[0].pos;
+            // check for blank lines between comments
+            for (let i = comments.length - 1; i >= 0; --i) {
+                const endLine = ts.getLineAndCharacterOfPosition(this.sourceFile, comments[i].end).line;
+                if (endLine < line - 1) {
+                    return;
+                }
+                start = comments[i].pos;
+                line = ts.getLineAndCharacterOfPosition(this.sourceFile, start).line;
+            }
         }
-        const lc = this.getLineAndCharacterOfPosition(start);
+        const prevLine = ts.getLineAndCharacterOfPosition(this.sourceFile, prev.end).line;
 
-        const prev = parent.statements[index - 1];
-        const prevLine = this.getLineAndCharacterOfPosition(prev.getEnd()).line;
-
-        if (prevLine >= lc.line - 1) {
+        if (prevLine >= line - 1) {
             // Previous statement is on the same or previous line
-            this.addFailureFromStartToEnd(start, start, Rule.FAILURE_STRING_FACTORY());
+            this.addFailure(start, start, Rule.FAILURE_STRING);
         }
     }
 }

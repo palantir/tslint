@@ -42,6 +42,21 @@ class C {
 
     [Symbol.iterator]() {}
     ~~~~~~~~~~~~~~~~~ [0]
+
+    thisType(foo: this): this {
+    ~~~~~~~~ [0]
+        return foo;
+    }
+
+    overload(): void;
+    overload(foo): void;
+    overload(foo?): void {
+        return this;
+    }
+}
+
+abstract class C2 {
+    abstract abstract(): void;
 }
 
 const o = {

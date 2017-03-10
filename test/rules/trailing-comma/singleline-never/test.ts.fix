@@ -106,7 +106,7 @@ var [ddOne, ddTwo] = dd;
 
 var a: [string, number] = null;
 
-var a: [string, number] = null;
+var a: [string, number,] = null;
 
 var a: [
     string,
@@ -365,7 +365,7 @@ class Test<A, B, C> {
             [
                 C,
                 C,
-            ]
+            ],
             C
         >
     >(
@@ -432,7 +432,7 @@ interface ITest<A ,B, C> {
             [
                 C,
                 C,
-            ]
+            ],
             C
         >
     >(

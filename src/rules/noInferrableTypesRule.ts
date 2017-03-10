@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { hasAccessModifier, hasModifier } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -76,12 +77,16 @@ class NoInferrableTypesWalker extends Lint.AbstractWalker<IOptions> {
         const cb = (node: ts.Node): void => {
             switch (node.kind) {
                 case ts.SyntaxKind.Parameter:
-                    if (!this.options.ignoreParameters) {
+                    if (!this.options.ignoreParameters &&
+                        !hasModifier(node.modifiers, ts.SyntaxKind.ReadonlyKeyword) &&
+                        // "ignore-properties" also works for parameter properties
+                        (!this.options.ignoreProperties || !hasAccessModifier(node as ts.ParameterDeclaration))) {
                         this.checkDeclaration(node as ts.ParameterDeclaration);
                     }
                     break;
                 case ts.SyntaxKind.PropertyDeclaration:
-                    if (this.options.ignoreProperties) {
+                    if (this.options.ignoreProperties ||
+                        hasModifier(node.modifiers, ts.SyntaxKind.ReadonlyKeyword)) {
                         break;
                     }
                     /* falls through*/

@@ -1,0 +1,19 @@
+f;
+
+f;
+
+(x, y) => f(x, y, 0);
+(x, y) => f(y, x);
+
+f;
+
+(x, ...y) => f(x, y);
+
+f;
+
+// Not catching this case (obj.f may need a 'this' binding)
+(x) => obj.f(x);
+
+// Not bothering to catch this case.
+({ x, y }) => f({ x, y });
+

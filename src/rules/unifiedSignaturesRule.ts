@@ -36,12 +36,19 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_OMITTING_SINGLE_PARAMETER =
-        "These overloads can be combined into one signature with an optional parameter.";
-    public static FAILURE_STRING_OMITTING_REST_PARAMETER =
-        "These overloads can be combined into one signature with a rest parameter.";
-    public static FAILURE_STRING_SINGLE_PARAMETER_DIFFERENCE(type1: string, type2: string) {
-        return `These overloads can be combined into one signature taking \`${type1} | ${type2}\`.`;
+    public static FAILURE_STRING_OMITTING_SINGLE_PARAMETER(otherLine?: number) {
+        return `${this.FAILURE_STRING_START(otherLine)} with an optional parameter.`;
+    }
+    public static FAILURE_STRING_OMITTING_REST_PARAMETER(otherLine?: number) {
+        return `${this.FAILURE_STRING_START(otherLine)} with a rest parameter.`;
+    }
+    public static FAILURE_STRING_SINGLE_PARAMETER_DIFFERENCE(otherLine: number | undefined, type1: string, type2: string) {
+        return `${this.FAILURE_STRING_START(otherLine)} taking \`${type1} | ${type2}\`.`;
+    }
+    private static FAILURE_STRING_START(otherLine?: number): string {
+        // For only 2 overloads we don't need to specify which is the other one.
+        const overloads = otherLine === undefined ? "These overloads" : `This overload and the one on line ${otherLine}`;
+        return overloads + " can be combined into one signature";
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -106,13 +113,17 @@ class Walker extends Lint.RuleWalker {
     private checkOverloads<T>(signatures: T[], getOverload: GetOverload<T>, typeParameters?: ts.TypeParameterDeclaration[]) {
         const isTypeParameter = getIsTypeParameter(typeParameters);
         for (const overloads of collectOverloads(signatures, getOverload)) {
-            forEachPair(overloads, (a, b) => {
-                this.compareSignatures(a, b, isTypeParameter);
-            });
+            if (overloads.length === 2) {
+                this.compareSignatures(overloads[0], overloads[1], isTypeParameter, /*only2*/ true);
+            } else {
+                forEachPair(overloads, (a, b) => {
+                    this.compareSignatures(a, b, isTypeParameter, /*only2*/ false);
+                });
+            }
         }
     }
 
-    private compareSignatures(a: ts.SignatureDeclaration, b: ts.SignatureDeclaration, isTypeParameter: IsTypeParameter) {
+    private compareSignatures(a: ts.SignatureDeclaration, b: ts.SignatureDeclaration, isTypeParameter: IsTypeParameter, only2: boolean) {
         if (!signaturesCanBeUnified(a, b, isTypeParameter)) {
             return;
         }
@@ -121,16 +132,23 @@ class Walker extends Lint.RuleWalker {
             const params = signaturesDifferBySingleParameter(a.parameters, b.parameters);
             if (params) {
                 const [p0, p1] = params;
-                this.addFailureAtNode(p1, Rule.FAILURE_STRING_SINGLE_PARAMETER_DIFFERENCE(typeText(p0), typeText(p1)));
+                const lineOfOtherOverload = only2 ? undefined : this.getLine(p0);
+                this.addFailureAtNode(p1, Rule.FAILURE_STRING_SINGLE_PARAMETER_DIFFERENCE(lineOfOtherOverload, typeText(p0), typeText(p1)));
             }
         } else {
-            const extraParameter = signaturesDifferByOptionalOrRestParameter(a.parameters, b.parameters);
-            if (extraParameter) {
+            const diff = signaturesDifferByOptionalOrRestParameter(a.parameters, b.parameters);
+            if (diff) {
+                const [extraParameter, signatureWithExtraParameter] = diff;
+                const lineOfOtherOverload = only2 ? undefined : this.getLine(signatureWithExtraParameter === a.parameters ? b : a);
                 this.addFailureAtNode(extraParameter, extraParameter.dotDotDotToken
-                    ? Rule.FAILURE_STRING_OMITTING_REST_PARAMETER
-                    : Rule.FAILURE_STRING_OMITTING_SINGLE_PARAMETER);
+                    ? Rule.FAILURE_STRING_OMITTING_REST_PARAMETER(lineOfOtherOverload)
+                    : Rule.FAILURE_STRING_OMITTING_SINGLE_PARAMETER(lineOfOtherOverload));
             }
         }
+    }
+
+    private getLine(node: ts.Node): number {
+        return this.getLineAndCharacterOfPosition(node.getStart()).line + 1;
     }
 }
 
@@ -167,10 +185,10 @@ function signaturesDifferBySingleParameter(types1: ts.ParameterDeclaration[], ty
 
 /**
  * Detect `a(): void` and `a(x: number): void`.
- * Returns the parameter declaration (`x: number` in this example) that should be optional/rest.
+ * Returns the parameter declaration (`x: number` in this example) that should be optional/rest, and overload it's a part of.
  */
 function signaturesDifferByOptionalOrRestParameter(types1: ts.ParameterDeclaration[], types2: ts.ParameterDeclaration[],
-    ): ts.ParameterDeclaration | undefined {
+    ): [ts.ParameterDeclaration, ts.ParameterDeclaration[]] | undefined {
     const minLength = Math.min(types1.length, types2.length);
     const longer = types1.length < types2.length ? types2 : types1;
 
@@ -189,7 +207,7 @@ function signaturesDifferByOptionalOrRestParameter(types1: ts.ParameterDeclarati
         }
     }
 
-    return longer[longer.length - 1];
+    return [longer[longer.length - 1], longer];
 }
 
 /**

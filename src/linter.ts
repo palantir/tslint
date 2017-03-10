@@ -35,8 +35,7 @@ import { findFormatter } from "./formatterLoader";
 import { ILinterOptions, LintResult } from "./index";
 import { IFormatter } from "./language/formatter/formatter";
 import { createLanguageService, wrapProgram } from "./language/languageServiceHost";
-import { Fix, IRule, RuleFailure, RuleSeverity } from "./language/rule/rule";
-import { TypedRule } from "./language/rule/typedRule";
+import { Fix, IRule, isTypedRule, RuleFailure, RuleSeverity } from "./language/rule/rule";
 import * as utils from "./language/utils";
 import { loadRules } from "./ruleLoader";
 import { arrayify, dedent } from "./utils";
@@ -179,7 +178,7 @@ class Linter {
     private applyRule(rule: IRule, sourceFile: ts.SourceFile) {
         let ruleFailures: RuleFailure[] = [];
         try {
-            if (TypedRule.isTypedRule(rule) && this.program) {
+            if (this.program && isTypedRule(rule)) {
                 ruleFailures = rule.applyWithProgram(sourceFile, this.languageService);
             } else {
                 ruleFailures = rule.apply(sourceFile, this.languageService);
