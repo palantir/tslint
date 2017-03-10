@@ -53,9 +53,12 @@ export interface TestResult {
     };
 }
 
-export function runTests(pattern: string, rulesDirectory?: string | string[]): TestResult[] {
-    return glob.sync(`${pattern}/tslint.json`)
-        .map((directory: string): TestResult => runTest(path.dirname(directory), rulesDirectory));
+export function runTests(patterns: string[], rulesDirectory?: string | string[]): TestResult[] {
+    const files: string[] = [];
+    for (const pattern of patterns) {
+        files.push(...glob.sync(`${pattern}/tslint.json`));
+    }
+    return files.map((directory: string): TestResult => runTest(path.dirname(directory), rulesDirectory));
 }
 
 export function runTest(testDirectory: string, rulesDirectory?: string | string[]): TestResult {
