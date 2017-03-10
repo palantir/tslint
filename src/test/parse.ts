@@ -26,6 +26,15 @@ import {
 } from "./lines";
 import {errorComparator, LintError, lintSyntaxError} from "./lintError";
 
+export function getTypescriptVersionRequirement(text: string): string | undefined {
+    const lines = text.split(/\r?\n/);
+    const firstLine = parseLine(lines[0]);
+    if (firstLine instanceof MessageSubstitutionLine && firstLine.key === "typescript") {
+        return firstLine.message;
+    }
+    return undefined;
+}
+
 /**
  * Takes the full text of a .lint file and returns the contents of the file
  * with all error markup removed

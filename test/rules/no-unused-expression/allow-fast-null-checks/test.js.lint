@@ -81,6 +81,7 @@ async function f(foo) {
 }
 
 new Foo();
+~~~~~~~~~~ [0]
 
 // invalid code:
 
@@ -127,4 +128,4 @@ function interactionHandler(e) {
     ~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
 }
 
-[0]: expected an assignment or function call
+[0]: unused expression, expected an assignment or function call

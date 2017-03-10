@@ -87,4 +87,28 @@ function foo() {
     return;
 }
 
+function test() {
+    console.log("Any statement");
+    // Any comment
+
+    return;
+}
+
+function foo() {
+    fn();
+    // comment
+
+    // comment
+    return;
+}
+
+function bar() {
+    "some statement";
+    //comment
+    ~nil [0]
+    //comment
+    //comment
+    return;
+}
+
 [0]: Missing blank line before return

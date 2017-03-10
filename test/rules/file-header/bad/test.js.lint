@@ -4,9 +4,9 @@
  */
 
 export class A {
-    public x = 1;
+    x = 1;
 
-    public B() {
+    B() {
         return 2;
     }
 }

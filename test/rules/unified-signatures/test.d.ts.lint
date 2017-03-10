@@ -1,8 +1,14 @@
 interface I {
+    // For 3 or more overloads, mentions the line.
+    a0(): void;
+    a0(x: string): string;
+    a0(x: number): void;
+       ~~~~~~~~~ [This overload and the one on line 3 can be combined into one signature with an optional parameter.]
+
     // Error for extra parameter.
-    a(): void;
-    a(x: number): void;
-      ~~~~~~~~~ [0]
+    a1(): void;
+    a1(x: number): void;
+       ~~~~~~~~~ [0]
 
     // No error for arity difference greater than 1.
     a2(): void;
