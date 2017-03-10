@@ -15,17 +15,23 @@
  * limitations under the License.
  */
 
+import { getChildOfKind } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+
+interface Options {
+    multiline?: "always" | "never";
+    singleline?: "always" | "never";
+}
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "trailing-comma",
         description: Lint.Utils.dedent`
-            Requires or disallows trailing commas in array and object literals, destructuring assignments, function and tuple typings,
-            named imports and function parameters.`,
+            Requires or disallows trailing commas in array and object literals, destructuring assignments, function typings,
+            named imports and exports and function parameters.`,
         hasFix: true,
         optionsDescription: Lint.Utils.dedent`
             One argument which is an object with the keys \`multiline\` and \`singleline\`.
@@ -36,7 +42,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
             A array is considered "multiline" if its closing bracket is on a line
             after the last array element. The same general logic is followed for
-            object literals, function and tuple typings, named import statements
+            object literals, function typings, named import statements
             and function parameters.`,
         options: {
             type: "object",
@@ -62,205 +68,106 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_ALWAYS = "Missing trailing comma";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new TrailingCommaWalker(sourceFile, this.getOptions()));
+        return this.applyWithWalker(new TrailingCommaWalker(sourceFile, this.ruleName, this.ruleArguments[0]));
+    }
+
+    public isEnabled() {
+        return super.isEnabled() && this.ruleArguments.length !== 0;
     }
 }
 
-class TrailingCommaWalker extends Lint.RuleWalker {
-    private static SYNTAX_LIST_WRAPPER_TOKENS: Array<[ts.SyntaxKind, ts.SyntaxKind]> = [
-        [ts.SyntaxKind.OpenBraceToken, ts.SyntaxKind.CloseBraceToken],
-        [ts.SyntaxKind.OpenBracketToken, ts.SyntaxKind.CloseBracketToken],
-        [ts.SyntaxKind.OpenParenToken, ts.SyntaxKind.CloseParenToken],
-    ];
-
-    public visitArrayLiteralExpression(node: ts.ArrayLiteralExpression) {
-        this.lintChildNodeWithIndex(node, 1);
-        super.visitArrayLiteralExpression(node);
+class TrailingCommaWalker extends Lint.AbstractWalker<Options> {
+    public walk(sourceFile: ts.SourceFile) {
+        const cb = (node: ts.Node): void => {
+            switch (node.kind) {
+                case ts.SyntaxKind.ArrayLiteralExpression:
+                case ts.SyntaxKind.ArrayBindingPattern:
+                case ts.SyntaxKind.ObjectBindingPattern:
+                case ts.SyntaxKind.NamedImports:
+                case ts.SyntaxKind.NamedExports:
+                    this.checkList((node as ts.ArrayLiteralExpression | ts.BindingPattern | ts.NamedImportsOrExports).elements,
+                                   node.end);
+                    break;
+                case ts.SyntaxKind.ObjectLiteralExpression:
+                    this.checkList((node as ts.ObjectLiteralExpression).properties, node.end);
+                    break;
+                case ts.SyntaxKind.EnumDeclaration:
+                    this.checkList((node as ts.EnumDeclaration).members, node.end);
+                    break;
+                case ts.SyntaxKind.CallExpression:
+                case ts.SyntaxKind.NewExpression:
+                    this.checkList((node as ts.CallExpression | ts.NewExpression).arguments, node.end);
+                    break;
+                case ts.SyntaxKind.ArrowFunction:
+                case ts.SyntaxKind.Constructor:
+                case ts.SyntaxKind.FunctionDeclaration:
+                case ts.SyntaxKind.FunctionExpression:
+                case ts.SyntaxKind.MethodDeclaration:
+                case ts.SyntaxKind.SetAccessor:
+                case ts.SyntaxKind.MethodSignature:
+                case ts.SyntaxKind.ConstructSignature:
+                case ts.SyntaxKind.ConstructorType:
+                case ts.SyntaxKind.FunctionType:
+                case ts.SyntaxKind.CallSignature:
+                    this.checkListWithEndToken(node, (node as ts.SignatureDeclaration).parameters, ts.SyntaxKind.CloseParenToken);
+                    break;
+                case ts.SyntaxKind.TypeLiteral:
+                    this.checkTypeLiteral(node as ts.TypeLiteralNode);
+                    break;
+                default:
+            }
+            return ts.forEachChild(node, cb);
+        };
+        return ts.forEachChild(sourceFile, cb);
     }
 
-    public visitArrowFunction(node: ts.ArrowFunction) {
-        this.lintChildNodeWithIndex(node, 1);
-        super.visitArrowFunction(node);
-    }
-
-    public visitBindingPattern(node: ts.BindingPattern) {
-        if (node.kind === ts.SyntaxKind.ArrayBindingPattern || node.kind === ts.SyntaxKind.ObjectBindingPattern) {
-            this.lintChildNodeWithIndex(node, 1);
+    private checkTypeLiteral(node: ts.TypeLiteralNode) {
+        const members = node.members;
+        if (members.length === 0) {
+            return;
         }
-        super.visitBindingPattern(node);
-    }
-
-    public visitCallExpression(node: ts.CallExpression) {
-        this.lintNode(node);
-        super.visitCallExpression(node);
-    }
-
-    public visitClassDeclaration(node: ts.ClassDeclaration) {
-        this.lintNode(node);
-        super.visitClassDeclaration(node);
-    }
-
-    public visitConstructSignature(node: ts.ConstructSignatureDeclaration) {
-        this.lintNode(node);
-        super.visitConstructSignature(node);
-    }
-
-    public visitConstructorDeclaration(node: ts.ConstructorDeclaration) {
-        this.lintNode(node);
-        super.visitConstructorDeclaration(node);
-    }
-
-    public visitConstructorType(node: ts.FunctionOrConstructorTypeNode) {
-        this.lintNode(node);
-        super.visitConstructorType(node);
-    }
-
-    public visitEnumDeclaration(node: ts.EnumDeclaration) {
-        this.lintNode(node, true);
-        super.visitEnumDeclaration(node);
-    }
-
-    public visitFunctionType(node: ts.FunctionOrConstructorTypeNode) {
-        this.lintChildNodeWithIndex(node, 1);
-        super.visitFunctionType(node);
-    }
-
-    public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
-        this.lintNode(node);
-        super.visitFunctionDeclaration(node);
-    }
-
-    public visitFunctionExpression(node: ts.FunctionExpression) {
-        this.lintNode(node);
-        super.visitFunctionExpression(node);
-    }
-
-    public visitInterfaceDeclaration(node: ts.InterfaceDeclaration) {
-        this.lintNode(node);
-        super.visitInterfaceDeclaration(node);
-    }
-
-    public visitMethodDeclaration(node: ts.MethodDeclaration) {
-        this.lintNode(node);
-        super.visitMethodDeclaration(node);
-    }
-
-    public visitMethodSignature(node: ts.SignatureDeclaration) {
-        this.lintNode(node);
-        super.visitMethodSignature(node);
-    }
-
-    public visitNamedImports(node: ts.NamedImports) {
-        this.lintChildNodeWithIndex(node, 1);
-        super.visitNamedImports(node);
-    }
-
-    public visitNewExpression(node: ts.NewExpression) {
-        this.lintNode(node);
-        super.visitNewExpression(node);
-    }
-
-    public visitObjectLiteralExpression(node: ts.ObjectLiteralExpression) {
-        this.lintChildNodeWithIndex(node, 1);
-        super.visitObjectLiteralExpression(node);
-    }
-
-    public visitSetAccessor(node: ts.AccessorDeclaration) {
-        this.lintNode(node);
-        super.visitSetAccessor(node);
-    }
-
-    public visitTupleType(node: ts.TupleTypeNode) {
-        this.lintChildNodeWithIndex(node, 1);
-        super.visitTupleType(node);
-    }
-
-    public visitTypeLiteral(node: ts.TypeLiteralNode) {
-        this.lintNode(node);
-        // object type literals need to be inspected separately because they
-        // have a different syntax list wrapper token, and they can be semicolon delimited
-        const children = node.getChildren();
-        for (let i = 0; i < children.length - 2; i++) {
-            if (children[i].kind === ts.SyntaxKind.OpenBraceToken &&
-                children[i + 1].kind === ts.SyntaxKind.SyntaxList &&
-                children[i + 2].kind === ts.SyntaxKind.CloseBraceToken) {
-                const grandChildren = children[i + 1].getChildren();
-                // the AST is different from the grammar spec. The semicolons are included as tokens as part of *Signature,
-                // as opposed to optionals alongside it. So instead of children[i + 1] having
-                // [ PropertySignature, Semicolon, PropertySignature, Semicolon ], the AST is
-                // [ PropertySignature, PropertySignature], where the Semicolons are under PropertySignature
-                const hasSemicolon = grandChildren.some((grandChild) =>
-                    Lint.childOfKind(grandChild, ts.SyntaxKind.SemicolonToken) !== undefined);
-
-                if (!hasSemicolon) {
-                    const endLineOfClosingElement = this.getSourceFile().getLineAndCharacterOfPosition(children[i + 2].getEnd()).line;
-                    this.lintChildNodeWithIndex(children[i + 1], grandChildren.length - 1, endLineOfClosingElement);
-                }
+        const sourceText = this.sourceFile.text;
+        for (const member of members) {
+            // PropertySignature in TypeLiteral can end with semicolon or comma. If one ends with a semicolon don't check for trailing comma
+            if (sourceText[member.end - 1] === ";") {
+                return;
             }
         }
-        super.visitTypeLiteral(node);
+        // The trailing comma is part of the last member and therefore not present as hasTrailingComma on the NodeArray
+        const hasTrailingComma = sourceText[members.end - 1] === ",";
+        return this.checkComma(hasTrailingComma, members, node.end);
     }
 
-    public visitTypeReference(node: ts.TypeReferenceNode) {
-        this.lintNode(node);
-        super.visitTypeReference(node);
-    }
-
-    private lintNode(node: ts.Node, includeBraces?: boolean) {
-        const children = node.getChildren();
-        const syntaxListWrapperTokens = (includeBraces === true) ?
-            TrailingCommaWalker.SYNTAX_LIST_WRAPPER_TOKENS : TrailingCommaWalker.SYNTAX_LIST_WRAPPER_TOKENS.slice(1);
-
-        for (let i = 0; i < children.length - 2; i++) {
-            syntaxListWrapperTokens.forEach(([openToken, closeToken]) => {
-                if (children[i].kind === openToken &&
-                    children[i + 1].kind === ts.SyntaxKind.SyntaxList &&
-                    children[i + 2].kind === closeToken) {
-                    this.lintChildNodeWithIndex(node, i + 1);
-                }
-            });
+    private checkListWithEndToken(node: ts.Node, list: ts.NodeArray<ts.Node>, closeTokenKind: ts.SyntaxKind) {
+        if (list.length === 0) {
+            return;
+        }
+        const token = getChildOfKind(node, closeTokenKind, this.sourceFile);
+        if (token !== undefined) {
+            return this.checkComma(list.hasTrailingComma, list, token.end);
         }
     }
 
-    private lintChildNodeWithIndex(node: ts.Node, childNodeIndex: number, endLineOfClosingElement?: number) {
-        const child = node.getChildAt(childNodeIndex);
-        if (child != null) {
-            const grandChildren = child.getChildren();
-
-            if (grandChildren.length > 0) {
-                const lastGrandChild = grandChildren[grandChildren.length - 1];
-                const hasTrailingComma = lastGrandChild.kind === ts.SyntaxKind.CommaToken;
-
-                const endLineOfLastElement = this.getSourceFile().getLineAndCharacterOfPosition(lastGrandChild.getEnd()).line;
-                if (endLineOfClosingElement === undefined) {
-                    let closingElementNode = node.getChildAt(childNodeIndex + 1);
-                    if (closingElementNode == null) {
-                        closingElementNode = node;
-                    }
-                    endLineOfClosingElement = this.getSourceFile().getLineAndCharacterOfPosition(closingElementNode.getEnd()).line;
-                }
-                const isMultiline = endLineOfClosingElement !== endLineOfLastElement;
-                const option = this.getOption(isMultiline ? "multiline" : "singleline");
-
-                if (hasTrailingComma && option === "never") {
-                    const failureStart = lastGrandChild.getStart();
-                    const fix = this.createFix(this.deleteText(failureStart, 1));
-                    this.addFailureAt(failureStart, 1, Rule.FAILURE_STRING_NEVER, fix);
-                } else if (!hasTrailingComma && option === "always") {
-                    const failureStart = lastGrandChild.getEnd();
-                    const fix = this.createFix(this.appendText(failureStart, ","));
-                    this.addFailureAt(failureStart - 1, 1, Rule.FAILURE_STRING_ALWAYS, fix);
-                }
-            }
+    private checkList(list: ts.NodeArray<ts.Node>, closeElementPos: number) {
+        if (list.length === 0) {
+            return;
         }
+        return this.checkComma(list.hasTrailingComma, list, closeElementPos);
     }
 
-    private getOption(option: string) {
-        const allOptions = this.getOptions();
-        if (allOptions == null || allOptions.length === 0) {
-            return null;
+    /* Expects `list.length !== 0` */
+    private checkComma(hasTrailingComma: boolean | undefined, list: ts.NodeArray<ts.Node>, closeTokenPos: number) {
+        const lastElementLine = ts.getLineAndCharacterOfPosition(this.sourceFile, list[list.length - 1].end).line;
+        const closeTokenLine = ts.getLineAndCharacterOfPosition(this.sourceFile, closeTokenPos).line;
+        const option = lastElementLine === closeTokenLine ? this.options.singleline : this.options.multiline;
+        if (hasTrailingComma && option === "never") {
+            this.addFailureAt(list.end - 1, 1, Rule.FAILURE_STRING_NEVER, this.createFix(
+                Lint.Replacement.deleteText(list.end - 1, 1),
+            ));
+        } else if (!hasTrailingComma && option === "always") {
+            this.addFailureAt(list.end, 0, Rule.FAILURE_STRING_ALWAYS, this.createFix(
+                Lint.Replacement.appendText(list.end, ","),
+            ));
         }
-
-        return allOptions[0][option];
     }
 }
