@@ -66,7 +66,7 @@ for (let i1 = 0; i1 < 4; i1++) {
 }
 for (const i2 = 0;;) {    // failure
 }
-for (const i2 = 0;;) {    // failure
+for (const i2 = 0;;) {
 }
 
 // scope
@@ -109,8 +109,11 @@ const nest = () => {
 };
 
 const nest2 = () => {
+    const error = false;
     try {
     } catch(error) {
+        // variable error is block scoped
+        error = true;
     }
 }
 
@@ -142,3 +145,45 @@ switch (1) {
         const y = 1;
         break;
 }
+
+var someVariable = 0;
+function funcxion(someVariable, someParameter) {
+    someVariable = 1;
+    {
+        var var1 = 0;
+        var var2 = 0;
+    }
+    {
+        var1 = 1;
+    }
+    {
+        let var2 = 1;
+        var2 = 2;
+    }
+}
+
+const shadowed1 = 0;
+const shadowed2 = 0;
+const shadowed3 = 0;
+function shadowVariables({shadowed1, ...shadowed2}, shadowed3) {
+    shadowed1 = 1;
+    shadowed2 = 1;
+    shadowed3 = 1;
+}
+
+// no error in for loop initializer
+for (let i = 1, l = arr.length; i < l; ++i) {
+}
+
+{
+    const var1 = 0;
+    let var2 = 0;
+    function foo(var1 = var2 = 1, var2 = var1 = 1) {}
+    function foo2(p1 = var2 = 1) {
+        const var2 = 0;
+    }
+}
+
+// cannot fix, because of uninitialized variables
+let uninitialized;
+let initialized1 = 0, uninitialized2;
