@@ -70,8 +70,8 @@ describe("TAP Formatter", () => {
               data:
                 ruleName: ${ruleName}
                 fileName: ${file}
-                line: ${line}
-                character: ${character}
+                line: ${String(line)}
+                character: ${String(character)}
                 failureString: ${reason}
                 rawLines: var x = 123;\n
               ...`;
