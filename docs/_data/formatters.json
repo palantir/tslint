@@ -53,6 +53,13 @@
     "consumer": "human"
   },
   {
+    "formatterName": "tap",
+    "description": "Formats output as TAP stream.",
+    "descriptionDetails": "Provides error messages output in TAP13 format which can be consumed by any TAP formatter.",
+    "sample": "\nTAP version 13\n1..1\nnot ok 1 - Some error\n  ---\n  message: Variable has any type\n  severity: error\n  data:\n     ruleName: no-any\n     fileName: test-file.ts\n     line: 10\n     character: 10\n     failureString: Some error\n     rawLines: Some raw output\n  ...",
+    "consumer": "machine"
+  },
+  {
     "formatterName": "verbose",
     "description": "The human-readable formatter which includes the rule name in messages.",
     "descriptionDetails": "The output is the same as the prose formatter with the rule name included",
