@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2013 Palantir Technologies, Inc.
+ * Copyright 2017 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,20 +70,19 @@ export class Formatter extends AbstractFormatter {
             const failureRaw = failure.getRawLines();
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
 
-            return [
-                `not ok ${i + 1} - ${failureMessage}`,
-                "  ---",
-                `  message : ${failureMessage}`,
-                `  severity: ${failureSeverity}`,
-                "  data:",
-                `    ruleName: ${ruleName}`,
-                `    fileName: ${fileName}`,
-                `    line: ${lineAndCharacter.line}`,
-                `    character: ${lineAndCharacter.character}`,
-                `    failureString: ${failureString}`,
-                `    rawLines: ${failureRaw}`,
-                "  ...",
-            ].join("\n");
+            return Utils.dedent`
+                not ok ${String(i+ 1)} - ${failureMessage}
+                  ---
+                  message : ${failureMessage}
+                  severity: ${failureSeverity}
+                  data:
+                    ruleName: ${ruleName}
+                    fileName: ${fileName}
+                    line: ${String(lineAndCharacter.line)}
+                    character: ${String(lineAndCharacter.character)}
+                    failureString: ${failureString}
+                    rawLines: ${failureRaw}
+                  ...`;
         });
 
     }

@@ -19,6 +19,8 @@ import * as ts from "typescript";
 import { IFormatter, TestUtils } from "../lint";
 import { createFailure } from "./utils";
 
+import * as Utils from "../../src/utils";
+
 describe("TAP Formatter", () => {
     const TEST_FILE = "formatters/tapFormatter.test.ts";
     let sourceFile: ts.SourceFile;
@@ -60,19 +62,18 @@ describe("TAP Formatter", () => {
                               line: number,
                               character: number,
                               reason: string) {
-        return [
-            `not ok ${num} - ${reason}`,
-            "  ---",
-            `  message : ${reason}`,
-            `  severity: ${severity}`,
-            "  data:",
-            `    ruleName: ${ruleName}`,
-            `    fileName: ${file}`,
-            `    line: ${line}`,
-            `    character: ${character}`,
-            `    failureString: ${reason}`,
-            `    rawLines: var x = 123;\n`,
-            "  ...",
-        ].join("\n") + "\n";
+        return Utils.dedent`
+            not ok ${String(num)} - ${reason}
+              ---
+              message : ${reason}
+              severity: ${severity}
+              data:
+                ruleName: ${ruleName}
+                fileName: ${file}
+                line: ${line}
+                character: ${character}
+                failureString: ${reason}
+                rawLines: var x = 123;\n
+              ...`;
     }
 });
