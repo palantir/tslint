@@ -44,6 +44,10 @@ v5.0.0
 
 -->
 
+Unreleased
+---
+- [enhancement] New TAP formatter
+
 v4.5.1
 ---
 
