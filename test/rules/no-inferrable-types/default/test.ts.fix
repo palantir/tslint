@@ -13,6 +13,8 @@ class Foo {
     bar = 0;
     baz = true,
     bas = "moar";
+    readonly foo: boolean = false;
+    constructor(readonly foobar: string = "test", public barfoo = 1) {}
 }
 
 // not errors, inferrable type is not declared
