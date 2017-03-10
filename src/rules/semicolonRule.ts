@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -23,6 +24,12 @@ const OPTION_ALWAYS = "always";
 const OPTION_NEVER = "never";
 const OPTION_IGNORE_BOUND_CLASS_METHODS = "ignore-bound-class-methods";
 const OPTION_IGNORE_INTERFACES = "ignore-interfaces";
+
+interface Options {
+    always: boolean;
+    boundClassMethods: boolean;
+    interfaces: boolean;
+}
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -63,141 +70,165 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING_MISSING = "Missing semicolon";
-    public static FAILURE_STRING_COMMA = "Interface properties should be separated by semicolons";
+    public static FAILURE_STRING_COMMA = "Properties should be separated by semicolons";
     public static FAILURE_STRING_UNNECESSARY = "Unnecessary semicolon";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new SemicolonWalker(sourceFile, this.getOptions()));
+        const options: Options = {
+            always: this.ruleArguments.indexOf(OPTION_NEVER) === -1,
+            boundClassMethods: this.ruleArguments.indexOf(OPTION_IGNORE_BOUND_CLASS_METHODS) === -1,
+            interfaces: this.ruleArguments.indexOf(OPTION_IGNORE_INTERFACES) === -1,
+        };
+        return this.applyWithWalker(new SemicolonWalker(sourceFile, this.ruleName, options));
     }
 }
 
-class SemicolonWalker extends Lint.RuleWalker {
-    public visitVariableStatement(node: ts.VariableStatement) {
-        this.checkSemicolonAt(node);
-        super.visitVariableStatement(node);
+class SemicolonWalker extends Lint.AbstractWalker<Options> {
+    private scanner?: ts.Scanner = undefined;
+    public walk(sourceFile: ts.SourceFile) {
+        const cb = (node: ts.Node): void => {
+            switch (node.kind) {
+                case ts.SyntaxKind.VariableStatement:
+                case ts.SyntaxKind.ExpressionStatement:
+                case ts.SyntaxKind.ReturnStatement:
+                case ts.SyntaxKind.BreakStatement:
+                case ts.SyntaxKind.ContinueStatement:
+                case ts.SyntaxKind.ThrowStatement:
+                case ts.SyntaxKind.ImportEqualsDeclaration:
+                case ts.SyntaxKind.DoStatement:
+                case ts.SyntaxKind.ExportAssignment:
+                    this.checkSemicolonAt(node);
+                    break;
+                case ts.SyntaxKind.TypeAliasDeclaration:
+                case ts.SyntaxKind.ImportDeclaration:
+                case ts.SyntaxKind.ExportDeclaration:
+                case ts.SyntaxKind.DebuggerStatement:
+                    this.checkSemicolonOrLineBreak(node);
+                    break;
+                case ts.SyntaxKind.ModuleDeclaration:
+                    // shorthand module declaration
+                    if ((node as ts.ModuleDeclaration).body === undefined) {
+                        this.checkSemicolonOrLineBreak(node);
+                    }
+                    break;
+                case ts.SyntaxKind.PropertyDeclaration:
+                    this.visitPropertyDeclaration(node as ts.PropertyDeclaration);
+                    break;
+                case ts.SyntaxKind.MethodDeclaration:
+                case ts.SyntaxKind.FunctionDeclaration:
+                    if ((node as ts.FunctionLikeDeclaration).body === undefined) {
+                        this.checkSemicolonOrLineBreak(node);
+                    }
+                    break;
+                case ts.SyntaxKind.InterfaceDeclaration:
+                    if (this.options.interfaces) {
+                        this.checkInterface(node as ts.InterfaceDeclaration);
+                    }
+                    break;
+                case ts.SyntaxKind.SemicolonClassElement:
+                    return this.reportUnnecessary(node.end - 1);
+                case ts.SyntaxKind.EmptyStatement:
+                    return this.checkEmptyStatement(node);
+                default:
+            }
+            return ts.forEachChild(node, cb);
+        };
+        return ts.forEachChild(sourceFile, cb);
     }
 
-    public visitExpressionStatement(node: ts.ExpressionStatement) {
-        this.checkSemicolonAt(node);
-        super.visitExpressionStatement(node);
-    }
-
-    public visitReturnStatement(node: ts.ReturnStatement) {
-        this.checkSemicolonAt(node);
-        super.visitReturnStatement(node);
-    }
-
-    public visitBreakStatement(node: ts.BreakOrContinueStatement) {
-        this.checkSemicolonAt(node);
-        super.visitBreakStatement(node);
-    }
-
-    public visitContinueStatement(node: ts.BreakOrContinueStatement) {
-        this.checkSemicolonAt(node);
-        super.visitContinueStatement(node);
-    }
-
-    public visitThrowStatement(node: ts.ThrowStatement) {
-        this.checkSemicolonAt(node);
-        super.visitThrowStatement(node);
-    }
-
-    public visitImportDeclaration(node: ts.ImportDeclaration) {
-        this.checkSemicolonAt(node);
-        super.visitImportDeclaration(node);
-    }
-
-    public visitImportEqualsDeclaration(node: ts.ImportEqualsDeclaration) {
-        this.checkSemicolonAt(node);
-        super.visitImportEqualsDeclaration(node);
-    }
-
-    public visitDoStatement(node: ts.DoStatement) {
-        this.checkSemicolonAt(node);
-        super.visitDoStatement(node);
-    }
-
-    public visitDebuggerStatement(node: ts.Statement) {
-        this.checkSemicolonAt(node);
-        super.visitDebuggerStatement(node);
-    }
-
-    public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
-        const initializer = node.initializer;
-
-        // check if this is a multi-line arrow function (`[^]` in the regex matches all characters including CR & LF)
-        if (initializer && initializer.kind === ts.SyntaxKind.ArrowFunction && /\{[^]*\n/.test(node.getText())) {
-            if (!this.hasOption(OPTION_IGNORE_BOUND_CLASS_METHODS)) {
-                this.checkSemicolonAt(node, "never");
+    private visitPropertyDeclaration(node: ts.PropertyDeclaration) {
+        // check if this is a multi-line arrow function
+        if (node.initializer !== undefined &&
+            node.initializer.kind === ts.SyntaxKind.ArrowFunction &&
+            ts.getLineAndCharacterOfPosition(this.sourceFile, node.getStart(this.sourceFile)).line
+                !== ts.getLineAndCharacterOfPosition(this.sourceFile, node.getEnd()).line) {
+            if (this.options.boundClassMethods) {
+                if (this.sourceFile.text[node.end - 1] === ";" &&
+                    this.isFollowedByLineBreak(node.end)) {
+                    this.reportUnnecessary(node.end - 1);
+                }
             }
         } else {
-            this.checkSemicolonAt(node);
+            this.checkSemicolonOrLineBreak(node);
         }
-        super.visitPropertyDeclaration(node);
     }
 
-    public visitInterfaceDeclaration(node: ts.InterfaceDeclaration) {
-        if (this.hasOption(OPTION_IGNORE_INTERFACES)) {
-            return;
-        }
+    private isFollowedByLineBreak(pos: number) {
+        const scanner = this.scanner ||
+            (this.scanner = ts.createScanner(this.sourceFile.languageVersion, true, this.sourceFile.languageVariant, this.sourceFile.text));
+        scanner.setTextPos(pos);
+        return scanner.scan() === ts.SyntaxKind.EndOfFileToken || scanner.hasPrecedingLineBreak();
+    }
 
+    private checkSemicolonOrLineBreak(node: ts.Node) {
+        const hasSemicolon = this.sourceFile.text[node.end - 1] === ";";
+        if (this.options.always && !hasSemicolon) {
+            this.reportMissing(node.end);
+        } else if (!this.options.always && hasSemicolon && this.isFollowedByLineBreak(node.end)) {
+            // semicolon can be removed if followed by line break;
+            this.reportUnnecessary(node.end - 1);
+        }
+    }
+
+    private checkEmptyStatement(node: ts.Node) {
+        // An empty statement is only ever useful when it is the only statement inside a loop
+        if (!utils.isIterationStatement(node.parent!)) {
+            const parentKind = node.parent!.kind;
+            // don't remove empty statement if it is a direct child of if, with or a LabeledStatement
+            // otherwise this would unintentionally change control flow
+            const noFix = parentKind === ts.SyntaxKind.IfStatement ||
+                          parentKind === ts.SyntaxKind.LabeledStatement ||
+                          parentKind === ts.SyntaxKind.WithStatement;
+            this.reportUnnecessary(node.end - 1, noFix);
+        }
+    }
+
+    private checkInterface(node: ts.InterfaceDeclaration) {
         for (const member of node.members) {
-            this.checkSemicolonAt(member);
-        }
-        super.visitInterfaceDeclaration(node);
-    }
-
-    public visitExportAssignment(node: ts.ExportAssignment) {
-        this.checkSemicolonAt(node);
-        super.visitExportAssignment(node);
-    }
-
-    public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
-        if (!node.body) {
-            this.checkSemicolonAt(node);
-        }
-        super.visitFunctionDeclaration(node);
-    }
-
-    public visitTypeAliasDeclaration(node: ts.TypeAliasDeclaration) {
-        this.checkSemicolonAt(node);
-        super.visitTypeAliasDeclaration(node);
-    }
-
-    private checkSemicolonAt(node: ts.Node, override?: "never") {
-        const sourceFile = this.getSourceFile();
-        const hasSemicolon = Lint.childOfKind(node, ts.SyntaxKind.SemicolonToken) !== undefined;
-        const position = node.getStart(sourceFile) + node.getWidth(sourceFile);
-        const never = override === "never" || this.hasOption(OPTION_NEVER);
-        // Backwards compatible with plain {"semicolon": true}
-        const always = !never && (this.hasOption(OPTION_ALWAYS) || (this.getOptions() && this.getOptions().length === 0));
-
-        if (always && !hasSemicolon) {
-            const children = node.getChildren(sourceFile);
-            const lastChild = children[children.length - 1];
-            if (node.parent!.kind === ts.SyntaxKind.InterfaceDeclaration && lastChild.kind === ts.SyntaxKind.CommaToken) {
-                const failureStart = lastChild.getStart(sourceFile);
-                const fix = this.createFix(this.createReplacement(failureStart, lastChild.getWidth(sourceFile), ";"));
-                this.addFailureAt(failureStart, 0, Rule.FAILURE_STRING_COMMA, fix);
-            } else {
-                const failureStart = Math.min(position, this.getLimit());
-                const fix = this.createFix(this.appendText(failureStart, ";"));
-                this.addFailureAt(failureStart, 0, Rule.FAILURE_STRING_MISSING, fix);
+            const lastChar = this.sourceFile.text[member.end - 1];
+            const hasSemicolon = lastChar === ";";
+            if (this.options.always && !hasSemicolon) {
+                if (lastChar === ",") {
+                    this.addFailureAt(member.end - 1, 1, Rule.FAILURE_STRING_COMMA, this.createFix(
+                        new Lint.Replacement(member.end - 1, 1, ";"),
+                    ));
+                } else {
+                    this.reportMissing(member.end);
+                }
+            } else if (!this.options.always && hasSemicolon &&
+                       (member === node.members[node.members.length - 1] || this.isFollowedByLineBreak(member.end))) {
+                this.reportUnnecessary(member.end - 1);
             }
-        } else if (never && hasSemicolon) {
-            const scanner = ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, sourceFile.text);
-            scanner.setTextPos(position);
+        }
+    }
 
-            let tokenKind = scanner.scan();
-            while (tokenKind === ts.SyntaxKind.WhitespaceTrivia || tokenKind === ts.SyntaxKind.NewLineTrivia) {
-                tokenKind = scanner.scan();
-            }
+    private reportMissing(pos: number) {
+        this.addFailureAt(pos, 0, Rule.FAILURE_STRING_MISSING, this.createFix(
+            Lint.Replacement.appendText(pos, ";"),
+        ));
+    }
 
-            if (tokenKind !== ts.SyntaxKind.OpenParenToken && tokenKind !== ts.SyntaxKind.OpenBracketToken
-                    && tokenKind !== ts.SyntaxKind.PlusToken && tokenKind !== ts.SyntaxKind.MinusToken) {
-                const failureStart = Math.min(position - 1, this.getLimit());
-                const fix = this.createFix(this.deleteText(failureStart, 1));
-                this.addFailureAt(failureStart, 1, Rule.FAILURE_STRING_UNNECESSARY, fix);
+    private reportUnnecessary(pos: number, noFix?: boolean) {
+        this.addFailureAt(pos, 1, Rule.FAILURE_STRING_UNNECESSARY, noFix ? undefined : this.createFix(
+            Lint.Replacement.deleteText(pos, 1),
+        ));
+    }
+
+    private checkSemicolonAt(node: ts.Node) {
+        const hasSemicolon = this.sourceFile.text[node.end - 1] === ";";
+
+        if (this.options.always && !hasSemicolon) {
+            this.reportMissing(node.end);
+        } else if (!this.options.always && hasSemicolon) {
+            switch (utils.getNextToken(node, this.sourceFile)!.kind) {
+                case ts.SyntaxKind.OpenParenToken:
+                case ts.SyntaxKind.OpenBracketToken:
+                case ts.SyntaxKind.PlusToken:
+                case ts.SyntaxKind.MinusToken:
+                case ts.SyntaxKind.RegularExpressionLiteral:
+                    break;
+                default:
+                    this.reportUnnecessary(node.end - 1);
             }
         }
     }
