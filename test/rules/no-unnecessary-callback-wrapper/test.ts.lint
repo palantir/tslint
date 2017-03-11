@@ -1,0 +1,24 @@
+x => f(x);
+~~~~~~~~~ [0]
+
+(x, y) => f(x, y);
+~~~~~~~~~~~~~~~~~ [0]
+
+(x, y) => f(x, y, 0);
+(x, y) => f(y, x);
+
+(x, y) => f<T>(x, y);
+~~~~~~~~~~~~~~~~~~~~ [0]
+
+(x, ...y) => f(x, y);
+
+(...args) => f(...args);
+~~~~~~~~~~~~~~~~~~~~~~~ [0]
+
+// Not catching this case (obj.f may need a 'this' binding)
+(x) => obj.f(x);
+
+// Not bothering to catch this case.
+({ x, y }) => f({ x, y });
+
+[0]: No need to wrap 'f' in another function. Just use it directly.

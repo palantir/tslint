@@ -74,8 +74,10 @@ The configuration file specifies which rules are enabled and their options. Thes
   /*
    * Possible values:
    * - the name of a built-in config
-   * - the name of an NPM module which has a "main" file that exports a config object
-   * - a relative path to a JSON file
+   * - a string that can be resolved as a module that exports the config object, e.g.:
+   *   - an npm package name
+   *   - an npm package name followed by the path to a file inside
+   *   - a relative path to a JSON file
    */
   "extends": "tslint:latest",
   "rules": {
@@ -121,7 +123,7 @@ Options:
 -h, --help            display detailed help
 -i, --init            generate a tslint.json config file in the current working directory
 -o, --out             output file
---project             tsconfig.json file
+-p, --project         tsconfig.json file
 -r, --rules-dir       rules directory
 -s, --formatters-dir  formatters directory
 -t, --format          output format (prose, json, stylish, verbose, pmd, msbuild, checkstyle, vso, fileslist)  [default: "prose"]
@@ -198,7 +200,7 @@ tslint accepts the following command-line options:
     the tests. See the full tslint documentation for more details on how
     this can be used to test custom rules.
 
---project:
+-p, --project:
     The location of a tsconfig.json file that will be used to determine which
     files will be linted.
 

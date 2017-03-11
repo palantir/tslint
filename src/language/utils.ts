@@ -107,7 +107,7 @@ export function isBlockScopedBindingElement(node: ts.BindingElement): boolean {
 }
 
 export function getBindingElementVariableDeclaration(node: ts.BindingElement): ts.VariableDeclaration | null {
-    let currentParent = node.parent!;
+    let currentParent = node.parent! as ts.Node;
     while (currentParent.kind !== ts.SyntaxKind.VariableDeclaration) {
         if (currentParent.parent == null) {
             return null; // function parameter, no variable declaration

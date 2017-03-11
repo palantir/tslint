@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "tslint";
+import * as Lint from "../index";
 
 const OPTION_IGNORE_MODULE = "ignore-module";
 

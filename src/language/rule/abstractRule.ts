@@ -19,38 +19,22 @@ import * as ts from "typescript";
 
 import {doesIntersect} from "../utils";
 import {IWalker, WalkContext} from "../walker";
-import {IDisabledInterval, IOptions, IRule, IRuleMetadata, RuleFailure} from "./rule";
+import { IOptions, IRule, IRuleMetadata, RuleFailure, RuleSeverity } from "./rule";
 
 export abstract class AbstractRule implements IRule {
     public static metadata: IRuleMetadata;
     protected readonly ruleArguments: any[];
+    protected readonly ruleSeverity: RuleSeverity;
+    public ruleName: string;
 
-    public static isRuleEnabled(ruleConfigValue: any): boolean {
-        if (typeof ruleConfigValue === "boolean") {
-            return ruleConfigValue;
-        }
-
-        if (Array.isArray(ruleConfigValue) && ruleConfigValue.length > 0) {
-            return ruleConfigValue[0];
-        }
-
-        return false;
-    }
-
-    constructor(public readonly ruleName: string, private value: any, private disabledIntervals: IDisabledInterval[]) {
-        if (Array.isArray(value) && value.length > 1) {
-            this.ruleArguments = value.slice(1);
-        } else {
-            this.ruleArguments = [];
-        }
+    constructor(private options: IOptions) {
+        this.ruleName = options.ruleName;
+        this.ruleArguments = options.ruleArguments;
+        this.ruleSeverity = options.ruleSeverity;
     }
 
     public getOptions(): IOptions {
-        return {
-            disabledIntervals: this.disabledIntervals,
-            ruleArguments: this.ruleArguments,
-            ruleName: this.ruleName,
-        };
+        return this.options;
     }
 
     public abstract apply(sourceFile: ts.SourceFile, languageService: ts.LanguageService): RuleFailure[];
@@ -61,7 +45,7 @@ export abstract class AbstractRule implements IRule {
     }
 
     public isEnabled(): boolean {
-        return AbstractRule.isRuleEnabled(this.value);
+        return this.ruleSeverity !== "off";
     }
 
     protected applyWithFunction(sourceFile: ts.SourceFile, walkFn: (ctx: WalkContext<void>) => void): RuleFailure[];
@@ -76,7 +60,7 @@ export abstract class AbstractRule implements IRule {
         const result: RuleFailure[] = [];
         for (const failure of failures) {
             // don't add failures for a rule if the failure intersects an interval where that rule is disabled
-            if (!doesIntersect(failure, this.disabledIntervals) && !result.some((f) => f.equals(failure))) {
+            if (!doesIntersect(failure, this.options.disabledIntervals) && !result.some((f) => f.equals(failure))) {
                 result.push(failure);
             }
         }

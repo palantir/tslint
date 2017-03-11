@@ -31,8 +31,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-unused-variable",
-        deprecationMessage: "Use the tsc compiler options --noUnusedParameters and --noUnusedLocals instead.",
-        description: "Disallows unused imports, variables, functions and private class members.",
+        description: Lint.Utils.dedent`Disallows unused imports, variables, functions and
+            private class members. Similar to tsc's --noUnusedParameters and --noUnusedLocals
+            options, but does not interrupt code compilation.`,
         hasFix: true,
         optionsDescription: Lint.Utils.dedent`
             Three optional arguments may be optionally provided:

@@ -174,7 +174,7 @@ const enum Kind {
     Return,
     /** This node breaks, and doesn't have 'super()'. */
     Break,
-};
+}
 /** Represents a single 'super()' call. */
 interface Single {
     /** Node of the 'super()' call. */

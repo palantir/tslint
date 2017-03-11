@@ -1,16 +1,16 @@
-class Promise {
-    then(): Promise;
+class Promise<T> {
+    then(): Promise<T>;
 }
 
 function returnsPromiseFunction() {
-    return new Promise();
+    return new Promise<void>();
 }
 
-const returnsPromiseVariable = () => new Promise();
+const returnsPromiseVariable = () => new Promise<void>();
 
 class ReturnsPromiseClass {
     returnsPromiseMemberFunction() {
-        return new Promise();
+        return new Promise<void>();
     }
 
     returnsPromiseMemberVariable = () => new Promise();

@@ -38,9 +38,16 @@ export function getFormatter(formatterName: string) {
     return Lint.findFormatter(formatterName, formattersDirectory);
 }
 
-export function applyRuleOnFile(fileName: string, Rule: any, ruleValue: any = true): Lint.RuleFailure[] {
+// this function doesn't work with rules that use the language service
+export function applyRuleOnFile(fileName: string, Rule: any, ruleArguments: any[] = []): Lint.RuleFailure[] {
     const sourceFile = getSourceFile(fileName);
-    const rule = new Rule("", ruleValue, []);
+    const options = {
+        disabledIntervals: [],
+        ruleArguments,
+        ruleName: Rule.metadata.ruleName,
+        ruleSeverity: "error",
+    };
+    const rule = new Rule(options);
     return rule.apply(sourceFile);
 }
 

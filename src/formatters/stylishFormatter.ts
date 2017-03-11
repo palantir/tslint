@@ -17,7 +17,7 @@
 
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
 import {IFormatterMetadata} from "../language/formatter/formatter";
-import {RuleFailure} from "../language/rule/rule";
+import { RuleFailure } from "../language/rule/rule";
 
 import * as colors from "colors";
 
@@ -39,10 +39,20 @@ export class Formatter extends AbstractFormatter {
     /* tslint:enable:object-literal-sort-keys */
 
     public format(failures: RuleFailure[]): string {
-        if (typeof failures[0] === "undefined") {
-            return "\n";
+        const outputLines = this.mapToMessages(failures);
+
+        // Removes initial blank line
+        if (outputLines[0] === "") {
+            outputLines.shift();
         }
 
+        return outputLines.join("\n") + "\n";
+    }
+
+    private mapToMessages(failures: RuleFailure[]): string[] {
+        if (!failures) {
+            return [];
+        }
         const outputLines: string[] = [];
         const positionMaxSize       = this.getPositionMaxSize(failures);
         const ruleMaxSize           = this.getRuleMaxSize(failures);
@@ -71,21 +81,20 @@ export class Formatter extends AbstractFormatter {
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
 
             let positionTuple = `${lineAndCharacter.line + 1}:${lineAndCharacter.character + 1}`;
-            positionTuple     = this.pad(positionTuple, positionMaxSize);
-            positionTuple     = colors.red(positionTuple);
+            positionTuple = this.pad(positionTuple, positionMaxSize);
 
-            // Ouput
+            if (failure.getRuleSeverity() === "warning") {
+                positionTuple = colors.blue(failure.getRuleSeverity().toUpperCase() + ": " + positionTuple);
+            } else {
+                positionTuple = colors.red(failure.getRuleSeverity().toUpperCase() + ": " + positionTuple);
+            }
+
+            // Output
             const output = `${positionTuple}  ${ruleName}  ${failureString}`;
 
             outputLines.push(output);
         }
-
-        // Removes initial blank line
-        if (outputLines[0] === "") {
-            outputLines.shift();
-        }
-
-        return outputLines.join("\n") + "\n\n";
+        return outputLines;
     }
 
     private pad(str: string, len: number): string {
