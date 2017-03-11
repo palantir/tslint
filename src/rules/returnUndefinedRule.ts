@@ -56,22 +56,32 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
             return;
         }
 
-        const returnKindFromExpression = !node.expression
-            ? ReturnKind.Void
-            : u.isIdentifier(node.expression) && node.expression.text === "undefined"
-            ? ReturnKind.Value
-            : undefined;
-
-        if (returnKindFromExpression === undefined) {
+        const actualReturnKind = returnKindFromReturn(node);
+        if (actualReturnKind === undefined) {
             return;
         }
 
-        const functionReturningFrom = Lint.ancestorWhere(node, isFunctionLike)! as FunctionLike;
+        const functionReturningFrom = Lint.ancestorWhere(node, isFunctionLike) as FunctionLike | undefined;
+        if (!functionReturningFrom) {
+            // Return outside of function is invalid
+            return;
+        }
+
         const returnKindFromType = getReturnKind(functionReturningFrom, checker);
-        if (returnKindFromType !== undefined && returnKindFromType !== returnKindFromExpression) {
+        if (returnKindFromType !== undefined && returnKindFromType !== actualReturnKind) {
             ctx.addFailureAtNode(node,
                 returnKindFromType === ReturnKind.Void ? Rule.FAILURE_STRING_VOID_RETURN : Rule.FAILURE_STRING_VALUE_RETURN);
         }
+    }
+}
+
+function returnKindFromReturn(node: ts.ReturnStatement): ReturnKind | undefined {
+    if (!node.expression) {
+        return ReturnKind.Void;
+    } else if (u.isIdentifier(node.expression) && node.expression.text === "undefined") {
+        return ReturnKind.Value;
+    } else {
+        return undefined;
     }
 }
 
