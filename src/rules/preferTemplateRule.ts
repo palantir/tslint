@@ -20,7 +20,7 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
-const OPTION_BINARY_OK = "binary-ok";
+const OPTION_SINGLE_CONCAT = "allow-single-concat";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -28,12 +28,12 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "prefer-template",
         description: "Prefer a template expression over string literal concatenation.",
         optionsDescription: Lint.Utils.dedent`
-            If \`${OPTION_BINARY_OK}\` is specified, then a single concatenation (\`x + y\`) is allowed, but not more (\`x + y + z\`).`,
+            If \`${OPTION_SINGLE_CONCAT}\` is specified, then a single concatenation (\`x + y\`) is allowed, but not more (\`x + y + z\`).`,
         options: {
             type: "string",
-            enum: [OPTION_BINARY_OK],
+            enum: [OPTION_SINGLE_CONCAT],
         },
-        optionExamples: ["true", `[true, "${OPTION_BINARY_OK}"]`],
+        optionExamples: ["true", `[true, "${OPTION_SINGLE_CONCAT}"]`],
         type: "style",
         typescriptOnly: false,
     };
@@ -47,24 +47,23 @@ export class Rule extends Lint.Rules.AbstractRule {
             return []; // Not possible in a declaration file
         }
 
-        const binaryOk = this.getOptions().ruleArguments.indexOf(OPTION_BINARY_OK) !== -1;
-        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, binaryOk));
+        const allowSingleConcat = this.getOptions().ruleArguments.indexOf(OPTION_SINGLE_CONCAT) !== -1;
+        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, allowSingleConcat));
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>, binaryOk: boolean): void {
-    return ts.forEachChild(ctx.sourceFile, cb);
-    function cb(node: ts.Node): void {
-        const failure = getError(node, binaryOk);
+function walk(ctx: Lint.WalkContext<void>, allowSingleConcat: boolean): void {
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        const failure = getError(node, allowSingleConcat);
         if (failure) {
             ctx.addFailureAtNode(node, failure);
         } else {
             return ts.forEachChild(node, cb);
         }
-    }
+    });
 }
 
-function getError(node: ts.Node, binaryOk: boolean): string | undefined {
+function getError(node: ts.Node, allowSingleConcat: boolean): string | undefined {
     if (!isPlusExpression(node)) {
         return undefined;
     }
@@ -83,10 +82,10 @@ function getError(node: ts.Node, binaryOk: boolean): string | undefined {
         return containsAnyStringLiterals(left) ? Rule.FAILURE_STRING : undefined;
     } else if (l) {
         // `"x" + y`
-        return !binaryOk ? Rule.FAILURE_STRING : undefined;
+        return !allowSingleConcat ? Rule.FAILURE_STRING : undefined;
     } else {
         // `? + "b"`
-        return !binaryOk || isPlusExpression(left) ? Rule.FAILURE_STRING : undefined;
+        return !allowSingleConcat || isPlusExpression(left) ? Rule.FAILURE_STRING : undefined;
     }
 }
 
