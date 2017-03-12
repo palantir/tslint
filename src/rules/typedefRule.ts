@@ -26,7 +26,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "typedef",
         description: "Requires type definitions to exist.",
         optionsDescription: Lint.Utils.dedent`
-            Seven arguments may be optionally provided:
+            Several arguments may be optionally provided:
 
             * \`"call-signature"\` checks return type of functions.
             * \`"arrow-call-signature"\` checks return type of arrow functions.

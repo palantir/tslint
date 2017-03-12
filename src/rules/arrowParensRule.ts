@@ -15,11 +15,16 @@
  * limitations under the License.
  */
 
+import { getChildOfKind, isArrowFunction } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
 
 const BAN_SINGLE_ARG_PARENS = "ban-single-arg-parens";
+
+interface Options {
+    banSingleArgParens: boolean;
+}
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -45,49 +50,44 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_EXISTS = "Parentheses are prohibited around the parameter in this single parameter arrow function";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const newParensWalker = new ArrowParensWalker(sourceFile, this.getOptions());
-        return this.applyWithWalker(newParensWalker);
+        return this.applyWithFunction(sourceFile, walk, {
+            banSingleArgParens: this.ruleArguments.indexOf(BAN_SINGLE_ARG_PARENS) !== -1,
+        });
     }
 }
 
-class ArrowParensWalker extends Lint.RuleWalker {
-    private avoidOnSingleParameter: boolean;
-
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
-        super(sourceFile, options);
-        this.avoidOnSingleParameter = this.hasOption(BAN_SINGLE_ARG_PARENS);
-    }
-
-    public visitArrowFunction(node: ts.ArrowFunction) {
-        if (node.parameters.length === 1 && node.typeParameters === undefined) {
-            const parameter = node.parameters[0];
-
-            let openParen = node.getFirstToken();
-            let openParenIndex = 0;
-            if (openParen.kind === ts.SyntaxKind.AsyncKeyword) {
-                openParen = node.getChildAt(1);
-                openParenIndex = 1;
-            }
-
-            const hasParens = openParen.kind === ts.SyntaxKind.OpenParenToken;
-            if (!hasParens && !this.avoidOnSingleParameter) {
-                const fix = this.createFix(
-                    this.appendText(parameter.getStart(), "("),
-                    this.appendText(parameter.getEnd(), ")"),
-                );
-                this.addFailureAtNode(parameter, Rule.FAILURE_STRING_MISSING, fix);
-            } else if (hasParens && this.avoidOnSingleParameter && isSimpleParameter(parameter)) {
-                // Skip over the parameter to get the closing parenthesis
-                const closeParen = node.getChildAt(openParenIndex + 2);
-                const fix = this.createFix(
-                    this.deleteText(openParen.getStart(), 1),
-                    this.deleteText(closeParen.getStart(), 1),
-                );
-                this.addFailureAtNode(parameter, Rule.FAILURE_STRING_EXISTS, fix);
+function walk(ctx: Lint.WalkContext<Options>) {
+    function cb(node: ts.Node): void {
+        if (isArrowFunction(node) && parensAreOptional(node)) {
+            const openParen = getChildOfKind(node, ts.SyntaxKind.OpenParenToken);
+            if (openParen === undefined) {
+                if (!ctx.options.banSingleArgParens) {
+                    const parameter = node.parameters[0];
+                    const start = parameter.getStart(ctx.sourceFile);
+                    const end = parameter.end;
+                    ctx.addFailure(start, end, Rule.FAILURE_STRING_MISSING, ctx.createFix(
+                        Lint.Replacement.appendText(start, "("),
+                        Lint.Replacement.appendText(end, ")"),
+                    ));
+                }
+            } else if (ctx.options.banSingleArgParens) {
+                const closeParen = getChildOfKind(node, ts.SyntaxKind.CloseParenToken)!;
+                ctx.addFailureAtNode(node.parameters[0], Rule.FAILURE_STRING_EXISTS, ctx.createFix(
+                    Lint.Replacement.deleteText(openParen.end - 1, 1),
+                    Lint.Replacement.deleteText(closeParen.end - 1, 1),
+                ));
             }
         }
-        super.visitArrowFunction(node);
+        return ts.forEachChild(node, cb);
     }
+    return ts.forEachChild(ctx.sourceFile, cb);
+}
+
+function parensAreOptional(node: ts.ArrowFunction) {
+    return node.parameters.length === 1 &&
+        node.typeParameters === undefined &&
+        node.type === undefined &&
+        isSimpleParameter(node.parameters[0]);
 }
 
 function isSimpleParameter(parameter: ts.ParameterDeclaration): boolean {

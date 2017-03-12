@@ -48,6 +48,7 @@ const auth: GitHubApi.Auth = {
 };
 console.log("Using OAuth token " + auth.token + "\n");
 
+// process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // ignores TLS certificate error
 github.authenticate(auth);
 
 const commits: ICommit[] = [];

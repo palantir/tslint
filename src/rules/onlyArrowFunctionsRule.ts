@@ -87,13 +87,29 @@ class OnlyArrowFunctionsWalker extends Lint.RuleWalker {
     }
 }
 
-/** Generator functions and functions explicitly declaring `this` are allowed. */
+/** Generator functions and functions using `this` are allowed. */
 function functionIsExempt(node: ts.FunctionLikeDeclaration) {
-    return node.asteriskToken || hasThisParameter(node);
+    return node.asteriskToken || hasThisParameter(node) || node.body && usesThisInBody(node.body);
 }
 
 function hasThisParameter(node: ts.FunctionLikeDeclaration) {
     const first = node.parameters[0];
     return first && first.name.kind === ts.SyntaxKind.Identifier &&
         (first.name as ts.Identifier).originalKeywordKind === ts.SyntaxKind.ThisKeyword;
+}
+
+function usesThisInBody(node: ts.Node): boolean {
+    return node.kind === ts.SyntaxKind.ThisKeyword || !hasNewThis(node) && ts.forEachChild(node, usesThisInBody);
+}
+
+function hasNewThis(node: ts.Node) {
+    switch (node.kind) {
+        case ts.SyntaxKind.FunctionDeclaration:
+        case ts.SyntaxKind.FunctionExpression:
+        case ts.SyntaxKind.ClassDeclaration:
+        case ts.SyntaxKind.ClassExpression:
+            return true;
+        default:
+            return false;
+    }
 }

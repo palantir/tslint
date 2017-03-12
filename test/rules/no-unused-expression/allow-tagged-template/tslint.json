@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "no-unused-expression": [
+      true,
+      "allow-tagged-template"
+    ]
+  }
+}

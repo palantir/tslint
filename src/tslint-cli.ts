@@ -70,7 +70,8 @@ const processed = optimist
             describe: "output file",
             type: "string",
         },
-        "project": {
+        "p": {
+            alias: "project",
             describe: "tsconfig.json file",
             type: "string",
         },
@@ -92,7 +93,7 @@ const processed = optimist
         },
         "test": {
             describe: "test that tslint produces the correct output for the specified directory",
-            type: "string",
+            type: "boolean",
         },
         "type-check": {
             describe: "enable type checking when linting a project",
@@ -186,7 +187,7 @@ tslint accepts the following commandline options:
         the tests. See the full tslint documentation for more details on how
         this can be used to test custom rules.
 
-    --project:
+    -p, --project:
         The location of a tsconfig.json file that will be used to determine which
         files will be linted.
 
@@ -213,7 +214,7 @@ const options: IRunnerOptions = {
     formattersDirectory: argv.s,
     init: argv.init,
     out: argv.out,
-    project: argv.project,
+    project: argv.p,
     rulesDirectory: argv.r,
     test: argv.test,
     typeCheck: argv["type-check"],

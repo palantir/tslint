@@ -23,6 +23,9 @@ class Foo {
          ~~~~~~~         [boolean]
     bas: string = "moar";
          ~~~~~~          [string]
+    readonly foo: boolean = false;
+    constructor(readonly foobar: string = "test", public barfoo: number = 1) {}
+                                                                 ~~~~~~ [number]
 }
 
 // not errors, inferrable type is not declared

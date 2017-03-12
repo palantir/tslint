@@ -46,7 +46,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 class FileHeaderWalker extends Lint.RuleWalker {
     // match a single line or multi line comment with leading whitespace
     // the wildcard dot does not match new lines - we can use [\s\S] instead
-    private commentRegexp: RegExp = /^\s*(\/\/(.*?)|\/\*([\s\S]*?)\*\/)/;
+    private commentRegexp: RegExp = /^\s*(\/\/(.*)|\/\*([\s\S]*?)\*\/)/;
     private headerRegexp: RegExp;
 
     public setRegexp(headerRegexp: RegExp) {
