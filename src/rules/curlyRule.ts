@@ -164,9 +164,9 @@ function isStatementBraced(node: ts.Statement) {
 function areOnSameLine(node: ts.Node, statement: ts.Statement) {
     const file = node.getSourceFile();
     const nodeStartPos = file.getLineAndCharacterOfPosition(node.getStart());
-    const nodeEndPos = file.getLineAndCharacterOfPosition(node.getEnd());
     const statementStartPos = file.getLineAndCharacterOfPosition(statement.getStart());
+    const statementEndPos = file.getLineAndCharacterOfPosition(statement.getEnd());
 
     return nodeStartPos.line === statementStartPos.line
-        && nodeStartPos.line === nodeEndPos.line;
+        && nodeStartPos.line === statementEndPos.line;
 }
