@@ -37,9 +37,26 @@ export class Rule extends Lint.Rules.AbstractRule {
             In the code above, the author almost certainly meant for both \`foo++\` and \`bar++\`
             to be executed only if \`foo === bar\`. However, he forgot braces and \`bar++\` will be executed
             no matter what. This rule could prevent such a mistake.`,
-        optionsDescription: "Not configurable.",
-        options: null,
-        optionExamples: ["true"],
+        optionsDescription: Lint.Utils.dedent`
+            The rule may be set to \`true\`, or to any combination of these arguments:
+
+            * \`"${OPTION_ALWAYS}"\` requires braces for all control-flow statements (same as default)
+            * \`"${OPTION_IGNORE_SAME_LINE}"\` skips checking braces for control-flow statements
+            that are on one line and start on the same line as their control-flow keyword
+
+            Note: \`"${OPTION_ALWAYS}"\` will be overriden by any "ignore" options that are also set.
+        `,
+        options: {
+            type: "array",
+            items: {
+                type: "string",
+                enum: [
+                    OPTION_ALWAYS,
+                    OPTION_IGNORE_SAME_LINE,
+                ],
+            },
+        },
+        optionExamples: ["true", '[true, "ignore-same-line"]'],
         type: "functionality",
         typescriptOnly: false,
     };
