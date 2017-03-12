@@ -15,12 +15,24 @@
  * limitations under the License.
  */
 
+import {
+    isAssignmentKind, isBinaryExpression, isConditionalExpression, isExpressionStatement,
+    isIdentifier, isNumericLiteral, isPrefixUnaryExpression, isVoidExpression,
+} from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
 import { unwrapParentheses } from "../language/utils";
 
 const ALLOW_FAST_NULL_CHECKS = "allow-fast-null-checks";
+const ALLOW_NEW = "allow-new";
+const ALLOW_TAGGED_TEMPLATE = "allow-tagged-template";
+
+interface Options {
+    allowFastNullChecks: boolean;
+    allowNew: boolean;
+    allowTaggedTemplate: boolean;
+}
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -33,10 +45,12 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: Lint.Utils.dedent`
             Detects potential errors where an assignment or function call was intended.`,
         optionsDescription: Lint.Utils.dedent`
-            One argument may be optionally provided:
+            Two arguments may be optionally provided:
 
             * \`${ALLOW_FAST_NULL_CHECKS}\` allows to use logical operators to perform fast null checks and perform
-            method or function calls for side effects (e.g. \`e && e.preventDefault()\`).`,
+            method or function calls for side effects (e.g. \`e && e.preventDefault()\`).
+            * \`${ALLOW_NEW}\` allows 'new' expressions for side effects (e.g. \`new ModifyGlobalState();\`.
+            * \`${ALLOW_TAGGED_TEMPLATE}\` allows tagged templates for side effects (e.g. \`this.add\\\`foo\\\`;\`.`,
         options: {
             type: "array",
             items: {
@@ -52,181 +66,139 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "expected an assignment or function call";
+    public static FAILURE_STRING = "unused expression, expected an assignment or function call";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoUnusedExpressionWalker(sourceFile, this.getOptions()));
+        return this.applyWithWalker(new NoUnusedExpressionWalker(sourceFile, this.ruleName, {
+            allowFastNullChecks: this.ruleArguments.indexOf(ALLOW_FAST_NULL_CHECKS) !== -1,
+            allowNew: this.ruleArguments.indexOf(ALLOW_NEW) !== -1,
+            allowTaggedTemplate: this.ruleArguments.indexOf(ALLOW_TAGGED_TEMPLATE) !== -1,
+        }));
     }
 }
 
-export class NoUnusedExpressionWalker extends Lint.RuleWalker {
-    protected expressionIsUnused: boolean;
-
-    protected static isDirective(node: ts.Node, checkPreviousSiblings = true): boolean {
-        const { parent } = node;
-        if (parent === undefined) {
-            return true;
-        }
-        const grandParentKind = parent.parent == null ? null : parent.parent.kind;
-        const isStringExpression = node.kind === ts.SyntaxKind.ExpressionStatement
-            && (node as ts.ExpressionStatement).expression.kind === ts.SyntaxKind.StringLiteral;
-        const parentIsSourceFile = parent.kind === ts.SyntaxKind.SourceFile;
-        const parentIsNSBody = parent.kind === ts.SyntaxKind.ModuleBlock;
-        const parentIsFunctionBody = grandParentKind !== null && parent.kind === ts.SyntaxKind.Block && [
-            ts.SyntaxKind.ArrowFunction,
-            ts.SyntaxKind.FunctionExpression,
-            ts.SyntaxKind.FunctionDeclaration,
-            ts.SyntaxKind.MethodDeclaration,
-            ts.SyntaxKind.Constructor,
-            ts.SyntaxKind.GetAccessor,
-            ts.SyntaxKind.SetAccessor,
-        ].indexOf(grandParentKind) > -1;
-
-        if (!(parentIsSourceFile || parentIsFunctionBody || parentIsNSBody) || !isStringExpression) {
-            return false;
-        }
-
-        if (checkPreviousSiblings) {
-            const siblings: ts.Node[] = [];
-            ts.forEachChild(parent, (child) => { siblings.push(child); });
-            return siblings.slice(0, siblings.indexOf(node)).every((n) => NoUnusedExpressionWalker.isDirective(n, false));
-        } else {
-            return true;
-        }
-    }
-
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
-        super(sourceFile, options);
-        this.expressionIsUnused = true;
-    }
-
-    public visitExpressionStatement(node: ts.ExpressionStatement) {
-        this.expressionIsUnused = true;
-        super.visitExpressionStatement(node);
-        this.checkExpressionUsage(node);
-    }
-
-    public visitBinaryExpression(node: ts.BinaryExpression) {
-        super.visitBinaryExpression(node);
-        switch (node.operatorToken.kind) {
-            case ts.SyntaxKind.EqualsToken:
-            case ts.SyntaxKind.PlusEqualsToken:
-            case ts.SyntaxKind.MinusEqualsToken:
-            case ts.SyntaxKind.AsteriskEqualsToken:
-            case ts.SyntaxKind.SlashEqualsToken:
-            case ts.SyntaxKind.PercentEqualsToken:
-            case ts.SyntaxKind.AmpersandEqualsToken:
-            case ts.SyntaxKind.CaretEqualsToken:
-            case ts.SyntaxKind.BarEqualsToken:
-            case ts.SyntaxKind.LessThanLessThanEqualsToken:
-            case ts.SyntaxKind.GreaterThanGreaterThanEqualsToken:
-            case ts.SyntaxKind.GreaterThanGreaterThanGreaterThanEqualsToken:
-                this.expressionIsUnused = false;
-                break;
-            case ts.SyntaxKind.AmpersandAmpersandToken:
-            case ts.SyntaxKind.BarBarToken:
-                if (this.hasOption(ALLOW_FAST_NULL_CHECKS) && isTopLevelExpression(node)) {
-                    this.expressionIsUnused = !hasCallExpression(node.right);
-                    break;
-                } else {
-                    this.expressionIsUnused = true;
-                    break;
+class NoUnusedExpressionWalker extends Lint.AbstractWalker<Options> {
+    public walk(sourceFile: ts.SourceFile) {
+        const cb = (node: ts.Node): void => {
+            if (isExpressionStatement(node)) {
+                if (!isDirective(node) && this.isUnusedExpression(node.expression)) {
+                    this.reportFailure(node);
                 }
-            default:
-                this.expressionIsUnused = true;
-        }
+            } else if (isVoidExpression(node)) {
+                // allow `void 0`
+                if (!isLiteralZero(node.expression) && this.isUnusedExpression(node.expression)) {
+                    this.reportFailure(node.expression);
+                }
+            } else if (isBinaryExpression(node)) {
+                if (node.operatorToken.kind === ts.SyntaxKind.CommaToken) {
+                    // allow indirect eval: `(0, eval)("code");`
+                    if (!isIndirectEval(node) && this.isUnusedExpression(node.left)) {
+                        this.reportFailure(node.left);
+                    }
+                }
+            }
+            return ts.forEachChild(node, cb);
+        };
+        return ts.forEachChild(sourceFile, cb);
     }
 
-    public visitPrefixUnaryExpression(node: ts.PrefixUnaryExpression) {
-        super.visitPrefixUnaryExpression(node);
-        switch (node.operator) {
-            case ts.SyntaxKind.PlusPlusToken:
-            case ts.SyntaxKind.MinusMinusToken:
-                this.expressionIsUnused = false;
-                break;
-            default:
-                this.expressionIsUnused = true;
-        }
-    }
-
-    public visitPostfixUnaryExpression(node: ts.PostfixUnaryExpression) {
-        super.visitPostfixUnaryExpression(node);
-        this.expressionIsUnused = false; // the only kinds of postfix expressions are postincrement and postdecrement
-    }
-
-    public visitBlock(node: ts.Block) {
-        super.visitBlock(node);
-        this.expressionIsUnused = true;
-    }
-
-    public visitArrowFunction(node: ts.ArrowFunction) {
-        super.visitArrowFunction(node);
-        this.expressionIsUnused = true;
-    }
-
-    public visitCallExpression(node: ts.CallExpression) {
-        super.visitCallExpression(node);
-        this.expressionIsUnused = false;
-    }
-
-    protected visitNewExpression(node: ts.NewExpression) {
-        super.visitNewExpression(node);
-        this.expressionIsUnused = false;
-    }
-
-    public visitConditionalExpression(node: ts.ConditionalExpression) {
-        this.visitNode(node.condition);
-        this.expressionIsUnused = true;
-        this.visitNode(node.whenTrue);
-        const firstExpressionIsUnused = this.expressionIsUnused;
-        this.expressionIsUnused = true;
-        this.visitNode(node.whenFalse);
-        const secondExpressionIsUnused = this.expressionIsUnused;
-        // if either expression is unused, then that expression's branch is a no-op unless it's
-        // being assigned to something or passed to a function, so consider the entire expression unused
-        this.expressionIsUnused = firstExpressionIsUnused || secondExpressionIsUnused;
-    }
-
-    protected checkExpressionUsage(node: ts.ExpressionStatement) {
-        if (this.expressionIsUnused) {
-            const { expression } = node;
-            const { kind } = expression;
-            const isValidStandaloneExpression = kind === ts.SyntaxKind.DeleteExpression
-                || kind === ts.SyntaxKind.YieldExpression
-                || kind === ts.SyntaxKind.AwaitExpression;
-
-            if (!isValidStandaloneExpression && !NoUnusedExpressionWalker.isDirective(node)) {
-                this.addFailureAtNode(node, Rule.FAILURE_STRING);
+    private reportFailure(node: ts.Node) {
+        const start = node.getStart(this.sourceFile);
+        const end = node.end;
+        // don't add a new failure if it is contained in another failure's span
+        for (const failure of this.failures) {
+            if (failure.getStartPosition().getPosition() <= start &&
+                failure.getEndPosition().getPosition() >= end) {
+                return;
             }
         }
+        this.addFailure(start, end, Rule.FAILURE_STRING);
     }
-}
 
-function hasCallExpression(node: ts.Expression): boolean {
-    const nodeToCheck = unwrapParentheses(node);
-
-    if (nodeToCheck.kind === ts.SyntaxKind.CallExpression) {
+    private isUnusedExpression(expression: ts.Expression): boolean {
+        expression = unwrapParentheses(expression);
+        switch (expression.kind) {
+            case ts.SyntaxKind.CallExpression:
+            case ts.SyntaxKind.YieldExpression:
+            case ts.SyntaxKind.DeleteExpression:
+            case ts.SyntaxKind.AwaitExpression:
+            case ts.SyntaxKind.PostfixUnaryExpression:
+                return false;
+            case ts.SyntaxKind.NewExpression:
+                return !this.options.allowNew;
+            case ts.SyntaxKind.TaggedTemplateExpression:
+                return !this.options.allowTaggedTemplate;
+            default:
+        }
+        if (isPrefixUnaryExpression(expression) &&
+            (expression.operator === ts.SyntaxKind.PlusPlusToken || expression.operator === ts.SyntaxKind.MinusMinusToken)) {
+            return false;
+        }
+        if (isConditionalExpression(expression)) {
+            return this.isUnusedExpression(expression.whenTrue) || this.isUnusedExpression(expression.whenFalse);
+        }
+        if (isBinaryExpression(expression)) {
+            const operatorKind = expression.operatorToken.kind;
+            if (isAssignmentKind(operatorKind)) {
+                return false;
+            }
+            if (this.options.allowFastNullChecks &&
+                (operatorKind === ts.SyntaxKind.AmpersandAmpersandToken || operatorKind === ts.SyntaxKind.BarBarToken)) {
+                return this.isUnusedExpression(expression.right);
+            } else if (operatorKind === ts.SyntaxKind.CommaToken) {
+                return this.isUnusedExpression(expression.left) || this.isUnusedExpression(expression.right);
+            }
+        }
         return true;
     }
-
-    if (nodeToCheck.kind === ts.SyntaxKind.BinaryExpression) {
-        const operatorToken = (nodeToCheck as ts.BinaryExpression).operatorToken;
-
-        if (operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken ||
-            operatorToken.kind === ts.SyntaxKind.BarBarToken) {
-            return hasCallExpression((nodeToCheck as ts.BinaryExpression).right);
-        }
-    }
-
-    return false;
 }
 
-function isTopLevelExpression(node: ts.Expression): boolean {
-    let nodeToCheck = node.parent as ts.Node;
+function isLiteralZero(node: ts.Expression) {
+    return isNumericLiteral(node) && node.text === "0";
+}
 
-    while (nodeToCheck.kind === ts.SyntaxKind.ParenthesizedExpression) {
-        nodeToCheck = nodeToCheck.parent as ts.Node;
+function isIndirectEval(node: ts.BinaryExpression): boolean {
+    return isIdentifier(node.right) && node.right.text === "eval" &&
+        isLiteralZero(node.left) &&
+        node.parent!.kind === ts.SyntaxKind.ParenthesizedExpression &&
+        node.parent!.parent!.kind === ts.SyntaxKind.CallExpression;
+}
+
+function isDirective(node: ts.ExpressionStatement) {
+    if (node.expression.kind !== ts.SyntaxKind.StringLiteral || !canContainDirective(node.parent!)) {
+        return false;
     }
 
-    return nodeToCheck.kind === ts.SyntaxKind.ExpressionStatement;
+    const parent = node.parent as ts.BlockLike;
+    // check if all previous statements in block are also directives
+    for (let i = parent.statements.indexOf(node) - 1; i >= 0; --i) {
+        const statement = parent.statements[i];
+        if (!isExpressionStatement(statement) || statement.expression.kind !== ts.SyntaxKind.StringLiteral) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function canContainDirective(node: ts.Node): boolean {
+    switch (node.kind) {
+        case ts.SyntaxKind.SourceFile:
+        case ts.SyntaxKind.ModuleBlock:
+            return true;
+        case ts.SyntaxKind.Block:
+            switch (node.parent!.kind) {
+                case ts.SyntaxKind.ArrowFunction:
+                case ts.SyntaxKind.FunctionExpression:
+                case ts.SyntaxKind.FunctionDeclaration:
+                case ts.SyntaxKind.MethodDeclaration:
+                case ts.SyntaxKind.Constructor:
+                case ts.SyntaxKind.GetAccessor:
+                case ts.SyntaxKind.SetAccessor:
+                    return true;
+                default:
+                    return false;
+            }
+        default:
+            return false;
+    }
 }

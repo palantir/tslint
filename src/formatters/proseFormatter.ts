@@ -24,14 +24,14 @@ export class Formatter extends AbstractFormatter {
     public static metadata: IFormatterMetadata = {
         formatterName: "prose",
         description: "The default formatter which outputs simple human-readable messages.",
-        sample: "myFile.ts[1, 14]: Missing semicolon",
+        sample: "ERROR: myFile.ts[1, 14]: Missing semicolon",
         consumer: "human",
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public format(failures: RuleFailure[], fixes?: RuleFailure[]): string {
         if (failures.length === 0 && (!fixes || fixes.length === 0)) {
-            return "";
+            return "\n";
         }
 
         const fixLines: string[] = [];
@@ -54,7 +54,7 @@ export class Formatter extends AbstractFormatter {
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
             const positionTuple = `[${lineAndCharacter.line + 1}, ${lineAndCharacter.character + 1}]`;
 
-            return `${fileName}${positionTuple}: ${failureString}`;
+            return `${failure.getRuleSeverity().toUpperCase()}: ${fileName}${positionTuple}: ${failureString}`;
         });
 
         return fixLines.concat(errorLines).join("\n") + "\n";

@@ -9,11 +9,21 @@ layout: page
    <h5>Rationale</h5>
    {{page.rationale | markdownify}}
 {% endif %}
-{% if page.requiresTypeInfo %}
-   <strong>Note:</strong>
-   <a href="https://github.com/palantir/tslint#type-checking">This rule requires type info to run</a>
-{% endif %}
 
+{% if page.typescriptOnly or page.hasFix or page.requiresTypeInfo %}
+   <h5>Notes: </h5>
+    <div class="rule-features">
+        {% if page.typescriptOnly %}
+            <span class="feature feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+        {% endif %}
+        {% if page.hasFix %}
+            <span class="feature feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+        {% endif %}
+        {% if page.requiresTypeInfo %}
+            <a class="feature feature-requires-type-info" href="https://github.com/palantir/tslint#type-checking" title="This rule requires type information to run. Click to learn more.">Requires Type Info</a>
+        {% endif %}
+    </div>
+{% endif %}
 
 <h3>Config</h3>
 {{page.optionsDescription | markdownify}}

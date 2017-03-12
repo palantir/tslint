@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "quotemark": [true, "double"]
+  },
+  "jsRules": {
+    "quotemark": [true, "double"]
+  }
+}

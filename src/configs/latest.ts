@@ -23,11 +23,13 @@ export const rules = {
     "no-angle-bracket-type-assertion": true,
 
     // added in v4.1
-    "only-arrow-functions": [true,
-        "allow-declarations",
-        // the following option was added in 4.1
-        "allow-named-functions",
-    ],
+    "only-arrow-functions": {
+        options: [
+            "allow-declarations",
+            // the following option was added in 4.1
+            "allow-named-functions",
+        ],
+    },
     "prefer-const": true,
 
     // added in v4.2
@@ -38,13 +40,15 @@ export const rules = {
 
     // added in v4.3
     "import-spacing": true,
-    "space-before-function-paren": [true, {
-        "anonymous": "never",
-        "asyncArrow": "always",
-        "constructor": "never",
-        "method": "never",
-        "named": "never",
-    }],
+    "space-before-function-paren": {
+        options: {
+            "anonymous": "never",
+            "asyncArrow": "always",
+            "constructor": "never",
+            "method": "never",
+            "named": "never",
+        },
+    },
     "typeof-compare": true,
     "unified-signatures": true,
 
@@ -52,6 +56,19 @@ export const rules = {
     "arrow-return-shorthand": true,
     "no-unnecessary-initializer": true,
     "no-misused-new": true,
+
+    // added in v4.5
+    "ban-types": {
+        options: [
+            ["Object", "Avoid using the `Object` type. Did you mean `object`?"],
+            ["Function", "Avoid using the `Function` type. Prefer a specific function type, like `() => void`."],
+            ["Boolean", "Avoid using the `Boolean` type. Did you mean `boolean`?"],
+            ["Number", "Avoid using the `Number` type. Did you mean `number`?"],
+            ["String", "Avoid using the `String` type. Did you mean `string`?"],
+            ["Symbol", "Avoid using the `Symbol` type. Did you mean `symbol`?"],
+        ],
+    },
+    "no-duplicate-super": true,
 };
 // tslint:enable object-literal-sort-keys
 

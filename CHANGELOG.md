@@ -1,6 +1,55 @@
 Change Log
 ===
 
+<!--
+
+v5.0.0
+---
+
+- **BREAKING CHANGES**
+    - The severity level of rules is now configurable and defaults to severity "error"
+    - The following formatters have changed their outputs:
+        - msbuildFormatter - default was "warning"; it is now "error"
+        - pmdFormatter - default was priority 1; it is now "error" (priority 3). If set to "warning", it will output priority 4
+- [enhancement] Enable WARN with new config file format (#629, #345)
+    - Valid values for `severity`: `error | warn | warning | none | off`
+    - Old style:
+
+    ```json
+    {
+        "extends": "tslint:latest",
+        "rules": {
+            "callable-types": true
+        }
+    }
+    ```
+
+    - New style, with `interface-name` generating warnings, and passing options to `max-line-length`:
+
+    ```json
+    {
+        "extends": "tslint:latest",
+        "rules": {
+            "callable-types": true,
+            "interface-name": {
+                "severity": "warn"
+            },
+            "max-line-length": {
+                "options": 140,
+                "severity": "warning"
+            }
+        }
+    }
+    ```
+
+-->
+
+v4.5.1
+---
+
+- [enhancement] Updated recommended rules to include `ban-types` and `no-duplicate-super` (#2271)
+- [bugfix] `object-literal-key-quotes` handle negative number property name (#2273)
+
 v4.5.0
 ---
 
@@ -30,6 +79,8 @@ v4.5.0
 - [enhancement] Don't exit when a rule requires type checking but type checking is not enabled (#2188)
 - [enhancement] `no-switch-case-fallthrough` allow single line comment `// falls through` (#2218)
 - [enhancement] `no-unbound-method` allows property access and binary expressions (#2143)
+- [api] Introduce `AbstractWalker` for performance (#2093)
+    - see [performance] (https://palantir.github.io/tslint/develop/custom-rules/performance.html) and [migration] (https://palantir.github.io/tslint/develop/custom-rules/migration.html) docs
 
 Thanks to our contributors!
 

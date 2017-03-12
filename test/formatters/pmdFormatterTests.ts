@@ -16,7 +16,8 @@
 
 import * as ts from "typescript";
 
-import {IFormatter, RuleFailure, TestUtils} from "../lint";
+import { IFormatter, TestUtils } from "../lint";
+import { createFailure } from "./utils";
 
 describe("PMD Formatter", () => {
     const TEST_FILE = "formatters/pmdFormatter.test.ts";
@@ -33,27 +34,27 @@ describe("PMD Formatter", () => {
         const maxPosition = sourceFile.getFullWidth();
 
         const failures = [
-            new RuleFailure(sourceFile, 0, 1, "first failure", "first-name"),
-            new RuleFailure(sourceFile, 2, 3, "&<>'\" should be escaped", "escape"),
-            new RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name"),
-            new RuleFailure(sourceFile, 0, maxPosition, "full failure", "full-name"),
+            createFailure(sourceFile, 0, 1, "first failure", "first-name", undefined, "error"),
+            createFailure(sourceFile, 2, 3, "&<>'\" should be escaped", "escape", undefined, "error"),
+            createFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name", undefined, "warning"),
+            createFailure(sourceFile, 0, maxPosition, "full failure", "full-name", undefined, "warning"),
         ];
         const expectedResult =
             "<pmd version=\"tslint\">" +
                 "<file name=\"formatters/pmdFormatter.test.ts\">" +
-                    "<violation begincolumn=\"1\" beginline=\"1\" priority=\"1\" rule=\"first failure\"> " +
+                    "<violation begincolumn=\"1\" beginline=\"1\" priority=\"3\" rule=\"first failure\"> " +
                     "</violation>" +
                 "</file>" +
                 "<file name=\"formatters/pmdFormatter.test.ts\">" +
-                    "<violation begincolumn=\"3\" beginline=\"1\" priority=\"1\" rule=\"&amp;&lt;&gt;&#39;&quot; should be escaped\"> " +
+                    "<violation begincolumn=\"3\" beginline=\"1\" priority=\"3\" rule=\"&amp;&lt;&gt;&#39;&quot; should be escaped\"> " +
                     "</violation>" +
                 "</file>" +
                 "<file name=\"formatters/pmdFormatter.test.ts\">" +
-                    "<violation begincolumn=\"3\" beginline=\"6\" priority=\"1\" rule=\"last failure\"> " +
+                    "<violation begincolumn=\"3\" beginline=\"6\" priority=\"4\" rule=\"last failure\"> " +
                     "</violation>" +
                 "</file>" +
                 "<file name=\"formatters/pmdFormatter.test.ts\">" +
-                    "<violation begincolumn=\"1\" beginline=\"1\" priority=\"1\" rule=\"full failure\"> " +
+                    "<violation begincolumn=\"1\" beginline=\"1\" priority=\"4\" rule=\"full failure\"> " +
                     "</violation>" +
                 "</file>" +
             "</pmd>";

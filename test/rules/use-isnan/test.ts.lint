@@ -9,6 +9,39 @@ if (isNaN(something)) { }
 // no violation for assignments
 let x = 0;
 x = NaN;
+x += NaN;
+x -= NaN;
+x /= NaN;
+x *= NaN;
+x %= NaN;
+x **= NaN;
+x <<= NaN;
+x >>= NaN;
+x >>>= NaN;
+x &= NaN;
+x ^= NaN;
+x |= NaN;
+
+// no violation for arithmetic operators
+x = x + NaN;
+x = NaN - x;
+x = x / NaN;
+x = NaN * x;
+x = x % NaN;
+x = NaN ** x;
+
+// no violation for bitwise operators
+x = x & NaN;
+x = NaN | x;
+x = x ^ NaN;
+x = NaN << x;
+x = x >> NaN;
+x = NaN >>> x;
+x = x & NaN;
+
+// no violation for other operators
+if (x instanceof NaN) { }
+if (NaN in x) { }
 
 // do not use equality operators to compare for NaN
 if (foo == NaN) {  }

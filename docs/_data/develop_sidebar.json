@@ -7,6 +7,14 @@
          "url": "/custom-rules/"
       },
       {
+         "title": "Custom Rules - Performance",
+         "url": "/custom-rules/performance.html"
+      },
+      {
+         "title": "Custom Rules - Migrating to AbstractWalker",
+         "url": "/custom-rules/performance/migration.html"
+      },
+      {
          "title": "Custom Formatters",
          "url": "/custom-formatters/"
       },

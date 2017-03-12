@@ -35,16 +35,19 @@ export * from "./language/walker";
 export * from "./language/formatter/formatter";
 
 export interface LintResult {
-    failureCount: number;
+    errorCount: number;
+    warningCount: number;
     failures: RuleFailure[];
     fixes?: RuleFailure[];
-    format: string | Function;
+    format: string | FormatterFunction;
     output: string;
 }
 
+export type FormatterFunction = (failures: RuleFailure[]) => string;
+
 export interface ILinterOptions {
     fix: boolean;
-    formatter?: string | Function;
+    formatter?: string | FormatterFunction;
     formattersDirectory?: string;
     rulesDirectory?: string | string[];
 }

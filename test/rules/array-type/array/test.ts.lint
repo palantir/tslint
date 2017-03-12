@@ -1,5 +1,5 @@
-let x: Array<number> = [1] as number[];
-       ~~~~~~~~~~~~~                    [Array type using 'Array<T>' is forbidden. Use 'T[]' instead.]
+let x: Array<undefined> = [undefined] as undefined[];
+       ~~~~~~~~~~~~~~~~                               [Array type using 'Array<T>' is forbidden. Use 'T[]' instead.]
 let y: string[] = <Array<string>>["2"];
                    ~~~~~~~~~~~~~        [Array type using 'Array<T>' is forbidden. Use 'T[]' instead.]
 let z: Array = [3, "4"];
