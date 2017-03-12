@@ -82,8 +82,8 @@ class CurlyWalker extends Lint.RuleWalker {
 
         const args = this.getOptions();
 
-        this.optionAlways = args.length === 0 || args.includes(OPTION_ALWAYS);
-        this.optionIgnoreSameLine = args.includes(OPTION_IGNORE_SAME_LINE);
+        this.optionAlways = args.length === 0 || args.indexOf(OPTION_ALWAYS) > -1;
+        this.optionIgnoreSameLine = args.indexOf(OPTION_IGNORE_SAME_LINE) > -1;
     }
 
     public visitForInStatement(node: ts.ForInStatement) {
