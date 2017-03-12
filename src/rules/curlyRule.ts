@@ -19,6 +19,9 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
+const OPTION_ALWAYS = "always";
+const OPTION_IGNORE_SAME_LINE = "ignore-same-line";
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -54,8 +57,21 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class CurlyWalker extends Lint.RuleWalker {
+    private optionIgnoreSameLine: boolean;
+    private optionAlways: boolean;
+
+    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
+        super(sourceFile, options);
+
+        const args = this.getOptions();
+
+        this.optionAlways = args.length === 0 || args.includes(OPTION_ALWAYS);
+        this.optionIgnoreSameLine = args.includes(OPTION_IGNORE_SAME_LINE);
+    }
+
     public visitForInStatement(node: ts.ForInStatement) {
-        if (!isStatementBraced(node.statement)) {
+        if (!isStatementBraced(node.statement)
+                && this.areBracketsRequired(node, node.statement)) {
             this.addFailureAtNode(node, Rule.FOR_FAILURE_STRING);
         }
 
@@ -63,7 +79,8 @@ class CurlyWalker extends Lint.RuleWalker {
     }
 
     public visitForOfStatement(node: ts.ForOfStatement) {
-        if (!isStatementBraced(node.statement)) {
+        if (!isStatementBraced(node.statement)
+                && this.areBracketsRequired(node, node.statement)) {
             this.addFailureAtNode(node, Rule.FOR_FAILURE_STRING);
         }
 
@@ -71,7 +88,8 @@ class CurlyWalker extends Lint.RuleWalker {
     }
 
     public visitForStatement(node: ts.ForStatement) {
-        if (!isStatementBraced(node.statement)) {
+        if (!isStatementBraced(node.statement)
+                && this.areBracketsRequired(node, node.statement)) {
             this.addFailureAtNode(node, Rule.FOR_FAILURE_STRING);
         }
 
@@ -79,7 +97,8 @@ class CurlyWalker extends Lint.RuleWalker {
     }
 
     public visitIfStatement(node: ts.IfStatement) {
-        if (!isStatementBraced(node.thenStatement)) {
+        if (!isStatementBraced(node.thenStatement)
+                && this.areBracketsRequired(node, node.thenStatement)) {
             this.addFailureFromStartToEnd(node.getStart(), node.thenStatement.getEnd(), Rule.IF_FAILURE_STRING);
         }
 
@@ -87,16 +106,19 @@ class CurlyWalker extends Lint.RuleWalker {
                 && node.elseStatement.kind !== ts.SyntaxKind.IfStatement
                 && !isStatementBraced(node.elseStatement)) {
 
-            // find the else keyword to place the error appropriately
+            // find the else keyword to check placement (and to place the error appropriately)
             const elseKeywordNode = Lint.childOfKind(node, ts.SyntaxKind.ElseKeyword)!;
-            this.addFailureFromStartToEnd(elseKeywordNode.getStart(), node.elseStatement.getEnd(), Rule.ELSE_FAILURE_STRING);
+            if (this.areBracketsRequired(elseKeywordNode, node.elseStatement)) {
+                this.addFailureFromStartToEnd(elseKeywordNode.getStart(), node.elseStatement.getEnd(), Rule.ELSE_FAILURE_STRING);
+            }
         }
 
         super.visitIfStatement(node);
     }
 
     public visitDoStatement(node: ts.DoStatement) {
-        if (!isStatementBraced(node.statement)) {
+        if (!isStatementBraced(node.statement)
+                && this.areBracketsRequired(node, node.statement)) {
             this.addFailureAtNode(node, Rule.DO_FAILURE_STRING);
         }
 
@@ -104,14 +126,30 @@ class CurlyWalker extends Lint.RuleWalker {
     }
 
     public visitWhileStatement(node: ts.WhileStatement) {
-        if (!isStatementBraced(node.statement)) {
+        if (!isStatementBraced(node.statement)
+                && this.areBracketsRequired(node, node.statement)) {
             this.addFailureAtNode(node, Rule.WHILE_FAILURE_STRING);
         }
 
         super.visitWhileStatement(node);
     }
+
+    private areBracketsRequired(keywordNode: ts.Node, queryStatement: ts.Statement) {
+        // Brackets are required if the node & statement don't fit any configured exceptions
+        return !(this.optionIgnoreSameLine && areOnSameLine(keywordNode, queryStatement));
+    }
 }
 
 function isStatementBraced(node: ts.Statement) {
     return node.kind === ts.SyntaxKind.Block;
+}
+
+function areOnSameLine(node: ts.Node, statement: ts.Statement) {
+    const file = node.getSourceFile();
+    const nodeStartPos = file.getLineAndCharacterOfPosition(node.getStart());
+    const nodeEndPos = file.getLineAndCharacterOfPosition(node.getEnd());
+    const statementStartPos = file.getLineAndCharacterOfPosition(statement.getStart());
+
+    return nodeStartPos.line === statementStartPos.line
+        && nodeStartPos.line === nodeEndPos.line;
 }
