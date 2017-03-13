@@ -91,8 +91,6 @@ function parseOptions(options: any[]): Options {
     return { checkParameters, ignorePattern };
 }
 
-const programToUnusedCheckedProgram = new WeakMap<ts.Program, ts.Program>();
-
 function walk(ctx: Lint.WalkContext<void>, program: ts.Program, { checkParameters, ignorePattern }: Options): void {
     const { sourceFile } = ctx;
     const unusedCheckedProgram = getUnusedCheckedProgram(program, checkParameters);
@@ -344,6 +342,8 @@ function getUnusedDiagnostic(diag: ts.Diagnostic): UnusedKind | undefined  {
             return undefined;
     }
 }
+
+const programToUnusedCheckedProgram = new WeakMap<ts.Program, ts.Program>();
 
 function getUnusedCheckedProgram(program: ts.Program, checkParameters: boolean): ts.Program {
     // Assuming checkParameters will always have the same value, so only lookup by program.

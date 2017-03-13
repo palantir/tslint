@@ -1,8 +1,0 @@
-{
-  "linterOptions": {
-    "typeCheck": true
-  },
-  "rules": {
-    "no-unused-variable": [true, "react"]
-  }
-}

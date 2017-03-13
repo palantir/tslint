@@ -1,2 +1,0 @@
-import * as React from "react";
-            ~~~~~               ['React' is declared but never used.]

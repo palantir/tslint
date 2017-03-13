@@ -147,7 +147,7 @@ export class Runner {
                 console.error("Invalid option for project: " + this.options.project);
                 return onComplete(1);
             }
-            program = Linter.createProgram(this.options.project, path.dirname(this.options.project));
+            program = Linter.createProgram(this.options.project);
             if (files.length === 0) {
                 files = Linter.getFileNames(program);
             }

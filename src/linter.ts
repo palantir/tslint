@@ -208,24 +208,22 @@ class Linter {
     }
 
     private getSourceFile(fileName: string, source: string) {
-        let sourceFile: ts.SourceFile;
         if (this.program) {
-            sourceFile = this.program.getSourceFile(fileName);
+            const sourceFile = this.program.getSourceFile(fileName);
+            if (sourceFile === undefined) {
+                const INVALID_SOURCE_ERROR = dedent`
+                    Invalid source file: ${fileName}. Ensure that the files supplied to lint have a .ts, .tsx, .js or .jsx extension.
+                `;
+                throw new Error(INVALID_SOURCE_ERROR);
+            }
             // check if the program has been type checked
-            if (sourceFile && !("resolvedModules" in sourceFile)) {
+            if (!("resolvedModules" in sourceFile)) {
                 throw new Error("Program must be type checked before linting");
             }
+            return sourceFile;
         } else {
-            sourceFile = utils.getSourceFile(fileName, source);
+            return utils.getSourceFile(fileName, source);
         }
-
-        if (sourceFile === undefined) {
-            const INVALID_SOURCE_ERROR = dedent`
-                Invalid source file: ${fileName}. Ensure that the files supplied to lint have a .ts, .tsx, .js or .jsx extension.
-            `;
-            throw new Error(INVALID_SOURCE_ERROR);
-        }
-        return sourceFile;
     }
 
     private containsRule(rules: RuleFailure[], rule: RuleFailure) {
