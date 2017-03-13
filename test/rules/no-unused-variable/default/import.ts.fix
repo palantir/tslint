@@ -3,20 +3,20 @@
  * This text will not be deleted.
  */
 
-import  $ = require("jquery");
-import  _ = require("underscore");
-import {a2 as aa2} from "modA";
+import  $ = require("a");
+import  _ = require("a");
+import {a2 as aa2} from "a";
 aa2;
-import {a3 as aa3} from "modA";
+import {a3 as aa3} from "a";
 aa3;
 // This import statement is unused and will be deleted along with this comment.
 
 
-import {a8} from "modA";
+import {a8} from "a";
 a8;
-import {a13} from "modA";
+import {a13} from "a";
 a13;
-import {a14, a16} from "modA";
+import {a14, a16} from "a";
 a14;
 a16;
 
@@ -31,19 +31,19 @@ module S {
 }
 
 
-import * as bar from "libB";
-import baz from "libC";
-import { namedExport } from "libD";
+import * as bar from "a";
+import baz from "a";
+import { namedExport } from "a";
 
-import d3 from "libD";
+import d3 from "a";
 d3;
 
 bar.someFunc();
 baz();
 namedExport();
 
-import "jquery";
+import "a";
 
-import abc = require('abc');
+import abc = require('a');
 import def = abc.someVar;
 console.log(def);

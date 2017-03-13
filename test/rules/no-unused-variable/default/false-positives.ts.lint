@@ -43,12 +43,12 @@ interface MyDateTimeOpts extends DateTimeOpts {
 let opts: MyDateTimeOpts;
 console.log(opts.timezoneOffset - 1);
 
-import * as myLib from 'myLib';
+import * as myLib from 'a';
 export { myLib };
 
-import foo from 'foo';
+import foo from 'a';
 const bar = {foo};
 myFunc(bar);
 
-import a from "module";
+import a from "a";
 export { a };

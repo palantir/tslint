@@ -2,30 +2,30 @@
  * Some license that appears in the leading trivia of a statement that will be deleted.
  * This text will not be deleted.
  */
-import xyz = require("xyz");
+import xyz = require("a");
        ~~~                   ['xyz' is declared but never used.]
-import  $ = require("jquery");
-import  _ = require("underscore");
-import {a1 as aa1, a2 as aa2} from "modA";
+import  $ = require("a");
+import  _ = require("a");
+import {a1 as aa1, a2 as aa2} from "a";
               ~~~             ['aa1' is declared but never used.]
 aa2;
-import {a3 as aa3, a4 as aa4} from "modA";
+import {a3 as aa3, a4 as aa4} from "a";
                          ~~~  ['aa4' is declared but never used.]
 aa3;
 // This import statement is unused and will be deleted along with this comment.
-import {a5, a6} from "modA";
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [All imports are unused.]
-import {a7} from "modA";
-~~~~~~~~~~~~~~~~~~~~~~~~      [All imports are unused.]
-import {a8, a9, a10} from "modA";
+import {a5, a6} from "a";
+~~~~~~~~~~~~~~~~~~~~~~~~~  [All imports are unused.]
+import {a7} from "a";
+~~~~~~~~~~~~~~~~~~~~~      [All imports are unused.]
+import {a8, a9, a10} from "a";
             ~~                ['a9' is declared but never used.]
                 ~~~           ['a10' is declared but never used.]
 a8;
-import {a11, a12, a13} from "modA";
+import {a11, a12, a13} from "a";
         ~~~                   ['a11' is declared but never used.]
              ~~~              ['a12' is declared but never used.]
 a13;
-import {a14, a15, a16} from "modA";
+import {a14, a15, a16} from "a";
              ~~~              ['a15' is declared but never used.]
 a14;
 a16;
@@ -42,15 +42,15 @@ module S {
       ~~~~~~~~       ['template' is declared but never used.]
 }
 
-import * as foo from "libA";
+import * as foo from "a";
             ~~~              ['foo' is declared but never used.]
-import * as bar from "libB";
-import baz from "libC";
-import defaultExport, { namedExport } from "libD";
+import * as bar from "a";
+import baz from "a";
+import defaultExport, { namedExport } from "a";
        ~~~~~~~~~~~~~                               ['defaultExport' is declared but never used.]
-import d1, { d2 } from "libD";
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                     [All imports are unused.]
-import d3, { d4 } from "libD";
+import d1, { d2 } from "a";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~                     [All imports are unused.]
+import d3, { d4 } from "a";
            ~~~~~~                                  [All named bindings are unused.]
 d3;
 
@@ -58,8 +58,8 @@ bar.someFunc();
 baz();
 namedExport();
 
-import "jquery";
+import "a";
 
-import abc = require('abc');
+import abc = require('a');
 import def = abc.someVar;
 console.log(def);
