@@ -61,36 +61,6 @@ export function createFailure(fileName: string, start: number[], end: number[], 
     return new Lint.RuleFailure(sourceFile, startPosition, endPosition, failure, "");
 }
 
-// return a partial on createFailure
-export function createFailuresOnFile(fileName: string, failure: string) {
-    return (start: number[], end: number[]) => {
-        return createFailure(fileName, start, end, failure);
-    };
-}
-
-// assert on array equality for failures
-export function assertFailuresEqual(actualFailures: Lint.RuleFailure[], expectedFailures: Lint.RuleFailure[]) {
-    assert.equal(actualFailures.length, expectedFailures.length);
-    actualFailures.forEach((actualFailure, i) => {
-        const startPosition = JSON.stringify(actualFailure.getStartPosition().toJson());
-        const endPosition = JSON.stringify(actualFailure.getEndPosition().toJson());
-        assert.isTrue(actualFailure.equals(expectedFailures[i]),
-                      `actual failure at ${startPosition}, ${endPosition} did not match expected failure`);
-    });
-}
-
-// assert whether a failure array contains the given failure
-export function assertContainsFailure(haystack: Lint.RuleFailure[], needle: Lint.RuleFailure) {
-    const haystackContainsNeedle = haystack.some((item) => item.equals(needle));
-
-    if (!haystackContainsNeedle) {
-        const stringifiedNeedle = JSON.stringify(needle.toJson(), null, 2);
-        const stringifiedHaystack = JSON.stringify(haystack.map((hay) => hay.toJson()), null, 2);
-
-        assert(false, "expected " + stringifiedNeedle + " within " + stringifiedHaystack);
-    }
-}
-
 export function createTempFile(extension: string) {
     let tmpfile: string | null = null;
     for (let i = 0; i < 5; i++) {
