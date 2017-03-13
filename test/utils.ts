@@ -28,37 +28,9 @@ export function getSourceFile(fileName: string): ts.SourceFile {
     return Lint.getSourceFile(fileName, source);
 }
 
-export function getRule(ruleName: string) {
-    const rulesDirectory = path.join(path.dirname(module.filename), "../src/rules");
-    return Lint.findRule(ruleName, rulesDirectory);
-}
-
 export function getFormatter(formatterName: string) {
     const formattersDirectory = path.join(path.dirname(module.filename), "../src/formatters");
     return Lint.findFormatter(formatterName, formattersDirectory);
-}
-
-// this function doesn't work with rules that use the language service
-export function applyRuleOnFile(fileName: string, Rule: any, ruleArguments: any[] = []): Lint.RuleFailure[] {
-    const sourceFile = getSourceFile(fileName);
-    const options = {
-        disabledIntervals: [],
-        ruleArguments,
-        ruleName: Rule.metadata.ruleName,
-        ruleSeverity: "error",
-    };
-    const rule = new Rule(options);
-    return rule.apply(sourceFile);
-}
-
-// start and end are arrays with the first and second elements
-// being (one-indexed) line and character positions respectively
-export function createFailure(fileName: string, start: number[], end: number[], failure: string): Lint.RuleFailure {
-    const sourceFile = getSourceFile(fileName);
-    const startPosition = sourceFile.getPositionOfLineAndCharacter(start[0] - 1, start[1] - 1);
-    const endPosition = sourceFile.getPositionOfLineAndCharacter(end[0] - 1, end[1] - 1);
-
-    return new Lint.RuleFailure(sourceFile, startPosition, endPosition, failure, "");
 }
 
 export function createTempFile(extension: string) {
