@@ -36,7 +36,6 @@
     "verify": "npm-run-all clean compile lint test docs"
   },
   "dependencies": {
-    "@types/semver": "^5.3.30",
     "babel-code-frame": "^6.20.0",
     "colors": "^1.1.2",
     "diff": "^3.0.1",
@@ -63,6 +62,7 @@
     "@types/node": "^6.0.56",
     "@types/optimist": "0.0.29",
     "@types/resolve": "0.0.4",
+    "@types/semver": "^5.3.30",
     "chai": "^3.5.0",
     "github": "^8.1.1",
     "js-yaml": "^3.7.0",
