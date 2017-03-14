@@ -20,3 +20,7 @@ class C {
     a(a: number, b: number): void;
     a(a?: number, b?: number): void {}
 }
+
+function rest(...xs: number[]): void;
+function rest(xs: number[], y: string): void;
+function rest(...args: any[]) {}
