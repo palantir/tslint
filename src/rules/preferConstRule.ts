@@ -65,7 +65,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const options: Options = {
             destructuringAll: this.ruleArguments.length !== 0 &&
-                this.ruleArguments[0].destructuring === "all",
+                this.ruleArguments[0].destructuring === OPTION_DESTRUCTURING_ALL,
         };
         const preferConstWalker = new PreferConstWalker(sourceFile, this.ruleName, options);
         return this.applyWithWalker(preferConstWalker);
@@ -133,7 +133,8 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
                     if (utils.isFunctionDeclaration(node) ||
                         utils.isMethodDeclaration(node) ||
                         utils.isFunctionExpression(node) ||
-                        utils.isArrowFunction(node)) {
+                        utils.isArrowFunction(node) ||
+                        utils.isConstructorDeclaration(node)) {
                         // special handling for function parameters
                         // each parameter initializer can only reassign preceding parameters of variables of the containing scope
                         if (node.body !== undefined) {
