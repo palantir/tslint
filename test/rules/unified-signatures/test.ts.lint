@@ -24,3 +24,8 @@ class C {
 function rest(...xs: number[]): void;
 function rest(xs: number[], y: string): void;
 function rest(...args: any[]) {}
+
+function opt(xs?: number[]): void;
+function opt(xs: number[], y: string): void;
+                           ~~~~~~~~~         [These overloads can be combined into one signature with an optional parameter.]
+function opt(...args: any[]) {}
