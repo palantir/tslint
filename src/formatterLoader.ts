@@ -57,7 +57,7 @@ function loadFormatter(...paths: string[]) {
     const fullPath = path.resolve(moduleDirectory, formatterPath);
 
     if (fs.existsSync(`${fullPath}.js`)) {
-        const formatterModule = require(fullPath);
+        const formatterModule = require(fullPath); // tslint:disable-line no-var-requires
         return formatterModule.Formatter;
     }
 
@@ -71,5 +71,5 @@ function loadFormatterModule(name: string) {
     } catch (e) {
         return undefined;
     }
-    return require(src).Formatter;
+    return require(src).Formatter; // tslint:disable-line no-var-requires
 }

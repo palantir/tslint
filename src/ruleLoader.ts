@@ -126,7 +126,7 @@ function transformName(name: string) {
 function loadRule(directory: string, ruleName: string) {
     const fullPath = path.join(directory, ruleName);
     if (fs.existsSync(fullPath + ".js")) {
-        const ruleModule = require(fullPath);
+        const ruleModule = require(fullPath); // tslint:disable-line no-var-requires
         if (ruleModule && ruleModule.Rule) {
             return ruleModule.Rule;
         }

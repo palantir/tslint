@@ -1,0 +1,10 @@
+import a = require("a");
+var b = require("b");
+        ~~~~~~~~~~~~  [0]
+
+function f(require) {
+    require(3);
+    ~~~~~~~~~~ [0]
+}
+
+[0]: Prefer to use an 'import' statement instead of 'require()'.

@@ -15,11 +15,12 @@
  * limitations under the License.
  */
 
+import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
 
-export class Rule extends Lint.Rules.AbstractRule {
+export class Rule extends Lint.Rules.OptionallyTypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-var-requires",
@@ -35,30 +36,33 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "require statement not part of an import statement";
+    public static FAILURE_STRING = "Prefer to use an 'import' statement instead of 'require()'.";
+
+    public applyWithProgram(sourceFile: ts.SourceFile, languageService: ts.LanguageService): Lint.RuleFailure[] {
+        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, languageService.getProgram().getTypeChecker()));
+    }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const requiresWalker = new NoVarRequiresWalker(sourceFile, this.getOptions());
-        return this.applyWithWalker(requiresWalker);
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class NoVarRequiresWalker extends Lint.ScopeAwareRuleWalker<{}> {
-    public createScope(): {} {
-        return {};
-    }
-
-    public visitCallExpression(node: ts.CallExpression) {
-        const expression = node.expression;
-
-        if (this.getCurrentDepth() <= 1 && expression.kind === ts.SyntaxKind.Identifier) {
-            const identifierName = (expression as ts.Identifier).text;
-            if (identifierName === "require") {
-                // if we're calling (invoking) require, then it's not part of an import statement
-                this.addFailureAtNode(node, Rule.FAILURE_STRING);
+function walk(ctx: Lint.WalkContext<void>, checker?: ts.TypeChecker): void {
+    ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (utils.isCallExpression(node)) {
+            const { expression } = node;
+            if (utils.isIdentifier(expression) && expression.text === "require") {
+                if (!isShadowedRequire(expression)) {
+                    // A statement `import a = require("a")` does not have an identifier node for `require`.
+                    ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
+                }
             }
         }
+        return ts.forEachChild(node, cb);
+    });
 
-        super.visitCallExpression(node);
+    function isShadowedRequire(node: ts.Identifier): boolean {
+        const sym = checker && checker.getSymbolAtLocation(node);
+        return !!sym && !!sym.declarations && sym.declarations.every((d) => d.getSourceFile() === ctx.sourceFile);
     }
 }

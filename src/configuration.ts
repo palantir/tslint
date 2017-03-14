@@ -134,7 +134,7 @@ export function loadConfigurationFromPath(configFilePath?: string): IConfigurati
             .replace(/^\uFEFF/, ""));
             rawConfigFile = JSON.parse(fileContent);
         } else {
-            rawConfigFile = require(resolvedConfigFilePath);
+            rawConfigFile = require(resolvedConfigFilePath); // tslint:disable-line no-var-requires
             delete require.cache[resolvedConfigFilePath];
         }
 
