@@ -135,7 +135,7 @@ function getTypePredicateOneWay(left: ts.Expression, right: ts.Expression, isStr
             if ((right as ts.Identifier).originalKeywordKind === ts.SyntaxKind.UndefinedKeyword) {
                 return nullOrUndefined(undefinedFlags);
             }
-
+            return undefined;
         default:
             return undefined;
     }
