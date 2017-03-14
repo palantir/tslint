@@ -208,8 +208,9 @@ function signaturesDifferByOptionalOrRestParameter(types1: ts.ParameterDeclarati
         }
     }
 
-    if (minLength > 0 && shorter[minLength - 1].dotDotDotToken)
+    if (minLength > 0 && shorter[minLength - 1].dotDotDotToken) {
         return undefined;
+    }
 
     return [longer[longer.length - 1], longer];
 }
