@@ -202,7 +202,7 @@ function signaturesDifferByOptionalOrRestParameter(types1: ts.ParameterDeclarati
     }
 
     for (let i = 0; i < minLength; i++) {
-        if (!typesAreEqual(types1[i].type, types2[i].type)) {
+        if (!parametersAreEqual(types1[i], types2[i])) {
             return undefined;
         }
     }
