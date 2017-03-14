@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { isPropertyAccessExpression } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -39,22 +40,17 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Access to arguments.callee is forbidden";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoArgWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class NoArgWalker extends Lint.RuleWalker {
-    public visitPropertyAccessExpression(node: ts.PropertyAccessExpression) {
-        const expression = node.expression;
-        const name = node.name;
-
-        if (expression.kind === ts.SyntaxKind.Identifier && name.text === "callee") {
-            const identifierExpression = expression as ts.Identifier;
-            if (identifierExpression.text === "arguments") {
-                this.addFailureAtNode(expression, Rule.FAILURE_STRING);
-            }
+function walk(ctx: Lint.WalkContext<void>) {
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (isPropertyAccessExpression(node) &&
+            node.name.text === "callee" &&
+            node.expression.kind === ts.SyntaxKind.Identifier && (node.expression as ts.Identifier).text === "arguments") {
+            return ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
-
-        super.visitPropertyAccessExpression(node);
-    }
+        return ts.forEachChild(node, cb);
+    });
 }

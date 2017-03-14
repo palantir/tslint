@@ -44,37 +44,34 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Forbidden bitwise operation";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoBitwiseWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class NoBitwiseWalker extends Lint.RuleWalker {
-    public visitBinaryExpression(node: ts.BinaryExpression) {
-        switch (node.operatorToken.kind) {
-            case ts.SyntaxKind.AmpersandToken:
-            case ts.SyntaxKind.AmpersandEqualsToken:
-            case ts.SyntaxKind.BarToken:
-            case ts.SyntaxKind.BarEqualsToken:
-            case ts.SyntaxKind.CaretToken:
-            case ts.SyntaxKind.CaretEqualsToken:
-            case ts.SyntaxKind.LessThanLessThanToken:
-            case ts.SyntaxKind.LessThanLessThanEqualsToken:
-            case ts.SyntaxKind.GreaterThanGreaterThanToken:
-            case ts.SyntaxKind.GreaterThanGreaterThanEqualsToken:
-            case ts.SyntaxKind.GreaterThanGreaterThanGreaterThanToken:
-            case ts.SyntaxKind.GreaterThanGreaterThanGreaterThanEqualsToken:
-                this.addFailureAtNode(node, Rule.FAILURE_STRING);
-                break;
-            default:
-                break;
+function walk(ctx: Lint.WalkContext<void>) {
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (node.kind === ts.SyntaxKind.BinaryExpression) {
+            switch ((node as ts.BinaryExpression).operatorToken.kind) {
+                case ts.SyntaxKind.AmpersandToken:
+                case ts.SyntaxKind.AmpersandEqualsToken:
+                case ts.SyntaxKind.BarToken:
+                case ts.SyntaxKind.BarEqualsToken:
+                case ts.SyntaxKind.CaretToken:
+                case ts.SyntaxKind.CaretEqualsToken:
+                case ts.SyntaxKind.LessThanLessThanToken:
+                case ts.SyntaxKind.LessThanLessThanEqualsToken:
+                case ts.SyntaxKind.GreaterThanGreaterThanToken:
+                case ts.SyntaxKind.GreaterThanGreaterThanEqualsToken:
+                case ts.SyntaxKind.GreaterThanGreaterThanGreaterThanToken:
+                case ts.SyntaxKind.GreaterThanGreaterThanGreaterThanEqualsToken:
+                    ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
+                    break;
+                default:
+            }
+        } else if (node.kind === ts.SyntaxKind.PrefixUnaryExpression &&
+                   (node as ts.PrefixUnaryExpression).operator === ts.SyntaxKind.TildeToken) {
+            ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
-        super.visitBinaryExpression(node);
-    }
-
-    public visitPrefixUnaryExpression(node: ts.PrefixUnaryExpression) {
-        if (node.operator === ts.SyntaxKind.TildeToken) {
-            this.addFailureAtNode(node, Rule.FAILURE_STRING);
-        }
-        super.visitPrefixUnaryExpression(node);
-    }
+        return ts.forEachChild(node, cb);
+    });
 }
