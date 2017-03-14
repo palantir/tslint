@@ -72,7 +72,7 @@ class Walker extends Lint.ProgramAwareRuleWalker {
                     this.visitNamespaceAccess(node, expression, name);
                     break;
                 }
-                // fall through
+                // falls through
             default:
                 super.visitNode(node);
         }
