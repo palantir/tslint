@@ -1,4 +1,7 @@
 {
+  "lintOptions": {
+    "typeCheck": true
+  },
   "extends": "tslint:latest",
   "rules": {
     "callable-types": true,

@@ -21,6 +21,5 @@ import {AbstractRule} from "./abstractRule";
 import {ITypedRule, RuleFailure} from "./rule";
 
 export abstract class OptionallyTypedRule extends AbstractRule implements ITypedRule {
-
-    public abstract applyWithProgram(sourceFile: ts.SourceFile, languageService: ts.LanguageService): RuleFailure[];
+    public abstract applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): RuleFailure[];
 }

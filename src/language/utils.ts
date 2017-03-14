@@ -22,35 +22,7 @@ import {IDisabledInterval, RuleFailure} from "./rule/rule";
 
 export function getSourceFile(fileName: string, source: string): ts.SourceFile {
     const normalizedName = path.normalize(fileName).replace(/\\/g, "/");
-    const compilerOptions = createCompilerOptions();
-
-    const compilerHost: ts.CompilerHost = {
-        fileExists: () => true,
-        getCanonicalFileName: (filename: string) => filename,
-        getCurrentDirectory: () => "",
-        getDefaultLibFileName: () => "lib.d.ts",
-        getDirectories: (_path: string) => [],
-        getNewLine: () => "\n",
-        getSourceFile: (filenameToGet: string) => {
-            const target = compilerOptions.target == null ? ts.ScriptTarget.ES5 : compilerOptions.target;
-            return ts.createSourceFile(filenameToGet, source, target, true);
-        },
-        readFile: (x: string) => x,
-        useCaseSensitiveFileNames: () => true,
-        writeFile: (x: string) => x,
-    };
-
-    const program = ts.createProgram([normalizedName], compilerOptions, compilerHost);
-
-    return program.getSourceFile(normalizedName);
-}
-
-export function createCompilerOptions(): ts.CompilerOptions {
-    return {
-        allowJs: true,
-        noResolve: true,
-        target: ts.ScriptTarget.ES5,
-    };
+    return ts.createSourceFile(normalizedName, source, ts.ScriptTarget.ES5, /*setParentNodes*/ true);
 }
 
 export function doesIntersect(failure: RuleFailure, disabledIntervals: IDisabledInterval[]) {

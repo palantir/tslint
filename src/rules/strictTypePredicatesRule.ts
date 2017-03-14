@@ -49,8 +49,8 @@ export class Rule extends Lint.Rules.TypedRule {
         return `Use '${isPositive ? "===" : "!=="} ${value}' instead.`;
     }
 
-    public applyWithProgram(srcFile: ts.SourceFile, langSvc: ts.LanguageService): Lint.RuleFailure[] {
-        return this.applyWithWalker(new Walker(srcFile, this.getOptions(), langSvc.getProgram()));
+    public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+        return this.applyWithWalker(new Walker(sourceFile, this.getOptions(), program));
     }
 }
 
