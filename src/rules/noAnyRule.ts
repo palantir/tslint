@@ -47,10 +47,9 @@ function walk(ctx: Lint.WalkContext<void>) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (node.kind === ts.SyntaxKind.AnyKeyword) {
             const start = node.end - 3;
-            ctx.addFailure(start, node.end, Rule.FAILURE_STRING, ctx.createFix(
+            return ctx.addFailure(start, node.end, Rule.FAILURE_STRING, ctx.createFix(
                 new Lint.Replacement(start, 3, "{}"),
             ));
-            return ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
         return ts.forEachChild(node, cb);
     });
