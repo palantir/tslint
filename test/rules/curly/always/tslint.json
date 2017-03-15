@@ -1,8 +1,0 @@
-{
-  "rules": {
-    "curly": [true, "always"]
-  },
-  "jsRules": {
-    "curly": [true, "always"]
-  }
-}

@@ -19,7 +19,6 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
-const OPTION_ALWAYS = "always";
 const OPTION_IGNORE_SAME_LINE = "ignore-same-line";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -38,20 +37,16 @@ export class Rule extends Lint.Rules.AbstractRule {
             to be executed only if \`foo === bar\`. However, he forgot braces and \`bar++\` will be executed
             no matter what. This rule could prevent such a mistake.`,
         optionsDescription: Lint.Utils.dedent`
-            The rule may be set to \`true\`, or to any combination of these arguments:
+            The rule may be set to \`true\`, or to the following:
 
-            * \`"${OPTION_ALWAYS}"\` requires braces for all control-flow statements (same as default)
             * \`"${OPTION_IGNORE_SAME_LINE}"\` skips checking braces for control-flow statements
             that are on one line and start on the same line as their control-flow keyword
-
-            Note: \`"${OPTION_ALWAYS}"\` will be overriden by any "ignore" options that are also set.
         `,
         options: {
             type: "array",
             items: {
                 type: "string",
                 enum: [
-                    OPTION_ALWAYS,
                     OPTION_IGNORE_SAME_LINE,
                 ],
             },
@@ -75,14 +70,12 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class CurlyWalker extends Lint.RuleWalker {
     private optionIgnoreSameLine: boolean;
-    private optionAlways: boolean;
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
 
         const args = this.getOptions();
 
-        this.optionAlways = args.length === 0 || args.indexOf(OPTION_ALWAYS) > -1;
         this.optionIgnoreSameLine = args.indexOf(OPTION_IGNORE_SAME_LINE) > -1;
     }
 
