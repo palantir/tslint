@@ -123,6 +123,7 @@ function isSimple(node: ts.Node): node is SimpleExpression {
         case ts.SyntaxKind.Identifier:
         case ts.SyntaxKind.NumericLiteral:
         case ts.SyntaxKind.StringLiteral:
+        case ts.SyntaxKind.ThisKeyword:
             return true;
         default:
             return false;
