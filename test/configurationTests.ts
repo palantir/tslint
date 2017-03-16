@@ -252,6 +252,11 @@ describe("Configuration", () => {
             assert.equal("off", config.rules.get("no-eval")!.ruleSeverity);
         });
 
+        it("resolve rule directory from package", () => {
+            assert.doesNotThrow(() => loadConfigurationFromPath("./test/config/tslint-custom-rules-with-package.json"));
+            assert.doesNotThrow(() => loadConfigurationFromPath("./test/config/tslint-custom-rules-with-package-fallback.json"));
+        });
+
         describe("with config not relative to tslint", () => {
             let tmpfile: string | null;
 

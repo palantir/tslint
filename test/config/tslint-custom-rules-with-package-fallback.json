@@ -1,0 +1,3 @@
+{
+  "rulesDirectory": ["../external/tslint-test-custom-rules/rules"]
+}
