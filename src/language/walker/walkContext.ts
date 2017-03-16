@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import { Fix, Replacement, RuleFailure } from "../rule/rule";
+import { Replacement, RuleFailure } from "../rule/rule";
 
 export class WalkContext<T> {
     public readonly failures: RuleFailure[] = [];
@@ -25,23 +25,19 @@ export class WalkContext<T> {
     constructor(public readonly sourceFile: ts.SourceFile, public readonly ruleName: string, public readonly options: T) {}
 
     /** Add a failure with any arbitrary span. Prefer `addFailureAtNode` if possible. */
-    public addFailureAt(start: number, width: number, failure: string, fix?: Fix) {
+    public addFailureAt(start: number, width: number, failure: string, fix?: Replacement | Replacement[]) {
         this.addFailure(start, start + width, failure, fix);
     }
 
-    public addFailure(start: number, end: number, failure: string, fix?: Fix) {
+    public addFailure(start: number, end: number, failure: string, fix?: Replacement | Replacement[]) {
         const fileLength = this.sourceFile.end;
-        this.failures.push(
-            new RuleFailure(this.sourceFile, Math.min(start, fileLength), Math.min(end, fileLength), failure, this.ruleName, fix),
-        );
+        start = Math.min(start, fileLength);
+        end = Math.min(end, fileLength);
+        this.failures.push(new RuleFailure(this.sourceFile, start, end, failure, this.ruleName, fix));
     }
 
     /** Add a failure using a node's span. */
-    public addFailureAtNode(node: ts.Node, failure: string, fix?: Fix) {
+    public addFailureAtNode(node: ts.Node, failure: string, fix?: Replacement | Replacement[]) {
         this.addFailure(node.getStart(this.sourceFile), node.getEnd(), failure, fix);
-    }
-
-    public createFix(...replacements: Replacement[]) {
-        return new Fix(this.ruleName, replacements);
     }
 }

@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import {Fix, IOptions, Replacement, RuleFailure} from "../rule/rule";
+import {IOptions, Replacement, RuleFailure} from "../rule/rule";
 import {SyntaxWalker} from "./syntaxWalker";
 import {IWalker} from "./walker";
 
@@ -65,7 +65,7 @@ export class RuleWalker extends SyntaxWalker implements IWalker {
     }
 
     /** @deprecated Prefer `addFailureAt` and its variants. */
-    public createFailure(start: number, width: number, failure: string, fix?: Fix): RuleFailure {
+    public createFailure(start: number, width: number, failure: string, fix?: Replacement | Replacement[]): RuleFailure {
         const from = (start > this.limit) ? this.limit : start;
         const to = ((start + width) > this.limit) ? this.limit : (start + width);
         return new RuleFailure(this.sourceFile, from, to, failure, this.ruleName, fix);
@@ -77,17 +77,17 @@ export class RuleWalker extends SyntaxWalker implements IWalker {
     }
 
     /** Add a failure with any arbitrary span. Prefer `addFailureAtNode` if possible. */
-    public addFailureAt(start: number, width: number, failure: string, fix?: Fix) {
+    public addFailureAt(start: number, width: number, failure: string, fix?: Replacement | Replacement[]) {
         this.addFailure(this.createFailure(start, width, failure, fix));
     }
 
     /** Like `addFailureAt` but uses start and end instead of start and width. */
-    public addFailureFromStartToEnd(start: number, end: number, failure: string, fix?: Fix) {
+    public addFailureFromStartToEnd(start: number, end: number, failure: string, fix?: Replacement | Replacement[]) {
         this.addFailureAt(start, end - start, failure, fix);
     }
 
     /** Add a failure using a node's span. */
-    public addFailureAtNode(node: ts.Node, failure: string, fix?: Fix) {
+    public addFailureAtNode(node: ts.Node, failure: string, fix?: Replacement | Replacement[]) {
         this.addFailureAt(node.getStart(this.sourceFile), node.getWidth(this.sourceFile), failure, fix);
     }
 
@@ -109,9 +109,5 @@ export class RuleWalker extends SyntaxWalker implements IWalker {
 
     public getRuleName(): string {
         return this.ruleName;
-    }
-
-    public createFix(...replacements: Replacement[]): Fix {
-        return new Fix(this.ruleName, replacements);
     }
 }

@@ -138,6 +138,10 @@ export class Replacement {
         return replacements.reduce((text, r) => r.apply(text), content);
     }
 
+    public static replaceNode(node: ts.Node, text: string): Replacement {
+        return this.replaceFromTo(node.getStart(), node.getEnd(), text);
+    }
+
     public static replaceFromTo(start: number, end: number, text: string) {
         return new Replacement(start, end - start, text);
     }
@@ -188,19 +192,10 @@ export class Fix {
         return Replacement.applyAll(content, replacements);
     }
 
-    constructor(private innerRuleName: string, private innerReplacements: Replacement[]) {
-    }
-
-    get ruleName() {
-        return this.innerRuleName;
-    }
-
-    get replacements() {
-        return this.innerReplacements;
-    }
+    constructor(readonly replacements: Replacement[]) {}
 
     public apply(content: string) {
-        return Replacement.applyAll(content, this.innerReplacements);
+        return Replacement.applyAll(content, this.replacements);
     }
 }
 
@@ -240,19 +235,21 @@ export class RuleFailure {
     private endPosition: RuleFailurePosition;
     private rawLines: string;
     private ruleSeverity: RuleSeverity;
+    private fix?: Fix;
 
     constructor(private sourceFile: ts.SourceFile,
                 start: number,
                 end: number,
                 private failure: string,
                 private ruleName: string,
-                private fix?: Fix) {
+                fix?: Replacement | Replacement[]) {
 
         this.fileName = sourceFile.fileName;
         this.startPosition = this.createFailurePosition(start);
         this.endPosition = this.createFailurePosition(end);
         this.rawLines = sourceFile.text;
         this.ruleSeverity = "error";
+        this.fix = fix ? new Fix(Array.isArray(fix) ? fix : [fix]) : undefined;
     }
 
     public getFileName() {

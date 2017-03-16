@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -43,17 +44,18 @@ export class Rule extends Lint.Rules.AbstractRule {
 class Walker extends Lint.RuleWalker {
     public visitPropertySignature(node: ts.PropertyDeclaration) {
         const { type } = node;
-        if (type !== undefined && type.kind === ts.SyntaxKind.FunctionType) {
-            this.addFailureAtNode(node.name, Rule.FAILURE_STRING, this.createMethodSignatureFix(node, type as ts.FunctionTypeNode));
+        if (type && utils.isFunctionTypeNode(type)) {
+            this.addFailureAtNode(node.name, Rule.FAILURE_STRING, this.createMethodSignatureFix(node, type));
         }
 
         super.visitPropertySignature(node);
     }
 
-    private createMethodSignatureFix(node: ts.PropertyDeclaration, type: ts.FunctionTypeNode): Lint.Fix | undefined {
-        return type.type && this.createFix(
+    private createMethodSignatureFix(node: ts.PropertyDeclaration, type: ts.FunctionTypeNode): Lint.Replacement[] | undefined {
+        return type.type && [
             this.deleteFromTo(Lint.childOfKind(node, ts.SyntaxKind.ColonToken)!.getStart(), type.getStart()),
             this.deleteFromTo(Lint.childOfKind(type, ts.SyntaxKind.EqualsGreaterThanToken)!.getStart(), type.type.getStart()),
-            this.appendText(Lint.childOfKind(type, ts.SyntaxKind.CloseParenToken)!.end, ":"));
+            this.appendText(Lint.childOfKind(type, ts.SyntaxKind.CloseParenToken)!.end, ":"),
+        ];
     }
 }

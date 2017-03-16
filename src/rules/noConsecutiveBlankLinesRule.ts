@@ -92,14 +92,12 @@ function walk(ctx: Lint.WalkContext<number>) {
     const templateRanges = getTemplateRanges(ctx.sourceFile);
     for (const possibleFailure of possibleFailures) {
         if (!templateRanges.some((template) => template.pos < possibleFailure.pos && possibleFailure.pos < template.end)) {
-            ctx.addFailureAt(possibleFailure.pos, 1, failureString, ctx.createFix(
-                Lint.Replacement.deleteFromTo(
-                    // special handling for fixing blank lines at the end of the file
-                    // to fix this we need to cut off the line break of the last allowed blank line, too
-                    possibleFailure.end === sourceText.length ? getStartOfLineBreak(sourceText, possibleFailure.pos) : possibleFailure.pos,
-                    possibleFailure.end,
-                ),
-            ));
+            // special handling for fixing blank lines at the end of the file
+            // to fix this we need to cut off the line break of the last allowed blank line, too
+            const start = possibleFailure.end === sourceText.length
+                ? getStartOfLineBreak(sourceText, possibleFailure.pos)
+                : possibleFailure.pos;
+            ctx.addFailureAt(possibleFailure.pos, 1, failureString, Lint.Replacement.deleteFromTo(start, possibleFailure.end));
         }
     }
 }

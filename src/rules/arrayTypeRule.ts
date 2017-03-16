@@ -65,12 +65,11 @@ class ArrayTypeWalker extends Lint.RuleWalker {
             // Add a space if the type is preceded by 'as' and the node has no leading whitespace
             const space = !parens && node.parent!.kind === ts.SyntaxKind.AsExpression &&
                 node.getStart() === node.getFullStart() ? " " : "";
-            const fix = this.createFix(
+            this.addFailureAtNode(node, failureString, [
                 this.createReplacement(typeName.getStart(), parens, space + "Array<"),
                 // Delete the square brackets and replace with an angle bracket
                 this.createReplacement(typeName.getEnd() - parens, node.getEnd() - typeName.getEnd() + parens, ">"),
-            );
-            this.addFailureAtNode(node, failureString, fix);
+            ]);
         }
 
         super.visitArrayType(node);
@@ -83,21 +82,19 @@ class ArrayTypeWalker extends Lint.RuleWalker {
             const typeArgs = node.typeArguments;
             if (!typeArgs || typeArgs.length === 0) {
                 // Create an 'any' array
-                const fix = this.createFix(this.createReplacement(node.getStart(), node.getWidth(), "any[]"));
-                this.addFailureAtNode(node, failureString, fix);
+                this.addFailureAtNode(node, failureString, this.createReplacement(node.getStart(), node.getWidth(), "any[]"));
             } else if (typeArgs && typeArgs.length === 1 && (!this.hasOption(OPTION_ARRAY_SIMPLE) || this.isSimpleType(typeArgs[0]))) {
                 const type = typeArgs[0];
                 const typeStart = type.getStart();
                 const typeEnd = type.getEnd();
                 const parens = type.kind === ts.SyntaxKind.UnionType ||
                     type.kind === ts.SyntaxKind.FunctionType || type.kind === ts.SyntaxKind.IntersectionType;
-                const fix = this.createFix(
+                this.addFailureAtNode(node, failureString, [
                     // Delete Array and the first angle bracket
                     this.createReplacement(node.getStart(), typeStart - node.getStart(), parens ? "(" : ""),
                     // Delete the last angle bracket and replace with square brackets
                     this.createReplacement(typeEnd, node.getEnd() - typeEnd, (parens ? ")" : "") + "[]"),
-                );
-                this.addFailureAtNode(node, failureString, fix);
+                ]);
             }
         }
 

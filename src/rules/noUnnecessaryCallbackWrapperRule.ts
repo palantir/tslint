@@ -45,19 +45,17 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 function walk(ctx: Lint.WalkContext<void>) {
-    return ts.forEachChild(ctx.sourceFile, cb);
-    function cb(node: ts.Node): void {
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         const fn = detectRedundantCallback(node);
         if (fn) {
-            const fix = ctx.createFix(
+            ctx.addFailureAtNode(node, Rule.FAILURE_STRING(fn.getText()), [
                 Lint.Replacement.deleteFromTo(node.getStart(), fn.getStart()),
-                Lint.Replacement.deleteFromTo(fn.getEnd(), node.getEnd()));
-            ctx.addFailureAtNode(node, Rule.FAILURE_STRING(fn.getText()), fix);
+                Lint.Replacement.deleteFromTo(fn.getEnd(), node.getEnd()),
+            ]);
         } else {
             return ts.forEachChild(node, cb);
         }
-    }
-
+    });
 }
 
 // Returns the `f` in `x => f(x)`.

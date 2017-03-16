@@ -179,17 +179,15 @@ function addImportSpecifierFailures(ctx: Lint.WalkContext<void>, failures: Map<t
             if (failure !== undefined) {
                 const start = defaultName.getStart();
                 const end = namedBindings ? namedBindings.getStart() : importNode.moduleSpecifier.getStart();
-                const fix = ctx.createFix(Lint.Replacement.deleteFromTo(start, end));
-                ctx.addFailureAtNode(defaultName, failure, fix);
+                ctx.addFailureAtNode(defaultName, failure, Lint.Replacement.deleteFromTo(start, end));
             }
         }
 
         if (namedBindings) {
             if (allNamedBindingsAreFailures) {
                 const start = defaultName ? defaultName.getEnd() : namedBindings.getStart();
-                const fix = ctx.createFix(Lint.Replacement.deleteFromTo(start, namedBindings.getEnd()));
                 const failure = "All named bindings are unused.";
-                ctx.addFailureAtNode(namedBindings, failure, fix);
+                ctx.addFailureAtNode(namedBindings, failure, Lint.Replacement.deleteFromTo(start, namedBindings.getEnd()));
             } else {
                 const { elements } = namedBindings;
                 for (let i = 0; i < elements.length; i++) {
@@ -203,8 +201,7 @@ function addImportSpecifierFailures(ctx: Lint.WalkContext<void>, failures: Map<t
                     const nextElement = elements[i + 1];
                     const start = prevElement ? prevElement.getEnd() : element.getStart();
                     const end = nextElement && !prevElement ? nextElement.getStart() : element.getEnd();
-                    const fix = ctx.createFix(Lint.Replacement.deleteFromTo(start, end));
-                    ctx.addFailureAtNode(element.name, failure, fix);
+                    ctx.addFailureAtNode(element.name, failure, Lint.Replacement.deleteFromTo(start, end));
                 }
             }
         }
@@ -217,8 +214,7 @@ function addImportSpecifierFailures(ctx: Lint.WalkContext<void>, failures: Map<t
         }
 
         function removeAll(errorNode: ts.Node, failure: string): void {
-            const fix = ctx.createFix(Lint.Replacement.deleteFromTo(importNode.getStart(), importNode.getEnd()));
-            ctx.addFailureAtNode(errorNode, failure, fix);
+            ctx.addFailureAtNode(errorNode, failure, Lint.Replacement.deleteFromTo(importNode.getStart(), importNode.getEnd()));
         }
     });
 

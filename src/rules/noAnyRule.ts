@@ -39,16 +39,16 @@ export class Rule extends Lint.Rules.AbstractRule {
         "or suppress this occurrence.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoAnyWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class NoAnyWalker extends Lint.RuleWalker {
-    public visitAnyKeyword(node: ts.Node) {
-        const fix = this.createFix(
-            this.createReplacement(node.getStart(), node.getWidth(), "{}"),
-        );
-        this.addFailureAtNode(node, Rule.FAILURE_STRING, fix);
-        super.visitAnyKeyword(node);
-    }
+function walk(ctx: Lint.WalkContext<void>): void {
+    ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (node.kind === ts.SyntaxKind.AnyKeyword) {
+            ctx.addFailureAtNode(node, Rule.FAILURE_STRING, Lint.Replacement.replaceNode(node, "{}"));
+        } else {
+            return ts.forEachChild(node, cb);
+        }
+    });
 }
