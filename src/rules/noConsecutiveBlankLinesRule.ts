@@ -108,7 +108,7 @@ function getStartOfLineBreak(sourceText: string, pos: number) {
     return sourceText[pos - 2] === "\r" ? pos - 1 : pos - 1;
 }
 
-function getTemplateRanges(sourceFile: ts.SourceFile): ts.TextRange[] {
+export function getTemplateRanges(sourceFile: ts.SourceFile): ts.TextRange[] {
     const intervals: ts.TextRange[] = [];
     const cb = (node: ts.Node): void => {
         if (node.kind >= ts.SyntaxKind.FirstTemplateToken &&

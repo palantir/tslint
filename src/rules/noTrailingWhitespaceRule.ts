@@ -15,10 +15,11 @@
  * limitations under the License.
  */
 
-import * as utils from "tsutils";
+import { forEachTokenWithTrivia, getLineRanges } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { getTemplateRanges } from "./noConsecutiveBlankLinesRule";
 
 const OPTION_IGNORE_COMMENTS = "ignore-comments";
 const OPTION_IGNORE_JSDOC = "ignore-jsdoc";
@@ -72,53 +73,49 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 function walk(ctx: Lint.WalkContext<IgnoreOption>) {
-    let lastSeenWasWhitespace = false;
-    let lastSeenWhitespacePosition = 0;
-    utils.forEachTokenWithTrivia(ctx.sourceFile, (fullText, kind, range) => {
-        if (kind === ts.SyntaxKind.NewLineTrivia || kind === ts.SyntaxKind.EndOfFileToken) {
-            if (lastSeenWasWhitespace) {
-                reportFailure(ctx, lastSeenWhitespacePosition, range.pos);
-            }
-            lastSeenWasWhitespace = false;
-        } else if (kind === ts.SyntaxKind.WhitespaceTrivia) {
-            lastSeenWasWhitespace = true;
-            lastSeenWhitespacePosition = range.pos;
-        } else {
-            if (ctx.options !== IgnoreOption.Comments) {
-                if (kind === ts.SyntaxKind.SingleLineCommentTrivia) {
-                    const commentText = fullText.substring(range.pos + 2, range.end);
-                    const match = /\s+$/.exec(commentText);
-                    if (match !== null) {
-                        reportFailure(ctx, range.end - match[0].length, range.end);
-                    }
-                } else if (kind === ts.SyntaxKind.MultiLineCommentTrivia &&
-                           (ctx.options !== IgnoreOption.JsDoc ||
-                            fullText[range.pos + 2] !== "*" ||
-                            fullText[range.pos + 3] === "*")) {
-                    let startPos = range.pos + 2;
-                    const commentText = fullText.substring(startPos, range.end - 2);
-                    const lines = commentText.split("\n");
-                    // we don't want to check the content of the last comment line, as it is always followed by */
-                    const len = lines.length - 1;
-                    for (let i = 0; i < len; ++i) {
-                        let line = lines[i];
-                        // remove carriage return at the end, it is does not account to trailing whitespace
-                        if (line.endsWith("\r")) {
-                            line = line.substr(0, line.length - 1);
-                        }
-                        const start = line.search(/\s+$/);
-                        if (start !== -1) {
-                            reportFailure(ctx, startPos + start, startPos + line.length);
-                        }
-                        startPos += lines[i].length + 1;
-                    }
-                }
-            }
-            lastSeenWasWhitespace = false;
+    const possibleFailures: ts.TextRange[] = [];
+    const sourceFile = ctx.sourceFile;
+    const text = sourceFile.text;
+    for (const range of getLineRanges(sourceFile)) {
+        const line = text.substring(range.pos, range.end).replace(/\r?\n/, "");
+        const match = line.match(/^(.*?)\s+$/);
+        if (match !== null) {
+            possibleFailures.push({
+                end: range.pos + line.length,
+                pos: range.pos + match[1].length,
+            });
         }
-    });
+    }
+
+    if (possibleFailures.length === 0) {
+        return;
+    }
+    const excludedRanges = ctx.options === IgnoreOption.None
+                           ? getTemplateRanges(ctx.sourceFile)
+                           : getExcludedRanges(ctx.sourceFile, ctx.options);
+    for (const possibleFailure of possibleFailures) {
+        if (!excludedRanges.some((range) => range.pos < possibleFailure.pos && possibleFailure.pos < range.end)) {
+            ctx.addFailure(possibleFailure.pos, possibleFailure.end, Rule.FAILURE_STRING, ctx.createFix(
+                Lint.Replacement.deleteFromTo(possibleFailure.pos, possibleFailure.end),
+            ));
+        }
+    }
 }
 
-function reportFailure(ctx: Lint.WalkContext<IgnoreOption>, start: number, end: number) {
-    ctx.addFailure(start, end, Rule.FAILURE_STRING, ctx.createFix(Lint.Replacement.deleteFromTo(start, end)));
+function getExcludedRanges(sourceFile: ts.SourceFile, option: IgnoreOption): ts.TextRange[] {
+    const intervals: ts.TextRange[] = [];
+    forEachTokenWithTrivia(sourceFile, (text, kind, range) => {
+        if (kind >= ts.SyntaxKind.FirstTemplateToken && kind <= ts.SyntaxKind.LastTemplateToken) {
+            intervals.push(range);
+        } else if (option === IgnoreOption.Comments) {
+            if (kind === ts.SyntaxKind.SingleLineCommentTrivia || kind === ts.SyntaxKind.MultiLineCommentTrivia) {
+                intervals.push(range);
+            }
+        } else if (option === IgnoreOption.JsDoc) {
+            if (kind === ts.SyntaxKind.MultiLineCommentTrivia && text[range.pos + 2] === "*" && text[range.pos + 3] !== "*") {
+                intervals.push(range);
+            }
+        }
+    });
+    return intervals;
 }
