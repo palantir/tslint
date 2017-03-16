@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -38,73 +39,56 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY = (name: string) => {
+    public static FAILURE_STRING(name: string): string {
         return `Duplicate variable: '${name}'`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoDuplicateVariableWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class NoDuplicateVariableWalker extends Lint.BlockScopeAwareRuleWalker<{}, ScopeInfo> {
-    public createScope(): any {
-        return null;
-    }
-
-    public createBlockScope(): ScopeInfo {
-        return new ScopeInfo();
-    }
-
-    public visitBindingElement(node: ts.BindingElement) {
-        const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
-        const isBlockScoped = Lint.isBlockScopedBindingElement(node);
-
-        // duplicate-variable errors for block-scoped vars are caught by tsc
-        if (isSingleVariable && !isBlockScoped) {
-            this.handleSingleVariableIdentifier(node.name as ts.Identifier);
+function walk(ctx: Lint.WalkContext<void>): void {
+    const scopes: Array<Set<string>> = [new Set()];
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (utils.isFunctionScopeBoundary(node)) {
+            scopes.push(new Set());
+            ts.forEachChild(node, cb);
+            scopes.pop();
+            return;
         }
 
-        super.visitBindingElement(node);
-    }
-
-    public visitCatchClause(node: ts.CatchClause) {
-        // don't visit the catch clause variable declaration, just visit the block
-        // the catch clause variable declaration has its own special scoping rules
-        this.visitBlock(node.block);
-    }
-
-    public visitMethodSignature(_node: ts.SignatureDeclaration) {
-        // don't call super, we don't want to walk method signatures either
-    }
-
-    public visitTypeLiteral(_node: ts.TypeLiteralNode) {
-        // don't call super, we don't want to walk the inside of type nodes
-    }
-
-    public visitVariableDeclaration(node: ts.VariableDeclaration) {
-        const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
-
-        // destructuring is handled by this.visitBindingElement()
-        if (isSingleVariable && !Lint.isBlockScopedVariable(node)) {
-            this.handleSingleVariableIdentifier(node.name as ts.Identifier);
+        if (utils.isVariableDeclaration(node) && !utils.isBlockScopedVariableDeclaration(node)) {
+            const scope = scopes[scopes.length - 1];
+            forEachBoundIdentifier(node.name, (id) => {
+                const { text } = id;
+                if (scope.has(text)) {
+                    ctx.addFailureAtNode(id, Rule.FAILURE_STRING(text));
+                } else {
+                    scope.add(text);
+                }
+            });
         }
 
-        super.visitVariableDeclaration(node);
-    }
-
-    private handleSingleVariableIdentifier(variableIdentifier: ts.Identifier) {
-        const variableName = variableIdentifier.text;
-        const currentBlockScope = this.getCurrentBlockScope();
-
-        if (currentBlockScope.varNames.indexOf(variableName) >= 0) {
-            this.addFailureAtNode(variableIdentifier, Rule.FAILURE_STRING_FACTORY(variableIdentifier.text));
-        } else {
-            currentBlockScope.varNames.push(variableName);
-        }
-    }
+        return ts.forEachChild(node, cb);
+    });
 }
 
-class ScopeInfo {
-    public varNames: string[] = [];
+function forEachBoundIdentifier(name: ts.BindingName, action: (id: ts.Identifier) => void): void {
+    switch (name.kind) {
+        case ts.SyntaxKind.Identifier:
+            return action(name);
+        case ts.SyntaxKind.ObjectBindingPattern:
+            for (const e of name.elements) {
+                forEachBoundIdentifier(e.name, action);
+            }
+            break;
+        case ts.SyntaxKind.ArrayBindingPattern:
+            for (const e of name.elements) {
+                if (e.kind !== ts.SyntaxKind.OmittedExpression) {
+                    forEachBoundIdentifier(e.name, action);
+                }
+            }
+            break;
+    }
 }
