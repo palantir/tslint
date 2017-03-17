@@ -1,0 +1,37 @@
+let x;
+if (true) {
+~~ [X]
+    x = 1;
+} else {
+    x = 2;
+}
+
+if (true)
+~~ [X]
+    x = "TRUE";
+else if (false)
+    x = "FALSE";
+else
+    x = "FILE_NOT_FOUND";
+
+// Must assign same variable
+if (true) {
+    x = 1;
+} else {
+    y = 2;
+}
+
+// All branches must be present
+if (true) {
+    x = 1;
+}
+
+// Must not be a multi-statement block.
+if (true) {
+    x = 1;
+} else {
+    x = 2;
+    y = 3;
+}
+
+[X]: Use a conditional expression instead of assigning to 'x' in multiple places.
