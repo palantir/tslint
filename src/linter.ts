@@ -34,7 +34,7 @@ import { isError, showWarningOnce } from "./error";
 import { findFormatter } from "./formatterLoader";
 import { ILinterOptions, LintResult } from "./index";
 import { IFormatter } from "./language/formatter/formatter";
-import { Fix, IRule, isTypedRule, RuleFailure, RuleSeverity } from "./language/rule/rule";
+import { Fix, IRule, isTypedRule, Replacement, RuleFailure, RuleSeverity } from "./language/rule/rule";
 import * as utils from "./language/utils";
 import { loadRules } from "./ruleLoader";
 import { arrayify, dedent } from "./utils";
@@ -108,7 +108,7 @@ class Linter {
                 source = fs.readFileSync(fileName, { encoding: "utf-8" });
                 if (fixes.length > 0) {
                     this.fixes = this.fixes.concat(ruleFailures);
-                    source = Fix.applyAll(source, fixes);
+                    source = Replacement.applyFixes(source, fixes);
                     fs.writeFileSync(fileName, source, { encoding: "utf-8" });
 
                     // reload AST if file is modified
