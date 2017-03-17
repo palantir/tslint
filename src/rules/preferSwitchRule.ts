@@ -52,13 +52,14 @@ export class Rule extends Lint.Rules.AbstractRule {
             const obj = options[0];
             minCases = obj[OPTION_MIN_CASES];
         }
-        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, minCases));
+        return this.applyWithFunction(sourceFile, walk, minCases);
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>, minCases: number): void {
-    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        if (utils.isIfStatement(node) && check(node, ctx.sourceFile, minCases)) {
+function walk(ctx: Lint.WalkContext<number>): void {
+    const { options: minCases, sourceFile } = ctx;
+    return ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
+        if (utils.isIfStatement(node) && check(node, sourceFile, minCases)) {
             const { expression, elseStatement } = node;
             ctx.addFailureAtNode(expression, Rule.FAILURE_STRING);
             // Be careful not to fail again for the "else if"
