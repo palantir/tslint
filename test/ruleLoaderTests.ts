@@ -152,25 +152,6 @@ describe("Rule Loader", () => {
 
         assert.isFalse(testFailed, "Bad 'tslint:all'");
     });
-
-    it("ensures that `.ts` files in `rules/` end in `.test.ts` to avoid being linted", () => {
-        walkSync(testRulesDir, (filename) => {
-            if (/\.ts$/.test(filename)) {
-                assert.match(filename, /\.test\.ts$/);
-            }
-        });
-    });
-
-    const walkSync = (dir: string, cb: (filename: string) => void) => {
-        fs.readdirSync(dir).forEach((file) => {
-            const fullPath = path.join(dir, file);
-            if (fs.statSync(path.join(dir, file)).isDirectory()) {
-                walkSync(fullPath, cb);
-            } else {
-                cb(fullPath);
-            }
-        });
-    };
 });
 
 function diffLists(actual: string[], expected: string[]): diff.IDiffResult[] {

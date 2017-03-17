@@ -191,6 +191,7 @@ function signaturesDifferByOptionalOrRestParameter(types1: ts.ParameterDeclarati
     ): [ts.ParameterDeclaration, ts.ParameterDeclaration[]] | undefined {
     const minLength = Math.min(types1.length, types2.length);
     const longer = types1.length < types2.length ? types2 : types1;
+    const shorter = types1.length < types2.length ? types1 : types2;
 
     // If one is has 2+ parameters more than the other, they must all be optional/rest.
     // Differ by optional parameters: f() and f(x), f() and f(x, ?y, ...z)
@@ -205,6 +206,10 @@ function signaturesDifferByOptionalOrRestParameter(types1: ts.ParameterDeclarati
         if (!typesAreEqual(types1[i].type, types2[i].type)) {
             return undefined;
         }
+    }
+
+    if (minLength > 0 && shorter[minLength - 1].dotDotDotToken) {
+        return undefined;
     }
 
     return [longer[longer.length - 1], longer];

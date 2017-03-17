@@ -103,12 +103,12 @@ export interface IDisabledInterval {
 export interface IRule {
     getOptions(): IOptions;
     isEnabled(): boolean;
-    apply(sourceFile: ts.SourceFile, languageService: ts.LanguageService): RuleFailure[];
+    apply(sourceFile: ts.SourceFile): RuleFailure[];
     applyWithWalker(walker: IWalker): RuleFailure[];
 }
 
 export interface ITypedRule extends IRule {
-    applyWithProgram(sourceFile: ts.SourceFile, languageService: ts.LanguageService): RuleFailure[];
+    applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): RuleFailure[];
 }
 
 export interface IRuleFailureJson {

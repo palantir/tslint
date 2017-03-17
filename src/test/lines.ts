@@ -90,6 +90,10 @@ export function printLine(line: Line, code?: string): string | null {
             return `${leadingSpaces}${tildes}`;
         } else if (line instanceof EndErrorLine) {
             let tildes = "~".repeat(line.endCol - line.startCol);
+            if (code.length < line.endCol) {
+                // Better than crashing in String.repeat
+                throw new Error("Bad error marker at " + JSON.stringify(line));
+            }
             let endSpaces = " ".repeat(code.length - line.endCol);
             if (tildes.length === 0) {
                 tildes = ZERO_LENGTH_ERROR;

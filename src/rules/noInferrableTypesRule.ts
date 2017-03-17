@@ -92,7 +92,6 @@ class NoInferrableTypesWalker extends Lint.AbstractWalker<IOptions> {
                     /* falls through*/
                 case ts.SyntaxKind.VariableDeclaration:
                     this.checkDeclaration(node as ts.VariableLikeDeclaration);
-                default:
             }
             return ts.forEachChild(node, cb);
         };

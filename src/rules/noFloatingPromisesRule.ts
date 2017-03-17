@@ -44,8 +44,8 @@ export class Rule extends Lint.Rules.TypedRule {
 
     public static FAILURE_STRING = "Promises must be handled appropriately";
 
-    public applyWithProgram(sourceFile: ts.SourceFile, langSvc: ts.LanguageService): Lint.RuleFailure[] {
-        const walker = new NoFloatingPromisesWalker(sourceFile, this.getOptions(), langSvc.getProgram());
+    public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+        const walker = new NoFloatingPromisesWalker(sourceFile, this.getOptions(), program);
 
         for (const className of this.getOptions().ruleArguments) {
             walker.addPromiseClass(className);

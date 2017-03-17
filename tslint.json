@@ -1,4 +1,7 @@
 {
+  "lintOptions": {
+    "typeCheck": true
+  },
   "extends": "tslint:all",
   "rules": {
     "align": [true,
@@ -34,13 +37,15 @@
     "no-require-imports": false,
     "no-unbound-method": false, // TODO
     "no-unnecessary-callback-wrapper": false, // TODO
+    "no-unnecessary-qualifier": false, // TODO
     "no-unsafe-any": false, // TODO
     "no-use-before-declare": false,
     "no-void-expression": false,
-    "only-arrow-functions": [true, "allow-declarations"],
+    "only-arrow-functions": false, // TODO: [true, "allow-declarations"],
     "prefer-function-over-method": false, // TODO
     "restrict-plus-operands": false,
     "strict-boolean-expressions": false, // TODO
+    "switch-default": false,
     "strict-type-predicates": false, // TODO
     "triple-equals": [true, "allow-null-check"],
     "typedef": false,

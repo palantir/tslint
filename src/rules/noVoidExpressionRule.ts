@@ -35,8 +35,8 @@ export class Rule extends Lint.Rules.TypedRule {
 
     public static FAILURE_STRING = "Expression has type `void`. Put it on its own line as a statement.";
 
-    public applyWithProgram(sourceFile: ts.SourceFile, langSvc: ts.LanguageService): Lint.RuleFailure[] {
-        return this.applyWithWalker(new Walker(sourceFile, this.getOptions(), langSvc.getProgram()));
+    public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+        return this.applyWithWalker(new Walker(sourceFile, this.getOptions(), program));
     }
 }
 

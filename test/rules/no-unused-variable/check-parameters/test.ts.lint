@@ -1,15 +1,17 @@
+[typescript]: >= 2.1.0
+
 export function func1(x: number, y: number, ...args: number[]) {
-                                               ~~~~              [Unused parameter: 'args']
+                                               ~~~~              ['args' is declared but never used.]
     return x + y;
 }
 
 export function func2(x: number, y: number, ...args: number[]) {
-                                 ~                               [Unused parameter: 'y']
+                                 ~                               ['y' is declared but never used.]
     return x + args[0];
 }
 
 export function func3(x?: number, y?: number) {
-                                  ~             [Unused parameter: 'y']
+                                  ~             ['y' is declared but never used.]
     return x;
 }
 
@@ -19,7 +21,7 @@ export interface ITestInterface {
 
 export class ABCD {
     constructor(private x: number, public y: number, private z: number) {
-                        ~                                                 [Unused parameter: 'x']
+                        ~                                                 [Property 'x' is declared but never used.]
     }
 
     func5() {
@@ -40,7 +42,7 @@ export function func7(f: (x: number) => number) {
 }
 
 export function func8([x, y]: [number, number]) {
-                          ~                       [Unused variable: 'y']
+                          ~                       ['y' is declared but never used.]
     return x;
 }
 
@@ -49,22 +51,23 @@ export class DestructuringTests {
     }
 
     public func9({a, b}) {
-                     ~     [Unused variable: 'b']
+                     ~     ['b' is declared but never used.]
         return a;
     }
 
     public func10([a, b]) {
-                      ~     [Unused variable: 'b']
+                      ~     ['b' is declared but never used.]
         return [a];
     }
 
     // destructuring with default value
     public func11([x = 0]) {
-                   ~         [Unused variable: 'x']
+                   ~         ['x' is declared but never used.]
         return;
     }
 }
 
 abstract class AbstractTest {
+               ~~~~~~~~~~~~ ['AbstractTest' is declared but never used.]
     abstract foo(x);
 }

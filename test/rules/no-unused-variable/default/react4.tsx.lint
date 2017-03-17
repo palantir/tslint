@@ -1,4 +1,2 @@
 import * as React from "react";
-            ~~~~~               [Unused import: 'React']
-
-console.log(<input type="text" />);
+            ~~~~~               ['React' is declared but never used.]
