@@ -21,8 +21,9 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
-const BANNED_KEYWORDS = new Set(["any", "Number", "number", "String", "string", "Boolean", "boolean", "Undefined", "undefined"]);
-const bannedKeywordsStr = Array.from(BANNED_KEYWORDS).map((kw) => `\`${kw}\``).join(", ");
+const BANNED_KEYWORDS = ["any", "Number", "number", "String", "string", "Boolean", "boolean", "Undefined", "undefined"];
+const bannedKeywordsSet = new Set(BANNED_KEYWORDS);
+const bannedKeywordsStr = BANNED_KEYWORDS.map((kw) => `\`${kw}\``).join(", ");
 
 const OPTION_LEADING_UNDERSCORE = "allow-leading-underscore";
 const OPTION_TRAILING_UNDERSCORE = "allow-trailing-underscore";
@@ -67,7 +68,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static KEYWORD_FAILURE = "variable name clashes with keyword/type";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, parseOptions(this.getOptions().ruleArguments)));
+        return this.applyWithFunction<Options>(sourceFile, walk, parseOptions(this.ruleArguments));
     }
 }
 
@@ -94,8 +95,9 @@ function parseOptions(ruleArguments: string[]): Options {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>, options: Options): void {
-    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+function walk(ctx: Lint.WalkContext<Options>): void {
+    const { options, sourceFile } = ctx;
+    return ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
         switch (node.kind) {
             case ts.SyntaxKind.BindingElement: {
                 const { initializer, name, propertyName } = node as ts.BindingElement;
@@ -151,7 +153,7 @@ function walk(ctx: Lint.WalkContext<void>, options: Options): void {
     }
 
     function handleVariableNameKeyword(name: ts.Identifier): void {
-        if (options.banKeywords && BANNED_KEYWORDS.has(name.text)) {
+        if (options.banKeywords && bannedKeywordsSet.has(name.text)) {
             ctx.addFailureAtNode(name, Rule.KEYWORD_FAILURE);
         }
     }
@@ -169,13 +171,10 @@ function isAlias(name: string, initializer: ts.Expression): boolean {
 }
 
 function isCamelCase(name: string, options: Options): boolean {
-    const firstCharacter = name.charAt(0);
-    const lastCharacter = name.charAt(name.length - 1);
-    const middle = name.substr(1, name.length - 2);
+    const firstCharacter = name[0];
+    const lastCharacter = name[name.length - 1];
+    const middle = name.slice(1, -1);
 
-    if (name.length <= 0) {
-        return true;
-    }
     if (!options.leadingUnderscore && firstCharacter === "_") {
         return false;
     }
