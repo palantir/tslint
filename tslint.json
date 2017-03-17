@@ -41,7 +41,7 @@
     "no-unsafe-any": false, // TODO
     "no-use-before-declare": false,
     "no-void-expression": false,
-    "only-arrow-functions": false, // TODO: [true, "allow-declarations"],
+    "only-arrow-functions": [true, "allow-declarations", "allow-named-functions"],
     "prefer-function-over-method": false, // TODO
     "restrict-plus-operands": false,
     "strict-boolean-expressions": false, // TODO
