@@ -60,10 +60,11 @@ function walk(ctx: Lint.WalkContext<number>): void {
     const { options: minCases, sourceFile } = ctx;
     return ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
         if (utils.isIfStatement(node) && check(node, sourceFile, minCases)) {
-            const { expression, elseStatement } = node;
+            const { expression, thenStatement, elseStatement } = node;
             ctx.addFailureAtNode(expression, Rule.FAILURE_STRING);
             // Be careful not to fail again for the "else if"
             ts.forEachChild(expression, cb);
+            ts.forEachChild(thenStatement, cb);
             if (elseStatement) {
                 ts.forEachChild(elseStatement, cb);
             }
