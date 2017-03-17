@@ -76,13 +76,12 @@ function walk(ctx: Lint.WalkContext<IgnoreOption>) {
     const possibleFailures: ts.TextRange[] = [];
     const sourceFile = ctx.sourceFile;
     const text = sourceFile.text;
-    for (const range of getLineRanges(sourceFile)) {
-        const line = text.substring(range.pos, range.end).replace(/\r?\n/, "");
-        const match = line.match(/^(.*?)\s+$/);
+    for (const line of getLineRanges(sourceFile)) {
+        const match = text.substr(line.pos, line.contentLength).match(/\s+$/);
         if (match !== null) {
             possibleFailures.push({
-                end: range.pos + line.length,
-                pos: range.pos + match[1].length,
+                end: line.pos + line.contentLength,
+                pos: line.pos + match.index!,
             });
         }
     }
@@ -91,8 +90,8 @@ function walk(ctx: Lint.WalkContext<IgnoreOption>) {
         return;
     }
     const excludedRanges = ctx.options === IgnoreOption.None
-                           ? getTemplateRanges(ctx.sourceFile)
-                           : getExcludedRanges(ctx.sourceFile, ctx.options);
+                           ? getTemplateRanges(sourceFile)
+                           : getExcludedRanges(sourceFile, ctx.options);
     for (const possibleFailure of possibleFailures) {
         if (!excludedRanges.some((range) => range.pos < possibleFailure.pos && possibleFailure.pos < range.end)) {
             ctx.addFailure(possibleFailure.pos, possibleFailure.end, Rule.FAILURE_STRING, ctx.createFix(
