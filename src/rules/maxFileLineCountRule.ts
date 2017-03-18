@@ -61,6 +61,6 @@ export class Rule extends Lint.Rules.AbstractRule {
         }
 
         return this.applyWithFunction(sourceFile, (ctx) =>
-            ctx.addFailure(0, 1, Rule.FAILURE_STRING(lineCount, lineLimit)));
+            ctx.addFailureAt(sourceFile.text.length - 1, 1, Rule.FAILURE_STRING(lineCount, lineLimit)));
     }
 }
