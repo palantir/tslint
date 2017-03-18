@@ -41,7 +41,6 @@ export class Rule extends Lint.Rules.AbstractRule {
             return [];
         }
 
-        return this.applyWithFunction(sourceFile, (ctx) =>
-            ctx.addFailure(length, length, Rule.FAILURE_STRING));
+        return [new Lint.RuleFailure(sourceFile, length, length, Rule.FAILURE_STRING, this.ruleName)];
     }
 }
