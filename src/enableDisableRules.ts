@@ -24,16 +24,11 @@ import { RuleFailure } from "./language/rule/rule";
 export interface RuleDisabler {
     /** True if there is a `tslint:disable` in the range of the failure. */
     isDisabled(failure: RuleFailure): boolean;
-    /** True if there is an explicit `tslint:enable` for a rule even if it is not turned on in tslint.json. */
-    isExplicitlyEnabled(ruleName: string): boolean;
 }
 
 export function getDisabler(sourceFile: ts.SourceFile, enabledRules: string[]): RuleDisabler {
     const map = getDisableMap(sourceFile, enabledRules);
     return {
-        isExplicitlyEnabled(ruleName) {
-            return map.has(ruleName);
-        },
         isDisabled(failure) {
             const disabledIntervals = map.get(failure.getRuleName());
             return !!disabledIntervals && disabledIntervals.some(({ pos, end }) => {
@@ -50,7 +45,6 @@ export function getDisabler(sourceFile: ts.SourceFile, enabledRules: string[]): 
  * (It will have no entry if the rule is never disabled, meaning all arrays are non-empty.)
  */
 function getDisableMap(sourceFile: ts.SourceFile, enabledRules: string[]): ReadonlyMap<string, ts.TextRange[]> {
-    const enabledRulesSet = new Set(enabledRules);
     const map = new Map<string, ts.TextRange[]>();
 
     utils.forEachComment(sourceFile, (fullText, comment) => {
@@ -83,14 +77,6 @@ function getDisableMap(sourceFile: ts.SourceFile, enabledRules: string[]): Reado
                         // Disable it again after the enable range is over.
                         disableRanges.push({ pos: end, end: -1 });
                     }
-                }
-            } else if (!enabledRulesSet.has(ruleName)) {
-                // This rule is being explicitly enabled. Disable it outside of this particular range.
-                const ranges = [{ pos: 0, end: start }];
-                map.set(ruleName, ranges);
-                if (end !== -1) {
-                    // If enabled just for this line, disable after.
-                    ranges.push({ pos: end, end: -1 });
                 }
             }
         } else { // disable

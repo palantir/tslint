@@ -22,8 +22,6 @@ import { camelize } from "../src/utils";
 import { IOptions } from "./../src/language/rule/rule";
 import { loadRules } from "./lint";
 
-const nullDisabler = { isDisabled: () => false, isExplicitlyEnabled: () => false };
-
 describe("Rule Loader", () => {
     const builtRulesDir = "build/src/rules";
     const srcRulesDir = "src/rules";
@@ -38,7 +36,7 @@ describe("Rule Loader", () => {
             { ruleName: "quotemark", ruleArguments: [], ruleSeverity: "error" },
         ];
 
-        const rules = loadRules(validConfiguration, nullDisabler, builtRulesDir);
+        const rules = loadRules(validConfiguration, builtRulesDir);
         assert.equal(rules.length, 4);
     });
 
@@ -49,7 +47,7 @@ describe("Rule Loader", () => {
             { ruleName: "invalidConfig2", ruleArguments: [], ruleSeverity: "off" },
         ];
 
-        const rules = loadRules(invalidConfiguration, nullDisabler, [builtRulesDir]);
+        const rules = loadRules(invalidConfiguration, [builtRulesDir]);
         assert.equal(rules.length, 1);
     });
 
@@ -59,23 +57,10 @@ describe("Rule Loader", () => {
             { ruleName: "max-line-length", ruleArguments: [140], ruleSeverity: "warning" },
         ];
 
-        const rules = loadRules(withOptions, nullDisabler, [builtRulesDir]);
+        const rules = loadRules(withOptions, [builtRulesDir]);
         assert.equal(rules.length, 2);
         assert.equal(rules[0].getOptions().ruleSeverity, "error");
         assert.equal(rules[1].getOptions().ruleSeverity, "warning");
-    });
-
-    it("loads disabled rules if rule in enableDisableRuleMap", () => {
-        const validConfiguration: IOptions[] = [
-            { ruleName: "forin", ruleArguments: [], ruleSeverity: "off" },
-        ];
-
-        const disabler = {
-            isDisabled(): never { throw new Error(); },
-            isExplicitlyEnabled() { return true; },
-        };
-        const rules = loadRules(validConfiguration, disabler, builtRulesDir);
-        assert.equal(rules.length, 1);
     });
 
     it("works with rulesDirectory argument as an Array", () => {
@@ -87,7 +72,7 @@ describe("Rule Loader", () => {
             { ruleName: "quotemark", ruleArguments: [], ruleSeverity: "error" },
         ];
 
-        const rules = loadRules(validConfiguration, nullDisabler, [builtRulesDir]);
+        const rules = loadRules(validConfiguration, [builtRulesDir]);
         assert.equal(rules.length, 4);
     });
 
@@ -97,7 +82,7 @@ describe("Rule Loader", () => {
             { ruleName: "await-promise", ruleArguments: [], ruleSeverity: "error" },
         ];
 
-        const rules = loadRules(validConfiguration, nullDisabler, builtRulesDir, true);
+        const rules = loadRules(validConfiguration, builtRulesDir, true);
         assert.equal(rules.length, 1);
     });
 

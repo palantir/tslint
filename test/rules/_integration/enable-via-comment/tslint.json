@@ -1,7 +1,0 @@
-{
-    "rules": {
-        "no-var-keyword": true,
-        "no-null-keyword": false,
-        "semicolon": false
-    }
-}

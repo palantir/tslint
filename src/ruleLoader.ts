@@ -19,7 +19,6 @@ import * as fs from "fs";
 import * as path from "path";
 
 import { getRelativePath } from "./configuration";
-import { RuleDisabler } from "./enableDisableRules";
 import { showWarningOnce } from "./error";
 import { IOptions, IRule, RuleStatic } from "./language/rule/rule";
 import { arrayify, camelize, dedent, find } from "./utils";
@@ -29,7 +28,6 @@ const CORE_RULES_DIRECTORY = path.resolve(moduleDirectory, ".", "rules");
 const cachedRules = new Map<string, RuleStatic | null>(); // null indicates that the rule was not found
 
 export function loadRules(ruleOptionsList: IOptions[],
-                          ruleDisabler: RuleDisabler,
                           rulesDirectories?: string | string[],
                           isJs?: boolean): IRule[] {
     const rules: IRule[] = [];
@@ -37,6 +35,11 @@ export function loadRules(ruleOptionsList: IOptions[],
     const notAllowedInJsRules: string[] = [];
 
     for (const ruleOptions of ruleOptionsList) {
+        if (ruleOptions.ruleSeverity === "off") {
+            // Perf: don't bother finding the rule if it's disabled.
+            continue;
+        }
+
         const ruleName = ruleOptions.ruleName;
         const Rule = findRule(ruleName, rulesDirectories);
         if (Rule === undefined) {
@@ -45,7 +48,7 @@ export function loadRules(ruleOptionsList: IOptions[],
             notAllowedInJsRules.push(ruleName);
         } else {
             const rule = new Rule(ruleOptions);
-            if (rule.isEnabled() || ruleDisabler.isExplicitlyEnabled(ruleName)) {
+            if (rule.isEnabled()) {
                 rules.push(rule);
             }
 

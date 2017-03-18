@@ -37,7 +37,7 @@ import { IFormatter } from "./language/formatter/formatter";
 import { Fix, IRule, isTypedRule, RuleFailure, RuleSeverity } from "./language/rule/rule";
 import * as utils from "./language/utils";
 import { loadRules } from "./ruleLoader";
-import { arrayify, dedent, mapDefined } from "./utils";
+import { arrayify, dedent } from "./utils";
 
 /**
  * Linter that can lint multiple files in consecutive runs.
@@ -52,7 +52,6 @@ class Linter {
 
     private failures: RuleFailure[] = [];
     private fixes: RuleFailure[] = [];
-    private disablers = new Map<ts.SourceFile, RuleDisabler>();
 
     /**
      * Creates a TypeScript program object from a tsconfig.json file path and optional project directory.
@@ -98,13 +97,15 @@ class Linter {
         let sourceFile = this.getSourceFile(fileName, source);
         const isJs = /\.jsx?$/i.test(fileName);
 
-        const enabledRules = this.getEnabledRules(sourceFile, configuration, isJs);
+        const enabledRules = this.getEnabledRules(configuration, isJs);
+        const disabler = getDisabler(sourceFile, enabledRules.map((r) => r.getOptions().ruleName));
+
         let hasLinterRun = false;
         let fileFailures: RuleFailure[] = [];
 
         if (this.options.fix) {
             for (const rule of enabledRules) {
-                const ruleFailures = this.applyRule(rule, sourceFile);
+                const ruleFailures = this.applyRule(rule, sourceFile, disabler);
                 const fixes = ruleFailures.map((f) => f.getFix()).filter((f): f is Fix => !!f) as Fix[];
                 source = fs.readFileSync(fileName, { encoding: "utf-8" });
                 if (fixes.length > 0) {
@@ -124,7 +125,7 @@ class Linter {
         if (!hasLinterRun || this.fixes.length > 0) {
             fileFailures = [];
             for (const rule of enabledRules) {
-                const ruleFailures = this.applyRule(rule, sourceFile);
+                const ruleFailures = this.applyRule(rule, sourceFile, disabler);
                 if (ruleFailures.length > 0) {
                     fileFailures = fileFailures.concat(ruleFailures);
                 }
@@ -170,7 +171,7 @@ class Linter {
         };
     }
 
-    private applyRule(rule: IRule, sourceFile: ts.SourceFile): RuleFailure[] {
+    private applyRule(rule: IRule, sourceFile: ts.SourceFile, disabler: RuleDisabler): RuleFailure[] {
         let ruleFailures: RuleFailure[];
         try {
             if (this.program && isTypedRule(rule)) {
@@ -187,20 +188,14 @@ class Linter {
             return [];
         }
 
-        return ruleFailures.filter((f) => !this.disablers.get(sourceFile)!.isDisabled(f));
+        return ruleFailures.filter((f) => !disabler.isDisabled(f));
     }
 
-    private getEnabledRules(sourceFile: ts.SourceFile, configuration: IConfigurationFile = DEFAULT_CONFIG, isJs: boolean): IRule[] {
+    private getEnabledRules(configuration: IConfigurationFile = DEFAULT_CONFIG, isJs: boolean): IRule[] {
         const ruleOptionsList = convertRuleOptions(isJs ? configuration.jsRules : configuration.rules);
-
-        // walk the code first to find all the intervals where rules are disabled
-        const allEnabledRules = mapDefined(ruleOptionsList, ({ ruleSeverity, ruleName }) => ruleSeverity === "off" ? undefined : ruleName);
-        const disabler = getDisabler(sourceFile, allEnabledRules);
-        this.disablers.set(sourceFile, disabler);
-
         const rulesDirectories = arrayify(this.options.rulesDirectory)
             .concat(arrayify(configuration.rulesDirectory));
-        return loadRules(ruleOptionsList, disabler, rulesDirectories, isJs);
+        return loadRules(ruleOptionsList, rulesDirectories, isJs);
     }
 
     private getSourceFile(fileName: string, source: string) {
