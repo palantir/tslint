@@ -33,19 +33,6 @@ export function doesIntersect(failure: RuleFailure, disabledIntervals: IDisabled
     });
 }
 
-/** @deprecated use forEachToken instead */
-export function scanAllTokens(scanner: ts.Scanner, callback: (s: ts.Scanner) => void) {
-    let lastStartPos = -1;
-    while (scanner.scan() !== ts.SyntaxKind.EndOfFileToken) {
-        const startPos = scanner.getStartPos();
-        if (startPos === lastStartPos) {
-            break;
-        }
-        lastStartPos = startPos;
-        callback(scanner);
-    }
-}
-
 /**
  * @returns true if any modifier kinds passed along exist in the given modifiers array
  */
