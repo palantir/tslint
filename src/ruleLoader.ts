@@ -22,7 +22,7 @@ import { getRelativePath } from "./configuration";
 import { RuleDisabler } from "./enableDisableRules";
 import { showWarningOnce } from "./error";
 import { IOptions, IRule, RuleStatic } from "./language/rule/rule";
-import { arrayify, camelize, dedent } from "./utils";
+import { arrayify, camelize, dedent, find } from "./utils";
 
 const moduleDirectory = path.dirname(module.filename);
 const CORE_RULES_DIRECTORY = path.resolve(moduleDirectory, ".", "rules");
@@ -39,7 +39,7 @@ export function loadRules(ruleOptionsList: IOptions[],
     for (const ruleOptions of ruleOptionsList) {
         const ruleName = ruleOptions.ruleName;
         const Rule = findRule(ruleName, rulesDirectories);
-        if (Rule === null) {
+        if (Rule === undefined) {
             notFoundRules.push(ruleName);
         } else if (isJs && Rule.metadata && Rule.metadata.typescriptOnly) {
             notAllowedInJsRules.push(ruleName);
@@ -80,21 +80,11 @@ export function loadRules(ruleOptionsList: IOptions[],
     return rules;
 }
 
-export function findRule(name: string, rulesDirectories?: string | string[]): RuleStatic | null {
+export function findRule(name: string, rulesDirectories?: string | string[]): RuleStatic | undefined {
     const camelizedName = transformName(name);
     // first check for core rules
-    let Rule = loadCachedRule(CORE_RULES_DIRECTORY, camelizedName);
-    if (Rule === null) {
-        // then check for rules within the first level of rulesDirectory
-        for (const dir of arrayify(rulesDirectories)) {
-            Rule = loadCachedRule(dir, camelizedName, true);
-            if (Rule != null) {
-                break;
-            }
-        }
-    }
-
-    return Rule;
+    return loadCachedRule(CORE_RULES_DIRECTORY, camelizedName) ||
+        find(arrayify(rulesDirectories), (dir) => loadCachedRule(dir, camelizedName, true));
 }
 
 function transformName(name: string) {
@@ -111,7 +101,7 @@ function transformName(name: string) {
  * @param directory - An absolute path to a directory of rules
  * @param ruleName - A name of a rule in filename format. ex) "someLintRule"
  */
-function loadRule(directory: string, ruleName: string) {
+function loadRule(directory: string, ruleName: string): RuleStatic | null {
     const fullPath = path.join(directory, ruleName);
     if (fs.existsSync(fullPath + ".js")) {
         const ruleModule = require(fullPath);
@@ -119,15 +109,15 @@ function loadRule(directory: string, ruleName: string) {
             return ruleModule.Rule;
         }
     }
-    return undefined;
+    return null;
 }
 
-function loadCachedRule(directory: string, ruleName: string, isCustomPath = false): RuleStatic | null {
+function loadCachedRule(directory: string, ruleName: string, isCustomPath = false): RuleStatic | undefined {
     // use cached value if available
     const fullPath = path.join(directory, ruleName);
     const cachedRule = cachedRules.get(fullPath);
     if (cachedRule !== undefined) {
-        return cachedRule;
+        return cachedRule === null ? undefined : cachedRule;
     }
 
     // get absolute path
@@ -141,5 +131,5 @@ function loadCachedRule(directory: string, ruleName: string, isCustomPath = fals
 
     const Rule = absolutePath === undefined ? null : loadRule(absolutePath, ruleName);
     cachedRules.set(fullPath, Rule);
-    return Rule;
+    return Rule === null ? undefined : Rule;
 }
