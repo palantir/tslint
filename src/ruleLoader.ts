@@ -19,22 +19,17 @@ import * as fs from "fs";
 import * as path from "path";
 
 import { getRelativePath } from "./configuration";
+import { RuleDisabler } from "./enableDisableRules";
 import { showWarningOnce } from "./error";
-import { AbstractRule } from "./language/rule/abstractRule";
-import { IDisabledInterval, IOptions, IRule } from "./language/rule/rule";
+import { IOptions, IRule, RuleStatic } from "./language/rule/rule";
 import { arrayify, camelize, dedent } from "./utils";
 
 const moduleDirectory = path.dirname(module.filename);
 const CORE_RULES_DIRECTORY = path.resolve(moduleDirectory, ".", "rules");
-const cachedRules = new Map<string, typeof AbstractRule | null>(); // null indicates that the rule was not found
-
-export interface IEnableDisablePosition {
-    isEnabled: boolean;
-    position: number;
-}
+const cachedRules = new Map<string, RuleStatic | null>(); // null indicates that the rule was not found
 
 export function loadRules(ruleOptionsList: IOptions[],
-                          enableDisableRuleMap: Map<string, IEnableDisablePosition[]>,
+                          ruleDisabler: RuleDisabler,
                           rulesDirectories?: string | string[],
                           isJs?: boolean): IRule[] {
     const rules: IRule[] = [];
@@ -43,23 +38,19 @@ export function loadRules(ruleOptionsList: IOptions[],
 
     for (const ruleOptions of ruleOptionsList) {
         const ruleName = ruleOptions.ruleName;
-        const enableDisableRules = enableDisableRuleMap.get(ruleName);
-        if (ruleOptions.ruleSeverity !== "off" || enableDisableRuleMap) {
-            const Rule: (typeof AbstractRule) | null = findRule(ruleName, rulesDirectories);
-            if (Rule == null) {
-                notFoundRules.push(ruleName);
-            } else {
-                if (isJs && Rule.metadata && Rule.metadata.typescriptOnly) {
-                    notAllowedInJsRules.push(ruleName);
-                } else {
-                    const ruleSpecificList = enableDisableRules || [];
-                    ruleOptions.disabledIntervals = buildDisabledIntervalsFromSwitches(ruleSpecificList);
-                    rules.push(new (Rule as any)(ruleOptions));
+        const Rule = findRule(ruleName, rulesDirectories);
+        if (Rule === null) {
+            notFoundRules.push(ruleName);
+        } else if (isJs && Rule.metadata && Rule.metadata.typescriptOnly) {
+            notAllowedInJsRules.push(ruleName);
+        } else {
+            const rule = new Rule(ruleOptions);
+            if (rule.isEnabled() || ruleDisabler.isExplicitlyEnabled(ruleName)) {
+                rules.push(rule);
+            }
 
-                    if (Rule.metadata && Rule.metadata.deprecationMessage) {
-                        showWarningOnce(`${Rule.metadata.ruleName} is deprecated. ${Rule.metadata.deprecationMessage}`);
-                    }
-                }
+            if (Rule.metadata && Rule.metadata.deprecationMessage) {
+                showWarningOnce(`${Rule.metadata.ruleName} is deprecated. ${Rule.metadata.deprecationMessage}`);
             }
         }
     }
@@ -89,14 +80,11 @@ export function loadRules(ruleOptionsList: IOptions[],
     return rules;
 }
 
-export function findRule(name: string, rulesDirectories?: string | string[]) {
+export function findRule(name: string, rulesDirectories?: string | string[]): RuleStatic | null {
     const camelizedName = transformName(name);
-    let Rule: typeof AbstractRule | null;
-
     // first check for core rules
-    Rule = loadCachedRule(CORE_RULES_DIRECTORY, camelizedName);
-
-    if (Rule == null) {
+    let Rule = loadCachedRule(CORE_RULES_DIRECTORY, camelizedName);
+    if (Rule === null) {
         // then check for rules within the first level of rulesDirectory
         for (const dir of arrayify(rulesDirectories)) {
             Rule = loadCachedRule(dir, camelizedName, true);
@@ -134,7 +122,7 @@ function loadRule(directory: string, ruleName: string) {
     return undefined;
 }
 
-function loadCachedRule(directory: string, ruleName: string, isCustomPath = false) {
+function loadCachedRule(directory: string, ruleName: string, isCustomPath = false): RuleStatic | null {
     // use cached value if available
     const fullPath = path.join(directory, ruleName);
     const cachedRule = cachedRules.get(fullPath);
@@ -146,44 +134,12 @@ function loadCachedRule(directory: string, ruleName: string, isCustomPath = fals
     let absolutePath: string | undefined = directory;
     if (isCustomPath) {
         absolutePath = getRelativePath(directory);
-        if (absolutePath != null) {
-            if (!fs.existsSync(absolutePath)) {
-                throw new Error(`Could not find custom rule directory: ${directory}`);
-            }
+        if (absolutePath !== undefined && !fs.existsSync(absolutePath)) {
+            throw new Error(`Could not find custom rule directory: ${directory}`);
         }
     }
 
-    let Rule: typeof AbstractRule | null = null;
-    if (absolutePath != null) {
-        Rule = loadRule(absolutePath, ruleName);
-    }
+    const Rule = absolutePath === undefined ? null : loadRule(absolutePath, ruleName);
     cachedRules.set(fullPath, Rule);
     return Rule;
-}
-
-/**
- * creates disabled intervals for rule based on list of switchers for it
- * @param ruleSpecificList - contains all switchers for rule states sorted top-down and strictly alternating between enabled and disabled
- */
-function buildDisabledIntervalsFromSwitches(ruleSpecificList: IEnableDisablePosition[]) {
-    const disabledIntervalList: IDisabledInterval[] = [];
-    // starting from second element in the list since first is always enabled in position 0;
-    let i = 1;
-
-    while (i < ruleSpecificList.length) {
-        const startPosition = ruleSpecificList[i].position;
-
-        // rule enabled state is always alternating therefore we can use position of next switch as end of disabled interval
-        // set endPosition as Infinity in case when last switch for rule in a file is disabled
-        const endPosition = ruleSpecificList[i + 1] ? ruleSpecificList[i + 1].position : Infinity;
-
-        disabledIntervalList.push({
-            endPosition,
-            startPosition,
-        });
-
-        i += 2;
-    }
-
-    return disabledIntervalList;
 }

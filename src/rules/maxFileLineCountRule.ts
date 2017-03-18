@@ -37,10 +37,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY = (lineCount: number, lineLimit: number) => {
-        let msg = `This file has ${lineCount} lines, which exceeds the maximum of ${lineLimit} lines allowed. `;
-        msg += `Consider breaking this file up into smaller parts`;
-        return msg;
+    public static FAILURE_STRING(lineCount: number, lineLimit: number): string {
+        return `This file has ${lineCount} lines, which exceeds the maximum of ${lineLimit} lines allowed. ` +
+            `Consider breaking this file up into smaller parts`;
     }
 
     public isEnabled(): boolean {
@@ -55,17 +54,13 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const ruleFailures: Lint.RuleFailure[] = [];
-        const ruleArguments = this.getOptions().ruleArguments;
-        const lineLimit: number = ruleArguments[0];
+        const lineLimit: number = this.ruleArguments[0];
         const lineCount: number = sourceFile.getLineStarts().length;
-        const disabledIntervals = this.getOptions().disabledIntervals;
-
-        if (lineCount > lineLimit && disabledIntervals.length === 0) {
-            const errorString = Rule.FAILURE_STRING_FACTORY(lineCount, lineLimit);
-            ruleFailures.push(new Lint.RuleFailure(sourceFile, 0, 1, errorString,
-              this.getOptions().ruleName));
+        if (lineCount <= lineLimit) {
+            return [];
         }
-        return ruleFailures;
+
+        return this.applyWithFunction(sourceFile, (ctx) =>
+            ctx.addFailure(0, 1, Rule.FAILURE_STRING(lineCount, lineLimit)));
     }
 }

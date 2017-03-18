@@ -39,7 +39,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY = (lineLimit: number) => {
+    public static FAILURE_STRING(lineLimit: number): string {
         return `Exceeds maximum line length of ${lineLimit}`;
     }
 
@@ -55,29 +55,25 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const ruleFailures: Lint.RuleFailure[] = [];
-        const ruleArguments = this.getOptions().ruleArguments;
-        const lineLimit = ruleArguments[0];
-        const lineStarts = sourceFile.getLineStarts();
-        const errorString = Rule.FAILURE_STRING_FACTORY(lineLimit);
-        const disabledIntervals = this.getOptions().disabledIntervals;
-        const source = sourceFile.getFullText();
+        return this.applyWithFunction(sourceFile, walk, this.ruleArguments[0]);
+    }
+}
 
-        for (let i = 0; i < lineStarts.length - 1; ++i) {
-            const from = lineStarts[i];
-            const to = lineStarts[i + 1];
-            if ((to - from - 1) > lineLimit && !((to - from - 2) === lineLimit && source[to - 2] === "\r")) {
-                // first condition above is whether the line (minus the newline) is larger than the line limit
-                // second two check for windows line endings, that is, check to make sure it is not the case
-                // that we are only over by the limit by exactly one and that the character we are over the
-                // limit by is a '\r' character which does not count against the limit
-                // (and thus we are not actually over the limit).
-                const ruleFailure = new Lint.RuleFailure(sourceFile, from, to - 1, errorString, this.getOptions().ruleName);
-                if (!Lint.doesIntersect(ruleFailure, disabledIntervals)) {
-                    ruleFailures.push(ruleFailure);
-                }
-            }
+function walk(ctx: Lint.WalkContext<number>): void {
+    const { sourceFile, options: lineLimit } = ctx;
+    const source = sourceFile.text;
+    const lineStarts = sourceFile.getLineStarts();
+
+    for (let i = 0; i < lineStarts.length - 1; ++i) {
+        const from = lineStarts[i];
+        const to = lineStarts[i + 1];
+        if ((to - from - 1) > lineLimit && !((to - from - 2) === lineLimit && source[to - 2] === "\r")) {
+            // first condition above is whether the line (minus the newline) is larger than the line limit
+            // second two check for windows line endings, that is, check to make sure it is not the case
+            // that we are only over by the limit by exactly one and that the character we are over the
+            // limit by is a '\r' character which does not count against the limit
+            // (and thus we are not actually over the limit).
+            ctx.addFailure(from, to - 1, Rule.FAILURE_STRING(lineLimit));
         }
-        return ruleFailures;
     }
 }

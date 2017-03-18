@@ -17,6 +17,7 @@
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { flatMap, mapDefined } from "../utils";
 
 const OPTION_ORDER = "order";
 const OPTION_ALPHABETIZE = "alphabetize";
@@ -477,23 +478,4 @@ function nameString(name: ts.PropertyName): string {
         default:
             return "";
     }
-}
-
-function mapDefined<T, U>(inputs: T[], getOutput: (input: T) => U | undefined): U[] {
-    const out = [];
-    for (const input of inputs) {
-        const output = getOutput(input);
-        if (output !== undefined) {
-            out.push(output);
-        }
-    }
-    return out;
-}
-
-function flatMap<T, U>(inputs: T[], getOutputs: (input: T) => U[]): U[] {
-    const out = [];
-    for (const input of inputs) {
-        out.push(...getOutputs(input));
-    }
-    return out;
 }

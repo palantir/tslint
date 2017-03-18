@@ -1,0 +1,11 @@
+// tslint:enable no-null-keyword
+null;
+~~~~ [Use 'undefined' instead of 'null']
+null;
+~~~~ [Use 'undefined' instead of 'null']
+
+foo // tslint:enable-line semicolon
+   ~nil [Missing semicolon]
+
+foo
+

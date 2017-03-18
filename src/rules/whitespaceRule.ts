@@ -256,6 +256,10 @@ class WhitespaceWalker extends Lint.RuleWalker {
     }
 
     private addMissingWhitespaceErrorAt(position: number) {
+        // TODO: this rule occasionally adds duplicate failures.
+        if (this.getFailures().some((f) => f.getStartPosition().getPosition() === position)) {
+            return;
+        }
         const fix = this.createFix(this.appendText(position, " "));
         this.addFailureAt(position, 1, Rule.FAILURE_STRING, fix);
     }

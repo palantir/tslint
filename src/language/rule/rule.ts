@@ -17,7 +17,10 @@
 
 import * as ts from "typescript";
 
-import {IWalker} from "../walker";
+export interface RuleStatic {
+    metadata: IRuleMetadata;
+    new(options: IOptions): IRule;
+}
 
 export interface IRuleMetadata {
     /**
@@ -92,19 +95,12 @@ export interface IOptions {
     ruleArguments: any[];
     ruleSeverity: RuleSeverity;
     ruleName: string;
-    disabledIntervals: IDisabledInterval[];
-}
-
-export interface IDisabledInterval {
-    startPosition: number;
-    endPosition: number;
 }
 
 export interface IRule {
     getOptions(): IOptions;
     isEnabled(): boolean;
     apply(sourceFile: ts.SourceFile): RuleFailure[];
-    applyWithWalker(walker: IWalker): RuleFailure[];
 }
 
 export interface ITypedRule extends IRule {
