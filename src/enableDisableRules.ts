@@ -21,30 +21,29 @@ import * as utils from "tsutils";
 import * as ts from "typescript";
 import { RuleFailure } from "./language/rule/rule";
 
-export interface RuleDisabler {
-    /** True if there is a `tslint:disable` in the range of the failure. */
-    isDisabled(failure: RuleFailure): boolean;
-}
+export function removeDisabledFailures(sourceFile: ts.SourceFile, failures: RuleFailure[]): RuleFailure[] {
+    if (!failures.length) {
+        // Usually there won't be failures anyway, so no need to look for "tslint:disable".
+        return failures;
+    }
 
-export function getDisabler(sourceFile: ts.SourceFile, enabledRules: string[]): RuleDisabler {
-    const map = getDisableMap(sourceFile, enabledRules);
-    return {
-        isDisabled(failure) {
-            const disabledIntervals = map.get(failure.getRuleName());
-            return !!disabledIntervals && disabledIntervals.some(({ pos, end }) => {
-                const failPos = failure.getStartPosition().getPosition();
-                const failEnd = failure.getEndPosition().getPosition();
-                return failEnd >= pos && (end === -1 || failPos <= end);
-            });
-        },
-    };
+    const failingRules = new Set(failures.map((f) => f.getRuleName()));
+    const map = getDisableMap(sourceFile, failingRules);
+    return failures.filter((failure) => {
+        const disabledIntervals = map.get(failure.getRuleName());
+        return !disabledIntervals || !disabledIntervals.some(({ pos, end }) => {
+            const failPos = failure.getStartPosition().getPosition();
+            const failEnd = failure.getEndPosition().getPosition();
+            return failEnd >= pos && (end === -1 || failPos <= end);
+        });
+    });
 }
 
 /**
  * The map will have an array of TextRange for each disable of a rule in a file.
  * (It will have no entry if the rule is never disabled, meaning all arrays are non-empty.)
  */
-function getDisableMap(sourceFile: ts.SourceFile, enabledRules: string[]): ReadonlyMap<string, ts.TextRange[]> {
+function getDisableMap(sourceFile: ts.SourceFile, failingRules: Set<string>): ReadonlyMap<string, ts.TextRange[]> {
     const map = new Map<string, ts.TextRange[]>();
 
     utils.forEachComment(sourceFile, (fullText, comment) => {
@@ -56,7 +55,8 @@ function getDisableMap(sourceFile: ts.SourceFile, enabledRules: string[]): Reado
             const { rulesList, isEnabled, modifier } = parsed;
             const switchRange = getSwitchRange(modifier, comment, sourceFile);
             if (switchRange) {
-                for (const ruleToSwitch of (rulesList === "all" ? enabledRules : rulesList)) {
+                const rulesToSwitch = rulesList === "all" ? Array.from(failingRules) : rulesList.filter((r) => failingRules.has(r));
+                for (const ruleToSwitch of rulesToSwitch) {
                     switchRuleState(ruleToSwitch, isEnabled, switchRange.pos, switchRange.end);
                 }
             }

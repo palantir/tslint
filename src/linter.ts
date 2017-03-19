@@ -29,7 +29,7 @@ import {
     IConfigurationFile,
     loadConfigurationFromPath,
 } from "./configuration";
-import { getDisabler, RuleDisabler } from "./enableDisableRules";
+import { removeDisabledFailures } from "./enableDisableRules";
 import { isError, showWarningOnce } from "./error";
 import { findFormatter } from "./formatterLoader";
 import { ILinterOptions, LintResult } from "./index";
@@ -37,7 +37,7 @@ import { IFormatter } from "./language/formatter/formatter";
 import { Fix, IRule, isTypedRule, RuleFailure, RuleSeverity } from "./language/rule/rule";
 import * as utils from "./language/utils";
 import { loadRules } from "./ruleLoader";
-import { arrayify, dedent } from "./utils";
+import { arrayify, dedent, flatMap, mapDefined } from "./utils";
 
 /**
  * Linter that can lint multiple files in consecutive runs.
@@ -96,54 +96,43 @@ class Linter {
     public lint(fileName: string, source: string, configuration: IConfigurationFile = DEFAULT_CONFIG): void {
         let sourceFile = this.getSourceFile(fileName, source);
         const isJs = /\.jsx?$/i.test(fileName);
-
         const enabledRules = this.getEnabledRules(configuration, isJs);
-        const disabler = getDisabler(sourceFile, enabledRules.map((r) => r.getOptions().ruleName));
 
-        let hasLinterRun = false;
-        let fileFailures: RuleFailure[] = [];
+        const fileFailures = this.getAllFailures(sourceFile, enabledRules);
+        if (!fileFailures.length) {
+            // Usual case: no errors.
+            return;
+        }
 
-        if (this.options.fix) {
+        if (this.options.fix && fileFailures.some((f) => f.hasFix())) {
+            // When fixing, we need to be careful as a fix in one rule may affect other rules.
+            // So fix each rule separately.
             for (const rule of enabledRules) {
-                const ruleFailures = this.applyRule(rule, sourceFile, disabler);
-                const fixes = ruleFailures.map((f) => f.getFix()).filter((f): f is Fix => !!f) as Fix[];
-                source = fs.readFileSync(fileName, { encoding: "utf-8" });
-                if (fixes.length > 0) {
-                    this.fixes = this.fixes.concat(ruleFailures);
-                    source = Fix.applyAll(source, fixes);
-                    fs.writeFileSync(fileName, source, { encoding: "utf-8" });
-
-                    // reload AST if file is modified
+                const hasFixes = fileFailures.some((f) => f.hasFix() && f.getRuleName() === rule.getOptions().ruleName);
+                if (hasFixes) {
+                    // Get new failures in case the file changed.
+                    const updatedFailures = removeDisabledFailures(sourceFile, this.applyRule(rule, sourceFile));
+                    source = Fix.applyAll(source, mapDefined(updatedFailures, (f) => f.getFix()));
                     sourceFile = this.getSourceFile(fileName, source);
-                }
-                fileFailures = fileFailures.concat(ruleFailures);
-            }
-            hasLinterRun = true;
-        }
-
-        // make a 1st pass or make a 2nd pass if there were any fixes because the positions may be off
-        if (!hasLinterRun || this.fixes.length > 0) {
-            fileFailures = [];
-            for (const rule of enabledRules) {
-                const ruleFailures = this.applyRule(rule, sourceFile, disabler);
-                if (ruleFailures.length > 0) {
-                    fileFailures = fileFailures.concat(ruleFailures);
+                    fs.writeFileSync(fileName, source, { encoding: "utf-8" });
                 }
             }
         }
-        this.failures = this.failures.concat(fileFailures);
 
         // add rule severity to failures
         const ruleSeverityMap = new Map(enabledRules.map((rule) => {
             return [rule.getOptions().ruleName, rule.getOptions().ruleSeverity] as [string, RuleSeverity];
         }));
-        for (const failure of this.failures) {
+
+        for (const failure of fileFailures) {
             const severity = ruleSeverityMap.get(failure.getRuleName());
             if (severity === undefined) {
                 throw new Error(`Severity for rule '${failure.getRuleName()} not found`);
             }
             failure.setRuleSeverity(severity);
         }
+
+        this.failures = this.failures.concat(fileFailures);
     }
 
     public getResult(): LintResult {
@@ -171,13 +160,17 @@ class Linter {
         };
     }
 
-    private applyRule(rule: IRule, sourceFile: ts.SourceFile, disabler: RuleDisabler): RuleFailure[] {
-        let ruleFailures: RuleFailure[];
+    private getAllFailures(sourceFile: ts.SourceFile, enabledRules: IRule[]): RuleFailure[] {
+        const failures = flatMap(enabledRules, (rule) => this.applyRule(rule, sourceFile));
+        return removeDisabledFailures(sourceFile, failures);
+    }
+
+    private applyRule(rule: IRule, sourceFile: ts.SourceFile): RuleFailure[] {
         try {
             if (this.program && isTypedRule(rule)) {
-                ruleFailures = rule.applyWithProgram(sourceFile, this.program);
+                return rule.applyWithProgram(sourceFile, this.program);
             } else {
-                ruleFailures = rule.apply(sourceFile);
+                return rule.apply(sourceFile);
             }
         } catch (error) {
             if (isError(error)) {
@@ -187,8 +180,6 @@ class Linter {
             }
             return [];
         }
-
-        return ruleFailures.filter((f) => !disabler.isDisabled(f));
     }
 
     private getEnabledRules(configuration: IConfigurationFile = DEFAULT_CONFIG, isJs: boolean): IRule[] {
