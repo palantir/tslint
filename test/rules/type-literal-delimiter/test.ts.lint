@@ -1,0 +1,28 @@
+type T = {
+    x: number
+            ~ [MISSING]
+    y: string
+}
+
+type T = {
+    x: number,
+    // Doesn't care about missing final comma; trailing-comma will handle.
+    y: string
+}
+
+// Does care about semicolon.
+type T = {
+    x: number,
+    y: string;
+             ~ [SEMI]
+}
+
+type T = {
+    x: number;
+             ~ [SEMI]
+    y: string
+}
+
+
+[MISSING]: Expected type literal to use ',' to separate members.
+[SEMI]: Expected type literal to use ',' instead of ';'.
