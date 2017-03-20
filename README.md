@@ -258,8 +258,7 @@ Core Rules
 
 _Rules_ encode logic for syntactic & semantic checks of TypeScript source code.
 
-[See the TSLint website for a list of core rules included in the `tslint` package.]
-(http://palantir.github.io/tslint/rules/)
+[See the TSLint website for a list of core rules included in the `tslint` package.](http://palantir.github.io/tslint/rules/)
 
 Core Formatters
 -----
