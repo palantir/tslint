@@ -19,11 +19,6 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
-interface Scope {
-    inClass: boolean;
-    inFunction: boolean;
-}
-
 const OPTION_FUNCTION_IN_METHOD = "check-function-in-method";
 const DEPRECATED_OPTION_FUNCTION_IN_METHOD = "no-this-in-function-in-method";
 
@@ -56,43 +51,48 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_INSIDE = "the \"this\" keyword is disallowed in function bodies inside class methods, " +
         "use arrow functions instead";
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoInvalidThisWalker(sourceFile, this.getOptions()));
+        const hasOption = (name: string) => this.ruleArguments.indexOf(name) !== -1;
+        const checkFuncInMethod = hasOption(DEPRECATED_OPTION_FUNCTION_IN_METHOD) || hasOption(OPTION_FUNCTION_IN_METHOD);
+        return this.applyWithFunction(sourceFile, walk, checkFuncInMethod);
     }
 }
 
-class NoInvalidThisWalker extends Lint.ScopeAwareRuleWalker<Scope> {
-    public createScope(node: ts.Node): Scope {
-        const isClassScope = node.kind === ts.SyntaxKind.ClassDeclaration || node.kind === ts.SyntaxKind.ClassExpression;
-        const inFunction = node.kind === ts.SyntaxKind.FunctionDeclaration || node.kind === ts.SyntaxKind.FunctionExpression;
-        return {
-            inClass: isClassScope,
-            inFunction,
-        };
-    }
+function walk(ctx: Lint.WalkContext<boolean>): void {
+    const { sourceFile, options: checkFuncInMethod } = ctx;
+    let inClass = false;
+    let inFunctionInClass = false;
 
-    protected validateThisKeyword(node: ts.Node) {
-        let inClass = 0;
-        let inFunction = 0;
-        this.getAllScopes().forEach((scope, index) => {
-            inClass = scope.inClass ? index + 1 : inClass;
-            inFunction = scope.inFunction ? index + 1 : inFunction;
-        });
+    ts.forEachChild(sourceFile, function cb(node: ts.Node) {
+        switch (node.kind) {
+            case ts.SyntaxKind.ClassDeclaration:
+            case ts.SyntaxKind.ClassExpression:
+                if (!inClass) {
+                    inClass = true;
+                    ts.forEachChild(node, cb);
+                    inClass = false;
+                    return;
+                }
+                break;
 
-        if (inClass === 0) {
-            this.addFailureAtNode(node, Rule.FAILURE_STRING_OUTSIDE);
+            case ts.SyntaxKind.FunctionDeclaration:
+            case ts.SyntaxKind.FunctionExpression:
+                if (inClass) {
+                    inFunctionInClass = true;
+                    ts.forEachChild(node, cb);
+                    inFunctionInClass = false;
+                    return;
+                }
+                break;
+
+            case ts.SyntaxKind.ThisKeyword:
+                if (!inClass) {
+                    ctx.addFailureAtNode(node, Rule.FAILURE_STRING_OUTSIDE);
+                } else if (checkFuncInMethod && inFunctionInClass) {
+                    ctx.addFailureAtNode(node, Rule.FAILURE_STRING_INSIDE);
+                }
+                return;
         }
 
-        const checkFuncInMethod = this.hasOption(DEPRECATED_OPTION_FUNCTION_IN_METHOD) || this.hasOption(OPTION_FUNCTION_IN_METHOD);
-        if (checkFuncInMethod && inClass > 0 && inFunction > inClass) {
-            this.addFailureAtNode(node, Rule.FAILURE_STRING_INSIDE);
-        }
-    }
-
-    public visitNode(node: ts.Node) {
-        if (node.kind === ts.SyntaxKind.ThisKeyword) {
-            this.validateThisKeyword(node);
-        }
-
-        super.visitNode(node);
-    }
+        ts.forEachChild(node, cb);
+    });
 }
