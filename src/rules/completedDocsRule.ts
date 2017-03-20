@@ -145,7 +145,7 @@ export class Rule extends Lint.Rules.TypedRule {
 
             * \`string\` to enable for that type
             * \`object\` keying types to when their documentation is required:
-                * \`"${ARGUMENT_METHODS}"\` and \`"${ARGUMENT_PROPERTIES} may specify:
+                * \`"${ARGUMENT_METHODS}"\` and \`"${ARGUMENT_PROPERTIES}"\` may specify:
                     * \`"${DESCRIPTOR_PRIVACIES}":
                         * \`"${ALL}"\`
                         * \`"${PRIVACY_PRIVATE}"\`
