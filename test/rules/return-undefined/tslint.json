@@ -1,0 +1,8 @@
+{
+  "linterOptions": {
+      "typeCheck": true
+  },
+  "rules": {
+    "return-undefined": true
+  }
+}
