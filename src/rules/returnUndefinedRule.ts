@@ -39,8 +39,8 @@ export class Rule extends Lint.Rules.TypedRule {
     public static FAILURE_STRING_VOID_RETURN =
         "`void` function should use `return;`, not `return undefined;`.";
 
-    public applyWithProgram(sourceFile: ts.SourceFile, langSvc: ts.LanguageService): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, langSvc.getProgram().getTypeChecker()));
+    public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, program.getTypeChecker()));
     }
 }
 
