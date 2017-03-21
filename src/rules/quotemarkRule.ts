@@ -88,7 +88,7 @@ class QuotemarkWalker extends Lint.RuleWalker {
             const escapedText = text.slice(1, -1).replace(new RegExp(expectedQuoteMark, "g"), `\\${expectedQuoteMark}`);
             const newText = expectedQuoteMark + escapedText + expectedQuoteMark;
             this.addFailureAtNode(node, Rule.FAILURE_STRING(actualQuoteMark, expectedQuoteMark),
-                this.createFix(this.createReplacement(node.getStart(), node.getWidth(), newText)));
+                this.createReplacement(node.getStart(), node.getWidth(), newText));
         }
     }
 }

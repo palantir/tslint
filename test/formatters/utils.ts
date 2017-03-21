@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 import * as ts from "typescript";
-import { Fix, RuleFailure, RuleSeverity } from "../../src/language/rule/rule";
+import { Replacement, RuleFailure, RuleSeverity } from "../../src/language/rule/rule";
 
 export function createFailure(sourceFile: ts.SourceFile,
                               start: number,
                               end: number,
                               failure: string,
                               ruleName: string,
-                              fix?: Fix,
+                              fix?: Replacement | Replacement[],
                               ruleSeverity: RuleSeverity = "warning") {
 
     const rule = new RuleFailure(sourceFile, start, end, failure, ruleName, fix);

@@ -17,6 +17,7 @@
 
 import * as ts from "typescript";
 
+import {arrayify, flatMap} from "../../utils";
 import {IWalker} from "../walker";
 
 export interface IRuleMetadata {
@@ -132,10 +133,18 @@ export function isTypedRule(rule: IRule): rule is ITypedRule {
 }
 
 export class Replacement {
+    public static applyFixes(content: string, fixes: Fix[]): string {
+        return this.applyAll(content, flatMap(fixes, arrayify));
+    }
+
     public static applyAll(content: string, replacements: Replacement[]) {
         // sort in reverse so that diffs are properly applied
         replacements.sort((a, b) => b.end - a.end);
         return replacements.reduce((text, r) => r.apply(text), content);
+    }
+
+    public static replaceNode(node: ts.Node, text: string, sourceFile?: ts.SourceFile): Replacement {
+        return this.replaceFromTo(node.getStart(sourceFile), node.getEnd(), text);
     }
 
     public static replaceFromTo(start: number, end: number, text: string) {
@@ -154,23 +163,10 @@ export class Replacement {
         return new Replacement(start, 0, text);
     }
 
-    constructor(private innerStart: number, private innerLength: number, private innerText: string) {
-    }
-
-    get start() {
-        return this.innerStart;
-    }
-
-    get length() {
-        return this.innerLength;
-    }
+    constructor(readonly start: number, readonly length: number, readonly text: string) {}
 
     get end() {
-        return this.innerStart + this.innerLength;
-    }
-
-    get text() {
-        return this.innerText;
+        return this.start + this.length;
     }
 
     public apply(content: string) {
@@ -178,31 +174,7 @@ export class Replacement {
     }
 }
 
-export class Fix {
-    public static applyAll(content: string, fixes: Fix[]) {
-        // accumulate replacements
-        let replacements: Replacement[] = [];
-        for (const fix of fixes) {
-            replacements = replacements.concat(fix.replacements);
-        }
-        return Replacement.applyAll(content, replacements);
-    }
-
-    constructor(private innerRuleName: string, private innerReplacements: Replacement[]) {
-    }
-
-    get ruleName() {
-        return this.innerRuleName;
-    }
-
-    get replacements() {
-        return this.innerReplacements;
-    }
-
-    public apply(content: string) {
-        return Replacement.applyAll(content, this.innerReplacements);
-    }
-}
+export type Fix = Replacement | Replacement[];
 
 export class RuleFailurePosition {
     constructor(private position: number, private lineAndCharacter: ts.LineAndCharacter) {
@@ -240,19 +212,21 @@ export class RuleFailure {
     private endPosition: RuleFailurePosition;
     private rawLines: string;
     private ruleSeverity: RuleSeverity;
+    private fix?: Fix;
 
     constructor(private sourceFile: ts.SourceFile,
                 start: number,
                 end: number,
                 private failure: string,
                 private ruleName: string,
-                private fix?: Fix) {
+                fix?: Fix) {
 
         this.fileName = sourceFile.fileName;
         this.startPosition = this.createFailurePosition(start);
         this.endPosition = this.createFailurePosition(end);
         this.rawLines = sourceFile.text;
         this.ruleSeverity = "error";
+        this.fix = fix;
     }
 
     public getFileName() {

@@ -161,13 +161,9 @@ class TrailingCommaWalker extends Lint.AbstractWalker<Options> {
         const closeTokenLine = ts.getLineAndCharacterOfPosition(this.sourceFile, closeTokenPos).line;
         const option = lastElementLine === closeTokenLine ? this.options.singleline : this.options.multiline;
         if (hasTrailingComma && option === "never") {
-            this.addFailureAt(list.end - 1, 1, Rule.FAILURE_STRING_NEVER, this.createFix(
-                Lint.Replacement.deleteText(list.end - 1, 1),
-            ));
+            this.addFailureAt(list.end - 1, 1, Rule.FAILURE_STRING_NEVER, Lint.Replacement.deleteText(list.end - 1, 1));
         } else if (!hasTrailingComma && option === "always") {
-            this.addFailureAt(list.end, 0, Rule.FAILURE_STRING_ALWAYS, this.createFix(
-                Lint.Replacement.appendText(list.end, ","),
-            ));
+            this.addFailureAt(list.end, 0, Rule.FAILURE_STRING_ALWAYS, Lint.Replacement.appendText(list.end, ","));
         }
     }
 }

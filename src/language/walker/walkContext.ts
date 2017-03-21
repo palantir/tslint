@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import { Fix, Replacement, RuleFailure } from "../rule/rule";
+import { Fix, RuleFailure } from "../rule/rule";
 
 export class WalkContext<T> {
     public readonly failures: RuleFailure[] = [];
@@ -30,18 +30,13 @@ export class WalkContext<T> {
     }
 
     public addFailure(start: number, end: number, failure: string, fix?: Fix) {
-        const fileLength = this.sourceFile.end;
-        this.failures.push(
-            new RuleFailure(this.sourceFile, Math.min(start, fileLength), Math.min(end, fileLength), failure, this.ruleName, fix),
-        );
+        start = Math.min(start, this.sourceFile.end);
+        end = Math.min(end, this.sourceFile.end);
+        this.failures.push(new RuleFailure(this.sourceFile, start, end, failure, this.ruleName, fix));
     }
 
     /** Add a failure using a node's span. */
     public addFailureAtNode(node: ts.Node, failure: string, fix?: Fix) {
         this.addFailure(node.getStart(this.sourceFile), node.getEnd(), failure, fix);
-    }
-
-    public createFix(...replacements: Replacement[]) {
-        return new Fix(this.ruleName, replacements);
     }
 }

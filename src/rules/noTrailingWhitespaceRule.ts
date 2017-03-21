@@ -120,5 +120,5 @@ function walk(ctx: Lint.WalkContext<IgnoreOption>) {
 }
 
 function reportFailure(ctx: Lint.WalkContext<IgnoreOption>, start: number, end: number) {
-    ctx.addFailure(start, end, Rule.FAILURE_STRING, ctx.createFix(Lint.Replacement.deleteFromTo(start, end)));
+    ctx.addFailure(start, end, Rule.FAILURE_STRING, Lint.Replacement.deleteFromTo(start, end));
 }

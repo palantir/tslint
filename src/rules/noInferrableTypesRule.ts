@@ -98,23 +98,23 @@ class NoInferrableTypesWalker extends Lint.AbstractWalker<IOptions> {
         return ts.forEachChild(sourceFile, cb);
     }
 
-    private checkDeclaration(node: ts.VariableLikeDeclaration) {
-        if (node.type != null && node.initializer != null) {
-            let failure: string | null = null;
+    private checkDeclaration({ name, type, initializer }: ts.VariableLikeDeclaration) {
+        if (type != null && initializer != null) {
+            let failure: string | undefined;
 
-            switch (node.type.kind) {
+            switch (type.kind) {
                 case ts.SyntaxKind.BooleanKeyword:
-                    if (node.initializer.kind === ts.SyntaxKind.TrueKeyword || node.initializer.kind === ts.SyntaxKind.FalseKeyword) {
+                    if (initializer.kind === ts.SyntaxKind.TrueKeyword || initializer.kind === ts.SyntaxKind.FalseKeyword) {
                         failure = "boolean";
                     }
                     break;
                 case ts.SyntaxKind.NumberKeyword:
-                    if (node.initializer.kind === ts.SyntaxKind.NumericLiteral) {
+                    if (initializer.kind === ts.SyntaxKind.NumericLiteral) {
                         failure = "number";
                     }
                     break;
                 case ts.SyntaxKind.StringKeyword:
-                    switch (node.initializer.kind) {
+                    switch (initializer.kind) {
                         case ts.SyntaxKind.StringLiteral:
                         case ts.SyntaxKind.NoSubstitutionTemplateLiteral:
                         case ts.SyntaxKind.TemplateExpression:
@@ -128,11 +128,8 @@ class NoInferrableTypesWalker extends Lint.AbstractWalker<IOptions> {
                     break;
             }
 
-            if (failure != null) {
-                this.addFailureAtNode(node.type,
-                                      Rule.FAILURE_STRING_FACTORY(failure),
-                                      this.createFix(Lint.Replacement.deleteFromTo(node.name.end, node.type.end)),
-                );
+            if (failure !== undefined) {
+                this.addFailureAtNode(type, Rule.FAILURE_STRING_FACTORY(failure), Lint.Replacement.deleteFromTo(name.end, type.end));
             }
         }
     }

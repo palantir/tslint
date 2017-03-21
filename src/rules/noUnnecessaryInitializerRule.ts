@@ -92,10 +92,8 @@ class Walker extends Lint.RuleWalker {
     }
 
     private failWithFix(node: ts.VariableDeclaration | ts.BindingElement | ts.ParameterDeclaration) {
-        const fix = this.createFix(this.deleteFromTo(
-            Lint.childOfKind(node, ts.SyntaxKind.EqualsToken)!.pos,
-            node.end));
-        this.addFailureAtNode(node, Rule.FAILURE_STRING, fix);
+        const start = Lint.childOfKind(node, ts.SyntaxKind.EqualsToken)!.pos;
+        this.addFailureAtNode(node, Rule.FAILURE_STRING, this.deleteFromTo(start, node.end));
     }
 }
 
