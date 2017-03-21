@@ -7,7 +7,7 @@
             "request": "launch",
             "program": "${workspaceRoot}/build/src/tslint-cli.js",
             "stopOnEntry": false,
-            "args": ["--test", "test/rules/align/arguments"],
+            "args": [],
             "cwd": "${workspaceRoot}",
             "preLaunchTask": "tsc",
             "runtimeExecutable": null,
