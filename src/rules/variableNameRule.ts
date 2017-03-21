@@ -30,6 +30,7 @@ const OPTION_TRAILING_UNDERSCORE = "allow-trailing-underscore";
 const OPTION_BAN_KEYWORDS = "ban-keywords";
 const OPTION_CHECK_FORMAT = "check-format";
 const OPTION_ALLOW_PASCAL_CASE = "allow-pascal-case";
+const OPTION_ALLOW_SNAKE_CASE = "allow-snake-case";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
@@ -42,6 +43,7 @@ export class Rule extends Lint.Rules.AbstractRule {
               * \`"${OPTION_LEADING_UNDERSCORE}"\` allows underscores at the beginning (only has an effect if "check-format" specified)
               * \`"${OPTION_TRAILING_UNDERSCORE}"\` allows underscores at the end. (only has an effect if "check-format" specified)
               * \`"${OPTION_ALLOW_PASCAL_CASE}"\` allows PascalCase in addition to camelCase.
+              * \`"${OPTION_ALLOW_SNAKE_CASE}"\` allows snake_case in addition to camelCase.
             * \`"${OPTION_BAN_KEYWORDS}"\`: disallows the use of certain TypeScript keywords as variable or parameter names.
               * These are: ${bannedKeywordsStr}`,
         options: {
@@ -53,6 +55,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                     OPTION_LEADING_UNDERSCORE,
                     OPTION_TRAILING_UNDERSCORE,
                     OPTION_ALLOW_PASCAL_CASE,
+                    OPTION_ALLOW_SNAKE_CASE,
                     OPTION_BAN_KEYWORDS,
                 ],
             },
@@ -64,7 +67,6 @@ export class Rule extends Lint.Rules.AbstractRule {
         typescriptOnly: false,
     };
 
-    public static FORMAT_FAILURE = "variable name must be in camelcase or uppercase";
     public static KEYWORD_FAILURE = "variable name clashes with keyword/type";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -78,6 +80,7 @@ interface Options {
     leadingUnderscore: boolean;
     trailingUnderscore: boolean;
     allowPascalCase: boolean;
+    allowSnakeCase: boolean;
 }
 function parseOptions(ruleArguments: string[]): Options {
     const banKeywords = hasOption(OPTION_BAN_KEYWORDS);
@@ -88,6 +91,7 @@ function parseOptions(ruleArguments: string[]): Options {
         leadingUnderscore: hasOption(OPTION_LEADING_UNDERSCORE),
         trailingUnderscore: hasOption(OPTION_TRAILING_UNDERSCORE),
         allowPascalCase: hasOption(OPTION_ALLOW_PASCAL_CASE),
+        allowSnakeCase: hasOption(OPTION_ALLOW_SNAKE_CASE),
     };
 
     function hasOption(name: string): boolean {
@@ -148,7 +152,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
         }
 
         if (!isCamelCase(text, options) && !isUpperCase(text)) {
-            ctx.addFailureAtNode(name, Rule.FORMAT_FAILURE);
+            ctx.addFailureAtNode(name, formatFailure());
         }
     }
 
@@ -156,6 +160,17 @@ function walk(ctx: Lint.WalkContext<Options>): void {
         if (options.banKeywords && bannedKeywordsSet.has(name.text)) {
             ctx.addFailureAtNode(name, Rule.KEYWORD_FAILURE);
         }
+    }
+
+    function formatFailure(): string {
+        let failureMessage = "variable name must be in camelcase";
+        if (options.allowPascalCase) {
+            failureMessage += ", pascalcase";
+        }
+        if (options.allowSnakeCase) {
+            failureMessage += ", snakecase";
+        }
+        return failureMessage + " or uppercase";
     }
 }
 
@@ -184,7 +199,10 @@ function isCamelCase(name: string, options: Options): boolean {
     if (!options.allowPascalCase && !isLowerCase(firstCharacter)) {
         return false;
     }
-    return middle.indexOf("_") === -1;
+    if (!options.allowSnakeCase && middle.indexOf("_") !== -1) {
+        return false;
+    }
+    return true;
 }
 
 function isLowerCase(name: string): boolean {
