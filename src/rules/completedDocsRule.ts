@@ -140,18 +140,18 @@ export class Rule extends Lint.Rules.TypedRule {
         ruleName: "completed-docs",
         description: "Enforces documentation for important items be filled out.",
         optionsDescription: Lint.Utils.dedent`
-             \`true\` to enable for ["${ARGUMENT_CLASSES}", "${ARGUMENT_FUNCTIONS}", "${ARGUMENT_METHODS}", "${ARGUMENT_PROPERTIES}"],
-             or an array with each item in one of two formats:
+            \`true\` to enable for ["${ARGUMENT_CLASSES}", "${ARGUMENT_FUNCTIONS}", "${ARGUMENT_METHODS}", "${ARGUMENT_PROPERTIES}"],
+            or an array with each item in one of two formats:
 
             * \`string\` to enable for that type
             * \`object\` keying types to when their documentation is required:
-                * \`"${ARGUMENT_METHODS}"\` and \`"${ARGUMENT_PROPERTIES} may specify:
-                    * \`"${DESCRIPTOR_PRIVACIES}":
+                * \`"${ARGUMENT_METHODS}"\` and \`"${ARGUMENT_PROPERTIES}"\` may specify:
+                    * \`"${DESCRIPTOR_PRIVACIES}"\`:
                         * \`"${ALL}"\`
                         * \`"${PRIVACY_PRIVATE}"\`
                         * \`"${PRIVACY_PROTECTED}"\`
                         * \`"${PRIVACY_PUBLIC}"\`
-                    * \`"${DESCRIPTOR_LOCATIONS}:
+                    * \`"${DESCRIPTOR_LOCATIONS}"\`:
                         * \`"${ALL}"\`
                         * \`"${LOCATION_INSTANCE}"\`
                         * \`"${LOCATION_STATIC}"\`
@@ -214,9 +214,9 @@ export class Rule extends Lint.Rules.TypedRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public applyWithProgram(sourceFile: ts.SourceFile, langSvc: ts.LanguageService): Lint.RuleFailure[] {
+    public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         const options = this.getOptions();
-        const completedDocsWalker = new CompletedDocsWalker(sourceFile, options, langSvc.getProgram());
+        const completedDocsWalker = new CompletedDocsWalker(sourceFile, options, program);
 
         completedDocsWalker.setRequirements(this.getRequirements(options.ruleArguments));
 
@@ -392,7 +392,12 @@ class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
             return;
         }
 
-        const comments = this.getTypeChecker().getSymbolAtLocation(node.name).getDocumentationComment();
+        const symbol = this.getTypeChecker().getSymbolAtLocation(node.name);
+        if (!symbol) {
+            return;
+        }
+
+        const comments = symbol.getDocumentationComment();
         this.checkComments(node, nodeType, comments);
     }
 

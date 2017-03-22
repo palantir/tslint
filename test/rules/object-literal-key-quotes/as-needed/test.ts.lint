@@ -15,6 +15,7 @@ const o = {
   1.23: null,
   '010': 'but this one does.',
   '.123': 'as does this one',
+  '-1': 'and this one',
   fn() { return },
   true: 0,
   "0x0": 0,

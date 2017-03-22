@@ -1,3 +1,5 @@
+declare module "*"
+declare module "foo" {}
 var x = 3
 a += b
 
@@ -61,6 +63,11 @@ class MyClass {
     public initializedMethodProperty1Line = () => { return "hi" }
 
     public initializedMethodPropertyWithoutSemicolon1Line = () => { return "hi again" }
+    public someMethod(): void
+    public someMethod(param): void
+    public someMethod(param?) {
+        return
+    }
 }
 
 interface ITest {
@@ -68,7 +75,7 @@ interface ITest {
     bar: number
     qux: string,
     baz: boolean
-}
+    bas: never}
 
 import {Router} from 'aurelia-router'
 
@@ -114,3 +121,8 @@ export = Date
 
 type t = number
 type t = number
+
+if (true);
+for(;;);
+
+

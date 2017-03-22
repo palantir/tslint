@@ -34,8 +34,8 @@ export class Rule extends Lint.Rules.TypedRule {
 
     public static FAILURE_STRING = "This is the default value for this type parameter.";
 
-    public applyWithProgram(sourceFile: ts.SourceFile, langSvc: ts.LanguageService): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, langSvc.getProgram().getTypeChecker()));
+    public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, program.getTypeChecker()));
     }
 }
 

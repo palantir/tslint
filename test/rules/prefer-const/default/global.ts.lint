@@ -1,0 +1,17 @@
+// this is not an external module
+// variables in the global scope are ignored by prefer-const
+let var1 = 0;
+let var2 = 0;
+{
+    let var2 = 1;
+    {
+        var2 = 2;
+    }
+    var var3 = 0;
+    {
+        let var3 = 1;
+        var3 = 2;
+        let var4 = 0;
+            ~~~~           [Identifier 'var4' is never reassigned; use 'const' instead of 'let'.]
+    }
+}

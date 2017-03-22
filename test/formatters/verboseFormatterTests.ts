@@ -16,7 +16,8 @@
 
 import * as ts from "typescript";
 
-import {IFormatter, RuleFailure, TestUtils} from "../lint";
+import { IFormatter, TestUtils } from "../lint";
+import { createFailure } from "./utils";
 
 describe("Verbose Formatter", () => {
     const TEST_FILE = "formatters/proseFormatter.test.ts";
@@ -33,15 +34,15 @@ describe("Verbose Formatter", () => {
         const maxPosition = sourceFile.getFullWidth();
 
         const failures = [
-            new RuleFailure(sourceFile, 0, 1, "first failure", "first-name"),
-            new RuleFailure(sourceFile, 32, 36, "mid failure", "mid-name"),
-            new RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name"),
+            createFailure(sourceFile, 0, 1, "first failure", "first-name", undefined, "error"),
+            createFailure(sourceFile, 32, 36, "mid failure", "mid-name", undefined, "error"),
+            createFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name", undefined, "error"),
         ];
 
         const expectedResult =
-            "(first-name) " + TEST_FILE + getPositionString(1, 1) + "first failure\n" +
-            "(mid-name) " + TEST_FILE + getPositionString(2, 12) + "mid failure\n" +
-            "(last-name) " + TEST_FILE + getPositionString(9, 2) + "last failure\n";
+            "ERROR: (first-name) " + TEST_FILE + getPositionString(1, 1) + "first failure\n" +
+            "ERROR: (mid-name) " + TEST_FILE + getPositionString(2, 12) + "mid failure\n" +
+            "ERROR: (last-name) " + TEST_FILE + getPositionString(9, 2) + "last failure\n";
 
         const actualResult = formatter.format(failures);
         assert.equal(actualResult, expectedResult);

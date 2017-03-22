@@ -1,6 +1,6 @@
 {
   "name": "tslint",
-  "version": "4.4.2",
+  "version": "4.5.1",
   "description": "An extensible static analysis linter for the TypeScript language",
   "bin": {
     "tslint": "./bin/tslint"
@@ -25,10 +25,9 @@
     "compile:core": "tsc -p src",
     "compile:scripts": "tsc -p scripts",
     "compile:test": "tsc -p test",
-    "lint": "npm-run-all -p lint:core lint:test lint:from-bin",
-    "lint:core": "tslint \"src/**/*.ts\"",
-    "lint:test": "tslint \"test/**/*.ts\" -e \"test/**/*.test.ts\"",
-    "lint:from-bin": "node bin/tslint \"{src,test}/**/*.ts\" -e \"test/**/*.test.ts\"",
+    "lint": "npm-run-all -p lint:global lint:from-bin",
+    "lint:global": "tslint --project test/tsconfig.json --format stylish # test includes 'src' too",
+    "lint:from-bin": "node bin/tslint --project test/tsconfig.json --format stylish",
     "test": "npm-run-all test:pre -p test:mocha test:rules",
     "test:pre": "cd ./test/config && npm install",
     "test:mocha": "mocha --reporter spec --colors \"build/test/**/*Tests.js\" build/test/assert.js",
@@ -43,11 +42,11 @@
     "glob": "^7.1.1",
     "optimist": "~0.6.0",
     "resolve": "^1.1.7",
-    "tsutils": "^1.1.0",
-    "update-notifier": "^2.0.0"
+    "semver": "^5.3.0",
+    "tsutils": "^1.2.2"
   },
   "peerDependencies": {
-    "typescript": ">=2.0.0"
+    "typescript": ">=2.0.0 || >=2.0.0-dev || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev"
   },
   "devDependencies": {
     "@types/babel-code-frame": "^6.20.0",
@@ -62,7 +61,7 @@
     "@types/node": "^6.0.56",
     "@types/optimist": "0.0.29",
     "@types/resolve": "0.0.4",
-    "@types/update-notifier": "^1.0.0",
+    "@types/semver": "^5.3.30",
     "chai": "^3.5.0",
     "github": "^8.1.1",
     "js-yaml": "^3.7.0",
@@ -71,7 +70,7 @@
     "rimraf": "^2.5.4",
     "tslint": "latest",
     "tslint-test-config-non-relative": "file:test/external/tslint-test-config-non-relative",
-    "typescript": "^2.1.6"
+    "typescript": "next"
   },
   "license": "Apache-2.0",
   "engines": {

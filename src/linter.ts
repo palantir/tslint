@@ -20,6 +20,7 @@ import * as path from "path";
 import * as ts from "typescript";
 
 import {
+    convertRuleOptions,
     DEFAULT_CONFIG,
     findConfiguration,
     findConfigurationPath,
@@ -33,9 +34,7 @@ import { isError, showWarningOnce } from "./error";
 import { findFormatter } from "./formatterLoader";
 import { ILinterOptions, LintResult } from "./index";
 import { IFormatter } from "./language/formatter/formatter";
-import { createLanguageService, wrapProgram } from "./language/languageServiceHost";
-import { Fix, IRule, RuleFailure } from "./language/rule/rule";
-import { TypedRule } from "./language/rule/typedRule";
+import { Fix, IRule, isTypedRule, RuleFailure, RuleSeverity } from "./language/rule/rule";
 import * as utils from "./language/utils";
 import { loadRules } from "./ruleLoader";
 import { arrayify, dedent } from "./utils";
@@ -44,7 +43,7 @@ import { arrayify, dedent } from "./utils";
  * Linter that can lint multiple files in consecutive runs.
  */
 class Linter {
-    public static VERSION = "4.4.2";
+    public static VERSION = "4.5.1";
 
     public static findConfiguration = findConfiguration;
     public static findConfigurationPath = findConfigurationPath;
@@ -53,7 +52,6 @@ class Linter {
 
     private failures: RuleFailure[] = [];
     private fixes: RuleFailure[] = [];
-    private languageService: ts.LanguageService;
 
     /**
      * Creates a TypeScript program object from a tsconfig.json file path and optional project directory.
@@ -92,10 +90,6 @@ class Linter {
         if ((options as any).configuration != null) {
             throw new Error("ILinterOptions does not contain the property `configuration` as of version 4. " +
                 "Did you mean to pass the `IConfigurationFile` object to lint() ? ");
-        }
-
-        if (program) {
-            this.languageService = wrapProgram(program);
         }
     }
 
@@ -136,6 +130,18 @@ class Linter {
             }
         }
         this.failures = this.failures.concat(fileFailures);
+
+        // add rule severity to failures
+        const ruleSeverityMap = new Map(enabledRules.map((rule) => {
+            return [rule.getOptions().ruleName, rule.getOptions().ruleSeverity] as [string, RuleSeverity];
+        }));
+        for (const failure of this.failures) {
+            const severity = ruleSeverityMap.get(failure.getRuleName());
+            if (severity === undefined) {
+                throw new Error(`Severity for rule '${failure.getRuleName()} not found`);
+            }
+            failure.setRuleSeverity(severity);
+        }
     }
 
     public getResult(): LintResult {
@@ -152,22 +158,24 @@ class Linter {
 
         const output = formatter.format(this.failures, this.fixes);
 
+        const errorCount = this.failures.filter((failure) => failure.getRuleSeverity() === "error").length;
         return {
-            failureCount: this.failures.length,
+            errorCount,
             failures: this.failures,
             fixes: this.fixes,
             format: formatterName,
             output,
+            warningCount: this.failures.length - errorCount,
         };
     }
 
     private applyRule(rule: IRule, sourceFile: ts.SourceFile) {
         let ruleFailures: RuleFailure[] = [];
         try {
-            if (TypedRule.isTypedRule(rule) && this.program) {
-                ruleFailures = rule.applyWithProgram(sourceFile, this.languageService);
+            if (this.program && isTypedRule(rule)) {
+                ruleFailures = rule.applyWithProgram(sourceFile, this.program);
             } else {
-                ruleFailures = rule.apply(sourceFile, this.languageService);
+                ruleFailures = rule.apply(sourceFile);
             }
         } catch (error) {
             if (isError(error)) {
@@ -187,38 +195,35 @@ class Linter {
     }
 
     private getEnabledRules(sourceFile: ts.SourceFile, configuration: IConfigurationFile = DEFAULT_CONFIG, isJs: boolean): IRule[] {
-        const configurationRules = isJs ? configuration.jsRules : configuration.rules;
+        const ruleOptionsList = convertRuleOptions(isJs ? configuration.jsRules : configuration.rules);
 
         // walk the code first to find all the intervals where rules are disabled
-        const enableDisableRuleMap = new EnableDisableRulesWalker(sourceFile, configurationRules).getEnableDisableRuleMap();
+        const enableDisableRuleMap = new EnableDisableRulesWalker(sourceFile, ruleOptionsList).getEnableDisableRuleMap();
 
         const rulesDirectories = arrayify(this.options.rulesDirectory)
             .concat(arrayify(configuration.rulesDirectory));
-        const configuredRules = loadRules(configurationRules, enableDisableRuleMap, rulesDirectories, isJs);
+        const configuredRules = loadRules(ruleOptionsList, enableDisableRuleMap, rulesDirectories, isJs);
 
         return configuredRules.filter((r) => r.isEnabled());
     }
 
     private getSourceFile(fileName: string, source: string) {
-        let sourceFile: ts.SourceFile;
         if (this.program) {
-            sourceFile = this.program.getSourceFile(fileName);
+            const sourceFile = this.program.getSourceFile(fileName);
+            if (sourceFile === undefined) {
+                const INVALID_SOURCE_ERROR = dedent`
+                    Invalid source file: ${fileName}. Ensure that the files supplied to lint have a .ts, .tsx, .js or .jsx extension.
+                `;
+                throw new Error(INVALID_SOURCE_ERROR);
+            }
             // check if the program has been type checked
-            if (sourceFile && !("resolvedModules" in sourceFile)) {
+            if (!("resolvedModules" in sourceFile)) {
                 throw new Error("Program must be type checked before linting");
             }
+            return sourceFile;
         } else {
-            sourceFile = utils.getSourceFile(fileName, source);
-            this.languageService = createLanguageService(fileName, source);
+            return utils.getSourceFile(fileName, source);
         }
-
-        if (sourceFile === undefined) {
-            const INVALID_SOURCE_ERROR = dedent`
-                Invalid source file: ${fileName}. Ensure that the files supplied to lint have a .ts, .tsx, .js or .jsx extension.
-            `;
-            throw new Error(INVALID_SOURCE_ERROR);
-        }
-        return sourceFile;
     }
 
     private containsRule(rules: RuleFailure[], rule: RuleFailure) {

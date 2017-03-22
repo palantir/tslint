@@ -114,7 +114,6 @@ var [ddOne, ddTwo] = dd;
 var a: [string, number] = null;
 
 var a: [string, number,] = null;
-                      ~          [Unnecessary trailing comma]
 
 var a: [
     string,
@@ -376,8 +375,7 @@ class Test<A, B, C> {
     }
 
     foo5<
-        T extends Test<[A, A], [A, A,], A>,
-                                    ~       [Unnecessary trailing comma]
+        T extends Test<[A, A], [A, A], A>,
         U extends Test<B, B, B>,
         V extends Test<
             [
@@ -387,7 +385,7 @@ class Test<A, B, C> {
             [
                 C,
                 C,
-            ]
+            ],
             C
         >
     >(
@@ -445,8 +443,7 @@ interface ITest<A ,B, C> {
     );
 
     foo5<
-        T extends Test<[A, A], [A, A,], A>,
-                                    ~       [Unnecessary trailing comma]
+        T extends Test<[A, A], [A, A], A>,
         U extends Test<B, B, B>,
         V extends Test<
             [
@@ -456,7 +453,7 @@ interface ITest<A ,B, C> {
             [
                 C,
                 C,
-            ]
+            ],
             C
         >
     >(

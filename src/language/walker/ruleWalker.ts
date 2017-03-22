@@ -64,10 +64,6 @@ export class RuleWalker extends SyntaxWalker implements IWalker {
         }
     }
 
-    public skip(_node: ts.Node) {
-        return; // TODO remove this method in next major version
-    }
-
     /** @deprecated Prefer `addFailureAt` and its variants. */
     public createFailure(start: number, width: number, failure: string, fix?: Fix): RuleFailure {
         const from = (start > this.limit) ? this.limit : start;

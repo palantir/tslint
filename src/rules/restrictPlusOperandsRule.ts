@@ -36,8 +36,8 @@ export class Rule extends Lint.Rules.TypedRule {
 
     public static INVALID_TYPES_ERROR = "Operands of '+' operation must either be both strings or both numbers";
 
-    public applyWithProgram(sourceFile: ts.SourceFile, langSvc: ts.LanguageService): Lint.RuleFailure[] {
-        return this.applyWithWalker(new RestrictPlusOperandsWalker(sourceFile, this.getOptions(), langSvc.getProgram()));
+    public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+        return this.applyWithWalker(new RestrictPlusOperandsWalker(sourceFile, this.getOptions(), program));
     }
 }
 

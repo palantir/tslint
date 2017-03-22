@@ -18,7 +18,9 @@
 import * as diff from "diff";
 import * as fs from "fs";
 import * as path from "path";
+import { IEnableDisablePosition } from "../src/ruleLoader";
 import { camelize } from "../src/utils";
+import { IOptions } from "./../src/language/rule/rule";
 import { loadRules } from "./lint";
 
 describe("Rule Loader", () => {
@@ -27,61 +29,72 @@ describe("Rule Loader", () => {
     const testRulesDir = "test/rules";
 
     it("loads core rules", () => {
-        const validConfiguration: {[name: string]: any} = {
-            "class-name": true,
-            "eofline": true,
-            "forin": false,
-            "no-debugger": true,
-            "quotemark": [true, "single"],
-        };
+        const validConfiguration: IOptions[] = [
+            { ruleName: "class-name", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
+            { ruleName: "eofline", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
+            { ruleName: "forin", ruleArguments: [], ruleSeverity: "off", disabledIntervals: [] },
+            { ruleName: "no-debugger", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
+            { ruleName: "quotemark", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
+        ];
 
-        const rules = loadRules(validConfiguration, {}, builtRulesDir);
+        const rules = loadRules(validConfiguration, new Map<string, IEnableDisablePosition[]>(), builtRulesDir);
         assert.equal(rules.length, 4);
     });
 
     it("ignores invalid rules", () => {
-        const invalidConfiguration: {[name: string]: any} = {
-            "class-name": true,
-            "invalidConfig1": true,
-            "invalidConfig2": false,
-        };
+        const invalidConfiguration: IOptions[] = [
+            { ruleName: "class-name", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
+            { ruleName: "invalidConfig1", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
+            { ruleName: "invalidConfig2", ruleArguments: [], ruleSeverity: "off", disabledIntervals: [] },
+        ];
 
-        const rules = loadRules(invalidConfiguration, {}, [builtRulesDir]);
+        const rules = loadRules(invalidConfiguration, new Map<string, IEnableDisablePosition[]>(), [builtRulesDir]);
         assert.equal(rules.length, 1);
     });
 
-    it("loads disabled rules if rule in enableDisableRuleMap", () => {
-        const validConfiguration: {[name: string]: any} = {
-            "class-name": true,
-            "eofline": true,
-            "forin": false,
-            "no-debugger": true,
-            "quotemark": [true, "single"],
-        };
+    it("properly sets rule severity with options", () => {
+        const withOptions: IOptions[] = [
+            { ruleName: "callable-types", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
+            { ruleName: "max-line-length", ruleArguments: [140], ruleSeverity: "warning", disabledIntervals: [] },
+        ];
 
-        const rules = loadRules(validConfiguration, {forin: [{isEnabled: true, position: 4}]}, builtRulesDir);
-        assert.equal(rules.length, 5);
+        const rules = loadRules(withOptions, new Map<string, IEnableDisablePosition[]>(), [builtRulesDir]);
+        assert.equal(rules.length, 2);
+        assert.equal(rules[0].getOptions().ruleSeverity, "error");
+        assert.equal(rules[1].getOptions().ruleSeverity, "warning");
+    });
+
+    it("loads disabled rules if rule in enableDisableRuleMap", () => {
+        const validConfiguration: IOptions[] = [
+            { ruleName: "forin", ruleArguments: [], ruleSeverity: "off", disabledIntervals: [] },
+        ];
+
+        const enableDisableMap = new Map<string, IEnableDisablePosition[]>();
+        enableDisableMap.set("forin", [{ isEnabled: true, position: 4 }]);
+        const rules = loadRules(validConfiguration, enableDisableMap, builtRulesDir);
+        assert.equal(rules.length, 1);
     });
 
     it("works with rulesDirectory argument as an Array", () => {
-        const validConfiguration: {[name: string]: any} = {
-            "class-name": true,
-            "eofline": true,
-            "forin": false,
-            "no-debugger": true,
-            "quotemark": [true, "single"],
-        };
+        const validConfiguration: IOptions[] = [
+            { ruleName: "class-name", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
+            { ruleName: "eofline", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
+            { ruleName: "forin", ruleArguments: [], ruleSeverity: "off", disabledIntervals: [] },
+            { ruleName: "no-debugger", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
+            { ruleName: "quotemark", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
+        ];
 
-        const rules = loadRules(validConfiguration, {}, [builtRulesDir]);
+        const rules = loadRules(validConfiguration, new Map<string, IEnableDisablePosition[]>(), [builtRulesDir]);
         assert.equal(rules.length, 4);
     });
 
     it("loads js rules", () => {
-        const validConfiguration: {[name: string]: any} = {
-            "class-name": true,
-        };
+        const validConfiguration: IOptions[] = [
+            { ruleName: "class-name", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
+            { ruleName: "await-promise", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
+        ];
 
-        const rules = loadRules(validConfiguration, {}, builtRulesDir, true);
+        const rules = loadRules(validConfiguration, new Map<string, IEnableDisablePosition[]>(), builtRulesDir, true);
         assert.equal(rules.length, 1);
     });
 
@@ -110,23 +123,4 @@ describe("Rule Loader", () => {
 
         assert.isFalse(testFailed, "List of rules doesn't match list of tests");
     });
-
-    it("ensures that `.ts` files in `rules/` end in `.test.ts` to avoid being linted", () => {
-        walkSync(testRulesDir, (filename) => {
-            if (/\.ts$/.test(filename)) {
-                assert.match(filename, /\.test\.ts$/);
-            }
-        });
-    });
-
-    const walkSync = (dir: string, cb: (filename: string) => void) => {
-        fs.readdirSync(dir).forEach((file) => {
-            const fullPath = path.join(dir, file);
-            if (fs.statSync(path.join(dir, file)).isDirectory()) {
-                walkSync(fullPath, cb);
-            } else {
-                cb(fullPath);
-            }
-        });
-    };
 });

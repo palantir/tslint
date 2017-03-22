@@ -17,238 +17,301 @@
 
 import * as ts from "typescript";
 import * as Lint from "../index";
-import {isAssignment, isCombinedModifierFlagSet, isCombinedNodeFlagSet, unwrapParentheses} from "../language/utils";
+
+import * as utils from "tsutils";
+
+const OPTION_DESTRUCTURING_ALL = "all";
+const OPTION_DESTRUCTURING_ANY = "any";
+
+interface Options {
+    destructuringAll: boolean;
+}
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "prefer-const",
-        description: "Requires that variable declarations use `const` instead of `let` if possible.",
+        description: "Requires that variable declarations use `const` instead of `let` and `var` if possible.",
         descriptionDetails: Lint.Utils.dedent`
             If a variable is only assigned to once when it is declared, it should be declared using 'const'`,
         hasFix: true,
-        optionsDescription: "Not configurable.",
-        options: null,
-        optionExamples: ["true"],
+        optionsDescription: Lint.Utils.dedent`
+            An optional object containing the property "destructuring" with two possible values:
+            
+            * "${OPTION_DESTRUCTURING_ANY}" (default) - If any variable in destructuring can be const, this rule warns for those variables.
+            * "${OPTION_DESTRUCTURING_ALL}" - Only warns if all variables in destructuring can be const.`,
+        options: {
+            type: "object",
+            properties: {
+                destructuring: {
+                    type: "string",
+                    enum: [OPTION_DESTRUCTURING_ALL, OPTION_DESTRUCTURING_ANY],
+                },
+            },
+        },
+        optionExamples: [
+            "true",
+            `[true, {"destructuring": "${OPTION_DESTRUCTURING_ALL}"}]`,
+        ],
         type: "maintainability",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY = (identifier: string) => {
-        return `Identifier '${identifier}' is never reassigned; use 'const' instead of 'let'.`;
+    public static FAILURE_STRING_FACTORY = (identifier: string, blockScoped: boolean) => {
+        return `Identifier '${identifier}' is never reassigned; use 'const' instead of '${blockScoped ? "let" : "var"}'.`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const preferConstWalker = new PreferConstWalker(sourceFile, this.getOptions());
+        const options: Options = {
+            destructuringAll: this.ruleArguments.length !== 0 &&
+                this.ruleArguments[0].destructuring === OPTION_DESTRUCTURING_ALL,
+        };
+        const preferConstWalker = new PreferConstWalker(sourceFile, this.ruleName, options);
         return this.applyWithWalker(preferConstWalker);
     }
 }
 
-class PreferConstWalker extends Lint.BlockScopeAwareRuleWalker<{}, ScopeInfo> {
-    private static collect(statements: ts.Statement[], scopeInfo: ScopeInfo) {
-        for (const s of statements) {
-            if (s.kind === ts.SyntaxKind.VariableStatement) {
-                PreferConstWalker.collectInVariableDeclarationList((s as ts.VariableStatement).declarationList, scopeInfo);
-            }
-        }
+class Scope {
+    public functionScope: Scope;
+    public variables = new Map<string, VariableInfo>();
+    public reassigned = new Set<string>();
+    constructor(functionScope?: Scope) {
+        // if no functionScope is provided we are in the process of creating a new function scope, which for consistency links to itself
+        this.functionScope = functionScope || this;
     }
 
-    private static collectInVariableDeclarationList(node: ts.VariableDeclarationList, scopeInfo: ScopeInfo) {
-        let allowConst: boolean;
-        if ((ts as any).getCombinedModifierFlags === undefined) {
-            // for back-compat, TypeScript < 2.1
-            allowConst = isCombinedNodeFlagSet(node, ts.NodeFlags.Let)
-                && !Lint.hasModifier(node.parent!.modifiers, ts.SyntaxKind.ExportKeyword);
+    public addVariable(identifier: ts.Identifier, declarationInfo: DeclarationInfo, destructuringInfo?: DestructuringInfo) {
+        // block scoped variables go to the block scope, function scoped variables to the containing function scope
+        const scope = declarationInfo.isBlockScoped ? this : this.functionScope;
+        scope.variables.set(identifier.text, {
+            declarationInfo,
+            destructuringInfo,
+            identifier,
+            reassigned: false,
+        });
+    }
+}
+
+interface VariableInfo {
+    identifier: ts.Identifier;
+    reassigned: boolean;
+    declarationInfo: DeclarationInfo;
+    destructuringInfo: DestructuringInfo | undefined;
+}
+
+interface DeclarationListInfo {
+    allInitialized: boolean;
+    canBeConst: true;
+    declarationList: ts.VariableDeclarationList;
+    isBlockScoped: boolean;
+    isForLoop: boolean;
+    reassignedSiblings: boolean;
+}
+
+interface UnchangeableDeclarationInfo {
+    canBeConst: false;
+    isBlockScoped: boolean;
+}
+
+type DeclarationInfo = DeclarationListInfo | UnchangeableDeclarationInfo;
+
+interface DestructuringInfo {
+    reassignedSiblings: boolean;
+}
+
+class PreferConstWalker extends Lint.AbstractWalker<Options> {
+    private scope: Scope;
+    public walk(sourceFile: ts.SourceFile) {
+        this.scope = new Scope();
+        const cb = (node: ts.Node): void => {
+            const savedScope = this.scope;
+            const boundary = utils.isScopeBoundary(node);
+            if (boundary !== utils.ScopeBoundary.None) {
+                if (boundary === utils.ScopeBoundary.Function) {
+                    this.scope = new Scope();
+                    if (utils.isFunctionDeclaration(node) ||
+                        utils.isMethodDeclaration(node) ||
+                        utils.isFunctionExpression(node) ||
+                        utils.isArrowFunction(node) ||
+                        utils.isConstructorDeclaration(node)) {
+                        // special handling for function parameters
+                        // each parameter initializer can only reassign preceding parameters of variables of the containing scope
+                        if (node.body !== undefined) {
+                            for (const param of node.parameters) {
+                                cb(param);
+                                this.settle(savedScope);
+                            }
+                            cb(node.body);
+                            this.onScopeEnd(savedScope);
+                        }
+                        this.scope = savedScope;
+                        return;
+                    }
+                } else {
+                    this.scope = new Scope(this.scope.functionScope);
+                }
+            }
+            if (node.kind === ts.SyntaxKind.VariableDeclarationList) {
+                this.handleVariableDeclaration(node as ts.VariableDeclarationList);
+            } else if (node.kind === ts.SyntaxKind.CatchClause) {
+                this.handleBindingName((node as ts.CatchClause).variableDeclaration.name, {
+                    canBeConst: false,
+                    isBlockScoped: true,
+                });
+            } else if (node.kind === ts.SyntaxKind.Parameter) {
+                this.handleBindingName((node as ts.ParameterDeclaration).name, {
+                    canBeConst: false,
+                    isBlockScoped: true,
+                });
+            } else if (utils.isPostfixUnaryExpression(node) ||
+                       utils.isPrefixUnaryExpression(node) &&
+                       (node.operator === ts.SyntaxKind.PlusPlusToken || node.operator === ts.SyntaxKind.MinusMinusToken)) {
+                if (utils.isIdentifier(node.operand)) {
+                    this.scope.reassigned.add(node.operand.text);
+                }
+            } else if (utils.isBinaryExpression(node) && utils.isAssignmentKind(node.operatorToken.kind)) {
+                this.handleExpression(node.left);
+            }
+
+            if (boundary) {
+                ts.forEachChild(node, cb);
+                this.onScopeEnd(savedScope);
+                this.scope = savedScope;
+            } else {
+                return ts.forEachChild(node, cb);
+            }
+        };
+
+        if (ts.isExternalModule(sourceFile)) {
+            ts.forEachChild(sourceFile, cb);
+            this.onScopeEnd();
         } else {
-            allowConst = isCombinedNodeFlagSet(node, ts.NodeFlags.Let) && !isCombinedModifierFlagSet(node, ts.ModifierFlags.Export);
-        }
-        if (allowConst) {
-            for (const decl of node.declarations) {
-                PreferConstWalker.addDeclarationName(decl.name, node, scopeInfo);
-            }
+            return ts.forEachChild(sourceFile, cb);
         }
     }
 
-    private static addDeclarationName(node: ts.BindingName, container: ts.VariableDeclarationList, scopeInfo: ScopeInfo) {
+    private handleExpression(node: ts.Expression): void {
         if (node.kind === ts.SyntaxKind.Identifier) {
-            scopeInfo.addVariable(node as ts.Identifier, container);
-        } else {
-            for (const el of (node as ts.BindingPattern).elements) {
-                if (el.kind === ts.SyntaxKind.BindingElement) {
-                    PreferConstWalker.addDeclarationName(el.name, container, scopeInfo);
-                }
-            }
-        }
-    }
-
-    public createScope() {
-        return {};
-    }
-
-    public createBlockScope(node: ts.Node) {
-        const scopeInfo = new ScopeInfo();
-        switch (node.kind) {
-            case ts.SyntaxKind.SourceFile:
-                PreferConstWalker.collect((node as ts.SourceFile).statements, scopeInfo);
-                break;
-            case ts.SyntaxKind.Block:
-                PreferConstWalker.collect((node as ts.Block).statements, scopeInfo);
-                break;
-            case ts.SyntaxKind.ModuleDeclaration:
-                const body = (node as ts.ModuleDeclaration).body;
-                if (body && body.kind === ts.SyntaxKind.ModuleBlock) {
-                    PreferConstWalker.collect((body as ts.ModuleBlock).statements, scopeInfo);
-                }
-                break;
-            case ts.SyntaxKind.ForStatement:
-            case ts.SyntaxKind.ForOfStatement:
-            case ts.SyntaxKind.ForInStatement:
-                const initializer = (node as ts.ForInStatement | ts.ForOfStatement | ts.ForStatement).initializer;
-                if (initializer && initializer.kind === ts.SyntaxKind.VariableDeclarationList) {
-                    PreferConstWalker.collectInVariableDeclarationList(initializer as ts.VariableDeclarationList, scopeInfo);
-                }
-                break;
-            case ts.SyntaxKind.SwitchStatement:
-                for (const caseClause of (node as ts.SwitchStatement).caseBlock.clauses) {
-                    PreferConstWalker.collect(caseClause.statements, scopeInfo);
-                }
-                break;
-            default:
-                break;
-        }
-        return scopeInfo;
-    }
-
-    public onBlockScopeEnd() {
-        const seenLetStatements = new Set<ts.VariableDeclarationList>();
-        for (const usage of this.getCurrentBlockScope().getConstCandiates()) {
-            let fix: Lint.Fix | undefined;
-            if (!usage.reassignedSibling && !seenLetStatements.has(usage.letStatement)) {
-                // only fix if all variables in the `let` statement can use `const`
-                fix = this.createFix(this.createReplacement(usage.letStatement.getStart(), "let".length, "const"));
-                seenLetStatements.add(usage.letStatement);
-            }
-            this.addFailureAtNode(usage.identifier, Rule.FAILURE_STRING_FACTORY(usage.identifier.text), fix);
-        }
-    }
-
-    protected visitBinaryExpression(node: ts.BinaryExpression) {
-        if (isAssignment(node)) {
-            this.handleLHSExpression(node.left);
-        }
-        super.visitBinaryExpression(node);
-    }
-
-    protected visitPrefixUnaryExpression(node: ts.PrefixUnaryExpression) {
-        this.handleUnaryExpression(node);
-        super.visitPrefixUnaryExpression(node);
-    }
-
-    protected visitPostfixUnaryExpression(node: ts.PostfixUnaryExpression) {
-        this.handleUnaryExpression(node);
-        super.visitPostfixUnaryExpression(node);
-    }
-
-    private handleLHSExpression(node: ts.Expression) {
-        node = unwrapParentheses(node);
-        if (node.kind === ts.SyntaxKind.Identifier) {
-            this.markAssignment(node as ts.Identifier);
+            this.scope.reassigned.add((node as ts.Identifier).text);
+        } else if (node.kind === ts.SyntaxKind.ParenthesizedExpression) {
+            return this.handleExpression((node as ts.ParenthesizedExpression).expression);
         } else if (node.kind === ts.SyntaxKind.ArrayLiteralExpression) {
-            const deconstructionArray = node as ts.ArrayLiteralExpression;
-            deconstructionArray.elements.forEach((child) => {
-                // recursively unwrap destructuring arrays
-                this.handleLHSExpression(child);
-            });
+            for (const element of (node as ts.ArrayLiteralExpression).elements) {
+                if (element.kind === ts.SyntaxKind.SpreadElement) {
+                    this.handleExpression((element as ts.SpreadElement).expression);
+                } else {
+                    this.handleExpression(element);
+                }
+            }
         } else if (node.kind === ts.SyntaxKind.ObjectLiteralExpression) {
-            for (const prop of (node as ts.ObjectLiteralExpression).properties) {
-                switch (prop.kind) {
-                    case ts.SyntaxKind.PropertyAssignment:
-                        this.handleLHSExpression(prop.initializer);
-                        break;
-                    case ts.SyntaxKind.ShorthandPropertyAssignment:
-                        this.handleLHSExpression(prop.name);
-                        break;
-                    case ts.SyntaxKind.SpreadAssignment:
-                        this.handleLHSExpression(prop.expression);
-                        break;
-                    default:
-                        break;
+            for (const property of (node as ts.ObjectLiteralExpression).properties) {
+                if (property.kind === ts.SyntaxKind.ShorthandPropertyAssignment) {
+                    this.scope.reassigned.add(property.name.text);
+                } else if (property.kind === ts.SyntaxKind.SpreadAssignment) {
+                    if (property.name !== undefined) {
+                        this.scope.reassigned.add((property.name as ts.Identifier).text);
+                    } else {
+                        // handle `...(variable)`
+                        this.handleExpression(property.expression!);
+                    }
+                } else {
+                    this.handleExpression((property as ts.PropertyAssignment).initializer);
                 }
             }
         }
     }
 
-    private handleUnaryExpression(node: ts.PrefixUnaryExpression | ts.PostfixUnaryExpression) {
-        if (node.operator === ts.SyntaxKind.PlusPlusToken || node.operator === ts.SyntaxKind.MinusMinusToken) {
-            this.handleLHSExpression(node.operand);
+    private handleBindingName(name: ts.BindingName, declarationInfo: DeclarationInfo) {
+        if (name.kind === ts.SyntaxKind.Identifier) {
+            this.scope.addVariable(name, declarationInfo);
+        } else {
+            const destructuringInfo: DestructuringInfo = {
+                reassignedSiblings: false,
+            };
+            utils.forEachDestructuringIdentifier(
+                name,
+                (declaration) => this.scope.addVariable(declaration.name, declarationInfo, destructuringInfo),
+            );
         }
     }
 
-    private markAssignment(identifier: ts.Identifier) {
-        const allBlockScopes = this.getAllBlockScopes();
-        // look through block scopes from local -> global
-        for (let i = allBlockScopes.length - 1; i >= 0; i--) {
-            if (allBlockScopes[i].incrementVariableUsage(identifier.text)) {
-                break;
-            }
+    private handleVariableDeclaration(declarationList: ts.VariableDeclarationList) {
+        let declarationInfo: DeclarationInfo;
+        const kind = utils.getVariableDeclarationKind(declarationList);
+        if (kind === utils.VariableDeclarationKind.Const ||
+            utils.hasModifier(declarationList.parent!.modifiers, ts.SyntaxKind.ExportKeyword)) {
+
+            declarationInfo = {
+                canBeConst: false,
+                isBlockScoped: true,
+            };
+        } else {
+            declarationInfo = {
+                allInitialized: declarationList.parent!.kind === ts.SyntaxKind.ForOfStatement ||
+                                declarationList.parent!.kind === ts.SyntaxKind.ForInStatement ||
+                                declarationList.declarations.every((declaration) => declaration.initializer !== undefined),
+                canBeConst: true,
+                declarationList,
+                isBlockScoped: kind === utils.VariableDeclarationKind.Let,
+                isForLoop: declarationList.parent!.kind === ts.SyntaxKind.ForStatement,
+                reassignedSiblings: false,
+            };
+        }
+
+        for (const declaration of declarationList.declarations) {
+            this.handleBindingName(declaration.name, declarationInfo);
         }
     }
-}
 
-interface IConstCandidate {
-    letStatement: ts.VariableDeclarationList;
-    identifier: ts.Identifier;
-    // whether or not a different variable declaration that shares the same `let` statement is ever reassigned
-    reassignedSibling: boolean;
-}
-
-interface UsageInfo {
-    letStatement: ts.VariableDeclarationList;
-    identifier: ts.Identifier;
-    usageCount: number;
-}
-
-class ScopeInfo {
-    public currentVariableDeclaration: ts.VariableDeclaration;
-    private identifierUsages = new Map<string, UsageInfo>();
-    // variable names grouped by common `let` statements
-    private sharedLetSets = new Map<ts.VariableDeclarationList, string[]>();
-
-    public addVariable(identifier: ts.Identifier, letStatement: ts.VariableDeclarationList) {
-        this.identifierUsages.set(identifier.text, { letStatement, identifier, usageCount: 0 });
-        let shared = this.sharedLetSets.get(letStatement);
-        if (shared === undefined) {
-            shared = [];
-            this.sharedLetSets.set(letStatement, shared);
-        }
-        shared.push(identifier.text);
-    }
-
-    public getConstCandiates() {
-        const constCandidates: IConstCandidate[] = [];
-        this.sharedLetSets.forEach((variableNames) => {
-            const anyReassigned = variableNames.some((key) => this.identifierUsages.get(key)!.usageCount > 0);
-            for (const variableName of variableNames) {
-                const usage = this.identifierUsages.get(variableName)!;
-                if (usage.usageCount === 0) {
-                    constCandidates.push({
-                        identifier: usage.identifier,
-                        letStatement: usage.letStatement,
-                        reassignedSibling: anyReassigned,
-                    });
+    private settle(parent?: Scope) {
+        const {variables, reassigned} = this.scope;
+        reassigned.forEach((name) => {
+            const variableInfo = variables.get(name);
+            if (variableInfo !== undefined) {
+                if (variableInfo.declarationInfo.canBeConst) {
+                    variableInfo.reassigned = true;
+                    variableInfo.declarationInfo.reassignedSiblings = true;
+                    if (variableInfo.destructuringInfo !== undefined) {
+                        variableInfo.destructuringInfo.reassignedSiblings = true;
+                    }
                 }
+            } else if (parent !== undefined) {
+                // if the reassigned variable was not declared in this scope we defer to the parent scope
+                parent.reassigned.add(name);
             }
         });
-        return constCandidates;
+        reassigned.clear();
     }
 
-    public incrementVariableUsage(varName: string) {
-        const usages = this.identifierUsages.get(varName);
-        if (usages !== undefined) {
-            usages.usageCount++;
-            return true;
-        }
-        return false;
+    private onScopeEnd(parent?: Scope) {
+        this.settle(parent);
+        const appliedFixes = new Set<ts.VariableDeclarationList>();
+        this.scope.variables.forEach((info, name) => {
+            if (info.declarationInfo.canBeConst &&
+                !info.reassigned &&
+                // don't add failures for reassigned variables in for loop initializer
+                !(info.declarationInfo.reassignedSiblings && info.declarationInfo.isForLoop) &&
+                // if {destructuring: "all"} is set, only add a failure if all variables in a destructuring assignment can be const
+                (!this.options.destructuringAll ||
+                 info.destructuringInfo === undefined ||
+                 !info.destructuringInfo.reassignedSiblings)) {
+
+                let fix: Lint.Fix | undefined;
+                // only apply fixes if the VariableDeclarationList has no reassigned variables
+                // and the variable is block scoped aka `let` and initialized
+                if (info.declarationInfo.allInitialized &&
+                    !info.declarationInfo.reassignedSiblings &&
+                    info.declarationInfo.isBlockScoped &&
+                    !appliedFixes.has(info.declarationInfo.declarationList)) {
+                    fix = this.createFix(
+                        new Lint.Replacement(info.declarationInfo.declarationList!.getStart(this.sourceFile), 3, "const"),
+                    );
+                    // add only one fixer per VariableDeclarationList
+                    appliedFixes.add(info.declarationInfo.declarationList);
+                }
+                this.addFailureAtNode(info.identifier, Rule.FAILURE_STRING_FACTORY(name, info.declarationInfo.isBlockScoped), fix);
+            }
+        });
     }
 }

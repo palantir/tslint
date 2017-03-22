@@ -86,8 +86,11 @@ export interface IRuleMetadata {
 
 export type RuleType = "functionality" | "maintainability" | "style" | "typescript";
 
+export type RuleSeverity = "warning" | "error" | "off";
+
 export interface IOptions {
     ruleArguments: any[];
+    ruleSeverity: RuleSeverity;
     ruleName: string;
     disabledIntervals: IDisabledInterval[];
 }
@@ -100,8 +103,12 @@ export interface IDisabledInterval {
 export interface IRule {
     getOptions(): IOptions;
     isEnabled(): boolean;
-    apply(sourceFile: ts.SourceFile, languageService: ts.LanguageService): RuleFailure[];
+    apply(sourceFile: ts.SourceFile): RuleFailure[];
     applyWithWalker(walker: IWalker): RuleFailure[];
+}
+
+export interface ITypedRule extends IRule {
+    applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): RuleFailure[];
 }
 
 export interface IRuleFailureJson {
@@ -109,6 +116,7 @@ export interface IRuleFailureJson {
     failure: string;
     fix?: Fix;
     name: string;
+    ruleSeverity: string;
     ruleName: string;
     startPosition: IRuleFailurePositionJson;
 }
@@ -117,6 +125,10 @@ export interface IRuleFailurePositionJson {
     character: number;
     line: number;
     position: number;
+}
+
+export function isTypedRule(rule: IRule): rule is ITypedRule {
+    return "applyWithProgram" in rule;
 }
 
 export class Replacement {
@@ -227,6 +239,7 @@ export class RuleFailure {
     private startPosition: RuleFailurePosition;
     private endPosition: RuleFailurePosition;
     private rawLines: string;
+    private ruleSeverity: RuleSeverity;
 
     constructor(private sourceFile: ts.SourceFile,
                 start: number,
@@ -239,6 +252,7 @@ export class RuleFailure {
         this.startPosition = this.createFailurePosition(start);
         this.endPosition = this.createFailurePosition(end);
         this.rawLines = sourceFile.text;
+        this.ruleSeverity = "error";
     }
 
     public getFileName() {
@@ -273,6 +287,14 @@ export class RuleFailure {
         return this.rawLines;
     }
 
+    public getRuleSeverity() {
+        return this.ruleSeverity;
+    }
+
+    public setRuleSeverity(value: RuleSeverity) {
+        this.ruleSeverity = value;
+    }
+
     public toJson(): IRuleFailureJson {
         return {
             endPosition: this.endPosition.toJson(),
@@ -280,6 +302,7 @@ export class RuleFailure {
             fix: this.fix,
             name: this.fileName,
             ruleName: this.ruleName,
+            ruleSeverity: this.ruleSeverity.toUpperCase(),
             startPosition: this.startPosition.toJson(),
         };
     }

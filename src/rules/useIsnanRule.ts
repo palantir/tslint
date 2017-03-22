@@ -45,7 +45,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 class UseIsnanRuleWalker extends Lint.RuleWalker {
     protected visitBinaryExpression(node: ts.BinaryExpression): void {
         if ((this.isExpressionNaN(node.left) || this.isExpressionNaN(node.right))
-                && node.operatorToken.kind !== ts.SyntaxKind.EqualsToken) {
+                && this.isComparisonOperator(node.operatorToken.kind)) {
             this.addFailureAtNode(node, Rule.FAILURE_STRING + node.getText());
         }
         super.visitBinaryExpression(node);
@@ -53,5 +53,16 @@ class UseIsnanRuleWalker extends Lint.RuleWalker {
 
     private isExpressionNaN(node: ts.Node) {
         return node.kind === ts.SyntaxKind.Identifier && node.getText() === "NaN";
+    }
+
+    private isComparisonOperator(operator: ts.BinaryOperator) {
+        return (operator === ts.SyntaxKind.LessThanToken
+            || operator === ts.SyntaxKind.GreaterThanToken
+            || operator === ts.SyntaxKind.LessThanEqualsToken
+            || operator === ts.SyntaxKind.GreaterThanEqualsToken
+            || operator === ts.SyntaxKind.EqualsEqualsToken
+            || operator === ts.SyntaxKind.ExclamationEqualsToken
+            || operator === ts.SyntaxKind.EqualsEqualsEqualsToken
+            || operator === ts.SyntaxKind.ExclamationEqualsEqualsToken);
     }
 }

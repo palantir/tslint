@@ -124,8 +124,7 @@ var a: [
 
 var a: [
     string,
-    number,
-          ~ [Unnecessary trailing comma]
+    number
 ] = null;
 
 import {
@@ -379,8 +378,8 @@ class Test<A, B, C> {
     }
 
     foo5<
-        T extends Test<[A, A], [A, A,], A>,
-        U extends Test<B, B, B,>,
+        T extends Test<[A, A], [A, A], A>,
+        U extends Test<B, B, B>,
         V extends Test<
             [
                 C,
@@ -388,8 +387,7 @@ class Test<A, B, C> {
             ],
             [
                 C,
-                C,
-                 ~ [Unnecessary trailing comma]
+                C
             ],
             C
         >
@@ -411,8 +409,7 @@ class Test<A, B, C> {
         W extends {
             foo: [
                 string,
-                string,
-                      ~ [Unnecessary trailing comma]
+                string
             ];
         }
     >() { return 42; }
@@ -449,8 +446,8 @@ interface ITest<A ,B, C> {
     );
 
     foo5<
-        T extends Test<[A, A], [A, A,], A>,
-        U extends Test<B, B, B,>,
+        T extends Test<[A, A], [A, A], A>,
+        U extends Test<B, B, B>,
         V extends Test<
             [
                 C,
@@ -458,8 +455,7 @@ interface ITest<A ,B, C> {
             ],
             [
                 C,
-                C,
-                 ~ [Unnecessary trailing comma]
+                C
             ],
             C
         >

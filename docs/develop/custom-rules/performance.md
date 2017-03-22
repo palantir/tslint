@@ -1,12 +1,5 @@
 ## Performance tips
 
-### Don't call the LanguageService repeatedly
-The LanguageService is designed to serve editors. By design it does as little work to serve requests as possible.
-For most requests no cache is used.
-
-Let's say you need all usages of a variable. The LanguageService needs to check the whole AST subtree in which the variable is in scope.
-Doing that once is barely noticable. But doing it over and over again, will result in pretty bad performance (looking at you `no-unused-variable`).
-
 ### Use the TypeChecker only when needed
 The TypeChecker is a really mighty tool, but that comes with a cost. To create a TypeChecker the Program first has to locate, read, parse and bind all SourceFiles referenced.
 To avoid that cost, try to avoid the TypeChecker where possible.
@@ -21,7 +14,7 @@ Some rules work directly on the content of the source file.
 `max-file-line-count` and `linebreak-style` don't need to walk the AST at all.
 
 Other rules define exceptions: `no-consecutive-blank-lines` ignores template strings.
-To optimize for the best case, this rule can first look for failures in the source. 
+To optimize for the best case, this rule can first look for failures in the source.
 If and only if there are any failures, walk the AST to find the location of all template strings to filter the failures.
 
 ### Implement your own walking algorithm
@@ -46,7 +39,7 @@ class MyWalker extends Lint.AbstractWalker<MyOptionsType> {
 
 ### Don't walk the whole AST if possible
 __The Spec is your friend:__
-The language spec defines where each statement can occur. If you are interested in `import` statements for example, you only need to search 
+The language spec defines where each statement can occur. If you are interested in `import` statements for example, you only need to search
 in `sourceFile.statements` and nested `NamespaceDeclaration`s.
 
 __Don't visit AST branches you're not interested in:__
@@ -76,12 +69,12 @@ Instead of stuffing the whole logic in a single closure, consider splitting it u
 Each function should handle similar kinds of nodes. Don't worry too much about the function call, since V8 eventually inlines the function
 if possible.
 
-The AST nodes have different properties, therefore they have a different hidden class in V8. A function can only be optimized for a certain 
+The AST nodes have different properties, therefore they have a different hidden class in V8. A function can only be optimized for a certain
 amount of different hidden classes. Above that threshold the function will be deoptimized and is never optimized again.
 
 ### Pass the optional `sourceFile` parameter
 There are serveral methods that have an optional parameter `sourceFile`. Don't omit this parameter if you care for performance.
-If ommitted, typescript needs to walk up the node's parent chain until it reaches the SourceFile. This *can* be quite costly when done 
+If ommitted, typescript needs to walk up the node's parent chain until it reaches the SourceFile. This *can* be quite costly when done
 frequently on deeply nested nodes.
 
 Some examples:
@@ -97,7 +90,7 @@ Some examples:
 `node.getStart()` scans the source to skip all the leading trivia. Although barely noticeable, this operation is not for free.
 If you need the start position of a node more than once per function, consider caching it.
 
-`node.getWidth()` is most of the time used together with `node.getStart()` to get the node's span. Internally it uses `node.getStart() - node.getEnd()` which effectively doubles the calls to `node.getStart()`. Consider using `node.getEnd()` instead and calculate the width yourself if necessary.
+`node.getWidth()` is most of the time used together with `node.getStart()` to get the node's span. Internally it uses `node.getEnd() - node.getStart()` which effectively doubles the calls to `node.getStart()`. Consider using `node.getEnd()` instead and calculate the width yourself if necessary.
 
 `node.getText()` calculates the start of the node and returns a substring until the end of the token.
 Most of the time this not needed, because this substring is already contained in the node.
@@ -106,7 +99,7 @@ declare node: ts.Identifier;
 node.getText() === node.text; // prefer node.text where available
 ```
 
-__Bonus points:__ If you know the width of the node (either from the `text` property or because it is a keyword of known width), 
+__Bonus points:__ If you know the width of the node (either from the `text` property or because it is a keyword of known width),
 you can use `node.getEnd() - width` to calculate the node's start.
 `node.getEnd()` is effectively for free as it only returns the `end` property. This way you avoid the cost of skipping leading trivia.
 
@@ -114,7 +107,7 @@ you can use `node.getEnd() - width` to calculate the node's start.
 Tail calls are function or method calls at the end of the control flow of a function. It's only a tail call if the return value of that call
 is directly returned unchanged. Browsers can optimize this pattern for performance.
 Further optimization is specced in ES2015 as "Proper Tail Calls".
-With proper tail calls the browser reuses the stack frame of the current function. When done right this allows for infinite recursion. 
+With proper tail calls the browser reuses the stack frame of the current function. When done right this allows for infinite recursion.
 ```ts
 function foo() {
     if (condition)
