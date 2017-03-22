@@ -69,6 +69,9 @@ export const rules = {
         ],
     },
     "no-duplicate-super": true,
+
+    // added in v5.0
+    "no-invalid-template-strings": true,
 };
 // tslint:enable object-literal-sort-keys
 
