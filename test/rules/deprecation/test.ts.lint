@@ -1,0 +1,7 @@
+declare interface D {
+    /** @deprecated */ m: () => void;
+}
+
+declare let d: D;
+d.m();
+  ~ [Is deprecated.]
