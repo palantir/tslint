@@ -5,3 +5,14 @@ declare interface D {
 declare let d: D;
 d.m();
   ~ [m is deprecated.]
+
+/**
+ * Some text
+ * @one-tag
+ * @deprecated reason is this
+ * @two-tag
+ */
+class P {}
+
+new P();
+    ~ [P is deprecated.]

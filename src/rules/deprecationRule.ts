@@ -56,7 +56,9 @@ class Walker extends Lint.ProgramAwareRuleWalker {
       // https://github.com/Microsoft/TypeScript/issues/7393.
       const commentNode: ts.Node = d;
 
-      if (d.getSourceFile() === node.getSourceFile() && d.pos === node.pos) {
+      if (d.getSourceFile() === node.getSourceFile()
+          && d.getStart() <= node.getStart()
+          && node.getEnd() <= d.getEnd()) {
           continue;
       }
 
