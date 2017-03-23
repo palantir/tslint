@@ -69,6 +69,16 @@ export const rules = {
         ],
     },
     "no-duplicate-super": true,
+
+    // added in v5.0
+    "align": {
+        options: [
+            "parameters",
+            "statements",
+            "members",
+            "elements",
+        ],
+    },
 };
 // tslint:enable object-literal-sort-keys
 
