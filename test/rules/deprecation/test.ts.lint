@@ -12,7 +12,15 @@ d.m();
  * @deprecated reason is this
  * @two-tag
  */
-class P {}
+export class P {
+    /** @deprecated */ f: string;
+    g, /** @deprecated */ h: number;
+}
 
-new P();
-    ~ [P is deprecated.]
+let p = new P();
+            ~ [P is deprecated.]
+p.f;
+  ~ [f is deprecated.]
+p.g;
+p.h;
+  ~ [h is deprecated.]

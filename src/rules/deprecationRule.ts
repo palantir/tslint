@@ -42,6 +42,8 @@ export class Rule extends Lint.Rules.TypedRule {
 }
 
 class Walker extends Lint.ProgramAwareRuleWalker {
+  // Implementation inspired by angular/tsickle:
+  // https://github.com/angular/tsickle/blob/cad7c180a2155db6f6fb8d22c44151d7e8a9149f/src/decorator-annotator.ts#L42
   protected visitIdentifier(node: ts.Identifier) {
     let decSym = this.getTypeChecker().getSymbolAtLocation(node);
 
@@ -56,9 +58,10 @@ class Walker extends Lint.ProgramAwareRuleWalker {
       // https://github.com/Microsoft/TypeScript/issues/7393.
       const commentNode: ts.Node = d;
 
-      if (d.getSourceFile() === node.getSourceFile()
-          && d.getStart() <= node.getStart()
-          && node.getEnd() <= d.getEnd()) {
+      // Don't warn on the declaration of the @deprecated symbol.
+      if (commentNode.getSourceFile() === node.getSourceFile()
+          && commentNode.getStart() <= node.getStart()
+          && node.getEnd() <= commentNode.getEnd()) {
           continue;
       }
 
