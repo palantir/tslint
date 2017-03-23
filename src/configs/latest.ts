@@ -76,7 +76,6 @@ export const rules = {
             "parameters",
             "statements",
             "members",
-            "elements",
         ],
     },
 };
