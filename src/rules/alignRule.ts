@@ -83,51 +83,61 @@ class AlignWalker extends Lint.AbstractWalker<Options> {
         const cb = (node: ts.Node): void => {
             if (this.options.statements && isBlockLike(node)) {
                 this.checkAlignment(node.statements, OPTION_STATEMENTS);
-            } else if (this.options.arguments &&
-                       (node.kind === ts.SyntaxKind.CallExpression ||
-                        node.kind === ts.SyntaxKind.NewExpression && (node as ts.NewExpression).arguments !== undefined)) {
-                this.checkAlignment((node as ts.CallExpression | ts.NewExpression).arguments, OPTION_ARGUMENTS);
             } else {
-                if (this.options.elements) {
-                    switch (node.kind) {
-                        case ts.SyntaxKind.ArrayLiteralExpression:
-                        case ts.SyntaxKind.ArrayBindingPattern:
-                            this.checkAlignment((node as ts.ArrayBindingOrAssignmentPattern).elements, OPTION_ELEMENTS);
+                switch (node.kind) {
+                    case ts.SyntaxKind.NewExpression:
+                        if ((node as ts.NewExpression).arguments === undefined) {
                             break;
-                        case ts.SyntaxKind.TupleType:
-                            this.checkAlignment((node as ts.TupleTypeNode).elementTypes, OPTION_ELEMENTS);
-                    }
-                }
-                if (this.options.parameters) {
-                    switch (node.kind) {
-                        case ts.SyntaxKind.FunctionDeclaration:
-                        case ts.SyntaxKind.FunctionExpression:
-                        case ts.SyntaxKind.Constructor:
-                        case ts.SyntaxKind.MethodDeclaration:
-                        case ts.SyntaxKind.ArrowFunction:
-                        case ts.SyntaxKind.CallSignature:
-                        case ts.SyntaxKind.ConstructSignature:
-                        case ts.SyntaxKind.MethodSignature:
-                        case ts.SyntaxKind.FunctionType:
-                        case ts.SyntaxKind.ConstructorType:
+                        }
+                        // falls through
+                    case ts.SyntaxKind.CallExpression:
+                        if (this.options.arguments) {
+                            this.checkAlignment((node as ts.CallExpression | ts.NewExpression).arguments!, OPTION_ARGUMENTS);
+                        }
+                        break;
+                    case ts.SyntaxKind.FunctionDeclaration:
+                    case ts.SyntaxKind.FunctionExpression:
+                    case ts.SyntaxKind.Constructor:
+                    case ts.SyntaxKind.MethodDeclaration:
+                    case ts.SyntaxKind.ArrowFunction:
+                    case ts.SyntaxKind.CallSignature:
+                    case ts.SyntaxKind.ConstructSignature:
+                    case ts.SyntaxKind.MethodSignature:
+                    case ts.SyntaxKind.FunctionType:
+                    case ts.SyntaxKind.ConstructorType:
+                        if (this.options.parameters) {
                             this.checkAlignment((node as ts.SignatureDeclaration).parameters, OPTION_PARAMETERS);
-                    }
-                }
-                if (this.options.members) {
-                    switch (node.kind) {
-                        case ts.SyntaxKind.ObjectLiteralExpression:
+                        }
+                        break;
+                    case ts.SyntaxKind.ArrayLiteralExpression:
+                    case ts.SyntaxKind.ArrayBindingPattern:
+                        if (this.options.elements) {
+                            this.checkAlignment((node as ts.ArrayBindingOrAssignmentPattern).elements, OPTION_ELEMENTS);
+                        }
+                        break;
+                    case ts.SyntaxKind.TupleType:
+                        if (this.options.elements) {
+                            this.checkAlignment((node as ts.TupleTypeNode).elementTypes, OPTION_ELEMENTS);
+                        }
+                        break;
+                    case ts.SyntaxKind.ObjectLiteralExpression:
+                        if (this.options.members) {
                             this.checkAlignment((node as ts.ObjectLiteralExpression).properties, OPTION_MEMBERS);
-                            break;
-                        case ts.SyntaxKind.ObjectBindingPattern:
+                        }
+                        break;
+                    case ts.SyntaxKind.ObjectBindingPattern:
+                        if (this.options.members) {
                             this.checkAlignment((node as ts.ObjectBindingPattern).elements, OPTION_MEMBERS);
-                            break;
-                        case ts.SyntaxKind.ClassDeclaration:
-                        case ts.SyntaxKind.ClassDeclaration:
-                        case ts.SyntaxKind.InterfaceDeclaration:
-                        case ts.SyntaxKind.TypeLiteral:
+                        }
+                        break;
+                    case ts.SyntaxKind.ClassDeclaration:
+                    case ts.SyntaxKind.ClassDeclaration:
+                    case ts.SyntaxKind.InterfaceDeclaration:
+                    case ts.SyntaxKind.TypeLiteral:
+                        if (this.options.members) {
                             this.checkAlignment((node as ts.ClassLikeDeclaration | ts.InterfaceDeclaration | ts.TypeLiteralNode).members,
                                                 OPTION_MEMBERS);
-                    }
+                        }
                 }
             }
             return ts.forEachChild(node, cb);
