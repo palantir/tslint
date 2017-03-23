@@ -23,7 +23,7 @@ let {
     foo,
     boo,
     baz,
-    ...baz,
+    baz,
 } = foo;
 
 let foo: {

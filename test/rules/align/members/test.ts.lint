@@ -30,8 +30,8 @@ let {
     boo,
      baz,
      ~~~ [members are not aligned]
-   ...baz,
-   ~~~~~~ [members are not aligned]
+   baz,
+   ~~~ [members are not aligned]
 } = foo;
 
 let foo: {
