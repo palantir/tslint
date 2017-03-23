@@ -4,4 +4,4 @@ declare interface D {
 
 declare let d: D;
 d.m();
-  ~ [Is deprecated.]
+  ~ [m is deprecated.]

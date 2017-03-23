@@ -24,11 +24,12 @@ export class Rule extends Lint.Rules.TypedRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "deprecation",
         description: "Warns when deprecated APIs are used.",
-        descriptionDetails: Lint.Utils.dedent``,
+        descriptionDetails: Lint.Utils.dedent`Any usage of an identifier
+            with the @deprecated JSDoc annotation will trigger a warning.
+            See http://usejsdoc.org/tags-deprecated.html`,
         rationale: Lint.Utils.dedent`
-            Deprecation`,
-        optionsDescription: Lint.Utils.dedent`
-            `,
+            Deprecated APIs should be avoided, and usage updated.`,
+        optionsDescription: "",
         options: null,
         optionExamples: [],
         type: "maintainability",
@@ -64,7 +65,7 @@ class Walker extends Lint.ProgramAwareRuleWalker {
       for (const {pos, end} of range) {
         const jsDocText = commentNode.getFullText().substring(pos, end);
         if (jsDocText.includes("@deprecated")) {
-            this.addFailureAtNode(node, "Is deprecated.");
+            this.addFailureAtNode(node, node.getText() + " is deprecated.");
         }
       }
     }
