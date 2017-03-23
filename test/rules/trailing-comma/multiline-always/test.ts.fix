@@ -544,3 +544,6 @@ export {
     foo,
     bar,
 };
+
+// don't crash
+new Foo
