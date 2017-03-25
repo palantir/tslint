@@ -15,15 +15,14 @@
  * limitations under the License.
  */
 
-import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
 
 type Option = "array" | "generic" | "array-simple";
-const OPTION_ARRAY: Option = "array";
-const OPTION_GENERIC: Option = "generic";
-const OPTION_ARRAY_SIMPLE: Option = "array-simple";
+const OPTION_ARRAY = "array";
+const OPTION_GENERIC = "generic";
+const OPTION_ARRAY_SIMPLE = "array-simple";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -53,13 +52,13 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_GENERIC_SIMPLE = "Array type using 'T[]' is forbidden for non-simple types. Use 'Array<T>' instead.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const option = this.getOptions().ruleArguments[0];
-        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, option));
+        return this.applyWithFunction(sourceFile, walk, this.ruleArguments[0]);
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>, option: Option): void {
-    return ts.forEachChild(ctx.sourceFile, function cb(node): void {
+function walk(ctx: Lint.WalkContext<Option>): void {
+    const { sourceFile, options: option } = ctx;
+    return ts.forEachChild(sourceFile, function cb(node): void {
         switch (node.kind) {
             case ts.SyntaxKind.ArrayType:
                 checkArrayType(node as ts.ArrayTypeNode);
@@ -158,7 +157,7 @@ function isSimpleType(nodeType: ts.TypeNode): boolean {
                 case 0:
                     return true;
                 case 1:
-                    return utils.isIdentifier(typeName) && typeName.text === "Array" && isSimpleType(typeArguments[0]);
+                    return typeName.kind === ts.SyntaxKind.Identifier && typeName.text === "Array" && isSimpleType(typeArguments[0]);
                 default:
                     return false;
             }
