@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as utils from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 import { isAssignment, unwrapParentheses } from "../language/utils";
@@ -42,7 +43,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 interface IncrementorState {
     indexVariableName: string;
-    arrayToken: ts.Identifier;
+    arrayExpr: ts.Expression;
     onlyArrayReadAccess: boolean;
 }
 
@@ -64,19 +65,15 @@ function walk(ctx: Lint.WalkContext<void>): void {
 
     function visitForStatement(node: ts.ForStatement): void {
         const arrayNodeInfo = getForLoopHeaderInfo(node);
-        if (!node.incrementor || !arrayNodeInfo) {
+        if (!arrayNodeInfo) {
             return ts.forEachChild(node, cb);
         }
 
-        const { indexVariable, arrayToken } = arrayNodeInfo;
+        const { indexVariable, arrayExpr } = arrayNodeInfo;
         const indexVariableName = indexVariable.text;
 
         // store `for` loop state
-        const state: IncrementorState = {
-            indexVariableName,
-            arrayToken: arrayToken as ts.Identifier,
-            onlyArrayReadAccess: true,
-        };
+        const state: IncrementorState = { indexVariableName, arrayExpr, onlyArrayReadAccess: true };
         scopes.push(state);
         ts.forEachChild(node.statement, cb);
         scopes.pop();
@@ -106,107 +103,111 @@ function walk(ctx: Lint.WalkContext<void>): void {
 
 function updateIncrementorState(node: ts.Identifier, state: IncrementorState): void {
     // check if iterator is used for something other than reading data from array
-    if (node.parent!.kind === ts.SyntaxKind.ElementAccessExpression) {
-        const elementAccess = node.parent as ts.ElementAccessExpression;
-        const arrayIdentifier = unwrapParentheses(elementAccess.expression) as ts.Identifier;
-        if (state.arrayToken.getText() !== arrayIdentifier.getText()) {
-            // iterator used in array other than one iterated over
-            state.onlyArrayReadAccess = false;
-        } else if (elementAccess.parent && isAssignment(elementAccess.parent)) {
-            // array position is assigned a new value
-            state.onlyArrayReadAccess = false;
-        }
-    } else {
+    const elementAccess = node.parent!;
+    if (!utils.isElementAccessExpression(elementAccess)) {
         state.onlyArrayReadAccess = false;
+        return;
     }
 
+    const arrayExpr = unwrapParentheses(elementAccess.expression);
+    if (state.arrayExpr.getText() !== arrayExpr.getText()) {
+        // iterator used in array other than one iterated over
+        state.onlyArrayReadAccess = false;
+    } else if (isAssignment(elementAccess.parent!)) {
+        // array position is assigned a new value
+        state.onlyArrayReadAccess = false;
+    }
 }
 
 // returns the iterator and array of a `for` loop if the `for` loop is basic.
-function getForLoopHeaderInfo(forLoop: ts.ForStatement): { indexVariable: ts.Identifier, arrayToken: ts.Expression } | undefined {
-    let indexVariableName: string | undefined;
-    let indexVariable: ts.Identifier | undefined;
-
-    // assign `indexVariableName` if initializer is simple and starts at 0
-    if (forLoop.initializer && forLoop.initializer.kind === ts.SyntaxKind.VariableDeclarationList) {
-        const syntaxList = forLoop.initializer.getChildAt(1);
-        if (syntaxList.kind === ts.SyntaxKind.SyntaxList && syntaxList.getChildCount() === 1) {
-            const assignment = syntaxList.getChildAt(0);
-            if (assignment.kind === ts.SyntaxKind.VariableDeclaration && assignment.getChildCount() === 3) {
-                const value = assignment.getChildAt(2).getText();
-                if (value === "0") {
-                    indexVariable = assignment.getChildAt(0) as ts.Identifier;
-                    indexVariableName = indexVariable.getText();
-                }
-            }
-        }
-    }
-
-    // ensure `for` condition
-    if (!indexVariableName
-        || !forLoop.condition
-        || forLoop.condition.kind !== ts.SyntaxKind.BinaryExpression
-        || forLoop.condition.getChildAt(0).getText() !== indexVariableName
-        || forLoop.condition.getChildAt(1).getText() !== "<") {
-
+function getForLoopHeaderInfo(forLoop: ts.ForStatement): { indexVariable: ts.Identifier, arrayExpr: ts.Expression } | undefined {
+    const { initializer, condition, incrementor } = forLoop;
+    if (!initializer || !condition || !incrementor) {
         return undefined;
     }
 
-    if (!forLoop.incrementor || !isIncremented(forLoop.incrementor, indexVariableName)) {
+    // Must start with `var i = 0;` or `let i = 0;`
+    if (!utils.isVariableDeclarationList(initializer) || initializer.declarations.length !== 1) {
+        return undefined;
+    }
+    const { name: indexVariable, initializer: indexInit } = initializer.declarations[0];
+    if (indexVariable.kind !== ts.SyntaxKind.Identifier || indexInit === undefined || !isNumber(indexInit, "0")) {
         return undefined;
     }
 
-    // ensure that the condition checks a `length` property
-    const conditionRight = forLoop.condition.getChildAt(2);
-    if (conditionRight.kind === ts.SyntaxKind.PropertyAccessExpression) {
-        const propertyAccess = conditionRight as ts.PropertyAccessExpression;
-        if (indexVariable && propertyAccess.name.getText() === "length") {
-            return { indexVariable: indexVariable!, arrayToken: unwrapParentheses(propertyAccess.expression) };
-        }
+    // Must end with `i++`
+    if (!isIncremented(incrementor, indexVariable.text)) {
+        return undefined;
     }
 
-    return undefined;
+    // Condition must be `i < arr.length;`
+    if (!utils.isBinaryExpression(condition)) {
+        return undefined;
+    }
+
+    const { left, operatorToken, right } = condition;
+    if (!isIdentifierNamed(left, indexVariable.text) ||
+            operatorToken.kind !== ts.SyntaxKind.LessThanToken ||
+            !utils.isPropertyAccessExpression(right)) {
+        return undefined;
+    }
+
+    const { expression: arrayExpr, name } = right;
+    if (name.text !== "length") {
+        return undefined;
+    }
+
+    return { indexVariable, arrayExpr };
 }
 
 function isIncremented(node: ts.Node, indexVariableName: string): boolean {
-    if (!node) {
-        return false;
+    switch (node.kind) {
+        case ts.SyntaxKind.PrefixUnaryExpression:
+        case ts.SyntaxKind.PostfixUnaryExpression: {
+            const { operator, operand } = node as ts.PrefixUnaryExpression | ts.PostfixUnaryExpression;
+            // `++x` or `x++`
+            return operator === ts.SyntaxKind.PlusPlusToken && isVar(operand);
+        }
+
+        case ts.SyntaxKind.BinaryExpression:
+            const { operatorToken, left: updatedVar, right: rhs } = node as ts.BinaryExpression;
+            if (!isVar(updatedVar)) {
+                return false;
+            }
+
+            switch (operatorToken.kind) {
+                case ts.SyntaxKind.PlusEqualsToken:
+                    // x += 1
+                    return isOne(rhs);
+                case ts.SyntaxKind.EqualsToken: {
+                    if (!utils.isBinaryExpression(rhs)) {
+                        return false;
+                    }
+                    const { operatorToken: rhsOp, left, right } = rhs;
+                    // `x = 1 + x` or `x = x + 1`
+                    return rhsOp.kind === ts.SyntaxKind.PlusToken && (isVar(left) && isOne(right) || isOne(left) && isVar(right));
+                }
+                default:
+                    return false;
+            }
+
+        default:
+            return false;
     }
 
-    // ensure variable is incremented
-    if (node.kind === ts.SyntaxKind.PrefixUnaryExpression) {
-        const incrementor = node as ts.PrefixUnaryExpression;
-        if (incrementor.operator === ts.SyntaxKind.PlusPlusToken && incrementor.operand.getText() === indexVariableName) {
-            // x++
-            return true;
-        }
-    } else if (node.kind === ts.SyntaxKind.PostfixUnaryExpression) {
-        const incrementor = node as ts.PostfixUnaryExpression;
-        if (incrementor.operator === ts.SyntaxKind.PlusPlusToken && incrementor.operand.getText() === indexVariableName) {
-            // ++x
-            return true;
-        }
-    } else if (node.kind === ts.SyntaxKind.BinaryExpression) {
-        const binaryExpression = node as ts.BinaryExpression;
-        if (binaryExpression.operatorToken.getText() === "+="
-            && binaryExpression.left.getText() === indexVariableName
-            && binaryExpression.right.getText() === "1") {
-            // x += 1
-            return true;
-        }
-        if (binaryExpression.operatorToken.getText() === "="
-            && binaryExpression.left.getText() === indexVariableName) {
-            const addExpression = binaryExpression.right as ts.BinaryExpression;
-            if (addExpression.operatorToken.getText() === "+") {
-                if (addExpression.right.getText() === indexVariableName && addExpression.left.getText() === "1") {
-                    // x = 1 + x
-                    return true;
-                } else if (addExpression.left.getText() === indexVariableName && addExpression.right.getText() === "1") {
-                    // x = x + 1
-                    return true;
-                }
-            }
-        }
+    function isVar(id: ts.Node): boolean {
+        return isIdentifierNamed(id, indexVariableName);
     }
-    return false;
+}
+
+function isIdentifierNamed(node: ts.Node, text: string): boolean {
+    return utils.isIdentifier(node) && node.text === text;
+}
+
+function isOne(node: ts.Node): boolean {
+    return isNumber(node, "1");
+}
+
+function isNumber(node: ts.Node, value: string): boolean {
+    return utils.isNumericLiteral(node) && node.text === value;
 }
