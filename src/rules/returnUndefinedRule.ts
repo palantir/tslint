@@ -62,7 +62,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
         }
 
         const functionReturningFrom = Lint.ancestorWhere(node, isFunctionLike) as FunctionLike | undefined;
-        if (!functionReturningFrom) {
+        if (functionReturningFrom === undefined) {
             // Return outside of function is invalid
             return;
         }
@@ -76,7 +76,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
 }
 
 function returnKindFromReturn(node: ts.ReturnStatement): ReturnKind | undefined {
-    if (!node.expression) {
+    if (node.expression === undefined) {
         return ReturnKind.Void;
     } else if (u.isIdentifier(node.expression) && node.expression.text === "undefined") {
         return ReturnKind.Value;
@@ -110,7 +110,7 @@ function getReturnKind(node: FunctionLike, checker: ts.TypeChecker): ReturnKind 
     }
 
     // Go with an explicit type declaration if possible.
-    if (node.type) {
+    if (node.type !== undefined) {
         return node.type.kind === ts.SyntaxKind.VoidKeyword ? ReturnKind.Void : ReturnKind.Value;
     }
 
@@ -118,8 +118,8 @@ function getReturnKind(node: FunctionLike, checker: ts.TypeChecker): ReturnKind 
         ? checker.getContextualType(node)
         : undefined;
 
-    const ty = contextualType || checker.getTypeAtLocation(node);
-    if (!ty) {
+    const ty = contextualType !== undefined ? contextualType : checker.getTypeAtLocation(node);
+    if (ty === undefined) {
         // Type error somewhere. Bail.
         return undefined;
     }

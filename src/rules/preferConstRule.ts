@@ -37,7 +37,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         hasFix: true,
         optionsDescription: Lint.Utils.dedent`
             An optional object containing the property "destructuring" with two possible values:
-            
+
             * "${OPTION_DESTRUCTURING_ANY}" (default) - If any variable in destructuring can be const, this rule warns for those variables.
             * "${OPTION_DESTRUCTURING_ALL}" - Only warns if all variables in destructuring can be const.`,
         options: {
@@ -78,7 +78,7 @@ class Scope {
     public reassigned = new Set<string>();
     constructor(functionScope?: Scope) {
         // if no functionScope is provided we are in the process of creating a new function scope, which for consistency links to itself
-        this.functionScope = functionScope || this;
+        this.functionScope = functionScope === undefined ? this : functionScope;
     }
 
     public addVariable(identifier: ts.Identifier, declarationInfo: DeclarationInfo, destructuringInfo?: DestructuringInfo) {
@@ -174,7 +174,7 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
                 this.handleExpression(node.left);
             }
 
-            if (boundary) {
+            if (boundary !== utils.ScopeBoundary.None) {
                 ts.forEachChild(node, cb);
                 this.onScopeEnd(savedScope);
                 this.scope = savedScope;

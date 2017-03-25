@@ -47,7 +47,7 @@ class Walker extends Lint.RuleWalker {
              node.heritageClauses[0].types === undefined ||
              // allow interfaces that extend 2 or more interfaces
              node.heritageClauses[0].types!.length < 2)) {
-            this.addFailureAtNode(node.name, node.heritageClauses ? Rule.FAILURE_STRING_FOR_EXTENDS : Rule.FAILURE_STRING);
+            this.addFailureAtNode(node.name, node.heritageClauses !== undefined ? Rule.FAILURE_STRING_FOR_EXTENDS : Rule.FAILURE_STRING);
         }
     }
 }

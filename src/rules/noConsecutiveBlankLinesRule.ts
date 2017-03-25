@@ -53,12 +53,15 @@ export class Rule extends Lint.Rules.AbstractRule {
      */
     public isEnabled(): boolean {
         return super.isEnabled() &&
-            (!this.ruleArguments[0] ||
+            (this.ruleArguments[0] === undefined ||
              typeof this.ruleArguments[0] === "number" && this.ruleArguments[0] > 0);
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const limit: number = this.ruleArguments[0] || Rule.DEFAULT_ALLOWED_BLANKS;
+        let limit: number = this.ruleArguments[0];
+        if (limit === undefined) {
+             limit = Rule.DEFAULT_ALLOWED_BLANKS;
+        }
         return this.applyWithFunction(sourceFile, walk, limit);
     }
 }

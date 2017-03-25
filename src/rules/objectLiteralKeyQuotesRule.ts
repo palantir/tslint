@@ -84,7 +84,10 @@ class ObjectLiteralKeyQuotesWalker extends Lint.RuleWalker {
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
-        this.mode = this.getOptions()[0] || "always";
+        this.mode = this.getOptions()[0];
+        if (this.mode === undefined) {
+            this.mode = "always";
+        }
     }
 
     public visitObjectLiteralExpression(node: ts.ObjectLiteralExpression) {
@@ -128,7 +131,7 @@ class ObjectLiteralKeyQuotesWalker extends Lint.RuleWalker {
         }
     }
 
-    private noneMayHaveQuotes(properties: ts.ObjectLiteralElementLike[], noneNeedQuotes?: boolean) {
+    private noneMayHaveQuotes(properties: ts.ObjectLiteralElementLike[], noneNeedQuotes = false) {
         for (const { name } of properties) {
             if (name !== undefined && name.kind === ts.SyntaxKind.StringLiteral && (noneNeedQuotes || !propertyNeedsQuotes(name.text))) {
                 const fix = this.createFix(this.deleteText(name.getStart(), 1), this.deleteText(name.getEnd() - 1, 1));

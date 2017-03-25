@@ -103,7 +103,7 @@ class IndentWalker extends Lint.RuleWalker {
             }
 
             const commentRanges = ts.getTrailingCommentRanges(node.text, lineStart);
-            if (commentRanges) {
+            if (commentRanges !== undefined) {
                 endOfComment = commentRanges[commentRanges.length - 1].end;
             } else {
                 let scanType = currentScannedType;
@@ -135,7 +135,7 @@ class IndentWalker extends Lint.RuleWalker {
                 continue;
             }
 
-            if (fullLeadingWhitespace.match(this.regExp)) {
+            if (this.regExp.test(fullLeadingWhitespace)) {
                 this.addFailureAt(lineStart, fullLeadingWhitespace.length, this.failureString);
             }
         }

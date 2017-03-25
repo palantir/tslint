@@ -104,7 +104,7 @@ class Linter {
         if (this.options.fix) {
             for (const rule of enabledRules) {
                 const ruleFailures = this.applyRule(rule, sourceFile);
-                const fixes = ruleFailures.map((f) => f.getFix()).filter((f): f is Fix => !!f) as Fix[];
+                const fixes = ruleFailures.map((f) => f.getFix()).filter((f): f is Fix => f !== undefined) as Fix[];
                 source = fs.readFileSync(fileName, { encoding: "utf-8" });
                 if (fixes.length > 0) {
                     this.fixes = this.fixes.concat(ruleFailures);
@@ -148,9 +148,9 @@ class Linter {
         let formatter: IFormatter;
         const formattersDirectory = getRelativePath(this.options.formattersDirectory);
 
-        const formatterName = this.options.formatter || "prose";
+        const formatterName = this.options.formatter !== undefined ? this.options.formatter : "prose";
         const Formatter = findFormatter(formatterName, formattersDirectory);
-        if (Formatter) {
+        if (Formatter !== undefined) {
             formatter = new Formatter();
         } else {
             throw new Error(`formatter '${formatterName}' not found`);
@@ -172,7 +172,7 @@ class Linter {
     private applyRule(rule: IRule, sourceFile: ts.SourceFile) {
         let ruleFailures: RuleFailure[] = [];
         try {
-            if (this.program && isTypedRule(rule)) {
+            if (this.program !== undefined && isTypedRule(rule)) {
                 ruleFailures = rule.applyWithProgram(sourceFile, this.program);
             } else {
                 ruleFailures = rule.apply(sourceFile);
@@ -208,7 +208,7 @@ class Linter {
     }
 
     private getSourceFile(fileName: string, source: string) {
-        if (this.program) {
+        if (this.program !== undefined) {
             const sourceFile = this.program.getSourceFile(fileName);
             if (sourceFile === undefined) {
                 const INVALID_SOURCE_ERROR = dedent`

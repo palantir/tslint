@@ -24,6 +24,7 @@
     "no-switch-case-fall-through": true,
     "prefer-const": true,
     "switch-default": false,
+    "strict-boolean-expressions": true,
     "variable-name": [true,
       "ban-keywords",
       "check-format",

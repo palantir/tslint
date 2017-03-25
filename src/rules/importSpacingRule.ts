@@ -51,7 +51,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class ImportStatementWalker extends Lint.RuleWalker {
     public visitImportDeclaration(node: ts.ImportDeclaration) {
-        if (!node.importClause) {
+        if (node.importClause === undefined) {
             this.checkModuleWithSideEffect(node);
         } else {
             const nodeStart = node.getStart();

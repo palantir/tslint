@@ -44,7 +44,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 class Walker extends Lint.RuleWalker {
     /** Whether we've seen 'super()' yet in the current constructor. */
     public visitConstructorDeclaration(node: ts.ConstructorDeclaration) {
-        if (!node.body) {
+        if (node.body === undefined) {
             return;
         }
 
@@ -84,7 +84,9 @@ class Walker extends Lint.RuleWalker {
 
             case ts.SyntaxKind.IfStatement: {
                 const { thenStatement, elseStatement } = node as ts.IfStatement;
-                return worse(this.getSuperForNode(thenStatement), elseStatement ? this.getSuperForNode(elseStatement) : Kind.NoSuper);
+                return worse(
+                    this.getSuperForNode(thenStatement),
+                    elseStatement !== undefined ? this.getSuperForNode(elseStatement) : Kind.NoSuper);
             }
 
             case ts.SyntaxKind.SwitchStatement:
@@ -114,7 +116,7 @@ class Walker extends Lint.RuleWalker {
                     return Kind.NoSuper;
 
                 default:
-                    if (fallthroughSingle) {
+                    if (fallthroughSingle !== undefined) {
                         this.addDuplicateFailure(fallthroughSingle, clauseSuper.node);
                     }
                     if (!clauseSuper.break) {
@@ -125,7 +127,7 @@ class Walker extends Lint.RuleWalker {
             }
         }
 
-        return foundSingle ? { node: foundSingle, break: false } : Kind.NoSuper;
+        return foundSingle !== undefined ? { node: foundSingle, break: false } : Kind.NoSuper;
     }
 
     /**
@@ -141,7 +143,7 @@ class Walker extends Lint.RuleWalker {
                     return;
 
                 case Kind.Break:
-                    if (seenSingle) {
+                    if (seenSingle !== undefined) {
                         return { ...seenSingle, break: true };
                     }
                     return childSuper;
@@ -150,14 +152,14 @@ class Walker extends Lint.RuleWalker {
                     return childSuper;
 
                 default:
-                    if (seenSingle && !seenSingle.break) {
+                    if (seenSingle !== undefined && !seenSingle.break) {
                         this.addDuplicateFailure(seenSingle.node, childSuper.node);
                     }
                     seenSingle = childSuper;
                     return;
             }
         });
-        return res || seenSingle || Kind.NoSuper;
+        return res !== undefined ? res : seenSingle !== undefined ? seenSingle : Kind.NoSuper;
     }
 
     private addDuplicateFailure(a: ts.Node, b: ts.Node) {

@@ -65,8 +65,7 @@ function couldBePromise(type: ts.Type): boolean {
 
 function isPromiseType(type: ts.Type): boolean {
     const { target } = type as ts.TypeReference;
-    const symbol = target && target.symbol;
-    return !!symbol && symbol.name === "Promise";
+    return target !== undefined && target.symbol !== undefined && target.symbol.name === "Promise";
 }
 
 function isUnionType(type: ts.Type): type is ts.UnionType {

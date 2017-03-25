@@ -57,7 +57,7 @@ export class Rule extends Lint.Rules.TypedRule {
 class Walker extends Lint.ProgramAwareRuleWalker {
     public visitBinaryExpression(node: ts.BinaryExpression) {
         const equals = Lint.getEqualsKind(node.operatorToken);
-        if (equals) {
+        if (equals !== undefined) {
             this.checkEquals(node, equals);
         }
         super.visitBinaryExpression(node);
@@ -65,7 +65,7 @@ class Walker extends Lint.ProgramAwareRuleWalker {
 
     private checkEquals(node: ts.BinaryExpression, { isStrict, isPositive }: Lint.EqualsKind) {
         const exprPred = getTypePredicate(node, isStrict);
-        if (!exprPred) {
+        if (exprPred === undefined) {
             return;
         }
 
@@ -114,7 +114,8 @@ class Walker extends Lint.ProgramAwareRuleWalker {
 /** Detects a type predicate given `left === right`. */
 function getTypePredicate(node: ts.BinaryExpression, isStrictEquals: boolean): TypePredicate | undefined {
     const { left, right } = node;
-    return getTypePredicateOneWay(left, right, isStrictEquals) || getTypePredicateOneWay(right, left, isStrictEquals);
+    const lr = getTypePredicateOneWay(left, right, isStrictEquals);
+    return lr !== undefined ? lr : getTypePredicateOneWay(right, left, isStrictEquals);
 }
 
 /** Only gets the type predicate if the expression is on the left. */
@@ -206,7 +207,7 @@ function isFunction(t: ts.Type): boolean {
         return true;
     }
     const symbol = t.getSymbol();
-    return (symbol && symbol.getName()) === "Function";
+    return symbol === undefined ? false : symbol.getName() === "Function";
 }
 
 /** Returns a boolean value if that should always be the result of a type predicate. */

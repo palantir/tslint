@@ -101,10 +101,10 @@ class Walker extends Lint.RuleWalker {
 
 function parametersAllOptionalAfter(parameters: ts.ParameterDeclaration[], idx: number): boolean {
     for (let i = idx + 1; i < parameters.length; i++) {
-        if (parameters[i].questionToken) {
+        if (parameters[i].questionToken !== undefined) {
             return true;
         }
-        if (!parameters[i].initializer) {
+        if (parameters[i].initializer === undefined) {
             return false;
         }
     }

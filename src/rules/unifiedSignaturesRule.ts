@@ -64,7 +64,7 @@ class Walker extends Lint.RuleWalker {
 
     public visitModuleDeclaration(node: ts.ModuleDeclaration) {
         const { body } = node;
-        if (body && body.kind === ts.SyntaxKind.ModuleBlock) {
+        if (body !== undefined && body.kind === ts.SyntaxKind.ModuleBlock) {
             this.checkStatements((body as ts.ModuleBlock).statements);
         }
         super.visitModuleDeclaration(node);
@@ -89,10 +89,10 @@ class Walker extends Lint.RuleWalker {
         this.checkOverloads(statements, (statement) => {
             if (statement.kind === ts.SyntaxKind.FunctionDeclaration) {
                 const fn = statement as ts.FunctionDeclaration;
-                if (fn.body) {
+                if (fn.body !== undefined) {
                     return undefined;
                 }
-                return fn.name && { signature: fn, key: fn.name.text };
+                return fn.name === undefined ? undefined : { signature: fn, key: fn.name.text };
             } else {
                 return undefined;
             }
@@ -102,7 +102,7 @@ class Walker extends Lint.RuleWalker {
     private checkMembers(members: Array<ts.TypeElement | ts.ClassElement>, typeParameters?: ts.TypeParameterDeclaration[]) {
         this.checkOverloads(members, getOverloadName, typeParameters);
         function getOverloadName(member: ts.TypeElement | ts.ClassElement) {
-            if (!utils.isSignatureDeclaration(member) || (member as ts.MethodDeclaration).body) {
+            if (!utils.isSignatureDeclaration(member) || (member as ts.MethodDeclaration).body !== undefined) {
                 return undefined;
             }
             const key = getOverloadKey(member);
@@ -130,17 +130,17 @@ class Walker extends Lint.RuleWalker {
 
         if (a.parameters.length === b.parameters.length) {
             const params = signaturesDifferBySingleParameter(a.parameters, b.parameters);
-            if (params) {
+            if (params !== undefined) {
                 const [p0, p1] = params;
                 const lineOfOtherOverload = only2 ? undefined : this.getLine(p0);
                 this.addFailureAtNode(p1, Rule.FAILURE_STRING_SINGLE_PARAMETER_DIFFERENCE(lineOfOtherOverload, typeText(p0), typeText(p1)));
             }
         } else {
             const diff = signaturesDifferByOptionalOrRestParameter(a.parameters, b.parameters);
-            if (diff) {
+            if (diff !== undefined) {
                 const [extraParameter, signatureWithExtraParameter] = diff;
                 const lineOfOtherOverload = only2 ? undefined : this.getLine(signatureWithExtraParameter === a.parameters ? b : a);
-                this.addFailureAtNode(extraParameter, extraParameter.dotDotDotToken
+                this.addFailureAtNode(extraParameter, extraParameter.dotDotDotToken !== undefined
                     ? Rule.FAILURE_STRING_OMITTING_REST_PARAMETER(lineOfOtherOverload)
                     : Rule.FAILURE_STRING_OMITTING_SINGLE_PARAMETER(lineOfOtherOverload));
             }
@@ -208,7 +208,7 @@ function signaturesDifferByOptionalOrRestParameter(types1: ts.ParameterDeclarati
         }
     }
 
-    if (minLength > 0 && shorter[minLength - 1].dotDotDotToken) {
+    if (minLength > 0 && shorter[minLength - 1].dotDotDotToken !== undefined) {
         return undefined;
     }
 
@@ -229,7 +229,7 @@ type IsTypeParameter = (typeName: string) => boolean;
 
 /** Given type parameters, returns a function to test whether a type is one of those parameters. */
 function getIsTypeParameter(typeParameters?: ts.TypeParameterDeclaration[]): IsTypeParameter {
-    if (!typeParameters) {
+    if (typeParameters === undefined) {
         return () => false;
     }
 
@@ -263,13 +263,13 @@ function collectOverloads<T>(nodes: T[], getOverload: GetOverload<T>): ts.Signat
     const map = new Map<string, ts.SignatureDeclaration[]>();
     for (const sig of nodes) {
         const overload = getOverload(sig);
-        if (!overload) {
+        if (overload === undefined) {
             continue;
         }
 
         const { signature, key } = overload;
         const overloads = map.get(key);
-        if (overloads) {
+        if (overloads !== undefined) {
             overloads.push(signature);
         } else {
             map.set(key, [signature]);
@@ -284,12 +284,13 @@ function parametersAreEqual(a: ts.ParameterDeclaration, b: ts.ParameterDeclarati
 
 /** True for optional/rest parameters. */
 function parameterMayBeMissing(p: ts.ParameterDeclaration): boolean {
-    return !!p.dotDotDotToken || !!p.questionToken;
+    return p.dotDotDotToken !== undefined || p.questionToken !== undefined;
 }
 
 /** False if one is optional and the other isn't, or one is a rest parameter and the other isn't. */
 function parametersHaveEqualSigils(a: ts.ParameterDeclaration, b: ts.ParameterDeclaration): boolean {
-    return !!a.dotDotDotToken === !!b.dotDotDotToken && !!a.questionToken === !!b.questionToken;
+    return (a.dotDotDotToken !== undefined) === (b.dotDotDotToken !== undefined) &&
+        (a.questionToken !== undefined) === (b.questionToken !== undefined);
 }
 
 function typeParametersAreEqual(a: ts.TypeParameterDeclaration, b: ts.TypeParameterDeclaration): boolean {
@@ -298,7 +299,7 @@ function typeParametersAreEqual(a: ts.TypeParameterDeclaration, b: ts.TypeParame
 
 function typesAreEqual(a: ts.TypeNode | undefined, b: ts.TypeNode | undefined): boolean {
     // TODO: Could traverse AST so that formatting differences don't affect this.
-    return a === b || !!a && !!b && a.getText() === b.getText();
+    return a === b || a !== undefined && b !== undefined && a.getText() === b.getText();
 }
 
 /** Returns the first index where `a` and `b` differ. */

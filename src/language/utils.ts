@@ -36,7 +36,7 @@ export function doesIntersect(failure: RuleFailure, disabledIntervals: IDisabled
 /**
  * @returns true if any modifier kinds passed along exist in the given modifiers array
  */
-export function hasModifier(modifiers: ts.ModifiersArray | undefined, ...modifierKinds: ts.SyntaxKind[]) {
+export function hasModifier(modifiers: ts.ModifiersArray | undefined, ...modifierKinds: ts.SyntaxKind[]): boolean {
     if (modifiers === undefined || modifierKinds.length === 0) {
         return false;
     }
@@ -99,7 +99,7 @@ export function ancestorWhere<T extends ts.Node>(node: ts.Node, predicate: (n: t
             return cur as T;
         }
         cur = cur.parent;
-    } while (cur);
+    } while (cur !== undefined);
     return undefined;
 }
 

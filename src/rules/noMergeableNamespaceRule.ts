@@ -59,7 +59,7 @@ class Walker extends Lint.RuleWalker {
             if (name.kind === ts.SyntaxKind.Identifier) {
                 const { text } = name;
                 const prev = seen.get(text);
-                if (prev) {
+                if (prev !== undefined) {
                     this.addFailureAtNode(name, Rule.failureStringFactory(text, this.getLineOfNode(prev)));
                 }
                 seen.set(text, statement as ts.NamespaceDeclaration);
@@ -72,7 +72,7 @@ class Walker extends Lint.RuleWalker {
 
     private checkModuleDeclaration(decl: ts.ModuleDeclaration): void {
         const { body } = decl;
-        if (!body) {
+        if (body === undefined) {
             return;
         }
 

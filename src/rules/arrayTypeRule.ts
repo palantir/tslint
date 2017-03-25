@@ -63,7 +63,7 @@ class ArrayTypeWalker extends Lint.RuleWalker {
             const failureString = this.hasOption(OPTION_GENERIC) ? Rule.FAILURE_STRING_GENERIC : Rule.FAILURE_STRING_GENERIC_SIMPLE;
             const parens = typeName.kind === ts.SyntaxKind.ParenthesizedType ? 1 : 0;
             // Add a space if the type is preceded by 'as' and the node has no leading whitespace
-            const space = !parens && node.parent!.kind === ts.SyntaxKind.AsExpression &&
+            const space = parens === 0 && node.parent!.kind === ts.SyntaxKind.AsExpression &&
                 node.getStart() === node.getFullStart() ? " " : "";
             const fix = this.createFix(
                 this.createReplacement(typeName.getStart(), parens, space + "Array<"),
@@ -81,11 +81,13 @@ class ArrayTypeWalker extends Lint.RuleWalker {
         if (typeName === "Array" && (this.hasOption(OPTION_ARRAY) || this.hasOption(OPTION_ARRAY_SIMPLE))) {
             const failureString = this.hasOption(OPTION_ARRAY) ? Rule.FAILURE_STRING_ARRAY : Rule.FAILURE_STRING_ARRAY_SIMPLE;
             const typeArgs = node.typeArguments;
-            if (!typeArgs || typeArgs.length === 0) {
+            if (typeArgs === undefined || typeArgs.length === 0) {
                 // Create an 'any' array
                 const fix = this.createFix(this.createReplacement(node.getStart(), node.getWidth(), "any[]"));
                 this.addFailureAtNode(node, failureString, fix);
-            } else if (typeArgs && typeArgs.length === 1 && (!this.hasOption(OPTION_ARRAY_SIMPLE) || this.isSimpleType(typeArgs[0]))) {
+            } else if (typeArgs !== undefined &&
+                    typeArgs.length === 1 &&
+                    (!this.hasOption(OPTION_ARRAY_SIMPLE) || this.isSimpleType(typeArgs[0]))) {
                 const type = typeArgs[0];
                 const typeStart = type.getStart();
                 const typeEnd = type.getEnd();
@@ -121,7 +123,9 @@ class ArrayTypeWalker extends Lint.RuleWalker {
                 // TypeReferences must be non-generic or be another Array with a simple type
                 const node = nodeType as ts.TypeReferenceNode;
                 const typeArgs = node.typeArguments;
-                if (!typeArgs || typeArgs.length === 0 || node.typeName.getText() === "Array" && this.isSimpleType(typeArgs[0])) {
+                if (typeArgs === undefined ||
+                        typeArgs.length === 0 ||
+                        node.typeName.getText() === "Array" && this.isSimpleType(typeArgs[0])) {
                     return true;
                 } else {
                     return false;

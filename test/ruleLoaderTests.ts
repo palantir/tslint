@@ -112,10 +112,10 @@ describe("Rule Loader", () => {
         const diffResults = diff.diffLines(rules, tests);
         let testFailed = false;
         for (const result of diffResults) {
-            if (result.added) {
+            if (result.added === true) {
                 console.warn("Test has no matching rule: " + result.value);
                 testFailed = true;
-            } else if (result.removed) {
+            } else if (result.removed === true) {
                 console.warn("Missing test: " + result.value);
                 testFailed = true;
             }

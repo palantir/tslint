@@ -299,7 +299,7 @@ class OneLineWalker extends Lint.RuleWalker {
             failure = Rule.WHITESPACE_FAILURE_STRING;
         }
 
-        if (failure) {
+        if (failure !== undefined) {
             this.addFailureAtNode(openBraceToken, failure);
         }
     }

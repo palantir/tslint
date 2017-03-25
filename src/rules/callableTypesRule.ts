@@ -61,7 +61,7 @@ class Walker extends Lint.RuleWalker {
     private check(node: ts.InterfaceDeclaration | ts.TypeLiteralNode) {
         if (node.members.length === 1 && node.members[0].kind === ts.SyntaxKind.CallSignature) {
             const call = node.members[0] as ts.CallSignatureDeclaration;
-            if (!call.type) {
+            if (call.type === undefined) {
                 // Bad parse
                 return;
             }
@@ -78,7 +78,7 @@ class Walker extends Lint.RuleWalker {
 
 /** True if there is no supertype or if the supertype is `Function`. */
 function noSupertype(heritageClauses: ts.NodeArray<ts.HeritageClause> | undefined): boolean {
-    if (!heritageClauses) {
+    if (heritageClauses === undefined) {
         return true;
     }
 
@@ -93,11 +93,11 @@ function noSupertype(heritageClauses: ts.NodeArray<ts.HeritageClause> | undefine
 }
 
 function renderSuggestion(call: ts.CallSignatureDeclaration): string {
-    const typeParameters = call.typeParameters && call.typeParameters.map((p) => p.getText()).join(", ");
+    const typeParameters = call.typeParameters === undefined ? undefined : call.typeParameters.map((p) => p.getText()).join(", ");
     const parameters = call.parameters.map((p) => p.getText()).join(", ");
     const returnType = call.type === undefined ? "void" : call.type.getText();
     let res = `(${parameters}) => ${returnType}`;
-    if (typeParameters) {
+    if (typeParameters !== undefined) {
         res = `<${typeParameters}>${res}`;
     }
     return res;

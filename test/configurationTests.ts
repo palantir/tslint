@@ -337,7 +337,7 @@ function demap<T>(map: Map<string, T>) {
 // this is needed since `assertConfigEquals` doesn't go into Map object
 function assertConfigEquals(actual: any, expected: any) {
     assert.deepEqual(actual, expected);
-    if (actual && (actual.jsRules || actual.rules)) {
+    if (actual !== undefined && (actual.jsRules !== undefined || actual.rules !== undefined)) {
         assert.deepEqual(demap(actual.jsRules), demap(expected.jsRules));
         assert.deepEqual(demap(actual.rules), demap(expected.rules));
     }

@@ -50,7 +50,7 @@ export class Formatter extends AbstractFormatter {
     }
 
     private mapToMessages(failures: RuleFailure[]): string[] {
-        if (!failures) {
+        if (failures.length === 0) {
             return [];
         }
         const outputLines: string[] = [];

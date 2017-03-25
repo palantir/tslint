@@ -52,7 +52,7 @@ class Walker extends Lint.ProgramAwareRuleWalker {
             }
 
             const { importClause } = statement as ts.ImportDeclaration;
-            if (importClause && importClause.name) {
+            if (importClause !== undefined && importClause.name !== undefined) {
                 this.checkDefaultImport(importClause.name);
             }
         }
@@ -61,8 +61,12 @@ class Walker extends Lint.ProgramAwareRuleWalker {
     private checkDefaultImport(defaultImport: ts.Identifier) {
         const { declarations } = this.getTypeChecker().getAliasedSymbol(
             this.getTypeChecker().getSymbolAtLocation(defaultImport));
-        const name = declarations && declarations[0] && declarations[0].name;
-        if (name && name.kind === ts.SyntaxKind.Identifier && defaultImport.text !== name.text) {
+        if (declarations === undefined || declarations[0] === undefined) {
+            return;
+        }
+
+        const name = declarations[0].name;
+        if (name !== undefined && name.kind === ts.SyntaxKind.Identifier && defaultImport.text !== name.text) {
             this.addFailureAtNode(defaultImport, Rule.FAILURE_STRING(defaultImport.text, name.text));
         }
     }

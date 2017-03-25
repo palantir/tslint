@@ -51,7 +51,7 @@ class Walker extends Lint.RuleWalker {
     }
 
     private createMethodSignatureFix(node: ts.PropertyDeclaration, type: ts.FunctionTypeNode): Lint.Fix | undefined {
-        return type.type && this.createFix(
+        return type.type === undefined ? undefined : this.createFix(
             this.deleteFromTo(Lint.childOfKind(node, ts.SyntaxKind.ColonToken)!.getStart(), type.getStart()),
             this.deleteFromTo(Lint.childOfKind(type, ts.SyntaxKind.EqualsGreaterThanToken)!.getStart(), type.type.getStart()),
             this.appendText(Lint.childOfKind(type, ts.SyntaxKind.CloseParenToken)!.end, ":"));

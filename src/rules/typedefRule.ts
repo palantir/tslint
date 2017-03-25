@@ -236,7 +236,7 @@ class TypedefWalker extends Lint.RuleWalker {
     }
 }
 
-function getName(name?: ts.Node, prefix?: string, suffix?: string): string {
+function getName(name?: ts.Node, prefix = "", suffix = ""): string {
     let ns = "";
 
     if (name != null) {
@@ -257,7 +257,7 @@ function getName(name?: ts.Node, prefix?: string, suffix?: string): string {
                 break;
         }
     }
-    return ns ? `${prefix || ""}${ns}${suffix || ""}` : "";
+    return ns === "" ? "" : `${prefix}${ns}${suffix}`;
 }
 
 function isTypedPropertyDeclaration(node: ts.Node): boolean {

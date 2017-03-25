@@ -65,12 +65,11 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
     });
 
     function checkIdentifier(node: ts.Identifier, symbol: ts.Symbol | undefined): void {
-        const declarations = symbol && symbol.declarations;
-        if (!declarations) {
+        if (symbol === undefined || symbol.declarations === undefined) {
             return;
         }
 
-        const declaredBefore = declarations.some((decl) => {
+        const declaredBefore = symbol.declarations.some((decl) => {
             switch (decl.kind) {
                 case ts.SyntaxKind.FunctionDeclaration:
                     // Functions may be declared later.

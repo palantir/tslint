@@ -68,10 +68,11 @@ export function parseErrorsFromMarkup(text: string): LintError[] {
 
     const lintErrors: LintError[] = [];
     function addError(errorLine: EndErrorLine, errorStartPos: { line: number, col: number }, lineNo: number) {
+        const message = messageSubstitutions.get(errorLine.message);
         lintErrors.push({
             startPos: errorStartPos,
             endPos: { line: lineNo, col: errorLine.endCol },
-            message: messageSubstitutions.get(errorLine.message) || errorLine.message,
+            message: message !== undefined ? message : errorLine.message,
         });
     }
     // for each line of code...

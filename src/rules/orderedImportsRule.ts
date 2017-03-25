@@ -130,7 +130,7 @@ function compare(a: string, b: string) {
 
 function removeQuotes(value: string) {
     // strip out quotes
-    if (value && value.length > 1 && (value[0] === "'" || value[0] === "\"")) {
+    if (value.length > 1 && (value[0] === "'" || value[0] === "\"")) {
         value = value.substr(1, value.length - 2);
     }
     return value;
@@ -161,11 +161,19 @@ class OrderedImportsWalker extends Lint.RuleWalker {
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
 
-        const optionSet = this.getOptions()[0] || {};
-        this.importSourcesOrderTransform =
-            TRANSFORMS[optionSet["import-sources-order"] || "case-insensitive"];
-        this.namedImportsOrderTransform =
-            TRANSFORMS[optionSet["named-imports-order"] || "case-insensitive"];
+        const optionSet = this.getOptions()[0];
+        if (optionSet !== undefined) {
+            this.importSourcesOrderTransform =
+                TRANSFORMS[optionSet["import-sources-order"]];
+            this.namedImportsOrderTransform =
+                TRANSFORMS[optionSet["named-imports-order"]];
+        }
+        if (this.importSourcesOrderTransform === undefined) {
+            this.importSourcesOrderTransform = TRANSFORMS["case-insensitive"];
+        }
+        if (this.namedImportsOrderTransform === undefined) {
+            this.namedImportsOrderTransform = TRANSFORMS["case-insensitive"];
+        }
     }
 
     // e.g. "import Foo from "./foo";"
@@ -176,7 +184,7 @@ class OrderedImportsWalker extends Lint.RuleWalker {
         const previousSource = this.currentImportsBlock.getLastImportSource();
         this.currentImportsBlock.addImportDeclaration(this.getSourceFile(), node, source);
 
-        if (previousSource && compare(source, previousSource) === -1) {
+        if (previousSource !== null && compare(source, previousSource) === -1) {
             this.lastFix = this.createFix();
             this.addFailureAtNode(node, Rule.IMPORT_SOURCES_UNORDERED, this.lastFix);
         }

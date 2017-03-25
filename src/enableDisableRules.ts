@@ -74,7 +74,7 @@ export class EnableDisableRulesWalker {
             position: start,
         });
 
-        if (end) {
+        if (end !== undefined) {
             // we only get here when rule state changes therefore we can safely use opposite state
             ruleStateMap.push({
                 isEnabled: !isEnabled,
@@ -96,7 +96,7 @@ export class EnableDisableRulesWalker {
             // filter empty items coming from whitespaces at start, at end or empty list
             let rulesList = commentText.substr(match[0].length)
                 .split(/\s+/)
-                .filter((rule) => !!rule);
+                .filter((rule) => rule !== "");
             if (rulesList.length === 0 && match[3] === ":") {
                 // nothing to do here: an explicit separator was specified but no rules to switch
                 return;

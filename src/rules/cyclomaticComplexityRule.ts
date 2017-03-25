@@ -201,7 +201,7 @@ class CyclomaticComplexityWalker extends Lint.RuleWalker {
             let failureString: string;
 
             // Attempt to find a name for the function.
-            if (node.name && node.name.kind === ts.SyntaxKind.Identifier) {
+            if (node.name !== undefined && node.name.kind === ts.SyntaxKind.Identifier) {
                 failureString = Rule.NAMED_FAILURE_STRING(this.threshold, complexity, (node.name as ts.Identifier).text);
             } else {
                 failureString = Rule.ANONYMOUS_FAILURE_STRING(this.threshold, complexity);
@@ -212,7 +212,7 @@ class CyclomaticComplexityWalker extends Lint.RuleWalker {
     }
 
     private incrementComplexity() {
-        if (this.functions.length) {
+        if (this.functions.length !== 0) {
             this.functions[this.functions.length - 1]++;
         }
     }

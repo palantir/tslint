@@ -168,7 +168,7 @@ function resolveConfigurationPath(filePath: string, relativeTo?: string) {
         }
     }
 
-    const basedir = relativeTo || process.cwd();
+    const basedir = relativeTo !== undefined ? relativeTo : process.cwd();
     try {
         return resolve.sync(filePath, { basedir });
     } catch (err) {
@@ -244,7 +244,7 @@ function getHomeDir() {
 // returns the absolute path (contrary to what the name implies)
 export function getRelativePath(directory?: string | null, relativeTo?: string) {
     if (directory != null) {
-        const basePath = relativeTo || process.cwd();
+        const basePath = relativeTo !== undefined ? relativeTo : process.cwd();
         return path.resolve(basePath, directory);
     }
     return undefined;
@@ -291,7 +291,7 @@ function parseRuleOptions(ruleConfigValue: any): Partial<IOptions> {
         // old style: boolean
         ruleArguments = [];
         ruleSeverity = ruleConfigValue === true ? "error" : "off";
-    } else if (ruleConfigValue.severity) {
+    } else if (ruleConfigValue.severity !== undefined) {
         switch (ruleConfigValue.severity.toLowerCase()) {
             case "warn":
             case "warning":
@@ -309,7 +309,7 @@ function parseRuleOptions(ruleConfigValue: any): Partial<IOptions> {
         ruleSeverity = "off";
     }
 
-    if (ruleConfigValue && ruleConfigValue.options) {
+    if (ruleConfigValue != null && ruleConfigValue.options != null) {
         ruleArguments = arrayify(ruleConfigValue.options);
     }
 
@@ -329,17 +329,17 @@ export function parseConfigFile(configFile: any, configFileDir?: string): IConfi
     const rules = new Map<string, Partial<IOptions>>();
     const jsRules = new Map<string, Partial<IOptions>>();
 
-    if (configFile.rules) {
+    if (configFile.rules != null) {
         for (const ruleName in configFile.rules) {
-            if (configFile.rules.hasOwnProperty(ruleName)) {
+            if (Object.prototype.hasOwnProperty.call(configFile.rules, ruleName) as boolean) {
                 rules.set(ruleName, parseRuleOptions(configFile.rules[ruleName]));
             }
         }
     }
 
-    if (configFile.jsRules) {
+    if (configFile.jsRules != null) {
         for (const ruleName in configFile.jsRules) {
-            if (configFile.jsRules.hasOwnProperty(ruleName)) {
+            if (Object.prototype.hasOwnProperty.call(configFile.jsRules, ruleName) as boolean) {
                 jsRules.set(ruleName, parseRuleOptions(configFile.jsRules[ruleName]));
             }
         }
@@ -348,7 +348,7 @@ export function parseConfigFile(configFile: any, configFileDir?: string): IConfi
     return {
         extends: arrayify(configFile.extends),
         jsRules,
-        linterOptions: configFile.linterOptions || {},
+        linterOptions: configFile.linterOptions != null ? configFile.linterOptions : {},
         rulesDirectory: getRulesDirectories(configFile.rulesDirectory, configFileDir),
         rules,
     };
@@ -359,12 +359,12 @@ export function parseConfigFile(configFile: any, configFileDir?: string): IConfi
  */
 export function convertRuleOptions(ruleConfiguration: Map<string, Partial<IOptions>>): IOptions[] {
     const output: IOptions[] = [];
-    ruleConfiguration.forEach((partialOptions, ruleName) => {
+    ruleConfiguration.forEach(({ ruleArguments, ruleSeverity }, ruleName) => {
         const options: IOptions = {
             disabledIntervals: [],
-            ruleArguments: partialOptions.ruleArguments || [],
+            ruleArguments: ruleArguments != null ? ruleArguments : [],
             ruleName,
-            ruleSeverity: partialOptions.ruleSeverity || "error",
+            ruleSeverity: ruleSeverity != null ? ruleSeverity : "error",
         };
         output.push(options);
     });

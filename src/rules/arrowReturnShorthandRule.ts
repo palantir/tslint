@@ -52,7 +52,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class Walker extends Lint.RuleWalker {
     public visitArrowFunction(node: ts.ArrowFunction) {
-        if (node.body && node.body.kind === ts.SyntaxKind.Block) {
+        if (node.body !== undefined && node.body.kind === ts.SyntaxKind.Block) {
             const expr = getSimpleReturnExpression(node.body as ts.Block);
             if (expr !== undefined && (this.hasOption(OPTION_MULTILINE) || !this.isMultiline(node.body))) {
                 this.addFailureAtNode(node.body, Rule.FAILURE_STRING, this.createArrowFunctionFix(node, node.body as ts.Block, expr));
@@ -77,7 +77,7 @@ class Walker extends Lint.RuleWalker {
         const semicolon = Lint.childOfKind(statement, ts.SyntaxKind.SemicolonToken);
 
         const anyComments = hasComments(arrow) || hasComments(openBrace) || hasComments(statement) || hasComments(returnKeyword) ||
-            hasComments(expr) || (semicolon && hasComments(semicolon)) || hasComments(closeBrace);
+            hasComments(expr) || (semicolon !== undefined && hasComments(semicolon)) || hasComments(closeBrace);
         return anyComments ? undefined : this.createFix(
             // Object literal must be wrapped in `()`
             ...(expr.kind === ts.SyntaxKind.ObjectLiteralExpression ? [

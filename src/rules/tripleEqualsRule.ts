@@ -62,7 +62,7 @@ class ComparisonWalker extends Lint.RuleWalker {
 
     public visitBinaryExpression(node: ts.BinaryExpression) {
         const eq = Lint.getEqualsKind(node.operatorToken);
-        if (eq && !eq.isStrict && !this.isExpressionAllowed(node)) {
+        if (eq !== undefined && !eq.isStrict && !this.isExpressionAllowed(node)) {
             this.addFailureAtNode(node.operatorToken, eq.isPositive ? Rule.EQ_FAILURE_STRING : Rule.NEQ_FAILURE_STRING);
         }
         super.visitBinaryExpression(node);

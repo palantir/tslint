@@ -46,7 +46,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static FAILURE_STRING_FACTORY(typeName: string, messageAddition?: string) {
         return `Don't use '${typeName}' as a type.` +
-            (messageAddition ? " " + messageAddition : "");
+            (messageAddition !== undefined ? " " + messageAddition : "");
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -67,7 +67,7 @@ class BanTypeWalker extends Lint.RuleWalker {
         const ban =
             this.bans.find(([bannedType]) =>
                 typeName.match(`^${bannedType}$`) != null) as string[];
-        if (ban) {
+        if (ban !== undefined) {
             this.addFailure(this.createFailure(
                 node.getStart(), node.getWidth(),
                 Rule.FAILURE_STRING_FACTORY(typeName, ban[1])));

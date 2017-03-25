@@ -71,7 +71,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
     let compilerOptions: ts.CompilerOptions = { allowJs: true };
     if (fs.existsSync(tsConfig)) {
         const {config, error} = ts.readConfigFile(tsConfig, ts.sys.readFile);
-        if (error) {
+        if (error !== undefined) {
             throw new Error(JSON.stringify(error));
         }
 
@@ -90,7 +90,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
         const fileCompileName = fileBasename.replace(/\.lint$/, "");
         let fileText = fs.readFileSync(fileToLint, "utf8");
         const tsVersionRequirement = parse.getTypescriptVersionRequirement(fileText);
-        if (tsVersionRequirement) {
+        if (tsVersionRequirement !== undefined) {
             const tsVersion = new semver.SemVer(ts.version);
             // remove prerelease suffix when matching to allow testing with nightly builds
             if (!semver.satisfies(`${tsVersion.major}.${tsVersion.minor}.${tsVersion.patch}`, tsVersionRequirement)) {
@@ -112,7 +112,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
         const errorsFromMarkup = parse.parseErrorsFromMarkup(fileText);
 
         let program: ts.Program | undefined;
-        if (tslintConfig !== undefined && tslintConfig.linterOptions && tslintConfig.linterOptions.typeCheck) {
+        if (tslintConfig !== undefined && tslintConfig.linterOptions !== undefined && tslintConfig.linterOptions.typeCheck === true) {
             const compilerHost: ts.CompilerHost = {
                 fileExists: () => true,
                 getCanonicalFileName: (filename: string) => filename,
@@ -224,8 +224,8 @@ export function consoleTestResultHandler(testResult: TestResult): boolean {
         } else {
             const markupDiffResults = diff.diffLines(results.markupFromMarkup, results.markupFromLinter);
             const fixesDiffResults = diff.diffLines(results.fixesFromLinter, results.fixesFromMarkup);
-            const didMarkupTestPass = !markupDiffResults.some((diff) => !!diff.added || !!diff.removed);
-            const didFixesTestPass = !fixesDiffResults.some((diff) => !!diff.added || !!diff.removed);
+            const didMarkupTestPass = !markupDiffResults.some((diff) => diff.added === true || diff.removed === true);
+            const didFixesTestPass = !fixesDiffResults.some((diff) => diff.added === true || diff.removed === true);
 
             if (didMarkupTestPass && didFixesTestPass) {
                 console.log(colors.green(" Passed"));
@@ -253,9 +253,9 @@ function displayDiffResults(diffResults: diff.IDiffResult[], extension: string) 
 
     for (const diffResult of diffResults) {
         let color = colors.grey;
-        if (diffResult.added) {
+        if (diffResult.added === true) {
             color = colors.green.underline;
-        } else if (diffResult.removed) {
+        } else if (diffResult.removed === true) {
             color = colors.red.underline;
         }
         process.stdout.write(color(diffResult.value));

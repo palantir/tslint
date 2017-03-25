@@ -54,24 +54,22 @@ class FileHeaderWalker extends Lint.RuleWalker {
     }
 
     public visitSourceFile(node: ts.SourceFile) {
-        if (this.headerRegexp) {
-            let text = node.getFullText();
-            let offset = 0;
-            // ignore shebang if it exists
-            if (text.indexOf("#!") === 0) {
-                offset = text.indexOf("\n") + 1;
-                text = text.substring(offset);
-            }
-            // check for a comment
-            const match = text.match(this.commentRegexp);
-            if (!match) {
+        let text = node.getFullText();
+        let offset = 0;
+        // ignore shebang if it exists
+        if (text.indexOf("#!") === 0) {
+            offset = text.indexOf("\n") + 1;
+            text = text.substring(offset);
+        }
+        // check for a comment
+        const match = text.match(this.commentRegexp);
+        if (match === null) {
+            this.addFailureAt(offset, 0, Rule.FAILURE_STRING);
+        } else {
+            // either the third or fourth capture group contains the comment contents
+            const comment = match[2] !== undefined ? match[2] : match[3];
+            if (comment !== undefined && comment.search(this.headerRegexp) < 0) {
                 this.addFailureAt(offset, 0, Rule.FAILURE_STRING);
-            } else {
-                // either the third or fourth capture group contains the comment contents
-                const comment = match[2] ? match[2] : match[3];
-                if (comment !== undefined && comment.search(this.headerRegexp) < 0) {
-                    this.addFailureAt(offset, 0, Rule.FAILURE_STRING);
-                }
             }
         }
     }

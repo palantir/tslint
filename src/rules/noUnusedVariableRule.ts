@@ -64,7 +64,7 @@ export class Rule extends Lint.Rules.TypedRule {
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         const x = program.getCompilerOptions();
-        if (x.noUnusedLocals && x.noUnusedParameters) {
+        if (x.noUnusedLocals === true && x.noUnusedParameters === true) {
             console.warn("WARNING: 'no-unused-variable' lint rule does not need to be set if " +
                 "the 'no-unused-locals' and 'no-unused-parameters' compiler options are enabled.");
         }
@@ -123,7 +123,7 @@ function walk(ctx: Lint.WalkContext<void>, program: ts.Program, { checkParameter
             }
         }
 
-        if (ignorePattern) {
+        if (ignorePattern !== undefined) {
             const varName = /'(.*)'/.exec(failure)![1];
             if (ignorePattern.test(varName)) {
                 continue;
@@ -133,7 +133,7 @@ function walk(ctx: Lint.WalkContext<void>, program: ts.Program, { checkParameter
         ctx.addFailureAt(diag.start, diag.length, failure);
     }
 
-    if (importSpecifierFailures.size) {
+    if (importSpecifierFailures.size !== 0) {
         addImportSpecifierFailures(ctx, importSpecifierFailures, sourceFile);
     }
 }
@@ -150,43 +150,43 @@ function addImportSpecifierFailures(ctx: Lint.WalkContext<void>, failures: Map<t
             return;
         }
 
-        if (!importNode.importClause) {
+        if (importNode.importClause === undefined) {
             // Error node
             return;
         }
 
         const { name: defaultName, namedBindings } = importNode.importClause;
-        if (namedBindings && namedBindings.kind === ts.SyntaxKind.NamespaceImport) {
+        if (namedBindings !== undefined && namedBindings.kind === ts.SyntaxKind.NamespaceImport) {
             tryRemoveAll(namedBindings.name);
             return;
         }
 
-        const allNamedBindingsAreFailures = !namedBindings || namedBindings.elements.every((e) => failures.has(e.name));
-        if (namedBindings && allNamedBindingsAreFailures) {
+        const allNamedBindingsAreFailures = namedBindings === undefined || namedBindings.elements.every((e) => failures.has(e.name));
+        if (namedBindings !== undefined && allNamedBindingsAreFailures) {
             for (const e of namedBindings.elements) {
                 failures.delete(e.name);
             }
         }
 
-        if ((!defaultName || failures.has(defaultName)) && allNamedBindingsAreFailures) {
-            if (defaultName) { failures.delete(defaultName); }
+        if ((defaultName === undefined || failures.has(defaultName)) && allNamedBindingsAreFailures) {
+            if (defaultName !== undefined) { failures.delete(defaultName); }
             removeAll(importNode, "All imports are unused.");
             return;
         }
 
-        if (defaultName) {
+        if (defaultName !== undefined) {
             const failure = tryDelete(defaultName);
             if (failure !== undefined) {
                 const start = defaultName.getStart();
-                const end = namedBindings ? namedBindings.getStart() : importNode.moduleSpecifier.getStart();
+                const end = namedBindings !== undefined ? namedBindings.getStart() : importNode.moduleSpecifier.getStart();
                 const fix = ctx.createFix(Lint.Replacement.deleteFromTo(start, end));
                 ctx.addFailureAtNode(defaultName, failure, fix);
             }
         }
 
-        if (namedBindings) {
+        if (namedBindings !== undefined) {
             if (allNamedBindingsAreFailures) {
-                const start = defaultName ? defaultName.getEnd() : namedBindings.getStart();
+                const start = defaultName !== undefined ? defaultName.getEnd() : namedBindings.getStart();
                 const fix = ctx.createFix(Lint.Replacement.deleteFromTo(start, namedBindings.getEnd()));
                 const failure = "All named bindings are unused.";
                 ctx.addFailureAtNode(namedBindings, failure, fix);
@@ -201,8 +201,8 @@ function addImportSpecifierFailures(ctx: Lint.WalkContext<void>, failures: Map<t
 
                     const prevElement = elements[i - 1];
                     const nextElement = elements[i + 1];
-                    const start = prevElement ? prevElement.getEnd() : element.getStart();
-                    const end = nextElement && !prevElement ? nextElement.getStart() : element.getEnd();
+                    const start = prevElement !== undefined ? prevElement.getEnd() : element.getStart();
+                    const end = nextElement !== undefined && prevElement === undefined ? nextElement.getStart() : element.getEnd();
                     const fix = ctx.createFix(Lint.Replacement.deleteFromTo(start, end));
                     ctx.addFailureAtNode(element.name, failure, fix);
                 }
@@ -222,7 +222,7 @@ function addImportSpecifierFailures(ctx: Lint.WalkContext<void>, failures: Map<t
         }
     });
 
-    if (failures.size) {
+    if (failures.size !== 0) {
         throw new Error("Should have revisited all import specifier failures.");
     }
 
@@ -242,7 +242,7 @@ function addImportSpecifierFailures(ctx: Lint.WalkContext<void>, failures: Map<t
  */
 function isImportUsed(importSpecifier: ts.Identifier, sourceFile: ts.SourceFile, checker: ts.TypeChecker): boolean {
     let symbol = checker.getSymbolAtLocation(importSpecifier);
-    if (!symbol) {
+    if (symbol === undefined) {
         return false;
     }
 
@@ -258,7 +258,7 @@ function isImportUsed(importSpecifier: ts.Identifier, sourceFile: ts.SourceFile,
 
         const type = getImplicitType(child, checker);
         // TODO: checker.typeEquals https://github.com/Microsoft/TypeScript/issues/13502
-        if (type && checker.typeToString(type) === checker.symbolToString(symbol)) {
+        if (type !== undefined && checker.typeToString(type) === checker.symbolToString(symbol)) {
             return true;
         }
 
@@ -267,9 +267,9 @@ function isImportUsed(importSpecifier: ts.Identifier, sourceFile: ts.SourceFile,
 }
 
 function getImplicitType(node: ts.Node, checker: ts.TypeChecker): ts.Type | undefined {
-    if ((utils.isPropertyDeclaration(node) || utils.isVariableDeclaration(node)) && !node.type) {
+    if ((utils.isPropertyDeclaration(node) || utils.isVariableDeclaration(node)) && node.type === undefined) {
         return checker.getTypeAtLocation(node);
-    } else if (utils.isSignatureDeclaration(node) && !node.type) {
+    } else if (utils.isSignatureDeclaration(node) && node.type === undefined) {
         return checker.getSignatureFromDeclaration(node).getReturnType();
     } else {
         return undefined;
@@ -300,13 +300,13 @@ function findImport(pos: number, sourceFile: ts.SourceFile): ts.Identifier | und
                 return i.name;
             }
         } else {
-            if (!i.importClause) {
+            if (i.importClause === undefined) {
                 // Error node
                 return undefined;
             }
 
             const { name: defaultName, namedBindings } = i.importClause;
-            if (namedBindings && namedBindings.kind === ts.SyntaxKind.NamespaceImport) {
+            if (namedBindings !== undefined && namedBindings.kind === ts.SyntaxKind.NamespaceImport) {
                 const { name } = namedBindings;
                 if (name.getStart() === pos) {
                     return name;
@@ -314,9 +314,9 @@ function findImport(pos: number, sourceFile: ts.SourceFile): ts.Identifier | und
                 return undefined;
             }
 
-            if (defaultName && defaultName.getStart() === pos) {
+            if (defaultName !== undefined && defaultName.getStart() === pos) {
                 return defaultName;
-            } else if (namedBindings) {
+            } else if (namedBindings !== undefined) {
                 for (const { name } of namedBindings.elements) {
                     if (name.getStart() === pos) {
                         return name;
@@ -348,7 +348,7 @@ const programToUnusedCheckedProgram = new WeakMap<ts.Program, ts.Program>();
 function getUnusedCheckedProgram(program: ts.Program, checkParameters: boolean): ts.Program {
     // Assuming checkParameters will always have the same value, so only lookup by program.
     let checkedProgram = programToUnusedCheckedProgram.get(program);
-    if (checkedProgram) {
+    if (checkedProgram !== undefined) {
         return checkedProgram;
     }
 

@@ -52,7 +52,7 @@ class AdjacentOverloadSignaturesWalker extends Lint.RuleWalker {
 
     public visitModuleDeclaration(node: ts.ModuleDeclaration) {
         const { body } = node;
-        if (body && body.kind === ts.SyntaxKind.ModuleBlock) {
+        if (body !== undefined && body.kind === ts.SyntaxKind.ModuleBlock) {
             this.visitStatements((body as ts.ModuleBlock).statements);
         }
         super.visitModuleDeclaration(node);
@@ -77,7 +77,7 @@ class AdjacentOverloadSignaturesWalker extends Lint.RuleWalker {
         this.checkOverloadsAdjacent(statements, (statement) => {
             if (statement.kind === ts.SyntaxKind.FunctionDeclaration) {
                 const name = (statement as ts.FunctionDeclaration).name;
-                return name && { name: name.text, key: name.text };
+                return name === undefined ? undefined : { name: name.text, key: name.text };
             } else {
                 return undefined;
             }
@@ -94,7 +94,7 @@ class AdjacentOverloadSignaturesWalker extends Lint.RuleWalker {
         const seen = new Set<string>();
         for (const node of overloads) {
             const overload = getOverload(node);
-            if (overload) {
+            if (overload !== undefined) {
                 const { name, key } = overload;
                 if (seen.has(key) && lastKey !== key) {
                     this.addFailureAtNode(node, Rule.FAILURE_STRING_FACTORY(name));
@@ -117,7 +117,7 @@ interface Overload {
 
 export function getOverloadKey(node: ts.SignatureDeclaration): string | undefined {
     const o = getOverload(node);
-    return o && o.key;
+    return o === undefined ? undefined : o.key;
 }
 
 function getOverloadIfSignature(node: ts.TypeElement | ts.ClassElement): Overload | undefined {
@@ -139,7 +139,7 @@ function getOverload(node: ts.SignatureDeclaration): Overload | undefined {
     }
 
     const propertyInfo = getPropertyInfo(node.name);
-    if (!propertyInfo) {
+    if (propertyInfo === undefined) {
         return undefined;
     }
 
@@ -149,14 +149,16 @@ function getOverload(node: ts.SignatureDeclaration): Overload | undefined {
     return { name, key };
 }
 
-function getPropertyInfo(name: ts.PropertyName): { name: string, computed?: boolean } | undefined {
+function getPropertyInfo(name: ts.PropertyName): { name: string, computed: boolean } | undefined {
     switch (name.kind) {
         case ts.SyntaxKind.Identifier:
-            return { name: (name as ts.Identifier).text };
+            return { name: (name as ts.Identifier).text, computed: false };
         case ts.SyntaxKind.ComputedPropertyName:
             const { expression } = (name as ts.ComputedPropertyName);
-            return utils.isLiteralExpression(expression) ? { name: expression.text } : { name: expression.getText(), computed: true };
+            return utils.isLiteralExpression(expression)
+                ? { name: expression.text, computed: false }
+                : { name: expression.getText(), computed: true };
         default:
-            return utils.isLiteralExpression(name) ? { name: (name as ts.StringLiteral).text } : undefined;
+            return utils.isLiteralExpression(name) ? { name: (name as ts.StringLiteral).text, computed: false } : undefined;
     }
 }

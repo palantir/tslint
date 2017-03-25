@@ -55,7 +55,7 @@ class NameWalker extends Lint.RuleWalker {
     public visitInterfaceDeclaration(node: ts.InterfaceDeclaration) {
         const interfaceName = node.name.text;
 
-        const always = this.hasOption(OPTION_ALWAYS) || (this.getOptions() && this.getOptions().length === 0);
+        const always = this.hasOption(OPTION_ALWAYS) || (this.getOptions() !== undefined && this.getOptions().length === 0);
 
         if (always) {
             if (!this.startsWithI(interfaceName)) {

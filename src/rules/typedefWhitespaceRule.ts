@@ -91,7 +91,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 class TypedefWhitespaceWalker extends Lint.RuleWalker {
     private static getColonPosition(node: ts.Node) {
         const colon = Lint.childOfKind(node, ts.SyntaxKind.ColonToken);
-        return colon && colon.getStart();
+        return colon === undefined ? undefined : colon.getStart();
     }
 
     public visitFunctionDeclaration(node: ts.FunctionDeclaration) {

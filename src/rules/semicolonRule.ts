@@ -154,7 +154,7 @@ class SemicolonWalker extends Lint.AbstractWalker<Options> {
     }
 
     private isFollowedByLineBreak(pos: number) {
-        const scanner = this.scanner ||
+        const scanner = this.scanner !== undefined ? this.scanner :
             (this.scanner = ts.createScanner(this.sourceFile.languageVersion, true, this.sourceFile.languageVariant, this.sourceFile.text));
         scanner.setTextPos(pos);
         return scanner.scan() === ts.SyntaxKind.EndOfFileToken || scanner.hasPrecedingLineBreak();
@@ -208,7 +208,7 @@ class SemicolonWalker extends Lint.AbstractWalker<Options> {
         ));
     }
 
-    private reportUnnecessary(pos: number, noFix?: boolean) {
+    private reportUnnecessary(pos: number, noFix = false) {
         this.addFailureAt(pos, 1, Rule.FAILURE_STRING_UNNECESSARY, noFix ? undefined : this.createFix(
             Lint.Replacement.deleteText(pos, 1),
         ));

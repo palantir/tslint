@@ -45,7 +45,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 class Walker extends Lint.RuleWalker {
     public visitBinaryExpression(node: ts.BinaryExpression) {
         const { operatorToken, left, right } = node;
-        if (Lint.getEqualsKind(operatorToken) && (isFaultyTypeof(left, right) || isFaultyTypeof(right, left))) {
+        if (Lint.getEqualsKind(operatorToken) !== undefined && (isFaultyTypeof(left, right) || isFaultyTypeof(right, left))) {
             this.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
         super.visitBinaryExpression(node);

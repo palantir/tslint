@@ -48,7 +48,7 @@ function walk(ctx: Lint.WalkContext<void>) {
     return ts.forEachChild(ctx.sourceFile, cb);
     function cb(node: ts.Node): void {
         const fn = detectRedundantCallback(node);
-        if (fn) {
+        if (fn !== undefined) {
             const fix = ctx.createFix(
                 Lint.Replacement.deleteFromTo(node.getStart(), fn.getStart()),
                 Lint.Replacement.deleteFromTo(fn.getEnd(), node.getEnd()));
@@ -78,9 +78,11 @@ function detectRedundantCallback(node: ts.Node): ts.Expression | undefined {
         return undefined;
     }
 
+    // Bug in `strict-boolean-expressions` fixed in TSLint 5.0, remove this disable then.
+    // tslint:disable strict-boolean-expressions
     const argumentsSameAsParameters = parameters.length === args.length && parameters.every(({dotDotDotToken, name}, i) => {
         let arg = args[i];
-        if (dotDotDotToken) {
+        if (dotDotDotToken !== undefined) {
             // Use SpreadElementExpression for ts2.0 compatibility
             if (!(isSpreadElement(arg) || arg.kind === (ts.SyntaxKind as any).SpreadElementExpression)) {
                 return false;

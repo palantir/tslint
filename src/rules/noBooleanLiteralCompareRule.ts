@@ -91,7 +91,7 @@ function needsParenthesesForNegate(node: ts.Expression) {
 function deconstructComparison(node: ts.BinaryExpression): { negate: boolean, expression: ts.Expression } | undefined {
     const { left, operatorToken, right } = node;
     const eq = Lint.getEqualsKind(operatorToken);
-    if (!eq) {
+    if (eq === undefined) {
         return undefined;
     }
 

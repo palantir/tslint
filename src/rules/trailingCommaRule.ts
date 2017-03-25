@@ -148,7 +148,7 @@ class TrailingCommaWalker extends Lint.AbstractWalker<Options> {
         }
         const token = getChildOfKind(node, closeTokenKind, this.sourceFile);
         if (token !== undefined) {
-            return this.checkComma(list.hasTrailingComma, list, token.end);
+            return this.checkComma(list.hasTrailingComma === true, list, token.end);
         }
     }
 
@@ -156,11 +156,11 @@ class TrailingCommaWalker extends Lint.AbstractWalker<Options> {
         if (list.length === 0) {
             return;
         }
-        return this.checkComma(list.hasTrailingComma, list, closeElementPos);
+        return this.checkComma(list.hasTrailingComma === true, list, closeElementPos);
     }
 
     /* Expects `list.length !== 0` */
-    private checkComma(hasTrailingComma: boolean | undefined, list: ts.NodeArray<ts.Node>, closeTokenPos: number) {
+    private checkComma(hasTrailingComma: boolean, list: ts.NodeArray<ts.Node>, closeTokenPos: number) {
         const lastElementLine = ts.getLineAndCharacterOfPosition(this.sourceFile, list[list.length - 1].end).line;
         const closeTokenLine = ts.getLineAndCharacterOfPosition(this.sourceFile, closeTokenPos).line;
         const option = lastElementLine === closeTokenLine ? this.options.singleline : this.options.multiline;

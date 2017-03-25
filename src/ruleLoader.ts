@@ -36,7 +36,7 @@ export interface IEnableDisablePosition {
 export function loadRules(ruleOptionsList: IOptions[],
                           enableDisableRuleMap: Map<string, IEnableDisablePosition[]>,
                           rulesDirectories?: string | string[],
-                          isJs?: boolean): IRule[] {
+                          isJs = false): IRule[] {
     const rules: IRule[] = [];
     const notFoundRules: string[] = [];
     const notAllowedInJsRules: string[] = [];
@@ -44,19 +44,19 @@ export function loadRules(ruleOptionsList: IOptions[],
     for (const ruleOptions of ruleOptionsList) {
         const ruleName = ruleOptions.ruleName;
         const enableDisableRules = enableDisableRuleMap.get(ruleName);
-        if (ruleOptions.ruleSeverity !== "off" || enableDisableRuleMap) {
+        if (ruleOptions.ruleSeverity !== "off" || enableDisableRuleMap !== undefined) {
             const Rule: (typeof AbstractRule) | null = findRule(ruleName, rulesDirectories);
             if (Rule == null) {
                 notFoundRules.push(ruleName);
             } else {
-                if (isJs && Rule.metadata && Rule.metadata.typescriptOnly) {
+                if (isJs && Rule.metadata !== undefined && Rule.metadata.typescriptOnly) {
                     notAllowedInJsRules.push(ruleName);
                 } else {
-                    const ruleSpecificList = enableDisableRules || [];
+                    const ruleSpecificList = enableDisableRules !== undefined ? enableDisableRules : [];
                     ruleOptions.disabledIntervals = buildDisabledIntervalsFromSwitches(ruleSpecificList);
                     rules.push(new (Rule as any)(ruleOptions));
 
-                    if (Rule.metadata && Rule.metadata.deprecationMessage) {
+                    if (Rule.metadata !== undefined && Rule.metadata.deprecationMessage !== undefined) {
                         showWarningOnce(`${Rule.metadata.ruleName} is deprecated. ${Rule.metadata.deprecationMessage}`);
                     }
                 }
@@ -127,7 +127,7 @@ function loadRule(directory: string, ruleName: string) {
     const fullPath = path.join(directory, ruleName);
     if (fs.existsSync(fullPath + ".js")) {
         const ruleModule = require(fullPath);
-        if (ruleModule && ruleModule.Rule) {
+        if (ruleModule !== undefined && ruleModule.Rule !== undefined) {
             return ruleModule.Rule;
         }
     }
@@ -175,7 +175,7 @@ function buildDisabledIntervalsFromSwitches(ruleSpecificList: IEnableDisablePosi
 
         // rule enabled state is always alternating therefore we can use position of next switch as end of disabled interval
         // set endPosition as Infinity in case when last switch for rule in a file is disabled
-        const endPosition = ruleSpecificList[i + 1] ? ruleSpecificList[i + 1].position : Infinity;
+        const endPosition = ruleSpecificList[i + 1] !== undefined ? ruleSpecificList[i + 1].position : Infinity;
 
         disabledIntervalList.push({
             endPosition,

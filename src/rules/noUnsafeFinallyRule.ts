@@ -157,7 +157,7 @@ class NoReturnInFinallyScopeAwareWalker extends Lint.ScopeAwareRuleWalker<IFinal
         let currentScope = this.getCurrentScope();
         let depth = this.getCurrentDepth();
 
-        while (currentScope) {
+        while (currentScope !== undefined) {
             if (isControlFlowBoundary(currentScope, node)) {
                 return false;
             }
@@ -202,9 +202,9 @@ function isReturnsOrThrowsBoundary(scope: IFinallyScope) {
 }
 
 function isContinueBoundary(scope: IFinallyScope, node: ts.ContinueStatement): boolean {
-    return node.label ? scope.labels.indexOf(node.label.text) >= 0 : scope.isContinueBoundary;
+    return node.label !== undefined ? scope.labels.indexOf(node.label.text) >= 0 : scope.isContinueBoundary;
 }
 
 function isBreakBoundary(scope: IFinallyScope, node: ts.BreakStatement): boolean {
-    return node.label ? scope.labels.indexOf(node.label.text) >= 0 : scope.isBreakBoundary;
+    return node.label !== undefined ? scope.labels.indexOf(node.label.text) >= 0 : scope.isBreakBoundary;
 }

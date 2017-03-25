@@ -79,7 +79,7 @@ class NoFloatingPromisesWalker extends Lint.ProgramAwareRuleWalker {
     }
 
     private checkNode(node: ts.CallExpression | ts.ExpressionStatement) {
-        if (node.parent && this.kindCanContainPromise(node.parent.kind)) {
+        if (node.parent !== undefined && this.kindCanContainPromise(node.parent.kind)) {
             return;
         }
 
@@ -92,7 +92,7 @@ class NoFloatingPromisesWalker extends Lint.ProgramAwareRuleWalker {
     }
 
     private symbolIsPromise(symbol?: ts.Symbol) {
-        if (!symbol) {
+        if (symbol === undefined) {
             return false;
         }
 
