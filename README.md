@@ -97,7 +97,17 @@ The configuration file specifies which rules are enabled and their options. Thes
      * A list of relative or absolute paths to directories that contain custom rules.
      * See the Custom Rules documentation below for more details.
      */
-  ]
+  ],
+  "cliOptions": {
+    /*
+     * Any options from the [command-line options section](####CLI) can be set here.
+     * They will be overriden by options passed in from the CLI.
+     */
+     "exclude": [
+         "test",
+         "bin"
+     ]
+  }
 }
 ```
 
