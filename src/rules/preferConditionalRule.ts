@@ -71,24 +71,28 @@ function detect({ thenStatement, elseStatement }: ts.IfStatement, sourceFile: ts
     if (!elseStatement) {
         return undefined;
     }
-    const elze = utils.isIfStatement(elseStatement) ? detect(elseStatement, sourceFile) : getAssigned(elseStatement);
+    const elze = utils.isIfStatement(elseStatement) ? detect(elseStatement, sourceFile) : getAssigned(elseStatement, sourceFile);
     if (!elze) {
         return undefined;
     }
-    const then = getAssigned(thenStatement);
+    const then = getAssigned(thenStatement, sourceFile);
     return then && nodeEquals(elze, then, sourceFile) ? then : undefined;
 }
 
 /** Returns the left side of an assignment. */
-function getAssigned(node: ts.Statement): ts.Expression | undefined {
+function getAssigned(node: ts.Statement, sourceFile: ts.SourceFile): ts.Expression | undefined {
     if (utils.isBlock(node)) {
-        return node.statements.length === 1 ? getAssigned(node.statements[0]) : undefined;
+        return node.statements.length === 1 ? getAssigned(node.statements[0], sourceFile) : undefined;
     } else if (utils.isExpressionStatement(node) && utils.isBinaryExpression(node.expression)) {
-        const { operatorToken, left } = node.expression;
-        return operatorToken.kind === ts.SyntaxKind.EqualsToken ? left : undefined;
+        const { operatorToken, left, right } = node.expression;
+        return operatorToken.kind === ts.SyntaxKind.EqualsToken && !isMultiLine(right, sourceFile) ? left : undefined;
     } else {
         return undefined;
     }
+}
+
+function isMultiLine(node: ts.Node, sourceFile: ts.SourceFile): boolean {
+    return node.getText(sourceFile).includes("\n");
 }
 
 function nodeEquals(a: ts.Node, b: ts.Node, sourceFile: ts.SourceFile): boolean {

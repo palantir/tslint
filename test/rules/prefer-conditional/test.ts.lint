@@ -34,4 +34,13 @@ if (true) {
     y = 3;
 }
 
+// Or even multi-line.
+if (true)
+    x = [
+        1,
+        2
+    ];
+else
+    x = 3;
+
 [X]: Use a conditional expression instead of assigning to 'x' in multiple places.
