@@ -49,17 +49,15 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 function walk(ctx: Lint.WalkContext<void>): void {
-    const scopes: Array<Set<string>> = [new Set()];
+    let scope = new Set<string>();
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (utils.isFunctionScopeBoundary(node)) {
-            scopes.push(new Set());
+            const oldScope = scope;
+            scope = new Set();
             ts.forEachChild(node, cb);
-            scopes.pop();
+            scope = oldScope;
             return;
-        }
-
-        if (utils.isVariableDeclaration(node) && !utils.isBlockScopedVariableDeclaration(node)) {
-            const scope = scopes[scopes.length - 1];
+        } else if (utils.isVariableDeclaration(node) && !utils.isBlockScopedVariableDeclaration(node)) {
             forEachBoundIdentifier(node.name, (id) => {
                 const { text } = id;
                 if (scope.has(text)) {
@@ -75,20 +73,13 @@ function walk(ctx: Lint.WalkContext<void>): void {
 }
 
 function forEachBoundIdentifier(name: ts.BindingName, action: (id: ts.Identifier) => void): void {
-    switch (name.kind) {
-        case ts.SyntaxKind.Identifier:
-            return action(name);
-        case ts.SyntaxKind.ObjectBindingPattern:
-            for (const e of name.elements) {
+    if (name.kind === ts.SyntaxKind.Identifier) {
+        action(name);
+    } else {
+        for (const e of name.elements) {
+            if (e.kind !== ts.SyntaxKind.OmittedExpression) {
                 forEachBoundIdentifier(e.name, action);
             }
-            break;
-        case ts.SyntaxKind.ArrayBindingPattern:
-            for (const e of name.elements) {
-                if (e.kind !== ts.SyntaxKind.OmittedExpression) {
-                    forEachBoundIdentifier(e.name, action);
-                }
-            }
-            break;
+        }
     }
 }
