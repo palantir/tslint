@@ -28,7 +28,8 @@ describe("Rule Loader", () => {
     const srcRulesDir = "src/rules";
     const testRulesDir = "test/rules";
 
-    it("loads core rules", () => {
+    // TODO: #2404
+    it.skip("loads core rules", () => {
         const validConfiguration: IOptions[] = [
             { ruleName: "class-name", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
             { ruleName: "eofline", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
@@ -75,7 +76,8 @@ describe("Rule Loader", () => {
         assert.equal(rules.length, 1);
     });
 
-    it("works with rulesDirectory argument as an Array", () => {
+    // TODO: #2404
+    it.skip("works with rulesDirectory argument as an Array", () => {
         const validConfiguration: IOptions[] = [
             { ruleName: "class-name", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
             { ruleName: "eofline", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
