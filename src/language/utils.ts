@@ -23,19 +23,6 @@ export function getSourceFile(fileName: string, source: string): ts.SourceFile {
     return ts.createSourceFile(normalizedName, source, ts.ScriptTarget.ES5, /*setParentNodes*/ true);
 }
 
-/** @deprecated use forEachToken instead */
-export function scanAllTokens(scanner: ts.Scanner, callback: (s: ts.Scanner) => void) {
-    let lastStartPos = -1;
-    while (scanner.scan() !== ts.SyntaxKind.EndOfFileToken) {
-        const startPos = scanner.getStartPos();
-        if (startPos === lastStartPos) {
-            break;
-        }
-        lastStartPos = startPos;
-        callback(scanner);
-    }
-}
-
 /**
  * @returns true if any modifier kinds passed along exist in the given modifiers array
  */
@@ -93,6 +80,17 @@ export function childOfKind(node: ts.Node, kind: ts.SyntaxKind): ts.Node | undef
  */
 export function someAncestor(node: ts.Node, predicate: (n: ts.Node) => boolean): boolean {
     return predicate(node) || (node.parent != null && someAncestor(node.parent, predicate));
+}
+
+export function ancestorWhere<T extends ts.Node>(node: ts.Node, predicate: (n: ts.Node) => boolean): ts.Node | undefined {
+    let cur: ts.Node | undefined = node;
+    do {
+        if (predicate(cur)) {
+            return cur as T;
+        }
+        cur = cur.parent;
+    } while (cur);
+    return undefined;
 }
 
 export function isAssignment(node: ts.Node) {

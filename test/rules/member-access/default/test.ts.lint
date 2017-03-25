@@ -3,7 +3,7 @@ declare class AmbientNoAccess {
     ~ [The class method 'a' must be marked either 'private', 'public', or 'protected']
 
     static b(): number;
-    ~~~~~~~~ [The class method 'b' must be marked either 'private', 'public', or 'protected']
+           ~ [The class method 'b' must be marked either 'private', 'public', or 'protected']
 }
 
 declare class AmbientAccess {
@@ -15,7 +15,7 @@ class Members {
     i: number;
     ~ [The class property 'i' must be marked either 'private', 'public', or 'protected']
     static j: number;
-    ~~~~~~~~ [The class property 'j' must be marked either 'private', 'public', or 'protected']
+           ~ [The class property 'j' must be marked either 'private', 'public', or 'protected']
 
     public nPublic: number;
     protected nProtected: number;
@@ -31,9 +31,9 @@ class Members {
     ~~~~~~~~ [The class method 'noAccess' must be marked either 'private', 'public', or 'protected']
 
     static noAccess(x: number): number;
-    ~~~~~~~~~~~~~~~ [The class method 'noAccess' must be marked either 'private', 'public', or 'protected']
+           ~~~~~~~~ [The class method 'noAccess' must be marked either 'private', 'public', or 'protected']
     static noAccess(o: any): any {}
-    ~~~~~~~~~~~~~~~ [The class method 'noAccess' must be marked either 'private', 'public', or 'protected']
+           ~~~~~~~~ [The class method 'noAccess' must be marked either 'private', 'public', or 'protected']
 
     public access(x: number): number;
     public access(o: any): any {}
@@ -51,7 +51,7 @@ function main() {
         i: number;
         ~ [The class property 'i' must be marked either 'private', 'public', or 'protected']
         static j: number;
-        ~~~~~~~~ [The class property 'j' must be marked either 'private', 'public', or 'protected']
+               ~ [The class property 'j' must be marked either 'private', 'public', or 'protected']
         public n: number;
     }
 }

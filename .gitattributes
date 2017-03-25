@@ -5,3 +5,4 @@
 *.lint text eol=lf
 *.fix text eol=lf
 /test/rules/linebreak-style/**/CRLF/*.lint text eol=crlf
+/test/rules/linebreak-style/**/LF/*.fix text eol=crlf

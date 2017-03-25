@@ -258,8 +258,7 @@ Core Rules
 
 _Rules_ encode logic for syntactic & semantic checks of TypeScript source code.
 
-[See the TSLint website for a list of core rules included in the `tslint` package.]
-(http://palantir.github.io/tslint/rules/)
+[See the TSLint website for a list of core rules included in the `tslint` package.](http://palantir.github.io/tslint/rules/)
 
 Core Formatters
 -----
@@ -267,8 +266,7 @@ Core Formatters
 
 _Formatters_ allow for transformation of lint results into various forms before outputting to stdout or a file.
 
-[See the TSLint website for a list of core formatters included in the `tslint` package.]
-(http://palantir.github.io/tslint/formatters/)
+[See the TSLint website for a list of core formatters included in the `tslint` package.](http://palantir.github.io/tslint/formatters/)
 
 Rule Flags
 -----
@@ -296,6 +294,7 @@ Custom Rules
 #### Custom rule sets from Palantir
 
 - [tslint-react](https://github.com/palantir/tslint-react) - Lint rules related to React & JSX.
+- [tslint-blueprint](https://github.com/palantir/tslint-blueprint) - Lint rules to enforce best practices with [blueprintjs libraries](https://github.com/palantir/blueprint)
 
 #### Custom rule sets from the community
 
