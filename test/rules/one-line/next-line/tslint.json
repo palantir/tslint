@@ -1,0 +1,10 @@
+{
+  "rules": {
+    "one-line": [true, {
+      "open-brace": "next-line",
+      "catch": "next-line",
+      "else": "next-line",
+      "finally": "next-line"
+    }]
+  }
+}

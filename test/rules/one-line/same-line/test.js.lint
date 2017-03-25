@@ -1,13 +1,13 @@
 export function Call()
 {
-~ [misplaced opening brace]
+~ [BRACE]
     if (x == 3)
     {
-    ~ [misplaced opening brace]
+    ~ [BRACE]
        x = 4;
     }
     else {
-    ~~~~   [misplaced 'else']
+    ~~~~   [ELSE]
         x = 5;
     }
     return "called";
@@ -15,20 +15,20 @@ export function Call()
 
 var object =
 {
-~ [misplaced opening brace]
+~ [BRACE]
     a: 1,
     b: 2
 };
 
 for(var x= 0; x < 1; ++x)
 {
-~ [misplaced opening brace]
+~ [BRACE]
     ++i;
 }
 
 switch(y)
 {
-~ [misplaced opening brace]
+~ [BRACE]
     case 0:
         x--;
         break;
@@ -39,19 +39,19 @@ switch(y)
 
 try
 {
-~ [misplaced opening brace]
+~ [BRACE]
     throw new Error("hi");
 }
 catch (e)
-~~~~~     [misplaced 'catch']
+~~~~~     [CATCH]
 {
-~ [misplaced opening brace]
+~ [BRACE]
     throw(e);
 }
 finally
-~~~~~~~ [misplaced 'finally']
+~~~~~~~ [FINALLY]
 {
-~ [misplaced opening brace]
+~ [BRACE]
     // do something
 }
 
@@ -59,31 +59,31 @@ try {
     foo();
 }
 finally
-~~~~~~~ [misplaced 'finally']
+~~~~~~~ [FINALLY]
 {
-~ [misplaced opening brace]
+~ [BRACE]
     bar();
 }
 
 try{
-   ~ [missing whitespace]
+   ~ [SPACE]
     foo();
 } catch(e){
-          ~ [missing whitespace]
+          ~ [SPACE]
     bar();
 } finally{
-         ~ [missing whitespace]
+         ~ [SPACE]
     baz();
 }
 
 while(x < 10){
-             ~ [missing whitespace]
+             ~ [SPACE]
     x++;
 }
 
 class BarBooBaz
 {
-~ [misplaced opening brace]
+~ [BRACE]
 
 }
 
@@ -114,3 +114,9 @@ if (true)
     true;
 else
     false;
+
+[BRACE]: Expected '{' to go on the same line as the preceding token.
+[ELSE]: Expected 'else' to go on the same line as the preceding token.
+[CATCH]: Expected 'catch' to go on the same line as the preceding token.
+[FINALLY]: Expected 'finally' to go on the same line as the preceding token.
+[SPACE]: Expected a space.

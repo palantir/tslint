@@ -1,0 +1,20 @@
+function f() {
+             ~ [Expected '{' to go on the line after the preceding token.]
+}
+
+try
+{
+} catch ()
+  ~~~~~ [Expected 'catch' to go on the line after the preceding token.]
+{
+} finally
+  ~~~~~~~ [Expected 'finally' to go on the line after the preceding token.]
+{
+}
+
+if (so)
+{
+} else
+  ~~~~ [Expected 'else' to go on the line after the preceding token.]
+{
+}

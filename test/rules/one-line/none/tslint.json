@@ -1,8 +1,8 @@
 {
   "rules": {
-    "one-line": true
+    "one-line": [true, {}]
   },
   "jsRules": {
-    "one-line": true
+    "one-line": [true, {}]
   }
 }
