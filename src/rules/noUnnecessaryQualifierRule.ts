@@ -80,7 +80,7 @@ class Walker extends Lint.ProgramAwareRuleWalker {
 
     private visitNamespaceAccess(node: ts.Node, qualifier: ts.EntityNameOrEntityNameExpression, name: ts.Identifier) {
         if (this.qualifierIsUnnecessary(qualifier, name)) {
-            const fix = this.createFix(this.deleteFromTo(qualifier.getStart(), name.getStart()));
+            const fix = this.deleteFromTo(qualifier.getStart(), name.getStart());
             this.addFailureAtNode(qualifier, Rule.FAILURE_STRING(qualifier.getText()), fix);
         } else {
             // Only look for nested qualifier errors if we didn't already fail on the outer qualifier.

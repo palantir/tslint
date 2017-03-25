@@ -45,9 +45,10 @@ class Walker extends Lint.RuleWalker {
     public visitThrowStatement(node: ts.ThrowStatement) {
         const {expression} = node;
         if (this.stringConcatRecursive(expression)) {
-            const fix = this.createFix(this.createReplacement(expression.getStart(),
-                                                              expression.getEnd() - expression.getStart(),
-                                                              `new Error(${expression.getText()})`));
+            const fix = this.createReplacement(
+                expression.getStart(),
+                expression.getEnd() - expression.getStart(),
+                `new Error(${expression.getText()})`);
             this.addFailure(this.createFailure(
                     node.getStart(), node.getWidth(), Rule.FAILURE_STRING, fix));
         }

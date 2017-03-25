@@ -49,9 +49,10 @@ function walk(ctx: Lint.WalkContext<void>) {
     function cb(node: ts.Node): void {
         const fn = detectRedundantCallback(node);
         if (fn) {
-            const fix = ctx.createFix(
+            const fix = [
                 Lint.Replacement.deleteFromTo(node.getStart(), fn.getStart()),
-                Lint.Replacement.deleteFromTo(fn.getEnd(), node.getEnd()));
+                Lint.Replacement.deleteFromTo(fn.getEnd(), node.getEnd()),
+            ];
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING(fn.getText()), fix);
         } else {
             return ts.forEachChild(node, cb);

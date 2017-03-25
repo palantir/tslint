@@ -304,9 +304,7 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
                     !info.declarationInfo.reassignedSiblings &&
                     info.declarationInfo.isBlockScoped &&
                     !appliedFixes.has(info.declarationInfo.declarationList)) {
-                    fix = this.createFix(
-                        new Lint.Replacement(info.declarationInfo.declarationList!.getStart(this.sourceFile), 3, "const"),
-                    );
+                    fix = new Lint.Replacement(info.declarationInfo.declarationList!.getStart(this.sourceFile), 3, "const");
                     // add only one fixer per VariableDeclarationList
                     appliedFixes.add(info.declarationInfo.declarationList);
                 }
