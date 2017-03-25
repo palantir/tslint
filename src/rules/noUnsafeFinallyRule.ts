@@ -48,6 +48,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
+type JumpStatement = ts.BreakStatement | ts.ContinueStatement | ts.ThrowStatement | ts.ReturnStatement;
+
 function walk(ctx: Lint.WalkContext<void>): void {
     let inFinally = false;
     ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
@@ -55,10 +57,10 @@ function walk(ctx: Lint.WalkContext<void>): void {
             case ts.SyntaxKind.TryStatement:
                 const { tryBlock, catchClause, finallyBlock } = node as ts.TryStatement;
                 ts.forEachChild(tryBlock, cb);
-                if (catchClause) {
+                if (catchClause !== undefined) {
                     ts.forEachChild(catchClause, cb);
                 }
-                if (finallyBlock) {
+                if (finallyBlock !== undefined) {
                     const old = inFinally;
                     inFinally = true;
                     cb(finallyBlock);
@@ -71,7 +73,7 @@ function walk(ctx: Lint.WalkContext<void>): void {
             case ts.SyntaxKind.ThrowStatement:
             case ts.SyntaxKind.ReturnStatement:
                 if (inFinally && !jumpIsLocalToFinallyBlock(node as JumpStatement)) {
-                    ctx.addFailureAtNode(node, Rule.FAILURE_STRING(showKind(node as JumpStatement)));
+                    ctx.addFailureAtNode(node, Rule.FAILURE_STRING(printJumpKind(node as JumpStatement)));
                 }
                 ts.forEachChild(node, cb);
                 break;
@@ -84,8 +86,8 @@ function walk(ctx: Lint.WalkContext<void>): void {
 }
 
 function jumpIsLocalToFinallyBlock(jump: JumpStatement): boolean {
-    const isBreakContinue = jump.kind === ts.SyntaxKind.BreakStatement || jump.kind === ts.SyntaxKind.ContinueStatement;
-    const label = isBreakContinue ? (jump as ts.BreakStatement | ts.ContinueStatement).label : undefined;
+    const isBreakOrContinue = jump.kind === ts.SyntaxKind.BreakStatement || jump.kind === ts.SyntaxKind.ContinueStatement;
+    const label = isBreakOrContinue ? (jump as ts.BreakStatement | ts.ContinueStatement).label : undefined;
 
     let node: ts.Node = jump;
     // This should only be called inside a finally block, so we'll eventually reach the TryStatement case and return.
@@ -109,7 +111,7 @@ function jumpIsLocalToFinallyBlock(jump: JumpStatement): boolean {
             case ts.SyntaxKind.ForStatement:
             case ts.SyntaxKind.WhileStatement:
             case ts.SyntaxKind.DoStatement:
-                if (isBreakContinue && !label) {
+                if (isBreakOrContinue && !label) {
                     return true;
                 }
                 break;
@@ -134,8 +136,7 @@ function jumpIsLocalToFinallyBlock(jump: JumpStatement): boolean {
     }
 }
 
-type JumpStatement = ts.BreakStatement | ts.ContinueStatement | ts.ThrowStatement | ts.ReturnStatement;
-function showKind(node: JumpStatement): string {
+function printJumpKind(node: JumpStatement): string {
     switch (node.kind) {
         case ts.SyntaxKind.BreakStatement:
             return "break";
