@@ -18,21 +18,8 @@
 import * as ts from "typescript";
 
 import * as Lint from "../index";
-
-export interface IBlockRequirementDescriptor {
-    visibilities?: Visibility[];
-}
-
-export interface IClassRequirementDescriptor {
-    locations?: Location[];
-    privacies?: Privacy[];
-}
-
-export type RequirementDescriptor = IBlockRequirementDescriptor | IClassRequirementDescriptor;
-
-export interface IRequirementDescriptors {
-    [type: string /* DocType */]: RequirementDescriptor;
-}
+import { BlockOrClassRequirement, IRequirementDescriptors } from "./completed-docs/requirementDescriptors";
+import { RequirementFactory } from "./completed-docs/requirementFactory";
 
 export const ALL = "all";
 
@@ -85,8 +72,6 @@ export type Privacy = All
 export type Visibility = All
     | typeof VISIBILITY_EXPORTED
     | typeof VISIBILITY_INTERNAL;
-
-type BlockOrClassRequirement = BlockRequirement | ClassRequirement;
 
 export class Rule extends Lint.Rules.TypedRule {
     public static FAILURE_STRING_EXIST = "Documentation must exist for ";
@@ -214,6 +199,8 @@ export class Rule extends Lint.Rules.TypedRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
+    private readonly requirementFactory = new RequirementFactory();
+
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         const options = this.getOptions();
         const completedDocsWalker = new CompletedDocsWalker(sourceFile, options, program);
@@ -228,101 +215,7 @@ export class Rule extends Lint.Rules.TypedRule {
             ruleArguments = Rule.defaultArguments;
         }
 
-        return Requirement.constructRequirements(ruleArguments);
-    }
-}
-
-abstract class Requirement<TDescriptor extends RequirementDescriptor> {
-    public static constructRequirements(ruleArguments: Array<DocType | IRequirementDescriptors>): Map<DocType, BlockOrClassRequirement> {
-        const requirements: Map<DocType, BlockOrClassRequirement> = new Map();
-
-        for (const ruleArgument of ruleArguments) {
-            Requirement.addRequirements(requirements, ruleArgument);
-        }
-
-        return requirements;
-    }
-
-    private static addRequirements(requirements: Map<DocType, BlockOrClassRequirement>, descriptor: DocType | IRequirementDescriptors) {
-        if (typeof descriptor === "string") {
-            requirements.set(descriptor, new BlockRequirement());
-            return;
-        }
-
-        for (const type in descriptor) {
-            if (descriptor.hasOwnProperty(type)) {
-                requirements.set(
-                    type as DocType,
-                    (type === "methods" || type === "properties")
-                        ? new ClassRequirement(descriptor[type])
-                        : new BlockRequirement(descriptor[type]));
-            }
-        }
-    }
-
-    protected constructor(public readonly descriptor: TDescriptor = {} as TDescriptor) { }
-
-    public abstract shouldNodeBeDocumented(node: ts.Declaration): boolean;
-
-    protected createSet<T extends All | string>(values?: T[]): Set<T> {
-        if (!values || values.length === 0) {
-            values = [ALL as T];
-        }
-
-        return new Set(values);
-    }
-}
-
-class BlockRequirement extends Requirement<IBlockRequirementDescriptor> {
-    public readonly visibilities: Set<Visibility> = this.createSet(this.descriptor.visibilities);
-
-    public shouldNodeBeDocumented(node: ts.Declaration): boolean {
-        if (this.visibilities.has(ALL)) {
-            return true;
-        }
-
-        if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword)) {
-            return this.visibilities.has(VISIBILITY_EXPORTED);
-        }
-
-        return this.visibilities.has(VISIBILITY_INTERNAL);
-    }
-}
-
-class ClassRequirement extends Requirement<IClassRequirementDescriptor> {
-    public readonly locations: Set<Location> = this.createSet(this.descriptor.locations);
-    public readonly privacies: Set<Privacy> = this.createSet(this.descriptor.privacies);
-
-    public shouldNodeBeDocumented(node: ts.Declaration) {
-        return this.shouldLocationBeDocumented(node) && this.shouldPrivacyBeDocumented(node);
-    }
-
-    private shouldLocationBeDocumented(node: ts.Declaration) {
-        if (this.locations.has(ALL)) {
-            return true;
-        }
-
-        if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.StaticKeyword)) {
-            return this.locations.has(LOCATION_STATIC);
-        }
-
-        return this.locations.has(LOCATION_INSTANCE);
-    }
-
-    private shouldPrivacyBeDocumented(node: ts.Declaration) {
-        if (this.privacies.has(ALL)) {
-            return true;
-        }
-
-        if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.PrivateKeyword)) {
-            return this.privacies.has(PRIVACY_PRIVATE);
-        }
-
-        if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.ProtectedKeyword)) {
-            return this.privacies.has(PRIVACY_PROTECTED);
-        }
-
-        return Lint.hasModifier(node.modifiers, ts.SyntaxKind.PublicKeyword);
+        return this.requirementFactory.constructRequirements(ruleArguments);
     }
 }
 
