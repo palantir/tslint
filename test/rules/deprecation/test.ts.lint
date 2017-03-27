@@ -1,3 +1,9 @@
+import {other, other2} from './other';
+        ~~~~~          [other is deprecated.]
+               ~~~~~~  [other2 is deprecated.]
+other();
+~~~~~ [other is deprecated.]
+
 declare interface D {
     /** @deprecated */ m: () => void;
 }
@@ -24,3 +30,12 @@ p.f;
 p.g;
 p.h;
   ~ [h is deprecated.]
+
+/** @deprecated */
+const A = 1, B = 2;
+
+A + B;
+~     [A is deprecated.]
+    ~ [B is deprecated.]
+
+declarationIsMissing();

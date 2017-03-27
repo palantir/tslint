@@ -34,6 +34,7 @@ export class Rule extends Lint.Rules.TypedRule {
         optionExamples: [],
         type: "maintainability",
         typescriptOnly: false,
+        requiresTypeInfo: true,
     };
     /* tslint:enable:object-literal-sort-keys */
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
@@ -47,21 +48,37 @@ class Walker extends Lint.ProgramAwareRuleWalker {
   protected visitIdentifier(node: ts.Identifier) {
     let decSym = this.getTypeChecker().getSymbolAtLocation(node);
 
-    // tslint:disable-next-line:no-bitwise
-    if (decSym.flags & ts.SymbolFlags.Alias) {
+    if (decSym && Lint.isSymbolFlagSet(decSym, ts.SymbolFlags.Alias)) {
         decSym = this.getTypeChecker().getAliasedSymbol(decSym);
+    }
+    if (!decSym || !decSym.getDeclarations()) {
+        super.visitIdentifier(node);
+        return;
     }
     for (const d of decSym.getDeclarations()) {
       // Switch to the TS JSDoc parser in the future to avoid false positives here.
       // For example using '@deprecated' in a true comment.
       // However, a new TS API would be needed, track at
       // https://github.com/Microsoft/TypeScript/issues/7393.
-      const commentNode: ts.Node = d;
+      let commentNode: ts.Node = d;
+
+      if (commentNode.kind === ts.SyntaxKind.VariableDeclaration) {
+          if (!commentNode.parent) { continue; }
+          commentNode = commentNode.parent;
+      }
+
+      // Go up one more level to VariableDeclarationStatement, where usually
+      // the comment lives. If the declaration has an 'export', the
+      // VDList.getFullText will not contain the comment.
+      if (commentNode.kind === ts.SyntaxKind.VariableDeclarationList) {
+        if (!commentNode.parent) { continue; }
+        commentNode = commentNode.parent;
+      }
 
       // Don't warn on the declaration of the @deprecated symbol.
-      if (commentNode.getSourceFile() === node.getSourceFile()
-          && commentNode.getStart() <= node.getStart()
-          && node.getEnd() <= commentNode.getEnd()) {
+      if (commentNode.pos <= node.pos
+          && node.getEnd() <= commentNode.getEnd()
+          && commentNode.getSourceFile() === node.getSourceFile()) {
           continue;
       }
 
@@ -70,7 +87,7 @@ class Walker extends Lint.ProgramAwareRuleWalker {
       for (const {pos, end} of range) {
         const jsDocText = commentNode.getFullText().substring(pos, end);
         if (jsDocText.includes("@deprecated")) {
-            this.addFailureAtNode(node, node.getText() + " is deprecated.");
+            this.addFailureAtNode(node, node.text + " is deprecated.");
         }
       }
     }
