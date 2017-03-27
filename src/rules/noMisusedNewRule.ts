@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { getPropertyName, isConstructSignatureDeclaration, isMethodDeclaration, isMethodSignature, isTypeReferenceNode } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -36,46 +37,34 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_CLASS = '`new` in a class is a method named "new". Did you mean `constructor`?';
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new Walker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class Walker extends Lint.RuleWalker {
-    public visitMethodSignature(node: ts.MethodSignature) {
-        if (nameIs(node.name, "constructor")) {
-            this.addFailureAtNode(node, Rule.FAILURE_STRING_INTERFACE);
+function walk(ctx: Lint.WalkContext<void>) {
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (isMethodSignature(node)) {
+            if (getPropertyName(node.name) === "constructor") {
+                ctx.addFailureAtNode(node, Rule.FAILURE_STRING_INTERFACE);
+            }
+        } else if (isMethodDeclaration(node)) {
+            if (node.body === undefined &&
+                getPropertyName(node.name) === "new" &&
+                returnTypeMatchesParent(node.parent as ts.ClassLikeDeclaration, node)) {
+                ctx.addFailureAtNode(node, Rule.FAILURE_STRING_CLASS);
+            }
+        } else if (isConstructSignatureDeclaration(node)) {
+            if (returnTypeMatchesParent(node.parent as ts.InterfaceDeclaration, node)) {
+                ctx.addFailureAtNode(node, Rule.FAILURE_STRING_INTERFACE);
+            }
         }
-    }
-
-    public visitMethodDeclaration(node: ts.MethodDeclaration) {
-        if (node.body === undefined && nameIs(node.name, "new") &&
-            returnTypeMatchesParent(node.parent as ts.ClassLikeDeclaration, node)) {
-            this.addFailureAtNode(node, Rule.FAILURE_STRING_CLASS);
-        }
-    }
-
-    public visitConstructSignature(node: ts.ConstructSignatureDeclaration) {
-        if (returnTypeMatchesParent(node.parent as ts.InterfaceDeclaration, node)) {
-            this.addFailureAtNode(node, Rule.FAILURE_STRING_INTERFACE);
-        }
-    }
-}
-
-function nameIs(name: ts.PropertyName, text: string): boolean {
-    return name.kind === ts.SyntaxKind.Identifier && name.text === text;
+        return ts.forEachChild(node, cb);
+    });
 }
 
 function returnTypeMatchesParent(parent: { name?: ts.Identifier }, decl: ts.SignatureDeclaration): boolean {
-    if (parent.name === undefined) {
+    if (parent.name === undefined || decl.type === undefined || !isTypeReferenceNode(decl.type)) {
         return false;
     }
-
-    const name = parent.name.text;
-    const type = decl.type;
-    if (type === undefined || type.kind !== ts.SyntaxKind.TypeReference) {
-        return false;
-    }
-
-    const typeName = (type as ts.TypeReferenceNode).typeName;
-    return typeName.kind === ts.SyntaxKind.Identifier && (typeName as ts.Identifier).text === name;
+    return decl.type.typeName.kind === ts.SyntaxKind.Identifier && decl.type.typeName.text === parent.name.text;
 }

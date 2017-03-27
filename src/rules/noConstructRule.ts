@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { isNewExpression } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -40,25 +41,20 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Forbidden constructor, use a literal or simple function call instead";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoConstructWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class NoConstructWalker extends Lint.RuleWalker {
-    private static FORBIDDEN_CONSTRUCTORS = [
-        "Boolean",
-        "Number",
-        "String",
-    ];
-
-    public visitNewExpression(node: ts.NewExpression) {
-        if (node.expression.kind === ts.SyntaxKind.Identifier) {
-            const identifier = node.expression as ts.Identifier;
-            const constructorName = identifier.text;
-            if (NoConstructWalker.FORBIDDEN_CONSTRUCTORS.indexOf(constructorName) !== -1) {
-                this.addFailureAt(node.getStart(), identifier.getEnd() - node.getStart(), Rule.FAILURE_STRING);
+function walk(ctx: Lint.WalkContext<void>) {
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (isNewExpression(node) && node.expression.kind === ts.SyntaxKind.Identifier) {
+            switch ((node.expression as ts.Identifier).text) {
+                case "Boolean":
+                case "String":
+                case "Number":
+                    ctx.addFailure(node.getStart(ctx.sourceFile), node.expression.end, Rule.FAILURE_STRING);
             }
         }
-        super.visitNewExpression(node);
-    }
+        return ts.forEachChild(node, cb);
+    });
 }

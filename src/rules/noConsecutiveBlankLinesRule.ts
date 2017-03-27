@@ -52,9 +52,7 @@ export class Rule extends Lint.Rules.AbstractRule {
      * Disable the rule if the option is provided but non-numeric or less than the minimum.
      */
     public isEnabled(): boolean {
-        return super.isEnabled() &&
-            (!this.ruleArguments[0] ||
-             typeof this.ruleArguments[0] === "number" && this.ruleArguments[0] > 0);
+        return super.isEnabled() && (!this.ruleArguments[0] || this.ruleArguments[0] > 0);
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -70,7 +68,7 @@ function walk(ctx: Lint.WalkContext<number>) {
     let consecutiveBlankLines = 0;
 
     for (const line of utils.getLineRanges(ctx.sourceFile)) {
-        if (sourceText.substring(line.pos, line.end).search(/\S/) === -1) {
+        if (line.contentLength === 0 || sourceText.substr(line.pos, line.contentLength).search(/\S/) === -1) {
             ++consecutiveBlankLines;
             if (consecutiveBlankLines === threshold) {
                 possibleFailures.push({
@@ -108,7 +106,7 @@ function getStartOfLineBreak(sourceText: string, pos: number) {
     return sourceText[pos - 2] === "\r" ? pos - 1 : pos - 1;
 }
 
-function getTemplateRanges(sourceFile: ts.SourceFile): ts.TextRange[] {
+export function getTemplateRanges(sourceFile: ts.SourceFile): ts.TextRange[] {
     const intervals: ts.TextRange[] = [];
     const cb = (node: ts.Node): void => {
         if (node.kind >= ts.SyntaxKind.FirstTemplateToken &&
