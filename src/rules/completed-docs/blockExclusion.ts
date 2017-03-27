@@ -19,24 +19,24 @@ import * as ts from "typescript";
 
 import * as Lint from "../../index";
 import { ALL, Visibility, VISIBILITY_EXPORTED, VISIBILITY_INTERNAL } from "../completedDocsRule";
-import { Requirement } from "./requirement";
+import { Exclusion } from "./exclusion";
 
-export interface IBlockRequirementDescriptor {
+export interface IBlockExclusionDescriptor {
     visibilities?: Visibility[];
 }
 
-export class BlockRequirement extends Requirement<IBlockRequirementDescriptor> {
+export class BlockExclusion extends Exclusion<IBlockExclusionDescriptor> {
     public readonly visibilities: Set<Visibility> = this.createSet(this.descriptor.visibilities);
 
-    public shouldNodeBeDocumented(node: ts.Declaration): boolean {
+    public excludes(node: ts.Declaration) {
         if (this.visibilities.has(ALL)) {
-            return true;
+            return false;
         }
 
         if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword)) {
-            return this.visibilities.has(VISIBILITY_EXPORTED);
+            return !this.visibilities.has(VISIBILITY_EXPORTED);
         }
 
-        return this.visibilities.has(VISIBILITY_INTERNAL);
+        return !this.visibilities.has(VISIBILITY_INTERNAL);
     }
 }

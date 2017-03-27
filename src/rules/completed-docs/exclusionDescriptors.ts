@@ -15,13 +15,12 @@
  * limitations under the License.
  */
 
-import { BlockRequirement, IBlockRequirementDescriptor } from "./blockRequirement";
-import { ClassRequirement, IClassRequirementDescriptor } from "./classRequirement";
+import { IBlockExclusionDescriptor } from "./blockExclusion";
+import { IClassExclusionDescriptor } from "./classExclusion";
+import { ITagExclusionDescriptor } from "./tagExclusion";
 
-export type RequirementDescriptor = IBlockRequirementDescriptor | IClassRequirementDescriptor;
+export type ExclusionDescriptor = IBlockExclusionDescriptor | IClassExclusionDescriptor | ITagExclusionDescriptor;
 
-export type BlockOrClassRequirement = BlockRequirement | ClassRequirement;
-
-export interface IRequirementDescriptors {
-    [type: string /* DocType */]: RequirementDescriptor;
+export interface IExclusionDescriptors {
+    [type: string /* DocType */]: ExclusionDescriptor;
 }

@@ -19,19 +19,21 @@ import * as ts from "typescript";
 
 import * as Lint from "../../index";
 import { ALL, Location, LOCATION_INSTANCE, LOCATION_STATIC, Privacy, PRIVACY_PRIVATE, PRIVACY_PROTECTED } from "../completedDocsRule";
-import { Requirement } from "./requirement";
+import { Exclusion } from "./exclusion";
 
-export interface IClassRequirementDescriptor {
+export interface IClassExclusionDescriptor {
     locations?: Location[];
     privacies?: Privacy[];
 }
 
-export class ClassRequirement extends Requirement<IClassRequirementDescriptor> {
+export class ClassExclusion extends Exclusion<IClassExclusionDescriptor> {
     public readonly locations: Set<Location> = this.createSet(this.descriptor.locations);
     public readonly privacies: Set<Privacy> = this.createSet(this.descriptor.privacies);
 
-    public shouldNodeBeDocumented(node: ts.Declaration) {
-        return this.shouldLocationBeDocumented(node) && this.shouldPrivacyBeDocumented(node);
+    public excludes(node: ts.Declaration) {
+        return !(
+            this.shouldLocationBeDocumented(node)
+            && this.shouldPrivacyBeDocumented(node));
     }
 
     private shouldLocationBeDocumented(node: ts.Declaration) {

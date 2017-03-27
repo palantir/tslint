@@ -1,0 +1,17 @@
+{
+  "linterOptions": {
+    "typeCheck": true
+  },
+  "rules": {
+    "completed-docs": [
+      true,
+      {
+        "variables": {
+          "tags": {
+            "existence": ["deprecated"]
+          }
+        }
+      }
+    ]
+  }
+}

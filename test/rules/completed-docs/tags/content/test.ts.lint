@@ -1,0 +1,30 @@
+const CompletelyEmptyVariable = 0;
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Documentation must exist for variables.]
+
+/**
+ * 
+ */
+const ContentEmptyVariable = 1;
+      ~~~~~~~~~~~~~~~~~~~~~~~~ [Documentation must exist for variables.]
+
+/**
+ * @see
+ */
+const ContentMissingVariable = 2;
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~ [Documentation must exist for variables.]
+
+/**
+ * @see wat
+ */
+const ContentInvalidVariable = 3;
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~ [Documentation must exist for variables.]
+
+/**
+ * @see #123
+ */
+const ContentValidVariable = 4;
+
+/**
+ * ...
+ */
+const CommentBodyVariableRofl = 5;
