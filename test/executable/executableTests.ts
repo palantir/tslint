@@ -248,7 +248,8 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
     });
 
     describe("--type-check", () => {
-        it("exits with code 1 if --project is not passed", (done) => {
+        // TODO: #2405
+        it.skip("exits with code 1 if --project is not passed", (done) => {
             execCli(["--type-check"], (err) => {
                 assert.isNotNull(err, "process should exit with error");
                 assert.strictEqual(err.code, 2, "error code should be 2");

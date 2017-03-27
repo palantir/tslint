@@ -32,7 +32,8 @@ describe("TAP Formatter", () => {
         formatter = new Formatter();
     });
 
-    it("formats failures", () => {
+    // TODO: #2329
+    it.skip("formats failures", () => {
         const maxPosition = sourceFile.getFullWidth();
 
         const failures = [
