@@ -290,7 +290,7 @@ function parseRuleOptions(ruleConfigValue: any): Partial<IOptions> {
     } else if (typeof ruleConfigValue === "boolean") {
         // old style: boolean
         ruleArguments = [];
-        ruleSeverity = ruleConfigValue === true ? "error" : "off";
+        ruleSeverity = ruleConfigValue ? "error" : "off";
     } else if (ruleConfigValue.severity) {
         switch (ruleConfigValue.severity.toLowerCase()) {
             case "warn":

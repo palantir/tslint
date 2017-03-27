@@ -26,7 +26,7 @@ import {
 import { IOptions } from "./../src/language/rule/rule";
 import { createTempFile } from "./utils";
 
-describe.only("Configuration", () => {
+describe("Configuration", () => {
     describe("parseConfigFile", () => {
         it("parses empty config", () => {
             const rawConfig = {

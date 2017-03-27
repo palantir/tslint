@@ -43,10 +43,10 @@ export class Rule extends Lint.Rules.AbstractRule {
             errors or difficult to modify.`,
         optionsDescription: Lint.Utils.dedent`
             An optional upper limit for cyclomatic complexity can be specified. If no limit option
-            is provided a default value of $(Rule.DEFAULT_THRESHOLD) will be used.`,
+            is provided a default value of ${Rule.DEFAULT_THRESHOLD.toString()} will be used.`,
         options: {
             type: "number",
-            minimum: "$(Rule.MINIMUM_THRESHOLD)",
+            minimum: Rule.MINIMUM_THRESHOLD,
         },
         optionExamples: ["true", "[true, 20]"],
         type: "maintainability",
