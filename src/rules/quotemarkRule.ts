@@ -104,9 +104,9 @@ function walk(ctx: Lint.WalkContext<Options>) {
             }
             text = text.replace(new RegExp(`\\\\${actualQuoteMark}`, "g"), actualQuoteMark);
 
-            return ctx.addFailure(start, node.end, Rule.FAILURE_STRING(actualQuoteMark, expectedQuoteMark), ctx.createFix(
+            return ctx.addFailure(start, node.end, Rule.FAILURE_STRING(actualQuoteMark, expectedQuoteMark),
                 new Lint.Replacement(start, node.end - start, expectedQuoteMark + text + expectedQuoteMark),
-            ));
+            );
         }
         return ts.forEachChild(node, cb);
     });

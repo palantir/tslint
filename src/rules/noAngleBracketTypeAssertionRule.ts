@@ -49,10 +49,10 @@ function walk(ctx: Lint.WalkContext<void>) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (isTypeAssertion(node)) {
             const start = node.getStart(ctx.sourceFile);
-            ctx.addFailure(start, node.end, Rule.FAILURE_STRING, ctx.createFix(
+            ctx.addFailure(start, node.end, Rule.FAILURE_STRING, [
                 Lint.Replacement.appendText(node.end, ` as ${ node.type.getText(ctx.sourceFile) }`),
                 Lint.Replacement.deleteFromTo(start, node.expression.getStart(ctx.sourceFile)),
-            ));
+            ]);
         }
         return ts.forEachChild(node, cb);
     });
