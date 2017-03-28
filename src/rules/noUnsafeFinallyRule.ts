@@ -126,6 +126,8 @@ function jumpIsLocalToFinallyBlock(jump: JumpStatement): boolean {
 
             default:
                 if (utils.isFunctionScopeBoundary(parent)) {
+                    // Haven't seen TryStatement yet, so the function is inside it.
+                    // No jump statement can escape a function, so the jump is local.
                     return true;
                 }
         }
