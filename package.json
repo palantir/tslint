@@ -46,7 +46,7 @@
     "tsutils": "^1.4.0"
   },
   "peerDependencies": {
-    "typescript": ">=2.0.0 || >=2.0.0-dev || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev"
+    "typescript": ">=2.1.0 || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev || >=2.4.0-dev"
   },
   "devDependencies": {
     "@types/babel-code-frame": "^6.20.0",
@@ -70,7 +70,7 @@
     "rimraf": "^2.5.4",
     "tslint": "latest",
     "tslint-test-config-non-relative": "file:test/external/tslint-test-config-non-relative",
-    "typescript": "^2.2.1"
+    "typescript": "^2.2.2"
   },
   "license": "Apache-2.0",
   "engines": {
