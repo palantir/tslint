@@ -98,7 +98,8 @@ class TrailingCommaWalker extends Lint.AbstractWalker<Options> {
                     if ((node as ts.NewExpression).arguments === undefined) {
                         break;
                     }
-                    // falls through
+                    this.checkList((node as ts.CallExpression | ts.NewExpression).arguments!, node.end);
+                    break;
                 case ts.SyntaxKind.CallExpression:
                     this.checkList((node as ts.CallExpression | ts.NewExpression).arguments!, node.end);
                     break;

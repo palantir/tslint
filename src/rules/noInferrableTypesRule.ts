@@ -89,7 +89,8 @@ class NoInferrableTypesWalker extends Lint.AbstractWalker<IOptions> {
                         hasModifier(node.modifiers, ts.SyntaxKind.ReadonlyKeyword)) {
                         break;
                     }
-                    /* falls through*/
+                    this.checkDeclaration(node as ts.VariableLikeDeclaration);
+                    break;
                 case ts.SyntaxKind.VariableDeclaration:
                     this.checkDeclaration(node as ts.VariableLikeDeclaration);
             }
