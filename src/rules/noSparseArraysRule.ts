@@ -23,7 +23,7 @@ import * as Lint from "../index";
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
-        ruleName: "no-array-literal-hole",
+        ruleName: "no-sparse-arrays",
         description: "Forbids array literals to contain missing elements.",
         rationale: "Missing elements are probably an accidentally duplicated comma.",
         optionsDescription: "Not configurable.",
@@ -44,7 +44,13 @@ export class Rule extends Lint.Rules.AbstractRule {
 function walk(ctx: Lint.WalkContext<void>): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (!utils.isArrayLiteralExpression(node)) {
-            return ts.forEachChild(node, cb);
+            if (utils.isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.EqualsToken) {
+                // Ignore LHS of assignments.
+                traverseExpressionsInLHS(node.left, cb);
+                return cb(node.right);
+            } else {
+                return ts.forEachChild(node, cb);
+            }
         }
 
         for (const element of node.elements) {
@@ -56,4 +62,30 @@ function walk(ctx: Lint.WalkContext<void>): void {
             }
         }
     });
+}
+
+/** Traverse the LHS of an `=` expression, calling `cb` embedded default value, but ignoring binding patterns. */
+function traverseExpressionsInLHS(node: ts.Node, cb: (node: ts.Expression) => void): void {
+    switch (node.kind) {
+        case ts.SyntaxKind.ArrayLiteralExpression:
+            for (const e of (node as ts.ArrayLiteralExpression).elements) {
+                traverseExpressionsInLHS(e, cb);
+            }
+            break;
+
+        case ts.SyntaxKind.ObjectLiteralExpression:
+            for (const o of (node as ts.ObjectLiteralExpression).properties) {
+                traverseExpressionsInLHS(o, cb);
+            }
+            break;
+
+        case ts.SyntaxKind.BinaryExpression: {
+            const { left, operatorToken, right } = node as ts.BinaryExpression;
+            if (operatorToken.kind === ts.SyntaxKind.EqualsToken) {
+                traverseExpressionsInLHS(left, cb);
+                cb(right);
+            }
+            break;
+        }
+    }
 }

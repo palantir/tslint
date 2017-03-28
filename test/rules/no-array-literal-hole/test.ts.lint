@@ -1,5 +1,0 @@
-[1, , 3];
-   ~ [Array has a missing element.]
-
-// Destructuring allowed.
-const [x, , z] = arr;

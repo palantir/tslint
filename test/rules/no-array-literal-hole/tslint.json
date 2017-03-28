@@ -1,8 +1,0 @@
-{
-  "rules": {
-    "no-array-literal-hole": true
-  },
-  "jsRules": {
-    "no-array-literal-hole": true
-  }
-}
