@@ -355,6 +355,15 @@ function() {
     }
 }
 
+function() {
+    try {
+    } finally {
+        function f() {
+            return;
+        }
+    }
+}
+
 [return]: 'return' statements in finally blocks are forbidden.
 [throw]: 'throw' statements in finally blocks are forbidden.
 [break]: 'break' statements in finally blocks are forbidden.

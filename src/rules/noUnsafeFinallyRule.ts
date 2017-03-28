@@ -15,7 +15,9 @@
  * limitations under the License.
  */
 
+import * as utils from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -75,19 +77,17 @@ function walk(ctx: Lint.WalkContext<void>): void {
                 if (inFinally && !jumpIsLocalToFinallyBlock(node as JumpStatement)) {
                     ctx.addFailureAtNode(node, Rule.FAILURE_STRING(printJumpKind(node as JumpStatement)));
                 }
-                ts.forEachChild(node, cb);
-                break;
+                // falls through
 
             default:
-                ts.forEachChild(node, cb);
-                break;
+                return ts.forEachChild(node, cb);
         }
     });
 }
 
 function jumpIsLocalToFinallyBlock(jump: JumpStatement): boolean {
-    const isBreakOrContinue = jump.kind === ts.SyntaxKind.BreakStatement || jump.kind === ts.SyntaxKind.ContinueStatement;
-    const label = isBreakOrContinue ? (jump as ts.BreakStatement | ts.ContinueStatement).label : undefined;
+    const isBreakOrContinue = utils.isBreakOrContinueStatement(jump);
+    const label = isBreakOrContinue ? (jump as ts.BreakOrContinueStatement).label : undefined;
 
     let node: ts.Node = jump;
     // This should only be called inside a finally block, so we'll eventually reach the TryStatement case and return.
@@ -124,12 +124,10 @@ function jumpIsLocalToFinallyBlock(jump: JumpStatement): boolean {
                 break;
             }
 
-            case ts.SyntaxKind.ClassDeclaration:
-            case ts.SyntaxKind.ClassExpression:
-            case ts.SyntaxKind.FunctionDeclaration:
-            case ts.SyntaxKind.FunctionExpression:
-            case ts.SyntaxKind.ArrowFunction:
-                return true;
+            default:
+                if (utils.isFunctionScopeBoundary(parent)) {
+                    return true;
+                }
         }
 
         node = parent;
