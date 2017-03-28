@@ -28,8 +28,7 @@ describe("Rule Loader", () => {
     const srcRulesDir = "src/rules";
     const testRulesDir = "test/rules";
 
-    // TODO: #2404
-    it.skip("loads core rules", () => {
+    it("loads core rules", () => {
         const validConfiguration: IOptions[] = [
             { ruleName: "class-name", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
             { ruleName: "eofline", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
@@ -39,7 +38,7 @@ describe("Rule Loader", () => {
         ];
 
         const rules = loadRules(validConfiguration, new Map<string, IEnableDisablePosition[]>(), builtRulesDir);
-        assert.equal(rules.length, 4);
+        assert.equal(rules.length, 5);
     });
 
     it("ignores invalid rules", () => {
@@ -76,8 +75,7 @@ describe("Rule Loader", () => {
         assert.equal(rules.length, 1);
     });
 
-    // TODO: #2404
-    it.skip("works with rulesDirectory argument as an Array", () => {
+    it("works with rulesDirectory argument as an Array", () => {
         const validConfiguration: IOptions[] = [
             { ruleName: "class-name", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
             { ruleName: "eofline", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
@@ -87,7 +85,7 @@ describe("Rule Loader", () => {
         ];
 
         const rules = loadRules(validConfiguration, new Map<string, IEnableDisablePosition[]>(), [builtRulesDir]);
-        assert.equal(rules.length, 4);
+        assert.equal(rules.length, 5);
     });
 
     it("loads js rules", () => {
