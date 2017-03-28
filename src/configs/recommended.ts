@@ -81,7 +81,6 @@ export const rules = {
     "no-reference": true,
     "no-shadowed-variable": true,
     "no-string-literal": true,
-    "no-switch-case-fall-through": false,
     "no-trailing-whitespace": true,
     "no-unsafe-finally": true,
     "no-unused-expression": true,
@@ -126,7 +125,6 @@ export const rules = {
     "semicolon": {
         options: ["always"],
     },
-    "switch-default": true,
     "trailing-comma": {
         options: {
             multiline: "always",
@@ -213,7 +211,6 @@ export const jsRules = {
     "no-reference": true,
     "no-shadowed-variable": true,
     "no-string-literal": true,
-    "no-switch-case-fall-through": false,
     "no-trailing-whitespace": true,
     "no-unused-expression": true,
     // disable this rule as it is very heavy performance-wise and not that useful
@@ -241,7 +238,6 @@ export const jsRules = {
     "semicolon": {
         options: ["always"],
     },
-    "switch-default": true,
     "trailing-comma": {
         options: {
             multiline: "always",
