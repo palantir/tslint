@@ -27,6 +27,18 @@ export const rules = {
         options: ["array-simple"],
     },
     "arrow-parens": true,
+    "arrow-return-shorthand": true,
+    "ban-types": {
+        options: [
+            ["Object", "Avoid using the `Object` type. Did you mean `object`?"],
+            ["Function", "Avoid using the `Function` type. Prefer a specific function type, like `() => void`."],
+            ["Boolean", "Avoid using the `Boolean` type. Did you mean `boolean`?"],
+            ["Number", "Avoid using the `Number` type. Did you mean `number`?"],
+            ["String", "Avoid using the `String` type. Did you mean `string`?"],
+            ["Symbol", "Avoid using the `Symbol` type. Did you mean `symbol`?"],
+        ],
+    },
+    "callable-types": true,
     "class-name": true,
     "comment-format": {
         options: ["check-space"],
@@ -35,12 +47,14 @@ export const rules = {
     "cyclomatic-complexity": false,
     "eofline": true,
     "forin": true,
+    "import-spacing": true,
     "indent":  {
         options: ["spaces"],
     },
     "interface-name": {
         options: ["always-prefix"],
     },
+    "interface-over-type-literal": true,
     "jsdoc-format": true,
     "label-position": true,
     "max-classes-per-file": {
@@ -56,6 +70,7 @@ export const rules = {
         },
     },
     "new-parens": true,
+    "no-angle-bracket-type-assertion": true,
     "no-any": false,
     "no-arg": true,
     "no-bitwise": true,
@@ -73,16 +88,22 @@ export const rules = {
     },
     "no-construct": true,
     "no-debugger": true,
+    "no-duplicate-super": true,
     "no-empty": true,
+    "no-empty-interface": true,
     "no-eval": true,
     "no-internal-module": true,
+    "no-invalid-this": false,
+    "no-misused-new": true,
     "no-namespace": true,
     "no-parameter-properties": false,
     "no-reference": true,
     "no-shadowed-variable": true,
     "no-string-literal": true,
+    "no-string-throw": true,
     "no-switch-case-fall-through": false,
     "no-trailing-whitespace": true,
+    "no-unnecessary-initializer": true,
     "no-unsafe-finally": true,
     "no-unused-expression": true,
     // disable this rule as it is very heavy performance-wise and not that useful
@@ -107,7 +128,10 @@ export const rules = {
         options: ["ignore-for-loop"],
     },
     "only-arrow-functions": {
-        options: ["allow-declarations"],
+        options: [
+            "allow-declarations",
+            "allow-named-functions",
+        ],
     },
     "ordered-imports": {
         options: {
@@ -115,6 +139,7 @@ export const rules = {
             "named-imports-order": "case-insensitive",
         },
     },
+    "prefer-const": true,
     "prefer-for-of": true,
     "quotemark": {
         options: [
@@ -126,7 +151,15 @@ export const rules = {
     "semicolon": {
         options: ["always"],
     },
-    "switch-default": true,
+    "space-before-function-paren": {
+        options: {
+            anonymous: "never",
+            asyncArrow: "always",
+            constructor: "never",
+            method: "never",
+            named: "never",
+        },
+    },
     "trailing-comma": {
         options: {
             multiline: "always",
@@ -152,6 +185,8 @@ export const rules = {
             "variable-declaration": "onespace",
         }],
     },
+    "typeof-compare": true,
+    "unified-signatures": true,
     "use-isnan": true,
     "variable-name": {
         options: [
@@ -182,6 +217,7 @@ export const jsRules = {
     "curly": true,
     "eofline": true,
     "forin": true,
+    "import-spacing": true,
     "indent":  {
         options: ["spaces"],
     },
@@ -207,12 +243,14 @@ export const jsRules = {
     },
     "no-construct": true,
     "no-debugger": true,
+    "no-duplicate-super": true,
     "no-duplicate-variable": true,
     "no-empty": true,
     "no-eval": true,
     "no-reference": true,
     "no-shadowed-variable": true,
     "no-string-literal": true,
+    "no-string-throw": true,
     "no-switch-case-fall-through": false,
     "no-trailing-whitespace": true,
     "no-unused-expression": true,
@@ -241,7 +279,15 @@ export const jsRules = {
     "semicolon": {
         options: ["always"],
     },
-    "switch-default": true,
+    "space-before-function-paren": {
+        options: {
+            anonymous: "never",
+            asyncArrow: "always",
+            constructor: "never",
+            method: "never",
+            named: "never",
+        },
+    },
     "trailing-comma": {
         options: {
             multiline: "always",

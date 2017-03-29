@@ -37,7 +37,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         hasFix: true,
         optionsDescription: Lint.Utils.dedent`
             An optional object containing the property "destructuring" with two possible values:
-            
+
             * "${OPTION_DESTRUCTURING_ANY}" (default) - If any variable in destructuring can be const, this rule warns for those variables.
             * "${OPTION_DESTRUCTURING_ALL}" - Only warns if all variables in destructuring can be const.`,
         options: {
@@ -304,9 +304,7 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
                     !info.declarationInfo.reassignedSiblings &&
                     info.declarationInfo.isBlockScoped &&
                     !appliedFixes.has(info.declarationInfo.declarationList)) {
-                    fix = this.createFix(
-                        new Lint.Replacement(info.declarationInfo.declarationList!.getStart(this.sourceFile), 3, "const"),
-                    );
+                    fix = new Lint.Replacement(info.declarationInfo.declarationList!.getStart(this.sourceFile), 3, "const");
                     // add only one fixer per VariableDeclarationList
                     appliedFixes.add(info.declarationInfo.declarationList);
                 }

@@ -74,7 +74,7 @@ class Walker extends Lint.ProgramAwareRuleWalker {
             }
         }
 
-        this.addFailureAtNode(expression, Rule.FAILURE_STRING(negate), this.createFix(...replacements));
+        this.addFailureAtNode(expression, Rule.FAILURE_STRING(negate), replacements);
     }
 }
 

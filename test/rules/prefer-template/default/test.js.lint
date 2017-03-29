@@ -1,0 +1,2 @@
+"a" + x;
+~~~~~~~ [Use a template literal instead of concatenating with a string literal.]

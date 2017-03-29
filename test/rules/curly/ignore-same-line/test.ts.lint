@@ -1,3 +1,5 @@
+if (a == 1) console.log("a");
+
 if (x == 3) {
     console.log("x");
 }
@@ -11,6 +13,8 @@ if (y == 4)
     ~~~~~~~~~~~~~~~~~~~~~~
         console.log("z");
 ~~~~~~~~~~~~~~~~~~~~~~~~~ [if statements must be braced]
+
+for (h = 0; h < 1; ++h) console.log("h");
 
 for (i = 0; i < 1; ++i) {
     console.log("i");
@@ -26,10 +30,21 @@ for (j = 0; j < 1; ++j)
       console.log("k");
 ~~~~~~~~~~~~~~~~~~~~~~~ [for statements must be braced]
 
+for (k1 in l1) console.log("l1");
+
 for (k in l) // failure
 ~~~~~~~~~~~~~~~~~~~~~~~
     console.log("l");
 ~~~~~~~~~~~~~~~~~~~~~ [for statements must be braced]
+
+for (k3 of l3) console.log("l3");
+
+for (k4 of l4) // failure
+~~~~~~~~~~~~~~~~~~~~~~~~~
+    console.log("l4");
+~~~~~~~~~~~~~~~~~~~~~~ [for statements must be braced]
+
+while (m < 0) console.log("q");
 
 while (m < 0) {
     console.log("q");
@@ -45,8 +60,14 @@ while (n < 0) // failure
     console.log("s");
 ~~~~~~~~~~~~~~~~~~~~~ [while statements must be braced]
 
+do console.log("m1");
+while (i == 1);
+
+do { console.log("m2"); }
+while (i == 1);
+
 do {
-    console.log("m");
+    console.log("m3");
 } while (i == 1);
 
 do
@@ -64,8 +85,7 @@ while (k == 1);
 
 if (true) {
     console.log("x");
-} else console.log("y"); // failure
-  ~~~~~~~~~~~~~~~~~~~~~~            [else statements must be braced]
+} else console.log("y");
 
 if (true) {
     console.log("x");

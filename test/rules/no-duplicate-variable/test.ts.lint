@@ -1,5 +1,9 @@
 var duplicated = 1;
 
+function f(x) {
+    var x;
+}
+
 class Test {
     private myFunc() {
         var notDuplicated = 123,

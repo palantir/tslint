@@ -15,9 +15,16 @@
  * limitations under the License.
  */
 
+import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+
+interface Options {
+    statements: boolean;
+    parameters: boolean;
+    arguments: boolean;
+}
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -54,69 +61,70 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_SUFFIX = " are not aligned";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const alignWalker = new AlignWalker(sourceFile, this.getOptions());
-        return this.applyWithWalker(alignWalker);
+        return this.applyWithWalker(new AlignWalker(sourceFile, this.ruleName, {
+            arguments: this.ruleArguments.indexOf(Rule.ARGUMENTS_OPTION) !== -1,
+            parameters: this.ruleArguments.indexOf(Rule.PARAMETERS_OPTION) !== -1,
+            statements: this.ruleArguments.indexOf(Rule.STATEMENTS_OPTION) !== -1,
+        }));
     }
 }
 
-class AlignWalker extends Lint.RuleWalker {
-    public visitConstructorDeclaration(node: ts.ConstructorDeclaration) {
-        this.checkAlignment(Rule.PARAMETERS_OPTION, node.parameters);
-        super.visitConstructorDeclaration(node);
+class AlignWalker extends Lint.AbstractWalker<Options> {
+    public walk(sourceFile: ts.SourceFile) {
+        const cb = (node: ts.Node): void => {
+            if (this.options.statements && utils.isBlockLike(node)) {
+                this.checkAlignment(node.statements, Rule.STATEMENTS_OPTION);
+            } else if (this.options.parameters) {
+                switch (node.kind) {
+                    case ts.SyntaxKind.FunctionDeclaration:
+                    case ts.SyntaxKind.FunctionExpression:
+                    case ts.SyntaxKind.Constructor:
+                    case ts.SyntaxKind.MethodDeclaration:
+                    case ts.SyntaxKind.ArrowFunction:
+                    case ts.SyntaxKind.CallSignature:
+                    case ts.SyntaxKind.ConstructSignature:
+                    case ts.SyntaxKind.MethodSignature:
+                    case ts.SyntaxKind.FunctionType:
+                    case ts.SyntaxKind.ConstructorType:
+                        this.checkAlignment((node as ts.SignatureDeclaration).parameters, Rule.PARAMETERS_OPTION);
+                }
+            } else if (this.options.arguments &&
+                       (node.kind === ts.SyntaxKind.CallExpression ||
+                        node.kind === ts.SyntaxKind.NewExpression && (node as ts.NewExpression).arguments !== undefined)) {
+                this.checkAlignment((node as ts.CallExpression | ts.NewExpression).arguments, Rule.ARGUMENTS_OPTION);
+            }
+            return ts.forEachChild(node, cb);
+        };
+        return cb(sourceFile);
     }
 
-    public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
-        this.checkAlignment(Rule.PARAMETERS_OPTION, node.parameters);
-        super.visitFunctionDeclaration(node);
-    }
-
-    public visitFunctionExpression(node: ts.FunctionExpression) {
-        this.checkAlignment(Rule.PARAMETERS_OPTION, node.parameters);
-        super.visitFunctionExpression(node);
-    }
-
-    public visitMethodDeclaration(node: ts.MethodDeclaration) {
-        this.checkAlignment(Rule.PARAMETERS_OPTION, node.parameters);
-        super.visitMethodDeclaration(node);
-    }
-
-    public visitCallExpression(node: ts.CallExpression) {
-        this.checkAlignment(Rule.ARGUMENTS_OPTION, node.arguments);
-        super.visitCallExpression(node);
-    }
-
-    public visitNewExpression(node: ts.NewExpression) {
-        this.checkAlignment(Rule.ARGUMENTS_OPTION, node.arguments);
-        super.visitNewExpression(node);
-    }
-
-    public visitBlock(node: ts.Block) {
-        this.checkAlignment(Rule.STATEMENTS_OPTION, node.statements);
-        super.visitBlock(node);
-    }
-
-    private checkAlignment(kind: string, nodes: ts.Node[]) {
-        if (nodes == null || nodes.length === 0 || !this.hasOption(kind)) {
+    private checkAlignment(nodes: ts.Node[], kind: string) {
+        if (nodes.length <= 1) {
             return;
         }
+        const sourceFile = this.sourceFile;
 
-        let prevPos = this.getLineAndCharacterOfPosition(nodes[0].getStart());
-        const alignToColumn = prevPos.character;
+        let pos = ts.getLineAndCharacterOfPosition(sourceFile, nodes[0].getStart(sourceFile));
+        const alignToColumn = pos.character;
+        let line = pos.line;
 
         // skip first node in list
-        for (const node of nodes.slice(1)) {
-            const curPos = this.getLineAndCharacterOfPosition(node.getStart());
-            if (curPos.line !== prevPos.line && curPos.character !== alignToColumn) {
-                const diff = alignToColumn - curPos.character;
-                let fix;
+        for (let i = 1; i < nodes.length; ++i) {
+            const node = nodes[i];
+            const start = node.getStart(sourceFile);
+            pos = ts.getLineAndCharacterOfPosition(sourceFile, start);
+            if (line !== pos.line && pos.character !== alignToColumn) {
+                const diff = alignToColumn - pos.character;
+                let fix: Lint.Fix | undefined;
                 if (0 < diff) {
-                    fix = this.createFix(this.appendText(node.getStart(), " ".repeat(diff)));
-                } else {
-                    fix = this.createFix(this.deleteText(node.getStart() + diff, -diff));
+                    fix = Lint.Replacement.appendText(start, " ".repeat(diff));
+                } else if (node.pos <= start + diff && /^\s+$/.test(sourceFile.text.substring(start + diff, start))) {
+                    // only delete text if there is only whitespace
+                    fix = Lint.Replacement.deleteText(start + diff, -diff);
                 }
-                this.addFailureAtNode(node, kind + Rule.FAILURE_STRING_SUFFIX, fix);
+                this.addFailure(start, node.end, kind + Rule.FAILURE_STRING_SUFFIX, fix);
             }
-            prevPos = curPos;
+            line = pos.line;
         }
     }
 }

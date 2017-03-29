@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "prefer-template": [true]
+  },
+  "jsRules": {
+    "prefer-template": [true]
+  }
+}

@@ -80,10 +80,11 @@ function walk(ctx: Lint.WalkContext<Option>): void {
         const parens = elementType.kind === ts.SyntaxKind.ParenthesizedType ? 1 : 0;
         // Add a space if the type is preceded by 'as' and the node has no leading whitespace
         const space = !parens && parent!.kind === ts.SyntaxKind.AsExpression && node.getStart() === node.getFullStart();
-        const fix = ctx.createFix(
+        const fix = [
             new Lint.Replacement(elementType.getStart(), parens, (space ? " " : "") + "Array<"),
             // Delete the square brackets and replace with an angle bracket
-            Lint.Replacement.replaceFromTo(elementType.getEnd() - parens, node.getEnd(), ">"));
+            Lint.Replacement.replaceFromTo(elementType.getEnd() - parens, node.getEnd(), ">")
+        ];
         ctx.addFailureAtNode(node, failureString, fix);
     }
 
@@ -97,8 +98,8 @@ function walk(ctx: Lint.WalkContext<Option>): void {
         const failureString = option === "array" ? Rule.FAILURE_STRING_ARRAY : Rule.FAILURE_STRING_ARRAY_SIMPLE;
         if (!typeArguments || typeArguments.length === 0) {
             // Create an 'any' array
-            ctx.addFailureAtNode(node, failureString,
-                ctx.createFix(Lint.Replacement.replaceFromTo(node.getStart(), node.getEnd(), "any[]")));
+            const fix = Lint.Replacement.replaceFromTo(node.getStart(), node.getEnd(), "any[]");
+            ctx.addFailureAtNode(node, failureString, fix);
             return;
         }
 
@@ -108,11 +109,12 @@ function walk(ctx: Lint.WalkContext<Option>): void {
 
         const type = typeArguments[0];
         const parens = typeNeedsParentheses(type);
-        const fix = ctx.createFix(
+        const fix = [
             // Delete 'Array<'
             Lint.Replacement.replaceFromTo(node.getStart(), type.getStart(), parens ? "(" : ""),
             // Delete '>' and replace with '[]
-            Lint.Replacement.replaceFromTo(type.getEnd(), node.getEnd(), parens ? ")[]" : "[]"));
+            Lint.Replacement.replaceFromTo(type.getEnd(), node.getEnd(), parens ? ")[]" : "[]"),
+        ];
         ctx.addFailureAtNode(node, failureString, fix);
     }
 }

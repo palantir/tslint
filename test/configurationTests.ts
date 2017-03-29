@@ -26,7 +26,7 @@ import {
 import { IOptions } from "./../src/language/rule/rule";
 import { createTempFile } from "./utils";
 
-describe.only("Configuration", () => {
+describe("Configuration", () => {
     describe("parseConfigFile", () => {
         it("parses empty config", () => {
             const rawConfig = {
@@ -80,14 +80,14 @@ describe.only("Configuration", () => {
             expected.rules.set("i", { ruleArguments: undefined, ruleSeverity: "warning" });
             expected.rules.set("j", { ruleArguments: undefined, ruleSeverity: "error" });
             expected.rules.set("k", { ruleArguments: undefined, ruleSeverity: "off" });
-            expected.rules.set("l", { ruleArguments: [1], ruleSeverity: undefined });
-            expected.rules.set("m", { ruleArguments: [2], ruleSeverity: undefined });
-            expected.rules.set("n", { ruleArguments: [{ no: false }], ruleSeverity: undefined });
+            expected.rules.set("l", { ruleArguments: [1], ruleSeverity: "error" });
+            expected.rules.set("m", { ruleArguments: [2], ruleSeverity: "error" });
+            expected.rules.set("n", { ruleArguments: [{ no: false }], ruleSeverity: "error" });
             expected.rules.set("o", { ruleArguments: [1], ruleSeverity: "warning" });
             expected.rules.set("p", { ruleArguments: [], ruleSeverity: "off" });
-            expected.rules.set("q", { ruleArguments: undefined, ruleSeverity: undefined });
-            expected.rules.set("r", { ruleArguments: undefined, ruleSeverity: "off" });
-            expected.rules.set("s", { ruleArguments: undefined, ruleSeverity: undefined });
+            expected.rules.set("q", { ruleArguments: undefined, ruleSeverity: "error" });
+            expected.rules.set("r", { ruleArguments: undefined, ruleSeverity: "error" });
+            expected.rules.set("s", { ruleArguments: undefined, ruleSeverity: "error" });
             assertConfigEquals(parseConfigFile(rawConfig), expected);
         });
 
@@ -100,6 +100,27 @@ describe.only("Configuration", () => {
                 ruleName: "s",
                 ruleSeverity: "error",
             });
+        });
+    });
+
+    describe("defaultSeverity", () => {
+        it("uses defaultSeverity if severity is default", () => {
+            const rawConfig = {
+                defaultSeverity: "warning",
+                rules: {
+                    a: { severity: "error" },
+                    b: { severity: "warning" },
+                    c: { severity: "off" },
+                    d: { severity: "default" },
+                },
+            };
+
+            const expected = getEmptyConfig();
+            expected.rules.set("a", { ruleArguments: undefined, ruleSeverity: "error" });
+            expected.rules.set("b", { ruleArguments: undefined, ruleSeverity: "warning" });
+            expected.rules.set("c", { ruleArguments: undefined, ruleSeverity: "off" });
+            expected.rules.set("d", { ruleArguments: undefined, ruleSeverity: "warning" });
+            assertConfigEquals(parseConfigFile(rawConfig), expected);
         });
     });
 
