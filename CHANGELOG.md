@@ -140,9 +140,6 @@ Thanks to our contributors!
 
 - Brian Olore
 - Andy Hanson
-- Andy
-- Noah Chen
-- Adi Dahiya
 - Chris Barr
 - Klaus Meinhardt
 - bumbleblym
