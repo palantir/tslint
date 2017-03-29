@@ -7,9 +7,8 @@ v5.0.0
 - **BREAKING CHANGES**
   - Minimum version of TypeScript version now 2.1.0 (#2425)
   - [recommended-rules] Added new rules to the recommended set (#2424)
-  - [formatter] The output of these formatters have changed because lint rule severity is configurable, defaulting to "error"
-       - `msbuildFormatter` was outputting all failures as "warning". This is now configurable, and defaults to "error".
-       - `pmdFormatter` was outputting all failures as priority 1. Now, it uses _priority 3_ for "error" and _priority 4_ for "warning"
+  - [formatter] `msbuildFormatter` was outputting all failures as "warning". This is now configurable, and defaults to "error".
+  - [formatter] `pmdFormatter` was outputting all failures as priority 1. Now, it uses _priority 3_ for "error" (default) and _priority 4_ for "warning"
   - [removed-rule] `no-unused-new` removed, with logic moved into `no-unused-expression` (#2269)
   - [rule-change] `no-trailing-whitespace` now checks template strings by default. Use the new options `ignore-template-strings` to restore the old behavior. (#2359)
   - These changes affect custom rules:
