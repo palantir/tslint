@@ -42,7 +42,8 @@ v5.0.0
 
 - [feature] The severity level of rules are now individually configurable. Default severity can also be configured.  (#629, #345)
 
-    - Valid values for `severity`: `error | warn | warning | none | off`
+    - Valid values for `severity`: `default` | `error | warn | warning | none | off`
+    - Valid values for `defaultSeverity`: `error | warn | warning | none | off`
     - Old style:
 
     ```json
