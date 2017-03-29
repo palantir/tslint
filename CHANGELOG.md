@@ -1,17 +1,44 @@
 Change Log
 ===
 
-<!--
-
 v5.0.0
 ---
 
-- **BREAKING CHANGES**
-    - The severity level of rules is now configurable and defaults to severity "error"
-    - The following formatters have changed their outputs:
-        - msbuildFormatter - default was "warning"; it is now "error"
-        - pmdFormatter - default was priority 1; it is now "error" (priority 3). If set to "warning", it will output priority 4
-- [enhancement] Enable WARN with new config file format (#629, #345)
+### :fire: Breaking changes
+
+- The severity level of rules is now configurable and defaults to severity "error"
+- The following formatters have changed their outputs:
+    - msbuildFormatter - default was "warning"; it is now "error"
+    - pmdFormatter - default was priority 1; it is now "error" (priority 3). If set to "warning", it will output priority 4
+- Minimum version of TypeScript version now 2.1.0 (#2425)
+- Removed `no-unused-new` rule, with logic moved into `no-unused-expression` (#2269)
+
+##### API breaks for custom rules
+
+- Removed method `skip` from `RuleWalker` (#2313)
+- Removed all use of the TypeScript Language Service, use only Program APIs instead (#2235)
+
+    - This means that some rules that previously worked without the type checker _now require it_. This includes:
+        - `no-unused-variable`
+        - `no-use-before-declare`
+
+    - This breaks custom rule compilation. If your rule was not using the `ts.LanguageService` APIs, the migration is quite simple:
+
+    ```
+    - public applyWithProgram(srcFile: ts.SourceFile, langSvc: ts.LanguageService): Lint.RuleFailure[] {
+    -     return this.applyWithWalker(new Walker(srcFile, this.getOptions(), langSvc.getProgram()));
+    + public applyWithProgram(srcFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+    +     return this.applyWithWalker(new Walker(srcFile, this.getOptions(), program));
+    ```
+
+- Removed `createFix`. Replacements should be passed directly into addFailure. (#2403)
+- Removed deprecated `scanAllTokens` and `skippableTokenAwareRuleWalker` (#2370)
+- `no-trailing-whitespace` now checks template strings by default. Use the new options `ignore-template-strings` to restore the old behavior. (#2359)
+
+### :tada: Notable features & enhancements
+
+- [feature] Configurable rule severities with new config file schema (#629, #345)
+
     - Valid values for `severity`: `error | warn | warning | none | off`
     - Old style:
 
@@ -42,7 +69,99 @@ v5.0.0
     }
     ```
 
--->
+Full list of changes:
+
+- [api] Added class `OptionallyTypedRule`, which allows rule authors to write a rule that applies when typing is either enabled or disabled (#2300)
+- [bugfix] `prefer-function-over-method` now ignores abstract methods (#2307)
+- [bugfix] `arrow-parens` with option `ban-single-arg-parens` now correctly handles functions with return type annotation (#2265)
+- [bugfix] exclude overload signatures from `prefer-function-over-method` (#2315)
+- [bugfix] `use-isnan` now applies only to comparison operators (#2317)
+- [bugfix] `file-header-rule` now handles single-line comments correctly (#2320)
+- [bugfix] `newline-before-return`: fix handling of blank lines between comments (#2321)
+- [bugfix] No longer enforce trailing commas in type parameters and tuple types. Fixes: #1905 (#2236)
+- [bugfix] don't fix `align` if it would remove code (#2379)
+- [bugfix] `unified-signatures` now recognizes rest parameters (#2342)
+- [bugfix] `no-inferrable-types` don't warn for inferrable type on readonly property (#2312)
+- [bugfix] `trailing-comma` no longer crashes on new without parentheses (e.g. `new Foo`) (#2389)
+- [bugfix] `semicolon` Ignore comments when checking for unnecessary semicolon (#2240)
+- [bugfix] `semicolon` Don't report unnecessary semicolon when followed by regex literal (#2240)
+- [bugfix] exit with 0 on type check errors when `--force` is specified (#2322)
+- [bugfix] `--test` now correctly strips single quotes from patterns on windows (#2322)
+- [bugfix] only fix initialized variables (#2219)
+- [bugfix] correctly handle variables shadowed by parameters and catched exceptions (#2219)
+- [bugfix] don't warn if one variable in a for loop initializer can not be const (#2219)
+- [bugfix] handle more cases in destructuring (#2219)
+- [bugfix] `no-unused-expression` allow comma separated assignments (#2269)
+- [bugfix] consider 'object' as a simple type in array-type rule (#2353)
+- [chore] removed update-notifier dependency (#2262)
+- [development] allow rule tests to specify version requirement for typescript (#2323)
+- [enhancement] `ignore-properties` option of `no-inferrable-types` now also ignores parameter properties (#2312)
+- [enhancement]: added new rules to the recommended set (#2424)
+- [enhancement] `unified-signatures` now displays line number of the overload to unify if there are more than 2 overloads (#2270)
+- [enhancement] New checks for CallSignature and NamedExports (#2236)
+- [enhancement] `semicolon` New check for export statements, function overloads and shorthand module declaration (#2240)
+- [enhancement] `semicolon` Report unnecessary semicolons in classes and in statement position (for option "always" too) (#2240)
+- [enhancement] `semicolon` check for semicolon after method overload (#2240)
+- [enhancement] check statement alignment for all blocks (#2379)
+- [enhancement] check parameter alignment for all signatures (#2379)
+- [enhancement] `--test` can handle multiple paths at once (#2322)
+- [enhancement] `only-arrow-functions` allow functions that use `this` in the body (#2229)
+- [enhancement] print error when `--type-check` is used without `--project` (#2322)
+- [enhancement] don't print stack trace on type check error (#2322)
+- [enhancement] show warnings for `var` (#2219)
+- [enhancement] fixer of `quotemark` unescapes original quotemark (e.g. `'\''` -> `"'"`) (#2359)
+- [enhancement] `no-unused-expression` allow indirect eval `(0, eval)("");` (#2269)
+- [enhancement] `no-unused-expression` checking for unused new can now use option `allow-fast-null-checks` (#2269)
+- [enhancement] `no-unused-expression` find unused comma separated expressions in all locations of the code (#2269)
+- [enhancement] `no-unused-expression` find unused expressions inside void expression (#2269)
+- [enhancement] added `-p` as shorthand for `--project` to be consistent with `tsc` (#2322)
+- [enhancement] Peer dependency support dev versions of typescript (#2287)
+- [new-config-option] Adds `defaultSeverity` with options `error`, `warning`, and `off`. (#2416)
+- [new-fixer] `linebreak-style` (#2394)
+- [new-fixer] `eofline` (#2393)
+- [new-formatter] TAP formatter (#2325)
+- [new-rule-option] `no-unused-expression` adds option `allow-tagged-template` to allow tagged templates for side effects (#2269)
+- [new-rule-option] `no-unused-expression` adds option `allow-new` to allow `new` without using the new object (#2269)
+- [new-rule-option] `member-access` adds `no-public` option (#2247)
+- [new-rule-option] `curly` added option `ignore-same-line` (#2334)
+- [new-rule-option] `{destructuring: "all"}` to only warn if all variables in a destructuring can be const (#2219)
+- [new-rule-option] added `ignore-template-strings` to `no-trailing-whitespace` (#2359)
+- [new-rule] `prefer-template` (#2243)
+- [new-rule] `return-undefined` (#2251)
+- [new-rule] `no-reference-import` (#2273)
+- [new-rule] `no-unnecessary-callback-wrapper` (#2249)
+- [no-log] internal (#2344)
+- [no-log] (#2298)
+- [no-log] (#2386)
+- [no-log] the original rewrite it not released yet, so there is no need to add another changelog entry (#2343)
+- [no-log] (#2423)
+- [no-log] Just a refactor. (#2372)
+- [no-log] (#2377)
+- [no-log] (#2380)
+- [no-log] (#2378)
+- [no-log] (#2361)
+- [no-log] this follows #1738 (#2284)
+- [rule-update] `array-type` now consider `undefined` and `never` as simple types, allowing `undefined[]` and `never[]` (#1843)
+
+Thanks to our contributors!
+
+- Brian Olore
+- Andy Hanson
+- Andy
+- Noah Chen
+- Adi Dahiya
+- Chris Barr
+- Klaus Meinhardt
+- bumbleblym
+- Josh Goldberg
+- James Clark
+- vilicvane
+- Aleksandr Filatov
+- Matt Banz
+- Karol Janyst
+- Mike Deverell
+- Alexander James Phillips
+- Irfan Hudda
 
 v4.5.1
 ---
