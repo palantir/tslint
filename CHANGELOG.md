@@ -4,7 +4,7 @@ Change Log
 v5.0.0
 ---
 
-### :fire: Breaking changes
+## :fire: Breaking changes
 
 - The severity level of rules is now configurable and defaults to severity "error"
 - The following formatters have changed their outputs:
@@ -13,7 +13,7 @@ v5.0.0
 - Minimum version of TypeScript version now 2.1.0 (#2425)
 - Removed `no-unused-new` rule, with logic moved into `no-unused-expression` (#2269)
 
-##### API breaks for custom rules
+### API breaks for custom rules
 
 - Removed method `skip` from `RuleWalker` (#2313)
 - Removed all use of the TypeScript Language Service, use only Program APIs instead (#2235)
@@ -35,7 +35,7 @@ v5.0.0
 - Removed deprecated `scanAllTokens` and `skippableTokenAwareRuleWalker` (#2370)
 - `no-trailing-whitespace` now checks template strings by default. Use the new options `ignore-template-strings` to restore the old behavior. (#2359)
 
-### :tada: Notable features & enhancements
+## :tada: Notable features & enhancements
 
 - [feature] Configurable rule severities with new config file schema (#629, #345)
 
@@ -69,7 +69,15 @@ v5.0.0
     }
     ```
 
-Full list of changes:
+- [new-rule] `prefer-template` (#2243)
+- [new-rule] `return-undefined` (#2251)
+- [new-rule] `no-reference-import` (#2273)
+- [new-rule] `no-unnecessary-callback-wrapper` (#2249)
+- [new-fixer] `linebreak-style` (#2394)
+- [new-fixer] `eofline` (#2393)
+
+
+## Full list of changes
 
 - [api] Added class `OptionallyTypedRule`, which allows rule authors to write a rule that applies when typing is either enabled or disabled (#2300)
 - [bugfix] `prefer-function-over-method` now ignores abstract methods (#2307)
@@ -117,8 +125,6 @@ Full list of changes:
 - [enhancement] added `-p` as shorthand for `--project` to be consistent with `tsc` (#2322)
 - [enhancement] Peer dependency support dev versions of typescript (#2287)
 - [new-config-option] Adds `defaultSeverity` with options `error`, `warning`, and `off`. (#2416)
-- [new-fixer] `linebreak-style` (#2394)
-- [new-fixer] `eofline` (#2393)
 - [new-formatter] TAP formatter (#2325)
 - [new-rule-option] `no-unused-expression` adds option `allow-tagged-template` to allow tagged templates for side effects (#2269)
 - [new-rule-option] `no-unused-expression` adds option `allow-new` to allow `new` without using the new object (#2269)
@@ -126,21 +132,6 @@ Full list of changes:
 - [new-rule-option] `curly` added option `ignore-same-line` (#2334)
 - [new-rule-option] `{destructuring: "all"}` to only warn if all variables in a destructuring can be const (#2219)
 - [new-rule-option] added `ignore-template-strings` to `no-trailing-whitespace` (#2359)
-- [new-rule] `prefer-template` (#2243)
-- [new-rule] `return-undefined` (#2251)
-- [new-rule] `no-reference-import` (#2273)
-- [new-rule] `no-unnecessary-callback-wrapper` (#2249)
-- [no-log] internal (#2344)
-- [no-log] (#2298)
-- [no-log] (#2386)
-- [no-log] the original rewrite it not released yet, so there is no need to add another changelog entry (#2343)
-- [no-log] (#2423)
-- [no-log] Just a refactor. (#2372)
-- [no-log] (#2377)
-- [no-log] (#2380)
-- [no-log] (#2378)
-- [no-log] (#2361)
-- [no-log] this follows #1738 (#2284)
 - [rule-update] `array-type` now consider `undefined` and `never` as simple types, allowing `undefined[]` and `never[]` (#1843)
 
 Thanks to our contributors!
