@@ -19,6 +19,7 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
+type Option = "array" | "generic" | "array-simple";
 const OPTION_ARRAY = "array";
 const OPTION_GENERIC = "generic";
 const OPTION_ARRAY_SIMPLE = "array-simple";
@@ -51,83 +52,118 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_GENERIC_SIMPLE = "Array type using 'T[]' is forbidden for non-simple types. Use 'Array<T>' instead.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const alignWalker = new ArrayTypeWalker(sourceFile, this.getOptions());
-        return this.applyWithWalker(alignWalker);
+        return this.applyWithFunction(sourceFile, walk, this.ruleArguments[0]);
     }
 }
 
-class ArrayTypeWalker extends Lint.RuleWalker {
-    public visitArrayType(node: ts.ArrayTypeNode) {
-        const typeName = node.elementType;
-        if (this.hasOption(OPTION_GENERIC) || this.hasOption(OPTION_ARRAY_SIMPLE) && !this.isSimpleType(typeName)) {
-            const failureString = this.hasOption(OPTION_GENERIC) ? Rule.FAILURE_STRING_GENERIC : Rule.FAILURE_STRING_GENERIC_SIMPLE;
-            const parens = typeName.kind === ts.SyntaxKind.ParenthesizedType ? 1 : 0;
-            // Add a space if the type is preceded by 'as' and the node has no leading whitespace
-            const space = !parens && node.parent!.kind === ts.SyntaxKind.AsExpression &&
-                node.getStart() === node.getFullStart() ? " " : "";
-            const fix = [
-                this.createReplacement(typeName.getStart(), parens, space + "Array<"),
-                // Delete the square brackets and replace with an angle bracket
-                this.createReplacement(typeName.getEnd() - parens, node.getEnd() - typeName.getEnd() + parens, ">"),
-            ];
-            this.addFailureAtNode(node, failureString, fix);
-        }
-
-        super.visitArrayType(node);
-    }
-
-    public visitTypeReference(node: ts.TypeReferenceNode) {
-        const typeName = node.typeName.getText();
-        if (typeName === "Array" && (this.hasOption(OPTION_ARRAY) || this.hasOption(OPTION_ARRAY_SIMPLE))) {
-            const failureString = this.hasOption(OPTION_ARRAY) ? Rule.FAILURE_STRING_ARRAY : Rule.FAILURE_STRING_ARRAY_SIMPLE;
-            const typeArgs = node.typeArguments;
-            if (!typeArgs || typeArgs.length === 0) {
-                // Create an 'any' array
-                const fix = this.createReplacement(node.getStart(), node.getWidth(), "any[]");
-                this.addFailureAtNode(node, failureString, fix);
-            } else if (typeArgs && typeArgs.length === 1 && (!this.hasOption(OPTION_ARRAY_SIMPLE) || this.isSimpleType(typeArgs[0]))) {
-                const type = typeArgs[0];
-                const typeStart = type.getStart();
-                const typeEnd = type.getEnd();
-                const parens = type.kind === ts.SyntaxKind.UnionType ||
-                    type.kind === ts.SyntaxKind.FunctionType || type.kind === ts.SyntaxKind.IntersectionType;
-                const fix = [
-                    // Delete Array and the first angle bracket
-                    this.createReplacement(node.getStart(), typeStart - node.getStart(), parens ? "(" : ""),
-                    // Delete the last angle bracket and replace with square brackets
-                    this.createReplacement(typeEnd, node.getEnd() - typeEnd, (parens ? ")" : "") + "[]"),
-                ];
-                this.addFailureAtNode(node, failureString, fix);
-            }
-        }
-
-        super.visitTypeReference(node);
-    }
-
-    private isSimpleType(nodeType: ts.TypeNode) {
-        switch (nodeType.kind) {
-            case ts.SyntaxKind.AnyKeyword:
+function walk(ctx: Lint.WalkContext<Option>): void {
+    const { sourceFile, options: option } = ctx;
+    return ts.forEachChild(sourceFile, function cb(node): void {
+        switch (node.kind) {
             case ts.SyntaxKind.ArrayType:
-            case ts.SyntaxKind.BooleanKeyword:
-            case ts.SyntaxKind.NullKeyword:
-            case ts.SyntaxKind.UndefinedKeyword:
-            case ts.SyntaxKind.NumberKeyword:
-            case ts.SyntaxKind.StringKeyword:
-            case ts.SyntaxKind.SymbolKeyword:
-            case ts.SyntaxKind.VoidKeyword:
-            case ts.SyntaxKind.NeverKeyword:
-                return true;
+                checkArrayType(node as ts.ArrayTypeNode);
+                break;
             case ts.SyntaxKind.TypeReference:
-                // TypeReferences must be non-generic or be another Array with a simple type
-                const node = nodeType as ts.TypeReferenceNode;
-                const typeArgs = node.typeArguments;
-                if (!typeArgs || typeArgs.length === 0 || node.typeName.getText() === "Array" && this.isSimpleType(typeArgs[0])) {
-                    return true;
-                } else {
-                    return false;
-                }
-            default:
-                return false;
+                checkTypeReference(node as ts.TypeReferenceNode);
+                break;
         }
+        return ts.forEachChild(node, cb);
+    });
+
+    function checkArrayType(node: ts.ArrayTypeNode): void {
+        const { elementType, parent } = node;
+        if (option === "array" || option === "array-simple" && isSimpleType(elementType)) {
+            return;
+        }
+
+        const failureString = option === "generic" ? Rule.FAILURE_STRING_GENERIC : Rule.FAILURE_STRING_GENERIC_SIMPLE;
+        const parens = elementType.kind === ts.SyntaxKind.ParenthesizedType ? 1 : 0;
+        // Add a space if the type is preceded by 'as' and the node has no leading whitespace
+        const space = !parens && parent!.kind === ts.SyntaxKind.AsExpression && node.getStart() === node.getFullStart();
+        const fix = [
+            new Lint.Replacement(elementType.getStart(), parens, (space ? " " : "") + "Array<"),
+            // Delete the square brackets and replace with an angle bracket
+            Lint.Replacement.replaceFromTo(elementType.getEnd() - parens, node.getEnd(), ">"),
+        ];
+        ctx.addFailureAtNode(node, failureString, fix);
+    }
+
+    function checkTypeReference(node: ts.TypeReferenceNode): void {
+        const { typeName, typeArguments } = node;
+
+        if (option === "generic" || !isArrayIdentifier(typeName)) {
+            return;
+        }
+
+        const failureString = option === "array" ? Rule.FAILURE_STRING_ARRAY : Rule.FAILURE_STRING_ARRAY_SIMPLE;
+        if (!typeArguments || typeArguments.length === 0) {
+            // Create an 'any' array
+            const fix = Lint.Replacement.replaceFromTo(node.getStart(), node.getEnd(), "any[]");
+            ctx.addFailureAtNode(node, failureString, fix);
+            return;
+        }
+
+        if (typeArguments.length !== 1 || (option === "array-simple" && !isSimpleType(typeArguments[0]))) {
+            return;
+        }
+
+        const type = typeArguments[0];
+        const parens = typeNeedsParentheses(type);
+        const fix = [
+            // Delete 'Array<'
+            Lint.Replacement.replaceFromTo(node.getStart(), type.getStart(), parens ? "(" : ""),
+            // Delete '>' and replace with '[]
+            Lint.Replacement.replaceFromTo(type.getEnd(), node.getEnd(), parens ? ")[]" : "[]"),
+        ];
+        ctx.addFailureAtNode(node, failureString, fix);
+    }
+}
+
+function typeNeedsParentheses(type: ts.TypeNode): boolean {
+    switch (type.kind) {
+        case ts.SyntaxKind.UnionType:
+        case ts.SyntaxKind.FunctionType:
+        case ts.SyntaxKind.IntersectionType:
+        case ts.SyntaxKind.TypeOperator:
+            return true;
+        default:
+            return false;
+    }
+}
+
+function isArrayIdentifier(name: ts.EntityName) {
+    return name.kind === ts.SyntaxKind.Identifier && name.text === "Array";
+}
+
+function isSimpleType(nodeType: ts.TypeNode): boolean {
+    switch (nodeType.kind) {
+        case ts.SyntaxKind.AnyKeyword:
+        case ts.SyntaxKind.ArrayType:
+        case ts.SyntaxKind.BooleanKeyword:
+        case ts.SyntaxKind.NullKeyword:
+        case ts.SyntaxKind.ObjectKeyword:
+        case ts.SyntaxKind.UndefinedKeyword:
+        case ts.SyntaxKind.NumberKeyword:
+        case ts.SyntaxKind.StringKeyword:
+        case ts.SyntaxKind.SymbolKeyword:
+        case ts.SyntaxKind.VoidKeyword:
+        case ts.SyntaxKind.NeverKeyword:
+            return true;
+        case ts.SyntaxKind.TypeReference:
+            // TypeReferences must be non-generic or be another Array with a simple type
+            const { typeName, typeArguments } = nodeType as ts.TypeReferenceNode;
+            if (!typeArguments) {
+                return true;
+            }
+            switch (typeArguments.length) {
+                case 0:
+                    return true;
+                case 1:
+                    return typeName.kind === ts.SyntaxKind.Identifier && typeName.text === "Array" && isSimpleType(typeArguments[0]);
+                default:
+                    return false;
+            }
+        default:
+            return false;
     }
 }
