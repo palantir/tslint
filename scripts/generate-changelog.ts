@@ -42,11 +42,11 @@ const repoInfo = {
 const tokenFile = path.join(os.homedir(), "github_token.txt");
 
 // authenticate
+console.log("Using OAuth token from " + tokenFile + "\n");
 const auth: GitHubApi.Auth = {
     token: fs.readFileSync(tokenFile, "utf8").toString().trim(),
     type: "oauth",
 };
-console.log("Using OAuth token " + auth.token + "\n");
 
 // process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // ignores TLS certificate error
 github.authenticate(auth);
@@ -126,7 +126,6 @@ github.repos.getLatestRelease(repoInfo).then((value) => {
         console.log("- " + missing.replace(/[\r\n]+/, "\r\n    "));
     }
 
-    console.log("\n---- thanks ----");
     console.log("Thanks to our contributors!");
     contributors.forEach((contributor) => {
         console.log("- " + contributor);
