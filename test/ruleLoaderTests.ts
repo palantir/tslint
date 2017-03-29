@@ -38,7 +38,7 @@ describe("Rule Loader", () => {
         ];
 
         const rules = loadRules(validConfiguration, new Map<string, IEnableDisablePosition[]>(), builtRulesDir);
-        assert.equal(rules.length, 4);
+        assert.equal(rules.length, 5);
     });
 
     it("ignores invalid rules", () => {
@@ -85,7 +85,7 @@ describe("Rule Loader", () => {
         ];
 
         const rules = loadRules(validConfiguration, new Map<string, IEnableDisablePosition[]>(), [builtRulesDir]);
-        assert.equal(rules.length, 4);
+        assert.equal(rules.length, 5);
     });
 
     it("loads js rules", () => {

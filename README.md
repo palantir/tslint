@@ -294,6 +294,7 @@ Custom Rules
 #### Custom rule sets from Palantir
 
 - [tslint-react](https://github.com/palantir/tslint-react) - Lint rules related to React & JSX.
+- [tslint-blueprint](https://github.com/palantir/tslint-blueprint) - Lint rules to enforce best practices with [blueprintjs libraries](https://github.com/palantir/blueprint)
 
 #### Custom rule sets from the community
 

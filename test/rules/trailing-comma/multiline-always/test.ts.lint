@@ -573,3 +573,6 @@ export {
     bar
        ~nil [Missing trailing comma]
 };
+
+// don't crash
+new Foo
