@@ -18,21 +18,22 @@ v5.0.0
     - [api] Removed deprecated `scanAllTokens` and `skippableTokenAwareRuleWalker` (#2370)
     - [api] Remove method `skip` from `RuleWalker` (#2313)
 
-- :fire: **New: Configure Rule Severity**
+- :fire: **New: Configurable Rule Severity**
   - [config] The severity level of rules are now configurable, adding options "default", "error", "warning" and "off" (#1738)
-  - [config] Adds `defaultSeverity` with options `error`, `warning`, and `off`. (#2416)
+  - [config] Adds `defaultSeverity` with options `error` (default if unspecified), `warning`, and `off`. (#2416)
     - Old style:
 
     ```json
     {
         "extends": "tslint:latest",
         "rules": {
-            "callable-types": true
+            "callable-types": true,
+            "max-line-length": [true, 140]
         }
     }
     ```
 
-    - New style:
+    - New style (`callable-types` outputs errors and `max-line-length` outputs warnings):
 
     ```json
     {
