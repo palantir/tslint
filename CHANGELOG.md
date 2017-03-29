@@ -7,7 +7,7 @@ v5.0.0
 ## :fire: Breaking changes
 
 - Minimum version of TypeScript version is now 2.1.0 (#2425)
-- The severity level of rules is now configurable and defaults to severity "error", which affects the output of formatters:
+- The severity level of rules are now configurable and defaults to severity "error". This affects the output of formatters:
     - `msbuildFormatter` was outputting all failures as "warning".
     - `pmdFormatter` was outputting all failures as priority 1. Now, it uses _priority 3_ for "error" (default) and _priority 4_ for "warning"
 - `tslint:recommended` configuration updated with `tslint:latest` rules & options (#2424)
