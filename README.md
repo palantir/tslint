@@ -118,8 +118,6 @@ See the [core rules list](#core-rules) below for descriptions of all the rules.
 
 The severity level of each rule can use the values `default`, `error`, `warning`/`warn`, and `off`/`none`. If no severity level is specified, `default` is used. The `defaultSeverity` option replaces the severity level for each rule that uses severity level `default` in the current file. Valid values for `defaultSeverity` include `error`, `warning`/`warn`, and `off`/`none`.
 
-The CLI exits with code 2 if an error is reported, and exits with code 0 otherwise.
-
 #### CLI
 
 usage: `tslint [options] file ...`
@@ -225,6 +223,12 @@ tslint accepts the following command-line options:
 -h, --help:
     Prints this help message.
 ```
+
+##### Exit Codes
+
+- `0`: Linting occurred without errors (warnings are ok)
+- `1`: An invalid command line argument or combination thereof was used
+- `2`: There was a rule violation with severity `error`
 
 #### Library
 
