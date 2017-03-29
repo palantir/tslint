@@ -55,6 +55,7 @@ class Walker extends Lint.ProgramAwareRuleWalker {
         super.visitIdentifier(node);
         return;
     }
+
     for (const d of decSym.getDeclarations()) {
       // Switch to the TS JSDoc parser in the future to avoid false positives here.
       // For example using '@deprecated' in a true comment.
@@ -63,22 +64,20 @@ class Walker extends Lint.ProgramAwareRuleWalker {
       let commentNode: ts.Node = d;
 
       if (commentNode.kind === ts.SyntaxKind.VariableDeclaration) {
-          if (!commentNode.parent) { continue; }
-          commentNode = commentNode.parent;
+          commentNode = commentNode.parent!;
       }
 
       // Go up one more level to VariableDeclarationStatement, where usually
       // the comment lives. If the declaration has an 'export', the
       // VDList.getFullText will not contain the comment.
       if (commentNode.kind === ts.SyntaxKind.VariableDeclarationList) {
-        if (!commentNode.parent) { continue; }
-        commentNode = commentNode.parent;
+        commentNode = commentNode.parent!;
       }
 
       // Don't warn on the declaration of the @deprecated symbol.
       if (commentNode.pos <= node.pos
           && node.getEnd() <= commentNode.getEnd()
-          && commentNode.getSourceFile() === node.getSourceFile()) {
+          && commentNode.getSourceFile() === this.getSourceFile()) {
           continue;
       }
 
