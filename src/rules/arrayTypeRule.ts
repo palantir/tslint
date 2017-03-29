@@ -83,7 +83,7 @@ function walk(ctx: Lint.WalkContext<Option>): void {
         const fix = [
             new Lint.Replacement(elementType.getStart(), parens, (space ? " " : "") + "Array<"),
             // Delete the square brackets and replace with an angle bracket
-            Lint.Replacement.replaceFromTo(elementType.getEnd() - parens, node.getEnd(), ">")
+            Lint.Replacement.replaceFromTo(elementType.getEnd() - parens, node.getEnd(), ">"),
         ];
         ctx.addFailureAtNode(node, failureString, fix);
     }
