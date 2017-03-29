@@ -8,8 +8,9 @@ v5.0.0
 
 - Minimum version of TypeScript version is now 2.1.0 (#2425)
 - The severity level of rules are now configurable and defaults to severity "error". This affects the output of formatters:
-    - `msbuildFormatter` was outputting all failures as "warning".
-    - `pmdFormatter` was outputting all failures as priority 1. Now, it uses _priority 3_ for "error" (default) and _priority 4_ for "warning"
+    - [formatter] `msbuild` was outputting all failures as "warning".
+    - [formatter] `pmd` was outputting all failures as priority 1. Now, it uses _priority 3_ for "error" (default) and _priority 4_ for "warning"
+- [formatter] `json` changed the `fix` property to now contain either one replacement or an array of replacements (#2403)
 - `tslint:recommended` configuration updated with `tslint:latest` rules & options (#2424)
 - Removed `no-unused-new` rule, with logic moved into `no-unused-expression` (#2269)
 - `no-trailing-whitespace` now checks template strings by default. Use the new options `ignore-template-strings` to restore the old behavior. (#2359)
