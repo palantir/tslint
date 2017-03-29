@@ -11,7 +11,9 @@ v5.0.0
     - msbuildFormatter - default was "warning"; it is now "error"
     - pmdFormatter - default was priority 1; it is now "error" (priority 3). If set to "warning", it will output priority 4
 - Minimum version of TypeScript version now 2.1.0 (#2425)
+- `tslint:recommended` configuration updated with `tslint:latest` rules & options (#2424)
 - Removed `no-unused-new` rule, with logic moved into `no-unused-expression` (#2269)
+- `no-trailing-whitespace` now checks template strings by default. Use the new options `ignore-template-strings` to restore the old behavior. (#2359)
 
 ### API breaks for custom rules
 
@@ -24,16 +26,17 @@ v5.0.0
 
     - This breaks custom rule compilation. If your rule was not using the `ts.LanguageService` APIs, the migration is quite simple:
 
-    ```
+    ```diff
     - public applyWithProgram(srcFile: ts.SourceFile, langSvc: ts.LanguageService): Lint.RuleFailure[] {
     -     return this.applyWithWalker(new Walker(srcFile, this.getOptions(), langSvc.getProgram()));
     + public applyWithProgram(srcFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
     +     return this.applyWithWalker(new Walker(srcFile, this.getOptions(), program));
     ```
+    
+    - N.B. If you are refactoring your custom rules, consider [these performance tips for writing custom rules](https://palantir.github.io/tslint/develop/custom-rules/performance.html).
 
 - Removed `createFix`. Replacements should be passed directly into addFailure. (#2403)
 - Removed deprecated `scanAllTokens` and `skippableTokenAwareRuleWalker` (#2370)
-- `no-trailing-whitespace` now checks template strings by default. Use the new options `ignore-template-strings` to restore the old behavior. (#2359)
 
 ## :tada: Notable features & enhancements
 
@@ -104,7 +107,6 @@ v5.0.0
 - [chore] removed update-notifier dependency (#2262)
 - [development] allow rule tests to specify version requirement for typescript (#2323)
 - [enhancement] `ignore-properties` option of `no-inferrable-types` now also ignores parameter properties (#2312)
-- [enhancement]: added new rules to the recommended set (#2424)
 - [enhancement] `unified-signatures` now displays line number of the overload to unify if there are more than 2 overloads (#2270)
 - [enhancement] New checks for CallSignature and NamedExports (#2236)
 - [enhancement] `semicolon` New check for export statements, function overloads and shorthand module declaration (#2240)
