@@ -248,6 +248,7 @@ export const jsRules = {
     "no-empty": true,
     "no-eval": true,
     "no-reference": true,
+    "no-reference-import": true,
     "no-shadowed-variable": true,
     "no-string-literal": true,
     "no-string-throw": true,
