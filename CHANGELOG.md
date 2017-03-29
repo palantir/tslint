@@ -137,12 +137,13 @@ Thanks to our contributors!
 
 - Brian Olore
 - Andy Hanson
+- @andy-ms
 - Chris Barr
 - Klaus Meinhardt
-- bumbleblym
+- @bumbleblym
 - Josh Goldberg
 - James Clark
-- vilicvane
+- @vilic
 - Aleksandr Filatov
 - Matt Banz
 - Karol Janyst
