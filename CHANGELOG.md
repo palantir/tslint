@@ -18,7 +18,7 @@ v5.0.0
     - [api] Removed deprecated `scanAllTokens` and `skippableTokenAwareRuleWalker` (#2370)
     - [api] Remove method `skip` from `RuleWalker` (#2313)
 
-- :fire: New: Configure Rule Severity
+- :fire: **New: Configure Rule Severity**
   - [config] The severity level of rules are now configurable, adding options "default", "error", "warning" and "off" (#1738)
   - [config] Adds `defaultSeverity` with options `error`, `warning`, and `off`. (#2416)
     - Old style:
@@ -111,7 +111,6 @@ Thanks to our contributors!
 - Brian Olore
 - Andy Hanson
 - Andy
-- Adi Dahiya
 - Chris Barr
 - Klaus Meinhardt
 - bumbleblym
