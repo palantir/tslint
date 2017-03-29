@@ -20,7 +20,7 @@ v5.0.0
 
 - :fire: **New: Configurable Rule Severity**
   - [config] The severity level of rules are now configurable, adding options "default", "error", "warning" and "off" (#1738)
-  - [config] Adds `defaultSeverity` with options `error` (default if unspecified), `warning`, and `off`. (#2416)
+  - [config] Adds `defaultSeverity` with options `error` (default), `warning`, and `off`. (#2416)
     - Old style:
 
     ```json
@@ -79,7 +79,7 @@ Updates:
 - [bugfix] `semicolon` Ignore comments when checking for unnecessary semicolon (#2240)
 - [bugfix] `semicolon` Don't report unnecessary semicolon when followed by regex literal (#2240)
 - [bugfix] CLI: exit with 0 on type check errors when `--force` is specified (#2322)
-- [bugfix] `--test` now correctly strips single quotes from patterns on windows (#2322)
+- [bugfix] CLI: `--test` now correctly strips single quotes from patterns on windows (#2322)
 - [bugfix] `prefer-const` only fix initialized variables (#2219)
 - [bugfix] `prefer-const` correctly handle variables shadowed by parameters and catched exceptions (#2219)
 - [bugfix] `prefer-const` don't warn if one variable in a for loop initializer can not be const (#2219)
@@ -99,13 +99,13 @@ Updates:
 - [enhancement] `only-arrow-functions` allow functions that use `this` in the body (#2229)
 - [enhancement] CLI: print error when `--type-check` is used without `--project` (#2322)
 - [enhancement] CLI: don't print stack trace on type check error (#2322)
+- [enhancement] CLI: added `-p` as shorthand for `--project` to be consistent with `tsc` (#2322)
 - [enhancement] `prefer-const` show warnings for `var` (#2219)
-- [enhancement] fixer of `quotemark` unescapes original quotemark (e.g. `'\''` -> `"'"`) (#2359)
+- [enhancement] `quotemark` fixer unescapes original quotemark (e.g. `'\''` -> `"'"`) (#2359)
 - [enhancement] `no-unused-expression` allow indirect eval `(0, eval)("");` (#2269)
 - [enhancement] `no-unused-expression` checking for unused new can now use option `allow-fast-null-checks` (#2269)
 - [enhancement] `no-unused-expression` find unused comma separated expressions in all locations of the code (#2269)
 - [enhancement] `no-unused-expression` find unused expressions inside void expression (#2269)
-- [enhancement] CLI: added `-p` as shorthand for `--project` to be consistent with `tsc` (#2322)
 - [chore] removed update-notifier dependency (#2262)
 
 Thanks to our contributors!
