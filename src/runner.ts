@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import * as fs from "fs";
 import * as glob from "glob";
+import * as fs from "mz/fs";
 import * as path from "path";
 import * as ts from "typescript";
 
@@ -110,32 +110,44 @@ export class Runner {
     constructor(private options: IRunnerOptions, private outputStream: NodeJS.WritableStream) { }
 
     public run(onComplete: (status: number) => void) {
+        this.runAsPromise()
+            .then(onComplete)
+            .catch((error) => {
+                if (error.name === FatalError.NAME) {
+                    console.error(error.message);
+                }
+
+                onComplete(1);
+            });
+    }
+
+    private async runAsPromise(): Promise<number> {
         if (this.options.version) {
             this.outputStream.write(Linter.VERSION + "\n");
-            return onComplete(0);
+            return 0;
         }
 
         if (this.options.init) {
-            if (fs.existsSync(CONFIG_FILENAME)) {
+            if (await fs.exists(CONFIG_FILENAME)) {
                 console.error(`Cannot generate ${CONFIG_FILENAME}: file already exists`);
-                return onComplete(1);
+                return 1;
             }
 
             const tslintJSON = JSON.stringify(DEFAULT_CONFIG, undefined, "    ");
-            fs.writeFileSync(CONFIG_FILENAME, tslintJSON);
-            return onComplete(0);
+            await fs.writeFile(CONFIG_FILENAME, tslintJSON);
+            return 0;
         }
 
         if (this.options.test) {
             const results = runTests((this.options.files || []).map(Runner.trimSingleQuotes), this.options.rulesDirectory);
             const didAllTestsPass = consoleTestResultsHandler(results);
-            return onComplete(didAllTestsPass ? 0 : 1);
+            return didAllTestsPass ? 0 : 1;
         }
 
         // when provided, it should point to an existing location
-        if (this.options.config && !fs.existsSync(this.options.config)) {
+        if (this.options.config && !(await fs.exists(this.options.config))) {
             console.error("Invalid option for configuration: " + this.options.config);
-            return onComplete(1);
+            return 1;
         }
 
         // if both files and tsconfig are present, use files
@@ -143,9 +155,9 @@ export class Runner {
         let program: ts.Program | undefined;
 
         if (this.options.project != null) {
-            if (!fs.existsSync(this.options.project)) {
+            if (!(await fs.exists(this.options.project))) {
                 console.error("Invalid option for project: " + this.options.project);
-                return onComplete(1);
+                return 1;
             }
             program = Linter.createProgram(this.options.project);
             if (files.length === 0) {
@@ -166,7 +178,7 @@ export class Runner {
                         return message;
                     });
                     console.error(messages.join("\n"));
-                    return onComplete(this.options.force ? 0 : 1);
+                    return this.options.force ? 0 : 1;
                 }
             } else {
                 // if not type checking, we don't need to pass in a program object
@@ -174,7 +186,7 @@ export class Runner {
             }
         } else if (this.options.typeCheck) {
             console.error("--project must be specified in order to enable type checking.");
-            return onComplete(1);
+            return 1;
         }
 
         let ignorePatterns: string[] = [];
@@ -190,19 +202,10 @@ export class Runner {
             .map((file: string) => glob.sync(file, { ignore: ignorePatterns, nodir: true }))
             .reduce((a: string[], b: string[]) => a.concat(b), []);
 
-        try {
-            this.processFiles(onComplete, files, program);
-        } catch (error) {
-            if (error.name === FatalError.NAME) {
-                console.error(error.message);
-                return onComplete(1);
-            }
-            // rethrow unhandled error
-            throw error;
-        }
+        return this.processFiles(files, program);
     }
 
-    private processFiles(onComplete: (status: number) => void, files: string[], program?: ts.Program) {
+    private async processFiles(files: string[], program?: ts.Program) {
         const possibleConfigAbsolutePath = this.options.config != null ? path.resolve(this.options.config) : null;
         const linter = new Linter({
             fix: !!this.options.fix,
@@ -214,15 +217,15 @@ export class Runner {
         let lastFolder: string | undefined;
         let configFile: IConfigurationFile | undefined;
         for (const file of files) {
-            if (!fs.existsSync(file)) {
+            if (!(await fs.exists(file))) {
                 console.error(`Unable to open file: ${file}`);
-                return onComplete(1);
+                return 1;
             }
 
             const buffer = new Buffer(256);
-            const fd = fs.openSync(file, "r");
+            const fd = await fs.open(file, "r");
             try {
-                fs.readSync(fd, buffer, 0, 256, 0);
+                await fs.read(fd, buffer, 0, 256, 0);
                 if (buffer.readInt8(0, true) === 0x47 && buffer.readInt8(188, true) === 0x47) {
                     // MPEG transport streams use the '.ts' file extension. They use 0x47 as the frame
                     // separator, repeating every 188 bytes. It is unlikely to find that pattern in
@@ -231,10 +234,10 @@ export class Runner {
                     continue;
                 }
             } finally {
-                fs.closeSync(fd);
+                await fs.close(fd);
             }
 
-            const contents = fs.readFileSync(file, "utf8");
+            const contents = await fs.readFile(file, "utf8");
             const folder = path.dirname(file);
             if (lastFolder !== folder) {
                 configFile = findConfiguration(possibleConfigAbsolutePath, folder).results;
@@ -245,12 +248,14 @@ export class Runner {
 
         const lintResult = linter.getResult();
 
-        this.outputStream.write(lintResult.output, () => {
-            if (this.options.force || lintResult.errorCount === 0) {
-                onComplete(0);
-            } else {
-                onComplete(2);
-            }
+        return new Promise<number>((resolve) => {
+            this.outputStream.write(lintResult.output, () => {
+                if (this.options.force || lintResult.errorCount === 0) {
+                    resolve(0);
+                } else {
+                    resolve(2);
+                }
+            });
         });
     }
 }
