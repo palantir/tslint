@@ -69,7 +69,7 @@ function sampleFunc() {
     for (; o < arr.length; o++) {
         console.log(arr[o]);
     }
-    
+
     // Prefix incrementor
     for(let p = 0; p < arr.length; ++p) {
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [0]
@@ -127,7 +127,7 @@ function sampleFunc() {
             console.log(q);
         }
     }
-    
+
     // For-of loops ARE allowed
     for (var r of arr) {
         console.log(r);
