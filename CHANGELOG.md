@@ -6,11 +6,10 @@ v5.0.0
 
 ## :fire: Breaking changes
 
-- The severity level of rules is now configurable and defaults to severity "error"
-- The following formatters have changed their outputs:
-    - msbuildFormatter - default was "warning"; it is now "error"
-    - pmdFormatter - default was priority 1; it is now "error" (priority 3). If set to "warning", it will output priority 4
-- Minimum version of TypeScript version now 2.1.0 (#2425)
+- Minimum version of TypeScript version is now 2.1.0 (#2425)
+- The severity level of rules is now configurable and defaults to severity "error", which affects the output of formatters:
+    - `msbuildFormatter` was outputting all failures as "warning".
+    - `pmdFormatter` was outputting all failures as priority 1. Now, it uses _priority 3_ for "error" (default) and _priority 4_ for "warning"
 - `tslint:recommended` configuration updated with `tslint:latest` rules & options (#2424)
 - Removed `no-unused-new` rule, with logic moved into `no-unused-expression` (#2269)
 - `no-trailing-whitespace` now checks template strings by default. Use the new options `ignore-template-strings` to restore the old behavior. (#2359)
@@ -40,7 +39,7 @@ v5.0.0
 
 ## :tada: Notable features & enhancements
 
-- [feature] Configurable rule severities with new config file schema (#629, #345)
+- [feature] The severity level of rules are now individually configurable. Default severity can also be configured.  (#629, #345)
 
     - Valid values for `severity`: `error | warn | warning | none | off`
     - Old style:
@@ -49,21 +48,20 @@ v5.0.0
     {
         "extends": "tslint:latest",
         "rules": {
-            "callable-types": true
+            "callable-types": true,
+            "max-line-length": [true, 140]
         }
     }
     ```
 
-    - New style, with `interface-name` generating warnings, and passing options to `max-line-length`:
+    - New style (in this example, `callable-types` outputs errors and `max-line-length` outputs warnings):
 
     ```json
     {
         "extends": "tslint:latest",
+        "defaultSeverity": "error",
         "rules": {
             "callable-types": true,
-            "interface-name": {
-                "severity": "warn"
-            },
             "max-line-length": {
                 "options": 140,
                 "severity": "warning"
@@ -85,47 +83,46 @@ v5.0.0
 - [api] Added class `OptionallyTypedRule`, which allows rule authors to write a rule that applies when typing is either enabled or disabled (#2300)
 - [bugfix] `prefer-function-over-method` now ignores abstract methods (#2307)
 - [bugfix] `arrow-parens` with option `ban-single-arg-parens` now correctly handles functions with return type annotation (#2265)
-- [bugfix] exclude overload signatures from `prefer-function-over-method` (#2315)
+- [bugfix] `prefer-function-over-method` exclude overload signatures (#2315)
 - [bugfix] `use-isnan` now applies only to comparison operators (#2317)
 - [bugfix] `file-header-rule` now handles single-line comments correctly (#2320)
 - [bugfix] `newline-before-return`: fix handling of blank lines between comments (#2321)
-- [bugfix] No longer enforce trailing commas in type parameters and tuple types. Fixes: #1905 (#2236)
-- [bugfix] don't fix `align` if it would remove code (#2379)
+- [bugfix] `trailing-comma` No longer enforce trailing commas in type parameters and tuple types (#2236)
+- [bugfix] `align` don't fix if it would remove code (#2379)
 - [bugfix] `unified-signatures` now recognizes rest parameters (#2342)
 - [bugfix] `no-inferrable-types` don't warn for inferrable type on readonly property (#2312)
 - [bugfix] `trailing-comma` no longer crashes on new without parentheses (e.g. `new Foo`) (#2389)
 - [bugfix] `semicolon` Ignore comments when checking for unnecessary semicolon (#2240)
 - [bugfix] `semicolon` Don't report unnecessary semicolon when followed by regex literal (#2240)
-- [bugfix] exit with 0 on type check errors when `--force` is specified (#2322)
-- [bugfix] `--test` now correctly strips single quotes from patterns on windows (#2322)
-- [bugfix] only fix initialized variables (#2219)
-- [bugfix] correctly handle variables shadowed by parameters and catched exceptions (#2219)
-- [bugfix] don't warn if one variable in a for loop initializer can not be const (#2219)
-- [bugfix] handle more cases in destructuring (#2219)
+- [bugfix] CLI: exit with 0 on type check errors when `--force` is specified (#2322)
+- [bugfix] CLI: `--test` now correctly strips single quotes from patterns on windows (#2322)
+- [bugfix] `prefer-const` only fix initialized variables (#2219)
+- [bugfix] `prefer-const` correctly handle variables shadowed by parameters and catched exceptions (#2219)
+- [bugfix] `prefer-const` don't warn if one variable in a for loop initializer can not be const (#2219)
+- [bugfix] `prefer-const` handle more cases in destructuring (#2219)
 - [bugfix] `no-unused-expression` allow comma separated assignments (#2269)
-- [bugfix] consider 'object' as a simple type in array-type rule (#2353)
 - [chore] removed update-notifier dependency (#2262)
 - [development] allow rule tests to specify version requirement for typescript (#2323)
 - [enhancement] `ignore-properties` option of `no-inferrable-types` now also ignores parameter properties (#2312)
 - [enhancement] `unified-signatures` now displays line number of the overload to unify if there are more than 2 overloads (#2270)
-- [enhancement] New checks for CallSignature and NamedExports (#2236)
+- [enhancement] `trailing-comma` New checks for CallSignature and NamedExports (#2236)
 - [enhancement] `semicolon` New check for export statements, function overloads and shorthand module declaration (#2240)
 - [enhancement] `semicolon` Report unnecessary semicolons in classes and in statement position (for option "always" too) (#2240)
 - [enhancement] `semicolon` check for semicolon after method overload (#2240)
-- [enhancement] check statement alignment for all blocks (#2379)
-- [enhancement] check parameter alignment for all signatures (#2379)
+- [enhancement] `array-type` now consider `object`, `undefined` and `never` as simple types, allowing `object`, `undefined[]` and `never[]` (#1843)(#2353)
+- [enhancement] `align` check statement alignment for all blocks (#2379)
+- [enhancement] `align`check parameter alignment for all signatures (#2379)
 - [enhancement] `--test` can handle multiple paths at once (#2322)
 - [enhancement] `only-arrow-functions` allow functions that use `this` in the body (#2229)
-- [enhancement] print error when `--type-check` is used without `--project` (#2322)
-- [enhancement] don't print stack trace on type check error (#2322)
-- [enhancement] show warnings for `var` (#2219)
-- [enhancement] fixer of `quotemark` unescapes original quotemark (e.g. `'\''` -> `"'"`) (#2359)
+- [enhancement] CLI: print error when `--type-check` is used without `--project` (#2322)
+- [enhancement] CLI: don't print stack trace on type check error (#2322)
+- [enhancement] CLI: added `-p` as shorthand for `--project` to be consistent with `tsc` (#2322)
+- [enhancement] `prefer-const` show warnings for `var` (#2219)
+- [enhancement] `quotemark` fixer unescapes original quotemark (e.g. `'\''` -> `"'"`) (#2359)
 - [enhancement] `no-unused-expression` allow indirect eval `(0, eval)("");` (#2269)
 - [enhancement] `no-unused-expression` checking for unused new can now use option `allow-fast-null-checks` (#2269)
 - [enhancement] `no-unused-expression` find unused comma separated expressions in all locations of the code (#2269)
 - [enhancement] `no-unused-expression` find unused expressions inside void expression (#2269)
-- [enhancement] added `-p` as shorthand for `--project` to be consistent with `tsc` (#2322)
-- [enhancement] Peer dependency support dev versions of typescript (#2287)
 - [new-config-option] Adds `defaultSeverity` with options `error`, `warning`, and `off`. (#2416)
 - [new-formatter] TAP formatter (#2325)
 - [new-rule-option] `no-unused-expression` adds option `allow-tagged-template` to allow tagged templates for side effects (#2269)
