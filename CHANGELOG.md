@@ -7,7 +7,7 @@ v5.0.0
 - **BREAKING CHANGES**
   - Minimum version of TypeScript version now 2.1.0 (#2425)
   - [recommended-rules] Added new rules to the recommended set (#2424)
-    [formatter] The output of these formatters have changed because lint rule severity is configurable, defaulting to "error"
+  - [formatter] The output of these formatters have changed because lint rule severity is configurable, defaulting to "error"
        - `msbuildFormatter` was outputting all failures as "warning". This is now configurable, and defaults to "error".
        - `pmdFormatter` was outputting all failures as priority 1. Now, it uses _priority 3_ for "error" and _priority 4_ for "warning"
   - [removed-rule] `no-unused-new` removed, with logic moved into `no-unused-expression` (#2269)
@@ -18,7 +18,7 @@ v5.0.0
     - [api] Removed deprecated `scanAllTokens` and `skippableTokenAwareRuleWalker` (#2370)
     - [api] Remove method `skip` from `RuleWalker` (#2313)
 
-- **Highlight**
+- :fire: Configure Rule Severity :fire:
   - [config] The severity level of rules are now configurable, adding options "default", "error", "warning" and "off" (#1738)
   - [config] Adds `defaultSeverity` with options `error`, `warning`, and `off`. (#2416)
     - Old style:
@@ -46,6 +46,7 @@ v5.0.0
         }
     }
     ```
+
 
 - [new-rule] `prefer-template` (#2243)
 - [new-rule] `return-undefined` (#2251)
