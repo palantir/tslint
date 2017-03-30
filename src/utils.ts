@@ -114,3 +114,24 @@ export type Equal<T> = (a: T, b: T) => boolean;
 export function arraysAreEqual<T>(a: T[] | undefined, b: T[] | undefined, eq: Equal<T>): boolean {
     return a === b || !!a && !!b && a.length === b.length && a.every((x, idx) => eq(x, b[idx]));
 }
+
+/** Returns an array that is the concatenation of all output arrays. */
+export function flatMap<T, U>(inputs: T[], getOutputs: (input: T) => U[]): U[] {
+    const out = [];
+    for (const input of inputs) {
+        out.push(...getOutputs(input));
+    }
+    return out;
+}
+
+/** Returns an array of all outputs that are not `undefined`. */
+export function mapDefined<T, U>(inputs: T[], getOutput: (input: T) => U | undefined): U[] {
+    const out = [];
+    for (const input of inputs) {
+        const output = getOutput(input);
+        if (output !== undefined) {
+            out.push(output);
+        }
+    }
+    return out;
+}

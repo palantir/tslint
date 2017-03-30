@@ -257,7 +257,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
     }
 
     function addMissingWhitespaceErrorAt(position: number): void {
-        const fix = ctx.createFix(Lint.Replacement.appendText(position, " "));
+        const fix = Lint.Replacement.appendText(position, " ");
         ctx.addFailureAt(position, 1, Rule.FAILURE_STRING, fix);
     }
 }

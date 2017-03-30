@@ -19,7 +19,6 @@ import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
-import { arraysAreEqual } from "../utils";
 
 export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -80,7 +79,7 @@ class Walker extends Lint.ProgramAwareRuleWalker {
 
     private visitNamespaceAccess(node: ts.Node, qualifier: ts.EntityNameOrEntityNameExpression, name: ts.Identifier) {
         if (this.qualifierIsUnnecessary(qualifier, name)) {
-            const fix = this.createFix(this.deleteFromTo(qualifier.getStart(), name.getStart()));
+            const fix = this.deleteFromTo(qualifier.getStart(), name.getStart());
             this.addFailureAtNode(qualifier, Rule.FAILURE_STRING(qualifier.getText()), fix);
         } else {
             // Only look for nested qualifier errors if we didn't already fail on the outer qualifier.
@@ -101,7 +100,7 @@ class Walker extends Lint.ProgramAwareRuleWalker {
 
         // If the symbol in scope is different, the qualifier is necessary.
         const fromScope = this.getSymbolInScope(qualifier, accessedSymbol.flags, name.text);
-        return fromScope === undefined || symbolsAreEqual(fromScope, accessedSymbol);
+        return fromScope === undefined || fromScope === accessedSymbol;
     }
 
     private getSymbolInScope(node: ts.Node, flags: ts.SymbolFlags, name: string): ts.Symbol | undefined {
@@ -115,7 +114,7 @@ class Walker extends Lint.ProgramAwareRuleWalker {
     }
 
     private symbolIsNamespaceInScope(symbol: ts.Symbol): boolean {
-        if (symbol.getDeclarations().some((decl) => this.namespacesInScope.some((ns) => nodesAreEqual(ns, decl)))) {
+        if (symbol.getDeclarations().some((decl) => this.namespacesInScope.some((ns) => ns === decl))) {
             return true;
         }
         const alias = this.tryGetAliasedSymbol(symbol);
@@ -125,14 +124,4 @@ class Walker extends Lint.ProgramAwareRuleWalker {
     private tryGetAliasedSymbol(symbol: ts.Symbol): ts.Symbol | undefined {
         return Lint.isSymbolFlagSet(symbol, ts.SymbolFlags.Alias) ? this.getTypeChecker().getAliasedSymbol(symbol) : undefined;
     }
-}
-
-// TODO: Should just be `===`. See https://github.com/palantir/tslint/issues/1969
-function nodesAreEqual(a: ts.Node, b: ts.Node) {
-    return a.pos === b.pos;
-}
-
-// Only needed in global files. Likely due to https://github.com/palantir/tslint/issues/1969. See `test.global.ts.lint`.
-function symbolsAreEqual(a: ts.Symbol, b: ts.Symbol): boolean {
-    return arraysAreEqual(a.declarations, b.declarations, nodesAreEqual);
 }

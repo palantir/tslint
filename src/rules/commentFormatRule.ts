@@ -45,11 +45,11 @@ export class Rule extends Lint.Rules.AbstractRule {
                 * note that comments starting with \`///\` are also allowed, for things such as \`///<reference>\`
             * \`"check-lowercase"\` requires that the first non-whitespace character of a comment must be lowercase, if applicable.
             * \`"check-uppercase"\` requires that the first non-whitespace character of a comment must be uppercase, if applicable.
-            
+
             Exceptions to \`"check-lowercase"\` or \`"check-uppercase"\` can be managed with object that may be passed as last argument.
-            
+
             One of two options can be provided in this object:
-                
+
                 * \`"ignore-words"\`  - array of strings - words that will be ignored at the beginning of the comment.
                 * \`"ignore-pattern"\` - string - RegExp pattern that will be ignored at the beginning of the comment.
             `,
