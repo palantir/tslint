@@ -67,6 +67,10 @@ function walk(ctx: Lint.WalkContext<void>): void {
 /** Traverse the LHS of an `=` expression, calling `cb` embedded default value, but ignoring binding patterns. */
 function traverseExpressionsInLHS(node: ts.Node, cb: (node: ts.Expression) => void): void {
     switch (node.kind) {
+        case ts.SyntaxKind.ParenthesizedExpression:
+            traverseExpressionsInLHS((node as ts.ParenthesizedExpression).expression, cb);
+            break;
+
         case ts.SyntaxKind.ArrayLiteralExpression:
             for (const e of (node as ts.ArrayLiteralExpression).elements) {
                 traverseExpressionsInLHS(e, cb);
