@@ -100,9 +100,9 @@ function walk(ctx: Lint.WalkContext<Options>) {
     }
     for (const possibleFailure of possibleFailures) {
         if (!excludedRanges.some((range) => range.pos < possibleFailure.pos && possibleFailure.pos < range.end)) {
-            ctx.addFailure(possibleFailure.pos, possibleFailure.end, Rule.FAILURE_STRING, ctx.createFix(
+            ctx.addFailure(possibleFailure.pos, possibleFailure.end, Rule.FAILURE_STRING,
                 Lint.Replacement.deleteFromTo(possibleFailure.pos, possibleFailure.end),
-            ));
+            );
         }
     }
 }

@@ -113,6 +113,15 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
             });
         });
 
+        it("exits with code 0 if custom rules directory is passed and file contains lint warnings", (done) => {
+            execCli(["-c", "./test/config/tslint-extends-package-warning.json", "-r", "./test/files/custom-rules", "src/test.ts"],
+                (err) => {
+                    assert.isNull(err, "process should exit without an error");
+                    done();
+                },
+            );
+        });
+
         it("exits with code 2 if custom rules directory is specified in config file and file contains lint errors", (done) => {
             execCli(["-c", "./test/config/tslint-custom-rules-with-dir.json", "src/test.ts"], (err) => {
                 assert.isNotNull(err, "process should exit with error");
@@ -248,11 +257,10 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
     });
 
     describe("--type-check", () => {
-        // TODO: #2405
-        it.skip("exits with code 1 if --project is not passed", (done) => {
+        it("exits with code 1 if --project is not passed", (done) => {
             execCli(["--type-check"], (err) => {
                 assert.isNotNull(err, "process should exit with error");
-                assert.strictEqual(err.code, 2, "error code should be 2");
+                assert.strictEqual(err.code, 1, "error code should be 1");
                 done();
             });
         });

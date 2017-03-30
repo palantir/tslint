@@ -32,8 +32,7 @@ describe("TAP Formatter", () => {
         formatter = new Formatter();
     });
 
-    // TODO: #2329
-    it.skip("formats failures", () => {
+    it("formats failures", () => {
         const maxPosition = sourceFile.getFullWidth();
 
         const failures = [
@@ -43,9 +42,9 @@ describe("TAP Formatter", () => {
         ];
 
         const expectedResult =
-            getFailureString(1, "first-name", "error", TEST_FILE, 0,  0, "first failure") +
-            getFailureString(2, "mid-name", "error", TEST_FILE, 1, 19, "mid failure") +
-            getFailureString(3, "last-name", "error", TEST_FILE, 0,  12,  "last failure");
+            getFailureString(1, "first-name", "error", TEST_FILE, 0, 0, "first failure") + "\n" +
+            getFailureString(2, "mid-name", "error", TEST_FILE, 1, 19, "mid failure") + "\n" +
+            getFailureString(3, "last-name", "error", TEST_FILE, 0, 12, "last failure") + "\n";
 
         const actualResult = formatter.format(failures);
         assert.equal(actualResult, `TAP version 13\n1..${failures.length}\n` + expectedResult);
