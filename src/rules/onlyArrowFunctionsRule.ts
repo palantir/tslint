@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -73,7 +74,7 @@ function parseOptions(ruleArguments: string[]): Options {
 
 function walk(ctx: Lint.WalkContext<Options>): void {
     const { sourceFile, options: { allowDeclarations, allowNamedFunctions } } = ctx;
-    ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
+    return ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
         switch (node.kind) {
             case ts.SyntaxKind.FunctionDeclaration:
                 if (allowDeclarations) {
@@ -87,7 +88,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
                 }
             }
         }
-        ts.forEachChild(node, cb);
+        return ts.forEachChild(node, cb);
     });
 }
 
@@ -103,17 +104,5 @@ function hasThisParameter(node: ts.FunctionLikeDeclaration) {
 }
 
 function usesThisInBody(node: ts.Node): boolean {
-    return node.kind === ts.SyntaxKind.ThisKeyword || !hasNewThis(node) && ts.forEachChild(node, usesThisInBody);
-}
-
-function hasNewThis(node: ts.Node) {
-    switch (node.kind) {
-        case ts.SyntaxKind.FunctionDeclaration:
-        case ts.SyntaxKind.FunctionExpression:
-        case ts.SyntaxKind.ClassDeclaration:
-        case ts.SyntaxKind.ClassExpression:
-            return true;
-        default:
-            return false;
-    }
+    return node.kind === ts.SyntaxKind.ThisKeyword || !utils.hasOwnThisReference(node) && ts.forEachChild(node, usesThisInBody);
 }
