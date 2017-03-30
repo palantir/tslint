@@ -89,7 +89,6 @@ function parseOptions(ruleArguments: string[]): Options {
 
 function walk(ctx: Lint.WalkContext<Options>) {
     const { sourceFile, options } = ctx;
-    const scanner = ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, sourceFile.text);
 
     ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
         switch (node.kind) {
@@ -252,12 +251,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
     }
 
     function checkForTrailingWhitespace(position: number): void {
-        scanner.setTextPos(position);
-        const nextTokenType = scanner.scan();
-
-        if (nextTokenType !== ts.SyntaxKind.WhitespaceTrivia
-                && nextTokenType !== ts.SyntaxKind.NewLineTrivia
-                && nextTokenType !== ts.SyntaxKind.EndOfFileToken) {
+        if (position !== sourceFile.end && !ts.isWhiteSpace(sourceFile.text.charCodeAt(position))) {
             addMissingWhitespaceErrorAt(position);
         }
     }
