@@ -130,8 +130,6 @@ describe("Rule Loader", () => {
                 case "importBlacklist":
                 case "noInvalidThis":
                 case "noSwitchCaseFallThrough":
-                case "noUnusedVariable":
-                case "switchDefault":
                 case "typeofCompare":
                     return false;
                 default:

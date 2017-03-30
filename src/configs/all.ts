@@ -105,12 +105,11 @@ export const rules = {
     "no-shadowed-variable": true,
     "no-string-literal": true,
     "no-string-throw": true,
-    // "no-switch-case-fall-through": Won't this be deprecated?
     "no-unbound-method": true,
     "no-unsafe-any": true,
     "no-unsafe-finally": true,
     "no-unused-expression": true,
-    // "no-unused-variable": Won't this be deprecated?
+    "no-unused-variable": true,
     "no-use-before-declare": true,
     "no-var-keyword": true,
     "no-void-expression": true,
@@ -118,9 +117,8 @@ export const rules = {
     "restrict-plus-operands": true,
     "strict-boolean-expressions": true,
     "strict-type-predicates": true,
-    // "switch-default": Won't this be deprecated?
+    "switch-default": true,
     "triple-equals": true,
-    // "typeof-compare": Won't this be deprecated?
     "use-isnan": true,
 
     // Maintainability
