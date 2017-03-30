@@ -66,7 +66,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
 
     function checkIdentifier(node: ts.Identifier, symbol: ts.Symbol | undefined): void {
         const declarations = symbol && symbol.declarations;
-        if (!declarations) {
+        if (declarations === undefined || declarations.length === 0) {
             return;
         }
 
