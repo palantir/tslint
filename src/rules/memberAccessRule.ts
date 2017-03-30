@@ -131,6 +131,8 @@ function memberType(node: ts.ClassElement): string {
             return "get property accessor";
         case ts.SyntaxKind.SetAccessor:
             return "set property accessor";
+        case ts.SyntaxKind.IndexSignature:
+            return "index signature";
         default:
             throw new Error("unhandled node type " + ts.SyntaxKind[node.kind]);
     }
