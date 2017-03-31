@@ -70,7 +70,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static KEYWORD_FAILURE = "variable name clashes with keyword/type";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction<Options>(sourceFile, walk, parseOptions(this.ruleArguments));
+        return this.applyWithFunction(sourceFile, walk, parseOptions(this.ruleArguments));
     }
 }
 
