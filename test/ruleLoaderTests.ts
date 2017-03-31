@@ -19,7 +19,7 @@ import * as diff from "diff";
 import * as fs from "fs";
 import * as path from "path";
 
-import { rules as allRules } from "../src/configs/all";
+import { rules as allRules, RULES_EXCLUDED_FROM_ALL_CONFIG } from "../src/configs/all";
 import { IEnableDisablePosition } from "../src/ruleLoader";
 import { camelize } from "../src/utils";
 import { IOptions } from "./../src/language/rule/rule";
@@ -120,20 +120,8 @@ describe("Rule Loader", () => {
     });
 
     it("includes every rule in 'tslint:all'", () => {
-        const expectedAllRules = everyRule().filter((ruleName) => {
-            // Some rules intentionally excluded
-            switch (ruleName) {
-                case "ban":
-                case "fileHeader":
-                case "importBlacklist":
-                case "noInvalidThis":
-                case "noSwitchCaseFallThrough":
-                case "typeofCompare":
-                    return false;
-                default:
-                    return true;
-            }
-        });
+        const expectedAllRules = everyRule().filter((ruleName) =>
+            RULES_EXCLUDED_FROM_ALL_CONFIG.indexOf(ruleName) === -1);
         const tslintAllRules = Object.keys(allRules).map(camelize).sort();
         const diffResults = diffLists(expectedAllRules, tslintAllRules);
 
@@ -156,7 +144,7 @@ function diffLists(actual: string[], expected: string[]): diff.IDiffResult[] {
 
 function everyRule(): string[] {
     return fs.readdirSync(srcRulesDir)
-            .filter((file) => /Rule.ts$/.test(file))
-            .map((file) => file.substr(0, file.length - "Rule.ts".length))
-            .sort();
+        .filter((file) => /Rule.ts$/.test(file))
+        .map((file) => file.substr(0, file.length - "Rule.ts".length))
+        .sort();
 }

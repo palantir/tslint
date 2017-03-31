@@ -220,6 +220,9 @@ export const rules = {
     ],
 };
 
+export const RULES_EXCLUDED_FROM_ALL_CONFIG =
+    ["ban", "fileHeader", "importBlacklist", "noInvalidThis", "noSwitchCaseFallThrough", "typeofCompare"];
+
 // Exclude typescript-only rules from jsRules, otherwise it's identical.
 export const jsRules: { [key: string]: any } = {};
 for (const key in rules) {
