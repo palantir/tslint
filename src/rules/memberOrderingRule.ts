@@ -180,7 +180,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 }]`,
         ],
         type: "typescript",
-        typescriptOnly: true,
+        typescriptOnly: false,
     };
 
     public static FAILURE_STRING_ALPHABETIZE(prevName: string, curName: string) {
