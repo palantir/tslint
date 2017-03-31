@@ -20,13 +20,25 @@ import * as ts from "typescript";
 import * as Lint from "../index";
 import { isTypeFlagSet } from "../language/utils";
 
+const OPTION_ALLOW_ARROW_FUNCTION_SHORTHAND = "allow-arrow-function-shorthand";
+
 export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-void-expression",
         description: "Requires expressions of type `void` to appear in statement position.",
-        optionsDescription: "Not configurable.",
-        options: null,
+        optionsDescription: Lint.Utils.dedent`
+            If \`${OPTION_ALLOW_ARROW_FUNCTION_SHORTHAND}\` is provided, \`() => returnsVoid()\` will be allowed.
+            Otherwise, it must be written as \`() => { returnsVoid(); }\`.`,
+        options: {
+            type: "array",
+            items: {
+                type: "string",
+                enum: [OPTION_ALLOW_ARROW_FUNCTION_SHORTHAND],
+            },
+            minLength: 0,
+            maxLength: 1,
+        },
         requiresTypeInfo: true,
         type: "functionality",
         typescriptOnly: false,
@@ -36,20 +48,31 @@ export class Rule extends Lint.Rules.TypedRule {
     public static FAILURE_STRING = "Expression has type `void`. Put it on its own line as a statement.";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithWalker(new Walker(sourceFile, this.getOptions(), program));
+        const allowArrowFunctionShorthand = this.ruleArguments.indexOf(OPTION_ALLOW_ARROW_FUNCTION_SHORTHAND) !== -1;
+        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, program.getTypeChecker()), allowArrowFunctionShorthand);
     }
 }
 
-class Walker extends Lint.ProgramAwareRuleWalker {
-    public visitNode(node: ts.Node) {
-        if (isPossiblyVoidExpression(node) && node.parent!.kind !== ts.SyntaxKind.ExpressionStatement && this.isVoid(node)) {
-            this.addFailureAtNode(node, Rule.FAILURE_STRING);
+function walk(ctx: Lint.WalkContext<boolean>, checker: ts.TypeChecker): void {
+    const { sourceFile, options: allowArrowFunctionShorthand } = ctx;
+    return ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
+        if (isPossiblyVoidExpression(node)
+                && !isParentAllowedVoid(node)
+                && isTypeFlagSet(checker.getTypeAtLocation(node), ts.TypeFlags.Void)) {
+            ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
-        super.visitNode(node);
-    }
+        return ts.forEachChild(node, cb);
+    });
 
-    private isVoid(node: ts.Node): boolean {
-        return isTypeFlagSet(this.getTypeChecker().getTypeAtLocation(node), ts.TypeFlags.Void);
+    function isParentAllowedVoid(node: ts.Node): boolean {
+        switch (node.parent!.kind) {
+            case ts.SyntaxKind.ExpressionStatement:
+                return true;
+            case ts.SyntaxKind.ArrowFunction:
+                return allowArrowFunctionShorthand;
+            default:
+                return false;
+        }
     }
 }
 
