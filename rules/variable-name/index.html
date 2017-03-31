@@ -9,8 +9,9 @@ optionsDescription: |-
     * `"allow-leading-underscore"` allows underscores at the beginning (only has an effect if "check-format" specified)
     * `"allow-trailing-underscore"` allows underscores at the end. (only has an effect if "check-format" specified)
     * `"allow-pascal-case"` allows PascalCase in addition to camelCase.
-  * `"ban-keywords"`: disallows the use of certain TypeScript keywords (`any`, `Number`, `number`, `String`,
-  `string`, `Boolean`, `boolean`, `undefined`) as variable or parameter names.
+    * `"allow-snake-case"` allows snake_case in addition to camelCase.
+  * `"ban-keywords"`: disallows the use of certain TypeScript keywords as variable or parameter names.
+    * These are: `any`, `Number`, `number`, `String`, `string`, `Boolean`, `boolean`, `Undefined`, `undefined`
 options:
   type: array
   items:
@@ -20,6 +21,7 @@ options:
       - allow-leading-underscore
       - allow-trailing-underscore
       - allow-pascal-case
+      - allow-snake-case
       - ban-keywords
   minLength: 0
   maxLength: 5
@@ -39,6 +41,7 @@ optionsJSON: |-
         "allow-leading-underscore",
         "allow-trailing-underscore",
         "allow-pascal-case",
+        "allow-snake-case",
         "ban-keywords"
       ]
     },

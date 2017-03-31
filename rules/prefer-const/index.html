@@ -1,17 +1,42 @@
 ---
 ruleName: prefer-const
-description: Requires that variable declarations use `const` instead of `let` if possible.
+description: Requires that variable declarations use `const` instead of `let` and `var` if possible.
 descriptionDetails: |-
 
   If a variable is only assigned to once when it is declared, it should be declared using 'const'
 hasFix: true
-optionsDescription: Not configurable.
-options: null
+optionsDescription: |-
+
+  An optional object containing the property "destructuring" with two possible values:
+
+  * "any" (default) - If any variable in destructuring can be const, this rule warns for those variables.
+  * "all" - Only warns if all variables in destructuring can be const.
+options:
+  type: object
+  properties:
+    destructuring:
+      type: string
+      enum:
+        - all
+        - any
 optionExamples:
   - 'true'
+  - '[true, {"destructuring": "all"}]'
 type: maintainability
 typescriptOnly: false
 layout: rule
 title: 'Rule: prefer-const'
-optionsJSON: 'null'
+optionsJSON: |-
+  {
+    "type": "object",
+    "properties": {
+      "destructuring": {
+        "type": "string",
+        "enum": [
+          "all",
+          "any"
+        ]
+      }
+    }
+  }
 ---

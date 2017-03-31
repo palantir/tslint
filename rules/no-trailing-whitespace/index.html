@@ -6,6 +6,7 @@ optionsDescription: |-
 
   Possible settings are:
 
+  * `"ignore-template-strings"`: Allows trailing whitespace in template strings.
   * `"ignore-comments"`: Allows trailing whitespace in comments.
   * `"ignore-jsdoc"`: Allows trailing whitespace only in JSDoc comments.
 hasFix: true
@@ -16,6 +17,7 @@ options:
     enum:
       - ignore-comments
       - ignore-jsdoc
+      - ignore-template-strings
 optionExamples:
   - 'true'
   - '[true, "ignore-comments"]'
@@ -31,7 +33,8 @@ optionsJSON: |-
       "type": "string",
       "enum": [
         "ignore-comments",
-        "ignore-jsdoc"
+        "ignore-jsdoc",
+        "ignore-template-strings"
       ]
     }
   }

@@ -173,7 +173,7 @@
     "ruleName": "comment-format",
     "description": "Enforces formatting rules for single-line comments.",
     "rationale": "Helps maintain a consistent, readable style in your codebase.",
-    "optionsDescription": "\nThree arguments may be optionally provided:\n\n* `\"check-space\"` requires that all single-line comments must begin with a space, as in `// comment`\n    * note that comments starting with `///` are also allowed, for things such as `///<reference>`\n* `\"check-lowercase\"` requires that the first non-whitespace character of a comment must be lowercase, if applicable.\n* `\"check-uppercase\"` requires that the first non-whitespace character of a comment must be uppercase, if applicable.\n\nExceptions to `\"check-lowercase\"` or `\"check-uppercase\"` can be managed with object that may be passed as last argument.\n\nOne of two options can be provided in this object:\n    \n    * `\"ignore-words\"`  - array of strings - words that will be ignored at the beginning of the comment.\n    * `\"ignore-pattern\"` - string - RegExp pattern that will be ignored at the beginning of the comment.\n",
+    "optionsDescription": "\nThree arguments may be optionally provided:\n\n* `\"check-space\"` requires that all single-line comments must begin with a space, as in `// comment`\n    * note that comments starting with `///` are also allowed, for things such as `///<reference>`\n* `\"check-lowercase\"` requires that the first non-whitespace character of a comment must be lowercase, if applicable.\n* `\"check-uppercase\"` requires that the first non-whitespace character of a comment must be uppercase, if applicable.\n\nExceptions to `\"check-lowercase\"` or `\"check-uppercase\"` can be managed with object that may be passed as last argument.\n\nOne of two options can be provided in this object:\n\n    * `\"ignore-words\"`  - array of strings - words that will be ignored at the beginning of the comment.\n    * `\"ignore-pattern\"` - string - RegExp pattern that will be ignored at the beginning of the comment.\n",
     "options": {
       "type": "array",
       "items": {
@@ -218,7 +218,7 @@
   {
     "ruleName": "completed-docs",
     "description": "Enforces documentation for important items be filled out.",
-    "optionsDescription": "\n`true` to enable for [\"classes\", \"functions\", \"methods\", \"properties\"],\nor an array with each item in one of two formats:\n\n* `string` to enable for that type\n* `object` keying types to when their documentation is required:\n    * `\"methods\"` and `\"properties may specify:\n        * `\"privacies\":\n            * `\"all\"`\n            * `\"private\"`\n            * `\"protected\"`\n            * `\"public\"`\n        * `\"locations:\n            * `\"all\"`\n            * `\"instance\"`\n            * `\"static\"`\n    * All other types may specify `\"visibilities\"`:\n        * `\"all\"`\n        * `\"exported\"`\n        * `\"internal\"`\n\nTypes that may be enabled are:\n\n    * `\"classes\"`\n    * `\"enums\"`\n    * `\"functions\"`\n    * `\"interfaces\"`\n    * `\"methods\"`\n    * `\"namespaces\"`\n    * `\"properties\"`\n    * `\"types\"`\n    * `\"variables\"`",
+    "optionsDescription": "\n`true` to enable for [\"classes\", \"functions\", \"methods\", \"properties\"],\nor an array with each item in one of two formats:\n\n* `string` to enable for that type\n* `object` keying types to when their documentation is required:\n    * `\"methods\"` and `\"properties\"` may specify:\n        * `\"privacies\"`:\n            * `\"all\"`\n            * `\"private\"`\n            * `\"protected\"`\n            * `\"public\"`\n        * `\"locations\"`:\n            * `\"all\"`\n            * `\"instance\"`\n            * `\"static\"`\n    * All other types may specify `\"visibilities\"`:\n        * `\"all\"`\n        * `\"exported\"`\n        * `\"internal\"`\n\nTypes that may be enabled are:\n\n    * `\"classes\"`\n    * `\"enums\"`\n    * `\"functions\"`\n    * `\"interfaces\"`\n    * `\"methods\"`\n    * `\"namespaces\"`\n    * `\"properties\"`\n    * `\"types\"`\n    * `\"variables\"`",
     "options": {
       "type": "array",
       "items": {
@@ -387,10 +387,19 @@
     "ruleName": "curly",
     "description": "Enforces braces for `if`/`for`/`do`/`while` statements.",
     "rationale": "\n```ts\nif (foo === bar)\n    foo++;\n    bar++;\n```\n\nIn the code above, the author almost certainly meant for both `foo++` and `bar++`\nto be executed only if `foo === bar`. However, he forgot braces and `bar++` will be executed\nno matter what. This rule could prevent such a mistake.",
-    "optionsDescription": "Not configurable.",
-    "options": null,
+    "optionsDescription": "\nThe rule may be set to `true`, or to the following:\n\n* `\"ignore-same-line\"` skips checking braces for control-flow statements\nthat are on one line and start on the same line as their control-flow keyword\n        ",
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "ignore-same-line"
+        ]
+      }
+    },
     "optionExamples": [
-      "true"
+      "true",
+      "[true, \"ignore-same-line\"]"
     ],
     "type": "functionality",
     "typescriptOnly": false
@@ -421,6 +430,7 @@
     "optionExamples": [
       "true"
     ],
+    "hasFix": true,
     "type": "maintainability",
     "typescriptOnly": false
   },
@@ -570,7 +580,8 @@
       "[true, \"CRLF\"]"
     ],
     "type": "maintainability",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "hasFix": true
   },
   {
     "ruleName": "match-default-export-name",
@@ -611,7 +622,7 @@
   {
     "ruleName": "max-file-line-count",
     "description": "Requires files to remain under a certain number of lines",
-    "rationale": "\nLimiting the number of lines allowed in a file allows files to remain small, \nsingle purpose, and maintainable.",
+    "rationale": "\nLimiting the number of lines allowed in a file allows files to remain small,\nsingle purpose, and maintainable.",
     "optionsDescription": "An integer indicating the maximum number of lines.",
     "options": {
       "type": "number",
@@ -642,21 +653,23 @@
     "ruleName": "member-access",
     "description": "Requires explicit visibility declarations for class members.",
     "rationale": "Explicit visibility declarations can make code more readable and accessible for those new to TS.",
-    "optionsDescription": "\nTwo arguments may be optionally provided:\n\n* `\"check-accessor\"` enforces explicit visibility on get/set accessors (can only be public)\n* `\"check-constructor\"`  enforces explicit visibility on constructors (can only be public)",
+    "optionsDescription": "\nThese arguments may be optionally provided:\n\n* `\"no-public\"` forbids public accessibility to be specified, because this is the default.\n* `\"check-accessor\"` enforces explicit visibility on get/set accessors\n* `\"check-constructor\"`  enforces explicit visibility on constructors",
     "options": {
       "type": "array",
       "items": {
         "type": "string",
         "enum": [
+          "no-public",
           "check-accessor",
           "check-constructor"
         ]
       },
       "minLength": 0,
-      "maxLength": 2
+      "maxLength": 3
     },
     "optionExamples": [
       "true",
+      "[true, \"no-public\"]",
       "[true, \"check-accessor\"]"
     ],
     "type": "typescript",
@@ -715,7 +728,7 @@
       "\n[true, {\n    \"order\": [\n        {\n            \"name\": \"static non-private\",\n            \"kinds\": [\n                \"public-static-field\",\n                \"protected-static-field\",\n                \"public-static-method\",\n                \"protected-static-method\"\n            ]\n        },\n        \"constructor\"\n    ]\n}]"
     ],
     "type": "typescript",
-    "typescriptOnly": true
+    "typescriptOnly": false
   },
   {
     "ruleName": "newline-before-return",
@@ -1184,6 +1197,14 @@
     "typescriptOnly": true
   },
   {
+    "ruleName": "no-reference-import",
+    "description": "Don't <reference types=\"foo\" /> if you import \"foo\" anyway.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "type": "style",
+    "typescriptOnly": true
+  },
+  {
     "ruleName": "no-reference",
     "description": "Disallows `/// <reference path=>` imports (use ES6-style imports instead).",
     "rationale": "\nUsing `/// <reference path=>` comments to load other files is outdated.\nUse ES6-style imports to reference other files.",
@@ -1257,7 +1278,7 @@
     "ruleName": "no-trailing-whitespace",
     "description": "Disallows trailing whitespace at the end of a line.",
     "rationale": "Keeps version control diffs clean as it prevents accidental whitespace from being committed.",
-    "optionsDescription": "\nPossible settings are:\n\n* `\"ignore-comments\"`: Allows trailing whitespace in comments.\n* `\"ignore-jsdoc\"`: Allows trailing whitespace only in JSDoc comments.",
+    "optionsDescription": "\nPossible settings are:\n\n* `\"ignore-template-strings\"`: Allows trailing whitespace in template strings.\n* `\"ignore-comments\"`: Allows trailing whitespace in comments.\n* `\"ignore-jsdoc\"`: Allows trailing whitespace only in JSDoc comments.",
     "hasFix": true,
     "options": {
       "type": "array",
@@ -1265,7 +1286,8 @@
         "type": "string",
         "enum": [
           "ignore-comments",
-          "ignore-jsdoc"
+          "ignore-jsdoc",
+          "ignore-template-strings"
         ]
       }
     },
@@ -1288,6 +1310,17 @@
     "type": "functionality",
     "typescriptOnly": true,
     "requiresTypeInfo": true
+  },
+  {
+    "ruleName": "no-unnecessary-callback-wrapper",
+    "description": "\nReplaces `x => f(x)` with just `f`.\nTo catch more cases, enable `only-arrow-functions` and `arrow-return-shorthand` too.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "style",
+    "typescriptOnly": false
   },
   {
     "ruleName": "no-unnecessary-initializer",
@@ -1316,7 +1349,7 @@
   },
   {
     "ruleName": "no-unsafe-any",
-    "description": "\nWarns when using an expression of type 'any' in an unsafe way.\nType casts and tests are allowed.\nExpressions that work on all values (such as '\"\" + x') are allowed.",
+    "description": "\nWarns when using an expression of type 'any' in a dynamic way.\nUses are only allowed if they would work for `{} | null | undefined`.\nType casts and tests are allowed.\nExpressions that work on all values (such as `\"\" + x`) are allowed.",
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
@@ -1344,7 +1377,7 @@
     "description": "Disallows unused expression statements.",
     "descriptionDetails": "\nUnused expressions are expression statements which are not assignments or function calls\n(and thus usually no-ops).",
     "rationale": "\nDetects potential errors where an assignment or function call was intended.",
-    "optionsDescription": "\nOne argument may be optionally provided:\n\n* `allow-fast-null-checks` allows to use logical operators to perform fast null checks and perform\nmethod or function calls for side effects (e.g. `e && e.preventDefault()`).",
+    "optionsDescription": "\nTwo arguments may be optionally provided:\n\n* `allow-fast-null-checks` allows to use logical operators to perform fast null checks and perform\nmethod or function calls for side effects (e.g. `e && e.preventDefault()`).\n* `allow-new` allows 'new' expressions for side effects (e.g. `new ModifyGlobalState();`.\n* `allow-tagged-template` allows tagged templates for side effects (e.g. `this.add\\`foo\\`;`.",
     "options": {
       "type": "array",
       "items": {
@@ -1364,23 +1397,10 @@
     "typescriptOnly": false
   },
   {
-    "ruleName": "no-unused-new",
-    "description": "Disallows unused 'new' expression statements.",
-    "descriptionDetails": "\nUnused 'new' expressions indicate that a constructor is being invoked solely for its side effects.",
-    "rationale": "\nDetects constructs such as `new SomeClass()`, where a constructor is used solely for its side effects, which is considered\npoor style.",
-    "optionsDescription": "Not configurable.",
-    "options": null,
-    "optionExamples": [
-      "true"
-    ],
-    "type": "functionality",
-    "typescriptOnly": false
-  },
-  {
     "ruleName": "no-unused-variable",
     "description": "Disallows unused imports, variables, functions and\n            private class members. Similar to tsc's --noUnusedParameters and --noUnusedLocals\n            options, but does not interrupt code compilation.",
     "hasFix": true,
-    "optionsDescription": "\nThree optional arguments may be optionally provided:\n\n* `\"check-parameters\"` disallows unused function and constructor parameters.\n    * NOTE: this option is experimental and does not work with classes\n    that use abstract method declarations, among other things.\n* `\"react\"` relaxes the rule for a namespace import named `React`\n(from either the module `\"react\"` or `\"react/addons\"`).\nAny JSX expression in the file will be treated as a usage of `React`\n(because it expands to `React.createElement `).\n* `{\"ignore-pattern\": \"pattern\"}` where pattern is a case-sensitive regexp.\nVariable names that match the pattern will be ignored.",
+    "optionsDescription": "\nThree optional arguments may be optionally provided:\n\n* `\"check-parameters\"` disallows unused function and constructor parameters.\n    * NOTE: this option is experimental and does not work with classes\n    that use abstract method declarations, among other things.\n* `{\"ignore-pattern\": \"pattern\"}` where pattern is a case-sensitive regexp.\nVariable names that match the pattern will be ignored.",
     "options": {
       "type": "array",
       "items": {
@@ -1615,13 +1635,25 @@
   },
   {
     "ruleName": "prefer-const",
-    "description": "Requires that variable declarations use `const` instead of `let` if possible.",
+    "description": "Requires that variable declarations use `const` instead of `let` and `var` if possible.",
     "descriptionDetails": "\nIf a variable is only assigned to once when it is declared, it should be declared using 'const'",
     "hasFix": true,
-    "optionsDescription": "Not configurable.",
-    "options": null,
+    "optionsDescription": "\nAn optional object containing the property \"destructuring\" with two possible values:\n\n* \"any\" (default) - If any variable in destructuring can be const, this rule warns for those variables.\n* \"all\" - Only warns if all variables in destructuring can be const.",
+    "options": {
+      "type": "object",
+      "properties": {
+        "destructuring": {
+          "type": "string",
+          "enum": [
+            "all",
+            "any"
+          ]
+        }
+      }
+    },
     "optionExamples": [
-      "true"
+      "true",
+      "[true, {\"destructuring\": \"all\"}]"
     ],
     "type": "maintainability",
     "typescriptOnly": false
@@ -1669,6 +1701,23 @@
     "typescriptOnly": false
   },
   {
+    "ruleName": "prefer-template",
+    "description": "Prefer a template expression over string literal concatenation.",
+    "optionsDescription": "\nIf `allow-single-concat` is specified, then a single concatenation (`x + y`) is allowed, but not more (`x + y + z`).",
+    "options": {
+      "type": "string",
+      "enum": [
+        "allow-single-concat"
+      ]
+    },
+    "optionExamples": [
+      "true",
+      "[true, \"allow-single-concat\"]"
+    ],
+    "type": "style",
+    "typescriptOnly": false
+  },
+  {
     "ruleName": "promise-function-async",
     "description": "Requires any function or method that returns a promise to be marked async.",
     "rationale": "\nEnsures that each function is only capable of 1) returning a rejected promise, or 2)\nthrowing an Error object. In contrast, non-`async` `Promise`-returning functions\nare technically capable of either. This practice removes a requirement for consuming\ncode to handle both cases.\n        ",
@@ -1685,7 +1734,7 @@
     "ruleName": "quotemark",
     "description": "Requires single or double quotes for string literals.",
     "hasFix": true,
-    "optionsDescription": "\nFive arguments may be optionally provided:\n\n* `\"single\"` enforces single quotes.\n* `\"double\"` enforces double quotes.\n* `\"jsx-single\"` enforces single quotes for JSX attributes.\n* `\"jsx-double\"` enforces double quotes for JSX attributes.\n* `\"avoid-escape\"` allows you to use the \"other\" quotemark in cases where escaping would normally be required.\nFor example, `[true, \"double\", \"avoid-escape\"]` would not report a failure on the string literal `'Hello \"World\"'`.",
+    "optionsDescription": "\nFive arguments may be optionally provided:\n\n* `\"single\"` enforces single quotes.\n* `\"double\"` enforces double quotes.\n* `\"jsx-single\"` enforces single quotes for JSX attributes.\n* `\"jsx-double\"` enforces double quotes for JSX attributes.\n* `\"avoid-escape\"` allows you to use the \"other\" quotemark in cases where escaping would normally be required.\nFor example, `[true, \"double\", \"avoid-escape\"]` would not report a failure on the string literal\n`'Hello \"World\"'`.",
     "options": {
       "type": "array",
       "items": {
@@ -1729,6 +1778,18 @@
       "true"
     ],
     "type": "functionality",
+    "typescriptOnly": false,
+    "requiresTypeInfo": true
+  },
+  {
+    "ruleName": "return-undefined",
+    "description": "Prefer `return;` in void functions and `return undefined;` in value-returning functions.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "style",
     "typescriptOnly": false,
     "requiresTypeInfo": true
   },
@@ -1870,9 +1931,9 @@
   },
   {
     "ruleName": "trailing-comma",
-    "description": "\nRequires or disallows trailing commas in array and object literals, destructuring assignments, function and tuple typings,\nnamed imports and function parameters.",
+    "description": "\nRequires or disallows trailing commas in array and object literals, destructuring assignments, function typings,\nnamed imports and exports and function parameters.",
     "hasFix": true,
-    "optionsDescription": "\nOne argument which is an object with the keys `multiline` and `singleline`.\nBoth should be set to either `\"always\"` or `\"never\"`.\n\n* `\"multiline\"` checks multi-line object literals.\n* `\"singleline\"` checks single-line object literals.\n\nA array is considered \"multiline\" if its closing bracket is on a line\nafter the last array element. The same general logic is followed for\nobject literals, function and tuple typings, named import statements\nand function parameters.",
+    "optionsDescription": "\nOne argument which is an object with the keys `multiline` and `singleline`.\nBoth should be set to either `\"always\"` or `\"never\"`.\n\n* `\"multiline\"` checks multi-line object literals.\n* `\"singleline\"` checks single-line object literals.\n\nA array is considered \"multiline\" if its closing bracket is on a line\nafter the last array element. The same general logic is followed for\nobject literals, function typings, named import statements\nand function parameters.",
     "options": {
       "type": "object",
       "properties": {
@@ -1926,7 +1987,7 @@
   {
     "ruleName": "typedef",
     "description": "Requires type definitions to exist.",
-    "optionsDescription": "\nSeven arguments may be optionally provided:\n\n* `\"call-signature\"` checks return type of functions.\n* `\"arrow-call-signature\"` checks return type of arrow functions.\n* `\"parameter\"` checks type specifier of function parameters for non-arrow functions.\n* `\"arrow-parameter\"` checks type specifier of function parameters for arrow functions.\n* `\"property-declaration\"` checks return types of interface properties.\n* `\"variable-declaration\"` checks non-binding variable declarations.\n* `\"member-variable-declaration\"` checks member variable declarations.\n* `\"object-destructuring\"` checks object destructuring declarations.\n* `\"array-destructuring\"` checks array destructuring declarations.",
+    "optionsDescription": "\nSeveral arguments may be optionally provided:\n\n* `\"call-signature\"` checks return type of functions.\n* `\"arrow-call-signature\"` checks return type of arrow functions.\n* `\"parameter\"` checks type specifier of function parameters for non-arrow functions.\n* `\"arrow-parameter\"` checks type specifier of function parameters for arrow functions.\n* `\"property-declaration\"` checks return types of interface properties.\n* `\"variable-declaration\"` checks non-binding variable declarations.\n* `\"member-variable-declaration\"` checks member variable declarations.\n* `\"object-destructuring\"` checks object destructuring declarations.\n* `\"array-destructuring\"` checks array destructuring declarations.",
     "options": {
       "type": "array",
       "items": {
@@ -2098,7 +2159,7 @@
   {
     "ruleName": "variable-name",
     "description": "Checks variable names for various errors.",
-    "optionsDescription": "\nFive arguments may be optionally provided:\n\n* `\"check-format\"`: allows only camelCased or UPPER_CASED variable names\n  * `\"allow-leading-underscore\"` allows underscores at the beginning (only has an effect if \"check-format\" specified)\n  * `\"allow-trailing-underscore\"` allows underscores at the end. (only has an effect if \"check-format\" specified)\n  * `\"allow-pascal-case\"` allows PascalCase in addition to camelCase.\n* `\"ban-keywords\"`: disallows the use of certain TypeScript keywords (`any`, `Number`, `number`, `String`,\n`string`, `Boolean`, `boolean`, `undefined`) as variable or parameter names.",
+    "optionsDescription": "\nFive arguments may be optionally provided:\n\n* `\"check-format\"`: allows only camelCased or UPPER_CASED variable names\n  * `\"allow-leading-underscore\"` allows underscores at the beginning (only has an effect if \"check-format\" specified)\n  * `\"allow-trailing-underscore\"` allows underscores at the end. (only has an effect if \"check-format\" specified)\n  * `\"allow-pascal-case\"` allows PascalCase in addition to camelCase.\n  * `\"allow-snake-case\"` allows snake_case in addition to camelCase.\n* `\"ban-keywords\"`: disallows the use of certain TypeScript keywords as variable or parameter names.\n  * These are: `any`, `Number`, `number`, `String`, `string`, `Boolean`, `boolean`, `Undefined`, `undefined`",
     "options": {
       "type": "array",
       "items": {
@@ -2108,6 +2169,7 @@
           "allow-leading-underscore",
           "allow-trailing-underscore",
           "allow-pascal-case",
+          "allow-snake-case",
           "ban-keywords"
         ]
       },

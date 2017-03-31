@@ -4,21 +4,24 @@ description: Requires explicit visibility declarations for class members.
 rationale: Explicit visibility declarations can make code more readable and accessible for those new to TS.
 optionsDescription: |-
 
-  Two arguments may be optionally provided:
+  These arguments may be optionally provided:
 
-  * `"check-accessor"` enforces explicit visibility on get/set accessors (can only be public)
-  * `"check-constructor"`  enforces explicit visibility on constructors (can only be public)
+  * `"no-public"` forbids public accessibility to be specified, because this is the default.
+  * `"check-accessor"` enforces explicit visibility on get/set accessors
+  * `"check-constructor"`  enforces explicit visibility on constructors
 options:
   type: array
   items:
     type: string
     enum:
+      - no-public
       - check-accessor
       - check-constructor
   minLength: 0
-  maxLength: 2
+  maxLength: 3
 optionExamples:
   - 'true'
+  - '[true, "no-public"]'
   - '[true, "check-accessor"]'
 type: typescript
 typescriptOnly: true
@@ -30,11 +33,12 @@ optionsJSON: |-
     "items": {
       "type": "string",
       "enum": [
+        "no-public",
         "check-accessor",
         "check-constructor"
       ]
     },
     "minLength": 0,
-    "maxLength": 2
+    "maxLength": 3
   }
 ---

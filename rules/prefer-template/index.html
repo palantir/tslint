@@ -1,0 +1,25 @@
+---
+ruleName: prefer-template
+description: Prefer a template expression over string literal concatenation.
+optionsDescription: |-
+
+  If `allow-single-concat` is specified, then a single concatenation (`x + y`) is allowed, but not more (`x + y + z`).
+options:
+  type: string
+  enum:
+    - allow-single-concat
+optionExamples:
+  - 'true'
+  - '[true, "allow-single-concat"]'
+type: style
+typescriptOnly: false
+layout: rule
+title: 'Rule: prefer-template'
+optionsJSON: |-
+  {
+    "type": "string",
+    "enum": [
+      "allow-single-concat"
+    ]
+  }
+---
