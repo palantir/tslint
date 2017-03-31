@@ -74,8 +74,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 function walk(ctx: Lint.WalkContext<void>, noPublic: boolean, checkAccessor: boolean, checkConstructor: boolean) {
-    return ts.forEachChild(ctx.sourceFile, recur);
-    function recur(node: ts.Node): void {
+    return ts.forEachChild(ctx.sourceFile, function recur(node: ts.Node): void {
         if (isClassLikeDeclaration(node)) {
             for (const child of node.members) {
                 if (shouldCheck(child)) {
@@ -84,7 +83,7 @@ function walk(ctx: Lint.WalkContext<void>, noPublic: boolean, checkAccessor: boo
             }
         }
         return ts.forEachChild(node, recur);
-    }
+    });
 
     function shouldCheck(node: ts.ClassElement): boolean {
         switch (node.kind) {
@@ -93,10 +92,11 @@ function walk(ctx: Lint.WalkContext<void>, noPublic: boolean, checkAccessor: boo
             case ts.SyntaxKind.GetAccessor:
             case ts.SyntaxKind.SetAccessor:
                 return checkAccessor;
-            case ts.SyntaxKind.SemicolonClassElement:
-                return false;
-            default:
+            case ts.SyntaxKind.MethodDeclaration:
+            case ts.SyntaxKind.PropertyDeclaration:
                 return true;
+            default:
+                return false;
         }
     }
 

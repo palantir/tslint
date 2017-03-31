@@ -45,9 +45,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         let fix: Lint.Fix | undefined;
         const lines = sourceFile.getLineStarts();
         if (lines.length > 1) {
-            fix = new Lint.Fix(this.ruleName, [
-                Lint.Replacement.appendText(length, sourceFile.text[lines[1] - 2] === "\r" ? "\r\n" : "\n"),
-            ]);
+            fix = Lint.Replacement.appendText(length, sourceFile.text[lines[1] - 2] === "\r" ? "\r\n" : "\n");
         }
 
         return [new Lint.RuleFailure(sourceFile, length, length, Rule.FAILURE_STRING, this.ruleName, fix)];

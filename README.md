@@ -80,11 +80,16 @@ The configuration file specifies which rules are enabled and their options. Thes
    *   - a relative path to a JSON file
    */
   "extends": "tslint:latest",
+  "defaultSeverity": "warning",
   "rules": {
     /*
      * Any rules specified here will override those from the base config we are extending.
      */
-    "curly": true
+    "curly": true,
+    "max-line-length": {
+      "severity": "error",
+      "options": 140
+    }
   },
   "jsRules": {
     /*
@@ -108,6 +113,10 @@ __`tslint:recommended`__ is a stable, somewhat opinionated set of rules which we
 __`tslint:latest`__ extends `tslint:recommended` and is continuously updated to include configuration for the latest rules in every TSLint release. Using this config may introduce breaking changes across minor releases as new rules are enabled which cause lint failures in your code. When TSLint reaches a major version bump, `tslint:recommended` will be updated to be identical to `tslint:latest`.
 
 See the [core rules list](#core-rules) below for descriptions of all the rules.
+
+##### Severity
+
+The severity level of each rule can use the values `default`, `error`, `warning`/`warn`, and `off`/`none`. If no severity level is specified, `default` is used. The `defaultSeverity` option replaces the severity level for each rule that uses severity level `default` in the current file. Valid values for `defaultSeverity` include `error`, `warning`/`warn`, and `off`/`none`.
 
 #### CLI
 
@@ -214,6 +223,12 @@ tslint accepts the following command-line options:
 -h, --help:
     Prints this help message.
 ```
+
+##### Exit Codes
+
+- `0`: Linting occurred without errors (warnings are ok)
+- `1`: An invalid command line argument or combination thereof was used
+- `2`: There was a rule violation with severity `error`
 
 #### Library
 

@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { getLineRanges } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -39,19 +40,12 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING(lineLimit: number): string {
+    public static FAILURE_STRING_FACTORY = (lineLimit: number): string => {
         return `Exceeds maximum line length of ${lineLimit}`;
     }
 
     public isEnabled(): boolean {
-        const ruleArguments = this.getOptions().ruleArguments;
-        if (super.isEnabled()) {
-            const option = ruleArguments[0];
-            if (typeof option === "number" && option > 0) {
-                return true;
-            }
-        }
-        return false;
+        return super.isEnabled() && this.ruleArguments[0] > 0;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -59,21 +53,11 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<number>): void {
-    const { sourceFile, options: lineLimit } = ctx;
-    const source = sourceFile.text;
-    const lineStarts = sourceFile.getLineStarts();
-
-    for (let i = 0; i < lineStarts.length - 1; ++i) {
-        const from = lineStarts[i];
-        const to = lineStarts[i + 1];
-        if ((to - from - 1) > lineLimit && !((to - from - 2) === lineLimit && source[to - 2] === "\r")) {
-            // first condition above is whether the line (minus the newline) is larger than the line limit
-            // second two check for windows line endings, that is, check to make sure it is not the case
-            // that we are only over by the limit by exactly one and that the character we are over the
-            // limit by is a '\r' character which does not count against the limit
-            // (and thus we are not actually over the limit).
-            ctx.addFailure(from, to - 1, Rule.FAILURE_STRING(lineLimit));
+function walk(ctx: Lint.WalkContext<number>) {
+    const limit = ctx.options;
+    for (const line of getLineRanges(ctx.sourceFile)) {
+        if (line.contentLength > limit) {
+            ctx.addFailureAt(line.pos, line.contentLength, Rule.FAILURE_STRING_FACTORY(limit));
         }
     }
 }

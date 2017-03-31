@@ -260,7 +260,7 @@ class WhitespaceWalker extends Lint.RuleWalker {
         if (this.getFailures().some((f) => f.getStartPosition().getPosition() === position)) {
             return;
         }
-        const fix = this.createFix(this.appendText(position, " "));
+        const fix = this.appendText(position, " ");
         this.addFailureAt(position, 1, Rule.FAILURE_STRING, fix);
     }
 }

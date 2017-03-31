@@ -31,13 +31,21 @@ describe("Rule Loader", () => {
         const validConfiguration: IOptions[] = [
             { ruleName: "class-name", ruleArguments: [], ruleSeverity: "error" },
             { ruleName: "eofline", ruleArguments: [], ruleSeverity: "error" },
-            { ruleName: "forin", ruleArguments: [], ruleSeverity: "off" },
+            { ruleName: "forin", ruleArguments: [], ruleSeverity: "error" },
             { ruleName: "no-debugger", ruleArguments: [], ruleSeverity: "error" },
-            { ruleName: "quotemark", ruleArguments: [], ruleSeverity: "error" },
+            { ruleName: "quotemark", ruleArguments: ["double"], ruleSeverity: "error" },
         ];
 
         const rules = loadRules(validConfiguration, builtRulesDir);
-        assert.equal(rules.length, 4);
+        assert.equal(rules.length, 5);
+    });
+
+    it("ignores off rules", () => {
+        const validConfiguration: IOptions[] = [
+            { ruleName: "forin", ruleArguments: [], ruleSeverity: "off" },
+        ];
+        const rules = loadRules(validConfiguration, builtRulesDir);
+        assert.equal(rules.length, 0);
     });
 
     it("ignores invalid rules", () => {
@@ -67,13 +75,13 @@ describe("Rule Loader", () => {
         const validConfiguration: IOptions[] = [
             { ruleName: "class-name", ruleArguments: [], ruleSeverity: "error" },
             { ruleName: "eofline", ruleArguments: [], ruleSeverity: "error" },
-            { ruleName: "forin", ruleArguments: [], ruleSeverity: "off" },
+            { ruleName: "forin", ruleArguments: [], ruleSeverity: "error" },
             { ruleName: "no-debugger", ruleArguments: [], ruleSeverity: "error" },
-            { ruleName: "quotemark", ruleArguments: [], ruleSeverity: "error" },
+            { ruleName: "quotemark", ruleArguments: ["double"], ruleSeverity: "error" },
         ];
 
         const rules = loadRules(validConfiguration, [builtRulesDir]);
-        assert.equal(rules.length, 4);
+        assert.equal(rules.length, 5);
     });
 
     it("loads js rules", () => {

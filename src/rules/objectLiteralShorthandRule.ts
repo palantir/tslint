@@ -52,9 +52,7 @@ class ObjectLiteralShorthandWalker extends Lint.RuleWalker {
             name.getText() === value.getText()) {
                 // Delete from name start up to value to include the ':'.
                 const lengthToValueStart = value.getStart() - name.getStart();
-                const fix = this.createFix(
-                    this.deleteText(name.getStart(), lengthToValueStart),
-                );
+                const fix = this.deleteText(name.getStart(), lengthToValueStart);
                 this.addFailureAtNode(node, Rule.LONGHAND_PROPERTY + `('{${name.getText()}}').`, fix);
         }
 

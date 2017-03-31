@@ -4,6 +4,11 @@
   },
   "extends": "tslint:latest",
   "rules": {
+    "ban": [true,
+      ["describe", "only"],
+      ["it", "only"]
+    ],
+
     "callable-types": true,
     "interface-name": false,
     "interface-over-type-literal": true,

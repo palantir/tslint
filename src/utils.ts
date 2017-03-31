@@ -126,6 +126,7 @@ export function find<T, U>(inputs: T[], getResult: (t: T) => U | undefined): U |
     return undefined;
 }
 
+/** Returns an array that is the concatenation of all output arrays. */
 export function flatMap<T, U>(inputs: T[], getOutputs: (input: T) => U[]): U[] {
     const out = [];
     for (const input of inputs) {
@@ -134,6 +135,7 @@ export function flatMap<T, U>(inputs: T[], getOutputs: (input: T) => U[]): U[] {
     return out;
 }
 
+/** Returns an array of all outputs that are not `undefined`. */
 export function mapDefined<T, U>(inputs: T[], getOutput: (input: T) => U | undefined): U[] {
     const out = [];
     for (const input of inputs) {

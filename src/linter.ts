@@ -34,7 +34,7 @@ import { isError, showWarningOnce } from "./error";
 import { findFormatter } from "./formatterLoader";
 import { ILinterOptions, LintResult } from "./index";
 import { IFormatter } from "./language/formatter/formatter";
-import { Fix, IRule, isTypedRule, RuleFailure, RuleSeverity } from "./language/rule/rule";
+import { IRule, isTypedRule, Replacement, RuleFailure, RuleSeverity } from "./language/rule/rule";
 import * as utils from "./language/utils";
 import { loadRules } from "./ruleLoader";
 import { arrayify, dedent, flatMap, mapDefined } from "./utils";
@@ -43,7 +43,7 @@ import { arrayify, dedent, flatMap, mapDefined } from "./utils";
  * Linter that can lint multiple files in consecutive runs.
  */
 class Linter {
-    public static VERSION = "4.5.1";
+    public static VERSION = "5.0.0";
 
     public static findConfiguration = findConfiguration;
     public static findConfigurationPath = findConfigurationPath;
@@ -98,7 +98,7 @@ class Linter {
         const isJs = /\.jsx?$/i.test(fileName);
         const enabledRules = this.getEnabledRules(configuration, isJs);
 
-        const fileFailures = this.getAllFailures(sourceFile, enabledRules);
+        let fileFailures = this.getAllFailures(sourceFile, enabledRules);
         if (!fileFailures.length) {
             // Usual case: no errors.
             return;
@@ -112,11 +112,15 @@ class Linter {
                 if (hasFixes) {
                     // Get new failures in case the file changed.
                     const updatedFailures = removeDisabledFailures(sourceFile, this.applyRule(rule, sourceFile));
-                    source = Fix.applyAll(source, mapDefined(updatedFailures, (f) => f.getFix()));
+                    this.fixes = this.fixes.concat(updatedFailures.filter((f) => f.hasFix()));
+                    source = Replacement.applyFixes(source, mapDefined(updatedFailures, (f) => f.getFix()));
                     sourceFile = this.getSourceFile(fileName, source);
                     fs.writeFileSync(fileName, source, { encoding: "utf-8" });
                 }
             }
+
+            // If there were fixes, get the *new* list of failures.
+            fileFailures = this.getAllFailures(sourceFile, enabledRules);
         }
 
         // add rule severity to failures
