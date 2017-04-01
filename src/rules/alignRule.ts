@@ -91,7 +91,10 @@ class AlignWalker extends Lint.AbstractWalker<Options> {
             } else if (this.options.arguments &&
                        (node.kind === ts.SyntaxKind.CallExpression ||
                         node.kind === ts.SyntaxKind.NewExpression && (node as ts.NewExpression).arguments !== undefined)) {
-                this.checkAlignment((node as ts.CallExpression | ts.NewExpression).arguments, Rule.ARGUMENTS_OPTION);
+                const args = (node as ts.CallExpression | ts.NewExpression).arguments;
+                if (args !== undefined) {
+                    this.checkAlignment(args, Rule.ARGUMENTS_OPTION);
+                }
             }
             return ts.forEachChild(node, cb);
         };
