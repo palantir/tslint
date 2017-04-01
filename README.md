@@ -322,6 +322,7 @@ If we don't have all the rules you're looking for, you can either write your own
 - [tslint-microsoft-contrib](https://github.com/Microsoft/tslint-microsoft-contrib) - A set of TSLint rules used on some Microsoft projects
 - [codelyzer](https://github.com/mgechev/codelyzer) - A set of tslint rules for static code analysis of Angular TypeScript projects
 - [vrsource-tslint-rules](https://github.com/vrsource/vrsource-tslint-rules)
+- [tslint-immutable](https://github.com/jonaskello/tslint-immutable) - TSLint rules to disable mutation in TypeScript
 
 #### Writing custom rules
 
