@@ -28,6 +28,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: ["true"],
+        hasFix: true,
         type: "maintainability",
         typescriptOnly: false,
     };
@@ -41,9 +42,14 @@ export class Rule extends Lint.Rules.AbstractRule {
             return [];
         }
 
+        let fix: Lint.Fix | undefined;
+        const lines = sourceFile.getLineStarts();
+        if (lines.length > 1) {
+            fix = Lint.Replacement.appendText(length, sourceFile.text[lines[1] - 2] === "\r" ? "\r\n" : "\n");
+        }
+
         return this.filterFailures([
-            new Lint.RuleFailure(sourceFile, length, length, Rule.FAILURE_STRING,
-              this.getOptions().ruleName),
+            new Lint.RuleFailure(sourceFile, length, length, Rule.FAILURE_STRING, this.ruleName, fix),
         ]);
     }
 }

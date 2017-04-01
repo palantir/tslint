@@ -145,13 +145,13 @@ export class Rule extends Lint.Rules.TypedRule {
 
             * \`string\` to enable for that type
             * \`object\` keying types to when their documentation is required:
-                * \`"${ARGUMENT_METHODS}"\` and \`"${ARGUMENT_PROPERTIES} may specify:
-                    * \`"${DESCRIPTOR_PRIVACIES}":
+                * \`"${ARGUMENT_METHODS}"\` and \`"${ARGUMENT_PROPERTIES}"\` may specify:
+                    * \`"${DESCRIPTOR_PRIVACIES}"\`:
                         * \`"${ALL}"\`
                         * \`"${PRIVACY_PRIVATE}"\`
                         * \`"${PRIVACY_PROTECTED}"\`
                         * \`"${PRIVACY_PUBLIC}"\`
-                    * \`"${DESCRIPTOR_LOCATIONS}:
+                    * \`"${DESCRIPTOR_LOCATIONS}"\`:
                         * \`"${ALL}"\`
                         * \`"${LOCATION_INSTANCE}"\`
                         * \`"${LOCATION_STATIC}"\`
@@ -214,9 +214,9 @@ export class Rule extends Lint.Rules.TypedRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public applyWithProgram(sourceFile: ts.SourceFile, langSvc: ts.LanguageService): Lint.RuleFailure[] {
+    public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         const options = this.getOptions();
-        const completedDocsWalker = new CompletedDocsWalker(sourceFile, options, langSvc.getProgram());
+        const completedDocsWalker = new CompletedDocsWalker(sourceFile, options, program);
 
         completedDocsWalker.setRequirements(this.getRequirements(options.ruleArguments));
 

@@ -38,8 +38,8 @@ export class Rule extends Lint.Rules.TypedRule {
         return `This expression is unnecessarily compared to a boolean. Just ${negate ? "negate it" : "use it directly"}.`;
     }
 
-    public applyWithProgram(sourceFile: ts.SourceFile, langSvc: ts.LanguageService): Lint.RuleFailure[] {
-        return this.applyWithWalker(new Walker(sourceFile, this.getOptions(), langSvc.getProgram()));
+    public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+        return this.applyWithWalker(new Walker(sourceFile, this.getOptions(), program));
     }
 }
 
@@ -74,7 +74,7 @@ class Walker extends Lint.ProgramAwareRuleWalker {
             }
         }
 
-        this.addFailureAtNode(expression, Rule.FAILURE_STRING(negate), this.createFix(...replacements));
+        this.addFailureAtNode(expression, Rule.FAILURE_STRING(negate), replacements);
     }
 }
 

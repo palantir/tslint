@@ -34,8 +34,7 @@ import { isError, showWarningOnce } from "./error";
 import { findFormatter } from "./formatterLoader";
 import { ILinterOptions, LintResult } from "./index";
 import { IFormatter } from "./language/formatter/formatter";
-import { createLanguageService, wrapProgram } from "./language/languageServiceHost";
-import { Fix, IRule, isTypedRule, RuleFailure, RuleSeverity } from "./language/rule/rule";
+import { Fix, IRule, isTypedRule, Replacement, RuleFailure, RuleSeverity } from "./language/rule/rule";
 import * as utils from "./language/utils";
 import { loadRules } from "./ruleLoader";
 import { arrayify, dedent } from "./utils";
@@ -44,7 +43,7 @@ import { arrayify, dedent } from "./utils";
  * Linter that can lint multiple files in consecutive runs.
  */
 class Linter {
-    public static VERSION = "4.5.1";
+    public static VERSION = "5.0.0";
 
     public static findConfiguration = findConfiguration;
     public static findConfigurationPath = findConfigurationPath;
@@ -53,7 +52,6 @@ class Linter {
 
     private failures: RuleFailure[] = [];
     private fixes: RuleFailure[] = [];
-    private languageService: ts.LanguageService;
 
     /**
      * Creates a TypeScript program object from a tsconfig.json file path and optional project directory.
@@ -93,10 +91,6 @@ class Linter {
             throw new Error("ILinterOptions does not contain the property `configuration` as of version 4. " +
                 "Did you mean to pass the `IConfigurationFile` object to lint() ? ");
         }
-
-        if (program) {
-            this.languageService = wrapProgram(program);
-        }
     }
 
     public lint(fileName: string, source: string, configuration: IConfigurationFile = DEFAULT_CONFIG): void {
@@ -114,7 +108,7 @@ class Linter {
                 source = fs.readFileSync(fileName, { encoding: "utf-8" });
                 if (fixes.length > 0) {
                     this.fixes = this.fixes.concat(ruleFailures);
-                    source = Fix.applyAll(source, fixes);
+                    source = Replacement.applyFixes(source, fixes);
                     fs.writeFileSync(fileName, source, { encoding: "utf-8" });
 
                     // reload AST if file is modified
@@ -179,9 +173,9 @@ class Linter {
         let ruleFailures: RuleFailure[] = [];
         try {
             if (this.program && isTypedRule(rule)) {
-                ruleFailures = rule.applyWithProgram(sourceFile, this.languageService);
+                ruleFailures = rule.applyWithProgram(sourceFile, this.program);
             } else {
-                ruleFailures = rule.apply(sourceFile, this.languageService);
+                ruleFailures = rule.apply(sourceFile);
             }
         } catch (error) {
             if (isError(error)) {
@@ -214,25 +208,22 @@ class Linter {
     }
 
     private getSourceFile(fileName: string, source: string) {
-        let sourceFile: ts.SourceFile;
         if (this.program) {
-            sourceFile = this.program.getSourceFile(fileName);
+            const sourceFile = this.program.getSourceFile(fileName);
+            if (sourceFile === undefined) {
+                const INVALID_SOURCE_ERROR = dedent`
+                    Invalid source file: ${fileName}. Ensure that the files supplied to lint have a .ts, .tsx, .js or .jsx extension.
+                `;
+                throw new Error(INVALID_SOURCE_ERROR);
+            }
             // check if the program has been type checked
-            if (sourceFile && !("resolvedModules" in sourceFile)) {
+            if (!("resolvedModules" in sourceFile)) {
                 throw new Error("Program must be type checked before linting");
             }
+            return sourceFile;
         } else {
-            sourceFile = utils.getSourceFile(fileName, source);
-            this.languageService = createLanguageService(fileName, source);
+            return utils.getSourceFile(fileName, source);
         }
-
-        if (sourceFile === undefined) {
-            const INVALID_SOURCE_ERROR = dedent`
-                Invalid source file: ${fileName}. Ensure that the files supplied to lint have a .ts, .tsx, .js or .jsx extension.
-            `;
-            throw new Error(INVALID_SOURCE_ERROR);
-        }
-        return sourceFile;
     }
 
     private containsRule(rules: RuleFailure[], rule: RuleFailure) {

@@ -37,7 +37,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         hasFix: true,
         optionsDescription: Lint.Utils.dedent`
             An optional object containing the property "destructuring" with two possible values:
-            
+
             * "${OPTION_DESTRUCTURING_ANY}" (default) - If any variable in destructuring can be const, this rule warns for those variables.
             * "${OPTION_DESTRUCTURING_ALL}" - Only warns if all variables in destructuring can be const.`,
         options: {
@@ -65,7 +65,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const options: Options = {
             destructuringAll: this.ruleArguments.length !== 0 &&
-                this.ruleArguments[0].destructuring === "all",
+                this.ruleArguments[0].destructuring === OPTION_DESTRUCTURING_ALL,
         };
         const preferConstWalker = new PreferConstWalker(sourceFile, this.ruleName, options);
         return this.applyWithWalker(preferConstWalker);
@@ -133,7 +133,8 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
                     if (utils.isFunctionDeclaration(node) ||
                         utils.isMethodDeclaration(node) ||
                         utils.isFunctionExpression(node) ||
-                        utils.isArrowFunction(node)) {
+                        utils.isArrowFunction(node) ||
+                        utils.isConstructorDeclaration(node)) {
                         // special handling for function parameters
                         // each parameter initializer can only reassign preceding parameters of variables of the containing scope
                         if (node.body !== undefined) {
@@ -303,9 +304,7 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
                     !info.declarationInfo.reassignedSiblings &&
                     info.declarationInfo.isBlockScoped &&
                     !appliedFixes.has(info.declarationInfo.declarationList)) {
-                    fix = this.createFix(
-                        new Lint.Replacement(info.declarationInfo.declarationList!.getStart(this.sourceFile), 3, "const"),
-                    );
+                    fix = new Lint.Replacement(info.declarationInfo.declarationList!.getStart(this.sourceFile), 3, "const");
                     // add only one fixer per VariableDeclarationList
                     appliedFixes.add(info.declarationInfo.declarationList);
                 }

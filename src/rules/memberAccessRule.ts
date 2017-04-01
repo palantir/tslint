@@ -15,9 +15,14 @@
  * limitations under the License.
  */
 
+import { getChildOfKind, isClassLikeDeclaration, isConstructorDeclaration, isIdentifier } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+
+const OPTION_NO_PUBLIC = "no-public";
+const OPTION_CHECK_ACCESSOR = "check-accessor";
+const OPTION_CHECK_CONSTRUCTOR = "check-constructor";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -26,116 +31,107 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Requires explicit visibility declarations for class members.",
         rationale: "Explicit visibility declarations can make code more readable and accessible for those new to TS.",
         optionsDescription: Lint.Utils.dedent`
-            Two arguments may be optionally provided:
+            These arguments may be optionally provided:
 
-            * \`"check-accessor"\` enforces explicit visibility on get/set accessors (can only be public)
-            * \`"check-constructor"\`  enforces explicit visibility on constructors (can only be public)`,
+            * \`"no-public"\` forbids public accessibility to be specified, because this is the default.
+            * \`"check-accessor"\` enforces explicit visibility on get/set accessors
+            * \`"check-constructor"\`  enforces explicit visibility on constructors`,
         options: {
             type: "array",
             items: {
                 type: "string",
-                enum: ["check-accessor", "check-constructor"],
+                enum: [OPTION_NO_PUBLIC, OPTION_CHECK_ACCESSOR, OPTION_CHECK_CONSTRUCTOR],
             },
             minLength: 0,
-            maxLength: 2,
+            maxLength: 3,
         },
-        optionExamples: ["true", '[true, "check-accessor"]'],
+        optionExamples: ["true", `[true, "${OPTION_NO_PUBLIC}"]`, `[true, "${OPTION_CHECK_ACCESSOR}"]`],
         type: "typescript",
         typescriptOnly: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY = (memberType: string, memberName: string | undefined, publicOnly: boolean) => {
+    public static FAILURE_STRING_NO_PUBLIC = "'public' is implicit.";
+
+    public static FAILURE_STRING_FACTORY(memberType: string, memberName: string | undefined): string {
         memberName = memberName === undefined ? "" : ` '${memberName}'`;
-        if (publicOnly) {
-            return `The ${memberType}${memberName} must be marked as 'public'`;
-        }
         return `The ${memberType}${memberName} must be marked either 'private', 'public', or 'protected'`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new MemberAccessWalker(sourceFile, this.getOptions()));
+        const options = this.getOptions().ruleArguments;
+        const noPublic = options.indexOf(OPTION_NO_PUBLIC) !== -1;
+        let checkAccessor = options.indexOf(OPTION_CHECK_ACCESSOR) !== -1;
+        let checkConstructor = options.indexOf(OPTION_CHECK_CONSTRUCTOR) !== -1;
+        if (noPublic) {
+            if (checkAccessor || checkConstructor) {
+                throw new Error("If 'no-public' is present, it should be the only option.");
+            }
+            checkAccessor = checkConstructor = true;
+        }
+        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, noPublic, checkAccessor, checkConstructor));
     }
 }
 
-export class MemberAccessWalker extends Lint.RuleWalker {
-    public visitConstructorDeclaration(node: ts.ConstructorDeclaration) {
-        if (this.hasOption("check-constructor")) {
-            // constructor is only allowed to have public or nothing, but the compiler will catch this
-            this.validateVisibilityModifiers(node);
+function walk(ctx: Lint.WalkContext<void>, noPublic: boolean, checkAccessor: boolean, checkConstructor: boolean) {
+    return ts.forEachChild(ctx.sourceFile, function recur(node: ts.Node): void {
+        if (isClassLikeDeclaration(node)) {
+            for (const child of node.members) {
+                if (shouldCheck(child)) {
+                    check(child);
+                }
+            }
         }
+        return ts.forEachChild(node, recur);
+    });
 
-        super.visitConstructorDeclaration(node);
-    }
-
-    public visitMethodDeclaration(node: ts.MethodDeclaration) {
-        this.validateVisibilityModifiers(node);
-        super.visitMethodDeclaration(node);
-    }
-
-    public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
-        this.validateVisibilityModifiers(node);
-        super.visitPropertyDeclaration(node);
-    }
-
-    public visitGetAccessor(node: ts.AccessorDeclaration) {
-        if (this.hasOption("check-accessor")) {
-            this.validateVisibilityModifiers(node);
+    function shouldCheck(node: ts.ClassElement): boolean {
+        switch (node.kind) {
+            case ts.SyntaxKind.Constructor:
+                return checkConstructor;
+            case ts.SyntaxKind.GetAccessor:
+            case ts.SyntaxKind.SetAccessor:
+                return checkAccessor;
+            case ts.SyntaxKind.MethodDeclaration:
+            case ts.SyntaxKind.PropertyDeclaration:
+                return true;
+            default:
+                return false;
         }
-        super.visitGetAccessor(node);
     }
 
-    public visitSetAccessor(node: ts.AccessorDeclaration) {
-        if (this.hasOption("check-accessor")) {
-            this.validateVisibilityModifiers(node);
-        }
-        super.visitSetAccessor(node);
-    }
-
-    private validateVisibilityModifiers(node: ts.ClassElement) {
-        if (node.parent!.kind === ts.SyntaxKind.ObjectLiteralExpression) {
+    function check(node: ts.ClassElement): void {
+        if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.ProtectedKeyword, ts.SyntaxKind.PrivateKeyword)) {
             return;
         }
 
-        const hasAnyVisibilityModifiers = Lint.hasModifier(
-            node.modifiers,
-            ts.SyntaxKind.PublicKeyword,
-            ts.SyntaxKind.PrivateKeyword,
-            ts.SyntaxKind.ProtectedKeyword,
-        );
+        const isPublic = Lint.hasModifier(node.modifiers, ts.SyntaxKind.PublicKeyword);
 
-        if (!hasAnyVisibilityModifiers) {
-            let memberType: string;
-            let publicOnly = false;
-
-            let end: number;
-            if (node.kind === ts.SyntaxKind.MethodDeclaration) {
-                memberType = "class method";
-                end = (node as ts.MethodDeclaration).name.getEnd();
-            } else if (node.kind === ts.SyntaxKind.PropertyDeclaration) {
-                memberType = "class property";
-                end = (node as ts.PropertyDeclaration).name.getEnd();
-            } else if (node.kind === ts.SyntaxKind.Constructor) {
-                memberType = "class constructor";
-                publicOnly = true;
-                end = Lint.childOfKind(node, ts.SyntaxKind.ConstructorKeyword)!.getEnd();
-            } else if (node.kind === ts.SyntaxKind.GetAccessor) {
-                memberType = "get property accessor";
-                end = (node as ts.AccessorDeclaration).name.getEnd();
-            } else if (node.kind === ts.SyntaxKind.SetAccessor) {
-                memberType = "set property accessor";
-                end = (node as ts.AccessorDeclaration).name.getEnd();
-            } else {
-                throw new Error("unhandled node type");
-            }
-
-            let memberName: string|undefined;
-            // look for the identifier and get its text
-            if (node.name !== undefined && node.name.kind === ts.SyntaxKind.Identifier) {
-                memberName = (node.name as ts.Identifier).text;
-            }
-            const failureString = Rule.FAILURE_STRING_FACTORY(memberType, memberName, publicOnly);
-            this.addFailureFromStartToEnd(node.getStart(), end, failureString);
+        if (noPublic && isPublic) {
+            const publicKeyword = node.modifiers!.find((m) => m.kind === ts.SyntaxKind.PublicKeyword)!;
+            ctx.addFailureAtNode(publicKeyword, Rule.FAILURE_STRING_NO_PUBLIC);
         }
+        if (!noPublic && !isPublic) {
+            const nameNode = isConstructorDeclaration(node) ? getChildOfKind(node, ts.SyntaxKind.ConstructorKeyword)! : node.name || node;
+            const memberName = node.name && isIdentifier(node.name) ? node.name.text : undefined;
+            ctx.addFailureAtNode(nameNode, Rule.FAILURE_STRING_FACTORY(memberType(node), memberName));
+        }
+    }
+}
+
+function memberType(node: ts.ClassElement): string {
+    switch (node.kind) {
+        case ts.SyntaxKind.MethodDeclaration:
+            return "class method";
+        case ts.SyntaxKind.PropertyDeclaration:
+            return "class property";
+        case ts.SyntaxKind.Constructor:
+            return "class constructor";
+        case ts.SyntaxKind.GetAccessor:
+            return "get property accessor";
+        case ts.SyntaxKind.SetAccessor:
+            return "set property accessor";
+        default:
+            throw new Error("unhandled node type " + ts.SyntaxKind[node.kind]);
     }
 }

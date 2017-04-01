@@ -1,6 +1,14 @@
 {
+  "lintOptions": {
+    "typeCheck": true
+  },
   "extends": "tslint:latest",
   "rules": {
+    "ban": [true,
+      ["describe", "only"],
+      ["it", "only"]
+    ],
+
     "callable-types": true,
     "interface-name": false,
     "interface-over-type-literal": true,
@@ -18,7 +26,9 @@
     "no-default-export": true,
     "no-empty-interface": true,
     "no-string-throw": true,
+    "no-switch-case-fall-through": true,
     "prefer-const": true,
+    "switch-default": false,
     "variable-name": [true,
       "ban-keywords",
       "check-format",

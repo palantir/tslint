@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { isBinaryExpression } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -38,31 +39,31 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Found an invalid comparison for NaN: ";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new UseIsnanRuleWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class UseIsnanRuleWalker extends Lint.RuleWalker {
-    protected visitBinaryExpression(node: ts.BinaryExpression): void {
-        if ((this.isExpressionNaN(node.left) || this.isExpressionNaN(node.right))
-                && this.isComparisonOperator(node.operatorToken.kind)) {
-            this.addFailureAtNode(node, Rule.FAILURE_STRING + node.getText());
+function walk(ctx: Lint.WalkContext<void>) {
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (isBinaryExpression(node)) {
+            switch (node.operatorToken.kind) {
+                case ts.SyntaxKind.LessThanToken:
+                case ts.SyntaxKind.GreaterThanToken:
+                case ts.SyntaxKind.LessThanEqualsToken:
+                case ts.SyntaxKind.GreaterThanEqualsToken:
+                case ts.SyntaxKind.EqualsEqualsToken:
+                case ts.SyntaxKind.ExclamationEqualsToken:
+                case ts.SyntaxKind.EqualsEqualsEqualsToken:
+                case ts.SyntaxKind.ExclamationEqualsEqualsToken:
+                    if (isExpressionNaN(node.right) || isExpressionNaN(node.left)) {
+                        ctx.addFailureAtNode(node, Rule.FAILURE_STRING + node.getText(ctx.sourceFile));
+                    }
+            }
         }
-        super.visitBinaryExpression(node);
-    }
+        return ts.forEachChild(node, cb);
+    });
+}
 
-    private isExpressionNaN(node: ts.Node) {
-        return node.kind === ts.SyntaxKind.Identifier && node.getText() === "NaN";
-    }
-
-    private isComparisonOperator(operator: ts.BinaryOperator) {
-        return (operator === ts.SyntaxKind.LessThanToken
-            || operator === ts.SyntaxKind.GreaterThanToken
-            || operator === ts.SyntaxKind.LessThanEqualsToken
-            || operator === ts.SyntaxKind.GreaterThanEqualsToken
-            || operator === ts.SyntaxKind.EqualsEqualsToken
-            || operator === ts.SyntaxKind.ExclamationEqualsToken
-            || operator === ts.SyntaxKind.EqualsEqualsEqualsToken
-            || operator === ts.SyntaxKind.ExclamationEqualsEqualsToken);
-    }
+function isExpressionNaN(node: ts.Node) {
+    return node.kind === ts.SyntaxKind.Identifier && (node as ts.Identifier).text === "NaN";
 }

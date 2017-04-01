@@ -18,16 +18,18 @@
 import * as diff from "diff";
 import * as fs from "fs";
 import * as path from "path";
+
+import { rules as allRules, RULES_EXCLUDED_FROM_ALL_CONFIG } from "../src/configs/all";
 import { IEnableDisablePosition } from "../src/ruleLoader";
 import { camelize } from "../src/utils";
 import { IOptions } from "./../src/language/rule/rule";
 import { loadRules } from "./lint";
 
-describe("Rule Loader", () => {
-    const builtRulesDir = "build/src/rules";
-    const srcRulesDir = "src/rules";
-    const testRulesDir = "test/rules";
+const builtRulesDir = "build/src/rules";
+const srcRulesDir = "src/rules";
+const testRulesDir = "test/rules";
 
+describe("Rule Loader", () => {
     it("loads core rules", () => {
         const validConfiguration: IOptions[] = [
             { ruleName: "class-name", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
@@ -38,7 +40,7 @@ describe("Rule Loader", () => {
         ];
 
         const rules = loadRules(validConfiguration, new Map<string, IEnableDisablePosition[]>(), builtRulesDir);
-        assert.equal(rules.length, 4);
+        assert.equal(rules.length, 5);
     });
 
     it("ignores invalid rules", () => {
@@ -85,7 +87,7 @@ describe("Rule Loader", () => {
         ];
 
         const rules = loadRules(validConfiguration, new Map<string, IEnableDisablePosition[]>(), [builtRulesDir]);
-        assert.equal(rules.length, 4);
+        assert.equal(rules.length, 5);
     });
 
     it("loads js rules", () => {
@@ -99,24 +101,17 @@ describe("Rule Loader", () => {
     });
 
     it("tests every rule", () => {
-        const rules = fs.readdirSync(srcRulesDir)
-            .filter((file) => /Rule.ts$/.test(file))
-            .map((file) => file.substr(0, file.length - "Rule.ts".length))
-            .sort()
-            .join("\n");
         const tests = fs.readdirSync(testRulesDir)
             .filter((file) => !file.startsWith("_") && fs.statSync(path.join(testRulesDir, file)).isDirectory())
-            .map(camelize)
-            .sort()
-            .join("\n");
-        const diffResults = diff.diffLines(rules, tests);
+            .map(camelize);
+        const diffResults = diffLists(everyRule(), tests);
         let testFailed = false;
-        for (const result of diffResults) {
-            if (result.added) {
-                console.warn("Test has no matching rule: " + result.value);
+        for (const { added, removed, value } of diffResults) {
+            if (added) {
+                console.warn(`Test has no matching rule: ${value}`);
                 testFailed = true;
-            } else if (result.removed) {
-                console.warn("Missing test: " + result.value);
+            } else if (removed) {
+                console.warn(`Missing test: ${value}`);
                 testFailed = true;
             }
         }
@@ -124,22 +119,32 @@ describe("Rule Loader", () => {
         assert.isFalse(testFailed, "List of rules doesn't match list of tests");
     });
 
-    it("ensures that `.ts` files in `rules/` end in `.test.ts` to avoid being linted", () => {
-        walkSync(testRulesDir, (filename) => {
-            if (/\.ts$/.test(filename)) {
-                assert.match(filename, /\.test\.ts$/);
-            }
-        });
-    });
+    it("includes every rule in 'tslint:all'", () => {
+        const expectedAllRules = everyRule().filter((ruleName) =>
+            RULES_EXCLUDED_FROM_ALL_CONFIG.indexOf(ruleName) === -1);
+        const tslintAllRules = Object.keys(allRules).map(camelize).sort();
+        const diffResults = diffLists(expectedAllRules, tslintAllRules);
 
-    const walkSync = (dir: string, cb: (filename: string) => void) => {
-        fs.readdirSync(dir).forEach((file) => {
-            const fullPath = path.join(dir, file);
-            if (fs.statSync(path.join(dir, file)).isDirectory()) {
-                walkSync(fullPath, cb);
-            } else {
-                cb(fullPath);
+        const failures: string[] = [];
+        for (const { added, removed, value } of diffResults) {
+            if (added) {
+                failures.push(`Rule in 'tslint:all' does not exist: ${value}`);
+            } else if (removed) {
+                failures.push(`Rule not in 'tslint:all': ${value}`);
             }
-        });
-    };
+        }
+
+        assert(failures.length === 0, failures.join("\n"));
+    });
 });
+
+function diffLists(actual: string[], expected: string[]): diff.IDiffResult[] {
+    return diff.diffLines(actual.join("\n"), expected.join("\n"));
+}
+
+function everyRule(): string[] {
+    return fs.readdirSync(srcRulesDir)
+        .filter((file) => /Rule.ts$/.test(file))
+        .map((file) => file.substr(0, file.length - "Rule.ts".length))
+        .sort();
+}
