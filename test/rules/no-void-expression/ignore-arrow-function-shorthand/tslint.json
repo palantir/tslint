@@ -3,6 +3,6 @@
     "typeCheck": true
   },
   "rules": {
-    "no-void-expression": [true, "allow-arrow-function-shorthand"]
+    "no-void-expression": [true, "ignore-arrow-function-shorthand"]
   }
 }

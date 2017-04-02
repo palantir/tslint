@@ -20,7 +20,7 @@ import * as ts from "typescript";
 import * as Lint from "../index";
 import { isTypeFlagSet } from "../language/utils";
 
-const OPTION_ALLOW_ARROW_FUNCTION_SHORTHAND = "allow-arrow-function-shorthand";
+const OPTION_IGNORE_ARROW_FUNCTION_SHORTHAND = "ignore-arrow-function-shorthand";
 
 export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -28,13 +28,13 @@ export class Rule extends Lint.Rules.TypedRule {
         ruleName: "no-void-expression",
         description: "Requires expressions of type `void` to appear in statement position.",
         optionsDescription: Lint.Utils.dedent`
-            If \`${OPTION_ALLOW_ARROW_FUNCTION_SHORTHAND}\` is provided, \`() => returnsVoid()\` will be allowed.
+            If \`${OPTION_IGNORE_ARROW_FUNCTION_SHORTHAND}\` is provided, \`() => returnsVoid()\` will be allowed.
             Otherwise, it must be written as \`() => { returnsVoid(); }\`.`,
         options: {
             type: "array",
             items: {
                 type: "string",
-                enum: [OPTION_ALLOW_ARROW_FUNCTION_SHORTHAND],
+                enum: [OPTION_IGNORE_ARROW_FUNCTION_SHORTHAND],
             },
             minLength: 0,
             maxLength: 1,
@@ -48,13 +48,17 @@ export class Rule extends Lint.Rules.TypedRule {
     public static FAILURE_STRING = "Expression has type `void`. Put it on its own line as a statement.";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        const allowArrowFunctionShorthand = this.ruleArguments.indexOf(OPTION_ALLOW_ARROW_FUNCTION_SHORTHAND) !== -1;
-        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, program.getTypeChecker()), allowArrowFunctionShorthand);
+        const ignoreArrowFunctionShorthand = this.ruleArguments.indexOf(OPTION_IGNORE_ARROW_FUNCTION_SHORTHAND) !== -1;
+        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, program.getTypeChecker()), { ignoreArrowFunctionShorthand });
     }
 }
 
-function walk(ctx: Lint.WalkContext<boolean>, checker: ts.TypeChecker): void {
-    const { sourceFile, options: allowArrowFunctionShorthand } = ctx;
+interface Options {
+    ignoreArrowFunctionShorthand: boolean;
+}
+
+function walk(ctx: Lint.WalkContext<Options>, checker: ts.TypeChecker): void {
+    const { sourceFile, options: { ignoreArrowFunctionShorthand } } = ctx;
     return ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
         if (isPossiblyVoidExpression(node)
                 && !isParentAllowedVoid(node)
@@ -69,7 +73,7 @@ function walk(ctx: Lint.WalkContext<boolean>, checker: ts.TypeChecker): void {
             case ts.SyntaxKind.ExpressionStatement:
                 return true;
             case ts.SyntaxKind.ArrowFunction:
-                return allowArrowFunctionShorthand;
+                return ignoreArrowFunctionShorthand;
             default:
                 return false;
         }
