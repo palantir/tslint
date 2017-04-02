@@ -202,7 +202,7 @@ function flagPredicate(testedFlag: ts.TypeFlags): Predicate {
 }
 
 function isFunction(t: ts.Type): boolean {
-    if (t.getCallSignatures().length !== 0) {
+    if (t.getConstructSignatures().length !== 0 || t.getCallSignatures().length !== 0) {
         return true;
     }
     const symbol = t.getSymbol();

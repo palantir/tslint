@@ -78,6 +78,12 @@ declare function get<T>(): T;
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [F]
 
     typeof get<number | (() => void)>() === "function";
+
+    class X {}
+    typeof X === "function";
+    ~~~~~~~~~~~~~~~~~~~~~~~ [T]
+    typeof X === "object";
+    ~~~~~~~~~~~~~~~~~~~~~ [F]
 }
 
 // typeof object
