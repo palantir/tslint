@@ -49,8 +49,7 @@ class Walker extends Lint.RuleWalker {
                 expression.getStart(),
                 expression.getEnd() - expression.getStart(),
                 `new Error(${expression.getText()})`);
-            this.addFailure(this.createFailure(
-                    node.getStart(), node.getWidth(), Rule.FAILURE_STRING, fix));
+            this.addFailureAtNode(node, Rule.FAILURE_STRING, fix);
         }
 
         super.visitThrowStatement(node);

@@ -87,7 +87,7 @@ class NoFloatingPromisesWalker extends Lint.ProgramAwareRuleWalker {
         const type = typeChecker.getTypeAtLocation(node);
 
         if (this.symbolIsPromise(type.symbol)) {
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+            this.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
     }
 

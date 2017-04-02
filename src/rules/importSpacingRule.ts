@@ -61,33 +61,33 @@ class ImportStatementWalker extends Lint.RuleWalker {
             const importClauseStart = node.importClause.getStart();
 
             if (importKeywordEnd === importClauseStart) {
-                this.addFailure(this.createFailure(nodeStart, "import".length, Rule.ADD_SPACE_AFTER_IMPORT));
+                this.addFailureAt(nodeStart, "import".length, Rule.ADD_SPACE_AFTER_IMPORT);
             } else if (importClauseStart > (importKeywordEnd + 1)) {
-                this.addFailure(this.createFailure(nodeStart, importClauseStart - nodeStart, Rule.TOO_MANY_SPACES_AFTER_IMPORT));
+                this.addFailureFromStartToEnd(nodeStart, importClauseStart, Rule.TOO_MANY_SPACES_AFTER_IMPORT);
             }
 
             const fromString = node.getText().substring(importClauseEnd - nodeStart, moduleSpecifierStart - nodeStart);
 
             if (/from$/.test(fromString)) {
-                this.addFailure(this.createFailure(importClauseEnd, fromString.length, Rule.ADD_SPACE_AFTER_FROM));
+                this.addFailureAt(importClauseEnd, fromString.length, Rule.ADD_SPACE_AFTER_FROM);
             } else if (/from\s{2,}$/.test(fromString)) {
-                this.addFailure(this.createFailure(importClauseEnd, fromString.length, Rule.TOO_MANY_SPACES_AFTER_FROM));
+                this.addFailureAt(importClauseEnd, fromString.length, Rule.TOO_MANY_SPACES_AFTER_FROM);
             }
 
             if (/^\s{2,}from/.test(fromString)) {
-                this.addFailure(this.createFailure(importClauseEnd, fromString.length, Rule.TOO_MANY_SPACES_BEFORE_FROM));
+                this.addFailureAt(importClauseEnd, fromString.length, Rule.TOO_MANY_SPACES_BEFORE_FROM);
             } else if (/^from/.test(fromString)) {
-                this.addFailure(this.createFailure(importClauseEnd, fromString.length, Rule.ADD_SPACE_BEFORE_FROM));
+                this.addFailureAt(importClauseEnd, fromString.length, Rule.ADD_SPACE_BEFORE_FROM);
             }
 
             const text = node.getText();
             const beforeImportClauseText = text.substring(0, importClauseStart - nodeStart);
             const afterImportClauseText = text.substring(importClauseEnd - nodeStart);
             if (LINE_BREAK_REGEX.test(beforeImportClauseText)) {
-                this.addFailure(this.createFailure(nodeStart, importClauseStart - nodeStart - 1, Rule.NO_LINE_BREAKS));
+                this.addFailureFromStartToEnd(nodeStart, importClauseStart - 1, Rule.NO_LINE_BREAKS);
             }
             if (LINE_BREAK_REGEX.test(afterImportClauseText)) {
-                this.addFailure(this.createFailure(importClauseEnd, node.getEnd() - importClauseEnd, Rule.NO_LINE_BREAKS));
+                this.addFailureFromStartToEnd(importClauseEnd, node.getEnd(), Rule.NO_LINE_BREAKS);
             }
         }
         super.visitImportDeclaration(node);
@@ -96,11 +96,11 @@ class ImportStatementWalker extends Lint.RuleWalker {
     public visitNamespaceImport(node: ts.NamespaceImport) {
         const text = node.getText();
         if (text.indexOf("*as") > -1) {
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.ADD_SPACE_AFTER_STAR));
+            this.addFailureAtNode(node, Rule.ADD_SPACE_AFTER_STAR);
         } else if (/\*\s{2,}as/.test(text)) {
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.TOO_MANY_SPACES_AFTER_STAR));
+            this.addFailureAtNode(node, Rule.TOO_MANY_SPACES_AFTER_STAR);
         } else if (LINE_BREAK_REGEX.test(text)) {
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.NO_LINE_BREAKS));
+            this.addFailureAtNode(node, Rule.NO_LINE_BREAKS);
         }
         super.visitNamespaceImport(node);
     }
@@ -110,13 +110,13 @@ class ImportStatementWalker extends Lint.RuleWalker {
         const nodeStart = node.getStart();
 
         if ((nodeStart + "import".length + 1) < moduleSpecifierStart) {
-            this.addFailure(this.createFailure(nodeStart, moduleSpecifierStart - nodeStart, Rule.TOO_MANY_SPACES_AFTER_IMPORT));
+            this.addFailureAt(nodeStart, moduleSpecifierStart - nodeStart, Rule.TOO_MANY_SPACES_AFTER_IMPORT);
         } else if ((nodeStart + "import".length) === moduleSpecifierStart) {
-            this.addFailure(this.createFailure(nodeStart,  "import".length, Rule.ADD_SPACE_AFTER_IMPORT));
+            this.addFailureAt(nodeStart,  "import".length, Rule.ADD_SPACE_AFTER_IMPORT);
         }
 
         if (LINE_BREAK_REGEX.test(node.getText())) {
-            this.addFailure(this.createFailure(nodeStart, node.getWidth(), Rule.NO_LINE_BREAKS));
+            this.addFailureAt(nodeStart, node.getWidth(), Rule.NO_LINE_BREAKS);
         }
     }
 }
