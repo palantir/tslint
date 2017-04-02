@@ -110,7 +110,7 @@ class ImportStatementWalker extends Lint.RuleWalker {
         const nodeStart = node.getStart();
 
         if ((nodeStart + "import".length + 1) < moduleSpecifierStart) {
-            this.addFailureAt(nodeStart, moduleSpecifierStart - nodeStart, Rule.TOO_MANY_SPACES_AFTER_IMPORT);
+            this.addFailureFromStartToEnd(nodeStart, moduleSpecifierStart, Rule.TOO_MANY_SPACES_AFTER_IMPORT);
         } else if ((nodeStart + "import".length) === moduleSpecifierStart) {
             this.addFailureAt(nodeStart,  "import".length, Rule.ADD_SPACE_AFTER_IMPORT);
         }
