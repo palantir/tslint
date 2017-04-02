@@ -99,6 +99,7 @@ export const rules = {
     "no-floating-promises": true,
     "no-for-in-array": true,
     "no-inferred-empty-object-type": true,
+    "no-invalid-template-strings": true,
     // "no-invalid-this": Won't this be deprecated?
     "no-misused-new": true,
     "no-null-keyword": true,
