@@ -19,6 +19,7 @@ import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { hasCommentAfterPosition } from "../language/utils";
 
 const OPTION_MULTILINE = "multiline";
 
@@ -96,7 +97,7 @@ function createFix(arrowFunction: ts.FunctionLikeDeclaration, body: ts.Block, ex
     ];
 
     function hasComments(node: ts.Node): boolean {
-        return ts.getTrailingCommentRanges(text, node.getEnd()) !== undefined;
+        return hasCommentAfterPosition(text, node.getEnd());
     }
 }
 
