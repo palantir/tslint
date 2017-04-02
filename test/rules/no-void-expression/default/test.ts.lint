@@ -1,3 +1,6 @@
+[].forEach(x => console.log(x));
+                ~~~~~~~~~~~~~~ [0]
+
 async function f(): Promise<void> {
     const x = doIt();
               ~~~~~~  [0]
