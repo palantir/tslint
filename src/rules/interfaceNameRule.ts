@@ -63,8 +63,9 @@ function walk(ctx: Lint.WalkContext<{ never: boolean }>): void {
             } else if (!never && name.text[0] !== "I") {
                 ctx.addFailureAtNode(name, Rule.FAILURE_STRING);
             }
+        } else {
+            return ts.forEachChild(node, cb);
         }
-        return ts.forEachChild(node, cb);
     });
 }
 
