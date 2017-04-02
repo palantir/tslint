@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { assert } from "chai";
 import * as diff from "diff";
 import * as fs from "fs";
 import * as path from "path";

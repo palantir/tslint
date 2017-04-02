@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { assert } from "chai";
 import * as cp from "child_process";
 import * as fs from "fs";
 import * as os from "os";
