@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {format} from "util";
+
 import {
     CodeLine,
     EndErrorLine,
@@ -60,8 +62,10 @@ export function parseErrorsFromMarkup(text: string): LintError[] {
     }
 
     const messageSubstitutionLines = lines.filter((l) => l instanceof MessageSubstitutionLine) as MessageSubstitutionLine[];
-    const messageSubstitutions = new Map(messageSubstitutionLines.map(({ key, message }) =>
-        [key, message] as [string, string]));
+    const messageSubstitutions = new Map<string, string>();
+    for (const {key, message} of messageSubstitutionLines) {
+        messageSubstitutions.set(key, formatMessage(messageSubstitutions, message));
+    }
 
     // errorLineForCodeLine[5] contains all the ErrorLine objects associated with the 5th line of code, for example
     const errorLinesForCodeLines = createCodeLineNoToErrorsMap(lines);
@@ -71,7 +75,7 @@ export function parseErrorsFromMarkup(text: string): LintError[] {
         lintErrors.push({
             startPos: errorStartPos,
             endPos: { line: lineNo, col: errorLine.endCol },
-            message: messageSubstitutions.get(errorLine.message) || errorLine.message,
+            message: substituteMessage(messageSubstitutions, errorLine.message),
         });
     }
     // for each line of code...
@@ -112,6 +116,25 @@ export function parseErrorsFromMarkup(text: string): LintError[] {
     lintErrors.sort(errorComparator);
 
     return lintErrors;
+}
+
+function substituteMessage(substitutions: Map<string, string>, message: string): string {
+    const substitution = substitutions.get(message);
+    if (substitution !== undefined) {
+        return substitution;
+    }
+    return formatMessage(substitutions, message);
+}
+
+function formatMessage(substitutions: Map<string, string>, message: string): string {
+    const formatMatch = /^([\w_]+) % \(\s*([^,]+(?:\s*,\s*[^,]+)*)\s*\)$/.exec(message);
+    if (formatMatch !== null) {
+        const base = substitutions.get(formatMatch[1]);
+        if (base !== undefined) {
+            message = format(base, ...(formatMatch[2].trim().split(/\s*,\s*/g)));
+        }
+    }
+    return message;
 }
 
 export function createMarkupFromErrors(code: string, lintErrors: LintError[]) {

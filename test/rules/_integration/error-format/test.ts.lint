@@ -1,0 +1,27 @@
+import {} from 'foo';
+
+let noSubstitution;
+    ~~~~~~~~~~~~~~ [Identifier 'noSubstitution' is never reassigned; use 'const' instead of 'let'.]
+let noFormat;
+    ~~~~~~~~ [no_format]
+let format;
+    ~~~~~~ [let_base % (format)]
+let formatMultiArgs;
+    ~~~~~~~~~~~~~~~ [base % (formatMultiArgs, let)]
+var formatMultiArgs2;
+    ~~~~~~~~~~~~~~~~ [base % (formatMultiArgs2, var)]
+let indirection;
+    ~~~~~~~~~~~ [let % (indirection)]
+var indirection2;
+    ~~~~~~~~~~~~ [var % (indirection2)]
+let indirection3;
+    ~~~~~~~~~~~~ [indirection3 % (let)]
+
+
+[no_format]: Identifier 'noFormat' is never reassigned; use 'const' instead of 'let'. 
+[base]: Identifier '%s' is never reassigned; use 'const' instead of '%s'.
+[let_base]: Identifier '%s' is never reassigned; use 'const' instead of 'let'.
+[base2]: Identifier '%%s' is never reassigned; use 'const' instead of '%s'.
+[let]: base2 % (let)
+[var]: base2 % (var)
+[indirection3]: base % (indirection3)
