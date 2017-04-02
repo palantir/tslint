@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -39,21 +40,18 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Missing radix parameter";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const radixWalker = new RadixWalker(sourceFile, this.getOptions());
-        return this.applyWithWalker(radixWalker);
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class RadixWalker extends Lint.RuleWalker {
-    public visitCallExpression(node: ts.CallExpression) {
-        const expression = node.expression;
-
-        if (expression.kind === ts.SyntaxKind.Identifier
-                && node.getFirstToken().getText() === "parseInt"
-                && node.arguments.length < 2) {
-            this.addFailureAtNode(node, Rule.FAILURE_STRING);
+function walk(ctx: Lint.WalkContext<void>): void {
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (utils.isCallExpression(node)) {
+            const { expression } = node;
+            if (utils.isIdentifier(expression) && expression.text === "parseInt" && node.arguments.length < 2) {
+                ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
+            }
         }
-
-        super.visitCallExpression(node);
-    }
+        return ts.forEachChild(node, cb);
+    });
 }
