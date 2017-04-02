@@ -209,6 +209,6 @@ function isLowerCase(name: string): boolean {
     return name === name.toLowerCase();
 }
 
-function isUpperCase(name: string): boolean {
+export function isUpperCase(name: string): boolean {
     return name === name.toUpperCase();
 }
