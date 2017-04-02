@@ -59,7 +59,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const options = this.getOptions().ruleArguments;
+        const options = this.ruleArguments;
         const noPublic = options.indexOf(OPTION_NO_PUBLIC) !== -1;
         let checkAccessor = options.indexOf(OPTION_CHECK_ACCESSOR) !== -1;
         let checkConstructor = options.indexOf(OPTION_CHECK_CONSTRUCTOR) !== -1;

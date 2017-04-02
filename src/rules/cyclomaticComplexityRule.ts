@@ -73,7 +73,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     private get threshold(): number {
-        const ruleArguments = this.getOptions().ruleArguments;
+        const { ruleArguments } = this;
         if (ruleArguments[0] !== undefined) {
             return ruleArguments[0];
         }
