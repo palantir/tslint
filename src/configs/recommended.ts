@@ -128,6 +128,7 @@ export const rules = {
 	"no-namespace": true,
 	"no-parameter-properties": false,
 	"no-reference": true,
+    "no-reference-import": true,
 	"no-shadowed-variable": true,
 	"no-string-literal": true,
 	"no-string-throw": true,
