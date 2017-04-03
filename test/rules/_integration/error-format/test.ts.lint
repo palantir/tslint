@@ -15,7 +15,9 @@ let indirection;
 var indirection2;
     ~~~~~~~~~~~~ [var % (indirection2)]
 let indirection3;
-    ~~~~~~~~~~~~ [indirection3 % (let)]
+    ~~~~~~~~~~~~ [partial_format % (let)]
+var formatInSubstitution;
+    ~~~~~~~~~~~~~~~~~~~~ [preformatted]
 
 
 [no_format]: Identifier 'noFormat' is never reassigned; use 'const' instead of 'let'. 
@@ -24,4 +26,5 @@ let indirection3;
 [base2]: Identifier '%%s' is never reassigned; use 'const' instead of '%s'.
 [let]: base2 % (let)
 [var]: base2 % (var)
-[indirection3]: base % (indirection3)
+[partial_format]: base % (indirection3)
+[preformatted]: base % (formatInSubstitution, var)
