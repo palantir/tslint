@@ -145,9 +145,9 @@ function formatMessage(substitutions: Map<string, string>, message: string): str
     if (formatMatch !== null) {
         const base = substitutions.get(formatMatch[1]);
         if (base !== undefined) {
-            const parameters = parseFormatParameters(formatMatch[2]);
-            if (parameters !== undefined) {
-                message = format(base, ...parameters);
+            const formatArgs = parseFormatArguments(formatMatch[2]);
+            if (formatArgs !== undefined) {
+                message = format(base, ...formatArgs);
             }
         }
     }
@@ -160,7 +160,7 @@ function formatMessage(substitutions: Map<string, string>, message: string): str
  * Whitespace between tokens is ignored.
  * Trailing comma is allowed.
  */
-function parseFormatParameters(text: string): string[] | undefined {
+function parseFormatArguments(text: string): string[] | undefined {
     if (scanner === undefined) {
         // once the scanner is created, it is cached for subsequent calls
         scanner = ts.createScanner(ts.ScriptTarget.Latest, false);
