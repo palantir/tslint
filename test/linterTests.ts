@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { assert } from "chai";
 import * as fs from "fs";
 import { createSourceFile, ScriptTarget } from "typescript";
 import { Replacement, RuleFailure } from "../src/language/rule/rule";
