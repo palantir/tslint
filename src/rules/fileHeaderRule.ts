@@ -36,43 +36,28 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "missing file header";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const walker = new FileHeaderWalker(sourceFile, this.getOptions());
-        const options = this.getOptions().ruleArguments;
-        walker.setRegexp(new RegExp(options[0].toString()));
-        return this.applyWithWalker(walker);
+        const { text } = sourceFile;
+        // ignore shebang if it exists
+        const offset = text.startsWith("#!") ? text.indexOf("\n") + 1 : 0;
+        if (!textHasComment(text, offset, new RegExp(this.ruleArguments[0]))) {
+            return [new Lint.RuleFailure(sourceFile, offset, offset, Rule.FAILURE_STRING, this.ruleName)];
+        }
+        return [];
     }
 }
 
-class FileHeaderWalker extends Lint.RuleWalker {
-    // match a single line or multi line comment with leading whitespace
-    // the wildcard dot does not match new lines - we can use [\s\S] instead
-    private commentRegexp: RegExp = /^\s*(\/\/(.*)|\/\*([\s\S]*?)\*\/)/;
-    private headerRegexp: RegExp;
+// match a single line or multi line comment with leading whitespace
+// the wildcard dot does not match new lines - we can use [\s\S] instead
+const commentRegexp = /^\s*(\/\/(.*)|\/\*([\s\S]*?)\*\/)/;
 
-    public setRegexp(headerRegexp: RegExp) {
-        this.headerRegexp = headerRegexp;
+function textHasComment(text: string, offset: number, headerRegexp: RegExp): boolean {
+    // check for a comment
+    const match = commentRegexp.exec(text.slice(offset));
+    if (match === null) {
+        return false;
     }
 
-    public visitSourceFile(node: ts.SourceFile) {
-        if (this.headerRegexp) {
-            let text = node.getFullText();
-            let offset = 0;
-            // ignore shebang if it exists
-            if (text.indexOf("#!") === 0) {
-                offset = text.indexOf("\n") + 1;
-                text = text.substring(offset);
-            }
-            // check for a comment
-            const match = text.match(this.commentRegexp);
-            if (!match) {
-                this.addFailureAt(offset, 0, Rule.FAILURE_STRING);
-            } else {
-                // either the third or fourth capture group contains the comment contents
-                const comment = match[2] ? match[2] : match[3];
-                if (comment !== undefined && comment.search(this.headerRegexp) < 0) {
-                    this.addFailureAt(offset, 0, Rule.FAILURE_STRING);
-                }
-            }
-        }
-    }
+    // either the third or fourth capture group contains the comment contents
+    const comment = match[2] !== undefined ? match[2] : match[3];
+    return comment.search(headerRegexp) !== -1;
 }
