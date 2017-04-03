@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as ts from "typescript";
 import {format} from "util";
 
 import {
@@ -27,6 +28,8 @@ import {
     printLine,
 } from "./lines";
 import {errorComparator, LintError, lintSyntaxError} from "./lintError";
+
+let scanner: ts.Scanner | undefined;
 
 export function getTypescriptVersionRequirement(text: string): string | undefined {
     const lines = text.split(/\r?\n/);
@@ -127,14 +130,54 @@ function substituteMessage(substitutions: Map<string, string>, message: string):
 }
 
 function formatMessage(substitutions: Map<string, string>, message: string): string {
-    const formatMatch = /^([\w_]+) % \(\s*([^,]+(?:\s*,\s*[^,]+)*)\s*\)$/.exec(message);
+    // message must have the following format to be formatted
+    // name % ('substitution1' [, "substitution2" [, ...]])
+    const formatMatch = /^([\w_]+) % \((.+)\)$/.exec(message);
     if (formatMatch !== null) {
         const base = substitutions.get(formatMatch[1]);
         if (base !== undefined) {
-            message = format(base, ...(formatMatch[2].trim().split(/\s*,\s*/g)));
+            const parameters = parseParameters(formatMatch[2]);
+            if (parameters !== undefined) {
+                message = format(base, ...parameters);
+            }
         }
     }
     return message;
+}
+
+/**
+ * Parse a list of comma separated string literals.
+ * This function bails out if it sees something unexpected.
+ * Whitespace between tokens is ignored.
+ * Trailing comma is allowed.
+ */
+function parseParameters(text: string): string[] | undefined {
+    if (scanner === undefined) {
+        // once the scanner is created, it is cached for subsequent calls
+        scanner = ts.createScanner(ts.ScriptTarget.Latest, false);
+    }
+    scanner.setText(text);
+    const result: string[] = [];
+    let expectValue = true;
+    for (let token = scanner.scan(); token !== ts.SyntaxKind.EndOfFileToken; token = scanner.scan()) {
+        if (token === ts.SyntaxKind.StringLiteral) {
+            if (!expectValue) {
+                return undefined;
+            }
+            result.push(scanner.getTokenValue());
+            expectValue = false;
+        } else if (token === ts.SyntaxKind.CommaToken) {
+            if (expectValue) {
+                return undefined;
+            }
+            expectValue = true;
+        } else if (token !== ts.SyntaxKind.WhitespaceTrivia) {
+            // only ignore whitespace, other trivia like comments makes this function bail out
+            return undefined;
+        }
+    }
+
+    return result.length === 0 ? undefined : result;
 }
 
 export function createMarkupFromErrors(code: string, lintErrors: LintError[]) {
