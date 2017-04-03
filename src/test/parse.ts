@@ -121,6 +121,12 @@ export function parseErrorsFromMarkup(text: string): LintError[] {
     return lintErrors;
 }
 
+/**
+ * Process `message` as follows:
+ * - search `substitutions` for an exact match and return the substitution
+ * - try to format the message when it looks like: name % ('substitution1' [, "substitution2" [, ...]])
+ * - or return it unchanged
+ */
 function substituteMessage(substitutions: Map<string, string>, message: string): string {
     const substitution = substitutions.get(message);
     if (substitution !== undefined) {
@@ -129,14 +135,17 @@ function substituteMessage(substitutions: Map<string, string>, message: string):
     return formatMessage(substitutions, message);
 }
 
+/**
+ * Tries to format the message when it has the correct format or returned unchanged:  name % ('substitution1' [, "substitution2" [, ...]])
+ * Where `name` is the name of a message substitution that is used as format string.
+ * If `name` is not found in `substitutions`, `message` is returned unchanged.
+ */
 function formatMessage(substitutions: Map<string, string>, message: string): string {
-    // message must have the following format to be formatted
-    // name % ('substitution1' [, "substitution2" [, ...]])
     const formatMatch = /^([\w_]+) % \((.+)\)$/.exec(message);
     if (formatMatch !== null) {
         const base = substitutions.get(formatMatch[1]);
         if (base !== undefined) {
-            const parameters = parseParameters(formatMatch[2]);
+            const parameters = parseFormatParameters(formatMatch[2]);
             if (parameters !== undefined) {
                 message = format(base, ...parameters);
             }
@@ -151,7 +160,7 @@ function formatMessage(substitutions: Map<string, string>, message: string): str
  * Whitespace between tokens is ignored.
  * Trailing comma is allowed.
  */
-function parseParameters(text: string): string[] | undefined {
+function parseFormatParameters(text: string): string[] | undefined {
     if (scanner === undefined) {
         // once the scanner is created, it is cached for subsequent calls
         scanner = ts.createScanner(ts.ScriptTarget.Latest, false);

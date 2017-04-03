@@ -22,6 +22,8 @@ let worksWithEscape;
     ~~~~~~~~~~~~~~~ [full_substitution % ('Identifier \'worksWithEscape\' is never reassigned; use \'const\' instead of \'let\'.')]
 var worksWithDoubleQuotes;
     ~~~~~~~~~~~~~~~~~~~~~ [full_substitution % ("Identifier 'worksWithDoubleQuotes' is never reassigned; use 'const' instead of 'var'.")]
+let doesntTrimSpaces;
+    ~~~~~~~~~~~~~~~~ [base3 % ("Identifier 'doesntTrimSpaces' is never reassigned; ", " 'let'")]
 
 [no_format]: Identifier 'noFormat' is never reassigned; use 'const' instead of 'let'.
 [base]: Identifier '%s' is never reassigned; use 'const' instead of '%s'.
@@ -32,3 +34,4 @@ var worksWithDoubleQuotes;
 [partial_format]: base % ('indirection3')
 [preformatted]: base % ('formatInSubstitution', 'var')
 [full_substitution]: %s
+[base3]: %suse 'const' instead of%s.
