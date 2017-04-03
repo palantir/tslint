@@ -104,16 +104,8 @@ class Linter {
         if (this.options.fix) {
             for (const rule of enabledRules) {
                 const ruleFailures = this.applyRule(rule, sourceFile);
-                const fixes = ruleFailures.map((f) => f.getFix()).filter((f): f is Fix => !!f) as Fix[];
-                source = fs.readFileSync(fileName, { encoding: "utf-8" });
-                if (fixes.length > 0) {
-                    this.fixes = this.fixes.concat(ruleFailures);
-                    source = Replacement.applyFixes(source, fixes);
-                    fs.writeFileSync(fileName, source, { encoding: "utf-8" });
-
-                    // reload AST if file is modified
-                    sourceFile = this.getSourceFile(fileName, source);
-                }
+                source = this.applyFixes(fileName, source, ruleFailures);
+                sourceFile = this.getSourceFile(fileName, source);
                 fileFailures = fileFailures.concat(ruleFailures);
             }
             hasLinterRun = true;
@@ -167,6 +159,38 @@ class Linter {
             output,
             warningCount: this.failures.length - errorCount,
         };
+    }
+
+    // Applies fixes to the files where the failures are reported.
+    // Returns the content of the source file which AST needs to be reloaded.
+    protected applyFixes(sourceFilePath: string, sourceContent: string, ruleFailures: RuleFailure[]) {
+      const fixesPerFile: {[file: string]: Fix[]} = ruleFailures
+          .reduce((accum: {[file: string]: Fix[]}, c) => {
+              const currentFileName = c.getFileName();
+              const fix = c.getFix();
+              if (fix) {
+                  accum[currentFileName] = accum[currentFileName] || [];
+                  accum[currentFileName].push(fix);
+              }
+              return accum;
+          }, {});
+
+      const hasFixes = Object.keys(fixesPerFile).length > 0;
+      let result = sourceContent;
+
+      if (hasFixes) {
+          this.fixes = this.fixes.concat(ruleFailures);
+          Object.keys(fixesPerFile).forEach((currentFileName: string) => {
+              const fixesForFile = fixesPerFile[currentFileName];
+              let source = fs.readFileSync(currentFileName, { encoding: "utf-8" });
+              source = Replacement.applyFixes(source, fixesForFile);
+              fs.writeFileSync(currentFileName, source, { encoding: "utf-8" });
+              if (sourceFilePath === currentFileName) {
+                  result = source;
+              }
+          });
+      }
+      return result;
     }
 
     private applyRule(rule: IRule, sourceFile: ts.SourceFile) {
