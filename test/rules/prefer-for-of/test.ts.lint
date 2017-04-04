@@ -150,4 +150,9 @@ for (let shadow = 0; shadow < arr.length; shadow++) {
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   [0]
     }
 }
+
+for (let i = 0; i < arr.length; i++) {
+    delete arr[i];
+}
+
 [0]: Expected a 'for-of' loop instead of a 'for' loop with this simple iteration
