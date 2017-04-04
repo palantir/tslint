@@ -19,3 +19,5 @@ yarn.lock
 /src/
 /test/
 tscommand*.txt
+/coverage/
+/.nyc_output
