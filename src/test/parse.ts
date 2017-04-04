@@ -127,27 +127,27 @@ export function parseErrorsFromMarkup(text: string): LintError[] {
  * - try to format the message when it looks like: name % ('substitution1' [, "substitution2" [, ...]])
  * - or return it unchanged
  */
-function substituteMessage(substitutions: Map<string, string>, message: string): string {
-    const substitution = substitutions.get(message);
+function substituteMessage(templates: Map<string, string>, message: string): string {
+    const substitution = templates.get(message);
     if (substitution !== undefined) {
         return substitution;
     }
-    return formatMessage(substitutions, message);
+    return formatMessage(templates, message);
 }
 
 /**
- * Tries to format the message when it has the correct format or returned unchanged:  name % ('substitution1' [, "substitution2" [, ...]])
- * Where `name` is the name of a message substitution that is used as format string.
- * If `name` is not found in `substitutions`, `message` is returned unchanged.
+ * Tries to format the message when it has the correct format or returns it unchanged:  name % ('substitution1' [, "substitution2" [, ...]])
+ * Where `name` is the name of a message substitution that is used as template.
+ * If `name` is not found in `templates`, `message` is returned unchanged.
  */
-function formatMessage(substitutions: Map<string, string>, message: string): string {
+function formatMessage(templates: Map<string, string>, message: string): string {
     const formatMatch = /^([\w_]+) % \((.+)\)$/.exec(message);
     if (formatMatch !== null) {
-        const base = substitutions.get(formatMatch[1]);
-        if (base !== undefined) {
+        const template = templates.get(formatMatch[1]);
+        if (template !== undefined) {
             const formatArgs = parseFormatArguments(formatMatch[2]);
             if (formatArgs !== undefined) {
-                message = format(base, ...formatArgs);
+                message = format(template, ...formatArgs);
             }
         }
     }
