@@ -69,7 +69,7 @@ export class Rule extends Lint.Rules.TypedRule {
                 "the 'no-unused-locals' and 'no-unused-parameters' compiler options are enabled.");
         }
 
-        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, program, parseOptions(this.getOptions().ruleArguments)));
+        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, program, parseOptions(this.ruleArguments)));
     }
 }
 
