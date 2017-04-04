@@ -19,7 +19,6 @@ import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
-import { isUpperCase } from "./variableNameRule";
 
 const OPTION_ALWAYS = "always-prefix";
 const OPTION_NEVER = "never-prefix";
@@ -71,5 +70,5 @@ function walk(ctx: Lint.WalkContext<{ never: boolean }>): void {
 
 function hasPrefixI(name: string): boolean {
     // Allow IndexedDB interfaces
-    return name.length >= 2 && name[0] === "I" && isUpperCase(name[1]) && !name.startsWith("IDB");
+    return name.length >= 2 && name[0] === "I" && Lint.Utils.isUpperCase(name[1]) && !name.startsWith("IDB");
 }
