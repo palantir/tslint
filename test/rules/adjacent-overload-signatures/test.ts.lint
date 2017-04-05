@@ -142,7 +142,7 @@ class Foo {
 
 // A semicolon on its own is a SemicolonClassElement, but still consider them adjacent.
 class Bar {
-	get test() { return 0; };
+    get test() { return 0; };
     set test(v: number) {};
 }
 
