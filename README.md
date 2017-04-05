@@ -24,7 +24,7 @@ Installation & Usage
 
 Refer to the full installation & usage documentation on the [TSLint website](https://palantir.github.io/tslint/).
 
-Here, you'll find information about
+There, you'll find information about
 - [configuration](https://palantir.github.io/tslint/usage/configuration/),
 - [core rules](https://palantir.github.io/tslint/),
 - [core formatters](http://palantir.github.io/tslint/formatters/), and
@@ -67,7 +67,6 @@ yarn test
 
 Creating a new release
 ----------------------
-<sup>[back to ToC &uarr;](#table-of-contents)</sup>
 
 1. Bump the version number in `package.json` and `src/tslintMulti.ts`
 2. Add release notes in `CHANGELOG.md`
