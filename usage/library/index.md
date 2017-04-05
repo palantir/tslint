@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Library
+title: Using TSLint as a Node.js library
 permalink: /usage/library/
 ---
 
@@ -14,7 +14,7 @@ yarn add tslint typescript
 
 {% include peer_dependencies.md %}
 
-### Usage
+### Library usage
 
 Please ensure that the TypeScript source files compile correctly _before_ running the linter.
 
@@ -32,6 +32,7 @@ const options = {
 
 const fileContents = fs.readFileSync(fileName, "utf8");
 const linter = new Linter(options);
-const configuration = Configuration.findConfiguration(configurationFilename, filename).results;
-const result = linter.lint(fileName, fileContents, configuration);
+const configuration = Configuration.findConfiguration(configurationFilename, fileName).results;
+linter.lint(fileName, fileContents, configuration);
+const result = linter.getResult();
 ```
