@@ -21,7 +21,6 @@ options:
       - type: string
         enum:
           - check-parameters
-          - react
       - type: object
         properties:
           ignore-pattern:
@@ -30,7 +29,7 @@ options:
   minLength: 0
   maxLength: 3
 optionExamples:
-  - '[true, "react"]'
+  - '[true]'
   - '[true, {"ignore-pattern": "^_"}]'
 type: functionality
 typescriptOnly: true
@@ -44,8 +43,7 @@ optionsJSON: |-
         {
           "type": "string",
           "enum": [
-            "check-parameters",
-            "react"
+            "check-parameters"
           ]
         },
         {

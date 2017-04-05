@@ -1,12 +1,33 @@
 ---
 ruleName: no-void-expression
 description: Requires expressions of type `void` to appear in statement position.
-optionsDescription: Not configurable.
-options: null
+optionsDescription: |-
+
+  If `ignore-arrow-function-shorthand` is provided, `() => returnsVoid()` will be allowed.
+  Otherwise, it must be written as `() => { returnsVoid(); }`.
+options:
+  type: array
+  items:
+    type: string
+    enum:
+      - ignore-arrow-function-shorthand
+  minLength: 0
+  maxLength: 1
 requiresTypeInfo: true
 type: functionality
 typescriptOnly: false
 layout: rule
 title: 'Rule: no-void-expression'
-optionsJSON: 'null'
+optionsJSON: |-
+  {
+    "type": "array",
+    "items": {
+      "type": "string",
+      "enum": [
+        "ignore-arrow-function-shorthand"
+      ]
+    },
+    "minLength": 0,
+    "maxLength": 1
+  }
 ---

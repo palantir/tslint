@@ -15,8 +15,10 @@ optionsDescription: |-
 
   * `allow-null-union` allows union types containing `null`.
     - It does *not* allow `null` itself.
+    - Without the '--strictNullChecks' compiler option, this will allow anything other than a string, number, or enum.
   * `allow-undefined-union` allows union types containing `undefined`.
     - It does *not* allow `undefined` itself.
+    - Without the '--strictNullChecks' compiler option, this will allow anything other than a string, number, or enum.
   * `allow-string` allows strings.
     - It does *not* allow unions containing `string`.
     - It does *not* allow string literal types.

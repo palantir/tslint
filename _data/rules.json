@@ -1073,6 +1073,17 @@
     "typescriptOnly": true
   },
   {
+    "ruleName": "no-invalid-template-strings",
+    "description": "Warns on use of `${` in non-template strings.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality",
+    "typescriptOnly": false
+  },
+  {
     "ruleName": "no-invalid-this",
     "description": "Disallows using the `this` keyword outside of classes.",
     "rationale": "See [the rule's author's rationale here.](https://github.com/palantir/tslint/pull/1105#issue-147549402)",
@@ -1232,6 +1243,18 @@
     "ruleName": "no-shadowed-variable",
     "description": "Disallows shadowing variable declarations.",
     "rationale": "Shadowing a variable masks access to it and obscures to what value an identifier actually refers.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality",
+    "typescriptOnly": false
+  },
+  {
+    "ruleName": "no-sparse-arrays",
+    "description": "Forbids array literals to contain missing elements.",
+    "rationale": "Missing elements are probably an accidentally duplicated comma.",
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
@@ -1408,8 +1431,7 @@
           {
             "type": "string",
             "enum": [
-              "check-parameters",
-              "react"
+              "check-parameters"
             ]
           },
           {
@@ -1427,7 +1449,7 @@
       "maxLength": 3
     },
     "optionExamples": [
-      "[true, \"react\"]",
+      "[true]",
       "[true, {\"ignore-pattern\": \"^_\"}]"
     ],
     "type": "functionality",
@@ -1473,8 +1495,18 @@
   {
     "ruleName": "no-void-expression",
     "description": "Requires expressions of type `void` to appear in statement position.",
-    "optionsDescription": "Not configurable.",
-    "options": null,
+    "optionsDescription": "\nIf `ignore-arrow-function-shorthand` is provided, `() => returnsVoid()` will be allowed.\nOtherwise, it must be written as `() => { returnsVoid(); }`.",
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "ignore-arrow-function-shorthand"
+        ]
+      },
+      "minLength": 0,
+      "maxLength": 1
+    },
     "requiresTypeInfo": true,
     "type": "functionality",
     "typescriptOnly": false
@@ -1883,7 +1915,7 @@
   {
     "ruleName": "strict-boolean-expressions",
     "description": "\nRestricts the types allowed in boolean expressions. By default only booleans are allowed.\n\nThe following nodes are checked:\n\n* Arguments to the `!`, `&&`, and `||` operators\n* The condition in a conditional expression (`cond ? x : y`)\n* Conditions for `if`, `for`, `while`, and `do-while` statements.",
-    "optionsDescription": "\nThese options may be provided:\n\n* `allow-null-union` allows union types containing `null`.\n  - It does *not* allow `null` itself.\n* `allow-undefined-union` allows union types containing `undefined`.\n  - It does *not* allow `undefined` itself.\n* `allow-string` allows strings.\n  - It does *not* allow unions containing `string`.\n  - It does *not* allow string literal types.\n* `allow-number` allows numbers.\n  - It does *not* allow unions containing `number`.\n  - It does *not* allow enums or number literal types.\n* `allow-mix` allow multiple of the above to appear together.\n  - For example, `string | number` or `RegExp | null | undefined` would normally not be allowed.\n  - A type like `\"foo\" | \"bar\" | undefined` is always allowed, because it has only one way to be false.",
+    "optionsDescription": "\nThese options may be provided:\n\n* `allow-null-union` allows union types containing `null`.\n  - It does *not* allow `null` itself.\n  - Without the '--strictNullChecks' compiler option, this will allow anything other than a string, number, or enum.\n* `allow-undefined-union` allows union types containing `undefined`.\n  - It does *not* allow `undefined` itself.\n  - Without the '--strictNullChecks' compiler option, this will allow anything other than a string, number, or enum.\n* `allow-string` allows strings.\n  - It does *not* allow unions containing `string`.\n  - It does *not* allow string literal types.\n* `allow-number` allows numbers.\n  - It does *not* allow unions containing `number`.\n  - It does *not* allow enums or number literal types.\n* `allow-mix` allow multiple of the above to appear together.\n  - For example, `string | number` or `RegExp | null | undefined` would normally not be allowed.\n  - A type like `\"foo\" | \"bar\" | undefined` is always allowed, because it has only one way to be false.",
     "options": {
       "type": "array",
       "items": {
