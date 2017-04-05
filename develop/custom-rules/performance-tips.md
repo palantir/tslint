@@ -1,7 +1,7 @@
 ---
 title: TSLint performance tips
 layout: page
-permalink: "/develop/custom-rules/performance"
+permalink: "/develop/custom-rules/performance-tips"
 ---
 
 As TSLint has matured, we have developed some best practices for making rules run faster. TSLint 5.0 was a particularly
