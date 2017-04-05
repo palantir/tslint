@@ -32,6 +32,7 @@ const options = {
 
 const fileContents = fs.readFileSync(fileName, "utf8");
 const linter = new Linter(options);
-const configuration = Configuration.findConfiguration(configurationFilename, filename).results;
-const result = linter.lint(fileName, fileContents, configuration);
+const configuration = Configuration.findConfiguration(configurationFilename, fileName).results;
+linter.lint(fileName, fileContents, configuration);
+const result = linter.getResult();
 ```
