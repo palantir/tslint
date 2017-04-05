@@ -106,6 +106,7 @@ export const rules = {
     "no-shadowed-variable": true,
     "no-string-literal": true,
     "no-string-throw": true,
+    "no-sparse-arrays": true,
     "no-unbound-method": true,
     "no-unsafe-any": true,
     "no-unsafe-finally": true,
