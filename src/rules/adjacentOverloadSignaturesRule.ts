@@ -83,6 +83,10 @@ function getMisplacedOverloads<T extends ts.Node>(overloads: T[], getKey: (node:
     let lastKey: string | undefined;
     const seen = new Set<string>();
     for (const node of overloads) {
+        if (node.kind === ts.SyntaxKind.SemicolonClassElement) {
+            continue;
+        }
+
         const key = getKey(node);
         if (key !== undefined) {
             if (seen.has(key) && lastKey !== key) {
