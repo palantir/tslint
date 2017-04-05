@@ -17,13 +17,13 @@
 
 import * as fs from "fs";
 import * as path from "path";
-import {FormatterFunction} from "./index";
+import {FormatterStatic} from "./index";
 import {camelize} from "./utils";
 
 const moduleDirectory = path.dirname(module.filename);
 const CORE_FORMATTERS_DIRECTORY = path.resolve(moduleDirectory, ".", "formatters");
 
-export function findFormatter(name: string | FormatterFunction, formattersDirectory?: string) {
+export function findFormatter(name: string | FormatterStatic, formattersDirectory?: string): FormatterStatic | undefined {
     if (typeof name === "function") {
         return name;
     } else if (typeof name === "string") {
@@ -52,24 +52,24 @@ export function findFormatter(name: string | FormatterFunction, formattersDirect
     }
 }
 
-function loadFormatter(...paths: string[]) {
+function loadFormatter(...paths: string[]): FormatterStatic | undefined {
     const formatterPath = paths.reduce((p, c) => path.join(p, c), "");
     const fullPath = path.resolve(moduleDirectory, formatterPath);
 
     if (fs.existsSync(`${fullPath}.js`)) {
         const formatterModule = require(fullPath);
-        return formatterModule.Formatter;
+        return formatterModule.Formatter; // tslint:disable-line no-unsafe-any
     }
 
     return undefined;
 }
 
-function loadFormatterModule(name: string) {
+function loadFormatterModule(name: string): FormatterStatic | undefined {
     let src: string;
     try {
         src = require.resolve(name);
     } catch (e) {
         return undefined;
     }
-    return require(src).Formatter;
+    return require(src).Formatter; // tslint:disable-line no-unsafe-any
 }

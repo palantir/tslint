@@ -47,7 +47,7 @@ export class Rule extends Lint.Rules.TypedRule {
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         const walker = new NoFloatingPromisesWalker(sourceFile, this.getOptions(), program);
 
-        for (const className of this.ruleArguments) {
+        for (const className of this.ruleArguments as string[]) {
             walker.addPromiseClass(className);
         }
 

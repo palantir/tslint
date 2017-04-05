@@ -74,7 +74,7 @@ class CurlyWalker extends Lint.RuleWalker {
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
 
-        const args = this.getOptions();
+        const args = this.getOptions() as any[];
 
         this.optionIgnoreSameLine = args.indexOf(OPTION_IGNORE_SAME_LINE) > -1;
     }

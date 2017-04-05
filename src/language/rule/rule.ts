@@ -20,6 +20,11 @@ import * as ts from "typescript";
 import {arrayify, flatMap} from "../../utils";
 import {IWalker} from "../walker";
 
+export interface RuleStatic {
+    metadata: IRuleMetadata;
+    new(options: IOptions): IRule;
+}
+
 export interface IRuleMetadata {
     /**
      * The kebab-case name of the rule.

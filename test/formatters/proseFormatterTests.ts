@@ -17,7 +17,7 @@
 import { assert } from "chai";
 import * as ts from "typescript";
 
-import { IFormatter, TestUtils } from "../lint";
+import { IFormatter, RuleFailure, TestUtils } from "../lint";
 import { createFailure } from "./utils";
 
 describe("Prose Formatter", () => {
@@ -54,12 +54,12 @@ describe("Prose Formatter", () => {
             createFailure(sourceFile, 0, 1, "first failure", "first-name", undefined, "error"),
         ];
 
-        const mockFix = { getFileName: () => "file2" } as any;
+        const mockFix = { getFileName: () => "file2" } as any as RuleFailure;
 
         const fixes = [
             createFailure(sourceFile, 0, 1, "first failure", "first-name", undefined, "error"),
             createFailure(sourceFile, 32, 36, "mid failure", "mid-name", undefined, "error"),
-             mockFix,
+            mockFix,
         ];
 
         const expectedResult =

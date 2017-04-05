@@ -228,7 +228,7 @@ export const RULES_EXCLUDED_FROM_ALL_CONFIG =
 // Exclude typescript-only rules from jsRules, otherwise it's identical.
 export const jsRules: { [key: string]: any } = {};
 for (const key in rules) {
-    if (!Object.prototype.hasOwnProperty.call(rules, key)) {
+    if (!(Object.prototype.hasOwnProperty.call(rules, key) as boolean)) {
         continue;
     }
 

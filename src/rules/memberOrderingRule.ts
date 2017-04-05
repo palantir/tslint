@@ -201,7 +201,7 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
-        this.opts = parseOptions(this.getOptions());
+        this.opts = parseOptions(this.getOptions() as any[]);
     }
 
     public visitClassDeclaration(node: ts.ClassDeclaration) {
@@ -310,11 +310,11 @@ function caseInsensitiveLess(a: string, b: string) {
 }
 
 function memberKindForConstructor(access: Access): MemberKind {
-    return (MemberKind as any)[access + "Constructor"];
+    return (MemberKind as any)[access + "Constructor"] as MemberKind;
 }
 
 function memberKindForMethodOrField(access: Access, membership: "Static" | "Instance", kind: "Method" | "Field"): MemberKind {
-    return (MemberKind as any)[access + membership + kind];
+    return (MemberKind as any)[access + membership + kind] as MemberKind;
 }
 
 const allAccess: Access[] = ["public", "protected", "private"];
@@ -398,6 +398,7 @@ function getOptionsJson(allOptions: any[]): { order: MemberCategoryJson[], alpha
         return { order: convertFromOldStyleOptions(allOptions), alphabetize: false }; // presume allOptions to be string[]
     }
 
+    // tslint:disable-next-line no-unsafe-any
     return { order: categoryFromOption(firstOption[OPTION_ORDER]), alphabetize: !!firstOption[OPTION_ALPHABETIZE] };
 }
 function categoryFromOption(orderOption: {}): MemberCategoryJson[] {

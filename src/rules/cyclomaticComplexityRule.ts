@@ -74,7 +74,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     private get threshold(): number {
         if (this.ruleArguments[0] !== undefined) {
-            return this.ruleArguments[0];
+            return this.ruleArguments[0] as number;
         }
         return Rule.DEFAULT_THRESHOLD;
     }

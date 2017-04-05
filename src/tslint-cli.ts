@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+// tslint:disable no-unsafe-any (TODO)
+
 import * as fs from "fs";
 import * as optimist from "optimist";
 

@@ -39,7 +39,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         const { text } = sourceFile;
         // ignore shebang if it exists
         const offset = text.startsWith("#!") ? text.indexOf("\n") + 1 : 0;
-        if (!textHasComment(text, offset, new RegExp(this.ruleArguments[0]))) {
+        if (!textHasComment(text, offset, new RegExp(this.ruleArguments[0] as string))) {
             return [new Lint.RuleFailure(sourceFile, offset, offset, Rule.FAILURE_STRING, this.ruleName)];
         }
         return [];

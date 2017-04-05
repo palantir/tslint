@@ -44,14 +44,14 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public isEnabled(): boolean {
-        return super.isEnabled() && this.ruleArguments[0] > 0;
+        return super.isEnabled() && this.ruleArguments[0] as number > 0;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const ruleFailures: Lint.RuleFailure[] = [];
         const ruleArguments = this.getOptions().ruleArguments;
-        const lineLimit: number = ruleArguments[0];
-        const lineCount: number = sourceFile.getLineStarts().length;
+        const lineLimit = ruleArguments[0] as number;
+        const lineCount = sourceFile.getLineStarts().length;
         const disabledIntervals = this.getOptions().disabledIntervals;
 
         if (lineCount > lineLimit && disabledIntervals.length === 0) {

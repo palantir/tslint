@@ -36,7 +36,7 @@ export class Rule extends Lint.Rules.TypedRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "Unsafe use of expression of type 'any'.";
+    public static FAILURE_STRING: string = "Unsafe use of expression of type 'any'.";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, program.getTypeChecker()));
@@ -115,8 +115,10 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
             case ts.SyntaxKind.NewExpression: {
                 const { expression, arguments: args } = node as ts.CallExpression | ts.NewExpression;
                 cb(expression);
-                for (const arg of args) {
-                    checkContextual(arg);
+                if (args) {
+                    for (const arg of args) {
+                        checkContextual(arg);
+                    }
                 }
                 // Also check the call expression itself
                 check();

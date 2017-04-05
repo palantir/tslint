@@ -84,7 +84,7 @@ class ObjectLiteralKeyQuotesWalker extends Lint.RuleWalker {
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
-        this.mode = this.getOptions()[0] || "always";
+        this.mode = (this.getOptions() as any)[0] as QuotesMode || "always";
     }
 
     public visitObjectLiteralExpression(node: ts.ObjectLiteralExpression) {

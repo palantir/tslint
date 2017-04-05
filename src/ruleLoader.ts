@@ -20,13 +20,12 @@ import * as path from "path";
 
 import { getRelativePath } from "./configuration";
 import { showWarningOnce } from "./error";
-import { AbstractRule } from "./language/rule/abstractRule";
-import { IDisabledInterval, IOptions, IRule } from "./language/rule/rule";
+import { IDisabledInterval, IOptions, IRule, RuleStatic } from "./language/rule/rule";
 import { arrayify, camelize, dedent } from "./utils";
 
 const moduleDirectory = path.dirname(module.filename);
 const CORE_RULES_DIRECTORY = path.resolve(moduleDirectory, ".", "rules");
-const cachedRules = new Map<string, typeof AbstractRule | null>(); // null indicates that the rule was not found
+const cachedRules = new Map<string, RuleStatic | null>(); // null indicates that the rule was not found
 
 export interface IEnableDisablePosition {
     isEnabled: boolean;
@@ -45,7 +44,7 @@ export function loadRules(ruleOptionsList: IOptions[],
         const ruleName = ruleOptions.ruleName;
         const enableDisableRules = enableDisableRuleMap.get(ruleName);
         if (ruleOptions.ruleSeverity !== "off" || enableDisableRuleMap) {
-            const Rule: (typeof AbstractRule) | null = findRule(ruleName, rulesDirectories);
+            const Rule = findRule(ruleName, rulesDirectories);
             if (Rule == null) {
                 notFoundRules.push(ruleName);
             } else {
@@ -54,7 +53,7 @@ export function loadRules(ruleOptionsList: IOptions[],
                 } else {
                     const ruleSpecificList = enableDisableRules || [];
                     ruleOptions.disabledIntervals = buildDisabledIntervalsFromSwitches(ruleSpecificList);
-                    rules.push(new (Rule as any)(ruleOptions));
+                    rules.push(new (Rule as any)(ruleOptions) as IRule);
 
                     if (Rule.metadata && Rule.metadata.deprecationMessage) {
                         showWarningOnce(`${Rule.metadata.ruleName} is deprecated. ${Rule.metadata.deprecationMessage}`);
@@ -89,9 +88,9 @@ export function loadRules(ruleOptionsList: IOptions[],
     return rules;
 }
 
-export function findRule(name: string, rulesDirectories?: string | string[]) {
+export function findRule(name: string, rulesDirectories?: string | string[]): RuleStatic | null {
     const camelizedName = transformName(name);
-    let Rule: typeof AbstractRule | null;
+    let Rule: RuleStatic | null;
 
     // first check for core rules
     Rule = loadCachedRule(CORE_RULES_DIRECTORY, camelizedName);
@@ -109,7 +108,7 @@ export function findRule(name: string, rulesDirectories?: string | string[]) {
     return Rule;
 }
 
-function transformName(name: string) {
+function transformName(name: string): string {
     // camelize strips out leading and trailing underscores and dashes, so make sure they aren't passed to camelize
     // the regex matches the groups (leading underscores and dashes)(other characters)(trailing underscores and dashes)
     const nameMatch = name.match(/^([-_]*)(.*?)([-_]*)$/);
@@ -123,18 +122,18 @@ function transformName(name: string) {
  * @param directory - An absolute path to a directory of rules
  * @param ruleName - A name of a rule in filename format. ex) "someLintRule"
  */
-function loadRule(directory: string, ruleName: string) {
+function loadRule(directory: string, ruleName: string): RuleStatic | null {
     const fullPath = path.join(directory, ruleName);
     if (fs.existsSync(fullPath + ".js")) {
-        const ruleModule = require(fullPath);
-        if (ruleModule && ruleModule.Rule) {
+        const ruleModule = require(fullPath) as { Rule: RuleStatic } | undefined;
+        if (ruleModule !== undefined) {
             return ruleModule.Rule;
         }
     }
-    return undefined;
+    return null;
 }
 
-function loadCachedRule(directory: string, ruleName: string, isCustomPath = false) {
+function loadCachedRule(directory: string, ruleName: string, isCustomPath = false): RuleStatic | null {
     // use cached value if available
     const fullPath = path.join(directory, ruleName);
     const cachedRule = cachedRules.get(fullPath);
@@ -153,9 +152,9 @@ function loadCachedRule(directory: string, ruleName: string, isCustomPath = fals
         }
     }
 
-    let Rule: typeof AbstractRule | null = null;
+    let Rule: RuleStatic | null = null;
     if (absolutePath != null) {
-        Rule = loadRule(absolutePath, ruleName);
+        Rule = loadRule(absolutePath, ruleName); // tslint:disable-line no-unsafe-any
     }
     cachedRules.set(fullPath, Rule);
     return Rule;

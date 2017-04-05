@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+// tslint:disable no-unsafe-any (TODO)
+
 import findup = require("findup-sync");
 import * as fs from "fs";
 import * as path from "path";
@@ -157,8 +159,8 @@ export function loadConfigurationFromPath(configFilePath?: string): IConfigurati
         let rawConfigFile: any;
         if (path.extname(resolvedConfigFilePath) === ".json") {
             const fileContent = stripComments(fs.readFileSync(resolvedConfigFilePath)
-            .toString()
-            .replace(/^\uFEFF/, ""));
+                .toString()
+                .replace(/^\uFEFF/, ""));
             rawConfigFile = JSON.parse(fileContent);
         } else {
             rawConfigFile = require(resolvedConfigFilePath);
@@ -252,7 +254,7 @@ export function extendConfigurationFile(targetConfig: IConfigurationFile,
     };
 }
 
-function getHomeDir() {
+function getHomeDir(): string | undefined {
     const environment = global.process.env;
     const paths = [
         environment.USERPROFILE,
@@ -266,6 +268,8 @@ function getHomeDir() {
             return homePath;
         }
     }
+
+    return undefined;
 }
 
 // returns the absolute path (contrary to what the name implies)
