@@ -5,6 +5,8 @@ let z: Array = [3, "4"];
 let xx: Array<Array<number>> = [[1, 2], [3]];
 let yy: Array<Array<number>> = [[4, 5], [6]];
 
+let ya = [[1, "2"]] as Array<[number, string]>;
+
 type Arr<T> = Array<T>;
 
 // Ignore user defined aliases
@@ -36,3 +38,8 @@ type barUnion = Array<string|number|boolean>;
 
 type fooIntersection = Array<string & number>;
 type barIntersection = Array<string & number>;
+
+interface FooInterface {
+    '.bar': {baz: Array<string>;};
+}
+

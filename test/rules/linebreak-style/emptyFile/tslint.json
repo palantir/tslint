@@ -1,5 +1,8 @@
 {
   "rules": {
     "linebreak-style": [true, "LF"]
+  },
+  "jsRules": {
+    "linebreak-style": [true, "LF"]
   }
 }

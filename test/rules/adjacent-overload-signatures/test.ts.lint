@@ -32,6 +32,24 @@ interface i5 {
     }
 }
 
+interface i6 {
+    // ensure no false positives for properties/methods available from prototype chain
+    toString(): string;
+}
+
+interface i7 {
+    // Computed properties with different source code text OK
+    [Symbol.iterator](): void;
+    [Symbol.toStringTag](): void;
+}
+
+interface i8 {
+    // Computed property with same source code text as regular property OK
+    [Symbol.iterator](): void;
+    x: number;
+    "Symbol.iterator"(): void;
+}
+
 
 // bad
 
@@ -77,4 +95,63 @@ interface b5 {
         a(b: number): void;
         ~~~~~~~~~~~~~~~~~~~  [All 'a' signatures should be adjacent]
     }
+}
+
+interface b6 {
+    (): void;
+    x: number;
+    (x: number): number;
+    ~~~~~~~~~~~~~~~~~~~~ [All '()' signatures should be adjacent]
+}
+
+// Also works in classes, source files, modules, namespaces
+
+class C {
+    a(): void;
+    b(): void;
+    a(x: number): void;
+    ~~~~~~~~~~~~~~~~~~~  [All 'a' signatures should be adjacent]
+}
+
+declare function a(): void;
+declare function b(): void;
+declare function a(x: number): void;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [All 'a' signatures should be adjacent]
+
+declare module "m" {
+    export function a(): void;
+    export function b(): void;
+    export function a(x: number): void;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [All 'a' signatures should be adjacent]
+}
+
+declare namespace N {
+    export function a(): void;
+    export function b(): void;
+    export function a(x: number): void;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [All 'a' signatures should be adjacent]
+}
+
+class Foo {
+  public static bar() {}
+  private constructor() {}
+  public bar() {}
+  public constructor(foo: any) {}
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [All 'constructor' signatures should be adjacent]
+}
+
+// A semi-colon on its own is a statement with no name
+class Bar {
+  private constructor() {}
+  ;
+  public bar() {}
+  ;
+}
+
+interface I {
+    // Catches computed properties with same source code text
+    [Symbol.iterator](): void;
+    x: number;
+    [Symbol.iterator](): void;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~ [All 'Symbol.iterator' signatures should be adjacent]
 }

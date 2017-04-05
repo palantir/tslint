@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "no-sparse-arrays": true
+  },
+  "jsRules": {
+    "no-sparse-arrays": true
+  }
+}

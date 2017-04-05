@@ -15,9 +15,10 @@
  * limitations under the License.
  */
 
+import { isDefaultClause } from "tsutils";
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -28,24 +29,23 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionExamples: ["true"],
         type: "functionality",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING = "Switch statement should include a 'default' case";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new SwitchDefaultWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-export class SwitchDefaultWalker extends Lint.RuleWalker {
-    public visitSwitchStatement(node: ts.SwitchStatement) {
-        const hasDefaultCase = node.caseBlock.clauses.some((clause) => clause.kind === ts.SyntaxKind.DefaultClause);
-
-        if (!hasDefaultCase) {
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+function walk(ctx: Lint.WalkContext<void>) {
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (node.kind === ts.SyntaxKind.SwitchStatement &&
+            !(node as ts.SwitchStatement).caseBlock.clauses.some(isDefaultClause)) {
+            ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
-
-        super.visitSwitchStatement(node);
-    }
+        return ts.forEachChild(node, cb);
+    });
 }

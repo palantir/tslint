@@ -1,0 +1,10 @@
+class Foo {
+    private x: number;
+    private bar(): any {
+        var bla: { a: string } = {a: '1'};
+    }
+    y: number;
+    ~~~~~~~~~~ [0]
+}
+
+[0]: Declaration of public member not allowed after declaration of private member. Instead, this should come at the beginning of the class/interface.

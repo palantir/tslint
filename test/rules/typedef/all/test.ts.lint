@@ -1,3 +1,8 @@
+// should not error with missing exception type
+try {
+} catch (e) {
+}
+
 var NoTypeObjectLiteralWithPropertyGetter = {
                                          ~    [expected variable-declaration: 'NoTypeObjectLiteralWithPropertyGetter' to have a typedef]
     Prop: "some property",
@@ -87,3 +92,15 @@ class A {
               ~ [expected member-variable-declaration: 'foo' to have a typedef]
     private bar: number;
 }
+
+
+const { paramA, paramB } = { paramA: "test", paramB: 15 };
+                        ~    [expected object-destructuring: '{ paramA, paramB }' to have a typedef]
+
+const { paramA, paramB }: { paramA: string, paramB: number } = { paramA: "test", paramB: 15 };
+
+const [ paramA, paramB ] = [15, 'test'];
+                        ~    [expected array-destructuring: '[ paramA, paramB ]' to have a typedef]
+
+const [ paramA3, paramB3 ]: [ number, string ] = [15, 'test'];
+

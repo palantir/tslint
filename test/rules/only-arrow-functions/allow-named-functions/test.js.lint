@@ -1,0 +1,7 @@
+const x = function() {}
+          ~~~~~~~~      [0]
+const y = function y() {}
+
+function z() {}
+
+[0]: non-arrow functions are forbidden

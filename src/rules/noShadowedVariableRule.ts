@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -29,37 +29,35 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionExamples: ["true"],
         type: "functionality",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY = (name: string) => `Shadowed variable: '${name}'`;
+    public static FAILURE_STRING_FACTORY = (name: string) => {
+        return `Shadowed variable: '${name}'`;
+    }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new NoShadowedVariableWalker(sourceFile, this.getOptions()));
     }
 }
 
-class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<ScopeInfo, ScopeInfo> {
+class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<Set<string>, Set<string>> {
     public createScope() {
-        return new ScopeInfo();
+        return new Set();
     }
 
     public createBlockScope() {
-        return new ScopeInfo();
+        return new Set();
     }
 
     public visitBindingElement(node: ts.BindingElement) {
         const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
-        const variableDeclaration = Lint.getBindingElementVariableDeclaration(node);
-
         if (isSingleVariable) {
             const name = node.name as ts.Identifier;
-            if (variableDeclaration) {
-                const isBlockScopedVariable = Lint.isBlockScopedVariable(variableDeclaration);
-                this.handleSingleVariableIdentifier(name, isBlockScopedVariable);
-            } else {
-                this.handleSingleParameterIdentifier(name);
-            }
+            const variableDeclaration = Lint.getBindingElementVariableDeclaration(node);
+            const isBlockScopedVariable = variableDeclaration !== null && Lint.isBlockScopedVariable(variableDeclaration);
+            this.handleSingleVariableIdentifier(name, isBlockScopedVariable);
         }
 
         super.visitBindingElement(node);
@@ -71,23 +69,23 @@ class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<ScopeInfo,
         this.visitBlock(node.block);
     }
 
-    public visitCallSignature(node: ts.SignatureDeclaration) {
+    public visitCallSignature(_node: ts.SignatureDeclaration) {
         // don't call super, we don't need to check parameter names in call signatures
     }
 
-    public visitFunctionType(node: ts.FunctionOrConstructorTypeNode) {
+    public visitFunctionType(_node: ts.FunctionOrConstructorTypeNode) {
         // don't call super, we don't need to check names in function types
     }
 
-    public visitConstructorType(node: ts.FunctionOrConstructorTypeNode) {
+    public visitConstructorType(_node: ts.FunctionOrConstructorTypeNode) {
         // don't call super, we don't need to check names in constructor types
     }
 
-    public visitIndexSignatureDeclaration(node: ts.SignatureDeclaration) {
+    public visitIndexSignatureDeclaration(_node: ts.SignatureDeclaration) {
         // don't call super, we don't want to walk index signatures
     }
 
-    public visitMethodSignature(node: ts.SignatureDeclaration) {
+    public visitMethodSignature(_node: ts.SignatureDeclaration) {
         // don't call super, we don't want to walk method signatures either
     }
 
@@ -95,13 +93,13 @@ class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<ScopeInfo,
         const isSingleParameter = node.name.kind === ts.SyntaxKind.Identifier;
 
         if (isSingleParameter) {
-            this.handleSingleParameterIdentifier(<ts.Identifier> node.name);
+            this.handleSingleVariableIdentifier(node.name as ts.Identifier, false);
         }
 
         super.visitParameterDeclaration(node);
     }
 
-    public visitTypeLiteral(node: ts.TypeLiteralNode) {
+    public visitTypeLiteral(_node: ts.TypeLiteralNode) {
         // don't call super, we don't want to walk the inside of type nodes
     }
 
@@ -109,7 +107,7 @@ class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<ScopeInfo,
         const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
 
         if (isSingleVariable) {
-            this.handleSingleVariableIdentifier(<ts.Identifier> node.name, Lint.isBlockScopedVariable(node));
+            this.handleSingleVariableIdentifier(node.name as ts.Identifier, Lint.isBlockScopedVariable(node));
         }
 
         super.visitVariableDeclaration(node);
@@ -117,46 +115,40 @@ class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<ScopeInfo,
 
     private handleSingleVariableIdentifier(variableIdentifier: ts.Identifier, isBlockScoped: boolean) {
         const variableName = variableIdentifier.text;
-        const currentScope = this.getCurrentScope();
-        const currentBlockScope = this.getCurrentBlockScope();
 
-        // this var is shadowing if there's already a var of the same name in any available scope AND
-        // it is not in the current block (those are handled by the 'no-duplicate-variable' rule)
-        if (this.isVarInAnyScope(variableName) && currentBlockScope.varNames.indexOf(variableName) < 0) {
+        if (this.isVarInCurrentScope(variableName) && !this.inCurrentBlockScope(variableName)) {
+            // shadowing if there's already a `var` of the same name in the scope AND
+            // it's not in the current block (handled by the 'no-duplicate-variable' rule)
+            this.addFailureOnIdentifier(variableIdentifier);
+        } else if (this.inPreviousBlockScope(variableName)) {
+            // shadowing if there is a `var`, `let`, 'const`, or parameter in a previous block scope
             this.addFailureOnIdentifier(variableIdentifier);
         }
 
-        // regular vars should always be added to the scope; block-scoped vars should be added iff
-        // the current scope is same as current block scope
-        if (!isBlockScoped
-                || this.getCurrentBlockDepth() === 1
-                || this.getCurrentBlockDepth() === this.getCurrentDepth()) {
-            currentScope.varNames.push(variableName);
+        if (!isBlockScoped) {
+            // `var` variables go on the scope
+            this.getCurrentScope().add(variableName);
         }
-        currentBlockScope.varNames.push(variableName);
+        // all variables go on block scope, including `var`
+        this.getCurrentBlockScope().add(variableName);
     }
 
-    private handleSingleParameterIdentifier(variableIdentifier: ts.Identifier) {
-        // treat parameters as block-scoped variables
-        const variableName = variableIdentifier.text;
-        const currentScope = this.getCurrentScope();
-
-        if (this.isVarInAnyScope(variableName)) {
-            this.addFailureOnIdentifier(variableIdentifier);
-        }
-        currentScope.varNames.push(variableName);
+    private isVarInCurrentScope(varName: string) {
+        return this.getCurrentScope().has(varName);
     }
 
-    private isVarInAnyScope(varName: string) {
-        return this.getAllScopes().some((scopeInfo) => scopeInfo.varNames.indexOf(varName) >= 0);
+    private inCurrentBlockScope(varName: string) {
+        return this.getCurrentBlockScope().has(varName);
+    }
+
+    private inPreviousBlockScope(varName: string) {
+        return this.getAllBlockScopes().some((scopeInfo) => {
+            return scopeInfo !== this.getCurrentBlockScope() && scopeInfo.has(varName);
+        });
     }
 
     private addFailureOnIdentifier(ident: ts.Identifier) {
         const failureString = Rule.FAILURE_STRING_FACTORY(ident.text);
-        this.addFailure(this.createFailure(ident.getStart(), ident.getWidth(), failureString));
+        this.addFailureAtNode(ident, failureString);
     }
-}
-
-class ScopeInfo {
-    public varNames: string[] = [];
 }

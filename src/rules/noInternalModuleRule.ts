@@ -15,9 +15,10 @@
  * limitations under the License.
  */
 
+import { getChildOfKind } from "tsutils";
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -29,36 +30,48 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionExamples: ["true"],
         type: "typescript",
+        typescriptOnly: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING = "The internal 'module' syntax is deprecated, use the 'namespace' keyword instead.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoInternalModuleWalker(sourceFile, this.getOptions()));
+        return this.applyWithWalker(new NoInternalModuleWalker(sourceFile, this.ruleName, undefined));
     }
 }
 
-class NoInternalModuleWalker extends Lint.RuleWalker {
-    public visitModuleDeclaration(node: ts.ModuleDeclaration) {
-        if (this.isInternalModuleDeclaration(node)) {
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+class NoInternalModuleWalker extends Lint.AbstractWalker<void> {
+    public walk(sourceFile: ts.SourceFile) {
+        return this.checkStatements(sourceFile.statements);
+    }
+
+    private checkStatements(statements: ts.Statement[]) {
+        for (const statement of statements) {
+            if (statement.kind === ts.SyntaxKind.ModuleDeclaration) {
+                this.checkModuleDeclaration(statement as ts.ModuleDeclaration);
+            }
         }
-        super.visitModuleDeclaration(node);
     }
 
-    private isInternalModuleDeclaration(node: ts.ModuleDeclaration) {
-        // an internal module declaration is not a namespace or a nested declaration
-        // for external modules, node.name.kind will be a LiteralExpression instead of Identifier
-        return !Lint.isNodeFlagSet(node, ts.NodeFlags.Namespace)
-            && !Lint.isNestedModuleDeclaration(node)
-            && node.name.kind === ts.SyntaxKind.Identifier
-            && !isGlobalAugmentation(node);
+    private checkModuleDeclaration(node: ts.ModuleDeclaration, nested?: boolean): void {
+        if (!nested &&
+            node.name.kind === ts.SyntaxKind.Identifier &&
+            // augmenting global uses a special syntax that is allowed
+            // see https://github.com/Microsoft/TypeScript/pull/6213
+            node.name.text !== "global") {
+            const moduleKeyword = getChildOfKind(node, ts.SyntaxKind.ModuleKeyword, this.sourceFile);
+            if (moduleKeyword) {
+                this.addFailureAtNode(moduleKeyword, Rule.FAILURE_STRING);
+            }
+        }
+        if (node.body !== undefined) {
+            switch (node.body.kind) {
+                case ts.SyntaxKind.ModuleBlock:
+                    return this.checkStatements(node.body.statements);
+                case ts.SyntaxKind.ModuleDeclaration:
+                    return this.checkModuleDeclaration(node.body, true);
+            }
+        }
     }
-}
-
-function isGlobalAugmentation(node: ts.ModuleDeclaration) {
-    // augmenting global uses a sepcial syntax that is allowed
-    // see https://github.com/Microsoft/TypeScript/pull/6213
-    return node.name.kind === ts.SyntaxKind.Identifier && node.name.text === "global";
 }

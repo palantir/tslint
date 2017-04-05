@@ -1,0 +1,14 @@
+{
+  "rules": {
+    "arrow-parens": [
+      true,
+      "ban-single-arg-parens"
+    ]
+  },
+  "jsRules": {
+    "arrow-parens": [
+      true,
+      "ban-single-arg-parens"
+    ]
+  }
+}

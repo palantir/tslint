@@ -15,9 +15,10 @@
  * limitations under the License.
  */
 
+import * as utils from "tsutils";
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
 
@@ -28,11 +29,15 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: ["true"],
+        rationale: "Improves readability and organization by grouping naturally related items together.",
         type: "typescript",
+        typescriptOnly: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY = (name: string) => `All '${name}' signatures should be adjacent`;
+    public static FAILURE_STRING_FACTORY = (name: string) => {
+        return `All '${name}' signatures should be adjacent`;
+    }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new AdjacentOverloadSignaturesWalker(sourceFile, this.getOptions()));
@@ -40,54 +45,118 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class AdjacentOverloadSignaturesWalker extends Lint.RuleWalker {
+    public visitSourceFile(node: ts.SourceFile) {
+        this.visitStatements(node.statements);
+        super.visitSourceFile(node);
+    }
+
+    public visitModuleDeclaration(node: ts.ModuleDeclaration) {
+        const { body } = node;
+        if (body && body.kind === ts.SyntaxKind.ModuleBlock) {
+            this.visitStatements((body as ts.ModuleBlock).statements);
+        }
+        super.visitModuleDeclaration(node);
+    }
 
     public visitInterfaceDeclaration(node: ts.InterfaceDeclaration): void {
-        this.checkNode(node);
+        this.checkOverloadsAdjacent(node.members, getOverloadIfSignature);
         super.visitInterfaceDeclaration(node);
     }
 
-    public visitTypeLiteral(node: ts.TypeLiteralNode): void {
-        this.checkNode(node);
+    public visitClassDeclaration(node: ts.ClassDeclaration) {
+        this.visitMembers(node.members);
+        super.visitClassDeclaration(node);
+    }
+
+    public visitTypeLiteral(node: ts.TypeLiteralNode) {
+        this.visitMembers(node.members);
         super.visitTypeLiteral(node);
     }
 
-    public checkNode(node: ts.TypeLiteralNode | ts.InterfaceDeclaration) {
-        let last: string = undefined;
-        const seen: { [name: string]: boolean } = {};
-        for (const member of node.members) {
-            if (member.name !== undefined) {
-                const methodName = getTextOfPropertyName(member.name);
-                if (methodName !== undefined) {
-                    if (seen[methodName] && last !== methodName) {
-                        this.addFailure(this.createFailure(member.getStart(), member.getWidth(),
-                            Rule.FAILURE_STRING_FACTORY(methodName)));
-                    }
-                    last = methodName;
-                    seen[methodName] = true;
-                }
+    private visitStatements(statements: ts.Statement[]) {
+        this.checkOverloadsAdjacent(statements, (statement) => {
+            if (statement.kind === ts.SyntaxKind.FunctionDeclaration) {
+                const name = (statement as ts.FunctionDeclaration).name;
+                return name && { name: name.text, key: name.text };
             } else {
-                last = undefined;
+                return undefined;
+            }
+        });
+    }
+
+    private visitMembers(members: Array<ts.TypeElement | ts.ClassElement>) {
+        this.checkOverloadsAdjacent(members, getOverloadIfSignature);
+    }
+
+    /** 'getOverloadName' may return undefined for nodes that cannot be overloads, e.g. a `const` declaration. */
+    private checkOverloadsAdjacent<T extends ts.Node>(overloads: T[], getOverload: (node: T) => Overload | undefined) {
+        let lastKey: string | undefined;
+        const seen = new Set<string>();
+        for (const node of overloads) {
+            const overload = getOverload(node);
+            if (overload) {
+                const { name, key } = overload;
+                if (seen.has(key) && lastKey !== key) {
+                    this.addFailureAtNode(node, Rule.FAILURE_STRING_FACTORY(name));
+                }
+                seen.add(key);
+                lastKey = key;
+            } else {
+                lastKey = undefined;
             }
         }
     }
 }
 
-function isLiteralExpression(node: ts.Node): node is ts.LiteralExpression {
-    return node.kind === ts.SyntaxKind.StringLiteral || node.kind === ts.SyntaxKind.NumericLiteral;
+interface Overload {
+    /** Unique key for this overload. */
+    key: string;
+    /** Display name for the overload. `foo` and `static foo` have the same name but different keys. */
+    name: string;
 }
 
-function getTextOfPropertyName(name: ts.PropertyName): string {
+export function getOverloadKey(node: ts.SignatureDeclaration): string | undefined {
+    const o = getOverload(node);
+    return o && o.key;
+}
+
+function getOverloadIfSignature(node: ts.TypeElement | ts.ClassElement): Overload | undefined {
+    return utils.isSignatureDeclaration(node) ? getOverload(node) : undefined;
+}
+
+function getOverload(node: ts.SignatureDeclaration): Overload | undefined {
+    switch (node.kind) {
+        case ts.SyntaxKind.ConstructSignature:
+        case ts.SyntaxKind.Constructor:
+            return { name: "constructor", key: "constructor" };
+        case ts.SyntaxKind.CallSignature:
+            return { name: "()", key: "()" };
+        default:
+    }
+
+    if (node.name === undefined) {
+        return undefined;
+    }
+
+    const propertyInfo = getPropertyInfo(node.name);
+    if (!propertyInfo) {
+        return undefined;
+    }
+
+    const { name, computed } = propertyInfo;
+    const isStatic = Lint.hasModifier(node.modifiers, ts.SyntaxKind.StaticKeyword);
+    const key = (computed ? "0" : "1") + (isStatic ? "0" : "1") + name;
+    return { name, key };
+}
+
+function getPropertyInfo(name: ts.PropertyName): { name: string, computed?: boolean } | undefined {
     switch (name.kind) {
         case ts.SyntaxKind.Identifier:
-            return (name as ts.Identifier).text;
+            return { name: (name as ts.Identifier).text };
         case ts.SyntaxKind.ComputedPropertyName:
             const { expression } = (name as ts.ComputedPropertyName);
-            if (isLiteralExpression(expression)) {
-                return expression.text;
-            }
+            return utils.isLiteralExpression(expression) ? { name: expression.text } : { name: expression.getText(), computed: true };
         default:
-            if (isLiteralExpression(name)) {
-                return name.text;
-            }
+            return utils.isLiteralExpression(name) ? { name: (name as ts.StringLiteral).text } : undefined;
     }
 }

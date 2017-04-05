@@ -16,11 +16,28 @@
  */
 
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
-import {RuleFailure} from "../language/rule/rule";
+import {IFormatterMetadata} from "../language/formatter/formatter";
+import { RuleFailure } from "../language/rule/rule";
 
 export class Formatter extends AbstractFormatter {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: IFormatterMetadata = {
+        formatterName: "verbose",
+        description: "The human-readable formatter which includes the rule name in messages.",
+        descriptionDetails: "The output is the same as the prose formatter with the rule name included",
+        sample: "ERROR: (semicolon) myFile.ts[1, 14]: Missing semicolon",
+        consumer: "human",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public format(failures: RuleFailure[]): string {
-        const outputLines = failures.map((failure: RuleFailure) => {
+
+        return this.mapToMessages(failures)
+            .join("\n") + "\n";
+    }
+
+    private mapToMessages(failures: RuleFailure[]): string[] {
+        return failures.map((failure: RuleFailure) => {
             const fileName = failure.getFileName();
             const failureString = failure.getFailure();
             const ruleName = failure.getRuleName();
@@ -28,9 +45,8 @@ export class Formatter extends AbstractFormatter {
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
             const positionTuple = "[" + (lineAndCharacter.line + 1) + ", " + (lineAndCharacter.character + 1) + "]";
 
-            return `(${ruleName}) ${fileName}${positionTuple}: ${failureString}`;
+            return `${failure.getRuleSeverity().toUpperCase()}: (${ruleName}) ${fileName}${positionTuple}: ${failureString}`;
         });
 
-        return outputLines.join("\n") + "\n";
     }
 }

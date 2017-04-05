@@ -4,43 +4,34 @@ title: Library
 permalink: /usage/library/
 ---
 
-### Installation ###
-------------
+### Installation
 
-```
-npm install tslint
-npm install typescript
+```sh
+npm install tslint typescript
+# or
+yarn add tslint typescript
 ```
 
 {% include peer_dependencies.md %}
 
-### Usage ###
------
+### Usage
 
 Please ensure that the TypeScript source files compile correctly _before_ running the linter.
 
-
 ```ts
-var fileName = "Specify file name";
+import { Linter, Configuration } from "tslint";
+import * as fs from "fs";
 
-var configuration = {
-    rules: {
-        "variable-name": true,
-        "quotemark": [true, "double"]
-    }
-};
-
-var options = {
+const fileName = "Specify input file name";
+const configurationFilename = "Specify configuration file name";
+const options = {
     formatter: "json",
-    configuration: configuration,
-    rulesDirectory: "customRules/", // can be an array of directories
+    rulesDirectory: "customRules/",
     formattersDirectory: "customFormatters/"
 };
 
-var Linter = require("tslint");
-var fs = require("fs");
-var contents = fs.readFileSync(fileName, "utf8");
-
-var ll = new Linter(fileName, contents, options);
-var result = ll.lint();
+const fileContents = fs.readFileSync(fileName, "utf8");
+const linter = new Linter(options);
+const configuration = Configuration.findConfiguration(configurationFilename, filename).results;
+const result = linter.lint(fileName, fileContents, configuration);
 ```

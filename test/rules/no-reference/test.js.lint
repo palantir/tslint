@@ -1,0 +1,2 @@
+/// <reference path="something.ts"/>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [<reference> is not allowed, use imports]

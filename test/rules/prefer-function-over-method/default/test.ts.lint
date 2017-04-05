@@ -1,0 +1,66 @@
+class C {
+    static s() {}
+
+    plain() {}
+    ~~~~~ [0]
+
+    thisInFunction() {
+    ~~~~~~~~~~~~~~ [0]
+        function() {
+            this;
+        }
+    }
+
+    thisInObjectMethod() {
+    ~~~~~~~~~~~~~~~~~~ [0]
+        return { x() { this; } }
+    }
+
+    recur() {
+    ~~~~~ [0]
+        this.recur();
+    }
+
+    thisInParameter(this: string) {}
+    ~~~~~~~~~~~~~~~ [0]
+
+    thisInParameterDefault(x = this) {}
+
+    thisUsed() {
+        this;
+    }
+
+    super() {
+        super;
+    }
+
+    protected protected() {}
+              ~~~~~~~~~ [0]
+
+    private private() {}
+            ~~~~~~~ [0]
+
+    [Symbol.iterator]() {}
+    ~~~~~~~~~~~~~~~~~ [0]
+
+    thisType(foo: this): this {
+    ~~~~~~~~ [0]
+        return foo;
+    }
+
+    overload(): void;
+    overload(foo): void;
+    overload(foo?): void {
+        return this;
+    }
+}
+
+abstract class C2 {
+    abstract abstract(): void;
+}
+
+const o = {
+    x() {}
+}
+
+[0]: Class method does not use 'this'. Use a function instead.

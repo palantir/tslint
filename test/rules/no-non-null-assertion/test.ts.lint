@@ -1,0 +1,4 @@
+var x = null
+
+x!.y = null
+~~          [Forbidden non null assertion]

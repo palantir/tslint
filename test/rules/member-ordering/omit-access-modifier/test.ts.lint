@@ -1,0 +1,12 @@
+class C {
+    private static x = 0;
+    static y = 1;
+
+    x = 0;
+    private y = 1;
+
+    constructor() {}
+
+    static z = 2;
+    ~~~~~~~~~~~~~ [Declaration of static field not allowed after declaration of constructor. Instead, this should come at the beginning of the class/interface.]
+}

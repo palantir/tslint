@@ -16,46 +16,85 @@
  */
 
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
-import {RuleFailure} from "../language/rule/rule";
+import {IFormatterMetadata} from "../language/formatter/formatter";
+import { RuleFailure } from "../language/rule/rule";
 
 import * as colors from "colors";
 
+import * as Utils from "../utils";
+
 export class Formatter extends AbstractFormatter {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: IFormatterMetadata = {
+        formatterName: "stylish",
+        description: "Human-readable formatter which creates stylish messages.",
+        descriptionDetails: Utils.dedent`
+            The output matches that produced by eslint's stylish formatter. Its readability
+            enhanced through spacing and colouring`,
+        sample: Utils.dedent`
+        myFile.ts
+        1:14  semicolon  Missing semicolon`,
+        consumer: "human",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public format(failures: RuleFailure[]): string {
-        if (typeof failures[0] === "undefined") {
-            return "\n";
+        const outputLines = this.mapToMessages(failures);
+
+        // Removes initial blank line
+        if (outputLines[0] === "") {
+            outputLines.shift();
         }
 
-        const fileName        = failures[0].getFileName();
-        const positionMaxSize = this.getPositionMaxSize(failures);
-        const ruleMaxSize     = this.getRuleMaxSize(failures);
+        return outputLines.join("\n") + "\n";
+    }
 
-        const outputLines = [
-            fileName,
-        ];
+    private mapToMessages(failures: RuleFailure[]): string[] {
+        if (!failures) {
+            return [];
+        }
+        const outputLines: string[] = [];
+        const positionMaxSize       = this.getPositionMaxSize(failures);
+        const ruleMaxSize           = this.getRuleMaxSize(failures);
+
+        let currentFile: string | undefined;
 
         for (const failure of failures) {
-            const failureString = failure.getFailure();
+            const fileName = failure.getFileName();
+
+            // Output the name of each file once
+            if (currentFile !== fileName) {
+                outputLines.push("");
+                outputLines.push(fileName);
+                currentFile = fileName;
+            }
+
+            let failureString = failure.getFailure();
+            failureString     = colors.yellow(failureString);
 
             // Rule
             let ruleName = failure.getRuleName();
             ruleName     = this.pad(ruleName, ruleMaxSize);
-            ruleName     = colors.yellow(ruleName);
+            ruleName     = colors.grey(ruleName);
 
             // Lines
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
 
             let positionTuple = `${lineAndCharacter.line + 1}:${lineAndCharacter.character + 1}`;
-            positionTuple     = this.pad(positionTuple, positionMaxSize);
-            positionTuple     = colors.red(positionTuple);
+            positionTuple = this.pad(positionTuple, positionMaxSize);
 
-            // Ouput
+            if (failure.getRuleSeverity() === "warning") {
+                positionTuple = colors.blue(failure.getRuleSeverity().toUpperCase() + ": " + positionTuple);
+            } else {
+                positionTuple = colors.red(failure.getRuleSeverity().toUpperCase() + ": " + positionTuple);
+            }
+
+            // Output
             const output = `${positionTuple}  ${ruleName}  ${failureString}`;
 
             outputLines.push(output);
         }
-
-        return outputLines.join("\n") + "\n\n";
+        return outputLines;
     }
 
     private pad(str: string, len: number): string {

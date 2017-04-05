@@ -17,7 +17,8 @@
 
 import * as ts from "typescript";
 
-import {RuleWalker} from "../walker/ruleWalker";
+import {arrayify, flatMap} from "../../utils";
+import {IWalker} from "../walker";
 
 export interface IRuleMetadata {
     /**
@@ -31,6 +32,11 @@ export interface IRuleMetadata {
     type: RuleType;
 
     /**
+     * A rule deprecation message, if applicable.
+     */
+    deprecationMessage?: string;
+
+    /**
      * A short, one line description of what the rule does.
      */
     description: string;
@@ -41,9 +47,14 @@ export interface IRuleMetadata {
     descriptionDetails?: string;
 
     /**
+     * Whether or not the rule will provide fix suggestions.
+     */
+    hasFix?: boolean;
+
+    /**
      * An explanation of the available options for the rule.
      */
-    optionsDescription?: string;
+    optionsDescription: string;
 
     /**
      * Schema of the options the rule accepts.
@@ -67,12 +78,20 @@ export interface IRuleMetadata {
      * Whether or not the rule requires type info to run.
      */
     requiresTypeInfo?: boolean;
+
+    /**
+     * Whether or not the rule use for TypeScript only. If `false`, this rule may be used with .js files.
+     */
+    typescriptOnly: boolean;
 }
 
 export type RuleType = "functionality" | "maintainability" | "style" | "typescript";
 
+export type RuleSeverity = "warning" | "error" | "off";
+
 export interface IOptions {
-    ruleArguments?: any[];
+    ruleArguments: any[];
+    ruleSeverity: RuleSeverity;
     ruleName: string;
     disabledIntervals: IDisabledInterval[];
 }
@@ -86,14 +105,62 @@ export interface IRule {
     getOptions(): IOptions;
     isEnabled(): boolean;
     apply(sourceFile: ts.SourceFile): RuleFailure[];
-    applyWithWalker(walker: RuleWalker): RuleFailure[];
+    applyWithWalker(walker: IWalker): RuleFailure[];
+}
+
+export interface ITypedRule extends IRule {
+    applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): RuleFailure[];
+}
+
+export interface IRuleFailureJson {
+    endPosition: IRuleFailurePositionJson;
+    failure: string;
+    fix?: Fix;
+    name: string;
+    ruleSeverity: string;
+    ruleName: string;
+    startPosition: IRuleFailurePositionJson;
+}
+
+export interface IRuleFailurePositionJson {
+    character: number;
+    line: number;
+    position: number;
+}
+
+export function isTypedRule(rule: IRule): rule is ITypedRule {
+    return "applyWithProgram" in rule;
 }
 
 export class Replacement {
+    public static applyFixes(content: string, fixes: Fix[]): string {
+        return this.applyAll(content, flatMap(fixes, arrayify));
+    }
+
     public static applyAll(content: string, replacements: Replacement[]) {
         // sort in reverse so that diffs are properly applied
         replacements.sort((a, b) => b.end - a.end);
         return replacements.reduce((text, r) => r.apply(text), content);
+    }
+
+    public static replaceNode(node: ts.Node, text: string, sourceFile?: ts.SourceFile): Replacement {
+        return this.replaceFromTo(node.getStart(sourceFile), node.getEnd(), text);
+    }
+
+    public static replaceFromTo(start: number, end: number, text: string) {
+        return new Replacement(start, end - start, text);
+    }
+
+    public static deleteText(start: number, length: number) {
+        return new Replacement(start, length, "");
+    }
+
+    public static deleteFromTo(start: number, end: number) {
+        return new Replacement(start, end - start, "");
+    }
+
+    public static appendText(start: number, text: string) {
+        return new Replacement(start, 0, text);
     }
 
     constructor(private innerStart: number, private innerLength: number, private innerText: string) {
@@ -120,32 +187,6 @@ export class Replacement {
     }
 }
 
-export class Fix {
-    public static applyAll(content: string, fixes: Fix[]) {
-        // accumulate replacements
-        let replacements: Replacement[] = [];
-        for (const fix of fixes) {
-            replacements = replacements.concat(fix.replacements);
-        }
-        return Replacement.applyAll(content, replacements);
-    }
-
-    constructor(private innerRuleName: string, private innerReplacements: Replacement[]) {
-    }
-
-    get ruleName() {
-        return this.innerRuleName;
-    }
-
-    get replacements() {
-        return this.innerReplacements;
-    }
-
-    public apply(content: string) {
-        return Replacement.applyAll(content, this.innerReplacements);
-    }
-}
-
 export class RuleFailurePosition {
     constructor(private position: number, private lineAndCharacter: ts.LineAndCharacter) {
     }
@@ -158,7 +199,7 @@ export class RuleFailurePosition {
         return this.lineAndCharacter;
     }
 
-    public toJson() {
+    public toJson(): IRuleFailurePositionJson {
         return {
             character: this.lineAndCharacter.character,
             line: this.lineAndCharacter.line,
@@ -176,10 +217,14 @@ export class RuleFailurePosition {
     }
 }
 
+export type Fix = Replacement | Replacement[];
+
 export class RuleFailure {
     private fileName: string;
     private startPosition: RuleFailurePosition;
     private endPosition: RuleFailurePosition;
+    private rawLines: string;
+    private ruleSeverity: RuleSeverity;
 
     constructor(private sourceFile: ts.SourceFile,
                 start: number,
@@ -191,6 +236,8 @@ export class RuleFailure {
         this.fileName = sourceFile.fileName;
         this.startPosition = this.createFailurePosition(start);
         this.endPosition = this.createFailurePosition(end);
+        this.rawLines = sourceFile.text;
+        this.ruleSeverity = "error";
     }
 
     public getFileName() {
@@ -221,13 +268,26 @@ export class RuleFailure {
         return this.fix;
     }
 
-    public toJson(): any {
+    public getRawLines() {
+        return this.rawLines;
+    }
+
+    public getRuleSeverity() {
+        return this.ruleSeverity;
+    }
+
+    public setRuleSeverity(value: RuleSeverity) {
+        this.ruleSeverity = value;
+    }
+
+    public toJson(): IRuleFailureJson {
         return {
             endPosition: this.endPosition.toJson(),
             failure: this.failure,
             fix: this.fix,
             name: this.fileName,
             ruleName: this.ruleName,
+            ruleSeverity: this.ruleSeverity.toUpperCase(),
             startPosition: this.startPosition.toJson(),
         };
     }

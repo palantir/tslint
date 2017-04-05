@@ -17,77 +17,96 @@
 
 import * as fs from "fs";
 import * as path from "path";
-import {camelize} from "underscore.string";
 
-import {getRulesDirectories} from "./configuration";
-import {IDisabledInterval, IRule} from "./language/rule/rule";
+import { getRelativePath } from "./configuration";
+import { showWarningOnce } from "./error";
+import { AbstractRule } from "./language/rule/abstractRule";
+import { IDisabledInterval, IOptions, IRule } from "./language/rule/rule";
+import { arrayify, camelize, dedent } from "./utils";
 
 const moduleDirectory = path.dirname(module.filename);
 const CORE_RULES_DIRECTORY = path.resolve(moduleDirectory, ".", "rules");
+const cachedRules = new Map<string, typeof AbstractRule | null>(); // null indicates that the rule was not found
 
 export interface IEnableDisablePosition {
     isEnabled: boolean;
     position: number;
 }
 
-export function loadRules(ruleConfiguration: {[name: string]: any},
-                          enableDisableRuleMap: {[rulename: string]: IEnableDisablePosition[]},
-                          rulesDirectories?: string | string[]): IRule[] {
+export function loadRules(ruleOptionsList: IOptions[],
+                          enableDisableRuleMap: Map<string, IEnableDisablePosition[]>,
+                          rulesDirectories?: string | string[],
+                          isJs?: boolean): IRule[] {
     const rules: IRule[] = [];
     const notFoundRules: string[] = [];
+    const notAllowedInJsRules: string[] = [];
 
-    for (const ruleName in ruleConfiguration) {
-        if (ruleConfiguration.hasOwnProperty(ruleName)) {
-            const ruleValue = ruleConfiguration[ruleName];
-            const Rule = findRule(ruleName, rulesDirectories);
+    for (const ruleOptions of ruleOptionsList) {
+        const ruleName = ruleOptions.ruleName;
+        const enableDisableRules = enableDisableRuleMap.get(ruleName);
+        if (ruleOptions.ruleSeverity !== "off" || enableDisableRuleMap) {
+            const Rule: (typeof AbstractRule) | null = findRule(ruleName, rulesDirectories);
             if (Rule == null) {
                 notFoundRules.push(ruleName);
             } else {
-                const all = "all"; // make the linter happy until we can turn it on and off
-                const allList = (all in enableDisableRuleMap ? enableDisableRuleMap[all] : []);
-                const ruleSpecificList = (ruleName in enableDisableRuleMap ? enableDisableRuleMap[ruleName] : []);
-                const disabledIntervals = buildDisabledIntervalsFromSwitches(ruleSpecificList, allList);
-                rules.push(new Rule(ruleName, ruleValue, disabledIntervals));
+                if (isJs && Rule.metadata && Rule.metadata.typescriptOnly) {
+                    notAllowedInJsRules.push(ruleName);
+                } else {
+                    const ruleSpecificList = enableDisableRules || [];
+                    ruleOptions.disabledIntervals = buildDisabledIntervalsFromSwitches(ruleSpecificList);
+                    rules.push(new (Rule as any)(ruleOptions));
+
+                    if (Rule.metadata && Rule.metadata.deprecationMessage) {
+                        showWarningOnce(`${Rule.metadata.ruleName} is deprecated. ${Rule.metadata.deprecationMessage}`);
+                    }
+                }
             }
         }
     }
 
     if (notFoundRules.length > 0) {
-        const ERROR_MESSAGE = `
+        const warning = dedent`
             Could not find implementations for the following rules specified in the configuration:
-            ${notFoundRules.join("\n")}
+                ${notFoundRules.join("\n                ")}
             Try upgrading TSLint and/or ensuring that you have all necessary custom rules installed.
             If TSLint was recently upgraded, you may have old rules configured which need to be cleaned up.
         `;
 
-        throw new Error(ERROR_MESSAGE);
-    } else {
-        return rules;
+        console.warn(warning);
     }
+    if (notAllowedInJsRules.length > 0) {
+        const warning = dedent`
+            Following rules specified in configuration couldn't be applied to .js or .jsx files:
+                ${notAllowedInJsRules.join("\n                ")}
+            Make sure to exclude them from "jsRules" section of your tslint.json.
+        `;
+
+        console.warn(warning);
+    }
+    if (rules.length === 0) {
+        console.warn("No valid rules have been specified");
+    }
+    return rules;
 }
 
 export function findRule(name: string, rulesDirectories?: string | string[]) {
-    let camelizedName = transformName(name);
+    const camelizedName = transformName(name);
+    let Rule: typeof AbstractRule | null;
 
     // first check for core rules
-    let Rule = loadRule(CORE_RULES_DIRECTORY, camelizedName);
-    if (Rule != null) {
-        return Rule;
-    }
+    Rule = loadCachedRule(CORE_RULES_DIRECTORY, camelizedName);
 
-    let directories = getRulesDirectories(rulesDirectories);
-
-    for (let rulesDirectory of directories) {
+    if (Rule == null) {
         // then check for rules within the first level of rulesDirectory
-        if (rulesDirectory != null) {
-            Rule = loadRule(rulesDirectory, camelizedName);
+        for (const dir of arrayify(rulesDirectories)) {
+            Rule = loadCachedRule(dir, camelizedName, true);
             if (Rule != null) {
-                return Rule;
+                break;
             }
         }
     }
 
-    return undefined;
+    return Rule;
 }
 
 function transformName(name: string) {
@@ -106,63 +125,64 @@ function transformName(name: string) {
  */
 function loadRule(directory: string, ruleName: string) {
     const fullPath = path.join(directory, ruleName);
-
     if (fs.existsSync(fullPath + ".js")) {
         const ruleModule = require(fullPath);
         if (ruleModule && ruleModule.Rule) {
             return ruleModule.Rule;
         }
     }
-
     return undefined;
 }
 
-/*
- * We're assuming both lists are already sorted top-down so compare the tops, use the smallest of the two,
- * and build the intervals that way.
- */
-function buildDisabledIntervalsFromSwitches(ruleSpecificList: IEnableDisablePosition[], allList: IEnableDisablePosition[]) {
-    let isCurrentlyDisabled = false;
-    let disabledStartPosition: number;
-    const disabledIntervalList: IDisabledInterval[] = [];
-    let i = 0;
-    let j = 0;
+function loadCachedRule(directory: string, ruleName: string, isCustomPath = false) {
+    // use cached value if available
+    const fullPath = path.join(directory, ruleName);
+    const cachedRule = cachedRules.get(fullPath);
+    if (cachedRule !== undefined) {
+        return cachedRule;
+    }
 
-    while (i < ruleSpecificList.length || j < allList.length) {
-        const ruleSpecificTopPositon = (i < ruleSpecificList.length ? ruleSpecificList[i].position : Infinity);
-        const allTopPositon = (j < allList.length ? allList[j].position : Infinity);
-        let newPositionToCheck: IEnableDisablePosition;
-        if (ruleSpecificTopPositon < allTopPositon) {
-            newPositionToCheck = ruleSpecificList[i];
-            i++;
-        } else {
-            newPositionToCheck = allList[j];
-            j++;
-        }
-
-        // we're currently disabled and enabling, or currently enabled and disabling -- a switch
-        if (newPositionToCheck.isEnabled === isCurrentlyDisabled) {
-            if (!isCurrentlyDisabled) {
-                // start a new interval
-                disabledStartPosition = newPositionToCheck.position;
-                isCurrentlyDisabled = true;
-            } else {
-                // we're currently disabled and about to enable -- end the interval
-                disabledIntervalList.push({
-                    endPosition: newPositionToCheck.position,
-                    startPosition: disabledStartPosition,
-                });
-                isCurrentlyDisabled = false;
+    // get absolute path
+    let absolutePath: string | undefined = directory;
+    if (isCustomPath) {
+        absolutePath = getRelativePath(directory);
+        if (absolutePath != null) {
+            if (!fs.existsSync(absolutePath)) {
+                throw new Error(`Could not find custom rule directory: ${directory}`);
             }
         }
     }
 
-    if (isCurrentlyDisabled) {
-        // we started an interval but didn't finish one -- so finish it with an Infinity
+    let Rule: typeof AbstractRule | null = null;
+    if (absolutePath != null) {
+        Rule = loadRule(absolutePath, ruleName);
+    }
+    cachedRules.set(fullPath, Rule);
+    return Rule;
+}
+
+/**
+ * creates disabled intervals for rule based on list of switchers for it
+ * @param ruleSpecificList - contains all switchers for rule states sorted top-down and strictly alternating between enabled and disabled
+ */
+function buildDisabledIntervalsFromSwitches(ruleSpecificList: IEnableDisablePosition[]) {
+    const disabledIntervalList: IDisabledInterval[] = [];
+    // starting from second element in the list since first is always enabled in position 0;
+    let i = 1;
+
+    while (i < ruleSpecificList.length) {
+        const startPosition = ruleSpecificList[i].position;
+
+        // rule enabled state is always alternating therefore we can use position of next switch as end of disabled interval
+        // set endPosition as Infinity in case when last switch for rule in a file is disabled
+        const endPosition = ruleSpecificList[i + 1] ? ruleSpecificList[i + 1].position : Infinity;
+
         disabledIntervalList.push({
-            endPosition: Infinity,
-            startPosition: disabledStartPosition,
+            endPosition,
+            startPosition,
         });
+
+        i += 2;
     }
 
     return disabledIntervalList;

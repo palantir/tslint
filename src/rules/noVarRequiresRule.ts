@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -31,6 +31,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionExamples: ["true"],
         type: "typescript",
+        typescriptOnly: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -51,10 +52,10 @@ class NoVarRequiresWalker extends Lint.ScopeAwareRuleWalker<{}> {
         const expression = node.expression;
 
         if (this.getCurrentDepth() <= 1 && expression.kind === ts.SyntaxKind.Identifier) {
-            const identifierName = (<ts.Identifier> expression).text;
+            const identifierName = (expression as ts.Identifier).text;
             if (identifierName === "require") {
                 // if we're calling (invoking) require, then it's not part of an import statement
-                this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+                this.addFailureAtNode(node, Rule.FAILURE_STRING);
             }
         }
 

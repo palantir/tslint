@@ -17,18 +17,19 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "class-name",
         description: "Enforces PascalCased class and interface names.",
-        rationale: "Makes it easy to differentitate classes from regular variables at a glance.",
+        rationale: "Makes it easy to differentiate classes from regular variables at a glance.",
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: ["true"],
         type: "style",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -45,7 +46,7 @@ class NameWalker extends Lint.RuleWalker {
         if (node.name != null) {
             const className = node.name.getText();
             if (!this.isPascalCased(className)) {
-                this.addFailureAt(node.name.getStart(), node.name.getWidth());
+                this.addFailureAtNode(node.name, Rule.FAILURE_STRING);
             }
         }
 
@@ -55,7 +56,7 @@ class NameWalker extends Lint.RuleWalker {
     public visitInterfaceDeclaration(node: ts.InterfaceDeclaration) {
         const interfaceName = node.name.getText();
         if (!this.isPascalCased(interfaceName)) {
-            this.addFailureAt(node.name.getStart(), node.name.getWidth());
+            this.addFailureAtNode(node.name, Rule.FAILURE_STRING);
         }
 
         super.visitInterfaceDeclaration(node);
@@ -68,10 +69,5 @@ class NameWalker extends Lint.RuleWalker {
 
         const firstCharacter = name.charAt(0);
         return ((firstCharacter === firstCharacter.toUpperCase()) && name.indexOf("_") === -1);
-    }
-
-    private addFailureAt(position: number, width: number) {
-        const failure = this.createFailure(position, width, Rule.FAILURE_STRING);
-        this.addFailure(failure);
     }
 }

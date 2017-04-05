@@ -1,5 +1,8 @@
 {
   "rules": {
     "no-eval": true
+  },
+  "jsRules": {
+    "no-eval": true
   }
 }

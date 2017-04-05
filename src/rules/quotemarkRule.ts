@@ -17,11 +17,18 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
-enum QuoteMark {
-    SINGLE_QUOTES,
-    DOUBLE_QUOTES
+const OPTION_SINGLE = "single";
+const OPTION_DOUBLE = "double";
+const OPTION_JSX_SINGLE = "jsx-single";
+const OPTION_JSX_DOUBLE = "jsx-double";
+const OPTION_AVOID_ESCAPE = "avoid-escape";
+
+interface Options {
+    quoteMark: string;
+    jsxQuoteMark: string;
+    avoidEscape: boolean;
 }
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -29,96 +36,78 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "quotemark",
         description: "Requires single or double quotes for string literals.",
+        hasFix: true,
         optionsDescription: Lint.Utils.dedent`
             Five arguments may be optionally provided:
 
-            * \`"single"\` enforces single quotes.
-            * \`"double"\` enforces double quotes.
-            * \`"jsx-single"\` enforces single quotes for JSX attributes.
-            * \`"jsx-double"\` enforces double quotes for JSX attributes.
-            * \`"avoid-escape"\` allows you to use the "other" quotemark in cases where escaping would normally be required.
-            For example, \`[true, "double", "avoid-escape"]\` would not report a failure on the string literal \`'Hello "World"'\`.`,
+            * \`"${OPTION_SINGLE}"\` enforces single quotes.
+            * \`"${OPTION_DOUBLE}"\` enforces double quotes.
+            * \`"${OPTION_JSX_SINGLE}"\` enforces single quotes for JSX attributes.
+            * \`"${OPTION_JSX_DOUBLE}"\` enforces double quotes for JSX attributes.
+            * \`"${OPTION_AVOID_ESCAPE}"\` allows you to use the "other" quotemark in cases where escaping would normally be required.
+            For example, \`[true, "${OPTION_DOUBLE}", "${OPTION_AVOID_ESCAPE}"]\` would not report a failure on the string literal
+            \`'Hello "World"'\`.`,
         options: {
             type: "array",
             items: {
                 type: "string",
-                enum: ["single", "double", "jsx-single", "jsx-double", "avoid-escape"],
+                enum: [OPTION_SINGLE, OPTION_DOUBLE, OPTION_JSX_SINGLE, OPTION_JSX_DOUBLE, OPTION_AVOID_ESCAPE],
             },
             minLength: 0,
             maxLength: 5,
         },
-        optionExamples: ['[true, "single", "avoid-escape"]', '[true, "single", "jsx-double"]'],
+        optionExamples: [
+            `[true, "${OPTION_SINGLE}", "${OPTION_AVOID_ESCAPE}"]`,
+            `[true, "${OPTION_SINGLE}", "${OPTION_JSX_DOUBLE}"]`,
+            ],
         type: "style",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static SINGLE_QUOTE_FAILURE = "\" should be '";
-    public static DOUBLE_QUOTE_FAILURE = "' should be \"";
+    public static FAILURE_STRING(actual: string, expected: string) {
+        return `${actual} should be ${expected}`;
+    }
 
     public isEnabled(): boolean {
-        if (super.isEnabled()) {
-            const quoteMarkString = this.getOptions().ruleArguments[0];
-            return (quoteMarkString === "single" || quoteMarkString === "double");
-        }
-
-        return false;
+        return super.isEnabled() && (this.ruleArguments[0] === OPTION_SINGLE || this.ruleArguments[0] === OPTION_DOUBLE);
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new QuotemarkWalker(sourceFile, this.getOptions()));
+        const args = this.ruleArguments;
+        const quoteMark = args[0] === OPTION_SINGLE ? "'" : '"';
+        return this.applyWithFunction(sourceFile, walk, {
+            quoteMark,
+            avoidEscape: args.indexOf(OPTION_AVOID_ESCAPE) !== -1,
+            jsxQuoteMark: args.indexOf(OPTION_JSX_SINGLE) !== -1
+                          ? "'"
+                          : args.indexOf(OPTION_JSX_DOUBLE) ? '"' : quoteMark,
+        });
     }
 }
 
-class QuotemarkWalker extends Lint.RuleWalker {
-    private quoteMark = QuoteMark.DOUBLE_QUOTES;
-    private jsxQuoteMark: QuoteMark;
-    private avoidEscape: boolean;
-
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
-        super(sourceFile, options);
-
-        const ruleArguments = this.getOptions();
-
-        if (ruleArguments.indexOf("single") > -1) {
-            this.quoteMark = QuoteMark.SINGLE_QUOTES;
-        }
-
-        if (ruleArguments.indexOf("jsx-single") > -1) {
-            this.jsxQuoteMark = QuoteMark.SINGLE_QUOTES;
-        } else if (ruleArguments.indexOf("jsx-double") > -1) {
-            this.jsxQuoteMark = QuoteMark.DOUBLE_QUOTES;
-        } else {
-            this.jsxQuoteMark = this.quoteMark;
-        }
-
-        this.avoidEscape = ruleArguments.indexOf("avoid-escape") > 0;
-    }
-
-    public visitStringLiteral(node: ts.StringLiteral) {
-        const inJsx = (node.parent.kind === ts.SyntaxKind.JsxAttribute);
-        const text = node.getText();
-        const width = node.getWidth();
-        const position = node.getStart();
-
-        const firstCharacter = text.charAt(0);
-        const lastCharacter = text.charAt(text.length - 1);
-
-        const quoteMark = inJsx ? this.jsxQuoteMark : this.quoteMark;
-        const expectedQuoteMark = (quoteMark === QuoteMark.SINGLE_QUOTES) ? "'" : "\"";
-
-        if (firstCharacter !== expectedQuoteMark || lastCharacter !== expectedQuoteMark) {
-            // allow the "other" quote mark to be used, but only to avoid having to escape
-            const includesOtherQuoteMark = text.slice(1, -1).indexOf(expectedQuoteMark) !== -1;
-
-            if (!(this.avoidEscape && includesOtherQuoteMark)) {
-                const failureMessage = (quoteMark === QuoteMark.SINGLE_QUOTES)
-                    ? Rule.SINGLE_QUOTE_FAILURE
-                    : Rule.DOUBLE_QUOTE_FAILURE;
-
-                this.addFailure(this.createFailure(position, width, failureMessage));
+function walk(ctx: Lint.WalkContext<Options>) {
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (node.kind === ts.SyntaxKind.StringLiteral) {
+            const expectedQuoteMark = node.parent!.kind === ts.SyntaxKind.JsxAttribute ? ctx.options.jsxQuoteMark : ctx.options.quoteMark;
+            const actualQuoteMark = ctx.sourceFile.text[node.end - 1];
+            if (actualQuoteMark === expectedQuoteMark) {
+                return;
             }
-        }
+            const start = node.getStart(ctx.sourceFile);
+            let text = ctx.sourceFile.text.substring(start + 1, node.end - 1);
+            if ((node as ts.StringLiteral).text.includes(expectedQuoteMark)) {
+                if (ctx.options.avoidEscape) {
+                    return;
+                }
+                text = text.replace(new RegExp(expectedQuoteMark, "g"), `\\${expectedQuoteMark}`);
+            }
+            text = text.replace(new RegExp(`\\\\${actualQuoteMark}`, "g"), actualQuoteMark);
 
-        super.visitStringLiteral(node);
-    }
+            return ctx.addFailure(start, node.end, Rule.FAILURE_STRING(actualQuoteMark, expectedQuoteMark),
+                new Lint.Replacement(start, node.end - start, expectedQuoteMark + text + expectedQuoteMark),
+            );
+        }
+        return ts.forEachChild(node, cb);
+    });
 }

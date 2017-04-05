@@ -15,9 +15,10 @@
  * limitations under the License.
  */
 
+import * as utils from "tsutils";
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -54,70 +55,64 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionExamples: ["true"],
         type: "functionality",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING_PART = "expected a 'break' before ";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoSwitchCaseFallThroughWalker(sourceFile, this.getOptions()));
+        return this.applyWithWalker(new NoSwitchCaseFallThroughWalker(sourceFile, this.ruleName, undefined));
     }
 }
 
-export class NoSwitchCaseFallThroughWalker extends Lint.RuleWalker {
-    public visitSwitchStatement(node: ts.SwitchStatement) {
-        let isFallingThrough = false;
-
-        // get the position for the first case statement
-        const switchClauses = node.caseBlock.clauses;
-        switchClauses.forEach((child, i) => {
-            const kind = child.kind;
-            if (kind === ts.SyntaxKind.CaseClause) {
-                const switchClause = <ts.CaseClause> child;
-                isFallingThrough = fallsThrough(switchClause.statements);
-                // no break statements and no statements means the fallthrough is expected.
-                // last item doesn't need a break
-                if (isFallingThrough && switchClause.statements.length > 0 && ((switchClauses.length - 1) > i)) {
-                    if (!isFallThroughAllowed(switchClauses[i + 1])) {
-                        this.addFailure(this.createFailure(
-                            switchClauses[i + 1].getStart(),
-                            "case".length,
-                            `${Rule.FAILURE_STRING_PART}'case'`
-                        ));
-                    }
-                }
-            } else {
-                // case statement falling through a default
-                if (isFallingThrough && !isFallThroughAllowed(child)) {
-                    const failureString = Rule.FAILURE_STRING_PART + "'default'";
-                    this.addFailure(this.createFailure(switchClauses[i].getStart(), "default".length, failureString));
-                }
+export class NoSwitchCaseFallThroughWalker extends Lint.AbstractWalker<void> {
+    public walk(sourceFile: ts.SourceFile) {
+        const cb = (node: ts.Node): void => {
+            if (node.kind === ts.SyntaxKind.SwitchStatement) {
+                this.visitSwitchStatement(node as ts.SwitchStatement);
             }
-        });
-        super.visitSwitchStatement(node);
+            return ts.forEachChild(node, cb);
+        };
+        return ts.forEachChild(sourceFile, cb);
     }
-}
 
-function fallsThrough(statements: ts.NodeArray<ts.Statement>) {
-    return !statements.some((statement) => {
-        return statement.kind === ts.SyntaxKind.BreakStatement
-            || statement.kind === ts.SyntaxKind.ThrowStatement
-            || statement.kind === ts.SyntaxKind.ReturnStatement
-            || statement.kind === ts.SyntaxKind.ContinueStatement;
-    });
-}
+    private visitSwitchStatement(node: ts.SwitchStatement) {
+        const clauses = node.caseBlock.clauses;
+        const len = clauses.length - 1; // last clause doesn't need to be checked
+        for (let i = 0; i < len; ++i) {
+            if (clauses[i].statements.length !== 0 &&
+                // TODO type assertion can be removed with typescript 2.2
+                !utils.endsControlFlow(clauses[i] as ts.CaseClause) &&
+                !this.isFallThroughAllowed(clauses[i])) {
 
-function isFallThroughAllowed(nextCaseOrDefaultStatement: ts.Node) {
-    const sourceFileText = nextCaseOrDefaultStatement.getSourceFile().text;
-    const firstChild = nextCaseOrDefaultStatement.getChildAt(0);
-    const commentRanges = ts.getLeadingCommentRanges(sourceFileText, firstChild.getFullStart());
-    if (commentRanges != null) {
-        for (let commentRange of commentRanges) {
-            const commentText = sourceFileText.substring(commentRange.pos, commentRange.end);
-            if (commentText === "/* falls through */") {
-                return true;
+                this.reportError(clauses[i + 1]);
             }
         }
     }
-    return false;
+
+    private isFallThroughAllowed(clause: ts.CaseOrDefaultClause) {
+        const sourceFileText = this.sourceFile.text;
+        const comments = ts.getLeadingCommentRanges(sourceFileText, clause.end);
+        if (comments === undefined) {
+            return false;
+        }
+        for (const comment of comments) {
+            let commentText: string;
+            if (comment.kind === ts.SyntaxKind.MultiLineCommentTrivia) {
+                commentText = sourceFileText.substring(comment.pos + 2, comment.end - 2);
+            } else {
+                commentText = sourceFileText.substring(comment.pos + 2, comment.end);
+            }
+            if (commentText.trim() === "falls through") {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private reportError(clause: ts.CaseOrDefaultClause) {
+        const keyword = clause.kind === ts.SyntaxKind.CaseClause ? "case" : "default";
+        this.addFailureAt(clause.getStart(this.sourceFile), keyword.length, `${Rule.FAILURE_STRING_PART}'${keyword}'`);
+    }
 }

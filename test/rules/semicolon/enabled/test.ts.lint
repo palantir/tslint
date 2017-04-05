@@ -7,6 +7,10 @@ c = () => {
 }
  ~nil [Missing semicolon]
 
+f(() => {
+    return 1;
+});
+
 d = function() { }
                   ~nil [Missing semicolon]
 
@@ -71,7 +75,19 @@ class MyClass {
 
     public initializedProperty = 6
                                   ~nil [Missing semicolon]
-    public initializedMethodProperty = () => { return "hi"; }
+    public initializedMethodProperty: mytype = () => {
+        return "hi";
+    };
+     ~ [Unnecessary semicolon]
+
+    public initializedMethodPropertyWithoutSemicolon = () => {
+        return "hi again";
+    }
+
+    public initializedMethodProperty1Line = () => { return "hi"; };
+
+    public initializedMethodPropertyWithoutSemicolon1Line = () => { return "hi again"; }
+                                                                                        ~nil [Missing semicolon]
 }
 
 interface ITest {
@@ -79,6 +95,8 @@ interface ITest {
                 ~nil [Missing semicolon]
     bar: number
                ~nil [Missing semicolon]
+    qux: string,
+               ~ [Properties should be separated by semicolons]
     baz: boolean;
 }
 

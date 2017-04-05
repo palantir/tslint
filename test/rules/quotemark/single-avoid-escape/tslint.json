@@ -1,5 +1,8 @@
 {
   "rules": {
     "quotemark": [true, "single", "avoid-escape"]
+  },
+  "jsRules": {
+    "quotemark": [true, "single", "avoid-escape"]
   }
 }

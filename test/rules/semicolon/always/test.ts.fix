@@ -1,3 +1,5 @@
+declare module "*";
+declare module "foo" {}
 var x = 3;
 a += b;
 
@@ -51,13 +53,30 @@ class MyClass {
     private email : string;
 
     public initializedProperty = 6;
-    public initializedMethodProperty = () => { return "hi"; }
+    public initializedMethodProperty = () => {
+        return "hi";
+    }
+
+    public initializedMethodPropertyWithoutSemicolon = () => {
+        return "hi again";
+    }
+
+    public initializedMethodProperty1Line = () => { return "hi"; };
+
+    public initializedMethodPropertyWithoutSemicolon1Line = () => { return "hi again"; };
+    public someMethod(): void;
+    public someMethod(param): void;
+    public someMethod(param?) {
+        return;
+    }
 }
 
 interface ITest {
     foo?: string;
-    bar: number;
+    bar: number; // handles comment
+    qux: string; // handles comment
     baz: boolean;
+    readonly raz: number;
 }
 
 import {Router} from 'aurelia-router';
@@ -70,3 +89,8 @@ export = Date;
 export = Date;
 type t = number;
 type t = number;
+
+if (true);
+for(;;);
+
+

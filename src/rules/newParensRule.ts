@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -29,22 +29,22 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionExamples: ["true"],
         type: "style",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING = "Parentheses are required when invoking a constructor";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const newParensWalker = new NewParensWalker(sourceFile, this.getOptions());
-        return this.applyWithWalker(newParensWalker);
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class NewParensWalker extends Lint.RuleWalker {
-    public visitNewExpression(node: ts.NewExpression) {
-        if (node.arguments === undefined) {
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+function walk(ctx: Lint.WalkContext<void>) {
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (node.kind === ts.SyntaxKind.NewExpression && (node as ts.NewExpression).arguments === undefined) {
+            ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
-        super.visitNewExpression(node);
-    }
+        return ts.forEachChild(node, cb);
+    });
 }

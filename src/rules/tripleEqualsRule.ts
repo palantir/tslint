@@ -15,15 +15,17 @@
  * limitations under the License.
  */
 
+import { isBinaryExpression } from "tsutils";
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 const OPTION_ALLOW_NULL_CHECK = "allow-null-check";
 const OPTION_ALLOW_UNDEFINED_CHECK = "allow-undefined-check";
 
-function isUndefinedExpression(expression: ts.Expression) {
-    return expression.kind === ts.SyntaxKind.Identifier && expression.getText() === "undefined";
+interface Options {
+    allowNull: boolean;
+    allowUndefined: boolean;
 }
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -47,6 +49,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: ["true", '[true, "allow-null-check"]', '[true, "allow-undefined-check"]'],
         type: "functionality",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -54,42 +57,33 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static NEQ_FAILURE_STRING = "!= should be !==";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const comparisonWalker = new ComparisonWalker(sourceFile, this.getOptions());
-        return this.applyWithWalker(comparisonWalker);
+        return this.applyWithFunction(sourceFile, walk, {
+            allowNull: this.ruleArguments.indexOf(OPTION_ALLOW_NULL_CHECK) !== -1,
+            allowUndefined: this.ruleArguments.indexOf(OPTION_ALLOW_UNDEFINED_CHECK) !== -1,
+        });
     }
 }
 
-class ComparisonWalker extends Lint.RuleWalker {
-    private static COMPARISON_OPERATOR_WIDTH = 2;
-
-    public visitBinaryExpression(node: ts.BinaryExpression) {
-        if (!this.isExpressionAllowed(node)) {
-            const position = node.getChildAt(1).getStart();
-            this.handleOperatorToken(position, node.operatorToken.kind);
+function walk(ctx: Lint.WalkContext<Options>) {
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (isBinaryExpression(node)) {
+            if ((node.operatorToken.kind === ts.SyntaxKind.EqualsEqualsToken ||
+                 node.operatorToken.kind === ts.SyntaxKind.ExclamationEqualsToken) &&
+                !(isExpressionAllowed(node.right, ctx.options) || isExpressionAllowed(node.left, ctx.options))) {
+                ctx.addFailureAtNode(node.operatorToken, node.operatorToken.kind === ts.SyntaxKind.EqualsEqualsToken
+                                                         ? Rule.EQ_FAILURE_STRING
+                                                         : Rule.NEQ_FAILURE_STRING);
+            }
         }
-        super.visitBinaryExpression(node);
-    }
+        return ts.forEachChild(node, cb);
+    });
+}
 
-    private handleOperatorToken(position: number, operator: ts.SyntaxKind) {
-        switch (operator) {
-            case ts.SyntaxKind.EqualsEqualsToken:
-                this.addFailure(this.createFailure(position, ComparisonWalker.COMPARISON_OPERATOR_WIDTH, Rule.EQ_FAILURE_STRING));
-                break;
-            case ts.SyntaxKind.ExclamationEqualsToken:
-                this.addFailure(this.createFailure(position, ComparisonWalker.COMPARISON_OPERATOR_WIDTH, Rule.NEQ_FAILURE_STRING));
-                break;
-            default:
-                break;
-        }
+function isExpressionAllowed(node: ts.Expression, options: Options) {
+    if (node.kind === ts.SyntaxKind.NullKeyword) {
+        return options.allowNull;
     }
-
-    private isExpressionAllowed(node: ts.BinaryExpression) {
-        const nullKeyword = ts.SyntaxKind.NullKeyword;
-
-        return (
-            this.hasOption(OPTION_ALLOW_NULL_CHECK) && (node.left.kind === nullKeyword || node.right.kind === nullKeyword)
-        ) || (
-            this.hasOption(OPTION_ALLOW_UNDEFINED_CHECK) && (isUndefinedExpression(node.left) || isUndefinedExpression(node.right))
-        );
-    }
+    return options.allowUndefined &&
+        node.kind === ts.SyntaxKind.Identifier &&
+        (node as ts.Identifier).originalKeywordKind === ts.SyntaxKind.UndefinedKeyword;
 }

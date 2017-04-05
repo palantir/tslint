@@ -15,9 +15,10 @@
  * limitations under the License.
  */
 
+import * as utils from "tsutils";
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -36,6 +37,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionExamples: ["true"],
         type: "style",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -47,27 +49,16 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-class JsdocWalker extends Lint.SkippableTokenAwareRuleWalker {
+class JsdocWalker extends Lint.RuleWalker {
     public visitSourceFile(node: ts.SourceFile) {
-        super.visitSourceFile(node);
-        Lint.scanAllTokens(ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, node.text), (scanner: ts.Scanner) => {
-            const startPos = scanner.getStartPos();
-            if (this.tokensToSkipStartEndMap[startPos] != null) {
-                // tokens to skip are places where the scanner gets confused about what the token is, without the proper context
-                // (specifically, regex, identifiers, and templates). So skip those tokens.
-                scanner.setTextPos(this.tokensToSkipStartEndMap[startPos]);
-                return;
-            }
-
-            if (scanner.getToken() === ts.SyntaxKind.MultiLineCommentTrivia) {
-                const commentText = scanner.getTokenText();
-                const startPosition = scanner.getTokenPos();
-                this.findFailuresForJsdocComment(commentText, startPosition, node);
+        utils.forEachComment(node, (fullText, comment) => {
+            if (comment.kind === ts.SyntaxKind.MultiLineCommentTrivia) {
+                this.findFailuresForJsdocComment(fullText.substring(comment.pos, comment.end), comment.pos);
             }
         });
     }
 
-    private findFailuresForJsdocComment(commentText: string, startingPosition: number, sourceFile: ts.SourceFile) {
+    private findFailuresForJsdocComment(commentText: string, startingPosition: number) {
         const currentPosition = startingPosition;
         // the file may be different depending on the OS it was originally authored on
         // can't rely on require('os').EOL or process.platform as that is the execution env
@@ -87,11 +78,11 @@ class JsdocWalker extends Lint.SkippableTokenAwareRuleWalker {
                 return;
             }
 
-            const indexToMatch = firstLine.indexOf("**") + sourceFile.getLineAndCharacterOfPosition(currentPosition).character;
+            const indexToMatch = firstLine.indexOf("**") + this.getLineAndCharacterOfPosition(currentPosition).character;
             // all lines but the first and last
             const otherLines = lines.splice(1, lines.length - 2);
             jsdocPosition += firstLine.length + 1; // + 1 for the splitted-out newline
-            for (let line of otherLines) {
+            for (const line of otherLines) {
                 // regex is: start of string, followed by any amount of whitespace, followed by *,
                 // followed by either a space or the end of the string
                 const asteriskMatch = line.match(/^\s*\*( |$)/);
@@ -117,10 +108,5 @@ class JsdocWalker extends Lint.SkippableTokenAwareRuleWalker {
                 this.addFailureAt(jsdocPosition, lastLine.length, Rule.ALIGNMENT_FAILURE_STRING);
             }
         }
-    }
-
-    private addFailureAt(currentPosition: number, width: number, failureString: string) {
-        const failure = this.createFailure(currentPosition, width, failureString);
-        this.addFailure(failure);
     }
 }

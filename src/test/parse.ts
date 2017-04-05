@@ -24,7 +24,16 @@ import {
     parseLine,
     printLine,
 } from "./lines";
-import {LintError, errorComparator, lintSyntaxError} from "./lintError";
+import {errorComparator, LintError, lintSyntaxError} from "./lintError";
+
+export function getTypescriptVersionRequirement(text: string): string | undefined {
+    const lines = text.split(/\r?\n/);
+    const firstLine = parseLine(lines[0]);
+    if (firstLine instanceof MessageSubstitutionLine && firstLine.key === "typescript") {
+        return firstLine.message;
+    }
+    return undefined;
+}
 
 /**
  * Takes the full text of a .lint file and returns the contents of the file
@@ -51,30 +60,31 @@ export function parseErrorsFromMarkup(text: string): LintError[] {
     }
 
     const messageSubstitutionLines = lines.filter((l) => l instanceof MessageSubstitutionLine) as MessageSubstitutionLine[];
-    const messageSubstitutions: { [key: string]: string } = {};
-    for (const line of messageSubstitutionLines) {
-        messageSubstitutions[line.key] = line.message;
-    }
+    const messageSubstitutions = new Map(messageSubstitutionLines.map(({ key, message }) =>
+        [key, message] as [string, string]));
 
     // errorLineForCodeLine[5] contains all the ErrorLine objects associated with the 5th line of code, for example
     const errorLinesForCodeLines = createCodeLineNoToErrorsMap(lines);
 
     const lintErrors: LintError[] = [];
+    function addError(errorLine: EndErrorLine, errorStartPos: { line: number, col: number }, lineNo: number) {
+        lintErrors.push({
+            startPos: errorStartPos,
+            endPos: { line: lineNo, col: errorLine.endCol },
+            message: messageSubstitutions.get(errorLine.message) || errorLine.message,
+        });
+    }
     // for each line of code...
     errorLinesForCodeLines.forEach((errorLinesForLineOfCode, lineNo) => {
 
         // for each error marking on that line...
         while (errorLinesForLineOfCode.length > 0) {
             const errorLine = errorLinesForLineOfCode.shift();
-            const errorStartPos = { line: lineNo, col: errorLine.startCol };
+            const errorStartPos = { line: lineNo, col: errorLine!.startCol };
 
             // if the error starts and ends on this line, add it now to list of errors
             if (errorLine instanceof EndErrorLine) {
-                lintErrors.push({
-                    startPos: errorStartPos,
-                    endPos: { line: lineNo, col: errorLine.endCol },
-                    message: messageSubstitutions[errorLine.message] || errorLine.message,
-                });
+                addError(errorLine, errorStartPos, lineNo);
 
             // if the error is the start of a multiline error
             } else if (errorLine instanceof MultilineErrorLine) {
@@ -83,18 +93,14 @@ export function parseErrorsFromMarkup(text: string): LintError[] {
                 for (let nextLineNo = lineNo + 1; ; ++nextLineNo) {
                     if (!isValidErrorMarkupContinuation(errorLinesForCodeLines, nextLineNo)) {
                         throw lintSyntaxError(
-                            `Error mark starting at ${errorStartPos.line}:${errorStartPos.col} does not end correctly.`
+                            `Error mark starting at ${errorStartPos.line}:${errorStartPos.col} does not end correctly.`,
                         );
                     } else {
                         const nextErrorLine = errorLinesForCodeLines[nextLineNo].shift();
 
                         // if end of multiline error, add it it list of errors
                         if (nextErrorLine instanceof EndErrorLine) {
-                            lintErrors.push({
-                                startPos: errorStartPos,
-                                endPos: { line: nextLineNo, col: nextErrorLine.endCol },
-                                message: messageSubstitutions[nextErrorLine.message] || nextErrorLine.message,
-                            });
+                            addError(nextErrorLine, errorStartPos, nextLineNo);
                             break;
                         }
                     }
@@ -122,7 +128,7 @@ export function createMarkupFromErrors(code: string, lintErrors: LintError[]) {
             errorLinesForCodeText[startPos.line].push(new EndErrorLine(
                 startPos.col,
                 endPos.col,
-                message
+                message,
             ));
         } else {
             // multiline error
@@ -140,9 +146,10 @@ export function createMarkupFromErrors(code: string, lintErrors: LintError[]) {
 /* tslint:enable:object-literal-sort-keys */
 
 function combineCodeTextAndErrorLines(codeText: string[], errorLinesForCodeText: ErrorLine[][]) {
-    return codeText.reduce((resultText, code, i) => {
+    return codeText.reduce<string[]>((resultText, code, i) => {
         resultText.push(code);
-        resultText.push(...(errorLinesForCodeText[i].map((line) => printLine(line, code))));
+        const errorPrintLines = errorLinesForCodeText[i].map((line) => printLine(line, code)).filter((line) => line !== null) as string[];
+        resultText.push(...errorPrintLines);
         return resultText;
     }, []);
 }

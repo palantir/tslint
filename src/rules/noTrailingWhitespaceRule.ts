@@ -15,9 +15,21 @@
  * limitations under the License.
  */
 
+import { forEachComment, forEachTokenWithTrivia, getLineRanges } from "tsutils";
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
+import { getTemplateRanges } from "./noConsecutiveBlankLinesRule";
+
+const OPTION_IGNORE_COMMENTS = "ignore-comments";
+const OPTION_IGNORE_JSDOC = "ignore-jsdoc";
+const OPTION_IGNORE_TEMPLATE_STRINGS = "ignore-template-strings";
+
+interface Options {
+    ignoreTemplates: boolean;
+    ignoreComments: boolean;
+    ignoreJsDoc: boolean;
+}
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -25,48 +37,105 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "no-trailing-whitespace",
         description: "Disallows trailing whitespace at the end of a line.",
         rationale: "Keeps version control diffs clean as it prevents accidental whitespace from being committed.",
-        optionsDescription: "Not configurable.",
-        options: null,
-        optionExamples: ["true"],
-        type: "maintainability",
+        optionsDescription: Lint.Utils.dedent`
+            Possible settings are:
+
+            * \`"${OPTION_IGNORE_TEMPLATE_STRINGS}"\`: Allows trailing whitespace in template strings.
+            * \`"${OPTION_IGNORE_COMMENTS}"\`: Allows trailing whitespace in comments.
+            * \`"${OPTION_IGNORE_JSDOC}"\`: Allows trailing whitespace only in JSDoc comments.`,
+        hasFix: true,
+        options: {
+            type: "array",
+            items: {
+                type: "string",
+                enum: [OPTION_IGNORE_COMMENTS, OPTION_IGNORE_JSDOC, OPTION_IGNORE_TEMPLATE_STRINGS],
+            },
+        },
+        optionExamples: [
+            "true",
+            `[true, "${OPTION_IGNORE_COMMENTS}"]`,
+            `[true, "${OPTION_IGNORE_JSDOC}"]`,
+        ],
+        type: "style",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING = "trailing whitespace";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoTrailingWhitespaceWalker(sourceFile, this.getOptions()));
+        const ignoreComments = this.ruleArguments.indexOf(OPTION_IGNORE_COMMENTS) !== -1;
+        return this.applyWithFunction(sourceFile, walk, {
+            ignoreComments,
+            ignoreJsDoc: ignoreComments || this.ruleArguments.indexOf(OPTION_IGNORE_JSDOC) !== -1,
+            ignoreTemplates: this.ruleArguments.indexOf(OPTION_IGNORE_TEMPLATE_STRINGS) !== -1,
+        });
     }
 }
 
-class NoTrailingWhitespaceWalker extends Lint.SkippableTokenAwareRuleWalker {
-    public visitSourceFile(node: ts.SourceFile) {
-        super.visitSourceFile(node);
-        let lastSeenWasWhitespace = false;
-        let lastSeenWhitespacePosition = 0;
-        Lint.scanAllTokens(ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, node.text), (scanner: ts.Scanner) => {
-            const startPos = scanner.getStartPos();
-            if (this.tokensToSkipStartEndMap[startPos] != null) {
-                // tokens to skip are places where the scanner gets confused about what the token is, without the proper context
-                // (specifically, regex, identifiers, and templates). So skip those tokens.
-                scanner.setTextPos(this.tokensToSkipStartEndMap[startPos]);
-                lastSeenWasWhitespace = false;
-                return;
-            }
-
-            if (scanner.getToken() === ts.SyntaxKind.NewLineTrivia) {
-                if (lastSeenWasWhitespace) {
-                    const width = scanner.getStartPos() - lastSeenWhitespacePosition;
-                    const failure = this.createFailure(lastSeenWhitespacePosition, width, Rule.FAILURE_STRING);
-                    this.addFailure(failure);
-                }
-                lastSeenWasWhitespace = false;
-            } else if (scanner.getToken() === ts.SyntaxKind.WhitespaceTrivia) {
-                lastSeenWasWhitespace = true;
-                lastSeenWhitespacePosition = scanner.getStartPos();
-            } else {
-                lastSeenWasWhitespace = false;
-            }
-        });
+function walk(ctx: Lint.WalkContext<Options>) {
+    const possibleFailures: ts.TextRange[] = [];
+    const sourceFile = ctx.sourceFile;
+    const text = sourceFile.text;
+    for (const line of getLineRanges(sourceFile)) {
+        const match = text.substr(line.pos, line.contentLength).match(/\s+$/);
+        if (match !== null) {
+            possibleFailures.push({
+                end: line.pos + line.contentLength,
+                pos: line.pos + match.index!,
+            });
+        }
     }
+
+    if (possibleFailures.length === 0) {
+        return;
+    }
+    let excludedRanges: ts.TextRange[];
+    if (ctx.options.ignoreTemplates) {
+        excludedRanges = ctx.options.ignoreJsDoc ? getExcludedRanges(sourceFile, ctx.options) : getTemplateRanges(sourceFile);
+    } else if (ctx.options.ignoreJsDoc) {
+        excludedRanges = getExcludedComments(sourceFile, ctx.options);
+    } else {
+        excludedRanges = [];
+    }
+    for (const possibleFailure of possibleFailures) {
+        if (!excludedRanges.some((range) => range.pos < possibleFailure.pos && possibleFailure.pos < range.end)) {
+            ctx.addFailure(possibleFailure.pos, possibleFailure.end, Rule.FAILURE_STRING,
+                Lint.Replacement.deleteFromTo(possibleFailure.pos, possibleFailure.end),
+            );
+        }
+    }
+}
+
+function getExcludedRanges(sourceFile: ts.SourceFile, options: Options): ts.TextRange[] {
+    const intervals: ts.TextRange[] = [];
+    forEachTokenWithTrivia(sourceFile, (text, kind, range) => {
+        if (kind >= ts.SyntaxKind.FirstTemplateToken && kind <= ts.SyntaxKind.LastTemplateToken) {
+            intervals.push(range);
+        } else if (options.ignoreComments) {
+            if (kind === ts.SyntaxKind.SingleLineCommentTrivia || kind === ts.SyntaxKind.MultiLineCommentTrivia) {
+                intervals.push(range);
+            }
+        } else if (options.ignoreJsDoc) {
+            if (isJsDoc(text, kind, range)) {
+                intervals.push(range);
+            }
+        }
+    });
+    return intervals;
+}
+
+function getExcludedComments(sourceFile: ts.SourceFile, options: Options): ts.TextRange[] {
+    const intervals: ts.TextRange[] = [];
+    forEachComment(sourceFile, (text, comment) => {
+        if (options.ignoreComments ||
+            options.ignoreJsDoc && isJsDoc(text, comment.kind, comment)) {
+            intervals.push(comment);
+        }
+    });
+    return intervals;
+}
+
+function isJsDoc(sourceText: string, kind: ts.SyntaxKind, range: ts.TextRange) {
+    return kind === ts.SyntaxKind.MultiLineCommentTrivia && sourceText[range.pos + 2] === "*" && sourceText[range.pos + 3] !== "*";
 }

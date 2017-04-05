@@ -17,35 +17,35 @@ var pair: NumberStringPair = {
 
 // bad
 var bad1  = 5 + "10";
-            ~~~~~~~~  [Types of values used in '+' operation must match]
+            ~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers]
 var bad2  = [] + 5;
-            ~~~~~~  [Types of values used in '+' operation must match]
+            ~~~~~~  [Operands of '+' operation must either be both strings or both numbers]
 var bad3  = [] + {};
-            ~~~~~~~  [Types of values used in '+' operation must match]
+            ~~~~~~~  [Operands of '+' operation must either be both strings or both numbers]
 var bad4  = [] + [];
-            ~~~~~~~  [cannot add type undefined[]]
+            ~~~~~~~  [Operands of '+' operation must either be both strings or both numbers]
 var bad4  = 5 + [];
-            ~~~~~~  [Types of values used in '+' operation must match]
+            ~~~~~~  [Operands of '+' operation must either be both strings or both numbers]
 var bad5  = "5" + {};
-            ~~~~~~~~  [Types of values used in '+' operation must match]
+            ~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers]
 var bad6  = 5.5 + "5";
-            ~~~~~~~~~  [Types of values used in '+' operation must match]
+            ~~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers]
 var bad7  = "5.5" + 5;
-            ~~~~~~~~~  [Types of values used in '+' operation must match]
+            ~~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers]
 var bad8  = x + y;
-            ~~~~~  [Types of values used in '+' operation must match]
+            ~~~~~  [Operands of '+' operation must either be both strings or both numbers]
 var bad9  = y + x;
-            ~~~~~  [Types of values used in '+' operation must match]
+            ~~~~~  [Operands of '+' operation must either be both strings or both numbers]
 var bad10 = x + {};
-            ~~~~~~  [Types of values used in '+' operation must match]
+            ~~~~~~  [Operands of '+' operation must either be both strings or both numbers]
 var bad11 = [] + y;
-            ~~~~~~  [Types of values used in '+' operation must match]
+            ~~~~~~  [Operands of '+' operation must either be both strings or both numbers]
 var bad12 = pair.first + "10";
-            ~~~~~~~~~~~~~~~~~  [Types of values used in '+' operation must match]
+            ~~~~~~~~~~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers]
 var bad13 = 5 + pair.second;
-            ~~~~~~~~~~~~~~~  [Types of values used in '+' operation must match]
+            ~~~~~~~~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers]
 var bad14 = pair + pair;
-            ~~~~~~~~~~~  [cannot add type NumberStringPair]
+            ~~~~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers]
 
 // good
 var good1 = 5 + 10;
@@ -58,3 +58,8 @@ var good6 = pair.first + 10;
 var good7 = pair.first + (10 as MyNumber);
 var good8 = "5.5" + pair.second;
 var good9 = ("5.5" as MyString) + pair.second;
+const good10 = 'hello' + (someBoolean ? 'a' : 'b') + (() => someBoolean ? 'c' : 'd')() + 'e';
+
+// don't check other binary expressions
+const balls = true;
+balls === true;

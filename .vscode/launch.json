@@ -1,0 +1,85 @@
+{
+    "version": "0.1.0",
+    "configurations": [
+        {
+            "name": "Debug CLI",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceRoot}/build/src/tslint-cli.js",
+            "stopOnEntry": false,
+            "args": [],
+            "cwd": "${workspaceRoot}",
+            "preLaunchTask": "tsc",
+            "runtimeExecutable": null,
+            "runtimeArgs": [
+                "--nolazy"
+            ],
+            "env": {
+                "NODE_ENV": "development"
+            },
+            "console": "internalConsole",
+            "sourceMaps": true,
+            "outFiles": ["${workspaceRoot}/build/**/*.js"]
+        },
+        {
+            "name": "Debug Mocha Tests",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
+            "stopOnEntry": false,
+            "args": ["--reporter", "spec", "--colors", "--no-timeouts", "build/test/**/*Tests.js", "build/test/assert.js"],
+            "cwd": "${workspaceRoot}",
+            "preLaunchTask": "tsc",
+            "runtimeExecutable": null,
+            "runtimeArgs": [
+                "--nolazy"
+            ],
+            "env": {
+                "NODE_ENV": "development"
+            },
+            "console": "internalConsole",
+            "sourceMaps": true, 
+            "outFiles": ["${workspaceRoot}/build/**/*.js"]
+        },
+        {
+            "name": "Debug Rule Tests",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceRoot}/test/ruleTestRunner.ts",
+            "stopOnEntry": false,
+            "args": ["run", "test"],
+            "cwd": "${workspaceRoot}",
+            "preLaunchTask": "tsc",
+            "runtimeExecutable": null,
+            "runtimeArgs": [
+                "--nolazy"
+            ],
+            "env": {
+                "NODE_ENV": "development"
+            },
+            "console": "internalConsole",
+            "sourceMaps": true, 
+            "outFiles": ["${workspaceRoot}/build/**/*.js"]
+        },
+        {
+            "name": "Debug Document Generation",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceRoot}/scripts/buildDocs.ts",
+            "stopOnEntry": false,
+            "args": ["run", "test"],
+            "cwd": "${workspaceRoot}",
+            "preLaunchTask": "tsc",
+            "runtimeExecutable": null,
+            "runtimeArgs": [
+                "--nolazy"
+            ],
+            "env": {
+                "NODE_ENV": "development"
+            },
+            "console": "internalConsole",
+            "sourceMaps": true, 
+            "outFiles": ["${workspaceRoot}/build/**/*/js"]
+        }
+    ]
+}

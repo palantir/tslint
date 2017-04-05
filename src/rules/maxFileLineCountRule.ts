@@ -14,8 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Lint from "../lint";
+
 import * as ts from "typescript";
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -23,7 +24,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "max-file-line-count",
         description: "Requires files to remain under a certain number of lines",
         rationale: Lint.Utils.dedent`
-            Limiting the number of lines allowed in a file allows files to remain small, 
+            Limiting the number of lines allowed in a file allows files to remain small,
             single purpose, and maintainable.`,
         optionsDescription: "An integer indicating the maximum number of lines.",
         options: {
@@ -32,6 +33,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: ["[true, 300]"],
         type: "maintainability",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -39,29 +41,24 @@ export class Rule extends Lint.Rules.AbstractRule {
         let msg = `This file has ${lineCount} lines, which exceeds the maximum of ${lineLimit} lines allowed. `;
         msg += `Consider breaking this file up into smaller parts`;
         return msg;
-    };
+    }
 
     public isEnabled(): boolean {
-        if (super.isEnabled()) {
-            const option = this.getOptions().ruleArguments[0];
-            if (typeof option === "number" && option > 0) {
-                return true;
-            }
-        }
-        return false;
+        return super.isEnabled() && this.ruleArguments[0] > 0;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const ruleFailures: Lint.RuleFailure[] = [];
-        const lineLimit: number = this.getOptions().ruleArguments[0];
+        const ruleArguments = this.getOptions().ruleArguments;
+        const lineLimit: number = ruleArguments[0];
         const lineCount: number = sourceFile.getLineStarts().length;
         const disabledIntervals = this.getOptions().disabledIntervals;
 
         if (lineCount > lineLimit && disabledIntervals.length === 0) {
             const errorString = Rule.FAILURE_STRING_FACTORY(lineCount, lineLimit);
-            ruleFailures.push(new Lint.RuleFailure(sourceFile, 0, 1, errorString, this.getOptions().ruleName));
+            ruleFailures.push(new Lint.RuleFailure(sourceFile, 0, 1, errorString,
+              this.getOptions().ruleName));
         }
-
         return ruleFailures;
     }
 }

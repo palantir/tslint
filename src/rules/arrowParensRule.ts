@@ -15,52 +15,85 @@
  * limitations under the License.
  */
 
+import { getChildOfKind, isArrowFunction } from "tsutils";
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
+
+const BAN_SINGLE_ARG_PARENS = "ban-single-arg-parens";
+
+interface Options {
+    banSingleArgParens: boolean;
+}
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "arrow-parens",
         description: "Requires parentheses around the parameters of arrow function definitions.",
+        hasFix: true,
         rationale: "Maintains stylistic consistency with other arrow function definitions.",
-        optionsDescription: "Not configurable.",
-        options: null,
-        optionExamples: ["true"],
+        optionsDescription: Lint.Utils.dedent`
+            If \`${BAN_SINGLE_ARG_PARENS}\` is specified, then arrow functions with one parameter
+            must not have parentheses if removing them is allowed by TypeScript.`,
+        options: {
+            type: "string",
+            enum: [BAN_SINGLE_ARG_PARENS],
+        },
+        optionExamples: [`true`, `[true, "${BAN_SINGLE_ARG_PARENS}"]`],
         type: "style",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "Parentheses are required around the parameters of an arrow function definition";
+    public static FAILURE_STRING_MISSING = "Parentheses are required around the parameters of an arrow function definition";
+    public static FAILURE_STRING_EXISTS = "Parentheses are prohibited around the parameter in this single parameter arrow function";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const newParensWalker = new ArrowParensWalker(sourceFile, this.getOptions());
-        return this.applyWithWalker(newParensWalker);
+        return this.applyWithFunction(sourceFile, walk, {
+            banSingleArgParens: this.ruleArguments.indexOf(BAN_SINGLE_ARG_PARENS) !== -1,
+        });
     }
 }
 
-class ArrowParensWalker extends Lint.RuleWalker {
-    public visitArrowFunction(node: ts.FunctionLikeDeclaration) {
-        if (node.parameters.length === 1) {
-            const parameter = node.parameters[0];
-            const text = parameter.getText();
-            const firstToken = node.getFirstToken();
-            const lastToken = node.getChildAt(2);
-            const width = text.length;
-            const position = parameter.getStart();
-            let isGenerics = false;
-
-            // If firstToken is LessThanToken, it would be Generics.
-            if (firstToken.kind === ts.SyntaxKind.LessThanToken) {
-                isGenerics = true;
-            }
-
-            if ((firstToken.kind !== ts.SyntaxKind.OpenParenToken || lastToken.kind !== ts.SyntaxKind.CloseParenToken)
-                 && !isGenerics && node.flags !== ts.NodeFlags.Async) {
-                this.addFailure(this.createFailure(position, width, Rule.FAILURE_STRING));
+function walk(ctx: Lint.WalkContext<Options>) {
+    function cb(node: ts.Node): void {
+        if (isArrowFunction(node) && parensAreOptional(node)) {
+            const openParen = getChildOfKind(node, ts.SyntaxKind.OpenParenToken);
+            if (openParen === undefined) {
+                if (!ctx.options.banSingleArgParens) {
+                    const parameter = node.parameters[0];
+                    const start = parameter.getStart(ctx.sourceFile);
+                    const end = parameter.end;
+                    ctx.addFailure(start, end, Rule.FAILURE_STRING_MISSING, [
+                        Lint.Replacement.appendText(start, "("),
+                        Lint.Replacement.appendText(end, ")"),
+                    ]);
+                }
+            } else if (ctx.options.banSingleArgParens) {
+                const closeParen = getChildOfKind(node, ts.SyntaxKind.CloseParenToken)!;
+                ctx.addFailureAtNode(node.parameters[0], Rule.FAILURE_STRING_EXISTS, [
+                    Lint.Replacement.deleteText(openParen.end - 1, 1),
+                    Lint.Replacement.deleteText(closeParen.end - 1, 1),
+                ]);
             }
         }
-        super.visitArrowFunction(node);
+        return ts.forEachChild(node, cb);
     }
+    return ts.forEachChild(ctx.sourceFile, cb);
+}
+
+function parensAreOptional(node: ts.ArrowFunction) {
+    return node.parameters.length === 1 &&
+        node.typeParameters === undefined &&
+        node.type === undefined &&
+        isSimpleParameter(node.parameters[0]);
+}
+
+function isSimpleParameter(parameter: ts.ParameterDeclaration): boolean {
+    return parameter.name.kind === ts.SyntaxKind.Identifier
+        && parameter.dotDotDotToken === undefined
+        && parameter.initializer === undefined
+        && parameter.questionToken === undefined
+        && parameter.type === undefined;
 }

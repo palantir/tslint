@@ -15,9 +15,10 @@
  * limitations under the License.
  */
 
+import { isCallExpression, isIdentifier, isPropertyAccessExpression } from "tsutils";
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -25,34 +26,41 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "radix",
         description: "Requires the radix parameter to be specified when calling `parseInt`.",
         rationale: Lint.Utils.dedent`
-            From [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/parseInt): 
+            From [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/parseInt):
             > Always specify this parameter to eliminate reader confusion and to guarantee predictable behavior.
             > Different implementations produce different results when a radix is not specified, usually defaulting the value to 10.`,
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: ["true"],
         type: "functionality",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING = "Missing radix parameter";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const radixWalker = new RadixWalker(sourceFile, this.getOptions());
-        return this.applyWithWalker(radixWalker);
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class RadixWalker extends Lint.RuleWalker {
-    public visitCallExpression(node: ts.CallExpression) {
-        const expression = node.expression;
-
-        if (expression.kind === ts.SyntaxKind.Identifier
-                && node.getFirstToken().getText() === "parseInt"
-                && node.arguments.length < 2) {
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+function walk(ctx: Lint.WalkContext<void>) {
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (isCallExpression(node) && node.arguments.length === 1 &&
+            (
+                // parseInt("123")
+                isIdentifier(node.expression) && node.expression.text === "parseInt" ||
+                // window.parseInt("123") || global.parseInt("123")
+                isPropertyAccessExpression(node.expression) &&
+                node.expression.name.text === "parseInt" &&
+                isIdentifier(node.expression.expression) &&
+                (
+                    node.expression.expression.text === "global" ||
+                    node.expression.expression.text === "window"
+                )
+            )) {
+            ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
-
-        super.visitCallExpression(node);
-    }
+        return ts.forEachChild(node, cb);
+    });
 }

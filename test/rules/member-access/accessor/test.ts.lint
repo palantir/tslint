@@ -1,12 +1,10 @@
 class Members {
     get g() {
-    ~~~~~~~~~
+        ~ [The get property accessor 'g' must be marked either 'private', 'public', or 'protected']
         return 1;
-~~~~~~~~~~~~~~~~~
     }
-~~~~~ [The get property accessor 'g' must be marked either 'private', 'public', or 'protected']
     set s(o: any) {}
-    ~~~~~~~~~~~~~~~~ [The set property accessor 's' must be marked either 'private', 'public', or 'protected']
+        ~ [The set property accessor 's' must be marked either 'private', 'public', or 'protected']
 
     public get publicG() {
         return 1;

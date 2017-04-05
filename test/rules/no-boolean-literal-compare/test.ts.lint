@@ -1,0 +1,45 @@
+declare const x: boolean;
+
+x === true;
+~ [T]
+true === x;
+         ~ [T]
+
+x === false;
+~ [F]
+false === x;
+          ~ [F]
+
+x !== true;
+~ [F]
+true !== x;
+         ~ [F]
+
+x !== false;
+~ [T]
+false !== x;
+          ~ [T]
+
+x == true;
+~ [T]
+
+declare const y: boolean | undefined;
+y === true;
+
+declare function f(): boolean;
+f() === false;
+~~~ [F]
+
+declare const a: number, b: number;
+
+a as any as boolean === false;
+~~~~~~~~~~~~~~~~~~~ [F]
+
+a < b === false;
+~~~~~ [F]
+
+!x === false;
+~~ [F]
+
+[T]: This expression is unnecessarily compared to a boolean. Just use it directly.
+[F]: This expression is unnecessarily compared to a boolean. Just negate it.

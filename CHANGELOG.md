@@ -1,16 +1,544 @@
 Change Log
 ===
 
+v5.0.0
+---
+
+## :fire: Breaking changes
+
+- Minimum version of TypeScript version is now 2.1.0 (#2425)
+- The severity level of rules are now configurable and defaults to severity "error". This affects the output of formatters:
+    - [formatter] `msbuild` was outputting all failures as "warning".
+    - [formatter] `pmd` was outputting all failures as priority 1. Now, it uses _priority 3_ for "error" (default) and _priority 4_ for "warning"
+- [formatter] `json` changed the `fix` property to now contain either one replacement or an array of replacements (#2403)
+- `tslint:recommended` configuration updated with `tslint:latest` rules & options (#2424)
+- Removed `no-unused-new` rule, with logic moved into `no-unused-expression` (#2269)
+- `no-trailing-whitespace` now checks template strings by default. Use the new options `ignore-template-strings` to restore the old behavior. (#2359)
+
+### API breaks for custom rules
+
+- Removed method `skip` from `RuleWalker` (#2313)
+- Removed all use of the TypeScript Language Service, use only Program APIs instead (#2235)
+
+    - This means that some rules that previously worked without the type checker _now require it_. This includes:
+        - `no-unused-variable`
+        - `no-use-before-declare`
+
+    - This breaks custom rule compilation. If your rule was not using the `ts.LanguageService` APIs, the migration is quite simple:
+
+    ```diff
+    - public applyWithProgram(srcFile: ts.SourceFile, langSvc: ts.LanguageService): Lint.RuleFailure[] {
+    -     return this.applyWithWalker(new Walker(srcFile, this.getOptions(), langSvc.getProgram()));
+    + public applyWithProgram(srcFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+    +     return this.applyWithWalker(new Walker(srcFile, this.getOptions(), program));
+    ```
+    
+    - N.B. If you are refactoring your custom rules, consider [these performance tips for writing custom rules](https://palantir.github.io/tslint/develop/custom-rules/performance.html).
+
+- Removed `createFix`. Replacements should be passed directly into addFailure. (#2403)
+- Removed deprecated `scanAllTokens` and `skippableTokenAwareRuleWalker` (#2370)
+
+## :tada: Notable features & enhancements
+
+- [feature] The severity level of rules are now individually configurable. Default severity can also be configured.  (#629, #345)
+
+    - Valid values for `severity`: `default` | `error | warn | warning | none | off`
+    - Valid values for `defaultSeverity`: `error | warn | warning | none | off`
+    - Old style:
+
+    ```json
+    {
+        "extends": "tslint:latest",
+        "rules": {
+            "callable-types": true,
+            "max-line-length": [true, 140]
+        }
+    }
+    ```
+
+    - New style (in this example, `callable-types` outputs errors and `max-line-length` outputs warnings):
+
+    ```json
+    {
+        "extends": "tslint:latest",
+        "defaultSeverity": "error",
+        "rules": {
+            "callable-types": true,
+            "max-line-length": {
+                "options": 140,
+                "severity": "warning"
+            }
+        }
+    }
+    ```
+
+- [new-rule] `prefer-template` (#2243)
+- [new-rule] `return-undefined` (#2251)
+- [new-rule] `no-reference-import` (#2273)
+- [new-rule] `no-unnecessary-callback-wrapper` (#2249)
+- [new-fixer] `linebreak-style` (#2394)
+- [new-fixer] `eofline` (#2393)
+
+
+## Full list of changes
+
+- [api] Added class `OptionallyTypedRule`, which allows rule authors to write a rule that applies when typing is either enabled or disabled (#2300)
+- [bugfix] `prefer-function-over-method` now ignores abstract methods (#2307)
+- [bugfix] `arrow-parens` with option `ban-single-arg-parens` now correctly handles functions with return type annotation (#2265)
+- [bugfix] `prefer-function-over-method` exclude overload signatures (#2315)
+- [bugfix] `use-isnan` now applies only to comparison operators (#2317)
+- [bugfix] `file-header-rule` now handles single-line comments correctly (#2320)
+- [bugfix] `newline-before-return`: fix handling of blank lines between comments (#2321)
+- [bugfix] `trailing-comma` No longer enforce trailing commas in type parameters and tuple types (#2236)
+- [bugfix] `align` don't fix if it would remove code (#2379)
+- [bugfix] `unified-signatures` now recognizes rest parameters (#2342)
+- [bugfix] `no-inferrable-types` don't warn for inferrable type on readonly property (#2312)
+- [bugfix] `trailing-comma` no longer crashes on new without parentheses (e.g. `new Foo`) (#2389)
+- [bugfix] `semicolon` Ignore comments when checking for unnecessary semicolon (#2240)
+- [bugfix] `semicolon` Don't report unnecessary semicolon when followed by regex literal (#2240)
+- [bugfix] CLI: exit with 0 on type check errors when `--force` is specified (#2322)
+- [bugfix] CLI: `--test` now correctly strips single quotes from patterns on windows (#2322)
+- [bugfix] `prefer-const` only fix initialized variables (#2219)
+- [bugfix] `prefer-const` correctly handle variables shadowed by parameters and catched exceptions (#2219)
+- [bugfix] `prefer-const` don't warn if one variable in a for loop initializer can not be const (#2219)
+- [bugfix] `prefer-const` handle more cases in destructuring (#2219)
+- [bugfix] `no-unused-expression` allow comma separated assignments (#2269)
+- [chore] removed update-notifier dependency (#2262)
+- [development] allow rule tests to specify version requirement for typescript (#2323)
+- [enhancement] `ignore-properties` option of `no-inferrable-types` now also ignores parameter properties (#2312)
+- [enhancement] `unified-signatures` now displays line number of the overload to unify if there are more than 2 overloads (#2270)
+- [enhancement] `trailing-comma` New checks for CallSignature and NamedExports (#2236)
+- [enhancement] `semicolon` New check for export statements, function overloads and shorthand module declaration (#2240)
+- [enhancement] `semicolon` Report unnecessary semicolons in classes and in statement position (for option "always" too) (#2240)
+- [enhancement] `semicolon` check for semicolon after method overload (#2240)
+- [enhancement] `array-type` now consider `object`, `undefined` and `never` as simple types, allowing `object`, `undefined[]` and `never[]` (#1843)(#2353)
+- [enhancement] `align` check statement alignment for all blocks (#2379)
+- [enhancement] `align`check parameter alignment for all signatures (#2379)
+- [enhancement] `--test` can handle multiple paths at once (#2322)
+- [enhancement] `only-arrow-functions` allow functions that use `this` in the body (#2229)
+- [enhancement] CLI: print error when `--type-check` is used without `--project` (#2322)
+- [enhancement] CLI: don't print stack trace on type check error (#2322)
+- [enhancement] CLI: added `-p` as shorthand for `--project` to be consistent with `tsc` (#2322)
+- [enhancement] `prefer-const` show warnings for `var` (#2219)
+- [enhancement] `quotemark` fixer unescapes original quotemark (e.g. `'\''` -> `"'"`) (#2359)
+- [enhancement] `no-unused-expression` allow indirect eval `(0, eval)("");` (#2269)
+- [enhancement] `no-unused-expression` checking for unused new can now use option `allow-fast-null-checks` (#2269)
+- [enhancement] `no-unused-expression` find unused comma separated expressions in all locations of the code (#2269)
+- [enhancement] `no-unused-expression` find unused expressions inside void expression (#2269)
+- [new-config-option] Adds `defaultSeverity` with options `error`, `warning`, and `off`. (#2416)
+- [new-formatter] TAP formatter (#2325)
+- [new-rule-option] `no-unused-expression` adds option `allow-tagged-template` to allow tagged templates for side effects (#2269)
+- [new-rule-option] `no-unused-expression` adds option `allow-new` to allow `new` without using the new object (#2269)
+- [new-rule-option] `member-access` adds `no-public` option (#2247)
+- [new-rule-option] `curly` added option `ignore-same-line` (#2334)
+- [new-rule-option] `{destructuring: "all"}` to only warn if all variables in a destructuring can be const (#2219)
+- [new-rule-option] added `ignore-template-strings` to `no-trailing-whitespace` (#2359)
+- [rule-update] `array-type` now consider `undefined` and `never` as simple types, allowing `undefined[]` and `never[]` (#1843)
+
+Thanks to our contributors!
+
+- Brian Olore
+- Andy Hanson
+- @andy-ms
+- Chris Barr
+- Klaus Meinhardt
+- @bumbleblym
+- Josh Goldberg
+- James Clark
+- @vilic
+- Aleksandr Filatov
+- Matt Banz
+- Karol Janyst
+- Mike Deverell
+- Alexander James Phillips
+- Irfan Hudda
+
+v4.5.1
+---
+
+- [enhancement] Updated recommended rules to include `ban-types` and `no-duplicate-super` (#2271)
+- [bugfix] `object-literal-key-quotes` handle negative number property name (#2273)
+
+v4.5.0
+---
+
+- [new-rule] `no-import-side-effect` (#2155)
+- [new-rule] `match-default-export-name` (#2117)
+- [new-rule] `no-non-null-assertion` (#2221)
+- [new-rule] `ban-types` (#2175)
+- [new-rule] `no-duplicate-super` (#2038)
+- [new-rule] `newline-before-return` (#2173)
+- [new-rule-option] `completed-docs` adds options for location, type, and privacy. Also adds interfaces, enums, types (#2095)
+- [new-rule-option] `no-inferrable-types` adds option  `ignore-properties` (#2178)
+- [new-rule-option] `typedef` adds options `object-destructuring` and `array-destructuring` options (#2146)
+- [new-rule-option] `member-ordering` adds option `alphabetize` (#2101)
+- [new-rule-option] `no-trailing-whitespace` adds option `ignore-jsdoc` (#2177)
+- [new-rule-option] `no-trailing-whitespace` adds option `ignore-comments` option (#2153)
+- [new-fixer] `no-inferrable-types` automatically remove inferrable type annotations (#2178)
+- [new-fixer] `no-any` (#2165)
+- [new-fixer] `noConsecutiveBlankLines` (#2201)
+- [new-fixer] `object-literal-shorthand` (#2165)
+- [bugfix] `no-switch-case-fallthrough` handle break, throw, continue and return nested in block, if-else and switch (#2218)
+- [bugfix] `no-switch-case-fallthrough` allow empty case clauses before default clause (#2218)
+- [bugfix] `no-mergeable-namespace` ignore property types that can't be merged (#2105)
+- [bugfix] `object-literal-key-quotes` no need to quote a float if its .toString() is the same. (#2144)
+- [bugfix] `no-consecutive-blank-lines` Correctly apply fixes at EOF (#2239)
+- [bugfix]: Fixes installation issue with node 7.5 (#2212)
+- [bugfix]: `quotemark` now handles escaped chars (#2224)
+- [enhancement] Don't exit when a rule requires type checking but type checking is not enabled (#2188)
+- [enhancement] `no-switch-case-fallthrough` allow single line comment `// falls through` (#2218)
+- [enhancement] `no-unbound-method` allows property access and binary expressions (#2143)
+- [api] Introduce `AbstractWalker` for performance (#2093)
+    - see [performance] (https://palantir.github.io/tslint/develop/custom-rules/performance.html) and [migration] (https://palantir.github.io/tslint/develop/custom-rules/migration.html) docs
+
+Thanks to our contributors!
+
+- Andy Hanson
+- Stefan Reichel
+- Shlomi Assaf
+- Josh Goldberg
+- Minko Gechev
+- Irfan Hudda
+- Klaus Meinhardt
+- Martin Probst
+- Naoto Usuyama
+- Caleb Eggensperger
+- Arturs Vonda
+- Joscha Feth
+- Moritz
+- Alexander Rusakov
+- Alex Ryan
+- Andy
+- Yuichi Nukiyama
+
+v4.4.2
+---
+
+* [bugfix] `whitespace` rule caused false positive on EOF (#2131)
+* [bugfix] WebStorm fails because `json` formatter parameter has extra space (#2132)
+
+v4.4.1
+---
+
+* [bugfix] errant space in recommended ruleset (couldn't find `no-misused-new`)
+
+v4.4.0
+---
+
+* [new-rule] `arrow-return-shorthand` (#1972)
+* [new-rule] `no-unbound-method` (#2089)
+* [new-rule] `no-boolean-literal-compare` (#2013)
+* [new-rule] `no-unsafe-any` (#2047)
+* [new-rule] `no-unnecessary-qualifier` (#2008)
+* [new-rule] `no-unnecessary-initializer` (#2106)
+* [new-rule] `await-promise` (#2102)
+* [new-rule] `no-floating-promises` (#1632)
+* [new-rule] `strict-type-predicates` (#2046)
+* [new-rule] `no-misused-new` (#1963)
+* [new-rule] `prefer-method-signature` (#2028)
+* [new-rule] `prefer-function-over-method` (#2037)
+* [new-rule-option] `allow-fast-null-checks` added to `no-unused-expression` (#1638)
+* [new-rule-option] `comment-format-rule` adds `ignore-words` and `ignore-pattern` options (#1757)
+* [new-rule-option] `whitespace` adds `check-preblock` option (#2002)
+* [new-rule-option] `strict-boolean-expressions` adds `allow-null-union`, `allow-undefined-union`, `allow-string`, and `allow-number` and  (#2033)
+* [new-fixer] `align` (#2097)
+* [new-fixer] `no-trailing-whitespace` (#2060)
+* [bugfix] `no-magic-numbers` false positive on default parameter values (#2004)
+* [bugfix] `no-empty-interface` allow empty interface with 2 or more parents (#2070)
+* [bugfix] `no-trailing-whitespace` fixed for comments and EOF (#2060)
+* [bugfix] `no-empty` no longer fails for private or protected constructor (#1976)
+* [bugfix] `tslint:disable`/`tslint-enable` now handles multiple rules and fixes what code is enabled/disabled (#2061)
+* [bugfix] `no-inferrable-types` now validates property declarations (#2081)
+* [bugfix] `unified-signatures` false positive (#2016)
+* [bugfix] `whitespace` finds all whitespace errors in JsxExpressions and TemplateExpressions (#2036)
+* [bugfix] `comment-format` no more false positives in JsxText (#2036)
+* [enhancement] `--test` option now accepts glob (#2079)
+
+Thanks to our contributors!
+
+* Alexander Rusakov
+* Andrii Dieiev
+* @andy-ms
+* Andy Hanson
+* Josh Goldberg
+* Kei Son
+* Klaus Meinhardt
+* Krati Ahuja
+* Martin Probst
+* Mohsen Azimi
+* Romke van der Meulen
+* cameron-mcateer
+
+v4.3.1
+---
+
+* [bugfix] Fix back-compat break. Allow formattersDirectory === null (#1997)
+
+v4.3.0
+---
+
+* **Enabled additional rules in `tslint:latest` configuration** (#1981)
+* [new-rule] `space-before-function-paren` (#1897)
+* [new-rule] `typeof-compare` (#1927)
+* [new-rule] `import-spacing` (#1935)
+* [new-rule] `unified-signatures` (#1944)
+* [new-fixer] `object-literal-key-quotes` (#1953)
+* [new-fixer] `no-angle-bracket-type-assertion` (#1979)
+* [bugfix] `adjacent-overload-signature` now handles static/computed function names (#1831)
+* [bugfix] `file-header` now handles files with only comments (#1913)
+* [bugfix] `no-consecutive-blank-lines` now allows blank lines in template strings (#1886)
+* [bugfix] `object-literal-key-quotes` no longer throws exception when using rest operator (#1916)
+* [bugfix] `restrict-plus-operands` no longer shows false positive in ternary operation (#1925)
+* [bugfix] `prefer-for-of` now handles nested `for` loops with reused iterator (#1926)
+* [bugfix] Exit gracefully when `tsconfig.json` passed as `--project` argument doens't have files (#1933)
+* [bugfix] `object-literal-key-quotes` now handles shorthand and spread properties (#1945)
+* [bugfix] `arrow-parens` Allow binding patterns `([x, y]) => ...` and `({x, y}) => ...` to have parens (#1958)
+* [bugfix] `semicolon` fixer now handles comma separator in interfaces and indicates failure when commas are using in interfaces (#1856)
+* [bugfix] `only-arrow-functions` option `allow-named-functions` now allows function declarations (#1961)
+* [bugfix] `prefer-for-of` no longer shows false positive when array is in parentheses (#1986)
+* [bugfix] `prefer-const` now works for TypeScript versions < 2.1.0 (#1989)
+* [enhancement] `member-access` narrow location of error (#1964)
+
+Thanks to our contributors!
+
+* Andrii Dieiev
+* @andy-ms
+* Andy Hanson
+* Josh Goldberg
+* Klaus Meinhardt
+* Linda_pp
+* Mohsen Azimi
+* Victor Grigoriu
+* Yuichi Nukiyama
+* cameron-mcateer
+
+v4.2.0
+---
+
+* [new-rule] `no-string-throw` (#1878)
+* [new-rule] `no-empty-interface` (#1889)
+* [new-rule] `interface-over-type-literal` (#1890)
+* [new-rule] `callable-types` (#1891)
+* [new-rule] `no-void-expression` (#1903)
+* [new-rule-option] `ban-single-arg-parens` added to `arrow-parens` (#1893)
+* [bugfix] `prefer-const` handles destructuring arrays (#1894), destructuring objects (#1906), and forward references (#1908)
+* [bugfix] Don't error for misplaced braces for 'else' in `one-line` rule (#1866)
+* [bugfix] `no-shadowed-variable` now identifies shadowed `for` iterator (#1816)
+* [bugfix] `object-literal-key-quotes` now includes function names (#1874)
+* [bugfix] error when EOF comes after `disable-next-line` comment (#1902)
+
+Thanks to our contributors!
+
+* Andrew Scott
+* @andy-ms
+* Andy Hanson
+* James Booth
+* Klaus Meinhardt
+* Vladimir Matveev
+
+v4.1.1
+---
+
+* [bugfix] `typedef` rule was showing false positive for `catch` clause (#1887)
+
+v4.1.0
+---
+
+* [new-rule] `prefer-const` (#1801)
+* [new-rule] `strict-boolean-expressions` (#1820)
+* [new-rule] `no-magic-numbers` (#1799)
+* [new-rule] `import-blacklist` (#1841)
+* [new-rule] `promise-functions-async` (#1779)
+* [new-rule] `no-inferred-empty-object-type`: a type must be specified when using a generic class/function/etc (#1821)
+* [new-rule-option] `allow-named-functions` added to `only-arrow-functions` (#1857)
+* [new-fixer] `prefer-const` (#1801)
+* [new-fixer] `quotemark` (#1790)
+* [new-formatter] `code-frame` formatter shows you the error in context (#1819)
+* [enhancement] `no-internal-module` failures highlight less text (#1781)
+* [enhancement] Avoid auto-fixing errors that would result in compilation errors for rules that use type-check (#1608)
+* [rule-change] `only-arrow-functions` will allow functions with a `this` parameter (#1597)
+* [bugfix] `no-use-before-declare` false positive on named import (#1620)
+* [bugfix] `prefer-for-of` was showing false positive when the element is assigned (#1813)
+* [bugfix] The command line argument `type-check` was swallowing the next argument (#1783)
+* [bugfix] `tslint:disable-line` was re-enabling `tslint:disable` (#1634)
+* [bugfix] `adjacent-overload-signatures` did not work for constructors (#1800)
+* [bugfix] `checkstyle` formatter was reporting errors under one file (#1811)
+* [bugfix] `trailing-comma` was applied to parameter lists (#1775)
+* [api] CLI logic moved into API friendly class (#1688)
+
+Thanks to our contributors!
+
+* Alex Eagle
+* Andrii Dieiev
+* Andy Hanson
+* Art Chaidarun
+* Donald Pipowitch
+* Feisal Ahmad
+* Josh Goldberg
+* Klaus Meinhardt
+* Maciej Sypień
+* Mohsen Azimi
+* Ryan Lester
+* Simon Schick
+* Subhash Sharma
+* Timothy Slatcher
+* Yaroslav Admin
+* Yuichi Nukiyama
+* tdsmithATabc
+* @wmrowan
+
+v4.0.2
+---
+
+* [enhancement] Don't exit when a rule can't be found. Print as a warning instead (#1771)
+* [api-change] Allow 3rd party apps to see exception when the config is invalid (#1764)
+* [bugfix] Don't flag a property named as empty string as not needing quotes in an object literal (#1762)
+* [bugfix] Report correct number of fixes done by --fix (#1767)
+* [bugfix] Fix false positives and exceptions in `prefer-for-of` (#1758)
+* [bugfix] Fix `adjacent-overload-signatures` false positive when a static function has the same name (#1772)
+
+Thanks to our contributors!
+* @gustavderdrache
+
+v4.0.1
+---
+
+* [bugfix] Removed `no-unused-variable` rule from recommended config, as it was causing spurious deprecation warnings.
+
+v4.0.0-dev.2
+---
+
+* Include latest v4.0.0 changes
+
+v4.0.0
+---
+
+* **BREAKING CHANGES**
+    * [api-change] Minor changes to the library API. See this PR for changes and upgrade instructions (#1720)
+    * [removed-rule] Removed `no-unreachable` rule; covered by compiler (#661)
+    * [enhancement] Changed order of applied configuration files for the `extends` array to make it more intuitive. (#1503)
+    * [enhancement] Changed TypeScript peer dependency to >= 2.0.0 (#1710)
+* [new-rule] `completed-docs` rule added (#1644)
+* [new-fixer] `ordered-imports` auto fixed (#1640)
+* [new-fixer] `arrow-parens` auto fixed (#1731)
+* [rule-change] `indent` rule now ignores template strings (#1611)
+* [new-rule-option] `object-literal-key-quotes` adds the options `consistent` and `consistent-as-needed` (#1733)
+* [enhancement] `--fix` option added to automatically fix selected rules (#1697)
+* [enhancement] Updated recommend rules (#1717)
+* [enhancement] `adjacent-overload-signatures` now works with classes, source files, modules, and namespaces (#1707)
+* [enhancement] Users are notified if they are using an old TSLint version (#1696)
+* [bugfix] Lint `.jsx` files if `jsRules` are configured (#1714)
+* [bugfix] Command line glob patterns now handle single quotes (#1679)
+
+Thanks to our contributors!
+* Andrii Dieiev
+* Andy
+* Chris Barr
+* Davie Schoots
+* Jordan Hawker
+* Josh Goldberg
+* Stepan Riha
+* Yuichi Nukiyama
+
+v4.0.0-dev.1
+---
+
+* **BREAKING CHANGES**
+    * [enhancement] The `semicolon` rule now disallows semicolons in multi-line bound class methods
+         (to get the v3 behavior, use the `ignore-bound-class-methods` option) (#1643)
+    * [removed-rule] Removed `use-strict` rule (#678)
+    * [removed-rule] Removed `label-undefined` rule; covered by compiler (#1614)
+    * [enhancement] Renamed `no-constructor-vars` to `no-parameter-properties` (#1296)
+    * [rule-change] The `orderedImports` rule now sorts relative modules below non-relative modules (#1640)
+* **Deprecated**
+    * [deprecated] `no-unused-variable` rule. This is checked by the TypeScript v2 compiler using the flags [`--noUnusedParameters` and `--noUnusedLocals`](https://github.com/Microsoft/TypeScript/wiki/What%27s-new-in-TypeScript#flag-unused-declarations-with---nounusedparameters-and---nounusedlocals). (#1481)
+* [enhancement] Lint .js files (#1515)
+* [new-fixer] `no-var-keyword` replaces `var` with `let` (#1547)
+* [new-fixer] `trailing-comma` auto fixed (#1546)
+* [new-fixer] `no-unused-variable` auto fixed for imports (#1568)
+* [new-fixer] `semicolon` auto fixed (#1423)
+* [new-rule] `max-classes-per-file` rule added (#1666)
+* [new-rule-option] `no-consecutive-blank-lines` rule now accepts a number value indicating max blank lines (#1650)
+* [new-rule-option] `ordered-imports` rule option `import-sources-order` accepts value `any` (#1602)
+* [bugfix] `no-empty` rule fixed when parameter has readonly modifier
+* [bugfix] `no-namespace` rule: do not flag nested or .d.ts namespaces (#1571)
+
+Thanks to our contributors!
+
+* Alex Eagle
+* Andrii Dieiev
+* Ben Coveney
+* Boris Aranovich
+* Chris Barr
+* Cyril Gandon
+* Evgeniy Zhukovskiy
+* Jay Anslow
+* Kunal Marwaha
+* Martin Probst
+* Mingye Wang
+* Raghav Katyal
+* Sean Dawson
+* Yuichi Nukiyama
+* jakpaw
+
+v4.0.0-dev.0
+---
+
+* **BREAKING CHANGES**
+    * [enhancement] Drop support for configuration via package.json (#1579)
+    * [removed-rule] Removed `no-duplicate-key` rule; covered by compiler (#1109)
+    * [enhancement] Call formatter once for all file results. Format output may be different (#656)
+    * [rule-change] `trailing-comma` supports function declarations, expressions, and types (#1486)
+    * [rule-change] `object-literal-sort-keys` now sorts quoted keys (#1529)
+    * [rule-change] `semicolon` now processes type aliases (#1475)
+    * [rule-change] `no-var-keyword` now rejects `export var` statements (#1256)
+    * [rule-change] `semicolon` now requires semicolon for function declaration with no body (#1447)
+* [new-formatter] `fileslist` formatter writes a list of files with errors without position or error type specifics (#1558)
+* [new-rule] `cyclomaticComplexity`, enforces a threshold of cyclomatic complexity.] (#1464)
+* [new-rule] `prefer-for-of`, which errors when `for(var x of y)` can be used instead of `for(var i = 0; i < y.length; i++)` (#1335)
+* [new-rule] `array-type`, which can require using either `T[]' or 'Array<T>' for arrays (#1498)
+* [rule-change] `object-literal-sort-keys` checks multiline objects only (#1642)
+* [rule-change] `ban` rule now can ban global functions (#327)
+* [bugfix] always write lint result, even if using formatter (#1353)
+* [bugfix] npm run test:bin fails on Windows (#1635)
+* [bugfix] Don't enforce trailing spaces on newlines in typedef-whitespace rule (#1531)
+* [bugfix] `jsdoc` rule should not match arbitrary comments (#1543)
+* [bugfix] `one-line` rule errors when declaring wildcard ambient modules (#1425)
+
+Thanks to our contributors!
+
+* Alex Eagle
+* Andrii Dieiev
+* Andy Hanson
+* Ben Coveney
+* Boris Aranovich
+* Chris Barr
+* Christian Dreher
+* Claas Augner
+* Josh Goldberg
+* Martin Probst
+* Mike Deverell
+* Nina Hartmann
+* Satoshi Amemiya
+* Scott Wu
+* Steve Van Opstal
+* Umar Bolatov
+* Vladimir Matveev
+* Yui
+
 v3.15.1
 ---
+
 * Enabled additional rules in `tslint:latest` configuration (#1506)
 
 v3.15.0
 ---
+
 * Stable release containing changes from the last dev release (v3.15.0-dev.0)
 
 v3.15.0-dev.0
 ---
+
 * [enhancement] Rules can automatically fix errors (#1423)
 * [enhancement] Better error messages for invalid source files (#1480)
 * [new-rule] `adjacent-overload-signatures` rule (#1426)
@@ -37,10 +565,12 @@ Thanks to our contributors!
 
 v3.14.0
 ---
+
 * Stable release containing changes from the last dev releases (v3.14.0-dev.0, v3.14.0-dev.1)
 
 v3.14.0-dev.1
 ---
+
 * [new-rule] `arrow-parens` rule (#777)
 * [new-rule] `max-file-line-count` rule (#1360)
 * [new-rule] `no-unsafe-finally` rule (#1349)
@@ -59,6 +589,7 @@ Thanks to our contributors!
 
 v3.14.0-dev.0
 ---
+
 * [enhancement] Add optional type information to rules (#1323)
 
 Thanks to our contributors!
@@ -66,10 +597,12 @@ Thanks to our contributors!
 
 v3.13.0
 ---
+
 * Stable release containing changes from the last dev release (v3.13.0-dev.0)
 
 v3.13.0-dev.0
 ---
+
 * [new-rule] `ordered-imports` rule (#1325)
 * [enhancement] MPEG transport stream files are ignored by the CLI (#1357)
 
@@ -80,20 +613,29 @@ Thanks to our contributors!
 * @janaagaard75
 * @mprobst
 
+v3.12.0-dev.2
+---
+
+* [enhancement] Support TypeScript v2.0.0-dev builds
+
 v3.12.1
 ---
+
 * Stable release containing changes from the last dev release (v3.12.0-dev.1)
 
 v3.12.0-dev.1
 ---
+
 * [bugfix] Fix null reference bug in typedef rule (#1345)
 
 v3.12.0
 ---
+
 * Stable release containing changes from the last dev release (v3.12.0-dev.0)
 
 v3.12.0-dev.0
 ---
+
 * [new-rule] `only-arrow-functions` rule (#1318)
 * [new-rule] `no-unused-new` rule (#1316)
 * [new-rule-option] `arrow-call-signature` option for `typedef` rule (#1284)
@@ -117,10 +659,12 @@ Thanks to our contributors!
 
 v3.11.0
 ---
+
 * Stable release containing changes from the last dev release (v3.11.0-dev.0)
 
 v3.11.0-dev.0
 ---
+
 * [new-rule] `linebreak-style` rule (#123)
 * [new-rule] `no-mergeable-namespace` rule (#843)
 * [enhancement] Add built-in configurations (#1261)
@@ -139,10 +683,12 @@ Thanks to our contributors!
 
 v3.10.2
 ---
+
 * Stable release containing changes from the last dev release (v3.10.0-dev.2)
 
 v3.10.0-dev.2
 ---
+
 * [bugfix] `member-ordering` rule doesn't crash on methods in class expressions (#1252)
 * [bugfix] `ban` rule handles chained methods appropriately (#1234)
 
@@ -151,18 +697,22 @@ Thanks to our contributors!
 
 v3.10.1
 ---
+
 * Stable release containing changes from the last dev release (v3.10.0-dev.1)
 
 v3.10.0-dev.1
 ---
+
 * [bugfix] `member-ordering` rule doesn't crash on methods in object literals (#1243)
 
 v3.10.0
 ---
+
 * Stable release containing changes from the last dev release (v3.10.0-dev.0)
 
 v3.10.0-dev.0
 ---
+
 * [new-rule] `new-parens` rule (#1177)
 * [new-rule] `no-default-export` rule (#1182)
 * [new-rule-option] `order: ...` option for `member-ordering` rule (#1208)
@@ -179,10 +729,12 @@ Thanks to our contributors!
 
 v3.9.0
 ---
+
 * Stable release containing changes from the last dev release (v3.9.0-dev.0)
 
 v3.9.0-dev.0
 ---
+
 * [new-rule] `no-namespace` rule (#1133)
 * [new-rule] `one-variable-per-declaration` rule (#525)
 * [new-rule-option] "ignore-params" option for `no-inferrable-types` rule (#1190)
@@ -207,19 +759,23 @@ Thanks to our contributors!
 
 v3.8.1
 ---
+
 * Stable release containing changes from the last dev release (v3.8.0-dev.1)
 
 v3.8.0-dev.1
 ---
+
 * [bugfix] Allow JS directives at the start of constructors, getters, and setters (#1159)
 * [bugfix] Remove accidentally included performance profiles from published NPM artifact (#1160)
 
 v3.8.0
 ---
+
 * Stable release containing changes from the last dev release (v3.8.0-dev.0)
 
 v3.8.0-dev.0
 ---
+
 * [new-rule] `no-invalid-this` rule (#1105)
 * [new-rule] `use-isnan` rule (#1054)
 * [new-rule] `no-reference` rule (#1139)
@@ -243,26 +799,32 @@ Thanks to our contributors!
 
 v3.7.4
 ---
+
 * Stable release containing changes from the last dev release (v3.7.0-dev.5)
 
 v3.7.0-dev.5
 ---
+
 * [bugfix] Allow JS directives in namespaces (#1115)
 
 v3.7.3
 ---
+
 * Stable release containing changes from the last dev release (v3.7.0-dev.4)
 
 v3.7.0-dev.4
 ---
+
 * [bugfix] Downgrade `findup-sync` dependency (#1108)
 
 v3.7.2
 ---
+
 * Stable release containing changes from the last dev release (v3.7.0-dev.3)
 
 v3.7.0-dev.3
 ---
+
 * [bugfix] `findConfigurationPath` always returns an absolute path (#1093)
 * [bugfix] Update `findup-sync` dependency (#1080)
 * [bugfix] `declare global` no longer triggers `no-internal-module` rule (#1069)
@@ -274,14 +836,17 @@ v3.7.1
 
 v3.7.0-dev.2
 ---
+
 * [bugfix] Improve handling of paths provided via the -c CLI option (#1083)
 
 v3.7.0
 ---
+
 * Stable release containing changes from the last dev release
 
 v3.7.0-dev.1
 ---
+
 * [enhancement] `extends` field for `tslint.json` files (#997)
 * [enhancement] `--force` CLI option (#1059)
 * [enhancement] Improve how `Linter` class handles configurations with a `rulesDirectory` field (#1035)
@@ -301,10 +866,12 @@ Thanks to our contributors!
 
 v3.6.0
 ---
+
 * Stable release containing changes from the last dev release
 
 v3.6.0-dev.1
 ---
+
 * [enhancement] Add `--exclude` CLI option (#915)
 * [bugfix] Fix `no-shadowed-variable` rule handling of standalone blocks (#1021)
 * [deprecation] Configuration through `package.json` files (#1020)
@@ -317,10 +884,12 @@ Thanks to our contributors!
 
 v3.5.0
 ---
+
 * Stable release containing changes from the last dev release
 
 v3.5.0-dev.1
 ---
+
 * [new-rule-option] "ignore-pattern" option for `no-unused-variable` rule (#314)
 * [bugfix] Fix occassional crash in `no-string-literal` rule (#906)
 * [enhancement] Tweak behavior of `member-ordering` rule with regards to arrow function types in interfaces (#226)
@@ -331,10 +900,12 @@ Thanks to our contributors!
 
 v3.4.0
 ---
+
 * Stable release containing changes from the last two dev releases
 
 v3.4.0-dev.2
 ---
+
 * [new-rule-option] "arrow-parameter" option for `typedef` rule (#333)
 * [new-rule-option] "never" option for `semicolon` rule (#363)
 * [new-rule-option] "onespace" setting for `typedef-whitespace` rule (#888)
@@ -352,6 +923,7 @@ Thanks to our contributors!
 
 v3.4.0-dev.1
 ---
+
 * [enhancement] Revamped testing system (#620)
   * Writing tests for rules is now much simpler with a linter DSL.
     See exisitng tests in `test/rules/**/*.ts.lint` for examples.
@@ -369,18 +941,22 @@ Thanks to our contributors!
 
 v3.3.0
 ---
+
 * [bugfix] Tweak TSLint build so TSLint works with typescript@next (#926)
 
 v3.3.0-dev.1
 ---
+
 * [bugfix] Correctly handle more than one custom rules directory (#928)
 
 v3.2.2
 ---
+
 * Stable release containing changes from the last dev release
 
 v3.2.2-dev.1
 ---
+
 * [enhancement] Throw an error if a path to a directory of custom rules is invalid (#910)
 * [new-rule-option] "jsx-single" and "jsx-double" options for `quotemark` rule (#673)
 * [bugfix] Handle paths to directories of custom rules more accurately
@@ -388,43 +964,52 @@ v3.2.2-dev.1
 
 v3.2.1
 ---
+
 * Stable release containing changes from the last dev release
 
 v3.2.1-dev.1
 ---
+
 * [enhancement] automatically generate a `tslint.json` file with new `--init` CLI command (#717)
 * [bugfix] `no-var-keyword` rule detects the use of `var` in all types of `for` loops (#855)
 
 v3.2.0
 ---
+
 * Stable release containing changes from last two dev releases
 
 v3.2.0-dev.2
 ---
+
 * [bugfix] formatters are now exported correctly to work with TS 1.8 (#863)
 
 v3.2.0-dev.1
 ---
+
 * [bugfix] fixed bug in how custom rules directories are registered (#844)
 * [enhancement] better support for globs in CLI (#827)
 * [new-rule] `no-null-keyword` rule (#722)
 
 v3.1.1
 ---
+
 * Bump TypeScript peer dependency to `>= 1.7.3` due to `const enum` incompatibility (#832)
 
 v3.1.0
 ---
+
 * [bugfix] build with TS v1.7.3 to fix null pointer exception (#832)
 * [bugfix] fixed false positive in `no-require-imports` rule (#816)
 
 v3.1.0-dev.1
 ---
+
 * [bugfix] fixed `no-shadowed-variable` false positives when handling destructuring in function params (#727)
 * [enhancement] `rulesDirectory` in `tslint.json` now supports multiple file paths (#795)
 
 v3.0.0
 ---
+
 * [bugfix] `member-access` rule now handles object literals and get/set accessors properly (#801)
     * New rule options: `check-accessor` and `check-constructor`
 * All the changes from the following releases, including some **breaking changes**:
@@ -436,18 +1021,21 @@ v3.0.0
 
 v3.0.0-dev.3
 ---
+
 * TypeScript is now a peerDependency (#791)
 * [bugfix] `no-unused-variable` rule with `react` option works with self-closing JSX tags (#776)
 * [bugfix] `use-strict` bugfix (#544)
 
 v3.0.0-dev.2
 ---
+
 * [new-rule-option] "react" option for `no-unused-variable` rule (#698, #725)
 * [bugfix] Fix how `Linter` is exported from "tslint" module (#760)
 * [bugfix] `no-use-before-declare` rule doesn't crash on uncompilable code (#763)
 
 v3.0.0-dev.1
 ---
+
 * **BREAKING CHANGES**
     * Rearchitect TSLint to use external modules instead of merged namespaces (#726)
         * Dependencies need to be handled differently now by custom rules and formatters
@@ -462,15 +1050,18 @@ v3.0.0-dev.1
 
 v2.6.0-dev.2
 ---
+
 * Upgrade TypeScript compiler to `v1.7.0-dev.20151003`
 * [bugfix] `no-unused-expression` rule now handles yield expressions properly (#706)
 
 v2.6.0-dev.1
 ---
+
 * Upgrade TypeScript compiler to `v1.7.0-dev.20150924`
 
 v2.5.1
 ---
+
 * [new-rule] no-inferrable-types rule (#676)
 * [new-rule-option] "avoid-escape" option for quotemark rule (#543)
 * [bugfix] type declaration for tslint external module #686
@@ -479,6 +1070,7 @@ v2.5.1
 
 v2.5.0
 ---
+
 * Use TypeScript compiler `v1.6.2`
 * [bugfixes] #637, #642, #650, #652
 * [bugfixes] fix various false positives in `no-unused-variable` rule (#570, #613, #663)
@@ -486,44 +1078,53 @@ v2.5.0
 
 v2.5.0-beta
 ---
+
 * Use TypeScript compiler `v1.6.0-beta`
 * [bugfix] Fix `no-internal-module` false positives on nested namespaces (#600)
 * [docs] Add documentation for `sort-object-literal-keys` rule
 
 v2.5.0-dev.5
 ---
+
 * Upgrade TypeScript compiler to `v1.7.0-dev.20150828`
 * [bugfix] Handle .tsx files appropriately (#597, #558)
 
 v2.5.0-dev.4
 ---
+
 * Upgrade TypeScript compiler to `v1.6.0-dev.20150825`
 
 v2.5.0-dev.3
 ---
+
 * Upgrade TypeScript compiler to `v1.6.0-dev.20150821`
 
 v2.5.0-dev.2
 ---
+
 * Upgrade TypeScript compiler to `v1.6.0-dev.20150811`
 * [bug] fix `whitespace` false positive in JSX elements (#559)
 
 v2.5.0-dev.1
 ---
+
 * Upgrade TypeScript compiler to `v1.6.0-dev.20150805`
 * [enhancement] Support `.tsx` syntax (#490)
 
 v2.4.5
 ---
+
 * [bugfix] fix false positives on `no-shadowed-variable` rule (#500)
 * [enhancement] add `allow-trailing-underscore` option to `variable-name` rule
 
 v2.4.4
 ---
+
 * [bugfix] remove "typescript" block from package.json (#606)
 
 v2.4.3
 ---
+
 * [new-rule] `no-conditional-assignment` (#507)
 * [new-rule] `member-access` (#552)
 * [new-rule] `no-internal-module` (#513)
@@ -536,10 +1137,12 @@ v2.4.3
 
 v2.4.2
 ---
+
 * [bug] remove npm-shrinkwrap.json from the published package
 
 v2.4.0
 ---
+
 * Upgraded Typescript compiler to 1.5.3
 * [bugs] #332, #493, #509, #483
 * [bug] fix error message in `no-var-keyword` rule
@@ -549,6 +1152,7 @@ v2.4.0
 
 v2.3.1-beta
 ---
+
 * [bugs] #137 #434 #451 #456
 * [new-rule] `no-require-imports` disallows `require()` style imports
 * [new-rule] `no-shadowed-variable` moves over shadowed variable checking from `no-duplicate-variable` into its own rule
@@ -559,6 +1163,7 @@ v2.3.1-beta
 
 v2.3.0-beta
 ---
+
 * [bugs] #401 #367 #324 #352
 * [new-rule] `no-var-keyword` disallows `var` in favor of `let` and `const`
 * [new-rule] `sort-object-literal-keys` forces object-literal keys to be sorted alphabetically
@@ -568,6 +1173,7 @@ v2.3.0-beta
 
 v2.2.0-beta
 ---
+
 * Upgraded Typescript compiler to 1.5.0-beta
 * **BREAKING CHANGES**
     * due to changes to the typescript compiler API, old custom rules may no longer work and may need to be rewritten
@@ -581,16 +1187,19 @@ v2.2.0-beta
 
 v2.1.1
 ---
+
 * [bugs] #292 #293 #295 #301 #302
 * Some internal refactoring
 * Added Windows CI testing (appveyor)
 
 v2.1.0
 ---
+
 * Fix crash on Windows
 
 v2.0.1
 ---
+
 * Upgraded Typescript compiler to 1.4
 * **BREAKING CHANGES**
     * typedef rule options were modified:
@@ -606,14 +1215,17 @@ v2.0.1
 
 v1.2.0
 ---
+
 * [bug] #245
 
 v1.0.1
 ---
+
 * [bug] #238
 
 v1.0.0
 ---
+
 * upgrade TypeScript compiler to 1.3
 * **BREAKING CHANGES**
     * all error messages now start with a lower-case character and do not end with a period
@@ -623,26 +1235,31 @@ v1.0.0
 
 v0.4.12
 ---
+
 * multiple files with -f on cli
 * config file search starts with input file
 
 v0.4.11
 ---
+
 * [bugs] #136, #163
 * internal refactors
 
 v0.4.10
 ---
+
 * [bugs] #138, #145, #146, #148
 
 v0.4.9
 ---
+
 * [new-rule] `no-any` disallows all uses of `any`
 * [bug] `/* tslint:disable */` now disables semicolon rule as well
 * [bug] delete operator no longer results in a false positive for `no-unused-expression`
 
 v0.4.8
 ---
+
 * [new-rule] `no-var-requires` disallows require statements not part of an import statement
 * [new-rule] `typedef` rule also checks for member variables
 * [bug] `no-unused-variable` no longer triggers false positives for class members labeled only `static`
@@ -652,6 +1269,7 @@ v0.4.8
 
 v0.4.7
 ---
+
 * [new-rule] added `no-unused-expression` rule which disallows unused expression statements
 * [feature] the `check-operator` option for the `whitespace` rule now checks whitespace around the => token
 * [bug] `no-use-before-declare-rule` no longer triggers false positives for member variables of classes used before the class is declared
@@ -664,6 +1282,7 @@ v0.4.7
 
 v0.4.6
 ---
+
 * [build] migrated build to use `grunt-ts` instead of `grunt-typescript`
 * [feature] `package.json` now contains a `tslintConfig` paramater to allow users to specify the location of the configuration file there
 * [feature] tslint now searches for the configuration file in the user's home directory if not found in the current path
@@ -671,16 +1290,19 @@ v0.4.6
 
 v0.4.5
 ---
+
 * [feature] `no-unused-variable` no longer checks parameters by defualt. Parameters are now only checked if the `check-parameters` option is set.
 * [bug] `no-unused-variable` parameter check no longer fails on variable argument parameters (like ...args) and on cases where the parameters are broken up by newlines.
 
 v0.4.4
 ---
+
 * [bug] `no-unused-variable` validates function parameters and constructor methods
 * [bug] `no-empty` and `no-trailing-comma` rules handle empty objects
 
 v0.4.3
 ---
+
 * [new-rule] `no-unused-variable`
 * [new-rule] `no-trailing-comma`
 * [new-rule] `no-use-before-declare`

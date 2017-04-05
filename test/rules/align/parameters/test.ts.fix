@@ -1,0 +1,32 @@
+function invalidParametersAlignment1(a: number,
+                                     b: number) {
+    var i = 0;
+}
+
+function invalidParametersAlignment2(a: number, b: number,
+                                     c: number) {
+    var i = 0;
+}
+
+function invalidParametersAlignment3(a: number,
+                                     b: number,
+                                     c: number) {
+    var i = 0;
+}
+
+class C1 {
+    invalidParametersAlignment(a: number,
+                               b: number)
+    {
+    }
+}
+
+class InvalidAlignmentInConstructor {
+    constructor(a: number,
+                str: string)
+    {
+    }
+}
+
+var invalidParametersAlignment4 = function(xxx: foo,
+                                           yyy: bar) { return true; }

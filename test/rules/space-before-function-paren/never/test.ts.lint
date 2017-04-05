@@ -1,0 +1,83 @@
+// Anonymous
+function () {}
+        ~  [space-before-function-paren]
+function (): void {
+        ~  [space-before-function-paren]
+}
+function (a: string, cb: ()=>{}): void {}
+        ~  [space-before-function-paren]
+
+var f = function () {};
+                ~  [space-before-function-paren]
+var f = function (): void {
+                ~  [space-before-function-paren]
+};
+var f = function (a: string, cb: ()=>{}): void {};
+                ~  [space-before-function-paren]
+
+
+// Named
+function foobar (){}
+               ~  [space-before-function-paren]
+function foobar (): void{
+               ~  [space-before-function-paren]
+}
+function foobar (a: string, cb: ()=>{}): void{}
+               ~  [space-before-function-paren]
+
+var f = function foobar (){};
+                       ~  [space-before-function-paren]
+var f = function foobar (): void{
+                       ~  [space-before-function-paren]
+};
+var f = function foobar (a: string, cb: ()=>{}): void{};
+                       ~  [space-before-function-paren]
+
+
+// Async Arrow
+// ignore
+() => {};
+var arrow = () => {};
+
+async () => {};
+     ~ [space-before-function-paren]
+var arrow = async () => {};
+                 ~ [space-before-function-paren]
+
+
+// Method
+interface IMyInterface {
+        one ();
+           ~  [space-before-function-paren]
+        two (): void;
+           ~  [space-before-function-paren]
+        three (a: string, cb: ()=>{}): void;
+             ~  [space-before-function-paren]
+}
+class MyClass {
+        one () {}
+           ~  [space-before-function-paren]
+        two (): void {
+           ~  [space-before-function-paren]
+        }
+        three (a: string, cb: ()=>{}): void {}
+             ~  [space-before-function-paren]
+}
+
+
+// Constructor
+class MyClass {
+        constructor () {}
+                   ~  [space-before-function-paren]
+}
+class MyClass {
+        constructor (): void {
+                   ~  [space-before-function-paren]
+        }
+}
+class MyClass {
+        constructor (a: string, cb: ()=>{}): void {}
+                   ~  [space-before-function-paren]
+}
+
+[space-before-function-paren]: Spaces before function parens are disallowed

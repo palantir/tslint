@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "curly": true
+  },
+  "jsRules": {
+    "curly": true
+  }
+}

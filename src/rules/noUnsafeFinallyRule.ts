@@ -15,8 +15,9 @@
  * limitations under the License.
  */
 
-import * as Lint from "../lint";
+import * as utils from "tsutils";
 import * as ts from "typescript";
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -35,18 +36,17 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionExamples: ["true"],
         type: "functionality",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_TYPE_BREAK = "break";
-
     public static FAILURE_TYPE_CONTINUE = "continue";
-
     public static FAILURE_TYPE_RETURN = "return";
-
     public static FAILURE_TYPE_THROW = "throw";
-
-    public static FAILURE_STRING_FACTORY = (name: string) => `${name} statements in finally blocks are forbidden.`;
+    public static FAILURE_STRING_FACTORY = (name: string) => {
+        return `${name} statements in finally blocks are forbidden.`;
+    }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new NoReturnInFinallyScopeAwareWalker(sourceFile, this.getOptions()));
@@ -80,7 +80,7 @@ interface IFinallyScope {
     /**
      * A collection of `break` or `continue` labels in this scope.
      */
-    labels: Array<string>;
+    labels: string[];
 }
 
 /**
@@ -95,8 +95,7 @@ class NoReturnInFinallyScopeAwareWalker extends Lint.ScopeAwareRuleWalker<IFinal
             return;
         }
 
-        this.addFailure(
-            this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING_FACTORY(Rule.FAILURE_TYPE_BREAK)));
+        this.addFailureAtNode(node, Rule.FAILURE_STRING_FACTORY(Rule.FAILURE_TYPE_BREAK));
     }
 
     protected visitContinueStatement(node: ts.BreakOrContinueStatement) {
@@ -105,8 +104,7 @@ class NoReturnInFinallyScopeAwareWalker extends Lint.ScopeAwareRuleWalker<IFinal
             return;
         }
 
-        this.addFailure(
-            this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING_FACTORY(Rule.FAILURE_TYPE_CONTINUE)));
+        this.addFailureAtNode(node, Rule.FAILURE_STRING_FACTORY(Rule.FAILURE_TYPE_CONTINUE));
     }
 
     protected visitLabeledStatement(node: ts.LabeledStatement) {
@@ -121,8 +119,7 @@ class NoReturnInFinallyScopeAwareWalker extends Lint.ScopeAwareRuleWalker<IFinal
             return;
         }
 
-        this.addFailure(
-            this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING_FACTORY(Rule.FAILURE_TYPE_RETURN)));
+        this.addFailureAtNode(node, Rule.FAILURE_STRING_FACTORY(Rule.FAILURE_TYPE_RETURN));
     }
 
     protected visitThrowStatement(node: ts.ThrowStatement): void {
@@ -131,8 +128,7 @@ class NoReturnInFinallyScopeAwareWalker extends Lint.ScopeAwareRuleWalker<IFinal
             return;
         }
 
-        this.addFailure(
-            this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING_FACTORY(Rule.FAILURE_TYPE_THROW)));
+        this.addFailureAtNode(node, Rule.FAILURE_STRING_FACTORY(Rule.FAILURE_TYPE_THROW));
     }
 
     public createScope(node: ts.Node): IFinallyScope {
@@ -172,13 +168,14 @@ class NoReturnInFinallyScopeAwareWalker extends Lint.ScopeAwareRuleWalker<IFinal
 
             currentScope = scopes[--depth];
         }
+        return false;
     }
 }
 
 function isLoopBlock(node: ts.Node): boolean {
     const parent = node.parent;
 
-    return parent &&
+    return parent !== undefined &&
         node.kind === ts.SyntaxKind.Block &&
         (parent.kind === ts.SyntaxKind.ForInStatement ||
         parent.kind === ts.SyntaxKind.ForOfStatement ||
@@ -194,14 +191,10 @@ function isCaseBlock(node: ts.Node): boolean {
 function isFinallyBlock(node: ts.Node): boolean {
     const parent = node.parent;
 
-    return parent &&
+    return parent !== undefined &&
         node.kind === ts.SyntaxKind.Block &&
-        isTryStatement(parent) &&
+        utils.isTryStatement(parent) &&
         parent.finallyBlock === node;
-}
-
-function isTryStatement(node: ts.Node): node is ts.TryStatement {
-    return node.kind === ts.SyntaxKind.TryStatement;
 }
 
 function isReturnsOrThrowsBoundary(scope: IFinallyScope) {

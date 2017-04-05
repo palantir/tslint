@@ -15,15 +15,17 @@
  * limitations under the License.
  */
 
+import { isTypeAssertion } from "tsutils";
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-angle-bracket-type-assertion",
         description: "Requires the use of `as Type` for type assertions instead of `<Type>`.",
+        hasFix: true,
         rationale: Lint.Utils.dedent`
             Both formats of type assertions have the same effect, but only \`as\` type assertions
             work in \`.tsx\` files. This rule ensures that you have a consistent type assertion style
@@ -32,19 +34,26 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionExamples: ["true"],
         type: "style",
+        typescriptOnly: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING = "Type assertion using the '<>' syntax is forbidden. Use the 'as' syntax instead.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoAngleBracketTypeAssertionWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class NoAngleBracketTypeAssertionWalker extends Lint.RuleWalker {
-    public visitTypeAssertionExpression(node: ts.TypeAssertion) {
-        this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
-        super.visitTypeAssertionExpression(node);
-    }
+function walk(ctx: Lint.WalkContext<void>) {
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (isTypeAssertion(node)) {
+            const start = node.getStart(ctx.sourceFile);
+            ctx.addFailure(start, node.end, Rule.FAILURE_STRING, [
+                Lint.Replacement.appendText(node.end, ` as ${ node.type.getText(ctx.sourceFile) }`),
+                Lint.Replacement.deleteFromTo(start, node.expression.getStart(ctx.sourceFile)),
+            ]);
+        }
+        return ts.forEachChild(node, cb);
+    });
 }

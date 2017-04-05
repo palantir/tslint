@@ -86,7 +86,7 @@ function f():
     return 5;
 }
 
-class BarBooBaz 
+class BarBooBaz
 {
 
 }
@@ -119,3 +119,12 @@ let geoConfig: {
     timeout: 5000,
     enableHighAccuracy: false
 };
+
+declare module "*";
+declare module "someLibrary/*";
+
+// No error if there are no braces
+if (true)
+    true;
+else
+    false;

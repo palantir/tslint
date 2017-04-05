@@ -20,4 +20,27 @@ function () {
 
 ((func) => func())(() => {});
 
+function* generator() {}
+let generator = function*() {}
+
+function hasThisParameter(this) {}
+let hasThisParameter = function(this) {}
+
+let usesThis = function() { this; }
+
+let notUsesThis = function() {
+                  ~~~~~~~~ [0]
+    function f() { this; }
+}
+let notUsesThis2 = function() {
+                   ~~~~~~~~ [0]
+    return class { method() { this; } }
+}
+
+export function exported() {}
+       ~~~~~~~~ [0]
+
+async function asyncFunction() {}
+      ~~~~~~~~ [0]
+
 [0]: non-arrow functions are forbidden

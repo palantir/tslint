@@ -1,3 +1,6 @@
+declare module "*"
+                  ~nil [Missing semicolon]
+declare module "foo" {}
 var x = 3
          ~nil [Missing semicolon]
 a += b
@@ -71,15 +74,38 @@ class MyClass {
 
     public initializedProperty = 6
                                   ~nil [Missing semicolon]
-    public initializedMethodProperty = () => { return "hi"; }
-}
+    public initializedMethodProperty = () => {
+        return "hi";
+    };
+     ~ [Unnecessary semicolon]
+
+    public initializedMethodPropertyWithoutSemicolon = () => {
+        return "hi again";
+    }
+
+    public initializedMethodProperty1Line = () => { return "hi"; };
+
+    public initializedMethodPropertyWithoutSemicolon1Line = () => { return "hi again"; }
+                                                                                        ~nil [Missing semicolon]
+    public someMethod(): void;
+    public someMethod(param): void
+                                  ~nil [Missing semicolon]
+    public someMethod(param?) {
+        return;
+    };
+     ~ [Unnecessary semicolon]
+};
+ ~ [Unnecessary semicolon]
 
 interface ITest {
     foo?: string
                 ~nil [Missing semicolon]
-    bar: number
+    bar: number // handles comment
                ~nil [Missing semicolon]
+    qux: string, // handles comment
+               ~ [Properties should be separated by semicolons]
     baz: boolean;
+    readonly raz: number;
 }
 
 import {Router} from 'aurelia-router';
@@ -96,3 +122,10 @@ export = Date
 type t = number;
 type t = number
                ~nil [Missing semicolon]
+
+if (true);
+         ~ [Unnecessary semicolon]
+for(;;);
+
+;
+~ [Unnecessary semicolon]

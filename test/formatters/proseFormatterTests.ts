@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import { assert } from "chai";
 import * as ts from "typescript";
 
-import {IFormatter, RuleFailure, TestUtils} from "../lint";
+import { IFormatter, TestUtils } from "../lint";
+import { createFailure } from "./utils";
 
 describe("Prose Formatter", () => {
     const TEST_FILE = "formatters/proseFormatter.test.ts";
@@ -33,17 +35,39 @@ describe("Prose Formatter", () => {
         const maxPosition = sourceFile.getFullWidth();
 
         const failures = [
-            new RuleFailure(sourceFile, 0, 1, "first failure", "first-name"),
-            new RuleFailure(sourceFile, 32, 36, "mid failure", "mid-name"),
-            new RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name"),
+            createFailure(sourceFile, 0, 1, "first failure", "first-name", undefined, "error"),
+            createFailure(sourceFile, 32, 36, "mid failure", "mid-name", undefined, "error"),
+            createFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name", undefined, "warning"),
         ];
 
         const expectedResult =
-            TEST_FILE + getPositionString(1, 1) + "first failure\n" +
-            TEST_FILE + getPositionString(2, 12) + "mid failure\n" +
-            TEST_FILE + getPositionString(9, 2) + "last failure\n";
+            "ERROR: " + TEST_FILE + getPositionString(1, 1) + "first failure\n" +
+            "ERROR: " + TEST_FILE + getPositionString(2, 12) + "mid failure\n" +
+            "WARNING: " + TEST_FILE + getPositionString(9, 2) + "last failure\n";
 
         const actualResult = formatter.format(failures);
+        assert.equal(actualResult, expectedResult);
+    });
+
+    it("formats fixes", () => {
+        const failures = [
+            createFailure(sourceFile, 0, 1, "first failure", "first-name", undefined, "error"),
+        ];
+
+        const mockFix = { getFileName: () => "file2" } as any;
+
+        const fixes = [
+            createFailure(sourceFile, 0, 1, "first failure", "first-name", undefined, "error"),
+            createFailure(sourceFile, 32, 36, "mid failure", "mid-name", undefined, "error"),
+             mockFix,
+        ];
+
+        const expectedResult =
+            `Fixed 2 error(s) in ${TEST_FILE}\n` +
+            `Fixed 1 error(s) in file2\n\n` +
+            `ERROR: ${TEST_FILE}${getPositionString(1, 1)}first failure\n`;
+
+        const actualResult = formatter.format(failures, fixes);
         assert.equal(actualResult, expectedResult);
     });
 

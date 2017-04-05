@@ -1,0 +1,14 @@
+interface I {
+    foo(): void;
+    bar<T>(): T;
+}
+
+type T = {
+    foo?(): void;
+}
+
+class C {
+    // OK in class
+    foo: () => void;
+}
+

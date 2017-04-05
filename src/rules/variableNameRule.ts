@@ -15,20 +15,24 @@
  * limitations under the License.
  */
 
+// tslint:disable object-literal-sort-keys
+
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 const BANNED_KEYWORDS = ["any", "Number", "number", "String", "string", "Boolean", "boolean", "Undefined", "undefined"];
+const bannedKeywordsSet = new Set(BANNED_KEYWORDS);
+const bannedKeywordsStr = BANNED_KEYWORDS.map((kw) => `\`${kw}\``).join(", ");
 
 const OPTION_LEADING_UNDERSCORE = "allow-leading-underscore";
 const OPTION_TRAILING_UNDERSCORE = "allow-trailing-underscore";
 const OPTION_BAN_KEYWORDS = "ban-keywords";
 const OPTION_CHECK_FORMAT = "check-format";
 const OPTION_ALLOW_PASCAL_CASE = "allow-pascal-case";
+const OPTION_ALLOW_SNAKE_CASE = "allow-snake-case";
 
 export class Rule extends Lint.Rules.AbstractRule {
-    /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "variable-name",
         description: "Checks variable names for various errors.",
@@ -38,9 +42,10 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"${OPTION_CHECK_FORMAT}"\`: allows only camelCased or UPPER_CASED variable names
               * \`"${OPTION_LEADING_UNDERSCORE}"\` allows underscores at the beginning (only has an effect if "check-format" specified)
               * \`"${OPTION_TRAILING_UNDERSCORE}"\` allows underscores at the end. (only has an effect if "check-format" specified)
-              * \`"${OPTION_ALLOW_PASCAL_CASE}"\` allows PascalCase in addtion to camelCase.
-            * \`"${OPTION_BAN_KEYWORDS}"\`: disallows the use of certain TypeScript keywords (\`any\`, \`Number\`, \`number\`, \`String\`,
-            \`string\`, \`Boolean\`, \`boolean\`, \`undefined\`) as variable or parameter names.`,
+              * \`"${OPTION_ALLOW_PASCAL_CASE}"\` allows PascalCase in addition to camelCase.
+              * \`"${OPTION_ALLOW_SNAKE_CASE}"\` allows snake_case in addition to camelCase.
+            * \`"${OPTION_BAN_KEYWORDS}"\`: disallows the use of certain TypeScript keywords as variable or parameter names.
+              * These are: ${bannedKeywordsStr}`,
         options: {
             type: "array",
             items: {
@@ -50,6 +55,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                     OPTION_LEADING_UNDERSCORE,
                     OPTION_TRAILING_UNDERSCORE,
                     OPTION_ALLOW_PASCAL_CASE,
+                    OPTION_ALLOW_SNAKE_CASE,
                     OPTION_BAN_KEYWORDS,
                 ],
             },
@@ -58,130 +64,151 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: ['[true, "ban-keywords", "check-format", "allow-leading-underscore"]'],
         type: "style",
+        typescriptOnly: false,
     };
-    /* tslint:enable:object-literal-sort-keys */
 
-    public static FORMAT_FAILURE = "variable name must be in camelcase or uppercase";
     public static KEYWORD_FAILURE = "variable name clashes with keyword/type";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const variableNameWalker = new VariableNameWalker(sourceFile, this.getOptions());
-        return this.applyWithWalker(variableNameWalker);
+        return this.applyWithFunction(sourceFile, walk, parseOptions(this.ruleArguments));
     }
 }
 
-class VariableNameWalker extends Lint.RuleWalker {
-    private shouldBanKeywords: boolean;
-    private shouldCheckFormat: boolean;
-
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
-        super(sourceFile, options);
-
-        this.shouldBanKeywords = this.hasOption(OPTION_BAN_KEYWORDS);
+interface Options {
+    banKeywords: boolean;
+    checkFormat: boolean;
+    leadingUnderscore: boolean;
+    trailingUnderscore: boolean;
+    allowPascalCase: boolean;
+    allowSnakeCase: boolean;
+}
+function parseOptions(ruleArguments: string[]): Options {
+    const banKeywords = hasOption(OPTION_BAN_KEYWORDS);
+    return {
+        banKeywords,
         // check variable name formatting by default if no options are specified
-        this.shouldCheckFormat = !this.shouldBanKeywords || this.hasOption(OPTION_CHECK_FORMAT);
-    }
+        checkFormat: !banKeywords || hasOption(OPTION_CHECK_FORMAT),
+        leadingUnderscore: hasOption(OPTION_LEADING_UNDERSCORE),
+        trailingUnderscore: hasOption(OPTION_TRAILING_UNDERSCORE),
+        allowPascalCase: hasOption(OPTION_ALLOW_PASCAL_CASE),
+        allowSnakeCase: hasOption(OPTION_ALLOW_SNAKE_CASE),
+    };
 
-    public visitBindingElement(node: ts.BindingElement) {
-        if (node.name.kind === ts.SyntaxKind.Identifier) {
-            const identifier = <ts.Identifier> node.name;
-            this.handleVariableNameKeyword(identifier);
-            // A destructuring pattern that does not rebind an expression is always an alias, e.g. `var {Foo} = ...;`.
-            // Only check if the name is rebound (`var {Foo: bar} = ...;`).
-            if (node.parent.kind !== ts.SyntaxKind.ObjectBindingPattern || node.propertyName) {
-                this.handleVariableNameFormat(identifier, node.initializer);
+    function hasOption(name: string): boolean {
+        return ruleArguments.indexOf(name) !== -1;
+    }
+}
+
+function walk(ctx: Lint.WalkContext<Options>): void {
+    const { options, sourceFile } = ctx;
+    return ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
+        switch (node.kind) {
+            case ts.SyntaxKind.BindingElement: {
+                const { initializer, name, propertyName } = node as ts.BindingElement;
+                if (name.kind === ts.SyntaxKind.Identifier) {
+                    handleVariableNameKeyword(name);
+                    // A destructuring pattern that does not rebind an expression is always an alias, e.g. `var {Foo} = ...;`.
+                    // Only check if the name is rebound (`var {Foo: bar} = ...;`).
+                    if (node.parent!.kind !== ts.SyntaxKind.ObjectBindingPattern || propertyName) {
+                        handleVariableNameFormat(name, initializer);
+                    }
+                }
+                break;
+            }
+
+            case ts.SyntaxKind.VariableStatement:
+                // skip 'declare' keywords
+                if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)) {
+                    return;
+                }
+                break;
+
+            case ts.SyntaxKind.Parameter:
+            case ts.SyntaxKind.PropertyDeclaration:
+            case ts.SyntaxKind.VariableDeclaration: {
+                const { name, initializer } = node as ts.ParameterDeclaration | ts.PropertyDeclaration | ts.VariableDeclaration;
+                if (name.kind === ts.SyntaxKind.Identifier) {
+                    handleVariableNameFormat(name, initializer);
+                    // do not check property declarations for keywords, they are allowed to be keywords
+                    if (node.kind !== ts.SyntaxKind.PropertyDeclaration) {
+                        handleVariableNameKeyword(name);
+                    }
+                }
+                break;
             }
         }
-        super.visitBindingElement(node);
-    }
 
-    public visitParameterDeclaration(node: ts.ParameterDeclaration) {
-        if (node.name.kind === ts.SyntaxKind.Identifier) {
-            const identifier = <ts.Identifier> node.name;
-            this.handleVariableNameFormat(identifier, undefined /* parameters may not alias */);
-            this.handleVariableNameKeyword(identifier);
-        }
-        super.visitParameterDeclaration(node);
-    }
+        return ts.forEachChild(node, cb);
+    });
 
-    public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
-        if (node.name != null && node.name.kind === ts.SyntaxKind.Identifier) {
-            const identifier = <ts.Identifier> node.name;
-            this.handleVariableNameFormat(identifier, node.initializer);
-            // do not check property declarations for keywords, they are allowed to be keywords
-        }
-        super.visitPropertyDeclaration(node);
-    }
-
-    public visitVariableDeclaration(node: ts.VariableDeclaration) {
-        if (node.name.kind === ts.SyntaxKind.Identifier) {
-            const identifier = <ts.Identifier> node.name;
-            this.handleVariableNameFormat(identifier, node.initializer);
-            this.handleVariableNameKeyword(identifier);
-        }
-        super.visitVariableDeclaration(node);
-    }
-
-    public visitVariableStatement(node: ts.VariableStatement) {
-        // skip 'declare' keywords
-        if (!Lint.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)) {
-            super.visitVariableStatement(node);
-        }
-    }
-
-    private isAlias(name: ts.Identifier, initializer: ts.Expression): boolean {
-        if (initializer.kind === ts.SyntaxKind.PropertyAccessExpression) {
-            return (initializer as ts.PropertyAccessExpression).name.text === name.text;
-        } else if (initializer.kind === ts.SyntaxKind.Identifier) {
-            return (initializer as ts.Identifier).text === name.text;
-        }
-    }
-
-    private handleVariableNameFormat(name: ts.Identifier, initializer: ts.Expression) {
-        const variableName = name.text;
-
-        if (initializer && this.isAlias(name, initializer)) {
+    function handleVariableNameFormat(name: ts.Identifier, initializer?: ts.Expression): void {
+        if (!options.checkFormat) {
             return;
         }
 
-        if (this.shouldCheckFormat && !this.isCamelCase(variableName) && !isUpperCase(variableName)) {
-            this.addFailure(this.createFailure(name.getStart(), name.getWidth(), Rule.FORMAT_FAILURE));
+        const { text } = name;
+        if (initializer && isAlias(text, initializer)) {
+            return;
+        }
+
+        if (!isCamelCase(text, options) && !isUpperCase(text)) {
+            ctx.addFailureAtNode(name, formatFailure());
         }
     }
 
-    private handleVariableNameKeyword(name: ts.Identifier) {
-        const variableName = name.text;
-
-        if (this.shouldBanKeywords && BANNED_KEYWORDS.indexOf(variableName) !== -1) {
-            this.addFailure(this.createFailure(name.getStart(), name.getWidth(), Rule.KEYWORD_FAILURE));
+    function handleVariableNameKeyword(name: ts.Identifier): void {
+        if (options.banKeywords && bannedKeywordsSet.has(name.text)) {
+            ctx.addFailureAtNode(name, Rule.KEYWORD_FAILURE);
         }
     }
 
-    private isCamelCase(name: string) {
-        const firstCharacter = name.charAt(0);
-        const lastCharacter = name.charAt(name.length - 1);
-        const middle = name.substr(1, name.length - 2);
-
-        if (name.length <= 0) {
-            return true;
+    function formatFailure(): string {
+        let failureMessage = "variable name must be in camelcase";
+        if (options.allowPascalCase) {
+            failureMessage += ", pascalcase";
         }
-        if (!this.hasOption(OPTION_LEADING_UNDERSCORE) && firstCharacter === "_") {
-            return false;
+        if (options.allowSnakeCase) {
+            failureMessage += ", snakecase";
         }
-        if (!this.hasOption(OPTION_TRAILING_UNDERSCORE) && lastCharacter === "_") {
-            return false;
-        }
-        if (!this.hasOption(OPTION_ALLOW_PASCAL_CASE) && !isLowerCase(firstCharacter)) {
-            return false;
-        }
-        return middle.indexOf("_") === -1;
+        return failureMessage + " or uppercase";
     }
 }
 
-function isLowerCase(name: string) {
+function isAlias(name: string, initializer: ts.Expression): boolean {
+    switch (initializer.kind) {
+        case ts.SyntaxKind.PropertyAccessExpression:
+            return (initializer as ts.PropertyAccessExpression).name.text === name;
+        case ts.SyntaxKind.Identifier:
+            return (initializer as ts.Identifier).text === name;
+        default:
+            return false;
+    }
+}
+
+function isCamelCase(name: string, options: Options): boolean {
+    const firstCharacter = name[0];
+    const lastCharacter = name[name.length - 1];
+    const middle = name.slice(1, -1);
+
+    if (!options.leadingUnderscore && firstCharacter === "_") {
+        return false;
+    }
+    if (!options.trailingUnderscore && lastCharacter === "_") {
+        return false;
+    }
+    if (!options.allowPascalCase && !isLowerCase(firstCharacter)) {
+        return false;
+    }
+    if (!options.allowSnakeCase && middle.indexOf("_") !== -1) {
+        return false;
+    }
+    return true;
+}
+
+function isLowerCase(name: string): boolean {
     return name === name.toLowerCase();
 }
 
-function isUpperCase(name: string) {
+export function isUpperCase(name: string): boolean {
     return name === name.toUpperCase();
 }

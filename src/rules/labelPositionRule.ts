@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -33,6 +33,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionExamples: ["true"],
         type: "functionality",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -52,8 +53,7 @@ class LabelPositionWalker extends Lint.RuleWalker {
                 && statement.kind !== ts.SyntaxKind.ForOfStatement
                 && statement.kind !== ts.SyntaxKind.WhileStatement
                 && statement.kind !== ts.SyntaxKind.SwitchStatement) {
-            const failure = this.createFailure(node.label.getStart(), node.label.getWidth(), Rule.FAILURE_STRING);
-            this.addFailure(failure);
+            this.addFailureAtNode(node.label, Rule.FAILURE_STRING);
         }
         super.visitLabeledStatement(node);
     }

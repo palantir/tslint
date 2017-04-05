@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -25,10 +25,12 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "no-var-keyword",
         description: "Disallows usage of the `var` keyword.",
         descriptionDetails: "Use `let` or `const` instead.",
+        hasFix: true,
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: ["true"],
         type: "functionality",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -44,7 +46,7 @@ class NoVarKeywordWalker extends Lint.RuleWalker {
     public visitVariableStatement(node: ts.VariableStatement) {
         if (!Lint.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)
                 && !Lint.isBlockScopedVariable(node)) {
-            this.addFailure(this.createFailure(node.declarationList.getStart(), "var".length, Rule.FAILURE_STRING));
+            this.reportFailure(node.declarationList);
         }
 
         super.visitVariableStatement(node);
@@ -65,10 +67,16 @@ class NoVarKeywordWalker extends Lint.RuleWalker {
         super.visitForOfStatement(node);
     }
 
-    private handleInitializerNode(node: ts.VariableDeclarationList | ts.Expression) {
+    private handleInitializerNode(node: ts.VariableDeclarationList | ts.Expression | undefined) {
         if (node && node.kind === ts.SyntaxKind.VariableDeclarationList &&
                 !(Lint.isNodeFlagSet(node, ts.NodeFlags.Let) || Lint.isNodeFlagSet(node, ts.NodeFlags.Const))) {
-            this.addFailure(this.createFailure(node.getStart(), "var".length, Rule.FAILURE_STRING));
+            this.reportFailure(node);
         }
+    }
+
+    private reportFailure(node: ts.Node) {
+        const nodeStart = node.getStart(this.getSourceFile());
+        this.addFailureAt(nodeStart, "var".length, Rule.FAILURE_STRING,
+            this.createReplacement(nodeStart, "var".length, "let"));
     }
 }

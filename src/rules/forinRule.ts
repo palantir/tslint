@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -32,13 +32,14 @@ export class Rule extends Lint.Rules.AbstractRule {
                 }
             }
             \`\`\`
-            Prevents accidental interation over properties inherited from an object's prototype.
+            Prevents accidental iteration over properties inherited from an object's prototype.
             See [MDN's \`for...in\`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...in)
             documentation for more information about \`for...in\` loops.`,
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: ["true"],
         type: "functionality",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -66,7 +67,7 @@ class ForInWalker extends Lint.RuleWalker {
 
         // if there is a block, verify that it has a single if statement or starts with if (..) continue;
         if (statementKind === ts.SyntaxKind.Block) {
-            const blockNode = <ts.Block> statement;
+            const blockNode = statement as ts.Block;
             const blockStatements = blockNode.statements;
             if (blockStatements.length >= 1) {
                 const firstBlockStatement = blockStatements[0];
@@ -77,7 +78,7 @@ class ForInWalker extends Lint.RuleWalker {
                     }
 
                     // if this "if" statement has a single continue block
-                    const ifStatement = (<ts.IfStatement> firstBlockStatement).thenStatement;
+                    const ifStatement = (firstBlockStatement as ts.IfStatement).thenStatement;
                     if (nodeIsContinue(ifStatement)) {
                         return;
                     }
@@ -85,8 +86,7 @@ class ForInWalker extends Lint.RuleWalker {
             }
         }
 
-        const failure = this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING);
-        this.addFailure(failure);
+        this.addFailureAtNode(node, Rule.FAILURE_STRING);
     }
 }
 
@@ -98,7 +98,7 @@ function nodeIsContinue(node: ts.Node) {
     }
 
     if (kind === ts.SyntaxKind.Block) {
-        const blockStatements = (<ts.Block> node).statements;
+        const blockStatements = (node as ts.Block).statements;
         if (blockStatements.length === 1 && blockStatements[0].kind === ts.SyntaxKind.ContinueStatement) {
             return true;
         }

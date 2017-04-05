@@ -1,3 +1,6 @@
+declare module "*";
+                  ~ [Unnecessary semicolon]
+declare module "foo" {}
 var x = 3;
          ~ [Unnecessary semicolon]
 a += b;
@@ -70,18 +73,42 @@ class MyClass {
                           ~ [Unnecessary semicolon]
     private email : string
     public initializedProperty = 6
-    public initializedMethodProperty = () => { return "hi" };
-                                                            ~ [Unnecessary semicolon]
+    public initializedMethodProperty = () => {
+        return "hi";
+                   ~ [Unnecessary semicolon]
+    };
+     ~ [Unnecessary semicolon]
 
-}
+    public initializedMethodPropertyWithoutSemicolon = () => {
+        return "hi again"; 
+                         ~ [Unnecessary semicolon]
+    }
+
+    public initializedMethodProperty1Line = () => { return "hi"; };
+                                                               ~ [Unnecessary semicolon]
+                                                                  ~ [Unnecessary semicolon]
+
+    public initializedMethodPropertyWithoutSemicolon1Line = () => { return "hi again"; }
+                                                                                     ~ [Unnecessary semicolon]
+    public someMethod(): void;
+                             ~ [Unnecessary semicolon]
+    public someMethod(param): void
+    public someMethod(param?) {
+        return
+    };
+     ~ [Unnecessary semicolon]
+};
+ ~ [Unnecessary semicolon]
 
 interface ITest {
     foo?: string;
                 ~ [Unnecessary semicolon]
     bar: number;
                ~ [Unnecessary semicolon]
+    qux: string,
     baz: boolean
-}
+    bas: never;}
+              ~ [Unnecessary semicolon]
 
 import {Router} from 'aurelia-router'
 
@@ -131,3 +158,10 @@ export = Date
 type t = number;
                ~ [Unnecessary semicolon]
 type t = number
+
+if (true);
+         ~ [Unnecessary semicolon]
+for(;;);
+
+;
+~ [Unnecessary semicolon]

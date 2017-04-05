@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 const OPTION_IGNORE_FOR_LOOP = "ignore-for-loop";
 
@@ -41,6 +41,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: ["true", `[true, "${OPTION_IGNORE_FOR_LOOP}"]`],
         type: "style",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -57,7 +58,7 @@ class OneVariablePerDeclarationWalker extends Lint.RuleWalker {
         const { declarationList } = node;
 
         if (declarationList.declarations.length > 1) {
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+            this.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
 
         super.visitVariableStatement(node);
@@ -71,7 +72,7 @@ class OneVariablePerDeclarationWalker extends Lint.RuleWalker {
                 && initializer != null
                 && initializer.kind === ts.SyntaxKind.VariableDeclarationList
                 && initializer.declarations.length > 1) {
-            this.addFailure(this.createFailure(initializer.getStart(), initializer.getWidth(), Rule.FAILURE_STRING));
+            this.addFailureAtNode(initializer, Rule.FAILURE_STRING);
         }
 
         super.visitForStatement(node);

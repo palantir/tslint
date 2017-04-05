@@ -1,5 +1,8 @@
 {
   "rules": {
     "radix": true
+  },
+  "jsRules": {
+    "radix": true
   }
 }

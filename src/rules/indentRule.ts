@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 const OPTION_USE_TABS = "tabs";
 const OPTION_USE_SPACES = "spaces";
@@ -29,7 +29,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Enforces indentation with tabs or spaces.",
         rationale: Lint.Utils.dedent`
             Using only one of tabs or spaces for indentation leads to more consistent editor behavior,
-            cleaner diffs in version control, and easier programatic manipulation.`,
+            cleaner diffs in version control, and easier programmatic manipulation.`,
         optionsDescription: Lint.Utils.dedent`
             One of the following arguments must be provided:
 
@@ -41,6 +41,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: ['[true, "spaces"]'],
         type: "maintainability",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -76,10 +77,11 @@ class IndentWalker extends Lint.RuleWalker {
         }
 
         let endOfComment = -1;
+        let endOfTemplateString = -1;
         const scanner = ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, node.text);
-        for (let lineStart of node.getLineStarts()) {
-            if (lineStart < endOfComment) {
-                // skip checking lines inside multi-line comments
+        for (const lineStart of node.getLineStarts()) {
+            if (lineStart < endOfComment || lineStart < endOfTemplateString) {
+                // skip checking lines inside multi-line comments or template strings
                 continue;
             }
 
@@ -103,6 +105,27 @@ class IndentWalker extends Lint.RuleWalker {
             const commentRanges = ts.getTrailingCommentRanges(node.text, lineStart);
             if (commentRanges) {
                 endOfComment = commentRanges[commentRanges.length - 1].end;
+            } else {
+                let scanType = currentScannedType;
+
+                // scan until we reach end of line, skipping over template strings
+                while (scanType !== ts.SyntaxKind.NewLineTrivia && scanType !== ts.SyntaxKind.EndOfFileToken) {
+                    if (scanType === ts.SyntaxKind.NoSubstitutionTemplateLiteral) {
+                        // template string without expressions - skip past it
+                        endOfTemplateString = scanner.getStartPos() + scanner.getTokenText().length;
+                    } else if (scanType === ts.SyntaxKind.TemplateHead) {
+                        // find end of template string containing expressions...
+                        while (scanType !== ts.SyntaxKind.TemplateTail && scanType !== ts.SyntaxKind.EndOfFileToken) {
+                            scanType = scanner.scan();
+                            if (scanType === ts.SyntaxKind.CloseBraceToken) {
+                                scanType = scanner.reScanTemplateToken();
+                            }
+                        }
+                        // ... and skip past it
+                        endOfTemplateString = scanner.getStartPos() + scanner.getTokenText().length;
+                    }
+                    scanType = scanner.scan();
+                }
             }
 
             if (currentScannedType === ts.SyntaxKind.SingleLineCommentTrivia
@@ -113,7 +136,7 @@ class IndentWalker extends Lint.RuleWalker {
             }
 
             if (fullLeadingWhitespace.match(this.regExp)) {
-                this.addFailure(this.createFailure(lineStart, fullLeadingWhitespace.length, this.failureString));
+                this.addFailureAt(lineStart, fullLeadingWhitespace.length, this.failureString);
             }
         }
         // no need to call super to visit the rest of the nodes, so don't call super here

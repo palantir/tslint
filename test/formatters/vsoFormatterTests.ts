@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import { assert } from "chai";
 import * as ts from "typescript";
 
-import {IFormatter, RuleFailure, TestUtils} from "../lint";
+import { IFormatter, TestUtils } from "../lint";
+import { createFailure } from "./utils";
 
 describe("VSO Formatter", () => {
     const TEST_FILE = "formatters/vsoFormatter.test.ts";
@@ -33,9 +35,9 @@ describe("VSO Formatter", () => {
         const maxPosition = sourceFile.getFullWidth();
 
         const failures = [
-            new RuleFailure(sourceFile, 0, 1, "first failure", "first-name"),
-            new RuleFailure(sourceFile, 32, 36, "mid failure", "mid-name"),
-            new RuleFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name"),
+            createFailure(sourceFile, 0, 1, "first failure", "first-name", undefined, "error"),
+            createFailure(sourceFile, 32, 36, "mid failure", "mid-name", undefined, "error"),
+            createFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name", undefined, "error"),
         ];
 
         const expectedResult =

@@ -15,9 +15,16 @@
  * limitations under the License.
  */
 
+import { hasModifier } from "tsutils";
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
+
+const OPTION_ALLOW_DECLARATIONS = "allow-declarations";
+
+interface Options {
+    allowDeclarations: boolean;
+}
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -31,35 +38,43 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: Lint.Utils.dedent`
             One argument may be optionally provided:
 
-            * \`allow-declarations\` allows \`declare namespace ... {}\` to describe external APIs.`,
+            * \`${OPTION_ALLOW_DECLARATIONS}\` allows \`declare namespace ... {}\` to describe external APIs.`,
         options: {
             type: "array",
             items: {
                 type: "string",
-                enum: ["allow-declarations"],
+                enum: [OPTION_ALLOW_DECLARATIONS],
             },
             minLength: 0,
             maxLength: 1,
         },
-        optionExamples: ["true", '[true, "allow-declarations"]'],
+        optionExamples: ["true", `[true, "${OPTION_ALLOW_DECLARATIONS}"]`],
         type: "typescript",
+        typescriptOnly: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING = "'namespace' and 'module' are disallowed";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoNamespaceWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk, {
+            allowDeclarations: this.ruleArguments.indexOf(OPTION_ALLOW_DECLARATIONS) !== -1,
+        });
     }
 }
 
-class NoNamespaceWalker extends Lint.RuleWalker {
-    public visitModuleDeclaration(decl: ts.ModuleDeclaration) {
-        super.visitModuleDeclaration(decl);
-        // declare module 'foo' {} is an external module, not a namespace.
-        if (decl.name.kind === ts.SyntaxKind.StringLiteral) { return; }
-        if (Lint.isNodeFlagSet(decl, ts.NodeFlags.Ambient) && this.hasOption("allow-declarations")) { return; }
-        if (Lint.isNestedModuleDeclaration(decl)) { return; }
-        this.addFailure(this.createFailure(decl.getStart(), decl.getWidth(), Rule.FAILURE_STRING));
+function walk(ctx: Lint.WalkContext<Options>) {
+    // Ignore all .d.ts files by returning and not walking their ASTs.
+    // .d.ts declarations do not have the Ambient flag set, but are still declarations.
+    if (ctx.sourceFile.isDeclarationFile && ctx.options.allowDeclarations) {
+        return;
+    }
+    for (const node of ctx.sourceFile.statements){
+        if (node.kind === ts.SyntaxKind.ModuleDeclaration) {
+            if ((node as ts.ModuleDeclaration).name.kind !== ts.SyntaxKind.StringLiteral &&
+                (!ctx.options.allowDeclarations || !hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword))) {
+                ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
+            }
+        }
     }
 }

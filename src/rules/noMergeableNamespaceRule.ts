@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -28,51 +28,67 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionExamples: ["true"],
         type: "maintainability",
+        typescriptOnly: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static failureStringFactory(identifier: string, locationToMerge: ts.LineAndCharacter): string {
-        return `Mergeable namespace ${identifier} found. Merge its contents with the namespace on line ${locationToMerge.line}.`;
+    public static failureStringFactory(name: string, seenBeforeLine: number) {
+        return `Mergeable namespace '${name}' found. Merge its contents with the namespace on line ${seenBeforeLine}.`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const languageService = Lint.createLanguageService(sourceFile.fileName, sourceFile.getFullText());
-        const noMergeableNamespaceWalker = new NoMergeableNamespaceWalker(sourceFile, this.getOptions(), languageService);
-        return this.applyWithWalker(noMergeableNamespaceWalker);
+        return this.applyWithWalker(new Walker(sourceFile, this.getOptions()));
     }
 }
 
-class NoMergeableNamespaceWalker extends Lint.RuleWalker {
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions, private languageService: ts.LanguageService) {
-        super(sourceFile, options);
+class Walker extends Lint.RuleWalker {
+    public visitSourceFile(node: ts.SourceFile) {
+        this.checkStatements(node.statements);
+        // All tree-walking handled by 'checkStatements'
     }
 
-    public visitModuleDeclaration(node: ts.ModuleDeclaration) {
-        if (Lint.isNodeFlagSet(node, ts.NodeFlags.Namespace)
-            && node.name.kind === ts.SyntaxKind.Identifier) {
-            this.validateReferencesForNamespace((<ts.Identifier> node.name).text, node.name.getStart());
-        }
-        super.visitModuleDeclaration(node);
-    }
+    private checkStatements(statements: ts.Statement[]): void {
+        const seen = new Map<string, ts.NamespaceDeclaration>();
 
-    private validateReferencesForNamespace(name: string, position: number) {
-        const { fileName } = this.getSourceFile();
-        const highlights = this.languageService.getDocumentHighlights(fileName, position, [fileName]);
-
-        if (highlights == null || highlights[0].highlightSpans.length > 1) {
-            const failureString = Rule.failureStringFactory(name, this.findLocationToMerge(position, highlights[0].highlightSpans));
-            this.addFailure(this.createFailure(position, name.length, failureString));
-        }
-    }
-
-    private findLocationToMerge(currentPosition: number, highlightSpans: ts.HighlightSpan[]): ts.LineAndCharacter {
-        const { line } = ts.getLineAndCharacterOfPosition(this.getSourceFile(), currentPosition);
-
-        for (const span of highlightSpans) {
-            const lineAndCharacter = ts.getLineAndCharacterOfPosition(this.getSourceFile(), span.textSpan.start);
-            if (lineAndCharacter.line !== line) {
-                return lineAndCharacter;
+        for (const statement of statements) {
+            if (statement.kind !== ts.SyntaxKind.ModuleDeclaration) {
+                continue;
             }
+
+            const { name } = statement as ts.ModuleDeclaration;
+            if (name.kind === ts.SyntaxKind.Identifier) {
+                const { text } = name;
+                const prev = seen.get(text);
+                if (prev) {
+                    this.addFailureAtNode(name, Rule.failureStringFactory(text, this.getLineOfNode(prev)));
+                }
+                seen.set(text, statement as ts.NamespaceDeclaration);
+            }
+
+            // Recursively check in all module declarations
+            this.checkModuleDeclaration(statement as ts.ModuleDeclaration);
         }
+    }
+
+    private checkModuleDeclaration(decl: ts.ModuleDeclaration): void {
+        const { body } = decl;
+        if (!body) {
+            return;
+        }
+
+        switch (body.kind) {
+            case ts.SyntaxKind.ModuleBlock:
+                this.checkStatements(body.statements);
+                break;
+            case ts.SyntaxKind.ModuleDeclaration:
+                this.checkModuleDeclaration(body as ts.ModuleDeclaration);
+                break;
+            default:
+                break;
+        }
+    }
+
+    private getLineOfNode(node: ts.Node): number {
+        return this.getLineAndCharacterOfPosition(node.pos).line;
     }
 }

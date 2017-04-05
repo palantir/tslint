@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "arrow-parens": true
+  },
+  "jsRules": {
+    "arrow-parens": true
+  }
+}

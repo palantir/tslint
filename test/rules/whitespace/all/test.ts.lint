@@ -34,16 +34,18 @@ module M {
                 ~      [missing whitespace]
     }
 
-    for(x = 1;x <2; ++x) {
+    for(x = 1;x <2; ++x){
        ~                   [missing whitespace]
               ~            [missing whitespace]
                  ~         [missing whitespace]
+                        ~  [missing whitespace]
         goto:console.log("hi");
              ~                  [missing whitespace]
     }
 
-    while(i < 1) {
+    while(i < 1){
          ~         [missing whitespace]
+                ~  [missing whitespace]
         ++i;
     }
 
@@ -86,6 +88,19 @@ var test = `
   <div class="repeat"
 `;
 
+var withinTemplateExpression = `${name==="something"?"foo":"bar"}`;
+                                      ~                             [missing whitespace]
+                                         ~                          [missing whitespace]
+                                                    ~               [missing whitespace]
+                                                     ~              [missing whitespace]
+                                                          ~         [missing whitespace]
+                                                           ~        [missing whitespace]
+var withinTemplateExpression = `${name === "something" ? "foo" : "bar"}`;
+
+var objectInsideTemplateExpression = `${({foo:"bar"}).foo}`;
+                                              ~                     [missing whitespace]
+var objectInsideTemplateExpression = `${({foo: "bar"}).foo}`;
+
 import { importA } from "libA";
 import { importB }from "libB";
                   ~            [missing whitespace]
@@ -108,3 +123,29 @@ export function each(obj, iterator, context) {
 
 export {each as forEach};
 import "libE";
+
+function foobar(){}
+                 ~ [missing whitespace]
+
+function foorbar()
+{}
+
+if (){
+     ~ [missing whitespace]
+    //
+} else{}
+      ~ [missing whitespace]
+
+if ()
+{}
+else
+{}
+
+/* some comment */{
+    // some code with a preceding comment
+}
+
+{
+    const foo = 123;
+    // code that just wants to be encapsulated in a block scope
+}

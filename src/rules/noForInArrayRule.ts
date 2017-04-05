@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -43,32 +43,27 @@ export class Rule extends Lint.Rules.TypedRule {
         optionExamples: ["true"],
         requiresTypeInfo: true,
         type: "functionality",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING = "for-in loops over arrays are forbidden. Use for-of or array.forEach instead.";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        const noForInArrayWalker = new NoForInArrayWalker(sourceFile, this.getOptions(), program);
-        return this.applyWithWalker(noForInArrayWalker);
+        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, program));
     }
 }
 
-class NoForInArrayWalker extends Lint.ProgramAwareRuleWalker {
-    public visitForInStatement(node: ts.ForInStatement) {
-        const iteratee = node.expression;
-        const tc = this.getTypeChecker();
-        const type = tc.getTypeAtLocation(iteratee);
-
-        /* tslint:disable:no-bitwise */
-        const isArrayType = type.symbol && type.symbol.name === "Array";
-        const isStringType = (type.flags & ts.TypeFlags.StringLike) !== 0;
-        /* tslint:enable:no-bitwise */
-
-        if (isArrayType || isStringType) {
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+function walk(ctx: Lint.WalkContext<void>, program: ts.Program) {
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (node.kind === ts.SyntaxKind.ForInStatement) {
+            const type = program.getTypeChecker().getTypeAtLocation((node as ts.ForInStatement).expression);
+            if (type.symbol !== undefined && type.symbol.name === "Array" ||
+                // tslint:disable-next-line:no-bitwise
+                (type.flags & ts.TypeFlags.StringLike) !== 0) {
+                ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
+            }
         }
-
-        super.visitForInStatement(node);
-    }
+        return ts.forEachChild(node, cb);
+    });
 }

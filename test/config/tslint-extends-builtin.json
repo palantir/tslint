@@ -1,6 +1,13 @@
 {
   "extends": "tslint:latest",
+  "jsRules": {
+    "no-eval": {
+      "severity": "none"
+    }
+  },
   "rules": {
-    "no-eval": false
+    "no-eval": {
+      "severity": "none"
+    }
   }
 }

@@ -15,17 +15,13 @@
  * limitations under the License.
  */
 
+// tslint:disable object-literal-sort-keys
+// tslint:disable:object-literal-key-quotes
 export const rules = {
-    "adjacent-overload-signatures": true,
-    "no-unsafe-finally": true,
-    "object-literal-key-quotes": [true, "as-needed"],
-    "object-literal-shorthand": true,
-    "only-arrow-functions": [true, "allow-declarations"],
-    "ordered-imports": [true, {
-        "import-sources-order": "case-insensitive",
-        "named-imports-order": "lowercase-last",
-    }],
+    // added in v5.1
+    "no-invalid-template-strings": true,
 };
+// tslint:enable object-literal-sort-keys
 
 // work around "extends" being a keyword
 const xtends = "tslint:recommended";

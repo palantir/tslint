@@ -15,33 +15,28 @@
  * limitations under the License.
  */
 
+import * as utils from "tsutils";
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
-const OPTION_REACT = "react";
 const OPTION_CHECK_PARAMETERS = "check-parameters";
+const OPTION_IGNORE_PATTERN = "ignore-pattern";
 
-const REACT_MODULES = ["react", "react/addons"];
-const REACT_NAMESPACE_IMPORT_NAME = "React";
-
-const MODULE_SPECIFIER_MATCH = /^["'](.+)['"]$/;
-
-export class Rule extends Lint.Rules.AbstractRule {
+export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-unused-variable",
-        description: "Disallows unused imports, variables, functions and private class members.",
+        description: Lint.Utils.dedent`Disallows unused imports, variables, functions and
+            private class members. Similar to tsc's --noUnusedParameters and --noUnusedLocals
+            options, but does not interrupt code compilation.`,
+        hasFix: true,
         optionsDescription: Lint.Utils.dedent`
             Three optional arguments may be optionally provided:
 
             * \`"check-parameters"\` disallows unused function and constructor parameters.
                 * NOTE: this option is experimental and does not work with classes
                 that use abstract method declarations, among other things.
-            * \`"react"\` relaxes the rule for a namespace import named \`React\`
-            (from either the module \`"react"\` or \`"react/addons"\`).
-            Any JSX expression in the file will be treated as a usage of \`React\`
-            (because it expands to \`React.createElement \`).
             * \`{"ignore-pattern": "pattern"}\` where pattern is a case-sensitive regexp.
             Variable names that match the pattern will be ignored.`,
         options: {
@@ -49,7 +44,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             items: {
                 oneOf: [{
                     type: "string",
-                    enum: ["check-parameters", "react"],
+                    enum: ["check-parameters"],
                 }, {
                     type: "object",
                     properties: {
@@ -61,286 +56,325 @@ export class Rule extends Lint.Rules.AbstractRule {
             minLength: 0,
             maxLength: 3,
         },
-        optionExamples: ['[true, "react"]', '[true, {"ignore-pattern": "^_"}]'],
+        optionExamples: ["[true]", '[true, {"ignore-pattern": "^_"}]'],
         type: "functionality",
+        typescriptOnly: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_TYPE_FUNC = "function";
-    public static FAILURE_TYPE_IMPORT = "import";
-    public static FAILURE_TYPE_METHOD = "method";
-    public static FAILURE_TYPE_PARAM = "parameter";
-    public static FAILURE_TYPE_PROP = "property";
-    public static FAILURE_TYPE_VAR = "variable";
+    public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+        const x = program.getCompilerOptions();
+        if (x.noUnusedLocals && x.noUnusedParameters) {
+            console.warn("WARNING: 'no-unused-variable' lint rule does not need to be set if " +
+                "the 'no-unused-locals' and 'no-unused-parameters' compiler options are enabled.");
+        }
 
-    public static FAILURE_STRING_FACTORY = (type: string, name: string) => `Unused ${type}: '${name}'`;
-
-    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const languageService = Lint.createLanguageService(sourceFile.fileName, sourceFile.getFullText());
-        return this.applyWithWalker(new NoUnusedVariablesWalker(sourceFile, this.getOptions(), languageService));
+        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, program, parseOptions(this.ruleArguments)));
     }
 }
 
-class NoUnusedVariablesWalker extends Lint.RuleWalker {
-    private skipBindingElement: boolean;
-    private skipParameterDeclaration: boolean;
-    private skipVariableDeclaration: boolean;
+interface Options {
+    checkParameters: boolean;
+    ignorePattern: RegExp | undefined;
+}
+function parseOptions(options: any[]): Options {
+    const checkParameters = options.indexOf(OPTION_CHECK_PARAMETERS) !== -1;
 
-    private hasSeenJsxElement: boolean;
-    private ignorePattern: RegExp;
-    private isReactUsed: boolean;
-    private reactImport: ts.NamespaceImport;
-
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions, private languageService: ts.LanguageService) {
-        super(sourceFile, options);
-        this.skipVariableDeclaration = false;
-        this.skipParameterDeclaration = false;
-        this.hasSeenJsxElement = false;
-        this.isReactUsed = false;
-
-        const ignorePatternOption = this.getOptions().filter((option: any) => {
-            return typeof option === "object" && option["ignore-pattern"] != null;
-        })[0];
-        if (ignorePatternOption != null) {
-            this.ignorePattern = new RegExp(ignorePatternOption["ignore-pattern"]);
+    let ignorePattern: RegExp | undefined;
+    for (const o of options) {
+        if (typeof o === "object" && o[OPTION_IGNORE_PATTERN] != null) {
+            ignorePattern = new RegExp(o[OPTION_IGNORE_PATTERN]);
+            break;
         }
     }
 
-    public visitSourceFile(node: ts.SourceFile) {
-        super.visitSourceFile(node);
+    return { checkParameters, ignorePattern };
+}
 
-        /*
-         * After super.visitSourceFile() is completed, this.reactImport will be set to a NamespaceImport iff:
-         *
-         * - a react option has been provided to the rule and
-         * - an import of a module that matches one of OPTION_REACT_MODULES is found, to a
-         *   NamespaceImport named OPTION_REACT_NAMESPACE_IMPORT_NAME
-         *
-         * e.g.
-         *
-         * import * as React from "react/addons";
-         *
-         * If reactImport is defined when a walk is completed, we need to have:
-         *
-         * a) seen another usage of React and/or
-         * b) seen a JSX identifier
-         *
-         * otherwise a a variable usage failure will will be reported
-         */
-        if (this.hasOption(OPTION_REACT)
-                && this.reactImport != null
-                && !this.isReactUsed
-                && !this.hasSeenJsxElement) {
-            const nameText = this.reactImport.name.getText();
-            if (!this.isIgnored(nameText)) {
-                const start = this.reactImport.name.getStart();
-                const msg = Rule.FAILURE_STRING_FACTORY(Rule.FAILURE_TYPE_IMPORT, nameText);
-                this.addFailure(this.createFailure(start, nameText.length, msg));
-            }
-        }
-    }
+function walk(ctx: Lint.WalkContext<void>, program: ts.Program, { checkParameters, ignorePattern }: Options): void {
+    const { sourceFile } = ctx;
+    const unusedCheckedProgram = getUnusedCheckedProgram(program, checkParameters);
+    const diagnostics = ts.getPreEmitDiagnostics(unusedCheckedProgram, sourceFile);
+    const checker = unusedCheckedProgram.getTypeChecker(); // Doesn't matter which program is used for this.
 
-    public visitBindingElement(node: ts.BindingElement) {
-        const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
+    // If all specifiers in an import are unused, we elide the entire import.
+    const importSpecifierFailures = new Map<ts.Identifier, string>();
 
-        if (isSingleVariable && !this.skipBindingElement) {
-            const variableIdentifier = <ts.Identifier> node.name;
-            this.validateReferencesForVariable(Rule.FAILURE_TYPE_VAR, variableIdentifier.text, variableIdentifier.getStart());
+    for (const diag of diagnostics) {
+        const kind = getUnusedDiagnostic(diag);
+        if (kind === undefined) {
+            continue;
         }
 
-        super.visitBindingElement(node);
-    }
+        const failure = ts.flattenDiagnosticMessageText(diag.messageText, "\n");
 
-    public visitCatchClause(node: ts.CatchClause) {
-        // don't visit the catch clause variable declaration, just visit the block
-        // the catch clause variable declaration needs to be there but doesn't need to be used
-        this.visitBlock(node.block);
-    }
+        if (kind === UnusedKind.VARIABLE_OR_PARAMETER) {
+            const importName = findImport(diag.start, sourceFile);
+            if (importName !== undefined) {
+                if (isImportUsed(importName, sourceFile, checker)) {
+                    continue;
+                }
 
-    // skip exported and declared functions
-    public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
-        if (!Lint.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword, ts.SyntaxKind.DeclareKeyword)) {
-            const variableName = node.name.text;
-            this.validateReferencesForVariable(Rule.FAILURE_TYPE_FUNC, variableName, node.name.getStart());
-        }
-
-        super.visitFunctionDeclaration(node);
-    }
-
-    public visitFunctionType(node: ts.FunctionOrConstructorTypeNode) {
-        this.skipParameterDeclaration = true;
-        super.visitFunctionType(node);
-        this.skipParameterDeclaration = false;
-    }
-
-    public visitImportDeclaration(node: ts.ImportDeclaration) {
-        if (!Lint.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword)) {
-            const importClause = node.importClause;
-
-            // named imports & namespace imports handled by other walker methods
-            // importClause will be null for bare imports
-            if (importClause != null && importClause.name != null) {
-                const variableIdentifier = importClause.name;
-                this.validateReferencesForVariable(Rule.FAILURE_TYPE_IMPORT, variableIdentifier.text, variableIdentifier.getStart());
+                if (importSpecifierFailures.has(importName)) {
+                    throw new Error("Should not get 2 errors for the same import.");
+                }
+                importSpecifierFailures.set(importName, failure);
+                continue;
             }
         }
 
-        super.visitImportDeclaration(node);
-    }
-
-    public visitImportEqualsDeclaration(node: ts.ImportEqualsDeclaration) {
-        if (!Lint.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword)) {
-            const name = node.name;
-            this.validateReferencesForVariable(Rule.FAILURE_TYPE_IMPORT, name.text, name.getStart());
-        }
-        super.visitImportEqualsDeclaration(node);
-    }
-
-    // skip parameters in index signatures (stuff like [key: string]: string)
-    public visitIndexSignatureDeclaration(node: ts.IndexSignatureDeclaration) {
-        this.skipParameterDeclaration = true;
-        super.visitIndexSignatureDeclaration(node);
-        this.skipParameterDeclaration = false;
-    }
-
-    // skip parameters in interfaces
-    public visitInterfaceDeclaration(node: ts.InterfaceDeclaration) {
-        this.skipParameterDeclaration = true;
-        super.visitInterfaceDeclaration(node);
-        this.skipParameterDeclaration = false;
-    }
-
-    public visitJsxElement(node: ts.JsxElement) {
-        this.hasSeenJsxElement = true;
-        super.visitJsxElement(node);
-    }
-
-    public visitJsxSelfClosingElement(node: ts.JsxSelfClosingElement) {
-        this.hasSeenJsxElement = true;
-        super.visitJsxSelfClosingElement(node);
-    }
-
-    // check private member functions
-    public visitMethodDeclaration(node: ts.MethodDeclaration) {
-        if (node.name != null && node.name.kind === ts.SyntaxKind.Identifier) {
-            const modifiers = node.modifiers;
-            const variableName = (<ts.Identifier> node.name).text;
-
-            if (Lint.hasModifier(modifiers, ts.SyntaxKind.PrivateKeyword)) {
-                this.validateReferencesForVariable(Rule.FAILURE_TYPE_METHOD, variableName, node.name.getStart());
+        if (ignorePattern) {
+            const varName = /'(.*)'/.exec(failure)![1];
+            if (ignorePattern.test(varName)) {
+                continue;
             }
         }
 
-        // abstract methods can't have a body so their parameters are always unused
-        if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.AbstractKeyword)) {
-            this.skipParameterDeclaration = true;
-        }
-        super.visitMethodDeclaration(node);
-        this.skipParameterDeclaration = false;
+        ctx.addFailureAt(diag.start, diag.length, failure);
     }
 
-    public visitNamedImports(node: ts.NamedImports) {
-        for (const namedImport of node.elements) {
-            this.validateReferencesForVariable(Rule.FAILURE_TYPE_IMPORT, namedImport.name.text, namedImport.name.getStart());
+    if (importSpecifierFailures.size) {
+        addImportSpecifierFailures(ctx, importSpecifierFailures, sourceFile);
+    }
+}
+
+/**
+ * Handle import-specifier failures separately.
+ * - If all of the import specifiers in an import are unused, add a combined failure for them all.
+ * - Unused imports are fixable.
+ */
+function addImportSpecifierFailures(ctx: Lint.WalkContext<void>, failures: Map<ts.Identifier, string>, sourceFile: ts.SourceFile) {
+    forEachImport(sourceFile, (importNode) => {
+        if (importNode.kind === ts.SyntaxKind.ImportEqualsDeclaration) {
+            tryRemoveAll(importNode.name);
+            return;
         }
-        super.visitNamedImports(node);
+
+        if (!importNode.importClause) {
+            // Error node
+            return;
+        }
+
+        const { name: defaultName, namedBindings } = importNode.importClause;
+        if (namedBindings && namedBindings.kind === ts.SyntaxKind.NamespaceImport) {
+            tryRemoveAll(namedBindings.name);
+            return;
+        }
+
+        const allNamedBindingsAreFailures = !namedBindings || namedBindings.elements.every((e) => failures.has(e.name));
+        if (namedBindings && allNamedBindingsAreFailures) {
+            for (const e of namedBindings.elements) {
+                failures.delete(e.name);
+            }
+        }
+
+        if ((!defaultName || failures.has(defaultName)) && allNamedBindingsAreFailures) {
+            if (defaultName) { failures.delete(defaultName); }
+            removeAll(importNode, "All imports are unused.");
+            return;
+        }
+
+        if (defaultName) {
+            const failure = tryDelete(defaultName);
+            if (failure !== undefined) {
+                const start = defaultName.getStart();
+                const end = namedBindings ? namedBindings.getStart() : importNode.moduleSpecifier.getStart();
+                const fix = Lint.Replacement.deleteFromTo(start, end);
+                ctx.addFailureAtNode(defaultName, failure, fix);
+            }
+        }
+
+        if (namedBindings) {
+            if (allNamedBindingsAreFailures) {
+                const start = defaultName ? defaultName.getEnd() : namedBindings.getStart();
+                const fix = Lint.Replacement.deleteFromTo(start, namedBindings.getEnd());
+                const failure = "All named bindings are unused.";
+                ctx.addFailureAtNode(namedBindings, failure, fix);
+            } else {
+                const { elements } = namedBindings;
+                for (let i = 0; i < elements.length; i++) {
+                    const element = elements[i];
+                    const failure = tryDelete(element.name);
+                    if (failure === undefined) {
+                        continue;
+                    }
+
+                    const prevElement = elements[i - 1];
+                    const nextElement = elements[i + 1];
+                    const start = prevElement ? prevElement.getEnd() : element.getStart();
+                    const end = nextElement && !prevElement ? nextElement.getStart() : element.getEnd();
+                    const fix = Lint.Replacement.deleteFromTo(start, end);
+                    ctx.addFailureAtNode(element.name, failure, fix);
+                }
+            }
+        }
+
+        function tryRemoveAll(name: ts.Identifier): void {
+            const failure = tryDelete(name);
+            if (failure !== undefined) {
+                removeAll(name, failure);
+            }
+        }
+
+        function removeAll(errorNode: ts.Node, failure: string): void {
+            const fix = Lint.Replacement.deleteFromTo(importNode.getStart(), importNode.getEnd());
+            ctx.addFailureAtNode(errorNode, failure, fix);
+        }
+    });
+
+    if (failures.size) {
+        throw new Error("Should have revisited all import specifier failures.");
     }
 
-    public visitNamespaceImport(node: ts.NamespaceImport) {
-        const importDeclaration = <ts.ImportDeclaration> node.parent.parent;
-        const moduleSpecifier = importDeclaration.moduleSpecifier.getText();
+    function tryDelete(name: ts.Identifier): string | undefined {
+        const failure = failures.get(name);
+        if (failure !== undefined) {
+            failures.delete(name);
+            return failure;
+        }
+        return undefined;
+    }
+}
 
-        // extract the unquoted module being imported
-        const moduleNameMatch = moduleSpecifier.match(MODULE_SPECIFIER_MATCH);
-        const isReactImport = (moduleNameMatch != null) && (REACT_MODULES.indexOf(moduleNameMatch[1]) !== -1);
+/**
+ * Ignore this import if it's used as an implicit type somewhere.
+ * Workround for https://github.com/Microsoft/TypeScript/issues/9944
+ */
+function isImportUsed(importSpecifier: ts.Identifier, sourceFile: ts.SourceFile, checker: ts.TypeChecker): boolean {
+    let symbol = checker.getSymbolAtLocation(importSpecifier);
+    if (!symbol) {
+        return false;
+    }
 
-        if (this.hasOption(OPTION_REACT) && isReactImport && node.name.text === REACT_NAMESPACE_IMPORT_NAME) {
-            this.reactImport = node;
-            const fileName = this.getSourceFile().fileName;
-            const position = node.name.getStart();
-            const highlights = this.languageService.getDocumentHighlights(fileName, position, [fileName]);
-            if (highlights != null && highlights[0].highlightSpans.length > 1) {
-                this.isReactUsed = true;
+    symbol = checker.getAliasedSymbol(symbol);
+    if (!Lint.isSymbolFlagSet(symbol, ts.SymbolFlags.Type)) {
+        return false;
+    }
+
+    return ts.forEachChild(sourceFile, function cb(child): boolean {
+        if (isImportLike(child)) {
+            return false;
+        }
+
+        const type = getImplicitType(child, checker);
+        // TODO: checker.typeEquals https://github.com/Microsoft/TypeScript/issues/13502
+        if (type && checker.typeToString(type) === checker.symbolToString(symbol)) {
+            return true;
+        }
+
+        return ts.forEachChild(child, cb);
+    });
+}
+
+function getImplicitType(node: ts.Node, checker: ts.TypeChecker): ts.Type | undefined {
+    if ((utils.isPropertyDeclaration(node) || utils.isVariableDeclaration(node)) && !node.type) {
+        return checker.getTypeAtLocation(node);
+    } else if (utils.isSignatureDeclaration(node) && !node.type) {
+        return checker.getSignatureFromDeclaration(node).getReturnType();
+    } else {
+        return undefined;
+    }
+}
+
+type ImportLike = ts.ImportDeclaration | ts.ImportEqualsDeclaration;
+function isImportLike(node: ts.Node): node is ImportLike {
+    return node.kind === ts.SyntaxKind.ImportDeclaration || node.kind === ts.SyntaxKind.ImportEqualsDeclaration;
+}
+
+function forEachImport<T>(sourceFile: ts.SourceFile, f: (i: ImportLike) => T | undefined): T | undefined {
+    return ts.forEachChild(sourceFile, (child) => {
+        if (isImportLike(child)) {
+            const res = f(child);
+            if (res !== undefined) {
+                return res;
+            }
+        }
+        return undefined;
+    });
+}
+
+function findImport(pos: number, sourceFile: ts.SourceFile): ts.Identifier | undefined {
+    return forEachImport(sourceFile, (i) => {
+        if (i.kind === ts.SyntaxKind.ImportEqualsDeclaration) {
+            if (i.name.getStart() === pos) {
+                return i.name;
             }
         } else {
-            this.validateReferencesForVariable(Rule.FAILURE_TYPE_IMPORT, node.name.text, node.name.getStart());
-        }
-        super.visitNamespaceImport(node);
-    }
+            if (!i.importClause) {
+                // Error node
+                return undefined;
+            }
 
-    public visitParameterDeclaration(node: ts.ParameterDeclaration) {
-        const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
-        const isPropertyParameter = Lint.hasModifier(
-            node.modifiers,
-            ts.SyntaxKind.PublicKeyword,
-            ts.SyntaxKind.PrivateKeyword,
-            ts.SyntaxKind.ProtectedKeyword
-        );
+            const { name: defaultName, namedBindings } = i.importClause;
+            if (namedBindings && namedBindings.kind === ts.SyntaxKind.NamespaceImport) {
+                const { name } = namedBindings;
+                if (name.getStart() === pos) {
+                    return name;
+                }
+                return undefined;
+            }
 
-        if (!isSingleVariable && isPropertyParameter) {
-            // tsc error: a parameter property may not be a binding pattern
-            this.skipBindingElement = true;
-        }
-
-        if (this.hasOption(OPTION_CHECK_PARAMETERS)
-                && isSingleVariable
-                && !this.skipParameterDeclaration
-                && !Lint.hasModifier(node.modifiers, ts.SyntaxKind.PublicKeyword)) {
-            const nameNode = <ts.Identifier> node.name;
-            this.validateReferencesForVariable(Rule.FAILURE_TYPE_PARAM, nameNode.text, node.name.getStart());
-        }
-
-        super.visitParameterDeclaration(node);
-        this.skipBindingElement = false;
-    }
-
-    // check private member variables
-    public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
-        if (node.name != null && node.name.kind === ts.SyntaxKind.Identifier) {
-            const modifiers = node.modifiers;
-            const variableName = (<ts.Identifier> node.name).text;
-
-            // check only if an explicit 'private' modifier is specified
-            if (Lint.hasModifier(modifiers, ts.SyntaxKind.PrivateKeyword)) {
-                this.validateReferencesForVariable(Rule.FAILURE_TYPE_PROP, variableName, node.name.getStart());
+            if (defaultName && defaultName.getStart() === pos) {
+                return defaultName;
+            } else if (namedBindings) {
+                for (const { name } of namedBindings.elements) {
+                    if (name.getStart() === pos) {
+                        return name;
+                    }
+                }
             }
         }
+        return undefined;
+    });
+}
 
-        super.visitPropertyDeclaration(node);
+const enum UnusedKind {
+    VARIABLE_OR_PARAMETER,
+    PROPERTY,
+}
+function getUnusedDiagnostic(diag: ts.Diagnostic): UnusedKind | undefined  {
+    switch (diag.code) {
+        case 6133:
+            return UnusedKind.VARIABLE_OR_PARAMETER; // "'{0}' is declared but never used.
+        case 6138:
+            return UnusedKind.PROPERTY; // "Property '{0}' is declared but never used."
+        default:
+            return undefined;
+    }
+}
+
+const programToUnusedCheckedProgram = new WeakMap<ts.Program, ts.Program>();
+
+function getUnusedCheckedProgram(program: ts.Program, checkParameters: boolean): ts.Program {
+    // Assuming checkParameters will always have the same value, so only lookup by program.
+    let checkedProgram = programToUnusedCheckedProgram.get(program);
+    if (checkedProgram) {
+        return checkedProgram;
     }
 
-    public visitVariableDeclaration(node: ts.VariableDeclaration) {
-        const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
+    checkedProgram = makeUnusedCheckedProgram(program, checkParameters);
+    programToUnusedCheckedProgram.set(program, checkedProgram);
+    return checkedProgram;
+}
 
-        if (isSingleVariable && !this.skipVariableDeclaration) {
-            const variableIdentifier = <ts.Identifier> node.name;
-            this.validateReferencesForVariable(Rule.FAILURE_TYPE_VAR, variableIdentifier.text, variableIdentifier.getStart());
-        }
-
-        super.visitVariableDeclaration(node);
-    }
-
-    // skip exported and declared variables
-    public visitVariableStatement(node: ts.VariableStatement) {
-        if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword, ts.SyntaxKind.DeclareKeyword)) {
-            this.skipBindingElement = true;
-            this.skipVariableDeclaration = true;
-        }
-
-        super.visitVariableStatement(node);
-        this.skipBindingElement = false;
-        this.skipVariableDeclaration = false;
-    }
-
-    private validateReferencesForVariable(type: string, name: string, position: number) {
-        const fileName = this.getSourceFile().fileName;
-        const highlights = this.languageService.getDocumentHighlights(fileName, position, [fileName]);
-        if ((highlights == null || highlights[0].highlightSpans.length <= 1) && !this.isIgnored(name)) {
-            this.addFailure(this.createFailure(position, name.length, Rule.FAILURE_STRING_FACTORY(type, name)));
-        }
-    }
-
-    private isIgnored(name: string) {
-        return this.ignorePattern != null && this.ignorePattern.test(name);
-    }
+function makeUnusedCheckedProgram(program: ts.Program, checkParameters: boolean): ts.Program {
+    const options = { ...program.getCompilerOptions(), noUnusedLocals: true, ...(checkParameters ? { noUnusedParameters: true } : null) };
+    const sourceFilesByName = new Map<string, ts.SourceFile>(program.getSourceFiles().map<[string, ts.SourceFile]>((s) => [s.fileName, s]));
+    // tslint:disable object-literal-sort-keys
+    return ts.createProgram(Array.from(sourceFilesByName.keys()), options, {
+        fileExists: (f) => sourceFilesByName.has(f),
+        readFile(f) {
+            const s = sourceFilesByName.get(f)!;
+            return s.text;
+        },
+        getSourceFile: (f) => sourceFilesByName.get(f)!,
+        getDefaultLibFileName: () => ts.getDefaultLibFileName(options),
+        writeFile: () => {}, // tslint:disable-line no-empty
+        getCurrentDirectory: () => "",
+        getDirectories: () => [],
+        getCanonicalFileName: (f) => f,
+        useCaseSensitiveFileNames: () => true,
+        getNewLine: () => "\n",
+    });
+    // tslint:enable object-literal-sort-keys
 }

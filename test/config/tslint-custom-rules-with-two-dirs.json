@@ -1,7 +1,25 @@
 {
   "rulesDirectory": ["../files/custom-rules-2", "../files/custom-rules/"],
+  "jsRules": {
+    "always-fail": {
+      "severity": "error"
+    },
+    "no-fail": {
+      "severity": "error"
+    },
+    "rule-two": {
+      "severity": "error"
+    }
+  },
   "rules": {
-    "always-fail": true,
-    "no-fail": true
+    "always-fail": {
+      "severity": "error"
+    },
+    "no-fail": {
+      "severity": "error"
+    },
+    "rule-two": {
+      "severity": "error"
+    }
   }
 }

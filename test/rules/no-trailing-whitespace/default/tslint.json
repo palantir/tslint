@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "no-trailing-whitespace": true
+  },
+  "jsRules": {
+    "no-trailing-whitespace": true
+  }
+}

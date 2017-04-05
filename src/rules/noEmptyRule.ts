@@ -15,9 +15,10 @@
  * limitations under the License.
  */
 
+import { hasModifier, isConstructorDeclaration, isParameterProperty } from "tsutils";
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -30,57 +31,42 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionExamples: ["true"],
         type: "functionality",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING = "block is empty";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new BlockWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class BlockWalker extends Lint.RuleWalker {
-    private ignoredBlocks: ts.Block[] = [];
-
-    public visitBlock(node: ts.Block) {
-        const openBrace = node.getChildAt(0);
-        const closeBrace = node.getChildAt(node.getChildCount() - 1);
-        const sourceFileText = node.getSourceFile().text;
-        const hasCommentAfter = ts.getTrailingCommentRanges(sourceFileText, openBrace.getEnd()) != null;
-        const hasCommentBefore = ts.getLeadingCommentRanges(sourceFileText, closeBrace.getFullStart()) != null;
-        const isSkipped = this.ignoredBlocks.indexOf(node) !== -1;
-
-        if (node.statements.length <= 0 && !hasCommentAfter && !hasCommentBefore && !isSkipped) {
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
-        }
-
-        super.visitBlock(node);
-    }
-
-    public visitConstructorDeclaration(node: ts.ConstructorDeclaration) {
-        const parameters = node.parameters;
-        let isSkipped = false;
-
-        for (let param of parameters) {
-            const hasPropertyAccessModifier = Lint.hasModifier(
-                param.modifiers,
-                ts.SyntaxKind.PrivateKeyword,
-                ts.SyntaxKind.ProtectedKeyword,
-                ts.SyntaxKind.PublicKeyword
-            );
-
-            if (hasPropertyAccessModifier) {
-                isSkipped = true;
-                this.ignoredBlocks.push(node.body);
-                break;
+function walk(ctx: Lint.WalkContext<void>) {
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (node.kind === ts.SyntaxKind.Block &&
+            (node as ts.Block).statements.length === 0 &&
+            !isExcludedConstructor(node.parent!)) {
+            const start = node.getStart(ctx.sourceFile);
+            // Block always starts with open brace. Adding 1 to its start gives us the end of the brace,
+            // which can be used to conveniently check for comments between braces
+            if (Lint.hasCommentAfterPosition(ctx.sourceFile.text, start + 1)) {
+                return;
             }
-
-            if (isSkipped) {
-                break;
-            }
+            return ctx.addFailure(start , node.end, Rule.FAILURE_STRING);
         }
+        return ts.forEachChild(node, cb);
+    });
+}
 
-        super.visitConstructorDeclaration(node);
-    }
+function isExcludedConstructor(node: ts.Node): boolean {
+    return isConstructorDeclaration(node) &&
+        (
+            /* If constructor is private or protected, the block is allowed to be empty.
+               The constructor is there on purpose to disallow instantiation from outside the class */
+            /* The public modifier does not serve a purpose here. It can only be used to allow instantiation of a base class where
+               the super constructor is protected. But then the block would not be empty, because of the call to super() */
+            hasModifier(node.modifiers, ts.SyntaxKind.PrivateKeyword, ts.SyntaxKind.ProtectedKeyword) ||
+            node.parameters.some(isParameterProperty)
+        );
 }

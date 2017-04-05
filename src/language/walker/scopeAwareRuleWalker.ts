@@ -17,6 +17,7 @@
 
 import * as ts from "typescript";
 
+import {isScopeBoundary} from "../utils";
 import {RuleWalker} from "./ruleWalker";
 
 export abstract class ScopeAwareRuleWalker<T> extends RuleWalker {
@@ -25,8 +26,8 @@ export abstract class ScopeAwareRuleWalker<T> extends RuleWalker {
     constructor(sourceFile: ts.SourceFile, options?: any) {
         super(sourceFile, options);
 
-        // initialize stack with global scope
-        this.scopeStack = [this.createScope(sourceFile)];
+        // initialize with global scope if file is not a module
+        this.scopeStack = ts.isExternalModule(sourceFile) ? [] : [this.createScope(sourceFile)];
     }
 
     public abstract createScope(node: ts.Node): T;
@@ -37,7 +38,7 @@ export abstract class ScopeAwareRuleWalker<T> extends RuleWalker {
 
     // get all scopes available at this depth
     public getAllScopes(): T[] {
-        return this.scopeStack.slice();
+        return this.scopeStack;
     }
 
     public getCurrentDepth(): number {
@@ -59,31 +60,18 @@ export abstract class ScopeAwareRuleWalker<T> extends RuleWalker {
 
         if (isNewScope) {
             this.scopeStack.push(this.createScope(node));
+            this.onScopeStart();
         }
 
-        this.onScopeStart();
         super.visitNode(node);
-        this.onScopeEnd();
 
         if (isNewScope) {
+            this.onScopeEnd();
             this.scopeStack.pop();
         }
     }
 
     protected isScopeBoundary(node: ts.Node): boolean {
-        return node.kind === ts.SyntaxKind.FunctionDeclaration
-            || node.kind === ts.SyntaxKind.FunctionExpression
-            || node.kind === ts.SyntaxKind.PropertyAssignment
-            || node.kind === ts.SyntaxKind.ShorthandPropertyAssignment
-            || node.kind === ts.SyntaxKind.MethodDeclaration
-            || node.kind === ts.SyntaxKind.Constructor
-            || node.kind === ts.SyntaxKind.ModuleDeclaration
-            || node.kind === ts.SyntaxKind.ArrowFunction
-            || node.kind === ts.SyntaxKind.ParenthesizedExpression
-            || node.kind === ts.SyntaxKind.ClassDeclaration
-            || node.kind === ts.SyntaxKind.ClassExpression
-            || node.kind === ts.SyntaxKind.InterfaceDeclaration
-            || node.kind === ts.SyntaxKind.GetAccessor
-            || node.kind === ts.SyntaxKind.SetAccessor;
+        return isScopeBoundary(node);
     }
 }

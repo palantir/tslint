@@ -3,7 +3,14 @@
     "tslint-test-custom-rules",
     "./tslint-custom-rules-with-two-dirs.json"
   ],
+  "jsRules": {
+    "always-fail": {
+      "severity": "none"
+    }
+  },
   "rules": {
-    "always-fail": false
+    "always-fail": {
+      "severity": "none"
+    }
   }
 }

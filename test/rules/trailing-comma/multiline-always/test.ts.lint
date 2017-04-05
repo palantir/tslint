@@ -10,7 +10,7 @@ var x = [{
     b: 2,
     d: 34,
     c: (a + b)
-             ~ [Missing trailing comma]
+              ~nil [Missing trailing comma]
 }];
 
 var s = {
@@ -19,7 +19,7 @@ var s = {
 
 var t = {
     tA: 7
-        ~ [Missing trailing comma]
+         ~nil [Missing trailing comma]
 }
 
 var y = {
@@ -30,7 +30,7 @@ var y = {
 var z = {
     zOne: 2,
     zTwo: 1
-          ~ [Missing trailing comma]
+           ~nil [Missing trailing comma]
 };
 
 var ss = [
@@ -39,7 +39,7 @@ var ss = [
 
 var tt = [
     7
-    ~ [Missing trailing comma]
+     ~nil [Missing trailing comma]
 ];
 
 var yy = [
@@ -50,7 +50,7 @@ var yy = [
 var zz = [
     2,
     1
-    ~ [Missing trailing comma]
+     ~nil [Missing trailing comma]
 ];
 
 var a = [{a: 1, b: 2, d: 34, c: (a + b),},];
@@ -71,7 +71,7 @@ var {
 
 var {
     tA
-     ~ [Missing trailing comma]
+      ~nil [Missing trailing comma]
 } = t;
 
 var {
@@ -82,7 +82,7 @@ var {
 var {
     zOne,
     zTwo
-       ~ [Missing trailing comma]
+        ~nil [Missing trailing comma]
 } = z;
 
 var [
@@ -91,7 +91,7 @@ var [
 
 var [
     ttA
-      ~ [Missing trailing comma]
+       ~nil [Missing trailing comma]
 ] = tt;
 
 var [
@@ -102,7 +102,7 @@ var [
 var [
     zzOne,
     zzTwo
-        ~ [Missing trailing comma]
+         ~nil [Missing trailing comma]
 ] = zz;
 
 var {cA, cB,} = c;
@@ -113,13 +113,27 @@ var [ccA, ccB,] = cc;
 
 var [ddOne, ddTwo] = dd;
 
+var a: [string, number] = null;
+
+var a: [string, number,] = null;
+
+var a: [
+    string,
+    number
+] = null;
+
+var a: [
+    string,
+    number,
+] = null;
+
 import {
     ClassS,
 } from "module";
 
 import {
     ClassT
-         ~ [Missing trailing comma]
+          ~nil [Missing trailing comma]
 } from "module";
 
 import {
@@ -130,9 +144,435 @@ import {
 import {
     ClassY,
     ClassZ
-         ~ [Missing trailing comma]
+          ~nil [Missing trailing comma]
 } from "module";
 
 import {ClassA, ClassB,} from "module";
 
 import {ClassC, ClassD} from "module";
+
+function foo(bar: string, baz: string);
+
+function foo(bar: string, baz: string,);
+
+function foo(
+    bar: string,
+    baz: string
+               ~nil [Missing trailing comma]
+);
+
+function foo(
+    bar: string,
+    baz: string,
+);
+
+var foo = function(bar: string, baz: string) { return 42; };
+
+var foo = function(bar: string, baz: string,) { return 42; };
+
+var foo = function(
+    bar: string,
+    baz: string
+               ~nil [Missing trailing comma]
+) {
+    return 42;
+};
+
+var foo = function(
+    bar: string,
+    baz: string,
+) {
+    return 42;
+};
+
+function foo(bar: string, baz: string) { return 42; }
+
+function foo(bar: string, baz: string,) { return 42; }
+
+function foo(
+    bar: string,
+    baz: string
+               ~nil [Missing trailing comma]
+) {
+    return 42;
+}
+
+function foo(
+    bar: string,
+    baz: string,
+) {
+    return 42;
+}
+
+function foo(bar: string, baz: string,
+    ack: string
+               ~nil [Missing trailing comma]
+) {
+    return 42;
+}
+
+function foo(bar: string, baz: string,
+    ack: string,
+) {
+    return 42;
+}
+
+var foo = (bar: string, baz: string) => 42;
+
+var foo = (bar: string, baz: string,) => 42;
+
+var foo = (
+    bar: string,
+    baz: string
+               ~nil [Missing trailing comma]
+) => 42;
+
+var foo = (
+    bar: string,
+    baz: string,
+) => 42;
+
+var foo: (bar: string, baz: string) => number = null;
+
+var foo: (bar: string, baz: string,) => number = null;
+
+var foo: (
+    bar: string,
+    baz: string
+               ~nil [Missing trailing comma]
+) => number = null;
+
+var foo: (
+    bar: string,
+    baz: string,
+) => number = null;
+
+var foo: (bar: string, baz: string) => number;
+
+var foo: (bar: string, baz: string,) => number;
+
+var foo: (
+    bar: string,
+    baz: string
+               ~nil [Missing trailing comma]
+) => number;
+
+var foo: (
+    bar: string,
+    baz: string,
+) => number;
+
+var foo: new (bar: string, baz: string) => Test;
+
+var foo: new (bar: string, baz: string,) => Test;
+
+var foo: new (
+    bar: string,
+    baz: string
+               ~nil [Missing trailing comma]
+) => Test;
+
+var foo: new (
+    bar: string,
+    baz: string,
+) => Test;
+
+var x = foo(42, 43);
+
+var x = foo(42, 43,);
+
+var x = foo(
+    42,
+    43
+      ~nil [Missing trailing comma]
+);
+
+var x = foo(
+    42,
+    43,
+);
+
+var x = new Test("foo");
+
+var x = new Test("foo",);
+
+var x = new Test(
+    "foo"
+         ~nil [Missing trailing comma]
+);
+
+var x = new Test(
+    "foo",
+);
+
+var x: { foo: string; bar: string };
+
+var x: { foo: string; bar: string; };
+
+var x: {
+    foo: string;
+    bar: string
+};
+
+var x: {
+    foo: string;
+    bar: string;
+};
+
+var x: { foo: string, bar: string };
+
+var x: { foo: string, bar: string, };
+
+var x: {
+    foo: string,
+    bar: string
+               ~nil [Missing trailing comma]
+};
+
+var x: {
+    foo: string,
+    bar: string,
+};
+
+class Test<A, B, C> {
+
+    constructor(bar: string) { }
+
+    constructor(bar: string, baz: string,) { }
+
+    constructor(
+        bar: string,
+        baz: string,
+        ack: string
+                   ~nil [Missing trailing comma]
+    ) { }
+
+    constructor(
+        bar: string,
+        baz: string,
+        ack: string,
+        foo: string,
+    ) { }
+
+    public foo(bar: string, baz: string) {
+        return 42;
+    }
+
+    private foo2(bar: string, baz: string,) {
+        return 42;
+    }
+
+    public static foo3(
+        bar: string,
+        baz: string
+                   ~nil [Missing trailing comma]
+    ) {
+        return 42;
+    }
+
+    private static foo4(
+        bar: string,
+        baz: string,
+    ) {
+        return 42;
+    }
+
+    foo5<
+        T extends Test<[A, A], [A, A], A>,
+        U extends Test<B, B, B>,
+        V extends Test<
+            [
+                C,
+                C
+            ],
+            [
+                C,
+                C
+            ],
+            C
+        >
+    >(
+        bar: A,
+        baz: T,
+    ) {
+        return 42;
+    }
+
+    foo6<
+        T extends { foo: A; bar: B; },
+        U extends { foo: A; bar: B; },
+        V extends {
+            foo: A;
+            bar: B;
+        },
+        W extends {
+            foo: [
+                string,
+                string,
+            ];
+        }
+    >() { return 42; }
+
+    set bar(foo: string) { }
+
+    set bar2(foo: string,) { }
+
+    set bar3(
+        foo: string
+                   ~nil [Missing trailing comma]
+    ) { }
+
+    set bar4(
+        foo: string,
+    ) { }
+}
+
+class Test2<A, B, C> { }
+
+class Test3<
+    A,
+    B,
+    C
+> { }
+
+class Test4<
+    A,
+    B,
+    C
+> { }
+
+interface ITest<A ,B, C> {
+
+    new <U, V>(bar: U): ITest<U, U, V>;
+
+    new <U, V>(bar: U, baz: V,): ITest<U, U, V>;
+
+    new <
+        U,
+        V
+    >(
+        bar: U,
+        baz: U,
+        ack: V,
+    ): ITest<
+        U,
+        U,
+        V
+    >;
+
+    new <
+        U,
+        V
+    >(
+        bar: U,
+        baz: U,
+        ack: V,
+        foo: V,
+    ): ITest<
+        U,
+        U,
+        V
+    >;
+
+    foo(bar: string, baz: string);
+
+    foo2(bar: string, baz: string,);
+
+    foo3(
+        bar: string,
+        baz: string
+                   ~nil [Missing trailing comma]
+    );
+
+    foo4(
+        bar: string,
+        baz: string,
+    );
+
+    foo5<
+        T extends Test<[A, A], [A, A], A>,
+        U extends Test<B, B, B>,
+        V extends Test<
+            [
+                C,
+                C
+            ],
+            [
+                C,
+                C
+            ],
+            C
+        >
+    >(
+        bar: A,
+        baz: T,
+    );
+
+    foo6<
+        T extends { foo: A; bar: B; },
+        U extends { foo: A; bar: B; },
+        V extends {
+            foo: A;
+            bar: B;
+        },
+        W extends {
+            foo: [
+                string,
+                string
+            ];
+        }
+    >();
+}
+
+interface ITest2<A, B, C> { }
+
+interface ITest3<
+    A,
+    B,
+    C
+> { }
+
+interface ITest4<
+    A,
+    B,
+    C
+> { }
+
+enum Foo { BAR, BAZ }
+
+enum Foo { BAR, BAZ, }
+
+enum Foo {
+    Bar,
+    Baz
+       ~nil [Missing trailing comma]
+}
+
+enum Foo {
+    Bar,
+    Baz,
+}
+
+const enum Foo { BAR = 1, BAZ = 2 }
+
+const enum Foo { BAR = 1, BAZ = 2, }
+
+const enum Foo {
+    Bar = 1,
+    Baz = 2
+           ~nil [Missing trailing comma]
+}
+
+const enum Foo {
+    Bar = 1,
+    Baz = 2,
+}
+
+export {
+    foo,
+    bar
+       ~nil [Missing trailing comma]
+};
+
+// don't crash
+new Foo

@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -33,6 +33,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionExamples: ["true"],
         type: "functionality",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -59,7 +60,7 @@ class NoConditionalAssignmentWalker extends Lint.RuleWalker {
 
     protected visitDoStatement(node: ts.DoStatement) {
         this.validateConditionalExpression(node.expression);
-        super.visitWhileStatement(node);
+        super.visitDoStatement(node);
     }
 
     protected visitForStatement(node: ts.ForStatement) {
@@ -80,7 +81,7 @@ class NoConditionalAssignmentWalker extends Lint.RuleWalker {
         this.isInConditional = true;
         if (expression.kind === ts.SyntaxKind.BinaryExpression) {
             // check for simple assignment in a conditional, like `if (a = 1) {`
-            this.checkForAssignment(<ts.BinaryExpression> expression);
+            this.checkForAssignment(expression as ts.BinaryExpression);
         }
         // walk the children of the conditional expression for nested assignments, like `if ((a = 1) && (b == 1)) {`
         this.walkChildren(expression);
@@ -89,7 +90,7 @@ class NoConditionalAssignmentWalker extends Lint.RuleWalker {
 
     private checkForAssignment(expression: ts.BinaryExpression) {
         if (isAssignmentToken(expression.operatorToken)) {
-            this.addFailure(this.createFailure(expression.getStart(), expression.getWidth(), Rule.FAILURE_STRING));
+            this.addFailureAtNode(expression, Rule.FAILURE_STRING);
         }
     }
 }

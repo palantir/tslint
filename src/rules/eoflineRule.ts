@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -28,26 +28,28 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: ["true"],
+        hasFix: true,
         type: "maintainability",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
     public static FAILURE_STRING = "file should end with a newline";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        if (sourceFile.text === "") {
-            // if the file is empty, it "ends with a newline", so don't return a failure
+        const length = sourceFile.text.length;
+        if (length === 0 || // if the file is empty, it "ends with a newline", so don't return a failure
+            sourceFile.text[length - 1] === "\n") {
             return [];
         }
 
-        const eofToken = sourceFile.endOfFileToken;
-        const eofTokenFullText = eofToken.getFullText();
-        if (eofTokenFullText.length === 0 || eofTokenFullText.charAt(eofTokenFullText.length - 1) !== "\n") {
-            const start = eofToken.getStart();
-            return [
-                new Lint.RuleFailure(sourceFile, start, start, Rule.FAILURE_STRING, this.getOptions().ruleName),
-            ];
+        let fix: Lint.Fix | undefined;
+        const lines = sourceFile.getLineStarts();
+        if (lines.length > 1) {
+            fix = Lint.Replacement.appendText(length, sourceFile.text[lines[1] - 2] === "\r" ? "\r\n" : "\n");
         }
 
-        return [];
+        return this.filterFailures([
+            new Lint.RuleFailure(sourceFile, length, length, Rule.FAILURE_STRING, this.ruleName, fix),
+        ]);
     }
 }

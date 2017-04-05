@@ -17,31 +17,38 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-any",
-        description: "Diallows usages of `any` as a type declaration.",
+        description: "Disallows usages of `any` as a type declaration.",
+        hasFix: true,
         rationale: "Using `any` as a type declaration nullifies the compile-time benefits of the type system.",
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: ["true"],
         type: "typescript",
+        typescriptOnly: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "Type declaration of 'any' is forbidden";
+    public static FAILURE_STRING = "Type declaration of 'any' loses type-safety. " +
+        "Consider replacing it with a more precise type, the empty type ('{}'), " +
+        "or suppress this occurrence.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoAnyWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class NoAnyWalker extends Lint.RuleWalker {
-    public visitAnyKeyword(node: ts.Node) {
-        this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
-        super.visitAnyKeyword(node);
-    }
+function walk(ctx: Lint.WalkContext<void>) {
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (node.kind === ts.SyntaxKind.AnyKeyword) {
+            const start = node.end - 3;
+            return ctx.addFailure(start, node.end, Rule.FAILURE_STRING, new Lint.Replacement(start, 3, "{}"));
+        }
+        return ts.forEachChild(node, cb);
+    });
 }

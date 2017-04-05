@@ -1,0 +1,15 @@
+import { Observable } from 'rxjs';
+                            ~~~~ [0]
+import { Observable } from 'rxjs/Observable';
+
+import forOwn = require('lodash');
+                         ~~~~~~ [0]
+import forOwn = require('lodash/forOwn');
+
+// non-static imports cannot be checked
+import {Observable} from rxjs;
+import forOwn = require(lodash);
+
+import * as notBlacklisted from "not-blacklisted";
+
+[0]: This import is blacklisted, import a submodule instead

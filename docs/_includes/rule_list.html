@@ -1,6 +1,21 @@
-<ul>
+<ul class="rules-list">
  {% assign rules = site.data.rules | where: "type",include.ruleType | sort: "name" %}
  {% for rule in rules %}
-  <li><a href="{{rule.ruleName}}">{{rule.ruleName}}</a> - {{rule.description | markdownify | remove:"<p>" | remove: "</p>"}}</li>
+  <li>
+      <a href="{{rule.ruleName}}">
+        <div class="rule-features">
+            {% if rule.typescriptOnly %}
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            {% endif %}
+            {% if rule.hasFix %}
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            {% endif %}
+            {% if rule.requiresTypeInfo %}
+                <span class="feature feature-sm feature-requires-type-info" title="This rule requires type information to run">Requires Type Info</span>
+            {% endif %}
+        </div>
+        <strong>{{rule.ruleName}}</strong> - {{rule.description | markdownify | remove:"<p>" | remove: "</p>"}}
+      </a>
+  </li>
  {% endfor %}
 </ul>

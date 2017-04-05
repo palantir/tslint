@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -31,20 +31,19 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionExamples: ["true"],
         type: "typescript",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING = "<reference> is not allowed, use imports";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoReferenceWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class NoReferenceWalker extends Lint.RuleWalker {
-    public visitSourceFile(node: ts.SourceFile) {
-        for (let ref of node.referencedFiles) {
-            this.addFailure(this.createFailure(ref.pos, ref.end - ref.pos, Rule.FAILURE_STRING));
-        }
+function walk(ctx: Lint.WalkContext<void>): void {
+    for (const ref of ctx.sourceFile.referencedFiles) {
+        ctx.addFailure(ref.pos, ref.end, Rule.FAILURE_STRING);
     }
 }

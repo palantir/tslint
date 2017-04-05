@@ -1,26 +1,30 @@
 ---
 title: CLI
 layout: page
-permalink: "/usage/cli/"
+permalink: /usage/cli/
 ---
+
 ### Installation
 
 __Local__ (in your project's working directory):
 
-```
-$ npm install tslint typescript --save-dev
+```sh
+npm install tslint typescript --save-dev
+# or
+yarn add tslint typescript
 ```
 
 __Global__:
 
+```sh
+npm install tslint typescript -g
+# or
+yarn global add tslint typescript
 ```
-$ npm install tslint typescript -g
-```
-
 
 {% include peer_dependencies.md %}
 
-### Usage ###
+### Usage
 
 Please ensure that the TypeScript source files compile correctly _before_ running the linter.
 
@@ -30,15 +34,18 @@ Options:
 
 ```
 -c, --config          configuration file
+-e, --exclude         exclude globs from path expansion
+--fix                 Fixes linting errors for select rules. This may overwrite linted files
 --force               return status code 0 even if there are lint errors
 -h, --help            display detailed help
 -i, --init            generate a tslint.json config file in the current working directory
 -o, --out             output file
+-p, --project         tsconfig.json file
 -r, --rules-dir       rules directory
 -s, --formatters-dir  formatters directory
--e, --exclude         exclude globs from path expansion
--t, --format          output format (prose, json, verbose, pmd, msbuild, checkstyle, vso)    [default: "prose"]
+-t, --format          output format (prose, json, stylish, verbose, pmd, msbuild, checkstyle, vso, fileslist, codeFrame)  [default: "prose"]
 --test                test that tslint produces the correct output for the specified directory
+--type-check          enable type checking when linting a project
 -v, --version         current version
 ```
 
@@ -54,7 +61,7 @@ tslint accepts the following command-line options:
     to the rules. If no option is specified, the config file named
     tslint.json is used, so long as it exists in the path.
     The format of the file is { rules: { /* rules list */ } },
-    where /* rules list */ is a key: value comma-seperated list of
+    where /* rules list */ is a key: value comma-separated list of
     rulename: rule-options pairs. Rule-options can be either a
     boolean true/false value denoting whether the rule is used or not,
     or a list [boolean, ...] where the boolean provides the same role
@@ -67,6 +74,9 @@ tslint accepts the following command-line options:
     A filename or glob which indicates files to exclude from linting.
     This option can be supplied multiple times if you need multiple
     globs to indicate which files to exclude.
+
+--fix:
+    Fixes linting errors for select rules. This may overwrite linted files.
 
 --force:
     Return status code 0 even if there are any lint errors.
@@ -109,11 +119,27 @@ tslint accepts the following command-line options:
     specified directory as the configuration file for the tests. See the
     full tslint documentation for more details on how this can be used to test custom rules.
 
+-p, --project:
+    The location of a tsconfig.json file that will be used to determine which
+    files will be linted.
+
+--type-check
+    Enables the type checker when running linting rules. --project must be
+    specified in order to enable type checking.
+
 -v, --version:
     The current version of tslint.
 
 -h, --help:
     Prints this help message.
 ```
+
+#### Exit Codes
+
+The CLI process may exit with the following codes:
+
+- `0`: Linting succeeded without errors (warnings may have ocurred)
+- `1`: An invalid command line argument or combination thereof was used
+- `2`: Linting failed with one or more rule violations with severity `error`
 
 [0]: {{site.baseurl | append: "/rules/"}}

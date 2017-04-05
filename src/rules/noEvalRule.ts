@@ -15,9 +15,10 @@
  * limitations under the License.
  */
 
+import { isCallExpression } from "tsutils";
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -32,26 +33,23 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionExamples: ["true"],
         type: "functionality",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING = "forbidden eval";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoEvalWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class NoEvalWalker extends Lint.RuleWalker {
-    public visitCallExpression(node: ts.CallExpression) {
-        const expression = node.expression;
-        if (expression.kind === ts.SyntaxKind.Identifier) {
-            const expressionName = (<ts.Identifier> expression).text;
-            if (expressionName === "eval") {
-                this.addFailure(this.createFailure(expression.getStart(), expression.getWidth(), Rule.FAILURE_STRING));
-            }
+function walk(ctx: Lint.WalkContext<void>) {
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (isCallExpression(node) &&
+            node.expression.kind === ts.SyntaxKind.Identifier && (node.expression as ts.Identifier).text === "eval") {
+            ctx.addFailureAtNode(node.expression, Rule.FAILURE_STRING);
         }
-
-        super.visitCallExpression(node);
-    }
+        return ts.forEachChild(node, cb);
+    });
 }

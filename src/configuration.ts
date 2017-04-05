@@ -19,58 +19,68 @@ import findup = require("findup-sync");
 import * as fs from "fs";
 import * as path from "path";
 import * as resolve from "resolve";
+import { FatalError } from "./error";
 
-import {arrayify, objectify, stripComments} from "./utils";
+import { IOptions, RuleSeverity } from "./language/rule/rule";
+import { arrayify, objectify, stripComments } from "./utils";
 
 export interface IConfigurationFile {
-    extends?: string | string[];
+    /**
+     * The severity that is applied to rules in _this_ config with `severity === "default"`.
+     * Not inherited.
+     */
+    defaultSeverity?: RuleSeverity;
+
+    /**
+     * An array of config files whose rules are inherited by this config file.
+     */
+    extends: string[];
+
+    /**
+     * Rules that are used to lint to JavaScript files.
+     */
+    jsRules: Map<string, Partial<IOptions>>;
+
+    /**
+     * Other linter options, currently for testing. Not publicly supported.
+     */
     linterOptions?: {
         typeCheck?: boolean,
     };
-    rulesDirectory?: string | string[];
-    rules?: any;
+
+    /**
+     * Directories containing custom rules. Resolved using node module semantics.
+     */
+    rulesDirectory: string[];
+
+    /**
+     * Rules that are used to lint TypeScript files.
+     */
+    rules: Map<string, Partial<IOptions>>;
+}
+
+export interface IConfigurationLoadResult {
+    path?: string;
+    results?: IConfigurationFile;
 }
 
 export const CONFIG_FILENAME = "tslint.json";
-/* tslint:disable:object-literal-key-quotes */
-export const DEFAULT_CONFIG = {
-    "rules": {
-        "class-name": true,
-        "comment-format": [true, "check-space"],
-        "indent": [true, "spaces"],
-        "no-duplicate-variable": true,
-        "no-eval": true,
-        "no-internal-module": true,
-        "no-trailing-whitespace": true,
-        "no-unsafe-finally": true,
-        "no-var-keyword": true,
-        "one-line": [true, "check-open-brace", "check-whitespace"],
-        "quotemark": [true, "double"],
-        "semicolon": [true, "always"],
-        "triple-equals": [true, "allow-null-check"],
-        "typedef-whitespace": [
-            true, {
-                "call-signature": "nospace",
-                "index-signature": "nospace",
-                "parameter": "nospace",
-                "property-declaration": "nospace",
-                "variable-declaration": "nospace",
-            },
-        ],
-        "variable-name": [true, "ban-keywords"],
-        "whitespace": [true,
-            "check-branch",
-            "check-decl",
-            "check-operator",
-            "check-separator",
-            "check-type",
-        ],
-    },
-};
-/* tslint:enable:object-literal-key-quotes */
 
-const PACKAGE_DEPRECATION_MSG = "Configuration of TSLint via package.json has been deprecated, "
-    + "please start using a tslint.json file instead (http://palantir.github.io/tslint/usage/tslint-json/).";
+export const DEFAULT_CONFIG: IConfigurationFile = {
+    defaultSeverity: "error",
+    extends: ["tslint:recommended"],
+    jsRules: new Map<string, Partial<IOptions>>(),
+    rules: new Map<string, Partial<IOptions>>(),
+    rulesDirectory: [],
+};
+
+export const EMPTY_CONFIG: IConfigurationFile = {
+    defaultSeverity: "error",
+    extends: [],
+    jsRules: new Map<string, Partial<IOptions>>(),
+    rules: new Map<string, Partial<IOptions>>(),
+    rulesDirectory: [],
+};
 
 const BUILT_IN_CONFIG = /^tslint:(.*)$/;
 
@@ -79,11 +89,18 @@ const BUILT_IN_CONFIG = /^tslint:(.*)$/;
  * @param configFile A path to a config file, this can be null if the location of a config is not known
  * @param inputFileLocation A path to the current file being linted. This is the starting location
  * of the search for a configuration.
- * @returns A TSLint configuration object
+ * @returns Load status for a TSLint configuration object
  */
-export function findConfiguration(configFile: string, inputFilePath: string): IConfigurationFile {
-    const configPath = findConfigurationPath(configFile, inputFilePath);
-    return loadConfigurationFromPath(configPath);
+export function findConfiguration(configFile: string | null, inputFilePath: string): IConfigurationLoadResult {
+    const path = findConfigurationPath(configFile, inputFilePath);
+    const loadResult: IConfigurationLoadResult = { path };
+
+    try {
+        loadResult.results = loadConfigurationFromPath(path);
+        return loadResult;
+    } catch (error) {
+        throw new FatalError(`Failed to load ${path}: ${error.message}`, error);
+    }
 }
 
 /**
@@ -93,10 +110,10 @@ export function findConfiguration(configFile: string, inputFilePath: string): IC
  * the location of the config file is not known and you want to search for one.
  * @param inputFilePath A path to the current file being linted. This is the starting location
  * of the search for a configuration.
- * @returns An absolute path to a tslint.json file, a path to a package.json file with a tslintConfig field
+ * @returns An absolute path to a tslint.json file
  * or undefined if neither can be found.
  */
-export function findConfigurationPath(suppliedConfigFilePath: string, inputFilePath: string) {
+export function findConfigurationPath(suppliedConfigFilePath: string | null, inputFilePath: string) {
     if (suppliedConfigFilePath != null) {
         if (!fs.existsSync(suppliedConfigFilePath)) {
             throw new Error(`Could not find config file at: ${path.resolve(suppliedConfigFilePath)}`);
@@ -107,12 +124,6 @@ export function findConfigurationPath(suppliedConfigFilePath: string, inputFileP
         // search for tslint.json from input file location
         let configFilePath = findup(CONFIG_FILENAME, { cwd: inputFilePath, nocase: true });
         if (configFilePath != null && fs.existsSync(configFilePath)) {
-            return path.resolve(configFilePath);
-        }
-
-        // search for package.json with tslintConfig property
-        configFilePath = findup("package.json", { cwd: inputFilePath, nocase: true });
-        if (configFilePath != null && require(configFilePath).tslintConfig != null) {
             return path.resolve(configFilePath);
         }
 
@@ -138,36 +149,33 @@ export function findConfigurationPath(suppliedConfigFilePath: string, inputFileP
  * 'path/to/config' will attempt to load a to/config file inside a node module named path
  * @returns a configuration object for TSLint loaded from the file at configFilePath
  */
-export function loadConfigurationFromPath(configFilePath: string): IConfigurationFile {
+export function loadConfigurationFromPath(configFilePath?: string): IConfigurationFile {
     if (configFilePath == null) {
         return DEFAULT_CONFIG;
-    } else if (path.basename(configFilePath) === "package.json") {
-        console.warn(PACKAGE_DEPRECATION_MSG);
-        return require(configFilePath).tslintConfig;
     } else {
         const resolvedConfigFilePath = resolveConfigurationPath(configFilePath);
-        let configFile: IConfigurationFile;
+        let rawConfigFile: any;
         if (path.extname(resolvedConfigFilePath) === ".json") {
             const fileContent = stripComments(fs.readFileSync(resolvedConfigFilePath)
             .toString()
             .replace(/^\uFEFF/, ""));
-            configFile = JSON.parse(fileContent);
+            rawConfigFile = JSON.parse(fileContent);
         } else {
-            configFile = require(resolvedConfigFilePath);
+            rawConfigFile = require(resolvedConfigFilePath);
             delete require.cache[resolvedConfigFilePath];
         }
 
         const configFileDir = path.dirname(resolvedConfigFilePath);
+        const configFile = parseConfigFile(rawConfigFile, configFileDir);
 
-        configFile.rulesDirectory = getRulesDirectories(configFile.rulesDirectory, configFileDir);
-        configFile.extends = arrayify(configFile.extends);
+        // load configurations, in order, using their identifiers or relative paths
+        // apply the current configuration last by placing it last in this array
+        const configs = configFile.extends.map((name) => {
+            const nextConfigFilePath = resolveConfigurationPath(name, configFileDir);
+            return loadConfigurationFromPath(nextConfigFilePath);
+        }).concat([configFile]);
 
-        for (const name of configFile.extends) {
-            const baseConfigFilePath = resolveConfigurationPath(name, configFileDir);
-            const baseConfigFile = loadConfigurationFromPath(baseConfigFilePath);
-            configFile = extendConfigurationFile(configFile, baseConfigFile);
-        }
-        return configFile;
+        return configs.reduce(extendConfigurationFile, EMPTY_CONFIG);
     }
 }
 
@@ -177,9 +185,9 @@ export function loadConfigurationFromPath(configFilePath: string): IConfiguratio
  */
 function resolveConfigurationPath(filePath: string, relativeTo?: string) {
     const matches = filePath.match(BUILT_IN_CONFIG);
-    const isBuiltInConfig = matches != null;
+    const isBuiltInConfig = matches != null && matches.length > 0;
     if (isBuiltInConfig) {
-        const configName = matches[1];
+        const configName = matches![1];
         try {
             return require.resolve(`./configs/${configName}`);
         } catch (err) {
@@ -201,22 +209,47 @@ function resolveConfigurationPath(filePath: string, relativeTo?: string) {
     }
 }
 
-export function extendConfigurationFile(config: IConfigurationFile, baseConfig: IConfigurationFile): IConfigurationFile {
-    let combinedConfig: IConfigurationFile = {};
+export function extendConfigurationFile(targetConfig: IConfigurationFile,
+                                        nextConfigSource: IConfigurationFile): IConfigurationFile {
 
-    const baseRulesDirectory = arrayify(baseConfig.rulesDirectory);
-    const configRulesDirectory = arrayify(config.rulesDirectory);
-    combinedConfig.rulesDirectory = configRulesDirectory.concat(baseRulesDirectory);
+    const combineProperties = (targetProperty: any, nextProperty: any) => {
+        const combinedProperty: any = {};
+        for (const name of Object.keys(objectify(targetProperty))) {
+            combinedProperty[name] = targetProperty[name];
+        }
+        // next config source overwrites the target config object
+        for (const name of Object.keys(objectify(nextProperty))) {
+            combinedProperty[name] = nextProperty[name];
+        }
+        return combinedProperty;
+    };
 
-    combinedConfig.rules = {};
-    for (const name of Object.keys(objectify(baseConfig.rules))) {
-        combinedConfig.rules[name] = baseConfig.rules[name];
-    }
-    for (const name of Object.keys(objectify(config.rules))) {
-        combinedConfig.rules[name] = config.rules[name];
-    }
+    const combineMaps = (target: Map<string, Partial<IOptions>>, next: Map<string, Partial<IOptions>>) => {
+        const combined = new Map<string, Partial<IOptions>>();
+        target.forEach((options, ruleName) => {
+            combined.set(ruleName, options);
+        });
+        next.forEach((options, ruleName) => {
+            const combinedRule = combined.get(ruleName);
+            if (combinedRule != null) {
+                combined.set(ruleName, combineProperties(combinedRule, options));
+            } else {
+                combined.set(ruleName, options);
+            }
+        });
+        return combined;
+    };
 
-    return combinedConfig;
+    const combinedRulesDirs = targetConfig.rulesDirectory.concat(nextConfigSource.rulesDirectory);
+    const dedupedRulesDirs = Array.from(new Set(combinedRulesDirs));
+
+    return {
+        extends: [],
+        jsRules: combineMaps(targetConfig.jsRules, nextConfigSource.jsRules),
+        linterOptions: combineProperties(targetConfig.linterOptions, nextConfigSource.linterOptions),
+        rules: combineMaps(targetConfig.rules, nextConfigSource.rules),
+        rulesDirectory: dedupedRulesDirs,
+    };
 }
 
 function getHomeDir() {
@@ -235,11 +268,13 @@ function getHomeDir() {
     }
 }
 
-export function getRelativePath(directory: string, relativeTo?: string): string {
+// returns the absolute path (contrary to what the name implies)
+export function getRelativePath(directory?: string | null, relativeTo?: string) {
     if (directory != null) {
         const basePath = relativeTo || process.cwd();
         return path.resolve(basePath, directory);
     }
+    return undefined;
 }
 
 /**
@@ -249,14 +284,138 @@ export function getRelativePath(directory: string, relativeTo?: string): string 
  * should be the path to the tslint.json file.
  * @return An array of absolute paths to directories potentially containing rules
  */
-export function getRulesDirectories(directories: string | string[], relativeTo?: string): string[] {
-    const rulesDirectories = arrayify(directories).map((dir) => getRelativePath(dir, relativeTo));
+export function getRulesDirectories(directories?: string | string[], relativeTo?: string): string[] {
+    const rulesDirectories = arrayify(directories)
+        .map((dir) => getRelativePath(dir, relativeTo))
+        .filter((dir) => dir !== undefined) as string[];
 
     for (const directory of rulesDirectories) {
-        if (!fs.existsSync(directory)) {
+        if (directory != null && !fs.existsSync(directory)) {
             throw new Error(`Could not find custom rule directory: ${directory}`);
         }
     }
 
     return rulesDirectories;
+}
+
+/**
+ * Parses the options of a single rule and upgrades legacy settings such as `true`, `[true, "option"]`
+ *
+ * @param ruleConfigValue The raw option setting of a rule
+ */
+function parseRuleOptions(ruleConfigValue: any, rawDefaultRuleSeverity: string): Partial<IOptions> {
+    let ruleArguments: any[] | undefined;
+    let ruleSeverity: RuleSeverity;
+    let defaultRuleSeverity: RuleSeverity = "error";
+
+    if (rawDefaultRuleSeverity) {
+        switch (rawDefaultRuleSeverity.toLowerCase()) {
+            case "warn":
+            case "warning":
+                defaultRuleSeverity = "warning";
+                break;
+            case "off":
+            case "none":
+                defaultRuleSeverity = "off";
+                break;
+            default:
+                defaultRuleSeverity = "error";
+        }
+    }
+
+    if (ruleConfigValue == null) {
+        ruleArguments = [];
+        ruleSeverity = "off";
+    } else if (Array.isArray(ruleConfigValue) && ruleConfigValue.length > 0) {
+        // old style: array
+        ruleArguments = ruleConfigValue.slice(1);
+        ruleSeverity = ruleConfigValue[0] === true ? defaultRuleSeverity : "off";
+    } else if (typeof ruleConfigValue === "boolean") {
+        // old style: boolean
+        ruleArguments = [];
+        ruleSeverity = ruleConfigValue === true ? defaultRuleSeverity : "off";
+    } else if (ruleConfigValue.severity) {
+        switch (ruleConfigValue.severity.toLowerCase()) {
+            case "default":
+                ruleSeverity = defaultRuleSeverity;
+                break;
+            case "error":
+                ruleSeverity = "error";
+                break;
+            case "warn":
+            case "warning":
+                ruleSeverity = "warning";
+                break;
+            case "off":
+            case "none":
+                ruleSeverity = "off";
+                break;
+            default:
+                console.warn(`Invalid severity level: ${ruleConfigValue.severity}`);
+                ruleSeverity = defaultRuleSeverity;
+        }
+    } else {
+        ruleSeverity = defaultRuleSeverity;
+    }
+
+    if (ruleConfigValue && ruleConfigValue.options) {
+        ruleArguments = arrayify(ruleConfigValue.options);
+    }
+
+    return {
+        ruleArguments,
+        ruleSeverity,
+    };
+}
+
+/**
+ * Parses a config file and normalizes legacy config settings
+ *
+ * @param configFile The raw object read from the JSON of a config file
+ * @param configFileDir The directory of the config file
+ */
+export function parseConfigFile(configFile: any, configFileDir?: string): IConfigurationFile {
+    const rules = new Map<string, Partial<IOptions>>();
+    const jsRules = new Map<string, Partial<IOptions>>();
+
+    if (configFile.rules) {
+        for (const ruleName in configFile.rules) {
+            if (configFile.rules.hasOwnProperty(ruleName)) {
+                rules.set(ruleName, parseRuleOptions(configFile.rules[ruleName], configFile.defaultSeverity));
+            }
+        }
+    }
+
+    if (configFile.jsRules) {
+        for (const ruleName in configFile.jsRules) {
+            if (configFile.jsRules.hasOwnProperty(ruleName)) {
+                jsRules.set(ruleName, parseRuleOptions(configFile.jsRules[ruleName], configFile.defaultSeverity));
+            }
+        }
+    }
+
+    return {
+        extends: arrayify(configFile.extends),
+        jsRules,
+        linterOptions: configFile.linterOptions || {},
+        rulesDirectory: getRulesDirectories(configFile.rulesDirectory, configFileDir),
+        rules,
+    };
+}
+
+/**
+ * Fills in default values for `IOption` properties and outputs an array of `IOption`
+ */
+export function convertRuleOptions(ruleConfiguration: Map<string, Partial<IOptions>>): IOptions[] {
+    const output: IOptions[] = [];
+    ruleConfiguration.forEach((partialOptions, ruleName) => {
+        const options: IOptions = {
+            disabledIntervals: [],
+            ruleArguments: partialOptions.ruleArguments || [],
+            ruleName,
+            ruleSeverity: partialOptions.ruleSeverity || "error",
+        };
+        output.push(options);
+    });
+    return output;
 }

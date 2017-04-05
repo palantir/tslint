@@ -1,0 +1,15 @@
+{
+  "linterOptions": {
+    "typeCheck": true
+  },
+  "rules": {
+    "completed-docs": [true, {
+      "methods": {
+        "visibilities": ["public", "protected"]
+      },
+      "properties": {
+        "visibilities": ["public"]
+      }
+    }]
+  }
+}

@@ -17,26 +17,20 @@
 
 import * as ts from "typescript";
 
-import {IOptions} from "../../lint";
-import {RuleWalker} from "../walker/ruleWalker";
-import {IDisabledInterval, IRule, IRuleMetadata, RuleFailure} from "./rule";
+import {doesIntersect} from "../utils";
+import {IWalker, WalkContext} from "../walker";
+import { IOptions, IRule, IRuleMetadata, RuleFailure, RuleSeverity } from "./rule";
 
 export abstract class AbstractRule implements IRule {
     public static metadata: IRuleMetadata;
-    private options: IOptions;
+    protected readonly ruleArguments: any[];
+    protected readonly ruleSeverity: RuleSeverity;
+    public ruleName: string;
 
-    constructor(ruleName: string, private value: any, disabledIntervals: IDisabledInterval[]) {
-        let ruleArguments: any[] = [];
-
-        if (Array.isArray(value) && value.length > 1) {
-            ruleArguments = value.slice(1);
-        }
-
-        this.options = {
-            disabledIntervals,
-            ruleArguments,
-            ruleName,
-        };
+    constructor(private options: IOptions) {
+        this.ruleName = options.ruleName;
+        this.ruleArguments = options.ruleArguments;
+        this.ruleSeverity = options.ruleSeverity;
     }
 
     public getOptions(): IOptions {
@@ -45,22 +39,39 @@ export abstract class AbstractRule implements IRule {
 
     public abstract apply(sourceFile: ts.SourceFile): RuleFailure[];
 
-    public applyWithWalker(walker: RuleWalker): RuleFailure[] {
+    public applyWithWalker(walker: IWalker): RuleFailure[] {
         walker.walk(walker.getSourceFile());
-        return walker.getFailures();
+        return this.filterFailures(walker.getFailures());
     }
 
     public isEnabled(): boolean {
-        const value = this.value;
+        return this.ruleSeverity !== "off";
+    }
 
-        if (typeof value === "boolean") {
-            return value;
+    protected applyWithFunction(sourceFile: ts.SourceFile, walkFn: (ctx: WalkContext<void>) => void): RuleFailure[];
+    protected applyWithFunction<T, U extends T>(
+        sourceFile: ts.SourceFile,
+        walkFn: (ctx: WalkContext<T>) => void,
+        options: U,
+    ): RuleFailure[];
+    protected applyWithFunction<T, U extends T>(
+        sourceFile: ts.SourceFile,
+        walkFn: (ctx: WalkContext<T | void>) => void,
+        options?: U,
+    ): RuleFailure[] {
+        const ctx = new WalkContext(sourceFile, this.ruleName, options);
+        walkFn(ctx);
+        return this.filterFailures(ctx.failures);
+    }
+
+    protected filterFailures(failures: RuleFailure[]): RuleFailure[] {
+        const result: RuleFailure[] = [];
+        for (const failure of failures) {
+            // don't add failures for a rule if the failure intersects an interval where that rule is disabled
+            if (!doesIntersect(failure, this.options.disabledIntervals) && !result.some((f) => f.equals(failure))) {
+                result.push(failure);
+            }
         }
-
-        if (Array.isArray(value) && value.length > 0) {
-            return value[0];
-        }
-
-        return false;
+        return result;
     }
 }

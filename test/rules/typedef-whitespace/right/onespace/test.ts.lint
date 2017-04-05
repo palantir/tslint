@@ -78,6 +78,28 @@ var withPreceedingSpacesWithSubsequentSpacesObject = {
     }
 };
 
+var noPreceedingSpaceWithSubsequentNewLineObject = {
+    _Prop:
+        "some property",
+
+    get Prop():
+        string {
+        return this._Prop;
+    }
+};
+
+var noPreceedingSpaceWithSubsequentSpaceAndNewLineObject = {
+    _Prop: 
+          ~ [trailing whitespace]
+        "some property",
+
+    get Prop(): 
+               ~ [trailing whitespace]
+        string {
+        return this._Prop;
+    }
+};
+
 // endregion
 
 // region Interface
@@ -122,6 +144,17 @@ interface WithPreceedingSpacesWithSubsequentSpaceInterface {
 interface WithPreceedingSpacesWithSubsequentSpacesInterface {
     Prop   :   string;
             ~         [expected onespace after colon in property-declaration]
+}
+
+interface NoPreceedingSpaceNoSubsequentSpaceAndNewLineInterface {
+    Prop:
+        string;
+}
+
+interface NoPreceedingSpaceWithSubsequentSpaceAndNewLineInterface {
+    Prop: 
+         ~ [trailing whitespace]
+        string;
 }
 
 // endregion
@@ -259,6 +292,46 @@ function withPreceedingSpacesWithSubsequentSpacesFn(a   :   number, b   :   numb
         return c / d;
     } catch (ex   :   Exception) {
                    ~        [expected onespace after colon in variable-declaration]
+        console.log(ex);
+    }
+}
+
+function noPreceedingSpaceNoSubsequentSpaceAndNewLineFn(a:
+    number, b:
+    number):
+    number {
+    var c:
+        number = a + b;
+    var d:
+        number = a - b;
+
+    try {
+        return c / d;
+    } catch (ex:
+        Exception) {
+        console.log(ex);
+    }
+}
+
+function withPreceedingSpaceWithSubsequentSpaceAndNewLineFn(a : 
+                                                               ~ [trailing whitespace]
+    number, b : 
+               ~ [trailing whitespace]
+    number) : 
+             ~ [trailing whitespace]
+number {
+    var c : 
+           ~ [trailing whitespace]
+        number = a + b;
+    var d : 
+           ~ [trailing whitespace]
+        number = a - b;
+
+    try {
+        return c / d;
+    } catch (ex : 
+                 ~ [trailing whitespace]
+        Exception) {
         console.log(ex);
     }
 }
@@ -456,6 +529,13 @@ function withPreceedingSpacesWithSubsequentSpaceSignature( )   : {};
 
 function withPreceedingSpacesWithSubsequentSpacesSignature( )   :   {};
                                                                  ~          [expected onespace after colon in call-signature]
+
+function noPreceedingSpaceNoSubsequentSpaceAndNewLineSignature( ):
+    {};
+
+function withPreceedingSpaceWithSubsequentSpaceAndNewLineSignature( ) : 
+                                                                       ~ [trailing whitespace]
+    {};
 
 // endregion
 
@@ -666,6 +746,67 @@ class WithPreceedingSpacesWithSubsequentSpacesClass {
              ~          [expected onespace after colon in parameter]
     )   :   void {}
          ~          [expected onespace after colon in call-signature]
+}
+
+class NoPreceedingSpaceNoSubsequentSpaceAndNewLineClass {
+    [index:
+        number]:
+        string
+
+    Prop:
+        string = "some property";
+
+    public get name():
+        string {
+        return "some name";
+    }
+
+    public set name(a:
+        string):
+        void {}
+
+    public shemp(
+        a:
+        number,
+        b:
+        number
+    ):
+    void {}
+}
+
+class WithPreceedingSpaceWithSubsequentSpaceAndNewLineClass {
+    [index : 
+            ~ [trailing whitespace]
+    number] : 
+             ~ [trailing whitespace]
+        string
+
+    Prop : 
+          ~ [trailing whitespace]
+        string = "some property";
+
+    public get name() : 
+                       ~ [trailing whitespace]
+        string {
+        return "some name";
+    }
+
+    public set name(a : 
+                       ~ [trailing whitespace]
+        string) : 
+                 ~ [trailing whitespace]
+        void {}
+
+    public shemp(
+        a : 
+           ~ [trailing whitespace]
+        number,
+        b : 
+           ~ [trailing whitespace]
+        number
+    ) : 
+       ~ [trailing whitespace]
+    void {}
 }
 
 // endregion

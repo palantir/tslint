@@ -11,10 +11,13 @@
 .vscode
 appveyor.yml
 circle.yml
-Gruntfile.js
 tslint.json
+yarn.lock
 /build/
 /docs/
+/scripts/
 /src/
 /test/
 tscommand*.txt
+/coverage/
+/.nyc_output

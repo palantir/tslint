@@ -4,7 +4,7 @@ title: Rule Flags
 permalink: /usage/rule-flags/
 ---
 
-You can enable/disable TSLint or a subset of rules within a file with the following comment rule flags:
+You may enable or disable linting or a subset of lint rules within a file with the following comment rule flags:
 
 * `/* tslint:disable */` - Disable all rules for the rest of the file
 * `/* tslint:enable */` - Enable all rules for the rest of the file
@@ -15,7 +15,7 @@ You can enable/disable TSLint or a subset of rules within a file with the follow
 * `// tslint:disable-next-line:rule1 rule2 rule3...` - Disables the listed rules for the next line
 * etc.
 
-Rules flags enable or disable rules as they are parsed. Disabling an already disabled rule or enabling an already enabled rule has no effect.
+Rules flags enable or disable rules as they are parsed. Disabling an already disabled rule or enabling an already enabled rule has no effect. Enabling a rule that is not present or disabled in `tslint.json` has also no effect.
 
 For example, imagine the directive `/* tslint:disable */` on the first line of a file, `/* tslint:enable:ban class-name */` on the 10th line and `/* tslint:enable */` on the 20th. No rules will be checked between the 1st and 10th lines, only the `ban` and `class-name` rules will be checked between the 10th and 20th, and all rules will be checked for the remainder of the file.
 

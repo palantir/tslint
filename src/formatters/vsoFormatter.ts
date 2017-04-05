@@ -1,5 +1,6 @@
 /**
  * @license
+ * Copyright 2016 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +16,28 @@
  */
 
 import {AbstractFormatter} from "../language/formatter/abstractFormatter";
+import {IFormatterMetadata} from "../language/formatter/formatter";
 import {RuleFailure} from "../language/rule/rule";
 
+import * as Utils from "../utils";
+
 export class Formatter extends AbstractFormatter {
-    public format(failures: RuleFailure[]): string {
-        const outputLines = failures.map((failure: RuleFailure) => {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: IFormatterMetadata = {
+        formatterName: "vso",
+        description: "Formats output as VSO/TFS logging commands.",
+        descriptionDetails: Utils.dedent`
+            Integrates with Visual Studio Online and Team Foundation Server by outputting errors
+            as 'warning' logging commands.`,
+        sample: "##vso[task.logissue type=warning;sourcepath=myFile.ts;linenumber=1;columnnumber=14;code=semicolon;]Missing semicolon",
+        consumer: "machine",
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
+    public format(failures: RuleFailure[], warnings: RuleFailure[] = []): string {
+        const all = failures.concat(warnings);
+
+        const outputLines = all.map((failure: RuleFailure) => {
             const fileName = failure.getFileName();
             const failureString = failure.getFailure();
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();

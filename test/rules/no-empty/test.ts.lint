@@ -23,6 +23,11 @@ for (var x = 0; x < 1; ++x) { }
 for (var y = 0; y < 1; ++y) {
     // empty here
 }
+{ // empty block allowed
+}
+{
+    /* this block is also empty, but allowed to be */
+}
 
 class testClass {
     constructor(private allowed: any, private alsoAllowed: any) {
@@ -39,4 +44,22 @@ class testClass3 {
                                  ~
     }
 ~~~~~ [block is empty]
+}
+
+class testClass4 {
+    constructor(readonly allowed: any) {
+    }
+}
+
+class PrivateClassConstructor {
+    private constructor() {}
+}
+
+class ProtectedClassConstructor {
+    protected constructor() {}
+}
+
+class PublicClassConstructor {
+    public constructor() {}
+                         ~~ [block is empty]
 }

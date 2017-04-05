@@ -1,5 +1,8 @@
 {
   "rules": {
     "comment-format": [true, "check-space", "check-lowercase"]
+  },
+  "jsRules": {
+    "comment-format": [true, "check-space", "check-lowercase"]
   }
 }

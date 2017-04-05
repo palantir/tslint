@@ -17,9 +17,9 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
-export class Rule extends Lint.Rules.AbstractRule {
+export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-use-before-declare",
@@ -31,101 +31,59 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionExamples: ["true"],
         type: "functionality",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_PREFIX = "variable '";
-    public static FAILURE_STRING_POSTFIX = "' used before declaration";
+    public static FAILURE_STRING(name: string) {
+        return `variable '${name}' used before declaration`;
+    }
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const languageService = Lint.createLanguageService(sourceFile.fileName, sourceFile.getFullText());
-        return this.applyWithWalker(new NoUseBeforeDeclareWalker(sourceFile, this.getOptions(), languageService));
+    public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, program.getTypeChecker()));
     }
 }
 
-type VisitedVariables = {[varName: string]: boolean};
+function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
+    return ts.forEachChild(ctx.sourceFile, function recur(node: ts.Node): void {
+        switch (node.kind) {
+            case ts.SyntaxKind.TypeReference:
+                // Ignore types.
+                return;
+            case ts.SyntaxKind.PropertyAccessExpression:
+                // Ignore `y` in `x.y`, but recurse to `x`.
+                return recur((node as ts.PropertyAccessExpression).expression);
+            case ts.SyntaxKind.Identifier:
+                return checkIdentifier(node as ts.Identifier, checker.getSymbolAtLocation(node));
+            case ts.SyntaxKind.ExportSpecifier:
+                return checkIdentifier(
+                    (node as ts.ExportSpecifier).name,
+                    checker.getExportSpecifierLocalTargetSymbol(node as ts.ExportSpecifier));
+            default:
+                return ts.forEachChild(node, recur);
+        }
+    });
 
-class NoUseBeforeDeclareWalker extends Lint.ScopeAwareRuleWalker<VisitedVariables> {
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions, private languageService: ts.LanguageService) {
-        super(sourceFile, options);
-    }
-
-    public createScope(): VisitedVariables {
-        return {};
-    }
-
-    public visitBindingElement(node: ts.BindingElement) {
-        const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
-        const isBlockScoped = Lint.isBlockScopedBindingElement(node);
-
-        // use-before-declare errors for block-scoped vars are caught by tsc
-        if (isSingleVariable && !isBlockScoped) {
-            const variableName = (<ts.Identifier> node.name).text;
-            this.validateUsageForVariable(variableName, node.name.getStart());
+    function checkIdentifier(node: ts.Identifier, symbol: ts.Symbol | undefined): void {
+        const declarations = symbol && symbol.declarations;
+        if (declarations === undefined || declarations.length === 0) {
+            return;
         }
 
-        super.visitBindingElement(node);
-    }
-
-    public visitImportDeclaration(node: ts.ImportDeclaration) {
-        const importClause = node.importClause;
-
-        // named imports & namespace imports handled by other walker methods
-        // importClause will be null for bare imports
-        if (importClause != null && importClause.name != null) {
-            const variableIdentifier = importClause.name;
-            this.validateUsageForVariable(variableIdentifier.text, variableIdentifier.getStart());
-        }
-
-        super.visitImportDeclaration(node);
-    }
-
-    public visitImportEqualsDeclaration(node: ts.ImportEqualsDeclaration) {
-        const name = <ts.Identifier> node.name;
-        this.validateUsageForVariable(name.text, name.getStart());
-
-        super.visitImportEqualsDeclaration(node);
-    }
-
-    public visitNamedImports(node: ts.NamedImports) {
-        for (let namedImport of node.elements) {
-            this.validateUsageForVariable(namedImport.name.text, namedImport.name.getStart());
-        }
-        super.visitNamedImports(node);
-    }
-
-    public visitNamespaceImport(node: ts.NamespaceImport) {
-        this.validateUsageForVariable(node.name.text, node.name.getStart());
-        super.visitNamespaceImport(node);
-    }
-
-    public visitVariableDeclaration(node: ts.VariableDeclaration) {
-        const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
-        const variableName = (<ts.Identifier> node.name).text;
-        const currentScope = this.getCurrentScope();
-
-        // only validate on the first variable declaration within the current scope
-        if (isSingleVariable && currentScope[variableName] == null) {
-            this.validateUsageForVariable(variableName, node.getStart());
-        }
-
-        currentScope[variableName] = true;
-        super.visitVariableDeclaration(node);
-    }
-
-    private validateUsageForVariable(name: string, position: number) {
-        const fileName = this.getSourceFile().fileName;
-        const highlights = this.languageService.getDocumentHighlights(fileName, position, [fileName]);
-        if (highlights != null) {
-            for (let highlight of highlights) {
-                for (let highlightSpan of highlight.highlightSpans) {
-                    const referencePosition = highlightSpan.textSpan.start;
-                    if (referencePosition < position) {
-                        const failureString = Rule.FAILURE_STRING_PREFIX + name + Rule.FAILURE_STRING_POSTFIX;
-                        this.addFailure(this.createFailure(referencePosition, name.length, failureString));
-                    }
-                }
+        const declaredBefore = declarations.some((decl) => {
+            switch (decl.kind) {
+                case ts.SyntaxKind.FunctionDeclaration:
+                    // Functions may be declared later.
+                    return true;
+                default:
+                    // Use `<=` in case this *is* the declaration.
+                    // If it's a global declared in a different file, OK.
+                    return decl.pos <= node.pos || decl.getSourceFile() !== ctx.sourceFile;
             }
+        });
+
+        if (!declaredBefore) {
+            ctx.addFailureAtNode(node, Rule.FAILURE_STRING(node.text));
         }
     }
 }

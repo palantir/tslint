@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import * as Lint from "../lint";
+import * as Lint from "../index";
 
 /* tslint:disable:object-literal-sort-keys */
 const SPACE_OPTIONS = {
@@ -30,7 +30,7 @@ const SPACE_OBJECT = {
     properties: {
         "call-signature": SPACE_OPTIONS,
         "index-signature": SPACE_OPTIONS,
-        parameter: SPACE_OPTIONS,
+        "parameter": SPACE_OPTIONS,
         "property-declaration": SPACE_OPTIONS,
         "variable-declaration": SPACE_OPTIONS,
     },
@@ -79,6 +79,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             ]`,
         ],
         type: "typescript",
+        typescriptOnly: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -89,11 +90,8 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class TypedefWhitespaceWalker extends Lint.RuleWalker {
     private static getColonPosition(node: ts.Node) {
-        const colon = node.getChildren().filter((child) =>
-            child.kind === ts.SyntaxKind.ColonToken
-        )[0];
-
-        return colon == null ? -1 : colon.getStart();
+        const colon = Lint.childOfKind(node, ts.SyntaxKind.ColonToken);
+        return colon && colon.getStart();
     }
 
     public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
@@ -151,11 +149,11 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
         super.visitVariableDeclaration(node);
     }
 
-    public checkSpace(option: string, node: ts.Node, typeNode: ts.TypeNode | ts.StringLiteral) {
+    public checkSpace(option: string, node: ts.Node, typeNode: ts.TypeNode | ts.StringLiteral | undefined) {
         if (this.hasOption(option) && typeNode != null) {
             const colonPosition = TypedefWhitespaceWalker.getColonPosition(node);
 
-            if (colonPosition != null) {
+            if (colonPosition !== undefined) {
                 const scanner = ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, node.getText());
 
                 this.checkLeft(option, node, scanner, colonPosition);
@@ -240,7 +238,7 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
                 hasLeadingWhitespace,
                 hasSeveralLeadingWhitespaces,
                 colonPosition - 1,
-                message
+                message,
             );
         }
     }
@@ -249,12 +247,19 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
         if (this.hasRightOption(option)) {
             let positionToCheck = colonPosition + 1 - node.getStart();
 
+            // Don't enforce trailing spaces on newlines
+            // (https://github.com/palantir/tslint/issues/1354)
+            scanner.setTextPos(positionToCheck);
+            const kind = scanner.scan();
+            if (kind === ts.SyntaxKind.NewLineTrivia) {
+                return;
+            }
+
             let hasTrailingWhitespace: boolean;
             if (positionToCheck >= node.getWidth()) {
                 hasTrailingWhitespace = false;
             } else {
-                scanner.setTextPos(positionToCheck);
-                hasTrailingWhitespace = scanner.scan() === ts.SyntaxKind.WhitespaceTrivia;
+                hasTrailingWhitespace = kind === ts.SyntaxKind.WhitespaceTrivia;
             }
 
             positionToCheck = colonPosition + 2 - node.getStart();
@@ -275,7 +280,7 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
                 hasTrailingWhitespace,
                 hasSeveralTrailingWhitespaces,
                 colonPosition + 1,
-                message
+                message,
             );
         }
     }
@@ -291,7 +296,7 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
             (optionValue === "onespace" || optionValue === "space");
 
         if (isFailure) {
-            this.addFailure(this.createFailure(failurePos, 1, message));
+            this.addFailureAt(failurePos, 1, message);
         }
     }
 }

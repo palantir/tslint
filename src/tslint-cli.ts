@@ -16,86 +16,98 @@
  */
 
 import * as fs from "fs";
-import * as glob from "glob";
 import * as optimist from "optimist";
-import * as path from "path";
-import * as ts from "typescript";
 
-import {
-    CONFIG_FILENAME,
-    DEFAULT_CONFIG,
-    findConfiguration,
-} from "./configuration";
-import {consoleTestResultHandler, runTest} from "./test";
-import * as Linter from "./tslintMulti";
+import { IRunnerOptions, Runner } from "./runner";
 
-let processed = optimist
+const processed = optimist
     .usage("Usage: $0 [options] file ...")
     .check((argv: any) => {
         // at least one of file, help, version, project or unqualified argument must be present
         if (!(argv.h || argv.i || argv.test || argv.v || argv.project || argv._.length > 0)) {
+            // throw a string, otherwise a call stack is printed for this message
+            // tslint:disable-next-line:no-string-throw
             throw "Missing files";
         }
 
         if (argv.f) {
+            // throw a string, otherwise a call stack is printed for this message
+            // tslint:disable-next-line:no-string-throw
             throw "-f option is no longer available. Supply files directly to the tslint command instead.";
         }
     })
     .options({
-        c: {
+        "c": {
             alias: "config",
             describe: "configuration file",
+            type: "string",
         },
-        e: {
+        "e": {
             alias: "exclude",
             describe: "exclude globs from path expansion",
+            type: "string",
         },
-        force: {
+        "fix": {
+            describe: "fixes linting errors for select rules (this may overwrite linted files)",
+            type: "boolean",
+        },
+        "force": {
             describe: "return status code 0 even if there are lint errors",
             type: "boolean",
         },
-        h: {
+        "h": {
             alias: "help",
             describe: "display detailed help",
+            type: "boolean",
         },
-        i: {
+        "i": {
             alias: "init",
             describe: "generate a tslint.json config file in the current working directory",
+            type: "boolean",
         },
-        o: {
+        "o": {
             alias: "out",
             describe: "output file",
+            type: "string",
         },
-        project: {
+        "p": {
+            alias: "project",
             describe: "tsconfig.json file",
+            type: "string",
         },
-        r: {
+        "r": {
             alias: "rules-dir",
             describe: "rules directory",
+            type: "string",
         },
-        s: {
+        "s": {
             alias: "formatters-dir",
             describe: "formatters directory",
+            type: "string",
         },
-        t: {
+        "t": {
             alias: "format",
             default: "prose",
-            describe: "output format (prose, json, stylish, verbose, pmd, msbuild, checkstyle, vso)",
+            describe: "output format (prose, json, stylish, verbose, pmd, msbuild, checkstyle, vso, fileslist, codeFrame)",
+            type: "string",
         },
-        test: {
+        "test": {
             describe: "test that tslint produces the correct output for the specified directory",
+            type: "boolean",
         },
         "type-check": {
             describe: "enable type checking when linting a project",
+            type: "boolean",
         },
-        v: {
+        "v": {
             alias: "version",
             describe: "current version",
+            type: "boolean",
         },
     });
 const argv = processed.argv;
 
-let outputStream: any;
+let outputStream: NodeJS.WritableStream;
 if (argv.o != null) {
     outputStream = fs.createWriteStream(argv.o, {
         flags: "w+",
@@ -105,29 +117,7 @@ if (argv.o != null) {
     outputStream = process.stdout;
 }
 
-if (argv.v != null) {
-    outputStream.write(Linter.VERSION + "\n");
-    process.exit(0);
-}
-
-if (argv.i != null) {
-    if (fs.existsSync(CONFIG_FILENAME)) {
-        console.error(`Cannot generate ${CONFIG_FILENAME}: file already exists`);
-        process.exit(1);
-    }
-
-    const tslintJSON = JSON.stringify(DEFAULT_CONFIG, undefined, "    ");
-    fs.writeFileSync(CONFIG_FILENAME, tslintJSON);
-    process.exit(0);
-}
-
-if (argv.test != null) {
-    const results = runTest(argv.test, argv.r);
-    const didAllTestsPass = consoleTestResultHandler(results);
-    process.exit(didAllTestsPass ? 0 : 1);
-}
-
-if ("help" in argv) {
+if (argv.help) {
     outputStream.write(processed.help());
     const outputString = `
 tslint accepts the following commandline options:
@@ -151,6 +141,9 @@ tslint accepts the following commandline options:
         A filename or glob which indicates files to exclude from linting.
         This option can be supplied multiple times if you need multiple
         globs to indicate which files to exclude.
+
+    --fix:
+        Fixes linting errors for select rules. This may overwrite linted files.
 
     --force:
         Return status code 0 even if there are any lint errors.
@@ -184,16 +177,17 @@ tslint accepts the following commandline options:
         formatters are prose (human readable), json (machine readable)
         and verbose. prose is the default if this option is not used.
         Other built-in options include pmd, msbuild, checkstyle, and vso.
-        Additonal formatters can be added and used if the --formatters-dir
+        Additional formatters can be added and used if the --formatters-dir
         option is set.
 
     --test:
-        Runs tslint on the specified directory and checks if tslint's output matches
-        the expected output in .lint files. Automatically loads the tslint.json file in the
-        specified directory as the configuration file for the tests. See the
-        full tslint documentation for more details on how this can be used to test custom rules.
+        Runs tslint on matched directories and checks if tslint outputs
+        match the expected output in .lint files. Automatically loads the
+        tslint.json files in the directories as the configuration file for
+        the tests. See the full tslint documentation for more details on how
+        this can be used to test custom rules.
 
-    --project:
+    -p, --project:
         The location of a tsconfig.json file that will be used to determine which
         files will be linted.
 
@@ -210,93 +204,22 @@ tslint accepts the following commandline options:
     process.exit(0);
 }
 
-// when provided, it should point to an existing location
-if (argv.c && !fs.existsSync(argv.c)) {
-    console.error("Invalid option for configuration: " + argv.c);
-    process.exit(1);
-}
-const possibleConfigAbsolutePath = argv.c != null ? path.resolve(argv.c) : null;
-
-const processFiles = (files: string[], program?: ts.Program) => {
-
-    const linter = new Linter({
-        formatter: argv.t,
-        formattersDirectory: argv.s || "",
-        rulesDirectory: argv.r || "",
-    }, program);
-
-    for (const file of files) {
-        if (!fs.existsSync(file)) {
-            console.error(`Unable to open file: ${file}`);
-            process.exit(1);
-        }
-
-        const buffer = new Buffer(256);
-        buffer.fill(0);
-        const fd = fs.openSync(file, "r");
-        try {
-            fs.readSync(fd, buffer, 0, 256, null);
-            if (buffer.readInt8(0) === 0x47 && buffer.readInt8(188) === 0x47) {
-                // MPEG transport streams use the '.ts' file extension. They use 0x47 as the frame
-                // separator, repeating every 188 bytes. It is unlikely to find that pattern in
-                // TypeScript source, so tslint ignores files with the specific pattern.
-                console.warn(`${file}: ignoring MPEG transport stream`);
-                return;
-            }
-        } finally {
-            fs.closeSync(fd);
-        }
-
-        const contents = fs.readFileSync(file, "utf8");
-        const configuration = findConfiguration(possibleConfigAbsolutePath, file);
-        linter.lint(file, contents, configuration);
-    }
-
-    const lintResult = linter.getResult();
-
-    outputStream.write(lintResult.output, () => {
-        if (lintResult.failureCount > 0) {
-            process.exit(argv.force ? 0 : 2);
-        }
-    });
+const options: IRunnerOptions = {
+    config: argv.c,
+    exclude: argv.exclude,
+    files: argv._,
+    fix: argv.fix,
+    force: argv.force,
+    format: argv.t,
+    formattersDirectory: argv.s,
+    init: argv.init,
+    out: argv.out,
+    project: argv.p,
+    rulesDirectory: argv.r,
+    test: argv.test,
+    typeCheck: argv["type-check"],
+    version: argv.v,
 };
 
-// if both files and tsconfig are present, use files
-let files = argv._;
-let program: ts.Program;
-
-if (argv.project != null) {
-    if (!fs.existsSync(argv.project)) {
-        console.error("Invalid option for project: " + argv.project);
-        process.exit(1);
-    }
-    program = Linter.createProgram(argv.project, path.dirname(argv.project));
-    if (files.length === 0) {
-        files = Linter.getFileNames(program);
-    }
-    if (argv["type-check"]) {
-        // if type checking, run the type checker
-        const diagnostics = ts.getPreEmitDiagnostics(program);
-        if (diagnostics.length > 0) {
-            const messages = diagnostics.map((diag) => {
-                // emit any error messages
-                let message = ts.DiagnosticCategory[diag.category];
-                if (diag.file) {
-                    const {line, character} = diag.file.getLineAndCharacterOfPosition(diag.start);
-                    message += ` at ${diag.file.fileName}:${line + 1}:${character + 1}:`;
-                }
-                message += " " + ts.flattenDiagnosticMessageText(diag.messageText, "\n");
-                return message;
-            });
-            throw new Error(messages.join("\n"));
-        }
-    } else {
-        // if not type checking, we don't need to pass in a program object
-        program = undefined;
-    }
-}
-
-files = files
-  .map((file: string) => glob.sync(file, { ignore: argv.e }))
-  .reduce((a: string[], b: string[]) => a.concat(b));
-processFiles(files, program);
+new Runner(options, outputStream)
+    .run((status: number) => process.exit(status));
