@@ -105,7 +105,7 @@ class NoMagicNumbersWalker extends Lint.AbstractWalker<Set<string>> {
 }
 ```
 
-## Migrating from `RuleWalker` to `AbstractWalker`
+## Migrating from RuleWalker to AbstractWalker
 
 The main difference between `RuleWalker` and `AbstractWalker` is that you need to implement the AST recursion yourself. But why would you want to do that?
 __Performance!__ `RuleWalker` wants to be "one walker to rule them all" (pun intended). It's easy to use but that convenience 

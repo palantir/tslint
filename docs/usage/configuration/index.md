@@ -86,14 +86,14 @@ __`tslint:all`__ turns on all rules to their strictest settings. This will use t
 ### Custom rules
 
 If TSLint's core rules don't have all the lint checks you're looking for,
-you may [write your own custom rules][0] or use custom rules that others have developed.
+you may [write your own custom rules][2] or use custom rules that others have developed.
 
 Some commonly used custom rule packages in the TSLint community are listed in the
 [README](https://github.com/palantir/tslint/blob/master/README.md).
 
 [0]: {{site.baseurl | append: "/usage/cli"}}
 [1]: {{site.baseurl | append: "/usage/third-party-tools"}}
-[2]: {{site.baseurl | append: "/usage/custom-rules"}}
+[2]: {{site.baseurl | append: "/develop/custom-rules"}}
 [3]: {{site.baseurl | append: "/rules"}}
 [rule-ban]: {{site.baseurl | append: "/rules/ban"}}
 [rule-import-blacklist]: {{site.baseurl | append: "/rules/import-blacklist"}}
