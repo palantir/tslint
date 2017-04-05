@@ -1,5 +1,5 @@
 ---
-title: CLI
+title: TSLint command-line interface
 layout: page
 permalink: /usage/cli/
 ---
@@ -24,7 +24,7 @@ yarn global add tslint typescript
 
 {% include peer_dependencies.md %}
 
-### Usage
+### CLI Usage
 
 Please ensure that the TypeScript source files compile correctly _before_ running the linter.
 
