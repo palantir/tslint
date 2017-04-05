@@ -4,7 +4,7 @@ title: Rule Flags
 permalink: /usage/rule-flags/
 ---
 
-You can enable/disable TSLint or a subset of rules within a file with the following comment rule flags:
+You may enable or disable linting or a subset of lint rules within a file with the following comment rule flags:
 
 * `/* tslint:disable */` - Disable all rules for the rest of the file
 * `/* tslint:enable */` - Enable all rules for the rest of the file
