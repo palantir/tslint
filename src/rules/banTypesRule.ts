@@ -68,9 +68,7 @@ class BanTypeWalker extends Lint.RuleWalker {
             this.bans.find(([bannedType]) =>
                 typeName.match(`^${bannedType}$`) != null) as string[];
         if (ban) {
-            this.addFailure(this.createFailure(
-                node.getStart(), node.getWidth(),
-                Rule.FAILURE_STRING_FACTORY(typeName, ban[1])));
+            this.addFailureAtNode(node, Rule.FAILURE_STRING_FACTORY(typeName, ban[1]));
         }
         super.visitTypeReference(node);
     }

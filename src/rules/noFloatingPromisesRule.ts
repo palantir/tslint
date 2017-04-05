@@ -47,7 +47,7 @@ export class Rule extends Lint.Rules.TypedRule {
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         const walker = new NoFloatingPromisesWalker(sourceFile, this.getOptions(), program);
 
-        for (const className of this.getOptions().ruleArguments) {
+        for (const className of this.ruleArguments) {
             walker.addPromiseClass(className);
         }
 
@@ -87,7 +87,7 @@ class NoFloatingPromisesWalker extends Lint.ProgramAwareRuleWalker {
         const type = typeChecker.getTypeAtLocation(node);
 
         if (this.symbolIsPromise(type.symbol)) {
-            this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+            this.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
     }
 

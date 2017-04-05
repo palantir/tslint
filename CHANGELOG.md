@@ -1,39 +1,69 @@
 Change Log
 ===
 
-<!--
-
 v5.0.0
 ---
 
-- **BREAKING CHANGES**
-    - The severity level of rules is now configurable and defaults to severity "error"
-    - The following formatters have changed their outputs:
-        - msbuildFormatter - default was "warning"; it is now "error"
-        - pmdFormatter - default was priority 1; it is now "error" (priority 3). If set to "warning", it will output priority 4
-- [enhancement] Enable WARN with new config file format (#629, #345)
-    - Valid values for `severity`: `error | warn | warning | none | off`
+## :fire: Breaking changes
+
+- Minimum version of TypeScript version is now 2.1.0 (#2425)
+- The severity level of rules are now configurable and defaults to severity "error". This affects the output of formatters:
+    - [formatter] `msbuild` was outputting all failures as "warning".
+    - [formatter] `pmd` was outputting all failures as priority 1. Now, it uses _priority 3_ for "error" (default) and _priority 4_ for "warning"
+- [formatter] `json` changed the `fix` property to now contain either one replacement or an array of replacements (#2403)
+- `tslint:recommended` configuration updated with `tslint:latest` rules & options (#2424)
+- Removed `no-unused-new` rule, with logic moved into `no-unused-expression` (#2269)
+- `no-trailing-whitespace` now checks template strings by default. Use the new options `ignore-template-strings` to restore the old behavior. (#2359)
+
+### API breaks for custom rules
+
+- Removed method `skip` from `RuleWalker` (#2313)
+- Removed all use of the TypeScript Language Service, use only Program APIs instead (#2235)
+
+    - This means that some rules that previously worked without the type checker _now require it_. This includes:
+        - `no-unused-variable`
+        - `no-use-before-declare`
+
+    - This breaks custom rule compilation. If your rule was not using the `ts.LanguageService` APIs, the migration is quite simple:
+
+    ```diff
+    - public applyWithProgram(srcFile: ts.SourceFile, langSvc: ts.LanguageService): Lint.RuleFailure[] {
+    -     return this.applyWithWalker(new Walker(srcFile, this.getOptions(), langSvc.getProgram()));
+    + public applyWithProgram(srcFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+    +     return this.applyWithWalker(new Walker(srcFile, this.getOptions(), program));
+    ```
+    
+    - N.B. If you are refactoring your custom rules, consider [these performance tips for writing custom rules](https://palantir.github.io/tslint/develop/custom-rules/performance.html).
+
+- Removed `createFix`. Replacements should be passed directly into addFailure. (#2403)
+- Removed deprecated `scanAllTokens` and `skippableTokenAwareRuleWalker` (#2370)
+
+## :tada: Notable features & enhancements
+
+- [feature] The severity level of rules are now individually configurable. Default severity can also be configured.  (#629, #345)
+
+    - Valid values for `severity`: `default` | `error | warn | warning | none | off`
+    - Valid values for `defaultSeverity`: `error | warn | warning | none | off`
     - Old style:
 
     ```json
     {
         "extends": "tslint:latest",
         "rules": {
-            "callable-types": true
+            "callable-types": true,
+            "max-line-length": [true, 140]
         }
     }
     ```
 
-    - New style, with `interface-name` generating warnings, and passing options to `max-line-length`:
+    - New style (in this example, `callable-types` outputs errors and `max-line-length` outputs warnings):
 
     ```json
     {
         "extends": "tslint:latest",
+        "defaultSeverity": "error",
         "rules": {
             "callable-types": true,
-            "interface-name": {
-                "severity": "warn"
-            },
             "max-line-length": {
                 "options": 140,
                 "severity": "warning"
@@ -42,7 +72,86 @@ v5.0.0
     }
     ```
 
--->
+- [new-rule] `prefer-template` (#2243)
+- [new-rule] `return-undefined` (#2251)
+- [new-rule] `no-reference-import` (#2273)
+- [new-rule] `no-unnecessary-callback-wrapper` (#2249)
+- [new-fixer] `linebreak-style` (#2394)
+- [new-fixer] `eofline` (#2393)
+
+
+## Full list of changes
+
+- [api] Added class `OptionallyTypedRule`, which allows rule authors to write a rule that applies when typing is either enabled or disabled (#2300)
+- [bugfix] `prefer-function-over-method` now ignores abstract methods (#2307)
+- [bugfix] `arrow-parens` with option `ban-single-arg-parens` now correctly handles functions with return type annotation (#2265)
+- [bugfix] `prefer-function-over-method` exclude overload signatures (#2315)
+- [bugfix] `use-isnan` now applies only to comparison operators (#2317)
+- [bugfix] `file-header-rule` now handles single-line comments correctly (#2320)
+- [bugfix] `newline-before-return`: fix handling of blank lines between comments (#2321)
+- [bugfix] `trailing-comma` No longer enforce trailing commas in type parameters and tuple types (#2236)
+- [bugfix] `align` don't fix if it would remove code (#2379)
+- [bugfix] `unified-signatures` now recognizes rest parameters (#2342)
+- [bugfix] `no-inferrable-types` don't warn for inferrable type on readonly property (#2312)
+- [bugfix] `trailing-comma` no longer crashes on new without parentheses (e.g. `new Foo`) (#2389)
+- [bugfix] `semicolon` Ignore comments when checking for unnecessary semicolon (#2240)
+- [bugfix] `semicolon` Don't report unnecessary semicolon when followed by regex literal (#2240)
+- [bugfix] CLI: exit with 0 on type check errors when `--force` is specified (#2322)
+- [bugfix] CLI: `--test` now correctly strips single quotes from patterns on windows (#2322)
+- [bugfix] `prefer-const` only fix initialized variables (#2219)
+- [bugfix] `prefer-const` correctly handle variables shadowed by parameters and catched exceptions (#2219)
+- [bugfix] `prefer-const` don't warn if one variable in a for loop initializer can not be const (#2219)
+- [bugfix] `prefer-const` handle more cases in destructuring (#2219)
+- [bugfix] `no-unused-expression` allow comma separated assignments (#2269)
+- [chore] removed update-notifier dependency (#2262)
+- [development] allow rule tests to specify version requirement for typescript (#2323)
+- [enhancement] `ignore-properties` option of `no-inferrable-types` now also ignores parameter properties (#2312)
+- [enhancement] `unified-signatures` now displays line number of the overload to unify if there are more than 2 overloads (#2270)
+- [enhancement] `trailing-comma` New checks for CallSignature and NamedExports (#2236)
+- [enhancement] `semicolon` New check for export statements, function overloads and shorthand module declaration (#2240)
+- [enhancement] `semicolon` Report unnecessary semicolons in classes and in statement position (for option "always" too) (#2240)
+- [enhancement] `semicolon` check for semicolon after method overload (#2240)
+- [enhancement] `array-type` now consider `object`, `undefined` and `never` as simple types, allowing `object`, `undefined[]` and `never[]` (#1843)(#2353)
+- [enhancement] `align` check statement alignment for all blocks (#2379)
+- [enhancement] `align`check parameter alignment for all signatures (#2379)
+- [enhancement] `--test` can handle multiple paths at once (#2322)
+- [enhancement] `only-arrow-functions` allow functions that use `this` in the body (#2229)
+- [enhancement] CLI: print error when `--type-check` is used without `--project` (#2322)
+- [enhancement] CLI: don't print stack trace on type check error (#2322)
+- [enhancement] CLI: added `-p` as shorthand for `--project` to be consistent with `tsc` (#2322)
+- [enhancement] `prefer-const` show warnings for `var` (#2219)
+- [enhancement] `quotemark` fixer unescapes original quotemark (e.g. `'\''` -> `"'"`) (#2359)
+- [enhancement] `no-unused-expression` allow indirect eval `(0, eval)("");` (#2269)
+- [enhancement] `no-unused-expression` checking for unused new can now use option `allow-fast-null-checks` (#2269)
+- [enhancement] `no-unused-expression` find unused comma separated expressions in all locations of the code (#2269)
+- [enhancement] `no-unused-expression` find unused expressions inside void expression (#2269)
+- [new-config-option] Adds `defaultSeverity` with options `error`, `warning`, and `off`. (#2416)
+- [new-formatter] TAP formatter (#2325)
+- [new-rule-option] `no-unused-expression` adds option `allow-tagged-template` to allow tagged templates for side effects (#2269)
+- [new-rule-option] `no-unused-expression` adds option `allow-new` to allow `new` without using the new object (#2269)
+- [new-rule-option] `member-access` adds `no-public` option (#2247)
+- [new-rule-option] `curly` added option `ignore-same-line` (#2334)
+- [new-rule-option] `{destructuring: "all"}` to only warn if all variables in a destructuring can be const (#2219)
+- [new-rule-option] added `ignore-template-strings` to `no-trailing-whitespace` (#2359)
+- [rule-update] `array-type` now consider `undefined` and `never` as simple types, allowing `undefined[]` and `never[]` (#1843)
+
+Thanks to our contributors!
+
+- Brian Olore
+- Andy Hanson
+- @andy-ms
+- Chris Barr
+- Klaus Meinhardt
+- @bumbleblym
+- Josh Goldberg
+- James Clark
+- @vilic
+- Aleksandr Filatov
+- Matt Banz
+- Karol Janyst
+- Mike Deverell
+- Alexander James Phillips
+- Irfan Hudda
 
 v4.5.1
 ---

@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -39,46 +40,53 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithWalker(new Walker(sourceFile, this.getOptions(), program));
+        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, program.getTypeChecker()));
     }
 }
 
-class Walker extends Lint.ProgramAwareRuleWalker {
-    public visitBinaryExpression(node: ts.BinaryExpression) {
-        this.check(node);
-        super.visitBinaryExpression(node);
-    }
-
-    private check(node: ts.BinaryExpression) {
-        const comparison = deconstructComparison(node);
-        if (comparison === undefined) {
-            return;
-        }
-
-        const { negate, expression } = comparison;
-        const type = this.getTypeChecker().getTypeAtLocation(expression);
-        if (!Lint.isTypeFlagSet(type, ts.TypeFlags.Boolean)) {
-            return;
-        }
-
-        const deleted = node.left === expression
-            ? this.deleteFromTo(node.left.end, node.end)
-            : this.deleteFromTo(node.getStart(), node.right.getStart());
-        const replacements = [deleted];
-        if (negate) {
-            if (needsParenthesesForNegate(expression)) {
-                replacements.push(this.appendText(node.getStart(), "!("));
-                replacements.push(this.appendText(node.getEnd(), ")"));
-            } else {
-                replacements.push(this.appendText(node.getStart(), "!"));
+function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (utils.isBinaryExpression(node)) {
+            const cmp = getBooleanComparison(node, checker);
+            if (cmp) {
+                ctx.addFailureAtNode(cmp.expression, Rule.FAILURE_STRING(cmp.negate), fix(node, cmp));
             }
         }
+        return ts.forEachChild(node, cb);
+    });
+}
 
-        this.addFailureAtNode(expression, Rule.FAILURE_STRING(negate), this.createFix(...replacements));
+interface Compare {
+    negate: boolean;
+    expression: ts.Expression;
+}
+
+function getBooleanComparison(node: ts.BinaryExpression, checker: ts.TypeChecker): Compare | undefined {
+    const cmp = deconstructComparison(node);
+    return cmp === undefined || !Lint.isTypeFlagSet(checker.getTypeAtLocation(cmp.expression), ts.TypeFlags.Boolean) ? undefined : cmp;
+}
+
+function fix(node: ts.BinaryExpression, { negate, expression }: Compare): Lint.Fix {
+    const deleted = node.left === expression
+        ? Lint.Replacement.deleteFromTo(node.left.end, node.end)
+        : Lint.Replacement.deleteFromTo(node.getStart(), node.right.getStart());
+    if (!negate) {
+        return deleted;
+    } else if (needsParenthesesForNegate(expression)) {
+        return [
+            deleted,
+            Lint.Replacement.appendText(node.getStart(), "!("),
+            Lint.Replacement.appendText(node.getEnd(), ")"),
+        ];
+    } else {
+        return [
+            deleted,
+            Lint.Replacement.appendText(node.getStart(), "!"),
+        ];
     }
 }
 
-function needsParenthesesForNegate(node: ts.Expression) {
+function needsParenthesesForNegate(node: ts.Expression): boolean {
     switch (node.kind) {
         case ts.SyntaxKind.AsExpression:
         case ts.SyntaxKind.BinaryExpression:
@@ -88,7 +96,7 @@ function needsParenthesesForNegate(node: ts.Expression) {
     }
 }
 
-function deconstructComparison(node: ts.BinaryExpression): { negate: boolean, expression: ts.Expression } | undefined {
+function deconstructComparison(node: ts.BinaryExpression): Compare | undefined {
     const { left, operatorToken, right } = node;
     const eq = Lint.getEqualsKind(operatorToken);
     if (!eq) {

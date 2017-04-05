@@ -80,11 +80,16 @@ The configuration file specifies which rules are enabled and their options. Thes
    *   - a relative path to a JSON file
    */
   "extends": "tslint:latest",
+  "defaultSeverity": "warning",
   "rules": {
     /*
      * Any rules specified here will override those from the base config we are extending.
      */
-    "curly": true
+    "curly": true,
+    "max-line-length": {
+      "severity": "error",
+      "options": 140
+    }
   },
   "jsRules": {
     /*
@@ -107,7 +112,14 @@ __`tslint:recommended`__ is a stable, somewhat opinionated set of rules which we
 
 __`tslint:latest`__ extends `tslint:recommended` and is continuously updated to include configuration for the latest rules in every TSLint release. Using this config may introduce breaking changes across minor releases as new rules are enabled which cause lint failures in your code. When TSLint reaches a major version bump, `tslint:recommended` will be updated to be identical to `tslint:latest`.
 
+__`tslint:all`__ turns on all rules to their strictest settings. This will use type checking, so it must be combined with the `--project` option.
+(Exceptions are [`"ban"`](https://palantir.github.io/tslint/rules/ban/), [`"import-blacklist"`](https://palantir.github.io/tslint/rules/import-blacklist/), and [`"file-header"`](https://palantir.github.io/tslint/rules/file-header/), which have no sensible defaults, and deprecated rules.)
+
 See the [core rules list](#core-rules) below for descriptions of all the rules.
+
+##### Severity
+
+The severity level of each rule can use the values `default`, `error`, `warning`/`warn`, and `off`/`none`. If no severity level is specified, `default` is used. The `defaultSeverity` option replaces the severity level for each rule that uses severity level `default` in the current file. Valid values for `defaultSeverity` include `error`, `warning`/`warn`, and `off`/`none`.
 
 #### CLI
 
@@ -215,6 +227,12 @@ tslint accepts the following command-line options:
     Prints this help message.
 ```
 
+##### Exit Codes
+
+- `0`: Linting occurred without errors (warnings are ok)
+- `1`: An invalid command line argument or combination thereof was used
+- `2`: There was a rule violation with severity `error`
+
 #### Library
 
 ```js
@@ -304,6 +322,7 @@ If we don't have all the rules you're looking for, you can either write your own
 - [tslint-microsoft-contrib](https://github.com/Microsoft/tslint-microsoft-contrib) - A set of TSLint rules used on some Microsoft projects
 - [codelyzer](https://github.com/mgechev/codelyzer) - A set of tslint rules for static code analysis of Angular TypeScript projects
 - [vrsource-tslint-rules](https://github.com/vrsource/vrsource-tslint-rules)
+- [tslint-immutable](https://github.com/jonaskello/tslint-immutable) - TSLint rules to disable mutation in TypeScript
 
 #### Writing custom rules
 

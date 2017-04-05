@@ -7,6 +7,9 @@ class Clazz {
     private foobar() {
     }
 }
+const template = `
+I have trailing whitespace
+`;
 // single line comment without trailing whitespace
 // single line comment with trailing whitespace
  /* single line multiline comment */

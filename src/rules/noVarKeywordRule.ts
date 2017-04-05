@@ -76,8 +76,7 @@ class NoVarKeywordWalker extends Lint.RuleWalker {
 
     private reportFailure(node: ts.Node) {
         const nodeStart = node.getStart(this.getSourceFile());
-        this.addFailureAt(nodeStart, "var".length, Rule.FAILURE_STRING, this.createFix(
-            this.createReplacement(nodeStart, "var".length, "let"),
-        ));
+        this.addFailureAt(nodeStart, "var".length, Rule.FAILURE_STRING,
+            this.createReplacement(nodeStart, "var".length, "let"));
     }
 }

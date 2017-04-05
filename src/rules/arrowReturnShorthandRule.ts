@@ -15,9 +15,11 @@
  * limitations under the License.
  */
 
+import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { hasCommentAfterPosition } from "../language/utils";
 
 const OPTION_MULTILINE = "multiline";
 
@@ -42,59 +44,60 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING =
-        "This arrow function body can be simplified by omitting the curly braces and the keyword 'return'.";
+    public static FAILURE_STRING(isObjectLiteral: boolean): string {
+        const start = "This arrow function body can be simplified by omitting the curly braces and the keyword 'return'";
+        return start + (isObjectLiteral ? ", and wrapping the object literal in parentheses." : ".");
+    }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new Walker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk, { multiline: this.ruleArguments.indexOf(OPTION_MULTILINE) !== -1 });
     }
 }
 
-class Walker extends Lint.RuleWalker {
-    public visitArrowFunction(node: ts.ArrowFunction) {
-        if (node.body && node.body.kind === ts.SyntaxKind.Block) {
-            const expr = getSimpleReturnExpression(node.body as ts.Block);
-            if (expr !== undefined && (this.hasOption(OPTION_MULTILINE) || !this.isMultiline(node.body))) {
-                this.addFailureAtNode(node.body, Rule.FAILURE_STRING, this.createArrowFunctionFix(node, node.body as ts.Block, expr));
+interface Options {
+    multiline: boolean;
+}
+
+function walk(ctx: Lint.WalkContext<Options>): void {
+    const { sourceFile, options: { multiline } } = ctx;
+    ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
+        if (utils.isArrowFunction(node) && utils.isBlock(node.body)) {
+            const expr = getSimpleReturnExpression(node.body);
+            if (expr !== undefined && (multiline || !node.body.getText(sourceFile).includes("\n"))) {
+                const isObjectLiteral = expr.kind === ts.SyntaxKind.ObjectLiteralExpression;
+                ctx.addFailureAtNode(node.body, Rule.FAILURE_STRING(isObjectLiteral), createFix(node, node.body, expr, sourceFile.text));
             }
         }
+        return ts.forEachChild(node, cb);
+    });
+}
 
-        super.visitArrowFunction(node);
-    }
+function createFix(arrowFunction: ts.FunctionLikeDeclaration, body: ts.Block, expr: ts.Expression, text: string): Lint.Fix | undefined {
+    const statement = expr.parent!;
+    const returnKeyword = Lint.childOfKind(statement, ts.SyntaxKind.ReturnKeyword)!;
+    const arrow = Lint.childOfKind(arrowFunction, ts.SyntaxKind.EqualsGreaterThanToken)!;
+    const openBrace = Lint.childOfKind(body, ts.SyntaxKind.OpenBraceToken)!;
+    const closeBrace = Lint.childOfKind(body, ts.SyntaxKind.CloseBraceToken)!;
+    const semicolon = Lint.childOfKind(statement, ts.SyntaxKind.SemicolonToken);
 
-    private isMultiline(node: ts.Node): boolean {
-        const getLine = (position: number) => this.getLineAndCharacterOfPosition(position).line;
-        return getLine(node.getEnd()) > getLine(node.getStart());
-    }
+    const anyComments = hasComments(arrow) || hasComments(openBrace) || hasComments(statement) || hasComments(returnKeyword) ||
+        hasComments(expr) || (semicolon && hasComments(semicolon)) || hasComments(closeBrace);
+    return anyComments ? undefined : [
+        // Object literal must be wrapped in `()`
+        ...(expr.kind === ts.SyntaxKind.ObjectLiteralExpression ? [
+            Lint.Replacement.appendText(expr.getStart(), "("),
+            Lint.Replacement.appendText(expr.getEnd(), ")"),
+        ] : []),
+        // " {"
+        Lint.Replacement.deleteFromTo(arrow.end, openBrace.end),
+        // "return "
+        Lint.Replacement.deleteFromTo(statement.getStart(), expr.getStart()),
+        // " }" (may include semicolon)
+        Lint.Replacement.deleteFromTo(expr.end, closeBrace.end),
+    ];
 
-    private createArrowFunctionFix(arrowFunction: ts.FunctionLikeDeclaration, body: ts.Block, expr: ts.Expression): Lint.Fix | undefined {
-        const text = this.getSourceFile().text;
-        const statement = expr.parent!;
-        const returnKeyword = Lint.childOfKind(statement, ts.SyntaxKind.ReturnKeyword)!;
-        const arrow = Lint.childOfKind(arrowFunction, ts.SyntaxKind.EqualsGreaterThanToken)!;
-        const openBrace = Lint.childOfKind(body, ts.SyntaxKind.OpenBraceToken)!;
-        const closeBrace = Lint.childOfKind(body, ts.SyntaxKind.CloseBraceToken)!;
-        const semicolon = Lint.childOfKind(statement, ts.SyntaxKind.SemicolonToken);
-
-        const anyComments = hasComments(arrow) || hasComments(openBrace) || hasComments(statement) || hasComments(returnKeyword) ||
-            hasComments(expr) || (semicolon && hasComments(semicolon)) || hasComments(closeBrace);
-        return anyComments ? undefined : this.createFix(
-            // Object literal must be wrapped in `()`
-            ...(expr.kind === ts.SyntaxKind.ObjectLiteralExpression ? [
-                this.appendText(expr.getStart(), "("),
-                this.appendText(expr.getEnd(), ")"),
-            ] : []),
-            // " {"
-            this.deleteFromTo(arrow.end, openBrace.end),
-            // "return "
-            this.deleteFromTo(statement.getStart(), expr.getStart()),
-            // " }" (may include semicolon)
-            this.deleteFromTo(expr.end, closeBrace.end),
-        );
-
-        function hasComments(node: ts.Node): boolean {
-            return ts.getTrailingCommentRanges(text, node.getEnd()) !== undefined;
-        }
+    function hasComments(node: ts.Node): boolean {
+        return hasCommentAfterPosition(text, node.getEnd());
     }
 }
 
