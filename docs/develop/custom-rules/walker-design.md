@@ -1,4 +1,11 @@
-## Using `WalkContext<T>` and `Rule#applyWithFunction`
+---
+title: Designing rule walkers
+layout: page
+permalink: "/develop/custom-rules/walker-design"
+---
+
+## Using WalkContext and applyWithFunction
+
 If you have a rule with a pretty simple implementation, you don't need to declare a class which extends the `Walker` class. Instead, you can define a callback function that accepts following argument:
 
 - `ctx: WalkContext<T>`: An object containing rule information, an object `options: T` containing the parsed rule arguments, the `ts.sourceFile` object, and functions for adding failures
@@ -6,6 +13,7 @@ If you have a rule with a pretty simple implementation, you don't need to declar
 Use this callback as an argument to `applyWithFunction`. You can also pass your parsed rule arguments as optional 3rd parameter.
 
 Let's look at `no-null-keyword` as an example:
+
 ```ts
 import * as ts from "typescript";
 import * as Lint from "tslint";
@@ -45,9 +53,10 @@ function walk(ctx: Lint.WalkContext<void>) {
 }
 ```
 
-## Using `AbstractWalker<T>`
+## Using AbstractWalker
+
 If your rule implementation is a bit more involved than the above example, you can also implement it as a class.
-Simply extend `AbstractWalker` and implement the `walk` method.
+Simply extend `AbstractWalker<T>` and implement the `walk` method.
 
 ```ts
 import * as ts from "typescript";
@@ -97,6 +106,7 @@ class NoMagicNumbersWalker extends Lint.AbstractWalker<Set<string>> {
 ```
 
 ## Migrating from `RuleWalker` to `AbstractWalker`
+
 The main difference between `RuleWalker` and `AbstractWalker` is that you need to implement the AST recursion yourself. But why would you want to do that?
 __Performance!__ `RuleWalker` wants to be "one walker to rule them all" (pun intended). It's easy to use but that convenience 
 makes it slow by default. When implementing the walking yourself, you only need to do as much work as needed.
@@ -120,5 +130,3 @@ This table describes the equivalent methods between the two classes:
 `this.getFailures()` | is available to be compatible, but prefer `this.failures`
 `this.skip()` | just don't use it, it's a noop
 `this.getRuleName()` | `this.ruleName`
-
-

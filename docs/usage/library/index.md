@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Library
+title: Using TSLint as a Node.js library
 permalink: /usage/library/
 ---
 
@@ -14,7 +14,7 @@ yarn add tslint typescript
 
 {% include peer_dependencies.md %}
 
-### Usage
+### Library usage
 
 Please ensure that the TypeScript source files compile correctly _before_ running the linter.
 

@@ -1,5 +1,5 @@
 ---
-title: Custom Rules
+title: Developing TSLint rules
 layout: page
 permalink: "/develop/custom-rules/"
 ---

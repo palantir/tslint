@@ -1,14 +1,14 @@
 ---
 layout: page
-title: Rules
+title: TSLint core rules
 permalink: /rules/
 menu: main
 order: 2
 ---
 
-_Rules_ encode logic for syntactic & semantic checks of TypeScript source code.
+Lint _rules_ encode logic for syntactic & semantic checks of TypeScript source code.
 
-### TypeScript Specific
+### TypeScript-specific
 
 _These rules find errors related to TypeScript features_:
 
