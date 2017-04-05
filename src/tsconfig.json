@@ -7,7 +7,6 @@
         "noUnusedParameters": true,
         "noUnusedLocals": true,
         "strictNullChecks": true,
-        "noEmitHelpers": true,
         "importHelpers": true,
         "declaration": true,
         "sourceMap": false,
