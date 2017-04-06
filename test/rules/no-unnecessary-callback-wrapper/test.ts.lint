@@ -17,6 +17,15 @@ x => f(x);
 
 // Not catching this case (obj.f may need a 'this' binding)
 (x) => obj.f(x);
+// x is not only used as argument
+(x) => obj[x](x);
+
+// ignore when callback is no identifier
+(x) => (++i)(x);
+(x) => foo()(x);
+
+// allow async arrows
+async (x) => f(x);
 
 // Not bothering to catch this case.
 ({ x, y }) => f({ x, y });
