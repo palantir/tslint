@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isElementAccessExpression, isStringLiteral, isValidIdentifier } from "tsutils";
+import { isElementAccessExpression, isStringLiteral, isValidPropertyAccess } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -46,7 +46,7 @@ function walk(ctx: Lint.WalkContext<void>) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (isElementAccessExpression(node)) {
             const argument = node.argumentExpression;
-            if (argument !== undefined && isStringLiteral(argument) && isValidIdentifier(argument.text)) {
+            if (argument !== undefined && isStringLiteral(argument) && isValidPropertyAccess(argument.text)) {
                 ctx.addFailureAtNode(
                     argument,
                     Rule.FAILURE_STRING,
