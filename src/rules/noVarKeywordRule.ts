@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { isModuleDeclaration, isVariableDeclarationList } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -37,46 +38,50 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Forbidden 'var' keyword, use 'let' or 'const' instead";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const noVarKeywordWalker = new NoVarKeywordWalker(sourceFile, this.getOptions());
-        return this.applyWithWalker(noVarKeywordWalker);
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class NoVarKeywordWalker extends Lint.RuleWalker {
-    public visitVariableStatement(node: ts.VariableStatement) {
-        if (!Lint.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)
-                && !Lint.isBlockScopedVariable(node)) {
-            this.reportFailure(node.declarationList);
+function walk(ctx: Lint.WalkContext<void>): void {
+    const { sourceFile } = ctx;
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        switch (node.kind) {
+            case ts.SyntaxKind.VariableStatement: {
+                const vs = node as ts.VariableStatement;
+                if (!Lint.isBlockScopedVariableDeclarationList(vs.declarationList) && !isGlobalVarDeclaration(vs)) {
+                    fail(vs.declarationList);
+                }
+                break;
+            }
+
+            case ts.SyntaxKind.ForStatement:
+            case ts.SyntaxKind.ForInStatement:
+            case ts.SyntaxKind.ForOfStatement: {
+                const { initializer } = node as ts.ForStatement | ts.ForInStatement | ts.ForOfStatement;
+                if (initializer && isVariableDeclarationList(initializer) && !Lint.isBlockScopedVariableDeclarationList(initializer)) {
+                    fail(initializer);
+                }
+                break;
+            }
         }
 
-        super.visitVariableStatement(node);
-    }
+        return ts.forEachChild(node, cb);
+    });
 
-    public visitForStatement(node: ts.ForStatement) {
-        this.handleInitializerNode(node.initializer);
-        super.visitForStatement(node);
+    function fail(node: ts.Node): void {
+        // Don't apply fix in a declaration file, because may have meant 'const'.
+        const fix = sourceFile.isDeclarationFile ? undefined : new Lint.Replacement(node.getStart(), "var".length, "let");
+        ctx.addFailureAtNode(Lint.childOfKind(node, ts.SyntaxKind.VarKeyword)!, Rule.FAILURE_STRING, fix);
     }
+}
 
-    public visitForInStatement(node: ts.ForInStatement) {
-        this.handleInitializerNode(node.initializer);
-        super.visitForInStatement(node);
-    }
+// Allow `declare var x: number;` or `declare global { var x: number; }`
+function isGlobalVarDeclaration(node: ts.VariableStatement): boolean {
+    const parent = node.parent!;
+    return Lint.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)
+        || parent.kind === ts.SyntaxKind.ModuleBlock && isDeclareGlobal(parent.parent!);
+}
 
-    public visitForOfStatement(node: ts.ForOfStatement) {
-        this.handleInitializerNode(node.initializer);
-        super.visitForOfStatement(node);
-    }
-
-    private handleInitializerNode(node: ts.VariableDeclarationList | ts.Expression | undefined) {
-        if (node && node.kind === ts.SyntaxKind.VariableDeclarationList &&
-                !(Lint.isNodeFlagSet(node, ts.NodeFlags.Let) || Lint.isNodeFlagSet(node, ts.NodeFlags.Const))) {
-            this.reportFailure(node);
-        }
-    }
-
-    private reportFailure(node: ts.Node) {
-        const nodeStart = node.getStart(this.getSourceFile());
-        this.addFailureAt(nodeStart, "var".length, Rule.FAILURE_STRING,
-            this.createReplacement(nodeStart, "var".length, "let"));
-    }
+function isDeclareGlobal(node: ts.Node): boolean {
+    return isModuleDeclaration(node) && node.name.kind === ts.SyntaxKind.Identifier && node.name.text === "global";
 }

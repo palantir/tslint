@@ -1,0 +1,8 @@
+export var x: number;
+       ~~~ [0]
+
+declare global {
+    var x: number;
+}
+
+[0]: Forbidden 'var' keyword, use 'let' or 'const' instead
