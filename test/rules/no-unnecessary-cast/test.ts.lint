@@ -1,0 +1,56 @@
+const nonNullStringLiteral: 'test' = 'test';
+const nonNullString: string = 'test';
+const nullableString: string|undefined = 'test';
+
+// non-null
+let a = nonNullStringLiteral!;
+        ~~~~~~~~~~~~~~~~~~~~~  [This cast is unnecessary.]
+let b = nonNullString!;
+        ~~~~~~~~~~~~~~  [This cast is unnecessary.]
+let c = nullableString!;
+
+// as
+let d = nonNullStringLiteral as string;
+let e = nonNullString as string;
+        ~~~~~~~~~~~~~~~~~~~~~~~  [This cast is unnecessary.]
+let f = nullableString as string;
+
+// type assertion
+let g = <string>nonNullStringLiteral;
+let h = <string>nonNullString;
+        ~~~~~~~~~~~~~~~~~~~~~  [This cast is unnecessary.]
+let i = <string>nullableString;
+
+// complex inner expression
+let j = (nonNullString + nonNullStringLiteral)!;
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [This cast is unnecessary.]
+let k = (nonNullString + nonNullStringLiteral) as string;
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [This cast is unnecessary.]
+let l = <string>(nonNullString + nonNullStringLiteral);
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [This cast is unnecessary.]
+let m = nonNullString.trim()!;
+        ~~~~~~~~~~~~~~~~~~~~~  [This cast is unnecessary.]
+let n = nonNullString.trim() as string;
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [This cast is unnecessary.]
+let o = <string>nonNullString.trim();
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [This cast is unnecessary.]
+let p = nonNullString!.trim();
+        ~~~~~~~~~~~~~~  [This cast is unnecessary.]
+
+// custom types
+interface Iface1 {
+  prop: string;
+}
+interface Iface2 {
+  prop: string;
+}
+
+const value1: Iface1 = {prop: 'test'};
+const value2: Iface2 = {prop: 'test'};
+
+let q = <Iface1>value1;
+        ~~~~~~~~~~~~~~  [This cast is unnecessary.]
+let r = <Iface2>value1;
+let s = value2 as Iface2;
+        ~~~~~~~~~~~~~~~~  [This cast is unnecessary.]
+let t = value2 as Iface1;

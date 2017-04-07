@@ -350,6 +350,10 @@ export class SyntaxWalker {
         this.walkChildren(node);
     }
 
+    protected visitAsExpression(node: ts.AsExpression) {
+        this.walkChildren(node);
+    }
+
     protected visitNode(node: ts.Node) {
         switch (node.kind) {
             case ts.SyntaxKind.AnyKeyword:
@@ -682,6 +686,10 @@ export class SyntaxWalker {
 
             case ts.SyntaxKind.WithStatement:
                 this.visitWithStatement(node as ts.WithStatement);
+                break;
+
+            case ts.SyntaxKind.AsExpression:
+                this.visitAsExpression(node as ts.AsExpression);
                 break;
 
             default:
