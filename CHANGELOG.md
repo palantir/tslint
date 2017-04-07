@@ -1,6 +1,34 @@
 Change Log
 ===
 
+v5.1.0
+---
+
+- [new-rule] `no-invalid-template-strings` (#2332)
+- [new-rule] `no-sparse-arrays` (#2407)
+- [new-rule-option] `no-void-expression`: adds `ignore-arrow-function-shorthand` (#2445)
+- [api] `tslint:all` configuration (#2417)
+- [bugfix] In tslint:recommended move `no-reference-import` from `jsRules` to `rules` (#2441)
+- [bugfix] `no-unnecessary-callback-wrapper`: only check if callback is identifier, allow all other expressions (#2510)
+- [bugfix] `member-access`: Skip index signature, it can not have an access modifier (#2437)
+- [bugfix] `restrict-plus-operands` fixes regression where every assignment and comparison was checked (#2454)
+- [bugfix] `no-unnecessary-callback-wrapper`: allow async wrapper function (#2510)
+- [bugfix] `prefer-for-of`: No error if `delete` is used (#2458)
+- [bugfix] `radix`: don't warn for missing radix on method calls (#2352)
+- [bugfix] `no-use-before-declare`: Handle symbol with empty declarations list. (#2436)
+- [bugfix] `strict-type-predicates`: Check for construct signatures in `isFunction`. (#2479)
+- [enhancement] `strict-boolean-expressions`: When `--strictNullChecks` is turned off, `allow-null-union` and `allow-undefined-union` turn off "always truthy" errors. (#2373)
+- [enhancement] `radix`: added check for global.parseInt and window.parseInt (#2352)
+- [enhancement] `arrow-return-shorthand`: Improve failure message when return expression is an object literal (#2466)
+
+Thanks to our contributors!
+- Andy Hanson
+- bumbleblym
+- Klaus Meinhardt
+- Jonas Kello
+- Minko Gechev
+- Donald Pipowitch
+
 v5.0.0
 ---
 
