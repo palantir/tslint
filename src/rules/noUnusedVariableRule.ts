@@ -59,6 +59,7 @@ export class Rule extends Lint.Rules.TypedRule {
         optionExamples: ["[true]", '[true, {"ignore-pattern": "^_"}]'],
         type: "functionality",
         typescriptOnly: true,
+        requiresTypeInfo: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
