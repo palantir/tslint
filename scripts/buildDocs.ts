@@ -152,9 +152,9 @@ function buildDocumentationDataFile(documentation: IDocumentation, metadataJson:
 /**
  * Generates Jekyll data from any item's metadata.
  */
-function generateJekyllData(metadata: any, type: string, name: string): any {
+function generateJekyllData(metadata: any, layout: string, type: string, name: string): any {
     return Object.assign({}, metadata, {
-        layout: type.toLowerCase(),
+        layout,
         title: `${type}: ${name}`,
     });
 }
@@ -164,7 +164,7 @@ function generateJekyllData(metadata: any, type: string, name: string): any {
  * that only consists of a YAML front matter block.
  */
 function generateRuleFile(metadata: IRuleMetadata): string {
-    const yamlData = generateJekyllData(metadata, "Rule", metadata.ruleName);
+    const yamlData = generateJekyllData(metadata, "rule", "Rule", metadata.ruleName);
     yamlData.optionsJSON = JSON.stringify(metadata.options, undefined, 2);
     return `---\n${yaml.safeDump(yamlData, <any> {lineWidth: 140})}---`;
 }
@@ -174,7 +174,7 @@ function generateRuleFile(metadata: IRuleMetadata): string {
  * that only consists of a YAML front matter block.
  */
 function generateFormatterFile(metadata: IFormatterMetadata): string {
-    const yamlData = generateJekyllData(metadata, "Formatter", metadata.formatterName);
+    const yamlData = generateJekyllData(metadata, "formatter", "TSLint formatter", metadata.formatterName);
     return `---\n${yaml.safeDump(yamlData, <any> {lineWidth: 140})}---`;
 }
 
