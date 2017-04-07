@@ -15,23 +15,25 @@
  * limitations under the License.
  */
 
-import * as ts from 'typescript';
+import * as ts from "typescript";
 import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.TypedRule {
-  static metadata: Lint.IRuleMetadata = {
-    ruleName: 'no-unnecessary-cast',
+  /* tslint:disable:object-literal-sort-keys */
+  public static metadata: Lint.IRuleMetadata = {
+    ruleName: "no-unnecessary-cast",
     description: `Warns if a cast does not change the type of an expression.`,
     options: null,
-    optionsDescription: 'Not configurable',
-    type: 'typescript',
+    optionsDescription: "Not configurable",
+    type: "typescript",
     typescriptOnly: true,
     requiresTypeInfo: true,
   };
+  /* tslint:enable:object-literal-sort-keys */
 
-  static FAILURE_STRING = 'This cast is unnecessary.';
+  public static FAILURE_STRING = "This cast is unnecessary.";
 
-  applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+  public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
     return this.applyWithWalker(new Walker(sourceFile, this.ruleName, program));
   }
 }
@@ -73,7 +75,7 @@ class Walker extends Lint.AbstractWalker<void> {
         replacements.push(
           Lint.Replacement.deleteFromTo(node.expression.getEnd(), node.getEnd()));
       }
-      this.addFailureAtNode(node, Rule.FAILURE_STRING, replacements)
+      this.addFailureAtNode(node, Rule.FAILURE_STRING, replacements);
     }
   }
 }
