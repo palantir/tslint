@@ -32,31 +32,36 @@ export class Rule extends Lint.Rules.TypedRule {
   static FAILURE_STRING = 'This cast is unnecessary.';
 
   applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-    return this.applyWithWalker(new Walker(sourceFile, this.getOptions(), program));
+    return this.applyWithWalker(new Walker(sourceFile, this.ruleName, program));
   }
 }
 
-class Walker extends Lint.ProgramAwareRuleWalker {
-  protected visitNonNullExpression(node: ts.NonNullExpression) {
-    this.verifyCast(node);
-    super.visitNonNullExpression(node);
+class Walker extends Lint.AbstractWalker<void> {
+  private readonly typeChecker: ts.TypeChecker;
+  constructor(sourceFile: ts.SourceFile, ruleName: string, program: ts.Program) {
+    super(sourceFile, ruleName, undefined);
+    this.typeChecker = program.getTypeChecker();
   }
 
-  protected visitTypeAssertionExpression(node: ts.TypeAssertion) {
-    this.verifyCast(node);
-    super.visitTypeAssertionExpression(node);
-  }
+  public walk(sourceFile: ts.SourceFile) {
+    const cb = (node: ts.Node): void => {
+      if (node.kind === ts.SyntaxKind.TypeAssertionExpression ||
+          node.kind === ts.SyntaxKind.NonNullExpression ||
+          node.kind === ts.SyntaxKind.AsExpression) {
+        this.verifyCast(
+          node as ts.TypeAssertion|ts.NonNullExpression|ts.AsExpression);
+      }
 
-  protected visitAsExpression(node: ts.AsExpression) {
-    this.verifyCast(node);
-    super.visitAsExpression(node);
+      return ts.forEachChild(node, cb);
+    };
+
+    return ts.forEachChild(sourceFile, cb);
   }
 
   private verifyCast(node: ts.TypeAssertion|ts.NonNullExpression|
                      ts.AsExpression) {
-    const checker = this.getTypeChecker();
-    const castType = checker.getTypeAtLocation(node);
-    const uncastType = checker.getTypeAtLocation(node.expression);
+    const castType = this.typeChecker.getTypeAtLocation(node);
+    const uncastType = this.typeChecker.getTypeAtLocation(node.expression);
 
     if (uncastType && castType && uncastType === castType) {
       const replacements: Lint.Replacement[] = [];
@@ -68,8 +73,7 @@ class Walker extends Lint.ProgramAwareRuleWalker {
         replacements.push(
           Lint.Replacement.deleteFromTo(node.expression.getEnd(), node.getEnd()));
       }
-      this.addFailure(this.createFailure(
-        node.getStart(), node.getWidth(), Rule.FAILURE_STRING, replacements));
+      this.addFailureAtNode(node, Rule.FAILURE_STRING, replacements)
     }
   }
 }

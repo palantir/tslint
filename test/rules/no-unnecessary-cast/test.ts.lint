@@ -1,6 +1,6 @@
-const nonNullStringLiteral: 'test' = 'test';
-const nonNullString: string = 'test';
-const nullableString: string|undefined = 'test';
+const nonNullStringLiteral: 'test';
+const nonNullString: string;
+const nullableString: string|undefined;
 
 // non-null
 let a = nonNullStringLiteral!;
@@ -54,3 +54,35 @@ let r = <Iface2>value1;
 let s = value2 as Iface2;
         ~~~~~~~~~~~~~~~~  [This cast is unnecessary.]
 let t = value2 as Iface1;
+
+interface TypeA {
+  kind: 'a';
+}
+interface TypeB {
+  kind: 'b';
+}
+
+function isB(x: TypeA|TypeB): x is TypeB {
+  return true;
+}
+
+function func(aOrB: TypeA|TypeB) {
+  let u = aOrB as TypeA;
+  let v = <TypeB>aOrB;
+
+  if (aOrB.kind === 'a') {
+    let w = aOrB as TypeA;
+            ~~~~~~~~~~~~~  [This cast is unnecessary.]
+  } else {
+    let x = <TypeB>aOrB;
+            ~~~~~~~~~~~  [This cast is unnecessary.]
+  }
+
+  if (isB(aOrB)) {
+    let y = aOrB as TypeB;
+            ~~~~~~~~~~~~~  [This cast is unnecessary.]
+  } else {
+    let z = <TypeA>aOrB;
+            ~~~~~~~~~~~  [This cast is unnecessary.]
+  }
+}
