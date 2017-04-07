@@ -16,6 +16,7 @@
  */
 
 import * as path from "path";
+import { isBlockScopedVariableDeclarationList } from "tsutils";
 import * as ts from "typescript";
 
 import {IDisabledInterval, RuleFailure} from "./rule/rule";
@@ -52,10 +53,6 @@ export function hasModifier(modifiers: ts.ModifiersArray | undefined, ...modifie
  */
 export function isBlockScopedVariable(node: ts.VariableDeclaration | ts.VariableStatement): boolean {
     return isBlockScopedVariableDeclarationList(node.kind === ts.SyntaxKind.VariableDeclaration ? node.parent! : node.declarationList);
-}
-
-export function isBlockScopedVariableDeclarationList(node: ts.VariableDeclarationList): boolean {// tslint:disable-next-line no-bitwise
-    return isNodeFlagSet(node, ts.NodeFlags.Let | ts.NodeFlags.Const);
 }
 
 export function isBlockScopedBindingElement(node: ts.BindingElement): boolean {

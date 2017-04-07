@@ -5,4 +5,13 @@ declare global {
     var x: number;
 }
 
+declare namespace foo.global {
+    var x: number;
+    ~~~ [0]
+    export namespace global {
+        var x: number;
+        ~~~ [0]
+    }
+}
+
 [0]: Forbidden 'var' keyword, use 'let' or 'const' instead
