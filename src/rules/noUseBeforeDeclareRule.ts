@@ -32,6 +32,7 @@ export class Rule extends Lint.Rules.TypedRule {
         optionExamples: ["true"],
         type: "functionality",
         typescriptOnly: false,
+        requiresTypeInfo: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
