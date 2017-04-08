@@ -1,6 +1,82 @@
-declare const x: any;
+import importEquals = require("./commonjsModule");
+import importAlias = importEquals;
+namespace N { const x: any = 0; }
+import importQualifiedName = N.x;
+import * as namespaceImport from "./es6Module";
+import defaultExport, { namedExport } from "./es6Module";
 
-function f(x: any) {
+const num: namespaceImport.T = 0;
+
+{
+    const { x: { y, z } } = { x: { y: 1, z: 2 } };
+    function f(a: any, b: { x: any }) {
+        const { g } = a; // TODO: warn here!
+        const { x } = b;
+    }
+}
+
+// Ignore string literal in type
+function returnsA(): "a";
+
+
+importAlias.property;
+~~~~~~~~~~~ [0]
+
+namespaceImport.namedExport;
+
+importAlias, importAlias;
+
+
+declare const x: any;
+declare const hasProp: { x: any };
+
+hasProp.x(1);
+~~~~~~~~~ [0]
+
+declare function takesAny(a: any, ...bs: any[]): void;
+declare function takesNumber(a: number, ...bs: number[]): void;
+
+takesAny(x, x);
+takesNumber(x, x);
+            ~ [0]
+               ~ [0]
+
+declare function templateTakesAny(arr: TemplateStringsArray, a: any, ...bs: any[]): any;
+declare function templateTakesNumber(arr: TemplateStringsArray, a: number, ...bs: number[]): any;
+
+templateTakesAny`${x}${x}`;
+templateTakesNumber`${x}${x}`;
+                      ~ [0]
+                          ~ [0]
+templateTakesAny`${x}`.prop;
+~~~~~~~~~~~~~~~~~~~~~~ [0]
+
+declare function decoratorTakesAny(value: any): Function;
+declare function decoratorTakesNumber(value: number): Function;
+declare const decoratorIsAny: any;
+
+class C {
+    @decoratorTakesAny(x) f() {}
+    @decoratorTakesNumber(x) g() {}
+                          ~ [0]
+    @decoratorIsAny h() {}
+     ~~~~~~~~~~~~~~ [0]
+}
+
+x instanceof Date;
+Date instanceof x;
+                ~ [0]
+
+const retBool: () => boolean = x;
+                               ~ [0]
+
+function params(a: any = x, b: boolean = x) {}
+                                         ~ [0]
+
+function f(x: any, retAny: () => any): any {
+    x;
+    (x);
+
     x.foo;
     ~ [0]
     x(0);
@@ -10,20 +86,44 @@ function f(x: any) {
     x + 3;
     ~ [0]
 
-    // OK to pass it to a function that takes `any`
-    g(x);
-    // Not OK to pass to any other function.
-    [].map(x);
-           ~ [0]
+    retAny();
+    retAny()[0];
+    ~~~~~~~~ [0]
 
     // Same for constructors
     new X(x);
     new Y(x);
           ~ [0]
+
+    // Assignment: assign to 'any' OK, assign to other not OK.
+    const v0: any = x;
+    const v1: boolean = x;
+                        ~ [0]
+    let v2: any, v3: boolean;
+    v2 = x;
+    v3 = x;
+         ~ [0]
+
+    // Return OK if return type is 'any'
+    return x;
 }
 
-class X { constructor(x: any) {} }
-class Y { constructor(x: number) {} }
+function f2(x: any): boolean {
+    return x;
+           ~ [0]
+}
+
+class X {
+    constructor(x: any) {}
+
+    prop0: any = x;
+    prop1: number = x;
+                    ~ [0]
+
+}
+class Y {
+    constructor(x: number) {}
+}
 
 function g(x: any): string {
     if (x === undefined) {
@@ -37,6 +137,8 @@ function g(x: any): string {
         return `Array, length ${x.length}`;
     }
     if (Math.random() > 0.5) {
+        // Allow explicit cast to 'any'
+        (x as any).whatchamacallit;
         // Allow explicit cast
         return (<string> x).toLowerCase() + (x as string).toUpperCase();
     }
