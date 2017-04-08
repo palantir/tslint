@@ -15,18 +15,12 @@ x => f(x);
 (...args) => f(...args);
 ~~~~~~~~~~~~~~~~~~~~~~~ [0]
 
-// Not catching this case (obj.f may need a 'this' binding)
+// Ignore if function is not an identifier
 (x) => obj.f(x);
 (x) => obj["f"](x);
+x => foo()(x);
 // x is not only used as argument
 (x) => obj[x](x);
-
-x => foo()(x);
-~~~~~~~~~~~~~ [No need to wrap 'foo()' in another function. Just use it directly.]
-// Not fooled by property access to '.x'
-x => foo.x()(x);
-~~~~~~~~~~~~~~~ [No need to wrap 'foo.x()' in another function. Just use it directly.]
-
 x => x(x);
 
 // allow async arrows

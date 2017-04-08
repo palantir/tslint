@@ -15,8 +15,7 @@
  * limitations under the License.
  */
 
-import { hasModifier, isArrowFunction, isCallExpression, isElementAccessExpression, isIdentifier,
-    isPropertyAccessExpression, isSpreadElement } from "tsutils";
+import { hasModifier, isArrowFunction, isCallExpression, isIdentifier, isSpreadElement } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -62,43 +61,15 @@ function walk(ctx: Lint.WalkContext<void>): void {
 }
 
 function detectUnnecessaryCallback(node: ts.Node): ts.CallExpression | undefined {
-    if (isArrowFunction(node) && !hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword)) {
-        const { parameters, body } = node;
-        if (isCallExpression(body)) {
-            const { expression, arguments: args } = body;
-            if (isRedundantCallback(parameters, args) && shouldFailOnCalledExpression(parameters, expression)) {
-                return body;
-            }
-        }
+    if (!isArrowFunction(node) || hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword)) {
+        return undefined;
     }
-    return undefined;
-}
-
-/**
- * False if there may be a 'this' binding or if a parameter is used in the called function itself.
- * I.e., rejects `x => obj.f(x)` or `x => f(x)(x)`.
- */
-function shouldFailOnCalledExpression(parameters: ReadonlyArray<{ name: ts.Identifier }>, expression: ts.Expression): boolean {
-    const parametersSet = new Set(parameters.map((p) => p.name.text));
-    return !isPropertyAccessExpression(expression) && !isElementAccessExpression(expression) && !usesParameter(expression);
-    function usesParameter(expr: ts.Expression): boolean {
-        if (isIdentifier(expr)) {
-            return parametersSet.has(expr.text);
-        }
-        if (isPropertyAccessExpression(expr)) {
-            // Ignore rhs, that does not refer to the parameter.
-            return usesParameter(expr.expression);
-        }
-        return ts.forEachChild(expr, usesParameter);
+    const { parameters, body } = node;
+    if (!isCallExpression(body)) {
+        return undefined;
     }
-}
-
-/** Detects that parameters and arguments are identical identifiers. */
-function isRedundantCallback(
-        parameters: ReadonlyArray<ts.ParameterDeclaration>,
-        args: ReadonlyArray<ts.Node>,
-        ): parameters is ReadonlyArray<ts.ParameterDeclaration & { name: ts.Identifier }> {
-    return parameters.length === args.length && parameters.every(({ dotDotDotToken, name }, i) => {
+    const { expression, arguments: args } = body;
+    const isRedundant = isIdentifier(expression) && parameters.length === args.length && parameters.every(({ dotDotDotToken, name }, i) => {
         let arg = args[i];
         if (dotDotDotToken !== undefined) {
             if (!isSpreadElement(arg)) {
@@ -106,6 +77,9 @@ function isRedundantCallback(
             }
             arg = arg.expression;
         }
-        return isIdentifier(name) && isIdentifier(arg) && name.text === arg.text;
+        return isIdentifier(name) && isIdentifier(arg) && name.text === arg.text
+            // If the invoked expression is one of the parameters, bail.
+            && expression.text !== name.text;
     });
+    return isRedundant ? body : undefined;
 }

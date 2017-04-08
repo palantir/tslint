@@ -11,16 +11,12 @@ f;
 
 f;
 
-// Not catching this case (obj.f may need a 'this' binding)
+// Ignore if function is not an identifier
 (x) => obj.f(x);
 (x) => obj["f"](x);
+x => foo()(x);
 // x is not only used as argument
 (x) => obj[x](x);
-
-foo();
-// Not fooled by property access to '.x'
-foo.x();
-
 x => x(x);
 
 // allow async arrows
