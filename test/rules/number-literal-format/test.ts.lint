@@ -1,0 +1,18 @@
+0;
+0.5;
+10;
+
+0.0;
+~~~ [trailing]
+0.50;
+~~~~ [trailing]
+
+.5;
+~~ [decimal]
+
+.50;
+~~~ [trailing]
+~~~ [decimal]
+
+[trailing]: Number literal should not have a trailing '0'.
+[decimal]: Number literal should begin with '0.' and not just '.'.

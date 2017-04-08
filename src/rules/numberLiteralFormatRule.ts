@@ -1,0 +1,69 @@
+/**
+ * @license
+ * Copyright 2017 Palantir Technologies, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import * as utils from "tsutils";
+import * as ts from "typescript";
+
+import * as Lint from "../index";
+
+export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "number-literal-format",
+        description: "Checks that decimal literals should begin with '0.' instead of just '.', and should not end with a trailing '0'.",
+        optionsDescription: "Not configurable.",
+        options: null,
+        optionExamples: ["true"],
+        type: "style",
+        typescriptOnly: false,
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
+    public static FAILURE_STRING_TRAILING_0 = "Number literal should not have a trailing '0'.";
+    public static FAILURE_STRING_LEADING_DECIMAL = "Number literal should begin with '0.' and not just '.'.";
+
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        return this.applyWithFunction(sourceFile, walk);
+    }
+}
+
+function walk(ctx: Lint.WalkContext<void>): void {
+    const { sourceFile } = ctx;
+    return ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
+        if (utils.isNumericLiteral(node)) {
+            return check(node);
+        }
+        return ts.forEachChild(node, cb);
+    });
+
+    function check(node: ts.NumericLiteral): void {
+        // Apparently the number literal '0.0' has a '.text' of '0'.
+        const text = node.getText(sourceFile);
+        if (text.length <= 1) {
+            return;
+        }
+
+        if (text.startsWith(".")) {
+            ctx.addFailureAtNode(node, Rule.FAILURE_STRING_LEADING_DECIMAL);
+        }
+
+        // Allow '10', but not '1.0'
+        if (text.endsWith("0") && text.includes(".")) {
+            ctx.addFailureAtNode(node, Rule.FAILURE_STRING_TRAILING_0);
+        }
+    }
+}
