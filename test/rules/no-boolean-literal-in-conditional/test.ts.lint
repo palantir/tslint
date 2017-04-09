@@ -1,0 +1,35 @@
+declare const b: boolean;
+declare const c: boolean;
+declare const d: boolean;
+declare const s: string;
+
+s ? true : false;
+b ? true : s;
+b ? c : d;
+
+b ? true : true;
+~~~~~~~~~~~~~~~ [Conditional expression with a boolean literal can be simplified to 'true'.]
+
+b ? false : false;
+~~~~~~~~~~~~~~~~~ [Conditional expression with a boolean literal can be simplified to 'false'.]
+
+b ? true : false;
+~~~~~~~~~~~~~~~~ [Conditional expression with a boolean literal can be simplified to 'x'.]
+
+b ? false : true;
+~~~~~~~~~~~~~~~~ [Conditional expression with a boolean literal can be simplified to '!x'.]
+
+b && b ? false : true;
+~~~~~~~~~~~~~~~~~~~~~ [Conditional expression with a boolean literal can be simplified to '!x'.]
+
+b ? true : c;
+~~~~~~~~~~~~ [Conditional expression with a boolean literal can be simplified to 'x || y'.]
+
+b ? false : c;
+~~~~~~~~~~~~~ [Conditional expression with a boolean literal can be simplified to '!x && y'.]
+
+b ? c : true;
+~~~~~~~~~~~~ [Conditional expression with a boolean literal can be simplified to '!x || y'.]
+
+b ? c : false;
+~~~~~~~~~~~~~ [Conditional expression with a boolean literal can be simplified to 'x && y'.]

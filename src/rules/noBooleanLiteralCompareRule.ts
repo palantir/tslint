@@ -86,7 +86,7 @@ function fix(node: ts.BinaryExpression, { negate, expression }: Compare): Lint.F
     }
 }
 
-function needsParenthesesForNegate(node: ts.Expression): boolean {
+export function needsParenthesesForNegate(node: ts.Expression): boolean {
     switch (node.kind) {
         case ts.SyntaxKind.AsExpression:
         case ts.SyntaxKind.BinaryExpression:

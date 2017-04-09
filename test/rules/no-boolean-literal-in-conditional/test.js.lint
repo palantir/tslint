@@ -1,0 +1,3 @@
+declare const b: boolean;
+b ? true : true;
+~~~~~~~~~~~~~~~ [Conditional expression with a boolean literal can be simplified to 'true'.]
