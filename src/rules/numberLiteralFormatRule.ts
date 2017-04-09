@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import * as utils from "tsutils";
+import { isNumericLiteral } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -33,7 +33,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
+    public static FAILURE_STRING_LEADING_0 = "Exponent should not have a leading '0'.";
     public static FAILURE_STRING_TRAILING_0 = "Number literal should not have a trailing '0'.";
+    public static FAILURE_STRING_TRAILING_DECIMAL = "Number literal should not end in '.'.";
     public static FAILURE_STRING_LEADING_DECIMAL = "Number literal should begin with '0.' and not just '.'.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -44,26 +46,45 @@ export class Rule extends Lint.Rules.AbstractRule {
 function walk(ctx: Lint.WalkContext<void>): void {
     const { sourceFile } = ctx;
     return ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
-        if (utils.isNumericLiteral(node)) {
+        if (isNumericLiteral(node)) {
             return check(node);
         }
         return ts.forEachChild(node, cb);
     });
 
     function check(node: ts.NumericLiteral): void {
-        // Apparently the number literal '0.0' has a '.text' of '0'.
+        // Apparently the number literal '0.0' has a '.text' of '0', so use '.getText()' instead.
         const text = node.getText(sourceFile);
-        if (text.length <= 1) {
-            return;
+        if (text.includes("e")) {
+            // Split on "e" to consider the parse before/after the exponent separately.
+            const [num, exp] = text.split("e");
+            if (exp.startsWith("-0") || exp.startsWith("0")) {
+                ctx.addFailureAt(node.getEnd() - exp.length, exp.length, Rule.FAILURE_STRING_LEADING_0);
+            }
+            return checkFormat(num, (msg) => {
+                ctx.addFailureAt(node.getStart(sourceFile), num.length, msg);
+            });
+        } else {
+            return checkFormat(text, (msg) => { ctx.addFailureAtNode(node, msg); });
         }
+    }
+}
 
-        if (text.startsWith(".")) {
-            ctx.addFailureAtNode(node, Rule.FAILURE_STRING_LEADING_DECIMAL);
-        }
+function checkFormat(text: string, fail: (message: string) => void): void {
+    if (text.length <= 1) {
+        return;
+    }
 
-        // Allow '10', but not '1.0'
-        if (text.endsWith("0") && text.includes(".")) {
-            ctx.addFailureAtNode(node, Rule.FAILURE_STRING_TRAILING_0);
-        }
+    if (text.startsWith(".")) {
+        fail(Rule.FAILURE_STRING_LEADING_DECIMAL);
+    }
+
+    if (text.endsWith(".")) {
+        fail(Rule.FAILURE_STRING_TRAILING_DECIMAL);
+    }
+
+    // Allow '10', but not '1.0'
+    if (text.endsWith("0") && text.includes(".")) {
+        fail(Rule.FAILURE_STRING_TRAILING_0);
     }
 }
