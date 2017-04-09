@@ -55,36 +55,30 @@ function walk(ctx: Lint.WalkContext<void>): void {
     function check(node: ts.NumericLiteral): void {
         // Apparently the number literal '0.0' has a '.text' of '0', so use '.getText()' instead.
         const text = node.getText(sourceFile);
-        if (text.includes("e")) {
-            // Split on "e" to consider the parse before/after the exponent separately.
-            const [num, exp] = text.split("e");
-            if (exp.startsWith("-0") || exp.startsWith("0")) {
-                ctx.addFailureAt(node.getEnd() - exp.length, exp.length, Rule.FAILURE_STRING_LEADING_0);
-            }
-            return checkFormat(num, (msg) => {
-                ctx.addFailureAt(node.getStart(sourceFile), num.length, msg);
-            });
-        } else {
-            return checkFormat(text, (msg) => { ctx.addFailureAtNode(node, msg); });
+        const [num, exp] = text.split(/e/i);
+        if (exp !== undefined && (exp.startsWith("-0") || exp.startsWith("0"))) {
+            ctx.addFailureAt(node.getEnd() - exp.length, exp.length, Rule.FAILURE_STRING_LEADING_0);
         }
-    }
-}
 
-function checkFormat(text: string, fail: (message: string) => void): void {
-    if (text.length <= 1) {
-        return;
-    }
+        if (num.length <= 1 || !text.includes(".")) {
+            return;
+        }
 
-    if (text.startsWith(".")) {
-        fail(Rule.FAILURE_STRING_LEADING_DECIMAL);
-    }
+        if (num.startsWith(".")) {
+            fail(Rule.FAILURE_STRING_LEADING_DECIMAL);
+        }
 
-    if (text.endsWith(".")) {
-        fail(Rule.FAILURE_STRING_TRAILING_DECIMAL);
-    }
+        if (num.endsWith(".")) {
+            fail(Rule.FAILURE_STRING_TRAILING_DECIMAL);
+        }
 
-    // Allow '10', but not '1.0'
-    if (text.endsWith("0") && text.includes(".")) {
-        fail(Rule.FAILURE_STRING_TRAILING_0);
+        // Allow '10', but not '1.0'
+        if (num.endsWith("0")) {
+            fail(Rule.FAILURE_STRING_TRAILING_0);
+        }
+
+        function fail(message: string): void {
+            ctx.addFailureAt(node.getStart(sourceFile), num.length, message);
+        }
     }
 }

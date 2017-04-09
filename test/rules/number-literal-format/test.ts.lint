@@ -20,6 +20,8 @@
 
 1e01;
   ~~ [leading-0]
+1E01;
+  ~~ [leading-0]
 1e-01;
   ~~~ [leading-0]
 1.0e10;
