@@ -48,7 +48,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             minLength: 0,
             maxLength: 1,
         },
-        optionExamples: ["true", `[true, "${OPTION_ALLOW_DECLARATIONS}"]`],
+        optionExamples: [true, [true, OPTION_ALLOW_DECLARATIONS]],
         type: "typescript",
         typescriptOnly: true,
     };

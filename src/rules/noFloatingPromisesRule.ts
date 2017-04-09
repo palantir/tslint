@@ -34,7 +34,7 @@ export class Rule extends Lint.Rules.TypedRule {
                 items: {type: "string"},
             },
         },
-        optionExamples: ["true", `[true, "JQueryPromise"]`],
+        optionExamples: [true, [true, "JQueryPromise"]],
         rationale: "Unhandled Promises can cause unexpected behavior, such as resolving at unexpected times.",
         type: "functionality",
         typescriptOnly: true,

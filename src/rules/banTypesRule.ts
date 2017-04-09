@@ -38,7 +38,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: Lint.Utils.dedent`
             A list of \`["regex", "optional explanation here"]\`, which bans
             types that match \`regex\``,
-        optionExamples: [`[true, ["Object", "Use {} instead."], ["String"]]`],
+        optionExamples: [[true, ["Object", "Use {} instead."], ["String"]]],
         type: "typescript",
         typescriptOnly: true,
     };

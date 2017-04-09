@@ -28,10 +28,10 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Require or disallow a space before function parenthesis",
         hasFix: true,
         optionExamples: [
-            `true`,
-            `[true, "always"]`,
-            `[true, "never"]`,
-            `[true, {"anonymous": "always", "named": "never", "asyncArrow": "always"}]`,
+            true,
+            [true, "always"],
+            [true, "never"],
+            [true, {anonymous: "always", named: "never", asyncArrow: "always"}],
         ],
         options: {
             properties: {

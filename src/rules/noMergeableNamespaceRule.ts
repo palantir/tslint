@@ -26,7 +26,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Disallows mergeable namespaces in the same file.",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "maintainability",
         typescriptOnly: true,
     };

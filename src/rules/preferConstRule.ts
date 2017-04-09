@@ -50,8 +50,8 @@ export class Rule extends Lint.Rules.AbstractRule {
             },
         },
         optionExamples: [
-            "true",
-            `[true, {"destructuring": "${OPTION_DESTRUCTURING_ALL}"}]`,
+            true,
+            [true, {destructuring: OPTION_DESTRUCTURING_ALL}],
         ],
         type: "maintainability",
         typescriptOnly: false,

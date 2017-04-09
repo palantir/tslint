@@ -40,7 +40,7 @@ export class Rule extends Lint.Rules.TypedRule {
             `,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         requiresTypeInfo: true,
         type: "functionality",
         typescriptOnly: false,

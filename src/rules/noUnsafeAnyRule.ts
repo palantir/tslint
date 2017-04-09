@@ -29,7 +29,7 @@ export class Rule extends Lint.Rules.TypedRule {
             Expressions that work on all values (such as \`"" + x\`) are allowed.`,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: true,
         requiresTypeInfo: true,

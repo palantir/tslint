@@ -26,7 +26,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: `Interfaces are generally preferred over type literals because interfaces can be implemented, extended and merged.`,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "style",
         typescriptOnly: true,
     };

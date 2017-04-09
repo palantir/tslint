@@ -29,7 +29,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             To catch more cases, enable \`only-arrow-functions\` and \`arrow-return-shorthand\` too.`,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "style",
         typescriptOnly: false,
     };

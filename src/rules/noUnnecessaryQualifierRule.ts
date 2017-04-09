@@ -28,7 +28,7 @@ export class Rule extends Lint.Rules.TypedRule {
         hasFix: true,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "style",
         typescriptOnly: true,
         requiresTypeInfo: true,

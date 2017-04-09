@@ -45,7 +45,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             minLength: 0,
             maxLength: 3,
         },
-        optionExamples: ["true", `[true, "${OPTION_NO_PUBLIC}"]`, `[true, "${OPTION_CHECK_ACCESSOR}"]`],
+        optionExamples: [true, [true, OPTION_NO_PUBLIC], [true, OPTION_CHECK_ACCESSOR]],
         type: "typescript",
         typescriptOnly: true,
     };

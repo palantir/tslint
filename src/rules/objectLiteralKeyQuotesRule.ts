@@ -57,7 +57,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             enum: ["always", "as-needed", "consistent", "consistent-as-needed"],
             // TODO: eslint supports "keywords", "unnecessary" and "numbers" options.
         },
-        optionExamples: ["[true, \"as-needed\"]", "[true, \"always\"]"],
+        optionExamples: [[true, "as-needed"], [true, "always"]],
         type: "style",
         typescriptOnly: false,
     };
