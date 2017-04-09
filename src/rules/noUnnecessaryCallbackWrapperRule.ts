@@ -44,32 +44,34 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>): void {
-    const { sourceFile } = ctx;
-    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        const call = detectUnnecessaryCallback(node);
-        if (call !== undefined) {
-            const start = node.getStart(sourceFile);
-            ctx.addFailure(start, node.end, Rule.FAILURE_STRING(call.expression.getText()), [
-                Lint.Replacement.deleteFromTo(start, call.getStart(sourceFile)),
-                Lint.Replacement.deleteFromTo(call.expression.end, node.end),
+function walk(ctx: Lint.WalkContext<void>) {
+    return ts.forEachChild(ctx.sourceFile, cb);
+    function cb(node: ts.Node): void {
+        if (isArrowFunction(node) && !hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword) &&
+            isCallExpression(node.body) && isIdentifier(node.body.expression) &&
+            isRedundantCallback(node.parameters, node.body.arguments, node.body.expression)) {
+            const start = node.getStart(ctx.sourceFile);
+            ctx.addFailure(start, node.end, Rule.FAILURE_STRING(node.body.expression.text), [
+                Lint.Replacement.deleteFromTo(start, node.body.getStart(ctx.sourceFile)),
+                Lint.Replacement.deleteFromTo(node.body.expression.end, node.end),
             ]);
         } else {
             return ts.forEachChild(node, cb);
         }
-    });
+    }
+
 }
 
-function detectUnnecessaryCallback(node: ts.Node): ts.CallExpression | undefined {
-    if (!isArrowFunction(node) || hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword)) {
-        return undefined;
+function isRedundantCallback(
+        parameters: ts.NodeArray<ts.ParameterDeclaration>,
+        args: ts.NodeArray<ts.Node>,
+        expression: ts.Identifier,
+        ): boolean {
+    if (parameters.length !== args.length) {
+        return false;
     }
-    const { parameters, body } = node;
-    if (!isCallExpression(body)) {
-        return undefined;
-    }
-    const { expression, arguments: args } = body;
-    const isRedundant = isIdentifier(expression) && parameters.length === args.length && parameters.every(({ dotDotDotToken, name }, i) => {
+    for (let i = 0; i < parameters.length; ++i) {
+        const {dotDotDotToken, name} = parameters[i];
         let arg = args[i];
         if (dotDotDotToken !== undefined) {
             if (!isSpreadElement(arg)) {
@@ -77,9 +79,11 @@ function detectUnnecessaryCallback(node: ts.Node): ts.CallExpression | undefined
             }
             arg = arg.expression;
         }
-        return isIdentifier(name) && isIdentifier(arg) && name.text === arg.text
-            // If the invoked expression is one of the parameters, bail.
-            && expression.text !== name.text;
-    });
-    return isRedundant ? body : undefined;
+        if (!isIdentifier(name) || !isIdentifier(arg) || name.text !== arg.text
+                // If the invoked expression is one of the parameters, bail.
+                || expression.text === name.text) {
+            return false;
+        }
+    }
+    return true;
 }
