@@ -2,12 +2,12 @@
   "rules": {
     "ban": [
       true,
-      ["xit"],
-      ["fit"],
+      "xit",
+      {"name": "fit"},
       ["xdescribe"],
       ["fdescribe"],
       ["window", "toString"],
-      ["_", "forEach"],
+      {"object": "_", "name": "forEach"},
       ["_", "filter", "Use the native JavaScript 'myArray.filter' instead."]
     ]
   }
