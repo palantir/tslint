@@ -20,6 +20,7 @@
 export const rules = {
     // added in v5.1
     "no-invalid-template-strings": true,
+    "no-sparse-arrays": true,
 };
 // tslint:enable object-literal-sort-keys
 
