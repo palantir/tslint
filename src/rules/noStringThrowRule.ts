@@ -46,20 +46,16 @@ function walk(ctx: Lint.WalkContext<void>): void {
     const { sourceFile } = ctx;
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (isThrowStatement(node)) {
-            check(node);
+            const { expression } = node as ts.ThrowStatement;
+            if (isString(expression)) {
+                ctx.addFailureAtNode(node, Rule.FAILURE_STRING, [
+                    Lint.Replacement.appendText(expression.getStart(sourceFile), "new Error("),
+                    Lint.Replacement.appendText(expression.getEnd(), ")"),
+                ]);
+            }
         }
         return ts.forEachChild(node, cb);
     });
-
-    function check(node: ts.ThrowStatement): void {
-        const { expression } = node;
-        if (isString(expression)) {
-            ctx.addFailureAtNode(node, Rule.FAILURE_STRING, [
-                Lint.Replacement.appendText(expression.getStart(sourceFile), "new Error("),
-                Lint.Replacement.appendText(expression.getEnd(), ")"),
-            ]);
-        }
-    }
 }
 
 function isString(node: ts.Node): boolean {
