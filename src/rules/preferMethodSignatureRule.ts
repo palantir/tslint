@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isPropertySignature } from "tsutils";
+import { isFunctionTypeNode, isPropertySignature } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -45,18 +45,13 @@ function walk(ctx: Lint.WalkContext<void>): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (isPropertySignature(node)) {
             const { type } = node;
-            if (type !== undefined && type.kind === ts.SyntaxKind.FunctionType) {
-                ctx.addFailureAtNode(node.name, Rule.FAILURE_STRING, createMethodSignatureFix(node, type as ts.FunctionTypeNode));
+            if (type !== undefined && isFunctionTypeNode(type)) {
+                ctx.addFailureAtNode(node.name, Rule.FAILURE_STRING, type.type && [
+                    Lint.Replacement.deleteFromTo(Lint.childOfKind(node, ts.SyntaxKind.ColonToken)!.getStart(), type.getStart()),
+                    Lint.Replacement.replaceFromTo(Lint.childOfKind(type, ts.SyntaxKind.EqualsGreaterThanToken)!.pos, type.type.pos, ":"),
+                ]);
             }
         }
         return ts.forEachChild(node, cb);
     });
-}
-
-function createMethodSignatureFix(node: ts.PropertySignature, type: ts.FunctionTypeNode): Lint.Fix | undefined {
-    return type.type && [
-        Lint.Replacement.deleteFromTo(Lint.childOfKind(node, ts.SyntaxKind.ColonToken)!.getStart(), type.getStart()),
-        Lint.Replacement.deleteFromTo(Lint.childOfKind(type, ts.SyntaxKind.EqualsGreaterThanToken)!.getStart(), type.type.getStart()),
-        Lint.Replacement.appendText(Lint.childOfKind(type, ts.SyntaxKind.CloseParenToken)!.end, ":"),
-    ];
 }
