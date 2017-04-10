@@ -32,8 +32,8 @@ interface CustomOptionValue {
 }
 
 interface Options {
-    multiline?: OptionValue | CustomOptionValue;
-    singleline?: OptionValue | CustomOptionValue;
+    multiline: CustomOptionValue;
+    singleline: CustomOptionValue;
 }
 
 const defaultOptions: CustomOptionValue = {
@@ -183,17 +183,22 @@ class TrailingCommaWalker extends Lint.AbstractWalker<Options> {
             switch (node.kind) {
                 case ts.SyntaxKind.ArrayLiteralExpression:
                 case ts.SyntaxKind.ArrayBindingPattern:
+                    this.checkList((node as ts.ArrayLiteralExpression | ts.ArrayBindingPattern).elements, node.end, "arrays");
+                    break;
                 case ts.SyntaxKind.ObjectBindingPattern:
+                    this.checkList((node as ts.ObjectBindingPattern).elements, node.end, "objects");
+                    break;
                 case ts.SyntaxKind.NamedImports:
+                    this.checkList((node as ts.NamedImports).elements, node.end, "imports");
+                    break;
                 case ts.SyntaxKind.NamedExports:
-                    this.checkList((node as ts.ArrayLiteralExpression | ts.BindingPattern | ts.NamedImportsOrExports).elements,
-                                   node.end, node);
+                    this.checkList((node as ts.NamedExports).elements, node.end, "exports");
                     break;
                 case ts.SyntaxKind.ObjectLiteralExpression:
-                    this.checkList((node as ts.ObjectLiteralExpression).properties, node.end, node);
+                    this.checkList((node as ts.ObjectLiteralExpression).properties, node.end, "objects");
                     break;
                 case ts.SyntaxKind.EnumDeclaration:
-                    this.checkList((node as ts.EnumDeclaration).members, node.end, node);
+                    this.checkList((node as ts.EnumDeclaration).members, node.end, "objects");
                     break;
                 case ts.SyntaxKind.NewExpression:
                     if ((node as ts.NewExpression).arguments === undefined) {
@@ -201,7 +206,7 @@ class TrailingCommaWalker extends Lint.AbstractWalker<Options> {
                     }
                     // falls through
                 case ts.SyntaxKind.CallExpression:
-                    this.checkList((node as ts.CallExpression | ts.NewExpression).arguments!, node.end, node);
+                    this.checkList((node as ts.CallExpression | ts.NewExpression).arguments!, node.end, "functions");
                     break;
                 case ts.SyntaxKind.ArrowFunction:
                 case ts.SyntaxKind.Constructor:
@@ -214,7 +219,8 @@ class TrailingCommaWalker extends Lint.AbstractWalker<Options> {
                 case ts.SyntaxKind.ConstructorType:
                 case ts.SyntaxKind.FunctionType:
                 case ts.SyntaxKind.CallSignature:
-                    this.checkListWithEndToken(node, (node as ts.SignatureDeclaration).parameters, ts.SyntaxKind.CloseParenToken);
+                    this.checkListWithEndToken(node, (node as ts.SignatureDeclaration).parameters,
+                                                ts.SyntaxKind.CloseParenToken, "functions");
                     break;
                 case ts.SyntaxKind.TypeLiteral:
                     this.checkTypeLiteral(node as ts.TypeLiteralNode);
@@ -240,34 +246,36 @@ class TrailingCommaWalker extends Lint.AbstractWalker<Options> {
         }
         // The trailing comma is part of the last member and therefore not present as hasTrailingComma on the NodeArray
         const hasTrailingComma = sourceText[members.end - 1] === ",";
-        return this.checkComma(hasTrailingComma, members, node.end, node);
+        return this.checkComma(hasTrailingComma, members, node.end, "typeLiterals");
     }
 
-    private checkListWithEndToken(node: ts.Node, list: ts.NodeArray<ts.Node>, closeTokenKind: ts.SyntaxKind) {
+    private checkListWithEndToken(node: ts.Node, list: ts.NodeArray<ts.Node>, closeTokenKind: ts.SyntaxKind,
+                                  optionKey: keyof CustomOptionValue) {
         if (list.length === 0) {
             return;
         }
         const token = getChildOfKind(node, closeTokenKind, this.sourceFile);
         if (token !== undefined) {
-            return this.checkComma(list.hasTrailingComma, list, token.end, node);
+            return this.checkComma(list.hasTrailingComma, list, token.end, optionKey);
         }
     }
 
-    private checkList(list: ts.NodeArray<ts.Node>, closeElementPos: number, originalNode: ts.Node) {
+    private checkList(list: ts.NodeArray<ts.Node>, closeElementPos: number, optionKey: keyof CustomOptionValue) {
         if (list.length === 0) {
             return;
         }
-        return this.checkComma(list.hasTrailingComma, list, closeElementPos, originalNode);
+        return this.checkComma(list.hasTrailingComma, list, closeElementPos, optionKey);
     }
 
     /* Expects `list.length !== 0` */
-    private checkComma(hasTrailingComma: boolean | undefined, list: ts.NodeArray<ts.Node>, closeTokenPos: number, originalNode: ts.Node) {
+    private checkComma(hasTrailingComma: boolean | undefined, list: ts.NodeArray<ts.Node>, closeTokenPos: number,
+                       optionKey: keyof CustomOptionValue) {
         const lastElementLine = ts.getLineAndCharacterOfPosition(this.sourceFile, list[list.length - 1].end).line;
         const closeTokenLine = ts.getLineAndCharacterOfPosition(this.sourceFile, closeTokenPos).line;
         const option = lastElementLine === closeTokenLine ? this.options.singleline : this.options.multiline;
-        const shouldHandle = getOptionForNodeType(originalNode, option as CustomOptionValue);
+        const shouldHandle = option[optionKey];
 
-        if (!shouldHandle || shouldHandle === "ignore") {
+        if (shouldHandle === "ignore") {
             return;
         }
 
@@ -276,39 +284,5 @@ class TrailingCommaWalker extends Lint.AbstractWalker<Options> {
         } else if (shouldHandle === "never" && hasTrailingComma) {
             this.addFailureAt(list.end - 1, 1, Rule.FAILURE_STRING_NEVER, Lint.Replacement.deleteText(list.end - 1, 1));
         }
-    }
-}
-
-function getOptionForNodeType(node: ts.Node, option: CustomOptionValue): OptionValue | void {
-    switch (node.kind) {
-        case ts.SyntaxKind.ArrayLiteralExpression:
-        case ts.SyntaxKind.ArrayBindingPattern:
-            return option.arrays;
-        case ts.SyntaxKind.ObjectBindingPattern:
-        case ts.SyntaxKind.ObjectLiteralExpression:
-        case ts.SyntaxKind.EnumDeclaration:
-            return option.objects;
-        case ts.SyntaxKind.CallExpression:
-        case ts.SyntaxKind.ArrowFunction:
-        case ts.SyntaxKind.Constructor:
-        case ts.SyntaxKind.FunctionDeclaration:
-        case ts.SyntaxKind.FunctionExpression:
-        case ts.SyntaxKind.MethodDeclaration:
-        case ts.SyntaxKind.SetAccessor:
-        case ts.SyntaxKind.MethodSignature:
-        case ts.SyntaxKind.ConstructSignature:
-        case ts.SyntaxKind.ConstructorType:
-        case ts.SyntaxKind.FunctionType:
-        case ts.SyntaxKind.CallSignature:
-        case ts.SyntaxKind.NewExpression:
-            return option.functions;
-        case ts.SyntaxKind.NamedImports:
-            return option.imports;
-        case ts.SyntaxKind.NamedExports:
-            return option.exports;
-        case ts.SyntaxKind.TypeLiteral:
-            return option.typeLiterals;
-        default:
-            return "ignore";
     }
 }
