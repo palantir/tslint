@@ -83,19 +83,15 @@ function renderSuggestion(call: ts.CallSignatureDeclaration,
     const colonPos = call.type!.pos - 1 - start;
     const text = sourceFile.text.substring(start, call.end);
     let res = text.substr(0, colonPos) + " =>" + text.substr(colonPos + 1);
-    if (res.endsWith(";")) {
-        res = res.slice(0, -1);
-    }
+
     if (parent.kind === ts.SyntaxKind.InterfaceDeclaration) {
         if (parent.typeParameters !== undefined) {
-            const typeParams = sourceFile.text.substring(parent.typeParameters.pos, parent.typeParameters.end);
-            if (call.typeParameters === undefined) {
-                res = `<${typeParams}>${res}`;
-            } else {
-                res = `<${typeParams}, ${res.substr(1)}`;
-            }
+            res = `type${sourceFile.text.substring(parent.name.pos, parent.typeParameters.end + 1)} = ${res}`;
+        } else {
+            res = `type ${parent.name.text} = ${res}`;
         }
-        res = `type ${parent.name.text} = ${res}`;
+    } else if (res.endsWith(";") && parent.parent!.kind !== ts.SyntaxKind.TypeAliasDeclaration) {
+        res = res.slice(0, -1);
     }
     return res;
 }
