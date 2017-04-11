@@ -51,7 +51,7 @@
   },
   "devDependencies": {
     "@types/babel-code-frame": "^6.20.0",
-    "@types/chai": "^3.4.34",
+    "@types/chai": "~3.4.34",
     "@types/colors": "^0.6.33",
     "@types/diff": "0.0.31",
     "@types/findup-sync": "^0.3.29",

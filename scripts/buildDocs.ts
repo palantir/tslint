@@ -41,7 +41,10 @@ import {IFormatterMetadata} from "../lib/language/formatter/formatter";
 import {IRuleMetadata} from "../lib/language/rule/rule";
 
 type Metadata = IRuleMetadata | IFormatterMetadata;
-type Documented = { metadata: Metadata };
+
+interface Documented {
+    metadata: Metadata;
+};
 
 interface IDocumentation {
     /**
@@ -167,13 +170,13 @@ function generateJekyllData(metadata: any, layout: string, type: string, name: s
 function generateRuleFile(metadata: IRuleMetadata): string {
     if (metadata.optionExamples) {
         metadata = { ...metadata };
-        metadata.optionExamples = (metadata.optionExamples as any[]).map(example =>
+        metadata.optionExamples = (metadata.optionExamples as any[]).map((example) =>
             typeof example === "string" ? example : stringify(example));
     }
 
     const yamlData = generateJekyllData(metadata, "rule", "Rule", metadata.ruleName);
     yamlData.optionsJSON = JSON.stringify(metadata.options, undefined, 2);
-    return `---\n${yaml.safeDump(yamlData, <any> {lineWidth: 140})}---`;
+    return `---\n${yaml.safeDump(yamlData, {lineWidth: 140} as any)}---`;
 }
 
 /**
@@ -182,7 +185,7 @@ function generateRuleFile(metadata: IRuleMetadata): string {
  */
 function generateFormatterFile(metadata: IFormatterMetadata): string {
     const yamlData = generateJekyllData(metadata, "formatter", "TSLint formatter", metadata.formatterName);
-    return `---\n${yaml.safeDump(yamlData, <any> {lineWidth: 140})}---`;
+    return `---\n${yaml.safeDump(yamlData, {lineWidth: 140} as any)}---`;
 }
 
 buildDocumentation(ruleDocumentation);
