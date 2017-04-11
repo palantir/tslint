@@ -3,6 +3,9 @@
 10;
 1.1e10;
 
+01;
+~~ [leading-0]
+
 1.
 ~~ [trailing-decimal]
 
@@ -27,7 +30,11 @@
 1.0e10;
 ~~~ [trailing-0]
 
-[leading-0]: Exponent should not have a leading '0'.
+0xDEAdBEEF;
+~~~~~~~~~~ [uppercase]
+
+[leading-0]: Number literal should not have a leading '0'.
 [trailing-0]: Number literal should not have a trailing '0'.
 [trailing-decimal]: Number literal should not end in '.'.
 [leading-decimal]: Number literal should begin with '0.' and not just '.'.
+[uppercase]: Hexadecimal number literal should be uppercase.
