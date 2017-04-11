@@ -39,7 +39,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "string",
             enum: [OPTION_ALWAYS, OPTION_NEVER],
         },
-        optionExamples: [`[true, "${OPTION_ALWAYS}"]`, `[true, "${OPTION_NEVER}"]`],
+        optionExamples: [[true, OPTION_ALWAYS], [true, OPTION_NEVER]],
         type: "style",
         typescriptOnly: true,
     };

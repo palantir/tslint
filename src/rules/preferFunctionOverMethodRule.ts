@@ -41,8 +41,8 @@ export class Rule extends Lint.Rules.AbstractRule {
             enum: [OPTION_ALLOW_PUBLIC, OPTION_ALLOW_PROTECTED],
         },
         optionExamples: [
-            "true",
-            `[true, "${OPTION_ALLOW_PUBLIC}", "${OPTION_ALLOW_PROTECTED}"]`,
+            true,
+            [true, OPTION_ALLOW_PUBLIC, OPTION_ALLOW_PROTECTED],
         ],
         type: "style",
         typescriptOnly: false,

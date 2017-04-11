@@ -27,7 +27,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: "Makes it easy to differentiate classes from regular variables at a glance.",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "style",
         typescriptOnly: false,
     };

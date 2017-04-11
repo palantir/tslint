@@ -48,7 +48,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "number",
             minimum: "$(Rule.MINIMUM_THRESHOLD)",
         },
-        optionExamples: ["true", "[true, 20]"],
+        optionExamples: [true, [true, 20]],
         type: "maintainability",
         typescriptOnly: false,
     };

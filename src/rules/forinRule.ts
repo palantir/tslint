@@ -37,7 +37,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             documentation for more information about \`for...in\` loops.`,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
     };

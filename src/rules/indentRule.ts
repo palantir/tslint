@@ -39,7 +39,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "string",
             enum: ["tabs", "spaces"],
         },
-        optionExamples: ['[true, "spaces"]'],
+        optionExamples: [[true, "spaces"]],
         type: "maintainability",
         typescriptOnly: false,
     };

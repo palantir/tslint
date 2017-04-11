@@ -31,7 +31,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             labels on any block statement in JS, it is considered poor code structure to do so.`,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
     };

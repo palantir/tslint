@@ -27,7 +27,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Require a `default` case in all `switch` statements.",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
     };

@@ -27,7 +27,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: "Useful in preventing merge conflicts",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "maintainability",
         typescriptOnly: false,
     };

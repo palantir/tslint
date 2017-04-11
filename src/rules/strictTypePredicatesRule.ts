@@ -34,7 +34,7 @@ export class Rule extends Lint.Rules.TypedRule {
             Does *not* warn for 'if (x.y)' where 'x.y' is always truthy. For that, see strict-boolean-expressions.`,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: true,
         requiresTypeInfo: true,

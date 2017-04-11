@@ -27,7 +27,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: "Encourages using strongly-typed property access.",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
     };

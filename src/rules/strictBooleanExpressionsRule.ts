@@ -65,8 +65,8 @@ export class Rule extends Lint.Rules.TypedRule {
             maxLength: 5,
         },
         optionExamples: [
-            "true",
-            `[true, ${OPTION_ALLOW_NULL_UNION}, ${OPTION_ALLOW_UNDEFINED_UNION}, ${OPTION_ALLOW_STRING}, ${OPTION_ALLOW_NUMBER}]`,
+            true,
+            [true, OPTION_ALLOW_NULL_UNION, OPTION_ALLOW_UNDEFINED_UNION, OPTION_ALLOW_STRING, OPTION_ALLOW_NUMBER],
         ],
         type: "functionality",
         typescriptOnly: true,

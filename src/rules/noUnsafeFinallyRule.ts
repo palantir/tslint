@@ -34,7 +34,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             This is confusing and unexpected behavior.`,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
     };

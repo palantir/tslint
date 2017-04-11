@@ -28,7 +28,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: "Using `module` leads to a confusion of concepts with external modules. Use the newer `namespace` keyword instead.",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "typescript",
         typescriptOnly: true,
     };

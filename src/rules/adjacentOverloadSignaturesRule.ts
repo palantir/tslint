@@ -28,7 +28,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Enforces function overloads to be consecutive.",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         rationale: "Improves readability and organization by grouping naturally related items together.",
         type: "typescript",
         typescriptOnly: true,

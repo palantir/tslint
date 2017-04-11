@@ -29,7 +29,7 @@ export class Rule extends Lint.Rules.TypedRule {
             the compiler will detect if a \`let\` and \`const\` variable is used before it is declared.`,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
         requiresTypeInfo: true,

@@ -56,7 +56,7 @@ export class Rule extends Lint.Rules.TypedRule {
             minLength: 0,
             maxLength: 3,
         },
-        optionExamples: ["[true]", '[true, {"ignore-pattern": "^_"}]'],
+        optionExamples: [true, [true, {"ignore-pattern": "^_"}]],
         type: "functionality",
         typescriptOnly: true,
         requiresTypeInfo: true,
