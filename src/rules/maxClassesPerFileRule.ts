@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { isClassLikeDeclaration } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -47,48 +48,32 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY = (maxCount: number): string => {
+    public static FAILURE_STRING(maxCount: number): string {
         const maxClassWord = maxCount === 1 ? "class per file is" : "classes per file are";
-        return `A maximum of ${maxCount} ${maxClassWord} allowed`;
+        return `A maximum of ${maxCount} ${maxClassWord} allowed.`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new MaxClassesPerFileWalker(sourceFile, this.getOptions()));
+        const argument = this.ruleArguments[0];
+        const maxClasses = isNaN(argument) || (argument as number) < 0 ? 1 : argument;
+        return this.applyWithFunction(sourceFile, walk, { maxClasses });
     }
 }
 
-class MaxClassesPerFileWalker extends Lint.RuleWalker {
-    private classCount = 0;
-    private maxClassCount: number;
+interface Options {
+    maxClasses: number;
+}
 
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
-        super(sourceFile, options);
-
-        if (options.ruleArguments[0] === undefined
-            || isNaN(options.ruleArguments[0])
-            || options.ruleArguments[0] < 1) {
-
-            this.maxClassCount = 1;
-        } else {
-            this.maxClassCount = options.ruleArguments[0];
+function walk(ctx: Lint.WalkContext<Options>): void {
+    const { sourceFile, options: { maxClasses } } = ctx;
+    let classes = 0;
+    return ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
+        if (isClassLikeDeclaration(node)) {
+            classes++;
+            if (classes > maxClasses) {
+                ctx.addFailureAtNode(node, Rule.FAILURE_STRING(maxClasses));
+            }
         }
-    }
-
-    public visitClassDeclaration(node: ts.ClassDeclaration) {
-        this.increaseClassCount(node);
-        super.visitClassDeclaration(node);
-    }
-
-    public visitClassExpression(node: ts.ClassExpression) {
-        this.increaseClassCount(node);
-        super.visitClassExpression(node);
-    }
-
-    private increaseClassCount(node: ts.ClassExpression | ts.ClassDeclaration) {
-        this.classCount++;
-        if (this.classCount > this.maxClassCount) {
-            const msg = Rule.FAILURE_STRING_FACTORY(this.maxClassCount);
-            this.addFailureAtNode(node, msg);
-        }
-    }
+        return ts.forEachChild(node, cb);
+    });
 }
