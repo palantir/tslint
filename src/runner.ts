@@ -21,8 +21,8 @@ import * as path from "path";
 import * as ts from "typescript";
 
 import {
-    CONFIG_FILENAME,
     DEFAULT_CONFIG,
+    DEFAULT_CONFIG_FILENAME,
     findConfiguration,
     IConfigurationFile,
 } from "./configuration";
@@ -116,13 +116,13 @@ export class Runner {
         }
 
         if (this.options.init) {
-            if (fs.existsSync(CONFIG_FILENAME)) {
-                console.error(`Cannot generate ${CONFIG_FILENAME}: file already exists`);
+            if (fs.existsSync(DEFAULT_CONFIG_FILENAME)) {
+                console.error(`Cannot generate ${DEFAULT_CONFIG_FILENAME}: file already exists`);
                 return onComplete(1);
             }
 
             const tslintJSON = JSON.stringify(DEFAULT_CONFIG, undefined, "    ");
-            fs.writeFileSync(CONFIG_FILENAME, tslintJSON);
+            fs.writeFileSync(DEFAULT_CONFIG_FILENAME, tslintJSON);
             return onComplete(0);
         }
 

@@ -17,6 +17,7 @@
 
 import findup = require("findup-sync");
 import * as fs from "fs";
+import { safeLoad } from "js-yaml";
 import * as path from "path";
 import * as resolve from "resolve";
 import { FatalError } from "./error";
@@ -64,7 +65,12 @@ export interface IConfigurationLoadResult {
     results?: IConfigurationFile;
 }
 
-export const CONFIG_FILENAME = "tslint.json";
+export const DEFAULT_CONFIG_FILENAME = "tslint.json";
+export const CONFIG_FILENAMES = [
+    DEFAULT_CONFIG_FILENAME,
+    "tslint.yml",
+    "tslint.yaml",
+];
 
 export const DEFAULT_CONFIG: IConfigurationFile = {
     defaultSeverity: "error",
@@ -122,7 +128,7 @@ export function findConfigurationPath(suppliedConfigFilePath: string | null, inp
         }
     } else {
         // search for tslint.json from input file location
-        let configFilePath = findup(CONFIG_FILENAME, { cwd: inputFilePath, nocase: true });
+        let configFilePath = findup(CONFIG_FILENAMES, { cwd: inputFilePath, nocase: true });
         if (configFilePath != null && fs.existsSync(configFilePath)) {
             return path.resolve(configFilePath);
         }
@@ -130,9 +136,11 @@ export function findConfigurationPath(suppliedConfigFilePath: string | null, inp
         // search for tslint.json in home directory
         const homeDir = getHomeDir();
         if (homeDir != null) {
-            configFilePath = path.join(homeDir, CONFIG_FILENAME);
-            if (fs.existsSync(configFilePath)) {
-                return path.resolve(configFilePath);
+            for (const configFilename of CONFIG_FILENAMES) {
+                configFilePath = path.join(homeDir, configFilename);
+                if (fs.existsSync(configFilePath)) {
+                    return path.resolve(configFilePath);
+                }
             }
         }
 
@@ -160,6 +168,8 @@ export function loadConfigurationFromPath(configFilePath?: string): IConfigurati
             .toString()
             .replace(/^\uFEFF/, ""));
             rawConfigFile = JSON.parse(fileContent);
+        } else if (path.extname(resolvedConfigFilePath) === ".yml" || path.extname(resolvedConfigFilePath) === ".yaml") {
+            rawConfigFile = safeLoad(fs.readFileSync(resolvedConfigFilePath, "utf8"));
         } else {
             rawConfigFile = require(resolvedConfigFilePath);
             delete require.cache[resolvedConfigFilePath];
