@@ -1,11 +1,21 @@
 interface I {
-          ~   [Interface has only a call signature — use `type I = () => void` instead.]
     (): void;
+    ~~~~~~~~~   [Interface has only a call signature — use `type I = () => void` instead.]
 }
 
 interface J extends Function {
-          ~                    [Interface has only a call signature — use `type J = () => void` instead.]
     (): void;
+    ~~~~~~~~~                    [Interface has only a call signature — use `type J = () => void` instead.]
+}
+
+interface K<T> {
+    <U extends T>(param1: U, param2: T): U;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Interface has only a call signature — use `type K = <T, U extends T>(param1: U, param2: T) => U` instead.]
+}
+
+interface L<T> {
+    (): T
+    ~~~~~ [Interface has only a call signature — use `type L = <T>() => T` instead.]
 }
 
 type T = {
