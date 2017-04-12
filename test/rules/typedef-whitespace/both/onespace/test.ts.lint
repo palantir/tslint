@@ -114,48 +114,69 @@ interface NoPreceedingSpaceNoSubsequentSpaceInterface {
     Prop:string;
        ~             [expected onespace before colon in property-declaration]
          ~           [expected onespace after colon in property-declaration]
+    Prop2?:string;
+        ~            [expected onespace before colon in property-declaration]
+           ~         [expected onespace after colon in property-declaration]
 }
 
 interface NoPreceedingSpaceWithSubsequentSpaceInterface {
     Prop: string;
        ~           [expected onespace before colon in property-declaration]
+    Prop2?: string;
+        ~          [expected onespace before colon in property-declaration]
 }
 
 interface NoPreceedingSpaceWithSubsequentSpacesInterface {
     Prop:   string;
        ~             [expected onespace before colon in property-declaration]
          ~           [expected onespace after colon in property-declaration]
+    Prop2?:   string;
+        ~            [expected onespace before colon in property-declaration]
+           ~         [expected onespace after colon in property-declaration]
 }
 
 interface WithPreceedingSpaceNoSubsequentSpaceInterface {
     Prop :string;
           ~           [expected onespace after colon in property-declaration]
+    Prop2 ?:string;
+            ~         [expected onespace after colon in property-declaration]
 }
 
 interface WithPreceedingSpaceWithSubsequentSpaceInterface {
     Prop : string;
+    Prop2 ?: string;
 }
 
 interface WithPreceedingSpaceWithSubsequentSpacesInterface {
     Prop :   string;
           ~           [expected onespace after colon in property-declaration]
+    Prop2 ?:   string;
+            ~         [expected onespace after colon in property-declaration]
 }
 
 interface WithPreceedingSpacesNoSubsequentSpaceInterface {
     Prop   :string;
           ~             [expected onespace before colon in property-declaration]
             ~           [expected onespace after colon in property-declaration]
+    Prop2   ?:string;
+           ~            [expected onespace before colon in property-declaration]
+              ~         [expected onespace after colon in property-declaration]
 }
 
 interface WithPreceedingSpacesWithSubsequentSpaceInterface {
     Prop   : string;
           ~           [expected onespace before colon in property-declaration]
+    Prop2   ?: string;
+           ~          [expected onespace before colon in property-declaration]
 }
 
 interface WithPreceedingSpacesWithSubsequentSpacesInterface {
     Prop   :   string;
           ~           [expected onespace before colon in property-declaration]
             ~         [expected onespace after colon in property-declaration]
+    Prop2   ?:   string;
+           ~          [expected onespace before colon in property-declaration]
+              ~       [expected onespace after colon in property-declaration]
 }
 
 interface WithPreceedingSpaceNoSubsequentSpaceAndNewLineInterface {
@@ -173,13 +194,13 @@ interface WithPreceedingSpaceWithSubsequentSpaceAndNewLineInterface {
 
 // region Function
 
-function noPreceedingSpaceNoSubsequentSpaceFn(a:number, b:number):number {
+function noPreceedingSpaceNoSubsequentSpaceFn(a:number, b?:number):number {
                                               ~                              [expected onespace before colon in parameter]
                                                 ~                            [expected onespace after colon in parameter]
                                                         ~                    [expected onespace before colon in parameter]
-                                                          ~                  [expected onespace after colon in parameter]
-                                                                ~            [expected onespace before colon in call-signature]
-                                                                  ~          [expected onespace after colon in call-signature]
+                                                           ~                 [expected onespace after colon in parameter]
+                                                                 ~           [expected onespace before colon in call-signature]
+                                                                   ~         [expected onespace after colon in call-signature]
     var c:number = a + b;
         ~            [expected onespace before colon in variable-declaration]
           ~          [expected onespace after colon in variable-declaration]
@@ -196,10 +217,10 @@ function noPreceedingSpaceNoSubsequentSpaceFn(a:number, b:number):number {
     }
 }
 
-function noPreceedingSpaceWithSubsequentSpaceFn(a: number, b: number): number {
+function noPreceedingSpaceWithSubsequentSpaceFn(a: number, b?: number): number {
                                                 ~                              [expected onespace before colon in parameter]
                                                            ~                   [expected onespace before colon in parameter]
-                                                                    ~          [expected onespace before colon in call-signature]
+                                                                     ~         [expected onespace before colon in call-signature]
     var c: number = a + b;
         ~          [expected onespace before colon in variable-declaration]
     var d: number = a - b;
@@ -213,13 +234,13 @@ function noPreceedingSpaceWithSubsequentSpaceFn(a: number, b: number): number {
     }
 }
 
-function noPreceedingSpaceWithSubsequentSpacesFn(a:   number, b:   number):   number {
+function noPreceedingSpaceWithSubsequentSpacesFn(a:   number, b?:   number):   number {
                                                  ~                                    [expected onespace before colon in parameter]
                                                    ~                                  [expected onespace after colon in parameter]
                                                               ~                       [expected onespace before colon in parameter]
-                                                                ~                     [expected onespace after colon in parameter]
-                                                                         ~            [expected onespace before colon in call-signature]
-                                                                           ~          [expected onespace after colon in call-signature]
+                                                                 ~                    [expected onespace after colon in parameter]
+                                                                          ~           [expected onespace before colon in call-signature]
+                                                                            ~         [expected onespace after colon in call-signature]
     var c:   number = a + b;
         ~            [expected onespace before colon in variable-declaration]
           ~          [expected onespace after colon in variable-declaration]
@@ -236,10 +257,10 @@ function noPreceedingSpaceWithSubsequentSpacesFn(a:   number, b:   number):   nu
     }
 }
 
-function withPreceedingSpaceNoSubsequentSpaceFn(a :number, b :number) :number {
+function withPreceedingSpaceNoSubsequentSpaceFn(a :number, b ?:number) :number {
                                                    ~                              [expected onespace after colon in parameter]
-                                                              ~                   [expected onespace after colon in parameter]
-                                                                       ~          [expected onespace after colon in call-signature]
+                                                               ~                  [expected onespace after colon in parameter]
+                                                                        ~         [expected onespace after colon in call-signature]
     var c :number = a + b;
            ~          [expected onespace after colon in variable-declaration]
     var d :number = a - b;
@@ -253,7 +274,7 @@ function withPreceedingSpaceNoSubsequentSpaceFn(a :number, b :number) :number {
     }
 }
 
-function withPreceedingSpaceWithSubsequentSpaceFn(a : number, b : number) : number {
+function withPreceedingSpaceWithSubsequentSpaceFn(a : number, b ?: number) : number {
     var c : number = a + b;
     var d : number = a - b;
 
@@ -264,10 +285,10 @@ function withPreceedingSpaceWithSubsequentSpaceFn(a : number, b : number) : numb
     }
 }
 
-function withPreceedingSpaceWithSubsequentSpacesFn(a :   number, b :   number) :   number {
+function withPreceedingSpaceWithSubsequentSpacesFn(a :   number, b ?:   number) :   number {
                                                       ~                               [expected onespace after colon in parameter]
-                                                                    ~                 [expected onespace after colon in parameter]
-                                                                                ~     [expected onespace after colon in call-signature]
+                                                                     ~                [expected onespace after colon in parameter]
+                                                                                 ~    [expected onespace after colon in call-signature]
     var c :   number = a + b;
            ~        [expected onespace after colon in variable-declaration]
     var d :   number = a - b;
@@ -281,13 +302,13 @@ function withPreceedingSpaceWithSubsequentSpacesFn(a :   number, b :   number) :
     }
 }
 
-function withPreceedingSpacesNoSubsequentSpaceFn(a   :number, b   :number)   :number {
+function withPreceedingSpacesNoSubsequentSpaceFn(a   :number, b   ?:number)   :number {
                                                     ~                                  [expected onespace before colon in parameter]
                                                       ~                                [expected onespace after colon in parameter]
                                                                  ~                     [expected onespace before colon in parameter]
-                                                                   ~                   [expected onespace after colon in parameter]
-                                                                            ~          [expected onespace before colon in call-signature]
-                                                                              ~        [expected onespace after colon in call-signature]
+                                                                    ~                  [expected onespace after colon in parameter]
+                                                                             ~         [expected onespace before colon in call-signature]
+                                                                               ~       [expected onespace after colon in call-signature]
     var c   :number = a + b;
            ~            [expected onespace before colon in variable-declaration]
              ~          [expected onespace after colon in variable-declaration]
@@ -304,10 +325,10 @@ function withPreceedingSpacesNoSubsequentSpaceFn(a   :number, b   :number)   :nu
     }
 }
 
-function withPreceedingSpacesWithSubsequentSpaceFn(a   : number, b   : number)   : number {
+function withPreceedingSpacesWithSubsequentSpaceFn(a   : number, b   ?: number)   : number {
                                                       ~                                 [expected onespace before colon in parameter]
                                                                     ~                   [expected onespace before colon in parameter]
-                                                                                ~       [expected onespace before colon in call-signature]
+                                                                                 ~      [expected onespace before colon in call-signature]
     var c   : number = a + b;
            ~          [expected onespace before colon in variable-declaration]
     var d   : number = a - b;
@@ -321,13 +342,13 @@ function withPreceedingSpacesWithSubsequentSpaceFn(a   : number, b   : number)  
     }
 }
 
-function withPreceedingSpacesWithSubsequentSpacesFn(a   :   number, b   :   number)   :   number {
+function withPreceedingSpacesWithSubsequentSpacesFn(a   :   number, b   ?:   number)   :   number {
                                                        ~                                     [expected onespace before colon in parameter]
                                                          ~                                   [expected onespace after colon in parameter]
                                                                        ~                     [expected onespace before colon in parameter]
-                                                                         ~                   [expected onespace after colon in parameter]
-                                                                                     ~       [expected onespace before colon in call-signature]
-                                                                                       ~     [expected onespace after colon in call-signature]
+                                                                          ~                  [expected onespace after colon in parameter]
+                                                                                      ~      [expected onespace before colon in call-signature]
+                                                                                        ~    [expected onespace after colon in call-signature]
     var c   :   number = a + b;
            ~          [expected onespace before colon in variable-declaration]
              ~        [expected onespace after colon in variable-declaration]
