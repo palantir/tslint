@@ -20,16 +20,18 @@ interface L<T> {
 
 type T = {
     (): void;
-    ~~~~~~~~~ [Type literal has only a call signature — use `() => void;` instead.]
-}
+    ~~~~~~~~~ [Type literal has only a call signature — use `() => void` instead.]
+};
 
 type U = {
     <T>(t: T): T;
-    ~~~~~~~~~~~~~ [Type literal has only a call signature — use `<T>(t: T) => T;` instead.]
+    ~~~~~~~~~~~~~ [Type literal has only a call signature — use `<T>(t: T) => T` instead.]
 }
 
 var fn: {(): void;};
          ~~~~~~~~~ [Type literal has only a call signature — use `() => void` instead.]
+function f(x: { (): void }): void;
+                ~~~~~~~~ [Type literal has only a call signature — use `() => void` instead.]
 
 // Overloads OK
 interface K {

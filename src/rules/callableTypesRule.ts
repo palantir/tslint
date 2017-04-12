@@ -90,7 +90,7 @@ function renderSuggestion(call: ts.CallSignatureDeclaration,
         } else {
             res = `type ${parent.name.text} = ${res}`;
         }
-    } else if (res.endsWith(";") && parent.parent!.kind !== ts.SyntaxKind.TypeAliasDeclaration) {
+    } else if (res.endsWith(";")) {
         res = res.slice(0, -1);
     }
     return res;
