@@ -55,7 +55,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const argument = this.ruleArguments[0];
-        const maxClasses = isNaN(argument) || (argument as number) < 0 ? 1 : argument;
+        const maxClasses = isNaN(argument) || (argument as number) > 0 ? argument : 1;
         return this.applyWithFunction(sourceFile, walk, { maxClasses });
     }
 }
