@@ -223,3 +223,10 @@ let uninitialized;
 let initialized1 = 0, uninitialized2;
     ~~~~~~~~~~~~           [Identifier 'initialized1' is never reassigned; use 'const' instead of 'let'.]
                       ~~~~~~~~~~~~~~           [Identifier 'uninitialized2' is never reassigned; use 'const' instead of 'let'.]
+
+// ambient declarations are not checked
+declare let ambient = 0;
+
+declare namespace ambient {
+    let foo = 0;
+}
