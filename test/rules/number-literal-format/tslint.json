@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "number-literal-format": true
+  }
+}
