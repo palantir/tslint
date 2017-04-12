@@ -84,13 +84,7 @@ class NoInferredEmptyObjectTypeRule extends Lint.ProgramAwareRuleWalker {
     }
 
     private isEmptyObjectInterface(objType: ts.ObjectType): boolean {
-        let isAnonymous: boolean;
-        if (ts.ObjectFlags == null) {
-            // typescript 2.0.x specific code
-            isAnonymous = isTypeFlagSet(objType, (ts.TypeFlags as any).Anonymous as ts.TypeFlags);
-        } else {
-            isAnonymous = isObjectFlagSet(objType, ts.ObjectFlags.Anonymous);
-        }
+        const isAnonymous = isObjectFlagSet(objType, ts.ObjectFlags.Anonymous);
         let hasProblematicCallSignatures = false;
         const hasProperties = (objType.getProperties() !== undefined && objType.getProperties().length > 0);
         const hasNumberIndexType = objType.getNumberIndexType() !== undefined;

@@ -28,7 +28,7 @@ export function getSourceFile(fileName: string): ts.SourceFile {
     return Lint.getSourceFile(fileName, source);
 }
 
-export function getFormatter(formatterName: string): Lint.FormatterStatic {
+export function getFormatter(formatterName: string): Lint.FormatterConstructor {
     const formattersDirectory = path.join(path.dirname(module.filename), "../src/formatters");
     return Lint.findFormatter(formatterName, formattersDirectory)!;
 }

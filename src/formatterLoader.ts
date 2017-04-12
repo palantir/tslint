@@ -17,13 +17,13 @@
 
 import * as fs from "fs";
 import * as path from "path";
-import {FormatterStatic} from "./index";
+import {FormatterConstructor} from "./index";
 import {camelize} from "./utils";
 
 const moduleDirectory = path.dirname(module.filename);
 const CORE_FORMATTERS_DIRECTORY = path.resolve(moduleDirectory, ".", "formatters");
 
-export function findFormatter(name: string | FormatterStatic, formattersDirectory?: string): FormatterStatic | undefined {
+export function findFormatter(name: string | FormatterConstructor, formattersDirectory?: string): FormatterConstructor | undefined {
     if (typeof name === "function") {
         return name;
     } else if (typeof name === "string") {
@@ -52,7 +52,7 @@ export function findFormatter(name: string | FormatterStatic, formattersDirector
     }
 }
 
-function loadFormatter(...paths: string[]): FormatterStatic | undefined {
+function loadFormatter(...paths: string[]): FormatterConstructor | undefined {
     const formatterPath = paths.reduce((p, c) => path.join(p, c), "");
     const fullPath = path.resolve(moduleDirectory, formatterPath);
 
@@ -64,7 +64,7 @@ function loadFormatter(...paths: string[]): FormatterStatic | undefined {
     return undefined;
 }
 
-function loadFormatterModule(name: string): FormatterStatic | undefined {
+function loadFormatterModule(name: string): FormatterConstructor | undefined {
     let src: string;
     try {
         src = require.resolve(name);

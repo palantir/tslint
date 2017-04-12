@@ -46,7 +46,7 @@ export interface IFormatterMetadata {
 
 export type ConsumerType = "human" | "machine";
 
-export interface FormatterStatic {
+export interface FormatterConstructor {
     new(): IFormatter;
 }
 

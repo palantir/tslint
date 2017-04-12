@@ -20,12 +20,12 @@ import * as path from "path";
 
 import { getRelativePath } from "./configuration";
 import { showWarningOnce } from "./error";
-import { IDisabledInterval, IOptions, IRule, RuleStatic } from "./language/rule/rule";
+import { IDisabledInterval, IOptions, IRule, RuleConstructor } from "./language/rule/rule";
 import { arrayify, camelize, dedent } from "./utils";
 
 const moduleDirectory = path.dirname(module.filename);
 const CORE_RULES_DIRECTORY = path.resolve(moduleDirectory, ".", "rules");
-const cachedRules = new Map<string, RuleStatic | null>(); // null indicates that the rule was not found
+const cachedRules = new Map<string, RuleConstructor | null>(); // null indicates that the rule was not found
 
 export interface IEnableDisablePosition {
     isEnabled: boolean;
@@ -88,9 +88,9 @@ export function loadRules(ruleOptionsList: IOptions[],
     return rules;
 }
 
-export function findRule(name: string, rulesDirectories?: string | string[]): RuleStatic | null {
+export function findRule(name: string, rulesDirectories?: string | string[]): RuleConstructor | null {
     const camelizedName = transformName(name);
-    let Rule: RuleStatic | null;
+    let Rule: RuleConstructor | null;
 
     // first check for core rules
     Rule = loadCachedRule(CORE_RULES_DIRECTORY, camelizedName);
@@ -122,10 +122,10 @@ function transformName(name: string): string {
  * @param directory - An absolute path to a directory of rules
  * @param ruleName - A name of a rule in filename format. ex) "someLintRule"
  */
-function loadRule(directory: string, ruleName: string): RuleStatic | null {
+function loadRule(directory: string, ruleName: string): RuleConstructor | null {
     const fullPath = path.join(directory, ruleName);
     if (fs.existsSync(fullPath + ".js")) {
-        const ruleModule = require(fullPath) as { Rule: RuleStatic } | undefined;
+        const ruleModule = require(fullPath) as { Rule: RuleConstructor } | undefined;
         if (ruleModule !== undefined) {
             return ruleModule.Rule;
         }
@@ -133,7 +133,7 @@ function loadRule(directory: string, ruleName: string): RuleStatic | null {
     return null;
 }
 
-function loadCachedRule(directory: string, ruleName: string, isCustomPath = false): RuleStatic | null {
+function loadCachedRule(directory: string, ruleName: string, isCustomPath = false): RuleConstructor | null {
     // use cached value if available
     const fullPath = path.join(directory, ruleName);
     const cachedRule = cachedRules.get(fullPath);
@@ -152,8 +152,8 @@ function loadCachedRule(directory: string, ruleName: string, isCustomPath = fals
         }
     }
 
-    let Rule: RuleStatic | null = null;
-    if (absolutePath != null) {
+    let Rule: RuleConstructor | null = null;
+    if (absolutePath !== undefined) {
         Rule = loadRule(absolutePath, ruleName); // tslint:disable-line no-unsafe-any
     }
     cachedRules.set(fullPath, Rule);

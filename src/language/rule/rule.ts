@@ -20,7 +20,7 @@ import * as ts from "typescript";
 import {arrayify, flatMap} from "../../utils";
 import {IWalker} from "../walker";
 
-export interface RuleStatic {
+export interface RuleConstructor {
     metadata: IRuleMetadata;
     new(options: IOptions): IRule;
 }
