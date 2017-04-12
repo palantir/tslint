@@ -151,7 +151,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
             return;
         }
 
-        if (!isCamelCase(text, options) && !isUpperCase(text)) {
+        if (!isCamelCase(text, options) && !Lint.Utils.isUpperCase(text)) {
             ctx.addFailureAtNode(name, formatFailure());
         }
     }
@@ -207,8 +207,4 @@ function isCamelCase(name: string, options: Options): boolean {
 
 function isLowerCase(name: string): boolean {
     return name === name.toLowerCase();
-}
-
-export function isUpperCase(name: string): boolean {
-    return name === name.toUpperCase();
 }

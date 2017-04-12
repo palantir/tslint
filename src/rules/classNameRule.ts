@@ -45,7 +45,7 @@ class NameWalker extends Lint.RuleWalker {
         // classes declared as default exports will be unnamed
         if (node.name != null) {
             const className = node.name.getText();
-            if (!this.isPascalCased(className)) {
+            if (!isPascalCased(className)) {
                 this.addFailureAtNode(node.name, Rule.FAILURE_STRING);
             }
         }
@@ -55,19 +55,14 @@ class NameWalker extends Lint.RuleWalker {
 
     public visitInterfaceDeclaration(node: ts.InterfaceDeclaration) {
         const interfaceName = node.name.getText();
-        if (!this.isPascalCased(interfaceName)) {
+        if (!isPascalCased(interfaceName)) {
             this.addFailureAtNode(node.name, Rule.FAILURE_STRING);
         }
 
         super.visitInterfaceDeclaration(node);
     }
+}
 
-    private isPascalCased(name: string) {
-        if (name.length <= 0) {
-            return true;
-        }
-
-        const firstCharacter = name.charAt(0);
-        return ((firstCharacter === firstCharacter.toUpperCase()) && name.indexOf("_") === -1);
-    }
+function isPascalCased(name: string): boolean {
+    return name.length === 0 || Lint.Utils.isUpperCase(name[0]) && name.indexOf("_") === -1;
 }
