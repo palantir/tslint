@@ -97,6 +97,49 @@ Then, at the bottom of our test file, we specify what full message each shortcut
 
 Again, we can run `grunt test` to make sure our rule is producing the output we expect. If it isn't we'll see the difference between the output from the rule and the output we marked.
 
+You can also use placeholders to format messages. That's useful if the error message contains non-static parts, e.g. variable names. But let's stick to the above example for now.
+
+``` 
+const octopus = 5;
+      ~~~~~~~     [no-animal]
+
+let giraffe: number, tiger: number;
+    ~~~~~~~                 [no-animal]
+                     ~~~~~  [no-animal]
+
+const tree = 5;
+      ~~~~      [error % ("plants")]
+const skyscraper = 100;
+
+[error] Variables named after %s are not allowed!
+[no-animal]: error % ('animals')
+```
+
+We created a message template called `error` which has one placeholder `%s`. For a complete list of supported placeholders, please refer to the documentation of node's [util.format()](https://nodejs.org/api/util.html#util_util_format_format_args).
+To use the template for formatting, you need to use a special syntax: `template_name % ('substitution1' [, "substitution2" [, ...]])`.
+Substitutions are passed as comma separated list of javascript string literals. The strings need to be wrapped in single or double quotes. Escaping characters works like you would expect in javascript.
+
+You may have noticed that the template is used for formatting in two different places. Use it in inline errors to pass another substitution every time.
+If you use formatting in another message shorthand (like we did for `[no-animal]`), you need to make sure the template is defined before its use. That means swapping the lines of `[error]` and `[no-animal]` will not work. There are no restrictions for the use of `[no-animal]` in inline errors, though.
+
+Now let's pretend the rule changed its error message to include the variable name at the end. The following example shows how to substitute multiple placeholders.
+
+``` 
+const octopus = 5;
+      ~~~~~~~     [no-animal % ('octopus')]
+
+let giraffe: number, tiger: number;
+    ~~~~~~~                 [no-animal % ('giraffe')]
+                     ~~~~~  [no-animal % ('tiger')]
+
+const tree = 5;
+      ~~~~      [error % ("plants", "tree")]
+const skyscraper = 100;
+
+[error] Variables named after %s are not allowed: '%s'
+[no-animal]: error % ('animals')
+```
+
 ##### Typescript version requirement #####
 
 Sometimes a rule requires a minimum version of the typescript compiler or your test contains syntax that older versions of the typescript parser cannot handle.
