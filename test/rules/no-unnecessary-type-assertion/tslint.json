@@ -3,6 +3,6 @@
     "typeCheck": true
   },
   "rules": {
-    "no-unnecessary-cast": true
+    "no-unnecessary-type-assertion": true
   }
 }

@@ -177,7 +177,7 @@ export const rules = {
     "no-unnecessary-callback-wrapper": true,
     "no-unnecessary-initializer": true,
     "no-unnecessary-qualifier": true,
-    "no-unnecessary-cast": true,
+    "no-unnecessary-type-assertion": true,
     "object-literal-key-quotes": [true, "consistent-as-needed"],
     "object-literal-shorthand": true,
     "one-line": [true,
