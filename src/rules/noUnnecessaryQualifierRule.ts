@@ -114,7 +114,12 @@ class Walker extends Lint.ProgramAwareRuleWalker {
     }
 
     private symbolIsNamespaceInScope(symbol: ts.Symbol): boolean {
-        if (symbol.getDeclarations().some((decl) => this.namespacesInScope.some((ns) => ns === decl))) {
+        const symbolDeclarations = symbol.getDeclarations();
+        if (!symbolDeclarations) {
+          return false;
+        }
+
+        if (symbolDeclarations.some((decl) => this.namespacesInScope.some((ns) => ns === decl))) {
             return true;
         }
         const alias = this.tryGetAliasedSymbol(symbol);
