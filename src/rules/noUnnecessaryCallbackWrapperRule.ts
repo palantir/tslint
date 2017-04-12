@@ -29,7 +29,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             To catch more cases, enable \`only-arrow-functions\` and \`arrow-return-shorthand\` too.`,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "style",
         typescriptOnly: false,
     };
@@ -49,7 +49,7 @@ function walk(ctx: Lint.WalkContext<void>) {
     function cb(node: ts.Node): void {
         if (isArrowFunction(node) && !hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword) &&
             isCallExpression(node.body) && isIdentifier(node.body.expression) &&
-            isRedundantCallback(node.parameters, node.body.arguments)) {
+            isRedundantCallback(node.parameters, node.body.arguments, node.body.expression)) {
             const start = node.getStart(ctx.sourceFile);
             ctx.addFailure(start, node.end, Rule.FAILURE_STRING(node.body.expression.text), [
                 Lint.Replacement.deleteFromTo(start, node.body.getStart(ctx.sourceFile)),
@@ -62,7 +62,11 @@ function walk(ctx: Lint.WalkContext<void>) {
 
 }
 
-function isRedundantCallback(parameters: ts.NodeArray<ts.ParameterDeclaration>, args: ts.NodeArray<ts.Node>): boolean {
+function isRedundantCallback(
+        parameters: ts.NodeArray<ts.ParameterDeclaration>,
+        args: ts.NodeArray<ts.Node>,
+        expression: ts.Identifier,
+        ): boolean {
     if (parameters.length !== args.length) {
         return false;
     }
@@ -75,7 +79,9 @@ function isRedundantCallback(parameters: ts.NodeArray<ts.ParameterDeclaration>, 
             }
             arg = arg.expression;
         }
-        if (!isIdentifier(name) || !isIdentifier(arg) || name.text !== arg.text) {
+        if (!isIdentifier(name) || !isIdentifier(arg) || name.text !== arg.text
+                // If the invoked expression is one of the parameters, bail.
+                || expression.text === name.text) {
             return false;
         }
     }

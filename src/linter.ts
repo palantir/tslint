@@ -43,7 +43,7 @@ import { arrayify, dedent } from "./utils";
  * Linter that can lint multiple files in consecutive runs.
  */
 class Linter {
-    public static VERSION = "5.0.0";
+    public static VERSION = "5.1.0";
 
     public static findConfiguration = findConfiguration;
     public static findConfigurationPath = findConfigurationPath;
@@ -121,19 +121,20 @@ class Linter {
                 }
             }
         }
-        this.failures = this.failures.concat(fileFailures);
 
         // add rule severity to failures
         const ruleSeverityMap = new Map(enabledRules.map((rule) => {
             return [rule.getOptions().ruleName, rule.getOptions().ruleSeverity] as [string, RuleSeverity];
         }));
-        for (const failure of this.failures) {
+        for (const failure of fileFailures) {
             const severity = ruleSeverityMap.get(failure.getRuleName());
             if (severity === undefined) {
                 throw new Error(`Severity for rule '${failure.getRuleName()} not found`);
             }
             failure.setRuleSeverity(severity);
         }
+
+        this.failures = this.failures.concat(fileFailures);
     }
 
     public getResult(): LintResult {

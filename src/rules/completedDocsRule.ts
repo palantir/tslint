@@ -197,18 +197,22 @@ export class Rule extends Lint.Rules.TypedRule {
             },
         },
         optionExamples: [
-            "true",
-            `[true, "${ARGUMENT_ENUMS}", "${ARGUMENT_FUNCTIONS}", "${ARGUMENT_METHODS}"]`,
-            `[true, {
-                "${ARGUMENT_ENUMS}": true,
-                "${ARGUMENT_FUNCTIONS}": {
-                    "${DESCRIPTOR_VISIBILITIES}": ["${VISIBILITY_EXPORTED}"]
+            true,
+            [true, ARGUMENT_ENUMS, ARGUMENT_FUNCTIONS, ARGUMENT_METHODS],
+            [
+                true,
+                {
+                    [ARGUMENT_ENUMS]: true,
+                    [ARGUMENT_FUNCTIONS]: {
+                        [DESCRIPTOR_VISIBILITIES]: [VISIBILITY_EXPORTED],
+                    },
+                    [ARGUMENT_METHODS]: {
+                        [DESCRIPTOR_LOCATIONS]: LOCATION_INSTANCE,
+                        [DESCRIPTOR_PRIVACIES]: [PRIVACY_PUBLIC, PRIVACY_PROTECTED],
+                    },
                 },
-                "${ARGUMENT_METHODS}": {
-                    "${DESCRIPTOR_LOCATIONS}": ["${LOCATION_INSTANCE}"]
-                    "${DESCRIPTOR_PRIVACIES}": ["${PRIVACY_PUBLIC}", "${PRIVACY_PROTECTED}"]
-                }
-            }]`],
+            ],
+        ],
         type: "style",
         typescriptOnly: false,
     };

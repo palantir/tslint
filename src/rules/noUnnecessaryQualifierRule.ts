@@ -28,7 +28,7 @@ export class Rule extends Lint.Rules.TypedRule {
         hasFix: true,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "style",
         typescriptOnly: true,
         requiresTypeInfo: true,
@@ -114,9 +114,13 @@ class Walker extends Lint.ProgramAwareRuleWalker {
     }
 
     private symbolIsNamespaceInScope(symbol: ts.Symbol): boolean {
-        if (symbol.getDeclarations().some((decl) => this.namespacesInScope.some((ns) => ns === decl))) {
+        const symbolDeclarations = symbol.getDeclarations();
+        if (symbolDeclarations == null) {
+            return false;
+        } else if (symbolDeclarations.some((decl) => this.namespacesInScope.some((ns) => ns === decl))) {
             return true;
         }
+
         const alias = this.tryGetAliasedSymbol(symbol);
         return alias !== undefined && this.symbolIsNamespaceInScope(alias);
     }

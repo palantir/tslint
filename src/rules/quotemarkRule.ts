@@ -57,9 +57,9 @@ export class Rule extends Lint.Rules.AbstractRule {
             maxLength: 5,
         },
         optionExamples: [
-            `[true, "${OPTION_SINGLE}", "${OPTION_AVOID_ESCAPE}"]`,
-            `[true, "${OPTION_SINGLE}", "${OPTION_JSX_DOUBLE}"]`,
-            ],
+            [true, OPTION_SINGLE, OPTION_AVOID_ESCAPE],
+            [true, OPTION_SINGLE, OPTION_JSX_DOUBLE],
+        ],
         type: "style",
         typescriptOnly: false,
     };

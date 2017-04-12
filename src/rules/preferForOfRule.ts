@@ -28,7 +28,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: "A for(... of ...) loop is easier to implement and read when the index is not needed.",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "typescript",
         typescriptOnly: false,
     };

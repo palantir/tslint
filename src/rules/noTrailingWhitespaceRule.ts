@@ -52,9 +52,9 @@ export class Rule extends Lint.Rules.AbstractRule {
             },
         },
         optionExamples: [
-            "true",
-            `[true, "${OPTION_IGNORE_COMMENTS}"]`,
-            `[true, "${OPTION_IGNORE_JSDOC}"]`,
+            true,
+            [true, OPTION_IGNORE_COMMENTS],
+            [true, OPTION_IGNORE_JSDOC],
         ],
         type: "style",
         typescriptOnly: false,

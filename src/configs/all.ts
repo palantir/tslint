@@ -162,6 +162,7 @@ export const rules = {
     ],
     "completed-docs": true,
     // "file-header": No sensible default
+    "deprecation": true,
     "import-spacing": true,
     "interface-name": true,
     "interface-over-type-literal": true,
@@ -178,6 +179,7 @@ export const rules = {
     "no-unnecessary-initializer": true,
     "no-unnecessary-qualifier": true,
     "no-unnecessary-type-assertion": true,
+    "number-literal-format": true,
     "object-literal-key-quotes": [true, "consistent-as-needed"],
     "object-literal-shorthand": true,
     "one-line": [true,

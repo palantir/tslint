@@ -62,7 +62,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             minLength: 0,
             maxLength: 5,
         },
-        optionExamples: ['[true, "ban-keywords", "check-format", "allow-leading-underscore"]'],
+        optionExamples: [[true, "ban-keywords", "check-format", "allow-leading-underscore"]],
         type: "style",
         typescriptOnly: false,
     };

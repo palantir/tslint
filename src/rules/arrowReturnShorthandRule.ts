@@ -36,8 +36,8 @@ export class Rule extends Lint.Rules.AbstractRule {
             enum: [OPTION_MULTILINE],
         },
         optionExamples: [
-            `[true]`,
-            `[true, "${OPTION_MULTILINE}"]`,
+            true,
+            [true, OPTION_MULTILINE],
         ],
         type: "style",
         typescriptOnly: false,

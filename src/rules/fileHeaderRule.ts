@@ -27,7 +27,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: {
             type: "string",
         },
-        optionExamples: ['[true, "Copyright \\\\d{4}"]'],
+        optionExamples: [[true, "Copyright \\d{4}"]],
         type: "style",
         typescriptOnly: false,
     };
@@ -38,26 +38,17 @@ export class Rule extends Lint.Rules.AbstractRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const { text } = sourceFile;
         // ignore shebang if it exists
-        const offset = text.startsWith("#!") ? text.indexOf("\n") + 1 : 0;
-        if (!textHasComment(text, offset, new RegExp(this.ruleArguments[0]))) {
+        let offset = text.startsWith("#!") ? text.indexOf("\n") : 0;
+        // returns the text of the first comment or undefined
+        const commentText = ts.forEachLeadingCommentRange(text, offset, (pos, end, kind) => {
+            return text.substring(pos + 2, kind === ts.SyntaxKind.SingleLineCommentTrivia ? end : end - 2);
+        });
+        if (commentText === undefined || !new RegExp(this.ruleArguments[0]).test(commentText)) {
+            if (offset !== 0) {
+                ++offset; // show warning in next line after shebang
+            }
             return [new Lint.RuleFailure(sourceFile, offset, offset, Rule.FAILURE_STRING, this.ruleName)];
         }
         return [];
     }
-}
-
-// match a single line or multi line comment with leading whitespace
-// the wildcard dot does not match new lines - we can use [\s\S] instead
-const commentRegexp = /^\s*(\/\/(.*)|\/\*([\s\S]*?)\*\/)/;
-
-function textHasComment(text: string, offset: number, headerRegexp: RegExp): boolean {
-    // check for a comment
-    const match = commentRegexp.exec(text.slice(offset));
-    if (match === null) {
-        return false;
-    }
-
-    // either the third or fourth capture group contains the comment contents
-    const comment = match[2] !== undefined ? match[2] : match[3];
-    return comment.search(headerRegexp) !== -1;
 }
