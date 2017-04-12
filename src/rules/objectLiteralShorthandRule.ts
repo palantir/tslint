@@ -68,7 +68,7 @@ function handleLonghandMethod(name: ts.PropertyName, initializer: ts.FunctionExp
     let fix: Lint.Fix = Lint.Replacement.deleteFromTo(name.end, getChildOfKind(initializer, ts.SyntaxKind.OpenParenToken)!.pos);
     let prefix = "";
     if (initializer.asteriskToken !== undefined) {
-        prefix = `*${prefix}`;
+        prefix = "*";
     }
     if (hasModifier(initializer.modifiers, ts.SyntaxKind.AsyncKeyword)) {
         prefix = `async ${prefix}`;
