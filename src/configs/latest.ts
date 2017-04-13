@@ -18,7 +18,7 @@
 // tslint:disable object-literal-sort-keys
 // tslint:disable:object-literal-key-quotes
 export const rules = {
-    // added in v5.0
+    // added in v5.1
     "align": {
         options: [
             "parameters",
@@ -26,7 +26,6 @@ export const rules = {
             "members",
         ],
     },
-    // added in v5.1
     "no-invalid-template-strings": true,
     "no-sparse-arrays": true,
 };
