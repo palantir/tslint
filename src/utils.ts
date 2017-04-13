@@ -47,6 +47,14 @@ export function camelize(stringWithHyphens: string): string {
     return stringWithHyphens.replace(/-(.)/g, (_, nextLetter) => nextLetter.toUpperCase());
 }
 
+export function isUpperCase(str: string): boolean {
+    return str === str.toUpperCase();
+}
+
+export function isLowerCase(str: string): boolean {
+    return str === str.toLowerCase();
+}
+
 /**
  * Removes leading indents from a template string without removing all leading whitespace
  */
