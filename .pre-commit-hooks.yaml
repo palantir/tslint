@@ -3,7 +3,7 @@
 #
 # To use, add the following to .pre-commit-config.yaml in your repo:
 # -   repo: git@github.com:palantir/tslint.git
-#     sha: <latest commit sha>
+#     sha: 7418afaf5fa511bfbe00fb2615f7ca015ab099d9
 #     hooks:
 #     -   id: tslint
 
