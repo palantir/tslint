@@ -1,26 +1,30 @@
 ---
-title: CLI
+title: TSLint command-line interface
 layout: page
-permalink: "/usage/cli/"
+permalink: /usage/cli/
 ---
+
 ### Installation
 
 __Local__ (in your project's working directory):
 
-```
-$ npm install tslint typescript --save-dev
+```sh
+npm install tslint typescript --save-dev
+# or
+yarn add tslint typescript
 ```
 
 __Global__:
 
+```sh
+npm install tslint typescript -g
+# or
+yarn global add tslint typescript
 ```
-$ npm install tslint typescript -g
-```
-
 
 {% include peer_dependencies.md %}
 
-### Usage ###
+### CLI Usage
 
 Please ensure that the TypeScript source files compile correctly _before_ running the linter.
 
@@ -129,5 +133,13 @@ tslint accepts the following command-line options:
 -h, --help:
     Prints this help message.
 ```
+
+#### Exit Codes
+
+The CLI process may exit with the following codes:
+
+- `0`: Linting succeeded without errors (warnings may have ocurred)
+- `1`: An invalid command line argument or combination thereof was used
+- `2`: Linting failed with one or more rule violations with severity `error`
 
 [0]: {{site.baseurl | append: "/rules/"}}

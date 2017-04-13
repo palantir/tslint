@@ -48,7 +48,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             minLength: 1,
             maxLength: 3,
         },
-        optionExamples: ['[true, "parameters", "statements"]'],
+        optionExamples: [[true, "parameters", "statements"]],
         type: "style",
         typescriptOnly: false,
     };
@@ -117,10 +117,10 @@ class AlignWalker extends Lint.AbstractWalker<Options> {
                 const diff = alignToColumn - pos.character;
                 let fix: Lint.Fix | undefined;
                 if (0 < diff) {
-                    fix = this.createFix(Lint.Replacement.appendText(start, " ".repeat(diff)));
+                    fix = Lint.Replacement.appendText(start, " ".repeat(diff));
                 } else if (node.pos <= start + diff && /^\s+$/.test(sourceFile.text.substring(start + diff, start))) {
                     // only delete text if there is only whitespace
-                    fix = this.createFix(Lint.Replacement.deleteText(start + diff, -diff));
+                    fix = Lint.Replacement.deleteText(start + diff, -diff);
                 }
                 this.addFailure(start, node.end, kind + Rule.FAILURE_STRING_SUFFIX, fix);
             }

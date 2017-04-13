@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { isTypeAliasDeclaration } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -26,7 +27,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: `Interfaces are generally preferred over type literals because interfaces can be implemented, extended and merged.`,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "style",
         typescriptOnly: true,
     };
@@ -35,15 +36,15 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Use an interface instead of a type literal.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new InterfaceOverTypeLiteralWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class InterfaceOverTypeLiteralWalker extends Lint.RuleWalker {
-    public visitTypeAliasDeclaration(node: ts.TypeAliasDeclaration) {
-        if (node.type.kind === ts.SyntaxKind.TypeLiteral) {
-            this.addFailureAtNode(node.name, Rule.FAILURE_STRING);
+function walk(ctx: Lint.WalkContext<void>): void {
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (isTypeAliasDeclaration(node) && node.type.kind === ts.SyntaxKind.TypeLiteral) {
+            ctx.addFailureAtNode(node.name, Rule.FAILURE_STRING);
         }
-        super.visitTypeAliasDeclaration(node);
-    }
+        return ts.forEachChild(node, cb);
+    });
 }

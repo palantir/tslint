@@ -27,7 +27,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: "Maintains stylistic consistency with other function calls.",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "style",
         typescriptOnly: false,
     };
@@ -36,16 +36,15 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Parentheses are required when invoking a constructor";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const newParensWalker = new NewParensWalker(sourceFile, this.getOptions());
-        return this.applyWithWalker(newParensWalker);
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class NewParensWalker extends Lint.RuleWalker {
-    public visitNewExpression(node: ts.NewExpression) {
-        if (node.arguments === undefined) {
-            this.addFailureAtNode(node, Rule.FAILURE_STRING);
+function walk(ctx: Lint.WalkContext<void>) {
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (node.kind === ts.SyntaxKind.NewExpression && (node as ts.NewExpression).arguments === undefined) {
+            ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
-        super.visitNewExpression(node);
-    }
+        return ts.forEachChild(node, cb);
+    });
 }

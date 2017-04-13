@@ -2,3 +2,12 @@ var x = parseInt(3, 10) +
         parseInt(4);
         ~~~~~~~~~~~  [Missing radix parameter]
 var y = parseFloat("2.5");
+
+parser.parseInt("123");
+obj.parser.parseInt("123");
+
+global.parseInt("123");
+~~~~~~~~~~~~~~~~~~~~~~  [Missing radix parameter]
+global.global.parseInt("123");
+window.parseInt("123");
+~~~~~~~~~~~~~~~~~~~~~~  [Missing radix parameter]

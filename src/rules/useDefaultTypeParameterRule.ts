@@ -26,7 +26,7 @@ export class Rule extends Lint.Rules.TypedRule {
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: ["true"],
-        type: "style",
+        type: "functionality",
         typescriptOnly: true,
         requiresTypeInfo: true,
     };
@@ -40,14 +40,13 @@ export class Rule extends Lint.Rules.TypedRule {
 }
 
 function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
-    return ts.forEachChild(ctx.sourceFile, recur);
-    function recur(node: ts.Node): void {
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         const argsAndParams = getArgsAndParameters(node, checker);
         if (argsAndParams) {
             checkArgsAndParameters(node, argsAndParams);
         }
-        return ts.forEachChild(node, recur);
-    }
+        return ts.forEachChild(node, cb);
+    });
 
     function checkArgsAndParameters(node: ts.Node, { typeArguments, typeParameters }: ArgsAndParams): void {
         // Just check the last one. Must specify previous type parameters if the last one is specified.
@@ -56,10 +55,10 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
         const param = typeParameters[i];
         // TODO: would like checker.areTypesEquivalent. https://github.com/Microsoft/TypeScript/issues/13502
         if (param.default && param.default.getText() === arg.getText()) {
-            ctx.addFailureAtNode(arg, Rule.FAILURE_STRING, ctx.createFix(replacement()));
+            ctx.addFailureAtNode(arg, Rule.FAILURE_STRING, fix());
         }
 
-        function replacement(): Lint.Replacement {
+        function fix(): Lint.Fix {
             if (i === 0) {
                 const lt = Lint.childOfKind(node, ts.SyntaxKind.LessThanToken)!;
                 const gt = Lint.childOfKind(node, ts.SyntaxKind.GreaterThanToken)!;

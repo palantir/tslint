@@ -1,0 +1,13 @@
+{
+  "extends": "tslint-test-custom-rules",
+  "jsRules": {
+    "always-fail": {
+      "severity": "warning"
+    }
+  },
+  "rules": {
+    "always-fail": {
+      "severity": "warning"
+    }
+  }
+}

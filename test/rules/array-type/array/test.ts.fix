@@ -42,3 +42,4 @@ type barIntersection = (string & number)[];
 interface FooInterface {
     '.bar': {baz: string[];};
 }
+

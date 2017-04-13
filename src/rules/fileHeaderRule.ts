@@ -27,7 +27,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: {
             type: "string",
         },
-        optionExamples: ['[true, "Copyright \\\\d{4}"]'],
+        optionExamples: [[true, "Copyright \\d{4}"]],
         type: "style",
         typescriptOnly: false,
     };
@@ -36,43 +36,19 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "missing file header";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const walker = new FileHeaderWalker(sourceFile, this.getOptions());
-        const options = this.getOptions().ruleArguments;
-        walker.setRegexp(new RegExp(options[0].toString()));
-        return this.applyWithWalker(walker);
-    }
-}
-
-class FileHeaderWalker extends Lint.RuleWalker {
-    // match a single line or multi line comment with leading whitespace
-    // the wildcard dot does not match new lines - we can use [\s\S] instead
-    private commentRegexp: RegExp = /^\s*(\/\/(.*)|\/\*([\s\S]*?)\*\/)/;
-    private headerRegexp: RegExp;
-
-    public setRegexp(headerRegexp: RegExp) {
-        this.headerRegexp = headerRegexp;
-    }
-
-    public visitSourceFile(node: ts.SourceFile) {
-        if (this.headerRegexp) {
-            let text = node.getFullText();
-            let offset = 0;
-            // ignore shebang if it exists
-            if (text.indexOf("#!") === 0) {
-                offset = text.indexOf("\n") + 1;
-                text = text.substring(offset);
+        const { text } = sourceFile;
+        // ignore shebang if it exists
+        let offset = text.startsWith("#!") ? text.indexOf("\n") : 0;
+        // returns the text of the first comment or undefined
+        const commentText = ts.forEachLeadingCommentRange(text, offset, (pos, end, kind) => {
+            return text.substring(pos + 2, kind === ts.SyntaxKind.SingleLineCommentTrivia ? end : end - 2);
+        });
+        if (commentText === undefined || !new RegExp(this.ruleArguments[0]).test(commentText)) {
+            if (offset !== 0) {
+                ++offset; // show warning in next line after shebang
             }
-            // check for a comment
-            const match = text.match(this.commentRegexp);
-            if (!match) {
-                this.addFailureAt(offset, 0, Rule.FAILURE_STRING);
-            } else {
-                // either the third or fourth capture group contains the comment contents
-                const comment = match[2] ? match[2] : match[3];
-                if (comment !== undefined && comment.search(this.headerRegexp) < 0) {
-                    this.addFailureAt(offset, 0, Rule.FAILURE_STRING);
-                }
-            }
+            return [new Lint.RuleFailure(sourceFile, offset, offset, Rule.FAILURE_STRING, this.ruleName)];
         }
+        return [];
     }
 }

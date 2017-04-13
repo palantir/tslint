@@ -6,3 +6,5 @@ var singleWithinDouble = "'singleWithinDouble'";
 var doubleWithinSingle = '"doubleWithinSingle"';
 var tabNewlineWithinDouble = "tab\tNewline\nWithinDouble";
                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [" should be ']
+"escaped\"quotemark";
+~~~~~~~~~~~~~~~~~~~~ [" should be ']

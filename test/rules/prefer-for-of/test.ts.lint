@@ -69,7 +69,7 @@ function sampleFunc() {
     for (; o < arr.length; o++) {
         console.log(arr[o]);
     }
-    
+
     // Prefix incrementor
     for(let p = 0; p < arr.length; ++p) {
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [0]
@@ -127,7 +127,7 @@ function sampleFunc() {
             console.log(q);
         }
     }
-    
+
     // For-of loops ARE allowed
     for (var r of arr) {
         console.log(r);
@@ -150,4 +150,9 @@ for (let shadow = 0; shadow < arr.length; shadow++) {
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   [0]
     }
 }
+
+for (let i = 0; i < arr.length; i++) {
+    delete arr[i];
+}
+
 [0]: Expected a 'for-of' loop instead of a 'for' loop with this simple iteration

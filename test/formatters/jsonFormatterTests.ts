@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import { assert } from "chai";
 import * as ts from "typescript";
 
-import { Fix, IFormatter, Replacement, TestUtils } from "../lint";
+import { IFormatter, Replacement, TestUtils } from "../lint";
 import { createFailure } from "./utils";
 
 describe("JSON Formatter", () => {
@@ -37,9 +38,7 @@ describe("JSON Formatter", () => {
             createFailure(sourceFile, 0, 1, "first failure", "first-name", undefined, "error"),
             createFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name", undefined, "error"),
             createFailure(sourceFile, 0, maxPosition, "full failure", "full-name",
-                new Fix("full-name", [
-                    new Replacement(0, 0, ""),
-                ]),
+                new Replacement(0, 0, ""),
                 "error"),
         ];
 
@@ -80,14 +79,9 @@ describe("JSON Formatter", () => {
             name: TEST_FILE,
             failure: "full failure",
             fix: {
-                innerReplacements: [
-                    {
-                        innerLength: 0,
-                        innerStart: 0,
-                        innerText: "",
-                    },
-                ],
-                innerRuleName: "full-name",
+                innerLength: 0,
+                innerStart: 0,
+                innerText: "",
             },
             startPosition: {
                 position: 0,

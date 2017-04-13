@@ -18,57 +18,9 @@
 // tslint:disable object-literal-sort-keys
 // tslint:disable:object-literal-key-quotes
 export const rules = {
-    // added in v3.x
-    "no-invalid-this": false,
-    "no-angle-bracket-type-assertion": true,
-
-    // added in v4.1
-    "only-arrow-functions": {
-        options: [
-            "allow-declarations",
-            // the following option was added in 4.1
-            "allow-named-functions",
-        ],
-    },
-    "prefer-const": true,
-
-    // added in v4.2
-    "callable-types": true,
-    "interface-over-type-literal": true,
-    "no-empty-interface": true,
-    "no-string-throw": true,
-
-    // added in v4.3
-    "import-spacing": true,
-    "space-before-function-paren": {
-        options: {
-            "anonymous": "never",
-            "asyncArrow": "always",
-            "constructor": "never",
-            "method": "never",
-            "named": "never",
-        },
-    },
-    "typeof-compare": true,
-    "unified-signatures": true,
-
-    // added in v4.4
-    "arrow-return-shorthand": true,
-    "no-unnecessary-initializer": true,
-    "no-misused-new": true,
-
-    // added in v4.5
-    "ban-types": {
-        options: [
-            ["Object", "Avoid using the `Object` type. Did you mean `object`?"],
-            ["Function", "Avoid using the `Function` type. Prefer a specific function type, like `() => void`."],
-            ["Boolean", "Avoid using the `Boolean` type. Did you mean `boolean`?"],
-            ["Number", "Avoid using the `Number` type. Did you mean `number`?"],
-            ["String", "Avoid using the `String` type. Did you mean `string`?"],
-            ["Symbol", "Avoid using the `Symbol` type. Did you mean `symbol`?"],
-        ],
-    },
-    "no-duplicate-super": true,
+    // added in v5.1
+    "no-invalid-template-strings": true,
+    "no-sparse-arrays": true,
 };
 // tslint:enable object-literal-sort-keys
 

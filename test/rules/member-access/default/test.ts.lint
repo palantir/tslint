@@ -12,6 +12,7 @@ declare class AmbientAccess {
 }
 
 class Members {
+    [x: string]: number;
     i: number;
     ~ [The class property 'i' must be marked either 'private', 'public', or 'protected']
     static j: number;

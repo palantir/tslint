@@ -1,47 +1,38 @@
 ---
 layout: page
-title: Library
+title: Using TSLint as a Node.js library
 permalink: /usage/library/
 ---
 
-### Installation ###
-------------
+### Installation
 
-```
-npm install tslint
-npm install typescript
+```sh
+npm install tslint typescript
+# or
+yarn add tslint typescript
 ```
 
 {% include peer_dependencies.md %}
 
-### Usage ###
------
+### Library usage
 
 Please ensure that the TypeScript source files compile correctly _before_ running the linter.
 
-
 ```ts
-var fileName = "Specify file name";
+import { Linter, Configuration } from "tslint";
+import * as fs from "fs";
 
-var configuration = {
-    rules: {
-        "variable-name": true,
-        "quotemark": [true, "double"]
-    }
-};
-
-var options = {
+const fileName = "Specify input file name";
+const configurationFilename = "Specify configuration file name";
+const options = {
     formatter: "json",
-    rulesDirectory: "customRules/", // can be an array of directories
-    formattersDirectory: "customFormatters/",
-    fix: false
+    rulesDirectory: "customRules/",
+    formattersDirectory: "customFormatters/"
 };
 
-var Linter = require("tslint").Linter;
-var fs = require("fs");
-var contents = fs.readFileSync(fileName, "utf8");
-
-var linter = new Linter(options);
-linter.lint(fileName, contents, configuration);
-var result = linter.getResult();
+const fileContents = fs.readFileSync(fileName, "utf8");
+const linter = new Linter(options);
+const configuration = Configuration.findConfiguration(configurationFilename, fileName).results;
+linter.lint(fileName, fileContents, configuration);
+const result = linter.getResult();
 ```

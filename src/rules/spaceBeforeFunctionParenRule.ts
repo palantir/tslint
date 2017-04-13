@@ -28,10 +28,10 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Require or disallow a space before function parenthesis",
         hasFix: true,
         optionExamples: [
-            `true`,
-            `[true, "always"]`,
-            `[true, "never"]`,
-            `[true, {"anonymous": "always", "named": "never", "asyncArrow": "always"}]`,
+            true,
+            [true, "always"],
+            [true, "never"],
+            [true, {anonymous: "always", named: "never", asyncArrow: "always"}],
         ],
         options: {
             properties: {
@@ -159,12 +159,10 @@ class FunctionWalker extends Lint.RuleWalker {
 
         if (hasSpace && option === "never") {
             const pos = openParen.getStart() - 1;
-            const fix = new Lint.Fix(Rule.metadata.ruleName, [ this.deleteText(pos, 1) ]);
-            this.addFailureAt(pos, 1, Rule.INVALID_WHITESPACE_ERROR, fix);
+            this.addFailureAt(pos, 1, Rule.INVALID_WHITESPACE_ERROR, this.deleteText(pos, 1));
         } else if (!hasSpace && option === "always") {
             const pos = openParen.getStart();
-            const fix = new Lint.Fix(Rule.metadata.ruleName, [ this.appendText(pos, " ") ]);
-            this.addFailureAt(pos, 1, Rule.MISSING_WHITESPACE_ERROR, fix);
+            this.addFailureAt(pos, 1, Rule.MISSING_WHITESPACE_ERROR, this.appendText(pos, " "));
         }
     }
 

@@ -25,7 +25,7 @@ export class Rule extends Lint.Rules.TypedRule {
         description: "Warns for an awaited value that is not a Promise.",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: true,
         requiresTypeInfo: true,

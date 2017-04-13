@@ -1,6 +1,7 @@
 .DS_Store
 .github
 .gitmodules
+.gitattributes
 .eslintrc.json
 .npmrc
 .project
@@ -9,6 +10,8 @@
 .tscache
 .tslintrc
 .vscode
+.nycrc
+.editorconfig
 appveyor.yml
 circle.yml
 tslint.json
@@ -19,3 +22,5 @@ yarn.lock
 /src/
 /test/
 tscommand*.txt
+/coverage/
+/.nyc_output
