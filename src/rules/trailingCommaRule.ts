@@ -149,12 +149,12 @@ export class Rule extends Lint.Rules.AbstractRule {
                 true,
                 {
                     multiline: {
-                        objects: "always"
+                        objects: "always",
                         arrays: "always",
                         functions: "never",
                         typeLiterals: "ignore",
-                    }
-                }
+                    },
+                },
             ],
         ],
         type: "maintainability",
