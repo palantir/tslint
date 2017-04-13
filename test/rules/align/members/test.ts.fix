@@ -1,0 +1,33 @@
+interface Foo {
+    bar,
+    baz
+    bas
+    foo;
+}
+
+class Foo {
+    bar,
+    baz() {}
+    get bas() {}
+    foo;
+}
+
+let foo = {
+    foo,
+    moep,
+    baz,
+    baz: foo,
+}
+
+let {
+    foo,
+    boo,
+    baz,
+    baz,
+} = foo;
+
+let foo: {
+    foo
+    bar
+    baz
+}
