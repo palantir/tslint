@@ -27,7 +27,7 @@ export class Rule extends Lint.Rules.TypedRule {
         description: "When adding two variables, operands must both be of type number or of type string.",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
         requiresTypeInfo: true,

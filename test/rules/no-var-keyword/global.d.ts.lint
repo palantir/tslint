@@ -1,0 +1,8 @@
+declare var x: number;
+
+declare namespace N {
+    var y: number;
+    ~~~ [0]
+}
+
+[0]: Forbidden 'var' keyword, use 'let' or 'const' instead

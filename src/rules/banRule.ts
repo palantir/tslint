@@ -36,8 +36,14 @@ export class Rule extends Lint.Rules.AbstractRule {
                 maxLength: 3,
             },
         },
-        optionExamples: [`[true, ["someGlobalMethod"], ["someObject", "someFunction"],
-                          ["someObject", "otherFunction", "Optional explanation"]]`],
+        optionExamples: [
+            [
+                true,
+                ["someGlobalMethod"],
+                ["someObject", "someFunction"],
+                ["someObject", "otherFunction", "Optional explanation"],
+            ],
+        ],
         type: "functionality",
         typescriptOnly: false,
     };

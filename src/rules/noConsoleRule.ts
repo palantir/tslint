@@ -31,7 +31,7 @@ export class Rule extends BanRule.Rule {
             type: "array",
             items: { type: "string" },
         },
-        optionExamples: [`[true, "log", "error"]`],
+        optionExamples: [[true, "log", "error"]],
         type: "functionality",
         typescriptOnly: false,
     };

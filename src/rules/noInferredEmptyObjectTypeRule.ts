@@ -26,7 +26,7 @@ export class Rule extends Lint.Rules.TypedRule {
         description: "Disallow type inference of {} (empty object type) at function and constructor call sites",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: true,
         requiresTypeInfo: true,

@@ -40,7 +40,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "string",
             enum: [OPTION_ARRAY, OPTION_GENERIC, OPTION_ARRAY_SIMPLE],
         },
-        optionExamples: [`[true, "${OPTION_ARRAY}"]`, `[true, "${OPTION_GENERIC}"]`, `[true, "${OPTION_ARRAY_SIMPLE}"]`],
+        optionExamples: [[true, OPTION_ARRAY], [true, OPTION_GENERIC], [true, OPTION_ARRAY_SIMPLE]],
         type: "style",
         typescriptOnly: true,
     };

@@ -281,6 +281,12 @@ export function getRelativePath(directory?: string | null, relativeTo?: string) 
     return undefined;
 }
 
+// check if directory should be used as path or if it should be resolved like a module
+// matches if directory starts with '/', './', '../', 'node_modules/' or equals '.' or '..'
+export function useAsPath(directory: string) {
+    return /^(?:\.?\.?(?:\/|$)|node_modules\/)/.test(directory);
+}
+
 /**
  * @param directories A path(s) to a directory of custom rules
  * @param relativeTo A path that directories provided are relative to.
@@ -289,17 +295,25 @@ export function getRelativePath(directory?: string | null, relativeTo?: string) 
  * @return An array of absolute paths to directories potentially containing rules
  */
 export function getRulesDirectories(directories?: string | string[], relativeTo?: string): string[] {
-    const rulesDirectories = arrayify(directories)
-        .map((dir) => getRelativePath(dir, relativeTo))
+    return arrayify(directories)
+        .map((dir) => {
+            if (!useAsPath(dir)) {
+                try {
+                    return path.dirname(resolve.sync(dir, { basedir: relativeTo }));
+                } catch (err) {
+                    // swallow error and fallback to using directory as path
+                }
+            }
+
+            const absolutePath = getRelativePath(dir, relativeTo);
+            if (absolutePath != null) {
+                if (!fs.existsSync(absolutePath)) {
+                    throw new Error(`Could not find custom rule directory: ${dir}`);
+                }
+            }
+            return absolutePath;
+        })
         .filter((dir) => dir !== undefined) as string[];
-
-    for (const directory of rulesDirectories) {
-        if (directory != null && !fs.existsSync(directory)) {
-            throw new Error(`Could not find custom rule directory: ${directory}`);
-        }
-    }
-
-    return rulesDirectories;
 }
 
 /**

@@ -37,7 +37,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             },
             minLength: 1,
         },
-        optionExamples: ["true", '[true, "rxjs", "lodash"]'],
+        optionExamples: [true, [true, "rxjs", "lodash"]],
         type: "functionality",
         typescriptOnly: false,
     };

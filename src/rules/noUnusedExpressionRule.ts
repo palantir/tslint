@@ -60,7 +60,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             minLength: 0,
             maxLength: 1,
         },
-        optionExamples: ["true", `[true, "${ALLOW_FAST_NULL_CHECKS}"]`],
+        optionExamples: [true, [true, ALLOW_FAST_NULL_CHECKS]],
         type: "functionality",
         typescriptOnly: false,
     };

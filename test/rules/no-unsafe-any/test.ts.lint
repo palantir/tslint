@@ -18,6 +18,9 @@ const num: namespaceImport.T = 0;
 // Ignore string literal in type
 function returnsA(): "a";
 
+label: for (const x of []) {
+    break label;
+}
 
 importAlias.property;
 ~~~~~~~~~~~ [0]

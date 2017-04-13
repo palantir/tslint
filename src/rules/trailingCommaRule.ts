@@ -58,7 +58,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             },
             additionalProperties: false,
         },
-        optionExamples: ['[true, {"multiline": "always", "singleline": "never"}]'],
+        optionExamples: [[true, {multiline: "always", singleline: "never"}]],
         type: "maintainability",
         typescriptOnly: false,
     };

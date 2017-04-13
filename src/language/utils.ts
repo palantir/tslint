@@ -16,6 +16,7 @@
  */
 
 import * as path from "path";
+import { isBlockScopedVariableDeclarationList } from "tsutils";
 import * as ts from "typescript";
 
 import {IDisabledInterval, RuleFailure} from "./rule/rule";
@@ -51,12 +52,12 @@ export function hasModifier(modifiers: ts.ModifiersArray | undefined, ...modifie
  * which indicates this is a "let" or "const".
  */
 export function isBlockScopedVariable(node: ts.VariableDeclaration | ts.VariableStatement): boolean {
-    const parentNode = (node.kind === ts.SyntaxKind.VariableDeclaration)
-        ? (node as ts.VariableDeclaration).parent
-        : (node as ts.VariableStatement).declarationList;
-
-    return isNodeFlagSet(parentNode!, ts.NodeFlags.Let)
-        || isNodeFlagSet(parentNode!, ts.NodeFlags.Const);
+    if (node.kind === ts.SyntaxKind.VariableDeclaration) {
+        const parent = node.parent!;
+        return parent.kind === ts.SyntaxKind.CatchClause || isBlockScopedVariableDeclarationList(parent);
+    } else {
+        return isBlockScopedVariableDeclarationList(node.declarationList);
+    }
 }
 
 export function isBlockScopedBindingElement(node: ts.BindingElement): boolean {

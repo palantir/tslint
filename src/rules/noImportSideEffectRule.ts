@@ -25,7 +25,7 @@ const OPTION_IGNORE_MODULE = "ignore-module";
 export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         description: "Avoid import statements with side-effect.",
-        optionExamples: ["true", `[true, { "${OPTION_IGNORE_MODULE}": "(\\.html|\\.css)$" }]`],
+        optionExamples: [true, [true, { [OPTION_IGNORE_MODULE]: "(\\.html|\\.css)$" }]],
         options: {
             items: {
                 properties: {

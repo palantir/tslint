@@ -29,7 +29,7 @@ export class Rule extends Lint.Rules.TypedRule {
             Expressions that work on all values (such as \`"" + x\`) are allowed.`,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: true,
         requiresTypeInfo: true,
@@ -65,6 +65,11 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
                 return;
             }
 
+            case ts.SyntaxKind.LabeledStatement:
+                // Ignore label
+                return cb((node as ts.LabeledStatement).statement);
+
+            case ts.SyntaxKind.BreakStatement: // Ignore label
             // Ignore types
             case ts.SyntaxKind.InterfaceDeclaration:
             case ts.SyntaxKind.TypeAliasDeclaration:

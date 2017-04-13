@@ -50,8 +50,8 @@ export class Rule extends Lint.Rules.AbstractRule {
             },
         },
         optionExamples: [
-            "true",
-            `[true, {"destructuring": "${OPTION_DESTRUCTURING_ALL}"}]`,
+            true,
+            [true, {destructuring: OPTION_DESTRUCTURING_ALL}],
         ],
         type: "maintainability",
         typescriptOnly: false,
@@ -123,12 +123,21 @@ interface DestructuringInfo {
 class PreferConstWalker extends Lint.AbstractWalker<Options> {
     private scope: Scope;
     public walk(sourceFile: ts.SourceFile) {
+        // don't check anything on declaration files
+        if (sourceFile.isDeclarationFile) {
+            return;
+        }
+
         this.scope = new Scope();
         const cb = (node: ts.Node): void => {
             const savedScope = this.scope;
             const boundary = utils.isScopeBoundary(node);
             if (boundary !== utils.ScopeBoundary.None) {
                 if (boundary === utils.ScopeBoundary.Function) {
+                    if (node.kind === ts.SyntaxKind.ModuleDeclaration && utils.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)) {
+                        // don't check ambient namespaces
+                        return;
+                    }
                     this.scope = new Scope();
                     if (utils.isFunctionDeclaration(node) ||
                         utils.isMethodDeclaration(node) ||
@@ -240,11 +249,11 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
         let declarationInfo: DeclarationInfo;
         const kind = utils.getVariableDeclarationKind(declarationList);
         if (kind === utils.VariableDeclarationKind.Const ||
-            utils.hasModifier(declarationList.parent!.modifiers, ts.SyntaxKind.ExportKeyword)) {
+            utils.hasModifier(declarationList.parent!.modifiers, ts.SyntaxKind.ExportKeyword, ts.SyntaxKind.DeclareKeyword)) {
 
             declarationInfo = {
                 canBeConst: false,
-                isBlockScoped: true,
+                isBlockScoped: kind !== utils.VariableDeclarationKind.Var,
             };
         } else {
             declarationInfo = {

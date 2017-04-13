@@ -72,8 +72,8 @@ export class Rule extends Lint.Rules.AbstractRule {
             additionalProperties: false,
         },
         optionExamples: [
-            "true",
-            '[true, {"import-sources-order": "lowercase-last", "named-imports-order": "lowercase-first"}]',
+            true,
+            [true, {"import-sources-order": "lowercase-last", "named-imports-order": "lowercase-first"}],
         ],
         type: "style",
         typescriptOnly: false,
