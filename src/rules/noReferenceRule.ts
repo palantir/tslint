@@ -29,7 +29,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             Use ES6-style imports to reference other files.`,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "typescript",
         typescriptOnly: false,
     };
@@ -38,14 +38,12 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "<reference> is not allowed, use imports";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoReferenceWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class NoReferenceWalker extends Lint.RuleWalker {
-    public visitSourceFile(node: ts.SourceFile) {
-        for (const ref of node.referencedFiles) {
-            this.addFailureFromStartToEnd(ref.pos, ref.end, Rule.FAILURE_STRING);
-        }
+function walk(ctx: Lint.WalkContext<void>): void {
+    for (const ref of ctx.sourceFile.referencedFiles) {
+        ctx.addFailure(ref.pos, ref.end, Rule.FAILURE_STRING);
     }
 }

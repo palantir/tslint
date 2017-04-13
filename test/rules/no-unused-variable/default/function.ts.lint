@@ -3,12 +3,12 @@ function func1(x: number, y: number) {
 }
 
 var func2 = () => {
-    ~~~~~           [Unused variable: 'func2']
+    ~~~~~           ['func2' is declared but never used.]
     //
 };
 
 function func3() {
-         ~~~~~     [Unused function: 'func3']
+         ~~~~~     ['func3' is declared but never used.]
     return func1(1, 2);
 }
 
@@ -17,6 +17,7 @@ export function func4() {
 }
 
 declare function func5(): any;
+                 ~~~~~ ['func5' is declared but never used.]
 
 export default function () {
     return 0;

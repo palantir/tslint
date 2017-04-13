@@ -110,8 +110,4 @@ export class RuleWalker extends SyntaxWalker implements IWalker {
     public getRuleName(): string {
         return this.ruleName;
     }
-
-    public createFix(...replacements: Replacement[]): Fix {
-        return new Fix(this.ruleName, replacements);
-    }
 }

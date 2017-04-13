@@ -35,7 +35,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: "Helps maintain a consistent, readable style for JSDoc comments.",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "style",
         typescriptOnly: false,
     };

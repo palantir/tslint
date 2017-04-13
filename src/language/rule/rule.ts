@@ -17,6 +17,7 @@
 
 import * as ts from "typescript";
 
+import {arrayify, flatMap} from "../../utils";
 import {IWalker} from "../walker";
 
 export interface IRuleMetadata {
@@ -65,8 +66,9 @@ export interface IRuleMetadata {
 
     /**
      * Examples of what a standard config for the rule might look like.
+     * Using a string[] here is deprecated. Write the options as a JSON object instead.
      */
-    optionExamples?: string[];
+    optionExamples?: Array<true | any[]> | string[];
 
     /**
      * An explanation of why the rule is useful.
@@ -103,12 +105,12 @@ export interface IDisabledInterval {
 export interface IRule {
     getOptions(): IOptions;
     isEnabled(): boolean;
-    apply(sourceFile: ts.SourceFile, languageService: ts.LanguageService): RuleFailure[];
+    apply(sourceFile: ts.SourceFile): RuleFailure[];
     applyWithWalker(walker: IWalker): RuleFailure[];
 }
 
 export interface ITypedRule extends IRule {
-    applyWithProgram(sourceFile: ts.SourceFile, languageService: ts.LanguageService): RuleFailure[];
+    applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): RuleFailure[];
 }
 
 export interface IRuleFailureJson {
@@ -132,10 +134,18 @@ export function isTypedRule(rule: IRule): rule is ITypedRule {
 }
 
 export class Replacement {
+    public static applyFixes(content: string, fixes: Fix[]): string {
+        return this.applyAll(content, flatMap(fixes, arrayify));
+    }
+
     public static applyAll(content: string, replacements: Replacement[]) {
         // sort in reverse so that diffs are properly applied
         replacements.sort((a, b) => b.end - a.end);
         return replacements.reduce((text, r) => r.apply(text), content);
+    }
+
+    public static replaceNode(node: ts.Node, text: string, sourceFile?: ts.SourceFile): Replacement {
+        return this.replaceFromTo(node.getStart(sourceFile), node.getEnd(), text);
     }
 
     public static replaceFromTo(start: number, end: number, text: string) {
@@ -178,32 +188,6 @@ export class Replacement {
     }
 }
 
-export class Fix {
-    public static applyAll(content: string, fixes: Fix[]) {
-        // accumulate replacements
-        let replacements: Replacement[] = [];
-        for (const fix of fixes) {
-            replacements = replacements.concat(fix.replacements);
-        }
-        return Replacement.applyAll(content, replacements);
-    }
-
-    constructor(private innerRuleName: string, private innerReplacements: Replacement[]) {
-    }
-
-    get ruleName() {
-        return this.innerRuleName;
-    }
-
-    get replacements() {
-        return this.innerReplacements;
-    }
-
-    public apply(content: string) {
-        return Replacement.applyAll(content, this.innerReplacements);
-    }
-}
-
 export class RuleFailurePosition {
     constructor(private position: number, private lineAndCharacter: ts.LineAndCharacter) {
     }
@@ -233,6 +217,8 @@ export class RuleFailurePosition {
             && ll.character === rr.character;
     }
 }
+
+export type Fix = Replacement | Replacement[];
 
 export class RuleFailure {
     private fileName: string;

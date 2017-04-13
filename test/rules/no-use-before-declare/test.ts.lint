@@ -1,6 +1,6 @@
 $.x = 3;
 ~        [variable '$' used before declaration]
-import $ = require("$");
+import $ = require("./$");
 var vara = varb, varb;
            ~~~~        [variable 'varb' used before declaration]
 
@@ -34,6 +34,8 @@ if (something) {
     var defined;
 }
 
+testUndeclaredImports(); // Function early reference OK
+
 function testUndeclaredImports() {
     console.log(foo1);
                 ~~~~   [variable 'foo1' used before declaration]
@@ -45,11 +47,11 @@ function testUndeclaredImports() {
     ~~~                [variable 'map' used before declaration]
 }
 
-import { default as foo1 } from "lib";
-import foo2 from "lib";
-import _, { map, foldl } from "underscore";
-import * as foo3 from "lib";
-import "lib";
+import { default as foo1 } from "./lib";
+import foo2 from "./lib";
+import _, { map, foldl } from "./underscore";
+import * as foo3 from "./lib";
+import "./lib";
 
 export default function () {
     //
@@ -58,8 +60,10 @@ export default function () {
 export {
     undeclaredA,
     ~~~~~~~~~~~ [variable 'undeclaredA' used before declaration]
-    undeclaredB, // tsc error
-    undeclaredC, // tsc error
+    undeclaredB,
+    ~~~~~~~~~~~ [variable 'undeclaredB' used before declaration]
+    undeclaredC,
+    ~~~~~~~~~~~ [variable 'undeclaredC' used before declaration]
     testUndeclaredImports
 };
 
@@ -81,3 +85,12 @@ import {
 import {First, ITest as ITest3 } from './ImportAliasSecond';
 
 import ITest from './InterfaceFile';
+
+class Greeter {
+    greet(options: { str: string }) {
+        var {str} = options;
+        return str;
+    }
+}
+
+undefined;

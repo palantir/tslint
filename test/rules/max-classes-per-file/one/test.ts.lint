@@ -9,11 +9,13 @@ class two {
     public theAbovePropertyMakesSense = false;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 }
-~ [A maximum of 1 class per file is allowed]
+~ [0]
 
 let three = class {
             ~~~~~~~
     public foo = "bar";
 ~~~~~~~~~~~~~~~~~~~~~~~
 }
-~ [A maximum of 1 class per file is allowed]
+~ [0]
+
+[0]: A maximum of 1 class per file is allowed.

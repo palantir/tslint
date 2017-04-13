@@ -58,7 +58,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             },
             additionalProperties: false,
         },
-        optionExamples: ['[true, {"multiline": "always", "singleline": "never"}]'],
+        optionExamples: [[true, {multiline: "always", singleline: "never"}]],
         type: "maintainability",
         typescriptOnly: false,
     };
@@ -94,9 +94,13 @@ class TrailingCommaWalker extends Lint.AbstractWalker<Options> {
                 case ts.SyntaxKind.EnumDeclaration:
                     this.checkList((node as ts.EnumDeclaration).members, node.end);
                     break;
-                case ts.SyntaxKind.CallExpression:
                 case ts.SyntaxKind.NewExpression:
-                    this.checkList((node as ts.CallExpression | ts.NewExpression).arguments, node.end);
+                    if ((node as ts.NewExpression).arguments === undefined) {
+                        break;
+                    }
+                    // falls through
+                case ts.SyntaxKind.CallExpression:
+                    this.checkList((node as ts.CallExpression | ts.NewExpression).arguments!, node.end);
                     break;
                 case ts.SyntaxKind.ArrowFunction:
                 case ts.SyntaxKind.Constructor:
@@ -161,13 +165,9 @@ class TrailingCommaWalker extends Lint.AbstractWalker<Options> {
         const closeTokenLine = ts.getLineAndCharacterOfPosition(this.sourceFile, closeTokenPos).line;
         const option = lastElementLine === closeTokenLine ? this.options.singleline : this.options.multiline;
         if (hasTrailingComma && option === "never") {
-            this.addFailureAt(list.end - 1, 1, Rule.FAILURE_STRING_NEVER, this.createFix(
-                Lint.Replacement.deleteText(list.end - 1, 1),
-            ));
+            this.addFailureAt(list.end - 1, 1, Rule.FAILURE_STRING_NEVER, Lint.Replacement.deleteText(list.end - 1, 1));
         } else if (!hasTrailingComma && option === "always") {
-            this.addFailureAt(list.end, 0, Rule.FAILURE_STRING_ALWAYS, this.createFix(
-                Lint.Replacement.appendText(list.end, ","),
-            ));
+            this.addFailureAt(list.end, 0, Rule.FAILURE_STRING_ALWAYS, Lint.Replacement.appendText(list.end, ","));
         }
     }
 }

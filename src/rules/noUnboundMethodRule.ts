@@ -25,7 +25,7 @@ export class Rule extends Lint.Rules.TypedRule {
         description: "Warns when a method is used as outside of a method call.",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: true,
         requiresTypeInfo: true,
@@ -34,8 +34,8 @@ export class Rule extends Lint.Rules.TypedRule {
 
     public static FAILURE_STRING = "Avoid referencing unbound methods which may cause unintentional scoping of 'this'.";
 
-    public applyWithProgram(srcFile: ts.SourceFile, langSvc: ts.LanguageService): Lint.RuleFailure[] {
-        return this.applyWithWalker(new Walker(srcFile, this.getOptions(), langSvc.getProgram()));
+    public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+        return this.applyWithWalker(new Walker(sourceFile, this.getOptions(), program));
     }
 }
 

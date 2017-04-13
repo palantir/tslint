@@ -51,9 +51,9 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         hasFix: true,
         optionExamples: [
-            "true",
-            `[true, "${OPTION_IGNORE_PARMS}"]`,
-            `[true, "${OPTION_IGNORE_PARMS}", "${OPTION_IGNORE_PROPERTIES}"]`,
+            true,
+            [true, OPTION_IGNORE_PARMS],
+            [true, OPTION_IGNORE_PARMS, OPTION_IGNORE_PROPERTIES],
         ],
         type: "typescript",
         typescriptOnly: true,
@@ -92,7 +92,6 @@ class NoInferrableTypesWalker extends Lint.AbstractWalker<IOptions> {
                     /* falls through*/
                 case ts.SyntaxKind.VariableDeclaration:
                     this.checkDeclaration(node as ts.VariableLikeDeclaration);
-                default:
             }
             return ts.forEachChild(node, cb);
         };
@@ -132,7 +131,7 @@ class NoInferrableTypesWalker extends Lint.AbstractWalker<IOptions> {
             if (failure != null) {
                 this.addFailureAtNode(node.type,
                                       Rule.FAILURE_STRING_FACTORY(failure),
-                                      this.createFix(Lint.Replacement.deleteFromTo(node.name.end, node.type.end)),
+                                      Lint.Replacement.deleteFromTo(node.name.end, node.type.end),
                 );
             }
         }

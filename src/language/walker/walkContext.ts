@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import { Fix, Replacement, RuleFailure } from "../rule/rule";
+import { Fix, RuleFailure } from "../rule/rule";
 
 export class WalkContext<T> {
     public readonly failures: RuleFailure[] = [];
@@ -39,9 +39,5 @@ export class WalkContext<T> {
     /** Add a failure using a node's span. */
     public addFailureAtNode(node: ts.Node, failure: string, fix?: Fix) {
         this.addFailure(node.getStart(this.sourceFile), node.getEnd(), failure, fix);
-    }
-
-    public createFix(...replacements: Replacement[]) {
-        return new Fix(this.ruleName, replacements);
     }
 }

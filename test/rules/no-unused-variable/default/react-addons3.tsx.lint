@@ -1,2 +1,2 @@
 import * as React from "react/addons";
-            ~~~~~                      [Unused import: 'React']
+            ~~~~~                      ['React' is declared but never used.]

@@ -25,12 +25,37 @@ import { IOptions, RuleSeverity } from "./language/rule/rule";
 import { arrayify, objectify, stripComments } from "./utils";
 
 export interface IConfigurationFile {
+    /**
+     * The severity that is applied to rules in _this_ config with `severity === "default"`.
+     * Not inherited.
+     */
+    defaultSeverity?: RuleSeverity;
+
+    /**
+     * An array of config files whose rules are inherited by this config file.
+     */
     extends: string[];
+
+    /**
+     * Rules that are used to lint to JavaScript files.
+     */
     jsRules: Map<string, Partial<IOptions>>;
+
+    /**
+     * Other linter options, currently for testing. Not publicly supported.
+     */
     linterOptions?: {
         typeCheck?: boolean,
     };
+
+    /**
+     * Directories containing custom rules. Resolved using node module semantics.
+     */
     rulesDirectory: string[];
+
+    /**
+     * Rules that are used to lint TypeScript files.
+     */
     rules: Map<string, Partial<IOptions>>;
 }
 
@@ -42,6 +67,7 @@ export interface IConfigurationLoadResult {
 export const CONFIG_FILENAME = "tslint.json";
 
 export const DEFAULT_CONFIG: IConfigurationFile = {
+    defaultSeverity: "error",
     extends: ["tslint:recommended"],
     jsRules: new Map<string, Partial<IOptions>>(),
     rules: new Map<string, Partial<IOptions>>(),
@@ -49,6 +75,7 @@ export const DEFAULT_CONFIG: IConfigurationFile = {
 };
 
 export const EMPTY_CONFIG: IConfigurationFile = {
+    defaultSeverity: "error",
     extends: [],
     jsRules: new Map<string, Partial<IOptions>>(),
     rules: new Map<string, Partial<IOptions>>(),
@@ -250,6 +277,12 @@ export function getRelativePath(directory?: string | null, relativeTo?: string) 
     return undefined;
 }
 
+// check if directory should be used as path or if it should be resolved like a module
+// matches if directory starts with '/', './', '../', 'node_modules/' or equals '.' or '..'
+export function useAsPath(directory: string) {
+    return /^(?:\.?\.?(?:\/|$)|node_modules\/)/.test(directory);
+}
+
 /**
  * @param directories A path(s) to a directory of custom rules
  * @param relativeTo A path that directories provided are relative to.
@@ -258,17 +291,25 @@ export function getRelativePath(directory?: string | null, relativeTo?: string) 
  * @return An array of absolute paths to directories potentially containing rules
  */
 export function getRulesDirectories(directories?: string | string[], relativeTo?: string): string[] {
-    const rulesDirectories = arrayify(directories)
-        .map((dir) => getRelativePath(dir, relativeTo))
+    return arrayify(directories)
+        .map((dir) => {
+            if (!useAsPath(dir)) {
+                try {
+                    return path.dirname(resolve.sync(dir, { basedir: relativeTo }));
+                } catch (err) {
+                    // swallow error and fallback to using directory as path
+                }
+            }
+
+            const absolutePath = getRelativePath(dir, relativeTo);
+            if (absolutePath != null) {
+                if (!fs.existsSync(absolutePath)) {
+                    throw new Error(`Could not find custom rule directory: ${dir}`);
+                }
+            }
+            return absolutePath;
+        })
         .filter((dir) => dir !== undefined) as string[];
-
-    for (const directory of rulesDirectories) {
-        if (directory != null && !fs.existsSync(directory)) {
-            throw new Error(`Could not find custom rule directory: ${directory}`);
-        }
-    }
-
-    return rulesDirectories;
 }
 
 /**
@@ -276,9 +317,25 @@ export function getRulesDirectories(directories?: string | string[], relativeTo?
  *
  * @param ruleConfigValue The raw option setting of a rule
  */
-function parseRuleOptions(ruleConfigValue: any): Partial<IOptions> {
+function parseRuleOptions(ruleConfigValue: any, rawDefaultRuleSeverity: string): Partial<IOptions> {
     let ruleArguments: any[] | undefined;
-    let ruleSeverity: RuleSeverity | undefined;
+    let ruleSeverity: RuleSeverity;
+    let defaultRuleSeverity: RuleSeverity = "error";
+
+    if (rawDefaultRuleSeverity) {
+        switch (rawDefaultRuleSeverity.toLowerCase()) {
+            case "warn":
+            case "warning":
+                defaultRuleSeverity = "warning";
+                break;
+            case "off":
+            case "none":
+                defaultRuleSeverity = "off";
+                break;
+            default:
+                defaultRuleSeverity = "error";
+        }
+    }
 
     if (ruleConfigValue == null) {
         ruleArguments = [];
@@ -286,27 +343,33 @@ function parseRuleOptions(ruleConfigValue: any): Partial<IOptions> {
     } else if (Array.isArray(ruleConfigValue) && ruleConfigValue.length > 0) {
         // old style: array
         ruleArguments = ruleConfigValue.slice(1);
-        ruleSeverity = ruleConfigValue[0] === true ? "error" : "off";
+        ruleSeverity = ruleConfigValue[0] === true ? defaultRuleSeverity : "off";
     } else if (typeof ruleConfigValue === "boolean") {
         // old style: boolean
         ruleArguments = [];
-        ruleSeverity = ruleConfigValue === true ? "error" : "off";
+        ruleSeverity = ruleConfigValue === true ? defaultRuleSeverity : "off";
     } else if (ruleConfigValue.severity) {
         switch (ruleConfigValue.severity.toLowerCase()) {
-            case "warn":
-            case "warning":
-                ruleSeverity = "warning";
+            case "default":
+                ruleSeverity = defaultRuleSeverity;
                 break;
             case "error":
                 ruleSeverity = "error";
                 break;
-            default:
+            case "warn":
+            case "warning":
+                ruleSeverity = "warning";
+                break;
+            case "off":
+            case "none":
                 ruleSeverity = "off";
+                break;
+            default:
+                console.warn(`Invalid severity level: ${ruleConfigValue.severity}`);
+                ruleSeverity = defaultRuleSeverity;
         }
-    } else if (typeof ruleConfigValue === "object") {
-        ruleSeverity = undefined;
     } else {
-        ruleSeverity = "off";
+        ruleSeverity = defaultRuleSeverity;
     }
 
     if (ruleConfigValue && ruleConfigValue.options) {
@@ -332,7 +395,7 @@ export function parseConfigFile(configFile: any, configFileDir?: string): IConfi
     if (configFile.rules) {
         for (const ruleName in configFile.rules) {
             if (configFile.rules.hasOwnProperty(ruleName)) {
-                rules.set(ruleName, parseRuleOptions(configFile.rules[ruleName]));
+                rules.set(ruleName, parseRuleOptions(configFile.rules[ruleName], configFile.defaultSeverity));
             }
         }
     }
@@ -340,7 +403,7 @@ export function parseConfigFile(configFile: any, configFileDir?: string): IConfi
     if (configFile.jsRules) {
         for (const ruleName in configFile.jsRules) {
             if (configFile.jsRules.hasOwnProperty(ruleName)) {
-                jsRules.set(ruleName, parseRuleOptions(configFile.jsRules[ruleName]));
+                jsRules.set(ruleName, parseRuleOptions(configFile.jsRules[ruleName], configFile.defaultSeverity));
             }
         }
     }

@@ -27,5 +27,5 @@ export abstract class TypedRule extends AbstractRule implements ITypedRule {
         throw new Error(`The '${this.ruleName}' rule requires type checking`);
     }
 
-    public abstract applyWithProgram(sourceFile: ts.SourceFile, languageService: ts.LanguageService): RuleFailure[];
+    public abstract applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): RuleFailure[];
 }

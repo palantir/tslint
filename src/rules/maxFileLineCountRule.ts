@@ -31,7 +31,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "number",
             minimum: "1",
         },
-        optionExamples: ["[true, 300]"],
+        optionExamples: [[true, 300]],
         type: "maintainability",
         typescriptOnly: false,
     };
@@ -44,14 +44,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public isEnabled(): boolean {
-        const ruleArguments = this.getOptions().ruleArguments;
-        if (super.isEnabled()) {
-            const option = ruleArguments[0];
-            if (typeof option === "number" && option > 0) {
-                return true;
-            }
-        }
-        return false;
+        return super.isEnabled() && this.ruleArguments[0] > 0;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {

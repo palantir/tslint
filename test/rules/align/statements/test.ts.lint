@@ -149,3 +149,13 @@ function validStatementsAlignment2()
 function shouldntCrash() {
   let f = new Foo;
 }
+
+if (foo) {
+    bar;
+};
+ ~ [statements are not aligned]
+
+if (foo) {
+    bar;
+} /* should not be removed */;
+                             ~ [statements are not aligned]

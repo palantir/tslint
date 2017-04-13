@@ -11,20 +11,20 @@
          "url": "/library/"
       },
       {
-         "title": "Third-Party Tools",
-         "url": "/third-party-tools/"
-      },
-      {
-         "title": "tslint.json",
-         "url": "/tslint-json/"
-      },
-      {
-         "title": "Custom Rules",
-         "url": "/custom-rules/"
+         "title": "Configuration",
+         "url": "/configuration/"
       },
       {
          "title": "Rule Flags",
          "url": "/rule-flags/"
+      },
+      {
+          "title": "Type Checking",
+          "url": "/type-checking/"
+      },
+      {
+         "title": "Third-Party Tools",
+         "url": "/third-party-tools/"
       }
    ]
 }

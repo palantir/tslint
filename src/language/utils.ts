@@ -16,41 +16,14 @@
  */
 
 import * as path from "path";
+import { isBlockScopedVariableDeclarationList } from "tsutils";
 import * as ts from "typescript";
 
 import {IDisabledInterval, RuleFailure} from "./rule/rule";
 
 export function getSourceFile(fileName: string, source: string): ts.SourceFile {
     const normalizedName = path.normalize(fileName).replace(/\\/g, "/");
-    const compilerOptions = createCompilerOptions();
-
-    const compilerHost: ts.CompilerHost = {
-        fileExists: () => true,
-        getCanonicalFileName: (filename: string) => filename,
-        getCurrentDirectory: () => "",
-        getDefaultLibFileName: () => "lib.d.ts",
-        getDirectories: (_path: string) => [],
-        getNewLine: () => "\n",
-        getSourceFile: (filenameToGet: string) => {
-            const target = compilerOptions.target == null ? ts.ScriptTarget.ES5 : compilerOptions.target;
-            return ts.createSourceFile(filenameToGet, source, target, true);
-        },
-        readFile: (x: string) => x,
-        useCaseSensitiveFileNames: () => true,
-        writeFile: (x: string) => x,
-    };
-
-    const program = ts.createProgram([normalizedName], compilerOptions, compilerHost);
-
-    return program.getSourceFile(normalizedName);
-}
-
-export function createCompilerOptions(): ts.CompilerOptions {
-    return {
-        allowJs: true,
-        noResolve: true,
-        target: ts.ScriptTarget.ES5,
-    };
+    return ts.createSourceFile(normalizedName, source, ts.ScriptTarget.ES5, /*setParentNodes*/ true);
 }
 
 export function doesIntersect(failure: RuleFailure, disabledIntervals: IDisabledInterval[]) {
@@ -59,19 +32,6 @@ export function doesIntersect(failure: RuleFailure, disabledIntervals: IDisabled
         const minEnd = Math.min(interval.endPosition, failure.getEndPosition().getPosition());
         return maxStart <= minEnd;
     });
-}
-
-/** @deprecated use forEachToken instead */
-export function scanAllTokens(scanner: ts.Scanner, callback: (s: ts.Scanner) => void) {
-    let lastStartPos = -1;
-    while (scanner.scan() !== ts.SyntaxKind.EndOfFileToken) {
-        const startPos = scanner.getStartPos();
-        if (startPos === lastStartPos) {
-            break;
-        }
-        lastStartPos = startPos;
-        callback(scanner);
-    }
 }
 
 /**
@@ -92,12 +52,7 @@ export function hasModifier(modifiers: ts.ModifiersArray | undefined, ...modifie
  * which indicates this is a "let" or "const".
  */
 export function isBlockScopedVariable(node: ts.VariableDeclaration | ts.VariableStatement): boolean {
-    const parentNode = (node.kind === ts.SyntaxKind.VariableDeclaration)
-        ? (node as ts.VariableDeclaration).parent
-        : (node as ts.VariableStatement).declarationList;
-
-    return isNodeFlagSet(parentNode!, ts.NodeFlags.Let)
-        || isNodeFlagSet(parentNode!, ts.NodeFlags.Const);
+    return isBlockScopedVariableDeclarationList(node.kind === ts.SyntaxKind.VariableDeclaration ? node.parent! : node.declarationList);
 }
 
 export function isBlockScopedBindingElement(node: ts.BindingElement): boolean {
@@ -131,6 +86,17 @@ export function childOfKind(node: ts.Node, kind: ts.SyntaxKind): ts.Node | undef
  */
 export function someAncestor(node: ts.Node, predicate: (n: ts.Node) => boolean): boolean {
     return predicate(node) || (node.parent != null && someAncestor(node.parent, predicate));
+}
+
+export function ancestorWhere<T extends ts.Node>(node: ts.Node, predicate: (n: ts.Node) => boolean): ts.Node | undefined {
+    let cur: ts.Node | undefined = node;
+    do {
+        if (predicate(cur)) {
+            return cur as T;
+        }
+        cur = cur.parent;
+    } while (cur);
+    return undefined;
 }
 
 export function isAssignment(node: ts.Node) {

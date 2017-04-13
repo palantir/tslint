@@ -26,7 +26,7 @@ export class Rule extends Lint.Rules.TypedRule {
         description: "Disallow type inference of {} (empty object type) at function and constructor call sites",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: true,
         requiresTypeInfo: true,
@@ -36,8 +36,8 @@ export class Rule extends Lint.Rules.TypedRule {
     public static EMPTY_INTERFACE_INSTANCE = "Explicit type parameter needs to be provided to the constructor";
     public static EMPTY_INTERFACE_FUNCTION = "Explicit type parameter needs to be provided to the function call";
 
-    public applyWithProgram(srcFile: ts.SourceFile, langSvc: ts.LanguageService): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoInferredEmptyObjectTypeRule(srcFile, this.getOptions(), langSvc.getProgram()));
+    public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+        return this.applyWithWalker(new NoInferredEmptyObjectTypeRule(sourceFile, this.getOptions(), program));
     }
 }
 
