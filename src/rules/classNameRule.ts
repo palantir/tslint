@@ -19,6 +19,7 @@ import { isClassLikeDeclaration, isInterfaceDeclaration } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { isUpperCase } from "../utils";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -53,7 +54,6 @@ function walk(ctx: Lint.WalkContext<void>) {
     });
 }
 
-function isPascalCased(name: string) {
-    const firstCharacter = name[0];
-    return ((firstCharacter === firstCharacter.toUpperCase()) && !name.includes("_"));
+function isPascalCased(name: string): boolean {
+    return isUpperCase(name[0]) && !name.includes("_");
 }
