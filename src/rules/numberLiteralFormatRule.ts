@@ -19,7 +19,7 @@ import { isNumericLiteral } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
-import { isUpperCase } from "./variableNameRule";
+import { isUpperCase } from "../utils";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */

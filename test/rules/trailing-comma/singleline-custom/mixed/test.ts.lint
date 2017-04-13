@@ -1,0 +1,28 @@
+var a = ['foo', 'bar',]
+                     ~ [Unnecessary trailing comma]
+
+var a = ['foo', 'bar']
+
+export { foo, bar }
+                 ~nil [Missing trailing comma]
+
+export { foo, bar, }
+
+function foo(bar, baz,)
+
+function bar(foo, bar)
+
+foo(bar, baz,)
+
+foo(bar, baz)
+
+import { foo, bar, } from 'foo'
+                 ~ [Unnecessary trailing comma]
+
+import { foo, bar } from 'foo'
+
+interface Foo { foo: string, bar: string }
+
+interface Foo { foo: string, bar: string, }
+
+interface Foo { foo: string; bar: string; }

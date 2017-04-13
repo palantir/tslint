@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "prefer-switch": true
+  },
+  "jsRules": {
+    "prefer-switch": true
+  }
+}
