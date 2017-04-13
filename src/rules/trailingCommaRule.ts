@@ -144,20 +144,18 @@ export class Rule extends Lint.Rules.AbstractRule {
             additionalProperties: false,
         },
         optionExamples: [
-            '[true, {"multiline": "always", "singleline": "never"}]',
-            Lint.Utils.dedent`
-                [
-                    true,
-                    {
-                        "multiline": {
-                            "objects": "always"
-                            "arrays": "always",
-                            "functions": "never",
-                            "typeLiterals": "ignore",
-                        }
+            [true, {multiline: "always", singleline: "never"}],
+            [
+                true,
+                {
+                    multiline: {
+                        objects: "always"
+                        arrays: "always",
+                        functions: "never",
+                        typeLiterals: "ignore",
                     }
-                ]
-            `,
+                }
+            ],
         ],
         type: "maintainability",
         typescriptOnly: false,

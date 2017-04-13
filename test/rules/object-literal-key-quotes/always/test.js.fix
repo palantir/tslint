@@ -6,8 +6,8 @@ const o = {
   "hyphens-need-quotes": null,
   [computed]: 456,
   "123": "hello", // failure
-  "1e4": "something", // failure
-  ".123": "float", // failure
+  "10000": "something", // failure
+  "0.123": "float", // failure
   '123': 'numbers do not need quotes',
   '010': 'but this one does.',
   '.123': 'as does this one',

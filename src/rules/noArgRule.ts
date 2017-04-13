@@ -31,7 +31,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             for more details on why to avoid \`arguments.callee\`.`,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
     };

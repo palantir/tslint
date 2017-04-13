@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { isLabeledStatement } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -31,7 +32,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             labels on any block statement in JS, it is considered poor code structure to do so.`,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
     };
@@ -40,21 +41,29 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "unexpected label on statement";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new LabelPositionWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class LabelPositionWalker extends Lint.RuleWalker {
-    public visitLabeledStatement(node: ts.LabeledStatement) {
-        const statement = node.statement;
-        if (statement.kind !== ts.SyntaxKind.DoStatement
-                && statement.kind !== ts.SyntaxKind.ForStatement
-                && statement.kind !== ts.SyntaxKind.ForInStatement
-                && statement.kind !== ts.SyntaxKind.ForOfStatement
-                && statement.kind !== ts.SyntaxKind.WhileStatement
-                && statement.kind !== ts.SyntaxKind.SwitchStatement) {
-            this.addFailureAtNode(node.label, Rule.FAILURE_STRING);
+function walk(ctx: Lint.WalkContext<void>): void {
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (isLabeledStatement(node) && !isLabelable(node.statement)) {
+            ctx.addFailureAtNode(node.label, Rule.FAILURE_STRING);
         }
-        super.visitLabeledStatement(node);
+        return ts.forEachChild(node, cb);
+    });
+}
+
+function isLabelable(node: ts.Node): boolean {
+    switch (node.kind) {
+        case ts.SyntaxKind.DoStatement:
+        case ts.SyntaxKind.ForStatement:
+        case ts.SyntaxKind.ForInStatement:
+        case ts.SyntaxKind.ForOfStatement:
+        case ts.SyntaxKind.WhileStatement:
+        case ts.SyntaxKind.SwitchStatement:
+            return true;
+        default:
+            return false;
     }
 }

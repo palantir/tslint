@@ -33,7 +33,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "string",
             enum: [OPTION_SINGLE_CONCAT],
         },
-        optionExamples: ["true", `[true, "${OPTION_SINGLE_CONCAT}"]`],
+        optionExamples: [true, [true, OPTION_SINGLE_CONCAT]],
         type: "style",
         typescriptOnly: false,
     };

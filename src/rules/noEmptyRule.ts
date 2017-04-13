@@ -29,7 +29,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: "Empty blocks are often indicators of missing code.",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
     };

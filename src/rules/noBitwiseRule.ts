@@ -35,7 +35,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             They also can be an indicator of overly clever code which decreases maintainability.`,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
     };

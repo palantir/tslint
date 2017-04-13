@@ -20,6 +20,7 @@
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { isLowerCase, isUpperCase } from "../utils";
 
 const BANNED_KEYWORDS = ["any", "Number", "number", "String", "string", "Boolean", "boolean", "Undefined", "undefined"];
 const bannedKeywordsSet = new Set(BANNED_KEYWORDS);
@@ -62,7 +63,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             minLength: 0,
             maxLength: 5,
         },
-        optionExamples: ['[true, "ban-keywords", "check-format", "allow-leading-underscore"]'],
+        optionExamples: [[true, "ban-keywords", "check-format", "allow-leading-underscore"]],
         type: "style",
         typescriptOnly: false,
     };
@@ -203,12 +204,4 @@ function isCamelCase(name: string, options: Options): boolean {
         return false;
     }
     return true;
-}
-
-function isLowerCase(name: string): boolean {
-    return name === name.toLowerCase();
-}
-
-export function isUpperCase(name: string): boolean {
-    return name === name.toUpperCase();
 }

@@ -51,9 +51,9 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         hasFix: true,
         optionExamples: [
-            "true",
-            `[true, "${OPTION_IGNORE_PARMS}"]`,
-            `[true, "${OPTION_IGNORE_PARMS}", "${OPTION_IGNORE_PROPERTIES}"]`,
+            true,
+            [true, OPTION_IGNORE_PARMS],
+            [true, OPTION_IGNORE_PARMS, OPTION_IGNORE_PROPERTIES],
         ],
         type: "typescript",
         typescriptOnly: true,
