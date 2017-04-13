@@ -31,7 +31,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             this rule ensures that only \`undefined\` is used.`,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
     };

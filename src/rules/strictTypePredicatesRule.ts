@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+import * as utils from "tsutils";
+
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -32,7 +34,7 @@ export class Rule extends Lint.Rules.TypedRule {
             Does *not* warn for 'if (x.y)' where 'x.y' is always truthy. For that, see strict-boolean-expressions.`,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: true,
         requiresTypeInfo: true,
@@ -50,41 +52,40 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithWalker(new Walker(sourceFile, this.getOptions(), program));
+        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, program.getTypeChecker()));
     }
 }
 
-class Walker extends Lint.ProgramAwareRuleWalker {
-    public visitBinaryExpression(node: ts.BinaryExpression) {
-        const equals = Lint.getEqualsKind(node.operatorToken);
-        if (equals) {
-            this.checkEquals(node, equals);
+function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (utils.isBinaryExpression(node)) {
+            const equals = Lint.getEqualsKind(node.operatorToken);
+            if (equals) {
+                checkEquals(node, equals);
+            }
         }
-        super.visitBinaryExpression(node);
-    }
+        return ts.forEachChild(node, cb);
+    });
 
-    private checkEquals(node: ts.BinaryExpression, { isStrict, isPositive }: Lint.EqualsKind) {
+    function checkEquals(node: ts.BinaryExpression, { isStrict, isPositive }: Lint.EqualsKind): void {
         const exprPred = getTypePredicate(node, isStrict);
-        if (!exprPred) {
+        if (exprPred === undefined) {
             return;
         }
-
-        const fail = (failure: string) => this.addFailureAtNode(node, failure);
 
         if (exprPred.kind === TypePredicateKind.TypeofTypo) {
             fail(Rule.FAILURE_STRING_BAD_TYPEOF);
             return;
         }
 
-        const checker = this.getTypeChecker();
         const exprType = checker.getTypeAtLocation(exprPred.expression);
         // TODO: could use checker.getBaseConstraintOfType to help with type parameters, but it's not publicly exposed.
         if (Lint.isTypeFlagSet(exprType, ts.TypeFlags.Any | ts.TypeFlags.TypeParameter)) {
             return;
         }
 
-        switch (exprPred.kind) { // tslint:disable-line:switch-default
-            case TypePredicateKind.Plain:
+        switch (exprPred.kind) {
+            case TypePredicateKind.Plain: {
                 const { predicate, isNullOrUndefined } = exprPred;
                 const value = getConstantBoolean(exprType, predicate);
                 // 'null'/'undefined' are the only two values *not* assignable to '{}'.
@@ -92,22 +93,22 @@ class Walker extends Lint.ProgramAwareRuleWalker {
                     fail(Rule.FAILURE_STRING(value === isPositive));
                 }
                 break;
+            }
 
-            case TypePredicateKind.NonStructNullUndefined:
+            case TypePredicateKind.NonStructNullUndefined: {
                 const result = testNonStrictNullUndefined(exprType);
-                switch (typeof result) {
-                    case "boolean":
-                        fail(Rule.FAILURE_STRING(result === isPositive));
-                        break;
-
-                    case "string":
-                        fail(Rule.FAILURE_STRICT_PREFER_STRICT_EQUALS(result as "null" | "undefined", isPositive));
-                        break;
-
-                    default:
+                if (result !== undefined) {
+                    fail(typeof result === "boolean"
+                        ? Rule.FAILURE_STRING(result === isPositive)
+                        : Rule.FAILURE_STRICT_PREFER_STRICT_EQUALS(result, isPositive));
                 }
+                break;
+            }
         }
 
+        function fail(failure: string): void {
+            ctx.addFailureAtNode(node, failure);
+        }
     }
 }
 
@@ -202,7 +203,7 @@ function flagPredicate(testedFlag: ts.TypeFlags): Predicate {
 }
 
 function isFunction(t: ts.Type): boolean {
-    if (t.getCallSignatures().length !== 0) {
+    if (t.getConstructSignatures().length !== 0 || t.getCallSignatures().length !== 0) {
         return true;
     }
     const symbol = t.getSymbol();
@@ -229,7 +230,7 @@ function getConstantBoolean(type: ts.Type, predicate: (t: ts.Type) => boolean): 
 }
 
 /** Returns bool for always/never true, or a string to recommend strict equality. */
-function testNonStrictNullUndefined(type: ts.Type): boolean | string | undefined {
+function testNonStrictNullUndefined(type: ts.Type): boolean | "null" | "undefined" | undefined {
     let anyNull = false;
     let anyUndefined = false;
     let anyOther = false;

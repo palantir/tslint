@@ -51,7 +51,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 ],
             },
         },
-        optionExamples: ["true", '[true, "ignore-same-line"]'],
+        optionExamples: [true, [true, "ignore-same-line"]],
         type: "functionality",
         typescriptOnly: false,
     };

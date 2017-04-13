@@ -36,14 +36,9 @@ export class Formatter extends AbstractFormatter {
                 },
                 "failure": "Missing semicolon",
                 "fix": {
-                    "innerRuleName": "semicolon",
-                    "innerReplacements": [
-                        {
-                            "innerStart": 13,
-                            "innerLength": 0,
-                            "innerText": ";"
-                        }
-                    ]
+                    "innerStart": 13,
+                    "innerLength": 0,
+                    "innerText": ";"
                 },
                 "name": "myFile.ts",
                 "ruleName": "semicolon",

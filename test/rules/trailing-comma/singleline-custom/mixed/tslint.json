@@ -1,0 +1,31 @@
+{
+    "rules": {
+        "trailing-comma": [
+            true,
+            {
+                "singleline": {
+                    "arrays": "never",
+                    "exports": "always",
+                    "functions": "ignore",
+                    "imports": "never",
+                    "objects": "always",
+                    "typeLiterals": "ignore"
+                }
+            }
+        ]
+    },
+    "jsRules": {
+        "trailing-comma": [
+            true,
+            {
+                "singleline": {
+                    "arrays": "never",
+                    "exports": "always",
+                    "functions": "ignore",
+                    "imports": "never",
+                    "objects": "always"
+                }
+            }
+        ]
+    }
+}

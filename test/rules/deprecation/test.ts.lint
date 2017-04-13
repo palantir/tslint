@@ -1,0 +1,41 @@
+import {other, other2} from './other';
+        ~~~~~          [other is deprecated.]
+               ~~~~~~  [other2 is deprecated.]
+other();
+~~~~~ [other is deprecated.]
+
+declare interface D {
+    /** @deprecated */ m: () => void;
+}
+
+declare let d: D;
+d.m();
+  ~ [m is deprecated.]
+
+/**
+ * Some text
+ * @one-tag
+ * @deprecated reason is this
+ * @two-tag
+ */
+export class P {
+    /** @deprecated */ f: string;
+    g, /** @deprecated */ h: number;
+}
+
+let p = new P();
+            ~ [P is deprecated.]
+p.f;
+  ~ [f is deprecated.]
+p.g;
+p.h;
+  ~ [h is deprecated.]
+
+/** @deprecated */
+const A = 1, B = 2;
+
+A + B;
+~     [A is deprecated.]
+    ~ [B is deprecated.]
+
+declarationIsMissing();

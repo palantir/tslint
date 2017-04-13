@@ -4,7 +4,7 @@
 (() => { return 0; });
        ~~~~~~~~~~~~~ [0]
 (() => { return { x: 1 } });
-       ~~~~~~~~~~~~~~~~~~~ [0]
+       ~~~~~~~~~~~~~~~~~~~ [1]
 (() => {
     return 0;
 });
@@ -30,3 +30,4 @@
        ~~~~~~~~~~~~~~~~~~ [0]
 
 [0]: This arrow function body can be simplified by omitting the curly braces and the keyword 'return'.
+[1]: This arrow function body can be simplified by omitting the curly braces and the keyword 'return', and wrapping the object literal in parentheses.

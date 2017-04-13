@@ -56,7 +56,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             minLength: 0,
             maxLength: 7,
         },
-        optionExamples: ['[true, "check-branch", "check-operator", "check-typecast"]'],
+        optionExamples: [[true, "check-branch", "check-operator", "check-typecast"]],
         type: "style",
         typescriptOnly: false,
     };
@@ -256,7 +256,7 @@ class WhitespaceWalker extends Lint.RuleWalker {
     }
 
     private addMissingWhitespaceErrorAt(position: number) {
-        const fix = this.createFix(this.appendText(position, " "));
+        const fix = this.appendText(position, " ");
         this.addFailureAt(position, 1, Rule.FAILURE_STRING, fix);
     }
 }

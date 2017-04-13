@@ -1,0 +1,44 @@
+let  foo;
+    ~    [Irregular whitespace not allowed]
+let  foo;
+    ~    [Irregular whitespace not allowed]
+let  foo;
+    ~    [Irregular whitespace not allowed]
+let ﻿ foo;
+    ~    [Irregular whitespace not allowed]
+let   foo;
+    ~    [Irregular whitespace not allowed]
+let   foo;
+    ~    [Irregular whitespace not allowed]
+let ᠎ foo;
+    ~    [Irregular whitespace not allowed]
+let   foo;
+    ~    [Irregular whitespace not allowed]
+let   foo;
+    ~    [Irregular whitespace not allowed]
+let   foo;
+    ~    [Irregular whitespace not allowed]
+let   foo;
+    ~    [Irregular whitespace not allowed]
+let   foo;
+    ~    [Irregular whitespace not allowed]
+let   foo;
+    ~    [Irregular whitespace not allowed]
+let   foo;
+    ~    [Irregular whitespace not allowed]
+let   foo;
+    ~    [Irregular whitespace not allowed]
+let   foo;
+    ~    [Irregular whitespace not allowed]
+let   foo;
+    ~    [Irregular whitespace not allowed]
+let   foo;
+    ~    [Irregular whitespace not allowed]
+let ​ foo;
+    ~    [Irregular whitespace not allowed]
+let   foo;
+    ~    [Irregular whitespace not allowed]
+let   foo;
+    ~    [Irregular whitespace not allowed]
+let 　 foo;
+    ~    [Irregular whitespace not allowed]

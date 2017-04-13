@@ -27,9 +27,9 @@ export class Rule extends Lint.Rules.TypedRule {
         description: "Prefer `return;` in void functions and `return undefined;` in value-returning functions.",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "style",
-        typescriptOnly: true,
+        typescriptOnly: false,
         requiresTypeInfo: true,
     };
     /* tslint:enable:object-literal-sort-keys */

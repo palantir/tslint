@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import * as ts from "typescript";
+import {format} from "util";
+
 import {
     CodeLine,
     EndErrorLine,
@@ -25,6 +28,8 @@ import {
     printLine,
 } from "./lines";
 import {errorComparator, LintError, lintSyntaxError} from "./lintError";
+
+let scanner: ts.Scanner | undefined;
 
 export function getTypescriptVersionRequirement(text: string): string | undefined {
     const lines = text.split(/\r?\n/);
@@ -60,8 +65,10 @@ export function parseErrorsFromMarkup(text: string): LintError[] {
     }
 
     const messageSubstitutionLines = lines.filter((l) => l instanceof MessageSubstitutionLine) as MessageSubstitutionLine[];
-    const messageSubstitutions = new Map(messageSubstitutionLines.map(({ key, message }) =>
-        [key, message] as [string, string]));
+    const messageSubstitutions = new Map<string, string>();
+    for (const {key, message} of messageSubstitutionLines) {
+        messageSubstitutions.set(key, formatMessage(messageSubstitutions, message));
+    }
 
     // errorLineForCodeLine[5] contains all the ErrorLine objects associated with the 5th line of code, for example
     const errorLinesForCodeLines = createCodeLineNoToErrorsMap(lines);
@@ -71,7 +78,7 @@ export function parseErrorsFromMarkup(text: string): LintError[] {
         lintErrors.push({
             startPos: errorStartPos,
             endPos: { line: lineNo, col: errorLine.endCol },
-            message: messageSubstitutions.get(errorLine.message) || errorLine.message,
+            message: substituteMessage(messageSubstitutions, errorLine.message),
         });
     }
     // for each line of code...
@@ -112,6 +119,74 @@ export function parseErrorsFromMarkup(text: string): LintError[] {
     lintErrors.sort(errorComparator);
 
     return lintErrors;
+}
+
+/**
+ * Process `message` as follows:
+ * - search `substitutions` for an exact match and return the substitution
+ * - try to format the message when it looks like: name % ('substitution1' [, "substitution2" [, ...]])
+ * - or return it unchanged
+ */
+function substituteMessage(templates: Map<string, string>, message: string): string {
+    const substitution = templates.get(message);
+    if (substitution !== undefined) {
+        return substitution;
+    }
+    return formatMessage(templates, message);
+}
+
+/**
+ * Tries to format the message when it has the correct format or returns it unchanged:  name % ('substitution1' [, "substitution2" [, ...]])
+ * Where `name` is the name of a message substitution that is used as template.
+ * If `name` is not found in `templates`, `message` is returned unchanged.
+ */
+function formatMessage(templates: Map<string, string>, message: string): string {
+    const formatMatch = /^([\w_]+) % \((.+)\)$/.exec(message);
+    if (formatMatch !== null) {
+        const template = templates.get(formatMatch[1]);
+        if (template !== undefined) {
+            const formatArgs = parseFormatArguments(formatMatch[2]);
+            if (formatArgs !== undefined) {
+                message = format(template, ...formatArgs);
+            }
+        }
+    }
+    return message;
+}
+
+/**
+ * Parse a list of comma separated string literals.
+ * This function bails out if it sees something unexpected.
+ * Whitespace between tokens is ignored.
+ * Trailing comma is allowed.
+ */
+function parseFormatArguments(text: string): string[] | undefined {
+    if (scanner === undefined) {
+        // once the scanner is created, it is cached for subsequent calls
+        scanner = ts.createScanner(ts.ScriptTarget.Latest, false);
+    }
+    scanner.setText(text);
+    const result: string[] = [];
+    let expectValue = true;
+    for (let token = scanner.scan(); token !== ts.SyntaxKind.EndOfFileToken; token = scanner.scan()) {
+        if (token === ts.SyntaxKind.StringLiteral) {
+            if (!expectValue) {
+                return undefined;
+            }
+            result.push(scanner.getTokenValue());
+            expectValue = false;
+        } else if (token === ts.SyntaxKind.CommaToken) {
+            if (expectValue) {
+                return undefined;
+            }
+            expectValue = true;
+        } else if (token !== ts.SyntaxKind.WhitespaceTrivia) {
+            // only ignore whitespace, other trivia like comments makes this function bail out
+            return undefined;
+        }
+    }
+
+    return result.length === 0 ? undefined : result;
 }
 
 export function createMarkupFromErrors(code: string, lintErrors: LintError[]) {

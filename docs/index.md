@@ -3,36 +3,23 @@ title: TSLint
 layout: default
 subtitle: An extensible linter for the TypeScript language.
 ---
-TSLint checks your [TypeScript][0] code for readability, maintainability, and functionality errors.
 
-## Getting Started
+TSLint is an extensible static analysis tool that checks [TypeScript][0] code for readability, maintainability, and functionality errors. It is widely supported across modern editors & build systems and can be customized with your own lint rules, configurations, and formatters.
 
-#### Local installation
-
-```sh
-$ npm install tslint typescript --save-dev
-```
-
-#### Global installation
+## Quick start
 
 ```sh
-$ npm install tslint typescript -g
-```
+# Install the global CLI and its peer dependency
+yarn global add tslint typescript
 
-#### Configuration
-
-Generate a skeleton `tslint.json` config file with the `--init` CLI flag:
-
-```sh
+# Navigate to to your sources folder
 cd path/to/project
+
+# Generate a basic configuration file
 tslint --init
-```
 
-Lint your TypeScript files!
-
-```
-// provide globs as strings
-tslint -c path/to/tslint.json 'path/to/project/**/*.ts'
+# Lint TypeScript source globs
+tslint -c tslint.json 'src/**/*.ts'
 ```
 
 Check out [the full usage guide][1] to learn more.
