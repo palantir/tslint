@@ -21,6 +21,8 @@ import {isBlockScopeBoundary} from "../utils";
 import {ScopeAwareRuleWalker} from "./scopeAwareRuleWalker";
 
 /**
+ * @deprecated See comment on ScopeAwareRuleWalker.
+ *
  * An AST walker that is aware of block scopes in addition to regular scopes. Block scopes
  * are a superset of regular scopes (new block scopes are created more frequently in a program).
  */
