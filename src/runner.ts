@@ -27,10 +27,12 @@ import {
     IConfigurationFile,
 } from "./configuration";
 import { FatalError } from "./error";
+import { LintResult } from "./index";
 import * as Linter from "./linter";
 import { consoleTestResultsHandler, runTests } from "./test";
+import { arrayify, flatMap } from "./utils";
 
-export interface IRunnerOptions {
+export interface Options {
     /**
      * Path to a configuration file.
      */
@@ -102,139 +104,113 @@ export interface IRunnerOptions {
     version?: boolean;
 }
 
-export class Runner {
-    private static trimSingleQuotes(str: string) {
-        return str.replace(/^'|'$/g, "");
+export const enum Status {
+    Ok = 0,
+    FatalError = 1,
+    LintError = 2,
+}
+
+export async function run(options: Options, outputStream: NodeJS.WritableStream): Promise<Status> {
+    try {
+        return await runWorker(options, outputStream);
+    } catch (error) {
+        if (error.name === FatalError.NAME) {
+            console.error(error.message);
+            return Status.FatalError;
+        }
+        throw error;
+    }
+}
+
+async function runWorker(options: Options, outputStream: NodeJS.WritableStream): Promise<Status> {
+    if (options.version) {
+        await writeToStream(outputStream, Linter.VERSION + "\n");
+        return Status.Ok;
     }
 
-    constructor(private options: IRunnerOptions, private outputStream: NodeJS.WritableStream) { }
-
-    public run(onComplete: (status: number) => void) {
-        if (this.options.version) {
-            this.outputStream.write(Linter.VERSION + "\n");
-            return onComplete(0);
+    if (options.init) {
+        if (fs.existsSync(CONFIG_FILENAME)) {
+            throw new FatalError(`Cannot generate ${CONFIG_FILENAME}: file already exists`);
         }
 
-        if (this.options.init) {
-            if (fs.existsSync(CONFIG_FILENAME)) {
-                console.error(`Cannot generate ${CONFIG_FILENAME}: file already exists`);
-                return onComplete(1);
-            }
+        fs.writeFileSync(CONFIG_FILENAME, JSON.stringify(DEFAULT_CONFIG, undefined, "    "));
+        return Status.Ok;
+    }
 
-            const tslintJSON = JSON.stringify(DEFAULT_CONFIG, undefined, "    ");
-            fs.writeFileSync(CONFIG_FILENAME, tslintJSON);
-            return onComplete(0);
-        }
+    if (options.test) {
+        const results = runTests((options.files || []).map(trimSingleQuotes), options.rulesDirectory);
+        return consoleTestResultsHandler(results) ? Status.Ok : Status.FatalError;
+    }
 
-        if (this.options.test) {
-            const results = runTests((this.options.files || []).map(Runner.trimSingleQuotes), this.options.rulesDirectory);
-            const didAllTestsPass = consoleTestResultsHandler(results);
-            return onComplete(didAllTestsPass ? 0 : 1);
-        }
+    if (options.config && !fs.existsSync(options.config)) {
+        throw new FatalError(`Invalid option for configuration: ${options.config}`);
+    }
 
-        // when provided, it should point to an existing location
-        if (this.options.config && !fs.existsSync(this.options.config)) {
-            console.error("Invalid option for configuration: " + this.options.config);
-            return onComplete(1);
-        }
+    const { output, errorCount } = runLinter(options);
+    await writeToStream(outputStream, output);
+    return options.force || errorCount === 0 ? Status.Ok : Status.LintError;
+}
 
-        // if both files and tsconfig are present, use files
-        let files = this.options.files === undefined ? [] : this.options.files;
-        let program: ts.Program | undefined;
-
-        if (this.options.project != null) {
-            if (!fs.existsSync(this.options.project)) {
-                console.error("Invalid option for project: " + this.options.project);
-                return onComplete(1);
-            }
-            program = Linter.createProgram(this.options.project);
-            if (files.length === 0) {
-                files = Linter.getFileNames(program);
-            }
-            if (this.options.typeCheck) {
-                // if type checking, run the type checker
-                const diagnostics = ts.getPreEmitDiagnostics(program);
-                if (diagnostics.length > 0) {
-                    const messages = diagnostics.map((diag) => {
-                        // emit any error messages
-                        let message = ts.DiagnosticCategory[diag.category];
-                        if (diag.file) {
-                            const {line, character} = diag.file.getLineAndCharacterOfPosition(diag.start);
-                            message += ` at ${diag.file.fileName}:${line + 1}:${character + 1}:`;
-                        }
-                        message += " " + ts.flattenDiagnosticMessageText(diag.messageText, "\n");
-                        return message;
-                    });
-                    console.error(messages.join("\n"));
-                    return onComplete(this.options.force ? 0 : 1);
-                }
+function runLinter(options: Options): LintResult {
+    const { files, program } = resolveFilesAndProgram(options);
+    // if type checking, run the type checker
+    if (program) {
+        const diagnostics = ts.getPreEmitDiagnostics(program);
+        if (diagnostics.length !== 0) {
+            const message = diagnostics.map(showDiagnostic).join("\n");
+            if (options.force) {
+                console.error(message);
             } else {
-                // if not type checking, we don't need to pass in a program object
-                program = undefined;
+                throw new FatalError(message);
             }
-        } else if (this.options.typeCheck) {
-            console.error("--project must be specified in order to enable type checking.");
-            return onComplete(1);
-        }
-
-        let ignorePatterns: string[] = [];
-        if (this.options.exclude) {
-            const excludeArguments: string[] = Array.isArray(this.options.exclude) ? this.options.exclude : [this.options.exclude];
-
-            ignorePatterns = excludeArguments.map(Runner.trimSingleQuotes);
-        }
-
-        files = files
-            // remove single quotes which break matching on Windows when glob is passed in single quotes
-            .map(Runner.trimSingleQuotes)
-            .map((file: string) => glob.sync(file, { ignore: ignorePatterns, nodir: true }))
-            .reduce((a: string[], b: string[]) => a.concat(b), []);
-
-        try {
-            this.processFiles(onComplete, files, program);
-        } catch (error) {
-            if (error.name === FatalError.NAME) {
-                console.error(error.message);
-                return onComplete(1);
-            }
-            // rethrow unhandled error
-            throw error;
         }
     }
+    return doLinting(options, files, program);
+}
 
-    private processFiles(onComplete: (status: number) => void, files: string[], program?: ts.Program) {
-        const possibleConfigAbsolutePath = this.options.config != null ? path.resolve(this.options.config) : null;
-        const linter = new Linter({
-            fix: !!this.options.fix,
-            formatter: this.options.format,
-            formattersDirectory: this.options.formattersDirectory || "",
-            rulesDirectory: this.options.rulesDirectory || "",
-        }, program);
+function resolveFilesAndProgram({ files, project, exclude, typeCheck }: Options): { files: string[], program?: ts.Program } {
+    // if both files and tsconfig are present, use files
+    if (project === undefined || files && files.length > 0) {
+        if (typeCheck) {
+            throw new FatalError("--project must be specified in order to enable type checking.");
+        }
+        return { files: resolveGlobs(files, exclude) };
+    }
 
-        let lastFolder: string | undefined;
-        let configFile: IConfigurationFile | undefined;
-        for (const file of files) {
-            if (!fs.existsSync(file)) {
-                console.error(`Unable to open file: ${file}`);
-                return onComplete(1);
-            }
+    if (!fs.existsSync(project)) {
+        throw new FatalError(`Invalid option for project: ${project}`);
+    }
 
-            const buffer = new Buffer(256);
-            const fd = fs.openSync(file, "r");
-            try {
-                fs.readSync(fd, buffer, 0, 256, 0);
-                if (buffer.readInt8(0, true) === 0x47 && buffer.readInt8(188, true) === 0x47) {
-                    // MPEG transport streams use the '.ts' file extension. They use 0x47 as the frame
-                    // separator, repeating every 188 bytes. It is unlikely to find that pattern in
-                    // TypeScript source, so tslint ignores files with the specific pattern.
-                    console.warn(`${file}: ignoring MPEG transport stream`);
-                    continue;
-                }
-            } finally {
-                fs.closeSync(fd);
-            }
+    const program = Linter.createProgram(project);
+    // if not type checking, we don't need to pass in a program object
+    return { files: Linter.getFileNames(program), program: typeCheck ? program : undefined };
+}
 
-            const contents = fs.readFileSync(file, "utf8");
+function resolveGlobs(files: string[] | undefined, exclude: Options["exclude"]): string[] {
+    const ignore = arrayify(exclude).map(trimSingleQuotes);
+    return flatMap(arrayify(files), (file) =>
+        // remove single quotes which break matching on Windows when glob is passed in single quotes
+        glob.sync(trimSingleQuotes(file), { ignore, nodir: true }));
+}
+
+function doLinting(options: Options, files: string[], program: ts.Program | undefined): LintResult {
+    const possibleConfigAbsolutePath = options.config !== undefined ? path.resolve(options.config) : null;
+    const linter = new Linter({
+        fix: !!options.fix,
+        formatter: options.format,
+        formattersDirectory: options.formattersDirectory,
+        rulesDirectory: options.rulesDirectory,
+    }, program);
+
+    let lastFolder: string | undefined;
+    let configFile: IConfigurationFile | undefined;
+    for (const file of files) {
+        if (!fs.existsSync(file)) {
+            throw new FatalError(`Unable to open file: ${file}`);
+        }
+
+        const contents = tryReadFile(file);
+        if (contents !== undefined) {
             const folder = path.dirname(file);
             if (lastFolder !== folder) {
                 configFile = findConfiguration(possibleConfigAbsolutePath, folder).results;
@@ -242,15 +218,46 @@ export class Runner {
             }
             linter.lint(file, contents, configFile);
         }
-
-        const lintResult = linter.getResult();
-
-        this.outputStream.write(lintResult.output, () => {
-            if (this.options.force || lintResult.errorCount === 0) {
-                onComplete(0);
-            } else {
-                onComplete(2);
-            }
-        });
     }
+
+    return linter.getResult();
+}
+
+/** Read a file, but return undefined if it is an MPEG '.ts' file. */
+function tryReadFile(filename: string): string | undefined {
+    const buffer = new Buffer(256);
+    const fd = fs.openSync(filename, "r");
+    try {
+        fs.readSync(fd, buffer, 0, 256, 0);
+        if (buffer.readInt8(0, true) === 0x47 && buffer.readInt8(188, true) === 0x47) {
+            // MPEG transport streams use the '.ts' file extension. They use 0x47 as the frame
+            // separator, repeating every 188 bytes. It is unlikely to find that pattern in
+            // TypeScript source, so tslint ignores files with the specific pattern.
+            console.warn(`${filename}: ignoring MPEG transport stream`);
+            return undefined;
+        }
+    } finally {
+        fs.closeSync(fd);
+    }
+
+    return fs.readFileSync(filename, "utf8");
+}
+
+function showDiagnostic({ file, start, category, messageText }: ts.Diagnostic): string {
+    let message = ts.DiagnosticCategory[category];
+    if (file) {
+        const {line, character} = file.getLineAndCharacterOfPosition(start);
+        message += ` at ${file.fileName}:${line + 1}:${character + 1}:`;
+    }
+    return message + " " + ts.flattenDiagnosticMessageText(messageText, "\n");
+}
+
+function trimSingleQuotes(str: string): string {
+    return str.replace(/^'|'$/g, "");
+}
+
+function writeToStream(outputStream: NodeJS.WritableStream, output: string): Promise<void> {
+    return new Promise<void>((resolve) => {
+        outputStream.write(output, () => { resolve(); });
+    });
 }

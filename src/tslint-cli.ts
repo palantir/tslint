@@ -18,7 +18,7 @@
 import * as fs from "fs";
 import * as optimist from "optimist";
 
-import { IRunnerOptions, Runner } from "./runner";
+import { run } from "./runner";
 
 const processed = optimist
     .usage("Usage: $0 [options] file ...")
@@ -204,7 +204,7 @@ tslint accepts the following commandline options:
     process.exit(0);
 }
 
-const options: IRunnerOptions = {
+run({
     config: argv.c,
     exclude: argv.exclude,
     files: argv._,
@@ -219,7 +219,4 @@ const options: IRunnerOptions = {
     test: argv.test,
     typeCheck: argv["type-check"],
     version: argv.v,
-};
-
-new Runner(options, outputStream)
-    .run((status: number) => process.exit(status));
+}, outputStream).then(process.exit);
