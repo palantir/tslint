@@ -36,7 +36,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "number",
             minimum: "$(Rule.MINIMUM_ALLOWED_BLANKS)",
         },
-        optionExamples: ["true", "[true, 2]"],
+        optionExamples: [true, [true, 2]],
         type: "style",
         typescriptOnly: false,
     };

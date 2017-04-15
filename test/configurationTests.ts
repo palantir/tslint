@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+import { assert } from "chai";
 import * as fs from "fs";
+import * as path from "path";
 
 import {
     convertRuleOptions,
@@ -248,6 +250,16 @@ describe("Configuration", () => {
             assert.equal("off", config.jsRules.get("no-eval")!.ruleSeverity);
             assert.equal("error", config.rules.get("no-var-keyword")!.ruleSeverity);
             assert.equal("off", config.rules.get("no-eval")!.ruleSeverity);
+        });
+
+        it("resolve rule directory from package", () => {
+            const config = loadConfigurationFromPath("./test/config/tslint-custom-rules-with-package.json");
+            assert.deepEqual(config.rulesDirectory, [path.join(process.cwd(), "test/config/node_modules/tslint-test-custom-rules/rules")]);
+        });
+
+        it("resolve rule directory from package fallback", () => {
+            const config = loadConfigurationFromPath("./test/config/tslint-custom-rules-with-package-fallback.json");
+            assert.deepEqual(config.rulesDirectory, [path.join(process.cwd(), "test/config/relative-rules-directory")]);
         });
 
         describe("with config not relative to tslint", () => {

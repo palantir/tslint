@@ -16,6 +16,7 @@
  */
 
 import * as path from "path";
+import { isBlockScopedVariableDeclarationList } from "tsutils";
 import * as ts from "typescript";
 
 export function getSourceFile(fileName: string, source: string): ts.SourceFile {
@@ -41,12 +42,7 @@ export function hasModifier(modifiers: ts.ModifiersArray | undefined, ...modifie
  * which indicates this is a "let" or "const".
  */
 export function isBlockScopedVariable(node: ts.VariableDeclaration | ts.VariableStatement): boolean {
-    const parentNode = (node.kind === ts.SyntaxKind.VariableDeclaration)
-        ? (node as ts.VariableDeclaration).parent
-        : (node as ts.VariableStatement).declarationList;
-
-    return isNodeFlagSet(parentNode!, ts.NodeFlags.Let)
-        || isNodeFlagSet(parentNode!, ts.NodeFlags.Const);
+    return isBlockScopedVariableDeclarationList(node.kind === ts.SyntaxKind.VariableDeclaration ? node.parent! : node.declarationList);
 }
 
 export function isBlockScopedBindingElement(node: ts.BindingElement): boolean {

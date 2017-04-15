@@ -27,7 +27,7 @@ export class Rule extends Lint.Rules.TypedRule {
         description: "When adding two variables, operands must both be of type number or of type string.",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
         requiresTypeInfo: true,
@@ -43,7 +43,7 @@ export class Rule extends Lint.Rules.TypedRule {
 
 function walk(ctx: Lint.WalkContext<void>, program: ts.Program) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        if (isBinaryExpression(node)) {
+        if (isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.PlusToken) {
             const tc = program.getTypeChecker();
             const leftType = getBaseTypeOfLiteralType(tc.getTypeAtLocation(node.left));
             const rightType = getBaseTypeOfLiteralType(tc.getTypeAtLocation(node.right));

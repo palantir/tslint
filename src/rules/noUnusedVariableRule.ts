@@ -44,7 +44,7 @@ export class Rule extends Lint.Rules.TypedRule {
             items: {
                 oneOf: [{
                     type: "string",
-                    enum: ["check-parameters", "react"],
+                    enum: ["check-parameters"],
                 }, {
                     type: "object",
                     properties: {
@@ -56,9 +56,10 @@ export class Rule extends Lint.Rules.TypedRule {
             minLength: 0,
             maxLength: 3,
         },
-        optionExamples: ['[true, "react"]', '[true, {"ignore-pattern": "^_"}]'],
+        optionExamples: [true, [true, {"ignore-pattern": "^_"}]],
         type: "functionality",
         typescriptOnly: true,
+        requiresTypeInfo: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -69,7 +70,7 @@ export class Rule extends Lint.Rules.TypedRule {
                 "the 'no-unused-locals' and 'no-unused-parameters' compiler options are enabled.");
         }
 
-        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, program, parseOptions(this.getOptions().ruleArguments)));
+        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, program, parseOptions(this.ruleArguments)));
     }
 }
 

@@ -37,13 +37,13 @@ import { IFormatter } from "./language/formatter/formatter";
 import { IRule, isTypedRule, Replacement, RuleFailure, RuleSeverity } from "./language/rule/rule";
 import * as utils from "./language/utils";
 import { loadRules } from "./ruleLoader";
-import { arrayify, dedent, flatMap, mapDefined } from "./utils";
+import { arrayify, dedent, flatMap } from "./utils";
 
 /**
  * Linter that can lint multiple files in consecutive runs.
  */
 class Linter {
-    public static VERSION = "5.0.0";
+    public static VERSION = "5.1.0";
 
     public static findConfiguration = findConfiguration;
     public static findConfigurationPath = findConfigurationPath;
@@ -94,7 +94,7 @@ class Linter {
     }
 
     public lint(fileName: string, source: string, configuration: IConfigurationFile = DEFAULT_CONFIG): void {
-        let sourceFile = this.getSourceFile(fileName, source);
+        const sourceFile = this.getSourceFile(fileName, source);
         const isJs = /\.jsx?$/i.test(fileName);
         const enabledRules = this.getEnabledRules(configuration, isJs);
 
@@ -105,22 +105,7 @@ class Linter {
         }
 
         if (this.options.fix && fileFailures.some((f) => f.hasFix())) {
-            // When fixing, we need to be careful as a fix in one rule may affect other rules.
-            // So fix each rule separately.
-            for (const rule of enabledRules) {
-                const hasFixes = fileFailures.some((f) => f.hasFix() && f.getRuleName() === rule.getOptions().ruleName);
-                if (hasFixes) {
-                    // Get new failures in case the file changed.
-                    const updatedFailures = removeDisabledFailures(sourceFile, this.applyRule(rule, sourceFile));
-                    this.fixes = this.fixes.concat(updatedFailures.filter((f) => f.hasFix()));
-                    source = Replacement.applyFixes(source, mapDefined(updatedFailures, (f) => f.getFix()));
-                    sourceFile = this.getSourceFile(fileName, source);
-                    fs.writeFileSync(fileName, source, { encoding: "utf-8" });
-                }
-            }
-
-            // If there were fixes, get the *new* list of failures.
-            fileFailures = this.getAllFailures(sourceFile, enabledRules);
+            fileFailures = this.applyAllFixes(enabledRules, fileFailures, sourceFile, fileName);
         }
 
         // add rule severity to failures
@@ -167,6 +152,51 @@ class Linter {
     private getAllFailures(sourceFile: ts.SourceFile, enabledRules: IRule[]): RuleFailure[] {
         const failures = flatMap(enabledRules, (rule) => this.applyRule(rule, sourceFile));
         return removeDisabledFailures(sourceFile, failures);
+    }
+
+    private applyAllFixes(
+            enabledRules: IRule[], fileFailures: RuleFailure[], sourceFile: ts.SourceFile, sourceFileName: string): RuleFailure[] {
+        // When fixing, we need to be careful as a fix in one rule may affect other rules.
+        // So fix each rule separately.
+        let source: string = sourceFile.text;
+
+        for (const rule of enabledRules) {
+            const hasFixes = fileFailures.some((f) => f.hasFix() && f.getRuleName() === rule.getOptions().ruleName);
+            if (hasFixes) {
+                // Get new failures in case the file changed.
+                const updatedFailures = removeDisabledFailures(sourceFile, this.applyRule(rule, sourceFile));
+                const fixableFailures = updatedFailures.filter((f) => f.hasFix());
+                this.fixes = this.fixes.concat(fixableFailures);
+                source = this.applyFixes(sourceFileName, source, fixableFailures);
+                sourceFile = this.getSourceFile(sourceFileName, source);
+            }
+        }
+
+        // If there were fixes, get the *new* list of failures.
+        return this.getAllFailures(sourceFile, enabledRules);
+    }
+
+    // Only "protected" because a test directly accesses it.
+    // tslint:disable-next-line member-ordering
+    protected applyFixes(sourceFilePath: string, source: string, fixableFailures: RuleFailure[]): string {
+        if (fixableFailures.some((f) => !f.hasFix())) {
+            throw new Error("!");
+        }
+
+        const fixesByFile = createMultiMap(fixableFailures, (f) => [f.getFileName(), f.getFix()!]);
+        fixesByFile.forEach((fileFixes, filePath) => {
+            let fileNewSource: string;
+            if (filePath === sourceFilePath) {
+                source = Replacement.applyFixes(source, fileFixes);
+                fileNewSource = source;
+            } else {
+                const oldSource = fs.readFileSync(filePath, "utf-8");
+                fileNewSource = Replacement.applyFixes(oldSource, fileFixes);
+            }
+            fs.writeFileSync(filePath, fileNewSource, "utf-8");
+        });
+
+        return source;
     }
 
     private applyRule(rule: IRule, sourceFile: ts.SourceFile): RuleFailure[] {
@@ -217,3 +247,20 @@ class Linter {
 namespace Linter { }
 
 export = Linter;
+
+function createMultiMap<T, K, V>(inputs: T[], getPair: (input: T) => [K, V] | undefined): Map<K, V[]> {
+    const map = new Map<K, V[]>();
+    for (const input of inputs) {
+        const pair = getPair(input);
+        if (pair !== undefined) {
+            const [k, v] = pair;
+            const vs = map.get(k);
+            if (vs !== undefined) {
+                vs.push(v);
+            } else {
+                map.set(k, [v]);
+            }
+        }
+    }
+    return map;
+}

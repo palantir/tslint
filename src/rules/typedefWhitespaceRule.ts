@@ -59,24 +59,24 @@ export class Rule extends Lint.Rules.AbstractRule {
             items: [SPACE_OBJECT, SPACE_OBJECT],
             additionalItems: false,
         },
-        optionExamples: [Lint.Utils.dedent`
+        optionExamples: [
             [
-              true,
-              {
-                "call-signature": "nospace",
-                "index-signature": "nospace",
-                "parameter": "nospace",
-                "property-declaration": "nospace",
-                "variable-declaration": "nospace"
-              },
-              {
-                "call-signature": "onespace",
-                "index-signature": "onespace",
-                "parameter": "onespace",
-                "property-declaration": "onespace",
-                "variable-declaration": "onespace"
-              }
-            ]`,
+                true,
+                {
+                    "call-signature": "nospace",
+                    "index-signature": "nospace",
+                    "parameter": "nospace",
+                    "property-declaration": "nospace",
+                    "variable-declaration": "nospace",
+                },
+                {
+                    "call-signature": "onespace",
+                    "index-signature": "onespace",
+                    "parameter": "onespace",
+                    "property-declaration": "onespace",
+                    "variable-declaration": "onespace",
+                },
+            ],
         ],
         type: "typescript",
         typescriptOnly: true,

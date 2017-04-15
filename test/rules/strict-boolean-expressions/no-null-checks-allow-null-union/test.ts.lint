@@ -1,0 +1,17 @@
+declare function get<T>(): T;
+
+// Everything except string/number/enum is allowed.
+if (get<{ x: number }>) {}
+
+if (get<string>()) {}
+    ~~~~~~~~~~~~~ [This type is not allowed in the 'if' condition because it is a string. Allowed types are boolean or null-union.]
+
+if (get<number>()) {}
+    ~~~~~~~~~~~~~ [This type is not allowed in the 'if' condition because it is a number. Allowed types are boolean or null-union.]
+
+enum E {}
+if (get<E>()) {}
+    ~~~~~~~~ [This type is not allowed in the 'if' condition because it is an enum. Allowed types are boolean or null-union.]
+
+if (get<E | { x: number }>()) {}
+    ~~~~~~~~~~~~~~~~~~~~~~~~ [This type is not allowed in the 'if' condition because it could be an enum. Allowed types are boolean or null-union.]

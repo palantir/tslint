@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { assert } from "chai";
+
 import * as lines from "../../src/test/lines";
 
 describe("Rule Test Lines", () => {

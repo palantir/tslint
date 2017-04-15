@@ -1,0 +1,9 @@
+"One plus one is ${1 + 1}.";
+                 ~~ [0]
+
+'One plus one is ${1 + 1}.';
+                 ~~ [0]
+
+`One plus one is ${1 + 1}.`;
+
+[0]: Interpolation will only work for template strings.

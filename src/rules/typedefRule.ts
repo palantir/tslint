@@ -56,7 +56,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             minLength: 0,
             maxLength: 7,
         },
-        optionExamples: ['[true, "call-signature", "parameter", "member-variable-declaration"]'],
+        optionExamples: [[true, "call-signature", "parameter", "member-variable-declaration"]],
         type: "typescript",
         typescriptOnly: true,
     };

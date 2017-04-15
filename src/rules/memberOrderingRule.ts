@@ -151,36 +151,34 @@ export class Rule extends Lint.Rules.AbstractRule {
             additionalProperties: false,
         },
         optionExamples: [
-            '[true, { "order": "fields-first" }]',
-            Lint.Utils.dedent`
-                [true, {
-                    "order": [
-                        "static-field",
-                        "instance-field",
-                        "constructor",
-                        "public-instance-method",
-                        "protected-instance-method",
-                        "private-instance-method"
-                    ]
-                }]`,
-            Lint.Utils.dedent`
-                [true, {
-                    "order": [
-                        {
-                            "name": "static non-private",
-                            "kinds": [
-                                "public-static-field",
-                                "protected-static-field",
-                                "public-static-method",
-                                "protected-static-method"
-                            ]
-                        },
-                        "constructor"
-                    ]
-                }]`,
+            [true, { order: "fields-first" }],
+            [true, {
+                order: [
+                    "static-field",
+                    "instance-field",
+                    "constructor",
+                    "public-instance-method",
+                    "protected-instance-method",
+                    "private-instance-method",
+                ],
+            }],
+            [true, {
+                order: [
+                    {
+                        name: "static non-private",
+                        kinds: [
+                            "public-static-field",
+                            "protected-static-field",
+                            "public-static-method",
+                            "protected-static-method",
+                        ],
+                    },
+                    "constructor",
+                ],
+            }],
         ],
         type: "typescript",
-        typescriptOnly: true,
+        typescriptOnly: false,
     };
 
     public static FAILURE_STRING_ALPHABETIZE(prevName: string, curName: string) {

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { assert } from "chai";
 import {arrayify, dedent, escapeRegExp, objectify} from "../src/utils";
 
 describe("Utils", () => {

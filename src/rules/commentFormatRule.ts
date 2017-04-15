@@ -87,9 +87,9 @@ export class Rule extends Lint.Rules.AbstractRule {
             maxLength: 4,
         },
         optionExamples: [
-            '[true, "check-space", "check-uppercase"]',
-            '[true, "check-lowercase", {"ignore-words": ["TODO", "HACK"]}]',
-            '[true, "check-lowercase", {"ignore-pattern": "STD\\w{2,3}\\b"}]',
+            [true, "check-space", "check-uppercase"],
+            [true, "check-lowercase", {"ignore-words": ["TODO", "HACK"]}],
+            [true, "check-lowercase", {"ignore-pattern": "STD\\w{2,3}\\b"}],
         ],
         type: "style",
         typescriptOnly: false,
