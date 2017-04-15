@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "no-object-literal-type-assertion": true
+  }
+}
