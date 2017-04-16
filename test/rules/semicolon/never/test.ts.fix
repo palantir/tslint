@@ -126,3 +126,18 @@ if (true);
 for(;;);
 
 
+
+switch(foo.bar) {
+    case 'header':  header  = foo; break
+    case 'sidebar': sidebar = foo; break
+    case 'track':   track   = foo; /* some comment */ break
+}
+
+switch(foo.bar) {
+    case 'header':  header  = foo
+        break
+    case 'sidebar': sidebar = foo /* some comment
+        */ break
+    case 'track':   track   = foo // some comment
+        break
+}
