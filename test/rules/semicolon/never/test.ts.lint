@@ -184,4 +184,7 @@ switch(foo.bar) {
         break
 }
 
+const x = f(() =>
+    0); const y = 2
+
 [0]: Unnecessary semicolon
