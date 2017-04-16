@@ -39,6 +39,10 @@ export function objectify(arg: any): any {
     }
 }
 
+export function hasOwnProperty(arg: {}, key: string): boolean {
+    return Object.prototype.hasOwnProperty.call(arg, key) as boolean;
+}
+
 /**
  * Replace hyphens in a rule name by upper-casing the letter after them.
  * E.g. "foo-bar" -> "fooBar"

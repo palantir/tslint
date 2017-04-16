@@ -156,4 +156,14 @@ function g(x: any): string {
     return `other: ${x}`;
 }
 
+function deleteOk(obj: { x: any }) {
+    delete obj.x;
+}
+
+const obj: { x: number, y: number } = {
+    x: "number" as any, // Cast OK, and doesn't warn for LHS either.
+    [x]: 1,
+     ~ [0]
+};
+
 [0]: Unsafe use of expression of type 'any'.

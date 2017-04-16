@@ -390,13 +390,12 @@ function getOptionsJson(allOptions: any[]): { order: MemberCategoryJson[], alpha
         throw new Error("Got empty options");
     }
 
-    const firstOption = allOptions[0];
+    const firstOption = allOptions[0] as Options | string;
     if (typeof firstOption !== "object") {
         // Undocumented direct string option. Deprecate eventually.
         return { order: convertFromOldStyleOptions(allOptions), alphabetize: false }; // presume allOptions to be string[]
     }
 
-    // tslint:disable-next-line no-unsafe-any
     return { order: categoryFromOption(firstOption[OPTION_ORDER]), alphabetize: !!firstOption[OPTION_ALPHABETIZE] };
 }
 function categoryFromOption(orderOption: {}): MemberCategoryJson[] {

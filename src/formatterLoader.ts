@@ -57,8 +57,8 @@ function loadFormatter(...paths: string[]): FormatterConstructor | undefined {
     const fullPath = path.resolve(moduleDirectory, formatterPath);
 
     if (fs.existsSync(`${fullPath}.js`)) {
-        const formatterModule = require(fullPath);
-        return formatterModule.Formatter; // tslint:disable-line no-unsafe-any
+        const formatterModule = require(fullPath) as { Formatter: FormatterConstructor };
+        return formatterModule.Formatter;
     }
 
     return undefined;
@@ -71,5 +71,5 @@ function loadFormatterModule(name: string): FormatterConstructor | undefined {
     } catch (e) {
         return undefined;
     }
-    return require(src).Formatter; // tslint:disable-line no-unsafe-any
+    return (require(src) as { Formatter: FormatterConstructor }).Formatter;
 }

@@ -24,6 +24,7 @@ import {
     IConfigurationFile,
     loadConfigurationFromPath,
     parseConfigFile,
+    RawConfigFile,
 } from "../src/configuration";
 import { IOptions, RuleSeverity } from "./../src/language/rule/rule";
 import { createTempFile } from "./utils";
@@ -47,7 +48,7 @@ describe("Configuration", () => {
         });
 
         it("parses different ways of storing options", () => {
-            const rawConfig = {
+            const rawConfig: RawConfigFile = {
                 rules: {
                     a: true,
                     b: [true],
@@ -67,7 +68,7 @@ describe("Configuration", () => {
                     p: null,
                     q: {},
                     r: "garbage",
-                    s: { junk: 1 },
+                    s: { junk: 1 } as any, // tslint:disable-line no-unsafe-any (Fixed in 5.2)
                 },
             };
             const expected = getEmptyConfig();
@@ -107,7 +108,7 @@ describe("Configuration", () => {
 
     describe("defaultSeverity", () => {
         it("uses defaultSeverity if severity is default", () => {
-            const rawConfig = {
+            const rawConfig: RawConfigFile = {
                 defaultSeverity: "warning",
                 rules: {
                     a: { severity: "error" },

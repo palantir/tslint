@@ -25,7 +25,7 @@ import { arrayify, camelize, dedent } from "./utils";
 
 const moduleDirectory = path.dirname(module.filename);
 const CORE_RULES_DIRECTORY = path.resolve(moduleDirectory, ".", "rules");
-const cachedRules = new Map<string, RuleConstructor | null>(); // null indicates that the rule was not found
+const cachedRules = new Map<string, RuleConstructor | "not-found">(); // null indicates that the rule was not found
 
 export interface IEnableDisablePosition {
     isEnabled: boolean;
@@ -45,7 +45,7 @@ export function loadRules(ruleOptionsList: IOptions[],
         const enableDisableRules = enableDisableRuleMap.get(ruleName);
         if (ruleOptions.ruleSeverity !== "off" || enableDisableRuleMap) {
             const Rule = findRule(ruleName, rulesDirectories);
-            if (Rule == null) {
+            if (Rule === "not-found") {
                 notFoundRules.push(ruleName);
             } else {
                 if (isJs && Rule.metadata && Rule.metadata.typescriptOnly) {
@@ -53,7 +53,7 @@ export function loadRules(ruleOptionsList: IOptions[],
                 } else {
                     const ruleSpecificList = enableDisableRules || [];
                     ruleOptions.disabledIntervals = buildDisabledIntervalsFromSwitches(ruleSpecificList);
-                    rules.push(new (Rule as any)(ruleOptions) as IRule);
+                    rules.push(new Rule(ruleOptions));
 
                     if (Rule.metadata && Rule.metadata.deprecationMessage) {
                         showWarningOnce(`${Rule.metadata.ruleName} is deprecated. ${Rule.metadata.deprecationMessage}`);
@@ -88,18 +88,18 @@ export function loadRules(ruleOptionsList: IOptions[],
     return rules;
 }
 
-export function findRule(name: string, rulesDirectories?: string | string[]): RuleConstructor | null {
+export function findRule(name: string, rulesDirectories?: string | string[]): RuleConstructor | "not-found" {
     const camelizedName = transformName(name);
-    let Rule: RuleConstructor | null;
+    let Rule: RuleConstructor | "not-found";
 
     // first check for core rules
     Rule = loadCachedRule(CORE_RULES_DIRECTORY, camelizedName);
 
-    if (Rule == null) {
+    if (Rule === "not-found") {
         // then check for rules within the first level of rulesDirectory
         for (const dir of arrayify(rulesDirectories)) {
             Rule = loadCachedRule(dir, camelizedName, true);
-            if (Rule != null) {
+            if (Rule !== "not-found") {
                 break;
             }
         }
@@ -122,7 +122,7 @@ function transformName(name: string): string {
  * @param directory - An absolute path to a directory of rules
  * @param ruleName - A name of a rule in filename format. ex) "someLintRule"
  */
-function loadRule(directory: string, ruleName: string): RuleConstructor | null {
+function loadRule(directory: string, ruleName: string): RuleConstructor | "not-found" {
     const fullPath = path.join(directory, ruleName);
     if (fs.existsSync(fullPath + ".js")) {
         const ruleModule = require(fullPath) as { Rule: RuleConstructor } | undefined;
@@ -130,10 +130,10 @@ function loadRule(directory: string, ruleName: string): RuleConstructor | null {
             return ruleModule.Rule;
         }
     }
-    return null;
+    return "not-found";
 }
 
-function loadCachedRule(directory: string, ruleName: string, isCustomPath = false): RuleConstructor | null {
+function loadCachedRule(directory: string, ruleName: string, isCustomPath = false): RuleConstructor | "not-found" {
     // use cached value if available
     const fullPath = path.join(directory, ruleName);
     const cachedRule = cachedRules.get(fullPath);
@@ -152,9 +152,9 @@ function loadCachedRule(directory: string, ruleName: string, isCustomPath = fals
         }
     }
 
-    let Rule: RuleConstructor | null = null;
+    let Rule: RuleConstructor | "not-found" = "not-found";
     if (absolutePath !== undefined) {
-        Rule = loadRule(absolutePath, ruleName); // tslint:disable-line no-unsafe-any
+        Rule = loadRule(absolutePath, ruleName);
     }
     cachedRules.set(fullPath, Rule);
     return Rule;
