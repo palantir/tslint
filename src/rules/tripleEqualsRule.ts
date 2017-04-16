@@ -15,12 +15,18 @@
  * limitations under the License.
  */
 
+import { isBinaryExpression } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
 
 const OPTION_ALLOW_NULL_CHECK = "allow-null-check";
 const OPTION_ALLOW_UNDEFINED_CHECK = "allow-undefined-check";
+
+interface Options {
+    allowNull: boolean;
+    allowUndefined: boolean;
+}
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -41,7 +47,11 @@ export class Rule extends Lint.Rules.AbstractRule {
             minLength: 0,
             maxLength: 2,
         },
-        optionExamples: ["true", '[true, "allow-null-check"]', '[true, "allow-undefined-check"]'],
+        optionExamples: [
+            true,
+            [true, "allow-null-check"],
+            [true, "allow-undefined-check"],
+        ],
         type: "functionality",
         typescriptOnly: false,
     };
@@ -51,29 +61,33 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static NEQ_FAILURE_STRING = "!= should be !==";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const comparisonWalker = new ComparisonWalker(sourceFile, this.getOptions());
-        return this.applyWithWalker(comparisonWalker);
+        return this.applyWithFunction(sourceFile, walk, {
+            allowNull: this.ruleArguments.indexOf(OPTION_ALLOW_NULL_CHECK) !== -1,
+            allowUndefined: this.ruleArguments.indexOf(OPTION_ALLOW_UNDEFINED_CHECK) !== -1,
+        });
     }
 }
 
-class ComparisonWalker extends Lint.RuleWalker {
-    private allowNull = this.hasOption(OPTION_ALLOW_NULL_CHECK);
-    private allowUndefined = this.hasOption(OPTION_ALLOW_UNDEFINED_CHECK);
-
-    public visitBinaryExpression(node: ts.BinaryExpression) {
-        const eq = Lint.getEqualsKind(node.operatorToken);
-        if (eq && !eq.isStrict && !this.isExpressionAllowed(node)) {
-            this.addFailureAtNode(node.operatorToken, eq.isPositive ? Rule.EQ_FAILURE_STRING : Rule.NEQ_FAILURE_STRING);
+function walk(ctx: Lint.WalkContext<Options>) {
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (isBinaryExpression(node)) {
+            if ((node.operatorToken.kind === ts.SyntaxKind.EqualsEqualsToken ||
+                 node.operatorToken.kind === ts.SyntaxKind.ExclamationEqualsToken) &&
+                !(isExpressionAllowed(node.right, ctx.options) || isExpressionAllowed(node.left, ctx.options))) {
+                ctx.addFailureAtNode(node.operatorToken, node.operatorToken.kind === ts.SyntaxKind.EqualsEqualsToken
+                                                         ? Rule.EQ_FAILURE_STRING
+                                                         : Rule.NEQ_FAILURE_STRING);
+            }
         }
-        super.visitBinaryExpression(node);
-    }
+        return ts.forEachChild(node, cb);
+    });
+}
 
-    private isExpressionAllowed({ left, right }: ts.BinaryExpression) {
-        const isAllowed = (n: ts.Expression) =>
-            n.kind === ts.SyntaxKind.NullKeyword ? this.allowNull
-            : this.allowUndefined &&
-                n.kind === ts.SyntaxKind.Identifier &&
-                (n as ts.Identifier).originalKeywordKind === ts.SyntaxKind.UndefinedKeyword;
-        return isAllowed(left) || isAllowed(right);
+function isExpressionAllowed(node: ts.Expression, options: Options) {
+    if (node.kind === ts.SyntaxKind.NullKeyword) {
+        return options.allowNull;
     }
+    return options.allowUndefined &&
+        node.kind === ts.SyntaxKind.Identifier &&
+        (node as ts.Identifier).originalKeywordKind === ts.SyntaxKind.UndefinedKeyword;
 }

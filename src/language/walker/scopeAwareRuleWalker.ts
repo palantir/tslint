@@ -20,6 +20,40 @@ import * as ts from "typescript";
 import {isScopeBoundary} from "../utils";
 import {RuleWalker} from "./ruleWalker";
 
+/**
+ * @deprecated Prefer to manually maintain any contextual information.
+ *
+ * For example, imagine a `no-break` rule that warns on `break` in `for` but not in `switch`:
+ *
+ * function walk(ctx: Lint.WalkContext<void>): void {
+ *     let isInFor = false;
+ *     ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+ *         switch (node.kind) {
+ *             case ts.SyntaxKind.Break:
+ *                 if (isInFor) {
+ *                     ctx.addFailureAtNode(node, "!");
+ *                 }
+ *                 break;
+ *             case ts.SyntaxKind.ForStatement: {
+ *                 const old = isInFor;
+ *                 isInFor = true;
+ *                 ts.forEachChild(node, cb);
+ *                 isInFor = old;
+ *                 break;
+ *             }
+ *             case ts.SyntaxKind.SwitchStatement: {
+ *                 const old = isInFor;
+ *                 isInFor = false;
+ *                 ts.forEachChild(node, cb);
+ *                 isInFor = old;
+ *                 break;
+ *             }
+ *             default:
+ *                 ts.forEachChild(node, cb);
+ *         }
+ *     });
+ * }
+ */
 export abstract class ScopeAwareRuleWalker<T> extends RuleWalker {
     private scopeStack: T[];
 

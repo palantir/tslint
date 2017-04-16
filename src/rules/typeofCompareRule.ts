@@ -28,7 +28,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Makes sure result of `typeof` is compared to correct string values",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
     };

@@ -253,24 +253,29 @@ export class Rule extends Lint.Rules.TypedRule {
             },
         },
         optionExamples: [
-            "true",
-            `[true, "${ARGUMENT_ENUMS}", "${ARGUMENT_FUNCTIONS}", "${ARGUMENT_METHODS}"]`,
-            `[true, {
-                "${ARGUMENT_ENUMS}": true,
-                "${ARGUMENT_FUNCTIONS}": {
-                    "${DESCRIPTOR_VISIBILITIES}": ["${VISIBILITY_EXPORTED}"]
-                },
-                "${ARGUMENT_METHODS}": {
-                    "${DESCRIPTOR_LOCATIONS}": ["${LOCATION_INSTANCE}"]
-                    "${DESCRIPTOR_PRIVACIES}": ["${PRIVACY_PUBLIC}", "${PRIVACY_PROTECTED}"]
-                    "${DESCRIPTOR_TAGS}": {
-                        "${TAGS_FOR_CONTENT}": {
-                            "see": ["#.*"]
+            true,
+            [true, ARGUMENT_ENUMS, ARGUMENT_FUNCTIONS, ARGUMENT_METHODS],
+            [
+                true,
+                {
+                    [ARGUMENT_ENUMS]: true,
+                    [ARGUMENT_FUNCTIONS]: {
+                        [DESCRIPTOR_VISIBILITIES]: [VISIBILITY_EXPORTED],
+                    },
+                    [ARGUMENT_METHODS]: {
+                        [DESCRIPTOR_LOCATIONS]: LOCATION_INSTANCE,
+                        [DESCRIPTOR_PRIVACIES]: [PRIVACY_PUBLIC, PRIVACY_PROTECTED],
+                    },
+                    [DESCRIPTOR_TAGS]: {
+                        [TAGS_FOR_CONTENT]: {
+                            see: ["#.*"],
                         },
-                        "${TAGS_FOR_EXISTENCE}": ["inheritdoc"]
-                    }
-                }
-            }]`],
+                        [TAGS_FOR_EXISTENCE]: ["inheritdoc"],
+                    },
+                },
+            ],
+        ],
+
         type: "style",
         typescriptOnly: false,
     };

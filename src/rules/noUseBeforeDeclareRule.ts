@@ -29,9 +29,10 @@ export class Rule extends Lint.Rules.TypedRule {
             the compiler will detect if a \`let\` and \`const\` variable is used before it is declared.`,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
+        requiresTypeInfo: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -66,7 +67,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
 
     function checkIdentifier(node: ts.Identifier, symbol: ts.Symbol | undefined): void {
         const declarations = symbol && symbol.declarations;
-        if (!declarations) {
+        if (declarations === undefined || declarations.length === 0) {
             return;
         }
 

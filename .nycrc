@@ -1,0 +1,17 @@
+{
+    "include": [
+        "build/**/*.js"
+    ],
+    "extension": [
+        ".js"
+    ],
+    "exclude": [
+        "build/test"
+    ],
+    "reporter": [
+        "text-summary",
+        "html"
+    ],
+    "sourceMap": true,
+    "all": true
+}

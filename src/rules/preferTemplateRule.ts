@@ -33,7 +33,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "string",
             enum: [OPTION_SINGLE_CONCAT],
         },
-        optionExamples: ["true", `[true, "${OPTION_SINGLE_CONCAT}"]`],
+        optionExamples: [true, [true, OPTION_SINGLE_CONCAT]],
         type: "style",
         typescriptOnly: false,
     };
@@ -47,7 +47,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             return []; // Not possible in a declaration file
         }
 
-        const allowSingleConcat = this.getOptions().ruleArguments.indexOf(OPTION_SINGLE_CONCAT) !== -1;
+        const allowSingleConcat = this.ruleArguments.indexOf(OPTION_SINGLE_CONCAT) !== -1;
         return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, allowSingleConcat));
     }
 }
