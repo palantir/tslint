@@ -100,14 +100,13 @@ class Walker extends Lint.RuleWalker {
     }
 
     private checkMembers(members: Array<ts.TypeElement | ts.ClassElement>, typeParameters?: ts.TypeParameterDeclaration[]) {
-        this.checkOverloads(members, getOverloadName, typeParameters);
-        function getOverloadName(member: ts.TypeElement | ts.ClassElement) {
+        this.checkOverloads(members, (member) => {
             if (!utils.isSignatureDeclaration(member) || (member as ts.MethodDeclaration).body) {
                 return undefined;
             }
             const key = getOverloadKey(member);
             return key === undefined ? undefined : { signature: member, key };
-        }
+        }, typeParameters);
     }
 
     private checkOverloads<T>(signatures: T[], getOverload: GetOverload<T>, typeParameters?: ts.TypeParameterDeclaration[]) {

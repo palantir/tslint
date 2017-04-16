@@ -34,6 +34,7 @@ describe("Utils", () => {
         assert.deepEqual(objectify(null), {});
         assert.deepEqual(objectify("foo"), {});
         assert.deepEqual(objectify(1), {});
+        // tslint:disable-next-line object-literal-contextual-type
         assert.deepEqual(objectify({foo: 1, mar: {baz: 2}}), {foo: 1, mar: {baz: 2}});
     });
 

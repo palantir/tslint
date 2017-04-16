@@ -363,7 +363,13 @@ function getUnusedCheckedProgram(program: ts.Program, checkParameters: boolean):
 }
 
 function makeUnusedCheckedProgram(program: ts.Program, checkParameters: boolean): ts.Program {
-    const options = { ...program.getCompilerOptions(), noUnusedLocals: true, ...(checkParameters ? { noUnusedParameters: true } : null) };
+    const options: ts.CompilerOptions = {
+        ...program.getCompilerOptions(),
+        noUnusedLocals: true,
+    };
+    if (checkParameters) {
+        options.noUnusedParameters = true;
+    }
     const sourceFilesByName = new Map<string, ts.SourceFile>(program.getSourceFiles().map<[string, ts.SourceFile]>((s) => [s.fileName, s]));
     // tslint:disable object-literal-sort-keys
     return ts.createProgram(Array.from(sourceFilesByName.keys()), options, {

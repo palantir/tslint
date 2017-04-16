@@ -42,7 +42,7 @@ describe("JSON Formatter", () => {
                 "error"),
         ];
 
-        /* tslint:disable:object-literal-sort-keys */
+        /* tslint:disable object-literal-sort-keys */
         const expectedResult: IRuleFailureJson[] = [{
             name: TEST_FILE,
             failure: "first failure",
@@ -96,7 +96,7 @@ describe("JSON Formatter", () => {
             ruleName: "full-name",
             ruleSeverity: "ERROR",
         }];
-        /* tslint:enable:object-literal-sort-keys */
+        /* tslint:enable:object-literal-sort-keys object-literal-contextual-type */
 
         const actualResult = JSON.parse(formatter.format(failures));
         assert.deepEqual(actualResult, expectedResult);

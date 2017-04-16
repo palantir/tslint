@@ -92,6 +92,7 @@ type BlockOrClassRequirement = BlockRequirement | ClassRequirement;
 export class Rule extends Lint.Rules.TypedRule {
     public static FAILURE_STRING_EXIST = "Documentation must exist for ";
 
+    // tslint:disable object-literal-contextual-type (https://github.com/palantir/tslint/issues/2428)
     public static defaultArguments = [
         ARGUMENT_CLASSES,
         ARGUMENT_FUNCTIONS,
@@ -217,7 +218,7 @@ export class Rule extends Lint.Rules.TypedRule {
         type: "style",
         typescriptOnly: false,
     };
-    /* tslint:enable:object-literal-sort-keys */
+    /* tslint:enable:object-literal-sort-keys object-literal-contextual-type */
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         const options = this.getOptions();

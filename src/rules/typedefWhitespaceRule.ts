@@ -19,7 +19,7 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
-/* tslint:disable:object-literal-sort-keys */
+/* tslint:disable:object-literal-sort-keys object-literal-contextual-type (https://github.com/palantir/tslint/issues/2428) */
 const SPACE_OPTIONS = {
     type: "string",
     enum: ["nospace", "onespace", "space"],

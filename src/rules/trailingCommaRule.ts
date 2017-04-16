@@ -47,7 +47,7 @@ function normalizeOptions(options: OptionsJson): Options {
     }
 }
 
-/* tslint:disable:object-literal-sort-keys */
+/* tslint:disable:object-literal-sort-keys object-literal-contextual-type */
 const metadataOptionShape = {
     anyOf: [{
         type: "string",
@@ -60,7 +60,7 @@ const metadataOptionShape = {
         }),
     }],
 };
-/* tslint:enable:object-literal-sort-keys */
+/* tslint:enable:object-literal-sort-keys object-literal-contextual-type */
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */

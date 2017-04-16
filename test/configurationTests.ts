@@ -39,7 +39,7 @@ describe("Configuration", () => {
         });
 
         it("arrayifies `extends`", () => {
-            const rawConfig = {
+            const rawConfig: RawConfigFile = {
                 extends: "a",
             };
             const expected = getEmptyConfig();
