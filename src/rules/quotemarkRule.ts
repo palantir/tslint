@@ -77,11 +77,11 @@ export class Rule extends Lint.Rules.AbstractRule {
         const args = this.ruleArguments;
         const quoteMark = args[0] === OPTION_SINGLE ? "'" : '"';
         return this.applyWithFunction(sourceFile, walk, {
-            quoteMark,
             avoidEscape: args.indexOf(OPTION_AVOID_ESCAPE) !== -1,
             jsxQuoteMark: args.indexOf(OPTION_JSX_SINGLE) !== -1
                           ? "'"
                           : args.indexOf(OPTION_JSX_DOUBLE) ? '"' : quoteMark,
+            quoteMark,
         });
     }
 }
