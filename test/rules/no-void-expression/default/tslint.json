@@ -4,8 +4,5 @@
   },
   "rules": {
     "no-void-expression": true
-  },
-  "jsRules": {
-    "no-void-expression": true
   }
 }

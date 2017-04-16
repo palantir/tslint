@@ -1,8 +1,5 @@
 {
   "rules": {
     "object-literal-sort-keys": true
-  },
-  "jsRules": {
-    "object-literal-sort-keys": true
   }
 }
