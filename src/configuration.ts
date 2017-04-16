@@ -149,7 +149,9 @@ export function findConfigurationPath(suppliedConfigFilePath: string | null, inp
  * 'path/to/config' will attempt to load a to/config file inside a node module named path
  * @returns a configuration object for TSLint loaded from the file at configFilePath
  */
-export function loadConfigurationFromPath(configFilePath?: string): IConfigurationFile {
+export function loadConfigurationFromPath(
+    configFilePath?: string,
+    originalFilePath: string | undefined = configFilePath): IConfigurationFile {
     if (configFilePath == null) {
         return DEFAULT_CONFIG;
     } else {
@@ -159,7 +161,7 @@ export function loadConfigurationFromPath(configFilePath?: string): IConfigurati
             const fileContent = stripComments(fs.readFileSync(resolvedConfigFilePath)
             .toString()
             .replace(/^\uFEFF/, ""));
-            rawConfigFile = JSON.parse(fileContent);
+            rawConfigFile = parseJson(fileContent, configFilePath, originalFilePath);
         } else {
             rawConfigFile = require(resolvedConfigFilePath);
             delete require.cache[resolvedConfigFilePath];
@@ -172,10 +174,20 @@ export function loadConfigurationFromPath(configFilePath?: string): IConfigurati
         // apply the current configuration last by placing it last in this array
         const configs = configFile.extends.map((name) => {
             const nextConfigFilePath = resolveConfigurationPath(name, configFileDir);
-            return loadConfigurationFromPath(nextConfigFilePath);
+            return loadConfigurationFromPath(nextConfigFilePath, originalFilePath);
         }).concat([configFile]);
 
         return configs.reduce(extendConfigurationFile, EMPTY_CONFIG);
+    }
+}
+
+function parseJson(fileContent: string, configFilePath: string, originalFilePath?: string) {
+    try {
+        return JSON.parse(fileContent);
+    } catch (error) {
+        throw configFilePath === originalFilePath
+            ? error
+            : new Error(`${error.message} in ${configFilePath}`);
     }
 }
 

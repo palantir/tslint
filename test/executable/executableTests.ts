@@ -95,6 +95,18 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                 done();
             });
         });
+
+        it("mentions the root cause if a config file extends from an invalid file", (done) => {
+            execCli(["-c", "test/config/tslint-extends-invalid.json", "src/test.ts"], (err, stdout, stderr) => {
+                assert.isNotNull(err, "process should exit with error");
+                assert.strictEqual(err.code, 1, "error code should be 1");
+
+                assert.include(stderr, "Failed to load", "stderr should contain notification about failing to load json");
+                assert.include(stderr, "tslint-invalid.json", "stderr should mention the problem file");
+                assert.strictEqual(stdout, "", "shouldn't contain any output in stdout");
+                done();
+            });
+        });
     });
 
     describe("Custom rules", () => {
