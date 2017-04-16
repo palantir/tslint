@@ -56,7 +56,7 @@ const normalizeOptions = (options: Options): Options => {
             typeLiterals: options.multiline,
         };
     } else {
-        options.multiline = Object.assign({}, defaultOptions, options.multiline);
+        options.multiline = { ...defaultOptions, ...options.multiline };
     }
 
     if (typeof options.singleline === "string") {
@@ -69,7 +69,7 @@ const normalizeOptions = (options: Options): Options => {
             typeLiterals: options.singleline,
         };
     } else {
-        options.singleline = Object.assign({}, defaultOptions, options.singleline);
+        options.singleline = { ...defaultOptions, ...options.singleline };
     }
 
     return options;
