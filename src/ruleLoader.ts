@@ -25,7 +25,7 @@ import { arrayify, camelize, dedent } from "./utils";
 
 const moduleDirectory = path.dirname(module.filename);
 const CORE_RULES_DIRECTORY = path.resolve(moduleDirectory, ".", "rules");
-const cachedRules = new Map<string, RuleConstructor | "not-found">(); // null indicates that the rule was not found
+const cachedRules = new Map<string, RuleConstructor | "not-found">();
 
 export interface IEnableDisablePosition {
     isEnabled: boolean;
