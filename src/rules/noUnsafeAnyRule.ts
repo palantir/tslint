@@ -65,6 +65,11 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
                 return;
             }
 
+            case ts.SyntaxKind.LabeledStatement:
+                // Ignore label
+                return cb((node as ts.LabeledStatement).statement);
+
+            case ts.SyntaxKind.BreakStatement: // Ignore label
             // Ignore types
             case ts.SyntaxKind.InterfaceDeclaration:
             case ts.SyntaxKind.TypeAliasDeclaration:
@@ -80,6 +85,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
                 return;
 
             // Recurse through these, but ignore the immediate child because it is allowed to be 'any'.
+            case ts.SyntaxKind.DeleteExpression:
             case ts.SyntaxKind.ExpressionStatement:
             case ts.SyntaxKind.TypeAssertionExpression:
             case ts.SyntaxKind.AsExpression:
@@ -88,6 +94,16 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
                 const { expression } =
                     node as ts.ExpressionStatement | ts.TypeAssertion | ts.AsExpression | ts.TemplateSpan | ts.ThrowStatement;
                 return cb(expression, /*anyOk*/ true);
+            }
+
+            case ts.SyntaxKind.PropertyAssignment: {
+                // Only check RHS.
+                const { name, initializer } = node as ts.PropertyAssignment;
+                // The LHS will be 'any' if the RHS is, so just handle the RHS.
+                // Still need to check the LHS in case it is a computed key.
+                cb(name, /*anyOk*/ true);
+                cb(initializer);
+                return;
             }
 
             case ts.SyntaxKind.PropertyDeclaration: {
@@ -115,8 +131,10 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
             case ts.SyntaxKind.NewExpression: {
                 const { expression, arguments: args } = node as ts.CallExpression | ts.NewExpression;
                 cb(expression);
-                for (const arg of args) {
-                    checkContextual(arg);
+                if (args) {
+                    for (const arg of args) {
+                        checkContextual(arg);
+                    }
                 }
                 // Also check the call expression itself
                 check();

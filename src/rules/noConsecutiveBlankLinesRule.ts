@@ -52,11 +52,12 @@ export class Rule extends Lint.Rules.AbstractRule {
      * Disable the rule if the option is provided but non-numeric or less than the minimum.
      */
     public isEnabled(): boolean {
-        return super.isEnabled() && (!this.ruleArguments[0] || this.ruleArguments[0] > 0);
+        const option = this.ruleArguments[0] as number | undefined;
+        return super.isEnabled() && (!option || option > 0);
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const limit: number = this.ruleArguments[0] || Rule.DEFAULT_ALLOWED_BLANKS;
+        const limit = this.ruleArguments[0] as number | undefined || Rule.DEFAULT_ALLOWED_BLANKS;
         return this.applyWithFunction(sourceFile, walk, limit);
     }
 }

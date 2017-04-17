@@ -116,7 +116,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_ALWAYS = "Missing trailing comma";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const options = normalizeOptions(this.ruleArguments[0]);
+        const options = normalizeOptions(this.ruleArguments[0] as Options);
         return this.applyWithWalker(new TrailingCommaWalker(sourceFile, this.ruleName, options));
     }
 
