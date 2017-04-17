@@ -1,8 +1,5 @@
 {
     "rules": {
         "no-irregular-whitespace": true
-    },
-    "jsRules": {
-        "no-irregular-whitespace": true
     }
 }

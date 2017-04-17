@@ -1,8 +1,5 @@
 {
   "rules": {
     "space-before-function-paren": true
-  },
-  "jsRules": {
-    "space-before-function-paren": [true, "always"]
   }
 }

@@ -1,8 +1,5 @@
 {
   "rules": {
     "no-string-literal": true
-  },
-  "jsRules": {
-    "no-string-literal": true
   }
 }
