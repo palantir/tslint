@@ -141,7 +141,7 @@ export function findConfigurationPath(suppliedConfigFilePath: string | null, inp
     }
 }
 
-/**findRule
+/**
  * Used Node semantics to load a configuration file given configFilePath.
  * For example:
  * '/path/to/config' will be treated as an absolute path
