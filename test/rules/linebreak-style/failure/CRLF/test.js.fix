@@ -1,4 +1,0 @@
-// this line uses CRLF
-// this line uses CRLF
-// this line uses CRLF
-// this line uses CRLF

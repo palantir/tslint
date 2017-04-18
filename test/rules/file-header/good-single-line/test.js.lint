@@ -1,9 +1,0 @@
-// Good header 4
-
-export class A {
-    x = 1;
-
-    B() {
-        return 2;
-    }
-}

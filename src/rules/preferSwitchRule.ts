@@ -46,10 +46,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Use a switch statement instead of using multiple '===' checks.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const options = this.getOptions().ruleArguments;
         let minCases = 2;
-        if (options.length) {
-            const obj = options[0];
+        if (this.ruleArguments.length) {
+            const obj = this.ruleArguments[0] as { "min-cases": number };
             minCases = obj[OPTION_MIN_CASES];
         }
         return this.applyWithFunction(sourceFile, walk, minCases);

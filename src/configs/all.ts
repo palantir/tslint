@@ -18,6 +18,7 @@
 import { join as joinPaths } from "path";
 
 import { findRule } from "../ruleLoader";
+import { hasOwnProperty } from "../utils";
 
 // tslint:disable object-literal-sort-keys
 // tslint:disable object-literal-key-quotes
@@ -103,6 +104,7 @@ export const rules = {
     // "no-invalid-this": Won't this be deprecated?
     "no-misused-new": true,
     "no-null-keyword": true,
+    "no-object-literal-type-assertion": true,
     "no-shadowed-variable": true,
     "no-string-literal": true,
     "no-string-throw": true,
@@ -233,11 +235,14 @@ export const RULES_EXCLUDED_FROM_ALL_CONFIG =
 // Exclude typescript-only rules from jsRules, otherwise it's identical.
 export const jsRules: { [key: string]: any } = {};
 for (const key in rules) {
-    if (!Object.prototype.hasOwnProperty.call(rules, key)) {
+    if (!hasOwnProperty(rules, key)) {
         continue;
     }
 
-    const Rule = findRule(key, joinPaths(__dirname, "..", "rules"))!;
+    const Rule = findRule(key, joinPaths(__dirname, "..", "rules"));
+    if (Rule === "not-found") {
+        throw new Error(`Couldn't find rule '${key}'.`);
+    }
     if (!Rule.metadata.typescriptOnly) {
         jsRules[key] = (rules as any)[key];
     }
