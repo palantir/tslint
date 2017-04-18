@@ -242,4 +242,4 @@ run({
     test: argv.test,
     typeCheck: argv["type-check"],
     version: argv.v,
-}, outputStream).then(process.exit);
+}, outputStream, process.stderr).then(process.exit);

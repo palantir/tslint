@@ -110,19 +110,19 @@ export const enum Status {
     LintError = 2,
 }
 
-export async function run(options: Options, outputStream: NodeJS.WritableStream): Promise<Status> {
+export async function run(options: Options, outputStream: NodeJS.WritableStream, errorStream: NodeJS.WritableStream): Promise<Status> {
     try {
-        return await runWorker(options, outputStream);
+        return await runWorker(options, outputStream, errorStream);
     } catch (error) {
         if ((error as FatalError).name === FatalError.NAME) {
-            console.error((error as FatalError).message);
+            await writeToStream(errorStream, (error as FatalError).message);
             return Status.FatalError;
         }
         throw error;
     }
 }
 
-async function runWorker(options: Options, outputStream: NodeJS.WritableStream): Promise<Status> {
+async function runWorker(options: Options, outputStream: NodeJS.WritableStream, errorStream: NodeJS.WritableStream): Promise<Status> {
     if (options.version) {
         await writeToStream(outputStream, Linter.VERSION + "\n");
         return Status.Ok;
@@ -146,12 +146,12 @@ async function runWorker(options: Options, outputStream: NodeJS.WritableStream):
         throw new FatalError(`Invalid option for configuration: ${options.config}`);
     }
 
-    const { output, errorCount } = runLinter(options);
+    const { output, errorCount } = await runLinter(options, errorStream);
     await writeToStream(outputStream, output);
     return options.force || errorCount === 0 ? Status.Ok : Status.LintError;
 }
 
-function runLinter(options: Options): LintResult {
+async function runLinter(options: Options, errorStream: NodeJS.WritableStream): Promise<LintResult> {
     const { files, program } = resolveFilesAndProgram(options);
     // if type checking, run the type checker
     if (program) {
@@ -159,13 +159,13 @@ function runLinter(options: Options): LintResult {
         if (diagnostics.length !== 0) {
             const message = diagnostics.map(showDiagnostic).join("\n");
             if (options.force) {
-                console.error(message);
+                await writeToStream(errorStream, message);
             } else {
                 throw new FatalError(message);
             }
         }
     }
-    return doLinting(options, files, program);
+    return doLinting(options, files, program, errorStream);
 }
 
 function resolveFilesAndProgram({ files, project, exclude, typeCheck }: Options): { files: string[], program?: ts.Program } {
@@ -193,7 +193,8 @@ function resolveGlobs(files: string[] | undefined, exclude: Options["exclude"]):
         glob.sync(trimSingleQuotes(file), { ignore, nodir: true }));
 }
 
-function doLinting(options: Options, files: string[], program: ts.Program | undefined): LintResult {
+async function doLinting(
+        options: Options, files: string[], program: ts.Program | undefined, errorStream: NodeJS.WritableStream): Promise<LintResult> {
     const possibleConfigAbsolutePath = options.config !== undefined ? path.resolve(options.config) : null;
     const linter = new Linter({
         fix: !!options.fix,
@@ -209,7 +210,7 @@ function doLinting(options: Options, files: string[], program: ts.Program | unde
             throw new FatalError(`Unable to open file: ${file}`);
         }
 
-        const contents = tryReadFile(file);
+        const contents = await tryReadFile(file, errorStream);
         if (contents !== undefined) {
             const folder = path.dirname(file);
             if (lastFolder !== folder) {
@@ -224,7 +225,7 @@ function doLinting(options: Options, files: string[], program: ts.Program | unde
 }
 
 /** Read a file, but return undefined if it is an MPEG '.ts' file. */
-function tryReadFile(filename: string): string | undefined {
+async function tryReadFile(filename: string, errorStream: NodeJS.WritableStream): Promise<string | undefined> {
     const buffer = new Buffer(256);
     const fd = fs.openSync(filename, "r");
     try {
@@ -233,7 +234,7 @@ function tryReadFile(filename: string): string | undefined {
             // MPEG transport streams use the '.ts' file extension. They use 0x47 as the frame
             // separator, repeating every 188 bytes. It is unlikely to find that pattern in
             // TypeScript source, so tslint ignores files with the specific pattern.
-            console.warn(`${filename}: ignoring MPEG transport stream`);
+            await writeToStream(errorStream, `${filename}: ignoring MPEG transport stream`);
             return undefined;
         }
     } finally {
