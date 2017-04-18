@@ -116,12 +116,12 @@ function walk(ctx: Lint.WalkContext<void>, noPublic: boolean, checkAccessor: boo
                 ? getChildOfKind(node, ts.SyntaxKind.ConstructorKeyword)!
                 : node.name !== undefined ? node.name : node;
             const memberName = node.name !== undefined && isIdentifier(node.name) ? node.name.text : undefined;
-            ctx.addFailureAtNode(nameNode, Rule.FAILURE_STRING_FACTORY(memberType(node), memberName));
+            ctx.addFailureAtNode(nameNode, Rule.FAILURE_STRING_FACTORY(typeToString(node), memberName));
         }
     }
 }
 
-function memberType(node: ts.ClassElement): string {
+function typeToString(node: ts.ClassElement): string {
     switch (node.kind) {
         case ts.SyntaxKind.MethodDeclaration:
             return "class method";

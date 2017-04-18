@@ -45,17 +45,17 @@ interface Argv {
 
 const processed = optimist
     .usage("Usage: $0 [options] file ...")
-    .check((argv: Argv) => {
+    .check((args: Argv) => {
         // at least one of file, help, version, project or unqualified argument must be present
         // tslint:disable-next-line strict-boolean-expressions
-        if (!(argv.h || argv.i || argv.test || argv.v || argv.project || argv._.length > 0)) {
+        if (!(args.h || args.i || args.test || args.v || args.project || args._.length > 0)) {
             // throw a string, otherwise a call stack is printed for this message
             // tslint:disable-next-line:no-string-throw
             throw "Missing files";
         }
 
         // tslint:disable-next-line strict-boolean-expressions
-        if (argv.f) {
+        if (args.f) {
             // throw a string, otherwise a call stack is printed for this message
             // tslint:disable-next-line:no-string-throw
             throw "-f option is no longer available. Supply files directly to the tslint command instead.";
