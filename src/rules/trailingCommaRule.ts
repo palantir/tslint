@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { getChildOfKind } from "tsutils";
+import { getChildOfKind, isSameLine } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -216,18 +216,14 @@ class TrailingCommaWalker extends Lint.AbstractWalker<Options> {
 
     /* Expects `list.length !== 0` */
     private checkComma(hasTrailingComma: boolean, list: ts.NodeArray<ts.Node>, closeTokenPos: number, optionKey: OptionName) {
-        const lastElementLine = ts.getLineAndCharacterOfPosition(this.sourceFile, list[list.length - 1].end).line;
-        const closeTokenLine = ts.getLineAndCharacterOfPosition(this.sourceFile, closeTokenPos).line;
-        const option = lastElementLine === closeTokenLine ? this.options.singleline : this.options.multiline;
-        const shouldHandle = option[optionKey];
+        const options = isSameLine(this.sourceFile, list[list.length - 1].end, closeTokenPos)
+            ? this.options.singleline
+            : this.options.multiline;
+        const option = options[optionKey];
 
-        if (shouldHandle === "ignore") {
-            return;
-        }
-
-        if (shouldHandle === "always" && !hasTrailingComma) {
+        if (option === "always" && !hasTrailingComma) {
             this.addFailureAt(list.end, 0, Rule.FAILURE_STRING_ALWAYS, Lint.Replacement.appendText(list.end, ","));
-        } else if (shouldHandle === "never" && hasTrailingComma) {
+        } else if (option === "never" && hasTrailingComma) {
             this.addFailureAt(list.end - 1, 1, Rule.FAILURE_STRING_NEVER, Lint.Replacement.deleteText(list.end - 1, 1));
         }
     }
