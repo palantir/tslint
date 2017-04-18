@@ -6,7 +6,8 @@
   "rules": {
     "ban": [true,
       ["describe", "only"],
-      ["it", "only"]
+      ["it", "only"],
+      ["Object", "assign"]
     ],
 
     "callable-types": true,
