@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isObjectLiteralExpression } from "tsutils";
+import { isObjectLiteralExpression, isSameLine } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -59,7 +59,8 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function walk(ctx: Lint.WalkContext<Options>) {
     return ts.forEachChild(ctx.sourceFile, function cb(node): void {
-        if (isObjectLiteralExpression(node) && node.properties.length > 1 && isMultiline(node, ctx.sourceFile)) {
+        if (isObjectLiteralExpression(node) && node.properties.length > 1 &&
+            !isSameLine(ctx.sourceFile, node.properties.pos, node.end)) {
             let lastKey: string | undefined;
             const {options: {ignoreCase}} = ctx;
             outer: for (const property of node.properties) {
@@ -84,9 +85,4 @@ function walk(ctx: Lint.WalkContext<Options>) {
         }
         return ts.forEachChild(node, cb);
     });
-}
-
-function isMultiline(node: ts.ObjectLiteralExpression, sourceFile: ts.SourceFile): boolean {
-    return ts.getLineAndCharacterOfPosition(sourceFile, node.properties[0].pos - 1).line
-        !== ts.getLineAndCharacterOfPosition(sourceFile, node.end).line;
 }

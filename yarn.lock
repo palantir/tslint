@@ -1450,9 +1450,9 @@ tslint@latest:
     semver "^5.3.0"
     tsutils "^1.4.0"
 
-tsutils@^1.4.0, tsutils@^1.6.0:
-  version "1.6.0"
-  resolved "https://registry.yarnpkg.com/tsutils/-/tsutils-1.6.0.tgz#1fd7fac2a61369ed99cd3997f0fbb437128850f2"
+tsutils@^1.4.0, tsutils@^1.7.0:
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/tsutils/-/tsutils-1.7.0.tgz#2e63ccc2d6912bb095f7e363ff4100721dc86f50"
 
 type-detect@0.1.1:
   version "0.1.1"
