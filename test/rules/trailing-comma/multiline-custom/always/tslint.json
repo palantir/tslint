@@ -13,20 +13,5 @@
                 }
             }
         ]
-    },
-    "jsRules": {
-        "trailing-comma": [
-            true,
-            {
-                "multiline": {
-                    "arrays": "always",
-                    "exports": "always",
-                    "functions": "always",
-                    "imports": "always",
-                    "objects": "always",
-                    "typeLiterals": "always"
-                }
-            }
-        ]
     }
 }

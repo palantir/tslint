@@ -18,6 +18,7 @@
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { hasOwnProperty } from "../utils";
 
 export interface IBlockRequirementDescriptor {
     visibilities?: Visibility[];
@@ -254,7 +255,7 @@ abstract class Requirement<TDescriptor extends RequirementDescriptor> {
         }
 
         for (const type in descriptor) {
-            if (descriptor.hasOwnProperty(type)) {
+            if (hasOwnProperty(descriptor, type)) {
                 requirements.set(
                     type as DocType,
                     (type === "methods" || type === "properties")

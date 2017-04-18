@@ -114,8 +114,8 @@ export async function run(options: Options, outputStream: NodeJS.WritableStream)
     try {
         return await runWorker(options, outputStream);
     } catch (error) {
-        if (error.name === FatalError.NAME) {
-            console.error(error.message);
+        if ((error as FatalError).name === FatalError.NAME) {
+            console.error((error as FatalError).message);
             return Status.FatalError;
         }
         throw error;

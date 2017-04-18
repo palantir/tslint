@@ -22,7 +22,7 @@ import * as resolve from "resolve";
 import { FatalError } from "./error";
 
 import { IOptions, RuleSeverity } from "./language/rule/rule";
-import { arrayify, objectify, stripComments } from "./utils";
+import { arrayify, hasOwnProperty, stripComments } from "./utils";
 
 export interface IConfigurationFile {
     /**
@@ -99,7 +99,7 @@ export function findConfiguration(configFile: string | null, inputFilePath: stri
         loadResult.results = loadConfigurationFromPath(path);
         return loadResult;
     } catch (error) {
-        throw new FatalError(`Failed to load ${path}: ${error.message}`, error);
+        throw new FatalError(`Failed to load ${path}: ${(error as Error).message}`, error as Error);
     }
 }
 
@@ -154,15 +154,15 @@ export function loadConfigurationFromPath(configFilePath?: string): IConfigurati
         return DEFAULT_CONFIG;
     } else {
         const resolvedConfigFilePath = resolveConfigurationPath(configFilePath);
-        let rawConfigFile: any;
+        let rawConfigFile: RawConfigFile;
         if (path.extname(resolvedConfigFilePath) === ".json") {
             const fileContent = stripComments(fs.readFileSync(resolvedConfigFilePath)
-            .toString()
-            .replace(/^\uFEFF/, ""));
-            rawConfigFile = JSON.parse(fileContent);
+                .toString()
+                .replace(/^\uFEFF/, ""));
+            rawConfigFile = JSON.parse(fileContent) as RawConfigFile;
         } else {
-            rawConfigFile = require(resolvedConfigFilePath);
-            delete require.cache[resolvedConfigFilePath];
+            rawConfigFile = require(resolvedConfigFilePath) as RawConfigFile;
+            delete (require.cache as { [key: string]: any })[resolvedConfigFilePath]; // tslint:disable-line no-unsafe-any (Fixed in 5.2)
         }
 
         const configFileDir = path.dirname(resolvedConfigFilePath);
@@ -212,16 +212,23 @@ function resolveConfigurationPath(filePath: string, relativeTo?: string) {
 export function extendConfigurationFile(targetConfig: IConfigurationFile,
                                         nextConfigSource: IConfigurationFile): IConfigurationFile {
 
-    const combineProperties = (targetProperty: any, nextProperty: any) => {
-        const combinedProperty: any = {};
-        for (const name of Object.keys(objectify(targetProperty))) {
-            combinedProperty[name] = targetProperty[name];
-        }
+    const combineProperties = <T>(targetProperty: T | undefined, nextProperty: T | undefined): T => {
+        const combinedProperty: { [key: string]: any } = {};
+        add(targetProperty);
         // next config source overwrites the target config object
-        for (const name of Object.keys(objectify(nextProperty))) {
-            combinedProperty[name] = nextProperty[name];
+        add(nextProperty);
+        return combinedProperty as T;
+
+        function add(property: T | undefined): void {
+            if (property) {
+                for (const name in property) {
+                    if (hasOwnProperty(property, name)) {
+                        combinedProperty[name] = property[name];
+                    }
+                }
+            }
+
         }
-        return combinedProperty;
     };
 
     const combineMaps = (target: Map<string, Partial<IOptions>>, next: Map<string, Partial<IOptions>>) => {
@@ -252,9 +259,9 @@ export function extendConfigurationFile(targetConfig: IConfigurationFile,
     };
 }
 
-function getHomeDir() {
-    const environment = global.process.env;
-    const paths = [
+function getHomeDir(): string | undefined {
+    const environment = global.process.env as { [key: string]: string };
+    const paths: string[] = [
         environment.USERPROFILE,
         environment.HOME,
         environment.HOMEPATH,
@@ -266,6 +273,8 @@ function getHomeDir() {
             return homePath;
         }
     }
+
+    return undefined;
 }
 
 // returns the absolute path (contrary to what the name implies)
@@ -317,9 +326,8 @@ export function getRulesDirectories(directories?: string | string[], relativeTo?
  *
  * @param ruleConfigValue The raw option setting of a rule
  */
-function parseRuleOptions(ruleConfigValue: any, rawDefaultRuleSeverity: string): Partial<IOptions> {
+function parseRuleOptions(ruleConfigValue: RawRuleConfig, rawDefaultRuleSeverity: string | undefined): Partial<IOptions> {
     let ruleArguments: any[] | undefined;
-    let ruleSeverity: RuleSeverity;
     let defaultRuleSeverity: RuleSeverity = "error";
 
     if (rawDefaultRuleSeverity) {
@@ -337,43 +345,46 @@ function parseRuleOptions(ruleConfigValue: any, rawDefaultRuleSeverity: string):
         }
     }
 
+    let ruleSeverity = defaultRuleSeverity;
+
     if (ruleConfigValue == null) {
         ruleArguments = [];
         ruleSeverity = "off";
-    } else if (Array.isArray(ruleConfigValue) && ruleConfigValue.length > 0) {
-        // old style: array
-        ruleArguments = ruleConfigValue.slice(1);
-        ruleSeverity = ruleConfigValue[0] === true ? defaultRuleSeverity : "off";
+    } else if (Array.isArray(ruleConfigValue)) {
+        if (ruleConfigValue.length > 0) {
+            // old style: array
+            ruleArguments = ruleConfigValue.slice(1);
+            ruleSeverity = ruleConfigValue[0] === true ? defaultRuleSeverity : "off";
+        }
     } else if (typeof ruleConfigValue === "boolean") {
         // old style: boolean
         ruleArguments = [];
         ruleSeverity = ruleConfigValue === true ? defaultRuleSeverity : "off";
-    } else if (ruleConfigValue.severity) {
-        switch (ruleConfigValue.severity.toLowerCase()) {
-            case "default":
-                ruleSeverity = defaultRuleSeverity;
-                break;
-            case "error":
-                ruleSeverity = "error";
-                break;
-            case "warn":
-            case "warning":
-                ruleSeverity = "warning";
-                break;
-            case "off":
-            case "none":
-                ruleSeverity = "off";
-                break;
-            default:
-                console.warn(`Invalid severity level: ${ruleConfigValue.severity}`);
-                ruleSeverity = defaultRuleSeverity;
+    } else if (typeof ruleConfigValue === "object") {
+        if (ruleConfigValue.severity) {
+            switch (ruleConfigValue.severity.toLowerCase()) {
+                case "default":
+                    ruleSeverity = defaultRuleSeverity;
+                    break;
+                case "error":
+                    ruleSeverity = "error";
+                    break;
+                case "warn":
+                case "warning":
+                    ruleSeverity = "warning";
+                    break;
+                case "off":
+                case "none":
+                    ruleSeverity = "off";
+                    break;
+                default:
+                    console.warn(`Invalid severity level: ${ruleConfigValue.severity}`);
+                    ruleSeverity = defaultRuleSeverity;
+            }
         }
-    } else {
-        ruleSeverity = defaultRuleSeverity;
-    }
-
-    if (ruleConfigValue && ruleConfigValue.options) {
-        ruleArguments = arrayify(ruleConfigValue.options);
+        if (ruleConfigValue.options != null) {
+            ruleArguments = arrayify(ruleConfigValue.options);
+        }
     }
 
     return {
@@ -382,39 +393,48 @@ function parseRuleOptions(ruleConfigValue: any, rawDefaultRuleSeverity: string):
     };
 }
 
+export interface RawConfigFile {
+    extends?: string | string[];
+    linterOptions?: IConfigurationFile["linterOptions"];
+    rulesDirectory?: string | string[];
+    defaultSeverity?: string;
+    rules?: RawRulesConfig;
+    jsRules?: RawRulesConfig;
+}
+export interface RawRulesConfig {
+    [key: string]: RawRuleConfig;
+}
+export type RawRuleConfig = null | undefined | boolean | any[] | {
+    severity?: RuleSeverity | "warn" | "none" | "default",
+    options?: any,
+};
+
 /**
  * Parses a config file and normalizes legacy config settings
  *
  * @param configFile The raw object read from the JSON of a config file
  * @param configFileDir The directory of the config file
  */
-export function parseConfigFile(configFile: any, configFileDir?: string): IConfigurationFile {
-    const rules = new Map<string, Partial<IOptions>>();
-    const jsRules = new Map<string, Partial<IOptions>>();
-
-    if (configFile.rules) {
-        for (const ruleName in configFile.rules) {
-            if (configFile.rules.hasOwnProperty(ruleName)) {
-                rules.set(ruleName, parseRuleOptions(configFile.rules[ruleName], configFile.defaultSeverity));
-            }
-        }
-    }
-
-    if (configFile.jsRules) {
-        for (const ruleName in configFile.jsRules) {
-            if (configFile.jsRules.hasOwnProperty(ruleName)) {
-                jsRules.set(ruleName, parseRuleOptions(configFile.jsRules[ruleName], configFile.defaultSeverity));
-            }
-        }
-    }
-
+export function parseConfigFile(configFile: RawConfigFile, configFileDir?: string): IConfigurationFile {
     return {
         extends: arrayify(configFile.extends),
-        jsRules,
+        jsRules: parseRules(configFile.jsRules),
         linterOptions: configFile.linterOptions || {},
+        rules: parseRules(configFile.rules),
         rulesDirectory: getRulesDirectories(configFile.rulesDirectory, configFileDir),
-        rules,
     };
+
+    function parseRules(config: RawRulesConfig | undefined): Map<string, Partial<IOptions>> {
+        const map = new Map<string, Partial<IOptions>>();
+        if (config) {
+            for (const ruleName in config) {
+                if (hasOwnProperty(config, ruleName)) {
+                    map.set(ruleName, parseRuleOptions(config[ruleName], configFile.defaultSeverity));
+                }
+            }
+        }
+        return map;
+    }
 }
 
 /**

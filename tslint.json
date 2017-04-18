@@ -27,6 +27,7 @@
     "no-empty-interface": true,
     "no-string-throw": true,
     "no-switch-case-fall-through": true,
+    "no-unsafe-any": true,
     "prefer-const": true,
     "switch-default": false,
     "variable-name": [true,

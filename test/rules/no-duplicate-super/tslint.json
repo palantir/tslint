@@ -1,8 +1,5 @@
 {
   "rules": {
     "no-duplicate-super": true
-  },
-  "jsRules": {
-    "no-duplicate-super": true
   }
 }

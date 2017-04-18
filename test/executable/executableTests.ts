@@ -325,7 +325,7 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
     });
 });
 
-type ExecFileCallback = (error: any, stdout: string, stderr: string) => void;
+type ExecFileCallback = (error: Error & { code: number }, stdout: string, stderr: string) => void;
 
 function execCli(args: string[], cb: ExecFileCallback): cp.ChildProcess;
 function execCli(args: string[], options: cp.ExecFileOptions, cb: ExecFileCallback): cp.ChildProcess;
@@ -346,7 +346,7 @@ function execCli(args: string[], options: cp.ExecFileOptions | ExecFileCallback,
         if (cb === undefined) {
             throw new Error("cb not defined");
         }
-        cb(error, stdout.trim(), stderr.trim());
+        cb(error as Error & { code: number }, stdout.trim(), stderr.trim());
     });
 }
 
