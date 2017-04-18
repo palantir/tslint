@@ -44,41 +44,48 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk);
+        return this.applyWithWalker(new NoDuplicateVariableWalker(sourceFile, this.ruleName, undefined));
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>): void {
-    let scope = new Set<string>();
-    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        if (utils.isFunctionScopeBoundary(node)) {
-            const oldScope = scope;
-            scope = new Set();
-            ts.forEachChild(node, cb);
-            scope = oldScope;
-            return;
-        } else if (utils.isVariableDeclaration(node) && !utils.isBlockScopedVariableDeclaration(node)) {
-            forEachBoundIdentifier(node.name, (id) => {
-                const { text } = id;
-                if (scope.has(text)) {
-                    ctx.addFailureAtNode(id, Rule.FAILURE_STRING(text));
-                } else {
-                    scope.add(text);
+class NoDuplicateVariableWalker extends Lint.AbstractWalker<void> {
+    private scope: Set<string>;
+    public walk(sourceFile: ts.SourceFile) {
+        this.scope = new Set();
+        const cb = (node: ts.Node): void => {
+            if (utils.isFunctionScopeBoundary(node)) {
+                const oldScope = this.scope;
+                this.scope = new Set();
+                ts.forEachChild(node, cb);
+                this.scope = oldScope;
+                return;
+            }
+            if (utils.isParameterDeclaration(node)) {
+                this.handleBindingName(node.name, false);
+            } else if (utils.isVariableDeclarationList(node) && !utils.isBlockScopedVariableDeclarationList(node)) {
+                for (const variable of node.declarations) {
+                    this.handleBindingName(variable.name, true);
                 }
-            });
-        }
+            }
 
-        return ts.forEachChild(node, cb);
-    });
-}
+            return ts.forEachChild(node, cb);
+        };
 
-function forEachBoundIdentifier(name: ts.BindingName, action: (id: ts.Identifier) => void): void {
-    if (name.kind === ts.SyntaxKind.Identifier) {
-        action(name);
-    } else {
-        for (const e of name.elements) {
-            if (e.kind !== ts.SyntaxKind.OmittedExpression) {
-                forEachBoundIdentifier(e.name, action);
+        return ts.forEachChild(sourceFile, cb);
+    }
+
+    private handleBindingName(name: ts.BindingName, check: boolean) {
+        if (name.kind === ts.SyntaxKind.Identifier) {
+            if (check && this.scope.has(name.text)) {
+                this.addFailureAtNode(name, Rule.FAILURE_STRING(name.text));
+            } else {
+                this.scope.add(name.text);
+            }
+        } else {
+            for (const e of name.elements) {
+                if (e.kind !== ts.SyntaxKind.OmittedExpression) {
+                    this.handleBindingName(e.name, check);
+                }
             }
         }
     }

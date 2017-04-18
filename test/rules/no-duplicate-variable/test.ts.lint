@@ -2,6 +2,7 @@ var duplicated = 1;
 
 function f(x) {
     var x;
+        ~ [err % ('x')]
 }
 
 class Test {
@@ -13,7 +14,7 @@ class Test {
             };
 
         var duplicated = null;
-            ~~~~~~~~~~         [Duplicate variable: 'duplicated']
+            ~~~~~~~~~~         [err % ('duplicated')]
     }
 }
 
@@ -25,12 +26,12 @@ function test() {
         };
 
     var duplicated = null;
-        ~~~~~~~~~~         [Duplicate variable: 'duplicated']
+        ~~~~~~~~~~         [err % ('duplicated')]
 }
 
 duplicated = 2;
 var duplicated = 3;
-    ~~~~~~~~~~      [Duplicate variable: 'duplicated']
+    ~~~~~~~~~~      [err % ('duplicated')]
 
 // valid code
 module tmp {
@@ -108,6 +109,7 @@ function testArguments1(arg: number, arg: number): void {
 // failure: local var/let declarations shadow arguments.
 function testArguments2(x: number, y: number): void {
     var x = 1;
+        ~ [err % ('x')]
     let y = 2;
 }
 
@@ -146,7 +148,7 @@ function testDestructuring() {
 
     var [x, y] = myFunc();
     var [z, z] = myFunc(); // failure
-            ~                         [Duplicate variable: 'z']
+            ~                         [err % ('z')]
 
     let [x1, y1] = myFunc();
     let [z1, z1] = myFunc(); // tsc error
@@ -159,15 +161,20 @@ function testDestructuring() {
 
     var [a2, [b2, c2]] = [1, [2, 3]];
     var [{a2, d2}] = [{a2: 1, d2: 4}]; // failure
-          ~~                                      [Duplicate variable: 'a2']
+          ~~                                      [err % ('a2')]
 
     function myFunc2([a, b]) {
-        var a; // not a failure; caught by no-shadowed-variable
+        var a;
+            ~ [err % ('a')]
         return b;
     }
 
     var [x, y3] = myFunc(); // failure
-         ~                             [Duplicate variable: 'x']
+         ~                             [err % ('x')]
     var [x3, ...y] = [1, 2, 3, 4]; // failure
-                ~                             [Duplicate variable: 'y']
+                ~                             [err % ('y')]
 }
+
+function compileErrors(foo, {bar}, bar, foo, {baz}, [baz]) {}
+
+[err]: Duplicate variable: '%s'
