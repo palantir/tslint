@@ -113,7 +113,7 @@ function getReturnKind(node: FunctionLike, checker: ts.TypeChecker): ReturnKind 
     } else if (Lint.isTypeFlagSet(returnType, ts.TypeFlags.Void)) {
         return ReturnKind.Void;
     } else if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword)) {
-        // TODO: Would need access to `checker.getPromisedTypeOfPromise` to do this properly.
+        // Would need access to `checker.getPromisedTypeOfPromise` to do this properly.
         // Assume that the return type is the global Promise (since this is an async function) and get its type argument.
         const typeArguments = (returnType as ts.GenericType).typeArguments;
         if (typeArguments !== undefined && typeArguments.length === 1) {
@@ -153,11 +153,5 @@ function isFunctionLike(node: ts.Node): node is FunctionLike {
 }
 
 function isFunctionExpressionLike(node: ts.Node): node is ts.FunctionExpression | ts.ArrowFunction {
-    switch (node.kind) {
-        case ts.SyntaxKind.FunctionExpression:
-        case ts.SyntaxKind.ArrowFunction:
-            return true;
-        default:
-            return false;
-    }
+    return node.kind === ts.SyntaxKind.FunctionExpression || node.kind === ts.SyntaxKind.ArrowFunction;
 }
